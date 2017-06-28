@@ -1,0 +1,43 @@
+apply plugin: 'java'
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src'
+        }
+    }
+    test {
+    	java {
+    		srcDir 'test'
+    	}
+    }
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives sourcesJar
+}
+
+dependencies {
+//compile group: 'org.graphstream', name: 'gs-core', version: '1.1.1'
+//compile group: 'org.graphstream', name: 'gs-ui', version: '1.3'
+//compile 'org.slf4j:slf4j-api:1.7.13', 'com.google.guava:guava:18.0', 'org.apache.commons:commons-lang3:3.4', 'org.sat4j:org.sat4j.core:2.3.1', 'net.sf.trove4j:trove4j:3.0.3','junit:junit:4.12'
+//	runtime 'org.slf4j:slf4j-log4j12:1.7.13', 'log4j:log4j:1.2.17'
+compile 'junit:junit:4.12'
+
+//compile group: 'nz.ac.waikato.cms.weka', name: 'weka-dev', version: '3.9.1'
+compile fileTree(dir: "${project.projectDir}/lib/", include: '*.jar')
+	
+}
+
+repositories {
+    mavenCentral()
+	mavenLocal()
+	maven {
+        url "http://clojars.org/repo/"
+    }
+}
