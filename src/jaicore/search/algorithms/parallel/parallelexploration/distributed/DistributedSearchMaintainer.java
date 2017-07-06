@@ -1,8 +1,8 @@
-package util.search.distributed;
+package jaicore.search.algorithms.parallel.parallelexploration.distributed;
 
 import java.util.Collection;
 
-import util.search.core.Node;
+import jaicore.search.structure.core.Node;
 
 public interface DistributedSearchMaintainer<T,V extends Comparable<V>> {
 	

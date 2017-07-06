@@ -1,4 +1,4 @@
-package util.search.distributed;
+package jaicore.search.algorithms.parallel.parallelexploration.distributed;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -19,12 +19,12 @@ import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import util.basic.SetUtil;
-import util.search.core.GraphGenerator;
-import util.search.core.Node;
-import util.search.core.NodeEvaluator;
-import util.search.core.ORGraphSearch;
-import util.search.graphgenerator.events.NodeTypeSwitchEvent;
+import jaicore.basic.SetUtil;
+import jaicore.search.algorithms.standard.core.NodeEvaluator;
+import jaicore.search.algorithms.standard.core.ORGraphSearch;
+import jaicore.search.structure.core.GraphGenerator;
+import jaicore.search.structure.core.Node;
+import jaicore.search.structure.graphgenerator.events.NodeTypeSwitchEvent;
 
 public class DistributedOrSearchMaster<T, A, V extends Comparable<V>> extends ORGraphSearch<T, A, V> {
 

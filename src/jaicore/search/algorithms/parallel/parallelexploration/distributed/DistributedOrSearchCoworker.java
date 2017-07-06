@@ -1,4 +1,4 @@
-package util.search.distributed;
+package jaicore.search.algorithms.parallel.parallelexploration.distributed;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -10,13 +10,13 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import util.search.core.GraphGenerator;
-import util.search.core.Node;
-import util.search.core.NodeEvaluator;
-import util.search.core.ORGraphSearch;
-import util.search.graphgenerator.GoalTester;
-import util.search.graphgenerator.RootGenerator;
-import util.search.graphgenerator.SuccessorGenerator;
+import jaicore.search.algorithms.standard.core.NodeEvaluator;
+import jaicore.search.algorithms.standard.core.ORGraphSearch;
+import jaicore.search.structure.core.GraphGenerator;
+import jaicore.search.structure.core.Node;
+import jaicore.search.structure.graphgenerator.GoalTester;
+import jaicore.search.structure.graphgenerator.RootGenerator;
+import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 public class DistributedOrSearchCoworker<T, A, V extends Comparable<V>> {
 

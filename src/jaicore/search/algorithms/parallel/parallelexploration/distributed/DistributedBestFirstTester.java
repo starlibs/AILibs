@@ -1,4 +1,4 @@
-package util.search.distributed;
+package jaicore.search.algorithms.parallel.parallelexploration.distributed;
 
 import java.io.Serializable;
 import java.nio.file.Path;
@@ -10,14 +10,14 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import util.graphvisualizer.SimpleGraphVisualizationWindow;
-import util.search.core.GraphGenerator;
-import util.search.core.NodeEvaluator;
-import util.search.core.NodeExpansionDescription;
-import util.search.core.NodeType;
-import util.search.graphgenerator.GoalTester;
-import util.search.graphgenerator.RootGenerator;
-import util.search.graphgenerator.SuccessorGenerator;
+import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
+import jaicore.search.algorithms.standard.core.NodeEvaluator;
+import jaicore.search.structure.core.GraphGenerator;
+import jaicore.search.structure.core.NodeExpansionDescription;
+import jaicore.search.structure.core.NodeType;
+import jaicore.search.structure.graphgenerator.GoalTester;
+import jaicore.search.structure.graphgenerator.RootGenerator;
+import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 public class DistributedBestFirstTester {
 

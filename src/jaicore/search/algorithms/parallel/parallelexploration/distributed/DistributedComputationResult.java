@@ -1,10 +1,10 @@
-package util.search.distributed;
+package jaicore.search.algorithms.parallel.parallelexploration.distributed;
 
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
-import util.search.core.Node;
+import jaicore.search.structure.core.Node;
 
 public class DistributedComputationResult<T, V extends Comparable<V>> implements Serializable {
 	private static final long serialVersionUID = -3947093065171620081L;
