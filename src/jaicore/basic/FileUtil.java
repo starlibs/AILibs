@@ -1,11 +1,16 @@
 package jaicore.basic;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -94,5 +99,26 @@ public abstract class FileUtil {
 		}
 		zos.close();
 		fos.close();
+	}
+
+	public static void serializeObject(Object object, String pathname) throws IOException {
+		try (ObjectOutputStream os2 = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(pathname)))) {
+			os2.writeObject(object);
+		}
+	}
+	
+	public static Object unserializeObject(String pathname) throws IOException, ClassNotFoundException {
+		try (ObjectInputStream is = new ObjectInputStream(new BufferedInputStream(new FileInputStream(pathname)))) {
+			return is.readObject();
+		}
+	}
+	
+	public static void touch(String filename) {
+		try (FileWriter fw = new FileWriter(filename)) {
+			fw.write("");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }

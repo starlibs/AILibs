@@ -24,7 +24,7 @@ import jaicore.search.algorithms.standard.core.NodeEvaluator;
 import jaicore.search.algorithms.standard.core.ORGraphSearch;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
-import jaicore.search.structure.graphgenerator.events.NodeTypeSwitchEvent;
+import jaicore.search.structure.events.NodeTypeSwitchEvent;
 
 public class DistributedOrSearchMaster<T, A, V extends Comparable<V>> extends ORGraphSearch<T, A, V> {
 

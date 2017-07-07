@@ -31,10 +31,10 @@ import org.graphstream.ui.view.ViewerPipe;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
-import jaicore.search.structure.graphgenerator.events.GraphInitializedEvent;
-import jaicore.search.structure.graphgenerator.events.NodeReachedEvent;
-import jaicore.search.structure.graphgenerator.events.NodeRemovedEvent;
-import jaicore.search.structure.graphgenerator.events.NodeTypeSwitchEvent;
+import jaicore.search.structure.events.GraphInitializedEvent;
+import jaicore.search.structure.events.NodeReachedEvent;
+import jaicore.search.structure.events.NodeRemovedEvent;
+import jaicore.search.structure.events.NodeTypeSwitchEvent;
 
 @SuppressWarnings("serial")
 public class SearchVisualizationPanel<T> extends JPanel {
@@ -243,7 +243,7 @@ public class SearchVisualizationPanel<T> extends JPanel {
 			ex.printStackTrace();
 		}
 	}
-
+	
 	@Subscribe
 	public synchronized void receiveNodeRemovedEvent(NodeRemovedEvent<T> e) {
 		try {

@@ -19,12 +19,12 @@ import jaicore.search.structure.core.GraphEventBus;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
 import jaicore.search.structure.core.NodeExpansionDescription;
+import jaicore.search.structure.events.GraphInitializedEvent;
+import jaicore.search.structure.events.NodeReachedEvent;
+import jaicore.search.structure.events.NodeTypeSwitchEvent;
 import jaicore.search.structure.graphgenerator.GoalTester;
 import jaicore.search.structure.graphgenerator.RootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
-import jaicore.search.structure.graphgenerator.events.GraphInitializedEvent;
-import jaicore.search.structure.graphgenerator.events.NodeReachedEvent;
-import jaicore.search.structure.graphgenerator.events.NodeTypeSwitchEvent;
 
 public class ORGraphSearch<T, A, V extends Comparable<V>> {
 
@@ -37,7 +37,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> {
 	protected boolean interrupted = false;
 
 	/* communication */
-	private final GraphEventBus<Node<T, V>> eventBus = new GraphEventBus<>();
+	protected final GraphEventBus<Node<T, V>> eventBus = new GraphEventBus<>();
 	protected final Map<T, Node<T, V>> ext2int = new HashMap<>();
 
 	/* search related objects */

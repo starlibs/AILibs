@@ -1,4 +1,4 @@
-package jaicore.search.structure.graphgenerator.events;
+package jaicore.search.structure.events;
 
 public class NodeRemovedEvent<T> {
 

@@ -16,12 +16,12 @@ import jaicore.search.structure.core.AndNode;
 import jaicore.search.structure.core.GraphEventBus;
 import jaicore.search.structure.core.Node;
 import jaicore.search.structure.core.OrNode;
+import jaicore.search.structure.events.GraphInitializedEvent;
+import jaicore.search.structure.events.NodeReachedEvent;
+import jaicore.search.structure.events.NodeTypeSwitchEvent;
 import jaicore.search.structure.graphgenerator.GoalTester;
 import jaicore.search.structure.graphgenerator.RootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
-import jaicore.search.structure.graphgenerator.events.GraphInitializedEvent;
-import jaicore.search.structure.graphgenerator.events.NodeReachedEvent;
-import jaicore.search.structure.graphgenerator.events.NodeTypeSwitchEvent;
 
 public abstract class ANDORGraphSearch<T, A, V extends Comparable<V>> {
 
