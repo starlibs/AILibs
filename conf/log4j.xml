@@ -46,7 +46,7 @@
 		</layout>
 	</appender>
 
-	<logger name="util">
+	<logger name="jaicore">
 		<level value="warn" />
 		<appender-ref ref="console" />
 		<appender-ref ref="infoFileAppender" />
@@ -55,11 +55,11 @@
 		<appender-ref ref="traceFileAppender" />
 	</logger>
 	
-	<logger name="util.logic">
+	<logger name="jaicore.logic">
 		<level value="warn" />
 	</logger>
 
-	<logger name="util.planning.graphgenerators.task">
+	<logger name="jaicore.planning.graphgenerators.task">
 		<level value="warn" />
 	</logger>
 	
@@ -67,12 +67,7 @@
 		<level value="info" />
 	</logger>
 	
-	<logger name="util.search.core.ORGraphSearch">
+	<logger name="jaicore.search.core.ORGraphSearch">
 		<level value="info" />
-	</logger>
-	
-	<logger name="dichotomies">
-		<level value="warn" />
-		<appender-ref ref="console" />
 	</logger>
 </log4j:configuration>

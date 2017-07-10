@@ -22,7 +22,7 @@ public class SkippingEvaluator<T,V extends Comparable<V>> implements NodeEvaluat
 	}
 
 	@Override
-	public V f(Node<T,V> node) {
+	public V f(Node<T,V> node) throws Exception {
 		int depth = node.path().size() - 1;
 		if (!fCache.containsKey(node)) {
 			if (depth == 0) {

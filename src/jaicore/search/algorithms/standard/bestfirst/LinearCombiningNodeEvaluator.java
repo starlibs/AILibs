@@ -15,7 +15,7 @@ public class LinearCombiningNodeEvaluator<T> implements NodeEvaluator<T,Integer>
 	}
 
 	@Override
-	public Integer f(Node<T,Integer> node) {
+	public Integer f(Node<T,Integer> node) throws Exception {
 		double score = 0;
 		int incr;
 		for (NodeEvaluator<T,Integer> evaluator : evaluators.keySet()) {

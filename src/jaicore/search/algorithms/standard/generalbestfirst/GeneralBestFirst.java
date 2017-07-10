@@ -51,7 +51,11 @@ public class GeneralBestFirst<T, A> extends ANDORGraphSearch<T, A, Integer> {
 	protected Node<T, Integer> initialize() {
 		root = getOrNode(null, rootGenerator.getRoots().iterator().next(), null);
 		open.add(root);
-		bestValues.put(root, nodeEvaluator.f(root));
+		try {
+			bestValues.put(root, nodeEvaluator.f(root));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		return root;
 	}
 
@@ -135,8 +139,13 @@ public class GeneralBestFirst<T, A> extends ANDORGraphSearch<T, A, Integer> {
 			if (type == NodeType.OR)
 				node = getOrNode(expanded, successor, successorDescription.getAction());
 			if (!isKnown) {
-				int val = nodeEvaluator.f(node);
-				newSuccessorsAndTheirScores.put(node, val);
+				int val;
+				try {
+					val = nodeEvaluator.f(node);
+					newSuccessorsAndTheirScores.put(node, val);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			} else
 				successors.add(node);
 		}

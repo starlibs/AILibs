@@ -52,16 +52,19 @@ public class ParallelizedORGraphSearch<T, A, V extends Comparable<V>> extends OR
 
 			@Override
 			public void run() {
-				
+
 				/* compute f-value for node; possibly use the escape value from the timeout node evaluator */
-				V label = nodeEvaluator.f(node);
-				if (Thread.interrupted()) {
+				V label = null;
+				try {
+					label = nodeEvaluator.f(node);
+				} catch (InterruptedException e) {
 					eventBus.post(new NodeTypeSwitchEvent<>(node, "or_timedout"));
-					if (label != null)
-						System.err.println("A timeout was observed but the label was still computed. It is likely that the logic that computes f does not observe interrupts!");
 					label = timeoutNodeEvaluator.f(node);
+				} catch (Exception e) {
+					eventBus.post(new NodeTypeSwitchEvent<>(node, "or_ffail"));
+					e.printStackTrace();
 				}
-				
+
 				/* only if we have a non-null label, update the node label and insert the node into open */
 				if (label != null) {
 					node.setInternalLabel(label);
@@ -73,7 +76,7 @@ public class ParallelizedORGraphSearch<T, A, V extends Comparable<V>> extends OR
 				fComputationTickets.release();
 			}
 		});
-		
+
 		/* set timeout for the job */
 		TimerTask t = new TimerTask() {
 

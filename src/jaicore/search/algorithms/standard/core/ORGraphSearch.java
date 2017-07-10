@@ -244,7 +244,11 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> {
 	}
 
 	protected void labelNode(Node<T, V> node) {
-		node.setInternalLabel(nodeEvaluator.f(node));
+		try {
+			node.setInternalLabel(nodeEvaluator.f(node));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	protected boolean beforeInsertionIntoOpen(Node<T, V> node) {

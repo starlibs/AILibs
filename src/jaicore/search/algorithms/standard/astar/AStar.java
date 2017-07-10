@@ -27,7 +27,7 @@ public class AStar<T, A> extends BestFirst<T, A> {
 		}
 
 		@Override
-		public Integer f(Node<T,Integer> node) {
+		public Integer f(Node<T,Integer> node) throws Exception {
 			List<Node<T,Integer>> path = node.path();
 			int depth = path.size() - 1;
 			int pathCost = 0;
