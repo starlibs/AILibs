@@ -19,24 +19,32 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jaicore.basic.FileUtil;
+import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.DistributedSearchCommunicationLayer;
+import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
+import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableNodeEvaluator;
+import jaicore.search.algorithms.standard.core.NodeEvaluator;
 import jaicore.search.structure.core.Node;
 
-public class CommunicationFolderBasedDistributionProcessor<T,V extends Comparable<V>> implements DistributedSearchMaintainer<T,V> {
+public class FolderBasedDistributedSearchCommunicationLayer<T, A, V extends Comparable<V>> implements DistributedSearchCommunicationLayer<T, A, V> {
 
-	private static final Logger logger = LoggerFactory.getLogger(CommunicationFolderBasedDistributionProcessor.class);
+	private static final Logger logger = LoggerFactory.getLogger(FolderBasedDistributedSearchCommunicationLayer.class);
 	private final Path communicationFolder;
 
 	/** Master Stuff **/
-	public CommunicationFolderBasedDistributionProcessor(Path communicationFolder) {
+	public FolderBasedDistributedSearchCommunicationLayer(Path communicationFolder) {
 		super();
 		this.communicationFolder = communicationFolder;
-
+	}
+	
+	public void init() {
+		
 		/* clean directory */
 		try (Stream<Path> paths = Files.walk(communicationFolder)) {
 			paths.forEach(filePath -> {
 				try {
 					if (Files.isRegularFile(filePath) && !filePath.getFileName().toString().contains("register")) {
-						System.out.println("Deleting " + filePath.getFileName());
+						logger.info("Deleting {}", filePath.getFileName());
 						Files.delete(filePath);
 					}
 				} catch (Exception e) {
@@ -59,7 +67,7 @@ public class CommunicationFolderBasedDistributionProcessor<T,V extends Comparabl
 
 					/* register coworker and remove it */
 					String coworkerId = filePath.toFile().getName().substring("register-".length());
-					System.out.println("Recognized coworker " + coworkerId);
+					logger.info("Recognized coworker {}", coworkerId);
 					try {
 						Files.delete(filePath);
 					} catch (Exception e) {
@@ -73,30 +81,27 @@ public class CommunicationFolderBasedDistributionProcessor<T,V extends Comparabl
 		}
 		return newCoworkers;
 	}
-	
+
 	@Override
 	public void detachCoworker(String coworker) {
 		File f = new File(communicationFolder.toAbsolutePath() + "/attach-" + coworker);
-		try{
+		try {
 			Files.delete(f.toPath());
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	@Override
-	public void createNewJobForCoworker(String coworkerId, Collection<Node<T,V>> nodesToBeSolved) {
+	public void createNewJobForCoworker(String coworkerId, Collection<Node<T, V>> nodesToBeSolved) {
 		File target = new File(communicationFolder.toFile().getAbsolutePath() + "/job-" + coworkerId);
 		File tmp = new File(target.getAbsolutePath() + ".tmp");
-		System.out.println("Writing job: " + nodesToBeSolved);
-		try (ObjectOutputStream bw = new ObjectOutputStream(
-				new BufferedOutputStream(new FileOutputStream(tmp)))) {
+		logger.info("Writing job: {}", nodesToBeSolved);
+		try (ObjectOutputStream bw = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(tmp)))) {
 			bw.writeObject(nodesToBeSolved);
 			bw.close();
 			Files.move(tmp.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
@@ -118,7 +123,7 @@ public class CommunicationFolderBasedDistributionProcessor<T,V extends Comparabl
 				/* read results object */
 				logger.info("Reading file " + file.getAbsolutePath() + " ...");
 				ObjectInputStream in = new ObjectInputStream(new BufferedInputStream(new FileInputStream(file)));
-				result = (DistributedComputationResult<T, V>)in.readObject();
+				result = (DistributedComputationResult<T, V>) in.readObject();
 				in.close();
 				logger.info("done");
 				Files.delete(file.toPath());
@@ -132,7 +137,7 @@ public class CommunicationFolderBasedDistributionProcessor<T,V extends Comparabl
 			}
 		}
 		if (!success)
-			System.err.println("Failed to read and/or delete file " + file.getName());
+			logger.error("Failed to read and/or delete file " + file.getName());
 		return result;
 	}
 
@@ -141,29 +146,27 @@ public class CommunicationFolderBasedDistributionProcessor<T,V extends Comparabl
 		try {
 			File f = new File(communicationFolder.toAbsolutePath() + "/register-" + coworker);
 			f.createNewFile();
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void unregister(String coworker) {
 		try {
 			File f = new File(communicationFolder.toAbsolutePath() + "/unregister-" + coworker);
 			if (f.exists())
 				Files.delete(f.toPath());
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public boolean hasNewJob(String coworker) {
 		File f = new File(communicationFolder.toAbsolutePath() + "/job-" + coworker);
 		return f.exists();
 	}
-	
-	public Collection<Node<T,V>> getJobDescription(String coworker) {
+
+	public Collection<Node<T, V>> getJobDescription(String coworker) {
 		File f = new File(communicationFolder.toAbsolutePath() + "/job-" + coworker);
 		if (!f.exists())
 			throw new NoSuchElementException("No job available for " + coworker);
@@ -171,16 +174,15 @@ public class CommunicationFolderBasedDistributionProcessor<T,V extends Comparabl
 		while (tries < 10) {
 			try (ObjectInputStream in = new ObjectInputStream(new BufferedInputStream(new FileInputStream(f)))) {
 				@SuppressWarnings("unchecked")
-				Collection<Node<T,V>> nodes = (Collection<Node<T,V>>)in.readObject();
+				Collection<Node<T, V>> nodes = (Collection<Node<T, V>>) in.readObject();
 				in.close();
 				Files.delete(f.toPath());
 				return nodes;
-			}
-			catch (IOException e) {
+			} catch (IOException e) {
 				try {
-					System.err.println("Error reading file " + f.toString() + ", waiting 500ms and retrying.");
+					logger.error("Error reading file " + f.toString() + ", waiting 500ms and retrying.");
 					e.printStackTrace();
-					tries ++;
+					tries++;
 					Thread.sleep(500);
 				} catch (InterruptedException e1) {
 					e1.printStackTrace();
@@ -189,7 +191,7 @@ public class CommunicationFolderBasedDistributionProcessor<T,V extends Comparabl
 				e.printStackTrace();
 			}
 		}
-		System.err.println("Giving up reading the results of " + coworker);
+		logger.info("Giving up reading the results of " + coworker);
 		return null;
 	}
 
@@ -201,11 +203,10 @@ public class CommunicationFolderBasedDistributionProcessor<T,V extends Comparabl
 			bw.writeObject(result);
 			bw.close();
 			Files.move(tmp.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 	}
 
 	@Override
@@ -213,8 +214,7 @@ public class CommunicationFolderBasedDistributionProcessor<T,V extends Comparabl
 		try {
 			File f = new File(communicationFolder.toAbsolutePath() + "/attach-" + coworker);
 			f.createNewFile();
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
@@ -223,5 +223,27 @@ public class CommunicationFolderBasedDistributionProcessor<T,V extends Comparabl
 	public boolean isAttached(String coworker) {
 		File f = new File(communicationFolder.toAbsolutePath() + "/attach-" + coworker);
 		return f.exists();
+	}
+
+	@Override
+	public void setGraphGenerator(SerializableGraphGenerator<T, A> generator) throws Exception {
+		FileUtil.serializeObject(generator, communicationFolder.toAbsolutePath() + "/graphgen.ser");
+	}
+
+	@Override
+	public void setNodeEvaluator(SerializableNodeEvaluator<T, V> evaluator) throws Exception {
+		FileUtil.serializeObject(evaluator, communicationFolder.toAbsolutePath() + "/nodeeval.ser");
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public SerializableGraphGenerator<T, A> getGraphGenerator() throws Exception {
+		return (SerializableGraphGenerator<T, A>) FileUtil.unserializeObject(communicationFolder.toAbsolutePath() + "/graphgen.ser");
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public NodeEvaluator<T, V> getNodeEvaluator() throws Exception {
+		return (NodeEvaluator<T,V>)FileUtil.unserializeObject(communicationFolder.toAbsolutePath() + "/nodeeval.ser");
 	}
 }

@@ -2,10 +2,10 @@ package jaicore.search.algorithms.standard.bestfirst;
 
 import java.util.Random;
 
-import jaicore.search.algorithms.standard.core.NodeEvaluator;
+import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableNodeEvaluator;
 import jaicore.search.structure.core.Node;
 
-public class RandomizedDepthFirstEvaluator<T> implements NodeEvaluator<T,Integer> {
+public class RandomizedDepthFirstEvaluator<T> implements SerializableNodeEvaluator<T,Integer> {
 
 	private final Random rand;
 

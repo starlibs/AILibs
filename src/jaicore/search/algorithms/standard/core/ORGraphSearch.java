@@ -1,6 +1,7 @@
 package jaicore.search.algorithms.standard.core;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jaicore.search.algorithms.interfaces.ObservableORGraphSearch;
 import jaicore.search.structure.core.GraphEventBus;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
@@ -26,7 +28,7 @@ import jaicore.search.structure.graphgenerator.GoalTester;
 import jaicore.search.structure.graphgenerator.RootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
-public class ORGraphSearch<T, A, V extends Comparable<V>> {
+public class ORGraphSearch<T, A, V extends Comparable<V>> implements ObservableORGraphSearch<T, A, V> {
 
 	private static final Logger logger = LoggerFactory.getLogger(ORGraphSearch.class);
 
@@ -68,7 +70,12 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> {
 	protected void initGraph() {
 		if (!initialized) {
 			initialized = true;
-			open.addAll(rootGenerator.getRoots().stream().map(n -> newNode(null, n)).collect(Collectors.toList()));
+			Collection<Node<T,V>> roots = rootGenerator.getRoots().stream().map(n -> newNode(null, n)).collect(Collectors.toList());
+			for (Node<T,V> root : roots) {
+				labelNode(root);
+				logger.info("Labeled root with {}", root.getInternalLabel());
+			}
+			open.addAll(roots);
 			createdCounter = open.size();
 			afterInitialization();
 		}
@@ -130,7 +137,10 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> {
 				if (beforeInsertionIntoOpen(newNode)) {
 					logger.info("Inserting successor {} of {} to OPEN.", newNode, expandedNodeInternal);
 					assert !open.contains(newNode) && !expanded.contains(newNode.getPoint()) : "Inserted node is already in OPEN or even expanded!";
-					open.add(newNode);
+					if (newNode.getInternalLabel() != null)
+						open.add(newNode);
+					else
+						logger.warn("Not inserting node {} since its label ist missing!", newNode);
 				}
 			}
 			else

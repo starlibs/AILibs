@@ -19,38 +19,26 @@ import jaicore.basic.StringUtil;
 /**
  * A literal defines a property over parameters. Note that literals can be cloned using the clone() methods.
  * 
- * @author mbunse
+ * @author Felix Mohr
  */
 public class Literal implements Serializable {
 
-	private static final long serialVersionUID = -4379410243502253051L;
-
 	private static Logger logger = LoggerFactory.getLogger(Literal.class);
-	
-	private static short counter;
-	private static Map<String,Short> ext2int = new HashMap<>();
-	private static Map<Short,String> int2ext = new HashMap<>();
-	
-	static {
-		ext2int.put("=", (short)1);
-		int2ext.put((short)1, "=");
-		counter = 2;
-	}
-	
-	private short getIntProperty(String property) {
-		boolean isNegated = property.startsWith("!");
-		String propertyName = !isNegated ? property : property.substring(1);
-		if (!ext2int.containsKey(propertyName)) {
-			short id = counter ++;
-			if (id < 0)
-				throw new IllegalArgumentException("No support for more than " + Short.MAX_VALUE + " predicates!");
-			ext2int.put(propertyName, id);
-			int2ext.put(id, propertyName);
-		}
-		return (short)(ext2int.get(propertyName) * (isNegated ? -1 : 1));
-	}
 
-	private short property;
+	// private short getIntProperty(String property) {
+	// boolean isNegated = property.startsWith("!");
+	// String propertyName = !isNegated ? property : property.substring(1);
+	// if (!ext2int.containsKey(propertyName)) {
+	// short id = counter ++;
+	// if (id < 0)
+	// throw new IllegalArgumentException("No support for more than " + Short.MAX_VALUE + " predicates!");
+	// ext2int.put(propertyName, id);
+	// int2ext.put(id, propertyName);
+	// }
+	// return (short)(ext2int.get(propertyName) * (isNegated ? -1 : 1));
+	// }
+
+	private String property;
 	protected List<LiteralParam> parameters;
 
 	public Literal(Literal l, Map<? extends LiteralParam, ? extends LiteralParam> map) {
@@ -72,7 +60,7 @@ public class Literal implements Serializable {
 		this(property);
 		this.parameters.add(parameter);
 	}
-	
+
 	/**
 	 * Creates a monadic literal (with only one parameter).
 	 * 
@@ -81,15 +69,15 @@ public class Literal implements Serializable {
 	 * @param parameter
 	 *            The parameter of this literal.
 	 */
-	private Literal(short property, List<LiteralParam> parameters) {
-		this(property);
-		this.parameters.addAll(parameters);
-	}
-	
-	private Literal(short property) {
-		this.parameters = new ArrayList<>();
-		this.property = property;
-	}
+	// private Literal(short property, List<LiteralParam> parameters) {
+	// this(property);
+	// this.parameters.addAll(parameters);
+	// }
+	//
+	// private Literal(short property) {
+	// this.parameters = new ArrayList<>();
+	// this.property = property;
+	// }
 
 	/**
 	 * Creates a literal with a list of parameters.
@@ -117,29 +105,29 @@ public class Literal implements Serializable {
 		if (propertyWithParams.contains("=")) {
 			String[] params = StringUtil.explode(propertyWithParams, "=");
 			boolean isNegated = params.length > 0 && params[0].endsWith("!");
-			this.property = (short)(isNegated ? -1 : 1);
+			this.property = "!=";
 			if (params.length == 2) {
 				int p1Length = isNegated ? params[0].length() - 1 : params[0].length();
 				this.parameters.add(LogicUtil.parseParamName(params[0].substring(0, p1Length).trim()));
 				this.parameters.add(LogicUtil.parseParamName(params[1].trim()));
 			}
-			
+
 		}
 
 		/* otherwise, if this is a normal predicate */
 		else {
-			
+
 			boolean isPositive = true;
 			if (propertyWithParams.startsWith("!")) {
 				isPositive = false;
 				propertyWithParams = propertyWithParams.substring(1);
 			}
-			
+
 			/* add parameters if given in the string */
 			if (propertyWithParams.contains("(")) {
 				if (propertyWithParams.contains(")")) {
 					int index = propertyWithParams.indexOf('(');
-					this.property = getIntProperty(propertyWithParams.substring(0, index));
+					this.property = propertyWithParams.substring(0, index);
 					if (index < propertyWithParams.length() - 2) {
 						this.parameters.addAll(Arrays.asList(StringUtil.explode(propertyWithParams.substring(index + 1, propertyWithParams.length() - 1), ",")).stream().map(s -> {
 							return LogicUtil.parseParamName(s.trim());
@@ -147,10 +135,10 @@ public class Literal implements Serializable {
 					}
 				}
 			} else {
-				this.property = getIntProperty(propertyWithParams);
+				this.property = propertyWithParams;
 			}
 			if (!isPositive) {
-				this.property *= -1;
+				this.property = "!" + this.property;
 			}
 		}
 	}
@@ -184,7 +172,7 @@ public class Literal implements Serializable {
 	 * Returns only the property name of this literal.
 	 */
 	public final String getPropertyName() {
-		return int2ext.get((short)(Math.abs(property)));
+		return isNegated() ? property.substring(1) : property;
 	}
 
 	/**
@@ -195,11 +183,11 @@ public class Literal implements Serializable {
 	}
 
 	public final boolean isNegated() {
-		return property < 0;
+		return property.startsWith("!");
 	}
 
 	public Literal toggleNegation() {
-		property *= -1;
+		property = isNegated() ? getPropertyName() : "!" + getPropertyName();
 		return this;
 	}
 
@@ -227,7 +215,7 @@ public class Literal implements Serializable {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((parameters == null) ? 0 : parameters.hashCode());
-		result = prime * result + property;
+		result = prime * result + ((property == null) ? 0 : property.hashCode());
 		return result;
 	}
 
@@ -245,7 +233,10 @@ public class Literal implements Serializable {
 				return false;
 		} else if (!parameters.equals(other.parameters))
 			return false;
-		if (property != other.property)
+		if (property == null) {
+			if (other.property != null)
+				return false;
+		} else if (!property.equals(other.property))
 			return false;
 		return true;
 	}
@@ -285,9 +276,7 @@ public class Literal implements Serializable {
 	public String toString() {
 
 		StringBuilder sb = new StringBuilder();
-		if (property < 0)
-			sb.append("!");
-		sb.append(int2ext.get((short)(property > 0 ? property : property * -1)) + "(");
+		sb.append(property + "(");
 
 		// iterate through parameter list
 		int params = this.parameters.size();
@@ -318,11 +307,7 @@ public class Literal implements Serializable {
 	public final boolean isGround() {
 		return !hasVariableParams();
 	}
-	
-	public short getPropertyId() {
-		return (short)Math.abs(property);
-	}
-	
+
 	public long getMemory() {
 		long memory = ObjectSizeFetcher.getObjectSize(property);
 		for (LiteralParam p : parameters)

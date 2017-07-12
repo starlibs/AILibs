@@ -11,15 +11,16 @@ import java.util.Random;
 import org.junit.Test;
 
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
-import jaicore.search.algorithms.standard.core.NodeEvaluator;
-import jaicore.search.structure.core.GraphGenerator;
+import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.DistributedSearchCommunicationLayer;
+import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
+import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableNodeEvaluator;
 import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.core.NodeType;
 import jaicore.search.structure.graphgenerator.GoalTester;
 import jaicore.search.structure.graphgenerator.RootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
-public class DistributedBestFirstTester {
+public class DistributedBestFirstTester implements Serializable {
 
 	static class TestNode implements Serializable {
 		private static final long serialVersionUID = 793618120417152627L;
@@ -64,12 +65,12 @@ public class DistributedBestFirstTester {
 	@Test
 	public void test() {
 		
-		Random rand = new Random(0);
-		int size = (int)Math.pow(2, 25);
+		Random rand = new Random(1);
+		int size = (int)Math.pow(2, 10);
 		int target = (int)Math.round(rand.nextDouble() * size);
 		System.out.println("Trying to find " + target + " within a space of " + size + " items.");
 
-		GraphGenerator<TestNode, String> gen = new GraphGenerator<TestNode, String>() {
+		SerializableGraphGenerator<TestNode, String> gen = new SerializableGraphGenerator<TestNode, String>() {
 
 			@Override
 			public RootGenerator<TestNode> getRootGenerator() {
@@ -97,19 +98,18 @@ public class DistributedBestFirstTester {
 		};
 		
 		Path folder = Paths.get("Z:/pc2/distsearch/testrsc/comm");
-		DistributedSearchMaintainer<TestNode,Integer> communicationLayer = new CommunicationFolderBasedDistributionProcessor<>(folder);
+		DistributedSearchCommunicationLayer<TestNode,String,Integer> communicationLayer = new FolderBasedDistributedSearchCommunicationLayer<>(folder);
 		
-		NodeEvaluator<TestNode,Integer> evaluator = n -> -1 * n.externalPath().size();
+		SerializableNodeEvaluator<TestNode,Integer> evaluator = n -> -1 * n.externalPath().size();
 		DistributedOrSearchMaster<TestNode,String,Integer> master = new DistributedOrSearchMaster<>(gen, evaluator, communicationLayer, 1);
 		
 		/* setup coworkers */
-		int coworkers = 10;
+		int coworkers = 1;
 		for (int i = 1; i <= coworkers; i++) {
 			final String name = "cw" + i; 
-			new Thread(() -> { new DistributedOrSearchCoworker<>(gen, evaluator, communicationLayer, name, 10000, 1000, 1).cowork(); }).start();
+			new Thread(() -> { new DistributedOrSearchCoworker<>(communicationLayer, name, 10000, 1000, 1).cowork(); }).start();
 		}
 		
-//		ORGraphSearch<TestNode, String> master = new ORGraphSearch<>(gen, new BestFirstFactory<>(evaluator));
 
 		/* run master in separate thread */
 		new SimpleGraphVisualizationWindow<>(master.getEventBus());

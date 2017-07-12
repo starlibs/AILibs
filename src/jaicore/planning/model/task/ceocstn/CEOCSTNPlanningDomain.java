@@ -1,10 +1,11 @@
 package jaicore.planning.model.task.ceocstn;
 
+import java.io.Serializable;
 import java.util.Collection;
 
 import jaicore.planning.model.ceoc.CEOCOperation;
 
-public class CEOCSTNPlanningDomain {
+public class CEOCSTNPlanningDomain implements Serializable {
 
 	private final Collection<CEOCOperation> operations;
 	private final Collection<OCMethod> methods;

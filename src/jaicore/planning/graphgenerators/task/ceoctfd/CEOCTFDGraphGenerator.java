@@ -29,38 +29,41 @@ import jaicore.planning.model.core.Operation;
 import jaicore.planning.model.task.ceocstn.CEOCSTNPlanningProblem;
 import jaicore.planning.model.task.stn.Method;
 import jaicore.planning.model.task.stn.MethodInstance;
-import jaicore.search.structure.core.GraphGenerator;
+import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.DistributableGraphGenerator;
+import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableRootGenerator;
 import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.core.NodeType;
 import jaicore.search.structure.graphgenerator.GoalTester;
 import jaicore.search.structure.graphgenerator.RootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
-public class CEOCTFDGraphGenerator implements GraphGenerator<TFDNode,String> {
+public class CEOCTFDGraphGenerator implements DistributableGraphGenerator<TFDNode, String> {
 
 	private static final Logger logger = LoggerFactory.getLogger(CEOCTFDGraphGenerator.class);
 	private static final int checkpointDistance = 1;
 	private final CEOCSTNPlanningProblem problem;
 	private final CNFFormula knowledge;
 	private final Map<String, Operation> primitiveTasks = new HashMap<>();
+	private SerializableRootGenerator<TFDNode> rootGenerator;
 
 	public CEOCTFDGraphGenerator(CEOCSTNPlanningProblem problem) {
 		this.problem = problem;
 		this.knowledge = problem.getKnowledge();
 		for (Operation op : problem.getDomain().getOperations())
 			primitiveTasks.put(op.getName(), op);
+		this.rootGenerator = () -> Arrays.asList(new TFDNode[] { new TFDNode(problem.getInit(), TaskPlannerUtil.getTaskChainOfTotallyOrderedNetwork(problem.getNetwork())) });
 	}
 
 	@Override
 	public RootGenerator<TFDNode> getRootGenerator() {
-		return () -> Arrays.asList(new TFDNode[]{ new TFDNode(problem.getInit(), TaskPlannerUtil.getTaskChainOfTotallyOrderedNetwork(problem.getNetwork()))});
+		return rootGenerator;
 	}
 
 	@Override
-	public SuccessorGenerator<TFDNode,String> getSuccessorGenerator() {
+	public SuccessorGenerator<TFDNode, String> getSuccessorGenerator() {
 		return l -> {
-			List<NodeExpansionDescription<TFDNode,String>> successors = new ArrayList<>();
-				
+			List<NodeExpansionDescription<TFDNode, String>> successors = new ArrayList<>();
+
 			TFDRestProblem rp = l.getPoint().getProblem();
 			if (rp == null)
 				rp = TFDNodeUtil.getRestProblem(l.externalPath());
@@ -69,17 +72,20 @@ public class CEOCTFDGraphGenerator implements GraphGenerator<TFDNode,String> {
 			Literal nextTaskTmp = currentlyRemainingTasks.get(0);
 			if (nextTaskTmp == null)
 				return successors;
+			if (nextTaskTmp.getPropertyName() == null)
+				throw new IllegalStateException("Invalid task " + nextTaskTmp + " without property name!");
 			String nextTaskName = nextTaskTmp.getPropertyName().substring(nextTaskTmp.getPropertyName().indexOf("-") + 1, nextTaskTmp.getPropertyName().length());
 			Literal nextTask = new Literal(nextTaskName, nextTaskTmp.getParameters());
 			int depth = l.path().size();
-			
+
 			/* if the task is primitive */
 			if (primitiveTasks.containsKey(nextTask.getPropertyName())) {
 
 				logger.info("Computing successors for PRIMITIVE task {} in state {}", nextTask, state);
-				for (Action applicableAction : TaskPlannerUtil.getActionsForPrimitiveTaskThatAreApplicableInState(knowledge, primitiveTasks.get(nextTask.getPropertyName()), nextTask, state)) {
+				for (Action applicableAction : TaskPlannerUtil.getActionsForPrimitiveTaskThatAreApplicableInState(knowledge, primitiveTasks.get(nextTask.getPropertyName()),
+						nextTask, state)) {
 					logger.info("Adding successor for PRIMITIVE task {} in state {}: {}", nextTask, state, applicableAction.getEncoding());
-					
+
 					/* if the depth is % k == 0, then compute the rest problem explicitly */
 					Monom updatedState = new Monom(state, false);
 					TFDNodeUtil.updateState(updatedState, applicableAction);
@@ -105,7 +111,8 @@ public class CEOCTFDGraphGenerator implements GraphGenerator<TFDNode,String> {
 				logger.info("Computing successors for COMPLEX task {} in state {}", nextTask, state);
 				Set<Method> usedMethods = new HashSet<>();
 				PerformanceLogger.logStart("compute instances");
-				Collection<MethodInstance> instances = TaskPlannerUtil.getMethodInstancesForTaskThatAreApplicableInState(knowledge, this.problem.getDomain().getMethods(), nextTask, state);
+				Collection<MethodInstance> instances = TaskPlannerUtil.getMethodInstancesForTaskThatAreApplicableInState(knowledge, this.problem.getDomain().getMethods(), nextTask,
+						state);
 				PerformanceLogger.logEnd("compute instances");
 				for (MethodInstance instance : instances) {
 
@@ -117,9 +124,9 @@ public class CEOCTFDGraphGenerator implements GraphGenerator<TFDNode,String> {
 					}
 
 					logger.info("Adding successor {}", instance);
-					
+
 					/* if the depth is % k == 0, then compute the rest problem explicitly */
-					
+
 					List<Literal> prependedTasks = TaskPlannerUtil.getTaskChainOfTotallyOrderedNetwork(instance.getNetwork());
 					List<Literal> remainingTasks = new ArrayList<>(prependedTasks);
 					remainingTasks.addAll(currentlyRemainingTasks);
@@ -129,16 +136,16 @@ public class CEOCTFDGraphGenerator implements GraphGenerator<TFDNode,String> {
 						node = new TFDNode(new Monom(state, false), remainingTasks, instance, null);
 					else
 						node = new TFDNode(instance, remainingTasks.isEmpty());
-					successors.add(new NodeExpansionDescription<>(l.getPoint(),  node, "edge label", NodeType.OR));
+					successors.add(new NodeExpansionDescription<>(l.getPoint(), node, "edge label", NodeType.OR));
 				}
-				
+
 				logger.info("Computed {} successors", successors.size());
 			}
-//			l.getPoint().clear();
+			// l.getPoint().clear();
 			return successors;
 		};
 	}
-	
+
 	@Override
 	public GoalTester<TFDNode> getGoalTester() {
 		return p -> p.getPoint().isGoal();
@@ -147,5 +154,15 @@ public class CEOCTFDGraphGenerator implements GraphGenerator<TFDNode,String> {
 	public CEOCSTNPlanningProblem getProblem() {
 		return problem;
 	}
-	
+
+
+	@Override
+	public String toString() {
+		return "CEOCTFDGraphGenerator [problem=" + problem + ", knowledge=" + knowledge + ", primitiveTasks=" + primitiveTasks + "]";
+	}
+
+	@Override
+	public void setRootGenerator(SerializableRootGenerator<TFDNode> generator) {
+		this.rootGenerator = generator;
+	}
 }

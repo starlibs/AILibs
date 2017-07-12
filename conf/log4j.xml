@@ -67,7 +67,7 @@
 		<level value="info" />
 	</logger>
 	
-	<logger name="jaicore.search.core.ORGraphSearch">
+	<logger name="jaicore.search.algorithms.parallel.parallelexploration.distributed">
 		<level value="info" />
 	</logger>
 </log4j:configuration>

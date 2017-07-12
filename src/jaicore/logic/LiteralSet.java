@@ -194,7 +194,7 @@ public class LiteralSet extends HashSet<Literal> {
 	
 	public boolean containsGroundEqualityPredicateThatEvaluatesTo(boolean eval) {
 		for (Literal l : this) {
-			if (l.getPropertyId() == 1 && l.isGround()) {
+			if (l.getPropertyName().equals("=") && l.isGround()) {
 				List<ConstantParam> params = l.getConstantParams();
 				if ((l.isPositive() == params.get(0).equals(params.get(1))) == eval)
 					return true;

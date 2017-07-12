@@ -4,21 +4,24 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import jaicore.search.structure.core.GraphGenerator;
+import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.DistributableGraphGenerator;
+import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableRootGenerator;
 import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.core.NodeType;
 import jaicore.search.structure.graphgenerator.GoalTester;
 import jaicore.search.structure.graphgenerator.RootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
-public class DistributedBestFirstClusterTesterGenerator implements GraphGenerator<TestNode, String> {
+public class DistributedBestFirstClusterTesterGenerator implements DistributableGraphGenerator<TestNode, String> {
 
+	private SerializableRootGenerator<TestNode> rootGenerator;
 	private int size, target;
 
 	public DistributedBestFirstClusterTesterGenerator(int size, int target) {
 		super();
 		this.size = size;
 		this.target = target;
+		rootGenerator =  () -> Arrays.asList(new TestNode[]{new TestNode(0, size)});
 		System.out.println("Trying to find " + target + " within a space of " + size + " items.");
 	}
 
@@ -40,6 +43,11 @@ public class DistributedBestFirstClusterTesterGenerator implements GraphGenerato
 	}
 
 	public RootGenerator<TestNode> getRootGenerator() {
-		return () -> Arrays.asList(new TestNode[]{new TestNode(0, size)});
+		return rootGenerator;
+	}
+
+	@Override
+	public void setRootGenerator(SerializableRootGenerator<TestNode> generator) {
+		rootGenerator = generator;
 	}
 }

@@ -16,21 +16,22 @@ import jaicore.search.structure.events.NodeTypeSwitchEvent;
 
 public class ParallelizedORGraphSearch<T, A, V extends Comparable<V>> extends ORGraphSearch<T, A, V> {
 
-	private final int NUM_THREADS = 4;
-	private final Semaphore fComputationTickets = new Semaphore(NUM_THREADS);
-	private final ExecutorService pool = Executors.newFixedThreadPool(NUM_THREADS);
+	private final Semaphore fComputationTickets;
+	private final ExecutorService pool;
 	private final AtomicInteger activeJobs = new AtomicInteger(0);
 	private final Timer timeouter = new Timer();
 	private final ITimeoutNodeEvaluator<T, V> timeoutNodeEvaluator;
 	private final int timeout;
 
-	public ParallelizedORGraphSearch(GraphGenerator<T, A> graphGenerator, NodeEvaluator<T, V> pNodeEvaluator, int timeout) {
-		this(graphGenerator, pNodeEvaluator, n -> null, timeout);
+	public ParallelizedORGraphSearch(GraphGenerator<T, A> graphGenerator, NodeEvaluator<T, V> pNodeEvaluator, int numThreads, int timeout) {
+		this(graphGenerator, pNodeEvaluator, numThreads, n -> null, timeout);
 	}
 
-	public ParallelizedORGraphSearch(GraphGenerator<T, A> graphGenerator, NodeEvaluator<T, V> pNodeEvaluator, ITimeoutNodeEvaluator<T, V> timeoutNodeEvaluator, int timeout) {
+	public ParallelizedORGraphSearch(GraphGenerator<T, A> graphGenerator, NodeEvaluator<T, V> pNodeEvaluator, int numThreads, ITimeoutNodeEvaluator<T, V> timeouter, int timeout) {
 		super(graphGenerator, pNodeEvaluator);
-		this.timeoutNodeEvaluator = timeoutNodeEvaluator;
+		this.timeoutNodeEvaluator = timeouter;
+		this.fComputationTickets = new Semaphore(numThreads);
+		this.pool = Executors.newFixedThreadPool(numThreads);
 		this.timeout = timeout;
 	}
 
@@ -70,7 +71,7 @@ public class ParallelizedORGraphSearch<T, A, V extends Comparable<V>> extends OR
 					node.setInternalLabel(label);
 					open.add(node);
 				}
-				
+
 				/* in any case, free the resources to compute f-values */
 				activeJobs.decrementAndGet();
 				fComputationTickets.release();

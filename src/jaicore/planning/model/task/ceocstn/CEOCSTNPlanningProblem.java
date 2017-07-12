@@ -1,10 +1,12 @@
 package jaicore.planning.model.task.ceocstn;
 
+import java.io.Serializable;
+
 import jaicore.logic.CNFFormula;
 import jaicore.logic.Monom;
 import jaicore.planning.model.task.stn.TaskNetwork;
 
-public class CEOCSTNPlanningProblem {
+public class CEOCSTNPlanningProblem implements Serializable {
 
 	private final CEOCSTNPlanningDomain domain;
 
