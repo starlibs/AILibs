@@ -2,7 +2,6 @@ package jaicore.search.algorithms.parallel.parallelexploration.distributed;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,16 +17,16 @@ import jaicore.search.algorithms.standard.core.ORGraphSearch;
 import jaicore.search.structure.core.Node;
 import jaicore.search.structure.events.NodeTypeSwitchEvent;
 
-public class DistributedOrSearchMaster<T, A, V extends Comparable<V>> extends ORGraphSearch<T, A, V> implements DistributionSearchResultProcessor<T, V> {
+public class DistributedOrSearch<T, A, V extends Comparable<V>> extends ORGraphSearch<T, A, V> implements DistributionSearchResultProcessor<T, V> {
 
-	private static final Logger logger = LoggerFactory.getLogger(DistributedOrSearchMaster.class);
+	private static final Logger logger = LoggerFactory.getLogger(DistributedOrSearch.class);
 	private final DistributedSearchManager<T, A, V> manager;
 
-	public DistributedOrSearchMaster(SerializableGraphGenerator<T, A> graphGenerator, SerializableNodeEvaluator<T, V> pNodeEvaluator,
-			DistributedSearchCommunicationLayer<T, A, V> communicationLayer, int numberOfThreads) {
+	public DistributedOrSearch(SerializableGraphGenerator<T, A> graphGenerator, SerializableNodeEvaluator<T, V> pNodeEvaluator,
+			DistributedSearchCommunicationLayer<T, A, V> communicationLayer) {
 		super(graphGenerator, pNodeEvaluator);
-		this.manager = new DistributedSearchManager<>(communicationLayer, this);
-		this.manager.getEventBus().register(this);
+		
+		/* initialize communication layer */
 		try {
 			communicationLayer.init();
 			communicationLayer.setGraphGenerator(graphGenerator);
@@ -35,6 +34,10 @@ public class DistributedOrSearchMaster<T, A, V extends Comparable<V>> extends OR
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		/* now start distributed manager */
+		this.manager = new DistributedSearchManager<>(communicationLayer, this);
+		this.manager.getEventBus().register(this);
 	}
 	
 	@Subscribe
@@ -42,19 +45,17 @@ public class DistributedOrSearchMaster<T, A, V extends Comparable<V>> extends OR
 		this.eventBus.post(new NodeTypeSwitchEvent<>(e.getNode(), "or_distributed"));
 	}
 	
-	public void afterInitialization() {
-
-		while (!Thread.interrupted()) {
-			if (!open.isEmpty())
-				distributeNodes();
-
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+	@Override
+	public void afterExpansion(Node<T, V> node) {
+		if (open.size() > 1) {
+			int helpers = manager.getNumbetOfIdleCoworkers() + manager.getNumbetOfPendingCoworkers();
+			int pendingTasks = manager.getNumberOfUnprocessedJobs();
+			int nodesToOutsource = Math.min(open.size() -1, helpers - pendingTasks);
+			logger.info("Finished node expansion, distributing min({} - 1, {} - {}) = {} nodes ...", open.size() - 1, helpers, pendingTasks, nodesToOutsource);
+			for (int i = 0; i < nodesToOutsource; i++) {
+				manager.distributeNodesRemotely(pollNodesForDistribution(nodesToOutsource));
 			}
 		}
-		cancel();
 	}
 
 	@Override
@@ -69,15 +70,6 @@ public class DistributedOrSearchMaster<T, A, V extends Comparable<V>> extends OR
 	public void cancel() {
 		super.cancel();
 		manager.shutdown();
-	}
-
-	private Node<T, V> getLocalVersionOfNode(Node<T, V> node) {
-		return ext2int.get(node.getPoint());
-	}
-
-	private void distributeNodes() {
-		logger.info("Distributing nodes ...");
-		manager.distributeNodesRemotely(pollNodesForDistribution(Math.max(1, manager.getNumberOfHelpers())));
 	}
 
 	private Collection<Node<T, V>> pollNodesForDistribution(int helpers) {
@@ -117,32 +109,16 @@ public class DistributedOrSearchMaster<T, A, V extends Comparable<V>> extends OR
 			return;
 
 		/* append open nodes */
-		for (List<Node<T, V>> p : result.getOpen()) {
-			insertPathIntoLocalGraph(p);
-			open.add(getLocalVersionOfNode(p.get(p.size() - 1)));
+		for (Node<T, V> p : result.getOpen()) {
+			insertNodeIntoLocalGraph(p);
+			open.add(getLocalVersionOfNode(p));
 		}
 		logger.info("Added {} nodes to open (and a respective number was added in order to make them reachable).", result.getOpen().size());
 
 		/* create solution graphs */
-		for (List<Node<T, V>> solution : result.getSolutions()) {
-			insertPathIntoLocalGraph(solution);
-		}
-	}
-
-	private void insertPathIntoLocalGraph(List<Node<T, V>> path) {
-		Node<T, V> localVersionOfParent = null;
-		Node<T, V> leaf = path.get(path.size() - 1);
-		for (Node<T, V> node : path) {
-			if (!ext2int.containsKey(node.getPoint())) {
-				assert node.getParent() != null : "Want to insert a new node that has no parent. That must not be the case! Affected node is: " + node.getPoint();
-				assert ext2int.containsKey(node.getParent().getPoint()) : "Want to insert a node whose parent is unknown locally";
-				Node<T, V> newNode = newNode(localVersionOfParent, node.getPoint(), node.getInternalLabel());
-				logger.info("Created new node {} as a local copy of {}", newNode, node);
-				if (!newNode.isGoal() && !newNode.getPoint().equals(leaf.getPoint()))
-					this.getEventBus().post(new NodeTypeSwitchEvent<Node<T, V>>(newNode, "or_closed"));
-				localVersionOfParent = newNode;
-			} else
-				localVersionOfParent = getLocalVersionOfNode(node);
+		for (Node<T, V> solution : result.getSolutions()) {
+			insertNodeIntoLocalGraph(solution);
+			solutions.add(solution.externalPath());
 		}
 	}
 }

@@ -13,7 +13,13 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.NoSuchElementException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.Semaphore;
 import java.util.stream.Stream;
 
 import org.slf4j.Logger;
@@ -29,16 +35,61 @@ import jaicore.search.structure.core.Node;
 public class FolderBasedDistributedSearchCommunicationLayer<T, A, V extends Comparable<V>> implements DistributedSearchCommunicationLayer<T, A, V> {
 
 	private static final Logger logger = LoggerFactory.getLogger(FolderBasedDistributedSearchCommunicationLayer.class);
+	private final Set<String> knownCoworkers = new HashSet<>();
 	private final Path communicationFolder;
+	private Map<String, Semaphore> registerTickets = new HashMap<>();
+	private Map<String, BlockingQueue<Collection<Node<T, V>>>> jobQueues = new HashMap<>();
 
-	/** Master Stuff **/
-	public FolderBasedDistributedSearchCommunicationLayer(Path communicationFolder) {
+	private final Thread masterFolderObserver = new Thread() {
+		public void run() {
+//			try {
+//				while (!Thread.interrupted()) {
+//
+//					Thread.sleep(500);
+//				}
+//			} catch (InterruptedException e) {
+//				logger.info("Shutting down folder listener.");
+//			}
+		}
+	};
+	
+	private final Thread coworkerFolderObserver = new Thread() {
+		public void run() {
+			try {
+				while (!Thread.interrupted()) {
+					
+					/* detect whether a coworker has a new job request */
+					for (String coworker : knownCoworkers) {
+						readCoworkersJob(coworker);
+					}
+					
+					/* check whether registering coworkers have been attached */
+					for (String registeringCoworker : registerTickets.keySet()) {
+						if (isAttached(registeringCoworker)) {
+							registerTickets.get(registeringCoworker).release();
+							registerTickets.remove(registeringCoworker);
+						}
+					}
+					
+					Thread.sleep(500);
+				}
+			} catch (InterruptedException e) {
+				logger.info("Shutting down folder listener.");
+			}
+		}
+	};
+	
+	public FolderBasedDistributedSearchCommunicationLayer(Path communicationFolder, boolean isMaster) {
 		super();
 		this.communicationFolder = communicationFolder;
+		if (isMaster)
+			masterFolderObserver.start();
+		else
+			coworkerFolderObserver.start();
 	}
-	
+
 	public void init() {
-		
+
 		/* clean directory */
 		try (Stream<Path> paths = Files.walk(communicationFolder)) {
 			paths.forEach(filePath -> {
@@ -79,6 +130,14 @@ public class FolderBasedDistributedSearchCommunicationLayer<T, A, V extends Comp
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
+		/* add coworkers */
+		for (String newCoworker : newCoworkers) {
+			knownCoworkers.add(newCoworker);
+			if (!jobQueues.containsKey(newCoworker))
+				jobQueues.put(newCoworker, new LinkedBlockingQueue<>());
+		}
+
 		return newCoworkers;
 	}
 
@@ -96,7 +155,7 @@ public class FolderBasedDistributedSearchCommunicationLayer<T, A, V extends Comp
 	public void createNewJobForCoworker(String coworkerId, Collection<Node<T, V>> nodesToBeSolved) {
 		File target = new File(communicationFolder.toFile().getAbsolutePath() + "/job-" + coworkerId);
 		File tmp = new File(target.getAbsolutePath() + ".tmp");
-		logger.info("Writing job: {}", nodesToBeSolved);
+		logger.info("Writing job for {}: {}", coworkerId, nodesToBeSolved);
 		try (ObjectOutputStream bw = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(tmp)))) {
 			bw.writeObject(nodesToBeSolved);
 			bw.close();
@@ -142,10 +201,27 @@ public class FolderBasedDistributedSearchCommunicationLayer<T, A, V extends Comp
 	}
 
 	/** Coworker Stuff **/
-	public void register(String coworker) {
+	public void register(String coworker) throws InterruptedException {
 		try {
+
+			/* detach coworker forst if it is attached */
+			if (isAttached(coworker))
+				detachCoworker(coworker);
+
+			/* create register semaphore */
+			Semaphore s = new Semaphore(0);
+			registerTickets.put(coworker, s);
+
+			/* now register */
 			File f = new File(communicationFolder.toAbsolutePath() + "/register-" + coworker);
 			f.createNewFile();
+
+			/* now wait for acceptance */
+			s.acquire(1);
+			
+			/* if the coworker has been registered, add him to the pool of candidates */
+			knownCoworkers.add(coworker);
+			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -153,7 +229,7 @@ public class FolderBasedDistributedSearchCommunicationLayer<T, A, V extends Comp
 
 	public void unregister(String coworker) {
 		try {
-			File f = new File(communicationFolder.toAbsolutePath() + "/unregister-" + coworker);
+			File f = new File(communicationFolder.toAbsolutePath() + "/register-" + coworker);
 			if (f.exists())
 				Files.delete(f.toPath());
 		} catch (IOException e) {
@@ -161,38 +237,10 @@ public class FolderBasedDistributedSearchCommunicationLayer<T, A, V extends Comp
 		}
 	}
 
-	public boolean hasNewJob(String coworker) {
-		File f = new File(communicationFolder.toAbsolutePath() + "/job-" + coworker);
-		return f.exists();
-	}
-
-	public Collection<Node<T, V>> getJobDescription(String coworker) {
-		File f = new File(communicationFolder.toAbsolutePath() + "/job-" + coworker);
-		if (!f.exists())
-			throw new NoSuchElementException("No job available for " + coworker);
-		int tries = 0;
-		while (tries < 10) {
-			try (ObjectInputStream in = new ObjectInputStream(new BufferedInputStream(new FileInputStream(f)))) {
-				@SuppressWarnings("unchecked")
-				Collection<Node<T, V>> nodes = (Collection<Node<T, V>>) in.readObject();
-				in.close();
-				Files.delete(f.toPath());
-				return nodes;
-			} catch (IOException e) {
-				try {
-					logger.error("Error reading file " + f.toString() + ", waiting 500ms and retrying.");
-					e.printStackTrace();
-					tries++;
-					Thread.sleep(500);
-				} catch (InterruptedException e1) {
-					e1.printStackTrace();
-				}
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
-			}
-		}
-		logger.info("Giving up reading the results of " + coworker);
-		return null;
+	public Collection<Node<T, V>> nextJob(String coworker) throws InterruptedException {
+		if (!jobQueues.containsKey(coworker))
+			jobQueues.put(coworker, new LinkedBlockingQueue<>());
+		return jobQueues.get(coworker).take();
 	}
 
 	@Override
@@ -244,6 +292,41 @@ public class FolderBasedDistributedSearchCommunicationLayer<T, A, V extends Comp
 	@SuppressWarnings("unchecked")
 	@Override
 	public NodeEvaluator<T, V> getNodeEvaluator() throws Exception {
-		return (NodeEvaluator<T,V>)FileUtil.unserializeObject(communicationFolder.toAbsolutePath() + "/nodeeval.ser");
+		return (NodeEvaluator<T, V>) FileUtil.unserializeObject(communicationFolder.toAbsolutePath() + "/nodeeval.ser");
+	}
+
+	@Override
+	public void close() {
+		masterFolderObserver.interrupt();
+		coworkerFolderObserver.interrupt();
+	}
+
+	private void readCoworkersJob(String coworker) {
+		File f = new File(communicationFolder.toAbsolutePath() + "/job-" + coworker);
+		if (!f.exists())
+			return;
+		int tries = 0;
+		while (tries < 10) {
+			try (ObjectInputStream in = new ObjectInputStream(new BufferedInputStream(new FileInputStream(f)))) {
+				@SuppressWarnings("unchecked")
+				Collection<Node<T, V>> nodes = (Collection<Node<T, V>>) in.readObject();
+				in.close();
+				Files.delete(f.toPath());
+				jobQueues.get(coworker).add(nodes);
+				return;
+			} catch (IOException e) {
+				try {
+					logger.error("Error reading file " + f.toString() + ", waiting 500ms and retrying.");
+					e.printStackTrace();
+					tries++;
+					Thread.sleep(500);
+				} catch (InterruptedException e1) {
+					e1.printStackTrace();
+				}
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+			}
+		}
+		logger.info("Giving up reading the results of " + coworker);
 	}
 }

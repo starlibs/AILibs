@@ -2,8 +2,12 @@ package jaicore.search.algorithms.parallel.parallelexploration.distributed;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -24,23 +28,25 @@ public class DistributedSearchManager<T, A, V extends Comparable<V>> {
 	private final DistributionSearchResultProcessor<T, V> resultProcessor;
 	private final BlockingQueue<Collection<Node<T, V>>> unprocessedJobs = new LinkedBlockingQueue<>();
 	private final BlockingQueue<String> idleCoworkers = new LinkedBlockingQueue<>();
+	private final Set<String> pendingCoworkers = Collections.synchronizedSet(new HashSet<>());
 	private final Map<String, Collection<Node<T, V>>> coworkerJobs = new HashMap<>();
 	private final EventBus eventBus = new EventBus();
+	private final List<Thread> auxThreads = new ArrayList<>();
 	
 	public EventBus getEventBus() {
 		return eventBus;
 	}
 
-	private class CoworkerDetectorWorker extends Thread {
+	private class CoworkerSynchronizerWorker extends Thread {
 		public void run() {
 			try {
 				while (!Thread.interrupted()) {
-					detectCoworkers();
+					logger.info("Scanning for new/removed coworkers ...");
+					detectNewCoworkers();
+					detectUnattachedCoworkers();
 					Thread.sleep(1000);
 				}
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			} catch (InterruptedException e) { }
 		}
 	}
 
@@ -52,27 +58,22 @@ public class DistributedSearchManager<T, A, V extends Comparable<V>> {
 				while (!Thread.interrupted()) {
 					Collection<Node<T, V>> nodes = null;
 
-					logger.info("Waiting for new jobs ...");
-					nodes = unprocessedJobs.take();
-
 					/* now create jobs for all pending coworkers */
-					logger.info("Registered new job. Waiting for the next available coworker ...");
+					logger.info("Waiting for the next available coworker ...");
 					String coworker = idleCoworkers.take();
+					pendingCoworkers.add(coworker);
+					
+					logger.info("Awaiting job for submission to coworker {}", coworker);
+					nodes = unprocessedJobs.take();
+					logger.info("Assigning next job to {}", coworker);
+					pendingCoworkers.remove(coworker);
 					coworkerJobs.put(coworker, nodes);
 					idleCoworkers.remove(coworker);
-					// for (Node<T, V> node : coworkerJobs.get(coworker)) {
-					// assert node.getPoint().equals(fromString(toString((Serializable) node.getPoint()))) : "Objects of class " + node.getPoint().getClass().getName()
-					// + " cannot be serialized and unserialized without losing equality. Check equals method of " + node.getPoint().getClass().getName();
-					// assert ext2int.containsKey(node.getPoint()) : "Outsourced node that has not been registered: " + node.getPoint();
-					// getEventBus().post(new NodeTypeSwitchEvent<Node<T, V>>(node, "or_distributed"));
-					// }
 					communicationLayer.createNewJobForCoworker(coworker, nodes);
 					for (Node<T,V> node : nodes)
 						eventBus.post(new NodePassedToCoworkerEvent<>(node));
 				}
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			} catch (InterruptedException e) { }
 		}
 	}
 
@@ -97,9 +98,7 @@ public class DistributedSearchManager<T, A, V extends Comparable<V>> {
 					/* wait some time to see whether new results are there */
 					Thread.sleep(500);
 				}
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			} catch (InterruptedException e) { }
 		}
 	}
 
@@ -115,9 +114,11 @@ public class DistributedSearchManager<T, A, V extends Comparable<V>> {
 		/* set up communication layer and run the workers */
 		this.communicationLayer = communicationLayer;
 		this.resultProcessor = resultProcessor;
-		new CoworkerDetectorWorker().start();
-		new JobWriterWorker().start();
-		new ResultReaderWorker().start();
+		auxThreads.add(new CoworkerSynchronizerWorker());
+		auxThreads.add(new JobWriterWorker());
+		auxThreads.add(new ResultReaderWorker());
+		for (Thread t : auxThreads)
+			t.start();
 	}
 
 	public void distributeNodesRemotely(Collection<Node<T, V>> nodes) {
@@ -137,28 +138,71 @@ public class DistributedSearchManager<T, A, V extends Comparable<V>> {
 		}
 	}
 
-	private void detectCoworkers() {
+	private void detectNewCoworkers() {
 		for (String newCoworker : communicationLayer.detectNewCoworkers()) {
+			logger.info("Detected new coworker {}. Now trying to attach it ...", newCoworker);
 			communicationLayer.attachCoworker(newCoworker);
-			logger.info("Attaching {}", newCoworker);
+			logger.info("Attached new coworker {}", newCoworker);
 			idleCoworkers.add(newCoworker);
 		}
 	}
-
-	protected int getNumberOfHelpers() {
-		return idleCoworkers.size() + coworkerJobs.size();
+	
+	private void detectUnattachedCoworkers() {
+		
+		/* check unattached idle coworkers */
+		for (String coworker : new ArrayList<>(idleCoworkers)) {
+			if (!communicationLayer.isAttached(coworker)) {
+				logger.info("Coworker {} was detached!", coworker);
+				idleCoworkers.remove(coworker);
+			}
+		}
+		
+		/* check unattached coworkers that were busy before */
+		for (String coworker : coworkerJobs.keySet()) {
+			if (!communicationLayer.isAttached(coworker)) {
+				Collection<Node<T,V>> job = coworkerJobs.get(coworker);
+				coworkerJobs.remove(coworker);
+				distributeNodesRemotely(job);
+				logger.info("Busy coworker {} was detached. Resubmitting his job {}.", coworker, job);
+			}
+		}
 	}
 
-	/** Read the object from Base64 string. */
+	public int getNumberOfHelpers() {
+		return idleCoworkers.size() + pendingCoworkers.size() + coworkerJobs.size();
+	}
+	
+	public int getNumbetOfIdleCoworkers() {
+		return idleCoworkers.size();
+	}
+	
+	public int getNumbetOfPendingCoworkers() {
+		return pendingCoworkers.size();
+	}
 
+	public int getNumberOfUnprocessedJobs() {
+		return unprocessedJobs.size();
+	}
+	
 	public boolean isBusy() {
-		return !coworkerJobs.isEmpty();
+		return !unprocessedJobs.isEmpty() || !coworkerJobs.isEmpty();
 	}
 
 	public void shutdown() {
 		for (String coworker : SetUtil.union(idleCoworkers, coworkerJobs.keySet())) {
 			coworkerJobs.remove(coworker);
 			communicationLayer.detachCoworker(coworker);
+		}
+		
+		for (Thread t : auxThreads) {
+			logger.info("Shutting down {}.", t);
+			t.interrupt();
+			try {
+				t.join();
+				logger.info("Shutdown of {} complete.", t);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 }

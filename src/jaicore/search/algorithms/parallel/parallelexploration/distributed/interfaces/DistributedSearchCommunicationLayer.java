@@ -4,10 +4,12 @@ import java.util.Collection;
 
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.DistributedComputationResult;
 import jaicore.search.algorithms.standard.core.NodeEvaluator;
-import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
 
 public interface DistributedSearchCommunicationLayer<T,A,V extends Comparable<V>> {
+	
+	/* infrastructural operations */
+	public void close();
 	
 	/* master operations */
 	public void init();
@@ -20,11 +22,10 @@ public interface DistributedSearchCommunicationLayer<T,A,V extends Comparable<V>
 	public void setNodeEvaluator(SerializableNodeEvaluator<T, V> evaluator) throws Exception;
 	
 	/* coworker operations */
-	public void register(String coworker);
+	public void register(String coworker) throws InterruptedException; // registers the coworker on the bus and blocks him until it becomes attached
 	public void unregister(String coworker);
 	public boolean isAttached(String coworker);
-	public boolean hasNewJob(String coworker);
-	public Collection<Node<T,V>> getJobDescription(String coworker);
+	public Collection<Node<T,V>> nextJob(String coworker) throws InterruptedException;
 	public SerializableGraphGenerator<T,A> getGraphGenerator() throws Exception;
 	public NodeEvaluator<T,V> getNodeEvaluator() throws Exception;
 	public void reportResult(String coworker, DistributedComputationResult<T, V> results);

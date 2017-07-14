@@ -2,7 +2,6 @@ package jaicore.search.algorithms.parallel.parallelexploration.distributed;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.List;
 
 import jaicore.search.structure.core.Node;
 
@@ -10,10 +9,10 @@ import jaicore.search.structure.core.Node;
 public class DistributedComputationResult<T, V extends Comparable<V>> implements Serializable {
 
 	private final String coworker;
-	private final Collection<List<Node<T, V>>> open;
-	private final Collection<List<Node<T, V>>> solutions;
+	private final Collection<Node<T, V>> open;
+	private final Collection<Node<T, V>> solutions;
 
-	public DistributedComputationResult(String coworker, Collection<List<Node<T, V>>> open, Collection<List<Node<T, V>>> solutions) {
+	public DistributedComputationResult(String coworker, Collection<Node<T, V>> open, Collection<Node<T, V>> solutions) {
 		super();
 		this.coworker = coworker;
 		this.open = open;
@@ -24,11 +23,11 @@ public class DistributedComputationResult<T, V extends Comparable<V>> implements
 		return coworker;
 	}
 
-	public Collection<List<Node<T, V>>> getOpen() {
+	public Collection<Node<T, V>> getOpen() {
 		return open;
 	}
 
-	public Collection<List<Node<T, V>>> getSolutions() {
+	public Collection<Node<T, V>> getSolutions() {
 		return solutions;
 	}
 }

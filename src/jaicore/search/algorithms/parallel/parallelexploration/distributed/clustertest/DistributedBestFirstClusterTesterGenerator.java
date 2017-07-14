@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.DistributableGraphGenerator;
+import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableRootGenerator;
 import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.core.NodeType;
@@ -12,7 +12,8 @@ import jaicore.search.structure.graphgenerator.GoalTester;
 import jaicore.search.structure.graphgenerator.RootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
-public class DistributedBestFirstClusterTesterGenerator implements DistributableGraphGenerator<TestNode, String> {
+@SuppressWarnings("serial")
+public class DistributedBestFirstClusterTesterGenerator implements SerializableGraphGenerator<TestNode, String> {
 
 	private SerializableRootGenerator<TestNode> rootGenerator;
 	private int size, target;
@@ -44,10 +45,5 @@ public class DistributedBestFirstClusterTesterGenerator implements Distributable
 
 	public RootGenerator<TestNode> getRootGenerator() {
 		return rootGenerator;
-	}
-
-	@Override
-	public void setRootGenerator(SerializableRootGenerator<TestNode> generator) {
-		rootGenerator = generator;
 	}
 }

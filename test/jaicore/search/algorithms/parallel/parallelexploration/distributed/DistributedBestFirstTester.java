@@ -66,7 +66,7 @@ public class DistributedBestFirstTester implements Serializable {
 	public void test() {
 		
 		Random rand = new Random(1);
-		int size = (int)Math.pow(2, 10);
+		int size = (int)Math.pow(2, 20);
 		int target = (int)Math.round(rand.nextDouble() * size);
 		System.out.println("Trying to find " + target + " within a space of " + size + " items.");
 
@@ -97,17 +97,18 @@ public class DistributedBestFirstTester implements Serializable {
 			}
 		};
 		
-		Path folder = Paths.get("Z:/pc2/distsearch/testrsc/comm");
-		DistributedSearchCommunicationLayer<TestNode,String,Integer> communicationLayer = new FolderBasedDistributedSearchCommunicationLayer<>(folder);
+		final Path folder = Paths.get("Z:/pc2/distsearch/testrsc/comm");
+		DistributedSearchCommunicationLayer<TestNode,String,Integer> masterCommunicationLayer = new FolderBasedDistributedSearchCommunicationLayer<>(folder, true);
 		
 		SerializableNodeEvaluator<TestNode,Integer> evaluator = n -> -1 * n.externalPath().size();
-		DistributedOrSearchMaster<TestNode,String,Integer> master = new DistributedOrSearchMaster<>(gen, evaluator, communicationLayer, 1);
+		DistributedOrSearch<TestNode,String,Integer> master = new DistributedOrSearch<>(gen, evaluator, masterCommunicationLayer);
 		
 		/* setup coworkers */
-		int coworkers = 1;
+		int coworkers = 5;
 		for (int i = 1; i <= coworkers; i++) {
 			final String name = "cw" + i; 
-			new Thread(() -> { new DistributedOrSearchCoworker<>(communicationLayer, name, 10000, 1000, 1).cowork(); }).start();
+			final String[] args = {folder.toFile().getAbsolutePath(), name, "10", "1"};
+			new Thread(() -> DistributedOrSearchCoworker.main(args)).start();
 		}
 		
 

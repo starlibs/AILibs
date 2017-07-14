@@ -29,7 +29,7 @@ import jaicore.planning.model.core.Operation;
 import jaicore.planning.model.task.ceocstn.CEOCSTNPlanningProblem;
 import jaicore.planning.model.task.stn.Method;
 import jaicore.planning.model.task.stn.MethodInstance;
-import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.DistributableGraphGenerator;
+import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableRootGenerator;
 import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.core.NodeType;
@@ -37,7 +37,7 @@ import jaicore.search.structure.graphgenerator.GoalTester;
 import jaicore.search.structure.graphgenerator.RootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
-public class CEOCTFDGraphGenerator implements DistributableGraphGenerator<TFDNode, String> {
+public class CEOCTFDGraphGenerator implements SerializableGraphGenerator<TFDNode, String> {
 
 	private static final Logger logger = LoggerFactory.getLogger(CEOCTFDGraphGenerator.class);
 	private static final int checkpointDistance = 1;
@@ -159,10 +159,5 @@ public class CEOCTFDGraphGenerator implements DistributableGraphGenerator<TFDNod
 	@Override
 	public String toString() {
 		return "CEOCTFDGraphGenerator [problem=" + problem + ", knowledge=" + knowledge + ", primitiveTasks=" + primitiveTasks + "]";
-	}
-
-	@Override
-	public void setRootGenerator(SerializableRootGenerator<TFDNode> generator) {
-		this.rootGenerator = generator;
 	}
 }

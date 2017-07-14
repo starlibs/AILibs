@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jaicore.search.algorithms.interfaces.ObservableORGraphSearch;
+import jaicore.search.algorithms.interfaces.IObservableORGraphSearch;
 import jaicore.search.structure.core.GraphEventBus;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
@@ -28,7 +28,7 @@ import jaicore.search.structure.graphgenerator.GoalTester;
 import jaicore.search.structure.graphgenerator.RootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
-public class ORGraphSearch<T, A, V extends Comparable<V>> implements ObservableORGraphSearch<T, A, V> {
+public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservableORGraphSearch<T, A, V> {
 
 	private static final Logger logger = LoggerFactory.getLogger(ORGraphSearch.class);
 
@@ -36,6 +36,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements ObservableO
 	private int createdCounter;
 	private int expandedCounter;
 	private boolean initialized = false;
+	private boolean started = false;
 	protected boolean interrupted = false;
 
 	/* communication */
@@ -105,18 +106,20 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements ObservableO
 	protected void runMainLoop(boolean exitOnSolution) {
 		Node<T, V> nodeToExpand;
 		do {
-			beforeSelection();
-			nodeToExpand = nextNode();
-			assert nodeToExpand == null || !expanded.contains(nodeToExpand.getPoint()) : "Node selected for expansion already has been expanded: " + nodeToExpand;
-			if (nodeToExpand != null) {
-				afterSelection(nodeToExpand);
-				assert ext2int.containsKey(nodeToExpand.getPoint()) : "Trying to expand a node whose point is not available in the ext2int map";
-				beforeExpansion(nodeToExpand);
-				expandNode(nodeToExpand);
-				afterExpansion(nodeToExpand);
-				if (exitOnSolution && !solutions.isEmpty()) {
-					return;
+			if (beforeSelection()) {
+				nodeToExpand = nextNode();
+				assert nodeToExpand == null || !expanded.contains(nodeToExpand.getPoint()) : "Node selected for expansion already has been expanded: " + nodeToExpand;
+				if (nodeToExpand != null) {
+					afterSelection(nodeToExpand);
+					assert ext2int.containsKey(nodeToExpand.getPoint()) : "Trying to expand a node whose point is not available in the ext2int map";
+					beforeExpansion(nodeToExpand);
+					expandNode(nodeToExpand);
+					afterExpansion(nodeToExpand);
 				}
+			}
+			
+			if (exitOnSolution && !solutions.isEmpty()) {
+				return;
 			}
 		} while (!(terminates() || interrupted || Thread.interrupted()));
 	}
@@ -237,11 +240,63 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements ObservableO
 		return newNode;
 	}
 
+	/**
+	 * This method can be used to create an initial graph different from just root nodes.
+	 * This can be interesting if the search is distributed and we want to search only an excerpt of the original one.
+	 * 
+	 * @param initialNodes
+	 */
+	public void bootstrap(Collection<Node<T,V>> initialNodes) {
+		
+		if (initialized)
+			throw new UnsupportedOperationException("Bootstrapping is only supported if the search has already been initialized.");
+		
+		/* now initialize the graph */
+		initGraph();
+		
+		/* remove previous roots from open */
+		open.clear();
+		
+		/* now insert new nodes, and the leaf ones in open */
+		for (Node<T,V> node : initialNodes) {
+			insertNodeIntoLocalGraph(node);
+			open.add(getLocalVersionOfNode(node));
+		}
+	}
+	
+	protected void insertNodeIntoLocalGraph(Node<T, V> node) {
+		Node<T, V> localVersionOfParent = null;
+		List<Node<T,V>> path = node.path();
+		Node<T, V> leaf = path.get(path.size() - 1);
+		for (Node<T, V> nodeOnPath : path) {
+			if (!ext2int.containsKey(nodeOnPath.getPoint())) {
+				assert nodeOnPath.getParent() != null : "Want to insert a new node that has no parent. That must not be the case! Affected node is: " + nodeOnPath.getPoint();
+				assert ext2int.containsKey(nodeOnPath.getParent().getPoint()) : "Want to insert a node whose parent is unknown locally";
+				Node<T, V> newNode = newNode(localVersionOfParent, nodeOnPath.getPoint(), nodeOnPath.getInternalLabel());
+				if (!newNode.isGoal() && !newNode.getPoint().equals(leaf.getPoint()))
+					this.getEventBus().post(new NodeTypeSwitchEvent<Node<T, V>>(newNode, "or_closed"));
+				localVersionOfParent = newNode;
+			} else
+				localVersionOfParent = getLocalVersionOfNode(nodeOnPath);
+		}
+	}
+	
+	/**
+	 * This is relevant if we work with several copies of a node (usually if we need to copy the search space somewhere).
+	 * 
+	 * @param node
+	 * @return
+	 */
+	protected Node<T, V> getLocalVersionOfNode(Node<T, V> node) {
+		return ext2int.get(node.getPoint());
+	}
+	
 	/* hooks */
 	protected void afterInitialization() {
 	}
 
-	protected void beforeSelection() {
+	protected boolean beforeSelection() {
+		return true;
 	}
 
 	protected void afterSelection(Node<T, V> node) {
