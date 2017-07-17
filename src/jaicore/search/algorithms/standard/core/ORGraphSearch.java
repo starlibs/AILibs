@@ -106,22 +106,23 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 	protected void runMainLoop(boolean exitOnSolution) {
 		Node<T, V> nodeToExpand;
 		do {
-			if (beforeSelection()) {
-				nodeToExpand = nextNode();
-				assert nodeToExpand == null || !expanded.contains(nodeToExpand.getPoint()) : "Node selected for expansion already has been expanded: " + nodeToExpand;
-				if (nodeToExpand != null) {
-					afterSelection(nodeToExpand);
-					assert ext2int.containsKey(nodeToExpand.getPoint()) : "Trying to expand a node whose point is not available in the ext2int map";
-					beforeExpansion(nodeToExpand);
-					expandNode(nodeToExpand);
-					afterExpansion(nodeToExpand);
+			beforeSelection();
+			nodeToExpand = nextNode();
+			assert nodeToExpand == null || !expanded.contains(nodeToExpand.getPoint()) : "Node selected for expansion already has been expanded: " + nodeToExpand;
+			if (nodeToExpand != null) {
+				afterSelection(nodeToExpand);
+				assert ext2int.containsKey(nodeToExpand.getPoint()) : "Trying to expand a node whose point is not available in the ext2int map";
+				beforeExpansion(nodeToExpand);
+				expandNode(nodeToExpand);
+				afterExpansion(nodeToExpand);
+				if (exitOnSolution && !solutions.isEmpty()) {
+					return;
 				}
 			}
-			
-			if (exitOnSolution && !solutions.isEmpty()) {
-				return;
-			}
-		} while (!(terminates() || interrupted || Thread.interrupted()));
+			if (Thread.interrupted())
+				interrupted = true;
+		} while (!(terminates() || interrupted));
+		System.out.println(interrupted);
 	}
 
 	private void expandNode(Node<T, V> expandedNodeInternal) {
@@ -190,6 +191,8 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 	}
 
 	public V getFOfReturnedSolution(List<T> solution) {
+		if (!ext2int.containsKey(solution.get(solution.size() -1)))
+			return null;
 		return ext2int.get(solution.get(solution.size() - 1)).getInternalLabel();
 	}
 

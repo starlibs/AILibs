@@ -32,14 +32,16 @@ public class DistributedOrSearchCoworker<T, A, V extends Comparable<V>> {
 	private final int searchTime;
 	private final int uptime;
 	private boolean shutdown = false;
+	private boolean showGraph;
 
-	public DistributedOrSearchCoworker(IORGraphSearchFactory<T, A, V> algorithmFactory, DistributedSearchCommunicationLayer<T, A, V> coworkerInterface, String id, int uptime, int searchTime) {
+	public DistributedOrSearchCoworker(IORGraphSearchFactory<T, A, V> algorithmFactory, DistributedSearchCommunicationLayer<T, A, V> coworkerInterface, String id, int uptime, int searchTime, boolean showGraph) {
 		super();
 		this.algorithmFactory = algorithmFactory;
 		this.coworkerInterface = coworkerInterface;
 		this.id = id;
 		this.searchTime = searchTime;
 		this.uptime = uptime;
+		this.showGraph = showGraph;
 		logger.info("Created new coworker {}", this.id);
 	}
 
@@ -48,6 +50,7 @@ public class DistributedOrSearchCoworker<T, A, V extends Comparable<V>> {
 		final Thread runningThread = Thread.currentThread();
 		Timer timer = new Timer();
 		timer.schedule(new TimerTask() {
+			
 			@Override
 			public void run() {
 				logger.info("Shutting down coworker " + id + ". Note that the shutdown will be effective not until the current job is finished.");
@@ -97,16 +100,18 @@ public class DistributedOrSearchCoworker<T, A, V extends Comparable<V>> {
 					break;
 
 				/* setup the search algorithm with the graph generator, and configure a time out */
-				ORGraphSearch<T, A, V> searchAlgorithm = (ORGraphSearch<T, A, V>) algorithmFactory.getSearch(graphGenerator, nodeEvaluator);
+				IObservableORGraphSearch<T, A, V> searchAlgorithm = (IObservableORGraphSearch<T, A, V>) algorithmFactory.getSearch(graphGenerator, nodeEvaluator);
 				timer.schedule(new TimerTask() {
 					@Override
 					public void run() {
+						logger.info("Search timeout triggered. Shutting down search process.");
 						searchAlgorithm.cancel();
 					}
 				}, searchTime);
 
 				/* run the algorithm */
-//				new SimpleGraphVisualizationWindow<>(((IObservableORGraphSearch<T, A, V>)searchAlgorithm).getEventBus());
+				if (showGraph)
+					new SimpleGraphVisualizationWindow<>(((IObservableORGraphSearch<T, A, V>)searchAlgorithm).getEventBus());
 				List<T> solution;
 				List<Node<T, V>> solutionNodes = new ArrayList<>();
 				logger.info("Running coworker {} with: {}", this.id, nodes.stream().map(n -> n.getPoint()).collect(Collectors.toList()));
@@ -145,8 +150,8 @@ public class DistributedOrSearchCoworker<T, A, V extends Comparable<V>> {
 
 	public static <T,A,V extends Comparable<V>> void main(String[] args) {
 		
-		if (args.length < 4) {
-			System.err.println("Need at least 4 args: communicationFolder, coworkerId, searchTime, upTime[, numThreads]");
+		if (args.length < 5) {
+			System.err.println("Need at least 5 args: communicationFolder, coworkerId, searchTime, upTime, showGraph[, numThreads]");
 			System.exit(1);
 		}
 		
@@ -154,12 +159,13 @@ public class DistributedOrSearchCoworker<T, A, V extends Comparable<V>> {
 		String id = args[1];
 		int searchTime = Integer.parseInt(args[2]) * 1000;
 		int uptime = Integer.parseInt(args[3]) * 1000;
-		int threads = (args.length > 4) ? Integer.parseInt(args[4]) : 1;
+		boolean showGraph = Boolean.parseBoolean(args[4]);
+		int threads = (args.length > 5) ? Integer.parseInt(args[5]) : 1;
 		
 		logger.info("Using {} threads.", threads);
 		
 		IORGraphSearchFactory<T, A, V> factory = (threads == 1 ? (gen, eval) -> new jaicore.search.algorithms.standard.core.ORGraphSearch<>(gen, eval) : (gen, eval) -> new ParallelizedORGraphSearch<>(gen, eval, threads, 1000));
 		DistributedSearchCommunicationLayer<T, A, V> communicationLayer = new FolderBasedDistributedSearchCommunicationLayer<>(folder, false);
-		new DistributedOrSearchCoworker<>(factory, communicationLayer, id, uptime, searchTime).cowork();
+		new DistributedOrSearchCoworker<>(factory, communicationLayer, id, uptime, searchTime, showGraph).cowork();
 	}
 }

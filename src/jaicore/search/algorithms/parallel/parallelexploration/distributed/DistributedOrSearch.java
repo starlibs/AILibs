@@ -10,14 +10,14 @@ import com.google.common.eventbus.Subscribe;
 
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.events.NodePassedToCoworkerEvent;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.DistributedSearchCommunicationLayer;
-import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.DistributionSearchResultProcessor;
+import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.DistributionSearchAdapter;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableNodeEvaluator;
 import jaicore.search.algorithms.standard.core.ORGraphSearch;
 import jaicore.search.structure.core.Node;
 import jaicore.search.structure.events.NodeTypeSwitchEvent;
 
-public class DistributedOrSearch<T, A, V extends Comparable<V>> extends ORGraphSearch<T, A, V> implements DistributionSearchResultProcessor<T, V> {
+public class DistributedOrSearch<T, A, V extends Comparable<V>> extends ORGraphSearch<T, A, V> implements DistributionSearchAdapter<T, V> {
 
 	private static final Logger logger = LoggerFactory.getLogger(DistributedOrSearch.class);
 	private final DistributedSearchManager<T, A, V> manager;
@@ -46,16 +46,15 @@ public class DistributedOrSearch<T, A, V extends Comparable<V>> extends ORGraphS
 	}
 	
 	@Override
-	public void afterExpansion(Node<T, V> node) {
+	public Collection<Node<T,V>> nextJob() {
 		if (open.size() > 1) {
-			int helpers = manager.getNumbetOfIdleCoworkers() + manager.getNumbetOfPendingCoworkers();
-			int pendingTasks = manager.getNumberOfUnprocessedJobs();
-			int nodesToOutsource = Math.min(open.size() -1, helpers - pendingTasks);
-			logger.info("Finished node expansion, distributing min({} - 1, {} - {}) = {} nodes ...", open.size() - 1, helpers, pendingTasks, nodesToOutsource);
-			for (int i = 0; i < nodesToOutsource; i++) {
-				manager.distributeNodesRemotely(pollNodesForDistribution(nodesToOutsource));
-			}
+//			int helpers = manager.getNumbetOfIdleCoworkers() + manager.getNumbetOfPendingCoworkers();
+//			int pendingTasks = manager.getNumberOfUnprocessedJobs();
+//			int nodesToOutsource = Math.min(open.size() -1, helpers - pendingTasks);
+//			logger.info("Finished node expansion, distributing min({} - 1, {} - {}) = {} nodes ...", open.size() - 1, helpers, pendingTasks, nodesToOutsource);
+			return pollNodesForDistribution(1);
 		}
+		return null;
 	}
 
 	@Override

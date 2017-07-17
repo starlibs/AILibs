@@ -19,17 +19,17 @@ import com.google.common.eventbus.EventBus;
 import jaicore.basic.SetUtil;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.events.NodePassedToCoworkerEvent;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.DistributedSearchCommunicationLayer;
-import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.DistributionSearchResultProcessor;
+import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.DistributionSearchAdapter;
 import jaicore.search.structure.core.Node;
 
 public class DistributedSearchManager<T, A, V extends Comparable<V>> {
 	private static final Logger logger = LoggerFactory.getLogger(DistributedSearchManager.class);
 	private final DistributedSearchCommunicationLayer<T, A, V> communicationLayer;
-	private final DistributionSearchResultProcessor<T, V> resultProcessor;
-	private final BlockingQueue<Collection<Node<T, V>>> unprocessedJobs = new LinkedBlockingQueue<>();
+	private final DistributionSearchAdapter<T, V> distAdapter;
+//	private final BlockingQueue<Collection<Node<T, V>>> unprocessedJobs = new LinkedBlockingQueue<>();
 	private final BlockingQueue<String> idleCoworkers = new LinkedBlockingQueue<>();
 	private final Set<String> pendingCoworkers = Collections.synchronizedSet(new HashSet<>());
-	private final Map<String, Collection<Node<T, V>>> coworkerJobs = new HashMap<>();
+	private final Map<String, Collection<Node<T, V>>> coworkerJobs = Collections.synchronizedMap(new HashMap<>());
 	private final EventBus eventBus = new EventBus();
 	private final List<Thread> auxThreads = new ArrayList<>();
 	
@@ -57,14 +57,16 @@ public class DistributedSearchManager<T, A, V extends Comparable<V>> {
 			try {
 				while (!Thread.interrupted()) {
 					Collection<Node<T, V>> nodes = null;
-
+					
+					/* get next nodes */
+					while ((nodes = distAdapter.nextJob())==null)
+						Thread.sleep(1000);
+					
 					/* now create jobs for all pending coworkers */
 					logger.info("Waiting for the next available coworker ...");
 					String coworker = idleCoworkers.take();
 					pendingCoworkers.add(coworker);
 					
-					logger.info("Awaiting job for submission to coworker {}", coworker);
-					nodes = unprocessedJobs.take();
 					logger.info("Assigning next job to {}", coworker);
 					pendingCoworkers.remove(coworker);
 					coworkerJobs.put(coworker, nodes);
@@ -89,7 +91,7 @@ public class DistributedSearchManager<T, A, V extends Comparable<V>> {
 						DistributedComputationResult<T, V> result;
 						if ((result = communicationLayer.readResult(busyCoworker)) != null) {
 							logger.info("Received result with {} open nodes and {} solution(s)", result.getOpen().size(), result.getSolutions().size());
-							resultProcessor.processResult(coworkerJobs.get(busyCoworker), result);
+							distAdapter.processResult(coworkerJobs.get(busyCoworker), result);
 							coworkerJobs.remove(busyCoworker);
 							idleCoworkers.add(busyCoworker);
 						}
@@ -102,7 +104,7 @@ public class DistributedSearchManager<T, A, V extends Comparable<V>> {
 		}
 	}
 
-	public DistributedSearchManager(DistributedSearchCommunicationLayer<T, A, V> communicationLayer, DistributionSearchResultProcessor<T, V> resultProcessor) {
+	public DistributedSearchManager(DistributedSearchCommunicationLayer<T, A, V> communicationLayer, DistributionSearchAdapter<T, V> resultProcessor) {
 		super();
 
 		/* sanity check */
@@ -113,7 +115,7 @@ public class DistributedSearchManager<T, A, V extends Comparable<V>> {
 
 		/* set up communication layer and run the workers */
 		this.communicationLayer = communicationLayer;
-		this.resultProcessor = resultProcessor;
+		this.distAdapter = resultProcessor;
 		auxThreads.add(new CoworkerSynchronizerWorker());
 		auxThreads.add(new JobWriterWorker());
 		auxThreads.add(new ResultReaderWorker());
@@ -121,22 +123,22 @@ public class DistributedSearchManager<T, A, V extends Comparable<V>> {
 			t.start();
 	}
 
-	public void distributeNodesRemotely(Collection<Node<T, V>> nodes) {
-
-		/* sanity check */
-		if (nodes == null)
-			throw new IllegalArgumentException("node collection to be distributed is NULL.");
-		else if (nodes.isEmpty())
-			throw new IllegalArgumentException("node collection to be distributed is empty.");
-
-		/* inject job */
-		try {
-			logger.info("Adding job to unprocessed jobs ...");
-			unprocessedJobs.put(nodes);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-	}
+//	public void distributeNodesRemotely(Collection<Node<T, V>> nodes) {
+//
+//		/* sanity check */
+//		if (nodes == null)
+//			throw new IllegalArgumentException("node collection to be distributed is NULL.");
+//		else if (nodes.isEmpty())
+//			throw new IllegalArgumentException("node collection to be distributed is empty.");
+//
+//		/* inject job */
+//		try {
+//			logger.info("Adding job to unprocessed jobs ...");
+//			unprocessedJobs.put(nodes);
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}
+//	}
 
 	private void detectNewCoworkers() {
 		for (String newCoworker : communicationLayer.detectNewCoworkers()) {
@@ -158,12 +160,12 @@ public class DistributedSearchManager<T, A, V extends Comparable<V>> {
 		}
 		
 		/* check unattached coworkers that were busy before */
-		for (String coworker : coworkerJobs.keySet()) {
+		for (String coworker : new ArrayList<>(coworkerJobs.keySet())) {
 			if (!communicationLayer.isAttached(coworker)) {
 				Collection<Node<T,V>> job = coworkerJobs.get(coworker);
 				coworkerJobs.remove(coworker);
-				distributeNodesRemotely(job);
-				logger.info("Busy coworker {} was detached. Resubmitting his job {}.", coworker, job);
+//				distributeNodesRemotely(job);
+				logger.warn("Busy coworker {} was detached. Resubmitting his job {}.", coworker, job);
 			}
 		}
 	}
@@ -180,12 +182,12 @@ public class DistributedSearchManager<T, A, V extends Comparable<V>> {
 		return pendingCoworkers.size();
 	}
 
-	public int getNumberOfUnprocessedJobs() {
-		return unprocessedJobs.size();
-	}
+//	public int getNumberOfUnprocessedJobs() {
+//		return unprocessedJobs.size();
+//	}
 	
 	public boolean isBusy() {
-		return !unprocessedJobs.isEmpty() || !coworkerJobs.isEmpty();
+		return !coworkerJobs.isEmpty();
 	}
 
 	public void shutdown() {

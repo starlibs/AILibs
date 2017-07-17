@@ -1,5 +1,7 @@
 package jaicore.search.algorithms.parallel.parallelevaluation.local.core;
 
+import java.io.Serializable;
+
 import jaicore.search.structure.core.Node;
 
 /**
@@ -8,7 +10,7 @@ import jaicore.search.structure.core.Node;
  * @author Felix Mohr
  *
  */
-public interface ITimeoutNodeEvaluator<T, V extends Comparable<V>> {
+public interface ITimeoutNodeEvaluator<T, V extends Comparable<V>> extends Serializable {
 
 	/**
 	 * A typical behavior would be to return a very bad value that makes an exploration of the node unlikely.

@@ -102,6 +102,9 @@ public abstract class FileUtil {
 	}
 
 	public static void serializeObject(Object object, String pathname) throws IOException {
+		File file = new File(pathname);
+		if (file.getParentFile() != null && !file.getParentFile().exists())
+			file.getParentFile().mkdirs();
 		try (ObjectOutputStream os2 = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(pathname)))) {
 			os2.writeObject(object);
 		}
