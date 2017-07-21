@@ -1,7 +1,6 @@
 package jaicore.ml;
 
 import java.io.BufferedReader;
-import java.io.PrintWriter;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,15 +13,32 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import weka.attributeSelection.AttributeSelection;
+import weka.classifiers.Classifier;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.OptionHandler;
 import weka.core.json.JSONInstances;
 import weka.core.json.JSONNode;
-import weka.filters.Filter;
 
 public class WekaUtil {
+	
+	public static String getClassifierDescriptor(Classifier c) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(c.getClass().getName());
+		if (c instanceof OptionHandler) {
+			sb.append("- [");
+			int i = 0;
+			for (String s : ((OptionHandler)c).getOptions()) {
+				if (i++ > 0)
+					sb.append(", ");
+				sb.append(s);	
+			}
+			sb.append("]");
+		}
+		return sb.toString();
+	}
 
 	public static List<String> getClassNames(Instance instance) {
 		List<String> names = new ArrayList<>();

@@ -27,7 +27,7 @@ public abstract class MathExt {
     	return k * doubleFactorial((short)(k - 2));
     }
     
-    public static float round(double d, int precision) {
-    	return (float)(Math.round(d * Math.pow(10, precision)) / Math.pow(10, precision));
+    public static double round(double d, int precision) {
+    	return (Math.round(d * Math.pow(10, precision)) / Math.pow(10, precision));
     }
 }
