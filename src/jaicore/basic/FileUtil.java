@@ -33,7 +33,11 @@ public abstract class FileUtil {
 			return lines;
 		}
 	}
-
+	
+	public static String readFileAsString(final File file) throws IOException {
+		return readFileAsString(file.getAbsolutePath());
+	}
+	
 	public static String readFileAsString(final String filename) throws IOException {
 		final StringBuffer sb = new StringBuffer();
 		try (BufferedReader r = Files.newBufferedReader(Paths.get(filename), StandardCharsets.UTF_8)) {

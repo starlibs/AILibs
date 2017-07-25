@@ -14,9 +14,6 @@ sourceSets {
     	java {
     		srcDir 'test'
     	}
-        resources {
-        	srcDir 'conf'
-    	}
     }
 }
 
@@ -41,6 +38,9 @@ dependencies {
 	// Basics
 	compile 'junit:junit:4.12'
 	compile 'com.google.guava:guava:18.0'
+	
+	// JSON
+	compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.0.pr4'
 	
 	// Logging
 	compile 'org.slf4j:slf4j-api:1.7.13'

@@ -12,6 +12,12 @@ import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+import jaicore.ml.core.SimpleInstanceImpl;
+import jaicore.ml.core.SimpleInstancesImpl;
+import jaicore.ml.core.SimpleLabeledInstanceImpl;
+import jaicore.ml.core.SimpleLabeledInstancesImpl;
+import jaicore.ml.interfaces.LabeledInstance;
+import jaicore.ml.interfaces.LabeledInstances;
 import weka.attributeSelection.AttributeSelection;
 import weka.classifiers.Classifier;
 import weka.core.Attribute;
@@ -23,6 +29,96 @@ import weka.core.json.JSONInstances;
 import weka.core.json.JSONNode;
 
 public class WekaUtil {
+	
+	public static Instances fromJAICoreInstances(LabeledInstances<?> instances) {
+
+		/* create basic attribute entries */
+		ArrayList<Attribute> attributes = new ArrayList<>();
+		int numAttributes = instances.getNumberOfColumns();
+		for (int i = 1; i <= numAttributes; i++) {
+			attributes.add(new Attribute("a" + i));
+		}
+
+		/* if the instances object is labeled, create the label entry and create a list of all the possible labels */
+		Map<Object,Double> labelMap = new HashMap<>();
+		attributes.add(new Attribute("label"));
+		int c = 0;
+		for (Object o : ((LabeledInstances<?>)instances).getOccurringLabels()) {
+			labelMap.put(o, (double)(++c));
+		}
+		
+		/* create instances object and insert the data points */
+		Instances wekaInstances = new Instances("JAICore-extracted dataset", attributes, 0);
+		wekaInstances.setClassIndex(numAttributes);
+		for (jaicore.ml.interfaces.Instance instance : instances) {
+			Instance wekaInstance = new DenseInstance(numAttributes + 1);
+			wekaInstance.setDataset(wekaInstances);
+			int att = 0;
+			for (Double val : instance) {
+				wekaInstance.setValue(att++, val);
+			}
+			wekaInstance.setClassValue(labelMap.get(((LabeledInstance<?>)instance).getLabel()));
+			wekaInstances.add(wekaInstance);
+		}
+		return wekaInstances;
+	}
+	
+	public static Instances fromJAICoreInstances(jaicore.ml.interfaces.Instances instances) {
+		
+		/* create basic attribute entries */
+		ArrayList<Attribute> attributes = new ArrayList<>();
+		int numAttributes = instances.getNumberOfColumns();
+		for (int i = 1; i <= numAttributes; i++) {
+			attributes.add(new Attribute("a" + i));
+		}
+		
+		/* create instances object and insert the data points */
+		Instances wekaInstances = new Instances("JAICore-extracted dataset", attributes, 0);
+		for (jaicore.ml.interfaces.Instance instance : instances) {
+			Instance wekaInstance = new DenseInstance(numAttributes);
+			int att = 0;
+			for (Double val : instance) {
+				wekaInstance.setValue(att++, val);
+			}
+			wekaInstances.add(wekaInstance);
+		}
+		
+		return wekaInstances;
+	}
+	
+	public static jaicore.ml.interfaces.LabeledInstances<String> toJAICoreLabeledInstances(Instances wekaInstances) {
+		jaicore.ml.interfaces.LabeledInstances<String> labeledInstances = new SimpleLabeledInstancesImpl();
+		for (Instance inst : wekaInstances) {
+			labeledInstances.add(toJAICoreLabeledInstance(inst));
+		}
+		return labeledInstances;
+	}
+	
+	public static jaicore.ml.interfaces.LabeledInstance<String> toJAICoreLabeledInstance(Instance wekaInst) {
+		jaicore.ml.interfaces.LabeledInstance<String> inst = new SimpleLabeledInstanceImpl<>();
+		for (int att = 0; att < wekaInst.numAttributes(); att ++) {
+			if (att == wekaInst.classIndex())
+				continue;
+			inst.add(wekaInst.value(att));
+		}
+		inst.setLabel(String.valueOf(wekaInst.classValue()));
+		return inst;
+	}
+	
+	public static jaicore.ml.interfaces.Instances toJAICoreInstances(Instances wekaInstances) {
+		jaicore.ml.interfaces.Instances instances = new SimpleInstancesImpl();
+		for (Instance inst : wekaInstances) {
+			instances.add(toJAICoreInstance(inst));
+		}
+		return instances;
+	}
+	
+	public static jaicore.ml.interfaces.Instance toJAICoreInstance(Instance wekaInst) {
+		jaicore.ml.interfaces.Instance inst = new SimpleInstanceImpl();
+		for (int att = 0; att < wekaInst.numAttributes(); att ++)
+			inst.add(wekaInst.value(att));
+		return inst;
+	}
 	
 	public static String getClassifierDescriptor(Classifier c) {
 		StringBuilder sb = new StringBuilder();
