@@ -30,7 +30,7 @@ import weka.core.json.JSONNode;
 
 public class WekaUtil {
 	
-	public static Instances fromJAICoreInstances(LabeledInstances<?> instances) {
+	public static <L> Instances fromJAICoreInstances(LabeledInstances<L> instances) {
 
 		/* create basic attribute entries */
 		ArrayList<Attribute> attributes = new ArrayList<>();
@@ -41,11 +41,25 @@ public class WekaUtil {
 
 		/* if the instances object is labeled, create the label entry and create a list of all the possible labels */
 		Map<Object,Double> labelMap = new HashMap<>();
-		attributes.add(new Attribute("label"));
 		int c = 0;
-		for (Object o : ((LabeledInstances<?>)instances).getOccurringLabels()) {
-			labelMap.put(o, (double)(++c));
+		boolean isNominal = false;
+		for (Object o : ((LabeledInstances<L>)instances).getOccurringLabels()) {
+			labelMap.put(o, (double)(c++));
+			if (!Double.class.isInstance(o)) {
+				System.out.println("No double value, assuming nominal attribute!");
+				isNominal = true;
+			}
 		}
+		
+		/* if the feature is  */
+		if (isNominal) {
+			List<String> values = labelMap.values().stream().map(d -> String.valueOf(d)).collect(Collectors.toList());
+			attributes.add(new Attribute("label", values));
+		}
+		else {
+			attributes.add(new Attribute("label"));
+		}
+		
 		
 		/* create instances object and insert the data points */
 		Instances wekaInstances = new Instances("JAICore-extracted dataset", attributes, 0);
