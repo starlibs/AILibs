@@ -331,6 +331,25 @@ public class WekaUtil {
 		iNew.setDataset(dataset);
 		return iNew;
 	}
+	
+  public static Instance getRefactoredInstance(final Instance instance, final List<String> classes) {
+    /* modify instance */
+    Instances dataset = WekaUtil.getEmptySetOfInstancesWithRefactoredClass(instance.dataset(), classes);
+    int numAttributes = instance.numAttributes();
+    int classIndex = instance.classIndex();
+    Instance iNew = new DenseInstance(numAttributes);
+    for (int i = 0; i < numAttributes; i++) {
+      Attribute a = instance.attribute(i);
+      if (i != classIndex) {
+        iNew.setValue(a, instance.value(a));
+      } else {
+        iNew.setValue(a, 0.0); // the value does not matter since this should only be used for TESTING
+      }
+    }
+    dataset.add(iNew);
+    iNew.setDataset(dataset);
+    return iNew;
+  }
 
 	public static Instances getEmptySetOfInstancesWithRefactoredClass(Instances instances) {
 		List<Attribute> newAttributes = getAttributes(instances);
@@ -339,6 +358,15 @@ public class WekaUtil {
 		newData.setClass(newAttributes.get(newAttributes.size() - 1));
 		return newData;
 	}
+	
+  public static Instances getEmptySetOfInstancesWithRefactoredClass(final Instances instances, final List<String> classes) {
+    List<Attribute> newAttributes = getAttributes(instances);
+    newAttributes.add(getNewClassAttribute(instances.classAttribute(), classes));
+    Instances newData = new Instances("split", (ArrayList<Attribute>) newAttributes, 0);
+    newData.setClass(newAttributes.get(newAttributes.size() - 1));
+    return newData;
+  }
+
 
 	public static List<Attribute> getAttributes(Instances inst) {
 		List<Attribute> attributes = new ArrayList<>();
@@ -363,6 +391,11 @@ public class WekaUtil {
 		Attribute a = new Attribute(attribute.name(), vals);
 		return a;
 	}
+
+  public static Attribute getNewClassAttribute(final Attribute attribute, final List<String> classes) {
+    Attribute a = new Attribute(attribute.name(), classes);
+    return a;
+  }
 
 	public static List<Attribute> getReplacedAttributeList(List<Attribute> attributes, Attribute classAttribute) {
 		ArrayList<Attribute> newAttributes = new ArrayList<>();
@@ -393,6 +426,27 @@ public class WekaUtil {
 		}
 		return newData;
 	}
+	
+  public static Instances mergeClassesOfInstances(final Instances data, final List<Set<String>> instancesCluster) {
+    List<String> classes = new LinkedList<>();
+    IntStream.range(0, instancesCluster.size()).forEach(x -> {
+      classes.add("C" + ((double) x));
+    });
+
+    Instances newData = WekaUtil.getEmptySetOfInstancesWithRefactoredClass(data, classes);
+    for (Instance i : data) {
+      Instance iNew = (Instance) i.copy();
+      String className = i.classAttribute().value((int) Math.round(i.classValue()));
+      for (Set<String> cluster : instancesCluster) {
+        if (cluster.contains(className)) {
+          iNew.setClassValue(instancesCluster.indexOf(cluster));
+          newData.add(iNew);
+        }
+      }
+    }
+    return newData;
+  }
+
 
 	public static Collection<String> getClassesDeclaredInDataset(Instances data) {
 		Enumeration<Object> classesExt = data.classAttribute().enumerateValues();
