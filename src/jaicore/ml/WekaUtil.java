@@ -235,6 +235,30 @@ public class WekaUtil {
 		}
 		return counter;
 	}
+	
+	public static int getNumberOfInstancesFromClass(Instances data, String c) {
+		return getInstancesOfClass(data, c).size();
+	}
+	
+	public static int getNumberOfInstancesFromClass(Instances data, Collection<String> cs) {
+		Map<String,Integer> map = getNumberOfInstancesPerClass(data);
+		int sum = 0;
+		for (String c : cs) {
+			if (map.containsKey(c))
+				sum += map.get(c);
+		}
+		return sum;
+	}
+	
+	public static double getRelativeNumberOfInstancesFromClass(Instances data, String c) {
+		if (data.size() == 0)
+			return 0;
+		return getNumberOfInstancesFromClass(data, c) / (1f * data.size());
+	}
+	
+	public static double getRelativeNumberOfInstancesFromClass(Instances data, Collection<String> cs) {
+		return getNumberOfInstancesFromClass(data, cs) / (1f * data.size());
+	}
 
 	public static List<Instances> getStratifiedSplit(Instances data, Random rand, double... portions) {
 
