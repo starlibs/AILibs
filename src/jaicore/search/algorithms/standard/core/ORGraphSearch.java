@@ -105,7 +105,13 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 
 	protected void runMainLoop(boolean exitOnSolution) {
 		Node<T, V> nodeToExpand;
+		int iteration = 0;
+		long start = System.currentTimeMillis(), end;
 		do {
+			iteration ++;
+			if (iteration % 100 == 1) {
+				start = System.currentTimeMillis();
+			}
 			beforeSelection();
 			nodeToExpand = nextNode();
 			assert nodeToExpand == null || !expanded.contains(nodeToExpand.getPoint()) : "Node selected for expansion already has been expanded: " + nodeToExpand;
@@ -121,6 +127,10 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 			}
 			if (Thread.interrupted())
 				interrupted = true;
+			if (iteration % 100 == 0) {
+				end = System.currentTimeMillis();
+				System.out.println(end - start);
+			}
 		} while (!(terminates() || interrupted));
 		System.out.println(interrupted);
 	}
@@ -132,9 +142,8 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 		expanded.add(expandedNodeInternal.getPoint());
 
 		/* compute successors */
-		Node<T, V> newNode;
-		for (NodeExpansionDescription<T, A> successorDescription : successorGenerator.generateSuccessors(expandedNodeInternal)) {
-			newNode = newNode(expandedNodeInternal, successorDescription.getTo());
+		successorGenerator.generateSuccessors(expandedNodeInternal).stream().parallel().forEach(successorDescription -> {
+			Node<T, V> newNode = newNode(expandedNodeInternal, successorDescription.getTo());
 
 			createdCounter++;
 			if (!goalTester.isGoal(newNode)) {
@@ -149,7 +158,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 			}
 			else
 				labelNode(newNode);
-		}
+		});
 
 		/* update statistics, send closed notifications, and possibly return a solution */
 		expandedCounter++;

@@ -245,6 +245,32 @@ public class WekaUtil {
     return counter;
   }
 
+  public static int getNumberOfInstancesFromClass(final Instances data, final String c) {
+    return getInstancesOfClass(data, c).size();
+  }
+
+  public static int getNumberOfInstancesFromClass(final Instances data, final Collection<String> cs) {
+    Map<String, Integer> map = getNumberOfInstancesPerClass(data);
+    int sum = 0;
+    for (String c : cs) {
+      if (map.containsKey(c)) {
+        sum += map.get(c);
+      }
+    }
+    return sum;
+  }
+
+  public static double getRelativeNumberOfInstancesFromClass(final Instances data, final String c) {
+    if (data.size() == 0) {
+      return 0;
+    }
+    return getNumberOfInstancesFromClass(data, c) / (1f * data.size());
+  }
+
+  public static double getRelativeNumberOfInstancesFromClass(final Instances data, final Collection<String> cs) {
+    return getNumberOfInstancesFromClass(data, cs) / (1f * data.size());
+  }
+
   public static List<Instances> getStratifiedSplit(final Instances data, final Random rand, final double... portions) {
 
     /* check that portions sum up to s.th. smaller than 1 */
@@ -300,6 +326,26 @@ public class WekaUtil {
     return instances;
   }
 
+  public static Instance getRefactoredInstance(final Instance instance) {
+
+    /* modify instance */
+    Instances dataset = WekaUtil.getEmptySetOfInstancesWithRefactoredClass(instance.dataset());
+    int numAttributes = instance.numAttributes();
+    int classIndex = instance.classIndex();
+    Instance iNew = new DenseInstance(numAttributes);
+    for (int i = 0; i < numAttributes; i++) {
+      Attribute a = instance.attribute(i);
+      if (i != classIndex) {
+        iNew.setValue(a, instance.value(a));
+      } else {
+        iNew.setValue(a, 0.0); // the value does not matter since this should only be used for TESTING
+      }
+    }
+    dataset.add(iNew);
+    iNew.setDataset(dataset);
+    return iNew;
+  }
+
   public static Instance getRefactoredInstance(final Instance instance, final List<String> classes) {
     /* modify instance */
     Instances dataset = WekaUtil.getEmptySetOfInstancesWithRefactoredClass(instance.dataset(), classes);
@@ -319,36 +365,17 @@ public class WekaUtil {
     return iNew;
   }
 
-  public static Instance getRefactoredInstance(final Instance instance) {
-    /* modify instance */
-    Instances dataset = WekaUtil.getEmptySetOfInstancesWithRefactoredClass(instance.dataset());
-    int numAttributes = instance.numAttributes();
-    int classIndex = instance.classIndex();
-    Instance iNew = new DenseInstance(numAttributes);
-    for (int i = 0; i < numAttributes; i++) {
-      Attribute a = instance.attribute(i);
-      if (i != classIndex) {
-        iNew.setValue(a, instance.value(a));
-      } else {
-        iNew.setValue(a, 0.0); // the value does not matter since this should only be used for TESTING
-      }
-    }
-    dataset.add(iNew);
-    iNew.setDataset(dataset);
-    return iNew;
-  }
-
-  public static Instances getEmptySetOfInstancesWithRefactoredClass(final Instances instances, final List<String> classes) {
+  public static Instances getEmptySetOfInstancesWithRefactoredClass(final Instances instances) {
     List<Attribute> newAttributes = getAttributes(instances);
-    newAttributes.add(getNewClassAttribute(instances.classAttribute(), classes));
+    newAttributes.add(getNewClassAttribute(instances.classAttribute()));
     Instances newData = new Instances("split", (ArrayList<Attribute>) newAttributes, 0);
     newData.setClass(newAttributes.get(newAttributes.size() - 1));
     return newData;
   }
 
-  public static Instances getEmptySetOfInstancesWithRefactoredClass(final Instances instances) {
+  public static Instances getEmptySetOfInstancesWithRefactoredClass(final Instances instances, final List<String> classes) {
     List<Attribute> newAttributes = getAttributes(instances);
-    newAttributes.add(getNewClassAttribute(instances.classAttribute()));
+    newAttributes.add(getNewClassAttribute(instances.classAttribute(), classes));
     Instances newData = new Instances("split", (ArrayList<Attribute>) newAttributes, 0);
     newData.setClass(newAttributes.get(newAttributes.size() - 1));
     return newData;
@@ -372,14 +399,14 @@ public class WekaUtil {
     return attributes;
   }
 
-  public static Attribute getNewClassAttribute(final Attribute attribute, final List<String> classes) {
-    Attribute a = new Attribute(attribute.name(), classes);
-    return a;
-  }
-
   public static Attribute getNewClassAttribute(final Attribute attribute) {
     List<String> vals = Arrays.asList(new String[] { "0.0", "1.0" });
     Attribute a = new Attribute(attribute.name(), vals);
+    return a;
+  }
+
+  public static Attribute getNewClassAttribute(final Attribute attribute, final List<String> classes) {
+    Attribute a = new Attribute(attribute.name(), classes);
     return a;
   }
 
@@ -398,11 +425,7 @@ public class WekaUtil {
   }
 
   public static Instances mergeClassesOfInstances(final Instances data, final Collection<String> cluster1, final Collection<String> cluster2) {
-    List<String> classes = new LinkedList<>();
-    classes.add("0.0");
-    classes.add("1.0");
-
-    Instances newData = WekaUtil.getEmptySetOfInstancesWithRefactoredClass(data, classes);
+    Instances newData = WekaUtil.getEmptySetOfInstancesWithRefactoredClass(data);
     for (Instance i : data) {
       Instance iNew = (Instance) i.copy();
       String className = i.classAttribute().value((int) Math.round(i.classValue()));
@@ -487,5 +510,4 @@ public class WekaUtil {
       return null;
     }
   }
-
 }
