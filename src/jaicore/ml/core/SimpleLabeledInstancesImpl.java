@@ -21,7 +21,16 @@ import jaicore.ml.interfaces.LabeledInstances;
 public class SimpleLabeledInstancesImpl extends ArrayList<LabeledInstance<String>> implements LabeledInstances<String> {
 
 	private int numColumns = -1;
-	private Set<String> labels = new HashSet<>();
+	
+	private Set<String> occurringLabels = new HashSet<>();
+	
+	public SimpleLabeledInstancesImpl() { }
+	
+	public SimpleLabeledInstancesImpl(String json) throws IOException { addAllFromJson(json); }
+	
+	public SimpleLabeledInstancesImpl(JsonNode jsonNode) { addAllFromJson(jsonNode); }
+	
+	public SimpleLabeledInstancesImpl(File jsonFile) throws IOException { addAllFromJson(jsonFile); }
 
 	@Override
 	public boolean add(LabeledInstance<String> instance) {
@@ -32,8 +41,8 @@ public class SimpleLabeledInstancesImpl extends ArrayList<LabeledInstance<String
 		else if (numColumns != instance.getNumberOfColumns())
 			throw new IllegalArgumentException("Cannot add " + instance.getNumberOfColumns() + "-valued instance to dataset with " + numColumns + " instances.");
 
-		labels.add(instance.getLabel());
-		
+		occurringLabels.add(instance.getLabel());
+
 		return super.add(instance);
 	}
 
@@ -69,29 +78,32 @@ public class SimpleLabeledInstancesImpl extends ArrayList<LabeledInstance<String
 
 	@Override
 	public Collection<String> getOccurringLabels() {
-		return new ArrayList<>(labels);
+		return new ArrayList<>(occurringLabels);
 	}
+	
 
 	@Override
-	public void addAllFromJson(String jsonString) {
+	public void addAllFromJson(String json) throws IOException {
 		ObjectMapper mapper = new ObjectMapper();
-		try {
-			JsonNode root = mapper.readTree(jsonString);
-			JsonNode instances = root.get("instances");
-			JsonNode labels = root.get("labels");
-			if (instances.size() != labels.size())
-				throw new IllegalArgumentException("Number of labels does not match the number of instances!");
-			int index = 0;
-			for (JsonNode instance : instances) {
-				LabeledInstance<String> labeledInstance = new SimpleLabeledInstanceImpl<>();
-				for (JsonNode val : instance) {
-					labeledInstance.add(val.asDouble());
-				}
-				labeledInstance.setLabel(labels.get(index++).asText());
-				this.add(labeledInstance);
+		JsonNode root = mapper.readTree(json);
+		addAllFromJson(root);
+	}
+
+	public void addAllFromJson(JsonNode jsonNode) {
+		JsonNode instances = jsonNode.get("instances");
+		JsonNode labels = jsonNode.get("labels");
+		if (labels == null)
+			throw new IllegalArgumentException("No labels provided in the dataset!");
+		if (instances.size() != labels.size())
+			throw new IllegalArgumentException("Number of labels does not match the number of instances!");
+		int index = 0;
+		for (JsonNode instance : instances) {
+			LabeledInstance<String> labeledInstance = new SimpleLabeledInstanceImpl();
+			for (JsonNode val : instance) {
+				labeledInstance.add(val.asDouble());
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
+			labeledInstance.setLabel(labels.get(index++).asText());
+			this.add(labeledInstance);
 		}
 	}
 

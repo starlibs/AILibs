@@ -1,4 +1,4 @@
-package jaicore.ml.classification.multiclass;
+package jaicore.ml.classification.multiclass.reduction;
 
 import java.util.Collection;
 import java.util.HashMap;

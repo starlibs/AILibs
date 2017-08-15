@@ -17,6 +17,21 @@ public class SimpleInstancesImpl extends ArrayList<Instance> implements Instance
 
 	private int numColumns = -1;
 
+	public SimpleInstancesImpl() {
+	}
+
+	public SimpleInstancesImpl(String json) throws IOException {
+		addAllFromJson(json);
+	}
+
+	public SimpleInstancesImpl(JsonNode jsonNode) {
+		addAllFromJson(jsonNode);
+	}
+
+	public SimpleInstancesImpl(File jsonFile) throws IOException {
+		addAllFromJson(jsonFile);
+	}
+
 	@Override
 	public boolean add(Instance instance) {
 
@@ -51,19 +66,18 @@ public class SimpleInstancesImpl extends ArrayList<Instance> implements Instance
 	}
 
 	@Override
-	public void addAllFromJson(String jsonString) {
+	public void addAllFromJson(String json) throws IOException {
 		ObjectMapper mapper = new ObjectMapper();
-		try {
-			JsonNode instances = mapper.readTree(jsonString);
-			for (JsonNode instanceAsJson : instances) {
-				Instance instance = new SimpleInstanceImpl();
-				for (JsonNode val : instanceAsJson) {
-					instance.add(val.asDouble());
-				}
-				this.add(instance);
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
+		JsonNode root = mapper.readTree(json);
+		addAllFromJson(root);
+	}
+
+	public void addAllFromJson(JsonNode jsonNode) {
+		if (!jsonNode.isArray())
+			throw new IllegalArgumentException("Root node from parsed JSON tree is not an array!");
+		for (JsonNode instanceAsJson : jsonNode) {
+			Instance instance = new SimpleInstanceImpl(instanceAsJson);
+			this.add(instance);
 		}
 	}
 

@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -20,7 +21,6 @@ import jaicore.search.algorithms.interfaces.IObservableORGraphSearch;
 import jaicore.search.structure.core.GraphEventBus;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
-import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.events.GraphInitializedEvent;
 import jaicore.search.structure.events.NodeReachedEvent;
 import jaicore.search.structure.events.NodeTypeSwitchEvent;
@@ -28,7 +28,7 @@ import jaicore.search.structure.graphgenerator.GoalTester;
 import jaicore.search.structure.graphgenerator.RootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
-public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservableORGraphSearch<T, A, V> {
+public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservableORGraphSearch<T, A, V>, Iterable<List<T>>, Iterator<List<T>> {
 
 	private static final Logger logger = LoggerFactory.getLogger(ORGraphSearch.class);
 
@@ -38,6 +38,9 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 	private boolean initialized = false;
 	private boolean started = false;
 	protected boolean interrupted = false;
+	
+	/* next solution var used for iterator */
+	private List<T> nextSolution = null;
 
 	/* communication */
 	protected final GraphEventBus<Node<T, V>> eventBus = new GraphEventBus<>();
@@ -331,5 +334,21 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 	protected boolean beforeInsertionIntoOpen(Node<T, V> node) {
 		labelNode(node);
 		return true;
+	}
+
+	@Override
+	public boolean hasNext() {
+		nextSolution = nextSolution();
+		return nextSolution != null;
+	}
+
+	@Override
+	public List<T> next() {
+		return nextSolution;
+	}
+
+	@Override
+	public Iterator<List<T>> iterator() {
+		return this;
 	}
 }

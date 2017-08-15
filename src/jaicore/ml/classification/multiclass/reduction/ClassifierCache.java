@@ -1,6 +1,4 @@
-package jaicore.ml.classification.multiclass;
-
-import jaicore.basic.SetUtil.Pair;
+package jaicore.ml.classification.multiclass.reduction;
 
 import java.util.HashMap;
 import java.util.concurrent.locks.Lock;
@@ -8,6 +6,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import jaicore.basic.SetUtil.Pair;
 import weka.classifiers.Classifier;
 import weka.core.Instances;
 
