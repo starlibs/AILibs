@@ -3,8 +3,10 @@ package jaicore.planning.graphgenerators.task;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -28,19 +30,18 @@ import jaicore.planning.model.task.stn.TaskNetwork;
 public class TaskPlannerUtil {
 
 	private static final Logger logger = LoggerFactory.getLogger(TaskPlannerUtil.class);
-	private static int newVarCounter = 1;
 
-	public static Collection<MethodInstance> getMethodInstancesForTaskThatAreApplicableInState(CNFFormula knowledge, Collection<? extends Method> methods, Literal task, Monom state) {
+	public static Collection<MethodInstance> getMethodInstancesForTaskThatAreApplicableInState(CNFFormula knowledge, Collection<? extends Method> methods, Literal task, Monom state, List<Literal> remainingProblems) {
 		Collection<MethodInstance> applicableDerivedMethods = new ArrayList<>();
 		for (Method m : methods) {
 			if (m.getTask().getPropertyName().equals(task.getPropertyName())) {
-				applicableDerivedMethods.addAll(getMethodInstancesForTaskThatAreApplicableInState(knowledge, m, task, state));
+				applicableDerivedMethods.addAll(getMethodInstancesForTaskThatAreApplicableInState(knowledge, m, task, state, remainingProblems));
 			}
 		}
 		return applicableDerivedMethods;
 	}
 
-	public static Collection<MethodInstance> getMethodInstancesForTaskThatAreApplicableInState(CNFFormula knowledge, Method method, Literal task, Monom state) {
+	public static Collection<MethodInstance> getMethodInstancesForTaskThatAreApplicableInState(CNFFormula knowledge, Method method, Literal task, Monom state, List<Literal> remainingProblems) {
 		Collection<MethodInstance> applicableDerivedMethodInstances = new ArrayList<>();
 		Collection<Map<VariableParam, LiteralParam>> maps = getMappingsThatMatchTasksAndMakesItApplicable(knowledge, method.getTask(), task, method.getPrecondition(), state);
 		for (Map<VariableParam, LiteralParam> grounding : maps) {
@@ -50,11 +51,21 @@ public class TaskPlannerUtil {
 			}
 
 			/* create new objects for unassigned open output variables */
+			Set<ConstantParam> knownConstants = new HashSet<>(state.getConstantParams());
+			for (Literal l : remainingProblems) {
+				knownConstants.addAll(l.getConstantParams());
+			}
 			Collection<VariableParam> unboundParams = SetUtil.difference(method.getParameters(), constantGrounding.keySet());
 			if (method instanceof OCMethod) {
 				Collection<VariableParam> unboundOutputParams = SetUtil.intersection(unboundParams, ((OCMethod) method).getOutputs());
+				int indexForNewVariable = 1;
 				for (VariableParam v : unboundOutputParams) {
-					constantGrounding.put(v, new ConstantParam("newVar" + (newVarCounter++)));
+					ConstantParam p;
+					do {
+						p = new ConstantParam("newVar" + (indexForNewVariable++));
+					}
+					while (knownConstants.contains(p));
+					constantGrounding.put(v, p);
 					unboundParams.remove(v);
 				}
 			}

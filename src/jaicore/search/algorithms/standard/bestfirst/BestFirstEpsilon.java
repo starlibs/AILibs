@@ -1,6 +1,6 @@
 package jaicore.search.algorithms.standard.bestfirst;
 
-import jaicore.search.algorithms.standard.core.NodeEvaluator;
+import jaicore.search.algorithms.standard.core.INodeEvaluator;
 import jaicore.search.algorithms.standard.core.ORGraphSearch;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
@@ -14,7 +14,7 @@ public class BestFirstEpsilon<T, A> extends ORGraphSearch<T, A, BestFirstEpsilon
 
 	private final double epsilon;
 
-	public BestFirstEpsilon(GraphGenerator<T, A> graphGenerator, NodeEvaluator<T, BestFirstEpsilonLabel> pNodeEvaluator, double epsilon) {
+	public BestFirstEpsilon(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, BestFirstEpsilonLabel> pNodeEvaluator, double epsilon) {
 		super(graphGenerator, pNodeEvaluator);
 		this.epsilon = epsilon;
 	}

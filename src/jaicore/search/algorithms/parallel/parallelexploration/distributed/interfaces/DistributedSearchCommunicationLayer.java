@@ -3,7 +3,7 @@ package jaicore.search.algorithms.parallel.parallelexploration.distributed.inter
 import java.util.Collection;
 
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.DistributedComputationResult;
-import jaicore.search.algorithms.standard.core.NodeEvaluator;
+import jaicore.search.algorithms.standard.core.INodeEvaluator;
 import jaicore.search.structure.core.Node;
 
 public interface DistributedSearchCommunicationLayer<T,A,V extends Comparable<V>> {
@@ -27,6 +27,6 @@ public interface DistributedSearchCommunicationLayer<T,A,V extends Comparable<V>
 	public boolean isAttached(String coworker);
 	public Collection<Node<T,V>> nextJob(String coworker) throws InterruptedException;
 	public SerializableGraphGenerator<T,A> getGraphGenerator() throws Exception;
-	public NodeEvaluator<T,V> getNodeEvaluator() throws Exception;
+	public INodeEvaluator<T,V> getNodeEvaluator() throws Exception;
 	public void reportResult(String coworker, DistributedComputationResult<T, V> results);
 }

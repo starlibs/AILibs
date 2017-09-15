@@ -4,7 +4,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
-import jaicore.search.algorithms.standard.core.NodeEvaluator;
+import jaicore.search.algorithms.standard.core.INodeEvaluator;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
 
@@ -15,12 +15,12 @@ import jaicore.search.structure.core.Node;
  */
 public class AStar<T, A> extends BestFirst<T, A> {
 
-	private static class FComputer<T> implements NodeEvaluator<T,Integer> {
+	private static class FComputer<T> implements INodeEvaluator<T,Integer> {
 
 		private final AStarEdgeCost<T> g;
-		private final NodeEvaluator<T,Integer> h;
+		private final INodeEvaluator<T,Integer> h;
 
-		public FComputer(AStarEdgeCost<T> g, NodeEvaluator<T,Integer> h) {
+		public FComputer(AStarEdgeCost<T> g, INodeEvaluator<T,Integer> h) {
 			super();
 			this.g = g;
 			this.h = h;
@@ -46,7 +46,7 @@ public class AStar<T, A> extends BestFirst<T, A> {
 		}
 	}
 	
-	public AStar(GraphGenerator<T, A> graphGenerator, AStarEdgeCost<T> g, NodeEvaluator<T,Integer> h) {
+	public AStar(GraphGenerator<T, A> graphGenerator, AStarEdgeCost<T> g, INodeEvaluator<T,Integer> h) {
 		super(graphGenerator, new FComputer<T>(g, h));
 	}
 

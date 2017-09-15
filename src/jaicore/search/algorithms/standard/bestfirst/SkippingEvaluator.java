@@ -4,17 +4,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-import jaicore.search.algorithms.standard.core.NodeEvaluator;
+import jaicore.search.algorithms.standard.core.INodeEvaluator;
 import jaicore.search.structure.core.Node;
 
-public class SkippingEvaluator<T,V extends Comparable<V>> implements NodeEvaluator<T,V> {
+public class SkippingEvaluator<T,V extends Comparable<V>> implements INodeEvaluator<T,V> {
 
-	private final NodeEvaluator<T,V> actualEvaluator;
+	private final INodeEvaluator<T,V> actualEvaluator;
 	private final Random rand;
 	private final float coin;
 	private final Map<Node<T,V>, V> fCache = new HashMap<>();
 
-	public SkippingEvaluator(NodeEvaluator<T,V> actualEvaluator, Random rand, float coin) {
+	public SkippingEvaluator(INodeEvaluator<T,V> actualEvaluator, Random rand, float coin) {
 		super();
 		this.actualEvaluator = actualEvaluator;
 		this.rand = rand;

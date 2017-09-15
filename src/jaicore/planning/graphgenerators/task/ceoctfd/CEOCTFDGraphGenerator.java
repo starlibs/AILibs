@@ -112,7 +112,7 @@ public class CEOCTFDGraphGenerator implements SerializableGraphGenerator<TFDNode
 				Set<Method> usedMethods = new HashSet<>();
 				PerformanceLogger.logStart("compute instances");
 				Collection<MethodInstance> instances = TaskPlannerUtil.getMethodInstancesForTaskThatAreApplicableInState(knowledge, this.problem.getDomain().getMethods(), nextTask,
-						state);
+						state, currentlyRemainingTasks);
 				PerformanceLogger.logEnd("compute instances");
 				for (MethodInstance instance : instances) {
 

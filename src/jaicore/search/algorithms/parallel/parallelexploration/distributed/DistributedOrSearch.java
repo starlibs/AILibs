@@ -40,9 +40,26 @@ public class DistributedOrSearch<T, A, V extends Comparable<V>> extends ORGraphS
 		this.manager.getEventBus().register(this);
 	}
 	
+	@Override
+	protected boolean beforeSelection() {
+		if (!super.beforeSelection())
+			return false;
+		if (this.manager.getNumberOfHelpers() == this.manager.getNumbetOfIdleCoworkers()) {
+			logger.info("There are no (busy) coworkers, continue exploring on my own.");
+			return true;
+		}
+		logger.info("No further local exploration since there are sufficient busy coworkers ...");
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+	
 	@Subscribe
 	public void receiveNodeEvent(NodePassedToCoworkerEvent<Node<T,V>> e) {
-		this.eventBus.post(new NodeTypeSwitchEvent<>(e.getNode(), "or_distributed"));
+		this.graphEventBus.post(new NodeTypeSwitchEvent<>(e.getNode(), "or_distributed"));
 	}
 	
 	@Override
@@ -52,7 +69,9 @@ public class DistributedOrSearch<T, A, V extends Comparable<V>> extends ORGraphS
 //			int pendingTasks = manager.getNumberOfUnprocessedJobs();
 //			int nodesToOutsource = Math.min(open.size() -1, helpers - pendingTasks);
 //			logger.info("Finished node expansion, distributing min({} - 1, {} - {}) = {} nodes ...", open.size() - 1, helpers, pendingTasks, nodesToOutsource);
-			return pollNodesForDistribution(1);
+			Collection<Node<T,V>> nextJob = pollNodesForDistribution(1);
+			logger.info("Passing next job with {} node(s) to the DistributedSearchManager.", nextJob.size());
+			return nextJob;
 		}
 		return null;
 	}
@@ -107,17 +126,22 @@ public class DistributedOrSearch<T, A, V extends Comparable<V>> extends ORGraphS
 		if (result.getOpen().isEmpty() && result.getSolutions().isEmpty())
 			return;
 
-		/* append open nodes */
-		for (Node<T, V> p : result.getOpen()) {
-			insertNodeIntoLocalGraph(p);
-			open.add(getLocalVersionOfNode(p));
+		/* special hints if */
+		if (result.getOpen().isEmpty()) {
+			logger.warn("No OPEN nodes were returned in this result. This produces a dead end node!");
 		}
-		logger.info("Added {} nodes to open (and a respective number was added in order to make them reachable).", result.getOpen().size());
+		else {
+			/* append open nodes */
+			for (Node<T, V> p : result.getOpen()) {
+				insertNodeIntoLocalGraph(p);
+				open.add(getLocalVersionOfNode(p));
+			}
+			logger.info("Added {} nodes to open (and a respective number was added in order to make them reachable).", result.getOpen().size());
+		}
 
 		/* create solution graphs */
 		for (Node<T, V> solution : result.getSolutions()) {
-			insertNodeIntoLocalGraph(solution);
-			solutions.add(solution.externalPath());
+			insertNodeIntoLocalGraph(solution); // they will be automatically added to the set of solutions by this
 		}
 	}
 }

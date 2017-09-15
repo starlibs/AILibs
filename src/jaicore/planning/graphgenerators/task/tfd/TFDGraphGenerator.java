@@ -59,7 +59,7 @@ public class TFDGraphGenerator implements GraphGenerator<TFDNode,String> {
 			
 			/* otherwise determine methods for the task */
 			else {
-				for (MethodInstance instance : TaskPlannerUtil.getMethodInstancesForTaskThatAreApplicableInState(null, this.problem.getDomain().getMethods(), nextTask, state)) {
+				for (MethodInstance instance : TaskPlannerUtil.getMethodInstancesForTaskThatAreApplicableInState(null, this.problem.getDomain().getMethods(), nextTask, state, currentlyRemainingTasks)) {
 					
 					/* derive remaining network for this instance */
 					List<Literal> remainingTasks = TaskPlannerUtil.getTaskChainOfTotallyOrderedNetwork(instance.getNetwork());

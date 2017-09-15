@@ -132,7 +132,8 @@ public class SearchVisualizationPanel<T> extends JPanel {
 				    	/* generate HTML for tooltip and set it */
 						StringBuilder sb = new StringBuilder();
 						sb.append("<html><div style='padding: 5px; background: #ffffcc; border: 1px solid black;'>");
-						sb.append(SearchVisualizationPanel.this.tooltipGenerator.getTooltip(SearchVisualizationPanel.this.getNodeOfString(arg0)));
+						T node = SearchVisualizationPanel.this.getNodeOfString(arg0);
+						sb.append(SearchVisualizationPanel.this.tooltipGenerator.getTooltip(node));
 						sb.append("</div></html>");
 						SearchVisualizationPanel.this.tooltipLabel.setText(sb.toString());
 						SearchVisualizationPanel.this.tooltipContainer.add(SearchVisualizationPanel.this.tooltipLabel);
@@ -292,6 +293,6 @@ public class SearchVisualizationPanel<T> extends JPanel {
 	}
 
 	public void setTooltipGenerator(TooltipGenerator<T> tooltipGenerator) {
-		this.tooltipGenerator = tooltipGenerator;
+		this.tooltipGenerator = (TooltipGenerator<T>)tooltipGenerator;
 	}
 }

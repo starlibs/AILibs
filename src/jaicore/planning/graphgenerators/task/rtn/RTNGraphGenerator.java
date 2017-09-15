@@ -131,7 +131,7 @@ public class RTNGraphGenerator implements GraphGenerator<RTNNode, RTNEdge> {
 					/* if this is an OR-Node */
 					PerformanceLogger.logStart("Compute applicable method instances");
 					final Collection<MethodInstance> instances = TaskPlannerUtil.getMethodInstancesForTaskThatAreApplicableInState(null, this.problem.getDomain().getMethods(), nextTask,
-							state);
+							state, currentlyRemainingTasks);
 					PerformanceLogger.logEnd("Compute applicable method instances");
 					PerformanceLogger.logStart("Generate nodes for applicable method instances");
 					for (MethodInstance instance : instances) {

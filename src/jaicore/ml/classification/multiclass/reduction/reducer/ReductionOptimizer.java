@@ -67,11 +67,11 @@ public class ReductionOptimizer implements Classifier {
 		System.out.println(solutions.size());
 
 		/* select */
-		List<RestProblem> solution = solutions.stream().min((s1, s2) -> search.getFOfReturnedSolution(s1).getF1() - search.getFOfReturnedSolution(s2).getF1()).get();
+		List<RestProblem> solution = solutions.stream().min((s1, s2) -> search.getAnnotationOfReturnedSolution(s1).f().getF1() - search.getAnnotationOfReturnedSolution(s2).f().getF1()).get();
 		root = getTreeFromSolution(solution, data, true);
 		root.buildClassifier(data);
 		System.out.println(root.toStringWithOffset());
-		System.out.println(search.getFOfReturnedSolution(solution).getF1());
+		System.out.println(search.getAnnotationOfReturnedSolution(solution).f().getF1());
 	}
 
 	@Override

@@ -517,18 +517,6 @@ public class WekaUtil {
 		return counter.keySet().stream().filter(k -> counter.get(k) != 0).collect(Collectors.toList());
 	}
 
-	public static Instance filterInstance(final Instance i, final AttributeSelection as) throws Exception {
-		Instances data = new Instances(i.dataset());
-		data.clear();
-		data.add(i);
-
-		data = as.reduceDimensionality(data);
-		if (data.isEmpty()) {
-			System.err.println("NO INSTANCE REMAINING AFTER FILTERING");
-		}
-		return data.iterator().next();
-	}
-
 	public static String instancesToJsonString(final Instances data) {
 		StringBuilder sb = new StringBuilder();
 		JSONNode json = JSONInstances.toJSON(data);

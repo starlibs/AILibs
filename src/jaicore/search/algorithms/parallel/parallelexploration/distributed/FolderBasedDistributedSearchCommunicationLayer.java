@@ -29,7 +29,7 @@ import jaicore.basic.FileUtil;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.DistributedSearchCommunicationLayer;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableNodeEvaluator;
-import jaicore.search.algorithms.standard.core.NodeEvaluator;
+import jaicore.search.algorithms.standard.core.INodeEvaluator;
 import jaicore.search.structure.core.Node;
 
 public class FolderBasedDistributedSearchCommunicationLayer<T, A, V extends Comparable<V>> implements DistributedSearchCommunicationLayer<T, A, V> {
@@ -230,8 +230,10 @@ public class FolderBasedDistributedSearchCommunicationLayer<T, A, V extends Comp
 	public void unregister(String coworker) {
 		try {
 			File f = new File(communicationFolder.toAbsolutePath() + "/register-" + coworker);
-			if (f.exists())
+			if (f.exists()) {
+				logger.info("Deleting {}", f.getAbsolutePath());
 				Files.delete(f.toPath());
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -291,8 +293,8 @@ public class FolderBasedDistributedSearchCommunicationLayer<T, A, V extends Comp
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public NodeEvaluator<T, V> getNodeEvaluator() throws Exception {
-		return (NodeEvaluator<T, V>) FileUtil.unserializeObject(communicationFolder.toAbsolutePath() + "/nodeeval.ser");
+	public INodeEvaluator<T, V> getNodeEvaluator() throws Exception {
+		return (INodeEvaluator<T, V>) FileUtil.unserializeObject(communicationFolder.toAbsolutePath() + "/nodeeval.ser");
 	}
 
 	@Override

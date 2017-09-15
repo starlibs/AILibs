@@ -5,6 +5,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.stream.Collectors;
@@ -13,12 +14,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
+import jaicore.graphvisualizer.TooltipGenerator;
 import jaicore.search.algorithms.interfaces.IORGraphSearchFactory;
 import jaicore.search.algorithms.interfaces.IObservableORGraphSearch;
 import jaicore.search.algorithms.parallel.parallelevaluation.local.core.ParallelizedORGraphSearch;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.DistributedSearchCommunicationLayer;
-import jaicore.search.algorithms.standard.core.NodeEvaluator;
-import jaicore.search.algorithms.standard.core.ORGraphSearch;
+import jaicore.search.algorithms.standard.core.INodeEvaluator;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
 
@@ -33,6 +34,7 @@ public class DistributedOrSearchCoworker<T, A, V extends Comparable<V>> {
 	private final int uptime;
 	private boolean shutdown = false;
 	private boolean showGraph;
+	private Class<?> tooltipGenerator;
 
 	public DistributedOrSearchCoworker(IORGraphSearchFactory<T, A, V> algorithmFactory, DistributedSearchCommunicationLayer<T, A, V> coworkerInterface, String id, int uptime, int searchTime, boolean showGraph) {
 		super();
@@ -45,6 +47,7 @@ public class DistributedOrSearchCoworker<T, A, V extends Comparable<V>> {
 		logger.info("Created new coworker {}", this.id);
 	}
 
+	@SuppressWarnings("unchecked")
 	public void cowork() {
 		
 		final Thread runningThread = Thread.currentThread();
@@ -53,7 +56,7 @@ public class DistributedOrSearchCoworker<T, A, V extends Comparable<V>> {
 			
 			@Override
 			public void run() {
-				logger.info("Shutting down coworker " + id + ". Note that the shutdown will be effective not until the current job is finished.");
+				logger.info("Uptime of coworker {} ended; shutting it down. Note that the shutdown will be effective not until the current job is finished.", id);
 				shutdown = true;
 				
 				/* if we have not been attached, we stop working */
@@ -76,7 +79,7 @@ public class DistributedOrSearchCoworker<T, A, V extends Comparable<V>> {
 		
 		/* now busily wait for jobs forever */
 		GraphGenerator<T, A> graphGenerator = null;
-		NodeEvaluator<T, V> nodeEvaluator = null;
+		INodeEvaluator<T, V> nodeEvaluator = null;
 		try {
 			while (!shutdown || coworkerInterface.isAttached(this.id)) {
 
@@ -96,8 +99,10 @@ public class DistributedOrSearchCoworker<T, A, V extends Comparable<V>> {
 				}
 
 				/* if we became detached and want to shut down, leave loop */
-				if (shutdown && !coworkerInterface.isAttached(this.id))
+				if (shutdown && !coworkerInterface.isAttached(this.id)) {
+					logger.info("Coworker will be shutdown since shutdown signal has been received and the coworker is not attached.");
 					break;
+				}
 
 				/* setup the search algorithm with the graph generator, and configure a time out */
 				IObservableORGraphSearch<T, A, V> searchAlgorithm = (IObservableORGraphSearch<T, A, V>) algorithmFactory.getSearch(graphGenerator, nodeEvaluator);
@@ -110,8 +115,12 @@ public class DistributedOrSearchCoworker<T, A, V extends Comparable<V>> {
 				}, searchTime);
 
 				/* run the algorithm */
-				if (showGraph)
-					new SimpleGraphVisualizationWindow<>(((IObservableORGraphSearch<T, A, V>)searchAlgorithm).getEventBus());
+				if (showGraph) {
+					SimpleGraphVisualizationWindow<Node<T,V>> window = new SimpleGraphVisualizationWindow<>(((IObservableORGraphSearch<T, A, V>)searchAlgorithm).getEventBus());
+					window.setTitle(this.id);
+					if (tooltipGenerator != null)
+						window.getPanel().setTooltipGenerator((TooltipGenerator<Node<T,V>>)tooltipGenerator.getConstructor().newInstance());
+				}
 				List<T> solution;
 				List<Node<T, V>> solutionNodes = new ArrayList<>();
 				logger.info("Running coworker {} with: {}", this.id, nodes.stream().map(n -> n.getPoint()).collect(Collectors.toList()));
@@ -128,6 +137,11 @@ public class DistributedOrSearchCoworker<T, A, V extends Comparable<V>> {
 				logger.info("Reporting open list of size " + openNodes.size() + " and " + solutionNodes.size() + " solutions.");
 				DistributedComputationResult<T, V> result = new DistributedComputationResult<>(this.id, openNodes, solutionNodes);
 				coworkerInterface.reportResult(this.id, result);
+				
+				/* if we returned nothing, detach for debugging */
+				if (openNodes.isEmpty() && solutionNodes.isEmpty()) {
+					logger.warn("Produced dead end!");
+				}
 			}
 		} catch (InterruptedException e) {
 			logger.info("Received interrupt.");
@@ -135,6 +149,7 @@ public class DistributedOrSearchCoworker<T, A, V extends Comparable<V>> {
 			logger.error("Cannot perform the search as the class {} was not found on the classpath. This is probably a problem of serialization. Simply make sure that the class is on the classpath for the coworker.", e.getMessage());
 		}
 		catch (Exception e) {
+			logger.error("Execution terminated unexpectedly. Please check error log!");
 			e.printStackTrace();
 		}
 
@@ -145,13 +160,14 @@ public class DistributedOrSearchCoworker<T, A, V extends Comparable<V>> {
 		else
 			coworkerInterface.unregister(id);
 		coworkerInterface.close();
-		logger.info("Terminating.");
+		Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
+		logger.info("Terminating. Currently active threads: {}", threadSet);
 	}
 
 	public static <T,A,V extends Comparable<V>> void main(String[] args) {
 		
 		if (args.length < 5) {
-			System.err.println("Need at least 5 args: communicationFolder, coworkerId, searchTime, upTime, showGraph[, numThreads]");
+			System.err.println("Need at least 5 args: communicationFolder, coworkerId, searchTime (s), upTime (s), showGraph[, numThreads]");
 			System.exit(1);
 		}
 		
@@ -162,10 +178,23 @@ public class DistributedOrSearchCoworker<T, A, V extends Comparable<V>> {
 		boolean showGraph = Boolean.parseBoolean(args[4]);
 		int threads = (args.length > 5) ? Integer.parseInt(args[5]) : 1;
 		
+		
+		
 		logger.info("Using {} threads.", threads);
+		String strClassPath = System.getProperty("java.class.path");
+		logger.info("Classpath is " + strClassPath);
 		
 		IORGraphSearchFactory<T, A, V> factory = (threads == 1 ? (gen, eval) -> new jaicore.search.algorithms.standard.core.ORGraphSearch<>(gen, eval) : (gen, eval) -> new ParallelizedORGraphSearch<>(gen, eval, threads, 1000));
 		DistributedSearchCommunicationLayer<T, A, V> communicationLayer = new FolderBasedDistributedSearchCommunicationLayer<>(folder, false);
-		new DistributedOrSearchCoworker<>(factory, communicationLayer, id, uptime, searchTime, showGraph).cowork();
+		DistributedOrSearchCoworker<T, A, V> coworker = new DistributedOrSearchCoworker<>(factory, communicationLayer, id, uptime, searchTime, showGraph);
+		if (args.length > 5) {
+			try {
+				coworker.tooltipGenerator = Class.forName(args[6]);
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+			}
+		}
+		coworker.cowork();
+		System.exit(0);
 	}
 }

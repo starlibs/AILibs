@@ -2,7 +2,7 @@ package jaicore.search.algorithms.parallel.parallelevaluation.local.bestfirst;
 
 import jaicore.search.algorithms.parallel.parallelevaluation.local.core.ITimeoutNodeEvaluator;
 import jaicore.search.algorithms.parallel.parallelevaluation.local.core.ParallelizedORGraphSearch;
-import jaicore.search.algorithms.standard.core.NodeEvaluator;
+import jaicore.search.algorithms.standard.core.INodeEvaluator;
 import jaicore.search.structure.core.GraphGenerator;
 
 /**
@@ -12,12 +12,12 @@ import jaicore.search.structure.core.GraphGenerator;
  */
 public class ParallelizedBestFirst<T, A> extends ParallelizedORGraphSearch<T, A, Integer> {
 
-	public ParallelizedBestFirst(GraphGenerator<T, A> graphGenerator, NodeEvaluator<T, Integer> pNodeEvaluator, int numThreads, ITimeoutNodeEvaluator<T, Integer> timeoutEvaluator,
+	public ParallelizedBestFirst(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, Integer> pNodeEvaluator, int numThreadsForNodeEvaluation, ITimeoutNodeEvaluator<T, Integer> timeoutEvaluator,
 			int timeout) {
-		super(graphGenerator, pNodeEvaluator, numThreads, timeoutEvaluator, timeout);
+		super(graphGenerator, pNodeEvaluator, numThreadsForNodeEvaluation, timeoutEvaluator, timeout);
 	}
 
-	public ParallelizedBestFirst(GraphGenerator<T, A> graphGenerator, NodeEvaluator<T, Integer> pNodeEvaluator, int numThreads, int timeout) {
-		super(graphGenerator, pNodeEvaluator, numThreads, timeout);
+	public ParallelizedBestFirst(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, Integer> pNodeEvaluator, int numThreadsForNodeEvaluation, int timeout) {
+		super(graphGenerator, pNodeEvaluator, numThreadsForNodeEvaluation, timeout);
 	}
 }

@@ -9,6 +9,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.NotSerializableException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.charset.StandardCharsets;
@@ -107,11 +108,17 @@ public abstract class FileUtil {
 
 	public static void serializeObject(Object object, String pathname) throws IOException {
 		File file = new File(pathname);
+		File tmpFile = new File(file + ".tmp." + System.currentTimeMillis());
 		if (file.getParentFile() != null && !file.getParentFile().exists())
 			file.getParentFile().mkdirs();
-		try (ObjectOutputStream os2 = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(pathname)))) {
+		try (ObjectOutputStream os2 = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(tmpFile.getAbsolutePath())))) {
 			os2.writeObject(object);
 		}
+		catch (NotSerializableException e) {
+			file.delete();
+			throw e;
+		}
+		tmpFile.renameTo(file);
 	}
 	
 	public static Object unserializeObject(String pathname) throws IOException, ClassNotFoundException {
@@ -127,5 +134,13 @@ public abstract class FileUtil {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	public static void move(File from, File to) {
+		from.renameTo(to);
+	}
+	
+	public static void move(String from, String to) {
+		move(new File(from), new File(to));
 	}
 }

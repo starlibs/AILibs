@@ -1,6 +1,6 @@
 package jaicore.search.algorithms.standard.bestfirst;
 
-import jaicore.search.algorithms.standard.core.NodeEvaluator;
+import jaicore.search.algorithms.standard.core.INodeEvaluator;
 import jaicore.search.algorithms.standard.core.ORGraphSearch;
 import jaicore.search.structure.core.GraphGenerator;
 
@@ -11,7 +11,7 @@ import jaicore.search.structure.core.GraphGenerator;
  */
 public class BestFirst<T,A> extends ORGraphSearch<T,A,Integer> {
 
-	public BestFirst(GraphGenerator<T, A> graphGenerator, NodeEvaluator<T, Integer> pNodeEvaluator) {
+	public BestFirst(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, Integer> pNodeEvaluator) {
 		super(graphGenerator, pNodeEvaluator);
 	}
 }

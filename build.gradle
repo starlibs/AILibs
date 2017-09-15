@@ -1,5 +1,4 @@
 apply plugin: 'java'
-apply plugin: 'eclipse-wtp'
 
 sourceSets {
     main {
@@ -41,6 +40,9 @@ dependencies {
 	compile 'junit:junit:4.12'
 	compile 'com.google.guava:guava:18.0'
 	
+	// for subprocesses:
+	compile group: 'com.sun.jna', name: 'jna', version: '3.0.9'
+	
 	// JSON
 	compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.0.pr4'
 	
@@ -55,8 +57,8 @@ repositories {
 	maven {
         url "http://clojars.org/repo/"
     }
-}
-
-eclipse {
-    project.natures 'org.eclipse.buildship.core.gradleprojectnature'
+    flatDir {
+    	dirs 'Z:/pc2/distsearch/lib'
+    	dirs 'E:/workspaces/sse-dev/Weka/lib'
+    }
 }

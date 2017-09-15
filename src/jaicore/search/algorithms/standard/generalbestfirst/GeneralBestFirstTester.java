@@ -10,7 +10,7 @@ import org.junit.Test;
 
 import jaicore.graph.Graph;
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
-import jaicore.search.algorithms.standard.core.NodeEvaluator;
+import jaicore.search.algorithms.standard.core.INodeEvaluator;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
 import jaicore.search.structure.core.NodeExpansionDescription;
@@ -111,7 +111,7 @@ public class GeneralBestFirstTester {
 			}
 		};
 		
-		NodeEvaluator<GameNode, Integer> evaluator = new NodeEvaluator<GameNode,Integer>() {
+		INodeEvaluator<GameNode, Integer> evaluator = new INodeEvaluator<GameNode,Integer>() {
 			@Override
 			public Integer f(Node<GameNode,Integer> path) {
 				return 0;

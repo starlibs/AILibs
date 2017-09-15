@@ -14,6 +14,7 @@ import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.DistributedSearchCommunicationLayer;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableNodeEvaluator;
+import jaicore.search.structure.core.Node;
 import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.core.NodeType;
 import jaicore.search.structure.graphgenerator.GoalTester;
@@ -82,6 +83,11 @@ public class DistributedBestFirstTester implements Serializable {
 				return n -> {
 					List<NodeExpansionDescription<TestNode, String>> l = new ArrayList<>();
 					TestNode parent = n.getPoint();
+					try {
+						Thread.sleep(1000 * (n.path().size() - 1));
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
 					if (parent.min < parent.max) {
 						int split = (int)Math.floor((parent.min + parent.max) / 2f);
 						l.add(new NodeExpansionDescription<>(parent, new TestNode(parent.min, split), "edge label", NodeType.OR));
@@ -104,16 +110,18 @@ public class DistributedBestFirstTester implements Serializable {
 		DistributedOrSearch<TestNode,String,Integer> master = new DistributedOrSearch<>(gen, evaluator, masterCommunicationLayer);
 		
 		/* setup coworkers */
-		int coworkers = 5;
+		int coworkers = 1;
 		for (int i = 1; i <= coworkers; i++) {
 			final String name = "cw" + i; 
-			final String[] args = {folder.toFile().getAbsolutePath(), name, "10", "1"};
+			final String[] args = {folder.toFile().getAbsolutePath(), name, "2", "1000", "true"};
 			new Thread(() -> DistributedOrSearchCoworker.main(args)).start();
 		}
 		
 
 		/* run master in separate thread */
-		new SimpleGraphVisualizationWindow<>(master.getEventBus());
+		SimpleGraphVisualizationWindow<Node<TestNode,Integer>> window = new SimpleGraphVisualizationWindow<>(master.getEventBus());
+		window.setTitle("Master");
+		window.getPanel().setTooltipGenerator(n -> (n.getPoint().min + "-" + n.getPoint().max));
 
 		long start = System.currentTimeMillis();
 		List<TestNode> solution = master.nextSolution();

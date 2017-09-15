@@ -17,7 +17,10 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.eventbus.Subscribe;
+
 import jaicore.search.algorithms.interfaces.IObservableORGraphSearch;
+import jaicore.search.algorithms.interfaces.solutionannotations.SolutionAnnotation;
 import jaicore.search.structure.core.GraphEventBus;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
@@ -36,14 +39,14 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 	private int createdCounter;
 	private int expandedCounter;
 	private boolean initialized = false;
-	private boolean started = false;
 	protected boolean interrupted = false;
-	
+	protected boolean canceled = false;
+
 	/* next solution var used for iterator */
 	private List<T> nextSolution = null;
 
 	/* communication */
-	protected final GraphEventBus<Node<T, V>> eventBus = new GraphEventBus<>();
+	protected final GraphEventBus<Node<T, V>> graphEventBus = new GraphEventBus<>();
 	protected final Map<T, Node<T, V>> ext2int = new HashMap<>();
 
 	/* search related objects */
@@ -51,21 +54,61 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 	protected final RootGenerator<T> rootGenerator;
 	protected final SuccessorGenerator<T, A> successorGenerator;
 	protected final GoalTester<T> goalTester;
-	protected final NodeEvaluator<T, V> nodeEvaluator;
+	protected final INodeEvaluator<T, V> nodeEvaluator; 
 	protected final Queue<List<T>> solutions = new LinkedBlockingQueue<>();
+	protected final Map<List<T>,SolutionAnnotation<T,V>> annotationsOfSolutionsReturnedByNodeEvaluator = new HashMap<>();
 	private final Set<T> expanded = new HashSet<>();
+	private final boolean solutionReportingNodeEvaluator;
 
 	@SuppressWarnings("unchecked")
-	public ORGraphSearch(GraphGenerator<T, A> graphGenerator, NodeEvaluator<T, V> pNodeEvaluator) {
+	public ORGraphSearch(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, V> pNodeEvaluator) {
 		super();
 		this.rootGenerator = graphGenerator.getRootGenerator();
 		this.successorGenerator = graphGenerator.getSuccessorGenerator();
 		this.goalTester = graphGenerator.getGoalTester();
 		this.nodeEvaluator = pNodeEvaluator;
-
+		
 		/* if the node evaluator is graph dependent, communicate the generator to it */
-		if (pNodeEvaluator instanceof GraphDependentNodeEvaluator)
-			((GraphDependentNodeEvaluator<T, A, V>) pNodeEvaluator).setGenerator(graphGenerator);
+		if (pNodeEvaluator instanceof DecoratingNodeEvaluator<?,?>) {
+			DecoratingNodeEvaluator<T, V> castedEvaluator = (DecoratingNodeEvaluator<T, V>)pNodeEvaluator;
+			if (castedEvaluator.isGraphDependent()) {
+				logger.info("{} is a graph dependent node evaluator. Setting its graph generator now ...", castedEvaluator);
+				castedEvaluator.setGenerator(graphGenerator);
+			}
+			if (castedEvaluator.isSolutionReporter()) {
+				logger.info("{} is a solution reporter. Register the search algo in its event bus", castedEvaluator);
+				castedEvaluator.getSolutionEventBus().register(this);
+				solutionReportingNodeEvaluator = true;
+			}
+			else
+				solutionReportingNodeEvaluator = false;
+		}
+		else {
+			if (pNodeEvaluator instanceof IGraphDependentNodeEvaluator) {
+				logger.info("{} is a graph dependent node evaluator. Setting its graph generator now ...", pNodeEvaluator);
+				((IGraphDependentNodeEvaluator<T, A, V>) pNodeEvaluator).setGenerator(graphGenerator);
+			}
+			
+			/* if the node evaluator is a solution reporter, register in his event bus */
+			if (pNodeEvaluator instanceof ISolutionReportingNodeEvaluator) {
+				logger.info("{} is a solution reporter. Register the search algo in its event bus", pNodeEvaluator);
+				((ISolutionReportingNodeEvaluator<T, V>)pNodeEvaluator).getSolutionEventBus().register(this);
+				solutionReportingNodeEvaluator = true;
+			}
+			else
+				solutionReportingNodeEvaluator = false;
+		}
+			
+//			/* if this is a decorator, go to the next one */
+//			if (currentlyConsideredEvaluator instanceof DecoratingNodeEvaluator) {
+//				logger.info("{} is decorator. Continue setup with the wrapped evaluator ...", currentlyConsideredEvaluator);
+//				currentlyConsideredEvaluator = ((DecoratingNodeEvaluator<T,V>)currentlyConsideredEvaluator).getEvaluator();
+//			}
+//			else
+//				currentlyConsideredEvaluator = null;
+//		}
+//		while (currentlyConsideredEvaluator != null);
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> { System.out.println("Received shutdown signal, canceling search."); this.cancel(); }));
 	}
 
 	/**
@@ -74,8 +117,8 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 	protected void initGraph() {
 		if (!initialized) {
 			initialized = true;
-			Collection<Node<T,V>> roots = rootGenerator.getRoots().stream().map(n -> newNode(null, n)).collect(Collectors.toList());
-			for (Node<T,V> root : roots) {
+			Collection<Node<T, V>> roots = rootGenerator.getRoots().stream().map(n -> newNode(null, n)).collect(Collectors.toList());
+			for (Node<T, V> root : roots) {
 				labelNode(root);
 				logger.info("Labeled root with {}", root.getInternalLabel());
 			}
@@ -98,7 +141,12 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 		initGraph();
 		if (!solutions.isEmpty())
 			return solutions.poll();
-		runMainLoop(true);
+		do {
+			step();
+			if (!solutions.isEmpty()) {
+				return solutions.poll();
+			}
+		} while (!(terminates() || interrupted));
 		return solutions.isEmpty() ? null : solutions.poll();
 	}
 
@@ -106,17 +154,9 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 		return open.isEmpty();
 	}
 
-	protected void runMainLoop(boolean exitOnSolution) {
-		Node<T, V> nodeToExpand;
-		int iteration = 0;
-		long start = System.currentTimeMillis(), end;
-		do {
-			iteration ++;
-			if (iteration % 100 == 1) {
-				start = System.currentTimeMillis();
-			}
-			beforeSelection();
-			nodeToExpand = nextNode();
+	protected void step() {
+		if (beforeSelection()) {
+			Node<T, V> nodeToExpand = nextNode();
 			assert nodeToExpand == null || !expanded.contains(nodeToExpand.getPoint()) : "Node selected for expansion already has been expanded: " + nodeToExpand;
 			if (nodeToExpand != null) {
 				afterSelection(nodeToExpand);
@@ -124,52 +164,50 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 				beforeExpansion(nodeToExpand);
 				expandNode(nodeToExpand);
 				afterExpansion(nodeToExpand);
-				if (exitOnSolution && !solutions.isEmpty()) {
-					return;
-				}
 			}
-			if (Thread.interrupted())
-				interrupted = true;
-			if (iteration % 100 == 0) {
-				end = System.currentTimeMillis();
-				System.out.println(end - start);
-			}
-		} while (!(terminates() || interrupted));
-		System.out.println(interrupted);
+		}
+		if (Thread.interrupted())
+			interrupted = true;
 	}
 
 	private void expandNode(Node<T, V> expandedNodeInternal) {
-		eventBus.post(new NodeTypeSwitchEvent<Node<T, V>>(expandedNodeInternal, "or_expanding"));
+		graphEventBus.post(new NodeTypeSwitchEvent<Node<T, V>>(expandedNodeInternal, "or_expanding"));
 		logger.info("Expanding node {}", expandedNodeInternal);
 		assert !expanded.contains(expandedNodeInternal.getPoint()) : "Node " + expandedNodeInternal + " expanded twice!!";
 		expanded.add(expandedNodeInternal.getPoint());
 
 		/* compute successors */
-		successorGenerator.generateSuccessors(expandedNodeInternal).stream().parallel().forEach(successorDescription -> {
+		successorGenerator.generateSuccessors(expandedNodeInternal).stream().forEach(successorDescription -> {
 			Node<T, V> newNode = newNode(expandedNodeInternal, successorDescription.getTo());
 
+			/* update creation counter */
 			createdCounter++;
-			if (!goalTester.isGoal(newNode)) {
-				if (beforeInsertionIntoOpen(newNode)) {
-					logger.info("Inserting successor {} of {} to OPEN.", newNode, expandedNodeInternal);
-					assert !open.contains(newNode) && !expanded.contains(newNode.getPoint()) : "Inserted node is already in OPEN or even expanded!";
-					if (newNode.getInternalLabel() != null)
-						open.add(newNode);
-					else
-						logger.warn("Not inserting node {} since its label ist missing!", newNode);
+			
+			/* compute node label */
+			boolean labelDefined = labelNode(newNode);
+			
+			/* if node is not a goal node, put it on open  */
+			if (labelDefined) {
+				if (!newNode.isGoal()) {
+					if (beforeInsertionIntoOpen(newNode)) {
+						logger.info("Inserting successor {} of {} to OPEN.", newNode, expandedNodeInternal);
+						assert !open.contains(newNode) && !expanded.contains(newNode.getPoint()) : "Inserted node is already in OPEN or even expanded!";
+						if (newNode.getInternalLabel() != null)
+							open.add(newNode);
+						else
+							logger.warn("Not inserting node {} since its label ist missing!", newNode);
+					}
 				}
 			}
-			else
-				labelNode(newNode);
 		});
 
 		/* update statistics, send closed notifications, and possibly return a solution */
 		expandedCounter++;
-		eventBus.post(new NodeTypeSwitchEvent<Node<T, V>>(expandedNodeInternal, "or_closed"));
+		graphEventBus.post(new NodeTypeSwitchEvent<Node<T, V>>(expandedNodeInternal, "or_closed"));
 	}
 
 	public GraphEventBus<Node<T, V>> getEventBus() {
-		return eventBus;
+		return graphEventBus;
 	}
 
 	protected Node<T, V> nextNode() {
@@ -202,14 +240,34 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 		return node.getInternalLabel();
 	}
 
-	public V getFOfReturnedSolution(List<T> solution) {
-		if (!ext2int.containsKey(solution.get(solution.size() -1)))
+	public SolutionAnnotation<T,V> getAnnotationOfReturnedSolution(List<T> solution) {
+		if (!annotationsOfSolutionsReturnedByNodeEvaluator.containsKey(solution))
 			return null;
-		return ext2int.get(solution.get(solution.size() - 1)).getInternalLabel();
+		else {
+			return annotationsOfSolutionsReturnedByNodeEvaluator.get(solution);
+		}
+	}
+	
+	public V getFOfReturnedSolution(List<T> solution) {
+		SolutionAnnotation<T, V> annotation = getAnnotationOfReturnedSolution(solution);
+		if (annotation == null) {
+			throw new IllegalArgumentException("There is no solution annotation for the given solution. Please check whether the solution was really produced by the algorithm. If so, please check that its annotation was added into the list of annotations before the solution itself was added to the solution set");
+		}
+		return annotation.f();
 	}
 
 	public void cancel() {
+		logger.info("Search has been canceled");
+		this.canceled = true;
 		this.interrupted = true;
+		if (nodeEvaluator instanceof ICancelableNodeEvaluator) {
+			logger.info("Canceling node evaluator.");
+			((ICancelableNodeEvaluator)nodeEvaluator).cancel();
+		}
+	}
+
+	public boolean isInterrupted() {
+		return this.interrupted;
 	}
 
 	public List<T> getCurrentPathToNode(T node) {
@@ -230,6 +288,10 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 		return newNode(parent, t2, null);
 	}
 
+	public INodeEvaluator<T, V> getNodeEvaluator() {
+		return this.nodeEvaluator;
+	}
+	
 	protected synchronized Node<T, V> newNode(Node<T, V> parent, T t2, V evaluation) {
 
 		assert parent == null || expanded.contains(parent.getPoint()) : "Generating successors of an unexpanded node " + parent;
@@ -241,47 +303,56 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 			newNode.setInternalLabel(evaluation);
 		if (goalTester.isGoal(newNode)) {
 			newNode.setGoal(true);
-			solutions.add(getTraversalPath(newNode));
+			List<T> solution = getTraversalPath(newNode);
+			if (!solutionReportingNodeEvaluator) {
+				annotationsOfSolutionsReturnedByNodeEvaluator.put(solution, () -> newNode.getInternalLabel());
+				solutions.add(solution);
+			}
+//			else while (!annotationsOfSolutionsReturnedByNodeEvaluator.keySet().contains(solution)) {
+				
+//				throw new IllegalStateException("The solution reporting node evaluator has not yet reported the solution we just detected: " + solution);
+				
+//			}
 		}
 		ext2int.put(t2, newNode);
 
 		/* send events for this new node */
 		if (parent == null) {
-			this.eventBus.post(new GraphInitializedEvent<Node<T, V>>(newNode));
+			this.graphEventBus.post(new GraphInitializedEvent<Node<T, V>>(newNode));
 		} else {
-			this.eventBus.post(new NodeReachedEvent<Node<T, V>>(parent, newNode, "or_" + (newNode.isGoal() ? "solution" : "open")));
+			this.graphEventBus.post(new NodeReachedEvent<Node<T, V>>(parent, newNode, "or_" + (newNode.isGoal() ? "solution" : "created")));
 			logger.info("Sent message for creation of node {} as a successor of {}", newNode, parent);
 		}
 		return newNode;
 	}
 
 	/**
-	 * This method can be used to create an initial graph different from just root nodes.
-	 * This can be interesting if the search is distributed and we want to search only an excerpt of the original one.
+	 * This method can be used to create an initial graph different from just root nodes. This can be interesting if the search is distributed and we want to search only an excerpt of the original
+	 * one.
 	 * 
 	 * @param initialNodes
 	 */
-	public void bootstrap(Collection<Node<T,V>> initialNodes) {
-		
+	public void bootstrap(Collection<Node<T, V>> initialNodes) {
+
 		if (initialized)
 			throw new UnsupportedOperationException("Bootstrapping is only supported if the search has already been initialized.");
-		
+
 		/* now initialize the graph */
 		initGraph();
-		
+
 		/* remove previous roots from open */
 		open.clear();
-		
+
 		/* now insert new nodes, and the leaf ones in open */
-		for (Node<T,V> node : initialNodes) {
+		for (Node<T, V> node : initialNodes) {
 			insertNodeIntoLocalGraph(node);
 			open.add(getLocalVersionOfNode(node));
 		}
 	}
-	
+
 	protected void insertNodeIntoLocalGraph(Node<T, V> node) {
 		Node<T, V> localVersionOfParent = null;
-		List<Node<T,V>> path = node.path();
+		List<Node<T, V>> path = node.path();
 		Node<T, V> leaf = path.get(path.size() - 1);
 		for (Node<T, V> nodeOnPath : path) {
 			if (!ext2int.containsKey(nodeOnPath.getPoint())) {
@@ -295,7 +366,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 				localVersionOfParent = getLocalVersionOfNode(nodeOnPath);
 		}
 	}
-	
+
 	/**
 	 * This is relevant if we work with several copies of a node (usually if we need to copy the search space somewhere).
 	 * 
@@ -305,7 +376,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 	protected Node<T, V> getLocalVersionOfNode(Node<T, V> node) {
 		return ext2int.get(node.getPoint());
 	}
-	
+
 	/* hooks */
 	protected void afterInitialization() {
 	}
@@ -323,11 +394,22 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 	protected void afterExpansion(Node<T, V> node) {
 	}
 
-	protected void labelNode(Node<T, V> node) {
+	/**
+	 * Default implementation to compute the node label.
+	 * 
+	 * This method should return true iff the label has been computed successfully.
+	 * Only in this case, the node is further process by this routine.
+	 * 
+	 * @param node
+	 * @return
+	 */
+	protected boolean labelNode(Node<T, V> node) {
 		try {
 			node.setInternalLabel(nodeEvaluator.f(node));
+			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
+			return false;
 		}
 	}
 
@@ -350,5 +432,14 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 	@Override
 	public Iterator<List<T>> iterator() {
 		return this;
+	}
+
+	@Subscribe
+	public void receiveNextSolutionFromFComputer(SolutionFoundEvent<T,V> solution) {
+		logger.info("Received solution from FComputer: {}", solution);
+		if (annotationsOfSolutionsReturnedByNodeEvaluator.containsKey(solution.getSolution()))
+			throw new IllegalStateException("Solution is reported for the second time already!");
+		annotationsOfSolutionsReturnedByNodeEvaluator.put(solution.getSolution(), solution.getAnnotation());
+		solutions.add(solution.getSolution());
 	}
 }

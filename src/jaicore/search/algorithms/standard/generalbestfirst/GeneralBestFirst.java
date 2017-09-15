@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 import jaicore.basic.SetUtil;
 import jaicore.graph.Graph;
 import jaicore.search.algorithms.standard.core.ANDORGraphSearch;
-import jaicore.search.algorithms.standard.core.NodeEvaluator;
+import jaicore.search.algorithms.standard.core.INodeEvaluator;
 import jaicore.search.structure.core.AndNode;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
@@ -33,14 +33,14 @@ public class GeneralBestFirst<T, A> extends ANDORGraphSearch<T, A, Integer> {
 
 	private final GeneralBestFirstEvaluationOrSelector<T> orAggregator;
 	private final GeneralBestFirstEvaluationAggregation<T> andAggregator;
-	private final NodeEvaluator<T, Integer> nodeEvaluator;
+	private final INodeEvaluator<T, Integer> nodeEvaluator;
 	private final Map<Node<T, Integer>, Integer> bestValues = new HashMap<>();
 	private final Map<Node<T, Integer>, List<Node<T, Integer>>> bestOrSuccessors = new HashMap<>();
 
 	/* solution stats */
 
 	public GeneralBestFirst(GraphGenerator<T, A> graphGenerator, GeneralBestFirstEvaluationOrSelector<T> orAggregator, GeneralBestFirstEvaluationAggregation<T> andAggregator,
-			NodeEvaluator<T, Integer> nodeEvaluator) {
+			INodeEvaluator<T, Integer> nodeEvaluator) {
 		super(graphGenerator.getRootGenerator(), graphGenerator.getSuccessorGenerator(), graphGenerator.getGoalTester());
 		this.orAggregator = orAggregator;
 		this.andAggregator = andAggregator;
