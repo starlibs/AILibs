@@ -57,8 +57,4 @@ repositories {
 	maven {
         url "http://clojars.org/repo/"
     }
-    flatDir {
-    	dirs 'Z:/pc2/distsearch/lib'
-    	dirs 'E:/workspaces/sse-dev/Weka/lib'
-    }
 }
