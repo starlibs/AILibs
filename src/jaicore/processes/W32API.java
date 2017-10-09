@@ -13,7 +13,8 @@ import com.sun.jna.win32.W32APITypeMapper;
 public interface W32API extends StdCallLibrary, W32Errors {
     
     /** Standard options to use the unicode version of a w32 API. */
-    Map UNICODE_OPTIONS = new HashMap() {
+    @SuppressWarnings("serial")
+	Map<Object,Object> UNICODE_OPTIONS = new HashMap<Object,Object>() {
         {
             put(OPTION_TYPE_MAPPER, W32APITypeMapper.UNICODE);
             put(OPTION_FUNCTION_MAPPER, W32APIFunctionMapper.UNICODE);
@@ -21,14 +22,15 @@ public interface W32API extends StdCallLibrary, W32Errors {
     };
     
     /** Standard options to use the ASCII/MBCS version of a w32 API. */
-    Map ASCII_OPTIONS = new HashMap() {
+    @SuppressWarnings("serial")
+	Map<Object,Object> ASCII_OPTIONS = new HashMap<Object,Object>() {
         {
             put(OPTION_TYPE_MAPPER, W32APITypeMapper.ASCII);
             put(OPTION_FUNCTION_MAPPER, W32APIFunctionMapper.ASCII);
         }
     };
 
-    Map DEFAULT_OPTIONS = Boolean.getBoolean("w32.ascii") ? ASCII_OPTIONS : UNICODE_OPTIONS;
+    Map<Object,Object> DEFAULT_OPTIONS = Boolean.getBoolean("w32.ascii") ? ASCII_OPTIONS : UNICODE_OPTIONS;
     
     public class HANDLE extends PointerType {
     	@Override

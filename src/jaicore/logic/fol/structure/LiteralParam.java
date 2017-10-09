@@ -1,11 +1,14 @@
 package jaicore.logic.fol.structure;
 
+import java.io.Serializable;
+
 /**
  * The parameter of a literal.
  * 
  * @author mbunse
  */
-public abstract class LiteralParam {
+@SuppressWarnings("serial")
+public abstract class LiteralParam implements Serializable {
 
 	private String name;
 	protected Type type;

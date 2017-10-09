@@ -20,11 +20,11 @@ import jaicore.ml.core.SimpleInstancesImpl;
 import jaicore.ml.core.SimpleLabeledInstanceImpl;
 import jaicore.ml.core.WekaCompatibleInstancesImpl;
 import jaicore.ml.interfaces.LabeledInstance;
-import weka.attributeSelection.AttributeSelection;
 import weka.classifiers.Classifier;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
+import weka.core.InstanceComparator;
 import weka.core.Instances;
 import weka.core.OptionHandler;
 import weka.core.json.JSONInstances;
@@ -536,5 +536,32 @@ public class WekaUtil {
 			e.printStackTrace();
 			return null;
 		}
+	}
+
+	/**
+	 * Compute indices of instances of the original data set that are contained in the given subset.
+	 * This does only work for data sets that contain an instance at most once!
+	 * 
+	 * @param dataset
+	 * @param subset
+	 * @return
+	 */
+	public static int[] getIndicesOfContainedInstances(Instances dataset, Instances subset) {
+		int[] indices = new int[subset.size()];
+		InstanceComparator comp = new InstanceComparator();
+		for (int i = 0; i < indices.length; i++) {
+			Instance inst = subset.get(i);
+			int index = -1;
+			for (int j = 0; j < dataset.size(); j++) {
+				if (comp.compare(inst, dataset.get(j)) == 0) {
+					index = j;
+					break;
+				}
+			}
+			if (index == -1)
+				throw new IllegalArgumentException("The instance " + inst + " is not contained in the given dataset.");
+			indices[i] = index;
+		}
+		return indices;
 	}
 }
