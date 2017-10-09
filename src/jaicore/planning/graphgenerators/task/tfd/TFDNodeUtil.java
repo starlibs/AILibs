@@ -8,10 +8,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import jaicore.basic.SetUtil;
-import jaicore.logic.CNFFormula;
-import jaicore.logic.ConstantParam;
-import jaicore.logic.Literal;
-import jaicore.logic.Monom;
+import jaicore.logic.fol.structure.CNFFormula;
+import jaicore.logic.fol.structure.ConstantParam;
+import jaicore.logic.fol.structure.Literal;
+import jaicore.logic.fol.structure.Monom;
 import jaicore.planning.graphgenerators.task.TaskPlannerUtil;
 import jaicore.planning.model.conditional.CEAction;
 import jaicore.planning.model.conditional.CEOperation;

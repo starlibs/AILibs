@@ -1,4 +1,4 @@
-package jaicore.logic;
+package jaicore.logic.fol.structure;
 
 public class HornRule {
 	private Monom premise;

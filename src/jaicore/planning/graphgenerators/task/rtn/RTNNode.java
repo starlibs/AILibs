@@ -2,8 +2,8 @@ package jaicore.planning.graphgenerators.task.rtn;
 
 import java.util.List;
 
-import jaicore.logic.Literal;
-import jaicore.logic.Monom;
+import jaicore.logic.fol.structure.Literal;
+import jaicore.logic.fol.structure.Monom;
 
 public class RTNNode {
 
@@ -73,12 +73,5 @@ public class RTNNode {
 
 	public int getId() {
 		return id;
-	}
-	
-	public long getMemory() {
-		long memoryForRemainingTasks = 0;
-		for (Literal l : remainingTasks)
-			memoryForRemainingTasks += l.getMemory();
-		return state.getMemory() + memoryForRemainingTasks;
 	}
 }

@@ -3,8 +3,8 @@ package jaicore.planning.graphgenerators.task.tfd;
 import java.io.Serializable;
 import java.util.List;
 
-import jaicore.logic.Literal;
-import jaicore.logic.Monom;
+import jaicore.logic.fol.structure.Literal;
+import jaicore.logic.fol.structure.Monom;
 
 public class TFDRestProblem implements Serializable {
 
@@ -26,13 +26,6 @@ public class TFDRestProblem implements Serializable {
 		return remainingTasks;
 	}
 	
-	public long getMemory() {
-		long memory = state.getMemory();
-		for (Literal l : remainingTasks)
-			memory += l.getMemory();
-		return memory;
-	}
-
 	@Override
 	public String toString() {
 		return "TFDRestProblem [state=" + state + ", remainingTasks=" + remainingTasks + "]";

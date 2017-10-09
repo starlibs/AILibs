@@ -1,6 +1,6 @@
 package jaicore.planning.model.core;
 
-import jaicore.logic.Monom;
+import jaicore.logic.fol.structure.Monom;
 
 public class PlanningProblem {
 

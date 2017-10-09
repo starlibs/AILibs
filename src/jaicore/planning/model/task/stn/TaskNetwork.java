@@ -2,7 +2,7 @@ package jaicore.planning.model.task.stn;
 
 import jaicore.basic.StringUtil;
 import jaicore.graph.Graph;
-import jaicore.logic.Literal;
+import jaicore.logic.fol.structure.Literal;
 
 @SuppressWarnings("serial")
 public class TaskNetwork extends Graph<Literal> {

@@ -408,17 +408,4 @@ public abstract class ANDORGraphSearch<T, A, V extends Comparable<V>> {
 	public Collection<Node<T, V>> getSuccessors(Node<T, V> node) {
 		return traversalGraph.getSuccessors(node);
 	}
-
-	public long getMemory() {
-		long memory = 0;
-		for (Node<T, V> n : traversalGraph.getItems()) {
-			memory += ((RTNNode) n.getPoint()).getMemory();
-			memory += getSuccessors(n).size() * 4;
-		}
-
-		memory += 8 * ext2int.size();
-		memory += 4 * solvedNodes.size();
-		memory += 4 * recursivelyExhaustedNodes.size();
-		return memory;
-	}
 }

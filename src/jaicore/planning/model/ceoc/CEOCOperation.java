@@ -3,9 +3,9 @@ package jaicore.planning.model.ceoc;
 import java.util.List;
 import java.util.Map;
 
-import jaicore.logic.CNFFormula;
-import jaicore.logic.Monom;
-import jaicore.logic.VariableParam;
+import jaicore.logic.fol.structure.CNFFormula;
+import jaicore.logic.fol.structure.Monom;
+import jaicore.logic.fol.structure.VariableParam;
 import jaicore.planning.model.conditional.CEOperation;
 
 public class CEOCOperation extends CEOperation {

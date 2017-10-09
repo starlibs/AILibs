@@ -1,7 +1,7 @@
 package jaicore.planning.model.task.stn;
 
-import jaicore.logic.CNFFormula;
-import jaicore.logic.Monom;
+import jaicore.logic.fol.structure.CNFFormula;
+import jaicore.logic.fol.structure.Monom;
 
 public class STNPlanningProblem {
 

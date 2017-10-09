@@ -1,10 +1,9 @@
-package jaicore.logic;
+package jaicore.logic.fol.structure;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -13,8 +12,8 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jaicore.basic.ObjectSizeFetcher;
 import jaicore.basic.StringUtil;
+
 
 /**
  * A literal defines a property over parameters. Note that literals can be cloned using the clone() methods.
@@ -253,7 +252,7 @@ public class Literal implements Serializable {
 	 *            A mapping of parameters.
 	 * @return A copy of this literal on which the given parameter mapping is applied.
 	 */
-	public Literal clone(Map<VariableParam, ? extends LiteralParam> mapping) {
+	public Literal clone(Map<? extends VariableParam, ? extends LiteralParam> mapping) {
 		logger.debug("start cloning");
 		Literal clone = new Literal(this.property);
 
@@ -269,7 +268,6 @@ public class Literal implements Serializable {
 		}
 		logger.debug("finished cloning");
 		return clone;
-
 	}
 
 	@Override
@@ -306,12 +304,5 @@ public class Literal implements Serializable {
 
 	public final boolean isGround() {
 		return !hasVariableParams();
-	}
-
-	public long getMemory() {
-		long memory = ObjectSizeFetcher.getObjectSize(property);
-		for (LiteralParam p : parameters)
-			memory += p.getMemory();
-		return memory;
 	}
 }

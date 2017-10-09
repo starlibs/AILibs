@@ -1,6 +1,6 @@
 package jaicore.planning.model.strips;
 
-import jaicore.logic.Monom;
+import jaicore.logic.fol.structure.Monom;
 import jaicore.planning.model.core.PlanningProblem;
 
 public class StripsPlanningProblem extends PlanningProblem {

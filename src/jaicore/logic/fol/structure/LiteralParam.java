@@ -1,21 +1,14 @@
-package jaicore.logic;
-
-import java.io.Serializable;
-
-import jaicore.basic.ObjectSizeFetcher;
+package jaicore.logic.fol.structure;
 
 /**
  * The parameter of a literal.
  * 
  * @author mbunse
  */
-public abstract class LiteralParam implements Serializable {
+public abstract class LiteralParam {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -5977769530543978156L;
-	private final String name;
+	private String name;
+	protected Type type;
 
 	/**
 	 * @param name
@@ -26,10 +19,12 @@ public abstract class LiteralParam implements Serializable {
 	}
 
 	/**
-	 * @return The name of this parameter.
+	 * @param name
+	 *            The name of this parameter;
 	 */
-	public String getName() {
-		return name;
+	public LiteralParam(String name, Type type) {
+		this(name);
+		this.setType(type);
 	}
 
 	@Override
@@ -37,6 +32,7 @@ public abstract class LiteralParam implements Serializable {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((type == null) ? 0 : type.hashCode());
 		return result;
 	}
 
@@ -54,10 +50,24 @@ public abstract class LiteralParam implements Serializable {
 				return false;
 		} else if (!name.equals(other.name))
 			return false;
+		if (type == null) {
+			if (other.type != null)
+				return false;
+		} else if (!type.equals(other.type))
+			return false;
 		return true;
 	}
-	
-	public long getMemory() {
-		return ObjectSizeFetcher.getObjectSize(name);
+
+	public String getName() {
+		return name;
 	}
+
+	public Type getType() {
+		return type;
+	}
+
+	public void setType(Type type) {
+		this.type = type;
+	}
+
 }

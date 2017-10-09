@@ -1,4 +1,4 @@
-package jaicore.logic;
+package jaicore.logic.fol.structure;
 
 import java.util.List;
 import java.util.Map;
@@ -70,7 +70,7 @@ public class InterpretedLiteral extends Literal {
 	 * @return A copy of this literal on which the given parameter mapping is
 	 *         applied.
 	 */
-	public Literal clone(Map<VariableParam, ? extends LiteralParam> mapping) {
+	public Literal clone(Map<? extends VariableParam, ? extends LiteralParam> mapping) {
 		logger.debug("start cloning");
 		Literal clone = new InterpretedLiteral(this.getProperty());
 

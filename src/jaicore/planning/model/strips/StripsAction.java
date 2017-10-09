@@ -2,9 +2,9 @@ package jaicore.planning.model.strips;
 
 import java.util.Map;
 
-import jaicore.logic.ConstantParam;
-import jaicore.logic.Monom;
-import jaicore.logic.VariableParam;
+import jaicore.logic.fol.structure.ConstantParam;
+import jaicore.logic.fol.structure.Monom;
+import jaicore.logic.fol.structure.VariableParam;
 import jaicore.planning.model.core.Action;
 
 public class StripsAction extends Action {

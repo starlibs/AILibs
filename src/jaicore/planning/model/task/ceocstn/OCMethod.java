@@ -2,9 +2,9 @@ package jaicore.planning.model.task.ceocstn;
 
 import java.util.List;
 
-import jaicore.logic.Literal;
-import jaicore.logic.Monom;
-import jaicore.logic.VariableParam;
+import jaicore.logic.fol.structure.Literal;
+import jaicore.logic.fol.structure.Monom;
+import jaicore.logic.fol.structure.VariableParam;
 import jaicore.planning.model.task.stn.Method;
 import jaicore.planning.model.task.stn.TaskNetwork;
 

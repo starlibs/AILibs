@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import jaicore.logic.Monom;
+import jaicore.logic.fol.structure.Monom;
 import jaicore.planning.model.core.PlannerUtil;
 import jaicore.planning.model.strips.StripsAction;
 import jaicore.planning.model.strips.StripsPlanningDomain;

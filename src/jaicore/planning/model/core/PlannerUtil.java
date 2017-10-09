@@ -7,10 +7,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import jaicore.basic.SetUtil;
-import jaicore.logic.ConstantParam;
-import jaicore.logic.Literal;
-import jaicore.logic.Monom;
-import jaicore.logic.VariableParam;
+import jaicore.logic.fol.structure.ConstantParam;
+import jaicore.logic.fol.structure.Literal;
+import jaicore.logic.fol.structure.Monom;
+import jaicore.logic.fol.structure.VariableParam;
 import jaicore.planning.model.strips.StripsAction;
 import jaicore.planning.model.strips.StripsOperation;
 import jaicore.planning.model.strips.StripsPlanningDomain;

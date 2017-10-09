@@ -3,10 +3,10 @@ package jaicore.planning.model.conditional;
 import java.util.HashMap;
 import java.util.Map;
 
-import jaicore.logic.CNFFormula;
-import jaicore.logic.ConstantParam;
-import jaicore.logic.Monom;
-import jaicore.logic.VariableParam;
+import jaicore.logic.fol.structure.CNFFormula;
+import jaicore.logic.fol.structure.ConstantParam;
+import jaicore.logic.fol.structure.Monom;
+import jaicore.logic.fol.structure.VariableParam;
 import jaicore.planning.model.core.Action;
 
 @SuppressWarnings("serial")

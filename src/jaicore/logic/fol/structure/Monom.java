@@ -1,4 +1,4 @@
-package jaicore.logic;
+package jaicore.logic.fol.structure;
 
 import java.util.Collection;
 import java.util.Map;

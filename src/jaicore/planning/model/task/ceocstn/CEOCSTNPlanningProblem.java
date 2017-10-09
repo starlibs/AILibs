@@ -2,8 +2,8 @@ package jaicore.planning.model.task.ceocstn;
 
 import java.io.Serializable;
 
-import jaicore.logic.CNFFormula;
-import jaicore.logic.Monom;
+import jaicore.logic.fol.structure.CNFFormula;
+import jaicore.logic.fol.structure.Monom;
 import jaicore.planning.model.task.stn.TaskNetwork;
 
 public class CEOCSTNPlanningProblem implements Serializable {

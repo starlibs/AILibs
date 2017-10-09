@@ -2,7 +2,7 @@ package jaicore.planning.graphgenerators.task.rtn;
 
 import java.util.Map;
 
-import jaicore.logic.ConstantParam;
+import jaicore.logic.fol.structure.ConstantParam;
 import jaicore.planning.model.ceoc.CEOCAction;
 import jaicore.planning.model.task.stn.MethodInstance;
 

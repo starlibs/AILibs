@@ -9,10 +9,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import jaicore.graph.LabeledGraph;
-import jaicore.logic.ConstantParam;
-import jaicore.logic.Literal;
-import jaicore.logic.Monom;
-import jaicore.logic.VariableParam;
+import jaicore.logic.fol.structure.ConstantParam;
+import jaicore.logic.fol.structure.Literal;
+import jaicore.logic.fol.structure.Monom;
+import jaicore.logic.fol.structure.VariableParam;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.model.ceoc.CEOCAction;
 import jaicore.planning.model.ceoc.CEOCOperation;

@@ -1,6 +1,5 @@
-package jaicore.logic;
+package jaicore.logic.fol.structure;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -222,13 +221,5 @@ public class LiteralSet extends HashSet<Literal> {
 				literalsWithPropertyName.add(lit);
 
 		return literalsWithPropertyName;
-	}
-	
-	public long getMemory() {
-		long memory = 0;
-		for (Literal l: this) {
-			memory += l.getMemory();
-		}
-		return memory;
 	}
 }

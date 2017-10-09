@@ -3,9 +3,9 @@ package jaicore.planning.model.conditional;
 import java.util.List;
 import java.util.Map;
 
-import jaicore.logic.CNFFormula;
-import jaicore.logic.Monom;
-import jaicore.logic.VariableParam;
+import jaicore.logic.fol.structure.CNFFormula;
+import jaicore.logic.fol.structure.Monom;
+import jaicore.logic.fol.structure.VariableParam;
 import jaicore.planning.model.core.Operation;
 
 public class CEOperation extends Operation {

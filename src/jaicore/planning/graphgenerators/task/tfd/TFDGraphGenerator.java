@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import jaicore.logic.Literal;
-import jaicore.logic.Monom;
+import jaicore.logic.fol.structure.Literal;
+import jaicore.logic.fol.structure.Monom;
 import jaicore.planning.graphgenerators.task.TaskPlannerUtil;
 import jaicore.planning.model.core.Action;
 import jaicore.planning.model.core.Operation;

@@ -1,6 +1,6 @@
 package jaicore.planning.model.task.rtn;
 
-import jaicore.logic.Monom;
+import jaicore.logic.fol.structure.Monom;
 import jaicore.planning.model.task.stn.TaskNetwork;
 
 public class RTNPlanningProblem {

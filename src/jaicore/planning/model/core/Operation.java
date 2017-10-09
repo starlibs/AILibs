@@ -3,8 +3,8 @@ package jaicore.planning.model.core;
 import java.io.Serializable;
 import java.util.List;
 
-import jaicore.logic.Monom;
-import jaicore.logic.VariableParam;
+import jaicore.logic.fol.structure.Monom;
+import jaicore.logic.fol.structure.VariableParam;
 
 public class Operation implements Serializable {
 

@@ -6,9 +6,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import jaicore.basic.ObjectSizeFetcher;
-import jaicore.logic.ConstantParam;
-import jaicore.logic.Monom;
-import jaicore.logic.VariableParam;
+import jaicore.logic.fol.structure.ConstantParam;
+import jaicore.logic.fol.structure.Monom;
+import jaicore.logic.fol.structure.VariableParam;
 
 public class Action implements Serializable {
 	/**

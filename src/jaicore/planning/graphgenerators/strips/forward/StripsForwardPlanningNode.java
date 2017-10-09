@@ -1,6 +1,6 @@
 package jaicore.planning.graphgenerators.strips.forward;
 
-import jaicore.logic.Monom;
+import jaicore.logic.fol.structure.Monom;
 import jaicore.planning.model.core.Action;
 
 public class StripsForwardPlanningNode {

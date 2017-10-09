@@ -3,7 +3,7 @@ package jaicore.planning.graphgenerators.task.tfd;
 import java.util.stream.Collectors;
 
 import jaicore.graphvisualizer.TooltipGenerator;
-import jaicore.logic.Literal;
+import jaicore.logic.fol.structure.Literal;
 import jaicore.planning.model.core.Action;
 import jaicore.search.structure.core.Node;
 

@@ -2,8 +2,8 @@ package jaicore.planning.model.strips;
 
 import java.util.List;
 
-import jaicore.logic.Monom;
-import jaicore.logic.VariableParam;
+import jaicore.logic.fol.structure.Monom;
+import jaicore.logic.fol.structure.VariableParam;
 import jaicore.planning.model.core.Operation;
 
 public class StripsOperation extends Operation {

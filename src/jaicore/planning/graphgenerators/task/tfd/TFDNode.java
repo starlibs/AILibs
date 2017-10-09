@@ -4,8 +4,8 @@ import java.io.Serializable;
 import java.util.List;
 
 import jaicore.basic.ObjectSizeFetcher;
-import jaicore.logic.Literal;
-import jaicore.logic.Monom;
+import jaicore.logic.fol.structure.Literal;
+import jaicore.logic.fol.structure.Monom;
 import jaicore.planning.model.core.Action;
 import jaicore.planning.model.task.stn.MethodInstance;
 
@@ -79,10 +79,6 @@ public class TFDNode implements Serializable {
 	
 	public void clear() {
 		this.problem = null;
-	}
-	
-	public long getMemory() {
-		return ObjectSizeFetcher.getObjectSize(this) + (problem != null ? problem.getMemory() : 0) + (appliedAction != null ? appliedAction.getMemory() : 0);
 	}
 
 	@Override

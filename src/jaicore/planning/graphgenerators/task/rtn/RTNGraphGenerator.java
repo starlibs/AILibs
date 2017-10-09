@@ -15,9 +15,9 @@ import org.slf4j.LoggerFactory;
 
 import jaicore.basic.PerformanceLogger;
 import jaicore.basic.SetUtil;
-import jaicore.logic.ConstantParam;
-import jaicore.logic.Literal;
-import jaicore.logic.Monom;
+import jaicore.logic.fol.structure.ConstantParam;
+import jaicore.logic.fol.structure.Literal;
+import jaicore.logic.fol.structure.Monom;
 import jaicore.planning.graphgenerators.task.TaskPlannerUtil;
 import jaicore.planning.graphgenerators.task.tfd.TFDNodeUtil;
 import jaicore.planning.model.ceoc.CEOCAction;

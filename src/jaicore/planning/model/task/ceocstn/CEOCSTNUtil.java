@@ -3,7 +3,7 @@ package jaicore.planning.model.task.ceocstn;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import jaicore.logic.Monom;
+import jaicore.logic.fol.structure.Monom;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.graphgenerators.task.tfd.TFDNodeUtil;
 import jaicore.planning.model.ceoc.CEOCAction;

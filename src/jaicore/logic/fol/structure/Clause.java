@@ -1,6 +1,8 @@
-package jaicore.logic;
+package jaicore.logic.fol.structure;
 
 import java.util.Map;
+
+import jaicore.logic.fol.util.LogicUtil;
 
 public class Clause extends LiteralSet {
 	public static Clause getByNegatingMonom(Monom m) {

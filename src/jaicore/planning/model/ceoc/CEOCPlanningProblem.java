@@ -1,6 +1,6 @@
 package jaicore.planning.model.ceoc;
 
-import jaicore.logic.Monom;
+import jaicore.logic.fol.structure.Monom;
 import jaicore.planning.model.core.PlanningProblem;
 
 public class CEOCPlanningProblem extends PlanningProblem {

@@ -1,4 +1,4 @@
-package jaicore.logic;
+package jaicore.logic.fol.structure;
 
 /**
  * The constant parameter of a literal.
@@ -17,7 +17,12 @@ public class ConstantParam extends LiteralParam {
 	public ConstantParam(String name) {
 		this(name, true);
 	}
-	
+
+	public ConstantParam(String name, Type type) {
+		this(name);
+		this.type = type;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (!(obj instanceof ConstantParam))
