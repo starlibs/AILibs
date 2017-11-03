@@ -20,6 +20,7 @@ import jaicore.logic.fol.structure.LiteralParam;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.logic.fol.structure.VariableParam;
 import jaicore.logic.fol.util.LogicUtil;
+import jaicore.planning.graphgenerators.task.ceociptfd.EvaluablePredicate;
 import jaicore.planning.model.core.Action;
 import jaicore.planning.model.core.Operation;
 import jaicore.planning.model.task.ceocstn.OCMethod;
@@ -30,8 +31,10 @@ import jaicore.planning.model.task.stn.TaskNetwork;
 public class TaskPlannerUtil {
 
 	private static final Logger logger = LoggerFactory.getLogger(TaskPlannerUtil.class);
-
-	public static Collection<MethodInstance> getMethodInstancesForTaskThatAreApplicableInState(CNFFormula knowledge, Collection<? extends Method> methods, Literal task, Monom state, List<Literal> remainingProblems) {
+	
+	private Map<String, EvaluablePredicate> evaluablePlanningPredicates;
+	
+	public Collection<MethodInstance> getMethodInstancesForTaskThatAreApplicableInState(CNFFormula knowledge, Collection<? extends Method> methods, Literal task, Monom state, List<Literal> remainingProblems) {
 		Collection<MethodInstance> applicableDerivedMethods = new ArrayList<>();
 		for (Method m : methods) {
 			if (m.getTask().getPropertyName().equals(task.getPropertyName())) {
@@ -41,7 +44,7 @@ public class TaskPlannerUtil {
 		return applicableDerivedMethods;
 	}
 
-	public static Collection<MethodInstance> getMethodInstancesForTaskThatAreApplicableInState(CNFFormula knowledge, Method method, Literal task, Monom state, List<Literal> remainingProblems) {
+	public Collection<MethodInstance> getMethodInstancesForTaskThatAreApplicableInState(CNFFormula knowledge, Method method, Literal task, Monom state, List<Literal> remainingProblems) {
 		Collection<MethodInstance> applicableDerivedMethodInstances = new ArrayList<>();
 		Collection<Map<VariableParam, LiteralParam>> maps = getMappingsThatMatchTasksAndMakesItApplicable(knowledge, method.getTask(), task, method.getPrecondition(), state);
 		for (Map<VariableParam, LiteralParam> grounding : maps) {
@@ -76,7 +79,7 @@ public class TaskPlannerUtil {
 		return applicableDerivedMethodInstances;
 	}
 
-	public static Collection<Action> getActionsForPrimitiveTaskThatAreApplicableInState(CNFFormula knowledge, Operation op, Literal task, Monom state) {
+	public Collection<Action> getActionsForPrimitiveTaskThatAreApplicableInState(CNFFormula knowledge, Operation op, Literal task, Monom state) {
 		Collection<Action> applicableDerivedActions = new ArrayList<>();
 		List<VariableParam> allParams = new ArrayList<>();
 		allParams.addAll(op.getParams());
@@ -98,7 +101,7 @@ public class TaskPlannerUtil {
 		return applicableDerivedActions;
 	}
 
-	private static Collection<Map<VariableParam, LiteralParam>> getMappingsThatMatchTasksAndMakesItApplicable(CNFFormula knowledge, Literal methodOrPrimitiveTask, Literal target,
+	private Collection<Map<VariableParam, LiteralParam>> getMappingsThatMatchTasksAndMakesItApplicable(CNFFormula knowledge, Literal methodOrPrimitiveTask, Literal target,
 			Monom preconditionOfMethodOrPrimitive, Monom state) {
 		
 		/* consistency check */
@@ -186,7 +189,7 @@ public class TaskPlannerUtil {
 		return groundings;
 	}
 
-	public static List<Literal> getTaskChainOfTotallyOrderedNetwork(TaskNetwork network) {
+	public List<Literal> getTaskChainOfTotallyOrderedNetwork(TaskNetwork network) {
 		List<Literal> taskSequence = new ArrayList<>();
 		if (network.getSources().isEmpty())
 			return taskSequence;
@@ -197,5 +200,13 @@ public class TaskPlannerUtil {
 			current = successors.isEmpty() ? null : successors.iterator().next();
 		}
 		return taskSequence;
+	}
+
+	public Map<String, EvaluablePredicate> getEvaluablePlanningPredicates() {
+		return evaluablePlanningPredicates;
+	}
+
+	public void setEvaluablePlanningPredicates(Map<String, EvaluablePredicate> evaluablePlanningPredicates) {
+		this.evaluablePlanningPredicates = evaluablePlanningPredicates;
 	}
 }

@@ -1,4 +1,4 @@
-package jaicore.planning.graphgenerators.task.ceoctfd;
+package jaicore.planning.graphgenerators.task.ceociptfd;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,7 +14,9 @@ import org.slf4j.LoggerFactory;
 
 import jaicore.basic.PerformanceLogger;
 import jaicore.logic.fol.structure.CNFFormula;
+import jaicore.logic.fol.structure.ConstantParam;
 import jaicore.logic.fol.structure.Literal;
+import jaicore.logic.fol.structure.LiteralParam;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.planning.graphgenerators.task.TaskPlannerUtil;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
@@ -26,7 +28,8 @@ import jaicore.planning.model.conditional.CEAction;
 import jaicore.planning.model.conditional.CEOperation;
 import jaicore.planning.model.core.Action;
 import jaicore.planning.model.core.Operation;
-import jaicore.planning.model.task.ceocstn.CEOCSTNPlanningProblem;
+import jaicore.planning.model.task.ceocipstn.CEOCIPSTNPlanningProblem;
+import jaicore.planning.model.task.ceocipstn.OCIPMethod;
 import jaicore.planning.model.task.stn.Method;
 import jaicore.planning.model.task.stn.MethodInstance;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
@@ -37,22 +40,33 @@ import jaicore.search.structure.graphgenerator.GoalTester;
 import jaicore.search.structure.graphgenerator.RootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
-public class CEOCTFDGraphGenerator implements SerializableGraphGenerator<TFDNode, String> {
+/**
+ * Graph Generator for HTN planning where (i) operations have conditional effects, (ii) operations may create new objects, and (iii) method preconditions may contain evaluable predicates.
+ * 
+ * @author fmohr
+ *
+ */
+@SuppressWarnings("serial")
+public class CEOCIPTFDGraphGenerator implements SerializableGraphGenerator<TFDNode, String> {
 
-	private static final Logger logger = LoggerFactory.getLogger(CEOCTFDGraphGenerator.class);
+	private static final Logger logger = LoggerFactory.getLogger(CEOCIPTFDGraphGenerator.class);
 	private static final int checkpointDistance = 1;
-	private final CEOCSTNPlanningProblem problem;
+	private final CEOCIPSTNPlanningProblem problem;
 	private final CNFFormula knowledge;
 	private final Map<String, Operation> primitiveTasks = new HashMap<>();
 	private SerializableRootGenerator<TFDNode> rootGenerator;
 	private final TaskPlannerUtil util = new TaskPlannerUtil();
+	private final Map<String, EvaluablePredicate> evaluablePredicates;
 
-	public CEOCTFDGraphGenerator(CEOCSTNPlanningProblem problem) {
+	public CEOCIPTFDGraphGenerator(CEOCIPSTNPlanningProblem problem, Map<String, EvaluablePredicate> pEvaluablePredicates) {
+		if (problem == null)
+			throw new IllegalArgumentException("Planning problem must not be NULL");
 		this.problem = problem;
 		this.knowledge = problem.getKnowledge();
 		for (Operation op : problem.getDomain().getOperations())
 			primitiveTasks.put(op.getName(), op);
 		this.rootGenerator = () -> Arrays.asList(new TFDNode[] { new TFDNode(problem.getInit(), util.getTaskChainOfTotallyOrderedNetwork(problem.getNetwork())) });
+		this.evaluablePredicates = pEvaluablePredicates != null ? pEvaluablePredicates : new HashMap<>();
 	}
 
 	@Override
@@ -84,8 +98,8 @@ public class CEOCTFDGraphGenerator implements SerializableGraphGenerator<TFDNode
 			if (primitiveTasks.containsKey(nextTask.getPropertyName())) {
 
 				logger.info("Computing successors for PRIMITIVE task {} in state {}", nextTask, state);
-				for (Action applicableAction : util.getActionsForPrimitiveTaskThatAreApplicableInState(knowledge, primitiveTasks.get(nextTask.getPropertyName()),
-						nextTask, state)) {
+				for (Action applicableAction : util.getActionsForPrimitiveTaskThatAreApplicableInState(knowledge, primitiveTasks.get(nextTask.getPropertyName()), nextTask,
+						state)) {
 					logger.info("Adding successor for PRIMITIVE task {} in state {}: {}", nextTask, state, applicableAction.getEncoding());
 
 					/* if the depth is % k == 0, then compute the rest problem explicitly */
@@ -113,10 +127,33 @@ public class CEOCTFDGraphGenerator implements SerializableGraphGenerator<TFDNode
 				logger.info("Computing successors for COMPLEX task {} in state {}", nextTask, state);
 				Set<Method> usedMethods = new HashSet<>();
 				PerformanceLogger.logStart("compute instances");
-				Collection<MethodInstance> instances = util.getMethodInstancesForTaskThatAreApplicableInState(knowledge, this.problem.getDomain().getMethods(), nextTask,
-						state, currentlyRemainingTasks);
+				Collection<MethodInstance> instances = util.getMethodInstancesForTaskThatAreApplicableInState(knowledge, this.problem.getDomain().getMethods(), nextTask, state,
+						currentlyRemainingTasks);
 				PerformanceLogger.logEnd("compute instances");
 				for (MethodInstance instance : instances) {
+					
+					/* check the evaluable condition of this method instance */
+					if (instance.getMethod() instanceof OCIPMethod) {
+						Monom additionalPrecondition = new Monom(((OCIPMethod)instance.getMethod()).getEvaluablePrecondition(), instance.getGrounding());
+						boolean containsUnsatisfiedLiteral = false;
+						for (Literal evaluableLiteral : additionalPrecondition) {
+							if (!evaluablePredicates.containsKey(evaluableLiteral.getPropertyName()))
+								throw new IllegalArgumentException("It is not known how to evaluate the evaluatable predicate " + evaluableLiteral.getPropertyName());
+							EvaluablePredicate ep = evaluablePredicates.get(evaluableLiteral.getPropertyName());
+							List<LiteralParam> paramList = evaluableLiteral.getParameters();
+							ConstantParam[] groundParamArray = new ConstantParam[paramList.size()];
+							for (int i = 0; i < groundParamArray.length; i++) {
+								LiteralParam param = paramList.get(i);
+								groundParamArray[i] = (param instanceof ConstantParam) ? (ConstantParam)param : instance.getGrounding().get(param);
+							}
+							if (!ep.test(state, groundParamArray)) {
+								containsUnsatisfiedLiteral = true;
+								break;
+							}
+						}
+						if (containsUnsatisfiedLiteral)
+							continue;
+					}
 
 					/* skip this instance if the method is lonely and we already used it */
 					if (!usedMethods.contains(instance.getMethod())) {
@@ -126,7 +163,7 @@ public class CEOCTFDGraphGenerator implements SerializableGraphGenerator<TFDNode
 					}
 
 					logger.info("Adding successor {}", instance);
-
+					
 					/* if the depth is % k == 0, then compute the rest problem explicitly */
 
 					List<Literal> prependedTasks = util.getTaskChainOfTotallyOrderedNetwork(instance.getNetwork());
@@ -153,10 +190,9 @@ public class CEOCTFDGraphGenerator implements SerializableGraphGenerator<TFDNode
 		return p -> p.getPoint().isGoal();
 	}
 
-	public CEOCSTNPlanningProblem getProblem() {
+	public CEOCIPSTNPlanningProblem getProblem() {
 		return problem;
 	}
-
 
 	@Override
 	public String toString() {

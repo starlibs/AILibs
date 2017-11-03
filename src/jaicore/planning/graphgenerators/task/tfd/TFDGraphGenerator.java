@@ -24,7 +24,8 @@ public class TFDGraphGenerator implements GraphGenerator<TFDNode,String> {
 
 	private final STNPlanningProblem problem;
 	private final Map<String,Operation> primitiveTasks = new HashMap<>();
-
+	private final TaskPlannerUtil util = new TaskPlannerUtil();
+	
 	public TFDGraphGenerator(STNPlanningProblem problem) {
 		this.problem = problem;
 		for (Operation op : problem.getDomain().getOperations())
@@ -33,7 +34,7 @@ public class TFDGraphGenerator implements GraphGenerator<TFDNode,String> {
 
 	@Override
 	public RootGenerator<TFDNode> getRootGenerator() {
-		return () -> Arrays.asList(new TFDNode[]{new TFDNode(problem.getInit(), TaskPlannerUtil.getTaskChainOfTotallyOrderedNetwork(problem.getNetwork()))});
+		return () -> Arrays.asList(new TFDNode[]{new TFDNode(problem.getInit(), util.getTaskChainOfTotallyOrderedNetwork(problem.getNetwork()))});
 	}
 
 	@Override
@@ -50,7 +51,7 @@ public class TFDGraphGenerator implements GraphGenerator<TFDNode,String> {
 			/* if the task is primitive */
 			if (primitiveTasks.containsKey(nextTask.getPropertyName())) {
 				
-				for (Action applicableAction : TaskPlannerUtil.getActionsForPrimitiveTaskThatAreApplicableInState(null, primitiveTasks.get(nextTask.getPropertyName()), nextTask, state)) {
+				for (Action applicableAction : util.getActionsForPrimitiveTaskThatAreApplicableInState(null, primitiveTasks.get(nextTask.getPropertyName()), nextTask, state)) {
 					Monom stateCopy = new Monom(state);
 					TFDNodeUtil.updateState(stateCopy, applicableAction);
 					successors.add(new NodeExpansionDescription<>(l.getPoint(), new TFDNode(stateCopy, currentlyRemainingTasks, null, applicableAction), "edge label", NodeType.OR));
@@ -59,10 +60,10 @@ public class TFDGraphGenerator implements GraphGenerator<TFDNode,String> {
 			
 			/* otherwise determine methods for the task */
 			else {
-				for (MethodInstance instance : TaskPlannerUtil.getMethodInstancesForTaskThatAreApplicableInState(null, this.problem.getDomain().getMethods(), nextTask, state, currentlyRemainingTasks)) {
+				for (MethodInstance instance : util.getMethodInstancesForTaskThatAreApplicableInState(null, this.problem.getDomain().getMethods(), nextTask, state, currentlyRemainingTasks)) {
 					
 					/* derive remaining network for this instance */
-					List<Literal> remainingTasks = TaskPlannerUtil.getTaskChainOfTotallyOrderedNetwork(instance.getNetwork());
+					List<Literal> remainingTasks = util.getTaskChainOfTotallyOrderedNetwork(instance.getNetwork());
 					remainingTasks.addAll(currentlyRemainingTasks);
 					successors.add(new NodeExpansionDescription<>(l.getPoint(), new TFDNode(state, remainingTasks, instance, null), "edge label", NodeType.OR));
 				}

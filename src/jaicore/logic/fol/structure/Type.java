@@ -1,11 +1,13 @@
 package jaicore.logic.fol.structure;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-public class Type {
+@SuppressWarnings("serial")
+public class Type implements Serializable {
 
 	private final String name;
 	private final List<Type> superTypeList;

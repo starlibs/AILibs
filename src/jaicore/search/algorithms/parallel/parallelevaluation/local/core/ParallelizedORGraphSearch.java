@@ -37,9 +37,10 @@ public class ParallelizedORGraphSearch<T, A, V extends Comparable<V>> extends OR
 		if (numThreadsForNodeEvaluation < 1)
 			throw new IllegalArgumentException("Number of threads should be at least 1 for " + this.getClass().getName());
 		this.fComputationTickets = new Semaphore(numThreadsForNodeEvaluation);
+		AtomicInteger counter = new AtomicInteger(0);
 		this.pool = Executors.newFixedThreadPool(numThreadsForNodeEvaluation, r -> {
 			Thread t = new Thread(r);
-			t.setName("ParallelizedORGraphSearch-worker");
+			t.setName("ParallelizedORGraphSearch-worker-" + counter.incrementAndGet());
 			return t;
 		});
 		this.timeout = timeoutInMS;
@@ -64,6 +65,7 @@ public class ParallelizedORGraphSearch<T, A, V extends Comparable<V>> extends OR
 	}
 	
 	protected boolean labelNode(Node<T, V> node) {
+		logger.info("Labeling node {}", node);
 		synchronized (pool) {
 			if (pool.isShutdown())
 				return false;

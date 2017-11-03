@@ -41,6 +41,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 	private boolean initialized = false;
 	protected boolean interrupted = false;
 	protected boolean canceled = false;
+	private Thread shutdownHook = new Thread(() -> { this.cancel(); });
 
 	/* next solution var used for iterator */
 	private List<T> nextSolution = null;
@@ -108,7 +109,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 //				currentlyConsideredEvaluator = null;
 //		}
 //		while (currentlyConsideredEvaluator != null);
-		Runtime.getRuntime().addShutdownHook(new Thread(() -> { System.out.println("Received shutdown signal, canceling search."); this.cancel(); }));
+		Runtime.getRuntime().addShutdownHook(shutdownHook);
 	}
 
 	/**
@@ -119,10 +120,10 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 			initialized = true;
 			Collection<Node<T, V>> roots = rootGenerator.getRoots().stream().map(n -> newNode(null, n)).collect(Collectors.toList());
 			for (Node<T, V> root : roots) {
-				labelNode(root);
+				if (labelNode(root))
+					open.add(root);
 				logger.info("Labeled root with {}", root.getInternalLabel());
 			}
-			open.addAll(roots);
 			createdCounter = open.size();
 			afterInitialization();
 		}
@@ -192,8 +193,10 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 					if (beforeInsertionIntoOpen(newNode)) {
 						logger.info("Inserting successor {} of {} to OPEN.", newNode, expandedNodeInternal);
 						assert !open.contains(newNode) && !expanded.contains(newNode.getPoint()) : "Inserted node is already in OPEN or even expanded!";
-						if (newNode.getInternalLabel() != null)
+						if (newNode.getInternalLabel() != null) {
 							open.add(newNode);
+							graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_open"));
+						}
 						else
 							logger.warn("Not inserting node {} since its label ist missing!", newNode);
 					}

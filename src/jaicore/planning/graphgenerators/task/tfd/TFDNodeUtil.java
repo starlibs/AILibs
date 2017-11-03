@@ -23,6 +23,7 @@ import jaicore.planning.model.task.stn.MethodInstance;
 public class TFDNodeUtil {
 	
 	private static Map<List<TFDNode>,Integer> cache = new HashMap<>();
+	private final static TaskPlannerUtil util = new TaskPlannerUtil();
 	
 	private static boolean checkDoubleRestProblemComputationOccurrence(List<TFDNode> path) {
 		if (cache.containsKey(path)) {
@@ -72,7 +73,7 @@ public class TFDNodeUtil {
 			MethodInstance appliedMethodInstance = n.getAppliedMethodInstance();
 			if (appliedMethodInstance != null) {
 				int j = 0;
-				for (Literal remainingTask : TaskPlannerUtil.getTaskChainOfTotallyOrderedNetwork(appliedMethodInstance.getNetwork())) {
+				for (Literal remainingTask : util.getTaskChainOfTotallyOrderedNetwork(appliedMethodInstance.getNetwork())) {
 					remainingTasks.add(j++, remainingTask);
 				}
 			}

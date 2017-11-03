@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import jaicore.basic.PerformanceLogger;
 import jaicore.basic.PerformanceLogger.PerformanceMeasure;
+import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.core.NodeType;
@@ -49,20 +50,22 @@ public class BestFirstTester {
 
 			@Override
 			public GoalTester<TestNode> getGoalTester() {
-				return l -> l.getPoint().value == 10000;
+				return l -> l.getPoint().value == 1000;
 			}
 			
 		};
 		
-		BestFirst<TestNode,String> astar = new BestFirst<>(gen, n -> 0);
+		BestFirst<TestNode,String> bf = new BestFirst<>(gen, n -> (int)Math.round(Math.random() * 1000));
+		new SimpleGraphVisualizationWindow<>(bf.getEventBus()).getPanel().setTooltipGenerator(n -> String.valueOf(n.getInternalLabel()));
 		
 		/* find solution */
 		PerformanceLogger.logStart("search");
-		List<TestNode> solutionPath = astar.nextSolution();
+		List<TestNode> solutionPath = bf.nextSolution();
 		PerformanceLogger.logEnd("search");
 		assertNotNull(solutionPath);
-		System.out.println("Generated " + astar.getCreatedCounter() + " nodes.");
+		System.out.println("Generated " + bf.getCreatedCounter() + " nodes.");
 		PerformanceLogger.printStatsAndClear(PerformanceMeasure.TIME);
+		while (true);
 	}
 
 }

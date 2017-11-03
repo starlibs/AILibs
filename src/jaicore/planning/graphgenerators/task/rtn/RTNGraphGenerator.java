@@ -41,6 +41,7 @@ public class RTNGraphGenerator implements GraphGenerator<RTNNode, RTNEdge> {
 
 	private final RTNPlanningProblem problem;
 	private final Map<String, Operation> primitiveTasks = new HashMap<>();
+	private final TaskPlannerUtil util = new TaskPlannerUtil();
 
 	public RTNGraphGenerator(RTNPlanningProblem problem) {
 		this.problem = problem;
@@ -50,7 +51,7 @@ public class RTNGraphGenerator implements GraphGenerator<RTNNode, RTNEdge> {
 
 	@Override
 	public RootGenerator<RTNNode> getRootGenerator() {
-		return () -> Arrays.asList(new RTNNode[]{ new RTNNode(problem.getInit(), new ArrayList<>(TaskPlannerUtil.getTaskChainOfTotallyOrderedNetwork(problem.getNetwork())))});
+		return () -> Arrays.asList(new RTNNode[]{ new RTNNode(problem.getInit(), new ArrayList<>(util.getTaskChainOfTotallyOrderedNetwork(problem.getNetwork())))});
 	}
 
 	@Override
@@ -79,7 +80,7 @@ public class RTNGraphGenerator implements GraphGenerator<RTNNode, RTNEdge> {
 					logger.info("Computing successors for PRIMITIVE task {} in state {}", nextTask, state);
 
 					PerformanceLogger.logStart("Compute applicable actions");
-					final Collection<Action> applicableActions = TaskPlannerUtil.getActionsForPrimitiveTaskThatAreApplicableInState(null, primitiveTasks.get(actualTaskName), nextTask,
+					final Collection<Action> applicableActions = util.getActionsForPrimitiveTaskThatAreApplicableInState(null, primitiveTasks.get(actualTaskName), nextTask,
 							state);
 					PerformanceLogger.logEnd("Compute applicable actions");
 					PerformanceLogger.logStart("Generate nodes for applicable actions");
@@ -130,7 +131,7 @@ public class RTNGraphGenerator implements GraphGenerator<RTNNode, RTNEdge> {
 
 					/* if this is an OR-Node */
 					PerformanceLogger.logStart("Compute applicable method instances");
-					final Collection<MethodInstance> instances = TaskPlannerUtil.getMethodInstancesForTaskThatAreApplicableInState(null, this.problem.getDomain().getMethods(), nextTask,
+					final Collection<MethodInstance> instances = util.getMethodInstancesForTaskThatAreApplicableInState(null, this.problem.getDomain().getMethods(), nextTask,
 							state, currentlyRemainingTasks);
 					PerformanceLogger.logEnd("Compute applicable method instances");
 					PerformanceLogger.logStart("Generate nodes for applicable method instances");
@@ -149,7 +150,7 @@ public class RTNGraphGenerator implements GraphGenerator<RTNNode, RTNEdge> {
 
 						logger.info("Adding successor {}", instance);
 
-						final List<Literal> remainingTasks = new ArrayList<>(TaskPlannerUtil.getTaskChainOfTotallyOrderedNetwork(instance.getNetwork()));
+						final List<Literal> remainingTasks = new ArrayList<>(util.getTaskChainOfTotallyOrderedNetwork(instance.getNetwork()));
 
 						final int indexForRemoval = remainingTasks.size();
 						remainingTasks.addAll(currentlyRemainingTasks);

@@ -153,12 +153,11 @@ public class SubProcessWrapper {
 		Thread killerHook = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				System.out.print("Destroying subprocess ... " + pidOfSubProcess);
+				logger.info("Destroying subprocess {}", pidOfSubProcess);
 				if (process.isAlive()) {
 					try {
 						process.destroy();
 						Runtime rt = Runtime.getRuntime();
-						System.out.println("KILLING " + pidOfSubProcess);
 						if (System.getProperty("os.name").toLowerCase().indexOf("windows") > -1)
 							rt.exec("taskkill /F /PID " + pidOfSubProcess);
 						else
@@ -167,7 +166,7 @@ public class SubProcessWrapper {
 						e.printStackTrace();
 					}
 				}
-				System.out.println("done");
+				logger.info("Subprocess {} destroyed.", pidOfSubProcess);
 //				try {
 //					System.out.println("Running java processes: ");
 //					ProcessUtil.getRunningJavaProcesses().stream().forEach(p -> System.out.println("\t" + p));

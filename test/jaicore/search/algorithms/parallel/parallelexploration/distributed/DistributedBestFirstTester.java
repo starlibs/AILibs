@@ -67,7 +67,7 @@ public class DistributedBestFirstTester implements Serializable {
 	public void test() {
 		
 		Random rand = new Random(1);
-		int size = (int)Math.pow(2, 20);
+		int size = (int)Math.pow(2, 25);
 		int target = (int)Math.round(rand.nextDouble() * size);
 		System.out.println("Trying to find " + target + " within a space of " + size + " items.");
 
@@ -84,7 +84,7 @@ public class DistributedBestFirstTester implements Serializable {
 					List<NodeExpansionDescription<TestNode, String>> l = new ArrayList<>();
 					TestNode parent = n.getPoint();
 					try {
-						Thread.sleep(1000 * (n.path().size() - 1));
+						Thread.sleep(10 * (n.path().size() - 1));
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
@@ -113,7 +113,7 @@ public class DistributedBestFirstTester implements Serializable {
 		int coworkers = 1;
 		for (int i = 1; i <= coworkers; i++) {
 			final String name = "cw" + i; 
-			final String[] args = {folder.toFile().getAbsolutePath(), name, "2", "1000", "true"};
+			final String[] args = {folder.toFile().getAbsolutePath(), name, "5", "1000", "true"};
 			new Thread(() -> DistributedOrSearchCoworker.main(args)).start();
 		}
 		
