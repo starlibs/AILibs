@@ -1,4 +1,4 @@
-package jaicore.search.algorithms.standard.bestfirst;
+package jaicore.search.algorithms.standard;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -11,6 +11,7 @@ import org.junit.Test;
 import jaicore.basic.PerformanceLogger;
 import jaicore.basic.PerformanceLogger.PerformanceMeasure;
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
+import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.core.NodeType;

@@ -1,4 +1,4 @@
-package jaicore.search.algorithms.standard.astar;
+package jaicore.search.algorithms.standard;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.junit.Test;
 
+import jaicore.search.algorithms.standard.astar.AStar;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.core.NodeType;

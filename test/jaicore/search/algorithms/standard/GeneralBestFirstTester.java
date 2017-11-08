@@ -1,4 +1,4 @@
-package jaicore.search.algorithms.standard.generalbestfirst;
+package jaicore.search.algorithms.standard;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -11,6 +11,7 @@ import org.junit.Test;
 import jaicore.graph.Graph;
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.search.algorithms.standard.core.INodeEvaluator;
+import jaicore.search.algorithms.standard.generalbestfirst.GeneralBestFirst;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
 import jaicore.search.structure.core.NodeExpansionDescription;
