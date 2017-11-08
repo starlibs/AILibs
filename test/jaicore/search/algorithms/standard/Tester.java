@@ -30,7 +30,7 @@ public class Tester {
 	
 	@Test
 	public void test() {
-		
+		TestNode t = new TestNode();
 		GraphGenerator<TestNode, String> gen = new GraphGenerator<Tester.TestNode,String>() {
 
 			@Override
@@ -43,6 +43,9 @@ public class Tester {
 				return n-> {
 					List<NodeExpansionDescription<TestNode, String>> l = new ArrayList<>();
 					l.add(new NodeExpansionDescription<>(n.getPoint(), new TestNode(), "edge label", NodeType.OR));
+					if (n.getPoint().value == 2 || n.getPoint().value == 5) {
+						l.add(new NodeExpansionDescription<>(n.getPoint(), t, "edege label", NodeType.OR));
+					}
 					return l;
 				};
 			}
@@ -55,7 +58,7 @@ public class Tester {
 		};
 		
 		BestFirst<TestNode,String> test = new BestFirst<>(gen, n-> n.getPoint().value);
-		new SimpleGraphVisualizationWindow(test.getEventBus());
+		new SimpleGraphVisualizationWindow<>(test.getEventBus()).getPanel().setTooltipGenerator(n-> String.valueOf(n.getInternalLabel()));
 		
 		List<TestNode> list = test.nextSolution();
 		assertNotNull(list);
