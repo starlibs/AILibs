@@ -304,7 +304,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 		Node<T, V> newNode = new Node<>(parent, t2);
 		if (evaluation != null)
 			newNode.setInternalLabel(evaluation);
-		if (goalTester.isGoal(newNode)) {
+		if (goalTester.isGoal(newNode.externalPath())) {
 			newNode.setGoal(true);
 			List<T> solution = getTraversalPath(newNode);
 			if (!solutionReportingNodeEvaluator) {

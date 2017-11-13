@@ -51,7 +51,7 @@ public class BestFirstTester {
 
 			@Override
 			public GoalTester<TestNode> getGoalTester() {
-				return l -> l.getPoint().value == 1000;
+				return l -> l.get(l.size()-1).value == 1000;
 			}
 			
 		};
