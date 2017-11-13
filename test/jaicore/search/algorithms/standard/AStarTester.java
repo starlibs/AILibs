@@ -40,7 +40,7 @@ public class AStarTester {
 				return n -> {
 					List<NodeExpansionDescription<TestNode,String>> l = new ArrayList<>(3);
 					for (int i = 0; i < 3; i++) {
-						l.add(new NodeExpansionDescription<>(n.getPoint(), new TestNode(), "edge label", NodeType.OR));
+						l.add(new NodeExpansionDescription<>(n, new TestNode(), "edge label", NodeType.OR));
 					}
 					return l;
 				};

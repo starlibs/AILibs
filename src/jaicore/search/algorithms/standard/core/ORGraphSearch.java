@@ -178,7 +178,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 		expanded.add(expandedNodeInternal.getPoint());
 
 		/* compute successors */
-		successorGenerator.generateSuccessors(expandedNodeInternal).stream().forEach(successorDescription -> {
+		successorGenerator.generateSuccessors(expandedNodeInternal.getPoint()).stream().forEach(successorDescription -> {
 			Node<T, V> newNode = newNode(expandedNodeInternal, successorDescription.getTo());
 
 			/* update creation counter */

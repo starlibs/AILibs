@@ -49,14 +49,14 @@ public class ReductionGraphGenerator implements GraphGenerator<RestProblem, Deci
 		return n -> {
 			List<NodeExpansionDescription<RestProblem, Decision>> restProblems = new ArrayList<>();
 			try {
-				List<String> set = new ArrayList<>(n.getPoint().get(0));
+				List<String> set = new ArrayList<>(n.get(0));
 				if (set.size() < 2)
 					throw new UnsupportedOperationException("Cannot create successor where rest problem consists of only one class.");
 
 				/* add remaining open problems to node */
 				List<Set<String>> remainingProblems = new ArrayList<>();
-				for (int j = 1; j < n.getPoint().size(); j++)
-					remainingProblems.add(n.getPoint().get(j));
+				for (int j = 1; j < n.size(); j++)
+					remainingProblems.add(n.get(j));
 
 				/* iterate over all considered classifiers */
 				String[] portfolio = new String[] { "weka.classifiers.trees.RandomForest", "weka.classifiers.functions.SMO", "weka.classifiers.lazy.IBk" };
@@ -74,7 +74,7 @@ public class ReductionGraphGenerator implements GraphGenerator<RestProblem, Deci
 						}
 						RestProblem rp = new RestProblem(new Decision(null, null, nodeType, AbstractClassifier.forName(classifier, null)));
 						rp.addAll(remainingProblems);
-						restProblems.add(new NodeExpansionDescription<>(n.getPoint(), rp, rp.getEdgeToParent(), NodeType.OR));
+						restProblems.add(new NodeExpansionDescription<>(n, rp, rp.getEdgeToParent(), NodeType.OR));
 					}
 
 					/* now go for splits (here we always apply direct) */
@@ -99,7 +99,7 @@ public class ReductionGraphGenerator implements GraphGenerator<RestProblem, Deci
 						rp.addAll(remainingProblems);
 
 						/* add rest problem */
-						restProblems.add(new NodeExpansionDescription<>(n.getPoint(), rp, rp.getEdgeToParent(), NodeType.OR));
+						restProblems.add(new NodeExpansionDescription<>(n, rp, rp.getEdgeToParent(), NodeType.OR));
 					}
 				}
 			} catch (Exception e) {
