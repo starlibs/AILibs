@@ -23,5 +23,5 @@ public interface GoalTester<T> {
 	 *				The path to check.
 	 * @return <code>true</code> if the path is a goalpath, <code>false</code> else.
 	 */
-	public boolean isGoal(List<T> path);
+//	public boolean isGoal(List<T> path);
 }

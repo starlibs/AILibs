@@ -27,7 +27,8 @@ import jaicore.search.structure.core.Node;
 import jaicore.search.structure.events.GraphInitializedEvent;
 import jaicore.search.structure.events.NodeReachedEvent;
 import jaicore.search.structure.events.NodeTypeSwitchEvent;
-import jaicore.search.structure.graphgenerator.GoalTester;
+import jaicore.search.structure.graphgenerator.NodeGoalTester;
+import jaicore.search.structure.graphgenerator.PathGoalTester;
 import jaicore.search.structure.graphgenerator.RootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
@@ -54,7 +55,10 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 	protected final Queue<Node<T, V>> open = new PriorityBlockingQueue<>();
 	protected final RootGenerator<T> rootGenerator;
 	protected final SuccessorGenerator<T, A> successorGenerator;
-	protected final GoalTester<T> goalTester;
+//	protected final GoalTester<T> goalTester;
+	protected final PathGoalTester<T> pathGoalTester;
+	protected final NodeGoalTester<T> nodeGoalTester;
+	
 	protected final INodeEvaluator<T, V> nodeEvaluator; 
 	protected final Queue<List<T>> solutions = new LinkedBlockingQueue<>();
 	protected final Map<List<T>,SolutionAnnotation<T,V>> annotationsOfSolutionsReturnedByNodeEvaluator = new HashMap<>();
@@ -66,7 +70,10 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 		super();
 		this.rootGenerator = graphGenerator.getRootGenerator();
 		this.successorGenerator = graphGenerator.getSuccessorGenerator();
-		this.goalTester = graphGenerator.getGoalTester();
+//		this.goalTester = graphGenerator.getGoalTester();
+		pathGoalTester = graphGenerator.getPathGoalTester();
+		nodeGoalTester = graphGenerator.getNodeGoalTester();
+		
 		this.nodeEvaluator = pNodeEvaluator;
 		
 		/* if the node evaluator is graph dependent, communicate the generator to it */
@@ -304,19 +311,35 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 		Node<T, V> newNode = new Node<>(parent, t2);
 		if (evaluation != null)
 			newNode.setInternalLabel(evaluation);
-		if (goalTester.isGoal(newNode.externalPath())) {
-			newNode.setGoal(true);
-			List<T> solution = getTraversalPath(newNode);
-			if (!solutionReportingNodeEvaluator) {
-				annotationsOfSolutionsReturnedByNodeEvaluator.put(solution, () -> newNode.getInternalLabel());
-				solutions.add(solution);
+		if(nodeGoalTester != null)
+			if (nodeGoalTester.isGoal(newNode)) {
+				newNode.setGoal(true);
+				List<T> solution = getTraversalPath(newNode);
+				if (!solutionReportingNodeEvaluator) {
+					annotationsOfSolutionsReturnedByNodeEvaluator.put(solution, () -> newNode.getInternalLabel());
+					solutions.add(solution);
+				}
+	//			else while (!annotationsOfSolutionsReturnedByNodeEvaluator.keySet().contains(solution)) {
+					
+	//				throw new IllegalStateException("The solution reporting node evaluator has not yet reported the solution we just detected: " + solution);
+					
+	//			}
 			}
-//			else while (!annotationsOfSolutionsReturnedByNodeEvaluator.keySet().contains(solution)) {
-				
-//				throw new IllegalStateException("The solution reporting node evaluator has not yet reported the solution we just detected: " + solution);
-				
-//			}
-		}
+		else
+			if(pathGoalTester != null)
+				if (pathGoalTester.isGoal(newNode.externalPath())) {
+					newNode.setGoal(true);
+					List<T> solution = getTraversalPath(newNode);
+					if (!solutionReportingNodeEvaluator) {
+						annotationsOfSolutionsReturnedByNodeEvaluator.put(solution, () -> newNode.getInternalLabel());
+						solutions.add(solution);
+					}
+		//			else while (!annotationsOfSolutionsReturnedByNodeEvaluator.keySet().contains(solution)) {
+						
+		//				throw new IllegalStateException("The solution reporting node evaluator has not yet reported the solution we just detected: " + solution);
+						
+		//			}
+				}
 		ext2int.put(t2, newNode);
 
 		/* send events for this new node */

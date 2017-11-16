@@ -15,7 +15,8 @@ import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.core.NodeType;
-import jaicore.search.structure.graphgenerator.GoalTester;
+import jaicore.search.structure.graphgenerator.NodeGoalTester;
+import jaicore.search.structure.graphgenerator.PathGoalTester;
 import jaicore.search.structure.graphgenerator.RootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
@@ -49,10 +50,19 @@ public class BestFirstTester {
 				};
 			}
 
+			/*
+			 * only one of the getGoalTester-Methods has to be implemented
+			 */
 			@Override
-			public GoalTester<TestNode> getGoalTester() {
+			public PathGoalTester<TestNode> getPathGoalTester() {
 				return l -> l.get(l.size()-1).value == 1000;
 			}
+
+			@Override
+			public NodeGoalTester<TestNode> getNodeGoalTester() {
+				return null;
+			}
+			
 			
 		};
 		
