@@ -18,6 +18,7 @@ import jaicore.search.structure.core.NodeType;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.PathGoalTester;
 import jaicore.search.structure.graphgenerator.RootGenerator;
+import jaicore.search.structure.graphgenerator.SelfContained;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 public class BestFirstTester {
@@ -61,6 +62,11 @@ public class BestFirstTester {
 			@Override
 			public NodeGoalTester<TestNode> getNodeGoalTester() {
 				return null;
+			}
+
+			@Override
+			public SelfContained isSelfContained() {
+				return () ->false;
 			}
 			
 			
