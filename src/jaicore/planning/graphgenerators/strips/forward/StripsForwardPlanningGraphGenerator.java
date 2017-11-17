@@ -12,7 +12,7 @@ import jaicore.planning.model.strips.StripsPlanningProblem;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.core.NodeType;
-import jaicore.search.structure.graphgenerator.GoalTester;
+import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.RootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
@@ -45,7 +45,7 @@ public class StripsForwardPlanningGraphGenerator implements GraphGenerator<Strip
 	}
 
 	@Override
-	public GoalTester<StripsForwardPlanningNode> getGoalTester() {
-		return l -> l.getPoint().getState().containsAll(problem.getGoalState());
+	public NodeGoalTester<StripsForwardPlanningNode> getGoalTester() {
+		return l -> l.getState().containsAll(problem.getGoalState());
 	}
 }

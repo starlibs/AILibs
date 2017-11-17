@@ -36,7 +36,7 @@ import jaicore.search.algorithms.parallel.parallelexploration.distributed.interf
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableRootGenerator;
 import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.core.NodeType;
-import jaicore.search.structure.graphgenerator.GoalTester;
+import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.RootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
@@ -138,7 +138,7 @@ public class CEOCIPTFDGraphGenerator implements SerializableGraphGenerator<TFDNo
 						boolean containsUnsatisfiedLiteral = false;
 						for (Literal evaluableLiteral : additionalPrecondition) {
 							if (!evaluablePredicates.containsKey(evaluableLiteral.getPropertyName()))
-								throw new IllegalArgumentException("It is not known how to evaluate the evaluatable predicate " + evaluableLiteral.getPropertyName());
+								throw new IllegalArgumentException("It is not known how to evaluate the evaluatable predicate \"" + evaluableLiteral.getPropertyName() + "\" in the precondition of " + instance.getMethod());
 							EvaluablePredicate ep = evaluablePredicates.get(evaluableLiteral.getPropertyName());
 							List<LiteralParam> paramList = evaluableLiteral.getParameters();
 							ConstantParam[] groundParamArray = new ConstantParam[paramList.size()];
@@ -186,8 +186,8 @@ public class CEOCIPTFDGraphGenerator implements SerializableGraphGenerator<TFDNo
 	}
 
 	@Override
-	public GoalTester<TFDNode> getGoalTester() {
-		return p -> p.getPoint().isGoal();
+	public NodeGoalTester<TFDNode> getGoalTester() {
+		return p -> p.isGoal();
 	}
 
 	public CEOCIPSTNPlanningProblem getProblem() {

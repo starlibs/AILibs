@@ -63,7 +63,7 @@ public class RandomizedAndOrSearch<T,A> extends ANDORGraphSearch<T,A,Integer> {
 			if (type == NodeType.OR)
 				node = getOrNode(expanded, successor, successorDescription.getAction());
 			successors.add(node);
-			if (!isKnown && !goalTester.isGoal(node)) {
+			if (!isKnown && !goalTester.isGoal(node.getPoint())) {
 				open.add(node);
 			}
 		}

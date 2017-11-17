@@ -14,7 +14,7 @@ import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.core.NodeType;
-import jaicore.search.structure.graphgenerator.GoalTester;
+import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.RootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
@@ -49,8 +49,8 @@ public class BestFirstTester {
 			}
 
 			@Override
-			public GoalTester<TestNode> getGoalTester() {
-				return l -> l.getPoint().value == 1000;
+			public NodeGoalTester<TestNode> getGoalTester() {
+				return l -> l.value == 1000;
 			}
 			
 		};

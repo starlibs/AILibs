@@ -33,7 +33,7 @@ import jaicore.search.algorithms.parallel.parallelexploration.distributed.interf
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableRootGenerator;
 import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.core.NodeType;
-import jaicore.search.structure.graphgenerator.GoalTester;
+import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.RootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
@@ -149,8 +149,8 @@ public class CEOCTFDGraphGenerator implements SerializableGraphGenerator<TFDNode
 	}
 
 	@Override
-	public GoalTester<TFDNode> getGoalTester() {
-		return p -> p.getPoint().isGoal();
+	public NodeGoalTester<TFDNode> getGoalTester() {
+		return p -> p.isGoal();
 	}
 
 	public CEOCSTNPlanningProblem getProblem() {

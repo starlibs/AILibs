@@ -16,7 +16,7 @@ import jaicore.planning.model.task.stn.STNPlanningProblem;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.core.NodeType;
-import jaicore.search.structure.graphgenerator.GoalTester;
+import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.RootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
@@ -73,7 +73,7 @@ public class TFDGraphGenerator implements GraphGenerator<TFDNode,String> {
 	}
 
 	@Override
-	public GoalTester<TFDNode> getGoalTester() {
-		return l -> l.getPoint().getRemainingTasks().isEmpty();
+	public NodeGoalTester<TFDNode> getGoalTester() {
+		return l -> l.getRemainingTasks().isEmpty();
 	}
 }

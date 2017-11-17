@@ -31,7 +31,7 @@ import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.core.NodeType;
 import jaicore.search.structure.core.OrNode;
-import jaicore.search.structure.graphgenerator.GoalTester;
+import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.RootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
@@ -262,8 +262,8 @@ public class RTNGraphGenerator implements GraphGenerator<RTNNode, RTNEdge> {
 	}
 
 	@Override
-	public GoalTester<RTNNode> getGoalTester() {
-		return p -> p.getPoint().getRemainingTasks().isEmpty();
+	public NodeGoalTester<RTNNode> getGoalTester() {
+		return p -> p.getRemainingTasks().isEmpty();
 	}
 
 	private boolean remainingTasksInitializeANDNode(List<Literal> tasks) {

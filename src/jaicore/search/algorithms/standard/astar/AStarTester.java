@@ -11,7 +11,7 @@ import org.junit.Test;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.core.NodeType;
-import jaicore.search.structure.graphgenerator.GoalTester;
+import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.RootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
@@ -46,8 +46,8 @@ public class AStarTester {
 			}
 
 			@Override
-			public GoalTester<TestNode> getGoalTester() {
-				return l -> l.getPoint().value == 10000;
+			public NodeGoalTester<TestNode> getGoalTester() {
+				return l -> l.value == 10000;
 			}
 		};
 		AStar<TestNode,String> astar = new AStar<>(gen, (n1, n2) -> n2.getPoint().value - n1.getPoint().value, n -> 0);

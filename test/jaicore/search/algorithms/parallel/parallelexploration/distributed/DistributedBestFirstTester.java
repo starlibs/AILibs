@@ -17,7 +17,7 @@ import jaicore.search.algorithms.parallel.parallelexploration.distributed.interf
 import jaicore.search.structure.core.Node;
 import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.core.NodeType;
-import jaicore.search.structure.graphgenerator.GoalTester;
+import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.RootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
@@ -67,7 +67,7 @@ public class DistributedBestFirstTester implements Serializable {
 	public void test() {
 		
 		Random rand = new Random(1);
-		int size = (int)Math.pow(2, 25);
+		int size = (int)Math.pow(2, 20);
 		int target = (int)Math.round(rand.nextDouble() * size);
 		System.out.println("Trying to find " + target + " within a space of " + size + " items.");
 
@@ -98,8 +98,8 @@ public class DistributedBestFirstTester implements Serializable {
 			}
 
 			@Override
-			public GoalTester<TestNode> getGoalTester() {
-				return n -> (n.getPoint().min == n.getPoint().max && n.getPoint().min == target);
+			public NodeGoalTester<TestNode> getGoalTester() {
+				return n -> (n.min == n.max && n.min == target);
 			}
 		};
 		
@@ -110,7 +110,7 @@ public class DistributedBestFirstTester implements Serializable {
 		DistributedOrSearch<TestNode,String,Integer> master = new DistributedOrSearch<>(gen, evaluator, masterCommunicationLayer);
 		
 		/* setup coworkers */
-		int coworkers = 1;
+		int coworkers = 5;
 		for (int i = 1; i <= coworkers; i++) {
 			final String name = "cw" + i; 
 			final String[] args = {folder.toFile().getAbsolutePath(), name, "5", "1000", "true"};

@@ -154,7 +154,7 @@ public class GeneralBestFirst<T, A> extends ANDORGraphSearch<T, A, Integer> {
 		for (Node<T, Integer> node : newSuccessorsAndTheirScores.keySet().stream().sorted((n1, n2) -> newSuccessorsAndTheirScores.get(n1) - newSuccessorsAndTheirScores.get(n2))
 				.collect(Collectors.toList())) {
 			bestValues.put(node, newSuccessorsAndTheirScores.get(node));
-			if (!goalTester.isGoal(node)) {
+			if (!goalTester.isGoal(node.getPoint())) {
 				open.add(node);
 			}
 			successors.add(node);

@@ -27,7 +27,8 @@ import jaicore.search.structure.core.Node;
 import jaicore.search.structure.events.GraphInitializedEvent;
 import jaicore.search.structure.events.NodeReachedEvent;
 import jaicore.search.structure.events.NodeTypeSwitchEvent;
-import jaicore.search.structure.graphgenerator.GoalTester;
+import jaicore.search.structure.graphgenerator.NodeGoalTester;
+import jaicore.search.structure.graphgenerator.PathGoalTester;
 import jaicore.search.structure.graphgenerator.RootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
@@ -54,7 +55,9 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 	protected final Queue<Node<T, V>> open = new PriorityBlockingQueue<>();
 	protected final RootGenerator<T> rootGenerator;
 	protected final SuccessorGenerator<T, A> successorGenerator;
-	protected final GoalTester<T> goalTester;
+	protected final boolean checkGoalPropertyOnEntirePath;
+	protected final PathGoalTester<T> pathGoalTester;
+	protected final NodeGoalTester<T> nodeGoalTester;
 	protected final INodeEvaluator<T, V> nodeEvaluator; 
 	protected final Queue<List<T>> solutions = new LinkedBlockingQueue<>();
 	protected final Map<List<T>,SolutionAnnotation<T,V>> annotationsOfSolutionsReturnedByNodeEvaluator = new HashMap<>();
@@ -66,7 +69,16 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 		super();
 		this.rootGenerator = graphGenerator.getRootGenerator();
 		this.successorGenerator = graphGenerator.getSuccessorGenerator();
-		this.goalTester = graphGenerator.getGoalTester();
+		checkGoalPropertyOnEntirePath = !(graphGenerator.getGoalTester() instanceof NodeGoalTester); 
+		if (checkGoalPropertyOnEntirePath) {
+			this.nodeGoalTester = null;
+			this.pathGoalTester = (PathGoalTester<T>)graphGenerator.getGoalTester();;
+		}
+		else {
+			this.nodeGoalTester = (NodeGoalTester<T>)graphGenerator.getGoalTester();
+			this.pathGoalTester = null;
+		}
+		
 		this.nodeEvaluator = pNodeEvaluator;
 		
 		/* if the node evaluator is graph dependent, communicate the generator to it */
@@ -304,7 +316,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 		Node<T, V> newNode = new Node<>(parent, t2);
 		if (evaluation != null)
 			newNode.setInternalLabel(evaluation);
-		if (goalTester.isGoal(newNode)) {
+		if (checkGoalPropertyOnEntirePath ? pathGoalTester.isGoal(newNode.externalPath()) : nodeGoalTester.isGoal(t2)) {
 			newNode.setGoal(true);
 			List<T> solution = getTraversalPath(newNode);
 			if (!solutionReportingNodeEvaluator) {

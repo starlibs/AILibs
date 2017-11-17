@@ -8,7 +8,7 @@ import jaicore.search.algorithms.parallel.parallelexploration.distributed.interf
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableRootGenerator;
 import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.core.NodeType;
-import jaicore.search.structure.graphgenerator.GoalTester;
+import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.RootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
@@ -39,8 +39,8 @@ public class DistributedBestFirstClusterTesterGenerator implements SerializableG
 		};
 	}
 
-	public GoalTester<TestNode> getGoalTester() {
-		return n -> (n.getPoint().min == n.getPoint().max && n.getPoint().min == target);
+	public NodeGoalTester<TestNode> getGoalTester() {
+		return n -> (n.min == n.max && n.min == target);
 	}
 
 	public RootGenerator<TestNode> getRootGenerator() {

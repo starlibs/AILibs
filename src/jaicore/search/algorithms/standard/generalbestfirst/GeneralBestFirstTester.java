@@ -16,7 +16,7 @@ import jaicore.search.structure.core.Node;
 import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.core.NodeType;
 import jaicore.search.structure.core.OrNode;
-import jaicore.search.structure.graphgenerator.GoalTester;
+import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.RootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
@@ -106,8 +106,8 @@ public class GeneralBestFirstTester {
 			}
 
 			@Override
-			public GoalTester<GameNode> getGoalTester() {
-				return l -> l.getPoint().active && l.getPoint().remaining == 0;
+			public NodeGoalTester<GameNode> getGoalTester() {
+				return l -> l.active && l.remaining == 0;
 			}
 		};
 		
