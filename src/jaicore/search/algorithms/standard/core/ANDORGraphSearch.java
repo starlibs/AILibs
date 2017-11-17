@@ -20,7 +20,7 @@ import jaicore.search.structure.events.NodeReachedEvent;
 import jaicore.search.structure.events.NodeTypeSwitchEvent;
 import jaicore.search.structure.graphgenerator.GoalTester;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
-import jaicore.search.structure.graphgenerator.RootGenerator;
+import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 public abstract class ANDORGraphSearch<T, A, V extends Comparable<V>> {
@@ -34,7 +34,7 @@ public abstract class ANDORGraphSearch<T, A, V extends Comparable<V>> {
 	private final GraphEventBus<Node<T, V>> eventBus = new GraphEventBus<>();
 
 	/* search related objects */
-	protected final RootGenerator<T> rootGenerator;
+	protected final SingleRootGenerator<T> rootGenerator;
 	protected final SuccessorGenerator<T, A> successorGenerator;
 	protected final NodeGoalTester<T> goalTester;
 	protected final Map<T, Node<T, V>> ext2int = new HashMap<>();
@@ -54,7 +54,7 @@ public abstract class ANDORGraphSearch<T, A, V extends Comparable<V>> {
 
 	abstract protected int getNumberOfOpenNodesInSolutionBase(Graph<Node<T, V>> solutionBase);
 
-	public ANDORGraphSearch(RootGenerator<T> rootGenerator, SuccessorGenerator<T, A> successorGenerator, GoalTester<T> goalTester) {
+	public ANDORGraphSearch(SingleRootGenerator<T> rootGenerator, SuccessorGenerator<T, A> successorGenerator, GoalTester<T> goalTester) {
 		super();
 		this.rootGenerator = rootGenerator;
 		this.successorGenerator = successorGenerator;

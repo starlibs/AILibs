@@ -3,16 +3,16 @@ package jaicore.search.algorithms.standard.astar;
 import static org.junit.Assert.assertNotNull;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
 
+import jaicore.search.algorithms.standard.astar.AStarTester.TestNode;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.core.NodeType;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
-import jaicore.search.structure.graphgenerator.RootGenerator;
+import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 public class AStarTester {
@@ -30,8 +30,8 @@ public class AStarTester {
 		GraphGenerator<TestNode, String> gen = new GraphGenerator<AStarTester.TestNode, String>() {
 
 			@Override
-			public RootGenerator<TestNode> getRootGenerator() {
-				return () -> Arrays.asList(new TestNode[]{new TestNode()});
+			public SingleRootGenerator<TestNode> getRootGenerator() {
+				return () -> new TestNode();
 			}
 
 			@Override
@@ -39,7 +39,7 @@ public class AStarTester {
 				return n -> {
 					List<NodeExpansionDescription<TestNode,String>> l = new ArrayList<>(3);
 					for (int i = 0; i < 3; i++) {
-						l.add(new NodeExpansionDescription<>(n.getPoint(), new TestNode(), "edge label", NodeType.OR));
+						l.add(new NodeExpansionDescription<>(n, new TestNode(), "edge label", NodeType.OR));
 					}
 					return l;
 				};

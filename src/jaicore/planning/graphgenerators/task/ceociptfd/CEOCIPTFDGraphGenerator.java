@@ -57,6 +57,7 @@ public class CEOCIPTFDGraphGenerator implements SerializableGraphGenerator<TFDNo
 	private SerializableRootGenerator<TFDNode> rootGenerator;
 	private final TaskPlannerUtil util = new TaskPlannerUtil();
 	private final Map<String, EvaluablePredicate> evaluablePredicates;
+	private final Map<TFDNode,TFDNode> parentMap = new HashMap<>();
 
 	public CEOCIPTFDGraphGenerator(CEOCIPSTNPlanningProblem problem, Map<String, EvaluablePredicate> pEvaluablePredicates) {
 		if (problem == null)
@@ -65,7 +66,7 @@ public class CEOCIPTFDGraphGenerator implements SerializableGraphGenerator<TFDNo
 		this.knowledge = problem.getKnowledge();
 		for (Operation op : problem.getDomain().getOperations())
 			primitiveTasks.put(op.getName(), op);
-		this.rootGenerator = () -> Arrays.asList(new TFDNode[] { new TFDNode(problem.getInit(), util.getTaskChainOfTotallyOrderedNetwork(problem.getNetwork())) });
+		this.rootGenerator = () -> new TFDNode(problem.getInit(), util.getTaskChainOfTotallyOrderedNetwork(problem.getNetwork()));
 		this.evaluablePredicates = pEvaluablePredicates != null ? pEvaluablePredicates : new HashMap<>();
 	}
 
@@ -80,9 +81,10 @@ public class CEOCIPTFDGraphGenerator implements SerializableGraphGenerator<TFDNo
 			logger.info("Generating successors for {}", l);
 			List<NodeExpansionDescription<TFDNode, String>> successors = new ArrayList<>();
 
-			TFDRestProblem rp = l.getPoint().getProblem();
+			List<TFDNode> path = TFDNodeUtil.getPathOfNode(l, parentMap);
+			TFDRestProblem rp = l.getProblem();
 			if (rp == null)
-				rp = TFDNodeUtil.getRestProblem(l.externalPath());
+				rp = TFDNodeUtil.getRestProblem(path);
 			Monom state = rp.getState();
 			List<Literal> currentlyRemainingTasks = rp.getRemainingTasks();
 			Literal nextTaskTmp = currentlyRemainingTasks.get(0);
@@ -92,7 +94,7 @@ public class CEOCIPTFDGraphGenerator implements SerializableGraphGenerator<TFDNo
 				throw new IllegalStateException("Invalid task " + nextTaskTmp + " without property name!");
 			String nextTaskName = nextTaskTmp.getPropertyName().substring(nextTaskTmp.getPropertyName().indexOf("-") + 1, nextTaskTmp.getPropertyName().length());
 			Literal nextTask = new Literal(nextTaskName, nextTaskTmp.getParameters());
-			int depth = l.path().size();
+			int depth = path.size();
 
 			/* if the task is primitive */
 			if (primitiveTasks.containsKey(nextTask.getPropertyName())) {
@@ -112,7 +114,8 @@ public class CEOCIPTFDGraphGenerator implements SerializableGraphGenerator<TFDNo
 						node = new TFDNode(updatedState, remainingTasks, null, new CEOCAction((CEOCOperation) applicableAction.getOperation(), applicableAction.getGrounding()));
 					else
 						node = new TFDNode(new CEAction((CEOperation) applicableAction.getOperation(), applicableAction.getGrounding()), remainingTasks.isEmpty());
-					successors.add(new NodeExpansionDescription<>(l.getPoint(), node, "edge label", NodeType.OR));
+					parentMap.put(node, l);
+					successors.add(new NodeExpansionDescription<>(l, node, "edge label", NodeType.OR));
 				}
 				if (successors.size() != new HashSet<>(successors).size()) {
 					System.err.println("Doppelte Knoten im Nachfolger!");
@@ -175,7 +178,8 @@ public class CEOCIPTFDGraphGenerator implements SerializableGraphGenerator<TFDNo
 						node = new TFDNode(new Monom(state, false), remainingTasks, instance, null);
 					else
 						node = new TFDNode(instance, remainingTasks.isEmpty());
-					successors.add(new NodeExpansionDescription<>(l.getPoint(), node, "edge label", NodeType.OR));
+					parentMap.put(node, l);
+					successors.add(new NodeExpansionDescription<>(l, node, "edge label", NodeType.OR));
 				}
 
 				logger.info("Computed {} successors", successors.size());

@@ -1,16 +1,19 @@
-package jaicore.search.algorithms.parallel.parallelexploration.distributed;
+package jaicore.search.algorithms.distributed;
 
 import java.io.Serializable;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
 import org.junit.Test;
 
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
+import jaicore.search.algorithms.distributed.DistributedBestFirstTester.TestNode;
+import jaicore.search.algorithms.parallel.parallelexploration.distributed.DistributedOrSearch;
+import jaicore.search.algorithms.parallel.parallelexploration.distributed.DistributedOrSearchCoworker;
+import jaicore.search.algorithms.parallel.parallelexploration.distributed.FolderBasedDistributedSearchCommunicationLayer;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.DistributedSearchCommunicationLayer;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableNodeEvaluator;
@@ -18,17 +21,19 @@ import jaicore.search.structure.core.Node;
 import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.core.NodeType;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
-import jaicore.search.structure.graphgenerator.RootGenerator;
+import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 public class DistributedBestFirstTester implements Serializable {
 
 	static class TestNode implements Serializable {
 		private static final long serialVersionUID = 793618120417152627L;
+		final int depth;
 		final int min, max;
 
-		public TestNode(int min, int max) {
+		public TestNode(int depth, int min, int max) {
 			super();
+			this.depth = depth;
 			this.min = min;
 			this.max = max;
 		}
@@ -74,24 +79,24 @@ public class DistributedBestFirstTester implements Serializable {
 		SerializableGraphGenerator<TestNode, String> gen = new SerializableGraphGenerator<TestNode, String>() {
 
 			@Override
-			public RootGenerator<TestNode> getRootGenerator() {
-				return () -> Arrays.asList(new TestNode[]{new TestNode(0, size)});
+			public SingleRootGenerator<TestNode> getRootGenerator() {
+				return () -> new TestNode(0, 0, size);
 			}
 
 			@Override
 			public SuccessorGenerator<TestNode, String> getSuccessorGenerator() {
 				return n -> {
 					List<NodeExpansionDescription<TestNode, String>> l = new ArrayList<>();
-					TestNode parent = n.getPoint();
+					TestNode parent = n;
 					try {
-						Thread.sleep(10 * (n.path().size() - 1));
+						Thread.sleep(10 * n.depth);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
 					if (parent.min < parent.max) {
 						int split = (int)Math.floor((parent.min + parent.max) / 2f);
-						l.add(new NodeExpansionDescription<>(parent, new TestNode(parent.min, split), "edge label", NodeType.OR));
-						l.add(new NodeExpansionDescription<>(parent, new TestNode(split + 1, parent.max), "edge label", NodeType.OR));
+						l.add(new NodeExpansionDescription<>(parent, new TestNode(parent.depth + 1, parent.min, split), "edge label", NodeType.OR));
+						l.add(new NodeExpansionDescription<>(parent, new TestNode(parent.depth + 1, split + 1, parent.max), "edge label", NodeType.OR));
 					}
 					return l;
 				};

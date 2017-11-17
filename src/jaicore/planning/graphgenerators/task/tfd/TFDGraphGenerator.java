@@ -1,7 +1,6 @@
 package jaicore.planning.graphgenerators.task.tfd;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +16,7 @@ import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.core.NodeType;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
-import jaicore.search.structure.graphgenerator.RootGenerator;
+import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 public class TFDGraphGenerator implements GraphGenerator<TFDNode,String> {
@@ -33,16 +32,16 @@ public class TFDGraphGenerator implements GraphGenerator<TFDNode,String> {
 	}
 
 	@Override
-	public RootGenerator<TFDNode> getRootGenerator() {
-		return () -> Arrays.asList(new TFDNode[]{new TFDNode(problem.getInit(), util.getTaskChainOfTotallyOrderedNetwork(problem.getNetwork()))});
+	public SingleRootGenerator<TFDNode> getRootGenerator() {
+		return () -> new TFDNode(problem.getInit(), util.getTaskChainOfTotallyOrderedNetwork(problem.getNetwork()));
 	}
 
 	@Override
 	public SuccessorGenerator<TFDNode,String> getSuccessorGenerator() {
 		return l -> {
 			List<NodeExpansionDescription<TFDNode,String>> successors = new ArrayList<>();
-			Monom state = l.getPoint().getState();
-			List<Literal> currentlyRemainingTasks = new ArrayList<>(l.getPoint().getRemainingTasks());
+			Monom state = l.getState();
+			List<Literal> currentlyRemainingTasks = new ArrayList<>(l.getRemainingTasks());
 			Literal nextTaskTmp = currentlyRemainingTasks.get(0);
 			currentlyRemainingTasks.remove(0);
 			String nextTaskName = nextTaskTmp.getPropertyName().substring(nextTaskTmp.getPropertyName().indexOf("-") + 1, nextTaskTmp.getPropertyName().length());
@@ -54,7 +53,7 @@ public class TFDGraphGenerator implements GraphGenerator<TFDNode,String> {
 				for (Action applicableAction : util.getActionsForPrimitiveTaskThatAreApplicableInState(null, primitiveTasks.get(nextTask.getPropertyName()), nextTask, state)) {
 					Monom stateCopy = new Monom(state);
 					TFDNodeUtil.updateState(stateCopy, applicableAction);
-					successors.add(new NodeExpansionDescription<>(l.getPoint(), new TFDNode(stateCopy, currentlyRemainingTasks, null, applicableAction), "edge label", NodeType.OR));
+					successors.add(new NodeExpansionDescription<>(l, new TFDNode(stateCopy, currentlyRemainingTasks, null, applicableAction), "edge label", NodeType.OR));
 				}
 			}
 			
@@ -65,7 +64,7 @@ public class TFDGraphGenerator implements GraphGenerator<TFDNode,String> {
 					/* derive remaining network for this instance */
 					List<Literal> remainingTasks = util.getTaskChainOfTotallyOrderedNetwork(instance.getNetwork());
 					remainingTasks.addAll(currentlyRemainingTasks);
-					successors.add(new NodeExpansionDescription<>(l.getPoint(), new TFDNode(state, remainingTasks, instance, null), "edge label", NodeType.OR));
+					successors.add(new NodeExpansionDescription<>(l, new TFDNode(state, remainingTasks, instance, null), "edge label", NodeType.OR));
 				}
 			}
 			return successors;

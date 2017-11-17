@@ -12,7 +12,7 @@ import jaicore.search.structure.core.Node;
 import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.core.NodeType;
 import jaicore.search.structure.graphgenerator.GoalTester;
-import jaicore.search.structure.graphgenerator.RootGenerator;
+import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 /**
@@ -26,13 +26,13 @@ public class RandomizedAndOrSearch<T,A> extends ANDORGraphSearch<T,A,Integer> {
 	private Node<T,Integer> root;
 	private final Queue<Node<T,Integer>> open = new LinkedList<>();
 	
-	public RandomizedAndOrSearch(RootGenerator<T> rootGenerator, SuccessorGenerator<T, A> successorGenerator, GoalTester<T> goalTester) {
+	public RandomizedAndOrSearch(SingleRootGenerator<T> rootGenerator, SuccessorGenerator<T, A> successorGenerator, GoalTester<T> goalTester) {
 		super(rootGenerator, successorGenerator, goalTester);
 	}
 
 	@Override
 	protected Node<T,Integer> initialize() {
-		root = getOrNode(null, rootGenerator.getRoots().iterator().next(), null);
+		root = getOrNode(null, rootGenerator.getRoot(), null);
 		open.add(root);
 		return root;
 	}
@@ -49,7 +49,7 @@ public class RandomizedAndOrSearch<T,A> extends ANDORGraphSearch<T,A,Integer> {
 
 	@Override
 	protected Collection<Node<T,Integer>> expand(Node<T,Integer> expanded) {
-		List<NodeExpansionDescription<T, A>> successorNodes = successorGenerator.generateSuccessors(expanded);
+		Collection<NodeExpansionDescription<T, A>> successorNodes = successorGenerator.generateSuccessors(expanded.getPoint());
 		Collection<Node<T,Integer>> successors = new ArrayList<>();
 		for (NodeExpansionDescription<T, A> successorDescription : successorNodes) {
 			

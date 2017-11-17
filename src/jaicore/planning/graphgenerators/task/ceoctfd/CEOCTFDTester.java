@@ -41,7 +41,7 @@ public class CEOCTFDTester {
 		long start = System.currentTimeMillis();
 		AStar<TFDNode,String> astar = new AStar<>(generator, (n1,n2) -> -1 * (Math.random() * 1000), n -> 0);
 		
-//		new SimpleGraphVisualizationWindow<>(astar.getEventBus()).getPanel().setTooltipGenerator(new TFDTooltipGenerator());
+		new SimpleGraphVisualizationWindow<>(astar.getEventBus()).getPanel().setTooltipGenerator(new TFDTooltipGenerator());
 	
 		List<TFDNode> solution = null;
 		Collection<List<TFDNode>> solutions = new HashSet<>();

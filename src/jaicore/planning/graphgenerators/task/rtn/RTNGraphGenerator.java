@@ -1,7 +1,6 @@
 package jaicore.planning.graphgenerators.task.rtn;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -32,7 +31,7 @@ import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.core.NodeType;
 import jaicore.search.structure.core.OrNode;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
-import jaicore.search.structure.graphgenerator.RootGenerator;
+import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 public class RTNGraphGenerator implements GraphGenerator<RTNNode, RTNEdge> {
@@ -50,8 +49,8 @@ public class RTNGraphGenerator implements GraphGenerator<RTNNode, RTNEdge> {
 	}
 
 	@Override
-	public RootGenerator<RTNNode> getRootGenerator() {
-		return () -> Arrays.asList(new RTNNode[]{ new RTNNode(problem.getInit(), new ArrayList<>(util.getTaskChainOfTotallyOrderedNetwork(problem.getNetwork())))});
+	public SingleRootGenerator<RTNNode> getRootGenerator() {
+		return () -> new RTNNode(false, problem.getInit(), new ArrayList<>(util.getTaskChainOfTotallyOrderedNetwork(problem.getNetwork())));
 	}
 
 	@Override
@@ -59,8 +58,8 @@ public class RTNGraphGenerator implements GraphGenerator<RTNNode, RTNEdge> {
 		return l -> {
 			PerformanceLogger.logStart("successor computation init");
 			final List<NodeExpansionDescription<RTNNode, RTNEdge>> successors = new ArrayList<>();
-			final Monom state = l.getPoint().getState();
-			final List<Literal> currentlyRemainingTasks = l.getPoint().getRemainingTasks();
+			final Monom state = l.getState();
+			final List<Literal> currentlyRemainingTasks = l.getRemainingTasks();
 			final Literal nextTaskTmp = currentlyRemainingTasks.get(0);
 			if (nextTaskTmp == null)
 				return successors;
@@ -70,7 +69,7 @@ public class RTNGraphGenerator implements GraphGenerator<RTNNode, RTNEdge> {
 			PerformanceLogger.logEnd("successor computation init");
 			
 			/* if this is an or-node, perform the split as always */
-			if (l instanceof OrNode) {
+			if (!l.isAndNode()) {
 				PerformanceLogger.logStart("successor computation: Computing OR-Nodes");
 
 				/* if the task is primitive */
@@ -114,8 +113,8 @@ public class RTNGraphGenerator implements GraphGenerator<RTNNode, RTNEdge> {
 						final List<Literal> remainingTasks = new ArrayList<>(currentlyRemainingTasks);
 						remainingTasks.remove(0);
 						PerformanceLogger.logStart("insert node");
-						successors.add(new NodeExpansionDescription<>(l.getPoint(), new RTNNode(updatedState, remainingTasks), new RTNEdge(null, null, relevantAction),
-								remainingTasksInitializeANDNode(remainingTasks) ? NodeType.AND : NodeType.OR));
+						boolean isAndNode = remainingTasksInitializeANDNode(remainingTasks);
+						successors.add(new NodeExpansionDescription<>(l, new RTNNode(isAndNode, updatedState, remainingTasks), new RTNEdge(null, null, relevantAction), null));
 						PerformanceLogger.logEnd("insert node");
 					}
 					assert checkDoubleNodes(successors);
@@ -157,8 +156,8 @@ public class RTNGraphGenerator implements GraphGenerator<RTNNode, RTNEdge> {
 						remainingTasks.remove(indexForRemoval); // remove the first literal of the 2ndly appended list
 
 						/* hard code the and-or-stuff for a moment */
-						successors.add(new NodeExpansionDescription<>(l.getPoint(), new RTNNode(state, remainingTasks), new RTNEdge(null, instance, null),
-								remainingTasksInitializeANDNode(remainingTasks) ? NodeType.AND : NodeType.OR));
+						boolean isAndNode = remainingTasksInitializeANDNode(remainingTasks);
+						successors.add(new NodeExpansionDescription<>(l, new RTNNode(isAndNode, state, remainingTasks), new RTNEdge(null, instance, null), null));
 					}
 					PerformanceLogger.logEnd("Generate nodes for applicable method instances");
 				}
@@ -187,7 +186,7 @@ public class RTNGraphGenerator implements GraphGenerator<RTNNode, RTNEdge> {
 					/* compute the reduced state */
 					final Monom reducedState = new Monom();
 					final Set<ConstantParam> relevantConstants = new HashSet<>(task.getConstantParams());
-					for (String c : RTNUtil.getClassesThatExistInState(l.getPoint())) {
+					for (String c : RTNUtil.getClassesThatExistInState(l)) {
 						relevantConstants.add(new ConstantParam(c));
 					}
 					for (Literal lit : state) {
@@ -247,12 +246,12 @@ public class RTNGraphGenerator implements GraphGenerator<RTNNode, RTNEdge> {
 					}
 
 					remainingTask.add(new Literal(task.getPropertyName().substring(task.getPropertyName().indexOf("-") + 1), paramsForTask));
-					successors.add(new NodeExpansionDescription<>(l.getPoint(), new RTNNode(reducedState, remainingTask), new RTNEdge(mapping, null, null), NodeType.OR));
+					successors.add(new NodeExpansionDescription<>(l, new RTNNode(false, reducedState, remainingTask), new RTNEdge(mapping, null, null), null));
 				}
 
 				/* now create one node for the remaining tasks */
 				if (!tasksForLastNode.isEmpty())
-					successors.add(new NodeExpansionDescription<>(l.getPoint(), new RTNNode(state, tasksForLastNode), new RTNEdge(null, null, null), NodeType.OR));
+					successors.add(new NodeExpansionDescription<>(l, new RTNNode(false, state, tasksForLastNode), new RTNEdge(null, null, null), null));
 				PerformanceLogger.logEnd("successor computation: Computing AND-Nodes");
 			}
 

@@ -3,8 +3,6 @@ package jaicore.search.algorithms.standard.generalbestfirst;
 import static org.junit.Assert.assertNotNull;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import org.junit.Test;
 
@@ -13,11 +11,8 @@ import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.search.algorithms.standard.core.INodeEvaluator;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
-import jaicore.search.structure.core.NodeExpansionDescription;
-import jaicore.search.structure.core.NodeType;
-import jaicore.search.structure.core.OrNode;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
-import jaicore.search.structure.graphgenerator.RootGenerator;
+import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 public class GeneralBestFirstTester {
@@ -78,30 +73,30 @@ public class GeneralBestFirstTester {
 		GraphGenerator<GameNode, GameAction> gen = new GraphGenerator<GeneralBestFirstTester.GameNode, GeneralBestFirstTester.GameAction>() {
 
 			@Override
-			public RootGenerator<GameNode> getRootGenerator() {
-				return () -> Arrays.asList(new GameNode[]{new GameNode(true, 20)});
+			public SingleRootGenerator<GameNode> getRootGenerator() {
+				return () -> new GameNode(true, 20);
 			}
 
 			@Override
 			public SuccessorGenerator<GameNode, GameAction> getSuccessorGenerator() {
 				return n -> {
-					
-					if (n instanceof OrNode) { 
-						List<NodeExpansionDescription<GameNode,GameAction>> successors = new ArrayList<>();
-						GameNode g = n.getPoint();
-						for (int i = 0; i < 4; i++)
-							if (g.remaining > i)
-								successors.add(new NodeExpansionDescription<>(n.getPoint(), new GameNode(false, g.remaining - i - 1), new GameAction("Take " + (i + 1)), NodeType.AND));
-						return successors;
-					}
-					else {
-						List<NodeExpansionDescription<GameNode,GameAction>> successors = new ArrayList<>();
-						GameNode g = n.getPoint();
-						for (int i = 0; i < 2; i++)
-							if (g.remaining > i)
-								successors.add(new NodeExpansionDescription<>(n.getPoint(), new GameNode(true, g.remaining - i - 1), new GameAction("Enemy takes " + (i + 1)), NodeType.OR));
-						return successors;						
-					}
+					return new ArrayList<>();	
+//					if (n instanceof OrNode) { 
+//						List<NodeExpansionDescription<GameNode,GameAction>> successors = new ArrayList<>();
+//						GameNode g = n.getPoint();
+//						for (int i = 0; i < 4; i++)
+//							if (g.remaining > i)
+//								successors.add(new NodeExpansionDescription<>(n.getPoint(), new GameNode(false, g.remaining - i - 1), new GameAction("Take " + (i + 1)), NodeType.AND));
+//						return successors;
+//					}
+//					else {
+//						List<NodeExpansionDescription<GameNode,GameAction>> successors = new ArrayList<>();
+//						GameNode g = n.getPoint();
+//						for (int i = 0; i < 2; i++)
+//							if (g.remaining > i)
+//								successors.add(new NodeExpansionDescription<>(n.getPoint(), new GameNode(true, g.remaining - i - 1), new GameAction("Enemy takes " + (i + 1)), NodeType.OR));
+//						return successors;						
+//					}
 				};
 			}
 
