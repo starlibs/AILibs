@@ -1,9 +1,7 @@
 package jaicore.search.structure.core;
 
-import jaicore.search.structure.graphgenerator.NodeGoalTester;
-import jaicore.search.structure.graphgenerator.PathGoalTester;
+import jaicore.search.structure.graphgenerator.GoalTester;
 import jaicore.search.structure.graphgenerator.RootGenerator;
-import jaicore.search.structure.graphgenerator.SelfContained;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 public interface GraphGenerator<T, A> {
@@ -12,11 +10,5 @@ public interface GraphGenerator<T, A> {
 
 	public SuccessorGenerator<T, A> getSuccessorGenerator();
 
-//	public GoalTester<T> getGoalTester();
-
-	public PathGoalTester<T> getPathGoalTester();
-	
-	public NodeGoalTester<T> getNodeGoalTester();
-	
-	public SelfContained isSelfContained();
+	public GoalTester<T> getGoalTester();
 }
