@@ -3,7 +3,6 @@ package jaicore.planning.graphgenerators.task.tfd;
 import java.io.Serializable;
 import java.util.List;
 
-import jaicore.basic.ObjectSizeFetcher;
 import jaicore.logic.fol.structure.Literal;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.planning.model.core.Action;

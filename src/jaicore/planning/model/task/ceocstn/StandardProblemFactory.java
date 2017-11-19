@@ -18,7 +18,7 @@ import jaicore.planning.model.task.stn.TaskNetwork;
 
 public class StandardProblemFactory {
 	
-	public static CEOCSTNPlanningProblem getNestedDichotomyCreationProblem(String rootClusterName, Collection<String> classesInit) {
+	public static CEOCSTNPlanningProblem getNestedDichotomyCreationProblem(String rootClusterName, Collection<String> classesInit, boolean objectCreation) {
 		
 		/* define operations */
 		List<String> classes = classesInit.stream().sorted().collect(Collectors.toList());
@@ -35,7 +35,14 @@ public class StandardProblemFactory {
 			addLists.put(new CNFFormula(new Monom("in('" + c + "',p)")), new Monom("in('" + c + "', lc)"));
 			addLists.put(new CNFFormula(new Monom("smallest('" + c + "',p)")), new Monom("smallest('" + c + "', lc)"));
 		}
-		operations.add(new CEOCOperation("initChildClusters", Arrays.asList(new VariableParam[] { new VariableParam("p"), new VariableParam("lc"), new VariableParam("rc") }), new Monom(), addLists, new HashMap<>(), Arrays.asList(new VariableParam[] { new VariableParam("lc"), new VariableParam("rc") })));
+		if (objectCreation) {
+			operations.add(new CEOCOperation("initChildClusters", Arrays.asList(new VariableParam[] { new VariableParam("p"), new VariableParam("lc"), new VariableParam("rc") }), new Monom(), addLists, new HashMap<>(), Arrays.asList(new VariableParam[] { new VariableParam("lc"), new VariableParam("rc") })));
+		}
+		else{
+			addLists.put(new CNFFormula(), new Monom("nextVar(next)"));
+			deleteLists.put(new CNFFormula(), new Monom("nextVar(lc)"));
+			operations.add(new CEOCOperation("initChildClusters", Arrays.asList(new VariableParam[] { new VariableParam("p"), new VariableParam("lc"), new VariableParam("rc"), new VariableParam("next") }), new Monom(), addLists, deleteLists, new ArrayList<>()));
+		}
 		operations.add(new CEOCOperation("closeClusters", Arrays.asList(new VariableParam[] { new VariableParam("l"), new VariableParam("lw"), new VariableParam("r"), new VariableParam("rw") }), new Monom("in(lw,l) & in(rw,r)"), new HashMap<>(), new HashMap<>(), new ArrayList<>()));
 		
 		/* operation to shift the first element from a left cluster to a right one */
@@ -54,7 +61,7 @@ public class StandardProblemFactory {
 			}
 			addLists.put(allQuantifiedBiggerRelation, new Monom("smallest('" + c2ndSmallest + "', l)"));
 		}
-			
+		deleteLists = new HashMap<>();
 			/* case two: some other is smallest */
 //			Monom case2 = new Monom("smallest('" + cSmallest + "',p) & '" + cSmallest + "' != x");
 //			addLists.put(new CNFFormula(case2), new Monom("smallest('" + cSmallest + "', lc)"));
@@ -94,9 +101,16 @@ public class StandardProblemFactory {
 		Literal taskCheckLeaf = new Literal("checkLeaf(c)");
 		
 		List<OCMethod> methods = new ArrayList<>();
-		methods.add(new OCMethod("assertbinarycluster",  Arrays.asList(new VariableParam[] { new VariableParam("c"), new VariableParam("lc"), new VariableParam("rc") }), taskRefine, new Monom(), new TaskNetwork("initChildClusters(c,lc,rc) -> shiftAnyElement(lc,rc) -> checkLeaf(lc) -> checkLeaf(rc)"), true, Arrays.asList(new VariableParam[]{ new VariableParam("lc"), new VariableParam("rc")})));
-		methods.add(new OCMethod("refineandclosetheotherunarily",  Arrays.asList(new VariableParam[] { new VariableParam("c"), new VariableParam("lc"), new VariableParam("rc") }), taskRefine, new Monom(), new TaskNetwork("initChildClusters(c,lc,rc) -> selectAndShiftFirstElement(lc,rc) -> refine(lc)"), false, Arrays.asList(new VariableParam[]{ new VariableParam("lc"), new VariableParam("rc")})));
-		methods.add(new OCMethod("refinebothwithatleasttwoonbothsides",  Arrays.asList(new VariableParam[] { new VariableParam("c"), new VariableParam("lc"), new VariableParam("rc") }), taskRefine, new Monom(), new TaskNetwork("initChildClusters(c,lc,rc) -> selectAndShiftFirstNonSmallestElement(lc,rc) -> selectAndShiftFurtherElement(lc,rc) -> configureClusters(lc,rc) -> refine(lc) -> refine(rc)"), false, Arrays.asList(new VariableParam[]{ new VariableParam("lc"), new VariableParam("rc")})));
+		if (objectCreation) {
+			methods.add(new OCMethod("assertbinarycluster",  Arrays.asList(new VariableParam[] { new VariableParam("c"), new VariableParam("lc"), new VariableParam("rc") }), taskRefine, new Monom(), new TaskNetwork("initChildClusters(c,lc,rc) -> shiftAnyElement(lc,rc) -> checkLeaf(lc) -> checkLeaf(rc)"), true, Arrays.asList(new VariableParam[]{ new VariableParam("lc"), new VariableParam("rc")})));
+			methods.add(new OCMethod("refineandclosetheotherunarily",  Arrays.asList(new VariableParam[] { new VariableParam("c"), new VariableParam("lc"), new VariableParam("rc") }), taskRefine, new Monom(), new TaskNetwork("initChildClusters(c,lc,rc) -> selectAndShiftFirstElement(lc,rc) -> refine(lc)"), false, Arrays.asList(new VariableParam[]{ new VariableParam("lc"), new VariableParam("rc")})));
+			methods.add(new OCMethod("refinebothwithatleasttwoonbothsides",  Arrays.asList(new VariableParam[] { new VariableParam("c"), new VariableParam("lc"), new VariableParam("rc") }), taskRefine, new Monom(), new TaskNetwork("initChildClusters(c,lc,rc) -> selectAndShiftFirstNonSmallestElement(lc,rc) -> selectAndShiftFurtherElement(lc,rc) -> configureClusters(lc,rc) -> refine(lc) -> refine(rc)"), false, Arrays.asList(new VariableParam[]{ new VariableParam("lc"), new VariableParam("rc")})));
+		}
+		else {
+			methods.add(new OCMethod("assertbinarycluster",  Arrays.asList(new VariableParam[] { new VariableParam("c"), new VariableParam("lc"), new VariableParam("rc"), new VariableParam("next") }), taskRefine, new Monom("nextVar(lc) & succ(lc,rc) & succ(rc,next)"), new TaskNetwork("initChildClusters(c,lc,rc,next) -> shiftAnyElement(lc,rc) -> checkLeaf(lc) -> checkLeaf(rc)"), true, Arrays.asList()));
+			methods.add(new OCMethod("refineandclosetheotherunarily",  Arrays.asList(new VariableParam[] { new VariableParam("c"), new VariableParam("lc"), new VariableParam("rc"), new VariableParam("next") }), taskRefine, new Monom("nextVar(lc) & succ(lc,rc) & succ(rc,next)"), new TaskNetwork("initChildClusters(c,lc,rc,next) -> selectAndShiftFirstElement(lc,rc) -> refine(lc)"), false, Arrays.asList()));
+			methods.add(new OCMethod("refinebothwithatleasttwoonbothsides",  Arrays.asList(new VariableParam[] { new VariableParam("c"), new VariableParam("lc"), new VariableParam("rc"), new VariableParam("next") }), taskRefine, new Monom("nextVar(lc) & succ(lc,rc) & succ(rc,next)"), new TaskNetwork("initChildClusters(c,lc,rc,next) -> selectAndShiftFirstNonSmallestElement(lc,rc) -> selectAndShiftFurtherElement(lc,rc) -> configureClusters(lc,rc) -> refine(lc) -> refine(rc)"), false, Arrays.asList(new VariableParam[]{ new VariableParam("lc"), new VariableParam("rc")})));
+		}
 		methods.add(new OCMethod("shiftElementAndConfigure",  Arrays.asList(new VariableParam[] { new VariableParam("l"), new VariableParam("r") }), taskConfigure, new Monom(), new TaskNetwork("selectAndShiftFurtherElement(l,r) -> configureClusters(l,r)"), false, new ArrayList<>()));
 		methods.add(new OCMethod("selectAndShiftFirstElementMethod",  Arrays.asList(new VariableParam[] { new VariableParam("x"), new VariableParam("l"), new VariableParam("r") }), taskShiftFirst, new Monom("in(x,l)"), new TaskNetwork("shiftFirstElement(x,l,r)"), false, new ArrayList<>()));
 		methods.add(new OCMethod("selectAndShiftFirstNonSmallestElementMethod",  Arrays.asList(new VariableParam[] { new VariableParam("x"), new VariableParam("l"), new VariableParam("r") }), taskShiftFirstNonSmallest, new Monom("in(x,l) & !smallest(x,l)"), new TaskNetwork("shiftFirstElement(x,l,r)"), false, new ArrayList<>()));
@@ -114,12 +128,23 @@ public class StandardProblemFactory {
 			init.add(new Literal("in('" + c + "','" + rootClusterName + "')"));
 		}
 		init.add(new Literal("smallest('" + classes.get(0) + "', '" + rootClusterName + "')"));
-		
 		for (int i = 0; i < classes.size(); i++) {
 			for (int j = i + 1; j < classes.size(); j++) {
 				init.add(new Literal("bigger('" + classes.get(j) + "', '" + classes.get(i) + "')"));
 			}
 		}
+		
+		/* if no constant creation is allowed, add all successor objects */
+		if (!objectCreation) {
+			init.add(new Literal("nextVar('var0')"));
+			String currentVar = "var0";
+			for (int i = 1; i < 100; i++) {
+				String nextVar = "var" + i;
+				init.add(new Literal("succ('" + currentVar + "', '" + nextVar + "')"));
+				currentVar = nextVar;
+			}
+		}
+		
 		TaskNetwork network = new TaskNetwork("refine('" + rootClusterName + "')");
 		return new CEOCSTNPlanningProblem(domain, null, init, network);
 	}

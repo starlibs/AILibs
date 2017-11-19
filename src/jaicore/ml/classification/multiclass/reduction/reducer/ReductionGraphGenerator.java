@@ -15,8 +15,8 @@ import jaicore.ml.classification.multiclass.reduction.splitters.RPNDSplitter;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.core.NodeType;
-import jaicore.search.structure.graphgenerator.GoalTester;
-import jaicore.search.structure.graphgenerator.RootGenerator;
+import jaicore.search.structure.graphgenerator.NodeGoalTester;
+import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
@@ -34,13 +34,11 @@ public class ReductionGraphGenerator implements GraphGenerator<RestProblem, Deci
 	}
 
 	@Override
-	public RootGenerator<RestProblem> getRootGenerator() {
+	public SingleRootGenerator<RestProblem> getRootGenerator() {
 		return () -> {
-			Collection<RestProblem> roots = new ArrayList<>();
 			RestProblem root = new RestProblem(null);
 			root.add(new HashSet<>(WekaUtil.getClassesActuallyContainedInDataset(data)));
-			roots.add(root);
-			return roots;
+			return root;
 		};
 	}
 
@@ -110,9 +108,9 @@ public class ReductionGraphGenerator implements GraphGenerator<RestProblem, Deci
 	}
 
 	@Override
-	public GoalTester<RestProblem> getGoalTester() {
+	public NodeGoalTester<RestProblem> getGoalTester() {
 		return n -> {
-			for (Set<String> open : n.getPoint()) {
+			for (Set<String> open : n) {
 				if (open.size() > 1)
 					return false;
 			}

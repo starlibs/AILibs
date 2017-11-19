@@ -20,6 +20,7 @@ import jaicore.search.structure.core.Node;
 import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.core.NodeType;
 import jaicore.search.structure.core.OrNode;
+import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 
 /**
  * A* algorithm implementation using the method design pattern.
@@ -41,7 +42,7 @@ public class GeneralBestFirst<T, A> extends ANDORGraphSearch<T, A, Integer> {
 
 	public GeneralBestFirst(GraphGenerator<T, A> graphGenerator, GeneralBestFirstEvaluationOrSelector<T> orAggregator, GeneralBestFirstEvaluationAggregation<T> andAggregator,
 			INodeEvaluator<T, Integer> nodeEvaluator) {
-		super(graphGenerator.getRootGenerator(), graphGenerator.getSuccessorGenerator(), graphGenerator.getGoalTester());
+		super((SingleRootGenerator<T>)graphGenerator.getRootGenerator(), graphGenerator.getSuccessorGenerator(), graphGenerator.getGoalTester());
 		this.orAggregator = orAggregator;
 		this.andAggregator = andAggregator;
 		this.nodeEvaluator = nodeEvaluator;
@@ -49,7 +50,7 @@ public class GeneralBestFirst<T, A> extends ANDORGraphSearch<T, A, Integer> {
 
 	@Override
 	protected Node<T, Integer> initialize() {
-		root = getOrNode(null, rootGenerator.getRoots().iterator().next(), null);
+		root = getOrNode(null, rootGenerator.getRoot(), null);
 		open.add(root);
 		try {
 			bestValues.put(root, nodeEvaluator.f(root));
@@ -124,7 +125,7 @@ public class GeneralBestFirst<T, A> extends ANDORGraphSearch<T, A, Integer> {
 
 	@Override
 	protected Collection<Node<T, Integer>> expand(Node<T, Integer> expanded) {
-		List<NodeExpansionDescription<T, A>> successorNodes = successorGenerator.generateSuccessors(expanded);
+		Collection<NodeExpansionDescription<T, A>> successorNodes = successorGenerator.generateSuccessors(expanded.getPoint());
 		Collection<Node<T, Integer>> successors = new ArrayList<>();
 		Map<Node<T, Integer>, Integer> newSuccessorsAndTheirScores = new HashMap<>();
 		for (NodeExpansionDescription<T, A> successorDescription : successorNodes) {
@@ -154,7 +155,7 @@ public class GeneralBestFirst<T, A> extends ANDORGraphSearch<T, A, Integer> {
 		for (Node<T, Integer> node : newSuccessorsAndTheirScores.keySet().stream().sorted((n1, n2) -> newSuccessorsAndTheirScores.get(n1) - newSuccessorsAndTheirScores.get(n2))
 				.collect(Collectors.toList())) {
 			bestValues.put(node, newSuccessorsAndTheirScores.get(node));
-			if (!goalTester.isGoal(node)) {
+			if (!goalTester.isGoal(node.getPoint())) {
 				open.add(node);
 			}
 			successors.add(node);

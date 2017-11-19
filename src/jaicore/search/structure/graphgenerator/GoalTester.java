@@ -1,5 +1,6 @@
 package jaicore.search.structure.graphgenerator;
 
+<<<<<<< HEAD
 import java.util.List;
 
 import jaicore.search.structure.core.Node;
@@ -24,4 +25,8 @@ public interface GoalTester<T> {
 	 * @return <code>true</code> if the path is a goalpath, <code>false</code> else.
 	 */
 //	public boolean isGoal(List<T> path);
+=======
+public interface GoalTester<T> {
+
+>>>>>>> fd1c7dd64da900832ded0b2d0dc43f9cb47f6214
 }

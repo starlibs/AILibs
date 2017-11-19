@@ -10,11 +10,13 @@ public class RTNNode {
 	private static int counter = 0;
 	private final int id = counter ++;
 	
+	private final boolean andNode;
 	private Monom state;
 	private List<Literal> remainingTasks;
 
-	public RTNNode(Monom state, List<Literal> remainingTasks) {
+	public RTNNode(boolean andNode, Monom state, List<Literal> remainingTasks) {
 		super();
+		this.andNode = andNode;
 		this.state = state;
 		this.remainingTasks = remainingTasks;
 	}
@@ -33,6 +35,10 @@ public class RTNNode {
 
 	public void setRemainingTasks(List<Literal> remainingTasks) {
 		this.remainingTasks = remainingTasks;
+	}
+
+	public boolean isAndNode() {
+		return andNode;
 	}
 
 	@Override

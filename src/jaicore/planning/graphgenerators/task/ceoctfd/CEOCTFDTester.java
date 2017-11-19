@@ -6,19 +6,29 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import jaicore.basic.MathExt;
+import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
+import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;
 import jaicore.planning.model.task.ceocstn.CEOCSTNPlanningProblem;
 import jaicore.planning.model.task.ceocstn.StandardProblemFactory;
 import jaicore.search.algorithms.standard.astar.AStar;
 
 public class CEOCTFDTester {
+	
+	private List<String> classes;
+	
+	@Before
+	public void setClasses() {
+		classes = Arrays.asList(new String[]{"A", "B", "C", "D", "E"});
+	}
 
 	@Test
 	public void testNestedDichotomy() throws Exception {
-		solveProblemUsingAStar(StandardProblemFactory.getNestedDichotomyCreationProblem("root", Arrays.asList(new String[]{"A", "B", "C", "D"})));
+		solveProblemUsingAStar(StandardProblemFactory.getNestedDichotomyCreationProblem("root", classes, true));
 	}
 	
 	private void solveProblemUsingAStar(CEOCSTNPlanningProblem problem) {
@@ -31,7 +41,7 @@ public class CEOCTFDTester {
 		long start = System.currentTimeMillis();
 		AStar<TFDNode,String> astar = new AStar<>(generator, (n1,n2) -> -1 * (Math.random() * 1000), n -> 0);
 		
-//		new SimpleGraphVisualizationWindow<>(astar.getEventBus());
+		new SimpleGraphVisualizationWindow<>(astar.getEventBus()).getPanel().setTooltipGenerator(new TFDTooltipGenerator());
 	
 		List<TFDNode> solution = null;
 		Collection<List<TFDNode>> solutions = new HashSet<>();
@@ -40,12 +50,12 @@ public class CEOCTFDTester {
 			solutions.add(solution);
 		}
 		while (solution != null);
-		
 		long end = System.currentTimeMillis();
 		float time = (int)Math.round((end - start) / 10.0) / 100f;
 		System.out.println(" done");
-		System.out.println("Found " + solutions.size() + " solutions. Expected number is " + (int)MathExt.doubleFactorial((short)(2 * 4 - 3)));
-		Assert.assertTrue(solutions.size() == (int)MathExt.doubleFactorial((short)(2 * 4 - 3)));
+		int expectedNumber = (int)MathExt.doubleFactorial((short)(2 * classes.size() - 3));
+		System.out.println("Found " + solutions.size() + " solutions in " + time + "s. Expected number is " + expectedNumber);
+		Assert.assertTrue(solutions.size() == expectedNumber);
 		
 		System.out.println();
 		List<String> solutionAsStringList = solutions.iterator().next().stream().filter(n -> n.getAppliedAction() != null).map(n -> n.getAppliedAction().getEncoding()).collect(Collectors.toList());

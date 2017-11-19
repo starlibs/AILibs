@@ -11,7 +11,6 @@ import java.util.Set;
 import jaicore.basic.PerformanceLogger;
 import jaicore.graph.Graph;
 import jaicore.graph.LabeledGraph;
-import jaicore.planning.graphgenerators.task.rtn.RTNNode;
 import jaicore.search.structure.core.AndNode;
 import jaicore.search.structure.core.GraphEventBus;
 import jaicore.search.structure.core.Node;
@@ -20,7 +19,8 @@ import jaicore.search.structure.events.GraphInitializedEvent;
 import jaicore.search.structure.events.NodeReachedEvent;
 import jaicore.search.structure.events.NodeTypeSwitchEvent;
 import jaicore.search.structure.graphgenerator.GoalTester;
-import jaicore.search.structure.graphgenerator.RootGenerator;
+import jaicore.search.structure.graphgenerator.NodeGoalTester;
+import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 public abstract class ANDORGraphSearch<T, A, V extends Comparable<V>> {
@@ -34,9 +34,9 @@ public abstract class ANDORGraphSearch<T, A, V extends Comparable<V>> {
 	private final GraphEventBus<Node<T, V>> eventBus = new GraphEventBus<>();
 
 	/* search related objects */
-	protected final RootGenerator<T> rootGenerator;
+	protected final SingleRootGenerator<T> rootGenerator;
 	protected final SuccessorGenerator<T, A> successorGenerator;
-	protected final GoalTester<T> goalTester;
+	protected final NodeGoalTester<T> goalTester;
 	protected final Map<T, Node<T, V>> ext2int = new HashMap<>();
 	private Node<T, V> root;
 	protected final LabeledGraph<Node<T, V>, A> traversalGraph = new LabeledGraph<>();
@@ -54,11 +54,11 @@ public abstract class ANDORGraphSearch<T, A, V extends Comparable<V>> {
 
 	abstract protected int getNumberOfOpenNodesInSolutionBase(Graph<Node<T, V>> solutionBase);
 
-	public ANDORGraphSearch(RootGenerator<T> rootGenerator, SuccessorGenerator<T, A> successorGenerator, GoalTester<T> goalTester) {
+	public ANDORGraphSearch(SingleRootGenerator<T> rootGenerator, SuccessorGenerator<T, A> successorGenerator, GoalTester<T> goalTester) {
 		super();
 		this.rootGenerator = rootGenerator;
 		this.successorGenerator = successorGenerator;
-		this.goalTester = goalTester;
+		this.goalTester = (NodeGoalTester<T>)goalTester;
 	}
 
 	/**
@@ -206,7 +206,7 @@ public abstract class ANDORGraphSearch<T, A, V extends Comparable<V>> {
 
 		Collection<Node<T, V>> successors = traversalGraph.getSuccessors(n);
 		if (successors.isEmpty()) {
-			if (goalTester.isGoal(n)) {
+			if (goalTester.isGoal(n.getPoint())) {
 				solvedNodes.add(n);
 				return true;
 			}
@@ -243,7 +243,7 @@ public abstract class ANDORGraphSearch<T, A, V extends Comparable<V>> {
 		/* if there is no successor, return true if the node is a goal and false otherwise (node may not have been expanded yet) */
 		Collection<Node<T, V>> successors = traversalGraph.getSuccessors(n);
 		if (successors.isEmpty()) {
-			if (goalTester.isGoal(n)) {
+			if (goalTester.isGoal(n.getPoint())) {
 				solvedNodes.add(n);
 				recursivelyExhaustedNodes.add(n);
 				return true;
