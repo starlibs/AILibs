@@ -1,27 +1,35 @@
 package jaicore.search.algorithms.standard.npuzzle;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import jaicore.search.structure.core.NodeExpansionDescription;
-import jaicore.search.structure.core.NodeType;
-
+/**
+ * A node for the normal n-Puzzleproblem.
+ * Every node contains the current board configuration as an 2D-Array of integer.
+ * The empty space is indicated by an Integer with value 0.
+ * @author jkoepe
+ */
 public class NPuzzleNode {
-	//within the board, 0 is the empty space
+	//board configuration and empty space
 	private int [][] board;
 	private int emptyX;
 	private int emptyY;
 	
-	public NPuzzleNode(int n) {
-		board = new int[n][n];
-		List<Integer> numbers = new ArrayList<>(n*n);
+	/**
+	 * Constructor for a NPuzzleNode which creates a NPuzzleNode with complete 
+	 * randomly distributed numbers.
+	 * @param dim
+	 * 		The dimension of the board.
+	 */
+	public NPuzzleNode(int dim) {
+		board = new int[dim][dim];
+		List<Integer> numbers = new ArrayList<>(dim*dim);
 		
-		for(int i = 0; i < n*n; i++) 
+		for(int i = 0; i < dim*dim; i++) 
 			numbers.add(i);
 		//creating of a random starting configuration for the NPuzzleProblem
-		for(int i = 0; i <n ; i++) {
-			for(int j = 0; j < n; j++) {
+		for(int i = 0; i <dim ; i++) {
+			for(int j = 0; j < dim; j++) {
 				int index = (int) (Math.random()* numbers.size());
 				int number = numbers.remove(index);
 				board[i][j] = number;
@@ -32,37 +40,54 @@ public class NPuzzleNode {
 			}
 		}
 	}
-	//TODO Shuffle the board does not work right now
-//	public NPuzzleNode(int n, int perm) {
-//		board = new int[n][n];
-//		int x = 1;
-//		for(int i = 0; i < n; i++) {
-//			for(int j = 0; j < n; j++) {
-//				board[i][j] = x;
-//				x++;
-//			}
-//		}
-//		emptyX = n-1;
-//		emptyY = n-1;
-//		/
-//		for(int i = 0; i < perm; i++) {
-//			String s = "";
-//			if(emptyX> 0)//move left
-//				s+= "l";
-//			if(emptyX< n -1)//move right
-//				s+= "r";
-//			
-//			if(emptyY>0)//move down
-//				s+="u";
-//			
-//			if(emptyY< n -1)//move up
-//				s+= "d";
-//			
-//			move(s.charAt((int) (Math.random()*s.length())));
-//		}
-//		System.out.println(this.toString());
-//	}
 	
+	/**
+	 * Constructor for a NPuzzleNode which creates a NPuzzleNode.
+	 * The board configuration starts with the targetconfiguration and shuffels the tiles afterwards.
+	 * @param dim
+	 * 			The dimension of the board.
+	 * @param perm
+	 * 			The number of moves which should be made before starting the search.
+	 * 			This number is hardcoded to at least 1.
+	 */
+	public NPuzzleNode(int dim, int perm) {
+		board = new int[dim][dim];
+		int x = 1;
+		for(int i = 0; i < dim; i++) {
+			for(int j = 0; j < dim; j++) {
+				board[i][j] = x;
+				x++;
+			}
+		}
+		emptyX = dim-1;
+		emptyY = dim-1;
+		if(perm <1)
+			perm = 1;
+		
+		for(int i = 0; i < perm; i++) {
+			String s = "";
+			if(emptyX> 0)//move left
+				s+= "l";
+			if(emptyX< dim -1)//move right
+				s+= "r";
+			if(emptyY>0)//move up
+				s+="u";
+			if(emptyY< dim -1)//move down
+				s+= "d";
+			
+			move(s.charAt((int)(Math.random()*s.length())));
+		}
+	}
+	
+	/**
+	 * Constructor for a NPuzzleNode in which the board is already given.
+	 * @param board
+	 * 			The board configuration for this node
+	 * @param emptyX
+	 * 			The empty space on the x-axis.
+	 * @param emptyY
+	 * 			The empty space on the y-axis.
+	 */
 	public NPuzzleNode(int [][] board, int emptyX, int emptyY) {
 		this.board = board;
 		this.emptyX = emptyX;
@@ -111,7 +136,17 @@ public class NPuzzleNode {
 		return s;
 	}
 	
-	
+	/**
+	 * Moves the empty tile to another location.
+	 * The possible parameters to move the empty tiles are:
+	 * <code>l</code> for moving the empty space to the left.
+	 * <code>right</code> for moving the empty space to the right.
+	 * <code>u</code> for moving the empty space upwards.
+	 * <code>d</down> for moving the empty space downwards.
+	 * @param m
+	 * 		The character which indicates the specific moves. Possible characters are given above.
+	 * 		
+	 */
 	private void move(char m) {
 		switch (m) {
 			case 'l': 
@@ -122,6 +157,7 @@ public class NPuzzleNode {
 				break;
 			case 'u': 
 				move(-1,0);
+				break;
 			case 'd': 
 				move(1,0);
 				break;
@@ -129,14 +165,22 @@ public class NPuzzleNode {
 		
 	}
 	
+	/**
+	 * The actual move of the empty tile.
+	 * @param y
+	 * 		The movement on the y-axis. This value should be -1 if going upwards, 1 if going downwards.
+	 * 		Otherwise it should be 0.
+	 * @param x
+	 * 		The movement on the y-axis. This value should be -1 if going left, 1 if going right.
+	 * 		Otherwise it should be 0.
+	 */
 	private void move(int y, int x) {
-				
+		int eY = getEmptyY();		
 		int eX = getEmptyX();
-		int eY = getEmptyY();
 		board[eY][eX] = board[eY +y][eX+x];
 		board[eY+y][eX+x] = 0;
-		emptyY += y;
-		emptyX += x;
+		this.emptyY += y;
+		this.emptyX += x;
 	}
 	
 	

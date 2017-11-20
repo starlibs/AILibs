@@ -12,19 +12,20 @@ import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 /**
- * A simple generator for the normal NPuzzleProblem
+ * A simple generator for the normal NPuzzleProblem.
  * @author jkoepe
  *
  */
 public class NPuzzleGenerator implements GraphGenerator<NPuzzleNode, String>{
+	
 	
 	int dimension;
 	SingleRootGenerator<NPuzzleNode> root;
 	
 	public NPuzzleGenerator(int dim) {
 		this.dimension = dim;
-		root = ()-> new NPuzzleNode(dim);
-//		root = ()-> new NPuzleNode(dim,100);
+//		root = ()-> new NPuzzleNode(dim);
+		root = ()-> new NPuzzleNode(dim,4);
 	}
 
 	@Override
@@ -82,22 +83,21 @@ public class NPuzzleGenerator implements GraphGenerator<NPuzzleNode, String>{
 		return false;
 	}
 	
-	
+	/**
+	 * Moves the empty tile to another location.
+	 * The possible parameters to move the empty tiles are:
+	 * <code>l</code> for moving the empty space to the left.
+	 * <code>right</code> for moving the empty space to the right.
+	 * <code>u</code> for moving the empty space upwards.
+	 * <code>d</down> for moving the empty space downwards.
+	 * @param n
+	 * 		The NPuzzleNode which contains the boardconfiguration.
+	 * 
+	 * @param m
+	 * 		The character which indicates the specific moves. Possible characters are given above.
+	 * 		
+	 */
 	public NPuzzleNode move(NPuzzleNode n, String move) {
-//		if(move.equals("l"))
-//			return move(n, 0,-1);
-//		
-//		if(move.equals("r"))
-//			return move(n, 0,1);
-//		
-//		if(move.equals("u"))
-//			return move(n, 1,0);
-//		
-//		if(move.equals("d"))
-//			return move(n, -1,0);
-//		
-//		System.out.println("No Valid move. No Move is executed");
-//		return null;
 		switch(move) {
 			case "l" : 
 				return move(n, 0,-1);
@@ -113,6 +113,17 @@ public class NPuzzleGenerator implements GraphGenerator<NPuzzleNode, String>{
 		}
 	}
 	
+	/**
+	 * The actual move of the empty tile.
+	 * @param n
+	 * 		The node which contains the boardconfiguration.
+	 * @param y
+	 * 		The movement on the y-axis. This value should be -1 if going upwards, 1 if going downwards.
+	 * 		Otherwise it should be 0.
+	 * @param x
+	 * 		The movement on the y-axis. This value should be -1 if going left, 1 if going right.
+	 * 		Otherwise it should be 0.
+	 */
 	public NPuzzleNode move(NPuzzleNode n,int y, int x) {
 		//cloning the board for the new node
 		
