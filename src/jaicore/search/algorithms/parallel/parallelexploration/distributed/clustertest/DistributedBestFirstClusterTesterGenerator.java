@@ -45,4 +45,9 @@ public class DistributedBestFirstClusterTesterGenerator implements SerializableG
 	public RootGenerator<TestNode> getRootGenerator() {
 		return rootGenerator;
 	}
+	
+	@Override
+	public boolean isSelfContained() {
+		return false;
+	}
 }

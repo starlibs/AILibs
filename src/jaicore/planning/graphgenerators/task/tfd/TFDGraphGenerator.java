@@ -75,4 +75,9 @@ public class TFDGraphGenerator implements GraphGenerator<TFDNode,String> {
 	public NodeGoalTester<TFDNode> getGoalTester() {
 		return l -> l.getRemainingTasks().isEmpty();
 	}
+	
+	@Override
+	public boolean isSelfContained() {
+		return false;
+	}
 }

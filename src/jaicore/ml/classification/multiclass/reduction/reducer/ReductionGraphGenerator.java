@@ -117,4 +117,9 @@ public class ReductionGraphGenerator implements GraphGenerator<RestProblem, Deci
 			return true;
 		};
 	}
+
+	@Override
+	public boolean isSelfContained() {
+		return false;
+	}
 }

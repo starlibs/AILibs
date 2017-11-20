@@ -165,4 +165,9 @@ public class CEOCTFDGraphGenerator implements SerializableGraphGenerator<TFDNode
 	public String toString() {
 		return "CEOCTFDGraphGenerator [problem=" + problem + ", knowledge=" + knowledge + ", primitiveTasks=" + primitiveTasks + "]";
 	}
+
+	@Override
+	public boolean isSelfContained() {
+		return false;
+	}
 }
