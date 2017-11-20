@@ -1,4 +1,4 @@
-package jaicore.search.algorithms.standard;
+package jaicore.search.algorithms.standard.nqueens;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -7,6 +7,7 @@ import java.util.List;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.core.NodeType;
+import jaicore.search.structure.graphgenerator.GoalTester;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.PathGoalTester;
 import jaicore.search.structure.graphgenerator.RootGenerator;
@@ -22,41 +23,31 @@ public class NQueens {
 		if(args.length != 0)
 			n = Integer.parseInt(args[0]);
 		
-		GraphGenerator<QueenNode,String> gen = new GraphGenerator<QueenNode, String>() {
+		GraphGenerator<QueenNode,String> gen = new GraphGenerator<QueenNode, String>(){
 
 			@Override
-			public RootGenerator getRootGenerator() {
-				return () -> {
-					return Arrays.asList(new QueenNode((int)(Math.random()*8),1));
-				};
-			}
-
-			@Override
-			public SuccessorGenerator getSuccessorGenerator() {
-				return n -> {
-					List<NodeExpansionDescription<QueenNode, String>> l = new ArrayList<>();
-					l.add(new NodeExpansionDescription(n, new QueenNode(2,2),"edge label", NodeType.OR));
-					return l;
-				};
-			}
-
-			@Override
-			public PathGoalTester getPathGoalTester() {
+			public RootGenerator<QueenNode> getRootGenerator() {
 				// TODO Auto-generated method stub
 				return null;
 			}
 
 			@Override
-			public NodeGoalTester getNodeGoalTester() {
+			public SuccessorGenerator<QueenNode, String> getSuccessorGenerator() {
 				// TODO Auto-generated method stub
 				return null;
 			}
 
 			@Override
-			public SelfContained isSelfContained() {
-				return ()-> true;
+			public GoalTester<QueenNode> getGoalTester() {
+				// TODO Auto-generated method stub
+				return null;
 			}
-		
+
+			@Override
+			public boolean isSelfContained() {
+				// TODO Auto-generated method stub
+				return false;
+			}
 		};
 		
 		System.out.println(gen.toString()+ n);

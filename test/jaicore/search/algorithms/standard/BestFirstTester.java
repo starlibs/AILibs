@@ -53,6 +53,11 @@ public class BestFirstTester {
 				return l -> l.value == 1000;
 			}
 			
+			@Override
+			public boolean isSelfContained() {
+				return false;
+			}
+			
 		};
 		
 		BestFirst<TestNode,String> bf = new BestFirst<>(gen, n -> (int)Math.round(Math.random() * 1000));

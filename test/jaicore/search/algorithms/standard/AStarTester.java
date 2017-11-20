@@ -50,6 +50,12 @@ public class AStarTester {
 			public NodeGoalTester<TestNode> getGoalTester() {
 				return l -> l.value == 10000;
 			}
+
+			@Override
+			public boolean isSelfContained() {
+				
+				return false;
+			}
 		};
 		AStar<TestNode,String> astar = new AStar<>(gen, (n1, n2) -> n2.getPoint().value - n1.getPoint().value, n -> 0);
 		

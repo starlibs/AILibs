@@ -105,6 +105,12 @@ public class GeneralBestFirstTester {
 			public NodeGoalTester<GameNode> getGoalTester() {
 				return l -> l.active && l.remaining == 0;
 			}
+
+			@Override
+			public boolean isSelfContained() {
+				
+				return false;
+			}
 		};
 		
 		INodeEvaluator<GameNode, Integer> evaluator = new INodeEvaluator<GameNode,Integer>() {

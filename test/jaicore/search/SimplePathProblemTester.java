@@ -46,6 +46,11 @@ public class SimplePathProblemTester {
 					return sum > 0 && (sum % 100) == 0;
 				};
 			}
+
+			@Override
+			public boolean isSelfContained() {
+				return false;
+			}
 		};
 		
 		BestFirst<Integer, Object> bf = new BestFirst<>(gen, n -> 0);

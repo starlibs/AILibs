@@ -1,4 +1,4 @@
-package jaicore.search.algorithms.standard;
+package jaicore.search.algorithms.standard.nqueens;
 
 import java.util.ArrayList;
 import java.util.List;
