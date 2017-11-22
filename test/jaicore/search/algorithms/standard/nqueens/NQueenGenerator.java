@@ -6,7 +6,7 @@ import java.util.List;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.core.NodeType;
-import jaicore.search.structure.graphgenerator.GoalTester;
+import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.RootGenerator;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
@@ -42,17 +42,19 @@ public class NQueenGenerator implements GraphGenerator<QueenNode,String> {
 	}
 
 	@Override
-	public GoalTester<QueenNode> getGoalTester() {
-		return n->{
-			return false;
+	public NodeGoalTester<QueenNode> getGoalTester() {
+		return n -> {
+			if(n.getNumberOfQueens() == dimension)
+				return true;
+			else
+				return false;
+			
 		};
-		
 	}
 
 	@Override
 	public boolean isSelfContained() {
-		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 	
 	

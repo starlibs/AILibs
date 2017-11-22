@@ -198,4 +198,8 @@ public class QueenNode {
 		
 		return s;
 	}
+	
+	public int getNumberOfQueens() {
+		return positions.size();
+	}
 }
