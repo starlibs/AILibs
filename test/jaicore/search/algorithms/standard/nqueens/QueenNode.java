@@ -104,6 +104,8 @@ public class QueenNode {
 	}
 	
 	public QueenNode(List<Position> pos, int x, int y, int dimension) {
+		for(Position p:pos)
+			this.positions.add(new Position(p));
 		this.positions = pos;
 		positions.add(new Position(x, y));
 		this.dimension = dimension;
