@@ -19,7 +19,7 @@ public class NQueenTester {
 		if(args.length != 0)
 			x = Integer.parseInt(args[0]);
 		
-		NQueenGenerator gen = new NQueenGenerator(4);
+		NQueenGenerator gen = new NQueenGenerator(8);
 		
 		BestFirst<QueenNode, String> search = new BestFirst<>(gen, n-> (int)Math.round(Math.random() * 1000));
 		
