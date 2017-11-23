@@ -20,17 +20,17 @@ public class NPuzzleGenerator implements GraphGenerator<NPuzzleNode, String>{
 	
 	
 	int dimension;
-	SingleRootGenerator<NPuzzleNode> root;
+	int shuffle;
 	
-	public NPuzzleGenerator(int dim) {
+	
+	public NPuzzleGenerator(int dim, int shuffle) {
 		this.dimension = dim;
-//		root = ()-> new NPuzzleNode(dim);
-		root = ()-> new NPuzzleNode(dim,4);
+		this.shuffle = shuffle;
 	}
 
 	@Override
-	public RootGenerator<NPuzzleNode> getRootGenerator() {
-		return root;
+	public SingleRootGenerator<NPuzzleNode> getRootGenerator() {
+		return () -> new NPuzzleNode(dimension, shuffle);
 	}
 
 	@Override
