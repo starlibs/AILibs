@@ -208,8 +208,8 @@ public class SearchVisualizationPanel<T> extends JPanel {
 	@Subscribe
 	public synchronized void receiveGraphInitEvent(GraphInitializedEvent<T> e) {
 		try {
-			if (root != null)
-				throw new UnsupportedOperationException("Cannot initialize the graph for a second time!");
+//			if (root != null)
+//				throw new UnsupportedOperationException("Cannot initialize the graph for a second time!");
 			root = e.getRoot();
 			if (root == null)
 				throw new IllegalArgumentException("Root must not be NULL");

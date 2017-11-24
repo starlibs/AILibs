@@ -130,6 +130,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 	 */
 	protected void initGraph() {
 		if (!initialized) {
+			//TODO
 			initialized = true;
 			if (rootGenerator instanceof MultipleRootGenerator) {
 				Collection<Node<T, V>> roots = ((MultipleRootGenerator<T>) rootGenerator).getRoots().stream().map(n -> newNode(null, n)).collect(Collectors.toList());
@@ -339,7 +340,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 			// }
 		}
 		ext2int.put(t2, newNode);
-
+		//TODO
 		/* send events for this new node */
 		if (parent == null) {
 			this.graphEventBus.post(new GraphInitializedEvent<Node<T, V>>(newNode));

@@ -1,3 +1,4 @@
+
 package jaicore.search.algorithms.standard.npuzzle;
 
 import static org.junit.Assert.assertNotNull;
