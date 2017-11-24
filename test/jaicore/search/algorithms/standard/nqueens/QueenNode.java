@@ -202,4 +202,29 @@ public class QueenNode {
 	public int getNumberOfQueens() {
 		return positions.size();
 	}
+	
+	/**
+	 * Returns the number of attacked cells of the current boardconfiguration
+	 * @return	
+	 * 		The number of attacked cells.
+	 */
+	public int getNumberOfAttackedCells() {
+		int attackedCells = positions.size() * dimension;
+		for(int i = positions.size(); i < dimension; i++) {
+			for(int j  =0 ; j < dimension; j++) {
+				if(this.attack(i, j))
+					attackedCells ++;
+			}
+		}
+		return attackedCells;
+	}
+	
+	public int getNumberOfAttackedCellsInNextRow() {
+		int attackedCells = 0;
+		for(int i = 0; i < dimension; i++) {
+			if(this.attack(dimension, i))
+				attackedCells ++;
+		}
+		return attackedCells;
+	}
 }
