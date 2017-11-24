@@ -20,9 +20,9 @@ public class NPuzzleTester {
 		 */
 		
 		
-		NPuzzleGenerator gen = new NPuzzleGenerator(3,1000);
-//		NPuzzleRedundantGenerator gen = new NPuzzleRedundantGenerator(3,1000);
-//		NPuzzleStarGenerator gen = new NPuzzleGenerator(3,1000);
+		NPuzzleGenerator gen = new NPuzzleGenerator(3,4);
+//		NPuzzleRedundantGenerator gen = new NPuzzleRedundantGenerator(3,4);
+//		NPuzzleStarGenerator gen = new NPuzzleGenerator(3,4);
 		
 		
 		

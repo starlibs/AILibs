@@ -8,6 +8,7 @@ import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.core.NodeType;
 import jaicore.search.structure.graphgenerator.MultipleRootGenerator;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
+import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 public class NQueenGenerator implements GraphGenerator<QueenNode,String> {
@@ -19,15 +20,20 @@ public class NQueenGenerator implements GraphGenerator<QueenNode,String> {
 		this.dimension = dimension;		
 	}
 
+//	@Override
+//	public MultipleRootGenerator<QueenNode> getRootGenerator() {
+//		return () ->{
+//			List<QueenNode> l = new ArrayList<>();
+//			for(int i = 0; i < dimension; i++) {
+//				l.add(new QueenNode(0,i, dimension));
+//			}
+//			return l;
+//		};
+//	}
+	
 	@Override
-	public MultipleRootGenerator<QueenNode> getRootGenerator() {
-		return () ->{
-			List<QueenNode> l = new ArrayList<>();
-			for(int i = 0; i < dimension; i++) {
-				l.add(new QueenNode(0,i, dimension));
-			}
-			return l;
-		};
+	public SingleRootGenerator<QueenNode> getRootGenerator(){
+		return () ->  new QueenNode(dimension);
 	}
 
 	@Override

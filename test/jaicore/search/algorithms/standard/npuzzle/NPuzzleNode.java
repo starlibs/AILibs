@@ -197,7 +197,8 @@ public class NPuzzleNode {
 				if(i == board.length -1 && j == board.length -1)
 					x = 0;
 				
-				if(x != i*board.length + j+1 && x != 0)
+				
+				if(x != board[i][j])
 					wrongTiles ++;
 				
 				x++;

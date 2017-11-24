@@ -96,6 +96,25 @@ public class QueenNode {
 	
 	int dimension;
 	
+	/**
+	 * Creates a QueenNode with a empty board
+	 * @param dimension
+	 * 		The dimension of the board.
+	 */
+	public QueenNode(int dimension) {
+		this.positions = new ArrayList<>();
+		this.dimension = dimension;
+	}
+	
+	/**
+	 * Creates a QueenNode with one Queen on it
+	 * @param x
+	 * 	The row position of the queen.
+	 * @param y
+	 * 	The column position of the queen.
+	 * @param dimension
+	 * 	The dimension of the board.
+	 */
 	public QueenNode(int x, int y, int dimension) {
 		positions = new ArrayList<>();
 		positions.add(new Position(x, y));
@@ -103,6 +122,17 @@ public class QueenNode {
 		
 	}
 	
+	/**
+	 * Creates a QueenNode with exiting positions of other queens
+	 * @param pos
+	 * 		The  positions of the other queens.
+	 * @param x
+	 * 		The row position of the newly placed queen.
+	 * @param y
+	 * 		The column position of the newly placed queen.
+	 * @param dimension
+	 * 		The dimension of the board.
+	 */
 	public QueenNode(List<Position> pos, int x, int y, int dimension) {
 		for(Position p:pos)
 			this.positions.add(new Position(p));
@@ -111,6 +141,15 @@ public class QueenNode {
 		this.dimension = dimension;
 	}
 	
+	/**
+	 * Creates a new QueenNode out of another QueenNode to add a new queen.
+	 * @param n
+	 * 		The old QueenNode.
+	 * @param x
+	 * 		The row position of the new queen.
+	 * @param y
+	 * 		The column position of the new queen.
+	 */
 	public QueenNode(QueenNode n, int x, int y) {
 		//Cloning the list
 		this.positions = new ArrayList<>(n.getPositions().size());
@@ -122,6 +161,8 @@ public class QueenNode {
 	}
 	
 	
+
+
 	public List<Position> getPositions(){
 		return this.positions;
 	}
@@ -156,6 +197,15 @@ public class QueenNode {
 		return s;
 	}
 	
+	/**
+	 * Checks if a cell is attacked by the queens on the board
+	 * @param i
+	 * 		The row of the cell to be checked.
+	 * @param j
+	 * 		The collumn of the cell to be checked.
+	 * @return
+	 * 		<code>true</code> if the cell is attacked, <code>false</code> otherwise.
+	 */
 	public boolean attack(int i, int j) {
 		for(Position p: positions)
 			if(p.attack(i, j, dimension))
@@ -219,6 +269,11 @@ public class QueenNode {
 		return attackedCells;
 	}
 	
+	/**
+	 * Returns the number of attacked cells in the next free row from top down.
+	 * @return
+	 * 		The number of attacked cells in the next row.
+	 */
 	public int getNumberOfAttackedCellsInNextRow() {
 		int attackedCells = 0;
 		for(int i = 0; i < dimension; i++) {
