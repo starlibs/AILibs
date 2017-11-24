@@ -47,6 +47,5 @@ public class NPuzzleRedundantNode extends NPuzzleNode {
 	public String getMoves() {
 		return this.moves;
 	}
-
 	
 }

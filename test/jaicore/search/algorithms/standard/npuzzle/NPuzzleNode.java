@@ -184,5 +184,29 @@ public class NPuzzleNode {
 	}
 	
 	
+	/**
+	 * Returns the number of wrongly placed tiles
+	 * @return
+	 * 		The number of wrongly placed tiles.
+	 */
+	public int getNumberOfWrongTiles() {
+		int wrongTiles = 0;
+		int x = 1;
+		for(int i = 0; i < board.length; i++) {
+			for(int j = 0; j < board.length; j++) {
+				if(i == board.length -1 && j == board.length -1)
+					x = 0;
+				
+				if(x != i*board.length + j+1 && x != 0)
+					wrongTiles ++;
+				
+				x++;
+			}
+		}
+		
+		return wrongTiles;
+	}
+	
+	
 	
 }
