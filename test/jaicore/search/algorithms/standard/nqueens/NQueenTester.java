@@ -15,7 +15,7 @@ public class NQueenTester {
 	
 	
 	public static void main(String [] args) {
-		int x = 4;
+		int x = 8;
 		if(args.length != 0)
 			x = Integer.parseInt(args[0]);
 		

@@ -20,21 +20,21 @@ public class NQueenGenerator implements GraphGenerator<QueenNode,String> {
 		this.dimension = dimension;		
 	}
 
-	@Override
-	public MultipleRootGenerator<QueenNode> getRootGenerator() {
-		return () ->{
-			List<QueenNode> l = new ArrayList<>();
-			for(int i = 0; i < dimension; i++) {
-				l.add(new QueenNode(0,i, dimension));
-			}
-			return l;
-		};
-	}
-	
 //	@Override
-//	public SingleRootGenerator<QueenNode> getRootGenerator(){
-//		return () ->  new QueenNode(dimension);
+//	public MultipleRootGenerator<QueenNode> getRootGenerator() {
+//		return () ->{
+//			List<QueenNode> l = new ArrayList<>();
+//			for(int i = 0; i < dimension; i++) {
+//				l.add(new QueenNode(0,i, dimension));
+//			}
+//			return l;
+//		};
 //	}
+	
+	@Override
+	public SingleRootGenerator<QueenNode> getRootGenerator(){
+		return () ->  new QueenNode(dimension);
+	}
 
 	@Override
 	public SuccessorGenerator<QueenNode, String> getSuccessorGenerator() {

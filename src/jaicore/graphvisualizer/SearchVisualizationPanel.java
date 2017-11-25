@@ -7,6 +7,8 @@ import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -44,7 +46,7 @@ public class SearchVisualizationPanel<T> extends JPanel {
 
 	private int nodeCounter = 0;
 
-	private T root;
+	private List<T> roots;
 
 	private final Graph graph;
 	private final Viewer viewer;
@@ -63,6 +65,8 @@ public class SearchVisualizationPanel<T> extends JPanel {
 		super();
 		this.eventSupplier = eventSupplier;
 		this.eventSupplier.register(this);
+		
+		this.roots = new ArrayList<T>();
 
 		/* setup layout for the jPanel */
 		setLayout(new OverlayLayout(this));
@@ -208,13 +212,14 @@ public class SearchVisualizationPanel<T> extends JPanel {
 	@Subscribe
 	public synchronized void receiveGraphInitEvent(GraphInitializedEvent<T> e) {
 		try {
-//			if (root != null)
+
+//			if (roots != null)
 //				throw new UnsupportedOperationException("Cannot initialize the graph for a second time!");
-			root = e.getRoot();
-			if (root == null)
+			roots.add(e.getRoot());
+			if (roots == null)
 				throw new IllegalArgumentException("Root must not be NULL");
-			newNode(root);
-			ext2intNodeMap.get(root).addAttribute("ui.class", "root");
+			newNode(roots.get(roots.size()-1));
+			ext2intNodeMap.get(roots.get(roots.size()-1)).addAttribute("ui.class", "root");
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
@@ -235,7 +240,7 @@ public class SearchVisualizationPanel<T> extends JPanel {
 	@Subscribe
 	public synchronized void receiveNodeTypeSwitchEvent(NodeTypeSwitchEvent<T> e) {
 		try {
-			if (e.getNode() == root)
+			if (roots.contains(e.getNode()))
 				return;
 			if (!ext2intNodeMap.containsKey(e.getNode()))
 				throw new NoSuchElementException("Cannot switch type of node " + e.getNode() + ". This node has not been reached previously.");
