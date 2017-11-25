@@ -57,7 +57,7 @@ public class AStarTester {
 				return false;
 			}
 		};
-		AStar<TestNode,String> astar = new AStar<>(gen, (n1, n2) -> n2.getPoint().value - n1.getPoint().value, n -> 0);
+		AStar<TestNode,String> astar = new AStar<>(gen, (n1, n2) -> n2.getPoint().value - n1.getPoint().value, n -> 0.0);
 		
 		
 		/* find solution */

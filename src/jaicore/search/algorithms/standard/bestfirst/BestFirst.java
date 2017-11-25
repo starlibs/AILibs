@@ -9,9 +9,9 @@ import jaicore.search.structure.core.GraphGenerator;
  *
  * @author Felix Mohr
  */
-public class BestFirst<T,A> extends ORGraphSearch<T,A,Integer> {
+public class BestFirst<T,A> extends ORGraphSearch<T,A,Double> {
 
-	public BestFirst(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, Integer> pNodeEvaluator) {
+	public BestFirst(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, Double> pNodeEvaluator) {
 		super(graphGenerator, pNodeEvaluator);
 	}
 }

@@ -27,13 +27,13 @@ public class NPuzzleTester {
 		
 		
 		
-		BestFirst<NPuzzleNode, String> search = new BestFirst<>(gen, n-> n.getPoint().getNumberOfWrongTiles());
+		BestFirst<NPuzzleNode, String> search = new BestFirst<>(gen, n-> (double)n.getPoint().getNumberOfWrongTiles());
 //		BestFirst<NPuzzleRedundantNode, String> search = new BestFirst<>(gen, n-> n.getPoint().getNumberOfWrongTiles());
 //		BestFirst<NPuzzleStarNode, String> search = new BestFirst<>(gen, n-> n.getPoint().getNumberOfWrongTiles());
 
 		
 		
-		SimpleGraphVisualizationWindow<Node<NPuzzleNode,Integer>> win = new SimpleGraphVisualizationWindow<>(search.getEventBus());
+		SimpleGraphVisualizationWindow<Node<NPuzzleNode,Double>> win = new SimpleGraphVisualizationWindow<>(search.getEventBus());
 //		SimpleGraphVisualizationWindow<Node<NPuzzleRedundantNode,Integer>> win = new SimpleGraphVisualizationWindow<>(search.getEventBus());
 //		SimpleGraphVisualizationWindow<Node<NPuzzleStarNode,Integer>> win = new SimpleGraphVisualizationWindow<>(search.getEventBus());
 	

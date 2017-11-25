@@ -60,7 +60,7 @@ public class BestFirstTester {
 			
 		};
 		
-		BestFirst<TestNode,String> bf = new BestFirst<>(gen, n -> (int)Math.round(Math.random() * 1000));
+		BestFirst<TestNode,String> bf = new BestFirst<>(gen, n -> (double)Math.round(Math.random() * 1000));
 		new SimpleGraphVisualizationWindow<>(bf.getEventBus()).getPanel().setTooltipGenerator(n -> String.valueOf(n.getInternalLabel()));
 		
 		/* find solution */

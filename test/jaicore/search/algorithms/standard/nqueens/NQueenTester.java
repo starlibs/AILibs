@@ -21,10 +21,10 @@ public class NQueenTester {
 		
 		NQueenGenerator gen = new NQueenGenerator(x);
 		
-		BestFirst<QueenNode, String> search = new BestFirst<QueenNode,String>(gen, n-> n.getPoint().getNumberOfAttackedCellsInNextRow());
+		BestFirst<QueenNode, String> search = new BestFirst<QueenNode,String>(gen, n-> (double)n.getPoint().getNumberOfAttackedCellsInNextRow());
 		
 //		new SimpleGraphVisualizationWindow<>(search.getEventBus()).getPanel().setTooltipGenerator(n->n.getPoint().toString());
-		SimpleGraphVisualizationWindow<Node<QueenNode,Integer>> win = new SimpleGraphVisualizationWindow<>(search.getEventBus());
+		SimpleGraphVisualizationWindow<Node<QueenNode,Double>> win = new SimpleGraphVisualizationWindow<>(search.getEventBus());
 		win.getPanel().setTooltipGenerator(n->n.getPoint().toString());
 		
 		/* find solution */

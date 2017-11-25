@@ -39,7 +39,7 @@ public class CEOCTFDTester {
 		System.out.println(" done");
 		System.out.print("Starting Search Process");
 		long start = System.currentTimeMillis();
-		AStar<TFDNode,String> astar = new AStar<>(generator, (n1,n2) -> -1 * (Math.random() * 1000), n -> 0);
+		AStar<TFDNode,String> astar = new AStar<>(generator, (n1,n2) -> -1 * (Math.random() * 1000), n -> 0.0);
 		
 		new SimpleGraphVisualizationWindow<>(astar.getEventBus()).getPanel().setTooltipGenerator(new TFDTooltipGenerator());
 	
