@@ -175,6 +175,25 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 	protected boolean terminates() {
 		return open.isEmpty();
 	}
+	
+	/**
+	 * Makes a single expansion and returns solution paths.
+	 * @return
+	 * 		The last found solution path.
+	 */
+	public List<T> nextExpansion() {
+		if(!this.initialized)
+			initGraph();
+		else {
+			if (!solutions.isEmpty())
+				return solutions.poll();
+			if(!terminates())
+				step();
+		}
+		
+		return solutions.isEmpty() ? null : solutions.poll();
+
+	}
 
 	protected void step() {
 		if (beforeSelection()) {
