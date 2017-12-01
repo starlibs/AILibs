@@ -6,6 +6,7 @@ import java.util.Scanner;
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.search.algorithms.standard.core.ORGraphSearch;
 import jaicore.search.structure.core.Node;
+import jaicore.search.structure.core.NodeExpansionDescription;
 
 public class NQueenIterableTester{
 
@@ -28,7 +29,7 @@ public class NQueenIterableTester{
 		List<QueenNode> solution = null;
 		while(solution == null) {
 			//if(key.nextLine()=="n")
-				solution = search.nextExpansion();
+			List<NodeExpansionDescription<QueenNode,String>> expansion = search.nextExpansion();
 			try {
 				Thread.sleep(2000);
 			} catch (InterruptedException e) {
@@ -37,6 +38,8 @@ public class NQueenIterableTester{
 			}
 			
 		}
+		
+		key.close();
 		
 		
 	}

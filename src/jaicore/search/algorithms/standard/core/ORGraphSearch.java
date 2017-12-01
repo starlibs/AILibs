@@ -24,6 +24,7 @@ import jaicore.search.algorithms.interfaces.solutionannotations.SolutionAnnotati
 import jaicore.search.structure.core.GraphEventBus;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
+import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.events.GraphInitializedEvent;
 import jaicore.search.structure.events.NodeReachedEvent;
 import jaicore.search.structure.events.NodeTypeSwitchEvent;
@@ -67,6 +68,8 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 	protected final Map<List<T>, SolutionAnnotation<T, V>> annotationsOfSolutionsReturnedByNodeEvaluator = new HashMap<>();
 	private final Set<T> expanded = new HashSet<>();
 	private final boolean solutionReportingNodeEvaluator;
+	
+	private List<NodeExpansionDescription<T,A>> lastExpansion;
 
 	@SuppressWarnings("unchecked")
 	public ORGraphSearch(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, V> pNodeEvaluator) {
@@ -82,9 +85,12 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 			this.nodeGoalTester = (NodeGoalTester<T>) graphGenerator.getGoalTester();
 			this.pathGoalTester = null;
 		}
-
+		
+		//init lastExpansion with an empty ArrayList
+		lastExpansion = new ArrayList<>();
+		
 		this.nodeEvaluator = pNodeEvaluator;
-
+		
 		/* if the node evaluator is graph dependent, communicate the generator to it */
 		if (pNodeEvaluator instanceof DecoratingNodeEvaluator<?, ?>) {
 			DecoratingNodeEvaluator<T, V> castedEvaluator = (DecoratingNodeEvaluator<T, V>) pNodeEvaluator;
@@ -181,21 +187,21 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 	 * @return
 	 * 		The last found solution path.
 	 */
-	public List<T> nextExpansion() {
+	public List<NodeExpansionDescription<T,A>> nextExpansion() {
 		if(!this.initialized)
 			initGraph();
 		else {
-			if (!solutions.isEmpty())
-				return solutions.poll();
+			
 			if(!terminates())
 				step();
 		}
 		
-		return solutions.isEmpty() ? null : solutions.poll();
+		return lastExpansion;
 
 	}
 
 	protected void step() {
+		lastExpansion.clear();
 		if (beforeSelection()) {
 			Node<T, V> nodeToExpand = nextNode();
 			assert nodeToExpand == null || !expanded.contains(nodeToExpand.getPoint()) : "Node selected for expansion already has been expanded: " + nodeToExpand;
@@ -219,6 +225,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 
 		/* compute successors */
 		successorGenerator.generateSuccessors(expandedNodeInternal.getPoint()).stream().forEach(successorDescription -> {
+			lastExpansion.add(successorDescription);
 			Node<T, V> newNode = newNode(expandedNodeInternal, successorDescription.getTo());
 
 			/* update creation counter */
@@ -242,7 +249,6 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 				}
 			}
 		});
-
 		/* update statistics, send closed notifications, and possibly return a solution */
 		expandedCounter++;
 		graphEventBus.post(new NodeTypeSwitchEvent<Node<T, V>>(expandedNodeInternal, "or_closed"));
