@@ -1,7 +1,11 @@
 package jaicore.search.algorithms.standard.nqueens;
 
+import static org.junit.Assert.assertNotNull;
+
 import java.util.List;
 import java.util.Scanner;
+
+import org.junit.Test;
 
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.search.algorithms.standard.core.ORGraphSearch;
@@ -10,10 +14,9 @@ import jaicore.search.structure.core.NodeExpansionDescription;
 
 public class NQueenIterableTester{
 
-	public static void main(String[] args) {
+	@Test
+	public void test(){
 		int x = 4;
-		if (args.length != 0)
-			x = Integer.parseInt(args[0]);
 		
 		NQueenGenerator gen = new NQueenGenerator(x);
 		
@@ -31,16 +34,14 @@ public class NQueenIterableTester{
 			//if(key.nextLine()=="n")
 			List<NodeExpansionDescription<QueenNode,String>> expansion = search.nextExpansion();
 			try {
-				Thread.sleep(2000);
+				assertNotNull(expansion);
+				Thread.sleep(200);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			
 		}
-		
-		key.close();
-		
 		
 	}
 

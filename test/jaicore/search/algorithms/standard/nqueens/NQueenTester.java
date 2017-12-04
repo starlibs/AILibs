@@ -4,6 +4,8 @@ import static org.junit.Assert.assertNotNull;
 
 import java.util.List;
 
+import org.junit.Test;
+
 import jaicore.basic.PerformanceLogger;
 import jaicore.basic.PerformanceLogger.PerformanceMeasure;
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
@@ -13,12 +15,10 @@ import jaicore.search.structure.core.Node;
 public class NQueenTester {
 	
 	
-	
-	public static void main(String [] args) {
+	@Test
+	public void test(){
 		int x = 8;
-		if(args.length != 0)
-			x = Integer.parseInt(args[0]);
-		
+				
 		NQueenGenerator gen = new NQueenGenerator(x);
 		
 		BestFirst<QueenNode, String> search = new BestFirst<QueenNode,String>(gen, n-> (double)n.getPoint().getNumberOfAttackedCellsInNextRow());
