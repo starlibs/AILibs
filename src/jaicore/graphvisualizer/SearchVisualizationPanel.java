@@ -5,14 +5,17 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.MouseInfo;
 import java.awt.Point;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.OverlayLayout;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
@@ -52,9 +55,10 @@ public class SearchVisualizationPanel<T> extends JPanel {
 	private final ViewerPipe viewerPipe;
 
 	private final Container graphContainer = new Container();
-	private final Container tooltipContainer = new Container();
+	private final JFrame tooltipContainer = new JFrame();
 	private final JLabel tooltipLabel = new JLabel();
-	private Timer t = null;
+	private final JScrollPane scrollPane = new JScrollPane(tooltipLabel);
+	private Timer tooltipTimer = null;
 	
 	private final ConcurrentMap<T, Node> ext2intNodeMap = new ConcurrentHashMap<>();
 	private final ConcurrentMap<Node, T> int2extNodeMap = new ConcurrentHashMap<>();
@@ -77,20 +81,24 @@ public class SearchVisualizationPanel<T> extends JPanel {
 		cam.setAutoFitView(true);
 
 		/* add containers to canvas */
-		tooltipContainer.setLayout(null);
-		add(tooltipContainer);
+		tooltipContainer.setLayout(new BorderLayout());
+		tooltipContainer.setMinimumSize(new Dimension(100, 100));
+		Dimension d = new Dimension(Toolkit.getDefaultToolkit().getScreenSize());
+		tooltipContainer.setMaximumSize(d);
+		tooltipContainer.setSize(d);
+		tooltipContainer.getContentPane().add(scrollPane, BorderLayout.CENTER);
 		graphContainer.setLayout(new BorderLayout());
 		graphContainer.add((JPanel) this.view, BorderLayout.CENTER);
 		add(graphContainer);
 		
 		/* add timer for disappearing tooltips */
-		this.t = new Timer(20000, new ActionListener() {
+		this.tooltipTimer = new Timer(20000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-            	SearchVisualizationPanel.this.tooltipLabel.setVisible(false);
+//            	SearchVisualizationPanel.this.tooltipContainer.setVisible(false);
             }
         });
-		this.t.setRepeats(false);
+		this.tooltipTimer.setRepeats(false);
 
 		/* add listener for mouse events */
 		viewerPipe = this.viewer.newViewerPipe();
@@ -131,12 +139,11 @@ public class SearchVisualizationPanel<T> extends JPanel {
 				    public void run() {
 				    	/* generate HTML for tooltip and set it */
 						StringBuilder sb = new StringBuilder();
-						sb.append("<html><div style='padding: 5px; background: #ffffcc; border: 1px solid black;'>");
-						T node = SearchVisualizationPanel.this.getNodeOfString(arg0);
-						sb.append(SearchVisualizationPanel.this.tooltipGenerator.getTooltip(node));
+//						sb.append("<html><div style='padding: 5px; background: #ffffcc; border: 1px solid black;'>");
+						sb.append("<html><div style='padding: 5px;'>");
+						sb.append(SearchVisualizationPanel.this.tooltipGenerator.getTooltip(SearchVisualizationPanel.this.getNodeOfString(arg0)));
 						sb.append("</div></html>");
 						SearchVisualizationPanel.this.tooltipLabel.setText(sb.toString());
-						SearchVisualizationPanel.this.tooltipContainer.add(SearchVisualizationPanel.this.tooltipLabel);
 
 						/* determine desired position for tooltip box */
 						final Point mousePosition = MouseInfo.getPointerInfo().getLocation();
@@ -165,10 +172,23 @@ public class SearchVisualizationPanel<T> extends JPanel {
 						if (rightOutside) {
 							position.x = mousePosition.x - 15 - size.width;
 						}
-						SearchVisualizationPanel.this.tooltipLabel.setBounds(position.x, position.y, size.width, size.height);
+//						SearchVisualizationPanel.this.tooltipLabel.setBounds(position.x, position.y, size.width, size.height);
 
-						SearchVisualizationPanel.this.tooltipLabel.setVisible(true);
-						SearchVisualizationPanel.this.t.restart();
+						SearchVisualizationPanel.this.scrollPane.getViewport().setViewPosition(new Point(0,0));
+						SearchVisualizationPanel.this.scrollPane.revalidate();
+						Dimension d = SearchVisualizationPanel.this.scrollPane.getPreferredSize();
+						d.height += 50;
+						d.width += 50;
+						if ( d.height > (SearchVisualizationPanel.this.tooltipContainer.getMaximumSize().height-50) )
+							d.height = (SearchVisualizationPanel.this.tooltipContainer.getMaximumSize().height-50);
+						if ( d.width > (SearchVisualizationPanel.this.tooltipContainer.getMaximumSize().width-50) )
+							d.width = (SearchVisualizationPanel.this.tooltipContainer.getMaximumSize().width-50);
+						SearchVisualizationPanel.this.tooltipContainer.setSize(d);
+						SearchVisualizationPanel.this.tooltipContainer.repaint();
+		            	SearchVisualizationPanel.this.tooltipContainer.setExtendedState(0);
+		            	
+		            	SearchVisualizationPanel.this.tooltipContainer.setVisible(true);
+		            	SearchVisualizationPanel.this.tooltipTimer.restart();
 					}
 				};
 								
@@ -202,7 +222,8 @@ public class SearchVisualizationPanel<T> extends JPanel {
 		if (toInt == null)
 			throw new IllegalArgumentException("Cannot insert edge between " + from + " and " + to + " since node " + to + " does not exist.");
 		final String edgeId = fromInt.getId() + "-" + toInt.getId();
-		return this.graph.addEdge(edgeId, fromInt, toInt, true);
+//TODO		return this.graph.addEdge(edgeId, fromInt, toInt, true);
+		return this.graph.addEdge(edgeId, fromInt, toInt, false);
 	}
 
 	@Subscribe
