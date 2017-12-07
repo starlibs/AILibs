@@ -43,7 +43,7 @@ public class NQueenGenerator implements GraphGenerator<QueenNode,String> {
 			int currentRow = n.getPositions().size();
 			for(int i = 0; i < dimension; i++) {
 				if(! n.attack(currentRow, i)){
-					l.add(new NodeExpansionDescription<>(n, new QueenNode(n, currentRow, i), "edge label", NodeType.OR));
+					l.add(new NodeExpansionDescription<>(n, new QueenNode(n, i), "edge label", NodeType.OR));
 				}
 			}
 			return l;

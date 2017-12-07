@@ -17,7 +17,7 @@ public class NQueenTester {
 	
 	@Test
 	public void test(){
-		int x = 8;
+		int x = 4;
 				
 		NQueenGenerator gen = new NQueenGenerator(x);
 		

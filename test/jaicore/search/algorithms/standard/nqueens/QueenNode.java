@@ -7,92 +7,92 @@ public class QueenNode {
 	/*
 	 * Helperclass to store the positions of the queen.
 	 */
-	public class Position {
-		int x;
-		int y;
-		
-		public Position(int x, int y) {
-			this.x= x;
-			this.y = y;
-		}
-		
-		public Position(Position pos) {
-			this.x = pos.getX();
-			this.y = pos.getY();
-		}
+//	public class Position {
+//		int x;
+//		int y;
+//		
+//		public Position(int x, int y) {
+//			this.x= x;
+//			this.y = y;
+//		}
+//		
+//		public Position(Position pos) {
+//			this.x = pos.getX();
+//			this.y = pos.getY();
+//		}
+//
+//		public int getX() {
+//			return x;
+//		}
+//
+//
+//		public int getY() {
+//			return y;
+//		}
+//
+//		public boolean equals(Object obj) {
+//			Position p =(Position) obj;
+//			if(p.getX() == x && p.getY() == y)
+//				return true;
+//			else
+//				return false;
+//		}
+//		
+//		@Override
+//		public String toString() {
+//			return "("+x+"," + y+ ")";
+//		}
+//
+//		public boolean attack(int i, int j, int dimension ) {
+//			if(i == x || j == y || isOnDiag(i,j, dimension))
+//				return true;
+//			return false;
+//		}
+//
+//		private boolean isOnDiag(int i, int j, int dimension) {
+//			int ex = x;
+//			int ey = y;
+//			//left up
+//			while(ex >= 0 && ey >= 0) {
+//				ex --;
+//				ey --;
+//				if(ex == i && ey == j) 
+//					return true;				
+//			}
+//			//right up
+//			ex = x;
+//			ey = y;
+//			while(ex >= 0 && ey < dimension) {
+//				ex --;
+//				ey ++;
+//				if(ex == i && ey == j) 
+//					return true;				
+//			}
+//			//right down
+//			ex = x;
+//			ey = y;
+//			while(ex <dimension  && ey < dimension) {
+//				ex ++;
+//				ey ++;
+//				if(ex == i && ey == j) 
+//					return true;
+//			}
+//			//left down
+//			ex = x;
+//			ey = y;
+//			while(ex < dimension && ey >= 0) {
+//				ex ++;
+//				ey --;
+//				if(ex == i && ey == j) 
+//					return true;				
+//			}
+//			return false;
+//		}
+//		
+//		
+//	}
 
-		public int getX() {
-			return x;
-		}
-
-
-		public int getY() {
-			return y;
-		}
-
-		public boolean equals(Object obj) {
-			Position p =(Position) obj;
-			if(p.getX() == x && p.getY() == y)
-				return true;
-			else
-				return false;
-		}
-		
-		@Override
-		public String toString() {
-			return "("+x+"," + y+ ")";
-		}
-
-		public boolean attack(int i, int j, int dimension ) {
-			if(i == x || j == y || isOnDiag(i,j, dimension))
-				return true;
-			return false;
-		}
-
-		private boolean isOnDiag(int i, int j, int dimension) {
-			int ex = x;
-			int ey = y;
-			//left up
-			while(ex >= 0 && ey >= 0) {
-				ex --;
-				ey --;
-				if(ex == i && ey == j) 
-					return true;				
-			}
-			//right up
-			ex = x;
-			ey = y;
-			while(ex >= 0 && ey < dimension) {
-				ex --;
-				ey ++;
-				if(ex == i && ey == j) 
-					return true;				
-			}
-			//right down
-			ex = x;
-			ey = y;
-			while(ex <dimension  && ey < dimension) {
-				ex ++;
-				ey ++;
-				if(ex == i && ey == j) 
-					return true;
-			}
-			//left down
-			ex = x;
-			ey = y;
-			while(ex < dimension && ey >= 0) {
-				ex ++;
-				ey --;
-				if(ex == i && ey == j) 
-					return true;				
-			}
-			return false;
-		}
-		
-		
-	}
-
-	List<Position> positions;
+	List<Integer> positions;
 	
 	int dimension;
 	
@@ -117,9 +117,28 @@ public class QueenNode {
 	 */
 	public QueenNode(int x, int y, int dimension) {
 		positions = new ArrayList<>();
-		positions.add(new Position(x, y));
+//		positions.add(new Position(x, y));
+		positions.add(x,y);
 		this.dimension = dimension;
 		
+	}
+	
+	/**
+	 * Creates a QueenNode with exiting positions of other queens
+	 * @param pos
+	 * 		The  positions of the other queens.
+	 * @param y
+	 * 		The column position of the newly placed queen.
+	 * @param dimension
+	 * 		The dimension of the board.
+	 */
+	public QueenNode(List<Integer> pos,int y, int dimension) {
+		this.positions = new ArrayList<>();
+		for(Integer p:pos)
+			this.positions.add(new Integer(p));
+//		positions.add(new Position(x, y));
+		positions.add(y);
+		this.dimension = dimension;
 	}
 	
 	/**
@@ -133,11 +152,12 @@ public class QueenNode {
 	 * @param dimension
 	 * 		The dimension of the board.
 	 */
-	public QueenNode(List<Position> pos, int x, int y, int dimension) {
-		for(Position p:pos)
-			this.positions.add(new Position(p));
+	public QueenNode(List<Integer> pos, int x, int y, int dimension) {
+		for(Integer p:pos)
+			this.positions.add(new Integer(p));
 		this.positions = pos;
-		positions.add(new Position(x, y));
+//		positions.add(new Position(x, y));
+		positions.add(x,y);
 		this.dimension = dimension;
 	}
 	
@@ -145,25 +165,23 @@ public class QueenNode {
 	 * Creates a new QueenNode out of another QueenNode to add a new queen.
 	 * @param n
 	 * 		The old QueenNode.
-	 * @param x
-	 * 		The row position of the new queen.
 	 * @param y
 	 * 		The column position of the new queen.
 	 */
-	public QueenNode(QueenNode n, int x, int y) {
+	public QueenNode(QueenNode n, int y) {
 		//Cloning the list
 		this.positions = new ArrayList<>(n.getPositions().size());
-		for(Position p : n.getPositions())
-			this.positions.add(new Position(p));
+		for(Integer p : n.getPositions())
+			this.positions.add(new Integer(p));
 		
-		positions.add(new Position(x, y));
+		positions.add( y);
 		this.dimension = n.getDimension();
 	}
 	
 	
 
 
-	public List<Position> getPositions(){
+	public List<Integer> getPositions(){
 		return this.positions;
 	}
 	
@@ -181,7 +199,8 @@ public class QueenNode {
 		
 		for(int i = 0; i < dimension; i++) {
 			for(int j = 0; j < dimension; j++) {
-				if(positions.contains(new Position(i,j)))
+//				if(positions.contains(new Position(i,j)))
+				if(positions.get(i) == j)
 					s+= " Q |";
 				else
 					s+= "   |";
@@ -207,12 +226,22 @@ public class QueenNode {
 	 * 		<code>true</code> if the cell is attacked, <code>false</code> otherwise.
 	 */
 	public boolean attack(int i, int j) {
-		for(Position p: positions)
-			if(p.attack(i, j, dimension))
+//		for(Position p: positions)
+//			if(p.attack(i, j, dimension))
+//				return true;
+//	
+//		return false;
+		for(Integer p : positions) {
+			if(j == p)
 				return true;
-	
+			int x = Math.abs(i-this.positions.indexOf(p));
+			if(j == p+x || p-x == j)
+				return true;
+		}
 		return false;
 	}
+	
+	
 	public String toStringAttack() {
 		String s = "";
 		for(int i = 0; i< dimension; i++) 
@@ -222,16 +251,12 @@ public class QueenNode {
 		
 		for(int i = 0; i < dimension; i++) {
 			for(int j = 0; j < dimension; j++) {
-				if(positions.contains(new Position(i,j)))
+//				if(positions.contains(new Position(i,j)))
+				if(positions.get(i)== j)
 					s+= " Q |";
 				
 				else {
-					boolean attack = false;
-					for(Position p : positions) {
-						attack = attack(i,j);
-						if(attack)
-							break;
-					}
+					boolean attack = attack(i,j);					
 					if(attack)
 						s+= " O |";
 					else
@@ -277,9 +302,45 @@ public class QueenNode {
 	public int getNumberOfAttackedCellsInNextRow() {
 		int attackedCells = 0;
 		for(int i = 0; i < dimension; i++) {
-			if(this.attack(dimension, i))
+			if(this.attack(dimension-1, i))
 				attackedCells ++;
 		}
 		return attackedCells;
 	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + dimension;
+		result = prime * result + ((positions == null) ? 0 : positions.hashCode());
+		return result;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		QueenNode other = (QueenNode) obj;
+		if (dimension != other.dimension)
+			return false;
+		if (positions == null) {
+			if (other.positions != null)
+				return false;
+		} else if (!positions.equals(other.positions))
+			return false;
+		return true;
+	}
+
+	
 }
