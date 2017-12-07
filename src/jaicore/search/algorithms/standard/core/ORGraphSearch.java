@@ -70,6 +70,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 	private final boolean solutionReportingNodeEvaluator;
 	
 	private List<NodeExpansionDescription<T,A>> lastExpansion;
+	private ParentDiscarding parentDiscarding;
 
 	@SuppressWarnings("unchecked")
 	public ORGraphSearch(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, V> pNodeEvaluator) {
@@ -88,6 +89,8 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 		
 		//init lastExpansion with an empty ArrayList
 		lastExpansion = new ArrayList<>();
+		//init parentDiscarding with none
+		parentDiscarding = ParentDiscarding.NONE;
 		
 		this.nodeEvaluator = pNodeEvaluator;
 		

@@ -6,12 +6,19 @@ import jaicore.search.structure.graphgenerator.NodeGoalTester;
 
 public class NPuzzleStarGenerator extends NPuzzleGenerator {
 	
-	Set<String> needed;
+	private Set<String> needed;
 
+	public NPuzzleStarGenerator(int dim) {
+		super(dim);
+	}
+	
 	public NPuzzleStarGenerator(int dim, int shuffle) {
 		super(dim, shuffle);
 	}
 	
+	public NPuzzleStarGenerator(int[][] board, int emptyX, int emptyY) {
+		super(board, emptyX, emptyY);
+	}
 	
 	@Override
 	public NodeGoalTester<NPuzzleNode> getGoalTester() {

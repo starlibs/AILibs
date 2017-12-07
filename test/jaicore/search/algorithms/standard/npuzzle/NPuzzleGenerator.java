@@ -19,18 +19,29 @@ import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 public class NPuzzleGenerator implements GraphGenerator<NPuzzleNode, String>{
 	
 	
-	int dimension;
-	int shuffle;
+	protected int dimension;
+	private NPuzzleNode root;
 	
+	public NPuzzleGenerator(int dim) {
+		this.dimension = dim;
+		this.root = new NPuzzleNode(dim);
+	}
 	
 	public NPuzzleGenerator(int dim, int shuffle) {
 		this.dimension = dim;
-		this.shuffle = shuffle;
+		this.root = new NPuzzleNode(dim, shuffle);
 	}
+	
+	public NPuzzleGenerator(int[][] board, int emptyX, int emptyY) {
+		this.dimension = board.length;
+		this.root = new NPuzzleNode(board, emptyX, emptyY);
+	}
+	
+	
 
 	@Override
 	public SingleRootGenerator<NPuzzleNode> getRootGenerator() {
-		return () -> new NPuzzleNode(dimension, shuffle);
+		return () -> root;
 	}
 
 	@Override
@@ -133,9 +144,10 @@ public class NPuzzleGenerator implements GraphGenerator<NPuzzleNode, String>{
 		}
 		
 		int[][] b = new int[dimension][dimension];
+		int[][] board=n.getBoard();
 		for(int i = 0; i< dimension; i++) {
 			for(int j= 0; j < dimension ; j++) {
-				b[i][j] = n.getBoard()[i][j];
+				b[i][j] = board[i][j];
 			}
 		}
 		int eX = n.getEmptyX();

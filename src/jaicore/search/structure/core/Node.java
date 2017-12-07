@@ -28,7 +28,11 @@ public class Node<T, V extends Comparable<V>> implements Serializable, Comparabl
 	public V getInternalLabel() {
 		return internalLabel;
 	}
-
+	
+	public void setParent(Node<T,V> newParent) {
+		this.parent = newParent;
+	}
+	
 	public void setInternalLabel(V internalLabel) {
 		this.internalLabel = internalLabel;
 	}

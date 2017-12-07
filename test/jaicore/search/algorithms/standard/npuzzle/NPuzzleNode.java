@@ -1,6 +1,7 @@
 package jaicore.search.algorithms.standard.npuzzle;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -206,6 +207,71 @@ public class NPuzzleNode {
 		}
 		
 		return wrongTiles;
+	}
+
+	/**
+	 * Returns the steps which are minimal need to reach a goal state
+	 * @return
+	 * 	The number of steps.
+	 */
+	public double getDistance() {
+		double d = 0.0;
+		for(int i = 0; i < board.length; i++) {
+			for(int j = 0;  j < board.length; j++) {
+				int tile = board[i][j];
+				double x = (double)tile / board.length;
+				double y = tile % board.length-1;
+				if(x%1==0)
+					x--;
+				x =Math.floor(x);
+				if (y < 0)
+					y = board.length-1;
+
+				if(tile == 0) {
+					x = board.length-1;
+					y = board.length-1;
+				}
+				double h1 = Math.abs(i-x);
+				double h2 = Math.abs(j-y);
+				double d1 = h1+h2;
+				d+= d1;
+			}
+		}
+		return d;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Arrays.deepHashCode(board);
+		result = prime * result + emptyX;
+		result = prime * result + emptyY;
+		return result;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		NPuzzleNode other = (NPuzzleNode) obj;
+		if (!Arrays.deepEquals(board, other.board))
+			return false;
+		if (emptyX != other.emptyX)
+			return false;
+		if (emptyY != other.emptyY)
+			return false;
+		return true;
 	}
 	
 	
