@@ -13,9 +13,9 @@ import java.util.List;
 public class NPuzzleNode {
 	//board configuration and empty space
 	protected int [][] board;
-	private int emptyX;
-	private int emptyY;
-	private int numberOfMoves;
+	protected int emptyX;
+	protected int emptyY;
+	protected int numberOfMoves;
 	
 	/**
 	 * Constructor for a NPuzzleNode which creates a NPuzzleNode with complete 
@@ -259,8 +259,8 @@ public class NPuzzleNode {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-//		result = prime * result + Arrays.deepHashCode(board);
-		result = prime * result + Arrays.hashCode(board);
+		result = prime * result + Arrays.deepHashCode(board);
+//		result = prime * result + Arrays.hashCode(board);
 		result = prime * result + emptyX;
 		result = prime * result + emptyY;
 		return result;

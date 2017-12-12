@@ -398,6 +398,9 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 
 			// }
 		}
+		//TODO Remove circles
+		if(ext2int.containsKey(t2))
+			return null;
 		ext2int.put(t2, newNode);
 		/* send events for this new node */
 		if (parent == null) {
