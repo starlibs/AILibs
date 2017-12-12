@@ -10,6 +10,7 @@ import jaicore.basic.PerformanceLogger;
 import jaicore.basic.PerformanceLogger.PerformanceMeasure;
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
+import jaicore.search.algorithms.standard.npuzzle.NPuzzleNode;
 import jaicore.search.algorithms.standard.npuzzle.NPuzzleRedundantGenerator;
 import jaicore.search.algorithms.standard.npuzzle.NPuzzleRedundantNode;
 import jaicore.search.structure.core.Node;
@@ -19,15 +20,15 @@ public class NPuzzleRedundantTester {
 	@Test
 	public void test() {
 		NPuzzleRedundantGenerator gen = new NPuzzleRedundantGenerator(3,4);
-		BestFirst<NPuzzleRedundantNode,String> search = new BestFirst<>(gen, n-> (double)n.getPoint().getNumberOfWrongTiles());
+		BestFirst<NPuzzleNode,String> search = new BestFirst<>(gen, n-> (double)n.getPoint().getNumberOfWrongTiles());
 		
-		SimpleGraphVisualizationWindow<Node<NPuzzleRedundantNode,Double>> win = new SimpleGraphVisualizationWindow<>(search.getEventBus());
+		SimpleGraphVisualizationWindow<Node<NPuzzleNode,Double>> win = new SimpleGraphVisualizationWindow<>(search.getEventBus());
 		win.getPanel().setTooltipGenerator(n->n.getPoint().toString());
 		
 		/*search for solution*/
 		PerformanceLogger.logStart("search");
 		
-		List<NPuzzleRedundantNode> solutionPath = search.nextSolution();
+		List<NPuzzleNode> solutionPath = search.nextSolution();
 		
 		PerformanceLogger.logEnd("search");
 		assertNotNull(solutionPath);

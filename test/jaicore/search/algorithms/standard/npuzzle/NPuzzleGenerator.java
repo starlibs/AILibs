@@ -34,7 +34,7 @@ public class NPuzzleGenerator implements GraphGenerator<NPuzzleNode, String>{
 	
 	public NPuzzleGenerator(int[][] board, int emptyX, int emptyY) {
 		this.dimension = board.length;
-		this.root = new NPuzzleNode(board, emptyX, emptyY);
+		this.root = new NPuzzleNode(board, emptyX, emptyY, 0);
 	}
 	
 	
@@ -156,7 +156,7 @@ public class NPuzzleGenerator implements GraphGenerator<NPuzzleNode, String>{
 		b[eY][eX] = b[eY +y][eX+x];
 		b[eY+y][eX+x] = 0;
 		
-		NPuzzleNode node = new NPuzzleNode(b, eX+x, eY+y);
+		NPuzzleNode node = new NPuzzleNode(b, eX+x, eY+y, n.getNumberOfMoves()+1);
 		
 		return node;		
 	}

@@ -5,6 +5,7 @@ import java.util.List;
 
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import jaicore.search.algorithms.standard.core.INodeEvaluator;
+import jaicore.search.algorithms.standard.core.ParentDiscarding;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
 
@@ -48,6 +49,10 @@ public class AStar<T, A> extends BestFirst<T, A> {
 	
 	public AStar(GraphGenerator<T, A> graphGenerator, AStarEdgeCost<T> g, INodeEvaluator<T,Double> h) {
 		super(graphGenerator, new FComputer<T>(g, h));
+	}
+	
+	public AStar(GraphGenerator<T, A> graphGenerator, AStarEdgeCost<T> g, INodeEvaluator<T,Double> h,  ParentDiscarding pd) {
+		super(graphGenerator, new FComputer<T>(g, h), pd);
 	}
 
 	

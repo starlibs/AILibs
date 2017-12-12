@@ -9,7 +9,7 @@ import org.junit.Test;
 import jaicore.basic.PerformanceLogger;
 import jaicore.basic.PerformanceLogger.PerformanceMeasure;
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
-import jaicore.search.algorithms.standard.bestfirst.BestFirst;
+import jaicore.search.algorithms.standard.astar.AStar;
 import jaicore.search.algorithms.standard.npuzzle.NPuzzleGenerator;
 import jaicore.search.algorithms.standard.npuzzle.NPuzzleNode;
 import jaicore.search.structure.core.Node;
@@ -27,7 +27,7 @@ public class NPuzzleGeneratorTester {
 //		NPuzzleGenerator gen = new NPuzzleGenerator(board,0,0);
 		
 		NPuzzleGenerator gen = new NPuzzleGenerator(3,50);
-		BestFirst<NPuzzleNode,String> search = new BestFirst<>(gen, n-> n.getPoint().getDistance());
+		AStar<NPuzzleNode,String> search = new AStar<>(gen,(n1,n2)->1.0, n->n.getPoint().getDistance());
 		
 		SimpleGraphVisualizationWindow<Node<NPuzzleNode,Double>> win = new SimpleGraphVisualizationWindow<>(search.getEventBus());
 		win.getPanel().setTooltipGenerator(n->n.getPoint().toString());

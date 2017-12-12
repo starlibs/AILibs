@@ -75,6 +75,11 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 
 	@SuppressWarnings("unchecked")
 	public ORGraphSearch(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, V> pNodeEvaluator) {
+		this(graphGenerator,pNodeEvaluator, ParentDiscarding.NONE);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public ORGraphSearch(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, V> pNodeEvaluator, ParentDiscarding pd) {
 		super();
 		this.rootGenerator = graphGenerator.getRootGenerator();
 		this.successorGenerator = graphGenerator.getSuccessorGenerator();
@@ -91,7 +96,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 		//init lastExpansion with an empty ArrayList
 		lastExpansion = new ArrayList<>();
 		//init parentDiscarding with none
-		parentDiscarding = ParentDiscarding.NONE;
+		parentDiscarding = pd;
 		
 		this.nodeEvaluator = pNodeEvaluator;
 		
@@ -208,12 +213,18 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 		lastExpansion.clear();
 		if (beforeSelection()) {
 			Node<T, V> nodeToExpand = nextNode();
-			assert nodeToExpand == null || !expanded.contains(nodeToExpand.getPoint()) : "Node selected for expansion already has been expanded: " + nodeToExpand;
+//			TODO
+//			assert nodeToExpand == null || !expanded.contains(nodeToExpand.getPoint()) : "Node selected for expansion already has been expanded: " + nodeToExpand;
 			if (nodeToExpand != null) {
 				afterSelection(nodeToExpand);
 				assert ext2int.containsKey(nodeToExpand.getPoint()) : "Trying to expand a node whose point is not available in the ext2int map";
 				beforeExpansion(nodeToExpand);
-				expandNode(nodeToExpand);
+				
+				if(parentDiscarding == ParentDiscarding.ALL) {
+					
+				}
+				else 
+					expandNode(nodeToExpand);
 				afterExpansion(nodeToExpand);
 			}
 		}
@@ -224,7 +235,8 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 	private void expandNode(Node<T, V> expandedNodeInternal) {
 		graphEventBus.post(new NodeTypeSwitchEvent<Node<T, V>>(expandedNodeInternal, "or_expanding"));
 		logger.info("Expanding node {}", expandedNodeInternal);
-		assert !expanded.contains(expandedNodeInternal.getPoint()) : "Node " + expandedNodeInternal + " expanded twice!!";
+//		TODO
+//		assert !expanded.contains(expandedNodeInternal.getPoint()) : "Node " + expandedNodeInternal + " expanded twice!!";
 		expanded.add(expandedNodeInternal.getPoint());
 
 		/* compute successors */
@@ -243,9 +255,26 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 				if (!newNode.isGoal()) {
 					if (beforeInsertionIntoOpen(newNode)) {
 						logger.info("Inserting successor {} of {} to OPEN.", newNode, expandedNodeInternal);
-						assert !open.contains(newNode) && !expanded.contains(newNode.getPoint()) : "Inserted node is already in OPEN or even expanded!";
+//						TODO
+//						assert !open.contains(newNode) && !expanded.contains(newNode.getPoint()) : "Inserted node is already in OPEN or even expanded!";
 						if (newNode.getInternalLabel() != null) {
-							open.add(newNode);
+							if(parentDiscarding == ParentDiscarding.OPEN) {
+								/*if the node is already on open replace it with the new one, if the new one is better*/
+								if(open.contains(newNode)) {
+									for(Node<T,V> n : open)
+										if(n.equals(newNode)) {
+											if(n.path().size() > newNode.path().size()){
+												open.remove(n);
+												open.add(newNode);
+												System.out.println("Ersete offenen Knoten");
+											}
+												
+										}
+								}
+									open.add(newNode);
+							}
+							else
+								open.add(newNode);
 							graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_open"));
 						} else
 							logger.warn("Not inserting node {} since its label ist missing!", newNode);
@@ -258,6 +287,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 		graphEventBus.post(new NodeTypeSwitchEvent<Node<T, V>>(expandedNodeInternal, "or_closed"));
 	}
 
+	
 	public GraphEventBus<Node<T, V>> getEventBus() {
 		return graphEventBus;
 	}
@@ -336,8 +366,9 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 	}
 
 	protected Node<T, V> newNode(Node<T, V> parent, T t2) {
-		assert !ext2int.containsKey(t2) : "Generating a second node object for " + t2 + " as successor of " + parent.getPoint() + " was contained as " + ext2int.get(t2).getPoint()
-				+ ", but ORGraphSearch currently only supports tree search!";
+		//TODO
+//		assert !ext2int.containsKey(t2) : "Generating a second node object for " + t2 + " as successor of " + parent.getPoint() + " was contained as " + ext2int.get(t2).getPoint()
+//				+ ", but ORGraphSearch currently only supports tree search!";
 		return newNode(parent, t2, null);
 	}
 

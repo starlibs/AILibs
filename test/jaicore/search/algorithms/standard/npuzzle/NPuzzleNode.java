@@ -12,9 +12,10 @@ import java.util.List;
  */
 public class NPuzzleNode {
 	//board configuration and empty space
-	private int [][] board;
+	protected int [][] board;
 	private int emptyX;
 	private int emptyY;
+	private int numberOfMoves;
 	
 	/**
 	 * Constructor for a NPuzzleNode which creates a NPuzzleNode with complete 
@@ -23,6 +24,7 @@ public class NPuzzleNode {
 	 * 		The dimension of the board.
 	 */
 	public NPuzzleNode(int dim) {
+		this.numberOfMoves = 0;
 		board = new int[dim][dim];
 		List<Integer> numbers = new ArrayList<>(dim*dim);
 		
@@ -52,7 +54,8 @@ public class NPuzzleNode {
 	 * 			This number is hardcoded to at least 1.
 	 */
 	public NPuzzleNode(int dim, int perm) {
-		board = new int[dim][dim];
+		this.board = new int[dim][dim];
+		this.numberOfMoves = 0;
 		int x = 1;
 		for(int i = 0; i < dim; i++) {
 			for(int j = 0; j < dim; j++) {
@@ -88,11 +91,15 @@ public class NPuzzleNode {
 	 * 			The empty space on the x-axis.
 	 * @param emptyY
 	 * 			The empty space on the y-axis.
+	 * 
+	 * @param noMoves
+	 * 			The number of already done moves.
 	 */
-	public NPuzzleNode(int [][] board, int emptyX, int emptyY) {
+	public NPuzzleNode(int [][] board, int emptyX, int emptyY, int numberOfMoves) {
 		this.board = board;
 		this.emptyX = emptyX;
 		this.emptyY = emptyY;
+		this.numberOfMoves = numberOfMoves;
 	}
 
 	
@@ -106,6 +113,10 @@ public class NPuzzleNode {
 
 	public int getEmptyY() {
 		return emptyY;
+	}
+	
+	public int getNumberOfMoves() {
+		return this.numberOfMoves;
 	}
 	
 	
@@ -228,8 +239,9 @@ public class NPuzzleNode {
 					y = board.length-1;
 
 				if(tile == 0) {
-					x = board.length-1;
-					y = board.length-1;
+//					x = board.length-1;
+//					y = board.length-1;
+					continue;
 				}
 				double h1 = Math.abs(i-x);
 				double h2 = Math.abs(j-y);
@@ -247,7 +259,8 @@ public class NPuzzleNode {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + Arrays.deepHashCode(board);
+//		result = prime * result + Arrays.deepHashCode(board);
+		result = prime * result + Arrays.hashCode(board);
 		result = prime * result + emptyX;
 		result = prime * result + emptyY;
 		return result;

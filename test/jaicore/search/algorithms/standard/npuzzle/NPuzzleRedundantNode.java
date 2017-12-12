@@ -40,7 +40,7 @@ public class NPuzzleRedundantNode extends NPuzzleNode {
 	 * 			The empty space on the y-axis.
 	 */
 	public NPuzzleRedundantNode(int [][] board, int emptyX, int emptyY, String string) {
-		super(board, emptyX, emptyY);
+		super(board, emptyX, emptyY, string.length());
 		this.moves += string;
 	}
 

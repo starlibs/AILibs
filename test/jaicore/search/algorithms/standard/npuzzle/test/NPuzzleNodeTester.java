@@ -17,9 +17,9 @@ public class NPuzzleNodeTester {
 	@Before
 	public void before() {
 		int [][] board = {{1,2,3},{4,5,6},{7,8,0}};
-		n = new NPuzzleNode(board,2,2);
+		n = new NPuzzleNode(board,2,2,0);
 		board  = new int[][] {{1,5,2},{7,4,3},{0,8,6}};
-		n1 = new NPuzzleNode(board,2,0);
+		n1 = new NPuzzleNode(board,2,0,0);
 		
 	}
 	@Test

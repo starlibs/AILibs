@@ -37,7 +37,7 @@ public class NQueenIterableTester{
 				assertNotNull(expansion);
 				Thread.sleep(200);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
+				
 				e.printStackTrace();
 			}
 			
