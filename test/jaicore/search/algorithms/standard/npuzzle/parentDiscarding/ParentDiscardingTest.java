@@ -64,7 +64,7 @@ public class ParentDiscardingTest {
 					return 0.0;
 				}, ParentDiscarding.ALL) ;
 
-		SimpleGraphVisualizationWindow<Node<PDPuzzleNode,Double>> win = new SimpleGraphVisualizationWindow<>(search.getEventBus());
+		SimpleGraphVisualizationWindow<Node<PDPuzzleNode,Double>> win = new SimpleGraphVisualizationWindow<>(search2.getEventBus());
 		win.getPanel().setTooltipGenerator(n->n.getPoint().toString());
 		
 		/*search for solution*/
@@ -72,16 +72,17 @@ public class ParentDiscardingTest {
 		
 		List<PDPuzzleNode> solutionPath = search.nextSolution();
 		List<PDPuzzleNode> solutionPath2 = search2.nextSolution();
+		solutionPath2 = search2.nextSolution();
 		
 		PerformanceLogger.logEnd("search");
 		assertNotNull(solutionPath);
 		assertNotNull(solutionPath2);
 		
-		assertEquals(4,solutionPath2.size(),0.0);
+		assertEquals(3,solutionPath2.size(),0.0);
 		
 		assert solutionPath.size() <=31;
 		System.out.println(solutionPath.size());
-		System.out.println("Generated " + search.getCreatedCounter() + " nodes.");
+		System.out.println("Generated " + search2.getCreatedCounter() + " nodes.");
 		PerformanceLogger.printStatsAndClear(PerformanceMeasure.TIME);
 		while(true);
 	}

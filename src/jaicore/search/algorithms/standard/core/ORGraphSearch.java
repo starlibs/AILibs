@@ -358,7 +358,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 								}
 							}
 							/*Reopening*/
-							if(closed.containsKey(newNode.getPoint())) {
+							else if(closed.containsKey(newNode.getPoint())) {
 								Node<T,V> node = closed.get(newNode.getPoint());
 								//Update
 								if(newNode.compareTo(node) < 0) {
@@ -368,6 +368,10 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 									openMap.put(node.getPoint(), node);
 								}
 								
+							}
+							else {
+								open.add(newNode);
+								openMap.put(newNode.getPoint(), newNode);
 							}
 						}
 						else
