@@ -1,5 +1,6 @@
 package jaicore.search.algorithms.standard.core;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -68,8 +69,10 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 	protected final Queue<List<T>> solutions = new LinkedBlockingQueue<>();
 	protected final Map<List<T>, SolutionAnnotation<T, V>> annotationsOfSolutionsReturnedByNodeEvaluator = new HashMap<>();
 	private final Set<T> expanded = new HashSet<>();
+	private final HashMap<T,Node<T,V>> closed = new HashMap<>();
+	private final HashMap<T,Node<T,V>> openMap = new HashMap<>();
 	private final boolean solutionReportingNodeEvaluator;
-	
+
 	private List<NodeExpansionDescription<T,A>> lastExpansion;
 	private ParentDiscarding parentDiscarding;
 
@@ -77,7 +80,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 	public ORGraphSearch(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, V> pNodeEvaluator) {
 		this(graphGenerator,pNodeEvaluator, ParentDiscarding.NONE);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public ORGraphSearch(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, V> pNodeEvaluator, ParentDiscarding pd) {
 		super();
@@ -92,14 +95,14 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 			this.nodeGoalTester = (NodeGoalTester<T>) graphGenerator.getGoalTester();
 			this.pathGoalTester = null;
 		}
-		
+
 		//init lastExpansion with an empty ArrayList
 		lastExpansion = new ArrayList<>();
 		//init parentDiscarding with none
 		parentDiscarding = pd;
-		
+
 		this.nodeEvaluator = pNodeEvaluator;
-		
+
 		/* if the node evaluator is graph dependent, communicate the generator to it */
 		if (pNodeEvaluator instanceof DecoratingNodeEvaluator<?, ?>) {
 			DecoratingNodeEvaluator<T, V> castedEvaluator = (DecoratingNodeEvaluator<T, V>) pNodeEvaluator;
@@ -160,8 +163,18 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 					open.add(root);
 			}
 
-			createdCounter = open.size();
-			afterInitialization();
+			//check if the equals method is explicitly implemented.
+			Method [] methods = open.peek().getPoint().getClass().getDeclaredMethods();
+			boolean containsEquals = false;
+			for(Method m : methods)
+				if(m.getName() == "equals") {
+					containsEquals = true;
+					break;
+				}
+
+			if(!containsEquals)
+				this.parentDiscarding = ParentDiscarding.NONE;
+
 		}
 	}
 
@@ -190,7 +203,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 	protected boolean terminates() {
 		return open.isEmpty();
 	}
-	
+
 	/**
 	 * Makes a single expansion and returns solution paths.
 	 * @return
@@ -200,11 +213,11 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 		if(!this.initialized)
 			initGraph();
 		else {
-			
+
 			if(!terminates())
 				step();
 		}
-		
+
 		return lastExpansion;
 
 	}
@@ -213,17 +226,19 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 		lastExpansion.clear();
 		if (beforeSelection()) {
 			Node<T, V> nodeToExpand = nextNode();
-//			TODO
+//			TODO assert warning
 //			assert nodeToExpand == null || !expanded.contains(nodeToExpand.getPoint()) : "Node selected for expansion already has been expanded: " + nodeToExpand;
 			if (nodeToExpand != null) {
 				afterSelection(nodeToExpand);
 				assert ext2int.containsKey(nodeToExpand.getPoint()) : "Trying to expand a node whose point is not available in the ext2int map";
 				beforeExpansion(nodeToExpand);
-				
+
 				if(parentDiscarding == ParentDiscarding.ALL) {
+					expandNodeWithParentDiscarding(nodeToExpand);
+					closed.put(nodeToExpand.getPoint(), nodeToExpand);
 					
 				}
-				else 
+				else
 					expandNode(nodeToExpand);
 				afterExpansion(nodeToExpand);
 			}
@@ -235,7 +250,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 	private void expandNode(Node<T, V> expandedNodeInternal) {
 		graphEventBus.post(new NodeTypeSwitchEvent<Node<T, V>>(expandedNodeInternal, "or_expanding"));
 		logger.info("Expanding node {}", expandedNodeInternal);
-//		TODO
+//		TODO assert warning
 //		assert !expanded.contains(expandedNodeInternal.getPoint()) : "Node " + expandedNodeInternal + " expanded twice!!";
 		expanded.add(expandedNodeInternal.getPoint());
 
@@ -243,6 +258,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 		successorGenerator.generateSuccessors(expandedNodeInternal.getPoint()).stream().forEach(successorDescription -> {
 			lastExpansion.add(successorDescription);
 			Node<T, V> newNode = newNode(expandedNodeInternal, successorDescription.getTo());
+			//TODO newNode == null;
 
 			/* update creation counter */
 			createdCounter++;
@@ -255,26 +271,34 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 				if (!newNode.isGoal()) {
 					if (beforeInsertionIntoOpen(newNode)) {
 						logger.info("Inserting successor {} of {} to OPEN.", newNode, expandedNodeInternal);
-//						TODO
 //						assert !open.contains(newNode) && !expanded.contains(newNode.getPoint()) : "Inserted node is already in OPEN or even expanded!";
 						if (newNode.getInternalLabel() != null) {
+
 							if(parentDiscarding == ParentDiscarding.OPEN) {
-								/*if the node is already on open replace it with the new one, if the new one is better*/
-								if(open.contains(newNode)) {
-									for(Node<T,V> n : open)
-										if(n.equals(newNode)) {
-											if(n.path().size() > newNode.path().size()){
-												open.remove(n);
-												open.add(newNode);
-												System.out.println("Ersete offenen Knoten");
-											}
-												
-										}
+
+								PriorityBlockingQueue<Node<T,V>> q = new PriorityBlockingQueue<>();
+								boolean added =false;
+								while(!open.isEmpty()) {
+									Node<T,V> node = open.poll();
+									if(node.getPoint().equals(newNode.getPoint())) {
+										if(node.compareTo(newNode)<1)
+											q.add(node);
+										else
+											q.add(newNode);
+										added = true;
+										createdCounter --;
+										break;
+									}
+									else
+										q.add(node);
 								}
+								q.drainTo(open);
+								if(!added)
 									open.add(newNode);
 							}
-							else
+							else {
 								open.add(newNode);
+							}
 							graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_open"));
 						} else
 							logger.warn("Not inserting node {} since its label ist missing!", newNode);
@@ -287,13 +311,83 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 		graphEventBus.post(new NodeTypeSwitchEvent<Node<T, V>>(expandedNodeInternal, "or_closed"));
 	}
 
-	
+	/*
+	* a version of the expand Node function with additions to implement complete parentDiscarding
+	*/
+	private void expandNodeWithParentDiscarding(Node<T, V> expandedNodeInternal) {
+		graphEventBus.post(new NodeTypeSwitchEvent<Node<T,V>>(expandedNodeInternal,"or_expanding"));
+		logger.info("Expanding node{}", expandedNodeInternal);
+		expanded.add(expandedNodeInternal.getPoint());
+
+		/*compute successors*/
+		successorGenerator.generateSuccessors(expandedNodeInternal.getPoint()).stream().forEach(successorDescription ->{
+			lastExpansion.add(successorDescription);
+
+			/*creating new node*/
+			Node<T,V> newNode = newNode(expandedNodeInternal,successorDescription.getTo());
+			//creation counter gets updated later
+			boolean labelDefined = labelNode(newNode);
+
+			/*if node ist not a goal node, put it on open*/
+			if(labelDefined){
+				if(!newNode.isGoal()){
+					if(beforeInsertionIntoOpen(newNode)){
+						logger.info("INserting successor {} of {} to OPEN", newNode, expandedNodeInternal);
+						if(newNode.getInternalLabel() != null){
+							if(openMap.containsKey(newNode.getPoint())){
+								PriorityBlockingQueue<Node<T,V>> q = new PriorityBlockingQueue<>();
+								boolean added = false;
+								while(!open.isEmpty()){
+									Node<T,V> node = open.poll();
+									if(node.getPoint().equals(newNode.getPoint())){
+										if(newNode.compareTo(node)<0 )
+											q.add(newNode);
+										else
+											q.add(node);
+										added = true;
+										break;
+									}
+									else
+										q.add(node);
+								}
+								q.drainTo(open);
+								if(!added){
+									open.add(newNode);
+									openMap.put(newNode.getPoint(), newNode);
+									createdCounter ++;
+								}
+							}
+							/*Reopening*/
+							if(closed.containsKey(newNode.getPoint())) {
+								Node<T,V> node = closed.get(newNode.getPoint());
+								//Update
+								if(newNode.compareTo(node) < 0) {
+									closed.remove(node.getPoint());
+									node.setInternalLabel(newNode.getInternalLabel());
+									open.add(node);
+									openMap.put(node.getPoint(), node);
+								}
+								
+							}
+						}
+						else
+							logger.warn("Not inserting node {} since its label is missung!",newNode);
+					}
+				}
+			}
+
+		});
+
+	}
+
 	public GraphEventBus<Node<T, V>> getEventBus() {
 		return graphEventBus;
 	}
 
 	protected Node<T, V> nextNode() {
 		logger.info("Select for expansion: {}", open.peek());
+		if(!openMap.isEmpty())
+			openMap.remove(open.peek().getPoint());
 		return open.poll();
 	}
 
@@ -366,7 +460,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 	}
 
 	protected Node<T, V> newNode(Node<T, V> parent, T t2) {
-		//TODO
+		//TODO assert warning
 //		assert !ext2int.containsKey(t2) : "Generating a second node object for " + t2 + " as successor of " + parent.getPoint() + " was contained as " + ext2int.get(t2).getPoint()
 //				+ ", but ORGraphSearch currently only supports tree search!";
 		return newNode(parent, t2, null);
@@ -380,6 +474,10 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 
 		assert parent == null || expanded.contains(parent.getPoint()) : "Generating successors of an unexpanded node " + parent;
 		assert !open.contains(parent) : "Parent node " + parent + " is still on OPEN, which must not be the case!";
+
+		//TODOcheck if t2 in ext2int
+//		if(ext2int.containsKey(t2))
+//			System.out.println("Yes");
 
 		/* create new node and check whether it is a goal */
 		Node<T, V> newNode = new Node<>(parent, t2);
@@ -398,9 +496,9 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 
 			// }
 		}
-		//TODO Remove circles
-		if(ext2int.containsKey(t2))
-			return null;
+		//TODO check if t2 is already in ext2int
+
+
 		ext2int.put(t2, newNode);
 		/* send events for this new node */
 		if (parent == null) {
@@ -415,7 +513,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 	/**
 	 * This method can be used to create an initial graph different from just root nodes. This can be interesting if the search is distributed and we want to search only an excerpt of the original
 	 * one.
-	 * 
+	 *
 	 * @param initialNodes
 	 */
 	public void bootstrap(Collection<Node<T, V>> initialNodes) {
@@ -455,7 +553,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 
 	/**
 	 * This is relevant if we work with several copies of a node (usually if we need to copy the search space somewhere).
-	 * 
+	 *
 	 * @param node
 	 * @return
 	 */
@@ -482,9 +580,9 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 
 	/**
 	 * Default implementation to compute the node label.
-	 * 
+	 *
 	 * This method should return true iff the label has been computed successfully. Only in this case, the node is further process by this routine.
-	 * 
+	 *
 	 * @param node
 	 * @return
 	 */
@@ -513,7 +611,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 	public List<T> next() {
 		return nextSolution;
 	}
-	
+
 //	@Override
 //	public boolean hasNext() {
 //		if(lastExpansion.isEmpty())
@@ -521,14 +619,14 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 //		else
 //			return true;
 //	}
-//	
+//
 //	@Override
 //	public List<NodeExpansionDescription<T,A>> next(){
 //		step();
 //		return lastExpansion;
 //	}
-	
-	
+
+
 	@Override
 	public Iterator<List<T>> iterator() {
 		return this;

@@ -10,15 +10,7 @@ public class PDPuzzleNode extends NPuzzleNode {
 		super(board, emptyX, emptyY, numberOfMoves);
 	}
 
-	/* (non-Javadoc)
-	 * @see jaicore.search.algorithms.standard.npuzzle.NPuzzleNode#toString()
-	 */
-	@Override
-	public String toString() {
-		// TODO Auto-generated method stub
-		return super.toString();
-	}
-
+	
 	/* (non-Javadoc)
 	 * @see jaicore.search.algorithms.standard.npuzzle.NPuzzleNode#getDistance()
 	 */
