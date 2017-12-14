@@ -272,36 +272,38 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 					if (beforeInsertionIntoOpen(newNode)) {
 						logger.info("Inserting successor {} of {} to OPEN.", newNode, expandedNodeInternal);
 //						assert !open.contains(newNode) && !expanded.contains(newNode.getPoint()) : "Inserted node is already in OPEN or even expanded!";
-						if (newNode.getInternalLabel() != null) {
-
-							if(parentDiscarding == ParentDiscarding.OPEN) {
-
-								PriorityBlockingQueue<Node<T,V>> q = new PriorityBlockingQueue<>();
-								boolean added =false;
-								while(!open.isEmpty()) {
-									Node<T,V> node = open.poll();
-									if(node.getPoint().equals(newNode.getPoint())) {
-										if(node.compareTo(newNode)<1)
-											q.add(node);
+						if(!expanded.contains(newNode.getPoint())){
+							if (newNode.getInternalLabel() != null) {
+	
+								if(parentDiscarding == ParentDiscarding.OPEN) {
+	
+									PriorityBlockingQueue<Node<T,V>> q = new PriorityBlockingQueue<>();
+									boolean added =false;
+									while(!open.isEmpty()) {
+										Node<T,V> node = open.poll();
+										if(node.getPoint().equals(newNode.getPoint())) {
+											if(node.compareTo(newNode)<1)
+												q.add(node);
+											else
+												q.add(newNode);
+											added = true;
+											createdCounter --;
+											break;
+										}
 										else
-											q.add(newNode);
-										added = true;
-										createdCounter --;
-										break;
+											q.add(node);
 									}
-									else
-										q.add(node);
+									q.drainTo(open);
+									if(!added)
+										open.add(newNode);
 								}
-								q.drainTo(open);
-								if(!added)
+								else {
 									open.add(newNode);
-							}
-							else {
-								open.add(newNode);
-							}
-							graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_open"));
-						} else
-							logger.warn("Not inserting node {} since its label ist missing!", newNode);
+								}
+								graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_open"));
+							} else
+								logger.warn("Not inserting node {} since its label ist missing!", newNode);
+						}
 					}
 				}
 			}
