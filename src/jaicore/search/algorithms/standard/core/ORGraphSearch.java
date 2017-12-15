@@ -36,8 +36,8 @@ import jaicore.search.structure.graphgenerator.RootGenerator;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
-//public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservableORGraphSearch<T, A, V>, Iterable<List<NodeExpansionDescription<T,A>>>, Iterator<List<NodeExpansionDescription<T,A>>> {
-public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservableORGraphSearch<T, A, V>, Iterable<List<T>>, Iterator<List<T>> {
+public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservableORGraphSearch<T, A, V>, Iterable<List<NodeExpansionDescription<T,A>>>, Iterator<List<NodeExpansionDescription<T,A>>> {
+//public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservableORGraphSearch<T, A, V>, Iterable<List<T>>, Iterator<List<T>> {
 
 	private static final Logger logger = LoggerFactory.getLogger(ORGraphSearch.class);
 
@@ -607,34 +607,34 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 		return true;
 	}
 
-	@Override
-	public boolean hasNext() {
-		nextSolution = nextSolution();
-		return nextSolution != null;
-	}
-
-	@Override
-	public List<T> next() {
-		return nextSolution;
-	}
-
 //	@Override
 //	public boolean hasNext() {
-//		if(lastExpansion.isEmpty())
-//			return false;
-//		else
-//			return true;
+//		nextSolution = nextSolution();
+//		return nextSolution != null;
 //	}
 //
 //	@Override
-//	public List<NodeExpansionDescription<T,A>> next(){
-//		step();
-//		return lastExpansion;
+//	public List<T> next() {
+//		return nextSolution;
 //	}
+
+	@Override
+	public boolean hasNext() {
+		if(lastExpansion.isEmpty())
+			return false;
+		else
+			return true;
+	}
+
+	@Override
+	public List<NodeExpansionDescription<T,A>> next(){
+		step();
+		return lastExpansion;
+	}
 
 
 	@Override
-	public Iterator<List<T>> iterator() {
+	public Iterator<List<NodeExpansionDescription<T,A>>> iterator() {
 		return this;
 	}
 
