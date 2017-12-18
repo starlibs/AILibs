@@ -27,7 +27,7 @@ public class StripsForwardPlanningTester {
 		
 		/* create AStar algorithm to solve the problem */
 		StripsForwardPlanningGraphGenerator generator = new StripsForwardPlanningGraphGenerator(problem);
-		AStar<StripsForwardPlanningNode,String> astar = new AStar<>(generator, (n1,n2) -> 1, n -> 0);
+		AStar<StripsForwardPlanningNode,String> astar = new AStar<>(generator, (n1,n2) -> 1, n -> 0.0);
 		List<StripsForwardPlanningNode> solution = astar.nextSolution();
 		assertNotNull(solution);
 		System.out.println(solution.stream().map(n -> n.getActionToReachState() != null ? n.getActionToReachState().getEncoding() : "").collect(Collectors.toList()));

@@ -20,7 +20,7 @@ public class TFDTester {
 		
 		/* create AStar algorithm to solve the problem */
 		TFDGraphGenerator generator = new TFDGraphGenerator(problem);
-		AStar<TFDNode,String> astar = new AStar<>(generator, (n1,n2) -> 1, n -> 0);
+		AStar<TFDNode,String> astar = new AStar<>(generator, (n1,n2) -> 1, n -> 0.0);
 		List<TFDNode> solution = astar.nextSolution();
 		Assert.assertNotNull(solution);
 		

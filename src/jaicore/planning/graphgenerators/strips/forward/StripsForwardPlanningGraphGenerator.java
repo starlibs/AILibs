@@ -47,4 +47,9 @@ public class StripsForwardPlanningGraphGenerator implements GraphGenerator<Strip
 	public NodeGoalTester<StripsForwardPlanningNode> getGoalTester() {
 		return l -> l.getState().containsAll(problem.getGoalState());
 	}
+
+	@Override
+	public boolean isSelfContained() {
+		return false;
+	}
 }

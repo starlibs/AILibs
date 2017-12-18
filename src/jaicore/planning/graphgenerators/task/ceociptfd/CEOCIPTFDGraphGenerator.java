@@ -228,4 +228,11 @@ public class CEOCIPTFDGraphGenerator implements SerializableGraphGenerator<TFDNo
 	public String toString() {
 		return "CEOCTFDGraphGenerator [problem=" + problem + ", knowledge=" + knowledge + ", primitiveTasks=" + primitiveTasks + "]";
 	}
+
+	@Override
+	public boolean isSelfContained() {
+		return false;
+	}
+
+
 }

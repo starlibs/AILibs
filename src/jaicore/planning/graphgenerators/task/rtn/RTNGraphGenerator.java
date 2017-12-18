@@ -280,4 +280,9 @@ public class RTNGraphGenerator implements GraphGenerator<RTNNode, RTNEdge> {
 		}
 		return true;
 	}
+
+	@Override
+	public boolean isSelfContained() {
+		return false;
+	}
 }

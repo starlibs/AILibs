@@ -106,6 +106,11 @@ public class DistributedBestFirstTester implements Serializable {
 			public NodeGoalTester<TestNode> getGoalTester() {
 				return n -> (n.min == n.max && n.min == target);
 			}
+
+			@Override
+			public boolean isSelfContained() {
+				return false;
+			}
 		};
 		
 		final Path folder = Paths.get("Z:/pc2/distsearch/testrsc/comm");
