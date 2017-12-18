@@ -9,9 +9,9 @@ import java.util.Random;
 import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 import org.junit.Test;
 
-import de.upb.crc901.taskconfigurator.classifiers.TwoPhasePipelineSearcher;
-import de.upb.crc901.taskconfigurator.core.MLUtil;
-import de.upb.crc901.taskconfigurator.search.algorithms.GraphBasedPipelineSearcher;
+import de.upb.crc901.mlplan.classifiers.TwoPhasePipelineSearcher;
+import de.upb.crc901.mlplan.core.MLUtil;
+import de.upb.crc901.mlplan.search.algorithms.GraphBasedPipelineSearcher;
 import jaicore.ml.WekaUtil;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;
@@ -42,7 +42,7 @@ public class PipelineOptimizerTest {
 
 		GraphBasedPipelineSearcher<TFDNode, String, Integer> optimizer = new TwoPhasePipelineSearcher(MLUtil.getGraphGenerator(new File("testrsc/automl2.testset"), null), r, timeoutPerRun,
 				timeoutForFComputation, 100, 20, false);
-		optimizer.setTooltipGenerator(new TFDTooltipGenerator());
+//		optimizer.setTooltipGenerator(new TFDTooltipGenerator());
 
 		/* now evaluate the approach */
 		DescriptiveStatistics stats = new DescriptiveStatistics();
