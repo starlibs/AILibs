@@ -5,22 +5,22 @@ import java.util.Map;
 import jaicore.search.algorithms.standard.core.INodeEvaluator;
 import jaicore.search.structure.core.Node;
 
-public class LinearCombiningNodeEvaluator<T> implements INodeEvaluator<T,Integer> {
+public class LinearCombiningNodeEvaluator<T> implements INodeEvaluator<T,BestFirstEpsilonLabel> {
 
-	private final Map<INodeEvaluator<T,Integer>, Double> evaluators;
+	private final Map<INodeEvaluator<T,BestFirstEpsilonLabel>, Double> evaluators;
 
-	public LinearCombiningNodeEvaluator(Map<INodeEvaluator<T,Integer>, Double> evaluators) {
+	public LinearCombiningNodeEvaluator(Map<INodeEvaluator<T,BestFirstEpsilonLabel>, Double> evaluators) {
 		super();
 		this.evaluators = evaluators;
 	}
 
 	@Override
-	public Integer f(Node<T,Integer> node) throws Exception {
+	public BestFirstEpsilonLabel f(Node<T,BestFirstEpsilonLabel> node) throws Exception {
 		double score = 0;
 		int incr;
-		for (INodeEvaluator<T,Integer> evaluator : evaluators.keySet()) {
+		for (INodeEvaluator<T,BestFirstEpsilonLabel> evaluator : evaluators.keySet()) {
 			if (evaluators.get(evaluator) != 0) {
-				incr = evaluator.f(node);
+				incr = evaluator.f(node).getF1();
 				if (incr == Integer.MAX_VALUE) {
 					score = Integer.MAX_VALUE;
 					break;
@@ -29,6 +29,6 @@ public class LinearCombiningNodeEvaluator<T> implements INodeEvaluator<T,Integer
 					score += incr * evaluators.get(evaluator);
 			}
 		}
-		return (int)Math.round(score);
+		return new BestFirstEpsilonLabel((int)Math.round(score), 0);
 	}
 }

@@ -44,7 +44,8 @@ public class CEOCTFDGraphGenerator implements SerializableGraphGenerator<TFDNode
 	private final CNFFormula knowledge;
 	private final Map<String, Operation> primitiveTasks = new HashMap<>();
 	private SerializableRootGenerator<TFDNode> rootGenerator;
-	private final TaskPlannerUtil util = new TaskPlannerUtil();
+	private final TaskPlannerUtil taskPlannerUtil = new TaskPlannerUtil(null);
+	private final TFDNodeUtil nodeUtil = new TFDNodeUtil(null);
 	private final Map<TFDNode,TFDNode> parentMap = new HashMap<>();
 
 	public CEOCTFDGraphGenerator(CEOCSTNPlanningProblem problem) {
@@ -52,7 +53,7 @@ public class CEOCTFDGraphGenerator implements SerializableGraphGenerator<TFDNode
 		this.knowledge = problem.getKnowledge();
 		for (Operation op : problem.getDomain().getOperations())
 			primitiveTasks.put(op.getName(), op);
-		this.rootGenerator = () -> new TFDNode(problem.getInit(), util.getTaskChainOfTotallyOrderedNetwork(problem.getNetwork()));
+		this.rootGenerator = () -> new TFDNode(problem.getInit(), taskPlannerUtil.getTaskChainOfTotallyOrderedNetwork(problem.getNetwork()));
 	}
 
 	@Override
@@ -65,11 +66,10 @@ public class CEOCTFDGraphGenerator implements SerializableGraphGenerator<TFDNode
 		return l -> {
 			logger.info("Generating successors for {}", l);
 			List<NodeExpansionDescription<TFDNode, String>> successors = new ArrayList<>();
-
 			TFDRestProblem rp = l.getProblem();
-			List<TFDNode> path = TFDNodeUtil.getPathOfNode(l, parentMap);
+			List<TFDNode> path = nodeUtil.getPathOfNode(l, parentMap);
 			if (rp == null)
-				rp = TFDNodeUtil.getRestProblem(path);
+				rp = nodeUtil.getRestProblem(path);
 			Monom state = rp.getState();
 			List<Literal> currentlyRemainingTasks = rp.getRemainingTasks();
 			Literal nextTaskTmp = currentlyRemainingTasks.get(0);
@@ -85,13 +85,13 @@ public class CEOCTFDGraphGenerator implements SerializableGraphGenerator<TFDNode
 			if (primitiveTasks.containsKey(nextTask.getPropertyName())) {
 
 				logger.info("Computing successors for PRIMITIVE task {} in state {}", nextTask, state);
-				for (Action applicableAction : util.getActionsForPrimitiveTaskThatAreApplicableInState(knowledge, primitiveTasks.get(nextTask.getPropertyName()),
+				for (Action applicableAction : taskPlannerUtil.getActionsForPrimitiveTaskThatAreApplicableInState(knowledge, primitiveTasks.get(nextTask.getPropertyName()),
 						nextTask, state)) {
 					logger.info("Adding successor for PRIMITIVE task {} in state {}: {}", nextTask, state, applicableAction.getEncoding());
 
 					/* if the depth is % k == 0, then compute the rest problem explicitly */
 					Monom updatedState = new Monom(state, false);
-					TFDNodeUtil.updateState(updatedState, applicableAction);
+					nodeUtil.updateState(updatedState, applicableAction);
 					List<Literal> remainingTasks = new ArrayList<>(currentlyRemainingTasks);
 					remainingTasks.remove(0);
 					TFDNode node = null;
@@ -115,7 +115,7 @@ public class CEOCTFDGraphGenerator implements SerializableGraphGenerator<TFDNode
 				logger.info("Computing successors for COMPLEX task {} in state {}", nextTask, state);
 				Set<Method> usedMethods = new HashSet<>();
 				PerformanceLogger.logStart("compute instances");
-				Collection<MethodInstance> instances = util.getMethodInstancesForTaskThatAreApplicableInState(knowledge, this.problem.getDomain().getMethods(), nextTask,
+				Collection<MethodInstance> instances = taskPlannerUtil.getMethodInstancesForTaskThatAreApplicableInState(knowledge, this.problem.getDomain().getMethods(), nextTask,
 						state, currentlyRemainingTasks);
 				PerformanceLogger.logEnd("compute instances");
 				for (MethodInstance instance : instances) {
@@ -131,7 +131,7 @@ public class CEOCTFDGraphGenerator implements SerializableGraphGenerator<TFDNode
 
 					/* if the depth is % k == 0, then compute the rest problem explicitly */
 
-					List<Literal> prependedTasks = util.getTaskChainOfTotallyOrderedNetwork(instance.getNetwork());
+					List<Literal> prependedTasks = taskPlannerUtil.getTaskChainOfTotallyOrderedNetwork(instance.getNetwork());
 					List<Literal> remainingTasks = new ArrayList<>(prependedTasks);
 					remainingTasks.addAll(currentlyRemainingTasks);
 					remainingTasks.remove(prependedTasks.size()); // remove the first literal of the 2ndly appended list

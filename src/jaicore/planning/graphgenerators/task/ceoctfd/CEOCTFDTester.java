@@ -28,7 +28,7 @@ public class CEOCTFDTester {
 
 	@Test
 	public void testNestedDichotomy() throws Exception {
-		solveProblemUsingAStar(StandardProblemFactory.getNestedDichotomyCreationProblem("root", classes, true));
+		solveProblemUsingAStar(StandardProblemFactory.getNestedDichotomyCreationProblem("root", classes, true, 1, 1));
 	}
 	
 	private void solveProblemUsingAStar(CEOCSTNPlanningProblem problem) {

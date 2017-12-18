@@ -12,11 +12,19 @@ import jaicore.search.structure.core.Node;
  */
 public class BestFirstEpsilon<T, A> extends ORGraphSearch<T, A, BestFirstEpsilonLabel> {
 
+	private final boolean absolute;
 	private final double epsilon;
 
+	public BestFirstEpsilon(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, BestFirstEpsilonLabel> pNodeEvaluator, int epsilon) {
+		super(graphGenerator, pNodeEvaluator);
+		this.epsilon = epsilon;
+		this.absolute = true;
+	}
+	
 	public BestFirstEpsilon(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, BestFirstEpsilonLabel> pNodeEvaluator, double epsilon) {
 		super(graphGenerator, pNodeEvaluator);
 		this.epsilon = epsilon;
+		this.absolute = false;
 	}
 
 	@Override
@@ -24,7 +32,8 @@ public class BestFirstEpsilon<T, A> extends ORGraphSearch<T, A, BestFirstEpsilon
 		if (epsilon <= 0 || open.isEmpty())
 			return open.poll();
 		int best = open.peek().getInternalLabel().getF1();
-		Node<T, BestFirstEpsilonLabel> choice = open.stream().filter(n -> n.getInternalLabel().getF1() <= best * (best >= 0 ? 1 + epsilon : 1 - epsilon))
+		double threshold = (absolute ? (best >= 0 ? best + epsilon : best - epsilon) : best * (best >= 0 ? 1 + epsilon : 1 - epsilon));
+		Node<T, BestFirstEpsilonLabel> choice = open.stream().filter(n -> n.getInternalLabel().getF1() <= threshold)
 				.min((p1, p2) -> p1.getInternalLabel().getF2() - p2.getInternalLabel().getF2()).get();
 		open.remove(choice);
 		return choice;

@@ -20,12 +20,14 @@ public class TaskNetwork extends Graph<Literal> {
 		Literal current = null;
 		int id = 1;
 		for (String taskDescription : StringUtil.explode(chain, "->")) {
-			Literal task = new Literal("tn" + "_" + id + "-" + taskDescription.trim());
-			this.addItem(task);
-			if (current != null)
-				this.addEdge(current, task);
-			current = task;
-			id++;
+			if (!taskDescription.trim().isEmpty()) {
+				Literal task = new Literal("tn" + "_" + id + "-" + taskDescription.trim());
+				this.addItem(task);
+				if (current != null)
+					this.addEdge(current, task);
+				current = task;
+				id++;
+			}
 		}
 	}
 }

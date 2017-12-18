@@ -23,7 +23,8 @@ public class TFDGraphGenerator implements GraphGenerator<TFDNode,String> {
 
 	private final STNPlanningProblem problem;
 	private final Map<String,Operation> primitiveTasks = new HashMap<>();
-	private final TaskPlannerUtil util = new TaskPlannerUtil();
+	private final TaskPlannerUtil util = new TaskPlannerUtil(null);
+	private final TFDNodeUtil tfdUtil = new TFDNodeUtil(null);
 	
 	public TFDGraphGenerator(STNPlanningProblem problem) {
 		this.problem = problem;
@@ -52,7 +53,7 @@ public class TFDGraphGenerator implements GraphGenerator<TFDNode,String> {
 				
 				for (Action applicableAction : util.getActionsForPrimitiveTaskThatAreApplicableInState(null, primitiveTasks.get(nextTask.getPropertyName()), nextTask, state)) {
 					Monom stateCopy = new Monom(state);
-					TFDNodeUtil.updateState(stateCopy, applicableAction);
+					tfdUtil.updateState(stateCopy, applicableAction);
 					successors.add(new NodeExpansionDescription<>(l, new TFDNode(stateCopy, currentlyRemainingTasks, null, applicableAction), "edge label", NodeType.OR));
 				}
 			}
