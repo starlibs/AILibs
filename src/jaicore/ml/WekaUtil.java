@@ -21,6 +21,7 @@ import jaicore.ml.core.SimpleLabeledInstanceImpl;
 import jaicore.ml.core.WekaCompatibleInstancesImpl;
 import jaicore.ml.interfaces.LabeledInstance;
 import weka.classifiers.Classifier;
+import weka.classifiers.bayes.NaiveBayesMultinomial;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
@@ -32,6 +33,28 @@ import weka.core.json.JSONNode;
 
 public class WekaUtil {
 
+	public static Collection<String> getBasicLearners() {
+		Collection<String> classifiers = new ArrayList<>();
+		classifiers.add("weka.classifiers.functions.SMO");
+		classifiers.add("weka.classifiers.functions.Logistic");
+		classifiers.add("weka.classifiers.functions.MultilayerPerceptron");
+		classifiers.add("weka.classifiers.bayes.NaiveBayes");
+		classifiers.add("weka.classifiers.bayes.BayesNet");
+		classifiers.add("weka.classifiers.bayes.NaiveBayesMultinomial");
+		classifiers.add("weka.classifiers.trees.J48");
+		classifiers.add("weka.classifiers.trees.RandomForest");
+		classifiers.add("weka.classifiers.trees.RandomTree");
+		classifiers.add("weka.classifiers.trees.LMT");
+		classifiers.add("weka.classifiers.lazy.IBk");
+		return classifiers;
+	}
+	
+	public static Collection<String> getMetaLearners() {
+		Collection<String> classifiers = new ArrayList<>();
+		classifiers.add("weka.classifiers.functions.AdaBoostM1");
+		return classifiers;
+	}
+	
 	public static <L> Instances fromJAICoreInstances(final WekaCompatibleInstancesImpl instances) {
 
 		/* create basic attribute entries */

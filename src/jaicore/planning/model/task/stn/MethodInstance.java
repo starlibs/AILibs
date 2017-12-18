@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import jaicore.basic.SetUtil;
 import jaicore.logic.fol.structure.ConstantParam;
 import jaicore.logic.fol.structure.Literal;
 import jaicore.logic.fol.structure.Monom;
@@ -27,7 +28,7 @@ public class MethodInstance implements Serializable {
 		this.grounding = grounding;
 		if (!this.grounding.keySet().containsAll(method.getParameters()))
 			throw new IllegalArgumentException("Planning Method instances must contain a grounding for ALL params of the method. Here, method (" + method.getName() + ") params: " + method.getParameters()
-					+ ". Given grounding: " + grounding);
+					+ ". Params missing: " + SetUtil.difference(method.getParameters(), this.grounding.keySet()));
 		precondition = new Monom(method.getPrecondition(), grounding);
 	}
 

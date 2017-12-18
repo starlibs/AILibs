@@ -887,4 +887,17 @@ public class SetUtil {
 		}
 		return numberOfAllowedPermutations;
 	}
+	
+	public static String serializeAsSet(Collection<String> set) {
+		return set.toString().replaceAll("\\[", "{").replaceAll("\\]", "}");
+	}
+
+	public static Set<String> unserialize(String setDescriptor) {
+		Set<String> items = new HashSet<>();
+		for (String item : setDescriptor.substring(1, setDescriptor.length() - 1).split(",")) {
+			if (!item.trim().isEmpty())
+				items.add(item.trim());
+		}
+		return items;
+	}
 }

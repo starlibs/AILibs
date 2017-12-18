@@ -21,4 +21,9 @@ public class BestFirstEpsilonLabel implements Comparable<BestFirstEpsilonLabel> 
 	public int compareTo(BestFirstEpsilonLabel o) {
 		return f1 - o.f1;
 	}
+
+	@Override
+	public String toString() {
+		return "BestFirstEpsilonLabel [f1=" + f1 + ", f2=" + f2 + "]";
+	}
 }

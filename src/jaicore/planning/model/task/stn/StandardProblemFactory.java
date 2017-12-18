@@ -53,7 +53,7 @@ public class StandardProblemFactory {
 	}
 
 	public static STNPlanningProblem getNestedDichotomyCreationProblem(String rootClusterName, List<String> classes) {
-		CEOCSTNPlanningProblem problem = jaicore.planning.model.task.ceocstn.StandardProblemFactory.getNestedDichotomyCreationProblem(rootClusterName, classes, true);
+		CEOCSTNPlanningProblem problem = jaicore.planning.model.task.ceocstn.StandardProblemFactory.getNestedDichotomyCreationProblem(rootClusterName, classes, true, 1, 1);
 		
 		List<CEOperation> operations = new ArrayList<>();
 		for (CEOCOperation op : problem.getDomain().getOperations()) {

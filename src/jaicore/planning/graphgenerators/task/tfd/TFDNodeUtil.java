@@ -8,10 +8,12 @@ import java.util.List;
 import java.util.Map;
 
 import jaicore.logic.fol.structure.CNFFormula;
+import jaicore.logic.fol.structure.Clause;
 import jaicore.logic.fol.structure.ConstantParam;
 import jaicore.logic.fol.structure.Literal;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.planning.graphgenerators.task.TaskPlannerUtil;
+import jaicore.planning.graphgenerators.task.ceociptfd.EvaluablePredicate;
 import jaicore.planning.model.conditional.CEAction;
 import jaicore.planning.model.conditional.CEOperation;
 import jaicore.planning.model.core.Action;
@@ -22,9 +24,16 @@ import jaicore.planning.model.task.stn.MethodInstance;
 public class TFDNodeUtil {
 
 	private static Map<List<TFDNode>, Integer> cache = new HashMap<>();
-	private final static TaskPlannerUtil util = new TaskPlannerUtil();
+	private final TaskPlannerUtil util;
+	private final Map<String, EvaluablePredicate> evaluablePlanningPredicates;
+	
+	public TFDNodeUtil(Map<String, EvaluablePredicate> evaluablePlanningPredicates) {
+		super();
+		this.evaluablePlanningPredicates = evaluablePlanningPredicates;
+		util = new TaskPlannerUtil(evaluablePlanningPredicates);
+	}
 
-	private static boolean checkDoubleRestProblemComputationOccurrence(List<TFDNode> path) {
+	private boolean checkDoubleRestProblemComputationOccurrence(List<TFDNode> path) {
 		if (cache.containsKey(path)) {
 			System.out.println("already seen path " + cache.get(path) + " times");
 			return false;
@@ -33,7 +42,7 @@ public class TFDNodeUtil {
 		return true;
 	}
 	
-	public static List<TFDNode> getPathOfNode(TFDNode node, Map<TFDNode, TFDNode> parentMap) {
+	public List<TFDNode> getPathOfNode(TFDNode node, Map<TFDNode, TFDNode> parentMap) {
 		
 		/* compute path for node */
 		List<TFDNode> path = new ArrayList<>();
@@ -46,7 +55,7 @@ public class TFDNodeUtil {
 		return path;
 	}
 
-	public static TFDRestProblem getRestProblem(List<TFDNode> path) {
+	public TFDRestProblem getRestProblem(List<TFDNode> path) {
 
 		/* get last node in list with explicit rest problem formulation */
 		assert checkDoubleRestProblemComputationOccurrence(path) : "We must not generate the information of a node twice!";
@@ -92,11 +101,11 @@ public class TFDNodeUtil {
 		return new TFDRestProblem(state, new ArrayList<>(remainingTasks));
 	}
 
-	public static Monom getState(List<TFDNode> path) {
+	public Monom getState(List<TFDNode> path) {
 		return getRestProblem(path).getState();
 	}
 
-	public static void updateState(Monom state, Action appliedAction) {
+	public void updateState(Monom state, Action appliedAction) {
 
 		// assert state.containsAll(appliedAction.getPrecondition().stream().filter(lit -> lit.isPositive()).collect(Collectors.toList())) && SetUtil.disjoint(state,
 		// appliedAction.getPrecondition().stream().filter(lit -> lit.isNegated()).collect(Collectors.toList())) : ("Action " + appliedAction + " is supposed to be aplpicable in state " + state + "
@@ -114,7 +123,41 @@ public class TFDNodeUtil {
 			CEAction a = new CEAction((CEOperation) appliedAction.getOperation(), appliedAction.getGrounding());
 			Map<CNFFormula, Monom> addLists = a.getAddLists();
 			for (CNFFormula condition : addLists.keySet()) {
-				if (condition.entailedBy(state)) {
+				
+				/* evaluate interpreted predicates */
+				CNFFormula modifiedCondition = new CNFFormula();
+				boolean conditionIsSatisfiable = true;
+				for (Clause c : condition) {
+					Clause modifiedClause = new Clause();
+					boolean clauseContainsTrue = false;
+					for (Literal l : c) {
+						if (l.getPropertyName().startsWith("$")) {
+							EvaluablePredicate predicate = util.getEvaluablePlanningPredicates().get(l.getPropertyName().substring(1));
+							if (predicate == null)
+								throw new IllegalArgumentException("Action has evaluable predicate " + l.getPropertyName() + " in its conditional postcondition, but this predicate is not defined in the evaluable predicates!");
+							boolean testResult = predicate.test(state, l.getConstantParams().toArray(new ConstantParam[0]));
+							if (testResult == l.isPositive()) {
+								clauseContainsTrue = true;
+								break;
+							}
+							else;
+								// simply ignore this predicate
+						}
+						else
+							modifiedClause.add(l);
+						
+						/* if the clause is not empty, add it to the condition */
+						if (!clauseContainsTrue) {
+							if (!modifiedClause.isEmpty())
+								modifiedCondition.add(modifiedClause);
+							else {
+								conditionIsSatisfiable = false;
+								break;
+							}
+						}
+					}
+				}
+				if (conditionIsSatisfiable && modifiedCondition.entailedBy(state)) {
 					state.addAll(addLists.get(condition));
 				}
 			}
@@ -130,7 +173,7 @@ public class TFDNodeUtil {
 	}
 
 	@SuppressWarnings("unused")
-	private static boolean checkConsistency(Monom state, Map<CNFFormula, Monom> addLists) {
+	private boolean checkConsistency(Monom state, Map<CNFFormula, Monom> addLists) {
 		for (Literal lit : state) {
 			if (lit.getPropertyName().equals("cluster")) {
 				String clusterName = lit.getConstantParams().get(0).getName();
@@ -178,7 +221,7 @@ public class TFDNodeUtil {
 		return true;
 	}
 
-	public static List<Literal> getRemainingTasks(List<TFDNode> path) {
+	public List<Literal> getRemainingTasks(List<TFDNode> path) {
 		return getRestProblem(path).getRemainingTasks();
 	}
 }

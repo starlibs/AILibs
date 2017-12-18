@@ -1,6 +1,7 @@
 package jaicore.planning.graphgenerators.task;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,6 +24,7 @@ import jaicore.logic.fol.util.LogicUtil;
 import jaicore.planning.graphgenerators.task.ceociptfd.EvaluablePredicate;
 import jaicore.planning.model.core.Action;
 import jaicore.planning.model.core.Operation;
+import jaicore.planning.model.task.ceocipstn.OCIPMethod;
 import jaicore.planning.model.task.ceocstn.OCMethod;
 import jaicore.planning.model.task.stn.Method;
 import jaicore.planning.model.task.stn.MethodInstance;
@@ -34,6 +36,11 @@ public class TaskPlannerUtil {
 	
 	private Map<String, EvaluablePredicate> evaluablePlanningPredicates;
 	
+	public TaskPlannerUtil(Map<String, EvaluablePredicate> evaluablePlanningPredicates) {
+		super();
+		this.evaluablePlanningPredicates = evaluablePlanningPredicates;
+	}
+
 	public Collection<MethodInstance> getMethodInstancesForTaskThatAreApplicableInState(CNFFormula knowledge, Collection<? extends Method> methods, Literal task, Monom state, List<Literal> remainingProblems) {
 		Collection<MethodInstance> applicableDerivedMethods = new ArrayList<>();
 		for (Method m : methods) {
@@ -48,33 +55,118 @@ public class TaskPlannerUtil {
 		Collection<MethodInstance> applicableDerivedMethodInstances = new ArrayList<>();
 		Collection<Map<VariableParam, LiteralParam>> maps = getMappingsThatMatchTasksAndMakesItApplicable(knowledge, method.getTask(), task, method.getPrecondition(), state);
 		for (Map<VariableParam, LiteralParam> grounding : maps) {
-			Map<VariableParam, ConstantParam> constantGrounding = new HashMap<>();
+			Map<VariableParam, ConstantParam> basicConstantGrounding = new HashMap<>();
 			for (VariableParam key : grounding.keySet()) {
-				constantGrounding.put(key, (ConstantParam) grounding.get(key));
-			}
-
-			/* create new objects for unassigned open output variables */
-			Set<ConstantParam> knownConstants = new HashSet<>(state.getConstantParams());
-			for (Literal l : remainingProblems) {
-				knownConstants.addAll(l.getConstantParams());
-			}
-			Collection<VariableParam> unboundParams = SetUtil.difference(method.getParameters(), constantGrounding.keySet());
-			if (method instanceof OCMethod) {
-				Collection<VariableParam> unboundOutputParams = SetUtil.intersection(unboundParams, ((OCMethod) method).getOutputs());
-				int indexForNewVariable = 1;
-				for (VariableParam v : unboundOutputParams) {
-					ConstantParam p;
-					do {
-						p = new ConstantParam("newVar" + (indexForNewVariable++));
-					}
-					while (knownConstants.contains(p));
-					constantGrounding.put(v, p);
-					unboundParams.remove(v);
-				}
+				basicConstantGrounding.put(key, (ConstantParam) grounding.get(key));
 			}
 			
-			assert unboundParams.isEmpty() : "Method " + method.getName() + " must be ground completely before processing. Here, " + unboundParams + " are unground.";
-			applicableDerivedMethodInstances.add(new MethodInstance(method, constantGrounding));
+			/* up to where, we only have considered the "normal" parameters. Now check whether additional inputs bindings are indicated by interpreted predicates */
+			Collection<Map<VariableParam,ConstantParam>> extendedGroundings = new ArrayList<>();
+			
+			/* this block is to cater for methods that have interpreted predicates and need to be oracled for valid groundings */
+			if (method instanceof OCIPMethod) {
+				OCIPMethod castedMethod = (OCIPMethod)method;
+				Collection<VariableParam> ungroundParamsInEvaluablePrecondition = SetUtil.difference(castedMethod.getEvaluablePrecondition().getVariableParams(), basicConstantGrounding.keySet());
+				
+				Map<Literal,EvaluablePredicate> evaluablePredicatesForLiterals = new HashMap<>();
+				for (Literal l : castedMethod.getEvaluablePrecondition())
+					evaluablePredicatesForLiterals.put(l, evaluablePlanningPredicates.get(l.getPropertyName()));
+				List<Literal> literalsOrderedByOracability = castedMethod.getEvaluablePrecondition().stream().sorted((l1,l2) -> (evaluablePredicatesForLiterals.get(l2).isOracable() ? 1 : 0) - (evaluablePredicatesForLiterals.get(l1).isOracable() ? 1 : 0)).collect(Collectors.toList());
+				
+				if (!ungroundParamsInEvaluablePrecondition.isEmpty()) {
+					if (ungroundParamsInEvaluablePrecondition.size() > 1)
+						throw new UnsupportedOperationException("Currently only support for at most one unground variable!");
+					if (!evaluablePredicatesForLiterals.get(literalsOrderedByOracability.get(0)).isOracable())
+						throw new IllegalArgumentException("None of the literals " + literalsOrderedByOracability + " is oracable");
+					
+					VariableParam paramToBeGround = ungroundParamsInEvaluablePrecondition.iterator().next();
+					Collection<ConstantParam> candidatesForGrounding = null;
+					boolean oracleAcquired = false;
+					for (Literal l : literalsOrderedByOracability) {
+						if (l == null)
+							throw new IllegalArgumentException("Evaluable precondition " + castedMethod.getEvaluablePrecondition() + " contains NULL predicate!");
+						int indexOfParam = l.getParameters().indexOf(paramToBeGround);
+						ConstantParam[] params = new ConstantParam[l.getParameters().size()];
+						for (int i = 0; i < params.length; i++) {
+							params[i] = (i != indexOfParam) ? basicConstantGrounding.get(l.getParameters().get(i)) : null;
+						}
+						
+						if (!evaluablePlanningPredicates.containsKey(l.getPropertyName()))
+							throw new IllegalArgumentException("No theory for predicate " + l.getPropertyName() + " defined!");
+						EvaluablePredicate predicate = evaluablePlanningPredicates.get(l.getPropertyName());
+						Collection<ConstantParam> candidatesForThisLiteral;
+						
+						/* if this is the first time an oracle is acquired, get the possible groundings */
+						if (!oracleAcquired) {
+							Collection<List<ConstantParam>> possibleGroundingsOfThisPredicate = l.isPositive() ? predicate.getParamsForPositiveEvaluation(state, params) : predicate.getParamsForNegativeEvaluation(state, params);
+							candidatesForThisLiteral = possibleGroundingsOfThisPredicate.stream().map(s -> s.get(indexOfParam)).collect(Collectors.toSet());
+							candidatesForGrounding = candidatesForThisLiteral;
+							oracleAcquired = true;
+						}
+						
+						/* otherwise just use the remaining candidates as possible inputs */
+						else {
+							candidatesForThisLiteral = new HashSet<>();
+							for (ConstantParam param : candidatesForGrounding) {
+								params[indexOfParam] = param;
+								boolean test = predicate.test(state, params);
+								if (test == l.isPositive()) {
+									candidatesForThisLiteral.add(param);
+								}
+							}
+						}
+						candidatesForGrounding = SetUtil.intersection(candidatesForGrounding, candidatesForThisLiteral);
+					}
+					for (ConstantParam param : candidatesForGrounding) {
+						Map<VariableParam, ConstantParam> extendedGrounding = new HashMap<>(basicConstantGrounding);
+						extendedGrounding.put(paramToBeGround, param);
+						extendedGroundings.add(extendedGrounding);
+					}
+				}
+				else {
+					boolean allSatisfied = true;
+					for (Literal l : castedMethod.getEvaluablePrecondition()) {
+						ConstantParam[] params = new ConstantParam[l.getParameters().size()];
+						for (int i = 0; i < params.length; i++)
+							params[i] = basicConstantGrounding.get(l.getParameters().get(i));
+						if (!evaluablePredicatesForLiterals.get(l).test(state, params)) {
+							allSatisfied = false;
+							break;
+						}
+					}
+					if (allSatisfied)
+						extendedGroundings.add(basicConstantGrounding);
+				}
+			}
+			else
+				extendedGroundings.add(basicConstantGrounding);
+			
+			/* now add a method application for each of the extended groundings */
+			for (Map<VariableParam,ConstantParam> extendedGrounding : extendedGroundings) {
+
+				/* create new objects for unassigned open output variables */
+				Set<ConstantParam> knownConstants = new HashSet<>(state.getConstantParams());
+				for (Literal l : remainingProblems) {
+					knownConstants.addAll(l.getConstantParams());
+				}
+				Collection<VariableParam> unboundParams = SetUtil.difference(method.getParameters(), extendedGrounding.keySet());
+				if (method instanceof OCMethod) {
+					Collection<VariableParam> unboundOutputParams = SetUtil.intersection(unboundParams, ((OCMethod) method).getOutputs());
+					int indexForNewVariable = 1;
+					for (VariableParam v : unboundOutputParams) {
+						ConstantParam p;
+						do {
+							p = new ConstantParam("newVar" + (indexForNewVariable++));
+						}
+						while (knownConstants.contains(p));
+						extendedGrounding.put(v, p);
+						unboundParams.remove(v);
+					}
+				}
+				
+				assert unboundParams.isEmpty() : "Method " + method.getName() + " must be ground completely before processing. Here, " + unboundParams + " are unground.";
+				applicableDerivedMethodInstances.add(new MethodInstance(method, extendedGrounding));
+			}
 		}
 		return applicableDerivedMethodInstances;
 	}

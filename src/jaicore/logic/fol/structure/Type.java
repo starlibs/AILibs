@@ -60,6 +60,8 @@ public class Type implements Serializable {
 	}
 
 	public void addSubType(Type newSubType) {
+		if (this.isSubTypeOf(newSubType))
+			throw new IllegalArgumentException("Cannot add " + newSubType + " as a sub-type of " + this + ", because the relation already exists the other way around.");
 		newSubType.superTypeList.add(this);
 		this.subTypeList.add(newSubType);
 	}
@@ -90,6 +92,8 @@ public class Type implements Serializable {
 	}
 
 	public void addSuperType(Type newSuperType) {
+		if (this.isSuperTypeOf(newSuperType))
+			throw new IllegalArgumentException("Cannot add " + newSuperType + " as a super-type of " + this + ", because the relation already exists the other way around.");
 		newSuperType.subTypeList.add(this);
 		this.superTypeList.add(newSuperType);
 	}
@@ -123,6 +127,7 @@ public class Type implements Serializable {
 		if (typeToCheck == this || this.subTypeOfBuffer.indexOf(typeToCheck) >= 0) {
 			return true;
 		}
+		assert !subTypeList.contains(this) : ("Type " + this.getName() + " contains itself as a sub-type!");
 		for (Type subType : subTypeList) {
 			if (subType.isSuperTypeOf(typeToCheck)) {
 				this.subTypeOfBuffer.add(typeToCheck);
