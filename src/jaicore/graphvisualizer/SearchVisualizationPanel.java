@@ -37,6 +37,7 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
 import jaicore.search.structure.events.GraphInitializedEvent;
+import jaicore.search.structure.events.NodeParentSwitchEvent;
 import jaicore.search.structure.events.NodeReachedEvent;
 import jaicore.search.structure.events.NodeRemovedEvent;
 import jaicore.search.structure.events.NodeTypeSwitchEvent;
@@ -229,6 +230,16 @@ public class SearchVisualizationPanel<T> extends JPanel {
 //TODO		return this.graph.addEdge(edgeId, fromInt, toInt, true);
 		return this.graph.addEdge(edgeId, fromInt, toInt, false);
 	}
+	
+	protected synchronized boolean removeEdge(final T from, final T to) {
+		for(Edge e: graph.getEachEdge()) {
+			if (e.getSourceNode().equals(from) && e.getTargetNode().equals(to)) {
+				graph.removeEdge(e);
+				return true;
+			}
+		}
+		return false;
+	}
 
 	@Subscribe
 	public synchronized void receiveGraphInitEvent(GraphInitializedEvent<T> e) {
@@ -267,6 +278,21 @@ public class SearchVisualizationPanel<T> extends JPanel {
 				throw new NoSuchElementException("Cannot switch type of node " + e.getNode() + ". This node has not been reached previously.");
 			ext2intNodeMap.get(e.getNode()).addAttribute("ui.class", e.getType());
 		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+	}
+	
+	@Subscribe
+	public synchronized void receivedNodeParentSwitchEvent(NodeParentSwitchEvent<T> e) {
+		try {
+			if(!ext2intNodeMap.containsKey(e.getNode()) && !ext2intNodeMap.containsKey(e.getNewParent()))
+				throw new NoSuchElementException("Cannot switch parent of node " + e.getNode()+". Either the node or the new parent node has not been reached previously.");
+			
+			removeEdge(e.getOldParent(), e.getNode());
+			newEdge(e.getNewParent(),e.getNode());
+			
+		}
+		catch(Exception ex) {
 			ex.printStackTrace();
 		}
 	}
