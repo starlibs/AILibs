@@ -40,7 +40,8 @@ public class RTNGraphGenerator implements GraphGenerator<RTNNode, RTNEdge> {
 
 	private final RTNPlanningProblem problem;
 	private final Map<String, Operation> primitiveTasks = new HashMap<>();
-	private final TaskPlannerUtil util = new TaskPlannerUtil();
+	private final TaskPlannerUtil util = new TaskPlannerUtil(null);
+	private final TFDNodeUtil tfdUtil = new TFDNodeUtil(null);
 
 	public RTNGraphGenerator(RTNPlanningProblem problem) {
 		this.problem = problem;
@@ -102,7 +103,7 @@ public class RTNGraphGenerator implements GraphGenerator<RTNNode, RTNEdge> {
 						PerformanceLogger.logEnd("copy action");
 						try {
 							PerformanceLogger.logStart("update state");
-							TFDNodeUtil.updateState(updatedState, applicableAction);
+							tfdUtil.updateState(updatedState, applicableAction);
 							PerformanceLogger.logEnd("update state");
 						} catch (Exception e) {
 							System.out.println("apply " + applicableAction.getEncoding() + " to state: " + state);

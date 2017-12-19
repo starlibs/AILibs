@@ -16,8 +16,9 @@ public class CEOCSTNUtil {
 	
 	public static Monom getStateAfterPlanExecution(Monom init, List<CEOCAction> plan) {
 		Monom state = new Monom(init);
+		TFDNodeUtil tfdUtil = new TFDNodeUtil(null);
 		for (CEOCAction a : plan)
-			TFDNodeUtil.updateState(state, a);
+			tfdUtil.updateState(state, a);
 		return state;
 	}
 }

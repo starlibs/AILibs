@@ -17,7 +17,7 @@ public class StandardProblemFactory {
 	public static RTNPlanningProblem getNestedDichotomyCreationProblem(String rootClusterName, List<String> classes) {
 		
 		/* get problem on the basis of the standard CEOC STN problem */
-		CEOCSTNPlanningProblem problem = jaicore.planning.model.task.ceocstn.StandardProblemFactory.getNestedDichotomyCreationProblem(rootClusterName, classes, true);
+		CEOCSTNPlanningProblem problem = jaicore.planning.model.task.ceocstn.StandardProblemFactory.getNestedDichotomyCreationProblem(rootClusterName, classes, true, 1, 1);
 		
 		/* now derive RTN methods from the CEOC STN methods */
 		Collection<CEOCOperation> operations = problem.getDomain().getOperations();
