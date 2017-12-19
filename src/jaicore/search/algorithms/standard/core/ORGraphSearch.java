@@ -29,6 +29,7 @@ import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.events.GraphInitializedEvent;
 import jaicore.search.structure.events.NodeParentSwitchEvent;
 import jaicore.search.structure.events.NodeReachedEvent;
+import jaicore.search.structure.events.NodeRemovedEvent;
 import jaicore.search.structure.events.NodeTypeSwitchEvent;
 import jaicore.search.structure.graphgenerator.MultipleRootGenerator;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
@@ -341,6 +342,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 					if(newNode.compareTo(node) < 0) {
 						closed.remove(node.getPoint());
 						node.setInternalLabel(newNode.getInternalLabel());
+						graphEventBus.post(new NodeRemovedEvent<Node<T,V>>(newNode));
 						graphEventBus.post(new NodeParentSwitchEvent<Node<T,V>>(node, node.getParent(), newNode.getParent()));
 						open.add(node);
 						openMap.put(node.getPoint(), node);
@@ -364,10 +366,13 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 							if(newNode.compareTo(node)< 0) {
 								q.add(newNode);
 								graphEventBus.post(new NodeParentSwitchEvent<Node<T,V>>(node, node.getParent(), newNode.getParent()));
+								graphEventBus.post(new NodeRemovedEvent<Node<T,V>>(node));
 								openMap.put(newNode.getPoint(), newNode);
 							}
-							else
+							else {
 								q.add(node);
+								graphEventBus.post(new NodeRemovedEvent<Node<T,V>>(newNode));
+							}
 							break;
 						}
 						else

@@ -233,7 +233,7 @@ public class SearchVisualizationPanel<T> extends JPanel {
 	
 	protected synchronized boolean removeEdge(final T from, final T to) {
 		for(Edge e: graph.getEachEdge()) {
-			if (e.getSourceNode().equals(from) && e.getTargetNode().equals(to)) {
+			if (e.getSourceNode().equals(this.ext2intNodeMap.get(from)) && e.getTargetNode().equals(this.ext2intNodeMap.get(to))) {
 				graph.removeEdge(e);
 				return true;
 			}
