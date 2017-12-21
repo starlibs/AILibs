@@ -4,6 +4,7 @@ import jaicore.search.algorithms.standard.core.INodeEvaluator;
 import jaicore.search.algorithms.standard.core.ORGraphSearch;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
+import jaicore.search.structure.core.OpenCollection;
 
 /**
  * A* algorithm implementation using the method design pattern.
@@ -15,6 +16,7 @@ public class BestFirstEpsilon<T, A> extends ORGraphSearch<T, A, BestFirstEpsilon
 	private final boolean absolute;
 	private final double epsilon;
 
+	
 	public BestFirstEpsilon(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, BestFirstEpsilonLabel> pNodeEvaluator, int epsilon) {
 		super(graphGenerator, pNodeEvaluator);
 		this.epsilon = epsilon;
@@ -26,11 +28,23 @@ public class BestFirstEpsilon<T, A> extends ORGraphSearch<T, A, BestFirstEpsilon
 		this.epsilon = epsilon;
 		this.absolute = false;
 	}
+	
+	public BestFirstEpsilon(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, BestFirstEpsilonLabel> pNodeEvaluator, int epsilon,OpenCollection open) {
+		super(graphGenerator, pNodeEvaluator, open);
+		this.epsilon = epsilon;
+		this.absolute = true;
+	}
+	
+	public BestFirstEpsilon(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, BestFirstEpsilonLabel> pNodeEvaluator, double epsilon,OpenCollection open ) {
+		super(graphGenerator, pNodeEvaluator, open);
+		this.epsilon = epsilon;
+		this.absolute = false;
+	}
 
 	@Override
 	public Node<T, BestFirstEpsilonLabel> nextNode() {
 		if (epsilon <= 0 || open.isEmpty())
-			return open.poll();
+			return open.next();
 		int best = open.peek().getInternalLabel().getF1();
 		double threshold = (absolute ? (best >= 0 ? best + epsilon : best - epsilon) : best * (best >= 0 ? 1 + epsilon : 1 - epsilon));
 		Node<T, BestFirstEpsilonLabel> choice = open.stream().filter(n -> n.getInternalLabel().getF1() <= threshold)

@@ -26,6 +26,8 @@ import jaicore.search.structure.core.GraphEventBus;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
 import jaicore.search.structure.core.NodeExpansionDescription;
+import jaicore.search.structure.core.OpenCollection;
+import jaicore.search.structure.core.PriorityQueueOpen;
 import jaicore.search.structure.events.GraphInitializedEvent;
 import jaicore.search.structure.events.NodeParentSwitchEvent;
 import jaicore.search.structure.events.NodeReachedEvent;
@@ -61,7 +63,8 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 	protected final Map<T, Node<T, V>> ext2int = new HashMap<>();
 
 	/* search related objects */
-	protected final Queue<Node<T, V>> open = new PriorityBlockingQueue<>();
+//	protected final Queue<Node<T, V>> open = new PriorityBlockingQueue<>();
+	protected OpenCollection<Node<T,V>> open;
 	protected final RootGenerator<T> rootGenerator;
 	protected final SuccessorGenerator<T, A> successorGenerator;
 	protected final boolean checkGoalPropertyOnEntirePath;
@@ -78,13 +81,24 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 	private List<NodeExpansionDescription<T,A>> lastExpansion;
 	private ParentDiscarding parentDiscarding;
 
+	//TODO more Constructors
 	@SuppressWarnings("unchecked")
 	public ORGraphSearch(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, V> pNodeEvaluator) {
-		this(graphGenerator,pNodeEvaluator, ParentDiscarding.NONE);
+		this(graphGenerator,pNodeEvaluator, new PriorityQueueOpen<>());
+	}
+	
+	@SuppressWarnings("unchecked")
+	public ORGraphSearch(GraphGenerator<T,A> graphGenerator, INodeEvaluator<T,V> pNodeEvaluator, ParentDiscarding pd) {
+		this(graphGenerator, pNodeEvaluator, new PriorityQueueOpen<>());
+	}
+	
+	@SuppressWarnings("unchecked")
+	public ORGraphSearch(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, V> pNodeEvaluator, OpenCollection<Node<T,V>> open) {
+		this(graphGenerator,pNodeEvaluator,open , ParentDiscarding.NONE);
 	}
 
 	@SuppressWarnings("unchecked")
-	public ORGraphSearch(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, V> pNodeEvaluator, ParentDiscarding pd) {
+	public ORGraphSearch(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, V> pNodeEvaluator, OpenCollection<Node<T,V>> open,ParentDiscarding pd) {
 		super();
 		this.rootGenerator = graphGenerator.getRootGenerator();
 		this.successorGenerator = graphGenerator.getSuccessorGenerator();
@@ -100,6 +114,9 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 
 		//init lastExpansion with an empty ArrayList
 		lastExpansion = new ArrayList<>();
+		
+		// inti open
+		this.open = open;
 		//init parentDiscarding with none
 		parentDiscarding = pd;
 
@@ -166,6 +183,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 			}
 
 			//check if the equals method is explicitly implemented.
+			//TODO peeking?
 			Method [] methods = open.peek().getPoint().getClass().getDeclaredMethods();
 			boolean containsEquals = false;
 			for(Method m : methods)
@@ -282,7 +300,8 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 									PriorityBlockingQueue<Node<T,V>> q = new PriorityBlockingQueue<>();
 									boolean added =false;
 									while(!open.isEmpty()) {
-										Node<T,V> node = open.poll();
+										//TODO polling
+										Node<T,V> node = open.next();
 										if(node.getPoint().equals(newNode.getPoint())) {
 											if(node.compareTo(newNode)<1)
 												q.add(node);
@@ -361,7 +380,8 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 					 * If newNode was found compute if it is better
 					 * than the old one and put the better back on OPEN*/
 					while(!open.isEmpty()) {
-						Node<T,V> node = open.poll();
+						//TODO polling
+						Node<T,V> node = open.next();
 						if(node.getPoint().equals(newNode.getPoint())) {
 							if(newNode.compareTo(node)< 0) {
 								q.add(newNode);
@@ -404,10 +424,11 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 	}
 
 	protected Node<T, V> nextNode() {
+		//TODO peek and poll
 		logger.info("Select for expansion: {}", open.peek());
 		if(!openMap.isEmpty())
 			openMap.remove(open.peek().getPoint());
-		return open.poll();
+		return open.next();
 	}
 
 	protected List<T> getTraversalPath(Node<T, V> n) {
