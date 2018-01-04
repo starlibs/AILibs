@@ -8,6 +8,10 @@ public class PriorityQueueOpen<E> implements OpenCollection<E> {
 
 	private PriorityBlockingQueue<E> open;
 	
+	public PriorityQueueOpen() {
+		this.open = new PriorityBlockingQueue<E>();
+	}
+	
 	@Override
 	public boolean add(E e) {
 		return open.add(e);

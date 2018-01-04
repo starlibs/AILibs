@@ -89,7 +89,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 	
 	@SuppressWarnings("unchecked")
 	public ORGraphSearch(GraphGenerator<T,A> graphGenerator, INodeEvaluator<T,V> pNodeEvaluator, ParentDiscarding pd) {
-		this(graphGenerator, pNodeEvaluator, new PriorityQueueOpen<>());
+		this(graphGenerator, pNodeEvaluator, new PriorityQueueOpen<>(), pd);
 	}
 	
 	@SuppressWarnings("unchecked")
