@@ -354,24 +354,6 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 			boolean proccessed = false;
 			
 			if(labelDefined) {
-				/*reopening, if the node is already on CLOSED */
-				if(closed.containsKey(newNode.getPoint())) {
-					Node<T,V> node = closed.get(newNode.getPoint());
-					/*update the node, if the new one is better*/
-					if(newNode.compareTo(node) < 0) {
-						closed.remove(node.getPoint());
-						node.setInternalLabel(newNode.getInternalLabel());
-						graphEventBus.post(new NodeRemovedEvent<Node<T,V>>(newNode));
-						graphEventBus.post(new NodeParentSwitchEvent<Node<T,V>>(node, node.getParent(), newNode.getParent()));
-						open.add(node);
-						openMap.put(node.getPoint(), node);
-					}
-					else {
-						
-					}
-					proccessed = true;
-				}
-				
 				/*modifing the node, if it is already on OPEN*/
 				if(openMap.containsKey(newNode.getPoint())) {
 					PriorityBlockingQueue<Node<T,V>> q = new PriorityBlockingQueue<>();
@@ -402,6 +384,27 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 					q.drainTo(open);
 					proccessed = true;
 				}
+				
+				/*reopening, if the node is already on CLOSED */
+				if(closed.containsKey(newNode.getPoint())) {
+					Node<T,V> node = closed.get(newNode.getPoint());
+					/*update the node, if the new one is better*/
+					if(newNode.compareTo(node) < 0) {
+						closed.remove(node.getPoint());
+						node.setInternalLabel(newNode.getInternalLabel());
+						
+						graphEventBus.post(new NodeRemovedEvent<Node<T,V>>(newNode));
+						graphEventBus.post(new NodeParentSwitchEvent<Node<T,V>>(node, node.getParent(), newNode.getParent()));
+						node.setParent(newNode.getParent());
+						open.add(node);
+						openMap.put(node.getPoint(), node);
+					}
+					else {
+						
+					}
+					proccessed = true;
+				}
+				
 				if(!proccessed) {
 					open.add(newNode);
 					openMap.put(newNode.getPoint(), newNode);
