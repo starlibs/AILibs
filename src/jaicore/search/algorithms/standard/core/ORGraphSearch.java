@@ -408,6 +408,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 				if(!proccessed) {
 					open.add(newNode);
 					openMap.put(newNode.getPoint(), newNode);
+					graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_open"));
 					createdCounter ++;
 				}
 				
