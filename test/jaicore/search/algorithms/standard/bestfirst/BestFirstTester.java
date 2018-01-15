@@ -1,4 +1,4 @@
-package jaicore.search.algorithms.standard;
+package jaicore.search.algorithms.standard.bestfirst;
 
 import static org.junit.Assert.assertNotNull;
 

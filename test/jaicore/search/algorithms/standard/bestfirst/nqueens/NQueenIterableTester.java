@@ -1,4 +1,4 @@
-package jaicore.search.algorithms.standard.nqueens;
+package jaicore.search.algorithms.standard.bestfirst.nqueens;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -9,6 +9,8 @@ import org.junit.Test;
 
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.search.algorithms.standard.core.ORGraphSearch;
+import jaicore.search.graphgenerators.nqueens.NQueenGenerator;
+import jaicore.search.graphgenerators.nqueens.QueenNode;
 import jaicore.search.structure.core.Node;
 import jaicore.search.structure.core.NodeExpansionDescription;
 

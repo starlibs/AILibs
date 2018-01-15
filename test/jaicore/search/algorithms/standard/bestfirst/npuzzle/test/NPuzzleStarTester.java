@@ -1,4 +1,4 @@
-package jaicore.search.algorithms.standard.npuzzle.test;
+package jaicore.search.algorithms.standard.bestfirst.npuzzle.test;
 
 import static org.junit.Assert.*;
 
@@ -10,8 +10,8 @@ import jaicore.basic.PerformanceLogger;
 import jaicore.basic.PerformanceLogger.PerformanceMeasure;
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
-import jaicore.search.algorithms.standard.npuzzle.NPuzzleNode;
-import jaicore.search.algorithms.standard.npuzzle.NPuzzleStarGenerator;
+import jaicore.search.graphgenerators.npuzzle.standard.NPuzzleNode;
+import jaicore.search.graphgenerators.npuzzle.star.NPuzzleStarGenerator;
 import jaicore.search.structure.core.Node;
 
 public class NPuzzleStarTester {

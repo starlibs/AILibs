@@ -1,4 +1,4 @@
-package jaicore.search.algorithms.standard.npuzzle.test;
+package jaicore.search.algorithms.standard.bestfirst.npuzzle.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -6,7 +6,7 @@ import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.Test;
 
-import jaicore.search.algorithms.standard.npuzzle.NPuzzleNode;
+import jaicore.search.graphgenerators.npuzzle.standard.NPuzzleNode;
 
 public class NPuzzleNodeTester {
 

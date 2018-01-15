@@ -1,4 +1,4 @@
-package jaicore.search.algorithms.standard.npuzzle;
+package jaicore.search.graphgenerators.npuzzle.standard;
 
 import java.util.ArrayList;
 import java.util.List;
