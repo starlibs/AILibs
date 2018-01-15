@@ -255,12 +255,12 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 				beforeExpansion(nodeToExpand);
 
 				if(parentDiscarding == ParentDiscarding.ALL) {
-					expandNodeWithParentDiscarding(nodeToExpand);
-					closed.put(nodeToExpand.getPoint(), nodeToExpand);
-					
+//					expandNodeWithParentDiscarding(nodeToExpand);
+					expandNode(nodeToExpand);
 				}
 				else
 					expandNode(nodeToExpand);
+				closed.put(nodeToExpand.getPoint(), nodeToExpand);
 				afterExpansion(nodeToExpand);
 			}
 		}
@@ -295,34 +295,68 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 //						assert !open.contains(newNode) && !expanded.contains(newNode.getPoint()) : "Inserted node is already in OPEN or even expanded!";
 						if(!expanded.contains(newNode.getPoint())){
 							if (newNode.getInternalLabel() != null) {
-	
-								if(parentDiscarding == ParentDiscarding.OPEN) {
-	
-									PriorityBlockingQueue<Node<T,V>> q = new PriorityBlockingQueue<>();
-									boolean added =false;
-									while(!open.isEmpty()) {
-										//TODO polling
-										Node<T,V> node = open.next();
-										if(node.getPoint().equals(newNode.getPoint())) {
-											if(node.compareTo(newNode)<1)
-												q.add(node);
+								boolean processed = false;
+								if(parentDiscarding != ParentDiscarding.NONE) {
+									/*Modifying the node, if it is already on OPEN*/
+									if(openMap.containsKey(newNode.getPoint())) {
+										PriorityBlockingQueue<Node<T,V>> q = new PriorityBlockingQueue<>();
+													
+										/*extract nodes from OPEN to q until newNode was found.
+										 * If newNode was found compute if it is better
+										 * than the old one and put the better back on OPEN*/
+										while(!open.isEmpty()) {
+											//TODO polling
+											Node<T,V> node = open.next();
+											if(node.getPoint().equals(newNode.getPoint())) {
+												if(newNode.compareTo(node)< 0) {
+													q.add(newNode);
+					//								graphEventBus.post(new NodeParentSwitchEvent<Node<T,V>>(node, node.getParent(), newNode.getParent()));
+													graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_open"));
+													graphEventBus.post(new NodeRemovedEvent<Node<T,V>>(node));
+													openMap.put(newNode.getPoint(), newNode);
+												}
+												else {
+													q.add(node);
+													graphEventBus.post(new NodeRemovedEvent<Node<T,V>>(newNode));
+												}
+												break;
+											}
 											else
-												q.add(newNode);
-											added = true;
-											createdCounter --;
-											break;
+												q.add(node);
 										}
-										else
-											q.add(node);
+										 /*reinsert q into OPEN*/
+										q.drainTo(open);
+										processed = true;
 									}
-									q.drainTo(open);
-									if(!added)
-										open.add(newNode);
 								}
-								else {
+								if(parentDiscarding == ParentDiscarding.ALL) {
+									/*reopening, if the node is already on CLOSED */
+									if(closed.containsKey(newNode.getPoint())) {
+										Node<T,V> node = closed.get(newNode.getPoint());
+										/*update the node, if the new one is better*/
+										if(newNode.compareTo(node) < 0) {
+											closed.remove(node.getPoint());
+											node.setInternalLabel(newNode.getInternalLabel());
+											
+											graphEventBus.post(new NodeRemovedEvent<Node<T,V>>(newNode));
+											graphEventBus.post(new NodeParentSwitchEvent<Node<T,V>>(node, node.getParent(), newNode.getParent()));
+											node.setParent(newNode.getParent());
+											open.add(node);
+											openMap.put(node.getPoint(), node);
+										}
+										else {
+											graphEventBus.post(new NodeRemovedEvent<Node<T,V>>(newNode));
+										}
+										processed = true;
+									}
+								}
+									
+								if(!processed) {
 									open.add(newNode);
+									openMap.put(newNode.getPoint(), newNode);
+									graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_open"));
+									createdCounter ++;
 								}
-								graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_open"));
 							} else
 								logger.warn("Not inserting node {} since its label ist missing!", newNode);
 						}
