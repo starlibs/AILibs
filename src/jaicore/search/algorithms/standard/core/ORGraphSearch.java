@@ -63,8 +63,8 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 	protected final Map<T, Node<T, V>> ext2int = new HashMap<>();
 
 	/* search related objects */
-//	protected final Queue<Node<T, V>> open = new PriorityBlockingQueue<>();
-	protected OpenCollection<Node<T,V>> open;
+	protected final Queue<Node<T, V>> open = new PriorityBlockingQueue<>();
+//	protected OpenCollection<Node<T,V>> open;
 	protected final RootGenerator<T> rootGenerator;
 	protected final SuccessorGenerator<T, A> successorGenerator;
 	protected final boolean checkGoalPropertyOnEntirePath;
@@ -81,24 +81,16 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 	private List<NodeExpansionDescription<T,A>> lastExpansion;
 	private ParentDiscarding parentDiscarding;
 
-	//TODO more Constructors
+
+
+	
 	@SuppressWarnings("unchecked")
 	public ORGraphSearch(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, V> pNodeEvaluator) {
-		this(graphGenerator,pNodeEvaluator, new PriorityQueueOpen<>());
-	}
-	
-	@SuppressWarnings("unchecked")
-	public ORGraphSearch(GraphGenerator<T,A> graphGenerator, INodeEvaluator<T,V> pNodeEvaluator, ParentDiscarding pd) {
-		this(graphGenerator, pNodeEvaluator, new PriorityQueueOpen<>(), pd);
-	}
-	
-	@SuppressWarnings("unchecked")
-	public ORGraphSearch(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, V> pNodeEvaluator, OpenCollection<Node<T,V>> open) {
-		this(graphGenerator,pNodeEvaluator,open , ParentDiscarding.NONE);
+		this(graphGenerator,pNodeEvaluator, ParentDiscarding.NONE);
 	}
 
 	@SuppressWarnings("unchecked")
-	public ORGraphSearch(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, V> pNodeEvaluator, OpenCollection<Node<T,V>> open,ParentDiscarding pd) {
+	public ORGraphSearch(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, V> pNodeEvaluator, ParentDiscarding pd) {
 		super();
 		this.rootGenerator = graphGenerator.getRootGenerator();
 		this.successorGenerator = graphGenerator.getSuccessorGenerator();
@@ -116,7 +108,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 		lastExpansion = new ArrayList<>();
 		
 		// inti open
-		this.open = open;
+//		this.open = open;
 		//init parentDiscarding with none
 		parentDiscarding = pd;
 
@@ -214,7 +206,6 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 		do {
 			step();
 			if (!solutions.isEmpty()) {
-//			if(!solutions.isEmpty() && open.peek().isGoal()){
 				return solutions.poll();
 			}
 		} while (!(terminates() || interrupted));
@@ -305,8 +296,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 										 * If newNode was found compute if it is better
 										 * than the old one and put the better back on OPEN*/
 										while(!open.isEmpty()) {
-											//TODO polling
-											Node<T,V> node = open.next();
+											Node<T,V> node = open.poll();
 											if(node.getPoint().equals(newNode.getPoint())) {
 												if(newNode.compareTo(node)< 0) {
 													q.add(newNode);
@@ -369,96 +359,6 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 		graphEventBus.post(new NodeTypeSwitchEvent<Node<T, V>>(expandedNodeInternal, "or_closed"));
 	}
 
-	/*
-	* a version of the expand Node function with additions to implement complete parentDiscarding
-	*/
-	private void expandNodeWithParentDiscarding(Node<T, V> expandedNodeInternal) {
-		/*put the node which should get expanded on expanded*/
-		logger.info("Expanding node{}", expandedNodeInternal);
-		expanded.add(expandedNodeInternal.getPoint());
-		
-		/*compute successors*/
-		successorGenerator.generateSuccessors(expandedNodeInternal.getPoint()).stream().forEach(successorDescription ->{
-			lastExpansion.add(successorDescription);
-			
-			/*creating new node*/
-			Node<T,V> newNode = newNode(expandedNodeInternal, successorDescription.getTo());
-			
-			/*defines the label for the newly created node*/
-			boolean labelDefined = labelNode(newNode);
-			boolean proccessed = false;
-			
-			if(labelDefined) {
-				if(!newNode.isGoal()){
-					/*modifing the node, if it is already on OPEN*/
-					if(openMap.containsKey(newNode.getPoint())) {
-						PriorityBlockingQueue<Node<T,V>> q = new PriorityBlockingQueue<>();
-									
-						/*extract nodes from OPEN to q until newNode was found.
-						 * If newNode was found compute if it is better
-						 * than the old one and put the better back on OPEN*/
-						while(!open.isEmpty()) {
-							//TODO polling
-							Node<T,V> node = open.next();
-							if(node.getPoint().equals(newNode.getPoint())) {
-								if(newNode.compareTo(node)< 0) {
-									q.add(newNode);
-	//								graphEventBus.post(new NodeParentSwitchEvent<Node<T,V>>(node, node.getParent(), newNode.getParent()));
-									graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_open"));
-									graphEventBus.post(new NodeRemovedEvent<Node<T,V>>(node));
-									openMap.put(newNode.getPoint(), newNode);
-								}
-								else {
-									q.add(node);
-									graphEventBus.post(new NodeRemovedEvent<Node<T,V>>(newNode));
-								}
-								break;
-							}
-							else
-								q.add(node);
-						}
-						 /*reinsert q into OPEN*/
-						q.drainTo(open);
-						proccessed = true;
-					}
-					
-					/*reopening, if the node is already on CLOSED */
-					if(closed.containsKey(newNode.getPoint())) {
-						Node<T,V> node = closed.get(newNode.getPoint());
-						/*update the node, if the new one is better*/
-						if(newNode.compareTo(node) < 0) {
-							closed.remove(node.getPoint());
-							node.setInternalLabel(newNode.getInternalLabel());
-							
-							graphEventBus.post(new NodeRemovedEvent<Node<T,V>>(newNode));
-							graphEventBus.post(new NodeParentSwitchEvent<Node<T,V>>(node, node.getParent(), newNode.getParent()));
-							node.setParent(newNode.getParent());
-							open.add(node);
-							openMap.put(node.getPoint(), node);
-						}
-						else {
-							graphEventBus.post(new NodeRemovedEvent<Node<T,V>>(newNode));
-						}
-						proccessed = true;
-					}
-					
-					if(!proccessed) {
-						open.add(newNode);
-						openMap.put(newNode.getPoint(), newNode);
-						graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_open"));
-						createdCounter ++;
-					}
-					
-				}
-				else {
-					logger.warn("Not inserting node {} since its label is missing!" ,newNode);
-				}
-			}
-		});
-		
-		expandedCounter ++;
-		graphEventBus.post(new NodeTypeSwitchEvent<Node<T,V>>(expandedNodeInternal, "or_closed"));
-	}
 
 	public GraphEventBus<Node<T, V>> getEventBus() {
 		return graphEventBus;
@@ -469,7 +369,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 		logger.info("Select for expansion: {}", open.peek());
 		if(!openMap.isEmpty())
 			openMap.remove(open.peek().getPoint());
-		return open.next();
+		return open.poll();
 	}
 
 	protected List<T> getTraversalPath(Node<T, V> n) {
