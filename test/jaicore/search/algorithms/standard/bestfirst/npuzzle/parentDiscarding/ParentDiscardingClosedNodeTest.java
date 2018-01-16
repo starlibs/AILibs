@@ -1,4 +1,4 @@
-package jaicore.search.algorithms.standard.npuzzle.parentDiscarding;
+package jaicore.search.algorithms.standard.bestfirst.npuzzle.parentDiscarding;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -10,8 +10,6 @@ import jaicore.basic.PerformanceLogger;
 import jaicore.basic.PerformanceLogger.PerformanceMeasure;
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.search.algorithms.standard.astar.AStar;
-import jaicore.search.algorithms.standard.bestfirst.npuzzle.parentDiscarding.PDPuzzleGenerator;
-import jaicore.search.algorithms.standard.bestfirst.npuzzle.parentDiscarding.PDPuzzleNode;
 import jaicore.search.algorithms.standard.core.ParentDiscarding;
 import jaicore.search.structure.core.Node;
 

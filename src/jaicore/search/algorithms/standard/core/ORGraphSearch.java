@@ -274,7 +274,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 
 			/* if node is not a goal node, put it on open */
 			if (labelDefined) {
-				if (!newNode.isGoal()) {
+//				if (!newNode.isGoal()) {
 					if (beforeInsertionIntoOpen(newNode)) {
 						logger.info("Inserting successor {} of {} to OPEN.", newNode, expandedNodeInternal);
 //						assert !open.contains(newNode) && !expanded.contains(newNode.getPoint()) : "Inserted node is already in OPEN or even expanded!";
@@ -294,8 +294,8 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 											if(node.getPoint().equals(newNode.getPoint())) {
 												if(newNode.compareTo(node)< 0) {
 													q.add(newNode);
-					//								graphEventBus.post(new NodeParentSwitchEvent<Node<T,V>>(node, node.getParent(), newNode.getParent()));
-													graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_open"));
+				
+													graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_" + (newNode.isGoal()?"solution" : "open")));
 													graphEventBus.post(new NodeRemovedEvent<Node<T,V>>(node));
 													openMap.put(newNode.getPoint(), newNode);
 												}
@@ -308,7 +308,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 											else
 												q.add(node);
 										}
-										 /*reinsert q into OPEN*/
+//										 /*reinsert q into OPEN*/   
 										q.drainTo(open);
 										processed = true;
 									}
@@ -338,14 +338,14 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 								if(!processed) {
 									open.add(newNode);
 									openMap.put(newNode.getPoint(), newNode);
-									graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_open"));
+									graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_"+ (newNode.isGoal() ? "solution" : "open")));
 									createdCounter ++;
 								}
 							} else
 								logger.warn("Not inserting node {} since its label ist missing!", newNode);
 //						}
 					}
-				}
+//				}
 			}
 		});
 		/* update statistics, send closed notifications, and possibly return a solution */
