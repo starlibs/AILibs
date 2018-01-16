@@ -1,11 +1,11 @@
-package jaicore.search.algorithms.standard.npuzzle.parentDiscarding;
+package jaicore.search.algorithms.standard.bestfirst.npuzzle.parentDiscarding;
 
 import static org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import jaicore.search.algorithms.standard.npuzzle.NPuzzleNode;
+import jaicore.search.graphgenerators.npuzzle.standard.NPuzzleNode;
 
 public class PDPuzzleNodeTester {
 	PDPuzzleNode n;

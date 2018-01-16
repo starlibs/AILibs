@@ -1,8 +1,8 @@
-package jaicore.search.algorithms.standard.npuzzle.parentDiscarding;
+package jaicore.search.algorithms.standard.bestfirst.npuzzle.parentDiscarding;
 
 import java.util.Arrays;
 
-import jaicore.search.algorithms.standard.npuzzle.NPuzzleNode;
+import jaicore.search.graphgenerators.npuzzle.standard.NPuzzleNode;
 
 public class PDPuzzleNode extends NPuzzleNode {
 

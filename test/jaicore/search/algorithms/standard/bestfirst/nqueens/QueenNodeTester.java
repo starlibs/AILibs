@@ -1,4 +1,4 @@
-package jaicore.search.algorithms.standard.nqueens;
+package jaicore.search.algorithms.standard.bestfirst.nqueens;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -9,6 +9,8 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import jaicore.search.graphgenerators.nqueens.QueenNode;
 
 public class QueenNodeTester {
 		

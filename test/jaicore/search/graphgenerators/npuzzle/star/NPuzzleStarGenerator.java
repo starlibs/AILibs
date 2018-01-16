@@ -1,7 +1,9 @@
-package jaicore.search.algorithms.standard.npuzzle;
+package jaicore.search.graphgenerators.npuzzle.star;
 
 import java.util.Set;
 
+import jaicore.search.graphgenerators.npuzzle.standard.NPuzzleGenerator;
+import jaicore.search.graphgenerators.npuzzle.standard.NPuzzleNode;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
 
 public class NPuzzleStarGenerator extends NPuzzleGenerator {

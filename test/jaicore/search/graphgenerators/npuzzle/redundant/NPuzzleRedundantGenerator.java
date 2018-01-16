@@ -1,4 +1,6 @@
-package jaicore.search.algorithms.standard.npuzzle;
+package jaicore.search.graphgenerators.npuzzle.redundant;
+
+import jaicore.search.graphgenerators.npuzzle.standard.NPuzzleGenerator;
 
 public class NPuzzleRedundantGenerator extends NPuzzleGenerator {
 

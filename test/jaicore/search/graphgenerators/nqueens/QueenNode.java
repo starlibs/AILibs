@@ -1,4 +1,4 @@
-package jaicore.search.algorithms.standard.nqueens;
+package jaicore.search.graphgenerators.nqueens;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -200,7 +200,7 @@ public class QueenNode {
 		for(int i = 0; i < dimension; i++) {
 			for(int j = 0; j < dimension; j++) {
 //				if(positions.contains(new Position(i,j)))
-				if(positions.get(i) == j)
+				if(positions.size() > i && positions.get(i) == j)
 					s+= " Q |";
 				else
 					s+= "   |";

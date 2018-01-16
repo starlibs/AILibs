@@ -1,4 +1,4 @@
-package jaicore.search.algorithms.standard;
+package jaicore.search.algorithms.standard.gbf;
 
 import static org.junit.Assert.assertNotNull;
 
