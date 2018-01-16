@@ -228,6 +228,8 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 
 			if(!terminates())
 				step();
+			else
+				return null;
 		}
 
 		return lastExpansion;
@@ -589,16 +591,21 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 
 	@Override
 	public boolean hasNext() {
-		if(lastExpansion.isEmpty())
-			return false;
+		if(!initialized){
+			initGraph();
+			step();
+		}
 		else
-			return true;
+			step();
+		return !this.lastExpansion.isEmpty();
 	}
 
 	@Override
 	public List<NodeExpansionDescription<T,A>> next(){
-		step();
-		return lastExpansion;
+		if(hasNext())
+			return this.lastExpansion;
+		else
+			return null;
 	}
 
 

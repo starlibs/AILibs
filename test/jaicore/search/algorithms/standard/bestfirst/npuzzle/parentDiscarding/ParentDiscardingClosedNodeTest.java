@@ -12,6 +12,7 @@ import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.search.algorithms.standard.astar.AStar;
 import jaicore.search.algorithms.standard.core.ParentDiscarding;
 import jaicore.search.structure.core.Node;
+import jaicore.search.structure.core.NodeExpansionDescription;
 
 public class ParentDiscardingClosedNodeTest {
 	
@@ -82,9 +83,11 @@ public class ParentDiscardingClosedNodeTest {
 		assert(solutionPath.contains(p3));
 
 		assertNotNull(solutionPath);
+
+		
 			
 		PerformanceLogger.printStatsAndClear(PerformanceMeasure.TIME);
-		while(true);
+//		while(true);
 	}
 
 }
