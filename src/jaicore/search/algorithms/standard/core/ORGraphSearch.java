@@ -236,13 +236,42 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 
 	}
 
-	protected void step() {
+//	protected void step() {
+//		lastExpansion.clear();
+//		if (beforeSelection()) {
+//			Node<T, V> nodeToExpand = nextNode();
+////			TODO assert warning
+////			assert nodeToExpand == null || !expanded.contains(nodeToExpand.getPoint()) : "Node selected for expansion already has been expanded: " + nodeToExpand;
+//			if (nodeToExpand != null) {
+//				afterSelection(nodeToExpand);
+//				assert ext2int.containsKey(nodeToExpand.getPoint()) : "Trying to expand a node whose point is not available in the ext2int map";
+//				beforeExpansion(nodeToExpand);
+//				expandNode(nodeToExpand);
+//				closed.put(nodeToExpand.getPoint(), nodeToExpand);
+//				afterExpansion(nodeToExpand);
+//			}
+//		}
+//		if (Thread.interrupted())
+//			interrupted = true;
+//	}
+	protected void step(){
+		if(beforeSelection()){
+			Node<T,V> nodeToExpand = nextNode();
+			step(nodeToExpand);
+		}
+		if(Thread.interrupted())
+			interrupted = true;
+	}
+	
+	public void step(Node<T,V> nodeToExpand){
 		lastExpansion.clear();
-		if (beforeSelection()) {
-			Node<T, V> nodeToExpand = nextNode();
-//			TODO assert warning
-//			assert nodeToExpand == null || !expanded.contains(nodeToExpand.getPoint()) : "Node selected for expansion already has been expanded: " + nodeToExpand;
-			if (nodeToExpand != null) {
+		if(beforeSelection()){
+			if(open.contains(nodeToExpand))
+				open.remove(nodeToExpand);
+			if(openMap.containsKey(nodeToExpand))
+				openMap.remove(nodeToExpand);
+			if(nodeToExpand!= null){
+				if(openMap.containsKey(nodeToExpand))
 				afterSelection(nodeToExpand);
 				assert ext2int.containsKey(nodeToExpand.getPoint()) : "Trying to expand a node whose point is not available in the ext2int map";
 				beforeExpansion(nodeToExpand);
@@ -251,8 +280,8 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 				afterExpansion(nodeToExpand);
 			}
 		}
-		if (Thread.interrupted())
-			interrupted = true;
+		if(Thread.interrupted())
+			interrupted =true;
 	}
 
 	private void expandNode(Node<T, V> expandedNodeInternal) {
@@ -622,4 +651,14 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 		annotationsOfSolutionsReturnedByNodeEvaluator.put(solution.getSolution(), solution.getAnnotation());
 		solutions.add(solution.getSolution());
 	}
+
+	public Queue<Node<T, V>> getOpen() {
+		return open;
+	}
+
+	public HashMap<T, Node<T, V>> getOpenMap() {
+		return openMap;
+	}
+	
+	
 }
