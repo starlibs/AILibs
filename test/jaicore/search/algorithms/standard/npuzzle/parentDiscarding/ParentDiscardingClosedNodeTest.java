@@ -1,6 +1,6 @@
 package jaicore.search.algorithms.standard.npuzzle.parentDiscarding;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
 
 import java.util.List;
 
@@ -10,9 +10,9 @@ import jaicore.basic.PerformanceLogger;
 import jaicore.basic.PerformanceLogger.PerformanceMeasure;
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.search.algorithms.standard.astar.AStar;
-import jaicore.search.algorithms.standard.bestfirst.BestFirst;
+import jaicore.search.algorithms.standard.bestfirst.npuzzle.parentDiscarding.PDPuzzleGenerator;
+import jaicore.search.algorithms.standard.bestfirst.npuzzle.parentDiscarding.PDPuzzleNode;
 import jaicore.search.algorithms.standard.core.ParentDiscarding;
-import jaicore.search.algorithms.standard.npuzzle.NPuzzleNode;
 import jaicore.search.structure.core.Node;
 
 public class ParentDiscardingClosedNodeTest {
@@ -86,7 +86,7 @@ public class ParentDiscardingClosedNodeTest {
 		assertNotNull(solutionPath);
 			
 		PerformanceLogger.printStatsAndClear(PerformanceMeasure.TIME);
-//		while(true);
+		while(true);
 	}
 
 }

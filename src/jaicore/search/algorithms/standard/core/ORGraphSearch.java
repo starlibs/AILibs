@@ -244,13 +244,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 				afterSelection(nodeToExpand);
 				assert ext2int.containsKey(nodeToExpand.getPoint()) : "Trying to expand a node whose point is not available in the ext2int map";
 				beforeExpansion(nodeToExpand);
-
-				if(parentDiscarding == ParentDiscarding.ALL) {
-//					expandNodeWithParentDiscarding(nodeToExpand);
-					expandNode(nodeToExpand);
-				}
-				else
-					expandNode(nodeToExpand);
+				expandNode(nodeToExpand);
 				closed.put(nodeToExpand.getPoint(), nodeToExpand);
 				afterExpansion(nodeToExpand);
 			}
@@ -284,7 +278,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 					if (beforeInsertionIntoOpen(newNode)) {
 						logger.info("Inserting successor {} of {} to OPEN.", newNode, expandedNodeInternal);
 //						assert !open.contains(newNode) && !expanded.contains(newNode.getPoint()) : "Inserted node is already in OPEN or even expanded!";
-						if(!expanded.contains(newNode.getPoint())){
+//						if(!expanded.contains(newNode.getPoint())){
 							if (newNode.getInternalLabel() != null) {
 								boolean processed = false;
 								if(parentDiscarding != ParentDiscarding.NONE) {
@@ -349,7 +343,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 								}
 							} else
 								logger.warn("Not inserting node {} since its label ist missing!", newNode);
-						}
+//						}
 					}
 				}
 			}

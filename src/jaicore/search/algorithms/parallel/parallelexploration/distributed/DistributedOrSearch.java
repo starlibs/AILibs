@@ -108,7 +108,7 @@ public class DistributedOrSearch<T, A, V extends Comparable<V>> extends ORGraphS
 		/* return all the not used paths to open */
 //		open.addAll(toPutBack);
 //		logger.info("Distributing " + nodes.size() + " of " + max);
-		nodes.add(open.next());
+		nodes.add(open.poll());
 		return nodes;
 	}
 
