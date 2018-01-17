@@ -102,7 +102,7 @@ public class ParallelizedORGraphSearch<T, A, V extends Comparable<V>> extends OR
 				} catch (InterruptedException e) {
 					graphEventBus.post(new NodeTypeSwitchEvent<>(node, "or_timedout"));
 					label = timeoutNodeEvaluator.f(node);
-				} catch (Exception e) {
+				} catch (Throwable e) {
 					graphEventBus.post(new NodeTypeSwitchEvent<>(node, "or_ffail"));
 					e.printStackTrace();
 				}
@@ -120,6 +120,8 @@ public class ParallelizedORGraphSearch<T, A, V extends Comparable<V>> extends OR
 					else
 						graphEventBus.post(new NodeTypeSwitchEvent<>(node, "or_solution"));
 				}
+				else
+					graphEventBus.post(new NodeTypeSwitchEvent<>(node, "or_ffail"));
 
 				/* in any case, free the resources to compute f-values */
 				activeJobs.decrementAndGet();

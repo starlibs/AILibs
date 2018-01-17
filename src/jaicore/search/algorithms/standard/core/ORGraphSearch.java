@@ -72,6 +72,13 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 	private final HashMap<T,Node<T,V>> closed = new HashMap<>();
 	private final HashMap<T,Node<T,V>> openMap = new HashMap<>();
 	private final boolean solutionReportingNodeEvaluator;
+	
+	protected INodeSelector<T, V> nodeSelector = open -> {
+		logger.info("Select for expansion: {}", open.peek());
+		if(!openMap.isEmpty())
+			openMap.remove(open.peek().getPoint());
+		return open.poll();
+	};
 
 	private List<NodeExpansionDescription<T,A>> lastExpansion;
 	private ParentDiscarding parentDiscarding;
@@ -164,16 +171,16 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 			}
 
 			//check if the equals method is explicitly implemented.
-			Method [] methods = open.peek().getPoint().getClass().getDeclaredMethods();
-			boolean containsEquals = false;
-			for(Method m : methods)
-				if(m.getName() == "equals") {
-					containsEquals = true;
-					break;
-				}
-
-			if(!containsEquals)
-				this.parentDiscarding = ParentDiscarding.NONE;
+//			Method [] methods = open.peek().getPoint().getClass().getDeclaredMethods();
+//			boolean containsEquals = false;
+//			for(Method m : methods)
+//				if(m.getName() == "equals") {
+//					containsEquals = true;
+//					break;
+//				}
+//
+//			if(!containsEquals)
+//				this.parentDiscarding = ParentDiscarding.NONE;
 
 		}
 	}
@@ -225,7 +232,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 	protected void step() {
 		lastExpansion.clear();
 		if (beforeSelection()) {
-			Node<T, V> nodeToExpand = nextNode();
+			Node<T, V> nodeToExpand = nodeSelector.selectNode(open);
 //			TODO assert warning
 //			assert nodeToExpand == null || !expanded.contains(nodeToExpand.getPoint()) : "Node selected for expansion already has been expanded: " + nodeToExpand;
 			if (nodeToExpand != null) {
@@ -388,13 +395,6 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 
 	public GraphEventBus<Node<T, V>> getEventBus() {
 		return graphEventBus;
-	}
-
-	protected Node<T, V> nextNode() {
-		logger.info("Select for expansion: {}", open.peek());
-		if(!openMap.isEmpty())
-			openMap.remove(open.peek().getPoint());
-		return open.poll();
 	}
 
 	protected List<T> getTraversalPath(Node<T, V> n) {
@@ -645,5 +645,13 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 			throw new IllegalStateException("Solution is reported for the second time already!");
 		annotationsOfSolutionsReturnedByNodeEvaluator.put(solution.getSolution(), solution.getAnnotation());
 		solutions.add(solution.getSolution());
+	}
+
+	public INodeSelector<T, V> getNodeSelector() {
+		return nodeSelector;
+	}
+
+	public void setNodeSelector(INodeSelector<T, V> nodeSelector) {
+		this.nodeSelector = nodeSelector;
 	}
 }

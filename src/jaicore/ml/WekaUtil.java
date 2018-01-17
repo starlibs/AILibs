@@ -21,7 +21,6 @@ import jaicore.ml.core.SimpleLabeledInstanceImpl;
 import jaicore.ml.core.WekaCompatibleInstancesImpl;
 import jaicore.ml.interfaces.LabeledInstance;
 import weka.classifiers.Classifier;
-import weka.classifiers.bayes.NaiveBayesMultinomial;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
@@ -30,6 +29,8 @@ import weka.core.Instances;
 import weka.core.OptionHandler;
 import weka.core.json.JSONInstances;
 import weka.core.json.JSONNode;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.Remove;
 
 public class WekaUtil {
 
@@ -48,13 +49,13 @@ public class WekaUtil {
 		classifiers.add("weka.classifiers.lazy.IBk");
 		return classifiers;
 	}
-	
+
 	public static Collection<String> getMetaLearners() {
 		Collection<String> classifiers = new ArrayList<>();
 		classifiers.add("weka.classifiers.functions.AdaBoostM1");
 		return classifiers;
 	}
-	
+
 	public static <L> Instances fromJAICoreInstances(final WekaCompatibleInstancesImpl instances) {
 
 		/* create basic attribute entries */
@@ -83,7 +84,7 @@ public class WekaUtil {
 		} else {
 			attributes.add(new Attribute("label"));
 		}
-		
+
 		/* create instances object and insert the data points */
 		Instances wekaInstances = new Instances("JAICore-extracted dataset", attributes, instances.size());
 		wekaInstances.setClassIndex(numAttributes);
@@ -179,7 +180,7 @@ public class WekaUtil {
 			}
 			inst.add(wekaInst.value(att));
 		}
-		inst.setLabel(wekaInst.classAttribute().value((int)wekaInst.classValue()));
+		inst.setLabel(wekaInst.classAttribute().value((int) wekaInst.classValue()));
 		return inst;
 	}
 
@@ -562,8 +563,7 @@ public class WekaUtil {
 	}
 
 	/**
-	 * Compute indices of instances of the original data set that are contained in the given subset.
-	 * This does only work for data sets that contain an instance at most once!
+	 * Compute indices of instances of the original data set that are contained in the given subset. This does only work for data sets that contain an instance at most once!
 	 * 
 	 * @param dataset
 	 * @param subset
@@ -586,5 +586,28 @@ public class WekaUtil {
 			indices[i] = index;
 		}
 		return indices;
+	}
+	
+	public static Instance useFilterOnSingleInstance(Instance instance, Filter filter) throws Exception {
+		Instances data = new Instances(instance.dataset());
+		data.clear();
+		data.add(instance);
+		Instances filteredInstances = Filter.useFilter(data, filter);
+		return filteredInstances.firstInstance();
+	}
+	
+	public static Instances removeClassAttribute(Instances data) throws Exception {
+		Remove remove = new Remove();
+		remove.setAttributeIndices("" + (data.classIndex() + 1));
+		remove.setInputFormat(data);
+		Instances reducedInstances = Filter.useFilter(data, remove);
+		return reducedInstances;
+	}
+	
+	public static Instance removeClassAttribute(Instance inst) throws Exception {
+		Remove remove = new Remove();
+		remove.setAttributeIndices("" + (inst.classIndex() + 1));
+		remove.setInputFormat(inst.dataset());
+		return useFilterOnSingleInstance(inst, remove);
 	}
 }

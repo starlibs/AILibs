@@ -191,6 +191,10 @@ public class QueenNode {
 	
 	@Override
 	public String toString() {
+		return positions.toString();
+	}
+	
+	public String boardVisualizationAsString() {
 		String s = "";
 		for(int i = 0; i< dimension; i++) 
 			s+="----";

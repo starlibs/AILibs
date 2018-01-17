@@ -45,7 +45,7 @@ public class ReductionOptimizer implements Classifier {
 		Instances validate = dataSplit.get(1);
 		BestFirstEpsilon<RestProblem, Decision> search = new BestFirstEpsilon<RestProblem, Decision>(new ReductionGraphGenerator(rand, train), n -> {
 			return new BestFirstEpsilonLabel(getLossForClassifier(getTreeFromSolution(n.externalPath(), data, false), data), n.path().size() * -1);
-		}, 0.1);
+		}, 0.1, false);
 
 		SimpleGraphVisualizationWindow<Node<RestProblem, BestFirstEpsilonLabel>> window = new SimpleGraphVisualizationWindow<>(search.getEventBus());
 		window.getPanel().setTooltipGenerator(new TooltipGenerator<Node<RestProblem, BestFirstEpsilonLabel>>() {

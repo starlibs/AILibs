@@ -28,6 +28,9 @@ artifacts {
 dependencies {
 	// Apache Commons Lang3
 	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.6'
+	
+	// Owner Framework
+	compile group: 'org.aeonbits.owner', name: 'owner-java8', version:'1.0.6'
 
 	// Graph Stream
 	compile group: 'org.graphstream', name: 'gs-core', version: '1.1.1'

@@ -15,26 +15,15 @@ public class NQueenTester {
 	
 	@Test
 	public void test(){
-		final int x = 8;
+		final int x = 20;
 				
 		NQueenGenerator gen = new NQueenGenerator(x);
 		
-		Random r = new Random();
+		IPolicy<QueenNode, String, Double> randomPolicy = new UniformRandomPolicy<>(new Random(1));
+		IPolicy<QueenNode, String, Double> ucb = new UCBPolicy<>();
 		
-		IPolicy<QueenNode, String, Double> randomPolicy = new IPolicy<QueenNode, String, Double>() {
-			
-			private Random r = new Random(0);
-			
-			@Override
-			public String getAction(QueenNode node, List<String> actions) {
-				if (actions.isEmpty())
-					throw new IllegalArgumentException("Cannot determine action if no actions are given!");
-				if (actions.size() == 1)
-					return actions.get(0);
-				return actions.get(r.nextInt(actions.size() - 1));
-			}
-		};
-		MCTS<QueenNode, String, Double> search = new MCTS<>(gen, randomPolicy, randomPolicy, n-> x - (double)n.getPoint().getNumberOfQueens());
+		
+		MCTS<QueenNode, String, Double> search = new MCTS<>(gen, ucb, randomPolicy, n-> (double)n.getPoint().getNumberOfQueens());
 		
 //		new SimpleGraphVisualizationWindow<>(search.getEventBus()).getPanel().setTooltipGenerator(n->n.getPoint().toString());
 //		SimpleGraphVisualizationWindow<Node<QueenNode,Double>> win = new SimpleGraphVisualizationWindow<>(search.getEventBus());
