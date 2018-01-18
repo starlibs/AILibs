@@ -87,7 +87,7 @@ public class QueenNodeTester {
 	}
 
 	@Test
-	public void testGetNumberOfAttackedCellsInNextRow() {
+	public void testGetNumberOfAttackedCellsInNextRow() throws InterruptedException {
 		assertEquals(n2.getNumberOfAttackedCellsInNextRow(),3);
 	}
 	

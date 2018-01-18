@@ -17,9 +17,9 @@ import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.graphvisualizer.TooltipGenerator;
 import jaicore.search.algorithms.interfaces.IORGraphSearchFactory;
 import jaicore.search.algorithms.interfaces.IObservableORGraphSearch;
-import jaicore.search.algorithms.parallel.parallelevaluation.local.core.ParallelizedORGraphSearch;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.DistributedSearchCommunicationLayer;
 import jaicore.search.algorithms.standard.core.INodeEvaluator;
+import jaicore.search.algorithms.standard.core.ORGraphSearch;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
 
@@ -184,7 +184,13 @@ public class DistributedOrSearchCoworker<T, A, V extends Comparable<V>> {
 		String strClassPath = System.getProperty("java.class.path");
 		logger.info("Classpath is " + strClassPath);
 		
-		IORGraphSearchFactory<T, A, V> factory = (threads == 1 ? (gen, eval) -> new jaicore.search.algorithms.standard.core.ORGraphSearch<>(gen, eval) : (gen, eval) -> new ParallelizedORGraphSearch<>(gen, eval, threads, 1000));
+		IORGraphSearchFactory<T, A, V> factory = (gen, eval) -> {
+			ORGraphSearch<T, A, V> search = new jaicore.search.algorithms.standard.core.ORGraphSearch<>(gen, eval);
+			if (threads > 1)
+				search.parallelizeNodeExpansion(threads);
+			search.setTimeoutForComputationOfF(1000, n -> null);
+			return search;
+		};
 		DistributedSearchCommunicationLayer<T, A, V> communicationLayer = new FolderBasedDistributedSearchCommunicationLayer<>(folder, false);
 		DistributedOrSearchCoworker<T, A, V> coworker = new DistributedOrSearchCoworker<>(factory, communicationLayer, id, uptime, searchTime, showGraph);
 		if (args.length > 5) {

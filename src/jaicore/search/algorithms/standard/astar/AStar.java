@@ -28,15 +28,16 @@ public class AStar<T, A> extends BestFirst<T, A> {
 		}
 
 		@Override
-		public Double f(Node<T,Double> node) throws Exception {
-			List<Node<T,Double>> path = node.path();
+		public Double f(Node<T,?> node) throws Exception {
+			List<?> path = node.path();
 			int depth = path.size() - 1;
 			double pathCost = 0;
 			double heuristic = h.f(node);
 			if (depth > 0) {
-				Iterator<Node<T,Double>> it = path.iterator();
-				Node<T,Double> parent = it.next();
-				Node<T,Double> current;
+				@SuppressWarnings("unchecked")
+				Iterator<Node<T,?>> it = (Iterator<Node<T, ?>>) path.iterator();
+				Node<T,?> parent = it.next();
+				Node<T,?> current;
 				while (it.hasNext()) {
 					current = it.next();
 					pathCost += g.g(parent, current);

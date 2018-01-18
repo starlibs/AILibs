@@ -302,10 +302,13 @@ public class QueenNode {
 	 * Returns the number of attacked cells in the next free row from top down.
 	 * @return
 	 * 		The number of attacked cells in the next row.
+	 * @throws InterruptedException 
 	 */
-	public int getNumberOfAttackedCellsInNextRow() {
+	public int getNumberOfAttackedCellsInNextRow() throws InterruptedException {
 		int attackedCells = 0;
 		for(int i = 0; i < dimension; i++) {
+			if (Thread.interrupted())
+				throw new InterruptedException();
 			if(this.attack(dimension-1, i))
 				attackedCells ++;
 		}

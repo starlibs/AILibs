@@ -26,6 +26,7 @@ import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.InstanceComparator;
 import weka.core.Instances;
+import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.json.JSONInstances;
 import weka.core.json.JSONNode;
@@ -225,6 +226,17 @@ public class WekaUtil {
 		return sb.toString();
 	}
 
+	public static Collection<Option> getOptionsOfWekaAlgorithm(final Object o) {
+		List<Option> options = new ArrayList<>();
+		if (!(o instanceof OptionHandler))
+			return options;
+		OptionHandler oh = (OptionHandler)o;
+		Enumeration<Option> optionEnum = oh.listOptions();
+		while (optionEnum.hasMoreElements())
+			options.add(optionEnum.nextElement());
+		return options;
+	}
+	
 	public static List<String> getClassNames(final Instance instance) {
 		List<String> names = new ArrayList<>();
 		Enumeration<Object> namesEnumration = instance.classAttribute().enumerateValues();
