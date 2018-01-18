@@ -5,6 +5,7 @@ import jaicore.search.algorithms.standard.core.INodeSelector;
 import jaicore.search.algorithms.standard.core.ORGraphSearch;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
+import jaicore.search.structure.core.OpenCollection;
 
 /**
  * A* algorithm implementation using the method design pattern.
@@ -16,6 +17,7 @@ public class BestFirstEpsilon<T, A> extends ORGraphSearch<T, A, BestFirstEpsilon
 	private final boolean absolute;
 	private final double epsilon;
 
+	
 	public BestFirstEpsilon(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, BestFirstEpsilonLabel> pNodeEvaluator, int epsilon) {
 		this(graphGenerator, pNodeEvaluator, epsilon, true);
 	}

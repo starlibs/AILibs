@@ -1,11 +1,12 @@
 package jaicore.search;
 
+import static org.junit.Assert.assertNotNull;
+
 import java.util.ArrayList;
 import java.util.Collection;
 
 import org.junit.Test;
 
-import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.NodeExpansionDescription;
@@ -54,8 +55,9 @@ public class SimplePathProblemTester {
 		};
 		
 		BestFirst<Integer, Object> bf = new BestFirst<>(gen, n -> 0.0);
-		new SimpleGraphVisualizationWindow<>(bf.getEventBus()).getPanel().setTooltipGenerator(n -> n.getPoint().toString());
-		bf.nextSolution();
-		while (true);
+//		new SimpleGraphVisualizationWindow<>(bf.getEventBus()).getPanel().setTooltipGenerator(n -> n.getPoint().toString());
+		assertNotNull(bf.nextSolution());
+		
+//		while (true);
 	}
 }

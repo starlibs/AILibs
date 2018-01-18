@@ -53,7 +53,9 @@ public class ParentDiscardingTest {
 		AStar<PDPuzzleNode,String> search2 = new AStar<>(gen2,
 				(n1,n2)->{
 					double g = 0.0;
-					if(n2.getPoint().getBoard()[0][0]== 2)
+					if(n2.getPoint().getBoard()[0][1]== 0)
+						return 3.0;
+					if(n1.getPoint().getBoard()[0][1] == 0)
 						return 3.0;
 					if(n2.getPoint().getBoard()[1][1] == 0)
 						return 1.0;
@@ -66,9 +68,11 @@ public class ParentDiscardingTest {
 
 		SimpleGraphVisualizationWindow<Node<PDPuzzleNode,Double>> win = new SimpleGraphVisualizationWindow<>(search.getEventBus());
 		win.getPanel().setTooltipGenerator(n->n.getPoint().toString());
+		win.setTitle("Search");
 		
 		SimpleGraphVisualizationWindow<Node<PDPuzzleNode,Double>> win2 = new SimpleGraphVisualizationWindow<>(search2.getEventBus());
 		win2.getPanel().setTooltipGenerator(n->n.getPoint().toString());
+		win2.setTitle("Search2");
 		
 		/*search for solution*/
 		PerformanceLogger.logStart("search");
