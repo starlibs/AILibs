@@ -1,6 +1,7 @@
 package jaicore.search.algorithms.standard.bestfirst;
 
 import jaicore.search.algorithms.standard.core.INodeEvaluator;
+import jaicore.search.algorithms.standard.core.INodeSelector;
 import jaicore.search.algorithms.standard.core.ORGraphSearch;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
