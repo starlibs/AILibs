@@ -20,7 +20,6 @@ import jaicore.ml.classification.multiclass.reduction.MCTreeNodeLeaf;
 import jaicore.search.algorithms.standard.bestfirst.BestFirstEpsilon;
 import jaicore.search.algorithms.standard.bestfirst.BestFirstEpsilonLabel;
 import jaicore.search.structure.core.Node;
-import jaicore.search.structure.core.NodeExpansionDescription;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.rules.OneR;
@@ -69,11 +68,11 @@ public class ReductionOptimizer implements Classifier {
 		System.out.println(solutions.size());
 
 		/* select */
-		List<RestProblem> bestSolution = solutions.stream().min((s1, s2) -> search.getAnnotationOfReturnedSolution(s1).f().getF1() - search.getAnnotationOfReturnedSolution(s2).f().getF1()).get();
+		List<RestProblem> bestSolution = solutions.stream().min((s1, s2) -> search.getFOfReturnedSolution(s1).getF1() - search.getFOfReturnedSolution(s2).getF1()).get();
 		root = getTreeFromSolution(bestSolution, data, true);
 		root.buildClassifier(data);
 		System.out.println(root.toStringWithOffset());
-		System.out.println(search.getAnnotationOfReturnedSolution(bestSolution).f().getF1());
+		System.out.println(search.getFOfReturnedSolution(bestSolution).getF1());
 	}
 
 	@Override

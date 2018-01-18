@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory;
 import com.google.common.eventbus.Subscribe;
 
 import jaicore.search.algorithms.interfaces.IObservableORGraphSearch;
-import jaicore.search.algorithms.interfaces.solutionannotations.SolutionAnnotation;
 import jaicore.search.structure.core.GraphEventBus;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
@@ -40,7 +39,6 @@ import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 public class ORGraphSearch<T, A, V extends Comparable<V>>
 		implements IObservableORGraphSearch<T, A, V>, Iterable<List<NodeExpansionDescription<T, A>>>, Iterator<List<NodeExpansionDescription<T, A>>> {
-	// public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservableORGraphSearch<T, A, V>, Iterable<List<T>>, Iterator<List<T>> {
 
 	private static final Logger logger = LoggerFactory.getLogger(ORGraphSearch.class);
 
@@ -60,7 +58,6 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 
 	/* search related objects */
 	protected final Queue<Node<T, V>> open = new PriorityBlockingQueue<>();
-	// protected OpenCollection<Node<T,V>> open;
 	protected final RootGenerator<T> rootGenerator;
 	protected final SuccessorGenerator<T, A> successorGenerator;
 	protected final boolean checkGoalPropertyOnEntirePath;
@@ -68,16 +65,20 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	protected final NodeGoalTester<T> nodeGoalTester;
 	protected final INodeEvaluator<T, V> nodeEvaluator;
 	protected final Queue<List<T>> solutions = new LinkedBlockingQueue<>();
-	protected final Map<List<T>, SolutionAnnotation<T, V>> annotationsOfSolutionsReturnedByNodeEvaluator = new HashMap<>();
+	protected final Map<Node<T,V>,Map<String,Object>> nodeAnnotations = new HashMap<>(); // for nodes effectively examined
+	protected final Map<List<T>,Map<String,Object>> solutionAnnotations = new HashMap<>(); // for solutions that may have been acquired from some subroutine without really knowing all of the nodes on the path
 	private final Set<T> expanded = new HashSet<>();
 	private final boolean solutionReportingNodeEvaluator;
-
+	
 	protected INodeSelector<T, V> nodeSelector = open -> {
 		logger.info("Select for expansion: {}", open.peek());
 		return open.peek();
 	};
 
-	private List<NodeExpansionDescription<T, A>> lastExpansion;
+	/**
+	 * Memorize the last expansion for when it is requested
+	 */
+	private List<NodeExpansionDescription<T, A>> lastExpansion = new ArrayList<>();
 	private ParentDiscarding parentDiscarding;
 
 	public ORGraphSearch(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, V> pNodeEvaluator) {
@@ -99,17 +100,11 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 			this.pathGoalTester = null;
 		}
 
-		// init lastExpansion with an empty ArrayList
-		lastExpansion = new ArrayList<>();
-
-		// inti open
-		// this.open = open;
-		// init parentDiscarding with none
+		/* set parent discarding */
 		parentDiscarding = pd;
 
-		this.nodeEvaluator = pNodeEvaluator;
-
 		/* if the node evaluator is graph dependent, communicate the generator to it */
+		this.nodeEvaluator = pNodeEvaluator;
 		if (pNodeEvaluator instanceof DecoratingNodeEvaluator<?, ?>) {
 			DecoratingNodeEvaluator<T, V> castedEvaluator = (DecoratingNodeEvaluator<T, V>) pNodeEvaluator;
 			if (castedEvaluator.isGraphDependent()) {
@@ -228,24 +223,6 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 
 	}
 
-	// protected void step() {
-	// lastExpansion.clear();
-	// if (beforeSelection()) {
-	// Node<T, V> nodeToExpand = nextNode();
-	//// TODO assert warning
-	//// assert nodeToExpand == null || !expanded.contains(nodeToExpand.getPoint()) : "Node selected for expansion already has been expanded: " + nodeToExpand;
-	// if (nodeToExpand != null) {
-	// afterSelection(nodeToExpand);
-	// assert ext2int.containsKey(nodeToExpand.getPoint()) : "Trying to expand a node whose point is not available in the ext2int map";
-	// beforeExpansion(nodeToExpand);
-	// expandNode(nodeToExpand);
-	// closed.put(nodeToExpand.getPoint(), nodeToExpand);
-	// afterExpansion(nodeToExpand);
-	// }
-	// }
-	// if (Thread.interrupted())
-	// interrupted = true;
-	// }
 	protected void step() {
 		if (beforeSelection()) {
 			Node<T, V> nodeToExpand = nodeSelector.selectNode(open);
@@ -380,22 +357,23 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	public V getFValue(Node<T, V> node) {
 		return node.getInternalLabel();
 	}
+	
+	public Object getNodeAnnotation(T node, String annotation) {
+		return nodeAnnotations.containsKey(node) ? nodeAnnotations.get(node).get(annotation) : null;
+	}
 
-	public SolutionAnnotation<T, V> getAnnotationOfReturnedSolution(List<T> solution) {
-		if (!annotationsOfSolutionsReturnedByNodeEvaluator.containsKey(solution))
-			return null;
-		else {
-			return annotationsOfSolutionsReturnedByNodeEvaluator.get(solution);
-		}
+	public Object getAnnotationOfReturnedSolution(List<T> solution, String annotation) {
+		return solutionAnnotations.get(solution).get(annotation);
 	}
 
 	public V getFOfReturnedSolution(List<T> solution) {
-		SolutionAnnotation<T, V> annotation = getAnnotationOfReturnedSolution(solution);
+		@SuppressWarnings("unchecked")
+		V annotation = (V)getAnnotationOfReturnedSolution(solution, "f");
 		if (annotation == null) {
 			throw new IllegalArgumentException(
 					"There is no solution annotation for the given solution. Please check whether the solution was really produced by the algorithm. If so, please check that its annotation was added into the list of annotations before the solution itself was added to the solution set");
 		}
-		return annotation.f();
+		return annotation;
 	}
 
 	public void cancel() {
@@ -451,7 +429,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 			newNode.setGoal(true);
 			List<T> solution = getTraversalPath(newNode);
 			if (!solutionReportingNodeEvaluator) {
-				annotationsOfSolutionsReturnedByNodeEvaluator.put(solution, () -> newNode.getInternalLabel());
+				nodeAnnotations.get(t2).put("f", newNode.getInternalLabel());
 				solutions.add(solution);
 			}
 			// else while (!annotationsOfSolutionsReturnedByNodeEvaluator.keySet().contains(solution)) {
@@ -588,12 +566,32 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	}
 
 	@Subscribe
-	public void receiveNextSolutionFromFComputer(SolutionFoundEvent<T, V> solution) {
-		logger.info("Received solution from FComputer: {}", solution);
-		if (annotationsOfSolutionsReturnedByNodeEvaluator.containsKey(solution.getSolution()))
+	public void receiveSolutionEvent(SolutionFoundEvent<T> solution) {
+		logger.info("Received solution: {}", solution);
+		if (solutionAnnotations.containsKey(solution.getSolution()))
 			throw new IllegalStateException("Solution is reported for the second time already!");
-		annotationsOfSolutionsReturnedByNodeEvaluator.put(solution.getSolution(), solution.getAnnotation());
+		solutionAnnotations.put(solution.getSolution(), new HashMap<>());
 		solutions.add(solution.getSolution());
+	}
+	
+	@Subscribe
+	public void receiveSolutionAnnotationEvent(SolutionAnnotationEvent<T,V> solution) {
+		logger.info("Received solution annotation: {}", solution);
+		if (!solutionAnnotations.containsKey(solution.getSolution()))
+			throw new IllegalStateException("Solution annotation is reported for a solution that has not been reported previously!");
+		solutionAnnotations.get(solution.getSolution()).put(solution.getAnnotationName(), solution.getAnnotationValue());
+	}
+	
+	@Subscribe
+	public void receiveNodeAnnotationEvent(NodeAnnotationEvent<T> event) {
+		T nodeExt = event.getNode();
+		if (!ext2int.containsKey(nodeExt))
+			throw new IllegalArgumentException("Received annotation for a node I don't know!");
+		Node<T,V> nodeInt = ext2int.get(nodeExt);
+		if (!nodeAnnotations.containsKey(nodeInt)) {
+			nodeAnnotations.put(nodeInt, new HashMap<>());
+		}
+		nodeAnnotations.get(nodeInt).put(event.getAnnotationName(), event.getAnnotationValue());
 	}
 
 	public INodeSelector<T, V> getNodeSelector() {

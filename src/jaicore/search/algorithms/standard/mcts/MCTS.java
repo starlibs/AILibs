@@ -11,9 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jaicore.graph.LabeledGraph;
-import jaicore.planning.graphgenerators.task.ceociptfd.EvaluablePredicate;
 import jaicore.search.algorithms.interfaces.IObservableORGraphSearch;
-import jaicore.search.algorithms.interfaces.solutionannotations.SolutionAnnotation;
 import jaicore.search.algorithms.standard.core.IGraphDependentNodeEvaluator;
 import jaicore.search.algorithms.standard.core.INodeEvaluator;
 import jaicore.search.structure.core.GraphEventBus;
@@ -49,7 +47,7 @@ public class MCTS<T,A,V extends Comparable<V>> implements IObservableORGraphSear
 	protected final IPolicy<T,A,V> defaultPolicy;
 	protected final INodeEvaluator<T, V> playoutSimulator;
 	
-	protected final Map<List<T>, SolutionAnnotation<T, V>> annotationsOfSolutionsReturnedByNodeEvaluator = new HashMap<>();
+	protected final Map<List<T>, V> playouts = new HashMap<>();
 
 	private final T root;
 	protected final LabeledGraph<T, A> exploredGraph;
@@ -100,7 +98,7 @@ public class MCTS<T,A,V extends Comparable<V>> implements IObservableORGraphSear
 				logger.info("Determined playout score {}. Now updating the path.", playout);
 				treePolicy.updatePath(path, playout);
 				if (isGoal(path.get(path.size() - 1))) {
-					annotationsOfSolutionsReturnedByNodeEvaluator.put(path, () -> playout);
+					playouts.put(path, playout);
 					return path;
 				}
 			}
@@ -178,22 +176,23 @@ public class MCTS<T,A,V extends Comparable<V>> implements IObservableORGraphSear
 		return null;
 	}
 
-	public SolutionAnnotation<T, V> getAnnotationOfReturnedSolution(List<T> solution) {
-		if (!annotationsOfSolutionsReturnedByNodeEvaluator.containsKey(solution))
+	public Object getAnnotationOfReturnedSolution(List<T> solution, String annotation) {
+		if (!playouts.containsKey(solution))
 			return null;
 		else {
-			return annotationsOfSolutionsReturnedByNodeEvaluator.get(solution);
+			return playouts.get(solution);
 		}
 	}
 
 	@Override
 	public V getFOfReturnedSolution(List<T> solution) {
-		SolutionAnnotation<T, V> annotation = getAnnotationOfReturnedSolution(solution);
+		@SuppressWarnings("unchecked")
+		V annotation = (V)getAnnotationOfReturnedSolution(solution, "<not used anyway>");
 		if (annotation == null) {
 			throw new IllegalArgumentException(
 					"There is no solution annotation for the given solution. Please check whether the solution was really produced by the algorithm. If so, please check that its annotation was added into the list of annotations before the solution itself was added to the solution set");
 		}
-		return annotation.f();
+		return annotation;
 	}
 
 	@Override
