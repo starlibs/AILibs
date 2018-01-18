@@ -566,11 +566,12 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	}
 
 	@Subscribe
-	public void receiveSolutionEvent(SolutionFoundEvent<T> solution) {
+	public void receiveSolutionEvent(SolutionFoundEvent<T,V> solution) {
 		logger.info("Received solution: {}", solution);
 		if (solutionAnnotations.containsKey(solution.getSolution()))
 			throw new IllegalStateException("Solution is reported for the second time already!");
 		solutionAnnotations.put(solution.getSolution(), new HashMap<>());
+		solutionAnnotations.get(solution.getSolution()).put("f", solution.getF());
 		solutions.add(solution.getSolution());
 	}
 	
