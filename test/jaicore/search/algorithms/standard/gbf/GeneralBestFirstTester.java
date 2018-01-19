@@ -115,7 +115,7 @@ public class GeneralBestFirstTester {
 		
 		INodeEvaluator<GameNode, Integer> evaluator = new INodeEvaluator<GameNode,Integer>() {
 			@Override
-			public Integer f(Node<GameNode,Integer> path) {
+			public Integer f(Node<GameNode,?> path) {
 				return 0;
 			}
 		};

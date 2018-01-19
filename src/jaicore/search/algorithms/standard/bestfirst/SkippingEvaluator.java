@@ -12,7 +12,7 @@ public class SkippingEvaluator<T,V extends Comparable<V>> implements INodeEvalua
 	private final INodeEvaluator<T,V> actualEvaluator;
 	private final Random rand;
 	private final float coin;
-	private final Map<Node<T,V>, V> fCache = new HashMap<>();
+	private final Map<Node<T,?>, V> fCache = new HashMap<>();
 
 	public SkippingEvaluator(INodeEvaluator<T,V> actualEvaluator, Random rand, float coin) {
 		super();
@@ -22,7 +22,7 @@ public class SkippingEvaluator<T,V extends Comparable<V>> implements INodeEvalua
 	}
 
 	@Override
-	public V f(Node<T,V> node) throws Exception {
+	public V f(Node<T,?> node) throws Exception {
 		int depth = node.path().size() - 1;
 		if (!fCache.containsKey(node)) {
 			if (depth == 0) {

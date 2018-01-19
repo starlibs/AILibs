@@ -15,7 +15,7 @@ public class LinearCombiningNodeEvaluator<T> implements INodeEvaluator<T,BestFir
 	}
 
 	@Override
-	public BestFirstEpsilonLabel f(Node<T,BestFirstEpsilonLabel> node) throws Exception {
+	public BestFirstEpsilonLabel f(Node<T,?> node) throws Exception {
 		double score = 0;
 		int incr;
 		for (INodeEvaluator<T,BestFirstEpsilonLabel> evaluator : evaluators.keySet()) {

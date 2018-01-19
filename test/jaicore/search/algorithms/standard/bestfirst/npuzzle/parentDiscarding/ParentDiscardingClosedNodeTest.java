@@ -59,7 +59,7 @@ public class ParentDiscardingClosedNodeTest {
 						if(n.getPoint().equals(p2))
 							return 2.0;
 						if(n.getPoint().equals(p3))
-							return 30.0; 
+							return 3.0;
 						if(n.getPoint().equals(p4))
 							return 2.0;
 						if(n.getPoint().equals(p4))

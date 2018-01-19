@@ -17,7 +17,7 @@ public abstract class DecoratingNodeEvaluator<T,V extends Comparable<V>> impleme
 	}
 	
 	@Override
-	public V f(Node<T,V> node) throws Exception {
+	public V f(Node<T,?> node) throws Exception {
 		return this.evaluator.f(node);
 	}
 	
