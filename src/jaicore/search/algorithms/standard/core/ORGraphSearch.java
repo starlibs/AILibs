@@ -295,7 +295,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 				return;
 
 			logger.info("Inserting successor {} of {} to OPEN.", newNode, expandedNodeInternal);
-			assert !open.contains(newNode) && !expanded.contains(newNode.getPoint()) : "Inserted node is already in OPEN or even expanded!";
+//			assert !open.contains(newNode) && !expanded.contains(newNode.getPoint()) : "Inserted node is already in OPEN or even expanded!";
 			// if(!expanded.contains(newNode.getPoint())){
 			if (newNode.getInternalLabel() == null) {
 				logger.warn("Not inserting node {} since its label ist missing!", newNode);
@@ -311,6 +311,8 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 				if (existingIdenticalNodeOnOpen.isPresent()) {
 					Node<T, V> existingNode = existingIdenticalNodeOnOpen.get();
 					if (newNode.compareTo(existingNode) < 0) {
+						open.remove(existingNode);
+						open.add(newNode);
 						graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_" + (newNode.isGoal() ? "solution" : "open")));
 						graphEventBus.post(new NodeRemovedEvent<>(existingNode));
 					} else {
@@ -425,8 +427,8 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	}
 
 	protected Node<T, V> newNode(Node<T, V> parent, T t2) {
-		assert !ext2int.containsKey(t2) : "Generating a second node object for " + t2 + " as successor of " + parent.getPoint() + " was contained as " + ext2int.get(t2).getPoint()
-				+ ", but ORGraphSearch currently only supports tree search!";
+//		assert !ext2int.containsKey(t2) : "Generating a second node object for " + t2 + " as successor of " + parent.getPoint() + " was contained as " + ext2int.get(t2).getPoint()
+//				+ ", but ORGraphSearch currently only supports tree search!";
 		return newNode(parent, t2, null);
 	}
 

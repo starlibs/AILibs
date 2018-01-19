@@ -59,7 +59,7 @@ public class ParentDiscardingClosedNodeTest {
 						if(n.getPoint().equals(p2))
 							return 2.0;
 						if(n.getPoint().equals(p3))
-							return 3.0;
+							return 30.0; 
 						if(n.getPoint().equals(p4))
 							return 2.0;
 						if(n.getPoint().equals(p4))
@@ -79,7 +79,7 @@ public class ParentDiscardingClosedNodeTest {
 
 		List<PDPuzzleNode> solutionPath = search.nextSolution();
 		
-//		solutionPath = search.nextSolution();
+		solutionPath = search.nextSolution();
 		assert(solutionPath.contains(p3));
 
 		assertNotNull(solutionPath);
