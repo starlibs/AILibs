@@ -1,8 +1,6 @@
 package jaicore.search.algorithms.parallelized.bestfirst.nqueens;
 
-import static org.junit.Assert.assertNotNull;
-
-import java.util.List;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
@@ -15,13 +13,20 @@ public class NQueenTester {
 	
 	@Test
 	public void test(){
-		int x = 10;
-		NQueenGenerator gen = new NQueenGenerator(x);
-		BestFirst<QueenNode, String> search = new BestFirst<>(gen, n-> (double)n.getPoint().getNumberOfAttackedCellsInNextRow());
-		search.parallelizeNodeExpansion(2);
-		search.setTimeoutForComputationOfF(350, n -> 100.0);
-		List<QueenNode> solutionPath = search.nextSolution();
-		assertNotNull(solutionPath);
+		int[] numberOfSolutions = { 2, 10, 4, 40, 92, 352, 724, 2680};
+		for (int i = 0; i < numberOfSolutions.length; i++) {
+			int n = i + 4;
+			System.out.print("Checking " + n + "-Queens Problem ... ");
+			NQueenGenerator gen = new NQueenGenerator(n);
+			BestFirst<QueenNode, String> search = new BestFirst<>(gen, node-> (double)node.getPoint().getNumberOfAttackedCellsInNextRow());
+			search.parallelizeNodeExpansion(2);
+			search.setTimeoutForComputationOfF(350, node -> 100.0);
+			int solutions = 0;
+			while (search.nextSolution() != null)
+				solutions ++;
+			assertEquals(numberOfSolutions[i], solutions);
+			System.out.println("done");
+		}
 	}
 }
 
