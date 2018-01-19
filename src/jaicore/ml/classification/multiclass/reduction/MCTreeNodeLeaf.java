@@ -8,59 +8,71 @@ import weka.core.Instances;
 
 public class MCTreeNodeLeaf extends MCTreeNode {
 
-	private int classIndex;
+  /**
+   *
+   */
+  private static final long serialVersionUID = 6991944564830487953L;
 
-	public MCTreeNodeLeaf(final int classIndex) throws Exception {
-		super(Arrays.asList(new Integer[] {classIndex}));
-		this.classIndex = classIndex;
-	}
+  private int classIndex;
 
-	@Override
-	public void addChild(final MCTreeNode newNode) {
-		throw new UnsupportedOperationException();
-	}
+  public MCTreeNodeLeaf(final int classIndex) {
+    super(Arrays.asList(new Integer[] { classIndex }));
+    this.classIndex = classIndex;
+  }
 
-	@Override
-	public void buildClassifier(final Instances data) throws Exception {
-		// intentionally do nothing
-	}
+  @Override
+  public void addChild(final MCTreeNode newNode) {
+    throw new UnsupportedOperationException();
+  }
 
-	@Override
-	public double classifyInstance(final Instance instance) throws Exception {
-		return this.classIndex;
-	}
+  @Override
+  public void buildClassifier(final Instances data) throws Exception {
+    // intentionally do nothing
+  }
 
-	@Override
-	public double[] distributionForInstance(final Instance instance) throws Exception {
-		return new double[] { 1.0 };
-	}
+  @Override
+  public double classifyInstance(final Instance instance) throws Exception {
+    return this.classIndex;
+  }
 
-	@Override
-	public int getHeight() {
-		return 0;
-	}
+  @Override
+  public void distributionForInstance(final Instance instance, final double[] distribution) throws Exception {
+    distribution[this.classIndex] = 1;
+  }
 
-	@Override
-	public Capabilities getCapabilities() {
-		return null;
-	}
+  @Override
+  public double[] distributionForInstance(final Instance instance) throws Exception {
+    return new double[] { 1.0 };
+  }
 
-	@Override
-	public String toString() {
-		return this.classIndex + "";
-	}
+  @Override
+  public int getHeight() {
+    return 0;
+  }
 
-	public boolean isCompletelyConfigured() {
-		return true;
-	}
+  @Override
+  public Capabilities getCapabilities() {
+    return null;
+  }
 
-	public String toStringWithOffset(String offset) {
-		StringBuilder sb = new StringBuilder();
+  @Override
+  public String toString() {
+    return this.classIndex + "";
+  }
 
-		sb.append(offset);
-		sb.append("(");
-		sb.append(getContainedClasses());
-		sb.append(")");
-		return sb.toString();
-	}
+  @Override
+  public boolean isCompletelyConfigured() {
+    return true;
+  }
+
+  @Override
+  public String toStringWithOffset(final String offset) {
+    StringBuilder sb = new StringBuilder();
+
+    sb.append(offset);
+    sb.append("(");
+    sb.append(this.getContainedClasses());
+    sb.append(")");
+    return sb.toString();
+  }
 }
