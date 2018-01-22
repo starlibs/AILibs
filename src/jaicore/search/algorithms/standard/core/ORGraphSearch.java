@@ -14,7 +14,6 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -31,6 +30,8 @@ import jaicore.search.structure.core.GraphEventBus;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
 import jaicore.search.structure.core.NodeExpansionDescription;
+import jaicore.search.structure.core.OpenCollection;
+import jaicore.search.structure.core.PriorityQueueOpen;
 import jaicore.search.structure.events.GraphInitializedEvent;
 import jaicore.search.structure.events.NodeParentSwitchEvent;
 import jaicore.search.structure.events.NodeReachedEvent;
@@ -63,7 +64,8 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	protected final Map<T, Node<T, V>> ext2int = new HashMap<>();
 
 	/* search related objects */
-	protected final Queue<Node<T, V>> open = new PriorityBlockingQueue<>();
+	protected  OpenCollection<Node<T, V>> open;
+	
 	protected final RootGenerator<T> rootGenerator;
 	protected final SuccessorGenerator<T, A> successorGenerator;
 	protected final boolean checkGoalPropertyOnEntirePath;
@@ -230,6 +232,9 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 
 		/* set parent discarding */
 		parentDiscarding = pd;
+		
+		/*setting a priorityqueueopen As a default open collection*/
+		this.setOpen(new PriorityQueueOpen<Node<T,V>>());
 
 		/* if the node evaluator is graph dependent, communicate the generator to it */
 		this.nodeEvaluator = pNodeEvaluator;
@@ -723,4 +728,19 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 		this.timeoutForComputationOfF = timeoutInMS;
 		this.timeoutNodeEvaluator = timeoutEvaluator;
 	}
+
+	/**
+	 * @return the openCollection
+	 */
+	public OpenCollection<Node<T, V>> getOpen() {
+		return open;
+	}
+
+	/**
+	 * @param open the openCollection to set
+	 */
+	public void setOpen(OpenCollection<Node<T, V>> open) {
+		this.open = open;
+	}
+	
 }

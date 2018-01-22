@@ -78,11 +78,6 @@ public class PriorityQueueOpen<E> implements OpenCollection<E> {
 	}
 
 	@Override
-	public E next() {
-		return open.poll();
-	}
-
-	@Override
 	public E peek() {
 		return open.peek();
 	}

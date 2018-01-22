@@ -79,7 +79,7 @@ public class ParentDiscardingClosedNodeTest {
 
 		List<PDPuzzleNode> solutionPath = search.nextSolution();
 		
-//		solutionPath = search.nextSolution();
+		solutionPath = search.nextSolution();
 		assert(solutionPath.contains(p3));
 
 		assertNotNull(solutionPath);
