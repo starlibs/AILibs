@@ -171,6 +171,8 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 					if (newNode.compareTo(existingNode) < 0) {
 						graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_" + (newNode.isGoal() ? "solution" : "open")));
 						graphEventBus.post(new NodeRemovedEvent<>(existingNode));
+						open.remove(existingNode);
+						open.add(newNode);
 					} else {
 						graphEventBus.post(new NodeRemovedEvent<>(newNode));
 					}
@@ -247,8 +249,9 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 		/* set parent discarding */
 		parentDiscarding = pd;
 		
-		/*setting a priorityqueueopen As a default open collection*/
-		this.setOpen(new PriorityQueueOpen<Node<T,V>>());
+//		/*setting a priorityqueueopen As a default open collection*/
+//		
+//		this.setOpen(new PriorityQueueOpen<Node<T,V>>());
 
 		/* if the node evaluator is graph dependent, communicate the generator to it */
 		this.nodeEvaluator = pNodeEvaluator;
@@ -402,6 +405,8 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 			}
 			return lastExpansion;
 		}
+		else
+			step();
 		return lastExpansion;
 	}
 
@@ -780,7 +785,8 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	/**
 	 * @param open the openCollection to set
 	 */
-	public void setOpen(OpenCollection<Node<T, V>> collection) {
+	public void setOpen(OpenCollection<Node<T,V>> collection) {
+		
 		collection.clear();
 		collection.addAll(open);
 		open = collection;
