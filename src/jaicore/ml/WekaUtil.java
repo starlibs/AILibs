@@ -27,9 +27,12 @@ import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.InstanceComparator;
 import weka.core.Instances;
+import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.json.JSONInstances;
 import weka.core.json.JSONNode;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.Remove;
 
 public class WekaUtil {
 
@@ -224,6 +227,19 @@ public class WekaUtil {
       sb.append("]");
     }
     return sb.toString();
+  }
+
+  public static Collection<Option> getOptionsOfWekaAlgorithm(final Object o) {
+    List<Option> options = new ArrayList<>();
+    if (!(o instanceof OptionHandler)) {
+      return options;
+    }
+    OptionHandler oh = (OptionHandler) o;
+    Enumeration<Option> optionEnum = oh.listOptions();
+    while (optionEnum.hasMoreElements()) {
+      options.add(optionEnum.nextElement());
+    }
+    return options;
   }
 
   public static List<String> getClassNames(final Instance instance) {
@@ -525,6 +541,7 @@ public class WekaUtil {
         }
       }
     }
+    System.out.println(data.size() + " - " + newData.size());
     return newData;
   }
 
@@ -589,5 +606,28 @@ public class WekaUtil {
       indices[i] = index;
     }
     return indices;
+  }
+
+  public static Instance useFilterOnSingleInstance(final Instance instance, final Filter filter) throws Exception {
+    Instances data = new Instances(instance.dataset());
+    data.clear();
+    data.add(instance);
+    Instances filteredInstances = Filter.useFilter(data, filter);
+    return filteredInstances.firstInstance();
+  }
+
+  public static Instances removeClassAttribute(final Instances data) throws Exception {
+    Remove remove = new Remove();
+    remove.setAttributeIndices("" + (data.classIndex() + 1));
+    remove.setInputFormat(data);
+    Instances reducedInstances = Filter.useFilter(data, remove);
+    return reducedInstances;
+  }
+
+  public static Instance removeClassAttribute(final Instance inst) throws Exception {
+    Remove remove = new Remove();
+    remove.setAttributeIndices("" + (inst.classIndex() + 1));
+    remove.setInputFormat(inst.dataset());
+    return useFilterOnSingleInstance(inst, remove);
   }
 }

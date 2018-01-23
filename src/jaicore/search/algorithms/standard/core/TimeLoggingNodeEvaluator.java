@@ -7,7 +7,7 @@ import jaicore.search.structure.core.Node;
 
 public class TimeLoggingNodeEvaluator<T, V extends Comparable<V>> extends DecoratingNodeEvaluator<T, V> {
 
-	private final Map<Node<T, V>, Integer> times = new ConcurrentHashMap<>();
+	private final Map<Node<T, ?>, Integer> times = new ConcurrentHashMap<>();
 
 	public TimeLoggingNodeEvaluator(INodeEvaluator<T, V> baseEvaluator) {
 		super(baseEvaluator);
@@ -20,7 +20,7 @@ public class TimeLoggingNodeEvaluator<T, V extends Comparable<V>> extends Decora
 	}
 
 	@Override
-	public V f(Node<T, V> node) throws Exception {
+	public V f(Node<T, ?> node) throws Exception {
 		long start = System.currentTimeMillis();
 		V f = super.f(node);
 		times.put(node, (int) (System.currentTimeMillis() - start));

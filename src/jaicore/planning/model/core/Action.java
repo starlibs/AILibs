@@ -47,6 +47,7 @@ public class Action implements Serializable {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + ((grounding == null) ? 0 : grounding.hashCode());
 		result = prime * result + ((operation == null) ? 0 : operation.hashCode());
 		return result;
 	}
@@ -60,6 +61,11 @@ public class Action implements Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		Action other = (Action) obj;
+		if (grounding == null) {
+			if (other.grounding != null)
+				return false;
+		} else if (!grounding.equals(other.grounding))
+			return false;
 		if (operation == null) {
 			if (other.operation != null)
 				return false;

@@ -2,23 +2,21 @@ package jaicore.search.algorithms.standard.core;
 
 import java.util.List;
 
-import jaicore.search.algorithms.interfaces.solutionannotations.SolutionAnnotation;
-
-public class SolutionFoundEvent<T, V extends Comparable<V>> {
+public class SolutionFoundEvent<T, V> {
 	private final List<T> solution;
-	private final SolutionAnnotation<T, V> annotation;
+	private final V f;
 
-	public SolutionFoundEvent(List<T> solution, SolutionAnnotation<T, V> annotation) {
+	public SolutionFoundEvent(List<T> solution, V f) {
 		super();
 		this.solution = solution;
-		this.annotation = annotation;
+		this.f = f;
 	}
 
 	public List<T> getSolution() {
 		return solution;
 	}
 
-	public SolutionAnnotation<T, V> getAnnotation() {
-		return annotation;
+	public V getF() {
+		return f;
 	}
 }

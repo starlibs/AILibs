@@ -7,10 +7,10 @@ import jaicore.logic.fol.structure.Literal;
 import jaicore.planning.model.core.Action;
 import jaicore.search.structure.core.Node;
 
-public class TFDTooltipGenerator implements TooltipGenerator<Node<TFDNode, Double>> {
+public class TFDTooltipGenerator<V extends Comparable<V>> implements TooltipGenerator<Node<TFDNode, V>> {
 
 	@Override
-	public String getTooltip(Node<TFDNode,Double> node) {
+	public String getTooltip(Node<TFDNode,V> node) {
 		StringBuilder sb = new StringBuilder();
 		TFDNode nodeRepresentation = node.getPoint();
 		sb.append("<h2>Node: " + nodeRepresentation.getID() + "</h2>");

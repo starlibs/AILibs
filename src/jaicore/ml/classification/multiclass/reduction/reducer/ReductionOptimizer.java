@@ -45,7 +45,7 @@ public class ReductionOptimizer implements Classifier {
 		Instances validate = dataSplit.get(1);
 		BestFirstEpsilon<RestProblem, Decision> search = new BestFirstEpsilon<RestProblem, Decision>(new ReductionGraphGenerator(rand, train), n -> {
 			return new BestFirstEpsilonLabel(getLossForClassifier(getTreeFromSolution(n.externalPath(), data, false), data), n.path().size() * -1);
-		}, 0.1);
+		}, 0.1, false);
 
 		SimpleGraphVisualizationWindow<Node<RestProblem, BestFirstEpsilonLabel>> window = new SimpleGraphVisualizationWindow<>(search.getEventBus());
 		window.getPanel().setTooltipGenerator(new TooltipGenerator<Node<RestProblem, BestFirstEpsilonLabel>>() {
@@ -59,7 +59,8 @@ public class ReductionOptimizer implements Classifier {
 		/* get best 20 solutions */
 		int i = 0;
 		Collection<List<RestProblem>> solutions = new ArrayList<>();
-		for (List<RestProblem> solution : search) {
+		List<RestProblem> solution;
+		while ((solution = search.nextSolution()) != null) {
 			solutions.add(solution);
 			if (i++ > 100)
 				break;
@@ -67,11 +68,11 @@ public class ReductionOptimizer implements Classifier {
 		System.out.println(solutions.size());
 
 		/* select */
-		List<RestProblem> solution = solutions.stream().min((s1, s2) -> search.getAnnotationOfReturnedSolution(s1).f().getF1() - search.getAnnotationOfReturnedSolution(s2).f().getF1()).get();
-		root = getTreeFromSolution(solution, data, true);
+		List<RestProblem> bestSolution = solutions.stream().min((s1, s2) -> search.getFOfReturnedSolution(s1).getF1() - search.getFOfReturnedSolution(s2).getF1()).get();
+		root = getTreeFromSolution(bestSolution, data, true);
 		root.buildClassifier(data);
 		System.out.println(root.toStringWithOffset());
-		System.out.println(search.getAnnotationOfReturnedSolution(solution).f().getF1());
+		System.out.println(search.getFOfReturnedSolution(bestSolution).getF1());
 	}
 
 	@Override
