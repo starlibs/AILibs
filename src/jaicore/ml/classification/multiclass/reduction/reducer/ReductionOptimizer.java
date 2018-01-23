@@ -43,16 +43,15 @@ public class ReductionOptimizer implements Classifier {
 		List<Instances> dataSplit = WekaUtil.getStratifiedSplit(data, rand, .6f);
 		Instances train = dataSplit.get(0);
 		Instances validate = dataSplit.get(1);
-		BestFirstEpsilon<RestProblem, Decision> search = new BestFirstEpsilon<RestProblem, Decision>(new ReductionGraphGenerator(rand, train), n -> {
-			return new BestFirstEpsilonLabel(getLossForClassifier(getTreeFromSolution(n.externalPath(), data, false), data), n.path().size() * -1);
-		}, 0.1, false);
+		BestFirstEpsilon<RestProblem, Decision, Integer> search = new BestFirstEpsilon<>(new ReductionGraphGenerator(rand, train), n -> getLossForClassifier(getTreeFromSolution(n.externalPath(), data, false), data) * 1.0, n -> n.path().size() * -1
+		, 0.1, false);
 
-		SimpleGraphVisualizationWindow<Node<RestProblem, BestFirstEpsilonLabel>> window = new SimpleGraphVisualizationWindow<>(search.getEventBus());
-		window.getPanel().setTooltipGenerator(new TooltipGenerator<Node<RestProblem, BestFirstEpsilonLabel>>() {
+		SimpleGraphVisualizationWindow<Node<RestProblem, Double>> window = new SimpleGraphVisualizationWindow<>(search.getEventBus());
+		window.getPanel().setTooltipGenerator(new TooltipGenerator<Node<RestProblem, Double>>() {
 
 			@Override
-			public String getTooltip(Node<RestProblem, BestFirstEpsilonLabel> node) {
-				return search.getFValue(node).getF1() + "<pre>" + getTreeFromSolution(node.externalPath(), data, false).toStringWithOffset() + "</pre>";
+			public String getTooltip(Node<RestProblem, Double> node) {
+				return search.getFValue(node) + "<pre>" + getTreeFromSolution(node.externalPath(), data, false).toStringWithOffset() + "</pre>";
 			}
 		});
 
@@ -68,11 +67,11 @@ public class ReductionOptimizer implements Classifier {
 		System.out.println(solutions.size());
 
 		/* select */
-		List<RestProblem> bestSolution = solutions.stream().min((s1, s2) -> search.getFOfReturnedSolution(s1).getF1() - search.getFOfReturnedSolution(s2).getF1()).get();
+		List<RestProblem> bestSolution = solutions.stream().min((s1, s2) -> search.getFOfReturnedSolution(s1).compareTo(search.getFOfReturnedSolution(s2))).get();
 		root = getTreeFromSolution(bestSolution, data, true);
 		root.buildClassifier(data);
 		System.out.println(root.toStringWithOffset());
-		System.out.println(search.getFOfReturnedSolution(bestSolution).getF1());
+		System.out.println(search.getFOfReturnedSolution(bestSolution));
 	}
 
 	@Override

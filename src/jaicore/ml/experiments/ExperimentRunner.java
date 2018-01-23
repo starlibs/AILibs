@@ -3,6 +3,7 @@ package jaicore.ml.experiments;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -33,7 +34,8 @@ public abstract class ExperimentRunner {
 	protected abstract String[] getSetupNames();
 	protected abstract int getNumberOfRunsPerExperiment();
 	protected abstract float getTrainingPortion();
-	protected abstract Classifier getConfiguredClassifier(int seed, String setupName, String algoName);
+	protected abstract int[] getTimeouts();
+	protected abstract Classifier getConfiguredClassifier(int seed, String setupName, String algoName, int timeout);
 	
 
 	public void run(int k) throws Exception {
@@ -41,6 +43,7 @@ public abstract class ExperimentRunner {
 		/* get classifiers */
 		String[] classifiers = getClassifierNames();
 		String[] setups = getSetupNames();
+		int[] timeouts = getTimeouts();
 		
 		/* read data sets */
 		List<File> availableDatasets = getAvailableDatasets(datasetFolder);
@@ -54,15 +57,19 @@ public abstract class ExperimentRunner {
 		int numberOfClassifiers = classifiers.length;
 		int numberOfSetups = setups.length;
 		int numberOfSeeds = getNumberOfRunsPerExperiment();
+		int numberOfTimeouts = timeouts.length;
 		System.out.println("Number of runs (seeds) per dataset/algo-combination: " + numberOfSeeds);
-		int totalExperimentSize = numberOfClassifiers * numberOfDatasets * numberOfSetups * numberOfSeeds;
-		int frameSizeForSeed = totalExperimentSize / numberOfSeeds;
+		int totalExperimentSize = numberOfClassifiers * numberOfDatasets * numberOfSetups * numberOfSeeds * numberOfTimeouts;
+		int frameSizeForTimeout = totalExperimentSize / numberOfTimeouts;
+		int frameSizeForSeed = frameSizeForTimeout / numberOfSeeds;
 		int frameSizeForSetup = frameSizeForSeed / numberOfSetups;
 		int frameSizeForDataset = frameSizeForSetup / numberOfDatasets;
 		
 		/* determine exact experiment */
-		int seedId = (int) Math.floor(k / frameSizeForSeed * 1f);
-		int indexWithinSeed = k % frameSizeForSeed;
+		int timeoutId = (int) Math.floor(k / frameSizeForTimeout * 1f);
+		int indexWithinTimeout = k % frameSizeForTimeout;
+		int seedId = (int) Math.floor(indexWithinTimeout / frameSizeForSeed * 1f);
+		int indexWithinSeed = indexWithinTimeout % frameSizeForSeed;
 		int setupId = (int) Math.floor(indexWithinSeed / frameSizeForSetup * 1f);
 		int indexWithinSetup = indexWithinSeed % frameSizeForSetup;
 		int datasetId = (int) Math.floor(indexWithinSetup / frameSizeForDataset * 1f);
@@ -73,7 +80,7 @@ public abstract class ExperimentRunner {
 		String datasetName = getAvailableDatasets(datasetFolder).get(datasetId).getName();
 		datasetName = datasetName.substring(0, datasetName.lastIndexOf("."));
 
-		System.out.println("Running experiment " + k + "/" + totalExperimentSize + ". The setup is: " + seedId + "/" +  setupId + "/" + datasetId + "/" + algoId + "(seed/setup/dataset/algo)");
+		System.out.println("Running experiment " + k + "/" + totalExperimentSize + ". The setup is: " + timeoutId + "/" + seedId + "/" +  setupId + "/" + datasetId + "/" + algoId + "(timeout/seed/setup/dataset/algo)");
 		
 		/* create random object */
 		Random r = new Random(seedId);
@@ -87,13 +94,15 @@ public abstract class ExperimentRunner {
 		System.out.println("Data were split into " + internalData.size() + "/" + testData.size());
 		
 		/* create actual classifier */
-		Classifier c = getConfiguredClassifier(seedId, setups[setupId],classifiers[algoId]);
+		System.out.println("Now configuring classifier ...");
+		Classifier c = getConfiguredClassifier(seedId, setups[setupId], classifiers[algoId], timeouts[timeoutId]);
+		System.out.println("Classifier configured. Determining result files.");
 		
 		/* determine result file */
 		File resultFolder = new File("results" + File.separator + setups[setupId]);
 		if (!resultFolder.exists())
 			resultFolder.mkdirs();
-		File resultFile = new File(resultFolder + File.separator + c.getClass().getName() + "-" + datasetName + ".csv");
+		File resultFile = new File(resultFolder + File.separator + classifiers[algoId] + "-" + datasetName + ".csv");
 		
 		/* now search for the best pipeline */
 		long start = System.currentTimeMillis();
@@ -107,7 +116,9 @@ public abstract class ExperimentRunner {
 		eval.evaluateModel(c, testData);
 		double error = MathExt.round((eval.pctIncorrect() + eval.pctUnclassified()) / 100f, 4);
 		
-		
+		try (FileWriter fw = new FileWriter(resultFile, true)) {
+			fw.write(seedId + ";" + error + "\n");
+		}
 		
 		System.out.println("Wrote an error of " + error + " to stats file.");
 	}
