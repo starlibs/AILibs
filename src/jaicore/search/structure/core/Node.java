@@ -2,14 +2,16 @@ package jaicore.search.structure.core;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Node<T, V extends Comparable<V>> implements Serializable, Comparable<Node<T, V>> {
 	private static final long serialVersionUID = -7608088086719059550L;
 	private final T externalLabel;
 	private boolean goal;
 	private Node<T, V> parent;
-	private V internalLabel;
+	private final Map<String, Object> annotations = new HashMap<>(); // for nodes effectively examined
 
 	public Node(Node<T, V> parent, T point) {
 		super();
@@ -25,8 +27,9 @@ public class Node<T, V extends Comparable<V>> implements Serializable, Comparabl
 		return externalLabel;
 	}
 
+	@SuppressWarnings("unchecked")
 	public V getInternalLabel() {
-		return internalLabel;
+		return (V)annotations.get("f");
 	}
 	
 	public void setParent(Node<T,V> newParent) {
@@ -34,7 +37,19 @@ public class Node<T, V extends Comparable<V>> implements Serializable, Comparabl
 	}
 	
 	public void setInternalLabel(V internalLabel) {
-		this.internalLabel = internalLabel;
+		this.setAnnotation("f", internalLabel);
+	}
+	
+	public void setAnnotation(String annotationName, Object annotationValue) {
+		this.annotations.put(annotationName, annotationValue);
+	}
+	
+	public Object getAnnotation(String annotationName) {
+		return this.annotations.get(annotationName);
+	}
+	
+	public Map<String,Object> getAnnotations() {
+		return this.annotations;
 	}
 
 	public boolean isGoal() {
@@ -67,6 +82,6 @@ public class Node<T, V extends Comparable<V>> implements Serializable, Comparabl
 
 	@Override
 	public int compareTo(Node<T, V> o) {
-		return this.internalLabel.compareTo(o.getInternalLabel());
+		return this.getInternalLabel().compareTo(o.getInternalLabel());
 	}
 }

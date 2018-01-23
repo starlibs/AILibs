@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -61,10 +62,10 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 
 	/* communication */
 	protected final GraphEventBus<Node<T, V>> graphEventBus = new GraphEventBus<>();
-	protected final Map<T, Node<T, V>> ext2int = new HashMap<>();
+	protected final Map<T, Node<T, V>> ext2int = new ConcurrentHashMap<>();
 
 	/* search related objects */
-	protected  OpenCollection<Node<T, V>> open;
+	protected OpenCollection<Node<T, V>> open = new PriorityQueueOpen<>();
 	
 	protected final RootGenerator<T> rootGenerator;
 	protected final SuccessorGenerator<T, A> successorGenerator;
@@ -79,7 +80,6 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	private int timeoutForComputationOfF;
 
 	protected final Queue<List<T>> solutions = new LinkedBlockingQueue<>();
-	protected final Map<Node<T, V>, Map<String, Object>> nodeAnnotations = new HashMap<>(); // for nodes effectively examined
 	protected final Map<List<T>, Map<String, Object>> solutionAnnotations = new HashMap<>(); // for solutions that may have been acquired from some subroutine without really knowing all of the nodes
 																								// on the path
 	/* parallelization */
@@ -90,11 +90,6 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 
 	private final Set<T> expanded = new HashSet<>();
 	private final boolean solutionReportingNodeEvaluator;
-
-	protected INodeSelector<T, V> nodeSelector = open -> {
-		logger.info("Select for expansion: {}", open.peek());
-		return open.peek();
-	};
 
 	/**
 	 * Memorize the last expansion for when it is requested
@@ -115,6 +110,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 
 		@Override
 		public void run() {
+			logger.debug("Start node creation.");
 			lastExpansion.add(successorDescription);
 			Node<T, V> newNode = newNode(expandedNodeInternal, successorDescription.getTo());
 			
@@ -124,22 +120,23 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 			/* set timeout on thread that interrupts it after the timeout */
 			int taskId = -1;
 			if (timeoutForComputationOfF > 0)
-				timeoutSubmitter.interruptMeAfterMS(timeoutForComputationOfF);
+				taskId = timeoutSubmitter.interruptMeAfterMS(timeoutForComputationOfF);
 
 			/* compute node label  */
 			V label = null;
+			boolean computationTimedout = false;
 			try {
 				label = nodeEvaluator.f(newNode);
 			} catch (InterruptedException e) {
-				graphEventBus.post(new NodeTypeSwitchEvent<>(newNode.getPoint(), "or_timedout"));
+				graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_timedout"));
+				computationTimedout = true;
 				try {
 					label = timeoutNodeEvaluator.f(newNode);
-				}
-				catch (Throwable e2) {
+				} catch (Throwable e2) {
 					e2.printStackTrace();
 				}
 			} catch (Throwable e) {
-				graphEventBus.post(new NodeTypeSwitchEvent<>(newNode.getPoint(), "or_ffail"));
+				graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_ffail"));
 				e.printStackTrace();
 			}
 			if (taskId >= 0)
@@ -147,10 +144,15 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 			
 			/* if no label was computed, prune the node and cancel the computation */
 			if (label == null) {
-				logger.warn("Not inserting node {} since its label ist missing!", newNode);
+				if (!computationTimedout)
+					logger.info("Not inserting node {} since its label ist missing!", newNode);
+				else
+					logger.info("Not inserting node {} because computation of f-value timed out.", newNode);
 				graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_pruned"));
-				activeJobs.decrementAndGet();
-				fComputationTickets.release();
+				if (pool != null) {
+					activeJobs.decrementAndGet();
+					fComputationTickets.release();
+				}
 				return;
 			}
 			newNode.setInternalLabel(label);
@@ -201,6 +203,18 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 					open.add(newNode);
 				graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_" + (newNode.isGoal() ? "solution" : "open")));
 				createdCounter++;
+			}
+			
+			/* Recognize solution in cache together with annotation */
+			if (newNode.isGoal()) {
+				List<T> solution = getTraversalPath(newNode);
+
+				/* if the node evaluator has not reported the solution already anyway, register the solution and store its annotation */
+				if (!solutionReportingNodeEvaluator && !solutions.contains(solution)) {
+					solutions.add(solution);
+					solutionAnnotations.put(solution, new HashMap<>());
+					solutionAnnotations.get(solution).put("f", newNode.getInternalLabel());
+				}
 			}
 			
 			/* free resources if this is computed by helper threads */
@@ -324,21 +338,48 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	public List<T> nextSolution() {
 
 		/* do preliminary stuff: init graph (only for first call) and return unreturned solutions first */
+		logger.info("Starting search for next solution. Size of OPEN is {}", open.size());
 		try {
 			initGraph();
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
 		}
-		if (!solutions.isEmpty())
+		if (!solutions.isEmpty()) {
+			logger.info("Still have solution in cache, return it.");
 			return solutions.poll();
-		boolean stepExecuted = false;
+		}
 		do {
-			stepExecuted = step();
-			if (!solutions.isEmpty()) {
-				return solutions.poll();
+
+			/* busy waiting for new nodes in OPEN */
+			while (open.isEmpty() && activeJobs.get() > 0) {
+				logger.debug("Waiting 100ms, because OPEN size is {} and there are {} active jobs.", open.size(), activeJobs.get());
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					logger.info("Received interrupt signal");
+					interrupted = true;
+					break;
+				}
 			}
-		} while (stepExecuted || interrupted);
+			if (open.isEmpty() || interrupted) {
+				logger.debug("OPEN has size {} and interrupted is {}", open.size(), interrupted);
+				break;
+			}
+
+			logger.debug("Iteration of main loop starts. Size of OPEN now {}. Now performing next expansion step.", open.size());
+			step();
+			if (!solutions.isEmpty()) {
+				List<T> solution = solutions.poll();
+				logger.debug("Iteration of main loop terminated. Found a solution to return. Size of OPEN now {}", open.size());
+				return solution;
+			}
+			logger.debug("Iteration of main loop terminated. Size of OPEN now {}. Number of active jobs: {}", open.size(), activeJobs.get());
+		} while ((!open.isEmpty() || activeJobs.get() > 0) && !interrupted);
+		if (interrupted)
+			logger.info("Algorithm was interrupted");
+		if (open.isEmpty())
+			logger.info("OPEN is empty, terminating (possibly returning a solution)");
 		return solutions.isEmpty() ? null : solutions.poll();
 	}
 
@@ -361,32 +402,44 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 			}
 			return lastExpansion;
 		}
-		return step() ? lastExpansion : null;
+		return lastExpansion;
 	}
 
-	protected boolean step() {
+	protected void step() {
 		if (beforeSelection()) {
-			Node<T, V> nodeToExpand = nodeSelector.selectNode(open);
+			
+			Node<T, V> nodeToExpand = open.peek();
+			assert parentDiscarding == ParentDiscarding.ALL || !expanded.contains(nodeToExpand.getPoint()) : "Selected node " + nodeToExpand + " for the second time for expansion even though parent discarding is off. This cannot be the case!";
 			if (nodeToExpand == null)
-				return false;
+				return;
 			afterSelection(nodeToExpand);
 			step(nodeToExpand);
 		}
-		if (Thread.interrupted())
-			interrupted = true;
-		return true;
 	}
 
 	public void step(Node<T, V> nodeToExpand) {
+		
+		/* if search has been interrupted, do not process next step */
+		logger.info("Step starts. Size of OPEN now {}", open.size());
+		if (Thread.interrupted()) {
+			logger.info("Received interrupt signal before step.");
+			interrupted = true;
+			return;
+		}
 		lastExpansion.clear();
 		assert nodeToExpand == null || !expanded.contains(nodeToExpand.getPoint()) : "Node selected for expansion already has been expanded: " + nodeToExpand;
 		open.remove(nodeToExpand);
+		assert !open.contains(nodeToExpand) : "The selected node " + nodeToExpand + " was not really removed from OPEN!";
+		logger.debug("Removed {} from OPEN for expansion. OPEN size now {}", nodeToExpand, open.size());
 		assert ext2int.containsKey(nodeToExpand.getPoint()) : "Trying to expand a node whose point is not available in the ext2int map";
 		beforeExpansion(nodeToExpand);
 		expandNode(nodeToExpand);
 		afterExpansion(nodeToExpand);
-		if (Thread.interrupted())
+		if (Thread.interrupted()) {
+			logger.info("Received interrupt signal during step.");
 			interrupted = true;
+		}
+		logger.info("Step ends. Size of OPEN now {}", open.size());
 	}
 
 	private void expandNode(Node<T, V> expandedNodeInternal) {
@@ -399,22 +452,37 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 		Collection<NodeExpansionDescription<T, A>> successorDescriptions = successorGenerator.generateSuccessors(expandedNodeInternal.getPoint());
 		if (additionalThreadsForExpansion < 1) {
 			successorDescriptions.stream().forEach(successorDescription -> {
-				new NodeBuilder(expandedNodeInternal, successorDescription).run();
+				
+				/* perform synchronized computation. The computation is outourced, because it may receive an interrupt-signal, and we do not want the main-thread to be interrupted */
+				Thread t = new Thread(new NodeBuilder(expandedNodeInternal, successorDescription), "Node Builder for some child of " + expandedNodeInternal);
+				logger.debug("Starting computation of successor in thread {}", t);
+				t.start();
+				try {
+					t.join();
+				} catch (InterruptedException e) {
+					logger.info("Search has been interrupted");
+					interrupted = true;
+					return;
+				}
+				logger.debug("Finished computation of successor", t);
 			});
 		} else {
 			successorDescriptions.stream().forEach(successorDescription -> {
+				if (interrupted)
+					return;
 				try {
 					fComputationTickets.acquire();
 				} catch (InterruptedException e) {
 					e.printStackTrace();
+					interrupted = true;
 				}
 				if (interrupted)
-					throw new IllegalStateException("Must not compute any f-values after service shutdown.");
+					return;
 				activeJobs.incrementAndGet();
 				pool.submit(new NodeBuilder(expandedNodeInternal, successorDescription));
-
 			});
 		}
+		logger.info("Finished expansion of node {}. Size of OPEN is now {}. Number of active jobs is {}", expandedNodeInternal, open.size(), activeJobs.get());
 
 		/* update statistics, send closed notifications, and possibly return a solution */
 		expandedCounter++;
@@ -452,7 +520,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 
 	public Object getNodeAnnotation(T node, String annotation) {
 		Node<T, V> intNode = ext2int.get(node);
-		return nodeAnnotations.get(intNode).get(annotation);
+		return intNode.getAnnotation(annotation);
 	}
 
 	public Object getAnnotationOfReturnedSolution(List<T> solution, String annotation) {
@@ -473,6 +541,8 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 		logger.info("Search has been canceled");
 		this.canceled = true;
 		this.interrupted = true;
+		if (this.pool != null)
+			this.pool.shutdownNow();
 		if (nodeEvaluator instanceof ICancelableNodeEvaluator) {
 			logger.info("Canceling node evaluator.");
 			((ICancelableNodeEvaluator) nodeEvaluator).cancel();
@@ -509,38 +579,19 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 
 		assert parent == null || expanded.contains(parent.getPoint()) : "Generating successors of an unexpanded node " + parent;
 		assert !open.contains(parent) : "Parent node " + parent + " is still on OPEN, which must not be the case!";
-
-		// TODOcheck if t2 in ext2int
-		// if(ext2int.containsKey(t2))
-		// System.out.println("Yes");
-
+		
 		/* create new node and check whether it is a goal */
 		Node<T, V> newNode = new Node<>(parent, t2);
 		if (evaluation != null)
 			newNode.setInternalLabel(evaluation);
-		if (checkGoalPropertyOnEntirePath ? pathGoalTester.isGoal(newNode.externalPath()) : nodeGoalTester.isGoal(t2)) {
-			newNode.setGoal(true);
-			List<T> solution = getTraversalPath(newNode);
-
-			/* if the node evaluator has not reported the solution already anyway, register the solution and store its annotation */
-			if (!solutionReportingNodeEvaluator) {
-				solutions.add(solution);
-				solutionAnnotations.put(solution, new HashMap<>());
-				solutionAnnotations.get(solution).put("f", newNode.getInternalLabel());
-			}
-			// else while (!annotationsOfSolutionsReturnedByNodeEvaluator.keySet().contains(solution)) {
-
-			// throw new IllegalStateException("The solution reporting node evaluator has not yet reported the solution we just detected: " + solution);
-
-			// }
-		}
-		// TODO check if t2 is already in ext2int
-
-		/* create empty annotations for the node */
-		nodeAnnotations.put(newNode, new HashMap<>());
-		nodeAnnotations.get(newNode).put("f", newNode.getInternalLabel());
-
+		
+		/* register node in map and create annotation object */
 		ext2int.put(t2, newNode);
+		
+		/* detect whether node is solution */
+		if (checkGoalPropertyOnEntirePath ? pathGoalTester.isGoal(newNode.externalPath()) : nodeGoalTester.isGoal(newNode.getPoint()))
+			newNode.setGoal(true);
+		
 		/* send events for this new node */
 		if (parent == null) {
 			this.graphEventBus.post(new GraphInitializedEvent<Node<T, V>>(newNode));
@@ -685,9 +736,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 			if (!ext2int.containsKey(nodeExt))
 				throw new IllegalArgumentException("Received annotation for a node I don't know!");
 			Node<T, V> nodeInt = ext2int.get(nodeExt);
-			if (!nodeAnnotations.containsKey(nodeInt))
-				throw new IllegalStateException("No annotation map has been created for the *known* node " + nodeInt + "!");
-			nodeAnnotations.get(nodeInt).put(event.getAnnotationName(), event.getAnnotationValue());
+			nodeInt.setAnnotation(event.getAnnotationName(), event.getAnnotationValue());
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
@@ -712,14 +761,6 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 		});
 	}
 
-	public INodeSelector<T, V> getNodeSelector() {
-		return nodeSelector;
-	}
-
-	public void setNodeSelector(INodeSelector<T, V> nodeSelector) {
-		this.nodeSelector = nodeSelector;
-	}
-
 	public int getTimeoutForComputationOfF() {
 		return timeoutForComputationOfF;
 	}
@@ -739,8 +780,10 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	/**
 	 * @param open the openCollection to set
 	 */
-	public void setOpen(OpenCollection<Node<T, V>> open) {
-		this.open = open;
+	public void setOpen(OpenCollection<Node<T, V>> collection) {
+		collection.clear();
+		collection.addAll(open);
+		open = collection;
 	}
 	
 }

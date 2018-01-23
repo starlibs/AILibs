@@ -1,12 +1,17 @@
 package jaicore.search.structure.core;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.concurrent.PriorityBlockingQueue;
 
 public class PriorityQueueOpen<E> implements OpenCollection<E> {
 
 	private PriorityBlockingQueue<E> open;
+	
+	public PriorityQueueOpen(Comparator<E> comparator) {
+		this.open = new PriorityBlockingQueue<>(0, comparator);
+	}
 	
 	public PriorityQueueOpen() {
 		this.open = new PriorityBlockingQueue<E>();
