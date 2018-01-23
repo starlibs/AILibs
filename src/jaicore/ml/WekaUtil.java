@@ -541,7 +541,6 @@ public class WekaUtil {
         }
       }
     }
-    System.out.println(data.size() + " - " + newData.size());
     return newData;
   }
 
@@ -583,7 +582,7 @@ public class WekaUtil {
   /**
    * Compute indices of instances of the original data set that are contained in the given subset.
    * This does only work for data sets that contain an instance at most once!
-   * 
+   *
    * @param dataset
    * @param subset
    * @return
