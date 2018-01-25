@@ -1,5 +1,6 @@
 package jaicore.ml.classification.multiclass.reduction;
 
+import jaicore.ml.MajorityClassifier;
 import jaicore.ml.WekaUtil;
 
 import java.io.Serializable;
@@ -18,6 +19,7 @@ import weka.classifiers.meta.MultiClassClassifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.WekaException;
 
 public class MCTreeNode implements Classifier, ITreeClassifier, Serializable, Iterable<MCTreeNode> {
 
@@ -105,7 +107,13 @@ public class MCTreeNode implements Classifier, ITreeClassifier, Serializable, It
 
     // refactor training data with respect to the split clusters and build the classifier
     Instances trainingData = WekaUtil.mergeClassesOfInstances(data, instancesCluster);
-    this.classifier.buildClassifier(trainingData);
+
+    try {
+      this.classifier.buildClassifier(trainingData);
+    } catch (WekaException e) {
+      this.classifier = new MajorityClassifier();
+      this.classifier.buildClassifier(trainingData);
+    }
 
     // recursively build classifiers for children
     this.children.stream().parallel().forEach(child -> {
