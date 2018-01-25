@@ -11,6 +11,8 @@ import jaicore.basic.PerformanceLogger.PerformanceMeasure;
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.search.algorithms.standard.astar.AStar;
 import jaicore.search.algorithms.standard.core.ParentDiscarding;
+import jaicore.search.graphgenerators.npuzzle.parentDiscarding.PDPuzzleGenerator;
+import jaicore.search.graphgenerators.npuzzle.parentDiscarding.PDPuzzleNode;
 import jaicore.search.structure.core.Node;
 import jaicore.search.structure.core.NodeExpansionDescription;
 

@@ -1,4 +1,4 @@
-package jaicore.search.algorithms.standard.bestfirst.npuzzle.parentDiscarding;
+package jaicore.search.graphgenerators.npuzzle.parentDiscarding;
 
 import java.util.Arrays;
 
