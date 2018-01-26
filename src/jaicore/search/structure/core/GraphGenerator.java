@@ -21,4 +21,10 @@ public interface GraphGenerator<T, A> {
 	 * 		
 	 */
 	public boolean isSelfContained(); 
+	
+	/**Method which allows to enable or dissable the nodenumbering
+	 */
+	public  void setNodeNumbering();
+	
+	
 }
