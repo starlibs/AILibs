@@ -451,17 +451,17 @@ public class WekaUtil {
 
   public static Instances getEmptySetOfInstancesWithRefactoredClass(final Instances instances) {
     List<Attribute> newAttributes = getAttributes(instances);
-    newAttributes.add(getNewClassAttribute(instances.classAttribute()));
+    newAttributes.add(instances.classIndex(), getNewClassAttribute(instances.classAttribute()));
     Instances newData = new Instances("split", (ArrayList<Attribute>) newAttributes, 0);
-    newData.setClass(newAttributes.get(newAttributes.size() - 1));
+    newData.setClassIndex(instances.classIndex());
     return newData;
   }
 
   public static Instances getEmptySetOfInstancesWithRefactoredClass(final Instances instances, final List<String> classes) {
     List<Attribute> newAttributes = getAttributes(instances);
-    newAttributes.add(getNewClassAttribute(instances.classAttribute(), classes));
+    newAttributes.add(instances.classIndex(), getNewClassAttribute(instances.classAttribute(), classes));
     Instances newData = new Instances("split", (ArrayList<Attribute>) newAttributes, 0);
-    newData.setClass(newAttributes.get(newAttributes.size() - 1));
+    newData.setClassIndex(instances.classIndex());
     return newData;
   }
 
@@ -496,7 +496,6 @@ public class WekaUtil {
 
   public static List<Attribute> getReplacedAttributeList(final List<Attribute> attributes, final Attribute classAttribute) {
     ArrayList<Attribute> newAttributes = new ArrayList<>();
-    System.out.println(attributes);
     for (Attribute a : attributes) {
       if (classAttribute != a) {
         newAttributes.add(a);
@@ -504,7 +503,6 @@ public class WekaUtil {
         newAttributes.add(getNewClassAttribute(classAttribute));
       }
     }
-    System.out.println(newAttributes);
     return newAttributes;
   }
 
@@ -531,12 +529,14 @@ public class WekaUtil {
     });
 
     Instances newData = WekaUtil.getEmptySetOfInstancesWithRefactoredClass(data, classes);
+
     for (Instance i : data) {
       Instance iNew = (Instance) i.copy();
       String className = i.classAttribute().value((int) Math.round(i.classValue()));
       for (Set<String> cluster : instancesCluster) {
         if (cluster.contains(className)) {
           iNew.setClassValue(instancesCluster.indexOf(cluster));
+          iNew.setDataset(newData);
           newData.add(iNew);
         }
       }
