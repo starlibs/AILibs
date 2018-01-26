@@ -144,6 +144,8 @@ public class MLUtil {
 			case "noaddSingleParam":
 			case "noaddValuedParam":
 				break;
+			case "configReduction":
+				break;
 			case "assignTo":
 				codeBuilder.append("String " + outParam.getName());
 				codeBuilder.append("= \"");
