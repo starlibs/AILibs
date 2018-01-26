@@ -23,12 +23,12 @@ import weka.core.Instances;
 public class MLPipeline implements Classifier, Serializable {
 
 	private final List<CEOCAction> creationPlan;
-	private final List<Preprocessor> preprocessors = new ArrayList<>();
+	private final List<SuvervisedFilterSelector> preprocessors = new ArrayList<>();
 	private final Classifier baseClassifier;
 	private boolean trained = false;
 	private long timeForTrainingPreprocessors, timeForTrainingClassifier, timeForExecutingPreprocessor, timeForExecutingClassifier;
 
-	public MLPipeline(List<CEOCAction> creationPlan, List<Preprocessor> preprocessor, Classifier baseClassifier) {
+	public MLPipeline(List<CEOCAction> creationPlan, List<SuvervisedFilterSelector> preprocessor, Classifier baseClassifier) {
 		super();
 		this.creationPlan = creationPlan;
 		if (baseClassifier == null)
@@ -46,7 +46,7 @@ public class MLPipeline implements Classifier, Serializable {
 			AttributeSelection selector = new AttributeSelection();
 			selector.setSearch(searcher);
 			selector.setEvaluator(evaluator);
-			preprocessors.add(new Preprocessor(searcher, evaluator, selector));
+			preprocessors.add(new SuvervisedFilterSelector(searcher, evaluator, selector));
 		}
 		this.baseClassifier = baseClassifier;
 	}
@@ -60,7 +60,7 @@ public class MLPipeline implements Classifier, Serializable {
 
 		/* reduce dimensionality */
 		long start = System.currentTimeMillis();
-		for (Preprocessor pp : preprocessors) {
+		for (SuvervisedFilterSelector pp : preprocessors) {
 
 			/* if the filter has not been trained yet, do so now and store it */
 			if (!pp.isPrepared()) {
@@ -92,7 +92,7 @@ public class MLPipeline implements Classifier, Serializable {
 
 	private Instance applyPreprocessors(Instance data) throws Exception {
 		long start = System.currentTimeMillis();
-		for (Preprocessor pp : preprocessors) {
+		for (SuvervisedFilterSelector pp : preprocessors) {
 			data = pp.apply(data);
 			timeForExecutingPreprocessor = System.currentTimeMillis() - start;
 		}
@@ -134,7 +134,7 @@ public class MLPipeline implements Classifier, Serializable {
 		return baseClassifier;
 	}
 
-	public List<Preprocessor> getPreprocessors() {
+	public List<SuvervisedFilterSelector> getPreprocessors() {
 		return preprocessors;
 	}
 

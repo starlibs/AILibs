@@ -1,4 +1,4 @@
-package de.upb.crc901.mlplan.evaluation;
+package de.upb.crc901.mlplan.evaluation.ecml2018;
 
 public class EvaluationSimulator {
 

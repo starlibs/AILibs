@@ -53,8 +53,12 @@ public class MonteCarloCrossValidationEvaluator implements SolutionEvaluator {
 				logger.info("Score for evaluation of {} with split #{}/{}: {}", pl, i + 1, repeats, score);
 				stats.addValue(score);
 			}
-		} catch (Throwable e) {
-			logger.warn("Exception or Error thrown by classifier {}. Returning a NULL score", pl.getBaseClassifier().getClass().getName());
+		}
+		catch (InterruptedException e) {
+			throw e;
+		}
+		catch (Throwable e) {
+			logger.info("Exception or Error thrown by classifier {}. Returning a NULL score", pl.getBaseClassifier().getClass().getName());
 			return null;
 		}
 

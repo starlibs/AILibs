@@ -6,6 +6,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.upb.crc901.mlplan.core.MLPipeline;
 import de.upb.crc901.mlplan.core.SolutionEvaluator;
 import jaicore.ml.WekaUtil;
@@ -15,6 +18,7 @@ import weka.core.Instances;
 @SuppressWarnings("serial")
 public class SimpleSolutionEvaluator implements SolutionEvaluator {
 
+	private final static Logger logger = LoggerFactory.getLogger(SimpleSolutionEvaluator.class);
 	private Thread worker;
 	private Instances train, validation;
 
@@ -36,8 +40,9 @@ public class SimpleSolutionEvaluator implements SolutionEvaluator {
 					eval.evaluateModel(pl, validation);
 					int score = (int) Math.round(eval.pctIncorrect() * 100);
 					return score;
-				} catch (Exception e) {
-					return Integer.MAX_VALUE;
+				} catch (Throwable e) {
+					logger.warn("Evaluation of pipeline failed due Exception {} with message {}. Returning null.", e.getClass().getName(), e.getMessage());
+					return null;
 				}
 			}
 		});
@@ -48,9 +53,9 @@ public class SimpleSolutionEvaluator implements SolutionEvaluator {
 		try {
 			return performance.get();
 		} catch (InterruptedException e) {
-			System.out.println("Received timeout, canceling computation of f. Awaiting termination of worker ...");
+			logger.info("Received timeout, canceling computation of f. Awaiting termination of worker ...");
 			worker.join();
-			System.out.println("worker thread closed ...");
+			logger.info("worker thread closed ...");
 			throw e;
 		} catch (ExecutionException e) {
 			e.printStackTrace();

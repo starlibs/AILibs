@@ -64,7 +64,15 @@
 		<appender-ref ref="traceFileAppender" />
 	</logger>
 	
-	<logger name="de.upb.crc901.taskconfigurator">
+	<logger name="de.upb.crc901.mlplan.classifiers">
+		<level value="info" />
+	</logger>
+	
+	<logger name="jaicore.search.algorithms.standard.bestfirst">
+		<level value="warn" />
+	</logger>
+		
+	<logger name="jaicore.concurrent">
 		<level value="warn" />
 	</logger>
 </log4j:configuration>

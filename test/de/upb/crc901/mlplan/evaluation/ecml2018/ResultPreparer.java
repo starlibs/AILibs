@@ -1,4 +1,4 @@
-package de.upb.crc901.mlplan.evaluation;
+package de.upb.crc901.mlplan.evaluation.ecml2018;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -15,6 +15,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math3.analysis.function.Exp;
+import org.hamcrest.Description;
+
 import jaicore.basic.FileUtil;
 
 public class ResultPreparer {
@@ -26,16 +30,41 @@ public class ResultPreparer {
 	static Pattern patternForSearcher = Pattern.compile("weka\\.attributeSelection\\.([^:]*):__construct");
 
 	public static void main(String[] args) throws Exception {
-		File folderOfPreliminaryResults = new File("results/JML/86400/10CV-selection");
-		prepareCompleteResults(folderOfPreliminaryResults);
+		File folderOfPreliminaryResults = new File("results/IJCAI2018/60");
+		createShortVersionOfClusterResults(folderOfPreliminaryResults, line -> {
+			String[] parts = line.split(";");
+			return new ExperimentResult(Integer.parseInt(parts[0].trim()), Double.parseDouble(parts[1].trim()), 0, "", "", "", false);
+		});
 	}
 
-	public static void prepareCompleteResults(File folderOfPreliminaryResults) throws Exception {
+	interface ILineInterpreter {
+		public ExperimentResult interpret(String line);
+	}
+
+	static class ExperimentResult {
+		int seed;
+		double loss, believedLoss;
+		String classifier, searcher, evaluator;
+		boolean phase2Reached;
+
+		public ExperimentResult(int seed, double loss, double believedLoss, String classifier, String searcher, String evaluator, boolean phase2Reached) {
+			super();
+			this.seed = seed;
+			this.loss = loss;
+			this.believedLoss = believedLoss;
+			this.classifier = classifier;
+			this.searcher = searcher;
+			this.evaluator = evaluator;
+			this.phase2Reached = phase2Reached;
+		}
+	}
+
+	public static void prepareCompleteResults(File folderOfPreliminaryResults, ILineInterpreter interpreter) throws Exception {
 		System.out.print("Extracting solution log summaries from logfiles ...");
 		writeAllExperimentStats(folderOfPreliminaryResults);
 		System.out.println(" done");
 		System.out.print("Creating summaries of results ...");
-		createShortVersionOfClusterResults(folderOfPreliminaryResults);
+		createShortVersionOfClusterResults(folderOfPreliminaryResults, interpreter);
 		System.out.println(" done");
 		System.out.println("Classifiers: ");
 		totalClassifierCount.keySet().stream().sorted().forEach(k -> System.out.println(k + ": " + totalClassifierCount.get(k)));
@@ -102,7 +131,7 @@ public class ResultPreparer {
 					totalClassifierCount.put(classifier, totalClassifierCount.get(classifier) + 1);
 				}
 				fw.write(lineParts[0] + ", " + lineParts[1] + ", " + lineParts[2] + ", " + lineParts[3] + ", " + classifier + ", " + getSearcherSelectedInSolution(lineParts[4])
-				+ ", " + getEvaluatorSelectedInSolution(lineParts[4]) + ", " + (isTunedSolution(lineParts[4]) ? 1 : 0) + "\n");
+						+ ", " + getEvaluatorSelectedInSolution(lineParts[4]) + ", " + (isTunedSolution(lineParts[4]) ? 1 : 0) + "\n");
 			}
 		}
 		if (FileUtil.readFileAsList(outFile.getAbsolutePath()).size() != FileUtil.readFileAsList(logFile.getAbsolutePath()).size()) {
@@ -156,7 +185,7 @@ public class ResultPreparer {
 		return matches.size() > 3;
 	}
 
-	public static void createShortVersionOfClusterResults(File folderOfPreliminaryResults) throws Exception {
+	public static void createShortVersionOfClusterResults(File folderOfPreliminaryResults, ILineInterpreter interpreter) throws Exception {
 
 		File resultFolder = new File(folderOfPreliminaryResults + File.separator + "short");
 		File solutionLogFolder = new File(folderOfPreliminaryResults + File.separator + "solutionlogs" + File.separator + "prepared");
@@ -171,50 +200,11 @@ public class ResultPreparer {
 					try (FileWriter fw = new FileWriter(new File(resultFolder + File.separator + f.toFile().getName()))) {
 						for (String line : FileUtil.readFileAsList(f.toFile().getAbsolutePath())) {
 							try {
-								if (line.trim().isEmpty())
-									continue;
-								String[] lineParts = new String[8];
-								String restOfLine = line;
-								for (int i = 0; i < 7; i++) {
-									lineParts[i] = restOfLine.substring(0, restOfLine.indexOf(",")).trim();
-									restOfLine = restOfLine.substring(restOfLine.indexOf(",") + 1);
+								ExperimentResult r = interpreter.interpret(line);
+								if (r != null) {
+									fw.write(r.seed + ", " + r.loss + ", " + r.believedLoss + ", " + r.classifier + ", " + r.searcher + ", " + r.evaluator + ", "
+											+ (r.phase2Reached ? 1 : 0) + "\n");
 								}
-								lineParts[7] = restOfLine;
-								long experimentId = Long.valueOf(lineParts[0].trim());
-								int clusterJobId = Integer.valueOf(lineParts[1].trim());
-								int seed = Integer.valueOf(lineParts[2].trim());
-								if (seenSeeds.contains(seed))
-									continue;
-								seenSeeds.add(seed);
-								double loss = Double.valueOf(lineParts[3].trim());
-								String plan = lineParts[7];
-
-								/* determine whether phase 2 was reached (only applies for our technique) */
-								boolean phase2Reached = false;
-								boolean isAUTOWekaJob = !line.contains("__construct");
-								double believedLoss = isAUTOWekaJob ? 0 : Double.valueOf(lineParts[4].trim()) / 100f;
-								if (!isAUTOWekaJob) {
-									File logFile = new File(solutionLogFolder + File.separator + "solutions-"
-											+ clusterJobId + "-" + experimentId + "-" + dataset + "-" + seed + ".csv");
-									if (logFile.exists()) {
-									phase2Reached = FileUtil.readFileAsList(logFile.toString()).stream().map(l -> Integer.valueOf(l.split(",")[7].trim())).filter(val -> val == 1)
-											.findAny().isPresent();
-									}
-									else
-										System.err.println("No log file present for " + logFile + ". Cannot determine further information.");
-								}
-
-								// String classifier = getClassifierSelectedInSolution(plan);
-								String classifier = "No Classifier Info";
-								String searcher = "No Seacher Info";
-								String evaluator = "No Evaluator Info";
-								if (!isAUTOWekaJob) {
-									classifier = getClassifierSelectedInSolution(plan);
-									searcher = getSearcherSelectedInSolution(plan);
-									evaluator = getEvaluatorSelectedInSolution(plan);
-								}
-
-								fw.write(seed + ", " + loss + ", " + believedLoss + ", " + classifier + ", " + searcher + ", " + evaluator + ", " + (phase2Reached ? 1 : 0) + "\n");
 							} catch (Exception e) {
 								System.err.println("Problems with " + f + ", line: " + line);
 								e.printStackTrace();
@@ -226,5 +216,110 @@ public class ResultPreparer {
 				}
 			});
 		}
+	}
+
+	public static void writeMeanErrorRates(File folderOfPreliminaryResults) {
+		File resultFolder = new File(folderOfPreliminaryResults + File.separator + "summaries");
+		resultFolder.mkdirs();
+		try (FileWriter fw = new FileWriter(new File(resultFolder + File.separator + "summaries"))) {
+			try (Stream<Path> paths = Files.walk(folderOfPreliminaryResults.toPath())) {
+				paths.filter(f -> f.getParent().toFile().equals(folderOfPreliminaryResults) && f.toFile().getAbsolutePath().endsWith(".csv")).forEach(f -> {
+					try {
+						String filename = f.toFile().getName();
+						String dataset = filename.substring(filename.indexOf("-") + 1, filename.lastIndexOf("."));
+						DescriptiveStatistics errorRates = new DescriptiveStatistics();
+						Set<Integer> seenSeeds = new HashSet<>();
+						for (String line : FileUtil.readFileAsList(f.toFile().getAbsolutePath())) {
+							try {
+								if (line.trim().isEmpty())
+									continue;
+								String[] lineParts = new String[2];
+								String restOfLine = line;
+								for (int i = 0; i < 1; i++) {
+									lineParts[i] = restOfLine.substring(0, restOfLine.indexOf(";")).trim();
+									restOfLine = restOfLine.substring(restOfLine.indexOf(";") + 1);
+								}
+								lineParts[1] = restOfLine;
+								int seed = Integer.valueOf(lineParts[0].trim());
+								if (seenSeeds.contains(seed))
+									continue;
+								seenSeeds.add(seed);
+								double errorRate = Double.valueOf(lineParts[1].trim());
+								errorRates.addValue(errorRate);
+							} catch (Exception e) {
+								System.err.println("Problems with " + f + ", line: " + line);
+								e.printStackTrace();
+							}
+						}
+						fw.write(dataset + ", " + errorRates.getMean() + "\n");
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				});
+			}
+			;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static ILineInterpreter getDefaultLineInterpreter() {
+
+		return new ILineInterpreter() {
+
+			File solutionLogFolder;
+			String dataset;
+			Set<Integer> seenSeeds;
+
+			@Override
+			public ExperimentResult interpret(String line) {
+				if (line.trim().isEmpty())
+					return null;
+				String[] lineParts = new String[8];
+				String restOfLine = line;
+				for (int i = 0; i < 7; i++) {
+					lineParts[i] = restOfLine.substring(0, restOfLine.indexOf(",")).trim();
+					restOfLine = restOfLine.substring(restOfLine.indexOf(",") + 1);
+				}
+				lineParts[7] = restOfLine;
+				long experimentId = Long.valueOf(lineParts[0].trim());
+				int clusterJobId = Integer.valueOf(lineParts[1].trim());
+				int seed = Integer.valueOf(lineParts[2].trim());
+				if (seenSeeds.contains(seed))
+					return null;
+				seenSeeds.add(seed);
+				double loss = Double.valueOf(lineParts[3].trim());
+				String plan = lineParts[7];
+
+				/* determine whether phase 2 was reached (only applies for our technique) */
+				boolean phase2Reached = false;
+				boolean isAUTOWekaJob = !line.contains("__construct");
+				double believedLoss = isAUTOWekaJob ? 0 : Double.valueOf(lineParts[4].trim()) / 100f;
+				if (!isAUTOWekaJob) {
+					File logFile = new File(solutionLogFolder + File.separator + "solutions-" + clusterJobId + "-" + experimentId + "-" + dataset + "-" + seed + ".csv");
+					if (logFile.exists()) {
+						try {
+							phase2Reached = FileUtil.readFileAsList(logFile.toString()).stream().map(l -> Integer.valueOf(l.split(",")[7].trim())).filter(val -> val == 1).findAny()
+									.isPresent();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					} else
+						System.err.println("No log file present for " + logFile + ". Cannot determine further information.");
+				}
+
+				// String classifier = getClassifierSelectedInSolution(plan);
+				String classifier = "No Classifier Info";
+				String searcher = "No Seacher Info";
+				String evaluator = "No Evaluator Info";
+				if (!isAUTOWekaJob) {
+					classifier = getClassifierSelectedInSolution(plan);
+					searcher = getSearcherSelectedInSolution(plan);
+					evaluator = getEvaluatorSelectedInSolution(plan);
+				}
+				return new ExperimentResult(seed, loss, believedLoss, classifier, searcher, evaluator, phase2Reached);
+			}
+
+		};
 	}
 }

@@ -8,26 +8,29 @@ import java.util.Random;
 
 import de.upb.crc901.mlplan.core.MLPipeline;
 import de.upb.crc901.mlplan.core.MLUtil;
-import de.upb.crc901.mlplan.core.Preprocessor;
 import de.upb.crc901.mlplan.core.SolutionEvaluator;
+import de.upb.crc901.mlplan.core.SuvervisedFilterSelector;
+import de.upb.crc901.mlplan.search.evaluators.DoubleRandomCompletionEvaluator;
 import de.upb.crc901.mlplan.search.evaluators.MonteCarloCrossValidationEvaluator;
 import de.upb.crc901.mlplan.search.evaluators.RandomCompletionEvaluator;
 import jaicore.ml.WekaUtil;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.search.algorithms.interfaces.IObservableORGraphSearch;
-import jaicore.search.algorithms.parallel.parallelevaluation.local.bestfirst.ParallelizedBestFirst;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
+import jaicore.search.algorithms.standard.bestfirst.BestFirst;
+import jaicore.search.algorithms.standard.core.INodeEvaluator;
+import jaicore.search.algorithms.standard.core.ORGraphSearch;
 import weka.attributeSelection.ASSearch;
 import weka.attributeSelection.AttributeSelection;
 import weka.attributeSelection.PrincipalComponents;
 import weka.attributeSelection.Ranker;
 import weka.core.Instances;
 
-public class ShrinkingPipelineOptimizer extends TwoPhasePipelineSearcher {
-	private Preprocessor preprocessor;
+public class ShrinkingPipelineOptimizer extends TwoPhaseHTNBasedPipelineSearcher<Double> {
+	private SuvervisedFilterSelector preprocessor;
 	
 	public ShrinkingPipelineOptimizer() throws IOException {
-		this (MLUtil.getGraphGenerator(new File("testrsc/automl2.testset"), null), null, 0, 0, 20, 50, false);
+		this (MLUtil.getGraphGenerator(new File("testrsc/automl2.testset"), null, null), null, 0, 0, 20, 50, false);
 	}
 	
 	public ShrinkingPipelineOptimizer(SerializableGraphGenerator<TFDNode, String> graphGenerator, Random random, int timeoutTotal, int timeoutPerNodeFComputation, int numberOfSolutions, int selectionDepth, boolean showGraph) {
@@ -35,9 +38,9 @@ public class ShrinkingPipelineOptimizer extends TwoPhasePipelineSearcher {
 	}
 	
 	@Override
-	protected IObservableORGraphSearch<TFDNode, String, Integer> getSearch(Instances data) throws IOException {
+	protected IObservableORGraphSearch<TFDNode, String, Double> getSearch(Instances data) throws IOException {
 		SolutionEvaluator solutionEvaluator = new MonteCarloCrossValidationEvaluator(5, 0.7f);
-		RandomCompletionEvaluator rce = new RandomCompletionEvaluator(getRandom(), 3, solutionEvaluator);
+		DoubleRandomCompletionEvaluator rce = new DoubleRandomCompletionEvaluator(getRandom(), 3, solutionEvaluator);
 		rce.setGenerator(getGraphGenerator());
 		
 		/* recude considered data if necessary */
@@ -62,7 +65,7 @@ public class ShrinkingPipelineOptimizer extends TwoPhasePipelineSearcher {
 			AttributeSelection as = new AttributeSelection();
 			as.setEvaluator(pca);
 			as.setSearch(r);
-			preprocessor = new Preprocessor(r, pca, as);
+			preprocessor = new SuvervisedFilterSelector(r, pca, as);
 			try {
 				System.out.print("Applying " + pca.getClass().getName() + " ...");
 				as.SelectAttributes(data);
@@ -76,12 +79,15 @@ public class ShrinkingPipelineOptimizer extends TwoPhasePipelineSearcher {
 		rce.setData(data);
 		
 		/* we allow CPUs-1 threads for node evaluation. Setting the timeout evaluator to null means to really prune all those */
-		return new ParallelizedBestFirst<>(getGraphGenerator(), rce, getNumberOfCPUs() - 1, n -> null, getTimeoutPerNodeFComputation());
+		BestFirst<TFDNode, String> search = new BestFirst<TFDNode,String>(getGraphGenerator(), rce);
+		search.parallelizeNodeExpansion(getNumberOfCPUs() - 1);
+		search.setTimeoutForComputationOfF(getTimeoutPerNodeFComputation(), n -> null);
+		return search;
 	}
 	
 	@Override
 	protected MLPipeline modifyPipeline(MLPipeline mlp) {
-		List<Preprocessor> preprocessors = new ArrayList<>(mlp.getPreprocessors());
+		List<SuvervisedFilterSelector> preprocessors = new ArrayList<>(mlp.getPreprocessors());
 		preprocessors.add(0, preprocessor);
 		return new MLPipeline(null, preprocessors, mlp.getBaseClassifier());
 	}

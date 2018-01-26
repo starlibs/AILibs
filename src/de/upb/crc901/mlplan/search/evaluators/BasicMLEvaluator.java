@@ -96,10 +96,11 @@ public class BasicMLEvaluator implements Serializable {
 	public BasicMLEvaluator(Random r) throws IOException {
 		super();
 		this.rand = r;
-		IBasicMLEvaluatorConf conf = ConfigCache.getOrCreate(IBasicMLEvaluatorConf.class);
-		this.statfolder = conf.getStatDir();
+//		IBasicMLEvaluatorConf conf = ConfigCache.getOrCreate(IBasicMLEvaluatorConf.class);
+//		this.statfolder = conf.getStatDir();
+		this.statfolder = null;
 		if (statfolder == null) {
-			logger.warn("Property \"statdir\" not set in configuration file or file does not exist (conf/BasicMLEvaluator.properties)");
+//			logger.warn("Property \"statdir\" not set in configuration file or file does not exist (conf/BasicMLEvaluator.properties)");
 			statfile = null;
 			resultWriterThread = null;
 		}

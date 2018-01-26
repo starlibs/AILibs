@@ -1,5 +1,6 @@
 package de.upb.crc901.mlplan.search.evaluators;
 
+import java.nio.channels.InterruptedByTimeoutException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -14,11 +15,12 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import org.apache.commons.math.stat.descriptive.SynchronizedMultivariateSummaryStatistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.upb.crc901.mlplan.core.CodePlanningUtil;
 import de.upb.crc901.mlplan.core.MLPipeline;
-import de.upb.crc901.mlplan.core.MLPipelineSolutionAnnotation;
 import de.upb.crc901.mlplan.core.MLUtil;
 import de.upb.crc901.mlplan.core.SolutionEvaluator;
 import jaicore.basic.SetUtil;
@@ -33,6 +35,8 @@ import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import jaicore.search.algorithms.standard.core.ICancelableNodeEvaluator;
 import jaicore.search.algorithms.standard.core.IGraphDependentNodeEvaluator;
 import jaicore.search.algorithms.standard.core.ISolutionReportingNodeEvaluator;
+import jaicore.search.algorithms.standard.core.NodeAnnotationEvent;
+import jaicore.search.algorithms.standard.core.SolutionAnnotationEvent;
 import jaicore.search.algorithms.standard.core.SolutionEventBus;
 import jaicore.search.algorithms.standard.core.SolutionFoundEvent;
 import jaicore.search.algorithms.standard.rdfs.RandomizedDepthFirstSearch;
@@ -44,29 +48,32 @@ import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 import weka.core.Instances;
 
 @SuppressWarnings("serial")
-public class RandomCompletionEvaluator implements IGraphDependentNodeEvaluator<TFDNode, String, Integer>, DataDependentNodeEvaluator<TFDNode, Integer>,
-		SerializableNodeEvaluator<TFDNode, Integer>, ISolutionReportingNodeEvaluator<TFDNode, Integer>, ICancelableNodeEvaluator {
+public abstract class RandomCompletionEvaluator<V extends Comparable<V>> implements IGraphDependentNodeEvaluator<TFDNode, String, V>, DataDependentNodeEvaluator<TFDNode, V>,
+		SerializableNodeEvaluator<TFDNode, V>, ISolutionReportingNodeEvaluator<TFDNode, V>, ICancelableNodeEvaluator {
 
 	private final static Logger logger = LoggerFactory.getLogger(RandomCompletionEvaluator.class);
-	private static Map<List<TFDNode>, List<TFDNode>> completions = new ConcurrentHashMap<>();
-	private static Set<List<TFDNode>> postedSolutions = new HashSet<>();
-	private static Set<List<CEOCAction>> unsuccessfulPlans = Collections.synchronizedSet(new HashSet<>());
-	private static Map<List<CEOCAction>, Integer> pipelineScores = new ConcurrentHashMap<>();
-	private static Map<List<CEOCAction>, Integer> pipelineScoreTimes = new ConcurrentHashMap<>();
-	private static Map<Node<TFDNode, Integer>, Integer> fValues = new ConcurrentHashMap<>();
-	private static final List<String> classifierRanking = Arrays.asList(new String[] { "IBk", "NaiveBayesMultinomial", "RandomTree", "NaiveBayes", "RandomForest", "SimpleLogistic",
-			"MultiLayerPerceptron", "VotedPerceptron", "J48", "SMO", "Logistic" });
+	private Map<List<TFDNode>, List<TFDNode>> completions = new ConcurrentHashMap<>();
+	private Map<List<TFDNode>, List<CEOCAction>> knownSolutions = new HashMap<>();
+	private Set<List<TFDNode>> postedSolutions = new HashSet<>();
+	private Set<List<CEOCAction>> unsuccessfulPlans = Collections.synchronizedSet(new HashSet<>());
+	private Map<List<CEOCAction>, V> scoresOfSolutionPaths = new ConcurrentHashMap<>();
+	private Map<List<CEOCAction>, Integer> pipelineScoreTimes = new ConcurrentHashMap<>();
+	protected Map<Node<TFDNode, ?>, V> fValues = new ConcurrentHashMap<>();
+	protected Map<String, Integer> ppFails = new ConcurrentHashMap<>();
+	protected Map<String, Integer> plFails = new ConcurrentHashMap<>();
+	protected Map<String, Integer> plSuccesses = new ConcurrentHashMap<>();
 
 	private GraphGenerator<TFDNode, String> generator;
 	private long timestampOfFirstEvaluation;
 	private final Random random;
-	private final int samples;
-	private final SolutionEvaluator evaluator;
+	protected final int samples;
+	protected final SolutionEvaluator evaluator;
 	private final SolutionEventBus<TFDNode> eventBus = new SolutionEventBus<>();
 	private boolean dataSet = false;
 
 	// private final Map<String,AttributeSelection> cachedFilters = new HashMap<>();
-	// private final Map<String,Map<String,Integer>> solutionsPerTechnique = new HashMap<>();
+	private int maxSolutionsPerTechnique = -1;
+	private final Map<String, Map<String, Integer>> solutionsPerTechnique = new HashMap<>();
 
 	public RandomCompletionEvaluator(Random random, int samples, SolutionEvaluator evaluator) {
 		super();
@@ -75,189 +82,325 @@ public class RandomCompletionEvaluator implements IGraphDependentNodeEvaluator<T
 		if (samples <= 0)
 			throw new IllegalArgumentException("Sample size must be greater than 0!");
 		if (evaluator == null)
-			throw new IllegalArgumentException("Evaluator must not be null!");
+			throw new IllegalArgumentException("Solution Evaluator must not be null!");
 		this.random = random;
 		this.samples = samples;
 		this.evaluator = evaluator;
+		
+		/* check whether assertions are on */
+		boolean assertOn = false;
+		assert assertOn = true; 
+		if (assertOn) {
+			System.out.println("--------------------------------------------------------");
+			System.out.println("Attention: assertions are activated.");
+			System.out.println("This causes significant performance loss using RandomCompleter.");
+			System.out.println("If you are not in debugging mode, we strongly suggest to deactive assertions.");
+			System.out.println("--------------------------------------------------------");
+		}
 	}
 
-	public Integer f(Node<TFDNode, Integer> n) throws Exception {
+	protected V computeEvaluationPriorToCompletion(Node<TFDNode, ?> n, List<TFDNode> path, List<CEOCAction> plan, List<String> currentProgram) throws Exception {
+		return null;
+	}
+
+	protected abstract V convertErrorRateToNodeEvaluation(Integer errorRate);
+
+	protected abstract double getExpectedUpperBoundForRelativeDistanceToOptimalSolution(Node<TFDNode, ?> n, List<TFDNode> path, List<CEOCAction> partialPlan,
+			List<String> currentProgram);
+
+	public V f(Node<TFDNode, ?> n) throws Exception {
 		if (timestampOfFirstEvaluation == 0)
 			timestampOfFirstEvaluation = System.currentTimeMillis();
 		logger.info("Received request for f-value of node {}", n);
-		
+
 		if (!fValues.containsKey(n)) {
-			
+
 			/* if we already have a value for this path, do not continue */
 			if (generator == null)
 				throw new IllegalStateException("Cannot compute f-values before the generator is set!");
-			if (!n.getPoint().isGoal()) {
-				List<TFDNode> path = n.externalPath();
-				logger.info("This is an unknown node; computing score for path to node: {}", path);
-				List<CEOCAction> partialPlan = CEOCSTNUtil.extractPlanFromSolutionPath(path);
-				
-				/* if we have an f-value belonging to this plan, store it (this can be if we get asked for the f of a node we generated internally but that does not even belong to the main search graph) */
-				if (!pipelineScores.containsKey(partialPlan)) {
-				
-					/* check whether a filter and a classifier have been defined */
-					List<String> currentProgram = Arrays.asList(MLUtil.getJavaCodeFromPlan(partialPlan).split("\n"));
-					Optional<String> preprocessorLine = currentProgram.stream().filter(line -> line.contains("new") && line.contains("attributeSelection")).findAny();
-					Optional<String> classifierLine = currentProgram.stream().filter(line -> line.contains("new") && line.contains("classifiers")).findAny();
-					if (!classifierLine.isPresent()) {
-						String nextLiteralName = n.getPoint().getRemainingTasks().get(0).getPropertyName();
-						if (nextLiteralName.endsWith("__construct") && nextLiteralName.contains("classifiers")) {
-							String classifierName = nextLiteralName.substring(nextLiteralName.lastIndexOf(".") + 1, nextLiteralName.indexOf(":"));
-							if (!classifierRanking.contains(classifierName))
-								return classifierRanking.size() * 2;
-							return classifierRanking.indexOf(classifierName) + (preprocessorLine.isPresent() ? classifierRanking.size() : 0);
-						}
-						logger.info("No classifier defined yet, so returning 0.");
-						return 0;
-					}
-	
-					/* if the classifier has just been defined, check for the standard configuration */
-					if (currentProgram.get(currentProgram.size() - 1).equals(classifierLine.get())) {
-						logger.info("Classifier has just been chosen, now try its standard configuration.");
-						Integer f = getFValueComputerForCompletePath(path);
-						if (f != null) {
-							fValues.put(n, f);
-						} else {
-							fValues.put(n, Integer.MAX_VALUE);
-						}
-					}
-	
-					/* if the space under this solution is overly searched, reject */
-					// String filterName = getFilterName(partialPipeline);
-					// String classifierName = getBaselearnerName(partialPipeline);
-					// if (solutionsPerTechnique.containsKey(filterName) && solutionsPerTechnique.get(filterName).containsKey(classifierName) &&
-					// solutionsPerTechnique.get(filterName).get(classifierName) > 10)
-					// {
-					// return Integer.MAX_VALUE;
-					// }
-	
-					/* check if we have an f-value for exactly this node */
-					if (!completions.containsKey(path)) {
-						
-						/* determine whether we have a solution path (found by the oracle) that goes over this node */
-						/* only if we have no path to a solution over this node, we compute a new one */
-						List<TFDNode> pathWhoseCompletionSubsumesCurrentPath = getSubsumingKnownPathCompletion(path);
-						// List<TFDNode> pathWhoseCompletionSubsumesCurrentPath = null;
-						if (pathWhoseCompletionSubsumesCurrentPath == null) {
-							int best = Integer.MAX_VALUE;
-							List<TFDNode> bestCompletion = null;
-							for (int i = 0; i < samples; i++) {
-	
-								/* create randomized dfs searcher */
-								BestFirst<TFDNode, String> completer = new RandomizedDepthFirstSearch<>(new GraphGenerator<TFDNode, String>() {
-									public SingleRootGenerator<TFDNode> getRootGenerator() {
-										return () -> n.getPoint();
-									}
-	
-									public SuccessorGenerator<TFDNode, String> getSuccessorGenerator() {
-										return generator.getSuccessorGenerator();
-									}
-	
-									public GoalTester<TFDNode> getGoalTester() {
-										return generator.getGoalTester();
-									}
 
-									@Override
-									public boolean isSelfContained() {
-										// TODO Auto-generated method stub
-										return false;
-									}
-								}, random);
-	
-								/* now complete the current path by the dfs-solution */
-								List<TFDNode> completedPath = new ArrayList<>(n.externalPath());
-								List<TFDNode> pathCompletion = completer.nextSolution();
-								if (pathCompletion == null)
-									return Integer.MAX_VALUE;
-								pathCompletion.remove(0);
-								completedPath.addAll(pathCompletion);
-	
-								/* now evaluate this solution */
-								Integer val = getFValueComputerForCompletePath(completedPath);
-	
+			/* compute path and partial plan belonging to the node */
+			List<TFDNode> path = n.externalPath();
+			List<CEOCAction> partialPlan = CEOCSTNUtil.extractPlanFromSolutionPath(path);
+			List<String> currentProgram = Arrays.asList(MLUtil.getJavaCodeFromPlan(partialPlan).split("\n"));
+
+			/* annotate node with estimated relative distance to optimal solution */
+			eventBus.post(new NodeAnnotationEvent<>(n.getPoint(), "EUBRD2OS", getExpectedUpperBoundForRelativeDistanceToOptimalSolution(n, path, partialPlan, currentProgram)));
+
+			if (!n.getPoint().isGoal()) {
+				logger.info("This is an unknown node; computing score for path to node: {}", path);
+				assert !scoresOfSolutionPaths.containsKey(partialPlan) : "A non-goal path is stored in the list of scores of solution paths!";
+
+				V evaluationPriorToCompletion = computeEvaluationPriorToCompletion(n, path, partialPlan, currentProgram);
+				if (evaluationPriorToCompletion != null) {
+					fValues.put(n, evaluationPriorToCompletion);
+					return evaluationPriorToCompletion;
+				}
+				
+				/* if there was no relevant change in comparison to parent, apply parent's f */
+				if (!MLUtil.didLastActionAffectPipeline(path)) {
+					V score = fValues.get(n.getParent());
+					fValues.put(n, score);
+					logger.info("PL has not changed, adopting value of parent.");
+					return score;
+				}
+				
+//				TFDNode lastNode = path.get(path.size() - 1);
+//				System.out.println(resolvedProblem.getPropertyName() + ". Resolved by " + (lastNode.getAppliedAction() != null ? lastNode.getAppliedAction().getEncoding() : lastNode.getAppliedMethodInstance().getEncoding()));
+
+				/* check if we have an f-value for exactly this node */
+				if (!completions.containsKey(path)) {
+
+					/* determine preprocessor and classifier of pipeline */
+					Optional<String> preprocessorLine = currentProgram.stream().filter(line -> line.contains("new") && line.contains("attributeSelection")).findAny();
+					String preprocessorName = preprocessorLine.isPresent() ? CodePlanningUtil.getPreprocessorEvaluatorFromPipelineGenerationCode(currentProgram) : "";
+					String classifierName = CodePlanningUtil.getClassifierFromPipelineGenerationCode(currentProgram);
+					String plName = preprocessorName + "&" + classifierName;
+					
+					/* ignore if preprocessing fails even with oneR */
+					String reference = preprocessorName + "&OneR";
+					if (plFails.containsKey(reference)) {
+						logger.info("Cancel {}, because even OneR does not finish within time using this preprocessor!", plName);
+						return null;
+					}
+					
+					/* if this specific pipeline has failed before, ignore it also now */
+					if (plFails.containsKey(plName)) {
+						logger.info("Ignoreing pipeline which has been failed before.");
+						return null;
+					}
+
+					/* if the space under this solution is overly searched, reject */
+					if (maxSolutionsPerTechnique >= 0 && solutionsPerTechnique.containsKey(preprocessorName)
+							&& solutionsPerTechnique.get(preprocessorName).containsKey(classifierName)
+							&& solutionsPerTechnique.get(preprocessorName).get(classifierName) >= maxSolutionsPerTechnique) {
+						return null;// new IllegalArgumentException("This node is in an oversearched region");
+					}
+
+					/* determine whether we have a solution path (found by the oracle) that goes over this node */
+					/* only if we have no path to a solution over this node, we compute a new one */
+					List<TFDNode> pathWhoseCompletionSubsumesCurrentPath = getSubsumingKnownPathCompletion(path);
+					// List<TFDNode> pathWhoseCompletionSubsumesCurrentPath = null;
+					boolean interrupted = false;
+					if (pathWhoseCompletionSubsumesCurrentPath == null) {
+						V best = null;
+						List<TFDNode> bestCompletion = null;
+						int i = 0;
+						for (; i < samples; i++) {
+							
+							if (Thread.interrupted()) {
+								interrupted = true;
+								break;
+							}
+
+							/* create randomized dfs searcher */
+							BestFirst<TFDNode, String> completer = new RandomizedDepthFirstSearch<>(new GraphGenerator<TFDNode, String>() {
+								public SingleRootGenerator<TFDNode> getRootGenerator() {
+									return () -> n.getPoint();
+								}
+
+								public SuccessorGenerator<TFDNode, String> getSuccessorGenerator() {
+									return generator.getSuccessorGenerator();
+								}
+
+								public GoalTester<TFDNode> getGoalTester() {
+									return generator.getGoalTester();
+								}
+
+								@Override
+								public boolean isSelfContained() {
+									// TODO Auto-generated method stub
+									return false;
+								}
+							}, random);
+
+							/* now complete the current path by the dfs-solution */
+							List<TFDNode> completedPath = new ArrayList<>(n.externalPath());
+							logger.info("Starting search for next solution ...");
+							List<TFDNode> pathCompletion = completer.nextSolution();
+							logger.info("Found solution {}", pathCompletion);
+							if (pathCompletion == null)
+								return null;
+							pathCompletion.remove(0);
+							completedPath.addAll(pathCompletion);
+
+							/* now evaluate this solution */
+							try {
+								V val = getFValueOfSolutionPath(completedPath);
 								if (val != null) {
-									if (val < best) {
+									if (best == null || val.compareTo(best) < 0) {
 										best = val;
 										bestCompletion = completedPath;
 									}
 								}
+							} catch (InterruptedException e) {
+								interrupted = true;
+								break;
 							}
-							if (bestCompletion == null)
-								return Integer.MAX_VALUE;
-							assert bestCompletion == null || isSolutionPath(bestCompletion) : "Identified a completion that is no solution path!";
-							completions.put(path, bestCompletion);
-							pathWhoseCompletionSubsumesCurrentPath = path;
-						} else {
-							assert isSolutionPath(completions.get(pathWhoseCompletionSubsumesCurrentPath)) : "Identified a subsuming completion "
-									+ pathWhoseCompletionSubsumesCurrentPath.stream().map(l -> l.toString() + "\n").collect(Collectors.toList()) + " that is no solution path!";
-							completions.put(path, completions.get(pathWhoseCompletionSubsumesCurrentPath));
 						}
+						
+						/* add number of samples to node  */
+						n.setAnnotation("fRPSamples", i);
+						
+						if (bestCompletion == null) {
+							countPLFail(plName);
+							logger.info("Did not find any successful completion for classifier {}. Interrupted: {}", classifierName, interrupted);
+							if (interrupted)
+								throw new InterruptedException();
+							return null;
+						}
+						
+						/* we have been interrupted, but there are intermediate results. We accept these */
+						if (interrupted) {
+							logger.info("Estimate {} is only based on {} instead of {} samples, because we received an interrupt.", best, i, samples);
+						}
+						
+						countPLSuccess(plName);
+						assert isSolutionPath(bestCompletion) : "Identified a completion that is no solution path!";
+						assert scoresOfSolutionPaths.containsKey(CEOCSTNUtil.extractPlanFromSolutionPath(bestCompletion)) : "Solution was detected but its score was not saved";
+						completions.put(path, bestCompletion);
+					} else {
+						assert isSolutionPath(completions.get(pathWhoseCompletionSubsumesCurrentPath)) : "Identified a subsuming completion "
+								+ pathWhoseCompletionSubsumesCurrentPath.stream().map(l -> l.toString() + "\n").collect(Collectors.toList()) + " that is no solution path!";
+						completions.put(path, completions.get(pathWhoseCompletionSubsumesCurrentPath));
 					}
-					fValues.put(n, getFValueComputerForCompletePath(completions.get(path)));
 				}
-				
-				/* if this is a known plan, transfer the knowledge about its f to the node */
-				else {
-					fValues.put(n, pipelineScores.get(partialPlan));
-				}
+				fValues.put(n, getFValueOfSolutionPath(completions.get(path)));
 			}
 
 			/* the node is a goal node */
 			else {
+
 				/* record that we found a new solution for this technique */
-				// String filterName = getFilterName(pipeline);
-				// String classifierName = getBaselearnerName(pipeline);
-				// if (!solutionsPerTechnique.containsKey(filterName))
-				// solutionsPerTechnique.put(filterName, new HashMap<>());
-				// if (!solutionsPerTechnique.get(filterName).containsKey(classifierName))
-				// solutionsPerTechnique.get(filterName).put(classifierName, 0);
-				// solutionsPerTechnique.get(filterName).put(classifierName, solutionsPerTechnique.get(filterName).get(classifierName) + 1);
-				fValues.put(n, getFValueComputerForCompletePath(n.externalPath()));
+				String preprocessorName = CodePlanningUtil.getPreprocessorEvaluatorFromPipelineGenerationCode(currentProgram);
+				String classifierName = CodePlanningUtil.getClassifierFromPipelineGenerationCode(currentProgram);
+				if (!solutionsPerTechnique.containsKey(preprocessorName))
+					solutionsPerTechnique.put(preprocessorName, new HashMap<>());
+				if (!solutionsPerTechnique.get(preprocessorName).containsKey(classifierName))
+					solutionsPerTechnique.get(preprocessorName).put(classifierName, 0);
+				int currentlyExploredVariants = solutionsPerTechnique.get(preprocessorName).get(classifierName);
+				solutionsPerTechnique.get(preprocessorName).put(classifierName, currentlyExploredVariants + 1);
+
+				V score = getFValueOfSolutionPath(path);
+				if (score == null)
+					return null;
+				fValues.put(n, score);
+				if (!postedSolutions.contains(path)) {
+					logger.error("Found a goal node whose solution has not been posted before!");
+					// for (List<CEOCAction> plan : knownSolutions.values()) {
+					// int counter = 0;
+					// for (List<TFDNode> path : knownSolutions.keySet()) {
+					// if (knownSolutions.get(path).equals(plan))
+					// counter ++;
+					// }
+					// if (counter > 1) {
+					// System.err.println("Plan " + plan + " has " + counter + " paths");
+					// for (List<TFDNode> path : knownSolutions.keySet()) {
+					// if (knownSolutions.get(path).equals(plan))
+					// System.err.println("\t" + path);
+					// }
+					// }
+					logger.error("Partial plan is {}", partialPlan);
+					logger.error("Is an unsuccessful plan? {}. F-Value: {}", unsuccessfulPlans.contains(partialPlan), scoresOfSolutionPaths.get(path));
+					System.exit(0);
+					// }
+				}
 			}
 		}
-		int f = fValues.get(n);
+		V f = fValues.get(n);
 		logger.info("Returning f-value: {}", f);
 		return f;
 	}
+	
+	private void countPLFail(String plName) {
+		int fails = 0;
+		if (!plFails.containsKey(plName)) {
+			fails = 1;
+		} else
+			fails = plFails.get(plName) + 1;
+		plFails.put(plName, fails);
+	}
+	
+	private void countPLSuccess(String plName) {
+		int successes = 0;
+		if (!plSuccesses.containsKey(plName)) {
+			successes = 1;
+		} else
+			successes = plSuccesses.get(plName) + 1;
+		plSuccesses.put(plName, successes);
+	}
 
-	private Integer getFValueComputerForCompletePath(List<TFDNode> path) throws Exception {
-		if (!dataSet)
-			throw new IllegalStateException("Cannot compute f-values if data have not been set!");
+	private V getFValueOfSolutionPath(List<TFDNode> path) throws Exception {
 		assert isSolutionPath(path) : "Can only compute f-values for completed plans, but it is invoked with a plan that does not yield a goal node!";
-		logger.info("Compute f-value for complete path {}", path);
 		List<CEOCAction> plan = CEOCSTNUtil.extractPlanFromSolutionPath(path);
-		if (!pipelineScores.containsKey(plan)) {
+		logger.info("Compute f-value for plan {}", plan);
+		assert checkPathPlanBijection(path, plan);
+		boolean knownPath = scoresOfSolutionPaths.containsKey(plan);
+		if (!knownPath) {
+			if (!dataSet)
+				throw new IllegalStateException("Cannot compute f-values if data have not been set!");
+
 			if (unsuccessfulPlans.contains(plan)) {
-				logger.info("Associated plan was evaluated unsuccessfully in a previous run; returning NULL: {}", plan); 
+				logger.info("Associated plan was evaluated unsuccessfully in a previous run; returning NULL: {}", plan);
 				return null;
 			}
 			logger.info("Associated plan is new. Compute f-value for complete plan {}", plan);
-			
+
 			long start = System.currentTimeMillis();
-			Integer val = null;
+			V val = null;
 			try {
-			 val = evaluator.getSolutionScore(MLUtil.extractPipelineFromPlan(plan));
-			}
-			catch (Exception e) {
+				val = convertErrorRateToNodeEvaluation(evaluator.getSolutionScore(MLUtil.extractPipelineFromPlan(plan)));
+			} catch (Exception e) {
 				unsuccessfulPlans.add(plan);
 				throw e;
 			}
 			long duration = System.currentTimeMillis() - start;
-			logger.info("Result: {}, Size: {}", val, pipelineScores.size());
+			logger.info("Result: {}, Size: {}", val, scoresOfSolutionPaths.size());
 			if (val == null) {
 				unsuccessfulPlans.add(plan);
 				return null;
 			}
-			pipelineScores.put(plan, val);
+
+			scoresOfSolutionPaths.put(plan, val);
 			pipelineScoreTimes.put(plan, (int) duration);
 			postSolution(path);
+		} else {
+			logger.info("Associated plan is known. Reading score from cache.");
+			if (!postedSolutions.contains(path))
+				throw new IllegalStateException("Reading cached score of a plan whose path has not been posted as a solution! Are there several paths to a plan?");
 		}
-		logger.info("Determined value {} for pipeline {}.", pipelineScores.get(plan), plan);
-		return pipelineScores.get(plan);
+		V score = scoresOfSolutionPaths.get(plan);
+		logger.info("Determined value {} for pipeline {}.", score, plan);
+		return score;
+	}
+
+	private boolean checkPathPlanBijection(List<TFDNode> pPath, List<CEOCAction> pPlan) {
+		synchronized (knownSolutions) {
+			knownSolutions.put(pPath, pPlan);
+			for (List<CEOCAction> plan : knownSolutions.values()) {
+				List<List<TFDNode>> paths = new ArrayList<>();
+				for (List<TFDNode> path : knownSolutions.keySet()) {
+					if (knownSolutions.get(path).equals(plan))
+						paths.add(path);
+				}
+				if (paths.size() > 1) {
+					System.err.println("There are " + paths.size() + " paths to plan " + plan);
+					Set<List<CEOCAction>> plans = new HashSet<>();
+					for (List<TFDNode> path : paths) {
+						List<CEOCAction> planForThisPath = CEOCSTNUtil.extractPlanFromSolutionPath(path);
+						System.err.println("\tPath: " + path);
+						System.err.println("\tPlan: " + planForThisPath);
+						plans.add(planForThisPath);
+					}
+					if (plans.size() != paths.size()) {
+						System.err.println(
+								"There are only " + plans.size() + " different plans according to equals, but all the " + paths.size() + " plans are (should be) different.");
+					}
+					return false;
+				}
+			}
+			return true;
+		}
 	}
 
 	private boolean isSolutionPath(List<TFDNode> path) {
@@ -341,47 +484,24 @@ public class RandomCompletionEvaluator implements IGraphDependentNodeEvaluator<T
 
 	}
 
-	private void postSolution(List<TFDNode> solution) {
+	protected void postSolution(List<TFDNode> solution) {
 		if (postedSolutions.contains(solution))
 			throw new IllegalArgumentException("Solution " + solution.toString() + " already posted!");
 		postedSolutions.add(solution);
-		int numberOfComputedFValues = pipelineScores.size();
 		List<CEOCAction> plan = CEOCSTNUtil.extractPlanFromSolutionPath(solution);
 		MLPipeline pl = MLUtil.extractPipelineFromPlan(plan);
-		MLPipelineSolutionAnnotation<TFDNode, Integer> annotation = new MLPipelineSolutionAnnotation<TFDNode, Integer>() {
 
-			@Override
-			public Integer f() {
-				return pipelineScores.get(plan);
-			}
+		/* now post the solution to the event bus */
+		int numberOfComputedFValues = scoresOfSolutionPaths.size();
 
-			@Override
-			public int getTimeForFComputation() {
-				return pipelineScoreTimes.get(plan);
-			}
-
-			@Override
-			public int getTimeUntilSolutionWasFound() {
-				return (int) (System.currentTimeMillis() - timestampOfFirstEvaluation);
-			}
-
-			@Override
-			public int getGenerationNumberOfGoalNode() {
-				return numberOfComputedFValues;
-			}
-
-			@Override
-			public boolean isTunedSolution() {
-				return solution.stream().filter(a -> a.getAppliedAction() != null).filter(a -> a.getAppliedAction().getOperation().getName().contains("setOptions")).findAny()
-						.isPresent();
-			}
-			
-			@Override
-			public MLPipeline getPipeline() {
-				return pl;
-			}
-		};
-		eventBus.post(new SolutionFoundEvent<TFDNode, Integer>(solution, annotation));
+		/* post solution and then the annotations */
+		eventBus.post(new SolutionFoundEvent<>(solution, scoresOfSolutionPaths.get(plan)));
+		eventBus.post(new SolutionAnnotationEvent<>(solution, "fTime", pipelineScoreTimes.get(plan)));
+		eventBus.post(new SolutionAnnotationEvent<>(solution, "timeToSolution", (int) (System.currentTimeMillis() - timestampOfFirstEvaluation)));
+		eventBus.post(new SolutionAnnotationEvent<>(solution, "nodesExpandedToSolution", numberOfComputedFValues));
+		eventBus.post(new SolutionAnnotationEvent<>(solution, "isTunedSolution", solution.stream().filter(a -> a.getAppliedAction() != null)
+				.filter(a -> a.getAppliedAction().getOperation().getName().contains("setOptions")).findAny().isPresent()));
+		eventBus.post(new SolutionAnnotationEvent<>(solution, "pipeline", pl));
 	}
 
 	private Monom getRenamedState(Monom state, Map<ConstantParam, ConstantParam> map) {
@@ -417,5 +537,13 @@ public class RandomCompletionEvaluator implements IGraphDependentNodeEvaluator<T
 	public void cancel() {
 		logger.info("Receive cancel signal.");
 		this.evaluator.cancel();
+	}
+
+	public int getMaxSolutionsPerTechnique() {
+		return maxSolutionsPerTechnique;
+	}
+
+	public void setMaxSolutionsPerTechnique(int maxSolutionsPerTechnique) {
+		this.maxSolutionsPerTechnique = maxSolutionsPerTechnique;
 	}
 }

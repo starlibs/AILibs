@@ -1,4 +1,4 @@
-package de.upb.crc901.taskconfigurator.test;
+package de.upb.crc901.mlplan.test;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -9,12 +9,12 @@ import java.util.Random;
 import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 import org.junit.Test;
 
-import de.upb.crc901.mlplan.classifiers.TwoPhasePipelineSearcher;
+import de.upb.crc901.mlplan.classifiers.TwoPhaseHTNBasedPipelineSearcher;
 import de.upb.crc901.mlplan.core.MLUtil;
-import de.upb.crc901.mlplan.search.algorithms.GraphBasedPipelineSearcher;
+import de.upb.crc901.mlplan.search.evaluators.DoubleRandomCompletionEvaluator;
+import de.upb.crc901.mlplan.search.evaluators.MonteCarloCrossValidationEvaluator;
 import jaicore.ml.WekaUtil;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
-import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;
 import weka.classifiers.Evaluation;
 import weka.core.Instances;
 
@@ -40,8 +40,9 @@ public class PipelineOptimizerTest {
 		System.out.println("Done");
 		data.setClassIndex(data.numAttributes() - 1);
 
-		GraphBasedPipelineSearcher<TFDNode, String, Integer> optimizer = new TwoPhasePipelineSearcher(MLUtil.getGraphGenerator(new File("testrsc/automl2.testset"), null), r, timeoutPerRun,
+		TwoPhaseHTNBasedPipelineSearcher<Double> optimizer = new TwoPhaseHTNBasedPipelineSearcher(MLUtil.getGraphGenerator(new File("testrsc/automl3.testset"), null, null), r, timeoutPerRun,
 				timeoutForFComputation, 100, 20, false);
+		optimizer.setRce(new DoubleRandomCompletionEvaluator(r, 3, new MonteCarloCrossValidationEvaluator(3, .7f)));
 //		optimizer.setTooltipGenerator(new TFDTooltipGenerator());
 
 		/* now evaluate the approach */

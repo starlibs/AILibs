@@ -2,6 +2,7 @@ package de.upb.crc901.mlplan.core;
 
 import java.io.Serializable;
 
+import de.upb.crc901.mlplan.pipeline.FeaturePreprocessor;
 import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
 import weka.attributeSelection.AttributeSelection;
@@ -9,13 +10,22 @@ import weka.core.Instance;
 import weka.core.Instances;
 
 @SuppressWarnings("serial")
-public class Preprocessor implements Serializable {
+public class SuvervisedFilterSelector implements Serializable, FeaturePreprocessor {
 	private final ASSearch searcher;
 	private final ASEvaluation evaluator;
 	private final AttributeSelection selector;
 	private boolean prepared;
 
-	public Preprocessor(ASSearch searcher, ASEvaluation evaluator, AttributeSelection selector) {
+	public SuvervisedFilterSelector(ASSearch searcher, ASEvaluation evaluator) {
+		super();
+		this.searcher = searcher;
+		this.evaluator = evaluator;
+		this.selector = new AttributeSelection();
+		this.selector.setSearch(searcher);
+		this.selector.setEvaluator(evaluator);
+	}
+
+	public SuvervisedFilterSelector(ASSearch searcher, ASEvaluation evaluator, AttributeSelection selector) {
 		super();
 		this.searcher = searcher;
 		this.evaluator = evaluator;
@@ -33,18 +43,18 @@ public class Preprocessor implements Serializable {
 	public AttributeSelection getSelector() {
 		return selector;
 	}
-	
+
 	public void prepare(Instances data) throws Exception {
 		selector.SelectAttributes(data);
 		prepared = true;
 	}
-	
+
 	public Instance apply(Instance data) throws Exception {
 		if (!prepared)
 			throw new IllegalStateException("Cannot apply preprocessor before it has been prepared!");
 		return selector.reduceDimensionality(data);
 	}
-	
+
 	public Instances apply(Instances data) throws Exception {
 		if (!prepared)
 			throw new IllegalStateException("Cannot apply preprocessor before it has been prepared!");
@@ -69,7 +79,7 @@ public class Preprocessor implements Serializable {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Preprocessor other = (Preprocessor) obj;
+		SuvervisedFilterSelector other = (SuvervisedFilterSelector) obj;
 		if (evaluator == null) {
 			if (other.evaluator != null)
 				return false;

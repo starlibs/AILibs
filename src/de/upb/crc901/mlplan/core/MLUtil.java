@@ -3,6 +3,7 @@ package de.upb.crc901.mlplan.core;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,14 +23,18 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import de.upb.crc901.configurationsetting.compositiondomain.CompositionDomain;
 import de.upb.crc901.configurationsetting.operation.OperationInvocation;
 import de.upb.crc901.configurationsetting.operation.SequentialComposition;
-import de.upb.crc901.taskconfigurator.test.IDistSearchConf;
+import de.upb.crc901.mlplan.test.IDistSearchConf;
 import jaicore.basic.FileUtil;
 import jaicore.basic.SetUtil;
+import jaicore.basic.StringUtil;
 import jaicore.logic.fol.structure.ConstantParam;
+import jaicore.logic.fol.structure.Literal;
 import jaicore.logic.fol.structure.LiteralParam;
+import jaicore.logic.fol.structure.Monom;
 import jaicore.logic.fol.structure.VariableParam;
 import jaicore.planning.graphgenerators.task.ceociptfd.CEOCIPTFDGraphGenerator;
 import jaicore.planning.graphgenerators.task.ceociptfd.EvaluablePredicate;
+import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.model.ceoc.CEOCAction;
 import jaicore.planning.model.ceoc.CEOCOperation;
 import weka.attributeSelection.ASEvaluation;
@@ -47,8 +52,8 @@ public class MLUtil {
 
 		/* read config */
 		IDistSearchConf props = ConfigCache.getOrCreate(IDistSearchConf.class);
-		File folderToStoreASSerializations = new File(props.getASSFolder());
-		logger.info("Use {} as folder for serializations of AttributeSelectors", folderToStoreASSerializations);
+//		File folderToStoreASSerializations = new File(props.getASSFolder());
+//		logger.info("Use {} as folder for serializations of AttributeSelectors", folderToStoreASSerializations);
 
 		StringBuilder creationString = new StringBuilder();
 		plan.stream().forEach(a -> creationString.append(a.toString() + "\n"));
@@ -99,7 +104,7 @@ public class MLUtil {
 		}
 	}
 
-	public static CEOCIPTFDGraphGenerator getGraphGenerator(File testsetFile, File evaluablePredicateFile) throws IOException {
+	public static CEOCIPTFDGraphGenerator getGraphGenerator(File testsetFile, File evaluablePredicateFile, Instances dataset) throws IOException {
 		Map<String, EvaluablePredicate> evaluablePredicateMap = new HashMap<>();
 		if (evaluablePredicateFile != null) {
 			List<String> evaluablePredicates = FileUtil.readFileAsList(evaluablePredicateFile.getAbsolutePath());
@@ -118,7 +123,7 @@ public class MLUtil {
 				}
 			}
 		}
-		return new CEOCIPTFDGraphGenerator(new TaskProblemGenerator().getProblem(testsetFile), evaluablePredicateMap, null);
+		return new CEOCIPTFDGraphGenerator(new TaskProblemGenerator().getProblem(testsetFile, dataset), evaluablePredicateMap, null);
 	}
 
 	static public String getJavaCodeFromPlan(List<CEOCAction> plan) {
@@ -137,6 +142,7 @@ public class MLUtil {
 			switch (a.getOperation().getName()) {
 			case "noop":
 			case "noaddSingleParam":
+			case "noaddValuedParam":
 				break;
 			case "assignTo":
 				codeBuilder.append("String " + outParam.getName());
@@ -216,7 +222,7 @@ public class MLUtil {
 		ArrayNode array = JsonNodeFactory.instance.arrayNode();
 
 		/* insert first element of pl */
-		for (Preprocessor pp : pl.getPreprocessors()) {
+		for (SuvervisedFilterSelector pp : pl.getPreprocessors()) {
 
 			ObjectNode on = JsonNodeFactory.instance.objectNode();
 			on.put("type", "preprocessor");
@@ -279,5 +285,24 @@ public class MLUtil {
 			comp.addOperationInvocation(new OperationInvocation(tpg.operationFromJAICoreToCRCSetting(action.getOperation()), inputMapping, outputMapping));
 		}
 		return comp;
+	}
+
+	public static boolean didLastActionAffectPipeline(List<TFDNode> path) {
+		Literal resolvedProblem = path.get(path.size() - 2).getRemainingTasks().get(0);
+		String taskName = resolvedProblem.getPropertyName().substring(resolvedProblem.getPropertyName().indexOf("-") + 1).toLowerCase();
+		boolean matches = taskName.matches("(addsingleparam|addoption|addvaluedparam|addoptionpair|noaddsingleparam|noaddvaluedparam)");
+		if (matches)
+			return true;
+		if (taskName.contains("__construct"))
+			return true;
+		return false;
+	}
+	
+	public static List<String> getObjectsInSet(Monom state, String setDescriptor) {
+		if (setDescriptor.startsWith("{") && setDescriptor.endsWith("}")) {
+			return new ArrayList<>(SetUtil.unserialize(setDescriptor));
+		}
+		return state.stream().filter(l -> l.getPropertyName().equals("in") && l.getParameters().get(1).getName().equals(setDescriptor))
+				.map(l -> l.getConstantParams().get(0).getName()).collect(Collectors.toList());
 	}
 }

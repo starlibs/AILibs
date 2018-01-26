@@ -1,4 +1,4 @@
-package de.upb.crc901.mlplan.evaluation;
+package de.upb.crc901.mlplan.evaluation.ecml2018;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 
 import org.aeonbits.owner.ConfigCache;
 
-import de.upb.crc901.mlplan.classifiers.TwoPhasePipelineSearcher;
+import de.upb.crc901.mlplan.classifiers.TwoPhaseHTNBasedPipelineSearcher;
 import jaicore.basic.MathExt;
 import jaicore.ml.WekaUtil;
 import weka.classifiers.Classifier;
@@ -42,7 +42,7 @@ public class PipelineEvaluation {
 		int k = Integer.parseInt(args[1]);
 		Classifier[] classifiers = new Classifier[] {
 //				new AutoWEKAClassifier()
-				new TwoPhasePipelineSearcher()
+				new TwoPhaseHTNBasedPipelineSearcher()
 				};
 		List<File> availableDatasets = getAvailableDatasets(folder);
 		System.out.println("Available datasets: ");
@@ -141,19 +141,19 @@ public class PipelineEvaluation {
 			((AutoWEKAClassifier) c).setMemLimit(memoryForAutoWEKARuns); // They use the memory for each parallel run
 			System.out.println("Expected usage: " + ((int)((Runtime.getRuntime().maxMemory() / 1024 / 1024)) + conf.getAssumedMemoryOverheadPerProcess() + allowedCPUs * (memoryForAutoWEKARuns + conf.getAssumedMemoryOverheadPerProcess())));
 //			((AutoWEKAClassifier) c).setParallelRuns(allowedCPUs - 2);
-		} else if (c instanceof TwoPhasePipelineSearcher) {
-			((TwoPhasePipelineSearcher) c).setTimeout(timeoutPerRunInS * 1000);
-			((TwoPhasePipelineSearcher) c).setRandom(r);
-			((TwoPhasePipelineSearcher) c).setTimeoutPerNodeFComputation(timeoutForFComputation * 1000);
-			((TwoPhasePipelineSearcher) c).setNumberOfCPUs(allowedCPUs);
-			((TwoPhasePipelineSearcher) c).setTmpDir(conf.getTmpDir());
-			((TwoPhasePipelineSearcher) c).setMemory(maxMemory);
-			((TwoPhasePipelineSearcher) c).setMemoryOverheadPerProcessInMB(conf.getAssumedMemoryOverheadPerProcess());
-			((TwoPhasePipelineSearcher) c).setSelectionDepth(conf.getNumberOfIterationsInSelectionPhase());
-			((TwoPhasePipelineSearcher) c).setNumberOfConsideredSolutions(conf.getNumberOfCandidatesInSelectionPhase());
-			((TwoPhasePipelineSearcher) c).setSolutionLogFile(new File(conf.getSolutionLogDir() + File.separator + "solutions-" + k + "-" + experimentId + "-" + datasetName + "-" + seedId + ".log"));
-			((TwoPhasePipelineSearcher) c).setSolutionEvaluator(conf.getValidationAlgorithm());
-			((TwoPhasePipelineSearcher) c).setPortionOfDataForPhase2(conf.getPortionOfDataForPhase2());
+		} else if (c instanceof TwoPhaseHTNBasedPipelineSearcher) {
+			((TwoPhaseHTNBasedPipelineSearcher) c).setTimeout(timeoutPerRunInS * 1000);
+			((TwoPhaseHTNBasedPipelineSearcher) c).setRandom(r);
+			((TwoPhaseHTNBasedPipelineSearcher) c).setTimeoutPerNodeFComputation(timeoutForFComputation * 1000);
+			((TwoPhaseHTNBasedPipelineSearcher) c).setNumberOfCPUs(allowedCPUs);
+			((TwoPhaseHTNBasedPipelineSearcher) c).setTmpDir(conf.getTmpDir());
+			((TwoPhaseHTNBasedPipelineSearcher) c).setMemory(maxMemory);
+			((TwoPhaseHTNBasedPipelineSearcher) c).setMemoryOverheadPerProcessInMB(conf.getAssumedMemoryOverheadPerProcess());
+			((TwoPhaseHTNBasedPipelineSearcher) c).setNumberOfMCIterationsPerSolutionInSelectionPhase(conf.getNumberOfIterationsInSelectionPhase());
+			((TwoPhaseHTNBasedPipelineSearcher) c).setNumberOfConsideredSolutions(conf.getNumberOfCandidatesInSelectionPhase());
+			((TwoPhaseHTNBasedPipelineSearcher) c).setSolutionLogFile(new File(conf.getSolutionLogDir() + File.separator + "solutions-" + k + "-" + experimentId + "-" + datasetName + "-" + seedId + ".log"));
+			((TwoPhaseHTNBasedPipelineSearcher) c).setSolutionEvaluator(conf.getValidationAlgorithm());
+			((TwoPhaseHTNBasedPipelineSearcher) c).setPortionOfDataForPhase2(conf.getPortionOfDataForPhase2());
 //			((TwoPhasePipelineSearcher) c).setTooltipGenerator(new TFDTooltipGenerator());
 		}
 		
@@ -182,12 +182,12 @@ public class PipelineEvaluation {
 			String selection = "n/a";
 			String believedError = "";
 			String timeUntilSolutionWasFound = "";
-			if (c instanceof TwoPhasePipelineSearcher) {
-				TwoPhasePipelineSearcher castedC = (TwoPhasePipelineSearcher)c;
+			if (c instanceof TwoPhaseHTNBasedPipelineSearcher) {
+				TwoPhaseHTNBasedPipelineSearcher castedC = (TwoPhaseHTNBasedPipelineSearcher)c;
 				selection = castedC.getSelectedModel().getCreationPlan().stream().map(a -> a.getEncoding()).collect(Collectors.toList()).toString();
 				System.out.println(castedC.getSelectedModel());
-				believedError = String.valueOf(castedC.getAnnotation(castedC.getSelectedModel()).f());
-				timeUntilSolutionWasFound = String.valueOf(castedC.getAnnotation(castedC.getSelectedModel()).getTimeUntilSolutionWasFound());
+				believedError = String.valueOf(castedC.getAnnotation(castedC.getSelectedModel()).getF());
+//				timeUntilSolutionWasFound = String.valueOf(castedC.getAnnotation(castedC.getSelectedModel()).get);
 			}
 			else if (c instanceof AutoWEKAClassifier) {
 				AutoWEKAClassifier castedC = (AutoWEKAClassifier)c;

@@ -20,15 +20,17 @@ import jaicore.logic.fol.structure.Literal;
 import jaicore.logic.fol.structure.LiteralParam;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.logic.fol.structure.VariableParam;
+import jaicore.ml.WekaUtil;
 import jaicore.planning.model.ceoc.CEOCOperation;
 import jaicore.planning.model.task.ceocipstn.CEOCIPSTNPlanningDomain;
 import jaicore.planning.model.task.ceocipstn.CEOCIPSTNPlanningProblem;
 import jaicore.planning.model.task.ceocipstn.OCIPMethod;
 import jaicore.planning.model.task.stn.TaskNetwork;
+import weka.core.Instances;
 
 public class TaskProblemGenerator {
 	
-	public CEOCIPSTNPlanningProblem getProblem(File testsetFile) {
+	public CEOCIPSTNPlanningProblem getProblem(File testsetFile, Instances dataset) {
 		
 		try {
 			/* read testset */
@@ -48,9 +50,11 @@ public class TaskProblemGenerator {
 				grounding.put(p, new ConstantParam(p.getName()));
 			}
 			Monom init = new Monom(query.getPrecondition(), grounding);
-//			for (ConstantParam c : wrapper.getCompositionDomain().getTypeModule().getConstants().stream().map(p -> new ConstantParam(p.getName())).collect(Collectors.toList())) {
-//				
-//			}
+			
+			/* now we implicitly assume that there is a parameter c, and c contains all the classes. */
+			for (String className : WekaUtil.getClassesDeclaredInDataset(dataset)) {
+				init.add(new Literal("in('" + className + "','c')"));
+			}
 			
 			/* KnowledgeModule is simply an extension of a set of clauses */
 			KnowledgeModule knowledge = wrapper.getCompositionDomain().getKnowledgeModule();

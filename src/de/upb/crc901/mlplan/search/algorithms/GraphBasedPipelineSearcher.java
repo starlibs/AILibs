@@ -1,8 +1,6 @@
 package de.upb.crc901.mlplan.search.algorithms;
 
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -35,19 +33,20 @@ public abstract class GraphBasedPipelineSearcher<T, A, V extends Comparable<V>> 
 	private int timeout;
 	private Random random;
 	private File solutionLogFile;
-	protected final Map<MLPipeline, MLPipelineSolutionAnnotation<T, V>> solutionAnnotationCache = new HashMap<>();
+
+	protected final Map<MLPipeline, MLPipelineSolutionAnnotation<V>> solutionAnnotationCache = new HashMap<>();
 	protected final Queue<MLPipeline> solutions = new PriorityQueue<>(new Comparator<MLPipeline>() {
 
 		@Override
 		public int compare(MLPipeline o1, MLPipeline o2) {
-			return solutionAnnotationCache.get(o1).f().compareTo(solutionAnnotationCache.get(o2).f());
+			return solutionAnnotationCache.get(o1).getF().compareTo(solutionAnnotationCache.get(o2).getF());
 		}
 	});
 	private MLPipeline selectedModel = null;
-	protected int numberOfConsideredSolutions;
-	protected int selectionDepth;
 	protected TooltipGenerator<Node<T, V>> tooltipGenerator;
-	protected IObservableORGraphSearch<T, A, V> search; 
+	protected IObservableORGraphSearch<T, A, V> search;
+	
+	public GraphBasedPipelineSearcher() { }
 
 	public GraphBasedPipelineSearcher(Random random, int timeout, boolean showGraph) {
 		super();
@@ -114,7 +113,16 @@ public abstract class GraphBasedPipelineSearcher<T, A, V extends Comparable<V>> 
 				w.getPanel().setTooltipGenerator(tooltipGenerator);
 		}
 		List<T> solution = null;
-		while (((solution = search.nextSolution()) != null) && !timedout.get()) {
+		while (true) {
+			if ((solution = search.nextSolution()) == null) {
+				logger.info("Search algorithm has signaled that no more solutions exist.");
+				search.cancel();
+				break;
+			}
+			if (timedout.get()) {
+				logger.info("Timeout was triggered.");
+				break;
+			}
 			if (search.getFOfReturnedSolution(solution) == null) {
 				logger.error("Received solution without f-value: {}", solution);
 				continue;
@@ -122,7 +130,15 @@ public abstract class GraphBasedPipelineSearcher<T, A, V extends Comparable<V>> 
 
 			/* derive solution pipeline from plan */
 			MLPipeline mlp = modifyPipeline(convertPathToPipeline(solution));
-			MLPipelineSolutionAnnotation<T, V> annotation = (MLPipelineSolutionAnnotation<T, V>) search.getAnnotationOfReturnedSolution(solution);
+			if (mlp == null)
+				throw new IllegalArgumentException("Pipeline obtained from " + solution + " is NULL!");
+			V solutionQuality = search.getFOfReturnedSolution(solution);
+			Integer fTime = (Integer)search.getAnnotationOfReturnedSolution(solution, "fTime");
+			if (fTime == null) {
+				logger.warn("No time information available for {}", mlp);
+				fTime = 0;
+			}
+			MLPipelineSolutionAnnotation<V> annotation = new MLPipelineSolutionAnnotation<>(solutionQuality, fTime);
 			solutionAnnotationCache.put(mlp, annotation);
 			solutions.add(mlp);
 
@@ -130,40 +146,40 @@ public abstract class GraphBasedPipelineSearcher<T, A, V extends Comparable<V>> 
 			if (solutionLogFile != null) {
 				if (!solutionLogFile.getParentFile().exists())
 					solutionLogFile.getParentFile().mkdirs();
-				try (FileWriter fw = new FileWriter(solutionLogFile, true)) {
-					fw.write(annotation.getTimeUntilSolutionWasFound() + ", " + annotation.f() + ", " + annotation.getGenerationNumberOfGoalNode() + ",  "
-							+ annotation.getTimeForFComputation() + ", " + mlp.getCreationPlan() + "\n");
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+				// if (annotation instanceof MLPipelineSolutionAnnotation) {
+				// try (FileWriter fw = new FileWriter(solutionLogFile, true)) {
+				// fw.write(castedAnnotation.getTimeUntilSolutionWasFound() + ", " + castedAnnotation.f() + ", " + castedAnnotation.getGenerationNumberOfGoalNode() + ", "
+				// + castedAnnotation.getTimeForFComputation() + ", " + mlp.getCreationPlan() + "\n");
+				// } catch (IOException e) {
+				// e.printStackTrace();
+				// }
+				// }
 			}
-		}
-		if (!timedout.get()) {
-			logger.info(
-					"Search was not interrupted, but there will be no more solutions. So we shutdown the search now (could be relevant if it needs to shutdown a thread pool etc.)");
-			search.cancel();
 		}
 	}
 
-	protected MLPipeline modifyPipeline(MLPipeline mlp) { return mlp; }
-	
+	protected MLPipeline modifyPipeline(MLPipeline mlp) {
+		return mlp;
+	}
+
 	protected void logSolution(MLPipeline mlp) {
-		logger.info("Registered solution #{} with f-value {} (computation took {}). Solution: {}", solutions.size(), solutionAnnotationCache.get(mlp).f(),
-				solutionAnnotationCache.get(mlp).getTimeForFComputation(), mlp);
+		MLPipelineSolutionAnnotation<V> annotation = solutionAnnotationCache.get(mlp);
+		logger.info("Registered solution #{} with f-value {} (computation took {}). Solution: {}", solutions.size(), annotation.getF(), annotation.getFTime(), mlp);
 	};
 
 	protected void afterSearch() {
 	}
 
-	public MLPipelineSolutionAnnotation<T, V> getAnnotation(MLPipeline pipeline) {
+	public MLPipelineSolutionAnnotation<V> getAnnotation(MLPipeline pipeline) {
 		return solutionAnnotationCache.get(pipeline);
 	}
 
 	@Override
 	public void buildClassifier(Instances data) throws Exception {
-
+		
 		/* search for solutions */
 		this.findPipelines(data);
+		this.search.cancel();
 		logger.info("Finished search.");
 
 		/* choose a model */
@@ -172,7 +188,7 @@ public abstract class GraphBasedPipelineSearcher<T, A, V extends Comparable<V>> 
 		selectedModel = selectModel();
 		if (selectedModel == null)
 			throw new IllegalStateException("No model chosen even though there were solutions!");
-		
+
 		/* train the selected model with all data */
 		logger.info("Now training the selected classifier on the whole data.");
 		selectedModel.buildClassifier(data);
@@ -223,22 +239,6 @@ public abstract class GraphBasedPipelineSearcher<T, A, V extends Comparable<V>> 
 		this.random = random;
 	}
 
-	public int getNumberOfConsideredSolutions() {
-		return numberOfConsideredSolutions;
-	}
-
-	public void setNumberOfConsideredSolutions(int numberOfConsideredSolutions) {
-		this.numberOfConsideredSolutions = numberOfConsideredSolutions;
-	}
-
-	public int getSelectionDepth() {
-		return selectionDepth;
-	}
-
-	public void setSelectionDepth(int selectionDepth) {
-		this.selectionDepth = selectionDepth;
-	}
-
 	public int getNumberOfCPUs() {
 		return numberOfCPUs;
 	}
@@ -254,7 +254,7 @@ public abstract class GraphBasedPipelineSearcher<T, A, V extends Comparable<V>> 
 	public void setSolutionLogFile(File solutionLogFile) {
 		this.solutionLogFile = solutionLogFile;
 	}
-	
+
 	public void cancel() {
 		logger.info("Received cancel signal.");
 		search.cancel();

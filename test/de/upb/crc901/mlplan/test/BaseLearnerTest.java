@@ -1,4 +1,4 @@
-package de.upb.crc901.taskconfigurator.test;
+package de.upb.crc901.mlplan.test;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

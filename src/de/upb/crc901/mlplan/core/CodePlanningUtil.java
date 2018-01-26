@@ -3,6 +3,9 @@ package de.upb.crc901.mlplan.core;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -66,5 +69,35 @@ public class CodePlanningUtil {
 	
 	public static String getListAppendAllCode(String list, String collectionName) {
 		return list + ".addAll(\"" + collectionName + "\");\n";
+	}
+
+	public static String getPreprocessorEvaluatorFromPipelineGenerationCode(List<String> code) {
+		Pattern p = Pattern.compile("new weka\\.attributeSelection\\.(.*)\\(");
+		List<Matcher> ppMatchers = code.stream().map(line -> p.matcher(line)).filter(m -> m.find()).collect(Collectors.toList());
+		String ppSeq = "";
+		for (Matcher m : ppMatchers) {
+			String pp = m.group(1);
+			if (pp.equals("AttributeSelection"))
+				continue;
+			if (ppSeq.isEmpty())
+				ppSeq += pp;
+			else {
+				ppSeq += ("&" + pp);
+				return ppSeq;
+			}
+		}
+		return ppSeq;
+	}
+	
+	public static String getClassifierFromPipelineGenerationCode(List<String> code) {
+		Optional<String> classifierLine = code.stream().filter(line -> line.contains("new") && line.contains("classifiers")).findAny();
+		if (!classifierLine.isPresent())
+			return "";
+		Pattern pattern = Pattern.compile("new weka\\.classifiers\\.[^\\.]+\\.(.*)\\(");
+		Matcher m = pattern.matcher(classifierLine.get());
+		if (!m.find())
+			return "";
+		String classifier = m.group(1);
+		return classifier;
 	}
 }

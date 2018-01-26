@@ -25,7 +25,7 @@ public class RandomPipelinePicker extends GraphBasedPipelineSearcher<TFDNode, St
 	private final SerializableGraphGenerator<TFDNode, String> graphGenerator;
 	public RandomPipelinePicker(File testsetFile, boolean showGraph, int numberOfSolutions, int selectionDepth, int timeout, Random random) throws IOException {
 		super(random, timeout, showGraph);
-		this.graphGenerator = MLUtil.getGraphGenerator(testsetFile, null);
+		this.graphGenerator = MLUtil.getGraphGenerator(testsetFile, null, null);
 	}
 
 	@Override

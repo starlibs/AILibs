@@ -272,7 +272,6 @@ MAX:String
 
 [Types]
 
-Thing;
 Image;
 JPGImage;Image
 BMPImage;Image
@@ -1080,10 +1079,10 @@ wekaRF; 	wekaParametrizeBaseClassifier(cn,oList); cn,oList; ; ; assignTo('weka.c
 wekaRF; 	wekaSelectBaseClassifier(cn); cn; ; ; assignTo('weka.classifiers.trees.RandomForest',cn)
 wekaRF; 	wekaParametrizeGivenBaseClassifier(cn,oList); cn,oList; assigned('weka.classifiers.trees.RandomForest',cn) ; ; getWekaRFConfig0(oList)
 # -I <int> mandatory
-wekaRFOptsNumIterations	; getWekaRFConfig0(o);	o,int; RFNumIterations(int) ; ; addMandatValuedParam(o, '-K', int) -> getWekaRFConfig1(o)
+wekaRFOptsNumIterations	; getWekaRFConfig0(o);	o,int; RFNumIterations(int) ; ; addMandatValuedParam(o, '-I', int) -> getWekaRFConfig1(o)
 # -K <int> mandatory, value 0 for unused
-wekaRFOptsNumFeatures	; getWekaRFConfig1(o);	o; ; ; addMandatValuedParam(o, '-M', '0') -> getWekaRFConfig2(o)
-wekaRFOptsNumFeatures	; getWekaRFConfig1(o);	o,int; RFNumFeatures(int) ; ; addMandatValuedParam(o, '-M', int) -> getWekaRFConfig2(o)
+wekaRFOptsNumFeatures	; getWekaRFConfig1(o);	o; ; ; addMandatValuedParam(o, '-K', '0') -> getWekaRFConfig2(o)
+wekaRFOptsNumFeatures	; getWekaRFConfig1(o);	o,int; RFNumFeatures(int) ; ; addMandatValuedParam(o, '-K', int) -> getWekaRFConfig2(o)
 # -depth <int> mandatory, value 0 for unused
 wekaRFOptsMaxDepth		; getWekaRFConfig2(o);	o; ; ; addMandatValuedParam(o, '-depth', '0')
 wekaRFOptsMaxDepth		; getWekaRFConfig2(o);	o,int; RFMaxDepth(int) ; ; addMandatValuedParam(o, '-depth', int)
@@ -1810,6 +1809,7 @@ RFNumIterations(128)
 #### RFNumIterations(256)
 
 # Random Forest numFeatures: Option -K [1, 32][2]il
+RFNumFeatures(0)
 #### RFNumFeatures(1)
 RFNumFeatures(2)
 #### RFNumFeatures(4)

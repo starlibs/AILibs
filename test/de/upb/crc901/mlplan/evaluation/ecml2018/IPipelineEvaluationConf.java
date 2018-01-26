@@ -1,4 +1,4 @@
-package de.upb.crc901.mlplan.evaluation;
+package de.upb.crc901.mlplan.evaluation.ecml2018;
 import java.io.File;
 
 import org.aeonbits.owner.Config;
