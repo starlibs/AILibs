@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jaicore.search.algorithms.standard.core.INodeEvaluator;
 import jaicore.search.algorithms.standard.core.ORGraphSearch;
 import jaicore.search.structure.core.GraphGenerator;
@@ -17,6 +20,8 @@ import jaicore.search.structure.core.PriorityQueueOpen;
  * @author Felix Mohr
  */
 public class BestFirstEpsilon<T, A, W extends Comparable<W>> extends ORGraphSearch<T, A, Double> {
+	
+	private final static Logger logger = LoggerFactory.getLogger(BestFirstEpsilon.class);
 
 	private final INodeEvaluator<T, W> secondaryNodeEvaluator;
 	private final Map<Node<T,Double>, W> secondaryCache = new HashMap<>();
@@ -43,6 +48,7 @@ public class BestFirstEpsilon<T, A, W extends Comparable<W>> extends ORGraphSear
 				}
 			});
 			Node<T, Double> choice = focal.stream().min((p1, p2) -> secondaryCache.get(p1).compareTo(secondaryCache.get(p2))).get();
+			logger.info("Best score is {}. Threshold for focal is {}. Choose node with f1 {} and best f2 {}. Size of focal was {}.", best, threshold, choice.getInternalLabel(), secondaryCache.get(choice), focal.size());
 			return choice;
 		}
 	}

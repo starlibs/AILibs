@@ -15,10 +15,18 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.graphstream.algorithm.Algorithm;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonObjectFormatVisitor;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+
 import jaicore.basic.MathExt;
 import jaicore.ml.WekaUtil;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
+import weka.core.Instance;
 import weka.core.Instances;
 
 public abstract class ExperimentRunner {
@@ -36,8 +44,12 @@ public abstract class ExperimentRunner {
 	protected abstract float getTrainingPortion();
 	protected abstract int[] getTimeouts();
 	protected abstract Classifier getConfiguredClassifier(int seed, String setupName, String algoName, int timeout);
+	protected abstract int getNumberOfCPUS();
 	
-
+	protected void logExperimentStart(String dataset, ArrayNode rows_for_search, String algorithm, int seed, int timeout, int cpus, String evaltech) {
+		
+	}
+	
 	public void run(int k) throws Exception {
 		
 		/* get classifiers */
@@ -64,6 +76,8 @@ public abstract class ExperimentRunner {
 		int frameSizeForSeed = frameSizeForTimeout / numberOfSeeds;
 		int frameSizeForSetup = frameSizeForSeed / numberOfSetups;
 		int frameSizeForDataset = frameSizeForSetup / numberOfDatasets;
+		if (k >= totalExperimentSize)
+			throw new IllegalArgumentException("Only " + totalExperimentSize + " experiments defined.");
 		
 		/* determine exact experiment */
 		int timeoutId = (int) Math.floor(k / frameSizeForTimeout * 1f);
@@ -79,7 +93,7 @@ public abstract class ExperimentRunner {
 		/* read dataset */
 		String datasetName = getAvailableDatasets(datasetFolder).get(datasetId).getName();
 		datasetName = datasetName.substring(0, datasetName.lastIndexOf("."));
-
+		
 		System.out.println("Running experiment " + k + "/" + totalExperimentSize + ". The setup is: " + timeoutId + "/" + seedId + "/" +  setupId + "/" + datasetId + "/" + algoId + "(timeout/seed/setup/dataset/algo)");
 		
 		/* create random object */
@@ -99,14 +113,21 @@ public abstract class ExperimentRunner {
 		System.out.println("Classifier configured. Determining result files.");
 		
 		/* determine result file */
-		File resultFolder = new File("results" + File.separator + setups[setupId]);
+		File resultFolder = new File("results" + File.separator + setups[setupId] + File.separator + timeouts[timeoutId]);
 		if (!resultFolder.exists())
 			resultFolder.mkdirs();
 		File resultFile = new File(resultFolder + File.separator + classifiers[algoId] + "-" + datasetName + ".csv");
 		
 		/* now search for the best pipeline */
 		long start = System.currentTimeMillis();
-		System.out.println("Invoking " + getExperimentDescription(datasetFolder, datasetId, c, seedId) + " with setup " + setups[setupId] + "s");
+		ObjectMapper om = new ObjectMapper();
+		ArrayNode an = om.createArrayNode();
+		for (Instance inst : internalData) {
+			an.add(data.indexOf(inst));
+		}
+		System.out.println(an);;
+		logExperimentStart(getAvailableDatasets(datasetFolder).get(datasetId).getName(), an, classifiers[algoId], seedId, timeouts[timeoutId], getNumberOfCPUS(), setups[setupId]);
+		System.out.println("Invoking " + getExperimentDescription(datasetFolder, datasetId, c, seedId) + " with setup " + setups[setupId] + " and timeout " + timeouts[timeoutId] + "s");
 		c.buildClassifier(internalData);
 		long end = System.currentTimeMillis();
 		System.out.println("Search has finished. Runtime: " + (end - start) / 1000f + " s");
@@ -125,7 +146,7 @@ public abstract class ExperimentRunner {
 	
 	public String getExperimentDescription(File folder, int datasetId, Classifier algorithm, int seed) {
 		try {
-			return algorithm.getClass().getName() + "-" + getAvailableDatasets(folder).get(datasetId).getName() + "-" + seed;
+			return algorithm + "-" + getAvailableDatasets(folder).get(datasetId).getName() + "-" + seed;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

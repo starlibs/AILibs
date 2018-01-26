@@ -69,8 +69,11 @@ public class TaskPlannerUtil {
 				Collection<VariableParam> ungroundParamsInEvaluablePrecondition = SetUtil.difference(castedMethod.getEvaluablePrecondition().getVariableParams(), basicConstantGrounding.keySet());
 				
 				Map<Literal,EvaluablePredicate> evaluablePredicatesForLiterals = new HashMap<>();
-				for (Literal l : castedMethod.getEvaluablePrecondition())
+				for (Literal l : castedMethod.getEvaluablePrecondition()) {
+					if (!evaluablePlanningPredicates.containsKey(l.getPropertyName()))
+						throw new IllegalArgumentException("The literal " + l + " is used in an evaluated precondition, but not evaluator was specified.");
 					evaluablePredicatesForLiterals.put(l, evaluablePlanningPredicates.get(l.getPropertyName()));
+				}
 				List<Literal> literalsOrderedByOracability = castedMethod.getEvaluablePrecondition().stream().sorted((l1,l2) -> (evaluablePredicatesForLiterals.get(l2).isOracable() ? 1 : 0) - (evaluablePredicatesForLiterals.get(l1).isOracable() ? 1 : 0)).collect(Collectors.toList());
 				
 				if (!ungroundParamsInEvaluablePrecondition.isEmpty()) {
