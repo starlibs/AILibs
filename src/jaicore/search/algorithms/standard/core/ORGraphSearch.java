@@ -27,6 +27,7 @@ import com.google.common.eventbus.Subscribe;
 import jaicore.concurrent.TimeoutTimer;
 import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
 import jaicore.search.algorithms.interfaces.IObservableORGraphSearch;
+import jaicore.search.algorithms.standard.bestfirst.RandomizedDepthFirstEvaluator;
 import jaicore.search.structure.core.GraphEventBus;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
@@ -129,6 +130,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 				label = nodeEvaluator.f(newNode);
 			} catch (InterruptedException e) {
 				graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_timedout"));
+				newNode.setAnnotation("fError", "Timeout");
 				computationTimedout = true;
 				try {
 					label = timeoutNodeEvaluator.f(newNode);
@@ -136,6 +138,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 					e2.printStackTrace();
 				}
 			} catch (Throwable e) {
+				newNode.setAnnotation("fError", e.getStackTrace());
 				graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_ffail"));
 				e.printStackTrace();
 			}
@@ -148,6 +151,8 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 					logger.info("Not inserting node {} since its label ist missing!", newNode);
 				else
 					logger.info("Not inserting node {} because computation of f-value timed out.", newNode);
+				if (!newNode.getAnnotations().containsKey("fError"))
+					newNode.setAnnotation("fError", "f-computer returned NULL");
 				graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_pruned"));
 				if (pool != null) {
 					activeJobs.decrementAndGet();
@@ -418,6 +423,9 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	}
 
 	public void step(Node<T, V> nodeToExpand) {
+		
+//		if (!(nodeEvaluator instanceof RandomizedDepthFirstEvaluator))
+//			System.out.println(nodeToExpand.getAnnotations());
 		
 		/* if search has been interrupted, do not process next step */
 		logger.info("Step starts. Size of OPEN now {}", open.size());

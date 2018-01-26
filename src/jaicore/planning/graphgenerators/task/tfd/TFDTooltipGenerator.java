@@ -1,5 +1,6 @@
 package jaicore.planning.graphgenerators.task.tfd;
 
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import jaicore.graphvisualizer.TooltipGenerator;
@@ -13,9 +14,17 @@ public class TFDTooltipGenerator<V extends Comparable<V>> implements TooltipGene
 	public String getTooltip(Node<TFDNode,V> node) {
 		StringBuilder sb = new StringBuilder();
 		TFDNode nodeRepresentation = node.getPoint();
+		Map<String,Object> annotations = node.getAnnotations();
 		sb.append("<h2>Node: " + nodeRepresentation.getID() + "</h2>");
+		sb.append(annotations);
 		sb.append("<h2>F-Value</h2>");
 		sb.append(node.getInternalLabel());
+		if (annotations.containsKey("fRPSamples")) {
+			sb.append(" (based on " + annotations.get("fRPSamples") + " samples)");
+		}
+		if (annotations.containsKey("fError")) {
+			sb.append("<pre style=\"color: red;\">" + annotations.get("fError") + "</pre>");
+		}
 		if (nodeRepresentation.getAppliedMethodInstance() != null || nodeRepresentation.getAppliedAction() != null) {
 			sb.append("<h2>Applied Instance</h2>");
 			sb.append(nodeRepresentation.getAppliedMethodInstance() != null ? nodeRepresentation.getAppliedMethodInstance().getEncoding() : nodeRepresentation.getAppliedAction().getEncoding());
