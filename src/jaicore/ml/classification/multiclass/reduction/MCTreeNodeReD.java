@@ -88,7 +88,7 @@ public class MCTreeNodeReD implements Classifier, Serializable {
     this.containedClasses = new LinkedList<>();
     this.innerNodeClassifier = innerNodeClassifier;
     this.addChild(leftChildClasses, leftChildClassifier);
-    this.addChild(leftChildClasses, leftChildClassifier);
+    this.addChild(rightChildClasses, rightChildClassifier);
   }
 
   public MCTreeNodeReD(final Classifier innerNodeClassifier, final List<List<String>> childClasses, final List<Classifier> childClassifier) {
@@ -159,15 +159,18 @@ public class MCTreeNodeReD implements Classifier, Serializable {
     // create subsets of the training data filtering for the respective class values and build child
     // classifier
     for (ChildNode child : this.getChildren()) {
+      assert (!child.containedClasses.isEmpty()) : "Contained classes of child must not be empty";
       Instances childData = WekaUtil.getEmptySetOfInstancesWithRefactoredClass(data, child.containedClasses);
       for (Instance i : data) {
-        Instance iNew = (Instance) i.copy();
         String className = i.classAttribute().value((int) Math.round(i.classValue()));
         if (child.containedClasses.contains(className)) {
+          Instance iNew = WekaUtil.getRefactoredInstance(i, child.containedClasses);
+          iNew.setClassValue(className);
           iNew.setDataset(childData);
           childData.add(iNew);
         }
       }
+      // System.out.println(childData);
       child.childNodeClassifier.buildClassifier(childData);
       instancesCluster.add(new HashSet<>(child.containedClasses));
     }
@@ -186,6 +189,8 @@ public class MCTreeNodeReD implements Classifier, Serializable {
 
   @Override
   public double classifyInstance(final Instance instance) throws Exception {
+    System.out.println(instance.classAttribute());
+    System.out.println(this.containedClasses);
     double selection = -1;
     double best = 0;
     double[] dist = this.distributionForInstance(instance);
