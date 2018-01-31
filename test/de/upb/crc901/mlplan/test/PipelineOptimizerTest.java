@@ -40,7 +40,7 @@ public class PipelineOptimizerTest {
 		System.out.println("Done");
 		data.setClassIndex(data.numAttributes() - 1);
 
-		TwoPhaseHTNBasedPipelineSearcher<Double> optimizer = new TwoPhaseHTNBasedPipelineSearcher(MLUtil.getGraphGenerator(new File("testrsc/automl3.testset"), null, null), r, timeoutPerRun,
+		TwoPhaseHTNBasedPipelineSearcher<Double> optimizer = new TwoPhaseHTNBasedPipelineSearcher(MLUtil.getGraphGenerator(new File("testrsc/automl3.testset"), null, null, null), r, timeoutPerRun,
 				timeoutForFComputation, 100, 20, false);
 		optimizer.setRce(new DoubleRandomCompletionEvaluator(r, 3, new MonteCarloCrossValidationEvaluator(3, .7f)));
 //		optimizer.setTooltipGenerator(new TFDTooltipGenerator());
@@ -65,7 +65,7 @@ public class PipelineOptimizerTest {
 			Evaluation eval = new Evaluation(internalData);
 			eval.evaluateModel(optimizer, testData);
 			System.out.println("Error of returned solution: " + (eval.pctIncorrect() + eval.pctUnclassified()) + ".\n-----------------------------");
-			System.out.println(MLUtil.getJavaCodeFromPlan(optimizer.getSelectedModel().getCreationPlan()));
+//			System.out.println(MLUtil.getJavaCodeFromPlan(optimizer.getSelectedModel().getCreationPlan()));
 			stats.addValue(eval.pctIncorrect());
 		}
 

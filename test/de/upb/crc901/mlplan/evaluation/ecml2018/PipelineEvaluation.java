@@ -184,7 +184,7 @@ public class PipelineEvaluation {
 			String timeUntilSolutionWasFound = "";
 			if (c instanceof TwoPhaseHTNBasedPipelineSearcher) {
 				TwoPhaseHTNBasedPipelineSearcher castedC = (TwoPhaseHTNBasedPipelineSearcher)c;
-				selection = castedC.getSelectedModel().getCreationPlan().stream().map(a -> a.getEncoding()).collect(Collectors.toList()).toString();
+//				selection = castedC.getSelectedModel().getCreationPlan().stream().map(a -> a.getEncoding()).collect(Collectors.toList()).toString();
 				System.out.println(castedC.getSelectedModel());
 				believedError = String.valueOf(castedC.getAnnotation(castedC.getSelectedModel()).getF());
 //				timeUntilSolutionWasFound = String.valueOf(castedC.getAnnotation(castedC.getSelectedModel()).get);

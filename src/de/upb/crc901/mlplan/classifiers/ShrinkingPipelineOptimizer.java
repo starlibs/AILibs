@@ -9,16 +9,13 @@ import java.util.Random;
 import de.upb.crc901.mlplan.core.MLPipeline;
 import de.upb.crc901.mlplan.core.MLUtil;
 import de.upb.crc901.mlplan.core.SolutionEvaluator;
-import de.upb.crc901.mlplan.core.SuvervisedFilterSelector;
+import de.upb.crc901.mlplan.core.SupervisedFilterSelector;
 import de.upb.crc901.mlplan.search.evaluators.DoubleRandomCompletionEvaluator;
 import de.upb.crc901.mlplan.search.evaluators.MonteCarloCrossValidationEvaluator;
-import de.upb.crc901.mlplan.search.evaluators.RandomCompletionEvaluator;
 import jaicore.ml.WekaUtil;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
-import jaicore.search.algorithms.interfaces.IObservableORGraphSearch;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
-import jaicore.search.algorithms.standard.core.INodeEvaluator;
 import jaicore.search.algorithms.standard.core.ORGraphSearch;
 import weka.attributeSelection.ASSearch;
 import weka.attributeSelection.AttributeSelection;
@@ -27,10 +24,10 @@ import weka.attributeSelection.Ranker;
 import weka.core.Instances;
 
 public class ShrinkingPipelineOptimizer extends TwoPhaseHTNBasedPipelineSearcher<Double> {
-	private SuvervisedFilterSelector preprocessor;
+	private SupervisedFilterSelector preprocessor;
 	
 	public ShrinkingPipelineOptimizer() throws IOException {
-		this (MLUtil.getGraphGenerator(new File("testrsc/automl2.testset"), null, null), null, 0, 0, 20, 50, false);
+		this (MLUtil.getGraphGenerator(new File("testrsc/automl2.testset"), null, null, null), null, 0, 0, 20, 50, false);
 	}
 	
 	public ShrinkingPipelineOptimizer(SerializableGraphGenerator<TFDNode, String> graphGenerator, Random random, int timeoutTotal, int timeoutPerNodeFComputation, int numberOfSolutions, int selectionDepth, boolean showGraph) {
@@ -38,7 +35,7 @@ public class ShrinkingPipelineOptimizer extends TwoPhaseHTNBasedPipelineSearcher
 	}
 	
 	@Override
-	protected IObservableORGraphSearch<TFDNode, String, Double> getSearch(Instances data) throws IOException {
+	protected ORGraphSearch<TFDNode, String, Double> getSearch(Instances data) throws IOException {
 		SolutionEvaluator solutionEvaluator = new MonteCarloCrossValidationEvaluator(5, 0.7f);
 		DoubleRandomCompletionEvaluator rce = new DoubleRandomCompletionEvaluator(getRandom(), 3, solutionEvaluator);
 		rce.setGenerator(getGraphGenerator());
@@ -65,7 +62,7 @@ public class ShrinkingPipelineOptimizer extends TwoPhaseHTNBasedPipelineSearcher
 			AttributeSelection as = new AttributeSelection();
 			as.setEvaluator(pca);
 			as.setSearch(r);
-			preprocessor = new SuvervisedFilterSelector(r, pca, as);
+			preprocessor = new SupervisedFilterSelector(r, pca, as);
 			try {
 				System.out.print("Applying " + pca.getClass().getName() + " ...");
 				as.SelectAttributes(data);
@@ -87,9 +84,9 @@ public class ShrinkingPipelineOptimizer extends TwoPhaseHTNBasedPipelineSearcher
 	
 	@Override
 	protected MLPipeline modifyPipeline(MLPipeline mlp) {
-		List<SuvervisedFilterSelector> preprocessors = new ArrayList<>(mlp.getPreprocessors());
+		List<SupervisedFilterSelector> preprocessors = new ArrayList<>(mlp.getPreprocessors());
 		preprocessors.add(0, preprocessor);
-		return new MLPipeline(null, preprocessors, mlp.getBaseClassifier());
+		return new MLPipeline(preprocessors, mlp.getBaseClassifier());
 	}
 }
 

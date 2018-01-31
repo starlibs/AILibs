@@ -27,7 +27,7 @@ public class HasAtLeastTwoClassesPredicate implements EvaluablePredicate {
 
 	@Override
 	public boolean test(Monom state, ConstantParam... params) {
-		return MLUtil.getObjectsInSet(state, "c").size() >= 2;
+		return MLUtil.getObjectsInSet(state, params[0].getName()).size() >= 2;
 	}
 
 }

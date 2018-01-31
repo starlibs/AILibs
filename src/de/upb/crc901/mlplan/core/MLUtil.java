@@ -3,7 +3,7 @@ package de.upb.crc901.mlplan.core;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,7 +11,6 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import org.aeonbits.owner.ConfigCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,25 +20,22 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import de.upb.crc901.configurationsetting.compositiondomain.CompositionDomain;
-import de.upb.crc901.configurationsetting.operation.OperationInvocation;
 import de.upb.crc901.configurationsetting.operation.SequentialComposition;
-import de.upb.crc901.mlplan.test.IDistSearchConf;
 import jaicore.basic.FileUtil;
 import jaicore.basic.SetUtil;
-import jaicore.basic.StringUtil;
+import jaicore.logic.fol.structure.CNFFormula;
 import jaicore.logic.fol.structure.ConstantParam;
 import jaicore.logic.fol.structure.Literal;
-import jaicore.logic.fol.structure.LiteralParam;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.logic.fol.structure.VariableParam;
+import jaicore.ml.WekaUtil;
 import jaicore.planning.graphgenerators.task.ceociptfd.CEOCIPTFDGraphGenerator;
 import jaicore.planning.graphgenerators.task.ceociptfd.EvaluablePredicate;
+import jaicore.planning.graphgenerators.task.ceociptfd.OracleTaskResolver;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.model.ceoc.CEOCAction;
 import jaicore.planning.model.ceoc.CEOCOperation;
-import weka.attributeSelection.ASEvaluation;
-import weka.attributeSelection.ASSearch;
-import weka.attributeSelection.AttributeSelection;
+import jaicore.planning.model.task.ceocipstn.CEOCIPSTNPlanningProblem;
 import weka.classifiers.Classifier;
 import weka.core.Instances;
 import weka.core.OptionHandler;
@@ -50,51 +46,25 @@ public class MLUtil {
 
 	public static MLPipeline extractPipelineFromPlan(List<CEOCAction> plan) {
 
-		/* read config */
-		IDistSearchConf props = ConfigCache.getOrCreate(IDistSearchConf.class);
-//		File folderToStoreASSerializations = new File(props.getASSFolder());
-//		logger.info("Use {} as folder for serializations of AttributeSelectors", folderToStoreASSerializations);
+		if (plan == null)
+			return null;
 
+		/* read config */
 		StringBuilder creationString = new StringBuilder();
 		plan.stream().forEach(a -> creationString.append(a.toString() + "\n"));
 		try {
 
 			/* now execute a light version of the plan that does not use any input. This way, we obtain the filter (preprocessor) and classifier objects created by the plan */
 			PlanExecutor executor = new PlanExecutor(new Random());
-			// List<CEOCAction> reducedPlan = plan.stream()
-			// .filter(a -> !a.getGrounding().values().contains(new ConstantParam("x")) && !(a.getOperation().getName().equals("inheritInstanceProp")
-			// || a.getOperation().getName().contains("setInputFormat") || a.getOperation().getName().contains("useFilter")))
-			// .collect(Collectors.toList());
 			Map<ConstantParam, Object> variables = executor.executePlan(plan, new HashMap<>());
 
 			/* now extract the filter and the classifier object */
-			Optional<?> classifier = variables.values().stream().filter(o -> o instanceof Classifier).findFirst();
-			Optional<?> as = variables.values().stream().filter(o -> o instanceof AttributeSelection).findFirst();
-			// Optional<?> searcher = variables.values().stream().filter(o -> o instanceof ASSearch).findFirst();
-			// Optional<?> evaluator = variables.values().stream().filter(o -> o instanceof ASEvaluation).findFirst();
-			if (as.isPresent()) {
-				// ConstantParam varWithAttributeSelector = variables.keySet().stream().filter(k -> variables.get(k).equals(as.get())).findAny().get();
-				ConstantParam varWithSearchSetter = plan.stream().filter(a -> a.getOperation().getName().endsWith("setSearch")).map(a -> a.getParameters().get(1)).findAny().get();
-				ConstantParam varWithEvalSetter = plan.stream().filter(a -> a.getOperation().getName().endsWith("setEvaluator")).map(a -> a.getParameters().get(1)).findAny().get();
-
-				ASSearch asSearch = (ASSearch) variables.get(varWithSearchSetter);
-				ASEvaluation asEval = (ASEvaluation) variables.get(varWithEvalSetter);
-				// Optional<CEOCAction> setterAction = plan.stream().filter(a -> a.getOperation().getName().endsWith("setOptions") && a.getParameters().get(0).equals(varWithEvalSetter)).findAny();
-				// if (setterAction.isPresent()) {
-				// System.out.println("Actually adopted options for eval: ");
-				// System.out.println("\tAction:" + setterAction.get());
-				// System.out.println("\tOption variable: " + Arrays.toString((String[])variables.get(setterAction.get().getParameters().get(1))));
-				// System.out.println("\tParams used for eval: " + Arrays.toString(((OptionHandler)asEval).getOptions()));
-				// }
-				// if (classifier.get() instanceof OptionHandler)
-				// System.out.println("\tfor classifier: " + Arrays.toString(((OptionHandler)classifier.get()).getOptions()));
-				// if (asSearch instanceof OptionHandler)
-				// System.out.println("\tfor search: " + Arrays.toString(((OptionHandler)asSearch).getOptions()));
-				//
-				// asFile = new File(folderToStoreASSerializations + File.separator + asSearch.getClass().getSimpleName() + "_" + asEval.getClass().getSimpleName());
-				return new MLPipeline(plan, asSearch, asEval, classifier.isPresent() ? (Classifier) classifier.get() : null);
-			} else
-				return new MLPipeline(plan, null, null, classifier.isPresent() ? (Classifier) classifier.get() : null);
+			Optional<Classifier> classifierOpt = variables.keySet().stream().filter(k -> k.getName().equals("classifier")).map(k -> (Classifier) variables.get(k)).findAny();
+			if (!classifierOpt.isPresent()) {
+				return null;
+			}
+			Classifier classifier = classifierOpt.get();
+			return (MLPipeline) classifier;
 		} catch (Throwable e) {
 			System.err.println("Could not execute the following code: " + getJavaCodeFromPlan(plan));
 			System.err.println("Code created from: ");
@@ -104,7 +74,28 @@ public class MLUtil {
 		}
 	}
 
-	public static CEOCIPTFDGraphGenerator getGraphGenerator(File testsetFile, File evaluablePredicateFile, Instances dataset) throws IOException {
+	public static CEOCIPSTNPlanningProblem getPlanningProblem(File testsetFile, Instances data) {
+		CEOCIPSTNPlanningProblem problem = new TaskProblemGenerator().getProblem(testsetFile, data);
+
+		/* TODO: DIRRTYYYYY!!!!! Added an operation here to support oracle */
+		Map<CNFFormula, Monom> addLists = new HashMap<>();
+		Monom precondition = new Monom();
+		addLists = new HashMap<>();
+		for (String c : WekaUtil.getClassesDeclaredInDataset(data)) {
+			addLists.put(new CNFFormula(new Monom("$contains('" + c + "', p) & $contains('" + c + "',ss)")), new Monom("in('" + c + "', lc)"));
+			addLists.put(new CNFFormula(new Monom("$contains('" + c + "', p) & !$contains('" + c + "',ss)")), new Monom("in('" + c + "', rc)"));
+		}
+		CEOCOperation op = new CEOCOperation("configChildNodes",
+				Arrays.asList(new VariableParam[] { new VariableParam("p"), new VariableParam("ss"), new VariableParam("lc"), new VariableParam("rc") }), precondition, addLists,
+				new HashMap<>(), Arrays.asList());
+		problem.getDomain().getOperations().add(op);
+
+		/* return the problem */
+		return problem;
+	}
+
+	public static CEOCIPTFDGraphGenerator getGraphGenerator(File testsetFile, File evaluablePredicateFile, Map<String, OracleTaskResolver> oracleResolvers, Instances dataset)
+			throws IOException {
 		Map<String, EvaluablePredicate> evaluablePredicateMap = new HashMap<>();
 		if (evaluablePredicateFile != null) {
 			List<String> evaluablePredicates = FileUtil.readFileAsList(evaluablePredicateFile.getAbsolutePath());
@@ -123,7 +114,7 @@ public class MLUtil {
 				}
 			}
 		}
-		return new CEOCIPTFDGraphGenerator(new TaskProblemGenerator().getProblem(testsetFile, dataset), evaluablePredicateMap, null);
+		return new CEOCIPTFDGraphGenerator(getPlanningProblem(testsetFile, dataset), evaluablePredicateMap, oracleResolvers);
 	}
 
 	static public String getJavaCodeFromPlan(List<CEOCAction> plan) {
@@ -144,13 +135,23 @@ public class MLUtil {
 			case "noaddSingleParam":
 			case "noaddValuedParam":
 				break;
-			case "configReduction":
+			case "defSet":
+				codeBuilder.append("Collection<String> " + inputs.get(0) + " = SetUtil.unserializeSet(\"" + inputs.get(1) + "\");\n");
+				break;
+			case "configChildNodes":
+				String add1 = "Collection<String> " + inputs.get(2) + " = SetUtil.unserializeSet(\"" + inputs.get(1) + "\");\n";
+				String add2 = "Collection<String> " + inputs.get(3) + " = SetUtil.difference(SetUtil.unserializeSet(\"" + inputs.get(0) + "\"), " + inputs.get(2) + ");\n";
+				codeBuilder.append(add1);
+				codeBuilder.append(add2);
 				break;
 			case "assignTo":
 				codeBuilder.append("String " + outParam.getName());
 				codeBuilder.append("= \"");
 				codeBuilder.append(inputs.get(0).getName());
 				codeBuilder.append("\";\n");
+				break;
+			case "setNull":
+				codeBuilder.append("Object " + inputs.get(0).getName() + " = null;\n");
 				break;
 			case "getOptionList": {
 				codeBuilder.append("List<String> ");
@@ -224,7 +225,7 @@ public class MLUtil {
 		ArrayNode array = JsonNodeFactory.instance.arrayNode();
 
 		/* insert first element of pl */
-		for (SuvervisedFilterSelector pp : pl.getPreprocessors()) {
+		for (SupervisedFilterSelector pp : pl.getPreprocessors()) {
 
 			ObjectNode on = JsonNodeFactory.instance.objectNode();
 			on.put("type", "preprocessor");
@@ -267,39 +268,36 @@ public class MLUtil {
 		return array;
 	}
 
-	public static MLPipeline copyPipeline(MLPipeline pl) {
-		return extractPipelineFromPlan(pl.getCreationPlan());
-	}
-
 	public static SequentialComposition pipelineToComposition(MLPipeline pl, CompositionDomain domain) {
-		SequentialComposition comp = new SequentialComposition(domain);
-		TaskProblemGenerator tpg = new TaskProblemGenerator();
-		for (CEOCAction action : pl.getCreationPlan()) {
-			Map<VariableParam, LiteralParam> inputMapping = new HashMap<>(action.getGrounding());
-			for (VariableParam output : action.getOperation().getOutputs())
-				inputMapping.remove(output);
-			Map<VariableParam, VariableParam> outputMapping = new HashMap<>();
-			for (VariableParam output: action.getOperation().getOutputs()) {
-				ConstantParam vp = action.getGrounding().get(output);
-				outputMapping.put(output, new VariableParam(vp.getName(), vp.getType()));
-			}
-
-			comp.addOperationInvocation(new OperationInvocation(tpg.operationFromJAICoreToCRCSetting(action.getOperation()), inputMapping, outputMapping));
-		}
-		return comp;
+		throw new UnsupportedOperationException("Currently no transformation of pipelines to sequential compositions possible");
+		// SequentialComposition comp = new SequentialComposition(domain);
+		// TaskProblemGenerator tpg = new TaskProblemGenerator();
+		// for (CEOCAction action : pl.getCreationPlan()) {
+		// Map<VariableParam, LiteralParam> inputMapping = new HashMap<>(action.getGrounding());
+		// for (VariableParam output : action.getOperation().getOutputs())
+		// inputMapping.remove(output);
+		// Map<VariableParam, VariableParam> outputMapping = new HashMap<>();
+		// for (VariableParam output: action.getOperation().getOutputs()) {
+		// ConstantParam vp = action.getGrounding().get(output);
+		// outputMapping.put(output, new VariableParam(vp.getName(), vp.getType()));
+		// }
+		//
+		// comp.addOperationInvocation(new OperationInvocation(tpg.operationFromJAICoreToCRCSetting(action.getOperation()), inputMapping, outputMapping));
+		// }
+		// return comp;
 	}
 
 	public static boolean didLastActionAffectPipeline(List<TFDNode> path) {
 		Literal resolvedProblem = path.get(path.size() - 2).getRemainingTasks().get(0);
 		String taskName = resolvedProblem.getPropertyName().substring(resolvedProblem.getPropertyName().indexOf("-") + 1).toLowerCase();
-		boolean matches = taskName.matches("(addsingleparam|addoption|addvaluedparam|addoptionpair|noaddsingleparam|noaddvaluedparam)");
+		boolean matches = taskName.matches("(addsingleparam|addoption|addvaluedparam|addoptionpair|noaddsingleparam|noaddvaluedparam|configchildnodest)");
 		if (matches)
 			return true;
 		if (taskName.contains("__construct"))
 			return true;
 		return false;
 	}
-	
+
 	public static List<String> getObjectsInSet(Monom state, String setDescriptor) {
 		if (setDescriptor.startsWith("{") && setDescriptor.endsWith("}")) {
 			return new ArrayList<>(SetUtil.unserialize(setDescriptor));

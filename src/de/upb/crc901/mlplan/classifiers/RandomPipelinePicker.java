@@ -10,9 +10,8 @@ import de.upb.crc901.mlplan.core.MLUtil;
 import de.upb.crc901.mlplan.search.algorithms.GraphBasedPipelineSearcher;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.model.task.ceocstn.CEOCSTNUtil;
-import jaicore.search.algorithms.interfaces.IObservableORGraphSearch;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
-import jaicore.search.algorithms.standard.rdfs.RandomizedDepthFirstSearch;
+import jaicore.search.algorithms.standard.core.ORGraphSearch;
 import weka.core.Instances;
 
 /**
@@ -25,11 +24,11 @@ public class RandomPipelinePicker extends GraphBasedPipelineSearcher<TFDNode, St
 	private final SerializableGraphGenerator<TFDNode, String> graphGenerator;
 	public RandomPipelinePicker(File testsetFile, boolean showGraph, int numberOfSolutions, int selectionDepth, int timeout, Random random) throws IOException {
 		super(random, timeout, showGraph);
-		this.graphGenerator = MLUtil.getGraphGenerator(testsetFile, null, null);
+		this.graphGenerator = MLUtil.getGraphGenerator(testsetFile, null, null, null);
 	}
 
 	@Override
-	protected IObservableORGraphSearch<TFDNode, String, Integer> getSearch(Instances data) {		return null;//new RandomizedDepthFirstSearch<>(graphGenerator, getRandom());
+	protected ORGraphSearch<TFDNode, String, Integer> getSearch(Instances data) {		return null;//new RandomizedDepthFirstSearch<>(graphGenerator, getRandom());
 	}
 
 	@Override

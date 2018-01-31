@@ -18,7 +18,7 @@ public class BasicCEOCIPSTNTest {
 	public void test() {
 		try {
 			GraphGenerator<TFDNode, String> graphGenerator = MLUtil.getGraphGenerator(new File("testrsc/simplehtnproblem.searchspace"),
-					new File("conf/interpretedpredicates.conf"), null);
+					new File("conf/interpretedpredicates.conf"), null, null);
 			BestFirst<TFDNode, String> bf = new BestFirst<>(graphGenerator, n -> 0.0);
 			new SimpleGraphVisualizationWindow<>(bf.getEventBus()).getPanel().setTooltipGenerator(new TFDTooltipGenerator());
 			bf.nextSolution();

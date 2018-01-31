@@ -12,7 +12,7 @@ import de.upb.crc901.mlplan.search.evaluators.RandomCompletionEvaluator;
 import de.upb.crc901.mlplan.search.evaluators.SimpleSolutionEvaluator;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.model.task.ceocstn.CEOCSTNUtil;
-import jaicore.search.algorithms.interfaces.IObservableORGraphSearch;
+import jaicore.search.algorithms.standard.core.ORGraphSearch;
 import jaicore.search.algorithms.standard.mcts.MCTS;
 import jaicore.search.algorithms.standard.mcts.UniformRandomPolicy;
 import jaicore.search.structure.core.GraphGenerator;
@@ -25,15 +25,16 @@ public class MCTSPipelineSearcher extends GraphBasedPipelineSearcher<TFDNode, St
 	}
 
 	@Override
-	protected IObservableORGraphSearch<TFDNode, String, Double> getSearch(Instances data) throws Exception {
+	protected ORGraphSearch<TFDNode, String, Double> getSearch(Instances data) throws Exception {
 		
-		/* setup search */
-		GraphGenerator<TFDNode, String> graphGenerator = MLUtil.getGraphGenerator(new File("testrsc/automl3.testset"), null, null);
-		Random r = new Random(0);
-		RandomCompletionEvaluator<Double> solutionEvaluator = new DoubleRandomCompletionEvaluator(r, 1, new SimpleSolutionEvaluator());
-		solutionEvaluator.setData(data);
-		MCTS<TFDNode,String,Double> search = new MCTS<>(graphGenerator, new UniformRandomPolicy<>(r), new UniformRandomPolicy<>(r), solutionEvaluator);
-		return search;
+//		/* setup search */
+//		GraphGenerator<TFDNode, String> graphGenerator = MLUtil.getGraphGenerator(new File("testrsc/automl3.testset"), null, null, null);
+//		Random r = new Random(0);
+//		RandomCompletionEvaluator<Double> solutionEvaluator = new DoubleRandomCompletionEvaluator(r, 1, new SimpleSolutionEvaluator());
+//		solutionEvaluator.setData(data);
+//		MCTS<TFDNode,String,Double> search = new MCTS<>(graphGenerator, new UniformRandomPolicy<>(r), new UniformRandomPolicy<>(r), solutionEvaluator);
+//		return search;
+		return null;
 	}
 
 	@Override

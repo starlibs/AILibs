@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -22,6 +24,7 @@ import de.upb.crc901.mlplan.core.MLPipeline;
 import de.upb.crc901.mlplan.core.MLPipelineSolutionAnnotation;
 import de.upb.crc901.mlplan.core.MLUtil;
 import de.upb.crc901.mlplan.core.SolutionEvaluator;
+import de.upb.crc901.mlplan.oracles.RPNDOracleTaskSolver;
 import de.upb.crc901.mlplan.search.algorithms.GraphBasedPipelineSearcher;
 import de.upb.crc901.mlplan.search.evaluators.CVEvaluator;
 import de.upb.crc901.mlplan.search.evaluators.MonteCarloCrossValidationEvaluator;
@@ -30,6 +33,7 @@ import de.upb.crc901.mlplan.search.evaluators.RandomCompletionEvaluator;
 import jaicore.basic.SetUtil;
 import jaicore.ml.WekaUtil;
 import jaicore.planning.graphgenerators.task.ceociptfd.CEOCIPTFDGraphGenerator;
+import jaicore.planning.graphgenerators.task.ceociptfd.OracleTaskResolver;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.model.task.ceocstn.CEOCSTNUtil;
 import jaicore.search.algorithms.interfaces.IObservableORGraphSearch;
@@ -44,6 +48,7 @@ public class TwoPhaseHTNBasedPipelineSearcher<V extends Comparable<V>> extends G
 
 	private final static Logger logger = LoggerFactory.getLogger(TwoPhaseHTNBasedPipelineSearcher.class);
 	private File htnSearchSpaceFile, evaluablePredicateFile;
+	private Map<String, OracleTaskResolver> oracleResolvers; // kann man im Moment nicht gut in Datei auslagern, weil die parametrisiert werden müssen
 	private SerializableGraphGenerator<TFDNode, String> graphGenerator;
 	private int timeoutPerNodeFComputation;
 	private File tmpDir;
@@ -59,7 +64,7 @@ public class TwoPhaseHTNBasedPipelineSearcher<V extends Comparable<V>> extends G
 	public TwoPhaseHTNBasedPipelineSearcher() { }
 
 	public TwoPhaseHTNBasedPipelineSearcher(File testsetFile, File evaluablePredicates, Instances dataset) throws IOException {
-		this(MLUtil.getGraphGenerator(testsetFile, evaluablePredicates, dataset));
+		this(MLUtil.getGraphGenerator(testsetFile, evaluablePredicates, null, dataset));
 	}
 
 	public TwoPhaseHTNBasedPipelineSearcher(SerializableGraphGenerator<TFDNode, String> graphGenerator) throws IOException {
@@ -74,11 +79,15 @@ public class TwoPhaseHTNBasedPipelineSearcher<V extends Comparable<V>> extends G
 	}
 
 	@Override
-	protected IObservableORGraphSearch<TFDNode, String, V> getSearch(Instances data) throws IOException {
+	protected ORGraphSearch<TFDNode, String, V> getSearch(Instances data) throws IOException {
+		
+		/*TODO DIRRRTYYYYY!!!! set oracle resolver */
+		oracleResolvers = new HashMap<>();
+		oracleResolvers.put("configChildNodesT", new RPNDOracleTaskSolver(getRandom(), "weka.classifiers.trees.RandomTree", data, MLUtil.getPlanningProblem(htnSearchSpaceFile, data)));
 		
 		if (graphGenerator == null) {
 			System.out.println("Automatically building graph generator using HTN file " + htnSearchSpaceFile + ", evaluable predicates " + evaluablePredicateFile + ", and dataset " + data.relationName() + " with " + data.numClasses() + " classes and " + data.size() + " points.");
-			graphGenerator = MLUtil.getGraphGenerator(htnSearchSpaceFile, evaluablePredicateFile, data);
+			graphGenerator = MLUtil.getGraphGenerator(htnSearchSpaceFile, evaluablePredicateFile, oracleResolvers, data);
 		}
 
 		if (rce == null) {
@@ -334,7 +343,7 @@ public class TwoPhaseHTNBasedPipelineSearcher<V extends Comparable<V>> extends G
 						MLPipeline mlCopy;
 						synchronized (this) {
 							validationSplit = WekaUtil.getStratifiedSplit(dataForSelection, new Random(baseForRandom * k), .7f);
-							mlCopy = MLUtil.extractPipelineFromPlan(pl.getCreationPlan()); // create a copy for the evaluation
+							mlCopy = pl.clone(); // create a copy for the evaluation
 						}
 						try {
 							mlCopy.buildClassifier(validationSplit.get(0));
@@ -430,5 +439,13 @@ public class TwoPhaseHTNBasedPipelineSearcher<V extends Comparable<V>> extends G
 
 	public void setGraphGenerator(SerializableGraphGenerator<TFDNode, String> graphGenerator) {
 		this.graphGenerator = graphGenerator;
+	}
+
+	public Map<String, OracleTaskResolver> getOracleResolvers() {
+		return oracleResolvers;
+	}
+
+	public void setOracleResolvers(Map<String, OracleTaskResolver> oracleResolvers) {
+		this.oracleResolvers = oracleResolvers;
 	}
 }

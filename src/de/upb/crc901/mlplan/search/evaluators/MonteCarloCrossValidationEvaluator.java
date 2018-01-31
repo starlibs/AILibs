@@ -15,7 +15,7 @@ import weka.core.Instances;
 public class MonteCarloCrossValidationEvaluator implements SolutionEvaluator {
 	
 	static final Logger logger = LoggerFactory.getLogger(MonteCarloCrossValidationEvaluator.class);
-	private final BasicMLEvaluator evaluator = new BasicMLEvaluator(new Random(System.currentTimeMillis()));
+	private final BasicMLEvaluator basicEvaluator = new BasicMLEvaluator(new Random(System.currentTimeMillis()));
 	private Instances data;
 	private boolean canceled = false;
 	private final int repeats;
@@ -43,13 +43,16 @@ public class MonteCarloCrossValidationEvaluator implements SolutionEvaluator {
 	@Override
 	public Integer getSolutionScore(MLPipeline pl) throws Exception {
 		
+		if (pl == null)
+			throw new IllegalArgumentException("Cannot compute score for null pipeline!");
+		
 		/* perform random stratified split */
 		DescriptiveStatistics stats = new DescriptiveStatistics();
 		logger.info("Starting evaluation of {}", pl);
 		try {
 			for (int i = 0; i < repeats && !canceled; i++) {
 				logger.info("Evaluating {} with split #{}/{}", pl, i + 1, repeats);
-				int score = (int) Math.round(evaluator.getErrorRateForRandomSplit(pl, data, trainingPortion)* 100);
+				int score = (int) Math.round(basicEvaluator.getErrorRateForRandomSplit(pl, data, trainingPortion)* 100);
 				logger.info("Score for evaluation of {} with split #{}/{}: {}", pl, i + 1, repeats, score);
 				stats.addValue(score);
 			}
@@ -58,7 +61,7 @@ public class MonteCarloCrossValidationEvaluator implements SolutionEvaluator {
 			throw e;
 		}
 		catch (Throwable e) {
-			logger.info("Exception or Error thrown by classifier {}. Returning a NULL score", pl.getBaseClassifier().getClass().getName());
+			logger.info("Classifier {} has thrown {}. Returning a NULL score. Message was: {}", pl.getBaseClassifier().getClass().getName(), e.getClass().getSimpleName(), e.getMessage());
 			return null;
 		}
 
@@ -67,4 +70,7 @@ public class MonteCarloCrossValidationEvaluator implements SolutionEvaluator {
 		return score;
 	}
 
+	public BasicMLEvaluator getEvaluator() {
+		return basicEvaluator;
+	}
 }

@@ -10,9 +10,10 @@ import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import org.aeonbits.owner.ConfigCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.eventbus.EventBus;
 
 import de.upb.crc901.mlplan.core.MLPipeline;
 import de.upb.crc901.mlplan.core.MLUtil;
@@ -31,6 +32,7 @@ public class BasicMLEvaluator implements Serializable {
 	private final BlockingQueue<LearningStats> results = new LinkedBlockingQueue<>();
 	private boolean canceled;
 	private transient final ResultWriter resultWriterThread; // no results will be written if the process is outsourced!
+	private final EventBus measurementEventBus = new EventBus();
 	
 	private class LearningStats {
 		Instances data, train;
@@ -122,24 +124,21 @@ public class BasicMLEvaluator implements Serializable {
 	}
 	
 	public double getErrorRateForSplit(MLPipeline pl, Instances train, Instances test) throws Exception {
-		MLPipeline plCopy = MLUtil.copyPipeline(pl);
+		MLPipeline plCopy = pl.clone();
 		plCopy.buildClassifier(train);
 		int mistakes = 0;
-		long overallExecutionTimeOfPreprocessor = 0;
-		long overallExecutionTimeOfClassifier = 0;
 		logger.info("Split size is {}/{}", train.size(), test.size());
 		
 		for (Instance i : test) {
 			if (i.classValue() != plCopy.classifyInstance(i))
 				mistakes++;
-			overallExecutionTimeOfPreprocessor += plCopy.getTimeForExecutingPreprocessor();
-			overallExecutionTimeOfClassifier += plCopy.getTimeForExecutingClassifier();
 		}
 		double error = mistakes * 100f / test.size();
 		Instances data = new Instances(train);
 		data.addAll(test);
 		if (resultWriterThread != null)
-			results.put(new LearningStats(data, train, plCopy, overallExecutionTimeOfPreprocessor, overallExecutionTimeOfClassifier, error));
+			results.put(new LearningStats(data, train, plCopy, (int)plCopy.getTimeForExecutingPreprocessor().getSum(), (int)plCopy.getTimeForExecutingClassifier().getSum(), error));
+		measurementEventBus.post(new PipelineMeasurementEvent<Double>(plCopy, error));
 		
 		/* write stats */
 		return error;
@@ -151,5 +150,9 @@ public class BasicMLEvaluator implements Serializable {
 
 	public void setCanceled(boolean canceled) {
 		this.canceled = canceled;
+	}
+
+	public EventBus getMeasurementEventBus() {
+		return measurementEventBus;
 	}
 }

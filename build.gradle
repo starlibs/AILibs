@@ -34,6 +34,9 @@ dependencies {
 	compile name: 'autoweka'
 	compile name: 'mysql-connector-java-5.1.45-bin'
 	
+	// apache lang (for reflection)
+	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.6'
+	
 	// Graph Stream
 	compile group: 'org.graphstream', name: 'gs-core', version: '1.1.1'
 	compile group: 'org.graphstream', name: 'gs-ui', version: '1.3'

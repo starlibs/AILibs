@@ -300,6 +300,8 @@ retrieveTrain;	s:List<Instances>; train:Instances; List<Instances>(s); Instances
 retrieveTest;	s:List<Instances>; test:Instances; List<Instances>(s); Instances(test); (0)
 
 assignTo			; s1:String; s2:String; ; assigned(s1,s2); (0)
+setNull				; obj; ; ; assigned(obj); (0)
+#defSet				; s1:List<String>, s2:List<String>; ; ; ; (0)
 
 getOptionList; 		; o:List<String>; ; List<String>(o); (0)
 
@@ -317,7 +319,12 @@ appendOptions		; l1:List<String>, l2:List<String>; ; List<String>(l1) & List<Str
 
 compileOptionListToArray; oList:List<String>; oArray:String[]; List<String>(oList); String[](oArray); (0)
 
-#configReduction; s1:ssubset, s2:cluster; ; ; ; (0)
+
+# Pipeline and Reduction
+de.upb.crc901.mlplan.core.MLPipeline:__construct;search,evaluate,classifier;pl;;;(0)
+jaicore.ml.classification.multiclass.reduction.MCTreeNodeReD:__construct; baseclassifier,leftClasses,leftClassifier,rightClasses,rightClassifier;c;;MCTreeNodeReD(c);(0)
+jaicore.ml.classification.multiclass.reduction.ConstantClassifier:__construct; ;c;;ConstantClassifier(c);(0)
+
 
 # Evaluation
 weka.classifiers.evaluation.Evaluation:__construct;test:Instances;e:Evaluation;Instances(test);Evaluation(e);(0)
@@ -377,65 +384,65 @@ weka.attributeSelection.SymmetricalUncertAttributeEval:setOptions;e,o;;FeatureEv
 
 # Classifier and their configuration methods
 # Base Classifier
-weka.classifiers.bayes.BayesNet:__construct;;c;;Classifier(c);(0)
-weka.classifiers.bayes.BayesNet:setOptions;c,o;;Classifier(c) & String[](o);optSet(c);(0)
-weka.classifiers.bayes.NaiveBayes:__construct;;c;;Classifier(c);(0)
-weka.classifiers.bayes.NaiveBayes:setOptions;c,o;;Classifier(c) & String[](o);optSet(c);(0)
-weka.classifiers.bayes.NaiveBayesMultinomial:__construct;;c;;Classifier(c);(0)
-weka.classifiers.bayes.NaiveBayesMultinomial:setOptions;c,o;;Classifier(c) & String[](o);optSet(c);(0)
-weka.classifiers.functions.GaussianProcesses:__construct;;c;;Classifier(c);(0)
-weka.classifiers.functions.GaussianProcesses:setOptions;c,o;;Classifier(c) & String[](o);optSet(c);(0)
-weka.classifiers.functions.LinearRegression:__construct;;c;;Classifier(c);(0)
-weka.classifiers.functions.LinearRegression:setOptions;c,o;;Classifier(c) & String[](o);optSet(c);(0)
-weka.classifiers.functions.Logistic:__construct;;c;;Classifier(c);(0)
-weka.classifiers.functions.Logistic:setOptions;c,o;;Classifier(c) & String[](o);optSet(c);(0)
-weka.classifiers.functions.MultilayerPerceptron:__construct;;c;;Classifier(c);(0)
-weka.classifiers.functions.MultilayerPerceptron:setOptions;c,o;;Classifier(c) & String[](o);optSet(c);(0)
+weka.classifiers.bayes.BayesNet:__construct;;c;;BayesNet(c);(0)
+weka.classifiers.bayes.BayesNet:setOptions;c,o;;BayesNet(c) & String[](o);optSet(c);(0)
+weka.classifiers.bayes.NaiveBayes:__construct;;c;;NaiveBayes(c);(0)
+weka.classifiers.bayes.NaiveBayes:setOptions;c,o;;NaiveBayes(c) & String[](o);optSet(c);(0)
+weka.classifiers.bayes.NaiveBayesMultinomial:__construct;;c;;NaiveBayesMultinomial(c);(0)
+weka.classifiers.bayes.NaiveBayesMultinomial:setOptions;c,o;;NaiveBayesMultinomial(c) & String[](o);optSet(c);(0)
+weka.classifiers.functions.GaussianProcesses:__construct;;c;;GaussianProcesses(c);(0)
+weka.classifiers.functions.GaussianProcesses:setOptions;c,o;;GaussianProcesses(c) & String[](o);optSet(c);(0)
+weka.classifiers.functions.LinearRegression:__construct;;c;;LinearRegression(c);(0)
+weka.classifiers.functions.LinearRegression:setOptions;c,o;;LinearRegression(c) & String[](o);optSet(c);(0)
+weka.classifiers.functions.Logistic:__construct;;c;;Logistic(c);(0)
+weka.classifiers.functions.Logistic:setOptions;c,o;;Logistic(c) & String[](o);optSet(c);(0)
+weka.classifiers.functions.MultilayerPerceptron:__construct;;c;;MultilayerPerceptron(c);(0)
+weka.classifiers.functions.MultilayerPerceptron:setOptions;c,o;;MultilayerPerceptron(c) & String[](o);optSet(c);(0)
 ####### weka.classifiers.functions.MultilayerPerceptron:setHiddenLayers;c:Classifier,h:String;;Classifier(c) & String(h);optSet(c);(0)
-weka.classifiers.functions.SGD:__construct;;c;;Classifier(c);(0)
-weka.classifiers.functions.SGD:setOptions;c,o;;Classifier(c) & String[](o);optSet(c);(0)
-weka.classifiers.functions.LibSVM:__construct;;c;;Classifier(c);(0)
-weka.classifiers.functions.LibSVM:setOptions;c,o;;Classifier(c) & String[](o);optSet(c);(0)
-weka.classifiers.functions.SimpleLinearRegression:__construct;;c;;Classifier(c);(0)
-weka.classifiers.functions.SimpleLinearRegression:setOptions;c,o;;Classifier(c) & String[](o);optSet(c);(0)
-weka.classifiers.functions.SimpleLogistic:__construct;;c;;Classifier(c);(0)
-weka.classifiers.functions.SimpleLogistic:setOptions;c,o;;Classifier(c) & String[](o);optSet(c);(0)
-weka.classifiers.functions.SMO:__construct;;c;;Classifier(c);(0)
-weka.classifiers.functions.SMO:setOptions;c,o;;Classifier(c) & String[](o);optSet(c);(0)
-weka.classifiers.functions.SMOreg:__construct;;c;;Classifier(c);(0)
-weka.classifiers.functions.SMOreg:setOptions;c,o;;Classifier(c) & String[](o);optSet(c);(0)
-weka.classifiers.functions.VotedPerceptron:__construct;;c;;Classifier(c);(0)
-weka.classifiers.functions.VotedPerceptron:setOptions;c,o;;Classifier(c) & String[](o);optSet(c);(0)
-weka.classifiers.lazy.IBk:__construct;;c;;Classifier(c);(0)
-weka.classifiers.lazy.IBk:setOptions;c,o;;Classifier(c) & String[](o);optSet(c);(0)
-weka.classifiers.lazy.KStar:__construct;;c;;Classifier(c);(0)
-weka.classifiers.lazy.KStar:setOptions;c,o;;Classifier(c) & String[](o);optSet(c);(0)
-weka.classifiers.rules.DecisionTable:__construct;;c;;Classifier(c);(0)
-weka.classifiers.rules.DecisionTable:setOptions;c,o;;Classifier(c) & String[](o);optSet(c);(0)
-weka.classifiers.rules.JRip:__construct;;c;;Classifier(c);(0)
-weka.classifiers.rules.JRip:setOptions;c,o;;Classifier(c) & String[](o);optSet(c);(0)
-weka.classifiers.rules.M5Rules:__construct;;c;;Classifier(c);(0)
-weka.classifiers.rules.M5Rules:setOptions;c,o;;Classifier(c) & String[](o);optSet(c);(0)
-weka.classifiers.rules.OneR:__construct;;c;;Classifier(c);(0)
-weka.classifiers.rules.OneR:setOptions;c,o;;Classifier(c) & String[](o);optSet(c);(0)
-weka.classifiers.rules.PART:__construct;;c;;Classifier(c);(0)
-weka.classifiers.rules.PART:setOptions;c,o;;Classifier(c) & String[](o);optSet(c);(0)
-weka.classifiers.rules.ZeroR:__construct;;c;;Classifier(c);(0)
-weka.classifiers.rules.ZeroR:setOptions;c,o;;Classifier(c) & String[](o);optSet(c);(0)
-weka.classifiers.trees.DecisionStump:__construct;;c;;Classifier(c);(0)
-weka.classifiers.trees.DecisionStump:setOptions;c,o;;Classifier(c) & String[](o);optSet(c);(0)
-weka.classifiers.trees.J48:__construct;;c;;Classifier(c);(0)
-weka.classifiers.trees.J48:setOptions;c,o;;Classifier(c) & String[](o);optSet(c);(0)
-weka.classifiers.trees.LMT:__construct;;c;;Classifier(c);(0)
-weka.classifiers.trees.LMT:setOptions;c,o;;Classifier(c) & String[](o);optSet(c);(0)
-weka.classifiers.trees.M5P:__construct;;c;;Classifier(c);(0)
-weka.classifiers.trees.M5P:setOptions;c,o;;Classifier(c) & String[](o);optSet(c);(0)
-weka.classifiers.trees.RandomForest:__construct;;c;;Classifier(c);(0)
-weka.classifiers.trees.RandomForest:setOptions;c,o;;Classifier(c) & String[](o);optSet(c);(0)
-weka.classifiers.trees.RandomTree:__construct;;c;;Classifier(c);(0)
-weka.classifiers.trees.RandomTree:setOptions;c,o;;Classifier(c) & String[](o);optSet(c);(0)
-weka.classifiers.trees.REPTree:__construct;;c;;Classifier(c);(0)
-weka.classifiers.trees.REPTree:setOptions;c,o;;Classifier(c) & String[](o);optSet(c);(0)
+weka.classifiers.functions.SGD:__construct;;c;;SGD(c);(0)
+weka.classifiers.functions.SGD:setOptions;c,o;;SGD(c) & String[](o);optSet(c);(0)
+weka.classifiers.functions.LibSVM:__construct;;c;;LibSVM(c);(0)
+weka.classifiers.functions.LibSVM:setOptions;c,o;;LibSVM(c) & String[](o);optSet(c);(0)
+weka.classifiers.functions.SimpleLinearRegression:__construct;;c;;SimpleLinearRegression(c);(0)
+weka.classifiers.functions.SimpleLinearRegression:setOptions;c,o;;SimpleLinearRegression(c) & String[](o);optSet(c);(0)
+weka.classifiers.functions.SimpleLogistic:__construct;;c;;SimpleLogistic(c);(0)
+weka.classifiers.functions.SimpleLogistic:setOptions;c,o;;SimpleLogistic(c) & String[](o);optSet(c);(0)
+weka.classifiers.functions.SMO:__construct;;c;;SMO(c);(0)
+weka.classifiers.functions.SMO:setOptions;c,o;;SMO(c) & String[](o);optSet(c);(0)
+weka.classifiers.functions.SMOreg:__construct;;c;;SMOreg(c);(0)
+weka.classifiers.functions.SMOreg:setOptions;c,o;;SMOreg(c) & String[](o);optSet(c);(0)
+weka.classifiers.functions.VotedPerceptron:__construct;;c;;VotedPerceptron(c);(0)
+weka.classifiers.functions.VotedPerceptron:setOptions;c,o;;VotedPerceptron(c) & String[](o);optSet(c);(0)
+weka.classifiers.lazy.IBk:__construct;;c;;IBk(c);(0)
+weka.classifiers.lazy.IBk:setOptions;c,o;;IBk(c) & String[](o);optSet(c);(0)
+weka.classifiers.lazy.KStar:__construct;;c;;KStar(c);(0)
+weka.classifiers.lazy.KStar:setOptions;c,o;;KStar(c) & String[](o);optSet(c);(0)
+weka.classifiers.rules.DecisionTable:__construct;;c;;DecisionTable(c);(0)
+weka.classifiers.rules.DecisionTable:setOptions;c,o;;DecisionTable(c) & String[](o);optSet(c);(0)
+weka.classifiers.rules.JRip:__construct;;c;;JRip(c);(0)
+weka.classifiers.rules.JRip:setOptions;c,o;;JRip(c) & String[](o);optSet(c);(0)
+weka.classifiers.rules.M5Rules:__construct;;c;;M5Rules(c);(0)
+weka.classifiers.rules.M5Rules:setOptions;c,o;;M5Rules(c) & String[](o);optSet(c);(0)
+weka.classifiers.rules.OneR:__construct;;c;;OneR(c);(0)
+weka.classifiers.rules.OneR:setOptions;c,o;;OneR(c) & String[](o);optSet(c);(0)
+weka.classifiers.rules.PART:__construct;;c;;PART(c);(0)
+weka.classifiers.rules.PART:setOptions;c,o;;PART(c) & String[](o);optSet(c);(0)
+weka.classifiers.rules.ZeroR:__construct;;c;;ZeroR(c);(0)
+weka.classifiers.rules.ZeroR:setOptions;c,o;;ZeroR(c) & String[](o);optSet(c);(0)
+weka.classifiers.trees.DecisionStump:__construct;;c;;DecisionStump(c);(0)
+weka.classifiers.trees.DecisionStump:setOptions;c,o;;DecisionStump(c) & String[](o);optSet(c);(0)
+weka.classifiers.trees.J48:__construct;;c;;J48(c);(0)
+weka.classifiers.trees.J48:setOptions;c,o;;J48(c) & String[](o);optSet(c);(0)
+weka.classifiers.trees.LMT:__construct;;c;;LMT(c);(0)
+weka.classifiers.trees.LMT:setOptions;c,o;;LMT(c) & String[](o);optSet(c);(0)
+weka.classifiers.trees.M5P:__construct;;c;;M5P(c);(0)
+weka.classifiers.trees.M5P:setOptions;c,o;;M5P(c) & String[](o);optSet(c);(0)
+weka.classifiers.trees.RandomForest:__construct;;c;;RandomForest(c);(0)
+weka.classifiers.trees.RandomForest:setOptions;c,o;;RandomForest(c) & String[](o);optSet(c);(0)
+weka.classifiers.trees.RandomTree:__construct;;c;;RandomTree(c);(0)
+weka.classifiers.trees.RandomTree:setOptions;c,o;;RandomTree(c) & String[](o);optSet(c);(0)
+weka.classifiers.trees.REPTree:__construct;;c;;REPTree(c);(0)
+weka.classifiers.trees.REPTree:setOptions;c,o;;REPTree(c) & String[](o);optSet(c);(0)
 
 # Nested Dichotomy Services
 weka.classifiers.meta.nestedDichotomies.ND:__construct;;c;;Classifier(c);(0)
@@ -507,9 +514,8 @@ addMandatoryValuedParameter				; addMandatValuedParam(o,p,v);			o,p,v; ; ; addVa
 
 
 ### Main ###
-
-inductionMethod;		induce(classes,x);	classes,x,dn,d,fsn,fs,fen,fe,as,cn,c; ; hasAtLeastTwoClasses(classes) ; createDataPreprocessor(dn,d) -> createRawFeaturePreprocessor(fsn,fs,fen,fe,as) -> createClassifier(classes,c) -> createGivenFeaturePreprocessor(fsn,fs,fen,fe,as)
-induceTrivialDataset;	induce(classes,x);	classes,x,dn,d,fsn,fs,fen,fe,as,cn,c; ; oneItem(classes) ; noop()
+inductionMethod;		induce(classes,x,returnedClassifier);	classes,cc,x,dn,d,fsn,fs,fen,fe,as,cn,bc,returnedClassifier; ; compactClasses(classes,cc) & hasAtLeastTwoClasses(classes) ; createDataPreprocessor(dn,d) -> createRawFeaturePreprocessor(fsn,fs,fen,fe,as) -> createClassifier(cc,bc) -> createGivenFeaturePreprocessor(fsn,fs,fen,fe,as) -> de.upb.crc901.mlplan.core.MLPipeline:__construct(fs,fe,bc,returnedClassifier)
+induceTrivialDataset;	induce(classes,x,c);	classes,x,dn,d,fsn,fs,fen,fe,as,cn,c; ; compactClasses(classes,cc) & oneItem(classes) ; jaicore.ml.classification.multiclass.reduction.ConstantClassifier:__construct(c)
 #wekaRawClassification;	createRawClassifier(cn,c); cn,c; ; ; wekaCreateRawClassifier(cn,c)
 #wekaGivenClassification;	createGivenClassifier(cn,c); cn,c; ; ; wekaCreateGivenClassifier(cn,c)
 wekaClassification;	createClassifier(classes,c); classes,c; ; ; wekaCreateClassifier(classes, c)
@@ -525,12 +531,12 @@ wekaPreprocessData; createDataPreprocessor(dn,d); dn,d; ; ; assignTo('noDataPrep
 ### FEATURE PREPROCESSORS ###
 
 # No preprocessing
-wekaPreprocessFeatures; createRawFeaturePreprocessor(fsn,fs,fen,fe,as); fsn,fs,fen,fe,as; ; ; assignTo('noFeaturePreprocessing',fsn)
+wekaPreprocessFeatures; createRawFeaturePreprocessor(fsn,fs,fen,fe,as); fsn,fs,fen,fe,as; ; ; assignTo('noFeaturePreprocessing',fsn) -> setNull(fs) -> setNull(fe)
 wekaPreprocessFeatures; createGivenFeaturePreprocessor(fsn,fs,fen,fe,as); fsn,fs,fen,fe,as; assigned('noFeaturePreprocessing',fsn) ; ; noop
 
 # Do preprocessing
-#wekaPreprocessFeatures; createRawFeaturePreprocessor(fsn,fs,fen,fe,as); fsn,fs,fen,fe,as; ; ; wekaCreateRawFeaturePreprocessor(fsn,fs,fen,fe,as)
-#wekaPreprocessFeatures; createGivenFeaturePreprocessor(fsn,fs,fen,fe,as); fsn,fs,fen,fe,as; !assigned('noFeaturePreprocessing',fsn) ; ; wekaCreateGivenFeaturePreprocessor(fsn,fs,fen,fe,as)
+wekaPreprocessFeatures; createRawFeaturePreprocessor(fsn,fs,fen,fe,as); fsn,fs,fen,fe,as; ; ; wekaCreateRawFeaturePreprocessor(fsn,fs,fen,fe,as)
+wekaPreprocessFeatures; createGivenFeaturePreprocessor(fsn,fs,fen,fe,as); fsn,fs,fen,fe,as; !assigned('noFeaturePreprocessing',fsn) ; ; wekaCreateGivenFeaturePreprocessor(fsn,fs,fen,fe,as)
 
 # Generic Attribute Selection
 wekaRawAttributeSelection	; wekaCreateRawFeaturePreprocessor(fsn,fs,fen,fe,as); fsn,fs,fen,fe,as; ; ; weka.attributeSelection.AttributeSelection:__construct(as) -> getWekaRawAS(fsn,fs,fen,fe) -> weka.attributeSelection.AttributeSelection:setSearch(as,fs) -> weka.attributeSelection.AttributeSelection:setEvaluator(as,fe)
@@ -657,20 +663,24 @@ wekaSymmUncertAEOptsMissingMerge				; getWekaSymmUncertAEConfig0(o);	o; ; ; addO
 ### CLASSIFIER CONSTRUCTION ###
 
 # Weka General Method (single vs. meta vs. ensemble)
-#wekaRawBaseClassifier; 			wekaCreateRawClassifier(cn,c); cn,c; ; ; wekaCreateRawBaseClassifier(cn,c)
-#wekaRawMetaClassifier; 		wekaCreateRawClassifier(cn,c); cn,c; ; ; wekaCreateRawMetaClassifier(cn,c)
-#wekaRawEnsembleClassifier;		wekaCreateRawClassifier(cn,c); cn,c; ; ; wekaCreateRawEnsembleClassifier(cn,c)
+wekaRawBaseClassifier; 			wekaCreateRawClassifier(cn,c); cn,c; ; ; wekaCreateRawBaseClassifier(cn,c)
+wekaRawMetaClassifier; 		wekaCreateRawClassifier(cn,c); cn,c; ; ; wekaCreateRawMetaClassifier(cn,c)
+wekaRawEnsembleClassifier;		wekaCreateRawClassifier(cn,c); cn,c; ; ; wekaCreateRawEnsembleClassifier(cn,c)
 
 wekaGivenBaseClassifier; 		wekaCreateGivenClassifier(cn,c); cn,c; ; ; wekaCreateGivenBaseClassifier(cn,c)
 wekaGivenMetaClassifier; 		wekaCreateGivenClassifier(cn,c); cn,c; ; ; wekaCreateGivenMetaClassifier(cn,c)
 wekaGivenEnsembleClassifier;	wekaCreateGivenClassifier(cn,c); cn,c; ; ; wekaCreateGivenEnsembleClassifier(cn,c)
 
-#wekaBaseClassifier; 		wekaCreateClassifier(classes,c); classes,c; ; ; wekaCreateBaseClassifier(c)
-#wekaMetaClassifier; 		wekaCreateClassifier(classes,c); classes,c; ; ; wekaCreateMetaClassifier(c)
-#wekaEnsembleClassifier;		wekaCreateClassifier(classes,c); classes,c; ; ; wekaCreateEnsembleClassifier(c)
-reductionClassifier;		wekaCreateClassifier(classes,c); classes,c; ; hasAtLeastTwoClasses(classes) ; reduceProblem(classes,c)
+wekaBaseClassifier; 		wekaCreateClassifier(classes,c); classes,c; ; ; wekaCreateBaseClassifier(c)
+wekaMetaClassifier; 		wekaCreateClassifier(classes,c); classes,c; ; ; wekaCreateMetaClassifier(c)
+wekaEnsembleClassifier;		wekaCreateClassifier(classes,c); classes,c; ; ; wekaCreateEnsembleClassifier(c)
+reductionClassifier;		wekaCreateClassifier(classes,c); classes,c; ; hasAtLeastThreeClasses(classes) ; reduceProblem(classes,c)
 
-createReduction;		reduceProblem(classes,c);classes,c,leftChildClasses,rightChildClasses; ; validRefinementChoice(leftChildClasses,classes) & partition(classes,leftChildClasses,rightChildClasses); induce(leftChildClasses,leftChildClasses) -> induce(rightChildClasses,rightChildClasses)
+# The following method uses an oracle task (configChildNodesT)!
+createReduction;		reduceProblem(classes,c);classes,c,leftChildClasses,rightChildClasses,leftClassifier,rightClassifier; ; ; configChildNodesT(classes,leftChildClasses,rightChildClasses) -> induce(leftChildClasses,leftChildClasses,leftClassifier) -> induce(rightChildClasses,rightChildClasses,rightClassifier) -> createMCTreeNode(leftChildClasses,rightChildClasses,leftClassifier,rightClassifier,c)
+selectInnerClassifier; createMCTreeNode(leftChildClasses,rightChildClasses,leftClassifier,rightClassifier,c);leftChildClasses,rightChildClasses,leftClassifier,rightClassifier,baseclassifier,c;;AllowedBaseClassifiersForMCTreeNode(baseclassifier); jaicore.ml.classification.multiclass.reduction.MCTreeNodeReD:__construct(baseclassifier, leftChildClasses, leftClassifier, rightChildClasses, rightClassifier,c)
+
+
 
 ### BASE CLASSIFIERS ###
 
@@ -2084,5 +2094,5 @@ VoteCombinationRule(MAX)
 
 [Queries]
 
-q1;x:Instances,c;;Instances(x) & StringSet(c) & classesIn(c);induce(c,x);(1000)
+q1;x:Instances,c;classifier;Instances(x) & StringSet(c) & classesIn(c);induce(c,x,classifier);(1000)
 

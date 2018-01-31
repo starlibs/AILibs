@@ -10,7 +10,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import org.apache.commons.math.stat.descriptive.SynchronizedMultivariateSummaryStatistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +17,7 @@ import de.upb.crc901.mlplan.core.CodePlanningUtil;
 import de.upb.crc901.mlplan.core.MLPipeline;
 import de.upb.crc901.mlplan.core.MLUtil;
 import de.upb.crc901.mlplan.core.SolutionEvaluator;
-import de.upb.crc901.mlplan.core.SuvervisedFilterSelector;
+import de.upb.crc901.mlplan.core.SupervisedFilterSelector;
 import jaicore.logic.fol.structure.Literal;
 import jaicore.ml.WekaUtil;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
@@ -27,6 +26,7 @@ import jaicore.search.algorithms.standard.core.NodeAnnotationEvent;
 import jaicore.search.algorithms.standard.core.SolutionAnnotationEvent;
 import jaicore.search.algorithms.standard.core.SolutionFoundEvent;
 import jaicore.search.structure.core.Node;
+import scala.collection.mutable.Cloneable;
 
 public class BalancedRandomCompletionEvaluator extends RandomCompletionEvaluator<Double> {
 
@@ -42,7 +42,15 @@ public class BalancedRandomCompletionEvaluator extends RandomCompletionEvaluator
 
 	@Override
 	public Double computeEvaluationPriorToCompletion(Node<TFDNode, ?> n, List<TFDNode> path, List<CEOCAction> plan, List<String> currentProgram) throws Exception {
-
+		
+		/* if a reduction has ever been made, return null */
+		Optional<CEOCAction> reductionAction = plan.stream().filter(a -> a.getOperation().getName().startsWith("configChildNodes")).findFirst();
+		if (reductionAction.isPresent()) {
+			return null;
+		}
+		if (n.getPoint().getAppliedMethodInstance() != null && n.getPoint().getAppliedMethodInstance().getMethod().getName().equals("createReduction"))
+			return reductionAction.isPresent() ? null : classifierRanking.size() * 2.0;
+		
 		/* determine intended/chosen classifier */
 		String intentendClassifierName = getIntendedClassifier(n);
 		if (intentendClassifierName != null) {
@@ -55,12 +63,16 @@ public class BalancedRandomCompletionEvaluator extends RandomCompletionEvaluator
 			int offset = (preprocessor.equals("")) ? 0 : classifierRanking.size();
 			return offset + classifierRanking.indexOf(simpleName) * 1.0;
 		} else {
-
+			
 			String classifierName = getNameOfClassifier(n, currentProgram);
 
 			/* if the classifier has not been decided, return 0.0 */
 			if (classifierName == null)
 				return 0.0;
+			
+			/* currently ignore the default-classifier testing but use path completion for the layer itself, too */
+			if (true)
+				return null;
 
 			/* check whether a filter and a classifier have been defined */
 			getSolutionEventBus().post(new NodeAnnotationEvent<>(n.getPoint(), "classifier", classifierName));
@@ -137,6 +149,8 @@ public class BalancedRandomCompletionEvaluator extends RandomCompletionEvaluator
 		} catch (Exception e) {
 			return 1;
 		}
+		if (pl == null)
+			return 1;
 
 		/* determine actually set params */
 		List<CEOCAction> paramSettingActions = plan.stream().filter(a -> a.getOperation().getName().toLowerCase().contains("param")).collect(Collectors.toList());
@@ -146,7 +160,7 @@ public class BalancedRandomCompletionEvaluator extends RandomCompletionEvaluator
 		int numOfParamsSettable = 0;
 		try {
 			numOfParamsSettable += WekaUtil.getOptionsOfWekaAlgorithm(pl.getBaseClassifier()).size();
-			SuvervisedFilterSelector preprocessor = pl.getPreprocessors().isEmpty() ? null : pl.getPreprocessors().get(0);
+			SupervisedFilterSelector preprocessor = pl.getPreprocessors().isEmpty() ? null : pl.getPreprocessors().get(0);
 			if (preprocessor != null) {
 				numOfParamsSettable += WekaUtil.getOptionsOfWekaAlgorithm(preprocessor.getSearcher()).size();
 				numOfParamsSettable += WekaUtil.getOptionsOfWekaAlgorithm(preprocessor.getEvaluator()).size();

@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import de.upb.crc901.mlplan.core.MLPipeline;
 import de.upb.crc901.mlplan.core.MLPipelineSolutionAnnotation;
+import de.upb.crc901.mlplan.core.MySQLExperimentLogger;
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.graphvisualizer.TooltipGenerator;
 import jaicore.search.algorithms.interfaces.IObservableORGraphSearch;
@@ -32,6 +33,7 @@ public abstract class GraphBasedPipelineSearcher<T, A, V extends Comparable<V>> 
 	private boolean showGraph;
 	private int timeout;
 	private Random random;
+	private MySQLExperimentLogger experimentLogger;
 	private File solutionLogFile;
 
 	protected final Map<MLPipeline, MLPipelineSolutionAnnotation<V>> solutionAnnotationCache = new HashMap<>();
@@ -68,6 +70,11 @@ public abstract class GraphBasedPipelineSearcher<T, A, V extends Comparable<V>> 
 
 	protected boolean shouldSearchTerminate(long timeRemaining) {
 		return timeRemaining < 1000;
+	}
+	
+	protected void logSolution(MLPipeline pl, V score) {
+		if (score instanceof Number && experimentLogger != null)
+			experimentLogger.addEvaluationEntry(pl, (double)score);
 	}
 
 	public void findPipelines(Instances data) throws Exception {
@@ -133,6 +140,7 @@ public abstract class GraphBasedPipelineSearcher<T, A, V extends Comparable<V>> 
 			if (mlp == null)
 				throw new IllegalArgumentException("Pipeline obtained from " + solution + " is NULL!");
 			V solutionQuality = search.getFOfReturnedSolution(solution);
+			logSolution(mlp, solutionQuality);
 			Integer fTime = (Integer)search.getAnnotationOfReturnedSolution(solution, "fTime");
 			if (fTime == null) {
 				logger.warn("No time information available for {}", mlp);
@@ -258,5 +266,13 @@ public abstract class GraphBasedPipelineSearcher<T, A, V extends Comparable<V>> 
 	public void cancel() {
 		logger.info("Received cancel signal.");
 		search.cancel();
+	}
+
+	public MySQLExperimentLogger getExperimentLogger() {
+		return experimentLogger;
+	}
+
+	public void setExperimentLogger(MySQLExperimentLogger experimentLogger) {
+		this.experimentLogger = experimentLogger;
 	}
 }

@@ -18,15 +18,22 @@ public class PartitionPredicate implements EvaluablePredicate {
 		List<String> union = MLUtil.getObjectsInSet(state, params[0].getName());
 		List<String> p1 = MLUtil.getObjectsInSet(state, params[1].getName());
 		List<String> p2 = MLUtil.getObjectsInSet(state, params[2].getName());
-		System.out.println(union);
-		System.out.println(p1);
-		System.out.println(p2);
-		return false;
+		return SetUtil.union(p1,p2).equals(union);
 	}
 
 	@Override
 	public Collection<List<ConstantParam>> getParamsForPositiveEvaluation(Monom state, ConstantParam... partialGrounding) {
-		return null;
+		List<String> union = MLUtil.getObjectsInSet(state, partialGrounding[0].getName());
+		List<String> p1 = partialGrounding[1] != null ? MLUtil.getObjectsInSet(state, partialGrounding[1].getName()) : null;
+		List<String> p2 = partialGrounding[2] != null ? MLUtil.getObjectsInSet(state, partialGrounding[2].getName()) : null;
+		if (p1 == null && p2 == null)
+			throw new IllegalArgumentException("At most one of the two last parameters must be null!");
+		Collection<List<ConstantParam>> validGroundings = new ArrayList<>();
+		if (p1 == null)
+			validGroundings.add(Arrays.asList(new ConstantParam[] { partialGrounding[0], new ConstantParam(SetUtil.serializeAsSet(SetUtil.difference(union, p2))), partialGrounding[2] }));
+		if (p2 == null)
+			validGroundings.add(Arrays.asList(new ConstantParam[] { partialGrounding[0], partialGrounding[1], new ConstantParam(SetUtil.serializeAsSet(SetUtil.difference(union, p1))) }));
+		return validGroundings;
 	}
 
 	public Collection<List<ConstantParam>> getParamsForNegativeEvaluation(Monom state, ConstantParam... partialGrounding) {
@@ -35,6 +42,6 @@ public class PartitionPredicate implements EvaluablePredicate {
 
 	@Override
 	public boolean isOracable() {
-		return false;
+		return true;
 	}
 }

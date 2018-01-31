@@ -121,6 +121,8 @@ public abstract class RandomCompletionEvaluator<V extends Comparable<V>> impleme
 
 			/* compute path and partial plan belonging to the node */
 			List<TFDNode> path = n.externalPath();
+			TFDNode currentNode = path.get(path.size() - 1);
+			Literal currentTask = currentNode.getRemainingTasks().isEmpty() ? null : currentNode.getRemainingTasks().get(0);
 			List<CEOCAction> partialPlan = CEOCSTNUtil.extractPlanFromSolutionPath(path);
 			List<String> currentProgram = Arrays.asList(MLUtil.getJavaCodeFromPlan(partialPlan).split("\n"));
 
@@ -138,7 +140,7 @@ public abstract class RandomCompletionEvaluator<V extends Comparable<V>> impleme
 				}
 				
 				/* if there was no relevant change in comparison to parent, apply parent's f */
-				if (!MLUtil.didLastActionAffectPipeline(path)) {
+				if (path.size() > 1 && !MLUtil.didLastActionAffectPipeline(path)) {
 					V score = fValues.get(n.getParent());
 					fValues.put(n, score);
 					logger.info("PL has not changed, adopting value of parent.");
@@ -159,21 +161,22 @@ public abstract class RandomCompletionEvaluator<V extends Comparable<V>> impleme
 					
 					/* ignore if preprocessing fails even with oneR */
 					String reference = preprocessorName + "&OneR";
-					if (plFails.containsKey(reference)) {
-						logger.info("Cancel {}, because even OneR does not finish within time using this preprocessor!", plName);
-						return null;
-					}
+//					if (plFails.containsKey(reference)) {
+//						logger.info("Cancel {}, because even OneR does not finish within time using this preprocessor!", plName);
+//						return null;
+//					}
 					
 					/* if this specific pipeline has failed before, ignore it also now */
-					if (plFails.containsKey(plName)) {
-						logger.info("Ignoreing pipeline which has been failed before.");
-						return null;
-					}
+//					if (plFails.containsKey(plName)) {
+//						logger.info("Ignoreing pipeline which has failed before.");
+//						return null;
+//					}
 
 					/* if the space under this solution is overly searched, reject */
 					if (maxSolutionsPerTechnique >= 0 && solutionsPerTechnique.containsKey(preprocessorName)
 							&& solutionsPerTechnique.get(preprocessorName).containsKey(classifierName)
 							&& solutionsPerTechnique.get(preprocessorName).get(classifierName) >= maxSolutionsPerTechnique) {
+						logger.warn("Returning null to prevent oversearch");
 						return null;// new IllegalArgumentException("This node is in an oversearched region");
 					}
 
@@ -219,8 +222,10 @@ public abstract class RandomCompletionEvaluator<V extends Comparable<V>> impleme
 							logger.info("Starting search for next solution ...");
 							List<TFDNode> pathCompletion = completer.nextSolution();
 							logger.info("Found solution {}", pathCompletion);
-							if (pathCompletion == null)
+							if (pathCompletion == null) {
+								logger.warn("No completion was found for currently remaining tasks {}", currentNode.getRemainingTasks());
 								return null;
+							}
 							pathCompletion.remove(0);
 							completedPath.addAll(pathCompletion);
 
@@ -247,6 +252,7 @@ public abstract class RandomCompletionEvaluator<V extends Comparable<V>> impleme
 							logger.info("Did not find any successful completion for classifier {}. Interrupted: {}", classifierName, interrupted);
 							if (interrupted)
 								throw new InterruptedException();
+							logger.warn("Did not find any completion");
 							return null;
 						}
 						
@@ -282,8 +288,10 @@ public abstract class RandomCompletionEvaluator<V extends Comparable<V>> impleme
 				solutionsPerTechnique.get(preprocessorName).put(classifierName, currentlyExploredVariants + 1);
 
 				V score = getFValueOfSolutionPath(path);
-				if (score == null)
+				if (score == null) {
+					logger.warn("No score was computed");
 					return null;
+				}
 				fValues.put(n, score);
 				if (!postedSolutions.contains(path)) {
 					logger.error("Found a goal node whose solution has not been posted before!");

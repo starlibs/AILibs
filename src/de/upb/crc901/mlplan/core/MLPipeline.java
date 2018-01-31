@@ -3,9 +3,13 @@ package de.upb.crc901.mlplan.core;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.SynchronousQueue;
+
+import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jaicore.ml.WekaUtil;
-import jaicore.planning.model.ceoc.CEOCAction;
 import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
 import weka.attributeSelection.AttributeSelection;
@@ -13,6 +17,8 @@ import weka.classifiers.Classifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.OptionHandler;
+
 
 /**
  * 
@@ -22,37 +28,33 @@ import weka.core.Instances;
 @SuppressWarnings("serial")
 public class MLPipeline implements Classifier, Serializable {
 
-	private final List<CEOCAction> creationPlan;
-	private final List<SuvervisedFilterSelector> preprocessors = new ArrayList<>();
+	private static final Logger logger = LoggerFactory.getLogger(MLPipeline.class);
+	
+	private final List<SupervisedFilterSelector> preprocessors = new ArrayList<>();
 	private final Classifier baseClassifier;
 	private boolean trained = false;
-	private long timeForTrainingPreprocessors, timeForTrainingClassifier, timeForExecutingPreprocessor, timeForExecutingClassifier;
+	private int timeForTrainingPreprocessors, timeForTrainingClassifier;
+	private DescriptiveStatistics timeForExecutingPreprocessors, timeForExecutingClassifier;
 
-	public MLPipeline(List<CEOCAction> creationPlan, List<SuvervisedFilterSelector> preprocessor, Classifier baseClassifier) {
+	public MLPipeline(List<SupervisedFilterSelector> preprocessors, Classifier baseClassifier) {
 		super();
-		this.creationPlan = creationPlan;
 		if (baseClassifier == null)
 			throw new IllegalArgumentException("Base classifier must not be null!");
 		this.preprocessors.addAll(preprocessors);
 		this.baseClassifier = baseClassifier;
 	}
 
-	public MLPipeline(List<CEOCAction> creationPlan, ASSearch searcher, ASEvaluation evaluator, Classifier baseClassifier) {
+	public MLPipeline(ASSearch searcher, ASEvaluation evaluator, Classifier baseClassifier) {
 		super();
-		this.creationPlan = creationPlan;
 		if (baseClassifier == null)
 			throw new IllegalArgumentException("Base classifier must not be null!");
 		if (searcher != null && evaluator != null) {
 			AttributeSelection selector = new AttributeSelection();
 			selector.setSearch(searcher);
 			selector.setEvaluator(evaluator);
-			preprocessors.add(new SuvervisedFilterSelector(searcher, evaluator, selector));
+			preprocessors.add(new SupervisedFilterSelector(searcher, evaluator, selector));
 		}
 		this.baseClassifier = baseClassifier;
-	}
-
-	public List<CEOCAction> getCreationPlan() {
-		return creationPlan;
 	}
 
 	@Override
@@ -60,21 +62,22 @@ public class MLPipeline implements Classifier, Serializable {
 
 		/* reduce dimensionality */
 		long start = System.currentTimeMillis();
-		for (SuvervisedFilterSelector pp : preprocessors) {
+		int numAttributesBefore = data.numAttributes();
+		logger.info("Starting to build the preprocessors of the pipeline.");
+		
+		for (SupervisedFilterSelector pp : preprocessors) {
 
 			/* if the filter has not been trained yet, do so now and store it */
 			if (!pp.isPrepared()) {
 				try {
 					start = System.currentTimeMillis();
 					pp.prepare(data);
-					timeForTrainingPreprocessors = System.currentTimeMillis() - start;
+					timeForTrainingPreprocessors = (int)(System.currentTimeMillis() - start);
 					int newNumberOfClasses = pp.apply(data).numClasses();
 					if (data.numClasses() != newNumberOfClasses) {
 						System.out.println(pp.getSelector() + " changed number of classes from " + data.numClasses() + " to " + newNumberOfClasses);
 					}
 				} catch (NullPointerException e) {
-					System.err.println("Problems with training pipeline: ");
-					System.err.println(MLUtil.getJavaCodeFromPlan(creationPlan));
 					e.printStackTrace();
 				}
 			}
@@ -82,20 +85,23 @@ public class MLPipeline implements Classifier, Serializable {
 			/* now apply the attribute selector */
 			data = pp.apply(data);
 		}
+		logger.info("Reduced number of attributes from {} to {}", numAttributesBefore, data.numAttributes());
 
 		/* build classifier based on reduced data */
 		start = System.currentTimeMillis();
 		baseClassifier.buildClassifier(data);
-		timeForTrainingClassifier = System.currentTimeMillis() - start;
+		timeForTrainingClassifier = (int)(System.currentTimeMillis() - start);
 		trained = true;
+		timeForExecutingPreprocessors = new DescriptiveStatistics();
+		timeForExecutingClassifier = new DescriptiveStatistics();
 	}
 
 	private Instance applyPreprocessors(Instance data) throws Exception {
 		long start = System.currentTimeMillis();
-		for (SuvervisedFilterSelector pp : preprocessors) {
+		for (SupervisedFilterSelector pp : preprocessors) {
 			data = pp.apply(data);
-			timeForExecutingPreprocessor = System.currentTimeMillis() - start;
 		}
+		timeForExecutingPreprocessors.addValue((int)(System.currentTimeMillis() - start));
 		return data;
 	}
 
@@ -103,10 +109,12 @@ public class MLPipeline implements Classifier, Serializable {
 	public double classifyInstance(Instance arg0) throws Exception {
 		if (!trained)
 			throw new IllegalStateException("Cannot make predictions on untrained pipeline!");
+		int numAttributesBefore = arg0.numAttributes();
 		arg0 = applyPreprocessors(arg0);
+		logger.info("Reduced number of attributes from {} to {}", numAttributesBefore, arg0.numAttributes());
 		long start = System.currentTimeMillis();
 		double result = baseClassifier.classifyInstance(arg0);
-		timeForExecutingClassifier = System.currentTimeMillis() - start;
+		timeForExecutingClassifier.addValue((System.currentTimeMillis() - start));
 		return result;
 	}
 
@@ -121,7 +129,7 @@ public class MLPipeline implements Classifier, Serializable {
 			throw new IllegalStateException("The filter has turned the instance into NULL");
 		long start = System.currentTimeMillis();
 		double[] result = baseClassifier.distributionForInstance(arg0);
-		timeForExecutingClassifier = System.currentTimeMillis() - start;
+		timeForExecutingClassifier.addValue((int)(System.currentTimeMillis() - start));
 		return result;
 	}
 
@@ -134,7 +142,7 @@ public class MLPipeline implements Classifier, Serializable {
 		return baseClassifier;
 	}
 
-	public List<SuvervisedFilterSelector> getPreprocessors() {
+	public List<SupervisedFilterSelector> getPreprocessors() {
 		return preprocessors;
 	}
 
@@ -151,11 +159,33 @@ public class MLPipeline implements Classifier, Serializable {
 		return timeForTrainingClassifier;
 	}
 
-	public long getTimeForExecutingPreprocessor() {
-		return timeForExecutingPreprocessor;
+	public DescriptiveStatistics getTimeForExecutingPreprocessor() {
+		return timeForExecutingPreprocessors;
 	}
 
-	public long getTimeForExecutingClassifier() {
+	public DescriptiveStatistics getTimeForExecutingClassifier() {
 		return timeForExecutingClassifier;
+	}
+
+	public MLPipeline clone() {
+		List<SupervisedFilterSelector> clonedPreprocessing = new ArrayList<>();
+		try {
+			
+			/* clone preprocessing */
+			for (SupervisedFilterSelector s : preprocessors) {
+				ASSearch search = s.getSearcher();
+				ASSearch searchClone = ASSearch.forName(search.getClass().getName(), (search instanceof OptionHandler) ? ((OptionHandler) search).getOptions() : new String[] {});
+				ASEvaluation eval = s.getEvaluator();
+				ASEvaluation evalClone = ASEvaluation.forName(eval.getClass().getName(), (eval instanceof OptionHandler) ? ((OptionHandler) eval).getOptions() : new String[] {});
+				clonedPreprocessing.add(new SupervisedFilterSelector(searchClone, evalClone));
+			}
+			
+			/* clone classifier */
+			Classifier classifierClone = WekaUtil.cloneClassifier(baseClassifier);
+			return new MLPipeline(clonedPreprocessing, classifierClone);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 }

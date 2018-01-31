@@ -6,12 +6,14 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,9 +88,21 @@ public class PlanExecutor {
 			case "setLocal":
 			case "setActive":
 			case "setStopped":
+			case "configReduction":
 			case "noop": {
 				break;
 			}
+			case "configChildNodes":
+				if (variables.containsKey(inputs.get(2)))
+					throw new IllegalArgumentException("Cannot redefine child node " + inputs.get(2) + "!");
+				if (variables.containsKey(inputs.get(3)))
+					throw new IllegalArgumentException("Cannot redefine child node " + inputs.get(3) + "!");
+				Collection<String> leftChildClasses = SetUtil.unserialize(inputs.get(1).getName());
+				Collection<String> rightChildClasses = SetUtil.difference(SetUtil.unserialize(inputs.get(0).getName()), leftChildClasses);
+				variables.put(inputs.get(2), leftChildClasses);
+				variables.put(inputs.get(3), rightChildClasses);
+				break;
+				
 			case "computeValue": {
 				if (!(variables.get(inputs.get(0)) instanceof List<?>)) {
 					throw new IllegalArgumentException("Input " + inputs.get(0) + " is not a value refinement list.");
@@ -161,6 +175,10 @@ public class PlanExecutor {
 						((List<String>) variables.get(inputs.get(0))).add(localParams[i]);
 					}
 				}
+				break;
+			}
+			case "setNull": { // TODO: appendOprions instead??
+				variables.put(inputs.get(0), null);
 				break;
 			}
 			case "assignTo": { // TODO: appendOprions instead??
@@ -283,10 +301,21 @@ public class PlanExecutor {
 						Class<?>[] inputClasses = new Class<?>[inputs.size()];
 						params = new Object[inputClasses.length];
 						for (int i = 0; i < inputs.size(); i++) {
-							params[i] = variables.get(inputs.get(i));
-							inputClasses[i] = params[i].getClass();
+							ConstantParam input = inputs.get(i);
+							String inputVal = input.getName();
+							if (inputVal.startsWith("\"") && inputVal.endsWith("\"")) {
+								params[i] = inputVal.substring(1, inputVal.length() - 1);
+								inputClasses[i] = String.class;
+							}
+							else {
+								if (!variables.containsKey(inputs.get(i))) {
+									throw new IllegalArgumentException("Supposed " + (i+1) + "-th input " + inputs.get(i) + " for " + clazz + ":__construct is not defined in variables: " + variables);
+								}
+								params[i] = variables.get(inputs.get(i));
+								inputClasses[i] = params[i] != null ? params[i].getClass() : null;
+							}
 						}
-						Constructor<?> ctor = clazz.getConstructor(inputClasses);
+						Constructor<?> ctor = ConstructorUtils.getMatchingAccessibleConstructor(clazz, inputClasses);
 						variables.put(outParam, ctor.newInstance(params));
 						logger.info("Binding new object {} to variable {}.", variables.get(outParam), outParam);
 						continue;

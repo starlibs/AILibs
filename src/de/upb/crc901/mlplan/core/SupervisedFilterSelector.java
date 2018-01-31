@@ -10,13 +10,13 @@ import weka.core.Instance;
 import weka.core.Instances;
 
 @SuppressWarnings("serial")
-public class SuvervisedFilterSelector implements Serializable, FeaturePreprocessor {
+public class SupervisedFilterSelector implements Serializable, FeaturePreprocessor {
 	private final ASSearch searcher;
 	private final ASEvaluation evaluator;
 	private final AttributeSelection selector;
 	private boolean prepared;
 
-	public SuvervisedFilterSelector(ASSearch searcher, ASEvaluation evaluator) {
+	public SupervisedFilterSelector(ASSearch searcher, ASEvaluation evaluator) {
 		super();
 		this.searcher = searcher;
 		this.evaluator = evaluator;
@@ -25,7 +25,7 @@ public class SuvervisedFilterSelector implements Serializable, FeaturePreprocess
 		this.selector.setEvaluator(evaluator);
 	}
 
-	public SuvervisedFilterSelector(ASSearch searcher, ASEvaluation evaluator, AttributeSelection selector) {
+	public SupervisedFilterSelector(ASSearch searcher, ASEvaluation evaluator, AttributeSelection selector) {
 		super();
 		this.searcher = searcher;
 		this.evaluator = evaluator;
@@ -79,7 +79,7 @@ public class SuvervisedFilterSelector implements Serializable, FeaturePreprocess
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		SuvervisedFilterSelector other = (SuvervisedFilterSelector) obj;
+		SupervisedFilterSelector other = (SupervisedFilterSelector) obj;
 		if (evaluator == null) {
 			if (other.evaluator != null)
 				return false;
@@ -104,5 +104,10 @@ public class SuvervisedFilterSelector implements Serializable, FeaturePreprocess
 
 	public void setPrepared(boolean prepared) {
 		this.prepared = prepared;
+	}
+
+	@Override
+	public String toString() {
+		return "SupervisedFilterSelector [searcher=" + searcher.getClass().getName() + ", evaluator=" + evaluator.getClass().getName() + "]";
 	}
 }
