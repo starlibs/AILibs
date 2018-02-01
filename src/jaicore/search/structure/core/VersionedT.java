@@ -47,7 +47,8 @@ public class VersionedT<T> {
 	 * @param id the id to set
 	 */
 	public void setId(int id) {
-		this.id = id;
+		if (id == 0)
+			this.id = id;
 	}
 
 	
