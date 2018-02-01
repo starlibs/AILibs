@@ -45,18 +45,8 @@ public class VersionedGraphGenerator<T,A> implements VersionedGraphGeneratorInte
 	}
 
 
-//	@Override
-//	public RootGenerator<VersionedT<T>> getRootGenerator() {
-//		return () -> {
-//			if(gen.getRootGenerator instanceof SingelRootGenerator)
-//				return getSingleRootGenerator();
-//			else
-//				return getMultipleRootGenerator();
-//		};
-//	}
-	
-//	public SingleRootGenerator<VersionedT<T>> getSingleRootGenerator(){
-	public SingleRootGenerator<VersionedT<T>> getRootGenerator(){
+	@Override
+	public SingleRootGenerator<VersionedT<T>> getRootGenerator() {
 		return () -> {
 			SingleRootGenerator rootGenerator = (SingleRootGenerator) gen.getRootGenerator();
 			T root = (T) rootGenerator.getRoot();
@@ -64,18 +54,26 @@ public class VersionedGraphGenerator<T,A> implements VersionedGraphGeneratorInte
 		};
 	}
 	
-//	public MultipleRootGenerator<VersionedT<T>> getMultipleRootGenerator(){
-//		return () -> {
-//			MultipleRootGenerator rootGenerator = (MultipleRootGenerator) gen.getRootGenerator();
-//			Collection<VersionedT<T>> vRoots = new ArrayList();
-//			Collection roots = rootGenerator.getRoots();
-//			
-//			roots.stream().forEach(
-//					n -> vRoots.add(new VersionedT(n, this.getNextID()))
-//					);			
-//			return (Collection<VersionedT<T>>) vRoots;
-//		};
-//	}
+	public SingleRootGenerator<VersionedT<T>> getSingleRootGenerator(){
+		return () -> {
+			SingleRootGenerator rootGenerator = (SingleRootGenerator) gen.getRootGenerator();
+			T root = (T) rootGenerator.getRoot();
+			return new VersionedT<T>(root, this.getNextID());
+		};
+	}
+	
+	public MultipleRootGenerator<VersionedT<T>> getMultipleRootGenerator(){
+		return () -> {
+			MultipleRootGenerator rootGenerator = (MultipleRootGenerator) gen.getRootGenerator();
+			Collection<VersionedT<T>> vRoots = new ArrayList();
+			Collection roots = rootGenerator.getRoots();
+			
+			roots.stream().forEach(
+					n -> vRoots.add(new VersionedT(n, this.getNextID()))
+					);			
+			return (Collection<VersionedT<T>>) vRoots;
+		};
+	}
 
 
 	@Override
@@ -87,7 +85,7 @@ public class VersionedGraphGenerator<T,A> implements VersionedGraphGeneratorInte
 			Collection<NodeExpansionDescription<VersionedT<T>,A>> versionedDescriptions = new ArrayList<>();
 			
 			successorDescriptions.stream().forEach(description->
-						versionedDescriptions.add(new NodeExpansionDescription(nodeToExpand, new VersionedT(description.getTo()), description.getAction(), description.getTypeOfToNode()))
+						versionedDescriptions.add(new NodeExpansionDescription(nodeToExpand, new VersionedT(description.getTo(), this.getNextID()), description.getAction(), description.getTypeOfToNode()))
 					);
 			return versionedDescriptions;
 		};
