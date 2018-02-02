@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
+import jaicore.search.graphgenerators.npuzzle.parentDiscarding.PDPuzzleNode;
 import jaicore.search.graphgenerators.npuzzle.standard.NPuzzleNode;
 
 public class PDPuzzleNodeTester {

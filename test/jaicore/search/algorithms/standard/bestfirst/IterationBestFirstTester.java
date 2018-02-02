@@ -1,19 +1,18 @@
 package jaicore.search.algorithms.standard.bestfirst;
 
-import static org.junit.Assert.assertNotNull;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 import org.junit.Test;
 
 import jaicore.basic.PerformanceLogger;
 import jaicore.basic.PerformanceLogger.PerformanceMeasure;
-import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
-import jaicore.search.algorithms.standard.bestfirst.BestFirstTester.TestNode;
 import jaicore.search.structure.core.GraphGenerator;
+import jaicore.search.structure.core.Node;
 import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.core.NodeType;
+import jaicore.search.structure.core.PriorityQueueOpen;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
@@ -25,6 +24,26 @@ public class IterationBestFirstTester {
 		int value = size++;
 		
 		public String toString() { return "" + value; }
+
+		/* (non-Javadoc)
+		 * @see java.lang.Object#equals(java.lang.Object)
+		 */
+		@Override
+		public boolean equals(Object obj) {
+			// TODO Auto-generated method stub
+			return super.equals(obj);
+		}
+
+		/* (non-Javadoc)
+		 * @see java.lang.Object#hashCode()
+		 */
+		@Override
+		public int hashCode() {
+			// TODO Auto-generated method stub
+			return super.hashCode();
+		}
+		
+		
 	}
 
 	@Test
@@ -50,7 +69,7 @@ public class IterationBestFirstTester {
 			
 			@Override
 			public NodeGoalTester<TestNode> getGoalTester() {
-				return l -> l.value == 1000;
+				return l -> l.value == 100;
 			}
 			
 			@Override
@@ -61,17 +80,43 @@ public class IterationBestFirstTester {
 			
 		
 		
-		BestFirst<TestNode,String> bf = new BestFirst<>(gen, n -> (double)Math.round(Math.random() * 1000));
+		BestFirst<TestNode,String> bf = new BestFirst<>(gen, n -> (double)Math.round(Math.random() * 100));
 //		new SimpleGraphVisualizationWindow<>(bf.getEventBus()).getPanel().setTooltipGenerator(n -> String.valueOf(n.getInternalLabel()));
 		
 		/* find solution */
 		PerformanceLogger.logStart("search");
-//		List<TestNode> solutionPath = bf.nextSolution();
+
 		List<NodeExpansionDescription<TestNode,String>> nedList = bf.next();
 		nedList = bf.next();
+		//iterate  1000 times over node expansions
+		int i = 0;
+//		for(List<NodeExpansionDescription<TestNode, String>> n : bf){
+////			System.out.println(n);
+//			i++;
+//			if(i==1000)
+//				break;
+//		}
+		PerformanceLogger.logEnd("search");
 		
-		for(List<NodeExpansionDescription<TestNode, String>> n : bf){
-			System.out.println(n);
+		
+		/*creating a test for selecting the node*/
+		bf = new BestFirst<>(gen, n->(double)Math.round(Math.random() * 100));
+		PerformanceLogger.logStart("second search");
+		
+		PriorityQueueOpen<Node<TestNode,Double>> open = new PriorityQueueOpen<>();
+		
+		bf.setOpen(open);
+		
+		bf.next();
+		//Printing the nodes from open and choose one via console input
+		Scanner sc = new Scanner(System.in);
+		for(int j = 0; j < 3; j++) {
+			System.out.println("Choose one of the following nodes");
+			open.stream().forEach(n->System.out.println(n.getInternalLabel().toString()));
+			String input = sc.nextLine();
+			
+			
+		
 		}
 		PerformanceLogger.logEnd("search");
 		

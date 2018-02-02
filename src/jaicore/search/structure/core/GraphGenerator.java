@@ -21,4 +21,8 @@ public interface GraphGenerator<T, A> {
 	 * 		
 	 */
 	public boolean isSelfContained(); 
+	
+	
+	
+	
 }
