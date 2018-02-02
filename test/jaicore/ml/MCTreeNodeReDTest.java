@@ -1,5 +1,6 @@
 package jaicore.ml;
 
+import jaicore.ml.classification.multiclass.reduction.ConstantClassifier;
 import jaicore.ml.classification.multiclass.reduction.MCTreeNodeReD;
 
 import java.io.FileReader;
@@ -12,6 +13,8 @@ import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.trees.J48;
 import weka.core.Instances;
+import weka.core.pmml.jaxbbindings.Con1;
+import weka.core.pmml.jaxbbindings.Constant;
 
 public class MCTreeNodeReDTest {
 
@@ -32,17 +35,17 @@ public class MCTreeNodeReDTest {
     List<String> childB = new LinkedList<>();
 
     for (int i = 0; i < classValues.size(); i++) {
-      if (i < classValues.size() / 2) {
+      if (i < 1) {
         childA.add(classValues.get(i));
       } else {
         childB.add(classValues.get(i));
       }
     }
 
-    Classifier childAClassifier = new J48();
+    Classifier childAClassifier = new ConstantClassifier();
     Classifier childBClassifier = new J48();
 
-    MCTreeNodeReD root = new MCTreeNodeReD(new J48(), childA, childAClassifier, childB, childBClassifier);
+    MCTreeNodeReD root = new MCTreeNodeReD(J48.class.getName(), childA, childAClassifier, childB, childBClassifier);
     root.buildClassifier(data);
 
     // for (Instance test : stratifiedSplit.get(1)) {

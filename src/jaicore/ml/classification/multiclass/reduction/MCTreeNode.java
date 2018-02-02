@@ -37,6 +37,10 @@ public class MCTreeNode implements Classifier, ITreeClassifier, Serializable, It
 
   private static ClassifierCache classifierCache = new ClassifierCache();
 
+  public MCTreeNode(Classifier left, Classifier right, String baseClassifier) {
+	  containedClasses = new ArrayList<>();
+  }
+  
   public MCTreeNode(final List<Integer> containedClasses) {
     this.containedClasses = containedClasses;
   }

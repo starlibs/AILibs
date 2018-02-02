@@ -1,6 +1,5 @@
 package jaicore.planning.graphgenerators.task.ceociptfd;
 
-import java.nio.channels.UnsupportedAddressTypeException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -8,11 +7,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jaicore.logic.fol.structure.CNFFormula;
+import jaicore.logic.fol.structure.ConstantParam;
 import jaicore.logic.fol.structure.Literal;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.planning.graphgenerators.task.TaskPlannerUtil;
@@ -130,7 +131,9 @@ public class CEOCIPTFDGraphGenerator implements SerializableGraphGenerator<TFDNo
 
 				/* if there are oracles, use them */
 				if (oracleResolvers != null && oracleResolvers.containsKey(nextTask.getPropertyName())) {
+//					System.out.println("Solving " + nextTask + " with oracle");
 					Collection<List<Action>> subsolutions = oracleResolvers.get(nextTaskName).getSubSolutions(state, nextTask);
+//					System.out.println(subsolutions);
 					
 					for (List<Action> subsolution : subsolutions) {
 						
@@ -155,8 +158,10 @@ public class CEOCIPTFDGraphGenerator implements SerializableGraphGenerator<TFDNo
 				else {
 					logger.info("Computing successors for COMPLEX task {} in state {}", nextTask, state);
 					Set<Method> usedMethods = new HashSet<>();
+					logger.info("Computing method instantiations.");
 					Collection<MethodInstance> instances = taskPlannerUtil.getMethodInstancesForTaskThatAreApplicableInState(knowledge, this.problem.getDomain().getMethods(),
 							nextTask, state, currentlyRemainingTasks);
+					logger.info("Ready with computing method instantiations.");
 					for (MethodInstance instance : instances) {
 
 						/* check the evaluable condition of this method instance */
@@ -189,7 +194,7 @@ public class CEOCIPTFDGraphGenerator implements SerializableGraphGenerator<TFDNo
 						} else if (instance.getMethod().isLonely()) {
 							continue;
 						}
-
+						
 						logger.info("Adding successor {}", instance);
 
 						/* if the depth is % k == 0, then compute the rest problem explicitly */
@@ -199,8 +204,13 @@ public class CEOCIPTFDGraphGenerator implements SerializableGraphGenerator<TFDNo
 						remainingTasks.addAll(currentlyRemainingTasks);
 						remainingTasks.remove(prependedTasks.size()); // remove the first literal of the 2ndly appended list
 						TFDNode node = null;
+						Monom successorState = new Monom(state, false);
+						
+						/* reserve outputs if there are any */
+						instance.getParameters().stream().filter(p -> p.getName().startsWith("newVar") && !instance.getPrecondition().getConstantParams().contains(p)).forEach(p -> successorState.add(new Literal("def('" + p.getName() + "')")));
+						
 						if (depth % checkpointDistance == 0)
-							node = new TFDNode(new Monom(state, false), remainingTasks, instance, null);
+							node = new TFDNode(successorState, remainingTasks, instance, null);
 						else
 							node = new TFDNode(instance, remainingTasks.isEmpty());
 						parentMap.put(node, l);

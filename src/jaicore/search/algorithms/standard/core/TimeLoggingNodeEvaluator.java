@@ -20,7 +20,7 @@ public class TimeLoggingNodeEvaluator<T, V extends Comparable<V>> extends Decora
 	}
 
 	@Override
-	public V f(Node<T, ?> node) throws Exception {
+	public V f(Node<T, ?> node) throws Throwable {
 		long start = System.currentTimeMillis();
 		V f = super.f(node);
 		times.put(node, (int) (System.currentTimeMillis() - start));

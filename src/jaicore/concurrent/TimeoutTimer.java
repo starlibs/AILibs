@@ -65,6 +65,8 @@ public class TimeoutTimer {
 		}
 		
 		public void cancelTimeout(int taskId) {
+			if (!tasks.containsKey(taskId))
+				throw new IllegalArgumentException("Task with id " + taskId + " was not found.");
 			tasks.get(taskId).cancel();
 			tasks.remove(taskId);
 			logger.info("Timeout for {} has been canceled.", taskId);

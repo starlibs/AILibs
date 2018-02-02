@@ -71,4 +71,29 @@ public class SimpleLabeledInstanceImpl extends ArrayList<Double> implements Labe
 	public String toString() {
 		return "{data=" + super.toString() + ", label=" + this.label + "}";
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((label == null) ? 0 : label.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		SimpleLabeledInstanceImpl other = (SimpleLabeledInstanceImpl) obj;
+		if (label == null) {
+			if (other.label != null)
+				return false;
+		} else if (!label.equals(other.label))
+			return false;
+		return true;
+	}
 }

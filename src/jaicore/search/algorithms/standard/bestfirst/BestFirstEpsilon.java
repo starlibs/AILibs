@@ -43,7 +43,7 @@ public class BestFirstEpsilon<T, A, W extends Comparable<W>> extends ORGraphSear
 			focal.stream().filter(n -> !secondaryCache.containsKey(n)).forEach(n -> {
 				try {
 					secondaryCache.put(n, secondaryNodeEvaluator.f(n));
-				} catch (Exception e) {
+				} catch (Throwable e) {
 					e.printStackTrace();
 				}
 			});
