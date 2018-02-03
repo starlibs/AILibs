@@ -26,6 +26,7 @@ import com.google.common.eventbus.Subscribe;
 
 import jaicore.concurrent.TimeoutTimer;
 import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
+import jaicore.planning.model.core.PDDLReader;
 import jaicore.search.algorithms.interfaces.IObservableORGraphSearch;
 import jaicore.search.algorithms.standard.bestfirst.RandomizedDepthFirstEvaluator;
 import jaicore.search.structure.core.GraphEventBus;
@@ -618,7 +619,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	}
 
 	protected Node<T, V> newNode(Node<T, V> parent, T t2) {
-		assert !ext2int.containsKey(t2) : "Generating a second node object for " + t2 + " as successor of " + parent.getPoint() + " was contained as " + ext2int.get(t2).getPoint()
+		assert parentDiscarding == ParentDiscarding.NONE || !ext2int.containsKey(t2) : "Generating a second node object for " + t2 + " as successor of " + parent.getPoint() + " was contained as " + ext2int.get(t2).getPoint()
 				+ ", but ORGraphSearch currently only supports tree search!";
 		return newNode(parent, t2, null);
 	}

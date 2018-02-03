@@ -26,7 +26,7 @@ public class VersionedGraphGenerator<T,A> implements VersionedGraphGeneratorInte
 	boolean nodeNumbering;
 	Random rnd;
 	
-	public VersionedGraphGenerator(GraphGenerator gen) {
+	public VersionedGraphGenerator(GraphGenerator<T,A> gen) {
 		this.gen = gen;
 		nodeNumbering = true;
 		rnd = new Random();
@@ -48,7 +48,7 @@ public class VersionedGraphGenerator<T,A> implements VersionedGraphGeneratorInte
 	@Override
 	public SingleRootGenerator<VersionedT<T>> getRootGenerator() {
 		return () -> {
-			SingleRootGenerator rootGenerator = (SingleRootGenerator) gen.getRootGenerator();
+			SingleRootGenerator<T> rootGenerator = (SingleRootGenerator<T>) gen.getRootGenerator();
 			T root = (T) rootGenerator.getRoot();
 			return new VersionedT<T>(root, this.getNextID());
 		};
