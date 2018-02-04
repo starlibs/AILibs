@@ -6,299 +6,343 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Map;
 
-import javax.swing.JFileChooser;
-
+import jaicore.logic.fol.structure.CNFFormula;
 import jaicore.logic.fol.structure.Literal;
+import jaicore.logic.fol.structure.Monom;
+import jaicore.planning.model.ceoc.CEOCOperation;
+import jaicore.planning.model.task.stn.Method;
 import jaicore.planning.model.task.stn.TaskNetwork;
 
 public class CEOCSTN2File {
 	
+	private static final int printNetwork = 0;
 	private static String packageName;
 	
-	public static void print(CEOCSTNPlanningProblem problem) {
-		File output = null;
-		//Filechooser for selecting the output-file
-		JFileChooser chooser = new JFileChooser();
-		chooser.showOpenDialog(null);
-		output = chooser.getSelectedFile();
+	/**
+	 * Writes the given Problem into the output file
+	 * @param problem the problem form which the domain should be written into a file
+	 * @param output into this file
+	 * @throws IOException
+	 */
+	public static void printDomain(CEOCSTNPlanningProblem problem, File output) throws IOException {
 		
-//		output = new File("F:\\Desktop\\Test.lisp");
+		FileWriter fileWriter = new FileWriter(output);
+		BufferedWriter bw = new BufferedWriter(fileWriter);
 		
-		FileWriter fileWriter;
-		BufferedWriter bw;
-		try {
-			fileWriter = new FileWriter(output);
-			bw = new BufferedWriter(fileWriter);
-			
-			String fileName = output.getName();
-			fileName = fileName.substring(0, fileName.indexOf("."));
-			fileName = fileName.toLowerCase();
+		String fileName = output.getName();
+		fileName = fileName.substring(0,fileName.indexOf(".")).toLowerCase();
 		
-			
-			//print the package if one is availiable
-			if(packageName != "") {
-				bw.write("(int-package : "+packageName +")");
-				bw.flush();
-			}
-			
-			//Writing of domain file
-			bw.write("(defun define-" +fileName+"-domain()\n" );
-			bw.write(indent(1) + "(let (( * define-silently* t))\n");
+	
+		
+		
+		//print the package if one is availiable
+		if(packageName != "") {
+			bw.write("(int-package : "+packageName +")");
 			bw.flush();
-			
-			bw.write(indent(2)+ "(defdomain (" +fileName+ " :redinfe-ok t)(\n");
-			bw.flush();
-			
-			problem.getDomain().getOperations().stream().forEach(operation->{
-				try {
-//					System.out.println(operation);
-					bw.write(indent(3) + "(:operator (!" +operation.getName());
-					bw.flush();
-				
-					//print the parameter of the operation
-					operation.getParams().stream().forEach(param->{
-//						System.out.println(param);
-						try {
-							bw.write(" ?" + param.getName());
-							bw.flush();
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
-						
-					});
-					
-					//adding the preconditions of the operation
-					bw.write(")\n" + indent(6) +"(");
-					operation.getPrecondition().forEach(precond->{
-						try {
-							bw.write(" (");
-							bw.write(precond.getPropertyName());
-							precond.getParameters().stream().forEach(param-> {
-								try {
-									bw.write(" ?"+ param.getName());
-								} catch (IOException e) {
-									
-									e.printStackTrace();
-								}
-							});
-							bw.write(")");
-							bw.flush();
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-//						
-					});
-					bw.write(" )\n");
-					bw.flush();
-									
-					//adding the delete list of the operation
-					bw.write(indent(6) + "(");
-					operation.getDeleteLists().values().stream().forEach(deleteList ->{
-						deleteList.forEach(member -> {
-						 try {
-							bw.write(" (");
-							bw.write(member.getProperty());
-							member.getParameters().stream().forEach(param->{
-								try {
-									bw.write(" ?" + param.getName());
-								} catch (IOException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
-							});
-							bw.write(")");
-							
-							bw.flush();
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						});
-					});
-					
-					bw.write(" )\n");
-					
-					
-					//adding the add list of the operation
-					bw.write(indent(6) + "(");
-					operation.getAddLists().values().stream().forEach(deleteList ->{
-						deleteList.forEach(member -> {
-						 try {
-							bw.write(" (");
-							bw.write(member.getProperty());
-							member.getParameters().stream().forEach(param->{
-								try {
-									bw.write(" ?" + param.getName());
-								} catch (IOException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
-							});
-							bw.write(")");
-							
-							bw.flush();
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						});
-					});
-					
-					bw.write(" )\n");
-					
-					
-					bw.write(indent(3) + " )\n\n");
-					bw.flush();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			});
-				
-			//print the methods into the file
-			problem.getDomain().getMethods().stream().forEach(method->{
-				try {
-					bw.write(indent(3)+"(:method (" + method.getName() );
-					method.getParameters().stream().forEach(param -> {
-						try {
-							bw.write(" ?" + param.getName());
-							bw.flush();
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					});
-					bw.write(")\n");
-					
-					//writes the preconditions of the method into the file
-					bw.write(indent(6) + "(");
-					method.getPrecondition().stream().forEach(precond->{
-						try {
-							bw.write(" (");
-							bw.write(precond.getProperty());
-							precond.getParameters().stream().forEach(param->{
-								try {
-									bw.write(" ?" + param.getName());
-								} catch (IOException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
-							});
-							bw.write(")");
-							bw.flush();
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					});					
-					bw.write(")\n");
-					bw.flush();
-					
-//					//write the task of the method into the file
-//					bw.write(indent(6) + "(");
-//					Literal task = method.getTask();
-//					try {
-//						bw.write(" (");
-//						bw.write(task.getProperty());
-//						task.getParameters().stream().forEach(param->{
-//							try {
-//								bw.write(" ?" + param.getName());
-//							} catch (IOException e) {
-//								// TODO Auto-generated catch block
-//								e.printStackTrace();
-//							}
-//						});
-//						bw.write(")");
-//						bw.flush();
-//					} catch (IOException e) {
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					}
-//								
-//					bw.write(")\n");
-//					bw.flush();
-					
-					//adding the task network
-					bw.write(indent(6) + "( :ordered\n ");
-					TaskNetwork network = method.getNetwork();
-					
-					printNetwork(bw,network.getRoot(), network, 9);
-					
-					bw.write(indent(6) + ")\n");
-					bw.flush();
-					
-					bw.write(indent(3) + ")\n\n");
-					bw.flush();
-					
-					
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				
-				
-			});		
-			
-			
-			bw.write("))))");
-			bw.flush();
-			//closing the writer object
-			fileWriter.close();
-			bw.close();
-		} catch (IOException e) {
-			
-			e.printStackTrace();
 		}
 		
+		//Writing of the domain file
+		bw.write("(defun define-" +fileName+"-domain()\n" );
+		bw.write(indent(1) + "(let (( * define-silently* t))\n");
+		bw.flush();
 		
-	
+		bw.write(indent(1)+ "(defdomain (" +fileName+ " :redinfe-ok t)(\n");
+		bw.flush();
+		
+		//print the operations
+		problem.getDomain().getOperations().stream().forEach(operation-> {
+			try {
+				printOperation(bw, operation, 3);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		});
+		
+		problem.getDomain().getMethods().stream().forEach(method->{
+			try {
+				printMethod(bw, method, 3);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		});
+		
+		bw.write(indent(1)+")\n");
+		bw.write("\t)\n)");
+		bw.flush();
+		
+		
 	}
 	
-	private static void printNetwork(BufferedWriter bw, Literal lit, TaskNetwork network, int i) throws IOException {
-		bw.write(indent(i)+ "(");
+	
+	/**
+	 * Prints the operations of the domain into a FIle
+	 * @param bw
+	 * @param operation
+	 * @param i
+	 * @throws IOException
+	 */
+	public static void printOperation(BufferedWriter bw, CEOCOperation operation,int i) throws IOException {
+		bw.write(indent(i) + "(:operator (!" + operation.getName());
+		//print the parameter of the operation
+		operation.getParams().stream().forEach(param->{
+			try {
+				bw.write(" ?" + param.getName());
+				bw.flush();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+		});
+		bw.write(")\n ");		
+		//print Preconditions
+		printMonom(bw,operation.getPrecondition(), 4);
+		
+		//print the delete List of the operation
+		printMonomMap(bw, operation.getDeleteLists(), 4);
+		
+		//print the add List of the operation
+		printMonomMap(bw, operation.getAddLists(), 4);
+		
+		bw.write(indent(i) +")\n\n");
+		bw.flush();
+		
+	}
+	
+	/**
+	 * Prints a Map with CNFFormula as keys and Monom to the bufferedwriter
+	 * @param bw the bufferedwriter which determines the goal location
+	 * @param map the map contianing the monoms
+	 * @param i the number if indents to create in front of the map
+	 * @throws IOException
+	 */
+	private static void printMonomMap(BufferedWriter bw, Map<CNFFormula, Monom> map, int i) throws IOException {
+
+		map.values().stream().forEach(member-> {
+			try {
+				printMonom(bw, member, 4);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		});
+
+		bw.flush();
+		
+	}
+
+	/**
+	 * Prints a single monom into the bufferedwriter
+	 * @param bw the bufferedwriter which determines the output
+	 * @param monom the monom to write 
+	 * @param i the number if indents infront of the monom
+	 * @throws IOException
+	 */
+	public static void printMonom(BufferedWriter bw, Monom monom, int i) throws IOException {
+		printMonom(bw, monom, i, false);
+	}
+	/**
+	 * Prints a single monom into the bufferedwriter
+	 * @param bw the bufferedwriter which determines the output
+	 * @param monom the monom to write 
+	 * @param i the number if indents infront of the monom
+	 * @throws IOException
+	 */
+	public static void printMonom(BufferedWriter bw, Monom monom, int i, boolean newline) throws IOException {
+		bw.write(indent(i) + "(");
+		monom.stream().forEach(lit-> {
+			try {
+				printLiteral(bw, lit);
+				if(newline)
+					bw.write("\n" + indent(i)+ " ");
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		});
+		
+		bw.write(")\n");
+		bw.flush();
+	}
+	
+
+	/**
+	 * Prints a single literal into the bufferedwriter
+	 * @param bw the bufferedwriter which determines the output
+	 * @param literal the literal to write 
+	 * @throws IOException
+	 */
+	public static void printLiteral(BufferedWriter bw, Literal lit) throws IOException {
+		bw.write(" (");
 		bw.write(lit.getProperty());
+		lit.getParameters().forEach(param -> {
+			try {
+				bw.write(" ?" + param.getName());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		});
+		bw.write(")");
+		bw.flush();
+	}
+	
+	/**
+	 * Prints a mehtod into the given writer
+	 * @param bw the writer where the method should be written to
+	 * @param method the method to write
+	 * @param i the number of indents infront of the method
+	 * @throws IOException
+	 */
+	public static void printMethod(BufferedWriter bw, Method method, int i) throws IOException {
+		bw.write(indent(i) + "(:method (" + method.getName());
+		method.getParameters().forEach(param ->{
+			try {
+				bw.write(" ?" + param.getName());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		});
+		bw.write(")\n");
+		
+		//write the precondition into the file
+		printMonom(bw, method.getPrecondition(), i+1);
+		
+		//print the tasknetwork
+		printNetwork(bw, method.getNetwork().getRoot(), method.getNetwork(), true, 4);
+		
+		bw.write(indent(i) + ")\n");
+		bw.flush();
+	}
+	/**
+	 * prints the root of the network
+	 * @param bw
+	 * @param lit
+	 * @param network
+	 * @param ordered
+	 * @param i
+	 * @throws IOException
+	 */
+	private static void printNetwork(BufferedWriter bw, Literal lit, TaskNetwork network,boolean ordered, int i ) throws IOException{
+		bw.write(indent(i) + "(");
+		if(lit.equals(network.getRoot())){
+			if(ordered)
+				bw.write(":ordered\n");
+			else
+				bw.write(":unordered\n");
+		}
+		//write the parameters of the current literal
+		bw.write(indent(i+1) + "(" + lit.getProperty());
+		bw.flush();
 		lit.getParameters().stream().forEach(param -> {
 			try {
 				bw.write(" ?" +param.getName());
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-		});
+		});	
+		
 		bw.write(")\n");
-		network.getSuccessors(lit).stream().forEach(suc->{
+		
+		network.getSuccessors(lit).stream().forEach(literal->{
 			try {
-				printNetwork(bw,suc, network, i );
+				printNetwork(bw, literal, network, i+1);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		});
-		bw.flush();
 		
+		
+		bw.write(indent(i) +")\n");
+		bw.flush();
 	}
-
-	//creates a number of intends;
-	public static String indent(int numberOfIntends) {
-		String r = "";
-		for(int i = 0; i < numberOfIntends; i++) {
-			r+= "\t";
+	
+	/**
+	 * prints an arbitrary literal of the network
+	 * @param bw
+	 * @param lit
+	 * @param network
+	 * @param i
+	 * @throws IOException
+	 */
+	private static void printNetwork(BufferedWriter bw, Literal lit, TaskNetwork network, int i ) throws IOException{
+		bw.write(indent(i) + "(" + lit.getProperty()); 
+		lit.getParameters().stream().forEach(param -> {
+			try {
+				bw.write(" ?" +param.getName());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		});	
+		bw.write(")\n");
+	}
+	
+	
+	public static void printProblem(CEOCSTNPlanningProblem problem, File output) throws IOException {
+		FileWriter fileWriter = new FileWriter(output);
+		BufferedWriter bw = new BufferedWriter(fileWriter);
+		
+		String fileName = output.getName();
+		fileName = fileName.substring(0,fileName.indexOf(".")).toLowerCase();
+		
+		
+		//print the package if one is availiable
+		if(packageName != "") {
+			bw.write("(int-package : "+packageName +")");
+			bw.flush();
 		}
-		return r;
+		
+		//Writing of the domain file
+		bw.write("(make-problem '" + fileName+"'-01 ' " + fileName+"\n");
+		bw.write(indent(1)+ "(\n");
+		//print inital state
+		printMonom(bw, problem.getInit(), 2, true);
+		
+		//print tasknetwork
+		printNetwork(bw, problem.getNetwork().getRoot(), problem.getNetwork(),2);
+		
+		
+		bw.write(indent(1)+ ")\n");
+		bw.write(")");
+		bw.flush();
 	}
+	
+	//creates a number of intends;
+		public static String indent(int numberOfIntends) {
+			String r = "";
+			for(int i = 0; i < numberOfIntends; i++) {
+				r+= "\t";
+			}
+			return r;
+		}
 	
 	public static void main(String[] args) {
 		packageName = "";
 		
-		
 		Collection<String> init = Arrays.asList(new String[] {"A", "B", "C", "D"});
 		CEOCSTNPlanningProblem problem = StandardProblemFactory.getNestedDichotomyCreationProblem("root", init, true, 0,0);
 //		problem.getDomain().getOperations().stream().forEach(n-> System.out.println(n));
-		print(problem);
+		
+		File domain = new File ("F:\\Desktop\\Test-Domain.lisp");
+		try {
+			printDomain(problem, domain);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		File problemFile = new File("F:\\Desktop\\Test-Problem.lisp");
+		try {
+			printProblem(problem, problemFile);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 	
 	}
-	
-
 }
