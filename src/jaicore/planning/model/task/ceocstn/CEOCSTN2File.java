@@ -10,20 +10,21 @@ import java.util.Collection;
 import javax.swing.JFileChooser;
 
 import jaicore.logic.fol.structure.Literal;
+import jaicore.logic.fol.structure.Monom;
 import jaicore.planning.model.task.stn.TaskNetwork;
 
 public class CEOCSTN2File {
 	
 	private static String packageName;
 	
-	public static void print(CEOCSTNPlanningProblem problem) {
+	public static void printDomain(CEOCSTNPlanningProblem problem) {
 		File output = null;
 		//Filechooser for selecting the output-file
-		JFileChooser chooser = new JFileChooser();
-		chooser.showOpenDialog(null);
-		output = chooser.getSelectedFile();
+//		JFileChooser chooser = new JFileChooser();
+//		chooser.showOpenDialog(null);
+//		output = chooser.getSelectedFile();
 		
-//		output = new File("F:\\Desktop\\Test.lisp");
+		output = new File("F:\\Desktop\\Test-Domain.lisp");
 		
 		FileWriter fileWriter;
 		BufferedWriter bw;
@@ -55,7 +56,6 @@ public class CEOCSTN2File {
 //					System.out.println(operation);
 					bw.write(indent(3) + "(:operator (!" +operation.getName());
 					bw.flush();
-				
 					//print the parameter of the operation
 					operation.getParams().stream().forEach(param->{
 //						System.out.println(param);
@@ -69,53 +69,18 @@ public class CEOCSTN2File {
 					});
 					
 					//adding the preconditions of the operation
-					bw.write(")\n" + indent(6) +"(");
-					operation.getPrecondition().forEach(precond->{
-						try {
-							bw.write(" (");
-							bw.write(precond.getPropertyName());
-							precond.getParameters().stream().forEach(param-> {
-								try {
-									bw.write(" ?"+ param.getName());
-								} catch (IOException e) {
-									
-									e.printStackTrace();
-								}
-							});
-							bw.write(")");
-							bw.flush();
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-//						
-					});
-					bw.write(" )\n");
-					bw.flush();
+					printMonom(operation.getPrecondition(), bw);		
 									
 					//adding the delete list of the operation
 					bw.write(indent(6) + "(");
+					
 					operation.getDeleteLists().values().stream().forEach(deleteList ->{
-						deleteList.forEach(member -> {
-						 try {
-							bw.write(" (");
-							bw.write(member.getProperty());
-							member.getParameters().stream().forEach(param->{
-								try {
-									bw.write(" ?" + param.getName());
-								} catch (IOException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
-							});
-							bw.write(")");
-							
-							bw.flush();
+						try {
+							printMonom(deleteList, bw);
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
-						});
 					});
 					
 					bw.write(" )\n");
@@ -123,27 +88,13 @@ public class CEOCSTN2File {
 					
 					//adding the add list of the operation
 					bw.write(indent(6) + "(");
-					operation.getAddLists().values().stream().forEach(deleteList ->{
-						deleteList.forEach(member -> {
-						 try {
-							bw.write(" (");
-							bw.write(member.getProperty());
-							member.getParameters().stream().forEach(param->{
-								try {
-									bw.write(" ?" + param.getName());
-								} catch (IOException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
-							});
-							bw.write(")");
-							
-							bw.flush();
+					operation.getAddLists().values().stream().forEach(addList ->{
+						try {
+							printMonom(addList, bw);
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
-						});
 					});
 					
 					bw.write(" )\n");
@@ -294,10 +245,78 @@ public class CEOCSTN2File {
 		
 		Collection<String> init = Arrays.asList(new String[] {"A", "B", "C", "D"});
 		CEOCSTNPlanningProblem problem = StandardProblemFactory.getNestedDichotomyCreationProblem("root", init, true, 0,0);
-//		problem.getDomain().getOperations().stream().forEach(n-> System.out.println(n));
-		print(problem);
+		
+//		problem.getInit().stream().forEach(member ->System.out.println(member));
+		
+		printDomain(problem);
+		printProblem(problem);
 		
 	
+	}
+
+	private static void printProblem(CEOCSTNPlanningProblem problem) {
+		
+		File output = new File("F:\\Desktop\\Test-Domain.lisp");
+		
+		FileWriter fileWriter;
+		BufferedWriter bw;
+	
+		try {
+			fileWriter = new FileWriter(output);
+			bw = new BufferedWriter(fileWriter);
+			
+			String fileName = output.getName();
+			fileName = fileName.substring(0, fileName.indexOf("."));
+			fileName = fileName.toLowerCase();
+		
+			
+			//print the package if one is availiable
+			if(packageName != "") {
+				bw.write("(int-package : "+packageName +")");
+				bw.flush();
+			}
+			
+			//Writing of domain file
+			bw.write("(defun define-" +fileName+"-domain()\n" );
+			bw.write(indent(1) + "(let (( * define-silently* t))\n");
+			bw.flush();
+			
+			bw.write(indent(2)+ "(make  '" +fileName+ "01'" + fileName+ "\n");
+			bw.write(indent(3) +"(");
+			
+			bw.write(indent(3)+ ")\n");
+			bw.write(")");
+			bw.flush();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
+	}
+	
+	private static void printMonom(Monom monom, BufferedWriter bw) throws IOException {
+		bw.write(")\n" + indent(6) +"(");
+		monom.forEach(precond->{
+			try {
+				bw.write(" (");
+				bw.write(precond.getPropertyName());
+				precond.getParameters().stream().forEach(param-> {
+					try {
+						bw.write(" ?"+ param.getName());
+					} catch (IOException e) {
+						
+						e.printStackTrace();
+					}
+				});
+				bw.write(")");
+				bw.flush();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+//			
+		});
+		bw.write(" )\n");
+		bw.flush();
 	}
 	
 
