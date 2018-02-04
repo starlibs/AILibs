@@ -1,4 +1,4 @@
-package jaicore;
+package jaicore.planning.model.task.ceocstn;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -7,9 +7,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 
-import jaicore.planning.model.task.ceocstn.CEOCSTNPlanningProblem;
-import jaicore.planning.model.task.ceocstn.StandardProblemFactory;
-import jaicore.planning.model.task.stn.TaskNetwork;
+import jaicore.logic.fol.structure.Literal;
 
 public class CEOCSTN2File {
 	
@@ -171,7 +169,7 @@ public class CEOCSTN2File {
 					});
 					bw.write(")\n");
 					
-					
+					//writes the preconditions of the method into the file
 					bw.write(indent(6) + "(");
 					method.getPrecondition().stream().forEach(precond->{
 						try {
@@ -191,12 +189,34 @@ public class CEOCSTN2File {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
-					});
-					TaskNetwork test = method.getNetwork();
-					//TODO
+					});					
 					bw.write(")\n");
 					bw.flush();
-						
+					
+					//write the task of the method into the file
+					bw.write(indent(6) + "(");
+					Literal task = method.getTask();
+					try {
+						bw.write(" (");
+						bw.write(task.getProperty());
+						task.getParameters().stream().forEach(param->{
+							try {
+								bw.write(" ?" + param.getName());
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						});
+						bw.write(")");
+						bw.flush();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+								
+					bw.write(")\n");
+					bw.flush();
+					
 					bw.write(indent(3) + ")\n\n");
 					bw.flush();
 				} catch (IOException e) {
