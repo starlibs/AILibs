@@ -7,7 +7,10 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 
+import javax.swing.JFileChooser;
+
 import jaicore.logic.fol.structure.Literal;
+import jaicore.planning.model.task.stn.TaskNetwork;
 
 public class CEOCSTN2File {
 	
@@ -16,11 +19,11 @@ public class CEOCSTN2File {
 	public static void print(CEOCSTNPlanningProblem problem) {
 		File output = null;
 		//Filechooser for selecting the output-file
-//		JFileChooser chooser = new JFileChooser();
-//		chooser.showOpenDialog(null);
-//		output = chooser.getSelectedFile();
+		JFileChooser chooser = new JFileChooser();
+		chooser.showOpenDialog(null);
+		output = chooser.getSelectedFile();
 		
-		output = new File("C:\\Users\\Azoth\\Desktop\\Test.lisp");
+//		output = new File("F:\\Desktop\\Test.lisp");
 		
 		FileWriter fileWriter;
 		BufferedWriter bw;
@@ -193,32 +196,43 @@ public class CEOCSTN2File {
 					bw.write(")\n");
 					bw.flush();
 					
-					//write the task of the method into the file
-					bw.write(indent(6) + "(");
-					Literal task = method.getTask();
-					try {
-						bw.write(" (");
-						bw.write(task.getProperty());
-						task.getParameters().stream().forEach(param->{
-							try {
-								bw.write(" ?" + param.getName());
-							} catch (IOException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-						});
-						bw.write(")");
-						bw.flush();
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-								
-					bw.write(")\n");
+//					//write the task of the method into the file
+//					bw.write(indent(6) + "(");
+//					Literal task = method.getTask();
+//					try {
+//						bw.write(" (");
+//						bw.write(task.getProperty());
+//						task.getParameters().stream().forEach(param->{
+//							try {
+//								bw.write(" ?" + param.getName());
+//							} catch (IOException e) {
+//								// TODO Auto-generated catch block
+//								e.printStackTrace();
+//							}
+//						});
+//						bw.write(")");
+//						bw.flush();
+//					} catch (IOException e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					}
+//								
+//					bw.write(")\n");
+//					bw.flush();
+					
+					//adding the task network
+					bw.write(indent(6) + "( :ordered\n ");
+					TaskNetwork network = method.getNetwork();
+					
+					printNetwork(bw,network.getRoot(), network, 9);
+					
+					bw.write(indent(6) + ")\n");
 					bw.flush();
 					
 					bw.write(indent(3) + ")\n\n");
 					bw.flush();
+					
+					
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -242,6 +256,29 @@ public class CEOCSTN2File {
 	
 	}
 	
+	private static void printNetwork(BufferedWriter bw, Literal lit, TaskNetwork network, int i) throws IOException {
+		bw.write(indent(i)+ "(");
+		bw.write(lit.getProperty());
+		lit.getParameters().stream().forEach(param -> {
+			try {
+				bw.write(" ?" +param.getName());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		});
+		bw.write(")\n");
+		network.getSuccessors(lit).stream().forEach(suc->{
+			try {
+				printNetwork(bw,suc, network, i );
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		});
+		bw.flush();
+		
+	}
+
 	//creates a number of intends;
 	public static String indent(int numberOfIntends) {
 		String r = "";
@@ -259,6 +296,8 @@ public class CEOCSTN2File {
 		CEOCSTNPlanningProblem problem = StandardProblemFactory.getNestedDichotomyCreationProblem("root", init, true, 0,0);
 //		problem.getDomain().getOperations().stream().forEach(n-> System.out.println(n));
 		print(problem);
+		
+	
 	}
 	
 
