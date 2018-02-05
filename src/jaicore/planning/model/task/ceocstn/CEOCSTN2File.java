@@ -8,6 +8,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
+import javax.swing.JFileChooser;
+
 import jaicore.logic.fol.structure.CNFFormula;
 import jaicore.logic.fol.structure.Literal;
 import jaicore.logic.fol.structure.Monom;
@@ -320,22 +322,28 @@ public class CEOCSTN2File {
 			return r;
 		}
 	
-	public static void main(String[] args) {
-		packageName = "";
+	
+	public static void print(CEOCSTNPlanningProblem problem) {
+		print(problem, "");
+	}
+
+	public static void print(CEOCSTNPlanningProblem problem, String packageName) {
+		CEOCSTN2File.packageName = packageName;
+		JFileChooser chooser = new JFileChooser();
+		chooser.setDialogTitle("Domain-File");
+		chooser.showOpenDialog(null);
+		File domainFile = chooser.getSelectedFile();
 		
-		Collection<String> init = Arrays.asList(new String[] {"A", "B", "C", "D"});
-		CEOCSTNPlanningProblem problem = StandardProblemFactory.getNestedDichotomyCreationProblem("root", init, true, 0,0);
-//		problem.getDomain().getOperations().stream().forEach(n-> System.out.println(n));
-		
-		File domain = new File ("F:\\Desktop\\Test-Domain.lisp");
 		try {
-			printDomain(problem, domain);
+			printDomain(problem, domainFile);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		File problemFile = new File("F:\\Desktop\\Test-Problem.lisp");
+		chooser.setDialogTitle("Problem-File");
+		chooser.showOpenDialog(null);
+		File problemFile = chooser.getSelectedFile();
 		try {
 			printProblem(problem, problemFile);
 		} catch (IOException e) {
@@ -343,6 +351,5 @@ public class CEOCSTN2File {
 			e.printStackTrace();
 		}
 		
-	
 	}
 }
