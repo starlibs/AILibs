@@ -71,6 +71,10 @@
 	<logger name="de.upb.crc901.mlplan.classifiers">
 		<level value="info" />
 	</logger>
+	
+	<logger name="weka.classifiers.meta.AutoWEKAClassifier">
+		<level value="info" />
+	</logger>
 		
 	<logger name="de.upb.crc901.mlplan.search.evaluators.multilabel.MultilabelEvaluator">
 		<level value="warn" />
