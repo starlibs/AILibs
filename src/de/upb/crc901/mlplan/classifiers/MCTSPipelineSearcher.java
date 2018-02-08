@@ -1,21 +1,15 @@
 package de.upb.crc901.mlplan.classifiers;
 
-import java.io.File;
 import java.util.List;
 import java.util.Random;
 
 import de.upb.crc901.mlplan.core.MLPipeline;
 import de.upb.crc901.mlplan.core.MLUtil;
 import de.upb.crc901.mlplan.search.algorithms.GraphBasedPipelineSearcher;
-import de.upb.crc901.mlplan.search.evaluators.DoubleRandomCompletionEvaluator;
-import de.upb.crc901.mlplan.search.evaluators.RandomCompletionEvaluator;
-import de.upb.crc901.mlplan.search.evaluators.SimpleSolutionEvaluator;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.model.task.ceocstn.CEOCSTNUtil;
 import jaicore.search.algorithms.standard.core.ORGraphSearch;
-import jaicore.search.algorithms.standard.mcts.MCTS;
-import jaicore.search.algorithms.standard.mcts.UniformRandomPolicy;
-import jaicore.search.structure.core.GraphGenerator;
+import weka.classifiers.Classifier;
 import weka.core.Instances;
 
 public class MCTSPipelineSearcher extends GraphBasedPipelineSearcher<TFDNode, String, Double> {
@@ -38,8 +32,13 @@ public class MCTSPipelineSearcher extends GraphBasedPipelineSearcher<TFDNode, St
 	}
 
 	@Override
-	protected MLPipeline convertPathToPipeline(List<TFDNode> path) {
-		return MLUtil.extractPipelineFromPlan(CEOCSTNUtil.extractPlanFromSolutionPath(path));
+	protected Classifier convertPathToPipeline(List<TFDNode> path) {
+		try {
+			return MLUtil.extractGeneratedClassifierFromPlan(CEOCSTNUtil.extractPlanFromSolutionPath(path));
+		}
+		catch (Throwable e) {
+			throw new IllegalArgumentException("Converting path to pipeline caused " + e.getClass().getName() + " with message " + e.getMessage() + " for path " + path);
+		}
 	}
 
 	@Override

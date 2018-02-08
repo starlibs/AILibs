@@ -6,12 +6,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.apache.commons.lang3.concurrent.MultiBackgroundInitializer;
+
 import de.upb.crc901.mlplan.core.MLPipeline;
 import de.upb.crc901.mlplan.core.MLUtil;
 import de.upb.crc901.mlplan.core.SolutionEvaluator;
 import de.upb.crc901.mlplan.core.SupervisedFilterSelector;
 import de.upb.crc901.mlplan.search.evaluators.DoubleRandomCompletionEvaluator;
 import de.upb.crc901.mlplan.search.evaluators.MonteCarloCrossValidationEvaluator;
+import de.upb.crc901.mlplan.search.evaluators.MulticlassEvaluator;
 import jaicore.ml.WekaUtil;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
@@ -21,6 +24,7 @@ import weka.attributeSelection.ASSearch;
 import weka.attributeSelection.AttributeSelection;
 import weka.attributeSelection.PrincipalComponents;
 import weka.attributeSelection.Ranker;
+import weka.classifiers.Classifier;
 import weka.core.Instances;
 
 public class ShrinkingPipelineOptimizer extends TwoPhaseHTNBasedPipelineSearcher<Double> {
@@ -36,7 +40,7 @@ public class ShrinkingPipelineOptimizer extends TwoPhaseHTNBasedPipelineSearcher
 	
 	@Override
 	protected ORGraphSearch<TFDNode, String, Double> getSearch(Instances data) throws IOException {
-		SolutionEvaluator solutionEvaluator = new MonteCarloCrossValidationEvaluator(5, 0.7f);
+		SolutionEvaluator solutionEvaluator = new MonteCarloCrossValidationEvaluator(new MulticlassEvaluator(new Random(System.currentTimeMillis())), 5, 0.7f);
 		DoubleRandomCompletionEvaluator rce = new DoubleRandomCompletionEvaluator(getRandom(), 3, solutionEvaluator);
 		rce.setGenerator(getGraphGenerator());
 		
@@ -83,7 +87,8 @@ public class ShrinkingPipelineOptimizer extends TwoPhaseHTNBasedPipelineSearcher
 	}
 	
 	@Override
-	protected MLPipeline modifyPipeline(MLPipeline mlp) {
+	protected Classifier modifyPipeline(Classifier classifier) {
+		MLPipeline mlp = (MLPipeline)classifier;
 		List<SupervisedFilterSelector> preprocessors = new ArrayList<>(mlp.getPreprocessors());
 		preprocessors.add(0, preprocessor);
 		return new MLPipeline(preprocessors, mlp.getBaseClassifier());

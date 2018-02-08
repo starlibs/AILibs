@@ -18,6 +18,7 @@ import java.util.stream.Stream;
 import org.aeonbits.owner.ConfigCache;
 
 import de.upb.crc901.mlplan.classifiers.TwoPhaseHTNBasedPipelineSearcher;
+import de.upb.crc901.mlplan.search.evaluators.MulticlassEvaluator;
 import jaicore.basic.MathExt;
 import jaicore.ml.WekaUtil;
 import weka.classifiers.Classifier;
@@ -152,7 +153,7 @@ public class PipelineEvaluation {
 			((TwoPhaseHTNBasedPipelineSearcher) c).setNumberOfMCIterationsPerSolutionInSelectionPhase(conf.getNumberOfIterationsInSelectionPhase());
 			((TwoPhaseHTNBasedPipelineSearcher) c).setNumberOfConsideredSolutions(conf.getNumberOfCandidatesInSelectionPhase());
 			((TwoPhaseHTNBasedPipelineSearcher) c).setSolutionLogFile(new File(conf.getSolutionLogDir() + File.separator + "solutions-" + k + "-" + experimentId + "-" + datasetName + "-" + seedId + ".log"));
-			((TwoPhaseHTNBasedPipelineSearcher) c).setSolutionEvaluator(conf.getValidationAlgorithm());
+			((TwoPhaseHTNBasedPipelineSearcher) c).setSolutionEvaluator(new MulticlassEvaluator(r), conf.getValidationAlgorithm());
 			((TwoPhaseHTNBasedPipelineSearcher) c).setPortionOfDataForPhase2(conf.getPortionOfDataForPhase2());
 //			((TwoPhasePipelineSearcher) c).setTooltipGenerator(new TFDTooltipGenerator());
 		}

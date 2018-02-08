@@ -9,9 +9,9 @@ import java.util.concurrent.FutureTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.upb.crc901.mlplan.core.MLPipeline;
 import de.upb.crc901.mlplan.core.SolutionEvaluator;
 import jaicore.ml.WekaUtil;
+import weka.classifiers.Classifier;
 import weka.classifiers.evaluation.Evaluation;
 import weka.core.Instances;
 
@@ -23,7 +23,7 @@ public class SimpleSolutionEvaluator implements SolutionEvaluator {
 	private Instances train, validation;
 
 	@Override
-	public Integer getSolutionScore(MLPipeline pl) throws InterruptedException {
+	public Integer getSolutionScore(Classifier c) throws InterruptedException {
 
 		/* check whether we have data available */
 		if (train == null)
@@ -35,9 +35,9 @@ public class SimpleSolutionEvaluator implements SolutionEvaluator {
 		FutureTask<Integer> performance = new FutureTask<>(new Callable<Integer>() {
 			public Integer call() {
 				try {
-					pl.buildClassifier(train);
+					c.buildClassifier(train);
 					Evaluation eval = new Evaluation(train);
-					eval.evaluateModel(pl, validation);
+					eval.evaluateModel(c, validation);
 					int score = (int) Math.round(eval.pctIncorrect() * 100);
 					return score;
 				} catch (Throwable e) {

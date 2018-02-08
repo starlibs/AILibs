@@ -88,7 +88,7 @@ public class BalancedSearcher extends TwoPhaseHTNBasedPipelineSearcher<Double> {
 				Node<TFDNode, Double> nodeToBeExplored = primaryOpen.stream().min((n1, n2) -> {
 					try {
 						return explorationEvaluator.f(n1).compareTo(explorationEvaluator.f(n2));
-					} catch (Exception e) {
+					} catch (Throwable e) {
 						e.printStackTrace();
 					}
 					return 0;
@@ -98,7 +98,7 @@ public class BalancedSearcher extends TwoPhaseHTNBasedPipelineSearcher<Double> {
 				try {
 					if (logger.isInfoEnabled())
 						logger.info("Entering exploration phase under {} with exploration value: {}", nodeToBeExplored, explorationEvaluator.f(nodeToBeExplored));
-				} catch (Exception e) {
+				} catch (Throwable e) {
 					e.printStackTrace();
 				}
 				exploring = true;

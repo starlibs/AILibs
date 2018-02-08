@@ -64,15 +64,15 @@
 		<appender-ref ref="traceFileAppender" />
 	</logger>
 	
-	<logger name="jaicore.ml.classification.multiclass.reduction.splitters">
+	<logger name="jaicore.search">
 		<level value="warn" />
 	</logger>
 	
-	<logger name="de.upb.crc901.mlplan.core.MLPipeline">
-		<level value="warn" />
+	<logger name="de.upb.crc901.mlplan.classifiers">
+		<level value="info" />
 	</logger>
 		
-	<logger name="jaicore.concurrent">
+	<logger name="de.upb.crc901.mlplan.search.evaluators.multilabel.MultilabelEvaluator">
 		<level value="warn" />
 	</logger>
 </log4j:configuration>

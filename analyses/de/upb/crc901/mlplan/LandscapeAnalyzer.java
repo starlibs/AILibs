@@ -13,6 +13,7 @@ import de.upb.crc901.mlplan.core.MLUtil;
 import de.upb.crc901.mlplan.core.SolutionEvaluator;
 import de.upb.crc901.mlplan.search.evaluators.DoubleRandomCompletionEvaluator;
 import de.upb.crc901.mlplan.search.evaluators.MonteCarloCrossValidationEvaluator;
+import de.upb.crc901.mlplan.search.evaluators.MulticlassEvaluator;
 import de.upb.crc901.mlplan.search.evaluators.RandomCompletionEvaluator;
 import jaicore.basic.FileUtil;
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
@@ -27,11 +28,11 @@ import weka.core.Instances;
 
 public class LandscapeAnalyzer {
 
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) throws Throwable {
 		genData("autowekasets/glass");
 	}
 
-	public static void recoverResults(String dataset) throws Exception {
+	public static void recoverResults(String dataset) throws Throwable {
 		String filename = getSerializationFileName(dataset);
 		System.out.println("Reading data from " + filename);
 		Map<String, Map<String, Map<List<TFDNode>, Integer>>> scores = (Map<String, Map<String, Map<List<TFDNode>, Integer>>>) FileUtil.unserializeObject(filename);
@@ -41,14 +42,14 @@ public class LandscapeAnalyzer {
 				System.out.println("\t" + classifier);
 				for (List<TFDNode> solution : scores.get(preprocessor).get(classifier).keySet()) {
 					System.out.println("\t\t" + scores.get(preprocessor).get(classifier).get(solution) + " for "
-							+ MLUtil.extractPipelineFromPlan(CEOCSTNUtil.extractPlanFromSolutionPath(solution)));
+							+ MLUtil.extractGeneratedClassifierFromPlan(CEOCSTNUtil.extractPlanFromSolutionPath(solution)));
 				}
 			}
 		}
 
 	}
 
-	public static void genData(String dataset) throws Exception {
+	public static void genData(String dataset) throws Throwable {
 		System.out.print("Reading in data ...");
 		// Instances overallData = new Instances(new BufferedReader(new FileReader("testrsc/" + dataset + ".arff")));
 		// overallData.setClassIndex(overallData.numAttributes() - 1);
@@ -66,7 +67,7 @@ public class LandscapeAnalyzer {
 //		System.exit(0);
 		Random r = new Random(0);
 		GraphGenerator<TFDNode, String> graphGenerator = MLUtil.getGraphGenerator(new File("testrsc/automl3.testset"), null, null, null);
-		SolutionEvaluator solutionEvaluator = new MonteCarloCrossValidationEvaluator(3, .7f);
+		SolutionEvaluator solutionEvaluator = new MonteCarloCrossValidationEvaluator(new MulticlassEvaluator(r), 3, .7f);
 		RandomCompletionEvaluator<Double> rce = new DoubleRandomCompletionEvaluator(r, 3, solutionEvaluator);
 		rce.setGenerator(graphGenerator);
 		rce.setData(data);
@@ -83,7 +84,7 @@ public class LandscapeAnalyzer {
 		LandscapeDBAdapater mysql = new LandscapeDBAdapater();
 		while ((solution = search.nextSolution()) != null) {
 			solutions.add(solution);
-			MLPipeline pipeline = MLUtil.extractPipelineFromPlan(CEOCSTNUtil.extractPlanFromSolutionPath(solution));
+			MLPipeline pipeline = (MLPipeline)MLUtil.extractGeneratedClassifierFromPlan(CEOCSTNUtil.extractPlanFromSolutionPath(solution));
 			mysql.addEntry(dataset, pipeline, (int)Math.round(search.getFOfReturnedSolution(solution)));
 		}
 		search.cancel();

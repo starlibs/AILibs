@@ -7,15 +7,15 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.upb.crc901.mlplan.core.MLPipeline;
 import de.upb.crc901.mlplan.core.SolutionEvaluator;
+import weka.classifiers.Classifier;
 import weka.core.Instances;
 
 @SuppressWarnings("serial")
 public class CVEvaluator implements SolutionEvaluator {
 	
 	static final Logger logger = LoggerFactory.getLogger(CVEvaluator.class);
-	private final BasicMLEvaluator evaluator = new BasicMLEvaluator(new Random(System.currentTimeMillis()));
+	private final MulticlassEvaluator evaluator = new MulticlassEvaluator(new Random(System.currentTimeMillis()));
 	private Instances data;
 	private boolean canceled = false;
 	private final int folds;
@@ -39,28 +39,28 @@ public class CVEvaluator implements SolutionEvaluator {
 	}
 
 	@Override
-	public Integer getSolutionScore(MLPipeline pl) throws Exception {
+	public Integer getSolutionScore(Classifier c) throws Exception {
 		
 		/* perform random stratified split */
 		DescriptiveStatistics stats = new DescriptiveStatistics();
-		logger.info("Starting evaluation of {}", pl);
+		logger.info("Starting evaluation of {}", c);
 		try {
 			data.stratify(folds);
 			for (int i = 0; i < folds && !canceled; i++) {
-				logger.info("Evaluating {} with split #{}/{}", pl, i + 1, folds);
+				logger.info("Evaluating {} with split #{}/{}", c, i + 1, folds);
 				Instances train = data.trainCV(folds, i);
 				Instances test = data.testCV(folds, i);
-				int score = (int) Math.round(evaluator.getErrorRateForSplit(pl, train, test)* 100);
-				logger.info("Score for evaluation of {} with split #{}/{}: {}", pl, i + 1, folds, score);
+				int score = (int) Math.round(evaluator.getErrorRateForSplit(c, train, test)* 100);
+				logger.info("Score for evaluation of {} with split #{}/{}: {}", c, i + 1, folds, score);
 				stats.addValue(score);
 			}
 		} catch (Throwable e) {
-			logger.warn("Exception or Error thrown by classifier {}. Returning a NULL score", pl.getBaseClassifier().getClass().getName());
+			logger.warn("Exception or Error thrown by classifier {}. Returning a NULL score", c);
 			return null;
 		}
 
 		int score = (int)Math.round(stats.getMean());
-		logger.info("Obtained score of {} for classifier {}.", score, pl.getBaseClassifier().getClass().getName());
+		logger.info("Obtained score of {} for classifier {}.", score, c);
 		return score;
 	}
 

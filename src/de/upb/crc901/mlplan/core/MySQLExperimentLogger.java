@@ -1,5 +1,6 @@
 package de.upb.crc901.mlplan.core;
 
+import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -17,15 +18,14 @@ import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.common.eventbus.Subscribe;
 
-import de.upb.crc901.mlplan.search.evaluators.PipelineMeasurementEvent;
+import de.upb.crc901.mlplan.search.evaluators.ClassifierMeasurementEvent;
 import jaicore.basic.MathExt;
-import scala.compat.Platform;
 import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
 import weka.classifiers.Classifier;
 import weka.core.OptionHandler;
 
-public class MySQLExperimentLogger {
+public class MySQLExperimentLogger implements Serializable {
 	private final Connection connect;
 	private Statement statement = null;
 	private int runId;
@@ -107,7 +107,13 @@ public class MySQLExperimentLogger {
 		}
 	}
 	
-	public void addEvaluationEntry(MLPipeline pipeline, double score) {
+	public void addEvaluationEntry(Classifier classifier, double score) {
+		
+		if (!(classifier instanceof MLPipeline)) {
+			System.out.println("Cannot log information for classifiers of class " + classifier.getClass().getName());
+			return;
+		}
+		MLPipeline pipeline = (MLPipeline)classifier;
 		
 		String searcherName = "", searcherParams = "", evaluatorName = "", evaluatorParams = "";
 		if (!pipeline.getPreprocessors().isEmpty()) {
@@ -119,9 +125,9 @@ public class MySQLExperimentLogger {
 			evaluatorName = evaluation.getClass().getSimpleName();
 			evaluatorParams = evaluation instanceof OptionHandler ? Arrays.toString(((OptionHandler)evaluation).getOptions()) : "";
 		}
-		Classifier classifier = pipeline.getBaseClassifier();
-		String classifierName = classifier.getClass().getSimpleName();
-		String classifierParams = classifier instanceof OptionHandler ? Arrays.toString(((OptionHandler)classifier).getOptions()) : "";
+		Classifier baseClassifier = pipeline.getBaseClassifier();
+		String classifierName = baseClassifier.getClass().getSimpleName();
+		String classifierParams = baseClassifier instanceof OptionHandler ? Arrays.toString(((OptionHandler)baseClassifier).getOptions()) : "";
 		
 		String plKey = pipeline.toString();
 		Map<String,DescriptiveStatistics> stats = measurePLValues.containsKey(plKey) ? measurePLValues.get(plKey) : null;
@@ -165,7 +171,12 @@ public class MySQLExperimentLogger {
 		}
 	}
 	
-	public void addResultEntry(MLPipeline pipeline, double score) {
+	public void addResultEntry(Classifier classifier, double score) {
+		
+		if (!(classifier instanceof MLPipeline)) {
+			throw new UnsupportedOperationException("Currently no support for logging results for classifiers of class " + classifier.getClass().getName());
+		}
+		MLPipeline pipeline = (MLPipeline)classifier;
 		
 		String searcherName = "", searcherParams = "", evaluatorName = "", evaluatorParams = "";
 		if (!pipeline.getPreprocessors().isEmpty()) {
@@ -177,9 +188,9 @@ public class MySQLExperimentLogger {
 			evaluatorName = evaluation.getClass().getSimpleName();
 			evaluatorParams = evaluation instanceof OptionHandler ? Arrays.toString(((OptionHandler)evaluation).getOptions()) : "";
 		}
-		Classifier classifier = pipeline.getBaseClassifier();
-		String classifierName = classifier.getClass().getSimpleName();
-		String classifierParams = classifier instanceof OptionHandler ? Arrays.toString(((OptionHandler)classifier).getOptions()) : "";
+		Classifier baseClassifier = pipeline.getBaseClassifier();
+		String classifierName = baseClassifier.getClass().getSimpleName();
+		String classifierParams = baseClassifier instanceof OptionHandler ? Arrays.toString(((OptionHandler)baseClassifier).getOptions()) : "";
 		
 		String plKey = pipeline.toString();
 //		Map<String,DescriptiveStatistics> stats = measurePLValues.containsKey(plKey) ? measurePLValues.get(plKey) : null;
@@ -224,9 +235,9 @@ public class MySQLExperimentLogger {
 	}
 	
 	@Subscribe
-	public void receivePipelineMeasurementEvent(PipelineMeasurementEvent<Double> event) {
+	public void receivePipelineMeasurementEvent(ClassifierMeasurementEvent<Double> event) {
 		try {
-			MLPipeline pl = event.getPl();
+			MLPipeline pl = (MLPipeline)event.getClassifier();
 			String plKey = pl.toString();
 			if (!measurePLValues.containsKey(plKey)) {
 				Map<String,DescriptiveStatistics> stats = new HashMap<>();

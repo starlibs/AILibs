@@ -1,6 +1,5 @@
 package de.upb.crc901.mlplan.search.evaluators;
 
-import java.nio.channels.InterruptedByTimeoutException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -15,12 +14,10 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import org.apache.commons.math.stat.descriptive.SynchronizedMultivariateSummaryStatistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.upb.crc901.mlplan.core.CodePlanningUtil;
-import de.upb.crc901.mlplan.core.MLPipeline;
 import de.upb.crc901.mlplan.core.MLUtil;
 import de.upb.crc901.mlplan.core.SolutionEvaluator;
 import jaicore.basic.SetUtil;
@@ -30,6 +27,7 @@ import jaicore.logic.fol.structure.Monom;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.model.ceoc.CEOCAction;
 import jaicore.planning.model.task.ceocstn.CEOCSTNUtil;
+import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import jaicore.search.algorithms.standard.core.ICancelableNodeEvaluator;
@@ -45,6 +43,7 @@ import jaicore.search.structure.core.Node;
 import jaicore.search.structure.graphgenerator.GoalTester;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
+import weka.classifiers.Classifier;
 import weka.core.Instances;
 
 @SuppressWarnings("serial")
@@ -63,12 +62,12 @@ public abstract class RandomCompletionEvaluator<V extends Comparable<V>> impleme
 	protected Map<String, Integer> plFails = new ConcurrentHashMap<>();
 	protected Map<String, Integer> plSuccesses = new ConcurrentHashMap<>();
 
-	private GraphGenerator<TFDNode, String> generator;
+	private SerializableGraphGenerator<TFDNode, String> generator;
 	private long timestampOfFirstEvaluation;
 	private final Random random;
 	protected final int samples;
 	protected final SolutionEvaluator evaluator;
-	private final SolutionEventBus<TFDNode> eventBus = new SolutionEventBus<>();
+	private transient SolutionEventBus<TFDNode> eventBus;
 	private boolean dataSet = false;
 
 	// private final Map<String,AttributeSelection> cachedFilters = new HashMap<>();
@@ -99,7 +98,7 @@ public abstract class RandomCompletionEvaluator<V extends Comparable<V>> impleme
 		}
 	}
 
-	protected V computeEvaluationPriorToCompletion(Node<TFDNode, ?> n, List<TFDNode> path, List<CEOCAction> plan, List<String> currentProgram) throws Exception {
+	protected V computeEvaluationPriorToCompletion(Node<TFDNode, ?> n, List<TFDNode> path, List<CEOCAction> plan, List<String> currentProgram) throws Throwable {
 		return null;
 	}
 
@@ -108,7 +107,7 @@ public abstract class RandomCompletionEvaluator<V extends Comparable<V>> impleme
 	protected abstract double getExpectedUpperBoundForRelativeDistanceToOptimalSolution(Node<TFDNode, ?> n, List<TFDNode> path, List<CEOCAction> partialPlan,
 			List<String> currentProgram);
 
-	public V f(Node<TFDNode, ?> n) throws Exception {
+	public V f(Node<TFDNode, ?> n) throws Throwable {
 		if (timestampOfFirstEvaluation == 0)
 			timestampOfFirstEvaluation = System.currentTimeMillis();
 		logger.info("Received request for f-value of node {}", n);
@@ -127,6 +126,8 @@ public abstract class RandomCompletionEvaluator<V extends Comparable<V>> impleme
 			List<String> currentProgram = Arrays.asList(MLUtil.getJavaCodeFromPlan(partialPlan).split("\n"));
 
 			/* annotate node with estimated relative distance to optimal solution */
+			if (eventBus == null)
+				eventBus = new SolutionEventBus<>();
 			eventBus.post(new NodeAnnotationEvent<>(n.getPoint(), "EUBRD2OS", getExpectedUpperBoundForRelativeDistanceToOptimalSolution(n, path, partialPlan, currentProgram)));
 
 			if (!n.getPoint().isGoal()) {
@@ -338,7 +339,7 @@ public abstract class RandomCompletionEvaluator<V extends Comparable<V>> impleme
 		plSuccesses.put(plName, successes);
 	}
 
-	private V getFValueOfSolutionPath(List<TFDNode> path) throws Exception {
+	private V getFValueOfSolutionPath(List<TFDNode> path) throws Throwable {
 		assert isSolutionPath(path) : "Can only compute f-values for completed plans, but it is invoked with a plan that does not yield a goal node!";
 		List<CEOCAction> plan = CEOCSTNUtil.extractPlanFromSolutionPath(path);
 		logger.info("Compute f-value for plan {}", plan);
@@ -357,11 +358,12 @@ public abstract class RandomCompletionEvaluator<V extends Comparable<V>> impleme
 			long start = System.currentTimeMillis();
 			V val = null;
 			try {
-				val = convertErrorRateToNodeEvaluation(evaluator.getSolutionScore(MLUtil.extractPipelineFromPlan(plan)));
-			} catch (Exception e) {
+				val = convertErrorRateToNodeEvaluation(evaluator.getSolutionScore(MLUtil.extractGeneratedClassifierFromPlan(plan)));
+			} catch (Throwable e) {
 				unsuccessfulPlans.add(plan);
 				throw e;
 			}
+			
 			long duration = System.currentTimeMillis() - start;
 			logger.info("Result: {}, Size: {}", val, scoresOfSolutionPaths.size());
 			if (val == null) {
@@ -497,19 +499,27 @@ public abstract class RandomCompletionEvaluator<V extends Comparable<V>> impleme
 			throw new IllegalArgumentException("Solution " + solution.toString() + " already posted!");
 		postedSolutions.add(solution);
 		List<CEOCAction> plan = CEOCSTNUtil.extractPlanFromSolutionPath(solution);
-		MLPipeline pl = MLUtil.extractPipelineFromPlan(plan);
-
-		/* now post the solution to the event bus */
-		int numberOfComputedFValues = scoresOfSolutionPaths.size();
-
-		/* post solution and then the annotations */
-		eventBus.post(new SolutionFoundEvent<>(solution, scoresOfSolutionPaths.get(plan)));
-		eventBus.post(new SolutionAnnotationEvent<>(solution, "fTime", pipelineScoreTimes.get(plan)));
-		eventBus.post(new SolutionAnnotationEvent<>(solution, "timeToSolution", (int) (System.currentTimeMillis() - timestampOfFirstEvaluation)));
-		eventBus.post(new SolutionAnnotationEvent<>(solution, "nodesExpandedToSolution", numberOfComputedFValues));
-		eventBus.post(new SolutionAnnotationEvent<>(solution, "isTunedSolution", solution.stream().filter(a -> a.getAppliedAction() != null)
-				.filter(a -> a.getAppliedAction().getOperation().getName().contains("setOptions")).findAny().isPresent()));
-		eventBus.post(new SolutionAnnotationEvent<>(solution, "pipeline", pl));
+		try {
+			Classifier c = MLUtil.extractGeneratedClassifierFromPlan(plan);
+	
+			/* now post the solution to the event bus */
+			int numberOfComputedFValues = scoresOfSolutionPaths.size();
+	
+			/* post solution and then the annotations */
+			if (eventBus == null)
+				eventBus = new SolutionEventBus<>();
+			eventBus.post(new SolutionFoundEvent<>(solution, scoresOfSolutionPaths.get(plan)));
+			eventBus.post(new SolutionAnnotationEvent<>(solution, "fTime", pipelineScoreTimes.get(plan)));
+			eventBus.post(new SolutionAnnotationEvent<>(solution, "timeToSolution", (int) (System.currentTimeMillis() - timestampOfFirstEvaluation)));
+			eventBus.post(new SolutionAnnotationEvent<>(solution, "nodesExpandedToSolution", numberOfComputedFValues));
+			eventBus.post(new SolutionAnnotationEvent<>(solution, "isTunedSolution", solution.stream().filter(a -> a.getAppliedAction() != null)
+					.filter(a -> a.getAppliedAction().getOperation().getName().contains("setOptions")).findAny().isPresent()));
+			eventBus.post(new SolutionAnnotationEvent<>(solution, "classifier", c));
+		}
+		catch (Throwable e) {
+			logger.error("Cannot post solution {}, because no valid MLPipeline object could be derived from it.", solution);
+			e.printStackTrace();
+		}
 	}
 
 	private Monom getRenamedState(Monom state, Map<ConstantParam, ConstantParam> map) {
@@ -533,11 +543,14 @@ public abstract class RandomCompletionEvaluator<V extends Comparable<V>> impleme
 
 	@Override
 	public void setGenerator(GraphGenerator<TFDNode, String> generator) {
-		this.generator = generator;
+		this.generator = (SerializableGraphGenerator<TFDNode, String>)generator;
 	}
 
 	@Override
 	public SolutionEventBus<TFDNode> getSolutionEventBus() {
+		if (this.eventBus == null) {
+			this.eventBus = new SolutionEventBus<>();
+		}
 		return this.eventBus;
 	}
 

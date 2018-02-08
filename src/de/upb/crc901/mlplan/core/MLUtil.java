@@ -44,52 +44,45 @@ public class MLUtil {
 
 	private static Logger logger = LoggerFactory.getLogger(MLUtil.class);
 
-	public static MLPipeline extractPipelineFromPlan(List<CEOCAction> plan) {
+	public static Classifier extractGeneratedClassifierFromPlan(List<CEOCAction> plan) throws Throwable {
 
 		if (plan == null)
-			return null;
+			throw new IllegalArgumentException("Plan must not be null");
 
 		/* read config */
 		StringBuilder creationString = new StringBuilder();
 		plan.stream().forEach(a -> creationString.append(a.toString() + "\n"));
-		try {
 
-			/* now execute a light version of the plan that does not use any input. This way, we obtain the filter (preprocessor) and classifier objects created by the plan */
-			PlanExecutor executor = new PlanExecutor(new Random());
-			Map<ConstantParam, Object> variables = executor.executePlan(plan, new HashMap<>());
+		/* now execute a light version of the plan that does not use any input. This way, we obtain the filter (preprocessor) and classifier objects created by the plan */
+		PlanExecutor executor = new PlanExecutor(new Random());
+		Map<ConstantParam, Object> variables = executor.executePlan(plan, new HashMap<>());
 
-			/* now extract the filter and the classifier object */
-			Optional<Classifier> classifierOpt = variables.keySet().stream().filter(k -> k.getName().equals("classifier")).map(k -> (Classifier) variables.get(k)).findAny();
-			if (!classifierOpt.isPresent()) {
-				return null;
-			}
-			Classifier classifier = classifierOpt.get();
-			return (MLPipeline) classifier;
-		} catch (Throwable e) {
-			System.err.println("Could not execute the following code: " + getJavaCodeFromPlan(plan));
-			System.err.println("Code created from: ");
-			plan.stream().forEach(a -> System.err.println("\t " + a.getEncoding()));
-			e.printStackTrace();
-			return null;
+		/* now extract the filter and the classifier object */
+		Optional<Classifier> classifierOpt = variables.keySet().stream().filter(k -> k.getName().equals("classifier")).map(k -> (Classifier) variables.get(k)).findAny();
+		if (!classifierOpt.isPresent()) {
+			throw new IllegalArgumentException("The plan " + plan + " does not define any classifier in the field \"classifier\", so I cannot derive an MLPipeline object from it");
 		}
+		return classifierOpt.get();
 	}
 
 	public static CEOCIPSTNPlanningProblem getPlanningProblem(File testsetFile, Instances data) {
 		CEOCIPSTNPlanningProblem problem = new TaskProblemGenerator().getProblem(testsetFile, data);
 
-		/* TODO: DIRRTYYYYY!!!!! Added an operation here to support oracle */
-		Map<CNFFormula, Monom> addLists = new HashMap<>();
-		Monom precondition = new Monom();
-		addLists = new HashMap<>();
-		for (String c : WekaUtil.getClassesDeclaredInDataset(data)) {
-			addLists.put(new CNFFormula(new Monom("$contains('" + c + "', p) & $contains('" + c + "',ss)")), new Monom("in('" + c + "', lc)"));
-			addLists.put(new CNFFormula(new Monom("$contains('" + c + "', p) & !$contains('" + c + "',ss)")), new Monom("in('" + c + "', rc)"));
+		if (data != null) {
+			/* TODO: DIRRTYYYYY!!!!! Added an operation here to support oracle */
+			Map<CNFFormula, Monom> addLists = new HashMap<>();
+			Monom precondition = new Monom();
+			addLists = new HashMap<>();
+			for (String c : WekaUtil.getClassesDeclaredInDataset(data)) {
+				addLists.put(new CNFFormula(new Monom("$contains('" + c + "', p) & $contains('" + c + "',ss)")), new Monom("in('" + c + "', lc)"));
+				addLists.put(new CNFFormula(new Monom("$contains('" + c + "', p) & !$contains('" + c + "',ss)")), new Monom("in('" + c + "', rc)"));
+			}
+			CEOCOperation op = new CEOCOperation("configChildNodes",
+					Arrays.asList(new VariableParam[] { new VariableParam("p"), new VariableParam("ss"), new VariableParam("lc"), new VariableParam("rc") }), precondition,
+					addLists, new HashMap<>(), Arrays.asList());
+			problem.getDomain().getOperations().add(op);
 		}
-		CEOCOperation op = new CEOCOperation("configChildNodes",
-				Arrays.asList(new VariableParam[] { new VariableParam("p"), new VariableParam("ss"), new VariableParam("lc"), new VariableParam("rc") }), precondition, addLists,
-				new HashMap<>(), Arrays.asList());
-		problem.getDomain().getOperations().add(op);
-
+		
 		/* return the problem */
 		return problem;
 	}

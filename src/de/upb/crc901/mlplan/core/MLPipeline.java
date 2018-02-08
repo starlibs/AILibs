@@ -2,10 +2,12 @@ package de.upb.crc901.mlplan.core;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.SynchronousQueue;
 
 import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math.stat.descriptive.SynchronizedMultivariateSummaryStatistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,7 +61,7 @@ public class MLPipeline implements Classifier, Serializable {
 
 	@Override
 	public void buildClassifier(Instances data) throws Exception {
-
+		
 		/* reduce dimensionality */
 		long start = System.currentTimeMillis();
 		int numAttributesBefore = data.numAttributes();

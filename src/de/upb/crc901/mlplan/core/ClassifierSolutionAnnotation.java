@@ -1,10 +1,12 @@
 package de.upb.crc901.mlplan.core;
 
-public class MLPipelineSolutionAnnotation<V> {
+import java.io.Serializable;
+
+public class ClassifierSolutionAnnotation<V> implements Serializable {
 	final V f;
 	final int fTime;
 
-	public MLPipelineSolutionAnnotation(V f, int fTime) {
+	public ClassifierSolutionAnnotation(V f, int fTime) {
 		super();
 		this.f = f;
 		this.fTime = fTime;

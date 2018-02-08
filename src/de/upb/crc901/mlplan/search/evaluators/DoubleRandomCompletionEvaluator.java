@@ -25,7 +25,7 @@ public class DoubleRandomCompletionEvaluator extends RandomCompletionEvaluator<D
 	}
 	
 	@Override
-	public Double computeEvaluationPriorToCompletion(Node<TFDNode,?> n, List<TFDNode> path, List<CEOCAction> plan, List<String> currentProgram) throws Exception {
+	public Double computeEvaluationPriorToCompletion(Node<TFDNode,?> n, List<TFDNode> path, List<CEOCAction> plan, List<String> currentProgram) throws Throwable {
 		
 		/*
 		 * if we have an f-value belonging to this plan, store it (this can be if we get asked for the f of a node we generated internally but that does not even belong to the main search
@@ -49,7 +49,7 @@ public class DoubleRandomCompletionEvaluator extends RandomCompletionEvaluator<D
 		/* if the classifier has just been defined, check for the standard configuration */
 		if (currentProgram.get(currentProgram.size() - 1).equals(classifierLine.get())) {
 			logger.info("Classifier has just been chosen, now try its standard configuration.");
-			Integer f = evaluator.getSolutionScore(MLUtil.extractPipelineFromPlan(plan));
+			Integer f = evaluator.getSolutionScore(MLUtil.extractGeneratedClassifierFromPlan(plan));
 			if (f != null) {
 				fValues.put(n, (double)f);
 			} else {

@@ -1,28 +1,26 @@
 package de.upb.crc901.mlplan.search.evaluators;
 
-import java.io.IOException;
-import java.util.Random;
-
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.upb.crc901.mlplan.core.MLPipeline;
 import de.upb.crc901.mlplan.core.SolutionEvaluator;
+import weka.classifiers.Classifier;
 import weka.core.Instances;
 
 @SuppressWarnings("serial")
 public class MonteCarloCrossValidationEvaluator implements SolutionEvaluator {
-	
+
 	static final Logger logger = LoggerFactory.getLogger(MonteCarloCrossValidationEvaluator.class);
-	private final BasicMLEvaluator basicEvaluator = new BasicMLEvaluator(new Random(System.currentTimeMillis()));
+	private final BasicMLEvaluator basicEvaluator;
 	private Instances data;
 	private boolean canceled = false;
 	private final int repeats;
 	private final float trainingPortion;
 
-	public MonteCarloCrossValidationEvaluator(int repeats, float trainingPortion) throws IOException {
+	public MonteCarloCrossValidationEvaluator(BasicMLEvaluator basicEvaluator, int repeats, float trainingPortion) {
 		super();
+		this.basicEvaluator = basicEvaluator;
 		this.repeats = repeats;
 		this.trainingPortion = trainingPortion;
 	}
@@ -41,32 +39,23 @@ public class MonteCarloCrossValidationEvaluator implements SolutionEvaluator {
 	}
 
 	@Override
-	public Integer getSolutionScore(MLPipeline pl) throws Exception {
-		
+	public Integer getSolutionScore(Classifier pl) throws Throwable {
+
 		if (pl == null)
 			throw new IllegalArgumentException("Cannot compute score for null pipeline!");
-		
+
 		/* perform random stratified split */
 		DescriptiveStatistics stats = new DescriptiveStatistics();
 		logger.info("Starting evaluation of {}", pl);
-		try {
-			for (int i = 0; i < repeats && !canceled; i++) {
-				logger.info("Evaluating {} with split #{}/{}", pl, i + 1, repeats);
-				int score = (int) Math.round(basicEvaluator.getErrorRateForRandomSplit(pl, data, trainingPortion)* 100);
-				logger.info("Score for evaluation of {} with split #{}/{}: {}", pl, i + 1, repeats, score);
-				stats.addValue(score);
-			}
-		}
-		catch (InterruptedException e) {
-			throw e;
-		}
-		catch (Throwable e) {
-			logger.info("Classifier {} has thrown {}. Returning a NULL score. Message was: {}", pl.getBaseClassifier().getClass().getName(), e.getClass().getSimpleName(), e.getMessage());
-			return null;
+		for (int i = 0; i < repeats && !canceled; i++) {
+			logger.info("Evaluating {} with split #{}/{}", pl, i + 1, repeats);
+			int score = (int) Math.round(basicEvaluator.getErrorRateForRandomSplit(pl, data, trainingPortion) * 100);
+			logger.info("Score for evaluation of {} with split #{}/{}: {}", pl, i + 1, repeats, score);
+			stats.addValue(score);
 		}
 
-		int score = (int)Math.round(stats.getMean());
-		logger.info("Obtained score of {} for classifier {}.", score, pl.getBaseClassifier().getClass().getName());
+		int score = (int) Math.round(stats.getMean());
+		logger.info("Obtained score of {} for classifier {}.", score, pl);
 		return score;
 	}
 

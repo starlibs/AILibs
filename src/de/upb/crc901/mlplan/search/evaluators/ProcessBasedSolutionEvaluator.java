@@ -11,6 +11,7 @@ import de.upb.crc901.mlplan.core.MLPipeline;
 import de.upb.crc901.mlplan.core.SolutionEvaluator;
 import jaicore.basic.FileUtil;
 import jaicore.processes.SubProcessWrapper;
+import weka.classifiers.Classifier;
 import weka.core.Instances;
 
 @SuppressWarnings("serial")
@@ -34,14 +35,14 @@ public class ProcessBasedSolutionEvaluator implements SolutionEvaluator {
 		this.memoryOverheadPerProcessInMB = memoryOverheadPerProcessInMB;
 	}
 
-	public static Integer evalPipeline(SolutionEvaluator evaluator, MLPipeline pl, String dataFile) throws Exception {
+	public static Integer evalPipeline(SolutionEvaluator evaluator, MLPipeline pl, String dataFile) throws Throwable {
 		Instances data = (Instances) FileUtil.unserializeObject(dataFile);
 		evaluator.setData(data);
 		return evaluator.getSolutionScore(pl);
 	}
 
 	@Override
-	public Integer getSolutionScore(MLPipeline pl) throws Exception {
+	public Integer getSolutionScore(Classifier pl) throws Exception {
 
 		/* check whether we have data available */
 		if (data == null)

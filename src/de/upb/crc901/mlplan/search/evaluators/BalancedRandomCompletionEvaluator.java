@@ -26,12 +26,12 @@ import jaicore.search.algorithms.standard.core.NodeAnnotationEvent;
 import jaicore.search.algorithms.standard.core.SolutionAnnotationEvent;
 import jaicore.search.algorithms.standard.core.SolutionFoundEvent;
 import jaicore.search.structure.core.Node;
-import scala.collection.mutable.Cloneable;
+import weka.classifiers.Classifier;
 
 public class BalancedRandomCompletionEvaluator extends RandomCompletionEvaluator<Double> {
 
 	private final static Logger logger = LoggerFactory.getLogger(BalancedRandomCompletionEvaluator.class);
-	private static final List<String> classifierRanking = Arrays.asList(new String[] { "OneR", "RandomTree", "J48", "IBk", "NaiveBayesMultinomial", "NaiveBayes", "RandomForest",
+	private static final List<String> classifierRanking = Arrays.asList(new String[] { "RandomTree", "J48", "IBk", "NaiveBayesMultinomial", "NaiveBayes", "RandomForest",
 			"SimpleLogistic", "MultiLayerPerceptron", "VotedPerceptron", "SMO", "Logistic" });
 
 	private final Map<String, Integer> regionCounter = new HashMap<>();
@@ -41,7 +41,7 @@ public class BalancedRandomCompletionEvaluator extends RandomCompletionEvaluator
 	}
 
 	@Override
-	public Double computeEvaluationPriorToCompletion(Node<TFDNode, ?> n, List<TFDNode> path, List<CEOCAction> plan, List<String> currentProgram) throws Exception {
+	public Double computeEvaluationPriorToCompletion(Node<TFDNode, ?> n, List<TFDNode> path, List<CEOCAction> plan, List<String> currentProgram) throws Throwable {
 		
 		/* if a reduction has ever been made, return null */
 		Optional<CEOCAction> reductionAction = plan.stream().filter(a -> a.getOperation().getName().startsWith("configChildNodes")).findFirst();
@@ -92,7 +92,7 @@ public class BalancedRandomCompletionEvaluator extends RandomCompletionEvaluator
 					}
 					
 					long start = System.currentTimeMillis();
-					Integer f = evaluator.getSolutionScore(MLUtil.extractPipelineFromPlan(plan));
+					Integer f = evaluator.getSolutionScore(MLUtil.extractGeneratedClassifierFromPlan(plan));
 					int fTime = (int)(System.currentTimeMillis() - start);
 					if (f != null) {
 						fValues.put(n, (double) f);
@@ -143,13 +143,13 @@ public class BalancedRandomCompletionEvaluator extends RandomCompletionEvaluator
 		if (nameOfClassifier == null)
 			return 1;
 
-		MLPipeline pl = null;
+		Classifier c = null;
 		try {
-			pl = MLUtil.extractPipelineFromPlan(plan);
-		} catch (Exception e) {
+			c = MLUtil.extractGeneratedClassifierFromPlan(plan);
+		} catch (Throwable e) {
 			return 1;
 		}
-		if (pl == null)
+		if (c == null)
 			return 1;
 
 		/* determine actually set params */
@@ -159,16 +159,19 @@ public class BalancedRandomCompletionEvaluator extends RandomCompletionEvaluator
 		/* determine possible params */
 		int numOfParamsSettable = 0;
 		try {
-			numOfParamsSettable += WekaUtil.getOptionsOfWekaAlgorithm(pl.getBaseClassifier()).size();
-			SupervisedFilterSelector preprocessor = pl.getPreprocessors().isEmpty() ? null : pl.getPreprocessors().get(0);
-			if (preprocessor != null) {
-				numOfParamsSettable += WekaUtil.getOptionsOfWekaAlgorithm(preprocessor.getSearcher()).size();
-				numOfParamsSettable += WekaUtil.getOptionsOfWekaAlgorithm(preprocessor.getEvaluator()).size();
+			if (c instanceof MLPipeline) {
+				MLPipeline pl = (MLPipeline)c;
+				numOfParamsSettable += WekaUtil.getOptionsOfWekaAlgorithm(pl.getBaseClassifier()).size();
+				SupervisedFilterSelector preprocessor = pl.getPreprocessors().isEmpty() ? null : pl.getPreprocessors().get(0);
+				if (preprocessor != null) {
+					numOfParamsSettable += WekaUtil.getOptionsOfWekaAlgorithm(preprocessor.getSearcher()).size();
+					numOfParamsSettable += WekaUtil.getOptionsOfWekaAlgorithm(preprocessor.getEvaluator()).size();
+				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return numOfParamSettingActions == 0 ? 1 : 1f / numOfParamSettingActions;
+		return numOfParamSettingActions == 0 ? 1 : (1f * numOfParamsSettable / numOfParamSettingActions);
 	}
 
 	private String getNameOfClassifier(Node<TFDNode, ?> n, List<String> currentProgram) {

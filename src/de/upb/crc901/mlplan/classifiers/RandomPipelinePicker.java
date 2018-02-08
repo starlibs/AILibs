@@ -12,6 +12,7 @@ import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.model.task.ceocstn.CEOCSTNUtil;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
 import jaicore.search.algorithms.standard.core.ORGraphSearch;
+import weka.classifiers.Classifier;
 import weka.core.Instances;
 
 /**
@@ -32,12 +33,17 @@ public class RandomPipelinePicker extends GraphBasedPipelineSearcher<TFDNode, St
 	}
 
 	@Override
-	protected MLPipeline convertPathToPipeline(List<TFDNode> path) {
-		return MLUtil.extractPipelineFromPlan(CEOCSTNUtil.extractPlanFromSolutionPath(path));
+	protected Classifier convertPathToPipeline(List<TFDNode> path) {
+		try {
+			return MLUtil.extractGeneratedClassifierFromPlan(CEOCSTNUtil.extractPlanFromSolutionPath(path));
+		}
+		catch (Throwable e) {
+			throw new IllegalArgumentException("Converting path to pipeline caused " + e.getClass().getName() + " with message " + e.getMessage() + " for path " + path);
+		}
 	}
 
 	@Override
-	protected MLPipeline selectModel() {
+	protected Classifier selectModel() {
 		return solutions.peek();
 	}
 }

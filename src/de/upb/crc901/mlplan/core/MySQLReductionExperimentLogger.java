@@ -17,7 +17,7 @@ import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.common.eventbus.Subscribe;
 
-import de.upb.crc901.mlplan.search.evaluators.PipelineMeasurementEvent;
+import de.upb.crc901.mlplan.search.evaluators.ClassifierMeasurementEvent;
 import jaicore.basic.MathExt;
 import scala.compat.Platform;
 import weka.attributeSelection.ASEvaluation;

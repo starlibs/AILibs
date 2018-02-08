@@ -102,7 +102,7 @@ public class PlanExecutor {
 				variables.put(inputs.get(2), leftChildClasses);
 				variables.put(inputs.get(3), rightChildClasses);
 				break;
-				
+
 			case "computeValue": {
 				if (!(variables.get(inputs.get(0)) instanceof List<?>)) {
 					throw new IllegalArgumentException("Input " + inputs.get(0) + " is not a value refinement list.");
@@ -113,23 +113,23 @@ public class PlanExecutor {
 				double d = Double.parseDouble(inputs.get(3).getName());
 				String type = inputs.get(4).getName();
 				int x = Integer.parseInt(inputs.get(5).getName());
-    			double pValue;
-	    		if ( type.equals("LOG_INTEGER") || type.equals("LOG_NUMERIC") )
+				double pValue;
+				if (type.equals("LOG_INTEGER") || type.equals("LOG_NUMERIC"))
 					pValue = Math.log10(d);
-	    		else
-	    			pValue = d;
-//System.err.println(vList);
-	    		for ( String s : vList ) {
+				else
+					pValue = d;
+				// System.err.println(vList);
+				for (String s : vList) {
 					int i = Integer.parseInt(s);
-					pValue += i*Math.pow(10,x);
-					x--; 
-				}					
-	    		if ( type.equals("LOG_INTEGER") || type.equals("LOG_NUMERIC") )
-					pValue = Math.pow(10,pValue);
-				pValue = Math.min(pValue,ub);
-				pValue = Math.max(pValue,lb);
-	    		if ( type.equals("INTEGER") || type.equals("LOG_INTEGER") )
-					variables.put(outParam, (int)(Math.floor(pValue)));
+					pValue += i * Math.pow(10, x);
+					x--;
+				}
+				if (type.equals("LOG_INTEGER") || type.equals("LOG_NUMERIC"))
+					pValue = Math.pow(10, pValue);
+				pValue = Math.min(pValue, ub);
+				pValue = Math.max(pValue, lb);
+				if (type.equals("INTEGER") || type.equals("LOG_INTEGER"))
+					variables.put(outParam, (int) (Math.floor(pValue)));
 				else
 					variables.put(outParam, pValue);
 				break;
@@ -198,12 +198,12 @@ public class PlanExecutor {
 					List<String> aList = (List<String>) variables.get(inputs.get(1));
 					for (int i = 0; i < aList.size(); i++) {
 						qString += " ";
-						if ( containsSpace(aList.get(i)) ) {
+						if (containsSpace(aList.get(i))) {
 							qString += "\"";
-							if ( aList.get(i).indexOf("\"") == -1 ) {
+							if (aList.get(i).indexOf("\"") == -1) {
 								qString += aList.get(i);
 							} else {
-								qString += escapeQuotes(aList.get(i));								
+								qString += escapeQuotes(aList.get(i));
 							}
 							qString += "\"";
 						} else {
@@ -222,12 +222,12 @@ public class PlanExecutor {
 					String qString = "";
 					List<String> aList = (List<String>) variables.get(inputs.get(0));
 					for (int i = 0; i < aList.size(); i++) {
-						if ( containsSpace(aList.get(i)) ) {
+						if (containsSpace(aList.get(i))) {
 							qString += "\"";
-							if ( aList.get(i).indexOf("\"") == -1 ) {
+							if (aList.get(i).indexOf("\"") == -1) {
 								qString += aList.get(i);
 							} else {
-								qString += escapeQuotes(aList.get(i));								
+								qString += escapeQuotes(aList.get(i));
 							}
 							qString += "\"";
 						} else {
@@ -306,10 +306,10 @@ public class PlanExecutor {
 							if (inputVal.startsWith("\"") && inputVal.endsWith("\"")) {
 								params[i] = inputVal.substring(1, inputVal.length() - 1);
 								inputClasses[i] = String.class;
-							}
-							else {
+							} else {
 								if (!variables.containsKey(inputs.get(i))) {
-									throw new IllegalArgumentException("Supposed " + (i+1) + "-th input " + inputs.get(i) + " for " + clazz + ":__construct is not defined in variables: " + variables);
+									throw new IllegalArgumentException(
+											"Supposed " + (i + 1) + "-th input " + inputs.get(i) + " for " + clazz + ":__construct is not defined in variables: " + variables);
 								}
 								params[i] = variables.get(inputs.get(i));
 								inputClasses[i] = params[i] != null ? params[i].getClass() : null;
@@ -392,6 +392,147 @@ public class PlanExecutor {
 			}
 			}
 
+		}
+		return variables;
+	}
+
+	public Map<ConstantParam, Object> executePlanOfMultiLabel(List<CEOCAction> plan, Map<ConstantParam, Object> planInputData) throws Throwable, InstantiationException,
+			IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException {
+
+		/* initialize a copy of the data. The variables object will maintain the objects we know */
+		Map<ConstantParam, Object> variables = new HashMap<>(planInputData);
+
+		/* the node object is the node in the execution tree we are currently in (relevant only for caching) */
+
+		for (CEOCAction a : plan) {
+
+			/** otherwise, we now perform this computation and create a new node for it in the execution tree **/
+
+			/* create local copies of the operation, its inputs and outputs. Using this, we then match the operation with a concrete java method */
+			CEOCOperation op = a.getOperation();
+			Map<VariableParam, ConstantParam> grounding = a.getGrounding();
+			ConstantParam outParam = op.getOutputs().isEmpty() ? null : grounding.get(op.getOutputs().get(0));
+			List<ConstantParam> inputs = new ArrayList<>(
+					SetUtil.difference(op.getParams(), op.getOutputs()).stream().map(v -> a.getGrounding().get(v)).collect(Collectors.toList()));
+
+			/* the whole switch-statement: determine whether this is a "native" statement or a real java call. */
+
+			/** @TODO: Problem: Eigentlich bräuchte man ein cloneable um wirkliche Kopien von den Objekten zu erzeugen. Sonst können wir den ExecutionTree gar nicht so bauen. */
+			switch (a.getOperation().getName()) {
+			case "noop": {
+				break;
+			}
+			
+			case "assignTo": {
+				if (variables.containsKey(inputs.get(0))) {
+					variables.put(outParam, variables.get(inputs.get(0)));
+				} else {
+					variables.put(outParam, inputs.get(0));
+				}
+				break;
+			}
+
+			/* now consider the case that methods are called using reflection */
+			default: {
+				Object obj = null;
+				java.lang.reflect.Method method = null;
+				Object[] params = null;
+				String[] opSplit = a.getOperation().getName().split(":");
+				Class<?> clazz = Class.forName(opSplit[0]);
+
+				/* if this is a constructor call, create the object */
+				if (opSplit[1].equals("__construct")) {
+					Class<?>[] inputClasses = new Class<?>[inputs.size()];
+					params = new Object[inputClasses.length];
+					for (int i = 0; i < inputs.size(); i++) {
+						ConstantParam input = inputs.get(i);
+						String inputVal = input.getName();
+						if (inputVal.startsWith("\"") && inputVal.endsWith("\"")) {
+							params[i] = inputVal.substring(1, inputVal.length() - 1);
+							inputClasses[i] = String.class;
+						} else {
+							if (!variables.containsKey(inputs.get(i))) {
+								throw new IllegalArgumentException(
+										"Supposed " + (i + 1) + "-th input " + inputs.get(i) + " for " + clazz + ":__construct is not defined in variables: " + variables);
+							}
+							params[i] = variables.get(inputs.get(i));
+							inputClasses[i] = params[i] != null ? params[i].getClass() : null;
+						}
+					}
+					Constructor<?> ctor = ConstructorUtils.getMatchingAccessibleConstructor(clazz, inputClasses);
+					variables.put(outParam, ctor.newInstance(params));
+					logger.info("Binding new object {} to variable {}.", variables.get(outParam), outParam);
+					continue;
+				}
+				/* otherwise, prepare everything for the method invocation */
+				else {
+
+					/* try to determine the method called here */
+					method = getMethod(clazz, opSplit[1], inputs, variables);
+					if (method == null)
+						throw new IllegalArgumentException("Could not find the method " + opSplit[1] + " for class " + clazz + " to be called with inputs " + inputs + ". ");
+
+					if (Modifier.isStatic(method.getModifiers())) {
+						params = new Object[method.getParameterCount()];
+						for (int i = 0; i < inputs.size(); i++) {
+							params[i] = variables.get(inputs.get(i));
+						}
+						if (method.isVarArgs() && inputs.size() <= params.length) {
+							params[params.length - 1] = new Object[0];
+						}
+					}
+
+					/* if this is not a static call, use first element as the object on which the method is invoked */
+					else {
+						obj = variables.get(inputs.get(0));
+
+						params = new Object[method.getParameterCount()];
+						Class<?>[] requiredInputTypes = method.getParameterTypes();
+						for (int i = 1; i < inputs.size(); i++) {
+							params[i - 1] = variables.get(inputs.get(i));
+							if (!(requiredInputTypes[i - 1].isAssignableFrom(params[i - 1].getClass())
+									|| requiredInputTypes[i - 1].equals(int.class) && params[i - 1].getClass().equals(Integer.class)))
+								throw new IllegalArgumentException("The " + (i - 1) + "-th param of " + method.getName() + " must be " + requiredInputTypes[i - 1] + ", but "
+										+ params[i - 1].getClass() + " is given!");
+						}
+						if (method.isVarArgs() && inputs.size() <= params.length) {
+							params[params.length - 1] = new Object[0];
+						}
+					}
+				}
+
+				/* execute the configured step */
+				if (method == null)
+					throw new IllegalStateException(
+							"No method to invoke for " + a.getEncoding() + " with param types " + a.getParameters() + " where variables = " + variables.keySet());
+				if (method.getParameterCount() > 0 && (params == null || params.length != method.getParameterCount()))
+					throw new IllegalStateException("Cannot invoke " + obj + "." + method.getName() + " with " + (params == null ? "NULL" : params.length) + " parameters where "
+							+ method.getParameterCount() + " are expected.");
+				boolean hasReturnValue = !method.getReturnType().getName().equals("void");
+				if (!hasReturnValue && a.getOperation().getOutputs().size() > 0)
+					throw new IllegalArgumentException("Plan contains action " + a + " whose method has a return value, but the operation supposes that there are "
+							+ a.getOperation().getOutputs().size() + " outputs.");
+				Object out = null;
+
+				if (obj != null && !method.getDeclaringClass().isInstance(obj))
+					throw new IllegalArgumentException(
+							"Cannot invoke method " + method.getName() + " of class " + method.getDeclaringClass().getName() + " on object of type " + obj.getClass().getName());
+				try {
+					out = method.invoke(obj, params);
+				} catch (InvocationTargetException e) {
+					System.err.println("Error when invoking " + method.getName() + " on " + obj + " with inputs "
+							+ Arrays.asList(params).stream().map(i -> i instanceof String[] ? Arrays.toString((String[]) i) : i).collect(Collectors.toList()));
+					throw e.getTargetException();
+				}
+
+				/* update knowledge */
+				if (hasReturnValue && outParam != null) {
+					if (out == null)
+						throw new IllegalStateException("Output of " + a.getEncoding() + " is NULL but must not be null!");
+					variables.put(outParam, out);
+				}
+			}
+			}
 		}
 		return variables;
 	}
@@ -499,40 +640,41 @@ public class PlanExecutor {
 
 	private String escapeQuotes(String param) {
 		String[] paramParts = param.split("\"");
-		
+
 		String requoted = "";
-		for ( int i=0 ; i < paramParts.length ; i++ ) {
+		for (int i = 0; i < paramParts.length; i++) {
 			String part = paramParts[i];
-			if ( i == paramParts.length-1 ) {
-				if ( ! param.endsWith("\"") ) {
+			if (i == paramParts.length - 1) {
+				if (!param.endsWith("\"")) {
 					requoted += part;
 					continue;
 				}
 			}
 			int count = 0;
-			while ( part.endsWith("\\") ) {
+			while (part.endsWith("\\")) {
 				count++;
-			    part = part.substring(0, part.length()-1);
+				part = part.substring(0, part.length() - 1);
 			}
 			requoted += part;
-			for ( int j=0 ; j<count ; j++ )
+			for (int j = 0; j < count; j++)
 				requoted += "\\\\";
-			requoted += "\\\"";			
+			requoted += "\\\"";
 		}
 		return requoted;
 	}
-	
+
 	private void concatenateSublists(List<String> list) {
-		while ( true ) {
+		while (true) {
 			int i = list.lastIndexOf("@DOUBLEQUOTESTART");
-			if ( i < 0 ) break;
+			if (i < 0)
+				break;
 			String result = "";
-			for ( int j = i+1 ; j < list.size() ; j++ ) {
+			for (int j = i + 1; j < list.size(); j++) {
 				String s = list.get(j);
 				list.remove(j);
-				if ( s.equals("@DOUBLEQUOTEEND") )
+				if (s.equals("@DOUBLEQUOTEEND"))
 					break;
-				if ( result.isEmpty() )
+				if (result.isEmpty())
 					result = s;
 				else
 					result += " " + s;
@@ -542,17 +684,17 @@ public class PlanExecutor {
 	}
 
 	private boolean containsSpace(String param) {
-		
+
 		String[] paramParts = param.split("\"");
-		
+
 		int offset = 0;
-		
-		while ( offset < paramParts.length ) {
-			if ( paramParts[offset].indexOf(" ") >= 0 ) {
+
+		while (offset < paramParts.length) {
+			if (paramParts[offset].indexOf(" ") >= 0) {
 				return true;
 			}
-			if ( offset == paramParts.length-1 ) {
-				if ( param.endsWith("\"") ) {
+			if (offset == paramParts.length - 1) {
+				if (param.endsWith("\"")) {
 					System.err.println("Error in paramter string >> " + param + " <<: unbalanced quotes!");
 					break;
 				} else {
@@ -560,31 +702,30 @@ public class PlanExecutor {
 				}
 			}
 
-			if ( paramParts[offset].endsWith("\\") ) {
+			if (paramParts[offset].endsWith("\\")) {
 				System.err.println("Error in paramter string >> " + param + " <<: outermost quote is escaped!");
 				break;
 			}
-			
+
 			int index = offset;
 			index++;
-			while ( index < paramParts.length ) {
-				if ( ! paramParts[index].endsWith("\\") ) {
+			while (index < paramParts.length) {
+				if (!paramParts[index].endsWith("\\")) {
 					break;
 				}
 				index++;
 			}
-			
-			if ( (index == paramParts.length) ||
-				 (index == paramParts.length-1)	&& !param.endsWith("\"") ) {
+
+			if ((index == paramParts.length) || (index == paramParts.length - 1) && !param.endsWith("\"")) {
 				System.err.println("Error in paramter string >> " + param + " <<: unbalanced quotes!");
 				break;
 			}
-			if ( index == paramParts.length-1 ) {
+			if (index == paramParts.length - 1) {
 				return false;
 			}
-			offset = index+1;
+			offset = index + 1;
 		}
-		
+
 		return true;
 	}
 

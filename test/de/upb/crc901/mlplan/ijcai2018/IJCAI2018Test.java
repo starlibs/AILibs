@@ -1,7 +1,6 @@
 package de.upb.crc901.mlplan.ijcai2018;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Random;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -11,6 +10,7 @@ import de.upb.crc901.mlplan.core.MySQLExperimentLogger;
 import de.upb.crc901.mlplan.search.algorithms.GraphBasedPipelineSearcher;
 import de.upb.crc901.mlplan.search.evaluators.BalancedRandomCompletionEvaluator;
 import de.upb.crc901.mlplan.search.evaluators.MonteCarloCrossValidationEvaluator;
+import de.upb.crc901.mlplan.search.evaluators.MulticlassEvaluator;
 import jaicore.ml.experiments.ExperimentRunner;
 import weka.classifiers.Classifier;
 
@@ -64,16 +64,17 @@ public class IJCAI2018Test extends ExperimentRunner {
 			bs.setRandom(random);
 			bs.setTimeout(1000 * timeout);
 			bs.setNumberOfCPUs(4);
-			MonteCarloCrossValidationEvaluator solutionEvaluator = new MonteCarloCrossValidationEvaluator(3, .7f);
-			bs.setSolutionEvaluator(solutionEvaluator);
+			MonteCarloCrossValidationEvaluator solutionEvaluator = new MonteCarloCrossValidationEvaluator(new MulticlassEvaluator(random), 3, .7f);
+			bs.setSolutionEvaluatorFactory4Search(() -> solutionEvaluator);
+			bs.setSolutionEvaluatorFactory4Selection(() -> new MonteCarloCrossValidationEvaluator(new MulticlassEvaluator(random), 10, .7f));
 			bs.setRce(new BalancedRandomCompletionEvaluator(random, 3, solutionEvaluator));
 			bs.setTimeoutPerNodeFComputation(1000 * (timeout == 60 ? 15 : 300));
 //			bs.setTooltipGenerator(new TFDTooltipGenerator<>());
 			bs.setPortionOfDataForPhase2(.7f);
 			bs.setExperimentLogger(expLogger);
-			solutionEvaluator.getEvaluator().getMeasurementEventBus().register(expLogger);
+			((MulticlassEvaluator)solutionEvaluator.getEvaluator()).getMeasurementEventBus().register(expLogger);
 			return bs;
-		} catch (IOException e) {
+		} catch (Throwable e) {
 			e.printStackTrace();
 		}
 		return null;

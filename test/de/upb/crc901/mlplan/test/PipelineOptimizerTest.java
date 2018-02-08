@@ -13,8 +13,8 @@ import de.upb.crc901.mlplan.classifiers.TwoPhaseHTNBasedPipelineSearcher;
 import de.upb.crc901.mlplan.core.MLUtil;
 import de.upb.crc901.mlplan.search.evaluators.DoubleRandomCompletionEvaluator;
 import de.upb.crc901.mlplan.search.evaluators.MonteCarloCrossValidationEvaluator;
+import de.upb.crc901.mlplan.search.evaluators.MulticlassEvaluator;
 import jaicore.ml.WekaUtil;
-import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import weka.classifiers.Evaluation;
 import weka.core.Instances;
 
@@ -42,7 +42,7 @@ public class PipelineOptimizerTest {
 
 		TwoPhaseHTNBasedPipelineSearcher<Double> optimizer = new TwoPhaseHTNBasedPipelineSearcher(MLUtil.getGraphGenerator(new File("testrsc/automl3.testset"), null, null, null), r, timeoutPerRun,
 				timeoutForFComputation, 100, 20, false);
-		optimizer.setRce(new DoubleRandomCompletionEvaluator(r, 3, new MonteCarloCrossValidationEvaluator(3, .7f)));
+		optimizer.setRce(new DoubleRandomCompletionEvaluator(r, 3, new MonteCarloCrossValidationEvaluator(new MulticlassEvaluator(r), 3, .7f)));
 //		optimizer.setTooltipGenerator(new TFDTooltipGenerator());
 
 		/* now evaluate the approach */
