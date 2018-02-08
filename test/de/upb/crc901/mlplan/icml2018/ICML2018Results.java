@@ -4,6 +4,8 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.HashMap;
+import java.util.Map;
 
 import de.upb.crc901.mlplan.core.MySQLMultiLabelExperimentLogger;
 
@@ -14,14 +16,23 @@ public class ICML2018Results {
 
 	public static void main(String[] args) throws Exception {
 		try {
-			ResultSet rs = expLogger.getResults("icml2018");
-			System.out.println(resultSet2LatexTable(rs));
+			Map<String,String> replacement = new HashMap<>();
+			replacement.put("Arts1: -C -26", "arts");
+			replacement.put("bibsonomy_bibtex: -C -159", "bibtex");
+			replacement.put("bibsonomy_bookmarks: -C -208", "bookmarks");
+			replacement.put("flags_ml: -C -12", "flags");
+			
+			String[] tables = {"icml2018_f1", "icml2018_exact", "icml2018_hamming", "icml2018_jaccard", "icml2018_rank"};
+			for (String table : tables) {
+				ResultSet rs = expLogger.getResults(table);
+				System.out.println(resultSet2LatexTable(rs, replacement));
+			}
 		} finally {
 			expLogger.close();
 		}
 	}
 
-	public static String resultSet2LatexTable(ResultSet rs) throws SQLException {
+	public static String resultSet2LatexTable(ResultSet rs, Map<String,String> replacements) throws SQLException {
 		StringBuilder sb = new StringBuilder();
 		ResultSetMetaData meta = rs.getMetaData();
 		int cols = meta.getColumnCount();
@@ -52,7 +63,11 @@ public class ICML2018Results {
 					break;
 				}
 				default: {
-					sb.append(rs.getString(col));
+					String str = rs.getString(col);
+					for (String key : replacements.keySet()) {
+						str = str.replaceAll(key, replacements.get(key));
+					}
+					sb.append(str);
 					break;
 				}
 				}

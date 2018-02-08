@@ -29,6 +29,7 @@ import de.upb.crc901.mlplan.search.evaluators.multilabel.F1AverageMultilabelEval
 import de.upb.crc901.mlplan.search.evaluators.multilabel.HammingMultilabelEvaluator;
 import de.upb.crc901.mlplan.search.evaluators.multilabel.JaccardMultilabelEvaluator;
 import de.upb.crc901.mlplan.search.evaluators.multilabel.MultilabelEvaluator;
+import de.upb.crc901.mlplan.search.evaluators.multilabel.RankMultilabelEvaluator;
 import jaicore.ml.WekaUtil;
 import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;
 import meka.classifiers.multilabel.MultiLabelClassifier;
@@ -46,8 +47,8 @@ public class ICML2018MLTest {
 	}
 
 	protected String[] getClassifierNames() {
-//		return new String[] { "MLPlan-Multilabel-", "BR-Auto-WEKA" };
-		return new String[] { "MLPlan-Multilabel-" };
+		return new String[] { "MLPlan-Multilabel-", "BR-Auto-WEKA" };
+//		return new String[] { "MLPlan-Multilabel-" };
 	}
 
 	protected String[] getSetupNames() {
@@ -55,7 +56,7 @@ public class ICML2018MLTest {
 	}
 
 	protected int getNumberOfRunsPerExperiment() {
-		return 15;
+		return 10;
 	}
 
 	protected float getTrainingPortion() {
@@ -93,8 +94,8 @@ public class ICML2018MLTest {
 				bs.setSolutionEvaluatorFactory4Search(() -> new MonteCarloCrossValidationEvaluator(evaluator, 3, .7f));
 				bs.setSolutionEvaluatorFactory4Selection(() -> new MonteCarloCrossValidationEvaluator(evaluator, 10, .7f));
 				bs.setRce(new BalancedRandomCompletionEvaluator(random, 3, new MonteCarloCrossValidationEvaluator(evaluator, 3, .7f)));
-				bs.setTimeoutPerNodeFComputation(1000 * (timeout == 60 ? 15 : (timeout == 3600 ? 300 : 300 * 4)));
-				bs.setTooltipGenerator(new TFDTooltipGenerator<>());
+				bs.setTimeoutPerNodeFComputation(1000 * (timeout == 60 ? 15 : 300 ));
+//				bs.setTooltipGenerator(new TFDTooltipGenerator<>());
 				bs.setPortionOfDataForPhase2(.3f);
 				// BR br = new BR();
 				// br.setClassifier(bs);
@@ -119,8 +120,7 @@ public class ICML2018MLTest {
 	}
 
 	protected int[] getTimeouts() {
-//		return new int[] { 86400 / 2 };
-		return new int[] { 60 };
+		return new int[] { 3600, 86400 / 2 };
 	}
 
 	protected int getNumberOfCPUS() {
@@ -210,7 +210,7 @@ public class ICML2018MLTest {
 			int loss_hamming  = (int) (new HammingMultilabelEvaluator(r).loss(c, testData) * 100);
 			int loss_exact  = (int) (new ExactMatchMultilabelEvaluator(r).loss(c, testData) * 100);
 			int loss_jaccard  = (int) (new JaccardMultilabelEvaluator(r).loss(c, testData) * 100);
-			int loss_rank  = (int) (new F1AverageMultilabelEvaluator(r).loss(c, testData) * 100);
+			int loss_rank  = (int) (new RankMultilabelEvaluator(r).loss(c, testData) * 100);
 			System.out.println("Sending error Rate " + loss_f1 + "/" + loss_hamming + "/" + loss_exact + "/" + loss_jaccard + "/" + loss_rank + " to logger.");
 
 			logExperimentResult(data.relationName(), an, classifiers[algoId], seedId, timeouts[timeoutId], getNumberOfCPUS(), setups[setupId], c, loss_f1, loss_hamming, loss_exact, loss_jaccard, loss_rank);
