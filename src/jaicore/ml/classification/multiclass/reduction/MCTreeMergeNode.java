@@ -10,7 +10,7 @@ public class MCTreeMergeNode extends MCTreeNodeReD {
    */
   private static final long serialVersionUID = -6282530004580334598L;
 
-  public MCTreeMergeNode(final Classifier innerNodeClassifier, final List<String> leftChildClasses, final Classifier leftChildClassifier, final List<String> rightChildClasses,
+  public MCTreeMergeNode(final String innerNodeClassifier, final List<String> leftChildClasses, final Classifier leftChildClassifier, final List<String> rightChildClasses,
       final Classifier rightChildClassifier) {
     super(innerNodeClassifier, leftChildClasses, leftChildClassifier, rightChildClasses, rightChildClassifier);
   }

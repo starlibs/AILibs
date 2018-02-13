@@ -102,7 +102,7 @@ public class MCTS<T,A,V extends Comparable<V>> implements IObservableORGraphSear
 					return path;
 				}
 			}
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			e.printStackTrace();
 		}
 		return null;

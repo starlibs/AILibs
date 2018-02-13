@@ -54,7 +54,7 @@ public class GeneralBestFirst<T, A> extends ANDORGraphSearch<T, A, Integer> {
 		open.add(root);
 		try {
 			bestValues.put(root, nodeEvaluator.f(root));
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			e.printStackTrace();
 		}
 		return root;
@@ -144,7 +144,7 @@ public class GeneralBestFirst<T, A> extends ANDORGraphSearch<T, A, Integer> {
 				try {
 					val = nodeEvaluator.f(node);
 					newSuccessorsAndTheirScores.put(node, val);
-				} catch (Exception e) {
+				} catch (Throwable e) {
 					e.printStackTrace();
 				}
 			} else

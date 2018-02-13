@@ -47,6 +47,10 @@ public class MCTreeNode implements Classifier, ITreeClassifier, Serializable, It
   private static Map<String, Classifier> classifierCacheMap = new HashMap<>();
   private static Lock classifierCacheMapLock = new ReentrantLock();
 
+  public MCTreeNode(Classifier left, Classifier right, String baseClassifier) {
+	  containedClasses = new ArrayList<>();
+  }
+  
   public MCTreeNode(final List<Integer> containedClasses) {
     this.containedClasses = containedClasses;
   }

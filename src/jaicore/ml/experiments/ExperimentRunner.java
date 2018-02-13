@@ -50,6 +50,23 @@ public abstract class ExperimentRunner {
 		
 	}
 	
+	protected void logExperimentResult(String dataset, ArrayNode rows_for_search, String algorithm, int seed, int timeout, int cpus, String evaltech, Classifier c, double errorRate) {
+		
+		/* determine result file */
+		File resultFolder = new File("results" + File.separator + evaltech + File.separator + timeout);
+		if (!resultFolder.exists())
+			resultFolder.mkdirs();
+		File resultFile = new File(resultFolder + File.separator + algorithm + "-" + dataset + ".csv");
+		
+		try (FileWriter fw = new FileWriter(resultFile, true)) {
+			fw.write(seed + ";" + errorRate + "\n");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		System.out.println("Wrote an error of " + errorRate + " to stats file.");
+	}
+	
 	public void run(int k) throws Exception {
 		
 		/* get classifiers */
@@ -112,21 +129,14 @@ public abstract class ExperimentRunner {
 		Classifier c = getConfiguredClassifier(seedId, setups[setupId], classifiers[algoId], timeouts[timeoutId]);
 		System.out.println("Classifier configured. Determining result files.");
 		
-		/* determine result file */
-		File resultFolder = new File("results" + File.separator + setups[setupId] + File.separator + timeouts[timeoutId]);
-		if (!resultFolder.exists())
-			resultFolder.mkdirs();
-		File resultFile = new File(resultFolder + File.separator + classifiers[algoId] + "-" + datasetName + ".csv");
-		
 		/* now search for the best pipeline */
 		long start = System.currentTimeMillis();
 		ObjectMapper om = new ObjectMapper();
+		jaicore.ml.interfaces.LabeledInstances<?> dataAsInstances = WekaUtil.toJAICoreLabeledInstances(data);
 		ArrayNode an = om.createArrayNode();
-		for (Instance inst : internalData) {
-			an.add(data.indexOf(inst));
-		}
-		System.out.println(an);;
-		logExperimentStart(getAvailableDatasets(datasetFolder).get(datasetId).getName(), an, classifiers[algoId], seedId, timeouts[timeoutId], getNumberOfCPUS(), setups[setupId]);
+		WekaUtil.toJAICoreLabeledInstances(internalData).stream().map(v -> dataAsInstances.indexOf(v)).sorted().forEach(v -> an.add(v));
+		System.out.println(an);
+		logExperimentStart(data.relationName(), an, classifiers[algoId], seedId, timeouts[timeoutId], getNumberOfCPUS(), setups[setupId]);
 		System.out.println("Invoking " + getExperimentDescription(datasetFolder, datasetId, c, seedId) + " with setup " + setups[setupId] + " and timeout " + timeouts[timeoutId] + "s");
 		c.buildClassifier(internalData);
 		long end = System.currentTimeMillis();
@@ -135,13 +145,9 @@ public abstract class ExperimentRunner {
 		/* check performance of the pipeline */
 		Evaluation eval = new Evaluation(internalData);
 		eval.evaluateModel(c, testData);
-		double error = MathExt.round((eval.pctIncorrect() + eval.pctUnclassified()) / 100f, 4);
-		
-		try (FileWriter fw = new FileWriter(resultFile, true)) {
-			fw.write(seedId + ";" + error + "\n");
-		}
-		
-		System.out.println("Wrote an error of " + error + " to stats file.");
+		int error = (int)((eval.pctIncorrect() + eval.pctUnclassified()) * 100);
+		System.out.println("Sending error Rate " + error + " to logger.");
+		logExperimentResult(data.relationName(), an, classifiers[algoId], seedId, timeouts[timeoutId], getNumberOfCPUS(), setups[setupId], c, error);
 	}
 	
 	public String getExperimentDescription(File folder, int datasetId, Classifier algorithm, int seed) {
@@ -164,6 +170,8 @@ public abstract class ExperimentRunner {
 	public Instances getKthInstances(File folder, int k) throws IOException {
 		File f = getAvailableDatasets(folder).get(k);
 		System.out.println("Selecting " + f);
-		return new Instances(new BufferedReader(new FileReader(f)));
+		Instances inst = new Instances(new BufferedReader(new FileReader(f)));
+		inst.setRelationName((folder + File.separator + f.getName()).replace(File.separator, "/"));
+		return inst;
 	}
 }

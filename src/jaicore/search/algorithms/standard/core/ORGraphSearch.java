@@ -26,6 +26,7 @@ import com.google.common.eventbus.Subscribe;
 
 import jaicore.concurrent.TimeoutTimer;
 import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
+import jaicore.planning.model.core.PDDLReader;
 import jaicore.search.algorithms.interfaces.IObservableORGraphSearch;
 import jaicore.search.algorithms.standard.bestfirst.RandomizedDepthFirstEvaluator;
 import jaicore.search.structure.core.GraphEventBus;
@@ -77,7 +78,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	/* computation of f */
 	protected final INodeEvaluator<T, V> nodeEvaluator;
 	private INodeEvaluator<T, V> timeoutNodeEvaluator;
-	private TimeoutSubmitter timeoutSubmitter = TimeoutTimer.getInstance().getSubmitter();
+	private TimeoutSubmitter timeoutSubmitter;
 	private int timeoutForComputationOfF;
 
 	protected final Queue<List<T>> solutions = new LinkedBlockingQueue<>();
@@ -111,6 +112,8 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 
 		@Override
 		public void run() {
+			if (ORGraphSearch.this.canceled || ORGraphSearch.this.interrupted)
+				return;
 			logger.debug("Start node creation.");
 			lastExpansion.add(successorDescription);
 			Node<T, V> newNode = newNode(expandedNodeInternal, successorDescription.getTo());
@@ -120,8 +123,12 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 
 			/* set timeout on thread that interrupts it after the timeout */
 			int taskId = -1;
-			if (timeoutForComputationOfF > 0)
+			if (timeoutForComputationOfF > 0) {
+				if (timeoutSubmitter == null) {
+					timeoutSubmitter = TimeoutTimer.getInstance().getSubmitter();
+				}
 				taskId = timeoutSubmitter.interruptMeAfterMS(timeoutForComputationOfF);
+			}
 
 			/* compute node label  */
 			V label = null;
@@ -138,9 +145,8 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 					e2.printStackTrace();
 				}
 			} catch (Throwable e) {
-				newNode.setAnnotation("fError", e.getStackTrace());
+				newNode.setAnnotation("fError", e);
 				graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_ffail"));
-				e.printStackTrace();
 			}
 			if (taskId >= 0)
 				timeoutSubmitter.cancelTimeout(taskId);
@@ -176,6 +182,8 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 					if (newNode.compareTo(existingNode) < 0) {
 						graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_" + (newNode.isGoal() ? "solution" : "open")));
 						graphEventBus.post(new NodeRemovedEvent<>(existingNode));
+						open.remove(existingNode);
+						open.add(newNode);
 					} else {
 						graphEventBus.post(new NodeRemovedEvent<>(newNode));
 					}
@@ -252,8 +260,9 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 		/* set parent discarding */
 		parentDiscarding = pd;
 		
-		/*setting a priorityqueueopen As a default open collection*/
-		this.setOpen(new PriorityQueueOpen<Node<T,V>>());
+//		/*setting a priorityqueueopen As a default open collection*/
+//		
+//		this.setOpen(new PriorityQueueOpen<Node<T,V>>());
 
 		/* if the node evaluator is graph dependent, communicate the generator to it */
 		this.nodeEvaluator = pNodeEvaluator;
@@ -296,14 +305,14 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 		Runtime.getRuntime().addShutdownHook(shutdownHook);
 	}
 
-	private void labelNode(Node<T, V> node) throws Exception {
+	private void labelNode(Node<T, V> node) throws Throwable {
 		node.setInternalLabel(nodeEvaluator.f(node));
 	}
 
 	/**
 	 * This method setups the graph by inserting the root nodes.
 	 */
-	protected void initGraph() throws Exception {
+	protected void initGraph() throws Throwable {
 		if (!initialized) {
 			initialized = true;
 			if (rootGenerator instanceof MultipleRootGenerator) {
@@ -346,7 +355,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 		logger.info("Starting search for next solution. Size of OPEN is {}", open.size());
 		try {
 			initGraph();
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			e.printStackTrace();
 			return null;
 		}
@@ -401,12 +410,14 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 		if (!this.initialized) {
 			try {
 				initGraph();
-			} catch (Exception e) {
+			} catch (Throwable e) {
 				e.printStackTrace();
 				return null;
 			}
 			return lastExpansion;
 		}
+		else
+			step();
 		return lastExpansion;
 	}
 
@@ -457,7 +468,39 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 		expanded.add(expandedNodeInternal.getPoint());
 
 		/* compute successors */
-		Collection<NodeExpansionDescription<T, A>> successorDescriptions = successorGenerator.generateSuccessors(expandedNodeInternal.getPoint());
+		logger.debug("Start computation of successors");
+		final Collection<NodeExpansionDescription<T, A>> successorDescriptions = new ArrayList<>();
+		{
+		Thread t = new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				if (ORGraphSearch.this.canceled || ORGraphSearch.this.interrupted)
+					return;
+				int taskId = -1;
+				if (timeoutForComputationOfF > 0) {
+					if (timeoutSubmitter == null) {
+						timeoutSubmitter = TimeoutTimer.getInstance().getSubmitter();
+					}
+					taskId = timeoutSubmitter.interruptMeAfterMS(timeoutForComputationOfF);
+				}
+				successorDescriptions.addAll(successorGenerator.generateSuccessors(expandedNodeInternal.getPoint()));
+				if (taskId >= 0)
+					timeoutSubmitter.cancelTimeout(taskId);
+			}
+		}, "Node Builder for some child of " + expandedNodeInternal);
+		logger.debug("Starting computation of successors in thread {}", t);
+		t.start();
+		try {
+			t.join();
+		} catch (InterruptedException e) {
+			logger.info("Search has been interrupted");
+			interrupted = true;
+			return;
+		}
+		logger.debug("Finished computation of successors");
+		}
+		
 		if (additionalThreadsForExpansion < 1) {
 			successorDescriptions.stream().forEach(successorDescription -> {
 				
@@ -555,6 +598,8 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 			logger.info("Canceling node evaluator.");
 			((ICancelableNodeEvaluator) nodeEvaluator).cancel();
 		}
+		if (timeoutSubmitter != null)
+			timeoutSubmitter.close();
 	}
 
 	public boolean isInterrupted() {
@@ -574,7 +619,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	}
 
 	protected Node<T, V> newNode(Node<T, V> parent, T t2) {
-		assert !ext2int.containsKey(t2) : "Generating a second node object for " + t2 + " as successor of " + parent.getPoint() + " was contained as " + ext2int.get(t2).getPoint()
+		assert parentDiscarding == ParentDiscarding.NONE || !ext2int.containsKey(t2) : "Generating a second node object for " + t2 + " as successor of " + parent.getPoint() + " was contained as " + ext2int.get(t2).getPoint()
 				+ ", but ORGraphSearch currently only supports tree search!";
 		return newNode(parent, t2, null);
 	}
@@ -624,7 +669,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 		/* now initialize the graph */
 		try {
 			initGraph();
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			e.printStackTrace();
 			return;
 		}
@@ -688,7 +733,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 		if (!initialized) {
 			try {
 				initGraph();
-			} catch (Exception e) {
+			} catch (Throwable e) {
 				e.printStackTrace();
 				return false;
 			}
@@ -788,7 +833,8 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	/**
 	 * @param open the openCollection to set
 	 */
-	public void setOpen(OpenCollection<Node<T, V>> collection) {
+	public void setOpen(OpenCollection<Node<T,V>> collection) {
+		
 		collection.clear();
 		collection.addAll(open);
 		open = collection;

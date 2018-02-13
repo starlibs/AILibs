@@ -1,5 +1,6 @@
 package jaicore.planning.graphgenerators.task.tfd;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -16,14 +17,24 @@ public class TFDTooltipGenerator<V extends Comparable<V>> implements TooltipGene
 		TFDNode nodeRepresentation = node.getPoint();
 		Map<String,Object> annotations = node.getAnnotations();
 		sb.append("<h2>Node: " + nodeRepresentation.getID() + "</h2>");
-		sb.append(annotations);
+		sb.append("<h2>Annotation</h2><table><tr><th>Key</th><th>Value</th></tr>");
+		for (String key : annotations.keySet()) {
+			sb.append("<tr><td>" + key + "</td><td>" + annotations.get(key) + "</td></tr>");
+		}
+		sb.append("</table>");
 		sb.append("<h2>F-Value</h2>");
 		sb.append(node.getInternalLabel());
 		if (annotations.containsKey("fRPSamples")) {
 			sb.append(" (based on " + annotations.get("fRPSamples") + " samples)");
 		}
-		if (annotations.containsKey("fError")) {
-			sb.append("<pre style=\"color: red;\">" + annotations.get("fError") + "</pre>");
+		if (annotations.containsKey("fError") && (annotations.get("fError") instanceof Throwable)) {
+			sb.append("<h2>Error Details:</h2><pre style=\"color: red;\">");
+			Throwable e = (Throwable)annotations.get("fError");
+			sb.append("Error Type " + e.getClass().getName() + "\nMessage: " + e.getMessage() +"\nStack Trace:\n");
+			for (StackTraceElement ste : e.getStackTrace()) {
+				sb.append("  " + ste.toString() + "\n");
+			}
+			sb.append("</pre>");
 		}
 		if (nodeRepresentation.getAppliedMethodInstance() != null || nodeRepresentation.getAppliedAction() != null) {
 			sb.append("<h2>Applied Instance</h2>");

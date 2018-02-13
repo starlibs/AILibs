@@ -34,7 +34,6 @@ public class MCTreeNodeReDTest {
 
       List<Double> pctCorrectClassifier = new LinkedList<>();
       List<Double> pctCorrectDecomposition = new LinkedList<>();
-      List<Classifier> ensemble = new LinkedList<>();
 
       for (int k = 0; k < 10; k++) {
         Collections.shuffle(classValues, new Random(k));
@@ -62,13 +61,8 @@ public class MCTreeNodeReDTest {
           childBClassifier = new MajorityClassifier();
         }
 
-        MCTreeNodeReD root = new MCTreeNodeReD(AbstractClassifier.forName(CLASSIFIER_NAME, null), childA, childAClassifier, childB, childBClassifier);
-        ensemble.add(root);
+        MCTreeNodeReD root = new MCTreeNodeReD(CLASSIFIER_NAME, childA, childAClassifier, childB, childBClassifier);
         root.buildClassifier(stratifiedSplit.get(0));
-
-        // for (Instance test : stratifiedSplit.get(1)) {
-        // System.out.println(root.classifyInstance(test) + " " + test.classValue());
-        // }
 
         Evaluation eval = new Evaluation(data);
         eval.evaluateModel(root, stratifiedSplit.get(1), new Object[] {});
@@ -88,19 +82,8 @@ public class MCTreeNodeReDTest {
 
       }
 
-      Ensemble e = new Ensemble();
-      e.addAll(ensemble);
-      e.buildClassifier(stratifiedSplit.get(0));
-      Evaluation eval = new Evaluation(data);
-      eval.evaluateModel(e, stratifiedSplit.get(1), new Object[] {});
-
-      System.out.println("Ensemble: " + (100 - eval.pctCorrect()));
-      System.out.println();
     }
 
-    while (true) {
-      ;
-    }
   }
 
 }

@@ -7,6 +7,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jaicore.basic.SetUtil;
 import jaicore.ml.WekaUtil;
 import weka.classifiers.Classifier;
@@ -15,6 +18,7 @@ import weka.core.Instances;
 
 public class RPNDSplitter implements ISplitter {
 
+	private static final Logger logger = LoggerFactory.getLogger(RPNDSplitter.class);
 	private final Instances data;
 	private final Random rand;
 
@@ -25,7 +29,7 @@ public class RPNDSplitter implements ISplitter {
 	}
 
 	@Override
-	public Collection<Collection<String>> split(Collection<String> classes, Classifier c) {
+	public Collection<Collection<String>> split(Collection<String> classes, Classifier c) throws Exception {
 
 		/* 2. if we have a leaf node, abort */
 		if (classes.size() == 1) {
@@ -46,24 +50,27 @@ public class RPNDSplitter implements ISplitter {
 		return split(copy, s1, s2, c);
 	}
 
-	public Collection<Collection<String>> split(Collection<String> classes, Collection<String> s1, Collection<String> s2, Classifier c) {
-		
+	public Collection<Collection<String>> split(Collection<String> classes, Collection<String> s1, Collection<String> s2, Classifier c) throws Exception {
+
+		logger.info("Start creation of RPND split with basis {}/{} for classes {}", s1, s2, classes);
+
 		/* 3b. and 3c. train binary classifiers for c1 vs c2 */
 		Instances reducedData = WekaUtil.mergeClassesOfInstances(data, s1, s2);
-		try {
-			c.buildClassifier(reducedData);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		logger.debug("Building classifier for separating the two class sets {} and {}", s1, s2);
+		c.buildClassifier(reducedData);
 
 		/* 3d. insort the remaining classes */
+		logger.info("Now classifying the items of the other classes");
 		List<String> remainingClasses = new ArrayList<>(SetUtil.difference(SetUtil.difference(classes, s1), s2));
 		for (int i = 0; i < remainingClasses.size(); i++) {
 			String className = remainingClasses.get(i);
 			Instances testData = WekaUtil.getInstancesOfClass(data, className);
+			logger.debug("Classify {} instances of class {}", testData.size(), className);
 			int o1 = 0;
 			int o2 = 0;
 			for (Instance inst : testData) {
+				if (Thread.interrupted())
+					throw new InterruptedException();
 				try {
 					double prediction = c.classifyInstance(WekaUtil.getRefactoredInstance(inst));
 					if (prediction == 0)
