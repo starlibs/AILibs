@@ -1,11 +1,13 @@
 package jaicore.ml;
 
+import java.io.Serializable;
+
 import weka.classifiers.Classifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 
-public class MajorityClassifier implements Classifier {
+public class MajorityClassifier implements Classifier, Serializable {
 
   private int majorityClassIndex = 0;
 
