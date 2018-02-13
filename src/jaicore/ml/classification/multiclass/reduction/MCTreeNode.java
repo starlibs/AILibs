@@ -6,12 +6,19 @@ import jaicore.ml.WekaUtil;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
@@ -34,8 +41,11 @@ public class MCTreeNode implements Classifier, ITreeClassifier, Serializable, It
   private String classifierID;
   private final List<Integer> containedClasses;
   private boolean trained = false;
+  private boolean fromCache = false;
 
-  private static ClassifierCache classifierCache = new ClassifierCache();
+  public static AtomicInteger cacheRetrievals = new AtomicInteger();
+  private static Map<String, Classifier> classifierCacheMap = new HashMap<>();
+  private static Lock classifierCacheMapLock = new ReentrantLock();
 
   public MCTreeNode(final List<Integer> containedClasses) {
     this.containedClasses = containedClasses;
@@ -105,14 +115,38 @@ public class MCTreeNode implements Classifier, ITreeClassifier, Serializable, It
       index++;
     }
 
+    String classifierKey = this.classifier.getClass().getName() + "#" + instancesCluster + "#" + data.size() + "#" + new HashCodeBuilder().append(data.toString()).toHashCode();
+
     // refactor training data with respect to the split clusters and build the classifier
     Instances trainingData = WekaUtil.mergeClassesOfInstances(data, instancesCluster);
 
+    Classifier cachedClassifier = null;
+    classifierCacheMapLock.lock();
     try {
-      this.classifier.buildClassifier(trainingData);
-    } catch (WekaException e) {
-      this.classifier = new MajorityClassifier();
-      this.classifier.buildClassifier(trainingData);
+      cachedClassifier = AbstractClassifier.makeCopy(classifierCacheMap.get(classifierKey));
+      this.fromCache = true;
+    } finally {
+      classifierCacheMapLock.unlock();
+    }
+    cachedClassifier = null;
+
+    if (cachedClassifier != null) {
+      this.classifier = cachedClassifier;
+    } else {
+      try {
+        this.classifier.buildClassifier(trainingData);
+      } catch (WekaException e) {
+        this.classifier = new MajorityClassifier();
+        this.classifier.buildClassifier(trainingData);
+      }
+
+      classifierCacheMapLock.lock();
+      try {
+        classifierCacheMap.put(classifierKey, this.classifier);
+      } finally {
+        classifierCacheMapLock.unlock();
+      }
+
     }
 
     // recursively build classifiers for children
@@ -143,7 +177,9 @@ public class MCTreeNode implements Classifier, ITreeClassifier, Serializable, It
 
   public void distributionForInstance(final Instance instance, final double[] distribution) throws Exception {
     Instance iNew = WekaUtil.getRefactoredInstance(instance, IntStream.range(0, this.children.size()).mapToObj(x -> x + ".0").collect(Collectors.toList()));
-    double[] localDistribution = this.classifier.distributionForInstance(iNew);
+
+    double[] localDistribution = new double[this.containedClasses.size()];
+    localDistribution = this.classifier.distributionForInstance(iNew);
 
     for (MCTreeNode child : this.children) {
       child.distributionForInstance(instance, distribution);
@@ -185,11 +221,11 @@ public class MCTreeNode implements Classifier, ITreeClassifier, Serializable, It
   }
 
   public static void clearCache() {
-    classifierCache.clear();
+    classifierCacheMap.clear();
   }
 
-  public static ClassifierCache getClassifierCache() {
-    return classifierCache;
+  public static Map<String, Classifier> getClassifierCache() {
+    return classifierCacheMap;
   }
 
   public Classifier getClassifier() {
