@@ -19,6 +19,10 @@ public class SimpleInstancesImpl extends ArrayList<Instance> implements Instance
 
 	public SimpleInstancesImpl() {
 	}
+	
+	public SimpleInstancesImpl(int initialCapacity) {
+		super(initialCapacity);
+	}
 
 	public SimpleInstancesImpl(String json) throws IOException {
 		addAllFromJson(json);
@@ -30,6 +34,10 @@ public class SimpleInstancesImpl extends ArrayList<Instance> implements Instance
 
 	public SimpleInstancesImpl(File jsonFile) throws IOException {
 		addAllFromJson(jsonFile);
+	}
+	
+	public boolean add(double[] values) {
+		return super.add(new SimpleInstanceImpl(values));
 	}
 
 	@Override

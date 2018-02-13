@@ -2,6 +2,8 @@ package jaicore.ml.core;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -14,6 +16,20 @@ public class SimpleInstanceImpl extends ArrayList<Double> implements Instance {
 
 	public SimpleInstanceImpl() {
 
+	}
+	
+	public SimpleInstanceImpl(int initialCapacity) {
+		super(initialCapacity);
+	}
+	
+	public SimpleInstanceImpl(Collection<Double> values) {
+		super(values);
+	}
+	
+	public SimpleInstanceImpl(double[] values) {
+		super(values.length);
+		for (int i = 0; i < values.length; i++)
+			super.add(i, values[i]);
 	}
 
 	public SimpleInstanceImpl(String json) throws IOException {
