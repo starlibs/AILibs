@@ -17,9 +17,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import javax.swing.plaf.synth.SynthSpinnerUI;
-
 import org.apache.commons.lang3.reflect.MethodUtils;
+
+import com.google.common.collect.ContiguousSet;
+import com.google.common.collect.DiscreteDomain;
+import com.google.common.collect.Range;
 
 import jaicore.ml.core.SimpleInstanceImpl;
 import jaicore.ml.core.SimpleInstancesImpl;
@@ -28,7 +30,6 @@ import jaicore.ml.core.WekaCompatibleInstancesImpl;
 import jaicore.ml.interfaces.LabeledInstance;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
-import weka.classifiers.SingleClassifierEnhancer;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
@@ -60,7 +61,7 @@ public class WekaUtil {
 		classifiers.add("weka.classifiers.lazy.IBk");
 		classifiers.add("weka.classifiers.lazy.KStar");
 		classifiers.add("weka.classifiers.rules.JRip");
-		classifiers.add("weka.classifiers.rules.DecisionStump");
+		classifiers.add("weka.classifiers.trees.DecisionStump");
 		classifiers.add("weka.classifiers.trees.J48");
 		classifiers.add("weka.classifiers.trees.LMT");
 		classifiers.add("weka.classifiers.trees.RandomForest");
@@ -204,9 +205,9 @@ public class WekaUtil {
 	}
 
 	public static jaicore.ml.interfaces.Instances toJAICoreInstances(final Instances wekaInstances) {
-		jaicore.ml.interfaces.Instances instances = new SimpleInstancesImpl();
+		jaicore.ml.interfaces.Instances instances = new SimpleInstancesImpl(wekaInstances.size());
 		for (Instance inst : wekaInstances) {
-			instances.add(toJAICoreInstance(inst));
+			instances.add(new SimpleInstanceImpl(inst.toDoubleArray()));
 		}
 		return instances;
 	}
@@ -371,7 +372,7 @@ public class WekaUtil {
 		return getNumberOfInstancesFromClass(data, cs) / (1f * data.size());
 	}
 
-	public static List<Instances> getArbitrarySplit(final Instances data, final Random rand, final double... portions) {
+	public static Collection<Integer>[] getArbitrarySplit(final Instances data, final Random rand, final double... portions) {
 		
 		/* check that portions sum up to s.th. smaller than 1 */
 		double sum = 0;
@@ -382,9 +383,11 @@ public class WekaUtil {
 			throw new IllegalArgumentException("Portions must sum up to at most 1.");
 		}
 		
-		LinkedList<Instance> shuffledData = new LinkedList<>(data);
-		Collections.shuffle(shuffledData);
-		List<Instances> folds = new ArrayList<>();
+		LinkedList<Integer> indices = new LinkedList<>(ContiguousSet.create(Range.closed(0, data.size() - 1), DiscreteDomain.integers()).asList());
+		Collections.shuffle(indices, rand);
+		
+		@SuppressWarnings("unchecked")
+		Collection<Integer>[] folds = new ArrayList[portions.length + 1];
 		Instances emptyInstances = new Instances(data);
 		emptyInstances.clear();
 		
@@ -392,17 +395,88 @@ public class WekaUtil {
 		for (int i = 0; i <= portions.length; i++) {
 			double portion = i < portions.length ? portions[i] : 1 - sum;
 			int numberOfItems = (int)Math.floor(data.size() * portion);
-			Instances fold = new Instances(emptyInstances);
-			for (int j = 0; j < numberOfItems; j++)
-				fold.add(shuffledData.poll());
-			folds.add(fold);
+			Collection<Integer> fold = new ArrayList<>(numberOfItems);
+			for (int j = 0; j < numberOfItems; j++) {
+				fold.add(indices.poll());
+			}
+			folds[i] = fold;
 		}
 		
 		/* distribute remaining ones over the folds */
-		while (!shuffledData.isEmpty()) {
-			folds.get(rand.nextInt(folds.size())).add(shuffledData.poll());
+		while (!indices.isEmpty()) {
+			folds[rand.nextInt(folds.length)].add(indices.poll());
 		}
-		assert folds.stream().mapToInt(l -> l.size()).sum() == data.size() : "The number of instancens in the folds does not equal the number of instances in the original dataset";
+		assert Arrays.asList(folds).stream().mapToInt(l -> l.size()).sum() == data.size() : "The number of instancens in the folds does not equal the number of instances in the original dataset";
+		return folds;
+	}
+	
+	public static List<Instances> realizeSplit(final Instances data, final Collection<Integer>[] split) {
+		List<Instances> folds = new ArrayList<>();
+		Instances emptyInstances = new Instances(data);
+		emptyInstances.clear();
+		for (Collection<Integer> foldIndices : split) {
+			Instances fold = new Instances(emptyInstances);
+			foldIndices.stream().forEach(i -> fold.add(data.get(i)));
+			folds.add(fold);
+		}
+		return folds;
+	}
+	
+	public static Collection<Integer>[] getStratifiedSplitIndices(final Instances data, final Random rand, final double... pPortions) {
+
+		/* check that portions sum up to s.th. smaller than 1 */
+		double sum = 0;
+		double[] portions = new double[pPortions.length + 1];
+		for (int i = 0; i < pPortions.length; i++) {
+			sum += pPortions[i];
+			portions[i] = pPortions[i];
+		}
+		if (sum > 1) {
+			throw new IllegalArgumentException("Portions must sum up to at most 1.");
+		}
+		portions[pPortions.length] = 1 - sum;
+		
+		/* determine how many instance of each class should be in each fold */
+		Map<String, Integer> numberOfInstancesPerClass = getNumberOfInstancesPerClass(data);
+		Map<String, Map<Integer, Integer>> numberOfInstancesPerClassAndFold = new HashMap<>();
+		for (String className : numberOfInstancesPerClass.keySet()) {
+			numberOfInstancesPerClassAndFold.put(className, new HashMap<>());
+			for (int foldId = 0; foldId < portions.length; foldId ++) {
+				numberOfInstancesPerClassAndFold.get(className).put(foldId, (int)Math.ceil(numberOfInstancesPerClass.get(className) * portions[foldId]));
+			}
+		}
+		
+		/* compute basic structures for iteration over all instances */
+		Map<String, Integer> nextBinForClass = new HashMap<>();
+		numberOfInstancesPerClass.keySet().forEach(c -> nextBinForClass.put(c, 0));
+		Collection<Integer>[] folds = new ArrayList[portions.length];
+		LinkedList<Integer> indices = new LinkedList<>(ContiguousSet.create(Range.closed(0, data.size() - 1), DiscreteDomain.integers()).asList());
+		Collections.shuffle(indices, rand);
+		
+		/* first assign one item of each class to each fold */
+		while (!indices.isEmpty()) {
+			int index = indices.poll();
+			
+			/* determine fold where to place this instance */
+			String assignedClass = WekaUtil.getClassName(data.get(index));
+			int foldId = nextBinForClass.get(assignedClass);
+			if (folds[foldId] == null)
+				folds[foldId] = new ArrayList<>();
+			Collection<Integer> fold = folds[foldId];
+			fold.add(index);
+			
+			/* update point for class */
+			numberOfInstancesPerClassAndFold.get(assignedClass).put(foldId, numberOfInstancesPerClassAndFold.get(assignedClass).get(foldId) -1);
+			do {
+				foldId ++;
+				if (foldId >= portions.length)
+					foldId = 0;
+			}
+			while (numberOfInstancesPerClassAndFold.get(assignedClass).get(foldId) <= 0);
+			nextBinForClass.put(assignedClass, foldId);
+		}
+		
+		assert Arrays.asList(folds).stream().mapToInt(l -> l.size()).sum() == data.size() : "The number of instancens in the folds does not equal the number of instances in the original dataset";
 		return folds;
 	}
 
@@ -686,5 +760,28 @@ public class WekaUtil {
 		if (cloneMethod != null)
 			return (Classifier) cloneMethod.invoke(c);
 		return AbstractClassifier.makeCopy(c);
+	}
+	
+	public static int[] getIndicesOfSubset(final Instances data, final Instances subset) {
+		
+		InstanceComparator comp = new InstanceComparator();
+		List<Instance> copy = new ArrayList<>(subset);
+		
+		/* init rows object */
+		int[] result = new int[subset.size()];
+		int row = 0;
+		int i = 0;
+		for (Instance ref : data) {
+			for (int j = 0; j < copy.size(); j++) {
+				Instance inst = copy.get(j);
+				if (inst != null && comp.compare(inst, ref) == 0) {
+					result[i++] = row;
+					copy.remove(j--);
+				}
+			}
+			row ++;
+			System.out.println(i + "/" + copy.size());
+		}
+		return result;
 	}
 }

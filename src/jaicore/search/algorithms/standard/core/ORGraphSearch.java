@@ -46,6 +46,7 @@ import jaicore.search.structure.graphgenerator.PathGoalTester;
 import jaicore.search.structure.graphgenerator.RootGenerator;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
+import scala.util.regexp.Base.Star;
 
 public class ORGraphSearch<T, A, V extends Comparable<V>>
 		implements IObservableORGraphSearch<T, A, V>, Iterable<List<NodeExpansionDescription<T, A>>>, Iterator<List<NodeExpansionDescription<T, A>>> {
@@ -134,7 +135,13 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 			V label = null;
 			boolean computationTimedout = false;
 			try {
+				long startComputation = System.currentTimeMillis();
 				label = nodeEvaluator.f(newNode);
+				
+				/* check whether the required time exceeded the timeout */
+				long computationTime = System.currentTimeMillis() - startComputation;
+				if (timeoutForComputationOfF > 0 && computationTime > timeoutForComputationOfF + 1000)
+					logger.warn("Computation of f for node {} took {}ms, which is more than the allowed {}ms", newNode, computationTime, timeoutForComputationOfF);
 			} catch (InterruptedException e) {
 				graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_timedout"));
 				newNode.setAnnotation("fError", "Timeout");
