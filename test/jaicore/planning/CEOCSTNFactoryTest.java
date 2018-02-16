@@ -16,7 +16,7 @@ public class CEOCSTNFactoryTest {
 		CEOCSTNPlanningProblem problem = StandardProblemFactory.getNestedDichotomyCreationProblem("root", init, true, 0, 0);
 		System.out.println("Methods\n---------------");
 		problem.getDomain().getMethods().stream().forEach(m -> System.out.println(m));
-		System.out.println("Operations\n---------------");
+		System.out.println("\nOperations\n---------------");
 		problem.getDomain().getOperations().stream().forEach(o -> System.out.println(o));
 	}
 
