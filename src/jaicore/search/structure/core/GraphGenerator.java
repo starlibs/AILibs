@@ -23,6 +23,14 @@ public interface GraphGenerator<T, A> {
 	public boolean isSelfContained(); 
 	
 	
+	/**
+	 * indicates if the nodes should be get a unique id, or if all should get the same id od -1
+	 * @return
+	 * 		<code>true</code> if every node should get an unique id, otherwise return <code>false</code>
+	 */
+	public  void setNodeNumbering(boolean nodenumbering);
+	
+	
 	
 	
 }
