@@ -6,11 +6,20 @@ public abstract class AbstractGraphGenerator<T,A> implements GraphGenerator<T, A
 	
 	//variables needed for creating ids;
 	private boolean nodeNumbering;
-	private Random rnd;
+	Random rnd;
 	
 	public AbstractGraphGenerator() {
-		this.nodeNumbering = false;
-		this.rnd = new Random();
+		this(1);
+	}
+	
+	/**
+	 * Constructor for an AbstractGraphGenerator, which implements versioning, with a given seed.
+	 * @param seed
+	 * 		The seed for the random generator, which generates the ids.
+	 */
+	public AbstractGraphGenerator(int seed) {
+		this. nodeNumbering = false;
+		this.rnd = new Random(seed);
 	}
 	
 	/**
@@ -34,6 +43,16 @@ public abstract class AbstractGraphGenerator<T,A> implements GraphGenerator<T, A
 			return rnd.nextInt(Integer.MAX_VALUE);
 		else
 			return -1;
+	}
+	
+	/**
+	 * Creates a new Random generator with the given seed
+	 * @param seed
+	 * 		The seed for the random generator.
+	 */
+			
+	public void reset(int seed) {
+		this.rnd = new Random(seed);
 	}
 
 }
