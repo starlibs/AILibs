@@ -1,9 +1,10 @@
-build.commands=org.eclipse.jdt.core.javabuilder,org.eclipse.wst.common.project.facet.core.builder,org.eclipse.wst.validation.validationbuilder
+#Fri Feb 16 09:54:33 CET 2018
 connection.arguments=
-connection.java.home=null
 connection.jvm.arguments=
-connection.project.dir=../ML-Plan
-derived.resources=.gradle,build
-eclipse.preferences.version=1
+build.commands=org.eclipse.jdt.core.javabuilder,org.eclipse.wst.common.project.facet.core.builder,org.eclipse.wst.validation.validationbuilder
+connection.project.dir=
 natures=org.eclipse.jdt.core.javanature,org.eclipse.wst.common.project.facet.core.nature,org.eclipse.wst.common.modulecore.ModuleCoreNature,org.eclipse.buildship.core.gradleprojectnature
+eclipse.preferences.version=1
+connection.java.home=null
+derived.resources=.gradle,build
 project.path=\:JAICore
