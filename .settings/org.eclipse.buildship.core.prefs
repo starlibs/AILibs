@@ -1,9 +1,11 @@
 #Fri Feb 16 09:54:33 CET 2018
 connection.arguments=
 connection.jvm.arguments=
-connection.project.dir=.
+
+connection.project.dir=../LibraryParser
 derived.resources=.gradle,build
 eclipse.preferences.version=1
+
 build.commands=org.eclipse.jdt.core.javabuilder,org.eclipse.wst.common.project.facet.core.builder,org.eclipse.wst.validation.validationbuilder
 connection.project.dir=
 
