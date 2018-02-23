@@ -242,11 +242,11 @@ public class WekaUtil {
 				return true;
 			}
 		}
-		// iterate over every attribute.
+		// iterate over every attribute and check.
 		for(Enumeration<Attribute> attributeEnum = wekaInstances.enumerateAttributes();
 				attributeEnum.hasMoreElements();) {
 			Attribute currentAttr = attributeEnum.nextElement();
-			if(currentAttr.isNominal()) {
+			if(!currentAttr.isNominal()) {
 				continue; // ignore attributes that aren't nominal. 
 			}
 			if(currentAttr == classAttribute) {
