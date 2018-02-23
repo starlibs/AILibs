@@ -228,6 +228,37 @@ public class WekaUtil {
 		}
 		return labeledInstances;
 	}
+	
+	/**
+	 * Returns true if there is at least one nominal attribute in the given dataset that has more than 2 values.
+	 * @param wekaInstances dataset that is checked
+	 * @param ignoreClassAttribute if true class attribute is ignored.
+	 */
+	public static boolean needsBinarization(final Instances wekaInstances, final boolean ignoreClassAttribute) {
+		Attribute classAttribute = wekaInstances.classAttribute();
+		if(!ignoreClassAttribute) {
+			// check if class Attribute has more than 2 values:
+			if(classAttribute.isNominal() && classAttribute.numValues() >= 3) {
+				return true;
+			}
+		}
+		// iterate over every attribute.
+		for(Enumeration<Attribute> attributeEnum = wekaInstances.enumerateAttributes();
+				attributeEnum.hasMoreElements();) {
+			Attribute currentAttr = attributeEnum.nextElement();
+			if(currentAttr.isNominal()) {
+				continue; // ignore attributes that aren't nominal. 
+			}
+			if(currentAttr == classAttribute) {
+				// ignore class attribute (already checked in case ignoreClassAttribute==true):
+				continue;
+			}
+			if(currentAttr.numValues() >= 3) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	public static jaicore.ml.interfaces.LabeledInstance<String> toJAICoreLabeledInstance(final Instance wekaInst) {
 		jaicore.ml.interfaces.LabeledInstance<String> inst = new SimpleLabeledInstanceImpl();
