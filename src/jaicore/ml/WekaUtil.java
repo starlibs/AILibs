@@ -19,6 +19,8 @@ import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.reflect.MethodUtils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.common.collect.ContiguousSet;
 import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.Range;
@@ -30,6 +32,9 @@ import jaicore.ml.core.WekaCompatibleInstancesImpl;
 import jaicore.ml.interfaces.LabeledInstance;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
+import weka.classifiers.rules.M5Rules;
+import weka.classifiers.rules.PART;
+import weka.classifiers.trees.M5P;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
@@ -47,25 +52,34 @@ public class WekaUtil {
 	public static Collection<String> getBasicLearners() {
 		Collection<String> classifiers = new ArrayList<>();
 
+
+		classifiers.add("weka.classifiers.bayes.BayesNet");
+		classifiers.add("weka.classifiers.bayes.NaiveBayes");
+		classifiers.add("weka.classifiers.bayes.NaiveBayesMultinomial");
 		classifiers.add("weka.classifiers.functions.GaussianProcesses");
 		classifiers.add("weka.classifiers.functions.LinearRegression");
-		classifiers.add("weka.classifiers.functions.SMO");
 		classifiers.add("weka.classifiers.functions.Logistic");
 		classifiers.add("weka.classifiers.functions.MultilayerPerceptron");
 		classifiers.add("weka.classifiers.functions.SimpleLinearRegression");
 		classifiers.add("weka.classifiers.functions.SimpleLogistic");
+		classifiers.add("weka.classifiers.functions.SMO");
 		classifiers.add("weka.classifiers.functions.VotedPerceptron");
-		classifiers.add("weka.classifiers.bayes.NaiveBayes");
-		classifiers.add("weka.classifiers.bayes.BayesNet");
-		classifiers.add("weka.classifiers.bayes.NaiveBayesMultinomial");
 		classifiers.add("weka.classifiers.lazy.IBk");
 		classifiers.add("weka.classifiers.lazy.KStar");
 		classifiers.add("weka.classifiers.rules.JRip");
+		classifiers.add("weka.classifiers.rules.M5Rules");
+		classifiers.add("weka.classifiers.rules.OneR");
+		classifiers.add("weka.classifiers.rules.PART");
+		classifiers.add("weka.classifiers.rules.ZeroR");
 		classifiers.add("weka.classifiers.trees.DecisionStump");
+		classifiers.add("weka.classifiers.trees.HoeffdingTree");		
 		classifiers.add("weka.classifiers.trees.J48");
 		classifiers.add("weka.classifiers.trees.LMT");
+		classifiers.add("weka.classifiers.trees.LMT");
+		classifiers.add("weka.classifiers.trees.M5P");
 		classifiers.add("weka.classifiers.trees.RandomForest");
 		classifiers.add("weka.classifiers.trees.RandomTree");
+		classifiers.add("weka.classifiers.trees.REPTree");
 		return classifiers;
 	}
 
@@ -479,6 +493,13 @@ public class WekaUtil {
 		assert Arrays.asList(folds).stream().mapToInt(l -> l.size()).sum() == data.size() : "The number of instancens in the folds does not equal the number of instances in the original dataset";
 		return folds;
 	}
+	
+	public static ArrayNode splitToJsonArray(Collection<Integer>[] splitDecision) {
+		ObjectMapper om = new ObjectMapper();
+		ArrayNode an = om.createArrayNode();
+		splitDecision[0].stream().sorted().forEach(v -> an.add(v));
+		return an;
+	}
 
 	public static List<Instances> getStratifiedSplit(final Instances data, final Random rand, final double... portions) {
 
@@ -741,6 +762,8 @@ public class WekaUtil {
 	}
 
 	public static Instances removeClassAttribute(final Instances data) throws Exception {
+		if (data.classIndex() < 0)
+			throw new IllegalArgumentException("Class index of data is not set!");
 		Remove remove = new Remove();
 		remove.setAttributeIndices("" + (data.classIndex() + 1));
 		remove.setInputFormat(data);
