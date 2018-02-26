@@ -77,7 +77,7 @@ public class SimpleLabeledInstancesImpl extends ArrayList<LabeledInstance<String
 	}
 
 	@Override
-	public Collection<String> getOccurringLabels() {
+	public ArrayList<String> getOccurringLabels() {
 		return new ArrayList<>(occurringLabels);
 	}
 	
