@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import de.upb.crc901.mlplan.classifiers.BRAutoWeka;
+import de.upb.crc901.mlplan.classifiers.BRBase;
 import de.upb.crc901.mlplan.classifiers.MultiLabelGraphBasedPipelineSearcher;
 import de.upb.crc901.mlplan.classifiers.TwoPhaseHTNBasedPipelineSearcher;
 import de.upb.crc901.mlplan.core.MySQLMultiLabelExperimentLogger;
@@ -47,8 +48,8 @@ public class ICML2018MLTest {
 	}
 
 	protected String[] getClassifierNames() {
-		return new String[] { "MLPlan-Multilabel-", "BR-Auto-WEKA" };
-//		return new String[] { "MLPlan-Multilabel-" };
+//		return new String[] { "MLPlan-Multilabel-", "BR-Auto-WEKA" };
+		return new String[] { "BRBase" };
 	}
 
 	protected String[] getSetupNames() {
@@ -95,7 +96,7 @@ public class ICML2018MLTest {
 				bs.setSolutionEvaluatorFactory4Selection(() -> new MonteCarloCrossValidationEvaluator(evaluator, 10, .7f));
 				bs.setRce(new BalancedRandomCompletionEvaluator(random, 3, new MonteCarloCrossValidationEvaluator(evaluator, 3, .7f)));
 				bs.setTimeoutPerNodeFComputation(1000 * (timeout == 60 ? 15 : 300 ));
-//				bs.setTooltipGenerator(new TFDTooltipGenerator<>());
+				bs.setTooltipGenerator(new TFDTooltipGenerator<>());
 				bs.setPortionOfDataForPhase2(.3f);
 				// BR br = new BR();
 				// br.setClassifier(bs);
@@ -104,6 +105,9 @@ public class ICML2018MLTest {
 			}
 			case "BR-Auto-WEKA":
 				return new BRAutoWeka(seed, timeout, 16 * 1024); // give 9gb to AutoWEKA
+
+			case "BRBase":
+				return new BRBase(seed, 1000 * timeout, evaluator);
 			}
 		} catch (Throwable e) {
 			e.printStackTrace();
@@ -120,7 +124,7 @@ public class ICML2018MLTest {
 	}
 
 	protected int[] getTimeouts() {
-		return new int[] { 3600, 86400 / 2 };
+		return new int[] { 20 * 60 };
 	}
 
 	protected int getNumberOfCPUS() {

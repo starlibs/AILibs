@@ -14,6 +14,7 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.reflect.ConstructorUtils;
+import org.apache.commons.lang3.reflect.MethodUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -303,7 +304,7 @@ public class PlanExecutor {
 						for (int i = 0; i < inputs.size(); i++) {
 							ConstantParam input = inputs.get(i);
 							String inputVal = input.getName();
-							if (inputVal.startsWith("\"") && inputVal.endsWith("\"")) {
+							if ((inputVal.startsWith("\"") && inputVal.endsWith("\"")) || (inputVal.startsWith("'") && inputVal.endsWith("'"))) {
 								params[i] = inputVal.substring(1, inputVal.length() - 1);
 								inputClasses[i] = String.class;
 							} else {
@@ -316,6 +317,8 @@ public class PlanExecutor {
 							}
 						}
 						Constructor<?> ctor = ConstructorUtils.getMatchingAccessibleConstructor(clazz, inputClasses);
+						if (ctor == null)
+							throw new IllegalArgumentException("No constructor with input classes " + Arrays.toString(inputClasses) + " found for class " + clazz);
 						variables.put(outParam, ctor.newInstance(params));
 						logger.info("Binding new object {} to variable {}.", variables.get(outParam), outParam);
 						continue;
@@ -323,10 +326,33 @@ public class PlanExecutor {
 					/* otherwise, prepare everything for the method invocation */
 					else {
 
+						/* determine input classes (ignore first input since it is assumed to be the object reference (no static calls for the time being)) */
+						Class<?>[] inputClasses = new Class<?>[inputs.size() - 1];
+						{
+							int index = 0;
+							for (ConstantParam input : inputs) {
+								if (index == 0) {
+									index ++;
+									continue;
+								}
+								if (variables.containsKey(input))
+									inputClasses[index - 1] = variables.get(input).getClass();
+								else if (input.getName().matches("^-?\\d+$")) {
+									inputClasses[index - 1] = Integer.class;
+								}
+								else {
+									inputClasses[index - 1] = String.class;
+								}
+								index++;
+							}
+						}
+
 						/* try to determine the method called here */
-						method = getMethod(clazz, opSplit[1], inputs, variables);
+						method = MethodUtils.getMatchingAccessibleMethod(clazz, opSplit[1], inputClasses);
+						
+						// method = getMethod(clazz, opSplit[1], inputs, variables);
 						if (method == null)
-							throw new IllegalArgumentException("Could not find the method " + opSplit[1] + " for class " + clazz + " to be called with inputs " + inputs + ". ");
+							throw new IllegalArgumentException("Could not find the method " + opSplit[1] + " for class " + clazz + " to be called with inputs " + inputs.stream().skip(1).collect(Collectors.toList()) + " corresponding to classes " + Arrays.toString(inputClasses) + ". ");
 
 						if (Modifier.isStatic(method.getModifiers())) {
 							params = new Object[method.getParameterCount()];
@@ -422,7 +448,7 @@ public class PlanExecutor {
 			case "noop": {
 				break;
 			}
-			
+
 			case "assignTo": {
 				if (variables.containsKey(inputs.get(0))) {
 					variables.put(outParam, variables.get(inputs.get(0)));

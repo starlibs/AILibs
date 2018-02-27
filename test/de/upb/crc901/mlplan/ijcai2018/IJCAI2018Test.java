@@ -6,7 +6,7 @@ import java.util.Random;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import de.upb.crc901.mlplan.classifiers.TwoPhaseHTNBasedPipelineSearcher;
-import de.upb.crc901.mlplan.core.MySQLExperimentLogger;
+import de.upb.crc901.mlplan.core.MySQLMLPlanExperimentLogger;
 import de.upb.crc901.mlplan.search.algorithms.GraphBasedPipelineSearcher;
 import de.upb.crc901.mlplan.search.evaluators.BalancedRandomCompletionEvaluator;
 import de.upb.crc901.mlplan.search.evaluators.MonteCarloCrossValidationEvaluator;
@@ -16,7 +16,7 @@ import weka.classifiers.Classifier;
 
 public class IJCAI2018Test extends ExperimentRunner {
 
-	MySQLExperimentLogger expLogger = new MySQLExperimentLogger("isys-db.cs.upb.de", "mlplan", "UMJXI4WlNqbS968X", "mlplan_results");
+	MySQLMLPlanExperimentLogger expLogger = new MySQLMLPlanExperimentLogger("isys-db.cs.upb.de", "mlplan", "UMJXI4WlNqbS968X", "mlplan_results");
 	
 	public IJCAI2018Test(File datasetFolder) {
 		super(datasetFolder);

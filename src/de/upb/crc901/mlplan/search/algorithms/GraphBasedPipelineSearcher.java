@@ -15,7 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.upb.crc901.mlplan.core.ClassifierSolutionAnnotation;
-import de.upb.crc901.mlplan.core.MySQLExperimentLogger;
+import de.upb.crc901.mlplan.core.MySQLMLPlanExperimentLogger;
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.graphvisualizer.TooltipGenerator;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
@@ -38,7 +38,7 @@ public abstract class GraphBasedPipelineSearcher<T, A, V extends Comparable<V>> 
 	private boolean showGraph;
 	private int timeout;
 	private Random random;
-	private transient MySQLExperimentLogger experimentLogger;
+	private transient MySQLMLPlanExperimentLogger experimentLogger;
 	private File solutionLogFile;
 
 	protected final Map<Classifier, ClassifierSolutionAnnotation<V>> solutionAnnotationCache = new HashMap<>();
@@ -291,11 +291,11 @@ public abstract class GraphBasedPipelineSearcher<T, A, V extends Comparable<V>> 
 		logger.warn("Received cancel signal, but ignoring it.");
 	}
 
-	public MySQLExperimentLogger getExperimentLogger() {
+	public MySQLMLPlanExperimentLogger getExperimentLogger() {
 		return experimentLogger;
 	}
 
-	public void setExperimentLogger(MySQLExperimentLogger experimentLogger) {
+	public void setExperimentLogger(MySQLMLPlanExperimentLogger experimentLogger) {
 		this.experimentLogger = experimentLogger;
 	}
 
