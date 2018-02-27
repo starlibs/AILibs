@@ -1,0 +1,20 @@
+{
+    "Catalano.Imaging.Filters.Crop" : {
+        "methods" :  {
+            "ApplyInPlace" : {
+                "resultmap":{
+                    "out" : "i1"
+                }
+            }
+        }
+    },
+    "Catalano.Imaging.Filters.Resize":{
+        "methods" :  {
+            "applyInPlace" : {
+                "resultmap":{
+                    "out" : "i1"
+                }
+            }
+        }
+    }
+}
