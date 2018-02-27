@@ -19,13 +19,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import de.upb.crc901.mlplan.classifiers.TwoPhaseHTNBasedPipelineSearcher;
+import de.upb.crc901.mlplan.core.MLUtil;
 import de.upb.crc901.mlplan.core.MySQLMLPlanExperimentLogger;
-import de.upb.crc901.mlplan.search.evaluators.BalancedRandomCompletionEvaluator;
-import de.upb.crc901.mlplan.search.evaluators.MonteCarloCrossValidationEvaluator;
 import de.upb.crc901.mlplan.search.evaluators.MulticlassEvaluator;
 import de.upb.crc901.services.core.HttpServiceServer;
+import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.ml.WekaUtil;
+import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;
+import jaicore.search.algorithms.standard.bestfirst.BestFirst;
+import jaicore.search.algorithms.standard.core.ORGraphSearch;
 import weka.classifiers.Classifier;
 import weka.core.Instances;
 
@@ -76,24 +79,23 @@ public class SCC2018MLTest {
 				// bs.setHtnSearchSpaceFile(new File("testrsc/automl3.testset"));
 				// bs.setEvaluablePredicateFile(new File("testrsc/automl-reduction.evaluablepredicates"));
 				
-//				ORGraphSearch<TFDNode, String, Double> bf = new BestFirst<>(MLUtil.getGraphGenerator(new File("testrsc/services/automl-services.searchspace"), null, null, null), n -> 0.0);
-//				new SimpleGraphVisualizationWindow<>(bf.getEventBus()).getPanel().setTooltipGenerator(new TFDTooltipGenerator<>());;
+				ORGraphSearch<TFDNode, String, Double> bf = new BestFirst<>(MLUtil.getGraphGenerator(new File("testrsc/services/automl-services.searchspace"), null, null, null), n -> 0.0);
+				new SimpleGraphVisualizationWindow<>(bf.getEventBus()).getPanel().setTooltipGenerator(new TFDTooltipGenerator<>());;
+				
+				while(bf.nextSolution() != null);		
 //				
-//				bf.nextSolution();
-				
-				
-				bs.setRandom(random);
-				bs.setTimeout(1000 * timeout);
-				bs.setNumberOfCPUs(1);
-				MulticlassEvaluator evaluator = new MulticlassEvaluator(random);
-				bs.setSolutionEvaluatorFactory4Search(() -> new MonteCarloCrossValidationEvaluator(evaluator, 3, .7f));
-				bs.setSolutionEvaluatorFactory4Selection(() -> new MonteCarloCrossValidationEvaluator(evaluator, 10, .7f));
-				bs.setRce(new BalancedRandomCompletionEvaluator(random, 3, new MonteCarloCrossValidationEvaluator(evaluator, 3, .7f)));
-				bs.setTimeoutPerNodeFComputation(1000 * (timeout == 60 ? 15 : 300));
-				bs.setTooltipGenerator(new TFDTooltipGenerator<>());
-				bs.setPortionOfDataForPhase2(.3f);
-				bs.setExperimentLogger(expLogger);
-				evaluator.getMeasurementEventBus().register(expLogger);
+//				bs.setRandom(random);
+//				bs.setTimeout(1000 * timeout);
+//				bs.setNumberOfCPUs(1);
+//				MulticlassEvaluator evaluator = new MulticlassEvaluator(random);
+//				bs.setSolutionEvaluatorFactory4Search(() -> new MonteCarloCrossValidationEvaluator(evaluator, 3, .7f));
+//				bs.setSolutionEvaluatorFactory4Selection(() -> new MonteCarloCrossValidationEvaluator(evaluator, 10, .7f));
+//				bs.setRce(new BalancedRandomCompletionEvaluator(random, 3, new MonteCarloCrossValidationEvaluator(evaluator, 3, .7f)));
+//				bs.setTimeoutPerNodeFComputation(1000 * (timeout == 60 ? 15 : 300));
+//				bs.setTooltipGenerator(new TFDTooltipGenerator<>());
+//				bs.setPortionOfDataForPhase2(.3f);
+//				bs.setExperimentLogger(expLogger);
+//				evaluator.getMeasurementEventBus().register(expLogger);
 				return bs;
 			}
 			}
