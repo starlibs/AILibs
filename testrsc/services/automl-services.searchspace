@@ -136,6 +136,7 @@ null:String
 --:String
 
 localhost:String
+131.234.79.111:String
 8000:Number
 
 
@@ -211,7 +212,8 @@ INCLUDE testrsc/services/sl.services
 
 de.upb.crc901.services.mlpipeline.MLPipelinePlan:__construct;;config;;;(0)
 de.upb.crc901.services.mlpipeline.MLPipelinePlan:onHost;c,host,port;;;;(0)
-de.upb.crc901.services.mlpipeline.MLPipelinePlan:setClassifier;c,classifier;;;;(0)
+de.upb.crc901.services.mlpipeline.MLPipelinePlan:setClassifier;c,classifier;p;;;(0)
+de.upb.crc901.services.mlpipeline.MLPipelinePlan:addOptions;c,p,option,value;;;;(0)
 de.upb.crc901.services.mlpipeline.MLPipelinePlan:addWekaAttributeSelection;c,searcher,evaluator;;;definesWekaPreprocessor(c);(0)
 de.upb.crc901.services.mlpipeline.MLServicePipeline:__construct;config;pl;;;(0)
 
@@ -246,8 +248,8 @@ inducePipelineWithoutPP;	induce(x,returnedClassifier);	x,returnedClassifier,conf
 
 
 
-INCLUDE testrsc/services/weka.methods
-#INCLUDE testrsc/services/sl.methods
+#INCLUDE testrsc/services/weka.methods
+INCLUDE testrsc/services/sl.methods
 
 [Rules]
 

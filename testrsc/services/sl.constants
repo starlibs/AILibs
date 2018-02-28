@@ -451,3 +451,9 @@ sklearn.tree.DecisionTreeClassifier:String
 #  Classes: sklearn.neural_network.MLPClassifier
 #  Type: float
 -validation_fraction:String
+
+
+
+## SVC Kernels
+poly:String
+rbf:String
