@@ -1,0 +1,453 @@
+## OUR CLASSIFIERS
+
+sklearn.ensemble.AdaBoostClassifier:String
+sklearn.ensemble.BaggingClassifier:String
+sklearn.mixture.BayesianGaussianMixture:String
+sklearn.naive_bayes.BernoulliNB:String
+sklearn.tree.ExtraTreeClassifier:String
+sklearn.ensemble.ExtraTreesClassifier:String
+sklearn.naive_bayes.GaussianNB:String
+sklearn.gaussian_process.GaussianProcessClassifier:String
+sklearn.ensemble.GradientBoostingClassifier:String
+# deprecated
+sklearn.neighbors.KNeighborsClassifier:String 
+sklearn.neighbors.LSHForest:String
+sklearn.discriminant_analysis.LinearDiscriminantAnalysis:String
+sklearn.svm.LinearSVC:String
+sklearn.linear_model.LogisticRegression:String
+sklearn.linear_model.LogisticRegressionCV:String
+sklearn.naive_bayes.MultinomialNB:String
+sklearn.neighbors.NearestNeighbors:String
+sklearn.svm.NuSVC:String
+sklearn.linear_model.PassiveAggressiveClassifier:String
+sklearn.discriminant_analysis.QuadraticDiscriminantAnalysis:String
+sklearn.neighbors.RadiusNeighborsClassifier:String
+sklearn.ensemble.RandomForestClassifier:String
+sklearn.linear_model.RidgeClassifier:String
+sklearn.linear_model.RidgeClassifierCV:String
+sklearn.linear_model.SGDClassifier:String
+sklearn.svm.SVC:String
+sklearn.neural_network.MLPClassifier:String
+sklearn.tree.DecisionTreeClassifier:String
+
+### CLASSIFIER OPTIONS ###
+
+#  Classes: sklearn.ensemble.AdaBoostClassifier, sklearn.neighbors.KNeighborsClassifier, sklearn.neighbors.NearestNeighbors, sklearn.neighbors.RadiusNeighborsClassifier
+#  Type: str
+-algorithm:String
+
+#  Classes: sklearn.ensemble.AdaBoostClassifier, sklearn.ensemble.BaggingClassifier
+#  Type: complex/multitype
+-base_estimator:String
+
+#  Classes: sklearn.ensemble.AdaBoostClassifier, sklearn.ensemble.GradientBoostingClassifier, sklearn.linear_model.SGDClassifier, sklearn.neural_network.MLPClassifier
+#  Type: str
+-learning_rate:String
+
+#  Classes: sklearn.ensemble.AdaBoostClassifier, sklearn.ensemble.BaggingClassifier, sklearn.ensemble.ExtraTreesClassifier, sklearn.ensemble.GradientBoostingClassifier, sklearn.neighbors.LSHForest, sklearn.ensemble.RandomForestClassifier
+#  Type: int
+-n_estimators:String
+
+#  Classes: sklearn.ensemble.AdaBoostClassifier, sklearn.ensemble.BaggingClassifier, sklearn.mixture.BayesianGaussianMixture, sklearn.tree.ExtraTreeClassifier, sklearn.ensemble.ExtraTreesClassifier, sklearn.gaussian_process.GaussianProcessClassifier, sklearn.ensemble.GradientBoostingClassifier, sklearn.neighbors.LSHForest, sklearn.svm.LinearSVC, sklearn.linear_model.LogisticRegression, sklearn.linear_model.LogisticRegressionCV, sklearn.svm.NuSVC, sklearn.linear_model.PassiveAggressiveClassifier, sklearn.ensemble.RandomForestClassifier, sklearn.linear_model.RidgeClassifier, sklearn.linear_model.SGDClassifier, sklearn.svm.SVC, sklearn.neural_network.MLPClassifier, sklearn.tree.DecisionTreeClassifier
+#  Type: complex/multitype
+-random_state:String
+
+#  Classes: sklearn.ensemble.BaggingClassifier, sklearn.ensemble.ExtraTreesClassifier, sklearn.ensemble.RandomForestClassifier
+#  Type: bool
+-bootstrap:String
+
+#  Classes: sklearn.ensemble.BaggingClassifier
+#  Type: bool
+-bootstrap_features:String
+
+#  Classes: sklearn.ensemble.BaggingClassifier, sklearn.tree.ExtraTreeClassifier, sklearn.ensemble.ExtraTreesClassifier, sklearn.ensemble.GradientBoostingClassifier, sklearn.ensemble.RandomForestClassifier, sklearn.tree.DecisionTreeClassifier
+#  Type: complex/multitype
+-max_features:String
+
+#  Classes: sklearn.ensemble.BaggingClassifier
+#  Type: float
+-max_samples:String
+
+#  Classes: sklearn.ensemble.BaggingClassifier, sklearn.ensemble.ExtraTreesClassifier, sklearn.gaussian_process.GaussianProcessClassifier, sklearn.neighbors.KNeighborsClassifier, sklearn.linear_model.LogisticRegression, sklearn.linear_model.LogisticRegressionCV, sklearn.neighbors.NearestNeighbors, sklearn.linear_model.PassiveAggressiveClassifier, sklearn.ensemble.RandomForestClassifier, sklearn.linear_model.SGDClassifier
+#  Type: int
+-n_jobs:String
+
+#  Classes: sklearn.ensemble.BaggingClassifier, sklearn.ensemble.ExtraTreesClassifier, sklearn.ensemble.RandomForestClassifier
+#  Type: bool
+-oob_score:String
+
+#  Classes: sklearn.ensemble.BaggingClassifier, sklearn.mixture.BayesianGaussianMixture, sklearn.ensemble.ExtraTreesClassifier, sklearn.ensemble.GradientBoostingClassifier, sklearn.svm.LinearSVC, sklearn.linear_model.LogisticRegression, sklearn.linear_model.LogisticRegressionCV, sklearn.svm.NuSVC, sklearn.linear_model.PassiveAggressiveClassifier, sklearn.ensemble.RandomForestClassifier, sklearn.linear_model.SGDClassifier, sklearn.svm.SVC, sklearn.neural_network.MLPClassifier
+#  Type: bool
+-verbose:String
+
+#  Classes: sklearn.ensemble.BaggingClassifier, sklearn.mixture.BayesianGaussianMixture, sklearn.ensemble.ExtraTreesClassifier, sklearn.gaussian_process.GaussianProcessClassifier, sklearn.ensemble.GradientBoostingClassifier, sklearn.linear_model.LogisticRegression, sklearn.linear_model.PassiveAggressiveClassifier, sklearn.ensemble.RandomForestClassifier, sklearn.linear_model.SGDClassifier, sklearn.neural_network.MLPClassifier
+#  Type: bool
+-warm_start:String
+
+#  Classes: sklearn.mixture.BayesianGaussianMixture
+#  Type: complex/multitype
+-covariance_prior:String
+
+#  Classes: sklearn.mixture.BayesianGaussianMixture
+#  Type: str
+-covariance_type:String
+
+#  Classes: sklearn.mixture.BayesianGaussianMixture
+#  Type: complex/multitype
+-degrees_of_freedom_prior:String
+
+#  Classes: sklearn.mixture.BayesianGaussianMixture
+#  Type: str
+-init_params:String
+
+#  Classes: sklearn.mixture.BayesianGaussianMixture, sklearn.svm.LinearSVC, sklearn.linear_model.LogisticRegression, sklearn.linear_model.LogisticRegressionCV, sklearn.svm.NuSVC, sklearn.linear_model.PassiveAggressiveClassifier, sklearn.linear_model.RidgeClassifier, sklearn.linear_model.SGDClassifier, sklearn.svm.SVC, sklearn.neural_network.MLPClassifier
+#  Type: int
+-max_iter:String
+
+#  Classes: sklearn.mixture.BayesianGaussianMixture
+#  Type: complex/multitype
+-mean_precision_prior:String
+
+#  Classes: sklearn.mixture.BayesianGaussianMixture
+#  Type: complex/multitype
+-mean_prior:String
+
+#  Classes: sklearn.mixture.BayesianGaussianMixture, sklearn.discriminant_analysis.LinearDiscriminantAnalysis
+#  Type: complex/multitype
+-n_components:String
+
+#  Classes: sklearn.mixture.BayesianGaussianMixture
+#  Type: int
+-n_init:String
+
+#  Classes: sklearn.mixture.BayesianGaussianMixture
+#  Type: float
+-reg_covar:String
+
+#  Classes: sklearn.mixture.BayesianGaussianMixture, sklearn.discriminant_analysis.LinearDiscriminantAnalysis, sklearn.svm.LinearSVC, sklearn.linear_model.LogisticRegression, sklearn.linear_model.LogisticRegressionCV, sklearn.svm.NuSVC, sklearn.linear_model.PassiveAggressiveClassifier, sklearn.discriminant_analysis.QuadraticDiscriminantAnalysis, sklearn.linear_model.RidgeClassifier, sklearn.linear_model.SGDClassifier, sklearn.svm.SVC, sklearn.neural_network.MLPClassifier
+#  Type: float
+-tol:String
+
+#  Classes: sklearn.mixture.BayesianGaussianMixture
+#  Type: int
+-verbose_interval:String
+
+#  Classes: sklearn.mixture.BayesianGaussianMixture
+#  Type: complex/multitype
+-weight_concentration_prior:String
+
+#  Classes: sklearn.mixture.BayesianGaussianMixture
+#  Type: str
+-weight_concentration_prior_type:String
+
+#  Classes: sklearn.naive_bayes.BernoulliNB, sklearn.naive_bayes.MultinomialNB, sklearn.linear_model.RidgeClassifier, sklearn.linear_model.SGDClassifier, sklearn.neural_network.MLPClassifier
+#  Type: float
+-alpha:String
+
+#  Classes: sklearn.naive_bayes.BernoulliNB
+#  Type: float
+-binarize:String
+
+#  Classes: sklearn.naive_bayes.BernoulliNB, sklearn.naive_bayes.MultinomialNB
+#  Type: complex/multitype
+-class_prior:String
+
+#  Classes: sklearn.naive_bayes.BernoulliNB, sklearn.naive_bayes.MultinomialNB
+#  Type: bool
+-fit_prior:String
+
+#  Classes: sklearn.tree.ExtraTreeClassifier, sklearn.ensemble.ExtraTreesClassifier, sklearn.svm.LinearSVC, sklearn.linear_model.LogisticRegression, sklearn.linear_model.LogisticRegressionCV, sklearn.svm.NuSVC, sklearn.linear_model.PassiveAggressiveClassifier, sklearn.ensemble.RandomForestClassifier, sklearn.linear_model.RidgeClassifier, sklearn.linear_model.RidgeClassifierCV, sklearn.linear_model.SGDClassifier, sklearn.svm.SVC, sklearn.tree.DecisionTreeClassifier
+#  Type: complex/multitype
+-class_weight:String
+
+#  Classes: sklearn.tree.ExtraTreeClassifier, sklearn.ensemble.ExtraTreesClassifier, sklearn.ensemble.GradientBoostingClassifier, sklearn.ensemble.RandomForestClassifier, sklearn.tree.DecisionTreeClassifier
+#  Type: str
+-criterion:String
+
+#  Classes: sklearn.tree.ExtraTreeClassifier, sklearn.ensemble.ExtraTreesClassifier, sklearn.ensemble.GradientBoostingClassifier, sklearn.ensemble.RandomForestClassifier, sklearn.tree.DecisionTreeClassifier
+#  Type: complex/multitype
+-max_depth:String
+
+#  Classes: sklearn.tree.ExtraTreeClassifier, sklearn.ensemble.ExtraTreesClassifier, sklearn.ensemble.GradientBoostingClassifier, sklearn.ensemble.RandomForestClassifier, sklearn.tree.DecisionTreeClassifier
+#  Type: complex/multitype
+-max_leaf_nodes:String
+
+#  Classes: sklearn.tree.ExtraTreeClassifier, sklearn.ensemble.ExtraTreesClassifier, sklearn.ensemble.GradientBoostingClassifier, sklearn.ensemble.RandomForestClassifier, sklearn.tree.DecisionTreeClassifier
+#  Type: float
+-min_impurity_decrease:String
+
+#  Classes: sklearn.tree.ExtraTreeClassifier, sklearn.ensemble.ExtraTreesClassifier, sklearn.ensemble.GradientBoostingClassifier, sklearn.ensemble.RandomForestClassifier, sklearn.tree.DecisionTreeClassifier
+#  Type: complex/multitype
+-min_impurity_split:String
+
+#  Classes: sklearn.tree.ExtraTreeClassifier, sklearn.ensemble.ExtraTreesClassifier, sklearn.ensemble.GradientBoostingClassifier, sklearn.ensemble.RandomForestClassifier, sklearn.tree.DecisionTreeClassifier
+#  Type: int
+-min_samples_leaf:String
+
+#  Classes: sklearn.tree.ExtraTreeClassifier, sklearn.ensemble.ExtraTreesClassifier, sklearn.ensemble.GradientBoostingClassifier, sklearn.ensemble.RandomForestClassifier, sklearn.tree.DecisionTreeClassifier
+#  Type: int
+-min_samples_split:String
+
+#  Classes: sklearn.tree.ExtraTreeClassifier, sklearn.ensemble.ExtraTreesClassifier, sklearn.ensemble.GradientBoostingClassifier, sklearn.ensemble.RandomForestClassifier, sklearn.tree.DecisionTreeClassifier
+#  Type: float
+-min_weight_fraction_leaf:String
+
+#  Classes: sklearn.tree.ExtraTreeClassifier, sklearn.tree.DecisionTreeClassifier
+#  Type: str
+-splitter:String
+
+#  Classes: sklearn.naive_bayes.GaussianNB, sklearn.discriminant_analysis.LinearDiscriminantAnalysis, sklearn.discriminant_analysis.QuadraticDiscriminantAnalysis
+#  Type: complex/multitype
+-priors:String
+
+#  Classes: sklearn.gaussian_process.GaussianProcessClassifier
+#  Type: bool
+-copy_X_train:String
+
+#  Classes: sklearn.gaussian_process.GaussianProcessClassifier, sklearn.svm.NuSVC, sklearn.svm.SVC
+#  Type: str
+-kernel:String
+
+#  Classes: sklearn.gaussian_process.GaussianProcessClassifier
+#  Type: int
+-max_iter_predict:String
+
+#  Classes: sklearn.gaussian_process.GaussianProcessClassifier, sklearn.svm.LinearSVC, sklearn.linear_model.LogisticRegression, sklearn.linear_model.LogisticRegressionCV
+#  Type: str
+-multi_class:String
+
+#  Classes: sklearn.gaussian_process.GaussianProcessClassifier
+#  Type: int
+-n_restarts_optimizer:String
+
+#  Classes: sklearn.gaussian_process.GaussianProcessClassifier
+#  Type: str
+-optimizer:String
+
+#  Classes: sklearn.ensemble.GradientBoostingClassifier
+#  Type: complex/multitype
+-init:String
+
+#  Classes: sklearn.ensemble.GradientBoostingClassifier, sklearn.svm.LinearSVC, sklearn.linear_model.PassiveAggressiveClassifier, sklearn.linear_model.SGDClassifier
+#  Type: str
+-loss:String
+
+#  Classes: sklearn.ensemble.GradientBoostingClassifier, sklearn.tree.DecisionTreeClassifier
+#  Type: bool
+-presort:String
+
+#  Classes: sklearn.ensemble.GradientBoostingClassifier
+#  Type: float
+-subsample:String
+
+#  Classes: sklearn.neighbors.KNeighborsClassifier, sklearn.neighbors.NearestNeighbors, sklearn.neighbors.RadiusNeighborsClassifier
+#  Type: int
+-leaf_size:String
+
+#  Classes: sklearn.neighbors.KNeighborsClassifier, sklearn.neighbors.NearestNeighbors, sklearn.neighbors.RadiusNeighborsClassifier
+#  Type: str
+-metric:String
+
+#  Classes: sklearn.neighbors.KNeighborsClassifier, sklearn.neighbors.NearestNeighbors, sklearn.neighbors.RadiusNeighborsClassifier
+#  Type: complex/multitype
+-metric_params:String
+
+#  Classes: sklearn.neighbors.KNeighborsClassifier, sklearn.neighbors.LSHForest, sklearn.neighbors.NearestNeighbors
+#  Type: int
+-n_neighbors:String
+
+#  Classes: sklearn.neighbors.KNeighborsClassifier, sklearn.neighbors.NearestNeighbors, sklearn.neighbors.RadiusNeighborsClassifier
+#  Type: int
+-p:String
+
+#  Classes: sklearn.neighbors.KNeighborsClassifier, sklearn.neighbors.RadiusNeighborsClassifier
+#  Type: str
+-weights:String
+
+#  Classes: sklearn.neighbors.LSHForest
+#  Type: int
+-min_hash_match:String
+
+#  Classes: sklearn.neighbors.LSHForest
+#  Type: int
+-n_candidates:String
+
+#  Classes: sklearn.neighbors.LSHForest, sklearn.neighbors.NearestNeighbors, sklearn.neighbors.RadiusNeighborsClassifier
+#  Type: float
+-radius:String
+
+#  Classes: sklearn.neighbors.LSHForest
+#  Type: float
+-radius_cutoff_ratio:String
+
+#  Classes: sklearn.discriminant_analysis.LinearDiscriminantAnalysis
+#  Type: complex/multitype
+-shrinkage:String
+
+#  Classes: sklearn.discriminant_analysis.LinearDiscriminantAnalysis, sklearn.linear_model.LogisticRegression, sklearn.linear_model.LogisticRegressionCV, sklearn.linear_model.RidgeClassifier, sklearn.neural_network.MLPClassifier
+#  Type: str
+-solver:String
+
+#  Classes: sklearn.discriminant_analysis.LinearDiscriminantAnalysis, sklearn.discriminant_analysis.QuadraticDiscriminantAnalysis
+#  Type: bool
+-store_covariance:String
+
+#  Classes: sklearn.svm.LinearSVC, sklearn.linear_model.LogisticRegression, sklearn.linear_model.PassiveAggressiveClassifier, sklearn.svm.SVC
+#  Type: float
+-C:String
+
+#  Classes: sklearn.svm.LinearSVC, sklearn.linear_model.LogisticRegression, sklearn.linear_model.LogisticRegressionCV
+#  Type: bool
+-dual:String
+
+#  Classes: sklearn.svm.LinearSVC, sklearn.linear_model.LogisticRegression, sklearn.linear_model.LogisticRegressionCV, sklearn.linear_model.PassiveAggressiveClassifier, sklearn.linear_model.RidgeClassifier, sklearn.linear_model.RidgeClassifierCV, sklearn.linear_model.SGDClassifier
+#  Type: bool
+-fit_intercept:String
+
+#  Classes: sklearn.svm.LinearSVC, sklearn.linear_model.LogisticRegression, sklearn.linear_model.LogisticRegressionCV
+#  Type: float
+-intercept_scaling:String
+
+#  Classes: sklearn.svm.LinearSVC, sklearn.linear_model.LogisticRegression, sklearn.linear_model.LogisticRegressionCV, sklearn.linear_model.SGDClassifier
+#  Type: str
+-penalty:String
+
+#  Classes: sklearn.linear_model.LogisticRegressionCV
+#  Type: int
+-Cs:String
+
+#  Classes: sklearn.linear_model.LogisticRegressionCV, sklearn.linear_model.RidgeClassifierCV
+#  Type: complex/multitype
+-cv:String
+
+#  Classes: sklearn.linear_model.LogisticRegressionCV
+#  Type: bool
+-refit:String
+
+#  Classes: sklearn.linear_model.LogisticRegressionCV, sklearn.linear_model.RidgeClassifierCV
+#  Type: complex/multitype
+-scoring:String
+
+#  Classes: sklearn.svm.NuSVC, sklearn.svm.SVC
+#  Type: int
+-cache_size:String
+
+#  Classes: sklearn.svm.NuSVC, sklearn.svm.SVC
+#  Type: float
+-coef0:String
+
+#  Classes: sklearn.svm.NuSVC, sklearn.svm.SVC
+#  Type: str
+-decision_function_shape:String
+
+#  Classes: sklearn.svm.NuSVC, sklearn.svm.SVC
+#  Type: int
+-degree:String
+
+#  Classes: sklearn.svm.NuSVC, sklearn.svm.SVC
+#  Type: str
+-gamma:String
+
+#  Classes: sklearn.svm.NuSVC
+#  Type: float
+-nu:String
+
+#  Classes: sklearn.svm.NuSVC, sklearn.svm.SVC
+#  Type: bool
+-probability:String
+
+#  Classes: sklearn.svm.NuSVC, sklearn.svm.SVC
+#  Type: bool
+-shrinking:String
+
+#  Classes: sklearn.linear_model.PassiveAggressiveClassifier, sklearn.linear_model.SGDClassifier
+#  Type: bool
+-average:String
+
+#  Classes: sklearn.linear_model.PassiveAggressiveClassifier, sklearn.linear_model.SGDClassifier
+#  Type: complex/multitype
+-n_iter:String
+
+#  Classes: sklearn.linear_model.PassiveAggressiveClassifier, sklearn.linear_model.SGDClassifier, sklearn.neural_network.MLPClassifier
+#  Type: bool
+-shuffle:String
+
+#  Classes: sklearn.discriminant_analysis.QuadraticDiscriminantAnalysis
+#  Type: float
+-reg_param:String
+
+#  Classes: sklearn.discriminant_analysis.QuadraticDiscriminantAnalysis
+#  Type: complex/multitype
+-store_covariances:String
+
+#  Classes: sklearn.neighbors.RadiusNeighborsClassifier
+#  Type: complex/multitype
+-outlier_label:String
+
+#  Classes: sklearn.linear_model.RidgeClassifier
+#  Type: bool
+-copy_X:String
+
+#  Classes: sklearn.linear_model.RidgeClassifier, sklearn.linear_model.RidgeClassifierCV
+#  Type: bool
+-normalize:String
+
+#  Classes: sklearn.linear_model.RidgeClassifierCV
+#  Type: tuple
+-alphas:String
+
+#  Classes: sklearn.linear_model.SGDClassifier, sklearn.neural_network.MLPClassifier
+#  Type: float
+-epsilon:String
+
+#  Classes: sklearn.linear_model.SGDClassifier
+#  Type: float
+-eta0:String
+
+#  Classes: sklearn.linear_model.SGDClassifier
+#  Type: float
+-l1_ratio:String
+
+#  Classes: sklearn.linear_model.SGDClassifier, sklearn.neural_network.MLPClassifier
+#  Type: float
+-power_t:String
+
+#  Classes: sklearn.neural_network.MLPClassifier
+#  Type: str
+-activation:String
+
+#  Classes: sklearn.neural_network.MLPClassifier
+#  Type: str
+-batch_size:String
+
+#  Classes: sklearn.neural_network.MLPClassifier
+#  Type: float
+-beta_1:String
+
+#  Classes: sklearn.neural_network.MLPClassifier
+#  Type: float
+-beta_2:String
+
+#  Classes: sklearn.neural_network.MLPClassifier
+#  Type: bool
+-early_stopping:String
+
+#  Classes: sklearn.neural_network.MLPClassifier
+#  Type: tuple
+-hidden_layer_sizes:String
+
+#  Classes: sklearn.neural_network.MLPClassifier
+#  Type: float
+-learning_rate_init:String
+
+#  Classes: sklearn.neural_network.MLPClassifier
+#  Type: float
+-momentum:String
+
+#  Classes: sklearn.neural_network.MLPClassifier
+#  Type: bool
+-nesterovs_momentum:String
+
+#  Classes: sklearn.neural_network.MLPClassifier
+#  Type: float
+-validation_fraction:String

@@ -21,6 +21,7 @@ import de.upb.crc901.mlplan.classifiers.TwoPhaseHTNBasedPipelineSearcher;
 import de.upb.crc901.mlplan.search.evaluators.MulticlassEvaluator;
 import jaicore.basic.MathExt;
 import jaicore.ml.WekaUtil;
+import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.meta.AutoWEKAClassifier;
@@ -155,7 +156,7 @@ public class PipelineEvaluation {
 			((TwoPhaseHTNBasedPipelineSearcher) c).setSolutionLogFile(new File(conf.getSolutionLogDir() + File.separator + "solutions-" + k + "-" + experimentId + "-" + datasetName + "-" + seedId + ".log"));
 			((TwoPhaseHTNBasedPipelineSearcher) c).setSolutionEvaluator(new MulticlassEvaluator(r), conf.getValidationAlgorithm());
 			((TwoPhaseHTNBasedPipelineSearcher) c).setPortionOfDataForPhase2(conf.getPortionOfDataForPhase2());
-//			((TwoPhasePipelineSearcher) c).setTooltipGenerator(new TFDTooltipGenerator());
+			((TwoPhaseHTNBasedPipelineSearcher) c).setTooltipGenerator(new TFDTooltipGenerator());
 		}
 		
 		/* determine result file */

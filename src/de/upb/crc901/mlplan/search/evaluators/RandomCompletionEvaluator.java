@@ -21,10 +21,12 @@ import de.upb.crc901.mlplan.core.CodePlanningUtil;
 import de.upb.crc901.mlplan.core.MLUtil;
 import de.upb.crc901.mlplan.core.SolutionEvaluator;
 import jaicore.basic.SetUtil;
+import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.logic.fol.structure.ConstantParam;
 import jaicore.logic.fol.structure.Literal;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
+import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;
 import jaicore.planning.model.ceoc.CEOCAction;
 import jaicore.planning.model.task.ceocstn.CEOCSTNUtil;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
@@ -219,14 +221,15 @@ public abstract class RandomCompletionEvaluator<V extends Comparable<V>> impleme
 							}, random);
 
 							/* now complete the current path by the dfs-solution */
+//							new SimpleGraphVisualizationWindow<>(completer.getEventBus()).getPanel().setTooltipGenerator(new TFDTooltipGenerator<>());
 							List<TFDNode> completedPath = new ArrayList<>(n.externalPath());
 							logger.info("Starting search for next solution ...");
 							List<TFDNode> pathCompletion = completer.nextSolution();
-							logger.info("Found solution {}", pathCompletion);
 							if (pathCompletion == null) {
-								logger.warn("No completion was found for currently remaining tasks {}", currentNode.getRemainingTasks());
+								logger.warn("No completion was found for currently remaining tasks {}. Nodes expanded in search: {}", currentNode.getRemainingTasks(), completer.getExpandedCounter());
 								return null;
 							}
+							logger.info("Found solution {}", pathCompletion);
 							pathCompletion.remove(0);
 							completedPath.addAll(pathCompletion);
 

@@ -76,7 +76,7 @@
 		<level value="info" />
 	</logger>
 		
-	<logger name="de.upb.crc901.mlplan.search.evaluators.multilabel.MultilabelEvaluator">
+	<logger name="de.upb.crc901.services.core">
 		<level value="warn" />
 	</logger>
 </log4j:configuration>

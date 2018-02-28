@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.EventBus;
 
+import de.upb.crc901.services.mlpipeline.MLServicePipeline;
 import jaicore.ml.WekaUtil;
 import weka.classifiers.Classifier;
 import weka.core.Instance;
@@ -36,19 +37,33 @@ public class MulticlassEvaluator implements BasicMLEvaluator, Serializable {
 	}
 	
 	public double getErrorRateForSplit(Classifier c, Instances train, Instances test) throws Exception {
+		logger.info("Split size is {}/{}", train.size(), test.size());
 		Classifier cCopy = WekaUtil.cloneClassifier(c);
 		cCopy.buildClassifier(train);
+		return loss(cCopy,test);
+	}
+	
+	public double loss(Classifier c, Instances test) throws Exception {
 		int mistakes = 0;
-		logger.info("Split size is {}/{}", train.size(), test.size());
 		
-		for (Instance i : test) {
-			if (i.classValue() != cCopy.classifyInstance(i))
-				mistakes++;
+		if (c instanceof MLServicePipeline) {
+			MLServicePipeline cc = (MLServicePipeline)c;
+			double[] predictions = cc.classifyInstances(test);
+			for (int i = 0; i < predictions.length; i++) {
+				if (predictions[i] != test.get(i).classValue())
+					mistakes ++;
+			}
 		}
+		else {
+			for (Instance i : test) {
+				if (i.classValue() != c.classifyInstance(i))
+					mistakes++;
+			}
+		}
+		
+		
 		double error = mistakes * 100f / test.size();
-		Instances data = new Instances(train);
-		data.addAll(test);
-		measurementEventBus.post(new ClassifierMeasurementEvent<Double>(cCopy, error));
+		measurementEventBus.post(new ClassifierMeasurementEvent<Double>(c, error));
 		return error;
 	}
 

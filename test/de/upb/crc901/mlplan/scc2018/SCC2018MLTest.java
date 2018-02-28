@@ -1,4 +1,4 @@
-package de.upb.crc901.mlplan.icml2018;
+package de.upb.crc901.mlplan.scc2018;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -18,38 +18,31 @@ import java.util.stream.Stream;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
-import de.upb.crc901.mlplan.classifiers.BRAutoWeka;
-import de.upb.crc901.mlplan.classifiers.BRBase;
-import de.upb.crc901.mlplan.classifiers.MultiLabelGraphBasedPipelineSearcher;
 import de.upb.crc901.mlplan.classifiers.TwoPhaseHTNBasedPipelineSearcher;
-import de.upb.crc901.mlplan.core.MySQLMultiLabelExperimentLogger;
-import de.upb.crc901.mlplan.search.evaluators.BalancedRandomCompletionEvaluator;
-import de.upb.crc901.mlplan.search.evaluators.MonteCarloCrossValidationEvaluator;
-import de.upb.crc901.mlplan.search.evaluators.multilabel.ExactMatchMultilabelEvaluator;
-import de.upb.crc901.mlplan.search.evaluators.multilabel.F1AverageMultilabelEvaluator;
-import de.upb.crc901.mlplan.search.evaluators.multilabel.HammingMultilabelEvaluator;
-import de.upb.crc901.mlplan.search.evaluators.multilabel.JaccardMultilabelEvaluator;
-import de.upb.crc901.mlplan.search.evaluators.multilabel.MultilabelEvaluator;
-import de.upb.crc901.mlplan.search.evaluators.multilabel.RankMultilabelEvaluator;
+import de.upb.crc901.mlplan.core.MLUtil;
+import de.upb.crc901.mlplan.core.MySQLMLPlanExperimentLogger;
+import de.upb.crc901.mlplan.search.evaluators.MulticlassEvaluator;
+import de.upb.crc901.services.core.HttpServiceServer;
+import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.ml.WekaUtil;
+import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;
-import meka.classifiers.multilabel.MultiLabelClassifier;
-import meka.core.MLUtils;
+import jaicore.search.algorithms.standard.bestfirst.BestFirst;
+import jaicore.search.algorithms.standard.core.ORGraphSearch;
 import weka.classifiers.Classifier;
 import weka.core.Instances;
 
-public class ICML2018MLTest {
+public class SCC2018MLTest {
 
 	private final File datasetFolder;
-	private final MySQLMultiLabelExperimentLogger expLogger = new MySQLMultiLabelExperimentLogger("isys-db.cs.upb.de", "mlplan", "UMJXI4WlNqbS968X", "mlplan_multilabel_results");
+	private final MySQLMLPlanExperimentLogger expLogger = new MySQLMLPlanExperimentLogger("isys-db.cs.upb.de", "mlplan", "UMJXI4WlNqbS968X", "mlplan_services_results");
 
-	public ICML2018MLTest(File datasetFolder) {
+	public SCC2018MLTest(File datasetFolder) {
 		this.datasetFolder = datasetFolder;
 	}
 
 	protected String[] getClassifierNames() {
-//		return new String[] { "MLPlan-Multilabel-", "BR-Auto-WEKA" };
-		return new String[] { "BRBase" };
+		return new String[] { "MLS-Plan" };
 	}
 
 	protected String[] getSetupNames() {
@@ -68,46 +61,43 @@ public class ICML2018MLTest {
 		expLogger.createAndSetRun(dataset, rowsForSearch, algoName, seed, timeout, numCPUs, setupName);
 	}
 
-	protected void logExperimentResult(String dataset, ArrayNode rowsForSearch, String algoName, int seed, int timeout, int numCPUs, String setupName, Classifier c,
-			double loss_f1, double loss_hamming, double loss_exact, double loss_jaccard, double loss_rank) {
-		expLogger.addResultEntry(c, loss_f1, loss_hamming, loss_exact, loss_jaccard, loss_rank);
+	protected void logExperimentResult(String dataset, ArrayNode rowsForSearch, String algoName, int seed, int timeout, int numCPUs, String setupName, Classifier c, double loss) {
+		expLogger.addResultEntry(c, loss);
 		expLogger.close();
 	}
 
-	protected MultiLabelClassifier getConfiguredClassifier(int seed, String setupName, String algoName, int timeout, MultilabelEvaluator evaluator) {
+	protected Classifier getConfiguredClassifier(int seed, String setupName, String algoName, int timeout) {
 		try {
 			switch (algoName) {
-			case "MLPlan-Multilabel-": {
-
-				// timeout = 60 * 6;
+			case "MLS-Plan": {
+				
+				
 				Random random = new Random(seed);
-				// TwoPhasePipelineSearcher<Double> bs = new BalancedSearcher(random, 1000 * timeout);
 				TwoPhaseHTNBasedPipelineSearcher<Double> bs = new TwoPhaseHTNBasedPipelineSearcher<>();
 
-				// MultilabelEvaluator evaluator = new HammingMultilabelEvaluator(random);
-
-				bs.setHtnSearchSpaceFile(new File("testrsc/multilabel/mlplan-multilabel.searchspace"));
+				bs.setHtnSearchSpaceFile(new File("testrsc/services/automl-services.searchspace"));
 				// bs.setHtnSearchSpaceFile(new File("testrsc/automl3.testset"));
 				// bs.setEvaluablePredicateFile(new File("testrsc/automl-reduction.evaluablepredicates"));
-				bs.setRandom(random);
-				bs.setTimeout(1000 * timeout);
-				bs.setNumberOfCPUs(4);
-				bs.setSolutionEvaluatorFactory4Search(() -> new MonteCarloCrossValidationEvaluator(evaluator, 3, .7f));
-				bs.setSolutionEvaluatorFactory4Selection(() -> new MonteCarloCrossValidationEvaluator(evaluator, 10, .7f));
-				bs.setRce(new BalancedRandomCompletionEvaluator(random, 3, new MonteCarloCrossValidationEvaluator(evaluator, 3, .7f)));
-				bs.setTimeoutPerNodeFComputation(1000 * (timeout == 60 ? 15 : 300 ));
-				bs.setTooltipGenerator(new TFDTooltipGenerator<>());
-				bs.setPortionOfDataForPhase2(.3f);
-				// BR br = new BR();
-				// br.setClassifier(bs);
-				return new MultiLabelGraphBasedPipelineSearcher<>(bs);
-				// return br;
+				
+				ORGraphSearch<TFDNode, String, Double> bf = new BestFirst<>(MLUtil.getGraphGenerator(new File("testrsc/services/automl-services.searchspace"), null, null, null), n -> 0.0);
+				new SimpleGraphVisualizationWindow<>(bf.getEventBus()).getPanel().setTooltipGenerator(new TFDTooltipGenerator<>());;
+				
+				while(bf.nextSolution() != null);		
+//				
+//				bs.setRandom(random);
+//				bs.setTimeout(1000 * timeout);
+//				bs.setNumberOfCPUs(1);
+//				MulticlassEvaluator evaluator = new MulticlassEvaluator(random);
+//				bs.setSolutionEvaluatorFactory4Search(() -> new MonteCarloCrossValidationEvaluator(evaluator, 3, .7f));
+//				bs.setSolutionEvaluatorFactory4Selection(() -> new MonteCarloCrossValidationEvaluator(evaluator, 10, .7f));
+//				bs.setRce(new BalancedRandomCompletionEvaluator(random, 3, new MonteCarloCrossValidationEvaluator(evaluator, 3, .7f)));
+//				bs.setTimeoutPerNodeFComputation(1000 * (timeout == 60 ? 15 : 300));
+//				bs.setTooltipGenerator(new TFDTooltipGenerator<>());
+//				bs.setPortionOfDataForPhase2(.3f);
+//				bs.setExperimentLogger(expLogger);
+//				evaluator.getMeasurementEventBus().register(expLogger);
+				return bs;
 			}
-			case "BR-Auto-WEKA":
-				return new BRAutoWeka(seed, timeout, 16 * 1024); // give 9gb to AutoWEKA
-
-			case "BRBase":
-				return new BRBase(seed, 1000 * timeout, evaluator);
 			}
 		} catch (Throwable e) {
 			e.printStackTrace();
@@ -116,23 +106,24 @@ public class ICML2018MLTest {
 	}
 
 	public static void main(String[] args) throws Exception {
+		HttpServiceServer.TEST_SERVER();
 		File folder = new File(args[0]);
 		int k = Integer.valueOf(args[1]);
-		ICML2018MLTest runner = new ICML2018MLTest(folder);
-		runner.run(k, "de.upb.crc901.mlplan.search.evaluators.multilabel.F1AverageMultilabelEvaluator");
+		SCC2018MLTest runner = new SCC2018MLTest(folder);
+		runner.run(k);
 		System.exit(0);
 	}
 
 	protected int[] getTimeouts() {
-		return new int[] { 20 * 60 };
+		return new int[] { 60 };
 	}
 
 	protected int getNumberOfCPUS() {
 		return 4;
 	}
 
-	public void run(int k, String evalName) throws Exception {
-
+	public void run(int k) throws Exception {
+		
 		/* get classifiers */
 		String[] classifiers = getClassifierNames();
 		String[] setups = getSetupNames();
@@ -183,8 +174,8 @@ public class ICML2018MLTest {
 
 		/* create actual dataset */
 		Instances data = getKthInstances(datasetFolder, datasetId);
-		MLUtils.prepareData(data);
-		Collection<Integer>[] overallSplitIndices = WekaUtil.getArbitrarySplit(data, r, getTrainingPortion());
+		data.setClassIndex(data.numAttributes() - 1);
+		Collection<Integer>[] overallSplitIndices = WekaUtil.getStratifiedSplitIndices(data, r, getTrainingPortion());
 		List<Instances> overallSplit = WekaUtil.realizeSplit(data, overallSplitIndices);
 		Instances internalData = overallSplit.get(0);
 		Instances testData = overallSplit.get(1);
@@ -192,8 +183,8 @@ public class ICML2018MLTest {
 
 		/* create actual classifier */
 		System.out.println("Now configuring classifier ...");
-		MultilabelEvaluator eval = (MultilabelEvaluator) Class.forName(evalName).getConstructor(Random.class).newInstance(new Random(seedId));
-		MultiLabelClassifier c = getConfiguredClassifier(seedId, setups[setupId], classifiers[algoId], timeouts[timeoutId], eval);
+		MulticlassEvaluator eval = new MulticlassEvaluator(new Random(seedId));
+		Classifier c = getConfiguredClassifier(seedId, setups[setupId], classifiers[algoId], timeouts[timeoutId]);
 		System.out.println("Classifier configured. Determining result files.");
 
 		/* now search for the best pipeline */
@@ -210,22 +201,22 @@ public class ICML2018MLTest {
 			System.out.println("Search has finished. Runtime: " + (end - start) / 1000f + " s");
 
 			/* check performance of the pipeline */
-			int loss_f1  = (int) (new F1AverageMultilabelEvaluator(r).loss(c, testData) * 100);
-			int loss_hamming  = (int) (new HammingMultilabelEvaluator(r).loss(c, testData) * 100);
-			int loss_exact  = (int) (new ExactMatchMultilabelEvaluator(r).loss(c, testData) * 100);
-			int loss_jaccard  = (int) (new JaccardMultilabelEvaluator(r).loss(c, testData) * 100);
-			int loss_rank  = (int) (new RankMultilabelEvaluator(r).loss(c, testData) * 100);
-			System.out.println("Sending error Rate " + loss_f1 + "/" + loss_hamming + "/" + loss_exact + "/" + loss_jaccard + "/" + loss_rank + " to logger.");
+			int loss = (int) (eval.loss(c, testData) * 100);
+			System.out.println("Sending error Rate " + loss + " to logger.");
 
-			logExperimentResult(data.relationName(), an, classifiers[algoId], seedId, timeouts[timeoutId], getNumberOfCPUS(), setups[setupId], c, loss_f1, loss_hamming, loss_exact, loss_jaccard, loss_rank);
+			logExperimentResult(data.relationName(), an, classifiers[algoId], seedId, timeouts[timeoutId], getNumberOfCPUS(), setups[setupId], c, loss);
 		} catch (Throwable e) {
 			e.printStackTrace();
 			System.out.println("Sending error Rate -10000 to logger.");
-			logExperimentResult(data.relationName(), an, classifiers[algoId], seedId, timeouts[timeoutId], getNumberOfCPUS(), setups[setupId], c, -10000, -10000, -10000, -10000, -10000);
+			logExperimentResult(data.relationName(), an, classifiers[algoId], seedId, timeouts[timeoutId], getNumberOfCPUS(), setups[setupId], c, -10000);
 		}
 	}
 
 	public String getExperimentDescription(File folder, int datasetId, Classifier algorithm, int seed) {
+		if (folder == null)
+			throw new IllegalArgumentException("Folder must not be null");
+		if (algorithm == null)
+			throw new IllegalArgumentException("Algorithm must not be null");
 		try {
 			return algorithm.getClass().getName() + "-" + getAvailableDatasets(folder).get(datasetId).getName() + "-" + seed;
 		} catch (IOException e) {

@@ -1,8 +1,5 @@
 package de.upb.crc901.mlplan.core;
 
-import java.io.Serializable;
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -11,14 +8,12 @@ import java.sql.Types;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.common.eventbus.Subscribe;
 
-import de.upb.crc901.mlplan.classifiers.BRAutoWeka;
 import de.upb.crc901.mlplan.classifiers.MultiLabelGraphBasedPipelineSearcher;
 import de.upb.crc901.mlplan.search.evaluators.ClassifierMeasurementEvent;
 import jaicore.basic.MathExt;
@@ -29,64 +24,18 @@ import weka.classifiers.SingleClassifierEnhancer;
 import weka.classifiers.meta.AutoWEKAClassifier;
 import weka.core.OptionHandler;
 
-public class MySQLMultiLabelExperimentLogger implements Serializable {
-	private final Connection connect;
-	private Statement statement = null;
+public class MySQLMultiLabelExperimentLogger extends MySQLExperimentLogger {
 	private int runId;
 	private Map<String, Map<String, DescriptiveStatistics>> measurePLValues = new HashMap<>();
 
-	/**
-	 * Initialize connection to database
-	 * 
-	 * @param host
-	 * @param user
-	 * @param password
-	 * @param database
-	 */
 	public MySQLMultiLabelExperimentLogger(String host, String user, String password, String database) {
-		Connection initConnection = null;
-		try {
-			Class.forName("com.mysql.jdbc.Driver");
-			Properties connectionProps = new Properties();
-			connectionProps.put("user", user);
-			connectionProps.put("password", password);
-			initConnection = DriverManager.getConnection("jdbc:mysql://" + host + "/" + database, connectionProps);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		connect = initConnection;
-	}
-
-	public ResultSet executeQuery(String query) throws SQLException {
-		this.statement = connect.createStatement();
-		return this.statement.executeQuery(query);
-	}
-
-	protected PreparedStatement getPreparedStatement(String sql) throws SQLException {
-		return connect.prepareStatement(sql);
-	}
-
-	/**
-	 * Close the connection. No more queries can be sent after having the access object closed
-	 */
-	public void close() {
-		try {
-			if (statement != null) {
-				statement.close();
-			}
-
-			if (connect != null) {
-				connect.close();
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		super(host,user,password,database);
 	}
 
 	public void createAndSetRun(String dataset, ArrayNode rowsForSearch, String algorithm, int seed, int timeout, int cpus, String evaltechnique) {
 		PreparedStatement stmt = null;
 		try {
-			stmt = connect.prepareStatement("INSERT INTO `runs` (dataset, rows_for_search, algorithm, seed, timeout, CPUs, evaltechnique) VALUES (?,?,?,?,?,?,?)",
+			stmt = getConnect().prepareStatement("INSERT INTO `runs` (dataset, rows_for_search, algorithm, seed, timeout, CPUs, evaltechnique) VALUES (?,?,?,?,?,?,?)",
 					Statement.RETURN_GENERATED_KEYS);
 			stmt.setString(1, dataset);
 			stmt.setString(2, rowsForSearch.toString());
@@ -136,7 +85,7 @@ public class MySQLMultiLabelExperimentLogger implements Serializable {
 
 			PreparedStatement stmt = null;
 			try {
-				stmt = connect.prepareStatement(
+				stmt = getConnect().prepareStatement(
 						"INSERT INTO `evaluations` (run_id, searcher, searcherparams, evaluator, evaluatorparams, classifier, classifierparams, pipeline, errorRate, time_train_preprocessors_mean, time_train_classifier_mean, time_execute_preprocessors_mean, time_execute_classifier_mean, time_train_preprocessors_std, time_train_classifier_std, time_execute_preprocessors_std, time_execute_classifier_std) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 				stmt.setInt(1, runId);
 				stmt.setString(2, searcherName);
@@ -178,8 +127,12 @@ public class MySQLMultiLabelExperimentLogger implements Serializable {
 			return;
 		}
 	}
-
+	
 	public void addResultEntry(Classifier classifier, double loss_f1, double loss_hamming, double loss_exact, double loss_jaccard, double loss_rank) {
+		addResultEntry(runId, classifier, loss_f1, loss_hamming, loss_exact, loss_jaccard, loss_rank);
+	}
+	
+	public void addResultEntry(int run_id, Classifier classifier, double loss_f1, double loss_hamming, double loss_exact, double loss_jaccard, double loss_rank) {
 
 		if (classifier instanceof MultiLabelGraphBasedPipelineSearcher) {
 			MultiLabelGraphBasedPipelineSearcher<?, ?, ?> searchAlgo = (MultiLabelGraphBasedPipelineSearcher<?, ?, ?>) classifier;
@@ -210,9 +163,9 @@ public class MySQLMultiLabelExperimentLogger implements Serializable {
 
 			PreparedStatement stmt = null;
 			try {
-				stmt = connect.prepareStatement(
+				stmt = getConnect().prepareStatement(
 						"INSERT INTO `results` (run_id, searcher, searcherparams, evaluator, evaluatorparams, mmclassifier, mmclassifierparams, classifier, classifierparams, pipeline, loss_f1, loss_hamming, loss_exact, loss_jaccard, loss_rank) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
-				stmt.setInt(1, runId);
+				stmt.setInt(1, run_id);
 				stmt.setString(2, searcherName);
 				stmt.setString(3, searcherParams);
 				stmt.setString(4, evaluatorName);
@@ -238,12 +191,12 @@ public class MySQLMultiLabelExperimentLogger implements Serializable {
 					e.printStackTrace();
 				}
 			}
-		} else if (classifier instanceof BRAutoWeka) {
+		} else {
 			PreparedStatement stmt = null;
 			try {
-				stmt = connect.prepareStatement(
+				stmt = getConnect().prepareStatement(
 						"INSERT INTO `results` (run_id, searcher, searcherparams, evaluator, evaluatorparams, mmclassifier, mmclassifierparams, classifier, classifierparams, pipeline, loss_f1, loss_hamming, loss_exact, loss_jaccard, loss_rank) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
-				stmt.setInt(1, runId);
+				stmt.setInt(1, run_id);
 				stmt.setString(2, "");
 				stmt.setString(3, "");
 				stmt.setString(4, "");
@@ -283,8 +236,6 @@ public class MySQLMultiLabelExperimentLogger implements Serializable {
 					e.printStackTrace();
 				}
 			}
-		} else {
-			throw new UnsupportedOperationException("Currently no support for logging results for classifiers of class " + classifier.getClass().getName());
 		}
 	}
 
@@ -314,7 +265,7 @@ public class MySQLMultiLabelExperimentLogger implements Serializable {
 	}
 	
 	public ResultSet getResults(String viewname) throws SQLException {
-		PreparedStatement stmt = connect.prepareStatement("SELECT * FROM " + viewname);
+		PreparedStatement stmt = getConnect().prepareStatement("SELECT * FROM " + viewname);
 		return stmt.executeQuery();
 	}
 }

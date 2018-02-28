@@ -1,87 +1,24 @@
 package de.upb.crc901.mlplan.core;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.sql.Types;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
 
 import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.google.common.eventbus.Subscribe;
-
-import de.upb.crc901.mlplan.search.evaluators.ClassifierMeasurementEvent;
 import jaicore.basic.MathExt;
-import scala.compat.Platform;
-import weka.attributeSelection.ASEvaluation;
-import weka.attributeSelection.ASSearch;
-import weka.classifiers.Classifier;
-import weka.core.OptionHandler;
 
-public class MySQLReductionExperimentLogger {
-	private final Connection connect;
-	private Statement statement = null;
-	
-	/**
-	 * Initialize connection to database
-	 * 
-	 * @param host
-	 * @param user
-	 * @param password
-	 * @param database
-	 */
-	public MySQLReductionExperimentLogger(String host, String user, String password, String database) {
-		Connection initConnection = null;
-		try {
-			Class.forName("com.mysql.jdbc.Driver");
-			Properties connectionProps = new Properties();
-			connectionProps.put("user", user);
-			connectionProps.put("password", password);
-			initConnection = DriverManager.getConnection("jdbc:mysql://" + host + "/" + database, connectionProps);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		connect = initConnection;
-	}
-	
-	public ResultSet executeQuery(String query) throws SQLException {
-		this.statement = connect.createStatement();
-		return this.statement.executeQuery(query);
-	}
-	
-	protected PreparedStatement getPreparedStatement(String sql) throws SQLException {
-		return connect.prepareStatement(sql);
-	}
-	
-	/**
-	 * Close the connection. No more queries can be sent after having the access object closed
-	 */
-	public void close() {
-		try {
-			if (statement != null) {
-				statement.close();
-			}
+public class MySQLReductionExperimentLogger extends MySQLExperimentLogger {
 
-			if (connect != null) {
-				connect.close();
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	public MySQLReductionExperimentLogger (String host, String user, String password, String database) {
+		super (host,user,password,database);
 	}
 	
 	public void addEvaluationEntry(String dataset, String left, String inner, String right, DescriptiveStatistics errorRates, DescriptiveStatistics runTimes) {
 		
 		PreparedStatement stmt = null;
 		try {
-			stmt = connect.prepareStatement("INSERT INTO `reductionstumps` (dataset, left_classifier, inner_classifier, right_classifier, n, error_rate_min, error_rate_max, error_rate_mean, error_rate_std, runtime_min, runtime_max, runtime_mean, runtime_std) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)");
+			stmt = getConnect().prepareStatement("INSERT INTO `reductionstumps` (dataset, left_classifier, inner_classifier, right_classifier, n, error_rate_min, error_rate_max, error_rate_mean, error_rate_std, runtime_min, runtime_max, runtime_mean, runtime_std) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)");
 			int key = 0;
 			stmt.setString(++key, dataset);
 			stmt.setString(++key, left);

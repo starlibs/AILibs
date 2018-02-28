@@ -1,0 +1,10 @@
+scikitLearnClassification;	createClassifier(c); c; ; ; slCreateClassifier(c)
+
+
+# General classifier
+slBaseClassifier; 		slCreateClassifier(c); c; ; ; slCreateBaseClassifier(c)
+slMetaClassifier; 		slCreateClassifier(c); c; ; ; slCreateMetaClassifier(c)
+
+
+### BASE CLASSIFIERS ###
+slLinearSVC; 		slCreateBaseClassifier(c); c,oList,oArray; ; ; sklearn.svm.LinearSVC:__construct(c)

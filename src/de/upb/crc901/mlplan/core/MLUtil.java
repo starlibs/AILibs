@@ -2,6 +2,7 @@ package de.upb.crc901.mlplan.core;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -36,6 +37,7 @@ import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.model.ceoc.CEOCAction;
 import jaicore.planning.model.ceoc.CEOCOperation;
 import jaicore.planning.model.task.ceocipstn.CEOCIPSTNPlanningProblem;
+import jaicore.planning.model.task.ceocipstn.CEOCIPSTN2JSHOP2;
 import weka.classifiers.Classifier;
 import weka.core.Instances;
 import weka.core.OptionHandler;
@@ -60,10 +62,23 @@ public class MLUtil {
 		/* now extract the filter and the classifier object */
 		Optional<Classifier> classifierOpt = variables.keySet().stream().filter(k -> k.getName().equals("classifier")).map(k -> (Classifier) variables.get(k)).findAny();
 		if (!classifierOpt.isPresent()) {
-			throw new IllegalArgumentException("The plan " + plan + " does not define any classifier in the field \"classifier\", so I cannot derive an MLPipeline object from it");
+			StringBuilder sb = new StringBuilder();
+			plan.forEach(a -> sb.append(a.getEncoding() + "\n"));
+			throw new IllegalArgumentException("The plan does not define any classifier in the field \"classifier\", so I cannot derive an MLPipeline object from it. Plan was: \n" + sb.toString());
 		}
 		return classifierOpt.get();
 	}
+	
+	public static String getJSHOP2File(File testsetFile) {
+		StringWriter sw = new StringWriter();
+		try {
+			CEOCIPSTN2JSHOP2.printDomain(getPlanningProblem(testsetFile, null), sw, testsetFile.getName());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return sw.toString();
+	}
+	
 
 	public static CEOCIPSTNPlanningProblem getPlanningProblem(File testsetFile, Instances data) {
 		CEOCIPSTNPlanningProblem problem = new TaskProblemGenerator().getProblem(testsetFile, data);
