@@ -1,16 +1,30 @@
 package de.upb.crc901.mlplan.evaluablepredicates.mlplan.randomforest;
 
-import java.util.Arrays;
-import java.util.List;
+import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
 
-import de.upb.crc901.mlplan.evaluablepredicates.mlplan.OptionsPredicate;
-
-public class AllowedTreeDepthForRandomForests extends OptionsPredicate {
+public class AllowedTreeDepthForRandomForests extends NumericRangeOptionPredicate {
 	
-	private static List<Integer> validValues = Arrays.asList(new Integer[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10});
+	@Override
+	protected double getMin() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 
 	@Override
-	protected List<? extends Object> getValidValues() {
-		return validValues;
+	protected double getMax() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	protected int getSteps() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	protected boolean needsIntegers() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }

@@ -1,3 +1,9 @@
+scikitLearnClassification;	chooseClassifier(c); c; ; ; de.upb.crc901.services.mlpipeline.MLPipelinePlan:onHost(c,'localhost', '5000') -> slCreateClassifier(c)
+
+
+# General classifier
+slBaseClassifier; 		slCreateClassifier(c); c; ; ; slCreateBaseClassifier(c)
+slMetaClassifier; 		slCreateClassifier(c); c; ; ; slCreateMetaClassifier(c)
 
 
 ##########################
