@@ -72,27 +72,24 @@ public class SCC2018MLTest {
 		try {
 			switch (algoName) {
 			case "MLS-Plan": {
-				
 
 				File evaluablePredicatFile = new File("testrsc/services/automl.evaluablepredicates");
-				
+
 				Random random = new Random(seed);
 				TwoPhaseHTNBasedPipelineSearcher<Double> bs = new TwoPhaseHTNBasedPipelineSearcher<>();
 
-
-				
-				
-//				ORGraphSearch<TFDNode, String, Double> bf = new BestFirst<>(MLUtil.getGraphGenerator(new File("testrsc/services/automl-services.searchspace"), evaluablePredicatFile, null, null), n -> 0.0);
-//				new SimpleGraphVisualizationWindow<>(bf.getEventBus()).getPanel().setTooltipGenerator(new TFDTooltipGenerator<>());;
-//				
-//				while(bf.nextSolution() != null);
+				// ORGraphSearch<TFDNode, String, Double> bf = new BestFirst<>(MLUtil.getGraphGenerator(new File("testrsc/services/automl-services.searchspace"), evaluablePredicatFile, null, null), n
+				// -> 0.0);
+				// new SimpleGraphVisualizationWindow<>(bf.getEventBus()).getPanel().setTooltipGenerator(new TFDTooltipGenerator<>());;
+				//
+				// while(bf.nextSolution() != null);
 
 				bs.setHtnSearchSpaceFile(new File("testrsc/services/automl-services.searchspace"));
-				//bs.setHtnSearchSpaceFile(new File("testrsc/automl3.testset"));
+				// bs.setHtnSearchSpaceFile(new File("testrsc/automl3.testset"));
 				bs.setEvaluablePredicateFile(evaluablePredicatFile);
 				bs.setRandom(random);
 				bs.setTimeout(1000 * timeout);
-				bs.setNumberOfCPUs(3);
+				bs.setNumberOfCPUs(4);
 				MulticlassEvaluator evaluator = new MulticlassEvaluator(random);
 				bs.setSolutionEvaluatorFactory4Search(() -> new MonteCarloCrossValidationEvaluator(evaluator, 3, .7f));
 				bs.setSolutionEvaluatorFactory4Selection(() -> new MonteCarloCrossValidationEvaluator(evaluator, 10, .7f));
@@ -100,7 +97,7 @@ public class SCC2018MLTest {
 				bs.setTimeoutPerNodeFComputation(1000 * (timeout == 60 ? 15 : 300));
 				bs.setTooltipGenerator(new TFDTooltipGenerator<>());
 				bs.setPortionOfDataForPhase2(.3f);
-				
+
 				bs.setExperimentLogger(expLogger);
 				evaluator.getMeasurementEventBus().register(expLogger);
 				return bs;
@@ -113,12 +110,17 @@ public class SCC2018MLTest {
 	}
 
 	public static void main(String[] args) throws Exception {
-		HttpServiceServer.TEST_SERVER();
-		File folder = new File(args[0]);
-		int k = Integer.valueOf(args[1]);
-		SCC2018MLTest runner = new SCC2018MLTest(folder);
-		runner.run(k);
-		System.exit(0);
+		HttpServiceServer server = HttpServiceServer.TEST_SERVER();
+		try {
+
+			File folder = new File(args[0]);
+			int k = Integer.valueOf(args[1]);
+			SCC2018MLTest runner = new SCC2018MLTest(folder);
+			runner.run(k);
+			System.exit(0);
+		} finally {
+			server.shutdown();
+		}
 	}
 
 	protected int[] getTimeouts() {
@@ -130,7 +132,7 @@ public class SCC2018MLTest {
 	}
 
 	public void run(int k) throws Exception {
-		
+
 		/* get classifiers */
 		String[] classifiers = getClassifierNames();
 		String[] setups = getSetupNames();

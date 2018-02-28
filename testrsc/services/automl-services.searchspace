@@ -136,7 +136,7 @@ null:String
 --:String
 
 localhost:String
-131.234.79.111:String
+192.168.232.131:String
 8000:Number
 
 
@@ -248,8 +248,8 @@ inducePipelineWithoutPP;	induce(x,returnedClassifier);	x,returnedClassifier,conf
 
 
 
-#INCLUDE testrsc/services/weka.methods
-INCLUDE testrsc/services/sl.methods
+INCLUDE testrsc/services/weka.methods
+#INCLUDE testrsc/services/sl.methods
 
 [Rules]
 

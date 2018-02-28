@@ -1,4 +1,4 @@
-scikitLearnClassification;	chooseClassifier(c); c; ; ; de.upb.crc901.services.mlpipeline.MLPipelinePlan:onHost(c,'131.234.79.111', '5000') -> slCreateClassifier(c)
+scikitLearnClassification;	chooseClassifier(c); c; ; ; de.upb.crc901.services.mlpipeline.MLPipelinePlan:onHost(c,'192.168.232.131', '5000') -> slCreateClassifier(c)
 
 
 # General classifier
@@ -10,7 +10,7 @@ slMetaClassifier; 		slCreateClassifier(c); c; ; ; slCreateMetaClassifier(c)
 #slLinearSVC; 					slCreateBaseClassifier(c); c,p; ; ; de.upb.crc901.services.mlpipeline.MLPipelinePlan:setClassifier(c,'sklearn.svm.LinearSVC',p)  
 #slBayesianGaussian;			slCreateBaseClassifier(c); c,p; ; ; de.upb.crc901.services.mlpipeline.MLPipelinePlan:setClassifier(c,'sklearn.mixture.BayesianGaussianMixture',p)
 
-slGaussianProcessClassifier;	slCreateBaseClassifier(c); c,p; ; ; de.upb.crc901.services.mlpipeline.MLPipelinePlan:setClassifier(c,'sklearn.gaussian_process.GaussianProcessClassifier',p)
+#slGaussianProcessClassifier;	slCreateBaseClassifier(c); c,p; ; ; de.upb.crc901.services.mlpipeline.MLPipelinePlan:setClassifier(c,'sklearn.gaussian_process.GaussianProcessClassifier',p)
 
 slSVC; slCreateBaseClassifier(c); c,p; ; ; de.upb.crc901.services.mlpipeline.MLPipelinePlan:setClassifier(c,'sklearn.svm.SVC',p) -> slSVCSetKernel(c,p)
 slSetSVCPolyKernel; slSVCSetKernel(c,p); c,p; ; ; de.upb.crc901.services.mlpipeline.MLPipelinePlan:addOptions(c,p,'-kernel', 'poly')
@@ -35,4 +35,4 @@ slRandomForestSetDepth;			slRandomForestSetDepth(c,p); c,p,t; ; AllowedTreeDepth
 
 
 ### META Classifiers ###
-slAdaBoost;			slCreateBaseClassifier(c); c,p; ; ; de.upb.crc901.services.mlpipeline.MLPipelinePlan:setClassifier(c,'sklearn.ensemble.AdaBoostClassifier', p)
+#slAdaBoost;			slCreateBaseClassifier(c); c,p; ; ; de.upb.crc901.services.mlpipeline.MLPipelinePlan:setClassifier(c,'sklearn.ensemble.AdaBoostClassifier', p)
