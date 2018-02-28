@@ -198,7 +198,10 @@ public class BalancedRandomCompletionEvaluator extends RandomCompletionEvaluator
 
 	private Optional<MethodInstance> getClassifierDefiningMethodInstance(Node<TFDNode, ?> n) {
 		return n.externalPath().stream().filter(n2 -> n2.getAppliedMethodInstance() != null).map(n2 -> n2.getAppliedMethodInstance())
-				.filter(m -> m.getMethod().getTask().getPropertyName().toLowerCase().endsWith("createbaseclassifier")).findFirst();
+				.filter(m -> {
+					String methodName = m.getMethod().getTask().getPropertyName().toLowerCase();
+					return methodName.endsWith("createbaseclassifier") || methodName.endsWith("createmetaclassifier") || methodName.endsWith("createensembleclassifier");
+				}).findFirst();
 	}
 
 	private String getIntendedPreprocessor(Node<TFDNode, ?> n) {

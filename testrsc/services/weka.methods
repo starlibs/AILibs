@@ -139,9 +139,9 @@ wekaSymmUncertAEOptsMissingMerge				; getWekaSymmUncertAEConfig0(o);	o; ; ; addO
 ### CLASSIFIER CONSTRUCTION ###
 
 # Weka General Method (single vs. meta vs. ensemble)
-wekaBaseClassifier; 		wekaCreateClassifier(config); config,classifier; ; ; wekaCreateBaseClassifier(classifier) -> de.upb.crc901.services.mlpipeline.MLPipelinePlan:setClassifier(config, classifier)
-wekaMetaClassifier; 		wekaCreateClassifier(config); config,classifier; ; ; wekaCreateMetaClassifier(classifier) -> de.upb.crc901.services.mlpipeline.MLPipelinePlan:setClassifier(config, classifier)
-wekaEnsembleClassifier;		wekaCreateClassifier(config); config,classifier; ; ; wekaCreateEnsembleClassifier(classifier) -> de.upb.crc901.services.mlpipeline.MLPipelinePlan:setClassifier(config, classifier)
+wekaBaseClassifier; 		wekaCreateClassifier(config); config,classifier,p; ; ; wekaCreateBaseClassifier(classifier) -> de.upb.crc901.services.mlpipeline.MLPipelinePlan:setClassifier(config, classifier, p)
+wekaMetaClassifier; 		wekaCreateClassifier(config); config,classifier,p; ; ; wekaCreateMetaClassifier(classifier) -> de.upb.crc901.services.mlpipeline.MLPipelinePlan:setClassifier(config, classifier, p)
+wekaEnsembleClassifier;		wekaCreateClassifier(config); config,classifier,p; ; ; wekaCreateEnsembleClassifier(classifier) -> de.upb.crc901.services.mlpipeline.MLPipelinePlan:setClassifier(config, classifier, p)
 
 
 ### BASE CLASSIFIERS ###
