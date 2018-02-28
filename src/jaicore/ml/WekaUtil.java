@@ -28,6 +28,7 @@ import jaicore.ml.core.SimpleInstancesImpl;
 import jaicore.ml.core.SimpleLabeledInstanceImpl;
 import jaicore.ml.core.WekaCompatibleInstancesImpl;
 import jaicore.ml.interfaces.LabeledInstance;
+import jaicore.ml.interfaces.LabeledInstances;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.core.Attribute;
@@ -174,22 +175,89 @@ public class WekaUtil {
 		Instances instances = new Instances("JAICore-extracted dataset", attributes, 1);
 		instances.setClassIndex(numAttributes);
 
-		Instance inst = new DenseInstance(attributes.size());
-		for (int i = 0; i < attributes.size() - 1; i++) {
-			inst.setValue(i, instance.get(i));
+		double values[] = new double[numAttributes];
+		for (int i = 0; i < numAttributes; i++) {
+			values[i] = instance.get(i);
 		}
+		Instance inst = new DenseInstance(1., values);
 		instances.add(inst);
-		Instance addedInstance = instances.iterator().next();
+		Instance addedInstance = instances.get(0);
 		addedInstance.setClassValue(instance.getLabel());
 		return addedInstance;
 	}
-
+	
+	public static Instances fromJAICoreInstances(final LabeledInstances<String> labeledInstances) {
+		int attributeCount = labeledInstances.getNumberOfColumns() + 1; // the amount of attributes including the class label.
+		int dataSize = labeledInstances.getNumberOfRows();
+		
+		/* create basic attribute entries */
+		ArrayList<Attribute> attributeList = new ArrayList<>(attributeCount);
+		for (int i = 1; i < attributeCount; i++) {
+			attributeList.add(new Attribute("a" + i));
+		}
+		/* create class attribute */
+		ArrayList<String> classes = labeledInstances.getOccurringLabels();
+		Attribute classAttribute = new Attribute("label", classes);
+		
+		attributeList.add(classAttribute);
+		
+		weka.core.Instances wekaInstances = new Instances("JAICore-extracted dataset", attributeList,
+				dataSize);
+		wekaInstances.setClassIndex(wekaInstances.numAttributes()-1); // the last item is the class attribute.
+		
+		for (jaicore.ml.interfaces.LabeledInstance<String> labeledInstance : labeledInstances) {
+			double[] values = new double[attributeCount];
+			for (int i = 0; i < attributeCount - 1; i++) {
+				values[i] = labeledInstance.get(i);
+			}
+			weka.core.Instance wekaInstance = new DenseInstance(1.0, values);
+			String label = labeledInstance.getLabel();
+			
+			wekaInstance.setDataset(wekaInstances);
+			double classIndex = (double) classAttribute.indexOfValue(label);
+			wekaInstance.setClassValue(classIndex);
+			wekaInstances.add(wekaInstance);
+		}
+		return wekaInstances;
+	}
+	
 	public static WekaCompatibleInstancesImpl toJAICoreLabeledInstances(final Instances wekaInstances) {
 		WekaCompatibleInstancesImpl labeledInstances = new WekaCompatibleInstancesImpl(getClassesDeclaredInDataset(wekaInstances));
 		for (Instance inst : wekaInstances) {
 			labeledInstances.add(toJAICoreLabeledInstance(inst));
 		}
 		return labeledInstances;
+	}
+	
+	/**
+	 * Returns true if there is at least one nominal attribute in the given dataset that has more than 2 values.
+	 * @param wekaInstances dataset that is checked
+	 * @param ignoreClassAttribute if true class attribute is ignored.
+	 */
+	public static boolean needsBinarization(final Instances wekaInstances, final boolean ignoreClassAttribute) {
+		Attribute classAttribute = wekaInstances.classAttribute();
+		if(!ignoreClassAttribute) {
+			// check if class Attribute has more than 2 values:
+			if(classAttribute.isNominal() && classAttribute.numValues() >= 3) {
+				return true;
+			}
+		}
+		// iterate over every attribute and check.
+		for(Enumeration<Attribute> attributeEnum = wekaInstances.enumerateAttributes();
+				attributeEnum.hasMoreElements();) {
+			Attribute currentAttr = attributeEnum.nextElement();
+			if(!currentAttr.isNominal()) {
+				continue; // ignore attributes that aren't nominal. 
+			}
+			if(currentAttr == classAttribute) {
+				// ignore class attribute (already checked in case ignoreClassAttribute==true):
+				continue;
+			}
+			if(currentAttr.numValues() >= 3) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public static jaicore.ml.interfaces.LabeledInstance<String> toJAICoreLabeledInstance(final Instance wekaInst) {
