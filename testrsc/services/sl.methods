@@ -1,4 +1,4 @@
-scikitLearnClassification;	chooseClassifier(c); c; ; ; de.upb.crc901.services.mlpipeline.MLPipelinePlan:onHost(c,'192.168.232.131', '5000') -> slCreateClassifier(c)
+scikitLearnClassification;	chooseClassifier(c); c; ; ; de.upb.crc901.services.mlpipeline.MLPipelinePlan:onHost(c,'localhost', '5000') -> slCreateClassifier(c)
 
 
 # General classifier

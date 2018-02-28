@@ -207,13 +207,13 @@ appendOptions		; l1:List<String>, l2:List<String>; ; List<String>(l1) & List<Str
 
 compileOptionListToArray; oList:List<String>; oArray:String[]; List<String>(oList); String[](oArray); (0)
 
-INCLUDE testrsc/services/weka.services
+#INCLUDE testrsc/services/weka.services
 INCLUDE testrsc/services/sl.services
 
 de.upb.crc901.services.mlpipeline.MLPipelinePlan:__construct;;config;;;(0)
 de.upb.crc901.services.mlpipeline.MLPipelinePlan:onHost;c,host,port;;;;(0)
-de.upb.crc901.services.mlpipeline.MLPipelinePlan:setClassifier;c,classifier;p;;;(0)
-de.upb.crc901.services.mlpipeline.MLPipelinePlan:addOptions;c,p,option,value;;;;(0)
+de.upb.crc901.services.mlpipeline.MLPipelinePlan:setClassifier;c,classifier;p;;definesClassifier(classifier);(0)
+de.upb.crc901.services.mlpipeline.MLPipelinePlan:addOptions;c,p,option,value;;;definesOption(option, value);(0)
 de.upb.crc901.services.mlpipeline.MLPipelinePlan:addWekaAttributeSelection;c,searcher,evaluator;;;definesWekaPreprocessor(c);(0)
 de.upb.crc901.services.mlpipeline.MLServicePipeline:__construct;config;pl;;;(0)
 
@@ -248,8 +248,9 @@ inducePipelineWithoutPP;	induce(x,returnedClassifier);	x,returnedClassifier,conf
 
 
 
-INCLUDE testrsc/services/weka.methods
+#INCLUDE testrsc/services/weka.methods
 #INCLUDE testrsc/services/sl.methods
+INCLUDE testrsc/services/sl.methods_
 
 [Rules]
 

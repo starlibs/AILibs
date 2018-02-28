@@ -73,33 +73,33 @@ public class SCC2018MLTest {
 			switch (algoName) {
 			case "MLS-Plan": {
 
-				File evaluablePredicatFile = new File("testrsc/services/automl.evaluablepredicates");
+				File evaluablePredicatFile = new File("testrsc/services/automl.evaluablepredicates_");
 
 				Random random = new Random(seed);
 				TwoPhaseHTNBasedPipelineSearcher<Double> bs = new TwoPhaseHTNBasedPipelineSearcher<>();
 
-				// ORGraphSearch<TFDNode, String, Double> bf = new BestFirst<>(MLUtil.getGraphGenerator(new File("testrsc/services/automl-services.searchspace"), evaluablePredicatFile, null, null), n
-				// -> 0.0);
-				// new SimpleGraphVisualizationWindow<>(bf.getEventBus()).getPanel().setTooltipGenerator(new TFDTooltipGenerator<>());;
-				//
-				// while(bf.nextSolution() != null);
+				 ORGraphSearch<TFDNode, String, Double> bf = new BestFirst<>(MLUtil.getGraphGenerator(new File("testrsc/services/automl-services.searchspace"), evaluablePredicatFile, null, null), n
+				 -> 0.0);
+				 new SimpleGraphVisualizationWindow<>(bf.getEventBus()).getPanel().setTooltipGenerator(new TFDTooltipGenerator<>());;
+				
+				 while(bf.nextSolution() != null);
 
-				bs.setHtnSearchSpaceFile(new File("testrsc/services/automl-services.searchspace"));
-				// bs.setHtnSearchSpaceFile(new File("testrsc/automl3.testset"));
-				bs.setEvaluablePredicateFile(evaluablePredicatFile);
-				bs.setRandom(random);
-				bs.setTimeout(1000 * timeout);
-				bs.setNumberOfCPUs(4);
-				MulticlassEvaluator evaluator = new MulticlassEvaluator(random);
-				bs.setSolutionEvaluatorFactory4Search(() -> new MonteCarloCrossValidationEvaluator(evaluator, 3, .7f));
-				bs.setSolutionEvaluatorFactory4Selection(() -> new MonteCarloCrossValidationEvaluator(evaluator, 10, .7f));
-				bs.setRce(new BalancedRandomCompletionEvaluator(random, 3, new MonteCarloCrossValidationEvaluator(evaluator, 3, .7f)));
-				bs.setTimeoutPerNodeFComputation(1000 * (timeout == 60 ? 15 : 300));
-				bs.setTooltipGenerator(new TFDTooltipGenerator<>());
-				bs.setPortionOfDataForPhase2(.3f);
-
-				bs.setExperimentLogger(expLogger);
-				evaluator.getMeasurementEventBus().register(expLogger);
+//				bs.setHtnSearchSpaceFile(new File("testrsc/services/automl-services.searchspace"));
+//				// bs.setHtnSearchSpaceFile(new File("testrsc/automl3.testset"));
+//				bs.setEvaluablePredicateFile(evaluablePredicatFile);
+//				bs.setRandom(random);
+//				bs.setTimeout(1000 * timeout);
+//				bs.setNumberOfCPUs(4);
+//				MulticlassEvaluator evaluator = new MulticlassEvaluator(random);
+//				bs.setSolutionEvaluatorFactory4Search(() -> new MonteCarloCrossValidationEvaluator(evaluator, 3, .7f));
+//				bs.setSolutionEvaluatorFactory4Selection(() -> new MonteCarloCrossValidationEvaluator(evaluator, 10, .7f));
+//				bs.setRce(new BalancedRandomCompletionEvaluator(random, 3, new MonteCarloCrossValidationEvaluator(evaluator, 3, .7f)));
+//				bs.setTimeoutPerNodeFComputation(1000 * (timeout == 60 ? 15 : 300));
+//				bs.setTooltipGenerator(new TFDTooltipGenerator<>());
+//				bs.setPortionOfDataForPhase2(.3f);
+//
+//				bs.setExperimentLogger(expLogger);
+//				evaluator.getMeasurementEventBus().register(expLogger);
 				return bs;
 			}
 			}
