@@ -22,6 +22,8 @@ import jaicore.logic.fol.structure.Literal;
 import jaicore.ml.WekaUtil;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.model.ceoc.CEOCAction;
+import jaicore.planning.model.task.stn.Method;
+import jaicore.planning.model.task.stn.MethodInstance;
 import jaicore.search.algorithms.standard.core.NodeAnnotationEvent;
 import jaicore.search.algorithms.standard.core.SolutionAnnotationEvent;
 import jaicore.search.algorithms.standard.core.SolutionFoundEvent;
@@ -42,7 +44,7 @@ public class BalancedRandomCompletionEvaluator extends RandomCompletionEvaluator
 
 	@Override
 	public Double computeEvaluationPriorToCompletion(Node<TFDNode, ?> n, List<TFDNode> path, List<CEOCAction> plan, List<String> currentProgram) throws Throwable {
-		
+
 		/* if a reduction has ever been made, return null */
 		Optional<CEOCAction> reductionAction = plan.stream().filter(a -> a.getOperation().getName().startsWith("configChildNodes")).findFirst();
 		if (reductionAction.isPresent()) {
@@ -50,87 +52,94 @@ public class BalancedRandomCompletionEvaluator extends RandomCompletionEvaluator
 		}
 		if (n.getPoint().getAppliedMethodInstance() != null && n.getPoint().getAppliedMethodInstance().getMethod().getName().equals("createReduction"))
 			return reductionAction.isPresent() ? null : classifierRanking.size() * 2.0;
-		
-		/* determine intended/chosen classifier */
-		String intentendClassifierName = getIntendedClassifier(n);
-		if (intentendClassifierName != null) {
-			String simpleName = intentendClassifierName.substring(intentendClassifierName.lastIndexOf(".") + 1);
-			if (!classifierRanking.contains(simpleName))
-				return classifierRanking.size() * 2.0;
 
+		/* if no decision about the classifier has been made, return 0.0 */
+		Optional<MethodInstance> methodInPlanThatChoosesClassifier = getClassifierDefiningMethodInstance(n);
+		if (!methodInPlanThatChoosesClassifier.isPresent())
+			return 0.0;
+
+		/* if we have just decided about the classifier, assign a ranking */
+		if (n.getPoint().getAppliedMethodInstance() != null && n.getPoint().getAppliedMethodInstance() == methodInPlanThatChoosesClassifier.get()) {
+			Optional<String> matchingClassifier = classifierRanking.stream().filter(c -> methodInPlanThatChoosesClassifier.get().getMethod().getName().toLowerCase().contains(c.toLowerCase())).findFirst();
+			if (!matchingClassifier.isPresent())
+				return classifierRanking.size() * 2.0;
+	
+			System.out.println(matchingClassifier.get());
+			
 			/* determine chosen preprocessor */
 			String preprocessor = CodePlanningUtil.getPreprocessorEvaluatorFromPipelineGenerationCode(currentProgram);
 			int offset = (preprocessor.equals("")) ? 0 : classifierRanking.size();
-			return offset + classifierRanking.indexOf(simpleName) * 1.0;
-		} else {
-			
-			String classifierName = getNameOfClassifier(n, currentProgram);
-
-			/* if the classifier has not been decided, return 0.0 */
-			if (classifierName == null)
-				return 0.0;
-			
-			/* currently ignore the default-classifier testing but use path completion for the layer itself, too */
-			if (true)
-				return null;
-
-			/* check whether a filter and a classifier have been defined */
-			getSolutionEventBus().post(new NodeAnnotationEvent<>(n.getPoint(), "classifier", classifierName));
-
-			/* if the classifier has just been defined, check for the standard configuration */
-			boolean classifierJustDefined = currentProgram.get(currentProgram.size() - 1).contains("new " + classifierName);
-			if (classifierJustDefined) {
-				String preprocessor = CodePlanningUtil.getPreprocessorEvaluatorFromPipelineGenerationCode(currentProgram);
-				String plName = preprocessor + "&" + classifierName.substring(classifierName.lastIndexOf(".") + 1);
-				logger.info("Classifier has just been chosen, now try its standard configuration.");
-				try {
-					
-					/* check whether oneR has been set */
-					String reference = preprocessor + "&OneR";
-					if (plFails.containsKey(reference)) {
-						return null;
-					}
-					
-					long start = System.currentTimeMillis();
-					Integer f = evaluator.getSolutionScore(MLUtil.extractGeneratedClassifierFromPlan(plan));
-					int fTime = (int)(System.currentTimeMillis() - start);
-					if (f != null) {
-						fValues.put(n, (double) f);
-					} else {
-						fValues.put(n, Double.MAX_VALUE);
-					}
-
-					/* return the value right now, because we have no completion for this node */
-					if (f == null)
-						return null;
-					getSolutionEventBus().post(new SolutionFoundEvent<TFDNode,Double>(path, (double)f));
-					getSolutionEventBus().post(new SolutionAnnotationEvent<>(path, "fTime", fTime));
-					return f != null ? (double) f : null;
-				} catch (InterruptedException e) {
-					
-					/* punish preprocessor for timeout */
-					int fails = 0;
-					if (!ppFails.containsKey(preprocessor)) {
-						fails = 1;
-					} else
-						fails = ppFails.get(preprocessor) + 1;
-					ppFails.put(preprocessor, fails);
-					
-					/* punish pipeline prototype */
-					fails = 0;
-					if (!plFails.containsKey(plName)) {
-						fails = 1;
-					} else
-						fails = plFails.get(plName) + 1;
-					plFails.put(plName, fails);
-					throw e;
-				}
-			}
-
-			/* this is the case where we really start computing f-values by simulation */
-			return null;
+			return offset + classifierRanking.indexOf(matchingClassifier.get()) * 1.0;
 		}
+		
+		/* otherwise, perform full computation */
+		return null;
+
+		// String classifierName = getNameOfClassifier(n, currentProgram);
+
+		/* if the classifier has not been decided, return 0.0 */
+		// if (classifierName == null)
+		// return 0.0;
+
+		/* currently ignore the default-classifier testing but use path completion for the layer itself, too */
+
+		/* check whether a filter and a classifier have been defined */
+		// getSolutionEventBus().post(new NodeAnnotationEvent<>(n.getPoint(), "classifier", classifierName));
+		//
+		// /* if the classifier has just been defined, check for the standard configuration */
+		// boolean classifierJustDefined = currentProgram.get(currentProgram.size() - 1).contains("new " + classifierName);
+		// if (classifierJustDefined) {
+		// String preprocessor = CodePlanningUtil.getPreprocessorEvaluatorFromPipelineGenerationCode(currentProgram);
+		// String plName = preprocessor + "&" + classifierName.substring(classifierName.lastIndexOf(".") + 1);
+		// logger.info("Classifier has just been chosen, now try its standard configuration.");
+		// try {
+		//
+		// /* check whether oneR has been set */
+		// String reference = preprocessor + "&OneR";
+		// if (plFails.containsKey(reference)) {
+		// return null;
+		// }
+		//
+		// long start = System.currentTimeMillis();
+		// Integer f = evaluator.getSolutionScore(MLUtil.extractGeneratedClassifierFromPlan(plan));
+		// int fTime = (int) (System.currentTimeMillis() - start);
+		// if (f != null) {
+		// fValues.put(n, (double) f);
+		// } else {
+		// fValues.put(n, Double.MAX_VALUE);
+		// }
+		//
+		// /* return the value right now, because we have no completion for this node */
+		// if (f == null)
+		// return null;
+		// getSolutionEventBus().post(new SolutionFoundEvent<TFDNode, Double>(path, (double) f));
+		// getSolutionEventBus().post(new SolutionAnnotationEvent<>(path, "fTime", fTime));
+		// return f != null ? (double) f : null;
+		// } catch (InterruptedException e) {
+		//
+		// /* punish preprocessor for timeout */
+		// int fails = 0;
+		// if (!ppFails.containsKey(preprocessor)) {
+		// fails = 1;
+		// } else
+		// fails = ppFails.get(preprocessor) + 1;
+		// ppFails.put(preprocessor, fails);
+		//
+		// /* punish pipeline prototype */
+		// fails = 0;
+		// if (!plFails.containsKey(plName)) {
+		// fails = 1;
+		// } else
+		// fails = plFails.get(plName) + 1;
+		// plFails.put(plName, fails);
+		// throw e;
+		// }
+		// }
+
+		/* this is the case where we really start computing f-values by simulation */
+//		return null;
 	}
+
 
 	@Override
 	protected Double convertErrorRateToNodeEvaluation(Integer errorRate) {
@@ -160,7 +169,7 @@ public class BalancedRandomCompletionEvaluator extends RandomCompletionEvaluator
 		int numOfParamsSettable = 0;
 		try {
 			if (c instanceof MLPipeline) {
-				MLPipeline pl = (MLPipeline)c;
+				MLPipeline pl = (MLPipeline) c;
 				numOfParamsSettable += WekaUtil.getOptionsOfWekaAlgorithm(pl.getBaseClassifier()).size();
 				SupervisedFilterSelector preprocessor = pl.getPreprocessors().isEmpty() ? null : pl.getPreprocessors().get(0);
 				if (preprocessor != null) {
@@ -187,15 +196,9 @@ public class BalancedRandomCompletionEvaluator extends RandomCompletionEvaluator
 		return null;
 	}
 
-	private String getIntendedClassifier(Node<TFDNode, ?> n) {
-		Pattern p = Pattern.compile("(weka\\.classifiers\\.[a-zA-Z0-9\\.]*):__construct");
-		for (Literal l : n.getPoint().getRemainingTasks()) {
-			Matcher m = p.matcher(l.getPropertyName());
-			if (m.find()) {
-				return m.group(1);
-			}
-		}
-		return null;
+	private Optional<MethodInstance> getClassifierDefiningMethodInstance(Node<TFDNode, ?> n) {
+		return n.externalPath().stream().filter(n2 -> n2.getAppliedMethodInstance() != null).map(n2 -> n2.getAppliedMethodInstance())
+				.filter(m -> m.getMethod().getTask().getPropertyName().toLowerCase().endsWith("createbaseclassifier")).findFirst();
 	}
 
 	private String getIntendedPreprocessor(Node<TFDNode, ?> n) {
