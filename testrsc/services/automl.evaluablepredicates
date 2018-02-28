@@ -1,0 +1,3 @@
+AllowedBaseClassifiersForMCTreeNode = de.upb.crc901.mlplan.evaluablepredicates.AllowedBaseClassifiersForMCTreeNodePredicate
+AllowedTreeEstimatorsForRandomForests = de.upb.crc901.mlplan.evaluablepredicates.mlplan.randomforest.AllowedTreeEstimatorsForRandomForests
+AllowedTreeDepthForRandomForests = de.upb.crc901.mlplan.evaluablepredicates.mlplan.randomforest.AllowedTreeDepthForRandomForests

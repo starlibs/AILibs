@@ -371,7 +371,9 @@ public class PlanExecutor {
 							params = new Object[method.getParameterCount()];
 							Class<?>[] requiredInputTypes = method.getParameterTypes();
 							for (int i = 1; i < inputs.size(); i++) {
-								params[i - 1] = variables.get(inputs.get(i));
+								
+								/* consider params as variables iff their value is known in "variables" */
+								params[i - 1] = variables.containsKey(inputs.get(i)) ? variables.get(inputs.get(i)) : (inputs.get(i).getName().matches("^-?\\d+$") ? Integer.parseInt(inputs.get(i).getName()) : inputs.get(i).getName());
 								if (!(requiredInputTypes[i - 1].isAssignableFrom(params[i - 1].getClass())
 										|| requiredInputTypes[i - 1].equals(int.class) && params[i - 1].getClass().equals(Integer.class)))
 									throw new IllegalArgumentException("The " + (i - 1) + "-th param of " + method.getName() + " must be " + requiredInputTypes[i - 1] + ", but "
