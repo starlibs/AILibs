@@ -106,19 +106,17 @@ public abstract class FileUtil {
 		fos.close();
 	}
 
-	public static void serializeObject(Object object, String pathname) throws IOException {
+	public static synchronized void serializeObject(Object object, String pathname) throws IOException {
 		File file = new File(pathname);
-		File tmpFile = new File(file + ".tmp." + System.currentTimeMillis());
 		if (file.getParentFile() != null && !file.getParentFile().exists())
 			file.getParentFile().mkdirs();
-		try (ObjectOutputStream os2 = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(tmpFile.getAbsolutePath())))) {
+		try (ObjectOutputStream os2 = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(file.getAbsolutePath())))) {
 			os2.writeObject(object);
 		}
 		catch (NotSerializableException e) {
 			file.delete();
 			throw e;
 		}
-		tmpFile.renameTo(file);
 	}
 	
 	public static Object unserializeObject(String pathname) throws IOException, ClassNotFoundException {

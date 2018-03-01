@@ -17,7 +17,7 @@ import jaicore.planning.model.ceoc.CEOCOperation;
 import jaicore.planning.model.task.stn.Method;
 import jaicore.planning.model.task.stn.TaskNetwork;
 
-public class CEOCSTN2File {
+public class CEOCSTN2Shop2 {
 	
 	private static final int printNetwork = 0;
 	private static String packageName;
@@ -328,7 +328,7 @@ public class CEOCSTN2File {
 	}
 
 	public static void print(CEOCSTNPlanningProblem problem, String packageName) {
-		CEOCSTN2File.packageName = packageName;
+		CEOCSTN2Shop2.packageName = packageName;
 		JFileChooser chooser = new JFileChooser();
 		chooser.setDialogTitle("Domain-File");
 		chooser.showOpenDialog(null);
