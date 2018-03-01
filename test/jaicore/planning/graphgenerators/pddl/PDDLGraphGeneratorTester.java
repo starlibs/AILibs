@@ -29,18 +29,19 @@ public class PDDLGraphGeneratorTester {
 		chooser.setDialogTitle(" Open a Domain-File");
 		chooser.showOpenDialog(null);
 		domain = chooser.getSelectedFile();
-//		domain = new File("F:/Desktop/pddl4j/pddl/blocksworld/domain.pddl");
+		domain = new File("F:/Desktop/pddl4j/pddl/blocksworld/domain.pddl");
 		
 		chooser.setDialogTitle("Open a Problme-File");
 		chooser.showOpenDialog(null);
 		problem = chooser.getSelectedFile();
-//		problem = new File("F:/Desktop/pddl4j/pddl/blocksworld/p15.pddl");
+		problem = new File("F:/Desktop/pddl4j/pddl/blocksworld/p15.pddl");
 		
 		if(domain.exists() && problem.exists()) {
 			PDDLGraphGenerator gen = new PDDLGraphGenerator(domain, problem);
+			gen.setNodeNumbering(true);
 		
 			//create a Astar-serch with the heuristic given pddl4j
-			AStar<PDDLNode,String> search = new AStar<>(gen, (s1,s2)-> 1.0, state ->(double)gen.getHeuristic().estimate(state.getPoint().getNode(), gen.getProblem().getGoal()),ParentDiscarding.ALL);
+			AStar<PDDLNode,String> search = new AStar<>(gen, (s1,s2)-> 1.0, state ->(double)gen.getHeuristic().estimate(state.getPoint().getNode(), gen.getProblem().getGoal()));
 		
 			
 			List<PDDLNode> solution = search.nextSolution();
