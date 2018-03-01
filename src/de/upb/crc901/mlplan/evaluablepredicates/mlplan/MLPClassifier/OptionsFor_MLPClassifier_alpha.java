@@ -1,5 +1,11 @@
 
 package de.upb.crc901.mlplan.evaluablepredicates.mlplan.MLPClassifier;
+/*
+    alpha : float, optional, default 0.0001
+        L2 penalty (regularization term) parameter.
+
+
+ */
 
 import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
 
@@ -12,7 +18,7 @@ public class OptionsFor_MLPClassifier_alpha extends NumericRangeOptionPredicate 
 
 	@Override
 	protected double getMax() {
-		return 3;
+		return 0;
 	}
 
 	@Override

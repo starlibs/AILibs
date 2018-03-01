@@ -1,5 +1,11 @@
 
 package de.upb.crc901.mlplan.evaluablepredicates.mlplan.BaggingClassifier;
+/*
+    bootstrap_features : boolean, optional (default=False)
+        Whether features are drawn with replacement.
+
+
+ */
 
 import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
 
@@ -12,7 +18,7 @@ public class OptionsFor_BaggingClassifier_bootstrap_features extends NumericRang
 
 	@Override
 	protected double getMax() {
-		return 3;
+		return 0;
 	}
 
 	@Override

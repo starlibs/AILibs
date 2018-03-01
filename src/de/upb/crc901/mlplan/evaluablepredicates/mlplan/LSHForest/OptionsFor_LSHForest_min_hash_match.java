@@ -1,5 +1,12 @@
 
 package de.upb.crc901.mlplan.evaluablepredicates.mlplan.LSHForest;
+/*
+    min_hash_match : int (default = 4)
+        lowest hash length to be searched when candidate selection is
+        performed for nearest neighbors.
+
+
+ */
 
 import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
 
@@ -12,7 +19,7 @@ public class OptionsFor_LSHForest_min_hash_match extends NumericRangeOptionPredi
 
 	@Override
 	protected double getMax() {
-		return 3;
+		return 0;
 	}
 
 	@Override

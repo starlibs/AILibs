@@ -1,5 +1,12 @@
 
 package de.upb.crc901.mlplan.evaluablepredicates.mlplan.PassiveAggressiveClassifier;
+/*
+    fit_intercept : bool, default=False
+        Whether the intercept should be estimated or not. If False, the
+        data is assumed to be already centered.
+
+
+ */
 
 import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
 
@@ -12,7 +19,7 @@ public class OptionsFor_PassiveAggressiveClassifier_fit_intercept extends Numeri
 
 	@Override
 	protected double getMax() {
-		return 3;
+		return 0;
 	}
 
 	@Override

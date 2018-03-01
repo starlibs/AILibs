@@ -1,5 +1,11 @@
 
 package de.upb.crc901.mlplan.evaluablepredicates.mlplan.RandomForestClassifier;
+/*
+    n_estimators : integer, optional (default=10)
+        The number of trees in the forest.
+
+
+ */
 
 import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
 
@@ -12,7 +18,7 @@ public class OptionsFor_RandomForestClassifier_n_estimators extends NumericRange
 
 	@Override
 	protected double getMax() {
-		return 3;
+		return 0;
 	}
 
 	@Override

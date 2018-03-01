@@ -1,5 +1,11 @@
 
 package de.upb.crc901.mlplan.evaluablepredicates.mlplan.MLPClassifier;
+/*
+    verbose : bool, optional, default False
+        Whether to print progress messages to stdout.
+
+
+ */
 
 import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
 
@@ -12,7 +18,7 @@ public class OptionsFor_MLPClassifier_verbose extends NumericRangeOptionPredicat
 
 	@Override
 	protected double getMax() {
-		return 3;
+		return 0;
 	}
 
 	@Override

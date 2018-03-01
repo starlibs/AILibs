@@ -1,5 +1,14 @@
 
 package de.upb.crc901.mlplan.evaluablepredicates.mlplan.QuadraticDiscriminantAnalysis;
+/*
+    tol : float, optional, default 1.0e-4
+        Threshold used for rank estimation.
+
+        .. versionadded:: 0.17
+
+    Attributes
+    
+ */
 
 import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
 
@@ -12,7 +21,7 @@ public class OptionsFor_QuadraticDiscriminantAnalysis_tol extends NumericRangeOp
 
 	@Override
 	protected double getMax() {
-		return 3;
+		return 0;
 	}
 
 	@Override

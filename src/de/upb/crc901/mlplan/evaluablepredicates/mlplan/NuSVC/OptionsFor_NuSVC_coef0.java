@@ -1,5 +1,12 @@
 
 package de.upb.crc901.mlplan.evaluablepredicates.mlplan.NuSVC;
+/*
+    coef0 : float, optional (default=0.0)
+        Independent term in kernel function.
+        It is only significant in 'poly' and 'sigmoid'.
+
+
+ */
 
 import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
 
@@ -12,7 +19,7 @@ public class OptionsFor_NuSVC_coef0 extends NumericRangeOptionPredicate {
 
 	@Override
 	protected double getMax() {
-		return 3;
+		return 0;
 	}
 
 	@Override

@@ -1,5 +1,12 @@
 
 package de.upb.crc901.mlplan.evaluablepredicates.mlplan.SGDClassifier;
+/*
+    fit_intercept : bool
+        Whether the intercept should be estimated or not. If False, the
+        data is assumed to be already centered. Defaults to True.
+
+
+ */
 
 import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
 
@@ -12,7 +19,7 @@ public class OptionsFor_SGDClassifier_fit_intercept extends NumericRangeOptionPr
 
 	@Override
 	protected double getMax() {
-		return 3;
+		return 0;
 	}
 
 	@Override

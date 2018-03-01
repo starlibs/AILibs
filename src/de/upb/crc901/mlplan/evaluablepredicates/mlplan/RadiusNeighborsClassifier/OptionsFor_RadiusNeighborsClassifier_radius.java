@@ -1,5 +1,12 @@
 
 package de.upb.crc901.mlplan.evaluablepredicates.mlplan.RadiusNeighborsClassifier;
+/*
+    radius : float, optional (default = 1.0)
+        Range of parameter space to use by default for :meth:`radius_neighbors`
+        queries.
+
+
+ */
 
 import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
 
@@ -12,7 +19,7 @@ public class OptionsFor_RadiusNeighborsClassifier_radius extends NumericRangeOpt
 
 	@Override
 	protected double getMax() {
-		return 3;
+		return 0;
 	}
 
 	@Override

@@ -1,5 +1,11 @@
 
 package de.upb.crc901.mlplan.evaluablepredicates.mlplan.NearestNeighbors;
+/*
+    n_neighbors : int, optional (default = 5)
+        Number of neighbors to use by default for :meth:`kneighbors` queries.
+
+
+ */
 
 import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
 
@@ -12,7 +18,7 @@ public class OptionsFor_NearestNeighbors_n_neighbors extends NumericRangeOptionP
 
 	@Override
 	protected double getMax() {
-		return 3;
+		return 0;
 	}
 
 	@Override

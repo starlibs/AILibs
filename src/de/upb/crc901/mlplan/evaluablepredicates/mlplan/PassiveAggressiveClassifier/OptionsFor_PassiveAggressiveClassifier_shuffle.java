@@ -1,5 +1,11 @@
 
 package de.upb.crc901.mlplan.evaluablepredicates.mlplan.PassiveAggressiveClassifier;
+/*
+    shuffle : bool, default=True
+        Whether or not the training data should be shuffled after each epoch.
+
+
+ */
 
 import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
 
@@ -12,7 +18,7 @@ public class OptionsFor_PassiveAggressiveClassifier_shuffle extends NumericRange
 
 	@Override
 	protected double getMax() {
-		return 3;
+		return 0;
 	}
 
 	@Override

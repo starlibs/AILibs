@@ -1,5 +1,15 @@
 
 package de.upb.crc901.mlplan.evaluablepredicates.mlplan.MLPClassifier;
+/*
+    max_iter : int, optional, default 200
+        Maximum number of iterations. The solver iterates until convergence
+        (determined by 'tol') or this number of iterations. For stochastic
+        solvers ('sgd', 'adam'), note that this determines the number of epochs
+        (how many times each data point will be used), not the number of
+        gradient steps.
+
+
+ */
 
 import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
 
@@ -12,7 +22,7 @@ public class OptionsFor_MLPClassifier_max_iter extends NumericRangeOptionPredica
 
 	@Override
 	protected double getMax() {
-		return 3;
+		return 0;
 	}
 
 	@Override

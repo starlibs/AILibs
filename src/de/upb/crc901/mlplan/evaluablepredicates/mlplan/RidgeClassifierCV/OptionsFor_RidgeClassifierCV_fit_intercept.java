@@ -1,5 +1,13 @@
 
 package de.upb.crc901.mlplan.evaluablepredicates.mlplan.RidgeClassifierCV;
+/*
+    fit_intercept : boolean
+        Whether to calculate the intercept for this model. If set
+        to false, no intercept will be used in calculations
+        (e.g. data is expected to be already centered).
+
+
+ */
 
 import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
 
@@ -12,7 +20,7 @@ public class OptionsFor_RidgeClassifierCV_fit_intercept extends NumericRangeOpti
 
 	@Override
 	protected double getMax() {
-		return 3;
+		return 0;
 	}
 
 	@Override

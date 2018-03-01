@@ -1,5 +1,13 @@
 
 package de.upb.crc901.mlplan.evaluablepredicates.mlplan.LogisticRegression;
+/*
+    dual : bool, default: False
+        Dual or primal formulation. Dual formulation is only implemented for
+        l2 penalty with liblinear solver. Prefer dual=False when
+        n_samples > n_features.
+
+
+ */
 
 import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
 
@@ -12,7 +20,7 @@ public class OptionsFor_LogisticRegression_dual extends NumericRangeOptionPredic
 
 	@Override
 	protected double getMax() {
-		return 3;
+		return 0;
 	}
 
 	@Override

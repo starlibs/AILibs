@@ -1,5 +1,13 @@
 
 package de.upb.crc901.mlplan.evaluablepredicates.mlplan.LinearSVC;
+/*
+    fit_intercept : boolean, optional (default=True)
+        Whether to calculate the intercept for this model. If set
+        to false, no intercept will be used in calculations
+        (i.e. data is expected to be already centered).
+
+
+ */
 
 import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
 
@@ -12,7 +20,7 @@ public class OptionsFor_LinearSVC_fit_intercept extends NumericRangeOptionPredic
 
 	@Override
 	protected double getMax() {
-		return 3;
+		return 0;
 	}
 
 	@Override

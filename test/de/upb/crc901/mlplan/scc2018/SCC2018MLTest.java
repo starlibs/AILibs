@@ -87,7 +87,6 @@ public class SCC2018MLTest {
 		}
 		return null;
 	}
-	
 	private void execDeriavationTree(File searchSpaceFile, File evaluablePredicatFile, TwoPhaseHTNBasedPipelineSearcher<Double> bs, int seed, int timeout, int numCPUs) throws IOException {
 
 		Random random = new Random(seed);

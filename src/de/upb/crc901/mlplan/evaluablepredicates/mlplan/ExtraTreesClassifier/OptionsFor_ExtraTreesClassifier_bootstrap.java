@@ -1,5 +1,11 @@
 
 package de.upb.crc901.mlplan.evaluablepredicates.mlplan.ExtraTreesClassifier;
+/*
+    bootstrap : boolean, optional (default=False)
+        Whether bootstrap samples are used when building trees.
+
+
+ */
 
 import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
 
@@ -12,7 +18,7 @@ public class OptionsFor_ExtraTreesClassifier_bootstrap extends NumericRangeOptio
 
 	@Override
 	protected double getMax() {
-		return 3;
+		return 0;
 	}
 
 	@Override

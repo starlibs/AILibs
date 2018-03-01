@@ -1,5 +1,14 @@
 
 package de.upb.crc901.mlplan.evaluablepredicates.mlplan.LinearDiscriminantAnalysis;
+/*
+    tol : float, optional, (default 1.0e-4)
+        Threshold used for rank estimation in SVD solver.
+
+        .. versionadded:: 0.17
+
+    Attributes
+    
+ */
 
 import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
 
@@ -12,7 +21,7 @@ public class OptionsFor_LinearDiscriminantAnalysis_tol extends NumericRangeOptio
 
 	@Override
 	protected double getMax() {
-		return 3;
+		return 0;
 	}
 
 	@Override

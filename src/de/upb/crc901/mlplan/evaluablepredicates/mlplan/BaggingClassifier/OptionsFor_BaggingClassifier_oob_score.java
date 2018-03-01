@@ -1,5 +1,12 @@
 
 package de.upb.crc901.mlplan.evaluablepredicates.mlplan.BaggingClassifier;
+/*
+    oob_score : bool
+        Whether to use out-of-bag samples to estimate
+        the generalization error.
+
+
+ */
 
 import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
 
@@ -12,7 +19,7 @@ public class OptionsFor_BaggingClassifier_oob_score extends NumericRangeOptionPr
 
 	@Override
 	protected double getMax() {
-		return 3;
+		return 0;
 	}
 
 	@Override

@@ -1,5 +1,13 @@
 
 package de.upb.crc901.mlplan.evaluablepredicates.mlplan.MLPClassifier;
+/*
+    power_t : double, optional, default 0.5
+        The exponent for inverse scaling learning rate.
+        It is used in updating effective learning rate when the learning_rate
+        is set to 'invscaling'. Only used when solver='sgd'.
+
+
+ */
 
 import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
 
@@ -12,7 +20,7 @@ public class OptionsFor_MLPClassifier_power_t extends NumericRangeOptionPredicat
 
 	@Override
 	protected double getMax() {
-		return 3;
+		return 0;
 	}
 
 	@Override

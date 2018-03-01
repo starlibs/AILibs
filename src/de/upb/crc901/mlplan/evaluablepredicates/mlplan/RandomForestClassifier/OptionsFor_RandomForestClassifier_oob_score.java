@@ -1,5 +1,12 @@
 
 package de.upb.crc901.mlplan.evaluablepredicates.mlplan.RandomForestClassifier;
+/*
+    oob_score : bool (default=False)
+        Whether to use out-of-bag samples to estimate
+        the generalization accuracy.
+
+
+ */
 
 import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
 
@@ -12,7 +19,7 @@ public class OptionsFor_RandomForestClassifier_oob_score extends NumericRangeOpt
 
 	@Override
 	protected double getMax() {
-		return 3;
+		return 0;
 	}
 
 	@Override

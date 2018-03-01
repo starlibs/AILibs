@@ -1,5 +1,11 @@
 
 package de.upb.crc901.mlplan.evaluablepredicates.mlplan.RandomForestClassifier;
+/*
+    bootstrap : boolean, optional (default=True)
+        Whether bootstrap samples are used when building trees.
+
+
+ */
 
 import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
 
@@ -12,7 +18,7 @@ public class OptionsFor_RandomForestClassifier_bootstrap extends NumericRangeOpt
 
 	@Override
 	protected double getMax() {
-		return 3;
+		return 0;
 	}
 
 	@Override

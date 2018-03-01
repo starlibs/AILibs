@@ -1,5 +1,12 @@
 
 package de.upb.crc901.mlplan.evaluablepredicates.mlplan.SGDClassifier;
+/*
+    shuffle : bool, optional
+        Whether or not the training data should be shuffled after each epoch.
+        Defaults to True.
+
+
+ */
 
 import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
 
@@ -12,7 +19,7 @@ public class OptionsFor_SGDClassifier_shuffle extends NumericRangeOptionPredicat
 
 	@Override
 	protected double getMax() {
-		return 3;
+		return 0;
 	}
 
 	@Override

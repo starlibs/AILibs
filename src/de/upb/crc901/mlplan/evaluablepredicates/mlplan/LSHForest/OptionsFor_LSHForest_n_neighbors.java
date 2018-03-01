@@ -1,5 +1,12 @@
 
 package de.upb.crc901.mlplan.evaluablepredicates.mlplan.LSHForest;
+/*
+    n_neighbors : int (default = 5)
+        Number of neighbors to be returned from query function when
+        it is not provided to the :meth:`kneighbors` method.
+
+
+ */
 
 import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
 
@@ -12,7 +19,7 @@ public class OptionsFor_LSHForest_n_neighbors extends NumericRangeOptionPredicat
 
 	@Override
 	protected double getMax() {
-		return 3;
+		return 0;
 	}
 
 	@Override

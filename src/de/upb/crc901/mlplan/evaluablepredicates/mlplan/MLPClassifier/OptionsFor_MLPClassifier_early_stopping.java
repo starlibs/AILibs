@@ -1,5 +1,16 @@
 
 package de.upb.crc901.mlplan.evaluablepredicates.mlplan.MLPClassifier;
+/*
+    early_stopping : bool, default False
+        Whether to use early stopping to terminate training when validation
+        score is not improving. If set to true, it will automatically set
+        aside 10% of training data as validation and terminate training when
+        validation score is not improving by at least tol for two consecutive
+        epochs.
+        Only effective when solver='sgd' or 'adam'
+
+
+ */
 
 import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
 
@@ -12,7 +23,7 @@ public class OptionsFor_MLPClassifier_early_stopping extends NumericRangeOptionP
 
 	@Override
 	protected double getMax() {
-		return 3;
+		return 0;
 	}
 
 	@Override

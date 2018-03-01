@@ -1,5 +1,13 @@
 
 package de.upb.crc901.mlplan.evaluablepredicates.mlplan.GradientBoostingClassifier;
+/*
+    warm_start : bool, default: False
+        When set to ``True``, reuse the solution of the previous call to fit
+        and add more estimators to the ensemble, otherwise, just erase the
+        previous solution.
+
+
+ */
 
 import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
 
@@ -12,7 +20,7 @@ public class OptionsFor_GradientBoostingClassifier_warm_start extends NumericRan
 
 	@Override
 	protected double getMax() {
-		return 3;
+		return 0;
 	}
 
 	@Override

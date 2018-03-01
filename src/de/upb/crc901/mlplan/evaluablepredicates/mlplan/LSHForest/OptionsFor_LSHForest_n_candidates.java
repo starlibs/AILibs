@@ -1,5 +1,12 @@
 
 package de.upb.crc901.mlplan.evaluablepredicates.mlplan.LSHForest;
+/*
+    n_candidates : int (default = 50)
+        Minimum number of candidates evaluated per estimator, assuming enough
+        items meet the `min_hash_match` constraint.
+
+
+ */
 
 import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
 
@@ -12,7 +19,7 @@ public class OptionsFor_LSHForest_n_candidates extends NumericRangeOptionPredica
 
 	@Override
 	protected double getMax() {
-		return 3;
+		return 0;
 	}
 
 	@Override

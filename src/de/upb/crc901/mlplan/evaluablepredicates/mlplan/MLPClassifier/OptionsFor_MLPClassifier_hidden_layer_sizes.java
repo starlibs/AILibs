@@ -1,5 +1,12 @@
 
 package de.upb.crc901.mlplan.evaluablepredicates.mlplan.MLPClassifier;
+/*
+    hidden_layer_sizes : tuple, length = n_layers - 2, default (100,)
+        The ith element represents the number of neurons in the ith
+        hidden layer.
+
+
+ */
 
 import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
 
@@ -12,7 +19,7 @@ public class OptionsFor_MLPClassifier_hidden_layer_sizes extends NumericRangeOpt
 
 	@Override
 	protected double getMax() {
-		return 3;
+		return 0;
 	}
 
 	@Override

@@ -1,5 +1,11 @@
 
 package de.upb.crc901.mlplan.evaluablepredicates.mlplan.RidgeClassifier;
+/*
+    copy_X : boolean, optional, default True
+        If True, X will be copied; else, it may be overwritten.
+
+
+ */
 
 import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
 
@@ -12,7 +18,7 @@ public class OptionsFor_RidgeClassifier_copy_X extends NumericRangeOptionPredica
 
 	@Override
 	protected double getMax() {
-		return 3;
+		return 0;
 	}
 
 	@Override

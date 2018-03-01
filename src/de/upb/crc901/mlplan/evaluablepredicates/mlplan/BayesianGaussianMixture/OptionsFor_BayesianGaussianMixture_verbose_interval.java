@@ -1,5 +1,12 @@
 
 package de.upb.crc901.mlplan.evaluablepredicates.mlplan.BayesianGaussianMixture;
+/*
+    verbose_interval : int, default to 10.
+        Number of iteration done before the next print.
+
+    Attributes
+    
+ */
 
 import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
 
@@ -12,7 +19,7 @@ public class OptionsFor_BayesianGaussianMixture_verbose_interval extends Numeric
 
 	@Override
 	protected double getMax() {
-		return 3;
+		return 0;
 	}
 
 	@Override

@@ -36,7 +36,11 @@ public abstract class NumericRangeOptionPredicate extends OptionsPredicate  {
 	public NumericRangeOptionPredicate() {
 		double max = getMax();
 		double min = getMin();
-		double stepSize = (max - min) / (getSteps()-1);
+		int steps = getSteps();
+		if(steps < 0) {
+			steps = 0;
+		}
+		double stepSize = (max - min) / (steps + 1);
 		boolean needsIntegers = needsIntegers();
 		Set<Object> numericalValues = new TreeSet<>();	
 		
@@ -60,9 +64,12 @@ public abstract class NumericRangeOptionPredicate extends OptionsPredicate  {
 			scale = isLinear() ? -1 :  max / Math.exp(expCoeff  * max); // a
 		}
 			
-		for (int i = 0; i < getSteps(); i++) {
+		for (int i = 0; i < getSteps()+1; i++) {
 			// linear value:
 			double value = min + i * stepSize;
+			if(value > max) {
+				break;
+			}
 			// if it is logarithmic scale recalculate value:
 			if(!isLinear()) {
 				// y = a exp b*x
@@ -98,21 +105,21 @@ public abstract class NumericRangeOptionPredicate extends OptionsPredicate  {
 			
 			@Override
 			protected int getSteps() {
-				return 3;
+				return 0;
 			}
 			
 			@Override
 			protected double getMin() {
-				return 1;
+				return 0;
 			}
 			
 			@Override
 			protected double getMax() {
-				return 3;
+				return 0;
 			}
 			
 			protected boolean isLinear() {
-				return false;
+				return true;
 			}
 		};
 		System.out.println(test.getValidValues());

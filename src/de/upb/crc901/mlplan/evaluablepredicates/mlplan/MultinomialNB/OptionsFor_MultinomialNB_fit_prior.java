@@ -1,5 +1,12 @@
 
 package de.upb.crc901.mlplan.evaluablepredicates.mlplan.MultinomialNB;
+/*
+    fit_prior : boolean, optional (default=True)
+        Whether to learn class prior probabilities or not.
+        If false, a uniform prior will be used.
+
+
+ */
 
 import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
 
@@ -12,7 +19,7 @@ public class OptionsFor_MultinomialNB_fit_prior extends NumericRangeOptionPredic
 
 	@Override
 	protected double getMax() {
-		return 3;
+		return 0;
 	}
 
 	@Override
