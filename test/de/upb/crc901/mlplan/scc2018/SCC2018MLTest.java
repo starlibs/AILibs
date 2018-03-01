@@ -60,7 +60,7 @@ public class SCC2018MLTest {
 	}
 
 	protected void logExperimentStart(String dataset, ArrayNode rowsForSearch, String algoName, int seed, int timeout, int numCPUs, String setupName) {
-		expLogger.createAndSetRun(dataset, rowsForSearch, algoName, seed, timeout, numCPUs, setupName);
+		expLogger.createRunIfDoesNotExist(dataset, rowsForSearch, algoName, seed, timeout, numCPUs, setupName);
 	}
 
 	protected void logExperimentResult(String dataset, ArrayNode rowsForSearch, String algoName, int seed, int timeout, int numCPUs, String setupName, Classifier c, double loss) {
