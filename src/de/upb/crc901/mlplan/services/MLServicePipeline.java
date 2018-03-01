@@ -11,6 +11,8 @@ import java.util.Random;
 
 import javax.swing.plaf.synth.SynthScrollBarUI;
 
+import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
+
 import de.upb.crc901.mlplan.services.MLPipelinePlan.MLPipe;
 import de.upb.crc901.mlplan.services.MLPipelinePlan.WekaAttributeSelectionPipe;
 import de.upb.crc901.services.core.EasyClient;
@@ -26,6 +28,10 @@ import weka.core.Instance;
 import weka.core.Instances;
 
 public class MLServicePipeline implements Classifier, Serializable {
+	
+	private boolean trained;
+	private int timeForTrainingPipeline;
+	private DescriptiveStatistics timesForPrediction;
 
 	private final EnvironmentState servicesContainer = new EnvironmentState();
 	
@@ -155,6 +161,7 @@ public class MLServicePipeline implements Classifier, Serializable {
 		}
 		trainEC.withAddedMethodOperation("empty", classifierFieldName, "train", dataInFieldName);
 		
+		long start = System.currentTimeMillis();
 		try {
 //			System.out.println("Sending the following train composition:\n " + trainEC.getCurrentCompositionText());
 			// send train request:
@@ -162,6 +169,9 @@ public class MLServicePipeline implements Classifier, Serializable {
 		} catch(IOException ex) {
 			ex.printStackTrace();
 		}
+		timeForTrainingPipeline = (int)(System.currentTimeMillis() - start);
+		trained = true;
+		timesForPrediction = new DescriptiveStatistics();
 	}
 
 	@Override
@@ -297,4 +307,23 @@ public class MLServicePipeline implements Classifier, Serializable {
 		
 	}
 
+	
+	public List<String> getPPFieldNames() {
+		return PPFieldNames;
+	}
+
+	public String getClassifierFieldName() {
+		return classifierFieldName;
+	}
+
+	public int getTimeForTrainingPipeline() {
+		return timeForTrainingPipeline;
+	}
+	
+
+	public DescriptiveStatistics getTimesForPrediction() {
+		return timesForPrediction;
+	}
+
+	
 }

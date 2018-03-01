@@ -15,6 +15,7 @@ import com.google.common.eventbus.Subscribe;
 
 import de.upb.crc901.mlplan.classifiers.TwoPhaseHTNBasedPipelineSearcher;
 import de.upb.crc901.mlplan.search.evaluators.ClassifierMeasurementEvent;
+import de.upb.crc901.mlplan.services.MLServicePipeline;
 import jaicore.basic.MathExt;
 import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
@@ -45,14 +46,17 @@ public class MySQLMLPlanExperimentLogger extends MySQLExperimentLogger {
 			e.printStackTrace();
 		}
 	}
-
-	public void addEvaluationEntry(Classifier classifier, double score) {
-
-		if (!(classifier instanceof MLPipeline)) {
-			System.out.println("Cannot log information for classifiers of class " + classifier.getClass().getName());
-			return;
+	
+	public void createRunIfDoesNotExist(String dataset, ArrayNode rowsForSearch, String algorithm, int seed, int timeout, int cpus, String evaltechnique) {
+		try {
+			String[] values = { dataset, rowsForSearch.toString(), algorithm, String.valueOf(seed), String.valueOf(timeout), String.valueOf(cpus), evaltechnique };
+			runId = insert("INSERT INTO `runs` (dataset, rows_for_search, algorithm, seed, timeout, CPUs, evaltechnique) VALUES (?,?,?,?,?,?,?)", values);
+		} catch (SQLException e) {
+			e.printStackTrace();
 		}
-		MLPipeline pipeline = (MLPipeline) classifier;
+	}
+
+	public void addEvaluationEntry(MLPipeline pipeline, double score) {
 
 		String searcherName = "", searcherParams = "", evaluatorName = "", evaluatorParams = "";
 		if (!pipeline.getPreprocessors().isEmpty()) {
@@ -98,6 +102,48 @@ public class MySQLMLPlanExperimentLogger extends MySQLExperimentLogger {
 			}
 
 			insert("INSERT INTO `evaluations` (run_id, searcher, searcherparams, evaluator, evaluatorparams, classifier, classifierparams, pipeline, errorRate, time_train_preprocessors_mean, time_train_classifier_mean, time_execute_preprocessors_mean, time_execute_classifier_mean, time_train_preprocessors_std, time_train_classifier_std, time_execute_preprocessors_std, time_execute_classifier_std) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+					values);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (stmt != null)
+					stmt.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}		
+	}
+	
+	public void addEvaluationEntry (MLServicePipeline pipeline, double score) {
+		String preprocessor = "";
+		if (!pipeline.getPPFieldNames().isEmpty()) {
+			preprocessor = pipeline.getPPFieldNames().get(0);
+		}
+		String classifierName = pipeline.getClassifierFieldName();
+
+		String plKey = pipeline.toString();
+		Map<String, DescriptiveStatistics> stats = measurePLValues.containsKey(plKey) ? measurePLValues.get(plKey) : null;
+
+		PreparedStatement stmt = null;
+		try {
+			List<String> values = new ArrayList<>();
+			values.add(String.valueOf(runId));
+			values.add(preprocessor);
+			values.add(classifierName);
+			values.add(plKey);
+			values.add(String.valueOf(score / 10000));
+			if (stats != null) {
+				values.add(String.valueOf(stats.get("time_train").getMean()));
+				values.add(String.valueOf(stats.get("time_predict").getMean()));
+				values.add(String.valueOf(stats.get("time_train").getStandardDeviation()));
+				values.add(String.valueOf(stats.get("time_predict").getStandardDeviation()));
+			} else {
+				for (int i = 0; i < 4; i++)
+					values.add(null);
+			}
+
+			insert("INSERT INTO `evaluations` (run_id, preprocessor, classifier, pipeline, errorRate, time_train_mean, time_predict_mean, time_train_std, time_predict_std) VALUES (?,?,?,?,?,?,?,?,?)",
 					values);
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -156,6 +202,8 @@ public class MySQLMLPlanExperimentLogger extends MySQLExperimentLogger {
 	@Subscribe
 	public void receivePipelineMeasurementEvent(ClassifierMeasurementEvent<Double> event) {
 		try {
+			
+			/* normal pipelines */
 			if (event.getClassifier() instanceof MLPipeline) {
 				MLPipeline pl = (MLPipeline) event.getClassifier();
 				String plKey = pl.toString();
@@ -174,6 +222,22 @@ public class MySQLMLPlanExperimentLogger extends MySQLExperimentLogger {
 					stats.get("time_execute_preprocessors").addValue(pl.getTimeForExecutingPreprocessor().getMean());
 				if (pl.getTimeForExecutingClassifier().getMean() != Double.NaN)
 					stats.get("time_execute_classifier").addValue(pl.getTimeForExecutingClassifier().getMean());
+			}
+			
+			/* service pipelines */
+			if (event.getClassifier() instanceof MLServicePipeline) {
+				MLServicePipeline pl = (MLServicePipeline) event.getClassifier();
+				String plKey = pl.toString();
+				if (!measurePLValues.containsKey(plKey)) {
+					Map<String, DescriptiveStatistics> stats = new HashMap<>();
+					stats.put("time_train", new DescriptiveStatistics());
+					stats.put("time_predict", new DescriptiveStatistics());
+					measurePLValues.put(plKey, stats);
+				}
+				Map<String, DescriptiveStatistics> stats = measurePLValues.get(plKey);
+				stats.get("time_train").addValue(pl.getTimeForTrainingPipeline());
+				if (pl.getTimesForPrediction().getMean() != Double.NaN)
+					stats.get("time_predict").addValue(pl.getTimesForPrediction().getMean());
 			}
 		} catch (Throwable e) {
 			e.printStackTrace();
