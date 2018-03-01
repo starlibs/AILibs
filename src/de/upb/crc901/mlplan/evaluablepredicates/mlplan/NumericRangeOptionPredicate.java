@@ -105,21 +105,21 @@ public abstract class NumericRangeOptionPredicate extends OptionsPredicate  {
 			
 			@Override
 			protected int getSteps() {
-				return 0;
+				return 10;
 			}
 			
 			@Override
 			protected double getMin() {
-				return 0;
+				return 1;
 			}
 			
 			@Override
 			protected double getMax() {
-				return 0;
+				return 1000;
 			}
 			
 			protected boolean isLinear() {
-				return true;
+				return false;
 			}
 		};
 		System.out.println(test.getValidValues());

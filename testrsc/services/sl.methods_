@@ -1,4 +1,4 @@
-scikitLearnClassification;	chooseClassifier(c); c; ; ; de.upb.crc901.services.mlpipeline.MLPipelinePlan:onHost(c,'localhost', '5000') -> slCreateClassifier(c)
+scikitLearnClassification;	chooseClassifier(c); c; ; ; de.upb.crc901.services.mlpipeline.MLPipelinePlan:onHost(c,'isys-db.cs.upb.de', '5000') -> slCreateClassifier(c)
 
 
 # General classifier

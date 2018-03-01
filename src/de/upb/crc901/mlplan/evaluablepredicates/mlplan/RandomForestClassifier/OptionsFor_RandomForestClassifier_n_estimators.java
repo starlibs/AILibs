@@ -13,17 +13,22 @@ public class OptionsFor_RandomForestClassifier_n_estimators extends NumericRange
 	
 	@Override
 	protected double getMin() {
-		return 0;
+		return 1;
 	}
 
 	@Override
 	protected double getMax() {
-		return 0;
+		return 1000;
 	}
 
 	@Override
 	protected int getSteps() {
-		return 1;
+		return 10;
+	}
+	
+	@Override
+	protected boolean isLinear() {
+		return false;
 	}
 
 	@Override

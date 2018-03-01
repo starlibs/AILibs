@@ -76,8 +76,8 @@ public class SCC2018MLTest {
 				File evaluablePredicatFile = new File("testrsc/services/automl.evaluablepredicates_");
 				File searchSpaceFile = new File("testrsc/services/automl-services.searchspace");
 				TwoPhaseHTNBasedPipelineSearcher<Double> bs = new TwoPhaseHTNBasedPipelineSearcher<>();
-//				execDeriavationTree(searchSpaceFile, evaluablePredicatFile, bs, seed, timeout , 4 /* num CPUs*/ );
-				logicalDerivationTree(searchSpaceFile, evaluablePredicatFile);
+				execDeriavationTree(searchSpaceFile, evaluablePredicatFile, bs, seed, timeout , 4 /* num CPUs*/ );
+//				logicalDerivationTree(searchSpaceFile, evaluablePredicatFile);
 				
 				return bs;
 			}
@@ -87,6 +87,7 @@ public class SCC2018MLTest {
 		}
 		return null;
 	}
+	
 	private void execDeriavationTree(File searchSpaceFile, File evaluablePredicatFile, TwoPhaseHTNBasedPipelineSearcher<Double> bs, int seed, int timeout, int numCPUs) throws IOException {
 
 		Random random = new Random(seed);

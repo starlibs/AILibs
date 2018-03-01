@@ -82,14 +82,18 @@ public class TwoPhaseHTNBasedPipelineSearcher<V extends Comparable<V>> extends G
 	protected ORGraphSearch<TFDNode, String, V> getSearch(Instances data) throws IOException {
 		
 		/* TODO DIRRRTYYYYY!!!! set oracle resolver */
-		oracleResolvers = new HashMap<>();
-		oracleResolvers.put("configChildNodesT",
-				new RPNDOracleTaskSolver(getRandom(), "weka.classifiers.trees.RandomTree", data, MLUtil.getPlanningProblem(htnSearchSpaceFile, data)));
+//		oracleResolvers = new HashMap<>();
+//		oracleResolvers.put("configChildNodesT",
+//				new RPNDOracleTaskSolver(getRandom(), "weka.classifiers.trees.RandomTree", data, MLUtil.getPlanningProblem(htnSearchSpaceFile, data)));
 
 		if (graphGenerator == null) {
 			System.out.println("Automatically building graph generator using HTN file " + htnSearchSpaceFile + ", evaluable predicates " + evaluablePredicateFile + ", and dataset "
 					+ data.relationName() + " with " + data.classIndex() + " classes and " + data.size() + " points.");
 			graphGenerator = MLUtil.getGraphGenerator(htnSearchSpaceFile, evaluablePredicateFile, oracleResolvers, data);
+		}
+		
+		if (graphGenerator == null) {
+			throw new IllegalStateException("No graph generator has been set.");
 		}
 
 		if (rce == null) {
