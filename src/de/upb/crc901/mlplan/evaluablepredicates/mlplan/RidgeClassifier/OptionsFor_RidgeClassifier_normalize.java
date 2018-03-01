@@ -18,17 +18,17 @@ public class OptionsFor_RidgeClassifier_normalize extends NumericRangeOptionPred
 	
 	@Override
 	protected double getMin() {
-		return 0;
+		return 1;
 	}
 
 	@Override
 	protected double getMax() {
-		return 0;
+		return 1;
 	}
 
 	@Override
 	protected int getSteps() {
-		return 1;
+		return -1;
 	}
 
 	@Override

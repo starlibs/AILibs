@@ -18,17 +18,17 @@ public class OptionsFor_BaggingClassifier_warm_start extends NumericRangeOptionP
 	
 	@Override
 	protected double getMin() {
-		return 0;
+		return 1;
 	}
 
 	@Override
 	protected double getMax() {
-		return 0;
+		return 1;
 	}
 
 	@Override
 	protected int getSteps() {
-		return 1;
+		return -1;
 	}
 
 	@Override

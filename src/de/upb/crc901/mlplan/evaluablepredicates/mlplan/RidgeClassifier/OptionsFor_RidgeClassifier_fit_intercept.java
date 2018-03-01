@@ -15,17 +15,17 @@ public class OptionsFor_RidgeClassifier_fit_intercept extends NumericRangeOption
 	
 	@Override
 	protected double getMin() {
-		return 0;
+		return 1;
 	}
 
 	@Override
 	protected double getMax() {
-		return 0;
+		return 1;
 	}
 
 	@Override
 	protected int getSteps() {
-		return 1;
+		return -1;
 	}
 
 	@Override

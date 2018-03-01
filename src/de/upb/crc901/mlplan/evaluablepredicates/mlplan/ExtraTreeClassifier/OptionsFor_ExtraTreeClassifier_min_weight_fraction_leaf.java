@@ -15,17 +15,17 @@ public class OptionsFor_ExtraTreeClassifier_min_weight_fraction_leaf extends Num
 	
 	@Override
 	protected double getMin() {
-		return 0;
+		return 1;
 	}
 
 	@Override
 	protected double getMax() {
-		return 0;
+		return 1;
 	}
 
 	@Override
 	protected int getSteps() {
-		return 1;
+		return -1;
 	}
 
 	@Override

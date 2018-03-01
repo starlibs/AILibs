@@ -13,17 +13,17 @@ public class OptionsFor_LogisticRegression_tol extends NumericRangeOptionPredica
 	
 	@Override
 	protected double getMin() {
-		return 0;
+		return 1;
 	}
 
 	@Override
 	protected double getMax() {
-		return 0;
+		return 1;
 	}
 
 	@Override
 	protected int getSteps() {
-		return 1;
+		return -1;
 	}
 
 	@Override
