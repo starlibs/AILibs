@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import java.util.concurrent.SynchronousQueue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -57,7 +58,7 @@ public class BalancedRandomCompletionEvaluator extends RandomCompletionEvaluator
 		Optional<MethodInstance> methodInPlanThatChoosesClassifier = getClassifierDefiningMethodInstance(n);
 		if (!methodInPlanThatChoosesClassifier.isPresent())
 			return 0.0;
-
+		
 		/* if we have just decided about the classifier, assign a ranking */
 		if (n.getPoint().getAppliedMethodInstance() != null && n.getPoint().getAppliedMethodInstance() == methodInPlanThatChoosesClassifier.get()) {
 			Optional<String> matchingClassifier = classifierRanking.stream().filter(c -> methodInPlanThatChoosesClassifier.get().getMethod().getName().toLowerCase().contains(c.toLowerCase())).findFirst();

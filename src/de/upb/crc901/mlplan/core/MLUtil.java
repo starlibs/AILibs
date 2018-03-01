@@ -140,6 +140,7 @@ public class MLUtil {
 
 			switch (a.getOperation().getName()) {
 			case "noop":
+			case "associateWithAssertion":
 			case "noaddSingleParam":
 			case "noaddValuedParam":
 				break;
@@ -298,7 +299,7 @@ public class MLUtil {
 	public static boolean didLastActionAffectPipeline(List<TFDNode> path) {
 		Literal resolvedProblem = path.get(path.size() - 2).getRemainingTasks().get(0);
 		String taskName = resolvedProblem.getPropertyName().substring(resolvedProblem.getPropertyName().indexOf("-") + 1).toLowerCase();
-		boolean matches = taskName.matches("(addsingleparam|addoption|addvaluedparam|addoptionpair|noaddsingleparam|noaddvaluedparam|configchildnodest)");
+		boolean matches = taskName.matches("(.*)(addsingleparam|addoption|addvaluedparam|addoptionpair|noaddsingleparam|noaddvaluedparam|configchildnodest|addoptions|setclassifier)(.*)");
 		if (matches)
 			return true;
 		if (taskName.contains("__construct"))

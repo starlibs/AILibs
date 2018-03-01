@@ -30,6 +30,8 @@ sklearn.svm.SVC:String
 sklearn.neural_network.MLPClassifier:String
 sklearn.tree.DecisionTreeClassifier:String
 
+sklearn.feature_selection.GenericUnivariateSelect:String
+
 ### CLASSIFIER OPTIONS ###
 
 #  Classes: sklearn.ensemble.AdaBoostClassifier, sklearn.neighbors.KNeighborsClassifier, sklearn.neighbors.NearestNeighbors, sklearn.neighbors.RadiusNeighborsClassifier

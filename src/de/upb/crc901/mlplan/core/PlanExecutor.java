@@ -1,5 +1,6 @@
 package de.upb.crc901.mlplan.core;
 
+import java.lang.management.PlatformLoggingMXBean;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -90,6 +91,7 @@ public class PlanExecutor {
 			case "setActive":
 			case "setStopped":
 			case "configReduction":
+			case "associateWithAssertion":
 			case "noop": {
 				break;
 			}
@@ -319,7 +321,13 @@ public class PlanExecutor {
 						Constructor<?> ctor = ConstructorUtils.getMatchingAccessibleConstructor(clazz, inputClasses);
 						if (ctor == null)
 							throw new IllegalArgumentException("No constructor with input classes " + Arrays.toString(inputClasses) + " found for class " + clazz);
+						try {
 						variables.put(outParam, ctor.newInstance(params));
+						}
+						catch (InvocationTargetException e) {
+							e.getTargetException().printStackTrace();
+							throw e;
+						}
 						logger.info("Binding new object {} to variable {}.", variables.get(outParam), outParam);
 						continue;
 					}
@@ -400,9 +408,13 @@ public class PlanExecutor {
 							+ a.getOperation().getOutputs().size() + " outputs.");
 				Object out = null;
 
-				if (obj != null && !method.getDeclaringClass().isInstance(obj))
+				if (obj != null && !method.getDeclaringClass().isInstance(obj)) {
+					StringBuilder sb = new StringBuilder();
+					plan.stream().forEach(action -> sb.append(" - " + action.getEncoding() + "\n"));
 					throw new IllegalArgumentException(
-							"Cannot invoke method " + method.getName() + " of class " + method.getDeclaringClass().getName() + " on object of type " + obj.getClass().getName());
+							"Cannot invoke method " + method.getName() + " of class " + method.getDeclaringClass().getName() + " on object of type " + obj.getClass().getName() + ". Plan was:\n" + sb.toString());
+				}
+				
 				try {
 					out = method.invoke(obj, params);
 				} catch (InvocationTargetException e) {
