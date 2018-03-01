@@ -17,7 +17,7 @@ public class OptionsFor_PassiveAggressiveClassifier_warm_start extends NumericRa
 
 	@Override
 	protected int getSteps() {
-		return 3;
+		return 1;
 	}
 
 	@Override

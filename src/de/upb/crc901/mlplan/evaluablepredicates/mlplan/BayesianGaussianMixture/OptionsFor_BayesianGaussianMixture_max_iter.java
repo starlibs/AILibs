@@ -17,7 +17,7 @@ public class OptionsFor_BayesianGaussianMixture_max_iter extends NumericRangeOpt
 
 	@Override
 	protected int getSteps() {
-		return 3;
+		return 1;
 	}
 
 	@Override

@@ -17,7 +17,7 @@ public class OptionsFor_ExtraTreesClassifier_min_samples_leaf extends NumericRan
 
 	@Override
 	protected int getSteps() {
-		return 3;
+		return 1;
 	}
 
 	@Override

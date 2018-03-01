@@ -17,7 +17,7 @@ public class OptionsFor_BaggingClassifier_max_features extends NumericRangeOptio
 
 	@Override
 	protected int getSteps() {
-		return 3;
+		return 1;
 	}
 
 	@Override

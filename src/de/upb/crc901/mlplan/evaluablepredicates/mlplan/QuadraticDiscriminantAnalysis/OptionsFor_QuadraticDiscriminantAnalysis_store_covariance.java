@@ -17,7 +17,7 @@ public class OptionsFor_QuadraticDiscriminantAnalysis_store_covariance extends N
 
 	@Override
 	protected int getSteps() {
-		return 3;
+		return 1;
 	}
 
 	@Override

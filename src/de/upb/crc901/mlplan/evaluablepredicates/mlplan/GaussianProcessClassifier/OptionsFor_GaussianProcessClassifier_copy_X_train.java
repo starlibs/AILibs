@@ -17,7 +17,7 @@ public class OptionsFor_GaussianProcessClassifier_copy_X_train extends NumericRa
 
 	@Override
 	protected int getSteps() {
-		return 3;
+		return 1;
 	}
 
 	@Override

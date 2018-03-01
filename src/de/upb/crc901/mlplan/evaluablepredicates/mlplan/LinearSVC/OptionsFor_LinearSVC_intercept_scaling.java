@@ -17,7 +17,7 @@ public class OptionsFor_LinearSVC_intercept_scaling extends NumericRangeOptionPr
 
 	@Override
 	protected int getSteps() {
-		return 3;
+		return 1;
 	}
 
 	@Override

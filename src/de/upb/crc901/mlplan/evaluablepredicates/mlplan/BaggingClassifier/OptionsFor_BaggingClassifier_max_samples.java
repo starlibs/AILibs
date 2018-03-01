@@ -17,7 +17,7 @@ public class OptionsFor_BaggingClassifier_max_samples extends NumericRangeOption
 
 	@Override
 	protected int getSteps() {
-		return 3;
+		return 1;
 	}
 
 	@Override

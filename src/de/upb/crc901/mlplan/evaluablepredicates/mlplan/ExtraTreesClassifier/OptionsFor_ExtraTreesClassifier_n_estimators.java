@@ -17,7 +17,7 @@ public class OptionsFor_ExtraTreesClassifier_n_estimators extends NumericRangeOp
 
 	@Override
 	protected int getSteps() {
-		return 3;
+		return 1;
 	}
 
 	@Override

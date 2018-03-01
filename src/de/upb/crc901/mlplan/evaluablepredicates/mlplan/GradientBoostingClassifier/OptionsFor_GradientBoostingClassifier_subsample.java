@@ -17,7 +17,7 @@ public class OptionsFor_GradientBoostingClassifier_subsample extends NumericRang
 
 	@Override
 	protected int getSteps() {
-		return 3;
+		return 1;
 	}
 
 	@Override

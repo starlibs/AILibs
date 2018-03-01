@@ -17,7 +17,7 @@ public class OptionsFor_KNeighborsClassifier_n_neighbors extends NumericRangeOpt
 
 	@Override
 	protected int getSteps() {
-		return 3;
+		return 1;
 	}
 
 	@Override

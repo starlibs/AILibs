@@ -17,7 +17,7 @@ public class OptionsFor_ExtraTreesClassifier_min_samples_split extends NumericRa
 
 	@Override
 	protected int getSteps() {
-		return 3;
+		return 1;
 	}
 
 	@Override

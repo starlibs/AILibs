@@ -17,7 +17,7 @@ public class OptionsFor_MLPClassifier_hidden_layer_sizes extends NumericRangeOpt
 
 	@Override
 	protected int getSteps() {
-		return 3;
+		return 1;
 	}
 
 	@Override

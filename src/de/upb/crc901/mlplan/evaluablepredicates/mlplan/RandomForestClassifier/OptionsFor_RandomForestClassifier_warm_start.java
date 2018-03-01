@@ -17,7 +17,7 @@ public class OptionsFor_RandomForestClassifier_warm_start extends NumericRangeOp
 
 	@Override
 	protected int getSteps() {
-		return 3;
+		return 1;
 	}
 
 	@Override

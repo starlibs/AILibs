@@ -17,7 +17,7 @@ public class OptionsFor_GaussianProcessClassifier_n_restarts_optimizer extends N
 
 	@Override
 	protected int getSteps() {
-		return 3;
+		return 1;
 	}
 
 	@Override

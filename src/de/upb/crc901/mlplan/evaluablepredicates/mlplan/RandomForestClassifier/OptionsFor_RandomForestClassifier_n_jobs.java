@@ -17,7 +17,7 @@ public class OptionsFor_RandomForestClassifier_n_jobs extends NumericRangeOption
 
 	@Override
 	protected int getSteps() {
-		return 3;
+		return 1;
 	}
 
 	@Override

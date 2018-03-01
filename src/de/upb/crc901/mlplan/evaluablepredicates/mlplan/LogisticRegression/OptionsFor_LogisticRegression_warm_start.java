@@ -17,7 +17,7 @@ public class OptionsFor_LogisticRegression_warm_start extends NumericRangeOption
 
 	@Override
 	protected int getSteps() {
-		return 3;
+		return 1;
 	}
 
 	@Override

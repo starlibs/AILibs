@@ -17,7 +17,7 @@ public class OptionsFor_BayesianGaussianMixture_n_components extends NumericRang
 
 	@Override
 	protected int getSteps() {
-		return 3;
+		return 1;
 	}
 
 	@Override

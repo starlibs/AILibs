@@ -17,7 +17,7 @@ public class OptionsFor_GaussianProcessClassifier_n_jobs extends NumericRangeOpt
 
 	@Override
 	protected int getSteps() {
-		return 3;
+		return 1;
 	}
 
 	@Override

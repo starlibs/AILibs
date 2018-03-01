@@ -17,7 +17,7 @@ public class OptionsFor_GradientBoostingClassifier_verbose extends NumericRangeO
 
 	@Override
 	protected int getSteps() {
-		return 3;
+		return 1;
 	}
 
 	@Override

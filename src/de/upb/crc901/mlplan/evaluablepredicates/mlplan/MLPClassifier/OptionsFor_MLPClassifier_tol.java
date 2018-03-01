@@ -17,7 +17,7 @@ public class OptionsFor_MLPClassifier_tol extends NumericRangeOptionPredicate {
 
 	@Override
 	protected int getSteps() {
-		return 3;
+		return 1;
 	}
 
 	@Override

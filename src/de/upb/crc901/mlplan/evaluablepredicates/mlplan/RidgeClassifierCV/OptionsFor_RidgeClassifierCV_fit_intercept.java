@@ -17,7 +17,7 @@ public class OptionsFor_RidgeClassifierCV_fit_intercept extends NumericRangeOpti
 
 	@Override
 	protected int getSteps() {
-		return 3;
+		return 1;
 	}
 
 	@Override

@@ -17,7 +17,7 @@ public class OptionsFor_LSHForest_n_estimators extends NumericRangeOptionPredica
 
 	@Override
 	protected int getSteps() {
-		return 3;
+		return 1;
 	}
 
 	@Override

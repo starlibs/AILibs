@@ -17,7 +17,7 @@ public class OptionsFor_NearestNeighbors_radius extends NumericRangeOptionPredic
 
 	@Override
 	protected int getSteps() {
-		return 3;
+		return 1;
 	}
 
 	@Override

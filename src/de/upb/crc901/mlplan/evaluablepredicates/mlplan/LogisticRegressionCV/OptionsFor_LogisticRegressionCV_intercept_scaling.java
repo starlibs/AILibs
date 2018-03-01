@@ -17,7 +17,7 @@ public class OptionsFor_LogisticRegressionCV_intercept_scaling extends NumericRa
 
 	@Override
 	protected int getSteps() {
-		return 3;
+		return 1;
 	}
 
 	@Override

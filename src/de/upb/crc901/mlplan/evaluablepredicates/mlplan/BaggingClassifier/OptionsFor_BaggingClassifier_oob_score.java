@@ -17,7 +17,7 @@ public class OptionsFor_BaggingClassifier_oob_score extends NumericRangeOptionPr
 
 	@Override
 	protected int getSteps() {
-		return 3;
+		return 1;
 	}
 
 	@Override

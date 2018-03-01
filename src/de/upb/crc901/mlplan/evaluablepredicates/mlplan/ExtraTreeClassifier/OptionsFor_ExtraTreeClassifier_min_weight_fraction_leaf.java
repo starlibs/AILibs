@@ -17,7 +17,7 @@ public class OptionsFor_ExtraTreeClassifier_min_weight_fraction_leaf extends Num
 
 	@Override
 	protected int getSteps() {
-		return 3;
+		return 1;
 	}
 
 	@Override

@@ -74,32 +74,11 @@ public class SCC2018MLTest {
 			case "MLS-Plan": {
 
 				File evaluablePredicatFile = new File("testrsc/services/automl.evaluablepredicates_");
-
-				Random random = new Random(seed);
+				File searchSpaceFile = new File("testrsc/services/automl-services.searchspace");
 				TwoPhaseHTNBasedPipelineSearcher<Double> bs = new TwoPhaseHTNBasedPipelineSearcher<>();
-
-				 ORGraphSearch<TFDNode, String, Double> bf = new BestFirst<>(MLUtil.getGraphGenerator(new File("testrsc/services/automl-services.searchspace"), evaluablePredicatFile, null, null), n
-				 -> 0.0);
-				 new SimpleGraphVisualizationWindow<>(bf.getEventBus()).getPanel().setTooltipGenerator(new TFDTooltipGenerator<>());;
+//				execDeriavationTree(searchSpaceFile, evaluablePredicatFile, bs, seed, timeout , 4 /* num CPUs*/ );
+				logicalDerivationTree(searchSpaceFile, evaluablePredicatFile);
 				
-				 while(bf.nextSolution() != null);
-
-//				bs.setHtnSearchSpaceFile(new File("testrsc/services/automl-services.searchspace"));
-//				// bs.setHtnSearchSpaceFile(new File("testrsc/automl3.testset"));
-//				bs.setEvaluablePredicateFile(evaluablePredicatFile);
-//				bs.setRandom(random);
-//				bs.setTimeout(1000 * timeout);
-//				bs.setNumberOfCPUs(4);
-//				MulticlassEvaluator evaluator = new MulticlassEvaluator(random);
-//				bs.setSolutionEvaluatorFactory4Search(() -> new MonteCarloCrossValidationEvaluator(evaluator, 3, .7f));
-//				bs.setSolutionEvaluatorFactory4Selection(() -> new MonteCarloCrossValidationEvaluator(evaluator, 10, .7f));
-//				bs.setRce(new BalancedRandomCompletionEvaluator(random, 3, new MonteCarloCrossValidationEvaluator(evaluator, 3, .7f)));
-//				bs.setTimeoutPerNodeFComputation(1000 * (timeout == 60 ? 15 : 300));
-//				bs.setTooltipGenerator(new TFDTooltipGenerator<>());
-//				bs.setPortionOfDataForPhase2(.3f);
-//
-//				bs.setExperimentLogger(expLogger);
-//				evaluator.getMeasurementEventBus().register(expLogger);
 				return bs;
 			}
 			}
@@ -108,7 +87,37 @@ public class SCC2018MLTest {
 		}
 		return null;
 	}
+	
+	private void execDeriavationTree(File searchSpaceFile, File evaluablePredicatFile, TwoPhaseHTNBasedPipelineSearcher<Double> bs, int seed, int timeout, int numCPUs) throws IOException {
 
+		Random random = new Random(seed);
+		bs.setHtnSearchSpaceFile(searchSpaceFile);
+		//bs.setHtnSearchSpaceFile(new File("testrsc/automl3.testset"));
+		bs.setEvaluablePredicateFile(evaluablePredicatFile);
+		bs.setRandom(random);
+		bs.setTimeout(1000 * timeout);
+		bs.setNumberOfCPUs(numCPUs);
+		MulticlassEvaluator evaluator = new MulticlassEvaluator(random);
+		bs.setSolutionEvaluatorFactory4Search(() -> new MonteCarloCrossValidationEvaluator(evaluator, 3, .7f));
+		bs.setSolutionEvaluatorFactory4Selection(() -> new MonteCarloCrossValidationEvaluator(evaluator, 10, .7f));
+		bs.setRce(new BalancedRandomCompletionEvaluator(random, 3, new MonteCarloCrossValidationEvaluator(evaluator, 3, .7f)));
+		bs.setTimeoutPerNodeFComputation(1000 * (timeout == 60 ? 15 : 300));
+		bs.setTooltipGenerator(new TFDTooltipGenerator<>());
+		bs.setPortionOfDataForPhase2(.3f);
+
+		bs.setExperimentLogger(expLogger);
+		evaluator.getMeasurementEventBus().register(expLogger);
+	}
+
+	private void logicalDerivationTree(File searchSpaceFile, File evaluablePredicatFile) throws IOException {
+
+		 ORGraphSearch<TFDNode, String, Double> bf = new BestFirst<>(MLUtil.getGraphGenerator(searchSpaceFile, evaluablePredicatFile, null, null), n
+		 -> 0.0);
+		 new SimpleGraphVisualizationWindow<>(bf.getEventBus()).getPanel().setTooltipGenerator(new TFDTooltipGenerator<>());;
+		
+		 while(bf.nextSolution() != null);
+	}
+	
 	public static void main(String[] args) throws Exception {
 		HttpServiceServer server = HttpServiceServer.TEST_SERVER();
 		try {

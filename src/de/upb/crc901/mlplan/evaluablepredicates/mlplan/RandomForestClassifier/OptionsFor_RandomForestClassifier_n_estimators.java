@@ -17,7 +17,7 @@ public class OptionsFor_RandomForestClassifier_n_estimators extends NumericRange
 
 	@Override
 	protected int getSteps() {
-		return 3;
+		return 1;
 	}
 
 	@Override

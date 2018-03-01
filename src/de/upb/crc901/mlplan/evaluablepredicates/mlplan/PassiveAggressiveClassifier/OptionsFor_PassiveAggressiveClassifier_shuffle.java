@@ -17,7 +17,7 @@ public class OptionsFor_PassiveAggressiveClassifier_shuffle extends NumericRange
 
 	@Override
 	protected int getSteps() {
-		return 3;
+		return 1;
 	}
 
 	@Override

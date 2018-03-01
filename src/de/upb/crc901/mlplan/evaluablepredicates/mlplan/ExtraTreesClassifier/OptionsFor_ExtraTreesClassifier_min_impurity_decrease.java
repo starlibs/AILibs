@@ -17,7 +17,7 @@ public class OptionsFor_ExtraTreesClassifier_min_impurity_decrease extends Numer
 
 	@Override
 	protected int getSteps() {
-		return 3;
+		return 1;
 	}
 
 	@Override

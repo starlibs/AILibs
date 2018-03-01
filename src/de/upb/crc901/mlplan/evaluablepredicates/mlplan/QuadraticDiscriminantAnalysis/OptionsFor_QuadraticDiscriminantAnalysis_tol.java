@@ -17,7 +17,7 @@ public class OptionsFor_QuadraticDiscriminantAnalysis_tol extends NumericRangeOp
 
 	@Override
 	protected int getSteps() {
-		return 3;
+		return 1;
 	}
 
 	@Override

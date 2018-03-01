@@ -17,7 +17,7 @@ public class OptionsFor_GradientBoostingClassifier_learning_rate extends Numeric
 
 	@Override
 	protected int getSteps() {
-		return 3;
+		return 1;
 	}
 
 	@Override

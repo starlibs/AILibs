@@ -17,7 +17,7 @@ public class OptionsFor_DecisionTreeClassifier_min_samples_leaf extends NumericR
 
 	@Override
 	protected int getSteps() {
-		return 3;
+		return 1;
 	}
 
 	@Override

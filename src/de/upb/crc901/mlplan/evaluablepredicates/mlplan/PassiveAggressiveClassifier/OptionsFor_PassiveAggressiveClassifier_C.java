@@ -17,7 +17,7 @@ public class OptionsFor_PassiveAggressiveClassifier_C extends NumericRangeOption
 
 	@Override
 	protected int getSteps() {
-		return 3;
+		return 1;
 	}
 
 	@Override

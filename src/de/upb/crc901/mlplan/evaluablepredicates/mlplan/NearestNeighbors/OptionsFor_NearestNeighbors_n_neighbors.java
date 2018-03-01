@@ -17,7 +17,7 @@ public class OptionsFor_NearestNeighbors_n_neighbors extends NumericRangeOptionP
 
 	@Override
 	protected int getSteps() {
-		return 3;
+		return 1;
 	}
 
 	@Override

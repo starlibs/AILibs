@@ -17,7 +17,7 @@ public class OptionsFor_LSHForest_n_neighbors extends NumericRangeOptionPredicat
 
 	@Override
 	protected int getSteps() {
-		return 3;
+		return 1;
 	}
 
 	@Override

@@ -17,7 +17,7 @@ public class OptionsFor_BaggingClassifier_warm_start extends NumericRangeOptionP
 
 	@Override
 	protected int getSteps() {
-		return 3;
+		return 1;
 	}
 
 	@Override

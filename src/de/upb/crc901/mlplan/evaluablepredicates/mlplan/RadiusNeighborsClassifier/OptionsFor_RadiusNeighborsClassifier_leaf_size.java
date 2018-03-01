@@ -17,7 +17,7 @@ public class OptionsFor_RadiusNeighborsClassifier_leaf_size extends NumericRange
 
 	@Override
 	protected int getSteps() {
-		return 3;
+		return 1;
 	}
 
 	@Override

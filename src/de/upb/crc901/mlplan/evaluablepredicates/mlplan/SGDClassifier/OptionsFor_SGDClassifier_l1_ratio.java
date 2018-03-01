@@ -17,7 +17,7 @@ public class OptionsFor_SGDClassifier_l1_ratio extends NumericRangeOptionPredica
 
 	@Override
 	protected int getSteps() {
-		return 3;
+		return 1;
 	}
 
 	@Override

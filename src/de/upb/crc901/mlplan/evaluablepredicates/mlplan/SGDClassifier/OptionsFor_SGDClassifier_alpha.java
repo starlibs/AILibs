@@ -17,7 +17,7 @@ public class OptionsFor_SGDClassifier_alpha extends NumericRangeOptionPredicate 
 
 	@Override
 	protected int getSteps() {
-		return 3;
+		return 1;
 	}
 
 	@Override

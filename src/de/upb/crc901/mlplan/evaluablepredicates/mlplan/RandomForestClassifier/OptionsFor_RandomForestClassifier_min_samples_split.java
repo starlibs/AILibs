@@ -17,7 +17,7 @@ public class OptionsFor_RandomForestClassifier_min_samples_split extends Numeric
 
 	@Override
 	protected int getSteps() {
-		return 3;
+		return 1;
 	}
 
 	@Override

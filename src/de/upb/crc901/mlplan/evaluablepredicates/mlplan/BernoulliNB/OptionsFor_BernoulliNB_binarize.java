@@ -17,7 +17,7 @@ public class OptionsFor_BernoulliNB_binarize extends NumericRangeOptionPredicate
 
 	@Override
 	protected int getSteps() {
-		return 3;
+		return 1;
 	}
 
 	@Override
