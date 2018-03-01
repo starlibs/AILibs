@@ -67,7 +67,7 @@ public class PDDLGraphGenerator extends AbstractGraphGenerator<PDDLNode,String> 
 	public SingleRootGenerator<PDDLNode> getRootGenerator() {
 		//Create a root node and return it
 		BitState init = new BitState(problem.getInit());
-		return () -> new PDDLNode(new Node(init, null, -1, 0, heuristic.estimate(init, problem.getGoal())));
+		return () -> new PDDLNode(new Node(init, null, -1, 0, heuristic.estimate(init, problem.getGoal())), this.nextID());
 	}
 
 	@Override
@@ -81,7 +81,7 @@ public class PDDLGraphGenerator extends AbstractGraphGenerator<PDDLNode,String> 
 					op.getCondEffects().stream().filter(ce -> current.satisfy(ce.getCondition())).forEach(ce ->
                     // Apply the effect to the successor node
                     state.apply(ce.getEffects()));
-					list.add(new NodeExpansionDescription<PDDLNode, String>(s, new PDDLNode(state), "edge label", NodeType.OR));
+					list.add(new NodeExpansionDescription<PDDLNode, String>(s, new PDDLNode(state, this.nextID()), "edge label", NodeType.OR));
 //					list.add(new NodeExpansionDescription<Node, String>(s, state, "edge label", NodeType.OR));
 				}
 			}
