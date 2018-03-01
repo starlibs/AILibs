@@ -212,13 +212,13 @@ compileOptionListToArray; oList:List<String>; oArray:String[]; List<String>(oLis
 INCLUDE testrsc/services/weka.services
 INCLUDE testrsc/services/sl.services
 
-de.upb.crc901.services.mlpipeline.MLPipelinePlan:__construct;;config;;;(0)
-de.upb.crc901.services.mlpipeline.MLPipelinePlan:onHost;c,host,port;;;;(0)
-de.upb.crc901.services.mlpipeline.MLPipelinePlan:addAttributeSelection;c,algorithm;p;;definesPreprocessor(algorithm);(0)
-de.upb.crc901.services.mlpipeline.MLPipelinePlan:setClassifier;c,classifier;p;;definesClassifier(classifier);(0)
-de.upb.crc901.services.mlpipeline.MLPipelinePlan:addOptions;c,p,option,value;;;definesOption(option, value);(0)
-de.upb.crc901.services.mlpipeline.MLPipelinePlan:addWekaAttributeSelection;c,searcher,evaluator;;;definesWekaPreprocessor(c);(0)
-de.upb.crc901.services.mlpipeline.MLServicePipeline:__construct;config;pl;;;(0)
+de.upb.crc901.mlplan.services.MLPipelinePlan:__construct;;config;;;(0)
+de.upb.crc901.mlplan.services.MLPipelinePlan:onHost;c,host,port;;;;(0)
+de.upb.crc901.mlplan.services.MLPipelinePlan:addAttributeSelection;c,algorithm;p;;definesPreprocessor(algorithm);(0)
+de.upb.crc901.mlplan.services.MLPipelinePlan:setClassifier;c,classifier;p;;definesClassifier(classifier);(0)
+de.upb.crc901.mlplan.services.MLPipelinePlan:addOptions;c,p,option,value;;;definesOption(option, value);(0)
+de.upb.crc901.mlplan.services.MLPipelinePlan:addWekaAttributeSelection;c,searcher,evaluator;;;definesWekaPreprocessor(c);(0)
+de.upb.crc901.mlplan.services.MLServicePipeline:__construct;config;pl;;;(0)
 
 
 [Methods]
@@ -246,11 +246,11 @@ addMandatoryValuedParameter				; addMandatValuedParam(o,p,v);			o,p,v; ; ; addVa
 
 
 ### Main ###
-inducePipeline;		induce(x,returnedClassifier);	x,returnedClassifier,config; ; ;         de.upb.crc901.services.mlpipeline.MLPipelinePlan:__construct(config) -> chooseFeaturePreprocessor(config) -> chooseClassifier(config) -> configureFeaturePreprocessor(config) -> de.upb.crc901.services.mlpipeline.MLServicePipeline:__construct(config,returnedClassifier)
+inducePipeline;		induce(x,returnedClassifier);	x,returnedClassifier,config; ; ;         de.upb.crc901.mlplan.services.MLPipelinePlan:__construct(config) -> chooseFeaturePreprocessor(config) -> chooseClassifier(config) -> configureFeaturePreprocessor(config) -> de.upb.crc901.mlplan.services.MLServicePipeline:__construct(config,returnedClassifier)
 
 
 ignorePreprocessing; chooseFeaturePreprocessor(config); config; ; ; noop()
-ignorePreprocessingConfiguration; configureFeaturePreprocessor(config); config; ; ; noop()
+#ignorePreprocessingConfiguration; configureFeaturePreprocessor(config); config; ; ; noop()
 
 INCLUDE testrsc/services/weka_pp.methods
 INCLUDE testrsc/services/weka_classifiers.methods
