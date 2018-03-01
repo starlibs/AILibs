@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.EventBus;
 
-import de.upb.crc901.services.mlpipeline.MLServicePipeline;
+import de.upb.crc901.mlplan.services.MLServicePipeline;
 import jaicore.ml.WekaUtil;
 import weka.classifiers.Classifier;
 import weka.core.Instance;
