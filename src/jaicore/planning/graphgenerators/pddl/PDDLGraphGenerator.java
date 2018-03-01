@@ -18,6 +18,7 @@ import fr.uga.pddl4j.planners.hsp.Node;
 import fr.uga.pddl4j.util.BitOp;
 import fr.uga.pddl4j.util.BitState;
 import jaicore.search.graphgenerators.nqueens.QueenNode;
+import jaicore.search.structure.core.AbstractGraphGenerator;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.core.NodeType;
@@ -27,7 +28,7 @@ import jaicore.search.structure.graphgenerator.RootGenerator;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
-public class PDDLGraphGenerator implements GraphGenerator<Node,String> {
+public class PDDLGraphGenerator extends AbstractGraphGenerator<PDDLNode,String> {
 
 	ProblemFactory factory;
 	CodedProblem problem;
@@ -63,23 +64,25 @@ public class PDDLGraphGenerator implements GraphGenerator<Node,String> {
 	}
 
 	@Override
-	public SingleRootGenerator<Node> getRootGenerator() {
+	public SingleRootGenerator<PDDLNode> getRootGenerator() {
 		//Create a root node and return it
 		BitState init = new BitState(problem.getInit());
-		return () -> new Node(init, null, -1, 0, heuristic.estimate(init, problem.getGoal()));
+		return () -> new PDDLNode(new Node(init, null, -1, 0, heuristic.estimate(init, problem.getGoal())));
 	}
 
 	@Override
-	public SuccessorGenerator<Node, String> getSuccessorGenerator() {
+	public SuccessorGenerator<PDDLNode, String> getSuccessorGenerator() {
 		return s->{
-			List<NodeExpansionDescription<Node, String>> list = new ArrayList<>();
+			Node current = s.getNode();
+			List<NodeExpansionDescription<PDDLNode, String>> list = new ArrayList<>();
 			for(BitOp op: problem.getOperators()) {
-				if(op.isApplicable(s)) {
-					Node state = new Node(s);
-					op.getCondEffects().stream().filter(ce -> s.satisfy(ce.getCondition())).forEach(ce ->
+				if(op.isApplicable(current)) {
+					Node state = new Node(current);
+					op.getCondEffects().stream().filter(ce -> current.satisfy(ce.getCondition())).forEach(ce ->
                     // Apply the effect to the successor node
                     state.apply(ce.getEffects()));
-					list.add(new NodeExpansionDescription<Node, String>(s, state, "edge label", NodeType.OR));
+					list.add(new NodeExpansionDescription<PDDLNode, String>(s, new PDDLNode(state), "edge label", NodeType.OR));
+//					list.add(new NodeExpansionDescription<Node, String>(s, state, "edge label", NodeType.OR));
 				}
 			}
 			
@@ -88,9 +91,9 @@ public class PDDLGraphGenerator implements GraphGenerator<Node,String> {
 	}
 
 	@Override
-	public NodeGoalTester<Node> getGoalTester() {
+	public NodeGoalTester<PDDLNode> getGoalTester() {
 		return state ->{
-			return state.satisfy(problem.getGoal());
+			return state.getNode().satisfy(problem.getGoal());
 		};
 	}
 
