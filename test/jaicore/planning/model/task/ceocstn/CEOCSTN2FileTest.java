@@ -20,7 +20,7 @@ public class CEOCSTN2FileTest {
 		Collection<String> init = Arrays.asList(new String[] {"A", "B", "C", "D"});
 		CEOCSTNPlanningProblem problem = StandardProblemFactory.getNestedDichotomyCreationProblem("root", init, true, 0,0);
 
-		CEOCSTN2File.print(problem);	
+		CEOCSTN2Shop2.print(problem);	
 	}
 
 }
