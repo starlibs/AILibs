@@ -65,6 +65,12 @@ public class NQueenGenerator implements GraphGenerator<QueenNode,String> {
 	public boolean isSelfContained() {
 		return true;
 	}
+
+	@Override
+	public void setNodeNumbering(boolean nodenumbering) {
+		// TODO Auto-generated method stub
+		
+	}
 	
 	
 

@@ -111,6 +111,12 @@ public class GeneralBestFirstTester {
 				
 				return false;
 			}
+
+			@Override
+			public void setNodeNumbering(boolean nodenumbering) {
+				// TODO Auto-generated method stub
+				
+			}
 		};
 		
 		INodeEvaluator<GameNode, Integer> evaluator = new INodeEvaluator<GameNode,Integer>() {

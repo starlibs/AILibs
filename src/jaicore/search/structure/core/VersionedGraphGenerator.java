@@ -65,7 +65,7 @@ public class VersionedGraphGenerator<T,A> implements VersionedGraphGeneratorInte
 	public MultipleRootGenerator<VersionedT<T>> getMultipleRootGenerator(){
 		return () -> {
 			MultipleRootGenerator rootGenerator = (MultipleRootGenerator) gen.getRootGenerator();
-			Collection<VersionedT<T>> vRoots = new ArrayList();
+			Collection<VersionedT<T>> vRoots = new ArrayList<VersionedT<T>>();
 			Collection roots = rootGenerator.getRoots();
 			
 			roots.stream().forEach(
