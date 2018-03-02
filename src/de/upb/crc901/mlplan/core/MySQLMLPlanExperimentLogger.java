@@ -110,9 +110,10 @@ public class MySQLMLPlanExperimentLogger extends MySQLExperimentDatabaseHandle {
 
 	public void addEvaluationEntry(Classifier parentSearchAlgorithm, MLServicePipeline identifiedPipeline, double score) {
 		String preprocessor = "";
-		if (!identifiedPipeline.getPPFieldNames().isEmpty()) {
+		if (!identifiedPipeline.getPreprocessorNames().isEmpty()) {
 			preprocessor = identifiedPipeline.getPreprocessorNames().get(0);
 		}
+		System.out.println("PRE: " + preprocessor);
 		String classifierName = identifiedPipeline.getClassifierName();
 
 		String plKey = identifiedPipeline.toString();

@@ -61,7 +61,6 @@ public class MulticlassEvaluator implements BasicMLEvaluator, Serializable {
 			}
 		}
 		
-		
 		double error = mistakes * 100f / test.size();
 		measurementEventBus.post(new ClassifierMeasurementEvent<Double>(c, error));
 		return error;

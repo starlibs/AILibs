@@ -24,12 +24,12 @@ import weka.classifiers.Classifier;
 
 public class SCC2018MLTest extends MultiClassClassificationExperimentRunner {
 	
-	private static final int[] timeouts = new int[] { 60 };
+	private static final int[] timeouts = new int[] { 3600 };
 	private static final int seeds = 10;
 	private static final float trainingPortion = 0.7f;
 
 	private static final int numCPUs = 5;
-	private static final int memoryInMB = 1996;
+	private static final int memoryInMB = 2036;
 	
 	private final MySQLMLPlanExperimentLogger logger; // we want to have the logger, because we also send 
 	
@@ -99,10 +99,10 @@ public class SCC2018MLTest extends MultiClassClassificationExperimentRunner {
 	public static void main(String[] args) throws Exception {
 		HttpServiceServer server = HttpServiceServer.TEST_SERVER();
 		try {
-
+						
 			File folder = new File(args[0]);
 			SCC2018MLTest runner = new SCC2018MLTest(folder);
-			runner.runSpecific(1);
+			runner.runSpecific(24);
 		} finally {
 			server.shutdown();
 		}

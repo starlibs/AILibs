@@ -16,7 +16,7 @@
         "extends" : ["$base_weka_filter_config$"]
     },
     "de.upb.crc901.services.wrappers.WekaAttributeSelectionWrapper":{
-        "methods" : ["SelectAttributes", "reduceDimensionality"]
+        "methods" : ["SelectAttributes", "reduceDimensionality", "preprocess"]
     },
     "$base_weka_attributeselection_config$" : {
         "extends" : ["$base_weka_preprocessor_config$"],

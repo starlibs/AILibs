@@ -1,7 +1,7 @@
 selectSLPreprocessing; chooseFeaturePreprocessor(config); config; ; ; slChoosePreprocessor(config)
-configureSLPreprocessing; configureFeaturePreprocessor(config); config; ; ; de.upb.crc901.services.mlpipeline.MLPipelinePlan:onHost(config,'isys-db.cs.upb.de', '5000') -> slConfigurePreprocessor(config)
+configureSLPreprocessing; configureFeaturePreprocessor(config); config; ; ; de.upb.crc901.mlplan.services.MLPipelinePlan:onHost(config,'isys-db.cs.upb.de', '5000') -> slConfigurePreprocessor(config)
 
 ## 
 slunichoose;	slChoosePreprocessor(config); config; ; ; associateWithAssertion('sklearn.feature_selection.GenericUnivariateSelect',config)
-sluniconfig;	slConfigurePreprocessor(config); config,handle; associated('sklearn.feature_selection.GenericUnivariateSelect',config) ; ;  de.upb.crc901.services.mlpipeline.MLPipelinePlan:addAttributeSelection(config, 'sklearn.feature_selection.GenericUnivariateSelect', handle)
+sluniconfig;	slConfigurePreprocessor(config); config,handle; associated('sklearn.feature_selection.GenericUnivariateSelect',config) ; ;  de.upb.crc901.mlplan.services.MLPipelinePlan:addAttributeSelection(config, 'sklearn.feature_selection.GenericUnivariateSelect', handle)
 

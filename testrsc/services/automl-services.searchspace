@@ -249,14 +249,13 @@ addMandatoryValuedParameter				; addMandatValuedParam(o,p,v);			o,p,v; ; ; addVa
 inducePipeline;		induce(x,returnedClassifier);	x,returnedClassifier,config; ; ;         de.upb.crc901.mlplan.services.MLPipelinePlan:__construct(config) -> chooseFeaturePreprocessor(config) -> chooseClassifier(config) -> configureFeaturePreprocessor(config) -> de.upb.crc901.mlplan.services.MLServicePipeline:__construct(config,returnedClassifier)
 
 
-ignorePreprocessing; chooseFeaturePreprocessor(config); config; ; ; noop()
-ignorePreprocessingConfiguration; configureFeaturePreprocessor(config); config; ; ; noop()
+#ignorePreprocessing; chooseFeaturePreprocessor(config); config; ; ; associateWithAssertion('nopp',config)
+ignorePreprocessingConfiguration; configureFeaturePreprocessor(config); config; associated('nopp',config) ; ; noop()
 
-#INCLUDE testrsc/services/weka_pp.methods
+INCLUDE testrsc/services/weka_pp.methods
 #INCLUDE testrsc/services/weka_classifiers.methods
 #INCLUDE testrsc/services/sl_pp.methods
 INCLUDE testrsc/services/sl.methods
-#INCLUDE testrsc/services/sl.methods_
 
 [Rules]
 

@@ -4,7 +4,7 @@ scikitLearnClassification;	chooseClassifier(c); c; ; ; de.upb.crc901.mlplan.serv
 # Resolve classifier grammar
 slBaseClassifier; 		slCreateClassifier(c); c; ; ; slCreate_classifier_basic(c)
 
-#INCLUDE testrsc/services/gen/sl_basic_cl.methods
+INCLUDE testrsc/services/gen/sl_basic_cl.methods
 
 slMetaClassifier; 		slCreateClassifier(c); c; ; ; slCreate_classifier_meta(c)
 

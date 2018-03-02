@@ -1,12 +1,9 @@
 package de.upb.crc901.mlplan.search.evaluators;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
-import java.util.concurrent.SynchronousQueue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -23,21 +20,18 @@ import jaicore.logic.fol.structure.Literal;
 import jaicore.ml.WekaUtil;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.model.ceoc.CEOCAction;
-import jaicore.planning.model.task.stn.Method;
 import jaicore.planning.model.task.stn.MethodInstance;
-import jaicore.search.algorithms.standard.core.NodeAnnotationEvent;
-import jaicore.search.algorithms.standard.core.SolutionAnnotationEvent;
-import jaicore.search.algorithms.standard.core.SolutionFoundEvent;
 import jaicore.search.structure.core.Node;
 import weka.classifiers.Classifier;
 
+@SuppressWarnings("serial")
 public class BalancedRandomCompletionEvaluator extends RandomCompletionEvaluator<Double> {
 
 	private final static Logger logger = LoggerFactory.getLogger(BalancedRandomCompletionEvaluator.class);
 	private static final List<String> classifierRanking = Arrays.asList(new String[] { "RandomTree", "J48", "IBk", "NaiveBayesMultinomial", "NaiveBayes", "RandomForest",
 			"SimpleLogistic", "MultiLayerPerceptron", "VotedPerceptron", "SMO", "Logistic" });
 
-	private final Map<String, Integer> regionCounter = new HashMap<>();
+//	private final Map<String, Integer> regionCounter = new HashMap<>();
 
 	public BalancedRandomCompletionEvaluator(Random random, int samples, SolutionEvaluator evaluator) {
 		super(random, samples, evaluator);
@@ -64,9 +58,7 @@ public class BalancedRandomCompletionEvaluator extends RandomCompletionEvaluator
 			Optional<String> matchingClassifier = classifierRanking.stream().filter(c -> methodInPlanThatChoosesClassifier.get().getMethod().getName().toLowerCase().contains(c.toLowerCase())).findFirst();
 			if (!matchingClassifier.isPresent())
 				return classifierRanking.size() * 2.0;
-	
-			System.out.println(matchingClassifier.get());
-			
+
 			/* determine chosen preprocessor */
 			String preprocessor = CodePlanningUtil.getPreprocessorEvaluatorFromPipelineGenerationCode(currentProgram);
 			int offset = (preprocessor.equals("")) ? 0 : classifierRanking.size();

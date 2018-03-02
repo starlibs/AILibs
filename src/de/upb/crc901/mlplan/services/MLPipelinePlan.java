@@ -47,13 +47,6 @@ public class MLPipelinePlan {
 		return asPipe;
 	}
 	
-	public WekaAttributeSelectionPipe addWekaAttributeSelection() {
-		Objects.requireNonNull(this.nextHost, "Host needs to be specified before adding pipes to the pipeline.");
-		WekaAttributeSelectionPipe asPipe =  new WekaAttributeSelectionPipe(this.nextHost);
-		atrPipes.add(asPipe); // add to pipe list before returning.
-		return asPipe;
-	}
-	
 	public void addOptions(MLPipe pipe, String option, Object value) {
 		pipe.addOptions(option + " " + value.toString());
 	}
@@ -72,8 +65,9 @@ public class MLPipelinePlan {
 		asPipe.withEval(eval.getClass().getName());
 		if(eval instanceof OptionHandler) {
 			String evalOptions[] = ((OptionHandler) eval).getOptions();
-			asPipe.addOptions(evalOptions);
+			asPipe.addEvalOptions(evalOptions);
 		}
+		atrPipes.add(asPipe);
 		return asPipe;
 	}
 	
@@ -185,8 +179,8 @@ public class MLPipelinePlan {
 		protected WekaAttributeSelectionPipe(String host) {
 			super(host, classname);
 		}
-		private Set<String> 	searcherOptions = new TreeSet<>(), 
-							evalOptions = new TreeSet<>();
+		private List<String> 	searcherOptions = new ArrayList<>(), 
+							evalOptions = new ArrayList<>();
 		
 		public WekaAttributeSelectionPipe withSearcher(String searcherName) {
 			this.searcherName = Objects.requireNonNull(searcherName);
@@ -208,7 +202,7 @@ public class MLPipelinePlan {
 			return this;
 		}
 		
-		private void addToOptionList(Set<String> optionList, String[] additionalOptions) {
+		private void addToOptionList(List<String> optionList, String[] additionalOptions) {
 			Objects.requireNonNull(additionalOptions);
 			for(String newOption : additionalOptions) {
 				optionList.add(newOption);
