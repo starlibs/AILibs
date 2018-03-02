@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -14,10 +15,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.apache.commons.lang3.reflect.MethodUtils;
+import org.omg.CORBA.Principal;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -25,11 +28,15 @@ import com.google.common.collect.ContiguousSet;
 import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.Range;
 
-import jaicore.basic.SetUtil;
 import jaicore.ml.WekaUtil;
 import jaicore.ml.measures.PMMulticlass;
+import weka.attributeSelection.AttributeSelection;
+import weka.attributeSelection.CfsSubsetEval;
+import weka.attributeSelection.PrincipalComponents;
+import weka.attributeSelection.Ranker;
+import weka.attributeSelection.WrapperSubsetEval;
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
+import weka.core.Instance;
 import weka.core.Instances;
 
 public abstract class MultiClassClassificationExperimentRunner {
@@ -216,6 +223,7 @@ public abstract class MultiClassClassificationExperimentRunner {
 			/* create actual dataset */
 			Instances data = getKthInstances(datasetFolder, datasetId);
 			data.setClassIndex(data.numAttributes() - 1);
+			
 			Collection<Integer>[] overallSplitIndices = WekaUtil.getStratifiedSplitIndices(data, r, trainingPortion);
 			List<Instances> overallSplit = WekaUtil.realizeSplit(data, overallSplitIndices);
 			Instances internalData = overallSplit.get(0);
@@ -240,9 +248,22 @@ public abstract class MultiClassClassificationExperimentRunner {
 				System.out.println("Search has finished. Runtime: " + (end - start) / 1000f + " s");
 
 				/* check performance of the pipeline */
-				Evaluation eval = new Evaluation(internalData);
-				eval.evaluateModel(c, testData);
-				int error = (int) ((eval.pctIncorrect() + eval.pctUnclassified()) * 100);
+				int mistakes = 0;
+				Method m = MethodUtils.getMatchingAccessibleMethod(c.getClass(), "classifyInstances", Instances.class);
+				if (m != null) {
+					double[] predictions = (double[]) m.invoke(c, testData);
+					for (int i = 0; i < predictions.length; i++) {
+						if (predictions[i] != testData.get(i).classValue())
+							mistakes ++;
+					}
+				}
+				else {
+					for (Instance i : testData) {
+						if (i.classValue() != c.classifyInstance(i))
+							mistakes++;
+					}
+				}
+				double error = mistakes * 10000f / testData.size();
 				System.out.println("Sending error Rate " + error + " to logger.");
 				database.addResultEntry(runId, error);
 			} catch (Throwable e) {
