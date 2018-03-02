@@ -74,7 +74,7 @@ public abstract class GraphBasedPipelineSearcher<T, A, V extends Comparable<V>> 
 
 	protected void logSolution(Classifier pl, V score) {
 		if (score instanceof Number && experimentLogger != null)
-			experimentLogger.addEvaluationEntry(pl, (double) score);
+			experimentLogger.addEvaluationEntry(this, pl, (double) score);
 	}
 
 	public void findPipelines(Instances data) throws Exception {

@@ -17,6 +17,7 @@ import com.google.common.eventbus.Subscribe;
 import de.upb.crc901.mlplan.classifiers.MultiLabelGraphBasedPipelineSearcher;
 import de.upb.crc901.mlplan.search.evaluators.ClassifierMeasurementEvent;
 import jaicore.basic.MathExt;
+import jaicore.basic.MySQLAdapter;
 import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
 import weka.classifiers.Classifier;
@@ -24,7 +25,7 @@ import weka.classifiers.SingleClassifierEnhancer;
 import weka.classifiers.meta.AutoWEKAClassifier;
 import weka.core.OptionHandler;
 
-public class MySQLMultiLabelExperimentLogger extends MySQLExperimentLogger {
+public class MySQLMultiLabelExperimentLogger extends MySQLAdapter {
 	private int runId;
 	private Map<String, Map<String, DescriptiveStatistics>> measurePLValues = new HashMap<>();
 

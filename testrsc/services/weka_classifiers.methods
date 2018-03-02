@@ -4,9 +4,9 @@ wekaClassification;	chooseClassifier(config); config; ; ; wekaCreateClassifier(c
 ### CLASSIFIER CONSTRUCTION ###
 
 # Weka General Method (single vs. meta vs. ensemble)
-wekaBaseClassifier; 		wekaCreateClassifier(config); config,classifier,p; ; ; wekaCreateBaseClassifier(classifier) -> de.upb.crc901.services.mlpipeline.MLPipelinePlan:setClassifier(config, classifier, p)
-#wekaMetaClassifier; 		wekaCreateClassifier(config); config,classifier,p; ; ; wekaCreateMetaClassifier(classifier) -> de.upb.crc901.services.mlpipeline.MLPipelinePlan:setClassifier(config, classifier, p)
-#wekaEnsembleClassifier;		wekaCreateClassifier(config); config,classifier,p; ; ; wekaCreateEnsembleClassifier(classifier) -> de.upb.crc901.services.mlpipeline.MLPipelinePlan:setClassifier(config, classifier, p)
+wekaBaseClassifier; 		wekaCreateClassifier(config); config,classifier,p; ; ; wekaCreateBaseClassifier(classifier) -> de.upb.crc901.mlplan.services.MLPipelinePlan:setClassifier(config, classifier, p)
+#wekaMetaClassifier; 		wekaCreateClassifier(config); config,classifier,p; ; ; wekaCreateMetaClassifier(classifier) -> de.upb.crc901.mlplan.services.MLPipelinePlan:setClassifier(config, classifier, p)
+#wekaEnsembleClassifier;		wekaCreateClassifier(config); config,classifier,p; ; ; wekaCreateEnsembleClassifier(classifier) -> de.upb.crc901.mlplan.services.MLPipelinePlan:setClassifier(config, classifier, p)
 
 
 ### BASE CLASSIFIERS ###

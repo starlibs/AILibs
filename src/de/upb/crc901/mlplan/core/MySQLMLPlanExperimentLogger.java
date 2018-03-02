@@ -10,20 +10,22 @@ import java.util.Map;
 
 import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.common.eventbus.Subscribe;
 
 import de.upb.crc901.mlplan.classifiers.TwoPhaseHTNBasedPipelineSearcher;
 import de.upb.crc901.mlplan.search.evaluators.ClassifierMeasurementEvent;
 import de.upb.crc901.mlplan.services.MLServicePipeline;
 import jaicore.basic.MathExt;
+import jaicore.ml.experiments.Experiment;
+import jaicore.ml.experiments.MySQLExperimentDatabaseHandle;
 import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
 import weka.classifiers.Classifier;
 import weka.core.OptionHandler;
 
-public class MySQLMLPlanExperimentLogger extends MySQLExperimentLogger {
-	private int runId;
+@SuppressWarnings("serial")
+public class MySQLMLPlanExperimentLogger extends MySQLExperimentDatabaseHandle {
+
 	private Map<String, Map<String, DescriptiveStatistics>> measurePLValues = new HashMap<>();
 
 	/**
@@ -38,47 +40,38 @@ public class MySQLMLPlanExperimentLogger extends MySQLExperimentLogger {
 		super(host, user, password, database);
 	}
 
-	public void createAndSetRun(String dataset, ArrayNode rowsForSearch, String algorithm, int seed, int timeout, int cpus, String evaltechnique) {
-		try {
-			String[] values = { dataset, rowsForSearch.toString(), algorithm, String.valueOf(seed), String.valueOf(timeout), String.valueOf(cpus), evaltechnique };
-			runId = insert("INSERT INTO `runs` (dataset, rows_for_search, algorithm, seed, timeout, CPUs, evaltechnique) VALUES (?,?,?,?,?,?,?)", values);
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public void createRunIfDoesNotExist(String dataset, ArrayNode rowsForSearch, String algorithm, int seed, int timeout, int cpus, String evaltechnique) {
-		try {
-			String[] values = { dataset, rowsForSearch.toString(), algorithm, String.valueOf(seed), String.valueOf(timeout), String.valueOf(cpus), evaltechnique };
-			runId = insert("INSERT INTO `runs` (dataset, rows_for_search, algorithm, seed, timeout, CPUs, evaltechnique) VALUES (?,?,?,?,?,?,?)", values);
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+	public void addEvaluationEntry(Classifier parentSearchAlgorithm, Classifier identifiedPipeline, double score) {
+		if (identifiedPipeline instanceof MLPipeline)
+			addEvaluationEntry(parentSearchAlgorithm, (MLPipeline) identifiedPipeline, score);
+		else if (identifiedPipeline instanceof MLServicePipeline)
+			addEvaluationEntry(parentSearchAlgorithm, (MLServicePipeline) identifiedPipeline, score);
+		else
+			throw new IllegalArgumentException("Cannot log evaluation entries for pipelines of class " + identifiedPipeline.getClass().getName());
 	}
 
-	public void addEvaluationEntry(MLPipeline pipeline, double score) {
+	public void addEvaluationEntry(Classifier parentSearchAlgorithm, MLPipeline identifiedPipeline, double score) {
 
 		String searcherName = "", searcherParams = "", evaluatorName = "", evaluatorParams = "";
-		if (!pipeline.getPreprocessors().isEmpty()) {
-			ASSearch searcher = pipeline.getPreprocessors().get(0).getSearcher();
-			ASEvaluation evaluation = pipeline.getPreprocessors().get(0).getEvaluator();
+		if (!identifiedPipeline.getPreprocessors().isEmpty()) {
+			ASSearch searcher = identifiedPipeline.getPreprocessors().get(0).getSearcher();
+			ASEvaluation evaluation = identifiedPipeline.getPreprocessors().get(0).getEvaluator();
 
 			searcherName = searcher.getClass().getSimpleName();
 			searcherParams = searcher instanceof OptionHandler ? Arrays.toString(((OptionHandler) searcher).getOptions()) : "";
 			evaluatorName = evaluation.getClass().getSimpleName();
 			evaluatorParams = evaluation instanceof OptionHandler ? Arrays.toString(((OptionHandler) evaluation).getOptions()) : "";
 		}
-		Classifier baseClassifier = pipeline.getBaseClassifier();
+		Classifier baseClassifier = identifiedPipeline.getBaseClassifier();
 		String classifierName = baseClassifier.getClass().getSimpleName();
 		String classifierParams = baseClassifier instanceof OptionHandler ? Arrays.toString(((OptionHandler) baseClassifier).getOptions()) : "";
 
-		String plKey = pipeline.toString();
+		String plKey = identifiedPipeline.toString();
 		Map<String, DescriptiveStatistics> stats = measurePLValues.containsKey(plKey) ? measurePLValues.get(plKey) : null;
 
 		PreparedStatement stmt = null;
 		try {
 			List<String> values = new ArrayList<>();
-			values.add(String.valueOf(runId));
+			values.add(String.valueOf(getRunIdOfClassifier(parentSearchAlgorithm)));
 			values.add(searcherName);
 			values.add(searcherParams);
 			values.add(evaluatorName);
@@ -112,23 +105,23 @@ public class MySQLMLPlanExperimentLogger extends MySQLExperimentLogger {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		}		
-	}
-	
-	public void addEvaluationEntry (MLServicePipeline pipeline, double score) {
-		String preprocessor = "";
-		if (!pipeline.getPPFieldNames().isEmpty()) {
-			preprocessor = pipeline.getPPFieldNames().get(0);
 		}
-		String classifierName = pipeline.getClassifierFieldName();
+	}
 
-		String plKey = pipeline.toString();
+	public void addEvaluationEntry(Classifier parentSearchAlgorithm, MLServicePipeline identifiedPipeline, double score) {
+		String preprocessor = "";
+		if (!identifiedPipeline.getPPFieldNames().isEmpty()) {
+			preprocessor = identifiedPipeline.getPreprocessorNames().get(0);
+		}
+		String classifierName = identifiedPipeline.getClassifierName();
+
+		String plKey = identifiedPipeline.toString();
 		Map<String, DescriptiveStatistics> stats = measurePLValues.containsKey(plKey) ? measurePLValues.get(plKey) : null;
 
 		PreparedStatement stmt = null;
 		try {
 			List<String> values = new ArrayList<>();
-			values.add(String.valueOf(runId));
+			values.add(String.valueOf(getRunIdOfClassifier(parentSearchAlgorithm)));
 			values.add(preprocessor);
 			values.add(classifierName);
 			values.add(plKey);
@@ -143,7 +136,7 @@ public class MySQLMLPlanExperimentLogger extends MySQLExperimentLogger {
 					values.add(null);
 			}
 
-			insert("INSERT INTO `evaluations` (run_id, preprocessor, classifier, pipeline, errorRate, time_train_mean, time_predict_mean, time_train_std, time_predict_std) VALUES (?,?,?,?,?,?,?,?,?)",
+			insert("INSERT INTO `evaluations_mls` (run_id, preprocessor, classifier, pipeline, errorRate, time_train_mean, time_predict_mean, time_train_std, time_predict_std) VALUES (?,?,?,?,?,?,?,?,?)",
 					values);
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -157,12 +150,24 @@ public class MySQLMLPlanExperimentLogger extends MySQLExperimentLogger {
 		}
 	}
 
-	public void addResultEntry(Classifier classifier, double score) {
+	@Override
+	public void addResultEntry(int runId, double score) {
+
+		Classifier classifier = getClassifierOfRun(runId);
 
 		if (!(classifier instanceof de.upb.crc901.mlplan.classifiers.TwoPhaseHTNBasedPipelineSearcher)) {
 			throw new UnsupportedOperationException("Currently no support for logging results for classifiers of class " + classifier.getClass().getName());
 		}
-		MLPipeline pipeline = (MLPipeline) ((TwoPhaseHTNBasedPipelineSearcher<?>) classifier).getSelectedModel();
+		Classifier chosenModel = ((TwoPhaseHTNBasedPipelineSearcher<?>) classifier).getSelectedModel();
+		if (chosenModel instanceof MLPipeline)
+			addResultEntry(runId, (MLPipeline) chosenModel, score);
+		else if (chosenModel instanceof MLServicePipeline)
+			addResultEntry(runId, (MLServicePipeline) chosenModel, score);
+		else
+			throw new UnsupportedOperationException("Cannot write results for classifiers of type " + chosenModel.getClass());
+	}
+
+	private void addResultEntry(int runId, MLPipeline pipeline, double score) {
 
 		String searcherName = "", searcherParams = "", evaluatorName = "", evaluatorParams = "";
 		if (!pipeline.getPreprocessors().isEmpty()) {
@@ -199,10 +204,41 @@ public class MySQLMLPlanExperimentLogger extends MySQLExperimentLogger {
 		}
 	}
 
+	private void addResultEntry(int runId, MLServicePipeline pipeline, double score) {
+		String preprocessor = "";
+		if (!pipeline.getPPFieldNames().isEmpty()) {
+			preprocessor = pipeline.getPreprocessorNames().get(0);
+		}
+		String classifierName = pipeline.getClassifierName();
+
+		String plKey = pipeline.toString();
+		Map<String, DescriptiveStatistics> stats = measurePLValues.containsKey(plKey) ? measurePLValues.get(plKey) : null;
+
+		PreparedStatement stmt = null;
+		try {
+			List<String> values = new ArrayList<>();
+			values.add(String.valueOf(runId));
+			values.add(preprocessor);
+			values.add(classifierName);
+			values.add(plKey);
+			values.add(String.valueOf(score / 10000));
+			insert("INSERT INTO `results_mls` (run_id, preprocessor, classifier, pipeline, errorRate) VALUES (?,?,?,?,?)", values);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (stmt != null)
+					stmt.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
 	@Subscribe
 	public void receivePipelineMeasurementEvent(ClassifierMeasurementEvent<Double> event) {
 		try {
-			
+
 			/* normal pipelines */
 			if (event.getClassifier() instanceof MLPipeline) {
 				MLPipeline pl = (MLPipeline) event.getClassifier();
@@ -223,7 +259,7 @@ public class MySQLMLPlanExperimentLogger extends MySQLExperimentLogger {
 				if (pl.getTimeForExecutingClassifier().getMean() != Double.NaN)
 					stats.get("time_execute_classifier").addValue(pl.getTimeForExecutingClassifier().getMean());
 			}
-			
+
 			/* service pipelines */
 			if (event.getClassifier() instanceof MLServicePipeline) {
 				MLServicePipeline pl = (MLServicePipeline) event.getClassifier();
@@ -244,4 +280,5 @@ public class MySQLMLPlanExperimentLogger extends MySQLExperimentLogger {
 		}
 
 	}
+
 }

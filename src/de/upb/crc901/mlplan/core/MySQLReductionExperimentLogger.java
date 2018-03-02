@@ -7,8 +7,9 @@ import java.sql.Types;
 import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 
 import jaicore.basic.MathExt;
+import jaicore.basic.MySQLAdapter;
 
-public class MySQLReductionExperimentLogger extends MySQLExperimentLogger {
+public class MySQLReductionExperimentLogger extends MySQLAdapter {
 
 	public MySQLReductionExperimentLogger (String host, String user, String password, String database) {
 		super (host,user,password,database);

@@ -5,11 +5,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
-
-import javax.swing.plaf.synth.SynthScrollBarUI;
 
 import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 
@@ -40,6 +39,9 @@ public class MLServicePipeline implements Classifier, Serializable {
 	private final List<String> PPFieldNames = new LinkedList<>();
 	
 	private final String classifierFieldName;
+	
+	private final String classifierName;
+	private final List<String> preprocessorNames = new ArrayList<>();
 
 	public MLServicePipeline(final MLPipelinePlan plan) {
 		super();
@@ -49,6 +51,7 @@ public class MLServicePipeline implements Classifier, Serializable {
 
 		int varIDCounter = 1;
 		EasyClient constructorEC = new EasyClient().withOTMS(otms);
+		
 		// build composition
 		for (MLPipe attrPipe : plan.getAttrSelections()) {
 			String ppFieldName = "service" + varIDCounter;
@@ -64,6 +67,7 @@ public class MLServicePipeline implements Classifier, Serializable {
 				
 				String evalFieldName = "eval" + varIDCounter;
 				String evalOptions = "evalOptions" + varIDCounter;
+				preprocessorNames.add(wekaASPipe.getSearcher() + "/" + wekaASPipe.getEval());
 				
 				
 				// add inputs from attribute selection
@@ -102,6 +106,7 @@ public class MLServicePipeline implements Classifier, Serializable {
 		constructorEC.withAddedConstructOperation(classifierFieldName, // output field name of the created servicehandle
 				 plan.getClassifierPipe().getName(), // classpath of the classifier
 				 classifierOptions); // no args for the classifier construct
+		classifierName  = plan.getClassifierPipe().getName();
 		
 		//set the host to the first service:
 		if(!plan.getAttrSelections().isEmpty()) {
@@ -325,5 +330,12 @@ public class MLServicePipeline implements Classifier, Serializable {
 		return timesForPrediction;
 	}
 
+	public String getClassifierName() {
+		return classifierName;
+	}
+
+	public List<String> getPreprocessorNames() {
+		return preprocessorNames;
+	}
 	
 }

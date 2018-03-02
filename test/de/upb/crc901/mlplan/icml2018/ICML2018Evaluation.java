@@ -11,7 +11,7 @@ import de.upb.crc901.mlplan.pipeline.featuregen.FeatureGenerator;
 import de.upb.crc901.mlplan.pipeline.featuregen.FeatureGeneratorTree;
 import de.upb.crc901.mlplan.pipeline.featuregen.PCA;
 import de.upb.crc901.mlplan.pipeline.featuregen.PolynomialFeatures;
-import jaicore.ml.experiments.ExperimentRunner;
+import jaicore.ml.experiments.MultiClassClassificationExperimentRunner;
 import weka.attributeSelection.BestFirst;
 import weka.attributeSelection.CfsSubsetEval;
 import weka.classifiers.AbstractClassifier;
@@ -23,7 +23,7 @@ import weka.classifiers.lazy.IBk;
 import weka.classifiers.meta.AdaBoostM1;
 import weka.classifiers.trees.RandomForest;
 
-public class ICML2018Evaluation extends ExperimentRunner {
+public class ICML2018Evaluation extends MultiClassClassificationExperimentRunner {
 
 	public static void main(String[] args) throws Exception {
 

@@ -317,12 +317,7 @@ appendOptions		; l1:List<String>, l2:List<String>; ; List<String>(l1) & List<Str
 
 compileOptionListToArray; oList:List<String>; oArray:String[]; List<String>(oList); String[](oArray); (0)
 
-# Evaluation
-weka.classifiers.evaluation.Evaluation:__construct;test:Instances;e:Evaluation;Instances(test);Evaluation(e);(0)
-weka.classifiers.evaluation.Evaluation:crossValidateModel;e:Evaluation,c:Classifier,x:Instances,f:Folds,r:Random;;Evaluation(e) & Classifier(c)& Instances(x) & Random(r) & Folds(f);;(0)
-weka.classifiers.evaluation.Evaluation:evaluateModel;e:Evaluation,c:Classifier,x:Instances;;Evaluation(e) & Classifier(c)& Instances(x);;(0)
-weka.classifiers.evaluation.Evaluation:pctCorrect;e:Evaluation;q:Double;Evaluation(e);Double(q);(0)
-
+de.upb.crc901.mlplan.core.MLPipeline:__construct;fs,fe,c;pl;;Pipeline(pl);(0)
 
 ### DATA PREPROCESSING ###
 ####### weka.filters.Filter:useFilter;x:Instances,p:DataPreprocessor;z:Instances;DataPreprocessor(p) & Instances(x); Instances(z);(0)
@@ -506,7 +501,7 @@ addMandatoryValuedParameter				; addMandatValuedParam(o,p,v);			o,p,v; ; ; addVa
 
 ### Main ###
 
-inductionMethod;	induce(x);	x,dn,d,fsn,fs,fen,fe,as,cn,c; ; ; createDataPreprocessor(dn,d) -> createRawFeaturePreprocessor(fsn,fs,fen,fe,as) -> createClassifier(c) -> createGivenFeaturePreprocessor(fsn,fs,fen,fe,as)
+inductionMethod;	induce(x,pl);	x,dn,d,fsn,fs,fen,fe,as,cn,c,pl; ; ; createDataPreprocessor(dn,d) -> createRawFeaturePreprocessor(fsn,fs,fen,fe,as) -> createClassifier(c) -> createGivenFeaturePreprocessor(fsn,fs,fen,fe,as)  -> de.upb.crc901.mlplan.core.MLPipeline:__construct(fs,fe,c,pl)
 wekaRawClassification;	createRawClassifier(cn,c); cn,c; ; ; wekaCreateRawClassifier(cn,c)
 wekaGivenClassification;	createGivenClassifier(cn,c); cn,c; ; ; wekaCreateGivenClassifier(cn,c)
 wekaClassification;	createClassifier(c); c; ; ; wekaCreateClassifier(c)
@@ -2079,5 +2074,5 @@ VoteCombinationRule(MAX)
 
 [Queries]
 
-q1;x:Instances;;Instances(x);induce(x);(1000)
+q1;x:Instances;classifier;Instances(x);induce(x,classifier);(1000)
 

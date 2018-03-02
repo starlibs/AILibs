@@ -20,7 +20,7 @@ import jaicore.basic.SetUtil;
 import jaicore.ml.WekaUtil;
 import jaicore.ml.classification.multiclass.reduction.MCTreeNodeReD;
 import jaicore.ml.classification.multiclass.reduction.splitters.RPNDSplitter;
-import jaicore.ml.experiments.ExperimentRunner;
+import jaicore.ml.experiments.MultiClassClassificationExperimentRunner;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.evaluation.Evaluation;
@@ -29,7 +29,7 @@ import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 
-public class IJCAI2018ReductionTest extends ExperimentRunner {
+public class IJCAI2018ReductionTest extends MultiClassClassificationExperimentRunner {
 
 	MySQLReductionExperimentLogger expLogger = new MySQLReductionExperimentLogger("isys-db.cs.upb.de", "reduction", "ao4Dkf9QZw9nXWgG", "results_reduction");
 
@@ -175,7 +175,7 @@ public class IJCAI2018ReductionTest extends ExperimentRunner {
 	public static void main(String[] args) throws Exception {
 		File folder = new File(args[0]);
 		int k = Integer.valueOf(args[1]);
-		ExperimentRunner runner = new IJCAI2018ReductionTest(folder);
+		MultiClassClassificationExperimentRunner runner = new IJCAI2018ReductionTest(folder);
 		runner.run(k);
 		System.exit(0);
 	}

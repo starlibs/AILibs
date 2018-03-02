@@ -11,10 +11,10 @@ import de.upb.crc901.mlplan.search.algorithms.GraphBasedPipelineSearcher;
 import de.upb.crc901.mlplan.search.evaluators.BalancedRandomCompletionEvaluator;
 import de.upb.crc901.mlplan.search.evaluators.MonteCarloCrossValidationEvaluator;
 import de.upb.crc901.mlplan.search.evaluators.MulticlassEvaluator;
-import jaicore.ml.experiments.ExperimentRunner;
+import jaicore.ml.experiments.MultiClassClassificationExperimentRunner;
 import weka.classifiers.Classifier;
 
-public class IJCAI2018Test extends ExperimentRunner {
+public class IJCAI2018Test extends MultiClassClassificationExperimentRunner {
 
 	MySQLMLPlanExperimentLogger expLogger = new MySQLMLPlanExperimentLogger("isys-db.cs.upb.de", "mlplan", "UMJXI4WlNqbS968X", "mlplan_results");
 	
@@ -83,7 +83,7 @@ public class IJCAI2018Test extends ExperimentRunner {
 	public static void main(String[] args) throws Exception {
 		File folder = new File(args[0]);
 		int k = Integer.valueOf(args[1]);
-		ExperimentRunner runner = new IJCAI2018Test(folder);
+		MultiClassClassificationExperimentRunner runner = new IJCAI2018Test(folder);
 		runner.run(k);
 		System.exit(0);
 	}

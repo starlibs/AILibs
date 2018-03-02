@@ -36,9 +36,9 @@ import com.google.common.collect.ContiguousSet;
 import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.Range;
 
-import de.upb.crc901.mlplan.core.MySQLExperimentLogger;
 import jaicore.basic.FileUtil;
 import jaicore.basic.MathExt;
+import jaicore.basic.MySQLAdapter;
 import jaicore.basic.SetUtil;
 import jaicore.ml.WekaUtil;
 import jflex.GeneratorException;
@@ -51,7 +51,7 @@ import weka.core.Instances;
 
 public class BRLandscapeAnalyzer {
 
-	private static final MySQLExperimentLogger logger = new MySQLExperimentLogger("isys-db.cs.upb.de", "mlplan", "UMJXI4WlNqbS968X", "landscapeanalysises");
+	private static final MySQLAdapter logger = new MySQLAdapter("isys-db.cs.upb.de", "mlplan", "UMJXI4WlNqbS968X", "landscapeanalysises");
 
 	private static class JobResult {
 		ArrayNode trainingData;

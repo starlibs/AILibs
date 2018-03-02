@@ -1,7 +1,7 @@
 ### FEATURE PREPROCESSORS ###
 
 selectWekaPreprocessing; chooseFeaturePreprocessor(config); config; ; ; wekaChooseSearcher(config) -> wekaChooseEvaluator(config)
-configureWekaPreprocessing; configureFeaturePreprocessor(config); config,fs,fe; ; ; configureWekaSearcher(config,fs) -> configureWekaEvaluator(config,fe) -> de.upb.crc901.services.mlpipeline.MLPipelinePlan:addWekaAttributeSelection(config, fs, fe) 
+configureWekaPreprocessing; configureFeaturePreprocessor(config); config,fs,fe; ; ; configureWekaSearcher(config,fs) -> configureWekaEvaluator(config,fe) -> de.upb.crc901.mlplan.services.MLPipelinePlan:addWekaAttributeSelection(config, fs, fe) 
 
 # Generic Attribute Selection
 #wekaRawAttributeSelection	; wekaCreateRawFeaturePreprocessor(fsn,fs,fen,fe,as); fsn,fs,fen,fe,as; ; ; weka.attributeSelection.AttributeSelection:__construct(as) -> getWekaRawAS(fsn,fs,fen,fe) -> weka.attributeSelection.AttributeSelection:setSearch(as,fs) -> weka.attributeSelection.AttributeSelection:setEvaluator(as,fe)
@@ -30,7 +30,7 @@ wekaBFOptsLookupCacheSize	; getWekaBFConfig2(o);	o,int; ; ; addMandatValuedParam
 
 # Greedy Stepwise
 wekaGS;	wekaChooseSearcher(config); config; ; ; associateWithAssertion('weka.attributeSelection.GreedyStepwise',config)
-wekaGS;	configureWekaSearcher(config, fs); config,fs,oList,oArray; associated('weka.attributeSelection.GreedyStepwise',config) ; ; getOptionList(oList) -> getWekaGSConfig0(oList) -> compileOptionListToArray(oList,oArray) -> weka.attributeSelection.GreedyStepwise:setOptions(fs,oArray)
+wekaGS;	configureWekaSearcher(config, fs); config,fs,oList,oArray; associated('weka.attributeSelection.GreedyStepwise',config) ; ; weka.attributeSelection.GreedyStepwise:__construct(fs) -> getOptionList(oList) -> getWekaGSConfig0(oList) -> compileOptionListToArray(oList,oArray) -> weka.attributeSelection.GreedyStepwise:setOptions(fs,oArray)
 # wekaGS;	wekaParametrizeFeatureSubsetSearch(fsn,fs); fsn,fs,oList,oArray; ; ; weka.attributeSelection.GreedyStepwise:__construct(fs) -> assignTo('weka.attributeSelection.GreedyStepwise',fsn) -> getOptionList(oList) -> getWekaGSConfig0(oList) -> compileOptionListToArray(oList,oArray) -> weka.attributeSelection.GreedyStepwise:setOptions(fs,oArray)
 # -C, -B, -R optional
 wekaGSOptsConservForwSel	; getWekaGSConfig0(o);	o,int; ; ; addOptParam(o, '-C') -> getWekaGSConfig1(o)
@@ -43,7 +43,7 @@ wekaGSOptsThreshold			; getWekaGSConfig3(o);	o,float;  in(o,'-R') & GSThreshold(
 
 # Ranker
 wekaRank;	wekaChooseSearcher(config); config; ; ; associateWithAssertion('weka.attributeSelection.Ranker',config)
-wekaRank;	configureWekaSearcher(config,fs); config,fs,oList,oArray; associated('weka.attributeSelection.Ranker',config) ; ; getOptionList(oList) -> getWekaRankConfig0(oList) -> compileOptionListToArray(oList,oArray) -> weka.attributeSelection.Ranker:setOptions(fs,oArray)
+wekaRank;	configureWekaSearcher(config,fs); config,fs,oList,oArray; associated('weka.attributeSelection.Ranker',config) ; ; weka.attributeSelection.Ranker:__construct(fs) -> getOptionList(oList) -> getWekaRankConfig0(oList) -> compileOptionListToArray(oList,oArray) -> weka.attributeSelection.Ranker:setOptions(fs,oArray)
 # wekaRank;	wekaParametrizeFeatureRankingSearch(fsn,fs); fsn,fs,oList,oArray; ; ; weka.attributeSelection.Ranker:__construct(fs) -> assignTo('weka.attributeSelection.Ranker',fsn) -> getOptionList(oList) -> getWekaRankConfig0(oList) -> compileOptionListToArray(oList,oArray) -> weka.attributeSelection.Ranker:setOptions(fs,oArray)
 # -T <float> mandatory
 wekaRankOptsThreshold			; getWekaRankConfig0(o);	o,float;  RankThreshold(float) ; ; addMandatValuedParam(o, '-T', float)
@@ -54,35 +54,30 @@ wekaRankOptsThreshold			; getWekaRankConfig0(o);	o,float;  RankThreshold(float) 
 # Correlation-based Feature Subset Selection
 wekaCfsSubsetEval;	wekaChooseEvaluator(config); config; ; ; associateWithAssertion('weka.attributeSelection.CfsSubsetEval',config)
 wekaCfsSubsetEval;	configureWekaEvaluator(config,fe); config,fe,oList,oArray; associated('weka.attributeSelection.CfsSubsetEval',config) ; ;  weka.attributeSelection.CfsSubsetEval:__construct(fe) -> getOptionList(oList) -> getWekaCfsSubsetEvalConfig0(oList) -> compileOptionListToArray(oList,oArray) -> weka.attributeSelection.CfsSubsetEval:setOptions(fe,oArray)
-# wekaCfsSubsetEval;	wekaParametrizeFeatureSubsetEvaluation(fen,fe); fen,fe,oList,oArray; ; ; weka.attributeSelection.CfsSubsetEval:__construct(fe) -> assignTo('weka.attributeSelection.CfsSubsetEval',fen) -> getOptionList(oList) -> getWekaCfsSubsetEvalConfig0(oList) -> compileOptionListToArray(oList,oArray) -> weka.attributeSelection.CfsSubsetEval:setOptions(fe,oArray)
 # -M, -L optional
 wekaCfsSubsetEvalOptsMissingSeparate	; getWekaCfsSubsetEvalConfig0(o);	o; ; ; addOptParam(o, '-M') -> getWekaCfsSubsetEvalConfig1(o)
 wekaCfsSubsetEvalOptsLocallyPredictive	; getWekaCfsSubsetEvalConfig1(o);	o; ; ; addOptParam(o, '-L')
 
 # Correlation Attribute Evaluation
 wekaCorrAttrEval;	wekaChooseEvaluator(config); config; ; ; associateWithAssertion('weka.attributeSelection.CorrelationAttributeEval',config)
-wekaCorrAttrEval;	configureWekaEvaluator(config,fe); config,fe,oList,oArray; associated('weka.attributeSelection.CorrelationAttributeEval',config) ; ; noop
-# wekaCorrAttrEval;	wekaParametrizeFeatureRankingEvaluation(fen,fe); fen,fe,oList,oArray; ; ; weka.attributeSelection.CorrelationAttributeEval:__construct(fe) -> assignTo('weka.attributeSelection.CorrelationAttributeEval',fen)
+wekaCorrAttrEval;	configureWekaEvaluator(config,fe); config,fe; associated('weka.attributeSelection.CorrelationAttributeEval',config) ; ;  weka.attributeSelection.CorrelationAttributeEval:__construct(fe)
 # No parameter
 
 # Gain Ratio Attribute Evaluation
 wekaGainRatioAE;	wekaChooseEvaluator(config); config; ; ; associateWithAssertion('weka.attributeSelection.GainRatioAttributeEval',config)
-wekaGainRatioAE;	configureWekaEvaluator(config,fe); config,fe,oList,oArray; associated('weka.attributeSelection.GainRatioAttributeEval',config) ; ; noop
-# wekaGainRatioAE;	wekaParametrizeFeatureRankingEvaluation(fen,fe); fen,fe,oList,oArray; ; ; weka.attributeSelection.GainRatioAttributeEval:__construct(fe) -> assignTo('weka.attributeSelection.GainRatioAttributeEval',fen)
+wekaGainRatioAE;	configureWekaEvaluator(config,fe); config,fe,oList,oArray; associated('weka.attributeSelection.GainRatioAttributeEval',config) ; ;  weka.attributeSelection.GainRatioAttributeEval:__construct(fe)
 # No parameter
 
 # Info Gain Attribute Evaluation
 wekaInfoGainAE;	wekaChooseEvaluator(config); config; ; ; associateWithAssertion('weka.attributeSelection.InfoGainAttributeEval',config)
-wekaInfoGainAE;	configureWekaEvaluator(config,fe); config,fe,oList,oArray; associated('weka.attributeSelection.InfoGainAttributeEval',config) ; ; getOptionList(oList) -> getWekaInfoGainAEConfig0(oList) -> compileOptionListToArray(oList,oArray) -> weka.attributeSelection.InfoGainAttributeEval:setOptions(fe,oArray)
-# wekaInfoGainAE;	wekaParametrizeFeatureRankingEvaluation(fen,fe); fen,fe,oList,oArray; ; ; weka.attributeSelection.InfoGainAttributeEval:__construct(fe) -> assignTo('weka.attributeSelection.InfoGainAttributeEval',fen) -> getOptionList(oList) -> getWekaInfoGainAEConfig0(oList) -> compileOptionListToArray(oList,oArray) -> weka.attributeSelection.InfoGainAttributeEval:setOptions(fe,oArray)
+wekaInfoGainAE;	configureWekaEvaluator(config,fe); config,fe,oList,oArray; associated('weka.attributeSelection.InfoGainAttributeEval',config) ; ; weka.attributeSelection.InfoGainAttributeEval:__construct(fe) -> getOptionList(oList) -> getWekaInfoGainAEConfig0(oList) -> compileOptionListToArray(oList,oArray) -> weka.attributeSelection.InfoGainAttributeEval:setOptions(fe,oArray)
 # -M, -B optional
 wekaInfoGainAEOptsMissingMerge				; getWekaInfoGainAEConfig0(o);	o; ; ; addOptParam(o, '-M') -> getWekaInfoGainAEConfig1(o)
 wekaInfoGainAEOptsBinarizeNumericAttributes	; getWekaInfoGainAEConfig1(o);	o; ; ; addOptParam(o, '-B')
 
 # OneR Attribute Evaluation
 wekaOneRAE;	wekaChooseEvaluator(config); config; ; ; associateWithAssertion('weka.attributeSelection.OneRAttributeEval',config)
-wekaOneRAE;	configureWekaEvaluator(config,fe); config,fe,oList,oArray; associated('weka.attributeSelection.OneRAttributeEval',config) ; ; getOptionList(oList) -> getWekaOneRAEConfig0(oList) -> compileOptionListToArray(oList,oArray) -> weka.attributeSelection.OneRAttributeEval:setOptions(fe,oArray)
-#wekaOneRAE;	wekaParametrizeFeatureRankingEvaluation(fen,fe); fen,fe,oList,oArray; ;;  weka.attributeSelection.OneRAttributeEval:__construct(fe) -> assignTo('weka.attributeSelection.OneRAttributeEval',fen) -> getOptionList(oList) -> getWekaOneRAEConfig0(oList) -> compileOptionListToArray(oList,oArray) -> weka.attributeSelection.OneRAttributeEval:setOptions(fe,oArray)
+wekaOneRAE;	configureWekaEvaluator(config,fe); config,fe,oList,oArray; associated('weka.attributeSelection.OneRAttributeEval',config) ; ;  weka.attributeSelection.OneRAttributeEval:__construct(fe) -> getOptionList(oList) -> getWekaOneRAEConfig0(oList) -> compileOptionListToArray(oList,oArray) -> weka.attributeSelection.OneRAttributeEval:setOptions(fe,oArray)
 # -D optional
 wekaOneRAEOptsEvalUsingTrainingData	; getWekaOneRAEConfig0(o);	o; ; ; addOptParam(o, '-D') -> getWekaOneRAEConfig1(o)
 # -F <int> mandatory
@@ -94,8 +89,7 @@ wekaOneRAEOptsSeed					; getWekaOneRAEConfig3(o);	o; ; ; addMandatValuedParam(o,
 
 # Principal Component Analysis
 wekaPCA;	wekaChooseEvaluator(config); config; ; ; associateWithAssertion('weka.attributeSelection.PrincipalComponents',config)
-wekaPCA;	configureWekaEvaluator(config,fe); config,fe,oList,oArray; associated('weka.attributeSelection.PrincipalComponents',config) ; ; getOptionList(oList) -> getWekaPCAConfig0(oList) -> compileOptionListToArray(oList,oArray) -> weka.attributeSelection.PrincipalComponents:setOptions(fe,oArray)
-wekaPCA;	wekaParametrizeFeatureRankingEvaluation(fen,fe); fen,fe,oList,oArray; ; ; weka.attributeSelection.PrincipalComponents:__construct(fe) -> assignTo('weka.attributeSelection.PrincipalComponents',fen) -> getOptionList(oList) -> getWekaPCAConfig0(oList) -> compileOptionListToArray(oList,oArray) -> weka.attributeSelection.PrincipalComponents:setOptions(fe,oArray)
+wekaPCA;	configureWekaEvaluator(config,fe); config,fe,oList,oArray; associated('weka.attributeSelection.PrincipalComponents',config) ; ; weka.attributeSelection.PrincipalComponents:__construct(fe) -> getOptionList(oList) -> getWekaPCAConfig0(oList) -> compileOptionListToArray(oList,oArray) -> weka.attributeSelection.PrincipalComponents:setOptions(fe,oArray)
 # -C, -O optional
 wekaPCAOptsCenterData				; getWekaPCAConfig0(o);	o; ; ; addOptParam(o, '-C') -> getWekaPCAConfig1(o)
 wekaPCAOptsTransformBackToOriginal	; getWekaPCAConfig1(o);	o; ; ; addOptParam(o, '-O') -> getWekaPCAConfig2(o)
@@ -107,8 +101,7 @@ wekaPCAOptsMaximumAttributeNames	; getWekaPCAConfig3(o);	o,int; PCAMaximumAttrib
 
 # ReliefF Attribute Evaluation
 wekaReliefF;	wekaChooseEvaluator(config); config; ; ; associateWithAssertion('weka.attributeSelection.ReliefFAttributeEval',config)
-wekaReliefF;	configureWekaEvaluator(config,fe); config,fe,oList,oArray; associated('weka.attributeSelection.ReliefFAttributeEval',config) ; ; getOptionList(oList) -> getWekaReliefFAEConfig0(oList) -> compileOptionListToArray(oList,oArray) -> weka.attributeSelection.ReliefFAttributeEval:setOptions(fe,oArray)
-wekaReliefF;	wekaParametrizeFeatureRankingEvaluation(fen,fe); fen,fe,oList,oArray; ; ; weka.attributeSelection.ReliefFAttributeEval:__construct(fe) -> assignTo('weka.attributeSelection.ReliefFAttributeEval',fen) -> getOptionList(oList) -> getWekaReliefFAEConfig0(oList) -> compileOptionListToArray(oList,oArray) -> weka.attributeSelection.ReliefFAttributeEval:setOptions(fe,oArray)
+wekaReliefF;	configureWekaEvaluator(config,fe); config,fe,oList,oArray; associated('weka.attributeSelection.ReliefFAttributeEval',config) ; ; weka.attributeSelection.ReliefFAttributeEval:__construct(fe) -> getOptionList(oList) -> getWekaReliefFAEConfig0(oList) -> compileOptionListToArray(oList,oArray) -> weka.attributeSelection.ReliefFAttributeEval:setOptions(fe,oArray)
 # -W optional
 wekaReliefFAEOptsWeightByDistance			; getWekaReliefFAEConfig0(o);	o; ; ; addOptParam(o, '-W') -> getWekaReliefFAEConfig1(o)
 # -K <int> mandatory
@@ -119,11 +112,9 @@ wekaReliefFOptsSigma2	; getWekaReliefFAEConfig2(o);	o,int; notin(o,'-W') & Relie
 
 # Symmetric Uncertainty Attribute Evaluation
 wekaSymmUncertAE;	wekaChooseEvaluator(config); config; ; ; associateWithAssertion('weka.attributeSelection.SymmetricalUncertAttributeEval',config)
-wekaSymmUncertAE;	configureWekaEvaluator(config,fe); config,fe,oList,oArray; associated('weka.attributeSelection.SymmetricalUncertAttributeEval',config) ; ; getOptionList(oList) -> getWekaSymmUncertAEConfig0(oList) -> compileOptionListToArray(oList,oArray) -> weka.attributeSelection.SymmetricalUncertAttributeEval:setOptions(fe,oArray)
-wekaSymmUncertAE;	wekaParametrizeFeatureRankingEvaluation(fen,fe); fen,fe,oList,oArray; ; ; weka.attributeSelection.SymmetricalUncertAttributeEval:__construct(fe) -> assignTo('weka.attributeSelection.SymmetricalUncertAttributeEval',fen) -> getOptionList(oList) -> getWekaSymmUncertAEConfig0(oList) -> compileOptionListToArray(oList,oArray) -> weka.attributeSelection.SymmetricalUncertAttributeEval:setOptions(fe,oArray)
+wekaSymmUncertAE;	configureWekaEvaluator(config,fe); config,fe,oList,oArray; associated('weka.attributeSelection.SymmetricalUncertAttributeEval',config) ; ; weka.attributeSelection.SymmetricalUncertAttributeEval:__construct(fe) -> getOptionList(oList) -> getWekaSymmUncertAEConfig0(oList) -> compileOptionListToArray(oList,oArray) -> weka.attributeSelection.SymmetricalUncertAttributeEval:setOptions(fe,oArray)
 # -M optional
 wekaSymmUncertAEOptsMissingMerge				; getWekaSymmUncertAEConfig0(o);	o; ; ; addOptParam(o, '-M')
-
 
 
 

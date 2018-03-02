@@ -9,10 +9,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import de.upb.crc901.mlplan.core.MySQLExperimentLogger;
 import de.upb.crc901.mlplan.core.SolutionEvaluator;
 import de.upb.crc901.mlplan.search.evaluators.MonteCarloCrossValidationEvaluator;
 import de.upb.crc901.mlplan.search.evaluators.MulticlassEvaluator;
+import jaicore.basic.MySQLAdapter;
 import jaicore.ml.WekaUtil;
 import meka.classifiers.multilabel.MultiLabelClassifier;
 import weka.classifiers.AbstractClassifier;
