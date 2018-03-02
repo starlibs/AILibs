@@ -111,6 +111,12 @@ public class DistributedBestFirstTester implements Serializable {
 			public boolean isSelfContained() {
 				return false;
 			}
+
+			@Override
+			public void setNodeNumbering(boolean nodenumbering) {
+				// TODO Auto-generated method stub
+				
+			}
 		};
 		
 		final Path folder = Paths.get("Z:/pc2/distsearch/testrsc/comm");

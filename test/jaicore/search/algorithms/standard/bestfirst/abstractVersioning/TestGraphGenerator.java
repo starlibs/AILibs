@@ -12,7 +12,7 @@ import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 
-public class TestGraphGenerator extends AbstractGraphGenerator {
+public class TestGraphGenerator extends AbstractGraphGenerator<TestNode,String> {
 	private int size = 0;
 	
 	@Override
@@ -34,7 +34,7 @@ public class TestGraphGenerator extends AbstractGraphGenerator {
 
 	@Override
 	public NodeGoalTester<TestNode> getGoalTester() {
-		return n -> n.getValue()==50;
+		return n -> n.getValue()==100;
 	}
 
 	@Override
