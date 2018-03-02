@@ -29,7 +29,7 @@ public class SCC2018MLTest extends MultiClassClassificationExperimentRunner {
 	private static final float trainingPortion = 0.7f;
 
 	private static final int numCPUs = 5;
-	private static final int memoryInMB = 2036;
+	private static final int memoryInMB = 1000+(int)(Math.random()*2000);
 	
 	private final MySQLMLPlanExperimentLogger logger; // we want to have the logger, because we also send 
 	
@@ -102,7 +102,7 @@ public class SCC2018MLTest extends MultiClassClassificationExperimentRunner {
 						
 			File folder = new File(args[0]);
 			SCC2018MLTest runner = new SCC2018MLTest(folder);
-			runner.runSpecific(24);
+			runner.runSpecific(1);
 		} finally {
 			server.shutdown();
 		}
