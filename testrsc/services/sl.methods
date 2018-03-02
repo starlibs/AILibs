@@ -1,38 +1,15 @@
-scikitLearnClassification;	chooseClassifier(c); c; ; ; de.upb.crc901.services.mlpipeline.MLPipelinePlan:onHost(c,'localhost', '5000') -> slCreateClassifier(c)
+scikitLearnClassification;	chooseClassifier(c); c; ; ; de.upb.crc901.mlplan.services.MLPipelinePlan:onHost(c,'isys-db.cs.upb.de', '5000') -> slCreateClassifier(c)
 
 
-# General classifier
-slBaseClassifier; 		slCreateClassifier(c); c; ; ; slCreateBaseClassifier(c)
-slMetaClassifier; 		slCreateClassifier(c); c; ; ; slCreateMetaClassifier(c)
+# Resolve classifier grammar
+slBaseClassifier; 		slCreateClassifier(c); c; ; ; slCreate_classifier_basic(c)
 
+#INCLUDE testrsc/services/gen/sl_basic_cl.methods
 
-### BASE CLASSIFIERS ###
-#slLinearSVC; 					slCreateBaseClassifier(c); c,p; ; ; de.upb.crc901.services.mlpipeline.MLPipelinePlan:setClassifier(c,'sklearn.svm.LinearSVC',p)  
-#slBayesianGaussian;			slCreateBaseClassifier(c); c,p; ; ; de.upb.crc901.services.mlpipeline.MLPipelinePlan:setClassifier(c,'sklearn.mixture.BayesianGaussianMixture',p)
+slMetaClassifier; 		slCreateClassifier(c); c; ; ; slCreate_classifier_meta(c)
 
-#slGaussianProcessClassifier;	slCreateBaseClassifier(c); c,p; ; ; de.upb.crc901.services.mlpipeline.MLPipelinePlan:setClassifier(c,'sklearn.gaussian_process.GaussianProcessClassifier',p)
+INCLUDE testrsc/services/gen/sl_meta_cl.methods
 
-slSVC; slCreateBaseClassifier(c); c,p; ; ; de.upb.crc901.services.mlpipeline.MLPipelinePlan:setClassifier(c,'sklearn.svm.SVC',p) -> slSVCSetKernel(c,p)
-slSetSVCPolyKernel; slSVCSetKernel(c,p); c,p; ; ; de.upb.crc901.services.mlpipeline.MLPipelinePlan:addOptions(c,p,'-kernel', 'poly')
-slSetSVCRBFKernel; slSVCSetKernel(c,p); c,p; ; ; de.upb.crc901.services.mlpipeline.MLPipelinePlan:addOptions(c,p,'-kernel', 'rbf')
+slMetaClassifier; 		slCreateClassifier(c); c; ; ; slCreate_classifier_ensemble(c)
 
-slRandomForestClassifier;		slCreateBaseClassifier(c); c,p; ; ; de.upb.crc901.services.mlpipeline.MLPipelinePlan:setClassifier(c,'sklearn.ensemble.RandomForestClassifier',p) -> slRandomForestSetTrees(c,p) -> slRandomForestSetDepth(c,p)
-slRandomForestSetTrees;			slRandomForestSetTrees(c,p); c,p,t; ; AllowedTreeEstimatorsForRandomForests(t); de.upb.crc901.services.mlpipeline.MLPipelinePlan:addOptions(c,p,'-n_estimators', t)
-slRandomForestSetDepth;			slRandomForestSetDepth(c,p); c,p,t; ; AllowedTreeDepthForRandomForests(t); de.upb.crc901.services.mlpipeline.MLPipelinePlan:addOptions(c,p,'-max_depth', t)
-
- 
-
-
-
-#sklearn.ensemble.BaggingClassifier:String
-#sklearn.naive_bayes.BernoulliNB:String
-#sklearn.tree.ExtraTreeClassifier:String
-#sklearn.ensemble.ExtraTreesClassifier:String
-#sklearn.naive_bayes.GaussianNB:String
-#sklearn.gaussian_process.GaussianProcessClassifier:String
-#sklearn.ensemble.GradientBoostingClassifier:String
-
-
-
-### META Classifiers ###
-#slAdaBoost;			slCreateBaseClassifier(c); c,p; ; ; de.upb.crc901.services.mlpipeline.MLPipelinePlan:setClassifier(c,'sklearn.ensemble.AdaBoostClassifier', p)
+INCLUDE testrsc/services/gen/sl_ensemble_cl.methods

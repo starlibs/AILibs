@@ -1,8 +1,0 @@
-scikitLearnClassification;	chooseClassifier(c); c; ; ; de.upb.crc901.services.mlpipeline.MLPipelinePlan:onHost(c,'isys-db.cs.upb.de', '5000') -> slCreateClassifier(c)
-
-
-# General classifier
-slBaseClassifier; 		slCreateClassifier(c); c; ; ; slCreateBaseClassifier(c)
-slMetaClassifier; 		slCreateClassifier(c); c; ; ; slCreateMetaClassifier(c)
-
-INCLUDE testrsc/services/sl.generated

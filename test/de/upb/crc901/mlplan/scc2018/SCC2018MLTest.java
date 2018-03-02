@@ -54,9 +54,11 @@ public class SCC2018MLTest extends MultiClassClassificationExperimentRunner {
 			switch (algoName) {
 			case "MLS-Plan": {
 
-				File evaluablePredicatFile = new File("testrsc/services/automl.evaluablepredicates_");
+				File evaluablePredicatFile = new File("testrsc/services/automl.evaluablepredicates");
 				File searchSpaceFile = new File("testrsc/services/automl-services.searchspace");
 				TwoPhaseHTNBasedPipelineSearcher<Double> bs = new TwoPhaseHTNBasedPipelineSearcher<>();
+				
+//				logicalDerivationTree(searchSpaceFile, evaluablePredicatFile);
 				
 				Random random = new Random(seed);
 				bs.setHtnSearchSpaceFile(searchSpaceFile);
@@ -100,7 +102,7 @@ public class SCC2018MLTest extends MultiClassClassificationExperimentRunner {
 
 			File folder = new File(args[0]);
 			SCC2018MLTest runner = new SCC2018MLTest(folder);
-			runner.runSpecific(24);
+			runner.runSpecific(1);
 		} finally {
 			server.shutdown();
 		}
