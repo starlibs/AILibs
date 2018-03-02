@@ -52,4 +52,10 @@ public class StripsForwardPlanningGraphGenerator implements GraphGenerator<Strip
 	public boolean isSelfContained() {
 		return false;
 	}
+
+	@Override
+	public void setNodeNumbering(boolean nodenumbering) {
+		// TODO Auto-generated method stub
+		
+	}
 }

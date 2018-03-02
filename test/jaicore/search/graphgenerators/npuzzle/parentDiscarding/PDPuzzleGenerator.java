@@ -135,4 +135,12 @@ public class PDPuzzleGenerator implements GraphGenerator<PDPuzzleNode,String> {
 		return node;		
 	}
 
+
+
+	@Override
+	public void setNodeNumbering(boolean nodenumbering) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

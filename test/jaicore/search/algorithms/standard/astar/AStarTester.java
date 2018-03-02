@@ -56,6 +56,12 @@ public class AStarTester {
 				
 				return false;
 			}
+
+			@Override
+			public void setNodeNumbering(boolean nodenumbering) {
+				// TODO Auto-generated method stub
+				
+			}
 		};
 		AStar<TestNode,String> astar = new AStar<>(gen, (n1, n2) -> n2.getPoint().value - n1.getPoint().value, n -> 0.0);
 		

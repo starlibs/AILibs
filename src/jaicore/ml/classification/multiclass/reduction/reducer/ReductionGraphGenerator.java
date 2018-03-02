@@ -122,4 +122,10 @@ public class ReductionGraphGenerator implements GraphGenerator<RestProblem, Deci
 	public boolean isSelfContained() {
 		return false;
 	}
+
+	@Override
+	public void setNodeNumbering(boolean nodenumbering) {
+		// TODO Auto-generated method stub
+		
+	}
 }
