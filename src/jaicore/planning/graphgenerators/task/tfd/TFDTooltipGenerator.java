@@ -34,6 +34,14 @@ public class TFDTooltipGenerator<V extends Comparable<V>> implements TooltipGene
 			for (StackTraceElement ste : e.getStackTrace()) {
 				sb.append("  " + ste.toString() + "\n");
 			}
+			if (e instanceof RuntimeException) {
+				Throwable e2 = ((RuntimeException)e).getCause();
+				sb.append("Sub-Error Type " + e2.getClass().getName() + "\nMessage: " + e2.getMessage() +"\nStack Trace:\n");
+				for (StackTraceElement ste : e2.getStackTrace()) {
+					sb.append("  " + ste.toString() + "\n");
+				}
+
+			}
 			sb.append("</pre>");
 		}
 		if (nodeRepresentation.getAppliedMethodInstance() != null || nodeRepresentation.getAppliedAction() != null) {
