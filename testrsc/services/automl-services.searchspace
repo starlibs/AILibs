@@ -252,9 +252,9 @@ inducePipeline;		induce(x,returnedClassifier);	x,returnedClassifier,config; ; ; 
 #ignorePreprocessing; chooseFeaturePreprocessor(config); config; ; ; associateWithAssertion('nopp',config)
 ignorePreprocessingConfiguration; configureFeaturePreprocessor(config); config; associated('nopp',config) ; ; noop()
 
-INCLUDE testrsc/services/weka_pp.methods
+#INCLUDE testrsc/services/weka_pp.methods
 #INCLUDE testrsc/services/weka_classifiers.methods
-#INCLUDE testrsc/services/sl_pp.methods
+INCLUDE testrsc/services/sl_pp.methods
 INCLUDE testrsc/services/sl.methods
 
 [Rules]
