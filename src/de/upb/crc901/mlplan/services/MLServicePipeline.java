@@ -28,6 +28,7 @@ import weka.core.Instances;
 
 public class MLServicePipeline implements Classifier, Serializable {
 
+	private long expirationDate;
 	private boolean trained;
 	private int timeForTrainingPipeline;
 	private DescriptiveStatistics timesForPrediction;
@@ -43,7 +44,11 @@ public class MLServicePipeline implements Classifier, Serializable {
 	private final String classifierName;
 	private final List<String> preprocessorNames = new ArrayList<>();
 
-	public MLServicePipeline(final MLPipelinePlan plan) {
+	private final int getSecondsRemaining() {
+		return expirationDate > 0 ? (int)(expirationDate - System.currentTimeMillis()) / 1000 : Integer.MAX_VALUE;
+	}
+	
+	public MLServicePipeline(final MLPipelinePlan plan) throws InterruptedException {
 		super();
 		if (!plan.isValid()) {
 			throw new RuntimeException("The given plan is not valid..");
@@ -145,9 +150,15 @@ public class MLServicePipeline implements Classifier, Serializable {
 
 	@Override
 	public void buildClassifier(final Instances data) throws Exception {
+
+		int secondsRemaining = getSecondsRemaining();
+		if (secondsRemaining < 5)
+			throw new IllegalStateException("Cannot train, only " + secondsRemaining + " lifetime remain!");
+		
+		
 		int invocationNumber = 1;
 		String dataInFieldName = "i1";
-		EasyClient trainEC = new EasyClient().withOTMS(otms).withInputs(servicesContainer).withPositionalArgument(data);
+		EasyClient trainEC = new EasyClient().withOTMS(otms).withTimeout(secondsRemaining).withInputs(servicesContainer).withPositionalArgument(data);
 		// create train composition
 		for (String ppFieldname : PPFieldNames) {
 			String dataOutFieldName = "data" + invocationNumber;
@@ -180,10 +191,14 @@ public class MLServicePipeline implements Classifier, Serializable {
 
 	public double[] classifyInstances(final Instances instances) throws Exception {
 
+		int secondsRemaining = getSecondsRemaining();
+		if (secondsRemaining < 5)
+			throw new IllegalStateException("Cannot train, only " + secondsRemaining + " lifetime remain!");
+		
 		int invocationNumber = 1;
 		String dataInFieldName = "i1";
 
-		EasyClient predictEC = new EasyClient().withOTMS(otms).withInputs(servicesContainer).withPositionalArgument(instances); // translates to i1
+		EasyClient predictEC = new EasyClient().withOTMS(otms).withTimeout(secondsRemaining).withInputs(servicesContainer).withPositionalArgument(instances); // translates to i1
 
 		// create train composition
 		for (String ppFieldname : PPFieldNames) {
@@ -315,4 +330,11 @@ public class MLServicePipeline implements Classifier, Serializable {
 		return preprocessorNames;
 	}
 
+	public long getExpirationDate() {
+		return expirationDate;
+	}
+
+	public void setExpirationDate(long expirationDate) {
+		this.expirationDate = expirationDate;
+	}
 }

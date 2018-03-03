@@ -193,7 +193,7 @@ public class BalancedRandomCompletionEvaluator extends RandomCompletionEvaluator
 		return n.externalPath().stream().filter(n2 -> n2.getAppliedMethodInstance() != null).map(n2 -> n2.getAppliedMethodInstance())
 				.filter(m -> {
 					String methodName = m.getMethod().getTask().getPropertyName().toLowerCase();
-					return methodName.endsWith("createbaseclassifier") || methodName.endsWith("createmetaclassifier") || methodName.endsWith("createensembleclassifier");
+					return methodName.contains("create") && methodName.contains("classifier");
 				}).findFirst();
 	}
 

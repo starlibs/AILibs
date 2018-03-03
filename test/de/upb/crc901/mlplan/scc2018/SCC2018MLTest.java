@@ -24,7 +24,7 @@ import weka.classifiers.Classifier;
 
 public class SCC2018MLTest extends MultiClassClassificationExperimentRunner {
 	
-	private static final int[] timeouts = new int[] { 3600 };
+	private static final int[] timeouts = new int[] { 60 };
 	private static final int seeds = 10;
 	private static final float trainingPortion = 0.7f;
 
@@ -72,7 +72,8 @@ public class SCC2018MLTest extends MultiClassClassificationExperimentRunner {
 				bs.setSolutionEvaluatorFactory4Search(() -> new MonteCarloCrossValidationEvaluator(evaluator, 3, .7f));
 				bs.setSolutionEvaluatorFactory4Selection(() -> new MonteCarloCrossValidationEvaluator(evaluator, 10, .7f));
 				bs.setRce(new BalancedRandomCompletionEvaluator(random, 3, new MonteCarloCrossValidationEvaluator(evaluator, 3, .7f)));
-				bs.setTimeoutPerNodeFComputation(1000 * (timeoutInSeconds == 60 ? 15 : 300));
+//				bs.setTimeoutPerNodeFComputation(1000 * (timeoutInSeconds == 60 ? 15 : 300));
+				bs.setTimeoutPerNodeFComputation(1000);
 				bs.setTooltipGenerator(new TFDTooltipGenerator<>());
 				bs.setPortionOfDataForPhase2(.3f);
 				
@@ -102,7 +103,7 @@ public class SCC2018MLTest extends MultiClassClassificationExperimentRunner {
 						
 			File folder = new File(args[0]);
 			SCC2018MLTest runner = new SCC2018MLTest(folder);
-			runner.runSpecific(1);
+			runner.runSpecific(24);
 		} finally {
 			server.shutdown();
 		}

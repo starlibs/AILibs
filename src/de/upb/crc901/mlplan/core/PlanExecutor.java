@@ -321,13 +321,7 @@ public class PlanExecutor {
 						Constructor<?> ctor = ConstructorUtils.getMatchingAccessibleConstructor(clazz, inputClasses);
 						if (ctor == null)
 							throw new IllegalArgumentException("No constructor with input classes " + Arrays.toString(inputClasses) + " found for class " + clazz);
-						try {
 						variables.put(outParam, ctor.newInstance(params));
-						}
-						catch (InvocationTargetException e) {
-							e.getTargetException().printStackTrace();
-							throw e;
-						}
 						logger.info("Binding new object {} to variable {}.", variables.get(outParam), outParam);
 						continue;
 					}
