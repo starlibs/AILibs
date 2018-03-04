@@ -7,28 +7,18 @@
 
     */
 
-    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
+    import java.util.Arrays;
+import java.util.List;
 
-    public class OptionsFor_NearestNeighbors_n_neighbors extends NumericRangeOptionPredicate {
+import de.upb.crc901.mlplan.evaluablepredicates.mlplan.OptionsPredicate;
+
+    public class OptionsFor_NearestNeighbors_n_neighbors extends OptionsPredicate {
         
-        @Override
-        protected double getMin() {
-            return 1;
-        }
+        private static List<Integer> validValues = Arrays.asList(new Integer[]{1, 3, 5, 11, 21, 51, 101});
 
         @Override
-        protected double getMax() {
-            return 1;
-        }
-
-        @Override
-        protected int getSteps() {
-            return -1;
-        }
-
-        @Override
-        protected boolean needsIntegers() {
-            return true;
+        protected List<? extends Object> getValidValues() {
+            return validValues;
         }
     }
     

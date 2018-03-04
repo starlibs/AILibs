@@ -16,7 +16,7 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.NuSVC;
     */
     public class OptionsFor_NuSVC_kernel extends OptionsPredicate {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{});
+        private static List<String> validValues = Arrays.asList(new String[]{"linear", "poly", "sigmoid", "precomputed"}); // rbf is default
 
         @Override
         protected List<? extends Object> getValidValues() {

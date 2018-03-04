@@ -14,7 +14,7 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.NuSVC;
     */
     public class OptionsFor_NuSVC_verbose extends OptionsPredicate {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{"true", "false"});
+        private static List<Object> validValues = Arrays.asList(new Object[]{}); // deactivate this option (always use default)
 
         @Override
         protected List<? extends Object> getValidValues() {

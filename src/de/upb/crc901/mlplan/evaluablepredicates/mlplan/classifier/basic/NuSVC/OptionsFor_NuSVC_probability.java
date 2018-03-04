@@ -13,7 +13,7 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.NuSVC;
     */
     public class OptionsFor_NuSVC_probability extends OptionsPredicate {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{"true", "false"});
+        private static List<Object> validValues = Arrays.asList(new Object[]{"true"}); // false is in ignore anyway
 
         @Override
         protected List<? extends Object> getValidValues() {

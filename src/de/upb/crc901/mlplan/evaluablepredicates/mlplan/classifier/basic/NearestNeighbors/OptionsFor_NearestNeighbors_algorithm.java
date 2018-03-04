@@ -21,7 +21,7 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.Nearest
     */
     public class OptionsFor_NearestNeighbors_algorithm extends OptionsPredicate {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{});
+        private static List<String> validValues = Arrays.asList(new String[]{ "ball_tree", "kd_tree", "brute"}); // auto is default
 
         @Override
         protected List<? extends Object> getValidValues() {

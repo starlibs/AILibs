@@ -7,28 +7,18 @@
 
     */
 
-    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
+    import java.util.Arrays;
+import java.util.List;
 
-    public class OptionsFor_NuSVC_tol extends NumericRangeOptionPredicate {
+import de.upb.crc901.mlplan.evaluablepredicates.mlplan.OptionsPredicate;
+
+    public class OptionsFor_NuSVC_tol extends OptionsPredicate {
         
-        @Override
-        protected double getMin() {
-            return 1;
-        }
+        private static List<Object> validValues = Arrays.asList(new Object[]{}); // deactivate this option (always use default)
 
         @Override
-        protected double getMax() {
-            return 1;
-        }
-
-        @Override
-        protected int getSteps() {
-            return -1;
-        }
-
-        @Override
-        protected boolean needsIntegers() {
-            return false;
+        protected List<? extends Object> getValidValues() {
+            return validValues;
         }
     }
     

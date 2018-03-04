@@ -13,12 +13,12 @@
         
         @Override
         protected double getMin() {
-            return 1;
+            return 200;
         }
 
         @Override
         protected double getMax() {
-            return 1;
+            return 200;
         }
 
         @Override

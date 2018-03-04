@@ -24,7 +24,7 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.NuSVC;
     */
     public class OptionsFor_NuSVC_decision_function_shape extends OptionsPredicate {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{});
+        private static List<String> validValues = Arrays.asList(new String[]{"ovo"});
 
         @Override
         protected List<? extends Object> getValidValues() {

@@ -14,22 +14,27 @@
         
         @Override
         protected double getMin() {
-            return 1;
+            return 0.0;
         }
 
         @Override
         protected double getMax() {
-            return 1;
+            return 1000;
         }
 
         @Override
         protected int getSteps() {
-            return -1;
+            return 5;
         }
 
         @Override
         protected boolean needsIntegers() {
             return false;
         }
+        
+        @Override
+        protected boolean isLinear() {
+    		return false;
+    	} 
     }
     

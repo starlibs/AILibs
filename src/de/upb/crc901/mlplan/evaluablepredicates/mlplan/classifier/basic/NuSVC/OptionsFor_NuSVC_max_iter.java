@@ -7,28 +7,18 @@
 
     */
 
-    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
+    import java.util.Arrays;
+import java.util.List;
 
-    public class OptionsFor_NuSVC_max_iter extends NumericRangeOptionPredicate {
+import de.upb.crc901.mlplan.evaluablepredicates.mlplan.OptionsPredicate;
+
+    public class OptionsFor_NuSVC_max_iter extends OptionsPredicate {
         
-        @Override
-        protected double getMin() {
-            return 1;
-        }
+        private static List<Integer> validValues = Arrays.asList(new Integer[]{1, 5}); // no large values make sense, because these are covered by -1
 
         @Override
-        protected double getMax() {
-            return 1;
-        }
-
-        @Override
-        protected int getSteps() {
-            return -1;
-        }
-
-        @Override
-        protected boolean needsIntegers() {
-            return true;
+        protected List<? extends Object> getValidValues() {
+            return validValues;
         }
     }
     
