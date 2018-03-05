@@ -1,5 +1,6 @@
 package de.upb.crc901.mlplan.services;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,7 +22,7 @@ import weka.core.OptionHandler;
  * @author aminfaez
  *
  */
-public class MLPipelinePlan {
+public class MLPipelinePlan implements Serializable {
 	// list of preprocessors
 	private List<MLPipe> atrPipes = new LinkedList<>();
 	
@@ -116,7 +117,7 @@ public class MLPipelinePlan {
 	
 	
 	// CLASSES for pipe creation.
-	abstract class AbstractPipe {
+	abstract class AbstractPipe implements Serializable {
 		private final String host;
 		
 		protected AbstractPipe(String hostname) {
