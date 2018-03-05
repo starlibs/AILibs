@@ -1,34 +1,23 @@
 
-    package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.LogisticRegressionCV;
-    /*
-        max_iter : int, optional
-        Maximum number of iterations of the optimization algorithm.
+package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.LogisticRegressionCV;
+/*
+    max_iter : int, optional
+    Maximum number of iterations of the optimization algorithm.
 
 
-    */
+*/
 
-    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
+import de.upb.crc901.mlplan.evaluablepredicates.mlplan.OptionsPredicate;
 
-    public class OptionsFor_LogisticRegressionCV_max_iter extends NumericRangeOptionPredicate {
-        
-        @Override
-        protected double getMin() {
-            return 1;
-        }
+import java.util.Arrays;
+import java.util.List;
 
-        @Override
-        protected double getMax() {
-            return 1;
-        }
+public class OptionsFor_LogisticRegressionCV_max_iter extends OptionsPredicate {
 
-        @Override
-        protected int getSteps() {
-            return -1;
-        }
+  private static List<Object> validValues = Arrays.asList(new Object[] { 10, 30, 50, 100, 200 });
 
-        @Override
-        protected boolean needsIntegers() {
-            return true;
-        }
-    }
-    
+  @Override
+  protected List<? extends Object> getValidValues() {
+    return validValues;
+  }
+}

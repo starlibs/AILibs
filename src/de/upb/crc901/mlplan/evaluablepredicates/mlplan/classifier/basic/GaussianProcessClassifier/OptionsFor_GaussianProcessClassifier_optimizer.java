@@ -1,6 +1,6 @@
 package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.GaussianProcessClassifier;
 
-import de.upb.crc901.mlplan.evaluablepredicates.mlplan.OptionsPredicate;
+import de.upb.crc901.mlplan.evaluablepredicates.mlplan.DisabledOptionPredicate;
 
 import java.util.Arrays;
 import java.util.List;
@@ -34,7 +34,7 @@ import java.util.List;
 
 */
 // XXX No additional values known.
-public class OptionsFor_GaussianProcessClassifier_optimizer extends OptionsPredicate {
+public class OptionsFor_GaussianProcessClassifier_optimizer extends DisabledOptionPredicate {
 
   private static List<Object> validValues = Arrays.asList(new Object[] {});
 

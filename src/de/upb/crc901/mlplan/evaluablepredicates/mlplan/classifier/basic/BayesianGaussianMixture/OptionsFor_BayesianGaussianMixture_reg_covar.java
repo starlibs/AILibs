@@ -8,7 +8,7 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.Bayesia
 
 */
 
-import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
+import de.upb.crc901.mlplan.evaluablepredicates.mlplan.DisabledOptionPredicate;
 
 /**
  * XXX reasonable values unclear.
@@ -16,25 +16,6 @@ import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredica
  * @author wever
  *
  */
-public class OptionsFor_BayesianGaussianMixture_reg_covar extends NumericRangeOptionPredicate {
+public class OptionsFor_BayesianGaussianMixture_reg_covar extends DisabledOptionPredicate {
 
-  @Override
-  protected double getMin() {
-    return 1;
-  }
-
-  @Override
-  protected double getMax() {
-    return 1;
-  }
-
-  @Override
-  protected int getSteps() {
-    return -1;
-  }
-
-  @Override
-  protected boolean needsIntegers() {
-    return false;
-  }
 }

@@ -31,7 +31,7 @@ public class OptionsFor_ExtraTreeClassifier_min_samples_leaf extends NumericRang
 
   @Override
   protected int getSteps() {
-    return 1;
+    return 10;
   }
 
   @Override

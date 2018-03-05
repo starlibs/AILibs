@@ -1,34 +1,23 @@
 
-    package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.KNeighborsClassifier;
-    /*
-        n_neighbors : int, optional (default = 5)
-        Number of neighbors to use by default for :meth:`kneighbors` queries.
+package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.KNeighborsClassifier;
+/*
+    n_neighbors : int, optional (default = 5)
+    Number of neighbors to use by default for :meth:`kneighbors` queries.
 
 
-    */
+*/
 
-    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
+import de.upb.crc901.mlplan.evaluablepredicates.mlplan.OptionsPredicate;
 
-    public class OptionsFor_KNeighborsClassifier_n_neighbors extends NumericRangeOptionPredicate {
-        
-        @Override
-        protected double getMin() {
-            return 1;
-        }
+import java.util.Arrays;
+import java.util.List;
 
-        @Override
-        protected double getMax() {
-            return 1;
-        }
+public class OptionsFor_KNeighborsClassifier_n_neighbors extends OptionsPredicate {
 
-        @Override
-        protected int getSteps() {
-            return -1;
-        }
+  private static List<Integer> validValues = Arrays.asList(new Integer[] { 1, 3, 11, 21, 51, 101 });
 
-        @Override
-        protected boolean needsIntegers() {
-            return true;
-        }
-    }
-    
+  @Override
+  protected List<? extends Object> getValidValues() {
+    return validValues;
+  }
+}

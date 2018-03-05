@@ -1,35 +1,39 @@
 
-    package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.LinearSVC;
-    /*
-        max_iter : int, (default=1000)
-        The maximum number of iterations to be run.
+package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.LinearSVC;
+/*
+    max_iter : int, (default=1000)
+    The maximum number of iterations to be run.
 
-    Attributes
-    
-    */
+Attributes
 
-    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
+*/
 
-    public class OptionsFor_LinearSVC_max_iter extends NumericRangeOptionPredicate {
-        
-        @Override
-        protected double getMin() {
-            return 1;
-        }
+import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
 
-        @Override
-        protected double getMax() {
-            return 1;
-        }
+public class OptionsFor_LinearSVC_max_iter extends NumericRangeOptionPredicate {
 
-        @Override
-        protected int getSteps() {
-            return -1;
-        }
+  @Override
+  protected double getMin() {
+    return 10;
+  }
 
-        @Override
-        protected boolean needsIntegers() {
-            return true;
-        }
-    }
-    
+  @Override
+  protected double getMax() {
+    return 1000000;
+  }
+
+  @Override
+  protected int getSteps() {
+    return 10;
+  }
+
+  @Override
+  protected boolean needsIntegers() {
+    return true;
+  }
+
+  @Override
+  protected boolean isLinear() {
+    return false;
+  }
+}

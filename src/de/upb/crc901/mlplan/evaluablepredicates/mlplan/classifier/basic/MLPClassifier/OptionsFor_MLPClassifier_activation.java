@@ -1,34 +1,34 @@
 package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.MLPClassifier;
 
-    import java.util.Arrays;
-    import java.util.List;
+import de.upb.crc901.mlplan.evaluablepredicates.mlplan.OptionsPredicate;
 
-    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.OptionsPredicate;
-    /*
-        activation : {'identity', 'logistic', 'tanh', 'relu'}, default 'relu'
-        Activation function for the hidden layer.
+import java.util.Arrays;
+import java.util.List;
 
-        - 'identity', no-op activation, useful to implement linear bottleneck,
-          returns f(x) = x
+/*
+    activation : {'identity', 'logistic', 'tanh', 'relu'}, default 'relu'
+    Activation function for the hidden layer.
 
-        - 'logistic', the logistic sigmoid function,
-          returns f(x) = 1 / (1 + exp(-x)).
+    - 'identity', no-op activation, useful to implement linear bottleneck,
+      returns f(x) = x
 
-        - 'tanh', the hyperbolic tan function,
-          returns f(x) = tanh(x).
+    - 'logistic', the logistic sigmoid function,
+      returns f(x) = 1 / (1 + exp(-x)).
 
-        - 'relu', the rectified linear unit function,
-          returns f(x) = max(0, x)
+    - 'tanh', the hyperbolic tan function,
+      returns f(x) = tanh(x).
+
+    - 'relu', the rectified linear unit function,
+      returns f(x) = max(0, x)
 
 
-    */
-    public class OptionsFor_MLPClassifier_activation extends OptionsPredicate {
-        
-        private static List<Object> validValues = Arrays.asList(new Object[]{});
+*/
+public class OptionsFor_MLPClassifier_activation extends OptionsPredicate {
 
-        @Override
-        protected List<? extends Object> getValidValues() {
-            return validValues;
-        }
-    }
-    
+  private static List<Object> validValues = Arrays.asList(new Object[] { "identity", "logistic", "tanh" });
+
+  @Override
+  protected List<? extends Object> getValidValues() {
+    return validValues;
+  }
+}

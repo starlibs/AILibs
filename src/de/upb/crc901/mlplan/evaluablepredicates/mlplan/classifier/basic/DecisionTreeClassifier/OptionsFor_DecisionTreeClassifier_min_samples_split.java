@@ -33,7 +33,7 @@ public class OptionsFor_DecisionTreeClassifier_min_samples_split extends Numeric
 
   @Override
   protected int getSteps() {
-    return 1;
+    return 8;
   }
 
   @Override

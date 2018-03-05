@@ -1,34 +1,23 @@
 
-    package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.LSHForest;
-    /*
-        n_estimators : int (default = 10)
-        Number of trees in the LSH Forest.
+package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.LSHForest;
+/*
+    n_estimators : int (default = 10)
+    Number of trees in the LSH Forest.
 
 
-    */
+*/
 
-    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
+import de.upb.crc901.mlplan.evaluablepredicates.mlplan.OptionsPredicate;
 
-    public class OptionsFor_LSHForest_n_estimators extends NumericRangeOptionPredicate {
-        
-        @Override
-        protected double getMin() {
-            return 1;
-        }
+import java.util.Arrays;
+import java.util.List;
 
-        @Override
-        protected double getMax() {
-            return 1;
-        }
+public class OptionsFor_LSHForest_n_estimators extends OptionsPredicate {
 
-        @Override
-        protected int getSteps() {
-            return -1;
-        }
+  private static List<Object> validValues = Arrays.asList(new Object[] { "3", "5", "20", "100", "200", "500", "1000" });
 
-        @Override
-        protected boolean needsIntegers() {
-            return true;
-        }
-    }
-    
+  @Override
+  protected List<? extends Object> getValidValues() {
+    return validValues;
+  }
+}
