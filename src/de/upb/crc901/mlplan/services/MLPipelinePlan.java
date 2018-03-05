@@ -132,7 +132,7 @@ public class MLPipelinePlan {
 		}
 	}
 	
-	class MLPipe extends AbstractPipe {
+	public class MLPipe extends AbstractPipe {
 		private final String classifierName;
 		private final Set<String> classifierOptions = new TreeSet<>();
 		private final List<Object> constructorArgs = new ArrayList<>(); 
@@ -162,6 +162,11 @@ public class MLPipelinePlan {
 		public String getName() {
 			return classifierName;
 		}
+		
+		public String getQualifiedName() {
+			return classifierName;
+		}
+		
 		public ArrayList<String> /*ArrayList was explicitly used*/ getOptions(){
 			ArrayList<String> options = new ArrayList<>();
 			options.addAll(classifierOptions);
@@ -214,6 +219,10 @@ public class MLPipelinePlan {
 		}
 		public String getEval() {
 			return evalName;
+		}
+		
+		public String getQualifiedName() {
+			return searcherName + "/" + evalName;
 		}
 		
 		public ArrayList<String> getSearcherOptions(){

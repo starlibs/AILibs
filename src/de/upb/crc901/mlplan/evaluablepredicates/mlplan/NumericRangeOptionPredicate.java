@@ -60,8 +60,8 @@ public abstract class NumericRangeOptionPredicate extends OptionsPredicate  {
 			if(min <= 0.00001) {
 				min = 0.00001;  // set a lower bound
 			}
-			expCoeff = isLinear() ? -1 : Math.log(max/min) / (max-min); // b
-			scale = isLinear() ? -1 :  max / Math.exp(expCoeff  * max); // a
+			expCoeff = isLinear() ? -1 : Math.log10(max/min) / (max-min); // b
+			scale = isLinear() ? -1 :  max / Math.pow(10, expCoeff  * max); // a
 		}
 			
 		for (int i = 0; i < getSteps()+1; i++) {
@@ -73,7 +73,7 @@ public abstract class NumericRangeOptionPredicate extends OptionsPredicate  {
 			// if it is logarithmic scale recalculate value:
 			if(!isLinear()) {
 				// y = a exp b*x
-				value = scale * Math.exp(expCoeff  * value);
+				value = scale * Math.pow(10, expCoeff  * value);
 			}
 			
 			if(needsIntegers) {
@@ -100,22 +100,22 @@ public abstract class NumericRangeOptionPredicate extends OptionsPredicate  {
 			
 			@Override
 			protected boolean needsIntegers() {
-				return true;
+				return false;
 			}
 			
 			@Override
 			protected int getSteps() {
-				return 10;
+				return 7;
 			}
 			
 			@Override
 			protected double getMin() {
-				return 1;
+				return 1e-3;
 			}
 			
 			@Override
 			protected double getMax() {
-				return 1000;
+				return 1e3;
 			}
 			
 			protected boolean isLinear() {

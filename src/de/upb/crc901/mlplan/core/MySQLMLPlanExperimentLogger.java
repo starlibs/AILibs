@@ -14,9 +14,9 @@ import com.google.common.eventbus.Subscribe;
 
 import de.upb.crc901.mlplan.classifiers.TwoPhaseHTNBasedPipelineSearcher;
 import de.upb.crc901.mlplan.search.evaluators.ClassifierMeasurementEvent;
+import de.upb.crc901.mlplan.services.MLPipelinePlan;
 import de.upb.crc901.mlplan.services.MLServicePipeline;
 import jaicore.basic.MathExt;
-import jaicore.ml.experiments.Experiment;
 import jaicore.ml.experiments.MySQLExperimentDatabaseHandle;
 import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
@@ -110,11 +110,12 @@ public class MySQLMLPlanExperimentLogger extends MySQLExperimentDatabaseHandle {
 
 	public void addEvaluationEntry(Classifier parentSearchAlgorithm, MLServicePipeline identifiedPipeline, double score) {
 		String preprocessor = "";
-		if (!identifiedPipeline.getPreprocessorNames().isEmpty()) {
-			preprocessor = identifiedPipeline.getPreprocessorNames().get(0);
+		MLPipelinePlan plan = identifiedPipeline.getConstructionPlan();
+		if (!plan.getAttrSelections().isEmpty()) {
+			preprocessor = plan.getAttrSelections().get(0).getQualifiedName();
+			
 		}
-		System.out.println("PRE: " + preprocessor);
-		String classifierName = identifiedPipeline.getClassifierName();
+		String classifierName = plan.getClassifierPipe().getName();
 
 		String plKey = identifiedPipeline.toString();
 		Map<String, DescriptiveStatistics> stats = measurePLValues.containsKey(plKey) ? measurePLValues.get(plKey) : null;
@@ -207,13 +208,15 @@ public class MySQLMLPlanExperimentLogger extends MySQLExperimentDatabaseHandle {
 
 	private void addResultEntry(int runId, MLServicePipeline pipeline, double score) {
 		String preprocessor = "";
-		if (!pipeline.getPPFieldNames().isEmpty()) {
-			preprocessor = pipeline.getPreprocessorNames().get(0);
+		MLPipelinePlan plan = pipeline.getConstructionPlan();
+		if (!plan.getAttrSelections().isEmpty()) {
+			preprocessor = plan.getAttrSelections().get(0).getQualifiedName();
+			
 		}
-		String classifierName = pipeline.getClassifierName();
+		String classifierName = plan.getClassifierPipe().getName();
 
 		String plKey = pipeline.toString();
-		Map<String, DescriptiveStatistics> stats = measurePLValues.containsKey(plKey) ? measurePLValues.get(plKey) : null;
+//		Map<String, DescriptiveStatistics> stats = measurePLValues.containsKey(plKey) ? measurePLValues.get(plKey) : null;
 
 		PreparedStatement stmt = null;
 		try {
