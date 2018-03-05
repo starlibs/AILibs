@@ -6,6 +6,6 @@ import de.upb.crc901.mlplan.core.MLUtil;
 
 public class SHOP2Tester {
 	public static void main(String[] args) {
-		System.out.println(MLUtil.getJSHOP2File(new File("testrsc/automl3.testset")));
+		System.out.println(MLUtil.getJSHOP2File(new File("testrsc/automl3.testset")).getY());
 	}
 }

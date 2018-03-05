@@ -1,5 +1,6 @@
 package de.upb.crc901.mlplan.services;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,7 +22,7 @@ import weka.core.OptionHandler;
  * @author aminfaez
  *
  */
-public class MLPipelinePlan {
+public class MLPipelinePlan implements Serializable {
 	// list of preprocessors
 	private List<MLPipe> atrPipes = new LinkedList<>();
 	
@@ -116,7 +117,7 @@ public class MLPipelinePlan {
 	
 	
 	// CLASSES for pipe creation.
-	abstract class AbstractPipe {
+	abstract class AbstractPipe implements Serializable {
 		private final String host;
 		
 		protected AbstractPipe(String hostname) {
@@ -132,7 +133,7 @@ public class MLPipelinePlan {
 		}
 	}
 	
-	class MLPipe extends AbstractPipe {
+	public class MLPipe extends AbstractPipe {
 		private final String classifierName;
 		private final Set<String> classifierOptions = new TreeSet<>();
 		private final List<Object> constructorArgs = new ArrayList<>(); 
@@ -162,6 +163,11 @@ public class MLPipelinePlan {
 		public String getName() {
 			return classifierName;
 		}
+		
+		public String getQualifiedName() {
+			return classifierName;
+		}
+		
 		public ArrayList<String> /*ArrayList was explicitly used*/ getOptions(){
 			ArrayList<String> options = new ArrayList<>();
 			options.addAll(classifierOptions);
@@ -214,6 +220,10 @@ public class MLPipelinePlan {
 		}
 		public String getEval() {
 			return evalName;
+		}
+		
+		public String getQualifiedName() {
+			return searcherName + "/" + evalName;
 		}
 		
 		public ArrayList<String> getSearcherOptions(){
