@@ -58,7 +58,7 @@ public class SCC2018MLTest extends MultiClassClassificationExperimentRunner {
 				File searchSpaceFile = new File("testrsc/services/automl-services.searchspace");
 				TwoPhaseHTNBasedPipelineSearcher<Double> bs = new TwoPhaseHTNBasedPipelineSearcher<>();
 				
-//				logicalDerivationTree(searchSpaceFile, evaluablePredicatFile);
+				logicalDerivationTree(searchSpaceFile, evaluablePredicatFile);
 				
 				Random random = new Random(seed);
 				bs.setHtnSearchSpaceFile(searchSpaceFile);
