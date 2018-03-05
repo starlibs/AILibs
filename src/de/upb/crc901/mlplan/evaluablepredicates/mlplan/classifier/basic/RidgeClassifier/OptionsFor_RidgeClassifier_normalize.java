@@ -17,7 +17,7 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.RidgeCl
     */
     public class OptionsFor_RidgeClassifier_normalize extends OptionsPredicate {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{"true", "false"});
+        private static List<Object> validValues = Arrays.asList(new Object[]{"true" }); // default is false
 
         @Override
         protected List<? extends Object> getValidValues() {

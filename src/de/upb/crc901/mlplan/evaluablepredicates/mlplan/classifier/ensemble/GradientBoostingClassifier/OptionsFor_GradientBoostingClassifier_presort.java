@@ -19,7 +19,7 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.ensemble.Grad
     */
     public class OptionsFor_GradientBoostingClassifier_presort extends OptionsPredicate {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{});
+        private static List<Object> validValues = Arrays.asList(new Object[]{"true", "false"});
 
         @Override
         protected List<? extends Object> getValidValues() {

@@ -18,17 +18,21 @@
 
         @Override
         protected double getMax() {
-            return 1;
+            return 100;
         }
 
         @Override
         protected int getSteps() {
-            return -1;
+            return 3;
         }
 
         @Override
         protected boolean needsIntegers() {
             return false;
+        }
+        
+        protected boolean isLinear() {
+        	return false;
         }
     }
     

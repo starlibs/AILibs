@@ -14,7 +14,7 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.Nearest
     */
     public class OptionsFor_NearestNeighbors_metric extends OptionsPredicate {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{});
+        private static List<Object> validValues = Arrays.asList(new Object[]{"manhattan", "chebyshev"}); // minkowski is default and covers euclidean with p=2
 
         @Override
         protected List<? extends Object> getValidValues() {

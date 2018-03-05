@@ -7,28 +7,11 @@
 
     */
 
-    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
+    import org.apache.tools.ant.types.Assertions.DisabledAssertion;
 
-    public class OptionsFor_SVC_tol extends NumericRangeOptionPredicate {
-        
-        @Override
-        protected double getMin() {
-            return 1;
-        }
+import de.upb.crc901.mlplan.evaluablepredicates.mlplan.DisabledOptionPredicate;
+import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
 
-        @Override
-        protected double getMax() {
-            return 1;
-        }
-
-        @Override
-        protected int getSteps() {
-            return -1;
-        }
-
-        @Override
-        protected boolean needsIntegers() {
-            return false;
-        }
+    public class OptionsFor_SVC_tol extends DisabledOptionPredicate { // no reason to change the default
     }
     

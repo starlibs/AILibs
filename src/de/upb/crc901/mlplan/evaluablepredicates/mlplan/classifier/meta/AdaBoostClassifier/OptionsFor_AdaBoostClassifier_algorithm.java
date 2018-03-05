@@ -16,7 +16,7 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.meta.AdaBoost
     */
     public class OptionsFor_AdaBoostClassifier_algorithm extends OptionsPredicate {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{});
+        private static List<Object> validValues = Arrays.asList(new Object[]{"SAMME"}); // SAMME.R is default
 
         @Override
         protected List<? extends Object> getValidValues() {

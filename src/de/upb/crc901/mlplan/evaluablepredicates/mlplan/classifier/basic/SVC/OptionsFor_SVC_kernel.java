@@ -17,7 +17,7 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.SVC;
     */
     public class OptionsFor_SVC_kernel extends OptionsPredicate {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{});
+        private static List<Object> validValues = Arrays.asList(new Object[]{"linear", "poly", "sigmoid", "precomputed"}); // rbf is default
 
         @Override
         protected List<? extends Object> getValidValues() {

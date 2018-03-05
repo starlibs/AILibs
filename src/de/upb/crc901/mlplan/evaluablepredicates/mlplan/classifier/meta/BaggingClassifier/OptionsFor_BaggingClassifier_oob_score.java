@@ -3,7 +3,8 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.meta.BaggingC
     import java.util.Arrays;
     import java.util.List;
 
-    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.OptionsPredicate;
+import de.upb.crc901.mlplan.evaluablepredicates.mlplan.DisabledOptionPredicate;
+import de.upb.crc901.mlplan.evaluablepredicates.mlplan.OptionsPredicate;
     /*
         oob_score : bool
         Whether to use out-of-bag samples to estimate
@@ -11,13 +12,6 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.meta.BaggingC
 
 
     */
-    public class OptionsFor_BaggingClassifier_oob_score extends OptionsPredicate {
-        
-        private static List<Object> validValues = Arrays.asList(new Object[]{"true", "false"});
-
-        @Override
-        protected List<? extends Object> getValidValues() {
-            return validValues;
-        }
+    public class OptionsFor_BaggingClassifier_oob_score extends DisabledOptionPredicate { // default is unclear
     }
     

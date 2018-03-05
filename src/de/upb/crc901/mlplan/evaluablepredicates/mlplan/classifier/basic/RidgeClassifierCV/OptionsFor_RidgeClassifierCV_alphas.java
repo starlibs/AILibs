@@ -12,28 +12,9 @@
 
     */
 
-    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
+    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.DisabledOptionPredicate;
 
-    public class OptionsFor_RidgeClassifierCV_alphas extends NumericRangeOptionPredicate {
+    public class OptionsFor_RidgeClassifierCV_alphas extends DisabledOptionPredicate { // don't know how to set this
         
-        @Override
-        protected double getMin() {
-            return 1;
-        }
-
-        @Override
-        protected double getMax() {
-            return 1;
-        }
-
-        @Override
-        protected int getSteps() {
-            return -1;
-        }
-
-        @Override
-        protected boolean needsIntegers() {
-            return false;
-        }
     }
     

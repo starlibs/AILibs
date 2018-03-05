@@ -1,9 +1,6 @@
 package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.RadiusNeighborsClassifier;
 
-    import java.util.Arrays;
-    import java.util.List;
-
-    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.OptionsPredicate;
+    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.NearestNeighbors.OptionsFor_NearestNeighbors_algorithm;
     /*
         algorithm : {'auto', 'ball_tree', 'kd_tree', 'brute'}, optional
         Algorithm used to compute the nearest neighbors:
@@ -19,13 +16,7 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.RadiusN
 
 
     */
-    public class OptionsFor_RadiusNeighborsClassifier_algorithm extends OptionsPredicate {
+    public class OptionsFor_RadiusNeighborsClassifier_algorithm extends OptionsFor_NearestNeighbors_algorithm {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{});
-
-        @Override
-        protected List<? extends Object> getValidValues() {
-            return validValues;
-        }
     }
     

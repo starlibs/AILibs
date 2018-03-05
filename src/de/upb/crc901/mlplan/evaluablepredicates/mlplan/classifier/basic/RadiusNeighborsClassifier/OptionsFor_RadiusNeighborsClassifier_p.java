@@ -9,28 +9,9 @@
 
     */
 
-    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
+    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.NearestNeighbors.OptionsFor_NearestNeighbors_p;
 
-    public class OptionsFor_RadiusNeighborsClassifier_p extends NumericRangeOptionPredicate {
+    public class OptionsFor_RadiusNeighborsClassifier_p extends OptionsFor_NearestNeighbors_p {
         
-        @Override
-        protected double getMin() {
-            return 1;
-        }
-
-        @Override
-        protected double getMax() {
-            return 1;
-        }
-
-        @Override
-        protected int getSteps() {
-            return -1;
-        }
-
-        @Override
-        protected boolean needsIntegers() {
-            return true;
-        }
     }
     

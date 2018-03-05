@@ -12,7 +12,7 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.meta.BaggingC
     */
     public class OptionsFor_BaggingClassifier_bootstrap extends OptionsPredicate {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{"true", "false"});
+        private static List<Object> validValues = Arrays.asList(new Object[]{"true"}); // default is true
 
         @Override
         protected List<? extends Object> getValidValues() {

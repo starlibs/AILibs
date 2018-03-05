@@ -14,7 +14,7 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.ensemble.Extr
     */
     public class OptionsFor_ExtraTreesClassifier_warm_start extends OptionsPredicate {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{"true", "false"});
+        private static List<Object> validValues = Arrays.asList(new Object[]{"true"}); // default is false
 
         @Override
         protected List<? extends Object> getValidValues() {

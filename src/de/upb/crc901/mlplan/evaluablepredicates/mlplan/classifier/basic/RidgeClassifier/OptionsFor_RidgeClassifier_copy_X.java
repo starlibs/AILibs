@@ -12,7 +12,7 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.RidgeCl
     */
     public class OptionsFor_RidgeClassifier_copy_X extends OptionsPredicate {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{"true", "false"});
+        private static List<Object> validValues = Arrays.asList(new Object[]{ "false"}); // true is default
 
         @Override
         protected List<? extends Object> getValidValues() {

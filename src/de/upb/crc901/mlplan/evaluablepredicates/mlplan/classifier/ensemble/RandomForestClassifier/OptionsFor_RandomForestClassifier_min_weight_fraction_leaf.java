@@ -9,28 +9,9 @@
 
     */
 
-    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
+    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.ensemble.ExtraTreesClassifier.OptionsFor_ExtraTreesClassifier_min_weight_fraction_leaf;
 
-    public class OptionsFor_RandomForestClassifier_min_weight_fraction_leaf extends NumericRangeOptionPredicate {
+    public class OptionsFor_RandomForestClassifier_min_weight_fraction_leaf extends OptionsFor_ExtraTreesClassifier_min_weight_fraction_leaf {
         
-        @Override
-        protected double getMin() {
-            return 1;
-        }
-
-        @Override
-        protected double getMax() {
-            return 1;
-        }
-
-        @Override
-        protected int getSteps() {
-            return -1;
-        }
-
-        @Override
-        protected boolean needsIntegers() {
-            return false;
-        }
     }
     

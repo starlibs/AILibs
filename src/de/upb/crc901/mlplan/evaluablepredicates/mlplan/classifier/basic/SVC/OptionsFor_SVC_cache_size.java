@@ -7,28 +7,12 @@
 
     */
 
-    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
+    import org.apache.tools.ant.types.Assertions.DisabledAssertion;
 
-    public class OptionsFor_SVC_cache_size extends NumericRangeOptionPredicate {
+import de.upb.crc901.mlplan.evaluablepredicates.mlplan.DisabledOptionPredicate;
+import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
+
+    public class OptionsFor_SVC_cache_size extends DisabledOptionPredicate { // we don't want to set this
         
-        @Override
-        protected double getMin() {
-            return 1;
-        }
-
-        @Override
-        protected double getMax() {
-            return 1;
-        }
-
-        @Override
-        protected int getSteps() {
-            return -1;
-        }
-
-        @Override
-        protected boolean needsIntegers() {
-            return true;
-        }
     }
     

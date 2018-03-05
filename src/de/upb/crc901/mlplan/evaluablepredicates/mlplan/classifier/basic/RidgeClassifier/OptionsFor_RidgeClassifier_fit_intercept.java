@@ -1,10 +1,8 @@
 package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.RidgeClassifier;
 
-    import java.util.Arrays;
-    import java.util.List;
+import de.upb.crc901.mlplan.evaluablepredicates.mlplan.DisabledOptionPredicate;
 
-    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.OptionsPredicate;
-    /*
+/*
         fit_intercept : boolean
         Whether to calculate the intercept for this model. If set to false, no
         intercept will be used in calculations (e.g. data is expected to be
@@ -12,13 +10,7 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.RidgeCl
 
 
     */
-    public class OptionsFor_RidgeClassifier_fit_intercept extends OptionsPredicate {
-        
-        private static List<Object> validValues = Arrays.asList(new Object[]{"true", "false"});
+    public class OptionsFor_RidgeClassifier_fit_intercept extends DisabledOptionPredicate { // default is not clear
 
-        @Override
-        protected List<? extends Object> getValidValues() {
-            return validValues;
-        }
     }
     

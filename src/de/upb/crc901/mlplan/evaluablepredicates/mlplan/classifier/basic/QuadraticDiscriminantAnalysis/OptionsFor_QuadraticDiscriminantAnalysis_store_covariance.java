@@ -3,7 +3,8 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.Quadrat
     import java.util.Arrays;
     import java.util.List;
 
-    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.OptionsPredicate;
+import de.upb.crc901.mlplan.evaluablepredicates.mlplan.DisabledOptionPredicate;
+import de.upb.crc901.mlplan.evaluablepredicates.mlplan.OptionsPredicate;
     /*
         store_covariance : boolean
         If True the covariance matrices are computed and stored in the
@@ -13,13 +14,8 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.Quadrat
 
 
     */
-    public class OptionsFor_QuadraticDiscriminantAnalysis_store_covariance extends OptionsPredicate {
+    public class OptionsFor_QuadraticDiscriminantAnalysis_store_covariance extends DisabledOptionPredicate { // default is unclear
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{"true", "false"});
-
-        @Override
-        protected List<? extends Object> getValidValues() {
-            return validValues;
-        }
+        
     }
     

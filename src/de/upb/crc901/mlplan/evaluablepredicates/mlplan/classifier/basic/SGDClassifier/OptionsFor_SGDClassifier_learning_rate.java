@@ -18,7 +18,7 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.SGDClas
     */
     public class OptionsFor_SGDClassifier_learning_rate extends OptionsPredicate {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{});
+        private static List<Object> validValues = Arrays.asList(new Object[]{"constant", "optimal", "invscaling"});
 
         @Override
         protected List<? extends Object> getValidValues() {

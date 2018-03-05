@@ -1,9 +1,6 @@
 package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.RidgeClassifierCV;
 
-    import java.util.Arrays;
-    import java.util.List;
-
-    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.OptionsPredicate;
+    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.RidgeClassifier.OptionsFor_RidgeClassifier_normalize;
     /*
         normalize : boolean, optional, default False
         This parameter is ignored when ``fit_intercept`` is set to False.
@@ -15,13 +12,7 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.RidgeCl
 
 
     */
-    public class OptionsFor_RidgeClassifierCV_normalize extends OptionsPredicate {
+    public class OptionsFor_RidgeClassifierCV_normalize extends OptionsFor_RidgeClassifier_normalize {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{"true", "false"});
-
-        @Override
-        protected List<? extends Object> getValidValues() {
-            return validValues;
-        }
     }
     

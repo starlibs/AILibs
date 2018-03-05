@@ -25,7 +25,7 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.SGDClas
     */
     public class OptionsFor_SGDClassifier_loss extends OptionsPredicate {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{});
+        private static List<Object> validValues = Arrays.asList(new Object[]{"log", "modified_huber", "squared_hinge", "perceptron", "squared_loss", "huber", "epsilon_insensitive', 'squared_epsilon_insensitive"}); // hinge is default 
 
         @Override
         protected List<? extends Object> getValidValues() {

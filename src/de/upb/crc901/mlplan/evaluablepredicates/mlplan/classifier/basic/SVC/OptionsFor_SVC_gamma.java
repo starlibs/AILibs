@@ -3,7 +3,8 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.SVC;
     import java.util.Arrays;
     import java.util.List;
 
-    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.OptionsPredicate;
+import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
+import de.upb.crc901.mlplan.evaluablepredicates.mlplan.OptionsPredicate;
     /*
         gamma : float, optional (default='auto')
         Kernel coefficient for 'rbf', 'poly' and 'sigmoid'.
@@ -11,13 +12,30 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.SVC;
 
 
     */
-    public class OptionsFor_SVC_gamma extends OptionsPredicate {
+    public class OptionsFor_SVC_gamma extends NumericRangeOptionPredicate {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{});
+        @Override
+        protected double getMin() {
+            return 10e-5;
+        }
 
         @Override
-        protected List<? extends Object> getValidValues() {
-            return validValues;
+        protected double getMax() {
+            return 10e4;
+        }
+
+        @Override
+        protected int getSteps() {
+            return 10;
+        }
+        
+        protected boolean isLinear() {
+        	return false;
+        }
+
+        @Override
+        protected boolean needsIntegers() {
+            return false;
         }
     }
     

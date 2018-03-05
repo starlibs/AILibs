@@ -3,7 +3,10 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.SVC;
     import java.util.Arrays;
     import java.util.List;
 
-    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.OptionsPredicate;
+import org.apache.tools.ant.types.Assertions.DisabledAssertion;
+
+import de.upb.crc901.mlplan.evaluablepredicates.mlplan.DisabledOptionPredicate;
+import de.upb.crc901.mlplan.evaluablepredicates.mlplan.OptionsPredicate;
     /*
         probability : boolean, optional (default=False)
         Whether to enable probability estimates. This must be enabled prior
@@ -11,13 +14,6 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.SVC;
 
 
     */
-    public class OptionsFor_SVC_probability extends OptionsPredicate {
-        
-        private static List<Object> validValues = Arrays.asList(new Object[]{"true", "false"});
-
-        @Override
-        protected List<? extends Object> getValidValues() {
-            return validValues;
-        }
+    public class OptionsFor_SVC_probability extends DisabledOptionPredicate { // we don't want probabilistic estimates here
     }
     

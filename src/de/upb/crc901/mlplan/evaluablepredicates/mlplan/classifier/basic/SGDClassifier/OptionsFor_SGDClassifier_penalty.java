@@ -15,7 +15,7 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.SGDClas
     */
     public class OptionsFor_SGDClassifier_penalty extends OptionsPredicate {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{});
+        private static List<Object> validValues = Arrays.asList(new Object[]{"none", "l1", "elasticnet"}); // l2 is default
 
         @Override
         protected List<? extends Object> getValidValues() {

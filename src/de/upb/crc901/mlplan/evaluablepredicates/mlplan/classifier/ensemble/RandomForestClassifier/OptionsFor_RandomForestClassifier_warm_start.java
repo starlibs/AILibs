@@ -14,7 +14,7 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.ensemble.Rand
     */
     public class OptionsFor_RandomForestClassifier_warm_start extends OptionsPredicate {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{"true", "false"});
+        private static List<Object> validValues = Arrays.asList(new Object[]{"true"}); // false is default
 
         @Override
         protected List<? extends Object> getValidValues() {

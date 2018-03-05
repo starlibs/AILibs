@@ -1,9 +1,9 @@
 package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.SGDClassifier;
 
     import java.util.Arrays;
-    import java.util.List;
+import java.util.List;
 
-    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.OptionsPredicate;
+import de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.RidgeClassifier.OptionsFor_RidgeClassifier_fit_intercept;
     /*
         fit_intercept : bool
         Whether the intercept should be estimated or not. If False, the
@@ -11,9 +11,9 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.SGDClas
 
 
     */
-    public class OptionsFor_SGDClassifier_fit_intercept extends OptionsPredicate {
+    public class OptionsFor_SGDClassifier_fit_intercept extends OptionsFor_RidgeClassifier_fit_intercept {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{"true", "false"});
+        private static List<Object> validValues = Arrays.asList(new Object[]{"false"}); // default is true
 
         @Override
         protected List<? extends Object> getValidValues() {

@@ -13,7 +13,7 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.Passive
     */
     public class OptionsFor_PassiveAggressiveClassifier_fit_intercept extends OptionsPredicate {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{"true", "false"});
+        private static List<Object> validValues = Arrays.asList(new Object[]{"true"}); // false is covered by default
 
         @Override
         protected List<? extends Object> getValidValues() {

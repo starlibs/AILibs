@@ -1,9 +1,6 @@
 package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.RidgeClassifierCV;
 
-    import java.util.Arrays;
-    import java.util.List;
-
-    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.OptionsPredicate;
+    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.RidgeClassifier.OptionsFor_RidgeClassifier_fit_intercept;
     /*
         fit_intercept : boolean
         Whether to calculate the intercept for this model. If set
@@ -12,13 +9,8 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.RidgeCl
 
 
     */
-    public class OptionsFor_RidgeClassifierCV_fit_intercept extends OptionsPredicate {
+    public class OptionsFor_RidgeClassifierCV_fit_intercept extends OptionsFor_RidgeClassifier_fit_intercept {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{"true", "false"});
-
-        @Override
-        protected List<? extends Object> getValidValues() {
-            return validValues;
-        }
+        
     }
     

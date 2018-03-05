@@ -18,7 +18,7 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.Passive
     */
     public class OptionsFor_PassiveAggressiveClassifier_average extends OptionsPredicate {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{"true", "false"});
+        private static List<Object> validValues = Arrays.asList(new Object[]{"true", 2, 10, 50});
 
         @Override
         protected List<? extends Object> getValidValues() {

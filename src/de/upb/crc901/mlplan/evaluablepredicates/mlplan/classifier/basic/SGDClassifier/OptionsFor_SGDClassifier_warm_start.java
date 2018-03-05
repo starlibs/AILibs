@@ -1,9 +1,6 @@
 package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.SGDClassifier;
 
-    import java.util.Arrays;
-    import java.util.List;
-
-    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.OptionsPredicate;
+    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.DisabledOptionPredicate;
     /*
         warm_start : bool, optional
         When set to True, reuse the solution of the previous call to fit as
@@ -11,13 +8,7 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.SGDClas
 
 
     */
-    public class OptionsFor_SGDClassifier_warm_start extends OptionsPredicate {
+    public class OptionsFor_SGDClassifier_warm_start extends DisabledOptionPredicate { // default is unclear
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{"true", "false"});
-
-        @Override
-        protected List<? extends Object> getValidValues() {
-            return validValues;
-        }
     }
     

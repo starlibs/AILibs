@@ -9,28 +9,9 @@
 
     */
 
-    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
+    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.DisabledOptionPredicate;
 
-    public class OptionsFor_SGDClassifier_eta0 extends NumericRangeOptionPredicate {
-        
-        @Override
-        protected double getMin() {
-            return 1;
-        }
+    public class OptionsFor_SGDClassifier_eta0 extends DisabledOptionPredicate { // we should only set this if learning rate is not "optimal"
 
-        @Override
-        protected double getMax() {
-            return 1;
-        }
-
-        @Override
-        protected int getSteps() {
-            return -1;
-        }
-
-        @Override
-        protected boolean needsIntegers() {
-            return false;
-        }
     }
     

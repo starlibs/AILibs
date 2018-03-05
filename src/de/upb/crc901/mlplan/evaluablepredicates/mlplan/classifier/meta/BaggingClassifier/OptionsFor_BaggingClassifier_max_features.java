@@ -9,28 +9,10 @@
 
     */
 
-    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
+    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.DisabledOptionPredicate;
+import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
 
-    public class OptionsFor_BaggingClassifier_max_features extends NumericRangeOptionPredicate {
+    public class OptionsFor_BaggingClassifier_max_features extends DisabledOptionPredicate { // no idea what to put here
         
-        @Override
-        protected double getMin() {
-            return 1;
-        }
-
-        @Override
-        protected double getMax() {
-            return 1;
-        }
-
-        @Override
-        protected int getSteps() {
-            return -1;
-        }
-
-        @Override
-        protected boolean needsIntegers() {
-            return false;
-        }
     }
     

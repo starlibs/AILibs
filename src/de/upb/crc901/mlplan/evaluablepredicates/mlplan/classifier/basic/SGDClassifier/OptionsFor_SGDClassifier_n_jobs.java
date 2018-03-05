@@ -9,28 +9,11 @@
 
     */
 
-    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
+    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.DisabledOptionPredicate;
 
-    public class OptionsFor_SGDClassifier_n_jobs extends NumericRangeOptionPredicate {
+    public class OptionsFor_SGDClassifier_n_jobs extends DisabledOptionPredicate
+    {
         
-        @Override
-        protected double getMin() {
-            return 1;
-        }
-
-        @Override
-        protected double getMax() {
-            return 1;
-        }
-
-        @Override
-        protected int getSteps() {
-            return -1;
-        }
-
-        @Override
-        protected boolean needsIntegers() {
-            return true;
-        }
+    
     }
     

@@ -14,7 +14,7 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.Passive
     */
     public class OptionsFor_PassiveAggressiveClassifier_loss extends OptionsPredicate {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{});
+        private static List<Object> validValues = Arrays.asList(new Object[]{}); // problem: which one is default?
 
         @Override
         protected List<? extends Object> getValidValues() {

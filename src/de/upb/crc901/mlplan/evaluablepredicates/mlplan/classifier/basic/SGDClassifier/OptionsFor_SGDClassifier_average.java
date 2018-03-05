@@ -1,9 +1,6 @@
 package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.SGDClassifier;
 
-    import java.util.Arrays;
-    import java.util.List;
-
-    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.OptionsPredicate;
+    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.PassiveAggressiveClassifier.OptionsFor_PassiveAggressiveClassifier_average;
     /*
         average : bool or int, optional
         When set to True, computes the averaged SGD weights and stores the
@@ -14,13 +11,7 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.SGDClas
 
 
     */
-    public class OptionsFor_SGDClassifier_average extends OptionsPredicate {
+    public class OptionsFor_SGDClassifier_average extends OptionsFor_PassiveAggressiveClassifier_average {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{"true", "false"});
-
-        @Override
-        protected List<? extends Object> getValidValues() {
-            return validValues;
-        }
     }
     

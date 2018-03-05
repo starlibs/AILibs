@@ -3,7 +3,8 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.SVC;
     import java.util.Arrays;
     import java.util.List;
 
-    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.OptionsPredicate;
+import de.upb.crc901.mlplan.evaluablepredicates.mlplan.DisabledOptionPredicate;
+import de.upb.crc901.mlplan.evaluablepredicates.mlplan.OptionsPredicate;
     /*
         verbose : bool, default: False
         Enable verbose output. Note that this setting takes advantage of a
@@ -12,13 +13,6 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.SVC;
 
 
     */
-    public class OptionsFor_SVC_verbose extends OptionsPredicate {
-        
-        private static List<Object> validValues = Arrays.asList(new Object[]{"true", "false"});
-
-        @Override
-        protected List<? extends Object> getValidValues() {
-            return validValues;
-        }
+    public class OptionsFor_SVC_verbose extends DisabledOptionPredicate { // no relevant option
     }
     

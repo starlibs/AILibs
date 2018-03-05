@@ -25,7 +25,7 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.ensemble.Extr
     */
     public class OptionsFor_ExtraTreesClassifier_max_features extends OptionsPredicate {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{});
+        private static List<Object> validValues = Arrays.asList(new Object[]{1, 2, 5, "sqrt", "log2"}); // auto is default
 
         @Override
         protected List<? extends Object> getValidValues() {

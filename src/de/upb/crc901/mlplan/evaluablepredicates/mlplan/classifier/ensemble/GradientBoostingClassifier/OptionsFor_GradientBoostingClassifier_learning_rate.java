@@ -14,17 +14,21 @@
         
         @Override
         protected double getMin() {
-            return 1;
+            return 10e-2;
         }
 
         @Override
         protected double getMax() {
-            return 1;
+            return 10e2;
         }
 
         @Override
         protected int getSteps() {
-            return -1;
+            return 5;
+        }
+        
+        protected boolean isLinear() {
+        	return false;
         }
 
         @Override

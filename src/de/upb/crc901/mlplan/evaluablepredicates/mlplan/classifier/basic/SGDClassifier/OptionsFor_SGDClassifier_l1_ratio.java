@@ -15,7 +15,7 @@
         
         @Override
         protected double getMin() {
-            return 1;
+            return 0;
         }
 
         @Override
@@ -25,7 +25,7 @@
 
         @Override
         protected int getSteps() {
-            return -1;
+            return 10;
         }
 
         @Override

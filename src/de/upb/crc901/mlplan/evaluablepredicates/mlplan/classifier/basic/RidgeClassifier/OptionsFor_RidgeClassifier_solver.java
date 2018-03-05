@@ -43,7 +43,7 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.RidgeCl
     */
     public class OptionsFor_RidgeClassifier_solver extends OptionsPredicate {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{});
+        private static List<Object> validValues = Arrays.asList(new Object[]{ "svd", "cholesky", "lsqr", "sparse_cg", "sag", "saga"}); // auto is assumed to be default
 
         @Override
         protected List<? extends Object> getValidValues() {

@@ -24,7 +24,7 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.SVC;
     */
     public class OptionsFor_SVC_decision_function_shape extends OptionsPredicate {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{});
+        private static List<Object> validValues = Arrays.asList(new Object[]{"ovo"}); // ovr is default
 
         @Override
         protected List<? extends Object> getValidValues() {

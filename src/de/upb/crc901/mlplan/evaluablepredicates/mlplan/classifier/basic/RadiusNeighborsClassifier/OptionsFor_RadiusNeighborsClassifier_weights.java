@@ -3,7 +3,10 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.RadiusN
     import java.util.Arrays;
     import java.util.List;
 
-    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.OptionsPredicate;
+import org.apache.tools.ant.types.Assertions.DisabledAssertion;
+
+import de.upb.crc901.mlplan.evaluablepredicates.mlplan.DisabledOptionPredicate;
+import de.upb.crc901.mlplan.evaluablepredicates.mlplan.OptionsPredicate;
     /*
         weights : str or callable
         weight function used in prediction.  Possible values:
@@ -21,9 +24,9 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.RadiusN
 
 
     */
-    public class OptionsFor_RadiusNeighborsClassifier_weights extends OptionsPredicate {
+    public class OptionsFor_RadiusNeighborsClassifier_weights extends DisabledOptionPredicate {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{});
+        private static List<Object> validValues = Arrays.asList(new Object[]{"distance"}); // default is uniform
 
         @Override
         protected List<? extends Object> getValidValues() {

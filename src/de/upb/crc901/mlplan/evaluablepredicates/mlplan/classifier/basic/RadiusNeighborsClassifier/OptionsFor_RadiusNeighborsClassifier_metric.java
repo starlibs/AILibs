@@ -1,9 +1,6 @@
 package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.RadiusNeighborsClassifier;
 
-    import java.util.Arrays;
-    import java.util.List;
-
-    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.OptionsPredicate;
+    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.NearestNeighbors.OptionsFor_NearestNeighbors_metric;
     /*
         metric : string or callable, default 'minkowski'
         the distance metric to use for the tree.  The default metric is
@@ -13,13 +10,7 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.RadiusN
 
 
     */
-    public class OptionsFor_RadiusNeighborsClassifier_metric extends OptionsPredicate {
+    public class OptionsFor_RadiusNeighborsClassifier_metric extends OptionsFor_NearestNeighbors_metric {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{});
-
-        @Override
-        protected List<? extends Object> getValidValues() {
-            return validValues;
-        }
     }
     

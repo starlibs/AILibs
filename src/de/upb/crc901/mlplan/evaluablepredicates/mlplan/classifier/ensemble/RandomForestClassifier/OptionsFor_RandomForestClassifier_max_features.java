@@ -1,9 +1,6 @@
 package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.ensemble.RandomForestClassifier;
 
-    import java.util.Arrays;
-    import java.util.List;
-
-    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.OptionsPredicate;
+    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.ensemble.ExtraTreesClassifier.OptionsFor_ExtraTreesClassifier_max_features;
     /*
         max_features : int, float, string or None, optional (default="auto")
         The number of features to consider when looking for the best split:
@@ -23,13 +20,7 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.ensemble.Rand
 
 
     */
-    public class OptionsFor_RandomForestClassifier_max_features extends OptionsPredicate {
+    public class OptionsFor_RandomForestClassifier_max_features extends OptionsFor_ExtraTreesClassifier_max_features {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{});
-
-        @Override
-        protected List<? extends Object> getValidValues() {
-            return validValues;
-        }
     }
     

@@ -22,28 +22,9 @@
 
     */
 
-    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
+    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.ensemble.ExtraTreesClassifier.OptionsFor_ExtraTreesClassifier_min_impurity_decrease;
 
-    public class OptionsFor_GradientBoostingClassifier_min_impurity_decrease extends NumericRangeOptionPredicate {
+    public class OptionsFor_GradientBoostingClassifier_min_impurity_decrease extends OptionsFor_ExtraTreesClassifier_min_impurity_decrease {
         
-        @Override
-        protected double getMin() {
-            return 1;
-        }
-
-        @Override
-        protected double getMax() {
-            return 1;
-        }
-
-        @Override
-        protected int getSteps() {
-            return -1;
-        }
-
-        @Override
-        protected boolean needsIntegers() {
-            return false;
-        }
     }
     

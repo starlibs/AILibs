@@ -14,7 +14,7 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.ensemble.Rand
     */
     public class OptionsFor_RandomForestClassifier_criterion extends OptionsPredicate {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{});
+        private static List<Object> validValues = Arrays.asList(new Object[]{"entropy"}); // gini is default
 
         @Override
         protected List<? extends Object> getValidValues() {
