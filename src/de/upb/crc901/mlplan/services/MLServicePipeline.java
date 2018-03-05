@@ -66,9 +66,6 @@ public class MLServicePipeline implements Classifier, Serializable {
 
       // set host of the attribute selection
       constructorEC.withHost(attrPipe.getHost());
-      // set client id
-      constructorEC.withClientID(0 + "");
-      constructorEC.withRequestID("0_0");
 
       if (attrPipe instanceof WekaAttributeSelectionPipe) {
         WekaAttributeSelectionPipe wekaASPipe = (WekaAttributeSelectionPipe) attrPipe;
@@ -164,8 +161,8 @@ public class MLServicePipeline implements Classifier, Serializable {
 
     int invocationNumber = 1;
     String dataInFieldName = "i1";
-    EasyClient trainEC = new EasyClient().withOTMS(this.otms).withTimeout(secondsRemaining).withInputs(this.servicesContainer).withPositionalArgument(data);
-    trainEC.withClientID(Thread.currentThread().getId() + "");
+    EasyClient trainEC = new EasyClient().withOTMS(this.otms).withInputs(this.servicesContainer).withPositionalArgument(data);
+//    trainEC.withClientID(Thread.currentThread().getId() + "");
     // create train composition
     for (String ppFieldname : this.PPFieldNames) {
       String dataOutFieldName = "data" + invocationNumber;
@@ -207,7 +204,7 @@ public class MLServicePipeline implements Classifier, Serializable {
     int invocationNumber = 1;
     String dataInFieldName = "i1";
 
-    EasyClient predictEC = new EasyClient().withOTMS(this.otms).withTimeout(secondsRemaining).withInputs(this.servicesContainer).withPositionalArgument(instances); // translates to
+    EasyClient predictEC = new EasyClient().withOTMS(this.otms).withInputs(this.servicesContainer).withPositionalArgument(instances); // translates to
                                                                                                                                                                     // i1
 
     // create train composition

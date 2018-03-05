@@ -73,7 +73,7 @@ public class SCC2018MLTest extends MultiClassClassificationExperimentRunner {
 				bs.setSolutionEvaluatorFactory4Selection(() -> new MonteCarloCrossValidationEvaluator(evaluator, 10, .7f));
 				bs.setRce(new BalancedRandomCompletionEvaluator(random, 3, new MonteCarloCrossValidationEvaluator(evaluator, 3, .7f)));
 //				bs.setTimeoutPerNodeFComputation(1000 * (timeoutInSeconds == 60 ? 15 : 300));
-				bs.setTimeoutPerNodeFComputation(1000);
+				bs.setTimeoutPerNodeFComputation(3000);
 				bs.setTooltipGenerator(new TFDTooltipGenerator<>());
 				bs.setPortionOfDataForPhase2(.3f);
 				
@@ -103,7 +103,7 @@ public class SCC2018MLTest extends MultiClassClassificationExperimentRunner {
 						
 			File folder = new File(args[0]);
 			SCC2018MLTest runner = new SCC2018MLTest(folder);
-			runner.runSpecific(24);
+			runner.runSpecific(1);
 		} finally {
 			server.shutdown();
 		}
