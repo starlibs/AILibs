@@ -1,6 +1,6 @@
 package jaicore.planning.graphgenerators.task.tfd;
 
-import java.util.Arrays;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -36,6 +36,14 @@ public class TFDTooltipGenerator<V extends Comparable<V>> implements TooltipGene
 			}
 			if (e instanceof RuntimeException) {
 				Throwable e2 = ((RuntimeException)e).getCause();
+				sb.append("Sub-Error Type " + e2.getClass().getName() + "\nMessage: " + e2.getMessage() +"\nStack Trace:\n");
+				for (StackTraceElement ste : e2.getStackTrace()) {
+					sb.append("  " + ste.toString() + "\n");
+				}
+
+			}
+			else if (e instanceof InvocationTargetException) {
+				Throwable e2 = ((InvocationTargetException)e).getCause();
 				sb.append("Sub-Error Type " + e2.getClass().getName() + "\nMessage: " + e2.getMessage() +"\nStack Trace:\n");
 				for (StackTraceElement ste : e2.getStackTrace()) {
 					sb.append("  " + ste.toString() + "\n");
