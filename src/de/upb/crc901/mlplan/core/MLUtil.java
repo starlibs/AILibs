@@ -24,6 +24,7 @@ import de.upb.crc901.configurationsetting.compositiondomain.CompositionDomain;
 import de.upb.crc901.configurationsetting.operation.SequentialComposition;
 import jaicore.basic.FileUtil;
 import jaicore.basic.SetUtil;
+import jaicore.basic.SetUtil.Pair;
 import jaicore.logic.fol.structure.CNFFormula;
 import jaicore.logic.fol.structure.ConstantParam;
 import jaicore.logic.fol.structure.Literal;
@@ -36,8 +37,8 @@ import jaicore.planning.graphgenerators.task.ceociptfd.OracleTaskResolver;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.model.ceoc.CEOCAction;
 import jaicore.planning.model.ceoc.CEOCOperation;
-import jaicore.planning.model.task.ceocipstn.CEOCIPSTNPlanningProblem;
 import jaicore.planning.model.task.ceocipstn.CEOCIPSTN2JSHOP2;
+import jaicore.planning.model.task.ceocipstn.CEOCIPSTNPlanningProblem;
 import weka.classifiers.Classifier;
 import weka.core.Instances;
 import weka.core.OptionHandler;
@@ -69,14 +70,25 @@ public class MLUtil {
 		return classifierOpt.get();
 	}
 	
-	public static String getJSHOP2File(File testsetFile) {
-		StringWriter sw = new StringWriter();
+	public static Pair<String,String> getJSHOP2File(File testsetFile) {
+		
+		/* get domain */
+		StringWriter domainWriter = new StringWriter();
+		CEOCIPSTNPlanningProblem planningProblem = getPlanningProblem(testsetFile, null);
 		try {
-			CEOCIPSTN2JSHOP2.printDomain(getPlanningProblem(testsetFile, null), sw, testsetFile.getName());
+			CEOCIPSTN2JSHOP2.printDomain(planningProblem, domainWriter, testsetFile.getName());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return sw.toString();
+		
+		/* get problem */
+		StringWriter problemWriter = new StringWriter();
+		try {
+			CEOCIPSTN2JSHOP2.printProblem(planningProblem, problemWriter, testsetFile.getName());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return new Pair<>(domainWriter.toString(), problemWriter.toString());
 	}
 	
 
