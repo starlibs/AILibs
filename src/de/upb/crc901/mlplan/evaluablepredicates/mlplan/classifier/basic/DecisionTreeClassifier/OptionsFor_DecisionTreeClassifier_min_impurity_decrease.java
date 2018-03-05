@@ -1,49 +1,53 @@
 
-    package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.DecisionTreeClassifier;
-    /*
-        min_impurity_decrease : float, optional (default=0.)
-        A node will be split if this split induces a decrease of the impurity
-        greater than or equal to this value.
+package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.DecisionTreeClassifier;
+/*
+    min_impurity_decrease : float, optional (default=0.)
+    A node will be split if this split induces a decrease of the impurity
+    greater than or equal to this value.
 
-        The weighted impurity decrease equation is the following::
+    The weighted impurity decrease equation is the following::
 
-            N_t / N * (impurity - N_t_R / N_t * right_impurity
-                                - N_t_L / N_t * left_impurity)
+        N_t / N * (impurity - N_t_R / N_t * right_impurity
+                            - N_t_L / N_t * left_impurity)
 
-        where ``N`` is the total number of samples, ``N_t`` is the number of
-        samples at the current node, ``N_t_L`` is the number of samples in the
-        left child, and ``N_t_R`` is the number of samples in the right child.
+    where ``N`` is the total number of samples, ``N_t`` is the number of
+    samples at the current node, ``N_t_L`` is the number of samples in the
+    left child, and ``N_t_R`` is the number of samples in the right child.
 
-        ``N``, ``N_t``, ``N_t_R`` and ``N_t_L`` all refer to the weighted sum,
-        if ``sample_weight`` is passed.
+    ``N``, ``N_t``, ``N_t_R`` and ``N_t_L`` all refer to the weighted sum,
+    if ``sample_weight`` is passed.
 
-        .. versionadded:: 0.19
+    .. versionadded:: 0.19
 
 
-    */
+*/
 
-    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
+import de.upb.crc901.mlplan.evaluablepredicates.mlplan.NumericRangeOptionPredicate;
 
-    public class OptionsFor_DecisionTreeClassifier_min_impurity_decrease extends NumericRangeOptionPredicate {
-        
-        @Override
-        protected double getMin() {
-            return 1;
-        }
+public class OptionsFor_DecisionTreeClassifier_min_impurity_decrease extends NumericRangeOptionPredicate {
 
-        @Override
-        protected double getMax() {
-            return 1;
-        }
+  @Override
+  protected double getMin() {
+    return 0.00001;
+  }
 
-        @Override
-        protected int getSteps() {
-            return -1;
-        }
+  @Override
+  protected double getMax() {
+    return 1;
+  }
 
-        @Override
-        protected boolean needsIntegers() {
-            return false;
-        }
-    }
-    
+  @Override
+  protected int getSteps() {
+    return 10;
+  }
+
+  @Override
+  protected boolean needsIntegers() {
+    return false;
+  }
+
+  @Override
+  protected boolean isLinear() {
+    return false;
+  }
+}

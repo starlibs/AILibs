@@ -1,4 +1,8 @@
-apply plugin: 'java'
+plugins {
+	id 'java'
+	id 'eclipse-wtp'
+	id 'org.sonarqube' version '2.6'
+}
 
 sourceSets {
     main {
@@ -10,13 +14,48 @@ sourceSets {
         	srcDir 'conf'
     	}
     }
-    test {
-    	java {
-    		srcDir 'test'
-    	}
-    }
+//    test {
+//   	java {
+//   		srcDir 'test'
+//   	}
+//    }
 }
 
+sonarqube {
+	properties {
+		property "sonar.projectName", "ML-Plan"
+		property "sonar.sources", "src"
+	}
+}
+
+project(":weka") {
+	sonarqube {
+		skipProject = true
+	}
+}
+project(":CrcConfigurationFramework") {
+	sonarqube {
+		skipProject = true
+	}
+}
+
+project(":CrcConfigurationSetting") {
+	sonarqube {
+		skipProject = true
+	}
+}
+
+project(":JASE") {
+	sonarqube {
+		skipProject = true
+	}
+}
+
+project(":JAICore") {
+	sonarqube {
+		skipProject = true
+	}
+}
 task sourcesJar(type: Jar, dependsOn: classes) {
     classifier = 'sources'
     from sourceSets.main.allSource
