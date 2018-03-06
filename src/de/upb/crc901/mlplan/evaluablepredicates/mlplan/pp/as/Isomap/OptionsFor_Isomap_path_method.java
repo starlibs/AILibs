@@ -5,20 +5,20 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.pp.as.Isomap;
 
     import de.upb.crc901.mlplan.evaluablepredicates.mlplan.OptionsPredicate;
     /*
-        path_method : string ['auto'|'FW'|'D']
+        path_method : string ["auto","FW","D"]
         Method to use in finding shortest path.
 
-        'auto' : attempt to choose the best algorithm automatically.
+        "auto" : attempt to choose the best algorithm automatically.
 
-        'FW' : Floyd-Warshall algorithm.
+        "FW" : Floyd-Warshall algorithm.
 
-        'D' : Dijkstra's algorithm.
+        "D" : Dijkstra"s algorithm.
 
 
     */
     public class OptionsFor_Isomap_path_method extends OptionsPredicate {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{});
+        private static List<Object> validValues = Arrays.asList(new Object[]{"auto","FW","D"});
 
         @Override
         protected List<? extends Object> getValidValues() {

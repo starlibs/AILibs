@@ -5,7 +5,7 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.pp.as.Isomap;
 
     import de.upb.crc901.mlplan.evaluablepredicates.mlplan.OptionsPredicate;
     /*
-        neighbors_algorithm : string ['auto'|'brute'|'kd_tree'|'ball_tree']
+        neighbors_algorithm : string ["auto","brute","kd_tree","ball_tree"]
         Algorithm to use for nearest neighbors search,
         passed to neighbors.NearestNeighbors instance.
 
@@ -13,7 +13,7 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.pp.as.Isomap;
     */
     public class OptionsFor_Isomap_neighbors_algorithm extends OptionsPredicate {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{});
+        private static List<Object> validValues = Arrays.asList(new Object[]{"auto","brute","kd_tree","ball_tree"});
 
         @Override
         protected List<? extends Object> getValidValues() {

@@ -5,14 +5,14 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.pp.as.GenericUnivariateS
 
     import de.upb.crc901.mlplan.evaluablepredicates.mlplan.OptionsPredicate;
     /*
-        mode : {'percentile', 'k_best', 'fpr', 'fdr', 'fwe'}
+        mode : {"percentile", "k_best", "fpr", "fdr", "fwe"}
         Feature selection mode.
 
 
     */
     public class OptionsFor_GenericUnivariateSelect_mode extends OptionsPredicate {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{});
+        private static List<Object> validValues = Arrays.asList(new Object[]{"percentile", "k_best", "fpr", "fdr", "fwe"});
 
         @Override
         protected List<? extends Object> getValidValues() {

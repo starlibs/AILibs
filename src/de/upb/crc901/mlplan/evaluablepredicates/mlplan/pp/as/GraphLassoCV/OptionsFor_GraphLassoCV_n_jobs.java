@@ -11,19 +11,20 @@
 
     public class OptionsFor_GraphLassoCV_n_jobs extends NumericRangeOptionPredicate {
         
+    	 
         @Override
         protected double getMin() {
-            return 1;
+            return 2;
         }
 
         @Override
         protected double getMax() {
-            return 1;
+            return 4;
         }
 
         @Override
         protected int getSteps() {
-            return -1;
+            return 1;
         }
 
         @Override

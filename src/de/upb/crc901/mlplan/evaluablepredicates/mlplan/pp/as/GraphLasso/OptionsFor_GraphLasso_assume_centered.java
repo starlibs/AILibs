@@ -16,7 +16,7 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.pp.as.GraphLasso;
     */
     public class OptionsFor_GraphLasso_assume_centered extends OptionsPredicate {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{"true", "false"});
+        private static List<Object> validValues = Arrays.asList(new Object[]{"true"});
 
         @Override
         protected List<? extends Object> getValidValues() {

@@ -14,7 +14,7 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.pp.as.GraphLasso;
     */
     public class OptionsFor_GraphLasso_mode extends OptionsPredicate {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{});
+        private static List<Object> validValues = Arrays.asList(new Object[]{"lars"});
 
         @Override
         protected List<? extends Object> getValidValues() {

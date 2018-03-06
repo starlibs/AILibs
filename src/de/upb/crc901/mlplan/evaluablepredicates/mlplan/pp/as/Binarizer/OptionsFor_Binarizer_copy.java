@@ -24,7 +24,7 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.pp.as.Binarizer;
     */
     public class OptionsFor_Binarizer_copy extends OptionsPredicate {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{"true", "false"});
+        private static List<Object> validValues = Arrays.asList(new Object[]{});
 
         @Override
         protected List<? extends Object> getValidValues() {

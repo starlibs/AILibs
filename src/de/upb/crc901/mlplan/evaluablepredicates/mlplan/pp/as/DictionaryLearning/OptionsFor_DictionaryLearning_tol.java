@@ -13,17 +13,17 @@
         
         @Override
         protected double getMin() {
-            return 1;
+            return 0.01;
         }
 
         @Override
         protected double getMax() {
-            return 1;
+            return 0.5;
         }
 
         @Override
         protected int getSteps() {
-            return -1;
+            return 2;
         }
 
         @Override

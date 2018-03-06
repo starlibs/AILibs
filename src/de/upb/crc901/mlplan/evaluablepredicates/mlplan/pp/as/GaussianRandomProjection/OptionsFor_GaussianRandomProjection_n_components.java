@@ -21,7 +21,7 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.pp.as.GaussianRandomProj
     */
     public class OptionsFor_GaussianRandomProjection_n_components extends OptionsPredicate {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{});
+        private static List<Object> validValues = Arrays.asList(new Object[]{"2", "4", "10"});
 
         @Override
         protected List<? extends Object> getValidValues() {

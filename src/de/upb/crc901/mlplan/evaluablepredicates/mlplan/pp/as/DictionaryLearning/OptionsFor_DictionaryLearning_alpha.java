@@ -28,7 +28,7 @@
 
         @Override
         protected boolean needsIntegers() {
-            return true;
+            return false;
         }
     }
     

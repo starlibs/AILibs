@@ -19,7 +19,7 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.pp.as.DictionaryLearning
     */
     public class OptionsFor_DictionaryLearning_fit_algorithm extends OptionsPredicate {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{});
+        private static List<Object> validValues = Arrays.asList(new Object[]{"lars", "cd"});
 
         @Override
         protected List<? extends Object> getValidValues() {

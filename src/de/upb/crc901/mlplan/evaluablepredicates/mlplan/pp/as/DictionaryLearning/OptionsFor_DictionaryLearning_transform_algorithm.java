@@ -5,7 +5,7 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.pp.as.DictionaryLearning
 
     import de.upb.crc901.mlplan.evaluablepredicates.mlplan.OptionsPredicate;
     /*
-        transform_algorithm : {'lasso_lars', 'lasso_cd', 'lars', 'omp',     'threshold'}
+        transform_algorithm : {"lasso_lars", "lasso_cd", "lars", "omp",     "threshold"}
         Algorithm used to transform the data
         lars: uses the least angle regression method (linear_model.lars_path)
         lasso_lars: uses Lars to compute the Lasso solution
@@ -14,7 +14,7 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.pp.as.DictionaryLearning
         the estimated components are sparse.
         omp: uses orthogonal matching pursuit to estimate the sparse solution
         threshold: squashes to zero all coefficients less than alpha from
-        the projection ``dictionary * X'``
+        the projection ``dictionary * X"``
 
         .. versionadded:: 0.17
            *lasso_cd* coordinate descent method to improve speed.
@@ -23,7 +23,7 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.pp.as.DictionaryLearning
     */
     public class OptionsFor_DictionaryLearning_transform_algorithm extends OptionsPredicate {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{});
+        private static List<Object> validValues = Arrays.asList(new Object[]{"lasso_lars", "lasso_cd", "lars", "omp",     "threshold"});
 
         @Override
         protected List<? extends Object> getValidValues() {
