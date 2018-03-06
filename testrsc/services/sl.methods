@@ -1,8 +1,8 @@
-scikitLearnClassification;	chooseClassifier(c); c; ; ; de.upb.crc901.mlplan.services.MLPipelinePlan:onHost(c,'localhost', '5000') -> slCreateClassifier(c)
+scikitLearnClassification;	chooseClassifier(c); c; ; ; slCreateClassifier(c)
 
 
 # Resolve classifier grammar
-#slBaseClassifier; 		slCreateClassifier(c); c; ; ; slCreate_classifier_basic(c)
+slBaseClassifier; 		slCreateClassifier(c); c; ; ; slCreate_classifier_basic(c)
 
 INCLUDE testrsc/services/gen/sl_basic_cl.methods
 
@@ -10,6 +10,6 @@ slMetaClassifier; 		slCreateClassifier(c); c; ; ; slCreate_classifier_meta(c)
 
 INCLUDE testrsc/services/gen/sl_meta_cl.methods
 
-#slEnsembleClassifier; 		slCreateClassifier(c); c; ; ; slCreate_classifier_ensemble(c)
+slEnsembleClassifier; 		slCreateClassifier(c); c; ; ; slCreate_classifier_ensemble(c)
 
 INCLUDE testrsc/services/gen/sl_ensemble_cl.methods

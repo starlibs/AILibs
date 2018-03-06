@@ -16,6 +16,8 @@ import de.upb.crc901.mlplan.core.MySQLMLPlanExperimentLogger;
 import de.upb.crc901.mlplan.search.evaluators.BalancedRandomCompletionEvaluator;
 import de.upb.crc901.mlplan.search.evaluators.MonteCarloCrossValidationEvaluator;
 import de.upb.crc901.mlplan.search.evaluators.MulticlassEvaluator;
+import de.upb.crc901.mlplan.services.MLPipelinePlan;
+import de.upb.crc901.mlplan.services.MLPipelinePlan.MLPipe;
 import de.upb.crc901.services.core.HttpServiceServer;
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.ml.experiments.MultiClassClassificationExperimentRunner;
@@ -57,9 +59,11 @@ public class SCC2018MLTest extends MultiClassClassificationExperimentRunner {
 		return algoModes;
 	}
 	
-	public SCC2018MLTest(File datasetFolder) throws IOException {
-		super(datasetFolder, getClassifierNames(), getSetupNames(), timeouts, seeds, trainingPortion, numCPUs, memoryInMB, PMMulticlass.errorRate, new MySQLMLPlanExperimentLogger("isys-db.cs.upb.de", "mlplan", "UMJXI4WlNqbS968X", "mlplan_results_test"));
+	public SCC2018MLTest(File datasetFolder, String hostPase, String hostJase) throws IOException {
+		super(datasetFolder, getClassifierNames(), getSetupNames(), timeouts, seeds, trainingPortion, numCPUs, memoryInMB, PMMulticlass.errorRate, new MySQLMLPlanExperimentLogger(conf.getDBHost(), conf.getDBUsername(), conf.getDBPassword(), conf.getDBDatabaseName()));
 		this.logger = (MySQLMLPlanExperimentLogger)getLogger();
+		MLPipelinePlan.hostPASE = hostPase;
+		MLPipelinePlan.hostJASE = hostJase;
 	}
 
 	@Override
@@ -97,7 +101,7 @@ public class SCC2018MLTest extends MultiClassClassificationExperimentRunner {
 				bs.setRce(new BalancedRandomCompletionEvaluator(random, numberOfSamples, new MonteCarloCrossValidationEvaluator(baseEvaluator, mccvRepeats, mccvPortion)));
 //				bs.setTimeoutPerNodeFComputation(1000 * (timeoutInSeconds == 60 ? 15 : 300));
 				bs.setTimeoutPerNodeFComputation(1000 * conf.getTimeoutPerCandidate());
-//				bs.setTooltipGenerator(new TFDTooltipGenerator<>());
+				bs.setTooltipGenerator(new TFDTooltipGenerator<>());
 				bs.setPortionOfDataForPhase2(conf.getPortionOfDataForPhase2());
 				
 				bs.setExperimentLogger(logger);
@@ -121,14 +125,20 @@ public class SCC2018MLTest extends MultiClassClassificationExperimentRunner {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		HttpServiceServer server = HttpServiceServer.TEST_SERVER();
+		File folder = new File(args[0]);
+		String hostPase = args[1];
+		String hostJase = args[2];
+		
+		/* start JASE server */
+		HttpServiceServer server = null;
+		if (hostJase.split(":")[0].equals("localhost"))
+			server = new HttpServiceServer(Integer.parseInt(hostJase.split(":")[1]), "testrsc/conf/classifiers.json", "testrsc/conf/preprocessors.json", "testrsc/conf/others.json");
 		try {
-			
-			File folder = new File(args[0]);
-			SCC2018MLTest runner = new SCC2018MLTest(folder);
+			SCC2018MLTest runner = new SCC2018MLTest(folder, hostPase, hostJase);
 			runner.runAny();
 		} finally {
-			server.shutdown();
+			if (server != null)
+				server.shutdown();
 		}
 	}
 }

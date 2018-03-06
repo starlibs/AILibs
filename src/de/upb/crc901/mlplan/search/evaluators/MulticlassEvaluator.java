@@ -31,6 +31,7 @@ public class MulticlassEvaluator implements BasicMLEvaluator, Serializable {
 
 	public double getErrorRateForRandomSplit(Classifier c, Instances data, double splitSize) throws Exception {
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, rand, splitSize);
+		System.out.println(split.get(0).get(0));
 		Instances train = split.get(0);
 		Instances test = split.get(1);
 		return getErrorRateForSplit(c, train, test);

@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Random;
 
 import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.upb.crc901.mlplan.services.MLPipelinePlan.MLPipe;
 import de.upb.crc901.mlplan.services.MLPipelinePlan.WekaAttributeSelectionPipe;
@@ -32,6 +34,8 @@ public class MLServicePipeline implements Classifier, Serializable {
 	private int timeForTrainingPipeline;
 	private DescriptiveStatistics timesForPrediction;
 	private final MLPipelinePlan constructionPlan;
+	
+	private static final Logger logger = LoggerFactory.getLogger(MLServicePipeline.class);
 
 	private final EnvironmentState servicesContainer = new EnvironmentState();
 
@@ -117,7 +121,7 @@ public class MLServicePipeline implements Classifier, Serializable {
 			ServiceCompositionResult result = constructorEC.dispatch();
 			this.servicesContainer.extendBy(result); // add the services to out state
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error("Error in the creation of the services involved in a MLServicePipeline. Exception: {}. Message: {}", e.getClass().getName(), e.getMessage());
 		}
 
 		// Service creation done!

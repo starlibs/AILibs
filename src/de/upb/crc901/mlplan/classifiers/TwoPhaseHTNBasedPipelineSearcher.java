@@ -123,6 +123,7 @@ public class TwoPhaseHTNBasedPipelineSearcher<V extends Comparable<V>> extends G
 		if (getNumberOfCPUs() < 1)
 			throw new IllegalStateException("Cannot generate search where number of CPUs is " + getNumberOfCPUs());
 		ORGraphSearch<TFDNode, String, V> search = createActualSearchObject(graphGenerator, rce, getNumberOfCPUs());
+		search.setLoggerName("mlplan");
 		search.setTimeoutForComputationOfF(timeoutPerNodeFComputation, n -> null);
 		
 		/* reset graph tooltip */
@@ -334,7 +335,7 @@ public class TwoPhaseHTNBasedPipelineSearcher<V extends Comparable<V>> extends G
 		dataForSelection.addAll(this.dataPreservedForSelection);
 		int remainingTime = (int) (getTimeout() - (System.currentTimeMillis() - getTimeOfStart()));
 		if (remainingTime < 0) {
-			logger.info("Timelimit is already exhausted, just returning a greedy solution.");
+			logger.info("Timelimit is already exhausted, just returning a greedy solution that had internal error {}.", solutionAnnotationCache.get(solutions.peek()).getF());
 			return solutions.peek();
 		}
 		Collection<Classifier> ensembleToSelectFrom = getSelectionForPhase2(remainingTime);

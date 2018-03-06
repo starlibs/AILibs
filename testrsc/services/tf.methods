@@ -1,4 +1,4 @@
-tensorflowClassification;	chooseClassifier(c); c; ; ; de.upb.crc901.mlplan.services.MLPipelinePlan:onHost(c,'localhost', '5000') -> tfCreateClassifier(c)
+tensorflowClassification;	chooseClassifier(c); c; ; ; tfCreateClassifier(c)
 
 
 # Resolve classifier grammar

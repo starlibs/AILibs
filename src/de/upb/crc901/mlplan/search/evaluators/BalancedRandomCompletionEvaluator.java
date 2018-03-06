@@ -16,7 +16,6 @@ import de.upb.crc901.mlplan.core.MLPipeline;
 import de.upb.crc901.mlplan.core.MLUtil;
 import de.upb.crc901.mlplan.core.SolutionEvaluator;
 import de.upb.crc901.mlplan.core.SupervisedFilterSelector;
-import jaicore.logic.fol.structure.Literal;
 import jaicore.ml.WekaUtil;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.model.ceoc.CEOCAction;
@@ -28,8 +27,8 @@ import weka.classifiers.Classifier;
 public class BalancedRandomCompletionEvaluator extends RandomCompletionEvaluator<Double> {
 
 	private final static Logger logger = LoggerFactory.getLogger(BalancedRandomCompletionEvaluator.class);
-	private static final List<String> classifierRanking = Arrays.asList(new String[] { "RandomTree", "J48", "IBk", "NaiveBayesMultinomial", "NaiveBayes", "RandomForest",
-			"SimpleLogistic", "MultiLayerPerceptron", "VotedPerceptron", "SMO", "Logistic" });
+	private static final List<String> classifierRanking = Arrays.asList(new String[] { "RandomForest", "J48", "neighbor", "tf_nn", "NaiveBayesMultinomial", "MultinomialNB", "NaiveBayes", "BernoulliNB",
+			"SimpleLogistic", "LinearSVC", "VotedPerceptron", "SMO", "LogisticRegression" });
 
 //	private final Map<String, Integer> regionCounter = new HashMap<>();
 
@@ -56,6 +55,7 @@ public class BalancedRandomCompletionEvaluator extends RandomCompletionEvaluator
 		/* if we have just decided about the classifier, assign a ranking */
 		if (n.getPoint().getAppliedMethodInstance() != null && n.getPoint().getAppliedMethodInstance() == methodInPlanThatChoosesClassifier.get()) {
 			Optional<String> matchingClassifier = classifierRanking.stream().filter(c -> methodInPlanThatChoosesClassifier.get().getMethod().getName().toLowerCase().contains(c.toLowerCase())).findFirst();
+			
 			if (!matchingClassifier.isPresent())
 				return classifierRanking.size() * 2.0;
 
@@ -192,22 +192,22 @@ public class BalancedRandomCompletionEvaluator extends RandomCompletionEvaluator
 	private Optional<MethodInstance> getClassifierDefiningMethodInstance(Node<TFDNode, ?> n) {
 		return n.externalPath().stream().filter(n2 -> n2.getAppliedMethodInstance() != null).map(n2 -> n2.getAppliedMethodInstance())
 				.filter(m -> {
-					String methodName = m.getMethod().getTask().getPropertyName().toLowerCase();
-					return methodName.contains("create") && methodName.contains("classifier");
+					String taskName = m.getMethod().getTask().getPropertyName();
+					return taskName.matches("(wekaCreate(Base|Meta|Ensemble)Classifier)|(slCreate_classifier_(basic|meta|ensemble))|(tfCreate_classifier_nn)");
 				}).findFirst();
 	}
 
-	private String getIntendedPreprocessor(Node<TFDNode, ?> n) {
-		Pattern p = Pattern.compile("(weka\\.attributeSelection\\.[a-zA-Z0-9\\.]*):__construct");
-		String combo = "";
-		for (Literal l : n.getPoint().getRemainingTasks()) {
-			Matcher m = p.matcher(l.getPropertyName());
-			if (m.find()) {
-				if (combo.length() > 0)
-					combo += "&";
-				combo += m.group(1);
-			}
-		}
-		return combo.length() > 0 ? combo : null;
-	}
+//	private String getIntendedPreprocessor(Node<TFDNode, ?> n) {
+//		Pattern p = Pattern.compile("(weka\\.attributeSelection\\.[a-zA-Z0-9\\.]*):__construct");
+//		String combo = "";
+//		for (Literal l : n.getPoint().getRemainingTasks()) {
+//			Matcher m = p.matcher(l.getPropertyName());
+//			if (m.find()) {
+//				if (combo.length() > 0)
+//					combo += "&";
+//				combo += m.group(1);
+//			}
+//		}
+//		return combo.length() > 0 ? combo : null;
+//	}
 }

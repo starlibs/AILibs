@@ -5,8 +5,8 @@ wekaClassification;	chooseClassifier(config); config; ; ; wekaCreateClassifier(c
 
 # Weka General Method (single vs. meta vs. ensemble)
 wekaBaseClassifier; 		wekaCreateClassifier(config); config,classifier,p; ; ; wekaCreateBaseClassifier(classifier) -> de.upb.crc901.mlplan.services.MLPipelinePlan:setClassifier(config, classifier, p)
-#wekaMetaClassifier; 		wekaCreateClassifier(config); config,classifier,p; ; ; wekaCreateMetaClassifier(classifier) -> de.upb.crc901.mlplan.services.MLPipelinePlan:setClassifier(config, classifier, p)
-#wekaEnsembleClassifier;		wekaCreateClassifier(config); config,classifier,p; ; ; wekaCreateEnsembleClassifier(classifier) -> de.upb.crc901.mlplan.services.MLPipelinePlan:setClassifier(config, classifier, p)
+wekaMetaClassifier; 		wekaCreateClassifier(config); config,classifier,p; ; ; wekaCreateMetaClassifier(classifier) -> de.upb.crc901.mlplan.services.MLPipelinePlan:setClassifier(config, classifier, p)
+wekaEnsembleClassifier;		wekaCreateClassifier(config); config,classifier,p; ; ; wekaCreateEnsembleClassifier(classifier) -> de.upb.crc901.mlplan.services.MLPipelinePlan:setClassifier(config, classifier, p)
 
 
 ### BASE CLASSIFIERS ###
@@ -88,8 +88,8 @@ wekaLinearROptsAttrSel			; getWekaLinearRConfig2(o);	o,type; LinearRAttrSel(type
 # Logistic Regression
 #wekaLR;	wekaCreateRawBaseClassifier(cn,c); cn,c; ;	weka.classifiers.functions.Logistic:__construct(c) -> assignTo('weka.classifiers.functions.Logistic',cn)
 #wekaLR;	wekaCreateGivenBaseClassifier(cn,c); cn,c,oList,oArray; assigned('weka.classifiers.functions.Logistic',cn) ;	weka.classifiers.functions.Logistic:__construct(c) -> getOptionList(oList) -> getWekaLogisticRConfig0(oList) -> compileOptionListToArray(oList,oArray) -> weka.classifiers.functions.Logistic:setOptions(c,oArray)
-wekaLR;	wekaCreateBaseClassifier(c); c,oList,oArray; ;	; weka.classifiers.functions.Logistic:__construct(c) -> getOptionList(oList) -> getWekaLogisticRConfig0(oList) -> compileOptionListToArray(oList,oArray) -> weka.classifiers.functions.Logistic:setOptions(c,oArray)
-wekaLR;	wekaParametrizeBaseClassifier(cn,oList); cn,oList; ;;  assignTo('weka.classifiers.functions.Logistic',cn) -> getWekaLogisticRConfig0(oList)
+#wekaLR;	wekaCreateBaseClassifier(c); c,oList,oArray; ;	; weka.classifiers.functions.Logistic:__construct(c) -> getOptionList(oList) -> getWekaLogisticRConfig0(oList) -> compileOptionListToArray(oList,oArray) -> weka.classifiers.functions.Logistic:setOptions(c,oArray)
+#wekaLR;	wekaParametrizeBaseClassifier(cn,oList); cn,oList; ;;  assignTo('weka.classifiers.functions.Logistic',cn) -> getWekaLogisticRConfig0(oList)
 wekaLR;	wekaSelectBaseClassifier(cn); cn; ; ; assignTo('weka.classifiers.functions.Logistic',cn)
 wekaLR;	wekaParametrizeGivenBaseClassifier(cn,oList); cn,oList; assigned('weka.classifiers.functions.Logistic',cn) ; ; getWekaLogisticRConfig0(oList)
 # -R <float> mandatory
@@ -98,8 +98,8 @@ wekaLogisticROptsRidge			; getWekaLogisticRConfig0(o);	o,float; LogisticRRidge(f
 # Neural Networks
 #wekaNN;	wekaCreateRawBaseClassifier(cn,c); cn,c; ;	weka.classifiers.functions.MultilayerPerceptron:__construct(c) -> assignTo('weka.classifiers.functions.MultilayerPerceptron',cn)
 #wekaNN;	wekaCreateGivenBaseClassifier(cn,c); cn,c,oList,oArray; assigned('weka.classifiers.functions.MultilayerPerceptron',cn) ;	weka.classifiers.functions.MultilayerPerceptron:__construct(c) -> getOptionList(oList) -> getWekaNNConfig0(oList) -> compileOptionListToArray(oList,oArray) -> weka.classifiers.functions.MultilayerPerceptron:setOptions(c,oArray)
-wekaNN;	wekaCreateBaseClassifier(c); c,oList,oArray; ;	; weka.classifiers.functions.MultilayerPerceptron:__construct(c) -> getOptionList(oList) -> getWekaNNConfig0(oList) -> compileOptionListToArray(oList,oArray) -> weka.classifiers.functions.MultilayerPerceptron:setOptions(c,oArray)
-wekaNN;	wekaParametrizeBaseClassifier(cn,oList); cn,oList; ; ; assignTo('weka.classifiers.functions.MultilayerPerceptron',cn) -> getWekaNNConfig0(oList)
+#wekaNN;	wekaCreateBaseClassifier(c); c,oList,oArray; ;	; weka.classifiers.functions.MultilayerPerceptron:__construct(c) -> getOptionList(oList) -> getWekaNNConfig0(oList) -> compileOptionListToArray(oList,oArray) -> weka.classifiers.functions.MultilayerPerceptron:setOptions(c,oArray)
+#wekaNN;	wekaParametrizeBaseClassifier(cn,oList); cn,oList; ; ; assignTo('weka.classifiers.functions.MultilayerPerceptron',cn) -> getWekaNNConfig0(oList)
 wekaNN;	wekaSelectBaseClassifier(cn); cn; ;;  assignTo('weka.classifiers.functions.MultilayerPerceptron',cn)
 wekaNN;	wekaParametrizeGivenBaseClassifier(cn,oList); cn,oList; assigned('weka.classifiers.functions.MultilayerPerceptron',cn) ;;  getWekaNNConfig0(oList)
 # -B, -C, -D, -R optional
@@ -268,8 +268,8 @@ wekaKStarOptsMissingMode		; getWekaKStarConfig2(o);	o,type; KStarMissingMode(typ
 # Decision Tables
 #wekaDecTable;	wekaCreateRawBaseClassifier(cn,c); cn,c; ; weka.classifiers.rules.DecisionTable:__construct(c) -> assignTo('weka.classifiers.rules.DecisionTable',cn)
 #wekaDecTable;	wekaCreateGivenBaseClassifier(cn,c); cn,c,oList,oArray; assigned('weka.classifiers.rules.DecisionTable',cn) ; weka.classifiers.rules.DecisionTable:__construct(c) -> getOptionList(oList) -> getWekaDecTableConfig0(oList) -> compileOptionListToArray(oList,oArray) -> weka.classifiers.rules.DecisionTable:setOptions(c,oArray)
-wekaDecTable;	wekaCreateBaseClassifier(c); c,oList,oArray; ; ; weka.classifiers.rules.DecisionTable:__construct(c) -> getOptionList(oList) -> getWekaDecTableConfig0(oList) -> compileOptionListToArray(oList,oArray) -> weka.classifiers.rules.DecisionTable:setOptions(c,oArray)
-wekaDecTable;	wekaParametrizeBaseClassifier(cn,oList); cn,oList; ; ; assignTo('weka.classifiers.rules.DecisionTable',cn) -> getWekaDecTableConfig0(oList)
+#wekaDecTable;	wekaCreateBaseClassifier(c); c,oList,oArray; ; ; weka.classifiers.rules.DecisionTable:__construct(c) -> getOptionList(oList) -> getWekaDecTableConfig0(oList) -> compileOptionListToArray(oList,oArray) -> weka.classifiers.rules.DecisionTable:setOptions(c,oArray)
+#wekaDecTable;	wekaParametrizeBaseClassifier(cn,oList); cn,oList; ; ; assignTo('weka.classifiers.rules.DecisionTable',cn) -> getWekaDecTableConfig0(oList)
 wekaDecTable;	wekaSelectBaseClassifier(cn); cn; ; ; assignTo('weka.classifiers.rules.DecisionTable',cn)
 wekaDecTable;	wekaParametrizeGivenBaseClassifier(cn,oList); cn,oList; assigned('weka.classifiers.rules.DecisionTable',cn) ; ; getWekaDecTableConfig0(oList)
 # -I optional

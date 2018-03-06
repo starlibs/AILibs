@@ -8,6 +8,8 @@ import org.aeonbits.owner.Config.Sources;
 public interface IPipelineEvaluationConf extends Config {
 	
 	  public static final String PREFIX = "pleval.";
+	  public static final String DBPREFIX = "database.";
+	  
 	  public static final String PREFIX_SELECTION = PREFIX + "selection.";
 	  public static final String PREFIX_MEM = PREFIX + "mem.";
 	  public static final String TIMEOUT_TOTAL = PREFIX + "timeout.total";
@@ -23,8 +25,14 @@ public interface IPipelineEvaluationConf extends Config {
 	  public static final String SELECTION_ITERATIONS = PREFIX_SELECTION + "iterations";
 	  public static final String SELECTION_CANDIDATES = PREFIX_SELECTION + "numberofcandidates";
 	  public static final String SOLUTIONLOGDIR = PREFIX + "logdir";
-	  
 	  public static final String VALIDATION = PREFIX + "validation";
+	  
+	  /* database settings */
+	  public static final String DB_HOST = DBPREFIX + "host";
+	  public static final String DB_USER = DBPREFIX + "username";
+	  public static final String DB_PASS = DBPREFIX + "password";
+	  public static final String DB_NAME = DBPREFIX + "dbname";
+	  
 
 	  // GET
 	  @Key(TIMEOUT_TOTAL)
@@ -70,4 +78,16 @@ public interface IPipelineEvaluationConf extends Config {
 	  
 	  @Key(SELECTION_CANDIDATES)
 	  public int getNumberOfCandidatesInSelectionPhase();
+	  
+	  @Key(DB_HOST)
+	  public String getDBHost();
+	  
+	  @Key(DB_USER)
+	  public String getDBUsername();
+	  
+	  @Key(DB_PASS)
+	  public String getDBPassword();
+	  
+	  @Key(DB_NAME)
+	  public String getDBDatabaseName();
 }

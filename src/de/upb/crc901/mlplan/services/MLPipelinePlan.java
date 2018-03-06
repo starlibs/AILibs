@@ -23,6 +23,12 @@ import weka.core.OptionHandler;
  *
  */
 public class MLPipelinePlan implements Serializable {
+	
+	
+	/** TODO UGLY HACK! */
+	public static String hostJASE;
+	public static String hostPASE;
+	
 	// list of preprocessors
 	private List<MLPipe> atrPipes = new LinkedList<>();
 	
@@ -42,6 +48,10 @@ public class MLPipelinePlan implements Serializable {
 	}
 	
 	public MLPipe addAttributeSelection(String classname) {
+
+		/* we assume, by default, that this method is only called for python instances */
+		this.onHost(hostPASE);
+		
 		Objects.requireNonNull(this.nextHost, "Host needs to be specified before adding pipes to the pipeline.");
 		MLPipe asPipe =  new MLPipe(this.nextHost, Objects.requireNonNull(classname));
 		atrPipes.add(asPipe); // add to pipe list before returning.
@@ -56,8 +66,7 @@ public class MLPipelinePlan implements Serializable {
 	public WekaAttributeSelectionPipe addWekaAttributeSelection(ASSearch searcher, ASEvaluation eval) {
 		Objects.requireNonNull(searcher);
 		Objects.requireNonNull(eval);
-		String hardcodedHost = "localhost:8000";
-		WekaAttributeSelectionPipe asPipe =  new WekaAttributeSelectionPipe(hardcodedHost);
+		WekaAttributeSelectionPipe asPipe =  new WekaAttributeSelectionPipe(hostJASE);
 		asPipe.withSearcher(searcher.getClass().getName());
 		if(searcher instanceof OptionHandler) {
 			String searchOptions[] = ((OptionHandler) searcher).getOptions();
@@ -74,6 +83,10 @@ public class MLPipelinePlan implements Serializable {
 	
 	
 	public MLPipe setClassifier(String classifierName) {
+		
+		/* we assume, by default, that this method is only called for python instances */
+		this.onHost(hostPASE);
+				
 		Objects.requireNonNull(this.nextHost, "Host needs to be specified before adding pipes to the pipeline.");
 		this.cPipe = new MLPipe(this.nextHost, classifierName); // set cPipe field.
 		return cPipe;
@@ -82,8 +95,7 @@ public class MLPipelinePlan implements Serializable {
 	public MLPipe setClassifier(Classifier wekaClassifier) {
 		Objects.requireNonNull(wekaClassifier);
 		String classname = wekaClassifier.getClass().getName();
-		String host = "localhost:8000";
-		this.cPipe = new MLPipe(host, classname);
+		this.cPipe = new MLPipe(hostJASE, classname);
 		if(wekaClassifier instanceof OptionHandler) {
 			String[] options = ((OptionHandler) wekaClassifier).getOptions();
 			cPipe.addOptions(options);

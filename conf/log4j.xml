@@ -64,8 +64,9 @@
 		<appender-ref ref="traceFileAppender" />
 	</logger>
 	
-	<logger name="jaicore.search">
-		<level value="warn" />
+	<logger name="mlplan">
+		<level value="info" />
+		<appender-ref ref="console" />
 	</logger>
 	
 	<logger name="de.upb.crc901.mlplan.classifiers">

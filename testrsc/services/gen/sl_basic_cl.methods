@@ -39,7 +39,7 @@ sl-BayesianGaussianMixture-set-weight_concentration_prior_type;		sl-BayesianGaus
 #   BernoulliNB   #
 #-----------------#
 
-sl_BernoulliNB;			slCreate_classifier_basic(c); c,p; ; ; de.upb.crc901.mlplan.services.MLPipelinePlan:setClassifier(c,'sklearn.naive_bayes.BernoulliNB',p)	->	sl-BernoulliNB-set-alpha(c,p)	->	sl-BernoulliNB-set-binarize(c,p)	->	sl-BernoulliNB-set-fit_prior(c,p)
+#sl_BernoulliNB;			slCreate_classifier_basic(c); c,p; ; ; de.upb.crc901.mlplan.services.MLPipelinePlan:setClassifier(c,'sklearn.naive_bayes.BernoulliNB',p)	->	sl-BernoulliNB-set-alpha(c,p)	->	sl-BernoulliNB-set-binarize(c,p)	->	sl-BernoulliNB-set-fit_prior(c,p)
 
 
 #----------------------------------------------#
@@ -152,7 +152,7 @@ sl-KNeighborsClassifier-set-weights;		sl-KNeighborsClassifier-set-weights(c,p); 
 #   LSHForest   #
 #---------------#
 
-sl_LSHForest;			slCreate_classifier_basic(c); c,p; ; ; de.upb.crc901.mlplan.services.MLPipelinePlan:setClassifier(c,'sklearn.neighbors.LSHForest',p)	->	sl-LSHForest-set-min_hash_match(c,p)	->	sl-LSHForest-set-n_candidates(c,p)	->	sl-LSHForest-set-n_estimators(c,p)	->	sl-LSHForest-set-n_neighbors(c,p)	->	sl-LSHForest-set-radius(c,p)	->	sl-LSHForest-set-radius_cutoff_ratio(c,p)
+#sl_LSHForest;			slCreate_classifier_basic(c); c,p; ; ; de.upb.crc901.mlplan.services.MLPipelinePlan:setClassifier(c,'sklearn.neighbors.LSHForest',p)	->	sl-LSHForest-set-min_hash_match(c,p)	->	sl-LSHForest-set-n_candidates(c,p)	->	sl-LSHForest-set-n_estimators(c,p)	->	sl-LSHForest-set-n_neighbors(c,p)	->	sl-LSHForest-set-radius(c,p)	->	sl-LSHForest-set-radius_cutoff_ratio(c,p)
 
 
 #--------------------------------------------#
@@ -303,7 +303,7 @@ sl-LogisticRegressionCV-set-verbose;		sl-LogisticRegressionCV-set-verbose(c,p); 
 #   MultinomialNB   #
 #-------------------#
 
-sl_MultinomialNB;			slCreate_classifier_basic(c); c,p; ; ; de.upb.crc901.mlplan.services.MLPipelinePlan:setClassifier(c,'sklearn.naive_bayes.MultinomialNB',p)	->	sl-MultinomialNB-set-alpha(c,p)	->	sl-MultinomialNB-set-fit_prior(c,p)
+#sl_MultinomialNB;			slCreate_classifier_basic(c); c,p; ; ; de.upb.crc901.mlplan.services.MLPipelinePlan:setClassifier(c,'sklearn.naive_bayes.MultinomialNB',p)	->	sl-MultinomialNB-set-alpha(c,p)	->	sl-MultinomialNB-set-fit_prior(c,p)
 
 
 #------------------------------------------------#
@@ -320,7 +320,7 @@ sl-MultinomialNB-set-fit_prior;		sl-MultinomialNB-set-fit_prior(c,p); c,p,t; ; O
 #   NearestNeighbors   #
 #----------------------#
 
-sl_NearestNeighbors;			slCreate_classifier_basic(c); c,p; ; ; de.upb.crc901.mlplan.services.MLPipelinePlan:setClassifier(c,'sklearn.neighbors.NearestNeighbors',p)	->	sl-NearestNeighbors-set-algorithm(c,p)	->	sl-NearestNeighbors-set-leaf_size(c,p)	->	sl-NearestNeighbors-set-metric(c,p)	->	sl-NearestNeighbors-set-n_jobs(c,p)	->	sl-NearestNeighbors-set-n_neighbors(c,p)	->	sl-NearestNeighbors-set-p(c,p)	->	sl-NearestNeighbors-set-radius(c,p)
+#sl_NearestNeighbors;			slCreate_classifier_basic(c); c,p; ; ; de.upb.crc901.mlplan.services.MLPipelinePlan:setClassifier(c,'sklearn.neighbors.NearestNeighbors',p)	->	sl-NearestNeighbors-set-algorithm(c,p)	->	sl-NearestNeighbors-set-leaf_size(c,p)	->	sl-NearestNeighbors-set-metric(c,p)	->	sl-NearestNeighbors-set-n_jobs(c,p)	->	sl-NearestNeighbors-set-n_neighbors(c,p)	->	sl-NearestNeighbors-set-p(c,p)	->	sl-NearestNeighbors-set-radius(c,p)
 
 
 #---------------------------------------------------#
@@ -432,7 +432,7 @@ sl-QuadraticDiscriminantAnalysis-set-tol;		sl-QuadraticDiscriminantAnalysis-set-
 #   RadiusNeighborsClassifier   #
 #-------------------------------#
 
-sl_RadiusNeighborsClassifier;			slCreate_classifier_basic(c); c,p; ; ; de.upb.crc901.mlplan.services.MLPipelinePlan:setClassifier(c,'sklearn.neighbors.RadiusNeighborsClassifier',p)	->	sl-RadiusNeighborsClassifier-set-algorithm(c,p)	->	sl-RadiusNeighborsClassifier-set-leaf_size(c,p)	->	sl-RadiusNeighborsClassifier-set-metric(c,p)	->	sl-RadiusNeighborsClassifier-set-p(c,p)	->	sl-RadiusNeighborsClassifier-set-radius(c,p)	->	sl-RadiusNeighborsClassifier-set-weights(c,p)
+#sl_RadiusNeighborsClassifier;			slCreate_classifier_basic(c); c,p; ; ; de.upb.crc901.mlplan.services.MLPipelinePlan:setClassifier(c,'sklearn.neighbors.RadiusNeighborsClassifier',p)	->	sl-RadiusNeighborsClassifier-set-algorithm(c,p)	->	sl-RadiusNeighborsClassifier-set-leaf_size(c,p)	->	sl-RadiusNeighborsClassifier-set-metric(c,p)	->	sl-RadiusNeighborsClassifier-set-p(c,p)	->	sl-RadiusNeighborsClassifier-set-radius(c,p)	->	sl-RadiusNeighborsClassifier-set-weights(c,p)
 
 
 #------------------------------------------------------------#
@@ -579,7 +579,7 @@ sl-SVC-set-verbose;		sl-SVC-set-verbose(c,p); c,p,t; ; OptionsFor_SVC_verbose(t)
 #   MLPClassifier   #
 #-------------------#
 
-sl_MLPClassifier;			slCreate_classifier_basic(c); c,p; ; ; de.upb.crc901.mlplan.services.MLPipelinePlan:setClassifier(c,'sklearn.neural_network.MLPClassifier',p)	->	sl-MLPClassifier-set-activation(c,p)	->	sl-MLPClassifier-set-alpha(c,p)	->	sl-MLPClassifier-set-batch_size(c,p)	->	sl-MLPClassifier-set-beta_1(c,p)	->	sl-MLPClassifier-set-beta_2(c,p)	->	sl-MLPClassifier-set-early_stopping(c,p)	->	sl-MLPClassifier-set-epsilon(c,p)	->	sl-MLPClassifier-set-hidden_layer_sizes(c,p)	->	sl-MLPClassifier-set-learning_rate(c,p)	->	sl-MLPClassifier-set-learning_rate_init(c,p)	->	sl-MLPClassifier-set-max_iter(c,p)	->	sl-MLPClassifier-set-momentum(c,p)	->	sl-MLPClassifier-set-nesterovs_momentum(c,p)	->	sl-MLPClassifier-set-power_t(c,p)	->	sl-MLPClassifier-set-shuffle(c,p)	->	sl-MLPClassifier-set-solver(c,p)	->	sl-MLPClassifier-set-tol(c,p)	->	sl-MLPClassifier-set-validation_fraction(c,p)	->	sl-MLPClassifier-set-verbose(c,p)	->	sl-MLPClassifier-set-warm_start(c,p)
+#sl_MLPClassifier;			slCreate_classifier_basic(c); c,p; ; ; de.upb.crc901.mlplan.services.MLPipelinePlan:setClassifier(c,'sklearn.neural_network.MLPClassifier',p)	->	sl-MLPClassifier-set-activation(c,p)	->	sl-MLPClassifier-set-alpha(c,p)	->	sl-MLPClassifier-set-batch_size(c,p)	->	sl-MLPClassifier-set-beta_1(c,p)	->	sl-MLPClassifier-set-beta_2(c,p)	->	sl-MLPClassifier-set-early_stopping(c,p)	->	sl-MLPClassifier-set-epsilon(c,p)	->	sl-MLPClassifier-set-hidden_layer_sizes(c,p)	->	sl-MLPClassifier-set-learning_rate(c,p)	->	sl-MLPClassifier-set-learning_rate_init(c,p)	->	sl-MLPClassifier-set-max_iter(c,p)	->	sl-MLPClassifier-set-momentum(c,p)	->	sl-MLPClassifier-set-nesterovs_momentum(c,p)	->	sl-MLPClassifier-set-power_t(c,p)	->	sl-MLPClassifier-set-shuffle(c,p)	->	sl-MLPClassifier-set-solver(c,p)	->	sl-MLPClassifier-set-tol(c,p)	->	sl-MLPClassifier-set-validation_fraction(c,p)	->	sl-MLPClassifier-set-verbose(c,p)	->	sl-MLPClassifier-set-warm_start(c,p)
 
 
 #------------------------------------------------#
