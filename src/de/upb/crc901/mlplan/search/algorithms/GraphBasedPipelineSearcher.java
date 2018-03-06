@@ -2,6 +2,7 @@ package de.upb.crc901.mlplan.search.algorithms;
 
 import java.io.File;
 import java.io.Serializable;
+import java.lang.reflect.Method;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.Queue;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.commons.lang3.reflect.MethodUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -217,6 +219,15 @@ public abstract class GraphBasedPipelineSearcher<T, A, V extends Comparable<V>> 
 		if (selectedModel == null)
 			throw new IllegalStateException("Cannot make predictions since the model has not been learned yet.");
 		return selectedModel.classifyInstance(instance);
+	}
+	
+	public double[] classifyInstances(Instances instances) throws Exception {
+		if (selectedModel == null)
+			throw new IllegalStateException("Cannot make predictions since the model has not been learned yet.");
+		Method m = MethodUtils.getMatchingAccessibleMethod(selectedModel.getClass(), "classifyInstances", Instances.class);
+		if (m == null)
+			throw new IllegalStateException("Selected model " + selectedModel.getClass() + " has no support for querying multiple instances at a time.");
+		return (double[]) m.invoke(selectedModel, instances);
 	}
 
 	@Override
