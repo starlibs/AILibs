@@ -148,6 +148,8 @@ noFeaturePreprocessing:String
 ### BASE CLASSIFIERS ###
 
 INCLUDE testrsc/services/weka.constants
+#INCLUDE testrsc/services/tf.constants
+#INCLUDE testrsc/services/sl.constants
 
 
 ### ENSEMBLE CLASSIFIERS PARAMETER ###
@@ -210,7 +212,6 @@ appendOptions		; l1:List<String>, l2:List<String>; ; List<String>(l1) & List<Str
 compileOptionListToArray; oList:List<String>; oArray:String[]; List<String>(oList); String[](oArray); (0)
 
 INCLUDE testrsc/services/weka.services
-INCLUDE testrsc/services/sl.services
 
 de.upb.crc901.mlplan.services.MLPipelinePlan:__construct;;config;;;(0)
 de.upb.crc901.mlplan.services.MLPipelinePlan:onHost;c,host,port;;;;(0)
@@ -253,9 +254,10 @@ inducePipeline;		induce(x,returnedClassifier);	x,returnedClassifier,config; ; ; 
 ignorePreprocessingConfiguration; configureFeaturePreprocessor(config); config; associated('nopp',config) ; ; noop()
 
 INCLUDE testrsc/services/weka_pp.methods
-INCLUDE testrsc/services/weka_classifiers.methods
+#INCLUDE testrsc/services/weka_classifiers.methods
 #INCLUDE testrsc/services/sl_pp.methods
 #INCLUDE testrsc/services/sl.methods
+INCLUDE testrsc/services/tf.methods
 
 [Rules]
 

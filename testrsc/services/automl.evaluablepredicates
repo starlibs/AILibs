@@ -391,3 +391,7 @@ OptionsFor_RobustScaler_with_scaling = de.upb.crc901.mlplan.evaluablepredicates.
 OptionsFor_StandardScaler_copy = de.upb.crc901.mlplan.evaluablepredicates.mlplan.pp.as.StandardScaler.OptionsFor_StandardScaler_copy
 OptionsFor_StandardScaler_with_mean = de.upb.crc901.mlplan.evaluablepredicates.mlplan.pp.as.StandardScaler.OptionsFor_StandardScaler_with_mean
 OptionsFor_StandardScaler_with_std = de.upb.crc901.mlplan.evaluablepredicates.mlplan.pp.as.StandardScaler.OptionsFor_StandardScaler_with_std
+OptionsFor_TF_layer_count = de.upb.crc901.mlplan.evaluablepredicates.mlplan.tf.nn.OptionsFor_TF_layer_count
+OptionsFor_TF_epochs = de.upb.crc901.mlplan.evaluablepredicates.mlplan.tf.nn.OptionsFor_TF_epochs
+OptionsFor_TF_learning_rate = de.upb.crc901.mlplan.evaluablepredicates.mlplan.tf.nn.OptionsFor_TF_learning_rate
+OptionsFor_TF_batch_size = de.upb.crc901.mlplan.evaluablepredicates.mlplan.tf.nn.OptionsFor_TF_batch_size

@@ -12,9 +12,9 @@ wekaBaseClassifier; 		wekaCreateClassifier(config); config,classifier,p; ; ; wek
 ### BASE CLASSIFIERS ###
 
 # Bayes Network
-wekaBN;	wekaCreateBaseClassifier(c); c,oList,oArray; ; ; weka.classifiers.bayes.BayesNet:__construct(c) -> getOptionList(oList) -> getWekaBNConfig0(oList) -> compileOptionListToArray(oList,oArray) -> weka.classifiers.bayes.BayesNet:setOptions(c,oArray)
-wekaBN;	wekaParametrizeBaseClassifier(cn,oList); cn,oList; ;;  assignTo('weka.classifiers.bayes.BayesNet',cn) -> getWekaBNConfig0(oList)
-wekaBN;	wekaSelectBaseClassifier(cn); cn; ; ; assignTo('weka.classifiers.bayes.BayesNet',cn)
+#wekaBN;	wekaCreateBaseClassifier(c); c,oList,oArray; ; ; weka.classifiers.bayes.BayesNet:__construct(c) -> getOptionList(oList) -> getWekaBNConfig0(oList) -> compileOptionListToArray(oList,oArray) -> weka.classifiers.bayes.BayesNet:setOptions(c,oArray)
+#wekaBN;	wekaParametrizeBaseClassifier(cn,oList); cn,oList; ;;  assignTo('weka.classifiers.bayes.BayesNet',cn) -> getWekaBNConfig0(oList)
+#wekaBN;	wekaSelectBaseClassifier(cn); cn; ; ; assignTo('weka.classifiers.bayes.BayesNet',cn)
 wekaBN;	wekaParametrizeGivenBaseClassifier(cn,oList); cn,oList; assigned('weka.classifiers.bayes.BayesNet',cn) ;;  getWekaBNConfig0(oList)
 # -D optional
 wekaBNOptsUseADTree			; getWekaBNConfig0(o);	o; ; ; addOptParam(o, '-D') -> getWekaBNConfig1(o)

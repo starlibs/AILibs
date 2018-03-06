@@ -1,5 +1,5 @@
 selectSLPreprocessing; chooseFeaturePreprocessor(config); config; ; ; slChoose_pp_as(config)
-configureSLPreprocessing; configureFeaturePreprocessor(config); config; ; ; de.upb.crc901.mlplan.services.MLPipelinePlan:onHost(config,'isys-db.cs.upb.de', '5000') -> slConfigure_pp_as(config)
+configureSLPreprocessing; configureFeaturePreprocessor(config); config; ; ; de.upb.crc901.mlplan.services.MLPipelinePlan:onHost(config,'localhost', '5000') -> slConfigure_pp_as(config)
 
 ## 
 #slunichoose;	slChoosePreprocessor(config); config; ; ; associateWithAssertion('sklearn.feature_selection.GenericUnivariateSelect',config)
