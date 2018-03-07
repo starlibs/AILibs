@@ -216,6 +216,7 @@ public class MLServicePipeline implements Classifier, Serializable {
 		}
 		predictEC.withAddedMethodOperation("predictions", this.classifierFieldName, "predict", dataInFieldName);
 
+		long start = System.currentTimeMillis();
 		ServiceCompositionResult result;
 		try {
 			// System.out.println("Sending the following predict composition:\n " +
@@ -226,6 +227,8 @@ public class MLServicePipeline implements Classifier, Serializable {
 			// ex.printStackTrace();
 			throw new RuntimeException(ex);
 		}
+		long end = System.currentTimeMillis();
+		timesForPrediction.addValue(end-start);
 
 		@SuppressWarnings("unchecked")
 		List<String> predictedLabels = (List<String>) result.get("predictions").getData();
@@ -342,4 +345,10 @@ public class MLServicePipeline implements Classifier, Serializable {
 		return constructionPlan;
 	}
 
+	@Override
+	public String toString() {
+		return constructionPlan.toString();
+	}
+	
+	
 }

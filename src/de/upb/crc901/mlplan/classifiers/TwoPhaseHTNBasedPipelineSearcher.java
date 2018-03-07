@@ -412,12 +412,12 @@ public class TwoPhaseHTNBasedPipelineSearcher<V extends Comparable<V>> extends G
 			sem.acquire(ensembleToSelectFrom.size());
 			System.out.println("done");
 			long endOfPhase2 = System.currentTimeMillis();
-			logger.info("Finished phase 2 within {}ms net. Total runtime was {}ms. Selected model is {}", endOfPhase2 - startOfPhase2, endOfPhase2 - getTimeOfStart(), selectedModel);
+			logger.info("Finished phase 2 within {}ms net. Total runtime was {}ms. ", endOfPhase2 - startOfPhase2, endOfPhase2 - getTimeOfStart());
 			logger.debug("Shutting down thread pool");
 			pool.shutdownNow();
 			pool.awaitTermination(5, TimeUnit.SECONDS);
 			selectedModel = selectedClassifier[0];
-			System.out.println(selectedModel);
+			logger.info("Selected a model. The model is: {}. Its internal error was {}", selectedModel, solutionAnnotationCache.get(selectedModel).getF());
 			if (selectedModel == null && !ensembleToSelectFrom.isEmpty()) {
 				selectedModel = ensembleToSelectFrom.iterator().next();
 			}

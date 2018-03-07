@@ -262,4 +262,22 @@ public class MLPipelinePlan implements Serializable {
 		}
 
 	}
+	
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		for (MLPipe pipe : atrPipes) {
+			if (sb.length() > 0)
+				sb.append(";");
+			if (pipe instanceof WekaAttributeSelectionPipe) {
+				WekaAttributeSelectionPipe cPipe = (WekaAttributeSelectionPipe)pipe;
+				sb.append(cPipe.getSearcher() + cPipe.getSearcherOptions().toString() + "/" + cPipe.getEval() + cPipe.getEvalOptions());
+			}
+			else
+				sb.append(pipe.getName() + pipe.getOptions().toString());
+		}
+		if (sb.length() > 0)
+			sb.append(" -> ");
+		sb.append(cPipe.getName() + cPipe.getOptions().toString());
+		return sb.toString();
+	}
 }

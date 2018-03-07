@@ -17,7 +17,7 @@ import de.upb.crc901.mlplan.search.evaluators.BalancedRandomCompletionEvaluator;
 import de.upb.crc901.mlplan.search.evaluators.MonteCarloCrossValidationEvaluator;
 import de.upb.crc901.mlplan.search.evaluators.MulticlassEvaluator;
 import de.upb.crc901.mlplan.services.MLPipelinePlan;
-import de.upb.crc901.mlplan.services.MLPipelinePlan.MLPipe;
+import de.upb.crc901.services.core.HttpServiceClient;
 import de.upb.crc901.services.core.HttpServiceServer;
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.ml.experiments.MultiClassClassificationExperimentRunner;
@@ -64,6 +64,8 @@ public class SCC2018MLTest extends MultiClassClassificationExperimentRunner {
 		this.logger = (MySQLMLPlanExperimentLogger)getLogger();
 		MLPipelinePlan.hostPASE = hostPase;
 		MLPipelinePlan.hostJASE = hostJase;
+		String[] jaseParts = hostJase.split(":");
+		HttpServiceClient.hostForCancelation = jaseParts[0] + ":" + (Integer.parseInt(jaseParts[1]) + 1000);
 	}
 
 	@Override
@@ -101,7 +103,7 @@ public class SCC2018MLTest extends MultiClassClassificationExperimentRunner {
 				bs.setRce(new BalancedRandomCompletionEvaluator(random, numberOfSamples, new MonteCarloCrossValidationEvaluator(baseEvaluator, mccvRepeats, mccvPortion)));
 //				bs.setTimeoutPerNodeFComputation(1000 * (timeoutInSeconds == 60 ? 15 : 300));
 				bs.setTimeoutPerNodeFComputation(1000 * conf.getTimeoutPerCandidate());
-				bs.setTooltipGenerator(new TFDTooltipGenerator<>());
+//				bs.setTooltipGenerator(new TFDTooltipGenerator<>());
 				bs.setPortionOfDataForPhase2(conf.getPortionOfDataForPhase2());
 				
 				bs.setExperimentLogger(logger);

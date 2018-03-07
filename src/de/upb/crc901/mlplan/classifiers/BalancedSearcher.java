@@ -28,7 +28,7 @@ public class BalancedSearcher extends TwoPhaseHTNBasedPipelineSearcher<Double> {
 	private int timeoutPerNodeFComputation;
 	private int explorationPhaseLength = 10;
 	private int exploitationPhaseLength = 50;
-
+	
 	class RegionOversearchingPreventor implements INodeEvaluator<TFDNode, Integer> {
 
 		private Map<String, Integer> counter = new ConcurrentHashMap<>();

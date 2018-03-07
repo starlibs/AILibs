@@ -22,6 +22,7 @@ import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
 import weka.classifiers.Classifier;
 import weka.core.OptionHandler;
+import weka.core.pmml.jaxbbindings.TrainingInstances;
 
 @SuppressWarnings("serial")
 public class MySQLMLPlanExperimentLogger extends MySQLExperimentDatabaseHandle {
@@ -129,10 +130,15 @@ public class MySQLMLPlanExperimentLogger extends MySQLExperimentDatabaseHandle {
 			values.add(plKey);
 			values.add(String.valueOf(score / 10000));
 			if (stats != null) {
-				values.add(String.valueOf(stats.get("time_train").getMean()));
-				values.add(String.valueOf(stats.get("time_predict").getMean()));
-				values.add(String.valueOf(stats.get("time_train").getStandardDeviation()));
-				values.add(String.valueOf(stats.get("time_predict").getStandardDeviation()));
+				DescriptiveStatistics trainStats = stats.get("time_train");
+				DescriptiveStatistics predictStats = stats.get("time_predict");
+//				System.out.println(trainStats);
+//				System.out.println(predictStats);
+				values.add(String.valueOf(trainStats.getN() > 0 ? trainStats.getMean() : -1));
+				values.add(String.valueOf(predictStats.getN() > 0 ? predictStats.getMean() : -1));
+				values.add(String.valueOf(trainStats.getN() > 0 ? trainStats.getStandardDeviation() : -1));
+				values.add(String.valueOf(predictStats.getN() > 0 ? predictStats.getStandardDeviation() : -1));
+//				System.out.println(values);
 			} else {
 				for (int i = 0; i < 4; i++)
 					values.add(null);
@@ -268,6 +274,7 @@ public class MySQLMLPlanExperimentLogger extends MySQLExperimentDatabaseHandle {
 			if (event.getClassifier() instanceof MLServicePipeline) {
 				MLServicePipeline pl = (MLServicePipeline) event.getClassifier();
 				String plKey = pl.toString();
+//				System.out.println(plKey);
 				if (!measurePLValues.containsKey(plKey)) {
 					Map<String, DescriptiveStatistics> stats = new HashMap<>();
 					stats.put("time_train", new DescriptiveStatistics());
@@ -278,6 +285,8 @@ public class MySQLMLPlanExperimentLogger extends MySQLExperimentDatabaseHandle {
 				stats.get("time_train").addValue(pl.getTimeForTrainingPipeline());
 				if (pl.getTimesForPrediction().getMean() != Double.NaN)
 					stats.get("time_predict").addValue(pl.getTimesForPrediction().getMean());
+//				System.out.println(stats.get("time_predict"));
+//				System.out.println(pl.getTimesForPrediction());
 			}
 		} catch (Throwable e) {
 			e.printStackTrace();
