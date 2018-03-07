@@ -14,7 +14,7 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.pp.as.DictionaryLearning
     */
     public class OptionsFor_DictionaryLearning_split_sign extends OptionsPredicate {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{"true", "false"});
+        private static List<Object> validValues = Arrays.asList(new Object[]{"true"});
 
         @Override
         protected List<? extends Object> getValidValues() {

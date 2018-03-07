@@ -15,7 +15,7 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.pp.as.GraphLassoCV;
     */
     public class OptionsFor_GraphLassoCV_mode extends OptionsPredicate {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{});
+        private static List<Object> validValues = Arrays.asList(new Object[]{"cd", "lars"});
 
         @Override
         protected List<? extends Object> getValidValues() {

@@ -19,12 +19,12 @@
 
         @Override
         protected double getMax() {
-            return 1;
+            return 10;
         }
 
         @Override
         protected int getSteps() {
-            return -1;
+            return 3;
         }
 
         @Override

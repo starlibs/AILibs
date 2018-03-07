@@ -15,7 +15,7 @@
         
         @Override
         protected double getMin() {
-            return 1;
+            return 0.01;
         }
 
         @Override
@@ -25,9 +25,11 @@
 
         @Override
         protected int getSteps() {
-            return -1;
+            return 5;
         }
-
+        protected boolean isLinear() {
+        	return false;
+        }
         @Override
         protected boolean needsIntegers() {
             return false;

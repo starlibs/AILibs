@@ -43,6 +43,9 @@ public abstract class NumericRangeOptionPredicate extends OptionsPredicate  {
 		double stepSize = (max - min) / (steps + 1);
 		boolean needsIntegers = needsIntegers();
 		Set<Object> numericalValues = new TreeSet<>();	
+
+//		numericalValues.add(min);
+//		numericalValues.add(max);
 		
 		// Pre-compute  constants for logarithmic scale if necessary
 		double expCoeff;
@@ -60,20 +63,18 @@ public abstract class NumericRangeOptionPredicate extends OptionsPredicate  {
 			if(min <= 0.00001) {
 				min = 0.00001;  // set a lower bound
 			}
-			expCoeff = isLinear() ? -1 : Math.log10(max/min) / (max-min); // b
-			scale = isLinear() ? -1 :  max / Math.pow(10, expCoeff  * max); // a
+			expCoeff = isLinear() ? -1 : Math.log(max/min) / (max-min); // b
+			scale = isLinear() ? -1 :  max / Math.exp(expCoeff  * max); // a
 		}
 			
-		for (int i = 0; i < getSteps()+1; i++) {
+		for (int i = 0; i <= getSteps()+1; i++) {
 			// linear value:
 			double value = min + i * stepSize;
-			if(value > max) {
-				break;
-			}
+			
 			// if it is logarithmic scale recalculate value:
 			if(!isLinear()) {
 				// y = a exp b*x
-				value = scale * Math.pow(10, expCoeff  * value);
+				value = scale * Math.exp( expCoeff  * value);
 			}
 			
 			if(needsIntegers) {
@@ -100,26 +101,27 @@ public abstract class NumericRangeOptionPredicate extends OptionsPredicate  {
 			
 			@Override
 			protected boolean needsIntegers() {
-				return false;
+				return true;
 			}
 			
-			@Override
-			protected int getSteps() {
-				return 7;
-			}
-			
-			@Override
-			protected double getMin() {
-				return 1e-3;
-			}
-			
-			@Override
-			protected double getMax() {
-				return 1e3;
-			}
+
+	        @Override
+	        protected double getMin() {
+	            return 1;
+	        }
+
+	        @Override
+	        protected double getMax() {
+	            return 3;
+	        }
+
+	        @Override
+	        protected int getSteps() {
+	            return 2;
+	        }
 			
 			protected boolean isLinear() {
-				return false;
+				return true;
 			}
 		};
 		System.out.println(test.getValidValues());

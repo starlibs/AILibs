@@ -20,7 +20,7 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.pp.as.Imputer;
     */
     public class OptionsFor_Imputer_copy extends OptionsPredicate {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{"true", "false"});
+        private static List<Object> validValues = Arrays.asList(new Object[]{});
 
         @Override
         protected List<? extends Object> getValidValues() {

@@ -22,12 +22,12 @@
 
         @Override
         protected double getMax() {
-            return 1;
+            return 1000000;
         }
 
         @Override
         protected int getSteps() {
-            return -1;
+            return 500;
         }
 
         @Override

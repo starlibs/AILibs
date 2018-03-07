@@ -13,7 +13,7 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.pp.as.GraphLassoCV;
     */
     public class OptionsFor_GraphLassoCV_verbose extends OptionsPredicate {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{"true", "false"});
+        private static List<Object> validValues = Arrays.asList(new Object[]{});
 
         @Override
         protected List<? extends Object> getValidValues() {
