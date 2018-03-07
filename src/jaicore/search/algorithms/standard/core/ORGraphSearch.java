@@ -26,9 +26,7 @@ import com.google.common.eventbus.Subscribe;
 
 import jaicore.concurrent.TimeoutTimer;
 import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
-import jaicore.planning.model.core.PDDLReader;
 import jaicore.search.algorithms.interfaces.IObservableORGraphSearch;
-import jaicore.search.algorithms.standard.bestfirst.RandomizedDepthFirstEvaluator;
 import jaicore.search.structure.core.GraphEventBus;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
@@ -46,12 +44,11 @@ import jaicore.search.structure.graphgenerator.PathGoalTester;
 import jaicore.search.structure.graphgenerator.RootGenerator;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
-import scala.util.regexp.Base.Star;
 
 public class ORGraphSearch<T, A, V extends Comparable<V>>
 		implements IObservableORGraphSearch<T, A, V>, Iterable<List<NodeExpansionDescription<T, A>>>, Iterator<List<NodeExpansionDescription<T, A>>> {
 
-	private static final Logger logger = LoggerFactory.getLogger(ORGraphSearch.class);
+	private Logger logger = LoggerFactory.getLogger(ORGraphSearch.class);
 
 	/* meta vars for controlling the general behavior */
 	private int createdCounter;
@@ -175,7 +172,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 			}
 			newNode.setInternalLabel(label);
 			
-			logger.info("Inserting successor {} of {} to OPEN.", newNode, expandedNodeInternal);
+			logger.info("Inserting successor {} of {} to OPEN. F-Value is {}", newNode, expandedNodeInternal, label);
 //			assert !open.contains(newNode) && !expanded.contains(newNode.getPoint()) : "Inserted node is already in OPEN or even expanded!";
 
 			/* if we discard (either only on OPEN or on both OPEN and CLOSED) */
@@ -367,7 +364,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 			return null;
 		}
 		if (!solutions.isEmpty()) {
-			logger.info("Still have solution in cache, return it.");
+			logger.debug("Still have solution in cache, return it.");
 			return solutions.poll();
 		}
 		do {
@@ -446,9 +443,9 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 //			System.out.println(nodeToExpand.getAnnotations());
 		
 		/* if search has been interrupted, do not process next step */
-		logger.info("Step starts. Size of OPEN now {}", open.size());
+		logger.debug("Step starts. Size of OPEN now {}", open.size());
 		if (Thread.interrupted()) {
-			logger.info("Received interrupt signal before step.");
+			logger.debug("Received interrupt signal before step.");
 			interrupted = true;
 			return;
 		}
@@ -462,15 +459,15 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 		expandNode(nodeToExpand);
 		afterExpansion(nodeToExpand);
 		if (Thread.interrupted()) {
-			logger.info("Received interrupt signal during step.");
+			logger.debug("Received interrupt signal during step.");
 			interrupted = true;
 		}
-		logger.info("Step ends. Size of OPEN now {}", open.size());
+		logger.debug("Step ends. Size of OPEN now {}", open.size());
 	}
 
 	private void expandNode(Node<T, V> expandedNodeInternal) {
 		graphEventBus.post(new NodeTypeSwitchEvent<Node<T, V>>(expandedNodeInternal, "or_expanding"));
-		logger.info("Expanding node {}", expandedNodeInternal);
+		logger.info("Expanding node {} with f-value {}", expandedNodeInternal, expandedNodeInternal.getInternalLabel());
 		assert !expanded.contains(expandedNodeInternal.getPoint()) : "Node " + expandedNodeInternal + " expanded twice!!";
 		expanded.add(expandedNodeInternal.getPoint());
 
@@ -501,7 +498,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 		try {
 			t.join();
 		} catch (InterruptedException e) {
-			logger.info("Search has been interrupted");
+			logger.debug("Search has been interrupted");
 			interrupted = true;
 			return;
 		}
@@ -518,7 +515,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 				try {
 					t.join();
 				} catch (InterruptedException e) {
-					logger.info("Search has been interrupted");
+					logger.debug("Search has been interrupted");
 					interrupted = true;
 					return;
 				}
@@ -540,7 +537,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 				pool.submit(new NodeBuilder(expandedNodeInternal, successorDescription));
 			});
 		}
-		logger.info("Finished expansion of node {}. Size of OPEN is now {}. Number of active jobs is {}", expandedNodeInternal, open.size(), activeJobs.get());
+		logger.debug("Finished expansion of node {}. Size of OPEN is now {}. Number of active jobs is {}", expandedNodeInternal, open.size(), activeJobs.get());
 
 		/* update statistics, send closed notifications, and possibly return a solution */
 		expandedCounter++;
@@ -657,7 +654,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 			this.graphEventBus.post(new GraphInitializedEvent<Node<T, V>>(newNode));
 		} else {
 			this.graphEventBus.post(new NodeReachedEvent<Node<T, V>>(parent, newNode, "or_" + (newNode.isGoal() ? "solution" : "created")));
-			logger.info("Sent message for creation of node {} as a successor of {}", newNode, parent);
+			logger.debug("Sent message for creation of node {} as a successor of {}", newNode, parent);
 		}
 		return newNode;
 	}
@@ -766,7 +763,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	@Subscribe
 	public void receiveSolutionEvent(SolutionFoundEvent<T, V> solution) {
 		try {
-			logger.info("Received solution: {}", solution);
+			logger.info("Received solution with f-value {}", solution.getF());
 			if (solutionAnnotations.containsKey(solution.getSolution()))
 				throw new IllegalStateException("Solution is reported for the second time already!");
 			solutionAnnotations.put(solution.getSolution(), new HashMap<>());
@@ -780,7 +777,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	@Subscribe
 	public void receiveSolutionAnnotationEvent(SolutionAnnotationEvent<T, V> solution) {
 		try {
-			logger.info("Received solution annotation: {}", solution);
+			logger.debug("Received solution annotation: {}", solution);
 			if (!solutionAnnotations.containsKey(solution.getSolution()))
 				throw new IllegalStateException("Solution annotation is reported for a solution that has not been reported previously!");
 			solutionAnnotations.get(solution.getSolution()).put(solution.getAnnotationName(), solution.getAnnotationValue());
@@ -847,4 +844,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 		open = collection;
 	}
 	
+	public void setLoggerName(String name) {
+		logger = LoggerFactory.getLogger(name);
+	}
 }

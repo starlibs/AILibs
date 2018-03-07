@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.reflect.MethodUtils;
-import org.omg.CORBA.Principal;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -30,11 +29,6 @@ import com.google.common.collect.Range;
 
 import jaicore.ml.WekaUtil;
 import jaicore.ml.measures.PMMulticlass;
-import weka.attributeSelection.AttributeSelection;
-import weka.attributeSelection.CfsSubsetEval;
-import weka.attributeSelection.PrincipalComponents;
-import weka.attributeSelection.Ranker;
-import weka.attributeSelection.WrapperSubsetEval;
 import weka.classifiers.Classifier;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -216,6 +210,7 @@ public abstract class MultiClassClassificationExperimentRunner {
 			if (runId < 0) {
 				throw new ExperimentAlreadyConductedException("Experiment has already been conducted, but quite recently: " + exp);
 			}
+			System.out.println("The assigned runId for this experiment is " + runId);
 			
 			/* create random object */
 			Random r = new Random(seedId);

@@ -36,18 +36,26 @@ public class TFDTooltipGenerator<V extends Comparable<V>> implements TooltipGene
 			}
 			if (e instanceof RuntimeException) {
 				Throwable e2 = ((RuntimeException)e).getCause();
-				sb.append("Sub-Error Type " + e2.getClass().getName() + "\nMessage: " + e2.getMessage() +"\nStack Trace:\n");
-				for (StackTraceElement ste : e2.getStackTrace()) {
-					sb.append("  " + ste.toString() + "\n");
+				if (e2 != null) {
+					sb.append("Sub-Error Type " + e2.getClass().getName() + "\nMessage: " + e2.getMessage() +"\nStack Trace:\n");
+					for (StackTraceElement ste : e2.getStackTrace()) {
+						sb.append("  " + ste.toString() + "\n");
+					}
 				}
+				else
+					sb.append("No cause was attached.\n");
 
 			}
 			else if (e instanceof InvocationTargetException) {
 				Throwable e2 = ((InvocationTargetException)e).getCause();
-				sb.append("Sub-Error Type " + e2.getClass().getName() + "\nMessage: " + e2.getMessage() +"\nStack Trace:\n");
-				for (StackTraceElement ste : e2.getStackTrace()) {
-					sb.append("  " + ste.toString() + "\n");
+				if (e2 != null) {
+					sb.append("Sub-Error Type " + e2.getClass().getName() + "\nMessage: " + e2.getMessage() +"\nStack Trace:\n");
+					for (StackTraceElement ste : e2.getStackTrace()) {
+						sb.append("  " + ste.toString() + "\n");
+					}
 				}
+				else
+					sb.append("No cause was attached.\n");
 
 			}
 			sb.append("</pre>");

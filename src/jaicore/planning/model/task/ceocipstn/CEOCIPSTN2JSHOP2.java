@@ -230,24 +230,22 @@ public class CEOCIPSTN2JSHOP2 {
 		bw.write(")\n");
 	}
 
-	public static void printProblem(CEOCSTNPlanningProblem problem, File output) throws IOException {
-		FileWriter fileWriter = new FileWriter(output);
-		BufferedWriter bw = new BufferedWriter(fileWriter);
-
-		String fileName = output.getName();
-		fileName = fileName.substring(0, fileName.indexOf(".")).toLowerCase();
+	public static void printProblem(CEOCIPSTNPlanningProblem problem,  Writer writer, String name) throws IOException {
+		BufferedWriter bw = new BufferedWriter(writer);
 
 		// print the package if one is availiable
-		if (packageName != "") {
-			bw.write("(int-package : " + packageName + ")");
-			bw.flush();
-		}
+//		if (packageName != "") {
+//			bw.write("(int-package : " + packageName + ")");
+//			bw.flush();
+//		}
 
 		// Writing of the domain file
-		bw.write("(make-problem '" + fileName + "'-01 ' " + fileName + "\n");
+		bw.write("(defproblem problem " + name + "\n");
 		bw.write(indent(1) + "(\n");
 		// print inital state
 		printMonom(bw, problem.getInit(), 2, true);
+		bw.write(indent(1) + ")\n");
+		bw.write(indent(1) + "(\n");
 
 		// print tasknetwork
 		printNetwork(bw, problem.getNetwork(), 2);
