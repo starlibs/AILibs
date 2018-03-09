@@ -88,8 +88,8 @@ wekaLinearROptsAttrSel			; getWekaLinearRConfig2(o);	o,type; LinearRAttrSel(type
 # Logistic Regression
 #wekaLR;	wekaCreateRawBaseClassifier(cn,c); cn,c; ;	weka.classifiers.functions.Logistic:__construct(c) -> assignTo('weka.classifiers.functions.Logistic',cn)
 #wekaLR;	wekaCreateGivenBaseClassifier(cn,c); cn,c,oList,oArray; assigned('weka.classifiers.functions.Logistic',cn) ;	weka.classifiers.functions.Logistic:__construct(c) -> getOptionList(oList) -> getWekaLogisticRConfig0(oList) -> compileOptionListToArray(oList,oArray) -> weka.classifiers.functions.Logistic:setOptions(c,oArray)
-#wekaLR;	wekaCreateBaseClassifier(c); c,oList,oArray; ;	; weka.classifiers.functions.Logistic:__construct(c) -> getOptionList(oList) -> getWekaLogisticRConfig0(oList) -> compileOptionListToArray(oList,oArray) -> weka.classifiers.functions.Logistic:setOptions(c,oArray)
-#wekaLR;	wekaParametrizeBaseClassifier(cn,oList); cn,oList; ;;  assignTo('weka.classifiers.functions.Logistic',cn) -> getWekaLogisticRConfig0(oList)
+wekaLR;	wekaCreateBaseClassifier(c); c,oList,oArray; ;	; weka.classifiers.functions.Logistic:__construct(c) -> getOptionList(oList) -> getWekaLogisticRConfig0(oList) -> compileOptionListToArray(oList,oArray) -> weka.classifiers.functions.Logistic:setOptions(c,oArray)
+wekaLR;	wekaParametrizeBaseClassifier(cn,oList); cn,oList; ;;  assignTo('weka.classifiers.functions.Logistic',cn) -> getWekaLogisticRConfig0(oList)
 wekaLR;	wekaSelectBaseClassifier(cn); cn; ; ; assignTo('weka.classifiers.functions.Logistic',cn)
 wekaLR;	wekaParametrizeGivenBaseClassifier(cn,oList); cn,oList; assigned('weka.classifiers.functions.Logistic',cn) ; ; getWekaLogisticRConfig0(oList)
 # -R <float> mandatory
@@ -116,8 +116,8 @@ wekaNNOptsSeed			; getWekaNNConfig7(o);	o; ;;  addMandatValuedParam(o, '-S', '1'
 # SGD
 #wekaSGDs;	wekaCreateRawBaseClassifier(cn,c); cn,c; ; weka.classifiers.functions.SGD:__construct(c) -> assignTo('weka.classifiers.functions.SGD',cn)
 #wekaSGDs;	wekaCreateGivenBaseClassifier(cn,c); cn,c,oList,oArray; assigned('weka.classifiers.functions.SGD',cn) ; weka.classifiers.functions.SGD:__construct(c) -> getOptionList(oList) -> getWekaSGDConfig0(oList) -> compileOptionListToArray(oList,oArray) -> weka.classifiers.functions.SGD:setOptions(c,oArray)
-#wekaSGDs;	wekaCreateBaseClassifier(c); c,oList,oArray; ;;  weka.classifiers.functions.SGD:__construct(c) -> getOptionList(oList) -> getWekaSGDConfig0(oList) -> compileOptionListToArray(oList,oArray) -> weka.classifiers.functions.SGD:setOptions(c,oArray)
-#wekaSGDs;	wekaParametrizeBaseClassifier(cn,oList); cn,oList; ;;  assignTo('weka.classifiers.functions.SGD',cn) -> getWekaSGDConfig0(oList)
+wekaSGDs;	wekaCreateBaseClassifier(c); c,oList,oArray; ;;  weka.classifiers.functions.SGD:__construct(c) -> getOptionList(oList) -> getWekaSGDConfig0(oList) -> compileOptionListToArray(oList,oArray) -> weka.classifiers.functions.SGD:setOptions(c,oArray)
+wekaSGDs;	wekaParametrizeBaseClassifier(cn,oList); cn,oList; ;;  assignTo('weka.classifiers.functions.SGD',cn) -> getWekaSGDConfig0(oList)
 wekaSGDs;	wekaSelectBaseClassifier(cn); cn; ;;  assignTo('weka.classifiers.functions.SGD',cn)
 wekaSGDs;	wekaParametrizeGivenBaseClassifier(cn,oList); cn,oList; assigned('weka.classifiers.functions.SGD',cn) ;;  getWekaSGDConfig0(oList)
 # -M, -N optional
@@ -239,8 +239,8 @@ wekaVPOptsMaxK			; getWekaVPConfig2(o);	o,int; VPMaxK(int) ; ; addMandatValuedPa
 # KNN
 #wekaKNN;	wekaCreateRawBaseClassifier(cn,c); cn,c; ; weka.classifiers.lazy.IBk:__construct(c) -> assignTo('weka.classifiers.lazy.IBk',cn)
 #wekaKNN;	wekaCreateGivenBaseClassifier(cn,c); cn,c,oList,oArray; assigned('weka.classifiers.lazy.IBk',cn) ; weka.classifiers.lazy.IBk:__construct(c) -> getOptionList(oList) -> getWekaKNNConfig0(oList) -> compileOptionListToArray(oList,oArray) -> weka.classifiers.lazy.IBk:setOptions(c,oArray)
-#wekaKNN;	wekaCreateBaseClassifier(c); c,oList,oArray; ; ; weka.classifiers.lazy.IBk:__construct(c) -> getOptionList(oList) -> getWekaKNNConfig0(oList) -> compileOptionListToArray(oList,oArray) -> weka.classifiers.lazy.IBk:setOptions(c,oArray)
-#wekaKNN;	wekaParametrizeBaseClassifier(cn,oList); cn,oList; ; ; assignTo('weka.classifiers.lazy.IBk',cn) -> getWekaKNNConfig0(oList)
+wekaKNN;	wekaCreateBaseClassifier(c); c,oList,oArray; ; ; weka.classifiers.lazy.IBk:__construct(c) -> getOptionList(oList) -> getWekaKNNConfig0(oList) -> compileOptionListToArray(oList,oArray) -> weka.classifiers.lazy.IBk:setOptions(c,oArray)
+wekaKNN;	wekaParametrizeBaseClassifier(cn,oList); cn,oList; ; ; assignTo('weka.classifiers.lazy.IBk',cn) -> getWekaKNNConfig0(oList)
 wekaKNN;	wekaSelectBaseClassifier(cn); cn; ; ; assignTo('weka.classifiers.lazy.IBk',cn)
 wekaKNN;	wekaParametrizeGivenBaseClassifier(cn,oList); cn,oList; assigned('weka.classifiers.lazy.IBk',cn) ; ; getWekaKNNConfig0(oList)
 # -E, -X. -I, -F optional, -I or -F, not both

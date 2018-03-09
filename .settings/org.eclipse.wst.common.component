@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-modules id="moduleCoreId" project-version="1.5.0">
+	<wb-module deploy-name="ML-Plan">
+		<wb-resource deploy-path="/" source-path="conf"/>
+		<wb-resource deploy-path="/" source-path="src"/>
+		<wb-resource deploy-path="/" source-path="analyses"/>
+		<dependent-module deploy-path="../" handle="module:/resource/JAICore/JAICore">
+			<dependency-type>uses</dependency-type>
+		</dependent-module>
+		<dependent-module deploy-path="../" handle="module:/resource/weka/weka">
+			<dependency-type>uses</dependency-type>
+		</dependent-module>
+		<dependent-module deploy-path="../" handle="module:/resource/JASE/JASE">
+			<dependency-type>uses</dependency-type>
+		</dependent-module>
+	</wb-module>
+</project-modules>

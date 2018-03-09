@@ -105,7 +105,7 @@ public abstract class GraphBasedPipelineSearcher<T, A, V extends Comparable<V>> 
 							logger.info("Sent cancel signal to the search algorithm...");
 							return;
 						}
-						Thread.sleep(10000);
+						Thread.sleep(1000);
 					}
 				} catch (Throwable e) {
 					System.err.println("Timer received the following exception (canceling search due to this):");

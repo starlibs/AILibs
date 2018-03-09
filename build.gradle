@@ -14,11 +14,11 @@ sourceSets {
         	srcDir 'conf'
     	}
     }
-//    test {
-//   	java {
-//   		srcDir 'test'
-//   	}
-//    }
+    test {
+   	java {
+   		srcDir 'test'
+   	}
+    }
 }
 
 sonarqube {

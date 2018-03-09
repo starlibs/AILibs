@@ -28,7 +28,7 @@ sl-FastICA-set-whiten;		sl-FastICA-set-whiten(c,p); c,p,t; ; OptionsFor_FastICA_
 #   GenericUnivariateSelect   #
 #-----------------------------#
 
-#sl_GenericUnivariateSelect;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.feature_selection.GenericUnivariateSelect',config)
+sl_GenericUnivariateSelect;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.feature_selection.GenericUnivariateSelect',config)
 sl_GenericUnivariateSelect;			slConfigure_pp_as(config); config,pipe; associated('sklearn.feature_selection.GenericUnivariateSelect',config); ; de.upb.crc901.mlplan.services.MLPipelinePlan:addAttributeSelection(config,'sklearn.feature_selection.GenericUnivariateSelect',pipe)	->	sl-GenericUnivariateSelect-set-mode(config,pipe)	->	sl-GenericUnivariateSelect-set-param(config,pipe)	->	sl-GenericUnivariateSelect-set-score_func(config,pipe)
 
 
@@ -48,7 +48,7 @@ sl-GenericUnivariateSelect-set-score_func;		sl-GenericUnivariateSelect-set-score
 #   Isomap   #
 #------------#
 
-#sl_Isomap;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.manifold.Isomap',config)
+sl_Isomap;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.manifold.Isomap',config)
 sl_Isomap;			slConfigure_pp_as(config); config,pipe; associated('sklearn.manifold.Isomap',config); ; de.upb.crc901.mlplan.services.MLPipelinePlan:addAttributeSelection(config,'sklearn.manifold.Isomap',pipe)	->	sl-Isomap-set-eigen_solver(config,pipe)	->	sl-Isomap-set-n_components(config,pipe)	->	sl-Isomap-set-n_jobs(config,pipe)	->	sl-Isomap-set-n_neighbors(config,pipe)	->	sl-Isomap-set-neighbors_algorithm(config,pipe)	->	sl-Isomap-set-path_method(config,pipe)	->	sl-Isomap-set-tol(config,pipe)
 
 
@@ -76,7 +76,7 @@ sl-Isomap-set-tol;		sl-Isomap-set-tol(c,p); c,p,t; ; OptionsFor_Isomap_tol(t); d
 #   LocallyLinearEmbedding   #
 #----------------------------#
 
-#sl_LocallyLinearEmbedding;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.manifold.LocallyLinearEmbedding',config)
+sl_LocallyLinearEmbedding;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.manifold.LocallyLinearEmbedding',config)
 sl_LocallyLinearEmbedding;			slConfigure_pp_as(config); config,pipe; associated('sklearn.manifold.LocallyLinearEmbedding',config); ; de.upb.crc901.mlplan.services.MLPipelinePlan:addAttributeSelection(config,'sklearn.manifold.LocallyLinearEmbedding',pipe)	->	sl-LocallyLinearEmbedding-set-eigen_solver(config,pipe)	->	sl-LocallyLinearEmbedding-set-hessian_tol(config,pipe)	->	sl-LocallyLinearEmbedding-set-max_iter(config,pipe)	->	sl-LocallyLinearEmbedding-set-method(config,pipe)	->	sl-LocallyLinearEmbedding-set-modified_tol(config,pipe)	->	sl-LocallyLinearEmbedding-set-n_components(config,pipe)	->	sl-LocallyLinearEmbedding-set-n_jobs(config,pipe)	->	sl-LocallyLinearEmbedding-set-n_neighbors(config,pipe)	->	sl-LocallyLinearEmbedding-set-neighbors_algorithm(config,pipe)	->	sl-LocallyLinearEmbedding-set-reg(config,pipe)	->	sl-LocallyLinearEmbedding-set-tol(config,pipe)
 
 
@@ -112,7 +112,7 @@ sl-LocallyLinearEmbedding-set-tol;		sl-LocallyLinearEmbedding-set-tol(c,p); c,p,
 #   MDS   #
 #---------#
 
-#sl_MDS;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.manifold.MDS',config)
+sl_MDS;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.manifold.MDS',config)
 sl_MDS;			slConfigure_pp_as(config); config,pipe; associated('sklearn.manifold.MDS',config); ; de.upb.crc901.mlplan.services.MLPipelinePlan:addAttributeSelection(config,'sklearn.manifold.MDS',pipe)	->	sl-MDS-set-dissimilarity(config,pipe)	->	sl-MDS-set-eps(config,pipe)	->	sl-MDS-set-max_iter(config,pipe)	->	sl-MDS-set-metric(config,pipe)	->	sl-MDS-set-n_components(config,pipe)	->	sl-MDS-set-n_init(config,pipe)	->	sl-MDS-set-n_jobs(config,pipe)	->	sl-MDS-set-verbose(config,pipe)
 
 
@@ -142,7 +142,7 @@ sl-MDS-set-verbose;		sl-MDS-set-verbose(c,p); c,p,t; ; OptionsFor_MDS_verbose(t)
 #   MiniBatchDictionaryLearning   #
 #---------------------------------#
 
-#sl_MiniBatchDictionaryLearning;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.decomposition.MiniBatchDictionaryLearning',config)
+sl_MiniBatchDictionaryLearning;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.decomposition.MiniBatchDictionaryLearning',config)
 sl_MiniBatchDictionaryLearning;			slConfigure_pp_as(config); config,pipe; associated('sklearn.decomposition.MiniBatchDictionaryLearning',config); ; de.upb.crc901.mlplan.services.MLPipelinePlan:addAttributeSelection(config,'sklearn.decomposition.MiniBatchDictionaryLearning',pipe)	->	sl-MiniBatchDictionaryLearning-set-alpha(config,pipe)	->	sl-MiniBatchDictionaryLearning-set-batch_size(config,pipe)	->	sl-MiniBatchDictionaryLearning-set-fit_algorithm(config,pipe)	->	sl-MiniBatchDictionaryLearning-set-n_iter(config,pipe)	->	sl-MiniBatchDictionaryLearning-set-n_jobs(config,pipe)	->	sl-MiniBatchDictionaryLearning-set-shuffle(config,pipe)	->	sl-MiniBatchDictionaryLearning-set-split_sign(config,pipe)	->	sl-MiniBatchDictionaryLearning-set-transform_algorithm(config,pipe)	->	sl-MiniBatchDictionaryLearning-set-verbose(config,pipe)
 
 
@@ -174,7 +174,7 @@ sl-MiniBatchDictionaryLearning-set-verbose;		sl-MiniBatchDictionaryLearning-set-
 #   NMF   #
 #---------#
 
-#sl_NMF;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.decomposition.NMF',config)
+sl_NMF;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.decomposition.NMF',config)
 sl_NMF;			slConfigure_pp_as(config); config,pipe; associated('sklearn.decomposition.NMF',config); ; de.upb.crc901.mlplan.services.MLPipelinePlan:addAttributeSelection(config,'sklearn.decomposition.NMF',pipe)	->	sl-NMF-set-alpha(config,pipe)	->	sl-NMF-set-beta_loss(config,pipe)	->	sl-NMF-set-l1_ratio(config,pipe)	->	sl-NMF-set-max_iter(config,pipe)	->	sl-NMF-set-shuffle(config,pipe)	->	sl-NMF-set-solver(config,pipe)	->	sl-NMF-set-tol(config,pipe)	->	sl-NMF-set-verbose(config,pipe)
 
 
@@ -204,7 +204,7 @@ sl-NMF-set-verbose;		sl-NMF-set-verbose(c,p); c,p,t; ; OptionsFor_NMF_verbose(t)
 #   SelectFdr   #
 #---------------#
 
-#sl_SelectFdr;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.feature_selection.SelectFdr',config)
+sl_SelectFdr;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.feature_selection.SelectFdr',config)
 sl_SelectFdr;			slConfigure_pp_as(config); config,pipe; associated('sklearn.feature_selection.SelectFdr',config); ; de.upb.crc901.mlplan.services.MLPipelinePlan:addAttributeSelection(config,'sklearn.feature_selection.SelectFdr',pipe)	->	sl-SelectFdr-set-alpha(config,pipe)	->	sl-SelectFdr-set-score_func(config,pipe)
 
 
@@ -212,7 +212,7 @@ sl_SelectFdr;			slConfigure_pp_as(config); config,pipe; associated('sklearn.feat
 #     Option Configuration for SelectFdr     #
 #--------------------------------------------#
 
-#sl-SelectFdr-set-alpha;		sl-SelectFdr-set-alpha(c,p); c,p; ; ;  noop()
+sl-SelectFdr-set-alpha;		sl-SelectFdr-set-alpha(c,p); c,p; ; ;  noop()
 sl-SelectFdr-set-alpha;		sl-SelectFdr-set-alpha(c,p); c,p,t; ; OptionsFor_SelectFdr_alpha(t); de.upb.crc901.mlplan.services.MLPipelinePlan:addOptions(c,p,'-alpha', t)
 sl-SelectFdr-set-score_func;		sl-SelectFdr-set-score_func(c,p); c,p; ; ;  noop()
 sl-SelectFdr-set-score_func;		sl-SelectFdr-set-score_func(c,p); c,p,t; ; OptionsFor_SelectFdr_score_func(t); de.upb.crc901.mlplan.services.MLPipelinePlan:addOptions(c,p,'-score_func', t)
@@ -222,7 +222,7 @@ sl-SelectFdr-set-score_func;		sl-SelectFdr-set-score_func(c,p); c,p,t; ; Options
 #   SelectFpr   #
 #---------------#
 
-#sl_SelectFpr;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.feature_selection.SelectFpr',config)
+sl_SelectFpr;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.feature_selection.SelectFpr',config)
 sl_SelectFpr;			slConfigure_pp_as(config); config,pipe; associated('sklearn.feature_selection.SelectFpr',config); ; de.upb.crc901.mlplan.services.MLPipelinePlan:addAttributeSelection(config,'sklearn.feature_selection.SelectFpr',pipe)	->	sl-SelectFpr-set-alpha(config,pipe)	->	sl-SelectFpr-set-score_func(config,pipe)
 
 
@@ -240,7 +240,7 @@ sl-SelectFpr-set-score_func;		sl-SelectFpr-set-score_func(c,p); c,p,t; ; Options
 #   SelectFwe   #
 #---------------#
 
-#sl_SelectFwe;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.feature_selection.SelectFwe',config)
+sl_SelectFwe;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.feature_selection.SelectFwe',config)
 sl_SelectFwe;			slConfigure_pp_as(config); config,pipe; associated('sklearn.feature_selection.SelectFwe',config); ; de.upb.crc901.mlplan.services.MLPipelinePlan:addAttributeSelection(config,'sklearn.feature_selection.SelectFwe',pipe)	->	sl-SelectFwe-set-alpha(config,pipe)	->	sl-SelectFwe-set-score_func(config,pipe)
 
 
@@ -258,7 +258,7 @@ sl-SelectFwe-set-score_func;		sl-SelectFwe-set-score_func(c,p); c,p,t; ; Options
 #   SelectKBest   #
 #-----------------#
 
-#sl_SelectKBest;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.feature_selection.SelectKBest',config)
+sl_SelectKBest;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.feature_selection.SelectKBest',config)
 sl_SelectKBest;			slConfigure_pp_as(config); config,pipe; associated('sklearn.feature_selection.SelectKBest',config); ; de.upb.crc901.mlplan.services.MLPipelinePlan:addAttributeSelection(config,'sklearn.feature_selection.SelectKBest',pipe)	->	sl-SelectKBest-set-k(config,pipe)	->	sl-SelectKBest-set-score_func(config,pipe)
 
 
@@ -276,7 +276,7 @@ sl-SelectKBest-set-score_func;		sl-SelectKBest-set-score_func(c,p); c,p,t; ; Opt
 #   SelectPercentile   #
 #----------------------#
 
-#sl_SelectPercentile;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.feature_selection.SelectPercentile',config)
+sl_SelectPercentile;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.feature_selection.SelectPercentile',config)
 sl_SelectPercentile;			slConfigure_pp_as(config); config,pipe; associated('sklearn.feature_selection.SelectPercentile',config); ; de.upb.crc901.mlplan.services.MLPipelinePlan:addAttributeSelection(config,'sklearn.feature_selection.SelectPercentile',pipe)	->	sl-SelectPercentile-set-percentile(config,pipe)	->	sl-SelectPercentile-set-score_func(config,pipe)
 
 
@@ -316,7 +316,7 @@ sl-SparseRandomProjection-set-n_components;		sl-SparseRandomProjection-set-n_com
 #   SpectralEmbedding   #
 #-----------------------#
 
-#sl_SpectralEmbedding;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.manifold.SpectralEmbedding',config)
+sl_SpectralEmbedding;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.manifold.SpectralEmbedding',config)
 sl_SpectralEmbedding;			slConfigure_pp_as(config); config,pipe; associated('sklearn.manifold.SpectralEmbedding',config); ; de.upb.crc901.mlplan.services.MLPipelinePlan:addAttributeSelection(config,'sklearn.manifold.SpectralEmbedding',pipe)	->	sl-SpectralEmbedding-set-affinity(config,pipe)	->	sl-SpectralEmbedding-set-n_components(config,pipe)	->	sl-SpectralEmbedding-set-n_jobs(config,pipe)
 
 
@@ -336,7 +336,7 @@ sl-SpectralEmbedding-set-n_jobs;		sl-SpectralEmbedding-set-n_jobs(c,p); c,p,t; ;
 #   TSNE   #
 #----------#
 
-#sl_TSNE;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.manifold.TSNE',config)
+sl_TSNE;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.manifold.TSNE',config)
 sl_TSNE;			slConfigure_pp_as(config); config,pipe; associated('sklearn.manifold.TSNE',config); ; de.upb.crc901.mlplan.services.MLPipelinePlan:addAttributeSelection(config,'sklearn.manifold.TSNE',pipe)	->	sl-TSNE-set-angle(config,pipe)	->	sl-TSNE-set-early_exaggeration(config,pipe)	->	sl-TSNE-set-init(config,pipe)	->	sl-TSNE-set-learning_rate(config,pipe)	->	sl-TSNE-set-method(config,pipe)	->	sl-TSNE-set-metric(config,pipe)	->	sl-TSNE-set-min_grad_norm(config,pipe)	->	sl-TSNE-set-n_components(config,pipe)	->	sl-TSNE-set-n_iter(config,pipe)	->	sl-TSNE-set-n_iter_without_progress(config,pipe)	->	sl-TSNE-set-perplexity(config,pipe)	->	sl-TSNE-set-verbose(config,pipe)
 
 
@@ -374,7 +374,7 @@ sl-TSNE-set-verbose;		sl-TSNE-set-verbose(c,p); c,p,t; ; OptionsFor_TSNE_verbose
 #   VarianceThreshold   #
 #-----------------------#
 
-#sl_VarianceThreshold;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.feature_selection.VarianceThreshold',config)
+sl_VarianceThreshold;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.feature_selection.VarianceThreshold',config)
 sl_VarianceThreshold;			slConfigure_pp_as(config); config,pipe; associated('sklearn.feature_selection.VarianceThreshold',config); ; de.upb.crc901.mlplan.services.MLPipelinePlan:addAttributeSelection(config,'sklearn.feature_selection.VarianceThreshold',pipe)	->	sl-VarianceThreshold-set-threshold(config,pipe)
 
 
@@ -390,7 +390,7 @@ sl-VarianceThreshold-set-threshold;		sl-VarianceThreshold-set-threshold(c,p); c,
 #   AdditiveChi2Sampler   #
 #-------------------------#
 
-#sl_AdditiveChi2Sampler;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.kernel_approximation.AdditiveChi2Sampler',config)
+sl_AdditiveChi2Sampler;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.kernel_approximation.AdditiveChi2Sampler',config)
 sl_AdditiveChi2Sampler;			slConfigure_pp_as(config); config,pipe; associated('sklearn.kernel_approximation.AdditiveChi2Sampler',config); ; de.upb.crc901.mlplan.services.MLPipelinePlan:addAttributeSelection(config,'sklearn.kernel_approximation.AdditiveChi2Sampler',pipe)	->	sl-AdditiveChi2Sampler-set-sample_steps(config,pipe)
 
 
@@ -406,7 +406,7 @@ sl-AdditiveChi2Sampler-set-sample_steps;		sl-AdditiveChi2Sampler-set-sample_step
 #   BernoulliRBM   #
 #------------------#
 
-#sl_BernoulliRBM;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.neural_network.BernoulliRBM',config)
+sl_BernoulliRBM;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.neural_network.BernoulliRBM',config)
 sl_BernoulliRBM;			slConfigure_pp_as(config); config,pipe; associated('sklearn.neural_network.BernoulliRBM',config); ; de.upb.crc901.mlplan.services.MLPipelinePlan:addAttributeSelection(config,'sklearn.neural_network.BernoulliRBM',pipe)	->	sl-BernoulliRBM-set-batch_size(config,pipe)	->	sl-BernoulliRBM-set-learning_rate(config,pipe)	->	sl-BernoulliRBM-set-n_components(config,pipe)	->	sl-BernoulliRBM-set-n_iter(config,pipe)	->	sl-BernoulliRBM-set-verbose(config,pipe)
 
 
@@ -430,7 +430,7 @@ sl-BernoulliRBM-set-verbose;		sl-BernoulliRBM-set-verbose(c,p); c,p,t; ; Options
 #   Binarizer   #
 #---------------#
 
-#sl_Binarizer;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.preprocessing.Binarizer',config)
+sl_Binarizer;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.preprocessing.Binarizer',config)
 sl_Binarizer;			slConfigure_pp_as(config); config,pipe; associated('sklearn.preprocessing.Binarizer',config); ; de.upb.crc901.mlplan.services.MLPipelinePlan:addAttributeSelection(config,'sklearn.preprocessing.Binarizer',pipe)	->	sl-Binarizer-set-copy(config,pipe)	->	sl-Binarizer-set-threshold(config,pipe)
 
 
@@ -448,7 +448,7 @@ sl-Binarizer-set-threshold;		sl-Binarizer-set-threshold(c,p); c,p,t; ; OptionsFo
 #   DictionaryLearning   #
 #------------------------#
 
-#sl_DictionaryLearning;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.decomposition.DictionaryLearning',config)
+sl_DictionaryLearning;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.decomposition.DictionaryLearning',config)
 sl_DictionaryLearning;			slConfigure_pp_as(config); config,pipe; associated('sklearn.decomposition.DictionaryLearning',config); ; de.upb.crc901.mlplan.services.MLPipelinePlan:addAttributeSelection(config,'sklearn.decomposition.DictionaryLearning',pipe)	->	sl-DictionaryLearning-set-alpha(config,pipe)	->	sl-DictionaryLearning-set-fit_algorithm(config,pipe)	->	sl-DictionaryLearning-set-max_iter(config,pipe)	->	sl-DictionaryLearning-set-n_jobs(config,pipe)	->	sl-DictionaryLearning-set-split_sign(config,pipe)	->	sl-DictionaryLearning-set-tol(config,pipe)	->	sl-DictionaryLearning-set-transform_algorithm(config,pipe)	->	sl-DictionaryLearning-set-verbose(config,pipe)
 
 
@@ -478,7 +478,7 @@ sl-DictionaryLearning-set-verbose;		sl-DictionaryLearning-set-verbose(c,p); c,p,
 #   FactorAnalysis   #
 #--------------------#
 
-#sl_FactorAnalysis;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.decomposition.FactorAnalysis',config)
+sl_FactorAnalysis;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.decomposition.FactorAnalysis',config)
 sl_FactorAnalysis;			slConfigure_pp_as(config); config,pipe; associated('sklearn.decomposition.FactorAnalysis',config); ; de.upb.crc901.mlplan.services.MLPipelinePlan:addAttributeSelection(config,'sklearn.decomposition.FactorAnalysis',pipe)	->	sl-FactorAnalysis-set-copy(config,pipe)	->	sl-FactorAnalysis-set-iterated_power(config,pipe)	->	sl-FactorAnalysis-set-max_iter(config,pipe)	->	sl-FactorAnalysis-set-random_state(config,pipe)	->	sl-FactorAnalysis-set-svd_method(config,pipe)	->	sl-FactorAnalysis-set-tol(config,pipe)
 
 
@@ -504,7 +504,7 @@ sl-FactorAnalysis-set-tol;		sl-FactorAnalysis-set-tol(c,p); c,p,t; ; OptionsFor_
 #   GaussianRandomProjection   #
 #------------------------------#
 
-#sl_GaussianRandomProjection;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.random_projection.GaussianRandomProjection',config)
+sl_GaussianRandomProjection;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.random_projection.GaussianRandomProjection',config)
 sl_GaussianRandomProjection;			slConfigure_pp_as(config); config,pipe; associated('sklearn.random_projection.GaussianRandomProjection',config); ; de.upb.crc901.mlplan.services.MLPipelinePlan:addAttributeSelection(config,'sklearn.random_projection.GaussianRandomProjection',pipe)	->	sl-GaussianRandomProjection-set-eps(config,pipe)	->	sl-GaussianRandomProjection-set-n_components(config,pipe)
 
 
@@ -522,7 +522,7 @@ sl-GaussianRandomProjection-set-n_components;		sl-GaussianRandomProjection-set-n
 #   GraphLasso   #
 #----------------#
 
-#sl_GraphLasso;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.covariance.GraphLasso',config)
+sl_GraphLasso;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.covariance.GraphLasso',config)
 sl_GraphLasso;			slConfigure_pp_as(config); config,pipe; associated('sklearn.covariance.GraphLasso',config); ; de.upb.crc901.mlplan.services.MLPipelinePlan:addAttributeSelection(config,'sklearn.covariance.GraphLasso',pipe)	->	sl-GraphLasso-set-alpha(config,pipe)	->	sl-GraphLasso-set-assume_centered(config,pipe)	->	sl-GraphLasso-set-enet_tol(config,pipe)	->	sl-GraphLasso-set-max_iter(config,pipe)	->	sl-GraphLasso-set-mode(config,pipe)	->	sl-GraphLasso-set-tol(config,pipe)	->	sl-GraphLasso-set-verbose(config,pipe)
 
 
@@ -550,7 +550,7 @@ sl-GraphLasso-set-verbose;		sl-GraphLasso-set-verbose(c,p); c,p,t; ; OptionsFor_
 #   GraphLassoCV   #
 #------------------#
 
-#sl_GraphLassoCV;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.covariance.GraphLassoCV',config)
+sl_GraphLassoCV;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.covariance.GraphLassoCV',config)
 sl_GraphLassoCV;			slConfigure_pp_as(config); config,pipe; associated('sklearn.covariance.GraphLassoCV',config); ; de.upb.crc901.mlplan.services.MLPipelinePlan:addAttributeSelection(config,'sklearn.covariance.GraphLassoCV',pipe)	->	sl-GraphLassoCV-set-alphas(config,pipe)	->	sl-GraphLassoCV-set-assume_centered(config,pipe)	->	sl-GraphLassoCV-set-enet_tol(config,pipe)	->	sl-GraphLassoCV-set-max_iter(config,pipe)	->	sl-GraphLassoCV-set-mode(config,pipe)	->	sl-GraphLassoCV-set-n_jobs(config,pipe)	->	sl-GraphLassoCV-set-n_refinements(config,pipe)	->	sl-GraphLassoCV-set-tol(config,pipe)	->	sl-GraphLassoCV-set-verbose(config,pipe)
 
 
@@ -582,7 +582,7 @@ sl-GraphLassoCV-set-verbose;		sl-GraphLassoCV-set-verbose(c,p); c,p,t; ; Options
 #   Imputer   #
 #-------------#
 
-#sl_Imputer;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.preprocessing.Imputer',config)
+sl_Imputer;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.preprocessing.Imputer',config)
 sl_Imputer;			slConfigure_pp_as(config); config,pipe; associated('sklearn.preprocessing.Imputer',config); ; de.upb.crc901.mlplan.services.MLPipelinePlan:addAttributeSelection(config,'sklearn.preprocessing.Imputer',pipe)	->	sl-Imputer-set-axis(config,pipe)	->	sl-Imputer-set-copy(config,pipe)	->	sl-Imputer-set-missing_values(config,pipe)	->	sl-Imputer-set-strategy(config,pipe)	->	sl-Imputer-set-verbose(config,pipe)
 
 
@@ -606,7 +606,7 @@ sl-Imputer-set-verbose;		sl-Imputer-set-verbose(c,p); c,p,t; ; OptionsFor_Impute
 #   KernelCenterer   #
 #--------------------#
 
-#sl_KernelCenterer;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.preprocessing.KernelCenterer',config)
+sl_KernelCenterer;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.preprocessing.KernelCenterer',config)
 sl_KernelCenterer;			slConfigure_pp_as(config); config,pipe; associated('sklearn.preprocessing.KernelCenterer',config); ; de.upb.crc901.mlplan.services.MLPipelinePlan:addAttributeSelection(config,'sklearn.preprocessing.KernelCenterer',pipe)
 
 
@@ -620,7 +620,7 @@ sl_KernelCenterer;			slConfigure_pp_as(config); config,pipe; associated('sklearn
 #   LatentDirichletAllocation   #
 #-------------------------------#
 
-#sl_LatentDirichletAllocation;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.decomposition.LatentDirichletAllocation',config)
+sl_LatentDirichletAllocation;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.decomposition.LatentDirichletAllocation',config)
 sl_LatentDirichletAllocation;			slConfigure_pp_as(config); config,pipe; associated('sklearn.decomposition.LatentDirichletAllocation',config); ; de.upb.crc901.mlplan.services.MLPipelinePlan:addAttributeSelection(config,'sklearn.decomposition.LatentDirichletAllocation',pipe)	->	sl-LatentDirichletAllocation-set-batch_size(config,pipe)	->	sl-LatentDirichletAllocation-set-evaluate_every(config,pipe)	->	sl-LatentDirichletAllocation-set-learning_decay(config,pipe)	->	sl-LatentDirichletAllocation-set-learning_offset(config,pipe)	->	sl-LatentDirichletAllocation-set-max_doc_update_iter(config,pipe)	->	sl-LatentDirichletAllocation-set-max_iter(config,pipe)	->	sl-LatentDirichletAllocation-set-mean_change_tol(config,pipe)	->	sl-LatentDirichletAllocation-set-n_components(config,pipe)	->	sl-LatentDirichletAllocation-set-n_jobs(config,pipe)	->	sl-LatentDirichletAllocation-set-perp_tol(config,pipe)	->	sl-LatentDirichletAllocation-set-total_samples(config,pipe)	->	sl-LatentDirichletAllocation-set-verbose(config,pipe)
 
 
@@ -674,7 +674,7 @@ sl-MaxAbsScaler-set-copy;		sl-MaxAbsScaler-set-copy(c,p); c,p,t; ; OptionsFor_Ma
 #   MinMaxScaler   #
 #------------------#
 
-#sl_MinMaxScaler;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.preprocessing.MinMaxScaler',config)
+sl_MinMaxScaler;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.preprocessing.MinMaxScaler',config)
 sl_MinMaxScaler;			slConfigure_pp_as(config); config,pipe; associated('sklearn.preprocessing.MinMaxScaler',config); ; de.upb.crc901.mlplan.services.MLPipelinePlan:addAttributeSelection(config,'sklearn.preprocessing.MinMaxScaler',pipe)	->	sl-MinMaxScaler-set-copy(config,pipe)	->	sl-MinMaxScaler-set-feature_range(config,pipe)
 
 
@@ -710,7 +710,7 @@ sl-Normalizer-set-norm;		sl-Normalizer-set-norm(c,p); c,p,t; ; OptionsFor_Normal
 #   QuantileTransformer   #
 #-------------------------#
 
-#sl_QuantileTransformer;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.preprocessing.QuantileTransformer',config)
+sl_QuantileTransformer;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.preprocessing.QuantileTransformer',config)
 sl_QuantileTransformer;			slConfigure_pp_as(config); config,pipe; associated('sklearn.preprocessing.QuantileTransformer',config); ; de.upb.crc901.mlplan.services.MLPipelinePlan:addAttributeSelection(config,'sklearn.preprocessing.QuantileTransformer',pipe)	->	sl-QuantileTransformer-set-copy(config,pipe)	->	sl-QuantileTransformer-set-ignore_implicit_zeros(config,pipe)	->	sl-QuantileTransformer-set-n_quantiles(config,pipe)	->	sl-QuantileTransformer-set-output_distribution(config,pipe)	->	sl-QuantileTransformer-set-subsample(config,pipe)
 
 
@@ -734,7 +734,7 @@ sl-QuantileTransformer-set-subsample;		sl-QuantileTransformer-set-subsample(c,p)
 #   RandomizedLogisticRegression   #
 #----------------------------------#
 
-#sl_RandomizedLogisticRegression;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.linear_model.RandomizedLogisticRegression',config)
+sl_RandomizedLogisticRegression;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.linear_model.RandomizedLogisticRegression',config)
 sl_RandomizedLogisticRegression;			slConfigure_pp_as(config); config,pipe; associated('sklearn.linear_model.RandomizedLogisticRegression',config); ; de.upb.crc901.mlplan.services.MLPipelinePlan:addAttributeSelection(config,'sklearn.linear_model.RandomizedLogisticRegression',pipe)	->	sl-RandomizedLogisticRegression-set-C(config,pipe)	->	sl-RandomizedLogisticRegression-set-fit_intercept(config,pipe)	->	sl-RandomizedLogisticRegression-set-n_jobs(config,pipe)	->	sl-RandomizedLogisticRegression-set-n_resampling(config,pipe)	->	sl-RandomizedLogisticRegression-set-normalize(config,pipe)	->	sl-RandomizedLogisticRegression-set-pre_dispatch(config,pipe)	->	sl-RandomizedLogisticRegression-set-sample_fraction(config,pipe)	->	sl-RandomizedLogisticRegression-set-scaling(config,pipe)	->	sl-RandomizedLogisticRegression-set-selection_threshold(config,pipe)	->	sl-RandomizedLogisticRegression-set-tol(config,pipe)	->	sl-RandomizedLogisticRegression-set-verbose(config,pipe)
 
 
