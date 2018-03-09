@@ -12,9 +12,26 @@ import org.apache.commons.io.FileUtils;
 
 public class PythonResultsPreparer {
 
-  private static final String SQL_TABLE = "coldstart_results";
-  private static final String BASE_FOLDER_NAME = "results" + File.separator + "ecml" + File.separator + "asl_";
-  private static final int TIMEOUT = 86400;
+  private enum EApproach {
+    TPOT("tpotb_"), AUTOSKLEARN("asl_");
+
+    private final String string;
+
+    private EApproach(final String string) {
+      this.string = string;
+    }
+
+    @Override
+    public String toString() {
+      return this.string;
+    }
+  }
+
+  private static final EApproach APPROACH = EApproach.TPOT;
+  private static final int TIMEOUT = 3600;
+  private static final String SQL_TABLE = "result_warmstart";
+
+  private static final String BASE_FOLDER_NAME = "results" + File.separator + "ecml" + File.separator + APPROACH;
   private static final File RESULTS_FOLDER = new File(BASE_FOLDER_NAME + TIMEOUT);
 
   public static void main(final String[] args) throws IOException {
@@ -29,6 +46,8 @@ public class PythonResultsPreparer {
       int k = Integer.valueOf(file.getName().split("_")[0]);
       errorRates.put(k, (1 - accuracy));
     }
+
+    System.out.println(errorRates);
 
     StringBuffer sb = new StringBuffer();
     sb.append("DELETE FROM " + SQL_TABLE + " WHERE timeout=" + TIMEOUT + ";\n");
@@ -52,8 +71,10 @@ public class PythonResultsPreparer {
   }
 
   private static String getDataset(final int k) {
-    String[] datasets = { "abalone", "amazon", "cars", "cifar10", "cifar10small", "convex", "credit-g", "dexter", "dorothea", "gisette", "kddcup09", "krvskp", "madelon", "mnist",
-        "mnistrotationback", "secom", "semeion", "shuttle", "waveform", "wine", "yeast" };
+    String[] datasets = { "vowel", "page-blocks", "glass", "iris", "ionosphere", "segment" };
+    // String[] datasets = { "abalone", "amazon", "cars", "cifar10", "cifar10small", "convex",
+    // "credit-g", "dexter", "dorothea", "gisette", "kddcup09", "krvskp", "madelon", "mnist",
+    // "mnistrotationback", "secom", "semeion", "shuttle", "waveform", "wine", "yeast" };
 
     int datasetsIndex = k / 20;
     return datasets[datasetsIndex];

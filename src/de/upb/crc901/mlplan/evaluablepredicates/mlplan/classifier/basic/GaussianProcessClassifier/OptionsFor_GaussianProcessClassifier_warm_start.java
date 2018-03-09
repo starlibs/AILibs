@@ -1,9 +1,6 @@
 package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.basic.GaussianProcessClassifier;
 
-import de.upb.crc901.mlplan.evaluablepredicates.mlplan.OptionsPredicate;
-
-import java.util.Arrays;
-import java.util.List;
+import de.upb.crc901.mlplan.evaluablepredicates.mlplan.DisabledOptionPredicate;
 
 /*
     warm_start : bool, optional (default: False)
@@ -15,12 +12,6 @@ import java.util.List;
 
 
 */
-public class OptionsFor_GaussianProcessClassifier_warm_start extends OptionsPredicate {
+public class OptionsFor_GaussianProcessClassifier_warm_start extends DisabledOptionPredicate {
 
-  private static List<Object> validValues = Arrays.asList(new Object[] { "true" });
-
-  @Override
-  protected List<? extends Object> getValidValues() {
-    return validValues;
-  }
 }
