@@ -164,6 +164,7 @@ public class MLServicePipeline implements Classifier, Serializable {
 		// create train composition
 		for (String ppFieldname : this.PPFieldNames) {
 			String dataOutFieldName = "data" + invocationNumber;
+			trainEC.withAddedMethodOperation("Empty", ppFieldname, "train", dataInFieldName);
 			trainEC.withAddedMethodOperation(dataOutFieldName, ppFieldname, "preprocess", dataInFieldName);
 			// output of this pipe is the input of the next one:
 			dataInFieldName = dataOutFieldName;

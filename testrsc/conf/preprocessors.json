@@ -3,7 +3,7 @@
 
     },
     "de.upb.crc901.services.wrappers.WekaFilterWrapper" : {
-        "methods" : {"preprocess":{}}
+        "methods" : {"preprocess":{}, "train":{}}
     }, 
     "$base_weka_filter_config$" : {
         "wrapper" : "de.upb.crc901.services.wrappers.WekaFilterWrapper",
@@ -16,7 +16,7 @@
         "extends" : ["$base_weka_filter_config$"]
     },
     "de.upb.crc901.services.wrappers.WekaAttributeSelectionWrapper":{
-        "methods" : ["SelectAttributes", "reduceDimensionality", "preprocess"]
+        "methods" : {"preprocess":{}, "train":{}}
     },
     "$base_weka_attributeselection_config$" : {
         "extends" : ["$base_weka_preprocessor_config$"],

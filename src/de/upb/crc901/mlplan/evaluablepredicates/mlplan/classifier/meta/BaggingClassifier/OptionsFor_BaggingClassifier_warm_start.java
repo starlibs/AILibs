@@ -17,7 +17,7 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.meta.BaggingC
     */
     public class OptionsFor_BaggingClassifier_warm_start extends OptionsPredicate {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{"true"}); // default is false
+        private static List<Object> validValues = Arrays.asList(new Object[]{}); // default is false
 
         @Override
         protected List<? extends Object> getValidValues() {
