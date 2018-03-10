@@ -3,7 +3,8 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.ensemble.Extr
     import java.util.Arrays;
     import java.util.List;
 
-    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.OptionsPredicate;
+import de.upb.crc901.mlplan.evaluablepredicates.mlplan.DisabledOptionPredicate;
+import de.upb.crc901.mlplan.evaluablepredicates.mlplan.OptionsPredicate;
     /*
         warm_start : bool, optional (default=False)
         When set to ``True``, reuse the solution of the previous call to fit
@@ -12,13 +13,8 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.ensemble.Extr
 
 
     */
-    public class OptionsFor_ExtraTreesClassifier_warm_start extends OptionsPredicate {
+    public class OptionsFor_ExtraTreesClassifier_warm_start extends DisabledOptionPredicate {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{"true"}); // default is false
-
-        @Override
-        protected List<? extends Object> getValidValues() {
-            return validValues;
-        }
+        
     }
     

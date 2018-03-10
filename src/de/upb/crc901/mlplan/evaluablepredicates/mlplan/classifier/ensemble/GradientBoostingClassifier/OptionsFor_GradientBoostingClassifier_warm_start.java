@@ -3,7 +3,8 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.ensemble.Grad
     import java.util.Arrays;
     import java.util.List;
 
-    import de.upb.crc901.mlplan.evaluablepredicates.mlplan.OptionsPredicate;
+import de.upb.crc901.mlplan.evaluablepredicates.mlplan.DisabledOptionPredicate;
+import de.upb.crc901.mlplan.evaluablepredicates.mlplan.OptionsPredicate;
     /*
         warm_start : bool, default: False
         When set to ``True``, reuse the solution of the previous call to fit
@@ -12,13 +13,6 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.classifier.ensemble.Grad
 
 
     */
-    public class OptionsFor_GradientBoostingClassifier_warm_start extends OptionsPredicate {
-        
-        private static List<Object> validValues = Arrays.asList(new Object[]{"true"}); // default is false
-
-        @Override
-        protected List<? extends Object> getValidValues() {
-            return validValues;
-        }
+    public class OptionsFor_GradientBoostingClassifier_warm_start extends DisabledOptionPredicate {
     }
     
