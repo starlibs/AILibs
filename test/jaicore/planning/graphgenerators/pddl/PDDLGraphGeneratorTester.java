@@ -1,8 +1,11 @@
 package jaicore.planning.graphgenerators.pddl;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 import javax.swing.JFileChooser;
@@ -10,13 +13,10 @@ import javax.swing.JFileChooser;
 import org.junit.Test;
 
 import fr.uga.pddl4j.encoding.CodedProblem;
-import fr.uga.pddl4j.parser.ErrorManager;
 import fr.uga.pddl4j.planners.ProblemFactory;
-import fr.uga.pddl4j.planners.hsp.Node;
-import fr.uga.pddl4j.util.BitState;
+import fr.uga.pddl4j.planners.hsp.HSP;
+import fr.uga.pddl4j.util.Plan;
 import jaicore.search.algorithms.standard.astar.AStar;
-import jaicore.search.algorithms.standard.core.ParentDiscarding;
-import jaicore.search.structure.core.GraphGenerator;
 
 public class PDDLGraphGeneratorTester {
 
@@ -29,12 +29,12 @@ public class PDDLGraphGeneratorTester {
 		chooser.setDialogTitle(" Open a Domain-File");
 		chooser.showOpenDialog(null);
 		domain = chooser.getSelectedFile();
-		domain = new File("F:/Desktop/pddl4j/pddl/blocksworld/domain.pddl");
-		
+		domain = new File("/home/jkoepe/git/pddl4j/pddl/blocksworld/domain.pddl");
+				
 		chooser.setDialogTitle("Open a Problme-File");
 		chooser.showOpenDialog(null);
 		problem = chooser.getSelectedFile();
-		problem = new File("F:/Desktop/pddl4j/pddl/blocksworld/p15.pddl");
+		problem = new File("/home/jkoepe/git/pddl4j/pddl/blocksworld/p15.pddl");
 		
 		if(domain.exists() && problem.exists()) {
 			PDDLGraphGenerator gen = new PDDLGraphGenerator(domain, problem);
@@ -46,6 +46,31 @@ public class PDDLGraphGeneratorTester {
 			
 			List<PDDLNode> solution = search.nextSolution();
 			assertNotNull(solution);
+			
+			Plan plan = gen.extractPlan(solution);
+			assertNotNull(plan);
+			
+			plan.actions().stream().forEach(n->System.out.println(n.getName()));
+			
+			ProblemFactory factory = new ProblemFactory();
+			try {
+				factory.parse(domain, problem);
+				
+				CodedProblem enc = factory.encode();
+				
+				HSP hspComp = new HSP();
+				
+//				Plan hspPlan = hspComp.search(enc);
+				
+//				assertNotNull(hspPlan);
+								
+			} catch (IOException e) {
+				System.out.println("The comparrison with HSP did not work");
+				e.printStackTrace();
+			}
+			
+			
+			
 		}
 		else
 			System.out.println("Either the domain file was not found or the problem file");

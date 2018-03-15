@@ -17,6 +17,7 @@ import fr.uga.pddl4j.planners.ProblemFactory;
 import fr.uga.pddl4j.planners.hsp.Node;
 import fr.uga.pddl4j.util.BitOp;
 import fr.uga.pddl4j.util.BitState;
+import fr.uga.pddl4j.util.SequentialPlan;
 import jaicore.search.graphgenerators.nqueens.QueenNode;
 import jaicore.search.structure.core.AbstractGraphGenerator;
 import jaicore.search.structure.core.GraphGenerator;
@@ -124,6 +125,22 @@ public class PDDLGraphGenerator extends AbstractGraphGenerator<PDDLNode,String> 
 
 	public void setProblem(CodedProblem problem) {
 		this.problem = problem;
+	}
+	
+	public SequentialPlan extractPlan(List<PDDLNode> solution) {
+		int i = solution.size()-1;
+		Node n = solution.get(i).getNode();
+		SequentialPlan plan = new SequentialPlan();
+		while(n.getOperator() != -1) {
+			final BitOp op = problem.getOperators().get(n.getOperator());
+			plan.add(0, op);
+			i--;
+			System.out.println(i);
+			n = solution.get(i).getNode();
+		}
+		
+		return plan;
+		
 	}
 	
 }
