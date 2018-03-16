@@ -502,6 +502,9 @@ sklearn.decomposition.RandomizedPCA:String
 sklearn.decomposition.SparsePCA:String
 sklearn.cross_decomposition.CCA:String
 sklearn.cluster.FeatureAgglomeration:String
+sklearn.kernel_approximation.Nystroem:String
+sklearn.kernel_approximation.RBFSampler:String
+sklearn.kernel_approximation.SkewedChi2Sampler:String
 
 
 #--------------------#
@@ -641,7 +644,14 @@ sklearn.cluster.FeatureAgglomeration:String
 -linkage:String
 -n_clusters:String
 -pooling_func:String
-
+-coef0:String
+-degree:String
+-gamma:String
+-kernel:String
+-kernel_params:String
+-n_components:String
+-random_state:String
+-skewedness:String
 
 ## SVC Kernels
 poly:String

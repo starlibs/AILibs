@@ -11,3 +11,10 @@ selectSLPreprocessing; chooseFeaturePreprocessor(config); config; ; ; slChoose_p
 configureSLPreprocessing; configureFeaturePreprocessor(config); config; ; ; slConfigure_pp_pca(config)
 
 INCLUDE testrsc/services/gen/sl_pca_pp.methods
+
+# kernel
+
+selectSLPreprocessing; chooseFeaturePreprocessor(config); config; ; ; slChoose_pp_kernelapprox(config)
+configureSLPreprocessing; configureFeaturePreprocessor(config); config; ; ; slConfigure_pp_kernelapprox(config)
+
+INCLUDE testrsc/services/gen/sl_kernelapprox_pp.methods
