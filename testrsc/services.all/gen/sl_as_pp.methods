@@ -806,3 +806,28 @@ sl-StandardScaler-set-with_mean;		sl-StandardScaler-set-with_mean(c,p); c,p; ; ;
 sl-StandardScaler-set-with_mean;		sl-StandardScaler-set-with_mean(c,p); c,p,t; ; OptionsFor_StandardScaler_with_mean(t); de.upb.crc901.mlplan.services.MLPipelinePlan:addOptions(c,p,'-with_mean', t)
 sl-StandardScaler-set-with_std;		sl-StandardScaler-set-with_std(c,p); c,p; ; ;  noop()
 sl-StandardScaler-set-with_std;		sl-StandardScaler-set-with_std(c,p); c,p,t; ; OptionsFor_StandardScaler_with_std(t); de.upb.crc901.mlplan.services.MLPipelinePlan:addOptions(c,p,'-with_std', t)
+
+
+#---------#
+#   CCA   #
+#---------#
+
+sl_CCA;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.cross_decomposition.CCA',config)
+sl_CCA;			slConfigure_pp_as(config); config,pipe; associated('sklearn.cross_decomposition.CCA',config); ; de.upb.crc901.mlplan.services.MLPipelinePlan:addAttributeSelection(config,'sklearn.cross_decomposition.CCA',pipe)	->	sl-CCA-set-copy(config,pipe)	->	sl-CCA-set-max_iter(config,pipe)	->	sl-CCA-set-n_components(config,pipe)	->	sl-CCA-set-scale(config,pipe)	->	sl-CCA-set-tol(config,pipe)
+
+
+#--------------------------------------#
+#     Option Configuration for CCA     #
+#--------------------------------------#
+
+sl-CCA-set-copy;		sl-CCA-set-copy(c,p); c,p; ; ;  noop()
+sl-CCA-set-copy;		sl-CCA-set-copy(c,p); c,p,t; ; OptionsFor_CCA_copy(t); de.upb.crc901.mlplan.services.MLPipelinePlan:addOptions(c,p,'-copy', t)
+sl-CCA-set-max_iter;		sl-CCA-set-max_iter(c,p); c,p; ; ;  noop()
+sl-CCA-set-max_iter;		sl-CCA-set-max_iter(c,p); c,p,t; ; OptionsFor_CCA_max_iter(t); de.upb.crc901.mlplan.services.MLPipelinePlan:addOptions(c,p,'-max_iter', t)
+sl-CCA-set-n_components;		sl-CCA-set-n_components(c,p); c,p; ; ;  noop()
+sl-CCA-set-n_components;		sl-CCA-set-n_components(c,p); c,p,t; ; OptionsFor_CCA_n_components(t); de.upb.crc901.mlplan.services.MLPipelinePlan:addOptions(c,p,'-n_components', t)
+sl-CCA-set-scale;		sl-CCA-set-scale(c,p); c,p; ; ;  noop()
+sl-CCA-set-scale;		sl-CCA-set-scale(c,p); c,p,t; ; OptionsFor_CCA_scale(t); de.upb.crc901.mlplan.services.MLPipelinePlan:addOptions(c,p,'-scale', t)
+sl-CCA-set-tol;		sl-CCA-set-tol(c,p); c,p; ; ;  noop()
+sl-CCA-set-tol;		sl-CCA-set-tol(c,p); c,p,t; ; OptionsFor_CCA_tol(t); de.upb.crc901.mlplan.services.MLPipelinePlan:addOptions(c,p,'-tol', t)
+

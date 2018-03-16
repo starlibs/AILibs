@@ -492,8 +492,6 @@ sklearn.preprocessing.MinMaxScaler:String
 sklearn.preprocessing.Normalizer:String
 sklearn.preprocessing.QuantileTransformer:String
 sklearn.linear_model.RandomizedLogisticRegression:String
-/Users/aminfaez/anaconda3/lib/python3.6/site-packages/sklearn/utils/deprecation.py:58: DeprecationWarning: Class RandomizedLogisticRegression is deprecated; The class RandomizedLogisticRegression is deprecated in 0.19 and will be removed in 0.21.
-  warnings.warn(msg, category=DeprecationWarning)
 sklearn.preprocessing.RobustScaler:String
 sklearn.preprocessing.StandardScaler:String
 sklearn.decomposition.IncrementalPCA:String
@@ -502,6 +500,7 @@ sklearn.decomposition.MiniBatchSparsePCA:String
 sklearn.decomposition.PCA:String
 sklearn.decomposition.RandomizedPCA:String
 sklearn.decomposition.SparsePCA:String
+sklearn.cross_decomposition.CCA:String
 
 
 #--------------------#
@@ -636,6 +635,7 @@ sklearn.decomposition.SparsePCA:String
 -svd_solver:String
 -U_init:String
 -V_init:String
+
 
 ## SVC Kernels
 poly:String
