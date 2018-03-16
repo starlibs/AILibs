@@ -221,6 +221,12 @@ public abstract class RandomCompletionEvaluator<V extends Comparable<V>> impleme
 									// TODO Auto-generated method stub
 									return false;
 								}
+
+								@Override
+								public void setNodeNumbering(boolean nodenumbering) {
+									// TODO Auto-generated method stub
+									
+								}
 							}, random);
 
 							/* now complete the current path by the dfs-solution */
