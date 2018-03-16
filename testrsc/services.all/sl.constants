@@ -496,6 +496,12 @@ sklearn.linear_model.RandomizedLogisticRegression:String
   warnings.warn(msg, category=DeprecationWarning)
 sklearn.preprocessing.RobustScaler:String
 sklearn.preprocessing.StandardScaler:String
+sklearn.decomposition.IncrementalPCA:String
+sklearn.decomposition.KernelPCA:String
+sklearn.decomposition.MiniBatchSparsePCA:String
+sklearn.decomposition.PCA:String
+sklearn.decomposition.RandomizedPCA:String
+sklearn.decomposition.SparsePCA:String
 
 
 #--------------------#
@@ -601,6 +607,35 @@ sklearn.preprocessing.StandardScaler:String
 -with_scaling:String
 -with_mean:String
 -with_std:String
+
+-batch_size:String
+-copy:String
+-n_components:String
+-whiten:String
+-alpha:String
+-coef0:String
+-copy_X:String
+-degree:String
+-eigen_solver:String
+-fit_inverse_transform:String
+-gamma:String
+-kernel:String
+-kernel_params:String
+-max_iter:String
+-n_jobs:String
+-random_state:String
+-remove_zero_eig:String
+-tol:String
+-callback:String
+-method:String
+-n_iter:String
+-ridge_alpha:String
+-shuffle:String
+-verbose:String
+-iterated_power:String
+-svd_solver:String
+-U_init:String
+-V_init:String
 
 ## SVC Kernels
 poly:String
