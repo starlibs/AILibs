@@ -831,3 +831,26 @@ sl-CCA-set-scale;		sl-CCA-set-scale(c,p); c,p,t; ; OptionsFor_CCA_scale(t); de.u
 sl-CCA-set-tol;		sl-CCA-set-tol(c,p); c,p; ; ;  noop()
 sl-CCA-set-tol;		sl-CCA-set-tol(c,p); c,p,t; ; OptionsFor_CCA_tol(t); de.upb.crc901.mlplan.services.MLPipelinePlan:addOptions(c,p,'-tol', t)
 
+
+#--------------------------#
+#   FeatureAgglomeration   #
+#--------------------------#
+
+sl_FeatureAgglomeration;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.cluster.FeatureAgglomeration',config)
+sl_FeatureAgglomeration;			slConfigure_pp_as(config); config,pipe; associated('sklearn.cluster.FeatureAgglomeration',config); ; de.upb.crc901.mlplan.services.MLPipelinePlan:addAttributeSelection(config,'sklearn.cluster.FeatureAgglomeration',pipe)	->	sl-FeatureAgglomeration-set-affinity(config,pipe)	->	sl-FeatureAgglomeration-set-compute_full_tree(config,pipe)	->	sl-FeatureAgglomeration-set-linkage(config,pipe)	->	sl-FeatureAgglomeration-set-n_clusters(config,pipe)	->	sl-FeatureAgglomeration-set-pooling_func(config,pipe)
+
+
+#-------------------------------------------------------#
+#     Option Configuration for FeatureAgglomeration     #
+#-------------------------------------------------------#
+
+sl-FeatureAgglomeration-set-affinity;		sl-FeatureAgglomeration-set-affinity(c,p); c,p; ; ;  noop()
+sl-FeatureAgglomeration-set-affinity;		sl-FeatureAgglomeration-set-affinity(c,p); c,p,t; ; OptionsFor_FeatureAgglomeration_affinity(t); de.upb.crc901.mlplan.services.MLPipelinePlan:addOptions(c,p,'-affinity', t)
+sl-FeatureAgglomeration-set-compute_full_tree;		sl-FeatureAgglomeration-set-compute_full_tree(c,p); c,p; ; ;  noop()
+sl-FeatureAgglomeration-set-compute_full_tree;		sl-FeatureAgglomeration-set-compute_full_tree(c,p); c,p,t; ; OptionsFor_FeatureAgglomeration_compute_full_tree(t); de.upb.crc901.mlplan.services.MLPipelinePlan:addOptions(c,p,'-compute_full_tree', t)
+sl-FeatureAgglomeration-set-linkage;		sl-FeatureAgglomeration-set-linkage(c,p); c,p; ; ;  noop()
+sl-FeatureAgglomeration-set-linkage;		sl-FeatureAgglomeration-set-linkage(c,p); c,p,t; ; OptionsFor_FeatureAgglomeration_linkage(t); de.upb.crc901.mlplan.services.MLPipelinePlan:addOptions(c,p,'-linkage', t)
+sl-FeatureAgglomeration-set-n_clusters;		sl-FeatureAgglomeration-set-n_clusters(c,p); c,p; ; ;  noop()
+sl-FeatureAgglomeration-set-n_clusters;		sl-FeatureAgglomeration-set-n_clusters(c,p); c,p,t; ; OptionsFor_FeatureAgglomeration_n_clusters(t); de.upb.crc901.mlplan.services.MLPipelinePlan:addOptions(c,p,'-n_clusters', t)
+sl-FeatureAgglomeration-set-pooling_func;		sl-FeatureAgglomeration-set-pooling_func(c,p); c,p; ; ;  noop()
+sl-FeatureAgglomeration-set-pooling_func;		sl-FeatureAgglomeration-set-pooling_func(c,p); c,p,t; ; OptionsFor_FeatureAgglomeration_pooling_func(t); de.upb.crc901.mlplan.services.MLPipelinePlan:addOptions(c,p,'-pooling_func', t)

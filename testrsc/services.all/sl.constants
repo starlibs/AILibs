@@ -501,6 +501,7 @@ sklearn.decomposition.PCA:String
 sklearn.decomposition.RandomizedPCA:String
 sklearn.decomposition.SparsePCA:String
 sklearn.cross_decomposition.CCA:String
+sklearn.cluster.FeatureAgglomeration:String
 
 
 #--------------------#
@@ -635,6 +636,11 @@ sklearn.cross_decomposition.CCA:String
 -svd_solver:String
 -U_init:String
 -V_init:String
+-compute_full_tree:String
+-connectivity:String
+-linkage:String
+-n_clusters:String
+-pooling_func:String
 
 
 ## SVC Kernels
