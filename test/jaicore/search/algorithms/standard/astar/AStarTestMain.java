@@ -1,4 +1,4 @@
-package jaicore.search.algorithms.standard.bestfirst;
+package jaicore.search.algorithms.standard.astar;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -7,10 +7,7 @@ import java.util.List;
 
 import org.junit.Test;
 
-import jaicore.basic.PerformanceLogger;
-import jaicore.basic.PerformanceLogger.PerformanceMeasure;
-import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
-import jaicore.search.algorithms.standard.bestfirst.BestFirst;
+
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.core.NodeType;
@@ -18,8 +15,7 @@ import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
-public class BestFirstTester {
-
+public class AStarTestMain {
 	static class TestNode {
 		static int size = 0;
 		int value = size++;
@@ -27,10 +23,17 @@ public class BestFirstTester {
 		public String toString() { return "" + value; }
 	}
 
+	public static void main(String[] args) {
+		test();
+
+	}
+	
+
+
 	@Test
-	public void test() {
-		
-		GraphGenerator<TestNode, String> gen = new GraphGenerator<BestFirstTester.TestNode, String>() {
+	public static void test() {
+
+		GraphGenerator<TestNode, String> gen = new GraphGenerator<AStarTestMain.TestNode, String>() {
 
 			@Override
 			public SingleRootGenerator<TestNode> getRootGenerator() {
@@ -50,11 +53,12 @@ public class BestFirstTester {
 
 			@Override
 			public NodeGoalTester<TestNode> getGoalTester() {
-				return l -> l.value == 1000;
+				return l -> l.value == 10000;
 			}
-			
+
 			@Override
 			public boolean isSelfContained() {
+				
 				return false;
 			}
 
@@ -63,20 +67,14 @@ public class BestFirstTester {
 				// TODO Auto-generated method stub
 				
 			}
-			
 		};
+		AStar<TestNode,String> astar = new AStar<>(gen, (n1, n2) -> n2.getPoint().value - n1.getPoint().value, n -> 0.0);
 		
-		BestFirst<TestNode,String> bf = new BestFirst<>(gen, n -> (double)Math.round(Math.random() * 1000));
-		new SimpleGraphVisualizationWindow<>(bf.getEventBus()).getPanel().setTooltipGenerator(n -> String.valueOf(n.getInternalLabel()));
 		
 		/* find solution */
-		PerformanceLogger.logStart("search");
-		List<TestNode> solutionPath = bf.nextSolution();
-		PerformanceLogger.logEnd("search");
+		List<TestNode> solutionPath = astar.nextSolution();
 		assertNotNull(solutionPath);
-		System.out.println("Generated " + bf.getCreatedCounter() + " nodes.");
-		PerformanceLogger.printStatsAndClear(PerformanceMeasure.TIME);
-		while (true);
+		System.out.println(solutionPath);
 	}
 
 }

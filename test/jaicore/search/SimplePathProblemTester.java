@@ -52,6 +52,12 @@ public class SimplePathProblemTester {
 			public boolean isSelfContained() {
 				return false;
 			}
+
+			@Override
+			public void setNodeNumbering(boolean nodenumbering) {
+				// TODO Auto-generated method stub
+				
+			}
 		};
 		
 		BestFirst<Integer, Object> bf = new BestFirst<>(gen, n -> 0.0);

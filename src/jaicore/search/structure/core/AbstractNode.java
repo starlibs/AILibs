@@ -29,4 +29,11 @@ public abstract class AbstractNode {
 		}
 	}
 
+	/**
+	 * @return the id
+	 */
+	public int getId() {
+		return id;
+	}
+
 }

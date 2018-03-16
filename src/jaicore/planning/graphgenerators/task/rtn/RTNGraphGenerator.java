@@ -285,4 +285,10 @@ public class RTNGraphGenerator implements GraphGenerator<RTNNode, RTNEdge> {
 	public boolean isSelfContained() {
 		return false;
 	}
+
+	@Override
+	public void setNodeNumbering(boolean nodenumbering) {
+		// TODO Auto-generated method stub
+		
+	}
 }
