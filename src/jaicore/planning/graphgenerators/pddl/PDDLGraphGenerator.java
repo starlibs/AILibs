@@ -127,6 +127,7 @@ public class PDDLGraphGenerator extends AbstractGraphGenerator<PDDLNode,String> 
 		this.problem = problem;
 	}
 	
+	//extracts the plan similar to extractPlan in HSP from pddl4j
 	public SequentialPlan extractPlan(List<PDDLNode> solution) {
 		int i = solution.size()-1;
 		Node n = solution.get(i).getNode();
@@ -135,7 +136,6 @@ public class PDDLGraphGenerator extends AbstractGraphGenerator<PDDLNode,String> 
 			final BitOp op = problem.getOperators().get(n.getOperator());
 			plan.add(0, op);
 			i--;
-			System.out.println(i);
 			n = solution.get(i).getNode();
 		}
 		

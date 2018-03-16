@@ -1,8 +1,8 @@
 package jaicore.planning.graphgenerators.pddl;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,6 +16,7 @@ import fr.uga.pddl4j.encoding.CodedProblem;
 import fr.uga.pddl4j.planners.ProblemFactory;
 import fr.uga.pddl4j.planners.hsp.HSP;
 import fr.uga.pddl4j.util.Plan;
+import fr.uga.pddl4j.util.SequentialPlan;
 import jaicore.search.algorithms.standard.astar.AStar;
 
 public class PDDLGraphGeneratorTester {
@@ -43,32 +44,34 @@ public class PDDLGraphGeneratorTester {
 			//create a Astar-serch with the heuristic given pddl4j
 			AStar<PDDLNode,String> search = new AStar<>(gen, (s1,s2)-> 1.0, state ->(double)gen.getHeuristic().estimate(state.getPoint().getNode(), gen.getProblem().getGoal()));
 		
-			
-			List<PDDLNode> solution = search.nextSolution();
-			assertNotNull(solution);
-			
-			Plan plan = gen.extractPlan(solution);
-			assertNotNull(plan);
-			
-			plan.actions().stream().forEach(n->System.out.println(n.getName()));
-			
-			ProblemFactory factory = new ProblemFactory();
-			try {
-				factory.parse(domain, problem);
+			if(gen.getProblem().isSolvable()) {
+				List<PDDLNode> solution = search.nextSolution();
+				assertNotNull(solution);
 				
-				CodedProblem enc = factory.encode();
+				Plan plan = gen.extractPlan(solution);
+				assertNotNull(plan);
 				
-				HSP hspComp = new HSP();
+				plan.actions().stream().forEach(n->System.out.println(n.getName()));
 				
-//				Plan hspPlan = hspComp.search(enc);
-				
-//				assertNotNull(hspPlan);
-								
-			} catch (IOException e) {
-				System.out.println("The comparrison with HSP did not work");
-				e.printStackTrace();
+				ProblemFactory factory = new ProblemFactory();
+				try {
+					factory.parse(domain, problem);
+					
+					CodedProblem enc = factory.encode();
+					
+					HSP hspComp = new HSP();
+					
+					SequentialPlan hspPlan = hspComp.search(enc);
+					
+	//				assertNotNull(hspPlan);
+									
+				} catch (IOException e) {
+					System.out.println("The comparrison with HSP did not work");
+					e.printStackTrace();
+				}
 			}
-			
+			else
+				fail("problem not solvable");
 			
 			
 		}
