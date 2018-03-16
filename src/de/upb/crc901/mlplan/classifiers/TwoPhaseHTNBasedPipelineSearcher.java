@@ -6,7 +6,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -14,23 +13,25 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.util.concurrent.AtomicDouble;
-
 import de.upb.crc901.mlplan.core.ClassifierSolutionAnnotation;
 import de.upb.crc901.mlplan.core.ISolutionEvaluatorFactory;
 import de.upb.crc901.mlplan.core.MLUtil;
 import de.upb.crc901.mlplan.core.SolutionEvaluator;
-import de.upb.crc901.mlplan.oracles.RPNDOracleTaskSolver;
 import de.upb.crc901.mlplan.search.algorithms.GraphBasedPipelineSearcher;
 import de.upb.crc901.mlplan.search.evaluators.BasicMLEvaluator;
 import de.upb.crc901.mlplan.search.evaluators.RandomCompletionEvaluator;
 import jaicore.basic.SetUtil;
+import jaicore.basic.SetUtil.Pair;
+import jaicore.concurrent.TimeoutTimer;
+import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
+import jaicore.logging.LoggerUtil;
 import jaicore.ml.WekaUtil;
 import jaicore.planning.graphgenerators.task.ceociptfd.OracleTaskResolver;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
@@ -40,6 +41,7 @@ import jaicore.search.algorithms.parallel.parallelexploration.distributed.interf
 import jaicore.search.algorithms.standard.core.INodeEvaluator;
 import jaicore.search.algorithms.standard.core.ORGraphSearch;
 import jaicore.search.structure.core.GraphGenerator;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.core.Instances;
 
@@ -152,12 +154,8 @@ public class TwoPhaseHTNBasedPipelineSearcher<V extends Comparable<V>> extends G
 	}
 
 	@Override
-	protected Classifier convertPathToPipeline(List<TFDNode> path) {
-		try {
-			return MLUtil.extractGeneratedClassifierFromPlan(CEOCSTNUtil.extractPlanFromSolutionPath(path));
-		} catch (Throwable e) {
-			throw new IllegalArgumentException("Converting path to pipeline caused " + e.getClass().getName() + " with message " + e.getMessage() + " for path " + path);
-		}
+	protected Classifier convertPathToPipeline(List<TFDNode> path) throws Throwable {
+		return MLUtil.extractGeneratedClassifierFromPlan(CEOCSTNUtil.extractPlanFromSolutionPath(path));
 	}
 
 	public SerializableGraphGenerator<TFDNode, String> getGraphGenerator() {
@@ -311,14 +309,15 @@ public class TwoPhaseHTNBasedPipelineSearcher<V extends Comparable<V>> extends G
 	}
 
 	public int getExpectedRuntimeForPhase2ForAGivenPool(Collection<Classifier> solutions) {
-		long estimateForPhase2IfSequential = (int) (getInSearchEvaluationTimeOfSolutionSet(solutions));
+		long estimateForPhase2IfSequential = (int) (getInSearchEvaluationTimeOfSolutionSet(solutions) / 0.7); // consider the fact the inner search train time was on only 70% of the data
 		long estimateForAvailableCores = getNumberOfCPUs();
-		double cacheFactor = Math.pow(getNumberOfCPUs(), -.6);
-		double conservativenessFactor = 1.1;
+//		double cacheFactor = Math.pow(getNumberOfCPUs(), -.6);
+		double cacheFactor = .8;
+		double conservativenessFactor = 1;
 		int runtime = (int) (conservativenessFactor * estimateForPhase2IfSequential * numberOfMCIterationsPerSolutionInSelectionPhase * cacheFactor / estimateForAvailableCores);
 		logger.debug("Expected runtime is {} = {} * {} * {} * {} / {}", runtime, conservativenessFactor, estimateForPhase2IfSequential,
 				numberOfMCIterationsPerSolutionInSelectionPhase, cacheFactor, estimateForAvailableCores);
-		return runtime * 2;
+		return runtime;
 	}
 
 	protected Classifier selectModel() {
@@ -349,16 +348,17 @@ public class TwoPhaseHTNBasedPipelineSearcher<V extends Comparable<V>> extends G
 		logger.info("We expect phase 2 to consume {}ms for {} candidates. {}ms are permitted by timeout. The following pipelines are considered: ", expectedTimeForSolution, ensembleToSelectFrom.size(), remainingTime);
 		ensembleToSelectFrom.stream().forEach(pl -> logger.info("\t{}: {} (f) / {} (t)", pl, solutionAnnotationCache.get(pl).getF(), getAnnotation(pl).getFTime()));
 		
-		
+		AtomicInteger evaluatorCounter = new AtomicInteger(0);
 		ExecutorService pool = Executors.newFixedThreadPool(getNumberOfCPUs(), r -> {
 			Thread t = new Thread(r);
-			t.setName("final-evaluator-");
+			t.setName("final-evaluator-" + evaluatorCounter.incrementAndGet());
 			return t;
 		});
-		Classifier selectedModel = null;
+		Classifier selectedModel = solutions.peek(); // backup solution
 		final Semaphore sem = new Semaphore(0);
-		final long timestampOfDeadline = getTimeOfStart() + getTimeout() - 2000;
+		long timestampOfDeadline = getTimeOfStart() + getTimeout() - 2000;
 		SolutionEvaluator evaluator = solutionEvaluatorFactory4Selection.getInstance();
+		
 		
 		Instances dataForSelection = new Instances(this.dataForSearch);
 		dataForSelection.addAll(this.dataPreservedForSelection);
@@ -368,6 +368,7 @@ public class TwoPhaseHTNBasedPipelineSearcher<V extends Comparable<V>> extends G
 		
 		/* evaluate each candiate */
 		List<DescriptiveStatistics> stats = new ArrayList<>();
+		final TimeoutSubmitter ts = TimeoutTimer.getInstance().getSubmitter();
 		for (int i = 0; i < ensembleToSelectFrom.size(); i++) {
 			Classifier c = ensembleToSelectFrom.get(i);
 			final DescriptiveStatistics statsForThisCandidate = new DescriptiveStatistics();
@@ -376,19 +377,31 @@ public class TwoPhaseHTNBasedPipelineSearcher<V extends Comparable<V>> extends G
 			for (int j = 0; j < numberOfMCIterationsPerSolutionInSelectionPhase; j++) {
 				pool.submit(new Runnable() {
 					public void run() {
+						int taskId = -1;
 						try {
-							if (System.currentTimeMillis() + getAnnotation(c).getFTime() >= timestampOfDeadline) {
-								logger.info("Not evaluating solutiom {} anymore, because expected time is {} and timeout would be violated!", c, getAnnotation(c).getFTime());
+							int indexOfCurrentlyChosenModel = getClassifierThatWouldCurrentlyBeSelectedWithinPhase2(ensembleToSelectFrom, stats, false);
+							Classifier currentlyChosenModel = ensembleToSelectFrom.get(indexOfCurrentlyChosenModel);
+							int trainingTimeForChosenModelInsideSearch = solutionAnnotationCache.get(currentlyChosenModel).getFTime();
+							int estimatedOverallTrainingTimeForChosenModel = (int)Math.round(trainingTimeForChosenModelInsideSearch / (1 - portionOfDataForPhase2) / .7); // we assume a linear growth
+							int expectedTrainingTimeOfThisModel = (int)Math.round(getAnnotation(c).getFTime() / .7);
+							int remainingTime = (int)(timestampOfDeadline - System.currentTimeMillis()); 
+							taskId = ts.interruptMeAfterMS(timeoutPerNodeFComputation);
+							if (estimatedOverallTrainingTimeForChosenModel + expectedTrainingTimeOfThisModel >= remainingTime) {
+								logger.info("Not evaluating solutiom {} anymore, because expected time is {}, overall training time of currently selected solution is {}. This adds up which exceeds the remaining time of {}!", c, expectedTrainingTimeOfThisModel, estimatedOverallTrainingTimeForChosenModel, expectedTrainingTimeOfThisModel + estimatedOverallTrainingTimeForChosenModel, remainingTime);
 								return;
 							}
-							double selectionScore = evaluator.getSolutionScore(c);
-							synchronized (stats) {
+							Classifier clone = WekaUtil.cloneClassifier(c);
+							double selectionScore = evaluator.getSolutionScore(clone);
+							synchronized (statsForThisCandidate) {
 								statsForThisCandidate.addValue(selectionScore);
 							}
 						} catch (Throwable e) {
 							e.printStackTrace();
+							LoggerUtil.logException("Observed an exeption when trying to evaluate a candidate in the selection phase.", e, logger);
 						} finally {
 							sem.release();
+							if (taskId >= 0)
+								ts.cancelTimeout(taskId);
 						}
 					}
 				});
@@ -398,9 +411,8 @@ public class TwoPhaseHTNBasedPipelineSearcher<V extends Comparable<V>> extends G
 		try {
 			
 			/* now wait for results */
-			System.out.print("Waiting for termination ");
+			logger.info("Waiting for termination of threads that compute the selection scores.");
 			sem.acquire(ensembleToSelectFrom.size() * numberOfMCIterationsPerSolutionInSelectionPhase);
-			System.out.println("done");
 			long endOfPhase2 = System.currentTimeMillis();
 			logger.info("Finished phase 2 within {}ms net. Total runtime was {}ms. ", endOfPhase2 - startOfPhase2, endOfPhase2 - getTimeOfStart());
 			logger.debug("Shutting down thread pool");
@@ -409,36 +421,16 @@ public class TwoPhaseHTNBasedPipelineSearcher<V extends Comparable<V>> extends G
 			if (!pool.isShutdown())
 				logger.warn("Thread pool is not shut down yet!");
 			
-			/* select the model */
-			double best = Double.MAX_VALUE;
-			DescriptiveStatistics statsOfBest = new DescriptiveStatistics();
-			for (int i = 0; i < ensembleToSelectFrom.size(); i++) {
-				Classifier candidate = ensembleToSelectFrom.get(i);
-				DescriptiveStatistics statsOfCandidate = stats.get(i);
-				if (statsOfCandidate.getN() == 0) {
-					logger.info("Ignoring candidate {} because no results were obtained in selection phase.", candidate);
-					continue;
-				}
-				double avgError = statsOfCandidate.getMean() / 100f;
-				double quartileScore = statsOfCandidate.getPercentile(75) / 100;
-				double score = (avgError + quartileScore) / 2f;
-				logger.info("Score of candidate {} is {} based on {} (avg) and {} (.75-pct) with {} samples", candidate, score, avgError, quartileScore, statsOfCandidate.getN());
-				if (score < best) {
-					best = score;
-					selectedModel = candidate;
-					statsOfBest = statsOfCandidate;
-				}
-			}
+			
+			/* set chosen model */
 			if (ensembleToSelectFrom.isEmpty()) {
 				logger.warn("No solution contained in ensemble.");
 			}
 			else {
-				if (selectedModel == null) {
-					selectedModel = ensembleToSelectFrom.iterator().next();
-					logger.info("Selected a model WITHOUT selections (probably due to time constraints). The model is: {}. Its internal error was {}. Validation error was {}", selectedModel, solutionAnnotationCache.get(selectedModel).getF(), statsOfBest.getMean());
-				}
-				else
-					logger.info("Selected a model. The model is: {}. Its internal error was {}. Validation error was {}", selectedModel, solutionAnnotationCache.get(selectedModel).getF(), statsOfBest.getMean());
+				int selectedModelIndex = getClassifierThatWouldCurrentlyBeSelectedWithinPhase2(ensembleToSelectFrom, stats, true);
+				selectedModel = ensembleToSelectFrom.get(selectedModelIndex);
+				DescriptiveStatistics statsOfBest = stats.get(selectedModelIndex);
+				logger.info("Selected a model. The model is: {}. Its internal error was {}. Validation error was {}", selectedModel, solutionAnnotationCache.get(selectedModel).getF(), statsOfBest.getMean());
 			}
 			
 		} catch (InterruptedException e) {
@@ -447,6 +439,30 @@ public class TwoPhaseHTNBasedPipelineSearcher<V extends Comparable<V>> extends G
 //		else
 			// logger.warn("Thread pool still active!");
 			return selectedModel;
+	}
+	
+	private synchronized int getClassifierThatWouldCurrentlyBeSelectedWithinPhase2(List<Classifier> ensembleToSelectFrom, List<DescriptiveStatistics> stats, boolean logComputations) {
+		int selectedModel = 0;
+		double best = Double.MAX_VALUE;
+		for (int i = 0; i < ensembleToSelectFrom.size(); i++) {
+			Classifier candidate = ensembleToSelectFrom.get(i);
+			DescriptiveStatistics statsOfCandidate = stats.get(i);
+			if (statsOfCandidate.getN() == 0) {
+				if (logComputations)
+					logger.info("Ignoring candidate {} because no results were obtained in selection phase.", candidate);
+				continue;
+			}
+			double avgError = statsOfCandidate.getMean() / 100f;
+			double quartileScore = statsOfCandidate.getPercentile(75) / 100;
+			double score = (avgError + quartileScore) / 2f;
+			if (logComputations)
+				logger.info("Score of candidate {} is {} based on {} (avg) and {} (.75-pct) with {} samples", candidate, score, avgError, quartileScore, statsOfCandidate.getN());
+			if (score < best) {
+				best = score;
+				selectedModel = i;
+			}
+		}
+		return selectedModel;
 	}
 
 	public RandomCompletionEvaluator<V> getRce() {

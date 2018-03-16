@@ -49,8 +49,13 @@ public class MLPipelinePlan implements Serializable {
 	
 	public MLPipe addAttributeSelection(String classname) {
 
-		/* we assume, by default, that this method is only called for python instances */
-		this.onHost(hostPASE);
+//		/* we assume, by default, that this method is only called for python instances */
+		if (classname.startsWith("sklearn") || classname.startsWith("tf"))
+			onHost(hostPASE);
+		else if (classname.startsWith("weka"))
+			onHost(hostJASE);
+		else
+			throw new IllegalArgumentException("No support for classifiers that are not from scikit, weka, or tensor flow");
 		
 		Objects.requireNonNull(this.nextHost, "Host needs to be specified before adding pipes to the pipeline.");
 		MLPipe asPipe =  new MLPipe(this.nextHost, Objects.requireNonNull(classname));
@@ -83,10 +88,12 @@ public class MLPipelinePlan implements Serializable {
 	
 	
 	public MLPipe setClassifier(String classifierName) {
-		
-		/* we assume, by default, that this method is only called for python instances */
-		this.onHost(hostPASE);
-				
+		if (classifierName.startsWith("sklearn") || classifierName.startsWith("tf"))
+			onHost(hostPASE);
+		else if (classifierName.startsWith("weka"))
+			onHost(hostJASE);
+		else
+			throw new IllegalArgumentException("No support for classifiers that are not from scikit, weka, or tensor flow");
 		Objects.requireNonNull(this.nextHost, "Host needs to be specified before adding pipes to the pipeline.");
 		this.cPipe = new MLPipe(this.nextHost, classifierName); // set cPipe field.
 		return cPipe;
@@ -277,7 +284,11 @@ public class MLPipelinePlan implements Serializable {
 		}
 		if (sb.length() > 0)
 			sb.append(" -> ");
-		sb.append(cPipe.getName() + cPipe.getOptions().toString());
+		if (cPipe != null) {
+			sb.append(cPipe.getName() + cPipe.getOptions().toString());
+		}
+		else
+			sb.append("NULL");
 		return sb.toString();
 	}
 }

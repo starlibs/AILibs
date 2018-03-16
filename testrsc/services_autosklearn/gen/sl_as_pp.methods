@@ -28,7 +28,7 @@ sl-FastICA-set-whiten;		sl-FastICA-set-whiten(c,p); c,p,t; ; OptionsFor_FastICA_
 #   GenericUnivariateSelect   #
 #-----------------------------#
 
-#sl_GenericUnivariateSelect;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.feature_selection.GenericUnivariateSelect',config)
+sl_GenericUnivariateSelect;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.feature_selection.GenericUnivariateSelect',config)
 sl_GenericUnivariateSelect;			slConfigure_pp_as(config); config,pipe; associated('sklearn.feature_selection.GenericUnivariateSelect',config); ; de.upb.crc901.mlplan.services.MLPipelinePlan:addAttributeSelection(config,'sklearn.feature_selection.GenericUnivariateSelect',pipe)	->	sl-GenericUnivariateSelect-set-mode(config,pipe)	->	sl-GenericUnivariateSelect-set-param(config,pipe)	->	sl-GenericUnivariateSelect-set-score_func(config,pipe)
 
 
@@ -42,34 +42,6 @@ sl-GenericUnivariateSelect-set-param;		sl-GenericUnivariateSelect-set-param(c,p)
 sl-GenericUnivariateSelect-set-param;		sl-GenericUnivariateSelect-set-param(c,p); c,p,t; ; OptionsFor_GenericUnivariateSelect_param(t); de.upb.crc901.mlplan.services.MLPipelinePlan:addOptions(c,p,'-param', t)
 sl-GenericUnivariateSelect-set-score_func;		sl-GenericUnivariateSelect-set-score_func(c,p); c,p; ; ;  noop()
 sl-GenericUnivariateSelect-set-score_func;		sl-GenericUnivariateSelect-set-score_func(c,p); c,p,t; ; OptionsFor_GenericUnivariateSelect_score_func(t); de.upb.crc901.mlplan.services.MLPipelinePlan:addOptions(c,p,'-score_func', t)
-
-
-#------------#
-#   Isomap   #
-#------------#
-
-#sl_Isomap;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.manifold.Isomap',config)
-sl_Isomap;			slConfigure_pp_as(config); config,pipe; associated('sklearn.manifold.Isomap',config); ; de.upb.crc901.mlplan.services.MLPipelinePlan:addAttributeSelection(config,'sklearn.manifold.Isomap',pipe)	->	sl-Isomap-set-eigen_solver(config,pipe)	->	sl-Isomap-set-n_components(config,pipe)	->	sl-Isomap-set-n_jobs(config,pipe)	->	sl-Isomap-set-n_neighbors(config,pipe)	->	sl-Isomap-set-neighbors_algorithm(config,pipe)	->	sl-Isomap-set-path_method(config,pipe)	->	sl-Isomap-set-tol(config,pipe)
-
-
-#-----------------------------------------#
-#     Option Configuration for Isomap     #
-#-----------------------------------------#
-
-sl-Isomap-set-eigen_solver;		sl-Isomap-set-eigen_solver(c,p); c,p; ; ;  noop()
-sl-Isomap-set-eigen_solver;		sl-Isomap-set-eigen_solver(c,p); c,p,t; ; OptionsFor_Isomap_eigen_solver(t); de.upb.crc901.mlplan.services.MLPipelinePlan:addOptions(c,p,'-eigen_solver', t)
-sl-Isomap-set-n_components;		sl-Isomap-set-n_components(c,p); c,p; ; ;  noop()
-sl-Isomap-set-n_components;		sl-Isomap-set-n_components(c,p); c,p,t; ; OptionsFor_Isomap_n_components(t); de.upb.crc901.mlplan.services.MLPipelinePlan:addOptions(c,p,'-n_components', t)
-sl-Isomap-set-n_jobs;		sl-Isomap-set-n_jobs(c,p); c,p; ; ;  noop()
-sl-Isomap-set-n_jobs;		sl-Isomap-set-n_jobs(c,p); c,p,t; ; OptionsFor_Isomap_n_jobs(t); de.upb.crc901.mlplan.services.MLPipelinePlan:addOptions(c,p,'-n_jobs', t)
-sl-Isomap-set-n_neighbors;		sl-Isomap-set-n_neighbors(c,p); c,p; ; ;  noop()
-sl-Isomap-set-n_neighbors;		sl-Isomap-set-n_neighbors(c,p); c,p,t; ; OptionsFor_Isomap_n_neighbors(t); de.upb.crc901.mlplan.services.MLPipelinePlan:addOptions(c,p,'-n_neighbors', t)
-sl-Isomap-set-neighbors_algorithm;		sl-Isomap-set-neighbors_algorithm(c,p); c,p; ; ;  noop()
-sl-Isomap-set-neighbors_algorithm;		sl-Isomap-set-neighbors_algorithm(c,p); c,p,t; ; OptionsFor_Isomap_neighbors_algorithm(t); de.upb.crc901.mlplan.services.MLPipelinePlan:addOptions(c,p,'-neighbors_algorithm', t)
-sl-Isomap-set-path_method;		sl-Isomap-set-path_method(c,p); c,p; ; ;  noop()
-sl-Isomap-set-path_method;		sl-Isomap-set-path_method(c,p); c,p,t; ; OptionsFor_Isomap_path_method(t); de.upb.crc901.mlplan.services.MLPipelinePlan:addOptions(c,p,'-path_method', t)
-sl-Isomap-set-tol;		sl-Isomap-set-tol(c,p); c,p; ; ;  noop()
-sl-Isomap-set-tol;		sl-Isomap-set-tol(c,p); c,p,t; ; OptionsFor_Isomap_tol(t); de.upb.crc901.mlplan.services.MLPipelinePlan:addOptions(c,p,'-tol', t)
 
 
 #----------------------------#
@@ -204,7 +176,7 @@ sl-NMF-set-verbose;		sl-NMF-set-verbose(c,p); c,p,t; ; OptionsFor_NMF_verbose(t)
 #   SelectFdr   #
 #---------------#
 
-#sl_SelectFdr;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.feature_selection.SelectFdr',config)
+sl_SelectFdr;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.feature_selection.SelectFdr',config)
 sl_SelectFdr;			slConfigure_pp_as(config); config,pipe; associated('sklearn.feature_selection.SelectFdr',config); ; de.upb.crc901.mlplan.services.MLPipelinePlan:addAttributeSelection(config,'sklearn.feature_selection.SelectFdr',pipe)	->	sl-SelectFdr-set-alpha(config,pipe)	->	sl-SelectFdr-set-score_func(config,pipe)
 
 
@@ -222,7 +194,7 @@ sl-SelectFdr-set-score_func;		sl-SelectFdr-set-score_func(c,p); c,p,t; ; Options
 #   SelectFpr   #
 #---------------#
 
-#sl_SelectFpr;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.feature_selection.SelectFpr',config)
+sl_SelectFpr;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.feature_selection.SelectFpr',config)
 sl_SelectFpr;			slConfigure_pp_as(config); config,pipe; associated('sklearn.feature_selection.SelectFpr',config); ; de.upb.crc901.mlplan.services.MLPipelinePlan:addAttributeSelection(config,'sklearn.feature_selection.SelectFpr',pipe)	->	sl-SelectFpr-set-alpha(config,pipe)	->	sl-SelectFpr-set-score_func(config,pipe)
 
 
@@ -674,7 +646,7 @@ sl-MaxAbsScaler-set-copy;		sl-MaxAbsScaler-set-copy(c,p); c,p,t; ; OptionsFor_Ma
 #   MinMaxScaler   #
 #------------------#
 
-#sl_MinMaxScaler;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.preprocessing.MinMaxScaler',config)
+sl_MinMaxScaler;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.preprocessing.MinMaxScaler',config)
 sl_MinMaxScaler;			slConfigure_pp_as(config); config,pipe; associated('sklearn.preprocessing.MinMaxScaler',config); ; de.upb.crc901.mlplan.services.MLPipelinePlan:addAttributeSelection(config,'sklearn.preprocessing.MinMaxScaler',pipe)	->	sl-MinMaxScaler-set-copy(config,pipe)	->	sl-MinMaxScaler-set-feature_range(config,pipe)
 
 
@@ -710,7 +682,7 @@ sl-Normalizer-set-norm;		sl-Normalizer-set-norm(c,p); c,p,t; ; OptionsFor_Normal
 #   QuantileTransformer   #
 #-------------------------#
 
-#sl_QuantileTransformer;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.preprocessing.QuantileTransformer',config)
+sl_QuantileTransformer;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.preprocessing.QuantileTransformer',config)
 sl_QuantileTransformer;			slConfigure_pp_as(config); config,pipe; associated('sklearn.preprocessing.QuantileTransformer',config); ; de.upb.crc901.mlplan.services.MLPipelinePlan:addAttributeSelection(config,'sklearn.preprocessing.QuantileTransformer',pipe)	->	sl-QuantileTransformer-set-copy(config,pipe)	->	sl-QuantileTransformer-set-ignore_implicit_zeros(config,pipe)	->	sl-QuantileTransformer-set-n_quantiles(config,pipe)	->	sl-QuantileTransformer-set-output_distribution(config,pipe)	->	sl-QuantileTransformer-set-subsample(config,pipe)
 
 

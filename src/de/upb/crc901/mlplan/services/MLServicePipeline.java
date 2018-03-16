@@ -1,13 +1,9 @@
 package de.upb.crc901.mlplan.services;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Random;
 
 import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 import org.slf4j.Logger;
@@ -17,16 +13,22 @@ import de.upb.crc901.mlplan.services.MLPipelinePlan.MLPipe;
 import de.upb.crc901.mlplan.services.MLPipelinePlan.WekaAttributeSelectionPipe;
 import de.upb.crc901.services.core.EasyClient;
 import de.upb.crc901.services.core.EnvironmentState;
-import de.upb.crc901.services.core.HttpServiceServer;
 import de.upb.crc901.services.core.OntologicalTypeMarshallingSystem;
 import de.upb.crc901.services.core.ServiceCompositionResult;
 import de.upb.crc901.services.core.ServiceHandle;
-import jaicore.ml.WekaUtil;
+import jaicore.logging.LoggerUtil;
 import weka.classifiers.Classifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 
+/**
+ * 
+ * Note, while this class is serializable, it MUST NOT BE CLONED USING AbstractClassifier.makeCopy, because the references to the used services are serialized and, hence, makeCopy does not work properly. Instead, use the clone method (as adopted by WekaUtils.clone). 
+ * 
+ * @author fmohr
+ *
+ */
 public class MLServicePipeline implements Classifier, Serializable {
 
 	private long expirationDate;
@@ -34,7 +36,7 @@ public class MLServicePipeline implements Classifier, Serializable {
 	private int timeForTrainingPipeline;
 	private DescriptiveStatistics timesForPrediction;
 	private final MLPipelinePlan constructionPlan;
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(MLServicePipeline.class);
 
 	private final EnvironmentState servicesContainer = new EnvironmentState();
@@ -121,7 +123,7 @@ public class MLServicePipeline implements Classifier, Serializable {
 			ServiceCompositionResult result = constructorEC.dispatch();
 			this.servicesContainer.extendBy(result); // add the services to out state
 		} catch (IOException e) {
-			logger.error("Error in the creation of the services involved in a MLServicePipeline. Exception: {}. Message: {}", e.getClass().getName(), e.getMessage());
+			LoggerUtil.logException("Could not construct pipeline " + plan + ".", e, logger);
 		}
 
 		// Service creation done!
@@ -137,6 +139,7 @@ public class MLServicePipeline implements Classifier, Serializable {
 					!(this.servicesContainer.retrieveField(ppFieldName).getData() instanceof ServiceHandle) || // or if it isn't a servicehandle
 					!((ServiceHandle) this.servicesContainer.retrieveField(ppFieldName).getData()).isSerialized()) // of if it doesn't contain an id.
 			{
+				logger.error("Could not create preprocessing service for {}", ppFieldName);
 				throw new RuntimeException(ppFieldName);
 			}
 		}
@@ -145,8 +148,10 @@ public class MLServicePipeline implements Classifier, Serializable {
 				!(this.servicesContainer.retrieveField(this.classifierFieldName).getData() instanceof ServiceHandle) || // or if it isn't a servicehandle
 				!((ServiceHandle) this.servicesContainer.retrieveField(this.classifierFieldName).getData()).isSerialized()) // of if it doesn't contain an id.
 		{
+			logger.error("Could not create classifier service for {}", this.classifierFieldName);
 			throw new RuntimeException(this.classifierFieldName);
 		}
+		logger.info("Succesfully spawned all necessary services for pipeline of plan {}", plan);
 	}
 
 	@Override
@@ -178,16 +183,25 @@ public class MLServicePipeline implements Classifier, Serializable {
 			// trainEC.getCurrentCompositionText());
 			// send train request:
 			trainEC.dispatch();
-		} catch (IOException ex) {
-			ex.printStackTrace();
+			
+			this.timeForTrainingPipeline = (int) (System.currentTimeMillis() - start);
+			this.trained = true;
+			this.timesForPrediction = new DescriptiveStatistics();
+			
+		} catch (InterruptedException ex) {
+			logger.info("The build process was interrupted.");
+			throw ex;
 		}
-		this.timeForTrainingPipeline = (int) (System.currentTimeMillis() - start);
-		this.trained = true;
-		this.timesForPrediction = new DescriptiveStatistics();
+		catch (Exception ex) {
+			LoggerUtil.logException("Could not train pipeline " + constructionPlan + ".", ex, logger);
+			throw ex;
+		}
 	}
 
 	@Override
 	public double classifyInstance(final Instance instance) throws Exception {
+		if (!this.trained)
+			throw new IllegalStateException("Cannot classify instances as the pipeline has not been (successfully) trained!");
 		Instances instances = new Instances(instance.dataset(), 1);
 		instances.add(instance);
 		return this.classifyInstances(instances)[0];
@@ -195,6 +209,9 @@ public class MLServicePipeline implements Classifier, Serializable {
 
 	public double[] classifyInstances(final Instances instances) throws Exception {
 
+		if (!this.trained)
+			throw new IllegalStateException("Cannot classify instances as the pipeline has not been (successfully) trained!");
+		
 		int secondsRemaining = this.getSecondsRemaining();
 		if (secondsRemaining < 5) {
 			throw new IllegalStateException("Cannot train, only " + secondsRemaining + " lifetime remain!");
@@ -224,12 +241,17 @@ public class MLServicePipeline implements Classifier, Serializable {
 			// predictEC.getCurrentCompositionText());
 			// send predict request:
 			result = predictEC.dispatch();
-		} catch (IOException ex) {
-			// ex.printStackTrace();
+		} catch (Throwable ex) {
+			LoggerUtil.logException("Could not obtain predictions from pipeline " + constructionPlan + ". Training flag: " + trained, ex, logger);
 			throw new RuntimeException(ex);
 		}
 		long end = System.currentTimeMillis();
-		timesForPrediction.addValue(end-start);
+		timesForPrediction.addValue(end - start);
+
+		if (!result.containsKey("predictions")) {
+			logger.error("Did not receive predictions from the server!");
+			throw new RuntimeException("Did not receive predictions from the server.");
+		}
 
 		@SuppressWarnings("unchecked")
 		List<String> predictedLabels = (List<String>) result.get("predictions").getData();
@@ -242,7 +264,8 @@ public class MLServicePipeline implements Classifier, Serializable {
 
 	@Override
 	public double[] distributionForInstance(final Instance instance) throws Exception {
-		// TODO Auto-generated method stub
+		if (!this.trained)
+			throw new IllegalStateException("Cannot classify instances as the pipeline has not been (successfully) trained!");
 		return null;
 	}
 
@@ -251,70 +274,18 @@ public class MLServicePipeline implements Classifier, Serializable {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	public MLServicePipeline clone() {
+		try {
+			return new MLServicePipeline(constructionPlan);
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e); 
+		}
+	}
 
 	private void readObject(final java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 		in.defaultReadObject();
 		this.otms = new OntologicalTypeMarshallingSystem();
-	}
-
-	public static void main(final String[] args) throws Throwable {
-		HttpServiceServer server = null;
-		try {
-			int jasePort = 8000;
-			server = HttpServiceServer.TEST_SERVER();
-			// create a ml pp plan:
-			MLPipelinePlan plan = new MLPipelinePlan();
-			// add attribute selections:
-
-			String jaseHost = "localhost:" + jasePort;
-			String paseHost = "localhost:" + 5000;
-			//
-			plan.onHost(paseHost).addAttributeSelection("sklearn.preprocessing.Imputer").addOptions("-strategy \"median\"", "-axis 0");
-
-			plan.onHost(jaseHost);
-
-			// plan.addWekaAttributeSelection() .withSearcher("weka.attributeSelection.Ranker")
-			// .withEval("weka.attributeSelection.CorrelationAttributeEval");
-			// plan.addWekaAttributeSelection() .withSearcher("weka.attributeSelection.Ranker")
-			// .withEval("weka.attributeSelection.PrincipalComponents");
-			plan.onHost(paseHost).addAttributeSelection("sklearn.feature_selection.VarianceThreshold");
-
-			plan.onHost(jaseHost).setClassifier("weka.classifiers.functions.MultilayerPerceptron");
-			// plan.onHost(paseHost);
-			// plan.setClassifier("tflib.NeuralNet").addOptions("-layer_count 2", "-epochs 1000",
-			// "-learning_rate 0.3");
-
-			// System.out.println("Create MLServicePipeline with classifier and "
-			// + plan.getAttrSelections().size() + " many preprocessors.");
-
-			MLServicePipeline pl = new MLServicePipeline(plan);
-
-			Instances wekaInstances = new Instances(
-					new BufferedReader(new FileReader("../CrcTaskBasedConfigurator/testrsc" + File.separator + "polychotomous" + File.separator + "audiology.arff")));
-			wekaInstances.setClassIndex(wekaInstances.numAttributes() - 1);
-			// System.out.println(wekaInstances.numClasses());
-			List<Instances> split = WekaUtil.getStratifiedSplit(wekaInstances, new Random(0), .7f);
-
-			pl.buildClassifier(split.get(0));
-			System.out.println("Building done!");
-
-			int mistakes = 0;
-			int index = 0;
-			double[] predictions = pl.classifyInstances(split.get(1));
-			for (Instance instance : split.get(1)) {
-				double prediction = predictions[index];
-				if (instance.classValue() != prediction) {
-					mistakes++;
-				}
-				index++;
-			}
-			System.out.println("Pipeline done. This many mistakes were made:" + mistakes + ". Error rate: " + (mistakes * 1f / split.get(1).size()));
-		} finally {
-			if (server != null) {
-				server.shutdown();
-			}
-		}
-
 	}
 
 	public List<String> getPPFieldNames() {
@@ -340,7 +311,6 @@ public class MLServicePipeline implements Classifier, Serializable {
 	public void setExpirationDate(final long expirationDate) {
 		this.expirationDate = expirationDate;
 	}
-	
 
 	public MLPipelinePlan getConstructionPlan() {
 		return constructionPlan;
@@ -350,6 +320,4 @@ public class MLServicePipeline implements Classifier, Serializable {
 	public String toString() {
 		return constructionPlan.toString();
 	}
-	
-	
 }

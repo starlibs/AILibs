@@ -59,19 +59,20 @@ public class MLUtil {
 		/* now execute a light version of the plan that does not use any input. This way, we obtain the filter (preprocessor) and classifier objects created by the plan */
 		PlanExecutor executor = new PlanExecutor(new Random());
 		Map<ConstantParam, Object> variables = executor.executePlan(plan, new HashMap<>());
-
+		
 		/* now extract the filter and the classifier object */
 		Optional<Classifier> classifierOpt = variables.keySet().stream().filter(k -> k.getName().equals("classifier")).map(k -> (Classifier) variables.get(k)).findAny();
 		if (!classifierOpt.isPresent()) {
 			StringBuilder sb = new StringBuilder();
 			plan.forEach(a -> sb.append(a.getEncoding() + "\n"));
-			throw new IllegalArgumentException("The plan does not define any classifier in the field \"classifier\", so I cannot derive an MLPipeline object from it. Plan was: \n" + sb.toString());
+			throw new IllegalArgumentException(
+					"The plan does not define any classifier in the field \"classifier\", so I cannot derive an MLPipeline object from it. Plan was: \n" + sb.toString());
 		}
 		return classifierOpt.get();
 	}
-	
-	public static Pair<String,String> getJSHOP2File(File testsetFile) {
-		
+
+	public static Pair<String, String> getJSHOP2File(File testsetFile) {
+
 		/* get domain */
 		StringWriter domainWriter = new StringWriter();
 		CEOCIPSTNPlanningProblem planningProblem = getPlanningProblem(testsetFile, null);
@@ -80,7 +81,7 @@ public class MLUtil {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 		/* get problem */
 		StringWriter problemWriter = new StringWriter();
 		try {
@@ -90,7 +91,6 @@ public class MLUtil {
 		}
 		return new Pair<>(domainWriter.toString(), problemWriter.toString());
 	}
-	
 
 	public static CEOCIPSTNPlanningProblem getPlanningProblem(File testsetFile, Instances data) {
 		CEOCIPSTNPlanningProblem problem = new TaskProblemGenerator().getProblem(testsetFile, data);
@@ -109,7 +109,7 @@ public class MLUtil {
 					addLists, new HashMap<>(), Arrays.asList());
 			problem.getDomain().getOperations().add(op);
 		}
-		
+
 		/* return the problem */
 		return problem;
 	}
@@ -311,7 +311,8 @@ public class MLUtil {
 	public static boolean didLastActionAffectPipeline(List<TFDNode> path) {
 		Literal resolvedProblem = path.get(path.size() - 2).getRemainingTasks().get(0);
 		String taskName = resolvedProblem.getPropertyName().substring(resolvedProblem.getPropertyName().indexOf("-") + 1).toLowerCase();
-		boolean matches = taskName.matches("(.*)(addsingleparam|addoption|addvaluedparam|addoptionpair|noaddsingleparam|noaddvaluedparam|configchildnodest|addoptions|setclassifier)(.*)");
+		boolean matches = taskName
+				.matches("(.*)(addsingleparam|addoption|addvaluedparam|addoptionpair|noaddsingleparam|noaddvaluedparam|configchildnodest|addoptions|setclassifier)(.*)");
 		if (matches)
 			return true;
 		if (taskName.contains("__construct"))

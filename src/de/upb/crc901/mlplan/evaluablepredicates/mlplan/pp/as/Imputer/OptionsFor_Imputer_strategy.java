@@ -19,7 +19,7 @@ package de.upb.crc901.mlplan.evaluablepredicates.mlplan.pp.as.Imputer;
     */
     public class OptionsFor_Imputer_strategy extends OptionsPredicate {
         
-        private static List<Object> validValues = Arrays.asList(new Object[]{"median", "most_frequest"});
+        private static List<Object> validValues = Arrays.asList(new Object[]{"median", "most_frequent"});
 
         @Override
         protected List<? extends Object> getValidValues() {
