@@ -2,6 +2,8 @@ package jaicore.search.gui;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.concurrent.TimeUnit;
+
 import org.junit.Test;
 
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
@@ -16,7 +18,7 @@ public class ReplayTester {
 	
 	@Test
 	public void test() {
-		int i = 3;
+		int i = 2;
 		
 		//prepare a simple Search with the 8 Queens problem
 		System.out.print("Checking " + (i+4)+ "-Queens Problem ... ");
@@ -37,11 +39,25 @@ public class ReplayTester {
 		while (search.nextSolution() != null)
 			solutions ++;
 		assertEquals(numbersOfSolutions[i], solutions);
+		System.out.println("Solutions found.\n Starting the replay:");
 		
 		//Test the recorder
 		SimpleGraphVisualizationWindow<Node<QueenNode, Double>> recordedWin = new SimpleGraphVisualizationWindow<>(recorder.getEventBus());
 		recordedWin.getPanel().setTooltipGenerator(n->n.getPoint().toString());
 		recorder.play();
+		
+		recordedWin = new SimpleGraphVisualizationWindow<>(recorder.getEventBus());
+		recordedWin.getPanel().setTooltipGenerator(n->n.getPoint().toString());
+		for(int s =0; s < 50; s++) {
+			recorder.step();
+			try {
+				TimeUnit.MILLISECONDS.sleep(10);
+			} catch (InterruptedException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		}
+		
 		
 		System.out.println("done");
 		
