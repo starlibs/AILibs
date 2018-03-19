@@ -54,6 +54,10 @@ dependencies {
 	// Logging
 	compile 'org.slf4j:slf4j-api:1.7.13'
 	runtime 'org.slf4j:slf4j-log4j12:1.7.13', 'log4j:log4j:1.2.17'
+
+	//pddl4j
+	compile 'com.github.pellierd:pddl4j:v3.5.0'
+	runtime 'com.github.pellierd:pddl4j:v3.5.0'
 }
 
 repositories {
@@ -61,6 +65,7 @@ repositories {
 	mavenLocal()
 	maven {
         url "http://clojars.org/repo/"
+	url "https://jitpack.io"
     }
     flatDir {
     	dirs 'lib'
