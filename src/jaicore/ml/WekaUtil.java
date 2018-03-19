@@ -31,11 +31,9 @@ import jaicore.ml.core.SimpleLabeledInstanceImpl;
 import jaicore.ml.core.WekaCompatibleInstancesImpl;
 import jaicore.ml.interfaces.LabeledInstance;
 import jaicore.ml.interfaces.LabeledInstances;
+import weka.attributeSelection.CfsSubsetEval;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
-import weka.classifiers.rules.M5Rules;
-import weka.classifiers.rules.PART;
-import weka.classifiers.trees.M5P;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
@@ -57,8 +55,8 @@ public class WekaUtil {
 		classifiers.add("weka.classifiers.bayes.BayesNet");
 		classifiers.add("weka.classifiers.bayes.NaiveBayes");
 		classifiers.add("weka.classifiers.bayes.NaiveBayesMultinomial");
-		classifiers.add("weka.classifiers.functions.GaussianProcesses");
-		classifiers.add("weka.classifiers.functions.LinearRegression");
+//		classifiers.add("weka.classifiers.functions.GaussianProcesses");
+//		classifiers.add("weka.classifiers.functions.LinearRegression");
 		classifiers.add("weka.classifiers.functions.Logistic");
 		classifiers.add("weka.classifiers.functions.MultilayerPerceptron");
 		classifiers.add("weka.classifiers.functions.SimpleLinearRegression");
@@ -73,15 +71,28 @@ public class WekaUtil {
 		classifiers.add("weka.classifiers.rules.PART");
 		classifiers.add("weka.classifiers.rules.ZeroR");
 		classifiers.add("weka.classifiers.trees.DecisionStump");
-		classifiers.add("weka.classifiers.trees.HoeffdingTree");		
+//		classifiers.add("weka.classifiers.trees.HoeffdingTree");		
 		classifiers.add("weka.classifiers.trees.J48");
-		classifiers.add("weka.classifiers.trees.LMT");
 		classifiers.add("weka.classifiers.trees.LMT");
 		classifiers.add("weka.classifiers.trees.M5P");
 		classifiers.add("weka.classifiers.trees.RandomForest");
 		classifiers.add("weka.classifiers.trees.RandomTree");
 		classifiers.add("weka.classifiers.trees.REPTree");
 		return classifiers;
+	}
+	
+	public static Collection<String> getFeatureEvaluators() {
+		Collection<String> preprocessors = new ArrayList<>();
+		
+		preprocessors.add("weka.attributeSelection.CfsSubsetEval");
+		preprocessors.add("weka.attributeSelection.CorrelationAttributeEval");
+		preprocessors.add("weka.attributeSelection.GainRatioAttributeEval");
+		preprocessors.add("weka.attributeSelection.InfoGainAttributeEval");
+		preprocessors.add("weka.attributeSelection.OneRAttributeEval");
+		preprocessors.add("weka.attributeSelection.PrincipalComponents");
+		preprocessors.add("weka.attributeSelection.ReliefFAttributeEval");
+		preprocessors.add("weka.attributeSelection.SymmetricalUncertAttributeEval");
+		return preprocessors;
 	}
 
 	public static Collection<String> getMetaLearners() {

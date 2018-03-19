@@ -20,6 +20,7 @@ import jaicore.basic.StringUtil;
  * 
  * @author Felix Mohr
  */
+@SuppressWarnings("serial")
 public class Literal implements Serializable {
 
 	private static Logger logger = LoggerFactory.getLogger(Literal.class);

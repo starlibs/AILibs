@@ -35,10 +35,15 @@ public abstract class LiteralParam implements Serializable {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + ((type == null) ? 0 : type.hashCode());
 		return result;
 	}
 
+	/**
+	 * It is with intention that the equals method does NOT check the type.
+	 * We assume that the name of a parameter is sufficient to identify it.
+	 * The type is rather optional to enable efficient processing in some contexts.
+	 *  
+	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -52,11 +57,6 @@ public abstract class LiteralParam implements Serializable {
 			if (other.name != null)
 				return false;
 		} else if (!name.equals(other.name))
-			return false;
-		if (type == null) {
-			if (other.type != null)
-				return false;
-		} else if (!type.equals(other.type))
 			return false;
 		return true;
 	}

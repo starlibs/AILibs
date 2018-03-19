@@ -20,6 +20,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.reflect.MethodUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -27,6 +29,7 @@ import com.google.common.collect.ContiguousSet;
 import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.Range;
 
+import jaicore.logging.LoggerUtil;
 import jaicore.ml.WekaUtil;
 import jaicore.ml.measures.PMMulticlass;
 import weka.classifiers.Classifier;
@@ -35,6 +38,8 @@ import weka.core.Instances;
 
 public abstract class MultiClassClassificationExperimentRunner {
 
+	private static final Logger logger = LoggerFactory.getLogger(MultiClassClassificationExperimentRunner.class);
+	
 	private final File datasetFolder;
 	private final List<File> availableDatasets;
 	private final String[] classifiers;
@@ -85,7 +90,7 @@ public abstract class MultiClassClassificationExperimentRunner {
 		availableDatasets.stream().forEach(ds -> System.out.println("\t" + (i.getAndIncrement()) + ": " + ds.getName()));
 		System.out.println("Available algorithms: ");
 		i.set(0);
-		Arrays.asList(classifiers).stream().forEach(c -> System.out.println("\t" + (i.getAndIncrement()) + ": " + c.getClass().getName()));
+		Arrays.asList(classifiers).stream().forEach(c -> System.out.println("\t" + (i.getAndIncrement()) + ": " + c));
 	}
 
 	protected abstract Classifier getConfiguredClassifier(int seed, String algoName, String algoMode, int timeout, int numberOfCPUs, int memoryInMB,
@@ -262,16 +267,16 @@ public abstract class MultiClassClassificationExperimentRunner {
 				System.out.println("Sending error Rate " + error + " to logger.");
 				database.addResultEntry(runId, error);
 			} catch (Throwable e) {
-				e.printStackTrace();
+				LoggerUtil.logException("Experiment failed.", e, logger);
 				System.out.println("Sending error Rate -10000 to logger.");
 				try {
 					database.addResultEntry(runId, -10000);
 				} catch (Exception e1) {
-					e1.printStackTrace();
+					LoggerUtil.logException("Could not write result to database.", e1, logger);
 				}
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			LoggerUtil.logException("Experiment failed.", e, logger);
 		}
 	}
 

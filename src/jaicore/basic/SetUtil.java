@@ -420,7 +420,14 @@ public class SetUtil {
 	 * @return The Cartesian product A x B.
 	 */
 	public static <T> Collection<List<T>> cartesianProduct(List<? extends Collection<T>> listOfSets) {
-
+		
+		/* compute expected number of items of the result */
+		int expectedSize = 1;
+		for (Collection<T> items : listOfSets) {
+			assert items.size() == new HashSet<>(items).size() : "One of the collection is effectively a multi-set, which is forbidden for CP computation: " + items;
+			expectedSize *= items.size();
+		}
+		
 		/* there must be at least one set */
 		if (listOfSets.isEmpty())
 			throw new IllegalArgumentException("Empty list of sets");
@@ -436,6 +443,7 @@ public class SetUtil {
 				tupleOfSize1.add(obj);
 				product.add(tupleOfSize1);
 			}
+			assert product.size() == expectedSize : "Invalid number of expected entries! Expected " + expectedSize + " but computed " + product.size() + " for a single set: " + listOfSets.get(0);
 			return product;
 		}
 
@@ -444,7 +452,7 @@ public class SetUtil {
 		 * for the rest, and append the removed one afterwards
 		 */
 		Collection<T> removed = listOfSets.get(listOfSets.size() - 1);
-		listOfSets.remove(removed);
+		listOfSets.remove(listOfSets.size() - 1);
 		Collection<List<T>> subSolution = cartesianProduct(listOfSets);
 		Set<List<T>> product = new HashSet<>();
 		for (List<T> tuple : subSolution) {
@@ -454,6 +462,7 @@ public class SetUtil {
 				product.add(newTuple);
 			}
 		}
+		assert product.size() == expectedSize : "Invalid number of expected entries! Expected " + expectedSize + " but computed " + product.size();
 		return product;
 	}
 

@@ -158,7 +158,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 			/* if no label was computed, prune the node and cancel the computation */
 			if (label == null) {
 				if (!computationTimedout)
-					logger.info("Not inserting node {} since its label ist missing!", newNode);
+					logger.info("Not inserting node {} since its label is missing!", newNode);
 				else
 					logger.info("Not inserting node {} because computation of f-value timed out.", newNode);
 				if (!newNode.getAnnotations().containsKey("fError"))

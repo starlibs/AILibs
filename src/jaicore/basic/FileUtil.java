@@ -141,4 +141,14 @@ public abstract class FileUtil {
 	public static void move(String from, String to) {
 		move(new File(from), new File(to));
 	}
+	
+	public static List<File> getFilesOfFolder(File folder) {
+	    List<File> files = new ArrayList<>();
+		for (File file : folder.listFiles()) {
+	        if (!file.isDirectory()) {
+	            files.add(file);
+	        }
+	    }
+		return files;
+	}
 }

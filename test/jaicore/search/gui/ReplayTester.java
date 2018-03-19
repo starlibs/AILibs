@@ -1,7 +1,5 @@
 package jaicore.search.gui;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
@@ -31,24 +29,17 @@ public class ReplayTester {
 		
 		//Prepare an replay object
 		Recorder<Node<QueenNode, Double>> recorder = new Recorder<>(search.getEventBus());
+		search.nextSolution();
 		
-		
-		
-		
-		int solutions = 0;
-		while (search.nextSolution() != null)
-			solutions ++;
-		assertEquals(numbersOfSolutions[i], solutions);
-		System.out.println("Solutions found.\n Starting the replay:");
+		System.out.println("Solution found.\n Starting the replay:");
 		
 		//Test the recorder
 		SimpleGraphVisualizationWindow<Node<QueenNode, Double>> recordedWin = new SimpleGraphVisualizationWindow<>(recorder.getEventBus());
-		recordedWin.getPanel().setTooltipGenerator(n->n.getPoint().toString());
-		recorder.play();
+//		recordedWin.getPanel().setTooltipGenerator(n->n.getPoint().toString());
+//		recorder.play();
 		
-		recordedWin = new SimpleGraphVisualizationWindow<>(recorder.getEventBus());
 		recordedWin.getPanel().setTooltipGenerator(n->n.getPoint().toString());
-		for(int s =0; s < 50; s++) {
+		for(int s =0; s < 500; s++) {
 			recorder.step();
 			try {
 				TimeUnit.MILLISECONDS.sleep(10);

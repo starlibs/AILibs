@@ -31,7 +31,6 @@ import jaicore.planning.model.task.ceocstn.OCMethod;
 import jaicore.planning.model.task.stn.Method;
 import jaicore.planning.model.task.stn.MethodInstance;
 import jaicore.planning.model.task.stn.TaskNetwork;
-import scala.annotation.meta.param;
 
 public class TaskPlannerUtil {
 
@@ -79,7 +78,7 @@ public class TaskPlannerUtil {
 				Map<Literal, EvaluablePredicate> evaluablePredicatesForLiterals = new HashMap<>();
 				for (Literal l : castedMethod.getEvaluablePrecondition()) {
 					if (!evaluablePlanningPredicates.containsKey(l.getPropertyName()))
-						throw new IllegalArgumentException("The literal " + l + " is used in an evaluated precondition, but not evaluator was specified.");
+						throw new IllegalArgumentException("The literal " + l + " is used in an evaluated precondition, but no evaluator has been specified for it.");
 					evaluablePredicatesForLiterals.put(l, evaluablePlanningPredicates.get(l.getPropertyName()));
 				}
 
@@ -120,7 +119,7 @@ public class TaskPlannerUtil {
 						ConstantParam[] params = new ConstantParam[l.getParameters().size()];
 						for (int i = 0; i < params.length; i++)
 							params[i] = basicConstantGrounding.get(l.getParameters().get(i));
-						if (!evaluablePredicatesForLiterals.get(l).test(state, params)) {
+						if (evaluablePredicatesForLiterals.get(l).test(state, params) != l.isPositive()) {
 							allSatisfied = false;
 							break;
 						}
@@ -352,13 +351,32 @@ public class TaskPlannerUtil {
 					completeGroundingMethod.putAll(restMap);
 
 					/* now check applicability of the GROUND method */
+					logger.debug("Now considering grounding {}", completeGroundingMethod);
 					Monom precondition = new Monom(preconditionOfMethodOrPrimitive, completeGroundingMethod);
-					if (precondition.isContradictory())
+					if (precondition.isContradictory()) {
+						logger.debug("Ignoring this grounding because it makes the precondition contradictory.");
 						continue;
+					}
 					List<Literal> positiveLiterals = precondition.stream().filter(l -> l.isPositive()).collect(Collectors.toList());
 					List<Literal> negativeLiterals = precondition.stream().filter(l -> l.isNegated()).map(l -> l.clone().toggleNegation()).collect(Collectors.toList());
 					if (unitedKnowledge.containsAll(positiveLiterals) && SetUtil.intersection(unitedKnowledge, negativeLiterals).isEmpty()) {
+						logger.debug("Adding the grounding.");
 						groundings.add(completeGroundingMethod);
+					}
+					else if (logger.isDebugEnabled()) {
+						for (Literal l : positiveLiterals) {
+							if (!unitedKnowledge.contains(l)) {
+								logger.debug("Ignoring this grounding because the united knowledge {} does not contain the positive literal {}", unitedKnowledge, l);
+								if (logger.isTraceEnabled()) {
+									for (Literal l2 : unitedKnowledge) {
+										logger.trace("Comparing {} of signature {}{} with {} of signature{}{}: {}/{}", l, l.getClass().getName(), l.getParameters().stream().map(p -> p.getName() + ":" + p.getType()).collect(Collectors.toList()), l2, l2.getClass().getName(), l2.getParameters().stream().map(p -> p.getName() + ":" + p.getType()).collect(Collectors.toList()), l.equals(l2), l2.equals(l));
+									}
+								}
+								break;
+							}
+						}
+						if (!SetUtil.intersection(unitedKnowledge, negativeLiterals).isEmpty())
+							logger.debug("Ignoring this grounding because of an non-empty intersection of the united knowledge {} and the negative literals {}", unitedKnowledge, negativeLiterals);
 					}
 				}
 			}
