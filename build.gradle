@@ -72,7 +72,10 @@ dependencies {
 	//compile name: 'weka-interruptable'
 	//compile name: 'autoweka'
 	compile name: 'mysql-connector-java-5.1.45-bin'
-	compile name: 'meka'
+	// https://mvnrepository.com/artifact/net.sf.meka/meka
+	compile group: 'net.sf.meka', name: 'meka', version: '1.9.1'
+	
+	//compile name: 'meka'
 	
 	// apache lang (for reflection)
 	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.6'
