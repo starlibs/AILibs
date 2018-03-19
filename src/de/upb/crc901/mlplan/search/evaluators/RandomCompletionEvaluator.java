@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import org.apache.log4j.spi.LoggerRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +22,9 @@ import de.upb.crc901.mlplan.core.CodePlanningUtil;
 import de.upb.crc901.mlplan.core.MLUtil;
 import de.upb.crc901.mlplan.core.SolutionEvaluator;
 import jaicore.basic.SetUtil;
+import jaicore.basic.SetUtil.Pair;
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
+import jaicore.logging.LoggerUtil;
 import jaicore.logic.fol.structure.ConstantParam;
 import jaicore.logic.fol.structure.Literal;
 import jaicore.logic.fol.structure.Monom;
@@ -217,6 +220,12 @@ public abstract class RandomCompletionEvaluator<V extends Comparable<V>> impleme
 								public boolean isSelfContained() {
 									// TODO Auto-generated method stub
 									return false;
+								}
+
+								@Override
+								public void setNodeNumbering(boolean nodenumbering) {
+									// TODO Auto-generated method stub
+									
 								}
 							}, random);
 
@@ -520,8 +529,13 @@ public abstract class RandomCompletionEvaluator<V extends Comparable<V>> impleme
 			eventBus.post(new SolutionAnnotationEvent<>(solution, "classifier", c));
 		}
 		catch (Throwable e) {
-			logger.error("Cannot post solution {}, because no valid MLPipeline object could be derived from it.", solution);
-			e.printStackTrace();
+			List<Pair<String, Object>> explanations = new ArrayList<>();
+			if (logger.isDebugEnabled()) {
+				StringBuilder sb = new StringBuilder();
+				solution.forEach(n -> sb.append(n.toString() + "\n"));
+				explanations.add(new Pair<>("The path that has been tried to convert is as follows:", sb.toString()));
+			}
+			LoggerUtil.logException("Cannot post solution, because no valid MLPipeline object could be derived from it.", e, logger, explanations);
 		}
 	}
 

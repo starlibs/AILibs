@@ -1,4 +1,4 @@
-package de.upb.crc901.mlplan.brlandscape;
+package de.upb.crc901.mlplan.landscapeanalysis;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -97,12 +97,22 @@ public class BRLandscapeAnalyzer {
 		public void run() {
 			try {
 
-				Set<String> usedKeys = getUsedKeys();
+//				Set<String> usedKeys = getUsedKeys();
 				String shortClassifierName = classifierName.substring(classifierName.lastIndexOf(".") + 1);
 				String entry = encodeEntry(dataSplitId, labelIndex, seed, shortClassifierName);
-				if (usedKeys.contains(entry))
-					return;
+//				if (usedKeys.contains(entry))
+//					return;
 
+				boolean failureKnown = isMemoryFailRunKnown(dataSplitId, labelIndex, shortClassifierName);
+
+				if (failureKnown) {
+					System.out.println("Skipping " + labelIndex + " since failure is known");
+					return;
+				}
+				
+//				if (true)
+//					return;
+				
 				/* create experiment */
 				int id = createExperimentIfDoesNotExist(dataSplitId, labelIndex, seed, shortClassifierName);
 				JobResult result = executeRun(this.data, labelIndex, seed, classifierName);
@@ -210,7 +220,7 @@ public class BRLandscapeAnalyzer {
 		Set<String> usedKeys = getUsedKeys();
 		for (File dataset : datasets) {
 
-			ExecutorService pool = Executors.newFixedThreadPool(2);
+			ExecutorService pool = Executors.newFixedThreadPool(4);
 			int experiments = 0;
 			Instances allInstances = new Instances(new BufferedReader(new FileReader(dataset)));
 			Collection<Integer>[] splitDecision = WekaUtil.getArbitrarySplit(allInstances, new Random(0), .7f);
@@ -228,7 +238,7 @@ public class BRLandscapeAnalyzer {
 						String shortClassifierName = classifierName.substring(classifierName.lastIndexOf(".") + 1);
 						String entry = encodeEntry(splitId, labelIndex, seed, shortClassifierName);
 						if (usedKeys.contains(entry)) {
-							System.out.println("Skipping " + entry);
+//							System.out.println("Skipping " + entry);
 							continue;
 						}
 						pool.submit(new Job(classifierName, splitId, labelIndex, seed, inst));
@@ -255,6 +265,12 @@ public class BRLandscapeAnalyzer {
 			keys.add(encodeEntry(rs.getInt(1), rs.getInt(2), rs.getInt(3), rs.getString(4)));
 		}
 		return keys;
+	}
+	
+	private static boolean isMemoryFailRunKnown(int splitId, int label_index, String classifier) throws SQLException {
+		String[] values = new String[]{String.valueOf(splitId) , String.valueOf(label_index), classifier};
+		ResultSet rs = logger.getResultsOfQuery("SELECT classifier,seed,exception FROM binaryrelevance JOIN outerdatasetsplits USING(split_id) WHERE dataset = (SELECT dataset from outerdatasetsplits WHERE split_id = ?) AND label_index = ? AND (lower(exception) like \"%memory%\" or lower(exception) like '%stack%') and classifier = ?", values);
+		return rs.next();
 	}
 
 	private static void updateExperiment(int id, ArrayNode trainingInstances, int tp, int tn, int fp, int fn, double rankError, int trainingTimeInMS, Throwable e)

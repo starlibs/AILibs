@@ -27,7 +27,7 @@ import weka.classifiers.Classifier;
 public class BalancedRandomCompletionEvaluator extends RandomCompletionEvaluator<Double> {
 
 	private final static Logger logger = LoggerFactory.getLogger(BalancedRandomCompletionEvaluator.class);
-	private static final List<String> classifierRanking = Arrays.asList(new String[] { "RandomForest", "J48", "neighbor", "tf_nn", "NaiveBayesMultinomial", "MultinomialNB", "NaiveBayes", "BernoulliNB",
+	private static final List<String> classifierRanking = Arrays.asList(new String[] { "RandomForest", "J48", "neighbor", "tf_nn", "wekaNBMN", "MultinomialNB", "wekaNB", "BernoulliNB",
 			"SimpleLogistic", "LinearSVC", "VotedPerceptron", "SMO", "LogisticRegression" });
 
 //	private final Map<String, Integer> regionCounter = new HashMap<>();

@@ -13,7 +13,6 @@ import org.aeonbits.owner.ConfigCache;
 import de.upb.crc901.mlplan.classifiers.TwoPhaseHTNBasedPipelineSearcher;
 import de.upb.crc901.mlplan.core.DummyMLPlanExperimentLogger;
 import de.upb.crc901.mlplan.core.MLUtil;
-import de.upb.crc901.mlplan.core.MySQLMLPlanExperimentLogger;
 import de.upb.crc901.mlplan.search.evaluators.BalancedRandomCompletionEvaluator;
 import de.upb.crc901.mlplan.search.evaluators.MonteCarloCrossValidationEvaluator;
 import de.upb.crc901.mlplan.search.evaluators.MulticlassEvaluator;
@@ -29,7 +28,6 @@ import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import jaicore.search.algorithms.standard.core.ORGraphSearch;
 import weka.classifiers.Classifier;
-import weka.knowledgeflow.steps.Dummy;
 
 public class SCC2018MLTest extends MultiClassClassificationExperimentRunner {
 	
@@ -62,8 +60,10 @@ public class SCC2018MLTest extends MultiClassClassificationExperimentRunner {
 		return algoModes;
 	}
 	
+	
 	public SCC2018MLTest(File datasetFolder, String hostPase, String hostJase) throws IOException {
 //		super(datasetFolder, getClassifierNames(), getSetupNames(), timeouts, seeds, trainingPortion, numCPUs, memoryInMB, PMMulticlass.errorRate, new MySQLMLPlanExperimentLogger(conf.getDBHost(), conf.getDBUsername(), conf.getDBPassword(), conf.getDBDatabaseName()));
+//		this.logger = (MySQLMLPlanExperimentLogger)getLogger();
 		super(datasetFolder, getClassifierNames(), getSetupNames(), timeouts, seeds, trainingPortion, numCPUs, memoryInMB, PMMulticlass.errorRate, new DummyMLPlanExperimentLogger());
 		this.logger = getLogger();
 		MLPipelinePlan.hostPASE = hostPase;
@@ -82,8 +82,6 @@ public class SCC2018MLTest extends MultiClassClassificationExperimentRunner {
 				File searchSpaceFile = new File("testrsc/services/automl-services.searchspace");
 				TwoPhaseHTNBasedPipelineSearcher<Double> bs = new TwoPhaseHTNBasedPipelineSearcher<>();
 				
-//				logicalDerivationTree(searchSpaceFile, evaluablePredicatFile);
-				
 				Random random = new Random(seed);
 				bs.setHtnSearchSpaceFile(searchSpaceFile);
 				//bs.setHtnSearchSpaceFile(new File("testrsc/automl3.testset"));
@@ -101,15 +99,15 @@ public class SCC2018MLTest extends MultiClassClassificationExperimentRunner {
 				float mccvPortion = Integer.valueOf(m.group(2)) / 100f;
 				
 				bs.setSolutionEvaluatorFactory4Search(() -> new MonteCarloCrossValidationEvaluator(baseEvaluator, mccvRepeats, mccvPortion)); 
-				bs.setSolutionEvaluatorFactory4Selection(() -> new MonteCarloCrossValidationEvaluator(baseEvaluator, mccvRepeats, mccvPortion));
+				bs.setSolutionEvaluatorFactory4Selection(() -> new MonteCarloCrossValidationEvaluator(baseEvaluator, mccvRepeats, mccvPortion * .85f));
 				int numberOfSamples = conf.getNumberOfSamplesInFValueComputation();
 				System.out.println("Samples: " + numberOfSamples);
 				bs.setRce(new BalancedRandomCompletionEvaluator(random, numberOfSamples, new MonteCarloCrossValidationEvaluator(baseEvaluator, mccvRepeats, mccvPortion)));
 //				bs.setTimeoutPerNodeFComputation(1000 * (timeoutInSeconds == 60 ? 15 : 300));
 				bs.setTimeoutPerNodeFComputation(1000 * conf.getTimeoutPerCandidate());
 				bs.setTooltipGenerator(new TFDTooltipGenerator<>());
+				bs.setNumberOfMCIterationsPerSolutionInSelectionPhase(conf.getNumberOfIterationsInSelectionPhase());
 				bs.setPortionOfDataForPhase2(conf.getPortionOfDataForPhase2());
-				
 //				bs.setExperimentLogger(logger);
 				baseEvaluator.getMeasurementEventBus().register(logger);
 				return bs;
@@ -141,7 +139,7 @@ public class SCC2018MLTest extends MultiClassClassificationExperimentRunner {
 			server = new HttpServiceServer(Integer.parseInt(hostJase.split(":")[1]), "testrsc/conf/classifiers.json", "testrsc/conf/preprocessors.json", "testrsc/conf/others.json");
 		try {
 			SCC2018MLTest runner = new SCC2018MLTest(folder, hostPase, hostJase);
-			runner.runSpecific(0);
+			runner.runSpecific(24);
 		} finally {
 			if (server != null)
 				server.shutdown();

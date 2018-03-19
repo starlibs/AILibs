@@ -322,7 +322,7 @@ public class PlanExecutor {
 						if (ctor == null)
 							throw new IllegalArgumentException("No constructor with input classes " + Arrays.toString(inputClasses) + " found for class " + clazz);
 						variables.put(outParam, ctor.newInstance(params));
-						logger.info("Binding new object {} to variable {}.", variables.get(outParam), outParam);
+						logger.info("Binding new object of class {} to variable {}.", variables.get(outParam).getClass().getName(), outParam);
 						continue;
 					}
 					/* otherwise, prepare everything for the method invocation */
@@ -334,15 +334,14 @@ public class PlanExecutor {
 							int index = 0;
 							for (ConstantParam input : inputs) {
 								if (index == 0) {
-									index ++;
+									index++;
 									continue;
 								}
 								if (variables.containsKey(input))
 									inputClasses[index - 1] = variables.get(input).getClass();
 								else if (input.getName().matches("^-?\\d+$")) {
 									inputClasses[index - 1] = Integer.class;
-								}
-								else {
+								} else {
 									inputClasses[index - 1] = String.class;
 								}
 								index++;
@@ -351,10 +350,11 @@ public class PlanExecutor {
 
 						/* try to determine the method called here */
 						method = MethodUtils.getMatchingAccessibleMethod(clazz, opSplit[1], inputClasses);
-						
+
 						// method = getMethod(clazz, opSplit[1], inputs, variables);
 						if (method == null)
-							throw new IllegalArgumentException("Could not find the method " + opSplit[1] + " for class " + clazz + " to be called with inputs " + inputs.stream().skip(1).collect(Collectors.toList()) + " corresponding to classes " + Arrays.toString(inputClasses) + ". ");
+							throw new IllegalArgumentException("Could not find the method " + opSplit[1] + " for class " + clazz + " to be called with inputs "
+									+ inputs.stream().skip(1).collect(Collectors.toList()) + " corresponding to classes " + Arrays.toString(inputClasses) + ". ");
 
 						if (Modifier.isStatic(method.getModifiers())) {
 							params = new Object[method.getParameterCount()];
@@ -373,9 +373,10 @@ public class PlanExecutor {
 							params = new Object[method.getParameterCount()];
 							Class<?>[] requiredInputTypes = method.getParameterTypes();
 							for (int i = 1; i < inputs.size(); i++) {
-								
+
 								/* consider params as variables iff their value is known in "variables" */
-								params[i - 1] = variables.containsKey(inputs.get(i)) ? variables.get(inputs.get(i)) : (inputs.get(i).getName().matches("^-?\\d+$") ? Integer.parseInt(inputs.get(i).getName()) : inputs.get(i).getName());
+								params[i - 1] = variables.containsKey(inputs.get(i)) ? variables.get(inputs.get(i))
+										: (inputs.get(i).getName().matches("^-?\\d+$") ? Integer.parseInt(inputs.get(i).getName()) : inputs.get(i).getName());
 								if (!(requiredInputTypes[i - 1].isAssignableFrom(params[i - 1].getClass())
 										|| requiredInputTypes[i - 1].equals(int.class) && params[i - 1].getClass().equals(Integer.class)))
 									throw new IllegalArgumentException("The " + (i - 1) + "-th param of " + method.getName() + " must be " + requiredInputTypes[i - 1] + ", but "
@@ -405,15 +406,29 @@ public class PlanExecutor {
 				if (obj != null && !method.getDeclaringClass().isInstance(obj)) {
 					StringBuilder sb = new StringBuilder();
 					plan.stream().forEach(action -> sb.append(" - " + action.getEncoding() + "\n"));
-					throw new IllegalArgumentException(
-							"Cannot invoke method " + method.getName() + " of class " + method.getDeclaringClass().getName() + " on object of type " + obj.getClass().getName() + ". Plan was:\n" + sb.toString());
+					throw new IllegalArgumentException("Cannot invoke method " + method.getName() + " of class " + method.getDeclaringClass().getName() + " on object of type "
+							+ obj.getClass().getName() + ". Plan was:\n" + sb.toString());
 				}
-				
+
 				try {
 					out = method.invoke(obj, params);
 				} catch (InvocationTargetException e) {
-					System.err.println("Error when invoking " + method.getName() + " on " + obj + " with inputs "
-							+ Arrays.asList(params).stream().map(i -> i instanceof String[] ? Arrays.toString((String[]) i) : i).collect(Collectors.toList()));
+					Throwable e2 = e.getTargetException();
+					synchronized (this) {
+						logger.error(
+								"Error when invoking {} on {} with inputs {}. The target exception is of type {} with message \"{}\". Enable debug mode for this class for its stack trace and the plan.",
+								method.getName(), obj.getClass(),
+								Arrays.asList(params).stream().map(i -> i instanceof String[] ? Arrays.toString((String[]) i) : i).collect(Collectors.toList()),
+								e2.getClass().getName(), e2.getMessage());
+						if (logger.isDebugEnabled()) {
+							StringBuilder sb = new StringBuilder();
+							sb.append("Some detailed information about the execution:\n\tHere is the stack trace:");
+							Arrays.asList(e2.getStackTrace()).forEach(ste -> sb.append("\n\t\t" + ste.toString()));
+							sb.append("\n\tHere is the plan:");
+							plan.forEach(action -> sb.append("\n\t\t" + action.getEncoding()));
+							logger.debug(sb.toString());
+						}
+					}
 					throw e.getTargetException();
 				}
 
@@ -554,7 +569,7 @@ public class PlanExecutor {
 				try {
 					out = method.invoke(obj, params);
 				} catch (InvocationTargetException e) {
-					System.err.println("Error when invoking " + method.getName() + " on " + obj + " with inputs "
+					logger.error("Error when invoking " + method.getName() + " on " + obj + " with inputs "
 							+ Arrays.asList(params).stream().map(i -> i instanceof String[] ? Arrays.toString((String[]) i) : i).collect(Collectors.toList()));
 					throw e.getTargetException();
 				}
@@ -627,7 +642,7 @@ public class PlanExecutor {
 			if ((!varArgs || i < types.length - 1) && !(types[i].isAssignableFrom(inputClasses[i]) || types[i].equals(int.class) && inputClasses[i].equals(Integer.class))) {
 				return false;
 			} else if (varArgs && i == types.length - 1 && inputClasses.length >= types.length) {
-				System.out.println("OK");
+				; // do nothing
 			}
 		}
 		return true;
@@ -729,7 +744,7 @@ public class PlanExecutor {
 			}
 			if (offset == paramParts.length - 1) {
 				if (param.endsWith("\"")) {
-					System.err.println("Error in paramter string >> " + param + " <<: unbalanced quotes!");
+					logger.error("Error in paramter string >> " + param + " <<: unbalanced quotes!");
 					break;
 				} else {
 					return false;
@@ -737,7 +752,7 @@ public class PlanExecutor {
 			}
 
 			if (paramParts[offset].endsWith("\\")) {
-				System.err.println("Error in paramter string >> " + param + " <<: outermost quote is escaped!");
+				logger.error("Error in paramter string >> " + param + " <<: outermost quote is escaped!");
 				break;
 			}
 
@@ -751,7 +766,7 @@ public class PlanExecutor {
 			}
 
 			if ((index == paramParts.length) || (index == paramParts.length - 1) && !param.endsWith("\"")) {
-				System.err.println("Error in paramter string >> " + param + " <<: unbalanced quotes!");
+				logger.error("Error in paramter string >> " + param + " <<: unbalanced quotes!");
 				break;
 			}
 			if (index == paramParts.length - 1) {

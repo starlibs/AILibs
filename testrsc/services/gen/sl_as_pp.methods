@@ -212,7 +212,7 @@ sl_SelectFdr;			slConfigure_pp_as(config); config,pipe; associated('sklearn.feat
 #     Option Configuration for SelectFdr     #
 #--------------------------------------------#
 
-#sl-SelectFdr-set-alpha;		sl-SelectFdr-set-alpha(c,p); c,p; ; ;  noop()
+sl-SelectFdr-set-alpha;		sl-SelectFdr-set-alpha(c,p); c,p; ; ;  noop()
 sl-SelectFdr-set-alpha;		sl-SelectFdr-set-alpha(c,p); c,p,t; ; OptionsFor_SelectFdr_alpha(t); de.upb.crc901.mlplan.services.MLPipelinePlan:addOptions(c,p,'-alpha', t)
 sl-SelectFdr-set-score_func;		sl-SelectFdr-set-score_func(c,p); c,p; ; ;  noop()
 sl-SelectFdr-set-score_func;		sl-SelectFdr-set-score_func(c,p); c,p,t; ; OptionsFor_SelectFdr_score_func(t); de.upb.crc901.mlplan.services.MLPipelinePlan:addOptions(c,p,'-score_func', t)
@@ -240,7 +240,7 @@ sl-SelectFpr-set-score_func;		sl-SelectFpr-set-score_func(c,p); c,p,t; ; Options
 #   SelectFwe   #
 #---------------#
 
-#sl_SelectFwe;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.feature_selection.SelectFwe',config)
+sl_SelectFwe;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.feature_selection.SelectFwe',config)
 sl_SelectFwe;			slConfigure_pp_as(config); config,pipe; associated('sklearn.feature_selection.SelectFwe',config); ; de.upb.crc901.mlplan.services.MLPipelinePlan:addAttributeSelection(config,'sklearn.feature_selection.SelectFwe',pipe)	->	sl-SelectFwe-set-alpha(config,pipe)	->	sl-SelectFwe-set-score_func(config,pipe)
 
 
@@ -258,7 +258,7 @@ sl-SelectFwe-set-score_func;		sl-SelectFwe-set-score_func(c,p); c,p,t; ; Options
 #   SelectKBest   #
 #-----------------#
 
-#sl_SelectKBest;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.feature_selection.SelectKBest',config)
+sl_SelectKBest;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.feature_selection.SelectKBest',config)
 sl_SelectKBest;			slConfigure_pp_as(config); config,pipe; associated('sklearn.feature_selection.SelectKBest',config); ; de.upb.crc901.mlplan.services.MLPipelinePlan:addAttributeSelection(config,'sklearn.feature_selection.SelectKBest',pipe)	->	sl-SelectKBest-set-k(config,pipe)	->	sl-SelectKBest-set-score_func(config,pipe)
 
 
@@ -276,7 +276,7 @@ sl-SelectKBest-set-score_func;		sl-SelectKBest-set-score_func(c,p); c,p,t; ; Opt
 #   SelectPercentile   #
 #----------------------#
 
-#sl_SelectPercentile;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.feature_selection.SelectPercentile',config)
+sl_SelectPercentile;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.feature_selection.SelectPercentile',config)
 sl_SelectPercentile;			slConfigure_pp_as(config); config,pipe; associated('sklearn.feature_selection.SelectPercentile',config); ; de.upb.crc901.mlplan.services.MLPipelinePlan:addAttributeSelection(config,'sklearn.feature_selection.SelectPercentile',pipe)	->	sl-SelectPercentile-set-percentile(config,pipe)	->	sl-SelectPercentile-set-score_func(config,pipe)
 
 
@@ -504,7 +504,7 @@ sl-FactorAnalysis-set-tol;		sl-FactorAnalysis-set-tol(c,p); c,p,t; ; OptionsFor_
 #   GaussianRandomProjection   #
 #------------------------------#
 
-#sl_GaussianRandomProjection;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.random_projection.GaussianRandomProjection',config)
+sl_GaussianRandomProjection;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.random_projection.GaussianRandomProjection',config)
 sl_GaussianRandomProjection;			slConfigure_pp_as(config); config,pipe; associated('sklearn.random_projection.GaussianRandomProjection',config); ; de.upb.crc901.mlplan.services.MLPipelinePlan:addAttributeSelection(config,'sklearn.random_projection.GaussianRandomProjection',pipe)	->	sl-GaussianRandomProjection-set-eps(config,pipe)	->	sl-GaussianRandomProjection-set-n_components(config,pipe)
 
 
@@ -582,7 +582,7 @@ sl-GraphLassoCV-set-verbose;		sl-GraphLassoCV-set-verbose(c,p); c,p,t; ; Options
 #   Imputer   #
 #-------------#
 
-#sl_Imputer;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.preprocessing.Imputer',config)
+sl_Imputer;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.preprocessing.Imputer',config)
 sl_Imputer;			slConfigure_pp_as(config); config,pipe; associated('sklearn.preprocessing.Imputer',config); ; de.upb.crc901.mlplan.services.MLPipelinePlan:addAttributeSelection(config,'sklearn.preprocessing.Imputer',pipe)	->	sl-Imputer-set-axis(config,pipe)	->	sl-Imputer-set-copy(config,pipe)	->	sl-Imputer-set-missing_values(config,pipe)	->	sl-Imputer-set-strategy(config,pipe)	->	sl-Imputer-set-verbose(config,pipe)
 
 
@@ -606,7 +606,7 @@ sl-Imputer-set-verbose;		sl-Imputer-set-verbose(c,p); c,p,t; ; OptionsFor_Impute
 #   KernelCenterer   #
 #--------------------#
 
-#sl_KernelCenterer;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.preprocessing.KernelCenterer',config)
+sl_KernelCenterer;			slChoose_pp_as(config); config; ; ; associateWithAssertion('sklearn.preprocessing.KernelCenterer',config)
 sl_KernelCenterer;			slConfigure_pp_as(config); config,pipe; associated('sklearn.preprocessing.KernelCenterer',config); ; de.upb.crc901.mlplan.services.MLPipelinePlan:addAttributeSelection(config,'sklearn.preprocessing.KernelCenterer',pipe)
 
 

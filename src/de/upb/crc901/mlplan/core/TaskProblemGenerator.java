@@ -53,6 +53,7 @@ public class TaskProblemGenerator {
 
 			/* now we implicitly assume that there is a parameter c, and c contains all the classes. */
 			if (dataset != null) {
+				init.add(new Literal("definesClassesOf('c','x')"));
 				for (String className : WekaUtil.getClassesDeclaredInDataset(dataset)) {
 					init.add(new Literal("in('" + className + "','c')"));
 				}

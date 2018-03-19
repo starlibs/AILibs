@@ -3,6 +3,7 @@ package de.upb.crc901.mlplan.search.algorithms;
 import java.io.File;
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Random;
+import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang3.reflect.MethodUtils;
@@ -18,8 +20,10 @@ import org.slf4j.LoggerFactory;
 
 import de.upb.crc901.mlplan.core.ClassifierSolutionAnnotation;
 import de.upb.crc901.mlplan.core.MySQLMLPlanExperimentLogger;
+import jaicore.basic.SetUtil.Pair;
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.graphvisualizer.TooltipGenerator;
+import jaicore.logging.LoggerUtil;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;
 import jaicore.search.algorithms.interfaces.IObservableORGraphSearch;
@@ -65,7 +69,7 @@ public abstract class GraphBasedPipelineSearcher<T, A, V extends Comparable<V>> 
 
 	protected abstract IObservableORGraphSearch<T, A, V> getSearch(Instances data) throws Exception;
 
-	protected abstract Classifier convertPathToPipeline(List<T> path);
+	protected abstract Classifier convertPathToPipeline(List<T> path) throws Throwable;
 
 	protected void beforeSearch() {
 	}
@@ -126,7 +130,7 @@ public abstract class GraphBasedPipelineSearcher<T, A, V extends Comparable<V>> 
 		List<T> solution = null;
 		while (true) {
 			if ((solution = search.nextSolution()) == null) {
-				logger.info("Search algorithm has signaled that no more solutions exist.");
+				logger.info("Search algorithm has signaled that no more solutions exist or will be returned (possibly due to a cancel).");
 				search.cancel();
 				break;
 			}
@@ -140,35 +144,33 @@ public abstract class GraphBasedPipelineSearcher<T, A, V extends Comparable<V>> 
 			}
 
 			/* derive solution pipeline from plan */
-			Classifier mlp = modifyPipeline(convertPathToPipeline(solution));
-			if (mlp == null)
-				throw new IllegalArgumentException("Pipeline obtained from " + solution + " is NULL!");
-			V solutionQuality = search.getFOfReturnedSolution(solution);
-			logSolution(mlp, solutionQuality);
-			Integer fTime = (Integer) search.getAnnotationOfReturnedSolution(solution, "fTime");
-			if (fTime == null) {
-				logger.warn("No time information available for {}", mlp);
-				fTime = 0;
+			try {
+				Classifier mlp = modifyPipeline(convertPathToPipeline(solution));
+				if (mlp == null)
+					throw new IllegalArgumentException("Pipeline obtained from " + solution + " is NULL!");
+				V solutionQuality = search.getFOfReturnedSolution(solution);
+				logSolution(mlp, solutionQuality);
+				Integer fTime = (Integer) search.getAnnotationOfReturnedSolution(solution, "fTime");
+				if (fTime == null) {
+					logger.warn("No time information available for {}", mlp);
+					fTime = 0;
+				}
+				ClassifierSolutionAnnotation<V> annotation = new ClassifierSolutionAnnotation<>(solutionQuality, fTime);
+				solutionAnnotationCache.put(mlp, annotation);
+				solutions.add(mlp);
 			}
-			ClassifierSolutionAnnotation<V> annotation = new ClassifierSolutionAnnotation<>(solutionQuality, fTime);
-			solutionAnnotationCache.put(mlp, annotation);
-			solutions.add(mlp);
-
-			/* log solution stats */
-			if (solutionLogFile != null) {
-				if (!solutionLogFile.getParentFile().exists())
-					solutionLogFile.getParentFile().mkdirs();
-				// if (annotation instanceof MLPipelineSolutionAnnotation) {
-				// try (FileWriter fw = new FileWriter(solutionLogFile, true)) {
-				// fw.write(castedAnnotation.getTimeUntilSolutionWasFound() + ", " + castedAnnotation.f() + ", " + castedAnnotation.getGenerationNumberOfGoalNode() + ", "
-				// + castedAnnotation.getTimeForFComputation() + ", " + mlp.getCreationPlan() + "\n");
-				// } catch (IOException e) {
-				// e.printStackTrace();
-				// }
-				// }
+			catch (Throwable e) {
+				List<Pair<String, Object>> explanations = new ArrayList<>();
+				if (logger.isDebugEnabled()) {
+					StringBuilder sb = new StringBuilder();
+					solution.forEach(n -> sb.append(n.toString() + "\n"));
+					explanations.add(new Pair<>("The path that has been tried to convert is as follows:", sb.toString()));
+				}
+				LoggerUtil.logException("Observed exception when converting path to pipeline", e, logger, explanations);
 			}
 		}
 		search.cancel();
+
 	}
 
 	protected Classifier modifyPipeline(Classifier mlp) {
@@ -220,7 +222,7 @@ public abstract class GraphBasedPipelineSearcher<T, A, V extends Comparable<V>> 
 			throw new IllegalStateException("Cannot make predictions since the model has not been learned yet.");
 		return selectedModel.classifyInstance(instance);
 	}
-	
+
 	public double[] classifyInstances(Instances instances) throws Exception {
 		if (selectedModel == null)
 			throw new IllegalStateException("Cannot make predictions since the model has not been learned yet.");
