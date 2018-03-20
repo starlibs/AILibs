@@ -11,9 +11,9 @@ import jaicore.search.structure.core.GraphEventBus;
 public class Recorder<T> {
 	
 	
-	List<Object> events;
-	GraphEventBus<T> recordEventBus;
-	GraphEventBus<T> playEventBus;
+	private List<Object> events;
+	private GraphEventBus<T> recordEventBus;
+	private GraphEventBus<T> playEventBus;
 	//time which should be waited between to outgoing events
 	private int sleepTime = 10;
 	//the next event to post 
