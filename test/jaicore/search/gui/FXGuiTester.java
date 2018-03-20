@@ -16,7 +16,7 @@ public class FXGuiTester {
 	
 	@Test
 	public void test() {
-		int i  =3;
+		int i  =1;
 //		prepare a simple Search with the 8 Queens problem
 		System.out.print("Checking " + (i+4)+ "-Queens Problem ... ");
 		NQueenGenerator gen = new NQueenGenerator(i+4);
@@ -27,7 +27,7 @@ public class FXGuiTester {
 //		win.getPanel().setTooltipGenerator(n->n.getPoint().toString());
 		
 		//Prepare an replay object
-//		Recorder<Node<QueenNode, Double>> recorder = new Recorder<>(search.getEventBus());
+		Recorder<Node<QueenNode, Double>> recorder = new Recorder<>(search.getEventBus());
 		
 		
 		
@@ -35,7 +35,7 @@ public class FXGuiTester {
 		int solutions = 0;
 		while (search.nextSolution() != null)
 			solutions ++;
-		assertEquals(numbersOfSolutions[i], solutions);
+		
 		System.out.println("Solutions found.\n Starting the replay:");
 		
 		//Test the recorder
@@ -46,8 +46,11 @@ public class FXGuiTester {
 		
 		
 		String [] args = new String[0];
-		FXGui<Node<QueenNode, Double>> gui = new FXGui<Node<QueenNode, Double>>(search.getEventBus());
-		javafx.application.Application.launch(gui.getClass(), args);
+
+		javafx.application.Application.launch(FXGui.getClass(), args);
+
+		System.out.println("Gui created");
+		recorder.play();
 		
 	}
 
