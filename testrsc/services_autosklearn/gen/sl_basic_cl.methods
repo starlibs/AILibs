@@ -58,7 +58,7 @@ sl-BernoulliNB-set-fit_prior;		sl-BernoulliNB-set-fit_prior(c,p); c,p,t; ; Optio
 #   ExtraTreeClassifier   #
 #-------------------------#
 
-sl_ExtraTreeClassifier;			slCreate_classifier_basic(c); c,p; ; ; de.upb.crc901.mlplan.services.MLPipelinePlan:setClassifier(c,'sklearn.tree.ExtraTreeClassifier',p)	->	sl-ExtraTreeClassifier-set-criterion(c,p)	->	sl-ExtraTreeClassifier-set-max_features(c,p)	->	sl-ExtraTreeClassifier-set-min_impurity_decrease(c,p)	->	sl-ExtraTreeClassifier-set-min_samples_leaf(c,p)	->	sl-ExtraTreeClassifier-set-min_samples_split(c,p)	->	sl-ExtraTreeClassifier-set-min_weight_fraction_leaf(c,p)	->	sl-ExtraTreeClassifier-set-splitter(c,p)
+#sl_ExtraTreeClassifier;			slCreate_classifier_basic(c); c,p; ; ; de.upb.crc901.mlplan.services.MLPipelinePlan:setClassifier(c,'sklearn.tree.ExtraTreeClassifier',p)	->	sl-ExtraTreeClassifier-set-criterion(c,p)	->	sl-ExtraTreeClassifier-set-max_features(c,p)	->	sl-ExtraTreeClassifier-set-min_impurity_decrease(c,p)	->	sl-ExtraTreeClassifier-set-min_samples_leaf(c,p)	->	sl-ExtraTreeClassifier-set-min_samples_split(c,p)	->	sl-ExtraTreeClassifier-set-min_weight_fraction_leaf(c,p)	->	sl-ExtraTreeClassifier-set-splitter(c,p)
 
 
 #------------------------------------------------------#
@@ -98,7 +98,7 @@ sl_GaussianNB;			slCreate_classifier_basic(c); c,p; ; ; de.upb.crc901.mlplan.ser
 #   GaussianProcessClassifier   #
 #-------------------------------#
 
-sl_GaussianProcessClassifier;			slCreate_classifier_basic(c); c,p; ; ; de.upb.crc901.mlplan.services.MLPipelinePlan:setClassifier(c,'sklearn.gaussian_process.GaussianProcessClassifier',p)	->	sl-GaussianProcessClassifier-set-copy_X_train(c,p)	->	sl-GaussianProcessClassifier-set-max_iter_predict(c,p)	->	sl-GaussianProcessClassifier-set-multi_class(c,p)	->	sl-GaussianProcessClassifier-set-n_jobs(c,p)	->	sl-GaussianProcessClassifier-set-n_restarts_optimizer(c,p)	->	sl-GaussianProcessClassifier-set-optimizer(c,p)
+#sl_GaussianProcessClassifier;			slCreate_classifier_basic(c); c,p; ; ; de.upb.crc901.mlplan.services.MLPipelinePlan:setClassifier(c,'sklearn.gaussian_process.GaussianProcessClassifier',p)	->	sl-GaussianProcessClassifier-set-copy_X_train(c,p)	->	sl-GaussianProcessClassifier-set-max_iter_predict(c,p)	->	sl-GaussianProcessClassifier-set-multi_class(c,p)	->	sl-GaussianProcessClassifier-set-n_jobs(c,p)	->	sl-GaussianProcessClassifier-set-n_restarts_optimizer(c,p)	->	sl-GaussianProcessClassifier-set-optimizer(c,p)
 
 
 #------------------------------------------------------------#
@@ -229,7 +229,7 @@ sl-LinearSVC-set-verbose;		sl-LinearSVC-set-verbose(c,p); c,p,t; ; OptionsFor_Li
 #   LogisticRegression   #
 #------------------------#
 
-sl_LogisticRegression;			slCreate_classifier_basic(c); c,p; ; ; de.upb.crc901.mlplan.services.MLPipelinePlan:setClassifier(c,'sklearn.linear_model.LogisticRegression',p)	->	sl-LogisticRegression-set-C(c,p)	->	sl-LogisticRegression-set-dual(c,p)	->	sl-LogisticRegression-set-fit_intercept(c,p)	->	sl-LogisticRegression-set-intercept_scaling(c,p)	->	sl-LogisticRegression-set-max_iter(c,p)	->	sl-LogisticRegression-set-multi_class(c,p)	->	sl-LogisticRegression-set-n_jobs(c,p)	->	sl-LogisticRegression-set-penalty(c,p)	->	sl-LogisticRegression-set-solver(c,p)	->	sl-LogisticRegression-set-tol(c,p)	->	sl-LogisticRegression-set-verbose(c,p)	->	sl-LogisticRegression-set-warm_start(c,p)
+#sl_LogisticRegression;			slCreate_classifier_basic(c); c,p; ; ; de.upb.crc901.mlplan.services.MLPipelinePlan:setClassifier(c,'sklearn.linear_model.LogisticRegression',p)	->	sl-LogisticRegression-set-C(c,p)	->	sl-LogisticRegression-set-dual(c,p)	->	sl-LogisticRegression-set-fit_intercept(c,p)	->	sl-LogisticRegression-set-intercept_scaling(c,p)	->	sl-LogisticRegression-set-max_iter(c,p)	->	sl-LogisticRegression-set-multi_class(c,p)	->	sl-LogisticRegression-set-n_jobs(c,p)	->	sl-LogisticRegression-set-penalty(c,p)	->	sl-LogisticRegression-set-solver(c,p)	->	sl-LogisticRegression-set-tol(c,p)	->	sl-LogisticRegression-set-verbose(c,p)	->	sl-LogisticRegression-set-warm_start(c,p)
 
 
 #-----------------------------------------------------#

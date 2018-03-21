@@ -4,12 +4,14 @@ import weka.classifiers.Classifier;
 
 public class ClassifierMeasurementEvent<V> {
 	private final Classifier classifier;
+	private final Throwable error;
 	private final V score;
 
-	public ClassifierMeasurementEvent(Classifier c, V score) {
+	public ClassifierMeasurementEvent(Classifier c, V score, Throwable e) {
 		super();
 		this.classifier = c;
 		this.score = score;
+		this.error = e;
 	}
 
 	public Classifier getClassifier() {
@@ -20,4 +22,7 @@ public class ClassifierMeasurementEvent<V> {
 		return score;
 	}
 
+	public Throwable getError() {
+		return error;
+	}
 }

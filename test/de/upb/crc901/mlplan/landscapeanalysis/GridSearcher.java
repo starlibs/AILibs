@@ -21,6 +21,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -86,8 +87,9 @@ public class GridSearcher {
 		private int dataSplitId;
 		private int seed;
 		private Instances data;
+		private Semaphore computationTickets;
 
-		public Job(String preprocessorAlgorithm, String preprocessorOptions, String classifierAlgorithm, String classifierOptions, int dataSplitId, int seed, Instances data) {
+		public Job(String preprocessorAlgorithm, String preprocessorOptions, String classifierAlgorithm, String classifierOptions, int dataSplitId, int seed, Instances data, Semaphore computationTickets) {
 			super();
 			this.preprocessorAlgorithm = preprocessorAlgorithm;
 			this.preprocessorOptions = preprocessorOptions;
@@ -96,6 +98,7 @@ public class GridSearcher {
 			this.dataSplitId = dataSplitId;
 			this.seed = seed;
 			this.data = data;
+			this.computationTickets = computationTickets;
 		}
 
 		@Override
@@ -120,6 +123,9 @@ public class GridSearcher {
 
 			catch (Throwable e) {
 				e.printStackTrace();
+			}
+			finally {
+				computationTickets.release();
 			}
 		}
 	}
@@ -218,12 +224,12 @@ public class GridSearcher {
 
 		Collection<String> classifierNames = WekaUtil.getBasicLearners();
 
-		classifierNames.clear();
-		classifierNames.add("weka.classifiers.functions.SMO");
+//		classifierNames.clear();
+//		classifierNames.add("weka.classifiers.functions.SMO");
 		
 		List<File> datasets = getAvailableDatasets(new File(args[0]));
 		Collections.shuffle(datasets);
-
+		
 		/* launch JASE Server */
 		int port = 8000;
 		HttpServiceServer server = new HttpServiceServer(port, "testrsc/conf/classifiers.json", "testrsc/conf/others.json", "testrsc/conf/preprocessors.json");
@@ -235,27 +241,30 @@ public class GridSearcher {
 		Set<String> usedKeys = getUsedKeys();
 		Set<String> failedKeys = getFailedKeys();
 		System.out.println("Considering " + failedKeys.size() + " keys of failed runs");
+		System.out.println(failedKeys);
+		int experiments = 0;
+		ExecutorService pool = Executors.newFixedThreadPool(8);
+		Semaphore computationTickets = new Semaphore(8);
+		
 		for (File dataset : datasets) {
-
-			int experiments = 0;
-			ExecutorService pool = Executors.newFixedThreadPool(4);
 			Instances allInstances = new Instances(new BufferedReader(new FileReader(dataset)));
 			allInstances.setClassIndex(allInstances.numAttributes() - 1);
 
-			for (int seed = 0; seed < 5; seed++) {
+			for (int seed = 0; seed < 1; seed++) {
 
 				Collection<Integer>[] splitDecision = WekaUtil.getArbitrarySplit(allInstances, new Random(seed), .7f);
 				System.out.println("Considering dataset " + dataset.getName());
 				int splitId = getOuterSplit(dataset.getName(), WekaUtil.splitToJsonArray(splitDecision));
 				Instances inst = WekaUtil.realizeSplit(allInstances, splitDecision).get(0);
-
+				
 				/* get update of used keys */
 				for (String preprocessor : new String[] { "" }) {
 					for (String classifierName : classifierNames) {
 						File configFile = new File(configFolder + "/" + classifierName + ".params");
 
-						Collection<Map<String, String>> combos = getAllConsideredParamCombos(configFile, configFolder, 10000);
-//						System.out.println(combos.size());
+//						Collection<Map<String, String>> combos = getAllConsideredParamCombos(configFile, configFolder, 10000);
+						Collection<Map<String, String>> combos = new ArrayList<>();
+						combos.add(new HashMap<>());
 						for (Map<String, String> classifierParamsAsMap : combos) {
 							experiments ++;
 							String classifierParams = paramMapToString(classifierParamsAsMap);
@@ -269,16 +278,19 @@ public class GridSearcher {
 								logger.info("Skipping {} because a similar one has raised an issue", dsEntry);
 								continue;
 							}
-							pool.submit(new Job(preprocessor, "", classifierName, classifierParams, splitId, seed, inst));
+							System.out.print("Scheduling job ...");
+							computationTickets.acquire();
+							System.out.println(" done");
+							pool.submit(new Job(preprocessor, "", classifierName, classifierParams, splitId, seed, inst, computationTickets));
 						}
 					}
 				}
 			}
-
-			pool.shutdown();
-			System.out.println("Waiting one month for termination of " + experiments + " jobs.");
-			pool.awaitTermination(30, TimeUnit.DAYS);
 		}
+		pool.shutdown();
+		System.out.println("Waiting one month for termination of " + experiments + " jobs.");
+		pool.awaitTermination(30, TimeUnit.DAYS);
+		System.out.println("Ready");
 		dbAdapter.close();
 	}
 

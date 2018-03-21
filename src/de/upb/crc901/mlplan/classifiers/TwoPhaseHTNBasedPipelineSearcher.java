@@ -369,11 +369,10 @@ public class TwoPhaseHTNBasedPipelineSearcher<V extends Comparable<V>> extends G
 		/* evaluate each candiate */
 		List<DescriptiveStatistics> stats = new ArrayList<>();
 		final TimeoutSubmitter ts = TimeoutTimer.getInstance().getSubmitter();
+		ensembleToSelectFrom.forEach(c -> stats.add(new DescriptiveStatistics()));
 		for (int i = 0; i < ensembleToSelectFrom.size(); i++) {
 			Classifier c = ensembleToSelectFrom.get(i);
-			final DescriptiveStatistics statsForThisCandidate = new DescriptiveStatistics();
-			stats.add(statsForThisCandidate);
-			
+			final DescriptiveStatistics statsForThisCandidate = stats.get(i);
 			for (int j = 0; j < numberOfMCIterationsPerSolutionInSelectionPhase; j++) {
 				pool.submit(new Runnable() {
 					public void run() {
@@ -396,7 +395,6 @@ public class TwoPhaseHTNBasedPipelineSearcher<V extends Comparable<V>> extends G
 								statsForThisCandidate.addValue(selectionScore);
 							}
 						} catch (Throwable e) {
-							e.printStackTrace();
 							LoggerUtil.logException("Observed an exeption when trying to evaluate a candidate in the selection phase.", e, logger);
 						} finally {
 							sem.release();

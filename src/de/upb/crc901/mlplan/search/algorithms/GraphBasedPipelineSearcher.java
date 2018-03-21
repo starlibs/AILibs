@@ -11,12 +11,13 @@ import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Random;
-import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang3.reflect.MethodUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.eventbus.EventBus;
 
 import de.upb.crc901.mlplan.core.ClassifierSolutionAnnotation;
 import de.upb.crc901.mlplan.core.MySQLMLPlanExperimentLogger;
@@ -24,8 +25,7 @@ import jaicore.basic.SetUtil.Pair;
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.graphvisualizer.TooltipGenerator;
 import jaicore.logging.LoggerUtil;
-import jaicore.planning.graphgenerators.task.tfd.TFDNode;
-import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;
+import jaicore.ml.WekaUtil;
 import jaicore.search.algorithms.interfaces.IObservableORGraphSearch;
 import jaicore.search.structure.core.Node;
 import weka.classifiers.AbstractClassifier;
@@ -44,9 +44,9 @@ public abstract class GraphBasedPipelineSearcher<T, A, V extends Comparable<V>> 
 	private boolean showGraph;
 	private int timeout;
 	private Random random;
-	private transient MySQLMLPlanExperimentLogger experimentLogger;
 	private File solutionLogFile;
 
+	private final EventBus eventBus = new EventBus(GraphBasedPipelineSearcher.class.getName());
 	protected final Map<Classifier, ClassifierSolutionAnnotation<V>> solutionAnnotationCache = new HashMap<>();
 	protected transient Queue<Classifier> solutions;
 	private Classifier selectedModel = null;
@@ -76,11 +76,6 @@ public abstract class GraphBasedPipelineSearcher<T, A, V extends Comparable<V>> 
 
 	protected boolean shouldSearchTerminate(long timeRemaining) {
 		return timeRemaining < 1000;
-	}
-
-	protected void logSolution(Classifier pl, V score) {
-		if (score instanceof Number && experimentLogger != null)
-			experimentLogger.addEvaluationEntry(this, pl, (double) score);
 	}
 
 	public void findPipelines(Instances data) throws Exception {
@@ -138,8 +133,10 @@ public abstract class GraphBasedPipelineSearcher<T, A, V extends Comparable<V>> 
 				logger.info("Timeout was triggered.");
 				break;
 			}
-			if (search.getFOfReturnedSolution(solution) == null) {
-				logger.error("Received solution without f-value: {}", solution);
+			
+			V solutionQuality = search.getFOfReturnedSolution(solution);
+			if (solutionQuality == null) {
+				logger.warn("Received solution without f-value: {}", solution);
 				continue;
 			}
 
@@ -148,16 +145,16 @@ public abstract class GraphBasedPipelineSearcher<T, A, V extends Comparable<V>> 
 				Classifier mlp = modifyPipeline(convertPathToPipeline(solution));
 				if (mlp == null)
 					throw new IllegalArgumentException("Pipeline obtained from " + solution + " is NULL!");
-				V solutionQuality = search.getFOfReturnedSolution(solution);
-				logSolution(mlp, solutionQuality);
-				Integer fTime = (Integer) search.getAnnotationOfReturnedSolution(solution, "fTime");
-				if (fTime == null) {
-					logger.warn("No time information available for {}", mlp);
-					fTime = 0;
+				else {
+					Integer fTime = (Integer) search.getAnnotationOfReturnedSolution(solution, "fTime");
+					if (fTime == null) {
+						logger.warn("No time information available for {}", mlp);
+						fTime = 0;
+					}
+					ClassifierSolutionAnnotation<V> annotation = new ClassifierSolutionAnnotation<>(solutionQuality, fTime);
+					solutionAnnotationCache.put(mlp, annotation);
+					solutions.add(mlp);
 				}
-				ClassifierSolutionAnnotation<V> annotation = new ClassifierSolutionAnnotation<>(solutionQuality, fTime);
-				solutionAnnotationCache.put(mlp, annotation);
-				solutions.add(mlp);
 			}
 			catch (Throwable e) {
 				List<Pair<String, Object>> explanations = new ArrayList<>();
@@ -169,6 +166,8 @@ public abstract class GraphBasedPipelineSearcher<T, A, V extends Comparable<V>> 
 				LoggerUtil.logException("Observed exception when converting path to pipeline", e, logger, explanations);
 			}
 		}
+		
+		/* stop search (if not already canceled previously) */
 		search.cancel();
 
 	}
@@ -210,6 +209,7 @@ public abstract class GraphBasedPipelineSearcher<T, A, V extends Comparable<V>> 
 
 		/* train the selected model with all data */
 		logger.info("Now training the selected classifier on the whole data.");
+		selectedModel = WekaUtil.cloneClassifier(selectedModel);
 		selectedModel.buildClassifier(data);
 		logger.info("Classifier built.");
 	}
@@ -304,14 +304,6 @@ public abstract class GraphBasedPipelineSearcher<T, A, V extends Comparable<V>> 
 		logger.warn("Received cancel signal, but ignoring it.");
 	}
 
-	public MySQLMLPlanExperimentLogger getExperimentLogger() {
-		return experimentLogger;
-	}
-
-	public void setExperimentLogger(MySQLMLPlanExperimentLogger experimentLogger) {
-		this.experimentLogger = experimentLogger;
-	}
-
 	public long getTimeOfStart() {
 		return timeOfStart;
 	}
@@ -332,5 +324,9 @@ public abstract class GraphBasedPipelineSearcher<T, A, V extends Comparable<V>> 
 
 	public void setShowGraph(boolean showGraph) {
 		this.showGraph = showGraph;
+	}
+
+	public EventBus getEventBus() {
+		return eventBus;
 	}
 }

@@ -65,7 +65,7 @@
 	</logger>
 	
 	<logger name="mlplan">
-		<level value="warn" />
+		<level value="debug" />
 		<appender-ref ref="console" />
 	</logger>
 	
@@ -73,7 +73,7 @@
 		<level value="debug" />
 	</logger>
 	
-	<logger name="de.upb.crc901.mlplan.services.MLServicePipeline">
+	<logger name="de.upb.crc901.mlplan.services">
 		<level value="debug" />
 	</logger>
 	
@@ -82,7 +82,7 @@
 	</logger>
 	
 	<logger name="de.upb.crc901.mlplan.classifiers">
-		<level value="info" />
+		<level value="debug" />
 	</logger>
 	
 	<logger name="de.upb.crc901.mlplan.search.algorithms.GraphBasedPipelineSearcher">

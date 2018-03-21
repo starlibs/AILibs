@@ -119,6 +119,14 @@ public class MLPipeline implements Classifier, Serializable {
 		timeForExecutingClassifier.addValue((System.currentTimeMillis() - start));
 		return result;
 	}
+	
+	public double[] classifyInstances(Instances arg0) throws Exception {
+		int n = arg0.size();
+		double[] answers = new double[n];
+		for (int i = 0; i < n; i++)
+			answers[i] = classifyInstance(arg0.get(i));
+		return answers;
+	}
 
 	@Override
 	public double[] distributionForInstance(Instance arg0) throws Exception {

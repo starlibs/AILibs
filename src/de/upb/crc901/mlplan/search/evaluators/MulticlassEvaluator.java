@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.eventbus.EventBus;
 
 import de.upb.crc901.mlplan.services.MLServicePipeline;
+import jaicore.logging.LoggerUtil;
 import jaicore.ml.WekaUtil;
 import weka.classifiers.Classifier;
 import weka.core.Instance;
@@ -17,9 +18,9 @@ import weka.core.Instances;
 
 @SuppressWarnings("serial")
 public class MulticlassEvaluator implements BasicMLEvaluator, Serializable {
-	
+
 	private final static Logger logger = LoggerFactory.getLogger(MulticlassEvaluator.class);
-	
+
 	private final Random rand;
 	private boolean canceled;
 	private final EventBus measurementEventBus = new EventBus();
@@ -35,34 +36,44 @@ public class MulticlassEvaluator implements BasicMLEvaluator, Serializable {
 		Instances test = split.get(1);
 		return getErrorRateForSplit(c, train, test);
 	}
-	
+
 	public double getErrorRateForSplit(Classifier c, Instances train, Instances test) throws Exception {
 		logger.info("Split size is {}/{}", train.size(), test.size());
-		Classifier cCopy = WekaUtil.cloneClassifier(c);
-		cCopy.buildClassifier(train);
-		return loss(cCopy,test);
+		try {
+			Classifier cCopy = WekaUtil.cloneClassifier(c);
+			cCopy.buildClassifier(train);
+			return loss(cCopy, test);
+		} catch (Exception e) {
+			LoggerUtil.logException("Problems with evaluation of classifier.", e, logger);
+			measurementEventBus.post(new ClassifierMeasurementEvent<Double>(c, null, e));
+			throw e;
+		}
 	}
-	
+
 	public double loss(Classifier c, Instances test) throws Exception {
 		int mistakes = 0;
-		
-		if (c instanceof MLServicePipeline) {
-			MLServicePipeline cc = (MLServicePipeline)c;
-			double[] predictions = cc.classifyInstances(test);
-			for (int i = 0; i < predictions.length; i++) {
-				if (predictions[i] != test.get(i).classValue())
-					mistakes ++;
+		Throwable exception = null;
+		try {
+			if (c instanceof MLServicePipeline) {
+				MLServicePipeline cc = (MLServicePipeline) c;
+				double[] predictions = cc.classifyInstances(test);
+				for (int i = 0; i < predictions.length; i++) {
+					if (predictions[i] != test.get(i).classValue())
+						mistakes++;
+				}
+			} else {
+				for (Instance i : test) {
+					if (i.classValue() != c.classifyInstance(i))
+						mistakes++;
+				}
 			}
+		} catch (Throwable e) {
+			exception = e;
+			LoggerUtil.logException("Problems with evaluation of classifier.", e, logger);
 		}
-		else {
-			for (Instance i : test) {
-				if (i.classValue() != c.classifyInstance(i))
-					mistakes++;
-			}
-		}
-		
+
 		double error = mistakes * 100f / test.size();
-		measurementEventBus.post(new ClassifierMeasurementEvent<Double>(c, error));
+		measurementEventBus.post(new ClassifierMeasurementEvent<Double>(c, error, exception));
 		return error;
 	}
 

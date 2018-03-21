@@ -23,7 +23,7 @@ sl-AdaBoostClassifier-set-n_estimators;		sl-AdaBoostClassifier-set-n_estimators(
 #   BaggingClassifier   #
 #-----------------------#
 
-sl_BaggingClassifier;			slCreate_classifier_meta(c); c,p; ; ; de.upb.crc901.mlplan.services.MLPipelinePlan:setClassifier(c,'sklearn.ensemble.BaggingClassifier',p)	->	sl-BaggingClassifier-set-bootstrap(c,p)	->	sl-BaggingClassifier-set-bootstrap_features(c,p)	->	sl-BaggingClassifier-set-max_features(c,p)	->	sl-BaggingClassifier-set-max_samples(c,p)	->	sl-BaggingClassifier-set-n_estimators(c,p)	->	sl-BaggingClassifier-set-n_jobs(c,p)	->	sl-BaggingClassifier-set-oob_score(c,p)	->	sl-BaggingClassifier-set-verbose(c,p)	->	sl-BaggingClassifier-set-warm_start(c,p)
+#sl_BaggingClassifier;			slCreate_classifier_meta(c); c,p; ; ; de.upb.crc901.mlplan.services.MLPipelinePlan:setClassifier(c,'sklearn.ensemble.BaggingClassifier',p)	->	sl-BaggingClassifier-set-bootstrap(c,p)	->	sl-BaggingClassifier-set-bootstrap_features(c,p)	->	sl-BaggingClassifier-set-max_features(c,p)	->	sl-BaggingClassifier-set-max_samples(c,p)	->	sl-BaggingClassifier-set-n_estimators(c,p)	->	sl-BaggingClassifier-set-n_jobs(c,p)	->	sl-BaggingClassifier-set-oob_score(c,p)	->	sl-BaggingClassifier-set-verbose(c,p)	->	sl-BaggingClassifier-set-warm_start(c,p)
 
 
 #----------------------------------------------------#
