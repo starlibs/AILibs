@@ -1,6 +1,5 @@
 package jaicore.search.gui;
 
-import jaicore.graphvisualizer.SearchVisualizationPanel;
 import javafx.application.Application;
 import javafx.embed.swing.SwingNode;
 import javafx.geometry.NodeOrientation;
@@ -17,7 +16,7 @@ public class FXGui<T> extends Application {
 
 
 
-    private Recorder<T> rec;
+    private RecordPlayer<T> rec;
     private String t;
     
 	/*@Override
@@ -28,7 +27,7 @@ public class FXGui<T> extends Application {
          //It runs once before the start method,
          //and after the constructor.
 		//if(rec == null) {
-		//	System.out.println("No Recorder was set, therefore the buttons will not work.");
+		//	System.out.println("No RecordPlayer was set, therefore the buttons will not work.");
 		//}
 
         if(rec == null){
@@ -43,7 +42,6 @@ public class FXGui<T> extends Application {
         //Parent root = FXMLLoader.load(getClass().getResource("/gui.fxml"));
 
         //creating the Borderpane for as main pane
-        t = "T";
         BorderPane root = new BorderPane();
 
         //Create Buttons for controlling
@@ -78,7 +76,7 @@ public class FXGui<T> extends Application {
 
 
 	    primaryStage.setScene(new Scene(root, 400,300));
-	    primaryStage.setTitle("Recorder");
+	    primaryStage.setTitle("RecordPlayer");
 	    primaryStage.show();
 
 
@@ -103,7 +101,7 @@ public class FXGui<T> extends Application {
         });
     }
 
-    public void setRecorder(Recorder<T> rec){
+    public void setRecorder(RecordPlayer<T> rec){
         this.rec = rec;
         t= "aiudvöiu#";
     }
