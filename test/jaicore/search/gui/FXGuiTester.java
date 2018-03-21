@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import jaicore.search.graphgenerators.nqueens.NQueenGenerator;
 import jaicore.search.graphgenerators.nqueens.QueenNode;
@@ -27,7 +26,7 @@ public class FXGuiTester {
 //		win.getPanel().setTooltipGenerator(n->n.getPoint().toString());
 		
 		//Prepare an replay object
-		Recorder<Node<QueenNode, Double>> recorder = new Recorder<>(search.getEventBus());
+		RecordPlayer<Node<QueenNode, Double>> recordPlayer = new RecordPlayer<>(search.getEventBus());
 		
 		
 		
@@ -38,8 +37,8 @@ public class FXGuiTester {
 		
 		System.out.println("Solutions found.\n Starting the replay:");
 		
-		//Test the recorder
-//		recorder.play();
+		//Test the recordPlayer
+//		recordPlayer.play();
 		
 		
 		
@@ -47,10 +46,10 @@ public class FXGuiTester {
 		
 		String [] args = new String[0];
 
-		javafx.application.Application.launch(FXGui.getClass(), args);
+		//javafx.application.Application.launch(FXGui, args);
 
 		System.out.println("Gui created");
-		recorder.play();
+		recordPlayer.play();
 		
 	}
 

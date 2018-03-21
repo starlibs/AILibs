@@ -1,73 +1,40 @@
 package jaicore.search.gui;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
 import com.google.common.eventbus.Subscribe;
-
 import jaicore.search.structure.core.GraphEventBus;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.List;
+import java.util.ArrayList;
+
+import java.util.ArrayList;
+
 public class Recorder<T> {
-	
-	
-	private List<Object> events;
-	private GraphEventBus<T> recordEventBus;
-	private GraphEventBus<T> playEventBus;
-	//time which should be waited between to outgoing events
-	private int sleepTime = 10;
-	//the next event to post 
-	private int index;
-	
-	
-	public Recorder(GraphEventBus<T> eventBus) {
-		this.index = 0;
-		this.recordEventBus = eventBus;
-		eventBus.register(this);
-		playEventBus = new GraphEventBus<>();
-		events = new ArrayList<Object>();
-		
-		
-	}
 
-	
-	@Subscribe
-	public void receiveEvent(T event) {
-		events.add(event);
-		
-	}
-	
-	public GraphEventBus<T> getEventBus() {
-		return playEventBus;
-	}
-
-	public void play() {
-		for(Object e : events) {
-			playEventBus.post(e);
-			try {
-				TimeUnit.MILLISECONDS.sleep(sleepTime);
-			} catch (InterruptedException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-			
-		}
-		
-	}
-	public void step() {
-		playEventBus.post(events.get(index));
-		index++;
-	}
-	
-	
-	public int getSleepTime() {
-		return sleepTime;
-	}
+    private GraphEventBus<T>  eventBus;
+    private List<T> events;
 
 
-	public void setSleepTime(int sleepTime) {
-		this.sleepTime = sleepTime;
-	}
-	
+    public Recorder(GraphEventBus eventBus){
+        this.eventBus = eventBus;
+        eventBus.register(this);
+        this.events = new ArrayList<>();
+    }
+
+    @Subscribe
+    public void receiveEvent(T e){
+        events.add(e);
+    }
+
+    public void writeEventsToFile(String path)throws IOException{
+        FileWriter writer = new FileWriter(path);
+        for(Object event: events){
+            System.out.println(event.toString());
+            writer.write(event.toString());
+            writer.flush();
+        }
+        writer.close();
+    }
 
 }
