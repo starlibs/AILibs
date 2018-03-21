@@ -7,50 +7,43 @@ import jaicore.search.graphgenerators.nqueens.QueenNode;
 import jaicore.search.structure.core.Node;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 public class RecorderTester {
 
 	int[] numbersOfSolutions = { 2, 10, 4, 40, 92, 352};
-
+	
 	@Test
 	public void test() {
-		int i = 2;
-
+		int i = 5;
+		
 		//prepare a simple Search with the 8 Queens problem
 		System.out.print("Checking " + (i+4)+ "-Queens Problem ... ");
 		NQueenGenerator gen = new NQueenGenerator(i+4);
 		BestFirst<QueenNode, String> search = new BestFirst<>(gen, node-> (double)node.getPoint().getNumberOfAttackedCellsInNextRow());
 
-		//Add a graphvisualization windows
-//		SimpleGraphVisualizationWindow<Node<QueenNode, Double>> win = new SimpleGraphVisualizationWindow<>(search.getEventBus());
-//		win.getPanel().setTooltipGenerator(n->n.getPoint().toString());
-
 		//Prepare an replay object
 		Recorder<Node<QueenNode, Double>> recorder = new Recorder<>(search.getEventBus());
+
+		SimpleGraphVisualizationWindow<Node<QueenNode, Double>> win = new SimpleGraphVisualizationWindow<>(search.getEventBus());
+//		win.getPanel().setTooltipGenerator(n->n.getPoint().toString());
+
 		search.nextSolution();
-
+		
 		System.out.println("Solution found.\n Starting the replay:");
-
+		
 		//Test the recorder
-		SimpleGraphVisualizationWindow<Node<QueenNode, Double>> recordedWin = new SimpleGraphVisualizationWindow<>(recorder.getEventBus());
-//		recordedWin.getPanel().setTooltipGenerator(n->n.getPoint().toString());
-//		recorder.play();
-
-		recordedWin.getPanel().setTooltipGenerator(n->n.getPoint().toString());
-		for(int s =0; s < 100; s++) {
-			recorder.step();
-			try {
-				TimeUnit.MILLISECONDS.sleep(10);
-			} catch (InterruptedException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
+		String test = "/home/jkoepe/git/test.txt";
+		try {
+			recorder.writeEventsToFile(test);
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 		System.out.println("done");
-
-
-
+		
+		
+		
 	}
 
 }

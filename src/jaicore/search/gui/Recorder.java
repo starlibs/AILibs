@@ -12,14 +12,14 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class Recorder<T> {
-	
-	
+
+
 	private List<Object> events;
 	private GraphEventBus<T> recordEventBus;
 	private GraphEventBus<T> playEventBus;
 	//time which should be waited between to outgoing events
 	private int sleepTime = 50;
-	//the next event to post 
+	//the next event to post
 	private int index;
 
 
@@ -43,8 +43,8 @@ public class Recorder<T> {
 		playEventBus = new GraphEventBus<>();
 		events = new ArrayList<Object>();
 
-		
-		
+
+
 	}
 
 	/**
@@ -54,7 +54,7 @@ public class Recorder<T> {
 	@Subscribe
 	public void receiveEvent(T event) {
 		events.add(event);
-		
+
 	}
 
 	/**
