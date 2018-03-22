@@ -22,11 +22,17 @@ public abstract class MySQLExperimentDatabaseHandle extends MySQLAdapter impleme
 		super(host, user, password, database);
 	}
 	
+	protected void beforeCreateRun(Experiment e) {}
+	protected void afterCreateRun(Experiment e, int jobId) {}
+	
 	@Override
 	public int createRunIfDoesNotExist(Experiment e) {
 		try {
 			String[] values = { InetAddress.getLocalHost().toString(), e.getDataset(), e.getAlgorithm(), e.getAlgorithmMode(), String.valueOf(e.getSeed()), String.valueOf(e.getTimeoutInSeconds()), String.valueOf(e.getCpus()), String.valueOf(e.getMemoryInMB()), e.getPerformanceMeasure() };
-			return insert("INSERT INTO `runs` (machine, dataset, algorithm, algorithmmode, seed, timeout, CPUs, memoryInMB, performancemeasure) VALUES (?,?,?,?,?,?,?,?,?)", values);
+			beforeCreateRun(e);
+			int id = insert("INSERT INTO `runs` (machine, dataset, algorithm, algorithmmode, seed, timeout, CPUs, memoryInMB, performancemeasure) VALUES (?,?,?,?,?,?,?,?,?)", values);
+			afterCreateRun(e, id);
+			return id;
 		} catch (SQLException | UnknownHostException exc) {
 			if (!exc.getMessage().startsWith("Duplicate entry"))
 				exc.printStackTrace();

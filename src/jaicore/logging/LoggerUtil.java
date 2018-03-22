@@ -17,7 +17,7 @@ public class LoggerUtil {
 		try {
 			String eMessage = e.getMessage();
 			boolean containsLineBreaks = eMessage != null ? eMessage.contains("\n") : false;
-			String shortenedEMessage = (eMessage != null && containsLineBreaks) ? eMessage.substring(0, eMessage.indexOf("\n") - 1) : eMessage;
+			String shortenedEMessage = (eMessage != null && containsLineBreaks) ? eMessage.substring(0, Math.max(0, eMessage.indexOf("\n") - 1)) : eMessage;
 			String shortenedInfo = containsLineBreaks ? " The message has a line break. Enable debug for the full message." : "";
 			logger.error("{} Exception is {} with message {}.{} Enable debug mode for stack trace", message, e.getClass().getName(), shortenedEMessage, shortenedInfo);
 			if (logger.isDebugEnabled()) {

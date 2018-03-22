@@ -22,10 +22,12 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.RuntimeJsonMappingException;
 import com.google.common.eventbus.Subscribe;
 
 import jaicore.concurrent.TimeoutTimer;
 import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
+import jaicore.logging.LoggerUtil;
 import jaicore.search.algorithms.interfaces.IObservableORGraphSearch;
 import jaicore.search.structure.core.GraphEventBus;
 import jaicore.search.structure.core.GraphGenerator;
@@ -133,13 +135,16 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 			boolean computationTimedout = false;
 			try {
 				long startComputation = System.currentTimeMillis();
+				System.gc();
 				label = nodeEvaluator.f(newNode);
+				System.gc();
 				
 				/* check whether the required time exceeded the timeout */
 				long computationTime = System.currentTimeMillis() - startComputation;
 				if (timeoutForComputationOfF > 0 && computationTime > timeoutForComputationOfF + 1000)
 					logger.warn("Computation of f for node {} took {}ms, which is more than the allowed {}ms", newNode, computationTime, timeoutForComputationOfF);
 			} catch (InterruptedException e) {
+				logger.debug("Received interrupt during computation of f.");
 				graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_timedout"));
 				newNode.setAnnotation("fError", "Timeout");
 				computationTimedout = true;
@@ -149,6 +154,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 					e2.printStackTrace();
 				}
 			} catch (Throwable e) {
+				LoggerUtil.logException("Observed an execution during computation of f.", e, logger);
 				newNode.setAnnotation("fError", e);
 				graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_ffail"));
 			}
@@ -593,7 +599,11 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	}
 
 	public void cancel() {
-		logger.info("Search has been canceled");
+		StringBuilder sb = new StringBuilder();
+		for (StackTraceElement ste : Thread.currentThread().getStackTrace()) {
+			sb.append("\n" + ste.toString());
+		}
+		logger.info("Search has been canceled. Cancel came from: {}", sb.toString());
 		this.canceled = true;
 		this.interrupted = true;
 		if (this.pool != null)
@@ -813,7 +823,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 		AtomicInteger counter = new AtomicInteger(0);
 		this.pool = Executors.newFixedThreadPool(threadsForExpansion, r -> {
 			Thread t = new Thread(r);
-			t.setName("ParallelizedORGraphSearch-worker-" + counter.incrementAndGet());
+			t.setName("ORGraphSearch-worker-" + counter.incrementAndGet());
 			return t;
 		});
 	}

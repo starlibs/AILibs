@@ -504,6 +504,10 @@ public class WekaUtil {
 	}
 	
 	public static List<Instances> realizeSplit(final Instances data, final Collection<Integer>[] split) {
+		return realizeSplitAsSubInstances(data, split);
+	}
+	
+	public static List<Instances> realizeSplitAsCopiedInstances(final Instances data, final Collection<Integer>[] split) {
 		List<Instances> folds = new ArrayList<>();
 		Instances emptyInstances = new Instances(data);
 		emptyInstances.clear();
@@ -511,6 +515,19 @@ public class WekaUtil {
 			Instances fold = new Instances(emptyInstances);
 			foldIndices.stream().forEach(i -> fold.add(data.get(i)));
 			folds.add(fold);
+		}
+		return folds;
+	}
+	
+	public static List<Instances> realizeSplitAsSubInstances(final Instances data, final Collection<Integer>[] split) {
+		List<Instances> folds = new ArrayList<>();
+		for (Collection<Integer> foldIndices : split) {
+			int[] indices = new int[foldIndices.size()];
+			int i = 0;
+			for (Integer x : foldIndices) {
+				indices[i++] = x;
+			}
+			folds.add(new SubInstances(data, indices));
 		}
 		return folds;
 	}
@@ -676,7 +693,7 @@ public class WekaUtil {
 	}
 
 	public static Instances getEmptySetOfInstancesWithRefactoredClass(final Instances instances) {
-		List<Attribute> newAttributes = getAttributes(instances);
+		List<Attribute> newAttributes = getAttributes(instances,false);
 		newAttributes.add(instances.classIndex(), getNewClassAttribute(instances.classAttribute()));
 		Instances newData = new Instances("split", (ArrayList<Attribute>) newAttributes, 0);
 		newData.setClassIndex(instances.classIndex());
@@ -684,19 +701,21 @@ public class WekaUtil {
 	}
 
 	public static Instances getEmptySetOfInstancesWithRefactoredClass(final Instances instances, final List<String> classes) {
-		List<Attribute> newAttributes = getAttributes(instances);
+		List<Attribute> newAttributes = getAttributes(instances,false);
 		newAttributes.add(instances.classIndex(), getNewClassAttribute(instances.classAttribute(), classes));
 		Instances newData = new Instances("split", (ArrayList<Attribute>) newAttributes, 0);
 		newData.setClassIndex(instances.classIndex());
 		return newData;
 	}
 
-	public static List<Attribute> getAttributes(final Instances inst) {
+	public static List<Attribute> getAttributes(final Instances inst, boolean includeClassAttribute) {
 		List<Attribute> attributes = new ArrayList<>();
 		Enumeration<Attribute> e = inst.enumerateAttributes();
 		while (e.hasMoreElements()) {
 			attributes.add(e.nextElement());
 		}
+		if (includeClassAttribute)
+			attributes.add(inst.classAttribute());
 		return attributes;
 	}
 
