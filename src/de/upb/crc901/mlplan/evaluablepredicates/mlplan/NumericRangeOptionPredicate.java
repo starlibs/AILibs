@@ -96,7 +96,7 @@ public abstract class NumericRangeOptionPredicate extends OptionsPredicate  {
 	}
 	
 	public NumericRangeOptionPredicate() {
-		if(values != null) {
+		if(values == null) {
 			values = new ArrayList<>();
 			fillList();
 			List<? extends Object> additionalValues = this.additionalValues();
