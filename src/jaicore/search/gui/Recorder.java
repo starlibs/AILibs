@@ -16,9 +16,10 @@ public class Recorder<T> {
 	private GraphEventBus<T> recordEventBus;
 	private GraphEventBus<T> playEventBus;
 	//time which should be waited between to outgoing events
-	private int sleepTime = 10;
+	private int sleepTime = 50;
 	//the next event to post 
 	private int index;
+
 
 	/**
 	 * Creates a new Recroder which is listeneing to the eventbus given as a paramter
@@ -31,6 +32,7 @@ public class Recorder<T> {
 		eventBus.register(this);
 		playEventBus = new GraphEventBus<>();
 		events = new ArrayList<Object>();
+
 		
 		
 	}
@@ -69,16 +71,17 @@ public class Recorder<T> {
 			
 		}*/
 		while(index < events.size()){
-			playEventBus.post(events.get(index));
+            try {
+                TimeUnit.MILLISECONDS.sleep(sleepTime);
+            }
+            catch (InterruptedException e){
+                e.printStackTrace();
+            }
+		    playEventBus.post(events.get(index));
 			index ++;
-			try {
-				TimeUnit.MILLISECONDS.sleep(sleepTime);
-			}
-			catch (InterruptedException e){
-				e.printStackTrace();
-			}
+
 		}
-		
+
 	}
 
 	/**
@@ -86,7 +89,8 @@ public class Recorder<T> {
 	 */
 	public void step() {
 		System.out.println(events.get(index).getClass().getSimpleName() + "\t" +index);
-		playEventBus.post(events.get(index));
+		Object event = events.get(index);
+		playEventBus.post(event);
 		index++;
 		System.out.println(index);
 	}
@@ -105,15 +109,10 @@ public class Recorder<T> {
 	 */
 	public void back(){
 		index--;
-		Object event = events.get(index);
-		Object counter = createCounterEvent(event);
-		if(counter == null){
-			System.out.println("Event could not be reversed");
-		}
-		playEventBus.post(counter);
 
-
-		System.out.println(index);
+		for(int i = 0; i < index; i++){
+		    playEventBus.post(events.get(i));
+        }
 
 	}
 
