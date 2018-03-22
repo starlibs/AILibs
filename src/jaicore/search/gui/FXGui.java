@@ -1,7 +1,11 @@
 package jaicore.search.gui;
 
+import com.google.common.eventbus.EventBus;
+import jaicore.graphvisualizer.SearchVisualizationPanel;
+import jaicore.search.structure.core.GraphEventBus;
 import javafx.application.Application;
 import javafx.embed.swing.SwingNode;
+import javafx.event.ActionEvent;
 import javafx.geometry.NodeOrientation;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -16,8 +20,13 @@ public class FXGui<T> extends Application {
 
 
 
-    private RecordPlayer<T> rec;
-    private String t;
+    //private RecordPlayer<T> rec;
+    private static Object referenceobject;
+    private static EventBus eventBus;
+    private static Recorder rec;
+
+    private SwingNode swing;
+
     
 	/*@Override
     public void init() throws Exception
@@ -41,31 +50,53 @@ public class FXGui<T> extends Application {
     public void start(Stage primaryStage) throws Exception {
         //Parent root = FXMLLoader.load(getClass().getResource("/gui.fxml"));
 
+
+
         //creating the Borderpane for as main pane
         BorderPane root = new BorderPane();
 
         //Create Buttons for controlling
-        Button play = new Button("play");
-        play.setOnAction((ActionEvent) ->{
-            System.out.println("play")
 
+        //play button
+        Button play = new Button("play");
+        play.setOnAction((ActionEvent ActionEvent) ->{
+            //System.out.println("play");
+            rec.play();
 ;        });
 
+        //step button
         Button step = new Button("step");
         step.setOnAction((ActionEvent)->{
-            System.out.println("step");
-            System.out.println(t);
+            //System.out.println("step");
+            rec.step();
+
+        });
+
+        //reset button
+        Button reset = new Button("reset");
+        reset.setOnAction((ActionEvent)->{
+            //System.out.println("Reset");
+            createSwingContent(swing);
+            rec.reset();
+        });
+
+        //back step button
+        Button back = new Button("back");
+        back.setOnAction((ActionEvent)->{
+            //System.out.println("back");
+            rec.back();
         });
 
 
         //toolbar for the different nodes
         ToolBar toolbar = new ToolBar(
-                play, step
+                play, step, back,reset
         );
         toolbar.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
         root.setTop(toolbar);
 
-        SwingNode swing = new SwingNode();
+        //Create Swing node
+        swing = new SwingNode();
         createSwingContent(swing);
         root.setCenter(swing);
 
@@ -93,17 +124,24 @@ public class FXGui<T> extends Application {
     }
 
     private void createSwingContent(SwingNode swingnode){
-       // SearchVisualizationPanel<T> panel = new SearchVisualizationPanel<>(null);
-        JPanel panel = new JPanel();
+
+        SearchVisualizationPanel<T> panel = new SearchVisualizationPanel<>(rec.getEventBus());
+        //JPanel panel = new JPanel();
         panel.add(new JButton("Test"));
 	    SwingUtilities.invokeLater(()-> {
             swingnode.setContent(panel);
         });
     }
 
-    public void setRecorder(RecordPlayer<T> rec){
-        this.rec = rec;
-        t= "aiudvöiu#";
+    public static void setReferenceobject(Object object){
+        referenceobject = object;
+    }
+    public static void setEventBus(GraphEventBus bus){
+        eventBus = bus;
+    }
+
+    public static void setRec(Recorder recorder){
+        rec = recorder;
     }
 
 

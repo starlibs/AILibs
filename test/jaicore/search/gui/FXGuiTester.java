@@ -1,13 +1,10 @@
 package jaicore.search.gui;
 
-import static org.junit.Assert.assertEquals;
-
-import org.junit.Test;
-
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import jaicore.search.graphgenerators.nqueens.NQueenGenerator;
 import jaicore.search.graphgenerators.nqueens.QueenNode;
 import jaicore.search.structure.core.Node;
+import org.junit.Test;
 
 public class FXGuiTester {
 	
@@ -26,10 +23,10 @@ public class FXGuiTester {
 //		win.getPanel().setTooltipGenerator(n->n.getPoint().toString());
 		
 		//Prepare an replay object
-		RecordPlayer<Node<QueenNode, Double>> recordPlayer = new RecordPlayer<>(search.getEventBus());
-		
-		
-		
+		Recorder<Node<QueenNode, Double>> recorder = new Recorder<>(search.getEventBus());
+
+
+
 		
 		int solutions = 0;
 		while (search.nextSolution() != null)
@@ -43,13 +40,15 @@ public class FXGuiTester {
 		
 		
 		
+		//SimpleGraphVisualizationWindow<Node<QueenNode, Double>> recordedWin = new SimpleGraphVisualizationWindow<>(recordPlayer.getEventBus());
 		
 		String [] args = new String[0];
+		FXGui.setRec(recorder);
+		javafx.application.Application.launch(FXGui.class, args);
 
-		//javafx.application.Application.launch(FXGui, args);
 
 		System.out.println("Gui created");
-		recordPlayer.play();
+		recorder.play();
 		
 	}
 
