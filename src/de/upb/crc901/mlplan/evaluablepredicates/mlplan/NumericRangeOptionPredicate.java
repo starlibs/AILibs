@@ -6,12 +6,16 @@ import java.util.Set;
 import java.util.TreeSet;
 
 public abstract class NumericRangeOptionPredicate extends OptionsPredicate  {
-	List<Object> values = new ArrayList<>();
+	private static List<Object> values = null;
 	
 	protected abstract double getMin();
 	
 	protected abstract double getMax();
 	
+	/**
+	 * Number steps takes between min and max.
+	 * If below 0 no option will be added to the list.
+	 */
 	protected abstract int getSteps();
 	
 	/**
@@ -33,12 +37,15 @@ public abstract class NumericRangeOptionPredicate extends OptionsPredicate  {
 		return true;
 	}
 	
-	public NumericRangeOptionPredicate() {
+	/**
+	 * Fills the list if the list is null.
+	 */
+	private void fillList() {
 		double max = getMax();
 		double min = getMin();
 		int steps = getSteps();
 		if(steps < 0) {
-			steps = 0;
+			return;
 		}
 		double stepSize = (max - min) / (steps + 1);
 		boolean needsIntegers = needsIntegers();
@@ -86,9 +93,16 @@ public abstract class NumericRangeOptionPredicate extends OptionsPredicate  {
 		if(!numericalValues.isEmpty()) {
 			values.addAll(numericalValues);
 		}
-		List<? extends Object> additionalValues = this.additionalValues();
-		if(additionalValues != null) {
-			values.addAll(additionalValues);
+	}
+	
+	public NumericRangeOptionPredicate() {
+		if(values != null) {
+			values = new ArrayList<>();
+			fillList();
+			List<? extends Object> additionalValues = this.additionalValues();
+			if(additionalValues != null) {
+				values.addAll(additionalValues);
+			}
 		}
 	}
 	
