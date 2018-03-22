@@ -1,5 +1,8 @@
 package jaicore.search.gui;
 
+import com.google.common.eventbus.EventBus;
+import jaicore.graphvisualizer.SearchVisualizationPanel;
+import jaicore.search.structure.core.GraphEventBus;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
