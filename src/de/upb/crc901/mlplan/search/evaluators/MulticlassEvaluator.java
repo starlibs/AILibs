@@ -52,7 +52,6 @@ public class MulticlassEvaluator implements BasicMLEvaluator, Serializable {
 
 	public double loss(Classifier c, Instances test) throws Exception {
 		int mistakes = 0;
-		Throwable exception = null;
 		try {
 			if (c instanceof MLServicePipeline) {
 				MLServicePipeline cc = (MLServicePipeline) c;
@@ -67,14 +66,14 @@ public class MulticlassEvaluator implements BasicMLEvaluator, Serializable {
 						mistakes++;
 				}
 			}
-		} catch (Throwable e) {
-			exception = e;
+			double error = mistakes * 100f / test.size();
+			measurementEventBus.post(new ClassifierMeasurementEvent<Double>(c, error, null));
+			return error;
+		} catch (Exception e) {
 			LoggerUtil.logException("Problems with evaluation of classifier.", e, logger);
+			measurementEventBus.post(new ClassifierMeasurementEvent<Double>(c, null, e));
+			throw e;
 		}
-
-		double error = mistakes * 100f / test.size();
-		measurementEventBus.post(new ClassifierMeasurementEvent<Double>(c, error, exception));
-		return error;
 	}
 
 	public boolean isCanceled() {

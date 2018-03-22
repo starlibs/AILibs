@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 import org.aeonbits.owner.ConfigCache;
 
 import de.upb.crc901.mlplan.classifiers.TwoPhaseHTNBasedPipelineSearcher;
+import de.upb.crc901.mlplan.core.DummyMLPlanExperimentLogger;
 import de.upb.crc901.mlplan.core.MLUtil;
 import de.upb.crc901.mlplan.core.MySQLMLPlanExperimentLogger;
 import de.upb.crc901.mlplan.search.evaluators.BalancedRandomCompletionEvaluator;
@@ -20,6 +21,7 @@ import de.upb.crc901.mlplan.services.MLPipelinePlan;
 import de.upb.crc901.services.core.HttpServiceClient;
 import de.upb.crc901.services.core.HttpServiceServer;
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
+import jaicore.ml.experiments.IMultiClassClassificationExperimentDatabase;
 import jaicore.ml.experiments.MultiClassClassificationExperimentRunner;
 import jaicore.ml.measures.PMMulticlass;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
@@ -28,7 +30,7 @@ import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import jaicore.search.algorithms.standard.core.ORGraphSearch;
 import weka.classifiers.Classifier;
 
-public class MLJTest extends MultiClassClassificationExperimentRunner {
+public class MLJTestOffline extends MultiClassClassificationExperimentRunner {
 	
 	private static IPipelineEvaluationConf conf;
 	private static int[] timeouts;
@@ -47,9 +49,6 @@ public class MLJTest extends MultiClassClassificationExperimentRunner {
 		memoryInMB = conf.getMemoryLimitinMB();
 	}
 	
-//	private final IMultiClassClassificationExperimentDatabase logger; 
-	private final MySQLMLPlanExperimentLogger logger; // we want to have the logger, because we also send
-	
 	protected static String[] getClassifierNames() {
 		return new String[] { "MLS-Plan" };
 	}
@@ -61,11 +60,8 @@ public class MLJTest extends MultiClassClassificationExperimentRunner {
 	}
 	
 	
-	public MLJTest(File datasetFolder, String hostPase, String hostJase) throws IOException {
-		super(datasetFolder, getClassifierNames(), getSetupNames(), timeouts, seeds, trainingPortion, numCPUs, memoryInMB, PMMulticlass.errorRate, new MySQLMLPlanExperimentLogger(conf.getDBHost(), conf.getDBUsername(), conf.getDBPassword(), conf.getDBDatabaseName()));
-		this.logger = (MySQLMLPlanExperimentLogger)getLogger();
-//		super(datasetFolder, getClassifierNames(), getSetupNames(), timeouts, seeds, trainingPortion, numCPUs, memoryInMB, PMMulticlass.errorRate, new DummyMLPlanExperimentLogger());
-//		this.logger = getLogger();
+	public MLJTestOffline(File datasetFolder, String hostPase, String hostJase) throws IOException {
+		super(datasetFolder, getClassifierNames(), getSetupNames(), timeouts, seeds, trainingPortion, numCPUs, memoryInMB, PMMulticlass.errorRate, new DummyMLPlanExperimentLogger());
 		MLPipelinePlan.hostPASE = hostPase;
 		MLPipelinePlan.hostJASE = hostJase;
 		String[] jaseParts = hostJase.split(":");
@@ -109,9 +105,6 @@ public class MLJTest extends MultiClassClassificationExperimentRunner {
 				bs.setNumberOfMCIterationsPerSolutionInSelectionPhase(conf.getNumberOfIterationsInSelectionPhase());
 				bs.setPortionOfDataForPhase2(conf.getPortionOfDataForPhase2());
 				
-				/* register the logger in the event bus of the graph search and the evaluator */
-				bs.getEventBus().register(logger);
-				baseEvaluator.getMeasurementEventBus().register(logger);
 				return bs;
 			}
 			}
@@ -140,7 +133,7 @@ public class MLJTest extends MultiClassClassificationExperimentRunner {
 		if (hostJase.split(":")[0].equals("localhost"))
 			server = new HttpServiceServer(Integer.parseInt(hostJase.split(":")[1]), "testrsc/conf/classifiers.json", "testrsc/conf/preprocessors.json", "testrsc/conf/others.json");
 		try {
-			MLJTest runner = new MLJTest(folder, hostPase, hostJase);
+			MLJTestOffline runner = new MLJTestOffline(folder, hostPase, hostJase);
 			runner.runSpecific(3);
 		} finally {
 			if (server != null)

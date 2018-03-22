@@ -14,24 +14,27 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import org.apache.log4j.spi.LoggerRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.ContiguousSet;
+import com.google.common.collect.DiscreteDomain;
+import com.google.common.collect.Range;
 
 import de.upb.crc901.mlplan.core.CodePlanningUtil;
 import de.upb.crc901.mlplan.core.MLUtil;
 import de.upb.crc901.mlplan.core.SolutionEvaluator;
 import jaicore.basic.SetUtil;
 import jaicore.basic.SetUtil.Pair;
-import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.logging.LoggerUtil;
 import jaicore.logic.fol.structure.ConstantParam;
 import jaicore.logic.fol.structure.Literal;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
-import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;
 import jaicore.planning.model.ceoc.CEOCAction;
+import jaicore.planning.model.core.Action;
 import jaicore.planning.model.task.ceocstn.CEOCSTNUtil;
+import jaicore.planning.model.task.stn.MethodInstance;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
@@ -134,11 +137,13 @@ public abstract class RandomCompletionEvaluator<V extends Comparable<V>> impleme
 			if (eventBus == null)
 				eventBus = new SolutionEventBus<>();
 			eventBus.post(new NodeAnnotationEvent<>(n.getPoint(), "EUBRD2OS", getExpectedUpperBoundForRelativeDistanceToOptimalSolution(n, path, partialPlan, currentProgram)));
+			
+			List<Long> pathNodeIds = path.stream().map(node -> node.getID()).collect(Collectors.toList());
 
 			if (!n.getPoint().isGoal()) {
-				logger.info("This is an unknown node; computing score for path to node: {}", path);
+				logger.info("This is an unknown node; computing score for path to node: {}", pathNodeIds);
 				assert !scoresOfSolutionPaths.containsKey(partialPlan) : "A non-goal path is stored in the list of scores of solution paths!";
-
+				
 				V evaluationPriorToCompletion = computeEvaluationPriorToCompletion(n, path, partialPlan, currentProgram);
 				if (evaluationPriorToCompletion != null) {
 					fValues.put(n, evaluationPriorToCompletion);
@@ -149,7 +154,7 @@ public abstract class RandomCompletionEvaluator<V extends Comparable<V>> impleme
 				if (path.size() > 1 && !MLUtil.didLastActionAffectPipeline(path)) {
 					V score = fValues.get(n.getParent());
 					fValues.put(n, score);
-					logger.info("PL has not changed, adopting value of parent.");
+					logger.info("Pipeline has not changed in node {}, adopting value of {} of parent.", n.getPoint().getID(), score);
 					return score;
 				}
 				
@@ -158,6 +163,8 @@ public abstract class RandomCompletionEvaluator<V extends Comparable<V>> impleme
 
 				/* check if we have an f-value for exactly this node */
 				if (!completions.containsKey(path)) {
+					
+					logger.info("No completion is explicitly known for path {}.", pathNodeIds);
 
 					/* determine preprocessor and classifier of pipeline */
 					Optional<String> preprocessorLine = currentProgram.stream().filter(line -> line.contains("new") && line.contains("attributeSelection")).findAny();
@@ -189,12 +196,16 @@ public abstract class RandomCompletionEvaluator<V extends Comparable<V>> impleme
 					/* determine whether we have a solution path (found by the oracle) that goes over this node */
 					/* only if we have no path to a solution over this node, we compute a new one */
 					List<TFDNode> pathWhoseCompletionSubsumesCurrentPath = getSubsumingKnownPathCompletion(path);
-					// List<TFDNode> pathWhoseCompletionSubsumesCurrentPath = null;
+					assert pathWhoseCompletionSubsumesCurrentPath == null || pathWhoseCompletionSubsumesCurrentPath.subList(0, path.size()).equals(path) : "The path completion " + pathWhoseCompletionSubsumesCurrentPath.stream().map(node -> node.getID()).collect(Collectors.toList()) + " does NOT subsume path " + pathNodeIds + ".\n\tStep-Wise Comparison (current above, (not) subsuming below): " + ContiguousSet.create(Range.closed(0, Math.max(path.size(), pathWhoseCompletionSubsumesCurrentPath.size())), DiscreteDomain.integers()).asList().stream().map(i -> "\n\t" + i + "\n\t\t" + (i < path.size() ? path.get(i).toString() : "") + "\n\t\t" + (i < pathWhoseCompletionSubsumesCurrentPath.size() ? pathWhoseCompletionSubsumesCurrentPath.get(i).toString() : "")).collect(Collectors.toList());
+					logger.info("Result of a look-up for a path that would subsume {}: {}.", pathNodeIds, pathWhoseCompletionSubsumesCurrentPath != null ? pathWhoseCompletionSubsumesCurrentPath.stream().map(node -> node.getID()).collect(Collectors.toList()) : null);
+
 					boolean interrupted = false;
 					if (pathWhoseCompletionSubsumesCurrentPath == null) {
 						V best = null;
 						List<TFDNode> bestCompletion = null;
 						int i = 0;
+						int j = 0;
+						final int maxSamples = samples * 2;
 						for (; i < samples; i++) {
 							
 							if (Thread.interrupted()) {
@@ -238,11 +249,12 @@ public abstract class RandomCompletionEvaluator<V extends Comparable<V>> impleme
 								logger.warn("No completion was found for currently remaining tasks {}. Nodes expanded in search: {}", currentNode.getRemainingTasks(), completer.getExpandedCounter());
 								return null;
 							}
-							logger.info("Found solution {}", pathCompletion);
+							logger.info("Found solution {}", pathCompletion.stream().map(node -> node.getID()).collect(Collectors.toList()));
 							pathCompletion.remove(0);
 							completedPath.addAll(pathCompletion);
 
 							/* now evaluate this solution */
+							j++;
 							try {
 								V val = getFValueOfSolutionPath(completedPath);
 								if (val != null) {
@@ -254,6 +266,13 @@ public abstract class RandomCompletionEvaluator<V extends Comparable<V>> impleme
 							} catch (InterruptedException e) {
 								interrupted = true;
 								break;
+							} catch (Throwable ex) {
+								if (j ==maxSamples) {
+									logger.warn("Too many retry attempts, giving up.");
+									throw ex;
+								}
+								else
+									LoggerUtil.logException("Could not evaluate solution candidate ... retry another completion.", ex, logger);
 							}
 						}
 						
@@ -354,7 +373,7 @@ public abstract class RandomCompletionEvaluator<V extends Comparable<V>> impleme
 	private V getFValueOfSolutionPath(List<TFDNode> path) throws Throwable {
 		assert isSolutionPath(path) : "Can only compute f-values for completed plans, but it is invoked with a plan that does not yield a goal node!";
 		List<CEOCAction> plan = CEOCSTNUtil.extractPlanFromSolutionPath(path);
-		logger.info("Compute f-value for plan {}", plan);
+		logger.info("Compute f-value for path {} and its plan {}", path.stream().map(n -> n.getID()).collect(Collectors.toList()), plan.stream().map(a -> a.getEncoding()).collect(Collectors.toList()));
 		assert checkPathPlanBijection(path, plan);
 		boolean knownPath = scoresOfSolutionPaths.containsKey(plan);
 		if (!knownPath) {
@@ -388,11 +407,18 @@ public abstract class RandomCompletionEvaluator<V extends Comparable<V>> impleme
 			postSolution(path);
 		} else {
 			logger.info("Associated plan is known. Reading score from cache.");
+			if (logger.isTraceEnabled()) {
+				for (List<CEOCAction> existingPlan : scoresOfSolutionPaths.keySet()) {
+					if (existingPlan.equals(plan)) {
+						logger.trace("The following plans appear equal:\n\t{}\n\t{}", existingPlan, plan);
+					}
+				}
+			}
 			if (!postedSolutions.contains(path))
 				throw new IllegalStateException("Reading cached score of a plan whose path has not been posted as a solution! Are there several paths to a plan?");
 		}
 		V score = scoresOfSolutionPaths.get(plan);
-		logger.info("Determined value {} for pipeline {}.", score, plan);
+		logger.info("Determined value {} for pipeline {}.", score, plan.stream().map(a -> a.getEncoding()).collect(Collectors.toList()));
 		return score;
 	}
 
@@ -430,18 +456,59 @@ public abstract class RandomCompletionEvaluator<V extends Comparable<V>> impleme
 	}
 
 	private List<TFDNode> getSubsumingKnownPathCompletion(List<TFDNode> path) throws InterruptedException {
+		List<Long> pathIds = path.stream().map(n -> n.getID()).collect(Collectors.toList());
 		for (List<TFDNode> partialPath : completions.keySet()) {
+			List<Long> partialPathIds = partialPath.stream().map(n -> n.getID()).collect(Collectors.toList());
 			List<TFDNode> compl = completions.get(partialPath);
-			if (compl.size() < path.size())
+			logger.debug("Checking whether {} subsumes {}. The known completion is {}", partialPathIds, pathIds, compl.stream().map(n -> n.getID()).collect(Collectors.toList()));
+			if (compl.size() < path.size()) {
+				logger.debug("Ignoring this partial path, because its completion is shorter than the path we already have.");
 				continue;
-			if (path.equals(compl))
+			}
+			if (path.equals(compl)) {
+				logger.debug("Return true, because the paths are even equal.");
 				return compl;
+			}
 
 			Map<ConstantParam, ConstantParam> map = new HashMap<>();
 			boolean allUnifiable = true;
 			for (int i = 0; i < path.size(); i++) {
 				TFDNode current = path.get(i);
 				TFDNode partner = compl.get(i);
+				
+				/* check whether the chosen method or operation is the same */
+				final Action a1 = current.getAppliedAction();
+				final Action a2 = partner.getAppliedAction();
+				if ((a1 == null) != (a2 == null)) {
+					allUnifiable = false;
+					logger.trace("Not unifiable because one node applies an action and the other not (either it applies nothing or a method instance).");
+					break;
+				}
+				if (a1 != null && !a1.getOperation().equals(a2.getOperation())) {
+					allUnifiable = false;
+					logger.trace("Not unifiable because operations {} and {} of a1 and a2 respectively deviate", a1.getOperation(), a2.getOperation());
+					break;
+				}
+				if (a1 == null) {
+					final MethodInstance mi1 = current.getAppliedMethodInstance();
+					final MethodInstance mi2 = partner.getAppliedMethodInstance();
+					
+					/* the nodes just don't do anything (should be the root) */
+					if (mi1 == null && mi2 == null) {
+						continue;
+					}
+					
+					if ((mi1 == null) != (mi2 == null)) {
+						allUnifiable = false;
+						logger.trace("Not unifiable because one node applies a method instance and the other not (either an action or nothing)");
+						break;
+					}
+					if (!mi1.getMethod().equals(mi2.getMethod())) {
+						allUnifiable = false;
+						logger.trace("Not unifiable because methods {} and {} of m1 and m2 respectively deviate", mi1.getMethod(), mi2.getMethod());
+						break;
+					}
+				}
 
 				/* compute substitutions of new vars */
 				Collection<ConstantParam> varsInCurrent = new HashSet<>(current.getState().getConstantParams());
@@ -499,8 +566,10 @@ public abstract class RandomCompletionEvaluator<V extends Comparable<V>> impleme
 			}
 
 			/* if all nodes were unifiable, return this path */
-			if (allUnifiable)
+			if (allUnifiable) {
+				logger.debug("Returning true, because this path is unifiable with the given one.");
 				return partialPath;
+			}
 		}
 		return null;
 

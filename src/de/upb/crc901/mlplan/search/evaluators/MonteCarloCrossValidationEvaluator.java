@@ -50,6 +50,7 @@ public class MonteCarloCrossValidationEvaluator implements SolutionEvaluator {
 		for (int i = 0; i < repeats && !canceled; i++) {
 			logger.info("Evaluating {} with split #{}/{}", pl, i + 1, repeats);
 			int score = (int) Math.round(basicEvaluator.getErrorRateForRandomSplit(pl, data, trainingPortion) * 100);
+			System.gc();
 			logger.info("Score for evaluation of {} with split #{}/{}: {}", pl, i + 1, repeats, score);
 			stats.addValue(score);
 		}

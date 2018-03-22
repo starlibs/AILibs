@@ -101,10 +101,9 @@ public class MySQLMLPlanExperimentLogger extends MySQLExperimentDatabaseHandle {
 		String preprocessor = "";
 		MLPipelinePlan plan = identifiedPipeline.getConstructionPlan();
 		if (!plan.getAttrSelections().isEmpty()) {
-			preprocessor = plan.getAttrSelections().get(0).getQualifiedName();
-
+			preprocessor = plan.getAttrSelections().get(0).getQualifiedName() + plan.getAttrSelections().get(0).getOptions().toString();
 		}
-		String classifierName = plan.getClassifierPipe().getName();
+		String classifierName = plan.getClassifierPipe().getName() + plan.getClassifierPipe().getOptions().toString();
 
 		PreparedStatement stmt = null;
 		try {
@@ -206,10 +205,9 @@ public class MySQLMLPlanExperimentLogger extends MySQLExperimentDatabaseHandle {
 		String preprocessor = "";
 		MLPipelinePlan plan = pipeline.getConstructionPlan();
 		if (!plan.getAttrSelections().isEmpty()) {
-			preprocessor = plan.getAttrSelections().get(0).getQualifiedName();
-
+			preprocessor = plan.getAttrSelections().get(0).getQualifiedName() + plan.getAttrSelections().get(0).getOptions().toString();
 		}
-		String classifierName = plan.getClassifierPipe().getName();
+		String classifierName = plan.getClassifierPipe().getName() + plan.getClassifierPipe().getOptions().toString();
 
 		String plKey = pipeline.toString();
 		// Map<String, DescriptiveStatistics> stats = measurePLValues.containsKey(plKey) ? measurePLValues.get(plKey) : null;

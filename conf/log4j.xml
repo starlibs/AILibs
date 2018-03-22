@@ -8,7 +8,7 @@
 		<layout class="org.apache.log4j.PatternLayout">
 			<!-- <param name="ConversionPattern" value="(%d{ISO8601}) %-5p [%t] [%c{1}.%M:%L] 
 				- %m%n" /> -->
-			<param name="ConversionPattern" value="%-5p [%t] [%c{1}.%M:%L] - %m%n" />
+			<param name="ConversionPattern" value="(%d{ISO8601}) %-5p [%t] [%c{1}.%M:%L] - %m%n" />
 		</layout>
 	</appender>
 
@@ -89,6 +89,9 @@
 		<level value="debug" />
 	</logger>
 	
+	<logger name="de.upb.crc901.mlplan.search.evaluators.RandomCompletionEvaluator">
+		<level value="debug" />
+	</logger>
 	
 	
 	<logger name="de.upb.crc901.services.core.HttpServiceServer">
@@ -96,11 +99,7 @@
 	</logger>
 	
 	<logger name="de.upb.crc901.services.core.HttpServiceClient">
-		<level value="warn" />
-	</logger>
-	
-	<logger name="de.upb.crc901.mlplan.services">
-		<level value="warn" />
+		<level value="debug" />
 	</logger>
 	
 	<logger name="de.upb.crc901.services.core">

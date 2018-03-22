@@ -1,12 +1,3 @@
-#
-# Small working subset of
-# Knowledge base for Auto-WEKA like classifier construction by HTN planning
-#
-# For Auto-WEKA see:
-# Chris Thornton Frank Hutter Holger H. Hoos Kevin Leyton-Brown
-# Auto-WEKA: Combined Selection and Hyperparameter Optimization of Classiï¬�cation Algorithms
-# 
-
 [NonFunctionalRequirements]
 
 int Price: +
@@ -145,13 +136,6 @@ isys-db.cs.upb.de:String
 
 noFeaturePreprocessing:String
 
-### BASE CLASSIFIERS ###
-
-INCLUDE testrsc/services/weka.constants
-#INCLUDE testrsc/services/tf.constants
-#INCLUDE testrsc/services/sl.constants
-
-
 ### ENSEMBLE CLASSIFIERS PARAMETER ###
 
 # Voting combinationRule: Option -R
@@ -211,14 +195,11 @@ appendOptions		; l1:List<String>, l2:List<String>; ; List<String>(l1) & List<Str
 
 compileOptionListToArray; oList:List<String>; oArray:String[]; List<String>(oList); String[](oArray); (0)
 
-INCLUDE testrsc/services/weka.services
-
 de.upb.crc901.mlplan.services.MLPipelinePlan:__construct;;config;;;(0)
 de.upb.crc901.mlplan.services.MLPipelinePlan:onHost;c,host,port;;;;(0)
 de.upb.crc901.mlplan.services.MLPipelinePlan:addAttributeSelection;c,algorithm;p;;definesPreprocessor(algorithm);(0)
 de.upb.crc901.mlplan.services.MLPipelinePlan:setClassifier;c,classifier;p;;definesClassifier(classifier);(0)
 de.upb.crc901.mlplan.services.MLPipelinePlan:addOptions;c,p,option,value;;;definesOption(option, value);(0)
-de.upb.crc901.mlplan.services.MLPipelinePlan:addWekaAttributeSelection;c,searcher,evaluator;;;definesWekaPreprocessor(c);(0)
 de.upb.crc901.mlplan.services.MLServicePipeline:__construct;config;pl;;;(0)
 
 
@@ -253,15 +234,10 @@ inducePipeline;		induce(x,returnedClassifier);	x,returnedClassifier,config; ; ; 
 ignorePreprocessing; chooseFeaturePreprocessor(x,config); x,config; ; ; associateWithAssertion('nopp',config)
 ignorePreprocessingConfiguration; configureFeaturePreprocessor(x,config); x,config; associated('nopp',config) ; ; noop()
 
-INCLUDE testrsc/services/weka_pp.methods
-INCLUDE testrsc/services/weka_classifiers.methods
 INCLUDE testrsc/services/sl_pp.methods
 INCLUDE testrsc/services/sl.methods
-#INCLUDE testrsc/services/tf.methods
 
 [Rules]
-
-INCLUDE testrsc/services/weka.params
 
 [Queries]
 
