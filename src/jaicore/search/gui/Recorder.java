@@ -87,9 +87,10 @@ public class Recorder<T> {
 	 * posts the next event, while there are events left
 	 */
 	public void step() {
-		System.out.println(events.get(index).getClass().getSimpleName());
+		System.out.println(events.get(index).getClass().getSimpleName() + "\t" +index);
 		playEventBus.post(events.get(index));
 		index++;
+		System.out.println(index);
 	}
 
 
@@ -113,6 +114,9 @@ public class Recorder<T> {
 		}
 		playEventBus.post(counter);
 
+
+		System.out.println(index);
+
 	}
 
 	/**
@@ -124,22 +128,22 @@ public class Recorder<T> {
 	 */
 	private Object createCounterEvent(Object object){
 		Class eventClass = object.getClass();
-		System.out.println(eventClass.getSimpleName());
+		//System.out.println(eventClass.getSimpleName());
 		switch(eventClass.getSimpleName()){
 			case "GraphInitializedEvent":
-				System.out.println("GraphInitializedEvent");
+				//System.out.println("GraphInitializedEvent");
 				return null;
 
 
 			case "NodeTypeSwitchEvent":
 				//NodeTypeSwitchEvent event = (NodeTypeSwitchEvent)object;
-				System.out.println("NodeTypeSwitchEvent");
+				//System.out.println("NodeTypeSwitchEvent");
 				return null;
 
 
 
 			case "NodeReachedEvent":
-				System.out.println("NodeReachedEvent");
+				//System.out.println("NodeReachedEvent");
 				NodeReachedEvent event = (NodeReachedEvent) object;
 				NodeRemovedEvent counter = new NodeRemovedEvent(event.getNode());
 				return counter;
