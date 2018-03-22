@@ -47,8 +47,7 @@ public class FXGuiTester {
 		javafx.application.Application.launch(FXGui.class, args);
 
 
-		System.out.println("Gui created");
-		recorder.play();
+
 		
 	}
 
