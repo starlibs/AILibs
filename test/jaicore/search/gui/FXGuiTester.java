@@ -1,5 +1,6 @@
 package jaicore.search.gui;
 
+import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import jaicore.search.graphgenerators.nqueens.NQueenGenerator;
 import jaicore.search.graphgenerators.nqueens.QueenNode;
@@ -32,7 +33,7 @@ public class FXGuiTester {
 		while (search.nextSolution() != null)
 			solutions ++;
 		
-		System.out.println("Solutions found.\n Starting the replay:");
+
 		
 		//Test the recordPlayer
 //		recordPlayer.play();
@@ -40,10 +41,11 @@ public class FXGuiTester {
 		
 		
 		
-		//SimpleGraphVisualizationWindow<Node<QueenNode, Double>> recordedWin = new SimpleGraphVisualizationWindow<>(recordPlayer.getEventBus());
+		SimpleGraphVisualizationWindow<Node<QueenNode, Double>> recordedWin = new SimpleGraphVisualizationWindow<>(recorder.getEventBus());
 		
 		String [] args = new String[0];
 		FXGui.setRec(recorder);
+		System.out.println("Start the GUI");
 		javafx.application.Application.launch(FXGui.class, args);
 
 
