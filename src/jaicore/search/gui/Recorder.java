@@ -22,6 +22,7 @@ public class Recorder<T> {
 	//the next event to post
 	private int index;
 
+
 	/**
 	 * Creates a new Recroder which is listeneing to the eventbus given as a paramter
 	 * @param eventBus
@@ -71,14 +72,15 @@ public class Recorder<T> {
 
 		}*/
 		while(index < events.size()){
-			playEventBus.post(events.get(index));
+            try {
+                TimeUnit.MILLISECONDS.sleep(sleepTime);
+            }
+            catch (InterruptedException e){
+                e.printStackTrace();
+            }
+		    playEventBus.post(events.get(index));
 			index ++;
-			try {
-				TimeUnit.MILLISECONDS.sleep(sleepTime);
-			}
-			catch (InterruptedException e){
-				e.printStackTrace();
-			}
+
 		}
 
 	}
@@ -88,7 +90,8 @@ public class Recorder<T> {
 	 */
 	public void step() {
 		System.out.println(events.get(index).getClass().getSimpleName() + "\t" +index);
-		playEventBus.post(events.get(index));
+		Object event = events.get(index);
+		playEventBus.post(event);
 		index++;
 		System.out.println(index);
 	}
@@ -107,15 +110,10 @@ public class Recorder<T> {
 	 */
 	public void back(){
 		index--;
-		Object event = events.get(index);
-		Object counter = createCounterEvent(event);
-		if(counter == null){
-			System.out.println("Event could not be reversed");
-		}
-		playEventBus.post(counter);
 
-
-		System.out.println(index);
+		for(int i = 0; i < index; i++){
+		    playEventBus.post(events.get(i));
+        }
 
 	}
 
@@ -167,7 +165,6 @@ public class Recorder<T> {
 		this.sleepTime = sleepTime;
 	}
 
-<<<<<<< HEAD
 
 	private List<Object> events;
 	private GraphEventBus<T> recordEventBus;
@@ -322,7 +319,5 @@ public class Recorder<T> {
 		return events.size();
 	}
 
-=======
->>>>>>> FXGui is able to use an recorder.
 
 }
