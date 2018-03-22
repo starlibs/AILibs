@@ -84,13 +84,16 @@ public class FXGui<T> extends Application {
         Button back = new Button("back");
         back.setOnAction((ActionEvent)->{
             //System.out.println("back");
+            createSwingContent(swing);
             rec.back();
         });
 
 
+
+
         //toolbar for the different nodes
         ToolBar toolbar = new ToolBar(
-                play, step, back,reset
+                play, step, back, reset
         );
         toolbar.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
         root.setTop(toolbar);
