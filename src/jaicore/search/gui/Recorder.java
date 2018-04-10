@@ -24,6 +24,13 @@ public class Recorder<T> {
 
 
 	/**
+	 * Creates an empty recorder, which can load an event bus
+	 */
+	public Recorder(){
+		this(null);
+	}
+
+	/**
 	 * Creates a new Recroder which is listeneing to the eventbus given as a paramter
 	 * @param eventBus
 	 * 		The eventbus to which this recorder is listening
@@ -156,6 +163,7 @@ public class Recorder<T> {
 
 	}
 
+
 	public int getSleepTime() {
 		return sleepTime;
 	}
@@ -163,6 +171,10 @@ public class Recorder<T> {
 
 	public void setSleepTime(int sleepTime) {
 		this.sleepTime = sleepTime;
+	}
+
+	public int getNumberOfEvents(){
+		return events.size();
 	}
 
 
