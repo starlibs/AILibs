@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.embed.swing.SwingNode?>
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="jaicore.search.gui.FXController"
+            prefHeight="400.0" prefWidth="600.0">
+
+    <top>
+        <ToolBar>
+            <Button text="play" onAction="#play"/>
+            <Button text="step" onAction="#step"/>
+            <Button text="back" onAction="#back"/>
+            <Button text="reset" onAction="#reset"/>
+        </ToolBar>
+    </top>
+
+    <center>
+        <SwingNode fx:id="swingNode"/>
+    </center>
+
+</BorderPane>

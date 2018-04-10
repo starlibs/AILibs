@@ -44,7 +44,7 @@ public class FXGuiTester {
 		SimpleGraphVisualizationWindow<Node<QueenNode, Double>> recordedWin = new SimpleGraphVisualizationWindow<>(recorder.getEventBus());
 		
 		String [] args = new String[0];
-		FXGui.setRec(recorder);
+		FXGui2.setRec(recorder);
 		System.out.println("Start the GUI");
 		javafx.application.Application.launch(FXGui.class, args);
 
