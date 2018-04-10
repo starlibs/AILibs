@@ -11,6 +11,7 @@ import java.util.Set;
 import jaicore.basic.PerformanceLogger;
 import jaicore.graph.Graph;
 import jaicore.graph.LabeledGraph;
+import jaicore.graph.observation.IObservableGraphAlgorithm;
 import jaicore.search.structure.core.AndNode;
 import jaicore.search.structure.core.GraphEventBus;
 import jaicore.search.structure.core.Node;
@@ -23,7 +24,7 @@ import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
-public abstract class ANDORGraphSearch<T, A, V extends Comparable<V>> {
+public abstract class ANDORGraphSearch<T, A, V extends Comparable<V>> implements IObservableGraphAlgorithm {
 
 	/* meta vars for controlling the general behavior */
 	private int expandedCounter;
@@ -407,5 +408,10 @@ public abstract class ANDORGraphSearch<T, A, V extends Comparable<V>> {
 
 	public Collection<Node<T, V>> getSuccessors(Node<T, V> node) {
 		return traversalGraph.getSuccessors(node);
+	}
+
+	@Override
+	public void registerListener(Object listener) {
+		this.eventBus.register(listener);
 	}
 }

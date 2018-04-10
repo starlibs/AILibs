@@ -901,9 +901,18 @@ public class SetUtil {
 		return set.toString().replaceAll("\\[", "{").replaceAll("\\]", "}");
 	}
 
-	public static Set<String> unserialize(String setDescriptor) {
+	public static Set<String> unserializeSet(String setDescriptor) {
 		Set<String> items = new HashSet<>();
 		for (String item : setDescriptor.substring(1, setDescriptor.length() - 1).split(",")) {
+			if (!item.trim().isEmpty())
+				items.add(item.trim());
+		}
+		return items;
+	}
+	
+	public static List<String> unserializeList(String listDescriptor) {
+		List<String> items = new ArrayList<>();
+		for (String item : listDescriptor.substring(1, listDescriptor.length() - 1).split(",")) {
 			if (!item.trim().isEmpty())
 				items.add(item.trim());
 		}

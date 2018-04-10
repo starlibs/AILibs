@@ -16,6 +16,7 @@ import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;
 import jaicore.planning.model.task.ceocstn.CEOCSTNPlanningProblem;
 import jaicore.planning.model.task.ceocstn.StandardProblemFactory;
 import jaicore.search.algorithms.standard.astar.AStar;
+import jaicore.search.structure.core.Node;
 
 public class CEOCTFDTester {
 	
@@ -41,7 +42,7 @@ public class CEOCTFDTester {
 		long start = System.currentTimeMillis();
 		AStar<TFDNode,String> astar = new AStar<>(generator, (n1,n2) -> -1 * (Math.random() * 1000), n -> 0.0);
 		
-		new SimpleGraphVisualizationWindow<>(astar.getEventBus()).getPanel().setTooltipGenerator(new TFDTooltipGenerator<>());
+		new SimpleGraphVisualizationWindow<Node<TFDNode,String>>(astar).getPanel().setTooltipGenerator(new TFDTooltipGenerator<>());
 	
 		List<TFDNode> solution = null;
 		Collection<List<TFDNode>> solutions = new HashSet<>();

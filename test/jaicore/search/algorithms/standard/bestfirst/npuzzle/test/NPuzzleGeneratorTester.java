@@ -29,7 +29,7 @@ public class NPuzzleGeneratorTester {
 		NPuzzleGenerator gen = new NPuzzleGenerator(3,50);
 		AStar<NPuzzleNode,String> search = new AStar<>(gen,(n1,n2)->1.0, n->n.getPoint().getDistance());
 		
-		SimpleGraphVisualizationWindow<Node<NPuzzleNode,Double>> win = new SimpleGraphVisualizationWindow<>(search.getEventBus());
+		SimpleGraphVisualizationWindow<Node<NPuzzleNode,Double>> win = new SimpleGraphVisualizationWindow<>(search);
 		win.getPanel().setTooltipGenerator(n->n.getPoint().toString());
 		
 		/*search for solution*/

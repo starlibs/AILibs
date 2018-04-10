@@ -129,7 +129,7 @@ public class GeneralBestFirstTester {
 		
 		/* find solution */
 		if (VISUALIZE) {
-			new SimpleGraphVisualizationWindow<>(gbf.getEventBus());
+			new SimpleGraphVisualizationWindow<>(gbf);
 		}
 		Graph<GameNode> solutionGraph = gbf.getSolution();
 		assertNotNull(solutionGraph);

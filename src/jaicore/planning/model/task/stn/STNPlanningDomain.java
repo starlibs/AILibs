@@ -7,9 +7,9 @@ import jaicore.planning.model.core.Operation;
 public class STNPlanningDomain {
 
 	private final Collection<? extends Operation> operations;
-	private final Collection<Method> methods;
+	private final Collection<? extends Method> methods;
 
-	public STNPlanningDomain(Collection<? extends Operation> operations, Collection<Method> methods) {
+	public STNPlanningDomain(Collection<? extends Operation> operations, Collection<? extends Method> methods) {
 		super();
 		this.operations = operations;
 		this.methods = methods;
@@ -19,7 +19,7 @@ public class STNPlanningDomain {
 		return operations;
 	}
 
-	public Collection<Method> getMethods() {
+	public Collection<? extends Method> getMethods() {
 		return methods;
 	}
 

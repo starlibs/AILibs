@@ -214,11 +214,6 @@ public class MCTS<T,A,V extends Comparable<V>> implements IObservableORGraphSear
 	public INodeEvaluator<T, V> getNodeEvaluator() {
 		return null;
 	}
-
-	@Override
-	public GraphEventBus<Node<T, V>> getEventBus() {
-		return graphEventBus;
-	}
 	
 	private Node<T,V> getFakeInternalNode(List<T> externalPath) {
 		Iterator<T> i = externalPath.iterator();
@@ -227,5 +222,16 @@ public class MCTS<T,A,V extends Comparable<V>> implements IObservableORGraphSear
 			current = new Node<>(current, i.next());
 		}
 		return current;
+	}
+
+	@Override
+	public Map<String, Object> getAnnotationsOfReturnedSolution(List<T> solution) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void registerListener(Object listener) {
+		this.graphEventBus.register(listener);
 	}
 }

@@ -135,9 +135,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 			boolean computationTimedout = false;
 			try {
 				long startComputation = System.currentTimeMillis();
-				System.gc();
 				label = nodeEvaluator.f(newNode);
-				System.gc();
 				
 				/* check whether the required time exceeded the timeout */
 				long computationTime = System.currentTimeMillis() - startComputation;
@@ -579,11 +577,20 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 		return node.getInternalLabel();
 	}
 
+	public Map<String,Object> getNodeAnnotations(T node) {
+		Node<T, V> intNode = ext2int.get(node);
+		return intNode.getAnnotations();
+	}
+	
 	public Object getNodeAnnotation(T node, String annotation) {
 		Node<T, V> intNode = ext2int.get(node);
 		return intNode.getAnnotation(annotation);
 	}
 
+	public Map<String,Object> getAnnotationsOfReturnedSolution(List<T> solution) {
+		return solutionAnnotations.get(solution);
+	}
+	
 	public Object getAnnotationOfReturnedSolution(List<T> solution, String annotation) {
 		return solutionAnnotations.get(solution).get(annotation);
 	}
@@ -856,5 +863,11 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	
 	public void setLoggerName(String name) {
 		logger = LoggerFactory.getLogger(name);
+	}
+
+	
+	@Override
+	public void registerListener(Object listener) {
+		this.graphEventBus.register(listener);
 	}
 }

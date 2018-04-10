@@ -2,8 +2,10 @@ package jaicore.planning.model.task.stn;
 
 import jaicore.logic.fol.structure.CNFFormula;
 import jaicore.logic.fol.structure.Monom;
+import jaicore.planning.algorithms.IHTNPlanningAlgorithm;
+import jaicore.planning.model.task.IHTNPlanningProblem;
 
-public class STNPlanningProblem {
+public class STNPlanningProblem implements IHTNPlanningProblem {
 
 	private final STNPlanningDomain domain;
 	

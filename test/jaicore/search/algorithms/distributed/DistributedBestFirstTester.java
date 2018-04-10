@@ -10,7 +10,6 @@ import java.util.Random;
 import org.junit.Test;
 
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
-import jaicore.search.algorithms.distributed.DistributedBestFirstTester.TestNode;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.DistributedOrSearch;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.DistributedOrSearchCoworker;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.FolderBasedDistributedSearchCommunicationLayer;
@@ -135,7 +134,7 @@ public class DistributedBestFirstTester implements Serializable {
 		
 
 		/* run master in separate thread */
-		SimpleGraphVisualizationWindow<Node<TestNode,Integer>> window = new SimpleGraphVisualizationWindow<>(master.getEventBus());
+		SimpleGraphVisualizationWindow<Node<TestNode,Integer>> window = new SimpleGraphVisualizationWindow<>(master);
 		window.setTitle("Master");
 		window.getPanel().setTooltipGenerator(n -> (n.getPoint().min + "-" + n.getPoint().max));
 

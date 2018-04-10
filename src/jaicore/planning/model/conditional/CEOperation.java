@@ -8,6 +8,7 @@ import jaicore.logic.fol.structure.Monom;
 import jaicore.logic.fol.structure.VariableParam;
 import jaicore.planning.model.core.Operation;
 
+@SuppressWarnings("serial")
 public class CEOperation extends Operation {
 	
 	private final Map<CNFFormula,Monom> addLists, deleteLists;

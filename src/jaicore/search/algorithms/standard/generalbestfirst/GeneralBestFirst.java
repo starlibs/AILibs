@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import jaicore.basic.SetUtil;
 import jaicore.graph.Graph;
+import jaicore.graph.observation.IObservableGraphAlgorithm;
 import jaicore.search.algorithms.standard.core.ANDORGraphSearch;
 import jaicore.search.algorithms.standard.core.INodeEvaluator;
 import jaicore.search.structure.core.AndNode;

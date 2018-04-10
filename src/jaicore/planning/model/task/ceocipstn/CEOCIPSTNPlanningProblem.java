@@ -4,9 +4,10 @@ import java.io.Serializable;
 
 import jaicore.logic.fol.structure.CNFFormula;
 import jaicore.logic.fol.structure.Monom;
+import jaicore.planning.model.task.IHTNPlanningProblem;
 import jaicore.planning.model.task.stn.TaskNetwork;
 
-public class CEOCIPSTNPlanningProblem implements Serializable {
+public class CEOCIPSTNPlanningProblem implements IHTNPlanningProblem,Serializable {
 
 	private final CEOCIPSTNPlanningDomain domain;
 

@@ -504,7 +504,7 @@ public class WekaUtil {
 	}
 	
 	public static List<Instances> realizeSplit(final Instances data, final Collection<Integer>[] split) {
-		return realizeSplitAsSubInstances(data, split);
+		return realizeSplitAsCopiedInstances(data, split);
 	}
 	
 	public static List<Instances> realizeSplitAsCopiedInstances(final Instances data, final Collection<Integer>[] split) {

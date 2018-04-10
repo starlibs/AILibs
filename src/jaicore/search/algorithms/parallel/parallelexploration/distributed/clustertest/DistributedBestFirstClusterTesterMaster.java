@@ -18,7 +18,7 @@ public class DistributedBestFirstClusterTesterMaster {
 		SerializableNodeEvaluator<TestNode,Integer> evaluator = n -> -1 * n.externalPath().size();
 		DistributedSearchCommunicationLayer<TestNode,String,Integer> communicationLayer = new FolderBasedDistributedSearchCommunicationLayer<>(folder, true);
 		DistributedOrSearch<TestNode,String,Integer> master = new DistributedOrSearch<>(gen, evaluator, communicationLayer);
-		new SimpleGraphVisualizationWindow<>(master.getEventBus());
+		new SimpleGraphVisualizationWindow<>(master);
 		List<TestNode> solution = master.nextSolution();
 		master.cancel();
 		System.out.println(solution);

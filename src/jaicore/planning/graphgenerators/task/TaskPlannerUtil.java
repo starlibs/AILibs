@@ -8,8 +8,12 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -24,12 +28,15 @@ import jaicore.logic.fol.structure.Monom;
 import jaicore.logic.fol.structure.VariableParam;
 import jaicore.logic.fol.util.LogicUtil;
 import jaicore.planning.graphgenerators.task.ceociptfd.EvaluablePredicate;
+import jaicore.planning.model.ceoc.CEOCAction;
+import jaicore.planning.model.ceoc.CEOCOperation;
 import jaicore.planning.model.core.Action;
 import jaicore.planning.model.core.Operation;
 import jaicore.planning.model.task.ceocipstn.OCIPMethod;
 import jaicore.planning.model.task.ceocstn.OCMethod;
 import jaicore.planning.model.task.stn.Method;
 import jaicore.planning.model.task.stn.MethodInstance;
+import jaicore.planning.model.task.stn.STNPlanningDomain;
 import jaicore.planning.model.task.stn.TaskNetwork;
 
 public class TaskPlannerUtil {
@@ -407,5 +414,36 @@ public class TaskPlannerUtil {
 
 	public void setEvaluablePlanningPredicates(Map<String, EvaluablePredicate> evaluablePlanningPredicates) {
 		this.evaluablePlanningPredicates = evaluablePlanningPredicates;
+	}
+
+	public Optional<? extends Operation> getOperationWithName(STNPlanningDomain domain, String nameOfOperation) {
+		Objects.requireNonNull(domain);
+		Objects.requireNonNull(nameOfOperation);
+		return domain.getOperations().stream().filter(o -> o.getName().equals(nameOfOperation)).findAny();
+	}
+	
+	public List<CEOCAction> recoverPlanFromActionEncoding(STNPlanningDomain domain, List<String> actionEncodings) {
+		List<CEOCAction> plan = new ArrayList<>();
+		Pattern p = Pattern.compile("([^(]+)\\(([^,]*|([^,]*(?:,[^,]*)+))\\)");
+		for (String actionEncoding : actionEncodings) {
+			Matcher m = p.matcher(actionEncoding);
+			if (!m.find())
+				throw new IllegalArgumentException("Cannot match the action encoding " + actionEncoding);
+			
+			/* compute operation */
+			Optional<? extends Operation> op = getOperationWithName(domain, m.group(1));
+			if (!op.isPresent())
+				throw new IllegalArgumentException("Invalid action " + actionEncoding + ", because no operation with name \"" + m.group(1) + "\" is known in the given domain.");
+			
+			/* compute grounding */
+			List<ConstantParam> args = Arrays.asList(m.group(2).split(",")).stream().map(param -> new ConstantParam(param.trim())).collect(Collectors.toList());
+			Map<VariableParam,ConstantParam> grounding = new HashMap<>();
+			List<VariableParam> params = op.get().getParams();
+			for (int i = 0; i < params.size(); i++) {
+				grounding.put(params.get(i), args.get(i));
+			}
+			plan.add(new CEOCAction((CEOCOperation)op.get(), grounding));
+		}
+		return plan;
 	}
 }

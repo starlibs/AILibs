@@ -33,7 +33,7 @@ public class RTNTester {
 		System.out.print("Starting Search Process");
 		GeneralBestFirst<RTNNode,RTNEdge> gbf = new GeneralBestFirst<>(generator, n -> new ArrayList<>(n.keySet()), n -> 0, n -> 0);
 		
-		new SimpleGraphVisualizationWindow<>(gbf.getEventBus());
+		new SimpleGraphVisualizationWindow<>(gbf);
 	
 		int i = 0;
 		int j = 0;

@@ -68,11 +68,11 @@ public class ParentDiscardingTest {
 					return 0.0;
 				}, ParentDiscarding.ALL) ;
 
-		SimpleGraphVisualizationWindow<Node<PDPuzzleNode,Double>> win = new SimpleGraphVisualizationWindow<>(search.getEventBus());
+		SimpleGraphVisualizationWindow<Node<PDPuzzleNode,Double>> win = new SimpleGraphVisualizationWindow<>(search);
 		win.getPanel().setTooltipGenerator(n->n.getPoint().toString());
 		win.setTitle("Search");
 		
-		SimpleGraphVisualizationWindow<Node<PDPuzzleNode,Double>> win2 = new SimpleGraphVisualizationWindow<>(search2.getEventBus());
+		SimpleGraphVisualizationWindow<Node<PDPuzzleNode,Double>> win2 = new SimpleGraphVisualizationWindow<>(search2);
 		win2.getPanel().setTooltipGenerator(n->n.getPoint().toString());
 		win2.setTitle("Search2");
 		

@@ -20,7 +20,7 @@ public class StandardProblemFactory {
 		CEOCSTNPlanningProblem problem = jaicore.planning.model.task.ceocstn.StandardProblemFactory.getNestedDichotomyCreationProblem(rootClusterName, classes, true, 1, 1);
 		
 		/* now derive RTN methods from the CEOC STN methods */
-		Collection<CEOCOperation> operations = problem.getDomain().getOperations();
+		Collection<? extends CEOCOperation> operations = problem.getDomain().getOperations();
 		Collection<RTNMethod> methods = new ArrayList<>();
 		for (OCMethod method : problem.getDomain().getMethods()) {
 			Map<Literal,StateReducer> reducers = new HashMap<>();

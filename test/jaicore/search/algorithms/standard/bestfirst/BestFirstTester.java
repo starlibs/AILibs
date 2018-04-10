@@ -10,8 +10,8 @@ import org.junit.Test;
 import jaicore.basic.PerformanceLogger;
 import jaicore.basic.PerformanceLogger.PerformanceMeasure;
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
-import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import jaicore.search.structure.core.GraphGenerator;
+import jaicore.search.structure.core.Node;
 import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.core.NodeType;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
@@ -67,7 +67,7 @@ public class BestFirstTester {
 		};
 		
 		BestFirst<TestNode,String> bf = new BestFirst<>(gen, n -> (double)Math.round(Math.random() * 1000));
-		new SimpleGraphVisualizationWindow<>(bf.getEventBus()).getPanel().setTooltipGenerator(n -> String.valueOf(n.getInternalLabel()));
+		new SimpleGraphVisualizationWindow<Node<TestNode,Double>>(bf).getPanel().setTooltipGenerator(n -> String.valueOf(n.getInternalLabel()));
 		
 		/* find solution */
 		PerformanceLogger.logStart("search");

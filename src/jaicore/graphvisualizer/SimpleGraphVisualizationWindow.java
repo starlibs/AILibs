@@ -11,7 +11,7 @@ import javax.swing.JFrame;
 import com.google.common.eventbus.EventBus;
 
 import jaicore.graph.Graph;
-import jaicore.search.structure.core.GraphEventBus;
+import jaicore.graph.observation.IObservableGraphAlgorithm;
 import jaicore.search.structure.events.GraphInitializedEvent;
 import jaicore.search.structure.events.NodeReachedEvent;
 
@@ -20,8 +20,8 @@ public class SimpleGraphVisualizationWindow<T> extends JFrame {
 	
 	private final SearchVisualizationPanel<T> panel;
 	
-	public SimpleGraphVisualizationWindow(GraphEventBus<T> eventBus) {
-		super("Visualizer for " + eventBus);
+	public SimpleGraphVisualizationWindow(IObservableGraphAlgorithm observable) {
+		super("Visualizer for " + observable);
 		
 		// initialize window data
 		setSize(1600, 1000);
@@ -32,7 +32,8 @@ public class SimpleGraphVisualizationWindow<T> extends JFrame {
 		contentPane.removeAll();
 
 		/* create option panel */
-		panel =  new SearchVisualizationPanel<>(eventBus);
+		panel =  new SearchVisualizationPanel<>();
+		observable.registerListener(panel);
 		contentPane.add(panel);
 		setVisible(true);
 	}
@@ -50,7 +51,8 @@ public class SimpleGraphVisualizationWindow<T> extends JFrame {
 
 		/* create option panel */
 		EventBus eventBus = new EventBus();
-		panel =  new SearchVisualizationPanel<>(eventBus);
+		panel =  new SearchVisualizationPanel<>();
+		eventBus.register(panel);
 		contentPane.add(panel);
 		setVisible(true);
 		

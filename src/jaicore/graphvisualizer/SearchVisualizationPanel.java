@@ -45,7 +45,6 @@ import jaicore.search.structure.events.NodeTypeSwitchEvent;
 @SuppressWarnings("serial")
 public class SearchVisualizationPanel<T> extends JPanel {
 
-	private final EventBus eventSupplier;
 	private TooltipGenerator<T> tooltipGenerator;
 
 	private int nodeCounter = 0;
@@ -66,11 +65,8 @@ public class SearchVisualizationPanel<T> extends JPanel {
 	private final ConcurrentMap<T, Node> ext2intNodeMap = new ConcurrentHashMap<>();
 	private final ConcurrentMap<Node, T> int2extNodeMap = new ConcurrentHashMap<>();
 
-	public SearchVisualizationPanel(EventBus eventSupplier) {
+	public SearchVisualizationPanel() {
 		super();
-		this.eventSupplier = eventSupplier;
-		this.eventSupplier.register(this);
-		
 		this.roots = new ArrayList<T>();
 
 		/* setup layout for the jPanel */

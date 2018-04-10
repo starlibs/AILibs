@@ -1,4 +1,4 @@
-package jaicore.planning;
+package jaicore.planning.task;
 
 import java.util.Arrays;
 import java.util.Collection;

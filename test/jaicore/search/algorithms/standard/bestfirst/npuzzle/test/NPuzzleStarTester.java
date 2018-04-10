@@ -20,7 +20,7 @@ public class NPuzzleStarTester {
 	public void test() {NPuzzleStarGenerator gen = new NPuzzleStarGenerator(3,4);
 	BestFirst<NPuzzleNode,String> search = new BestFirst<>(gen, n-> (double)n.getPoint().getNumberOfWrongTiles());
 	
-	SimpleGraphVisualizationWindow<Node<NPuzzleNode,Double>> win = new SimpleGraphVisualizationWindow<>(search.getEventBus());
+	SimpleGraphVisualizationWindow<Node<NPuzzleNode,Double>> win = new SimpleGraphVisualizationWindow<>(search);
 	win.getPanel().setTooltipGenerator(n->n.getPoint().toString());
 	
 	/*search for solution*/

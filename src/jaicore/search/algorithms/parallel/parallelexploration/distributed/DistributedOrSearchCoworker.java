@@ -116,7 +116,7 @@ public class DistributedOrSearchCoworker<T, A, V extends Comparable<V>> {
 
 				/* run the algorithm */
 				if (showGraph) {
-					SimpleGraphVisualizationWindow<Node<T,V>> window = new SimpleGraphVisualizationWindow<>(((IObservableORGraphSearch<T, A, V>)searchAlgorithm).getEventBus());
+					SimpleGraphVisualizationWindow<Node<T,V>> window = new SimpleGraphVisualizationWindow<>(((IObservableORGraphSearch<T, A, V>)searchAlgorithm));
 					window.setTitle(this.id);
 					if (tooltipGenerator != null)
 						window.getPanel().setTooltipGenerator((TooltipGenerator<Node<T,V>>)tooltipGenerator.getConstructor().newInstance());

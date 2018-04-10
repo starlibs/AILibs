@@ -76,7 +76,7 @@ public class ParentDiscardingClosedNodeTest {
 					}, ParentDiscarding.OPEN) ;
 
 		
-		SimpleGraphVisualizationWindow<Node<PDPuzzleNode,Double>> win = new SimpleGraphVisualizationWindow<>(search.getEventBus());
+		SimpleGraphVisualizationWindow<Node<PDPuzzleNode,Double>> win = new SimpleGraphVisualizationWindow<>(search);
 		win.getPanel().setTooltipGenerator(n->n.getPoint().toString());
 
 		List<PDPuzzleNode> solutionPath = search.nextSolution();
