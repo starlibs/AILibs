@@ -69,6 +69,7 @@ public class Recorder<T> {
 	 * posts every event which was stored
 	 */
 	public void play() {
+<<<<<<< HEAD
 		/*for(Object e : events) {
 			playEventBus.post(e);
 			try {
@@ -79,6 +80,8 @@ public class Recorder<T> {
 			}
 
 		}*/
+=======
+>>>>>>> Added support for every button, but load and save.
 		while(index < events.size()){
             try {
                 TimeUnit.MILLISECONDS.sleep(sleepTime);
@@ -118,10 +121,10 @@ public class Recorder<T> {
 	 */
 	public void back(){
 		index--;
-
-		for(int i = 0; i < index; i++){
-		    playEventBus.post(events.get(i));
-        }
+		System.out.println(index);
+		for(int i = 0; i< index; i ++){
+			playEventBus.post(events.get(i));
+		}
 
 	}
 
@@ -164,14 +167,12 @@ public class Recorder<T> {
 
 	}
 
-
-	public int getSleepTime() {
-		return sleepTime;
+	public void saveToFile(File file){
+		System.out.println(file.toString());
 	}
 
-
-	public void setSleepTime(int sleepTime) {
-		this.sleepTime = sleepTime;
+	public void loadFromFile(File file){
+		System.out.println(file.toString());
 	}
 
 	public int getNumberOfEvents(){
