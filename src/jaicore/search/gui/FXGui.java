@@ -7,6 +7,8 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 public class FXGui extends Application {
+
+
     @Override
     public void start(Stage stage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("gui.fxml"));
@@ -19,6 +21,7 @@ public class FXGui extends Application {
     }
 
     public static void main(String [] args){
+        FXController.setRec(new Recorder());
         launch(args);
     }
 }
