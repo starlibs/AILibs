@@ -6,6 +6,7 @@ import javafx.embed.swing.SwingNode;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.stage.FileChooser;
 
 import javax.swing.*;
 import java.net.URL;
@@ -19,12 +20,12 @@ public class FXController implements Initializable  {
 
     private static Recorder rec;
 
+    private Thread controllerThread;
 
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         createSwingContent(swingNode);
-
     }
 
     private void createSwingContent(SwingNode swingnode){
@@ -38,15 +39,31 @@ public class FXController implements Initializable  {
         });
     }
 
+    /**
+     * Starts the playback of the events. For this an own thread is created, in order to not freeze the whole GUI.
+     * The playback can be stoped by pressing the stop button.
+     */
    @FXML
     protected void play(ActionEvent event){
        System.out.println("play");
        int numberOfEvents = rec.getNumberOfEvents();
-       for(int i = 0; i  < numberOfEvents; i++){
-           rec.step();
-       }
+       Runnable runPlay = () ->{
+          try{
+              for(int i = 0; i < numberOfEvents; i ++){
+                  rec.step();
+                  TimeUnit.MILLISECONDS.sleep(50);
+              }
+          }
+          catch (InterruptedException e){}
+       };
+       controllerThread = new Thread(runPlay);
+       controllerThread.start();
    }
 
+    /**
+     * Takes a single step, if the step-Button is pressed.
+     * @param event
+     */
    @FXML
     protected void step(ActionEvent event){
         System.out.println("step");
@@ -57,12 +74,38 @@ public class FXController implements Initializable  {
    @FXML
     protected void back(ActionEvent event){
         System.out.println("back");
+        createSwingContent(swingNode);
+        rec.back();
+
    }
 
    @FXML
     protected void reset(ActionEvent event){
         System.out.println("reset");
+        createSwingContent(swingNode);
+        rec.reset();
    }
+
+   @FXML
+   protected void stop(ActionEvent event){
+        controllerThread.interrupt();
+        System.out.println("Stop");
+   }
+
+   @FXML
+   protected void save(ActionEvent event){
+       FileChooser chooser = new FileChooser();
+       chooser.setTitle("Choose Event-File");
+
+       rec.saveToFile(chooser.showSaveDialog(null));
+   }
+
+    @FXML
+    protected void load(ActionEvent event){
+       FileChooser chooser = new FileChooser();
+       chooser.setTitle("Open Event-File");
+       rec.loadFromFile(chooser.showOpenDialog(null));
+    }
 
    public static void setRec(Recorder recorder){
         rec = recorder;
