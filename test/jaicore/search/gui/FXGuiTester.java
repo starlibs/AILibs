@@ -45,6 +45,7 @@ public class FXGuiTester {
 		
 		String [] args = new String[0];
 		FXGui2.setRec(recorder);
+		FXController.setRec(recorder);
 		System.out.println("Start the GUI");
 		javafx.application.Application.launch(FXGui.class, args);
 
