@@ -26,6 +26,7 @@ public class FXController implements Initializable  {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         createSwingContent(swingNode);
+
     }
 
     private void createSwingContent(SwingNode swingnode){
@@ -47,6 +48,7 @@ public class FXController implements Initializable  {
     protected void play(ActionEvent event){
        System.out.println("play");
        int numberOfEvents = rec.getNumberOfEvents();
+<<<<<<< HEAD
        Runnable runPlay = () ->{
           try{
               for(int i = 0; i < numberOfEvents; i ++){
@@ -58,6 +60,11 @@ public class FXController implements Initializable  {
        };
        controllerThread = new Thread(runPlay);
        controllerThread.start();
+=======
+       for(int i = 0; i  < numberOfEvents; i++){
+           rec.step();
+       }
+>>>>>>> Gui based on xml
    }
 
     /**
@@ -100,6 +107,7 @@ public class FXController implements Initializable  {
        rec.saveToFile(chooser.showSaveDialog(null));
    }
 
+<<<<<<< HEAD
     @FXML
     protected void load(ActionEvent event){
        FileChooser chooser = new FileChooser();
@@ -107,6 +115,8 @@ public class FXController implements Initializable  {
        rec.loadFromFile(chooser.showOpenDialog(null));
     }
 
+=======
+>>>>>>> Gui based on xml
    public static void setRec(Recorder recorder){
         rec = recorder;
    }

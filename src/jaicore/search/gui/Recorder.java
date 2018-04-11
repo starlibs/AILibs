@@ -38,7 +38,8 @@ public class Recorder<T> {
 	public Recorder(GraphEventBus<T> eventBus) {
 		this.index = 0;
 		this.recordEventBus = eventBus;
-		eventBus.register(this);
+		if(eventBus != null)
+			eventBus.register(this);
 		playEventBus = new GraphEventBus<>();
 		events = new ArrayList<Object>();
 
@@ -96,11 +97,11 @@ public class Recorder<T> {
 	 * posts the next event, while there are events left
 	 */
 	public void step() {
-		System.out.println(events.get(index).getClass().getSimpleName() + "\t" +index);
+		//System.out.println(events.get(index).getClass().getSimpleName() + "\t" +index);
 		Object event = events.get(index);
 		playEventBus.post(event);
 		index++;
-		System.out.println(index);
+		//System.out.println(index);
 	}
 
 
