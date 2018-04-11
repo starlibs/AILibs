@@ -10,22 +10,26 @@ import javafx.fxml.Initializable;
 import javax.swing.*;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.concurrent.TimeUnit;
 
 public class FXController implements Initializable  {
 
     @FXML
     private SwingNode swingNode;
 
-    //static Recorder rec = new Recorder();
+    private static Recorder rec;
+
+
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         createSwingContent(swingNode);
+
     }
 
     private void createSwingContent(SwingNode swingnode){
-        EventBus bus = new EventBus();
-        SearchVisualizationPanel panel = new SearchVisualizationPanel<>(bus);
+
+        SearchVisualizationPanel panel = new SearchVisualizationPanel<>(rec.getEventBus());
 
         //JPanel panel = new JPanel();
         //panel.add(new JButton("Test"));
@@ -37,11 +41,16 @@ public class FXController implements Initializable  {
    @FXML
     protected void play(ActionEvent event){
        System.out.println("play");
+       int numberOfEvents = rec.getNumberOfEvents();
+       for(int i = 0; i  < numberOfEvents; i++){
+           rec.step();
+       }
    }
 
    @FXML
     protected void step(ActionEvent event){
         System.out.println("step");
+        rec.step();
 
    }
 
@@ -54,4 +63,14 @@ public class FXController implements Initializable  {
     protected void reset(ActionEvent event){
         System.out.println("reset");
    }
+
+   public static void setRec(Recorder recorder){
+        rec = recorder;
+   }
+
+   public static void createRec(){
+        rec = new Recorder();
+   }
+
+
 }
