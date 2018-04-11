@@ -5,6 +5,8 @@ import jaicore.search.structure.core.GraphEventBus;
 import jaicore.search.structure.events.NodeReachedEvent;
 import jaicore.search.structure.events.NodeRemovedEvent;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -68,16 +70,6 @@ public class Recorder<T> {
 	 * posts every event which was stored
 	 */
 	public void play() {
-		/*for(Object e : events) {
-			playEventBus.post(e);
-			try {
-				TimeUnit.MILLISECONDS.sleep(sleepTime);
-			} catch (InterruptedException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-			
-		}*/
 		while(index < events.size()){
             try {
                 TimeUnit.MILLISECONDS.sleep(sleepTime);
@@ -117,10 +109,10 @@ public class Recorder<T> {
 	 */
 	public void back(){
 		index--;
-
-		for(int i = 0; i < index; i++){
-		    playEventBus.post(events.get(i));
-        }
+		System.out.println(index);
+		for(int i = 0; i< index; i ++){
+			playEventBus.post(events.get(i));
+		}
 
 	}
 
@@ -163,14 +155,12 @@ public class Recorder<T> {
 
 	}
 
-
-	public int getSleepTime() {
-		return sleepTime;
+	public void saveToFile(File file){
+		System.out.println(file.toString());
 	}
 
-
-	public void setSleepTime(int sleepTime) {
-		this.sleepTime = sleepTime;
+	public void loadFromFile(File file){
+		System.out.println(file.toString());
 	}
 
 	public int getNumberOfEvents(){
