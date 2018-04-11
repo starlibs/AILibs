@@ -41,7 +41,7 @@ public class FXGuiTester {
 		
 		
 		
-		SimpleGraphVisualizationWindow<Node<QueenNode, Double>> recordedWin = new SimpleGraphVisualizationWindow<>(recorder.getEventBus());
+		//SimpleGraphVisualizationWindow<Node<QueenNode, Double>> recordedWin = new SimpleGraphVisualizationWindow<>(recorder.getEventBus());
 		
 		String [] args = new String[0];
 		FXGui2.setRec(recorder);

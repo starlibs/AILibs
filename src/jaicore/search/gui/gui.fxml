@@ -18,6 +18,9 @@
             <Button text="step" onAction="#step"/>
             <Button text="back" onAction="#back"/>
             <Button text="reset" onAction="#reset"/>
+            <Button text="stop" onAction="#stop"/>
+            <Button text="save" onAction="#save"/>
+            <Button text="load" onAction="#load"/>
         </ToolBar>
     </top>
 
