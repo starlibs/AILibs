@@ -1,22 +1,22 @@
 package jaicore.search.gui;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.eventbus.Subscribe;
 import jaicore.search.structure.core.GraphEventBus;
-import jaicore.search.structure.events.GraphInitializedEvent;
 import jaicore.search.structure.events.NodeReachedEvent;
 import jaicore.search.structure.events.NodeRemovedEvent;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class Recorder<T> {
-	
-	
+
+
 	private List<Object> events;
 
 	private GraphEventBus<T> recordEventBus;
@@ -25,7 +25,7 @@ public class Recorder<T> {
 
 	//time which should be waited between to outgoing events
 	private int sleepTime = 50;
-	//the next event to post 
+	//the next event to post
 	private int index;
 
 
@@ -55,8 +55,10 @@ public class Recorder<T> {
 
 
 
-		
-		
+
+
+
+
 	}
 
 	/**
@@ -66,7 +68,7 @@ public class Recorder<T> {
 	@Subscribe
 	public void receiveEvent(T event) {
 		events.add(event);
-		
+
 	}
 
 	/**
@@ -168,11 +170,13 @@ public class Recorder<T> {
 	}
 
 	public void saveToFile(File file){
-		System.out.println(((GraphInitializedEvent)events.get(0)).isSerializable());
 
 		ObjectMapper mapper = new ObjectMapper();
+		mapper.enable(SerializationFeature.INDENT_OUTPUT);
 		try {
-			mapper.writeValue(file, events.get(0));
+			Object t = events.get(0);
+			mapper.writeValue(file, t);
+//			mapper.writeValue(file, events);
 			System.out.println(mapper.writeValueAsString(events));
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -182,8 +186,13 @@ public class Recorder<T> {
 	public void loadFromFile(File file){
 		ObjectMapper mapper = new ObjectMapper();
 		try {
-			Object event = mapper.readTree(file);
-			System.out.println(event.getClass());
+			LinkedHashMap map = mapper.readValue(file, LinkedHashMap.class);
+//			System.out.println(map);
+			EventCreator creator = new EventCreator();
+			events.add(creator.createEvent(map));
+
+
+//			List loadedEvents = mapper.readValue(file, mapper.getTypeFactory().constructCollectionType(List.class, Object.class));
 
 		} catch (IOException e) {
 			e.printStackTrace();

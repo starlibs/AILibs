@@ -1,7 +1,11 @@
 package jaicore.search.structure.events;
 
-public class GraphInitializedEvent<T> {
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
+public class GraphInitializedEvent<T> {
+	
+	
+	
 	private T root;
 
 	public GraphInitializedEvent(T root) {
@@ -16,11 +20,6 @@ public class GraphInitializedEvent<T> {
 	public void setRoot(T root) {
 		this.root = root;
 	}
-
-	public String isSerializable() {
-		return root.toString();
-	}
-
 
 
 }
