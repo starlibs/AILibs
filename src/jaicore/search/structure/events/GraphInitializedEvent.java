@@ -7,6 +7,7 @@ public class GraphInitializedEvent<T> {
 	
 	
 	private T root;
+	public final String name = "GraphInitializedEvent";
 
 	public GraphInitializedEvent(T root) {
 		super();
