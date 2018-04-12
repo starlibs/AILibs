@@ -13,7 +13,7 @@ public class FXGuiTester {
 
 	@Test
 	public void test() {
-		int i  =1;
+		int i  =0;
 //		prepare a simple Search with the 8 Queens problem
 		System.out.print("Checking " + (i+4)+ "-Queens Problem ... ");
 		NQueenGenerator gen = new NQueenGenerator(i+4);
@@ -44,7 +44,7 @@ public class FXGuiTester {
 		//SimpleGraphVisualizationWindow<Node<QueenNode, Double>> recordedWin = new SimpleGraphVisualizationWindow<>(recorder.getEventBus());
 
 		String [] args = new String[0];
-		FXGui2.setRec(recorder);
+		//FXGui2.setRec(recorder);
 		FXController.setRec(recorder);
 		System.out.println("Start the GUI");
 		javafx.application.Application.launch(FXGui.class, args);

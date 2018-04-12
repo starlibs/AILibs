@@ -2,6 +2,7 @@ package jaicore.search.gui;
 
 import com.google.common.eventbus.EventBus;
 import jaicore.graphvisualizer.SearchVisualizationPanel;
+import jaicore.search.structure.events.GraphInitializedEvent;
 import javafx.embed.swing.SwingNode;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -10,6 +11,7 @@ import javafx.scene.control.Slider;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.FileChooser;
 
+import javax.naming.directory.SearchControls;
 import javax.swing.*;
 import java.io.File;
 import java.net.URL;
@@ -20,6 +22,8 @@ public class FXController implements Initializable  {
 
     @FXML
     private SwingNode swingNode;
+
+
 
     @FXML
     private Slider slider;
@@ -35,14 +39,15 @@ public class FXController implements Initializable  {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         createSwingContent(swingNode);
+
         sleepTime = 50;
         /*slider.valueChangingProperty().addListener((observable, oldValue, newValue) ->{
             sleepTime = (long) slider.getValue();
             System.out.println(sleepTime);
         });*/
         slider.setOnMouseReleased((MouseEvent event)->{
-            sleepTime = (long) slider.getValue();
-            //System.out.println(sleepTime);
+            sleepTime = (long) (200 - slider.getValue());
+            System.out.println(sleepTime);
         });
     }
 
@@ -56,6 +61,7 @@ public class FXController implements Initializable  {
         SwingUtilities.invokeLater(()-> {
             swingnode.setContent(panel);
         });
+
     }
 
     /**
@@ -117,8 +123,8 @@ public class FXController implements Initializable  {
        //chooser.setTitle("Choose Event-File");
        //rec.saveToFile(chooser.showSaveDialog(null));
 
+
        File file = new File("/home/jkoepe/Documents/Test.txt");
-       System.out.println(file.toString());
        rec.saveToFile(file);
    }
 
@@ -129,7 +135,6 @@ public class FXController implements Initializable  {
        //chooser.setTitle("Open Event-File");
        //rec.loadFromFile(chooser.showOpenDialog(null));
         File file = new File("/home/jkoepe/Documents/Test.txt");
-        System.out.println(file.toString());
         rec.loadFromFile(file);
     }
     

@@ -17,6 +17,10 @@ public class GraphInitializedEvent<T> {
 		this.root = root;
 	}
 
+	public String isSerializable() {
+		return root.toString();
+	}
+
 
 
 }
