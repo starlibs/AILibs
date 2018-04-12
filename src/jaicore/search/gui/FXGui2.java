@@ -138,8 +138,8 @@ public class FXGui2<T> extends Application {
 
     private void createSwingContent(SwingNode swingnode){
 
-        SearchVisualizationPanel<T> panel = new SearchVisualizationPanel<>(rec.getEventBus());
-        //JPanel panel = new JPanel();
+        //SearchVisualizationPanel<T> panel = new SearchVisualizationPanel<>(rec.getEventBus());
+        JPanel panel = new JPanel();
         panel.add(new JButton("Test"));
 	    SwingUtilities.invokeLater(()-> {
             swingnode.setContent(panel);

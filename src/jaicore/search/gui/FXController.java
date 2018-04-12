@@ -7,9 +7,11 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Slider;
+import javafx.scene.input.MouseEvent;
 import javafx.stage.FileChooser;
 
 import javax.swing.*;
+import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.concurrent.TimeUnit;
@@ -34,15 +36,20 @@ public class FXController implements Initializable  {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         createSwingContent(swingNode);
         sleepTime = 50;
-        slider.valueChangingProperty().addListener((observable, oldValue, newValue) ->{
+        /*slider.valueChangingProperty().addListener((observable, oldValue, newValue) ->{
             sleepTime = (long) slider.getValue();
             System.out.println(sleepTime);
+        });*/
+        slider.setOnMouseReleased((MouseEvent event)->{
+            sleepTime = (long) slider.getValue();
+            //System.out.println(sleepTime);
         });
     }
 
     private void createSwingContent(SwingNode swingnode){
 
         SearchVisualizationPanel panel = new SearchVisualizationPanel();
+        rec.registerListener(panel);
 
         //JPanel panel = new JPanel();
         //panel.add(new JButton("Test"));
@@ -94,7 +101,7 @@ public class FXController implements Initializable  {
    @FXML
     protected void reset(ActionEvent event){
         System.out.println("reset");
-        //createSwingContent(swingNode);
+        createSwingContent(swingNode);
         rec.reset();
    }
 
@@ -106,18 +113,24 @@ public class FXController implements Initializable  {
 
    @FXML
    protected void save(ActionEvent event){
-       FileChooser chooser = new FileChooser();
-       chooser.setTitle("Choose Event-File");
+       //FileChooser chooser = new FileChooser();
+       //chooser.setTitle("Choose Event-File");
+       //rec.saveToFile(chooser.showSaveDialog(null));
 
-       rec.saveToFile(chooser.showSaveDialog(null));
+       File file = new File("/home/jkoepe/Documents/Test.txt");
+       System.out.println(file.toString());
+       rec.saveToFile(file);
    }
 
 
     @FXML
     protected void load(ActionEvent event){
-       FileChooser chooser = new FileChooser();
-       chooser.setTitle("Open Event-File");
-       rec.loadFromFile(chooser.showOpenDialog(null));
+       //FileChooser chooser = new FileChooser();
+       //chooser.setTitle("Open Event-File");
+       //rec.loadFromFile(chooser.showOpenDialog(null));
+        File file = new File("/home/jkoepe/Documents/Test.txt");
+        System.out.println(file.toString());
+        rec.loadFromFile(file);
     }
     
    public static void setRec(Recorder recorder){
@@ -132,10 +145,6 @@ public class FXController implements Initializable  {
     protected void sliderTest(ActionEvent event){
        System.out.println(slider.getValue());
    }
-
-
-
-
 
 
 }

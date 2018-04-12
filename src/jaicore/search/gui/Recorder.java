@@ -69,7 +69,6 @@ public class Recorder<T> {
 	 * posts every event which was stored
 	 */
 	public void play() {
-<<<<<<< HEAD
 		/*for(Object e : events) {
 			playEventBus.post(e);
 			try {
@@ -80,8 +79,6 @@ public class Recorder<T> {
 			}
 
 		}*/
-=======
->>>>>>> Added support for every button, but load and save.
 		while(index < events.size()){
             try {
                 TimeUnit.MILLISECONDS.sleep(sleepTime);
@@ -181,8 +178,11 @@ public class Recorder<T> {
 
 
 	private List<Object> events;
+	private List<Object> listeners;
 	private GraphEventBus<T> recordEventBus;
 	private GraphEventBus<T> playEventBus;
+
+
 	//time which should be waited between to outgoing events
 	private int sleepTime = 50;
 	//the next event to post
@@ -331,6 +331,11 @@ public class Recorder<T> {
 
 	public int getNumberOfEvents(){
 		return events.size();
+	}
+
+	public void registerListener(Object listener) {
+		this.playEventBus.register(listener);
+		this.listeners.add(listener);
 	}
 
 
