@@ -28,4 +28,14 @@
         <SwingNode fx:id="swingNode"/>
     </center>
 
+    <bottom>
+        <Slider fx:id="slider">
+            <min>5</min>
+            <max>200</max>
+            <value>50</value>
+            <showTickMarks>true</showTickMarks>
+            <majorTickUnit>5</majorTickUnit>
+            <snapToTicks>true</snapToTicks>
+        </Slider>
+    </bottom>
 </BorderPane>
