@@ -6,6 +6,7 @@ import javafx.embed.swing.SwingNode;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Slider;
 import javafx.stage.FileChooser;
 
 import javax.swing.*;
@@ -18,19 +19,30 @@ public class FXController implements Initializable  {
     @FXML
     private SwingNode swingNode;
 
-    private static Recorder rec;
+    @FXML
+    private Slider slider;
 
+
+
+    private static Recorder rec;
     private Thread controllerThread;
+
+    private long sleepTime;
 
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         createSwingContent(swingNode);
+        sleepTime = 50;
+        slider.valueChangingProperty().addListener((observable, oldValue, newValue) ->{
+            sleepTime = (long) slider.getValue();
+            System.out.println(sleepTime);
+        });
     }
 
     private void createSwingContent(SwingNode swingnode){
 
-        SearchVisualizationPanel panel = new SearchVisualizationPanel<>(rec.getEventBus());
+        SearchVisualizationPanel panel = new SearchVisualizationPanel();
 
         //JPanel panel = new JPanel();
         //panel.add(new JButton("Test"));
@@ -51,7 +63,7 @@ public class FXController implements Initializable  {
           try{
               for(int i = 0; i < numberOfEvents; i ++){
                   rec.step();
-                  TimeUnit.MILLISECONDS.sleep(50);
+                  TimeUnit.MILLISECONDS.sleep(sleepTime);
               }
           }
           catch (InterruptedException e){}
@@ -82,7 +94,7 @@ public class FXController implements Initializable  {
    @FXML
     protected void reset(ActionEvent event){
         System.out.println("reset");
-        createSwingContent(swingNode);
+        //createSwingContent(swingNode);
         rec.reset();
    }
 
@@ -115,6 +127,15 @@ public class FXController implements Initializable  {
    public static void createRec(){
         rec = new Recorder();
    }
+
+   @FXML
+    protected void sliderTest(ActionEvent event){
+       System.out.println(slider.getValue());
+   }
+
+
+
+
 
 
 }
