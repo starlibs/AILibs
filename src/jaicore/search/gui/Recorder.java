@@ -15,8 +15,11 @@ public class Recorder<T> {
 	
 	
 	private List<Object> events;
+	private List<Object> listeners;
 	private GraphEventBus<T> recordEventBus;
 	private GraphEventBus<T> playEventBus;
+
+
 	//time which should be waited between to outgoing events
 	private int sleepTime = 50;
 	//the next event to post 
@@ -42,6 +45,8 @@ public class Recorder<T> {
 			eventBus.register(this);
 		playEventBus = new GraphEventBus<>();
 		events = new ArrayList<Object>();
+
+		listeners = new ArrayList<>();
 
 		
 		
@@ -165,6 +170,11 @@ public class Recorder<T> {
 
 	public int getNumberOfEvents(){
 		return events.size();
+	}
+
+	public void registerListener(Object listener) {
+		this.playEventBus.register(listener);
+		this.listeners.add(listener);
 	}
 
 

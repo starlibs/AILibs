@@ -20,7 +20,7 @@ public class FXGuiTester {
 		BestFirst<QueenNode, String> search = new BestFirst<>(gen, node-> (double)node.getPoint().getNumberOfAttackedCellsInNextRow());
 		
 		//Add a graphvisualization windows
-//		SimpleGraphVisualizationWindow<Node<QueenNode, Double>> win = new SimpleGraphVisualizationWindow<>(search.getEventBus());
+//		SimpleGraphVisualizationWindow<Node<QueenNode, Double>> win = new SimpleGraphVisualizationWindow<>(search);
 //		win.getPanel().setTooltipGenerator(n->n.getPoint().toString());
 		
 		//Prepare an replay object

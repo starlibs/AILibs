@@ -33,7 +33,7 @@ public class RecorderTester {
 		System.out.println("Solution found.\n Starting the replay:");
 
 		//Test the recorder
-		SimpleGraphVisualizationWindow<Node<QueenNode, Double>> recordedWin = new SimpleGraphVisualizationWindow<>(recorder.getEventBus());
+		SimpleGraphVisualizationWindow<Node<QueenNode, Double>> recordedWin = new SimpleGraphVisualizationWindow<>(search);
 //		recordedWin.getPanel().setTooltipGenerator(n->n.getPoint().toString());
 //		recorder.play();
 
