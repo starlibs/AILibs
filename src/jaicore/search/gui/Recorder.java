@@ -174,9 +174,9 @@ public class Recorder<T> {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.enable(SerializationFeature.INDENT_OUTPUT);
 		try {
-			Object t = events.get(0);
-			mapper.writeValue(file, t);
-//			mapper.writeValue(file, events);
+//			Object t = events.get(0);
+//			mapper.writeValue(file, t);
+			mapper.writeValue(file, events);
 			System.out.println(mapper.writeValueAsString(events));
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -186,10 +186,15 @@ public class Recorder<T> {
 	public void loadFromFile(File file){
 		ObjectMapper mapper = new ObjectMapper();
 		try {
-			LinkedHashMap map = mapper.readValue(file, LinkedHashMap.class);
-//			System.out.println(map);
+			List mapList = mapper.readValue(file, mapper.getTypeFactory().constructCollectionType(List.class, LinkedHashMap.class));
+//			LinkedHashMap map = mapper.readValue(file, LinkedHashMap.class);
+
 			EventCreator creator = new EventCreator();
-			events.add(creator.createEvent(map));
+			mapList.stream().forEach((o -> {
+				events.add(creator.createEvent((LinkedHashMap)o));
+			}));
+
+//			events.add(creator.createEvent((LinkedHashMap) mapList.get(0)));
 
 
 //			List loadedEvents = mapper.readValue(file, mapper.getTypeFactory().constructCollectionType(List.class, Object.class));
