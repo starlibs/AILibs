@@ -1,12 +1,15 @@
 package jaicore.search.gui;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.eventbus.Subscribe;
 import jaicore.search.structure.core.GraphEventBus;
+import jaicore.search.structure.events.GraphInitializedEvent;
 import jaicore.search.structure.events.NodeReachedEvent;
 import jaicore.search.structure.events.NodeRemovedEvent;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -15,7 +18,7 @@ public class Recorder<T> {
 	
 	
 	private List<Object> events;
-	private List<Object> listeners;
+
 	private GraphEventBus<T> recordEventBus;
 	private GraphEventBus<T> playEventBus;
 
@@ -26,6 +29,9 @@ public class Recorder<T> {
 	private int index;
 
 
+
+
+	/**
 	/**
 	 * Creates an empty recorder, which can load an event bus
 	 */
@@ -46,7 +52,8 @@ public class Recorder<T> {
 		playEventBus = new GraphEventBus<>();
 		events = new ArrayList<Object>();
 
-		listeners = new ArrayList<>();
+
+
 
 		
 		
@@ -161,11 +168,27 @@ public class Recorder<T> {
 	}
 
 	public void saveToFile(File file){
-		System.out.println(file.toString());
+		System.out.println(((GraphInitializedEvent)events.get(0)).isSerializable());
+
+		ObjectMapper mapper = new ObjectMapper();
+		try {
+			mapper.writeValue(file, events.get(0));
+			System.out.println(mapper.writeValueAsString(events));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void loadFromFile(File file){
-		System.out.println(file.toString());
+		ObjectMapper mapper = new ObjectMapper();
+		try {
+			Object event = mapper.readTree(file);
+			System.out.println(event.getClass());
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
 	}
 
 	public int getNumberOfEvents(){
@@ -174,7 +197,6 @@ public class Recorder<T> {
 
 	public void registerListener(Object listener) {
 		this.playEventBus.register(listener);
-		this.listeners.add(listener);
 	}
 
 
