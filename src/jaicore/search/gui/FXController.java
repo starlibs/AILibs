@@ -119,23 +119,23 @@ public class FXController implements Initializable  {
 
    @FXML
    protected void save(ActionEvent event){
-       //FileChooser chooser = new FileChooser();
-       //chooser.setTitle("Choose Event-File");
-       //rec.saveToFile(chooser.showSaveDialog(null));
+       FileChooser chooser = new FileChooser();
+       chooser.setTitle("Choose Event-File");
+       rec.saveToFile(chooser.showSaveDialog(null));
 
 
-       File file = new File("/home/jkoepe/Documents/Test.txt");
-       rec.saveToFile(file);
+//       File file = new File("/home/jkoepe/Documents/Test.txt");
+//       rec.saveToFile(file);
    }
 
 
     @FXML
     protected void load(ActionEvent event){
-       //FileChooser chooser = new FileChooser();
-       //chooser.setTitle("Open Event-File");
-       //rec.loadFromFile(chooser.showOpenDialog(null));
-        File file = new File("/home/jkoepe/Documents/Test.txt");
-        rec.loadFromFile(file);
+    	FileChooser chooser = new FileChooser();
+    	chooser.setTitle("Open Event-File");
+    	rec.loadFromFile(chooser.showOpenDialog(null));
+//        File file = new File("/home/jkoepe/Documents/Test.txt");
+//        rec.loadFromFile(file);
     }
     
    public static void setRec(Recorder recorder){

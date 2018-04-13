@@ -332,10 +332,11 @@ public class Recorder<T> {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.enable(SerializationFeature.INDENT_OUTPUT);
 		try {
+			//events = events.subList(0, 6);
 //			Object t = events.get(0);
 //			mapper.writeValue(file, t);
 			mapper.writeValue(file, events);
-			System.out.println(mapper.writeValueAsString(events));
+//			System.out.println(mapper.writeValueAsString(events));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
