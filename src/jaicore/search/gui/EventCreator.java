@@ -52,16 +52,26 @@ public class EventCreator {
 
         if(jMap.get("name").equals("NodeReachedEvent")){
 
+            //System.out.println(jMap.keySet());
             LinkedHashMap parentMap = (LinkedHashMap)jMap.get("parent");
             int parentId = computeId((LinkedHashMap) parentMap.get("point"));
             Node parent = (Node) nodeMap.get(parentId);
 
 
             LinkedHashMap map = (LinkedHashMap)jMap.get("node");
-            int nodeId = computeId((LinkedHashMap)map.get("poin"));
-            System.out.println(map.keySet());
+            int nodeId = computeId((LinkedHashMap)map.get("point"));
+            GuiNode guiNode = new GuiNode((LinkedHashMap) map.get("point"));
+            guiNode.setId(nodeId);
 
-            return null;//new NodeReachedEvent<>(parent, node, type);
+            Node node = new Node(null, guiNode);
+            node.setGoal(false);
+            node.setInternalLabel((double) 0.0);
+
+            nodeMap.put(nodeId, node);
+
+            String type = (String) jMap.get("type");
+
+            return new NodeReachedEvent<>(parent, node, type);
         }
 
         if(jMap.get("name").equals("NodeRemovedEvent"))
@@ -84,8 +94,15 @@ public class EventCreator {
         ArrayList list = (ArrayList) map.get("positions");
         if(list.isEmpty())
             return 0;
+
+        int multiplicator = 1;
         int result = 0;
-        return -1;
+        for(int i = list.size()-1; i >= 0; i--){
+            result += ((Integer)list.get(i) * multiplicator);
+            multiplicator *=10;
+        }
+
+        return result;
     }
 
 }
