@@ -5,7 +5,7 @@ import jaicore.search.structure.core.NodeType;
 import jaicore.search.structure.events.GraphInitializedEvent;
 import jaicore.search.structure.events.NodeReachedEvent;
 import jaicore.search.structure.events.NodeTypeSwitchEvent;
-import sun.awt.image.ImageWatched;
+
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,7 +52,7 @@ public class EventCreator {
 
         if(jMap.get("name").equals("NodeReachedEvent")){
 
-            //System.out.println(jMap.keySet());
+        	System.out.println(jMap.keySet());
             LinkedHashMap parentMap = (LinkedHashMap)jMap.get("parent");
             int parentId = computeId((LinkedHashMap) parentMap.get("point"));
             Node parent = (Node) nodeMap.get(parentId);
@@ -101,6 +101,7 @@ public class EventCreator {
             result += ((Integer)list.get(i) * multiplicator);
             multiplicator *=10;
         }
+        result += (list.size()*multiplicator);
 
         return result;
     }
