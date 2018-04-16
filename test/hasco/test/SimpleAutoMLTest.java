@@ -4,14 +4,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.SynchronousQueue;
 
-import org.apache.commons.math3.geometry.euclidean.oned.Interval;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.junit.Test;
 
@@ -20,7 +17,6 @@ import hasco.model.Component;
 import hasco.model.NumericParameter;
 import hasco.model.Parameter;
 import hasco.model.ParameterRefinementConfiguration;
-import jaicore.basic.SetUtil;
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.ml.WekaUtil;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
