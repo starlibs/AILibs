@@ -13,15 +13,30 @@
             prefHeight="400.0" prefWidth="600.0">
 
     <top>
-        <ToolBar>
-            <Button text="play" onAction="#play"/>
-            <Button text="step" onAction="#step"/>
-            <Button text="back" onAction="#back"/>
-            <Button text="reset" onAction="#reset"/>
-            <Button text="stop" onAction="#stop"/>
-            <Button text="save" onAction="#save"/>
-            <Button text="load" onAction="#load"/>
-        </ToolBar>
+        <BorderPane>
+            <top>
+                <ToolBar>
+                    <Button text="play" onAction="#play"/>
+                    <Button text="step" onAction="#step"/>
+                    <Button text="back" onAction="#back"/>
+                    <Button text="reset" onAction="#reset"/>
+                    <Button text="stop" onAction="#stop"/>
+                    <Button text="save" onAction="#save"/>
+                    <Button text="load" onAction="#load"/>
+                </ToolBar>
+            </top>
+            <bottom>
+                <Slider fx:id="slider">
+                    <min>0</min>
+                    <max>200</max>
+                    <value>150</value>
+                    <showTickMarks>true</showTickMarks>
+                    <showTickLabels>true</showTickLabels>
+                    <majorTickUnit>10</majorTickUnit>
+                    <snapToTicks>true</snapToTicks>
+                </Slider>
+            </bottom>
+        </BorderPane>
     </top>
 
     <center>
@@ -30,13 +45,6 @@
 
 
     <bottom>
-        <Slider fx:id="slider">
-            <min>0</min>
-            <max>195</max>
-            <value>150</value>
-            <showTickMarks>true</showTickMarks>
-            <majorTickUnit>5</majorTickUnit>
-            <snapToTicks>true</snapToTicks>
-        </Slider>
+
     </bottom>
 </BorderPane>
