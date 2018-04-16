@@ -33,7 +33,7 @@ import jaicore.search.structure.core.GraphGenerator;
  *
  * @param <T>
  */
-public class ForwardDecompositionHTNPlanner<V extends Comparable<V>> implements IObservableGraphBasedHTNPlanningAlgorithm<TFDNode, String> {
+public class ForwardDecompositionHTNPlanner<V extends Comparable<V>> implements IObservableGraphBasedHTNPlanningAlgorithm<TFDNode, String, V> {
 
 	private final static Logger logger = LoggerFactory.getLogger(ForwardDecompositionHTNPlanner.class);
 
@@ -59,7 +59,7 @@ public class ForwardDecompositionHTNPlanner<V extends Comparable<V>> implements 
 			/* create search algorithm */
 			GraphGenerator<TFDNode, String> graphGenerator = null;
 			if (planningProblem instanceof CEOCIPSTNPlanningProblem) {
-				graphGenerator = new CEOCIPTFDGraphGenerator((CEOCIPSTNPlanningProblem) planningProblem, null, null);
+				graphGenerator = new CEOCIPTFDGraphGenerator((CEOCIPSTNPlanningProblem) planningProblem);
 			}
 			else if (planningProblem instanceof CEOCSTNPlanningProblem) {
 				graphGenerator = new CEOCTFDGraphGenerator((CEOCSTNPlanningProblem) planningProblem);
@@ -101,6 +101,9 @@ public class ForwardDecompositionHTNPlanner<V extends Comparable<V>> implements 
 				throw new NoSuchElementException();
 			List<Action> plan = nextSolution.path.stream().filter(n -> n.getAppliedAction() != null).map(n -> n.getAppliedAction()).collect(Collectors.toList());
 			nextSolution = null;
+			if (plan == null) {
+				throw new IllegalStateException("Planner has no more solution even though hasNext said that there would be one.");
+			}
 			return plan;
 		}
 
@@ -158,5 +161,10 @@ public class ForwardDecompositionHTNPlanner<V extends Comparable<V>> implements 
 		synchronized (listeners) {
 			listeners.add(listener);
 		}
+	}
+
+	@Override
+	public List<Action> getPlan(List<TFDNode> path) {
+		return path.stream().filter(n -> n.getAppliedAction() != null).map(n -> n.getAppliedAction()).collect(Collectors.toList());
 	}
 }

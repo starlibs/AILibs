@@ -1,5 +1,7 @@
 package jaicore.planning.model.task.stn;
 
+import java.util.List;
+
 import jaicore.basic.StringUtil;
 import jaicore.graph.Graph;
 import jaicore.logic.fol.structure.Literal;
@@ -10,7 +12,19 @@ public class TaskNetwork extends Graph<Literal> {
 	public TaskNetwork() {
 		super();
 	}
-
+	
+	public TaskNetwork(List<Literal> chain) {
+		int n = chain.size();
+		Literal prev = null;
+		for (int i = 0; i < n; i++) {
+			Literal cur = chain.get(i);
+			this.addItem(cur);
+			if (prev != null)
+				this.addEdge(prev, cur);
+			prev = cur;
+		}
+	}
+	
 	public TaskNetwork(Graph<Literal> graph) {
 		super(graph);
 	}

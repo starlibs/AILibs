@@ -1,8 +1,11 @@
 package jaicore.planning.model.conditional;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import jaicore.basic.StringUtil;
 import jaicore.logic.fol.structure.CNFFormula;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.logic.fol.structure.VariableParam;
@@ -10,10 +13,15 @@ import jaicore.planning.model.core.Operation;
 
 @SuppressWarnings("serial")
 public class CEOperation extends Operation {
-	
-	private final Map<CNFFormula,Monom> addLists, deleteLists;
 
-	public CEOperation(String name, List<VariableParam> params, Monom precondition, Map<CNFFormula,Monom> addLists, Map<CNFFormula,Monom> deleteLists) {
+	private final Map<CNFFormula, Monom> addLists, deleteLists;
+
+	public CEOperation(String name, String params, Monom precondition, Map<CNFFormula, Monom> addLists, Map<CNFFormula, Monom> deleteLists) {
+		this(name, Arrays.asList(StringUtil.explode(params, ",")).stream().map(s -> new VariableParam(s.trim())).collect(Collectors.toList()), precondition, addLists,
+				deleteLists);
+	}
+
+	public CEOperation(String name, List<VariableParam> params, Monom precondition, Map<CNFFormula, Monom> addLists, Map<CNFFormula, Monom> deleteLists) {
 		super(name, params, precondition);
 		this.addLists = addLists;
 		this.deleteLists = deleteLists;
@@ -58,5 +66,4 @@ public class CEOperation extends Operation {
 		return true;
 	}
 
-	
 }

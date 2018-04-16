@@ -25,6 +25,7 @@ import jaicore.planning.model.conditional.CEAction;
 import jaicore.planning.model.conditional.CEOperation;
 import jaicore.planning.model.core.Action;
 import jaicore.planning.model.core.Operation;
+import jaicore.planning.model.core.PlannerUtil;
 import jaicore.planning.model.task.ceocstn.CEOCSTNPlanningProblem;
 import jaicore.planning.model.task.stn.Method;
 import jaicore.planning.model.task.stn.MethodInstance;
@@ -91,7 +92,7 @@ public class CEOCTFDGraphGenerator implements SerializableGraphGenerator<TFDNode
 
 					/* if the depth is % k == 0, then compute the rest problem explicitly */
 					Monom updatedState = new Monom(state, false);
-					nodeUtil.updateState(updatedState, applicableAction);
+					new PlannerUtil().updateState(updatedState, applicableAction);
 					List<Literal> remainingTasks = new ArrayList<>(currentlyRemainingTasks);
 					remainingTasks.remove(0);
 					TFDNode node = null;

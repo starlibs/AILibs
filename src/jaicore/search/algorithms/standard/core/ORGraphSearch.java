@@ -433,7 +433,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 		if (beforeSelection()) {
 			
 			Node<T, V> nodeToExpand = open.peek();
-			assert parentDiscarding == ParentDiscarding.ALL || !expanded.contains(nodeToExpand.getPoint()) : "Selected node " + nodeToExpand + " for the second time for expansion even though parent discarding is off. This cannot be the case!";
+			assert parentDiscarding == ParentDiscarding.ALL || !expanded.contains(nodeToExpand.getPoint()) : "Selected node " + nodeToExpand.getString() + " for the second time for expansion even though parent discarding is off. This cannot be the case!";
 			if (nodeToExpand == null)
 				return;
 			afterSelection(nodeToExpand);

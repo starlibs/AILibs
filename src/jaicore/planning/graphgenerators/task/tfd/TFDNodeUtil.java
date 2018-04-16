@@ -8,17 +8,13 @@ import java.util.List;
 import java.util.Map;
 
 import jaicore.logic.fol.structure.CNFFormula;
-import jaicore.logic.fol.structure.Clause;
 import jaicore.logic.fol.structure.ConstantParam;
 import jaicore.logic.fol.structure.Literal;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.planning.graphgenerators.task.TaskPlannerUtil;
 import jaicore.planning.graphgenerators.task.ceociptfd.EvaluablePredicate;
-import jaicore.planning.model.conditional.CEAction;
-import jaicore.planning.model.conditional.CEOperation;
 import jaicore.planning.model.core.Action;
-import jaicore.planning.model.strips.StripsAction;
-import jaicore.planning.model.strips.StripsOperation;
+import jaicore.planning.model.core.PlannerUtil;
 import jaicore.planning.model.task.stn.MethodInstance;
 
 public class TFDNodeUtil {
@@ -85,7 +81,7 @@ public class TFDNodeUtil {
 			/* compute updated state */
 			Action appliedAction = n.getAppliedAction();
 			if (appliedAction != null) {
-				updateState(state, appliedAction);
+				new PlannerUtil().updateState(state, appliedAction);
 			}
 
 			/* compute remaining tasks */
@@ -103,73 +99,6 @@ public class TFDNodeUtil {
 
 	public Monom getState(List<TFDNode> path) {
 		return getRestProblem(path).getState();
-	}
-
-	public void updateState(Monom state, Action appliedAction) {
-
-		// assert state.containsAll(appliedAction.getPrecondition().stream().filter(lit -> lit.isPositive()).collect(Collectors.toList())) && SetUtil.disjoint(state,
-		// appliedAction.getPrecondition().stream().filter(lit -> lit.isNegated()).collect(Collectors.toList())) : ("Action " + appliedAction + " is supposed to be aplpicable in state " + state + "
-		// but it is not!");
-
-		/* apply effects of action (STRIPS) */
-		if (appliedAction.getOperation() instanceof StripsOperation) {
-			Action a = new StripsAction((StripsOperation) appliedAction.getOperation(), appliedAction.getGrounding());
-			state.removeAll(((StripsAction) a).getDeleteList());
-			state.addAll(((StripsAction) a).getAddList());
-		}
-
-		/* apply effects of action (ConditionalEffect operations) */
-		else if (appliedAction.getOperation() instanceof CEOperation) {
-			CEAction a = new CEAction((CEOperation) appliedAction.getOperation(), appliedAction.getGrounding());
-			Map<CNFFormula, Monom> addLists = a.getAddLists();
-			for (CNFFormula condition : addLists.keySet()) {
-				
-				/* evaluate interpreted predicates */
-				CNFFormula modifiedCondition = new CNFFormula();
-				boolean conditionIsSatisfiable = true;
-				for (Clause c : condition) {
-					Clause modifiedClause = new Clause();
-					boolean clauseContainsTrue = false;
-					for (Literal l : c) {
-						if (l.getPropertyName().startsWith("$")) {
-							EvaluablePredicate predicate = util.getEvaluablePlanningPredicates().get(l.getPropertyName().substring(1));
-							if (predicate == null)
-								throw new IllegalArgumentException("Action has evaluable predicate " + l.getPropertyName() + " in its conditional postcondition, but this predicate is not defined in the evaluable predicates!");
-							boolean testResult = predicate.test(state, l.getConstantParams().toArray(new ConstantParam[0]));
-							if (testResult == l.isPositive()) {
-								clauseContainsTrue = true;
-								break;
-							}
-							else;
-								// simply ignore this predicate
-						}
-						else
-							modifiedClause.add(l);
-						
-						/* if the clause is not empty, add it to the condition */
-						if (!clauseContainsTrue) {
-							if (!modifiedClause.isEmpty())
-								modifiedCondition.add(modifiedClause);
-							else {
-								conditionIsSatisfiable = false;
-								break;
-							}
-						}
-					}
-				}
-				if (conditionIsSatisfiable && modifiedCondition.entailedBy(state)) {
-					state.addAll(addLists.get(condition));
-				}
-			}
-			Map<CNFFormula, Monom> deleteLists = a.getDeleteLists();
-			for (CNFFormula condition : deleteLists.keySet()) {
-				if (condition.entailedBy(state)) {
-					state.removeAll(deleteLists.get(condition));
-				}
-			}
-		} else {
-			System.err.println("No support for operations of class " + appliedAction.getOperation().getClass());
-		}
 	}
 
 	@SuppressWarnings("unused")

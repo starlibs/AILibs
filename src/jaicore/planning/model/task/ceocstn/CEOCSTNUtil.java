@@ -5,8 +5,8 @@ import java.util.stream.Collectors;
 
 import jaicore.logic.fol.structure.Monom;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
-import jaicore.planning.graphgenerators.task.tfd.TFDNodeUtil;
 import jaicore.planning.model.ceoc.CEOCAction;
+import jaicore.planning.model.core.PlannerUtil;
 
 public class CEOCSTNUtil {
 
@@ -16,9 +16,8 @@ public class CEOCSTNUtil {
 	
 	public static Monom getStateAfterPlanExecution(Monom init, List<CEOCAction> plan) {
 		Monom state = new Monom(init);
-		TFDNodeUtil tfdUtil = new TFDNodeUtil(null);
 		for (CEOCAction a : plan)
-			tfdUtil.updateState(state, a);
+			PlannerUtil.updateState(state, a);
 		return state;
 	}
 }
