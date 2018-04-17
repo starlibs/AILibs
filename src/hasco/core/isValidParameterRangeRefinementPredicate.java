@@ -21,7 +21,7 @@ import jaicore.basic.SetUtil;
 import jaicore.logic.fol.structure.ConstantParam;
 import jaicore.logic.fol.structure.Literal;
 import jaicore.logic.fol.structure.Monom;
-import jaicore.planning.graphgenerators.task.ceociptfd.EvaluablePredicate;
+import jaicore.logic.fol.theories.EvaluablePredicate;
 
 public class isValidParameterRangeRefinementPredicate implements EvaluablePredicate {
 

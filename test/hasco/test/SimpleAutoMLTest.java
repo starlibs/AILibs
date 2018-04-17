@@ -13,12 +13,14 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.junit.Test;
 
 import hasco.core.HASCOFD;
+import hasco.core.Solution;
 import hasco.model.Component;
 import hasco.model.NumericParameter;
 import hasco.model.Parameter;
 import hasco.model.ParameterRefinementConfiguration;
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.ml.WekaUtil;
+import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionSolution;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;
 import jaicore.search.structure.core.Node;
@@ -56,7 +58,7 @@ public class SimpleAutoMLTest {
 				e.printStackTrace();
 				return null;
 			}
-		}, paramConfigs, "classifier", c -> {
+		}, n -> null, paramConfigs, "classifier", c -> {
 			
 			System.out.print("Evaluating solution ... ");
 			DescriptiveStatistics stats = new DescriptiveStatistics();
@@ -115,7 +117,7 @@ public class SimpleAutoMLTest {
 		hasco.addComponent(c);
 
 		new SimpleGraphVisualizationWindow<Node<TFDNode, String>>(hasco).getPanel().setTooltipGenerator(new TFDTooltipGenerator<>());
-		for (Classifier candidate : hasco) {
+		for (Solution<ForwardDecompositionSolution,Classifier> candidate : hasco) {
 			System.out.println(candidate);
 		}
 		System.out.println("Ready");

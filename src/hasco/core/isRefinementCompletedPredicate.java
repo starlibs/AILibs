@@ -1,5 +1,6 @@
 package hasco.core;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +15,7 @@ import hasco.model.ParameterRefinementConfiguration;
 import jaicore.basic.SetUtil;
 import jaicore.logic.fol.structure.ConstantParam;
 import jaicore.logic.fol.structure.Monom;
-import jaicore.planning.graphgenerators.task.ceociptfd.EvaluablePredicate;
+import jaicore.logic.fol.theories.EvaluablePredicate;
 
 public class isRefinementCompletedPredicate implements EvaluablePredicate {
 
@@ -48,7 +49,7 @@ public class isRefinementCompletedPredicate implements EvaluablePredicate {
 		
 		/* initialize routine */
 		if (params.length != 2) {
-			throw new IllegalArgumentException("There should be exactly two parameters additional to the state. This parameters refer to the component name that is being configured and the object itself.");
+			throw new IllegalArgumentException("There should be exactly two parameters additional to the state but " + params.length +" were provided: " + Arrays.toString(params) + ". This parameters refer to the component name that is being configured and the object itself.");
 		}
 		if (params[0] == null)
 			throw new IllegalArgumentException("The component name must not be null.");
@@ -68,7 +69,7 @@ public class isRefinementCompletedPredicate implements EvaluablePredicate {
 				double min = Double.parseDouble(interval.get(0));
 				double max = Double.parseDouble(interval.get(1));
 				double length = max - min;
-				if (length < refinementConfig.getIntervalLength())
+				if (length > refinementConfig.getIntervalLength())
 					return false;
 			}
 //			System.out.println("\t" + param.getName() + " (" + componentParams.get(param.getName()) + ") is still refinable.");
