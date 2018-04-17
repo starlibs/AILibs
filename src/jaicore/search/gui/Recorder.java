@@ -1,5 +1,6 @@
 package jaicore.search.gui;
 
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.eventbus.Subscribe;
@@ -9,9 +10,7 @@ import jaicore.search.structure.events.NodeRemovedEvent;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class Recorder<T> {
@@ -27,6 +26,10 @@ public class Recorder<T> {
 	private int sleepTime = 50;
 	//the next event to post
 	private int index;
+
+	//log the Time of events
+	private long firstEvent;
+	private List<Long> eventTimes;
 
 
 
@@ -50,14 +53,10 @@ public class Recorder<T> {
 		if(eventBus != null)
 			eventBus.register(this);
 		playEventBus = new GraphEventBus<>();
-		events = new ArrayList<Object>();
+		events = new ArrayList<Object>(5);
 
-
-
-
-
-
-
+		firstEvent = 0;
+		eventTimes = new ArrayList<>(5);
 
 	}
 
@@ -67,7 +66,16 @@ public class Recorder<T> {
 	 */
 	@Subscribe
 	public void receiveEvent(T event) {
-		events.add(event);
+		this.events.add(event);
+		long curr = 0;
+		if(firstEvent == 0) {
+			firstEvent = System.nanoTime();
+			curr = firstEvent;
+		}
+		else
+			curr = System.nanoTime();
+
+		this.eventTimes.add(curr-firstEvent);
 
 	}
 
@@ -177,7 +185,15 @@ public class Recorder<T> {
 			//events = events.subList(0, 6);
 //			Object t = events.get(0);
 //			mapper.writeValue(file, t);
-			mapper.writeValue(file, events);
+			List<LinkedHashMap<Long,Object>> saveList = new ArrayList();
+			for(int i = 0; i < events.size(); i++){
+				LinkedHashMap t = new LinkedHashMap();
+				t.put(eventTimes.get(i), events.get(i));
+				saveList.add(t);
+			}
+//			System.out.println(saveList);
+
+			mapper.writeValue(file, saveList);
 //			System.out.println(mapper.writeValueAsString(events));
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -186,23 +202,28 @@ public class Recorder<T> {
 
 	public void loadFromFile(File file){
 		ObjectMapper mapper = new ObjectMapper();
+		eventTimes.clear();
+		events.clear();
+		index = 0 ;
+
 		try {
 			List mapList = mapper.readValue(file, mapper.getTypeFactory().constructCollectionType(List.class, LinkedHashMap.class));
-//			LinkedHashMap map = mapper.readValue(file, LinkedHashMap.class);
 
 			EventCreator creator = new EventCreator();
-			mapList.stream().forEach((o -> {
-				events.add(creator.createEvent((LinkedHashMap)o));
-			}));
+			mapList.stream().forEach(o ->{
+				LinkedHashMap map = (LinkedHashMap) o;
+				Set timeSet = map.keySet();
+				timeSet.stream().forEach(t->{
+					eventTimes.add(Long.parseLong((String)(t)));
+					events.add(creator.createEvent((LinkedHashMap)map.get(t)));
+				});
+			});
 
-//			events.add(creator.createEvent((LinkedHashMap) mapList.get(0)));
-
-
-//			List loadedEvents = mapper.readValue(file, mapper.getTypeFactory().constructCollectionType(List.class, Object.class));
-
+			System.out.println(eventTimes);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
 
 	}
 
@@ -214,5 +235,14 @@ public class Recorder<T> {
 		this.playEventBus.register(listener);
 	}
 
+	public List<Long> getEventTimes() {
+		return eventTimes;
+	}
 
+	public long getLastEvent(){
+		if(! eventTimes.isEmpty())
+			return eventTimes.get(eventTimes.size()-1);
+		else
+			return 0;
+	}
 }
