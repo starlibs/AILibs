@@ -22,12 +22,12 @@ public class Recorder<T> {
 	private GraphEventBus<T> playEventBus;
 
 
-	//time which should be waited between to outgoing events
-	private int sleepTime = 50;
+
+
 	//the next event to post
 	private int index;
 
-	//log the Time of events
+	//time variables
 	private long firstEvent;
 	private List<Long> eventTimes;
 
@@ -88,23 +88,6 @@ public class Recorder<T> {
 		return playEventBus;
 	}
 
-	/**
-	 * posts every event which was stored
-	 */
-	public void play() {
-		while(index < events.size()){
-            try {
-                TimeUnit.MILLISECONDS.sleep(sleepTime);
-            }
-            catch (InterruptedException e){
-                e.printStackTrace();
-            }
-		    playEventBus.post(events.get(index));
-			index ++;
-
-		}
-
-	}
 
 	/**
 	 * posts the next event, while there are events left
@@ -147,26 +130,19 @@ public class Recorder<T> {
 	 */
 	private Object createCounterEvent(Object object){
 		Class eventClass = object.getClass();
-		//System.out.println(eventClass.getSimpleName());
 		switch(eventClass.getSimpleName()){
 			case "GraphInitializedEvent":
-				//System.out.println("GraphInitializedEvent");
 				return null;
-
 
 			case "NodeTypeSwitchEvent":
 				//NodeTypeSwitchEvent event = (NodeTypeSwitchEvent)object;
 				//System.out.println("NodeTypeSwitchEvent");
 				return null;
 
-
-
 			case "NodeReachedEvent":
-				//System.out.println("NodeReachedEvent");
 				NodeReachedEvent event = (NodeReachedEvent) object;
 				NodeRemovedEvent counter = new NodeRemovedEvent(event.getNode());
 				return counter;
-
 
 			default:
 				System.out.println("False");
@@ -177,40 +153,53 @@ public class Recorder<T> {
 
 	}
 
+	/**
+	 * Stores the received events in the specified file.
+	 * @param file
+	 * 		The file in which the events should be stored
+	 */
 	public void saveToFile(File file){
 
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.enable(SerializationFeature.INDENT_OUTPUT);
 		try {
-			//events = events.subList(0, 6);
-//			Object t = events.get(0);
-//			mapper.writeValue(file, t);
 			List<LinkedHashMap<Long,Object>> saveList = new ArrayList();
+
+			//create a HashMap, which contains the event as values and the corresponding time as a value
+			//This is done to store the time in the same file as the events.
 			for(int i = 0; i < events.size(); i++){
 				LinkedHashMap t = new LinkedHashMap();
 				t.put(eventTimes.get(i), events.get(i));
 				saveList.add(t);
 			}
-//			System.out.println(saveList);
+
 
 			mapper.writeValue(file, saveList);
-//			System.out.println(mapper.writeValueAsString(events));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
+	/**
+	 * Load events from the specified file.
+	 * @param file
+	 * 		The file which contains the stored events.
+	 */
 	public void loadFromFile(File file){
-		ObjectMapper mapper = new ObjectMapper();
+
+		//reset the recorder to not mix up the old events with the loaded ones
 		eventTimes.clear();
 		events.clear();
 		index = 0 ;
 
+		ObjectMapper mapper = new ObjectMapper();
 		try {
+			//convert JASON-String into a linked list
 			List mapList = mapper.readValue(file, mapper.getTypeFactory().constructCollectionType(List.class, LinkedHashMap.class));
 
 			EventCreator creator = new EventCreator();
 			mapList.stream().forEach(o ->{
+				//Extract event-times and events from linked-hashmap
 				LinkedHashMap map = (LinkedHashMap) o;
 				Set timeSet = map.keySet();
 				timeSet.stream().forEach(t->{
@@ -218,8 +207,6 @@ public class Recorder<T> {
 					events.add(creator.createEvent((LinkedHashMap)map.get(t)));
 				});
 			});
-
-			System.out.println(eventTimes);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -227,18 +214,40 @@ public class Recorder<T> {
 
 	}
 
-	public int getNumberOfEvents(){
-		return events.size();
-	}
 
+
+	/**
+	 * Register a new listener to the replayEventBus
+	 * @param listener
+	 * 		The listener to be registerd to the replayEventBus.
+	 */
 	public void registerListener(Object listener) {
 		this.playEventBus.register(listener);
 	}
 
+	/**
+	 *
+	 * @return
+	 * 		The number of received events.
+	 */
+	public int getNumberOfEvents(){
+		return events.size();
+	}
+
+	/**
+	 *
+	 * @return
+	 */
 	public List<Long> getEventTimes() {
 		return eventTimes;
 	}
 
+
+	/**
+	 * Returns the Time, at which the last event was recieved in relation to the first received event.
+	 * @return
+	 * 		Returns the time at which the last event was received in nano seconds.
+	 */
 	public long getLastEvent(){
 		if(! eventTimes.isEmpty())
 			return eventTimes.get(eventTimes.size()-1);

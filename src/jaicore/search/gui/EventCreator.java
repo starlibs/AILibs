@@ -26,15 +26,17 @@ public class EventCreator {
     //Create a new GraphIinitializedEvent
     public Object createEvent(LinkedHashMap jMap){
 
-
+        //create new GraphInitializedEveent
         if(jMap.get("name").equals("GraphInitializedEvent")){
 
             LinkedHashMap map = (LinkedHashMap)jMap.get("root");
 
+            //extract Node
             GuiNode guiNode = new GuiNode((LinkedHashMap)map.get("point"));
             int id = computeId((LinkedHashMap)map.get("point"));
             guiNode.setId(id);
 
+            //create new Node based on extracted one
             Node node = new Node(null, guiNode);
             node.setGoal(false);
             node.setInternalLabel((double) 0.0);
@@ -45,24 +47,25 @@ public class EventCreator {
 
         }
 
-
-
+        //create a new NodeParentSwithcEvent
         if(jMap.get("name").equals("NodeParentSwitchEvent"))
             System.out.println("NodeParentSwitchEvent");
 
+        // create a new NodeReachedEvent
         if(jMap.get("name").equals("NodeReachedEvent")){
 
-        	System.out.println(jMap.keySet());
+            //extract parent node
             LinkedHashMap parentMap = (LinkedHashMap)jMap.get("parent");
             int parentId = computeId((LinkedHashMap) parentMap.get("point"));
             Node parent = (Node) nodeMap.get(parentId);
 
-
+            //extract current node
             LinkedHashMap map = (LinkedHashMap)jMap.get("node");
             int nodeId = computeId((LinkedHashMap)map.get("point"));
             GuiNode guiNode = new GuiNode((LinkedHashMap) map.get("point"));
             guiNode.setId(nodeId);
 
+            //create a new node with the extracted node
             Node node = new Node(null, guiNode);
             node.setGoal(false);
             node.setInternalLabel((double) 0.0);
@@ -74,9 +77,11 @@ public class EventCreator {
             return new NodeReachedEvent<>(parent, node, type);
         }
 
+        //create a new NodeRemovedEvent
         if(jMap.get("name").equals("NodeRemovedEvent"))
             System.out.println("NodeRemovedEvent");
 
+        //create a new NodeTypeSwithEvent
         if(jMap.get("name").equals("NodeTypeSwitchEvent")){
             LinkedHashMap map = (LinkedHashMap)jMap.get("node");
             int id = computeId((LinkedHashMap)map.get("point"));
