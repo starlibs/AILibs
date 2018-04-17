@@ -15,18 +15,23 @@ import javax.naming.directory.SearchControls;
 import javax.swing.*;
 import java.io.File;
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.concurrent.TimeUnit;
 
 public class FXController implements Initializable  {
 
+    //contains the GraphVisualizationPane
     @FXML
     private SwingNode swingNode;
-
-
-
+    //slider for replay speed
     @FXML
     private Slider slider;
+
+    //slider as a timeline
+    @FXML
+    private Slider timeline;
+    private List<Long> eventTimes;
 
 
 
@@ -47,8 +52,12 @@ public class FXController implements Initializable  {
         });*/
         slider.setOnMouseReleased((MouseEvent event)->{
             sleepTime = (long) (200 - slider.getValue());
-            System.out.println(sleepTime);
         });
+        eventTimes = rec.getEventTimes();
+
+        setTimeline();
+
+
     }
 
     private void createSwingContent(SwingNode swingnode){
@@ -77,6 +86,7 @@ public class FXController implements Initializable  {
               for(int i = 0; i < numberOfEvents; i ++){
                   rec.step();
                   TimeUnit.MILLISECONDS.sleep(sleepTime);
+                  timeline.setValue(eventTimes.get(i));
               }
           }
           catch (InterruptedException e){}
@@ -123,7 +133,6 @@ public class FXController implements Initializable  {
        chooser.setTitle("Choose Event-File");
        rec.saveToFile(chooser.showSaveDialog(null));
 
-
 //       File file = new File("/home/jkoepe/Documents/Test.txt");
 //       rec.saveToFile(file);
    }
@@ -136,6 +145,12 @@ public class FXController implements Initializable  {
     	rec.loadFromFile(chooser.showOpenDialog(null));
 //        File file = new File("/home/jkoepe/Documents/Test.txt");
 //        rec.loadFromFile(file);
+        createSwingContent(swingNode);
+
+        setTimeline();
+
+
+
     }
     
    public static void setRec(Recorder recorder){
@@ -146,9 +161,10 @@ public class FXController implements Initializable  {
         rec = new Recorder();
    }
 
-   @FXML
-    protected void sliderTest(ActionEvent event){
-       System.out.println(slider.getValue());
+   private void setTimeline(){
+       timeline.setMax(rec.getLastEvent());
+       if(!eventTimes.isEmpty())
+           timeline.setMajorTickUnit(rec.getLastEvent()>>4);
    }
 
 
