@@ -10,16 +10,16 @@ import java.util.regex.Pattern;
 
 import org.aeonbits.owner.ConfigCache;
 
-import de.upb.crc901.mlplan.classifiers.TwoPhaseHTNBasedPipelineSearcher;
-import de.upb.crc901.mlplan.core.MLUtil;
-import de.upb.crc901.mlplan.core.MySQLMLPlanExperimentLogger;
-import de.upb.crc901.mlplan.search.evaluators.BalancedRandomCompletionEvaluator;
-import de.upb.crc901.mlplan.search.evaluators.MonteCarloCrossValidationEvaluator;
-import de.upb.crc901.mlplan.search.evaluators.MulticlassEvaluator;
-import de.upb.crc901.mlplan.services.MLPipelinePlan;
+import de.upb.crc901.automl.pipeline.service.MLPipelinePlan;
+import de.upb.crc901.mlplan.multiclass.DefaultPreorder;
+import de.upb.crc901.mlplan.multiclass.MLPlanMySQLConnector;
+import de.upb.crc901.mlplan.multiclass.classifiers.TwoPhaseHTNBasedPipelineSearcher;
+import de.upb.crc901.mlplan.multiclass.core.MLUtil;
 import de.upb.crc901.services.core.HttpServiceClient;
 import de.upb.crc901.services.core.HttpServiceServer;
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
+import jaicore.ml.evaluation.MonteCarloCrossValidationEvaluator;
+import jaicore.ml.evaluation.MulticlassEvaluator;
 import jaicore.ml.experiments.MultiClassClassificationExperimentRunner;
 import jaicore.ml.measures.PMMulticlass;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
@@ -48,7 +48,7 @@ public class SCC2018MLTest extends MultiClassClassificationExperimentRunner {
 	}
 	
 //	private final IMultiClassClassificationExperimentDatabase logger; 
-	private final MySQLMLPlanExperimentLogger logger; // we want to have the logger, because we also send
+	private final MLPlanMySQLConnector logger; // we want to have the logger, because we also send
 	
 	protected static String[] getClassifierNames() {
 		return new String[] { "MLS-Plan" };
@@ -62,8 +62,8 @@ public class SCC2018MLTest extends MultiClassClassificationExperimentRunner {
 	
 	
 	public SCC2018MLTest(File datasetFolder, String hostPase, String hostJase) throws IOException {
-		super(datasetFolder, getClassifierNames(), getSetupNames(), timeouts, seeds, trainingPortion, numCPUs, memoryInMB, PMMulticlass.errorRate, new MySQLMLPlanExperimentLogger(conf.getDBHost(), conf.getDBUsername(), conf.getDBPassword(), conf.getDBDatabaseName()));
-		this.logger = (MySQLMLPlanExperimentLogger)getLogger();
+		super(datasetFolder, getClassifierNames(), getSetupNames(), timeouts, seeds, trainingPortion, numCPUs, memoryInMB, PMMulticlass.errorRate, new MLPlanMySQLConnector(conf.getDBHost(), conf.getDBUsername(), conf.getDBPassword(), conf.getDBDatabaseName()));
+		this.logger = (MLPlanMySQLConnector)getLogger();
 //		super(datasetFolder, getClassifierNames(), getSetupNames(), timeouts, seeds, trainingPortion, numCPUs, memoryInMB, PMMulticlass.errorRate, new DummyMLPlanExperimentLogger());
 //		this.logger = getLogger();
 		MLPipelinePlan.hostPASE = hostPase;
@@ -102,7 +102,7 @@ public class SCC2018MLTest extends MultiClassClassificationExperimentRunner {
 				bs.setSolutionEvaluatorFactory4Selection(() -> new MonteCarloCrossValidationEvaluator(baseEvaluator, mccvRepeats, mccvPortion * .85f));
 				int numberOfSamples = conf.getNumberOfSamplesInFValueComputation();
 				System.out.println("Samples: " + numberOfSamples);
-				bs.setRce(new BalancedRandomCompletionEvaluator(random, numberOfSamples, new MonteCarloCrossValidationEvaluator(baseEvaluator, mccvRepeats, mccvPortion)));
+				bs.setRce(new DefaultPreorder(random, numberOfSamples, new MonteCarloCrossValidationEvaluator(baseEvaluator, mccvRepeats, mccvPortion)));
 //				bs.setTimeoutPerNodeFComputation(1000 * (timeoutInSeconds == 60 ? 15 : 300));
 				bs.setTimeoutPerNodeFComputation(1000 * conf.getTimeoutPerCandidate());
 //				bs.setTooltipGenerator(new TFDTooltipGenerator<>());

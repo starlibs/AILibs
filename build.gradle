@@ -99,6 +99,7 @@ dependencies {
 	compile project(':JAICore')
 	compile project(':weka')
 	compile project(':JASE')
+	compile project(':HASCO')
 }
 
 repositories {

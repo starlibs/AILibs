@@ -14,7 +14,7 @@ import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
-import de.upb.crc901.mlplan.core.MySQLReductionExperimentLogger;
+import de.upb.crc901.mlplan.multiclasswithreduction.MySQLReductionExperimentLogger;
 import jaicore.basic.MathExt;
 import jaicore.basic.SetUtil;
 import jaicore.ml.WekaUtil;

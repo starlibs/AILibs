@@ -17,10 +17,10 @@ import java.util.stream.Stream;
 
 import org.aeonbits.owner.ConfigCache;
 
-import de.upb.crc901.mlplan.classifiers.TwoPhaseHTNBasedPipelineSearcher;
-import de.upb.crc901.mlplan.search.evaluators.MulticlassEvaluator;
+import de.upb.crc901.mlplan.multiclass.classifiers.TwoPhaseHTNBasedPipelineSearcher;
 import jaicore.basic.MathExt;
 import jaicore.ml.WekaUtil;
+import jaicore.ml.evaluation.MulticlassEvaluator;
 import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;

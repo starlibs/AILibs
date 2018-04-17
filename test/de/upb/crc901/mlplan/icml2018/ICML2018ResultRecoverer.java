@@ -3,7 +3,7 @@ package de.upb.crc901.mlplan.icml2018;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import de.upb.crc901.mlplan.core.MySQLMultiLabelExperimentLogger;
+import de.upb.crc901.mlplan.multilabel.MySQLMultiLabelExperimentLogger;
 
 public class ICML2018ResultRecoverer {
 	public static void main(String[] args) throws SQLException {

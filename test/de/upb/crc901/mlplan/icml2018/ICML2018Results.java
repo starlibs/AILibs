@@ -7,7 +7,7 @@ import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
 
-import de.upb.crc901.mlplan.core.MySQLMultiLabelExperimentLogger;
+import de.upb.crc901.mlplan.multilabel.MySQLMultiLabelExperimentLogger;
 
 public class ICML2018Results {
 

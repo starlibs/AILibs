@@ -7,7 +7,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import de.upb.crc901.mlplan.classifiers.RandomPipelinePicker;
+import de.upb.crc901.mlplan.multiclass.classifiers.RandomPipelinePicker;
 import weka.classifiers.evaluation.Evaluation;
 import weka.core.Instances;
 

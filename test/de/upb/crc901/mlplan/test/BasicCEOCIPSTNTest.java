@@ -5,7 +5,7 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-import de.upb.crc901.mlplan.core.MLUtil;
+import de.upb.crc901.mlplan.multiclass.core.MLUtil;
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;

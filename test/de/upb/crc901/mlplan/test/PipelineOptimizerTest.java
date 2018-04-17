@@ -9,12 +9,12 @@ import java.util.Random;
 import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 import org.junit.Test;
 
-import de.upb.crc901.mlplan.classifiers.TwoPhaseHTNBasedPipelineSearcher;
-import de.upb.crc901.mlplan.core.MLUtil;
-import de.upb.crc901.mlplan.search.evaluators.DoubleRandomCompletionEvaluator;
-import de.upb.crc901.mlplan.search.evaluators.MonteCarloCrossValidationEvaluator;
-import de.upb.crc901.mlplan.search.evaluators.MulticlassEvaluator;
+import de.upb.crc901.mlplan.multiclass.classifiers.TwoPhaseHTNBasedPipelineSearcher;
+import de.upb.crc901.mlplan.multiclass.core.MLUtil;
+import de.upb.crc901.mlplan.multiclass.evaluators.DoubleRandomCompletionEvaluator;
 import jaicore.ml.WekaUtil;
+import jaicore.ml.evaluation.MonteCarloCrossValidationEvaluator;
+import jaicore.ml.evaluation.MulticlassEvaluator;
 import weka.classifiers.Evaluation;
 import weka.core.Instances;
 

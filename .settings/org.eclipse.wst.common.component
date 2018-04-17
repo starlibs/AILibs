@@ -13,5 +13,8 @@
 		<dependent-module deploy-path="../" handle="module:/resource/JASE/JASE">
 			<dependency-type>uses</dependency-type>
 		</dependent-module>
+		<dependent-module deploy-path="../" handle="module:/resource/HASCO/HASCO">
+			<dependency-type>uses</dependency-type>
+		</dependent-module>
 	</wb-module>
 </project-modules>

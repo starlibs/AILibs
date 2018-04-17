@@ -15,8 +15,8 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import de.upb.crc901.mlplan.services.MLPipelinePlan;
-import de.upb.crc901.mlplan.services.MLServicePipeline;
+import de.upb.crc901.automl.pipeline.service.MLPipelinePlan;
+import de.upb.crc901.automl.pipeline.service.MLServicePipeline;
 import de.upb.crc901.services.core.HttpServiceClient;
 import de.upb.crc901.services.core.HttpServiceServer;
 import de.upb.crc901.services.core.OntologicalTypeMarshallingSystem;

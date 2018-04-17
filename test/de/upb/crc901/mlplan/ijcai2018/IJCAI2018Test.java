@@ -5,18 +5,18 @@ import java.util.Random;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
-import de.upb.crc901.mlplan.classifiers.TwoPhaseHTNBasedPipelineSearcher;
-import de.upb.crc901.mlplan.core.MySQLMLPlanExperimentLogger;
-import de.upb.crc901.mlplan.search.algorithms.GraphBasedPipelineSearcher;
-import de.upb.crc901.mlplan.search.evaluators.BalancedRandomCompletionEvaluator;
-import de.upb.crc901.mlplan.search.evaluators.MonteCarloCrossValidationEvaluator;
-import de.upb.crc901.mlplan.search.evaluators.MulticlassEvaluator;
+import de.upb.crc901.automl.search.algorithms.GraphBasedPipelineSearcher;
+import de.upb.crc901.mlplan.multiclass.DefaultPreorder;
+import de.upb.crc901.mlplan.multiclass.MLPlanMySQLConnector;
+import de.upb.crc901.mlplan.multiclass.classifiers.TwoPhaseHTNBasedPipelineSearcher;
+import jaicore.ml.evaluation.MonteCarloCrossValidationEvaluator;
+import jaicore.ml.evaluation.MulticlassEvaluator;
 import jaicore.ml.experiments.MultiClassClassificationExperimentRunner;
 import weka.classifiers.Classifier;
 
 public class IJCAI2018Test extends MultiClassClassificationExperimentRunner {
 
-	MySQLMLPlanExperimentLogger expLogger = new MySQLMLPlanExperimentLogger("isys-db.cs.upb.de", "mlplan", "UMJXI4WlNqbS968X", "mlplan_results");
+	MLPlanMySQLConnector expLogger = new MLPlanMySQLConnector("isys-db.cs.upb.de", "mlplan", "UMJXI4WlNqbS968X", "mlplan_results");
 	
 	public IJCAI2018Test(File datasetFolder) {
 		super(datasetFolder);
@@ -67,7 +67,7 @@ public class IJCAI2018Test extends MultiClassClassificationExperimentRunner {
 			MonteCarloCrossValidationEvaluator solutionEvaluator = new MonteCarloCrossValidationEvaluator(new MulticlassEvaluator(random), 3, .7f);
 			bs.setSolutionEvaluatorFactory4Search(() -> solutionEvaluator);
 			bs.setSolutionEvaluatorFactory4Selection(() -> new MonteCarloCrossValidationEvaluator(new MulticlassEvaluator(random), 10, .7f));
-			bs.setRce(new BalancedRandomCompletionEvaluator(random, 3, solutionEvaluator));
+			bs.setRce(new DefaultPreorder(random, 3, solutionEvaluator));
 			bs.setTimeoutPerNodeFComputation(1000 * (timeout == 60 ? 15 : 300));
 //			bs.setTooltipGenerator(new TFDTooltipGenerator<>());
 			bs.setPortionOfDataForPhase2(.7f);

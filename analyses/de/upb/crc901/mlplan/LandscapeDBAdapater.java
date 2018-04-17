@@ -5,14 +5,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 
-import de.upb.crc901.mlplan.core.MLPipeline;
-import de.upb.crc901.mlplan.core.MySQLMLPlanExperimentLogger;
+import de.upb.crc901.automl.pipeline.basic.MLPipeline;
+import de.upb.crc901.mlplan.multiclass.MLPlanMySQLConnector;
 import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
 import weka.classifiers.Classifier;
 import weka.core.OptionHandler;
 
-public class LandscapeDBAdapater extends MySQLMLPlanExperimentLogger {
+public class LandscapeDBAdapater extends MLPlanMySQLConnector {
 
 	public LandscapeDBAdapater() {
 		super("isys-db.cs.upb.de", "mlplan", "UMJXI4WlNqbS968X", "mlplan_results");

@@ -64,45 +64,12 @@
 		<appender-ref ref="traceFileAppender" />
 	</logger>
 	
-	<logger name="mlplan">
-		<level value="debug" />
-		<appender-ref ref="console" />
-	</logger>
-	
-	<logger name="jaicore.ml.experiments">
-		<level value="debug" />
-	</logger>
-	
-	<logger name="de.upb.crc901.mlplan.services">
-		<level value="debug" />
-	</logger>
-	
-	<logger name="de.upb.crc901.mlplan.core.PlanExecutor">
-		<level value="warn" />
-	</logger>
-	
-	<logger name="de.upb.crc901.mlplan.classifiers">
-		<level value="debug" />
-	</logger>
-	
-	<logger name="de.upb.crc901.mlplan.search.algorithms.GraphBasedPipelineSearcher">
-		<level value="debug" />
-	</logger>
-	
-	<logger name="de.upb.crc901.mlplan.search.evaluators.RandomCompletionEvaluator">
-		<level value="debug" />
+	<logger name="de.upb.crc901.mlplan.multiclass.MLPlan">
+		<level value="info" />
 	</logger>
 	
 	
-	<logger name="de.upb.crc901.services.core.HttpServiceServer">
-		<level value="warn" />
-	</logger>
-	
-	<logger name="de.upb.crc901.services.core.HttpServiceClient">
-		<level value="debug" />
-	</logger>
-	
-	<logger name="de.upb.crc901.services.core">
+	<logger name="jaicore.search.algorithms.standard.bestfirst.RandomCompletionEvaluator">
 		<level value="warn" />
 	</logger>
 </log4j:configuration>

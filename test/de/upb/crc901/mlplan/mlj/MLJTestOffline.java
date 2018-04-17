@@ -10,18 +10,16 @@ import java.util.regex.Pattern;
 
 import org.aeonbits.owner.ConfigCache;
 
-import de.upb.crc901.mlplan.classifiers.TwoPhaseHTNBasedPipelineSearcher;
-import de.upb.crc901.mlplan.core.DummyMLPlanExperimentLogger;
-import de.upb.crc901.mlplan.core.MLUtil;
-import de.upb.crc901.mlplan.core.MySQLMLPlanExperimentLogger;
-import de.upb.crc901.mlplan.search.evaluators.BalancedRandomCompletionEvaluator;
-import de.upb.crc901.mlplan.search.evaluators.MonteCarloCrossValidationEvaluator;
-import de.upb.crc901.mlplan.search.evaluators.MulticlassEvaluator;
-import de.upb.crc901.mlplan.services.MLPipelinePlan;
+import de.upb.crc901.automl.DummyExperimentDatabaseConnector;
+import de.upb.crc901.automl.pipeline.service.MLPipelinePlan;
+import de.upb.crc901.mlplan.multiclass.DefaultPreorder;
+import de.upb.crc901.mlplan.multiclass.classifiers.TwoPhaseHTNBasedPipelineSearcher;
+import de.upb.crc901.mlplan.multiclass.core.MLUtil;
 import de.upb.crc901.services.core.HttpServiceClient;
 import de.upb.crc901.services.core.HttpServiceServer;
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
-import jaicore.ml.experiments.IMultiClassClassificationExperimentDatabase;
+import jaicore.ml.evaluation.MonteCarloCrossValidationEvaluator;
+import jaicore.ml.evaluation.MulticlassEvaluator;
 import jaicore.ml.experiments.MultiClassClassificationExperimentRunner;
 import jaicore.ml.measures.PMMulticlass;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
@@ -61,7 +59,7 @@ public class MLJTestOffline extends MultiClassClassificationExperimentRunner {
 	
 	
 	public MLJTestOffline(File datasetFolder, String hostPase, String hostJase) throws IOException {
-		super(datasetFolder, getClassifierNames(), getSetupNames(), timeouts, seeds, trainingPortion, numCPUs, memoryInMB, PMMulticlass.errorRate, new DummyMLPlanExperimentLogger());
+		super(datasetFolder, getClassifierNames(), getSetupNames(), timeouts, seeds, trainingPortion, numCPUs, memoryInMB, PMMulticlass.errorRate, new DummyExperimentDatabaseConnector());
 		MLPipelinePlan.hostPASE = hostPase;
 		MLPipelinePlan.hostJASE = hostJase;
 		String[] jaseParts = hostJase.split(":");
@@ -77,6 +75,8 @@ public class MLJTestOffline extends MultiClassClassificationExperimentRunner {
 				File evaluablePredicatFile = new File("testrsc/services/automl.evaluablepredicates");
 				File searchSpaceFile = new File("testrsc/services/automl-services.searchspace");
 				TwoPhaseHTNBasedPipelineSearcher<Double> bs = new TwoPhaseHTNBasedPipelineSearcher<>();
+				
+//				logicalDerivationTree(searchSpaceFile, evaluablePredicatFile);
 				
 				Random random = new Random(seed);
 				bs.setHtnSearchSpaceFile(searchSpaceFile);
@@ -98,10 +98,10 @@ public class MLJTestOffline extends MultiClassClassificationExperimentRunner {
 				bs.setSolutionEvaluatorFactory4Selection(() -> new MonteCarloCrossValidationEvaluator(baseEvaluator, mccvRepeats, mccvPortion * .85f));
 				int numberOfSamples = conf.getNumberOfSamplesInFValueComputation();
 				System.out.println("Samples: " + numberOfSamples);
-				bs.setRce(new BalancedRandomCompletionEvaluator(random, numberOfSamples, new MonteCarloCrossValidationEvaluator(baseEvaluator, mccvRepeats, mccvPortion)));
+				bs.setRce(new DefaultPreorder(random, numberOfSamples, new MonteCarloCrossValidationEvaluator(baseEvaluator, mccvRepeats, mccvPortion)));
 //				bs.setTimeoutPerNodeFComputation(1000 * (timeoutInSeconds == 60 ? 15 : 300));
 				bs.setTimeoutPerNodeFComputation(1000 * conf.getTimeoutPerCandidate());
-//				bs.setTooltipGenerator(new TFDTooltipGenerator<>());
+				bs.setTooltipGenerator(new TFDTooltipGenerator<>());
 				bs.setNumberOfMCIterationsPerSolutionInSelectionPhase(conf.getNumberOfIterationsInSelectionPhase());
 				bs.setPortionOfDataForPhase2(conf.getPortionOfDataForPhase2());
 				
@@ -120,7 +120,12 @@ public class MLJTestOffline extends MultiClassClassificationExperimentRunner {
 		 -> 0.0);
 		 new SimpleGraphVisualizationWindow<>(bf.getEventBus()).getPanel().setTooltipGenerator(new TFDTooltipGenerator<>());;
 		
-		 while(bf.nextSolution() != null);
+		 bf.nextSolution();
+		 bf.nextSolution();
+		 bf.nextSolution();
+		 bf.nextSolution();
+		 bf.nextSolution();
+		 while(bf != null);
 	}
 	
 	public static void main(String[] args) throws Exception {
@@ -134,7 +139,7 @@ public class MLJTestOffline extends MultiClassClassificationExperimentRunner {
 			server = new HttpServiceServer(Integer.parseInt(hostJase.split(":")[1]), "testrsc/conf/classifiers.json", "testrsc/conf/preprocessors.json", "testrsc/conf/others.json");
 		try {
 			MLJTestOffline runner = new MLJTestOffline(folder, hostPase, hostJase);
-			runner.runSpecific(3);
+			runner.runSpecific(15);
 		} finally {
 			if (server != null)
 				server.shutdown();

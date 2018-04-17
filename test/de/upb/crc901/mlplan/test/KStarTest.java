@@ -7,7 +7,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import de.upb.crc901.mlplan.core.MLPipeline;
+import de.upb.crc901.automl.pipeline.basic.MLPipeline;
 import jaicore.ml.WekaUtil;
 import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;

@@ -6,7 +6,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import de.upb.crc901.mlplan.classifiers.MCTSPipelineSearcher;
+import de.upb.crc901.mlplan.multiclass.classifiers.MCTSPipelineSearcher;
 import weka.core.Instances;
 
 public class MCTSSearch {
