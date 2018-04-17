@@ -7,8 +7,8 @@ import java.util.List;
 import org.junit.Test;
 
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
-import jaicore.planning.algorithms.ForwardDecompositionHTNPlanner;
-import jaicore.planning.algorithms.ForwardDecompositionHTNPlanner.SolutionIterator;
+import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionHTNPlanner;
+import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionHTNPlanner.SolutionIterator;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;
 import jaicore.planning.model.task.ceocstn.CEOCSTNPlanningProblem;

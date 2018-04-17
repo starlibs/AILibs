@@ -1,5 +1,5 @@
 package jaicore.planning.algorithms;
 
-public interface IHTNPlanningAlgorithm extends IPlanningAlgorithm {
+public interface IHTNPlanningAlgorithm<T extends IPlanningSolution> extends IPlanningAlgorithm<T> {
 	
 }

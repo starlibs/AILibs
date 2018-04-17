@@ -1,9 +1,9 @@
 package jaicore.planning.algorithms;
 
-import java.util.List;
+import java.util.Map;
 
-import jaicore.planning.model.core.Action;
+import jaicore.basic.IIterableAlgorithm;
 
-public interface IPlanningAlgorithm extends Iterable<List<Action>> {
-	
+public interface IPlanningAlgorithm<S extends IPlanningSolution> extends IIterableAlgorithm<S> {
+	public Map<String,Object> getAnnotationsOfSolution(S solution);
 }

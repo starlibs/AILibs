@@ -12,7 +12,7 @@ import jaicore.logic.fol.structure.CNFFormula;
 import jaicore.logic.fol.structure.Literal;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.logic.fol.structure.VariableParam;
-import jaicore.planning.graphgenerators.task.ceociptfd.EvaluablePredicate;
+import jaicore.logic.fol.theories.EvaluablePredicate;
 import jaicore.planning.graphgenerators.task.ceociptfd.OracleTaskResolver;
 import jaicore.planning.model.ceoc.CEOCOperation;
 import jaicore.planning.model.task.stn.TaskNetwork;

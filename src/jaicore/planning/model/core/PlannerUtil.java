@@ -13,7 +13,7 @@ import jaicore.logic.fol.structure.ConstantParam;
 import jaicore.logic.fol.structure.Literal;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.logic.fol.structure.VariableParam;
-import jaicore.planning.graphgenerators.task.ceociptfd.EvaluablePredicate;
+import jaicore.logic.fol.theories.EvaluablePredicate;
 import jaicore.planning.model.conditional.CEAction;
 import jaicore.planning.model.conditional.CEOperation;
 import jaicore.planning.model.strips.StripsAction;

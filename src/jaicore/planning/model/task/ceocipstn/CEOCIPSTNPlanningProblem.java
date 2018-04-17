@@ -5,7 +5,7 @@ import java.util.Map;
 
 import jaicore.logic.fol.structure.CNFFormula;
 import jaicore.logic.fol.structure.Monom;
-import jaicore.planning.graphgenerators.task.ceociptfd.EvaluablePredicate;
+import jaicore.logic.fol.theories.EvaluablePredicate;
 import jaicore.planning.graphgenerators.task.ceociptfd.OracleTaskResolver;
 import jaicore.planning.model.task.IHTNPlanningProblem;
 import jaicore.planning.model.task.stn.TaskNetwork;
