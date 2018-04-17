@@ -11,6 +11,7 @@ public class FXGui extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
+        //load the fxml file of the gui
         Parent root = FXMLLoader.load(getClass().getResource("gui.fxml"));
 
         Scene scene = new Scene(root, 800, 600);
@@ -20,6 +21,10 @@ public class FXGui extends Application {
         stage.show();
     }
 
+    /**
+     * Start the gui with an empty recorder.
+     * @param args
+     */
     public static void main(String [] args){
         FXController.setRec(new Recorder());
         launch(args);

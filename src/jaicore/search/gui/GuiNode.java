@@ -2,6 +2,10 @@ package jaicore.search.gui;
 
 import java.util.LinkedHashMap;
 
+
+/**
+ * This class is a simple node class, which is used to recreate events from a JASO-String
+ */
 public class GuiNode {
 
 

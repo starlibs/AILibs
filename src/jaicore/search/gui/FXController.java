@@ -1,8 +1,6 @@
 package jaicore.search.gui;
 
-import com.google.common.eventbus.EventBus;
 import jaicore.graphvisualizer.SearchVisualizationPanel;
-import jaicore.search.structure.events.GraphInitializedEvent;
 import javafx.embed.swing.SwingNode;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -11,9 +9,7 @@ import javafx.scene.control.Slider;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.FileChooser;
 
-import javax.naming.directory.SearchControls;
 import javax.swing.*;
-import java.io.File;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -31,6 +27,7 @@ public class FXController implements Initializable  {
     //slider as a timeline
     @FXML
     private Slider timeline;
+    //noinspection unchecked
     private List<Long> eventTimes;
 
 
@@ -46,41 +43,38 @@ public class FXController implements Initializable  {
         createSwingContent(swingNode);
 
         sleepTime = 50;
-        /*slider.valueChangingProperty().addListener((observable, oldValue, newValue) ->{
-            sleepTime = (long) slider.getValue();
-            System.out.println(sleepTime);
-        });*/
-        slider.setOnMouseReleased((MouseEvent event)->{
+
+        //if the slider for replay-speed is released, wait (200 ms - the value of the slider)
+        //the slider has a range from 0 to 200
+        slider.setOnMouseReleased((MouseEvent event)-> {
             sleepTime = (long) (200 - slider.getValue());
         });
-        eventTimes = rec.getEventTimes();
 
         setTimeline();
 
 
     }
 
+    /**
+     * Creates the SearchVisualizationPanel and binds it to the swingNode in the GUI
+     * @param swingnode
+     */
     private void createSwingContent(SwingNode swingnode){
-
         SearchVisualizationPanel panel = new SearchVisualizationPanel();
         rec.registerListener(panel);
-
-        //JPanel panel = new JPanel();
-        //panel.add(new JButton("Test"));
-        SwingUtilities.invokeLater(()-> {
-            swingnode.setContent(panel);
-        });
-
+        SwingUtilities.invokeLater(()-> swingnode.setContent(panel));
     }
 
     /**
      * Starts the playback of the events. For this an own thread is created, in order to not freeze the whole GUI.
-     * The playback can be stoped by pressing the stop button.
+     * The playback can be stopped by pressing the stop button.
      */
    @FXML
     protected void play(ActionEvent event){
        System.out.println("play");
        int numberOfEvents = rec.getNumberOfEvents();
+
+       // create an own thread for playing the steps, in order to prevent freezing and make the replay stoppable
        Runnable runPlay = () ->{
           try{
               for(int i = 0; i < numberOfEvents; i ++){
@@ -98,6 +92,7 @@ public class FXController implements Initializable  {
     /**
      * Takes a single step, if the step-Button is pressed.
      * @param event
+     *      Button press event on the Button step
      */
    @FXML
     protected void step(ActionEvent event){
@@ -106,6 +101,11 @@ public class FXController implements Initializable  {
 
    }
 
+    /**
+     * Takes one step backewards, if the button is pressed
+     * @param event
+     *      The event fired, by pressing the back button
+     */
    @FXML
     protected void back(ActionEvent event){
         System.out.println("back");
@@ -114,19 +114,35 @@ public class FXController implements Initializable  {
 
    }
 
+    /**
+     * Reset the gui
+     * @param event
+     *      The event fired, by pressing the reset button
+     */
    @FXML
     protected void reset(ActionEvent event){
         System.out.println("reset");
         createSwingContent(swingNode);
+        setTimeline();
         rec.reset();
    }
 
+    /**
+     * Stops the current replay. This button does nothing, if the play-Button is not pressed before
+     * @param event
+     *      The event fired, by pressing the stop button
+     */
    @FXML
    protected void stop(ActionEvent event){
         controllerThread.interrupt();
         System.out.println("Stop");
    }
 
+    /**
+     * Opens a file chooser, in which the user has to specify a file to store the events.
+     * @param event
+     *      The event fired by pressing the save button.
+     */
    @FXML
    protected void save(ActionEvent event){
        FileChooser chooser = new FileChooser();
@@ -152,16 +168,16 @@ public class FXController implements Initializable  {
 
 
     }
-    
+
    public static void setRec(Recorder recorder){
         rec = recorder;
-   }
+    }
 
-   public static void createRec(){
-        rec = new Recorder();
-   }
-
-   private void setTimeline(){
+    /**
+     * Sets the values of the timeline to match the currently stored events in the recorder.
+     */
+    private void setTimeline(){
+       eventTimes = rec.getEventTimes();
        timeline.setMax(rec.getLastEvent());
        if(!eventTimes.isEmpty())
            timeline.setMajorTickUnit(rec.getLastEvent()>>4);
