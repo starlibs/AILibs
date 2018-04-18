@@ -37,6 +37,9 @@ public class FXController implements Initializable  {
 
     private long sleepTime;
 
+    private int index;
+
+
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -51,6 +54,7 @@ public class FXController implements Initializable  {
         });
 
         setTimeline();
+        index = 0;
 
 
     }
@@ -60,6 +64,8 @@ public class FXController implements Initializable  {
      * @param swingnode
      */
     private void createSwingContent(SwingNode swingnode){
+        if(swingnode.getContent() != null)
+            rec.unregisterListener(swingnode.getContent());
         SearchVisualizationPanel panel = new SearchVisualizationPanel();
         rec.registerListener(panel);
         SwingUtilities.invokeLater(()-> swingnode.setContent(panel));
@@ -77,7 +83,7 @@ public class FXController implements Initializable  {
        // create an own thread for playing the steps, in order to prevent freezing and make the replay stoppable
        Runnable runPlay = () ->{
           try{
-              for(int i = 0; i < numberOfEvents; i ++){
+              for(int i = index; i < numberOfEvents; i ++){
                   rec.step();
                   TimeUnit.MILLISECONDS.sleep(sleepTime);
                   timeline.setValue(eventTimes.get(i));
@@ -96,8 +102,10 @@ public class FXController implements Initializable  {
      */
    @FXML
     protected void step(ActionEvent event){
-        System.out.println("step");
         rec.step();
+        index ++;
+        timeline.setValue(eventTimes.get(index));
+        System.out.println(index);
 
    }
 
@@ -109,8 +117,17 @@ public class FXController implements Initializable  {
    @FXML
     protected void back(ActionEvent event){
         System.out.println("back");
-        createSwingContent(swingNode);
-        rec.back();
+        if(timeline.getValue() == 0)
+            System.out.println("I am at the start");
+        else
+            if(index == 1){
+                createSwingContent(swingNode);
+                index = 0;
+                setTimeline();
+                rec.reset();
+            }
+            else
+                rec.back();
 
    }
 
@@ -122,7 +139,9 @@ public class FXController implements Initializable  {
    @FXML
     protected void reset(ActionEvent event){
         System.out.println("reset");
+        controllerThread.interrupt();
         createSwingContent(swingNode);
+        index = 0;
         setTimeline();
         rec.reset();
    }
@@ -181,6 +200,7 @@ public class FXController implements Initializable  {
        timeline.setMax(rec.getLastEvent());
        if(!eventTimes.isEmpty())
            timeline.setMajorTickUnit(rec.getLastEvent()>>4);
+       timeline.setValue(index);
    }
 
 

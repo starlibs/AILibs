@@ -4,9 +4,11 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.eventbus.Subscribe;
+import jaicore.graph.observation.IObservableGraphAlgorithm;
 import jaicore.search.structure.core.GraphEventBus;
 import jaicore.search.structure.events.NodeReachedEvent;
 import jaicore.search.structure.events.NodeRemovedEvent;
+import jaicore.search.structure.events.NodeTypeSwitchEvent;
 
 import java.io.File;
 import java.io.IOException;
@@ -210,11 +212,11 @@ public class Recorder<T> {
 	 * @param eventBus
 	 * 		The eventbus to which this recorder is listening
 	 */
-	public Recorder(GraphEventBus<T> eventBus) {
+	public Recorder(IObservableGraphAlgorithm observable) {
 		this.index = 0;
-		this.recordEventBus = eventBus;
-		if(eventBus != null)
-			eventBus.register(this);
+		//this.recordEventBus = eventBus;
+		if(observable != null)
+			observable.registerListener(this);
 		playEventBus = new GraphEventBus<>();
 		events = new ArrayList<Object>();
 
@@ -275,10 +277,11 @@ public class Recorder<T> {
 	 * This is the opposite of step
 	 */
 	public void back(){
-		index--;
-		System.out.println(index);
-		for(int i = 0; i< index; i ++){
-			playEventBus.post(events.get(i));
+		if(index > 0) {
+			index--;
+//			System.out.println(events.get(index).getClass());
+			Object counter = createCounterEvent(events.get(index));
+			playEventBus.post(counter);
 		}
 
 	}
@@ -294,16 +297,18 @@ public class Recorder<T> {
 		Class eventClass = object.getClass();
 		switch(eventClass.getSimpleName()){
 			case "GraphInitializedEvent":
+				//just for completion, the controller handles the back button for the first event as an reset
 				return null;
 
 			case "NodeTypeSwitchEvent":
-				//NodeTypeSwitchEvent event = (NodeTypeSwitchEvent)object;
-				//System.out.println("NodeTypeSwitchEvent");
+				NodeTypeSwitchEvent typeSwitchEvent = (NodeTypeSwitchEvent)object;
+				System.out.println(typeSwitchEvent.getType());
 				return null;
 
 			case "NodeReachedEvent":
-				NodeReachedEvent event = (NodeReachedEvent) object;
-				NodeRemovedEvent counter = new NodeRemovedEvent(event.getNode());
+				NodeReachedEvent nodeReachedEvent = (NodeReachedEvent) object;
+				NodeRemovedEvent counter = new NodeRemovedEvent(nodeReachedEvent.getNode());
+				System.out.println("nodeReachedEvent");
 				return counter;
 
 			default:
@@ -385,6 +390,10 @@ public class Recorder<T> {
 	 */
 	public void registerListener(Object listener) {
 		this.playEventBus.register(listener);
+	}
+
+	public void unregisterListener(Object listener){
+		this.playEventBus.unregister(listener);
 	}
 
 	/**
