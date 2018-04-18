@@ -22,7 +22,8 @@ class Util {
 		Map<String, ComponentInstance> objectMap = new HashMap<>();
 		Map<String, Map<String, String>> parameterContainerMap = new HashMap<>(); // stores for each object the name of the container of each parameter
 		Map<String, String> parameterValues = new HashMap<>();
-
+		
+		/* create (empty) component instances, detect containers for parameter values, and register the values of the data containers */
 		for (Literal l : state) {
 			String[] params = l.getParameters().stream().map(p -> p.getName()).collect(Collectors.toList()).toArray(new String[] {});
 			switch (l.getPropertyName()) {
@@ -34,8 +35,6 @@ class Util {
 				Component component = components.stream().filter(c -> c.getName().equals(componentName)).findAny().get();
 				ComponentInstance object = new ComponentInstance(component, new HashMap<>(), new HashMap<>());
 				objectMap.put(objectName, object);
-				if (!parentObjectName.equals("request"))
-					objectMap.get(parentObjectName).getSatisfactionOfRequiredInterfaces().put(interfaceName, object);
 				break;
 			case "parameterContainer":
 				if (!parameterContainerMap.containsKey(params[2]))
@@ -47,6 +46,17 @@ class Util {
 				break;
 			}
 		}
+		
+		/* now establish the binding of the required interfaces of the component instances */
+		state.stream().filter(l -> l.getPropertyName().equals("resolves")).forEach(l -> {
+			String[] params = l.getParameters().stream().map(p -> p.getName()).collect(Collectors.toList()).toArray(new String[] {});
+			String parentObjectName = params[0];
+			String interfaceName = params[1];
+			String objectName = params[3];
+			ComponentInstance object = objectMap.get(objectName);
+			if (!parentObjectName.equals("request"))
+				objectMap.get(parentObjectName).getSatisfactionOfRequiredInterfaces().put(interfaceName, object);
+		});
 
 		/* update the configurations of the objects */
 		for (String objectName : objectMap.keySet()) {
