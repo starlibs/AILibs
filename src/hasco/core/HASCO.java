@@ -230,21 +230,27 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 				for (Parameter p : c.getParameters()) {
 					String paramIdentifier = "p" + (++j);
 					params.add(new VariableParam(paramIdentifier));
-
+					
+					/* add the information about this parameter container */
+					List<LiteralParam> literalParams = new ArrayList<>();
+					literalParams.clear();
+					literalParams.add(new ConstantParam(c.getName()));
+					literalParams.add(new ConstantParam(p.getName()));
+					literalParams.add(new VariableParam("c2"));
+					literalParams.add(new VariableParam(paramIdentifier));
+					standardKnowledgeAboutNewComponent.add(new Literal("parameterContainer", literalParams));
+					
+					/* add knowledge about initial value */
+					List<LiteralParam> valParams = new ArrayList<>();
+					valParams.add(new VariableParam(paramIdentifier));
 					if (p instanceof NumericParameter) {
+						standardKnowledgeAboutNewComponent.add(new Literal("parameterFocus(c2, '" + p.getName() + "', '" + p.getDefaultValue() + "')"));
 						NumericParameter np = (NumericParameter) p;
-						List<LiteralParam> literalParams = new ArrayList<>();
-						literalParams.add(new VariableParam(paramIdentifier));
-						literalParams.add(new ConstantParam("[" + np.getMin() + "," + np.getMax() + "]"));
-						standardKnowledgeAboutNewComponent.add(new Literal("val", literalParams));
-						literalParams.clear();
-						literalParams.add(new ConstantParam(c.getName()));
-						literalParams.add(new ConstantParam(p.getName()));
-						literalParams.add(new VariableParam("c2"));
-						literalParams.add(new VariableParam(paramIdentifier));
-						standardKnowledgeAboutNewComponent.add(new Literal("parameterContainer", literalParams));
-						standardKnowledgeAboutNewComponent.add(new Literal("parameterFocus(c2, '" + p.getName() + "', '" + np.getDefaultValue() + "')"));
+						valParams.add(new ConstantParam("[" + np.getMin() + "," + np.getMax() + "]"));
 					}
+					else
+						valParams.add(new ConstantParam(p.getDefaultValue().toString()));
+					standardKnowledgeAboutNewComponent.add(new Literal("val", valParams));
 				}
 				addList.put(new CNFFormula(), standardKnowledgeAboutNewComponent);
 				operations.add(new CEOCOperation("satisfy" + i + "With" + c.getName(), params, new Monom("component(c1)"), addList, new HashMap<>(), new ArrayList<>()));
@@ -254,7 +260,7 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 		/* create operations for parameter initialization */
 		{
 			Map<CNFFormula, Monom> addList = new HashMap<>();
-			addList.put(new CNFFormula(), new Monom("val(container,newValue)"));
+			addList.put(new CNFFormula(), new Monom("val(container,newValue) & overwritten(container)"));
 			Map<CNFFormula, Monom> deleteList = new HashMap<>();
 			deleteList.put(new CNFFormula(), new Monom("val(container,previousValue)"));
 			operations.add(new CEOCOperation("redefValue", "container,previousValue,newValue", new Monom("val(container,previousValue)"), addList, deleteList, ""));
@@ -311,21 +317,21 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 				refinementArguments += ", " + paramName;
 				params.add(new VariableParam(paramName));
 				initNetwork.add(new Literal("tRefineParam" + p.getName() + "Of" + c.getName() + "(c2, " + paramName + ")"));
-				if (p instanceof NumericParameter) {
-					methods.add(new OCIPMethod("ignoreParamRefinementFor" + p.getName() + "Of" + c.getName(), "object, container, interval",
+//				if (p instanceof NumericParameter) {
+					methods.add(new OCIPMethod("ignoreParamRefinementFor" + p.getName() + "Of" + c.getName(), "object, container, curval",
 							new Literal("tRefineParam" + p.getName() + "Of" + c.getName() + "(object,container)"),
-							new Monom("parameterContainer('" + c.getName() + "', '" + p.getName() + "', object, container) & val(container,interval)"),
+							new Monom("parameterContainer('" + c.getName() + "', '" + p.getName() + "', object, container) & val(container,curval)"),
 							new TaskNetwork(), false, "",
-							new Monom("notRefinable('" + c.getName() + "', object, '" + p.getName() + "', interval)")));
+							new Monom("notRefinable('" + c.getName() + "', object, '" + p.getName() + "', container, curval)")));
 					
-					methods.add(new OCIPMethod("refineParam" + p.getName() + "Of" + c.getName(), "object, container, interval, refinement",
+					methods.add(new OCIPMethod("refineParam" + p.getName() + "Of" + c.getName(), "object, container, curval, newval",
 							new Literal("tRefineParam" + p.getName() + "Of" + c.getName() + "(object,container)"),
-							new Monom("parameterContainer('" + c.getName() + "', '" + p.getName() + "', object, container) & val(container,interval)"),
-							new TaskNetwork("redefValue(container,interval,refinement)"), false, "",
-							new Monom("isValidParameterRangeRefinement('" + c.getName() + "', object, '" + p.getName() + "', interval, refinement)")));
-				} else
-					throw new IllegalArgumentException(
-							"Parameter " + p.getName() + " of type \"" + p.getClass() + "\" in component \"" + c.getName() + "\" is currently not supported.");
+							new Monom("parameterContainer('" + c.getName() + "', '" + p.getName() + "', object, container) & val(container,curval)"),
+							new TaskNetwork("redefValue(container,curval,newval)"), false, "",
+							new Monom("isValidParameterRangeRefinement('" + c.getName() + "', object, '" + p.getName() + "', container, curval, newval)")));
+//				else
+//					throw new IllegalArgumentException(
+//							"Parameter " + p.getName() + " of type \"" + p.getClass() + "\" in component \"" + c.getName() + "\" is currently not supported.");
 			}
 			initNetwork.add(new Literal("tRefineParamsOf" + c.getName() + "(c1,c2" + refinementArguments + ")"));
 			params = new ArrayList<VariableParam>(params);

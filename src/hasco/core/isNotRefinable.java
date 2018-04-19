@@ -44,7 +44,7 @@ public class isNotRefinable implements EvaluablePredicate {
 
 	@Override
 	public boolean test(Monom state, ConstantParam... params) {
-		return p.getParamsForPositiveEvaluation(state, params[0], params[1], params[2], params[3], null).isEmpty();
+		return p.getParamsForPositiveEvaluation(state, params[0], params[1], params[2], params[3], params[4], null).isEmpty();
 	}
 
 }

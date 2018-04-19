@@ -1,5 +1,6 @@
 package hasco.core;
 
+import java.nio.channels.UnsupportedAddressTypeException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -7,6 +8,8 @@ import java.util.Map;
 
 import org.apache.commons.lang3.NotImplementedException;
 
+import hasco.model.BooleanParameter;
+import hasco.model.CategoricalParameter;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
 import hasco.model.NumericParameter;
@@ -14,6 +17,7 @@ import hasco.model.Parameter;
 import hasco.model.ParameterRefinementConfiguration;
 import jaicore.basic.SetUtil;
 import jaicore.logic.fol.structure.ConstantParam;
+import jaicore.logic.fol.structure.Literal;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.logic.fol.theories.EvaluablePredicate;
 
@@ -57,21 +61,34 @@ public class isRefinementCompletedPredicate implements EvaluablePredicate {
 			throw new IllegalArgumentException("The component instance reference must not be null.");
 //		final String componentName = params[0].getName();
 		final String objectContainer = params[1].getName();
-
+		
 		/* determine current values for the params */
 		ComponentInstance groundComponent = Util.getGroundComponentsFromState(state, components, false).get(objectContainer);
 		Component component = groundComponent.getComponent();
+		Map<String,String> componentParamContainers = Util.getParameterContainerMap(state, objectContainer);
 		Map<String,String> componentParams = groundComponent.getParameterValues();
 		for (Parameter param : component.getParameters()) {
+			String containerOfParam = componentParamContainers.get(param.getName());
+			String currentValueOfParam = componentParams.get(param.getName());
 			if (param instanceof NumericParameter) {
 				ParameterRefinementConfiguration refinementConfig = refinementConfiguration.get(component).get(param);
-				List<String> interval = SetUtil.unserializeList(componentParams.get(param.getName()));
+				List<String> interval = SetUtil.unserializeList(currentValueOfParam);
 				double min = Double.parseDouble(interval.get(0));
 				double max = Double.parseDouble(interval.get(1));
+				
 				double length = max - min;
 				if (length > refinementConfig.getIntervalLength())
 					return false;
 			}
+			else if (param instanceof CategoricalParameter) { // categorical params can be refined iff their current value is not the default value
+				assert currentValueOfParam != null : "Param " + param.getName() + " has currently no value!";
+				assert param.getDefaultValue() != null : "Param " + param.getName() + " has no default value!";
+				boolean variableHasBeenSet = state.contains(new Literal("overwritten('" + containerOfParam + "')"));
+				if (!variableHasBeenSet)
+					return false;
+			}
+			else
+				throw new UnsupportedOperationException("Currently no support for testing parameters of type " + param.getClass().getName());
 //			System.out.println("\t" + param.getName() + " (" + componentParams.get(param.getName()) + ") is still refinable.");
 		}
 		return true;

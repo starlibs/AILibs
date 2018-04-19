@@ -12,6 +12,7 @@ import java.util.Stack;
 
 import org.apache.commons.math3.geometry.euclidean.oned.Interval;
 
+import hasco.model.CategoricalParameter;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
 import hasco.model.NumericParameter;
@@ -39,18 +40,21 @@ public class isValidParameterRangeRefinementPredicate implements EvaluablePredic
 	public Collection<List<ConstantParam>> getParamsForPositiveEvaluation(Monom state, ConstantParam... partialGrounding) {
 		
 		/* determine the context for which the interval refinement should be oracled */
-		if (partialGrounding.length != 5) {
-			throw new IllegalArgumentException("The interpreted predicate " + this.getClass().getName() + " requires 5 arguments when oracled but " + partialGrounding.length + " have been provided!");
+		if (partialGrounding.length != 6) {
+			throw new IllegalArgumentException("The interpreted predicate " + this.getClass().getName() + " requires 6 arguments when oracled but " + partialGrounding.length + " have been provided!");
 		}
 		String componentName = partialGrounding[0].getName();
 		String componentIdentifier = partialGrounding[1].getName();
 		String parameterName = partialGrounding[2].getName();
 		Component component = components.stream().filter(c -> c.getName().equals(componentName)).findAny().get();
 		Parameter param = component.getParameters().stream().filter(p -> p.getName().equals(parameterName)).findAny().get();
+		List<ConstantParam> partialGroundingAsList = Arrays.asList(partialGrounding);
+		String containerName = partialGrounding[3].getName();
+		String currentParamValue = partialGrounding[4].getName();
 		
 		/* determine refinements for numeric parameters */
 		if (param instanceof NumericParameter) {
-			List<String> currentIntervalAsString = SetUtil.unserializeList(partialGrounding[3].getName());
+			List<String> currentIntervalAsString = SetUtil.unserializeList(currentParamValue);
 			Interval currentInterval = new Interval(Double.parseDouble(currentIntervalAsString.get(0)), Double.parseDouble(currentIntervalAsString.get(1)));
 			
 			ParameterRefinementConfiguration refinementConfig = refinementConfiguration.get(component).get(param);
@@ -62,7 +66,7 @@ public class isValidParameterRangeRefinementPredicate implements EvaluablePredic
 				return new ArrayList<>();
 			
 			if (!refinementConfig.isInitRefinementOnLogScale()) {
-				return getGroundingsForIntervals(refineOnLinearScale(currentInterval, refinementConfig.getRefinementsPerStep(), refinementConfig.getIntervalLength()), Arrays.asList(partialGrounding));
+				return getGroundingsForIntervals(refineOnLinearScale(currentInterval, refinementConfig.getRefinementsPerStep(), refinementConfig.getIntervalLength()), partialGroundingAsList);
 			}
 			
 			Optional<Literal> focusPredicate = state.stream().filter(l -> l.getPropertyName().equals("parameterFocus") && l.getParameters().get(0).getName().equals(componentIdentifier) && l.getParameters().get(1).getName().equals(parameterName)).findAny();
@@ -70,22 +74,39 @@ public class isValidParameterRangeRefinementPredicate implements EvaluablePredic
 				throw new IllegalArgumentException("The given state does not specify a parameter focus for the log-scale parameter " + parameterName + " on object \"" + componentIdentifier + "\"");
 			double focus = Double.parseDouble(focusPredicate.get().getParameters().get(2).getName());
 			
-			return getGroundingsForIntervals(refineOnLogScale(currentInterval, refinementConfig.getRefinementsPerStep(), 2, focus), Arrays.asList(partialGrounding));
+			return getGroundingsForIntervals(refineOnLogScale(currentInterval, refinementConfig.getRefinementsPerStep(), 2, focus), partialGroundingAsList);
 			
-		} else
+		} else if (param instanceof CategoricalParameter) {
+			List<String> possibleValues = new ArrayList<>();
+			for (Object valAsObject : ((CategoricalParameter) param).getValues()) {
+				String val = valAsObject.toString();
+				boolean hasBeenSetBefore = state.contains(new Literal("overwritten('" + containerName + "')"));
+				if (!hasBeenSetBefore)
+					possibleValues.add(val);
+			}
+			return getGroundingsForOracledValues(possibleValues, partialGroundingAsList);
+		}
+		else
 			throw new UnsupportedOperationException("Currently no support for parameters of class \"" + param.getClass().getName() + "\"");
 		
 //		throw new NotImplementedException("Apparentely, there is an unimplemented case!");
 	}
 	
 	private Collection<List<ConstantParam>> getGroundingsForIntervals(List<Interval> refinements, List<ConstantParam> partialGrounding) {
-		Collection<List<ConstantParam>> groundings = new ArrayList<>();
+		List<String> paramValues = new ArrayList<>();
 		for (Interval oracledInterval : refinements) {
+			paramValues.add("[" + oracledInterval.getInf() + ", " + oracledInterval.getSup() + "]");
+		}
+		return getGroundingsForOracledValues(paramValues, partialGrounding);
+	}
+	
+	private Collection<List<ConstantParam>> getGroundingsForOracledValues(List<String> refinements, List<ConstantParam> partialGrounding) {
+		Collection<List<ConstantParam>> groundings = new ArrayList<>();
+		for (String oracledValue : refinements) {
 			List<ConstantParam> grounding = new ArrayList<>(partialGrounding);
-			grounding.set(4, new ConstantParam("[" + oracledInterval.getInf() + ", " + oracledInterval.getSup() + "]"));
+			grounding.set(5, new ConstantParam(oracledValue));
 			groundings.add(grounding);
 		}
-//		System.out.println("[" + currentInterval.getInf() + "," + currentInterval.getSup() + "] with " + refinementConfig.getRefinementsPerStep() + " steps and min interval length " + refinementConfig.getIntervalLength() + " -> " + groundings);
 		return groundings;
 	}
 	
@@ -105,6 +126,7 @@ public class isValidParameterRangeRefinementPredicate implements EvaluablePredic
 
 	@Override
 	public boolean test(Monom state, ConstantParam... params) {
+		System.out.println("HA");
 		return false;
 	}
 
