@@ -7,16 +7,15 @@ sourceSets {
     main {
         java {
             srcDir 'src'
-            srcDir 'test'
         }
         resources {
         	srcDir 'conf'
     	}
     }
     test {
-   	java {
-   		srcDir 'test'
-   	}
+	   	java {
+	   		srcDir 'test'
+	   	}
     }
 }
 

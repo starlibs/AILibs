@@ -1,31 +1,53 @@
 package hasco.model;
 
 public class NumericParameter extends Parameter {
-	private final boolean isInteger;
-	private final double defaultValue;
-	private final double min, max;
-	
-	public NumericParameter(String name, boolean isInteger, double defaultValue, double min, double max) {
-		super(name);
-		this.isInteger = isInteger;
-		this.defaultValue = defaultValue;
-		this.min = min;
-		this.max = max;
-	}
+  private final boolean isInteger;
+  private final double defaultValue;
+  private final double min, max;
 
-	public boolean isInteger() {
-		return isInteger;
-	}
+  public NumericParameter(final String name, final boolean isInteger, final double defaultValue, final double min, final double max) {
+    super(name);
+    this.isInteger = isInteger;
+    this.defaultValue = defaultValue;
+    this.min = min;
+    this.max = max;
+  }
 
-	public double getDefaultValue() {
-		return defaultValue;
-	}
+  public boolean isInteger() {
+    return this.isInteger;
+  }
 
-	public double getMin() {
-		return min;
-	}
+  public double getDefaultValue() {
+    return this.defaultValue;
+  }
 
-	public double getMax() {
-		return max;
-	}
+  public double getMin() {
+    return this.min;
+  }
+
+  public double getMax() {
+    return this.max;
+  }
+
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+
+    sb.append(super.getName());
+    if (this.isInteger) {
+      sb.append(":int");
+    } else {
+      sb.append(":double");
+    }
+
+    sb.append("[default:");
+    sb.append(this.defaultValue);
+    sb.append(",min:");
+    sb.append(this.min);
+    sb.append(",max:");
+    sb.append(this.max);
+    sb.append("]");
+
+    return sb.toString();
+  }
 }
