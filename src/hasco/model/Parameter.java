@@ -2,14 +2,20 @@ package hasco.model;
 
 public abstract class Parameter {
 	private final String name;
+	private final Object defaultValue;
 
-	public Parameter(String name) {
+	public Parameter(String name, Object defaultValue) {
 		super();
 		this.name = name;
+		this.defaultValue = defaultValue;
 	}
 
 	public String getName() {
 		return name;
+	}
+
+	public Object getDefaultValue() {
+		return defaultValue;
 	}
 
 	@Override

@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.math3.geometry.euclidean.oned.Interval;
 
+import hasco.model.BooleanParameter;
+import hasco.model.CategoricalParameter;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
 import hasco.model.NumericParameter;
@@ -18,6 +20,13 @@ import jaicore.logic.fol.structure.Monom;
 
 class Util {
 
+	static Map<String,String> getParameterContainerMap(Monom state, String objectName) {
+		Map<String, String> parameterContainerMap = new HashMap<>();
+		List<Literal> containerLiterals = state.stream().filter(l -> l.getPropertyName().equals("parameterContainer") && l.getParameters().get(2).getName().equals(objectName)).collect(Collectors.toList());
+		containerLiterals.forEach(l -> parameterContainerMap.put(l.getParameters().get(1).getName(), l.getParameters().get(3).getName()));
+		return parameterContainerMap;
+	}
+	
 	static Map<String, ComponentInstance> getGroundComponentsFromState(Monom state, Collection<Component> components, boolean resolveIntervals) {
 		Map<String, ComponentInstance> objectMap = new HashMap<>();
 		Map<String, Map<String, String>> parameterContainerMap = new HashMap<>(); // stores for each object the name of the container of each parameter
@@ -62,6 +71,9 @@ class Util {
 		for (String objectName : objectMap.keySet()) {
 			ComponentInstance object = objectMap.get(objectName);
 			for (Parameter p : object.getComponent().getParameters()) {
+				
+				assert parameterContainerMap.containsKey(objectName) : "No parameter container map has been defined for object " + objectName + " of component " + object.getComponent().getName() + "!";
+				assert parameterContainerMap.get(objectName).containsKey(p.getName()) : "The data container for parameter " + p.getName() + " of " + object.getComponent().getName() + " is not defined!";
 
 				String assignedValue = parameterValues.get(parameterContainerMap.get(objectName).get(p.getName()));
 				String interpretedValue = "";
@@ -78,7 +90,10 @@ class Util {
 						}
 						else
 							interpretedValue = assignedValue;
-					} else
+					} else if ((p instanceof BooleanParameter) || (p instanceof CategoricalParameter)) {
+						interpretedValue = assignedValue;
+					}
+					else
 						throw new UnsupportedOperationException("No support for parameters of type " + p.getClass().getName());
 					object.getParameterValues().put(p.getName(), interpretedValue);
 				}
