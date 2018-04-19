@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.eventbus.Subscribe;
 import jaicore.graph.observation.IObservableGraphAlgorithm;
 import jaicore.search.structure.core.GraphEventBus;
+import jaicore.search.structure.events.GraphInitializedEvent;
 import jaicore.search.structure.events.NodeReachedEvent;
 import jaicore.search.structure.events.NodeRemovedEvent;
 import jaicore.search.structure.events.NodeTypeSwitchEvent;
@@ -208,9 +209,9 @@ public class Recorder<T> {
 	}
 
 	/**
-	 * Creates a new Recroder which is listeneing to the eventbus given as a paramter
-	 * @param eventBus
-	 * 		The eventbus to which this recorder is listening
+	 * Creates a new Recroder which is observing a graph algorithm
+	 * @param observable
+	 * 		The observable algorithm
 	 */
 	public Recorder(IObservableGraphAlgorithm observable) {
 		this.index = 0;
@@ -259,8 +260,30 @@ public class Recorder<T> {
 	public void step() {
 		//System.out.println(events.get(index).getClass().getSimpleName() + "\t" +index);
 		Object event = events.get(index);
+
+		switch (event.getClass().getSimpleName()){
+			case "GraphInitializedEvent":
+				nodeTypes.add("root");
+				break;
+
+			case "NodeTypeSwitchEvent":
+				NodeTypeSwitchEvent switchEvent = (NodeTypeSwitchEvent) event;
+				String nodeType = switchEvent.getType();
+				nodeTypes.add(switchEvent.getType());
+				break;
+
+			case "NodeReachedEvent":
+				NodeReachedEvent reachedEvent = (NodeReachedEvent) event;
+				nodeTypes.add(reachedEvent.getType());
+				break;
+
+			default:
+				nodeTypes.add("");
+				break;
+		}
 		playEventBus.post(event);
 		index++;
+//		System.out.println(nodeTypes);
 		//System.out.println(index);
 	}
 
@@ -270,6 +293,8 @@ public class Recorder<T> {
 	 */
 	public void reset(){
 		this.index = 0;
+		nodeTypes.clear();
+
 	}
 
 	/**
@@ -277,9 +302,13 @@ public class Recorder<T> {
 	 * This is the opposite of step
 	 */
 	public void back(){
+
+
 		if(index > 0) {
 			index--;
-//			System.out.println(events.get(index).getClass());
+
+ 			nodeTypes.remove(nodeTypes.size()-1);
+// 			System.out.println(nodeTypes);
 			Object counter = createCounterEvent(events.get(index));
 			playEventBus.post(counter);
 		}
@@ -300,19 +329,32 @@ public class Recorder<T> {
 				//just for completion, the controller handles the back button for the first event as an reset
 				return null;
 
+
 			case "NodeTypeSwitchEvent":
 				NodeTypeSwitchEvent typeSwitchEvent = (NodeTypeSwitchEvent)object;
-				System.out.println(typeSwitchEvent.getType());
-				return null;
+//				System.out.println(typeSwitchEvent.getType());
+				NodeTypeSwitchEvent switchCounter = null;
+				switch(typeSwitchEvent.getType()){
+					case "or_closed":
+						switchCounter = new NodeTypeSwitchEvent(typeSwitchEvent.getNode(),"or_expanding");
+						break;
+					case "or_expanding":
+						switchCounter = new NodeTypeSwitchEvent(typeSwitchEvent.getNode(), "or_open");
+						break;
+
+					default:
+						switchCounter = new NodeTypeSwitchEvent(typeSwitchEvent.getNode(), nodeTypes.get(nodeTypes.size()-1));
+						break;
+				}
+				return switchCounter;
 
 			case "NodeReachedEvent":
 				NodeReachedEvent nodeReachedEvent = (NodeReachedEvent) object;
-				NodeRemovedEvent counter = new NodeRemovedEvent(nodeReachedEvent.getNode());
-				System.out.println("nodeReachedEvent");
-				return counter;
+				NodeRemovedEvent reachedCounter = new NodeRemovedEvent(nodeReachedEvent.getNode());
+				return reachedCounter;
 
 			default:
-				System.out.println("False");
+				System.out.println("Not an event");
 				break;
 		}
 
