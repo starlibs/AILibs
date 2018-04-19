@@ -2,23 +2,17 @@ package hasco.model;
 
 public class NumericParameter extends Parameter {
   private final boolean isInteger;
-  private final double defaultValue;
   private final double min, max;
 
   public NumericParameter(final String name, final boolean isInteger, final double defaultValue, final double min, final double max) {
-    super(name);
+    super(name, defaultValue);
     this.isInteger = isInteger;
-    this.defaultValue = defaultValue;
     this.min = min;
     this.max = max;
   }
 
   public boolean isInteger() {
     return this.isInteger;
-  }
-
-  public double getDefaultValue() {
-    return this.defaultValue;
   }
 
   public double getMin() {
@@ -41,7 +35,7 @@ public class NumericParameter extends Parameter {
     }
 
     sb.append("[default:");
-    sb.append(this.defaultValue);
+    sb.append(this.getDefaultValue());
     sb.append(",min:");
     sb.append(this.min);
     sb.append(",max:");
