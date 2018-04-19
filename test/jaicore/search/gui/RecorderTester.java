@@ -27,7 +27,7 @@ public class RecorderTester {
 //		win.getPanel().setTooltipGenerator(n->n.getPoint().toString());
 
 		//Prepare an replay object
-		Recorder<Node<QueenNode, Double>> recorder = new Recorder<>(search.getEventBus());
+		Recorder<Node<QueenNode, Double>> recorder = new Recorder(search);
 		search.nextSolution();
 
 		System.out.println("Solution found.\n Starting the replay:");

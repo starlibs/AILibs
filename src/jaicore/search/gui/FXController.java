@@ -33,7 +33,8 @@ public class FXController implements Initializable  {
 
 
     private static Recorder rec;
-    private Thread controllerThread;
+    private Thread playThread;
+    private Thread jumpThread;
 
     private long sleepTime;
 
@@ -47,10 +48,20 @@ public class FXController implements Initializable  {
 
         sleepTime = 50;
 
-        //if the slider for replay-speed is released, wait (200 ms - the value of the slider)
-        //the slider has a range from 0 to 200
+        /*
+        if the slider for replay-speed is released, wait (200 ms - the value of the slider)
+        the slider has a range from 0 to 200
+        */
         slider.setOnMouseReleased((MouseEvent event)-> {
             sleepTime = (long) (200 - slider.getValue());
+        });
+
+        timeline.setOnMouseReleased((MouseEvent event)-> {
+            double v = timeline.getValue();
+            int i = 0;
+            while (eventTimes.get(i) < v)
+                i++;
+            jumpTo(i);
         });
 
         setTimeline();
@@ -58,6 +69,8 @@ public class FXController implements Initializable  {
 
 
     }
+
+
 
     /**
      * Creates the SearchVisualizationPanel and binds it to the swingNode in the GUI
@@ -80,19 +93,23 @@ public class FXController implements Initializable  {
        System.out.println("play");
        int numberOfEvents = rec.getNumberOfEvents();
 
-       // create an own thread for playing the steps, in order to prevent freezing and make the replay stoppable
+       /* create an own thread for playing the steps, in order to prevent freezing and make the replay stoppable */
        Runnable runPlay = () ->{
           try{
-              for(int i = index; i < numberOfEvents; i ++){
+              while(index < numberOfEvents){
                   rec.step();
                   TimeUnit.MILLISECONDS.sleep(sleepTime);
-                  timeline.setValue(eventTimes.get(i));
+                  timeline.setValue(eventTimes.get(index));
+                  index ++;
               }
+              /* index correction */
+              index --;
           }
           catch (InterruptedException e){}
        };
-       controllerThread = new Thread(runPlay);
-       controllerThread.start();
+       playThread = new Thread(runPlay);
+       playThread.start();
+
    }
 
     /**
@@ -102,10 +119,12 @@ public class FXController implements Initializable  {
      */
    @FXML
     protected void step(ActionEvent event){
+        if(index == eventTimes.size()-1)
+            return;
         rec.step();
         index ++;
         timeline.setValue(eventTimes.get(index));
-        System.out.println(index);
+//        System.out.println(index);
 
    }
 
@@ -116,7 +135,7 @@ public class FXController implements Initializable  {
      */
    @FXML
     protected void back(ActionEvent event){
-        System.out.println("back");
+//        System.out.println("back");
         if(timeline.getValue() == 0)
             System.out.println("I am at the start");
         else
@@ -126,9 +145,11 @@ public class FXController implements Initializable  {
                 setTimeline();
                 rec.reset();
             }
-            else
+            else {
+                index --;
                 rec.back();
-
+            }
+        timeline.setValue(eventTimes.get(index));
    }
 
     /**
@@ -139,7 +160,11 @@ public class FXController implements Initializable  {
    @FXML
     protected void reset(ActionEvent event){
         System.out.println("reset");
-        controllerThread.interrupt();
+        if(playThread!= null)
+            playThread.interrupt();
+        if(jumpThread!= null)
+            jumpThread.interrupt();
+
         createSwingContent(swingNode);
         index = 0;
         setTimeline();
@@ -153,7 +178,8 @@ public class FXController implements Initializable  {
      */
    @FXML
    protected void stop(ActionEvent event){
-        controllerThread.interrupt();
+        playThread.interrupt();
+        jumpThread.interrupt();
         System.out.println("Stop");
    }
 
@@ -212,6 +238,23 @@ public class FXController implements Initializable  {
            timeline.setMajorTickUnit(rec.getLastEvent()>>4);
        timeline.setValue(index);
    }
+
+
+    private void jumpTo(int value) {
+        Runnable run = ()-> {
+            try {
+                while (value < index)
+                    this.back(null);
+                while (value > index)
+                    this.step(null);
+                TimeUnit.MILLISECONDS.sleep(0);
+            }
+            catch(InterruptedException e){
+            }
+        };
+        jumpThread = new Thread(run);
+        jumpThread.start();
+    }
 
 
 }
