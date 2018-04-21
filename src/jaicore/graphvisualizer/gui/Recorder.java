@@ -1,6 +1,5 @@
-package jaicore.search.gui;
+package jaicore.graphvisualizer.gui;
 
-import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.eventbus.Subscribe;
@@ -14,7 +13,6 @@ import jaicore.search.structure.events.NodeTypeSwitchEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 public class Recorder<T> {
 

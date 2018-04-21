@@ -1,4 +1,4 @@
-package jaicore.search.gui;
+package jaicore.graphvisualizer.gui;
 
 import com.google.common.eventbus.EventBus;
 import jaicore.graphvisualizer.SearchVisualizationPanel;

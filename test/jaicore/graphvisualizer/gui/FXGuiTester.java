@@ -1,6 +1,9 @@
-package jaicore.search.gui;
+package jaicore.graphvisualizer.gui;
 
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
+import jaicore.graphvisualizer.gui.FXController;
+import jaicore.graphvisualizer.gui.FXGui;
+import jaicore.graphvisualizer.gui.Recorder;
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import jaicore.search.graphgenerators.nqueens.NQueenGenerator;
 import jaicore.search.graphgenerators.nqueens.QueenNode;

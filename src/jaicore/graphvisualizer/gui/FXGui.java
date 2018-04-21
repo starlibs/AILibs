@@ -1,4 +1,4 @@
-package jaicore.search.gui;
+package jaicore.graphvisualizer.gui;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;

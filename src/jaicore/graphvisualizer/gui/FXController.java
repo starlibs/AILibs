@@ -1,4 +1,4 @@
-package jaicore.search.gui;
+package jaicore.graphvisualizer.gui;
 
 import jaicore.graphvisualizer.SearchVisualizationPanel;
 import javafx.embed.swing.SwingNode;
