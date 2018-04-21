@@ -1,4 +1,4 @@
-package jaicore.search.gui;
+package jaicore.graphvisualizer.gui;
 
 import java.util.LinkedHashMap;
 

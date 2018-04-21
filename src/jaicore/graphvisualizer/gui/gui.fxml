@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.Pane?>
 
 <?import javafx.scene.control.ProgressBar?>
-<BorderPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.152-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="jaicore.search.gui.FXController">
+<BorderPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.152-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="jaicore.graphvisualizer.gui.FXController">
 
     <top>
         <BorderPane>

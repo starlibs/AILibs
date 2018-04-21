@@ -1,4 +1,4 @@
-package jaicore.search.gui;
+package jaicore.graphvisualizer.gui;
 
 import jaicore.search.structure.core.Node;
 import jaicore.search.structure.core.NodeType;
@@ -10,7 +10,6 @@ import jaicore.search.structure.events.NodeTypeSwitchEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.Set;
 
 
 public class EventCreator {
