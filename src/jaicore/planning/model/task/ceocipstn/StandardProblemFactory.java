@@ -9,17 +9,17 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import jaicore.logic.fol.structure.CNFFormula;
-import jaicore.logic.fol.structure.Clause;
 import jaicore.logic.fol.structure.Literal;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.logic.fol.structure.VariableParam;
+import jaicore.logic.fol.theories.EvaluablePredicate;
+import jaicore.planning.graphgenerators.task.ceociptfd.OracleTaskResolver;
 import jaicore.planning.model.ceoc.CEOCOperation;
-import jaicore.planning.model.task.ceocstn.OCMethod;
 import jaicore.planning.model.task.stn.TaskNetwork;
 
 public class StandardProblemFactory {
 	
-	public static CEOCIPSTNPlanningProblem getNestedDichotomyCreationProblem(String rootClusterName, Collection<String> classesInit, boolean objectCreation, int maxExpRange, int maxRefinement) {
+	public static CEOCIPSTNPlanningProblem getNestedDichotomyCreationProblem(String rootClusterName, Collection<String> classesInit, boolean objectCreation, int maxExpRange, int maxRefinement, Map<String, EvaluablePredicate> evaluablePredicates, Map<String, OracleTaskResolver> oracleResolvers) {
 		
 		/* define operations */
 		List<String> classes = classesInit.stream().sorted().collect(Collectors.toList());
@@ -104,6 +104,6 @@ public class StandardProblemFactory {
 		}
 		
 		TaskNetwork network = new TaskNetwork("refine('" + rootClusterName + "')");
-		return new CEOCIPSTNPlanningProblem(domain, null, init, network);
+		return new CEOCIPSTNPlanningProblem(domain, null, init, network, evaluablePredicates, oracleResolvers);
 	}
 }

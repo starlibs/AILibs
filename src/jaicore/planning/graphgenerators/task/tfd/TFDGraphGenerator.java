@@ -10,6 +10,7 @@ import jaicore.logic.fol.structure.Monom;
 import jaicore.planning.graphgenerators.task.TaskPlannerUtil;
 import jaicore.planning.model.core.Action;
 import jaicore.planning.model.core.Operation;
+import jaicore.planning.model.core.PlannerUtil;
 import jaicore.planning.model.task.stn.MethodInstance;
 import jaicore.planning.model.task.stn.STNPlanningProblem;
 import jaicore.search.structure.core.GraphGenerator;
@@ -53,7 +54,7 @@ public class TFDGraphGenerator implements GraphGenerator<TFDNode,String> {
 				
 				for (Action applicableAction : util.getActionsForPrimitiveTaskThatAreApplicableInState(null, primitiveTasks.get(nextTask.getPropertyName()), nextTask, state)) {
 					Monom stateCopy = new Monom(state);
-					tfdUtil.updateState(stateCopy, applicableAction);
+					new PlannerUtil().updateState(stateCopy, applicableAction);
 					successors.add(new NodeExpansionDescription<>(l, new TFDNode(stateCopy, currentlyRemainingTasks, null, applicableAction), "edge label", NodeType.OR));
 				}
 			}

@@ -1,9 +1,12 @@
 package jaicore.planning.model.task.ceocipstn;
 
 import java.io.Serializable;
+import java.util.Map;
 
 import jaicore.logic.fol.structure.CNFFormula;
 import jaicore.logic.fol.structure.Monom;
+import jaicore.logic.fol.theories.EvaluablePredicate;
+import jaicore.planning.graphgenerators.task.ceociptfd.OracleTaskResolver;
 import jaicore.planning.model.task.IHTNPlanningProblem;
 import jaicore.planning.model.task.stn.TaskNetwork;
 
@@ -16,13 +19,18 @@ public class CEOCIPSTNPlanningProblem implements IHTNPlanningProblem,Serializabl
 	private final Monom init;
 
 	private final TaskNetwork network;
+	
+	private final Map<String, EvaluablePredicate> evaluablePlanningPredicates;
+	private final Map<String, OracleTaskResolver> oracleResolvers;
 
-	public CEOCIPSTNPlanningProblem(CEOCIPSTNPlanningDomain domain, CNFFormula knowledge, Monom init, TaskNetwork network) {
+	public CEOCIPSTNPlanningProblem(CEOCIPSTNPlanningDomain domain, CNFFormula knowledge, Monom init, TaskNetwork network, Map<String, EvaluablePredicate> evaluablePlanningPredicates, Map<String, OracleTaskResolver> oracleResolvers) {
 		super();
 		this.domain = domain;
 		this.knowledge = knowledge;
 		this.init = init;
 		this.network = network;
+		this.evaluablePlanningPredicates = evaluablePlanningPredicates;
+		this.oracleResolvers = oracleResolvers;
 	}
 
 	public CEOCIPSTNPlanningDomain getDomain() {
@@ -39,6 +47,14 @@ public class CEOCIPSTNPlanningProblem implements IHTNPlanningProblem,Serializabl
 
 	public TaskNetwork getNetwork() {
 		return network;
+	}
+
+	public Map<String, EvaluablePredicate> getEvaluablePlanningPredicates() {
+		return evaluablePlanningPredicates;
+	}
+
+	public Map<String, OracleTaskResolver> getOracleResolvers() {
+		return oracleResolvers;
 	}
 
 	@Override

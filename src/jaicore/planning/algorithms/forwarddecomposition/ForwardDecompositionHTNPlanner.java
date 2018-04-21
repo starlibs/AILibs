@@ -1,4 +1,4 @@
-package jaicore.planning.algorithms;
+package jaicore.planning.algorithms.forwarddecomposition;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jaicore.planning.algorithms.IObservableGraphBasedHTNPlanningAlgorithm;
 import jaicore.planning.graphgenerators.task.ceociptfd.CEOCIPTFDGraphGenerator;
 import jaicore.planning.graphgenerators.task.ceoctfd.CEOCTFDGraphGenerator;
 import jaicore.planning.graphgenerators.task.tfd.TFDGraphGenerator;
@@ -33,33 +34,23 @@ import jaicore.search.structure.core.GraphGenerator;
  *
  * @param <T>
  */
-public class ForwardDecompositionHTNPlanner<V extends Comparable<V>> implements IObservableGraphBasedHTNPlanningAlgorithm<TFDNode, String> {
+public class ForwardDecompositionHTNPlanner<V extends Comparable<V>> implements IObservableGraphBasedHTNPlanningAlgorithm<ForwardDecompositionSolution,TFDNode, String, V> {
 
 	private final static Logger logger = LoggerFactory.getLogger(ForwardDecompositionHTNPlanner.class);
 
-	/* this is a class to maintain fast access and management of solutions (no equals method, no comparisons of paths required) */
-	private static class Solution {
-		List<TFDNode> path;
-
-		public Solution(List<TFDNode> path) {
-			super();
-			this.path = path;
-		}
-	}
-
-	public class SolutionIterator implements Iterator<List<Action>> {
+	public class SolutionIterator implements Iterator<ForwardDecompositionSolution> {
 
 		private boolean initialized = false;
 		private boolean moreSolutionsMightExist = true;
 		private IObservableORGraphSearch<TFDNode, String, V> search;
-		private Solution nextSolution;
-
+		private ForwardDecompositionSolution nextSolution;
+		
 		public SolutionIterator() {
 
 			/* create search algorithm */
 			GraphGenerator<TFDNode, String> graphGenerator = null;
 			if (planningProblem instanceof CEOCIPSTNPlanningProblem) {
-				graphGenerator = new CEOCIPTFDGraphGenerator((CEOCIPSTNPlanningProblem) planningProblem, null, null);
+				graphGenerator = new CEOCIPTFDGraphGenerator((CEOCIPSTNPlanningProblem) planningProblem);
 			}
 			else if (planningProblem instanceof CEOCSTNPlanningProblem) {
 				graphGenerator = new CEOCTFDGraphGenerator((CEOCSTNPlanningProblem) planningProblem);
@@ -84,6 +75,8 @@ public class ForwardDecompositionHTNPlanner<V extends Comparable<V>> implements 
 				}
 				initialized = true;
 			}
+			if (canceled)
+				throw new IllegalStateException("The planner has already been canceled. Cannot compute more plans.");
 			if (!moreSolutionsMightExist)
 				return false;
 			List<TFDNode> solution = search.nextSolution();
@@ -91,33 +84,35 @@ public class ForwardDecompositionHTNPlanner<V extends Comparable<V>> implements 
 				moreSolutionsMightExist = false;
 				return false;
 			}
-			nextSolution = new Solution(solution);
+			List<Action> plan = solution.stream().filter(n -> n.getAppliedAction() != null).map(n -> n.getAppliedAction()).collect(Collectors.toList());
+			nextSolution = new ForwardDecompositionSolution(plan, solution);
 			return true;
 		}
 
 		@Override
-		public List<Action> next() {
+		public ForwardDecompositionSolution next() {
 			if (!moreSolutionsMightExist || (nextSolution == null && !hasNext()))
 				throw new NoSuchElementException();
-			List<Action> plan = nextSolution.path.stream().filter(n -> n.getAppliedAction() != null).map(n -> n.getAppliedAction()).collect(Collectors.toList());
+			if (nextSolution.getPlan() == null) {
+				throw new IllegalStateException("Planner has no more solution even though hasNext said that there would be one.");
+			}
+			ForwardDecompositionSolution solutionToReturn = nextSolution;
 			nextSolution = null;
-			return plan;
+			return solutionToReturn;
 		}
 
-		public Map<String, Object> getSolutionAnnotations(List<TFDNode> solution) {
-			return search.getAnnotationsOfReturnedSolution(solution);
+		public Map<String, Object> getSolutionAnnotations(ForwardDecompositionSolution solution) {
+			return search.getAnnotationsOfReturnedSolution(solution.getPath());
 		}
-
-		public Object getSolutionAnnotation(List<TFDNode> solution, String annotation) {
-			return search.getAnnotationOfReturnedSolution(solution, annotation);
-		}
-
+		
 		public IObservableORGraphSearch<TFDNode, String, V> getSearch() {
 			return search;
 		}
 	}
 
 	/* core elements of the search */
+	private SolutionIterator iterator;
+	private boolean canceled = false;
 	private final IHTNPlanningProblem planningProblem;
 	private final IObservableORGraphSearchFactory<TFDNode, String, V> searchFactory;
 	private final INodeEvaluator<TFDNode, V> nodeEvaluator;
@@ -150,7 +145,12 @@ public class ForwardDecompositionHTNPlanner<V extends Comparable<V>> implements 
 
 	@Override
 	public SolutionIterator iterator() {
-		return new SolutionIterator();
+		if (iterator != null)
+			throw new UnsupportedOperationException("ForwardDecomposition allows only to draw one iterator.");
+		if (this.canceled)
+			throw new IllegalStateException("The planning process has already been canceled. We cannot generate an iterator afterwards.");
+		iterator = new SolutionIterator();
+		return iterator;
 	}
 
 	@Override
@@ -158,5 +158,20 @@ public class ForwardDecompositionHTNPlanner<V extends Comparable<V>> implements 
 		synchronized (listeners) {
 			listeners.add(listener);
 		}
+	}
+
+	@Override
+	public List<Action> getPlan(List<TFDNode> path) {
+		return path.stream().filter(n -> n.getAppliedAction() != null).map(n -> n.getAppliedAction()).collect(Collectors.toList());
+	}
+
+	public Map<String, Object> getAnnotationsOfSolution(ForwardDecompositionSolution solution) {
+		return iterator.getSolutionAnnotations(solution);
+	}
+
+	@Override
+	public void cancel() {
+		this.canceled = true;
+		iterator.getSearch().cancel();
 	}
 }

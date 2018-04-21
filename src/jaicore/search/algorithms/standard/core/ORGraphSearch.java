@@ -22,9 +22,9 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.RuntimeJsonMappingException;
 import com.google.common.eventbus.Subscribe;
 
+import jaicore.basic.IIterableAlgorithm;
 import jaicore.concurrent.TimeoutTimer;
 import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
 import jaicore.logging.LoggerUtil;
@@ -48,7 +48,7 @@ import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 public class ORGraphSearch<T, A, V extends Comparable<V>>
-		implements IObservableORGraphSearch<T, A, V>, Iterable<List<NodeExpansionDescription<T, A>>>, Iterator<List<NodeExpansionDescription<T, A>>> {
+		implements IObservableORGraphSearch<T, A, V>, IIterableAlgorithm<List<NodeExpansionDescription<T, A>>>, Iterator<List<NodeExpansionDescription<T, A>>> {
 
 	private Logger logger = LoggerFactory.getLogger(ORGraphSearch.class);
 
@@ -147,7 +147,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 				newNode.setAnnotation("fError", "Timeout");
 				computationTimedout = true;
 				try {
-					label = timeoutNodeEvaluator.f(newNode);
+					label = timeoutNodeEvaluator != null ? timeoutNodeEvaluator.f(newNode) : null;
 				} catch (Throwable e2) {
 					e2.printStackTrace();
 				}
@@ -358,6 +358,11 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	 * @return A list of nodes from the initial point to a goal, <code>null</code> if a path doesn't exist.
 	 */
 	public List<T> nextSolution() {
+		
+		/* check whether solution has been canceled */
+		if (canceled) {
+			throw new IllegalStateException("Search has been canceled, no more solutions can be requested.");
+		}
 
 		/* do preliminary stuff: init graph (only for first call) and return unreturned solutions first */
 		logger.info("Starting search for next solution. Size of OPEN is {}", open.size());
@@ -433,7 +438,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 		if (beforeSelection()) {
 			
 			Node<T, V> nodeToExpand = open.peek();
-			assert parentDiscarding == ParentDiscarding.ALL || !expanded.contains(nodeToExpand.getPoint()) : "Selected node " + nodeToExpand + " for the second time for expansion even though parent discarding is off. This cannot be the case!";
+			assert parentDiscarding == ParentDiscarding.ALL || !expanded.contains(nodeToExpand.getPoint()) : "Selected node " + nodeToExpand.getString() + " for the second time for expansion even though parent discarding is off. This cannot be the case!";
 			if (nodeToExpand == null)
 				return;
 			afterSelection(nodeToExpand);

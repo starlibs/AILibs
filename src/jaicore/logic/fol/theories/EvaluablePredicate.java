@@ -1,4 +1,4 @@
-package jaicore.planning.graphgenerators.task.ceociptfd;
+package jaicore.logic.fol.theories;
 
 import java.util.Collection;
 import java.util.List;

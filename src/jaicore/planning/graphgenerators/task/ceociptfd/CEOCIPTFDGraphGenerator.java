@@ -6,7 +6,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.SynchronousQueue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +26,7 @@ import jaicore.planning.model.conditional.CEAction;
 import jaicore.planning.model.conditional.CEOperation;
 import jaicore.planning.model.core.Action;
 import jaicore.planning.model.core.Operation;
+import jaicore.planning.model.core.PlannerUtil;
 import jaicore.planning.model.task.ceocipstn.CEOCIPSTNPlanningProblem;
 import jaicore.planning.model.task.stn.Method;
 import jaicore.planning.model.task.stn.MethodInstance;
@@ -52,21 +55,19 @@ public class CEOCIPTFDGraphGenerator implements SerializableGraphGenerator<TFDNo
 	private SerializableRootGenerator<TFDNode> rootGenerator;
 	private final TFDNodeUtil tfdNodeUtil;
 	private final TaskPlannerUtil taskPlannerUtil;
-	private final Map<String, EvaluablePredicate> evaluablePredicates;
-	private final Map<String, OracleTaskResolver> oracleResolvers;
 	private final Map<TFDNode, TFDNode> parentMap = new HashMap<>();
 
-	public CEOCIPTFDGraphGenerator(CEOCIPSTNPlanningProblem problem, Map<String, EvaluablePredicate> pEvaluablePredicates, Map<String, OracleTaskResolver> oracleResolvers) {
+	public CEOCIPTFDGraphGenerator(CEOCIPSTNPlanningProblem problem) {
 		if (problem == null)
 			throw new IllegalArgumentException("Planning problem must not be NULL");
 		this.problem = problem;
 		this.knowledge = problem.getKnowledge();
-		for (Operation op : problem.getDomain().getOperations())
+		for (Operation op : problem.getDomain().getOperations()) {
 			primitiveTasks.put(op.getName(), op);
-		this.evaluablePredicates = pEvaluablePredicates != null ? pEvaluablePredicates : new HashMap<>();
-		this.oracleResolvers = oracleResolvers;
-		this.taskPlannerUtil = new TaskPlannerUtil(evaluablePredicates);
-		this.tfdNodeUtil = new TFDNodeUtil(evaluablePredicates);
+			logger.info("Recognizing primitive task {}", op.getName());
+		}
+		this.taskPlannerUtil = new TaskPlannerUtil(problem.getEvaluablePlanningPredicates());
+		this.tfdNodeUtil = new TFDNodeUtil(problem.getEvaluablePlanningPredicates());
 		this.rootGenerator = () -> new TFDNode(problem.getInit(), taskPlannerUtil.getTaskChainOfTotallyOrderedNetwork(problem.getNetwork()));
 	}
 
@@ -95,9 +96,12 @@ public class CEOCIPTFDGraphGenerator implements SerializableGraphGenerator<TFDNo
 			String nextTaskName = nextTaskTmp.getPropertyName().substring(nextTaskTmp.getPropertyName().indexOf("-") + 1, nextTaskTmp.getPropertyName().length());
 			Literal nextTask = new Literal(nextTaskName, nextTaskTmp.getParameters());
 			int depth = path.size();
+			
+			boolean isPrimitiveTask = primitiveTasks.containsKey(nextTaskName);
+			logger.debug("The task to be resolved is {}. Primitive: {}", nextTaskName, isPrimitiveTask);
 
 			/* if the task is primitive */
-			if (primitiveTasks.containsKey(nextTask.getPropertyName())) {
+			if (isPrimitiveTask) {
 
 				logger.info("Computing successors for PRIMITIVE task {} in state {}", nextTask, state);
 				for (Action applicableAction : taskPlannerUtil.getActionsForPrimitiveTaskThatAreApplicableInState(knowledge, primitiveTasks.get(nextTask.getPropertyName()),
@@ -106,7 +110,7 @@ public class CEOCIPTFDGraphGenerator implements SerializableGraphGenerator<TFDNo
 
 					/* if the depth is % k == 0, then compute the rest problem explicitly */
 					Monom updatedState = new Monom(state, false);
-					tfdNodeUtil.updateState(updatedState, applicableAction);
+					new PlannerUtil().updateState(updatedState, applicableAction);
 					List<Literal> remainingTasks = new ArrayList<>(currentlyRemainingTasks);
 					remainingTasks.remove(0);
 					TFDNode node = null;
@@ -128,6 +132,7 @@ public class CEOCIPTFDGraphGenerator implements SerializableGraphGenerator<TFDNo
 			else {
 
 				/* if there are oracles, use them */
+				Map<String, OracleTaskResolver> oracleResolvers = problem.getOracleResolvers();
 				if (oracleResolvers != null && oracleResolvers.containsKey(nextTask.getPropertyName())) {
 //					System.out.println("Solving " + nextTask + " with oracle");
 					Collection<List<Action>> subsolutions = oracleResolvers.get(nextTaskName).getSubSolutions(state, nextTask);
@@ -139,7 +144,7 @@ public class CEOCIPTFDGraphGenerator implements SerializableGraphGenerator<TFDNo
 							throw new UnsupportedOperationException("Currently only subplans of length 1 possible!");
 						Action applicableAction = subsolution.get(0);
 						Monom updatedState = new Monom(state, false);
-						tfdNodeUtil.updateState(updatedState, applicableAction);
+						new PlannerUtil().updateState(updatedState, applicableAction);
 						List<Literal> remainingTasks = new ArrayList<>(currentlyRemainingTasks);
 						remainingTasks.remove(0);
 						TFDNode node = null;
@@ -160,6 +165,11 @@ public class CEOCIPTFDGraphGenerator implements SerializableGraphGenerator<TFDNo
 					Collection<MethodInstance> instances = taskPlannerUtil.getMethodInstancesForTaskThatAreApplicableInState(knowledge, this.problem.getDomain().getMethods(),
 							nextTask, state, currentlyRemainingTasks);
 					logger.info("Ready with computing method instantiations.");
+					if (instances.isEmpty()) {
+						if (!problem.getDomain().getMethods().stream().filter(m -> m.getTask().getPropertyName().equals(nextTaskName)).findAny().isPresent())
+							logger.error("Could not find any method for complex task {}", nextTaskName);
+					}
+					
 					for (MethodInstance instance : instances) {
 
 						/* check the evaluable condition of this method instance */

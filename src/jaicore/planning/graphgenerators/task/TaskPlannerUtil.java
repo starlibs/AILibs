@@ -26,8 +26,8 @@ import jaicore.logic.fol.structure.Literal;
 import jaicore.logic.fol.structure.LiteralParam;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.logic.fol.structure.VariableParam;
+import jaicore.logic.fol.theories.EvaluablePredicate;
 import jaicore.logic.fol.util.LogicUtil;
-import jaicore.planning.graphgenerators.task.ceociptfd.EvaluablePredicate;
 import jaicore.planning.model.ceoc.CEOCAction;
 import jaicore.planning.model.ceoc.CEOCOperation;
 import jaicore.planning.model.core.Action;
@@ -38,6 +38,7 @@ import jaicore.planning.model.task.stn.Method;
 import jaicore.planning.model.task.stn.MethodInstance;
 import jaicore.planning.model.task.stn.STNPlanningDomain;
 import jaicore.planning.model.task.stn.TaskNetwork;
+import scala.annotation.meta.param;
 
 public class TaskPlannerUtil {
 
@@ -84,7 +85,7 @@ public class TaskPlannerUtil {
 
 				Map<Literal, EvaluablePredicate> evaluablePredicatesForLiterals = new HashMap<>();
 				for (Literal l : castedMethod.getEvaluablePrecondition()) {
-					if (!evaluablePlanningPredicates.containsKey(l.getPropertyName()))
+					if (evaluablePlanningPredicates == null || !evaluablePlanningPredicates.containsKey(l.getPropertyName()))
 						throw new IllegalArgumentException("The literal " + l + " is used in an evaluated precondition, but no evaluator has been specified for it.");
 					evaluablePredicatesForLiterals.put(l, evaluablePlanningPredicates.get(l.getPropertyName()));
 				}
@@ -124,8 +125,10 @@ public class TaskPlannerUtil {
 					boolean allSatisfied = true;
 					for (Literal l : castedMethod.getEvaluablePrecondition()) {
 						ConstantParam[] params = new ConstantParam[l.getParameters().size()];
-						for (int i = 0; i < params.length; i++)
-							params[i] = basicConstantGrounding.get(l.getParameters().get(i));
+						for (int i = 0; i < params.length; i++) {
+							LiteralParam param = l.getParameters().get(i);
+							params[i] = (param instanceof ConstantParam) ? (ConstantParam)param : basicConstantGrounding.get(param);
+						}
 						if (evaluablePredicatesForLiterals.get(l).test(state, params) != l.isPositive()) {
 							allSatisfied = false;
 							break;
@@ -146,8 +149,11 @@ public class TaskPlannerUtil {
 					knownConstants.addAll(l.getConstantParams());
 				}
 				Collection<VariableParam> unboundParams = SetUtil.difference(method.getParameters(), extendedGrounding.keySet());
+				
+				
 				if (method instanceof OCMethod) {
 					Collection<VariableParam> unboundOutputParams = SetUtil.intersection(unboundParams, ((OCMethod) method).getOutputs());
+					assert unboundOutputParams.equals(unboundParams) : "Some of the inputs of method " + method.getName() + " have not been ground. Unground inputs: " + SetUtil.difference(unboundParams, unboundOutputParams);
 					int indexForNewVariable = 1;
 					for (VariableParam v : unboundOutputParams) {
 						ConstantParam p;
@@ -157,9 +163,12 @@ public class TaskPlannerUtil {
 						extendedGrounding.put(v, p);
 						unboundParams.remove(v);
 					}
+					assert unboundParams.isEmpty() : "Method " + method.getName() + " must be ground completely before processing. Here, " + unboundParams + " are unground.";
 				}
-
-				assert unboundParams.isEmpty() : "Method " + method.getName() + " must be ground completely before processing. Here, " + unboundParams + " are unground.";
+				else if (!unboundParams.isEmpty()) {
+					throw new IllegalStateException("Could not compute a complete grounding for method " + method.getName() + ". The following parameters were not ground until the end: " + unboundParams);
+				}
+				
 				applicableDerivedMethodInstances.add(new MethodInstance(method, extendedGrounding));
 			}
 		}
@@ -177,7 +186,7 @@ public class TaskPlannerUtil {
 		Collection<LiteralParam> paramsThatNeedGrounding = SetUtil.intersection(SetUtil.difference(ungroundParamsInEvaluablePrecondition, paramsGroundSoFar), l.getParameters());
 		logger.info("Now checking validity of {}. Set of params that still need grounding: {}", l, paramsThatNeedGrounding);
 		if (paramsThatNeedGrounding.size() > 1)
-			throw new UnsupportedOperationException("Currently only support for at most one unground variable!");
+			throw new UnsupportedOperationException("Currently only support for at most one unground variable! Here, the following variables of \"" + l + "\"need grounding: " + paramsThatNeedGrounding);
 
 		/* consider every possible combination of groundings fixed by earlier oracle invocations */
 		// List<LiteralParam> paramsGroundSoFar = new ArrayList<>(oracledParams);
@@ -201,9 +210,13 @@ public class TaskPlannerUtil {
 		Map<VariableParam, Integer> positionsOfVariableParams = new HashMap<>();
 		for (int i = 0; i < params.length; i++) {
 			LiteralParam param = l.getParameters().get(i);
+			boolean parameterIsConstant = param instanceof ConstantParam;
 			boolean parameterIsGround = basicConstantGrounding.containsKey(param);
-			boolean parameterHasBeenDecidedByOracle = !parameterIsGround && paramsGroundSoFar.contains(param);
-			if (parameterIsGround) {
+			boolean parameterHasBeenDecidedByOracle = !(parameterIsConstant || parameterIsGround) && paramsGroundSoFar.contains(param);
+			if (parameterIsConstant) {
+				params[i] = (ConstantParam)param;
+			}
+			else if (parameterIsGround) {
 				params[i] = basicConstantGrounding.get(param);
 			} else {
 				positionsOfVariableParams.put((VariableParam) param, i);
@@ -244,6 +257,10 @@ public class TaskPlannerUtil {
 				logger.info("No valid grounding for param {} are known, so apply oracle.", paramToBeGround);
 				Collection<List<ConstantParam>> possibleGroundingsOfThisPredicate = l.isPositive() ? predicate.getParamsForPositiveEvaluation(state, params)
 						: predicate.getParamsForNegativeEvaluation(state, params);
+				if (possibleGroundingsOfThisPredicate == null) {
+					logger.warn("Predicate {} returned NULL for params {} in state {}. Canceling grounding process.", l.getPropertyName(), params, state);
+					return;
+				}
 				Collection<ConstantParam> possibleValuesForNewParamInThisGrounding = possibleGroundingsOfThisPredicate.stream().map(s -> s.get(finalizedIndexOfParam))
 						.collect(Collectors.toSet());
 				for (ConstantParam oracledParamOfThisLiteral : possibleValuesForNewParamInThisGrounding) {
@@ -289,6 +306,8 @@ public class TaskPlannerUtil {
 
 	private Collection<Map<VariableParam, LiteralParam>> getMappingsThatMatchTasksAndMakesItApplicable(CNFFormula knowledge, Literal methodOrPrimitiveTask, Literal target,
 			Monom preconditionOfMethodOrPrimitive, Monom state) {
+		
+		logger.info("Now computing the possible applications of method {} for task {}", methodOrPrimitiveTask, target);
 
 		/* consistency check */
 		if (!methodOrPrimitiveTask.getPropertyName().equals(target.getPropertyName()))
@@ -311,7 +330,7 @@ public class TaskPlannerUtil {
 		final List<Map<VariableParam, LiteralParam>> groundings = new ArrayList<>();
 
 		/* create knowledge for the check */
-		assert !knowledge.hasDisjunctions() : "Currently no support for non-factbase knowledge!";
+		assert knowledge == null || !knowledge.hasDisjunctions() : "Currently no support for non-factbase knowledge!";
 		Monom unitedKnowledge = new Monom(state);
 		if (knowledge != null)
 			unitedKnowledge.addAll(knowledge.extractMonom());

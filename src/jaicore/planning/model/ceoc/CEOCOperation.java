@@ -1,8 +1,11 @@
 package jaicore.planning.model.ceoc;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import jaicore.basic.StringUtil;
 import jaicore.logic.fol.structure.CNFFormula;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.logic.fol.structure.VariableParam;
@@ -12,6 +15,11 @@ public class CEOCOperation extends CEOperation {
 	
 	private final List<VariableParam> outputs;
 
+	public CEOCOperation(String name, String params, Monom precondition, Map<CNFFormula, Monom> addLists, Map<CNFFormula, Monom> deleteLists, String  outputs) {
+		super(name, params, precondition, addLists, deleteLists);
+		this.outputs = Arrays.asList(StringUtil.explode(outputs, ",")).stream().map(s -> new VariableParam(s.trim())).collect(Collectors.toList());
+	}
+	
 	public CEOCOperation(String name, List<VariableParam> params, Monom precondition, Map<CNFFormula, Monom> addLists, Map<CNFFormula, Monom> deleteLists, List<VariableParam> outputs) {
 		super(name, params, precondition, addLists, deleteLists);
 		this.outputs = outputs;

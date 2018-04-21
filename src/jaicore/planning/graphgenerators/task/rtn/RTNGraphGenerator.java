@@ -23,6 +23,7 @@ import jaicore.planning.model.ceoc.CEOCAction;
 import jaicore.planning.model.ceoc.CEOCOperation;
 import jaicore.planning.model.core.Action;
 import jaicore.planning.model.core.Operation;
+import jaicore.planning.model.core.PlannerUtil;
 import jaicore.planning.model.task.rtn.RTNPlanningProblem;
 import jaicore.planning.model.task.stn.Method;
 import jaicore.planning.model.task.stn.MethodInstance;
@@ -103,7 +104,7 @@ public class RTNGraphGenerator implements GraphGenerator<RTNNode, RTNEdge> {
 						PerformanceLogger.logEnd("copy action");
 						try {
 							PerformanceLogger.logStart("update state");
-							tfdUtil.updateState(updatedState, applicableAction);
+							new PlannerUtil().updateState(updatedState, applicableAction);
 							PerformanceLogger.logEnd("update state");
 						} catch (Exception e) {
 							System.out.println("apply " + applicableAction.getEncoding() + " to state: " + state);
