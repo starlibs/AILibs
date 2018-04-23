@@ -7,10 +7,12 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import hasco.model.Component;
 import hasco.model.NumericParameter;
@@ -26,9 +28,18 @@ public class ComponentLoader {
 
   }
 
-  public void loadComponents(final File jsonFile) throws IOException {
-    byte[] jsonData = Files.readAllBytes(jsonFile.toPath());
+  public void loadComponents(final File commonParametersFile, final File componentDescriptionFile) throws IOException {
+
     ObjectMapper objectMapper = new ObjectMapper();
+    byte[] commonParametersData = Files.readAllBytes(commonParametersFile.toPath());
+    JsonNode paramRoot = objectMapper.readTree(commonParametersFile);
+
+    Map<String, JsonNode> parameterMap = new HashMap<>();
+    for (JsonNode elem : paramRoot.path("parameters")) {
+      parameterMap.put(elem.get("name").asText(), elem);
+    }
+
+    byte[] jsonData = Files.readAllBytes(componentDescriptionFile.toPath());
     JsonNode rootNode = objectMapper.readTree(jsonData);
 
     // get the name of this repository
@@ -51,25 +62,75 @@ public class ComponentLoader {
         c.addRequiredInterface(requiredInterface.asText());
       }
 
-      Parameter p;
+      Parameter p = null;
       Map<Parameter, ParameterRefinementConfiguration> paramConfig = new HashMap<>();
-      for (JsonNode parameter : component.path("parameter")) {
-        switch (parameter.get("type").asText()) {
-          case "int":
-            p = new NumericParameter(parameter.get("name").asText(), true, parameter.get("default").asInt(), parameter.get("min").asInt(), parameter.get("max").asInt());
-            paramConfig = new HashMap<>();
-            paramConfig.put(p, new ParameterRefinementConfiguration(parameter.get("refineSplits").asInt(), parameter.get("minInterval").asInt()));
-            c.addParameter(p);
-            this.paramConfigs.put(c, paramConfig);
-            break;
-          case "double":
-            p = new NumericParameter(parameter.get("name").asText(), false, parameter.get("default").asDouble(), parameter.get("min").asInt(), parameter.get("max").asInt());
-            paramConfig.put(p, new ParameterRefinementConfiguration(parameter.get("refineSplits").asInt(), parameter.get("minInterval").asDouble()));
-            c.addParameter(p);
-            break;
-        }
-      }
 
+      for (JsonNode parameter : component.path("parameter")) {
+        // name of the parameter
+        String name = parameter.get("name").asText();
+        // possible string params
+        String[] stringParams = new String[] { "type" };
+        String[] stringParamValues = new String[stringParams.length];
+        // possible boolean params
+        String[] boolParams = new String[] {};
+        boolean[] boolParamValues = new boolean[boolParams.length];
+        // possible double params
+        String[] doubleParams = new String[] { "defaultValue", "min", "max", "refineSplits", "minInterval" };
+        double[] doubleParamValues = new double[doubleParams.length];
+
+        if (parameterMap.containsKey(name)) {
+          JsonNode commonParameter = parameterMap.get(name);
+          // get string parameter values from common parameter
+          for (int i = 0; i < stringParams.length; i++) {
+            if (commonParameter.get(stringParams[i]) != null) {
+              stringParamValues[i] = commonParameter.get(stringParams[i]).asText();
+            }
+          }
+          // get double parameter values from common parameter
+          for (int i = 0; i < doubleParams.length; i++) {
+            if (commonParameter.get(doubleParams[i]) != null) {
+              doubleParamValues[i] = commonParameter.get(doubleParams[i]).asDouble();
+            }
+          }
+          // get boolean parameter values from common parameter
+          for (int i = 0; i < boolParams.length; i++) {
+            if (commonParameter.get(boolParams[i]) != null) {
+              boolParamValues[i] = commonParameter.get(boolParams[i]).asBoolean();
+            }
+          }
+        }
+
+        // get string parameter values from current parameter
+        for (int i = 0; i < stringParams.length; i++) {
+          if (parameter.get(stringParams[i]) != null) {
+            stringParamValues[i] = parameter.get(stringParams[i]).asText();
+          }
+        }
+        // get double parameter values from current parameter
+        for (int i = 0; i < doubleParams.length; i++) {
+          if (parameter.get(doubleParams[i]) != null) {
+            doubleParamValues[i] = parameter.get(doubleParams[i]).asDouble();
+          }
+        }
+        // get boolean parameter values from current parameter
+        for (int i = 0; i < boolParams.length; i++) {
+          if (parameter.get(boolParams[i]) != null) {
+            boolParamValues[i] = parameter.get(boolParams[i]).asBoolean();
+          }
+        }
+
+        switch (stringParamValues[Arrays.stream(stringParams).collect(Collectors.toList()).indexOf("type")]) {
+          case "int":
+          case "double":
+            p = new NumericParameter(name, stringParamValues[0].equals("int"), doubleParamValues[0], doubleParamValues[1], doubleParamValues[2]);
+            paramConfig.put(p, new ParameterRefinementConfiguration((int) doubleParamValues[3], doubleParamValues[4]));
+        }
+
+        if (p != null) {
+          c.addParameter(p);
+        }
+
+      }
       this.paramConfigs.put(c, paramConfig);
       this.components.add(c);
     }
