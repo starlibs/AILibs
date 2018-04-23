@@ -1,5 +1,28 @@
 package hasco.core;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.eventbus.EventBus;
+
+import hasco.events.HASCORunStartedEvent;
+import hasco.events.HASCORunTerminatedEvent;
+import hasco.events.HASCOSolutionEvaluationEvent;
+import hasco.model.Component;
+import hasco.model.ComponentInstance;
+import hasco.model.NumericParameter;
+import hasco.model.Parameter;
+import hasco.model.ParameterRefinementConfiguration;
+import hasco.query.Factory;
 import jaicore.basic.IObjectEvaluator;
 import jaicore.graph.observation.IObservableGraphAlgorithm;
 import jaicore.logic.fol.structure.CNFFormula;
@@ -26,26 +49,8 @@ import jaicore.search.algorithms.interfaces.ISolutionEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.RandomCompletionEvaluator;
 import jaicore.search.algorithms.standard.core.AlternativeNodeEvaluator;
 import jaicore.search.algorithms.standard.core.INodeEvaluator;
+import jaicore.search.algorithms.standard.core.SolutionAnnotationEvent;
 import jaicore.search.structure.core.Node;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import hasco.model.Component;
-import hasco.model.ComponentInstance;
-import hasco.model.NumericParameter;
-import hasco.model.Parameter;
-import hasco.model.ParameterRefinementConfiguration;
-import hasco.query.Factory;
 
 /**
  * Hierarchically create an object of type T
@@ -72,11 +77,20 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
   private final IObservableORGraphSearchFactory<N, A, V> searchFactory;
   private final IHASCOSearchSpaceUtilFactory<N, A, V> searchSpaceUtilFactory;
   private final INodeEvaluator<N, V> nodeEvaluator;
+  
+  /* event buses for evaluation events */
+  private final EventBus solutionEvaluationEventBus = new EventBus();
 
   /* parameters relevant for functionality */
   private int timeout;
   private int numberOfCPUs = 1;
-  private Random random = new Random(0);
+  private int randomSeed;
+  
+  /* parameters for state of a single run */
+  private T bestRecognizedSolution;
+  private ComponentInstance compositionOfBestRecognizedSolution;
+  private V scoreOfBestRecognizedSolution;
+
 
   /* list of listeners */
   private final Collection<Object> listeners = new ArrayList<>();
@@ -88,11 +102,21 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
     this.plannerFactory = plannerFactory;
     this.searchFactory = searchFactory;
     this.nodeEvaluator = new AlternativeNodeEvaluator<>(nodeEvaluator,
-        new RandomCompletionEvaluator<>(this.random, 3, searchSpaceUtilFactory.getPathUnifier(), new ISolutionEvaluator<N, V>() {
+        new RandomCompletionEvaluator<>(new Random(this.randomSeed), 3, searchSpaceUtilFactory.getPathUnifier(), new ISolutionEvaluator<N, V>() {
 
           @Override
           public V evaluateSolution(final List<N> solutionPath) throws Exception {
-            return benchmark.evaluate(HASCO.this.getObjectFromPlan(searchSpaceUtilFactory.getPathToPlanConverter().getPlan(solutionPath)));
+        	List<Action> plan = searchSpaceUtilFactory.getPathToPlanConverter().getPlan(solutionPath);
+        	ComponentInstance composition = getSolutionCompositionForPlan(plan);
+        	T solution = HASCO.this.getObjectFromPlan(plan);
+            V scoreOfSolution = benchmark.evaluate(solution);
+            if (scoreOfBestRecognizedSolution == null || scoreOfBestRecognizedSolution.compareTo(scoreOfSolution) > 0) {
+            	bestRecognizedSolution = solution;
+            	compositionOfBestRecognizedSolution = composition;
+            	scoreOfBestRecognizedSolution = scoreOfSolution;
+            }
+            solutionEvaluationEventBus.post(new HASCOSolutionEvaluationEvent<T, V>(composition, solution, scoreOfSolution));
+            return scoreOfSolution;
           }
 
           @Override
@@ -108,8 +132,8 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
     this.benchmark = benchmark;
   }
 
-  public Random getRandom() {
-    return this.random;
+  public int getRandom() {
+    return this.randomSeed;
   }
 
   public class HASCOSolutionIterator implements Iterator<Solution<R, T>> {
@@ -122,7 +146,7 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
     private boolean isInitialized = false;
     private Iterator<R> planIterator;
     private boolean canceled = false;
-
+    
     private HASCOSolutionIterator() {
       this.domain = HASCO.this.getPlanningDomain();
       this.knowledge = new CNFFormula();
@@ -154,11 +178,13 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
             HASCO.this.listeners.forEach(l -> ((IObservableGraphAlgorithm<?, ?>) this.planner).registerListener(l));
           }
         }
+        HASCO.this.solutionEvaluationEventBus.post(new HASCORunStartedEvent<>(randomSeed, timeout, numberOfCPUs, benchmark));
         this.isInitialized = true;
       }
       if (this.canceled) {
         throw new IllegalStateException("HASCO has already been canceled. Cannot compute more solutions.");
       }
+      
       return this.planIterator.hasNext();
     }
 
@@ -167,7 +193,8 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 
       /* derive a map of ground components */
       R plan = this.planIterator.next();
-      return new Solution<>(plan, HASCO.this.getObjectFromPlan(plan.getPlan()));
+      Solution<R,T> solution = new Solution<>(plan, HASCO.this.getObjectFromPlan(plan.getPlan()));
+      return solution;
     }
 
     public Map<String, Object> getAnnotationsOfSolution(final Solution<R, T> solution) {
@@ -177,7 +204,12 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
     public void cancel() {
       this.canceled = true;
       this.planner.cancel();
+      HASCO.this.triggerTerminationEvent();
     }
+  }
+  
+  private void triggerTerminationEvent() {
+	  HASCO.this.solutionEvaluationEventBus.post(new HASCORunTerminatedEvent<T, V>(compositionOfBestRecognizedSolution, bestRecognizedSolution, scoreOfBestRecognizedSolution));
   }
 
   private T getObjectFromPlan(final List<Action> plan) {
@@ -189,11 +221,15 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
   }
 
   private ComponentInstance getSolutionCompositionForNode(final Node<N, V> path) {
-    Monom state = this.getInitState();
-    for (Action a : this.searchSpaceUtilFactory.getPathToPlanConverter().getPlan(path.externalPath())) {
-      PlannerUtil.updateState(state, a);
-    }
-    return this.getSolutionCompositionFromState(state);
+    return getSolutionCompositionForPlan(this.searchSpaceUtilFactory.getPathToPlanConverter().getPlan(path.externalPath()));
+  }
+  
+  private ComponentInstance getSolutionCompositionForPlan(final List<Action> plan) {
+	  Monom state = this.getInitState();
+	    for (Action a : plan) {
+	      PlannerUtil.updateState(state, a);
+	    }
+	    return this.getSolutionCompositionFromState(state);
   }
 
   private ComponentInstance getSolutionCompositionFromState(final Monom state) {
@@ -369,8 +405,8 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
     this.timeout = timeout;
   }
 
-  public void setRandom(final Random random) {
-    this.random = random;
+  public void setRandom(final int randomSeed) {
+    this.randomSeed = randomSeed;
   }
 
   public int getNumberOfCPUs() {
@@ -415,5 +451,9 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
     synchronized (this.listeners) {
       this.listeners.add(listener);
     }
+  }
+  
+  public void registerListenerForSolutionEvaluations(final Object listener) {
+	  solutionEvaluationEventBus.register(listener);
   }
 }
