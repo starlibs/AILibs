@@ -10,16 +10,22 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 @SuppressWarnings("serial")
 public class MySQLAdapter implements Serializable {
-	private final String host, user, password, database;
+	private final String driver, host, user, password, database;
 	private Connection connect;
 	private long timestampOfLastAction = Long.MIN_VALUE;
 
 	public MySQLAdapter(String host, String user, String password, String database) {
+		this("mysql", host, user, password, database);
+	}
+	
+	public MySQLAdapter(String driver, String host, String user, String password, String database) {
 		super();
+		this.driver = driver;
 		this.host = host;
 		this.user = user;
 		this.password = password;
@@ -43,7 +49,7 @@ public class MySQLAdapter implements Serializable {
 				Properties connectionProps = new Properties();
 				connectionProps.put("user", user);
 				connectionProps.put("password", password);
-				connect = DriverManager.getConnection("jdbc:mysql://" + host + "/" + database, connectionProps);
+				connect = DriverManager.getConnection("jdbc:" + driver + "://" + host + "/" + database, connectionProps);
 				return;
 			} catch (SQLException e) {
 				tries ++;
@@ -102,6 +108,24 @@ public class MySQLAdapter implements Serializable {
 		rs.next();
 		return rs.getInt(1);
 	}
+	
+	public int insert(String table, Map<String,String> map) throws SQLException {
+		StringBuilder sb1 = new StringBuilder();
+		StringBuilder sb2 = new StringBuilder();
+		List<String> values = new ArrayList<>();
+		for (String key : map.keySet()) {
+			if (sb1.length() != 0) {
+				sb1.append(", ");
+				sb2.append(", ");
+			}
+			sb1.append(key);
+			sb2.append("?");
+			values.add(map.get(key));
+		}
+		
+		String statement = "INSERT INTO `" + table + "` (" + sb1.toString() + ") VALUES (" + sb2.toString() + ")";
+		return insert(statement, values);
+	}
 
 	public void update(String sql, String[] values) throws SQLException {
 		update(sql, Arrays.asList(values));
@@ -109,6 +133,34 @@ public class MySQLAdapter implements Serializable {
 
 	public void update(String sql, List<String> values) throws SQLException {
 		checkConnection();
+		PreparedStatement stmt = connect.prepareStatement(sql);
+		for (int i = 1; i <= values.size(); i++) {
+			stmt.setString(i, values.get(i - 1));
+		}
+		stmt.executeUpdate();
+	}
+	
+	public void update(String table, Map<String,String> updateValues, Map<String,String> conditions) throws SQLException {
+		checkConnection();
+		StringBuilder updateSB = new StringBuilder();
+		List<String> values = new ArrayList<>();
+		for (String key : updateValues.keySet()) {
+			if (updateSB.length() > 0)
+				updateSB.append(", ");
+			updateSB.append(key + " = (?)");
+			values.add(updateValues.get(key));
+		}
+		
+		StringBuilder conditionSB = new StringBuilder();
+		for (String key : conditions.keySet()) {
+			if (conditionSB.length() > 0)
+				conditionSB.append(" AND ");
+			conditionSB.append(key + " = (?)");
+			values.add(conditions.get(key));
+		}
+		
+		String sql = "UPDATE " + table + " SET " + updateSB.toString() + " WHERE " + conditionSB.toString();
+		System.out.println(sql + " with values " + values);
 		PreparedStatement stmt = connect.prepareStatement(sql);
 		for (int i = 1; i <= values.size(); i++) {
 			stmt.setString(i, values.get(i - 1));

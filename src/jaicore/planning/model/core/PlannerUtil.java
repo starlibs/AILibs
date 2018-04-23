@@ -67,6 +67,15 @@ public class PlannerUtil {
 		else if (appliedAction.getOperation() instanceof CEOperation) {
 			CEAction a = new CEAction((CEOperation) appliedAction.getOperation(), appliedAction.getGrounding());
 			Map<CNFFormula, Monom> addLists = a.getAddLists();
+
+			/* first delete, then add */
+			Map<CNFFormula, Monom> deleteLists = a.getDeleteLists();
+			for (CNFFormula condition : deleteLists.keySet()) {
+				if (condition.entailedBy(state)) {
+					state.removeAll(deleteLists.get(condition));
+				}
+			}
+			
 			for (CNFFormula condition : addLists.keySet()) {
 				
 				/* evaluate interpreted predicates */
@@ -91,12 +100,6 @@ public class PlannerUtil {
 				}
 				if (conditionIsSatisfiable && modifiedCondition.entailedBy(state)) {
 					state.addAll(addLists.get(condition));
-				}
-			}
-			Map<CNFFormula, Monom> deleteLists = a.getDeleteLists();
-			for (CNFFormula condition : deleteLists.keySet()) {
-				if (condition.entailedBy(state)) {
-					state.removeAll(deleteLists.get(condition));
 				}
 			}
 		} else {

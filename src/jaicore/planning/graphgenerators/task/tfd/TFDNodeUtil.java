@@ -3,9 +3,11 @@ package jaicore.planning.graphgenerators.task.tfd;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import jaicore.logic.fol.structure.CNFFormula;
 import jaicore.logic.fol.structure.ConstantParam;
@@ -44,6 +46,7 @@ public class TFDNodeUtil {
 		List<TFDNode> path = new ArrayList<>();
 		TFDNode current = node;
 		while (current != null) {
+			assert !path.contains(current) : "There is a loop in the path! Node " + node + " has been visited twice!";
 			path.add(current);
 			current = parentMap.get(current);
 		}
