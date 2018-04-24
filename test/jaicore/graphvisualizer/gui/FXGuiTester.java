@@ -22,10 +22,6 @@ public class FXGuiTester {
 		NQueenGenerator gen = new NQueenGenerator(i+4);
 		BestFirst<QueenNode, String> search = new BestFirst<>(gen, node-> (double)node.getPoint().getNumberOfAttackedCellsInNextRow());
 
-		//Add a graphvisualization windows
-//		SimpleGraphVisualizationWindow<Node<QueenNode, Double>> win = new SimpleGraphVisualizationWindow<>(search);
-//		win.getPanel().setTooltipGenerator(n->n.getPoint().toString());
-
 		//Prepare an replay object
 		Recorder<Node<QueenNode, Double>> recorder = new Recorder(search);
 
@@ -36,23 +32,11 @@ public class FXGuiTester {
 		while (search.nextSolution() != null)
 			solutions ++;
 
-
-
-		//Test the recordPlayer
-//		recordPlayer.play();
-
-
-
-
-		//SimpleGraphVisualizationWindow<Node<QueenNode, Double>> recordedWin = new SimpleGraphVisualizationWindow<>(recorder.getEventBus());
-
 		String [] args = new String[0];
 		//FXGui2.setRec(recorder);
 		FXController.setRec(recorder);
 		System.out.println("Start the GUI");
 		javafx.application.Application.launch(FXGui.class, args);
-
-
 
 
 	}
