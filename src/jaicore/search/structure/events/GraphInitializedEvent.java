@@ -1,8 +1,13 @@
 package jaicore.search.structure.events;
 
-public class GraphInitializedEvent<T> {
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
+public class GraphInitializedEvent<T> {
+	
+	
+	
 	private T root;
+	public final String name = "GraphInitializedEvent";
 
 	public GraphInitializedEvent(T root) {
 		super();
@@ -16,5 +21,6 @@ public class GraphInitializedEvent<T> {
 	public void setRoot(T root) {
 		this.root = root;
 	}
+
 
 }

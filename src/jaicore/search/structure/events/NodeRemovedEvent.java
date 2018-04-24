@@ -3,6 +3,7 @@ package jaicore.search.structure.events;
 public class NodeRemovedEvent<T> {
 
 	private final T node;
+	public final String name = "§NodeRemovedEvent";
 
 	public NodeRemovedEvent(T node) {
 		super();

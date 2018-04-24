@@ -30,12 +30,12 @@ public class PDDLGraphGeneratorTester {
 		chooser.setDialogTitle(" Open a Domain-File");
 		chooser.showOpenDialog(null);
 		domain = chooser.getSelectedFile();
-		domain = new File("/home/jkoepe/git/pddl4j/pddl/blocksworld/domain.pddl");
+		//domain = new File("/home/jkoepe/git/pddl4j/pddl/blocksworld/domain.pddl");
 				
 		chooser.setDialogTitle("Open a Problme-File");
 		chooser.showOpenDialog(null);
 		problem = chooser.getSelectedFile();
-		problem = new File("/home/jkoepe/git/pddl4j/pddl/blocksworld/p15.pddl");
+		//problem = new File("/home/jkoepe/git/pddl4j/pddl/blocksworld/p15.pddl");
 		
 		if(domain.exists() && problem.exists()) {
 			PDDLGraphGenerator gen = new PDDLGraphGenerator(domain, problem);

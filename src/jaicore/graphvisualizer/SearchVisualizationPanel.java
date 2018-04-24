@@ -298,6 +298,7 @@ public class SearchVisualizationPanel<T> extends JPanel {
 		try {
 			graph.removeNode(ext2intNodeMap.get(e.getNode()));
 			// ext2intNodeMap.get(e.getNode()).addAttribute("ui.class", e.getType());
+			ext2intNodeMap.remove(e.getNode());
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}

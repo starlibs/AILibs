@@ -1,31 +1,22 @@
 package jaicore.planning.graphgenerators.pddl;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import fr.uga.pddl4j.encoding.CodedProblem;
-import fr.uga.pddl4j.encoding.Encoder;
 import fr.uga.pddl4j.heuristics.relaxation.Heuristic;
 import fr.uga.pddl4j.heuristics.relaxation.HeuristicToolKit;
-import fr.uga.pddl4j.parser.Domain;
-import fr.uga.pddl4j.parser.Parser;
-import fr.uga.pddl4j.parser.Problem;
 import fr.uga.pddl4j.planners.ProblemFactory;
 import fr.uga.pddl4j.planners.hsp.Node;
 import fr.uga.pddl4j.util.BitOp;
 import fr.uga.pddl4j.util.BitState;
 import fr.uga.pddl4j.util.SequentialPlan;
-import jaicore.search.graphgenerators.nqueens.QueenNode;
 import jaicore.search.structure.core.AbstractGraphGenerator;
-import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.core.NodeType;
-import jaicore.search.structure.graphgenerator.GoalTester;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
-import jaicore.search.structure.graphgenerator.RootGenerator;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
