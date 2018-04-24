@@ -178,8 +178,11 @@ public class FXController implements Initializable  {
      */
    @FXML
    protected void stop(ActionEvent event){
-        playThread.interrupt();
-        jumpThread.interrupt();
+        if(playThread!= null)
+            playThread.interrupt();
+
+        if(jumpThread != null)
+            jumpThread.interrupt();
         System.out.println("Stop");
    }
 
