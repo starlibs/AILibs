@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.eventbus.Subscribe;
 import jaicore.graph.observation.IObservableGraphAlgorithm;
+import jaicore.graphvisualizer.TooltipGenerator;
 import jaicore.search.structure.core.GraphEventBus;
 import jaicore.search.structure.events.GraphInitializedEvent;
 import jaicore.search.structure.events.NodeReachedEvent;
@@ -34,6 +35,8 @@ public class Recorder<T> {
 	private long firstEvent;
 	private List<Long> eventTimes;
 
+
+	private TooltipGenerator tooltipGenerator;
 
 
 
@@ -305,5 +308,9 @@ public class Recorder<T> {
 			return eventTimes.get(eventTimes.size()-1);
 		else
 			return 0;
+	}
+
+	public void setTooltipGenerator(TooltipGenerator<T> tooltipGenerator) {
+		this.tooltipGenerator = (TooltipGenerator<T>)tooltipGenerator;
 	}
 }

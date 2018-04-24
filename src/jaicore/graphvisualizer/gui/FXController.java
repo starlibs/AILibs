@@ -1,12 +1,16 @@
 package jaicore.graphvisualizer.gui;
 
+import jaicore.graphvisualizer.NodeListener;
 import jaicore.graphvisualizer.SearchVisualizationPanel;
+import jaicore.graphvisualizer.TooltipGenerator;
 import javafx.embed.swing.SwingNode;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Slider;
+import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 
 import javax.swing.*;
@@ -15,7 +19,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.concurrent.TimeUnit;
 
-public class FXController implements Initializable  {
+public class FXController implements Initializable, NodeListener {
 
     //contains the GraphVisualizationPane
     @FXML
@@ -31,6 +35,9 @@ public class FXController implements Initializable  {
     private List<Long> eventTimes;
 
 
+    @FXML
+    private Text toolTip;
+
 
     private static Recorder rec;
     private Thread playThread;
@@ -39,6 +46,8 @@ public class FXController implements Initializable  {
     private long sleepTime;
 
     private int index;
+
+
 
 
 
@@ -67,6 +76,8 @@ public class FXController implements Initializable  {
         setTimeline();
         index = 0;
 
+        toolTip.setText("");
+
 
     }
 
@@ -80,6 +91,7 @@ public class FXController implements Initializable  {
         if(swingnode.getContent() != null)
             rec.unregisterListener(swingnode.getContent());
         SearchVisualizationPanel panel = new SearchVisualizationPanel();
+        panel.addNodeListener(this);
         rec.registerListener(panel);
         SwingUtilities.invokeLater(()-> swingnode.setContent(panel));
     }
@@ -260,4 +272,26 @@ public class FXController implements Initializable  {
     }
 
 
+    @Override
+    public void mouseOver(Object node) {
+
+    }
+
+    @Override
+    public void mouseLeft(Object node) {
+
+    }
+
+    @Override
+    public void buttonReleased(Object node) {
+
+    }
+
+    @Override
+    public void buttonPushed(Object node) {
+        SearchVisualizationPanel panel = (SearchVisualizationPanel) swingNode.getContent();
+        TooltipGenerator gen = panel.getTooltipGenerator();
+        toolTip.setText(gen.getTooltip(node));
+
+    }
 }

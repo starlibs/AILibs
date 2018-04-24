@@ -11,6 +11,8 @@
 <?import javafx.scene.layout.Pane?>
 
 <?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.text.Text?>
 <BorderPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.152-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="jaicore.graphvisualizer.gui.FXController">
 
     <top>
@@ -45,7 +47,11 @@
             <items>
                 <TabPane>
                     <tabs>
-                        <Tab text="1" />
+                        <Tab text="ToolTips">
+                            <Text fx:id="toolTip"/>
+                        </Tab>
+                        <Tab text="Statistics">
+                        </Tab>
                     </tabs>
                 </TabPane>
                 <BorderPane>
