@@ -15,7 +15,6 @@ import jaicore.search.structure.events.NodeTypeSwitchEvent;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.*;
 
 public class Recorder<T> {
