@@ -313,4 +313,8 @@ public class Recorder<T> {
 	public void setTooltipGenerator(TooltipGenerator<T> tooltipGenerator) {
 		this.tooltipGenerator = (TooltipGenerator<T>)tooltipGenerator;
 	}
+
+	public TooltipGenerator getTooltipGenerator(){
+		return this.tooltipGenerator;
+	}
 }

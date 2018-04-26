@@ -93,6 +93,7 @@ public class FXController implements Initializable, NodeListener {
         SearchVisualizationPanel panel = new SearchVisualizationPanel();
         panel.addNodeListener(this);
         rec.registerListener(panel);
+        panel.setTooltipGenerator(rec.getTooltipGenerator());
         SwingUtilities.invokeLater(()-> swingnode.setContent(panel));
     }
 

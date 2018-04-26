@@ -5,6 +5,7 @@ import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import jaicore.search.algorithms.standard.bestfirst.abstractVersioning.TestGraphGenerator;
 import jaicore.search.algorithms.standard.bestfirst.abstractVersioning.TestNode;
 import jaicore.search.structure.core.GraphGenerator;
+import jaicore.search.structure.core.Node;
 import org.junit.Test;
 
 import java.util.List;
@@ -19,14 +20,14 @@ public class FXGuiTester2 {
 
         BestFirst<TestNode,String> bf = new BestFirst<>(gen, n->(double)Math.round(Math.random()*100));
 
-        Recorder rec = new Recorder();
+        Recorder<Node<TestNode, String>> rec = new Recorder();
         bf.registerListener(rec);
 
 
-        SimpleGraphVisualizationWindow win = new SimpleGraphVisualizationWindow(bf);
-        win.getPanel().setTooltipGenerator(n->{
+        SimpleGraphVisualizationWindow<Node<TestNode,String>> win = new SimpleGraphVisualizationWindow(bf);
+        win.getPanel().setTooltipGenerator(n->String.valueOf(n.getInternalLabel()));
 
-        });
+        rec.setTooltipGenerator(n->String.valueOf(n.getInternalLabel()));
 
         List<TestNode> solution = bf.nextSolution();
 
