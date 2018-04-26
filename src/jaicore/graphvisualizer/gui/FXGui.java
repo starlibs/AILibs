@@ -9,6 +9,7 @@ import javafx.stage.Stage;
 public class FXGui extends Application {
 
 
+
     @Override
     public void start(Stage stage) throws Exception {
         //load the fxml file of the gui

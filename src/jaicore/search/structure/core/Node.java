@@ -86,6 +86,22 @@ public class Node<T, V extends Comparable<V>> implements Serializable, Comparabl
 	}
 
 	public String getString() {
-		return "Node [ref=" + this.toString() + ", externalLabel=" + externalLabel + ", goal=" + goal + ", parentRef=" + parent.toString() + ", annotations=" + annotations + "]";
+		String s = "Node [ref=";
+		s += this.toString();
+		s += ", externalLabel=";
+		s += externalLabel;
+		s += ", goal";
+		s += goal;
+		s += ", parentRef=";
+		if (parent != null)
+			s += parent.toString();
+		else
+			s += "null";
+		s += ", annotations=";
+		s += annotations;
+		s += "]";
+
+//		return "Node [ref=" + this.toString() + ", externalLabel=" + externalLabel + ", goal=" + goal + ", parentRef=" + parent.toString() + ", annotations=" + annotations + "]";
+		return s;
 	}
 }

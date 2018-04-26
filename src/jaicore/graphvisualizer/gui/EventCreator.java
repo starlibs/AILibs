@@ -40,7 +40,7 @@ public class EventCreator {
             node.setGoal(false);
             node.setInternalLabel((double) 0.0);
 
-            nodeMap.put(0, node);
+            nodeMap.put(id, node);
 
             return new GraphInitializedEvent<>(node);
 
@@ -80,7 +80,7 @@ public class EventCreator {
         if(jMap.get("name").equals("NodeRemovedEvent"))
             System.out.println("NodeRemovedEvent");
 
-        //create a new NodeTypeSwithEvent
+        //create a new NodeTypeSwitchEvent
         if(jMap.get("name").equals("NodeTypeSwitchEvent")){
             LinkedHashMap map = (LinkedHashMap)jMap.get("node");
             int id = computeId((LinkedHashMap)map.get("point"));
@@ -95,19 +95,24 @@ public class EventCreator {
 
 
     private int computeId(LinkedHashMap map){
-        ArrayList list = (ArrayList) map.get("positions");
-        if(list.isEmpty())
-            return 0;
-
-        int multiplicator = 1;
-        int result = 0;
-        for(int i = list.size()-1; i >= 0; i--){
-            result += ((Integer)list.get(i) * multiplicator);
-            multiplicator *=10;
-        }
-        result += (list.size()*multiplicator);
-
-        return result;
+        if(map.keySet().contains("id"))
+            return (int) map.get("id");
+        else
+            return -1;
     }
+//        ArrayList list = (ArrayList) map.get("positions");
+//        if(list.isEmpty())
+//            return 0;
+//
+//        int multiplicator = 1;
+//        int result = 0;
+//        for(int i = list.size()-1; i >= 0; i--){
+//            result += ((Integer)list.get(i) * multiplicator);
+//            multiplicator *=10;
+//        }
+//        result += (list.size()*multiplicator);
+//
+//        return result;
+//    }
 
 }

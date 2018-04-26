@@ -14,6 +14,7 @@ import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 
 import javax.swing.*;
+import java.io.File;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -206,24 +207,23 @@ public class FXController implements Initializable, NodeListener {
      */
    @FXML
    protected void save(ActionEvent event){
-       FileChooser chooser = new FileChooser();
-       chooser.setTitle("Choose Event-File");
-       rec.saveToFile(chooser.showSaveDialog(null));
+//       FileChooser chooser = new FileChooser();
+//       chooser.setTitle("Choose Event-File");
+//       rec.saveToFile(chooser.showSaveDialog(null));
 
-//       File file = new File("/home/jkoepe/Documents/Test.txt");
-//       rec.saveToFile(file);
+       File file = new File("/home/jkoepe/Documents/Test.txt");
+       rec.saveToFile(file);
    }
 
 
     @FXML
     protected void load(ActionEvent event){
-    	FileChooser chooser = new FileChooser();
-    	chooser.setTitle("Open Event-File");
-    	rec.loadFromFile(chooser.showOpenDialog(null));
-//        File file = new File("/home/jkoepe/Documents/Test.txt");
-//        rec.loadFromFile(file);
+//    	FileChooser chooser = new FileChooser();
+//    	chooser.setTitle("Open Event-File");
+//    	rec.loadFromFile(chooser.showOpenDialog(null));
+        File file = new File("/home/jkoepe/Documents/Test.txt");
+        rec.loadFromFile(file);
         createSwingContent(swingNode);
-
         setTimeline();
 
 

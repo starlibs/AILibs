@@ -1,9 +1,8 @@
 package jaicore.graphvisualizer.gui;
 
-import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
-import jaicore.search.algorithms.standard.bestfirst.abstractVersioning.TestGraphGenerator;
-import jaicore.search.algorithms.standard.bestfirst.abstractVersioning.TestNode;
+import jaicore.search.graphgenerators.bestfirst.abstractVersioning.TestGraphGenerator;
+import jaicore.search.graphgenerators.bestfirst.abstractVersioning.TestNode;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
 import org.junit.Test;
@@ -24,10 +23,11 @@ public class FXGuiTester2 {
         bf.registerListener(rec);
 
 
-        SimpleGraphVisualizationWindow<Node<TestNode,String>> win = new SimpleGraphVisualizationWindow(bf);
-        win.getPanel().setTooltipGenerator(n->String.valueOf(n.getInternalLabel()));
+//        SimpleGraphVisualizationWindow<Node<TestNode,String>> win = new SimpleGraphVisualizationWindow(bf);
+//        win.getPanel().setTooltipGenerator(n->String.valueOf(n.getInternalLabel()));
 
         rec.setTooltipGenerator(n->String.valueOf(n.getInternalLabel()));
+//        rec.setTooltipGenerator(new TooltipTest());
 
         List<TestNode> solution = bf.nextSolution();
 
