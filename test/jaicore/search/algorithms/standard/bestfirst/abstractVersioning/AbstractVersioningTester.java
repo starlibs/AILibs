@@ -10,6 +10,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import jaicore.search.graphgenerators.bestfirst.abstractVersioning.TestGraphGenerator;
+import jaicore.search.graphgenerators.bestfirst.abstractVersioning.TestNode;
 import org.junit.Test;
 
 import jaicore.search.algorithms.standard.ORGraphSearchTester;

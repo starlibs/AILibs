@@ -28,32 +28,36 @@ artifacts {
 dependencies {
 	// Apache Commons Lang3
 	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.6'
-	
+
 	// Owner Framework
 	compile group: 'org.aeonbits.owner', name: 'owner-java8', version:'1.0.6'
 
 	// Graph Stream
 	compile group: 'org.graphstream', name: 'gs-core', version: '1.1.1'
 	compile group: 'org.graphstream', name: 'gs-ui', version: '1.3'
-	
+
 	// Weka and MEKA
 	compile group: 'nz.ac.waikato.cms.weka', name: 'weka-dev', version: '3.9.1'
 	compile name: 'meka'
-	
+
 	// Basics
 	compile 'junit:junit:4.12'
 	compile 'com.google.guava:guava:18.0'
-	
-	
+
+
 	// for subprocesses:
 	compile group: 'com.sun.jna', name: 'jna', version: '3.0.9'
-	
+
 	// JSON
 	compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.0.pr4'
-	
+
 	// Logging
 	compile 'org.slf4j:slf4j-api:1.7.13'
 	runtime 'org.slf4j:slf4j-log4j12:1.7.13', 'log4j:log4j:1.2.17'
+
+	//pddl4j
+	compile 'com.github.pellierd:pddl4j:v3.5.0'
+	runtime 'com.github.pellierd:pddl4j:v3.5.0'
 }
 
 repositories {
@@ -61,6 +65,7 @@ repositories {
 	mavenLocal()
 	maven {
         url "http://clojars.org/repo/"
+	url "https://jitpack.io"
     }
     flatDir {
     	dirs 'lib'
