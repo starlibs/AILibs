@@ -78,11 +78,11 @@ public class isValidParameterRangeRefinementPredicate implements EvaluablePredic
 			
 		} else if (param instanceof CategoricalParameter) {
 			List<String> possibleValues = new ArrayList<>();
+			boolean hasBeenSetBefore = state.contains(new Literal("overwritten('" + containerName + "')"));
+			if (hasBeenSetBefore)
+				return new ArrayList<>();
 			for (Object valAsObject : ((CategoricalParameter) param).getValues()) {
-				String val = valAsObject.toString();
-				boolean hasBeenSetBefore = state.contains(new Literal("overwritten('" + containerName + "')"));
-				if (!hasBeenSetBefore)
-					possibleValues.add(val);
+				possibleValues.add(valAsObject.toString());
 			}
 			return getGroundingsForOracledValues(possibleValues, partialGroundingAsList);
 		}

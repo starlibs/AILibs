@@ -107,7 +107,7 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
           @Override
           public V evaluateSolution(final List<N> solutionPath) throws Exception {
         	List<Action> plan = searchSpaceUtilFactory.getPathToPlanConverter().getPlan(solutionPath);
-        	ComponentInstance composition = getSolutionCompositionForPlan(plan);
+        	ComponentInstance composition = Util.getSolutionCompositionForPlan(components, getInitState(), plan);
         	T solution = HASCO.this.getObjectFromPlan(plan);
             V scoreOfSolution = benchmark.evaluate(solution);
             if (scoreOfBestRecognizedSolution == null || scoreOfBestRecognizedSolution.compareTo(scoreOfSolution) > 0) {
@@ -212,7 +212,7 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 	  HASCO.this.solutionEvaluationEventBus.post(new HASCORunTerminatedEvent<T, V>(compositionOfBestRecognizedSolution, bestRecognizedSolution, scoreOfBestRecognizedSolution));
   }
 
-  private T getObjectFromPlan(final List<Action> plan) {
+  public T getObjectFromPlan(final List<Action> plan) {
     Monom state = this.getInitState();
     for (Action a : plan) {
       PlannerUtil.updateState(state, a);
@@ -220,24 +220,9 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
     return this.getObjectFromState(state);
   }
 
-  private ComponentInstance getSolutionCompositionForNode(final Node<N, V> path) {
-    return getSolutionCompositionForPlan(this.searchSpaceUtilFactory.getPathToPlanConverter().getPlan(path.externalPath()));
-  }
-  
-  private ComponentInstance getSolutionCompositionForPlan(final List<Action> plan) {
-	  Monom state = this.getInitState();
-	    for (Action a : plan) {
-	      PlannerUtil.updateState(state, a);
-	    }
-	    return this.getSolutionCompositionFromState(state);
-  }
 
-  private ComponentInstance getSolutionCompositionFromState(final Monom state) {
-    return Util.getGroundComponentsFromState(state, this.components, true).get("solution");
-  }
-
-  private T getObjectFromState(final Monom state) {
-    return this.factory.getComponentInstantiation(this.getSolutionCompositionFromState(state));
+  public T getObjectFromState(final Monom state) {
+    return this.factory.getComponentInstantiation(Util.getSolutionCompositionFromState(components, state));
   }
 
   private Monom getInitState() {

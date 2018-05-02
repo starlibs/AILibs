@@ -3,7 +3,6 @@
 	<wb-module deploy-name="HASCO">
 		<wb-resource deploy-path="/" source-path="conf"/>
 		<wb-resource deploy-path="/" source-path="src"/>
-		<wb-resource deploy-path="/" source-path="test"/>
 		<dependent-module deploy-path="../" handle="module:/resource/JAICore/JAICore">
 			<dependency-type>uses</dependency-type>
 		</dependent-module>

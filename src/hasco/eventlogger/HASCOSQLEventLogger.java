@@ -28,31 +28,32 @@ public class HASCOSQLEventLogger<T, V extends Comparable<V>> {
 		
 		/* initialize tables if not existent */
 		try {
-			ResultSet rs = sqlAdapter.getResultsOfQuery("SHOW TABLES");
-			boolean haveRunTable = false;
-			boolean haveEvaluationTable = false;
-			while (rs.next()) {
-				String tableName = rs.getString(1);
-				if (tableName.equals("runs"))
-					haveRunTable = true;
-				else if (tableName.equals("evaluations"))
-					haveEvaluationTable = true;
-			}
 			
-			if (!haveRunTable) {
-				System.out.println("Creating table for runs");
-				sqlAdapter.update("CREATE TABLE `runs` ( `run_id` int(8) NOT NULL AUTO_INCREMENT, `seed` int(20) NOT NULL, `timeout` int(10) NOT NULL, `CPUs` int(2) NOT NULL, `benchmark` varchar(200) COLLATE utf8_bin DEFAULT NULL, `run_started` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, `run_terminated` timestamp NULL DEFAULT NULL, `solution` json DEFAULT NULL, `score` double DEFAULT NULL, PRIMARY KEY (`run_id`)) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8 COLLATE=utf8_bin", new ArrayList<>());
-			}
-			if (!haveEvaluationTable) {
-				System.out.println("Creating table for evaluations");
-				sqlAdapter.update("CREATE TABLE `evaluations` (\r\n" + 
-						" `evaluation_id` int(10) NOT NULL AUTO_INCREMENT,\r\n" + 
-						" `run_id` int(8) NOT NULL,\r\n" + 
-						" `composition` json NOT NULL,\r\n" + 
-						" `score` double NOT NULL,\r\n" + 
-						" PRIMARY KEY (`evaluation_id`)\r\n" + 
-						") ENGINE=InnoDB AUTO_INCREMENT=296 DEFAULT CHARSET=utf8 COLLATE=utf8_bin", new ArrayList<>());
-			}
+			if (sqlAdapter.getDriver().startsWith("hsqldb"))
+				sqlAdapter.update("SET DATABASE SQL SYNTAX MYS TRUE", new ArrayList<>());
+			
+			String sqlRuns = "CREATE TABLE IF NOT EXISTS runs(\r\n" + 
+					"	run_id integer NOT NULL AUTO_INCREMENT,\r\n" + 
+					"	seed INTEGER NOT NULL,\r\n" + 
+					"	timeout INTEGER,\r\n" + 
+					"	CPUs INTEGER,\r\n" + 
+					"	benchmark varchar(200) DEFAULT NULL,\r\n" + 
+					"	run_started timestamp DEFAULT CURRENT_TIMESTAMP,\r\n" + 
+					"	run_terminated timestamp NULL,\r\n" + 
+					"	solution varchar(1000) DEFAULT NULL,\r\n" + 
+					"	score double DEFAULT NULL,\r\n" + 
+					"	PRIMARY KEY (run_id)\r\n" + 
+					")";
+			sqlAdapter.update(sqlRuns, new ArrayList<>());
+			
+			String sqlEvaluations = "CREATE TABLE IF NOT EXISTS evaluations(\r\n" + 
+					"	evaluation_id integer NOT NULL AUTO_INCREMENT,\r\n" + 
+					"	run_id integer NOT NULL,\r\n" + 
+					"	composition VARCHAR(1000) NOT NULL,\r\n" + 
+					"	score double NOT NULL,\r\n" + 
+					"	PRIMARY KEY (evaluation_id)\r\n" + 
+					")";
+			sqlAdapter.update(sqlEvaluations, new ArrayList<>());
 			
 		} catch (SQLException e) {
 			e.printStackTrace();

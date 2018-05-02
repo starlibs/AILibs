@@ -20,7 +20,7 @@ import jaicore.search.algorithms.standard.core.ORGraphSearchFactory;
 
 public class HASCOFD<T> extends HASCO<T, TFDNode, String, Double, ForwardDecompositionSolution> {
 	
-	private static class TFDSearchSpaceUtilFactory implements IHASCOSearchSpaceUtilFactory<TFDNode, String, Double> {
+	public static class TFDSearchSpaceUtilFactory implements IHASCOSearchSpaceUtilFactory<TFDNode, String, Double> {
 
 		@Override
 		public IPathUnification<TFDNode> getPathUnifier() {
