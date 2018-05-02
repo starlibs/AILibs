@@ -10,15 +10,19 @@ import jaicore.planning.algorithms.IPlanningSolution;
  *
  * @param <T>
  */
-public class Solution<R extends IPlanningSolution,T> {
+public class Solution<R extends IPlanningSolution, T, V extends Comparable<V>> {
 
 	private final R planningSolution;
 	private final T solution;
+	private final V score;
+	private final int timeToComputeScore;
 
-	public Solution(R planningSolution, T solution) {
+	public Solution(R planningSolution, T solution, V score, int timeToComputeScore) {
 		super();
 		this.planningSolution = planningSolution;
 		this.solution = solution;
+		this.score = score;
+		this.timeToComputeScore = timeToComputeScore;
 	}
 
 	public R getPlanningSolution() {
@@ -29,4 +33,11 @@ public class Solution<R extends IPlanningSolution,T> {
 		return solution;
 	}
 
+	public V getScore() {
+		return score;
+	}
+
+	public int getTimeToComputeScore() {
+		return timeToComputeScore;
+	}
 }
