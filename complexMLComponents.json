@@ -1,0 +1,24 @@
+{
+	"repository": "Complex ML Components",
+	"include": ["./tpotComponents.json", "./testrsc/"],
+	"components": [
+		{
+			"name": "MLPipeline",
+			"providedInterface": ["MLPipeline"],
+			"requiredInterface": ["AbstractClassifier", "AbstractPreprocessor"],
+			"parameter": []
+		},
+		{
+			"name": "Meta_PreprocessingUnion",
+			"providedInterface": ["AbstractPreprocessor"],
+			"requiredInterface": ["AbstractPreprocessor", "AbstractPreprocessor"],
+			"parameter": []
+		},
+		{
+			"name": "Meta_PreprocessingForward",
+			"providedInterface": ["AbstractPreprocessor"],
+			"requiredInterface": ["BasePreprocessor", "AbstractPreprocessor"],
+			"parameter": []
+		}
+	]
+}

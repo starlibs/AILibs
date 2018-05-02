@@ -23,7 +23,7 @@ dependencies {
 
 	//compile name: 'JAICore'
 	compile name: 'CRCUtils'
-	compile name: 'mysql-connector-java-5.1.45-bin'
+	compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.45'
 	
 	// apache lang (for reflection)
 	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.6'
