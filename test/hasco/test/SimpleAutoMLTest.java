@@ -117,7 +117,7 @@ public class SimpleAutoMLTest {
 		hasco.addComponent(c);
 
 		new SimpleGraphVisualizationWindow<Node<TFDNode, String>>(hasco).getPanel().setTooltipGenerator(new TFDTooltipGenerator<>());
-		for (Solution<ForwardDecompositionSolution,Classifier> candidate : hasco) {
+		for (Solution<ForwardDecompositionSolution,Classifier,Double> candidate : hasco) {
 			System.out.println(candidate);
 		}
 		System.out.println("Ready");

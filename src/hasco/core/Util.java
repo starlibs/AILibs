@@ -17,14 +17,88 @@ import hasco.model.Parameter;
 import jaicore.basic.SetUtil;
 import jaicore.logic.fol.structure.Literal;
 import jaicore.logic.fol.structure.Monom;
+import jaicore.planning.model.core.Action;
+import jaicore.planning.model.core.PlannerUtil;
+import jaicore.search.structure.core.Node;
 
-class Util {
+public class Util {
 
 	static Map<String,String> getParameterContainerMap(Monom state, String objectName) {
 		Map<String, String> parameterContainerMap = new HashMap<>();
 		List<Literal> containerLiterals = state.stream().filter(l -> l.getPropertyName().equals("parameterContainer") && l.getParameters().get(2).getName().equals(objectName)).collect(Collectors.toList());
 		containerLiterals.forEach(l -> parameterContainerMap.put(l.getParameters().get(1).getName(), l.getParameters().get(3).getName()));
 		return parameterContainerMap;
+	}
+	
+	public static Map<String,Map<String,String>> getParametrizations(Monom state, Collection<Component> components, boolean resolveIntervals) {
+		Map<String, ComponentInstance> objectMap = new HashMap<>();
+		Map<String, Map<String, String>> parameterContainerMap = new HashMap<>(); // stores for each object the name of the container of each parameter
+		Map<String, String> parameterValues = new HashMap<>();
+		
+		Map<String, Map<String, String>> parameterValuesPerComponentInstance = new HashMap<>();
+
+		Collection<String> overwrittenDataContainers = state.stream().filter(l -> l.getPropertyName().equals("overwritten")).map(l -> l.getParameters().get(0).getName()).collect(Collectors.toSet());
+		
+		/* create (empty) component instances, detect containers for parameter values, and register the values of the data containers */
+		for (Literal l : state) {
+			String[] params = l.getParameters().stream().map(p -> p.getName()).collect(Collectors.toList()).toArray(new String[] {});
+			switch (l.getPropertyName()) {
+			case "resolves":
+				String parentObjectName = params[0];
+				String interfaceName = params[1];
+				String componentName = params[2];
+				String objectName = params[3];
+				Component component = components.stream().filter(c -> c.getName().equals(componentName)).findAny().get();
+				ComponentInstance object = new ComponentInstance(component, new HashMap<>(), new HashMap<>());
+				objectMap.put(objectName, object);
+				break;
+			case "parameterContainer":
+				if (!parameterContainerMap.containsKey(params[2]))
+					parameterContainerMap.put(params[2], new HashMap<>());
+				parameterContainerMap.get(params[2]).put(params[1], params[3]);
+				break;
+			case "val":
+				if (overwrittenDataContainers.contains(params[0]))
+					parameterValues.put(params[0], params[1]);
+				break;
+			}
+		}
+		
+		/* update the configurations of the objects */
+		for (String objectName : objectMap.keySet()) {
+			Map<String,String> paramValuesForThisComponent = new HashMap<>();
+			parameterValuesPerComponentInstance.put(objectName, paramValuesForThisComponent);
+			ComponentInstance object = objectMap.get(objectName);
+			for (Parameter p : object.getComponent().getParameters()) {
+				
+				assert parameterContainerMap.containsKey(objectName) : "No parameter container map has been defined for object " + objectName + " of component " + object.getComponent().getName() + "!";
+				assert parameterContainerMap.get(objectName).containsKey(p.getName()) : "The data container for parameter " + p.getName() + " of " + object.getComponent().getName() + " is not defined!";
+
+				String assignedValue = parameterValues.get(parameterContainerMap.get(objectName).get(p.getName()));
+				String interpretedValue = "";
+				if (assignedValue != null) {
+					if (p instanceof NumericParameter) {
+						if (resolveIntervals) {
+							NumericParameter np = (NumericParameter) p;
+							List<String> vals = SetUtil.unserializeList(assignedValue);
+							Interval interval = new Interval(Double.valueOf(vals.get(0)), Double.valueOf(vals.get(1)));
+							if (np.isInteger())
+								interpretedValue = String.valueOf((int) Math.round(interval.getBarycenter()));
+							else
+								interpretedValue = String.valueOf(interval.getBarycenter());
+						}
+						else
+							interpretedValue = assignedValue;
+					} else if ((p instanceof BooleanParameter) || (p instanceof CategoricalParameter)) {
+						interpretedValue = assignedValue;
+					}
+					else
+						throw new UnsupportedOperationException("No support for parameters of type " + p.getClass().getName());
+					paramValuesForThisComponent.put(p.getName(), interpretedValue);
+				}
+			}
+		}
+		return parameterValuesPerComponentInstance;
 	}
 	
 	static Map<String, ComponentInstance> getGroundComponentsFromState(Monom state, Collection<Component> components, boolean resolveIntervals) {
@@ -101,4 +175,25 @@ class Util {
 		}
 		return objectMap;
 	}
+	
+
+	  public static <N,A,V extends Comparable<V>> ComponentInstance getSolutionCompositionForNode(final IHASCOSearchSpaceUtilFactory<N, A, V> searchSpaceUtilFactory, final Collection<Component> components, Monom initState, final Node<N, ?> path) {
+	    return getSolutionCompositionForPlan(components, initState, searchSpaceUtilFactory.getPathToPlanConverter().getPlan(path.externalPath()));
+	  }
+	  
+	  public static Monom getFinalStateOfPlan(final Monom initState, List<Action> plan) {
+		  Monom state = new Monom(initState);
+		  for (Action a : plan) {
+		      PlannerUtil.updateState(state, a);
+		    }
+		  return state;
+	  }
+	  
+	  public static ComponentInstance getSolutionCompositionForPlan(final Collection<Component> components, final Monom initState, final List<Action> plan) {
+		    return getSolutionCompositionFromState(components, getFinalStateOfPlan(initState, plan));
+	  }
+
+	  public static ComponentInstance getSolutionCompositionFromState(final Collection<Component> components, final Monom state) {
+	    return Util.getGroundComponentsFromState(state, components, true).get("solution");
+	  }
 }
