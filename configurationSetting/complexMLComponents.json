@@ -1,6 +1,6 @@
 {
 	"repository": "Complex ML Components",
-	"include": ["./tpotComponents.json", "./testrsc/"],
+	"include": ["tpot/tpotComponents.json"],
 	"components": [
 		{
 			"name": "MLPipeline",
