@@ -1,5 +1,12 @@
 package jaicore.graphvisualizer.gui;
 
+import java.net.URL;
+import java.util.List;
+import java.util.ResourceBundle;
+import java.util.concurrent.TimeUnit;
+
+import javax.swing.SwingUtilities;
+
 import jaicore.graphvisualizer.NodeListener;
 import jaicore.graphvisualizer.SearchVisualizationPanel;
 import jaicore.graphvisualizer.TooltipGenerator;
@@ -8,16 +15,9 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Slider;
-import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
-
-import javax.swing.*;
-import java.net.URL;
-import java.util.List;
-import java.util.ResourceBundle;
-import java.util.concurrent.TimeUnit;
 
 public class FXController implements Initializable, NodeListener {
 

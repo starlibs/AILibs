@@ -94,10 +94,29 @@ public class WekaUtil {
 		preprocessors.add("weka.attributeSelection.SymmetricalUncertAttributeEval");
 		return preprocessors;
 	}
+	
+	public static Collection<String> getSearchers() {
+		Collection<String> preprocessors = new ArrayList<>();
+		
+		preprocessors.add("weka.attributeSelection.Ranker");
+		preprocessors.add("weka.attributeSelection.BestFirst");
+		preprocessors.add("weka.attributeSelection.GreedyStepwise");
+		return preprocessors;
+	}
 
 	public static Collection<String> getMetaLearners() {
 		Collection<String> classifiers = new ArrayList<>();
-		classifiers.add("weka.classifiers.functions.AdaBoostM1");
+		classifiers.add("weka.classifiers.meta.AdaBoostM1");
+		classifiers.add("weka.classifiers.meta.AdditiveRegression");
+		classifiers.add("weka.classifiers.meta.AttributeSelectedClassifier");
+		classifiers.add("weka.classifiers.meta.Bagging");
+		classifiers.add("weka.classifiers.meta.ClassificationViaRegression");
+		classifiers.add("weka.classifiers.meta.LogitBoost");
+		classifiers.add("weka.classifiers.meta.MultiClassClassifier");
+		classifiers.add("weka.classifiers.meta.RandomCommittee");
+		classifiers.add("weka.classifiers.meta.RandomSubspace");
+		classifiers.add("weka.classifiers.meta.Stacking");
+		classifiers.add("weka.classifiers.meta.Vote");
 		return classifiers;
 	}
 

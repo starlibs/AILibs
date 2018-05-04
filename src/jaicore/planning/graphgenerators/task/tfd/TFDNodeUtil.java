@@ -8,7 +8,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import jaicore.basic.SetUtil;
+import jaicore.basic.StringUtil;
 import jaicore.logic.fol.structure.CNFFormula;
 import jaicore.logic.fol.structure.ConstantParam;
 import jaicore.logic.fol.structure.Literal;
@@ -46,7 +49,7 @@ public class TFDNodeUtil {
 		List<TFDNode> path = new ArrayList<>();
 		TFDNode current = node;
 		while (current != null) {
-			assert !path.contains(current) : "There is a loop in the path! Node " + node + " has been visited twice!";
+			assert !path.contains(current) : "There is a loop in the path! Node " + node + " has been visited twice!\n\tThe full path is: \n\t\t" + StringUtil.implode(SetUtil.getInvertedCopyOfList(SetUtil.addAndGet(path, current)).stream().map(n -> n.toString()).collect(Collectors.toList()), "\n\t\t");
 			path.add(current);
 			current = parentMap.get(current);
 		}

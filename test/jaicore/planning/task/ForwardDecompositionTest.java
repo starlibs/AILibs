@@ -34,6 +34,7 @@ public class ForwardDecompositionTest {
 			System.out.println("\t" + solution);
 		}
 		System.out.println("Algorithm has finished.");
+		while (true);
 	}
 
 }

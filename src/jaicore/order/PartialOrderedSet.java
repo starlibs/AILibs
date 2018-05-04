@@ -1,5 +1,6 @@
 package jaicore.order;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,6 +10,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
+
+import jaicore.basic.SetUtil;
+
 /**
  * A {@link Set} with a partial order added to it.
  * 
@@ -23,8 +27,7 @@ public class PartialOrderedSet<E> extends HashSet<E> {
 	private final Map<E, Set<E>> order;
 
 	/**
-	 * Creates a new partial ordered set with the same elements as
-	 * <code>original</code> and the same order.
+	 * Creates a new partial ordered set with the same elements as <code>original</code> and the same order.
 	 * 
 	 * @param original
 	 *            The {@link PartialOrderedSet} to copy.
@@ -71,6 +74,18 @@ public class PartialOrderedSet<E> extends HashSet<E> {
 		directlyAfterA.add(b);
 	}
 
+	public void requireABeforeB(final E a, final E b) {
+		if (!allowsABeforeB(a, b)) {
+			throw new IllegalStateException("By transitivity " + a + " before " + b + "isn't allowed.");
+		}
+		Set<E> directlyAfterA = order.get(a);
+		if (directlyAfterA == null) {
+			directlyAfterA = new HashSet<>();
+			order.put(a, directlyAfterA);
+		}
+		directlyAfterA.add(b);
+	}
+
 	/**
 	 * Tests if the relation allows for a < b.
 	 * 
@@ -86,11 +101,12 @@ public class PartialOrderedSet<E> extends HashSet<E> {
 	}
 
 	/**
-	 * Tests whether a < b is directly, not just transitively, specified by the
-	 * order.
+	 * Tests whether a < b is directly, not just transitively, specified by the order.
 	 * 
-	 * @param a The first element.
-	 * @param b The second element.
+	 * @param a
+	 *            The first element.
+	 * @param b
+	 *            The second element.
 	 * @return Whether the order specifies directly, that a < b has to hold.
 	 */
 	public boolean isADirectlyBeforeB(final E a, final E b) {
@@ -163,18 +179,13 @@ public class PartialOrderedSet<E> extends HashSet<E> {
 	}
 
 	/**
-	 * Creates a total order of the elements stored in this
-	 * {@link PartialOrderedSet}. The order is created by iterating over all
-	 * elements in the set and inserting each element in the list at the
-	 * position of the element with the currently smallest index that has to be
-	 * after the current element.
+	 * Creates a total order of the elements stored in this {@link PartialOrderedSet}. The order is created by iterating over all elements in the set and inserting each element in the list at the
+	 * position of the element with the currently smallest index that has to be after the current element.
 	 * 
-	 * If no elements needs to be after the current element, it is appended to
-	 * the end. The runtime is O(n²).
+	 * If no elements needs to be after the current element, it is appended to the end. The runtime is O(n²).
 	 * 
 	 * 
-	 * @return A total ordering of the elements in this
-	 *         {@link PartialOrderedSet}.
+	 * @return A total ordering of the elements in this {@link PartialOrderedSet}.
 	 */
 	public List<E> getTotalOrder() {
 		final List<E> list = new LinkedList<>();
@@ -195,13 +206,10 @@ public class PartialOrderedSet<E> extends HashSet<E> {
 	}
 
 	/**
-	 * If the collection is a {@link PartialOrderedSet}, the order will also be
-	 * added. If the that would destroy asymmetry an
-	 * {@link IllegalStateException} will be thrown.
+	 * If the collection is a {@link PartialOrderedSet}, the order will also be added. If the that would destroy asymmetry an {@link IllegalStateException} will be thrown.
 	 * 
 	 * @throws IllegalStateException
-	 *             if adding the order of another {@link PartialOrderedSet}
-	 *             would destroy asymmetry.
+	 *             if adding the order of another {@link PartialOrderedSet} would destroy asymmetry.
 	 */
 	public void merge(PartialOrderedSet<? extends E> set) {
 		super.addAll(set);
@@ -248,6 +256,44 @@ public class PartialOrderedSet<E> extends HashSet<E> {
 
 		return sb.toString();
 
+	}
+
+	public List<E> getLinearization() {
+		
+		/* create a copy of all elements */
+		List<E> elements = new ArrayList<>();
+		Iterator<E> iterator = super.iterator();
+		while (iterator.hasNext())
+			elements.add(iterator.next());
+		
+		/* compute initial values of working variables */
+		List<E> linearization = new ArrayList<>();
+		Map<E,Set<E>> workingCopyOfOrder = new HashMap<>(order);
+		Collection<E> itemsWithoutSuccessor = new HashSet<>(SetUtil.difference(elements, workingCopyOfOrder.keySet()));
+		Collection<E> uninsertedItems = new HashSet<>(elements);
+		
+		/* now compute the linearization from the back */
+		while (!itemsWithoutSuccessor.isEmpty()) {
+			List<E> itemsToInsert = new ArrayList<>(itemsWithoutSuccessor);
+			itemsWithoutSuccessor.clear();
+			for (E itemWithoutSuccessor : itemsToInsert) {
+				linearization.add(0,itemWithoutSuccessor);
+				uninsertedItems.remove(itemWithoutSuccessor);
+				for (E uninsertedItem : uninsertedItems) {
+					if (workingCopyOfOrder.containsKey(uninsertedItem)) {
+						workingCopyOfOrder.get(uninsertedItem).remove(itemWithoutSuccessor);
+						if (workingCopyOfOrder.get(uninsertedItem).isEmpty())
+							itemsWithoutSuccessor.add(uninsertedItem);
+					}
+				}
+			}
+		}
+		return linearization;
+	}
+	
+	@Override
+	public Iterator<E> iterator() {
+		return getLinearization().iterator();
 	}
 
 	@Override

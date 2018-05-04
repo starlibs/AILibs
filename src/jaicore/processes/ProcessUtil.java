@@ -62,4 +62,12 @@ public class ProcessUtil {
 		}
 		throw new UnsupportedOperationException();
 	}
+	
+	public static void killProcess(int pid) throws IOException {
+		Runtime rt = Runtime.getRuntime();
+		if (System.getProperty("os.name").toLowerCase().indexOf("windows") > -1)
+			rt.exec("taskkill /F /PID " + pid);
+		else
+			rt.exec("kill -9 " + pid);
+	}
 }
