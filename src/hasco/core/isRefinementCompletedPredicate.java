@@ -8,11 +8,11 @@ import java.util.Map;
 
 import org.apache.commons.lang3.NotImplementedException;
 
-import hasco.model.BooleanParameter;
-import hasco.model.CategoricalParameter;
+import hasco.model.BooleanParameterDomain;
+import hasco.model.CategoricalParameterDomain;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
-import hasco.model.NumericParameter;
+import hasco.model.NumericParameterDomain;
 import hasco.model.Parameter;
 import hasco.model.ParameterRefinementConfiguration;
 import jaicore.basic.SetUtil;
@@ -70,7 +70,7 @@ public class isRefinementCompletedPredicate implements EvaluablePredicate {
 		for (Parameter param : component.getParameters()) {
 			String containerOfParam = componentParamContainers.get(param.getName());
 			String currentValueOfParam = componentParams.get(param.getName());
-			if (param instanceof NumericParameter) {
+			if (param.getDefaultDomain() instanceof NumericParameterDomain) {
 				ParameterRefinementConfiguration refinementConfig = refinementConfiguration.get(component).get(param);
 				List<String> interval = SetUtil.unserializeList(currentValueOfParam);
 				double min = Double.parseDouble(interval.get(0));
@@ -80,7 +80,7 @@ public class isRefinementCompletedPredicate implements EvaluablePredicate {
 				if (length > refinementConfig.getIntervalLength())
 					return false;
 			}
-			else if (param instanceof CategoricalParameter) { // categorical params can be refined iff their current value is not the default value
+			else if (param.getDefaultDomain() instanceof CategoricalParameterDomain) { // categorical params can be refined iff their current value is not the default value
 				assert currentValueOfParam != null : "Param " + param.getName() + " has currently no value!";
 				assert param.getDefaultValue() != null : "Param " + param.getName() + " has no default value!";
 				boolean variableHasBeenSet = state.contains(new Literal("overwritten('" + containerOfParam + "')"));
