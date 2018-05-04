@@ -18,7 +18,13 @@
       "name" : "fit_prior",
       "default" : "true",
       "type" : "boolean"
-    } ]
+    } ],
+    "dependencies": [
+    	{
+	    	"pre": "fit_prior in {true}",
+    		"post": "alpha in {0.02,0.01,0.0124}"
+    	}
+    ]
   }, {
     "name" : "sklearn.naive_bayes.MultinomialNB",
     "providedInterface" : [ "sklearn.naive_bayes.MultinomialNB", "AbstractClassifier" ],

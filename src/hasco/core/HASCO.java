@@ -19,7 +19,7 @@ import hasco.events.HASCORunTerminatedEvent;
 import hasco.events.HASCOSolutionEvaluationEvent;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
-import hasco.model.NumericParameter;
+import hasco.model.NumericParameterDomain;
 import hasco.model.Parameter;
 import hasco.model.ParameterRefinementConfiguration;
 import hasco.query.Factory;
@@ -169,6 +169,14 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 				for (Operation o : this.problem.getDomain().getOperations()) {
 					logger.debug(o.toString());
 				}
+				
+				/* check whether there is a refinement config for each numeric parameter */
+				for (Component c : components) {
+					for (Parameter p : c.getParameters()) {
+						if (p.isNumeric() && (!paramRefinementConfig.containsKey(c) || !paramRefinementConfig.get(c).containsKey(p)))
+							throw new IllegalArgumentException("No refinement config was delivered for numeric parameter " + p.getName() + " of component " + c.getName());
+					}
+				}
 
 				/* register listeners if the */
 				if (this.planner instanceof IObservableGraphAlgorithm<?, ?>) {
@@ -269,9 +277,9 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 					/* add knowledge about initial value */
 					List<LiteralParam> valParams = new ArrayList<>();
 					valParams.add(new VariableParam(paramIdentifier));
-					if (p instanceof NumericParameter) {
+					if (p.getDefaultDomain() instanceof NumericParameterDomain) {
 						standardKnowledgeAboutNewComponent.add(new Literal("parameterFocus(c2, '" + p.getName() + "', '" + p.getDefaultValue() + "')"));
-						NumericParameter np = (NumericParameter) p;
+						NumericParameterDomain np = (NumericParameterDomain) p.getDefaultDomain();
 						valParams.add(new ConstantParam("[" + np.getMin() + "," + np.getMax() + "]"));
 					} else {
 						valParams.add(new ConstantParam(p.getDefaultValue().toString()));
@@ -338,6 +346,8 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 			List<Literal> initNetwork = new ArrayList<>();
 			String refinementArguments = "";
 			int j = 0;
+			
+			/* go, in an ordering that is consistent with the pre-order on the params imposed by the dependencies, over the set of params */
 			for (Parameter p : c.getParameters()) {
 				String paramName = "p" + (++j);
 				refinementArguments += ", " + paramName;

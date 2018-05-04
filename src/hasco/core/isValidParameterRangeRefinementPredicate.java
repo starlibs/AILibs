@@ -1,5 +1,6 @@
 package hasco.core;
 
+import java.nio.channels.UnsupportedAddressTypeException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -10,15 +11,17 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Stack;
 
+import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.math.stat.descriptive.SynchronizedMultivariateSummaryStatistics;
 import org.apache.commons.math3.geometry.euclidean.oned.Interval;
 
-import hasco.model.CategoricalParameter;
+import hasco.model.CategoricalParameterDomain;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
-import hasco.model.NumericParameter;
+import hasco.model.NumericParameterDomain;
 import hasco.model.Parameter;
+import hasco.model.ParameterDomain;
 import hasco.model.ParameterRefinementConfiguration;
-import jaicore.basic.SetUtil;
 import jaicore.logic.fol.structure.ConstantParam;
 import jaicore.logic.fol.structure.Literal;
 import jaicore.logic.fol.structure.Monom;
@@ -27,21 +30,22 @@ import jaicore.logic.fol.theories.EvaluablePredicate;
 public class isValidParameterRangeRefinementPredicate implements EvaluablePredicate {
 
 	private final Collection<Component> components;
-	private final Map<Component,Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration;
-	private final Map<ComponentInstance,Double> knownCompositionsAndTheirScore = new HashMap<>();
+	private final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration;
+	private final Map<ComponentInstance, Double> knownCompositionsAndTheirScore = new HashMap<>();
 
-	public isValidParameterRangeRefinementPredicate(Collection<Component> components, Map<Component,Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration) {
+	public isValidParameterRangeRefinementPredicate(Collection<Component> components, Map<Component, Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration) {
 		super();
 		this.components = components;
 		this.refinementConfiguration = refinementConfiguration;
 	}
-	
+
 	@Override
 	public Collection<List<ConstantParam>> getParamsForPositiveEvaluation(Monom state, ConstantParam... partialGrounding) {
-		
+
 		/* determine the context for which the interval refinement should be oracled */
 		if (partialGrounding.length != 6) {
-			throw new IllegalArgumentException("The interpreted predicate " + this.getClass().getName() + " requires 6 arguments when oracled but " + partialGrounding.length + " have been provided!");
+			throw new IllegalArgumentException(
+					"The interpreted predicate " + this.getClass().getName() + " requires 6 arguments when oracled but " + partialGrounding.length + " have been provided!");
 		}
 		String componentName = partialGrounding[0].getName();
 		String componentIdentifier = partialGrounding[1].getName();
@@ -50,48 +54,68 @@ public class isValidParameterRangeRefinementPredicate implements EvaluablePredic
 		Parameter param = component.getParameters().stream().filter(p -> p.getName().equals(parameterName)).findAny().get();
 		List<ConstantParam> partialGroundingAsList = Arrays.asList(partialGrounding);
 		String containerName = partialGrounding[3].getName();
-		String currentParamValue = partialGrounding[4].getName();
-		
+		String currentParamValue = partialGrounding[4].getName(); // this is not really used, because the current value is again read from the state
+
+		/* determine true domain of parameter */
+		Map<Parameter, ParameterDomain> paramDomains = Util.getUpdatedDomainsOfComponentParameters(state, component, componentIdentifier);
+
 		/* determine refinements for numeric parameters */
-		if (param instanceof NumericParameter) {
-			List<String> currentIntervalAsString = SetUtil.unserializeList(currentParamValue);
-			Interval currentInterval = new Interval(Double.parseDouble(currentIntervalAsString.get(0)), Double.parseDouble(currentIntervalAsString.get(1)));
-			
+		if (param.isNumeric()) {
+			NumericParameterDomain currentlyActiveDomain = (NumericParameterDomain) paramDomains.get(param);
+			Interval currentInterval = new Interval(currentlyActiveDomain.getMin(), currentlyActiveDomain.getMax());
+
 			ParameterRefinementConfiguration refinementConfig = refinementConfiguration.get(component).get(param);
 			if (refinementConfig == null)
 				throw new IllegalArgumentException("No refinement configuration for parameter \"" + parameterName + "\" of component \"" + componentName + "\" has been supplied!");
-			
-			/* if the interval is already below the threshold for this parameter, no more refinements will be allowed */
-			if (currentInterval.getSup() - currentInterval.getInf() < refinementConfig.getIntervalLength())
-				return new ArrayList<>();
-			
-			if (!refinementConfig.isInitRefinementOnLogScale()) {
-				return getGroundingsForIntervals(refineOnLinearScale(currentInterval, refinementConfig.getRefinementsPerStep(), refinementConfig.getIntervalLength()), partialGroundingAsList);
+
+			/* if this is an integer and the number of comprised integers are at most as many as the branching factor, enumerate them */
+			if (currentlyActiveDomain.isInteger() && (Math.floor(currentInterval.getSup()) - Math.ceil(currentInterval.getInf()) + 1 <= refinementConfig.getRefinementsPerStep())) {
+				List<Interval> proposedRefinements = new ArrayList<>();
+				for (int i = (int)Math.ceil(currentInterval.getInf()); i <= (int)Math.floor(currentInterval.getSup()); i++) {
+					proposedRefinements.add(new Interval(i, i));
+				}
+				return getGroundingsForIntervals(proposedRefinements, partialGroundingAsList);
 			}
 			
-			Optional<Literal> focusPredicate = state.stream().filter(l -> l.getPropertyName().equals("parameterFocus") && l.getParameters().get(0).getName().equals(componentIdentifier) && l.getParameters().get(1).getName().equals(parameterName)).findAny();
+			/* if the interval is already below the threshold for this parameter, no more refinements will be allowed */
+			if (currentInterval.getSup() - currentInterval.getInf() < refinementConfig.getIntervalLength()) {
+				return new ArrayList<>();
+			}
+
+			if (!refinementConfig.isInitRefinementOnLogScale()) {
+				List<Interval> proposedRefinements = refineOnLinearScale(currentInterval, refinementConfig.getRefinementsPerStep(), refinementConfig.getIntervalLength());
+				for (Interval proposedRefinement : proposedRefinements) {
+					assert proposedRefinement.getInf() >= currentInterval.getInf() && proposedRefinement.getSup() <= currentInterval.getSup() : "The proposed refinement [" + proposedRefinement.getInf() + ", " + proposedRefinement.getSup() + "] is not a sub-interval of " + currentParamValue +"].";
+					assert proposedRefinement.equals(currentInterval) : "No real refinement! Intervals are identical.";
+				}
+				return getGroundingsForIntervals(proposedRefinements, partialGroundingAsList);
+			}
+
+			Optional<Literal> focusPredicate = state.stream().filter(l -> l.getPropertyName().equals("parameterFocus")
+					&& l.getParameters().get(0).getName().equals(componentIdentifier) && l.getParameters().get(1).getName().equals(parameterName)).findAny();
 			if (!focusPredicate.isPresent())
-				throw new IllegalArgumentException("The given state does not specify a parameter focus for the log-scale parameter " + parameterName + " on object \"" + componentIdentifier + "\"");
+				throw new IllegalArgumentException(
+						"The given state does not specify a parameter focus for the log-scale parameter " + parameterName + " on object \"" + componentIdentifier + "\"");
 			double focus = Double.parseDouble(focusPredicate.get().getParameters().get(2).getName());
-			
-			return getGroundingsForIntervals(refineOnLogScale(currentInterval, refinementConfig.getRefinementsPerStep(), 2, focus), partialGroundingAsList);
-			
-		} else if (param instanceof CategoricalParameter) {
+
+			List<Interval> proposedRefinements = refineOnLogScale(currentInterval, refinementConfig.getRefinementsPerStep(), 2, focus);
+			return getGroundingsForIntervals(proposedRefinements, partialGroundingAsList);
+
+		} else if (param.isCategorical()) {
 			List<String> possibleValues = new ArrayList<>();
 			boolean hasBeenSetBefore = state.contains(new Literal("overwritten('" + containerName + "')"));
 			if (hasBeenSetBefore)
 				return new ArrayList<>();
-			for (Object valAsObject : ((CategoricalParameter) param).getValues()) {
+			for (Object valAsObject : ((CategoricalParameterDomain) paramDomains.get(param)).getValues()) {
 				possibleValues.add(valAsObject.toString());
 			}
 			return getGroundingsForOracledValues(possibleValues, partialGroundingAsList);
-		}
-		else
+		} else
 			throw new UnsupportedOperationException("Currently no support for parameters of class \"" + param.getClass().getName() + "\"");
-		
-//		throw new NotImplementedException("Apparentely, there is an unimplemented case!");
+
+		// throw new NotImplementedException("Apparentely, there is an unimplemented case!");
 	}
-	
+
 	private Collection<List<ConstantParam>> getGroundingsForIntervals(List<Interval> refinements, List<ConstantParam> partialGrounding) {
 		List<String> paramValues = new ArrayList<>();
 		for (Interval oracledInterval : refinements) {
@@ -99,7 +123,7 @@ public class isValidParameterRangeRefinementPredicate implements EvaluablePredic
 		}
 		return getGroundingsForOracledValues(paramValues, partialGrounding);
 	}
-	
+
 	private Collection<List<ConstantParam>> getGroundingsForOracledValues(List<String> refinements, List<ConstantParam> partialGrounding) {
 		Collection<List<ConstantParam>> groundings = new ArrayList<>();
 		for (String oracledValue : refinements) {
@@ -109,7 +133,7 @@ public class isValidParameterRangeRefinementPredicate implements EvaluablePredic
 		}
 		return groundings;
 	}
-	
+
 	public void informAboutNewSolution(ComponentInstance solution, double score) {
 		this.knownCompositionsAndTheirScore.put(solution, score);
 	}
@@ -126,8 +150,7 @@ public class isValidParameterRangeRefinementPredicate implements EvaluablePredic
 
 	@Override
 	public boolean test(Monom state, ConstantParam... params) {
-		System.out.println("HA");
-		return false;
+		throw new NotImplementedException("Testing the validity-predicate is currently not supported. This is indirectly possible using the oracle.");
 	}
 
 	public List<Interval> refineOnLinearScale(Interval interval, int maxNumberOfSubIntervals, double minimumLengthOfIntervals) {
