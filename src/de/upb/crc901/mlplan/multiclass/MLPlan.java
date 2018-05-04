@@ -15,11 +15,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math.stat.descriptive.SynchronizedMultivariateSummaryStatistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.upb.crc901.automl.hascowekaml.HASCOForWekaML;
-import de.upb.crc901.automl.hascowekaml.HASCOForWekaML.HASCOForWekaMLSolution;
+import de.upb.crc901.automl.hascowekaml.HASCOForMEKA;
+import de.upb.crc901.automl.hascowekaml.HASCOForMEKA.HASCOForMEKASolution;
 import jaicore.basic.SetUtil;
 import jaicore.concurrent.TimeoutTimer;
 import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
@@ -57,7 +58,7 @@ public class MLPlan extends AbstractClassifier implements Classifier, OptionHand
 
 	/* variable relevant for and during a single run */
 	private long timeOfStart;
-	private HASCOForWekaML hasco = new HASCOForWekaML();
+	private HASCOForMEKA hasco = new HASCOForMEKA();
 
 	/* output variables */
 	private Classifier selectedClassifier;
@@ -206,20 +207,20 @@ public class MLPlan extends AbstractClassifier implements Classifier, OptionHand
 	}
 
 	protected boolean shouldSearchTerminate(long timeRemaining) {
-		Collection<HASCOForWekaMLSolution> currentSelection = getSelectionForPhase2();
+		Collection<HASCOForMEKASolution> currentSelection = getSelectionForPhase2();
 		int estimateForPhase2 = isSelectionActivated() ? getExpectedRuntimeForPhase2ForAGivenPool(currentSelection) : 0;
-		HASCOForWekaMLSolution internallyOptimalSolution = hasco.getCurrentlyBestSolution();
+		HASCOForMEKASolution internallyOptimalSolution = hasco.getCurrentlyBestSolution();
 		int timeToTrainBestSolutionOnEntireSet = internallyOptimalSolution != null ? (int)Math.round(hasco.getTimeHASCONeededToEvaluateSolution(internallyOptimalSolution) / (1 - portionOfDataForPhase2)) : 0;
 		boolean terminatePhase1 = estimateForPhase2 + timeToTrainBestSolutionOnEntireSet > timeRemaining;
 		logger.info("{}ms remaining in total, and we estimate {}ms for phase 2. Terminate phase 1: {}", timeRemaining, estimateForPhase2, terminatePhase1);
 		return terminatePhase1;
 	}
 
-	private synchronized List<HASCOForWekaMLSolution> getSelectionForPhase2() {
+	private synchronized List<HASCOForMEKASolution> getSelectionForPhase2() {
 		return getSelectionForPhase2(Integer.MAX_VALUE);
 	}
 
-	private synchronized List<HASCOForWekaMLSolution> getSelectionForPhase2(int remainingTime) {
+	private synchronized List<HASCOForMEKASolution> getSelectionForPhase2(int remainingTime) {
 
 		if (numberOfConsideredSolutions < 1)
 			throw new UnsupportedOperationException(
@@ -228,11 +229,11 @@ public class MLPlan extends AbstractClassifier implements Classifier, OptionHand
 		/* some initial checks for cases where we do not really have to do anything */
 		if (remainingTime < 0)
 			throw new IllegalArgumentException("Cannot do anything in negative time (" + remainingTime + "ms)");
-		HASCOForWekaMLSolution internallyOptimalSolution = hasco.getCurrentlyBestSolution();
+		HASCOForMEKASolution internallyOptimalSolution = hasco.getCurrentlyBestSolution();
 		if (internallyOptimalSolution == null)
 			return new ArrayList<>();
 		if (!isSelectionActivated()) {
-			List<HASCOForWekaMLSolution> best = new ArrayList<>();
+			List<HASCOForMEKASolution> best = new ArrayList<>();
 			best.add(internallyOptimalSolution);
 			return best;
 		}
@@ -242,16 +243,16 @@ public class MLPlan extends AbstractClassifier implements Classifier, OptionHand
 		int maxMarginFrombest = 300;
 		int bestK = (int) Math.ceil(numberOfConsideredSolutions / 2);
 		int randomK = numberOfConsideredSolutions - bestK;
-		Collection<HASCOForWekaMLSolution> potentialCandidates = new ArrayList<>(hasco.getFoundClassifiers()).stream().filter(solution -> {
+		Collection<HASCOForMEKASolution> potentialCandidates = new ArrayList<>(hasco.getFoundClassifiers()).stream().filter(solution -> {
 			return hasco.getQualityHASCODeterminedForSolution(solution) <= optimalInternalScore + maxMarginFrombest;
 		}).collect(Collectors.toList());
 		logger.debug("Computing {} best and {} random solutions for a max runtime of {}. Number of candidates that are at most {} worse than optimum {} is: {}/{}", bestK, randomK,
 				remainingTime, maxMarginFrombest, optimalInternalScore, potentialCandidates.size(), hasco.getFoundClassifiers().size());
-		List<HASCOForWekaMLSolution> selectionCandidates = potentialCandidates.stream().limit(bestK).collect(Collectors.toList());
-		List<HASCOForWekaMLSolution> remainingCandidates = new ArrayList<>(SetUtil.difference(potentialCandidates, selectionCandidates));
+		List<HASCOForMEKASolution> selectionCandidates = potentialCandidates.stream().limit(bestK).collect(Collectors.toList());
+		List<HASCOForMEKASolution> remainingCandidates = new ArrayList<>(SetUtil.difference(potentialCandidates, selectionCandidates));
 		Collections.shuffle(remainingCandidates, new Random(randomSeed));
 		selectionCandidates.addAll(remainingCandidates.stream().limit(randomK).collect(Collectors.toList()));
-
+		
 		/* if the candidates can be evaluated in the remaining time, return all of them */
 		int budget = getExpectedRuntimeForPhase2ForAGivenPool(selectionCandidates);
 		if (budget < remainingTime) {
@@ -259,12 +260,13 @@ public class MLPlan extends AbstractClassifier implements Classifier, OptionHand
 		}
 
 		/* otherwise return as much as can be expectedly done in the time */
-		List<HASCOForWekaMLSolution> actuallySelectedSolutions = new ArrayList<>();
+		List<HASCOForMEKASolution> actuallySelectedSolutions = new ArrayList<>();
 		int expectedRuntime;
-		for (HASCOForWekaMLSolution pl : selectionCandidates) {
+		for (HASCOForMEKASolution pl : selectionCandidates) {
 			actuallySelectedSolutions.add(pl);
 			expectedRuntime = getExpectedRuntimeForPhase2ForAGivenPool(actuallySelectedSolutions);
 			if (expectedRuntime > remainingTime && actuallySelectedSolutions.size() > 1) {
+				logger.debug("Not considering solution {} for phase 2, because the expected runtime of the whole thing would be {}/{}", pl, expectedRuntime, remainingTime);
 				actuallySelectedSolutions.remove(pl);
 			}
 		}
@@ -273,11 +275,11 @@ public class MLPlan extends AbstractClassifier implements Classifier, OptionHand
 		return actuallySelectedSolutions;
 	}
 
-	private int getInSearchEvaluationTimeOfSolutionSet(Collection<HASCOForWekaMLSolution> solutions) {
+	private int getInSearchEvaluationTimeOfSolutionSet(Collection<HASCOForMEKASolution> solutions) {
 		return hasco.getFoundClassifiers().stream().map(pl -> hasco.getTimeHASCONeededToEvaluateSolution(pl)).reduce(0, (a, b) -> a + b).intValue();
 	}
 
-	public int getExpectedRuntimeForPhase2ForAGivenPool(Collection<HASCOForWekaMLSolution> solutions) {
+	public int getExpectedRuntimeForPhase2ForAGivenPool(Collection<HASCOForMEKASolution> solutions) {
 		long estimateForPhase2IfSequential = (int) (getInSearchEvaluationTimeOfSolutionSet(solutions) / (1 - portionOfDataForPhase2)); // consider the fact the inner search train time was on only 70% of the data
 		long estimateForAvailableCores = numberOfCPUs;
 		// double cacheFactor = Math.pow(getNumberOfCPUs(), -.6);
@@ -291,8 +293,8 @@ public class MLPlan extends AbstractClassifier implements Classifier, OptionHand
 
 	protected Classifier selectModel(ClassifierEvaluator evaluator) {
 
-		Queue<HASCOForWekaMLSolution> solutions = hasco.getFoundClassifiers();
-		HASCOForWekaMLSolution bestSolution = solutions.peek();
+		Queue<HASCOForMEKASolution> solutions = hasco.getFoundClassifiers();
+		HASCOForMEKASolution bestSolution = solutions.peek();
 		double scoreOfBestSolution = hasco.getQualityHASCODeterminedForSolution(bestSolution);
 
 		if (!isSelectionActivated()) {
@@ -303,9 +305,9 @@ public class MLPlan extends AbstractClassifier implements Classifier, OptionHand
 		/* determine the models from which we want to select */
 		logger.info("Starting with phase 2: Selection of final model among the {} solutions that were identified.", solutions.size());
 		long startOfPhase2 = System.currentTimeMillis();
-		List<HASCOForWekaMLSolution> ensembleToSelectFrom;
+		List<HASCOForMEKASolution> ensembleToSelectFrom;
 		if (timeoutInS > 0) {
-			int remainingTime = timeoutInS > 0 ? (int) (timeoutInS * 1000 - (System.currentTimeMillis() - timeOfStart)) : Integer.MAX_VALUE;
+			int remainingTime = (int) (timeoutInS * 1000 - (System.currentTimeMillis() - timeOfStart));
 			if (remainingTime < 0) {
 				logger.info("Timelimit is already exhausted, just returning a greedy solution that had internal error {}.", scoreOfBestSolution);
 				return bestSolution.getClassifier();
@@ -329,7 +331,7 @@ public class MLPlan extends AbstractClassifier implements Classifier, OptionHand
 			t.setName("final-evaluator-" + evaluatorCounter.incrementAndGet());
 			return t;
 		});
-		HASCOForWekaMLSolution selectedModel = bestSolution; // backup solution
+		HASCOForMEKASolution selectedModel = bestSolution; // backup solution
 		final Semaphore sem = new Semaphore(0);
 		long timestampOfDeadline = timeOfStart + timeoutInS * 1000;
 
@@ -338,7 +340,7 @@ public class MLPlan extends AbstractClassifier implements Classifier, OptionHand
 		final TimeoutSubmitter ts = TimeoutTimer.getInstance().getSubmitter();
 		ensembleToSelectFrom.forEach(c -> stats.add(new DescriptiveStatistics()));
 		for (int i = 0; i < ensembleToSelectFrom.size(); i++) {
-			HASCOForWekaMLSolution c = ensembleToSelectFrom.get(i);
+			HASCOForMEKASolution c = ensembleToSelectFrom.get(i);
 			final DescriptiveStatistics statsForThisCandidate = stats.get(i);
 			for (int j = 0; j < numberOfMCIterationsPerSolutionInSelectionPhase; j++) {
 				pool.submit(new Runnable() {
@@ -346,7 +348,7 @@ public class MLPlan extends AbstractClassifier implements Classifier, OptionHand
 						int taskId = -1;
 						try {
 							int indexOfCurrentlyChosenModel = getClassifierThatWouldCurrentlyBeSelectedWithinPhase2(ensembleToSelectFrom, stats, false);
-							HASCOForWekaMLSolution currentlyChosenSolution = ensembleToSelectFrom.get(indexOfCurrentlyChosenModel);
+							HASCOForMEKASolution currentlyChosenSolution = ensembleToSelectFrom.get(indexOfCurrentlyChosenModel);
 							int trainingTimeForChosenModelInsideSearch = hasco.getTimeHASCONeededToEvaluateSolution(currentlyChosenSolution);
 							int estimatedOverallTrainingTimeForChosenModel = (int) Math.round(trainingTimeForChosenModelInsideSearch / (1 - portionOfDataForPhase2) / .7); // we assume a linear growth
 							int expectedTrainingTimeOfThisModel = (int) Math.round(hasco.getTimeHASCONeededToEvaluateSolution(c) / .7);
@@ -411,12 +413,12 @@ public class MLPlan extends AbstractClassifier implements Classifier, OptionHand
 		return selectedModel.getClassifier();
 	}
 
-	private synchronized int getClassifierThatWouldCurrentlyBeSelectedWithinPhase2(List<HASCOForWekaMLSolution> ensembleToSelectFrom, List<DescriptiveStatistics> stats,
+	private synchronized int getClassifierThatWouldCurrentlyBeSelectedWithinPhase2(List<HASCOForMEKASolution> ensembleToSelectFrom, List<DescriptiveStatistics> stats,
 			boolean logComputations) {
 		int selectedModel = 0;
 		double best = Double.MAX_VALUE;
 		for (int i = 0; i < ensembleToSelectFrom.size(); i++) {
-			HASCOForWekaMLSolution candidate = ensembleToSelectFrom.get(i);
+			HASCOForMEKASolution candidate = ensembleToSelectFrom.get(i);
 			DescriptiveStatistics statsOfCandidate = stats.get(i);
 			if (statsOfCandidate.getN() == 0) {
 				if (logComputations)

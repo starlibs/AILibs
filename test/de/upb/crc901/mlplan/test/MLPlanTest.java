@@ -4,12 +4,15 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.List;
+import java.util.Properties;
 import java.util.Random;
 
 import org.junit.Test;
 
 import de.upb.crc901.mlplan.multiclass.DefaultPreorder;
 import de.upb.crc901.mlplan.multiclass.MLPlan;
+import hasco.eventlogger.HASCOSQLEventLogger;
+import jaicore.basic.MySQLAdapter;
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.ml.WekaUtil;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
@@ -29,7 +32,9 @@ public class MLPlanTest {
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(0), .7f);
 		
 		MLPlan mlplan = new MLPlan();
-		mlplan.setTimeout(10);
+		mlplan.registerListener(new HASCOSQLEventLogger<>(new MySQLAdapter("isys-db.cs.upb.de", "mlplan", "UMJXI4WlNqbS968X", "hasco")));
+//		mlplan.registerListener(new HASCOSQLEventLogger<>(new MySQLAdapter("hsqldb:hsql", "localhost", "SA", "", "testdb", new Properties())));
+		mlplan.setTimeout(5);
 		mlplan.setPortionOfDataForPhase2(.3f);
 		mlplan.setNodeEvaluator(new DefaultPreorder());
 		

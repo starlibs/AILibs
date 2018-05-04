@@ -72,6 +72,7 @@ dependencies {
 	//compile name: 'weka-interruptable'
 	compile name: 'autoweka'
 	compile name: 'mysql-connector-java-5.1.45-bin'
+	compile name: 'hsqldb'
 	compile name: 'meka'
 	
 	// apache lang (for reflection)

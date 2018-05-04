@@ -9,20 +9,14 @@ import java.nio.file.Path;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -31,25 +25,24 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.google.common.collect.ContiguousSet;
-import com.google.common.collect.DiscreteDomain;
-import com.google.common.collect.Range;
 
 import autoweka.ClassParams;
 import autoweka.Conditional;
 import autoweka.Parameter;
+import de.upb.crc901.automl.pipeline.basic.MLPipeline;
 import de.upb.crc901.automl.pipeline.service.MLPipelinePlan;
-import de.upb.crc901.automl.pipeline.service.MLServicePipeline;
 import de.upb.crc901.services.core.HttpServiceServer;
 import jaicore.basic.FileUtil;
-import jaicore.basic.MathExt;
 import jaicore.basic.MySQLAdapter;
 import jaicore.basic.SetUtil;
 import jaicore.concurrent.TimeoutTimer;
 import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
 import jaicore.ml.WekaUtil;
+import jaicore.ml.evaluation.MulticlassEvaluator;
+import weka.attributeSelection.ASEvaluation;
+import weka.attributeSelection.ASSearch;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
-import weka.core.Instance;
 import weka.core.Instances;
 
 public class GridSearcher {
@@ -61,19 +54,16 @@ public class GridSearcher {
 	private static class JobResult {
 		ArrayNode trainingData;
 		Classifier c;
-		int tp, tn, fp, fn;
+		double errorRate;
 		double rankError;
 		int time;
 		Throwable e;
 
-		public JobResult(ArrayNode trainingData, Classifier c, int tp, int tn, int fp, int fn, double rankError, int time, Throwable e) {
+		public JobResult(ArrayNode trainingData, Classifier c, double errorRate, double rankError, int time, Throwable e) {
 			super();
 			this.trainingData = trainingData;
 			this.c = c;
-			this.tp = tp;
-			this.tn = tn;
-			this.fp = fp;
-			this.fn = fn;
+			this.errorRate = errorRate;
 			this.rankError = rankError;
 			this.time = time;
 			this.e = e;
@@ -83,54 +73,53 @@ public class GridSearcher {
 
 	private static class Job implements Runnable {
 
-		private String preprocessorAlgorithm, preprocessorOptions, classifierAlgorithm, classifierOptions;
+		private String searcherAlgorithm, searcherOptions, evaluatorAlgorithm, evaluatorOptions, classifierAlgorithm, classifierOptions;
 		private int dataSplitId;
 		private int seed;
 		private Instances data;
-		private Semaphore computationTickets;
 
-		public Job(String preprocessorAlgorithm, String preprocessorOptions, String classifierAlgorithm, String classifierOptions, int dataSplitId, int seed, Instances data, Semaphore computationTickets) {
+		public Job(String searcherAlgorithm, String searcherOptions, String evaluatorAlgorithm, String evaluatorOptions, String classifierAlgorithm, String classifierOptions, int dataSplitId, int seed, Instances data) {
 			super();
-			this.preprocessorAlgorithm = preprocessorAlgorithm;
-			this.preprocessorOptions = preprocessorOptions;
+			this.searcherAlgorithm = searcherAlgorithm;
+			this.searcherOptions = searcherOptions;
+			this.evaluatorAlgorithm = evaluatorAlgorithm;
+			this.evaluatorOptions = evaluatorOptions;
 			this.classifierAlgorithm = classifierAlgorithm;
 			this.classifierOptions = classifierOptions;
 			this.dataSplitId = dataSplitId;
 			this.seed = seed;
 			this.data = data;
-			this.computationTickets = computationTickets;
 		}
 
 		@Override
 		public void run() {
 			try {
 
-				String entry = encodeEntry(dataSplitId, seed, preprocessorAlgorithm, preprocessorOptions, classifierAlgorithm, classifierOptions);
+				String entry = encodeEntry(dataSplitId, seed, searcherAlgorithm, searcherOptions, evaluatorAlgorithm, evaluatorOptions, classifierAlgorithm, classifierOptions);
 
 				/* create experiment */
-				int id = createExperimentIfDoesNotExist(dataSplitId, seed, preprocessorAlgorithm, preprocessorOptions, classifierAlgorithm, classifierOptions);
-				JobResult result = executeRun(this.data, seed, preprocessorAlgorithm, preprocessorOptions, classifierAlgorithm, classifierOptions);
+				int id = createExperimentIfDoesNotExist(dataSplitId, seed, searcherAlgorithm, searcherOptions, evaluatorAlgorithm, evaluatorOptions, classifierAlgorithm, classifierOptions);
+				JobResult result = executeRun(this.data, seed, searcherAlgorithm, searcherOptions, evaluatorAlgorithm, evaluatorOptions, classifierAlgorithm, classifierOptions);
 
-				updateExperiment(id, result.trainingData, result.tp, result.tn, result.fp, result.fn, result.rankError, result.time, result.e);
+				updateExperiment(id, result.trainingData, result.errorRate, result.rankError, result.time, result.e);
 				if (result.c != null) {
 
 					/* serialize trained classifier */
-					File folder = new File("serializations");
-					folder.mkdirs();
-					FileUtil.serializeObject(result.c, folder + File.separator + id + ".classifier");
+//					File folder = new File("serializations");
+//					folder.mkdirs();
+//					FileUtil.serializeObject(result.c, folder + File.separator + id + ".classifier");
 				}
 			}
 
 			catch (Throwable e) {
 				e.printStackTrace();
 			}
-			finally {
-				computationTickets.release();
-			}
 		}
 	}
+	
+	private static int port;
 
-	private static JobResult executeRun(Instances data, int seed, String preprocessorAlgorithm, String preprocessorOptions, String classifierAlgorithm, String classifierOptions)
+	private static JobResult executeRun(Instances data, int seed, String searcherAlgorithm, String searcherOptions, String evaluatorAlgorithm, String evaluatorOptions, String classifierAlgorithm, String classifierOptions)
 			throws Exception {
 
 		/* prepare data and create split */
@@ -141,15 +130,21 @@ public class GridSearcher {
 		splitDecision[0].stream().sorted().forEach(v -> an.add(v));
 
 		/* create service base classifier */
-		MLPipelinePlan plan = new MLPipelinePlan();
-		plan.onHost("localhost:8000");
-		if (!preprocessorAlgorithm.isEmpty())
-			plan.addAttributeSelection(preprocessorAlgorithm).addOptions(preprocessorOptions);
-		plan.setClassifier(classifierAlgorithm).addOptions(classifierOptions);
+//		MLPipelinePlan plan = new MLPipelinePlan();
+//		plan.onHost("localhost:" + port);
+		ASSearch searcher = null;
+		ASEvaluation evaluation = null;
+		if (!searcherAlgorithm.isEmpty()) {
+			searcher = ASSearch.forName(searcherAlgorithm, new String[] {});
+			evaluation = ASEvaluation.forName(evaluatorAlgorithm, new String[] {});
+//			plan.addWekaAttributeSelection(searcher, evaluation);
+		}
+//		plan.setClassifier(classifierAlgorithm).addOptions(classifierOptions);
+		Classifier baseClassifier = AbstractClassifier.forName(classifierAlgorithm, new String[] {});
 		long timeStart = System.currentTimeMillis();
 		try {
-			logger.info("Create pipeline for plan {}", plan);
-			MLServicePipeline c = new MLServicePipeline(plan);
+//			logger.info("Create pipeline for plan {}", plan);
+			MLPipeline c = new MLPipeline(searcher, evaluation, baseClassifier);
 			
 			/* run experiment */
 			System.out.println("Computing performance of " + c + " for seed " + seed + " ... ");
@@ -160,61 +155,16 @@ public class GridSearcher {
 			logger.info("ready");
 			long timeEnd = System.currentTimeMillis();
 
-			Instances testData = split.get(1);
-			double[] predictions = c.classifyInstances(testData);
-			
-			/* compute basic metrics and the probabilities to predict 0 for each instance */
-			int tp = 0, fp = 0, tn = 0, fn = 0;
-			double[] predictedProbabilitiesForOne = new double[testData.size()];
-			boolean[] actualIsOne = new boolean[testData.size()];
-			for (int i = 0; i < testData.size(); i++) {
-				Instance inst = testData.get(i);
-				actualIsOne[i] = (inst.classValue() == 1);
-				double prediction = predictions[i];
-				predictedProbabilitiesForOne[i] = prediction;
-				if (inst.classValue() == 0) {
-					if (prediction == 0)
-						tn++;
-					else
-						fp++;
-				} else {
-					if (prediction == 0)
-						fn++;
-					else
-						tp++;
-				}
-			}
-			
-			/* compute rank loss */
-			List<Set<Integer>> instancePairs = SetUtil.getAllPossibleSubsetsWithSize(ContiguousSet.create(Range.closed(0, testData.size() - 1), DiscreteDomain.integers()).asList(),
-					2);
-			double mistakes = 0;
-			int differentPairs = 0;
-			for (Set<Integer> pair : instancePairs) {
-				Iterator<Integer> it = pair.iterator();
-				int x = it.next();
-				int y = it.next();
-				double xProb = predictedProbabilitiesForOne[x];
-				double yProb = predictedProbabilitiesForOne[y];
-				boolean xTrue = actualIsOne[x];
-				boolean yTrue = actualIsOne[y];
-				if (xTrue == yTrue)
-					continue;
-				differentPairs++;
-				if (Math.abs(xProb - yProb) < .000001)
-					mistakes += 0.5;
-				else if (xTrue && xProb < yProb)
-					mistakes++;
-				else if (yTrue && yProb < xProb)
-					mistakes++;
-			}
-			double rankLoss = MathExt.round(mistakes * 1f / differentPairs, 4);
-			logger.info("Computed tp, tn, fp, fn: {}, {}, {}, {}", tp, tn, fp, fn);
-			return new JobResult(an, c, tp, tn, fp, fn, rankLoss, (int) (timeEnd - timeStart), null);
+			MulticlassEvaluator eval = new MulticlassEvaluator(new Random(seed));
+			double errorRate = eval.loss(c, split.get(1));
+			double rankLoss = -1;
+			logger.info("Computed error rate: {}", errorRate);
+			return new JobResult(an, c, errorRate, rankLoss, (int) (timeEnd - timeStart), null);
 		} catch (Throwable e) {
 			long timeEnd = System.currentTimeMillis();
 			logger.error("Received an exception: {}, {}, {}", e.getClass().getName(), e.getMessage(), e.getCause());
-			return new JobResult(an, null, -1, -1, -1, -1, -1, (int) (timeEnd - timeStart), e instanceof RuntimeException ? ((RuntimeException)e).getCause() : e);
+			e.printStackTrace();
+			return new JobResult(an, null, -1, -1, (int) (timeEnd - timeStart), e instanceof RuntimeException ? ((RuntimeException)e).getCause() : e);
 
 		}
 
@@ -222,7 +172,8 @@ public class GridSearcher {
 
 	public static void main(String[] args) throws Throwable {
 
-		Collection<String> classifierNames = WekaUtil.getBasicLearners();
+		List<String> classifierNames = new ArrayList<>(WekaUtil.getBasicLearners());
+		Collections.shuffle(classifierNames);
 
 //		classifierNames.clear();
 //		classifierNames.add("weka.classifiers.functions.SMO");
@@ -231,7 +182,7 @@ public class GridSearcher {
 		Collections.shuffle(datasets);
 		
 		/* launch JASE Server */
-		int port = 8000;
+		port = 8000 + (int)(Math.random() * 1000);
 		HttpServiceServer server = new HttpServiceServer(port, "testrsc/conf/classifiers.json", "testrsc/conf/others.json", "testrsc/conf/preprocessors.json");
 		MLPipelinePlan.hostJASE = "localhost:" + port;
 		MLPipelinePlan.hostPASE = "localhost:5000";
@@ -243,14 +194,18 @@ public class GridSearcher {
 		System.out.println("Considering " + failedKeys.size() + " keys of failed runs");
 		System.out.println(failedKeys);
 		int experiments = 0;
-		ExecutorService pool = Executors.newFixedThreadPool(8);
-		Semaphore computationTickets = new Semaphore(8);
+		
+		List<Collection<?>> objects = new ArrayList<>();
+		objects.add(datasets);
+		objects.add(classifierNames);
+		
+		System.out.println(datasets.size() * classifierNames.size() + " many experiments.");
 		
 		for (File dataset : datasets) {
 			Instances allInstances = new Instances(new BufferedReader(new FileReader(dataset)));
 			allInstances.setClassIndex(allInstances.numAttributes() - 1);
 
-			for (int seed = 0; seed < 1; seed++) {
+			for (int seed = 0; seed < 20; seed++) {
 
 				Collection<Integer>[] splitDecision = WekaUtil.getArbitrarySplit(allInstances, new Random(seed), .7f);
 				System.out.println("Considering dataset " + dataset.getName());
@@ -258,74 +213,87 @@ public class GridSearcher {
 				Instances inst = WekaUtil.realizeSplit(allInstances, splitDecision).get(0);
 				
 				/* get update of used keys */
-				for (String preprocessor : new String[] { "" }) {
+				List<String> evaluators = new ArrayList<>(WekaUtil.getFeatureEvaluators());
+				Collections.shuffle(evaluators);
+				String searcher = "";
+				for (String evaluator : evaluators) {
+					if (evaluator != null) {
+						switch (evaluator) {
+						case "weka.attributeSelection.PrincipalComponents":
+						case "weka.attributeSelection.CorrelationAttributeEval":
+						case "weka.attributeSelection.GainRatioAttributeEval":
+						case "weka.attributeSelection.InfoGainAttributeEval":
+						case "weka.attributeSelection.OneRAttributeEval":
+						case "weka.attributeSelection.ReliefFAttributeEval":
+						case "weka.attributeSelection.SymmetricalUncertAttributeEval":
+							searcher = "weka.attributeSelection.Ranker";
+							break;
+						case "weka.attributeSelection.CfsSubsetEval":
+							searcher = Math.random() < 0.5 ? "weka.attributeSelection.BestFirst" : "weka.attributeSelection.GreedyStepwise";
+							break;
+						default:
+						}
+					}
+					
 					for (String classifierName : classifierNames) {
-						File configFile = new File(configFolder + "/" + classifierName + ".params");
-
+//						File configFile = new File(configFolder + "/" + classifierName + ".params");
 //						Collection<Map<String, String>> combos = getAllConsideredParamCombos(configFile, configFolder, 10000);
 						Collection<Map<String, String>> combos = new ArrayList<>();
 						combos.add(new HashMap<>());
 						for (Map<String, String> classifierParamsAsMap : combos) {
-							experiments ++;
 							String classifierParams = paramMapToString(classifierParamsAsMap);
-							String entry = encodeEntry(splitId, seed, preprocessor, "", classifierName, classifierParams);
+							String entry = encodeEntry(splitId, seed, searcher, "", evaluator, "", classifierName, classifierParams);
 							if (usedKeys.contains(entry)) {
 								// System.out.println("Skipping " + entry);
 								continue;
 							}
-							String dsEntry = encodeDSEntry(dataset.getName(), preprocessor, "", classifierName, classifierParams);
+							String dsEntry = encodeDSEntry(dataset.getName(), searcher, "", evaluator, "", classifierName, classifierParams);
 							if (failedKeys.contains(dsEntry)) {
 								logger.info("Skipping {} because a similar one has raised an issue", dsEntry);
 								continue;
 							}
-							System.out.print("Scheduling job ...");
-							computationTickets.acquire();
-							System.out.println(" done");
-							pool.submit(new Job(preprocessor, "", classifierName, classifierParams, splitId, seed, inst, computationTickets));
+							new Job(searcher, "", evaluator, "", classifierName, classifierParams, splitId, seed, inst).run();
 						}
 					}
 				}
 			}
 		}
-		pool.shutdown();
-		System.out.println("Waiting one month for termination of " + experiments + " jobs.");
-		pool.awaitTermination(30, TimeUnit.DAYS);
 		System.out.println("Ready");
 		dbAdapter.close();
 	}
 
-	private static String encodeEntry(int splitId, int seed, String preprocessorAlgorithm, String preprocessorOptions, String classifierAlgorithm, String classifierOptions) {
-		return splitId + ";" + ";" + seed + ";" + preprocessorOptions + ";" + preprocessorAlgorithm + ";" + classifierAlgorithm + ";" + classifierOptions;
+	private static String encodeEntry(int splitId, int seed, String searcherAlgorithm, String searcherOptions, String evaluatorAlgorithm, String evaluatorOptions, String classifierAlgorithm, String classifierOptions) {
+		return splitId + ";" + ";" + seed + ";" + searcherAlgorithm + ";" + searcherOptions + ";" + evaluatorAlgorithm + ";" + evaluatorOptions + ";" + classifierAlgorithm + ";" + classifierOptions;
 	}
 
-	private static String encodeDSEntry(String dataset, String preprocessorAlgorithm, String preprocessorOptions, String classifierAlgorithm, String classifierOptions) {
-		return dataset + ";" + preprocessorOptions + ";" + preprocessorAlgorithm + ";" + classifierAlgorithm + ";" + classifierOptions;
+	private static String encodeDSEntry(String dataset,String searcherAlgorithm, String searcherOptions, String evaluatorAlgorithm, String evaluatorOptions, String classifierAlgorithm, String classifierOptions) {
+		return dataset + ";" +searcherAlgorithm + ";" + searcherOptions + ";" + evaluatorAlgorithm + ";" + evaluatorOptions + ";" + classifierAlgorithm + ";" + classifierOptions;
 	}
 
 	private static Set<String> getUsedKeys() throws SQLException {
-		ResultSet rs = dbAdapter.getResultsOfQuery("SELECT split_id, seed, preprocessor_algorithm, preprocessor_options, classifier_algorithm, classifier_options FROM gridsearch_mc");
+		ResultSet rs = dbAdapter.getResultsOfQuery("SELECT split_id, seed, searcher_algorithm, searcher_options, evaluator_algorithm, evaluator_options, classifier_algorithm, classifier_options FROM gridsearch_mc");
 		Set<String> keys = new HashSet<>();
 		while (rs.next()) {
-			keys.add(encodeEntry(rs.getInt(1), rs.getInt(2), rs.getString(3), rs.getString(4), rs.getString(5), rs.getString(6)));
+			keys.add(encodeEntry(rs.getInt(1), rs.getInt(2), rs.getString(3), rs.getString(4), rs.getString(5), rs.getString(6), rs.getString(7), rs.getString(8)));
 		}
 		return keys;
 	}
 
 	private static Set<String> getFailedKeys() throws SQLException {
 		ResultSet rs = dbAdapter.getResultsOfQuery(
-				"SELECT dataset,preprocessor_algorithm, preprocessor_options, classifier_algorithm, classifier_options, exception FROM gridsearch_mc JOIN outerdatasetsplits USING(split_id) WHERE exception <> \"\"");
+				"SELECT dataset,searcher_algorithm, searcher_options, evaluator_algorithm, evaluator_options, classifier_algorithm, classifier_options, exception FROM gridsearch_mc JOIN outerdatasetsplits USING(split_id) WHERE exception <> \"\"");
 		Set<String> keys = new HashSet<>();
 		while (rs.next()) {
-			keys.add(encodeDSEntry(rs.getString(1), rs.getString(2), rs.getString(3), rs.getString(4), rs.getString(5)));
+			keys.add(encodeDSEntry(rs.getString(1), rs.getString(2), rs.getString(3), rs.getString(4), rs.getString(5), rs.getString(6), rs.getString(7)));
 		}
 		return keys;
 	}
 
-	private static void updateExperiment(int id, ArrayNode trainingInstances, int tp, int tn, int fp, int fn, double rankError, int trainingTimeInMS, Throwable e)
+	private static void updateExperiment(int id, ArrayNode trainingInstances, double errorRate, double rankError, int trainingTimeInMS, Throwable e)
 			throws SQLException {
-		String[] values = { trainingInstances.toString(), String.valueOf(tp), String.valueOf(tn), String.valueOf(fp), String.valueOf(fn), String.valueOf(rankError),
+		String[] values = { String.valueOf(errorRate), String.valueOf(rankError),
 				String.valueOf(trainingTimeInMS), e != null ? e.getClass().getName() + "\n" + e.getMessage() : "", String.valueOf(id) };
-		dbAdapter.update("UPDATE `gridsearch_mc` SET training_indices = ?, tp = ?, tn = ?, fp = ?, fn = ?, rank_error = ?, training_time_ms = ?, exception = ? WHERE id = ?",
+		dbAdapter.update("UPDATE `gridsearch_mc` SET errorRate = ?, rank_error = ?, training_time_ms = ?, exception = ? WHERE id = ?",
 				values);
 	}
 
@@ -341,11 +309,12 @@ public class GridSearcher {
 		}
 	}
 
-	private static int createExperimentIfDoesNotExist(int splitId, int seed, String preprocessorAlgorithm, String preprocessorOptions, String classifierAlgorithm,
+	private static int createExperimentIfDoesNotExist(int splitId, int seed, String searcherAlgorithm, String searcherOptions, String evaluatorAlgorithm, String evaluatorOptions, String classifierAlgorithm,
 			String classifierOptions) throws SQLException {
-		String[] values = { String.valueOf(splitId), String.valueOf(seed), preprocessorAlgorithm, preprocessorOptions, classifierAlgorithm, classifierOptions };
+		String[] values = { String.valueOf(splitId), String.valueOf(seed), searcherAlgorithm, searcherOptions, evaluatorAlgorithm
+				, evaluatorOptions, classifierAlgorithm, classifierOptions };
 		return dbAdapter.insert(
-				"INSERT INTO `gridsearch_mc` (split_id, seed, preprocessor_algorithm, preprocessor_options, classifier_algorithm, classifier_options) VALUES (?,?,?,?,?,?)",
+				"INSERT INTO `gridsearch_mc` (split_id, seed, searcher_algorithm, searcher_options, evaluator_algorithm, evaluator_options, classifier_algorithm, classifier_options) VALUES (?,?,?,?,?,?,?,?)",
 				values);
 	}
 

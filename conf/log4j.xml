@@ -65,7 +65,7 @@
 	</logger>
 	
 	<logger name="de.upb.crc901.mlplan.multiclass.MLPlan">
-		<level value="info" />
+		<level value="debug" />
 	</logger>
 	
 	

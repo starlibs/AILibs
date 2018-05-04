@@ -1,0 +1,166 @@
+{
+	"repository": "MEKA",
+	"include": ["../mlplan"],
+	"components": [
+		{
+			"name": "meka.classifiers.multilabel.BR",
+			"providedInterface": ["MLClassifier"],
+			"requiredInterface": ["Classifier"],
+			"parameter": [
+				
+			]
+		},
+		{
+			"name": "meka.classifiers.multilabel.CC",
+			"providedInterface": ["MLClassifier"],
+			"requiredInterface": ["Classifier"],
+			"parameter": [
+				
+			]
+		},
+		{
+			"name": "meka.classifiers.multilabel.BCC",
+			"providedInterface": ["MLClassifier"],
+			"requiredInterface": ["Classifier"],
+			"parameter": [
+				
+			]
+		},
+		{
+			"name": "meka.classifiers.multilabel.CT",
+			"providedInterface": ["MLClassifier"],
+			"requiredInterface": ["Classifier"],
+			"parameter": [
+				
+			]
+		},
+		{
+			"name": "meka.classifiers.multilabel.CDN",
+			"providedInterface": ["MLClassifier"],
+			"requiredInterface": ["Classifier"],
+			"parameter": [
+				
+			]
+		},
+		{
+			"name": "meka.classifiers.multilabel.CDT",
+			"providedInterface": ["MLClassifier"],
+			"requiredInterface": ["Classifier"],
+			"parameter": [
+				
+			]
+		},
+		{
+			"name": "meka.classifiers.multilabel.MCC",
+			"providedInterface": ["MLClassifier"],
+			"requiredInterface": ["Classifier"],
+			"parameter": [
+				
+			]
+		},
+		{
+			"name": "meka.classifiers.multilabel.PCC",
+			"providedInterface": ["MLClassifier"],
+			"requiredInterface": ["Classifier"],
+			"parameter": [
+				
+			]
+		},
+		{
+			"name": "meka.classifiers.multilabel.PMCC",
+			"providedInterface": ["MLClassifier"],
+			"requiredInterface": ["Classifier"],
+			"parameter": [
+				
+			]
+		},
+		{
+			"name": "meka.classifiers.multilabel.MajorityLabelset",
+			"providedInterface": ["MLClassifier"],
+			"requiredInterface": ["Classifier"],
+			"parameter": [
+				
+			]
+		},
+		{
+			"name": "meka.classifiers.multilabel.LC",
+			"providedInterface": ["MLClassifier"],
+			"requiredInterface": ["Classifier"],
+			"parameter": [
+				
+			]
+		},
+		{
+			"name": "meka.classifiers.multilabel.PS",
+			"providedInterface": ["MLClassifier"],
+			"requiredInterface": ["Classifier"],
+			"parameter": [
+				
+			]
+		},
+		{
+			"name": "meka.classifiers.multilabel.PSt",
+			"providedInterface": ["MLClassifier"],
+			"requiredInterface": ["Classifier"],
+			"parameter": [
+				
+			]
+		},
+		{
+			"name": "meka.classifiers.multilabel.RAkEL",
+			"providedInterface": ["MLClassifier"],
+			"requiredInterface": ["Classifier"],
+			"parameter": [
+				
+			]
+		},
+		{
+			"name": "meka.classifiers.multilabel.RAkELd",
+			"providedInterface": ["MLClassifier"],
+			"requiredInterface": ["Classifier"],
+			"parameter": [
+				
+			]
+		},
+		{
+			"name": "meka.classifiers.multilabel.SERAkELd",
+			"providedInterface": ["MLClassifier"],
+			"requiredInterface": ["Classifier"],
+			"parameter": [
+				
+			]
+		},
+		{
+			"name": "meka.classifiers.multilabel.HASEL",
+			"providedInterface": ["MLClassifier"],
+			"requiredInterface": ["Classifier"],
+			"parameter": [
+				
+			]
+		},
+		{
+			"name": "meka.classifiers.multilabel.MULAN",
+			"providedInterface": ["MLClassifier"],
+			"requiredInterface": ["Classifier"],
+			"parameter": [
+				
+			]
+		},
+		{
+			"name": "meka.classifiers.multilabel.FW",
+			"providedInterface": ["MLClassifier"],
+			"requiredInterface": ["Classifier"],
+			"parameter": [
+				
+			]
+		},
+		{
+			"name": "meka.classifiers.multilabel.RT",
+			"providedInterface": ["MLClassifier"],
+			"requiredInterface": ["Classifier"],
+			"parameter": [
+				
+			]
+		}
+	]
+}
