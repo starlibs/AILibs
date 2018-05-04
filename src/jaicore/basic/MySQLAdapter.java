@@ -13,24 +13,28 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.commons.lang3.math.NumberUtils;
+
 @SuppressWarnings("serial")
 public class MySQLAdapter implements Serializable {
 	private final String driver, host, user, password, database;
 	private Connection connect;
 	private long timestampOfLastAction = Long.MIN_VALUE;
+	private final Properties connectionProperties;
 
 	public MySQLAdapter(String host, String user, String password, String database) {
-		this("mysql", host, user, password, database);
+		this("mysql", host, user, password, database, new Properties());
 	}
 	
-	public MySQLAdapter(String driver, String host, String user, String password, String database) {
+	public MySQLAdapter(String driver, String host, String user, String password, String database, Properties connectionProperties) {
 		super();
 		this.driver = driver;
 		this.host = host;
 		this.user = user;
 		this.password = password;
 		this.database = database;
-
+		this.connectionProperties = connectionProperties;
+		
 		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 
 			@Override
@@ -46,14 +50,14 @@ public class MySQLAdapter implements Serializable {
 		int tries = 0;
 		do {
 			try {
-				Properties connectionProps = new Properties();
+				Properties connectionProps = new Properties(connectionProperties);
 				connectionProps.put("user", user);
 				connectionProps.put("password", password);
 				connect = DriverManager.getConnection("jdbc:" + driver + "://" + host + "/" + database, connectionProps);
 				return;
 			} catch (SQLException e) {
 				tries ++;
-				System.err.println("Connection to server failed (attempt " + tries + " of 3), waiting 3 seconds and trying again.");
+				System.err.println("Connection to server " + host + " failed with JDBC driver " + driver + " (attempt " + tries + " of 3), waiting 3 seconds and trying again.");
 				e.printStackTrace();
 				try {
 					Thread.sleep(3000);
@@ -66,7 +70,7 @@ public class MySQLAdapter implements Serializable {
 		System.exit(1);
 	}
 
-	private synchronized void checkConnection() throws SQLException {
+	public synchronized void checkConnection() throws SQLException {
 		int renewAfterSeconds = 5 * 60;
 		if (timestampOfLastAction + renewAfterSeconds * 1000 < System.currentTimeMillis()) {
 			System.out.println("Reconnect to database");
@@ -101,7 +105,16 @@ public class MySQLAdapter implements Serializable {
 		checkConnection();
 		PreparedStatement stmt = connect.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 		for (int i = 1; i <= values.size(); i++) {
-			stmt.setString(i, values.get(i - 1));
+			String val = values.get(i-1);
+			if (NumberUtils.isCreatable(val)) {
+				if (val.contains("."))
+					stmt.setDouble(i, NumberUtils.toDouble(val));
+				else
+					stmt.setInt(i, NumberUtils.toInt(val));
+			}
+			else {
+				stmt.setString(i, values.get(i - 1));
+			}
 		}
 		stmt.executeUpdate();
 		ResultSet rs = stmt.getGeneratedKeys();
@@ -114,6 +127,8 @@ public class MySQLAdapter implements Serializable {
 		StringBuilder sb2 = new StringBuilder();
 		List<String> values = new ArrayList<>();
 		for (String key : map.keySet()) {
+			if (map.get(key) == null)
+				continue;
 			if (sb1.length() != 0) {
 				sb1.append(", ");
 				sb2.append(", ");
@@ -123,7 +138,7 @@ public class MySQLAdapter implements Serializable {
 			values.add(map.get(key));
 		}
 		
-		String statement = "INSERT INTO `" + table + "` (" + sb1.toString() + ") VALUES (" + sb2.toString() + ")";
+		String statement = "INSERT INTO " + table + " (" + sb1.toString() + ") VALUES (" + sb2.toString() + ")";
 		return insert(statement, values);
 	}
 
@@ -160,7 +175,6 @@ public class MySQLAdapter implements Serializable {
 		}
 		
 		String sql = "UPDATE " + table + " SET " + updateSB.toString() + " WHERE " + conditionSB.toString();
-		System.out.println(sql + " with values " + values);
 		PreparedStatement stmt = connect.prepareStatement(sql);
 		for (int i = 1; i <= values.size(); i++) {
 			stmt.setString(i, values.get(i - 1));
@@ -180,5 +194,9 @@ public class MySQLAdapter implements Serializable {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	public String getDriver() {
+		return driver;
 	}
 }

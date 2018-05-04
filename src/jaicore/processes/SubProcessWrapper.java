@@ -157,11 +157,7 @@ public class SubProcessWrapper {
 				if (process.isAlive()) {
 					try {
 						process.destroy();
-						Runtime rt = Runtime.getRuntime();
-						if (System.getProperty("os.name").toLowerCase().indexOf("windows") > -1)
-							rt.exec("taskkill /F /PID " + pidOfSubProcess);
-						else
-							rt.exec("kill -9 " + pidOfSubProcess);
+						ProcessUtil.killProcess(pidOfSubProcess);
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
