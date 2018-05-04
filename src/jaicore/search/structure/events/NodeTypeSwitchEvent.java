@@ -4,6 +4,7 @@ public class NodeTypeSwitchEvent<T> {
 
 	private final T node;
 	private final String type;
+	public final String name = "NodeTypeSwitchEvent";
 
 	public NodeTypeSwitchEvent(T node, String type) {
 		super();

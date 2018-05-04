@@ -4,6 +4,7 @@ public class NodeReachedEvent<T> {
 
 	private final T parent, node;
 	private final String type;
+	public final String name = "NodeReachedEvent";
 
 	public NodeReachedEvent(T parent, T node, String type) {
 		super();

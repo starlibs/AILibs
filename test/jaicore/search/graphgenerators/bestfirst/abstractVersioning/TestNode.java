@@ -1,4 +1,4 @@
-package jaicore.search.algorithms.standard.bestfirst.abstractVersioning;
+package jaicore.search.graphgenerators.bestfirst.abstractVersioning;
 
 import jaicore.search.structure.core.AbstractNode;
 

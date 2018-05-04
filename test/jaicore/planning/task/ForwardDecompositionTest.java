@@ -30,7 +30,7 @@ public class ForwardDecompositionTest {
 		/* solve problem */
 		System.out.println("Starting search. Waiting for solutions:");
 		while (plannerRun.hasNext()) {
-			List<TFDNode> solution = plannerRun.next();
+			List<TFDNode> solution = (List<TFDNode>) plannerRun.next();
 			System.out.println("\t" + solution);
 		}
 		System.out.println("Algorithm has finished.");

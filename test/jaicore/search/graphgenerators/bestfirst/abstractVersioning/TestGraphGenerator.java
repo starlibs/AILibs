@@ -1,8 +1,7 @@
-package jaicore.search.algorithms.standard.bestfirst.abstractVersioning;
+package jaicore.search.graphgenerators.bestfirst.abstractVersioning;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import jaicore.search.structure.core.AbstractGraphGenerator;
 import jaicore.search.structure.core.NodeExpansionDescription;

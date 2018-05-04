@@ -4,6 +4,7 @@ public class NodeParentSwitchEvent<T> {
 	private final T node;
 	private final T oldParent;
 	private final T newParent;
+	public  final String name = "NodeParentSwitchEvent";
 	
 	public NodeParentSwitchEvent(T node,T oldParent, T newParent){
 		super();
