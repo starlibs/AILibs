@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.concurrent.TimeUnit;
 
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 
 import jaicore.graphvisualizer.NodeListener;
 import jaicore.graphvisualizer.SearchVisualizationPanel;
@@ -17,6 +17,8 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Slider;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.text.Text;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 
 public class FXController implements Initializable, NodeListener {
@@ -36,7 +38,14 @@ public class FXController implements Initializable, NodeListener {
 
 
     @FXML
-    private Text toolTip;
+    private SwingNode toolTip;
+
+    JLabel tip;
+
+//    @FXML
+//    private WebView webView;
+//
+//    private WebEngine engine;
 
 
     private static Recorder rec;
@@ -76,11 +85,22 @@ public class FXController implements Initializable, NodeListener {
         setTimeline();
         index = 0;
 
-        toolTip.setText("");
+
+        tip = new JLabel();
+        tip.setText("<html></html>");
+        setTip(toolTip);
+
+//        this.engine = this.webView.getEngine();
 
 
     }
 
+    private void setTip(SwingNode swingNode){
+        JScrollPane panel = new JScrollPane();
+        panel.setViewportView(tip);
+
+        SwingUtilities.invokeLater(()->swingNode.setContent(panel));
+    }
 
 
     /**
@@ -287,7 +307,13 @@ public class FXController implements Initializable, NodeListener {
     public void buttonPushed(Object node) {
         SearchVisualizationPanel panel = (SearchVisualizationPanel) swingNode.getContent();
         TooltipGenerator gen = panel.getTooltipGenerator();
-        toolTip.setText(gen.getTooltip(node));
+        StringBuilder sb = new StringBuilder();
+//						sb.append("<html><div style='padding: 5px; background: #ffffcc; border: 1px solid black;'>");
+        sb.append("<html><div style='padding: 5px;'>");
+        sb.append(gen.getTooltip(node));
+        sb.append("</div></html>");
+        tip.setText(sb.toString());
+
 
     }
 }
