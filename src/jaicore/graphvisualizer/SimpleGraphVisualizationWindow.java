@@ -12,8 +12,8 @@ import com.google.common.eventbus.EventBus;
 
 import jaicore.graph.Graph;
 import jaicore.graph.observation.IObservableGraphAlgorithm;
-import jaicore.search.structure.events.GraphInitializedEvent;
-import jaicore.search.structure.events.NodeReachedEvent;
+import jaicore.graphvisualizer.events.GraphInitializedEvent;
+import jaicore.graphvisualizer.events.NodeReachedEvent;
 
 @SuppressWarnings("serial")
 public class SimpleGraphVisualizationWindow<T> extends JFrame {

@@ -33,14 +33,13 @@ import org.graphstream.ui.view.Viewer.ThreadingModel;
 import org.graphstream.ui.view.ViewerListener;
 import org.graphstream.ui.view.ViewerPipe;
 
-import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
-import jaicore.search.structure.events.GraphInitializedEvent;
-import jaicore.search.structure.events.NodeParentSwitchEvent;
-import jaicore.search.structure.events.NodeReachedEvent;
-import jaicore.search.structure.events.NodeRemovedEvent;
-import jaicore.search.structure.events.NodeTypeSwitchEvent;
+import jaicore.graphvisualizer.events.GraphInitializedEvent;
+import jaicore.graphvisualizer.events.NodeParentSwitchEvent;
+import jaicore.graphvisualizer.events.NodeReachedEvent;
+import jaicore.graphvisualizer.events.NodeRemovedEvent;
+import jaicore.graphvisualizer.events.NodeTypeSwitchEvent;
 
 @SuppressWarnings("serial")
 public class SearchVisualizationPanel<T> extends JPanel {
