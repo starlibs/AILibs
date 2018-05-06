@@ -113,8 +113,11 @@ public class FXController implements Initializable, NodeListener {
 
         timeline.setMax(eventTimes.get(eventTimes.size()-1));
 
-        if(!eventTimes.isEmpty())
-            timeline.setMajorTickUnit(eventTimes.get(eventTimes.size()-1)/10);
+        if(!eventTimes.isEmpty()) {
+            long tickUnit = eventTimes.get(eventTimes.size()-1)/10 ;
+            if(tickUnit > 0)
+                timeline.setMajorTickUnit(tickUnit);
+        }
 
         timeline.setMinorTickCount(5);
         timeline.setValue(index);
@@ -188,7 +191,7 @@ public class FXController implements Initializable, NodeListener {
 //
 //        playThread = new Thread(runPlay);
 //        playThread.start();
-        
+
         Runnable runPlay = () ->{
             try{
                 while(index < this.eventTimes.size()-1){
@@ -213,7 +216,7 @@ public class FXController implements Initializable, NodeListener {
      */
     @FXML
     public void step(ActionEvent actionEvent) {
-        if(index == eventTimes.size()-1)
+        if(index >= eventTimes.size()-1)
             return;
         recorder.step();
         index ++;
