@@ -8,6 +8,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Slider;
+import javafx.scene.input.MouseEvent;
 import javafx.stage.FileChooser;
 import javafx.util.StringConverter;
 
@@ -33,11 +34,13 @@ public class FXController implements Initializable, NodeListener {
     //recorder on which the controller works
     private Recorder recorder;
     private Thread playThread;
+    private Thread jumpThread;
+
 
     private int index;
     private long sleepTime;
     private List<Long> eventTimes;
-    private Thread jumpThread;
+
 
     JLabel tip;
 
@@ -56,6 +59,35 @@ public class FXController implements Initializable, NodeListener {
         tip = new JLabel();
         tip.setText("<html></html>");
         initializeToolTip(toolTip);
+
+        /*
+        if the slider for replay-speed is released, wait (200 ms - the value of the slider)
+        the slider has a range from 0 to 200
+        */
+        speedSlider.setOnMouseReleased((MouseEvent event)-> {
+            sleepTime = (long) (200 - speedSlider.getValue());
+        });
+        speedSlider.setLabelFormatter(new StringConverter<Double>() {
+            @Override
+            public String toString(Double aDouble) {
+                Double speed = 200 - aDouble;
+                return String.valueOf(speed.longValue());
+            }
+
+            @Override
+            public Double fromString(String s) {
+                return null;
+            }
+        });
+
+        timeline.setOnMouseReleased((MouseEvent event)-> {
+            double v = timeline.getValue();
+            int i = 0;
+            while (eventTimes.get(i) < v)
+                i++;
+            jumpTo(i);
+        });
+
     }
 
     /**
@@ -143,17 +175,33 @@ public class FXController implements Initializable, NodeListener {
     @FXML
     public void play(ActionEvent actionEvent) {
         System.out.println("Play");
-        Runnable runPlay =()->{
-            while(this.index < this.eventTimes.size()-1){
-                try {
-                    step(null);
+//        Runnable runPlay =()->{
+//            while(this.index < this.eventTimes.size()-1){
+//                try {
+//                    step(null);
+//                    TimeUnit.MILLISECONDS.sleep(sleepTime);
+//                } catch (InterruptedException e) {
+//
+//                }
+//            }
+//        };
+//
+//        playThread = new Thread(runPlay);
+//        playThread.start();
+        
+        Runnable runPlay = () ->{
+            try{
+                while(index < this.eventTimes.size()-1){
+                    recorder.step();
                     TimeUnit.MILLISECONDS.sleep(sleepTime);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    timeline.setValue(eventTimes.get(index));
+                    index ++;
                 }
+                /* index correction */
+                index --;
             }
+            catch (InterruptedException e){}
         };
-
         playThread = new Thread(runPlay);
         playThread.start();
     }
@@ -294,4 +342,5 @@ public class FXController implements Initializable, NodeListener {
         tip.setText(sb.toString());
 
     }
+
 }
