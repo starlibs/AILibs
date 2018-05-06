@@ -1,6 +1,7 @@
 package jaicore.graphvisualizer.gui;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import jaicore.graph.observation.IObservableGraphAlgorithm;
@@ -18,7 +19,6 @@ import java.util.*;
 
 public class Recorder<T> implements IObservableGraphAlgorithm {
 
-
 	/* List which contains every received event */
 	private List<Object> receivedEvents;
 
@@ -35,7 +35,7 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 	private TooltipGenerator toolTipGenerator;
 
 	private Map<Object, List> nodeMap;
-	private Map<Object, String> toolTipMap;
+	private Map<Integer, List<String>> toolTipMap;
 
 
 	/**
@@ -162,27 +162,56 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 
 	public void reset(){
 		index = 0;
+		nodeMap.clear();
 	}
 
 	public void saveToFile(File file){
 		ObjectMapper mapper = new ObjectMapper();
+		mapper.enable(SerializationFeature.INDENT_OUTPUT);
 		try{
 			List mapperList = new ArrayList();
 
 			List<LinkedHashMap<Long,Object>> saveList = new ArrayList();
 
-			//create a HashMap, which contains the event as values and the corresponding time as a value
-			//This is done to store the time in the same file as the events.
+			toolTipMap = new HashMap<>();
 			for(int i = 0; i < receivedEvents.size(); i++){
-				LinkedHashMap t = new LinkedHashMap();
-				t.put(receivingTimes.get(i), receivedEvents.get(i));
-				saveList.add(t);
-			}
+				Object event = receivedEvents.get(i);
+				LinkedHashMap<Long, Object> timeToEvent = new LinkedHashMap();
 
-			for (Object node: nodeMap.keySet()){
-				toolTipMap.put(node, toolTipGenerator.getTooltip(node));
-			}
+				int code = 0;
+				ArrayList<String> tooltips;
+				switch (event.getClass().getSimpleName()){
+					case "GraphInitializedEvent":
+						GraphInitializedEvent graphInitializedEvent = (GraphInitializedEvent) event;
+						code = graphInitializedEvent.getRoot().hashCode();
+						tooltips = new ArrayList<>();
+						tooltips.add(toolTipGenerator.getTooltip(graphInitializedEvent.getRoot()));
+						toolTipMap.put(code, tooltips );
+						timeToEvent.put(receivingTimes.get(i), new GraphInitializedEvent(code));
+						break;
 
+					case "NodeTypeSwitchEvent":
+						NodeTypeSwitchEvent nodeTypeSwitchEvent = (NodeTypeSwitchEvent) event;
+						code = nodeTypeSwitchEvent.getNode().hashCode();
+						toolTipMap.get(code).add(toolTipGenerator.getTooltip(nodeTypeSwitchEvent.getNode()));
+						timeToEvent.put(receivingTimes.get(i), new NodeTypeSwitchEvent(code, nodeTypeSwitchEvent.getType()));
+						break;
+
+					case "NodeReachedEvent":
+						NodeReachedEvent nodeReachedEvent = (NodeReachedEvent) event;
+						code = nodeReachedEvent.getNode().hashCode();
+						tooltips = new ArrayList<>();
+						tooltips.add(toolTipGenerator.getTooltip(nodeReachedEvent.getNode()));
+						toolTipMap.put(code, tooltips );
+						timeToEvent.put(receivingTimes.get(i), new NodeReachedEvent(nodeReachedEvent.getParent().hashCode(),code, nodeReachedEvent.getType()));
+						break;
+
+					default:
+						System.out.println("not an allowed event");
+						break;
+				}
+				saveList.add(timeToEvent);
+			}
 
 
 			mapperList.add(saveList);
@@ -197,14 +226,78 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 
 	}
 
-	public void loadFromFile(File file){}
+	public void loadFromFile(File file){
+		//clear existing events
+		this.receivedEvents.clear();
+		this.receivingTimes.clear();
+
+		this.reset();
+
+		ObjectMapper mapper = new ObjectMapper();
+
+		try {
+			List mapperList = mapper.readValue(file, mapper.getTypeFactory().constructCollectionType(List.class, Object.class));
+//			mapperList.stream().forEach(n->System.out.println(n.getClass()));
+			ArrayList eventList = (ArrayList) mapperList.get(0);
+			eventList.stream().forEach(n->{
+				LinkedHashMap map = (LinkedHashMap) n;
+				map.keySet().stream().forEach(time->receivingTimes.add(Long.parseLong((String) time)));
+				map.values().stream().forEach(v->{
+					LinkedHashMap eventMap = (LinkedHashMap) v;
+
+					int node;
+					Object event;
+					switch(eventMap.get("name").toString()){
+						case "GraphInitializedEvent":
+							event = new GraphInitializedEvent(Integer.parseInt(String.valueOf(eventMap.get("root"))));
+
+							break;
+
+						case "NodeTypeSwitchEvent":
+							node = Integer.parseInt(String.valueOf(eventMap.get("node")));
+							event = new NodeTypeSwitchEvent(node, eventMap.get("type").toString());
+							break;
+
+						case "NodeReachedEvent":
+							int parent = Integer.parseInt(String.valueOf(eventMap.get("parent")));
+							node = Integer.parseInt(String.valueOf(eventMap.get("node")));
+							event = new NodeReachedEvent(parent, node, eventMap.get("type").toString());
+							break;
+
+						default:
+							event = null;
+
+
+					}
+					if(event != null)
+						receivedEvents.add(event);
+				});
+			});
+
+			toolTipMap = (Map<Integer, List<String>>) mapperList.get(1);
+			this.setToolTipGenerator(node->{
+				List<String> tips = toolTipMap.get(node.toString());
+				int i = nodeMap.get(node).size()-1;
+
+				return tips.get(i);
+			});
+
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+
+	}
 
 	public void registerListener(Object listener) {
 		this.replayBus.register(listener);
 	}
 
 	public void unregisterListener(Object listener) {
+
 		this.replayBus.unregister(listener);
+
 	}
 
 

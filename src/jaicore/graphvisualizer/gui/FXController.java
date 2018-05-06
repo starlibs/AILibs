@@ -12,6 +12,7 @@ import javafx.stage.FileChooser;
 import javafx.util.StringConverter;
 
 import javax.swing.*;
+import java.io.File;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -62,9 +63,6 @@ public class FXController implements Initializable, NodeListener {
      * @param node
      */
     private void initializeVisuPanel(SwingNode node){
-        if(node.getContent() != null)
-            this.recorder.unregisterListener(node.getContent());
-
         SearchVisualizationPanel visu = new SearchVisualizationPanel();
         visu.addNodeListener(this);
         this.recorder.registerListener(visu);
@@ -129,6 +127,9 @@ public class FXController implements Initializable, NodeListener {
     }
 
     public void setRecorder(Recorder recorder){
+        if(visuPanel.getContent() != null)
+            this.recorder.unregisterListener(visuPanel.getContent());
+
         this.recorder = recorder;
         this.eventTimes = recorder.getReceiveTimes();
         this.initializeVisuPanel(visuPanel);
@@ -244,10 +245,10 @@ public class FXController implements Initializable, NodeListener {
     public void save(ActionEvent actionEvent) {
         FileChooser chooser = new FileChooser();
         chooser.setTitle("Choose Event-File");
-        recorder.saveToFile(chooser.showSaveDialog(null));
+//        recorder.saveToFile(chooser.showSaveDialog(null));
 
-//       File file = new File("/home/jkoepe/Documents/Test.txt");
-//       rec.saveToFile(file);
+       File file = new File("/home/jkoepe/Documents/Test.txt");
+       recorder.saveToFile(file);
     }
 
     /**
@@ -257,9 +258,9 @@ public class FXController implements Initializable, NodeListener {
     public void load(ActionEvent actionEvent) {
         FileChooser chooser = new FileChooser();
         chooser.setTitle("Open Event-File");
-        recorder.loadFromFile(chooser.showOpenDialog(null));
-//        File file = new File("/home/jkoepe/Documents/Test.txt");
-//        rec.loadFromFile(file);
+//        recorder.loadFromFile(chooser.showOpenDialog(null));
+        File file = new File("/home/jkoepe/Documents/Test.txt");
+        recorder.loadFromFile(file);
 
         initializeVisuPanel(visuPanel);
 
