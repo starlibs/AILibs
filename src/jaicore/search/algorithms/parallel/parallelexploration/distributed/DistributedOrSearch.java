@@ -15,7 +15,7 @@ import jaicore.search.algorithms.parallel.parallelexploration.distributed.interf
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableNodeEvaluator;
 import jaicore.search.algorithms.standard.core.ORGraphSearch;
 import jaicore.search.structure.core.Node;
-import jaicore.search.structure.events.NodeTypeSwitchEvent;
+import jaicore.graphvisualizer.events.NodeTypeSwitchEvent;
 
 public class DistributedOrSearch<T, A, V extends Comparable<V>> extends ORGraphSearch<T, A, V> implements DistributionSearchAdapter<T, V> {
 

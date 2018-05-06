@@ -1,13 +1,10 @@
 package jaicore.graphvisualizer.gui;
 
 import jaicore.search.structure.core.Node;
-import jaicore.search.structure.core.NodeType;
-import jaicore.search.structure.events.GraphInitializedEvent;
-import jaicore.search.structure.events.NodeReachedEvent;
-import jaicore.search.structure.events.NodeTypeSwitchEvent;
+import jaicore.graphvisualizer.events.GraphInitializedEvent;
+import jaicore.graphvisualizer.events.NodeReachedEvent;
+import jaicore.graphvisualizer.events.NodeTypeSwitchEvent;
 
-
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
@@ -100,19 +97,4 @@ public class EventCreator {
         else
             return -1;
     }
-//        ArrayList list = (ArrayList) map.get("positions");
-//        if(list.isEmpty())
-//            return 0;
-//
-//        int multiplicator = 1;
-//        int result = 0;
-//        for(int i = list.size()-1; i >= 0; i--){
-//            result += ((Integer)list.get(i) * multiplicator);
-//            multiplicator *=10;
-//        }
-//        result += (list.size()*multiplicator);
-//
-//        return result;
-//    }
-
 }

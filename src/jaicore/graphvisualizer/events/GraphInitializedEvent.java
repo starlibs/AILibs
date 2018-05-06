@@ -1,4 +1,4 @@
-package jaicore.search.structure.events;
+package jaicore.graphvisualizer.events;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 

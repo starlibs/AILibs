@@ -1,4 +1,4 @@
-package jaicore.search.structure.events;
+package jaicore.graphvisualizer.events;
 
 public class NodeParentSwitchEvent<T> {
 	private final T node;
