@@ -487,6 +487,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 		logger.info("Expanding node {} with f-value {}", expandedNodeInternal, expandedNodeInternal.getInternalLabel());
 		assert !expanded.contains(expandedNodeInternal.getPoint()) : "Node " + expandedNodeInternal + " expanded twice!!";
 		expanded.add(expandedNodeInternal.getPoint());
+		assert expanded.contains(expandedNodeInternal.getPoint()) : "Expanded node " + expandedNodeInternal + " was not inserted into the set of expanded nodes!";
 
 		/* compute successors */
 		logger.debug("Start computation of successors");
@@ -521,7 +522,9 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 			}
 			logger.debug("Finished computation of successors");
 		}
-
+		
+		/* attach successors to search graph */
+//		System.out.println(expanded.contains(expandedNodeInternal.getPoint()));
 		if (additionalThreadsForExpansion < 1) {
 			successorDescriptions.stream().forEach(successorDescription -> {
 
