@@ -68,7 +68,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 
 	/* search related objects */
 	protected OpenCollection<Node<T, V>> open = new PriorityQueueOpen<>();
-	
+
 	protected final RootGenerator<T> rootGenerator;
 	protected final SuccessorGenerator<T, A> successorGenerator;
 	protected final boolean checkGoalPropertyOnEntirePath;
@@ -98,6 +98,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	 */
 	private List<NodeExpansionDescription<T, A>> lastExpansion = new ArrayList<>();
 	private ParentDiscarding parentDiscarding;
+	private boolean verifyThatGivenGraphIsATree = true;
 
 	private class NodeBuilder implements Runnable {
 
@@ -112,137 +113,144 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 
 		@Override
 		public void run() {
-			if (ORGraphSearch.this.canceled || ORGraphSearch.this.interrupted)
-				return;
-			logger.debug("Start node creation.");
-			lastExpansion.add(successorDescription);
-			Node<T, V> newNode = newNode(expandedNodeInternal, successorDescription.getTo());
-			
-			/* update creation counter */
-			createdCounter++;
-
-			/* set timeout on thread that interrupts it after the timeout */
-			int taskId = -1;
-			if (timeoutForComputationOfF > 0) {
-				if (timeoutSubmitter == null) {
-					timeoutSubmitter = TimeoutTimer.getInstance().getSubmitter();
-				}
-				taskId = timeoutSubmitter.interruptMeAfterMS(timeoutForComputationOfF);
-			}
-
-			/* compute node label  */
-			V label = null;
-			boolean computationTimedout = false;
 			try {
-				long startComputation = System.currentTimeMillis();
-				label = nodeEvaluator.f(newNode);
-				
-				/* check whether the required time exceeded the timeout */
-				long computationTime = System.currentTimeMillis() - startComputation;
-				if (timeoutForComputationOfF > 0 && computationTime > timeoutForComputationOfF + 1000)
-					logger.warn("Computation of f for node {} took {}ms, which is more than the allowed {}ms", newNode, computationTime, timeoutForComputationOfF);
-			} catch (InterruptedException e) {
-				logger.debug("Received interrupt during computation of f.");
-				graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_timedout"));
-				newNode.setAnnotation("fError", "Timeout");
-				computationTimedout = true;
-				try {
-					label = timeoutNodeEvaluator != null ? timeoutNodeEvaluator.f(newNode) : null;
-				} catch (Throwable e2) {
-					e2.printStackTrace();
+				if (ORGraphSearch.this.canceled || ORGraphSearch.this.interrupted)
+					return;
+				logger.debug("Start node creation.");
+				lastExpansion.add(successorDescription);
+
+				Node<T, V> newNode = newNode(expandedNodeInternal, successorDescription.getTo());
+
+				/* update creation counter */
+				createdCounter++;
+
+				/* set timeout on thread that interrupts it after the timeout */
+				int taskId = -1;
+				if (timeoutForComputationOfF > 0) {
+					if (timeoutSubmitter == null) {
+						timeoutSubmitter = TimeoutTimer.getInstance().getSubmitter();
+					}
+					taskId = timeoutSubmitter.interruptMeAfterMS(timeoutForComputationOfF);
 				}
-			} catch (Throwable e) {
-				LoggerUtil.logException("Observed an execution during computation of f.", e, logger);
-				newNode.setAnnotation("fError", e);
-				graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_ffail"));
-			}
-			if (taskId >= 0)
-				timeoutSubmitter.cancelTimeout(taskId);
-			
-			/* if no label was computed, prune the node and cancel the computation */
-			if (label == null) {
-				if (!computationTimedout)
-					logger.info("Not inserting node {} since its label is missing!", newNode);
-				else
-					logger.info("Not inserting node {} because computation of f-value timed out.", newNode);
-				if (!newNode.getAnnotations().containsKey("fError"))
-					newNode.setAnnotation("fError", "f-computer returned NULL");
-				graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_pruned"));
+
+				/* compute node label */
+				V label = null;
+				boolean computationTimedout = false;
+				try {
+					long startComputation = System.currentTimeMillis();
+					label = nodeEvaluator.f(newNode);
+
+					/* check whether the required time exceeded the timeout */
+					long computationTime = System.currentTimeMillis() - startComputation;
+					if (timeoutForComputationOfF > 0 && computationTime > timeoutForComputationOfF + 1000)
+						logger.warn("Computation of f for node {} took {}ms, which is more than the allowed {}ms", newNode, computationTime, timeoutForComputationOfF);
+				} catch (InterruptedException e) {
+					logger.debug("Received interrupt during computation of f.");
+					graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_timedout"));
+					newNode.setAnnotation("fError", "Timeout");
+					computationTimedout = true;
+					try {
+						label = timeoutNodeEvaluator != null ? timeoutNodeEvaluator.f(newNode) : null;
+					} catch (Throwable e2) {
+						e2.printStackTrace();
+					}
+				} catch (Throwable e) {
+					LoggerUtil.logException("Observed an execution during computation of f.", e, logger);
+					newNode.setAnnotation("fError", e);
+					graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_ffail"));
+				}
+				if (taskId >= 0)
+					timeoutSubmitter.cancelTimeout(taskId);
+
+				/* if no label was computed, prune the node and cancel the computation */
+				if (label == null) {
+					if (!computationTimedout)
+						logger.info("Not inserting node {} since its label is missing!", newNode);
+					else
+						logger.info("Not inserting node {} because computation of f-value timed out.", newNode);
+					if (!newNode.getAnnotations().containsKey("fError"))
+						newNode.setAnnotation("fError", "f-computer returned NULL");
+					graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_pruned"));
+					if (pool != null) {
+						activeJobs.decrementAndGet();
+						fComputationTickets.release();
+					}
+					return;
+				}
+				newNode.setInternalLabel(label);
+
+				logger.info("Inserting successor {} of {} to OPEN. F-Value is {}", newNode, expandedNodeInternal, label);
+				// assert !open.contains(newNode) && !expanded.contains(newNode.getPoint()) : "Inserted node is already in OPEN or even expanded!";
+
+				/* if we discard (either only on OPEN or on both OPEN and CLOSED) */
+				boolean nodeProcessed = false;
+				if (parentDiscarding != ParentDiscarding.NONE) {
+
+					/* determine whether we already have the node AND it is worse than the one we want to insert */
+					Optional<Node<T, V>> existingIdenticalNodeOnOpen = open.stream().filter(n -> n.getPoint().equals(newNode.getPoint())).findFirst();
+					if (existingIdenticalNodeOnOpen.isPresent()) {
+						Node<T, V> existingNode = existingIdenticalNodeOnOpen.get();
+						if (newNode.compareTo(existingNode) < 0) {
+							graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_" + (newNode.isGoal() ? "solution" : "open")));
+							graphEventBus.post(new NodeRemovedEvent<>(existingNode));
+							open.remove(existingNode);
+							open.add(newNode);
+						} else {
+							graphEventBus.post(new NodeRemovedEvent<>(newNode));
+						}
+						nodeProcessed = true;
+					}
+
+					/* if parent discarding is not only for OPEN but also for CLOSE (and the node was not on OPEN), check the list of expanded nodes */
+					else if (parentDiscarding == ParentDiscarding.ALL) {
+
+						/* reopening, if the node is already on CLOSED */
+						Optional<T> existingIdenticalNodeOnClosed = expanded.stream().filter(n -> n.equals(newNode.getPoint())).findFirst();
+						if (existingIdenticalNodeOnClosed.isPresent()) {
+							Node<T, V> node = ext2int.get(existingIdenticalNodeOnClosed.get());
+							if (newNode.compareTo(node) < 0) {
+								node.setParent(newNode.getParent());
+								node.setInternalLabel(newNode.getInternalLabel());
+								expanded.remove(node.getPoint());
+								open.add(node);
+								graphEventBus.post(new NodeParentSwitchEvent<Node<T, V>>(node, node.getParent(), newNode.getParent()));
+							}
+							graphEventBus.post(new NodeRemovedEvent<Node<T, V>>(newNode));
+							nodeProcessed = true;
+						}
+					}
+				}
+
+				/* if parent discarding is turned off OR if the node was node processed by a parent discarding rule, just insert it on OPEN */
+				if (!nodeProcessed) {
+
+					if (!newNode.isGoal())
+						open.add(newNode);
+					graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_" + (newNode.isGoal() ? "solution" : "open")));
+					createdCounter++;
+				}
+
+				/* Recognize solution in cache together with annotation */
+				if (newNode.isGoal()) {
+					List<T> solution = getTraversalPath(newNode);
+
+					/* if the node evaluator has not reported the solution already anyway, register the solution and store its annotation */
+					if (!solutionReportingNodeEvaluator && !solutions.contains(solution)) {
+						solutions.add(solution);
+						solutionAnnotations.put(solution, new HashMap<>());
+						solutionAnnotations.get(solution).put("f", newNode.getInternalLabel());
+					}
+				}
+
+				/* free resources if this is computed by helper threads */
 				if (pool != null) {
 					activeJobs.decrementAndGet();
 					fComputationTickets.release();
 				}
-				return;
-			}
-			newNode.setInternalLabel(label);
-			
-			logger.info("Inserting successor {} of {} to OPEN. F-Value is {}", newNode, expandedNodeInternal, label);
-//			assert !open.contains(newNode) && !expanded.contains(newNode.getPoint()) : "Inserted node is already in OPEN or even expanded!";
-
-			/* if we discard (either only on OPEN or on both OPEN and CLOSED) */
-			boolean nodeProcessed = false;
-			if (parentDiscarding != ParentDiscarding.NONE) {
-
-				/* determine whether we already have the node AND it is worse than the one we want to insert */
-				Optional<Node<T, V>> existingIdenticalNodeOnOpen = open.stream().filter(n -> n.getPoint().equals(newNode.getPoint())).findFirst();
-				if (existingIdenticalNodeOnOpen.isPresent()) {
-					Node<T, V> existingNode = existingIdenticalNodeOnOpen.get();
-					if (newNode.compareTo(existingNode) < 0) {
-						graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_" + (newNode.isGoal() ? "solution" : "open")));
-						graphEventBus.post(new NodeRemovedEvent<>(existingNode));
-						open.remove(existingNode);
-						open.add(newNode);
-					} else {
-						graphEventBus.post(new NodeRemovedEvent<>(newNode));
-					}
-					nodeProcessed = true;
-				}
-
-				/* if parent discarding is not only for OPEN but also for CLOSE (and the node was not on OPEN), check the list of expanded nodes */
-				if (parentDiscarding == ParentDiscarding.ALL && !existingIdenticalNodeOnOpen.isPresent()) {
-
-					/* reopening, if the node is already on CLOSED */
-					Optional<T> existingIdenticalNodeOnClosed = expanded.stream().filter(n -> n.equals(newNode.getPoint())).findFirst();
-					if (existingIdenticalNodeOnClosed.isPresent()) {
-						Node<T, V> node = ext2int.get(existingIdenticalNodeOnClosed.get());
-						if (newNode.compareTo(node) < 0) {
-							node.setParent(newNode.getParent());
-							node.setInternalLabel(newNode.getInternalLabel());
-							expanded.remove(node.getPoint());
-							open.add(node);
-							graphEventBus.post(new NodeParentSwitchEvent<Node<T, V>>(node, node.getParent(), newNode.getParent()));
-						}
-						graphEventBus.post(new NodeRemovedEvent<Node<T, V>>(newNode));
-						nodeProcessed = true;
-					}
-				}
+			} catch (Throwable e) {
+				e.printStackTrace();
 			}
 
-			/* if parent discarding is turned off OR if the node was node processed by a parent discarding rule, just insert it on OPEN */
-			if (!nodeProcessed) {
-				if (!newNode.isGoal())
-					open.add(newNode);
-				graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_" + (newNode.isGoal() ? "solution" : "open")));
-				createdCounter++;
-			}
-			
-			/* Recognize solution in cache together with annotation */
-			if (newNode.isGoal()) {
-				List<T> solution = getTraversalPath(newNode);
-
-				/* if the node evaluator has not reported the solution already anyway, register the solution and store its annotation */
-				if (!solutionReportingNodeEvaluator && !solutions.contains(solution)) {
-					solutions.add(solution);
-					solutionAnnotations.put(solution, new HashMap<>());
-					solutionAnnotations.get(solution).put("f", newNode.getInternalLabel());
-				}
-			}
-			
-			/* free resources if this is computed by helper threads */
-			if (pool != null) {
-				activeJobs.decrementAndGet();
-				fComputationTickets.release();
-			}
 		}
 	}
 
@@ -267,10 +275,10 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 
 		/* set parent discarding */
 		parentDiscarding = pd;
-		
-//		/*setting a priorityqueueopen As a default open collection*/
-//		
-//		this.setOpen(new PriorityQueueOpen<Node<T,V>>());
+
+		// /*setting a priorityqueueopen As a default open collection*/
+		//
+		// this.setOpen(new PriorityQueueOpen<Node<T,V>>());
 
 		/* if the node evaluator is graph dependent, communicate the generator to it */
 		this.nodeEvaluator = pNodeEvaluator;
@@ -358,7 +366,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	 * @return A list of nodes from the initial point to a goal, <code>null</code> if a path doesn't exist.
 	 */
 	public List<T> nextSolution() {
-		
+
 		/* check whether solution has been canceled */
 		if (canceled) {
 			throw new IllegalStateException("Search has been canceled, no more solutions can be requested.");
@@ -428,17 +436,17 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 				return null;
 			}
 			return lastExpansion;
-		}
-		else
+		} else
 			step();
 		return lastExpansion;
 	}
 
 	protected void step() {
 		if (beforeSelection()) {
-			
+
 			Node<T, V> nodeToExpand = open.peek();
-			assert parentDiscarding == ParentDiscarding.ALL || !expanded.contains(nodeToExpand.getPoint()) : "Selected node " + nodeToExpand.getString() + " for the second time for expansion even though parent discarding is off. This cannot be the case!";
+			assert parentDiscarding == ParentDiscarding.ALL || !expanded.contains(nodeToExpand.getPoint()) : "Node " + nodeToExpand.getString()
+					+ " has been selected for the second time for expansion.";
 			if (nodeToExpand == null)
 				return;
 			afterSelection(nodeToExpand);
@@ -447,10 +455,10 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	}
 
 	public void step(Node<T, V> nodeToExpand) {
-		
-//		if (!(nodeEvaluator instanceof RandomizedDepthFirstEvaluator))
-//			System.out.println(nodeToExpand.getAnnotations());
-		
+
+		// if (!(nodeEvaluator instanceof RandomizedDepthFirstEvaluator))
+		// System.out.println(nodeToExpand.getAnnotations());
+
 		/* if search has been interrupted, do not process next step */
 		logger.debug("Step starts. Size of OPEN now {}", open.size());
 		if (Thread.interrupted()) {
@@ -484,39 +492,39 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 		logger.debug("Start computation of successors");
 		final Collection<NodeExpansionDescription<T, A>> successorDescriptions = new ArrayList<>();
 		{
-		Thread t = new Thread(new Runnable() {
-			
-			@Override
-			public void run() {
-				if (ORGraphSearch.this.canceled || ORGraphSearch.this.interrupted)
-					return;
-				int taskId = -1;
-				if (timeoutForComputationOfF > 0) {
-					if (timeoutSubmitter == null) {
-						timeoutSubmitter = TimeoutTimer.getInstance().getSubmitter();
+			Thread t = new Thread(new Runnable() {
+
+				@Override
+				public void run() {
+					if (ORGraphSearch.this.canceled || ORGraphSearch.this.interrupted)
+						return;
+					int taskId = -1;
+					if (timeoutForComputationOfF > 0) {
+						if (timeoutSubmitter == null) {
+							timeoutSubmitter = TimeoutTimer.getInstance().getSubmitter();
+						}
+						taskId = timeoutSubmitter.interruptMeAfterMS(timeoutForComputationOfF);
 					}
-					taskId = timeoutSubmitter.interruptMeAfterMS(timeoutForComputationOfF);
+					successorDescriptions.addAll(successorGenerator.generateSuccessors(expandedNodeInternal.getPoint()));
+					if (taskId >= 0)
+						timeoutSubmitter.cancelTimeout(taskId);
 				}
-				successorDescriptions.addAll(successorGenerator.generateSuccessors(expandedNodeInternal.getPoint()));
-				if (taskId >= 0)
-					timeoutSubmitter.cancelTimeout(taskId);
+			}, "Node Builder for some child of " + expandedNodeInternal);
+			logger.debug("Starting computation of successors in thread {}", t);
+			t.start();
+			try {
+				t.join();
+			} catch (InterruptedException e) {
+				logger.debug("Search has been interrupted");
+				interrupted = true;
+				return;
 			}
-		}, "Node Builder for some child of " + expandedNodeInternal);
-		logger.debug("Starting computation of successors in thread {}", t);
-		t.start();
-		try {
-			t.join();
-		} catch (InterruptedException e) {
-			logger.debug("Search has been interrupted");
-			interrupted = true;
-			return;
+			logger.debug("Finished computation of successors");
 		}
-		logger.debug("Finished computation of successors");
-		}
-		
+
 		if (additionalThreadsForExpansion < 1) {
 			successorDescriptions.stream().forEach(successorDescription -> {
-				
+
 				/* perform synchronized computation. The computation is outourced, because it may receive an interrupt-signal, and we do not want the main-thread to be interrupted */
 				Thread t = new Thread(new NodeBuilder(expandedNodeInternal, successorDescription), "Node Builder for some child of " + expandedNodeInternal);
 				logger.debug("Starting computation of successor in thread {}", t);
@@ -582,20 +590,20 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 		return node.getInternalLabel();
 	}
 
-	public Map<String,Object> getNodeAnnotations(T node) {
+	public Map<String, Object> getNodeAnnotations(T node) {
 		Node<T, V> intNode = ext2int.get(node);
 		return intNode.getAnnotations();
 	}
-	
+
 	public Object getNodeAnnotation(T node, String annotation) {
 		Node<T, V> intNode = ext2int.get(node);
 		return intNode.getAnnotation(annotation);
 	}
 
-	public Map<String,Object> getAnnotationsOfReturnedSolution(List<T> solution) {
+	public Map<String, Object> getAnnotationsOfReturnedSolution(List<T> solution) {
 		return solutionAnnotations.get(solution);
 	}
-	
+
 	public Object getAnnotationOfReturnedSolution(List<T> solution, String annotation) {
 		return solutionAnnotations.get(solution).get(annotation);
 	}
@@ -645,8 +653,6 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	}
 
 	protected Node<T, V> newNode(Node<T, V> parent, T t2) {
-		assert parentDiscarding == ParentDiscarding.NONE || !ext2int.containsKey(t2) : "Generating a second node object for " + t2 + " as successor of " + parent.getPoint() + " was contained as " + ext2int.get(t2).getPoint()
-				+ ", but ORGraphSearch currently only supports tree search!";
 		return newNode(parent, t2, null);
 	}
 
@@ -658,19 +664,26 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 
 		assert parent == null || expanded.contains(parent.getPoint()) : "Generating successors of an unexpanded node " + parent;
 		assert !open.contains(parent) : "Parent node " + parent + " is still on OPEN, which must not be the case!";
-		
+
 		/* create new node and check whether it is a goal */
 		Node<T, V> newNode = new Node<>(parent, t2);
 		if (evaluation != null)
 			newNode.setInternalLabel(evaluation);
+
+		/* check loop */
+		assert parent == null || !parent.externalPath().contains(t2) : "There is a loop in the underlying graph. The following path contains the last node twice: " + newNode.externalPath().stream().map(n -> n.toString()).reduce("", (s,t) -> s + "\n\t\t" + t);
 		
+		/* currently, we only support tree search */
+		assert !ext2int.containsKey(t2) : "Reached node " + t2 + " for the second time.\nt\tFirst path:" + ext2int.get(t2).externalPath().stream().map(n -> n.toString()).reduce("", (s,t) -> s + "\n\t\t" + t)
+				+ "\n\tSecond Path:" + newNode.externalPath().stream().map(n -> n.toString()).reduce("", (s,t) -> s + "\n\t\t" + t);
+
 		/* register node in map and create annotation object */
 		ext2int.put(t2, newNode);
-		
+
 		/* detect whether node is solution */
 		if (checkGoalPropertyOnEntirePath ? pathGoalTester.isGoal(newNode.externalPath()) : nodeGoalTester.isGoal(newNode.getPoint()))
 			newNode.setGoal(true);
-		
+
 		/* send events for this new node */
 		if (parent == null) {
 			this.graphEventBus.post(new GraphInitializedEvent<Node<T, V>>(newNode));
@@ -820,7 +833,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 			e.printStackTrace();
 		}
 	}
-	
+
 	public int getAdditionalThreadsForExpansion() {
 		return additionalThreadsForExpansion;
 	}
@@ -857,20 +870,20 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	}
 
 	/**
-	 * @param open the openCollection to set
+	 * @param open
+	 *            the openCollection to set
 	 */
-	public void setOpen(OpenCollection<Node<T,V>> collection) {
-		
+	public void setOpen(OpenCollection<Node<T, V>> collection) {
+
 		collection.clear();
 		collection.addAll(open);
 		open = collection;
 	}
-	
+
 	public void setLoggerName(String name) {
 		logger = LoggerFactory.getLogger(name);
 	}
 
-	
 	@Override
 	public void registerListener(Object listener) {
 		this.graphEventBus.register(listener);

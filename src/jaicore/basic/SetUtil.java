@@ -913,7 +913,8 @@ public class SetUtil {
 
 	public static Interval unserializeInterval(String intervalDescriptor) {
 		List<String> interval = unserializeList(intervalDescriptor);
-		return new Interval(Double.valueOf(interval.get(0)), Double.valueOf(interval.get(1)));
+		double min = Double.valueOf(interval.get(0));
+		return new Interval(min, interval.size() == 1 ? min : Double.valueOf(interval.get(1)));
 	}
 	
 	public static <T> List<T> getInvertedCopyOfList(List<T> list) {

@@ -1,6 +1,7 @@
 package jaicore.planning.graphgenerators.task.tfd;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -73,11 +74,11 @@ public class TFDTooltipGenerator<V extends Comparable<V>> implements TooltipGene
 		}
 		sb.append("</ul>");
 		sb.append("<h2>Current State</h2>");
-		String[] monomStrings = nodeRepresentation.getProblem().getState().toString().split("&");
+		List<String> monomStrings = nodeRepresentation.getProblem().getState().stream().sorted((l1,l2) -> l1.getPropertyName().compareTo(l2.getPropertyName())).map(l -> l.toString()).collect(Collectors.toList());
 		sb.append("<ul>");
-		for (int i=0 ; i < monomStrings.length ; i++) {
+		for (String literal : monomStrings) {
 			sb.append("<li>");
-			sb.append(monomStrings[i].trim());
+			sb.append(literal);
 			sb.append("</li>");
 		}
 		sb.append("</ul>");

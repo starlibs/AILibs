@@ -322,7 +322,7 @@ public class TaskPlannerUtil {
 		final List<VariableParam> methodTaskParams = methodOrPrimitiveTask.getVariableParams(); // there should be no constants actually
 		if (taskParams.size() != methodTaskParams.size() || methodTaskParams.size() != methodOrPrimitiveTask.getParameters().size())
 			throw new IllegalArgumentException(
-					"A method associated with task \"" + methodOrPrimitiveTask + "\" is used to refine task \"" + target + "\". There is a parameter count clash!");
+					"A method or operation associated with task \"" + methodOrPrimitiveTask + "\" is used to refine task \"" + target + "\". There is a parameter count clash!");
 		final Map<VariableParam, LiteralParam> taskParameterMapping = new HashMap<>();
 		for (int i = 0; i < taskParams.size(); i++) {
 			taskParameterMapping.put(methodTaskParams.get(i), taskParams.get(i));

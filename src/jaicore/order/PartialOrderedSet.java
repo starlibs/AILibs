@@ -276,18 +276,32 @@ public class PartialOrderedSet<E> extends HashSet<E> {
 		while (!itemsWithoutSuccessor.isEmpty()) {
 			List<E> itemsToInsert = new ArrayList<>(itemsWithoutSuccessor);
 			itemsWithoutSuccessor.clear();
-			for (E itemWithoutSuccessor : itemsToInsert) {
-				linearization.add(0,itemWithoutSuccessor);
-				uninsertedItems.remove(itemWithoutSuccessor);
+			for (E itemToInsert : itemsToInsert) {
+				if (linearization.contains(itemToInsert))
+					continue;
+				assert !linearization.contains(itemToInsert) : "The object " + itemToInsert + " is already contained in the linearization " + linearization;
+				linearization.add(0,itemToInsert);
+				uninsertedItems.remove(itemToInsert);
 				for (E uninsertedItem : uninsertedItems) {
 					if (workingCopyOfOrder.containsKey(uninsertedItem)) {
-						workingCopyOfOrder.get(uninsertedItem).remove(itemWithoutSuccessor);
+						workingCopyOfOrder.get(uninsertedItem).remove(itemToInsert);
 						if (workingCopyOfOrder.get(uninsertedItem).isEmpty())
 							itemsWithoutSuccessor.add(uninsertedItem);
 					}
 				}
 			}
 		}
+		
+		/* consistency check */
+		assert linearization.size() == super.size() : "The linearization of " + elements + " has produced another number of elements: " + linearization.toString();
+//		if () {
+//			for (E e1 : linearization) {
+//				for (E e2 : linearization) {
+//					
+//				}
+//			}
+//		}
+		
 		return linearization;
 	}
 	
