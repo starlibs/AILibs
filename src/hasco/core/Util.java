@@ -1,18 +1,12 @@
 package hasco.core;
 
-import java.nio.channels.UnsupportedAddressTypeException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.lang.model.type.IntersectionType;
-
 import org.apache.commons.math3.geometry.euclidean.oned.Interval;
-import org.graphstream.stream.file.FileSinkImages.Resolution;
 
 import hasco.model.CategoricalParameterDomain;
 import hasco.model.Component;
@@ -28,7 +22,6 @@ import jaicore.logic.fol.structure.Monom;
 import jaicore.planning.model.core.Action;
 import jaicore.planning.model.core.PlannerUtil;
 import jaicore.search.structure.core.Node;
-import scala.annotation.varargs;
 
 public class Util {
 
@@ -281,25 +274,29 @@ public class Util {
 		for (Dependency dependency : component.getDependencies()) {
 			if (isDependencyPremiseSatisfied(dependency, currentValues)) {
 				for (Pair<Parameter, ParameterDomain> newDomain : dependency.getConclusion()) {
+					
+					/* directly use the concluded domain if the current value is NOT subsumed by it. Otherwise, just stick to the current domain */
 					Parameter param = newDomain.getX();
 					ParameterDomain concludedDomain = newDomain.getY();
+					if (!concludedDomain.subsumes(domains.get(param)))
+						domains.put(param, concludedDomain);
 					
-					/* create intersection */
-					ParameterDomain intersection = null;
-					if (param.isNumeric()) {
-						NumericParameterDomain cConcludedDomain = (NumericParameterDomain)concludedDomain;
-						NumericParameterDomain currentDomain = (NumericParameterDomain)domains.get(newDomain.getX());
-						intersection = new NumericParameterDomain(cConcludedDomain.isInteger(), Math.max(cConcludedDomain.getMin(), currentDomain.getMin()), Math.min(cConcludedDomain.getMax(), currentDomain.getMax()));
-					}
-					else if (param.isCategorical()) {
-						CategoricalParameterDomain cConcludedDomain = (CategoricalParameterDomain)concludedDomain;
-						CategoricalParameterDomain currentDomain = (CategoricalParameterDomain)domains.get(newDomain.getX());
-						intersection = new CategoricalParameterDomain(SetUtil.intersection(Arrays.asList(cConcludedDomain.getValues()), Arrays.asList(currentDomain.getValues())));
-					}
-					else
-						throw new UnsupportedOperationException("Cannot currently handle parameters that are not numeric and not categorical.");
-					assert intersection != null : "The intersection of the current domain and the domain dictated by a rule has failed";
-					domains.put(param, intersection);
+					
+//					ParameterDomain intersection = null;
+//					if (param.isNumeric()) {
+//						NumericParameterDomain cConcludedDomain = (NumericParameterDomain)concludedDomain;
+//						NumericParameterDomain currentDomain = (NumericParameterDomain)domains.get(newDomain.getX());
+//						intersection = new NumericParameterDomain(cConcludedDomain.isInteger(), Math.max(cConcludedDomain.getMin(), currentDomain.getMin()), Math.min(cConcludedDomain.getMax(), currentDomain.getMax()));
+//					}
+//					else if (param.isCategorical()) {
+//						CategoricalParameterDomain cConcludedDomain = (CategoricalParameterDomain)concludedDomain;
+//						CategoricalParameterDomain currentDomain = (CategoricalParameterDomain)domains.get(newDomain.getX());
+//						intersection = new CategoricalParameterDomain(SetUtil.intersection(Arrays.asList(cConcludedDomain.getValues()), Arrays.asList(currentDomain.getValues())));
+//					}
+//					else
+//						throw new UnsupportedOperationException("Cannot currently handle parameters that are not numeric and not categorical.");
+//					assert intersection != null : "The intersection of the current domain and the domain dictated by a rule has failed";
+//					domains.put(param, intersection);
 				}
 			}
 		}

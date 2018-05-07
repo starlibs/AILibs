@@ -70,12 +70,11 @@ public class isRefinementCompletedPredicate implements EvaluablePredicate {
 		for (Parameter param : component.getParameters()) {
 			String containerOfParam = componentParamContainers.get(param.getName());
 			String currentValueOfParam = componentParams.get(param.getName());
-			if (param.getDefaultDomain() instanceof NumericParameterDomain) {
+			if (param.isNumeric()) {
 				ParameterRefinementConfiguration refinementConfig = refinementConfiguration.get(component).get(param);
 				List<String> interval = SetUtil.unserializeList(currentValueOfParam);
 				double min = Double.parseDouble(interval.get(0));
 				double max = Double.parseDouble(interval.get(1));
-				
 				double length = max - min;
 				if (length > refinementConfig.getIntervalLength())
 					return false;
@@ -84,7 +83,9 @@ public class isRefinementCompletedPredicate implements EvaluablePredicate {
 				assert currentValueOfParam != null : "Param " + param.getName() + " has currently no value!";
 				assert param.getDefaultValue() != null : "Param " + param.getName() + " has no default value!";
 				boolean variableHasBeenSet = state.contains(new Literal("overwritten('" + containerOfParam + "')"));
-				if (!variableHasBeenSet)
+				boolean variableHasBeenClosed = state.contains(new Literal("closed('" + containerOfParam + "')"));
+				assert !variableHasBeenClosed || variableHasBeenSet : "Parameter " + param.getName() + " of component " + component.getName() + " with default domain " + param.getDefaultDomain() + " has been closed but no value has been set.";
+				if (!variableHasBeenSet && !variableHasBeenClosed)
 					return false;
 			}
 			else

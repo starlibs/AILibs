@@ -69,5 +69,8 @@ public class Parameter {
 		return true;
 	}
 
-
+	@Override
+	public String toString() {
+		return name;
+	}
 }

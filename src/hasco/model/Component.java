@@ -24,7 +24,7 @@ public class Component {
 		this(name);
 		this.requiredInterfaces.addAll(requiredInterfaces);
 		this.providedInterfaces.addAll(providedInterfaces);
-		this.parameters.addAll(parameters);
+		parameters.forEach(param -> this.addParameter(param));
 		this.dependencies.addAll(dependencies);
 	}
 
@@ -60,6 +60,7 @@ public class Component {
 	}
 
 	public void addParameter(final Parameter param) {
+		assert !parameters.stream().filter(p -> p.getName().equals(param.getName())).findAny().isPresent() : "Component " + name + " already has parameter with name " + param.getName();
 		this.parameters.add(param);
 	}
 
@@ -76,7 +77,6 @@ public class Component {
 			}
 		}
 		
-		System.out.println(this.parameters.getLinearization());
 		/* add the dependency to the set of dependencies */
 		this.dependencies.add(dependency);
 	}

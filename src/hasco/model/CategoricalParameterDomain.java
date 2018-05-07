@@ -59,4 +59,9 @@ public class CategoricalParameterDomain extends ParameterDomain {
 		CategoricalParameterDomain otherCategoricalDomain = (CategoricalParameterDomain)otherDomain;
 		return Arrays.asList(values).containsAll(Arrays.asList(otherCategoricalDomain.getValues()));
 	}
+
+	@Override
+	public String toString() {
+		return "CategoricalParameterDomain [values=" + Arrays.toString(values) + "]";
+	}
 }
