@@ -91,7 +91,6 @@ public class ComponentLoader {
 		JsonNode components = rootNode.path("components");
 		if (components != null) {
 			Iterator<JsonNode> componentsIt = components.elements();
-
 			Component c;
 			for (JsonNode component : components) {
 				c = new Component(component.get("name").asText());
@@ -106,7 +105,7 @@ public class ComponentLoader {
 				}
 
 				Map<Parameter, ParameterRefinementConfiguration> paramConfig = new HashMap<>();
-
+				
 				for (JsonNode parameter : component.path("parameter")) {
 					// name of the parameter
 					String name = parameter.get("name").asText();
@@ -166,7 +165,6 @@ public class ComponentLoader {
 					switch (type) {
 					case "int":
 					case "double":
-						System.out.println(Arrays.toString(doubleParamValues));
 						p = new Parameter(name, new NumericParameterDomain(type.equals("int"), doubleParamValues[1], doubleParamValues[2]), doubleParamValues[0]);
 						if (doubleParamValues[3] == 0)
 							throw new IllegalArgumentException("Please specify the parameter \"refineSplits\" for the parameter \"" + p.getName() + "\" in component \"" + c.getName() + "\"");
@@ -180,13 +178,13 @@ public class ComponentLoader {
 						break;
 					case "cat":
 						if (parameter.get("values").isTextual()) {
-							p = new Parameter(name, new CategoricalParameterDomain(Arrays.stream(stringParamValues[1].split(",")).collect(Collectors.toList())), stringParams[2]);
+							p = new Parameter(name, new CategoricalParameterDomain(Arrays.stream(stringParamValues[1].split(",")).collect(Collectors.toList())), stringParamValues[2]);
 						} else {
 							List<String> values = new LinkedList<>();
 							for (JsonNode value : parameter.get("values")) {
 								values.add(value.asText());
 							}
-							p = new Parameter(name, new CategoricalParameterDomain(values), stringParams[2]);
+							p = new Parameter(name, new CategoricalParameterDomain(values), stringParamValues[2]);
 						}
 						break;
 					default:
@@ -200,7 +198,7 @@ public class ComponentLoader {
 
 				/* now parse dependencies */
 				for (JsonNode dependency : component.path("dependencies")) {
-
+					
 					/* parse precondition */
 					String pre = dependency.get("pre").asText();
 					Collection<Collection<Pair<Parameter, ParameterDomain>>> premise = new ArrayList<>();
@@ -257,11 +255,16 @@ public class ComponentLoader {
 					String post = dependency.get("post").asText();
 					Collection<String> literals = Arrays.asList(post.split("&"));
 					Collection<Pair<Parameter, String>> monomInPremise = new ArrayList<>();
-
+					
 					for (String literal : literals) {
 						String[] parts = literal.trim().split(" ");
-						if (parts.length != 3) {
+						if (parts.length < 3) {
 							throw new IllegalArgumentException("Cannot parse literal " + literal + ". Literals must be of the form \"<a> P <b>\".");
+						}
+						if (parts.length > 3) {
+							for (int i = 3; i < parts.length; i++) {
+								parts[2] += " " + parts[i];
+							}
 						}
 
 						Parameter param = c.getParameter(parts[0]);
@@ -298,11 +301,9 @@ public class ComponentLoader {
 							throw new IllegalArgumentException("Cannot parse literal " + literal + ". Currently no support for predicate \"" + parts[1] + "\".");
 						}
 					}
-
 					/* add dependency to the component */
 					c.addDependency(new Dependency(premise, conclusion));
 				}
-
 				this.paramConfigs.put(c, paramConfig);
 				this.components.add(c);
 			}

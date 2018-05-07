@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Stack;
+import java.util.concurrent.SynchronousQueue;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.math.stat.descriptive.SynchronizedMultivariateSummaryStatistics;
@@ -63,6 +64,10 @@ public class isValidParameterRangeRefinementPredicate implements EvaluablePredic
 		if (param.isNumeric()) {
 			NumericParameterDomain currentlyActiveDomain = (NumericParameterDomain) paramDomains.get(param);
 			Interval currentInterval = new Interval(currentlyActiveDomain.getMin(), currentlyActiveDomain.getMax());
+			
+			/* if there is nothing to refine anymore */
+			if (currentInterval.getInf() == currentInterval.getSup())
+				return new ArrayList<>();
 
 			ParameterRefinementConfiguration refinementConfig = refinementConfiguration.get(component).get(param);
 			if (refinementConfig == null)
@@ -86,7 +91,7 @@ public class isValidParameterRangeRefinementPredicate implements EvaluablePredic
 				List<Interval> proposedRefinements = refineOnLinearScale(currentInterval, refinementConfig.getRefinementsPerStep(), refinementConfig.getIntervalLength());
 				for (Interval proposedRefinement : proposedRefinements) {
 					assert proposedRefinement.getInf() >= currentInterval.getInf() && proposedRefinement.getSup() <= currentInterval.getSup() : "The proposed refinement [" + proposedRefinement.getInf() + ", " + proposedRefinement.getSup() + "] is not a sub-interval of " + currentParamValue +"].";
-					assert proposedRefinement.equals(currentInterval) : "No real refinement! Intervals are identical.";
+					assert !proposedRefinement.equals(currentInterval) : "No real refinement! Intervals are identical.";
 				}
 				return getGroundingsForIntervals(proposedRefinements, partialGroundingAsList);
 			}
@@ -99,6 +104,10 @@ public class isValidParameterRangeRefinementPredicate implements EvaluablePredic
 			double focus = Double.parseDouble(focusPredicate.get().getParameters().get(2).getName());
 
 			List<Interval> proposedRefinements = refineOnLogScale(currentInterval, refinementConfig.getRefinementsPerStep(), 2, focus);
+			for (Interval proposedRefinement : proposedRefinements) {
+				assert proposedRefinement.getInf() >= currentInterval.getInf() && proposedRefinement.getSup() <= currentInterval.getSup() : "The proposed refinement [" + proposedRefinement.getInf() + ", " + proposedRefinement.getSup() + "] is not a sub-interval of " + currentParamValue +"].";
+				assert !proposedRefinement.equals(currentInterval) : "No real refinement! Intervals are identical.";
+			}
 			return getGroundingsForIntervals(proposedRefinements, partialGroundingAsList);
 
 		} else if (param.isCategorical()) {

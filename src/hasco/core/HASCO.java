@@ -277,7 +277,7 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 					/* add knowledge about initial value */
 					List<LiteralParam> valParams = new ArrayList<>();
 					valParams.add(new VariableParam(paramIdentifier));
-					if (p.getDefaultDomain() instanceof NumericParameterDomain) {
+					if (p.isNumeric()) {
 						standardKnowledgeAboutNewComponent.add(new Literal("parameterFocus(c2, '" + p.getName() + "', '" + p.getDefaultValue() + "')"));
 						NumericParameterDomain np = (NumericParameterDomain) p.getDefaultDomain();
 						valParams.add(new ConstantParam("[" + np.getMin() + "," + np.getMax() + "]"));
@@ -298,6 +298,10 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 			Map<CNFFormula, Monom> deleteList = new HashMap<>();
 			deleteList.put(new CNFFormula(), new Monom("val(container,previousValue)"));
 			operations.add(new CEOCOperation("redefValue", "container,previousValue,newValue", new Monom("val(container,previousValue)"), addList, deleteList, ""));
+			addList = new HashMap<>();
+			addList.put(new CNFFormula(), new Monom("closed(container)"));
+			deleteList = new HashMap<>();
+			operations.add(new CEOCOperation("declareClosed", "container", new Monom(), addList, deleteList, ""));
 		}
 
 		/* create methods */
@@ -356,7 +360,7 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 				// if (p instanceof NumericParameter) {
 				methods.add(new OCIPMethod("ignoreParamRefinementFor" + p.getName() + "Of" + c.getName(), "object, container, curval",
 						new Literal("tRefineParam" + p.getName() + "Of" + c.getName() + "(object,container)"),
-						new Monom("parameterContainer('" + c.getName() + "', '" + p.getName() + "', object, container) & val(container,curval)"), new TaskNetwork(), false, "",
+						new Monom("parameterContainer('" + c.getName() + "', '" + p.getName() + "', object, container) & val(container,curval)"), new TaskNetwork("declareClosed(container)"), false, "",
 						new Monom("notRefinable('" + c.getName() + "', object, '" + p.getName() + "', container, curval)")));
 
 				methods.add(new OCIPMethod("refineParam" + p.getName() + "Of" + c.getName(), "object, container, curval, newval",
