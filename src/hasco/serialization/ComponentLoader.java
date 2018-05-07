@@ -71,7 +71,6 @@ public class ComponentLoader {
 
     for (JsonNode includePathNode : includes) {
       String path = includePathNode.asText();
-      System.out.println("Include " + path);
       File subFile = new File(baseFolder.getAbsolutePath() + File.separator + path);
       if (!this.parsedFiles.contains(subFile.getCanonicalPath())) {
         if (subFile.isFile()) {
@@ -167,7 +166,6 @@ public class ComponentLoader {
           switch (type) {
             case "int":
             case "double":
-              System.out.println(Arrays.toString(doubleParamValues));
               p = new Parameter(name, new NumericParameterDomain(type.equals("int"), doubleParamValues[1], doubleParamValues[2]), doubleParamValues[0]);
               if (doubleParamValues[3] == 0) {
                 throw new IllegalArgumentException("Please specify the parameter \"refineSplits\" for the parameter \"" + p.getName() + "\" in component \"" + c.getName() + "\"");
@@ -337,8 +335,6 @@ public class ComponentLoader {
     this.components.clear();
 
     this.parseFile(componentDescriptionFile);
-
-    System.out.println(this.components);
   }
 
   public Map<Component, Map<Parameter, ParameterRefinementConfiguration>> getParamConfigs() {
