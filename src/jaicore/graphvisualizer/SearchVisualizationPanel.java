@@ -188,7 +188,7 @@ public class SearchVisualizationPanel<T> extends JPanel {
 						SearchVisualizationPanel.this.tooltipContainer.repaint();
 		            	SearchVisualizationPanel.this.tooltipContainer.setExtendedState(0);
 		            	
-		            	SearchVisualizationPanel.this.tooltipContainer.setVisible(true);
+//		            	SearchVisualizationPanel.this.tooltipContainer.setVisible(true);
 		            	SearchVisualizationPanel.this.tooltipTimer.restart();
 					}
 				};

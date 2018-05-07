@@ -33,8 +33,10 @@ public class Recorder<T> {
 	private int index;
 
 	//time variables
-	private long firstEvent;
-	private List<Long> eventTimes;
+	private long firstEventNano;
+	private long firstEventMilli;
+	private List<Long> nanoTimes;
+	private List<Long> milliTimes;
 
 
 	private TooltipGenerator tooltipGenerator;
@@ -64,8 +66,12 @@ public class Recorder<T> {
 		playEventBus = new GraphEventBus<>();
 		events = new ArrayList<Object>(5);
 
-		firstEvent = 0;
-		eventTimes = new ArrayList<>(5);
+		firstEventNano = 0;
+		firstEventMilli = 0;
+
+		nanoTimes = new ArrayList<>(5);
+		milliTimes = new ArrayList<>(5);
+
 		nodeTypes = new ArrayList<String>();
 
 		nodeMap = new HashMap<>();
@@ -80,15 +86,22 @@ public class Recorder<T> {
 	@Subscribe
 	public void receiveEvent(T event) {
 		this.events.add(event);
-		long curr = 0;
-		if(firstEvent == 0) {
-			firstEvent = System.nanoTime();
-			curr = firstEvent;
+		long currNano = 0;
+		long currMilli = 0;
+		if(firstEventNano == 0) {
+			firstEventNano = System.nanoTime();
+			firstEventMilli = System.currentTimeMillis();
+			currNano = firstEventNano;
+			currMilli = firstEventMilli;
 		}
-		else
-			curr = System.nanoTime();
+		else {
+			currNano = System.nanoTime();
+			currMilli = System.currentTimeMillis();
+		}
 
-		this.eventTimes.add(curr-firstEvent);
+		this.nanoTimes.add(currNano-firstEventNano);
+		this.milliTimes.add(currMilli-firstEventMilli);
+		this.milliTimes.add(currMilli-firstEventMilli);
 
 
 		int id = 0;
@@ -318,7 +331,7 @@ public class Recorder<T> {
 			//This is done to store the time in the same file as the events.
 			for(int i = 0; i < events.size(); i++){
 				LinkedHashMap t = new LinkedHashMap();
-				t.put(eventTimes.get(i), events.get(i));
+				t.put(nanoTimes.get(i), events.get(i));
 				saveList.add(t);
 			}
 
@@ -342,7 +355,7 @@ public class Recorder<T> {
 	public void loadFromFile(File file){
 
 		//reset the recorder to not mix up the old events with the loaded ones
-		eventTimes.clear();
+		nanoTimes.clear();
 		events.clear();
 		index = 0 ;
 		this.setTooltipGenerator(n->n.toString());
@@ -358,7 +371,7 @@ public class Recorder<T> {
 				LinkedHashMap map = (LinkedHashMap) o;
 				Set timeSet = map.keySet();
 				timeSet.stream().forEach(t->{
-					eventTimes.add(Long.parseLong((String)(t)));
+					nanoTimes.add(Long.parseLong((String)(t)));
 					events.add(creator.createEvent((LinkedHashMap)map.get(t)));
 				});
 			});
@@ -396,7 +409,7 @@ public class Recorder<T> {
 //				LinkedHashMap map = (LinkedHashMap) o;
 //				Set timeSet = map.keySet();
 //				timeSet.stream().forEach(t->{
-//					eventTimes.add(Long.parseLong((String)(t)));
+//					nanoTimes.add(Long.parseLong((String)(t)));
 //					events.add(creator.createEvent((LinkedHashMap)map.get(t)));
 //				});
 //			});
@@ -435,9 +448,13 @@ public class Recorder<T> {
 	 *
 	 * @return
 	 */
-	public List<Long> getEventTimes() {
-		return eventTimes;
+	public List<Long> getNanoTimes() {
+		return nanoTimes;
 	}
+
+	public List<Long>getMilliTimes(){
+	    return milliTimes;
+    }
 
 
 	/**
@@ -446,8 +463,8 @@ public class Recorder<T> {
 	 * 		Returns the time at which the last event was received in nano seconds.
 	 */
 	public long getLastEvent(){
-		if(! eventTimes.isEmpty())
-			return eventTimes.get(eventTimes.size()-1);
+		if(! nanoTimes.isEmpty())
+			return nanoTimes.get(nanoTimes.size()-1);
 		else
 			return 0;
 	}

@@ -1,36 +1,47 @@
 package jaicore.graphvisualizer.gui;
 
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
-import jaicore.graphvisualizer.gui.FXController;
-import jaicore.graphvisualizer.gui.FXGui;
-import jaicore.graphvisualizer.gui.Recorder;
-import jaicore.search.algorithms.standard.bestfirst.BestFirst;
-import jaicore.search.graphgenerators.nqueens.NQueenGenerator;
+import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionHTNPlanner;
+import jaicore.planning.graphgenerators.task.tfd.TFDNode;
+import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;
+import jaicore.planning.model.task.ceocstn.CEOCSTNPlanningProblem;
+import jaicore.planning.model.task.ceocstn.StandardProblemFactory;
 import jaicore.search.graphgenerators.nqueens.QueenNode;
 import jaicore.search.structure.core.Node;
 import org.junit.Test;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+
 public class FXGuiTester {
 
-	int[] numbersOfSolutions = { 2, 10, 4, 40, 92, 352};
 
 	@Test
 	public void test() {
-		int i = 0;
-//		prepare a simple Search with the 8 Queens problem
-		System.out.print("Checking " + (i+4)+ "-Queens Problem ... ");
-		NQueenGenerator gen = new NQueenGenerator(i+4);
-		BestFirst<QueenNode, String> search = new BestFirst<>(gen, node-> (double)node.getPoint().getNumberOfAttackedCellsInNextRow());
-
-		//Prepare an replay object
-		Recorder<Node<QueenNode, Double>> recorder = new Recorder(search);
+		/* create nested dichotomy problem */
+		Collection<String> init = Arrays.asList(new String[] {"A", "B", "C", "D"});
+		CEOCSTNPlanningProblem problem = StandardProblemFactory.getNestedDichotomyCreationProblem("root", init, true, 0, 0);
+		ForwardDecompositionHTNPlanner planner = new ForwardDecompositionHTNPlanner(problem, 1);
+		ForwardDecompositionHTNPlanner.SolutionIterator plannerRun = planner.iterator();
+//		new SimpleGraphVisualizationWindow<Node<TFDNode,Double>>(plannerRun.getSearch()).getPanel().setTooltipGenerator(new TFDTooltipGenerator<>());
 
 
+		Recorder<Node<TFDNode,Double>> recorder = new Recorder<>(plannerRun.getSearch());
+		recorder.setTooltipGenerator(new TFDTooltipGenerator<>());
+
+		/* solve problem */
+		System.out.println("Starting search. Waiting for solutions:");
+		while (plannerRun.hasNext()) {
+			List<TFDNode> solution = (List<TFDNode>) plannerRun.next();
+			System.out.println("\t" + solution);
+		}
+		System.out.println("Algorithm has finished.");
 
 
-		int solutions = 0;
-		while (search.nextSolution() != null)
-			solutions ++;
+
+
+
 
 		String [] args = new String[0];
 		//FXGui2.setRec(recorder);
