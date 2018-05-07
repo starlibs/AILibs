@@ -291,7 +291,7 @@
 				},
 				/* Threshold for the matrix decompositon, what is considered frequent. Between 0 and 1. (default: 0.5) */
 				{
-					"name": "_size",
+					"name": "_threshold",
 					"type": "double",
 					"min": 0,
 					"max": 1,
