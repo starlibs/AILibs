@@ -1,11 +1,12 @@
 package jaicore.graphvisualizer.gui;
 
 import java.net.URL;
+import java.sql.Time;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.concurrent.TimeUnit;
 
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 
 import jaicore.graphvisualizer.NodeListener;
 import jaicore.graphvisualizer.SearchVisualizationPanel;
@@ -16,8 +17,8 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Slider;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
+import javafx.util.StringConverter;
 
 public class FXController implements Initializable, NodeListener {
 
@@ -36,7 +37,14 @@ public class FXController implements Initializable, NodeListener {
 
 
     @FXML
-    private Text toolTip;
+    private SwingNode toolTip;
+
+    JLabel tip;
+
+//    @FXML
+//    private WebView webView;
+//
+//    private WebEngine engine;
 
 
     private static Recorder rec;
@@ -46,6 +54,8 @@ public class FXController implements Initializable, NodeListener {
     private long sleepTime;
 
     private int index;
+
+    private boolean nanoTime;
 
 
 
@@ -76,11 +86,22 @@ public class FXController implements Initializable, NodeListener {
         setTimeline();
         index = 0;
 
-        toolTip.setText("");
+
+        tip = new JLabel();
+        tip.setText("<html></html>");
+        setTip(toolTip);
+
+//        this.engine = this.webView.getEngine();
 
 
     }
 
+    private void setTip(SwingNode swingNode){
+        JScrollPane panel = new JScrollPane();
+        panel.setViewportView(tip);
+
+        SwingUtilities.invokeLater(()->swingNode.setContent(panel));
+    }
 
 
     /**
@@ -230,24 +251,76 @@ public class FXController implements Initializable, NodeListener {
         createSwingContent(swingNode);
 
         setTimeline();
-
-
-
     }
 
    public static void setRec(Recorder recorder){
         rec = recorder;
-    }
+   }
 
     /**
      * Sets the values of the timeline to match the currently stored events in the recorder.
      */
-    private void setTimeline(){
-       eventTimes = rec.getEventTimes();
-       timeline.setMax(rec.getLastEvent());
+   private void setTimeline(){
+//       eventTimes = rec.getNanoTimes();
+       List nano = rec.getNanoTimes();
+       List milli = rec.getMilliTimes();
+       int size = milli.size();
+       if(size > 15) {
+           eventTimes = milli;
+           this.nanoTime=false;
+       }
+       else {
+           eventTimes = nano;
+           this.nanoTime = true;
+       }
+
+       timeline.setMax(eventTimes.get(eventTimes.size()-1));
        if(!eventTimes.isEmpty())
-           timeline.setMajorTickUnit(rec.getLastEvent()>>4);
+           timeline.setMajorTickUnit(eventTimes.get(eventTimes.size()-1)/10);
+
+       timeline.setMinorTickCount(5);
        timeline.setValue(index);
+
+       timeline.setLabelFormatter(new StringConverter<Double>() {
+           @Override
+           public String toString(Double aDouble) {
+               long value= aDouble.longValue();
+
+               if(!nanoTime){
+                   long micro = value % 1000000;
+                   value = value / 1000000;
+                   long seconds = value %60;
+                   long minutes = value / 60;
+                   value = value /60;
+                   long hours = value /60;
+
+                   StringBuilder sb = new StringBuilder();
+
+                   if(hours != 0)
+                       sb.append(hours + "h:");
+                   if(minutes != 0)
+                       sb.append(minutes + "m:");
+                    if(seconds <10)
+                        sb.append(0);
+                   sb.append(seconds +"s:");
+                   sb.append(micro);
+                   return sb.toString();
+
+               }
+               else{
+                   return aDouble.toString();
+               }
+           }
+
+           @Override
+           public Double fromString(String s) {
+               return null;
+           }
+       });
+
+
+
+
    }
 
 
@@ -287,7 +360,13 @@ public class FXController implements Initializable, NodeListener {
     public void buttonPushed(Object node) {
         SearchVisualizationPanel panel = (SearchVisualizationPanel) swingNode.getContent();
         TooltipGenerator gen = panel.getTooltipGenerator();
-        toolTip.setText(gen.getTooltip(node));
+        StringBuilder sb = new StringBuilder();
+//						sb.append("<html><div style='padding: 5px; background: #ffffcc; border: 1px solid black;'>");
+        sb.append("<html><div style='padding: 5px;'>");
+        sb.append(gen.getTooltip(node));
+        sb.append("</div></html>");
+        tip.setText(sb.toString());
+
 
     }
 }
