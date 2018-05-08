@@ -276,8 +276,13 @@ public class ComponentLoader {
 
           for (String literal : literals) {
             String[] parts = literal.trim().split(" ");
-            if (parts.length != 3) {
+            if (parts.length < 3) {
               throw new IllegalArgumentException("Cannot parse literal " + literal + ". Literals must be of the form \"<a> P <b>\".");
+            }
+            if (parts.length > 3) {
+              for (int i = 3; i < parts.length; i++) {
+                parts[2] += " " + parts[i];
+              }
             }
 
             Parameter param = c.getParameter(parts[0]);
@@ -319,7 +324,6 @@ public class ComponentLoader {
                 throw new IllegalArgumentException("Cannot parse literal " + literal + ". Currently no support for predicate \"" + parts[1] + "\".");
             }
           }
-
           /* add dependency to the component */
           c.addDependency(new Dependency(premise, conclusion));
         }
@@ -348,7 +352,6 @@ public class ComponentLoader {
   public static void main(final String[] args) throws IOException {
     ComponentLoader cl = new ComponentLoader();
     cl.loadComponents(new File("complexMLComponents.json"));
-
   }
 
 }
