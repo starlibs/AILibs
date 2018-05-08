@@ -3,7 +3,6 @@ package de.upb.crc901.automl.hascowekaml;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -32,11 +31,11 @@ import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionSolu
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.search.algorithms.standard.core.INodeEvaluator;
 import meka.classifiers.multilabel.MultiLabelClassifier;
-import meka.core.MLUtils;
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.SingleClassifierEnhancer;
+import weka.classifiers.functions.SMO;
 import weka.core.Instances;
+import weka.core.OptionHandler;
 
 public class HASCOForMEKA implements IObservableGraphAlgorithm<TFDNode, String> {
 
@@ -68,30 +67,79 @@ public class HASCOForMEKA implements IObservableGraphAlgorithm<TFDNode, String> 
 
 		@Override
 		public MultiLabelClassifier getComponentInstantiation(ComponentInstance groundComponent) {
+			return (MultiLabelClassifier) produceClassifier(groundComponent);
+		}
+
+		private Classifier produceClassifier(ComponentInstance groundComponent) {
+
+			/* collect basic information about the component */
 			Component component = groundComponent.getComponent();
 			Map<String, String> paramValues = groundComponent.getParameterValues();
 			String className = component.getName();
+
+			/* now try to create an object of this component */
 			try {
 				List<String> params = new ArrayList<>();
 				for (Parameter p : component.getParameters()) {
 					if (paramValues.containsKey(p.getName())) {
-						params.add("-" + p.getName());
-						params.add(paramValues.get(p.getName()));
+
+						/* ignore activator params, which are only used to control the search */
+						if (p.getName().contains("Activator"))
+							continue;
+
+						/* if this is a boolean flag and the value is false, omit it */
+						String value = paramValues.get(p.getName());
+						if (value.equals("false"))
+							continue;
+
+						if (className.contains("meka"))
+							params.add(p.getName().replaceAll("_", "-"));
+						else if (className.contains("weka"))
+							params.add("-" + p.getName());
+
+						/* if this is a boolean flag and the value is positive, just add the name */
+						if (!value.equals("true"))
+							params.add(value);
 					}
 				}
 				String[] paramsAsArray = params.toArray(new String[] {});
-				
-				/* create main classification algorithm and set its base learner */
-				MultiLabelClassifier c = (MultiLabelClassifier) Class.forName(className).newInstance();
-				c.setOptions(paramsAsArray);
-				if (c instanceof SingleClassifierEnhancer) {
-					SingleClassifierEnhancer cc = (SingleClassifierEnhancer)c;
-					ComponentInstance baseClassifierCI = groundComponent.getSatisfactionOfRequiredInterfaces().get("Classifier");
-					Classifier baseClassifier = AbstractClassifier.forName(baseClassifierCI.getComponent().getName(), new String[] {});
-					cc.setClassifier(baseClassifier);
+				Classifier c = (Classifier) Class.forName(className).newInstance();
+				if (c instanceof OptionHandler) {
+					try {
+						((OptionHandler) c).setOptions(paramsAsArray);
+					} catch (Exception e) {
+						logger.error("Invalid option array for classifier {}: {}. Exception: {}. Error message: {}", className, params, e.getClass().getName(), e.getMessage());
+					}
 				}
-				System.err.println(Arrays.toString(c.getOptions()));
+				
+				/* if this is an enhanced classifier, set its base classifier */
+				if (component.getRequiredInterfaces().size() > 1)
+					throw new IllegalArgumentException("This factory can currently only handle at most one required interface per component");
+				if (component.getRequiredInterfaces().size() == 1) {
+					if ((c instanceof SingleClassifierEnhancer)) {
+					SingleClassifierEnhancer cc = (SingleClassifierEnhancer) c;
+					ComponentInstance baseClassifierCI = groundComponent.getSatisfactionOfRequiredInterfaces().values().iterator().next(); // there is only one required interface
+					if (baseClassifierCI == null)
+						throw new IllegalStateException(
+								"The required interface \"Classifier\" of component " + groundComponent.getComponent().getName() + " has not been satisifed!");
+					Classifier baseClassifier = produceClassifier(baseClassifierCI);
+					cc.setClassifier(baseClassifier);
+					}
+					else if(c instanceof SMO) {
+						SMO smo = (SMO)c;
+						ComponentInstance kernel = groundComponent.getSatisfactionOfRequiredInterfaces().values().iterator().next(); // there is only one required interface
+						System.out.println("Kernel " + kernel);
+					}
+					else
+						throw new IllegalArgumentException(
+							"Required interfaces are currently only supported for SingleClassifierInhancer or SMO objects (and the base classifier must be their required interface). The presented class "
+									+ c.getClass().getName() + " does not satisfy this requirement.");
+				}
 				return c;
+
+			} catch (ClassNotFoundException | NoClassDefFoundError e) {
+				logger.error("Could not find a class with class name {}", className);
+				return null;
 			} catch (Exception e) {
 				e.printStackTrace();
 				return null;
@@ -122,7 +170,7 @@ public class HASCOForMEKA implements IObservableGraphAlgorithm<TFDNode, String> 
 
 		long start = System.currentTimeMillis();
 		long deadline = start + timeoutInMS;
-		
+
 		/* derive existing components */
 		ComponentLoader cl = new ComponentLoader();
 		try {
@@ -130,15 +178,13 @@ public class HASCOForMEKA implements IObservableGraphAlgorithm<TFDNode, String> 
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
 
 		/* create algorithm */
-		IObjectEvaluator<MultiLabelClassifier, Double> mccv = new MonteCarloCrossValidationEvaluator(new F1AverageMultilabelEvaluator(new Random(0)), 5, data, 0.7f);
+		IObjectEvaluator<MultiLabelClassifier, Double> mccv = new MonteCarloCrossValidationEvaluator(new F1AverageMultilabelEvaluator(new Random(0)), 3, data, 0.7f);
 		HASCOFD<MultiLabelClassifier> hasco = new HASCOFD<MultiLabelClassifier>(new MEKAFactory(), preferredNodeEvaluator, cl.getParamConfigs(), "MLClassifier", mccv);
 		hasco.addComponents(cl.getComponents());
 		hasco.setNumberOfCPUs(numberOfCPUs);
 
-		
 		/* add all listeners to HASCO */
 		listeners.forEach(l -> hasco.registerListener(l));
 		listeners.forEach(l -> hasco.registerListenerForSolutionEvaluations(l));

@@ -1,6 +1,6 @@
 {
 	"repository": "MEKA",
-	"include": ["../mlplan"],
+	"include": ["../mlplan/autoweka.json"],
 	"parameters": [
 		/* Sets the downsampling ratio default: 0.75 (of original) */
 		{
@@ -19,14 +19,14 @@
 			"default": 0,
 			"values": [0, -1]
 		},
-		/* Determines the neighbourhood density (the number of neighbours for each node in the trellis). CAUTION: no default found */
+		/* Determines the neighbourhood density (the number of neighbours for each node in the trellis). CAUTION: default obtained from source code. No idea about good other values */
 		{
 			"name": "_L",
-			"type": "double",
-			"default": 0.5,
-			"min": 0.1,
-			"max": 1.0,
-			"minInterval": 0.05,
+			"type": "int",
+			"default": 1,
+			"min": 1,
+			"max": 5,
+			"minInterval": 1,
 			"refineSplits": 2
 		},
 		/* The dependency heuristic to use in rearranging the trellis (None by default). */
@@ -74,9 +74,12 @@
 				/* Sets the number of hidden units default: 10 */
 				{
 					"name": "_H", 
-					"type": "cat",
-					"default": "lbf",
-					"values": [ "lbf" ]
+					"type": "int",
+					"default": "10",
+					"min": "1",
+					"max": "100",
+					"refineSplits": 4,
+					"minInterval": 2
 				},
 				/* Sets the maximum number of epochs default: 1000 (auto_cut_out) */
 				{
@@ -310,7 +313,7 @@
 		{
 			"name": "meka.classifiers.multilabel.MajorityLabelset",
 			"providedInterface": ["MLClassifier", "BasicMLClassifier"],
-			"requiredInterface": ["Classifier"],
+			"requiredInterface": [],
 			"parameter": [
 				/* No parameters to optimize */
 			]
@@ -443,10 +446,10 @@
 				{
 					"name": "_Is",
 					"type": "int",
-					"default": 0,
-					"min": 0,
-					"max": 10,
-					"minInterval": 1,
+					"default": 50,
+					"min": 20,
+					"max": 100,
+					"minInterval": 5,
 					"refineSplits": 2
 				},
 				/* The number of iterations to search the output space at test time. default: 10 */
@@ -559,12 +562,6 @@
 			"parameter": [
 				
 			]
-		},
-		{
-			"name": "meka.classifiers.multilabel.SERAkELd",
-			"providedInterface": ["MLClassifier", "BasicMLClassifier"],
-			"requiredInterface": ["Classifier"],
-			"parameter": []
 		}
 	]
 }
