@@ -180,7 +180,7 @@ public class HASCOForMEKA implements IObservableGraphAlgorithm<TFDNode, String> 
 		}
 
 		/* create algorithm */
-		IObjectEvaluator<MultiLabelClassifier, Double> mccv = new MonteCarloCrossValidationEvaluator(new F1AverageMultilabelEvaluator(new Random(0)), 3, data, 0.7f);
+		IObjectEvaluator<MultiLabelClassifier, Double> mccv = new MonteCarloCrossValidationEvaluator(new F1AverageMultilabelEvaluator(new Random(0)), 1, data, 0.7f);
 		HASCOFD<MultiLabelClassifier> hasco = new HASCOFD<MultiLabelClassifier>(new MEKAFactory(), preferredNodeEvaluator, cl.getParamConfigs(), "MLClassifier", mccv);
 		hasco.addComponents(cl.getComponents());
 		hasco.setNumberOfCPUs(numberOfCPUs);
