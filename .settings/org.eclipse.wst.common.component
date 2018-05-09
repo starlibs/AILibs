@@ -10,6 +10,9 @@
 		<dependent-module deploy-path="../" handle="module:/resource/weka/weka">
 			<dependency-type>uses</dependency-type>
 		</dependent-module>
+		<dependent-module deploy-path="../" handle="module:/resource/meka/meka">
+			<dependency-type>uses</dependency-type>
+		</dependent-module>
 		<dependent-module deploy-path="../" handle="module:/resource/JASE/JASE">
 			<dependency-type>uses</dependency-type>
 		</dependent-module>

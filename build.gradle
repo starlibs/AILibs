@@ -1,7 +1,6 @@
 plugins {
 	id 'java'
 	id 'eclipse-wtp'
-	id 'org.sonarqube' version '2.6'
 }
 
 sourceSets {
@@ -21,41 +20,6 @@ sourceSets {
     }
 }
 
-sonarqube {
-	properties {
-		property "sonar.projectName", "ML-Plan"
-		property "sonar.sources", "src"
-	}
-}
-
-project(":weka") {
-	sonarqube {
-		skipProject = true
-	}
-}
-project(":CrcConfigurationFramework") {
-	sonarqube {
-		skipProject = true
-	}
-}
-
-project(":CrcConfigurationSetting") {
-	sonarqube {
-		skipProject = true
-	}
-}
-
-project(":JASE") {
-	sonarqube {
-		skipProject = true
-	}
-}
-
-project(":JAICore") {
-	sonarqube {
-		skipProject = true
-	}
-}
 task sourcesJar(type: Jar, dependsOn: classes) {
     classifier = 'sources'
     from sourceSets.main.allSource
@@ -69,11 +33,9 @@ dependencies {
 
 	//compile name: 'JAICore'
 	compile name: 'CRCUtils'
-	//compile name: 'weka-interruptable'
 	compile name: 'autoweka'
 	compile name: 'mysql-connector-java-5.1.45-bin'
 	compile name: 'hsqldb'
-	//compile name: 'meka'
 	
 	// apache lang (for reflection)
 	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.6'
@@ -82,9 +44,6 @@ dependencies {
 	compile group: 'org.graphstream', name: 'gs-core', version: '1.1.1'
 	compile group: 'org.graphstream', name: 'gs-ui', version: '1.3'
 	
-	// Weka
-	//compile group: 'nz.ac.waikato.cms.weka', name: 'weka-dev', version: '3.9.1'
-	compile group: 'net.sf.meka', name: 'meka', version: '1.9.1'
 	
 	// Basics
 	compile 'junit:junit:4.12'
@@ -99,6 +58,7 @@ dependencies {
 	
 	compile project(':JAICore')
 	compile project(':weka')
+	compile project(':meka')
 	compile project(':JASE')
 	compile project(':HASCO')
 }
