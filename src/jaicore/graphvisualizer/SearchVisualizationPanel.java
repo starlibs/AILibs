@@ -138,6 +138,7 @@ public class SearchVisualizationPanel<T> extends JPanel {
 
 				Runnable doButtonPushedAction = new Runnable() {				
 				    public void run() {
+				    	
 				    	/* generate HTML for tooltip and set it */
 						StringBuilder sb = new StringBuilder();
 //						sb.append("<html><div style='padding: 5px; background: #ffffcc; border: 1px solid black;'>");
@@ -188,7 +189,7 @@ public class SearchVisualizationPanel<T> extends JPanel {
 						SearchVisualizationPanel.this.tooltipContainer.repaint();
 		            	SearchVisualizationPanel.this.tooltipContainer.setExtendedState(0);
 		            	
-//		            	SearchVisualizationPanel.this.tooltipContainer.setVisible(true);
+		            	SearchVisualizationPanel.this.tooltipContainer.setVisible(true);
 		            	SearchVisualizationPanel.this.tooltipTimer.restart();
 					}
 				};

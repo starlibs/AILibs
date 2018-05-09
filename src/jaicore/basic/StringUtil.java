@@ -1,6 +1,7 @@
 package jaicore.basic;
 
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -106,5 +107,17 @@ public abstract class StringUtil {
 		for (int i = 1; i < input.length; i++)
 			output[i - 1] = input[i];
 		return output;
+	}
+	
+	public static String fromBinary(String binarySequence) {
+		StringBuilder sb = new StringBuilder(); // Some place to store the chars
+		binarySequence = binarySequence.replace(" ", "");
+		Arrays.stream( // Create a Stream
+				binarySequence.split("(?<=\\G.{8})") // Splits the input string into 8-char-sections (Since a char has 8 bits = 1 byte)
+		).forEach(s -> // Go through each 8-char-section...
+		    sb.append((char) Integer.parseInt(s, 2)) // ...and turn it into an int and then to a char
+		);
+
+		return sb.toString(); // Output text (t)
 	}
 }
