@@ -37,6 +37,8 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 	private Map<Object, List> nodeMap;
 	private Map<Integer, List<String>> toolTipMap;
 
+	private FXController contoller;
+
 
 	/**
 	 * Creator for an empty recorder
@@ -61,6 +63,8 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 		this.firstEventTime = 0;
 		this.replayBus = new EventBus();
 		this.nodeMap = new HashMap<>();
+
+		this.contoller = null;
 	}
 
 	/**
@@ -77,6 +81,10 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 			firstEventTime = receiveTime;
 
 		receivingTimes.add(receiveTime-firstEventTime);
+
+		if(contoller != null){
+			contoller.updateEventTimes(receivingTimes);
+		}
 	}
 
 	/**
@@ -312,5 +320,9 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 
 	public List<Long> getReceiveTimes() {
 		return receivingTimes;
+	}
+
+	public void setContoller(FXController ctrl){
+		this.contoller = ctrl;
 	}
 }

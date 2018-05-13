@@ -54,7 +54,6 @@ public class FXController implements Initializable, NodeListener {
         this.eventTimes = recorder.getReceiveTimes();
 
         initializeVisuPanel(visuPanel);
-        initializeTimeLine();
 
         tip = new JLabel();
         tip.setText("<html></html>");
@@ -88,6 +87,8 @@ public class FXController implements Initializable, NodeListener {
             jumpTo(i);
         });
 
+        updateTimeLine();
+
     }
 
     /**
@@ -107,7 +108,7 @@ public class FXController implements Initializable, NodeListener {
     /**
      * Configures the timeline according to the current recorder
      */
-    private void initializeTimeLine(){
+    public void updateTimeLine(){
         if(eventTimes.isEmpty())
             return;
 
@@ -168,7 +169,7 @@ public class FXController implements Initializable, NodeListener {
         this.recorder = recorder;
         this.eventTimes = recorder.getReceiveTimes();
         this.initializeVisuPanel(visuPanel);
-        initializeTimeLine();
+        updateTimeLine();
     }
 
     /**
@@ -251,10 +252,13 @@ public class FXController implements Initializable, NodeListener {
         if(playThread != null)
             playThread.interrupt();
 
-        initializeTimeLine();
-        initializeVisuPanel(this.visuPanel);
+//        updateTimeLine();
+//        initializeVisuPanel(this.visuPanel);
         recorder.reset();
         index = 0;
+        timeline.setValue(index);
+        SearchVisualizationPanel vPanel = (SearchVisualizationPanel) visuPanel.getContent();
+        vPanel.reset();
     }
 
     /**
@@ -315,7 +319,7 @@ public class FXController implements Initializable, NodeListener {
 
         initializeVisuPanel(visuPanel);
 
-        initializeTimeLine();
+        updateTimeLine();
     }
 
     @Override
@@ -343,7 +347,11 @@ public class FXController implements Initializable, NodeListener {
         sb.append(gen.getTooltip(node));
         sb.append("</div></html>");
         tip.setText(sb.toString());
+    }
 
+    public void updateEventTimes(List<Long> newEventTimes){
+        this.eventTimes = newEventTimes;
+        updateTimeLine();
     }
 
 }

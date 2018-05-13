@@ -344,4 +344,13 @@ public class SearchVisualizationPanel<T> extends JPanel {
 	public void setTooltipGenerator(TooltipGenerator<T> tooltipGenerator) {
 		this.tooltipGenerator = (TooltipGenerator<T>)tooltipGenerator;
 	}
+
+	public void reset(){
+		ext2intNodeMap.clear();
+		int2extNodeMap.clear();
+		graph.clear();
+		graph.addAttribute("ui.stylesheet", "url('conf/searchgraph.css')");
+
+
+	}
 }

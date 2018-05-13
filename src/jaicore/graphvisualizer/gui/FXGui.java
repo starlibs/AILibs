@@ -1,5 +1,6 @@
 package jaicore.graphvisualizer.gui;
 
+import jaicore.graph.observation.IObservableGraphAlgorithm;
 import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionHTNPlanner;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.model.task.ceocstn.CEOCSTNPlanningProblem;
@@ -11,6 +12,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -45,5 +47,44 @@ public class FXGui extends Application {
         super.init();
 
         this.rootRecorder = new Recorder();
+    }
+
+    public void open(){
+        open(new Recorder(), "GUI");
+    }
+
+    public void open(IObservableGraphAlgorithm algorithm){
+        open(new Recorder(algorithm),"Gui");
+    }
+
+    public void open(IObservableGraphAlgorithm algorithm, String title){
+        open(new Recorder(algorithm),title);
+    }
+
+    public void open(Recorder recorder){
+        open(recorder, "GUI");
+    }
+
+    public void open(Recorder recorder, String title){
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("gui.fxml"));
+        try {
+            Parent root = loader.load();
+            FXController controller = loader.getController();
+            controller.setRecorder(recorder);
+            recorder.setContoller(controller);
+
+            Scene scene = new Scene(root, 800,600);
+
+            Stage stage = new Stage();
+
+            stage.setTitle(title);
+            stage.setScene(scene);
+            stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
     }
 }
