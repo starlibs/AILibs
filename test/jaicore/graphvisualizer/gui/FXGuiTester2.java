@@ -1,6 +1,5 @@
 package jaicore.graphvisualizer.gui;
 
-import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import jaicore.search.graphgenerators.bestfirst.abstractVersioning.TestGraphGenerator;
 import jaicore.search.graphgenerators.bestfirst.abstractVersioning.TestNode;
@@ -13,8 +12,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-import java.io.IOException;
-
 
 public class FXGuiTester2 extends FXGui{
     @Override
@@ -23,7 +20,7 @@ public class FXGuiTester2 extends FXGui{
         GraphGenerator generator = new TestGraphGenerator();
         BestFirst<TestNode, String> bf = new BestFirst<>(generator, n->(double)Math.round(Math.random()*100));
         this.rootRecorder = new Recorder<>(bf);
-        rootRecorder.setToolTipGenerator(n->{
+        rootRecorder.setTooltipGenerator(n->{
             Node node = (Node) n;
             return String.valueOf(node.getInternalLabel());
         });

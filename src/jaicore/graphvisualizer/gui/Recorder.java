@@ -5,14 +5,12 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import jaicore.graph.observation.IObservableGraphAlgorithm;
-import jaicore.graphvisualizer.SearchVisualizationPanel;
 import jaicore.graphvisualizer.TooltipGenerator;
 import jaicore.graphvisualizer.events.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.NodeReachedEvent;
 import jaicore.graphvisualizer.events.NodeRemovedEvent;
 import jaicore.graphvisualizer.events.NodeTypeSwitchEvent;
 
-import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -283,7 +281,7 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 			});
 
 			toolTipMap = (Map<Integer, List<String>>) mapperList.get(1);
-			this.setToolTipGenerator(node->{
+			this.setTooltipGenerator(node->{
 				List<String> tips = toolTipMap.get(node.toString());
 				int i = nodeMap.get(node).size()-1;
 
@@ -310,11 +308,11 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 
 
 
-	public TooltipGenerator getToolTipGenerator() {
+	public TooltipGenerator getTooltipGenerator() {
 		return toolTipGenerator;
 	}
 
-	public void setToolTipGenerator(TooltipGenerator toolTipGenerator) {
+	public void setTooltipGenerator(TooltipGenerator toolTipGenerator) {
 		this.toolTipGenerator = toolTipGenerator;
 	}
 

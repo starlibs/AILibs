@@ -99,7 +99,7 @@ public class FXController implements Initializable, NodeListener {
         SearchVisualizationPanel visu = new SearchVisualizationPanel();
         visu.addNodeListener(this);
         this.recorder.registerListener(visu);
-        visu.setTooltipGenerator(this.recorder.getToolTipGenerator());
+        visu.setTooltipGenerator(this.recorder.getTooltipGenerator());
         SwingUtilities.invokeLater(()->node.setContent(visu));
 
 
@@ -339,8 +339,8 @@ public class FXController implements Initializable, NodeListener {
 
     @Override
     public void buttonPushed(Object node) {
-        SearchVisualizationPanel panel = (SearchVisualizationPanel) visuPanel.getContent();
-        TooltipGenerator gen = panel.getTooltipGenerator();
+//        SearchVisualizationPanel panel = (SearchVisualizationPanel) visuPanel.getContent();
+        TooltipGenerator gen = recorder.getTooltipGenerator();
         StringBuilder sb = new StringBuilder();
 //						sb.append("<html><div style='padding: 5px; background: #ffffcc; border: 1px solid black;'>");
         sb.append("<html><div style='padding: 5px;'>");
