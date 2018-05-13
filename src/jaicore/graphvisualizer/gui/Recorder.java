@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import jaicore.graph.observation.IObservableGraphAlgorithm;
+import jaicore.graphvisualizer.IGraphDataSupplier;
 import jaicore.graphvisualizer.TooltipGenerator;
 import jaicore.graphvisualizer.events.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.NodeReachedEvent;
@@ -37,6 +38,10 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 
 	private FXController contoller;
 
+	//List with DataSupplier
+	private List<IGraphDataSupplier> dataSuppliers;
+
+
 
 	/**
 	 * Creator for an empty recorder
@@ -63,6 +68,8 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 		this.nodeMap = new HashMap<>();
 
 		this.contoller = null;
+		this.dataSuppliers = new ArrayList<>();
+
 	}
 
 	/**
@@ -306,7 +313,16 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 
 	}
 
+	public void addDataSupplier(IGraphDataSupplier dataSupplier){
+		this.dataSuppliers.add(dataSupplier);
+		if(contoller != null)
+			this.contoller.addTab(dataSupplier);
 
+	}
+
+	public void removeDataSupplier(int i) {
+		this.dataSuppliers.remove(i);
+	}
 
 	public TooltipGenerator getTooltipGenerator() {
 		return toolTipGenerator;
@@ -323,4 +339,6 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 	public void setContoller(FXController ctrl){
 		this.contoller = ctrl;
 	}
+
+
 }

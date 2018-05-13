@@ -27,10 +27,11 @@ public class FXGuiTester extends FXGui{
 
 	@Override
 	public void start(Stage stage) throws Exception {
-		bestFirstTest();
+//		bestFirstTest();
 
-//		tooltipTest();
+		tooltipTest();
 
+		dataSupplierTest();
 	}
 
 	private void bestFirstTest(){
@@ -71,6 +72,29 @@ public class FXGuiTester extends FXGui{
 		System.out.println("Algorithm has finished.");
 
 		open(recorder, "TooltipTest");
+	}
+
+	private void dataSupplierTest(){
+
+		GraphGenerator generator = new TestGraphGenerator();
+		BestFirst bf = new BestFirst<>(generator, n->(double)Math.round(Math.random()*100));
+//		open(bf,"BestFirst");
+
+		Recorder rec = new Recorder(bf);
+
+		open(rec, "Recorder");
+
+		rec.setTooltipGenerator(n->{
+			Node node = (Node) n;
+			return String.valueOf(node.getInternalLabel());
+		});
+
+		TooltipGraphDataSupplier dataSupplier = new TooltipGraphDataSupplier();
+		rec.addDataSupplier(dataSupplier);
+
+
+		bf.nextSolution();
+
 	}
 
 }

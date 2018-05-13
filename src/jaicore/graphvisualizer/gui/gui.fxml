@@ -17,6 +17,9 @@
                     <Button onAction="#stop" text="stop" />
                     <Button onAction="#save" text="save" />
                     <Button onAction="#load" text="load" />
+                    <Button onAction="#test" text="test"/>
+                    <Button onAction="#addSupplier" text="addSupplier"/>
+                    <Button onAction="#removeSupplier" text="removeSupplier"/>
                 </ToolBar>
             </top>
             <bottom>
@@ -36,17 +39,14 @@
     <center>
         <SplitPane dividerPositions="0.25">
             <items>
-                <TabPane>
+                <TabPane fx:id="tabPane">
                     <tabs>
-                        <Tab text="ToolTips">
-                            <StackPane>
-                                <SwingNode fx:id="toolTip">
-
-                                </SwingNode>
-                            </StackPane>
+                        <Tab text="ToolTipsOld">
+                            <SwingNode fx:id="toolTip">
+                            </SwingNode>
                         </Tab>
-                        <Tab text="Statistics">
-                        </Tab>
+                        <!--<Tab text="Statistics">-->
+                        <!--</Tab>-->
                     </tabs>
                 </TabPane>
                 <BorderPane>

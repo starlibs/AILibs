@@ -1,5 +1,6 @@
 package jaicore.graphvisualizer.gui;
 
+import jaicore.graphvisualizer.IGraphDataSupplier;
 import jaicore.graphvisualizer.NodeListener;
 import jaicore.graphvisualizer.SearchVisualizationPanel;
 import jaicore.graphvisualizer.TooltipGenerator;
@@ -8,6 +9,8 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Slider;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.FileChooser;
 import javafx.util.StringConverter;
@@ -30,6 +33,8 @@ public class FXController implements Initializable, NodeListener {
     public SwingNode visuPanel;
     @FXML
     public Slider timeline;
+    @FXML
+    public TabPane tabPane;
 
     //recorder on which the controller works
     private Recorder recorder;
@@ -334,7 +339,6 @@ public class FXController implements Initializable, NodeListener {
 
     @Override
     public void buttonReleased(Object node) {
-
     }
 
     @Override
@@ -354,4 +358,24 @@ public class FXController implements Initializable, NodeListener {
         updateTimeLine();
     }
 
+    public void addTab(IGraphDataSupplier dataSupplier){
+        String name = dataSupplier.getClass().getSimpleName();
+        name = name.substring(0,name.length()-17);
+        Tab tab = new Tab();
+        tab.setText(name);
+        this.tabPane.getTabs().add(0,tab);
+    }
+
+    public void test(ActionEvent actionEvent) {
+       System.out.println(tabPane.getSelectionModel().getSelectedItem().getText());
+    }
+
+    public void addSupplier(ActionEvent actionEvent) {
+        this.recorder.addDataSupplier(new TooltipGraphDataSupplier());
+    }
+
+    public void removeSupplier(ActionEvent actionEvent) {
+        this.recorder.removeDataSupplier(0);
+        this.tabPane.getTabs().remove(0);
+    }
 }
