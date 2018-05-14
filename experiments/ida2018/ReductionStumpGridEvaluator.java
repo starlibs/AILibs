@@ -1,19 +1,18 @@
 package ida2018;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import de.upb.crc901.reduction.MySQLExperimentRunner;
 import de.upb.crc901.reduction.MySQLReductionExperiment;
 import de.upb.crc901.reduction.Util;
 import jaicore.ml.WekaUtil;
-import scala.collection.generic.AtomicIndexFlag;
-import scala.xml.Atom;
 
 /**
  * This determines reduction stumps that have not been evaluated and evaluates them
@@ -29,9 +28,15 @@ public class ReductionStumpGridEvaluator {
 
 		/* setup the experiment dimensions */
 		int numSeeds = 25;
-		Collection<File> datasetFiles = WekaUtil.getDatasetsInFolder(folder);
-		Collection<List<String>> reductionCombos = Util.getReductionStumpCombinations();
-		int maxNumberOfExperiments = 1000;
+		List<Integer> seeds = new ArrayList<>();
+		for (int seed = 1; seed <= numSeeds; seed++)
+			seeds.add(seed);
+		Collections.shuffle(seeds);
+		List<File> datasetFiles = WekaUtil.getDatasetsInFolder(folder);
+		Collections.shuffle(datasetFiles);
+		List<List<String>> reductionCombos = new ArrayList<>(Util.getReductionStumpCombinations());
+		Collections.shuffle(reductionCombos);
+		int maxNumberOfExperiments = Integer.MAX_VALUE;
 		int maxNumberOfSuccessfulExperiments = maxNumberOfExperiments;
 
 		/* compute total number of experiments */
@@ -44,7 +49,7 @@ public class ReductionStumpGridEvaluator {
 		AtomicInteger cntSuccessful = new AtomicInteger();
 
 		/* launch threads for execution */
-		for (int seed = 1; seed <= numSeeds; seed++) {
+		for (int seed : seeds) {
 			for (File dataFile : datasetFiles) {
 				for (List<String> combo : reductionCombos) {
 

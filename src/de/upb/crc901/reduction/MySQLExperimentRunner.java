@@ -118,8 +118,21 @@ public class MySQLExperimentRunner {
 			if (!knownExperiment.getExperiment().getDataset().equals(experimentInQuestion.getDataset()))
 				continue;
 			ReductionExperiment re = knownExperiment.getExperiment();
-			if (re.getExceptionRPND() != null) {
-				System.out.println(re.getExceptionRPND());
+			if (re.getExceptionRPND() != null && re.getNameOfClassifierForRPNDSplit().equals(experimentInQuestion.getExceptionRPND())) {
+				System.out.println("Skipping because " + experimentInQuestion.getNameOfClassifierForRPNDSplit() + " is known to be problematic as RPND classifier on " + re.getDataset() + " due to " + re.getExceptionRPND());
+				return true;
+			}
+			else if (re.getExceptionLeft() != null && re.getNameOfLeftClassifier().equals(experimentInQuestion.getNameOfLeftClassifier())) {
+				System.out.println("Skipping because " + experimentInQuestion.getNameOfLeftClassifier() + " is known to be problematic as left classifier on " + re.getDataset() + " due to " + re.getExceptionLeft());
+				return true;
+			}
+			else if (re.getExceptionInner() != null && re.getNameOfInnerClassifier().equals(experimentInQuestion.getNameOfInnerClassifier())) {
+				System.out.println("Skipping because " + experimentInQuestion.getNameOfInnerClassifier() + " is known to be problematic as left classifier on " + re.getDataset() + " due to " + re.getExceptionInner());
+				return true;
+			}
+			else if (re.getExceptionRight() != null && re.getNameOfRightClassifier().equals(experimentInQuestion.getNameOfRightClassifier())) {
+				System.out.println("Skipping because " + experimentInQuestion.getNameOfRightClassifier() + " is known to be problematic as right classifier on " + re.getDataset() + " due to " + re.getExceptionRight());
+				return true;
 			}
 		}
 		return false;
