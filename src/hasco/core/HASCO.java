@@ -83,6 +83,7 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 	private int timeout;
 	private int numberOfCPUs = 1;
 	private int randomSeed;
+	private boolean configureParams = true;
 
 	/* parameters for state of a single run */
 	private T bestRecognizedSolution;
@@ -169,7 +170,7 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 				for (Operation o : this.problem.getDomain().getOperations()) {
 					logger.debug(o.toString());
 				}
-				
+
 				/* check whether there is a refinement config for each numeric parameter */
 				for (Component c : components) {
 					for (Parameter p : c.getParameters()) {
@@ -230,7 +231,9 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 	}
 
 	public T getObjectFromState(final Monom state) {
-		return this.factory.getComponentInstantiation(Util.getSolutionCompositionFromState(components, state));
+		T object = this.factory.getComponentInstantiation(Util.getSolutionCompositionFromState(components, state));
+		assert object != null : "Factory has returned NULL";
+		return object;
 	}
 
 	private Monom getInitState() {
@@ -319,9 +322,11 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 
 				String refinementArguments = "";
 				int j = 0;
-				for (j = 1; j <= c.getParameters().size(); j++) {
-					String paramIdentifier = "p" + j;
-					refinementArguments += ", " + paramIdentifier;
+				if (configureParams) {
+					for (j = 1; j <= c.getParameters().size(); j++) {
+						String paramIdentifier = "p" + j;
+						refinementArguments += ", " + paramIdentifier;
+					}
 				}
 
 				network.add(new Literal("satisfy" + i + "With" + c.getName() + "(c1,c2" + refinementArguments + ")"));
@@ -332,10 +337,12 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 				}
 
 				refinementArguments = "";
-				for (j = 1; j <= c.getParameters().size(); j++) {
-					String paramIdentifier = "p" + j;
-					params.add(new VariableParam(paramIdentifier));
-					refinementArguments += ", " + paramIdentifier;
+				if (configureParams) {
+					for (j = 1; j <= c.getParameters().size(); j++) {
+						String paramIdentifier = "p" + j;
+						params.add(new VariableParam(paramIdentifier));
+						refinementArguments += ", " + paramIdentifier;
+					}
 				}
 				network.add(new Literal("tRefineParamsOf" + c.getName() + "(c1,c2" + refinementArguments + ")"));
 				List<VariableParam> outputs = new ArrayList<>(params);
@@ -350,36 +357,39 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 			List<Literal> initNetwork = new ArrayList<>();
 			String refinementArguments = "";
 			int j = 0;
-			
-			/* go, in an ordering that is consistent with the pre-order on the params imposed by the dependencies, over the set of params */
-			for (Parameter p : c.getParameters()) {
-				String paramName = "p" + (++j);
-				refinementArguments += ", " + paramName;
-				params.add(new VariableParam(paramName));
-				initNetwork.add(new Literal("tRefineParam" + p.getName() + "Of" + c.getName() + "(c2, " + paramName + ")"));
-				// if (p instanceof NumericParameter) {
-				methods.add(new OCIPMethod("ignoreParamRefinementFor" + p.getName() + "Of" + c.getName(), "object, container, curval",
-						new Literal("tRefineParam" + p.getName() + "Of" + c.getName() + "(object,container)"),
-						new Monom("parameterContainer('" + c.getName() + "', '" + p.getName() + "', object, container) & val(container,curval)"), new TaskNetwork("declareClosed(container)"), false, "",
-						new Monom("notRefinable('" + c.getName() + "', object, '" + p.getName() + "', container, curval)")));
 
-				methods.add(new OCIPMethod("refineParam" + p.getName() + "Of" + c.getName(), "object, container, curval, newval",
-						new Literal("tRefineParam" + p.getName() + "Of" + c.getName() + "(object,container)"),
-						new Monom("parameterContainer('" + c.getName() + "', '" + p.getName() + "', object, container) & val(container,curval)"),
-						new TaskNetwork("redefValue(container,curval,newval)"), false, "",
-						new Monom("isValidParameterRangeRefinement('" + c.getName() + "', object, '" + p.getName() + "', container, curval, newval)")));
-				// else
-				// throw new IllegalArgumentException(
-				// "Parameter " + p.getName() + " of type \"" + p.getClass() + "\" in component \"" + c.getName() +
-				// "\" is currently not supported.");
+			/* go, in an ordering that is consistent with the pre-order on the params imposed by the dependencies, over the set of params */
+			if (configureParams) {
+				for (Parameter p : c.getParameters()) {
+					String paramName = "p" + (++j);
+					refinementArguments += ", " + paramName;
+					params.add(new VariableParam(paramName));
+					initNetwork.add(new Literal("tRefineParam" + p.getName() + "Of" + c.getName() + "(c2, " + paramName + ")"));
+					// if (p instanceof NumericParameter) {
+					methods.add(new OCIPMethod("ignoreParamRefinementFor" + p.getName() + "Of" + c.getName(), "object, container, curval",
+							new Literal("tRefineParam" + p.getName() + "Of" + c.getName() + "(object,container)"),
+							new Monom("parameterContainer('" + c.getName() + "', '" + p.getName() + "', object, container) & val(container,curval)"),
+							new TaskNetwork("declareClosed(container)"), false, "",
+							new Monom("notRefinable('" + c.getName() + "', object, '" + p.getName() + "', container, curval)")));
+
+					methods.add(new OCIPMethod("refineParam" + p.getName() + "Of" + c.getName(), "object, container, curval, newval",
+							new Literal("tRefineParam" + p.getName() + "Of" + c.getName() + "(object,container)"),
+							new Monom("parameterContainer('" + c.getName() + "', '" + p.getName() + "', object, container) & val(container,curval)"),
+							new TaskNetwork("redefValue(container,curval,newval)"), false, "",
+							new Monom("isValidParameterRangeRefinement('" + c.getName() + "', object, '" + p.getName() + "', container, curval, newval)")));
+					// else
+					// throw new IllegalArgumentException(
+					// "Parameter " + p.getName() + " of type \"" + p.getClass() + "\" in component \"" + c.getName() +
+					// "\" is currently not supported.");
+				}
+				initNetwork.add(new Literal("tRefineParamsOf" + c.getName() + "(c1,c2" + refinementArguments + ")"));
+				params = new ArrayList<>(params);
+				params.add(1, new VariableParam("c2"));
+				methods.add(new OCIPMethod("refineParamsOf" + c.getName(), params, new Literal("tRefineParamsOf" + c.getName() + "(c1,c2" + refinementArguments + ")"),
+						new Monom("component(c1)"), new TaskNetwork(initNetwork), false, new ArrayList<>(), new Monom("!refinementCompleted('" + c.getName() + "', c2)")));
+				methods.add(new OCIPMethod("closeRefinementOfParamsOf" + c.getName(), params, new Literal("tRefineParamsOf" + c.getName() + "(c1,c2" + refinementArguments + ")"),
+						new Monom("component(c1)"), new TaskNetwork(), false, new ArrayList<>(), new Monom("refinementCompleted('" + c.getName() + "', c2)")));
 			}
-			initNetwork.add(new Literal("tRefineParamsOf" + c.getName() + "(c1,c2" + refinementArguments + ")"));
-			params = new ArrayList<>(params);
-			params.add(1, new VariableParam("c2"));
-			methods.add(new OCIPMethod("refineParamsOf" + c.getName(), params, new Literal("tRefineParamsOf" + c.getName() + "(c1,c2" + refinementArguments + ")"),
-					new Monom("component(c1)"), new TaskNetwork(initNetwork), false, new ArrayList<>(), new Monom("!refinementCompleted('" + c.getName() + "', c2)")));
-			methods.add(new OCIPMethod("closeRefinementOfParamsOf" + c.getName(), params, new Literal("tRefineParamsOf" + c.getName() + "(c1,c2" + refinementArguments + ")"),
-					new Monom("component(c1)"), new TaskNetwork(), false, new ArrayList<>(), new Monom("refinementCompleted('" + c.getName() + "', c2)")));
 		}
 		return new CEOCIPSTNPlanningDomain(operations, methods);
 	}
@@ -443,6 +453,14 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 	@Override
 	public HASCOSolutionIterator iterator() {
 		return new HASCOSolutionIterator();
+	}
+
+	public boolean isConfigureParams() {
+		return configureParams;
+	}
+
+	public void setConfigureParams(boolean configureParams) {
+		this.configureParams = configureParams;
 	}
 
 	@Override

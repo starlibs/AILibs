@@ -209,7 +209,7 @@ public class Util {
 				break;
 			}
 		}
-
+		
 		/* determine current values of the parameters of this component instance */
 		Map<Parameter, String> paramValuesForThisComponentInstance = new HashMap<>();
 		for (Parameter p : component.getParameters()) {
@@ -223,7 +223,7 @@ public class Util {
 		}
 
 		/* now compute the new domains based on the current values */
-		Collection<Parameter> overwrittenParams = getOverwrittenDatacontainersInState(state).stream().map(containerName -> component.getParameter(parameterContainerMapInv.get(containerName))).collect(Collectors.toList());
+		Collection<Parameter> overwrittenParams = getOverwrittenDatacontainersInState(state).stream().filter(containerName -> parameterContainerMap.containsValue(containerName)).map(containerName -> component.getParameter(parameterContainerMapInv.get(containerName))).collect(Collectors.toList());
 		return getUpdatedDomainsOfComponentParameters(component, paramValuesForThisComponentInstance, overwrittenParams);
 	}
 

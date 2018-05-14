@@ -24,7 +24,7 @@ public class DependencyCheck {
 		cl.loadComponents(new File("testrsc/autoweka.json"));
 		
 		/* create algorithm */
-		HASCOFD<Classifier> hasco = new HASCOFD<Classifier>(n -> null, n -> 0.0, cl.getParamConfigs(), "classifier", n -> null);
+		HASCOFD<Classifier> hasco = new HASCOFD<Classifier>(n -> null, n -> 0.0, cl.getParamConfigs(), "Classifier", n -> null);
 
 		hasco.addComponents(cl.getComponents());
 //		cl.getComponents().forEach(c -> {
