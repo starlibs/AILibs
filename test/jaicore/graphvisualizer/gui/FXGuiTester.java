@@ -29,7 +29,7 @@ public class FXGuiTester extends FXGui{
 	public void start(Stage stage) throws Exception {
 //		bestFirstTest();
 
-		tooltipTest();
+//		tooltipTest();
 
 		dataSupplierTest();
 	}
@@ -90,6 +90,12 @@ public class FXGuiTester extends FXGui{
 		});
 
 		TooltipGraphDataSupplier dataSupplier = new TooltipGraphDataSupplier();
+		dataSupplier.setTooltipGenerator((n -> {
+			Node node = (Node) n;
+			String s = String.valueOf(node.getInternalLabel());
+			return String.valueOf(s);
+		}));
+
 		rec.addDataSupplier(dataSupplier);
 
 

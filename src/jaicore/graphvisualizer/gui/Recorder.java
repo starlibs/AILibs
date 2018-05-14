@@ -41,6 +41,8 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 	//List with DataSupplier
 	private List<IGraphDataSupplier> dataSuppliers;
 
+	private boolean prettyPrint;
+
 
 
 	/**
@@ -57,7 +59,7 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 	 */
 	public Recorder(IObservableGraphAlgorithm algorithm){
 		if(algorithm != null)
-		algorithm.registerListener(this);
+			algorithm.registerListener(this);
 
 		//initial assignments
 		this.receivedEvents = new ArrayList<>();
@@ -69,6 +71,7 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 
 		this.contoller = null;
 		this.dataSuppliers = new ArrayList<>();
+		this.prettyPrint = true;
 
 	}
 
@@ -90,6 +93,10 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 		if(contoller != null){
 			contoller.updateEventTimes(receivingTimes);
 		}
+
+		if(! dataSuppliers.isEmpty())
+			for(IGraphDataSupplier supplier : dataSuppliers)
+				supplier.receiveEvent(event);
 	}
 
 	/**
@@ -180,7 +187,8 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 
 	public void saveToFile(File file){
 		ObjectMapper mapper = new ObjectMapper();
-		mapper.enable(SerializationFeature.INDENT_OUTPUT);
+		if(prettyPrint)
+			mapper.enable(SerializationFeature.INDENT_OUTPUT);
 		try{
 			List mapperList = new ArrayList();
 
@@ -232,6 +240,10 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 
 
 			mapper.writeValue(file, mapperList);
+
+			for(IGraphDataSupplier s: dataSuppliers){
+				s.getSerialization();
+			}
 
 		} catch (IOException e){
 			e.printStackTrace();
@@ -317,6 +329,10 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 		this.dataSuppliers.add(dataSupplier);
 		if(contoller != null)
 			this.contoller.addTab(dataSupplier);
+
+		for(Object event : receivedEvents)
+			dataSupplier.receiveEvent(event);
+
 
 	}
 
