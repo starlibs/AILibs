@@ -1,4 +1,4 @@
-package de.upb.crc901.reduction;
+package de.upb.crc901.reduction.single;
 
 public class ReductionExperiment {
 	private final int seed;

@@ -18,7 +18,6 @@
 			<attribute name="gradle_used_by_scope" value="test"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry combineaccessrules="false" kind="src" path="/SMAC2TestsetTranslator"/>
 	<classpathentry kind="src" output="bin/main" path="experiments">
 		<attributes>
 			<attribute name="gradle_scope" value="main"/>

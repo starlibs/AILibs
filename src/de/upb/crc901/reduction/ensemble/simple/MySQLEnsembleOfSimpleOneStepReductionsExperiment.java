@@ -1,10 +1,10 @@
-package de.upb.crc901.reduction;
+package de.upb.crc901.reduction.ensemble.simple;
 
-public class MySQLReductionExperiment {
+public class MySQLEnsembleOfSimpleOneStepReductionsExperiment {
 	private final int id;
-	private final ReductionExperiment experiment;
+	private final EnsembleOfSimpleOneStepReductionsExperiment experiment;
 
-	public MySQLReductionExperiment(int id, ReductionExperiment experiment) {
+	public MySQLEnsembleOfSimpleOneStepReductionsExperiment(int id, EnsembleOfSimpleOneStepReductionsExperiment experiment) {
 		super();
 		this.id = id;
 		this.experiment = experiment;
@@ -12,10 +12,6 @@ public class MySQLReductionExperiment {
 
 	public int getId() {
 		return id;
-	}
-
-	public ReductionExperiment getExperiment() {
-		return experiment;
 	}
 
 	@Override
@@ -35,7 +31,7 @@ public class MySQLReductionExperiment {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		MySQLReductionExperiment other = (MySQLReductionExperiment) obj;
+		MySQLEnsembleOfSimpleOneStepReductionsExperiment other = (MySQLEnsembleOfSimpleOneStepReductionsExperiment) obj;
 		if (experiment == null) {
 			if (other.experiment != null)
 				return false;
@@ -46,8 +42,8 @@ public class MySQLReductionExperiment {
 		return true;
 	}
 
-	@Override
-	public String toString() {
-		return "MySQLReductionExperiment [id=" + id + ", experiment=" + experiment + "]";
+	public EnsembleOfSimpleOneStepReductionsExperiment getExperiment() {
+		return experiment;
 	}
+
 }

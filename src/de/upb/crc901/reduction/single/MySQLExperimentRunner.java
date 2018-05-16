@@ -1,4 +1,4 @@
-package de.upb.crc901.reduction;
+package de.upb.crc901.reduction.single;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -11,10 +11,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 
+import de.upb.crc901.reduction.Util;
 import jaicore.basic.MySQLAdapter;
 
 public class MySQLExperimentRunner {
@@ -77,7 +77,7 @@ public class MySQLExperimentRunner {
 	}
 	
 	public void conductExperiment(MySQLReductionExperiment exp) throws Exception {
-		List<Map<String,Object>> mccvResults = Util.conductExperiment(exp.getExperiment());
+		List<Map<String,Object>> mccvResults = Util.conductSingleOneStepReductionExperiment(exp.getExperiment());
 		DescriptiveStatistics errorRate = new DescriptiveStatistics();
 		DescriptiveStatistics runtime = new DescriptiveStatistics();
 		for (Map<String,Object> result : mccvResults) {
@@ -122,18 +122,18 @@ public class MySQLExperimentRunner {
 				System.out.println("Skipping because " + experimentInQuestion.getNameOfClassifierForRPNDSplit() + " is known to be problematic as RPND classifier on " + re.getDataset() + " due to " + re.getExceptionRPND());
 				return true;
 			}
-			else if (re.getExceptionLeft() != null && re.getNameOfLeftClassifier().equals(experimentInQuestion.getNameOfLeftClassifier())) {
-				System.out.println("Skipping because " + experimentInQuestion.getNameOfLeftClassifier() + " is known to be problematic as left classifier on " + re.getDataset() + " due to " + re.getExceptionLeft());
-				return true;
-			}
-			else if (re.getExceptionInner() != null && re.getNameOfInnerClassifier().equals(experimentInQuestion.getNameOfInnerClassifier())) {
-				System.out.println("Skipping because " + experimentInQuestion.getNameOfInnerClassifier() + " is known to be problematic as left classifier on " + re.getDataset() + " due to " + re.getExceptionInner());
-				return true;
-			}
-			else if (re.getExceptionRight() != null && re.getNameOfRightClassifier().equals(experimentInQuestion.getNameOfRightClassifier())) {
-				System.out.println("Skipping because " + experimentInQuestion.getNameOfRightClassifier() + " is known to be problematic as right classifier on " + re.getDataset() + " due to " + re.getExceptionRight());
-				return true;
-			}
+//			else if (re.getExceptionLeft() != null && re.getNameOfLeftClassifier().equals(experimentInQuestion.getNameOfLeftClassifier())) {
+//				System.out.println("Skipping because " + experimentInQuestion.getNameOfLeftClassifier() + " is known to be problematic as left classifier on " + re.getDataset() + " due to " + re.getExceptionLeft());
+//				return true;
+//			}
+//			else if (re.getExceptionInner() != null && re.getNameOfInnerClassifier().equals(experimentInQuestion.getNameOfInnerClassifier())) {
+//				System.out.println("Skipping because " + experimentInQuestion.getNameOfInnerClassifier() + " is known to be problematic as left classifier on " + re.getDataset() + " due to " + re.getExceptionInner());
+//				return true;
+//			}
+//			else if (re.getExceptionRight() != null && re.getNameOfRightClassifier().equals(experimentInQuestion.getNameOfRightClassifier())) {
+//				System.out.println("Skipping because " + experimentInQuestion.getNameOfRightClassifier() + " is known to be problematic as right classifier on " + re.getDataset() + " due to " + re.getExceptionRight());
+//				return true;
+//			}
 		}
 		return false;
 	}

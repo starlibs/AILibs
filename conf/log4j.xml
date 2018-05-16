@@ -69,7 +69,7 @@
 	</logger>
 	
 	
-	<logger name="jaicore.search.algorithms.standard.bestfirst.RandomCompletionEvaluator">
-		<level value="warn" />
+	<logger name="de.upb.crc901.reduction">
+		<level value="info" />
 	</logger>
 </log4j:configuration>
