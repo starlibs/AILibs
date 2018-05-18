@@ -1,7 +1,5 @@
 package jaicore.ml.experiments;
 
-import com.fasterxml.jackson.databind.node.ArrayNode;
-
 public class Experiment {
 	private final String dataset;
 	private final String algorithm;

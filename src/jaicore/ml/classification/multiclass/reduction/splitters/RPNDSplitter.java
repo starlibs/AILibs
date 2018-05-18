@@ -19,18 +19,20 @@ import weka.core.Instances;
 public class RPNDSplitter implements ISplitter {
 
 	private static final Logger logger = LoggerFactory.getLogger(RPNDSplitter.class);
-	private final Instances data;
 	private final Random rand;
+	private final Classifier rpndClassifier;
 
-	public RPNDSplitter(Instances data, Random rand) {
+	public RPNDSplitter(Random rand, Classifier rpndClassifier) {
 		super();
-		this.data = data;
 		this.rand = rand;
+		this.rpndClassifier = rpndClassifier;
 	}
 
 	@Override
-	public Collection<Collection<String>> split(Collection<String> classes, Classifier c) throws Exception {
+	public Collection<Collection<String>> split(Instances data) throws Exception {
 
+		Collection<String> classes = WekaUtil.getClassesActuallyContainedInDataset(data);
+		
 		/* 2. if we have a leaf node, abort */
 		if (classes.size() == 1) {
 			Collection<Collection<String>> split = new ArrayList<>();
@@ -47,10 +49,10 @@ public class RPNDSplitter implements ISplitter {
 		s1.add(c1);
 		Collection<String> s2 = new HashSet<>();
 		s2.add(c2);
-		return split(copy, s1, s2, c);
+		return split(copy, s1, s2, rpndClassifier, data);
 	}
 
-	public Collection<Collection<String>> split(Collection<String> classes, Collection<String> s1, Collection<String> s2, Classifier c) throws Exception {
+	public Collection<Collection<String>> split(Collection<String> classes, Collection<String> s1, Collection<String> s2, Classifier c, Instances data) throws Exception {
 
 		logger.info("Start creation of RPND split with basis {}/{} for classes {}", s1, s2, classes);
 

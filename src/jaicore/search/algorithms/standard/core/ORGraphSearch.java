@@ -358,6 +358,21 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 		}
 	}
 
+	public List<T> nextSolutionThatDominatesOpen() {
+		List<T> currentlyBestSolution = null;
+		V currentlyBestScore = null;
+		do {
+			List<T> solution = nextSolution();
+			V scoreOfSolution = getFOfReturnedSolution(solution);
+			if (currentlyBestScore == null || scoreOfSolution.compareTo(currentlyBestScore) < 0) {
+				currentlyBestScore = scoreOfSolution;
+				currentlyBestSolution = solution;
+			}
+		}
+		while(open.peek().getInternalLabel().compareTo(currentlyBestScore) < 0);
+		return currentlyBestSolution;
+	}
+	
 	/**
 	 * Find the shortest path to a goal starting from <code>start</code>.
 	 *

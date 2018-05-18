@@ -104,4 +104,9 @@ public class Node<T, V extends Comparable<V>> implements Serializable, Comparabl
 //		return "Node [ref=" + this.toString() + ", externalLabel=" + externalLabel + ", goal=" + goal + ", parentRef=" + parent.toString() + ", annotations=" + annotations + "]";
 		return s;
 	}
+
+	@Override
+	public String toString() {
+		return "Node [externalLabel=" + externalLabel + ", goal=" + goal + ", parent=" + parent + ", annotations=" + annotations + "]";
+	}
 }
