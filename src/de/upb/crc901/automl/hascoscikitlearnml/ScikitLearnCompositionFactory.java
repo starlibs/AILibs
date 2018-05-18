@@ -1,9 +1,8 @@
 package de.upb.crc901.automl.hascoscikitlearnml;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import hasco.model.ComponentInstance;
 import hasco.query.Factory;
@@ -12,64 +11,117 @@ public class ScikitLearnCompositionFactory implements Factory<ScikitLearnComposi
 
   @Override
   public ScikitLearnComposition getComponentInstantiation(final ComponentInstance groundComponent) {
-    SLPipeline pipelineTree = this.buildSLPipelineTree(groundComponent);
-
-    String pipelineToString = pipelineTree.toString();
-    if (pipelineToString.contains("make_union")) {
-      System.out.println("make_union");
-      try (BufferedWriter bw = new BufferedWriter(new FileWriter(new File("make_union.log"), true))) {
-        bw.write(pipelineToString + "\n");
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
-    }
-    if (pipelineToString.contains("make_forward")) {
-      System.out.println("make_forward");
-      try (BufferedWriter bw = new BufferedWriter(new FileWriter(new File("make_forward.log"), true))) {
-        bw.write(pipelineToString + "\n");
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
-    }
-
+    Map<String, String> pipelineSourceCodeMap = this.generatePythonCodeFromComponentInstance(groundComponent);
     try {
-      return new ScikitLearnComposition();
+      return new ScikitLearnComposition(pipelineSourceCodeMap, groundComponent);
     } catch (IOException e) {
       e.printStackTrace();
     }
     return null;
   }
 
-  private SLPipeline buildSLPipelineTree(final ComponentInstance ci) {
-    StringBuilder codeBuilder = new StringBuilder();
-    codeBuilder.append(ci.getComponent().getName());
-    codeBuilder.append("(");
-    boolean first = true;
-    for (String paramName : ci.getParameterValues().keySet()) {
-      if (first) {
-        first = false;
-      } else {
-        codeBuilder.append(",");
+  private Map<String, String> generatePythonCodeFromComponentInstance(final ComponentInstance ci) {
+    Map<String, String> parsedCodeMap = new HashMap<>();
+    StringBuilder pythonCodeBuilder = new StringBuilder();
+
+    String[] componentNameSplit = ci.getComponent().getName().split("\\.");
+    String singleName = componentNameSplit[componentNameSplit.length - 1];
+
+    String importStatement = "";
+    if (!singleName.equals("make_forward")) {
+      importStatement = "from ";
+      for (int i = 0; i < componentNameSplit.length - 1; i++) {
+        importStatement += ((i > 0) ? "." : "") + componentNameSplit[i];
       }
-      codeBuilder.append(paramName + "=");
-      String paramValue = ci.getParameterValues().get(paramName);
-      try {
-        Double.valueOf(paramValue);
-        codeBuilder.append(ci.getParameterValues().get(paramName));
-      } catch (Exception e) {
-        codeBuilder.append("\"" + ci.getParameterValues().get(paramName) + "\"");
-      }
-
-    }
-    codeBuilder.append(")");
-
-    SLPipeline pipe = new SLPipeline(codeBuilder.toString());
-
-    for (String key : ci.getSatisfactionOfRequiredInterfaces().keySet()) {
-      pipe.addChild(this.buildSLPipelineTree(ci.getSatisfactionOfRequiredInterfaces().get(key)));
+      importStatement += " import " + singleName + "\n";
     }
 
-    return pipe;
+    switch (ci.getComponent().getName()) {
+      case "sklearn.pipeline.make_pipeline": {
+        pythonCodeBuilder.append(singleName);
+        pythonCodeBuilder.append("(");
+
+        ComponentInstance[] comps = { ci.getSatisfactionOfRequiredInterfaces().get("preprocessor"), ci.getSatisfactionOfRequiredInterfaces().get("classifier") };
+        boolean first = true;
+        for (ComponentInstance sc : comps) {
+          Map<String, String> subComponentMap = this.generatePythonCodeFromComponentInstance(sc);
+          importStatement += subComponentMap.get("import");
+          if (first) {
+            first = false;
+          } else {
+            pythonCodeBuilder.append(",");
+          }
+          pythonCodeBuilder.append(subComponentMap.get("pipeline"));
+        }
+        pythonCodeBuilder.append(")");
+        break;
+      }
+      case "sklearn.pipeline.make_union": {
+        pythonCodeBuilder.append(singleName);
+        pythonCodeBuilder.append("(");
+
+        ComponentInstance[] comps = { ci.getSatisfactionOfRequiredInterfaces().get("p1"), ci.getSatisfactionOfRequiredInterfaces().get("p2") };
+        boolean first = true;
+        for (ComponentInstance sc : comps) {
+          Map<String, String> subComponentMap = this.generatePythonCodeFromComponentInstance(sc);
+          importStatement += subComponentMap.get("import");
+          if (first) {
+            first = false;
+          } else {
+            pythonCodeBuilder.append(",");
+          }
+          pythonCodeBuilder.append(subComponentMap.get("pipeline"));
+        }
+        pythonCodeBuilder.append(")");
+        break;
+      }
+      case "make_forward": {
+        Map<String, String> pre = this.generatePythonCodeFromComponentInstance(ci.getSatisfactionOfRequiredInterfaces().get("source"));
+        pythonCodeBuilder.append(pre.get("pipeline"));
+        importStatement += pre.get("import");
+        pythonCodeBuilder.append(",");
+        Map<String, String> pp = this.generatePythonCodeFromComponentInstance(ci.getSatisfactionOfRequiredInterfaces().get("base"));
+        pythonCodeBuilder.append(pp.get("pipeline"));
+        importStatement += pp.get("import");
+        break;
+      }
+      default: {
+        pythonCodeBuilder.append(singleName);
+        pythonCodeBuilder.append("(");
+
+        boolean first = true;
+        for (String paramName : ci.getParameterValues().keySet()) {
+          if (first) {
+            first = false;
+          } else {
+            pythonCodeBuilder.append(",");
+          }
+          pythonCodeBuilder.append(paramName + "=");
+          String paramValue = ci.getParameterValues().get(paramName);
+          try {
+            Double.valueOf(paramValue);
+            pythonCodeBuilder.append(ci.getParameterValues().get(paramName));
+          } catch (Exception e) {
+            pythonCodeBuilder.append("\"" + ci.getParameterValues().get(paramName) + "\"");
+          }
+        }
+        if (ci.getSatisfactionOfRequiredInterfaces().containsKey("estimator")) {
+          Map<String, String> parameterComponent = this.generatePythonCodeFromComponentInstance(ci.getSatisfactionOfRequiredInterfaces().get("estimator"));
+          if (!first) {
+            pythonCodeBuilder.append(",");
+          }
+          pythonCodeBuilder.append("estimator=" + parameterComponent.get("pipeline"));
+          importStatement += parameterComponent.get("import");
+        }
+        pythonCodeBuilder.append(")");
+        break;
+      }
+    }
+
+    parsedCodeMap.put("import", importStatement);
+    parsedCodeMap.put("pipeline", pythonCodeBuilder.toString());
+
+    return parsedCodeMap;
   }
 
 }

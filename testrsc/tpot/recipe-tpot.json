@@ -1,0 +1,46 @@
+{
+	"repository": "recipe-tpot-space",
+	"parameters": [],
+	"components": [
+		{
+    		"name" : "sklearn.pipeline.make_pipeline",
+    		"providedInterface" : [ "MLPipeline", "SLClassifier" ],
+    		"requiredInterface" : [ 
+    			{
+    				"id": "preprocessor",
+    				"name": "AbstractPreprocessor"
+    			}, { 
+    				"id": "classifier",
+    				"name": "SLClassifier"
+    			}
+    		],
+    		"parameter" : [ ]
+  		},
+  		{ 
+    		"name" : "sklearn.pipeline.make_union", 
+    		"providedInterface" : [ "AbstractPreprocessor", "MakeUnion" ], 
+    		"requiredInterface" : [ 
+    			{ 
+    				"id": "p1",
+    				"name": "BasicPreprocessor"
+    			}, { 
+    				"id": "p2",
+    				"name": "BasicPreprocessor" 
+    			} 
+    		], 
+    		"parameter" : [ ]
+  		},
+  		{
+  			"name": "",
+  			"providedInterface": ["AbstractPreprocessor", "Bounding"],
+  			"requiredInterface": [],
+  			"parameter": []
+  		},
+  		{
+  			"name": "",
+  			"providedInterface": ["SLClassifier"],
+  			"requiredInterface": [],
+  			"parameter": []
+  		}
+	]
+}

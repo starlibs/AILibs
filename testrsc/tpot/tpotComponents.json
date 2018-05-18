@@ -1,12 +1,12 @@
 {
   "repository" : "TPOT-SEARCHSPACE",
   "components" : [ {
-    "name" : "make_pipeline",
+    "name" : "sklearn.pipeline.make_pipeline",
     "providedInterface" : [ "MLPipeline", "AbstractClassifier" ],
     "requiredInterface" : [ 
     	{
     		"id": "preprocessor",
-    		"name": "MakeUnion"
+    		"name": "AbstractPreprocessor"
     	}, { 
     		"id": "classifier",
     		"name": "BasicClassifier"
@@ -14,17 +14,23 @@
     "parameter" : [ ]
   },
   { 
-    "name" : "make_union", 
+    "name" : "sklearn.pipeline.make_union", 
     "providedInterface" : [ "AbstractPreprocessor", "MakeUnion" ], 
     "requiredInterface" : [ { "id": "p1", "name": "BasicPreprocessor" },{ "id": "p2", "name": "BasicPreprocessor" } ], 
     "parameter" : [ ]
   }, 
-  /*{*/ 
-  /*  "name" : "make_forward",*/ 
-  /*  "providedInterface" : [ "AbstractPreprocessor" ],*/ 
-  /*  "requiredInterface" : [ { "id": "base", "name": "BasicPreprocessor"}, {"id": "source", "name": "AbstractPreprocessor"} ],*/ 
-  /*  "parameter" : [ ]*/ 
-  /* }, */ 
+  { 
+    "name" : "make_forward", 
+    "providedInterface" : [ "AbstractPreprocessor", "MakeForward" ], 
+    "requiredInterface" : [ { "id": "base", "name": "BasicPreprocessor"}, {"id": "source", "name": "AbstractPreprocessor"} ], 
+    "parameter" : [ ]
+  },
+  {
+  	"name": "tpot.builtins.StackingEstimator",
+  	"providedInterface": ["tpot.builtins.StackingEstimator", "AbstractPreprocessor", "Stacking"],
+  	"requiredInterface": [ {"id": "estimator", "name": "BasicClassifier"} ],
+  	"parameter" : [ ]
+  },
   {
     "name" : "sklearn.naive_bayes.GaussianNB",
     "providedInterface" : [ "sklearn.naive_bayes.GaussianNB", "AbstractClassifier","BasicClassifier" ],
@@ -41,12 +47,13 @@
       "values" : [ 0.001, 0.01, 0.1, 1.0, 10.0, 100.0 ]
     }, {
       "name" : "fit_prior",
-      "default" : "true",
-      "type" : "boolean"
+      "default" : "True",
+      "type" : "cat",
+      "values": ["True", "False"]
     } ],
     "dependencies": [
     	{
-	    	"pre": "fit_prior in {true}",
+	    	"pre": "fit_prior in {True}",
     		"post": "alpha in {0.02,0.01,0.0124}"
     	}
     ]
@@ -61,8 +68,9 @@
       "values" : [ 0.001, 0.01, 0.1, 1.0, 100.0, 100.0 ]
     }, {
       "name" : "fit_prior",
-      "default" : "true",
-      "type" : "boolean"
+      "default" : "True",
+      "type" : "cat",
+      "values": ["True", "False"]
     } ]
   }, {
     "name" : "sklearn.tree.DecisionTreeClassifier",
@@ -138,8 +146,9 @@
       "refineSplits" : 2
     }, {
       "name" : "bootstrap",
-      "default" : "true",
-      "type" : "boolean"
+      "default" : "True",
+      "type" : "cat",
+      "values": ["True", "False"]
     } ]
   }, {
     "name" : "sklearn.ensemble.RandomForestClassifier",
@@ -181,8 +190,9 @@
       "refineSplits" : 2
     }, {
       "name" : "bootstrap",
-      "default" : "true",
-      "type" : "boolean"
+      "default" : "True",
+      "type" : "cat",
+      "values": ["True", "False"]
     } ]
   }, {
     "name" : "sklearn.ensemble.GradientBoostingClassifier",
@@ -276,11 +286,14 @@
       "default" : "hinge",
       "type" : "cat",
       "values" : [ "hinge", "squared_hinge" ]
-    }, {
-      "name" : "dual",
-      "default" : "true",
-      "type" : "boolean"
-    }, {
+    },
+    /*{*/
+    /*  "name" : "dual",*/
+    /*  "default" : "true",*/
+    /*  "type" : "cat",*/
+    /*  "values": ["true"] */
+    /* }, */
+    {
       "name" : "tol",
       "default" : 1.0E-5,
       "type" : "cat",
@@ -307,9 +320,16 @@
       "values" : [ 1.0E-4, 0.001, 0.01, 0.1, 0.5, 1.0, 5.0, 10.0, 15.0, 20.0, 25.0 ]
     }, {
       "name" : "dual",
-      "default" : "true",
-      "type" : "boolean"
-    } ]
+      "default" : "True",
+      "type" : "cat",
+      "values": ["True"]
+    } ],
+    "dependencies": [
+    	{
+	    	"pre": "dual in {True}",
+    		"post": "penalty in {l1}"
+    	}
+    ]
   }, {
     "name" : "xgboost.XGBClassifier",
     "providedInterface" : [ "xgboost.XGBClassifier", "AbstractClassifier","BasicClassifier" ],
@@ -394,7 +414,13 @@
       "default" : "euclidean",
       "type" : "cat",
       "values" : [ "euclidean", "l1", "l2", "manhattan", "cosine" ]
-    } ]
+    } ],
+    "dependency": [
+    	{
+    		"pre": "linkage in {ward}",
+    		"post": "affinity in {euclidean}"
+    	}
+    ]
   }, {
     "name" : "sklearn.preprocessing.MaxAbsScaler",
     "providedInterface" : [ "sklearn.preprocessing.MaxAbsScaler", "Preprocessing", "AbstractPreprocessor", "BasicPreprocessor" ],
@@ -470,14 +496,14 @@
       "values" : [ 2 ]
     }, {
       "name" : "include_bias",
-      "default" : "false",
+      "default" : "False",
       "type" : "cat",
-      "values" : [ "false" ]
+      "values" : [ "False" ]
     }, {
       "name" : "interaction_only",
-      "default" : "false",
+      "default" : "False",
       "type" : "cat",
-      "values" : [ "false" ]
+      "values" : [ "False" ]
     } ]
   }, {
     "name" : "sklearn.kernel_approximation.RBFSampler",
@@ -518,13 +544,13 @@
       "values" : [ 0.05, 0.1, 0.15, 0.2, 0.25 ]
     }, {
       "name" : "sparse",
-      "default" : "false",
+      "default" : "False",
       "type" : "cat",
-      "values" : [ "false" ]
+      "values" : [ "False" ]
     } ]
   }, {
     "name" : "sklearn.feature_selection.f_classif",
-    "providedInterface" : [ "sklearn.feature_selection.f_classif", "FeatureSelection", "AbstractPreprocessor", "BasicPreprocessor"  ],
+    "providedInterface" : [ "sklearn.feature_selection.f_classif"  ],
     "requiredInterface" : [ ],
     "parameter" : [ ]
   }, {

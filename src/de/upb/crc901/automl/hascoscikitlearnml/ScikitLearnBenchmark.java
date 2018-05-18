@@ -1,79 +1,176 @@
 package de.upb.crc901.automl.hascoscikitlearnml;
 
 import jaicore.basic.IObjectEvaluator;
+import jaicore.basic.MySQLAdapter;
+import jaicore.basic.chunks.Task;
 import jaicore.ml.WekaUtil;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
-import java.io.InputStreamReader;
-import java.lang.ProcessBuilder.Redirect;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import org.aeonbits.owner.ConfigCache;
 
 import weka.core.Instances;
 
 public class ScikitLearnBenchmark implements IObjectEvaluator<ScikitLearnComposition, Double> {
 
-  public enum BenchmarkMeasure {
-    ACCURACY;
-  }
+  private static final HASCOForScikitLearnMLConfig CONFIG = ConfigCache.getOrCreate(HASCOForScikitLearnMLConfig.class);
+  private static final Timer TIMEOUT_TIMER = new Timer();
 
-  private final BenchmarkMeasure measure;
-  private final Instances data;
-  private final int timeoutInMS;
-  private final int maximumSeeds;
-  private final double splitSize;
-  private final int repetitions;
+  private Task runTask;
+  private Instances data;
+  private int maximumSeeds;
+  private Double splitSize;
+  private int repetitions;
+  private String datasetFilePrefix;
+  private MySQLAdapter mysql;
+  private int timeoutInMS = -1;
 
-  public ScikitLearnBenchmark(final BenchmarkMeasure measure, final Instances data, final int repetitions, final double splitSize, final int timeoutInMS, final int maximumSeeds) {
-    this.measure = measure;
+  private List<Instances> trainTestSplit = null;
+
+  public ScikitLearnBenchmark(final Instances data, final int repetitions, final double splitSize, final int timeoutInMS, final int maximumSeeds, final String datasetFilePrefix,
+      final MySQLAdapter mysql, final Task runTask) {
     this.data = data;
     this.splitSize = splitSize;
-    this.timeoutInMS = timeoutInMS;
     this.maximumSeeds = maximumSeeds;
     this.repetitions = repetitions;
+    this.datasetFilePrefix = datasetFilePrefix;
+    this.mysql = mysql;
+    this.runTask = runTask;
+    this.timeoutInMS = timeoutInMS;
+  }
+
+  public ScikitLearnBenchmark() {
+  }
+
+  public ScikitLearnBenchmark(final List<Instances> trainTestSplit, final String datasetFilePrefix, final MySQLAdapter mysql, final Task runTask) {
+    this.trainTestSplit = trainTestSplit;
+    this.datasetFilePrefix = datasetFilePrefix;
+    this.mysql = mysql;
+    this.runTask = runTask;
+  }
+
+  public Double evaluateFixedSplit(final ScikitLearnComposition object) throws IOException, InterruptedException {
+    File trainFile = new File(CONFIG.getTmpFolder().getAbsolutePath() + File.separator + this.datasetFilePrefix + "_train.arff");
+    File testFile = new File(CONFIG.getTmpFolder().getAbsolutePath() + File.separator + this.datasetFilePrefix + "_test.arff");
+
+    long startTime = System.currentTimeMillis();
+    Double error = ScikitLearnEvaluator.evaluate(trainFile, testFile, object, true);
+
+    Map<String, String> values = new HashMap<>();
+    values.put("run_id", this.runTask.getValueAsString("run_id"));
+    values.put("pipeline", object.getPipelineCode());
+    values.put("pipelineComplexity", object.getComplexity() + "");
+    values.put("import", object.getImportCode());
+    values.put("errorRate", error + "");
+    values.put("timeToSolution", (System.currentTimeMillis() - CONFIG.getRunStartTimestamp()) + "");
+    values.put("evaluationTime", (System.currentTimeMillis() - startTime) + "");
+
+    try {
+      int id = this.mysql.insert("test_evaluation", values);
+      object.setTestID(id);
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+
+    return error;
   }
 
   @Override
   public Double evaluate(final ScikitLearnComposition object) throws Exception {
-    List<Double> errorRates = new LinkedList<>();
-    for (int i = 0; i < ((this.maximumSeeds > 0) ? Math.min(this.maximumSeeds, this.repetitions) : this.repetitions); i++) {
-      long splitSeed = (this.maximumSeeds <= 0) ? new Random().nextLong() : new Random().nextInt(this.maximumSeeds);
-      File trainFile = new File("tmp" + File.separator + splitSeed + "_train.arff");
-      File testFile = new File("tmp" + File.separator + splitSeed + "_test.arff");
-
-      if (!trainFile.exists() || !testFile.exists()) {
-        List<Instances> mccvSplit = WekaUtil.getStratifiedSplit(this.data, new Random(splitSeed), this.splitSize);
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(trainFile))) {
-          bw.write(mccvSplit.get(0).toString());
-        }
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(testFile))) {
-          bw.write(mccvSplit.get(1).toString());
-        }
-      }
-
-      String cmd = "python " + "tmp/" + object.getExecutable() + " " + trainFile.getName() + " " + testFile.getName();
-      ProcessBuilder pb = new ProcessBuilder().redirectError(Redirect.INHERIT).command(cmd.split(" "));
-      Process p = pb.start();
-      BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
-      String line;
-
-      Double error = 1.0;
-      while ((line = br.readLine()) != null) {
-        try {
-          error = Double.parseDouble(line);
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
-      }
-      errorRates.add(error);
-      p.waitFor();
+    if (this.splitSize == null) {
+      throw new IllegalArgumentException("Inappropriate use of ScikitLearnBenchmark. No split size provided.");
     }
 
-    return errorRates.stream().mapToDouble(x -> x).average().getAsDouble();
+    if (this.trainTestSplit != null) {
+      return this.evaluateFixedSplit(object);
+    }
+
+    EvaluationTimeout timeout = new EvaluationTimeout(Thread.currentThread());
+    if (this.timeoutInMS > 0) {
+      TIMEOUT_TIMER.schedule(timeout, this.timeoutInMS);
+    }
+    double returnValue = 10000d;
+
+    long startTime = System.currentTimeMillis();
+    try {
+      List<Double> errorRates = new LinkedList<>();
+      for (int i = 0; i < ((this.maximumSeeds > 0) ? Math.min(this.maximumSeeds, this.repetitions) : this.repetitions); i++) {
+        if (Thread.currentThread().isInterrupted()) {
+          throw new InterruptedException("Thread got interrupted, so stop evaluation of composition object");
+        }
+        long splitSeed = (this.maximumSeeds <= 0) ? new Random().nextLong() : new Random().nextInt(this.maximumSeeds);
+        File trainFile = new File(CONFIG.getTmpFolder().getAbsolutePath() + File.separator + splitSeed + "_train.arff");
+        File testFile = new File(CONFIG.getTmpFolder().getAbsolutePath() + File.separator + splitSeed + "_test.arff");
+
+        if (!trainFile.exists() || !testFile.exists()) {
+          List<Instances> mccvSplit = WekaUtil.getStratifiedSplit(this.data, new Random(splitSeed), this.splitSize);
+          try (BufferedWriter bw = new BufferedWriter(new FileWriter(trainFile))) {
+            bw.write(mccvSplit.get(0).toString());
+          }
+          try (BufferedWriter bw = new BufferedWriter(new FileWriter(testFile))) {
+            bw.write(mccvSplit.get(1).toString());
+          }
+        }
+        Double errorRate = ScikitLearnEvaluator.evaluate(trainFile, testFile, object, false);
+        if (errorRate >= 0 && errorRate <= 1) {
+          errorRates.add(errorRate);
+        }
+      }
+      timeout.cancel();
+      if (errorRates.isEmpty()) {
+        returnValue = 20000d;
+      } else {
+        if (errorRates.size() >= 5) {
+          Collections.sort(errorRates);
+          int numEvalsToRemove = (int) (Math.floor(errorRates.size() * 0.2));
+          for (int i = 0; i < numEvalsToRemove; i++) {
+            errorRates.remove(0);
+            errorRates.remove(errorRates.size() - 1);
+          }
+        }
+        returnValue = errorRates.stream().mapToDouble(x -> x).average().getAsDouble();
+      }
+
+    } catch (InterruptedException e) {
+      returnValue = 10000d;
+    }
+    Map<String, String> valueMap = new HashMap<>();
+    valueMap.put("run_id", this.runTask.getValueAsString("run_id"));
+    valueMap.put("pipeline", object.getPipelineCode());
+    valueMap.put("import", object.getImportCode());
+    valueMap.put("errorRate", returnValue + "");
+    valueMap.put("timeToSolution", (System.currentTimeMillis() - CONFIG.getRunStartTimestamp()) + "");
+    valueMap.put("evaluationTime", (System.currentTimeMillis() - startTime) + "");
+    valueMap.put("pipelineComplexity", object.getComplexity() + "");
+
+    this.mysql.insert(this.datasetFilePrefix + "evaluation", valueMap);
+    return returnValue;
+  }
+
+  class EvaluationTimeout extends TimerTask {
+    Thread threadToInterrupt;
+
+    EvaluationTimeout(final Thread threadToInterrupt) {
+      this.threadToInterrupt = threadToInterrupt;
+    }
+
+    @Override
+    public void run() {
+      this.threadToInterrupt.interrupt();
+    }
+
   }
 
 }
