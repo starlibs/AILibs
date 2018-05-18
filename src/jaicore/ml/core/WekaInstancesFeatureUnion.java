@@ -111,41 +111,4 @@ public class WekaInstancesFeatureUnion {
     return mergedInstances;
   }
 
-  public static void main(final String[] args) {
-    ArrayList<Attribute> attributeListA = new ArrayList<>();
-    attributeListA.add(new Attribute("A"));
-    attributeListA.add(new Attribute("C"));
-
-    ArrayList<Attribute> attributeListB = new ArrayList<>();
-    attributeListB.add(new Attribute("B"));
-    attributeListB.add(new Attribute("C"));
-
-    Instances dataSetA = new Instances("datasetA", attributeListA, 0);
-    dataSetA.setClassIndex(dataSetA.numAttributes() - 1);
-    Instances dataSetB = new Instances("datasetB", attributeListB, 0);
-    dataSetB.setClassIndex(dataSetB.numAttributes() - 1);
-
-    Instance iA = new DenseInstance(attributeListA.size());
-    iA.setDataset(dataSetA);
-    iA.setValue(0, 1.0);
-    iA.setValue(1, -1.0);
-    dataSetA.add(iA);
-
-    System.out.println(dataSetA);
-    System.out.println("=====");
-
-    Instance iB = new DenseInstance(attributeListA.size());
-    iB.setDataset(dataSetB);
-    iB.setValue(0, 2.0);
-    iB.setValue(1, -1.0);
-    dataSetB.add(iB);
-
-    System.out.println(dataSetB);
-    System.out.println("=====");
-    Instances merged = new WekaInstancesFeatureUnion().merge(dataSetA, dataSetB);
-    System.out.println("=======");
-    System.out.println(merged);
-
-  }
-
 }
