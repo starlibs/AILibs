@@ -1,4 +1,4 @@
-package ida2018;
+package ida2018.experiments;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -20,11 +20,10 @@ import jaicore.ml.WekaUtil;
  * @author fmohr
  *
  */
-public class RPNDBasedAveragedReductionStumpGridEvaluator {
+public class RPNDBasedAveragedHomogeneousReductionStumpEvaluator {
 
 	public static void main(String[] args) throws Exception {
 		File folder = new File(args[0]);
-		int nCPUs = Integer.valueOf(args[1]);
 
 		/* setup the experiment dimensions */
 		int numSeeds = 25;
@@ -34,13 +33,11 @@ public class RPNDBasedAveragedReductionStumpGridEvaluator {
 		Collections.shuffle(seeds);
 		List<File> datasetFiles = WekaUtil.getDatasetsInFolder(folder);
 		Collections.shuffle(datasetFiles);
-		List<List<String>> reductionCombos = new ArrayList<>(Util.getReductionStumpCombinations());
-		Collections.shuffle(reductionCombos);
+		
 		int maxNumberOfExperiments = Integer.MAX_VALUE;
 		int maxNumberOfSuccessfulExperiments = maxNumberOfExperiments;
 
 		/* compute total number of experiments */
-		int totalExperiments = numSeeds * datasetFiles.size() * reductionCombos.size();
 
 		/* conduct next experiments */
 		MySQLExperimentRunner runner = new MySQLExperimentRunner("isys-db.cs.upb.de", "ida2018", "WsFg33sE6aghabMr", "results_reduction");
@@ -51,7 +48,7 @@ public class RPNDBasedAveragedReductionStumpGridEvaluator {
 		/* launch threads for execution */
 		for (int seed : seeds) {
 			for (File dataFile : datasetFiles) {
-				for (List<String> combo : reductionCombos) {
+				for (String learner : WekaUtil.getBasicLearners()) {
 
 					/* wait until all problems have been solved */
 					if (cnt.incrementAndGet() > maxNumberOfExperiments) {
@@ -59,14 +56,14 @@ public class RPNDBasedAveragedReductionStumpGridEvaluator {
 						// pool.shutdown();
 						return;
 					}
-					System.out.println(combo + " on " + dataFile.getName());
+					System.out.println(learner + " on " + dataFile.getName());
 
 					/* create constants that describe the experiment */
 					final int fixedSeed = seed;
 					final File fixedFile = new File(dataFile.getAbsolutePath());
-					final String leftClassifier = combo.get(0);
-					final String innerClassifier = combo.get(1);
-					final String rightClassifier = combo.get(2);
+					final String leftClassifier = learner;
+					final String innerClassifier = learner;
+					final String rightClassifier = learner;
 
 					// pool.submit(new Runnable() {
 					// @Override

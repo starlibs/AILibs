@@ -1,4 +1,4 @@
-package ida2018;
+package ida2018.collectors;
 
 import java.io.File;
 import java.util.HashMap;
@@ -6,6 +6,7 @@ import java.util.Map;
 
 import javax.sound.midi.Synthesizer;
 
+import ida2018.IDA2018Util;
 import jaicore.basic.MySQLAdapter;
 import jaicore.basic.StatisticsUtil;
 import jaicore.basic.ValueUtil;
@@ -16,7 +17,7 @@ import jaicore.basic.chunks.TaskChunkUtil;
 import jaicore.basic.chunks.TaskKeyComparator;
 import jaicore.basic.kvstore.KVStoreUtil;
 
-public class Table1CollectorWithChunks {
+public class Table2CollectorWithChunks {
 
 
 	

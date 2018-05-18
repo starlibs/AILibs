@@ -1,4 +1,4 @@
-package ida2018;
+package ida2018.collectors;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import ida2018.IDA2018Util;
 import jaicore.basic.MathExt;
 import jaicore.basic.MySQLAdapter;
 

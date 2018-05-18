@@ -1,4 +1,4 @@
-package ida2018;
+package ida2018.collectors;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -11,7 +11,7 @@ import java.util.Map;
 import jaicore.basic.MathExt;
 import jaicore.basic.MySQLAdapter;
 
-public class Table2Collector {
+public class WinStatsCollector {
 	public static void main(String[] args) throws SQLException {
 		MySQLAdapter adapter = new MySQLAdapter("isys-db.cs.upb.de", "ida2018", "WsFg33sE6aghabMr", "results_reduction");
 
