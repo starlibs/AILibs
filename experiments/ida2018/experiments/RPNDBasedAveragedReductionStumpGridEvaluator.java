@@ -2,16 +2,13 @@ package ida2018.experiments;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import de.upb.crc901.reduction.Util;
 import de.upb.crc901.reduction.single.MySQLReductionExperiment;
 import de.upb.crc901.reduction.single.heterogeneous.simplerpnd.MySQLExperimentRunner;
+import ida2018.IDA2018Util;
 import jaicore.ml.WekaUtil;
 
 /**
@@ -24,7 +21,6 @@ public class RPNDBasedAveragedReductionStumpGridEvaluator {
 
 	public static void main(String[] args) throws Exception {
 		File folder = new File(args[0]);
-		int nCPUs = Integer.valueOf(args[1]);
 
 		/* setup the experiment dimensions */
 		int numSeeds = 25;
@@ -34,13 +30,12 @@ public class RPNDBasedAveragedReductionStumpGridEvaluator {
 		Collections.shuffle(seeds);
 		List<File> datasetFiles = WekaUtil.getDatasetsInFolder(folder);
 		Collections.shuffle(datasetFiles);
-		List<List<String>> reductionCombos = new ArrayList<>(Util.getReductionStumpCombinations());
+		List<List<String>> reductionCombos = new ArrayList<>(IDA2018Util.getReductionStumpCombinations());
 		Collections.shuffle(reductionCombos);
 		int maxNumberOfExperiments = Integer.MAX_VALUE;
 		int maxNumberOfSuccessfulExperiments = maxNumberOfExperiments;
 
-		/* compute total number of experiments */
-		int totalExperiments = numSeeds * datasetFiles.size() * reductionCombos.size();
+
 
 		/* conduct next experiments */
 		MySQLExperimentRunner runner = new MySQLExperimentRunner("isys-db.cs.upb.de", "ida2018", "WsFg33sE6aghabMr", "results_reduction");

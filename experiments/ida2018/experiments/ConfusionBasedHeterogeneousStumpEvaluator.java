@@ -10,11 +10,9 @@ import java.util.List;
 import java.util.Random;
 
 import de.upb.crc901.reduction.single.confusion.ConfusionBasedOptimizingAlgorithm;
-import de.upb.crc901.reduction.single.homogeneous.bestofkatrandom.MySQLReductionExperimentRunnerWrapper;
 import jaicore.ml.WekaUtil;
 import jaicore.ml.classification.multiclass.reduction.MCTreeNodeReD;
 import jaicore.ml.evaluation.MulticlassEvaluator;
-import weka.classifiers.Classifier;
 import weka.core.Instances;
 
 public class ConfusionBasedHeterogeneousStumpEvaluator {
@@ -31,11 +29,11 @@ public class ConfusionBasedHeterogeneousStumpEvaluator {
 		List<File> datasetFiles = WekaUtil.getDatasetsInFolder(folder);
 		Collections.shuffle(datasetFiles);
 		
-		int k = 10;
-		int mccvRepeats = 20;
+//		int k = 10;
+//		int mccvRepeats = 20;
 
 		/* conduct next experiments */
-		MySQLReductionExperimentRunnerWrapper runner = new MySQLReductionExperimentRunnerWrapper("isys-db.cs.upb.de", "ida2018", "WsFg33sE6aghabMr", "results_reduction", k, mccvRepeats);
+//		MySQLReductionExperimentRunnerWrapper runner = new MySQLReductionExperimentRunnerWrapper("isys-db.cs.upb.de", "ida2018", "WsFg33sE6aghabMr", "results_reduction", k, mccvRepeats);
 
 		/* launch threads for execution */
 		for (int seed : seeds) {

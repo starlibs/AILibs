@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import de.upb.crc901.reduction.Util;
 import de.upb.crc901.reduction.single.MySQLReductionExperiment;
 import de.upb.crc901.reduction.single.heterogeneous.bestofkrandom.MySQLReductionExperimentRunnerWrapper;
+import ida2018.IDA2018Util;
 import jaicore.ml.WekaUtil;
 
 /**
@@ -29,7 +29,7 @@ public class RandomBestOfKHeterogeneousReductionStumpGridEvaluator {
 		Collections.shuffle(seeds);
 		List<File> datasetFiles = WekaUtil.getDatasetsInFolder(folder);
 		Collections.shuffle(datasetFiles);
-		List<List<String>> reductionCombos = new ArrayList<>(Util.getReductionStumpCombinations());
+		List<List<String>> reductionCombos = new ArrayList<>(IDA2018Util.getReductionStumpCombinations());
 		Collections.shuffle(reductionCombos);
 		
 		int k = 10;

@@ -55,7 +55,6 @@ public class BaggedClassifiersGridEvaluation {
 					System.out.println("\t\t" + learner + " on " + dataFile.getName());
 
 					/* create constants that describe the experiment */
-					final int fixedSeed = seed;
 					final File fixedFile = new File(dataFile.getAbsolutePath());
 
 					Map<String, Object> values = new HashMap<>();

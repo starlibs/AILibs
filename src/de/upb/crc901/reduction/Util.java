@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 
 import de.upb.crc901.reduction.ensemble.simple.EnsembleOfSimpleOneStepReductionsExperiment;
 import de.upb.crc901.reduction.single.ReductionExperiment;
-import jaicore.basic.SetUtil;
 import jaicore.ml.WekaUtil;
 import jaicore.ml.classification.multiclass.reduction.MCTreeNodeReD;
 import jaicore.ml.classification.multiclass.reduction.splitters.RPNDSplitter;
@@ -27,19 +26,6 @@ import weka.core.Instances;
 public class Util {
 	
 	private final static Logger logger = LoggerFactory.getLogger(Util.class);
-
-	public static Collection<List<String>> getReductionStumpCombinations() {
-		Collection<String> classifiers = WekaUtil.getBasicLearners();
-		classifiers.removeIf(c -> c.contains("VotedPerceptron") || c.contains("OneR") || c.contains("ZeroR") || c.toLowerCase().contains("reptree"));
-		Collection<List<String>> classifierCombos;
-		try {
-			classifierCombos = SetUtil.cartesianProduct(classifiers, 3);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-			return null;
-		}
-		return classifierCombos;
-	}
 
 	public static List<Map<String, Object>> conductSingleOneStepReductionExperiment(ReductionExperiment experiment) throws Exception {
 
