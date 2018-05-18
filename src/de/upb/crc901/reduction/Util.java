@@ -30,6 +30,7 @@ public class Util {
 
 	public static Collection<List<String>> getReductionStumpCombinations() {
 		Collection<String> classifiers = WekaUtil.getBasicLearners();
+		classifiers.removeIf(c -> c.contains("VotedPerceptron") || c.contains("OneR") || c.contains("ZeroR") || c.toLowerCase().contains("reptree"));
 		Collection<List<String>> classifierCombos;
 		try {
 			classifierCombos = SetUtil.cartesianProduct(classifiers, 3);
@@ -48,20 +49,19 @@ public class Util {
 
 		/* prepare basis for experiments */
 		int seed = experiment.getSeed();
-		Classifier classifierForRPNDSplit = AbstractClassifier.forName(experiment.getNameOfClassifierForRPNDSplit(), null);
+		Classifier classifierForRPNDSplit = AbstractClassifier.forName(experiment.getNameOfInnerClassifier(), null);
 		Classifier leftClassifier = AbstractClassifier.forName(experiment.getNameOfLeftClassifier(), null);
 		Classifier innerClassifier = AbstractClassifier.forName(experiment.getNameOfInnerClassifier(), null);
 		Classifier rightClassifier = AbstractClassifier.forName(experiment.getNameOfRightClassifier(), null);
-		Collection<String> classes = WekaUtil.getClassesActuallyContainedInDataset(data);
 		Random splitRandomSource = new Random(seed);
-		RPNDSplitter splitter = new RPNDSplitter(data, new Random(seed));
+		RPNDSplitter splitter = new RPNDSplitter(new Random(seed), classifierForRPNDSplit);
 
 		/* conduct experiments */
 		List<Map<String, Object>> results = new ArrayList<>();
 		for (int k = 0; k < 10; k++) {
 			List<Collection<String>> classSplit;
 			try {
-				classSplit = new ArrayList<>(splitter.split(classes, classifierForRPNDSplit));
+				classSplit = new ArrayList<>(splitter.split(data));
 			} catch (Throwable e) {
 				throw new RuntimeException("Could not create RPND split.", e);
 			}
@@ -91,9 +91,8 @@ public class Util {
 		/* prepare basis for experiments */
 		int seed = experiment.getSeed();
 		String classifier = experiment.getNameOfClassifier();
-		Collection<String> classes = WekaUtil.getClassesActuallyContainedInDataset(data);
 		Random splitRandomSource = new Random(seed);
-		RPNDSplitter splitter = new RPNDSplitter(data, new Random(seed));
+		RPNDSplitter splitter = new RPNDSplitter(new Random(seed), AbstractClassifier.forName(classifier, null));
 
 		/* conduct experiments */
 		List<Map<String, Object>> results = new ArrayList<>();
@@ -106,7 +105,7 @@ public class Util {
 			for (int i = 0; i < experiment.getNumberOfStumps(); i++) {
 			
 				List<Collection<String>> classSplit;
-				classSplit = new ArrayList<>(splitter.split(classes, AbstractClassifier.forName(classifier, null)));
+				classSplit = new ArrayList<>(splitter.split(data));
 				MCTreeNodeReD tree = new MCTreeNodeReD(classifier, classSplit.get(0), classifier, classSplit.get(1), classifier);
 				tree.buildClassifier(dataSplit.get(0));
 				ensemble.addPreBuiltClassifier(tree);

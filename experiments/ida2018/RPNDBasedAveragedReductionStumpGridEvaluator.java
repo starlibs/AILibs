@@ -10,8 +10,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import de.upb.crc901.reduction.Util;
-import de.upb.crc901.reduction.single.MySQLExperimentRunner;
 import de.upb.crc901.reduction.single.MySQLReductionExperiment;
+import de.upb.crc901.reduction.single.heterogeneous.simplerpnd.MySQLExperimentRunner;
 import jaicore.ml.WekaUtil;
 
 /**
@@ -20,7 +20,7 @@ import jaicore.ml.WekaUtil;
  * @author fmohr
  *
  */
-public class ReductionStumpGridEvaluator {
+public class RPNDBasedAveragedReductionStumpGridEvaluator {
 
 	public static void main(String[] args) throws Exception {
 		File folder = new File(args[0]);
@@ -73,7 +73,7 @@ public class ReductionStumpGridEvaluator {
 					// public void run() {
 					try {
 						/* now conduct the experiment */
-						MySQLReductionExperiment experiment = runner.createAndGetExperimentIfNotConducted(fixedSeed, fixedFile, innerClassifier, leftClassifier, innerClassifier,
+						MySQLReductionExperiment experiment = runner.createAndGetExperimentIfNotConducted(fixedSeed, fixedFile, leftClassifier, innerClassifier,
 								rightClassifier);
 						try {
 							if (experiment == null)

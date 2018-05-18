@@ -1,4 +1,4 @@
-package de.upb.crc901.reduction.single;
+package de.upb.crc901.reduction.single.heterogeneous.simplerpnd;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -15,6 +15,8 @@ import java.util.Optional;
 import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 
 import de.upb.crc901.reduction.Util;
+import de.upb.crc901.reduction.single.MySQLReductionExperiment;
+import de.upb.crc901.reduction.single.ReductionExperiment;
 import jaicore.basic.MySQLAdapter;
 
 public class MySQLExperimentRunner {
@@ -36,16 +38,16 @@ public class MySQLExperimentRunner {
 		Collection<MySQLReductionExperiment> experiments = new HashSet<>();
 		ResultSet rs = adapter.getRowsOfTable(TABLE_NAME);
 		while (rs.next()) {
-			experiments.add(new MySQLReductionExperiment(rs.getInt("evaluation_id"), new ReductionExperiment(rs.getInt("seed"), rs.getString("dataset"), rs.getString("rpnd_classifier"), rs.getString("left_classifier"), rs.getString("inner_classifier"), rs.getString("right_classifier"), rs.getString("exception_rpnd"), rs.getString("exception_left"), rs.getString("exception_inner"), rs.getString("exception_right"))));
+			experiments.add(new MySQLReductionExperiment(rs.getInt("evaluation_id"), new ReductionExperiment(rs.getInt("seed"), rs.getString("dataset"), rs.getString("left_classifier"), rs.getString("inner_classifier"), rs.getString("right_classifier"), rs.getString("exception_left"), rs.getString("exception_inner"), rs.getString("exception_right"))));
 		}
 		return experiments;
 	}
 
-	public MySQLReductionExperiment createAndGetExperimentIfNotConducted(int seed, File dataFile, String nameOfRPNDClassifier, String nameOfLeftClassifier, String nameOfInnerClassifier,
+	public MySQLReductionExperiment createAndGetExperimentIfNotConducted(int seed, File dataFile, String nameOfLeftClassifier, String nameOfInnerClassifier,
 			String nameOfRightClassifier) throws FileNotFoundException, IOException {
 		
 		/* first check whether exactly the same experiment (with the same seed) has been conducted previously */
-		ReductionExperiment exp = new ReductionExperiment(seed, dataFile.getAbsolutePath(), nameOfRPNDClassifier, nameOfLeftClassifier, nameOfInnerClassifier, nameOfRightClassifier);
+		ReductionExperiment exp = new ReductionExperiment(seed, dataFile.getAbsolutePath(), nameOfLeftClassifier, nameOfInnerClassifier, nameOfRightClassifier);
 		Optional<MySQLReductionExperiment> existingExperiment = knownExperiments.stream().filter(e -> e.getExperiment().equals(exp)).findAny();
 		if (existingExperiment.isPresent())
 			return null;
@@ -57,7 +59,7 @@ public class MySQLExperimentRunner {
 		Map<String, String> map = new HashMap<>();
 		map.put("seed", String.valueOf(seed));
 		map.put("dataset", dataFile.getAbsolutePath());
-		map.put("rpnd_classifier", nameOfRPNDClassifier);
+		map.put("rpnd_classifier", nameOfInnerClassifier);
 		map.put("left_classifier", nameOfLeftClassifier);
 		map.put("inner_classifier", nameOfInnerClassifier);
 		map.put("right_classifier", nameOfRightClassifier);
@@ -118,10 +120,10 @@ public class MySQLExperimentRunner {
 			if (!knownExperiment.getExperiment().getDataset().equals(experimentInQuestion.getDataset()))
 				continue;
 			ReductionExperiment re = knownExperiment.getExperiment();
-			if (re.getExceptionRPND() != null && re.getNameOfClassifierForRPNDSplit().equals(experimentInQuestion.getExceptionRPND())) {
-				System.out.println("Skipping because " + experimentInQuestion.getNameOfClassifierForRPNDSplit() + " is known to be problematic as RPND classifier on " + re.getDataset() + " due to " + re.getExceptionRPND());
-				return true;
-			}
+//			if (re.getExceptionRPND() != null && re.getNameOfClassifierForRPNDSplit().equals(experimentInQuestion.getExceptionRPND())) {
+//				System.out.println("Skipping because " + experimentInQuestion.getNameOfClassifierForRPNDSplit() + " is known to be problematic as RPND classifier on " + re.getDataset() + " due to " + re.getExceptionRPND());
+//				return true;
+//			}
 //			else if (re.getExceptionLeft() != null && re.getNameOfLeftClassifier().equals(experimentInQuestion.getNameOfLeftClassifier())) {
 //				System.out.println("Skipping because " + experimentInQuestion.getNameOfLeftClassifier() + " is known to be problematic as left classifier on " + re.getDataset() + " due to " + re.getExceptionLeft());
 //				return true;

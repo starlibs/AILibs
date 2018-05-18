@@ -4,10 +4,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import de.upb.crc901.reduction.ensemble.simple.MySQLEnsembleOfSimpleOneStepReductionsExperiment;
-import de.upb.crc901.reduction.ensemble.simple.MySQLEnsembleOfSimpleOneStepReductionsExperimentRunner;
+import de.upb.crc901.reduction.single.MySQLReductionExperiment;
+import de.upb.crc901.reduction.single.homogeneous.bestofkatrandom.MySQLReductionExperimentRunnerWrapper;
 import jaicore.ml.WekaUtil;
 
 /**
@@ -16,11 +15,11 @@ import jaicore.ml.WekaUtil;
  * @author fmohr
  *
  */
-public class EnsemblesOfReductionStumpGridEvaluator {
+public class RandomBestOfKHomogeneousReductionStumpGridEvaluator {
 
 	public static void main(String[] args) throws Exception {
 		File folder = new File(args[0]);
-		
+
 		/* setup the experiment dimensions */
 		int numSeeds = 5;
 		List<Integer> seeds = new ArrayList<>();
@@ -29,44 +28,45 @@ public class EnsemblesOfReductionStumpGridEvaluator {
 		Collections.shuffle(seeds);
 		List<File> datasetFiles = WekaUtil.getDatasetsInFolder(folder);
 		Collections.shuffle(datasetFiles);
-
+		
+		int k = 10;
+		int mccvRepeats = 20;
 
 		/* conduct next experiments */
-		MySQLEnsembleOfSimpleOneStepReductionsExperimentRunner runner = new MySQLEnsembleOfSimpleOneStepReductionsExperimentRunner("isys-db.cs.upb.de", "ida2018",
-				"WsFg33sE6aghabMr", "results_reduction");
+		MySQLReductionExperimentRunnerWrapper runner = new MySQLReductionExperimentRunnerWrapper("isys-db.cs.upb.de", "ida2018", "WsFg33sE6aghabMr", "results_reduction", k, mccvRepeats);
 
 		/* launch threads for execution */
 		for (int seed : seeds) {
-			System.out.println("Selecting seed " + seed);
+			System.out.println("Considering seed " + seed);
 			for (File dataFile : datasetFiles) {
-				System.out.println("\tApproaching " + dataFile.getName());
-				for (String baseLearner : WekaUtil.getBasicLearners()) {
+				System.out.println("\tConsidering data file " + dataFile.getAbsolutePath());
+				for (String learner : WekaUtil.getBasicLearners()) {
 					
-					if (baseLearner.contains("VotedPerceptron") || baseLearner.contains("OneR") || baseLearner.contains("ZeroR") || baseLearner.toLowerCase().contains("reptree"))
-						continue;
-					
-					System.out.println("\t\tUsing " + baseLearner + " as the base learner.");
+					/* wait until all problems have been solved */
+					System.out.println("\t\t" + learner + " on " + dataFile.getName());
 
 					/* create constants that describe the experiment */
 					final int fixedSeed = seed;
 					final File fixedFile = new File(dataFile.getAbsolutePath());
 
 					try {
+						
 						/* now conduct the experiment */
-						MySQLEnsembleOfSimpleOneStepReductionsExperiment experiment = runner.createAndGetExperimentIfNotConducted(fixedSeed, fixedFile, baseLearner, 10);
+						MySQLReductionExperiment experiment = runner.createAndGetExperimentIfNotConducted(fixedSeed, fixedFile, learner);
 						try {
 							if (experiment == null)
 								continue;
-
 							runner.conductExperiment(experiment);
 						} catch (Throwable e) {
-							e.printStackTrace();
-							runner.associateExperimentWithException(experiment, baseLearner, e);
+							runner.associateExperimentWithException(experiment, e);
+							if (!(e instanceof RuntimeException))
+								e.printStackTrace();
 						}
 
 					} catch (Throwable e) {
 						e.printStackTrace();
 					}
+
 				}
 			}
 		}

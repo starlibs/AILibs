@@ -3,22 +3,20 @@ package de.upb.crc901.reduction.single;
 public class ReductionExperiment {
 	private final int seed;
 	private final String dataset;
-	private final String nameOfClassifierForRPNDSplit, nameOfLeftClassifier, nameOfInnerClassifier, nameOfRightClassifier;
-	private String exceptionRPND, exceptionLeft, exceptionInner, exceptionRight;
+	private final String nameOfLeftClassifier, nameOfInnerClassifier, nameOfRightClassifier;
+	private String exceptionLeft, exceptionInner, exceptionRight;
 
-	public ReductionExperiment(int seed, String dataset, String nameOfClassifierForRPNDSplit, String nameOfLeftClassifier, String nameOfInnerClassifier, String nameOfRightClassifier) {
+	public ReductionExperiment(int seed, String dataset, String nameOfLeftClassifier, String nameOfInnerClassifier, String nameOfRightClassifier) {
 		super();
 		this.seed = seed;
 		this.dataset = dataset;
-		this.nameOfClassifierForRPNDSplit = nameOfClassifierForRPNDSplit;
 		this.nameOfLeftClassifier = nameOfLeftClassifier;
 		this.nameOfInnerClassifier = nameOfInnerClassifier;
 		this.nameOfRightClassifier = nameOfRightClassifier;
 	}
 	
-	public ReductionExperiment(int seed, String dataset, String nameOfClassifierForRPNDSplit, String nameOfLeftClassifier, String nameOfInnerClassifier, String nameOfRightClassifier, String exceptionRPND, String exceptionLeft, String exceptionInner, String exceptionRight) {
-		this(seed,dataset,nameOfClassifierForRPNDSplit,nameOfLeftClassifier,nameOfInnerClassifier,nameOfRightClassifier);
-		this.exceptionRPND = exceptionRPND;
+	public ReductionExperiment(int seed, String dataset, String nameOfLeftClassifier, String nameOfInnerClassifier, String nameOfRightClassifier, String exceptionLeft, String exceptionInner, String exceptionRight) {
+		this(seed,dataset,nameOfLeftClassifier,nameOfInnerClassifier,nameOfRightClassifier);
 		this.exceptionLeft = exceptionLeft;
 		this.exceptionInner = exceptionInner;
 		this.exceptionRight = exceptionRight;
@@ -32,10 +30,6 @@ public class ReductionExperiment {
 		return dataset;
 	}
 
-	public String getNameOfClassifierForRPNDSplit() {
-		return nameOfClassifierForRPNDSplit;
-	}
-
 	public String getNameOfLeftClassifier() {
 		return nameOfLeftClassifier;
 	}
@@ -46,14 +40,6 @@ public class ReductionExperiment {
 
 	public String getNameOfRightClassifier() {
 		return nameOfRightClassifier;
-	}
-
-	public String getExceptionRPND() {
-		return exceptionRPND;
-	}
-
-	public void setExceptionRPND(String exceptionRPND) {
-		this.exceptionRPND = exceptionRPND;
 	}
 
 	public String getExceptionLeft() {
@@ -85,7 +71,9 @@ public class ReductionExperiment {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((dataset == null) ? 0 : dataset.hashCode());
-		result = prime * result + ((nameOfClassifierForRPNDSplit == null) ? 0 : nameOfClassifierForRPNDSplit.hashCode());
+		result = prime * result + ((exceptionInner == null) ? 0 : exceptionInner.hashCode());
+		result = prime * result + ((exceptionLeft == null) ? 0 : exceptionLeft.hashCode());
+		result = prime * result + ((exceptionRight == null) ? 0 : exceptionRight.hashCode());
 		result = prime * result + ((nameOfInnerClassifier == null) ? 0 : nameOfInnerClassifier.hashCode());
 		result = prime * result + ((nameOfLeftClassifier == null) ? 0 : nameOfLeftClassifier.hashCode());
 		result = prime * result + ((nameOfRightClassifier == null) ? 0 : nameOfRightClassifier.hashCode());
@@ -107,10 +95,20 @@ public class ReductionExperiment {
 				return false;
 		} else if (!dataset.equals(other.dataset))
 			return false;
-		if (nameOfClassifierForRPNDSplit == null) {
-			if (other.nameOfClassifierForRPNDSplit != null)
+		if (exceptionInner == null) {
+			if (other.exceptionInner != null)
 				return false;
-		} else if (!nameOfClassifierForRPNDSplit.equals(other.nameOfClassifierForRPNDSplit))
+		} else if (!exceptionInner.equals(other.exceptionInner))
+			return false;
+		if (exceptionLeft == null) {
+			if (other.exceptionLeft != null)
+				return false;
+		} else if (!exceptionLeft.equals(other.exceptionLeft))
+			return false;
+		if (exceptionRight == null) {
+			if (other.exceptionRight != null)
+				return false;
+		} else if (!exceptionRight.equals(other.exceptionRight))
 			return false;
 		if (nameOfInnerClassifier == null) {
 			if (other.nameOfInnerClassifier != null)
@@ -134,7 +132,8 @@ public class ReductionExperiment {
 
 	@Override
 	public String toString() {
-		return "ReductionExperiment [seed=" + seed + ", dataset=" + dataset + ", nameOfClassifierForRPNDSplit=" + nameOfClassifierForRPNDSplit + ", nameOfLeftClassifier="
-				+ nameOfLeftClassifier + ", nameOfInnerClassifier=" + nameOfInnerClassifier + ", nameOfRightClassifier=" + nameOfRightClassifier + "]";
+		return "ReductionExperiment [seed=" + seed + ", dataset=" + dataset + ", nameOfLeftClassifier=" + nameOfLeftClassifier + ", nameOfInnerClassifier=" + nameOfInnerClassifier
+				+ ", nameOfRightClassifier=" + nameOfRightClassifier + ", exceptionLeft=" + exceptionLeft + ", exceptionInner="
+				+ exceptionInner + ", exceptionRight=" + exceptionRight + "]";
 	}
 }
