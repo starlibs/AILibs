@@ -119,7 +119,7 @@ public class Table1Collector {
     }
     sb.append("c}\n &");
     for (String dataset : datasets) {
-      sb.append("& \\rotatebox[origin=l]{90}{" + dataset.substring(0, dataset.lastIndexOf(".")) + "}");
+      sb.append("& \\multicolumn{1}{c}{\\rotatebox[origin=l]{90}{" + dataset.substring(0, dataset.lastIndexOf(".")) + "}}");
     }
     sb.append("\\\\\\hline\n");
     Collections.sort(classifiers);
@@ -153,7 +153,7 @@ public class Table1Collector {
           displayedClassifierName = displayedClassifierName.replaceAll("[a-z]", "");
           break;
       }
-      sb.append("\\multirow{4}{*}{\\rotatebox[origin=c]{90}{" + displayedClassifierName + "}} & SA");
+      sb.append("\\multirow{4}{*}{\\rotatebox[origin=c]{90}{" + displayedClassifierName + "}} & SC");
       Map<String, Double> saRow = single.containsKey(classifier) ? single.get(classifier) : new HashMap<>();
       Map<String, Double> oneSRRow = homogeneousStumps.containsKey(classifier) ? homogeneousStumps.get(classifier) : new HashMap<>();
       Map<String, Double> baggingRow = baggingResults.containsKey(classifier) ? baggingResults.get(classifier) : new HashMap<>();

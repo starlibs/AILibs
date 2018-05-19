@@ -20,7 +20,7 @@ public class Table2CollectorWithChunks {
 
     MySQLAdapter adapter = IDA2018Util.getAdapter();
 
-    int minSamples = 2;
+    int minSamples = 1;
 
     /* read results for individual */
     Map<String, String> individualInitMap = new HashMap<>();
