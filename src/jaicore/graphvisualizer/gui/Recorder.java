@@ -1,11 +1,13 @@
 package jaicore.graphvisualizer.gui;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import jaicore.graph.observation.IObservableGraphAlgorithm;
 import jaicore.graphvisualizer.IGraphDataSupplier;
+import jaicore.graphvisualizer.IGraphDataVisualizer;
 import jaicore.graphvisualizer.TooltipGenerator;
 import jaicore.graphvisualizer.events.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.NodeReachedEvent;
@@ -236,14 +238,16 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 
 
 			mapperList.add(saveList);
-			mapperList.add(toolTipMap);
+//			mapperList.add(toolTipMap);
+			HashMap<String, JsonNode> supplierHashMap = new HashMap<>();
+			for(IGraphDataSupplier s: dataSuppliers)
+				supplierHashMap.put(s.getClass().getSimpleName(), s.getSerialization());
 
+			mapperList.add(supplierHashMap);
 
 			mapper.writeValue(file, mapperList);
 
-			for(IGraphDataSupplier s: dataSuppliers){
-				s.getSerialization();
-			}
+
 
 		} catch (IOException e){
 			e.printStackTrace();
@@ -299,13 +303,25 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 				});
 			});
 
-			toolTipMap = (Map<Integer, List<String>>) mapperList.get(1);
-			this.setTooltipGenerator(node->{
-				List<String> tips = toolTipMap.get(node.toString());
-				int i = nodeMap.get(node).size()-1;
+			mapperList.stream().filter(o-> mapperList.indexOf(o)!=0).forEach(o->{
+				LinkedHashMap map = (LinkedHashMap) o;
+				Object[] a = map.keySet().toArray();
+				String name = a[0].toString();
+				System.out.println(map.get(a[0]));
+				HashMap dataMap = (HashMap) map.get(a[0]);
+				IGraphDataSupplier supplier = new ReconstructionGraphDataSupplier(dataMap);
+				this.contoller.addTab(supplier.getVisualization(),name);
+				this.dataSuppliers.add(supplier);
 
-				return tips.get(i);
 			});
+
+//			toolTipMap = (Map<Integer, List<String>>) mapperList.get(1);
+//			this.setTooltipGenerator(node->{
+//				List<String> tips = toolTipMap.get(node.toString());
+//				int i = nodeMap.get(node).size()-1;
+//
+//				return tips.get(i);
+//			});
 
 
 		} catch (IOException e) {

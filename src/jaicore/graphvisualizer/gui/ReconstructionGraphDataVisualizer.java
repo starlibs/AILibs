@@ -6,13 +6,11 @@ import javafx.scene.Node;
 
 import javax.swing.*;
 
-public class TooltipVisualizer implements IGraphDataVisualizer {
-
-
+public class ReconstructionGraphDataVisualizer implements IGraphDataVisualizer {
     SwingNode node;
     JLabel label;
 
-    public TooltipVisualizer(){
+    public ReconstructionGraphDataVisualizer(){
         node = new SwingNode();
         label = new JLabel();
         label.setText("<html></html>");
@@ -47,6 +45,4 @@ public class TooltipVisualizer implements IGraphDataVisualizer {
     public Node getVisualization(){
         return node;
     }
-
-
 }

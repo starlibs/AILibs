@@ -1,9 +1,6 @@
 package jaicore.graphvisualizer.gui;
 
-import jaicore.graphvisualizer.IGraphDataSupplier;
-import jaicore.graphvisualizer.NodeListener;
-import jaicore.graphvisualizer.SearchVisualizationPanel;
-import jaicore.graphvisualizer.TooltipGenerator;
+import jaicore.graphvisualizer.*;
 import javafx.embed.swing.SwingNode;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -29,8 +26,6 @@ public class FXController implements Initializable, NodeListener {
     @FXML
     public Slider speedSlider;
     @FXML
-    public SwingNode toolTip;
-    @FXML
     public SwingNode visuPanel;
     @FXML
     public Slider timeline;
@@ -47,8 +42,8 @@ public class FXController implements Initializable, NodeListener {
     private long sleepTime;
     private List<Long> eventTimes;
 
-
-    JLabel tip;
+//
+//    JLabel tip;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -61,9 +56,9 @@ public class FXController implements Initializable, NodeListener {
 
         initializeVisuPanel(visuPanel);
 
-        tip = new JLabel();
-        tip.setText("<html></html>");
-        initializeToolTip(toolTip);
+//        tip = new JLabel();
+//        tip.setText("<html></html>");
+//        initializeToolTip(toolTip);
 
         /*
         if the slider for replay-speed is released, wait (200 ms - the value of the slider)
@@ -161,12 +156,12 @@ public class FXController implements Initializable, NodeListener {
             }
         });
     }
-
-    private void initializeToolTip(SwingNode toolTip){
-        JScrollPane panel = new JScrollPane();
-        panel.setViewportView(tip);
-        SwingUtilities.invokeLater(()->toolTip.setContent(panel));
-    }
+//
+//    private void initializeToolTip(SwingNode toolTip){
+//        JScrollPane panel = new JScrollPane();
+//        panel.setViewportView(tip);
+//        SwingUtilities.invokeLater(()->toolTip.setContent(panel));
+//    }
 
     public void setRecorder(Recorder recorder){
         if(visuPanel.getContent() != null)
@@ -317,6 +312,7 @@ public class FXController implements Initializable, NodeListener {
      * @param actionEvent
      */
     public void load(ActionEvent actionEvent) {
+        this.tabPane.getTabs().clear();
         FileChooser chooser = new FileChooser();
         chooser.setTitle("Open Event-File");
 //        recorder.loadFromFile(chooser.showOpenDialog(null));
@@ -353,10 +349,10 @@ public class FXController implements Initializable, NodeListener {
         updateTimeLine();
     }
 
-    public void addTab(Node node, String name){
+    public void addTab(IGraphDataVisualizer visualizer, String name){
         Tab tab = new Tab();
-        tab.setText(name);
-        tab.setContent(node);
+        tab.setText(name.substring(0,name.length()-17));
+        tab.setContent(visualizer.getVisualization());
         this.tabPane.getTabs().add(tab);
     }
 
@@ -364,12 +360,4 @@ public class FXController implements Initializable, NodeListener {
        System.out.println(tabPane.getSelectionModel().getSelectedItem().getText());
     }
 
-    public void addSupplier(ActionEvent actionEvent) {
-        this.recorder.addDataSupplier(new TooltipGraphDataSupplier());
-    }
-
-    public void removeSupplier(ActionEvent actionEvent) {
-        this.recorder.removeDataSupplier(0);
-        this.tabPane.getTabs().remove(0);
-    }
 }

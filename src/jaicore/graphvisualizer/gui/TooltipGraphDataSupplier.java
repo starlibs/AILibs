@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import jaicore.graphvisualizer.IGraphDataSupplier;
+import jaicore.graphvisualizer.IGraphDataVisualizer;
 import jaicore.graphvisualizer.TooltipGenerator;
 import jaicore.graphvisualizer.events.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.NodeReachedEvent;
@@ -54,13 +55,8 @@ public class TooltipGraphDataSupplier implements IGraphDataSupplier {
     public JsonNode getSerialization() {
         ObjectMapper mapper = new ObjectMapper();
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
-        try {
-            System.out.println(mapper.writeValueAsString(tooltipMap));
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-
-        return null;
+        JsonNode node=  mapper.valueToTree(tooltipMap);
+        return node;
     }
 
     public void setTooltipGenerator(TooltipGenerator gen){
@@ -72,11 +68,11 @@ public class TooltipGraphDataSupplier implements IGraphDataSupplier {
         return tooltipMap.get(node.hashCode());
     }
 
-    public javafx.scene.Node getVisualization(){
-        return visu.getVisualization();
-    }
+    public IGraphDataVisualizer getVisualization(){
+        return visu;    }
 
     public void update(Object node){
         visu.update(getData((Node)node));
     }
+
 }

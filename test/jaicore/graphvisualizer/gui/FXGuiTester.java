@@ -29,9 +29,9 @@ public class FXGuiTester extends FXGui{
 	public void start(Stage stage) throws Exception {
 //		bestFirstTest();
 
-		tooltipTest();
+//		tooltipTest();
 
-//		dataSupplierTest();
+		dataSupplierTest();
 	}
 
 	private void bestFirstTest(){
@@ -102,13 +102,14 @@ public class FXGuiTester extends FXGui{
 			Node node = (Node) n;
 			Comparable c = node.getInternalLabel();
 			String s = String.valueOf(c);
-			System.out.println(s);
 			return String.valueOf(s);
 		}));
 
 		rec.addDataSupplier(dataSupplier);
 
 		bf.nextSolution();
+
+		open();
 
 	}
 

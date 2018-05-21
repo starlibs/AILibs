@@ -3,6 +3,8 @@ package jaicore.graphvisualizer;
 import com.fasterxml.jackson.databind.JsonNode;
 import javafx.scene.Node;
 
+import java.util.HashMap;
+
 public interface IGraphDataSupplier<T> {
 
     void receiveEvent(T event);
@@ -13,10 +15,9 @@ public interface IGraphDataSupplier<T> {
     }
 
 
-    Node getVisualization();
+    IGraphDataVisualizer getVisualization();
 
-    public void update(Object node);
-
+    void update(Object node);
 
 
 
