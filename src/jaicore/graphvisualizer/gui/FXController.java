@@ -5,7 +5,6 @@ import javafx.embed.swing.SwingNode;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
 import javafx.scene.control.Slider;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -100,7 +99,7 @@ public class FXController implements Initializable, NodeListener {
         SearchVisualizationPanel visu = new SearchVisualizationPanel();
         visu.addNodeListener(this);
         this.recorder.registerListener(visu);
-        visu.setTooltipGenerator(this.recorder.getTooltipGenerator());
+//        visu.setTooltipGenerator(this.recorder.getTooltipGenerator());
         SwingUtilities.invokeLater(()->node.setContent(visu));
 
 
@@ -349,9 +348,9 @@ public class FXController implements Initializable, NodeListener {
         updateTimeLine();
     }
 
-    public void addTab(IGraphDataVisualizer visualizer, String name){
+    public void addTab(IDataVisualizer visualizer, String name){
         Tab tab = new Tab();
-        tab.setText(name.substring(0,name.length()-17));
+        tab.setText(name);
         tab.setContent(visualizer.getVisualization());
         this.tabPane.getTabs().add(tab);
     }

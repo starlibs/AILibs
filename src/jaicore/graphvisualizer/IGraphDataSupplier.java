@@ -1,24 +1,11 @@
 package jaicore.graphvisualizer;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import javafx.scene.Node;
-
-import java.util.HashMap;
-
 public interface IGraphDataSupplier<T> {
 
-    void receiveEvent(T event);
 
+    public void receiveEvent(T event);
 
-    default JsonNode getSerialization() {
-        return null;
-    }
+    public void update(long time, Object event);
 
-
-    IGraphDataVisualizer getVisualization();
-
-    void update(Object node);
-
-
-
+    IDataVisualizer getVisualization();
 }

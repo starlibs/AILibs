@@ -1,16 +1,16 @@
 package jaicore.graphvisualizer.gui;
 
-import jaicore.graphvisualizer.IGraphDataVisualizer;
+import jaicore.graphvisualizer.INodeDataVisualizer;
 import javafx.embed.swing.SwingNode;
 import javafx.scene.Node;
 
 import javax.swing.*;
 
-public class ReconstructionGraphDataVisualizer implements IGraphDataVisualizer {
+public class ReconstructionNodeDataVisualizer implements INodeDataVisualizer {
     SwingNode node;
     JLabel label;
 
-    public ReconstructionGraphDataVisualizer(){
+    public ReconstructionNodeDataVisualizer(){
         node = new SwingNode();
         label = new JLabel();
         label.setText("<html></html>");

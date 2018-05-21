@@ -1,13 +1,17 @@
 package jaicore.graphvisualizer.gui;
 
+import jaicore.graphvisualizer.BestFGraphDataSupplier;
 import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionHTNPlanner;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;
 import jaicore.planning.model.task.ceocstn.CEOCSTNPlanningProblem;
 import jaicore.planning.model.task.ceocstn.StandardProblemFactory;
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
+import jaicore.search.algorithms.standard.core.ORGraphSearch;
 import jaicore.search.graphgenerators.bestfirst.abstractVersioning.TestGraphGenerator;
 import jaicore.search.graphgenerators.bestfirst.abstractVersioning.TestNode;
+import jaicore.search.graphgenerators.nqueens.NQueenGenerator;
+import jaicore.search.graphgenerators.nqueens.QueenNode;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
 import javafx.stage.Stage;
@@ -31,7 +35,9 @@ public class FXGuiTester extends FXGui{
 
 //		tooltipTest();
 
-		dataSupplierTest();
+//		dataSupplierTest();
+
+		bestFTest();
 	}
 
 	private void bestFirstTest(){
@@ -43,10 +49,10 @@ public class FXGuiTester extends FXGui{
 
 		open(rec, "Recorder");
 
-		rec.setTooltipGenerator(n->{
-			Node node = (Node) n;
-			return String.valueOf(node.getInternalLabel());
-		});
+//		rec.setTooltipGenerator(n->{
+//			Node node = (Node) n;
+//			return String.valueOf(node.getInternalLabel());
+//		});
 		bf.nextSolution();
 
 	}
@@ -61,7 +67,7 @@ public class FXGuiTester extends FXGui{
 
 
 		Recorder<Node<TFDNode,Double>> recorder = new Recorder<>(plannerRun.getSearch());
-		recorder.setTooltipGenerator(new TFDTooltipGenerator<>());
+//		recorder.setTooltipGenerator(new TFDTooltipGenerator<>());
 
 		/* solve problem */
 		System.out.println("Starting search. Waiting for solutions:");
@@ -75,7 +81,7 @@ public class FXGuiTester extends FXGui{
 		TooltipGraphDataSupplier dataSupplier = new TooltipGraphDataSupplier();
 		dataSupplier.setTooltipGenerator(new TFDTooltipGenerator());
 
-		recorder.addDataSupplier(dataSupplier);
+		recorder.addNodeDataSupplier(dataSupplier);
 
 
 		open(recorder, "TooltipTest");
@@ -91,10 +97,10 @@ public class FXGuiTester extends FXGui{
 
 		open(rec, "Recorder");
 
-		rec.setTooltipGenerator(n->{
-			Node node = (Node) n;
-			return String.valueOf(node.getInternalLabel());
-		});
+//		rec.setTooltipGenerator(n->{
+//			Node node = (Node) n;
+//			return String.valueOf(node.getInternalLabel());
+//		});
 
 		TooltipGraphDataSupplier dataSupplier = new TooltipGraphDataSupplier();
 
@@ -105,11 +111,27 @@ public class FXGuiTester extends FXGui{
 			return String.valueOf(s);
 		}));
 
-		rec.addDataSupplier(dataSupplier);
+		rec.addNodeDataSupplier(dataSupplier);
 
 		bf.nextSolution();
 
 		open();
+
+	}
+
+
+	private void bestFTest(){
+		NQueenGenerator gen = new NQueenGenerator(8);
+		ORGraphSearch<QueenNode, String, Double> search = new ORGraphSearch<>(gen, n->(double)n.getPoint().getNumberOfNotAttackedCells());
+
+		Recorder rec = new Recorder(search);
+		open(rec,"Queens");
+
+		BestFGraphDataSupplier dataSupplier = new BestFGraphDataSupplier();
+
+		rec.addGraphDataSupplier(dataSupplier);
+
+		search.nextSolution();
 
 	}
 

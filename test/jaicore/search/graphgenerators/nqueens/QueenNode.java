@@ -349,5 +349,8 @@ public class QueenNode {
 		return true;
 	}
 
-	
+
+	public int getNumberOfNotAttackedCells() {
+		return (dimension*dimension)- getNumberOfAttackedCells();
+	}
 }

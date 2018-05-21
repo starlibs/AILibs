@@ -1,12 +1,12 @@
 package jaicore.graphvisualizer.gui;
 
-import jaicore.graphvisualizer.IGraphDataVisualizer;
+import jaicore.graphvisualizer.INodeDataVisualizer;
 import javafx.embed.swing.SwingNode;
 import javafx.scene.Node;
 
 import javax.swing.*;
 
-public class TooltipVisualizer implements IGraphDataVisualizer {
+public class TooltipVisualizer implements INodeDataVisualizer {
 
 
     SwingNode node;

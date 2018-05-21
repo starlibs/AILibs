@@ -7,8 +7,7 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import jaicore.graph.observation.IObservableGraphAlgorithm;
 import jaicore.graphvisualizer.IGraphDataSupplier;
-import jaicore.graphvisualizer.IGraphDataVisualizer;
-import jaicore.graphvisualizer.TooltipGenerator;
+import jaicore.graphvisualizer.INodeDataSupplier;
 import jaicore.graphvisualizer.events.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.NodeReachedEvent;
 import jaicore.graphvisualizer.events.NodeRemovedEvent;
@@ -33,7 +32,7 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 
 	//EventBus for Replays;
 	private EventBus replayBus;
-	private TooltipGenerator toolTipGenerator;
+//	private TooltipGenerator toolTipGenerator;
 
 	private Map<Object, List> nodeMap;
 	private Map<Integer, List<String>> toolTipMap;
@@ -41,7 +40,9 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 	private FXController contoller;
 
 	//List with DataSupplier
-	private List<IGraphDataSupplier> dataSuppliers;
+	private List<INodeDataSupplier> dataSuppliers;
+
+	private List <IGraphDataSupplier> graphDataSuppliers;
 
 	private boolean prettyPrint;
 
@@ -75,6 +76,8 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 		this.dataSuppliers = new ArrayList<>();
 		this.prettyPrint = true;
 
+		this.graphDataSuppliers = new ArrayList<>();
+
 	}
 
 	/**
@@ -97,7 +100,7 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 		}
 
 		if(! dataSuppliers.isEmpty())
-			for(IGraphDataSupplier supplier : dataSuppliers)
+			for(INodeDataSupplier supplier : dataSuppliers)
 				supplier.receiveEvent(event);
 	}
 
@@ -138,7 +141,11 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 				break;
 		}
 
+		for(IGraphDataSupplier s: graphDataSuppliers)
+			s.update(receivingTimes.get(index), event);
 		this.index++;
+
+
 	}
 
 
@@ -207,25 +214,25 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 					case "GraphInitializedEvent":
 						GraphInitializedEvent graphInitializedEvent = (GraphInitializedEvent) event;
 						code = graphInitializedEvent.getRoot().hashCode();
-						tooltips = new ArrayList<>();
-						tooltips.add(toolTipGenerator.getTooltip(graphInitializedEvent.getRoot()));
-						toolTipMap.put(code, tooltips );
+//						tooltips = new ArrayList<>();
+//						tooltips.add(toolTipGenerator.getTooltip(graphInitializedEvent.getRoot()));
+//						toolTipMap.put(code, tooltips );
 						timeToEvent.put(receivingTimes.get(i), new GraphInitializedEvent(code));
 						break;
 
 					case "NodeTypeSwitchEvent":
 						NodeTypeSwitchEvent nodeTypeSwitchEvent = (NodeTypeSwitchEvent) event;
 						code = nodeTypeSwitchEvent.getNode().hashCode();
-						toolTipMap.get(code).add(toolTipGenerator.getTooltip(nodeTypeSwitchEvent.getNode()));
+//						toolTipMap.get(code).add(toolTipGenerator.getTooltip(nodeTypeSwitchEvent.getNode()));
 						timeToEvent.put(receivingTimes.get(i), new NodeTypeSwitchEvent(code, nodeTypeSwitchEvent.getType()));
 						break;
 
 					case "NodeReachedEvent":
 						NodeReachedEvent nodeReachedEvent = (NodeReachedEvent) event;
 						code = nodeReachedEvent.getNode().hashCode();
-						tooltips = new ArrayList<>();
-						tooltips.add(toolTipGenerator.getTooltip(nodeReachedEvent.getNode()));
-						toolTipMap.put(code, tooltips );
+//						tooltips = new ArrayList<>();
+//						tooltips.add(toolTipGenerator.getTooltip(nodeReachedEvent.getNode()));
+//						toolTipMap.put(code, tooltips );
 						timeToEvent.put(receivingTimes.get(i), new NodeReachedEvent(nodeReachedEvent.getParent().hashCode(),code, nodeReachedEvent.getType()));
 						break;
 
@@ -240,7 +247,7 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 			mapperList.add(saveList);
 //			mapperList.add(toolTipMap);
 			HashMap<String, JsonNode> supplierHashMap = new HashMap<>();
-			for(IGraphDataSupplier s: dataSuppliers)
+			for(INodeDataSupplier s: dataSuppliers)
 				supplierHashMap.put(s.getClass().getSimpleName(), s.getSerialization());
 
 			mapperList.add(supplierHashMap);
@@ -309,7 +316,7 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 				String name = a[0].toString();
 				System.out.println(map.get(a[0]));
 				HashMap dataMap = (HashMap) map.get(a[0]);
-				IGraphDataSupplier supplier = new ReconstructionGraphDataSupplier(dataMap);
+				INodeDataSupplier supplier = new ReconstructionNodeDataSupplier(dataMap);
 				this.contoller.addTab(supplier.getVisualization(),name);
 				this.dataSuppliers.add(supplier);
 
@@ -341,7 +348,7 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 
 	}
 
-	public void addDataSupplier(IGraphDataSupplier dataSupplier){
+	public void addNodeDataSupplier(INodeDataSupplier dataSupplier){
 		this.dataSuppliers.add(dataSupplier);
 		if(contoller != null)
 			this.contoller.addTab(dataSupplier.getVisualization(), dataSupplier.getClass().getSimpleName());
@@ -352,8 +359,18 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 
 	}
 
+	public void addGraphDataSupplier(IGraphDataSupplier dataSupplier){
+		this.graphDataSuppliers.add(dataSupplier);
+		if(index != 0)
+			for(int i = 0; i < index; i++)
+				dataSupplier.update(receivingTimes.get(i), receivedEvents.get(i));
+		if(contoller != null){
+			this.contoller.addTab(dataSupplier.getVisualization(),dataSupplier.getClass().getSimpleName());
+		}
+	}
+
 	public void update(Object node){
-		for(IGraphDataSupplier dataSupplier : this.dataSuppliers)
+		for(INodeDataSupplier dataSupplier : this.dataSuppliers)
 			dataSupplier.update(node);
 	}
 
@@ -361,13 +378,13 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 		this.dataSuppliers.remove(i);
 	}
 
-	public TooltipGenerator getTooltipGenerator() {
-		return toolTipGenerator;
-	}
+//	public TooltipGenerator getTooltipGenerator() {
+//		return toolTipGenerator;
+//	}
 
-	public void setTooltipGenerator(TooltipGenerator toolTipGenerator) {
-		this.toolTipGenerator = toolTipGenerator;
-	}
+//	public void setTooltipGenerator(TooltipGenerator toolTipGenerator) {
+//		this.toolTipGenerator = toolTipGenerator;
+//	}
 
 	public List<Long> getReceiveTimes() {
 		return receivingTimes;
@@ -375,7 +392,7 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 
 	public void setContoller(FXController ctrl){
 		this.contoller = ctrl;
-		for(IGraphDataSupplier supplier : dataSuppliers)
+		for(INodeDataSupplier supplier : dataSuppliers)
 			this.contoller.addTab(supplier.getVisualization(), supplier.getClass().getSimpleName());
 
 	}

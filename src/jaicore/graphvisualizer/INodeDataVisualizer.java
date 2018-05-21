@@ -2,7 +2,7 @@ package jaicore.graphvisualizer;
 
 import javafx.scene.Node;
 
-public interface IGraphDataVisualizer {
+public interface INodeDataVisualizer extends IDataVisualizer {
 
     public Node getVisualization();
 

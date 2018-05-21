@@ -1,24 +1,24 @@
 package jaicore.graphvisualizer.gui;
 
-import jaicore.graphvisualizer.IGraphDataSupplier;
-import jaicore.graphvisualizer.IGraphDataVisualizer;
+import jaicore.graphvisualizer.INodeDataSupplier;
+import jaicore.graphvisualizer.INodeDataVisualizer;
 
 import java.util.HashMap;
 
-public class ReconstructionGraphDataSupplier implements IGraphDataSupplier {
+public class ReconstructionNodeDataSupplier implements INodeDataSupplier {
 
     HashMap<Integer, String> data;
-    IGraphDataVisualizer visualizer;
+    INodeDataVisualizer visualizer;
 
 
-    public ReconstructionGraphDataSupplier(HashMap map){
+    public ReconstructionNodeDataSupplier(HashMap map){
         this.data = new HashMap<Integer, String>();
         map.forEach((n,x)->{
             Integer i = Integer.parseInt((String) n);
             String s = (String) x;
             data.put(i,s);
         });
-        this.visualizer = new ReconstructionGraphDataVisualizer();
+        this.visualizer = new ReconstructionNodeDataVisualizer();
     }
 
     @Override
@@ -27,7 +27,7 @@ public class ReconstructionGraphDataSupplier implements IGraphDataSupplier {
     }
 
     @Override
-    public IGraphDataVisualizer getVisualization() {
+    public INodeDataVisualizer getVisualization() {
         return this.visualizer;
     }
 

@@ -1,11 +1,10 @@
 package jaicore.graphvisualizer.gui;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import jaicore.graphvisualizer.IGraphDataSupplier;
-import jaicore.graphvisualizer.IGraphDataVisualizer;
+import jaicore.graphvisualizer.INodeDataSupplier;
+import jaicore.graphvisualizer.INodeDataVisualizer;
 import jaicore.graphvisualizer.TooltipGenerator;
 import jaicore.graphvisualizer.events.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.NodeReachedEvent;
@@ -14,7 +13,7 @@ import jaicore.search.structure.core.Node;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TooltipGraphDataSupplier implements IGraphDataSupplier {
+public class TooltipGraphDataSupplier implements INodeDataSupplier {
 
     private TooltipGenerator tooltipGenerator;
 
@@ -68,7 +67,7 @@ public class TooltipGraphDataSupplier implements IGraphDataSupplier {
         return tooltipMap.get(node.hashCode());
     }
 
-    public IGraphDataVisualizer getVisualization(){
+    public INodeDataVisualizer getVisualization(){
         return visu;    }
 
     public void update(Object node){
