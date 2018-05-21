@@ -1,7 +1,7 @@
 package jaicore.graphvisualizer;
 
-import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonNode;
+import javafx.scene.Node;
 
 public interface IGraphDataSupplier<T> {
 
@@ -11,6 +11,13 @@ public interface IGraphDataSupplier<T> {
     default JsonNode getSerialization() {
         return null;
     }
+
+
+    Node getVisualization();
+
+    public void update(Object node);
+
+
 
 
 }

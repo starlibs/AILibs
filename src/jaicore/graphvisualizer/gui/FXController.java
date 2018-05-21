@@ -8,6 +8,7 @@ import javafx.embed.swing.SwingNode;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.control.Slider;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -343,14 +344,8 @@ public class FXController implements Initializable, NodeListener {
 
     @Override
     public void buttonPushed(Object node) {
-//        SearchVisualizationPanel panel = (SearchVisualizationPanel) visuPanel.getContent();
-        TooltipGenerator gen = recorder.getTooltipGenerator();
-        StringBuilder sb = new StringBuilder();
-//						sb.append("<html><div style='padding: 5px; background: #ffffcc; border: 1px solid black;'>");
-        sb.append("<html><div style='padding: 5px;'>");
-        sb.append(gen.getTooltip(node));
-        sb.append("</div></html>");
-        tip.setText(sb.toString());
+        this.recorder.update(node);
+
     }
 
     public void updateEventTimes(List<Long> newEventTimes){
@@ -358,12 +353,11 @@ public class FXController implements Initializable, NodeListener {
         updateTimeLine();
     }
 
-    public void addTab(IGraphDataSupplier dataSupplier){
-        String name = dataSupplier.getClass().getSimpleName();
-        name = name.substring(0,name.length()-17);
+    public void addTab(Node node, String name){
         Tab tab = new Tab();
         tab.setText(name);
-        this.tabPane.getTabs().add(0,tab);
+        tab.setContent(node);
+        this.tabPane.getTabs().add(tab);
     }
 
     public void test(ActionEvent actionEvent) {

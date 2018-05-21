@@ -179,6 +179,10 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 				}
 				newNode.setInternalLabel(label);
 
+				graphEventBus.post(new NodeReachedEvent<Node<T, V>>(newNode.getParent(), newNode, "or_" + (newNode.isGoal() ? "solution" : "created")));
+				logger.debug("Sent message for creation of node {} as a successor of {}", newNode, newNode.getParent());
+
+
 				logger.info("Inserting successor {} of {} to OPEN. F-Value is {}", newNode, expandedNodeInternal, label);
 				// assert !open.contains(newNode) && !expanded.contains(newNode.getPoint()) : "Inserted node is already in OPEN or even expanded!";
 
@@ -337,10 +341,12 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 					labelNode(root);
 					open.add(root);
 					logger.info("Labeled root with {}", root.getInternalLabel());
+					this.graphEventBus.post(new GraphInitializedEvent<Node<T, V>>(root));
 				}
 			} else {
 				Node<T, V> root = newNode(null, ((SingleRootGenerator<T>) rootGenerator).getRoot());
 				labelNode(root);
+				this.graphEventBus.post(new GraphInitializedEvent<Node<T, V>>(root));
 				open.add(root);
 			}
 
@@ -688,12 +694,12 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 			newNode.setGoal(true);
 
 		/* send events for this new node */
-		if (parent == null) {
-			this.graphEventBus.post(new GraphInitializedEvent<Node<T, V>>(newNode));
-		} else {
-			this.graphEventBus.post(new NodeReachedEvent<Node<T, V>>(parent, newNode, "or_" + (newNode.isGoal() ? "solution" : "created")));
-			logger.debug("Sent message for creation of node {} as a successor of {}", newNode, parent);
-		}
+//		if (parent == null) {
+//			this.graphEventBus.post(new GraphInitializedEvent<Node<T, V>>(newNode));
+//		} else {
+//			this.graphEventBus.post(new NodeReachedEvent<Node<T, V>>(parent, newNode, "or_" + (newNode.isGoal() ? "solution" : "created")));
+//			logger.debug("Sent message for creation of node {} as a successor of {}", newNode, parent);
+//		}
 		return newNode;
 	}
 

@@ -328,12 +328,17 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 	public void addDataSupplier(IGraphDataSupplier dataSupplier){
 		this.dataSuppliers.add(dataSupplier);
 		if(contoller != null)
-			this.contoller.addTab(dataSupplier);
+			this.contoller.addTab(dataSupplier.getVisualization(), dataSupplier.getClass().getSimpleName());
 
 		for(Object event : receivedEvents)
 			dataSupplier.receiveEvent(event);
 
 
+	}
+
+	public void update(Object node){
+		for(IGraphDataSupplier dataSupplier : this.dataSuppliers)
+			dataSupplier.update(node);
 	}
 
 	public void removeDataSupplier(int i) {
@@ -354,6 +359,9 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 
 	public void setContoller(FXController ctrl){
 		this.contoller = ctrl;
+		for(IGraphDataSupplier supplier : dataSuppliers)
+			this.contoller.addTab(supplier.getVisualization(), supplier.getClass().getSimpleName());
+
 	}
 
 

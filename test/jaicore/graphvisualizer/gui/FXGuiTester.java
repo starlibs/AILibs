@@ -29,9 +29,9 @@ public class FXGuiTester extends FXGui{
 	public void start(Stage stage) throws Exception {
 //		bestFirstTest();
 
-//		tooltipTest();
+		tooltipTest();
 
-		dataSupplierTest();
+//		dataSupplierTest();
 	}
 
 	private void bestFirstTest(){
@@ -71,6 +71,13 @@ public class FXGuiTester extends FXGui{
 		}
 		System.out.println("Algorithm has finished.");
 
+
+		TooltipGraphDataSupplier dataSupplier = new TooltipGraphDataSupplier();
+		dataSupplier.setTooltipGenerator(new TFDTooltipGenerator());
+
+		recorder.addDataSupplier(dataSupplier);
+
+
 		open(recorder, "TooltipTest");
 	}
 
@@ -90,14 +97,16 @@ public class FXGuiTester extends FXGui{
 		});
 
 		TooltipGraphDataSupplier dataSupplier = new TooltipGraphDataSupplier();
+
 		dataSupplier.setTooltipGenerator((n -> {
 			Node node = (Node) n;
-			String s = String.valueOf(node.getInternalLabel());
+			Comparable c = node.getInternalLabel();
+			String s = String.valueOf(c);
+			System.out.println(s);
 			return String.valueOf(s);
 		}));
 
 		rec.addDataSupplier(dataSupplier);
-
 
 		bf.nextSolution();
 
