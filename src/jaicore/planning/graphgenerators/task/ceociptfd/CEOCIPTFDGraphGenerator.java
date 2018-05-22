@@ -6,9 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.SynchronousQueue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -135,7 +133,13 @@ public class CEOCIPTFDGraphGenerator implements SerializableGraphGenerator<TFDNo
 				Map<String, OracleTaskResolver> oracleResolvers = problem.getOracleResolvers();
 				if (oracleResolvers != null && oracleResolvers.containsKey(nextTask.getPropertyName())) {
 //					System.out.println("Solving " + nextTask + " with oracle");
-					Collection<List<Action>> subsolutions = oracleResolvers.get(nextTaskName).getSubSolutions(state, nextTask);
+					Collection<List<Action>> subsolutions = null;
+					try {
+						subsolutions = oracleResolvers.get(nextTaskName).getSubSolutions(state, nextTask);
+					} catch (Exception e) {
+						e.printStackTrace();
+						return new ArrayList<>();
+					}
 //					System.out.println(subsolutions);
 					
 					for (List<Action> subsolution : subsolutions) {
