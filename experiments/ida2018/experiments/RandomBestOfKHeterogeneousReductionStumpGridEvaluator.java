@@ -22,7 +22,7 @@ public class RandomBestOfKHeterogeneousReductionStumpGridEvaluator {
 		File folder = new File(args[0]);
 
 		/* setup the experiment dimensions */
-		int numSeeds = 10;
+		int numSeeds = 3;
 		List<Integer> seeds = new ArrayList<>();
 		for (int seed = 1; seed <= numSeeds; seed++)
 			seeds.add(seed);

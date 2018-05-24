@@ -22,6 +22,7 @@ import weka.core.OptionHandler;
  * @author aminfaez
  *
  */
+@SuppressWarnings("serial")
 public class MLPipelinePlan implements Serializable {
 	
 	

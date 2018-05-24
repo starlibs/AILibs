@@ -1,7 +1,6 @@
 package de.upb.crc901.reduction.single.confusion;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -76,14 +75,14 @@ public class ConfusionBasedAlgorithm {
 		String bestInner = null;
 		Collection<Integer> bestLeftClasses = null;
 		Collection<Integer> bestRightClasses = null;
-		int numPair = 0;
+//		int numPair = 0;
 		for (List<String> classifierPair : classifierPairs) {
-			numPair++;
+//			numPair++;
 			String c1 = classifierPair.get(0);
 			String c2 = classifierPair.get(1);
 //			 System.out.println("\tConsidering " + c1 + "/" + c2 + "(" + numPair + "/" + classifierPairs.size() + ")");
-			double[][] cm1 = confusionMatrices.get(c1);
-			double[][] cm2 = confusionMatrices.get(c2);
+//			double[][] cm1 = confusionMatrices.get(c1);
+//			double[][] cm2 = confusionMatrices.get(c2);
 			Collection<Collection<Integer>> z1 = zeroConflictSets.get(c1);
 			Collection<Collection<Integer>> z2 = zeroConflictSets.get(c2);
 
@@ -170,9 +169,6 @@ public class ConfusionBasedAlgorithm {
 		return tree;
 	}
 
-	private int getLeastConflictingClass(double[][] confusionMatrix) {
-		return getLeastConflictingClass(confusionMatrix, new ArrayList<>());
-	}
 
 	private int getLeastConflictingClass(double[][] confusionMatrix, Collection<Integer> blackList) {
 

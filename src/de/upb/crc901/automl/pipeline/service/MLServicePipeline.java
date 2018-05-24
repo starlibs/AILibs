@@ -29,6 +29,7 @@ import weka.core.Instances;
  * @author fmohr
  *
  */
+@SuppressWarnings("serial")
 public class MLServicePipeline implements Classifier, Serializable {
 
 	private long expirationDate;

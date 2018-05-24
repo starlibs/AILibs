@@ -148,10 +148,6 @@ public class ConfusionBasedGreedyOptimizingAlgorithm {
 		return tree;
 	}
 
-	private int getLeastConflictingClass(double[][] confusionMatrix) {
-		return getLeastConflictingClass(confusionMatrix, new ArrayList<>());
-	}
-
 	private int getLeastConflictingClass(double[][] confusionMatrix, Collection<Integer> blackList) {
 
 		/* compute least conflicting class */

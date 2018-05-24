@@ -8,15 +8,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import de.upb.crc901.automl.pipeline.basic.MLPipeline;
 import jaicore.basic.SetUtil;
 import jaicore.ml.WekaUtil;
 import jaicore.ml.classification.multiclass.reduction.splitters.RPNDSplitter;
-import weka.attributeSelection.BestFirst;
-import weka.attributeSelection.CfsSubsetEval;
 import weka.attributeSelection.InfoGainAttributeEval;
 import weka.attributeSelection.Ranker;
 import weka.classifiers.AbstractClassifier;
@@ -26,34 +21,26 @@ import weka.core.Instances;
 
 public class NestedDichotomyUtil {
 
-	private static final Logger logger = LoggerFactory.getLogger(NestedDichotomyUtil.class);
+	
 
-	public static ClassSplit<String> createGeneralRPNDBasedSplit(Collection<String> classes, Random rand, String classifierName, Instances data) throws InterruptedException  {
+	public static ClassSplit<String> createGeneralRPNDBasedSplit(Collection<String> classes, Random rand, String classifierName, Instances data) throws Exception {
 		if (classes.size() < 2)
 			throw new IllegalArgumentException("Cannot compute split for less than two classes!");
-		RPNDSplitter splitter = new RPNDSplitter(data, rand);
+
+		RPNDSplitter splitter = new RPNDSplitter(rand, new MLPipeline(new Ranker(), new InfoGainAttributeEval(), AbstractClassifier.forName(classifierName, null)));
 		Collection<Collection<String>> splitAsCollection = null;
-		try {
-			splitAsCollection = splitter.split(classes, new MLPipeline(new Ranker(), new InfoGainAttributeEval(), AbstractClassifier.forName(classifierName, null)));
-		} catch (InterruptedException e) {
-			throw e;
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
+		splitAsCollection = splitter.split(data);
 		Iterator<Collection<String>> it = splitAsCollection.iterator();
 		return new ClassSplit<>(classes, it.next(), it.next());
 	}
 
 	public static ClassSplit<String> createGeneralRPNDBasedSplit(Collection<String> classes, Collection<String> s1, Collection<String> s2, Random rand, String classifierName,
-			Instances data) {
-		RPNDSplitter splitter = new RPNDSplitter(data, rand);
+			Instances data) throws Exception {
+		RPNDSplitter splitter = new RPNDSplitter(rand, AbstractClassifier.forName(classifierName, new String[] {}));
 		Collection<Collection<String>> splitAsCollection = null;
-		try {
-			splitAsCollection = splitter.split(classes, s1, s2, AbstractClassifier.forName(classifierName, new String[] {}));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+
+		splitAsCollection = splitter.split(classes, s1, s2, data);
+
 		Iterator<Collection<String>> it = splitAsCollection.iterator();
 		return new ClassSplit<>(classes, it.next(), it.next());
 	}

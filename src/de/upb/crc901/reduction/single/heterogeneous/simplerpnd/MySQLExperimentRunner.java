@@ -116,10 +116,10 @@ public class MySQLExperimentRunner {
 	}
 	
 	private boolean canInfeasibilityBeDerived(Collection<MySQLReductionExperiment> experimentsWithResults, ReductionExperiment experimentInQuestion) {
-		for (MySQLReductionExperiment knownExperiment : experimentsWithResults) {
-			if (!knownExperiment.getExperiment().getDataset().equals(experimentInQuestion.getDataset()))
-				continue;
-			ReductionExperiment re = knownExperiment.getExperiment();
+//		for (MySQLReductionExperiment knownExperiment : experimentsWithResults) {
+//			if (!knownExperiment.getExperiment().getDataset().equals(experimentInQuestion.getDataset()))
+//				continue;
+//			ReductionExperiment re = knownExperiment.getExperiment();
 //			if (re.getExceptionRPND() != null && re.getNameOfClassifierForRPNDSplit().equals(experimentInQuestion.getExceptionRPND())) {
 //				System.out.println("Skipping because " + experimentInQuestion.getNameOfClassifierForRPNDSplit() + " is known to be problematic as RPND classifier on " + re.getDataset() + " due to " + re.getExceptionRPND());
 //				return true;
@@ -136,7 +136,7 @@ public class MySQLExperimentRunner {
 //				System.out.println("Skipping because " + experimentInQuestion.getNameOfRightClassifier() + " is known to be problematic as right classifier on " + re.getDataset() + " due to " + re.getExceptionRight());
 //				return true;
 //			}
-		}
+//		}
 		return false;
 	}
 }

@@ -8,7 +8,6 @@ import jaicore.ml.experiments.Experiment;
 import jaicore.ml.experiments.IMultiClassClassificationExperimentDatabase;
 import weka.classifiers.Classifier;
 
-@SuppressWarnings("serial")
 public class DummyExperimentDatabaseConnector implements IMultiClassClassificationExperimentDatabase {
 
 	@Override

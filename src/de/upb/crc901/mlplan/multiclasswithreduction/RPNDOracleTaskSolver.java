@@ -2,7 +2,6 @@ package de.upb.crc901.mlplan.multiclasswithreduction;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -52,7 +51,7 @@ public class RPNDOracleTaskSolver implements OracleTaskResolver {
 	}
 
 	private interface Splitter {
-		Split split(Collection<String> set) throws InterruptedException;
+		Split split(Collection<String> set) throws Exception;
 	}
 
 	class Split extends Pair<Set<String>, Set<String>> {
@@ -77,58 +76,58 @@ public class RPNDOracleTaskSolver implements OracleTaskResolver {
 		}
 
 		@Override
-		public Split split(Collection<String> set) throws InterruptedException {
+		public Split split(Collection<String> set) throws Exception {
 			ClassSplit<String> split = NestedDichotomyUtil.createGeneralRPNDBasedSplit(set, rand, classifierName, data);
 			return new Split(new HashSet<>(split.getL()), new HashSet<>(split.getR()));
 		}
 	}
 
-	private class RandomSplit implements Splitter {
+//	private class RandomSplit implements Splitter {
+//
+//		@Override
+//		public Split split(Collection<String> setOrig) {
+//			List<String> set = new ArrayList<>(setOrig);
+//			Collections.shuffle(set, rand);
+//			int offset = rand.nextInt(set.size() - 1);
+//
+//			/* perform this specific split */
+//			Set<String> c1 = new HashSet<>();
+//			Set<String> c2 = new HashSet<>();
+//			boolean offsetReached = false;
+//			int i = 0;
+//			for (String b : set) {
+//				if (!offsetReached)
+//					c1.add(b);
+//				else
+//					c2.add(b);
+//				i++;
+//				if (i == offset)
+//					offsetReached = true;
+//			}
+//
+//			return new Split(c1, c2);
+//		}
+//	}
 
-		@Override
-		public Split split(Collection<String> setOrig) {
-			List<String> set = new ArrayList<>(setOrig);
-			Collections.shuffle(set, rand);
-			int offset = rand.nextInt(set.size() - 1);
-
-			/* perform this specific split */
-			Set<String> c1 = new HashSet<>();
-			Set<String> c2 = new HashSet<>();
-			boolean offsetReached = false;
-			int i = 0;
-			for (String b : set) {
-				if (!offsetReached)
-					c1.add(b);
-				else
-					c2.add(b);
-				i++;
-				if (i == offset)
-					offsetReached = true;
-			}
-
-			return new Split(c1, c2);
-		}
-	}
-
-	private class GreedySplitter implements Splitter {
-
-		private final Instances data;
-
-		public GreedySplitter(Instances data) {
-			super();
-			this.data = data;
-		}
-
-		@Override
-		public Split split(Collection<String> set) {
-			// ClassSplit<String> split = NestedDichotomyUtil.createGreedySplit(set, rand, classifierName, data);
-			// return new Split(new HashSet<>(split.getL()), new HashSet<>(split.getR()));
-			return null;
-		}
-	}
+//	private class GreedySplitter implements Splitter {
+//
+//		private final Instances data;
+//
+//		public GreedySplitter(Instances data) {
+//			super();
+//			this.data = data;
+//		}
+//
+//		@Override
+//		public Split split(Collection<String> set) {
+//			// ClassSplit<String> split = NestedDichotomyUtil.createGreedySplit(set, rand, classifierName, data);
+//			// return new Split(new HashSet<>(split.getL()), new HashSet<>(split.getR()));
+//			return null;
+//		}
+//	}
 
 	@Override
-	public Collection<List<Action>> getSubSolutions(Monom state, Literal task) {
+	public Collection<List<Action>> getSubSolutions(Monom state, Literal task) throws Exception {
 
 		/* prepare template grounding for actions */
 		String nameOfParent = task.getConstantParams().get(0).getName();

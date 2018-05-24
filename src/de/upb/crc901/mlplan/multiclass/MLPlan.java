@@ -15,7 +15,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
-import org.apache.commons.math.stat.descriptive.SynchronizedMultivariateSummaryStatistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

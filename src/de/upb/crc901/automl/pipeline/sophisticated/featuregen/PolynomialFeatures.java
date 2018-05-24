@@ -3,9 +3,6 @@ package de.upb.crc901.automl.pipeline.sophisticated.featuregen;
 import java.util.ArrayList;
 import java.util.List;
 
-import jaicore.basic.SetUtil;
-import jaicore.basic.SetUtil.Pair;
-import jaicore.ml.WekaUtil;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;

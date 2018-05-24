@@ -181,8 +181,8 @@ public class ConfusionBasedOptimizingAlgorithm {
 			/* compute CURRENT cost of the two separate problems */
 			double[][] cm1 = confusionMatrices.get(p.leftClassifier);
 			double[][] cm2 = confusionMatrices.get(p.rightClassifier);
-			double p1 = getExpectedMisclassificationRate(p.itemsOnLeft, cm1);
-			double p2 = getExpectedMisclassificationRate(p.itemsOnRight, cm2);
+//			double p1 = getExpectedMisclassificationRate(p.itemsOnLeft, cm1);
+//			double p2 = getExpectedMisclassificationRate(p.itemsOnRight, cm2);
 			
 			/* if the inner classifier has been set, train the respective model and check the */
 			if (p.innerClassifier != null) {
@@ -310,6 +310,7 @@ public class ConfusionBasedOptimizingAlgorithm {
 
 			@Override
 			public String getTooltip(Object node) {
+				@SuppressWarnings("unchecked")
 				Node<BFNode, Double> n = (Node<BFNode, Double>) node;
 				return n.getPoint().toString() + "<br />" + n.getInternalLabel();
 			}
@@ -347,90 +348,6 @@ public class ConfusionBasedOptimizingAlgorithm {
 				mistakes += cm[c][i];
 		}
 		return mistakes * 1f / occurrencesOfC;
-	}
-
-	private double getExpectedMisclassificationRate(Collection<Integer> items, double[][] cm) {
-		int totalQueriesForRelevantItems = 0;
-		for (int i : items) {
-			for (int j = 0; j < cm.length; j++) {
-				totalQueriesForRelevantItems += cm[i][j];
-			}
-		}
-		return getMistakesOfCluster(items, cm) / (totalQueriesForRelevantItems * 1f);
-	}
-
-	private int getLeastConflictingClass(double[][] confusionMatrix) {
-		return getLeastConflictingClass(confusionMatrix, new ArrayList<>());
-	}
-
-	private int getLeastConflictingClass(double[][] confusionMatrix, Collection<Integer> blackList) {
-
-		/* compute least conflicting class */
-		int leastConflictingClass = -1;
-		int leastKnownScore = Integer.MAX_VALUE;
-		for (int i = 0; i < confusionMatrix.length; i++) {
-			if (blackList.contains(i))
-				continue;
-			int sum = 0;
-			for (int j = 0; j < confusionMatrix.length; j++) {
-				if (i != j)
-					sum += confusionMatrix[i][j];
-			}
-			if (sum < leastKnownScore) {
-				leastKnownScore = sum;
-				leastConflictingClass = i;
-			}
-		}
-		return leastConflictingClass;
-	}
-
-	private Collection<Collection<Integer>> getZeroConflictSets(double[][] confusionMatrix) {
-		Collection<Integer> blackList = new ArrayList<>();
-		Collection<Collection<Integer>> partitions = new ArrayList<>();
-
-		int leastConflictingClass = -1;
-		do {
-			leastConflictingClass = getLeastConflictingClass(confusionMatrix, blackList);
-			if (leastConflictingClass >= 0) {
-				Collection<Integer> cluster = new ArrayList<>();
-				cluster.add(leastConflictingClass);
-				do {
-					Collection<Integer> newCluster = incrementCluster(cluster, confusionMatrix, blackList);
-					if (newCluster.size() == cluster.size())
-						break;
-					cluster = newCluster;
-					if (cluster.contains(-1))
-						throw new IllegalStateException("Computed illegal cluster: " + cluster);
-				} while (getMistakesOfCluster(cluster, confusionMatrix) == 0 && cluster.size() < confusionMatrix.length);
-				blackList.addAll(cluster);
-				partitions.add(cluster);
-			}
-		} while (leastConflictingClass >= 0 && blackList.size() < confusionMatrix.length);
-
-		return partitions;
-	}
-
-	private Collection<Integer> incrementCluster(Collection<Integer> cluster, double[][] confusionMatrix, Collection<Integer> blackList) {
-		int leastSeenPenalty = Integer.MAX_VALUE;
-		int choice = -1;
-		for (int cId = 0; cId < confusionMatrix.length; cId++) {
-			if (cluster.contains(cId) || blackList.contains(cId))
-				continue;
-			int addedPenalty = 0;
-			for (int i = 0; i < confusionMatrix.length; i++) {
-				addedPenalty += confusionMatrix[i][cId];
-				addedPenalty += confusionMatrix[cId][i];
-			}
-			if (addedPenalty < leastSeenPenalty) {
-				leastSeenPenalty = addedPenalty;
-				choice = cId;
-			}
-		}
-		Collection<Integer> newCluster = new ArrayList<>(cluster);
-		if (choice < 0)
-			return newCluster;
-		newCluster.add(choice);
-		return newCluster;
 	}
 
 	private int getMistakesOfCluster(Collection<Integer> cluster, double[][] confusionMatrix) {
