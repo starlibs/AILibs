@@ -5,3 +5,6 @@
 /testrsc/autowekasets/
 /.idea/
 /out/
+/.project
+/.settings/
+/.classpath
