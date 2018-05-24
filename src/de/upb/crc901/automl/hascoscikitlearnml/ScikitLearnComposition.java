@@ -27,10 +27,14 @@ public class ScikitLearnComposition {
   private final File executable;
   private final Map<String, String> placeholderValueMap;
   private final ComponentInstance ci;
+  private final String classifier;
   private int testID = -1;
 
   public ScikitLearnComposition(final Map<String, String> pipelineSourceCodeMap, final ComponentInstance ci) throws IOException {
     this.compositionID = ID_COUNTER.getAndIncrement();
+    this.classifier = (!ci.getComponent().getName().endsWith("make_pipeline")) ? ci.getComponent().getName()
+        : ci.getSatisfactionOfRequiredInterfaces().get("classifier").getComponent().getName();
+
     this.executable = new File(CONFIG.getTmpFolder().getAbsolutePath() + File.separator + CONFIG.getCandidateScriptName() + "_" + this.compositionID + ".py");
     this.placeholderValueMap = pipelineSourceCodeMap;
     this.ci = ci;

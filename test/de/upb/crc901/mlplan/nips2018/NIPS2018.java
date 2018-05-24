@@ -36,7 +36,10 @@ import org.aeonbits.owner.ConfigCache;
 import org.codehaus.plexus.util.FileUtils;
 
 import hasco.eventlogger.HASCOSQLEventLogger;
+import weka.core.DenseInstance;
+import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.SparseInstance;
 
 public class NIPS2018 {
   private static final String SQL_RUN_RETRIEVAL = "SELECT * FROM experiments WHERE timeout=? AND splitTechnique=?";
@@ -89,10 +92,9 @@ public class NIPS2018 {
       System.exit(0);
     }
 
-    config.setProperty(HASCOForScikitLearnMLConfig.K_RUN_ID, run.getValueAsString("run_id"));
-
     MySQLAdapter mysql = new MySQLAdapter(config.getDBHost(), config.getDBUser(), config.getDBPassword(), config.getDBDatabase());
-
+    config.setProperty(HASCOForScikitLearnMLConfig.K_RUN_ID, run.getValueAsString("run_id"));
+    config.setProperty(HASCOForScikitLearnMLConfig.K_SEED, run.getValueAsString("seed"));
     log("Perform experiment " + run);
 
     /* Prepare the temporary data folder */
@@ -112,6 +114,15 @@ public class NIPS2018 {
     log("Load dataset File: " + datasetFile.getCanonicalPath());
     Instances data = new Instances(new BufferedReader(new FileReader(datasetFile)));
     data.setClassIndex(data.numAttributes() - 1);
+
+    if (data.get(0) instanceof SparseInstance) {
+      log("Dataset is in sparse format. This is not supported by the python arff loader. Thus, all the instances need to be converted to dense instances.");
+      Instances tempData = new Instances(data, 0);
+      for (Instance i : data) {
+        tempData.add(new DenseInstance(i));
+      }
+      data = tempData;
+    }
 
     List<Instances> trainTestSplit = WekaUtil.getStratifiedSplit(data, new Random(run.getValueAsInt("seed")), .7f);
     List<Instances> searchSelectSplit = WekaUtil.getStratifiedSplit(trainTestSplit.get(0), new Random(run.getValueAsInt("seed")), .7f);

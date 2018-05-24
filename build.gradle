@@ -31,7 +31,6 @@ artifacts {
 
 dependencies {
 
-	//compile name: 'JAICore'
 	compile name: 'CRCUtils'
 	compile name: 'autoweka'
 	compile name: 'mysql-connector-java-5.1.45-bin'

@@ -10,15 +10,22 @@ import jaicore.search.algorithms.standard.core.INodeEvaluator;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.Random;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -74,6 +81,21 @@ public class HASCOForScikitLearnML implements IObservableGraphAlgorithm<TFDNode,
     public Double getTestScore() {
       return this.testScore;
     }
+
+    @Override
+    public String toString() {
+      StringBuilder sb = new StringBuilder();
+
+      sb.append(this.getClassifier().getPipelineCode());
+      sb.append(" ");
+      sb.append("Val: " + this.getValidationScore());
+      sb.append(" ");
+      sb.append("Sel: " + this.getSelectionScore());
+      sb.append(" ");
+      sb.append("Test: " + this.getTestScore());
+
+      return sb.toString();
+    }
   }
 
   private int numberOfCPUs = CONFIG.getCPUs();
@@ -82,8 +104,49 @@ public class HASCOForScikitLearnML implements IObservableGraphAlgorithm<TFDNode,
   private boolean isCanceled = false;
   private Collection<Object> listeners = new ArrayList<>();
   private HASCOSolutionIterator hascoRun;
-  private INodeEvaluator<TFDNode, Double> preferredNodeEvaluator = n -> null;
-  private ExecutorService threadPool = Executors.newFixedThreadPool(2);
+
+  private static final List<String> ORDERING_OF_CLASSIFIERS = Arrays.asList(new String[] { "sklearn.ensemble.GradientBoostingClassifier", "sklearn.ensemble.RandomForestClassifier",
+      "sklearn.ensemble.ExtraTreesClassifier", "sklearn.neighbors.KNeighborsClassifier", "sklearn.svm.LinearSVC", "sklearn.linear_model.LogisticRegression",
+      "sklearn.naive_bayes.GaussianNB", "sklearn.naive_bayes.BernoulliNB", "sklearn.tree.DecisionTreeClassifier", "sklearn.naive_bayes.MultinomialNB", "xgboost.XGBClassifier" });
+
+  private INodeEvaluator<TFDNode, Double> preferredNodeEvaluator = n -> {
+    boolean containsClassifier = n.externalPath().stream()
+        .anyMatch(x -> x.getAppliedMethodInstance() != null && (x.getAppliedMethodInstance().getMethod().getName().startsWith("resolveAbstractClassifierWith")
+            && !x.getAppliedMethodInstance().getMethod().getName().endsWith("make_pipeline")));
+
+    long counter = n.externalPath().stream()
+        .filter(x -> x.getAppliedMethodInstance() != null && (x.getAppliedMethodInstance().getMethod().getName().startsWith("resolveAbstractPreprocessorWith")
+            || x.getAppliedMethodInstance().getMethod().getName().startsWith("resolveBasicPreprocessorWith")))
+        .count();
+
+    if (containsClassifier && n.externalPath().get(n.externalPath().size() - 1).getAppliedMethodInstance() != null
+        && n.externalPath().get(n.externalPath().size() - 1).getAppliedMethodInstance().getMethod().getName().startsWith("resolveAbstractClassifierWith")) {
+      String methodName = n.externalPath().get(n.externalPath().size() - 1).getAppliedMethodInstance().getMethod().getName().substring(29);
+      double indexOfClassifier = ORDERING_OF_CLASSIFIERS.indexOf(methodName) + 1;
+      if (indexOfClassifier >= 0) {
+        double fScore = indexOfClassifier / 100000;
+        return fScore;
+      }
+    }
+
+    if (counter < 1 && !containsClassifier) {
+      return 0d;
+    }
+
+    return null;
+  };
+  BlockingQueue<Runnable> taskQueue = new PriorityBlockingQueue<>((int) (NUMBER_OF_CONSIDERED_SOLUTIONS * 1.5), new Comparator<Runnable>() {
+    @Override
+    public int compare(final Runnable o1, final Runnable o2) {
+      if (o1 instanceof SelectionPhaseEval && o2 instanceof SelectionPhaseEval) {
+        SelectionPhaseEval spe1 = (SelectionPhaseEval) o1;
+        SelectionPhaseEval spe2 = (SelectionPhaseEval) o2;
+        return spe1.solution.getValidationScore().compareTo(spe2.solution.getValidationScore());
+      }
+      return 0;
+    }
+  });
+  private ExecutorService threadPool = new ThreadPoolExecutor(2, 2, 120, TimeUnit.SECONDS, this.taskQueue);
 
   private Queue<HASCOForScikitLearnMLSolution> solutionsFoundByHASCO = new PriorityQueue<>(new Comparator<HASCOForScikitLearnMLSolution>() {
     @Override
@@ -97,7 +160,12 @@ public class HASCOForScikitLearnML implements IObservableGraphAlgorithm<TFDNode,
       return (int) Math.round(10000 * (o1.getSelectionScore() - o2.getSelectionScore()));
     }
   });
+
   private Lock selectedSolutionsLock = new ReentrantLock();
+  private AtomicInteger selectionTasksCounter = new AtomicInteger(0);
+  private Double bestValidationScore = null;
+  private static double EPSILON = 0.03;
+  private static final int NUMBER_OF_CONSIDERED_SOLUTIONS = 100;
 
   public void gatherSolutions(final ScikitLearnBenchmark searchBenchmark, final ScikitLearnBenchmark selectionBenchmark, final ScikitLearnBenchmark testBenchmark,
       final int timeoutInMS, final MySQLAdapter mysql) {
@@ -117,7 +185,8 @@ public class HASCOForScikitLearnML implements IObservableGraphAlgorithm<TFDNode,
     }
 
     /* create algorithm */
-    HASCOFD<ScikitLearnComposition> hasco = new HASCOFD<>(new ScikitLearnCompositionFactory(), this.preferredNodeEvaluator, cl.getParamConfigs(), "MLPipeline", searchBenchmark);
+    HASCOFD<ScikitLearnComposition> hasco = new HASCOFD<>(new ScikitLearnCompositionFactory(), this.preferredNodeEvaluator, cl.getParamConfigs(), CONFIG.getRequestedInterface(),
+        searchBenchmark);
     hasco.addComponents(cl.getComponents());
     hasco.setNumberOfCPUs(this.numberOfCPUs);
     hasco.setTimeout(CONFIG.getTimeout());
@@ -135,10 +204,32 @@ public class HASCOForScikitLearnML implements IObservableGraphAlgorithm<TFDNode,
       if (nextSolution.getValidationScore() >= 10000) {
         continue;
       }
+      System.out.println("Solution found " + nextSolution.getClassifier().getPipelineCode() + " " + nextSolution.getValidationScore());
       this.solutionsFoundByHASCO.add(nextSolution);
-      this.threadPool.submit(new SelectionPhaseEval(nextSolution, selectionBenchmark, testBenchmark, mysql));
+      List<HASCOForScikitLearnMLSolution> solutionList = new LinkedList<>(this.solutionsFoundByHASCO);
+
+      if (this.bestValidationScore == null || nextSolution.getValidationScore() < this.bestValidationScore) {
+        this.bestValidationScore = nextSolution.getValidationScore();
+      }
+
+      double coinFlipRatio = 1;
+      if (this.selectionTasksCounter.get() > 10) {
+        coinFlipRatio = (double) 10 / this.selectionTasksCounter.get();
+      }
+
+      double randomRatio = new Random(CONFIG.getSeed()).nextDouble();
+
+      boolean coinFlip = randomRatio <= coinFlipRatio;
+      if (solutionList.indexOf(nextSolution) <= (this.NUMBER_OF_CONSIDERED_SOLUTIONS / 2) || (nextSolution.getValidationScore() < this.bestValidationScore + EPSILON && coinFlip)) {
+        int tasks = this.selectionTasksCounter.incrementAndGet();
+        this.threadPool.submit(new SelectionPhaseEval(nextSolution, selectionBenchmark, testBenchmark, mysql));
+        System.out.println("Selection tasks in Queue: " + this.taskQueue.size() + " (Submitted new task)");
+      }
+
     }
-    if (deadlineReached) {
+    if (deadlineReached)
+
+    {
       logger.info("Deadline has been reached");
     } else if (this.isCanceled) {
       logger.info("Interrupting HASCO due to cancel.");
@@ -180,16 +271,19 @@ public class HASCOForScikitLearnML implements IObservableGraphAlgorithm<TFDNode,
             Double testPerformance = this.test.evaluateFixedSplit(this.solution.getClassifier());
             this.solution.setTestScore(testPerformance);
 
-            Map<String, String> values = new HashMap<>();
-            values.put("run_id", CONFIG.getRunID() + "");
-            values.put("pipeline", this.solution.getClassifier().getPipelineCode());
-            values.put("import", this.solution.getClassifier().getImportCode());
-            values.put("pipelineComplexity", this.solution.getClassifier().getComplexity() + "");
-            values.put("testErrorRate", this.solution.getTestScore() + "");
-            values.put("validationErrorRate", this.solution.getValidationScore() + "");
-            values.put("selectionErrorRate", this.solution.getSelectionScore() + "");
-            values.put("timeToSolution", (System.currentTimeMillis() - CONFIG.getRunStartTimestamp()) + "");
-            this.mysql.insert("experimentresult", values);
+            System.out.println(this.solution);
+            if (this.mysql != null) {
+              Map<String, String> values = new HashMap<>();
+              values.put("run_id", CONFIG.getRunID() + "");
+              values.put("pipeline", this.solution.getClassifier().getPipelineCode());
+              values.put("import", this.solution.getClassifier().getImportCode());
+              values.put("pipelineComplexity", this.solution.getClassifier().getComplexity() + "");
+              values.put("testErrorRate", this.solution.getTestScore() + "");
+              values.put("validationErrorRate", this.solution.getValidationScore() + "");
+              values.put("selectionErrorRate", this.solution.getSelectionScore() + "");
+              values.put("timeToSolution", (System.currentTimeMillis() - CONFIG.getRunStartTimestamp()) + "");
+              this.mysql.insert("experimentresult", values);
+            }
           } catch (Exception e) {
             e.printStackTrace();
           }
@@ -198,7 +292,9 @@ public class HASCOForScikitLearnML implements IObservableGraphAlgorithm<TFDNode,
         this.solution.setSelectionScore(10000d);
         e.printStackTrace();
       }
+      System.out.println("Selection tasks in Queue: " + HASCOForScikitLearnML.this.taskQueue.size() + " (Finished working on tasks)");
     }
+
   }
 
   public void cancel() {

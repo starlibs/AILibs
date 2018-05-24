@@ -18,6 +18,7 @@ public interface HASCOForScikitLearnMLConfig extends Mutable {
   public static final String K_TIMEOUT = "hasco.run.timeout";
   public static final String K_EVAL_TIMEOUT = "hasco.db.evaluationtimeout";
   public static final String K_SPLIT_TECHNIQUE = "hasco.run.splittechnique";
+  public static final String K_REQUEST_INTERFACE = "hasco.run.requestinterface";
 
   public static final String K_DB_HOST = "hasco.db.host";
   public static final String K_DB_USER = "hasco.db.user";
@@ -30,6 +31,7 @@ public interface HASCOForScikitLearnMLConfig extends Mutable {
   public static final String K_RUN_START_TIMESTAMP = "hasco.run.starttimestamp";
   public static final String K_COMPLEXITY_FACTOR = "hasco.run.complexityfactor";
   public static final String K_RUN_ID = "hasco.run.run_id";
+  public static final String K_SEED = "hasco.run.seed";
 
   @Key(K_TMP_FOLDER)
   @DefaultValue("tmp/")
@@ -100,4 +102,11 @@ public interface HASCOForScikitLearnMLConfig extends Mutable {
 
   @Key(K_RUN_ID)
   public int getRunID();
+
+  @Key(K_SEED)
+  public long getSeed();
+
+  @Key(K_REQUEST_INTERFACE)
+  @DefaultValue("AbstractClassifier")
+  public String getRequestedInterface();
 }

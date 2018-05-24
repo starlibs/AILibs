@@ -66,7 +66,7 @@ public class ScikitLearnBenchmark implements IObjectEvaluator<ScikitLearnComposi
     File testFile = new File(CONFIG.getTmpFolder().getAbsolutePath() + File.separator + this.datasetFilePrefix + "_test.arff");
 
     long startTime = System.currentTimeMillis();
-    Double error = ScikitLearnEvaluator.evaluate(trainFile, testFile, object, true);
+    Double error = ScikitLearnEvaluator.evaluate(trainFile, testFile, object, false);
 
     Map<String, String> values = new HashMap<>();
     values.put("run_id", this.runTask.getValueAsString("run_id"));
@@ -78,8 +78,10 @@ public class ScikitLearnBenchmark implements IObjectEvaluator<ScikitLearnComposi
     values.put("evaluationTime", (System.currentTimeMillis() - startTime) + "");
 
     try {
-      int id = this.mysql.insert("test_evaluation", values);
-      object.setTestID(id);
+      if (this.mysql != null) {
+        int id = this.mysql.insert("test_evaluation", values);
+        object.setTestID(id);
+      }
     } catch (SQLException e) {
       e.printStackTrace();
     }
@@ -89,6 +91,10 @@ public class ScikitLearnBenchmark implements IObjectEvaluator<ScikitLearnComposi
 
   @Override
   public Double evaluate(final ScikitLearnComposition object) throws Exception {
+    if (Thread.interrupted()) {
+      throw new InterruptedException("Got interrupted");
+    }
+
     if (this.splitSize == null) {
       throw new IllegalArgumentException("Inappropriate use of ScikitLearnBenchmark. No split size provided.");
     }
@@ -116,6 +122,7 @@ public class ScikitLearnBenchmark implements IObjectEvaluator<ScikitLearnComposi
 
         if (!trainFile.exists() || !testFile.exists()) {
           List<Instances> mccvSplit = WekaUtil.getStratifiedSplit(this.data, new Random(splitSeed), this.splitSize);
+
           try (BufferedWriter bw = new BufferedWriter(new FileWriter(trainFile))) {
             bw.write(mccvSplit.get(0).toString());
           }
@@ -141,21 +148,25 @@ public class ScikitLearnBenchmark implements IObjectEvaluator<ScikitLearnComposi
           }
         }
         returnValue = errorRates.stream().mapToDouble(x -> x).average().getAsDouble();
+        // System.out.println("ErrorRate: " + returnValue + " " + object.getPipelineCode());
       }
 
     } catch (InterruptedException e) {
       returnValue = 10000d;
     }
-    Map<String, String> valueMap = new HashMap<>();
-    valueMap.put("run_id", this.runTask.getValueAsString("run_id"));
-    valueMap.put("pipeline", object.getPipelineCode());
-    valueMap.put("import", object.getImportCode());
-    valueMap.put("errorRate", returnValue + "");
-    valueMap.put("timeToSolution", (System.currentTimeMillis() - CONFIG.getRunStartTimestamp()) + "");
-    valueMap.put("evaluationTime", (System.currentTimeMillis() - startTime) + "");
-    valueMap.put("pipelineComplexity", object.getComplexity() + "");
 
-    this.mysql.insert(this.datasetFilePrefix + "evaluation", valueMap);
+    if (this.mysql != null) {
+      Map<String, String> valueMap = new HashMap<>();
+      valueMap.put("run_id", this.runTask.getValueAsString("run_id"));
+      valueMap.put("pipeline", object.getPipelineCode());
+      valueMap.put("import", object.getImportCode());
+      valueMap.put("errorRate", returnValue + "");
+      valueMap.put("timeToSolution", (System.currentTimeMillis() - CONFIG.getRunStartTimestamp()) + "");
+      valueMap.put("evaluationTime", (System.currentTimeMillis() - startTime) + "");
+      valueMap.put("pipelineComplexity", object.getComplexity() + "");
+
+      this.mysql.insert(this.datasetFilePrefix + "evaluation", valueMap);
+    }
     return returnValue;
   }
 

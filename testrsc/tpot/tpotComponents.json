@@ -28,17 +28,17 @@
   {
   	"name": "tpot.builtins.StackingEstimator",
   	"providedInterface": ["tpot.builtins.StackingEstimator", "AbstractPreprocessor", "Stacking"],
-  	"requiredInterface": [ {"id": "estimator", "name": "BasicClassifier"} ],
+  	"requiredInterface": [ {"id": "estimator", "name": "BaseLearner"} ],
   	"parameter" : [ ]
   },
   {
     "name" : "sklearn.naive_bayes.GaussianNB",
-    "providedInterface" : [ "sklearn.naive_bayes.GaussianNB", "AbstractClassifier","BasicClassifier" ],
+    "providedInterface" : [ "sklearn.naive_bayes.GaussianNB", "AbstractClassifier","BasicClassifier", "BaseLearner" ],
     "requiredInterface" : [ ],
     "parameter" : [ ]
   }, {
     "name" : "sklearn.naive_bayes.BernoulliNB",
-    "providedInterface" : [ "sklearn.naive_bayes.BernoulliNB", "AbstractClassifier","BasicClassifier" ],
+    "providedInterface" : [ "sklearn.naive_bayes.BernoulliNB", "AbstractClassifier","BasicClassifier" , "BaseLearner"],
     "requiredInterface" : [ ],
     "parameter" : [ {
       "name" : "alpha",
@@ -59,7 +59,7 @@
     ]
   }, {
     "name" : "sklearn.naive_bayes.MultinomialNB",
-    "providedInterface" : [ "sklearn.naive_bayes.MultinomialNB", "AbstractClassifier","BasicClassifier" ],
+    "providedInterface" : [ "sklearn.naive_bayes.MultinomialNB", "AbstractClassifier","BasicClassifier", "BaseLearner" ],
     "requiredInterface" : [ ],
     "parameter" : [ {
       "name" : "alpha",
@@ -74,7 +74,7 @@
     } ]
   }, {
     "name" : "sklearn.tree.DecisionTreeClassifier",
-    "providedInterface" : [ "sklearn.tree.DecisionTreeClassifier", "AbstractClassifier","BasicClassifier" ],
+    "providedInterface" : [ "sklearn.tree.DecisionTreeClassifier", "AbstractClassifier","BasicClassifier", "BaseLearner" ],
     "requiredInterface" : [ ],
     "parameter" : [ {
       "name" : "criterion",
@@ -108,7 +108,7 @@
     } ]
   }, {
     "name" : "sklearn.ensemble.ExtraTreesClassifier",
-    "providedInterface" : [ "sklearn.ensemble.ExtraTreesClassifier", "EnsembleClassifier", "AbstractClassifier","BasicClassifier" ],
+    "providedInterface" : [ "sklearn.ensemble.ExtraTreesClassifier", "EnsembleClassifier", "AbstractClassifier","BasicClassifier", "BaseLearner" ],
     "requiredInterface" : [ ],
     "parameter" : [ {
       "name" : "n_estimators",
@@ -152,7 +152,7 @@
     } ]
   }, {
     "name" : "sklearn.ensemble.RandomForestClassifier",
-    "providedInterface" : [ "sklearn.ensemble.RandomForestClassifier", "EnsembleClassifier", "AbstractClassifier","BasicClassifier" ],
+    "providedInterface" : [ "sklearn.ensemble.RandomForestClassifier", "EnsembleClassifier", "AbstractClassifier","BasicClassifier", "BaseLearner" ],
     "requiredInterface" : [ ],
     "parameter" : [ {
       "name" : "n_estimators",
@@ -196,7 +196,7 @@
     } ]
   }, {
     "name" : "sklearn.ensemble.GradientBoostingClassifier",
-    "providedInterface" : [ "sklearn.ensemble.GradientBoostingClassifier", "EnsembleClassifier", "AbstractClassifier","BasicClassifier" ],
+    "providedInterface" : [ "sklearn.ensemble.GradientBoostingClassifier", "EnsembleClassifier", "AbstractClassifier","BasicClassifier", "BaseLearner" ],
     "requiredInterface" : [ ],
     "parameter" : [ {
       "name" : "n_estimators",
@@ -251,7 +251,7 @@
     } ]
   }, {
     "name" : "sklearn.neighbors.KNeighborsClassifier",
-    "providedInterface" : [ "sklearn.neighbors.KNeighborsClassifier", "AbstractClassifier","BasicClassifier" ],
+    "providedInterface" : [ "sklearn.neighbors.KNeighborsClassifier", "AbstractClassifier","BasicClassifier", "BaseLearner" ],
     "requiredInterface" : [ ],
     "parameter" : [ {
       "name" : "n_neighbors",
@@ -274,7 +274,7 @@
     } ]
   }, {
     "name" : "sklearn.svm.LinearSVC",
-    "providedInterface" : [ "sklearn.svm.LinearSVC", "AbstractClassifier","BasicClassifier" ],
+    "providedInterface" : [ "sklearn.svm.LinearSVC", "AbstractClassifier","BasicClassifier", "BaseLearner" ],
     "requiredInterface" : [ ],
     "parameter" : [ {
       "name" : "penalty",
@@ -306,7 +306,7 @@
     } ]
   }, {
     "name" : "sklearn.linear_model.LogisticRegression",
-    "providedInterface" : [ "sklearn.linear_model.LogisticRegression", "AbstractClassifier","BasicClassifier" ],
+    "providedInterface" : [ "sklearn.linear_model.LogisticRegression", "AbstractClassifier","BasicClassifier", "BaseLearner" ],
     "requiredInterface" : [ ],
     "parameter" : [ {
       "name" : "penalty",
@@ -332,7 +332,7 @@
     ]
   }, {
     "name" : "xgboost.XGBClassifier",
-    "providedInterface" : [ "xgboost.XGBClassifier", "AbstractClassifier","BasicClassifier" ],
+    "providedInterface" : [ "xgboost.XGBClassifier", "AbstractClassifier","BasicClassifier", "BaseLearner" ],
     "requiredInterface" : [ ],
     "parameter" : [ {
       "name" : "n_estimators",
@@ -443,7 +443,7 @@
     } ]
   }, {
     "name" : "sklearn.kernel_approximation.Nystroem",
-    "providedInterface" : [ "sklearn.kernel_approximation.Nystroem", "AbstractClassifier", "BasicPreprocessor" ],
+    "providedInterface" : [ "sklearn.kernel_approximation.Nystroem", "AbstractPreprocessor", "BasicPreprocessor" ],
     "requiredInterface" : [ ],
     "parameter" : [ {
       "name" : "kernel",
