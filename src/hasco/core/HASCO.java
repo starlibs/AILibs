@@ -259,6 +259,10 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
     return ifaces;
   }
 
+  private static final String RESOLVE_COMPONENT_IFACE_PREFIX = "1_tResolve";
+  private static final String REFINE_PARAMETERS_PREFIX = "2_tRefineParamsOf";
+  private static final String REFINE_PARAMETER_PREFIX = "2_tRefineParam";
+
   private CEOCIPSTNPlanningDomain getPlanningDomain() {
 
     /* create operations */
@@ -360,7 +364,7 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
         for (Entry<String, String> requiredInterface : requiredInterfaces.entrySet()) {
           String paramName = "sc" + (++sc);
           params.add(new VariableParam(paramName));
-          network.add(new Literal("tResolve" + requiredInterface.getValue() + "(c2," + paramName + ")"));
+          network.add(new Literal(RESOLVE_COMPONENT_IFACE_PREFIX + requiredInterface.getValue() + "(c2," + paramName + ")"));
         }
 
         refinementArguments = "";
@@ -371,11 +375,11 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
             refinementArguments += ", " + paramIdentifier;
           }
         }
-        network.add(new Literal("tRefineParamsOf" + c.getName() + "(c1,c2" + refinementArguments + ")"));
+        network.add(new Literal(REFINE_PARAMETERS_PREFIX + c.getName() + "(c1,c2" + refinementArguments + ")"));
         List<VariableParam> outputs = new ArrayList<>(params);
         outputs.remove(inputParam);
-        methods.add(new OCIPMethod("resolve" + i + "With" + c.getName(), params, new Literal("tResolve" + i + "(c1,c2)"), new Monom("component(c1)"), new TaskNetwork(network),
-            false, outputs, new Monom()));
+        methods.add(new OCIPMethod("resolve" + i + "With" + c.getName(), params, new Literal(RESOLVE_COMPONENT_IFACE_PREFIX + i + "(c1,c2)"), new Monom("component(c1)"),
+            new TaskNetwork(network), false, outputs, new Monom()));
       }
 
       /* create methods for choosing/refining parameters */
@@ -394,7 +398,7 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
           String paramName = "p" + (++j);
           refinementArguments += ", " + paramName;
           params.add(new VariableParam(paramName));
-          initNetwork.add(new Literal("tRefineParam" + p.getName() + "Of" + c.getName() + "(c2, " + paramName + ")"));
+          initNetwork.add(new Literal(REFINE_PARAMETER_PREFIX + p.getName() + "Of" + c.getName() + "(c2, " + paramName + ")"));
           // if (p instanceof NumericParameter) {
           methods.add(new OCIPMethod("ignoreParamRefinementFor" + p.getName() + "Of" + c.getName(), "object, container, curval",
               new Literal("tRefineParam" + p.getName() + "Of" + c.getName() + "(object,container)"),
@@ -402,7 +406,7 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
               false, "", new Monom("notRefinable('" + c.getName() + "', object, '" + p.getName() + "', container, curval)")));
 
           methods.add(new OCIPMethod("refineParam" + p.getName() + "Of" + c.getName(), "object, container, curval, newval",
-              new Literal("tRefineParam" + p.getName() + "Of" + c.getName() + "(object,container)"),
+              new Literal(REFINE_PARAMETER_PREFIX + p.getName() + "Of" + c.getName() + "(object,container)"),
               new Monom("parameterContainer('" + c.getName() + "', '" + p.getName() + "', object, container) & val(container,curval)"),
               new TaskNetwork("redefValue(container,curval,newval)"), false, "",
               new Monom("isValidParameterRangeRefinement('" + c.getName() + "', object, '" + p.getName() + "', container, curval, newval)")));
@@ -411,12 +415,12 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
           // "Parameter " + p.getName() + " of type \"" + p.getClass() + "\" in component \"" + c.getName() +
           // "\" is currently not supported.");
         }
-        initNetwork.add(new Literal("tRefineParamsOf" + c.getName() + "(c1,c2" + refinementArguments + ")"));
+        initNetwork.add(new Literal(REFINE_PARAMETERS_PREFIX + c.getName() + "(c1,c2" + refinementArguments + ")"));
         params = new ArrayList<>(params);
         params.add(1, new VariableParam("c2"));
-        methods.add(new OCIPMethod("refineParamsOf" + c.getName(), params, new Literal("tRefineParamsOf" + c.getName() + "(c1,c2" + refinementArguments + ")"),
+        methods.add(new OCIPMethod("refineParamsOf" + c.getName(), params, new Literal(REFINE_PARAMETERS_PREFIX + c.getName() + "(c1,c2" + refinementArguments + ")"),
             new Monom("component(c1)"), new TaskNetwork(initNetwork), false, new ArrayList<>(), new Monom("!refinementCompleted('" + c.getName() + "', c2)")));
-        methods.add(new OCIPMethod("closeRefinementOfParamsOf" + c.getName(), params, new Literal("tRefineParamsOf" + c.getName() + "(c1,c2" + refinementArguments + ")"),
+        methods.add(new OCIPMethod("closeRefinementOfParamsOf" + c.getName(), params, new Literal(REFINE_PARAMETERS_PREFIX + c.getName() + "(c1,c2" + refinementArguments + ")"),
             new Monom("component(c1)"), new TaskNetwork(), false, new ArrayList<>(), new Monom("refinementCompleted('" + c.getName() + "', c2)")));
       }
     }
@@ -428,8 +432,8 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
     evaluablePredicates.put("isValidParameterRangeRefinement", new isValidParameterRangeRefinementPredicate(this.components, this.paramRefinementConfig));
     evaluablePredicates.put("notRefinable", new isNotRefinable(this.components, this.paramRefinementConfig));
     evaluablePredicates.put("refinementCompleted", new isRefinementCompletedPredicate(this.components, this.paramRefinementConfig));
-    return new CEOCIPSTNPlanningProblem(domain, knowledge, init, new TaskNetwork("tResolve" + this.nameOfRequiredInterface + "('request', 'solution')"), evaluablePredicates,
-        new HashMap<>());
+    return new CEOCIPSTNPlanningProblem(domain, knowledge, init, new TaskNetwork(RESOLVE_COMPONENT_IFACE_PREFIX + this.nameOfRequiredInterface + "('request', 'solution')"),
+        evaluablePredicates, new HashMap<>());
   }
 
   protected void afterSearch() {
