@@ -216,7 +216,7 @@ public class MLPlan extends AbstractClassifier implements Classifier, OptionHand
     int estimateForPhase2 = this.isSelectionActivated() ? this.getExpectedRuntimeForPhase2ForAGivenPool(currentSelection) : 0;
     HASCOForMEKASolution internallyOptimalSolution = this.hasco.getCurrentlyBestSolution();
     int timeToTrainBestSolutionOnEntireSet = internallyOptimalSolution != null
-        ? (int) Math.round(this.hasco.getTimeHASCONeededToEvaluateSolution(internallyOptimalSolution) / (1 - this.portionOfDataForPhase2))
+        ? (int) Math.round((double) internallyOptimalSolution.getTimeForScoreComputation() / (1 - this.portionOfDataForPhase2))
         : 0;
     boolean terminatePhase1 = estimateForPhase2 + timeToTrainBestSolutionOnEntireSet > timeRemaining;
     logger.info("{}ms remaining in total, and we estimate {}ms for phase 2. Terminate phase 1: {}", timeRemaining, estimateForPhase2, terminatePhase1);
@@ -252,12 +252,12 @@ public class MLPlan extends AbstractClassifier implements Classifier, OptionHand
      * compute k pipeline candidates (the k/2 best, and k/2 random ones that do not deviate too much
      * from the best one)
      */
-    double optimalInternalScore = this.hasco.getQualityHASCODeterminedForSolution(internallyOptimalSolution);
+    double optimalInternalScore = internallyOptimalSolution.getScore();
     int maxMarginFrombest = 300;
     int bestK = (int) Math.ceil(this.numberOfConsideredSolutions / 2);
     int randomK = this.numberOfConsideredSolutions - bestK;
     Collection<HASCOForMEKASolution> potentialCandidates = new ArrayList<>(this.hasco.getFoundClassifiers()).stream().filter(solution -> {
-      return this.hasco.getQualityHASCODeterminedForSolution(solution) <= optimalInternalScore + maxMarginFrombest;
+      return solution.getScore() <= optimalInternalScore + maxMarginFrombest;
     }).collect(Collectors.toList());
     logger.debug("Computing {} best and {} random solutions for a max runtime of {}. Number of candidates that are at most {} worse than optimum {} is: {}/{}", bestK, randomK,
         remainingTime, maxMarginFrombest, optimalInternalScore, potentialCandidates.size(), this.hasco.getFoundClassifiers().size());
@@ -289,7 +289,7 @@ public class MLPlan extends AbstractClassifier implements Classifier, OptionHand
   }
 
   private int getInSearchEvaluationTimeOfSolutionSet(final Collection<HASCOForMEKASolution> solutions) {
-    return this.hasco.getFoundClassifiers().stream().map(pl -> this.hasco.getTimeHASCONeededToEvaluateSolution(pl)).reduce(0, (a, b) -> a + b).intValue();
+    return this.hasco.getFoundClassifiers().stream().map(x -> x.getTimeForScoreComputation()).reduce(0, (a, b) -> a + b).intValue();
   }
 
   public int getExpectedRuntimeForPhase2ForAGivenPool(final Collection<HASCOForMEKASolution> solutions) {
@@ -310,7 +310,7 @@ public class MLPlan extends AbstractClassifier implements Classifier, OptionHand
 
     Queue<HASCOForMEKASolution> solutions = this.hasco.getFoundClassifiers();
     HASCOForMEKASolution bestSolution = solutions.peek();
-    double scoreOfBestSolution = this.hasco.getQualityHASCODeterminedForSolution(bestSolution);
+    double scoreOfBestSolution = bestSolution.getScore();
 
     /* Check whether selection phase is activated otherwise simply return solution with best F-Value */
     if (!this.isSelectionActivated()) {
@@ -374,12 +374,12 @@ public class MLPlan extends AbstractClassifier implements Classifier, OptionHand
             try {
               int indexOfCurrentlyChosenModel = MLPlan.this.getClassifierThatWouldCurrentlyBeSelectedWithinPhase2(ensembleToSelectFrom, stats, false);
               HASCOForMEKASolution currentlyChosenSolution = ensembleToSelectFrom.get(indexOfCurrentlyChosenModel);
-              int trainingTimeForChosenModelInsideSearch = MLPlan.this.hasco.getTimeHASCONeededToEvaluateSolution(currentlyChosenSolution);
+              int trainingTimeForChosenModelInsideSearch = currentlyChosenSolution.getTimeForScoreComputation();
               int estimatedOverallTrainingTimeForChosenModel = (int) Math.round(trainingTimeForChosenModelInsideSearch / (1 - MLPlan.this.portionOfDataForPhase2) / .7); // we
                                                                                                                                                                          // assume a
                                                                                                                                                                          // linear
                                                                                                                                                                          // growth
-              int expectedTrainingTimeOfThisModel = (int) Math.round(MLPlan.this.hasco.getTimeHASCONeededToEvaluateSolution(c) / .7);
+              int expectedTrainingTimeOfThisModel = (int) Math.round(c.getTimeForScoreComputation() / .7);
               if (MLPlan.this.timeoutPerNodeFComputation > 0) {
                 taskId = ts.interruptMeAfterMS(MLPlan.this.timeoutPerNodeFComputation);
               }
@@ -432,8 +432,7 @@ public class MLPlan extends AbstractClassifier implements Classifier, OptionHand
         int selectedModelIndex = this.getClassifierThatWouldCurrentlyBeSelectedWithinPhase2(ensembleToSelectFrom, stats, true);
         selectedModel = ensembleToSelectFrom.get(selectedModelIndex);
         DescriptiveStatistics statsOfBest = stats.get(selectedModelIndex);
-        logger.info("Selected a model. The model is: {}. Its internal error was {}. Validation error was {}", selectedModel,
-            this.hasco.getQualityHASCODeterminedForSolution(selectedModel), statsOfBest.getMean());
+        logger.info("Selected a model. The model is: {}. Its internal error was {}. Validation error was {}", selectedModel, selectedModel.getScore(), statsOfBest.getMean());
       }
 
     } catch (InterruptedException e) {

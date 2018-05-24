@@ -66,7 +66,7 @@ public class ScikitLearnBenchmark implements IObjectEvaluator<ScikitLearnComposi
     File testFile = new File(CONFIG.getTmpFolder().getAbsolutePath() + File.separator + this.datasetFilePrefix + "_test.arff");
 
     long startTime = System.currentTimeMillis();
-    Double error = ScikitLearnEvaluator.evaluate(trainFile, testFile, object, false);
+    Double error = ScikitLearnEvaluator.evaluate(trainFile, testFile, object, true);
 
     Map<String, String> values = new HashMap<>();
     values.put("run_id", this.runTask.getValueAsString("run_id"));
@@ -130,9 +130,11 @@ public class ScikitLearnBenchmark implements IObjectEvaluator<ScikitLearnComposi
             bw.write(mccvSplit.get(1).toString());
           }
         }
-        Double errorRate = ScikitLearnEvaluator.evaluate(trainFile, testFile, object, false);
+        Double errorRate = ScikitLearnEvaluator.evaluate(trainFile, testFile, object, true);
         if (errorRate >= 0 && errorRate <= 1) {
           errorRates.add(errorRate);
+        } else {
+          break;
         }
       }
       timeout.cancel();
