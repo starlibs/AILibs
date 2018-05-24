@@ -1,0 +1,188 @@
+{
+	"repository": "MEKA_META",
+	"include": [
+		/*"./mlplan-multilabel.json"*/
+	],
+	"parameters": [
+	],
+	"components": [
+		{
+			"name": "meka.classifiers.multilabel.meta.BaggingML",
+			"providedInterface": ["MLClassifier", "MetaMLClassifier"],
+			"requiredInterface": ["BasicMLClassifier"],
+			"parameter": [
+				/* Sets the number of models (default 10) */
+				{
+					"name": "_I",
+					"type": "int",
+					"default": 10,
+					"min": 2,
+					"max": 20,
+					"refineSplits": 2,
+					"minInterval": 1
+				},
+				/* Size of each bag, as a percentage of total training size (default 67) */
+				{
+					"name": "_P",
+					"type": "int",
+					"default": 67,
+					"min": 40,
+					"max": 90,
+					"refineSplits": 2,
+					"minInterval": 5
+				}
+			]
+		},
+		{
+			"name": "meka.classifiers.multilabel.meta.BaggingMLdup",
+			"providedInterface": ["MLClassifier", "MetaMLClassifier"],
+			"requiredInterface": ["BasicMLClassifier"],
+			"parameter": [
+				/* Sets the number of models (default 10) */
+				{
+					"name": "_I",
+					"type": "int",
+					"default": 10,
+					"min": 2,
+					"max": 20,
+					"refineSplits": 2,
+					"minInterval": 1
+				},
+				/* Size of each bag, as a percentage of total training size (default 67) */
+				{
+					"name": "_P",
+					"type": "int",
+					"default": 67,
+					"min": 40,
+					"max": 90,
+					"refineSplits": 2,
+					"minInterval": 5
+				}
+			]
+		},
+		{
+			"name": "meka.classifiers.multilabel.meta.CM",
+			"providedInterface": ["MLClassifier", "MetaMLClassifier"],
+			"requiredInterface": ["BasicMLClassifier"],
+			"parameter": [
+				/* The number of iterations of EM to carry out (default: 10) */
+				{
+					"name": "_I",
+					"type": "int",
+					"default": 10,
+					"min": 2,
+					"max": 20,
+					"refineSplits": 2,
+					"minInterval": 1
+				},
+				/* Size of each bag, as a percentage of total training size (default 67) */
+				{
+					"name": "_P",
+					"type": "int",
+					"default": 67,
+					"min": 40,
+					"max": 90,
+					"refineSplits": 2,
+					"minInterval": 5
+				}
+			]
+		},
+		{
+			"name": "meka.classifiers.multilabel.meta.EM",
+			"providedInterface": ["MLClassifier", "MetaMLClassifier"],
+			"requiredInterface": ["BasicMLClassifier"],
+			"parameter": [
+				/* The number of iterations of EM to carry out (default: 10) */
+				{
+					"name": "_I",
+					"type": "int",
+					"default": 10,
+					"min": 2,
+					"max": 20,
+					"refineSplits": 2,
+					"minInterval": 1
+				}
+			]
+		},
+		{
+			"name": "meka.classifiers.multilabel.meta.EnsembleML",
+			"providedInterface": ["MLClassifier", "MetaMLClassifier"],
+			"requiredInterface": ["BasicMLClassifier"],
+			"parameter": [
+				/* The number of iterations of EM to carry out (default: 10) */
+				{
+					"name": "_I",
+					"type": "int",
+					"default": 10,
+					"min": 2,
+					"max": 20,
+					"refineSplits": 2,
+					"minInterval": 1
+				},
+				/* Size of each bag, as a percentage of total training size (default 67) */
+				{
+					"name": "_P",
+					"type": "int",
+					"default": 67,
+					"min": 40,
+					"max": 90,
+					"refineSplits": 2,
+					"minInterval": 5
+				}
+			]
+		},
+		{
+			"name": "meka.classifiers.multilabel.meta.MBR",
+			"providedInterface": ["MLClassifier", "MetaMLClassifier"],
+			"requiredInterface": ["meka.classifiers.multilabel.BR"],
+			"parameter": [
+				/* No parameters to optimize. */
+			]
+		},
+		{
+			"name": "meka.classifiers.multilabel.meta.RandomSubspaceML",
+			"providedInterface": ["MLClassifier", "MetaMLClassifier"],
+			"requiredInterface": ["BasicMLClassifier"],
+			"parameter": [
+				/* Size of attribute space, as a percentage of total attribute space size (must be between 1 and 100, default: 50) */
+				{
+					"name": "_A",
+					"type": "int",
+					"default": 50,
+					"min": 1,
+					"max": 100,
+					"minInterval": 1,
+					"refineSplits": 2
+				},
+				/* The number of models (default: 10) */
+				{
+					"name": "_I",
+					"type": "int",
+					"default": 10,
+					"min": 2,
+					"max": 20,
+					"refineSplits": 2,
+					"minInterval": 1
+				},
+				/* Size of each bag, as a percentage of total training size (default 67) */
+				{
+					"name": "_P",
+					"type": "int",
+					"default": 67,
+					"min": 40,
+					"max": 90,
+					"refineSplits": 2,
+					"minInterval": 5
+				}
+			]
+		},
+		{
+			"name": "meka.classifiers.multilabel.meta.SubsetMapper",
+			"providedInterface": ["MLClassifier", "MetaMLClassifier"],
+			"requiredInterface": ["BasicMLClassifier"],
+			"parameter": [
+				/* No parameters to optimize */
+			]
+		}
+	]
+}

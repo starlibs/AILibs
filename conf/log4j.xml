@@ -85,6 +85,10 @@
 		<level value="info" />
 	</logger>
 	
+	<logger name="de.upb.crc901.mlplan.multiclass.MLPlan">
+		<level value="debug" />
+	</logger>
+	
 	<logger name="de.upb.crc901.mlplan.search.algorithms.GraphBasedPipelineSearcher">
 		<level value="debug" />
 	</logger>

@@ -8,3 +8,7 @@
 /params/
 /autoweka.smac.SMACExperimentConstructor.properties
 /http/objects/
+/tmp*
+*.pyc
+/localtmp/
+/http/

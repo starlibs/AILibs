@@ -1,0 +1,25 @@
+{
+	"repository": "MEKA-MultiTarget-Meta",
+	"include": ["./mlplan-multitarget.json"],
+	"parameters": [
+	],
+	"components": [
+		{
+			"name": "meka.classifiers.multilabel.PLST",
+			"providedInterface": ["MLClassifier", "MetaMLClassifier"],
+			"requiredInterface": ["BasicMTClassifier"],
+			"parameter": [
+				/* Size of the compressed matrix. Should be less than the number of labels and more than 1. (default: 3) */
+				{
+					"name": "_size",
+					"type": "int",
+					"min": 2,
+					"max": 20,
+					"default": 3,
+					"minInterval": 1,
+					"refineSplits": 2
+				}
+			]
+		}
+	]
+}

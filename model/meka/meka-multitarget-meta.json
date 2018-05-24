@@ -1,0 +1,53 @@
+{
+	/* TODO: Define parameters for all the algorithms. */
+	"repository": "MEKA-MultiTarget-META",
+	"include": [],
+	"parameters": [],
+	"components": [
+		{
+			"name": "meka.classifiers.multitarget.meta.BaggingMT",
+			"providedInterface": ["MTClassifier", "MetaMTClassifier"],
+			"requiredInterface": ["BasicMTClassifier"],
+			"parameter": [
+				/* The number of models (default: 10) */
+				{
+					"name": "_I",
+					"type": "int",
+					"default": 10,
+					"min": 2,
+					"max": 20,
+					"refineSplits": 2,
+					"minInterval": 1
+				},
+				/* Size of each bag, as a percentage of total training size (default 67) */
+				{
+					"name": "_P",
+					"type": "int",
+					"default": 67,
+					"min": 40,
+					"max": 90,
+					"refineSplits": 2,
+					"minInterval": 5
+				}
+			]
+		},
+		{
+			"name": "meka.classifiers.multitarget.meta.EnsembleMT",
+			"providedInterface": ["MTClassifier", "MetaMTClassifier"],
+			"requiredInterface": ["BasicMTClassifier"],
+			"parameter": [ ]
+		},
+		{
+			"name": "meka.classifiers.multitarget.meta.FilteredClassifier",
+			"providedInterface": ["MTClassifier", "MetaMTClassifier"],
+			"requiredInterface": ["BasicMTClassifier"],
+			"parameter": [ ]
+		},
+		{
+			"name": "meka.classifiers.multitarget.meta.MultiSearch",
+			"providedInterface": ["MTClassifier", "MetaMTClassifier"],
+			"requiredInterface": ["BasicMTClassifier"],
+			"parameter": [ ]
+		}
+	]
+}

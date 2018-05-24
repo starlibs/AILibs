@@ -1,0 +1,22 @@
+{
+	"repository": "ML-Plan",
+	"components": [
+		{
+			"name": "weka.classifiers.trees.RandomTree",
+			"providedInterface": ["Classifier"],
+			"requiredInterface": [],
+			"parameter": [
+				
+			]
+		},
+		
+		{
+			"name": "weka.classifiers.trees.RandomForest",
+			"providedInterface": ["Classifier"],
+			"requiredInterface": [],
+			"parameter": [
+				
+			]
+		}
+	]
+}
