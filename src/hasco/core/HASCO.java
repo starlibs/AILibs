@@ -34,11 +34,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
-import java.util.TreeMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,6 +78,7 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
   private final IObservableORGraphSearchFactory<N, A, V> searchFactory;
   private final IHASCOSearchSpaceUtilFactory<N, A, V> searchSpaceUtilFactory;
   private final INodeEvaluator<N, V> nodeEvaluator;
+  private final RandomCompletionEvaluator<N, V> randomCompletionEvaluator;
 
   /* event buses for evaluation events */
   private final EventBus solutionEvaluationEventBus = new EventBus();
@@ -102,35 +103,37 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
     super();
     this.plannerFactory = plannerFactory;
     this.searchFactory = searchFactory;
-    this.nodeEvaluator = new AlternativeNodeEvaluator<>(nodeEvaluator,
-        new RandomCompletionEvaluator<>(new Random(this.randomSeed), 3, searchSpaceUtilFactory.getPathUnifier(), new ISolutionEvaluator<N, V>() {
+    this.randomCompletionEvaluator = new RandomCompletionEvaluator<>(new Random(this.randomSeed), 5, searchSpaceUtilFactory.getPathUnifier(), new ISolutionEvaluator<N, V>() {
+      @Override
+      public V evaluateSolution(final List<N> solutionPath) throws Exception {
+        List<Action> plan = HASCO.this.searchSpaceUtilFactory.getPathToPlanConverter().getPlan(solutionPath);
+        ComponentInstance composition = Util.getSolutionCompositionForPlan(HASCO.this.components, HASCO.this.getInitState(), plan);
+        T solution = HASCO.this.getObjectFromPlan(plan);
+        V scoreOfSolution = benchmark.evaluate(solution);
+        if (HASCO.this.scoreOfBestRecognizedSolution == null || HASCO.this.scoreOfBestRecognizedSolution.compareTo(scoreOfSolution) > 0) {
+          HASCO.this.bestRecognizedSolution = solution;
+          HASCO.this.compositionOfBestRecognizedSolution = composition;
+          HASCO.this.scoreOfBestRecognizedSolution = scoreOfSolution;
+        }
+        HASCO.this.solutionEvaluationEventBus.post(new HASCOSolutionEvaluationEvent<>(composition, solution, scoreOfSolution));
+        return scoreOfSolution;
+      }
 
-          @Override
-          public V evaluateSolution(final List<N> solutionPath) throws Exception {
-            List<Action> plan = searchSpaceUtilFactory.getPathToPlanConverter().getPlan(solutionPath);
-            ComponentInstance composition = Util.getSolutionCompositionForPlan(HASCO.this.components, HASCO.this.getInitState(), plan);
-            T solution = HASCO.this.getObjectFromPlan(plan);
-            V scoreOfSolution = benchmark.evaluate(solution);
-            if (HASCO.this.scoreOfBestRecognizedSolution == null || HASCO.this.scoreOfBestRecognizedSolution.compareTo(scoreOfSolution) > 0) {
-              HASCO.this.bestRecognizedSolution = solution;
-              HASCO.this.compositionOfBestRecognizedSolution = composition;
-              HASCO.this.scoreOfBestRecognizedSolution = scoreOfSolution;
-            }
-            HASCO.this.solutionEvaluationEventBus.post(new HASCOSolutionEvaluationEvent<>(composition, solution, scoreOfSolution));
-            return scoreOfSolution;
-          }
-
-          @Override
-          public boolean doesLastActionAffectScoreOfAnySubsequentSolution(final List<N> partialSolutionPath) {
-            return true;
-          }
-
-        }));
+      @Override
+      public boolean doesLastActionAffectScoreOfAnySubsequentSolution(final List<N> partialSolutionPath) {
+        return true;
+      }
+    });
+    this.nodeEvaluator = new AlternativeNodeEvaluator<>(nodeEvaluator, this.randomCompletionEvaluator);
     this.factory = factory;
     this.paramRefinementConfig = paramRefinementConfig;
     this.searchSpaceUtilFactory = searchSpaceUtilFactory;
     this.nameOfRequiredInterface = nameOfRequiredInterface;
     this.benchmark = benchmark;
+  }
+
+  public void setNumberOfRandomCompletions(final int randomCompletions) {
+    this.randomCompletionEvaluator.setNumberOfRandomCompletions(randomCompletions);
   }
 
   public int getRandom() {
@@ -155,6 +158,7 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
       this.problem = HASCO.this.getPlanningProblem(this.domain, this.knowledge, this.init);
       this.planner = HASCO.this.plannerFactory.newAlgorithm(this.problem, HASCO.this.searchFactory, HASCO.this.nodeEvaluator, HASCO.this.numberOfCPUs);
       this.planIterator = this.planner.iterator();
+
     }
 
     @Override
@@ -295,6 +299,7 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
         int k = 0;
         for (String requiredInterfaceID : c.getRequiredInterfaces().keySet()) {
           String reqIntIdentifier = "sc" + (++k);
+          params.add(new VariableParam(reqIntIdentifier));
 
           List<LiteralParam> literalParams = new ArrayList<>();
           literalParams.clear();
@@ -302,7 +307,7 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
           literalParams.add(new ConstantParam(requiredInterfaceID));
           literalParams.add(new VariableParam("c2"));
           literalParams.add(new VariableParam(reqIntIdentifier));
-          standardKnowledgeAboutNewComponent.add(new Literal("parameterContainer", literalParams));
+          standardKnowledgeAboutNewComponent.add(new Literal("interfaceIdentifier", literalParams));
         }
 
         addList.put(new CNFFormula(), standardKnowledgeAboutNewComponent);
@@ -334,7 +339,7 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
         VariableParam inputParam = new VariableParam("c1");
         params.add(inputParam);
         params.add(new VariableParam("c2"));
-        TreeMap<String, String> requiredInterfaces = c.getRequiredInterfaces();
+        LinkedHashMap<String, String> requiredInterfaces = c.getRequiredInterfaces();
         List<Literal> network = new ArrayList<>();
 
         String refinementArguments = "";
@@ -344,6 +349,10 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
             String paramIdentifier = "p" + j;
             refinementArguments += ", " + paramIdentifier;
           }
+        }
+
+        for (int k = 1; k <= requiredInterfaces.entrySet().size(); k++) {
+          refinementArguments += ",sc" + k;
         }
 
         int sc = 0;

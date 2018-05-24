@@ -12,6 +12,7 @@ import java.util.Map;
 public class ComponentInstance {
   private final Component component;
   private final Map<String, String> parameterValues;
+  /** The satisfactionOfRequiredInterfaces map maps from Interface IDs to ComopnentInstances */
   private final Map<String, ComponentInstance> satisfactionOfRequiredInterfaces;
 
   public ComponentInstance(final Component component, final Map<String, String> parameterValues, final Map<String, ComponentInstance> satisfactionOfRequiredInterfaces) {
@@ -29,6 +30,9 @@ public class ComponentInstance {
     return this.parameterValues;
   }
 
+  /**
+   * @return This method returns a mapping of interface IDs to component instances.
+   */
   public Map<String, ComponentInstance> getSatisfactionOfRequiredInterfaces() {
     return this.satisfactionOfRequiredInterfaces;
   }

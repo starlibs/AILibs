@@ -5,14 +5,15 @@ import jaicore.order.PartialOrderedSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.TreeMap;
 
 public class Component {
   private final String name;
-  private final Collection<String> providedInterfaces = new HashSet<>();
-  private final TreeMap<String, String> requiredInterfaces = new TreeMap<>();
+  private final Collection<String> providedInterfaces = new ArrayList<>();
+  private final LinkedHashMap<String, String> requiredInterfaces = new LinkedHashMap<>();
   private final PartialOrderedSet<Parameter> parameters = new PartialOrderedSet<>();
   private final Collection<Dependency> dependencies = new ArrayList<>();
 
@@ -34,7 +35,7 @@ public class Component {
     return this.name;
   }
 
-  public TreeMap<String, String> getRequiredInterfaces() {
+  public LinkedHashMap<String, String> getRequiredInterfaces() {
     return this.requiredInterfaces;
   }
 

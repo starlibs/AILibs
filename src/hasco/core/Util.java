@@ -121,6 +121,7 @@ public class Util {
     Map<String, ComponentInstance> objectMap = new HashMap<>();
     Map<String, Map<String, String>> parameterContainerMap = new HashMap<>(); // stores for each object the name of the container of each parameter
     Map<String, String> parameterValues = new HashMap<>();
+    Map<String, String> interfaceContainerMap = new HashMap<>();
 
     /*
      * create (empty) component instances, detect containers for parameter values, and register the
@@ -135,16 +136,11 @@ public class Util {
           String componentName = params[2];
           String objectName = params[3];
 
-          System.out.println(l);
-          System.out.println(parameterContainerMap);
-          System.out.println();
-
           Component component = components.stream().filter(c -> c.getName().equals(componentName)).findAny().get();
           ComponentInstance object = new ComponentInstance(component, new HashMap<>(), new HashMap<>());
           objectMap.put(objectName, object);
           break;
         case "parameterContainer":
-          System.err.println(params[1] + " " + params[2] + " " + params[3]);
           if (!parameterContainerMap.containsKey(params[2])) {
             parameterContainerMap.put(params[2], new HashMap<>());
           }
@@ -152,6 +148,9 @@ public class Util {
           break;
         case "val":
           parameterValues.put(params[0], params[1]);
+          break;
+        case "interfaceIdentifier":
+          interfaceContainerMap.put(params[3], params[1]);
           break;
       }
     }
@@ -162,9 +161,11 @@ public class Util {
       String parentObjectName = params[0];
       String interfaceName = params[1];
       String objectName = params[3];
+
       ComponentInstance object = objectMap.get(objectName);
       if (!parentObjectName.equals("request")) {
-        objectMap.get(parentObjectName).getSatisfactionOfRequiredInterfaces().put(interfaceName, object);
+        assert interfaceContainerMap.containsKey(objectName) : "Object name " + objectName + " for requried interface must have a defined identifier ";
+        objectMap.get(parentObjectName).getSatisfactionOfRequiredInterfaces().put(interfaceContainerMap.get(objectName), object);
       }
     });
 
