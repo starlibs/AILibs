@@ -12,3 +12,6 @@
 *.pyc
 /localtmp/
 /http/
+/.classpath
+/.project
+/.settings/
