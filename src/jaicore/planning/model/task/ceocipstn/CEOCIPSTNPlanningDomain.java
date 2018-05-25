@@ -6,6 +6,7 @@ import java.util.Collection;
 import jaicore.planning.model.ceoc.CEOCOperation;
 import jaicore.planning.model.task.ceocstn.CEOCSTNPlanningDomain;
 
+@SuppressWarnings("serial")
 public class CEOCIPSTNPlanningDomain extends CEOCSTNPlanningDomain implements Serializable {
 
 	

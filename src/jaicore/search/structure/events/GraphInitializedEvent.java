@@ -1,7 +1,5 @@
 package jaicore.search.structure.events;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 public class GraphInitializedEvent<T> {
 	
 	

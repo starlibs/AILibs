@@ -3,8 +3,6 @@
  */
 package jaicore.search.structure.core;
 
-
-import java.util.Random;
 /**
  * A Graphgenerator which is extended by versioning
  * @author jkoepe

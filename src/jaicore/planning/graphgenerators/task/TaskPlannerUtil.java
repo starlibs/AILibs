@@ -38,7 +38,6 @@ import jaicore.planning.model.task.stn.Method;
 import jaicore.planning.model.task.stn.MethodInstance;
 import jaicore.planning.model.task.stn.STNPlanningDomain;
 import jaicore.planning.model.task.stn.TaskNetwork;
-import scala.annotation.meta.param;
 
 public class TaskPlannerUtil {
 
@@ -188,18 +187,6 @@ public class TaskPlannerUtil {
 		if (paramsThatNeedGrounding.size() > 1)
 			throw new UnsupportedOperationException("Currently only support for at most one unground variable! Here, the following variables of \"" + l + "\"need grounding: " + paramsThatNeedGrounding);
 
-		/* consider every possible combination of groundings fixed by earlier oracle invocations */
-		// List<LiteralParam> paramsGroundSoFar = new ArrayList<>(oracledParams);
-		// Collection<List<ConstantParam>> oracledGroundings;
-		// if (!paramsGroundSoFar.isEmpty()) {
-		// List<Collection<ConstantParam>> currentlyValidGroundings = paramsGroundSoFar.stream().map(k -> candidatesForGrounding.get(k))
-		// .collect(Collectors.toList());
-		// oracledGroundings = SetUtil.cartesianProduct(currentlyValidGroundings);
-		// } else {
-		// oracledGroundings = new ArrayList<>();
-		// oracledGroundings.add(new ArrayList<>());
-		// }
-
 		/* now go over all previous groundings and check them */
 		List<Map<VariableParam, ConstantParam>> localCopyOfCurrentGrounding = new ArrayList<>(groundingsFixedSoFar);
 		VariableParam paramToBeGround = null;
@@ -299,7 +286,10 @@ public class TaskPlannerUtil {
 			for (VariableParam key : grounding.keySet()) {
 				constantGrounding.put(key, (ConstantParam) grounding.get(key));
 			}
-			applicableDerivedActions.add(new Action(op, constantGrounding));
+			if (op instanceof CEOCOperation)
+				applicableDerivedActions.add(new CEOCAction((CEOCOperation)op, constantGrounding));
+			else
+				applicableDerivedActions.add(new Action(op, constantGrounding));
 		}
 		return applicableDerivedActions;
 	}

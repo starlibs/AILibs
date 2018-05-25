@@ -6,11 +6,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
-import jaicore.search.structure.graphgenerator.GoalTester;
 import jaicore.search.structure.graphgenerator.MultipleRootGenerator;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.PathGoalTester;
-import jaicore.search.structure.graphgenerator.RootGenerator;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
@@ -19,7 +17,7 @@ import jaicore.search.structure.graphgenerator.SuccessorGenerator;
  * @author jkoepe
  *
  */
-public class VersionedGraphGenerator<T,A> implements VersionedGraphGeneratorInterface<VersionedT<T>,A> {
+public class VersionedGraphGenerator<T,A> implements VersionedGraphGeneratorInterface<VersionedDomainNode<T>,A> {
 
 	//variables 
 	GraphGenerator<T, A> gen;
@@ -46,46 +44,46 @@ public class VersionedGraphGenerator<T,A> implements VersionedGraphGeneratorInte
 
 
 	@Override
-	public SingleRootGenerator<VersionedT<T>> getRootGenerator() {
+	public SingleRootGenerator<VersionedDomainNode<T>> getRootGenerator() {
 		return () -> {
 			SingleRootGenerator<T> rootGenerator = (SingleRootGenerator<T>) gen.getRootGenerator();
 			T root = (T) rootGenerator.getRoot();
-			return new VersionedT<T>(root, this.getNextID());
+			return new VersionedDomainNode<T>(root, this.getNextID());
 		};
 	}
 	
-	public SingleRootGenerator<VersionedT<T>> getSingleRootGenerator(){
+	public SingleRootGenerator<VersionedDomainNode<T>> getSingleRootGenerator(){
 		return () -> {
-			SingleRootGenerator rootGenerator = (SingleRootGenerator) gen.getRootGenerator();
+			SingleRootGenerator<T> rootGenerator = (SingleRootGenerator<T>) gen.getRootGenerator();
 			T root = (T) rootGenerator.getRoot();
-			return new VersionedT<T>(root, this.getNextID());
+			return new VersionedDomainNode<T>(root, this.getNextID());
 		};
 	}
 	
-	public MultipleRootGenerator<VersionedT<T>> getMultipleRootGenerator(){
+	public MultipleRootGenerator<VersionedDomainNode<T>> getMultipleRootGenerator(){
 		return () -> {
-			MultipleRootGenerator rootGenerator = (MultipleRootGenerator) gen.getRootGenerator();
-			Collection<VersionedT<T>> vRoots = new ArrayList<VersionedT<T>>();
-			Collection roots = rootGenerator.getRoots();
+			MultipleRootGenerator<T> rootGenerator = (MultipleRootGenerator<T>) gen.getRootGenerator();
+			Collection<VersionedDomainNode<T>> vRoots = new ArrayList<VersionedDomainNode<T>>();
+			Collection<T> roots = rootGenerator.getRoots();
 			
 			roots.stream().forEach(
-					n -> vRoots.add(new VersionedT(n, this.getNextID()))
+					n -> vRoots.add(new VersionedDomainNode<T>(n, this.getNextID()))
 					);			
-			return (Collection<VersionedT<T>>) vRoots;
+			return (Collection<VersionedDomainNode<T>>) vRoots;
 		};
 	}
 
 
 	@Override
-	public SuccessorGenerator<VersionedT<T>, A> getSuccessorGenerator() {
+	public SuccessorGenerator<VersionedDomainNode<T>, A> getSuccessorGenerator() {
 		return nodeToExpand ->{
 			SuccessorGenerator<T,A> successorGenerator = (SuccessorGenerator<T, A>) gen.getSuccessorGenerator();
 			Collection<NodeExpansionDescription<T,A>> successorDescriptions = successorGenerator.generateSuccessors(nodeToExpand.getNode());
 			
-			Collection<NodeExpansionDescription<VersionedT<T>,A>> versionedDescriptions = new ArrayList<>();
+			Collection<NodeExpansionDescription<VersionedDomainNode<T>,A>> versionedDescriptions = new ArrayList<>();
 			
 			successorDescriptions.stream().forEach(description->
-						versionedDescriptions.add(new NodeExpansionDescription(nodeToExpand, new VersionedT(description.getTo(), this.getNextID()), description.getAction(), description.getTypeOfToNode()))
+						versionedDescriptions.add(new NodeExpansionDescription<>(nodeToExpand, new VersionedDomainNode<>(description.getTo(), this.getNextID()), description.getAction(), description.getTypeOfToNode()))
 					);
 			return versionedDescriptions;
 		};
@@ -94,7 +92,7 @@ public class VersionedGraphGenerator<T,A> implements VersionedGraphGeneratorInte
 
 
 	@Override
-	public NodeGoalTester<VersionedT<T>> getGoalTester() {
+	public NodeGoalTester<VersionedDomainNode<T>> getGoalTester() {
 		// TODO Auto-generated method stub
 		return n -> {
 			NodeGoalTester<T> goalTester = (NodeGoalTester<T>) gen.getGoalTester();
@@ -106,7 +104,7 @@ public class VersionedGraphGenerator<T,A> implements VersionedGraphGeneratorInte
 	 * A method which redirects the NodeGoalTester from VersionedT<T> to T
 	 * @return
 	 */
-	public NodeGoalTester<VersionedT<T>> getNodeGoalTester(){
+	public NodeGoalTester<VersionedDomainNode<T>> getNodeGoalTester(){
 		return n -> {
 			NodeGoalTester<T> goalTester = (NodeGoalTester<T>) gen.getGoalTester();
 			return goalTester.isGoal(n.getNode());
@@ -116,10 +114,11 @@ public class VersionedGraphGenerator<T,A> implements VersionedGraphGeneratorInte
 	
 	/**
 	 * Method which redirects the pathgoaltester from versioned<T> nodes to simple t nodes.
-	 * This method does currently not work as it is not implemented to extract the path from a verioned node
+	 * This method does currently not work as it is not implemented to extract the path from a versioned node
 	 * @return
 	 */
-	public PathGoalTester<VersionedT<T>> getPathGoalTester(){
+	@SuppressWarnings("unchecked")
+	public PathGoalTester<VersionedDomainNode<T>> getPathGoalTester(){
 		return n ->{
 			PathGoalTester<T> goalTester = (PathGoalTester<T>)gen.getGoalTester();
 			return goalTester.isGoal((List<T>) n);

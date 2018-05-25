@@ -1,11 +1,13 @@
 package jaicore.planning.model.task;
 
+import java.io.Serializable;
+
 import jaicore.logic.fol.structure.CNFFormula;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.planning.model.task.stn.STNPlanningDomain;
 import jaicore.planning.model.task.stn.TaskNetwork;
 
-public interface IHTNPlanningProblem {
+public interface IHTNPlanningProblem extends Serializable {
 	
 	public STNPlanningDomain getDomain();
 	

@@ -1,8 +1,6 @@
 package jaicore.planning.model.task.ceocipstn;
 
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Iterator;
@@ -12,14 +10,11 @@ import jaicore.logic.fol.structure.CNFFormula;
 import jaicore.logic.fol.structure.Literal;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.planning.model.ceoc.CEOCOperation;
-import jaicore.planning.model.task.ceocstn.CEOCSTNPlanningProblem;
 import jaicore.planning.model.task.stn.Method;
 import jaicore.planning.model.task.stn.TaskNetwork;
 
 public class CEOCIPSTN2JSHOP2 {
 
-	private static final int printNetwork = 0;
-	private static String packageName;
 
 	/**
 	 * Writes the given Problem into the output file

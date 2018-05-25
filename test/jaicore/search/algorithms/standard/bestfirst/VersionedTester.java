@@ -12,7 +12,7 @@ import jaicore.search.graphgenerators.npuzzle.standard.NPuzzleNode;
 import jaicore.search.graphgenerators.nqueens.NQueenGenerator;
 import jaicore.search.graphgenerators.nqueens.QueenNode;
 import jaicore.search.structure.core.VersionedGraphGenerator;
-import jaicore.search.structure.core.VersionedT;
+import jaicore.search.structure.core.VersionedDomainNode;
 
 public class VersionedTester {
 
@@ -29,8 +29,8 @@ public class VersionedTester {
 			VersionedGraphGenerator vgen = new VersionedGraphGenerator(gen);
 
 			// Redoing the sequential test from NQueenTester with versioned nodes
-			BestFirst<VersionedT<QueenNode>, String> search = new BestFirst<>(vgen,
-					node -> (double) ((VersionedT<QueenNode>) node.getPoint()).getNode().getNumberOfAttackedCellsInNextRow());
+			BestFirst<VersionedDomainNode<QueenNode>, String> search = new BestFirst<>(vgen,
+					node -> (double) ((VersionedDomainNode<QueenNode>) node.getPoint()).getNode().getNumberOfAttackedCellsInNextRow());
 			int solutions = 0;
 			while (search.nextSolution() != null)
 				solutions++;
@@ -38,8 +38,8 @@ public class VersionedTester {
 
 			// print out the ids of the solution path
 			System.out.println("The ids of a solution path");
-			search = new BestFirst<>(vgen, node -> (double) ((VersionedT<QueenNode>) node.getPoint()).getNode().getNumberOfAttackedCellsInNextRow());
-			List<VersionedT<QueenNode>> solution = search.nextSolution();
+			search = new BestFirst<>(vgen, node -> (double) ((VersionedDomainNode<QueenNode>) node.getPoint()).getNode().getNumberOfAttackedCellsInNextRow());
+			List<VersionedDomainNode<QueenNode>> solution = search.nextSolution();
 			solution.stream().forEach(node -> System.out.println("ID: " + node.getId()));
 			solution.stream().forEach(node -> assertTrue(node.getId() > 0));
 
@@ -47,7 +47,7 @@ public class VersionedTester {
 			System.out.println("Testing if every id is -1, if nodenumbering is disabled.");
 			vgen.setNodeNumbering(false);
 			solution.clear();
-			search = new BestFirst<>(vgen, node -> (double) ((VersionedT<QueenNode>) node.getPoint()).getNode().getNumberOfAttackedCellsInNextRow());
+			search = new BestFirst<>(vgen, node -> (double) ((VersionedDomainNode<QueenNode>) node.getPoint()).getNode().getNumberOfAttackedCellsInNextRow());
 			solution = search.nextSolution();
 			solution.stream().forEach(node -> System.out.println(node.getId()));
 			solution.stream().forEach(node -> assertEquals(-1, node.getId()));
@@ -66,15 +66,15 @@ public class VersionedTester {
 		// first group test with enabled ids
 		VersionedGraphGenerator gen = new VersionedGraphGenerator(new NPuzzleGenerator(8, 8));
 		System.out.println("Test with ids enabled");
-		BestFirst<VersionedT<NPuzzleNode>, String> search = new BestFirst<>(gen, node -> ((VersionedT<NPuzzleNode>) node.getPoint()).getNode().getDistance());
-		List<VersionedT<NPuzzleNode>> solution = search.nextSolution();
+		BestFirst<VersionedDomainNode<NPuzzleNode>, String> search = new BestFirst<>(gen, node -> ((VersionedDomainNode<NPuzzleNode>) node.getPoint()).getNode().getDistance());
+		List<VersionedDomainNode<NPuzzleNode>> solution = search.nextSolution();
 		solution.stream().forEach(node -> assertTrue(node.getId() > 0));
 		System.out.println("Every node on the solution path got a id");
 
 		// second group test with disabled ids
 		System.out.println("Test with ids disabled");
 		gen.setNodeNumbering(false);
-		search = new BestFirst<>(gen, node -> ((VersionedT<NPuzzleNode>) node.getPoint()).getNode().getDistance());
+		search = new BestFirst<>(gen, node -> ((VersionedDomainNode<NPuzzleNode>) node.getPoint()).getNode().getDistance());
 		solution = search.nextSolution();
 		solution.stream().forEach(node -> assertEquals(-1, node.getId()));
 

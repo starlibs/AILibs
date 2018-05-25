@@ -98,7 +98,6 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	 */
 	private List<NodeExpansionDescription<T, A>> lastExpansion = new ArrayList<>();
 	private ParentDiscarding parentDiscarding;
-	private boolean verifyThatGivenGraphIsATree = true;
 
 	private class NodeBuilder implements Runnable {
 

@@ -7,6 +7,7 @@ import jaicore.logic.fol.structure.VariableParam;
 import jaicore.planning.model.task.stn.Method;
 import jaicore.planning.model.task.stn.MethodInstance;
 
+@SuppressWarnings("serial")
 public class OCMethodInstance extends MethodInstance {
 
 	public OCMethodInstance(Method method, Map<VariableParam, ConstantParam> grounding) {

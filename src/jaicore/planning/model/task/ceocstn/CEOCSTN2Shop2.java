@@ -4,8 +4,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Map;
 
 import javax.swing.JFileChooser;
@@ -19,7 +17,6 @@ import jaicore.planning.model.task.stn.TaskNetwork;
 
 public class CEOCSTN2Shop2 {
 	
-	private static final int printNetwork = 0;
 	private static String packageName;
 	
 	/**

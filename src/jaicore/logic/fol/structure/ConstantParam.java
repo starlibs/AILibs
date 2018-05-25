@@ -5,6 +5,7 @@ package jaicore.logic.fol.structure;
  * 
  * @author mbunse
  */
+@SuppressWarnings("serial")
 public class ConstantParam extends LiteralParam {
 
 	private boolean variablesMayBeUnifiedWithThisConstant;

@@ -3,11 +3,9 @@ package jaicore.planning.graphgenerators.task.tfd;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import jaicore.basic.SetUtil;
@@ -26,11 +24,9 @@ public class TFDNodeUtil {
 
 	private static Map<List<TFDNode>, Integer> cache = new HashMap<>();
 	private final TaskPlannerUtil util;
-	private final Map<String, EvaluablePredicate> evaluablePlanningPredicates;
 	
 	public TFDNodeUtil(Map<String, EvaluablePredicate> evaluablePlanningPredicates) {
 		super();
-		this.evaluablePlanningPredicates = evaluablePlanningPredicates;
 		util = new TaskPlannerUtil(evaluablePlanningPredicates);
 	}
 
@@ -87,7 +83,7 @@ public class TFDNodeUtil {
 			/* compute updated state */
 			Action appliedAction = n.getAppliedAction();
 			if (appliedAction != null) {
-				new PlannerUtil().updateState(state, appliedAction);
+				PlannerUtil.updateState(state, appliedAction);
 			}
 
 			/* compute remaining tasks */

@@ -24,7 +24,7 @@ import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
-public abstract class ANDORGraphSearch<T, A, V extends Comparable<V>> implements IObservableGraphAlgorithm {
+public abstract class ANDORGraphSearch<T, A, V extends Comparable<V>> implements IObservableGraphAlgorithm<T,A> {
 
 	/* meta vars for controlling the general behavior */
 	private int expandedCounter;

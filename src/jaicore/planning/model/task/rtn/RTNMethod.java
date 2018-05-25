@@ -7,6 +7,7 @@ import jaicore.logic.fol.structure.Monom;
 import jaicore.logic.fol.structure.VariableParam;
 import jaicore.planning.model.task.ceocstn.OCMethod;
 
+@SuppressWarnings("serial")
 public class RTNMethod extends OCMethod {
 
 	public RTNMethod(String name, List<VariableParam> parameters, Literal task, Monom precondition, RTaskNetwork network, boolean lonely, List<VariableParam> outputs) {

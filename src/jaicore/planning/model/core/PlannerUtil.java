@@ -13,7 +13,6 @@ import jaicore.logic.fol.structure.ConstantParam;
 import jaicore.logic.fol.structure.Literal;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.logic.fol.structure.VariableParam;
-import jaicore.logic.fol.theories.EvaluablePredicate;
 import jaicore.planning.model.conditional.CEAction;
 import jaicore.planning.model.conditional.CEOperation;
 import jaicore.planning.model.strips.StripsAction;
@@ -55,7 +54,6 @@ public class PlannerUtil {
 		// assert state.containsAll(appliedAction.getPrecondition().stream().filter(lit -> lit.isPositive()).collect(Collectors.toList())) && SetUtil.disjoint(state,
 		// appliedAction.getPrecondition().stream().filter(lit -> lit.isNegated()).collect(Collectors.toList())) : ("Action " + appliedAction + " is supposed to be aplpicable in state " + state + "
 		// but it is not!");
-
 		/* apply effects of action (STRIPS) */
 		if (appliedAction.getOperation() instanceof StripsOperation) {
 			Action a = new StripsAction((StripsOperation) appliedAction.getOperation(), appliedAction.getGrounding());
@@ -68,14 +66,17 @@ public class PlannerUtil {
 			CEAction a = new CEAction((CEOperation) appliedAction.getOperation(), appliedAction.getGrounding());
 			Map<CNFFormula, Monom> addLists = a.getAddLists();
 
-			/* first delete, then add */
+			/* determine literals to remove */
 			Map<CNFFormula, Monom> deleteLists = a.getDeleteLists();
+			Collection<Literal> toRemove = new ArrayList<>();
 			for (CNFFormula condition : deleteLists.keySet()) {
 				if (condition.entailedBy(state)) {
-					state.removeAll(deleteLists.get(condition));
+					toRemove.addAll(deleteLists.get(condition));
 				}
 			}
 			
+			/* determine literals to add */
+			Collection<Literal> toAdd = new ArrayList<>();
 			for (CNFFormula condition : addLists.keySet()) {
 				
 				/* evaluate interpreted predicates */
@@ -99,9 +100,14 @@ public class PlannerUtil {
 					}
 				}
 				if (conditionIsSatisfiable && modifiedCondition.entailedBy(state)) {
-					state.addAll(addLists.get(condition));
+					toAdd.addAll(addLists.get(condition));
 				}
 			}
+			
+			/* now conduct update */
+			state.removeAll(toRemove);
+			state.addAll(toAdd);
+			
 		} else {
 			System.err.println("No support for operations of class " + appliedAction.getOperation().getClass());
 		}

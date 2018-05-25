@@ -15,11 +15,10 @@ import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 public class DistributedBestFirstClusterTesterGenerator implements SerializableGraphGenerator<TestNode, String> {
 
 	private SerializableRootGenerator<TestNode> rootGenerator;
-	private int size, target;
+	private int target;
 
 	public DistributedBestFirstClusterTesterGenerator(int size, int target) {
 		super();
-		this.size = size;
 		this.target = target;
 		rootGenerator =  () -> new TestNode(0, size);
 		System.out.println("Trying to find " + target + " within a space of " + size + " items.");

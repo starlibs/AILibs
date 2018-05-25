@@ -113,25 +113,13 @@ public class RandomCompletionEvaluator<T, V extends Comparable<V>>
 
       /* compute path and partial plan belonging to the node */
       List<T> path = n.externalPath();
-      T currentNode = path.get(path.size() - 1);
-      // Literal currentTask = currentNode.getRemainingTasks().isEmpty() ? null :
-      // currentNode.getRemainingTasks().get(0);
-      // List<CEOCAction> partialPlan = CEOCSTNUtil.extractPlanFromSolutionPath(path);
-      // List<String> currentProgram = Arrays.asList(MLUtil.getJavaCodeFromPlan(partialPlan).split("\n"));
 
       /* annotate node with estimated relative distance to optimal solution */
       if (this.eventBus == null) {
         this.eventBus = new SolutionEventBus<>();
       }
       this.eventBus.post(new NodeAnnotationEvent<>(n.getPoint(), "EUBRD2OS", this.getExpectedUpperBoundForRelativeDistanceToOptimalSolution(n, path)));
-
-      // List<Long> pathNodeIds = path.stream().map(node -> node.getID()).collect(Collectors.toList());
-
       if (!n.isGoal()) {
-        // logger.info("This is an unknown node; computing score for path to node: {}", pathNodeIds);
-        // assert !scoresOfSolutionPaths.containsKey(partialPlan) : "A non-goal path is stored in the list
-        // of scores of solution paths!";
-
         V evaluationPriorToCompletion = this.computeEvaluationPriorToCompletion(n, path);
         if (evaluationPriorToCompletion != null) {
           this.fValues.put(n, evaluationPriorToCompletion);
@@ -145,50 +133,11 @@ public class RandomCompletionEvaluator<T, V extends Comparable<V>>
                   + path;
           V score = this.fValues.get(n.getParent());
           this.fValues.put(n, score);
-          // logger.info("Pipeline has not changed in node {}, adopting value of {} of parent.",
-          // n.getPoint().getID(), score);
           return score;
         }
-
-        // T lastNode = path.get(path.size() - 1);
-        // System.out.println(resolvedProblem.getPropertyName() + ". Resolved by " +
-        // (lastNode.getAppliedAction() != null ? lastNode.getAppliedAction().getEncoding() :
-        // lastNode.getAppliedMethodInstance().getEncoding()));
-
+        
         /* check if we have an f-value for exactly this node */
         if (!this.completions.containsKey(path)) {
-
-          // logger.info("No completion is explicitly known for path {}.", pathNodeIds);
-
-          /* determine preprocessor and classifier of pipeline */
-          // Optional<String> preprocessorLine = currentProgram.stream().filter(line -> line.contains("new")
-          // && line.contains("attributeSelection")).findAny();
-          // String preprocessorName = preprocessorLine.isPresent() ?
-          // CodePlanningUtil.getPreprocessorEvaluatorFromPipelineGenerationCode(currentProgram) : "";
-          // String classifierName = CodePlanningUtil.getClassifierFromPipelineGenerationCode(currentProgram);
-          // String plName = preprocessorName + "&" + classifierName;
-
-          /* ignore if preprocessing fails even with oneR */
-          // String reference = preprocessorName + "&OneR";
-          // if (plFails.containsKey(reference)) {
-          // logger.info("Cancel {}, because even OneR does not finish within time using this preprocessor!",
-          // plName);
-          // return null;
-          // }
-
-          /* if this specific pipeline has failed before, ignore it also now */
-          // if (plFails.containsKey(plName)) {
-          // logger.info("Ignoreing pipeline which has failed before.");
-          // return null;
-          // }
-
-          /* if the space under this solution is overly searched, reject */
-          // if (maxSolutionsPerTechnique >= 0 && solutionsPerTechnique.containsKey(preprocessorName)
-          // && solutionsPerTechnique.get(preprocessorName).containsKey(classifierName)
-          // && solutionsPerTechnique.get(preprocessorName).get(classifierName) >= maxSolutionsPerTechnique) {
-          // logger.warn("Returning null to prevent oversearch");
-          // return null;// new IllegalArgumentException("This node is in an oversearched region");
-          // }
 
           /* determine whether we have a solution path (found by the oracle) that goes over this node */
           /* only if we have no path to a solution over this node, we compute a new one */
@@ -196,21 +145,6 @@ public class RandomCompletionEvaluator<T, V extends Comparable<V>>
             throw new IllegalStateException("Trying to check path unification, but no path unifier has been set. Path: " + path);
           }
           List<T> pathWhoseCompletionSubsumesCurrentPath = this.pathUnifier.getSubsumingKnownPathCompletion(this.completions, path);
-          // assert pathWhoseCompletionSubsumesCurrentPath == null ||
-          // pathWhoseCompletionSubsumesCurrentPath.subList(0, path.size()).equals(path) : "The path
-          // completion " + pathWhoseCompletionSubsumesCurrentPath.stream().map(node ->
-          // node.getID()).collect(Collectors.toList()) + " does NOT subsume path " + pathNodeIds +
-          // ".\n\tStep-Wise Comparison (current above, (not) subsuming below): " +
-          // ContiguousSet.create(Range.closed(0, Math.max(path.size(),
-          // pathWhoseCompletionSubsumesCurrentPath.size())),
-          // DiscreteDomain.integers()).asList().stream().map(i -> "\n\t" + i + "\n\t\t" + (i < path.size() ?
-          // path.get(i).toString() : "") + "\n\t\t" + (i < pathWhoseCompletionSubsumesCurrentPath.size() ?
-          // pathWhoseCompletionSubsumesCurrentPath.get(i).toString() : "")).collect(Collectors.toList());
-          // logger.info("Result of a look-up for a path that would subsume {}: {}.", pathNodeIds,
-          // pathWhoseCompletionSubsumesCurrentPath != null ?
-          // pathWhoseCompletionSubsumesCurrentPath.stream().map(node ->
-          // node.getID()).collect(Collectors.toList()) : null);
-
           boolean interrupted = false;
           if (pathWhoseCompletionSubsumesCurrentPath == null) {
             V best = null;
@@ -244,20 +178,16 @@ public class RandomCompletionEvaluator<T, V extends Comparable<V>>
 
                 @Override
                 public boolean isSelfContained() {
-                  // TODO Auto-generated method stub
                   return false;
                 }
 
                 @Override
                 public void setNodeNumbering(final boolean nodenumbering) {
-                  // TODO Auto-generated method stub
-
+                	throw new UnsupportedOperationException();
                 }
               }, this.random);
 
               /* now complete the current path by the dfs-solution */
-              // new SimpleGraphVisualizationWindow<>(completer.getEventBus()).getPanel().setTooltipGenerator(new
-              // TFDTooltipGenerator<>());
               List<T> completedPath = new ArrayList<>(n.externalPath());
               logger.info("Starting search for next solution ...");
               List<T> pathCompletion = completer.nextSolution();

@@ -52,6 +52,7 @@ public class MCTS<T,A,V extends Comparable<V>> implements IObservableORGraphSear
 	private final T root;
 	protected final LabeledGraph<T, A> exploredGraph;
 	
+	@SuppressWarnings("unchecked")
 	public MCTS(GraphGenerator<T, A> graphGenerator, IPolicy<T,A,V> treePolicy, IPolicy<T,A,V> defaultPolicy, INodeEvaluator<T, V> playoutSimulator) {
 		super();
 		this.rootGenerator = graphGenerator.getRootGenerator();
@@ -74,7 +75,7 @@ public class MCTS<T,A,V extends Comparable<V>> implements IObservableORGraphSear
 		this.exploredGraph.addItem(root);
 		
 		/* if the node evaluator is graph dependent, communicate the generator to it */
-		if (playoutSimulator instanceof IGraphDependentNodeEvaluator) {
+		if (playoutSimulator instanceof IGraphDependentNodeEvaluator<?,?,?>) {
 			logger.info("{} is a graph dependent node evaluator. Setting its graph generator now ...", playoutSimulator);
 			((IGraphDependentNodeEvaluator<T, A, V>) playoutSimulator).setGenerator(graphGenerator);
 		}

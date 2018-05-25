@@ -5,6 +5,7 @@ package jaicore.logic.fol.structure;
  * 
  * @author mbunse, wever
  */
+@SuppressWarnings("serial")
 public class VariableParam extends LiteralParam {
 	
 	private Type type;

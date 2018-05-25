@@ -19,5 +19,4 @@ public class CEOCSTNFactoryTest {
 		System.out.println("\nOperations\n---------------");
 		problem.getDomain().getOperations().stream().forEach(o -> System.out.println(o));
 	}
-
 }

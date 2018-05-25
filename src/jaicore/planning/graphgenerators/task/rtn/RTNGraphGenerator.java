@@ -18,7 +18,6 @@ import jaicore.logic.fol.structure.ConstantParam;
 import jaicore.logic.fol.structure.Literal;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.planning.graphgenerators.task.TaskPlannerUtil;
-import jaicore.planning.graphgenerators.task.tfd.TFDNodeUtil;
 import jaicore.planning.model.ceoc.CEOCAction;
 import jaicore.planning.model.ceoc.CEOCOperation;
 import jaicore.planning.model.core.Action;
@@ -29,8 +28,6 @@ import jaicore.planning.model.task.stn.Method;
 import jaicore.planning.model.task.stn.MethodInstance;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.NodeExpansionDescription;
-import jaicore.search.structure.core.NodeType;
-import jaicore.search.structure.core.OrNode;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
@@ -42,7 +39,6 @@ public class RTNGraphGenerator implements GraphGenerator<RTNNode, RTNEdge> {
 	private final RTNPlanningProblem problem;
 	private final Map<String, Operation> primitiveTasks = new HashMap<>();
 	private final TaskPlannerUtil util = new TaskPlannerUtil(null);
-	private final TFDNodeUtil tfdUtil = new TFDNodeUtil(null);
 
 	public RTNGraphGenerator(RTNPlanningProblem problem) {
 		this.problem = problem;
@@ -104,7 +100,7 @@ public class RTNGraphGenerator implements GraphGenerator<RTNNode, RTNEdge> {
 						PerformanceLogger.logEnd("copy action");
 						try {
 							PerformanceLogger.logStart("update state");
-							new PlannerUtil().updateState(updatedState, applicableAction);
+							PlannerUtil.updateState(updatedState, applicableAction);
 							PerformanceLogger.logEnd("update state");
 						} catch (Exception e) {
 							System.out.println("apply " + applicableAction.getEncoding() + " to state: " + state);
