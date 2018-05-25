@@ -262,6 +262,7 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
   private static final String RESOLVE_COMPONENT_IFACE_PREFIX = "1_tResolve";
   private static final String REFINE_PARAMETERS_PREFIX = "2_tRefineParamsOf";
   private static final String REFINE_PARAMETER_PREFIX = "2_tRefineParam";
+  private static final String SATISFY_PREFIX = "1_satisfy";
 
   private CEOCIPSTNPlanningDomain getPlanningDomain() {
 
@@ -315,7 +316,7 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
         }
 
         addList.put(new CNFFormula(), standardKnowledgeAboutNewComponent);
-        CEOCOperation newOp = new CEOCOperation("satisfy" + i + "With" + c.getName(), params, new Monom("component(c1)"), addList, new HashMap<>(), new ArrayList<>());
+        CEOCOperation newOp = new CEOCOperation(SATISFY_PREFIX + i + "With" + c.getName(), params, new Monom("component(c1)"), addList, new HashMap<>(), new ArrayList<>());
         operations.add(newOp);
       }
     }
@@ -360,7 +361,7 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
         }
 
         int sc = 0;
-        network.add(new Literal("satisfy" + i + "With" + c.getName() + "(c1,c2" + refinementArguments + ")"));
+        network.add(new Literal(SATISFY_PREFIX + i + "With" + c.getName() + "(c1,c2" + refinementArguments + ")"));
         for (Entry<String, String> requiredInterface : requiredInterfaces.entrySet()) {
           String paramName = "sc" + (++sc);
           params.add(new VariableParam(paramName));
@@ -401,7 +402,7 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
           initNetwork.add(new Literal(REFINE_PARAMETER_PREFIX + p.getName() + "Of" + c.getName() + "(c2, " + paramName + ")"));
           // if (p instanceof NumericParameter) {
           methods.add(new OCIPMethod("ignoreParamRefinementFor" + p.getName() + "Of" + c.getName(), "object, container, curval",
-              new Literal("tRefineParam" + p.getName() + "Of" + c.getName() + "(object,container)"),
+              new Literal(REFINE_PARAMETER_PREFIX + p.getName() + "Of" + c.getName() + "(object,container)"),
               new Monom("parameterContainer('" + c.getName() + "', '" + p.getName() + "', object, container) & val(container,curval)"), new TaskNetwork("declareClosed(container)"),
               false, "", new Monom("notRefinable('" + c.getName() + "', object, '" + p.getName() + "', container, curval)")));
 
