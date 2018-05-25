@@ -16,7 +16,7 @@ import de.upb.crc901.automl.pipeline.service.MLPipelinePlan;
 import de.upb.crc901.automl.pipeline.service.MLServicePipeline;
 import jaicore.basic.MathExt;
 import jaicore.ml.evaluation.ClassifierMeasurementEvent;
-import jaicore.ml.experiments.Experiment;
+import jaicore.ml.experiments.MLExperiment;
 import jaicore.ml.experiments.MySQLExperimentDatabaseHandle;
 import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
@@ -274,7 +274,7 @@ public class MLPlanMySQLConnector extends MySQLExperimentDatabaseHandle {
 	}
 
 	@Override
-	protected void afterCreateRun(Experiment e, int jobId) {
+	protected void afterCreateRun(MLExperiment e, int jobId) {
 		logger.info("Setting new job id which will be used to associate incoming messages.");
 		this.jobId = jobId;
 	}
