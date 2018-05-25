@@ -79,7 +79,7 @@ public class Table<V> {
     }
     sb.append("}");
 
-    // Collections.sort(this.columnIndex);
+    Collections.sort(this.columnIndex);
     for (String c : this.columnIndex) {
       sb.append("&");
       // sb.append("\\rotatebox{90}{");
