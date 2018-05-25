@@ -64,6 +64,17 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 
   private final static Logger logger = LoggerFactory.getLogger(HASCO.class);
 
+  // component selection
+  private static final String RESOLVE_COMPONENT_IFACE_PREFIX = "1_tResolve";
+  private static final String SATISFY_PREFIX = "1_satisfy";
+
+  // component configuration
+  private static final String REFINE_PARAMETERS_PREFIX = "2_tRefineParamsOf";
+  private static final String REFINE_PARAMETER_PREFIX = "2_tRefineParam";
+  private static final String DECLARE_CLOSED_PREFIX = "2_declareClosed";
+  private static final String REDEF_CLOSED_PREFIX = "2_satisfy";
+  private static final String REDEF_VALUE_PREFIX = "2_redefValue";
+
   /* domain description */
   private final Collection<Component> components = new ArrayList<>();
   private final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig;
@@ -259,11 +270,6 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
     return ifaces;
   }
 
-  private static final String RESOLVE_COMPONENT_IFACE_PREFIX = "1_tResolve";
-  private static final String REFINE_PARAMETERS_PREFIX = "2_tRefineParamsOf";
-  private static final String REFINE_PARAMETER_PREFIX = "2_tRefineParam";
-  private static final String SATISFY_PREFIX = "1_satisfy";
-
   private CEOCIPSTNPlanningDomain getPlanningDomain() {
 
     /* create operations */
@@ -327,11 +333,11 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
       addList.put(new CNFFormula(), new Monom("val(container,newValue) & overwritten(container)"));
       Map<CNFFormula, Monom> deleteList = new HashMap<>();
       deleteList.put(new CNFFormula(), new Monom("val(container,previousValue)"));
-      operations.add(new CEOCOperation("redefValue", "container,previousValue,newValue", new Monom("val(container,previousValue)"), addList, deleteList, ""));
+      operations.add(new CEOCOperation(REDEF_VALUE_PREFIX, "container,previousValue,newValue", new Monom("val(container,previousValue)"), addList, deleteList, ""));
       addList = new HashMap<>();
       addList.put(new CNFFormula(), new Monom("closed(container)"));
       deleteList = new HashMap<>();
-      operations.add(new CEOCOperation("declareClosed", "container", new Monom(), addList, deleteList, ""));
+      operations.add(new CEOCOperation(DECLARE_CLOSED_PREFIX, "container", new Monom(), addList, deleteList, ""));
     }
 
     /* create methods */
@@ -403,13 +409,14 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
           // if (p instanceof NumericParameter) {
           methods.add(new OCIPMethod("ignoreParamRefinementFor" + p.getName() + "Of" + c.getName(), "object, container, curval",
               new Literal(REFINE_PARAMETER_PREFIX + p.getName() + "Of" + c.getName() + "(object,container)"),
-              new Monom("parameterContainer('" + c.getName() + "', '" + p.getName() + "', object, container) & val(container,curval)"), new TaskNetwork("declareClosed(container)"),
-              false, "", new Monom("notRefinable('" + c.getName() + "', object, '" + p.getName() + "', container, curval)")));
+              new Monom("parameterContainer('" + c.getName() + "', '" + p.getName() + "', object, container) & val(container,curval)"),
+              new TaskNetwork(DECLARE_CLOSED_PREFIX + "(container)"), false, "",
+              new Monom("notRefinable('" + c.getName() + "', object, '" + p.getName() + "', container, curval)")));
 
           methods.add(new OCIPMethod("refineParam" + p.getName() + "Of" + c.getName(), "object, container, curval, newval",
               new Literal(REFINE_PARAMETER_PREFIX + p.getName() + "Of" + c.getName() + "(object,container)"),
               new Monom("parameterContainer('" + c.getName() + "', '" + p.getName() + "', object, container) & val(container,curval)"),
-              new TaskNetwork("redefValue(container,curval,newval)"), false, "",
+              new TaskNetwork(REDEF_VALUE_PREFIX + "(container,curval,newval)"), false, "",
               new Monom("isValidParameterRangeRefinement('" + c.getName() + "', object, '" + p.getName() + "', container, curval, newval)")));
           // else
           // throw new IllegalArgumentException(

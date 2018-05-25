@@ -46,4 +46,8 @@ repositories {
     flatDir {
     	dirs 'lib'
     }
+	maven {
+        url "http://clojars.org/repo/"
+		url "https://jitpack.io"
+    }
 }
