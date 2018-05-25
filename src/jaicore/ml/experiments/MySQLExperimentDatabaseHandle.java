@@ -22,11 +22,11 @@ public class MySQLExperimentDatabaseHandle extends MySQLAdapter implements IMult
 		super(host, user, password, database);
 	}
 	
-	protected void beforeCreateRun(Experiment e) {}
-	protected void afterCreateRun(Experiment e, int jobId) {}
+	protected void beforeCreateRun(MLExperiment e) {}
+	protected void afterCreateRun(MLExperiment e, int jobId) {}
 	
 	@Override
-	public int createRunIfDoesNotExist(Experiment e) {
+	public int createRunIfDoesNotExist(MLExperiment e) {
 		try {
 			String[] values = { InetAddress.getLocalHost().toString(), e.getDataset(), e.getAlgorithm(), e.getAlgorithmMode(), String.valueOf(e.getSeed()), String.valueOf(e.getTimeoutInSeconds()), String.valueOf(e.getCpus()), String.valueOf(e.getMemoryInMB()), e.getPerformanceMeasure() };
 			beforeCreateRun(e);
@@ -56,17 +56,17 @@ public class MySQLExperimentDatabaseHandle extends MySQLAdapter implements IMult
 	
 
 	@Override
-	public Collection<Experiment> getExperimentsForWhichARunExists() throws Exception {
+	public Collection<MLExperiment> getExperimentsForWhichARunExists() throws Exception {
 		ResultSet rs = getResultsOfQuery("SELECT dataset, algorithm, algorithmmode, seed, timeout, cpus, memoryinmb, performancemeasure FROM `runs`");
-		Collection<Experiment> list = new ArrayList<>();
+		Collection<MLExperiment> list = new ArrayList<>();
 		while (rs.next()) {
-			list.add(new Experiment(rs.getString(1), rs.getString(2), rs.getString(3), rs.getInt(4), rs.getInt(5), rs.getInt(6), rs.getInt(7), rs.getString(8)));
+			list.add(new MLExperiment(rs.getString(1), rs.getString(2), rs.getString(3), rs.getInt(4), rs.getInt(5), rs.getInt(6), rs.getInt(7), rs.getString(8)));
 		}
 		return list;
 	}
 	
 	@Override
-	public void updateExperiment(Experiment e, Map<String, String> data) throws Exception {
+	public void updateExperiment(MLExperiment e, Map<String, String> data) throws Exception {
 		Map<String,String> whereClause = new HashMap<>();
 		whereClause.put("dataset", e.getDataset());
 		whereClause.put("algorithm", e.getAlgorithm());

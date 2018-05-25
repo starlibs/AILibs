@@ -43,7 +43,7 @@ dependencies {
 	// Basics
 	compile 'junit:junit:4.12'
 	compile 'com.google.guava:guava:18.0'
-
+	
 
 	// for subprocesses:
 	compile group: 'com.sun.jna', name: 'jna', version: '3.0.9'
@@ -58,6 +58,9 @@ dependencies {
 	//pddl4j
 	compile 'com.github.pellierd:pddl4j:v3.5.0'
 	runtime 'com.github.pellierd:pddl4j:v3.5.0'
+	
+	// mysql connector
+	compile name: 'mysql-connector-java-5.1.45-bin'
 }
 
 repositories {

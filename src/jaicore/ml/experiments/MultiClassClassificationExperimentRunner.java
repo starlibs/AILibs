@@ -53,7 +53,7 @@ public abstract class MultiClassClassificationExperimentRunner {
 	private final PMMulticlass performanceMeasure;
 	private final IMultiClassClassificationExperimentDatabase database;
 	private final int totalExperimentSize;
-	private Collection<Experiment> experimentsConductedEarlier;
+	private Collection<MLExperiment> experimentsConductedEarlier;
 
 	@SuppressWarnings("serial")
 	class ExperimentAlreadyConductedException extends Exception {
@@ -192,7 +192,7 @@ public abstract class MultiClassClassificationExperimentRunner {
 		if (performanceMeasure != PMMulticlass.errorRate) {
 			throw new IllegalArgumentException("Currently the only supported performance measure is errorRate");
 		}
-		Experiment exp = new Experiment(new File(datasetFolder + File.separator + availableDatasets.get(datasetId)).getAbsolutePath(), algo, algoMode, seedId, timeoutInSeconds, numberOfCPUs, memoryInMB, performanceMeasure.toString());
+		MLExperiment exp = new MLExperiment(new File(datasetFolder + File.separator + availableDatasets.get(datasetId)).getAbsolutePath(), algo, algoMode, seedId, timeoutInSeconds, numberOfCPUs, memoryInMB, performanceMeasure.toString());
 		
 		/* conduct a first check whether this experiment already exists */
 		if (experimentsConductedEarlier != null && experimentsConductedEarlier.contains(exp)) {
@@ -206,7 +206,7 @@ public abstract class MultiClassClassificationExperimentRunner {
 			Classifier c = getConfiguredClassifier(seedId, algo, algoMode, timeoutInSeconds, numberOfCPUs, memoryInMB, performanceMeasure);
 			
 			/* get all experiments conducted or in progress so far */
-			Collection<Experiment> experiments = database.getExperimentsForWhichARunExists();
+			Collection<MLExperiment> experiments = database.getExperimentsForWhichARunExists();
 			if (experiments.contains(exp)) {
 				throw new ExperimentAlreadyConductedException("Experiment has already been conducted, but rather recently: " + exp);
 			}

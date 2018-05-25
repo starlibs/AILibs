@@ -7,11 +7,11 @@ import weka.classifiers.Classifier;
 
 public interface IMultiClassClassificationExperimentDatabase {
 	
-	public Collection<Experiment> getExperimentsForWhichARunExists() throws Exception;
+	public Collection<MLExperiment> getExperimentsForWhichARunExists() throws Exception;
 	
-	public int createRunIfDoesNotExist(Experiment experiment) throws Exception;
+	public int createRunIfDoesNotExist(MLExperiment experiment) throws Exception;
 	
-	public void updateExperiment(Experiment experiment, Map<String,String> data) throws Exception;
+	public void updateExperiment(MLExperiment experiment, Map<String,String> data) throws Exception;
 	
 	/**
 	 * This method tells the logger the classifier object that is used for the run.
