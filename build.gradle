@@ -37,10 +37,8 @@ dependencies {
 	compile group: 'org.graphstream', name: 'gs-ui', version: '1.3'
 
 	// Weka and MEKA
-	compile group: 'nz.ac.waikato.cms.weka', name: 'weka-dev', version: '3.9.1'
-	
-	// https://mvnrepository.com/artifact/net.sf.meka/meka
-	compile group: 'net.sf.meka', name: 'meka', version: '1.9.2'
+	compile project(':weka')
+	compile project(':meka')
 	
 	// Basics
 	compile 'junit:junit:4.12'
@@ -67,7 +65,7 @@ repositories {
 	mavenLocal()
 	maven {
         url "http://clojars.org/repo/"
-	url "https://jitpack.io"
+		url "https://jitpack.io"
     }
     flatDir {
     	dirs 'lib'
