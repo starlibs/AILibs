@@ -27,6 +27,6 @@
 			"providedInterface" : [ "AbstractPreprocessor", "MakeForward" ],
 			"requiredInterface" : [ { "id": "base", "name": "BasicPreprocessor"}, {"id": "source", "name": "AbstractPreprocessor"} ],
 			"parameter" : [ ]
-		} 
+		}
 	]
 }

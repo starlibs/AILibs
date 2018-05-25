@@ -90,7 +90,7 @@ public interface HASCOForScikitLearnMLConfig extends Mutable {
   public boolean getShowGraphVisualization();
 
   @Key(K_COMPONENT_FILE)
-  @DefaultValue("testrsc/tpot/tpotComponents.json")
+  @DefaultValue("model/scikit-learn/ml-plan-ul.json")
   public File getComponentFile();
 
   @Key(K_RUN_START_TIMESTAMP)

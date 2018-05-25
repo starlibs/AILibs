@@ -43,6 +43,12 @@ public class HASCOForScikitLearnML implements IObservableGraphAlgorithm<TFDNode,
   private static final Logger logger = LoggerFactory.getLogger(HASCOForMEKA.class);
   private static final HASCOForScikitLearnMLConfig CONFIG = ConfigCache.getOrCreate(HASCOForScikitLearnMLConfig.class);
 
+  private Lock selectedSolutionsLock = new ReentrantLock();
+  private AtomicInteger selectionTasksCounter = new AtomicInteger(0);
+  private Double bestValidationScore = null;
+  private static double EPSILON = 0.03;
+  private static final int NUMBER_OF_CONSIDERED_SOLUTIONS = 100;
+
   public static class HASCOForScikitLearnMLSolution {
 
     private Solution<ForwardDecompositionSolution, ScikitLearnComposition, Double> hascoSolution;
@@ -160,12 +166,6 @@ public class HASCOForScikitLearnML implements IObservableGraphAlgorithm<TFDNode,
       return (int) Math.round(10000 * (o1.getSelectionScore() - o2.getSelectionScore()));
     }
   });
-
-  private Lock selectedSolutionsLock = new ReentrantLock();
-  private AtomicInteger selectionTasksCounter = new AtomicInteger(0);
-  private Double bestValidationScore = null;
-  private static double EPSILON = 0.03;
-  private static final int NUMBER_OF_CONSIDERED_SOLUTIONS = 100;
 
   public void gatherSolutions(final ScikitLearnBenchmark searchBenchmark, final ScikitLearnBenchmark selectionBenchmark, final ScikitLearnBenchmark testBenchmark,
       final int timeoutInMS, final MySQLAdapter mysql) {
