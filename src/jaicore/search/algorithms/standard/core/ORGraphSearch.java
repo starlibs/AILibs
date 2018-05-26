@@ -35,11 +35,11 @@ import jaicore.search.structure.core.Node;
 import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.core.OpenCollection;
 import jaicore.search.structure.core.PriorityQueueOpen;
-import jaicore.graphvisualizer.events.GraphInitializedEvent;
-import jaicore.graphvisualizer.events.NodeParentSwitchEvent;
-import jaicore.graphvisualizer.events.NodeReachedEvent;
-import jaicore.graphvisualizer.events.NodeRemovedEvent;
-import jaicore.graphvisualizer.events.NodeTypeSwitchEvent;
+import jaicore.search.structure.events.GraphInitializedEvent;
+import jaicore.search.structure.events.NodeParentSwitchEvent;
+import jaicore.search.structure.events.NodeReachedEvent;
+import jaicore.search.structure.events.NodeRemovedEvent;
+import jaicore.search.structure.events.NodeTypeSwitchEvent;
 import jaicore.search.structure.graphgenerator.MultipleRootGenerator;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.PathGoalTester;
@@ -98,7 +98,6 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	 */
 	private List<NodeExpansionDescription<T, A>> lastExpansion = new ArrayList<>();
 	private ParentDiscarding parentDiscarding;
-	private boolean verifyThatGivenGraphIsATree = true;
 
 	private class NodeBuilder implements Runnable {
 
@@ -178,10 +177,6 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 					return;
 				}
 				newNode.setInternalLabel(label);
-
-				graphEventBus.post(new NodeReachedEvent<Node<T, V>>(newNode.getParent(), newNode, "or_" + (newNode.isGoal() ? "solution" : "created")));
-				logger.debug("Sent message for creation of node {} as a successor of {}", newNode, newNode.getParent());
-
 
 				logger.info("Inserting successor {} of {} to OPEN. F-Value is {}", newNode, expandedNodeInternal, label);
 				// assert !open.contains(newNode) && !expanded.contains(newNode.getPoint()) : "Inserted node is already in OPEN or even expanded!";
@@ -341,12 +336,10 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 					labelNode(root);
 					open.add(root);
 					logger.info("Labeled root with {}", root.getInternalLabel());
-					this.graphEventBus.post(new GraphInitializedEvent<Node<T, V>>(root));
 				}
 			} else {
 				Node<T, V> root = newNode(null, ((SingleRootGenerator<T>) rootGenerator).getRoot());
 				labelNode(root);
-				this.graphEventBus.post(new GraphInitializedEvent<Node<T, V>>(root));
 				open.add(root);
 			}
 
@@ -364,6 +357,21 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 		}
 	}
 
+	public List<T> nextSolutionThatDominatesOpen() {
+		List<T> currentlyBestSolution = null;
+		V currentlyBestScore = null;
+		do {
+			List<T> solution = nextSolution();
+			V scoreOfSolution = getFOfReturnedSolution(solution);
+			if (currentlyBestScore == null || scoreOfSolution.compareTo(currentlyBestScore) < 0) {
+				currentlyBestScore = scoreOfSolution;
+				currentlyBestSolution = solution;
+			}
+		}
+		while(open.peek().getInternalLabel().compareTo(currentlyBestScore) < 0);
+		return currentlyBestSolution;
+	}
+	
 	/**
 	 * Find the shortest path to a goal starting from <code>start</code>.
 	 *
@@ -694,12 +702,12 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 			newNode.setGoal(true);
 
 		/* send events for this new node */
-//		if (parent == null) {
-//			this.graphEventBus.post(new GraphInitializedEvent<Node<T, V>>(newNode));
-//		} else {
-//			this.graphEventBus.post(new NodeReachedEvent<Node<T, V>>(parent, newNode, "or_" + (newNode.isGoal() ? "solution" : "created")));
-//			logger.debug("Sent message for creation of node {} as a successor of {}", newNode, parent);
-//		}
+		if (parent == null) {
+			this.graphEventBus.post(new GraphInitializedEvent<Node<T, V>>(newNode));
+		} else {
+			this.graphEventBus.post(new NodeReachedEvent<Node<T, V>>(parent, newNode, "or_" + (newNode.isGoal() ? "solution" : "created")));
+			logger.debug("Sent message for creation of node {} as a successor of {}", newNode, parent);
+		}
 		return newNode;
 	}
 
