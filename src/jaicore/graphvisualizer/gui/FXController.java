@@ -195,14 +195,15 @@ public class FXController implements Initializable, NodeListener {
 
         Runnable runPlay = () ->{
             try{
-                while(index < this.eventTimes.size()){
+                while(index < this.eventTimes.size() && index >= 0){
                     recorder.step();
                     TimeUnit.MILLISECONDS.sleep(sleepTime);
                     timeline.setValue(eventTimes.get(index));
                     index ++;
                 }
                 /* index correction */
-                index --;
+                if(index >= 0)
+                    index --;
             }
             catch (InterruptedException e){}
         };

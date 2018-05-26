@@ -14,6 +14,7 @@ import jaicore.search.graphgenerators.nqueens.NQueenGenerator;
 import jaicore.search.graphgenerators.nqueens.QueenNode;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
+import javafx.application.Application;
 import javafx.stage.Stage;
 import org.junit.Test;
 
@@ -21,21 +22,23 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-public class FXGuiTester extends FXGui{
+public class FXGuiTester extends Application {
 
+    FXGui gui;
 
 	@Test
 	public void test() {
-		launch();
+	    launch();
 	}
 
 	@Override
 	public void start(Stage stage) throws Exception {
+	    gui = new FXGui();
 //		bestFirstTest();
 
-//		tooltipTest();
+		tooltipTest();
 
-//		dataSupplierTest();
+		dataSupplierTest();
 
 		bestFTest();
 	}
@@ -47,7 +50,7 @@ public class FXGuiTester extends FXGui{
 
 		Recorder rec = new Recorder(bf);
 
-		open(rec, "Recorder");
+		gui.open(rec, "Recorder");
 
 //		rec.setTooltipGenerator(n->{
 //			Node node = (Node) n;
@@ -84,7 +87,7 @@ public class FXGuiTester extends FXGui{
 		recorder.addNodeDataSupplier(dataSupplier);
 
 
-		open(recorder, "TooltipTest");
+		gui.open(recorder, "TooltipTest");
 	}
 
 	private void dataSupplierTest(){
@@ -95,7 +98,7 @@ public class FXGuiTester extends FXGui{
 
 		Recorder rec = new Recorder(bf);
 
-		open(rec, "Recorder");
+		gui.open(rec, "Recorder");
 
 //		rec.setTooltipGenerator(n->{
 //			Node node = (Node) n;
@@ -115,7 +118,7 @@ public class FXGuiTester extends FXGui{
 
 		bf.nextSolution();
 
-		open();
+		gui.open();
 
 	}
 
@@ -125,7 +128,7 @@ public class FXGuiTester extends FXGui{
 		ORGraphSearch<QueenNode, String, Double> search = new ORGraphSearch<>(gen, n->(double)n.getPoint().getNumberOfNotAttackedCells());
 
 		Recorder rec = new Recorder(search);
-		open(rec,"Queens");
+		gui.open(rec,"Queens");
 
 		BestFGraphDataSupplier dataSupplier = new BestFGraphDataSupplier();
 

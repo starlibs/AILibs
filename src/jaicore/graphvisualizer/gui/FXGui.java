@@ -1,6 +1,8 @@
 package jaicore.graphvisualizer.gui;
 
 import jaicore.graph.observation.IObservableGraphAlgorithm;
+import jaicore.graphvisualizer.BestFGraphDataSupplier;
+import jaicore.graphvisualizer.INodeDataSupplier;
 import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionHTNPlanner;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.model.task.ceocstn.CEOCSTNPlanningProblem;
@@ -22,35 +24,6 @@ import java.util.List;
 
 public class FXGui{
 
-
-
-//    protected FXMLLoader rootLoader;
-//    protected FXController rootController;
-//    protected Recorder rootRecorder;
-
-//    @Override
-//    public void start(Stage stage) throws Exception {
-////        //load the fxml file of the gui
-////        this.rootLoader = new FXMLLoader(getClass().getResource("gui.fxml"));
-////        Parent root = this.rootLoader.load();
-////
-////        this.rootController = rootLoader.getController();
-////        rootController.setRecorder(rootRecorder);
-////
-////        Scene scene = new Scene(root, 800, 600);
-////
-////        stage.setTitle("Gui");
-////        stage.setScene(scene);
-////        stage.show();
-//    }
-//
-////
-////    @Override
-////    public void init() throws Exception {
-////        super.init();
-////
-////        this.rootRecorder = new Recorder();
-////    }
 
     public void open(){
        open(new Recorder(), "GUI");
@@ -109,6 +82,18 @@ public class FXGui{
 //            stage.setScene(scene);
 //            stage.show();
 
+
+    }
+
+    public void open(IObservableGraphAlgorithm algorithm, String title, List<INodeDataSupplier> nodesupplier){
+        Recorder rec  = new Recorder<>(algorithm);
+        open(rec,title);
+
+        nodesupplier.stream().forEach(s->rec.addNodeDataSupplier(s));
+
+        BestFGraphDataSupplier dataSupplier = new BestFGraphDataSupplier();
+
+        rec.addGraphDataSupplier(dataSupplier);
 
     }
 
