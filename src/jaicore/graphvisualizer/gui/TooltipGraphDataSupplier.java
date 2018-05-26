@@ -8,6 +8,7 @@ import jaicore.graphvisualizer.INodeDataVisualizer;
 import jaicore.graphvisualizer.TooltipGenerator;
 import jaicore.graphvisualizer.events.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.NodeReachedEvent;
+import jaicore.graphvisualizer.events.NodeTypeSwitchEvent;
 import jaicore.search.structure.core.Node;
 
 import java.util.HashMap;
@@ -37,6 +38,9 @@ public class TooltipGraphDataSupplier implements INodeDataSupplier {
                 break;
 
             case "NodeTypeSwitchEvent":
+                NodeTypeSwitchEvent switchEvent = (NodeTypeSwitchEvent) event;
+                if(tooltipMap.containsKey(switchEvent.getNode().hashCode()))
+                    tooltipMap.put(switchEvent.getNode().hashCode(), tooltipGenerator.getTooltip(switchEvent.getNode()));
                 break;
 
             case "NodeReachedEvent":

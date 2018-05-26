@@ -1,51 +1,21 @@
 package jaicore.search.algorithms.standard.core;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Queue;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.eventbus.Subscribe;
-
 import jaicore.basic.IIterableAlgorithm;
 import jaicore.concurrent.TimeoutTimer;
 import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
+import jaicore.graphvisualizer.events.*;
 import jaicore.logging.LoggerUtil;
 import jaicore.search.algorithms.interfaces.IObservableORGraphSearch;
-import jaicore.search.structure.core.GraphEventBus;
-import jaicore.search.structure.core.GraphGenerator;
-import jaicore.search.structure.core.Node;
-import jaicore.search.structure.core.NodeExpansionDescription;
-import jaicore.search.structure.core.OpenCollection;
-import jaicore.search.structure.core.PriorityQueueOpen;
-import jaicore.search.structure.events.GraphInitializedEvent;
-import jaicore.search.structure.events.NodeParentSwitchEvent;
-import jaicore.search.structure.events.NodeReachedEvent;
-import jaicore.search.structure.events.NodeRemovedEvent;
-import jaicore.search.structure.events.NodeTypeSwitchEvent;
-import jaicore.search.structure.graphgenerator.MultipleRootGenerator;
-import jaicore.search.structure.graphgenerator.NodeGoalTester;
-import jaicore.search.structure.graphgenerator.PathGoalTester;
-import jaicore.search.structure.graphgenerator.RootGenerator;
-import jaicore.search.structure.graphgenerator.SingleRootGenerator;
-import jaicore.search.structure.graphgenerator.SuccessorGenerator;
+import jaicore.search.structure.core.*;
+import jaicore.search.structure.graphgenerator.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public class ORGraphSearch<T, A, V extends Comparable<V>>
 		implements IObservableORGraphSearch<T, A, V>, IIterableAlgorithm<List<NodeExpansionDescription<T, A>>>, Iterator<List<NodeExpansionDescription<T, A>>> {
