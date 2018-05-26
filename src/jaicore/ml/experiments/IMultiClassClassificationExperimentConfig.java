@@ -2,9 +2,9 @@ package jaicore.ml.experiments;
 
 import java.util.List;
 
-import jaicore.experiments.IExperimentConfig;
+import jaicore.experiments.IExperimentSetConfig;
 
-public interface IMultiClassClassificationExperimentConfig extends IExperimentConfig {
+public interface IMultiClassClassificationExperimentConfig extends IExperimentSetConfig {
 	public static final String DATASETS = "datasets";
 	public static final String ALGORITHMS = "algorithms";
 	public static final String ALGORITHMMODES = "algorithmmodes";

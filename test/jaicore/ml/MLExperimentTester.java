@@ -13,6 +13,7 @@ import org.junit.Test;
 import jaicore.basic.MySQLAdapter;
 import jaicore.experiments.ExperimentDBEntry;
 import jaicore.experiments.ExperimentRunner;
+import jaicore.experiments.IExperimentIntermediateResultProcessor;
 import jaicore.ml.evaluation.MulticlassEvaluator;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
@@ -26,7 +27,7 @@ public class MLExperimentTester {
 		if (m.getDatasetFolder() == null || (!new File(m.getDatasetFolder()).exists()))
 			throw new IllegalArgumentException("config specifies invalid dataset folder " + m.getDatasetFolder());
 
-		ExperimentRunner runner = new ExperimentRunner(m, (ExperimentDBEntry experiment, MySQLAdapter adapter) -> {
+		ExperimentRunner runner = new ExperimentRunner(m, (ExperimentDBEntry experiment, MySQLAdapter adapter, IExperimentIntermediateResultProcessor processor) -> {
 			Map<String, String> description = experiment.getExperiment().getValuesOfKeyFields();
 			Classifier c = AbstractClassifier.forName(description.get("classifier"), null);
 			Instances data = new Instances(new BufferedReader(new FileReader(new File(m.getDatasetFolder() + File.separator + description.get("dataset") + ".arff"))));
@@ -39,8 +40,7 @@ public class MLExperimentTester {
 			double loss = eval.getErrorRateForRandomSplit(c, data, .7f);
 
 			results.put("loss", loss);
-
-			return results;
+			processor.processResults(results);
 		});
 		runner.randomlyConductExperiments();
 	}

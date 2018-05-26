@@ -4,10 +4,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -21,22 +23,23 @@ import jaicore.basic.StringUtil;
 
 public class ExperimentRunner {
 
-	private final IExperimentConfig config;
+	private final IExperimentSetConfig config;
 	private final ISingleExperimentConductor conductor;
 	private final MySQLAdapter adapter;
 	private final Collection<ExperimentDBEntry> knownExperimentEntries = new HashSet<>();
-	private final int totalNumberOfExperiments;
-
+	
 	private static final String FIELD_ID = "experiment_id";
 	private static final String FIELD_MEMORY = "memory";
 	private static final String FIELD_NUMCPUS = "cpus";
+	private static final String FIELD_TIME = "time";
 
-	private final Map<String, List<String>> valuesForKeyFields = new HashMap<>();
-	private final int memoryLimit;
-	private final int cpuLimit;
+	private Map<String, List<String>> valuesForKeyFields = new HashMap<>();
+	private int memoryLimit;
+	private int cpuLimit;
+	private int totalNumberOfExperiments;
 
-	public ExperimentRunner(IExperimentConfig config, ISingleExperimentConductor conductor) {
-
+	public ExperimentRunner(IExperimentSetConfig config, ISingleExperimentConductor conductor) {
+		
 		/* check data base configuration */
 		if (config.getDBHost() == null)
 			throw new IllegalArgumentException("DB host must not be null in experiment config.");
@@ -49,16 +52,19 @@ public class ExperimentRunner {
 		if (config.getDBTableName() == null)
 			throw new IllegalArgumentException("DB table must not be null in experiment config.");
 
-		/* check memory and cpu constraints */
-		this.config = config;
 		this.conductor = conductor;
+		this.config = config;
+		this.adapter = new MySQLAdapter(config.getDBHost(), config.getDBUsername(), config.getDBPassword(), config.getDBDatabaseName());
+		updateExperimentSetupAccordingToConfig();
+	}
+	
+	private void updateExperimentSetupAccordingToConfig() {
 		this.memoryLimit = (int) (Runtime.getRuntime().maxMemory() / 1024 / 1024);
 		if (memoryLimit != config.getMemoryLimitinMB()) {
 			System.err.println("The true memory limit is " + memoryLimit + ", which differs from the " + config.getMemoryLimitinMB() + " specified in the config! We will write "
 					+ memoryLimit + " into the database.");
 		}
 		this.cpuLimit = config.getNumberOfCPUs();
-		this.adapter = new MySQLAdapter(config.getDBHost(), config.getDBUsername(), config.getDBPassword(), config.getDBDatabaseName());
 		int numExperiments = 1;
 		try {
 			createTableIfNotExists();
@@ -95,7 +101,7 @@ public class ExperimentRunner {
 				String dbKey = getDatabaseFieldnameForConfigEntry(key);
 				keyValues.put(dbKey, rs.getString(dbKey));
 			}
-			experimentEntries.add(new ExperimentDBEntry(rs.getInt(FIELD_ID), new Experiment(rs.getInt(FIELD_MEMORY), rs.getInt(FIELD_NUMCPUS), keyValues)));
+			experimentEntries.add(new ExperimentDBEntry(rs.getInt(FIELD_ID), new Experiment(rs.getInt(FIELD_MEMORY + "_max"), rs.getInt(FIELD_NUMCPUS), keyValues)));
 		}
 		return experimentEntries;
 	}
@@ -112,7 +118,7 @@ public class ExperimentRunner {
 			return null;
 
 		Map<String, Object> valuesToInsert = new HashMap<>(experiment.getValuesOfKeyFields());
-		valuesToInsert.put(FIELD_MEMORY, memoryLimit);
+		valuesToInsert.put(FIELD_MEMORY + "_max", memoryLimit);
 		valuesToInsert.put(FIELD_NUMCPUS, cpuLimit);
 
 		int id = adapter.insert(config.getDBTableName(), valuesToInsert);
@@ -120,9 +126,24 @@ public class ExperimentRunner {
 	}
 
 	public void updateExperiment(ExperimentDBEntry exp, Map<String, ? extends Object> values) throws SQLException {
+		Collection<String> writableFields = config.getResultFields();
+		writableFields.add("exception");
+		writableFields.add(FIELD_TIME + "_end");
+		if (!writableFields.containsAll(values.keySet()))
+			throw new IllegalArgumentException("The value set contains non-result fields: " + SetUtil.difference(values.keySet(), writableFields));
+		String now = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+		String memoryUsageInMB = String.valueOf((int)Runtime.getRuntime().totalMemory() / 1024 / 1024);
+		Map<String,String> valuesToWrite = new HashMap<>();
+		values.keySet().forEach(k -> valuesToWrite.put(k, values.get(k).toString()));
+		for (String result : values.keySet()) {
+			if (config.getResultFields().contains(result)) {
+				valuesToWrite.put(result + "_" + FIELD_TIME, now);
+				valuesToWrite.put(result + "_" + FIELD_MEMORY, memoryUsageInMB);
+			}
+		}
 		Map<String, String> where = new HashMap<>();
 		where.put(FIELD_ID, String.valueOf(exp.getId()));
-		adapter.update(config.getDBTableName(), values, where);
+		adapter.update(config.getDBTableName(), valuesToWrite, where);
 	}
 
 	public Experiment getExperimentForNumber(int id) {
@@ -160,7 +181,10 @@ public class ExperimentRunner {
 			return;
 		}
 		while (!Thread.interrupted() && knownExperimentEntries.size() < totalNumberOfExperiments) {
+			config.reload();
+			updateExperimentSetupAccordingToConfig();
 			int k = (int) Math.floor(Math.random() * totalNumberOfExperiments);
+			System.out.println("Now conducting " + k +"/" + totalNumberOfExperiments);
 			try {
 				Experiment exp = getExperimentForNumber(k);
 				conductExperimentIfNotAlreadyConducted(exp);
@@ -180,22 +204,25 @@ public class ExperimentRunner {
 
 		ExperimentDBEntry expEntry = createAndGetExperimentIfNotConducted(exp);
 		if (expEntry != null) {
-			Map<String, Object> where = new HashMap<>();
-			where.put(FIELD_ID, expEntry.getId());
+			Map<String, Object> valuesToAddAfterRun = new HashMap<>();
+			
 			knownExperimentEntries.add(expEntry);
-			Map<String, Object> results = null;
 			try {
-				results = conductor.conduct(expEntry, adapter);
+				System.gc();
+				conductor.conduct(expEntry, adapter, m -> {
+					try {
+						updateExperiment(expEntry, m);
+					} catch (SQLException e) {
+						e.printStackTrace();
+					}
+				});
+				
 			} catch (Throwable e) {
-				Map<String, Object> values = new HashMap<>();
-				values.put("exception", e.getClass().getName() + "\n" + e.getMessage());
-				adapter.update(config.getDBTableName(), values, where);
+				valuesToAddAfterRun.put("exception", e.getClass().getName() + "\n" + e.getMessage());
 				System.err.println("Experiment failed due to exception, which has been logged");
-				return;
 			}
-			if (!config.getResultFields().containsAll(results.keySet()))
-				throw new IllegalArgumentException("The result set contains non-result fields: " + SetUtil.difference(results.keySet(), config.getResultFields()));
-			adapter.update(config.getDBTableName(), results, where);
+			valuesToAddAfterRun.put(FIELD_TIME + "_end", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+			updateExperiment(expEntry, valuesToAddAfterRun);
 		}
 	}
 
@@ -210,13 +237,18 @@ public class ExperimentRunner {
 			keyFields.append("`" + shortKey + "`,");
 		}
 		sql.append("`" + FIELD_NUMCPUS + "` int(2) NOT NULL,");
-		sql.append("`" + FIELD_MEMORY + "` int(6) NOT NULL,");
-		for (String key : config.getResultFields()) {
-			sql.append("`" + key + "` VARCHAR(100) NULL,");
+		sql.append("`" + FIELD_MEMORY + "_max` int(6) NOT NULL,");
+		sql.append("`" + FIELD_TIME + "_start` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,");
+
+		for (String result : config.getResultFields()) {
+			sql.append("`" + result + "` VARCHAR(100) NULL,");
+			sql.append("`" + result + "_" + FIELD_TIME + "` TIMESTAMP NULL,");
+			sql.append("`" + result + "_" + FIELD_MEMORY + "` int(6) NULL,");
 		}
 		sql.append("`exception` TEXT NULL,");
+		sql.append("`" + FIELD_TIME + "_end` TIMESTAMP NULL,");
 		sql.append("PRIMARY KEY (`" + FIELD_ID + "`)");
-		sql.append(", UNIQUE KEY `keyFields` (" + keyFields.toString() + "`" + FIELD_NUMCPUS + "`, `" + FIELD_MEMORY + "`)");
+		sql.append(", UNIQUE KEY `keyFields` (" + keyFields.toString() + "`" + FIELD_NUMCPUS + "`, `" + FIELD_MEMORY + "_max`)");
 		sql.append(") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin");
 		adapter.update(sql.toString(), new String[] {});
 	}
