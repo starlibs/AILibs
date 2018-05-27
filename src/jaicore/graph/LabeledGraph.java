@@ -7,6 +7,7 @@ import java.util.Map;
 
 import jaicore.basic.SetUtil;
 
+@SuppressWarnings("serial")
 public class LabeledGraph<T, L> extends Graph<T> {
 
 	private static class Edge<T> {

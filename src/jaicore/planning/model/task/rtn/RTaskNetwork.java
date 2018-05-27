@@ -5,6 +5,7 @@ import java.util.Map;
 import jaicore.logic.fol.structure.Literal;
 import jaicore.planning.model.task.stn.TaskNetwork;
 
+@SuppressWarnings("serial")
 public class RTaskNetwork extends TaskNetwork {
 
 	private final Map<Literal,StateReducer> reducers;

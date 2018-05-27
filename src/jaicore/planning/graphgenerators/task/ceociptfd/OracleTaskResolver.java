@@ -9,5 +9,5 @@ import jaicore.planning.model.core.Action;
 
 public interface OracleTaskResolver {
 	
-	public Collection<List<Action>> getSubSolutions(Monom state, Literal task);
+	public Collection<List<Action>> getSubSolutions(Monom state, Literal task) throws Exception;
 }

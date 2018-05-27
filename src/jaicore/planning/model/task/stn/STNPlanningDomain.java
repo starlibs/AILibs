@@ -1,10 +1,12 @@
 package jaicore.planning.model.task.stn;
 
+import java.io.Serializable;
 import java.util.Collection;
 
 import jaicore.planning.model.core.Operation;
 
-public class STNPlanningDomain {
+@SuppressWarnings("serial")
+public class STNPlanningDomain implements Serializable {
 
 	private final Collection<? extends Operation> operations;
 	private final Collection<? extends Method> methods;

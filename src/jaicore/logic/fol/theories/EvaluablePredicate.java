@@ -2,11 +2,9 @@ package jaicore.logic.fol.theories;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 import jaicore.logic.fol.structure.ConstantParam;
 import jaicore.logic.fol.structure.Monom;
-import jaicore.logic.fol.structure.VariableParam;
 
 public interface EvaluablePredicate {
 	

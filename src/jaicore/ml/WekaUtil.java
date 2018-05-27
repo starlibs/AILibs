@@ -1,14 +1,19 @@
 package jaicore.ml;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
 import java.io.StringReader;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +21,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.reflect.MethodUtils;
 
@@ -31,7 +37,6 @@ import jaicore.ml.core.SimpleLabeledInstanceImpl;
 import jaicore.ml.core.WekaCompatibleInstancesImpl;
 import jaicore.ml.interfaces.LabeledInstance;
 import jaicore.ml.interfaces.LabeledInstances;
-import weka.attributeSelection.CfsSubsetEval;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.core.Attribute;
@@ -51,12 +56,11 @@ public class WekaUtil {
 	public static Collection<String> getBasicLearners() {
 		Collection<String> classifiers = new ArrayList<>();
 
-
 		classifiers.add("weka.classifiers.bayes.BayesNet");
 		classifiers.add("weka.classifiers.bayes.NaiveBayes");
 		classifiers.add("weka.classifiers.bayes.NaiveBayesMultinomial");
-//		classifiers.add("weka.classifiers.functions.GaussianProcesses");
-//		classifiers.add("weka.classifiers.functions.LinearRegression");
+		// classifiers.add("weka.classifiers.functions.GaussianProcesses");
+		// classifiers.add("weka.classifiers.functions.LinearRegression");
 		classifiers.add("weka.classifiers.functions.Logistic");
 		classifiers.add("weka.classifiers.functions.MultilayerPerceptron");
 		classifiers.add("weka.classifiers.functions.SimpleLinearRegression");
@@ -71,7 +75,7 @@ public class WekaUtil {
 		classifiers.add("weka.classifiers.rules.PART");
 		classifiers.add("weka.classifiers.rules.ZeroR");
 		classifiers.add("weka.classifiers.trees.DecisionStump");
-//		classifiers.add("weka.classifiers.trees.HoeffdingTree");		
+		// classifiers.add("weka.classifiers.trees.HoeffdingTree");
 		classifiers.add("weka.classifiers.trees.J48");
 		classifiers.add("weka.classifiers.trees.LMT");
 		classifiers.add("weka.classifiers.trees.M5P");
@@ -81,9 +85,45 @@ public class WekaUtil {
 		return classifiers;
 	}
 	
+	public static Collection<String> getNativeMultiClassClassifiers() {
+		Collection<String> classifiers = new ArrayList<>();
+
+		classifiers.add("weka.classifiers.bayes.BayesNet");
+		classifiers.add("weka.classifiers.bayes.NaiveBayes");
+		classifiers.add("weka.classifiers.bayes.NaiveBayesMultinomial");
+		// classifiers.add("weka.classifiers.functions.GaussianProcesses");
+		// classifiers.add("weka.classifiers.functions.LinearRegression");
+		classifiers.add("weka.classifiers.functions.Logistic");
+		classifiers.add("weka.classifiers.functions.MultilayerPerceptron");
+		classifiers.add("weka.classifiers.functions.SimpleLogistic");
+		classifiers.add("weka.classifiers.lazy.IBk");
+		classifiers.add("weka.classifiers.lazy.KStar");
+		classifiers.add("weka.classifiers.rules.JRip");
+		classifiers.add("weka.classifiers.rules.M5Rules");
+		classifiers.add("weka.classifiers.rules.OneR");
+		classifiers.add("weka.classifiers.rules.PART");
+		classifiers.add("weka.classifiers.rules.ZeroR");
+		classifiers.add("weka.classifiers.trees.DecisionStump");
+		// classifiers.add("weka.classifiers.trees.HoeffdingTree");
+		classifiers.add("weka.classifiers.trees.J48");
+		classifiers.add("weka.classifiers.trees.LMT");
+		classifiers.add("weka.classifiers.trees.M5P");
+		classifiers.add("weka.classifiers.trees.RandomForest");
+		classifiers.add("weka.classifiers.trees.RandomTree");
+		classifiers.add("weka.classifiers.trees.REPTree");
+		return classifiers;
+	}
+	
+	public static Collection<String> getBinaryClassifiers() {
+		Collection<String> classifiers = new ArrayList<>();
+		classifiers.add("weka.classifiers.functions.SMO");
+		classifiers.add("weka.classifiers.functions.VotedPerceptron");
+		return classifiers;
+	}
+
 	public static Collection<String> getFeatureEvaluators() {
 		Collection<String> preprocessors = new ArrayList<>();
-		
+
 		preprocessors.add("weka.attributeSelection.CfsSubsetEval");
 		preprocessors.add("weka.attributeSelection.CorrelationAttributeEval");
 		preprocessors.add("weka.attributeSelection.GainRatioAttributeEval");
@@ -94,10 +134,10 @@ public class WekaUtil {
 		preprocessors.add("weka.attributeSelection.SymmetricalUncertAttributeEval");
 		return preprocessors;
 	}
-	
+
 	public static Collection<String> getSearchers() {
 		Collection<String> preprocessors = new ArrayList<>();
-		
+
 		preprocessors.add("weka.attributeSelection.Ranker");
 		preprocessors.add("weka.attributeSelection.BestFirst");
 		preprocessors.add("weka.attributeSelection.GreedyStepwise");
@@ -153,7 +193,7 @@ public class WekaUtil {
 		/* create instances object and insert the data points */
 		Instances wekaInstances = new Instances("JAICore-extracted dataset", attributes, instances.size());
 		wekaInstances.setClassIndex(numAttributes);
-//		Attribute classAttribute = wekaInstances.classAttribute();
+		// Attribute classAttribute = wekaInstances.classAttribute();
 		for (jaicore.ml.interfaces.Instance instance : instances) {
 			Instance wekaInstance = new DenseInstance(numAttributes + 1);
 			wekaInstance.setDataset(wekaInstances);
@@ -229,11 +269,11 @@ public class WekaUtil {
 		addedInstance.setClassValue(instance.getLabel());
 		return addedInstance;
 	}
-	
+
 	public static Instances fromJAICoreInstances(final LabeledInstances<String> labeledInstances) {
 		int attributeCount = labeledInstances.getNumberOfColumns() + 1; // the amount of attributes including the class label.
 		int dataSize = labeledInstances.getNumberOfRows();
-		
+
 		/* create basic attribute entries */
 		ArrayList<Attribute> attributeList = new ArrayList<>(attributeCount);
 		for (int i = 1; i < attributeCount; i++) {
@@ -242,13 +282,12 @@ public class WekaUtil {
 		/* create class attribute */
 		ArrayList<String> classes = labeledInstances.getOccurringLabels();
 		Attribute classAttribute = new Attribute("label", classes);
-		
+
 		attributeList.add(classAttribute);
-		
-		weka.core.Instances wekaInstances = new Instances("JAICore-extracted dataset", attributeList,
-				dataSize);
-		wekaInstances.setClassIndex(wekaInstances.numAttributes()-1); // the last item is the class attribute.
-		
+
+		weka.core.Instances wekaInstances = new Instances("JAICore-extracted dataset", attributeList, dataSize);
+		wekaInstances.setClassIndex(wekaInstances.numAttributes() - 1); // the last item is the class attribute.
+
 		for (jaicore.ml.interfaces.LabeledInstance<String> labeledInstance : labeledInstances) {
 			double[] values = new double[attributeCount];
 			for (int i = 0; i < attributeCount - 1; i++) {
@@ -256,7 +295,7 @@ public class WekaUtil {
 			}
 			weka.core.Instance wekaInstance = new DenseInstance(1.0, values);
 			String label = labeledInstance.getLabel();
-			
+
 			wekaInstance.setDataset(wekaInstances);
 			double classIndex = (double) classAttribute.indexOfValue(label);
 			wekaInstance.setClassValue(classIndex);
@@ -264,7 +303,7 @@ public class WekaUtil {
 		}
 		return wekaInstances;
 	}
-	
+
 	public static WekaCompatibleInstancesImpl toJAICoreLabeledInstances(final Instances wekaInstances) {
 		WekaCompatibleInstancesImpl labeledInstances = new WekaCompatibleInstancesImpl(getClassesDeclaredInDataset(wekaInstances));
 		for (Instance inst : wekaInstances) {
@@ -272,32 +311,34 @@ public class WekaUtil {
 		}
 		return labeledInstances;
 	}
-	
+
 	/**
 	 * Returns true if there is at least one nominal attribute in the given dataset that has more than 2 values.
-	 * @param wekaInstances dataset that is checked
-	 * @param ignoreClassAttribute if true class attribute is ignored.
+	 * 
+	 * @param wekaInstances
+	 *            dataset that is checked
+	 * @param ignoreClassAttribute
+	 *            if true class attribute is ignored.
 	 */
 	public static boolean needsBinarization(final Instances wekaInstances, final boolean ignoreClassAttribute) {
 		Attribute classAttribute = wekaInstances.classAttribute();
-		if(!ignoreClassAttribute) {
+		if (!ignoreClassAttribute) {
 			// check if class Attribute has more than 2 values:
-			if(classAttribute.isNominal() && classAttribute.numValues() >= 3) {
+			if (classAttribute.isNominal() && classAttribute.numValues() >= 3) {
 				return true;
 			}
 		}
 		// iterate over every attribute and check.
-		for(Enumeration<Attribute> attributeEnum = wekaInstances.enumerateAttributes();
-				attributeEnum.hasMoreElements();) {
+		for (Enumeration<Attribute> attributeEnum = wekaInstances.enumerateAttributes(); attributeEnum.hasMoreElements();) {
 			Attribute currentAttr = attributeEnum.nextElement();
-			if(!currentAttr.isNominal()) {
-				continue; // ignore attributes that aren't nominal. 
+			if (!currentAttr.isNominal()) {
+				continue; // ignore attributes that aren't nominal.
 			}
-			if(currentAttr == classAttribute) {
+			if (currentAttr == classAttribute) {
 				// ignore class attribute (already checked in case ignoreClassAttribute==true):
 				continue;
 			}
-			if(currentAttr.numValues() >= 3) {
+			if (currentAttr.numValues() >= 3) {
 				return true;
 			}
 		}
@@ -485,7 +526,7 @@ public class WekaUtil {
 	}
 
 	public static Collection<Integer>[] getArbitrarySplit(final Instances data, final Random rand, final double... portions) {
-		
+
 		/* check that portions sum up to s.th. smaller than 1 */
 		double sum = 0;
 		for (double p : portions) {
@@ -494,38 +535,39 @@ public class WekaUtil {
 		if (sum > 1) {
 			throw new IllegalArgumentException("Portions must sum up to at most 1.");
 		}
-		
+
 		LinkedList<Integer> indices = new LinkedList<>(ContiguousSet.create(Range.closed(0, data.size() - 1), DiscreteDomain.integers()).asList());
 		Collections.shuffle(indices, rand);
-		
+
 		@SuppressWarnings("unchecked")
 		Collection<Integer>[] folds = new ArrayList[portions.length + 1];
 		Instances emptyInstances = new Instances(data);
 		emptyInstances.clear();
-		
+
 		/* distribute instances over the folds */
 		for (int i = 0; i <= portions.length; i++) {
 			double portion = i < portions.length ? portions[i] : 1 - sum;
-			int numberOfItems = (int)Math.floor(data.size() * portion);
+			int numberOfItems = (int) Math.floor(data.size() * portion);
 			Collection<Integer> fold = new ArrayList<>(numberOfItems);
 			for (int j = 0; j < numberOfItems; j++) {
 				fold.add(indices.poll());
 			}
 			folds[i] = fold;
 		}
-		
+
 		/* distribute remaining ones over the folds */
 		while (!indices.isEmpty()) {
 			folds[rand.nextInt(folds.length)].add(indices.poll());
 		}
-		assert Arrays.asList(folds).stream().mapToInt(l -> l.size()).sum() == data.size() : "The number of instancens in the folds does not equal the number of instances in the original dataset";
+		assert Arrays.asList(folds).stream().mapToInt(l -> l.size()).sum() == data
+				.size() : "The number of instancens in the folds does not equal the number of instances in the original dataset";
 		return folds;
 	}
-	
+
 	public static List<Instances> realizeSplit(final Instances data, final Collection<Integer>[] split) {
 		return realizeSplitAsCopiedInstances(data, split);
 	}
-	
+
 	public static List<Instances> realizeSplitAsCopiedInstances(final Instances data, final Collection<Integer>[] split) {
 		List<Instances> folds = new ArrayList<>();
 		Instances emptyInstances = new Instances(data);
@@ -537,7 +579,7 @@ public class WekaUtil {
 		}
 		return folds;
 	}
-	
+
 	public static List<Instances> realizeSplitAsSubInstances(final Instances data, final Collection<Integer>[] split) {
 		List<Instances> folds = new ArrayList<>();
 		for (Collection<Integer> foldIndices : split) {
@@ -550,7 +592,7 @@ public class WekaUtil {
 		}
 		return folds;
 	}
-	
+
 	public static Collection<Integer>[] getStratifiedSplitIndices(final Instances data, final Random rand, final double... pPortions) {
 
 		/* check that portions sum up to s.th. smaller than 1 */
@@ -564,28 +606,28 @@ public class WekaUtil {
 			throw new IllegalArgumentException("Portions must sum up to at most 1.");
 		}
 		portions[pPortions.length] = 1 - sum;
-		
+
 		/* determine how many instance of each class should be in each fold */
 		Map<String, Integer> numberOfInstancesPerClass = getNumberOfInstancesPerClass(data);
 		Map<String, Map<Integer, Integer>> numberOfInstancesPerClassAndFold = new HashMap<>();
 		for (String className : numberOfInstancesPerClass.keySet()) {
 			numberOfInstancesPerClassAndFold.put(className, new HashMap<>());
-			for (int foldId = 0; foldId < portions.length; foldId ++) {
-				numberOfInstancesPerClassAndFold.get(className).put(foldId, (int)Math.ceil(numberOfInstancesPerClass.get(className) * portions[foldId]));
+			for (int foldId = 0; foldId < portions.length; foldId++) {
+				numberOfInstancesPerClassAndFold.get(className).put(foldId, (int) Math.ceil(numberOfInstancesPerClass.get(className) * portions[foldId]));
 			}
 		}
-		
+
 		/* compute basic structures for iteration over all instances */
 		Map<String, Integer> nextBinForClass = new HashMap<>();
 		numberOfInstancesPerClass.keySet().forEach(c -> nextBinForClass.put(c, 0));
 		Collection<Integer>[] folds = new ArrayList[portions.length];
 		LinkedList<Integer> indices = new LinkedList<>(ContiguousSet.create(Range.closed(0, data.size() - 1), DiscreteDomain.integers()).asList());
 		Collections.shuffle(indices, rand);
-		
+
 		/* first assign one item of each class to each fold */
 		while (!indices.isEmpty()) {
 			int index = indices.poll();
-			
+
 			/* determine fold where to place this instance */
 			String assignedClass = WekaUtil.getClassName(data.get(index));
 			int foldId = nextBinForClass.get(assignedClass);
@@ -593,22 +635,22 @@ public class WekaUtil {
 				folds[foldId] = new ArrayList<>();
 			Collection<Integer> fold = folds[foldId];
 			fold.add(index);
-			
+
 			/* update point for class */
-			numberOfInstancesPerClassAndFold.get(assignedClass).put(foldId, numberOfInstancesPerClassAndFold.get(assignedClass).get(foldId) -1);
+			numberOfInstancesPerClassAndFold.get(assignedClass).put(foldId, numberOfInstancesPerClassAndFold.get(assignedClass).get(foldId) - 1);
 			do {
-				foldId ++;
+				foldId++;
 				if (foldId >= portions.length)
 					foldId = 0;
-			}
-			while (numberOfInstancesPerClassAndFold.get(assignedClass).get(foldId) <= 0);
+			} while (numberOfInstancesPerClassAndFold.get(assignedClass).get(foldId) <= 0);
 			nextBinForClass.put(assignedClass, foldId);
 		}
-		
-		assert Arrays.asList(folds).stream().mapToInt(l -> l.size()).sum() == data.size() : "The number of instancens in the folds does not equal the number of instances in the original dataset";
+
+		assert Arrays.asList(folds).stream().mapToInt(l -> l.size()).sum() == data
+				.size() : "The number of instancens in the folds does not equal the number of instances in the original dataset";
 		return folds;
 	}
-	
+
 	public static ArrayNode splitToJsonArray(Collection<Integer>[] splitDecision) {
 		ObjectMapper om = new ObjectMapper();
 		ArrayNode an = om.createArrayNode();
@@ -668,8 +710,33 @@ public class WekaUtil {
 			}
 			instancesForSplit.randomize(rand);
 		}
-		assert instances.stream().mapToInt(l -> l.size()).sum() == data.size() : "The number of instancens in the folds does not equal the number of instances in the original dataset";
+		assert instances.stream().mapToInt(l -> l.size()).sum() == data
+				.size() : "The number of instancens in the folds does not equal the number of instances in the original dataset";
 		return instances;
+	}
+
+	public static List<File> getDatasetsInFolder(final File folder) throws IOException {
+		List<File> files = new ArrayList<>();
+		try (Stream<Path> paths = Files.walk(folder.toPath())) {
+			paths.filter(f -> f.getParent().toFile().equals(folder) && f.toFile().getAbsolutePath().endsWith(".arff")).forEach(f -> files.add(f.toFile()));
+		}
+		return files.stream().sorted().collect(Collectors.toList());
+	}
+	
+	public static Instances getRefactoredInstances(final Instances data, Map<String,String> classMap) {
+			
+		List<String> targetClasses = new ArrayList<>(new HashSet<>(classMap.values()));
+		Instances childData = WekaUtil.getEmptySetOfInstancesWithRefactoredClass(data, targetClasses);
+		for (Instance i : data) {
+			String className = i.classAttribute().value((int) Math.round(i.classValue()));
+			if (classMap.containsKey(className)) {
+				Instance iNew = WekaUtil.getRefactoredInstance(i, targetClasses);
+				iNew.setClassValue(classMap.get(className));
+				iNew.setDataset(childData);
+				childData.add(iNew);
+			}
+		}
+		return childData;
 	}
 
 	public static Instance getRefactoredInstance(final Instance instance) {
@@ -712,7 +779,7 @@ public class WekaUtil {
 	}
 
 	public static Instances getEmptySetOfInstancesWithRefactoredClass(final Instances instances) {
-		List<Attribute> newAttributes = getAttributes(instances,false);
+		List<Attribute> newAttributes = getAttributes(instances, false);
 		newAttributes.add(instances.classIndex(), getNewClassAttribute(instances.classAttribute()));
 		Instances newData = new Instances("split", (ArrayList<Attribute>) newAttributes, 0);
 		newData.setClassIndex(instances.classIndex());
@@ -720,7 +787,7 @@ public class WekaUtil {
 	}
 
 	public static Instances getEmptySetOfInstancesWithRefactoredClass(final Instances instances, final List<String> classes) {
-		List<Attribute> newAttributes = getAttributes(instances,false);
+		List<Attribute> newAttributes = getAttributes(instances, false);
 		newAttributes.add(instances.classIndex(), getNewClassAttribute(instances.classAttribute(), classes));
 		Instances newData = new Instances("split", (ArrayList<Attribute>) newAttributes, 0);
 		newData.setClassIndex(instances.classIndex());
@@ -901,12 +968,12 @@ public class WekaUtil {
 			return (Classifier) cloneMethod.invoke(c);
 		return AbstractClassifier.makeCopy(c);
 	}
-	
+
 	public static int[] getIndicesOfSubset(final Instances data, final Instances subset) {
-		
+
 		InstanceComparator comp = new InstanceComparator();
 		List<Instance> copy = new ArrayList<>(subset);
-		
+
 		/* init rows object */
 		int[] result = new int[subset.size()];
 		int row = 0;
@@ -919,7 +986,7 @@ public class WekaUtil {
 					copy.remove(j--);
 				}
 			}
-			row ++;
+			row++;
 			System.out.println(i + "/" + copy.size());
 		}
 		return result;

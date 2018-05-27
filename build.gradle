@@ -37,13 +37,13 @@ dependencies {
 	compile group: 'org.graphstream', name: 'gs-ui', version: '1.3'
 
 	// Weka and MEKA
-	compile group: 'nz.ac.waikato.cms.weka', name: 'weka-dev', version: '3.9.1'
-	compile name: 'meka'
-
+	compile project(':weka')
+	compile project(':meka')
+	
 	// Basics
 	compile 'junit:junit:4.12'
 	compile 'com.google.guava:guava:18.0'
-
+	
 
 	// for subprocesses:
 	compile group: 'com.sun.jna', name: 'jna', version: '3.0.9'
@@ -58,6 +58,9 @@ dependencies {
 	//pddl4j
 	compile 'com.github.pellierd:pddl4j:v3.5.0'
 	runtime 'com.github.pellierd:pddl4j:v3.5.0'
+	
+	// mysql connector
+	compile name: 'mysql-connector-java-5.1.45-bin'
 }
 
 repositories {
@@ -65,7 +68,7 @@ repositories {
 	mavenLocal()
 	maven {
         url "http://clojars.org/repo/"
-	url "https://jitpack.io"
+		url "https://jitpack.io"
     }
     flatDir {
     	dirs 'lib'

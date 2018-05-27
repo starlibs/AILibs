@@ -2,17 +2,16 @@ package jaicore.planning.model.task.stn;
 
 import jaicore.logic.fol.structure.CNFFormula;
 import jaicore.logic.fol.structure.Monom;
-import jaicore.planning.algorithms.IHTNPlanningAlgorithm;
 import jaicore.planning.model.task.IHTNPlanningProblem;
 
+@SuppressWarnings("serial")
 public class STNPlanningProblem implements IHTNPlanningProblem {
 
 	private final STNPlanningDomain domain;
-	
 	private final CNFFormula knowledge;
 	private final Monom init;
-
 	private final TaskNetwork network;
+	private final boolean sortNetworkBasedOnNumberPrefixes = true;
 
 	public STNPlanningProblem(STNPlanningDomain domain, CNFFormula knowledge, Monom init, TaskNetwork network) {
 		super();
@@ -25,7 +24,7 @@ public class STNPlanningProblem implements IHTNPlanningProblem {
 	public STNPlanningDomain getDomain() {
 		return domain;
 	}
-	
+
 	public CNFFormula getKnowledge() {
 		return knowledge;
 	}
@@ -38,6 +37,10 @@ public class STNPlanningProblem implements IHTNPlanningProblem {
 		return network;
 	}
 
+	public boolean isSortNetworkBasedOnNumberPrefixes() {
+		return sortNetworkBasedOnNumberPrefixes;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -46,6 +49,7 @@ public class STNPlanningProblem implements IHTNPlanningProblem {
 		result = prime * result + ((init == null) ? 0 : init.hashCode());
 		result = prime * result + ((knowledge == null) ? 0 : knowledge.hashCode());
 		result = prime * result + ((network == null) ? 0 : network.hashCode());
+		result = prime * result + (sortNetworkBasedOnNumberPrefixes ? 1231 : 1237);
 		return result;
 	}
 
@@ -77,6 +81,8 @@ public class STNPlanningProblem implements IHTNPlanningProblem {
 			if (other.network != null)
 				return false;
 		} else if (!network.equals(other.network))
+			return false;
+		if (sortNetworkBasedOnNumberPrefixes != other.sortNetworkBasedOnNumberPrefixes)
 			return false;
 		return true;
 	}

@@ -2,9 +2,11 @@ package jaicore.ml.classification.multiclass.reduction.reducer;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
@@ -77,19 +79,21 @@ public class ReductionGraphGenerator implements GraphGenerator<RestProblem, Deci
 
 					/* now go for splits (here we always apply direct) */
 					List<ISplitter> splitters = new ArrayList<>();
+					Map<ISplitter,Classifier> classifiers = new HashMap<>();
 					for (int i = 0; i < 1; i++) {
-						splitters.add(new RPNDSplitter(data, rand));
+						Classifier c = AbstractClassifier.forName(classifier, null);
+						ISplitter splitter = new RPNDSplitter(rand, c);
+						classifiers.put(splitter,c);
+						splitters.add(splitter);
 						// splitters.add(new GreedySplitter(train));
 					}
 					for (ISplitter splitter : splitters) {
-						Classifier c = AbstractClassifier.forName(classifier, null);
-						assert c != null : "No classifier selected!";
-						Collection<Collection<String>> split = splitter.split(set, c);
+						Collection<Collection<String>> split = splitter.split(data);
 						Iterator<Collection<String>> iterator = split.iterator();
 
 						Set<String> c1 = new HashSet<>(iterator.next());
 						Set<String> c2 = new HashSet<>(iterator.next());
-						RestProblem rp = new RestProblem(new Decision(c1, c2, EMCNodeType.DIRECT, c));
+						RestProblem rp = new RestProblem(new Decision(c1, c2, EMCNodeType.DIRECT, classifiers.get(splitter)));
 						if (c1.size() > 1)
 							rp.add(c1);
 						if (c2.size() > 1)

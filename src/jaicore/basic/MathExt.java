@@ -21,10 +21,10 @@ public abstract class MathExt {
     	return set;
     }
     
-    public static double doubleFactorial(short k) {
+    public static int doubleFactorial(int k) {
     	if (k <= 0)
     		return 1;
-    	return k * doubleFactorial((short)(k - 2));
+    	return k * doubleFactorial(k - 2);
     }
     
     public static double round(double d, int precision) {

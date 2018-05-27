@@ -2,7 +2,6 @@ package jaicore.search.algorithms.parallel.parallelexploration.distributed.inter
 
 import java.io.Serializable;
 
-import jaicore.search.structure.graphgenerator.RootGenerator;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 
 public interface SerializableRootGenerator<T> extends SingleRootGenerator<T>, Serializable {

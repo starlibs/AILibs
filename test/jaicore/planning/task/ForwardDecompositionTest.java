@@ -1,40 +1,56 @@
 package jaicore.planning.task;
 
-import java.util.Arrays;
-import java.util.Collection;
+import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
 
-import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
+import jaicore.basic.MathExt;
 import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionHTNPlanner;
-import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionHTNPlanner.SolutionIterator;
-import jaicore.planning.graphgenerators.task.tfd.TFDNode;
-import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;
 import jaicore.planning.model.task.ceocstn.CEOCSTNPlanningProblem;
 import jaicore.planning.model.task.ceocstn.StandardProblemFactory;
-import jaicore.search.structure.core.Node;
 
 public class ForwardDecompositionTest {
 
-	@Test
-	public void test() {
-		
-		/* create nested dichotomy problem */
-		Collection<String> init = Arrays.asList(new String[] {"A", "B", "C", "D"});
-		CEOCSTNPlanningProblem problem = StandardProblemFactory.getNestedDichotomyCreationProblem("root", init, true, 0, 0);
-		ForwardDecompositionHTNPlanner planner = new ForwardDecompositionHTNPlanner(problem, 1);
-		SolutionIterator plannerRun = planner.iterator();
-		new SimpleGraphVisualizationWindow<Node<TFDNode,Double>>(plannerRun.getSearch()).getPanel().setTooltipGenerator(new TFDTooltipGenerator<>());
+	private void solveNDProblem(int numClasses) {
+		List<String> classes = new ArrayList<>();
+		for (int i = 1; i <= numClasses; i++)
+			classes.add("C" + i);
+			
+		CEOCSTNPlanningProblem problem = StandardProblemFactory.getNestedDichotomyCreationProblem("root", classes, true, 0, 0);
+		ForwardDecompositionHTNPlanner<Double> planner = new ForwardDecompositionHTNPlanner<>(problem, n -> 0.0, 1, 1);
+		ForwardDecompositionHTNPlanner<Double>.SolutionIterator plannerRun = planner.iterator();
+//		new SimpleGraphVisualizationWindow<Node<TFDNode,Double>>(plannerRun.getSearch()).getPanel().setTooltipGenerator(new TFDTooltipGenerator<>());
 		
 		/* solve problem */
-		System.out.println("Starting search. Waiting for solutions:");
+		System.out.println("Searching all nested dichotomies to sepratate " + numClasses + ".");
+		int numSolutions = 0;
 		while (plannerRun.hasNext()) {
-			List<TFDNode> solution = (List<TFDNode>) plannerRun.next();
-			System.out.println("\t" + solution);
+			plannerRun.next();
+			numSolutions ++;
+			if (numSolutions % 100 == 0)
+				System.out.println("Found " + numSolutions + " solutions so far ...");
 		}
-		System.out.println("Algorithm has finished.");
-		while (true);
+		int numberOfExpectedDichotomies = MathExt.doubleFactorial(2 * numClasses - 3);
+		assertEquals(numberOfExpectedDichotomies, numSolutions);
+		System.out.println("Ready, found exactly the expected " + numberOfExpectedDichotomies + " solutions.");
+	}
+	
+	@Test
+	public void solveNDWith3Classes() {
+		solveNDProblem(3);
+	}
+	
+	@Test
+	public void solveNDWith4Classes() {
+		solveNDProblem(4);
+	}
+	
+	@Test
+	public void solveNDWith5Classes() {
+		solveNDProblem(5);
 	}
 
 }

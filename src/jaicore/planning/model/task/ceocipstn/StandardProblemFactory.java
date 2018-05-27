@@ -29,7 +29,7 @@ public class StandardProblemFactory {
 //			System.out.println(classes);
 		}
 		List<CEOCOperation> operations = new ArrayList<>();
-		Map<CNFFormula,Monom> addLists = new HashMap<>(), deleteLists = new HashMap<>();
+		Map<CNFFormula,Monom> addLists = new HashMap<>();
 		
 		/* operation to close a */
 		

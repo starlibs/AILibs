@@ -13,7 +13,7 @@ import jaicore.basic.MySQLAdapter;
 import weka.classifiers.Classifier;
 
 @SuppressWarnings("serial")
-public abstract class MySQLExperimentDatabaseHandle extends MySQLAdapter implements IMultiClassClassificationExperimentDatabase {
+public class MySQLExperimentDatabaseHandle extends MySQLAdapter implements IMultiClassClassificationExperimentDatabase {
 	
 	private Map<Integer,Classifier> run2classifier = new HashMap<>();
 	private Map<Classifier,Integer> classifier2run = new HashMap<>();
@@ -22,11 +22,11 @@ public abstract class MySQLExperimentDatabaseHandle extends MySQLAdapter impleme
 		super(host, user, password, database);
 	}
 	
-	protected void beforeCreateRun(Experiment e) {}
-	protected void afterCreateRun(Experiment e, int jobId) {}
+	protected void beforeCreateRun(MLExperiment e) {}
+	protected void afterCreateRun(MLExperiment e, int jobId) {}
 	
 	@Override
-	public int createRunIfDoesNotExist(Experiment e) {
+	public int createRunIfDoesNotExist(MLExperiment e) {
 		try {
 			String[] values = { InetAddress.getLocalHost().toString(), e.getDataset(), e.getAlgorithm(), e.getAlgorithmMode(), String.valueOf(e.getSeed()), String.valueOf(e.getTimeoutInSeconds()), String.valueOf(e.getCpus()), String.valueOf(e.getMemoryInMB()), e.getPerformanceMeasure() };
 			beforeCreateRun(e);
@@ -56,18 +56,35 @@ public abstract class MySQLExperimentDatabaseHandle extends MySQLAdapter impleme
 	
 
 	@Override
-	public Collection<Experiment> getExperimentsForWhichARunExists() throws Exception {
+	public Collection<MLExperiment> getExperimentsForWhichARunExists() throws Exception {
 		ResultSet rs = getResultsOfQuery("SELECT dataset, algorithm, algorithmmode, seed, timeout, cpus, memoryinmb, performancemeasure FROM `runs`");
-		Collection<Experiment> list = new ArrayList<>();
+		Collection<MLExperiment> list = new ArrayList<>();
 		while (rs.next()) {
-			list.add(new Experiment(rs.getString(1), rs.getString(2), rs.getString(3), rs.getInt(4), rs.getInt(5), rs.getInt(6), rs.getInt(7), rs.getString(8)));
+			list.add(new MLExperiment(rs.getString(1), rs.getString(2), rs.getString(3), rs.getInt(4), rs.getInt(5), rs.getInt(6), rs.getInt(7), rs.getString(8)));
 		}
 		return list;
 	}
 	
 	@Override
-	public void updateExperiment(Experiment e, Map<String, String> data) throws Exception {
-		String[] values = { data.get("rows_for_training"), e.getDataset(), e.getAlgorithm(), e.getAlgorithmMode(), String.valueOf(e.getSeed()), String.valueOf(e.getTimeoutInSeconds()), String.valueOf(e.getCpus()), String.valueOf(e.getMemoryInMB()), e.getPerformanceMeasure() };
-		update("UPDATE runs SET rows_for_training = ? WHERE dataset = ? AND algorithm = ? AND algorithmmode = ? AND seed = ? AND timeout = ? AND cpus = ? AND memoryinmb = ? AND performancemeasure = ?", values);
+	public void updateExperiment(MLExperiment e, Map<String, String> data) throws Exception {
+		Map<String,String> whereClause = new HashMap<>();
+		whereClause.put("dataset", e.getDataset());
+		whereClause.put("algorithm", e.getAlgorithm());
+		whereClause.put("algorithmmode", e.getAlgorithmMode());
+		whereClause.put("seed", String.valueOf(e.getSeed()));
+		whereClause.put("timeout", String.valueOf(e.getTimeoutInSeconds()));
+		whereClause.put("cpus", String.valueOf(e.getCpus()));
+		whereClause.put("memoryinmb", String.valueOf(e.getMemoryInMB()));
+		whereClause.put("performancemeasure", String.valueOf(e.getPerformanceMeasure()));
+		update("runs", data, whereClause);
+	}
+
+	@Override
+	public void addResultEntry(int runId, double score) throws Exception {
+		Map<String,String> whereClause = new HashMap<>();
+		whereClause.put("run_id", String.valueOf(runId));
+		Map<String,String> data = new HashMap<>();
+		data.put("errorRate", String.valueOf(score));
+		update("runs", data, whereClause);
 	}
 }

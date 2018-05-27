@@ -6,18 +6,18 @@ package jaicore.search.structure.core;
  *
  * @param <T>
  */
-public class VersionedT<T> {
+public class VersionedDomainNode<T> {
 
 	//variables - only the node and the id of the node
 	private T node;
 	private int id;
 	
-	public VersionedT(T node) {
+	public VersionedDomainNode(T node) {
 		this.node = node;
 		this.id = 0;
 	}
 	
-	public VersionedT(T node, int id) {
+	public VersionedDomainNode(T node, int id) {
 		this.node = node;
 		this.id = id;
 	}

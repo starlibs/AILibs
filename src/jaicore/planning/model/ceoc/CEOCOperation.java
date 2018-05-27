@@ -11,6 +11,7 @@ import jaicore.logic.fol.structure.Monom;
 import jaicore.logic.fol.structure.VariableParam;
 import jaicore.planning.model.conditional.CEOperation;
 
+@SuppressWarnings("serial")
 public class CEOCOperation extends CEOperation {
 	
 	private final List<VariableParam> outputs;

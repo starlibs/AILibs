@@ -2,8 +2,8 @@ package jaicore.ml.classification.multiclass.reduction.splitters;
 
 import java.util.Collection;
 
-import weka.classifiers.Classifier;
+import weka.core.Instances;
 
 public interface ISplitter {
-	 public Collection<Collection<String>> split(Collection<String> set, Classifier c) throws Exception;
+	 public Collection<Collection<String>> split(Instances data) throws Exception;
 }

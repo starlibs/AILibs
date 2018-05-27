@@ -48,15 +48,14 @@ public class StandardProblemFactory {
 		/* operation to shift the first element from a left cluster to a right one */
 		addLists = new HashMap<>();
 		addLists.put(new CNFFormula(), new Monom("in(x,r) & biggest(x,r) & smallest(x,r)"));
-			
-		/* updates the smallest of */
 		Monom case1 = new Monom("smallest(x,l)");
 		for (String c2ndSmallest : classes) {
 			CNFFormula allQuantifiedBiggerRelation = new CNFFormula(case1);
 			allQuantifiedBiggerRelation.add(new Clause("in('" + c2ndSmallest + "', l)"));
 			for (String cOther : classes) {
 				if (!cOther.equals(c2ndSmallest)) {
-					allQuantifiedBiggerRelation.add(new Clause("!in('" + cOther + "', l) | x = '" + cOther + "' | bigger('" + cOther + "', '" + c2ndSmallest + "')"));
+					Clause c = new Clause("!in('" + cOther + "', l) | x = '" + cOther + "' | bigger('" + cOther + "', '" + c2ndSmallest + "')");
+					allQuantifiedBiggerRelation.add(c);
 				}
 			}
 			addLists.put(allQuantifiedBiggerRelation, new Monom("smallest('" + c2ndSmallest + "', l)"));
@@ -100,7 +99,7 @@ public class StandardProblemFactory {
 		/* define STN methods for the domain */
 		Literal taskRefine = new Literal("refine(c)");
 		Literal taskConfigure = new Literal("configureClusters(l,r)");
-		Literal taskConfigureSVM = new Literal("configureSVM(c,l,r)");
+//		Literal taskConfigureSVM = new Literal("configureSVM(c,l,r)");
 		Literal taskShiftFirst = new Literal("selectAndShiftFirstElement(l,r)");
 		Literal taskShiftFirstNonSmallest = new Literal("selectAndShiftFirstNonSmallestElement(l,r)");
 		Literal taskShiftFurther = new Literal("selectAndShiftFurtherElement(l,r)");
@@ -109,22 +108,22 @@ public class StandardProblemFactory {
 		
 		List<OCMethod> methods = new ArrayList<>();
 		if (objectCreation) {
-			methods.add(new OCMethod("assertbinarycluster",  Arrays.asList(new VariableParam[] { new VariableParam("c"), new VariableParam("lc"), new VariableParam("rc") }), taskRefine, new Monom(), new TaskNetwork("initChildClusters(c,lc,rc) -> shiftAnyElement(lc,rc) -> checkLeaf(lc) -> checkLeaf(rc) -> configureSVM(c,lc,rc)"), true, Arrays.asList(new VariableParam[]{ new VariableParam("lc"), new VariableParam("rc")})));
+			methods.add(new OCMethod("assertbinarycluster",  Arrays.asList(new VariableParam[] { new VariableParam("c"), new VariableParam("lc"), new VariableParam("rc") }), taskRefine, new Monom(), new TaskNetwork("initChildClusters(c,lc,rc) -> shiftAnyElement(lc,rc) -> checkLeaf(lc) -> checkLeaf(rc)"), true, Arrays.asList(new VariableParam[]{ new VariableParam("lc"), new VariableParam("rc")})));
 			methods.add(new OCMethod("refineandclosetheotherunarily",  Arrays.asList(new VariableParam[] { new VariableParam("c"), new VariableParam("lc"), new VariableParam("rc") }), taskRefine, new Monom(), new TaskNetwork("initChildClusters(c,lc,rc) -> selectAndShiftFirstElement(lc,rc) -> refine(lc)"), false, Arrays.asList(new VariableParam[]{ new VariableParam("lc"), new VariableParam("rc")})));
 			methods.add(new OCMethod("refinebothwithatleasttwoonbothsides",  Arrays.asList(new VariableParam[] { new VariableParam("c"), new VariableParam("lc"), new VariableParam("rc") }), taskRefine, new Monom(), new TaskNetwork("initChildClusters(c,lc,rc) -> selectAndShiftFirstNonSmallestElement(lc,rc) -> selectAndShiftFurtherElement(lc,rc) -> configureClusters(lc,rc) -> refine(lc) -> refine(rc)"), false, Arrays.asList(new VariableParam[]{ new VariableParam("lc"), new VariableParam("rc")})));
 		}
 		else {
-			methods.add(new OCMethod("assertbinarycluster",  Arrays.asList(new VariableParam[] { new VariableParam("c"), new VariableParam("lc"), new VariableParam("rc"), new VariableParam("next") }), taskRefine, new Monom("nextVar(lc) & succ(lc,rc) & succ(rc,next)"), new TaskNetwork("initChildClusters(c,lc,rc,next) -> shiftAnyElement(lc,rc) -> checkLeaf(lc) -> checkLeaf(rc) -> configureSVM(c,lc,rc)"), true, Arrays.asList()));
+			methods.add(new OCMethod("assertbinarycluster",  Arrays.asList(new VariableParam[] { new VariableParam("c"), new VariableParam("lc"), new VariableParam("rc"), new VariableParam("next") }), taskRefine, new Monom("nextVar(lc) & succ(lc,rc) & succ(rc,next)"), new TaskNetwork("initChildClusters(c,lc,rc,next) -> shiftAnyElement(lc,rc) -> checkLeaf(lc) -> checkLeaf(rc)"), true, Arrays.asList()));
 			methods.add(new OCMethod("refineandclosetheotherunarily",  Arrays.asList(new VariableParam[] { new VariableParam("c"), new VariableParam("lc"), new VariableParam("rc"), new VariableParam("next") }), taskRefine, new Monom("nextVar(lc) & succ(lc,rc) & succ(rc,next)"), new TaskNetwork("initChildClusters(c,lc,rc,next) -> selectAndShiftFirstElement(lc,rc) ->  refine(lc)"), false, Arrays.asList()));
 			methods.add(new OCMethod("refinebothwithatleasttwoonbothsides",  Arrays.asList(new VariableParam[] { new VariableParam("c"), new VariableParam("lc"), new VariableParam("rc"), new VariableParam("next") }), taskRefine, new Monom("nextVar(lc) & succ(lc,rc) & succ(rc,next)"), new TaskNetwork("initChildClusters(c,lc,rc,next) -> selectAndShiftFirstNonSmallestElement(lc,rc) -> selectAndShiftFurtherElement(lc,rc) -> configureClusters(lc,rc) -> refine(lc) -> refine(rc)"), false, Arrays.asList(new VariableParam[]{ new VariableParam("lc"), new VariableParam("rc")})));
 		}
-		for (int i = -1 * maxExpRange; i <= maxExpRange; i++)
-			methods.add(new OCMethod("setupSVMCForValue" + i,  Arrays.asList(new VariableParam[] { new VariableParam("c"), new VariableParam("l"), new VariableParam("r")}), taskConfigureSVM, new Monom(), new TaskNetwork("configureSVM1thPlace(c,l,r)"), false, new ArrayList<>()));
-		for (int i = 1; i <= maxRefinement; i++) {
-			if (i < maxRefinement)
-				methods.add(new OCMethod("setPlace" + i + "ofSVMCParam", 		 	Arrays.asList(new VariableParam[] { new VariableParam("c"), new VariableParam("l"), new VariableParam("r"), new VariableParam("x") }), new Literal("configureSVM" + i + "thPlace(c,l,r)"), new Monom("!configClosed(c) & digit(x)"), new TaskNetwork("setSVMCVal(c, '" + i + "',x) -> configureSVM" + (i + 1) + "thPlace(c,l,r)"), false, new ArrayList<>()));
-			methods.add(new OCMethod("setPlaceAndClose" + i + "ofSVMCParam",	Arrays.asList(new VariableParam[] { new VariableParam("c"), new VariableParam("l"), new VariableParam("r"), new VariableParam("x") }), new Literal("configureSVM" + i + "thPlace(c,l,r)"), new Monom("!configClosed(c) & digit(x)"), new TaskNetwork("setSVMCVal(c, '" + i + "',x)"), false, new ArrayList<>()));
-		}
+//		for (int i = -1 * maxExpRange; i <= maxExpRange; i++)
+//			methods.add(new OCMethod("setupSVMCForValue" + i,  Arrays.asList(new VariableParam[] { new VariableParam("c"), new VariableParam("l"), new VariableParam("r")}), taskConfigureSVM, new Monom(), new TaskNetwork("configureSVM1thPlace(c,l,r)"), false, new ArrayList<>()));
+//		for (int i = 1; i <= maxRefinement; i++) {
+//			if (i < maxRefinement)
+//				methods.add(new OCMethod("setPlace" + i + "ofSVMCParam", 		 	Arrays.asList(new VariableParam[] { new VariableParam("c"), new VariableParam("l"), new VariableParam("r"), new VariableParam("x") }), new Literal("configureSVM" + i + "thPlace(c,l,r)"), new Monom("!configClosed(c) & digit(x)"), new TaskNetwork("setSVMCVal(c, '" + i + "',x) -> configureSVM" + (i + 1) + "thPlace(c,l,r)"), false, new ArrayList<>()));
+//			methods.add(new OCMethod("setPlaceAndClose" + i + "ofSVMCParam",	Arrays.asList(new VariableParam[] { new VariableParam("c"), new VariableParam("l"), new VariableParam("r"), new VariableParam("x") }), new Literal("configureSVM" + i + "thPlace(c,l,r)"), new Monom("!configClosed(c) & digit(x)"), new TaskNetwork("setSVMCVal(c, '" + i + "',x)"), false, new ArrayList<>()));
+//		}
 		methods.add(new OCMethod("shiftElementAndConfigure",  Arrays.asList(new VariableParam[] { new VariableParam("l"), new VariableParam("r") }), taskConfigure, new Monom(), new TaskNetwork("selectAndShiftFurtherElement(l,r) -> configureClusters(l,r)"), false, new ArrayList<>()));
 		methods.add(new OCMethod("selectAndShiftFirstElementMethod",  Arrays.asList(new VariableParam[] { new VariableParam("x"), new VariableParam("l"), new VariableParam("r") }), taskShiftFirst, new Monom("in(x,l)"), new TaskNetwork("shiftFirstElement(x,l,r)"), false, new ArrayList<>()));
 		methods.add(new OCMethod("selectAndShiftFirstNonSmallestElementMethod",  Arrays.asList(new VariableParam[] { new VariableParam("x"), new VariableParam("l"), new VariableParam("r") }), taskShiftFirstNonSmallest, new Monom("in(x,l) & !smallest(x,l)"), new TaskNetwork("shiftFirstElement(x,l,r)"), false, new ArrayList<>()));
@@ -149,10 +148,10 @@ public class StandardProblemFactory {
 		}
 		
 		/* for SVM config */
-		for (int exp = -5; exp <= 5; exp++)
-			init.add(new Literal("exponent('" + exp + "')"));
-		for (int i = 0; i <= 9; i++)
-			init.add(new Literal("digit('" + i + "')"));
+//		for (int exp = -5; exp <= 5; exp++)
+//			init.add(new Literal("exponent('" + exp + "')"));
+//		for (int i = 0; i <= 9; i++)
+//			init.add(new Literal("digit('" + i + "')"));
 		
 		/* if no constant creation is allowed, add all successor objects */
 		if (!objectCreation) {

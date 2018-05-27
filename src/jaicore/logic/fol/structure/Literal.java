@@ -105,7 +105,7 @@ public class Literal implements Serializable {
 		if (propertyWithParams.contains("=")) {
 			String[] params = StringUtil.explode(propertyWithParams, "=");
 			boolean isNegated = params.length > 0 && params[0].endsWith("!");
-			this.property = "!=";
+			this.property = isNegated ? "!=" : "=";
 			if (params.length == 2) {
 				int p1Length = isNegated ? params[0].length() - 1 : params[0].length();
 				this.parameters.add(LogicUtil.parseParamName(params[0].substring(0, p1Length).trim()));

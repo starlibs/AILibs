@@ -1,8 +1,6 @@
 package jaicore.ml.experiments;
 
-import com.fasterxml.jackson.databind.node.ArrayNode;
-
-public class Experiment {
+public class MLExperiment {
 	private final String dataset;
 	private final String algorithm;
 	private final String algorithmMode;
@@ -12,7 +10,7 @@ public class Experiment {
 	private final int memoryInMB;
 	private final String performanceMeasure;
 
-	public Experiment(String dataset, String algorithm, String algorithmMode, int seed, int timeoutInSeconds, int cpus, int memoryInMB,
+	public MLExperiment(String dataset, String algorithm, String algorithmMode, int seed, int timeoutInSeconds, int cpus, int memoryInMB,
 			String performanceMeasure) {
 		super();
 		this.dataset = dataset;
@@ -80,7 +78,7 @@ public class Experiment {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Experiment other = (Experiment) obj;
+		MLExperiment other = (MLExperiment) obj;
 		if (algorithm == null) {
 			if (other.algorithm != null)
 				return false;

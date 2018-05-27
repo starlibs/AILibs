@@ -6,6 +6,7 @@ import jaicore.logic.fol.structure.Monom;
 import jaicore.logic.fol.structure.VariableParam;
 import jaicore.planning.model.core.Operation;
 
+@SuppressWarnings("serial")
 public class StripsOperation extends Operation {
 	
 	private final Monom addList, deleteList;

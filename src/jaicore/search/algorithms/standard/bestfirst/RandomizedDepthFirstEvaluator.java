@@ -5,6 +5,7 @@ import java.util.Random;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableNodeEvaluator;
 import jaicore.search.structure.core.Node;
 
+@SuppressWarnings("serial")
 public class RandomizedDepthFirstEvaluator<T> implements SerializableNodeEvaluator<T,Double> {
 
 	private final Random rand;
