@@ -25,7 +25,6 @@ public class MLServiceBenchmark implements IObjectEvaluator<MLServicePipeline, D
   private static final HASCOForCombinedMLConfig CONFIG = ConfigCache.getOrCreate(HASCOForCombinedMLConfig.class);
   private static final Timer TIMEOUT_TIMER = new Timer();
 
-  private Task runTask;
   private Instances data;
   private int maximumSeeds;
   private Double splitSize;
@@ -39,20 +38,18 @@ public class MLServiceBenchmark implements IObjectEvaluator<MLServicePipeline, D
   }
 
   public MLServiceBenchmark(final Instances data, final int repetitions, final double splitSize, final int timeoutInMS, final int maximumSeeds, final SQLAdapter mysql,
-      final String mysqlLogTable, final Task runTask) {
+      final String mysqlLogTable) {
     this.data = data;
     this.splitSize = splitSize;
     this.maximumSeeds = maximumSeeds;
     this.repetitions = repetitions;
     this.mysql = mysql;
-    this.runTask = runTask;
     this.timeoutInMS = timeoutInMS;
   }
 
-  public MLServiceBenchmark(final List<Instances> trainTestSplit, final SQLAdapter mysql, final String mysqlLogTable, final Task runTask) {
+  public MLServiceBenchmark(final List<Instances> trainTestSplit, final SQLAdapter mysql, final String mysqlLogTable) {
     this.trainTestSplit = trainTestSplit;
     this.mysql = mysql;
-    this.runTask = runTask;
   }
 
   public Double evaluateFixedSplit(final MLServicePipeline object) throws Exception {
@@ -134,7 +131,7 @@ public class MLServiceBenchmark implements IObjectEvaluator<MLServicePipeline, D
 
     if (this.mysql != null) {
       Map<String, String> valueMap = new HashMap<>();
-      valueMap.put("run_id", this.runTask.getValueAsString("run_id"));
+      valueMap.put("run_id", "" + CONFIG.getRunID());
       valueMap.put("pipeline", object.getConstructionPlan().toString());
       valueMap.put("errorRate", returnValue + "");
       valueMap.put("timeToSolution", (System.currentTimeMillis() - CONFIG.getRunStartTimestamp()) + "");
