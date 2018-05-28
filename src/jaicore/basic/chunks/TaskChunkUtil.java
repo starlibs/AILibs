@@ -8,7 +8,7 @@ import java.sql.ResultSet;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import jaicore.basic.MySQLAdapter;
+import jaicore.basic.SQLAdapter;
 
 public class TaskChunkUtil {
 	public static TaskChunk<Task> readFromCSV(final String[] columns, final File csvFile, final Map<String, String> commonFields) throws IOException {
@@ -65,7 +65,7 @@ public class TaskChunkUtil {
 		return chunk;
 	}
 
-	public static TaskChunk<Task> readFromMySQLTable(final MySQLAdapter adapter, final String table, final Map<String, String> commonFields) throws Exception {
+	public static TaskChunk<Task> readFromMySQLTable(final SQLAdapter adapter, final String table, final Map<String, String> commonFields) throws Exception {
 		return readFromMySQLResultSet(adapter.getRowsOfTable(table), commonFields);
 		
 	}

@@ -16,18 +16,26 @@ import java.util.Properties;
 
 import org.apache.commons.lang3.math.NumberUtils;
 
+/**
+ * This is a simple util class for easy database access and query execution in sql.
+ * You need to make sure that the respective JDBC connector is in the class path.
+ * By default, the adapter uses the mysql driver, but any jdbc driver can be used.
+ * 
+ * @author fmohr
+ *
+ */
 @SuppressWarnings("serial")
-public class MySQLAdapter implements Serializable, AutoCloseable {
+public class SQLAdapter implements Serializable, AutoCloseable {
   private final String driver, host, user, password, database;
   private Connection connect;
   private long timestampOfLastAction = Long.MIN_VALUE;
   private final Properties connectionProperties;
 
-  public MySQLAdapter(final String host, final String user, final String password, final String database) {
+  public SQLAdapter(final String host, final String user, final String password, final String database) {
     this("mysql", host, user, password, database, new Properties());
   }
 
-  public MySQLAdapter(final String driver, final String host, final String user, final String password, final String database, final Properties connectionProperties) {
+  public SQLAdapter(final String driver, final String host, final String user, final String password, final String database, final Properties connectionProperties) {
     super();
     this.driver = driver;
     this.host = host;
@@ -40,8 +48,7 @@ public class MySQLAdapter implements Serializable, AutoCloseable {
 
       @Override
       public void run() {
-        System.out.println("Closing MySQL Connection");
-        MySQLAdapter.this.close();
+        SQLAdapter.this.close();
       }
     }));
   }
@@ -75,7 +82,6 @@ public class MySQLAdapter implements Serializable, AutoCloseable {
   public synchronized void checkConnection() throws SQLException {
     int renewAfterSeconds = 5 * 60;
     if (this.timestampOfLastAction + renewAfterSeconds * 1000 < System.currentTimeMillis()) {
-      System.out.println("Reconnect to database");
       this.close();
       this.connect();
     }

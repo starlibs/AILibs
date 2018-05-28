@@ -9,11 +9,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import jaicore.basic.MySQLAdapter;
+import jaicore.basic.SQLAdapter;
 import weka.classifiers.Classifier;
 
 @SuppressWarnings("serial")
-public class MySQLExperimentDatabaseHandle extends MySQLAdapter implements IMultiClassClassificationExperimentDatabase {
+public class MySQLExperimentDatabaseHandle extends SQLAdapter implements IMultiClassClassificationExperimentDatabase {
 	
 	private Map<Integer,Classifier> run2classifier = new HashMap<>();
 	private Map<Classifier,Integer> classifier2run = new HashMap<>();

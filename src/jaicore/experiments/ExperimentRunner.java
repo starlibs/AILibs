@@ -17,15 +17,15 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import jaicore.basic.MySQLAdapter;
+import jaicore.basic.SQLAdapter;
 import jaicore.basic.SetUtil;
 import jaicore.basic.StringUtil;
 
 public class ExperimentRunner {
 
 	private final IExperimentSetConfig config;
-	private final ISingleExperimentConductor conductor;
-	private final MySQLAdapter adapter;
+	private final IExperimentSetEvaluator conductor;
+	private final SQLAdapter adapter;
 	private final Collection<ExperimentDBEntry> knownExperimentEntries = new HashSet<>();
 	
 	private static final String FIELD_ID = "experiment_id";
@@ -38,9 +38,10 @@ public class ExperimentRunner {
 	private int cpuLimit;
 	private int totalNumberOfExperiments;
 
-	public ExperimentRunner(IExperimentSetConfig config, ISingleExperimentConductor conductor) {
+	public ExperimentRunner(IExperimentSetEvaluator conductor) {
 		
 		/* check data base configuration */
+		this.config = conductor.getConfig();
 		if (config.getDBHost() == null)
 			throw new IllegalArgumentException("DB host must not be null in experiment config.");
 		if (config.getDBUsername() == null)
@@ -53,8 +54,7 @@ public class ExperimentRunner {
 			throw new IllegalArgumentException("DB table must not be null in experiment config.");
 
 		this.conductor = conductor;
-		this.config = config;
-		this.adapter = new MySQLAdapter(config.getDBHost(), config.getDBUsername(), config.getDBPassword(), config.getDBDatabaseName());
+		this.adapter = new SQLAdapter(config.getDBHost(), config.getDBUsername(), config.getDBPassword(), config.getDBDatabaseName());
 		updateExperimentSetupAccordingToConfig();
 	}
 	
@@ -209,7 +209,7 @@ public class ExperimentRunner {
 			knownExperimentEntries.add(expEntry);
 			try {
 				System.gc();
-				conductor.conduct(expEntry, adapter, m -> {
+				conductor.evaluate(expEntry, adapter, m -> {
 					try {
 						updateExperiment(expEntry, m);
 					} catch (SQLException e) {
