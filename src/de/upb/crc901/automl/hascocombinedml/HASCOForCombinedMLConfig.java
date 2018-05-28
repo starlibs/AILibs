@@ -11,7 +11,7 @@ public interface HASCOForCombinedMLConfig extends Mutable {
   public static final String K_TMP_FOLDER = "hasco.sklearn.tmp";
   public static final String K_TEMPLATE_FOLDER = "hasco.sklearn.template";
   public static final String K_CANDIDATE_NAME = "hasco.sklearn.candidatename";
-
+  
   public static final String K_NUM_CPUS = "hasco.run.cpus";
   public static final String K_DATASET_FOLDER = "hasco.run.datasetfolder";
   public static final String K_NUM_SAMPLES = "hasco.run.samples";
@@ -106,6 +106,7 @@ public interface HASCOForCombinedMLConfig extends Mutable {
   @Key(K_SEED)
   public long getSeed();
 
+  
   @Key(K_REQUEST_INTERFACE)
   @DefaultValue("AbstractClassifier")
   public String getRequestedInterface();

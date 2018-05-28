@@ -241,7 +241,6 @@ public class HASCOForCombinedML implements IObservableGraphAlgorithm<TFDNode, St
 
     }
     if (deadlineReached)
-
     {
       logger.info("Deadline has been reached");
     } else if (this.isCanceled) {
