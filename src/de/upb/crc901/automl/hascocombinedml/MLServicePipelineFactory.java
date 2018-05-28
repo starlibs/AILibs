@@ -4,17 +4,20 @@ import de.upb.crc901.automl.pipeline.service.MLPipelinePlan;
 import de.upb.crc901.automl.pipeline.service.MLPipelinePlan.MLPipe;
 import de.upb.crc901.automl.pipeline.service.MLServicePipeline;
 
-import java.util.Map;
+import jaicore.basic.ListHelper;
 
-import org.aeonbits.owner.ConfigCache;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import hasco.model.ComponentInstance;
 import hasco.query.Factory;
+import weka.attributeSelection.ASEvaluation;
+import weka.attributeSelection.ASSearch;
 import weka.classifiers.AbstractClassifier;
-import weka.classifiers.Classifier;
 
 public class MLServicePipelineFactory implements Factory<MLServicePipeline> {
-  private static final HASCOForCombinedMLConfig CONFIG = ConfigCache.getOrCreate(HASCOForCombinedMLConfig.class);
 
   @Override
   public MLServicePipeline getComponentInstantiation(final ComponentInstance groundComponent) {
@@ -22,32 +25,40 @@ public class MLServicePipelineFactory implements Factory<MLServicePipeline> {
     MLPipelinePlan plan = new MLPipelinePlan();
 
     try {
+      ComponentInstance preprocessorCI = null;
+      String ppName = "";
+      ComponentInstance classifierCI = null;
+      String classifierName = "";
+
       switch (groundComponent.getComponent().getName()) {
         case "pipeline": {
-          ComponentInstance preprocessorCI = groundComponent.getSatisfactionOfRequiredInterfaces().get("preprocessor");
-          if (preprocessorCI.getComponent().getName().startsWith("sklearn")) {
-            MLPipe preprocessorPipe = plan.addAttributeSelection(preprocessorCI.getComponent().getName());
-            this.setParameters(plan, preprocessorPipe, preprocessorCI.getParameterValues());
-          }
+          /* Retrieve component instances of pipeline */
+          preprocessorCI = groundComponent.getSatisfactionOfRequiredInterfaces().get("preprocessor");
+          ppName = preprocessorCI.getComponent().getName();
 
-          ComponentInstance classifierCI = groundComponent.getSatisfactionOfRequiredInterfaces().get("classifier");
-          if (classifierCI.getComponent().getName().startsWith("sklearn")) {
-            MLPipe classifierPipe = plan.setClassifier(classifierCI.getComponent().getName());
-            this.setParameters(plan, classifierPipe, classifierCI.getParameterValues());
-          }
+          classifierCI = groundComponent.getSatisfactionOfRequiredInterfaces().get("classifier");
+          classifierName = classifierCI.getComponent().getName();
           break;
         }
         default: {
-          if (groundComponent.getComponent().getName().startsWith("sklearn")) {
-            MLPipe classifierPipe = plan.setClassifier(groundComponent.getComponent().getName());
-            this.setParameters(plan, classifierPipe, groundComponent.getParameterValues());
-          } else {
-            Classifier c = AbstractClassifier.forName(groundComponent.getComponent().getName(), null);
-            plan.setClassifier(c);
-          }
+          classifierCI = groundComponent;
+          classifierName = groundComponent.getComponent().getName();
           break;
         }
       }
+
+      if (ppName.startsWith("sklearn")) {
+        this.addSKLearnPreprocessor(preprocessorCI, plan);
+      } else if (ppName.startsWith("weka")) {
+        this.addWEKAPreprocessor(preprocessorCI, plan);
+      }
+
+      if (classifierName.startsWith("sklearn")) {
+        this.addSKLearnClassifier(classifierCI, plan);
+      } else if (classifierName.startsWith("weka")) {
+        this.addWEKAClassifier(classifierCI, plan);
+      }
+
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -57,6 +68,58 @@ public class MLServicePipelineFactory implements Factory<MLServicePipeline> {
     } catch (InterruptedException e) {
       return null;
     }
+  }
+
+  private void addWEKAPreprocessor(final ComponentInstance ci, final MLPipelinePlan plan) throws Exception {
+    ComponentInstance evaluatorCI = ci.getSatisfactionOfRequiredInterfaces().get("eval");
+    ComponentInstance searcherCI = ci.getSatisfactionOfRequiredInterfaces().get("search");
+
+    ASEvaluation eval = ASEvaluation.forName(evaluatorCI.getComponent().getName(), this.getParameterList(evaluatorCI).toArray(new String[] {}));
+    ASSearch search = ASSearch.forName(searcherCI.getComponent().getName(), this.getParameterList(searcherCI).toArray(new String[] {}));
+    plan.addWekaAttributeSelection(search, eval);
+  }
+
+  private List<String> getParameterList(final ComponentInstance ci) {
+    List<String> parameters = new LinkedList<>();
+
+    for (Entry<String, String> parameterValues : ci.getParameterValues().entrySet()) {
+      if (parameterValues.getKey().endsWith("Activator") || parameterValues.getValue().equals("REMOVED")) {
+        continue;
+      }
+
+      if (!parameterValues.getValue().equals("false")) {
+        parameters.add("-" + parameterValues.getKey());
+      }
+      if (parameterValues.getValue() != null && !parameterValues.getValue().equals("") && !parameterValues.getValue().equals("true")
+          && !parameterValues.getValue().equals("false")) {
+        parameters.add(parameterValues.getValue());
+      }
+    }
+
+    for (String paramName : ci.getSatisfactionOfRequiredInterfaces().keySet()) {
+      List<String> subParams = this.getParameterList(ci.getSatisfactionOfRequiredInterfaces().get(paramName));
+      String paramValue = ci.getSatisfactionOfRequiredInterfaces().get(paramName).getComponent().getName() + " " + ListHelper.implode(subParams, " ");
+      parameters.add("-" + paramName);
+      parameters.add(paramValue);
+    }
+
+    return parameters;
+  }
+
+  private void addWEKAClassifier(final ComponentInstance ci, final MLPipelinePlan plan) throws Exception {
+    ci.getParameterValues();
+    List<String> parameters = this.getParameterList(ci);
+    plan.setClassifier(AbstractClassifier.forName(ci.getComponent().getName(), parameters.toArray(new String[] {})));
+  }
+
+  private void addSKLearnPreprocessor(final ComponentInstance ci, final MLPipelinePlan plan) {
+    MLPipe preprocessorPipe = plan.addAttributeSelection(ci.getComponent().getName());
+    this.setParameters(plan, preprocessorPipe, ci.getParameterValues());
+  }
+
+  private void addSKLearnClassifier(final ComponentInstance ci, final MLPipelinePlan plan) {
+    MLPipe classifierPipe = plan.setClassifier(ci.getComponent().getName());
+    this.setParameters(plan, classifierPipe, ci.getParameterValues());
   }
 
   private void setParameters(final MLPipelinePlan plan, final MLPipe pipe, final Map<String, String> parameterValues) {

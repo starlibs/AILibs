@@ -5,6 +5,7 @@ import de.upb.crc901.automl.pipeline.service.MLServicePipeline;
 
 import jaicore.basic.SQLAdapter;
 import jaicore.graph.observation.IObservableGraphAlgorithm;
+import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionSolution;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.search.algorithms.standard.core.INodeEvaluator;
@@ -14,10 +15,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Random;
@@ -191,6 +190,8 @@ public class HASCOForCombinedML implements IObservableGraphAlgorithm<TFDNode, St
     hasco.setNumberOfCPUs(this.numberOfCPUs);
     hasco.setTimeout(CONFIG.getTimeout());
 
+    new SimpleGraphVisualizationWindow<>(this);
+
     /* add all listeners to HASCO */
     this.listeners.forEach(l -> hasco.registerListener(l));
     this.listeners.forEach(l -> hasco.registerListenerForSolutionEvaluations(l));
@@ -199,6 +200,7 @@ public class HASCOForCombinedML implements IObservableGraphAlgorithm<TFDNode, St
     this.hascoRun = hasco.iterator();
     boolean deadlineReached = false;
     while (!this.isCanceled && this.hascoRun.hasNext() && (timeoutInMS <= 0 || !(deadlineReached = System.currentTimeMillis() >= deadline))) {
+      System.out.println("\n\n\n\n\n JUHU \n\n\n\n\n");
       HASCOForCombinedMLSolution nextSolution = new HASCOForCombinedMLSolution(this.hascoRun.next());
       /* Skip returned solutions that obtained a timeout or were not able to be computed */
       if (nextSolution.getValidationScore() >= 10000) {
@@ -272,16 +274,6 @@ public class HASCOForCombinedML implements IObservableGraphAlgorithm<TFDNode, St
             this.solution.setTestScore(testPerformance);
 
             System.out.println(this.solution);
-            if (this.mysql != null) {
-              Map<String, String> values = new HashMap<>();
-              values.put("run_id", CONFIG.getRunID() + "");
-              values.put("pipeline", this.solution.getClassifier().getConstructionPlan().toString());
-              values.put("testErrorRate", this.solution.getTestScore() + "");
-              values.put("validationErrorRate", this.solution.getValidationScore() + "");
-              values.put("selectionErrorRate", this.solution.getSelectionScore() + "");
-              values.put("timeToSolution", (System.currentTimeMillis() - CONFIG.getRunStartTimestamp()) + "");
-              this.mysql.insert("experimentresult", values);
-            }
           } catch (Exception e) {
             e.printStackTrace();
           }
