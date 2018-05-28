@@ -3,7 +3,7 @@ package de.upb.crc901.automl.hascocombinedml;
 import de.upb.crc901.automl.pipeline.service.MLServicePipeline;
 
 import jaicore.basic.IObjectEvaluator;
-import jaicore.basic.MySQLAdapter;
+import jaicore.basic.SQLAdapter;
 import jaicore.basic.chunks.Task;
 import jaicore.ml.WekaUtil;
 
@@ -30,7 +30,7 @@ public class MLServiceBenchmark implements IObjectEvaluator<MLServicePipeline, D
   private int maximumSeeds;
   private Double splitSize;
   private int repetitions;
-  private MySQLAdapter mysql;
+  private SQLAdapter mysql;
   private int timeoutInMS = -1;
 
   private List<Instances> trainTestSplit = null;
@@ -38,7 +38,7 @@ public class MLServiceBenchmark implements IObjectEvaluator<MLServicePipeline, D
   public MLServiceBenchmark() {
   }
 
-  public MLServiceBenchmark(final Instances data, final int repetitions, final double splitSize, final int timeoutInMS, final int maximumSeeds, final MySQLAdapter mysql,
+  public MLServiceBenchmark(final Instances data, final int repetitions, final double splitSize, final int timeoutInMS, final int maximumSeeds, final SQLAdapter mysql,
       final String mysqlLogTable, final Task runTask) {
     this.data = data;
     this.splitSize = splitSize;
@@ -49,7 +49,7 @@ public class MLServiceBenchmark implements IObjectEvaluator<MLServicePipeline, D
     this.timeoutInMS = timeoutInMS;
   }
 
-  public MLServiceBenchmark(final List<Instances> trainTestSplit, final MySQLAdapter mysql, final String mysqlLogTable, final Task runTask) {
+  public MLServiceBenchmark(final List<Instances> trainTestSplit, final SQLAdapter mysql, final String mysqlLogTable, final Task runTask) {
     this.trainTestSplit = trainTestSplit;
     this.mysql = mysql;
     this.runTask = runTask;

@@ -3,7 +3,7 @@ package de.upb.crc901.automl.hascocombinedml;
 import de.upb.crc901.automl.hascowekaml.HASCOForMEKA;
 import de.upb.crc901.automl.pipeline.service.MLServicePipeline;
 
-import jaicore.basic.MySQLAdapter;
+import jaicore.basic.SQLAdapter;
 import jaicore.graph.observation.IObservableGraphAlgorithm;
 import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionSolution;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
@@ -168,7 +168,7 @@ public class HASCOForCombinedML implements IObservableGraphAlgorithm<TFDNode, St
   });
 
   public void gatherSolutions(final MLServiceBenchmark searchBenchmark, final MLServiceBenchmark selectionBenchmark, final MLServiceBenchmark testBenchmark, final int timeoutInMS,
-      final MySQLAdapter mysql) {
+      final SQLAdapter mysql) {
     if (this.isCanceled) {
       throw new IllegalStateException("HASCO has already been canceled. Cannot gather results anymore.");
     }
@@ -240,9 +240,9 @@ public class HASCOForCombinedML implements IObservableGraphAlgorithm<TFDNode, St
     private HASCOForCombinedMLSolution solution;
     private MLServiceBenchmark benchmark;
     private MLServiceBenchmark test;
-    private MySQLAdapter mysql;
+    private SQLAdapter mysql;
 
-    public SelectionPhaseEval(final HASCOForCombinedMLSolution solution, final MLServiceBenchmark benchmark, final MLServiceBenchmark test, final MySQLAdapter mysql) {
+    public SelectionPhaseEval(final HASCOForCombinedMLSolution solution, final MLServiceBenchmark benchmark, final MLServiceBenchmark test, final SQLAdapter mysql) {
       this.solution = solution;
       this.benchmark = benchmark;
       this.test = test;

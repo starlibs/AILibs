@@ -1,7 +1,7 @@
 package de.upb.crc901.automl.hascoscikitlearnml;
 
 import jaicore.basic.IObjectEvaluator;
-import jaicore.basic.MySQLAdapter;
+import jaicore.basic.SQLAdapter;
 import jaicore.basic.chunks.Task;
 import jaicore.ml.WekaUtil;
 
@@ -34,13 +34,13 @@ public class ScikitLearnBenchmark implements IObjectEvaluator<ScikitLearnComposi
   private Double splitSize;
   private int repetitions;
   private String datasetFilePrefix;
-  private MySQLAdapter mysql;
+  private SQLAdapter mysql;
   private int timeoutInMS = -1;
 
   private List<Instances> trainTestSplit = null;
 
   public ScikitLearnBenchmark(final Instances data, final int repetitions, final double splitSize, final int timeoutInMS, final int maximumSeeds, final String datasetFilePrefix,
-      final MySQLAdapter mysql, final Task runTask) {
+      final SQLAdapter mysql, final Task runTask) {
     this.data = data;
     this.splitSize = splitSize;
     this.maximumSeeds = maximumSeeds;
@@ -54,7 +54,7 @@ public class ScikitLearnBenchmark implements IObjectEvaluator<ScikitLearnComposi
   public ScikitLearnBenchmark() {
   }
 
-  public ScikitLearnBenchmark(final List<Instances> trainTestSplit, final String datasetFilePrefix, final MySQLAdapter mysql, final Task runTask) {
+  public ScikitLearnBenchmark(final List<Instances> trainTestSplit, final String datasetFilePrefix, final SQLAdapter mysql, final Task runTask) {
     this.trainTestSplit = trainTestSplit;
     this.datasetFilePrefix = datasetFilePrefix;
     this.mysql = mysql;

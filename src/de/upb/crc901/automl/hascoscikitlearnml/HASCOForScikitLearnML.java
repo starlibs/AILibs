@@ -2,7 +2,7 @@ package de.upb.crc901.automl.hascoscikitlearnml;
 
 import de.upb.crc901.automl.hascowekaml.HASCOForMEKA;
 
-import jaicore.basic.MySQLAdapter;
+import jaicore.basic.SQLAdapter;
 import jaicore.graph.observation.IObservableGraphAlgorithm;
 import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionSolution;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
@@ -168,7 +168,7 @@ public class HASCOForScikitLearnML implements IObservableGraphAlgorithm<TFDNode,
   });
 
   public void gatherSolutions(final ScikitLearnBenchmark searchBenchmark, final ScikitLearnBenchmark selectionBenchmark, final ScikitLearnBenchmark testBenchmark,
-      final int timeoutInMS, final MySQLAdapter mysql) {
+      final int timeoutInMS, final SQLAdapter mysql) {
     if (this.isCanceled) {
       throw new IllegalStateException("HASCO has already been canceled. Cannot gather results anymore.");
     }
@@ -240,9 +240,9 @@ public class HASCOForScikitLearnML implements IObservableGraphAlgorithm<TFDNode,
     private HASCOForScikitLearnMLSolution solution;
     private ScikitLearnBenchmark benchmark;
     private ScikitLearnBenchmark test;
-    private MySQLAdapter mysql;
+    private SQLAdapter mysql;
 
-    public SelectionPhaseEval(final HASCOForScikitLearnMLSolution solution, final ScikitLearnBenchmark benchmark, final ScikitLearnBenchmark test, final MySQLAdapter mysql) {
+    public SelectionPhaseEval(final HASCOForScikitLearnMLSolution solution, final ScikitLearnBenchmark benchmark, final ScikitLearnBenchmark test, final SQLAdapter mysql) {
       this.solution = solution;
       this.benchmark = benchmark;
       this.test = test;
