@@ -3,7 +3,7 @@ package hasco.eventlogger;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.eventbus.Subscribe;
 
-import jaicore.basic.MySQLAdapter;
+import jaicore.basic.SQLAdapter;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -21,9 +21,9 @@ import hasco.events.HASCOSolutionEvaluationEvent;
 public class HASCOSQLEventLogger<T, V extends Comparable<V>> {
 
   private int runId;
-  private final MySQLAdapter sqlAdapter;
+  private final SQLAdapter sqlAdapter;
 
-  public HASCOSQLEventLogger(final MySQLAdapter sqlAdapter) {
+  public HASCOSQLEventLogger(final SQLAdapter sqlAdapter) {
     super();
     this.sqlAdapter = sqlAdapter;
 
