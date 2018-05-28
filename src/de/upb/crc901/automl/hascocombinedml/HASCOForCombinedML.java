@@ -3,6 +3,7 @@ package de.upb.crc901.automl.hascocombinedml;
 import de.upb.crc901.automl.hascowekaml.HASCOForMEKA;
 import de.upb.crc901.automl.pipeline.service.MLServicePipeline;
 
+import jaicore.basic.FileUtil;
 import jaicore.basic.SQLAdapter;
 import jaicore.graph.observation.IObservableGraphAlgorithm;
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
@@ -12,7 +13,6 @@ import jaicore.search.algorithms.standard.core.INodeEvaluator;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -110,35 +110,38 @@ public class HASCOForCombinedML implements IObservableGraphAlgorithm<TFDNode, St
   private Collection<Object> listeners = new ArrayList<>();
   private HASCOSolutionIterator hascoRun;
 
-  private static final List<String> ORDERING_OF_CLASSIFIERS = Arrays.asList(new String[] { "sklearn.ensemble.GradientBoostingClassifier", "sklearn.ensemble.RandomForestClassifier",
-      "sklearn.ensemble.ExtraTreesClassifier", "sklearn.neighbors.KNeighborsClassifier", "sklearn.svm.LinearSVC", "sklearn.linear_model.LogisticRegression",
-      "sklearn.naive_bayes.GaussianNB", "sklearn.naive_bayes.BernoulliNB", "sklearn.tree.DecisionTreeClassifier", "sklearn.naive_bayes.MultinomialNB", "xgboost.XGBClassifier" });
+  private List<String> ORDERING_OF_CLASSIFIERS = new LinkedList<>();
 
   private INodeEvaluator<TFDNode, Double> preferredNodeEvaluator = n -> {
-    boolean containsClassifier = n.externalPath().stream()
-        .anyMatch(x -> x.getAppliedMethodInstance() != null && (x.getAppliedMethodInstance().getMethod().getName().startsWith("resolveAbstractClassifierWith")
-            && !x.getAppliedMethodInstance().getMethod().getName().endsWith("make_pipeline")));
-
-    long counter = n.externalPath().stream()
-        .filter(x -> x.getAppliedMethodInstance() != null && (x.getAppliedMethodInstance().getMethod().getName().startsWith("resolveAbstractPreprocessorWith")
-            || x.getAppliedMethodInstance().getMethod().getName().startsWith("resolveBasicPreprocessorWith")))
-        .count();
-
-    if (containsClassifier && n.externalPath().get(n.externalPath().size() - 1).getAppliedMethodInstance() != null
-        && n.externalPath().get(n.externalPath().size() - 1).getAppliedMethodInstance().getMethod().getName().startsWith("resolveAbstractClassifierWith")) {
-      String methodName = n.externalPath().get(n.externalPath().size() - 1).getAppliedMethodInstance().getMethod().getName().substring(29);
-      double indexOfClassifier = ORDERING_OF_CLASSIFIERS.indexOf(methodName) + 1;
-      if (indexOfClassifier >= 0) {
-        double fScore = indexOfClassifier / 100000;
-        return fScore;
+    String lastMethodApplied = null;
+    boolean last = false;
+    for (TFDNode x : n.externalPath()) {
+      if (x.getAppliedMethodInstance() != null) {
+        lastMethodApplied = x.getAppliedMethodInstance().getMethod().getName();
+        last = true;
+      } else {
+        last = false;
       }
     }
 
-    if (counter < 1 && !containsClassifier) {
+    if (lastMethodApplied != null) {
+      if (lastMethodApplied.startsWith("resolve")) {
+        if (lastMethodApplied.startsWith("resolveAbstractClassifierWith") && !lastMethodApplied.endsWith("pipeline") && last) {
+          String classifierName = lastMethodApplied.substring(29);
+          double indexOfClassifier = Math.min(this.ORDERING_OF_CLASSIFIERS.indexOf(classifierName) + 1, this.ORDERING_OF_CLASSIFIERS.size() + 1);
+          double fScore = indexOfClassifier / 100000;
+
+          System.out.println(classifierName + " " + fScore);
+          return fScore;
+        } else {
+          return 0d;
+        }
+      } else {
+        return null;
+      }
+    } else {
       return 0d;
     }
-
-    return null;
   };
   BlockingQueue<Runnable> taskQueue = new PriorityBlockingQueue<>((int) (NUMBER_OF_CONSIDERED_SOLUTIONS * 1.5), new Comparator<Runnable>() {
     @Override
@@ -170,6 +173,14 @@ public class HASCOForCombinedML implements IObservableGraphAlgorithm<TFDNode, St
       final SQLAdapter mysql) {
     if (this.isCanceled) {
       throw new IllegalStateException("HASCO has already been canceled. Cannot gather results anymore.");
+    }
+
+    if (this.ORDERING_OF_CLASSIFIERS.isEmpty()) {
+      try {
+        this.ORDERING_OF_CLASSIFIERS = FileUtil.readFileAsList("model/combined/preferredNodeEvaluator.txt");
+      } catch (IOException e) {
+        logger.warn("Could not load preferred node evaluator.");
+      }
     }
 
     long start = System.currentTimeMillis();

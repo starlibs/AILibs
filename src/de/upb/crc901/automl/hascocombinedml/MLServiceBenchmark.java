@@ -78,6 +78,8 @@ public class MLServiceBenchmark implements IObjectEvaluator<MLServicePipeline, D
       throw new IllegalArgumentException("Inappropriate use of MLServiceBenchmark. No split size provided.");
     }
 
+    System.out.println("Evaluate " + object);
+
     if (this.trainTestSplit != null) {
       return this.evaluateFixedSplit(object);
     }
