@@ -218,7 +218,12 @@ public class ExperimentRunner {
 				});
 				
 			} catch (Throwable e) {
-				valuesToAddAfterRun.put("exception", e.getClass().getName() + "\n" + e.getMessage());
+				StringBuilder exceptionEntry = new StringBuilder();
+				exceptionEntry.append(e.getClass().getName() + "\n" + e.getMessage());
+				for (StackTraceElement se : e.getStackTrace()) {
+					exceptionEntry.append("\n\t" + se);
+				}
+				valuesToAddAfterRun.put("exception", exceptionEntry.toString());
 				System.err.println("Experiment failed due to exception, which has been logged");
 			}
 			valuesToAddAfterRun.put(FIELD_TIME + "_end", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
