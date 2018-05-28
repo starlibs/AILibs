@@ -12,7 +12,7 @@ import java.util.Random;
 
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 
-import jaicore.basic.MySQLAdapter;
+import jaicore.basic.SQLAdapter;
 import jaicore.ml.WekaUtil;
 import jaicore.ml.evaluation.MulticlassEvaluator;
 import weka.classifiers.AbstractClassifier;
@@ -42,7 +42,7 @@ public class BaggedClassifiersGridEvaluation {
 		int k = 10;
 
 		/* conduct next experiments */
-		MySQLAdapter adapter = new MySQLAdapter("isys-db.cs.upb.de", "ida2018", "WsFg33sE6aghabMr", "results_reduction");
+		SQLAdapter adapter = new SQLAdapter("isys-db.cs.upb.de", "ida2018", "WsFg33sE6aghabMr", "results_reduction");
 
 		/* launch threads for execution */
 		for (int seed : seeds) {

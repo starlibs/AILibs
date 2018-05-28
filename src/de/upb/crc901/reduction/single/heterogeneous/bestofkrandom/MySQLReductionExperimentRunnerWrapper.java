@@ -15,19 +15,19 @@ import java.util.Random;
 import de.upb.crc901.reduction.single.BestOfKAtRandomExperiment;
 import de.upb.crc901.reduction.single.ExperimentRunner;
 import de.upb.crc901.reduction.single.MySQLReductionExperiment;
-import jaicore.basic.MySQLAdapter;
+import jaicore.basic.SQLAdapter;
 import jaicore.ml.classification.multiclass.reduction.splitters.RandomSplitter;
 
 public class MySQLReductionExperimentRunnerWrapper {
 
 	private static final String TABLE_NAME = "reductionstumps_heterogeneous_random_bestofk";
-	private final MySQLAdapter adapter;
+	private final SQLAdapter adapter;
 	private final Collection<MySQLReductionExperiment> knownExperiments = new HashSet<>();
 	private final int k;
 	private final int mccvrepeats;
 
 	public MySQLReductionExperimentRunnerWrapper(String host, String user, String password, String database, int k, int mccvRepeats) {
-		adapter = new MySQLAdapter(host, user, password, database);
+		adapter = new SQLAdapter(host, user, password, database);
 		this.k = k;
 		this.mccvrepeats = mccvRepeats;
 		try {

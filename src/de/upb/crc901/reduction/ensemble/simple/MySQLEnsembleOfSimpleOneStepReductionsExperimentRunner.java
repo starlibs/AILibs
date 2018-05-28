@@ -15,17 +15,17 @@ import java.util.Optional;
 import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 
 import de.upb.crc901.reduction.Util;
-import jaicore.basic.MySQLAdapter;
+import jaicore.basic.SQLAdapter;
 
 public class MySQLEnsembleOfSimpleOneStepReductionsExperimentRunner {
 
 	private static final String TABLE_NAME = "homogeneousensemblesofreductionstumps";
-	private final MySQLAdapter adapter;
+	private final SQLAdapter adapter;
 	private final Collection<MySQLEnsembleOfSimpleOneStepReductionsExperiment> knownExperiments = new HashSet<>();
 //	private final static Logger logger = LoggerFactory.getLogger(MySQLEnsembleOfSimpleOneStepReductionsExperimentRunner.class);
 
 	public MySQLEnsembleOfSimpleOneStepReductionsExperimentRunner(String host, String user, String password, String database) {
-		adapter = new MySQLAdapter(host, user, password, database);
+		adapter = new SQLAdapter(host, user, password, database);
 		try {
 			knownExperiments.addAll(getConductedExperiments());
 		} catch (SQLException e) {

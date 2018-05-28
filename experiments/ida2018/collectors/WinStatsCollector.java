@@ -7,11 +7,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import jaicore.basic.MySQLAdapter;
+import jaicore.basic.SQLAdapter;
 
 public class WinStatsCollector {
 	public static void main(String[] args) throws SQLException {
-		MySQLAdapter adapter = new MySQLAdapter("isys-db.cs.upb.de", "ida2018", "WsFg33sE6aghabMr", "results_reduction");
+		SQLAdapter adapter = new SQLAdapter("isys-db.cs.upb.de", "ida2018", "WsFg33sE6aghabMr", "results_reduction");
 
 		int minNumberOfResults = 3;
 		List<String> datasets = new ArrayList<>();

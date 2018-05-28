@@ -17,16 +17,16 @@ import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 import de.upb.crc901.reduction.Util;
 import de.upb.crc901.reduction.single.MySQLReductionExperiment;
 import de.upb.crc901.reduction.single.ReductionExperiment;
-import jaicore.basic.MySQLAdapter;
+import jaicore.basic.SQLAdapter;
 
 public class MySQLExperimentRunner {
 
 	private static final String TABLE_NAME = "reductionstumps";
-	private final MySQLAdapter adapter;
+	private final SQLAdapter adapter;
 	private final Collection<MySQLReductionExperiment> knownExperiments = new HashSet<>();
 
 	public MySQLExperimentRunner(String host, String user, String password, String database) {
-		adapter = new MySQLAdapter(host, user, password, database);
+		adapter = new SQLAdapter(host, user, password, database);
 		try {
 			knownExperiments.addAll(getConductedExperiments());
 		} catch (SQLException e) {

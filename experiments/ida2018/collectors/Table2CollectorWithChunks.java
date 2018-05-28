@@ -1,6 +1,6 @@
 package ida2018.collectors;
 
-import jaicore.basic.MySQLAdapter;
+import jaicore.basic.SQLAdapter;
 import jaicore.basic.StatisticsUtil;
 import jaicore.basic.ValueUtil;
 import jaicore.basic.chunks.Task;
@@ -18,7 +18,7 @@ public class Table2CollectorWithChunks {
 
   public static void main(final String[] args) throws Exception {
 
-    MySQLAdapter adapter = IDA2018Util.getAdapter();
+    SQLAdapter adapter = IDA2018Util.getAdapter();
 
     int minSamples = 1;
 

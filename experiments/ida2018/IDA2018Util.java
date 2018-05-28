@@ -4,13 +4,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import jaicore.basic.MySQLAdapter;
+import jaicore.basic.SQLAdapter;
 import jaicore.basic.SetUtil;
 import jaicore.ml.WekaUtil;
 
 public class IDA2018Util {
-	public static MySQLAdapter getAdapter() {
-		return new MySQLAdapter("isys-db.cs.upb.de", "ida2018", "WsFg33sE6aghabMr", "results_reduction");
+	public static SQLAdapter getAdapter() {
+		return new SQLAdapter("isys-db.cs.upb.de", "ida2018", "WsFg33sE6aghabMr", "results_reduction");
 	}
 	
 	public static Collection<String> getConsideredDatasets() {

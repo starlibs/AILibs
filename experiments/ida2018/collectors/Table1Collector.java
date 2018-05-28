@@ -1,7 +1,7 @@
 package ida2018.collectors;
 
 import jaicore.basic.MathExt;
-import jaicore.basic.MySQLAdapter;
+import jaicore.basic.SQLAdapter;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -18,7 +18,7 @@ import ida2018.IDA2018Util;
 
 public class Table1Collector {
   public static void main(final String[] args) throws SQLException {
-    MySQLAdapter adapter = IDA2018Util.getAdapter();
+    SQLAdapter adapter = IDA2018Util.getAdapter();
 
     int minNumberOfResults = 3;
     List<String> datasets = new ArrayList<>();
