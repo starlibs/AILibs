@@ -20,13 +20,13 @@ import org.junit.Test;
 import weka.classifiers.Evaluation;
 import weka.core.Instances;
 
-public class MLPlanTest {
+public class MLSPlanTest {
 
   @Test
   public void test() throws Exception {
 
     /* read data and split */
-    Instances data = new Instances(new BufferedReader(new FileReader(new File("../ML-Plan/testrsc/polychotomous/segment.arff"))));
+    Instances data = new Instances(new BufferedReader(new FileReader(new File("../datasets/classification/multi-class/segment.arff"))));
     data.setClassIndex(data.numAttributes() - 1);
     List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(0), .7f);
 
