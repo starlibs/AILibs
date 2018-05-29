@@ -114,7 +114,7 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
     super();
     this.plannerFactory = plannerFactory;
     this.searchFactory = searchFactory;
-    this.randomCompletionEvaluator = new RandomCompletionEvaluator<>(new Random(this.randomSeed), 5, searchSpaceUtilFactory.getPathUnifier(), new ISolutionEvaluator<N, V>() {
+    this.randomCompletionEvaluator = new RandomCompletionEvaluator<>(new Random(this.randomSeed), 1, searchSpaceUtilFactory.getPathUnifier(), new ISolutionEvaluator<N, V>() {
       @Override
       public V evaluateSolution(final List<N> solutionPath) throws Exception {
         List<Action> plan = HASCO.this.searchSpaceUtilFactory.getPathToPlanConverter().getPlan(solutionPath);

@@ -192,7 +192,7 @@ public class Util {
       final Collection<Component> components, final Monom initState, final Node<N, ?> path) {
     return getSolutionCompositionForPlan(components, initState, searchSpaceUtilFactory.getPathToPlanConverter().getPlan(path.externalPath()));
   }
-
+  
   public static Monom getFinalStateOfPlan(final Monom initState, final List<Action> plan) {
     Monom state = new Monom(initState);
     for (Action a : plan) {
@@ -369,5 +369,4 @@ public class Util {
     }
     return true;
   }
-
 }

@@ -46,4 +46,24 @@ public class ComponentInstance {
 
     return sb.toString();
   }
+  
+  public String getPrettyPrint() {
+	  return getPrettyPrint(0);
+  }
+  
+  private String getPrettyPrint(int offset) {
+	  StringBuilder sb = new StringBuilder();
+	  sb.append(component.getName() + "\n");
+	  for (String requiredInterface : component.getRequiredInterfaces().keySet()) {
+		  for (int i = 0; i < offset + 1; i++)
+			  sb.append("\t");
+		  sb.append(requiredInterface);
+		  sb.append(": ");
+		  if (satisfactionOfRequiredInterfaces.containsKey(requiredInterface))
+			  sb.append(satisfactionOfRequiredInterfaces.get(requiredInterface).getPrettyPrint(offset + 1));
+		  else
+			  sb.append("null\n");
+	  }
+	  return sb.toString();
+  }
 }
