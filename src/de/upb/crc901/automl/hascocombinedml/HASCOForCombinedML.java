@@ -1,16 +1,5 @@
 package de.upb.crc901.automl.hascocombinedml;
 
-import de.upb.crc901.automl.hascowekaml.HASCOForMEKA;
-import de.upb.crc901.automl.pipeline.service.MLServicePipeline;
-
-import jaicore.basic.FileUtil;
-import jaicore.basic.SQLAdapter;
-import jaicore.graph.observation.IObservableGraphAlgorithm;
-import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
-import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionSolution;
-import jaicore.planning.graphgenerators.task.tfd.TFDNode;
-import jaicore.search.algorithms.standard.core.INodeEvaluator;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,320 +22,345 @@ import org.aeonbits.owner.ConfigCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.upb.crc901.automl.hascowekaml.HASCOForMEKA;
+import de.upb.crc901.automl.pipeline.service.MLServicePipeline;
 import hasco.core.HASCO.HASCOSolutionIterator;
 import hasco.core.HASCOFD;
 import hasco.core.Solution;
+import hasco.core.Util;
+import hasco.model.ComponentInstance;
 import hasco.serialization.ComponentLoader;
+import jaicore.basic.FileUtil;
+import jaicore.basic.SQLAdapter;
+import jaicore.graph.observation.IObservableGraphAlgorithm;
+import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionSolution;
+import jaicore.planning.graphgenerators.task.tfd.TFDNode;
+import jaicore.search.algorithms.standard.core.INodeEvaluator;
 
 public class HASCOForCombinedML implements IObservableGraphAlgorithm<TFDNode, String> {
 
-  private static final Logger logger = LoggerFactory.getLogger(HASCOForMEKA.class);
-  private static final HASCOForCombinedMLConfig CONFIG = ConfigCache.getOrCreate(HASCOForCombinedMLConfig.class);
+	private static final Logger logger = LoggerFactory.getLogger(HASCOForMEKA.class);
+	private static final HASCOForCombinedMLConfig CONFIG = ConfigCache.getOrCreate(HASCOForCombinedMLConfig.class);
 
-  private Lock selectedSolutionsLock = new ReentrantLock();
-  private AtomicInteger selectionTasksCounter = new AtomicInteger(0);
-  private Double bestValidationScore = null;
-  private static double EPSILON = 0.03;
-  private static final int NUMBER_OF_CONSIDERED_SOLUTIONS = 100;
+	private Lock selectedSolutionsLock = new ReentrantLock();
+	private AtomicInteger selectionTasksCounter = new AtomicInteger(0);
+	private Double bestValidationScore = null;
+	private static double EPSILON = 0.03;
+	private static final int NUMBER_OF_CONSIDERED_SOLUTIONS = 100;
 
-  public static class HASCOForCombinedMLSolution {
+	/* derive existing components */
+	private final ComponentLoader cl = new ComponentLoader();
 
-    private Solution<ForwardDecompositionSolution, MLServicePipeline, Double> hascoSolution;
-    private Double selectionScore = null;
-    private Double testScore = null;
+	public HASCOForCombinedML() throws IOException {
+		cl.loadComponents(CONFIG.getComponentFile());
+	}
 
-    public HASCOForCombinedMLSolution(final Solution<ForwardDecompositionSolution, MLServicePipeline, Double> hascoSolution) {
-      super();
-      this.hascoSolution = hascoSolution;
-    }
+	public static class HASCOForCombinedMLSolution {
 
-    public MLServicePipeline getClassifier() {
-      return this.hascoSolution.getSolution();
-    }
+		private Solution<ForwardDecompositionSolution, MLServicePipeline, Double> hascoSolution;
+		private Double selectionScore = null;
+		private Double testScore = null;
 
-    public int getTimeForScoreComputation() {
-      return this.hascoSolution.getTimeToComputeScore();
-    }
+		public HASCOForCombinedMLSolution(final Solution<ForwardDecompositionSolution, MLServicePipeline, Double> hascoSolution) {
+			super();
+			this.hascoSolution = hascoSolution;
+		}
 
-    public Double getValidationScore() {
-      return this.hascoSolution.getScore();
-    }
+		public MLServicePipeline getClassifier() {
+			return this.hascoSolution.getSolution();
+		}
 
-    public void setSelectionScore(final double selectionScore) {
-      this.selectionScore = selectionScore;
-    }
+		public int getTimeForScoreComputation() {
+			return this.hascoSolution.getTimeToComputeScore();
+		}
 
-    public Double getSelectionScore() {
-      return this.selectionScore;
-    }
+		public Double getValidationScore() {
+			return this.hascoSolution.getScore();
+		}
 
-    public void setTestScore(final double testScore) {
-      this.testScore = testScore;
-    }
+		public void setSelectionScore(final double selectionScore) {
+			this.selectionScore = selectionScore;
+		}
 
-    public Double getTestScore() {
-      return this.testScore;
-    }
+		public Double getSelectionScore() {
+			return this.selectionScore;
+		}
 
-    @Override
-    public String toString() {
-      StringBuilder sb = new StringBuilder();
-      sb.append(this.getClassifier().getConstructionPlan());
-      sb.append(" ");
-      sb.append("Val: " + this.getValidationScore());
-      sb.append(" ");
-      sb.append("Sel: " + this.getSelectionScore());
-      sb.append(" ");
-      sb.append("Test: " + this.getTestScore());
+		public void setTestScore(final double testScore) {
+			this.testScore = testScore;
+		}
 
-      return sb.toString();
-    }
-  }
+		public Double getTestScore() {
+			return this.testScore;
+		}
 
-  private int numberOfCPUs = CONFIG.getCPUs();
-  private int timeout = CONFIG.getTimeout();
+		@Override
+		public String toString() {
+			StringBuilder sb = new StringBuilder();
+			sb.append(this.getClassifier().getConstructionPlan());
+			sb.append(" ");
+			sb.append("Val: " + this.getValidationScore());
+			sb.append(" ");
+			sb.append("Sel: " + this.getSelectionScore());
+			sb.append(" ");
+			sb.append("Test: " + this.getTestScore());
 
-  private boolean isCanceled = false;
-  private Collection<Object> listeners = new ArrayList<>();
-  private HASCOSolutionIterator hascoRun;
+			return sb.toString();
+		}
+	}
 
-  private List<String> ORDERING_OF_CLASSIFIERS = new LinkedList<>();
+	private int numberOfCPUs = CONFIG.getCPUs();
+	private int timeout = CONFIG.getTimeout();
 
-  private INodeEvaluator<TFDNode, Double> preferredNodeEvaluator = n -> {
-    String lastMethodApplied = null;
-    boolean last = false;
-    for (TFDNode x : n.externalPath()) {
-      if (x.getAppliedMethodInstance() != null) {
-        lastMethodApplied = x.getAppliedMethodInstance().getMethod().getName();
-        last = true;
-      } else {
-        last = false;
-      }
-    }
+	private boolean isCanceled = false;
+	private Collection<Object> listeners = new ArrayList<>();
+	private HASCOSolutionIterator hascoRun;
 
-    if (lastMethodApplied != null) {
-      if (lastMethodApplied.startsWith("resolve")) {
-        if (lastMethodApplied.startsWith("resolveAbstractClassifierWith") && !lastMethodApplied.endsWith("pipeline") && last) {
-          String classifierName = lastMethodApplied.substring(29);
-          double indexOfClassifier = Math.min(this.ORDERING_OF_CLASSIFIERS.indexOf(classifierName) + 1, this.ORDERING_OF_CLASSIFIERS.size() + 1);
-          double fScore = indexOfClassifier / 100000;
+	private List<String> ORDERING_OF_CLASSIFIERS = new LinkedList<>();
 
-          System.out.println(classifierName + " " + fScore);
-          return fScore;
-        } else {
-          return 0d;
-        }
-      } else {
-        return null;
-      }
-    } else {
-      return 0d;
-    }
-  };
-  BlockingQueue<Runnable> taskQueue = new PriorityBlockingQueue<>((int) (NUMBER_OF_CONSIDERED_SOLUTIONS * 1.5), new Comparator<Runnable>() {
-    @Override
-    public int compare(final Runnable o1, final Runnable o2) {
-      if (o1 instanceof SelectionPhaseEval && o2 instanceof SelectionPhaseEval) {
-        SelectionPhaseEval spe1 = (SelectionPhaseEval) o1;
-        SelectionPhaseEval spe2 = (SelectionPhaseEval) o2;
-        return spe1.solution.getValidationScore().compareTo(spe2.solution.getValidationScore());
-      }
-      return 0;
-    }
-  });
-  private ExecutorService threadPool = new ThreadPoolExecutor(2, 2, 120, TimeUnit.SECONDS, this.taskQueue);
+	private INodeEvaluator<TFDNode, Double> preferredNodeEvaluator = n -> {
+		String lastMethodApplied = null;
+		boolean last = false;
+		for (TFDNode x : n.externalPath()) {
+			if (x.getAppliedMethodInstance() != null) {
+				lastMethodApplied = x.getAppliedMethodInstance().getMethod().getName();
+				last = true;
+			} else {
+				last = false;
+			}
+		}
 
-  private Queue<HASCOForCombinedMLSolution> solutionsFoundByHASCO = new PriorityQueue<>(new Comparator<HASCOForCombinedMLSolution>() {
-    @Override
-    public int compare(final HASCOForCombinedMLSolution o1, final HASCOForCombinedMLSolution o2) {
-      return (int) Math.round(10000 * (o1.getValidationScore() - o2.getValidationScore()));
-    }
-  });
-  private Queue<HASCOForCombinedMLSolution> solutionsSelectedByHASCO = new PriorityQueue<>(new Comparator<HASCOForCombinedMLSolution>() {
-    @Override
-    public int compare(final HASCOForCombinedMLSolution o1, final HASCOForCombinedMLSolution o2) {
-      return (int) Math.round(10000 * (o1.getSelectionScore() - o2.getSelectionScore()));
-    }
-  });
+		/* get partial component */
+		ComponentInstance instance = Util.getSolutionCompositionFromState(cl.getComponents(), n.getPoint().getState());
+		if (instance != null) {
+			ComponentInstance pp = instance.getSatisfactionOfRequiredInterfaces().get("preprocessor");
+			if (pp != null && pp.getComponent().getName().contains("AttributeSelection")) {
+				ComponentInstance search = pp.getSatisfactionOfRequiredInterfaces().get("search");
+				ComponentInstance eval = pp.getSatisfactionOfRequiredInterfaces().get("eval");
+				if (search != null && eval != null) {
+					boolean isSetEvaluator = eval.getComponent().getName().toLowerCase().matches(".*(subseteval|relief|gainratio|principalcomponents).*");
+					boolean isRanker = search.getComponent().getName().toLowerCase().contains("ranker");
+					if (isSetEvaluator && !isRanker){
+						return 20000d;
+					}
+				}
+			}
+		}
 
-  public void gatherSolutions(final MLServiceBenchmark searchBenchmark, final MLServiceBenchmark selectionBenchmark, final MLServiceBenchmark testBenchmark, final int timeoutInMS,
-      final SQLAdapter mysql) {
-    if (this.isCanceled) {
-      throw new IllegalStateException("HASCO has already been canceled. Cannot gather results anymore.");
-    }
+		if (lastMethodApplied != null) {
+			if (lastMethodApplied.startsWith("resolve")) {
+				if (lastMethodApplied.startsWith("resolveAbstractClassifierWith") && !lastMethodApplied.endsWith("pipeline") && last) {
+					String classifierName = lastMethodApplied.substring(29);
+					double indexOfClassifier = Math.min(this.ORDERING_OF_CLASSIFIERS.indexOf(classifierName) + 1, this.ORDERING_OF_CLASSIFIERS.size() + 1);
+					double fScore = indexOfClassifier / 100000;
 
-    if (this.ORDERING_OF_CLASSIFIERS.isEmpty()) {
-      try {
-        this.ORDERING_OF_CLASSIFIERS = FileUtil.readFileAsList("model/combined/preferredNodeEvaluator.txt");
-      } catch (IOException e) {
-        logger.warn("Could not load preferred node evaluator.");
-      }
-    }
+					System.out.println(classifierName + " " + fScore);
+					return fScore;
+				} else {
+					return 0d;
+				}
+			} else {
+				return null;
+			}
+		} else {
+			return 0d;
+		}
+	};
+	BlockingQueue<Runnable> taskQueue = new PriorityBlockingQueue<>((int) (NUMBER_OF_CONSIDERED_SOLUTIONS * 1.5), new Comparator<Runnable>() {
+		@Override
+		public int compare(final Runnable o1, final Runnable o2) {
+			if (o1 instanceof SelectionPhaseEval && o2 instanceof SelectionPhaseEval) {
+				SelectionPhaseEval spe1 = (SelectionPhaseEval) o1;
+				SelectionPhaseEval spe2 = (SelectionPhaseEval) o2;
+				return spe1.solution.getValidationScore().compareTo(spe2.solution.getValidationScore());
+			}
+			return 0;
+		}
+	});
+	private ExecutorService threadPool = new ThreadPoolExecutor(2, 2, 120, TimeUnit.SECONDS, this.taskQueue);
 
-    long start = System.currentTimeMillis();
-    long deadline = start + timeoutInMS;
+	private Queue<HASCOForCombinedMLSolution> solutionsFoundByHASCO = new PriorityQueue<>(new Comparator<HASCOForCombinedMLSolution>() {
+		@Override
+		public int compare(final HASCOForCombinedMLSolution o1, final HASCOForCombinedMLSolution o2) {
+			return (int) Math.round(10000 * (o1.getValidationScore() - o2.getValidationScore()));
+		}
+	});
+	private Queue<HASCOForCombinedMLSolution> solutionsSelectedByHASCO = new PriorityQueue<>(new Comparator<HASCOForCombinedMLSolution>() {
+		@Override
+		public int compare(final HASCOForCombinedMLSolution o1, final HASCOForCombinedMLSolution o2) {
+			return (int) Math.round(10000 * (o1.getSelectionScore() - o2.getSelectionScore()));
+		}
+	});
 
-    /* derive existing components */
-    ComponentLoader cl = new ComponentLoader();
-    try {
-      cl.loadComponents(CONFIG.getComponentFile());
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+	public void gatherSolutions(final MLServiceBenchmark searchBenchmark, final MLServiceBenchmark selectionBenchmark, final MLServiceBenchmark testBenchmark,
+			final int timeoutInMS, final SQLAdapter mysql) {
+		if (this.isCanceled) {
+			throw new IllegalStateException("HASCO has already been canceled. Cannot gather results anymore.");
+		}
 
-    /* create algorithm */
-    HASCOFD<MLServicePipeline> hasco = new HASCOFD<>(new MLServicePipelineFactory(), this.preferredNodeEvaluator, cl.getParamConfigs(), CONFIG.getRequestedInterface(),
-        searchBenchmark);
-    hasco.addComponents(cl.getComponents());
-    hasco.setNumberOfCPUs(this.numberOfCPUs);
-    hasco.setTimeout(CONFIG.getTimeout());
+		if (this.ORDERING_OF_CLASSIFIERS.isEmpty()) {
+			try {
+				this.ORDERING_OF_CLASSIFIERS = FileUtil.readFileAsList("model/combined/preferredNodeEvaluator.txt");
+			} catch (IOException e) {
+				logger.warn("Could not load preferred node evaluator.");
+			}
+		}
 
-    new SimpleGraphVisualizationWindow<>(this);
+		long start = System.currentTimeMillis();
+		long deadline = start + timeoutInMS;
 
-    /* add all listeners to HASCO */
-    this.listeners.forEach(l -> hasco.registerListener(l));
-    this.listeners.forEach(l -> hasco.registerListenerForSolutionEvaluations(l));
+		/* create algorithm */
+		HASCOFD<MLServicePipeline> hasco = new HASCOFD<>(new MLServicePipelineFactory(), this.preferredNodeEvaluator, cl.getParamConfigs(), CONFIG.getRequestedInterface(),
+				searchBenchmark);
+		hasco.addComponents(cl.getComponents());
+		hasco.setNumberOfCPUs(this.numberOfCPUs);
+		hasco.setTimeout(CONFIG.getTimeout());
 
-    /* run HASCO */
-    this.hascoRun = hasco.iterator();
-    boolean deadlineReached = false;
-    while (!this.isCanceled && this.hascoRun.hasNext() && (timeoutInMS <= 0 || !(deadlineReached = System.currentTimeMillis() >= deadline))) {
-      System.out.println("\n\n\n\n\n JUHU \n\n\n\n\n");
-      HASCOForCombinedMLSolution nextSolution = new HASCOForCombinedMLSolution(this.hascoRun.next());
-      /* Skip returned solutions that obtained a timeout or were not able to be computed */
-      if (nextSolution.getValidationScore() >= 10000) {
-        continue;
-      }
-      System.out.println("Solution found " + nextSolution.getClassifier().getConstructionPlan().toString() + " " + nextSolution.getValidationScore());
-      this.solutionsFoundByHASCO.add(nextSolution);
-      List<HASCOForCombinedMLSolution> solutionList = new LinkedList<>(this.solutionsFoundByHASCO);
+//		new SimpleGraphVisualizationWindow<>(this);
 
-      if (this.bestValidationScore == null || nextSolution.getValidationScore() < this.bestValidationScore) {
-        this.bestValidationScore = nextSolution.getValidationScore();
-      }
+		/* add all listeners to HASCO */
+		this.listeners.forEach(l -> hasco.registerListener(l));
+		this.listeners.forEach(l -> hasco.registerListenerForSolutionEvaluations(l));
 
-      double coinFlipRatio = 1;
-      if (this.selectionTasksCounter.get() > 10) {
-        coinFlipRatio = (double) 10 / this.selectionTasksCounter.get();
-      }
+		/* run HASCO */
+		this.hascoRun = hasco.iterator();
+		boolean deadlineReached = false;
+		while (!this.isCanceled && this.hascoRun.hasNext() && (timeoutInMS <= 0 || !(deadlineReached = System.currentTimeMillis() >= deadline))) {
+			HASCOForCombinedMLSolution nextSolution = new HASCOForCombinedMLSolution(this.hascoRun.next());
+			/* Skip returned solutions that obtained a timeout or were not able to be computed */
+			if (nextSolution.getValidationScore() >= 10000) {
+				continue;
+			}
+			System.out.println("Solution found " + nextSolution.getClassifier().getConstructionPlan().toString() + " " + nextSolution.getValidationScore());
+			this.solutionsFoundByHASCO.add(nextSolution);
+			List<HASCOForCombinedMLSolution> solutionList = new LinkedList<>(this.solutionsFoundByHASCO);
 
-      double randomRatio = new Random(CONFIG.getSeed()).nextDouble();
+			if (this.bestValidationScore == null || nextSolution.getValidationScore() < this.bestValidationScore) {
+				this.bestValidationScore = nextSolution.getValidationScore();
+			}
 
-      boolean coinFlip = randomRatio <= coinFlipRatio;
-      if (solutionList.indexOf(nextSolution) <= (NUMBER_OF_CONSIDERED_SOLUTIONS / 2) || (nextSolution.getValidationScore() < this.bestValidationScore + EPSILON && coinFlip)) {
-        int tasks = this.selectionTasksCounter.incrementAndGet();
-        this.threadPool.submit(new SelectionPhaseEval(nextSolution, selectionBenchmark, testBenchmark, mysql));
-        System.out.println("Selection tasks in Queue: " + this.taskQueue.size() + " (Submitted new task)");
-      }
+			double coinFlipRatio = 1;
+			if (this.selectionTasksCounter.get() > 10) {
+				coinFlipRatio = (double) 10 / this.selectionTasksCounter.get();
+			}
 
-    }
-    if (deadlineReached)
-    {
-      logger.info("Deadline has been reached");
-    } else if (this.isCanceled) {
-      logger.info("Interrupting HASCO due to cancel.");
-    }
-  }
+			double randomRatio = new Random(CONFIG.getSeed()).nextDouble();
 
-  class SelectionPhaseEval implements Runnable {
-    private HASCOForCombinedMLSolution solution;
-    private MLServiceBenchmark benchmark;
-    private MLServiceBenchmark test;
-    private SQLAdapter mysql;
+			boolean coinFlip = randomRatio <= coinFlipRatio;
+			if (solutionList.indexOf(nextSolution) <= (NUMBER_OF_CONSIDERED_SOLUTIONS / 2)
+					|| (nextSolution.getValidationScore() < this.bestValidationScore + EPSILON && coinFlip)) {
+				int tasks = this.selectionTasksCounter.incrementAndGet();
+				this.threadPool.submit(new SelectionPhaseEval(nextSolution, selectionBenchmark, testBenchmark, mysql));
+				System.out.println("Selection tasks in Queue: " + this.taskQueue.size() + " (Submitted new task)");
+			}
 
-    public SelectionPhaseEval(final HASCOForCombinedMLSolution solution, final MLServiceBenchmark benchmark, final MLServiceBenchmark test, final SQLAdapter mysql) {
-      this.solution = solution;
-      this.benchmark = benchmark;
-      this.test = test;
-      this.mysql = mysql;
-    }
+		}
+		if (deadlineReached) {
+			logger.info("Deadline has been reached");
+		} else if (this.isCanceled) {
+			logger.info("Interrupting HASCO due to cancel.");
+		}
+	}
 
-    @Override
-    public void run() {
-      try {
-        Double selectionError = this.benchmark.evaluate(this.solution.getClassifier());
-        System.out.println("Performed selection phase for returned solution with selection error:" + selectionError);
-        this.solution.setSelectionScore(selectionError);
+	class SelectionPhaseEval implements Runnable {
+		private HASCOForCombinedMLSolution solution;
+		private MLServiceBenchmark benchmark;
+		private MLServiceBenchmark test;
+		private SQLAdapter mysql;
 
-        boolean newBest = false;
-        HASCOForCombinedML.this.selectedSolutionsLock.lock();
-        try {
-          HASCOForCombinedML.this.solutionsSelectedByHASCO.add(this.solution);
-          if (HASCOForCombinedML.this.solutionsSelectedByHASCO.peek() == this.solution) {
-            newBest = true;
-          }
-        } finally {
-          HASCOForCombinedML.this.selectedSolutionsLock.unlock();
-        }
-        if (newBest) {
-          try {
-            Double testPerformance = this.test.evaluateFixedSplit(this.solution.getClassifier());
-            this.solution.setTestScore(testPerformance);
+		public SelectionPhaseEval(final HASCOForCombinedMLSolution solution, final MLServiceBenchmark benchmark, final MLServiceBenchmark test, final SQLAdapter mysql) {
+			this.solution = solution;
+			this.benchmark = benchmark;
+			this.test = test;
+			this.mysql = mysql;
+		}
 
-            System.out.println(this.solution);
-          } catch (Exception e) {
-            e.printStackTrace();
-          }
-        }
-      } catch (Exception e) {
-        this.solution.setSelectionScore(10000d);
-        e.printStackTrace();
-      }
-      System.out.println("Selection tasks in Queue: " + HASCOForCombinedML.this.taskQueue.size() + " (Finished working on tasks)");
-    }
+		@Override
+		public void run() {
+			try {
+				Double selectionError = this.benchmark.evaluate(this.solution.getClassifier());
+				System.out.println("Performed selection phase for returned solution with selection error:" + selectionError);
+				this.solution.setSelectionScore(selectionError);
 
-  }
+				boolean newBest = false;
+				HASCOForCombinedML.this.selectedSolutionsLock.lock();
+				try {
+					HASCOForCombinedML.this.solutionsSelectedByHASCO.add(this.solution);
+					if (HASCOForCombinedML.this.solutionsSelectedByHASCO.peek() == this.solution) {
+						newBest = true;
+					}
+				} finally {
+					HASCOForCombinedML.this.selectedSolutionsLock.unlock();
+				}
+				if (newBest) {
+					try {
+						Double testPerformance = this.test.evaluateFixedSplit(this.solution.getClassifier());
+						this.solution.setTestScore(testPerformance);
 
-  public void cancel() {
-    this.isCanceled = true;
-    if (this.hascoRun != null) {
-      this.hascoRun.cancel();
-    }
-  }
+						System.out.println(this.solution);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			} catch (Exception e) {
+				this.solution.setSelectionScore(10000d);
+				e.printStackTrace();
+			}
+			System.out.println("Selection tasks in Queue: " + HASCOForCombinedML.this.taskQueue.size() + " (Finished working on tasks)");
+		}
 
-  public Queue<HASCOForCombinedMLSolution> getFoundClassifiers() {
-    return new LinkedList<>(this.solutionsFoundByHASCO);
-  }
+	}
 
-  public Queue<HASCOForCombinedMLSolution> getSelectedClassifiers() {
-    return new LinkedList<>(this.solutionsSelectedByHASCO);
-  }
+	public void cancel() {
+		this.isCanceled = true;
+		if (this.hascoRun != null) {
+			this.hascoRun.cancel();
+		}
+	}
 
-  public HASCOForCombinedMLSolution getCurrentlyBestSolution() {
-    if (!this.solutionsSelectedByHASCO.isEmpty()) {
-      return this.solutionsSelectedByHASCO.peek();
-    } else {
-      return this.solutionsFoundByHASCO.peek();
-    }
-  }
+	public Queue<HASCOForCombinedMLSolution> getFoundClassifiers() {
+		return new LinkedList<>(this.solutionsFoundByHASCO);
+	}
 
-  @Override
-  public void registerListener(final Object listener) {
-    this.listeners.add(listener);
-  }
+	public Queue<HASCOForCombinedMLSolution> getSelectedClassifiers() {
+		return new LinkedList<>(this.solutionsSelectedByHASCO);
+	}
 
-  public INodeEvaluator<TFDNode, Double> getPreferredNodeEvaluator() {
-    return this.preferredNodeEvaluator;
-  }
+	public HASCOForCombinedMLSolution getCurrentlyBestSolution() {
+		if (!this.solutionsSelectedByHASCO.isEmpty()) {
+			return this.solutionsSelectedByHASCO.peek();
+		} else {
+			return this.solutionsFoundByHASCO.peek();
+		}
+	}
 
-  public void setPreferredNodeEvaluator(final INodeEvaluator<TFDNode, Double> preferredNodeEvaluator) {
-    this.preferredNodeEvaluator = preferredNodeEvaluator;
-  }
+	@Override
+	public void registerListener(final Object listener) {
+		this.listeners.add(listener);
+	}
 
-  public int getNumberOfCPUs() {
-    return this.numberOfCPUs;
-  }
+	public INodeEvaluator<TFDNode, Double> getPreferredNodeEvaluator() {
+		return this.preferredNodeEvaluator;
+	}
 
-  public void setNumberOfCPUs(final int numberOfCPUs) {
-    this.numberOfCPUs = numberOfCPUs;
-  }
+	public void setPreferredNodeEvaluator(final INodeEvaluator<TFDNode, Double> preferredNodeEvaluator) {
+		this.preferredNodeEvaluator = preferredNodeEvaluator;
+	}
 
-  public int getTimeout() {
-    return this.timeout;
-  }
+	public int getNumberOfCPUs() {
+		return this.numberOfCPUs;
+	}
 
-  public void setTimeout(final int timeout) {
-    this.timeout = timeout;
-  }
+	public void setNumberOfCPUs(final int numberOfCPUs) {
+		this.numberOfCPUs = numberOfCPUs;
+	}
+
+	public int getTimeout() {
+		return this.timeout;
+	}
+
+	public void setTimeout(final int timeout) {
+		this.timeout = timeout;
+	}
 
 }
