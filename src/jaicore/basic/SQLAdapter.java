@@ -17,10 +17,10 @@ import java.util.Properties;
 import org.apache.commons.lang3.math.NumberUtils;
 
 /**
- * This is a simple util class for easy database access and query execution in sql.
- * You need to make sure that the respective JDBC connector is in the class path.
- * By default, the adapter uses the mysql driver, but any jdbc driver can be used.
- * 
+ * This is a simple util class for easy database access and query execution in sql. You need to make
+ * sure that the respective JDBC connector is in the class path. By default, the adapter uses the
+ * mysql driver, but any jdbc driver can be used.
+ *
  * @author fmohr
  *
  */
@@ -77,6 +77,10 @@ public class SQLAdapter implements Serializable, AutoCloseable {
     } while (tries < 3);
     System.err.println("Quitting execution");
     System.exit(1);
+  }
+
+  public PreparedStatement getPreparedStatement(final String query) throws SQLException {
+    return this.connect.prepareStatement(query);
   }
 
   public synchronized void checkConnection() throws SQLException {

@@ -53,7 +53,7 @@ public class MLExperimentTester implements IExperimentSetEvaluator {
 
   public static void main(final String[] args) {
     ExperimentRunner runner = new ExperimentRunner(new MLExperimentTester());
-    runner.randomlyConductExperiments();
+    runner.randomlyConductExperiments(true);
   }
 
 }
