@@ -1,16 +1,8 @@
 package de.upb.crc901.mlplan.multilabel;
 
-import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-
 import jaicore.ml.experiments.MySQLExperimentDatabaseHandle;
-import meka.classifiers.multilabel.MultiLabelClassifier;
-import weka.classifiers.Classifier;
-import weka.classifiers.SingleClassifierEnhancer;
-import weka.core.OptionHandler;
 
+@SuppressWarnings("serial")
 public class MultiLabelMySQLHandle extends MySQLExperimentDatabaseHandle {
 
 	public MultiLabelMySQLHandle(String host, String user, String password, String database) {

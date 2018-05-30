@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.upb.crc901.automl.pipeline.sophisticated.featuregen.FeatureGenerator;
-import jaicore.graph.Tree;
 import jaicore.ml.WekaUtil;
 import weka.classifiers.Classifier;
 import weka.core.Attribute;
