@@ -21,28 +21,38 @@ import weka.core.Instances;
 
 public class NestedDichotomyUtil {
 
-	
+//	private static final Logger logger = LoggerFactory.getLogger(NestedDichotomyUtil.class);
 
-	public static ClassSplit<String> createGeneralRPNDBasedSplit(Collection<String> classes, Random rand, String classifierName, Instances data) throws Exception {
+	public static ClassSplit<String> createGeneralRPNDBasedSplit(Collection<String> classes, Random rand, String classifierName, Instances data) throws InterruptedException {
 		if (classes.size() < 2)
 			throw new IllegalArgumentException("Cannot compute split for less than two classes!");
-
-		RPNDSplitter splitter = new RPNDSplitter(rand, new MLPipeline(new Ranker(), new InfoGainAttributeEval(), AbstractClassifier.forName(classifierName, null)));
-		Collection<Collection<String>> splitAsCollection = null;
-		splitAsCollection = splitter.split(data);
-		Iterator<Collection<String>> it = splitAsCollection.iterator();
-		return new ClassSplit<>(classes, it.next(), it.next());
+		try {
+			RPNDSplitter splitter = new RPNDSplitter(rand, new MLPipeline(new Ranker(), new InfoGainAttributeEval(), AbstractClassifier.forName(classifierName, null)));
+			Collection<Collection<String>> splitAsCollection = null;
+			splitAsCollection = splitter.split(data);
+			Iterator<Collection<String>> it = splitAsCollection.iterator();
+			return new ClassSplit<>(classes, it.next(), it.next());
+		} catch (InterruptedException e) {
+			throw e;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	public static ClassSplit<String> createGeneralRPNDBasedSplit(Collection<String> classes, Collection<String> s1, Collection<String> s2, Random rand, String classifierName,
-			Instances data) throws Exception {
-		RPNDSplitter splitter = new RPNDSplitter(rand, AbstractClassifier.forName(classifierName, new String[] {}));
-		Collection<Collection<String>> splitAsCollection = null;
+			Instances data) {
+		try {
+			RPNDSplitter splitter = new RPNDSplitter(rand, AbstractClassifier.forName(classifierName, new String[] {}));
+			Collection<Collection<String>> splitAsCollection = null;
 
-		splitAsCollection = splitter.split(classes, s1, s2, data);
-
-		Iterator<Collection<String>> it = splitAsCollection.iterator();
-		return new ClassSplit<>(classes, it.next(), it.next());
+			splitAsCollection = splitter.split(classes, s1, s2, data);
+			Iterator<Collection<String>> it = splitAsCollection.iterator();
+			return new ClassSplit<>(classes, it.next(), it.next());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	public static ClassSplit<String> createUnaryRPNDBasedSplit(Collection<String> classes, Random rand, String classifierName, Instances data) {
