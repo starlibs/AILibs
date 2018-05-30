@@ -6,6 +6,8 @@ import jaicore.basic.IObjectEvaluator;
 import jaicore.basic.SQLAdapter;
 import jaicore.ml.WekaUtil;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -16,13 +18,19 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import org.aeonbits.owner.ConfigCache;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import weka.core.Instances;
 
 public class MLServiceBenchmark implements IObjectEvaluator<MLServicePipeline, Double> {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(MLServiceBenchmark.class);
+
   private static final HASCOForCombinedMLConfig CONFIG = ConfigCache.getOrCreate(HASCOForCombinedMLConfig.class);
   private static final Timer TIMEOUT_TIMER = new Timer();
+
+  private static final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS ? (`evaluation_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,`run_id` int(11) NOT NULL,`pipeline` text COLLATE utf8_bin NOT NULL,`errorRate` double NOT NULL,`timeToSolution` int(11) NOT NULL,`evaluationTime` int(11) NOT NULL,`createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (`evaluation_id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin";
 
   private Instances data;
   private int maximumSeeds;
@@ -30,6 +38,8 @@ public class MLServiceBenchmark implements IObjectEvaluator<MLServicePipeline, D
   private int repetitions;
   private SQLAdapter mysql;
   private int timeoutInMS = -1;
+  private int experimentID = -1;
+  private String mysqlLogTable;
 
   private List<Instances> trainTestSplit = null;
 
@@ -37,22 +47,51 @@ public class MLServiceBenchmark implements IObjectEvaluator<MLServicePipeline, D
   }
 
   public MLServiceBenchmark(final Instances data, final int repetitions, final double splitSize, final int timeoutInMS, final int maximumSeeds, final SQLAdapter mysql,
-      final String mysqlLogTable) {
+      final String mysqlLogTable, final int experimentID) throws SQLException {
     this.data = data;
     this.splitSize = splitSize;
     this.maximumSeeds = maximumSeeds;
     this.repetitions = repetitions;
     this.mysql = mysql;
     this.timeoutInMS = timeoutInMS;
+    this.experimentID = experimentID;
+    this.mysqlLogTable = mysqlLogTable;
+
+    PreparedStatement createTableStmt = this.mysql.getPreparedStatement("CREATE TABLE IF NOT EXISTS " + mysqlLogTable
+        + " (`evaluation_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,`run_id` int(11) NOT NULL,`pipeline` text COLLATE utf8_bin NOT NULL,`errorRate` double NOT NULL,`timeToSolution` int(11) NOT NULL,`evaluationTime` int(11) NOT NULL,`createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (`evaluation_id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin");
+    createTableStmt.execute();
   }
 
-  public MLServiceBenchmark(final List<Instances> trainTestSplit, final SQLAdapter mysql, final String mysqlLogTable) {
+  public MLServiceBenchmark(final List<Instances> trainTestSplit, final SQLAdapter mysql, final String mysqlLogTable, final int experimentID) throws SQLException {
     this.trainTestSplit = trainTestSplit;
     this.mysql = mysql;
+    this.experimentID = experimentID;
+    this.mysqlLogTable = mysqlLogTable;
+
+    PreparedStatement createTableStmt = this.mysql.getPreparedStatement("CREATE TABLE IF NOT EXISTS " + mysqlLogTable
+        + " (`evaluation_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,`run_id` int(11) NOT NULL,`pipeline` text COLLATE utf8_bin NOT NULL,`errorRate` double NOT NULL,`timeToSolution` int(11) NOT NULL,`evaluationTime` int(11) NOT NULL,`createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (`evaluation_id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin");
+    createTableStmt.execute();
   }
 
   public Double evaluateFixedSplit(final MLServicePipeline object) throws Exception {
-    return this.evaluate(object, this.trainTestSplit.get(0), this.trainTestSplit.get(1));
+    long startTime = System.currentTimeMillis();
+    Double errorRate = this.evaluate(object, this.trainTestSplit.get(0), this.trainTestSplit.get(1));
+
+    if (this.mysql != null) {
+      try {
+        Map<String, String> valueMap = new HashMap<>();
+        valueMap.put("run_id", this.experimentID + "");
+        valueMap.put("errorRate", errorRate + "");
+        valueMap.put("timeToSolution", (System.currentTimeMillis() - CONFIG.getRunStartTimestamp()) + "");
+        valueMap.put("pipeline", object.getConstructionPlan().toString());
+        valueMap.put("evaluationTime", (System.currentTimeMillis() - startTime) + "");
+
+        this.mysql.insert(this.mysqlLogTable, valueMap);
+      } catch (SQLException e) {
+        LOGGER.error("An SQLException occurred with message " + e.getMessage());
+      }
+    }
+    return errorRate;
   }
 
   private Double evaluate(final MLServicePipeline pipeline, final Instances train, final Instances test) throws Exception {
@@ -78,7 +117,7 @@ public class MLServiceBenchmark implements IObjectEvaluator<MLServicePipeline, D
       throw new IllegalArgumentException("Inappropriate use of MLServiceBenchmark. No split size provided.");
     }
 
-    System.out.println("Evaluate " + object);
+    System.out.println("Evaluate " + object.getConstructionPlan().toString());
 
     if (this.trainTestSplit != null) {
       return this.evaluateFixedSplit(object);
@@ -129,14 +168,18 @@ public class MLServiceBenchmark implements IObjectEvaluator<MLServicePipeline, D
     }
 
     if (this.mysql != null) {
-      Map<String, String> valueMap = new HashMap<>();
-      valueMap.put("run_id", CONFIG.getRunID() + "");
-      valueMap.put("pipeline", object.getConstructionPlan().toString());
-      valueMap.put("errorRate", returnValue + "");
-      valueMap.put("timeToSolution", (System.currentTimeMillis() - CONFIG.getRunStartTimestamp()) + "");
-      valueMap.put("evaluationTime", (System.currentTimeMillis() - startTime) + "");
+      try {
+        Map<String, String> valueMap = new HashMap<>();
+        valueMap.put("run_id", this.experimentID + "");
+        valueMap.put("errorRate", returnValue + "");
+        valueMap.put("timeToSolution", (System.currentTimeMillis() - CONFIG.getRunStartTimestamp()) + "");
+        valueMap.put("pipeline", object.toString());
+        valueMap.put("evaluationTime", (System.currentTimeMillis() - startTime) + "");
 
-      this.mysql.insert("evaluation", valueMap);
+        this.mysql.insert(this.mysqlLogTable, valueMap);
+      } catch (SQLException e) {
+        LOGGER.error("An SQLException occurred with message " + e.getMessage());
+      }
     }
     return returnValue;
   }

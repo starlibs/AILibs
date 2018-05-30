@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 import org.aeonbits.owner.ConfigCache;
 import org.slf4j.Logger;
@@ -121,11 +122,11 @@ public class HASCOForCombinedML implements IObservableGraphAlgorithm<TFDNode, St
   private List<String> ORDERING_OF_CLASSIFIERS = new LinkedList<>();
 
   private INodeEvaluator<TFDNode, Double> preferredNodeEvaluator = n -> {
-    String lastMethodApplied = null;
+    List<String> appliedMethods = new LinkedList<>();
     boolean last = false;
     for (TFDNode x : n.externalPath()) {
       if (x.getAppliedMethodInstance() != null) {
-        lastMethodApplied = x.getAppliedMethodInstance().getMethod().getName();
+        appliedMethods.add(x.getAppliedMethodInstance().getMethod().getName());
         last = true;
       } else {
         last = false;
@@ -134,32 +135,77 @@ public class HASCOForCombinedML implements IObservableGraphAlgorithm<TFDNode, St
 
     /* get partial component */
     ComponentInstance instance = Util.getSolutionCompositionFromState(this.cl.getComponents(), n.getPoint().getState());
+
     if (instance != null) {
       ComponentInstance pp = instance.getSatisfactionOfRequiredInterfaces().get("preprocessor");
       if (pp != null && pp.getComponent().getName().contains("AttributeSelection")) {
         ComponentInstance search = pp.getSatisfactionOfRequiredInterfaces().get("search");
         ComponentInstance eval = pp.getSatisfactionOfRequiredInterfaces().get("eval");
         if (search != null && eval != null) {
-          boolean isSetEvaluator = eval.getComponent().getName().toLowerCase().matches(".*(subseteval|relief|gainratio|principalcomponents).*");
+          boolean isSetEvaluator = eval.getComponent().getName().toLowerCase()
+              .matches(".*(subseteval|relief|gainratio|principalcomponents|onerattributeeval|infogainattributeeval|correlationattributeeval|symmetricaluncertattributeeval).*");
           boolean isRanker = search.getComponent().getName().toLowerCase().contains("ranker");
+          boolean isNonRankerEvaluator = eval.getComponent().getName().toLowerCase().matches(".*(cfssubseteval).*");
           if (isSetEvaluator && !isRanker) {
+            return 20000d;
+          }
+          if (isNonRankerEvaluator && isRanker) {
             return 20000d;
           }
         }
       }
     }
 
-    if (lastMethodApplied != null) {
-      if (lastMethodApplied.startsWith("resolve")) {
-        if (lastMethodApplied.startsWith("resolveAbstractClassifierWith") && !lastMethodApplied.endsWith("pipeline") && last) {
-          String classifierName = lastMethodApplied.substring(29);
-          double indexOfClassifier = Math.min(this.ORDERING_OF_CLASSIFIERS.indexOf(classifierName) + 1, this.ORDERING_OF_CLASSIFIERS.size() + 1);
-          double fScore = indexOfClassifier / 100000;
-          return fScore;
+    if (!appliedMethods.isEmpty() && instance != null && last) {
+      try {
+        boolean isPipeline = appliedMethods.stream().anyMatch(x -> x.contains("pipeline"));
+        boolean containsResolveClassifier = false;
+        String resolvedClassifier = "";
+
+        boolean lastMethod = false;
+        if (isPipeline) {
+          List<String> classifiers = appliedMethods.stream().filter(x -> x.startsWith("resolveBaseClassifierWith")).collect(Collectors.toList());
+          containsResolveClassifier = !classifiers.isEmpty();
+          if (containsResolveClassifier) {
+            resolvedClassifier = classifiers.get(0);
+          }
+          lastMethod = lastMethod || appliedMethods.get(appliedMethods.size() - 1).startsWith("resolveBaseClassifierWith");
         } else {
+          List<String> classifiers = appliedMethods.stream().filter(x -> x.startsWith("resolveAbstractClassifierWith")).collect(Collectors.toList());
+          containsResolveClassifier = !classifiers.isEmpty();
+          if (containsResolveClassifier) {
+            resolvedClassifier = classifiers.get(0);
+          }
+          lastMethod = lastMethod || appliedMethods.get(appliedMethods.size() - 1).startsWith("resolveBaseClassifierWith");
+        }
+        boolean containsResolvePreprocessor = appliedMethods.stream().anyMatch(x -> x.startsWith("resolveAbstractPreprocessorWith"));
+        lastMethod = lastMethod || appliedMethods.get(appliedMethods.size() - 1).startsWith("resolveAbstractPreprocessorWith");
+
+        double score = 0d;
+        if (isPipeline && !containsResolveClassifier) {
           return 0d;
         }
-      } else {
+
+        if (lastMethod) {
+          String classifierName = null;
+          if (containsResolveClassifier) {
+            classifierName = resolvedClassifier.substring(25);
+          }
+          if (isPipeline && containsResolveClassifier && containsResolvePreprocessor) {
+            score += this.ORDERING_OF_CLASSIFIERS.size() + 1;
+          }
+
+          if (classifierName != null) {
+            score += this.ORDERING_OF_CLASSIFIERS.indexOf(classifierName) + 1;
+            return score / 100000;
+          } else {
+            return 0d;
+          }
+        } else {
+          return null;
+        }
+      } catch (NullPointerException e) {
+        e.printStackTrace();
         return null;
       }
     } else {
@@ -177,7 +223,7 @@ public class HASCOForCombinedML implements IObservableGraphAlgorithm<TFDNode, St
       return 0;
     }
   });
-  private ExecutorService threadPool = new ThreadPoolExecutor(2, 2, 120, TimeUnit.SECONDS, this.taskQueue);
+  private ExecutorService threadPool = new ThreadPoolExecutor(1, 1, 120, TimeUnit.SECONDS, this.taskQueue);
 
   private Queue<HASCOForCombinedMLSolution> solutionsFoundByHASCO = new PriorityQueue<>(new Comparator<HASCOForCombinedMLSolution>() {
     @Override
@@ -215,8 +261,6 @@ public class HASCOForCombinedML implements IObservableGraphAlgorithm<TFDNode, St
     hasco.addComponents(this.cl.getComponents());
     hasco.setNumberOfCPUs(this.numberOfCPUs);
     hasco.setTimeout(CONFIG.getTimeout());
-
-    // new SimpleGraphVisualizationWindow<>(this);
 
     /* add all listeners to HASCO */
     this.listeners.forEach(l -> hasco.registerListener(l));
@@ -278,7 +322,7 @@ public class HASCOForCombinedML implements IObservableGraphAlgorithm<TFDNode, St
     public void run() {
       try {
         Double selectionError = this.benchmark.evaluate(this.solution.getClassifier());
-        System.out.println("Performed selection phase for returned solution with selection error:" + selectionError);
+        logger.debug("Performed selection phase for returned solution with selection error:" + selectionError);
         this.solution.setSelectionScore(selectionError);
 
         boolean newBest = false;
@@ -296,7 +340,7 @@ public class HASCOForCombinedML implements IObservableGraphAlgorithm<TFDNode, St
             Double testPerformance = this.test.evaluateFixedSplit(this.solution.getClassifier());
             this.solution.setTestScore(testPerformance);
 
-            System.out.println(this.solution);
+            logger.debug("Test Score of solution " + this.solution);
           } catch (Exception e) {
             e.printStackTrace();
           }
@@ -305,7 +349,7 @@ public class HASCOForCombinedML implements IObservableGraphAlgorithm<TFDNode, St
         this.solution.setSelectionScore(10000d);
         e.printStackTrace();
       }
-      System.out.println("Selection tasks in Queue: " + HASCOForCombinedML.this.taskQueue.size() + " (Finished working on tasks)");
+      logger.debug("Selection tasks in Queue: " + HASCOForCombinedML.this.taskQueue.size() + " (Finished working on tasks)");
     }
 
   }
