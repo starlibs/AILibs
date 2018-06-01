@@ -1,3 +1,0 @@
-includeFlat 'weka', 'meka'
-
-rootProject.name = 'JAICore'
