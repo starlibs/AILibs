@@ -37,13 +37,13 @@ dependencies {
 	compile group: 'org.graphstream', name: 'gs-ui', version: '1.3'
 
 	// Weka and MEKA
-	compile project(':weka')
-	compile project(':meka')
-	
+	compile group: 'net.sf.meka', name: 'meka', version: '1.6.0'
+	compile group: 'nz.ac.waikato.cms.weka', name: 'weka-stable', version: '3.8.0'
+
 	// Basics
 	compile 'junit:junit:4.12'
 	compile 'com.google.guava:guava:18.0'
-	
+
 
 	// for subprocesses:
 	compile group: 'com.sun.jna', name: 'jna', version: '3.0.9'
@@ -58,7 +58,7 @@ dependencies {
 	//pddl4j
 	compile 'com.github.pellierd:pddl4j:v3.5.0'
 	runtime 'com.github.pellierd:pddl4j:v3.5.0'
-	
+
 	// mysql connector
 	compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.45'
 
