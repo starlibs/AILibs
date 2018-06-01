@@ -1,0 +1,53 @@
+plugins {
+	id 'java'
+	id 'eclipse-wtp'
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src'
+        }
+        resources {
+        	srcDir 'conf'
+    	}
+    }
+    test {
+	   	java {
+	   		srcDir 'test'
+	   	}
+    }
+}
+
+dependencies {
+	// project dependencies
+	compile name: 'CRCUtils'
+	compile project(':JAICore')
+	
+	// basic dependencies
+	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.6'
+	compile group: 'org.graphstream', name: 'gs-core', version: '1.1.1'
+	compile group: 'org.graphstream', name: 'gs-ui', version: '1.3'
+	compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.0.pr4'
+	compile 'junit:junit:4.12'
+	compile 'com.google.guava:guava:18.0'
+	compile 'org.slf4j:slf4j-api:1.7.13'
+	compile group: 'org.aeonbits.owner', name: 'owner-java8', version:'1.0.6'
+
+	// database connector	
+	compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.45'
+	
+	runtime 'org.slf4j:slf4j-log4j12:1.7.13', 'log4j:log4j:1.2.17'
+}
+
+repositories {
+	mavenLocal()
+    mavenCentral()
+    flatDir {
+    	dirs 'lib'
+    }
+	maven {
+        url "http://clojars.org/repo/"
+		url "https://jitpack.io"
+    }
+}
