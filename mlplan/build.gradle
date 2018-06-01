@@ -1,0 +1,75 @@
+plugins {
+	id 'java'
+	id 'eclipse-wtp'
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src'
+
+        }
+        resources {
+        	srcDir 'conf'
+    	}
+    }
+    test {
+   	java {
+   		srcDir 'test'
+   	}
+    }
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives sourcesJar
+}
+
+dependencies {
+	compile name: 'CRCUtils'
+	// basic dependencies
+	compile project(':JAICore')
+	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.6'
+	// Graph Stream
+	compile group: 'org.graphstream', name: 'gs-core', version: '1.1.1'
+	compile group: 'org.graphstream', name: 'gs-ui', version: '1.3'
+	
+	// Basics
+	compile 'junit:junit:4.12'
+	compile 'com.google.guava:guava:18.0'
+	compile 'org.slf4j:slf4j-api:1.7.13'
+	compile group: 'org.aeonbits.owner', name: 'owner-java8', version:'1.0.6'
+	// DB connector
+	compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.45'
+	// Graph Stream
+	compile group: 'org.graphstream', name: 'gs-core', version: '1.1.1'
+	compile group: 'org.graphstream', name: 'gs-ui', version: '1.3'
+	// Jackson for JSON (used by JAICore but not contained in the JAR)
+	compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.0.pr4'
+	
+	// servicification dependencies
+	compile project(':JASE')
+
+	// wrapped library dependencies	
+	compile project(':weka')
+	compile project(':meka')
+	compile project(':HASCO')
+	
+	runtime 'org.slf4j:slf4j-log4j12:1.7.13', 'log4j:log4j:1.2.17'
+}
+
+repositories {
+	mavenLocal()
+    mavenCentral()
+    flatDir {
+    	dirs 'lib'
+    }
+	maven {
+        url "http://clojars.org/repo/"
+		url "https://jitpack.io"
+    }
+}
