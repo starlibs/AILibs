@@ -55,7 +55,7 @@ public class RandomCompletionEvaluator<T, V extends Comparable<V>>
   private final Random random;
   protected int samples;
   protected final ISolutionEvaluator<T, V> solutionEvaluator;
-  private transient SolutionEventBus<T> eventBus;
+  private transient SolutionEventBus<T> eventBus = new SolutionEventBus<>();
 
   public RandomCompletionEvaluator(final Random random, final int samples, final IPathUnification<T> pathUnifier, final ISolutionEvaluator<T, V> solutionEvaluator) {
     super();
@@ -395,11 +395,8 @@ public class RandomCompletionEvaluator<T, V extends Comparable<V>>
   }
 
   @Override
-  public SolutionEventBus<T> getSolutionEventBus() {
-    if (this.eventBus == null) {
-      this.eventBus = new SolutionEventBus<>();
-    }
-    return this.eventBus;
+  public void registerSolutionListener(Object listener) {
+    eventBus.register(listener);
   }
 
   @Override

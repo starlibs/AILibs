@@ -82,7 +82,7 @@ public class TFDNode implements Serializable {
 
 	@Override
 	public String toString() {
-		return "TFDNode:"+ID+" [problem=" + problem + ", appliedMethodInstance=" + appliedMethodInstance + ", appliedAction=" + appliedAction + ", isGoal=" + isGoal + "]";
+		return "TFDNode:"  + ID;
 	}
 
 	@Override

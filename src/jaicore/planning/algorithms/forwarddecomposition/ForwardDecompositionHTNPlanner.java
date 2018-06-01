@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jaicore.basic.ILoggingCustomizable;
 import jaicore.planning.algorithms.IObservableGraphBasedHTNPlanningAlgorithm;
 import jaicore.planning.graphgenerators.task.ceociptfd.CEOCIPTFDGraphGenerator;
 import jaicore.planning.graphgenerators.task.ceoctfd.CEOCTFDGraphGenerator;
@@ -34,7 +35,7 @@ import jaicore.search.structure.core.GraphGenerator;
  *
  * @param <T>
  */
-public class ForwardDecompositionHTNPlanner<V extends Comparable<V>> implements IObservableGraphBasedHTNPlanningAlgorithm<ForwardDecompositionSolution,TFDNode, String, V> {
+public class ForwardDecompositionHTNPlanner<V extends Comparable<V>> implements IObservableGraphBasedHTNPlanningAlgorithm<ForwardDecompositionSolution,TFDNode, String, V>, ILoggingCustomizable {
 
 	private final static Logger logger = LoggerFactory.getLogger(ForwardDecompositionHTNPlanner.class);
 
@@ -73,17 +74,26 @@ public class ForwardDecompositionHTNPlanner<V extends Comparable<V>> implements 
 						search.registerListener(listener);
 					}
 				}
+				if (loggerName != null && loggerName.length() > 0 && search instanceof ILoggingCustomizable) {
+					logger.info("Customizing logger of search with {}", loggerName);
+					((ILoggingCustomizable)search).setLoggerName(loggerName + ".search");
+				}
 				initialized = true;
 			}
 			if (canceled)
 				throw new IllegalStateException("The planner has already been canceled. Cannot compute more plans.");
-			if (!moreSolutionsMightExist)
+			if (!moreSolutionsMightExist) {
+				logger.info("No more solutions will be found.");
 				return false;
+			}
+			logger.info("Starting/continuing search for next plan.");
 			List<TFDNode> solution = search.nextSolution();
 			if (solution == null) {
+				logger.info("No solution found. Concluding that no more solutions can be found.");
 				moreSolutionsMightExist = false;
 				return false;
 			}
+			logger.info("Next solution found.");
 			List<Action> plan = solution.stream().filter(n -> n.getAppliedAction() != null).map(n -> n.getAppliedAction()).collect(Collectors.toList());
 			nextSolution = new ForwardDecompositionSolution(plan, solution);
 			return true;
@@ -116,6 +126,7 @@ public class ForwardDecompositionHTNPlanner<V extends Comparable<V>> implements 
 	private final IHTNPlanningProblem planningProblem;
 	private final IObservableORGraphSearchFactory<TFDNode, String, V> searchFactory;
 	private final INodeEvaluator<TFDNode, V> nodeEvaluator;
+	private String loggerName;
 
 	/* parameters relevant for functionality */
 	private final int numberOfCPUs;
@@ -173,5 +184,16 @@ public class ForwardDecompositionHTNPlanner<V extends Comparable<V>> implements 
 	public void cancel() {
 		this.canceled = true;
 		iterator.getSearch().cancel();
+	}
+
+	@Override
+	public void setLoggerName(String name) {
+		logger.info("Customizing logger for FD-HTN planning with {}", name);
+		this.loggerName = name;
+	}
+
+	@Override
+	public String getLoggerName() {
+		return loggerName;
 	}
 }

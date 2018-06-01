@@ -1,24 +1,55 @@
 package jaicore.search.algorithms.standard.core;
 
-import com.google.common.eventbus.Subscribe;
-import jaicore.basic.IIterableAlgorithm;
-import jaicore.concurrent.TimeoutTimer;
-import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
-import jaicore.graphvisualizer.events.*;
-import jaicore.logging.LoggerUtil;
-import jaicore.search.algorithms.interfaces.IObservableORGraphSearch;
-import jaicore.search.structure.core.*;
-import jaicore.search.structure.graphgenerator.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Queue;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.eventbus.Subscribe;
+
+import jaicore.basic.IIterableAlgorithm;
+import jaicore.basic.ILoggingCustomizable;
+import jaicore.concurrent.TimeoutTimer;
+import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
+import jaicore.graphvisualizer.events.GraphInitializedEvent;
+import jaicore.graphvisualizer.events.NodeParentSwitchEvent;
+import jaicore.graphvisualizer.events.NodeReachedEvent;
+import jaicore.graphvisualizer.events.NodeRemovedEvent;
+import jaicore.graphvisualizer.events.NodeTypeSwitchEvent;
+import jaicore.logging.LoggerUtil;
+import jaicore.search.algorithms.interfaces.IObservableORGraphSearch;
+import jaicore.search.structure.core.GraphEventBus;
+import jaicore.search.structure.core.GraphGenerator;
+import jaicore.search.structure.core.Node;
+import jaicore.search.structure.core.NodeExpansionDescription;
+import jaicore.search.structure.core.OpenCollection;
+import jaicore.search.structure.core.PriorityQueueOpen;
+import jaicore.search.structure.graphgenerator.MultipleRootGenerator;
+import jaicore.search.structure.graphgenerator.NodeGoalTester;
+import jaicore.search.structure.graphgenerator.PathGoalTester;
+import jaicore.search.structure.graphgenerator.RootGenerator;
+import jaicore.search.structure.graphgenerator.SingleRootGenerator;
+import jaicore.search.structure.graphgenerator.SuccessorGenerator;
+
 public class ORGraphSearch<T, A, V extends Comparable<V>>
-		implements IObservableORGraphSearch<T, A, V>, IIterableAlgorithm<List<NodeExpansionDescription<T, A>>>, Iterator<List<NodeExpansionDescription<T, A>>> {
+		implements IObservableORGraphSearch<T, A, V>, IIterableAlgorithm<List<NodeExpansionDescription<T, A>>>, Iterator<List<NodeExpansionDescription<T, A>>>, ILoggingCustomizable {
 
 	private Logger logger = LoggerFactory.getLogger(ORGraphSearch.class);
 
@@ -259,7 +290,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 			}
 			if (castedEvaluator.isSolutionReporter()) {
 				logger.info("{} is a solution reporter. Register the search algo in its event bus", castedEvaluator);
-				castedEvaluator.getSolutionEventBus().register(this);
+				castedEvaluator.registerSolutionListener(this);
 				solutionReportingNodeEvaluator = true;
 			} else
 				solutionReportingNodeEvaluator = false;
@@ -272,7 +303,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 			/* if the node evaluator is a solution reporter, register in his event bus */
 			if (pNodeEvaluator instanceof ISolutionReportingNodeEvaluator) {
 				logger.info("{} is a solution reporter. Register the search algo in its event bus", pNodeEvaluator);
-				((ISolutionReportingNodeEvaluator<T, V>) pNodeEvaluator).getSolutionEventBus().register(this);
+				((ISolutionReportingNodeEvaluator<T, V>) pNodeEvaluator).registerSolutionListener(this);
 				solutionReportingNodeEvaluator = true;
 			} else
 				solutionReportingNodeEvaluator = false;
@@ -867,8 +898,16 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 		open = collection;
 	}
 
+	@Override
 	public void setLoggerName(String name) {
+		logger.info("Switching logger from {} to {}", logger.getName(), name);
 		logger = LoggerFactory.getLogger(name);
+		logger.info("Activated logger {} with name {}", name, logger.getName());
+	}
+
+	@Override
+	public String getLoggerName() {
+		return logger.getName();
 	}
 
 	@Override
