@@ -1,479 +1,401 @@
 package jaicore.graphvisualizer.gui;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import jaicore.graph.observation.IObservableGraphAlgorithm;
-import jaicore.graphvisualizer.TooltipGenerator;
-import jaicore.search.structure.core.AbstractNode;
-import jaicore.search.structure.core.GraphEventBus;
-import jaicore.search.structure.core.Node;
-import jaicore.search.structure.events.GraphInitializedEvent;
-import jaicore.search.structure.events.NodeReachedEvent;
-import jaicore.search.structure.events.NodeRemovedEvent;
-import jaicore.search.structure.events.NodeTypeSwitchEvent;
+import jaicore.graphvisualizer.IGraphDataSupplier;
+import jaicore.graphvisualizer.INodeDataSupplier;
+import jaicore.graphvisualizer.events.GraphInitializedEvent;
+import jaicore.graphvisualizer.events.NodeReachedEvent;
+import jaicore.graphvisualizer.events.NodeRemovedEvent;
+import jaicore.graphvisualizer.events.NodeTypeSwitchEvent;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
-public class Recorder<T> {
+public class Recorder<T> implements IObservableGraphAlgorithm {
 
+	/* List which contains every received event */
+	private List<Object> receivedEvents;
 
-	private List<Object> events;
-	private List<String> nodeTypes;
-
-
-	private GraphEventBus<T> playEventBus;
-
-
-
-
-	//the next event to post
+	//index for iterating over the events
 	private int index;
 
-	//time variables
-	private long firstEventNano;
-	private long firstEventMilli;
-	private List<Long> nanoTimes;
-	private List<Long> milliTimes;
+	//receiving times
+	private List<Long> receivingTimes;
+	private long firstEventTime;
 
 
-	private TooltipGenerator tooltipGenerator;
+	//EventBus for Replays;
+	private EventBus replayBus;
+//	private TooltipGenerator toolTipGenerator;
 
-	private Map<Integer, List<ArrayList>> nodeMap;
+	private Map<Object, List> nodeMap;
+	private Map<Integer, List<String>> toolTipMap;
+
+	private FXController contoller;
+
+	//List with DataSupplier
+	private List<INodeDataSupplier> dataSuppliers;
+
+	private List <IGraphDataSupplier> graphDataSuppliers;
+
+	private boolean prettyPrint;
 
 
 
 	/**
-	/**
-	 * Creates an empty recorder, which can load an event bus
+	 * Creator for an empty recorder
 	 */
 	public Recorder(){
 		this(null);
 	}
 
 	/**
-	 * Creates a new Recroder which is observing a graph algorithm
-	 * @param observable
-	 * 		The observable algorithm
+	 * Creates a recorder which is listening to an IObservableGraphAlgorithm
+	 * @param algorithm
+	 * 		The algorithm to which this recorder is listening.
 	 */
-	public Recorder(IObservableGraphAlgorithm observable) {
+	public Recorder(IObservableGraphAlgorithm algorithm){
+		if(algorithm != null)
+			algorithm.registerListener(this);
+
+		//initial assignments
+		this.receivedEvents = new ArrayList<>();
+		this.receivingTimes = new ArrayList<>();
 		this.index = 0;
-		//this.recordEventBus = eventBus;
-		if(observable != null)
-			observable.registerListener(this);
-		playEventBus = new GraphEventBus<>();
-		events = new ArrayList<Object>(5);
+		this.firstEventTime = 0;
+		this.replayBus = new EventBus();
+		this.nodeMap = new HashMap<>();
 
-		firstEventNano = 0;
-		firstEventMilli = 0;
+		this.contoller = null;
+		this.dataSuppliers = new ArrayList<>();
+		this.prettyPrint = true;
 
-		nanoTimes = new ArrayList<>(5);
-		milliTimes = new ArrayList<>(5);
-
-		nodeTypes = new ArrayList<String>();
-
-		nodeMap = new HashMap<>();
-
+		this.graphDataSuppliers = new ArrayList<>();
 
 	}
 
 	/**
-	 * receives an event and writes it into a list
+	 * receive an event on a event bus
 	 * @param event
+	 * 		The event which was received.
 	 */
 	@Subscribe
-	public void receiveEvent(T event) {
-		this.events.add(event);
-		long currNano = 0;
-		long currMilli = 0;
-		if(firstEventNano == 0) {
-			firstEventNano = System.nanoTime();
-			firstEventMilli = System.currentTimeMillis();
-			currNano = firstEventNano;
-			currMilli = firstEventMilli;
-		}
-		else {
-			currNano = System.nanoTime();
-			currMilli = System.currentTimeMillis();
+	public void receiveEvent(T event){
+		this.receivedEvents.add(event);
+		long receiveTime = System.currentTimeMillis();
+
+		if(firstEventTime == 0)
+			firstEventTime = receiveTime;
+
+		receivingTimes.add(receiveTime-firstEventTime);
+
+		if(contoller != null){
+			contoller.updateEventTimes(receivingTimes);
 		}
 
-		this.nanoTimes.add(currNano-firstEventNano);
-		this.milliTimes.add(currMilli-firstEventMilli);
-		this.milliTimes.add(currMilli-firstEventMilli);
+		if(! dataSuppliers.isEmpty())
+			for(INodeDataSupplier supplier : dataSuppliers)
+				supplier.receiveEvent(event);
+	}
 
+	/**
+	 * one step forward
+	 */
+	public void step(){
+		if(index == this.receivedEvents.size())
+			return;
 
-		int id = 0;
-		Node node = null;
+		this.replayBus.post(this.receivedEvents.get(this.index));
 
-		switch (event.getClass().getSimpleName()){
+		Object event = receivedEvents.get(index);
+		List<String> types;
+
+		switch(event.getClass().getSimpleName()){
 			case "GraphInitializedEvent":
-				nodeTypes.add("root");
 				GraphInitializedEvent initializedEvent = (GraphInitializedEvent) event;
-				node= (Node) initializedEvent.getRoot();
-
-				if (node.getPoint() instanceof AbstractNode) {
-					AbstractNode abstractNode = (AbstractNode) node.getPoint();
-					id = abstractNode.getId();
-					List<ArrayList> utility = new ArrayList<>();
-					utility.add(new ArrayList<String>());
-					utility.add(new ArrayList<String>());
-					utility.get(0).add("root");
-					utility.get(1).add(tooltipGenerator.getTooltip(node));
-
-					nodeMap.put(id,utility);
-
-				}
+				types = new ArrayList();
+				types.add("root");
+				nodeMap.put(initializedEvent.getRoot(), types);
 				break;
 
 			case "NodeTypeSwitchEvent":
-				NodeTypeSwitchEvent switchEvent = (NodeTypeSwitchEvent) event;
-				String nodeType = switchEvent.getType();
-				node = (Node) switchEvent.getNode();
-				if(node.getPoint() instanceof AbstractNode){
-					AbstractNode abstractNode  = (AbstractNode) node.getPoint();
-					id = abstractNode.getId();
-					nodeMap.get(id).get(0).add(nodeType);
-					nodeMap.get(id).get(1).add(tooltipGenerator.getTooltip(node));
-				}
-
-
-				nodeTypes.add(switchEvent.getType());
+				NodeTypeSwitchEvent nodeTypeSwitchEvent = (NodeTypeSwitchEvent) event;
+				nodeMap.get(nodeTypeSwitchEvent.getNode()).add(nodeTypeSwitchEvent.getType());
 				break;
 
 			case "NodeReachedEvent":
-				NodeReachedEvent reachedEvent = (NodeReachedEvent) event;
-				nodeTypes.add(reachedEvent.getType());
-
-				node= (Node) reachedEvent.getNode();
-
-				if (node.getPoint() instanceof AbstractNode) {
-					AbstractNode abstractNode = (AbstractNode) node.getPoint();
-					id = abstractNode.getId();
-					List<ArrayList> utility = new ArrayList<>();
-					utility.add(new ArrayList<String>());
-					utility.add(new ArrayList<String>());
-					utility.get(0).add(reachedEvent.getType());
-					utility.get(1).add(tooltipGenerator.getTooltip(node));
-
-					nodeMap.put(id,utility);
-
-				}
-
+				NodeReachedEvent nodeReachedEvent = (NodeReachedEvent) event;
+				types = new ArrayList<>();
+				types.add(nodeReachedEvent.getType());
+				nodeMap.put(nodeReachedEvent.getNode(),types);
 				break;
 
 			default:
-				nodeTypes.add("");
+				System.out.println("not an allowed event");
 				break;
 		}
 
+		for(IGraphDataSupplier s: graphDataSuppliers)
+			s.update(receivingTimes.get(index), event);
+		this.index++;
 
-	}
-
-	/**
-	 * Returns the eventbus for the playback
-	 * @return
-	 * 		The playback eventbus
-	 */
-	public GraphEventBus<T> getEventBus() {
-		return playEventBus;
-	}
-
-
-	/**
-	 * posts the next event, while there are events left
-	 */
-	public void step() {
-		//System.out.println(events.get(index).getClass().getSimpleName() + "\t" +index);
-		 if(index >= events.size())
-					return;
-		Object event = events.get(index);
-
-
-
-		switch (event.getClass().getSimpleName()){
-			case "GraphInitializedEvent":
-				nodeTypes.add("root");
-
-				break;
-
-			case "NodeTypeSwitchEvent":
-				NodeTypeSwitchEvent switchEvent = (NodeTypeSwitchEvent) event;
-				String nodeType = switchEvent.getType();
-				nodeTypes.add(switchEvent.getType());
-				break;
-
-			case "NodeReachedEvent":
-				NodeReachedEvent reachedEvent = (NodeReachedEvent) event;
-				nodeTypes.add(reachedEvent.getType());
-				break;
-
-			default:
-				nodeTypes.add("");
-				break;
-		}
-
-		playEventBus.post(event);
-		index++;
 
 	}
 
 
-	/**
-	 * Resets the index back to 0
-	 */
-	public void reset(){
-		this.index = 0;
-		nodeTypes.clear();
-
+	private void play(){
 	}
 
 	/**
-	 * Gets one event backwards.
-	 * This is the opposite of step
+	 * one step backwards
 	 */
 	public void back(){
+		this.index --;
+
+		Object counter = null;
+		Object event = this.receivedEvents.get(index);
+
+		switch (event.getClass().getSimpleName()){
+			case "GraphInitializedEvent":
+				//just for completion
+				counter = null;
+				break;
+
+			case "NodeTypeSwitchEvent":
+				NodeTypeSwitchEvent nodeTypeSwitchEvent = (NodeTypeSwitchEvent) event;
+				List<String> typeList = nodeMap.get(nodeTypeSwitchEvent.getNode());
+				typeList.remove(typeList.size()-1);
+				counter = new NodeTypeSwitchEvent(nodeTypeSwitchEvent.getNode(), typeList.get(typeList.size()-1));
+				break;
+
+			case "NodeReachedEvent":
+				NodeReachedEvent nodeReachedEvent = (NodeReachedEvent) event;
+				counter = new NodeRemovedEvent(nodeReachedEvent.getNode());
+				break;
+
+			default:
+				System.out.println("not an allowed event");
+				break;
+
+		}
+
+		replayBus.post(counter);
+
+	}
+
+	public void reset(){
+		index = 0;
+		nodeMap.clear();
+	}
+
+	public void saveToFile(File file){
+		ObjectMapper mapper = new ObjectMapper();
+		if(prettyPrint)
+			mapper.enable(SerializationFeature.INDENT_OUTPUT);
+		try{
+			List mapperList = new ArrayList();
+
+			List<LinkedHashMap<Long,Object>> saveList = new ArrayList();
+
+			toolTipMap = new HashMap<>();
+			for(int i = 0; i < receivedEvents.size(); i++){
+				Object event = receivedEvents.get(i);
+				LinkedHashMap<Long, Object> timeToEvent = new LinkedHashMap();
+
+				int code = 0;
+				ArrayList<String> tooltips;
+				switch (event.getClass().getSimpleName()){
+					case "GraphInitializedEvent":
+						GraphInitializedEvent graphInitializedEvent = (GraphInitializedEvent) event;
+						code = graphInitializedEvent.getRoot().hashCode();
+//						tooltips = new ArrayList<>();
+//						tooltips.add(toolTipGenerator.getTooltip(graphInitializedEvent.getRoot()));
+//						toolTipMap.put(code, tooltips );
+						timeToEvent.put(receivingTimes.get(i), new GraphInitializedEvent(code));
+						break;
+
+					case "NodeTypeSwitchEvent":
+						NodeTypeSwitchEvent nodeTypeSwitchEvent = (NodeTypeSwitchEvent) event;
+						code = nodeTypeSwitchEvent.getNode().hashCode();
+//						toolTipMap.get(code).add(toolTipGenerator.getTooltip(nodeTypeSwitchEvent.getNode()));
+						timeToEvent.put(receivingTimes.get(i), new NodeTypeSwitchEvent(code, nodeTypeSwitchEvent.getType()));
+						break;
+
+					case "NodeReachedEvent":
+						NodeReachedEvent nodeReachedEvent = (NodeReachedEvent) event;
+						code = nodeReachedEvent.getNode().hashCode();
+//						tooltips = new ArrayList<>();
+//						tooltips.add(toolTipGenerator.getTooltip(nodeReachedEvent.getNode()));
+//						toolTipMap.put(code, tooltips );
+						timeToEvent.put(receivingTimes.get(i), new NodeReachedEvent(nodeReachedEvent.getParent().hashCode(),code, nodeReachedEvent.getType()));
+						break;
+
+					default:
+						System.out.println("not an allowed event");
+						break;
+				}
+				saveList.add(timeToEvent);
+			}
 
 
-		if(index > 0) {
-			index--;
+			mapperList.add(saveList);
+//			mapperList.add(toolTipMap);
+			HashMap<String, JsonNode> supplierHashMap = new HashMap<>();
+			for(INodeDataSupplier s: dataSuppliers)
+				supplierHashMap.put(s.getClass().getSimpleName(), s.getSerialization());
 
- 			nodeTypes.remove(nodeTypes.size()-1);
-// 			System.out.println(nodeTypes);
-			Object counter = createCounterEvent(events.get(index));
-			playEventBus.post(counter);
+			mapperList.add(supplierHashMap);
+
+			mapper.writeValue(file, mapperList);
+
+
+
+		} catch (IOException e){
+			e.printStackTrace();
 		}
 
 	}
 
-	/**
-	 * Creates an event, which does the opposite of the paramter event
-	 * @param object
-	 * 		The event, which should be reversed.
-	 * @return
-	 * 		An event, which can revert the event which was given as a paramter;
-	 */
-	private Object createCounterEvent(Object object){
-		Class eventClass = object.getClass();
-		switch(eventClass.getSimpleName()){
-			case "GraphInitializedEvent":
-				//just for completion, the controller handles the back button for the first event as an reset
-				return null;
+	public void loadFromFile(File file){
+		//clear existing events
+		this.receivedEvents.clear();
+		this.receivingTimes.clear();
 
+		this.reset();
 
-			case "NodeTypeSwitchEvent":
-				NodeTypeSwitchEvent typeSwitchEvent = (NodeTypeSwitchEvent)object;
-//				System.out.println(typeSwitchEvent.getType());
-				NodeTypeSwitchEvent switchCounter = null;
+		ObjectMapper mapper = new ObjectMapper();
 
-				Node node = (Node) typeSwitchEvent.getNode();
-				if(node.getPoint() instanceof AbstractNode){
-					ArrayList typeList = nodeMap.get(((AbstractNode) node.getPoint()).getId()).get(0);
+		try {
+			List mapperList = mapper.readValue(file, mapper.getTypeFactory().constructCollectionType(List.class, Object.class));
+//			mapperList.stream().forEach(n->System.out.println(n.getClass()));
+			ArrayList eventList = (ArrayList) mapperList.get(0);
+			eventList.stream().forEach(n->{
+				LinkedHashMap map = (LinkedHashMap) n;
+				map.keySet().stream().forEach(time->receivingTimes.add(Long.parseLong((String) time)));
+				map.values().stream().forEach(v->{
+					LinkedHashMap eventMap = (LinkedHashMap) v;
 
-					nodeMap.get(((AbstractNode) node.getPoint()).getId()).get(1).remove(typeList.size()-1);
-					typeList.remove(typeList.size()-1);
+					int node;
+					Object event;
+					switch(eventMap.get("name").toString()){
+						case "GraphInitializedEvent":
+							event = new GraphInitializedEvent(Integer.parseInt(String.valueOf(eventMap.get("root"))));
 
-					String type = (String) typeList.get(typeList.size()-1);
-					switchCounter = new NodeTypeSwitchEvent(node,type);
-//					System.out.println(type);
-				}
-				else {
-					switch (typeSwitchEvent.getType()) {
-						case "or_closed":
-							switchCounter = new NodeTypeSwitchEvent(node, "or_expanding");
 							break;
-						case "or_expanding":
-							switchCounter = new NodeTypeSwitchEvent(node, "or_open");
+
+						case "NodeTypeSwitchEvent":
+							node = Integer.parseInt(String.valueOf(eventMap.get("node")));
+							event = new NodeTypeSwitchEvent(node, eventMap.get("type").toString());
+							break;
+
+						case "NodeReachedEvent":
+							int parent = Integer.parseInt(String.valueOf(eventMap.get("parent")));
+							node = Integer.parseInt(String.valueOf(eventMap.get("node")));
+							event = new NodeReachedEvent(parent, node, eventMap.get("type").toString());
 							break;
 
 						default:
-							switchCounter = new NodeTypeSwitchEvent(node, nodeTypes.get(nodeTypes.size() - 1));
-							break;
+							event = null;
+
+
 					}
-				}
+					if(event != null)
+						receivedEvents.add(event);
+				});
+			});
 
-//				System.out.println(nodeMap);
-				return switchCounter;
+			mapperList.stream().filter(o-> mapperList.indexOf(o)!=0).forEach(o->{
+				LinkedHashMap map = (LinkedHashMap) o;
+				Object[] a = map.keySet().toArray();
+				String name = a[0].toString();
+				System.out.println(map.get(a[0]));
+				HashMap dataMap = (HashMap) map.get(a[0]);
+				INodeDataSupplier supplier = new ReconstructionNodeDataSupplier(dataMap);
+				this.contoller.addTab(supplier.getVisualization(),name);
+				this.dataSuppliers.add(supplier);
 
-			case "NodeReachedEvent":
-				NodeReachedEvent nodeReachedEvent = (NodeReachedEvent) object;
-				NodeRemovedEvent reachedCounter = new NodeRemovedEvent(nodeReachedEvent.getNode());
-				node = (Node) nodeReachedEvent.getNode();
-				if(node.getPoint() instanceof AbstractNode){
-					nodeMap.remove(((AbstractNode) node.getPoint()).getId());
-				}
+			});
 
-				return reachedCounter;
-
-			default:
-				System.out.println("Not an event");
-				break;
-		}
-
-		return null;
-
-	}
-
-	/**
-	 * Stores the received events in the specified file.
-	 * @param file
-	 * 		The file in which the events should be stored
-	 */
-	public void saveToFile(File file){
-
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.enable(SerializationFeature.INDENT_OUTPUT);
-		try {
-			List<LinkedHashMap<Long,Object>> saveList = new ArrayList();
-
-			//create a HashMap, which contains the event as values and the corresponding time as a value
-			//This is done to store the time in the same file as the events.
-			for(int i = 0; i < events.size(); i++){
-				LinkedHashMap t = new LinkedHashMap();
-				t.put(nanoTimes.get(i), events.get(i));
-				saveList.add(t);
-			}
-
-			List mapperList = new ArrayList();
-			mapperList.add(saveList);
-			mapperList.add(nodeMap);
-
-			mapper.writeValue(file, mapperList);
+//			toolTipMap = (Map<Integer, List<String>>) mapperList.get(1);
+//			this.setTooltipGenerator(node->{
+//				List<String> tips = toolTipMap.get(node.toString());
+//				int i = nodeMap.get(node).size()-1;
+//
+//				return tips.get(i);
+//			});
 
 
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}
-
-	/**
-	 * Load events from the specified file.
-	 * @param file
-	 * 		The file which contains the stored events.
-	 */
-	public void loadFromFile(File file){
-
-		//reset the recorder to not mix up the old events with the loaded ones
-		nanoTimes.clear();
-		events.clear();
-		index = 0 ;
-		this.setTooltipGenerator(n->n.toString());
-
-		ObjectMapper mapper =new ObjectMapper();
-		try{
-			List mapperList = mapper.readValue(file, mapper.getTypeFactory().constructCollectionType(List.class, Object.class));
-
-			EventCreator creator = new EventCreator();
-			ArrayList eventList = (ArrayList) mapperList.get(0);
-			eventList.stream().forEach(o ->{
-				//Extract event-times and events from linked-hashmap
-				LinkedHashMap map = (LinkedHashMap) o;
-				Set timeSet = map.keySet();
-				timeSet.stream().forEach(t->{
-					nanoTimes.add(Long.parseLong((String)(t)));
-					events.add(creator.createEvent((LinkedHashMap)map.get(t)));
-				});
-			});
-
-			HashMap map= (HashMap) mapperList.get(1);
-			map.keySet().stream().forEach(n-> {
-				Integer id = Integer.parseInt((String) n);
-				ArrayList utilityList = (ArrayList) map.get(id.toString());
-				this.nodeMap.put(id, utilityList);
-
-			});
-		} catch (IOException e){
-			e.printStackTrace();
-		}
-
-		this.setTooltipGenerator(n -> {
-			Node node = (Node) n;
-			if ( node.getPoint() instanceof GuiNode){
-				int id = ((GuiNode) node.getPoint()).getId();
-				List tooltipList = this.nodeMap.get(id).get(1);
-				return (String) tooltipList.get(tooltipList.size()-1);
-			}
-			else
-				return node.toString();
-		});
-
-//		ObjectMapper mapper = new ObjectMapper();
-//		try {
-//			//convert JASON-String into a linked list
-//			List mapList = mapper.readValue(file, mapper.getTypeFactory().constructCollectionType(List.class, LinkedHashMap.class));
-//
-//			EventCreator creator = new EventCreator();
-//			mapList.stream().forEach(o ->{
-//				//Extract event-times and events from linked-hashmap
-//				LinkedHashMap map = (LinkedHashMap) o;
-//				Set timeSet = map.keySet();
-//				timeSet.stream().forEach(t->{
-//					nanoTimes.add(Long.parseLong((String)(t)));
-//					events.add(creator.createEvent((LinkedHashMap)map.get(t)));
-//				});
-//			});
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
 
 
 	}
 
-
-
-	/**
-	 * Register a new listener to the replayEventBus
-	 * @param listener
-	 * 		The listener to be registerd to the replayEventBus.
-	 */
 	public void registerListener(Object listener) {
-		this.playEventBus.register(listener);
+		this.replayBus.register(listener);
 	}
 
-	public void unregisterListener(Object listener){
-		this.playEventBus.unregister(listener);
+	public void unregisterListener(Object listener) {
+
+		this.replayBus.unregister(listener);
+
 	}
 
-	/**
-	 *
-	 * @return
-	 * 		The number of received events.
-	 */
-	public int getNumberOfEvents(){
-		return events.size();
+	public void addNodeDataSupplier(INodeDataSupplier dataSupplier){
+		this.dataSuppliers.add(dataSupplier);
+		if(contoller != null)
+			this.contoller.addTab(dataSupplier.getVisualization(), dataSupplier.getClass().getSimpleName());
+
+		for(Object event : receivedEvents)
+			dataSupplier.receiveEvent(event);
+
+
 	}
 
-	/**
-	 *
-	 * @return
-	 */
-	public List<Long> getNanoTimes() {
-		return nanoTimes;
+	public void addGraphDataSupplier(IGraphDataSupplier dataSupplier){
+		this.graphDataSuppliers.add(dataSupplier);
+		if(index != 0)
+			for(int i = 0; i < index; i++)
+				dataSupplier.update(receivingTimes.get(i), receivedEvents.get(i));
+		if(contoller != null){
+			this.contoller.addTab(dataSupplier.getVisualization(),dataSupplier.getClass().getSimpleName());
+		}
 	}
 
-	public List<Long>getMilliTimes(){
-	    return milliTimes;
-    }
-
-
-	/**
-	 * Returns the Time, at which the last event was recieved in relation to the first received event.
-	 * @return
-	 * 		Returns the time at which the last event was received in nano seconds.
-	 */
-	public long getLastEvent(){
-		if(! nanoTimes.isEmpty())
-			return nanoTimes.get(nanoTimes.size()-1);
-		else
-			return 0;
+	public void update(Object node){
+		for(INodeDataSupplier dataSupplier : this.dataSuppliers)
+			dataSupplier.update(node);
 	}
 
-	public void setTooltipGenerator(TooltipGenerator<T> tooltipGenerator) {
-		this.tooltipGenerator = (TooltipGenerator<T>)tooltipGenerator;
+	public void removeDataSupplier(int i) {
+		this.dataSuppliers.remove(i);
 	}
 
-	public TooltipGenerator getTooltipGenerator(){
-		return this.tooltipGenerator;
+//	public TooltipGenerator getTooltipGenerator() {
+//		return toolTipGenerator;
+//	}
+
+//	public void setTooltipGenerator(TooltipGenerator toolTipGenerator) {
+//		this.toolTipGenerator = toolTipGenerator;
+//	}
+
+	public List<Long> getReceiveTimes() {
+		return receivingTimes;
 	}
+
+	public void setContoller(FXController ctrl){
+		this.contoller = ctrl;
+		for(INodeDataSupplier supplier : dataSuppliers)
+			this.contoller.addTab(supplier.getVisualization(), supplier.getClass().getSimpleName());
+
+	}
+
+
 }

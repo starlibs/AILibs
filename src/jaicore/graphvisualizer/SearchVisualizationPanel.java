@@ -33,14 +33,13 @@ import org.graphstream.ui.view.Viewer.ThreadingModel;
 import org.graphstream.ui.view.ViewerListener;
 import org.graphstream.ui.view.ViewerPipe;
 
-import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
-import jaicore.search.structure.events.GraphInitializedEvent;
-import jaicore.search.structure.events.NodeParentSwitchEvent;
-import jaicore.search.structure.events.NodeReachedEvent;
-import jaicore.search.structure.events.NodeRemovedEvent;
-import jaicore.search.structure.events.NodeTypeSwitchEvent;
+import jaicore.graphvisualizer.events.GraphInitializedEvent;
+import jaicore.graphvisualizer.events.NodeParentSwitchEvent;
+import jaicore.graphvisualizer.events.NodeReachedEvent;
+import jaicore.graphvisualizer.events.NodeRemovedEvent;
+import jaicore.graphvisualizer.events.NodeTypeSwitchEvent;
 
 @SuppressWarnings("serial")
 public class SearchVisualizationPanel<T> extends JPanel {
@@ -136,65 +135,65 @@ public class SearchVisualizationPanel<T> extends JPanel {
 			@Override
 			public void buttonPushed(String arg0) {
 
-				Runnable doButtonPushedAction = new Runnable() {				
-				    public void run() {
-				    	
-				    	/* generate HTML for tooltip and set it */
-						StringBuilder sb = new StringBuilder();
-//						sb.append("<html><div style='padding: 5px; background: #ffffcc; border: 1px solid black;'>");
-						sb.append("<html><div style='padding: 5px;'>");
-						sb.append(SearchVisualizationPanel.this.tooltipGenerator.getTooltip(SearchVisualizationPanel.this.getNodeOfString(arg0)));
-						sb.append("</div></html>");
-						SearchVisualizationPanel.this.tooltipLabel.setText(sb.toString());
-
-						/* determine desired position for tooltip box */
-						final Point mousePosition = MouseInfo.getPointerInfo().getLocation();
-						SwingUtilities.convertPointFromScreen(mousePosition, SearchVisualizationPanel.this);
-						Dimension size;
-						final Dimension preferredSize = SearchVisualizationPanel.this.tooltipLabel.getPreferredSize();
-						if (preferredSize.getWidth() <= getWidth() * 0.5)
-							size = preferredSize;
-						else {
-							javax.swing.text.View view = (javax.swing.text.View) tooltipLabel.getClientProperty(javax.swing.plaf.basic.BasicHTML.propertyKey);
-							view.setSize((int) Math.round(getWidth() * 0.5), 0);
-							float w = view.getPreferredSpan(javax.swing.text.View.X_AXIS);
-							float h = view.getPreferredSpan(javax.swing.text.View.Y_AXIS);
-							size = new java.awt.Dimension((int) Math.ceil(w), (int) Math.ceil(h));
-						}
-						final Point position = new Point(mousePosition.x + 15, mousePosition.y);
-
-						/* check if the tooltip is partly outside the window on the bottom */
-						final int yOffset = getHeight() - size.height - position.y;
-						if (yOffset < 0) {
-							position.y = position.y + yOffset;
-						}
-
-						/* check if the tooltip is partly outside the window on the right side. */
-						final boolean rightOutside = position.x + size.width > getWidth();
-						if (rightOutside) {
-							position.x = mousePosition.x - 15 - size.width;
-						}
-//						SearchVisualizationPanel.this.tooltipLabel.setBounds(position.x, position.y, size.width, size.height);
-
-						SearchVisualizationPanel.this.scrollPane.getViewport().setViewPosition(new Point(0,0));
-						SearchVisualizationPanel.this.scrollPane.revalidate();
-						Dimension d = SearchVisualizationPanel.this.scrollPane.getPreferredSize();
-						d.height += 50;
-						d.width += 50;
-						if ( d.height > (SearchVisualizationPanel.this.tooltipContainer.getMaximumSize().height-50) )
-							d.height = (SearchVisualizationPanel.this.tooltipContainer.getMaximumSize().height-50);
-						if ( d.width > (SearchVisualizationPanel.this.tooltipContainer.getMaximumSize().width-50) )
-							d.width = (SearchVisualizationPanel.this.tooltipContainer.getMaximumSize().width-50);
-						SearchVisualizationPanel.this.tooltipContainer.setSize(d);
-						SearchVisualizationPanel.this.tooltipContainer.repaint();
-		            	SearchVisualizationPanel.this.tooltipContainer.setExtendedState(0);
-		            	
-		            	SearchVisualizationPanel.this.tooltipContainer.setVisible(true);
-		            	SearchVisualizationPanel.this.tooltipTimer.restart();
-					}
-				};
-								
-				SwingUtilities.invokeLater(doButtonPushedAction);				 
+//				Runnable doButtonPushedAction = new Runnable() {
+//				    public void run() {
+//
+//				    	/* generate HTML for tooltip and set it */
+//						StringBuilder sb = new StringBuilder();
+////						sb.append("<html><div style='padding: 5px; background: #ffffcc; border: 1px solid black;'>");
+//						sb.append("<html><div style='padding: 5px;'>");
+//						sb.append(SearchVisualizationPanel.this.tooltipGenerator.getTooltip(SearchVisualizationPanel.this.getNodeOfString(arg0)));
+//						sb.append("</div></html>");
+//						SearchVisualizationPanel.this.tooltipLabel.setText(sb.toString());
+//
+//						/* determine desired position for tooltip box */
+//						final Point mousePosition = MouseInfo.getPointerInfo().getLocation();
+//						SwingUtilities.convertPointFromScreen(mousePosition, SearchVisualizationPanel.this);
+//						Dimension size;
+//						final Dimension preferredSize = SearchVisualizationPanel.this.tooltipLabel.getPreferredSize();
+//						if (preferredSize.getWidth() <= getWidth() * 0.5)
+//							size = preferredSize;
+//						else {
+//							javax.swing.text.View view = (javax.swing.text.View) tooltipLabel.getClientProperty(javax.swing.plaf.basic.BasicHTML.propertyKey);
+//							view.setSize((int) Math.round(getWidth() * 0.5), 0);
+//							float w = view.getPreferredSpan(javax.swing.text.View.X_AXIS);
+//							float h = view.getPreferredSpan(javax.swing.text.View.Y_AXIS);
+//							size = new java.awt.Dimension((int) Math.ceil(w), (int) Math.ceil(h));
+//						}
+//						final Point position = new Point(mousePosition.x + 15, mousePosition.y);
+//
+//						/* check if the tooltip is partly outside the window on the bottom */
+//						final int yOffset = getHeight() - size.height - position.y;
+//						if (yOffset < 0) {
+//							position.y = position.y + yOffset;
+//						}
+//
+//						/* check if the tooltip is partly outside the window on the right side. */
+//						final boolean rightOutside = position.x + size.width > getWidth();
+//						if (rightOutside) {
+//							position.x = mousePosition.x - 15 - size.width;
+//						}
+////						SearchVisualizationPanel.this.tooltipLabel.setBounds(position.x, position.y, size.width, size.height);
+//
+//						SearchVisualizationPanel.this.scrollPane.getViewport().setViewPosition(new Point(0,0));
+//						SearchVisualizationPanel.this.scrollPane.revalidate();
+//						Dimension d = SearchVisualizationPanel.this.scrollPane.getPreferredSize();
+//						d.height += 50;
+//						d.width += 50;
+//						if ( d.height > (SearchVisualizationPanel.this.tooltipContainer.getMaximumSize().height-50) )
+//							d.height = (SearchVisualizationPanel.this.tooltipContainer.getMaximumSize().height-50);
+//						if ( d.width > (SearchVisualizationPanel.this.tooltipContainer.getMaximumSize().width-50) )
+//							d.width = (SearchVisualizationPanel.this.tooltipContainer.getMaximumSize().width-50);
+//						SearchVisualizationPanel.this.tooltipContainer.setSize(d);
+//						SearchVisualizationPanel.this.tooltipContainer.repaint();
+//		            	SearchVisualizationPanel.this.tooltipContainer.setExtendedState(0);
+//
+//		            	SearchVisualizationPanel.this.tooltipContainer.setVisible(true);
+//		            	SearchVisualizationPanel.this.tooltipTimer.restart();
+//					}
+//				};
+//
+//				SwingUtilities.invokeLater(doButtonPushedAction);
 			}
 		});
 	}
@@ -344,5 +343,14 @@ public class SearchVisualizationPanel<T> extends JPanel {
 
 	public void setTooltipGenerator(TooltipGenerator<T> tooltipGenerator) {
 		this.tooltipGenerator = (TooltipGenerator<T>)tooltipGenerator;
+	}
+
+	public void reset(){
+		ext2intNodeMap.clear();
+		int2extNodeMap.clear();
+		graph.clear();
+		graph.addAttribute("ui.stylesheet", "url('conf/searchgraph.css')");
+
+
 	}
 }

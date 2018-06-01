@@ -3,8 +3,6 @@
 <?import javafx.embed.swing.SwingNode?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.web.WebView?>
-<?import javafx.scene.text.Text?>
 <?import javafx.scene.layout.StackPane?>
 <BorderPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.152-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="jaicore.graphvisualizer.gui.FXController">
 
@@ -19,10 +17,11 @@
                     <Button onAction="#stop" text="stop" />
                     <Button onAction="#save" text="save" />
                     <Button onAction="#load" text="load" />
+                    <Button onAction="#test" text="test"/>
                 </ToolBar>
             </top>
             <bottom>
-                <Slider fx:id="slider">
+                <Slider fx:id="speedSlider">
                     <min>0</min>
                     <max>200</max>
                     <value>150</value>
@@ -38,22 +37,11 @@
     <center>
         <SplitPane dividerPositions="0.25">
             <items>
-                <TabPane>
-                    <tabs>
-                        <Tab text="ToolTips">
-                            <StackPane>
-                                <SwingNode fx:id="toolTip">
-
-                                </SwingNode>
-                            </StackPane>
-                        </Tab>
-                        <Tab text="Statistics">
-                        </Tab>
-                    </tabs>
+                <TabPane fx:id="tabPane">
                 </TabPane>
                 <BorderPane>
                    <center>
-                       <SwingNode fx:id="swingNode" />
+                       <SwingNode fx:id="visuPanel" />
                    </center>
                 </BorderPane>
             </items>
