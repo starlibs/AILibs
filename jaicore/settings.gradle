@@ -1,6 +1,6 @@
 // JAICore
 include 'jaicore-basic'
-project(":jaicore-basic").projectDir = new File("jaicore-basic")
+project(":jaicore-basic").projectDir = new File("jaicore-basic/")
 
 include 'jaicore-concurrent'
 project(":jaicore-concurrent").projectDir = new File("jaicore-concurrent")
