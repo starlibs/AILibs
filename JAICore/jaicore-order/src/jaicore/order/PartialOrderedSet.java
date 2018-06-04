@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import jaicore.basic.SetUtil;
 
 /**
  * A {@link Set} with a partial order added to it.
