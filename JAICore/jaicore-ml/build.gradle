@@ -10,3 +10,11 @@ sourceSets {
      	}
     }
 }
+dependencies {
+	compile project (":jaicore-basic")
+	compile project (":jaicore-order")
+	compile project (":jaicore-search")
+	compile project (":jaicore-graphvisualizer")
+	compile project (":jaicore-logging")
+	compile project (":jaicore-experiments")
+}

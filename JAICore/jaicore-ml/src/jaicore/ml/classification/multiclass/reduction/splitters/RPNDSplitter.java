@@ -10,7 +10,7 @@ import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jaicore.basic.SetUtil;
+import jaicore.order.SetUtil;
 import jaicore.ml.WekaUtil;
 import weka.classifiers.Classifier;
 import weka.core.Instance;

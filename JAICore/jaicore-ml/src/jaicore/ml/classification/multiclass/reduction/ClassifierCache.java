@@ -6,7 +6,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import jaicore.basic.SetUtil.Pair;
+import jaicore.order.SetUtil.Pair;
 import weka.classifiers.Classifier;
 import weka.core.Instances;
 

@@ -6,7 +6,7 @@ import java.io.FileReader;
 import java.util.List;
 import java.util.Random;
 
-import jaicore.basic.MathExt;
+import jaicore.order.MathExt;
 import jaicore.ml.WekaUtil;
 import jaicore.ml.classification.multiclass.reduction.reducer.ReductionOptimizer;
 import weka.classifiers.Classifier;
