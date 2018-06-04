@@ -8,9 +8,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
-
 
 /**
  * A {@link Set} with a partial order added to it.
@@ -26,7 +26,8 @@ public class PartialOrderedSet<E> extends HashSet<E> {
 	private final Map<E, Set<E>> order;
 
 	/**
-	 * Creates a new partial ordered set with the same elements as <code>original</code> and the same order.
+	 * Creates a new partial ordered set with the same elements as
+	 * <code>original</code> and the same order.
 	 * 
 	 * @param original
 	 *            The {@link PartialOrderedSet} to copy.
@@ -100,7 +101,8 @@ public class PartialOrderedSet<E> extends HashSet<E> {
 	}
 
 	/**
-	 * Tests whether a < b is directly, not just transitively, specified by the order.
+	 * Tests whether a < b is directly, not just transitively, specified by the
+	 * order.
 	 * 
 	 * @param a
 	 *            The first element.
@@ -178,10 +180,14 @@ public class PartialOrderedSet<E> extends HashSet<E> {
 	}
 
 	/**
-	 * Creates a total order of the elements stored in this {@link PartialOrderedSet}. The order is created by iterating over all elements in the set and inserting each element in the list at the
-	 * position of the element with the currently smallest index that has to be after the current element.
+	 * Creates a total order of the elements stored in this
+	 * {@link PartialOrderedSet}. The order is created by iterating over all
+	 * elements in the set and inserting each element in the list at the position of
+	 * the element with the currently smallest index that has to be after the
+	 * current element.
 	 * 
-	 * If no elements needs to be after the current element, it is appended to the end. The runtime is O(n²).
+	 * If no elements needs to be after the current element, it is appended to the
+	 * end. The runtime is O(n²).
 	 * 
 	 * 
 	 * @return A total ordering of the elements in this {@link PartialOrderedSet}.
@@ -205,10 +211,13 @@ public class PartialOrderedSet<E> extends HashSet<E> {
 	}
 
 	/**
-	 * If the collection is a {@link PartialOrderedSet}, the order will also be added. If the that would destroy asymmetry an {@link IllegalStateException} will be thrown.
+	 * If the collection is a {@link PartialOrderedSet}, the order will also be
+	 * added. If the that would destroy asymmetry an {@link IllegalStateException}
+	 * will be thrown.
 	 * 
 	 * @throws IllegalStateException
-	 *             if adding the order of another {@link PartialOrderedSet} would destroy asymmetry.
+	 *             if adding the order of another {@link PartialOrderedSet} would
+	 *             destroy asymmetry.
 	 */
 	public void merge(PartialOrderedSet<? extends E> set) {
 		super.addAll(set);
@@ -258,19 +267,19 @@ public class PartialOrderedSet<E> extends HashSet<E> {
 	}
 
 	public List<E> getLinearization() {
-		
+
 		/* create a copy of all elements */
 		List<E> elements = new ArrayList<>();
 		Iterator<E> iterator = super.iterator();
 		while (iterator.hasNext())
 			elements.add(iterator.next());
-		
+
 		/* compute initial values of working variables */
 		List<E> linearization = new ArrayList<>();
-		Map<E,Set<E>> workingCopyOfOrder = new HashMap<>(order);
+		Map<E, Set<E>> workingCopyOfOrder = new HashMap<>(order);
 		Collection<E> itemsWithoutSuccessor = new HashSet<>(SetUtil.difference(elements, workingCopyOfOrder.keySet()));
 		Collection<E> uninsertedItems = new HashSet<>(elements);
-		
+
 		/* now compute the linearization from the back */
 		while (!itemsWithoutSuccessor.isEmpty()) {
 			List<E> itemsToInsert = new ArrayList<>(itemsWithoutSuccessor);
@@ -278,8 +287,9 @@ public class PartialOrderedSet<E> extends HashSet<E> {
 			for (E itemToInsert : itemsToInsert) {
 				if (linearization.contains(itemToInsert))
 					continue;
-				assert !linearization.contains(itemToInsert) : "The object " + itemToInsert + " is already contained in the linearization " + linearization;
-				linearization.add(0,itemToInsert);
+				assert !linearization.contains(itemToInsert) : "The object " + itemToInsert
+						+ " is already contained in the linearization " + linearization;
+				linearization.add(0, itemToInsert);
 				uninsertedItems.remove(itemToInsert);
 				for (E uninsertedItem : uninsertedItems) {
 					if (workingCopyOfOrder.containsKey(uninsertedItem)) {
@@ -290,20 +300,21 @@ public class PartialOrderedSet<E> extends HashSet<E> {
 				}
 			}
 		}
-		
+
 		/* consistency check */
-		assert linearization.size() == super.size() : "The linearization of " + elements + " has produced another number of elements: " + linearization.toString();
-//		if () {
-//			for (E e1 : linearization) {
-//				for (E e2 : linearization) {
-//					
-//				}
-//			}
-//		}
-		
+		assert linearization.size() == super.size() : "The linearization of " + elements
+				+ " has produced another number of elements: " + linearization.toString();
+		// if () {
+		// for (E e1 : linearization) {
+		// for (E e2 : linearization) {
+		//
+		// }
+		// }
+		// }
+
 		return linearization;
 	}
-	
+
 	@Override
 	public Iterator<E> iterator() {
 		return getLinearization().iterator();
@@ -338,12 +349,17 @@ public class PartialOrderedSet<E> extends HashSet<E> {
 
 	@Override
 	public boolean removeIf(Predicate<? super E> filter) {
-		for (E e : order.keySet()) {
-			if (filter.test(e)) {
-				order.remove(e);
+		Objects.requireNonNull(filter);
+		boolean removed = false;
+		final Iterator<E> each = order.keySet().iterator();
+		while (each.hasNext()) {
+			E next = each.next();
+			if (filter.test(next)) {
+				remove(next);
+				removed = true;
 			}
 		}
-		return super.removeIf(filter);
+		return removed;
 	}
 
 	@Override
