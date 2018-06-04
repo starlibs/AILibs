@@ -24,13 +24,13 @@ public class AStarTestMain {
 	}
 
 	public static void main(String[] args) {
-	//	test();
+		test();
 
 	}
 	
 
 
-//	@Test
+	@Test
 	public static void test() {
 
 		GraphGenerator<TestNode, String> gen = new GraphGenerator<AStarTestMain.TestNode, String>() {

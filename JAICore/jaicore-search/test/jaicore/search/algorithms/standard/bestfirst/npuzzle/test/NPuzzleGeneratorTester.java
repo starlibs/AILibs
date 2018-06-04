@@ -16,7 +16,7 @@ import jaicore.search.structure.core.Node;
 
 public class NPuzzleGeneratorTester {
 
-	//@Test
+	@Test
 	public void test() {
 //		NPuzzleGenerator gen = new NPuzzleGenerator(4,10);
 //		int board[][] = {{1,5,2},{7,4,3},{0,8,6}};

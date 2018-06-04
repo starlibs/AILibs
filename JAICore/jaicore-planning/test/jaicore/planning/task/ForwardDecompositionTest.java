@@ -38,17 +38,17 @@ public class ForwardDecompositionTest {
 		System.out.println("Ready, found exactly the expected " + numberOfExpectedDichotomies + " solutions.");
 	}
 	
-	//@Test
+	@Test
 	public void solveNDWith3Classes() {
 		solveNDProblem(3);
 	}
 	
-//	@Test
+	@Test
 	public void solveNDWith4Classes() {
 		solveNDProblem(4);
 	}
 	
-//	@Test
+	@Test
 	public void solveNDWith5Classes() {
 		solveNDProblem(5);
 	}

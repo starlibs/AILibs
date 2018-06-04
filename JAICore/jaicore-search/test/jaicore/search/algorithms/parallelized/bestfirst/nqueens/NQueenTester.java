@@ -11,7 +11,7 @@ import jaicore.search.graphgenerators.nqueens.QueenNode;
 public class NQueenTester {
 	
 	
-	//@Test
+	@Test
 	public void test(){
 		int[] numberOfSolutions = { 2, 10, 4, 40, 92, 352, 724, 2680};
 		for (int i = 0; i < numberOfSolutions.length; i++) {

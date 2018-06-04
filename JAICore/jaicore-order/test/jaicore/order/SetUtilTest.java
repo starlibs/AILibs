@@ -16,7 +16,6 @@ import jaicore.order.SetUtil;
 
 public class SetUtilTest {
 	
-	
 	@Test
 	public void testMappingCreation() throws InterruptedException {
 		Collection<String> a = new ArrayList<>();
@@ -103,7 +102,7 @@ public class SetUtilTest {
 		System.out.println((end2 - end1) + "ms");
 	}
 	
-//	@Test
+	@Test
 	public void testcalculateNumberOfTotalOrderings() throws InterruptedException {
 		final String a,b,c,d;
 		a = "a";

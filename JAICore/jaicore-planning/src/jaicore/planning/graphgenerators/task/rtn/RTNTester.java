@@ -19,7 +19,7 @@ import jaicore.search.algorithms.standard.generalbestfirst.GeneralBestFirst;
 
 public class RTNTester {
 
-	//@Test
+	@Test
 	public void testNestedDichotomyGeneration() throws Exception {
 		solveProblemUsingAStar(StandardProblemFactory.getNestedDichotomyCreationProblem("parent", Arrays.asList(new String[]{"A", "B", "C", "D"})));
 	}
