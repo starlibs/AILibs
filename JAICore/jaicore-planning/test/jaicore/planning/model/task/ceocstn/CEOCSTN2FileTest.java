@@ -13,7 +13,7 @@ import org.junit.Test;
 
 public class CEOCSTN2FileTest {
 
-	//@Test
+	@Test
 	public void test() {
 		String packageName = "";
 		

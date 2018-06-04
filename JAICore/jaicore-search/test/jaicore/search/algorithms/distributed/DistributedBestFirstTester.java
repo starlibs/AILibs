@@ -67,7 +67,7 @@ public class DistributedBestFirstTester implements Serializable {
 		}
 	}
 
-//	@Test
+	@Test
 	public void test() {
 		
 		Random rand = new Random(1);

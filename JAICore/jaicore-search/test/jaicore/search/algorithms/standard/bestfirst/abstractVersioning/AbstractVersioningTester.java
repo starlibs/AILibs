@@ -79,7 +79,7 @@ public class AbstractVersioningTester extends ORGraphSearchTester{
 		
 	}
 
-	//@Test
+	@Test
 	public void testIterable() {
 		TestGraphGenerator gen = new TestGraphGenerator();
 		gen.setNodeNumbering(true);
