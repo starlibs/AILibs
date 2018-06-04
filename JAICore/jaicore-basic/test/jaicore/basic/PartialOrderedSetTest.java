@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -198,6 +199,7 @@ public class PartialOrderedSetTest {
 		assertFalse("c was removed but is still part of the set.", this.set.contains(c));
 		
 		assertTrue("Since c was removed d before b should be allowed now.", this.set.allowsABeforeB(d, b));
+		
 	}
 
 	/**
@@ -208,10 +210,16 @@ public class PartialOrderedSetTest {
 	@Test
 	public void testRetainAllCollectionOfQ() {
 		Set<String> remainingCollection = new HashSet<>();
+
 		remainingCollection.add(b);
 		remainingCollection.add(d);
 		
 		set.retainAll(remainingCollection);
+		Set<String> remover = new HashSet<>();
+		remover.add(a);
+		remover.add(c);
+		
+		this.set.removeAll(remover);
 		
 		assertTrue("b wasn't removed but either anyway isn't part of the set.", this.set.contains(b));
 		assertTrue("d wasn't removed but either anyway isn't part of the set.", this.set.contains(d));
@@ -230,8 +238,7 @@ public class PartialOrderedSetTest {
 	 */
 	@Test
 	public void testRemoveIf() {
-		set.removeIf(s -> s.equals("c"));
-		
+		set.removeIf(s -> "c".equals(s));
 		assertFalse("c was removed but contains still says it's in.", set.contains("c"));
 		assertTrue("Since c was removed from the set, d before a should be allowed but isn't.", set.allowsABeforeB(d, a));
 		assertTrue("Since c was removed from the set, d before b should be allowed but isn't.", set.allowsABeforeB(d, b));
