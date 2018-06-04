@@ -14,7 +14,7 @@ import com.google.common.eventbus.Subscribe;
 import de.upb.crc901.automl.pipeline.basic.MLPipeline;
 import de.upb.crc901.automl.pipeline.service.MLPipelinePlan;
 import de.upb.crc901.automl.pipeline.service.MLServicePipeline;
-import jaicore.basic.MathExt;
+import jaicore.order.MathExt;
 import jaicore.ml.evaluation.ClassifierMeasurementEvent;
 import jaicore.ml.experiments.MLExperiment;
 import jaicore.ml.experiments.MySQLExperimentDatabaseHandle;

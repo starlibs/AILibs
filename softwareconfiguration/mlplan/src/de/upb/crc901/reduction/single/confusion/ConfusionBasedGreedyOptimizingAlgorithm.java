@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import jaicore.basic.SetUtil;
+import jaicore.order.SetUtil;
 import jaicore.ml.WekaUtil;
 import jaicore.ml.classification.multiclass.reduction.MCTreeNodeReD;
 import weka.classifiers.AbstractClassifier;

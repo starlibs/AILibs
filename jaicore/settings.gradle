@@ -1,0 +1,39 @@
+// JAICore
+include 'jaicore-basic'
+project(":jaicore-basic").projectDir = new File("jaicore-basic/")
+
+include 'jaicore-concurrent'
+project(":jaicore-concurrent").projectDir = new File("jaicore-concurrent")
+
+include 'jaicore-experiments'
+project(":jaicore-experiments").projectDir = new File("jaicore-experiments")
+
+include 'jaicore-graph'
+project(":jaicore-graph").projectDir = new File("jaicore-graph")
+
+include 'jaicore-graphvisualizer'
+project(":jaicore-graphvisualizer").projectDir = new File("jaicore-graphvisualizer")
+
+include 'jaicore-logging'
+project(":jaicore-logging").projectDir = new File("jaicore-logging")
+
+include 'jaicore-logic'
+project(":jaicore-logic").projectDir = new File("jaicore-logic")
+
+include 'jaicore-ml'
+project(":jaicore-ml").projectDir = new File("jaicore-ml")
+
+include 'jaicore-order'
+project(":jaicore-order").projectDir = new File("jaicore-order")
+
+include 'jaicore-planning'
+project(":jaicore-planning").projectDir = new File("jaicore-planning")
+
+include 'jaicore-processes'
+project(":jaicore-processes").projectDir = new File("jaicore-processes")
+
+include 'jaicore-search'
+project(":jaicore-search").projectDir = new File("jaicore-search")
+
+include 'jaicore-services'
+project(":jaicore-services").projectDir = new File("jaicore-services")

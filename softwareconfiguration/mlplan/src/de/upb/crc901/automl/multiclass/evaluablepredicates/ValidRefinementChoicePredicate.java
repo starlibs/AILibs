@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import jaicore.basic.SetUtil;
+import jaicore.order.SetUtil;
 import jaicore.logic.fol.structure.ConstantParam;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.logic.fol.theories.EvaluablePredicate;

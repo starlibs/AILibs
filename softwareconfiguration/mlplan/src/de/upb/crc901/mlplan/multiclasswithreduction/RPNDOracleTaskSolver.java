@@ -12,8 +12,8 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jaicore.basic.SetUtil;
-import jaicore.basic.SetUtil.Pair;
+import jaicore.order.SetUtil;
+import jaicore.order.SetUtil.Pair;
 import jaicore.logic.fol.structure.ConstantParam;
 import jaicore.logic.fol.structure.Literal;
 import jaicore.logic.fol.structure.Monom;
