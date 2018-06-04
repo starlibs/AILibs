@@ -1,6 +1,6 @@
 package jaicore.graphvisualizer.gui;
 
-import jaicore.search.structure.core.Node;
+//import jaicore.search.structure.core.Node;
 import jaicore.graphvisualizer.events.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.NodeReachedEvent;
 import jaicore.graphvisualizer.events.NodeTypeSwitchEvent;
@@ -39,7 +39,7 @@ public class EventCreator {
 
      //       nodeMap.put(id, node);
 
-            return new GraphInitializedEvent<>(node);
+            return new GraphInitializedEvent<>(null);
 
         }
 
@@ -62,15 +62,15 @@ public class EventCreator {
             guiNode.setId(nodeId);
 
             //create a new node with the extracted node
-            Node node = new Node(null, guiNode);
-            node.setGoal(false);
-            node.setInternalLabel((double) 0.0);
+          //  Node node = new Node(null, guiNode);
+           // node.setGoal(false);
+           // node.setInternalLabel((double) 0.0);
 
-            nodeMap.put(nodeId, node);
+            nodeMap.put(nodeId, null);
 
             String type = (String) jMap.get("type");
 
-            return new NodeReachedEvent<>(parent, node, type);
+            return new NodeReachedEvent<>(parent, null, type);
         }
 
         //create a new NodeRemovedEvent
