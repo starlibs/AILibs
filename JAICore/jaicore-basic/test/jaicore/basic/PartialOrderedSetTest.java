@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import jaicore.order.PartialOrderedSet;
+import jaicore.order.SetUtil;
 
 /**
  * 

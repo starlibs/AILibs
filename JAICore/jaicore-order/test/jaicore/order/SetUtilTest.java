@@ -1,4 +1,4 @@
-package jaicore.basic;
+package jaicore.order;
 
 import static org.junit.Assert.assertTrue;
 
@@ -12,6 +12,7 @@ import java.util.Set;
 import org.junit.Test;
 
 import jaicore.order.PartialOrderedSet;
+import jaicore.order.SetUtil;
 
 public class SetUtilTest {
 	
