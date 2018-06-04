@@ -21,7 +21,7 @@ public class NQueenTester extends ORGraphSearchTester {
 	
 	int[] numbersOfSolutions = { 2, 10, 4, 40, 92, 352, 724};
 	
-	@Test
+	//@Test
 	public void testIterable(){
 		int x = 4;
 		
@@ -51,7 +51,7 @@ public class NQueenTester extends ORGraphSearchTester {
 		
 	}
 	
-	@Test
+	//@Test
 	public void testSequential(){
 		for (int i = 0; i < numbersOfSolutions.length; i++) {
 			int n = i + 4;
@@ -66,7 +66,7 @@ public class NQueenTester extends ORGraphSearchTester {
 		}
 	}
 	
-	@Test
+	//@Test
 	public void testParallelized(){
 		for (int i = 0; i < numbersOfSolutions.length; i++) {
 			int n = i + 4;

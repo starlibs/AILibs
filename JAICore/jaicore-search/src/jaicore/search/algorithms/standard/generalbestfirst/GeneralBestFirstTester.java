@@ -67,7 +67,7 @@ public class GeneralBestFirstTester {
 		}
 	}
 
-	@Test
+	//@Test
 	public void test() {
 		
 		GraphGenerator<GameNode, GameAction> gen = new GraphGenerator<GeneralBestFirstTester.GameNode, GeneralBestFirstTester.GameAction>() {

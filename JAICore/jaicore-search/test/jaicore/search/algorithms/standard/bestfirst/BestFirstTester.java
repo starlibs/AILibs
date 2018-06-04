@@ -27,7 +27,7 @@ public class BestFirstTester {
 		public String toString() { return "" + value; }
 	}
 
-	@Test
+	//@Test
 	public void test() {
 		
 		GraphGenerator<TestNode, String> gen = new GraphGenerator<BestFirstTester.TestNode, String>() {

@@ -11,7 +11,7 @@ import jaicore.search.algorithms.standard.astar.AStar;
 
 public class TFDTester {
 
-	@Test
+	//@Test
 	public void testDockworker() throws Exception {
 		solveProblemUsingAStar(StandardProblemFactory.getDockworkerProblem());
 	}

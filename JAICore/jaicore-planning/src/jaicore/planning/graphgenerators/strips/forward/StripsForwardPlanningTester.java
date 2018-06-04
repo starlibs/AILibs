@@ -13,12 +13,12 @@ import jaicore.search.algorithms.standard.astar.AStar;
 
 public class StripsForwardPlanningTester {
 
-	@Test
+	//@Test
 	public void testBlocksWorld() throws Exception {
 		solveProblemUsingAStar(StandardProblemFactory.getBlocksWorldProblem());
 	}
 	
-	@Test
+//	@Test
 	public void testDockworker() throws Exception {
 		solveProblemUsingAStar(StandardProblemFactory.getDockworkerProblem());
 	}

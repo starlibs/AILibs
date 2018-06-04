@@ -21,7 +21,7 @@ import jaicore.search.algorithms.standard.astar.AStar;
 
 public class PDDLGraphGeneratorTester {
 
-	@Test
+	//@Test
 	public void test() {
 		File domain = null;
 		File problem = null;
