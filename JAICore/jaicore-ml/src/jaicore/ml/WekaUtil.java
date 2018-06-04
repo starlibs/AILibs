@@ -257,9 +257,9 @@ public class WekaUtil {
 		Attribute classAttribute = new Attribute("label", possibleValues);
 		attributes.add(classAttribute);
 		Instances instances = new Instances("JAICore-extracted dataset", attributes, 1);
-		instances.setClassIndex(numAttributes);
+		instances.setClassIndex(attributes.size()-1);
 
-		double values[] = new double[numAttributes];
+		double [] values = new double[numAttributes+1];
 		for (int i = 0; i < numAttributes; i++) {
 			values[i] = instance.get(i);
 		}

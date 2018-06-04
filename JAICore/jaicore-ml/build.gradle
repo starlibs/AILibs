@@ -17,4 +17,6 @@ dependencies {
 	compile project(":JAICore:jaicore-graphvisualizer")
 	compile project(":JAICore:jaicore-logging")
 	compile project(":JAICore:jaicore-experiments")
+	compile group: 'de.upb.isys', name: 'interruptable-weka', version: '0.0.1'
+	
 }

@@ -66,7 +66,8 @@ configure(subprojects.findAll()) {
 		compile group: 'org.slf4j', name: 'log4j-over-slf4j', version: '1.7.25'
 
 		runtime group: 'ch.qos.logback', name: 'logback-classic', version:'1.2.3' //logger
-
+    
+    compile group: 'nz.ac.waikato.cms.weka.thirdparty', name: 'bounce', version: '0.18'
 		//Testing
 		testCompile group: 'junit', name: 'junit', version: '4.12'
 		testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: '1.3'

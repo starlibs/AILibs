@@ -37,7 +37,7 @@ import weka.core.Instances;
 
 public class WekaConversionTest {
 
-	private static final File folder = new File("testrsc/ml/orig/");
+	private static final File folder = new File("testsrc/ml/orig/");
 
 	@Test
 	public void wekaToJAICore() throws Exception {
@@ -121,6 +121,7 @@ public class WekaConversionTest {
 
 		/* get actual instance to be converted */
 		LabeledInstance<String> instance = instances.get(12);
+		System.out.println(instance.getNumberOfColumns());
 		Instance wekaInstance = WekaUtil.fromJAICoreInstance(instance);
 		//Assert.assertNotEquals(wekaInstance.classIndex(), -1);
 		Assert.assertEquals(instance.getNumberOfColumns() + 1, wekaInstance.numAttributes());

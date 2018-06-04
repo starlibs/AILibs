@@ -15,7 +15,7 @@ import weka.core.Instances;
 
 public class WekaUtilTester {
 
-	private static final File folder = new File("testrsc/ml/orig/");
+	private static final File folder = new File("testsrc/ml/orig/");
 	Classifier[] portfolio = {
 //			new BayesNet(), new NaiveBayes(), 
 //			new SimpleLogistic(),
