@@ -9,7 +9,7 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import jaicore.basic.SetUtil;
+import jaicore.order.SetUtil;
 
 public class Graph<T> implements Serializable {
 	/**
