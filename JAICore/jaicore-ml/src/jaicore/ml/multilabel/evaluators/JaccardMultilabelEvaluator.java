@@ -6,7 +6,7 @@ import java.util.Random;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
-import jaicore.basic.SetUtil;
+import jaicore.order.SetUtil;
 import meka.classifiers.multilabel.Evaluation;
 import meka.classifiers.multilabel.MultiLabelClassifier;
 import meka.core.Result;

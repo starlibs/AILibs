@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.junit.Test;
 
-import jaicore.basic.MathExt;
+import jaicore.order.MathExt;
 import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionHTNPlanner;
 import jaicore.planning.model.task.ceocstn.CEOCSTNPlanningProblem;
 import jaicore.planning.model.task.ceocstn.StandardProblemFactory;

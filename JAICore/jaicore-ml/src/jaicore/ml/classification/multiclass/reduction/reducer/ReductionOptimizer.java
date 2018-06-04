@@ -10,7 +10,7 @@ import java.util.stream.IntStream;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
-import jaicore.basic.MathExt;
+import jaicore.order.MathExt;
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.graphvisualizer.TooltipGenerator;
 import jaicore.ml.WekaUtil;

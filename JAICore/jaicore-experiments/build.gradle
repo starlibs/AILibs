@@ -11,5 +11,5 @@ sourceSets {
     }
 }
 dependencies {
-	compile project (":jaicore-basic")
+	compile project(":JAICore:jaicore-basic")
 }

@@ -10,7 +10,7 @@ import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import jaicore.basic.SetUtil;
+import jaicore.order.SetUtil;
 import jaicore.graph.Graph;
 import jaicore.search.algorithms.standard.core.ANDORGraphSearch;
 import jaicore.search.algorithms.standard.core.INodeEvaluator;

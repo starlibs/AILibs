@@ -1,10 +1,23 @@
-def jaicorePrefix = 'jaicore/'
+def jaicorePrefix = 'JAICore/'
 def configPrefix = 'softwareconfiguration/'
 
 // JAICore
 
-include 'JAICore'
-project(":JAICore").projectDir = new File(jaicorePrefix,"JAICore")
+include ":JAICore:jaicore-basic"
+include ":JAICore:jaicore-concurrent"
+include ":JAICore:jaicore-experiments"
+include ":JAICore:jaicore-graph"
+include ":JAICore:jaicore-graphvisualizer"
+include ":JAICore:jaicore-logging"
+include ":JAICore:jaicore-logic"
+include ":JAICore:jaicore-ml"
+include ":JAICore:jaicore-order"
+
+include ":JAICore:jaicore-planning"
+include ":JAICore:jaicore-processes"
+include ":JAICore:jaicore-search"
+include "JAICore:jaicore-services"
+
 
 // Software-Configuration
 include 'HASCO'

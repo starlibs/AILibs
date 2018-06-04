@@ -11,9 +11,9 @@ sourceSets {
     }
 }
 dependencies {
-	compile project (":jaicore-search")
-	compile project (":jaicore-basic")
-	compile project (":jaicore-logic")
-	compile project (":jaicore-graphvisualizer")
-	compile project (":jaicore-graph")
+	compile project(":JAICore:jaicore-search")
+	compile project(":JAICore:jaicore-basic")
+	compile project(":JAICore:jaicore-logic")
+	compile project(":JAICore:jaicore-graphvisualizer")
+	compile project(":JAICore:jaicore-graph")
 }

@@ -11,9 +11,9 @@ sourceSets {
     }
 }
 dependencies {
-	compile project (":jaicore-graph")
-	compile project (":jaicore-basic")
-	compile project (":jaicore-logging")
-	compile project (":jaicore-concurrent")
-	compile project (":jaicore-graphvisualizer")
+	compile project(":JAICore:jaicore-graph")
+	compile project(":JAICore:jaicore-basic")
+	compile project(":JAICore:jaicore-logging")
+	compile project(":JAICore:jaicore-concurrent")
+	compile project(":JAICore:jaicore-graphvisualizer")
 }

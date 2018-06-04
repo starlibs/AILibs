@@ -11,10 +11,10 @@ sourceSets {
     }
 }
 dependencies {
-	compile project (":jaicore-basic")
-	compile project (":jaicore-order")
-	compile project (":jaicore-search")
-	compile project (":jaicore-graphvisualizer")
-	compile project (":jaicore-logging")
-	compile project (":jaicore-experiments")
+	compile project(":JAICore:jaicore-basic")
+	compile project(":JAICore:jaicore-order")
+	compile project(":JAICore:jaicore-search")
+	compile project(":JAICore:jaicore-graphvisualizer")
+	compile project(":JAICore:jaicore-logging")
+	compile project(":JAICore:jaicore-experiments")
 }

@@ -1,7 +1,7 @@
 package jaicore.experiments;
 
 import jaicore.basic.SQLAdapter;
-import jaicore.basic.SetUtil;
+import jaicore.order.SetUtil;
 import jaicore.basic.StringUtil;
 
 import java.io.FileNotFoundException;
