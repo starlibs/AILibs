@@ -1,0 +1,86 @@
+\documentclass{standalone}
+
+\usepackage{hyperref}
+
+%Languages & fonts
+\usepackage[ngerman]{babel}
+\usepackage[utf8]{inputenc}
+
+\usepackage{mathpazo}
+
+%Maths
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{wasysym}
+\usepackage{cancel}
+\usepackage{units}
+
+
+
+%Algorithms
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\renewcommand{\algorithmicensure}{\textbf{Output:}}
+\renewcommand{\listalgorithmname}{{Algorithmenverzeichnis}}
+
+%Code
+\usepackage{listings}
+
+%color including
+%\usepackage[usenames, dvipsnames, svgnames, table, hyperref]{xcolor}
+
+%\usepackage{xcolor-patch}
+
+%Pictures-including
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+
+%Pictures-generation
+\usepackage{tikz}
+\usetikzlibrary{arrows, automata, shapes}
+
+
+%other
+\usepackage{enumitem}
+
+
+%Theoremstyles
+
+\newtheoremstyle{definition}
+{}%spaceabove
+{}%spacebelow
+{}%bodyfont
+{}%indentamt
+{\bfseries}%headfont
+{}%headpunct
+{\newline}%headspace
+{}%headspec
+
+%Theorems
+\newcounter{counter}
+
+\theoremstyle{definition}
+\newtheorem{cor}[counter]{Corollary}
+\newtheorem{defi}[counter]{Definition}
+\newtheorem{lemma}[counter]{Lemma}
+\newtheorem{thm}[counter]{Theorem}
+
+
+
+%settings
+\setcounter{secnumdepth}{-1}
+\setcounter{tocdepth}{2}
+\hypersetup{
+	hidelinks,
+	colorlinks,
+	urlcolor = blue,
+	linkcolor = black
+}
+
+\begin{document}
+	\input{run.tex}
+\end{document}
