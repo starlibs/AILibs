@@ -20,7 +20,7 @@ import jaicore.search.structure.core.Node;
 public class ParentDiscardingTest {
 
 	
-	@Test
+	//@Test
 	public void test() {
 
 		

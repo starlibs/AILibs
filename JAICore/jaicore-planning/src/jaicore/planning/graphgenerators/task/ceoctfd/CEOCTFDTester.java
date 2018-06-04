@@ -27,7 +27,7 @@ public class CEOCTFDTester {
 		classes = Arrays.asList(new String[]{"A", "B", "C", "D", "E"});
 	}
 
-	@Test
+//	@Test
 	public void testNestedDichotomy() throws Exception {
 		solveProblemUsingAStar(StandardProblemFactory.getNestedDichotomyCreationProblem("root", classes, true, 1, 1));
 	}

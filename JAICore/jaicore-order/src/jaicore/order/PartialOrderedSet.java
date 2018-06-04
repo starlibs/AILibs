@@ -267,19 +267,17 @@ public class PartialOrderedSet<E> extends HashSet<E> {
 	}
 
 	public List<E> getLinearization() {
-
+		
 		/* create a copy of all elements */
 		List<E> elements = new ArrayList<>();
 		Iterator<E> iterator = super.iterator();
 		while (iterator.hasNext())
 			elements.add(iterator.next());
-
 		/* compute initial values of working variables */
 		List<E> linearization = new ArrayList<>();
 		Map<E, Set<E>> workingCopyOfOrder = new HashMap<>(order);
 		Collection<E> itemsWithoutSuccessor = new HashSet<>(SetUtil.difference(elements, workingCopyOfOrder.keySet()));
 		Collection<E> uninsertedItems = new HashSet<>(elements);
-
 		/* now compute the linearization from the back */
 		while (!itemsWithoutSuccessor.isEmpty()) {
 			List<E> itemsToInsert = new ArrayList<>(itemsWithoutSuccessor);
@@ -287,8 +285,6 @@ public class PartialOrderedSet<E> extends HashSet<E> {
 			for (E itemToInsert : itemsToInsert) {
 				if (linearization.contains(itemToInsert))
 					continue;
-				assert !linearization.contains(itemToInsert) : "The object " + itemToInsert
-						+ " is already contained in the linearization " + linearization;
 				linearization.add(0, itemToInsert);
 				uninsertedItems.remove(itemToInsert);
 				for (E uninsertedItem : uninsertedItems) {

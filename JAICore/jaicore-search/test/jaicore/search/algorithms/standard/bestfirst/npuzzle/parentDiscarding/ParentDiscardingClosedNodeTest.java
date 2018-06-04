@@ -19,7 +19,7 @@ import jaicore.search.structure.core.NodeExpansionDescription;
 public class ParentDiscardingClosedNodeTest {
 	
 	
-	@Test
+	//@Test
 	public void test() {
 		
 		int board[][] = {{1,1,1,1},{1,1,1,1},{0,1,1,1},{1,1,1,1}};

@@ -46,7 +46,7 @@ public class IterationBestFirstTester {
 		
 	}
 
-	@Test
+	//@Test
 	public void test() {
 		
 		GraphGenerator<TestNode,String> gen = new GraphGenerator<IterationBestFirstTester.TestNode,String>(){
