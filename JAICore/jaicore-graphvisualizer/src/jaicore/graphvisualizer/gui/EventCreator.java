@@ -33,11 +33,11 @@ public class EventCreator {
             guiNode.setId(id);
 
             //create new Node based on extracted one
-            Node node = new Node(null, guiNode);
-            node.setGoal(false);
-            node.setInternalLabel((double) 0.0);
+     //       Node node = new Node(null, guiNode);
+      //      node.setGoal(false);
+     //       node.setInternalLabel((double) 0.0);
 
-            nodeMap.put(id, node);
+     //       nodeMap.put(id, node);
 
             return new GraphInitializedEvent<>(node);
 
