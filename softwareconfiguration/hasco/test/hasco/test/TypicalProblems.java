@@ -187,7 +187,7 @@ public class TypicalProblems {
 		
 		Recorder<Node<TFDNode, String>> rec = new Recorder<>();
         hascoalg.registerListener(rec);
-        rec.setTooltipGenerator(new TFDTooltipGenerator<>());
+      //  rec.setTooltipGenerator(new TFDTooltipGenerator<>());
 
 		/* run algorithm */
 		it.hasNext();
