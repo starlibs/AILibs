@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 
-import jaicore.basic.SetUtil.Pair;
+import jaicore.order.SetUtil.Pair;
 
 public class LoggerUtil {
 	
