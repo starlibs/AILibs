@@ -3,7 +3,7 @@ package jaicore.logic.fol.structure;
 import java.util.Collection;
 import java.util.Map;
 
-import jaicore.basic.SetUtil;
+import jaicore.order.SetUtil;
 
 public class Monom extends LiteralSet {
 

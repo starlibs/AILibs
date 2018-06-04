@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jaicore.basic.SetUtil;
+import jaicore.order.SetUtil;
 import jaicore.basic.StringUtil;
 
 /**
