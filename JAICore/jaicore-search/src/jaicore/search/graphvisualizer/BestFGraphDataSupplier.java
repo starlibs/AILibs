@@ -1,11 +1,13 @@
-package jaicore.graphvisualizer;
+package jaicore.search.graphvisualizer;
 
+import java.util.TreeMap;
+
+import jaicore.graphvisualizer.IDataVisualizer;
+import jaicore.graphvisualizer.IGraphDataSupplier;
 import jaicore.graphvisualizer.events.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.NodeReachedEvent;
 import jaicore.graphvisualizer.events.NodeTypeSwitchEvent;
 import jaicore.search.structure.core.Node;
-
-import java.util.TreeMap;
 
 public class BestFGraphDataSupplier implements IGraphDataSupplier {
 

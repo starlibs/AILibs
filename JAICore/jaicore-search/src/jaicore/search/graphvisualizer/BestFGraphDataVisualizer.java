@@ -1,5 +1,6 @@
-package jaicore.graphvisualizer;
+package jaicore.search.graphvisualizer;
 
+import jaicore.graphvisualizer.IDataVisualizer;
 import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.chart.LineChart;

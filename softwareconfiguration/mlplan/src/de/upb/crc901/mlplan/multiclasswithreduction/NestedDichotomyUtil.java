@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Random;
 
 import de.upb.crc901.automl.pipeline.basic.MLPipeline;
-import jaicore.basic.SetUtil;
+import jaicore.order.SetUtil;
 import jaicore.ml.WekaUtil;
 import jaicore.ml.classification.multiclass.reduction.splitters.RPNDSplitter;
 import weka.attributeSelection.InfoGainAttributeEval;

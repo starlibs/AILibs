@@ -1,26 +1,18 @@
 package jaicore.graphvisualizer.gui;
 
+import java.util.List;
+
+import javax.swing.JFrame;
+
 import jaicore.graph.observation.IObservableGraphAlgorithm;
-import jaicore.graphvisualizer.BestFGraphDataSupplier;
+import jaicore.graphvisualizer.IGraphDataSupplier;
 import jaicore.graphvisualizer.INodeDataSupplier;
-import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionHTNPlanner;
-import jaicore.planning.graphgenerators.task.tfd.TFDNode;
-import jaicore.planning.model.task.ceocstn.CEOCSTNPlanningProblem;
-import jaicore.planning.model.task.ceocstn.StandardProblemFactory;
-import jaicore.search.structure.core.Node;
-import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-
-import javax.swing.*;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
 
 public class FXGui{
 
@@ -85,15 +77,14 @@ public class FXGui{
 
     }
 
-    public void open(IObservableGraphAlgorithm algorithm, String title, List<INodeDataSupplier> nodesupplier){
+    public void open(IObservableGraphAlgorithm algorithm, String title, List<INodeDataSupplier> nodesupplier, IGraphDataSupplier supplier){
         Recorder rec  = new Recorder<>(algorithm);
         open(rec,title);
 
         nodesupplier.stream().forEach(s->rec.addNodeDataSupplier(s));
 
-        BestFGraphDataSupplier dataSupplier = new BestFGraphDataSupplier();
 
-        rec.addGraphDataSupplier(dataSupplier);
+        rec.addGraphDataSupplier(supplier);
 
     }
 

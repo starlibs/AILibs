@@ -1,6 +1,14 @@
-package jaicore.graphvisualizer.gui;
+package jaicore.planning.gui;
 
-import jaicore.graphvisualizer.BestFGraphDataSupplier;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+
+import org.junit.Test;
+
+import jaicore.graphvisualizer.gui.FXGui;
+import jaicore.graphvisualizer.gui.Recorder;
+import jaicore.graphvisualizer.gui.TooltipGraphDataSupplier;
 import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionHTNPlanner;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;
@@ -12,15 +20,11 @@ import jaicore.search.graphgenerators.bestfirst.abstractVersioning.TestGraphGene
 import jaicore.search.graphgenerators.bestfirst.abstractVersioning.TestNode;
 import jaicore.search.graphgenerators.nqueens.NQueenGenerator;
 import jaicore.search.graphgenerators.nqueens.QueenNode;
+import jaicore.search.graphvisualizer.BestFGraphDataSupplier;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
 import javafx.application.Application;
 import javafx.stage.Stage;
-import org.junit.Test;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
 
 public class FXGuiTester extends Application {
 

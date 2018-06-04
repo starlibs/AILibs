@@ -3,8 +3,8 @@ package hasco.serialization;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import jaicore.basic.SetUtil;
-import jaicore.basic.SetUtil.Pair;
+import jaicore.order.SetUtil;
+import jaicore.order.SetUtil.Pair;
 
 import java.io.BufferedReader;
 import java.io.File;

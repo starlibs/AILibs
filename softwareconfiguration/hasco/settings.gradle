@@ -1,3 +1,0 @@
-includeFlat 'JAICore', 'weka', 'meka'
-
-rootProject.name = 'HASCO'

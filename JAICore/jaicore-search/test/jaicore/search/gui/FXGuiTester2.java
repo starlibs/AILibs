@@ -1,20 +1,21 @@
-package jaicore.graphvisualizer.gui;
-
-import jaicore.graphvisualizer.INodeDataSupplier;
-import jaicore.search.algorithms.standard.bestfirst.BestFirst;
-import jaicore.search.graphgenerators.bestfirst.abstractVersioning.TestGraphGenerator;
-import jaicore.search.structure.core.GraphGenerator;
-import jaicore.search.structure.core.Node;
+package jaicore.search.gui;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class FXGuiTester2 extends GuiApplication {
+import jaicore.graphvisualizer.INodeDataSupplier;
+import jaicore.graphvisualizer.gui.GuiApplication;
+import jaicore.graphvisualizer.gui.TooltipGraphDataSupplier;
+import jaicore.search.algorithms.standard.bestfirst.BestFirst;
+import jaicore.search.graphgenerators.bestfirst.abstractVersioning.TestGraphGenerator;
+import jaicore.search.graphvisualizer.BestFGraphDataSupplier;
+import jaicore.search.structure.core.GraphGenerator;
+import jaicore.search.structure.core.Node;
 
+public class FXGuiTester2 extends GuiApplication{
 
-
-    @Override
-    void startGui() {
+    
+    public void startGui() {
         GraphGenerator generator = new TestGraphGenerator();
         BestFirst bf = new BestFirst<>(generator, n->(double)Math.round(Math.random()*100));
 
@@ -28,7 +29,7 @@ public class FXGuiTester2 extends GuiApplication {
 
         List<INodeDataSupplier> supplierList = new ArrayList<>();
         supplierList.add(dataSupplier);
-        this.gui.open(bf, "Test", supplierList);
+        this.gui.open(bf, "Test", supplierList, new BestFGraphDataSupplier());
 
         bf.nextSolution();
 

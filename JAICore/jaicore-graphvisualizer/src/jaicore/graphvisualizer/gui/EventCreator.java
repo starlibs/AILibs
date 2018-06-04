@@ -53,7 +53,7 @@ public class EventCreator {
             //extract parent node
             LinkedHashMap parentMap = (LinkedHashMap)jMap.get("parent");
             int parentId = computeId((LinkedHashMap) parentMap.get("point"));
-            Node parent = (Node) nodeMap.get(parentId);
+            Object parent = nodeMap.get(parentId);
 
             //extract current node
             LinkedHashMap map = (LinkedHashMap)jMap.get("node");

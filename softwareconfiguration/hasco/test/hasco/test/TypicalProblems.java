@@ -28,7 +28,7 @@ import hasco.model.Component;
 import hasco.model.ComponentInstance;
 import hasco.model.Parameter;
 import jaicore.basic.FileUtil;
-import jaicore.basic.SetUtil.Pair;
+import jaicore.order.SetUtil.Pair;
 import jaicore.graphvisualizer.gui.FXController;
 import jaicore.graphvisualizer.gui.FXGui;
 import jaicore.graphvisualizer.gui.Recorder;

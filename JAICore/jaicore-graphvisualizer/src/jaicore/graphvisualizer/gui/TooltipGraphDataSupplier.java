@@ -9,7 +9,6 @@ import jaicore.graphvisualizer.TooltipGenerator;
 import jaicore.graphvisualizer.events.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.NodeReachedEvent;
 import jaicore.graphvisualizer.events.NodeTypeSwitchEvent;
-import jaicore.search.structure.core.Node;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,7 +32,7 @@ public class TooltipGraphDataSupplier implements INodeDataSupplier {
         switch(event.getClass().getSimpleName()){
             case "GraphInitializedEvent":
                 GraphInitializedEvent initializedEvent = (GraphInitializedEvent) event;
-                String tooltip = tooltipGenerator.getTooltip((Node)initializedEvent.getRoot());
+                String tooltip = tooltipGenerator.getTooltip(initializedEvent.getRoot());
                 tooltipMap.put(initializedEvent.getRoot().hashCode(), tooltip);
                 break;
 
@@ -67,7 +66,7 @@ public class TooltipGraphDataSupplier implements INodeDataSupplier {
     }
 
 
-    public String getData(Node node){
+    public String getData(Object node){
         return tooltipMap.get(node.hashCode());
     }
 
@@ -75,7 +74,7 @@ public class TooltipGraphDataSupplier implements INodeDataSupplier {
         return visu;    }
 
     public void update(Object node){
-        visu.update(getData((Node)node));
+        visu.update(getData(node));
     }
 
 }
