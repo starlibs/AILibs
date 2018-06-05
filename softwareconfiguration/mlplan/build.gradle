@@ -50,7 +50,6 @@ dependencies {
 	// Basics
 	compile 'junit:junit:4.12'
 	compile 'com.google.guava:guava:18.0'
-	compile 'org.slf4j:slf4j-api:1.7.13'
 	compile group: 'org.aeonbits.owner', name: 'owner-java8', version:'1.0.6'
 	// DB connector
 	compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.45'
@@ -66,6 +65,4 @@ dependencies {
 	// wrapped library dependencies
 	compile group: 'de.upb.isys', name: 'meka', version: '0.0.1'
 	compile group: 'de.upb.isys', name: 'interruptable-weka', version: '0.0.1'
-
-	runtime 'org.slf4j:slf4j-log4j12:1.7.13', 'log4j:log4j:1.2.17'
 }

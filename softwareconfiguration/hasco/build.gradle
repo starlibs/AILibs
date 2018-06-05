@@ -21,7 +21,7 @@ sourceSets {
 
 dependencies {
 	// project dependencies
-	compile name: 'CRCUtils'
+	// compile name: 'CRCUtils'
 	compile project(':JAICore:jaicore-logic')
 	compile project(':JAICore:jaicore-basic')
 	compile project(':JAICore:jaicore-graph')
@@ -39,13 +39,10 @@ dependencies {
 	compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.0.pr4'
 	compile 'junit:junit:4.12'
 	compile 'com.google.guava:guava:18.0'
-	compile 'org.slf4j:slf4j-api:1.7.13'
 	compile group: 'org.aeonbits.owner', name: 'owner-java8', version:'1.0.6'
 
 	// database connector	
 	compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.45'
-	
-	runtime 'org.slf4j:slf4j-log4j12:1.7.13', 'log4j:log4j:1.2.17'
 }
 
 repositories {

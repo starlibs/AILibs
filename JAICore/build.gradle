@@ -31,6 +31,7 @@ configure(subprojects.findAll()) {
 
 	//Dependencies for all(!) projects
 	dependencies {
+	
 		// Apache Commons Lang3
 		compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.6'
 
@@ -55,10 +56,6 @@ configure(subprojects.findAll()) {
 		// JSON
 		compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.0.pr4'
 
-		// Logging
-		compile 'org.slf4j:slf4j-api:1.7.13'
-		runtime 'org.slf4j:slf4j-log4j12:1.7.13', 'log4j:log4j:1.2.17'
-
 		//pddl4j
 		compile 'com.github.pellierd:pddl4j:v3.5.0'
 		runtime 'com.github.pellierd:pddl4j:v3.5.0'
@@ -66,7 +63,7 @@ configure(subprojects.findAll()) {
 		// mysql connector
 		compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.45'
 
-		runtime group: 'ch.qos.logback', name: 'logback-classic', version:'1.2.3' //logger
+		//runtime group: 'ch.qos.logback', name: 'logback-classic', version:'1.2.3' //logger
 
 		//Testing
 		testCompile group: 'junit', name: 'junit', version: '4.12'
