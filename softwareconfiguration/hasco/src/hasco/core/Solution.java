@@ -19,10 +19,16 @@ public class Solution<R extends IPlanningSolution, T, V extends Comparable<V>> {
 
 	public Solution(R planningSolution, T solution, V score, int timeToComputeScore) {
 		super();
+		if (score == null)
+			throw new IllegalArgumentException("Obtained solution without score!");
 		this.planningSolution = planningSolution;
 		this.solution = solution;
 		this.score = score;
 		this.timeToComputeScore = timeToComputeScore;
+	}
+	
+	public Solution(Solution<R,T,V> s) {
+		this(s.planningSolution, s.solution, s.score, s.timeToComputeScore);
 	}
 
 	public R getPlanningSolution() {

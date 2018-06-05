@@ -1,11 +1,7 @@
 package hasco.core;
 
-import java.util.Map;
 import java.util.stream.Collectors;
 
-import hasco.model.Component;
-import hasco.model.Parameter;
-import hasco.model.ParameterRefinementConfiguration;
 import hasco.query.Factory;
 import jaicore.basic.IObjectEvaluator;
 import jaicore.planning.algorithms.IPathToPlanConverter;
@@ -19,7 +15,7 @@ import jaicore.search.algorithms.standard.core.INodeEvaluator;
 import jaicore.search.algorithms.standard.core.ORGraphSearchFactory;
 
 public class HASCOFD<T> extends HASCO<T, TFDNode, String, Double, ForwardDecompositionSolution> {
-	
+
 	public static class TFDSearchSpaceUtilFactory implements IHASCOSearchSpaceUtilFactory<TFDNode, String, Double> {
 
 		@Override
@@ -33,12 +29,12 @@ public class HASCOFD<T> extends HASCO<T, TFDNode, String, Double, ForwardDecompo
 		}
 	}
 
-	public HASCOFD(IObservableORGraphSearchFactory<TFDNode, String, Double> searchFactory, Factory<T> converter, INodeEvaluator<TFDNode,Double> nodeEvaluator,
-			Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramConfigs, String nameOfRequiredInterface, IObjectEvaluator<T,Double> benchmark) {
-		super(new ForwardDecompositionHTNPlannerFactory<>(), searchFactory, new TFDSearchSpaceUtilFactory(), nodeEvaluator, converter, paramConfigs, nameOfRequiredInterface, benchmark);
+	public HASCOFD(IObservableORGraphSearchFactory<TFDNode, String, Double> searchFactory, Factory<? extends T> converter, INodeEvaluator<TFDNode, Double> nodeEvaluator,
+			String nameOfRequiredInterface, IObjectEvaluator<T, Double> benchmark) {
+		super(new ForwardDecompositionHTNPlannerFactory<>(), searchFactory, new TFDSearchSpaceUtilFactory(), nodeEvaluator, converter, nameOfRequiredInterface, benchmark);
 	}
 
-	public HASCOFD(Factory<T> converter, INodeEvaluator<TFDNode,Double> nodeEvaluator, Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramConfigs, String nameOfRequiredInterface, IObjectEvaluator<T,Double> benchmark) {
-		this(new ORGraphSearchFactory<>(), converter, nodeEvaluator, paramConfigs, nameOfRequiredInterface, benchmark);
+	public HASCOFD(Factory<? extends T> converter, INodeEvaluator<TFDNode, Double> nodeEvaluator, String nameOfRequiredInterface, IObjectEvaluator<T, Double> benchmark) {
+		this(new ORGraphSearchFactory<>(), converter, nodeEvaluator, nameOfRequiredInterface, benchmark);
 	}
 }

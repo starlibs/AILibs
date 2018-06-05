@@ -85,7 +85,7 @@ public class TypicalProblems {
 	}
 	
 
-	@Test
+//	@Test
 	public void test() throws IOException {
 		try (BufferedWriter fw = new BufferedWriter(new FileWriter("results-traditional.csv", true))) {
 			for (File f : FileUtil.getFilesOfFolder(new File("testrsc"))) {
@@ -175,7 +175,7 @@ public class TypicalProblems {
 				bestFoundSolution.set(0, configs.get(0));
 			}
 			return min;
-		}, null, "iface", l -> prob.scores.containsKey(l) ? prob.scores.get(l) : Double.MAX_VALUE);
+		}, "iface", l -> prob.scores.containsKey(l) ? prob.scores.get(l) : Double.MAX_VALUE);
 		hascoalg.addComponent(prob.component);
 //		 new SimpleGraphVisualizationWindow<Node<TFDNode,Double>>(hascoalg).getPanel().setTooltipGenerator(new TFDTooltipGenerator<>());
 

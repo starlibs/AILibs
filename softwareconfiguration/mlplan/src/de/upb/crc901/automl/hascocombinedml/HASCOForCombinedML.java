@@ -1,15 +1,5 @@
 package de.upb.crc901.automl.hascocombinedml;
 
-import de.upb.crc901.automl.hascowekaml.HASCOForMEKA;
-import de.upb.crc901.automl.pipeline.service.MLServicePipeline;
-
-import jaicore.basic.FileUtil;
-import jaicore.basic.SQLAdapter;
-import jaicore.graph.observation.IObservableGraphAlgorithm;
-import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionSolution;
-import jaicore.planning.graphgenerators.task.tfd.TFDNode;
-import jaicore.search.algorithms.standard.core.INodeEvaluator;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,16 +23,26 @@ import org.aeonbits.owner.ConfigCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.upb.crc901.automl.hascowekaml.HASCOForWekaML;
+import de.upb.crc901.automl.pipeline.service.MLServicePipeline;
 import hasco.core.HASCO.HASCOSolutionIterator;
 import hasco.core.HASCOFD;
 import hasco.core.Solution;
 import hasco.core.Util;
 import hasco.model.ComponentInstance;
 import hasco.serialization.ComponentLoader;
+import jaicore.basic.FileUtil;
+import jaicore.basic.ILoggingCustomizable;
+import jaicore.basic.SQLAdapter;
+import jaicore.graph.observation.IObservableGraphAlgorithm;
+import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionSolution;
+import jaicore.planning.graphgenerators.task.tfd.TFDNode;
+import jaicore.search.algorithms.standard.core.INodeEvaluator;
 
-public class HASCOForCombinedML implements IObservableGraphAlgorithm<TFDNode, String> {
+public class HASCOForCombinedML implements IObservableGraphAlgorithm<TFDNode, String>, ILoggingCustomizable {
 
-  private static final Logger logger = LoggerFactory.getLogger(HASCOForMEKA.class);
+private String loggerName;
+  private Logger logger = LoggerFactory.getLogger(HASCOForWekaML.class);
   private static final HASCOForCombinedMLConfig CONFIG = ConfigCache.getOrCreate(HASCOForCombinedMLConfig.class);
 
   private Lock selectedSolutionsLock = new ReentrantLock();
@@ -256,11 +256,12 @@ public class HASCOForCombinedML implements IObservableGraphAlgorithm<TFDNode, St
     long deadline = start + timeoutInMS;
 
     /* create algorithm */
-    HASCOFD<MLServicePipeline> hasco = new HASCOFD<>(new MLServicePipelineFactory(), this.preferredNodeEvaluator, this.cl.getParamConfigs(), CONFIG.getRequestedInterface(),
-        searchBenchmark);
+    HASCOFD<MLServicePipeline> hasco = new HASCOFD<>(new MLServicePipelineFactory(), this.preferredNodeEvaluator, CONFIG.getRequestedInterface(), searchBenchmark);
     hasco.addComponents(this.cl.getComponents());
+    hasco.addParamRefinementConfigurations(this.cl.getParamConfigs());
     hasco.setNumberOfCPUs(this.numberOfCPUs);
     hasco.setTimeout(CONFIG.getTimeout());
+    hasco.setLoggerName(loggerName + ".hasco");
 
     /* add all listeners to HASCO */
     this.listeners.forEach(l -> hasco.registerListener(l));
@@ -406,4 +407,16 @@ public class HASCOForCombinedML implements IObservableGraphAlgorithm<TFDNode, St
     this.timeout = timeout;
   }
 
+	@Override
+	public void setLoggerName(String name) {
+		logger.info("Switching logger from {} to {}", logger.getName(), name);
+		this.loggerName = name;
+		logger = LoggerFactory.getLogger(name);
+		logger.info("Activated logger {} with name {}", name, logger.getName());
+	}
+
+	@Override
+	public String getLoggerName() {
+		return loggerName;
+	}
 }

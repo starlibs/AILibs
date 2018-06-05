@@ -15,7 +15,6 @@ import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import hasco.core.HASCO.HASCOSolutionIterator;
 import hasco.core.HASCOFD;
 import hasco.core.Solution;
 import hasco.model.Component;
@@ -126,7 +125,6 @@ public class HASCOForMEKA implements IObservableGraphAlgorithm<TFDNode, String> 
 					cc.setClassifier(baseClassifier);
 					}
 					else if(c instanceof SMO) {
-						SMO smo = (SMO)c;
 						ComponentInstance kernel = groundComponent.getSatisfactionOfRequiredInterfaces().values().iterator().next(); // there is only one required interface
 						System.out.println("Kernel " + kernel);
 					}
@@ -151,7 +149,7 @@ public class HASCOForMEKA implements IObservableGraphAlgorithm<TFDNode, String> 
 	private boolean isCanceled = false;
 	private int numberOfCPUs = 1;
 	private Collection<Object> listeners = new ArrayList<>();
-	private HASCOSolutionIterator hascoRun;
+	private HASCOFD<MultiLabelClassifier>.HASCOSolutionIterator hascoRun;
 	private INodeEvaluator<TFDNode, Double> preferredNodeEvaluator = n -> null;
 
 	private Queue<HASCOForMEKASolution> solutionsFoundByHASCO = new PriorityQueue<>(new Comparator<HASCOForMEKASolution>() {
@@ -181,8 +179,9 @@ public class HASCOForMEKA implements IObservableGraphAlgorithm<TFDNode, String> 
 
 		/* create algorithm */
 		IObjectEvaluator<MultiLabelClassifier, Double> mccv = new MonteCarloCrossValidationEvaluator(new F1AverageMultilabelEvaluator(new Random(0)), 1, data, 0.7f);
-		HASCOFD<MultiLabelClassifier> hasco = new HASCOFD<MultiLabelClassifier>(new MEKAFactory(), preferredNodeEvaluator, cl.getParamConfigs(), "MLClassifier", mccv);
+		HASCOFD<MultiLabelClassifier> hasco = new HASCOFD<MultiLabelClassifier>(new MEKAFactory(), preferredNodeEvaluator, "MLClassifier", mccv);
 		hasco.addComponents(cl.getComponents());
+		hasco.addParamRefinementConfigurations(cl.getParamConfigs());
 		hasco.setNumberOfCPUs(numberOfCPUs);
 
 		/* add all listeners to HASCO */

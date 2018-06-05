@@ -32,7 +32,7 @@ import weka.core.Instances;
 
 public class SimpleAutoMLTest {
 
-  @Test
+//  @Test
   public void test() throws Exception {
 
     /* read instances */
@@ -59,7 +59,7 @@ public class SimpleAutoMLTest {
         e.printStackTrace();
         return null;
       }
-    }, n -> null, paramConfigs, "classifier", c -> {
+    }, n -> null, "classifier", c -> {
 
       System.out.print("Evaluating solution ... ");
       DescriptiveStatistics stats = new DescriptiveStatistics();
@@ -116,6 +116,7 @@ public class SimpleAutoMLTest {
     c.addParameter(p);
     paramConfigs.put(c, paramConfig);
     hasco.addComponent(c);
+    hasco.addParamRefinementConfigurations(paramConfigs);
 
     new SimpleGraphVisualizationWindow<Node<TFDNode, String>>(hasco).getPanel().setTooltipGenerator(new TFDTooltipGenerator<>());
     for (Solution<ForwardDecompositionSolution, Classifier, Double> candidate : hasco) {
