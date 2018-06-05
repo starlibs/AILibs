@@ -10,11 +10,12 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.Test;
-
-import jaicore.order.PartialOrderedSet;
-import jaicore.order.SetUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SetUtilTest {
+	
+	private static final Logger logger = LoggerFactory.getLogger(jaicore.order.SetUtilTest.class);
 	
 	@Test
 	public void testMappingCreation() throws InterruptedException {

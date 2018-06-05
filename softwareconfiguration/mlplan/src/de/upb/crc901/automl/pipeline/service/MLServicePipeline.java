@@ -127,7 +127,7 @@ public class MLServicePipeline implements Classifier, Serializable {
       ServiceCompositionResult result = constructorEC.dispatch();
       this.servicesContainer.extendBy(result); // add the services to out state
     } catch (IOException e) {
-      LoggerUtil.logException("Could not construct pipeline " + plan + ".", e, logger);
+      logger.error("Could not construct pipeline " + plan + ". Details:\n", LoggerUtil.getExceptionInfo(e));
     }
 
     // Service creation done!
@@ -196,7 +196,7 @@ public class MLServicePipeline implements Classifier, Serializable {
       logger.info("The build process was interrupted.");
       throw ex;
     } catch (Exception ex) {
-      LoggerUtil.logException("Could not train pipeline " + this.constructionPlan + ".", ex, logger);
+      logger.error("Could not train pipeline " + this.constructionPlan + ". Details:\n{}", LoggerUtil.getExceptionInfo(ex));
       throw ex;
     }
   }
@@ -248,7 +248,7 @@ public class MLServicePipeline implements Classifier, Serializable {
       result = predictEC.dispatch();
     } catch (Throwable ex) {
       ex.printStackTrace();
-      LoggerUtil.logException("Could not obtain predictions from pipeline " + this.constructionPlan + ". Training flag: " + this.trained, ex, logger);
+      logger.error("Could not obtain predictions from pipeline " + this.constructionPlan + ". Training flag: " + this.trained + ". Details:\n{}", LoggerUtil.getExceptionInfo(ex));
       throw new RuntimeException(ex);
     }
     long end = System.currentTimeMillis();

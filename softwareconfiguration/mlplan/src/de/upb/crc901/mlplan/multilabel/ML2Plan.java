@@ -370,7 +370,7 @@ public class ML2Plan extends AbstractClassifier implements Classifier, OptionHan
 								statsForThisCandidate.addValue(selectionScore);
 							}
 						} catch (Throwable e) {
-							LoggerUtil.logException("Observed an exeption when trying to evaluate a candidate in the selection phase.", e, logger);
+							logger.error("Observed an exeption when trying to evaluate a candidate in the selection phase. Details:\n{}", LoggerUtil.getExceptionInfo(e));
 						} finally {
 							sem.release();
 							if (taskId >= 0)

@@ -217,7 +217,7 @@ public class RandomCompletionEvaluator<T, V extends Comparable<V>>
                   logger.warn("Too many retry attempts, giving up.");
                   throw ex;
                 } else {
-                  LoggerUtil.logException("Could not evaluate solution candidate ... retry another completion.", ex, logger);
+                  logger.error("Could not evaluate solution candidate ... retry another completion. {}", LoggerUtil.getExceptionInfo(ex));
                   i--;
                 }
               }
@@ -385,7 +385,7 @@ public class RandomCompletionEvaluator<T, V extends Comparable<V>>
         solution.forEach(n -> sb.append(n.toString() + "\n"));
         explanations.add(new Pair<>("The path that has been tried to convert is as follows:", sb.toString()));
       }
-      LoggerUtil.logException("Cannot post solution, because no valid MLPipeline object could be derived from it.", e, logger, explanations);
+      logger.error("Cannot post solution, because no valid MLPipeline object could be derived from it:\n{}", LoggerUtil.getExceptionInfo(e, explanations));
     }
   }
 

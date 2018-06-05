@@ -155,7 +155,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 						e2.printStackTrace();
 					}
 				} catch (Throwable e) {
-					LoggerUtil.logException("Observed an execution during computation of f.", e, logger);
+					logger.error("Observed an execution during computation of f:\n{}", LoggerUtil.getExceptionInfo(e));
 					newNode.setAnnotation("fError", e);
 					graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_ffail"));
 				}

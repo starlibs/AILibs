@@ -267,16 +267,16 @@ public abstract class MultiClassClassificationExperimentRunner {
 				System.out.println("Sending error Rate " + error + " to logger.");
 				database.addResultEntry(runId, error);
 			} catch (Throwable e) {
-				LoggerUtil.logException("Experiment failed.", e, logger);
+				logger.error("Experiment failed. Details:\n{}", LoggerUtil.getExceptionInfo(e));
 				System.out.println("Sending error Rate -10000 to logger.");
 				try {
 					database.addResultEntry(runId, -10000);
 				} catch (Exception e1) {
-					LoggerUtil.logException("Could not write result to database.", e1, logger);
+					logger.error("Could not write result to database. Details:\n{}", LoggerUtil.getExceptionInfo(e1));
 				}
 			}
 		} catch (Exception e) {
-			LoggerUtil.logException("Experiment failed.", e, logger);
+			logger.error("Experiment failed. Details:\n{}", LoggerUtil.getExceptionInfo(e));
 		}
 	}
 

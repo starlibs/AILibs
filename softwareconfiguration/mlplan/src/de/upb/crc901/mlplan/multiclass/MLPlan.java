@@ -406,7 +406,7 @@ public class MLPlan extends AbstractClassifier implements Classifier, OptionHand
 								statsForThisCandidate.addValue(selectionScore);
 							}
 						} catch (Throwable e) {
-							LoggerUtil.logException("Observed an exeption when trying to evaluate a candidate in the selection phase.", e, logger);
+							logger.error("Observed an exeption when trying to evaluate a candidate in the selection phase.\n{}", LoggerUtil.getExceptionInfo(e));
 						} finally {
 							sem.release();
 							if (taskId >= 0) {

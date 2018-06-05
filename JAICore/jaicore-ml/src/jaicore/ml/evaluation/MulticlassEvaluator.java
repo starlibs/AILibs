@@ -47,7 +47,7 @@ public class MulticlassEvaluator implements BasicMLEvaluator, Serializable {
 			cCopy.buildClassifier(train);
 			return loss(cCopy, test);
 		} catch (Exception e) {
-			LoggerUtil.logException("Problems with evaluation of classifier.", e, logger);
+			logger.error("Problems with evaluation of classifier. Details:\n{}", LoggerUtil.getExceptionInfo(e));
 			measurementEventBus.post(new ClassifierMeasurementEvent<Double>(c, null, e));
 			throw e;
 		}
@@ -73,7 +73,7 @@ public class MulticlassEvaluator implements BasicMLEvaluator, Serializable {
 			measurementEventBus.post(new ClassifierMeasurementEvent<Double>(c, error, null));
 			return error;
 		} catch (Exception e) {
-			LoggerUtil.logException("Problems with evaluation of classifier.", e, logger);
+			logger.error("Problems with evaluation of classifier. Details:\n{}", LoggerUtil.getExceptionInfo(e));
 			measurementEventBus.post(new ClassifierMeasurementEvent<Double>(c, null, e));
 			throw e;
 		}
