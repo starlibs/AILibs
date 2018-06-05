@@ -30,7 +30,7 @@ artifacts {
 }
 
 dependencies {
-	compile name: 'CRCUtils'
+	// compile name: 'CRCUtils'
 	
 	// basic dependencies
 	compile project(':HASCO')

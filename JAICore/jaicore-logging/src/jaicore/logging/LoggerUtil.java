@@ -13,17 +13,12 @@ public class LoggerUtil {
 	}
 	
 	public static String getExceptionInfo(Throwable e, List<Pair<String, Object>> additionalInformationObjects) {
-
-		String eMessage = e.getMessage();
-		boolean containsLineBreaks = eMessage != null ? eMessage.contains("\n") : false;
-		
 		StringBuilder sb = new StringBuilder();
-		sb.append("Some detailed information about the execution:");
-		if (containsLineBreaks) {
-			sb.append("\n\tHere is the full message:\n\t\t");
-			sb.append(eMessage.replace("\n", "\n\t\t"));
-		}
-		sb.append("\n\tHere is the stack trace:");
+		sb.append("\n\tError class: ");
+		sb.append(e.getClass().getName());
+		sb.append("\n\tError message: ");
+		sb.append(e.getMessage().replace("\n", "\n\t\t"));
+		sb.append("\n\tError trace:");
 		Arrays.asList(e.getStackTrace()).forEach(ste -> sb.append("\n\t\t" + ste.toString()));
 		while (e.getCause() != null) {
 			e = e.getCause();
