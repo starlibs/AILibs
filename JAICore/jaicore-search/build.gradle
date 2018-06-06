@@ -16,4 +16,6 @@ dependencies {
 	compile project(":JAICore:jaicore-logging")
 	compile project(":JAICore:jaicore-concurrent")
 	compile project(":JAICore:jaicore-graphvisualizer")
+
+	compile group: 'org.knowm.xchart', name: 'xchart', version: '3.5.2'
 }
