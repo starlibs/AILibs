@@ -1,20 +1,16 @@
 package hasco.serialization;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import jaicore.order.SetUtil;
-import jaicore.order.SetUtil.Pair;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IllegalFormatException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -24,6 +20,9 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.math3.geometry.euclidean.oned.Interval;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import hasco.model.BooleanParameterDomain;
 import hasco.model.CategoricalParameterDomain;
 import hasco.model.Component;
@@ -32,6 +31,8 @@ import hasco.model.NumericParameterDomain;
 import hasco.model.Parameter;
 import hasco.model.ParameterDomain;
 import hasco.model.ParameterRefinementConfiguration;
+import jaicore.basic.sets.SetUtil;
+import jaicore.basic.sets.SetUtil.Pair;
 
 public class ComponentLoader {
 
@@ -105,6 +106,10 @@ public class ComponentLoader {
 
         // add required interfaces
         for (JsonNode requiredInterface : component.path("requiredInterface")) {
+        	if (!requiredInterface.has("id"))
+        		throw new IOException("No id has been specified for a required interface of " + c.getName());
+        	if (!requiredInterface.has("name"))
+        		throw new IOException("No name has been specified for a required interface of " + c.getName());
           c.addRequiredInterface(requiredInterface.get("id").asText(), requiredInterface.get("name").asText());
         }
 

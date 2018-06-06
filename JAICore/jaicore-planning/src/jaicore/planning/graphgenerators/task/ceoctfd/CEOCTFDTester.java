@@ -9,7 +9,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import jaicore.order.MathExt;
+import jaicore.basic.MathExt;
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;

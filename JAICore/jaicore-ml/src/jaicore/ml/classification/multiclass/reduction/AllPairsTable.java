@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 
-import jaicore.order.SetUtil;
+import jaicore.basic.sets.SetUtil;
 import jaicore.ml.WekaUtil;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import jaicore.order.SetUtil;
+import jaicore.basic.sets.SetUtil;
 import jaicore.logic.fol.structure.Monom;
 
 public abstract class SetTheoryUtil {

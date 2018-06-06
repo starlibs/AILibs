@@ -15,7 +15,7 @@ import hasco.model.ComponentInstance;
 import hasco.model.NumericParameterDomain;
 import hasco.model.Parameter;
 import hasco.model.ParameterRefinementConfiguration;
-import jaicore.order.SetUtil;
+import jaicore.basic.sets.SetUtil;
 import jaicore.logic.fol.structure.ConstantParam;
 import jaicore.logic.fol.structure.Literal;
 import jaicore.logic.fol.structure.Monom;

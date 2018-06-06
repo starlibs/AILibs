@@ -2,7 +2,7 @@ package hasco.model;
 
 import java.util.Collection;
 
-import jaicore.order.SetUtil.Pair;
+import jaicore.basic.sets.SetUtil.Pair;
 
 public class Dependency {
 	private final Collection<Collection<Pair<Parameter, ParameterDomain>>> premise; // semantics are DNF (every entry is an AND-connected constraint)

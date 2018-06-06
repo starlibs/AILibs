@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import jaicore.order.SetUtil;
+import jaicore.basic.sets.SetUtil;
 
 @SuppressWarnings("serial")
 public class LabeledGraph<T, L> extends Graph<T> {

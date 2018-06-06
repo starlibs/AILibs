@@ -1,7 +1,5 @@
 package hasco.model;
 
-import jaicore.order.PartialOrderedSet;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -9,6 +7,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.TreeMap;
+
+import jaicore.basic.sets.PartialOrderedSet;
 
 public class Component {
   private final String name;

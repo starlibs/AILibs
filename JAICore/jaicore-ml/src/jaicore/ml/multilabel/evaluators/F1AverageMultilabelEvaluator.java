@@ -8,7 +8,7 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jaicore.order.SetUtil;
+import jaicore.basic.sets.SetUtil;
 import meka.classifiers.multilabel.Evaluation;
 import meka.classifiers.multilabel.MultiLabelClassifier;
 import meka.core.Result;

@@ -1,7 +1,7 @@
 package hasco.core;
 
-import jaicore.order.SetUtil;
-import jaicore.order.SetUtil.Pair;
+import jaicore.basic.sets.SetUtil;
+import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.logic.fol.structure.Literal;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.planning.model.core.Action;

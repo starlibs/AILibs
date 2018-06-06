@@ -10,7 +10,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jaicore.order.SetUtil;
+import jaicore.basic.sets.SetUtil;
 import jaicore.logic.fol.structure.CNFFormula;
 import jaicore.logic.fol.structure.Clause;
 import jaicore.logic.fol.structure.ConstantParam;

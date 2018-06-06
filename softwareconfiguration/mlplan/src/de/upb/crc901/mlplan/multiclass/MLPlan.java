@@ -22,17 +22,20 @@ import org.slf4j.LoggerFactory;
 import de.upb.crc901.automl.hascowekaml.HASCOForWekaML;
 import de.upb.crc901.automl.hascowekaml.HASCOForWekaML.HASCOForWekaMLSolution;
 import jaicore.basic.ILoggingCustomizable;
+import jaicore.basic.LoggerUtil;
+import jaicore.basic.sets.SetUtil;
 import jaicore.concurrent.TimeoutTimer;
 import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
 import jaicore.graph.observation.IObservableGraphAlgorithm;
-import jaicore.logging.LoggerUtil;
+import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.ml.WekaUtil;
 import jaicore.ml.evaluation.ClassifierEvaluator;
 import jaicore.ml.evaluation.MonteCarloCrossValidationEvaluator;
 import jaicore.ml.evaluation.MulticlassEvaluator;
-import jaicore.order.SetUtil;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
+import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;
 import jaicore.search.algorithms.standard.core.INodeEvaluator;
+import jaicore.search.structure.core.Node;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.core.Capabilities;
@@ -60,7 +63,7 @@ public class MLPlan extends AbstractClassifier implements Classifier, OptionHand
 	private int numberOfMCIterationsPerSolutionInSelectionPhase = 3;
 
 	/* variable relevant for and during a single run */
-	private long timeOfStart;
+	private long timeOfStart = -1;
 	private final HASCOForWekaML hasco;
 
 	/* output variables */
@@ -566,5 +569,12 @@ public class MLPlan extends AbstractClassifier implements Classifier, OptionHand
 	@Override
 	public String getLoggerName() {
 		return loggerName;
+	}
+	
+	public void enableVisualization() {
+		if (this.timeOfStart >= 0)
+			throw new IllegalStateException("Cannot enable visualization after buildClassifier has been invoked. Please enable it previously.");
+		new SimpleGraphVisualizationWindow<Node<TFDNode, Double>>(this).getPanel()
+		.setTooltipGenerator(new TFDTooltipGenerator<>());
 	}
 }

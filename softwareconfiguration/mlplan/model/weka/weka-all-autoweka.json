@@ -1,0 +1,5 @@
+{
+	"repository" : "WEKA - Auto-WEKA Searchspace",
+	"include": ["./weka-classifiers-autoweka.json", "./weka-preprocessors-autoweka.json"],
+	"components" : [ ]
+}

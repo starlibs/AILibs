@@ -1,7 +1,5 @@
 package jaicore.basic.kvstore;
 
-import jaicore.order.SetUtil;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -20,6 +18,8 @@ import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jaicore.basic.sets.SetUtil;
 
 public class SimpleKVStore implements Serializable {
 

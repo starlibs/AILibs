@@ -1,10 +1,10 @@
-package jaicore.logging;
+package jaicore.basic;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import jaicore.order.SetUtil.Pair;
+import jaicore.basic.sets.SetUtil.Pair;
 
 public class LoggerUtil {
 

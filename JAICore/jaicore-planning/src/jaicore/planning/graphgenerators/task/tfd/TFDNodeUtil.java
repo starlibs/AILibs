@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import jaicore.order.SetUtil;
 import jaicore.basic.StringUtil;
+import jaicore.basic.sets.SetUtil;
 import jaicore.logic.fol.structure.CNFFormula;
 import jaicore.logic.fol.structure.ConstantParam;
 import jaicore.logic.fol.structure.Literal;

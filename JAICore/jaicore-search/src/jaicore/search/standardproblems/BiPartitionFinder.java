@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import jaicore.basic.IObjectEvaluator;
-import jaicore.order.SetUtil.Pair;
+import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import jaicore.search.structure.core.GraphGenerator;

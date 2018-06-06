@@ -45,6 +45,9 @@ dependencies {
 
 	// Jackson for JSON (used by JAICore but not contained in the JAR)
 	compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.0.pr4'
+	
+	// OpenML connector
+	compile group: 'org.openml', name: 'apiconnector', version: '1.0.18'
 
 	// servicification dependencies
 	compile group: 'de.upb.isys', name: 'jase', version: '0.0.2'
