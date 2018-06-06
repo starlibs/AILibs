@@ -46,7 +46,11 @@ public class MulticlassEvaluator implements BasicMLEvaluator, Serializable {
 			Classifier cCopy = WekaUtil.cloneClassifier(c);
 			cCopy.buildClassifier(train);
 			return loss(cCopy, test);
-		} catch (Exception e) {
+		} catch (InterruptedException e) {
+			logger.info("Evaluation of classifier was interrupted.");
+			throw e;
+		}
+		catch (Exception e) {
 			logger.error("Problems with evaluation of classifier. Details:\n{}", LoggerUtil.getExceptionInfo(e));
 			measurementEventBus.post(new ClassifierMeasurementEvent<Double>(c, null, e));
 			throw e;

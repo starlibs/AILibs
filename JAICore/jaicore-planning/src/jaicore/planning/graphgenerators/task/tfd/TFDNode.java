@@ -89,10 +89,7 @@ public class TFDNode implements Serializable {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((appliedAction == null) ? 0 : appliedAction.hashCode());
-		result = prime * result + ((appliedMethodInstance == null) ? 0 : appliedMethodInstance.hashCode());
-		result = prime * result + (isGoal ? 1231 : 1237);
-		result = prime * result + ((problem == null) ? 0 : problem.hashCode());
+		result = prime * result + (int) (ID ^ (ID >>> 32));
 		return result;
 	}
 
@@ -105,22 +102,7 @@ public class TFDNode implements Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		TFDNode other = (TFDNode) obj;
-		if (appliedAction == null) {
-			if (other.appliedAction != null)
-				return false;
-		} else if (!appliedAction.equals(other.appliedAction))
-			return false;
-		if (appliedMethodInstance == null) {
-			if (other.appliedMethodInstance != null)
-				return false;
-		} else if (!appliedMethodInstance.equals(other.appliedMethodInstance))
-			return false;
-		if (isGoal != other.isGoal)
-			return false;
-		if (problem == null) {
-			if (other.problem != null)
-				return false;
-		} else if (!problem.equals(other.problem))
+		if (ID != other.ID)
 			return false;
 		return true;
 	}

@@ -679,8 +679,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	}
 
 	protected synchronized Node<T, V> newNode(Node<T, V> parent, T t2, V evaluation) {
-
-		assert parent == null || expanded.contains(parent.getPoint()) : "Generating successors of an unexpanded node " + parent + ". List of expanded nodes:\n" + expanded.stream().map(n -> n.toString()).collect(Collectors.joining("\n\t"));
+		assert parent == null || expanded.contains(parent.getPoint()) : "Generating successors of an unexpanded node " + parent + ". List of expanded nodes:\n" + expanded.stream().map(n -> "\n\t" + n.toString()).collect(Collectors.joining());
 		assert !open.contains(parent) : "Parent node " + parent + " is still on OPEN, which must not be the case!";
 
 		/* create new node and check whether it is a goal */

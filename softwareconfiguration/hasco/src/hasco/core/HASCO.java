@@ -27,6 +27,7 @@ import hasco.model.ParameterRefinementConfiguration;
 import hasco.query.Factory;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.IObjectEvaluator;
+import jaicore.basic.LoggerUtil;
 import jaicore.graph.observation.IObservableGraphAlgorithm;
 import jaicore.logic.fol.structure.CNFFormula;
 import jaicore.logic.fol.structure.ConstantParam;
@@ -251,10 +252,16 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 		for (Action a : plan) {
 			PlannerUtil.updateState(state, a);
 		}
-		return this.getObjectFromState(state);
+		try {
+			return this.getObjectFromState(state);
+		}
+		catch (Exception e) {
+			logger.error("Could not retrieve target object from plan. Details:\n{}", LoggerUtil.getExceptionInfo(e));
+			return null;
+		}
 	}
 
-	public T getObjectFromState(final Monom state) {
+	public T getObjectFromState(final Monom state) throws Exception {
 		T object = this.factory.getComponentInstantiation(Util.getSolutionCompositionFromState(this.components, state));
 		assert object != null : "Factory has returned NULL";
 		return object;
