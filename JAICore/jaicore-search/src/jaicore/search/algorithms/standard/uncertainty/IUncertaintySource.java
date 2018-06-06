@@ -7,6 +7,6 @@ import jaicore.search.structure.core.Node;
 @FunctionalInterface
 public interface IUncertaintySource <T>{
 
-	public double calculateUncertainty (Node<T, UncertaintyFMeasure> n, List<T> solutionPath);
+	public double calculateUncertainty (Node<T, UncertaintyFMeasure> n, List<T> solutionPath, List<UncertaintyFMeasure> simulationEvaluations);
 	
 }

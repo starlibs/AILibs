@@ -104,21 +104,7 @@ public class NQueensAsOptPareto {
 								return true;
 							}
 						},
-						(n, solutionPath) -> {
-							QueenNode queenNode = n.getPoint();
-							double post = 0.0d;
-							boolean startsCounting = false;
-							for (QueenNode q : solutionPath) {
-								if (startsCounting) {
-									post++;
-								}
-								if (q.equals(queenNode)) {
-									startsCounting = true;
-								}
-							}
-							double uncertainty = post / (double) solutionPath.size();
-							return uncertainty;
-						}
+						new BasicUncertaintySource<>()
 				)
 		);
 		search.setOpen(new ParetoSelection<>(true));

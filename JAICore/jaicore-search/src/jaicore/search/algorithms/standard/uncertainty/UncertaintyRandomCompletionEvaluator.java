@@ -83,6 +83,7 @@ public class UncertaintyRandomCompletionEvaluator<T> extends RandomCompletionEva
 						int i = 0;
 						int j = 0;
 						final int maxSamples = samples * 20;
+						List<UncertaintyFMeasure> evaluations = new ArrayList<>();
 						for (; i < samples; i++) {
 							
 							if (Thread.interrupted()) {
@@ -128,10 +129,13 @@ public class UncertaintyRandomCompletionEvaluator<T> extends RandomCompletionEva
 							/* now evaluate this solution */
 							j++;
 							try {
-								UncertaintyFMeasure val = getUncertainFValueOfSolutionPath(n, completedPath, false);
-								if (val != null && (best == null || val.compareTo(best) < 0)) {
-									best = val;
-									bestCompletion = completedPath;
+								UncertaintyFMeasure val = getUncertainFValueOfSolutionPath(n, completedPath, false, evaluations);
+								if (val != null) {
+									evaluations.add(val);
+									if (best == null || val.compareTo(best) < 0) {
+										best = val;
+										bestCompletion = completedPath;
+									}
 								}
 							} catch (InterruptedException e) {
 								interrupted = true;
@@ -167,12 +171,12 @@ public class UncertaintyRandomCompletionEvaluator<T> extends RandomCompletionEva
 						completions.put(path, completions.get(pathWhoseCompletionSubsumesCurrentPath));
 					}
 				}
-				fValues.put(n, getUncertainFValueOfSolutionPath(n, completions.get(path), false));
+				fValues.put(n, getUncertainFValueOfSolutionPath(n, completions.get(path), false, null));
 			}
 
 			/* the node is a goal node */
 			else {
-				UncertaintyFMeasure score = getUncertainFValueOfSolutionPath(n, path, true);
+				UncertaintyFMeasure score = getUncertainFValueOfSolutionPath(n, path, true, null);
 				if (score == null) {
 					logger.warn("No score was computed");
 					return null;
@@ -189,7 +193,7 @@ public class UncertaintyRandomCompletionEvaluator<T> extends RandomCompletionEva
 	}
 
 	@SuppressWarnings("unchecked")
-	private UncertaintyFMeasure getUncertainFValueOfSolutionPath(Node<T, ?> n, List<T> path, boolean readchedGoal) throws Exception {
+	private UncertaintyFMeasure getUncertainFValueOfSolutionPath(Node<T, ?> n, List<T> path, boolean readchedGoal, List<UncertaintyFMeasure> simulationEvaluations) throws Exception {
 		boolean knownPath = scoresOfSolutionPaths.containsKey(path);
 		if (!knownPath) {
 			if (unsuccessfulPaths.contains(path)) {
@@ -205,7 +209,7 @@ public class UncertaintyRandomCompletionEvaluator<T> extends RandomCompletionEva
 				if (readchedGoal) {
 					val = new UncertaintyFMeasure(score.getfValue(), 0.0d);
 				} else {
-					val = new UncertaintyFMeasure(score.getfValue(), this.uncertaintyCalculation.calculateUncertainty((Node<T, UncertaintyFMeasure>) n, path));
+					val = new UncertaintyFMeasure(score.getfValue(), this.uncertaintyCalculation.calculateUncertainty((Node<T, UncertaintyFMeasure>) n, path, simulationEvaluations));
 				}
 			} catch (Exception e) {
 				unsuccessfulPaths.add(path);
