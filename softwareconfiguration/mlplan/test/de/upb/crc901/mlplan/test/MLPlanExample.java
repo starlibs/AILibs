@@ -18,7 +18,7 @@ import weka.core.Instances;
 
 public class MLPlanExample {
 
-	@Test
+//	@Test
 	public void test() throws Exception {
 		
 		/* load data for segment dataset and create a train-test-split */
