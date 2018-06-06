@@ -27,7 +27,6 @@ dependencies {
 	compile project(':JAICore:jaicore-graph')
 	compile project(':JAICore:jaicore-planning')
 	compile project(':JAICore:jaicore-search')
-	compile project(':JAICore:jaicore-order')
 	compile project(':JAICore:jaicore-ml')
 	
 	
