@@ -22,9 +22,9 @@ import weka.core.Instances;
 
 public class MLPlanExample {
 
-//  @Test
-  public void test() throws Exception {
-
+  //@Test
+//  public void test() throws Exception {
+//
 //    /* read data and split */
 //    Instances data = new Instances(new BufferedReader(new FileReader(new File("../datasets/classification/multi-class/segment.arff"))));
 //    data.setClassIndex(data.numAttributes() - 1);
@@ -47,6 +47,6 @@ public class MLPlanExample {
 //    while (true) {
 //      ;
 //    }
-  }
+//  }
 
 }

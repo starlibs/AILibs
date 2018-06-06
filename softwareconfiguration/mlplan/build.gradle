@@ -1,5 +1,4 @@
 plugins {
-	id 'java'
 	id 'eclipse-wtp'
 }
 
@@ -20,20 +19,12 @@ sourceSets {
     }
 }
 
-task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-}
-
-artifacts {
-    archives sourcesJar
-}
-
 dependencies {
-	// compile name: 'CRCUtils'
-	
+	compile name: 'CRCUtils'
+
 	// basic dependencies
-	compile project(':HASCO')
+	compile project(':hasco')
+
 	compile project(':JAICore:jaicore-logic')
 	compile project(':JAICore:jaicore-basic')
 	compile project(':JAICore:jaicore-graph')
@@ -41,21 +32,17 @@ dependencies {
 	compile project(':JAICore:jaicore-search')
 	compile project(':JAICore:jaicore-order')
 	compile project(':JAICore:jaicore-ml')
-	
-	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.6'
+
 	// Graph Stream
 	compile group: 'org.graphstream', name: 'gs-core', version: '1.1.1'
 	compile group: 'org.graphstream', name: 'gs-ui', version: '1.3'
 
 	// Basics
-	compile 'junit:junit:4.12'
-	compile 'com.google.guava:guava:18.0'
 	compile group: 'org.aeonbits.owner', name: 'owner-java8', version:'1.0.6'
+
 	// DB connector
 	compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.45'
-	// Graph Stream
-	compile group: 'org.graphstream', name: 'gs-core', version: '1.1.1'
-	compile group: 'org.graphstream', name: 'gs-ui', version: '1.3'
+
 	// Jackson for JSON (used by JAICore but not contained in the JAR)
 	compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.0.pr4'
 
@@ -65,4 +52,5 @@ dependencies {
 	// wrapped library dependencies
 	compile group: 'de.upb.isys', name: 'meka', version: '0.0.1'
 	compile group: 'de.upb.isys', name: 'interruptable-weka', version: '0.0.1'
+
 }
