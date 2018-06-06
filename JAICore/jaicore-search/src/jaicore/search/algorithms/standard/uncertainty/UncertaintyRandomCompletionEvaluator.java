@@ -6,7 +6,6 @@ import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jaicore.logging.LoggerUtil;
 import jaicore.search.algorithms.interfaces.IPathUnification;
 import jaicore.search.algorithms.interfaces.ISolutionEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
@@ -143,7 +142,7 @@ public class UncertaintyRandomCompletionEvaluator<T> extends RandomCompletionEva
 									throw ex;
 								}
 								else {
-									logger.error(LoggerUtil.getExceptionInfo(ex));
+									logger.error(ex.getMessage());
 									i--;
 								}
 							}
