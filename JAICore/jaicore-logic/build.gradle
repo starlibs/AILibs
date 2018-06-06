@@ -11,6 +11,5 @@ sourceSets {
     }
 }
 dependencies {
-	compile project(":JAICore:jaicore-order")
 	compile project(":JAICore:jaicore-basic")
 }
