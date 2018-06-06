@@ -64,8 +64,13 @@
 		<appender-ref ref="traceFileAppender" />
 	</logger>
 	
-	<logger name="mlplan">
+	<logger name="hasco">
 		<level value="warn" />
+		<appender-ref ref="console" />
+	</logger>
+	
+	<logger name="mlplan">
+		<level value="info" />
 		<appender-ref ref="console" />
 	</logger>
 	

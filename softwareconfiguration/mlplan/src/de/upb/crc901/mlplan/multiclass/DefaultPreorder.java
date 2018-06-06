@@ -43,7 +43,6 @@ public class DefaultPreorder implements INodeEvaluator<TFDNode,Double> {
 			String preprocessor = "";
 			int offset = (preprocessor.equals("")) ? 0 : classifierRanking.size();
 			double f = offset + classifierRanking.indexOf(matchingClassifier.get()) * 1.0;
-			System.out.println(f);
 			return f;
 		}
 		
@@ -56,7 +55,7 @@ public class DefaultPreorder implements INodeEvaluator<TFDNode,Double> {
 				.filter(m -> {
 					Literal task = m.getMethod().getTask();
 					String taskName = task.getPropertyName();
-					if (!taskName.startsWith("tResolve"))
+					if (!taskName.contains("tResolve"))
 						return false;
 					Matcher matcher = p.matcher(m.getMethod().getName());
 					matcher.find();

@@ -7,8 +7,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Random;
@@ -16,11 +14,8 @@ import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.upb.crc901.automl.hascocombinedml.MLServicePipelineFactory;
 import hasco.core.HASCOFD;
 import hasco.core.Solution;
-import hasco.model.Component;
-import hasco.model.Parameter;
 import hasco.serialization.ComponentLoader;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.graph.observation.IObservableGraphAlgorithm;
@@ -29,7 +24,6 @@ import jaicore.ml.evaluation.MulticlassEvaluator;
 import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionSolution;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.search.algorithms.standard.core.INodeEvaluator;
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.core.Instances;
 
@@ -74,7 +68,7 @@ public class HASCOForWekaML implements IObservableGraphAlgorithm<TFDNode, String
 		long deadline = start + timeoutInMS;
 
 		/* create algorithm */
-		HASCOFD<Classifier> hasco = new HASCOFD<>(new MLServicePipelineFactory(), this.preferredNodeEvaluator, "AbstractClassifier", new MonteCarloCrossValidationEvaluator(new MulticlassEvaluator(new Random(3)), 3, data, .7f));
+		HASCOFD<Classifier> hasco = new HASCOFD<>(new WEKAPipelineFactory(), this.preferredNodeEvaluator, "AbstractClassifier", new MonteCarloCrossValidationEvaluator(new MulticlassEvaluator(new Random(3)), 3, data, .7f));
 		if (this.loggerName != null && this.loggerName.length() > 0)
 			hasco.setLoggerName(loggerName + ".hasco");
 
