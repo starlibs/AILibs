@@ -20,11 +20,11 @@ import org.slf4j.LoggerFactory;
 
 import de.upb.crc901.automl.hascowekaml.HASCOForMEKA;
 import de.upb.crc901.automl.hascowekaml.HASCOForMEKA.HASCOForMEKASolution;
-import jaicore.basic.LoggerUtil;
 import jaicore.basic.sets.SetUtil;
 import jaicore.concurrent.TimeoutTimer;
 import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
 import jaicore.graph.observation.IObservableGraphAlgorithm;
+import jaicore.logging.LoggerUtil;
 import jaicore.ml.WekaUtil;
 import jaicore.ml.evaluation.ClassifierEvaluator;
 import jaicore.ml.evaluation.MonteCarloCrossValidationEvaluator;

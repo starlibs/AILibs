@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.EventBus;
 
-import jaicore.basic.LoggerUtil;
+import jaicore.logging.LoggerUtil;
 import jaicore.ml.WekaUtil;
 import weka.classifiers.Classifier;
 import weka.core.Instance;

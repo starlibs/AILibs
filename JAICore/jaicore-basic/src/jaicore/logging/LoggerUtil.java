@@ -1,4 +1,4 @@
-package jaicore.basic;
+package jaicore.logging;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,13 +11,17 @@ public class LoggerUtil {
 	public static String getExceptionInfo(Throwable e) {
 		return getExceptionInfo(e, new ArrayList<>());
 	}
-	
+
 	public static String getExceptionInfo(Throwable e, List<Pair<String, Object>> additionalInformationObjects) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("\n\tError class: ");
 		sb.append(e.getClass().getName());
 		sb.append("\n\tError message: ");
-		sb.append(e.getMessage().replace("\n", "\n\t\t"));
+		if (e.getMessage() != null) {
+			sb.append(e.getMessage().replace("\n", "\n\t\t"));
+		} else {
+			sb.append("NaN");
+		}
 		sb.append("\n\tError trace:");
 		Arrays.asList(e.getStackTrace()).forEach(ste -> sb.append("\n\t\t" + ste.toString()));
 		while (e.getCause() != null) {
@@ -35,5 +39,9 @@ public class LoggerUtil {
 			}
 		}
 		return sb.toString();
+	}
+
+	public static String logException(Throwable e) {
+		return getExceptionInfo(e, new ArrayList<>());
 	}
 }
