@@ -29,7 +29,7 @@ public class NQueensAsOptPareto {
 	@Test
 	public void testNQueensProblem () {
 		
-		ORGraphSearch<QueenNode, String, UncertaintyFMeasure> search = new ORGraphSearch<QueenNode, String, UncertaintyFMeasure>(
+		ORGraphSearch<QueenNode, String, Double> search = new ORGraphSearch<QueenNode, String, Double>(
 				new SerializableGraphGenerator<QueenNode, String>() {
 					
 					private static final long serialVersionUID = 1L;
@@ -75,7 +75,7 @@ public class NQueensAsOptPareto {
 				
 		
 				},
-				new UncertaintyRandomCompletionEvaluator<QueenNode>(
+				new UncertaintyRandomCompletionEvaluator<QueenNode, String, Double>(
 						new Random(123l),
 						3,
 						new IPathUnification<QueenNode>() {
@@ -87,14 +87,14 @@ public class NQueensAsOptPareto {
 								return null;
 							}
 						},
-						new ISolutionEvaluator<QueenNode, UncertaintyFMeasure>() {
+						new ISolutionEvaluator<QueenNode, Double>() {
 							@Override
-							public UncertaintyFMeasure evaluateSolution(List<QueenNode> solutionPath) throws Exception {
+							public Double evaluateSolution(List<QueenNode> solutionPath) throws Exception {
 								QueenNode leaf = solutionPath.get(solutionPath.size() - 1);
 								if (leaf.getNumberOfQueens() == dimension) {
-									return new UncertaintyFMeasure(scoreSolution(leaf), 0.0d);
+									return scoreSolution(leaf);
 								} else {
-									return new UncertaintyFMeasure(0.0d, 0.0d);
+									return 0.0d;
 								}
 							}
 

@@ -8,13 +8,13 @@ import org.knowm.xchart.XYChartBuilder;
 import org.knowm.xchart.XYSeries.XYSeriesRenderStyle;
 import org.knowm.xchart.style.Styler.ChartTheme;
 import org.knowm.xchart.style.Styler.LegendPosition;
-import jaicore.search.algorithms.standard.uncertainty.UncertaintyFMeasure;
 
 public class ParetoFrontVisualizer {
 
 	final XYChart chart;
 	final SwingWrapper<XYChart> vis;
-	final List<UncertaintyFMeasure> points;
+	final List<Double> fValues;
+	final List<Double> uncertainties;
 	
 	public ParetoFrontVisualizer () {
 		chart = new XYChartBuilder()
@@ -37,27 +37,32 @@ public class ParetoFrontVisualizer {
 		
 		vis = new SwingWrapper<>(chart);
 		
-		points = new ArrayList<>();
+		fValues = new ArrayList<>();
+		uncertainties = new ArrayList<>();
 	}
 	
 	public void show () {
 		vis.displayChart();
 	}
 	
-	public void update (UncertaintyFMeasure point) {
-		points.add(point);
+	public void update (double fValue, double uncertainty) {
+		fValues.add(fValue);
+		uncertainties.add(uncertainty);
 		
-		double[] u = new double[points.size()];
-		double[] f = new double[points.size()];
-		for (int i = 0; i < points.size(); i++) {
-			u[i] = points.get(i).getUncertainty();
-			f[i] = points.get(i).getfValue();
-		}
-		
-		javax.swing.SwingUtilities.invokeLater(() -> {
-			chart.updateXYSeries("Paretofront Candidates", u, f, null);
-			vis.repaintChart();
-		});
+		if (fValues.size() == uncertainties.size()) {
+			double[] f = new double[fValues.size()];
+			double[] u = new double[uncertainties.size()];
+			for (int i = 0; i < fValues.size(); i++) {
+				f[i] = fValues.get(i);
+				u[i] = uncertainties.get(i);
+			}
+			javax.swing.SwingUtilities.invokeLater(() -> {
+				chart.updateXYSeries("Paretofront Candidates", u, f, null);
+				vis.repaintChart();
+			});
+		} else {
+			System.out.println("ERROR: Unqueal value amounts");
+		}		
 	}
 	
 }

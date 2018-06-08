@@ -20,24 +20,25 @@ import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 @SuppressWarnings("serial")
-public class UncertaintyRandomCompletionEvaluator<T> extends RandomCompletionEvaluator<T, UncertaintyFMeasure> {
+public class UncertaintyRandomCompletionEvaluator<T, N extends Comparable<N>, V extends Comparable<V>> extends RandomCompletionEvaluator<T, V> {
 
 	private static final Logger logger = LoggerFactory.getLogger(UncertaintyRandomCompletionEvaluator.class);
 	
-	private IUncertaintySource<T> uncertaintyCalculation;
+	private IUncertaintySource<T, V> uncertaintyCalculation;
 
-	public UncertaintyRandomCompletionEvaluator(Random random, int samples, IPathUnification<T> pathUnifier, ISolutionEvaluator<T, UncertaintyFMeasure> solutionEvaluator, IUncertaintySource<T> uncertaintySource) {
+	public UncertaintyRandomCompletionEvaluator(Random random, int samples, IPathUnification<T> pathUnifier, ISolutionEvaluator<T, V> solutionEvaluator, IUncertaintySource<T, V> uncertaintySource) {
 		super(random, samples,pathUnifier, solutionEvaluator);
 		this.uncertaintyCalculation = uncertaintySource;
 	}
 
 	@Override
-	public UncertaintyFMeasure f(Node<T, ?> n) throws Throwable {
+	public V f(Node<T, ?> n) throws Throwable {
 		if (timestampOfFirstEvaluation == 0)
 			timestampOfFirstEvaluation = System.currentTimeMillis();
 		logger.info("Received request for f-value of node {}", n);
 
 		if (!fValues.containsKey(n)) {
+			double uncertainty = 1.0d;
 
 			/* if we already have a value for this path, do not continue */
 			if (generator == null)
@@ -53,7 +54,7 @@ public class UncertaintyRandomCompletionEvaluator<T> extends RandomCompletionEva
 
 			if (!n.isGoal()) {
 				
-				UncertaintyFMeasure evaluationPriorToCompletion = computeEvaluationPriorToCompletion(n, path);
+				V evaluationPriorToCompletion = computeEvaluationPriorToCompletion(n, path);
 				if (evaluationPriorToCompletion != null) {
 					fValues.put(n, evaluationPriorToCompletion);
 					return evaluationPriorToCompletion;
@@ -62,7 +63,7 @@ public class UncertaintyRandomCompletionEvaluator<T> extends RandomCompletionEva
 				/* if there was no relevant change in comparison to parent, apply parent's f */
 				if (path.size() > 1 && !solutionEvaluator.doesLastActionAffectScoreOfAnySubsequentSolution(path)) {
 					assert fValues.containsKey(n.getParent()) : "The solution evaluator tells that the solution on the path has not significantly changed, but no f-value has been stored before for the parent. The path is: " + path;
-					UncertaintyFMeasure score = fValues.get(n.getParent());
+					V score = fValues.get(n.getParent());
 					fValues.put(n, score);
 					return score;
 				}
@@ -78,12 +79,12 @@ public class UncertaintyRandomCompletionEvaluator<T> extends RandomCompletionEva
 
 					boolean interrupted = false;
 					if (pathWhoseCompletionSubsumesCurrentPath == null) {
-						UncertaintyFMeasure best = null;
+						V best = null;
 						List<T> bestCompletion = null;
 						int i = 0;
 						int j = 0;
 						final int maxSamples = samples * 20;
-						List<UncertaintyFMeasure> evaluations = new ArrayList<>();
+						List<V> evaluations = new ArrayList<>();
 						for (; i < samples; i++) {
 							
 							if (Thread.interrupted()) {
@@ -129,7 +130,8 @@ public class UncertaintyRandomCompletionEvaluator<T> extends RandomCompletionEva
 							/* now evaluate this solution */
 							j++;
 							try {
-								UncertaintyFMeasure val = getUncertainFValueOfSolutionPath(n, completedPath, false, evaluations);
+								V val = getFValueOfSolutionPath(completedPath);
+								uncertainty = this.uncertaintyCalculation.calculateUncertainty(n, completedPath, evaluations);
 								if (val != null) {
 									evaluations.add(val);
 									if (best == null || val.compareTo(best) < 0) {
@@ -171,12 +173,12 @@ public class UncertaintyRandomCompletionEvaluator<T> extends RandomCompletionEva
 						completions.put(path, completions.get(pathWhoseCompletionSubsumesCurrentPath));
 					}
 				}
-				fValues.put(n, getUncertainFValueOfSolutionPath(n, completions.get(path), false, null));
+				fValues.put(n, getFValueOfSolutionPath(this.completions.get(path)));
 			}
 
 			/* the node is a goal node */
 			else {
-				UncertaintyFMeasure score = getUncertainFValueOfSolutionPath(n, path, true, null);
+				V score = getFValueOfSolutionPath(path);
 				if (score == null) {
 					logger.warn("No score was computed");
 					return null;
@@ -185,58 +187,14 @@ public class UncertaintyRandomCompletionEvaluator<T> extends RandomCompletionEva
 				if (!postedSolutions.contains(path)) {
 					logger.error("Found a goal node whose solution has not been posted before!");
 				}
+				uncertainty = 0.0d;
 			}
+
+			n.setAnnotation("uncertainty", uncertainty);
 		}
-		UncertaintyFMeasure f = fValues.get(n);
+		V f = fValues.get(n);
 		logger.info("Returning f-value: {}", f);
 		return f;
-	}
-
-	@SuppressWarnings("unchecked")
-	private UncertaintyFMeasure getUncertainFValueOfSolutionPath(Node<T, ?> n, List<T> path, boolean readchedGoal, List<UncertaintyFMeasure> simulationEvaluations) throws Exception {
-		boolean knownPath = scoresOfSolutionPaths.containsKey(path);
-		if (!knownPath) {
-			if (unsuccessfulPaths.contains(path)) {
-				logger.info("Associated path was evaluated unsuccessfully in a previous run; returning NULL: {}", path);
-				return null;
-			}
-			logger.info("Associated plan is new. Compute f-value for complete path {}", path);
-
-			long start = System.currentTimeMillis();
-			UncertaintyFMeasure val = null;
-			try {
-				UncertaintyFMeasure score = solutionEvaluator.evaluateSolution(path);
-				if (readchedGoal) {
-					val = new UncertaintyFMeasure(score.getfValue(), 0.0d);
-				} else {
-					val = new UncertaintyFMeasure(score.getfValue(), this.uncertaintyCalculation.calculateUncertainty((Node<T, UncertaintyFMeasure>) n, path, simulationEvaluations));
-				}
-			} catch (Exception e) {
-				unsuccessfulPaths.add(path);
-				throw e;
-			}
-			
-			long duration = System.currentTimeMillis() - start;
-			logger.info("Result: {}, Size: {}", val, scoresOfSolutionPaths.size());
-
-			scoresOfSolutionPaths.put(path, val);
-			timesToComputeEvaluations.put(path, (int) duration);
-			postSolution(path);
-		} else {
-			logger.info("Associated plan is known. Reading score from cache.");
-			if (logger.isTraceEnabled()) {
-				for (List<T> existingPath : scoresOfSolutionPaths.keySet()) {
-					if (existingPath.equals(path)) {
-						logger.trace("The following plans appear equal:\n\t{}\n\t{}", existingPath, path);
-					}
-				}
-			}
-			if (!postedSolutions.contains(path))
-				throw new IllegalStateException("Reading cached score of a plan whose path has not been posted as a solution! Are there several paths to a plan?");
-		}
-		UncertaintyFMeasure score = scoresOfSolutionPaths.get(path);
-		logger.info("Determined value {} for path {}.", score, path);
-		return score;
 	}
 
 }

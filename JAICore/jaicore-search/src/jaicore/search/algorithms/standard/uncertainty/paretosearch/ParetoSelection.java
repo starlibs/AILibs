@@ -3,14 +3,12 @@ package jaicore.search.algorithms.standard.uncertainty.paretosearch;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.PriorityBlockingQueue;
-
-import jaicore.search.algorithms.standard.uncertainty.UncertaintyFMeasure;
 import jaicore.search.structure.core.Node;
 import jaicore.search.structure.core.OpenCollection;
 
-public class ParetoSelection <N> implements OpenCollection<Node<N, UncertaintyFMeasure>> {
+public class ParetoSelection <T, V extends Comparable<V>> implements OpenCollection<Node<T, V>> {
 	
-	private PriorityBlockingQueue<Node<N, UncertaintyFMeasure>> open;
+	private PriorityBlockingQueue<Node<T, V>> open;
 	boolean visualize;
 	ParetoFrontVisualizer visualizer;
 	
@@ -24,20 +22,22 @@ public class ParetoSelection <N> implements OpenCollection<Node<N, UncertaintyFM
 	}
 	
 	@Override
-	public boolean add(Node<N, UncertaintyFMeasure> n) {
+	public boolean add(Node<T, V> n) {
 		if (visualize) {
-			UncertaintyFMeasure measure = n.getInternalLabel();
-			visualizer.update(measure);
+			if (n.getInternalLabel() instanceof Double) {
+				visualizer.update((Double)n.getInternalLabel(), (Double) n.getAnnotation("uncertainty"));
+			}
 		}
 		return open.add(n);
 	}
 
 	@Override
-	public boolean addAll(Collection<? extends Node<N, UncertaintyFMeasure>> c) {
+	public boolean addAll(Collection<? extends Node<T, V>> c) {
 		if (visualize) {
-			for(Node<N, UncertaintyFMeasure> n: c) {
-				UncertaintyFMeasure measure = n.getInternalLabel();
-				visualizer.update(measure);
+			for(Node<T, V> n: c) {
+				if (n.getInternalLabel() instanceof Double) {
+					visualizer.update((Double)n.getInternalLabel(), (Double) n.getAnnotation("uncertainty"));
+				}
 			}
 		}
 		return open.addAll(c);
@@ -64,7 +64,7 @@ public class ParetoSelection <N> implements OpenCollection<Node<N, UncertaintyFM
 	}
 
 	@Override
-	public Iterator<Node<N, UncertaintyFMeasure>> iterator() {
+	public Iterator<Node<T, V>> iterator() {
 		return open.iterator();
 	}
 
@@ -89,12 +89,12 @@ public class ParetoSelection <N> implements OpenCollection<Node<N, UncertaintyFM
 	}
 
 	@Override
-	public <T> T[] toArray(T[] a) {
+	public <X> X[] toArray(X[] a) {
 		return open.toArray(a);
 	}
 
 	@Override
-	public Node<N, UncertaintyFMeasure> peek() {
+	public Node<T, V> peek() {
 		return open.peek();
 	}
 

@@ -5,8 +5,8 @@ import java.util.List;
 import jaicore.search.structure.core.Node;
 
 @FunctionalInterface
-public interface IUncertaintySource <T>{
+public interface IUncertaintySource <T, V extends Comparable<V>>{
 
-	public double calculateUncertainty (Node<T, UncertaintyFMeasure> n, List<T> solutionPath, List<UncertaintyFMeasure> simulationEvaluations);
+	public double calculateUncertainty (Node<T, ?> n, List<T> solutionPath, List<V> simulationEvaluations);
 	
 }
