@@ -1,7 +1,7 @@
 package jaicore.search.algorithms.standard.bestfirst;
 
-import jaicore.basic.LoggerUtil;
 import jaicore.basic.sets.SetUtil.Pair;
+import jaicore.logging.LoggerUtil;
 import jaicore.search.algorithms.interfaces.IPathUnification;
 import jaicore.search.algorithms.interfaces.ISolutionEvaluator;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;

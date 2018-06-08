@@ -7,7 +7,7 @@ import de.upb.crc901.services.core.EnvironmentState;
 import de.upb.crc901.services.core.OntologicalTypeMarshallingSystem;
 import de.upb.crc901.services.core.ServiceCompositionResult;
 import de.upb.crc901.services.core.ServiceHandle;
-import jaicore.basic.LoggerUtil;
+import jaicore.logging.LoggerUtil;
 
 import java.io.IOException;
 import java.io.Serializable;
