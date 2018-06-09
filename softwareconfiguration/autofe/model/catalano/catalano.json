@@ -1,0 +1,15 @@
+{
+	"repository" : "Catalano image filters",
+	"include": ["./catalano-filters.json"],
+	"components" : [ {
+	  	    "name" : "pipeline",
+	  	    "providedInterface" : [ "FilterPipeline" ],
+	  	    "requiredInterface" : [
+	  	    	{
+	  	    		"id": "filter",
+	  	    		"name": "AbstractFilter"
+	  	    	}
+			],
+	    	"parameter" : [ ]
+	    }]
+}
