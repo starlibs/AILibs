@@ -2,9 +2,8 @@ package autofe.algorithm.hasco.filter.meta;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-
-import weka.core.Instances;
 
 // TODO: Integrate descriptive statistics
 @SuppressWarnings("serial")
@@ -16,8 +15,8 @@ public class FilterPipeline implements IFilter, Serializable {
 	}
 
 	@Override
-	public Instances applyFilter(final Instances inputData) {
-		Instances actInstances = inputData;
+	public Collection<?> applyFilter(final Collection<?> inputData) {
+		Collection<?> actInstances = inputData;
 		for (IFilter filter : this.filters) {
 			actInstances = filter.applyFilter(actInstances);
 		}
