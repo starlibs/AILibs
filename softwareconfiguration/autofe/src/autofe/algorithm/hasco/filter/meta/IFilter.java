@@ -1,7 +1,7 @@
 package autofe.algorithm.hasco.filter.meta;
 
-import weka.core.Instances;
+import java.util.Collection;
 
 public interface IFilter {
-	public Instances applyFilter(final Instances inputData);
+	public Collection<?> applyFilter(final Collection<?> inputData);
 }

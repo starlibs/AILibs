@@ -11,8 +11,9 @@ import java.util.Queue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import autofe.algorithm.hasco.evaluation.AbstractHASCOFEObjectEvaluator;
+import autofe.algorithm.hasco.filter.meta.FilterPipeline;
 import autofe.algorithm.hasco.filter.meta.FilterPipelineFactory;
-import autofe.algorithm.hasco.filter.meta.IFilter;
 import autofe.configuration.AbstractConfiguration;
 import hasco.core.HASCOFD;
 import hasco.core.Solution;
@@ -23,11 +24,11 @@ import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionSolu
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.search.algorithms.standard.core.INodeEvaluator;
 
-public class HASCOFE implements IObservableGraphAlgorithm<TFDNode, String>, ILoggingCustomizable {
+public class HASCOFE<T> implements IObservableGraphAlgorithm<TFDNode, String>, ILoggingCustomizable {
 
 	// Search relevant properties
 	private AbstractConfiguration config;
-	private HASCOFD<IFilter>.HASCOSolutionIterator hascoRun;
+	private HASCOFD<FilterPipeline>.HASCOSolutionIterator hascoRun;
 	private INodeEvaluator<TFDNode, Double> nodeEvaluator;
 
 	// Logging
@@ -44,22 +45,25 @@ public class HASCOFE implements IObservableGraphAlgorithm<TFDNode, String>, ILog
 		}
 	});
 
-	public static class HASCOFESolution extends Solution<ForwardDecompositionSolution, IFilter, Double> {
-		public HASCOFESolution(Solution<ForwardDecompositionSolution, IFilter, Double> solution) {
+	public static class HASCOFESolution extends Solution<ForwardDecompositionSolution, FilterPipeline, Double> {
+		public HASCOFESolution(Solution<ForwardDecompositionSolution, FilterPipeline, Double> solution) {
 			super(solution);
 		}
 	}
 
-	public HASCOFE(AbstractConfiguration config, INodeEvaluator<TFDNode, Double> nodeEvaluator) {
+	public HASCOFE(AbstractConfiguration config, INodeEvaluator<TFDNode, Double> nodeEvaluator,
+			final Collection<T> data, AbstractHASCOFEObjectEvaluator<T> benchmark) {
 		this.config = config;
 		this.nodeEvaluator = nodeEvaluator;
-		this.initializeHASCOSearch();
+		this.initializeHASCOSearch(data, benchmark);
 	}
 
-	private void initializeHASCOSearch() {
+	private void initializeHASCOSearch(final Collection<T> data, AbstractHASCOFEObjectEvaluator<T> benchmark) {
+		benchmark.setData(data);
 
-		// TODO: Insert benchmark (last parameter) for phase 2 if necessary
-		HASCOFD<IFilter> hasco = new HASCOFD<>(new FilterPipelineFactory(), this.nodeEvaluator, "FilterPipeline", null);
+		// TODO: Which node evaluator to be used?
+		HASCOFD<FilterPipeline> hasco = new HASCOFD<>(new FilterPipelineFactory(), this.nodeEvaluator, "FilterPipeline",
+				benchmark);
 		if (this.loggerName != null && this.loggerName.length() > 0)
 			hasco.setLoggerName(loggerName + ".hasco");
 
