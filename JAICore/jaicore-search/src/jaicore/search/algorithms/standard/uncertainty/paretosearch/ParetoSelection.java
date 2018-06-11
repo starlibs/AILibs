@@ -23,12 +23,18 @@ public class ParetoSelection <T, V extends Comparable<V>> implements OpenCollect
 	
 	@Override
 	public boolean add(Node<T, V> n) {
+		// Only add if the node isnt dominated
+		System.out.println("Add Node " + n);
 		if (visualize) {
 			if (n.getInternalLabel() instanceof Double) {
 				visualizer.update((Double)n.getInternalLabel(), (Double) n.getAnnotation("uncertainty"));
 			}
 		}
-		return open.add(n);
+		if (isDominated(n)) {
+			return false;
+		} else {
+			return open.add(n);
+		}
 	}
 
 	@Override
@@ -40,7 +46,36 @@ public class ParetoSelection <T, V extends Comparable<V>> implements OpenCollect
 				}
 			}
 		}
-		return open.addAll(c);
+		boolean changed = false; // have to return if the collection has changed as a result of this call
+		for (Node<T, V> n : c) {
+			if (!isDominated(n)) {
+				changed |= this.open.add(n);
+			}
+		}
+		return changed;
+	}
+
+	/**
+	 * Checks if a node is dominated by any other node contained in the pareto set.
+	 * Atm, this is harcoded for "f" and "uncertainty" of a node.
+	 * A node p is dominated iff there exist a point q in the pareto set, such that
+	 * (q.f <= p.f and q.uncertainty < p.uncertainty) or (q.f < p.f and q.uncertainty <= p.uncertainty)
+	 * @param p The node to check.
+	 */
+	private boolean isDominated(Node<T, V> p) {
+		for (Node<T,V> q : this.open) {
+			V q_f = (V) q.getAnnotation("f");
+			V p_f = (V) p.getAnnotation("f");
+
+			double q_uncertainty = (double) q.getAnnotation("uncertainty");
+			double p_uncertainty = (double) p.getAnnotation("uncertainty");
+
+			if (((q_f.compareTo(p_f) < 0) && (q_uncertainty <= p_uncertainty)) || ((q_f.compareTo(p_f) <= 0) && (q_uncertainty < p_uncertainty))) {
+				return true;
+			}
+
+		}
+		return false;
 	}
 
 	@Override
