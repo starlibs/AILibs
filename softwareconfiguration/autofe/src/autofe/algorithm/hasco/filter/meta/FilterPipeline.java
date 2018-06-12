@@ -22,4 +22,13 @@ public class FilterPipeline implements IFilter, Serializable {
 		}
 		return actInstances;
 	}
+
+	// TODO: Use StringBuilder
+	@Override
+	public String toString() {
+		String filterNames = "FilterPipeline: ";
+		for (IFilter filter : this.filters)
+			filterNames += filter.getClass().getSimpleName() + ", ";
+		return filterNames;
+	}
 }
