@@ -1,0 +1,15 @@
+{
+	"repository" : "AutoFE test space",
+	"include": ["./filters.json"],
+	"components" : [ {
+	  	    "name" : "pipeline",
+	  	    "providedInterface" : [ "FilterPipeline"],
+	  	    "requiredInterface" : [
+	  	    	{
+	  	    		"id": "filter",
+	  	    		"name": "filter"
+	  	    	}
+			],
+	    	"parameter" : [ ]
+	    }]
+}
