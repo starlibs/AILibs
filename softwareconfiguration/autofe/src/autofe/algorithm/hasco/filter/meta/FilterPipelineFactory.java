@@ -14,6 +14,7 @@ public class FilterPipelineFactory implements Factory<FilterPipeline> {
 
 	private static final Logger logger = LoggerFactory.getLogger(FilterPipelineFactory.class);
 
+	// TODO: Allow arbitrary long filter pipeline
 	@Override
 	public FilterPipeline getComponentInstantiation(final ComponentInstance groundComponent) throws Exception {
 
@@ -31,17 +32,21 @@ public class FilterPipelineFactory implements Factory<FilterPipeline> {
 
 		final List<IFilter> filters = new ArrayList<>();
 
-		// TODO: Parameter list
-		for (ComponentInstance actFilterCI : filterCI.getSatisfactionOfRequiredInterfaces().values()) {
-			IFilter tmpFilter = FilterUtils.getFilterForName(actFilterCI.getComponent().getName());
-			if (tmpFilter != null)
-				filters.add(tmpFilter);
-			else
-				logger.warn(
-						"Could not retrieve filter named '" + actFilterCI.getComponent().getName() + "'. Skipping...");
+		// // TODO: Parameter list (filters need an interface so set them)
+		// for (ComponentInstance actFilterCI :
+		// filterCI.getSatisfactionOfRequiredInterfaces().values()) {
+		// IFilter tmpFilter =
+		// FilterUtils.getFilterForName(actFilterCI.getComponent().getName());
+		// if (tmpFilter != null)
+		// filters.add(tmpFilter);
+		// else
+		// logger.warn(
+		// "Could not retrieve filter named '" + actFilterCI.getComponent().getName() +
+		// "'. Skipping...");
+		//
+		// }
 
-		}
-
+		filters.add(FilterUtils.getFilterForName(filterCI.getComponent().getName()));
 		return new FilterPipeline(filters);
 	}
 
