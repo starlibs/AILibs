@@ -1,0 +1,16 @@
+{
+  "repository" : "AutoFE filters",
+  "components" : [ {
+    "name" : "autofe.algorithm.hasco.filter.generic.AddConstantFilter",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "filter" ],
+    "parameter" : [ ],
+    "dependencies" : [ ]
+  }, {
+    "name" : "autofe.algorithm.hasco.filter.generic.IdentityFilter",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "filter" ],
+    "parameter" : [ ],
+    "dependencies" : [ ]
+  }]
+}
