@@ -19,10 +19,22 @@ public class FilterPipelineFactory implements Factory<FilterPipeline> {
 	public FilterPipeline getComponentInstantiation(final ComponentInstance groundComponent) throws Exception {
 
 		ComponentInstance filterCI = null;
+		ComponentInstance actCI = null;
+		List<ComponentInstance> filterComponents = new ArrayList<>();
 
 		switch (groundComponent.getComponent().getName()) {
 		case "pipeline":
-			filterCI = groundComponent.getSatisfactionOfRequiredInterfaces().get("filter");
+			//filterCI = groundComponent.getSatisfactionOfRequiredInterfaces().get("AbstractFilter");
+			actCI = groundComponent.getSatisfactionOfRequiredInterfaces().get("AbstractFilter");
+//			filterComponents.add(actCI);
+			
+			while(actCI.getComponent().getName().equals("FilterCombiner")) {
+				filterCI = actCI.getSatisfactionOfRequiredInterfaces().get("filter");
+				filterComponents.add(filterCI);
+				actCI = actCI.getSatisfactionOfRequiredInterfaces().get("AbstractFilter");
+			}
+			filterComponents.add(actCI);
+			
 			break;
 
 		default:
@@ -46,7 +58,10 @@ public class FilterPipelineFactory implements Factory<FilterPipeline> {
 		//
 		// }
 
-		filters.add(FilterUtils.getFilterForName(filterCI.getComponent().getName()));
+		for(ComponentInstance filter : filterComponents) {
+			filters.add(FilterUtils.getFilterForName(filter.getComponent().getName()));
+		}
+//		filters.add(FilterUtils.getFilterForName(filterCI.getComponent().getName()));
 		return new FilterPipeline(filters);
 	}
 
