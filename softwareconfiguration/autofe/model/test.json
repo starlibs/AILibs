@@ -6,10 +6,39 @@
 	  	    "providedInterface" : [ "FilterPipeline"],
 	  	    "requiredInterface" : [
 	  	    	{
-	  	    		"id": "AbstractFilter",
+	  	    		"id": "pipe",
 	  	    		"name": "AbstractFilter"
 	  	    	}
 			],
 	    	"parameter" : [ ]
-	    }]
+	    },{
+	  	    "name" : "autofe.MakeUnion",
+	  	    "providedInterface" : [ "AbstractFilter", "MakeUnion"],
+	  	    "requiredInterface" : [
+	  	    	{
+	  	    		"id": "filter1",
+	  	    		"name": "AbstractFilter"
+	  	    	},
+	  	    	{
+	  	    		"id": "filter2",
+	  	    		"name": "AbstractFilter"
+	  	    	}
+			],
+	    	"parameter" : [ ]
+	    }, {
+	  	    "name" : "autofe.MakeForward",
+	  	    "providedInterface" : [ "AbstractFilter", "MakeForward"],
+	  	    "requiredInterface" : [
+	  	    	{
+	  	    		"id": "filter",
+	  	    		"name": "AbstractFilter"
+	  	    	},
+	  	    	{
+	  	    		"id": "source",
+	  	    		"name": "AbstractFilter"
+	  	    	}
+			],
+	    	"parameter" : [ ]
+	    }
+	    ]
 }
