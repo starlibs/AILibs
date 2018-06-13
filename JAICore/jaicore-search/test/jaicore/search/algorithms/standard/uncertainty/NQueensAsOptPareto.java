@@ -125,6 +125,11 @@ public class NQueensAsOptPareto {
 		// assertEquals(foundCorrectSolutions, correctSolutions);
 	}
 	
+	/**
+	 * Calculates the ratio of attacked queens for a chess board where all queens were placed.
+	 * @param n Chessboard with all placed queens.
+	 * @return Ratio of attacked queens.
+	 */
 	private double scoreSolution (QueenNode n) {
 		double attackedQueens = 0.0d;
 		List<Integer> positions = n.getPositions();
