@@ -12,6 +12,7 @@ import org.openml.apiconnector.xml.DataSetDescription;
 import de.upb.crc901.mlplan.multiclass.DefaultPreorder;
 import de.upb.crc901.mlplan.multiclass.MLPlan;
 import jaicore.ml.WekaUtil;
+import jaicore.search.algorithms.standard.core.UncertaintyORGraphSearchFactory.OversearchAvoidanceMode;
 import weka.classifiers.Evaluation;
 import weka.core.Instances;
 
@@ -43,6 +44,7 @@ public class MLPlanExample {
 		mlplan.setTimeout(30);
 		mlplan.setPortionOfDataForPhase2(.3f);
 		mlplan.setNodeEvaluator(new DefaultPreorder());
+		mlplan.setOversearchAvoidanceMode(OversearchAvoidanceMode.TWO_PHASE_SELECTION);
 		mlplan.enableVisualization();
 		mlplan.buildClassifier(split.get(0));
 
