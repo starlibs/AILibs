@@ -85,6 +85,7 @@ public class UncertaintyRandomCompletionEvaluator<T, N extends Comparable<N>, V 
 						int j = 0;
 						final int maxSamples = samples * 20;
 						List<V> evaluations = new ArrayList<>();
+						List<List<T>> completedPaths = new ArrayList<>(); 
 						for (; i < samples; i++) {
 							
 							if (Thread.interrupted()) {
@@ -126,12 +127,11 @@ public class UncertaintyRandomCompletionEvaluator<T, N extends Comparable<N>, V 
 							logger.info("Found solution {}", pathCompletion);
 							pathCompletion.remove(0);
 							completedPath.addAll(pathCompletion);
-
+							completedPaths.add(completedPath);
 							/* now evaluate this solution */
 							j++;
 							try {
 								V val = getFValueOfSolutionPath(completedPath);
-								uncertainty = this.uncertaintyCalculation.calculateUncertainty(n, completedPath, evaluations);
 								if (val != null) {
 									evaluations.add(val);
 									if (best == null || val.compareTo(best) < 0) {
@@ -156,6 +156,7 @@ public class UncertaintyRandomCompletionEvaluator<T, N extends Comparable<N>, V 
 						
 						/* add number of samples to node  */
 						n.setAnnotation("fRPSamples", i);
+						uncertainty = this.uncertaintyCalculation.calculateUncertainty(n, completedPaths, evaluations);
 						
 						if (bestCompletion == null) {
 							if (interrupted)
