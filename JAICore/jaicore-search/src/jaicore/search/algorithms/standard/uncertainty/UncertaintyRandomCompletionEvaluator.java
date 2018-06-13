@@ -20,7 +20,7 @@ import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 @SuppressWarnings("serial")
-public class UncertaintyRandomCompletionEvaluator<T, N extends Comparable<N>, V extends Comparable<V>> extends RandomCompletionEvaluator<T, V> {
+public class UncertaintyRandomCompletionEvaluator<T, N, V extends Comparable<V>> extends RandomCompletionEvaluator<T, V> {
 
 	private static final Logger logger = LoggerFactory.getLogger(UncertaintyRandomCompletionEvaluator.class);
 	
