@@ -5,21 +5,29 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import jaicore.graph.Graph;
+import jaicore.graph.Tree;
+
 // TODO: Integrate descriptive statistics
 @SuppressWarnings("serial")
 public class FilterPipeline implements IFilter, Serializable {
-	private List<IFilter> filters = new ArrayList<>();
+//	private List<IFilter> filters = new ArrayList<>();
+	private Graph<IFilter> filters;
 
-	public FilterPipeline(final List<IFilter> filters) {
-		this.filters.addAll(filters);
+	public FilterPipeline(final Graph<IFilter> filters) {
+		this.filters = filters;
 	}
 
 	@Override
 	public Collection<?> applyFilter(final Collection<?> inputData) {
 		Collection<?> actInstances = inputData;
-		for (IFilter filter : this.filters) {
-			actInstances = filter.applyFilter(actInstances);
-		}
+		
+		// TODO: Implement filter application (traversing through graph)
+		
+//		for (IFilter filter : this.filters) {
+//			actInstances = filter.applyFilter(actInstances);
+//		}
+		
 		return actInstances;
 	}
 
@@ -27,7 +35,7 @@ public class FilterPipeline implements IFilter, Serializable {
 	@Override
 	public String toString() {
 		String filterNames = "FilterPipeline: ";
-		for (IFilter filter : this.filters)
+		for (IFilter filter : this.filters.getItems())
 			filterNames += filter.getClass().getSimpleName() + ", ";
 		return filterNames;
 	}

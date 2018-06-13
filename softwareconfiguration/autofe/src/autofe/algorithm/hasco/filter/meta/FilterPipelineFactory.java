@@ -1,7 +1,7 @@
 package autofe.algorithm.hasco.filter.meta;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedList;
+import java.util.Queue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,41 +9,84 @@ import org.slf4j.LoggerFactory;
 import autofe.util.FilterUtils;
 import hasco.model.ComponentInstance;
 import hasco.query.Factory;
+import jaicore.graph.Graph;
 
 public class FilterPipelineFactory implements Factory<FilterPipeline> {
+	
+	private static final String UNION_NAME = "autofe.MakeUnion";
+	private static final String FORWARD_NAME = "autofe.MakeForward";
 
 	private static final Logger logger = LoggerFactory.getLogger(FilterPipelineFactory.class);
 
-	// TODO: Allow arbitrary long filter pipeline
 	@Override
 	public FilterPipeline getComponentInstantiation(final ComponentInstance groundComponent) throws Exception {
 
-		ComponentInstance filterCI = null;
-		ComponentInstance actCI = null;
-		List<ComponentInstance> filterComponents = new ArrayList<>();
+		
+		Graph<IFilter> filterGraph = new Graph<>();
+		Queue<ComponentInstance> open = new LinkedList<>();
+		Queue<IFilter> openFilter = new LinkedList<>();
 
 		switch (groundComponent.getComponent().getName()) {
 		case "pipeline":
-			//filterCI = groundComponent.getSatisfactionOfRequiredInterfaces().get("AbstractFilter");
-			actCI = groundComponent.getSatisfactionOfRequiredInterfaces().get("AbstractFilter");
-//			filterComponents.add(actCI);
 			
-			while(actCI.getComponent().getName().equals("FilterCombiner")) {
-				filterCI = actCI.getSatisfactionOfRequiredInterfaces().get("filter");
-				filterComponents.add(filterCI);
-				actCI = actCI.getSatisfactionOfRequiredInterfaces().get("AbstractFilter");
+			ComponentInstance actCI = groundComponent.getSatisfactionOfRequiredInterfaces().get("pipe");
+			IFilter actCIFilter = FilterUtils.getFilterForName(actCI.getComponent().getName());
+			filterGraph.addItem(actCIFilter);
+			openFilter.offer(actCIFilter);
+			open.offer(actCI);
+			
+			// Apply breadth-first-search
+			while(!open.isEmpty()) {
+				actCI = open.poll();
+				actCIFilter = openFilter.poll();
+				
+				if(actCI == null) {
+					logger.warn("Found null component. Breaking...");
+					break;
+				}
+					
+				switch(actCI.getComponent().getName()) {
+				case UNION_NAME:
+					ComponentInstance filter1CI = actCI.getSatisfactionOfRequiredInterfaces().get("filter1");
+					IFilter filter1 = FilterUtils.getFilterForName(filter1CI.getComponent().getName());
+					ComponentInstance filter2CI = actCI.getSatisfactionOfRequiredInterfaces().get("filter2");
+					IFilter filter2 = FilterUtils.getFilterForName(filter2CI.getComponent().getName());
+					open.offer(filter1CI);
+					open.offer(filter2CI);
+					openFilter.offer(filter1);
+					openFilter.offer(filter2);
+					
+					// Update graph
+					filterGraph.addItem(filter1);
+					filterGraph.addItem(filter2);
+					filterGraph.addEdge(actCIFilter, filter1);
+					filterGraph.addEdge(actCIFilter, filter2);
+					
+					break;
+				case FORWARD_NAME:
+					ComponentInstance filterCI = actCI.getSatisfactionOfRequiredInterfaces().get("filter");
+					IFilter filter = FilterUtils.getFilterForName(filterCI.getComponent().getName());
+					ComponentInstance sourceCI = actCI.getSatisfactionOfRequiredInterfaces().get("source");
+					IFilter source = FilterUtils.getFilterForName(sourceCI.getComponent().getName());
+					open.offer(filterCI);
+					open.offer(sourceCI);
+					openFilter.offer(filter);
+					openFilter.offer(source);
+					
+					// Update graph
+					filterGraph.addItem(filter);
+					filterGraph.addItem(source);
+					filterGraph.addEdge(actCIFilter, filter);
+					filterGraph.addEdge(actCIFilter, source);
+					break;
+				default:
+					// Basic filter
+					break;
+				}
 			}
-			filterComponents.add(actCI);
-			
-			break;
-
-		default:
-			filterCI = groundComponent;
-			break;
 		}
-
-		final List<IFilter> filters = new ArrayList<>();
-
+			
+			
 		// // TODO: Parameter list (filters need an interface so set them)
 		// for (ComponentInstance actFilterCI :
 		// filterCI.getSatisfactionOfRequiredInterfaces().values()) {
@@ -57,12 +100,8 @@ public class FilterPipelineFactory implements Factory<FilterPipeline> {
 		// "'. Skipping...");
 		//
 		// }
-
-		for(ComponentInstance filter : filterComponents) {
-			filters.add(FilterUtils.getFilterForName(filter.getComponent().getName()));
-		}
-//		filters.add(FilterUtils.getFilterForName(filterCI.getComponent().getName()));
-		return new FilterPipeline(filters);
+	
+		return new FilterPipeline(filterGraph);
+	
 	}
-
 }
