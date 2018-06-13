@@ -6,8 +6,8 @@
 	  	    "providedInterface" : [ "FilterPipeline"],
 	  	    "requiredInterface" : [
 	  	    	{
-	  	    		"id": "filter",
-	  	    		"name": "filter"
+	  	    		"id": "AbstractFilter",
+	  	    		"name": "AbstractFilter"
 	  	    	}
 			],
 	    	"parameter" : [ ]

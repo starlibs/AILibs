@@ -93,6 +93,7 @@ public class HASCOFE<T> implements IObservableGraphAlgorithm<TFDNode, String>, I
 			this.hasco.addParamRefinementConfigurations(cl.getParamConfigs());
 		} catch (IOException e) {
 			logger.warn("Could not import configuration file. Using default components instead...");
+			e.printStackTrace();
 			final List<Component> components = getDefaultComponents();
 			this.hasco.addComponents(components);
 		}
