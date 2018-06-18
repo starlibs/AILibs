@@ -1,24 +1,24 @@
-package jaicore.graphvisualizer.gui;
+package jaicore.graphvisualizer.gui.dataVisualizer;
 
-import jaicore.graphvisualizer.INodeDataVisualizer;
+import com.google.common.eventbus.Subscribe;
+import jaicore.graphvisualizer.events.add.HTMLEvent;
 import javafx.embed.swing.SwingNode;
 import javafx.scene.Node;
 
 import javax.swing.*;
 
-public class TooltipVisualizer implements INodeDataVisualizer {
-
+public class HTMLVisualizer implements IVisualizer {
 
     SwingNode node;
     JLabel label;
 
-    public TooltipVisualizer(){
-        node = new SwingNode();
+    public HTMLVisualizer(){
         label = new JLabel();
         label.setText("<html></html>");
-
-        createSwingNode(node);
+        node = new SwingNode();
+        createSwingNode( node);
     }
+
 
     private void createSwingNode(SwingNode node){
         JScrollPane pane = new JScrollPane();
@@ -28,25 +28,20 @@ public class TooltipVisualizer implements INodeDataVisualizer {
         });
     }
 
-    public String getHTML(String data){
-        StringBuilder sb = new StringBuilder();
-//						sb.append("<html><div style='padding: 5px; background: #ffffcc; border: 1px solid black;'>");
-        sb.append("<html><div style='padding: 5px;'>");
-        sb.append(data);
-        sb.append("</div></html>");
-
-        return sb.toString();
-    }
-
-
-    public void update(String data){
-        label.setText(getHTML(data));
-    }
-
-
-    public Node getVisualization(){
+    @Override
+    public Node getVisualization() {
         return node;
     }
 
 
+    @Subscribe
+    public void receiveData(HTMLEvent html){
+        StringBuilder sb = new StringBuilder();
+//						sb.append("<html><div style='padding: 5px; background: #ffffcc; border: 1px solid black;'>");
+        sb.append("<html><div style='padding: 5px;'>");
+        sb.append(html.getText());
+        sb.append("</div></html>");
+
+        label.setText(sb.toString());
+    }
 }

@@ -17,7 +17,6 @@
                     <Button onAction="#stop" text="stop" />
                     <Button onAction="#save" text="save" />
                     <Button onAction="#load" text="load" />
-                    <Button onAction="#test" text="test"/>
                 </ToolBar>
             </top>
             <bottom>

@@ -1,6 +1,6 @@
 package jaicore.graphvisualizer.events;
 
-public class NodeParentSwitchEvent<T> {
+public class NodeParentSwitchEvent<T> implements VisuEvent {
 	private final T node;
 	private final T oldParent;
 	private final T newParent;
