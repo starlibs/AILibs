@@ -1,6 +1,28 @@
 package jaicore.graphvisualizer.gui;
 
-import jaicore.graphvisualizer.*;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+import javax.swing.SwingUtilities;
+
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
+import com.google.common.reflect.ClassPath;
+
+import jaicore.graphvisualizer.NodeListener;
+import jaicore.graphvisualizer.SearchVisualizationPanel;
+import jaicore.graphvisualizer.events.add.AddSupplierEvent;
+import jaicore.graphvisualizer.events.add.InfoEvent;
+import jaicore.graphvisualizer.events.controlEvents.FileEvent;
+import jaicore.graphvisualizer.events.controlEvents.NodePushed;
+import jaicore.graphvisualizer.events.controlEvents.ResetEvent;
+import jaicore.graphvisualizer.events.controlEvents.StepEvent;
+import jaicore.graphvisualizer.gui.dataSupplier.ISupplier;
+import jaicore.graphvisualizer.gui.dataVisualizer.IVisualizer;
 import javafx.embed.swing.SwingNode;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -12,16 +34,9 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.FileChooser;
 import javafx.util.StringConverter;
 
-import javax.swing.*;
-import java.io.File;
-import java.net.URL;
-import java.util.List;
-import java.util.ResourceBundle;
-import java.util.concurrent.TimeUnit;
-
 public class FXController implements Initializable, NodeListener {
 
-
+    //FXMl objects
     @FXML
     public Slider speedSlider;
     @FXML
@@ -31,35 +46,30 @@ public class FXController implements Initializable, NodeListener {
     @FXML
     public TabPane tabPane;
 
-    //recorder on which the controller works
-    private Recorder recorder;
-    private Thread playThread;
-    private Thread jumpThread;
-
-
+    //control variables
     private int index;
+    private int maxIndex;
     private long sleepTime;
-    private List<Long> eventTimes;
 
-//
-//    JLabel tip;
+    //EventBus
+    private EventBus controlEventBus;
+
+    //Thread for playing
+    private Thread playThread;
+
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
 
-        this.index =0;
+        this.index = 0;
+        this.maxIndex = 0;
         this.sleepTime = 50;
 
-        recorder = new Recorder();
-        this.eventTimes = recorder.getReceiveTimes();
+        this.controlEventBus = new EventBus();
 
-        initializeVisuPanel(visuPanel);
+        initializeVisualization(visuPanel);
 
-//        tip = new JLabel();
-//        tip.setText("<html></html>");
-//        initializeToolTip(toolTip);
-
-        /*
+          /*
         if the slider for replay-speed is released, wait (200 ms - the value of the slider)
         the slider has a range from 0 to 200
         */
@@ -79,249 +89,212 @@ public class FXController implements Initializable, NodeListener {
             }
         });
 
-        timeline.setOnMouseReleased((MouseEvent event)-> {
-            double v = timeline.getValue();
-            int i = 0;
-            while (eventTimes.get(i) < v)
-                i++;
-            jumpTo(i);
+        timeline.setOnMouseReleased((MouseEvent event)->{
+            int nIndex = (int) timeline.getValue();
+            jumpTo(nIndex);
         });
-
-        updateTimeLine();
 
     }
 
-    /**
-     * Creates the SearchVisualizationPanel and binds it to visuPanel in the GUI
-     * @param node
-     */
-    private void initializeVisuPanel(SwingNode node){
+    private void initializeVisualization(SwingNode swingNode) {
         SearchVisualizationPanel visu = new SearchVisualizationPanel();
         visu.addNodeListener(this);
-        this.recorder.registerListener(visu);
-//        visu.setTooltipGenerator(this.recorder.getTooltipGenerator());
-        SwingUtilities.invokeLater(()->node.setContent(visu));
 
-
+        SwingUtilities.invokeLater(()->swingNode.setContent(visu));
     }
 
-    /**
-     * Configures the timeline according to the current recorder
-     */
-    public void updateTimeLine(){
-        if(eventTimes.isEmpty())
-            return;
-
-        timeline.setMax(eventTimes.get(eventTimes.size()-1));
-
-        if(!eventTimes.isEmpty()) {
-            long tickUnit = eventTimes.get(eventTimes.size()-1)/10 ;
-            if(tickUnit > 0)
-                timeline.setMajorTickUnit(tickUnit);
-        }
-
-        timeline.setMinorTickCount(5);
-        timeline.setValue(index);
-
-        /*create a timeline label*/
-        timeline.setLabelFormatter(new StringConverter<Double>() {
-            @Override
-            public String toString(Double aDouble) {
-                long value= aDouble.longValue();
-
-                long micro = value % 1000000;
-                value = value / 1000000;
-                long seconds = value %60;
-                long minutes = value / 60;
-                value = value /60;
-                long hours = value /60;
-
-                StringBuilder sb = new StringBuilder();
-
-                if(hours != 0)
-                    sb.append(hours + "h:");
-                if(minutes != 0)
-                    sb.append(minutes + "m:");
-                if(seconds <10)
-                    sb.append(0);
-                sb.append(seconds +"s:");
-                sb.append(micro);
-                return sb.toString();
-           }
-
-            @Override
-            public Double fromString(String s) {
-                return null;
-            }
-        });
-    }
-//
-//    private void initializeToolTip(SwingNode toolTip){
-//        JScrollPane panel = new JScrollPane();
-//        panel.setViewportView(tip);
-//        SwingUtilities.invokeLater(()->toolTip.setContent(panel));
-//    }
-
-    public void setRecorder(Recorder recorder){
-        if(visuPanel.getContent() != null)
-            this.recorder.unregisterListener(visuPanel.getContent());
-
-        this.recorder = recorder;
-        this.eventTimes = recorder.getReceiveTimes();
-        this.initializeVisuPanel(visuPanel);
-        updateTimeLine();
-    }
-
-    /**
-     * Starts the playback of the events. For this an own thread is created, in order to not freeze the whole GUI.
-     * The playback can be stopped by pressing the stop button.
-     */
     @FXML
     public void play(ActionEvent actionEvent) {
-        System.out.println("Play");
-//        Runnable runPlay =()->{
-//            while(this.index < this.eventTimes.size()-1){
-//                try {
-//                    step(null);
-//                    TimeUnit.MILLISECONDS.sleep(sleepTime);
-//                } catch (InterruptedException e) {
-//
-//                }
-//            }
-//        };
-//
-//        playThread = new Thread(runPlay);
-//        playThread.start();
-
-        Runnable runPlay = () ->{
+        Runnable run = ()->{
             try{
-                while(index < this.eventTimes.size() && index >= 0){
-                    recorder.step();
+                while (index < maxIndex && index >= 0){
+                    this.step(null);
                     TimeUnit.MILLISECONDS.sleep(sleepTime);
-                    timeline.setValue(eventTimes.get(index));
-                    index ++;
                 }
-                /* index correction */
-                if(index >= 0)
-                    index --;
+
             }
-            catch (InterruptedException e){}
+            catch(InterruptedException e){
+//                e.printStackTrace();
+            }
         };
-        playThread = new Thread(runPlay);
+
+        playThread = new Thread(run);
         playThread.start();
+
     }
 
     /**
-     * Takes a single step, if the step-Button is pressed.
+     * Posts a stepEvent which goes one step forward
      * @param actionEvent
-     *      Button press event on the Button step
      */
     @FXML
     public void step(ActionEvent actionEvent) {
-        if(index >= eventTimes.size()-1)
+        if(index == maxIndex)
             return;
-        recorder.step();
-        index ++;
-        timeline.setValue(eventTimes.get(index));
+        this.controlEventBus.post(new StepEvent(true, 1));
+        this.index ++;
+        this.timeline.setValue(index);
     }
 
-    /**
-     * Takes one step backewards, if the button is pressed
-     * @param actionEvent
-     *      The event fired, by pressing the back button
-     */
     @FXML
     public void back(ActionEvent actionEvent) {
         if(index == 0)
             return;
-        if(index ==1)
-            reset(null);
-        else{
-            index --;
-            recorder.back();
-            timeline.setValue(eventTimes.get(index));
+        if(index == 1) {
+            this.reset(null);
+            return;
         }
+        this.controlEventBus.post(new StepEvent(false, 1));
+        this.index --;
+        timeline.setValue(index);
     }
 
-    /**
-     * Reset the gui
-     * @param actionEvent
-     *      The event fired, by pressing the reset button
-     */
     @FXML
     public void reset(ActionEvent actionEvent) {
+        this.controlEventBus.post(new ResetEvent());
+        this.index = 0;
+        SearchVisualizationPanel panel = (SearchVisualizationPanel) visuPanel.getContent();
+        panel.reset();
+        timeline.setValue(index);
+    }
+
+    /**
+     * Stops a replay
+     * @param actionEvent
+     */
+    @FXML
+    public void stop(ActionEvent actionEvent) {
         if(playThread != null)
             playThread.interrupt();
-
-//        updateTimeLine();
-//        initializeVisuPanel(this.visuPanel);
-        recorder.reset();
-        index = 0;
-        timeline.setValue(index);
-        SearchVisualizationPanel vPanel = (SearchVisualizationPanel) visuPanel.getContent();
-        vPanel.reset();
     }
 
-    /**
-     * stops all running threads
-     * @param actionEvent
-     */
-    public void stop(ActionEvent actionEvent) {
-        if(playThread!= null)
-            playThread.interrupt();
-
-        if(jumpThread != null)
-            jumpThread.interrupt();
-    }
-
-    /**
-     * jumps to a specifc point on the timeline
-     * @param value
-     */
-    private void jumpTo(int value){
-        Runnable run = ()-> {
-            try {
-                while (value < index)
-                    this.back(null);
-                while (value > index)
-                    this.step(null);
-                TimeUnit.MILLISECONDS.sleep(0);
-            }
-            catch(InterruptedException e){
-            }
-        };
-        jumpThread = new Thread(run);
-        jumpThread.start();
-    }
-
-    /**
-     * stores a search in a file
-     * @param actionEvent
-     */
+    @FXML
     public void save(ActionEvent actionEvent) {
         FileChooser chooser = new FileChooser();
         chooser.setTitle("Choose Event-File");
-//        recorder.saveToFile(chooser.showSaveDialog(null));
+//        File file = chooser.showSaveDialog(null);
 
-       File file = new File("/home/jkoepe/Documents/Test.txt");
-       recorder.saveToFile(file);
+        File file = new File("/home/jkoepe/Documents/Test.txt");
+
+
+        this.controlEventBus.post(new FileEvent(false, file));
+
     }
 
-    /**
-     * loads a recorded search
-     * @param actionEvent
-     */
+    @FXML
     public void load(ActionEvent actionEvent) {
-        this.tabPane.getTabs().clear();
         FileChooser chooser = new FileChooser();
-        chooser.setTitle("Open Event-File");
-//        recorder.loadFromFile(chooser.showOpenDialog(null));
+        chooser.setTitle("Choose Event-File");
+//        File file = chooser.showOpenDialog(null);
+
         File file = new File("/home/jkoepe/Documents/Test.txt");
-        recorder.loadFromFile(file);
 
-        initializeVisuPanel(visuPanel);
+        this.controlEventBus.post(new FileEvent(true, file));
 
-        updateTimeLine();
+    }
+
+    private void jumpTo(int newIndex){
+        if(newIndex == 0) {
+            this.reset(null);
+            return;
+        }
+        if(newIndex > index)
+            this.controlEventBus.post(new StepEvent(true, newIndex-index));
+        else
+            this.controlEventBus.post(new StepEvent(false, index-newIndex));
+        index = newIndex;
+        timeline.setValue(index);
+    }
+
+
+    public void registerListener(Recorder listener){
+        //TODO
+        this.controlEventBus.register(listener);
+        SearchVisualizationPanel visu = (SearchVisualizationPanel) visuPanel.getContent();
+        listener.registerListener(visu);
+        listener.registerInfoListener(this);
+
+
+    }
+
+
+    private void updateTimeline(){
+        if(maxIndex == 0)
+            return;
+
+        timeline.setMax(maxIndex);
+    }
+
+
+    public void registerSupplier(ISupplier supplier){
+
+//       IVisualizer visualizer = (IVisualizer) findClassByName(supplier.getVisualizerName());
+//
+
+//        if(supplier instanceof TooltipSupplier){
+//           IVisualizer visualizer= new TooltipVisualizer();
+//           supplier.registerListener(visualizer);
+//
+//           this.controlEventBus.register(supplier);
+//           this.controlEventBus.register(visualizer);
+//
+//
+//           Tab tab = new Tab();
+//           tab.setContent(visualizer.getVisualization());
+//    //       tab.setText(supplier.getVisualizerTitle());
+//           this.tabPane.getTabs().add(tab);
+//        }
+
+        System.out.println(supplier.getClass().getSimpleName());
+        try {
+            ClassPath path = ClassPath.from(ClassLoader.getSystemClassLoader());
+            Set set = path.getAllClasses();
+            set.stream().forEach(cls->{
+                if(cls instanceof ClassPath.ClassInfo){
+                    if(((ClassPath.ClassInfo) cls).getName().contains(".dataVisualizer.")){
+                       IVisualizer v = (IVisualizer) findClassByName(((ClassPath.ClassInfo) cls).getName());
+                       if(v!= null){
+                            if(v.getSupplier() .equals(supplier.getClass().getSimpleName())){
+                                supplier.registerListener(v);
+                                this.controlEventBus.register(supplier);
+                               this.controlEventBus.register(v);
+
+
+                               Tab tab = new Tab();
+                               tab.setContent(v.getVisualization());
+                               tab.setText(v.getTitle());
+                               this.tabPane.getTabs().add(tab);
+
+                            }
+                       }
+                    }
+                }
+            });
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+
+    private Object findClassByName(String name){
+        try{
+            Class<?> cls = Class.forName(name);
+            if(cls.isInterface())
+                return null;
+            return cls.newInstance();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+            return null;
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+            return null;
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     @Override
@@ -336,28 +309,26 @@ public class FXController implements Initializable, NodeListener {
 
     @Override
     public void buttonReleased(Object node) {
+
     }
 
     @Override
     public void buttonPushed(Object node) {
-        this.recorder.update(node);
+       this.controlEventBus.post(new NodePushed(node));
+    }
+
+
+    @Subscribe
+    public void receiveInfoEvent(InfoEvent event){
+        this.maxIndex = event.getMaxIndex();
+        //TODO
+        updateTimeline();
 
     }
 
-    public void updateEventTimes(List<Long> newEventTimes){
-        this.eventTimes = newEventTimes;
-        updateTimeLine();
+    @Subscribe
+    public void receiveAddSupplierEvent(AddSupplierEvent event){
+        ISupplier supplier = event.getSupplier();
+        this.registerSupplier(supplier);
     }
-
-    public void addTab(IDataVisualizer visualizer, String name){
-        Tab tab = new Tab();
-        tab.setText(name);
-        tab.setContent(visualizer.getVisualization());
-        this.tabPane.getTabs().add(tab);
-    }
-
-    public void test(ActionEvent actionEvent) {
-       System.out.println(tabPane.getSelectionModel().getSelectedItem().getText());
-    }
-
 }

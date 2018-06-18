@@ -4,7 +4,7 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 
 public abstract class GuiApplication extends Application {
-    protected FXGui gui;
+    FXGui gui;
 
 
     @Override
@@ -13,5 +13,5 @@ public abstract class GuiApplication extends Application {
         startGui();
 
     }
-    public abstract void startGui();
+    abstract void startGui();
 }
