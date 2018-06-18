@@ -9,63 +9,86 @@ import java.util.Map.Entry;
 
 import jaicore.ml.core.Interval;
 import weka.classifiers.trees.RandomTree;
-import weka.core.Utils;
 
 /**
  * Extension of a classic RandomTree to predict intervals.
+ * 
  * @author mirkoj
  *
  */
-public class ExtendedRandomTree extends RandomTree{
-	
-	
-	
-	public void predictInterval(Interval[] queriedInterval) {
+public class ExtendedRandomTree extends RandomTree {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -467555221387281335L;
+
+	public Interval predictInterval(Interval[] queriedInterval) {
 		// the stack of elements that still have to be processed.
 		Deque<Entry<Interval[], Tree>> stack = new ArrayDeque<>();
 		// initially, the root and the queried interval
-		stack.push(new AbstractMap.SimpleEntry<Interval[], Tree>(queriedInterval, m_Tree));
-		
-		//the list of all leaf values
+		stack.push(getEntry(queriedInterval, m_Tree));
+
+		// the list of all leaf values
 		ArrayList<Double> list = new ArrayList<>();
-		
-		while(stack.peek() != null) {
-			//pick the next node to process
+
+		while (stack.peek() != null) {
+			// pick the next node to process
 			Entry<Interval[], Tree> toProcess = stack.pop();
 			Tree nextTree = toProcess.getValue();
 			double threshold = nextTree.getSplitPoint();
 			int attribute = nextTree.getAttribute();
 			Tree[] children = nextTree.getSuccessors();
-			double [] classDistribution = nextTree.getClassDistribution();
+			double[] classDistribution = nextTree.getClassDistribution();
+			Interval intervalForAttribute = queriedInterval[attribute];
+			// process node
 			if (attribute == -1) {
 				// node is a leaf
-		        if (classDistribution == null) {
-		            if (this.getAllowUnclassifiedInstances()) {
-		              double[] result = new double[m_Info.numClasses()];
-		              if (this.m_Info.classAttribute().isNumeric()) {
-		                result[0] = Utils.missingValue();
-		              }
-		              //
-		            } else {
-		              //return null;
-		            
-		          }
-			}
+				// for now, assume that we have regression!
+				list.add(classDistribution[0]);
+			} else {
+				// no leaf node...
+				Tree leftChild = children[0];
+				Tree rightChild = children[1];
+				// traverse the tree
+				if (intervalForAttribute.getLowerBound() <= threshold) {
+					if (threshold <= intervalForAttribute.getUpperBound()) {
+						Interval[] newInterval = substituteInterval(queriedInterval,
+								new Interval(intervalForAttribute.getLowerBound(), threshold), attribute);
+						stack.push(getEntry(newInterval, leftChild));
+					} else {
+						stack.push(getEntry(queriedInterval, leftChild));
+					}
+				}
+				if (intervalForAttribute.getUpperBound() > threshold) {
+					if (intervalForAttribute.getLowerBound() <= threshold) {
+						Interval[] newInterval = substituteInterval(queriedInterval,
+								new Interval(threshold, intervalForAttribute.getUpperBound()), attribute);
+						stack.push(getEntry(newInterval, rightChild));
+					} else {
+						stack.push(getEntry(queriedInterval, rightChild));
+					}
+				}
 			}
 		}
+		return combineInterval(list);
 	}
-	
-	public void get() {
-		Deque<Tree> toProcess = new ArrayDeque<>();
-		toProcess.addFirst(m_Tree);
-		while (toProcess.peek() != null) {
-			Tree node = toProcess.pop();
-			if (node.getAttribute() == -1) {
-				toProcess.addAll(Arrays.asList(node.getSuccessors()));
-			}else {
-				System.out.println(Arrays.toString(node.getClassDistribution()));
-			}
-		}
-		m_Tree.getDistribution();
+
+	private Interval combineInterval(ArrayList<Double> list) {
+		double min = list.stream().min(Double::compareTo)
+				.orElseThrow(() -> new IllegalStateException("Couldn't find minimum?!"));
+		double max = list.stream().max(Double::compareTo)
+				.orElseThrow(() -> new IllegalStateException("Couldn't find maximum?!"));
+		return new Interval(min, max);
+	}
+
+	private Interval[] substituteInterval(Interval[] original, Interval toSubstitute, int index) {
+		Interval[] copy = Arrays.copyOf(original, original.length);
+		copy[index] = toSubstitute;
+		return copy;
+	}
+
+	private Entry<Interval[], Tree> getEntry(Interval[] interval, Tree tree) {
+		return new AbstractMap.SimpleEntry<>(interval, tree);
 	}
 }

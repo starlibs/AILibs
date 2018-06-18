@@ -24,8 +24,6 @@ public class ExtendedRandomTreeTest {
 			ExtendedRandomTree tree = new ExtendedRandomTree();
 			tree.buildClassifier(data);
 			
-			tree.toString();
-			tree.get();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

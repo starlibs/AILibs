@@ -6,21 +6,21 @@ package jaicore.ml.core;
  *
  */
 public class Interval {
-	private int lowerBound;
+	private double lowerBound;
 
-	private int upperBound;
+	private double upperBound;
 
-	public Interval(int lowerBound, int upperBound) {
+	public Interval(double lowerBound, double upperBound) {
 		super();
 		this.lowerBound = lowerBound;
 		this.upperBound = upperBound;
 	}
 
-	public int getLowerBound() {
+	public double getLowerBound() {
 		return lowerBound;
 	}
 
-	public int getUpperBound() {
+	public double getUpperBound() {
 		return upperBound;
 	}
 }
