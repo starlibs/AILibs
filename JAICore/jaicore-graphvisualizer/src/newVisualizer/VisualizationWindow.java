@@ -25,10 +25,9 @@ public class VisualizationWindow<T> {
 			
 			Platform.runLater(()->{
 				GuiApp app = new GuiApp();
-				System.out.println("Hier bin ich ");
-				for (int i = 0; i <3 ; i ++) {
-					app.open(i);
-				}
+
+					app.open("Test");
+
 			});
 			
 			
