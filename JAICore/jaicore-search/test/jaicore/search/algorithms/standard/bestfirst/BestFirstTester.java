@@ -17,6 +17,7 @@ import jaicore.search.structure.core.NodeType;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
+import newVisualizer.VisualizationWindow;
 
 public class BestFirstTester {
 
@@ -67,7 +68,10 @@ public class BestFirstTester {
 		};
 		
 		BestFirst<TestNode,String> bf = new BestFirst<>(gen, n -> (double)Math.round(Math.random() * 1000));
-		new SimpleGraphVisualizationWindow<Node<TestNode,Double>>(bf).getPanel().setTooltipGenerator(n -> String.valueOf(n.getInternalLabel()));
+//		new SimpleGraphVisualizationWindow<Node<TestNode,Double>>(bf).getPanel().setTooltipGenerator(n -> String.valueOf(n.getInternalLabel()));
+		
+		new VisualizationWindow<Node<TestNode,Double>>(bf);
+		
 		
 		/* find solution */
 		PerformanceLogger.logStart("search");
