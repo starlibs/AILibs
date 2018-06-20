@@ -460,10 +460,10 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 		if (beforeSelection()) {
 
 			Node<T, V> nodeToExpand = open.peek();
-			assert parentDiscarding == ParentDiscarding.ALL || !expanded.contains(nodeToExpand.getPoint()) : "Node " + nodeToExpand.getString()
-					+ " has been selected for the second time for expansion.";
 			if (nodeToExpand == null)
 				return;
+			assert parentDiscarding == ParentDiscarding.ALL || !expanded.contains(nodeToExpand.getPoint()) : "Node " + nodeToExpand.getString()
+					+ " has been selected for the second time for expansion.";
 			afterSelection(nodeToExpand);
 			step(nodeToExpand);
 		}
