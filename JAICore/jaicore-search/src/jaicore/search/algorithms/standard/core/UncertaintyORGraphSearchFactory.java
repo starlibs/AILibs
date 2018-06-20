@@ -1,7 +1,11 @@
 package jaicore.search.algorithms.standard.core;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Random;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +22,9 @@ import jaicore.search.algorithms.standard.uncertainty.explorationexploitationsea
 import jaicore.search.algorithms.standard.uncertainty.paretosearch.ParetoSelection;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
+import jaicore.logic.fol.structure.ConstantParam;
+import jaicore.logic.fol.structure.VariableParam;
+import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 
 public class UncertaintyORGraphSearchFactory <T, A> implements IObservableORGraphSearchFactory<T, A, Double>{
 
@@ -90,8 +97,28 @@ public class UncertaintyORGraphSearchFactory <T, A> implements IObservableORGrap
 							}
 						},
 						(solution1, solution2) -> {
-							// TODO: Improve pipeline comparison
-							return 0.0d;
+							if (solution1 instanceof TFDNode && solution2 instanceof TFDNode) {
+								TFDNode t1 = (TFDNode) solution1;
+								TFDNode t2 = (TFDNode) solution2;
+								Set<Entry<VariableParam, ConstantParam>> s1 = t1.getAppliedMethodInstance().getGrounding().entrySet();
+								List<String> l1 = new ArrayList<>();
+								s1.forEach(e -> l1.add(e.getValue().getName()));
+								Set<Entry<VariableParam, ConstantParam>> s2 = t2.getAppliedMethodInstance().getGrounding().entrySet();
+								List<String> l2 = new ArrayList<>();
+								s2.forEach(e -> l2.add(e.getValue().getName()));
+								List<String> u = new ArrayList<>();
+								u.addAll(l1);
+								u.addAll(l2);
+								Set<String> i = new HashSet<>();
+								l1.forEach(e -> {
+									if (l2.contains(e)) {
+										i.add(e);
+									}
+								});
+								return 1.0d - (((double)(u.size() - i.size())) / ((double) u.size()));
+							} else {
+								return 0.0d;
+							}
 						},
 						new BasicExplorationCandidateSelector<T, Double>(5.0d)
 				));
