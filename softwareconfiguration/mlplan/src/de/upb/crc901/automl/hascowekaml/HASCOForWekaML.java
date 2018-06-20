@@ -70,7 +70,7 @@ public class HASCOForWekaML implements IObservableGraphAlgorithm<TFDNode, String
 		long deadline = start + timeoutInMS;
 
 		/* create algorithm */
-		HASCOFD<Classifier> hasco = new HASCOFD<>(new WEKAPipelineFactory(), this.preferredNodeEvaluator, "AbstractClassifier", new MonteCarloCrossValidationEvaluator(new MulticlassEvaluator(new Random(3)), 3, data, .7f), OversearchAvoidanceMode.PARETO_FRONT_SELECTION);
+		HASCOFD<Classifier> hasco = new HASCOFD<>(new WEKAPipelineFactory(), this.preferredNodeEvaluator, "AbstractClassifier", new MonteCarloCrossValidationEvaluator(new MulticlassEvaluator(new Random(3)), 3, data, .7f), this.oversearchAvoidanceMode);
 		if (this.loggerName != null && this.loggerName.length() > 0)
 			hasco.setLoggerName(loggerName + ".hasco");
 
