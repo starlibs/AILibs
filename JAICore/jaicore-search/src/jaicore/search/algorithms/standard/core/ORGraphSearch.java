@@ -372,7 +372,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 		while(open.peek().getInternalLabel().compareTo(currentlyBestScore) < 0);
 		return currentlyBestSolution;
 	}
-	
+
 	/**
 	 * Find the shortest path to a goal starting from <code>start</code>.
 	 *
@@ -439,7 +439,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 
 	/**
 	 * Makes a single expansion and returns solution paths.
-	 * 
+	 *
 	 * @return The last found solution path.
 	 */
 	public List<NodeExpansionDescription<T, A>> nextExpansion() {
@@ -460,10 +460,10 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 		if (beforeSelection()) {
 
 			Node<T, V> nodeToExpand = open.peek();
-//			assert parentDiscarding == ParentDiscarding.ALL || !expanded.contains(nodeToExpand.getPoint()) : "Node " + nodeToExpand.getString()
-//					+ " has been selected for the second time for expansion.";
 			if (nodeToExpand == null)
 				return;
+			// assert parentDiscarding == ParentDiscarding.ALL || !expanded.contains(nodeToExpand.getPoint()) : "Node " + nodeToExpand.getString()
+			// 		+ " has been selected for the second time for expansion.";
 			afterSelection(nodeToExpand);
 			step(nodeToExpand);
 		}
@@ -537,7 +537,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 			}
 			logger.debug("Finished computation of successors");
 		}
-		
+
 		/* attach successors to search graph */
 //		System.out.println(expanded.contains(expandedNodeInternal.getPoint()));
 		if (additionalThreadsForExpansion < 1) {
@@ -689,7 +689,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 
 		/* check loop */
 		assert parent == null || !parent.externalPath().contains(t2) : "There is a loop in the underlying graph. The following path contains the last node twice: " + newNode.externalPath().stream().map(n -> n.toString()).reduce("", (s,t) -> s + "\n\t\t" + t);
-		
+
 		/* currently, we only support tree search */
 		assert !ext2int.containsKey(t2) : "Reached node " + t2 + " for the second time.\nt\tFirst path:" + ext2int.get(t2).externalPath().stream().map(n -> n.toString()).reduce("", (s,t) -> s + "\n\t\t" + t)
 				+ "\n\tSecond Path:" + newNode.externalPath().stream().map(n -> n.toString()).reduce("", (s,t) -> s + "\n\t\t" + t);

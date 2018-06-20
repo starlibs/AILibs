@@ -85,6 +85,8 @@ public class UncertaintyORGraphSearchFactory <T, A> implements IObservableORGrap
 				search.setOpen(new UncertaintyExplorationOpenSelection<T, Double>(
 						10,
 						20,
+						0.05d,
+						0.05d,
 						(currentExplorationLength, currentExploitationLength, lastExplorationPhaseCompletelyUsed, phaseSwitchAmount) -> {
 							if (phaseSwitchAmount < 10 && lastExplorationPhaseCompletelyUsed) {
 								return AdjustmentOptions.INCREASE_EXPLORATION_PHASE_LENGTH;
@@ -98,24 +100,25 @@ public class UncertaintyORGraphSearchFactory <T, A> implements IObservableORGrap
 						},
 						(solution1, solution2) -> {
 							if (solution1 instanceof TFDNode && solution2 instanceof TFDNode) {
-								TFDNode t1 = (TFDNode) solution1;
-								TFDNode t2 = (TFDNode) solution2;
-								Set<Entry<VariableParam, ConstantParam>> s1 = t1.getAppliedMethodInstance().getGrounding().entrySet();
-								List<String> l1 = new ArrayList<>();
-								s1.forEach(e -> l1.add(e.getValue().getName()));
-								Set<Entry<VariableParam, ConstantParam>> s2 = t2.getAppliedMethodInstance().getGrounding().entrySet();
-								List<String> l2 = new ArrayList<>();
-								s2.forEach(e -> l2.add(e.getValue().getName()));
-								List<String> u = new ArrayList<>();
-								u.addAll(l1);
-								u.addAll(l2);
-								Set<String> i = new HashSet<>();
-								l1.forEach(e -> {
-									if (l2.contains(e)) {
-										i.add(e);
-									}
-								});
-								return 1.0d - (((double)(u.size() - i.size())) / ((double) u.size()));
+//								TFDNode t1 = (TFDNode) solution1;
+//								TFDNode t2 = (TFDNode) solution2;
+//								Set<Entry<VariableParam, ConstantParam>> s1 = t1.getAppliedMethodInstance().getGrounding().entrySet();
+//								List<String> l1 = new ArrayList<>();
+//								s1.forEach(e -> l1.add(e.getValue().getName()));
+//								Set<Entry<VariableParam, ConstantParam>> s2 = t2.getAppliedMethodInstance().getGrounding().entrySet();
+//								List<String> l2 = new ArrayList<>();
+//								s2.forEach(e -> l2.add(e.getValue().getName()));
+//								List<String> u = new ArrayList<>();
+//								u.addAll(l1);
+//								u.addAll(l2);
+//								Set<String> i = new HashSet<>();
+//								l1.forEach(e -> {
+//									if (l2.contains(e)) {
+//										i.add(e);
+//									}
+//								});
+//								return 1.0d - (((double)(u.size() - i.size())) / ((double) u.size()));
+								return 0.0d;
 							} else {
 								return 0.0d;
 							}
