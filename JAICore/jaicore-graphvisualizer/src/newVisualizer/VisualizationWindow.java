@@ -1,6 +1,7 @@
 package newVisualizer;
 
 import jaicore.graph.observation.IObservableGraphAlgorithm;
+import jaicore.graphvisualizer.gui.Recorder;
 import javafx.application.Platform;
 
 public class VisualizationWindow<T> {
@@ -22,11 +23,11 @@ public class VisualizationWindow<T> {
 		}
 		try {
 			System.out.println("Test2");
-			
+			Recorder recorder = new Recorder<>(observable);
 			Platform.runLater(()->{
 				GuiApp app = new GuiApp();
 
-					app.open("Test");
+					app.open("Test", recorder);
 
 			});
 			
@@ -39,6 +40,7 @@ public class VisualizationWindow<T> {
 		}
 		catch(Exception e) {
 			e.printStackTrace();
+			System.exit(0);
 		}
 		
 	}

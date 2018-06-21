@@ -2,6 +2,8 @@ package newVisualizer;
 
 import java.io.IOException;
 
+import jaicore.graph.observation.IObservableGraphAlgorithm;
+import jaicore.graphvisualizer.gui.Recorder;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -16,7 +18,7 @@ public class GuiApp extends Application{
 		
 	}
 	
-	public void open(String i) {
+	public void open(String i, Recorder recorder) {
 		FXMLLoader loader = new FXMLLoader(getClass().getResource("/gui2.fxml"));
 		try {
 			System.out.println(getClass().getResourceAsStream("/gui2.fxml").read());
@@ -33,13 +35,19 @@ public class GuiApp extends Application{
             System.out.println("test");
             System.exit(0);
         }
+
+
         
-        Scene scene = new Scene(root);
+        Scene scene = new Scene(root, 800, 600);
         Stage stage = new Stage();
         stage.setTitle(i);
         stage.setScene(scene);
+
+		Controller controller = loader.getController();
+
+//		controller.register(algorithm);
+        controller.registerRecorder(recorder);
         stage.show();
-        
 		
 	}
 

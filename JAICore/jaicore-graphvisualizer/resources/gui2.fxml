@@ -37,7 +37,7 @@
                 </TabPane>
                 <BorderPane>
                     <center>
-                        <SwingNode/>
+                        <SwingNode fx:id="graphNode"/>
                     </center>
                 </BorderPane>
             </items>
