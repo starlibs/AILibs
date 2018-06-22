@@ -14,6 +14,7 @@ import autofe.algorithm.hasco.HASCOFE;
 import autofe.algorithm.hasco.HASCOFE.HASCOFESolution;
 import autofe.algorithm.hasco.evaluation.ClusterEvaluator;
 import jaicore.ml.WekaUtil;
+import weka.core.Instance;
 import weka.core.Instances;
 
 public class SimpleAutoFETest {
@@ -30,12 +31,12 @@ public class SimpleAutoFETest {
 		data.setClassIndex(data.numAttributes() - 1);
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(0), .7f);
 
-		HASCOFE<Instances> hascoFE = new HASCOFE<>(new File("model/test.json"), n -> null, split.get(0),
+		HASCOFE<Instance> hascoFE = new HASCOFE<>(new File("model/test.json"), n -> null, split.get(0),
 				new ClusterEvaluator<>());
 		hascoFE.setLoggerName("autofe");
 		hascoFE.enableVisualization();
 		hascoFE.runSearch(10 * 1000);
-		HASCOFESolution solution = hascoFE.getCurrentlyBestSolution();
+		HASCOFESolution<Instance> solution = hascoFE.getCurrentlyBestSolution();
 		System.out.println(solution);
 		System.out.println(hascoFE.getFoundClassifiers());
 		// System.out.println(solution.getSolution().toString());

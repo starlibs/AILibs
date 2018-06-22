@@ -11,18 +11,19 @@ public final class FilterUtils {
 		// Utility class
 	}
 
-	public static IFilter getFilterForName(final String name) {
+	@SuppressWarnings("unchecked")
+	public static <T> IFilter<T> getFilterForName(final String name) {
 		// TODO: Make filter selection automatically (instantiate class by fully
 		// classified class name)
 		switch (name) {
 		case "autofe.algorithm.hasco.filter.generic.AddConstantFilter":
-			return new AddConstantFilter();
+			return (IFilter<T>) new AddConstantFilter();
 		case "autofe.algorithm.hasco.filter.generic.IdentityFilter":
-			return new IdentityFilter();
+			return new IdentityFilter<T>();
 		case "autofe.MakeUnion":
-			return new UnionFilter();
+			return new UnionFilter<T>();
 		case "autofe.MakeForward":
-			return new ForwardFilter();
+			return new ForwardFilter<T>();
 		default:
 			return null;
 		}

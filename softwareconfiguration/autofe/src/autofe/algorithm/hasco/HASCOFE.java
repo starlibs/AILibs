@@ -35,8 +35,8 @@ public class HASCOFE<T> implements IObservableGraphAlgorithm<TFDNode, String>, I
 	// private AbstractConfiguration config;
 	// TODO: Unify
 	private File configFile;
-	private HASCOFD<FilterPipeline> hasco;
-	private HASCOFD<FilterPipeline>.HASCOSolutionIterator hascoRun;
+	private HASCOFD<FilterPipeline<T>> hasco;
+	private HASCOFD<FilterPipeline<T>>.HASCOSolutionIterator hascoRun;
 	private INodeEvaluator<TFDNode, Double> nodeEvaluator;
 
 	// Logging
@@ -48,15 +48,15 @@ public class HASCOFE<T> implements IObservableGraphAlgorithm<TFDNode, String>, I
 	private long timeOfStart = -1;
 	private boolean isCanceled = false;
 	private Collection<Object> listeners = new ArrayList<>();
-	private Queue<HASCOFESolution> solutionsFoundByHASCO = new PriorityQueue<>(new Comparator<HASCOFESolution>() {
+	private Queue<HASCOFESolution<T>> solutionsFoundByHASCO = new PriorityQueue<>(new Comparator<HASCOFESolution<T>>() {
 
-		public int compare(final HASCOFESolution o1, final HASCOFESolution o2) {
+		public int compare(final HASCOFESolution<T> o1, final HASCOFESolution<T> o2) {
 			return o1.getScore().compareTo(o2.getScore());
 		}
 	});
 
-	public static class HASCOFESolution extends Solution<ForwardDecompositionSolution, FilterPipeline, Double> {
-		public HASCOFESolution(Solution<ForwardDecompositionSolution, FilterPipeline, Double> solution) {
+	public static class HASCOFESolution<T> extends Solution<ForwardDecompositionSolution, FilterPipeline<T>, Double> {
+		public HASCOFESolution(Solution<ForwardDecompositionSolution, FilterPipeline<T>, Double> solution) {
 			super(solution);
 		}
 
@@ -81,7 +81,7 @@ public class HASCOFE<T> implements IObservableGraphAlgorithm<TFDNode, String>, I
 	private void initializeHASCOSearch(final Collection<T> data, AbstractHASCOFEObjectEvaluator<T> benchmark) {
 		benchmark.setData(data);
 
-		this.hasco = new HASCOFD<>(new FilterPipelineFactory(), this.nodeEvaluator, "FilterPipeline", benchmark);
+		this.hasco = new HASCOFD<>(new FilterPipelineFactory<T>(), this.nodeEvaluator, "FilterPipeline", benchmark);
 		if (this.loggerName != null && this.loggerName.length() > 0)
 			this.hasco.setLoggerName(loggerName + ".hasco");
 
@@ -138,7 +138,7 @@ public class HASCOFE<T> implements IObservableGraphAlgorithm<TFDNode, String>, I
 		boolean deadlineReached = false;
 		while (!this.isCanceled && this.hascoRun.hasNext()
 				&& (timeoutInMS <= 0 || !(deadlineReached = System.currentTimeMillis() >= deadline))) {
-			HASCOFESolution nextSolution = new HASCOFESolution(this.hascoRun.next());
+			HASCOFESolution<T> nextSolution = new HASCOFESolution<>(this.hascoRun.next());
 			this.solutionsFoundByHASCO.add(nextSolution);
 		}
 		if (deadlineReached) {
@@ -156,11 +156,11 @@ public class HASCOFE<T> implements IObservableGraphAlgorithm<TFDNode, String>, I
 		}
 	}
 
-	public Queue<HASCOFESolution> getFoundClassifiers() {
+	public Queue<HASCOFESolution<T>> getFoundClassifiers() {
 		return new LinkedList<>(this.solutionsFoundByHASCO);
 	}
 
-	public HASCOFESolution getCurrentlyBestSolution() {
+	public HASCOFESolution<T> getCurrentlyBestSolution() {
 		return this.solutionsFoundByHASCO.peek();
 	}
 

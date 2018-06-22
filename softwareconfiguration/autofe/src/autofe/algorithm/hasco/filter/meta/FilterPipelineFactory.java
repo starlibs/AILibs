@@ -11,68 +11,67 @@ import hasco.model.ComponentInstance;
 import hasco.query.Factory;
 import jaicore.graph.Graph;
 
-public class FilterPipelineFactory implements Factory<FilterPipeline> {
-	
+public class FilterPipelineFactory<T> implements Factory<FilterPipeline<T>> {
+
 	private static final String UNION_NAME = "autofe.MakeUnion";
 	private static final String FORWARD_NAME = "autofe.MakeForward";
 
 	private static final Logger logger = LoggerFactory.getLogger(FilterPipelineFactory.class);
 
 	@Override
-	public FilterPipeline getComponentInstantiation(final ComponentInstance groundComponent) throws Exception {
+	public FilterPipeline<T> getComponentInstantiation(final ComponentInstance groundComponent) throws Exception {
 
-		
-		Graph<IFilter> filterGraph = new Graph<>();
+		Graph<IFilter<T>> filterGraph = new Graph<>();
 		Queue<ComponentInstance> open = new LinkedList<>();
-		Queue<IFilter> openFilter = new LinkedList<>();
+		Queue<IFilter<T>> openFilter = new LinkedList<>();
 
 		switch (groundComponent.getComponent().getName()) {
 		case "pipeline":
-			
+
 			ComponentInstance actCI = groundComponent.getSatisfactionOfRequiredInterfaces().get("pipe");
-			IFilter actCIFilter = FilterUtils.getFilterForName(actCI.getComponent().getName());
+			IFilter<T> actCIFilter = FilterUtils.getFilterForName(actCI.getComponent().getName());
 			filterGraph.addItem(actCIFilter);
 			openFilter.offer(actCIFilter);
 			open.offer(actCI);
-			
+
 			// Apply breadth-first-search
-			while(!open.isEmpty()) {
+			while (!open.isEmpty()) {
 				actCI = open.poll();
 				actCIFilter = openFilter.poll();
-				
-				if(actCI == null) {
+
+				if (actCI == null) {
 					logger.warn("Found null component. Breaking...");
 					break;
 				}
-					
-				switch(actCI.getComponent().getName()) {
+
+				switch (actCI.getComponent().getName()) {
 				case UNION_NAME:
 					ComponentInstance filter1CI = actCI.getSatisfactionOfRequiredInterfaces().get("filter1");
-					IFilter filter1 = FilterUtils.getFilterForName(filter1CI.getComponent().getName());
+					IFilter<T> filter1 = FilterUtils.getFilterForName(filter1CI.getComponent().getName());
 					ComponentInstance filter2CI = actCI.getSatisfactionOfRequiredInterfaces().get("filter2");
-					IFilter filter2 = FilterUtils.getFilterForName(filter2CI.getComponent().getName());
+					IFilter<T> filter2 = FilterUtils.getFilterForName(filter2CI.getComponent().getName());
 					open.offer(filter1CI);
 					open.offer(filter2CI);
 					openFilter.offer(filter1);
 					openFilter.offer(filter2);
-					
+
 					// Update graph
 					filterGraph.addItem(filter1);
 					filterGraph.addItem(filter2);
 					filterGraph.addEdge(actCIFilter, filter1);
 					filterGraph.addEdge(actCIFilter, filter2);
-					
+
 					break;
 				case FORWARD_NAME:
 					ComponentInstance filterCI = actCI.getSatisfactionOfRequiredInterfaces().get("filter");
-					IFilter filter = FilterUtils.getFilterForName(filterCI.getComponent().getName());
+					IFilter<T> filter = FilterUtils.getFilterForName(filterCI.getComponent().getName());
 					ComponentInstance sourceCI = actCI.getSatisfactionOfRequiredInterfaces().get("source");
-					IFilter source = FilterUtils.getFilterForName(sourceCI.getComponent().getName());
+					IFilter<T> source = FilterUtils.getFilterForName(sourceCI.getComponent().getName());
 					open.offer(filterCI);
 					open.offer(sourceCI);
 					openFilter.offer(filter);
 					openFilter.offer(source);
-					
+
 					// Update graph
 					filterGraph.addItem(filter);
 					filterGraph.addItem(source);
@@ -85,8 +84,7 @@ public class FilterPipelineFactory implements Factory<FilterPipeline> {
 				}
 			}
 		}
-			
-			
+
 		// // TODO: Parameter list (filters need an interface so set them)
 		// for (ComponentInstance actFilterCI :
 		// filterCI.getSatisfactionOfRequiredInterfaces().values()) {
@@ -100,8 +98,8 @@ public class FilterPipelineFactory implements Factory<FilterPipeline> {
 		// "'. Skipping...");
 		//
 		// }
-	
-		return new FilterPipeline(filterGraph);
-	
+
+		return new FilterPipeline<T>(filterGraph);
+
 	}
 }

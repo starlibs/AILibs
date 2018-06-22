@@ -8,7 +8,7 @@ import autofe.algorithm.hasco.filter.meta.FilterPipeline;
 public class ClusterEvaluator<T> extends AbstractHASCOFEObjectEvaluator<T> {
 
 	@Override
-	public Double evaluate(FilterPipeline object) throws Exception {
+	public Double evaluate(FilterPipeline<T> object) throws Exception {
 		// TODO Auto-generated method stub
 		return new Random().nextDouble() * 10;
 	}
