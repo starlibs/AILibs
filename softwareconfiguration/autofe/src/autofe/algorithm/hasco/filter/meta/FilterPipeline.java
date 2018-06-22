@@ -2,7 +2,6 @@ package autofe.algorithm.hasco.filter.meta;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -13,6 +12,7 @@ import java.util.TreeSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import autofe.util.DataSet;
 import jaicore.graph.Graph;
 
 // TODO: Integrate descriptive statistics
@@ -25,9 +25,9 @@ public class FilterPipeline<T> implements IFilter<T>, Serializable {
 
 	class FilterDataEntry {
 		IFilter<T> filter;
-		Collection<T> dataset;
+		DataSet<T> dataset;
 
-		public FilterDataEntry(IFilter<T> filter, Collection<T> dataset) {
+		public FilterDataEntry(IFilter<T> filter, DataSet<T> dataset) {
 			this.filter = filter;
 			this.dataset = dataset;
 		}
@@ -38,7 +38,7 @@ public class FilterPipeline<T> implements IFilter<T>, Serializable {
 	}
 
 	@Override
-	public Collection<T> applyFilter(final Collection<T> inputData, final boolean copy) {
+	public DataSet<T> applyFilter(final DataSet<T> inputData, final boolean copy) {
 		// Copy graph
 		Graph<FilterDataEntry> dataGraph = this.copyGraphIntoDataGraph();
 

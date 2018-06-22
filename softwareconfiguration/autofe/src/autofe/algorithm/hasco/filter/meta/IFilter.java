@@ -1,7 +1,7 @@
 package autofe.algorithm.hasco.filter.meta;
 
-import java.util.Collection;
+import autofe.util.DataSet;
 
 public interface IFilter<T> {
-	public Collection<T> applyFilter(final Collection<T> inputData, final boolean copy);
+	public DataSet<T> applyFilter(final DataSet<T> inputData, final boolean copy);
 }
