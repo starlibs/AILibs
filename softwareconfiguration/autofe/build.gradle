@@ -7,7 +7,7 @@ sourceSets {
         java {
             srcDir 'src'
         }
-         resources {
+        resources {
         	srcDir 'conf'
     	}
     }
@@ -52,4 +52,8 @@ dependencies {
 	// wrapped library dependencies
 	compile group: 'de.upb.isys', name: 'meka', version: '0.0.1'
 	compile group: 'de.upb.isys', name: 'interruptable-weka', version: '0.0.1'
+	
+	compile files('lib/Catalano.Image.jar')
+	compile files('lib/Catalano.Math.jar')
+	compile files('lib/Catalano.Statistics.jar')
 }
