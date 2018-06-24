@@ -17,6 +17,7 @@ import jaicore.graphvisualizer.NodeListener;
 import jaicore.graphvisualizer.SearchVisualizationPanel;
 import jaicore.graphvisualizer.events.add.AddSupplierEvent;
 import jaicore.graphvisualizer.events.add.InfoEvent;
+import jaicore.graphvisualizer.events.add.RequestSuppliersEvent;
 import jaicore.graphvisualizer.events.controlEvents.FileEvent;
 import jaicore.graphvisualizer.events.controlEvents.NodePushed;
 import jaicore.graphvisualizer.events.controlEvents.ResetEvent;
@@ -50,6 +51,7 @@ public class FXController implements Initializable, NodeListener {
     private int index;
     private int maxIndex;
     private long sleepTime;
+    private int numberSuppliers;
 
     //EventBus
     private EventBus controlEventBus;
@@ -64,6 +66,7 @@ public class FXController implements Initializable, NodeListener {
         this.index = 0;
         this.maxIndex = 0;
         this.sleepTime = 50;
+        this.numberSuppliers = 0;
 
         this.controlEventBus = new EventBus();
 
@@ -322,6 +325,11 @@ public class FXController implements Initializable, NodeListener {
     public void receiveInfoEvent(InfoEvent event){
         this.maxIndex = event.getMaxIndex();
         //TODO
+        if (event.getNumberOfDataSupplier() != this.numberSuppliers) {
+            this.controlEventBus.post(new RequestSuppliersEvent());
+            this.cleanVisualizer();
+        }
+
         updateTimeline();
 
     }
@@ -329,6 +337,11 @@ public class FXController implements Initializable, NodeListener {
     @Subscribe
     public void receiveAddSupplierEvent(AddSupplierEvent event){
         ISupplier supplier = event.getSupplier();
+        this.numberSuppliers ++;
         this.registerSupplier(supplier);
+    }
+
+    private void cleanVisualizer(){
+        this.tabPane.getTabs().removeAll(tabPane.getTabs());
     }
 }
