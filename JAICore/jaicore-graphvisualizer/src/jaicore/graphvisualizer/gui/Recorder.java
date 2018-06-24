@@ -9,6 +9,7 @@ import jaicore.graph.observation.IObservableGraphAlgorithm;
 import jaicore.graphvisualizer.events.*;
 import jaicore.graphvisualizer.events.add.AddSupplierEvent;
 import jaicore.graphvisualizer.events.add.InfoEvent;
+import jaicore.graphvisualizer.events.add.RequestSuppliersEvent;
 import jaicore.graphvisualizer.events.controlEvents.ControlEvent;
 import jaicore.graphvisualizer.events.controlEvents.FileEvent;
 import jaicore.graphvisualizer.events.controlEvents.StepEvent;
@@ -75,7 +76,7 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 	public void registerInfoListener(Object listener){
 		this.infoBus.register(listener);
 		if(!receivedEvents.isEmpty())
-			this.infoBus.post(new InfoEvent(receivedEvents.size()-1, receivingTimes.get(receivingTimes.size()-1) ));
+			this.infoBus.post(new InfoEvent(receivedEvents.size()-1, receivingTimes.get(receivingTimes.size()-1), this.suppliers.size() ));
 	}
 
 	@Subscribe
@@ -89,7 +90,7 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 		long eventTime = receiveTime - firstEventTime;
 		receivingTimes.add(eventTime);
 
-		this.infoBus.post(new InfoEvent(receivedEvents.size(), eventTime ));
+		this.infoBus.post(new InfoEvent(receivedEvents.size(), eventTime , this.suppliers.size()));
 //		if(contoller != null){
 ////			contoller.updateEventTimes(receivingTimes);
 //			contoller.updateTimeLine();
@@ -347,5 +348,12 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 		if(algorithm != null)
 			algorithm.registerListener(supplier);
 		this.infoBus.post(new AddSupplierEvent(supplier));
+	}
+
+	@Subscribe
+	public void receiveRequestSupplierEvent(RequestSuppliersEvent event){
+		for (ISupplier supplier : this.suppliers){
+			this.infoBus.post(new AddSupplierEvent(supplier));
+		}
 	}
 }
