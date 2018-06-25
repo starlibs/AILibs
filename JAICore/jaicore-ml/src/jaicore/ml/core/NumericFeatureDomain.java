@@ -8,7 +8,7 @@ package jaicore.ml.core;
  */
 public class NumericFeatureDomain extends FeatureDomain{
 	private final boolean isInteger;
-	private final double min, max;
+	private double min, max;
 	
 	public NumericFeatureDomain(final boolean isInteger, final double min, final double max) {
 		super();
@@ -27,6 +27,14 @@ public class NumericFeatureDomain extends FeatureDomain{
 
 	public double getMax() {
 		return this.max;
+	}
+	
+	public void setMin(double min) {
+		this.min = min;
+	}
+	
+	public void setMax(double min) {
+		this.min = min;
 	}
 
 	@Override
@@ -82,5 +90,10 @@ public class NumericFeatureDomain extends FeatureDomain{
 		if (Double.doubleToLongBits(min) != Double.doubleToLongBits(other.min))
 			return false;
 		return true;
+	}
+
+	@Override
+	double getRangeSize() {
+		return max-min;
 	}
 }

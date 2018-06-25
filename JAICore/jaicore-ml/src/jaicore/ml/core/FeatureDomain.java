@@ -11,9 +11,16 @@ public abstract class FeatureDomain {
 /**
  * Checks if the domain contains an item.
  * 
- * @param item to be checked
+ * @param Item to be checked
  * @return 
  */
 	abstract public boolean contains(Object item);
+	
+	/**
+	 * Computes the size of the domain. For categorical features it returns the number of catogeries,
+	 * for numeric features upper interval bound - lower interval bound.
+	 * @return Size of feature domain
+	 */
+	abstract double getRangeSize();
 
 }

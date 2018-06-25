@@ -71,4 +71,9 @@ public class CategoricalFeatureDomain extends FeatureDomain{
 	public String toString() {
 		return "CategoricalParameterDomain [values=" + Arrays.toString(values) + "]";
 	}
+
+	@Override
+	double getRangeSize() {
+		return values.length;
+	}
 }
