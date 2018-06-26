@@ -74,8 +74,9 @@ public class BestFirstTester {
 		VisualizationWindow win = new VisualizationWindow<Node<TestNode, Double>>(bf, "BestFirst");
 		TooltipSupplier tooltipSupplier = new TooltipSupplier();
 		tooltipSupplier.setGenerator(node ->{
-			Node n = (Node) node;
-			return String.valueOf(n);
+			Node<?, ?> n = (Node<?, ?>) node;
+			String s = String.valueOf(n.getInternalLabel());
+			return s;
 		});
 		win.addDataSupplier(tooltipSupplier);
 //		new VisualizationWindow<Node<TestNode,Double>>(bf, "BestFirst2");
