@@ -23,8 +23,9 @@ import jaicore.ml.evaluation.MonteCarloCrossValidationEvaluator;
 import jaicore.ml.evaluation.MulticlassEvaluator;
 import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionSolution;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
+import jaicore.search.algorithms.interfaces.ISolutionEvaluator;
 import jaicore.search.algorithms.standard.core.INodeEvaluator;
-import jaicore.search.algorithms.standard.core.UncertaintyORGraphSearchFactory.OversearchAvoidanceMode;
+import jaicore.search.algorithms.standard.uncertainty.OversearchAvoidanceConfig;
 import weka.classifiers.Classifier;
 import weka.core.Instances;
 
@@ -42,7 +43,7 @@ public class HASCOForWekaML implements IObservableGraphAlgorithm<TFDNode, String
 	}
 
 	private boolean isCanceled = false;
-	private OversearchAvoidanceMode oversearchAvoidanceMode = OversearchAvoidanceMode.NONE;
+	private OversearchAvoidanceConfig oversearchAvoidanceConfig = new OversearchAvoidanceConfig(OversearchAvoidanceConfig.OversearchAvoidanceMode.NONE);
 	private Collection<Object> listeners = new ArrayList<>();
 	private HASCOFD<Classifier>.HASCOSolutionIterator hascoRun;
 	private INodeEvaluator<TFDNode, Double> preferredNodeEvaluator = n -> null;
@@ -70,7 +71,7 @@ public class HASCOForWekaML implements IObservableGraphAlgorithm<TFDNode, String
 		long deadline = start + timeoutInMS;
 
 		/* create algorithm */
-		HASCOFD<Classifier> hasco = new HASCOFD<>(new WEKAPipelineFactory(), this.preferredNodeEvaluator, "AbstractClassifier", new MonteCarloCrossValidationEvaluator(new MulticlassEvaluator(new Random(3)), 3, data, .7f), this.oversearchAvoidanceMode);
+		HASCOFD<Classifier> hasco = new HASCOFD<>(new WEKAPipelineFactory(), this.preferredNodeEvaluator, "AbstractClassifier", new MonteCarloCrossValidationEvaluator(new MulticlassEvaluator(new Random(3)), 3, data, .7f), this.oversearchAvoidanceConfig);
 		if (this.loggerName != null && this.loggerName.length() > 0)
 			hasco.setLoggerName(loggerName + ".hasco");
 
@@ -139,7 +140,7 @@ public class HASCOForWekaML implements IObservableGraphAlgorithm<TFDNode, String
 		return loggerName;
 	}
 	
-	public void setOversearchAvoidanceMode(OversearchAvoidanceMode oversearchAvoidanceMode) {
-		this.oversearchAvoidanceMode = oversearchAvoidanceMode;
+	public void setOversearchAvoidanceMode(OversearchAvoidanceConfig oversearchAvoidanceConfig) {
+		this.oversearchAvoidanceConfig = oversearchAvoidanceConfig;
 	}
 }

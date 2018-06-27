@@ -13,8 +13,8 @@ import jaicore.search.algorithms.interfaces.IObservableORGraphSearchFactory;
 import jaicore.search.algorithms.interfaces.IPathUnification;
 import jaicore.search.algorithms.standard.core.INodeEvaluator;
 import jaicore.search.algorithms.standard.core.ORGraphSearchFactory;
-import jaicore.search.algorithms.standard.core.UncertaintyORGraphSearchFactory;
-import jaicore.search.algorithms.standard.core.UncertaintyORGraphSearchFactory.OversearchAvoidanceMode;
+import jaicore.search.algorithms.standard.uncertainty.OversearchAvoidanceConfig;
+import jaicore.search.algorithms.standard.uncertainty.UncertaintyORGraphSearchFactory;
 
 public class HASCOFD<T> extends HASCO<T, TFDNode, String, Double, ForwardDecompositionSolution> {
 
@@ -41,7 +41,7 @@ public class HASCOFD<T> extends HASCO<T, TFDNode, String, Double, ForwardDecompo
 		this(new ORGraphSearchFactory<>(), converter, nodeEvaluator, nameOfRequiredInterface, benchmark);
 	}
 	
-	public HASCOFD(Factory<? extends T> converter, INodeEvaluator<TFDNode, Double> nodeEvaluator, String nameOfRequiredInterface, IObjectEvaluator<T, Double> benchmark, OversearchAvoidanceMode oversearchAvoidanceMode) {
-		this(new UncertaintyORGraphSearchFactory<>(oversearchAvoidanceMode, new CEOCTFDPathUnifier()), converter, nodeEvaluator, nameOfRequiredInterface, benchmark);
+	public HASCOFD(Factory<? extends T> converter, INodeEvaluator<TFDNode, Double> nodeEvaluator, String nameOfRequiredInterface, IObjectEvaluator<T, Double> benchmark, OversearchAvoidanceConfig<TFDNode> oversearchAvoidanceConfig) {
+		this(new UncertaintyORGraphSearchFactory<>(oversearchAvoidanceConfig, new CEOCTFDPathUnifier()), converter, nodeEvaluator, nameOfRequiredInterface, benchmark);
 	}
 }
