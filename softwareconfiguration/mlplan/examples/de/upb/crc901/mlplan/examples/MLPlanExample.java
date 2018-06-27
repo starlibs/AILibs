@@ -12,7 +12,8 @@ import org.openml.apiconnector.xml.DataSetDescription;
 import de.upb.crc901.mlplan.multiclass.DefaultPreorder;
 import de.upb.crc901.mlplan.multiclass.MLPlan;
 import jaicore.ml.WekaUtil;
-import jaicore.search.algorithms.standard.core.UncertaintyORGraphSearchFactory.OversearchAvoidanceMode;
+import jaicore.planning.graphgenerators.task.tfd.TFDNode;
+import jaicore.search.algorithms.standard.uncertainty.OversearchAvoidanceConfig;
 import weka.classifiers.Evaluation;
 import weka.core.Instances;
 
@@ -39,12 +40,19 @@ public class MLPlanExample {
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(0), .7f);
 		
 		/* initialize mlplan, and let it run for 30 seconds */
+		int timeoutInSeconds = 30;
 		MLPlan mlplan = new MLPlan(new File("model/weka/weka-all-autoweka.json"));
 		mlplan.setLoggerName("mlplan");
-		mlplan.setTimeout(30);
+		mlplan.setTimeout(timeoutInSeconds);
 		mlplan.setPortionOfDataForPhase2(.3f);
 		mlplan.setNodeEvaluator(new DefaultPreorder());
-		mlplan.setOversearchAvoidanceMode(OversearchAvoidanceMode.TWO_PHASE_SELECTION);
+		OversearchAvoidanceConfig<TFDNode> oversearchAvoidanceConfig = new OversearchAvoidanceConfig<>(OversearchAvoidanceConfig.OversearchAvoidanceMode.TWO_PHASE_SELECTION);
+		oversearchAvoidanceConfig.setInterval(20);
+		oversearchAvoidanceConfig.activateDynamicPhaseLengthsAdjustment((long)timeoutInSeconds * 1000000000l);
+		// TODO: Add correct lambdas
+		oversearchAvoidanceConfig.setSolutionDistanceMetric(null);
+		oversearchAvoidanceConfig.setSolutionEvaluator(null);
+		mlplan.setOversearchAvoidanceConfig(oversearchAvoidanceConfig);
 		mlplan.enableVisualization();
 		mlplan.buildClassifier(split.get(0));
 

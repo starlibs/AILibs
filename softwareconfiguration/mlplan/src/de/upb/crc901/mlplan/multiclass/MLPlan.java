@@ -35,7 +35,7 @@ import jaicore.ml.evaluation.MulticlassEvaluator;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;
 import jaicore.search.algorithms.standard.core.INodeEvaluator;
-import jaicore.search.algorithms.standard.core.UncertaintyORGraphSearchFactory.OversearchAvoidanceMode;
+import jaicore.search.algorithms.standard.uncertainty.OversearchAvoidanceConfig;
 import jaicore.search.structure.core.Node;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
@@ -213,8 +213,8 @@ public class MLPlan extends AbstractClassifier implements Classifier, OptionHand
 		this.timeoutInS = timeoutInS;
 	}
 	
-	public void setOversearchAvoidanceMode (OversearchAvoidanceMode oversearchAvoidanceMode) {
-		hasco.setOversearchAvoidanceMode(oversearchAvoidanceMode);
+	public void setOversearchAvoidanceConfig (OversearchAvoidanceConfig config) {
+		hasco.setOversearchAvoidanceMode(config);
 	}
 
 	public void setRandom(final int randomSeed) {
