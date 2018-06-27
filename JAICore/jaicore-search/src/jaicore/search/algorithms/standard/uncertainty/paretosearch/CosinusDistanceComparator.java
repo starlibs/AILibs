@@ -29,13 +29,19 @@ public class CosinusDistanceComparator implements Comparator<Node<?,Double>> {
         Double secondF = (Double) second.getAnnotation("f");
         Double secondU = (Double)second.getAnnotation("uncertainty");
 
-        double cosDistanceFirst = this.dCos(firstF, firstU);
-        double cosDistanceSecond = this.dCos(secondF, secondU);
+        double cosDistanceFirst = 1 - this.cosineSimilarity(firstF, firstU);
+        double cosDistanceSecond = 1 - this.cosineSimilarity(secondF, secondU);
 
         return (int)((cosDistanceFirst - cosDistanceSecond) * 10000);
     }
 
-    public double dCos(double f, double u) {
+    /**
+     * Cosine similarity to x.
+     * @param f
+     * @param u
+     * @return
+     */
+    public double cosineSimilarity(double f, double u) {
         return (this.x1*f + this.x2*u)/(Math.sqrt(f*f + u*u)*Math.sqrt(this.x1*this.x1 + this.x2*this.x2));
     }
 
