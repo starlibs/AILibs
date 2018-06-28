@@ -1,14 +1,14 @@
 package autofe.algorithm.hasco.evaluation;
 
-import java.util.Collection;
 
 import autofe.algorithm.hasco.filter.meta.FilterPipeline;
+import autofe.util.DataSet;
 import jaicore.basic.IObjectEvaluator;
 
-public abstract class AbstractHASCOFEObjectEvaluator<T> implements IObjectEvaluator<FilterPipeline<T>, Double> {
-	protected Collection<T> data;
+public abstract class AbstractHASCOFEObjectEvaluator implements IObjectEvaluator<FilterPipeline, Double> {
+	protected DataSet data;
 
-	public void setData(final Collection<T> data) {
+	public void setData(final DataSet data) {
 		this.data = data;
 	}
 }

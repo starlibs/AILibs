@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Random;
 
 import org.junit.Test;
+import org.nd4j.linalg.api.ndarray.INDArray;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
 
@@ -31,11 +32,12 @@ public class ImageAutoFETest {
 		data.setClassIndex(data.numAttributes() - 1);
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(0), .7f);
 
-		List<FastBitmap> intermediate = new ArrayList<>();
+		List<INDArray> intermediate = new ArrayList<>();
 		for (Instance inst : split.get(0)) {
-			intermediate.add(DataSetUtils.cifar10InstanceToBitmap(inst));
+//			intermediate.add(DataSetUtils.cifar10InstanceToBitmap(inst));
+			intermediate.add(DataSetUtils.cifar10InstanceToMatrix(inst));
 		}
-		DataSet<FastBitmap> trainSet = new DataSet<>(split.get(0), intermediate);
+		DataSet trainSet = new DataSet(split.get(0), intermediate);
 
 		System.out.println(split.get(0).numAttributes());
 	}

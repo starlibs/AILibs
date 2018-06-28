@@ -1,34 +1,35 @@
 package autofe.algorithm.hasco.filter.generic;
 
-import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.List;
 
 import autofe.algorithm.hasco.filter.meta.IFilter;
 import autofe.util.DataSet;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
+import weka.core.Instances;
 
-public class AddConstantFilter implements IFilter<Instance> {
+public class AddConstantFilter implements IFilter {
 
-	private double constant;
+	private double constant = 1;
 
 	@Override
-	public DataSet<Instance> applyFilter(DataSet<Instance> inputData, final boolean copy) {
+	public DataSet applyFilter(DataSet inputData, final boolean copy) {
 		System.out.println("Applying filter AddConstantFilter...");
 
 		// TODO: Check for copy flag
 
 		// Assume to deal with FastBitmap instances
-		List<Instance> transformedInstances = new ArrayList<>(inputData.getInstances().size());
+//		List<Instance> transformedInstances = new ArrayList<>(inputData.getInstances().size());
+		Instances transformedInstances = new Instances(inputData.getInstances());
 		for (Instance inst : inputData.getInstances()) {
 			Instance newInstance = new DenseInstance(inst);
+			newInstance.setDataset(transformedInstances);
 			Enumeration<Attribute> atts = newInstance.enumerateAttributes();
 			while (atts.hasMoreElements()) {
 				Attribute att = atts.nextElement();
 				if (att.isNumeric())
-					newInstance.setValue(att, newInstance.value(att) + 1);
+					newInstance.setValue(att, newInstance.value(att) + this.constant);
 			}
 			transformedInstances.add(newInstance);
 
@@ -38,7 +39,7 @@ public class AddConstantFilter implements IFilter<Instance> {
 
 		System.out.println("Finished applying filter AddConstantFilter.");
 
-		return new DataSet<Instance>(transformedInstances, null);
+		return new DataSet(transformedInstances, null);
 	}
 
 	public double getConstant() {

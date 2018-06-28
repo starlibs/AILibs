@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import autofe.algorithm.hasco.evaluation.AbstractHASCOFEObjectEvaluator;
 import autofe.algorithm.hasco.filter.meta.FilterPipeline;
 import autofe.algorithm.hasco.filter.meta.FilterPipelineFactory;
+import autofe.util.DataSet;
 import hasco.core.HASCOFD;
 import hasco.core.Solution;
 import hasco.model.Component;
@@ -35,8 +36,8 @@ public class HASCOFE<T> implements IObservableGraphAlgorithm<TFDNode, String>, I
 	// private AbstractConfiguration config;
 	// TODO: Unify
 	private File configFile;
-	private HASCOFD<FilterPipeline<T>> hasco;
-	private HASCOFD<FilterPipeline<T>>.HASCOSolutionIterator hascoRun;
+	private HASCOFD<FilterPipeline> hasco;
+	private HASCOFD<FilterPipeline>.HASCOSolutionIterator hascoRun;
 	private INodeEvaluator<TFDNode, Double> nodeEvaluator;
 
 	// Logging
@@ -48,15 +49,15 @@ public class HASCOFE<T> implements IObservableGraphAlgorithm<TFDNode, String>, I
 	private long timeOfStart = -1;
 	private boolean isCanceled = false;
 	private Collection<Object> listeners = new ArrayList<>();
-	private Queue<HASCOFESolution<T>> solutionsFoundByHASCO = new PriorityQueue<>(new Comparator<HASCOFESolution<T>>() {
+	private Queue<HASCOFESolution> solutionsFoundByHASCO = new PriorityQueue<>(new Comparator<HASCOFESolution>() {
 
-		public int compare(final HASCOFESolution<T> o1, final HASCOFESolution<T> o2) {
+		public int compare(final HASCOFESolution o1, final HASCOFESolution o2) {
 			return o1.getScore().compareTo(o2.getScore());
 		}
 	});
 
-	public static class HASCOFESolution<T> extends Solution<ForwardDecompositionSolution, FilterPipeline<T>, Double> {
-		public HASCOFESolution(Solution<ForwardDecompositionSolution, FilterPipeline<T>, Double> solution) {
+	public static class HASCOFESolution extends Solution<ForwardDecompositionSolution, FilterPipeline, Double> {
+		public HASCOFESolution(Solution<ForwardDecompositionSolution, FilterPipeline, Double> solution) {
 			super(solution);
 		}
 
@@ -66,8 +67,8 @@ public class HASCOFE<T> implements IObservableGraphAlgorithm<TFDNode, String>, I
 		}
 	}
 
-	public HASCOFE(final File config, INodeEvaluator<TFDNode, Double> nodeEvaluator, final Collection<T> data,
-			AbstractHASCOFEObjectEvaluator<T> benchmark) {
+	public HASCOFE(final File config, INodeEvaluator<TFDNode, Double> nodeEvaluator, final DataSet data,
+			AbstractHASCOFEObjectEvaluator benchmark) {
 
 		if (config == null || !config.exists())
 			throw new IllegalArgumentException(
@@ -78,10 +79,10 @@ public class HASCOFE<T> implements IObservableGraphAlgorithm<TFDNode, String>, I
 		this.initializeHASCOSearch(data, benchmark);
 	}
 
-	private void initializeHASCOSearch(final Collection<T> data, AbstractHASCOFEObjectEvaluator<T> benchmark) {
+	private void initializeHASCOSearch(final DataSet data, AbstractHASCOFEObjectEvaluator benchmark) {
 		benchmark.setData(data);
 
-		this.hasco = new HASCOFD<>(new FilterPipelineFactory<T>(), this.nodeEvaluator, "FilterPipeline", benchmark);
+		this.hasco = new HASCOFD<>(new FilterPipelineFactory(), this.nodeEvaluator, "FilterPipeline", benchmark);
 		if (this.loggerName != null && this.loggerName.length() > 0)
 			this.hasco.setLoggerName(loggerName + ".hasco");
 
@@ -138,7 +139,7 @@ public class HASCOFE<T> implements IObservableGraphAlgorithm<TFDNode, String>, I
 		boolean deadlineReached = false;
 		while (!this.isCanceled && this.hascoRun.hasNext()
 				&& (timeoutInMS <= 0 || !(deadlineReached = System.currentTimeMillis() >= deadline))) {
-			HASCOFESolution<T> nextSolution = new HASCOFESolution<>(this.hascoRun.next());
+			HASCOFESolution nextSolution = new HASCOFESolution(this.hascoRun.next());
 			this.solutionsFoundByHASCO.add(nextSolution);
 		}
 		if (deadlineReached) {
@@ -156,11 +157,11 @@ public class HASCOFE<T> implements IObservableGraphAlgorithm<TFDNode, String>, I
 		}
 	}
 
-	public Queue<HASCOFESolution<T>> getFoundClassifiers() {
+	public Queue<HASCOFESolution> getFoundClassifiers() {
 		return new LinkedList<>(this.solutionsFoundByHASCO);
 	}
 
-	public HASCOFESolution<T> getCurrentlyBestSolution() {
+	public HASCOFESolution getCurrentlyBestSolution() {
 		return this.solutionsFoundByHASCO.peek();
 	}
 

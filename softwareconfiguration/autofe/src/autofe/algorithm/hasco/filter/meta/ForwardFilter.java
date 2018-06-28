@@ -2,12 +2,12 @@ package autofe.algorithm.hasco.filter.meta;
 
 import autofe.util.DataSet;
 
-public class ForwardFilter<T> implements IFilter<T>, IAbstractFilter {
+public class ForwardFilter implements IFilter, IAbstractFilter {
 
 	@Override
-	public DataSet<T> applyFilter(DataSet<T> inputData, final boolean copy) {
-		// TODO Auto-generated method stub
-		return null;
+	public DataSet applyFilter(DataSet inputData, final boolean copy) {
+		// TODO
+		return inputData;
 	}
 
 }

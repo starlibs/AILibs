@@ -56,4 +56,10 @@ dependencies {
 	compile files('lib/Catalano.Image.jar')
 	compile files('lib/Catalano.Math.jar')
 	compile files('lib/Catalano.Statistics.jar')
+	compile files('lib/largeScaleKernelLearning.jar')
+	compile files('lib/mtj.jar')
+	compile files('lib/arpack_combined.jar')
+	compile files('lib/core.jar')
+	
+	compile 'org.nd4j:nd4j-native-platform:1.0.0-alpha'
 }

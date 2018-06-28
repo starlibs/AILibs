@@ -17,28 +17,33 @@ import jaicore.graph.Graph;
 
 // TODO: Integrate descriptive statistics
 @SuppressWarnings("serial")
-public class FilterPipeline<T> implements IFilter<T>, Serializable {
+public class FilterPipeline implements IFilter, Serializable {
 
 	private static final Logger logger = LoggerFactory.getLogger(FilterPipeline.class);
 
-	private Graph<IFilter<T>> filters;
+	private Graph<IFilter> filters;
 
-	class FilterDataEntry {
-		IFilter<T> filter;
-		DataSet<T> dataset;
+	class FilterDataEntry implements Comparable<FilterDataEntry> {
+		IFilter filter;
+		DataSet dataset;
 
-		public FilterDataEntry(IFilter<T> filter, DataSet<T> dataset) {
+		public FilterDataEntry(IFilter filter, DataSet dataset) {
 			this.filter = filter;
 			this.dataset = dataset;
 		}
+
+		@Override
+		public int compareTo(FilterDataEntry arg0) {
+			return filter.getClass().getName().compareTo(arg0.getClass().getName());
+		}
 	}
 
-	public FilterPipeline(final Graph<IFilter<T>> filters) {
+	public FilterPipeline(final Graph<IFilter> filters) {
 		this.filters = filters;
 	}
 
 	@Override
-	public DataSet<T> applyFilter(final DataSet<T> inputData, final boolean copy) {
+	public DataSet applyFilter(final DataSet inputData, final boolean copy) {
 		// Copy graph
 		Graph<FilterDataEntry> dataGraph = this.copyGraphIntoDataGraph();
 
@@ -61,9 +66,11 @@ public class FilterPipeline<T> implements IFilter<T>, Serializable {
 				continue;
 			}
 
-			if (nextEntry.filter instanceof IAbstractFilter) {
-				throw new IllegalStateException("Got an abstract filter which should not be stored in filter graph.");
-			}
+//			if (nextEntry.filter instanceof IAbstractFilter) {
+//				logger.warn("Filter:" + nextEntry.filter.getClass().getName());
+//				throw new IllegalStateException("Got an abstract filter which should not be stored in filter graph.");
+//			}
+			
 
 			// Check for union
 			Set<FilterDataEntry> successors = dataGraph.getSuccessors(nextEntry);
@@ -77,25 +84,32 @@ public class FilterPipeline<T> implements IFilter<T>, Serializable {
 				FilterDataEntry succ1 = it.next();
 				FilterDataEntry succ2 = it.next();
 				nextEntry.dataset = nextEntry.filter
-						.applyFilter(new UnionFilter<T>().union(succ1.dataset, succ2.dataset), true);
+						.applyFilter(new UnionFilter().union(succ1.dataset, succ2.dataset), true);
 				dataGraph = this.eraseSubTreeData(dataGraph, nextEntry);
 			} else {
+				// TODO: Check this
 				// Regular filter
-				nextEntry.dataset = nextEntry.filter.applyFilter(successors.iterator().next().dataset, false);
+//				if(!(nextEntry.filter instanceof ForwardFilter))
+					nextEntry.dataset = nextEntry.filter.applyFilter(successors.iterator().next().dataset, false);
+//				else
+//					nextEntry.dataset = successors.iterator().next().dataset;
 			}
 
 			// Add predecessors to working set
 			nextNodes.addAll(dataGraph.getPredecessors(nextEntry));
 		}
-
-		return dataGraph.getRoot().dataset;
+		DataSet resultDataSet = dataGraph.getRoot().dataset;
+		
+		// Update intermediate instances into Weka instances
+		resultDataSet.updateInstances();
+		return resultDataSet;
 	}
 
 	// TODO: Use StringBuilder
 	@Override
 	public String toString() {
 		String filterNames = "FilterPipeline: ";
-		for (IFilter<T> filter : this.filters.getItems())
+		for (IFilter filter : this.filters.getItems())
 			filterNames += filter.getClass().getSimpleName() + ", ";
 		return filterNames;
 	}
@@ -119,16 +133,16 @@ public class FilterPipeline<T> implements IFilter<T>, Serializable {
 	private Graph<FilterDataEntry> copyGraphIntoDataGraph() {
 		// Copy graph
 		Graph<FilterDataEntry> dataGraph = new Graph<>();
-		Map<IFilter<T>, FilterDataEntry> filterFDEMapping = new HashMap<>();
+		Map<IFilter, FilterDataEntry> filterFDEMapping = new HashMap<>();
 		// Add all items
-		for (IFilter<T> filter : this.filters.getItems()) {
+		for (IFilter filter : this.filters.getItems()) {
 			FilterDataEntry newEntry = new FilterDataEntry(filter, null);
 			filterFDEMapping.put(filter, newEntry);
 			dataGraph.addItem(newEntry);
 		}
 		// Add all edges
-		for (IFilter<T> filter : this.filters.getItems()) {
-			for (IFilter<T> succ : this.filters.getSuccessors(filter)) {
+		for (IFilter filter : this.filters.getItems()) {
+			for (IFilter succ : this.filters.getSuccessors(filter)) {
 				dataGraph.addEdge(filterFDEMapping.get(filter), filterFDEMapping.get(succ));
 			}
 		}

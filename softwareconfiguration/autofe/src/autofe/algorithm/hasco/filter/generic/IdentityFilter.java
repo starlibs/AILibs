@@ -3,10 +3,10 @@ package autofe.algorithm.hasco.filter.generic;
 import autofe.algorithm.hasco.filter.meta.IFilter;
 import autofe.util.DataSet;
 
-public class IdentityFilter<T> implements IFilter<T> {
+public class IdentityFilter implements IFilter {
 
 	@Override
-	public DataSet<T> applyFilter(DataSet<T> inputData, final boolean copy) {
+	public DataSet applyFilter(DataSet inputData, final boolean copy) {
 		return inputData;
 	}
 

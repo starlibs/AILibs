@@ -2,30 +2,44 @@ package autofe.util;
 
 import java.util.List;
 
-import weka.core.Instance;
+import org.nd4j.linalg.api.ndarray.INDArray;
 
-public class DataSet<T> {
-	private List<Instance> instances;
-	private List<T> intermediateInstances;
+import weka.core.Instances;
 
-	public DataSet(final List<Instance> instances, final List<T> intermediateInstances) {
+public class DataSet {
+	private Instances instances;
+	private List<INDArray> intermediateInstances;
+
+	public DataSet(final Instances instances, final List<INDArray> intermediateInstances) {
 		this.instances = instances;
 		this.intermediateInstances = intermediateInstances;
 	}
 
-	public List<Instance> getInstances() {
+	public Instances getInstances() {
 		return instances;
 	}
 
-	public void setInstances(List<Instance> instances) {
+	public void setInstances(Instances instances) {
 		this.instances = instances;
 	}
 
-	public List<T> getIntermediateInstances() {
+	public List<INDArray> getIntermediateInstances() {
 		return intermediateInstances;
 	}
 
-	public void setIntermediateInstances(List<T> intermediateInstances) {
+	public void setIntermediateInstances(List<INDArray> intermediateInstances) {
 		this.intermediateInstances = intermediateInstances;
+	}
+	
+	public void updateInstances() {
+		if(this.intermediateInstances != null)
+			this.instances = DataSetUtils.matricesToInstances(this.intermediateInstances, this.instances);
+		
+		// TODO
+//		throw new UnsupportedOperationException("Not implemented yet.");
+//		if(this.intermediateInstances != null && this.intermediateInstances.get(0) instanceof FastBitmap)
+//			this.instances = DataSetUtils.bitmapsToInstances((List<FastBitmap>) getIntermediateInstances(), this.instances);
+//		else
+//			throw new UnsupportedOperationException("Not implemented yet.");
 	}
 }

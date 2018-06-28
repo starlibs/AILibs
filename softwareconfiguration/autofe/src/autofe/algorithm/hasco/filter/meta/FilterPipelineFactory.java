@@ -11,7 +11,7 @@ import hasco.model.ComponentInstance;
 import hasco.query.Factory;
 import jaicore.graph.Graph;
 
-public class FilterPipelineFactory<T> implements Factory<FilterPipeline<T>> {
+public class FilterPipelineFactory implements Factory<FilterPipeline> {
 
 	private static final String UNION_NAME = "autofe.MakeUnion";
 	private static final String FORWARD_NAME = "autofe.MakeForward";
@@ -19,17 +19,17 @@ public class FilterPipelineFactory<T> implements Factory<FilterPipeline<T>> {
 	private static final Logger logger = LoggerFactory.getLogger(FilterPipelineFactory.class);
 
 	@Override
-	public FilterPipeline<T> getComponentInstantiation(final ComponentInstance groundComponent) throws Exception {
+	public FilterPipeline getComponentInstantiation(final ComponentInstance groundComponent) throws Exception {
 
-		Graph<IFilter<T>> filterGraph = new Graph<>();
+		Graph<IFilter> filterGraph = new Graph<>();
 		Queue<ComponentInstance> open = new LinkedList<>();
-		Queue<IFilter<T>> openFilter = new LinkedList<>();
+		Queue<IFilter> openFilter = new LinkedList<>();
 
 		switch (groundComponent.getComponent().getName()) {
 		case "pipeline":
 
 			ComponentInstance actCI = groundComponent.getSatisfactionOfRequiredInterfaces().get("pipe");
-			IFilter<T> actCIFilter = FilterUtils.getFilterForName(actCI.getComponent().getName());
+			IFilter actCIFilter = FilterUtils.getFilterForName(actCI.getComponent().getName());
 			filterGraph.addItem(actCIFilter);
 			openFilter.offer(actCIFilter);
 			open.offer(actCI);
@@ -47,9 +47,9 @@ public class FilterPipelineFactory<T> implements Factory<FilterPipeline<T>> {
 				switch (actCI.getComponent().getName()) {
 				case UNION_NAME:
 					ComponentInstance filter1CI = actCI.getSatisfactionOfRequiredInterfaces().get("filter1");
-					IFilter<T> filter1 = FilterUtils.getFilterForName(filter1CI.getComponent().getName());
+					IFilter filter1 = FilterUtils.getFilterForName(filter1CI.getComponent().getName());
 					ComponentInstance filter2CI = actCI.getSatisfactionOfRequiredInterfaces().get("filter2");
-					IFilter<T> filter2 = FilterUtils.getFilterForName(filter2CI.getComponent().getName());
+					IFilter filter2 = FilterUtils.getFilterForName(filter2CI.getComponent().getName());
 					open.offer(filter1CI);
 					open.offer(filter2CI);
 					openFilter.offer(filter1);
@@ -64,9 +64,9 @@ public class FilterPipelineFactory<T> implements Factory<FilterPipeline<T>> {
 					break;
 				case FORWARD_NAME:
 					ComponentInstance filterCI = actCI.getSatisfactionOfRequiredInterfaces().get("filter");
-					IFilter<T> filter = FilterUtils.getFilterForName(filterCI.getComponent().getName());
+					IFilter filter = FilterUtils.getFilterForName(filterCI.getComponent().getName());
 					ComponentInstance sourceCI = actCI.getSatisfactionOfRequiredInterfaces().get("source");
-					IFilter<T> source = FilterUtils.getFilterForName(sourceCI.getComponent().getName());
+					IFilter source = FilterUtils.getFilterForName(sourceCI.getComponent().getName());
 					open.offer(filterCI);
 					open.offer(sourceCI);
 					openFilter.offer(filter);
@@ -99,7 +99,7 @@ public class FilterPipelineFactory<T> implements Factory<FilterPipeline<T>> {
 		//
 		// }
 
-		return new FilterPipeline<T>(filterGraph);
+		return new FilterPipeline(filterGraph);
 
 	}
 }
