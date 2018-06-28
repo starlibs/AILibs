@@ -4,7 +4,7 @@ import jaicore.search.structure.core.Node;
 import java.util.Comparator;
 import java.lang.Double;
 
-public class CosinusDistanceComparator implements Comparator<Node<?,Double>> {
+public class CosinusDistanceComparator implements Comparator<ParetoNode<?,Double>> {
 
     public final double x1;
     public final double x2;
@@ -15,19 +15,18 @@ public class CosinusDistanceComparator implements Comparator<Node<?,Double>> {
     }
 
     /**
-     * Compares the cosine distance of two nodes to (1,1).
-     *
+     * Compares the cosine distance of two nodes to x.
      * @param first
      * @param second
      * @return
      */
-    public int compare(Node<?,Double> first, Node<?,Double> second) {
+    public int compare(ParetoNode<?,Double> first, ParetoNode<?,Double> second) {
 
-        Double firstF = (Double) first.getAnnotation("f");
-        Double firstU = (Double)first.getAnnotation("uncertainty");
+        Double firstF = (Double) first.node.getAnnotation("f");
+        Double firstU = (Double) first.node.getAnnotation("uncertainty");
 
-        Double secondF = (Double) second.getAnnotation("f");
-        Double secondU = (Double)second.getAnnotation("uncertainty");
+        Double secondF = (Double) second.node.getAnnotation("f");
+        Double secondU = (Double) second.node.getAnnotation("uncertainty");
 
         double cosDistanceFirst = 1 - this.cosineSimilarity(firstF, firstU);
         double cosDistanceSecond = 1 - this.cosineSimilarity(secondF, secondU);
