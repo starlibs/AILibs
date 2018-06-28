@@ -1,7 +1,5 @@
 package jaicore.search.algorithms.standard.uncertainty;
 
-import jaicore.search.algorithms.interfaces.ISolutionEvaluator;
-
 public class OversearchAvoidanceConfig<N> {
 	
 	public enum OversearchAvoidanceMode {
@@ -14,8 +12,10 @@ public class OversearchAvoidanceConfig<N> {
 	private boolean adjustPhaseLengthsDynamically = false;
 	private long timeout;
 	private int interval = 20;
-	private ISolutionDistanceMetric<N> solutionDistanceMetric;
-	private ISolutionEvaluator<N, Double> solutionEvaluator;
+	private int randomSampleAmount = 3;
+	private double exploitationScoreThreshold = 0.05d;
+	private double explorationUncertaintyThreshold = 0.05d;
+	private ISolutionDistanceMetric<N> solutionDistanceMetric= (s1, s2) -> 0.0d;
 
 	public OversearchAvoidanceConfig(OversearchAvoidanceMode mode) {
 		this.oversearchAvoidanceMode = mode;
@@ -31,15 +31,6 @@ public class OversearchAvoidanceConfig<N> {
 
 	public OversearchAvoidanceConfig<N> setSolutionDistanceMetric(ISolutionDistanceMetric<N> solutionDistanceMetric) {
 		this.solutionDistanceMetric = solutionDistanceMetric;
-		return this;
-	}
-
-	public ISolutionEvaluator<N, Double> getSolutionEvaluator() {
-		return solutionEvaluator;
-	}
-
-	public OversearchAvoidanceConfig<N> setSolutionEvaluator(ISolutionEvaluator<N, Double> solutionEvaluator) {
-		this.solutionEvaluator = solutionEvaluator;
 		return this;
 	}
 
@@ -62,6 +53,30 @@ public class OversearchAvoidanceConfig<N> {
 
 	public void setInterval(int interval) {
 		this.interval = interval;
+	}
+
+	public int getRandomSampleAmount() {
+		return randomSampleAmount;
+	}
+
+	public void setRandomSampleAmount(int randomSampleAmount) {
+		this.randomSampleAmount = randomSampleAmount;
+	}
+
+	public double getExploitationScoreThreshold() {
+		return exploitationScoreThreshold;
+	}
+
+	public void setExploitationScoreThreshold(double exploitationScoreThreshold) {
+		this.exploitationScoreThreshold = exploitationScoreThreshold;
+	}
+
+	public double getExplorationUncertaintyThreshold() {
+		return explorationUncertaintyThreshold;
+	}
+
+	public void setExplorationUncertaintyThreshold(double explorationUncertaintyThreshold) {
+		this.explorationUncertaintyThreshold = explorationUncertaintyThreshold;
 	}
 
 }

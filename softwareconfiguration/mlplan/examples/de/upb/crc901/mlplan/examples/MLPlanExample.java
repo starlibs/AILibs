@@ -13,6 +13,7 @@ import de.upb.crc901.mlplan.multiclass.DefaultPreorder;
 import de.upb.crc901.mlplan.multiclass.MLPlan;
 import jaicore.ml.WekaUtil;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
+import jaicore.search.algorithms.standard.uncertainty.ISolutionDistanceMetric;
 import jaicore.search.algorithms.standard.uncertainty.OversearchAvoidanceConfig;
 import weka.classifiers.Evaluation;
 import weka.core.Instances;
@@ -47,11 +48,15 @@ public class MLPlanExample {
 		mlplan.setPortionOfDataForPhase2(.3f);
 		mlplan.setNodeEvaluator(new DefaultPreorder());
 		OversearchAvoidanceConfig<TFDNode> oversearchAvoidanceConfig = new OversearchAvoidanceConfig<>(OversearchAvoidanceConfig.OversearchAvoidanceMode.TWO_PHASE_SELECTION);
-		oversearchAvoidanceConfig.setInterval(20);
 		oversearchAvoidanceConfig.activateDynamicPhaseLengthsAdjustment((long)timeoutInSeconds * 1000000000l);
-		// TODO: Add correct lambdas
-		oversearchAvoidanceConfig.setSolutionDistanceMetric(null);
-		oversearchAvoidanceConfig.setSolutionEvaluator(null);
+		oversearchAvoidanceConfig.setSolutionDistanceMetric(new ISolutionDistanceMetric<TFDNode>() {
+			
+			@Override
+			public double calculateSolutionDistance(TFDNode solution1, TFDNode solution2) {
+				// TODO Create correct similarity metric
+				return 0;
+			}
+		});
 		mlplan.setOversearchAvoidanceConfig(oversearchAvoidanceConfig);
 		mlplan.enableVisualization();
 		mlplan.buildClassifier(split.get(0));
