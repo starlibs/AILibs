@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import jaicore.search.algorithms.interfaces.IObservableORGraphSearch;
 import jaicore.search.algorithms.interfaces.IObservableORGraphSearchFactory;
 import jaicore.search.algorithms.interfaces.IPathUnification;
+import jaicore.search.algorithms.interfaces.ISolutionEvaluator;
 import jaicore.search.algorithms.standard.core.INodeEvaluator;
 import jaicore.search.algorithms.standard.core.ORGraphSearch;
 import jaicore.search.algorithms.standard.uncertainty.explorationexploitationsearch.BasicClockModelPhaseLengthAdjuster;
@@ -23,6 +24,7 @@ public class UncertaintyORGraphSearchFactory <T, A> implements IObservableORGrap
 
 	private OversearchAvoidanceConfig<T> oversearchAvoidanceConfig;
 	private IPathUnification<T> pathUnification;
+	private ISolutionEvaluator<T, Double> solutionEvaluator;
 	private int timeoutForFInMS;
 	private INodeEvaluator<T, Double> timeoutEvaluator;
 	private String loggerName;
@@ -42,9 +44,9 @@ public class UncertaintyORGraphSearchFactory <T, A> implements IObservableORGrap
 					graphGenerator,
 					new UncertaintyRandomCompletionEvaluator<T, A, Double>(
 						new Random(123l),
-						3,
+						oversearchAvoidanceConfig.getRandomSampleAmount(),
 						pathUnification,
-						oversearchAvoidanceConfig.getSolutionEvaluator(),
+						this.solutionEvaluator,
 						new BasicUncertaintySource<T>()
 					)
 			);
@@ -54,8 +56,8 @@ public class UncertaintyORGraphSearchFactory <T, A> implements IObservableORGrap
 					search.setOpen(new UncertaintyExplorationOpenSelection<T, Double>(
 							oversearchAvoidanceConfig.getTimeout(),
 							oversearchAvoidanceConfig.getInterval(),
-							0.05d,
-							0.05d,
+							oversearchAvoidanceConfig.getExploitationScoreThreshold(),
+							oversearchAvoidanceConfig.getExplorationUncertaintyThreshold(),
 							new BasicClockModelPhaseLengthAdjuster(),
 							oversearchAvoidanceConfig.getSolutionDistanceMetric(),
 							new BasicExplorationCandidateSelector<T, Double>(5.0d)
@@ -64,8 +66,8 @@ public class UncertaintyORGraphSearchFactory <T, A> implements IObservableORGrap
 					search.setOpen(new UncertaintyExplorationOpenSelection<T, Double>(
 							oversearchAvoidanceConfig.getTimeout(),
 							oversearchAvoidanceConfig.getInterval(),
-							0.05d,
-							0.05d,
+							oversearchAvoidanceConfig.getExploitationScoreThreshold(),
+							oversearchAvoidanceConfig.getExplorationUncertaintyThreshold(),
 							new IPhaseLengthAdjuster() {
 								
 								@Override
@@ -114,6 +116,11 @@ public class UncertaintyORGraphSearchFactory <T, A> implements IObservableORGrap
 
 	public void setLoggerName(String loggerName) {
 		this.loggerName = loggerName;
+	}
+
+	public UncertaintyORGraphSearchFactory<T, A> setSolutionEvaluator(ISolutionEvaluator<T, Double> solutionEvaluator) {
+		this.solutionEvaluator = solutionEvaluator;
+		return this;
 	}
 	
 }

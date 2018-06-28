@@ -43,5 +43,6 @@ public class HASCOFD<T> extends HASCO<T, TFDNode, String, Double, ForwardDecompo
 	
 	public HASCOFD(Factory<? extends T> converter, INodeEvaluator<TFDNode, Double> nodeEvaluator, String nameOfRequiredInterface, IObjectEvaluator<T, Double> benchmark, OversearchAvoidanceConfig<TFDNode> oversearchAvoidanceConfig) {
 		this(new UncertaintyORGraphSearchFactory<>(oversearchAvoidanceConfig, new CEOCTFDPathUnifier()), converter, nodeEvaluator, nameOfRequiredInterface, benchmark);
+		((UncertaintyORGraphSearchFactory)getSearchFactory()).setSolutionEvaluator(getSolutionEvaluator());
 	}
 }

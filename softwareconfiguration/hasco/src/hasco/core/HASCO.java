@@ -108,6 +108,28 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 	private Logger logger = LoggerFactory.getLogger(HASCO.class);
 	private String loggerName;
 	
+	private ISolutionEvaluator<N, V> solutionEvaluator = new ISolutionEvaluator<N, V>() {
+		@Override
+		public V evaluateSolution(final List<N> solutionPath) throws Exception {
+			List<Action> plan = HASCO.this.searchSpaceUtilFactory.getPathToPlanConverter().getPlan(solutionPath);
+			ComponentInstance composition = Util.getSolutionCompositionForPlan(HASCO.this.components, HASCO.this.getInitState(), plan);
+			T solution = HASCO.this.getObjectFromPlan(plan);
+			V scoreOfSolution = benchmark.evaluate(solution);
+			if (HASCO.this.scoreOfBestRecognizedSolution == null || HASCO.this.scoreOfBestRecognizedSolution.compareTo(scoreOfSolution) > 0) {
+				HASCO.this.bestRecognizedSolution = solution;
+				HASCO.this.compositionOfBestRecognizedSolution = composition;
+				HASCO.this.scoreOfBestRecognizedSolution = scoreOfSolution;
+			}
+			HASCO.this.solutionEvaluationEventBus.post(new HASCOSolutionEvaluationEvent<>(composition, solution, scoreOfSolution));
+			return scoreOfSolution;
+		}
+
+		@Override
+		public boolean doesLastActionAffectScoreOfAnySubsequentSolution(final List<N> partialSolutionPath) {
+			return true;
+		}
+	};
+	
 	/* list of listeners */
 	private final Collection<Object> listeners = new ArrayList<>();
 
@@ -118,32 +140,20 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 		super();
 		this.plannerFactory = plannerFactory;
 		this.searchFactory = searchFactory;
-		this.randomCompletionEvaluator = new RandomCompletionEvaluator<>(new Random(this.randomSeed), 1, searchSpaceUtilFactory.getPathUnifier(), new ISolutionEvaluator<N, V>() {
-			@Override
-			public V evaluateSolution(final List<N> solutionPath) throws Exception {
-				List<Action> plan = HASCO.this.searchSpaceUtilFactory.getPathToPlanConverter().getPlan(solutionPath);
-				ComponentInstance composition = Util.getSolutionCompositionForPlan(HASCO.this.components, HASCO.this.getInitState(), plan);
-				T solution = HASCO.this.getObjectFromPlan(plan);
-				V scoreOfSolution = benchmark.evaluate(solution);
-				if (HASCO.this.scoreOfBestRecognizedSolution == null || HASCO.this.scoreOfBestRecognizedSolution.compareTo(scoreOfSolution) > 0) {
-					HASCO.this.bestRecognizedSolution = solution;
-					HASCO.this.compositionOfBestRecognizedSolution = composition;
-					HASCO.this.scoreOfBestRecognizedSolution = scoreOfSolution;
-				}
-				HASCO.this.solutionEvaluationEventBus.post(new HASCOSolutionEvaluationEvent<>(composition, solution, scoreOfSolution));
-				return scoreOfSolution;
-			}
-
-			@Override
-			public boolean doesLastActionAffectScoreOfAnySubsequentSolution(final List<N> partialSolutionPath) {
-				return true;
-			}
-		});
+		this.randomCompletionEvaluator = new RandomCompletionEvaluator<>(new Random(this.randomSeed), 1, searchSpaceUtilFactory.getPathUnifier(), solutionEvaluator);
 		this.nodeEvaluator = new AlternativeNodeEvaluator<>(nodeEvaluator, this.randomCompletionEvaluator);
 		this.factory = factory;
 		this.searchSpaceUtilFactory = searchSpaceUtilFactory;
 		this.nameOfRequiredInterface = nameOfRequiredInterface;
 		this.benchmark = benchmark;
+	}
+
+	public IObservableORGraphSearchFactory<N, A, V> getSearchFactory() {
+		return searchFactory;
+	}
+
+	public ISolutionEvaluator<N, V> getSolutionEvaluator() {
+		return solutionEvaluator;
 	}
 
 	public void setNumberOfRandomCompletions(final int randomCompletions) {
