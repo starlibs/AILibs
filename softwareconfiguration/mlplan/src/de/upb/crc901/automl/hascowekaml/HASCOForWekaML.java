@@ -26,7 +26,6 @@ import jaicore.ml.evaluation.MonteCarloCrossValidationEvaluator;
 import jaicore.ml.evaluation.MulticlassEvaluator;
 import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionSolution;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
-import jaicore.search.algorithms.interfaces.ISolutionEvaluator;
 import jaicore.search.algorithms.standard.core.INodeEvaluator;
 import jaicore.search.algorithms.standard.uncertainty.OversearchAvoidanceConfig;
 import weka.classifiers.Classifier;
@@ -46,7 +45,7 @@ public class HASCOForWekaML implements IObservableGraphAlgorithm<TFDNode, String
 	}
 
 	private boolean isCanceled = false;
-	private OversearchAvoidanceConfig oversearchAvoidanceConfig = new OversearchAvoidanceConfig(OversearchAvoidanceConfig.OversearchAvoidanceMode.NONE);
+	private OversearchAvoidanceConfig<TFDNode> oversearchAvoidanceConfig = new OversearchAvoidanceConfig<>(OversearchAvoidanceConfig.OversearchAvoidanceMode.NONE);
 	private Collection<Object> listeners = new ArrayList<>();
 	private HASCOFD<Classifier>.HASCOSolutionIterator hascoRun;
 	private INodeEvaluator<TFDNode, Double> preferredNodeEvaluator = n -> null;

@@ -15,6 +15,7 @@ public class OversearchAvoidanceConfig<N> {
 	private int randomSampleAmount = 3;
 	private double exploitationScoreThreshold = 0.05d;
 	private double explorationUncertaintyThreshold = 0.05d;
+	private double minimumSolutionDistanceForExploration = 0.1d;
 	private ISolutionDistanceMetric<N> solutionDistanceMetric= (s1, s2) -> 0.0d;
 
 	public OversearchAvoidanceConfig(OversearchAvoidanceMode mode) {
@@ -77,6 +78,14 @@ public class OversearchAvoidanceConfig<N> {
 
 	public void setExplorationUncertaintyThreshold(double explorationUncertaintyThreshold) {
 		this.explorationUncertaintyThreshold = explorationUncertaintyThreshold;
+	}
+
+	public double getMinimumSolutionDistanceForExploration() {
+		return minimumSolutionDistanceForExploration;
+	}
+
+	public void setMinimumSolutionDistanceForExploration(double minimumSolutionDistanceForExploration) {
+		this.minimumSolutionDistanceForExploration = minimumSolutionDistanceForExploration;
 	}
 
 }
