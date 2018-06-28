@@ -60,7 +60,7 @@ public class UncertaintyORGraphSearchFactory <T, A> implements IObservableORGrap
 							oversearchAvoidanceConfig.getExplorationUncertaintyThreshold(),
 							new BasicClockModelPhaseLengthAdjuster(),
 							oversearchAvoidanceConfig.getSolutionDistanceMetric(),
-							new BasicExplorationCandidateSelector<T, Double>(5.0d)
+							new BasicExplorationCandidateSelector<T, Double>(oversearchAvoidanceConfig.getMinimumSolutionDistanceForExploration())
 					));
 				} else {
 					search.setOpen(new UncertaintyExplorationOpenSelection<T, Double>(
