@@ -3,14 +3,18 @@ package jaicore.ml.core;
 import java.util.Arrays;
 import java.util.Collection;
 
+import weka.core.Instance;
+
 /**
- * Description of a categorical feature domain. Needed for fANOVA application in the {@link ExtendedRandomTree}.
+ * Description of a categorical feature domain. Needed for fANOVA application in
+ * the {@link ExtendedRandomTree}.
  * 
  * @author jmhansel
  *
  */
-public class CategoricalFeatureDomain extends FeatureDomain{
-	private final String[] values;
+public class CategoricalFeatureDomain extends FeatureDomain {
+	private String[] values;
+	
 
 	public CategoricalFeatureDomain(final String[] values) {
 		super();
@@ -58,14 +62,16 @@ public class CategoricalFeatureDomain extends FeatureDomain{
 		return false;
 	}
 
-//	TODO do I need this?
-//	@Override
-//	public boolean subsumes(FeatureDomain otherDomain) {
-//		if (!(otherDomain instanceof CategoricalFeatureDomain))
-//			return false;
-//		CategoricalFeatureDomain otherCategoricalDomain = (CategoricalFeatureDomain)otherDomain;
-//		return Arrays.asList(values).containsAll(Arrays.asList(otherCategoricalDomain.getValues()));
-//	}
+	// TODO do I need this?
+	// @Override
+	// public boolean subsumes(FeatureDomain otherDomain) {
+	// if (!(otherDomain instanceof CategoricalFeatureDomain))
+	// return false;
+	// CategoricalFeatureDomain otherCategoricalDomain =
+	// (CategoricalFeatureDomain)otherDomain;
+	// return
+	// Arrays.asList(values).containsAll(Arrays.asList(otherCategoricalDomain.getValues()));
+	// }
 
 	@Override
 	public String toString() {
@@ -73,7 +79,15 @@ public class CategoricalFeatureDomain extends FeatureDomain{
 	}
 
 	@Override
-	double getRangeSize() {
+	public double getRangeSize() {
 		return values.length;
+	}
+
+	@Override
+	public boolean containsInstance(double value) {
+		boolean val = true;
+		
+		// TODO
+		return false;
 	}
 }

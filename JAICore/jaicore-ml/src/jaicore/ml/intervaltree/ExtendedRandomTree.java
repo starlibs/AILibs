@@ -15,7 +15,9 @@ import jaicore.ml.core.FeatureDomain;
 import jaicore.ml.core.FeatureSpace;
 import jaicore.ml.core.Interval;
 import jaicore.ml.core.NumericFeatureDomain;
+import jaicore.ml.interfaces.Instance;
 import weka.classifiers.trees.RandomTree;
+import weka.core.Instances;
 
 /**
  * Extension of a classic RandomTree to predict intervals.
@@ -32,6 +34,20 @@ public class ExtendedRandomTree extends RandomTree {
 	private FeatureSpace featureSpace;
 	private HashMap<Tree, FeatureSpace> partitioning;
 	private HashMap<Tree, Double> sizeOfPartitions;
+	private ArrayList<Tree> leaves;
+	private Instances observations;
+
+	public ExtendedRandomTree() {
+		super();
+		this.partitioning = new HashMap<Tree, FeatureSpace>();
+		this.sizeOfPartitions = new HashMap<Tree, Double>();
+		this.leaves = new ArrayList<Tree>();
+	}
+
+	public ExtendedRandomTree(FeatureSpace featureSpace) {
+		this();
+		this.featureSpace = featureSpace;
+	}
 
 	public Interval predictInterval(Interval[] queriedInterval) {
 		// the stack of elements that still have to be processed.
@@ -134,20 +150,77 @@ public class ExtendedRandomTree extends RandomTree {
 	}
 
 	/**
+	 * Computes the total variance of the partitioned tree
+	 * 
+	 * @return Total variance
+	 */
+	private double computeTotalVariance() {
+		double var = 0.0d;
+		double meanAcrossDomain = 0.0d;
+		// compute mean of predicted value across entire domain
+		for (Tree leaf : leaves) {
+			double productOfFractions = 1.0d;
+			for (int j = 0; j < featureSpace.getDimension(); j++) {
+				productOfFractions *= partitioning.get(leaf).getFeatureDomain(j).getRangeSize()
+						/ featureSpace.getFeatureDomain(j).getRangeSize();
+			}
+			// in the regression case, this is the predicted value
+			productOfFractions *= leaf.getClassDistribution()[0];
+			meanAcrossDomain += productOfFractions;
+		}
+		// compute total variance
+		for (Tree leaf : leaves) {
+			double productOfFractions = 1.0d;
+			for (int j = 0; j < featureSpace.getDimension(); j++) {
+				productOfFractions *= partitioning.get(leaf).getFeatureDomain(j).getRangeSize()
+						/ featureSpace.getFeatureDomain(j).getRangeSize();
+			}
+			// in the regression case, this is the predicted value
+			productOfFractions *= ((leaf.getClassDistribution()[0] - meanAcrossDomain)
+					* (leaf.getClassDistribution()[0] - meanAcrossDomain));
+			var += productOfFractions;
+		}
+		return var;
+	}
+
+	/**
+	 * Assess importance information for single features using fANOVA
+	 * 
+	 * @return Array containing importance values for each feature
+	 */
+	public double[] quantifyImportanceOfSingleFeatures() {
+		double importanceValues[] = new double[featureSpace.getDimension()];
+		// iterate over all features
+		for (int i = 1; i < featureSpace.getDimension(); i++) {
+			double singleVariance = 0.0d;
+			// iterate over all samples
+			for (weka.core.Instance sample : observations) {
+				// iterate over leaves to get all partitions
+				for (Tree leaf : leaves)
+					if (sample.attribute(i).isNumeric()) {
+						sample.value(i);
+					}
+			}
+		}
+		return importanceValues;
+	}
+
+	/**
 	 * Computes a partitioning of the feature space for this random tree
 	 * 
 	 * @param subSpace
 	 * @param node
 	 */
-	public void computePartitioning(FeatureSpace subSpace, Tree node) {
+	private void computePartitioning(FeatureSpace subSpace, Tree node) {
 
 		double splitPoint = node.getSplitPoint();
 		int attribute = node.getAttribute();
 		Tree[] children = node.getSuccessors();
 
-		// if node is leaf add partitoin to the map
+		// if node is leaf add partition to the map
 		if (attribute <= -1) {
 			double rangeSize = subSpace.getRangeSize();
+			leaves.add(node);
 			partitioning.put(node, subSpace);
 			sizeOfPartitions.put(node, rangeSize);
 			return;
@@ -157,7 +230,8 @@ public class ExtendedRandomTree extends RandomTree {
 		if (subSpace.getFeatureDomain(attribute) instanceof CategoricalFeatureDomain) {
 			for (Tree subtree : children) {
 				FeatureSpace childSubSpace = new FeatureSpace(subSpace);
-				// TODO remove all but the true elements from the feature space
+				// TODO remove all but the true elements from the categorical feature domain
+				// associated with the split attribute
 			}
 		}
 		// if the split attribute is numeric, set the new interval ranges of the

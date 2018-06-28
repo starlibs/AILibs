@@ -1,5 +1,7 @@
 package jaicore.ml.core;
 
+import weka.core.Instance;
+
 /**
  * Description of a numeric feature domain. Needed for fANOVA application in the {@link ExtendedRandomTree}.
  * 
@@ -93,7 +95,12 @@ public class NumericFeatureDomain extends FeatureDomain{
 	}
 
 	@Override
-	double getRangeSize() {
+	public double getRangeSize() {
 		return max-min;
+	}
+
+	@Override
+	public boolean containsInstance(double value) {
+		return ((value > min) && (value < max));
 	}
 }
