@@ -101,6 +101,6 @@ public class NumericFeatureDomain extends FeatureDomain{
 
 	@Override
 	public boolean containsInstance(double value) {
-		return ((value > min) && (value < max));
+		return ((value >= min) && (value <= max));
 	}
 }

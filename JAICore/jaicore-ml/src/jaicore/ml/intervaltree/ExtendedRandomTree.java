@@ -4,11 +4,15 @@ import java.util.AbstractMap;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Queue;
+import java.util.Set;
 
 import jaicore.ml.core.CategoricalFeatureDomain;
 import jaicore.ml.core.FeatureDomain;
@@ -17,10 +21,13 @@ import jaicore.ml.core.Interval;
 import jaicore.ml.core.NumericFeatureDomain;
 import jaicore.ml.interfaces.Instance;
 import weka.classifiers.trees.RandomTree;
+//import weka.classifiers.trees.RandomTree.Tree;
 import weka.core.Instances;
 
 /**
- * Extension of a classic RandomTree to predict intervals.
+ * Extension of a classic RandomTree to predict intervals. This class also
+ * provides an implementaion of fANOVA based on Hutter et al.s implementation
+ * https://github.com/frank-hutter/fanova
  * 
  * @author mirkoj
  *
@@ -32,10 +39,16 @@ public class ExtendedRandomTree extends RandomTree {
 	 */
 	private static final long serialVersionUID = -467555221387281335L;
 	private FeatureSpace featureSpace;
+	// TODO dont use hashmaps
 	private HashMap<Tree, FeatureSpace> partitioning;
 	private HashMap<Tree, Double> sizeOfPartitions;
+	// private HashMap<Tree, Double> midpoints;
 	private ArrayList<Tree> leaves;
-	private Instances observations;
+	private ArrayList<Set<Double>> splitPoints;
+	private double totalVariance;
+	private double[][] observations;
+	private double[][] intervalSizes;
+	private double[][] leafDomainPercentages;
 
 	public ExtendedRandomTree() {
 		super();
@@ -135,7 +148,7 @@ public class ExtendedRandomTree extends RandomTree {
 	 */
 	public double getFractionOfVarianceForSingleFeature(int featureIndex) {
 		// TODO implement
-		return 0.0d;
+		return 0;
 	}
 
 	/**
@@ -146,7 +159,7 @@ public class ExtendedRandomTree extends RandomTree {
 	 */
 	public double getFractionOfVarianceForSingleFeature(int featureIndexA, int featureIndexB) {
 		// TODO implement
-		return 0.0d;
+		return 0;
 	}
 
 	/**
@@ -160,18 +173,23 @@ public class ExtendedRandomTree extends RandomTree {
 		// compute mean of predicted value across entire domain
 		for (Tree leaf : leaves) {
 			double productOfFractions = 1.0d;
-			for (int j = 0; j < featureSpace.getDimension(); j++) {
+			for (int j = 0; j < featureSpace.getDimensionality(); j++) {
 				productOfFractions *= partitioning.get(leaf).getFeatureDomain(j).getRangeSize()
 						/ featureSpace.getFeatureDomain(j).getRangeSize();
 			}
 			// in the regression case, this is the predicted value
 			productOfFractions *= leaf.getClassDistribution()[0];
+			// System.out.println(leaf.toString() + "s distribution: " +
+			// leaf.getClassDistribution()[0]);
 			meanAcrossDomain += productOfFractions;
+			// System.out.println("product of fractions: " + productOfFractions);
+			// System.out.println("mean across domain: " + meanAcrossDomain);
 		}
+		// System.out.println("mean across domain: " + meanAcrossDomain);
 		// compute total variance
 		for (Tree leaf : leaves) {
 			double productOfFractions = 1.0d;
-			for (int j = 0; j < featureSpace.getDimension(); j++) {
+			for (int j = 0; j < featureSpace.getDimensionality(); j++) {
 				productOfFractions *= partitioning.get(leaf).getFeatureDomain(j).getRangeSize()
 						/ featureSpace.getFeatureDomain(j).getRangeSize();
 			}
@@ -180,6 +198,7 @@ public class ExtendedRandomTree extends RandomTree {
 					* (leaf.getClassDistribution()[0] - meanAcrossDomain));
 			var += productOfFractions;
 		}
+		this.totalVariance = var;
 		return var;
 	}
 
@@ -188,21 +207,90 @@ public class ExtendedRandomTree extends RandomTree {
 	 * 
 	 * @return Array containing importance values for each feature
 	 */
-	public double[] quantifyImportanceOfSingleFeatures() {
-		double importanceValues[] = new double[featureSpace.getDimension()];
-		// iterate over all features
-		for (int i = 1; i < featureSpace.getDimension(); i++) {
-			double singleVariance = 0.0d;
-			// iterate over all samples
-			for (weka.core.Instance sample : observations) {
-				// iterate over leaves to get all partitions
-				for (Tree leaf : leaves)
-					if (sample.attribute(i).isNumeric()) {
-						sample.value(i);
-					}
-			}
+	// public double[] quantifyImportanceOfSingleFeatures() {
+	// double importanceValues[] = new double[featureSpace.getDimensionality()];
+	// // iterate over all features
+	// for (int featureIndex = 0; featureIndex < featureSpace.getDimensionality();
+	// featureIndex++) {
+	// double singleVariance = 0;
+	//
+	// // iterate over all observations
+	// for (int j = 0; j < observations.length; j++) {
+	// // iterate over leaves to get all partitions
+	// for (Tree leaf : leaves)
+	//// if (sample.attribute(i).isNumeric()) {
+	//// sample.value(i);
+	// }
+	// }
+	// }
+	// return importanceValues;
+	// }
+
+	public double computeMarginalForSingleFeature(int featureIndex) {
+		double fraction = 0;
+		int[] indicesOfObs = { featureIndex };
+		double[] curObs = new double[1];
+		// TODO new name
+		ArrayList<Double> as = new ArrayList<Double>();
+		double weightedSum = 0, weightedSumOfSquares = 0;
+		for (int valueIndex = 0; valueIndex < observations[featureIndex].length; valueIndex++) {
+			curObs[0] = observations[featureIndex][valueIndex];
+			double marginalPrediction = this.getMarginalPrediction(indicesOfObs, curObs);
+			System.out.println("marginal prediction: " + marginalPrediction);
+			as.add(marginalPrediction);
+			double intervalSize = intervalSizes[featureIndex][valueIndex];
+			weightedSum += marginalPrediction * intervalSize;
+			weightedSumOfSquares += marginalPrediction * marginalPrediction * intervalSize;
 		}
-		return importanceValues;
+		double marginalVarianceContribution = weightedSumOfSquares - weightedSum * weightedSum;
+		System.out.println("marginal variance contribution: " + marginalVarianceContribution);
+		System.out.println("total variance: " + totalVariance);
+		fraction = marginalVarianceContribution / totalVariance;
+		return fraction;
+	}
+
+	// TODO this function
+	private double getMarginalPrediction(int[] indices, double[] observations) {
+		double result = 0;
+		for (Tree leaf : leaves) {
+			if (!observationConsistentWithLeaf(indices, observations, leaf)) {
+				continue;
+			}
+			// double sizeOfLeaf = sizeOfPartitions.get(leaf);
+			double sizeOfLeaf = partitioning.get(leaf).getRangeSizeOfFeatureSubspace(indices);
+			double sizeOfDomain = featureSpace.getRangeSizeOfFeatureSubspace(indices);
+			double fractionOfSpaceForThisLeaf = sizeOfLeaf / sizeOfDomain;
+			System.out.println("size of leaf " + sizeOfLeaf);
+			System.out.println("size of domain " + sizeOfDomain);
+			// predicted value c_i
+			double prediction = leaf.getClassDistribution()[0];
+			// System.out.println("prediction: " + prediction);
+			System.out.println("fraction of space for leave: " + fractionOfSpaceForThisLeaf);
+			result += prediction * fractionOfSpaceForThisLeaf;
+		}
+		return result;
+	}
+
+	/**
+	 * Checks whether all observations are consistent with the feature space
+	 * associated with a leaf
+	 * 
+	 * @param indices
+	 * @param observations
+	 * @param leaf
+	 * @return
+	 */
+	public boolean observationConsistentWithLeaf(int indices[], double[] observations, Tree leaf) {
+		if (indices == null && observations == null)
+			return true;
+		FeatureSpace subSpace = partitioning.get(leaf);
+		for (int i = 0; i < indices.length; i++) {
+			int observationIndex = indices[i];
+			double value = observations[i];
+			if (!subSpace.getFeatureDomain(observationIndex).containsInstance(value))
+				return false;
+		}
+		return true;
 	}
 
 	/**
@@ -245,4 +333,76 @@ public class ExtendedRandomTree extends RandomTree {
 			computePartitioning(rightSubSpace, children[1]);
 		}
 	}
+
+	/**
+	 * Collect all split points of a given
+	 * 
+	 * @param root
+	 */
+	public void collectSplitPointsAndIntervalSizes(Tree root) {
+
+		// One ArrayList for each feature
+		splitPoints = new ArrayList<Set<Double>>(featureSpace.getDimensionality());
+		for (int i = 0; i < featureSpace.getDimensionality(); i++)
+			splitPoints.add(i, new HashSet<Double>());
+
+		Queue<Tree> queueOfNodes = new LinkedList<>();
+		queueOfNodes.add(root);
+
+		// While the queue is not empty
+		while (!queueOfNodes.isEmpty()) {
+
+			Tree node = queueOfNodes.poll();
+
+			// Is node a leaf?
+			if (node.getAttribute() <= -1) {
+				continue;
+			}
+			// TODO deal with categorical features()
+			splitPoints.get(node.getAttribute()).add(node.getSplitPoint());
+
+			// Add successors to queue
+			for (int i = 0; i < node.getSuccessors().length; i++) {
+				queueOfNodes.add(node.getSuccessors()[i]);
+			}
+		}
+
+	}
+
+	/**
+	 * Compute observations, i.e. representatives of each equivalence class of
+	 * partitions
+	 */
+	public void computeObservations() {
+		observations = new double[featureSpace.getDimensionality()][];
+		intervalSizes = new double[featureSpace.getDimensionality()][];
+		for (int featureIndex = 0; featureIndex < featureSpace.getDimensionality(); featureIndex++) {
+			List<Double> curSplitPoints = new ArrayList<Double>();
+			curSplitPoints.addAll(splitPoints.get(featureIndex));
+			// curSplitPoints
+			FeatureDomain curDomain = featureSpace.getFeatureDomain(featureIndex);
+			if (curDomain instanceof NumericFeatureDomain) {
+				NumericFeatureDomain curNumDomain = (NumericFeatureDomain) curDomain;
+				curSplitPoints.add(curNumDomain.getMin());
+				curSplitPoints.add(curNumDomain.getMax());
+			}
+			Collections.sort(curSplitPoints);
+			// System.out.println(curSplitPoints);
+			// if the tree does not split on this value, it is not important
+			if (curSplitPoints.size() == 0) {
+				observations[featureIndex] = new double[0];
+				intervalSizes[featureIndex] = new double[0];
+			} else {
+				observations[featureIndex] = new double[curSplitPoints.size() - 1];
+				intervalSizes[featureIndex] = new double[curSplitPoints.size() - 1];
+				for (int lowerIntervalId = 0; lowerIntervalId < curSplitPoints.size() - 1; lowerIntervalId++) {
+					observations[featureIndex][lowerIntervalId] = (curSplitPoints.get(lowerIntervalId)
+							+ curSplitPoints.get(lowerIntervalId + 1)) / 2;
+					intervalSizes[featureIndex][lowerIntervalId] = curSplitPoints.get(lowerIntervalId + 1)
+							- curSplitPoints.get(lowerIntervalId);
+				}
+			}
+		}
+	}
+
 }
