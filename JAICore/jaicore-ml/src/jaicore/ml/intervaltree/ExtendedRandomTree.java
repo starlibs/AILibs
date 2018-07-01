@@ -148,6 +148,7 @@ public class ExtendedRandomTree extends RandomTree {
 	 */
 	public double getFractionOfVarianceForSingleFeature(int featureIndex) {
 		// TODO implement
+
 		return 0;
 	}
 
@@ -157,7 +158,7 @@ public class ExtendedRandomTree extends RandomTree {
 	 * @param featureIndex
 	 * @return Fraction of variance explained by this feature.
 	 */
-	public double getFractionOfVarianceForSingleFeature(int featureIndexA, int featureIndexB) {
+	public double getFractionOfVarianceForPairOfFeatures(int featureIndexA, int featureIndexB) {
 		// TODO implement
 		return 0;
 	}
@@ -177,6 +178,7 @@ public class ExtendedRandomTree extends RandomTree {
 				productOfFractions *= partitioning.get(leaf).getFeatureDomain(j).getRangeSize()
 						/ featureSpace.getFeatureDomain(j).getRangeSize();
 			}
+			System.out.println("prod of frac " + productOfFractions);
 			// in the regression case, this is the predicted value
 			productOfFractions *= leaf.getClassDistribution()[0];
 			// System.out.println(leaf.toString() + "s distribution: " +
@@ -403,6 +405,13 @@ public class ExtendedRandomTree extends RandomTree {
 				}
 			}
 		}
+	}
+
+	public void preprocess() {
+		this.computePartitioning(featureSpace, m_Tree);
+		this.computeTotalVariance();
+		this.collectSplitPointsAndIntervalSizes(m_Tree);
+		this.computeObservations();
 	}
 
 }

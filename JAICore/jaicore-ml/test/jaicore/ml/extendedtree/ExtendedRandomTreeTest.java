@@ -25,7 +25,10 @@ public class ExtendedRandomTreeTest {
 			data.setClassIndex(data.numAttributes() - 1);
 			
 			ExtendedRandomTree tree = new ExtendedRandomTree();
+			tree.setFeatureSpace(new FeatureSpace(data));
 			tree.buildClassifier(data);
+			tree.preprocess();
+			System.out.println(tree.computeMarginalForSingleFeature(2));
 			
 		} catch (Exception e) {
 			e.printStackTrace();

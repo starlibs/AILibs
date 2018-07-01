@@ -2,6 +2,7 @@ package jaicore.ml.core;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.List;
 
 import weka.core.Attribute;
@@ -20,30 +21,36 @@ public class FeatureSpace {
 		this();
 		for (int i = 0; i < data.numAttributes(); i++) {
 			Attribute attr = data.attribute(i);
-			if (attr.type() == Attribute.NUMERIC) {
+			if (attr.isNumeric()) {
+//				NumericFeatureDomain domain = new NumericFeatureDomain(false, attr.getLowerNumericBound(), attr.getUpperNumericBound());
+//						for debugging
 				NumericFeatureDomain domain = new NumericFeatureDomain(false, -5000.0d, 5000.d);
 				featureDomains.add(domain);
-				System.out.println();
-				// } else if(attr.type() == Attribute.NOMINAL) {
-				// String[] values = attr.
-				// CategoricalFeatureDomain domain = new CategoricalFeatureDomain()
-			} else {
-				// TODO add categorical features!!!
+			} 
+			else if(attr.isNominal() || attr.isString()) {
+				String[] attrVals = new String[attr.numValues()];
+				for(int valIndex = 0; valIndex < attr.numValues(); valIndex++)
+					attrVals[valIndex] = attr.value(valIndex);
+				CategoricalFeatureDomain domain = new CategoricalFeatureDomain(attrVals);
+				featureDomains.add(domain);
+			}
+			else {
 				throw new IllegalArgumentException("Attribute type not supported!");
 			}
-
 		}
 	}
 
 	public FeatureSpace(List<FeatureDomain> domains) {
 		featureDomains = new ArrayList<FeatureDomain>();
-		for (FeatureDomain domain : domains)
+		for (FeatureDomain domain : domains) {
 			if (domain instanceof NumericFeatureDomain) {
 				NumericFeatureDomain numDomain = (NumericFeatureDomain) domain;
-				FeatureDomain nDomain = new NumericFeatureDomain(numDomain.isInteger(), numDomain.getMin(), numDomain.getMax());
-				featureDomains.add(nDomain);
+				featureDomains.add(new NumericFeatureDomain(numDomain));
+			} else if (domain instanceof CategoricalFeatureDomain) {
+				CategoricalFeatureDomain catDomain = (CategoricalFeatureDomain) domain;
+				featureDomains.add(new CategoricalFeatureDomain(catDomain));
 			}
-		// TODO add support for categorical features
+		}
 	}
 
 	public FeatureSpace(FeatureSpace space) {

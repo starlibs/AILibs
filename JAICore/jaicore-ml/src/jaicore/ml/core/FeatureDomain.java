@@ -31,5 +31,5 @@ public abstract class FeatureDomain {
 	 * @return true iff contained in the domain
 	 */
 	abstract public boolean containsInstance(double value);
-
+	
 }

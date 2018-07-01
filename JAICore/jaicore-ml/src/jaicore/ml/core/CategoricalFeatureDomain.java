@@ -20,11 +20,16 @@ public class CategoricalFeatureDomain extends FeatureDomain {
 		super();
 		this.values = values;
 	}
+	
+	public CategoricalFeatureDomain(CategoricalFeatureDomain domain) {
+		super();
+		this.values = domain.values;
+	}
 
 	public CategoricalFeatureDomain(final Collection<String> values) {
 		this(values.toArray(new String[] {}));
 	}
-
+	
 	public String[] getValues() {
 		return this.values;
 	}

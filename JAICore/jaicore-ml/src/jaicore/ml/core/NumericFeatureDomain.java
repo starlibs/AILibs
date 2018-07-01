@@ -18,6 +18,13 @@ public class NumericFeatureDomain extends FeatureDomain{
 		this.min = min;
 		this.max = max;
 	}
+	
+	public NumericFeatureDomain(NumericFeatureDomain domain) {
+		super();
+		this.isInteger = domain.isInteger;
+		this.min = domain.min;
+		this.max = domain.max;
+	}
 
 	public boolean isInteger() {
 		return this.isInteger;
