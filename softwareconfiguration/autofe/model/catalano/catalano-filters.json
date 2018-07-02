@@ -7,8 +7,8 @@
     "parameter" : [ {
     	"name" : "catFilter",
     	"type" : "cat",
-    	"default" : "None",
-    	"values" : ["None", "GaussianBlur", "SobelEdgeDetector", "ExtractBoundary", "DifferenceEdgeDetector", "Erosion", "FastVariance", "Emboss", "GaborFilter", "HighBoost", "HomogenityEdgeDetector","HorizontalRunLengthSmoothing", "ImageQuantization","ImageNormalization", "MorphologicGradientImage", "KirschCompassEdgeDetector", "IsotropicCompassEdgeDetector", "RobertsCrossEdgeDetector", "SobelCompassEdgeDetector", "WeightedMedian"]
+    	"default" : "NonePreprocessor",
+    	"values" : ["NonePreprocessor", "GaussianBlur", "SobelEdgeDetector", "ExtractBoundary", "DifferenceEdgeDetector", "Erosion", "FastVariance", "Emboss", "GaborFilter", "HighBoost", "HomogenityEdgeDetector","HorizontalRunLengthSmoothing", "ImageQuantization","ImageNormalization", "MorphologicGradientImage", "KirschCompassEdgeDetector", "IsotropicCompassEdgeDetector", "RobertsCrossEdgeDetector", "SobelCompassEdgeDetector", "WeightedMedian"]
     }],
     "dependencies" : [ ]
   }, {
@@ -18,10 +18,15 @@
     "parameter" : [ ],
     "dependencies" : [ ]
   }, {
-  	"name": "NoneExtractor",
+  	"name": "CatalanoExtractor",
   	"requiredInterface": [],
   	"providedInterface": ["BasicExtractor"],
-  	"parameter": [],
+  	"parameter": [{
+    	"name" : "catFilter",
+    	"type" : "cat",
+    	"default" : "NoneExtractor",
+    	"values" : ["NoneExtractor", "UniformLocalBinaryPattern", "RobustLocalBinaryPattern"]
+    }],
   	"dependencies": []
   }
   ]

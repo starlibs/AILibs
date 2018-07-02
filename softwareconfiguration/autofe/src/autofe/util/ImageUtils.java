@@ -28,7 +28,12 @@ import Catalano.Imaging.Filters.RobertsCrossEdgeDetector;
 import Catalano.Imaging.Filters.SobelCompassEdgeDetector;
 import Catalano.Imaging.Filters.SobelEdgeDetector;
 import Catalano.Imaging.Filters.WeightedMedian;
-import autofe.algorithm.hasco.filter.image.CatalanoWrapperFilter;
+import Catalano.Imaging.Texture.BinaryPattern.RobustLocalBinaryPattern;
+import Catalano.Imaging.Texture.BinaryPattern.UniformLocalBinaryPattern;
+import Catalano.Imaging.Tools.ImageHistogram;
+import autofe.algorithm.hasco.filter.image.CatalanoBinaryPatternFilter;
+import autofe.algorithm.hasco.filter.image.CatalanoInPlaceFilter;
+import autofe.algorithm.hasco.filter.meta.IFilter;
 
 public final class ImageUtils {
 
@@ -129,50 +134,82 @@ public final class ImageUtils {
 		return ColorSpace.Grayscale;
 	}
 
-	public static CatalanoWrapperFilter getCatalanoFilterByName(final String name) {
+	public static IFilter getCatalanoFilterByName(final String name) {
 		switch (name) {
 		case "GaussianBlur":
-			return new CatalanoWrapperFilter(new GaussianBlur(), false);
+			return new CatalanoInPlaceFilter(new GaussianBlur(), false);
 		case "SobelEdgeDetector":
-			return new CatalanoWrapperFilter(new SobelEdgeDetector(), true);
+			return new CatalanoInPlaceFilter(new SobelEdgeDetector(), true);
 		case "ExtractBoundary":
-			return new CatalanoWrapperFilter(new ExtractBoundary(), true);
+			return new CatalanoInPlaceFilter(new ExtractBoundary(), true);
 		case "DifferenceEdgeDetector":
-			return new CatalanoWrapperFilter(new DifferenceEdgeDetector(), true);
+			return new CatalanoInPlaceFilter(new DifferenceEdgeDetector(), true);
 		case "Erosion":
-			return new CatalanoWrapperFilter(new Erosion(), false);
+			return new CatalanoInPlaceFilter(new Erosion(), false);
 		case "FastVariance":
-			return new CatalanoWrapperFilter(new FastVariance(), false);
+			return new CatalanoInPlaceFilter(new FastVariance(), false);
 		case "Emboss":
-			return new CatalanoWrapperFilter(new Emboss(), false);
+			return new CatalanoInPlaceFilter(new Emboss(), false);
 		case "GaborFilter":
-			return new CatalanoWrapperFilter(new GaborFilter(), true);
+			return new CatalanoInPlaceFilter(new GaborFilter(), true);
 		case "HighBoost":
-			return new CatalanoWrapperFilter(new HighBoost(), false);
+			return new CatalanoInPlaceFilter(new HighBoost(), false);
 		case "HomogenityEdgeDetector":
-			return new CatalanoWrapperFilter(new HomogenityEdgeDetector(), true);
+			return new CatalanoInPlaceFilter(new HomogenityEdgeDetector(), true);
 		case "HorizontalRunLengthSmoothing":
-			return new CatalanoWrapperFilter(new HorizontalRunLengthSmoothing(), true);
+			return new CatalanoInPlaceFilter(new HorizontalRunLengthSmoothing(), true);
 		case "ImageQuantization":
-			return new CatalanoWrapperFilter(new ImageQuantization(), true);
+			return new CatalanoInPlaceFilter(new ImageQuantization(), true);
 		case "ImageNormalization":
-			return new CatalanoWrapperFilter(new ImageNormalization(), true);
+			return new CatalanoInPlaceFilter(new ImageNormalization(), true);
 		case "MorphologicGradientImage":
-			return new CatalanoWrapperFilter(new MorphologicGradientImage(), true);
+			return new CatalanoInPlaceFilter(new MorphologicGradientImage(), true);
 		case "KirschCompassEdgeDetector":
-			return new CatalanoWrapperFilter(new KirschCompassEdgeDetector(), false);
+			return new CatalanoInPlaceFilter(new KirschCompassEdgeDetector(), false);
 		case "IsotropicCompassEdgeDetector":
-			return new CatalanoWrapperFilter(new IsotropicCompassEdgeDetector(), false);
+			return new CatalanoInPlaceFilter(new IsotropicCompassEdgeDetector(), false);
 		case "RobertsCrossEdgeDetector":
-			return new CatalanoWrapperFilter(new RobertsCrossEdgeDetector(), true);
+			return new CatalanoInPlaceFilter(new RobertsCrossEdgeDetector(), true);
 		case "SobelCompassEdgeDetector":
-			return new CatalanoWrapperFilter(new SobelCompassEdgeDetector(), false);
+			return new CatalanoInPlaceFilter(new SobelCompassEdgeDetector(), false);
 		case "WeightedMedian":
-			return new CatalanoWrapperFilter(new WeightedMedian(), false);
-		case "None":
-			return new CatalanoWrapperFilter(null, false);
+			return new CatalanoInPlaceFilter(new WeightedMedian(), false);
+		case "NonePreprocessor":
+			return new CatalanoInPlaceFilter(null, false);
+
+		/* Binary pattern */
+		case "NoneExtractor":
+			return new CatalanoBinaryPatternFilter(null, false);
+		case "UniformLocalBinaryPattern":
+			return new CatalanoBinaryPatternFilter(new UniformLocalBinaryPattern(), true);
+		case "RobustLocalBinaryPattern":
+			return new CatalanoBinaryPatternFilter(new RobustLocalBinaryPattern(), true);
+		// case "ExtractNormalizedRGBChannel":
+		// return new CatalanoExtractFilter(new ExtractNormalizedRGBChannel(), false,
+		// true);
+
 		default:
-			return new CatalanoWrapperFilter(new GaussianBlur(), false);
+			// Return identity
+			return new CatalanoInPlaceFilter(null, false);
 		}
+	}
+
+	public static INDArray imageHistorgramToMatrix(final ImageHistogram histogram) {
+
+		INDArray result = Nd4j.create(histogram.getValues().length + 9);
+		double[] values = histogram.Normalize();
+		for (int i = 0; i < values.length; i++) {
+			result.putScalar(i, values[i]);
+		}
+		result.putScalar(values.length, histogram.getMean());
+		result.putScalar(values.length + 1, histogram.getStdDev());
+		result.putScalar(values.length + 2, histogram.getEntropy());
+		result.putScalar(values.length + 3, histogram.getKurtosis());
+		result.putScalar(values.length + 4, histogram.getSkewness());
+		result.putScalar(values.length + 5, histogram.getMedian());
+		result.putScalar(values.length + 6, histogram.getMode());
+		result.putScalar(values.length + 7, histogram.getMin());
+		result.putScalar(values.length + 8, histogram.getMax());
+		return result;
 	}
 }

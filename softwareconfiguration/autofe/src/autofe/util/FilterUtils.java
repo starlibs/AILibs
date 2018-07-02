@@ -19,14 +19,18 @@ public final class FilterUtils {
 	public static IFilter getFilterForName(final String name, final Map<String, String> parameters) {
 		// Image filters
 		if (name.startsWith("autofe.algorithm.hasco.filter.image")) {
+			String catFilter;
 			switch (name) {
 			case "autofe.algorithm.hasco.filter.image.CatalanoWrapperFilter":
-				String paramValue = parameters.get("catFilter");
-				return ImageUtils.getCatalanoFilterByName(paramValue);
+				catFilter = parameters.get("catFilter");
+				return ImageUtils.getCatalanoFilterByName(catFilter);
 			case "autofe.algorithm.hasco.filter.image.LocalBinaryPatternFilter":
 				return new LocalBinaryPatternFilter();
-			case "NoneExtractor":
-				return getDefaultFilter();
+			case "CatalanoExtractor":
+				catFilter = parameters.get("catFilter");
+				return ImageUtils.getCatalanoFilterByName(catFilter);
+			// case "NoneExtractor":
+			// return getDefaultFilter();
 			}
 		}
 

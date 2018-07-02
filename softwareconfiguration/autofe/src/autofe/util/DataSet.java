@@ -4,12 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import weka.core.Instances;
 
 public class DataSet {
 	private Instances instances;
 	private List<INDArray> intermediateInstances;
+	
+	private static final Logger logger = LoggerFactory.getLogger(DataSet.class);
 
 	public DataSet(final Instances instances, final List<INDArray> intermediateInstances) {
 		this.instances = instances;
@@ -45,13 +49,9 @@ public class DataSet {
 	}
 
 	public void updateInstances() {
-
 		if (this.intermediateInstances != null) {
-			System.out.println("Updating instances...");
-			System.out.println("Num intermediate matrices: " + this.intermediateInstances.size());
 			this.instances = DataSetUtils.matricesToInstances(this.intermediateInstances, this.instances);
-			System.out.println("Num instances new: " + this.instances.numInstances());
-		} else
-			System.out.println("No updates");
+		} else 
+			logger.debug("Could not update any instance due to lack of intermediate instances.");
 	}
 }
