@@ -36,6 +36,14 @@
 			<param name="ConversionPattern" value="(%d{ISO8601}) %-5p [%t] [%c{1}.%M:%L] - %m%n" />
 		</layout>
 	</appender>
+	
+	<appender name="debugFileAppender" class="org.apache.log4j.FileAppender">
+		<param name="File" value="logs/debug.log" />
+		<param name="Threshold" value="DEBUG" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="(%d{ISO8601}) %-5p [%t] [%c{1}.%M:%L] - %m%n" />
+		</layout>
+	</appender>
 
 	<appender name="traceFileAppender" class="org.apache.log4j.FileAppender">
 		<param name="File" value="logs/trace.log" />
@@ -61,8 +69,13 @@
 	</logger>
 	
 	<logger name="autofe">
-		<level value="info" />
+		<level value="debug" />
 		<appender-ref ref="console" />
+		<appender-ref ref="infoFileAppender" />
+		<appender-ref ref="warnFileAppender" />
+		<appender-ref ref="errFileAppender" />
+		<appender-ref ref="traceFileAppender" />
+		<appender-ref ref="debugFileAppender" />
 	</logger>
 
 <!-- 	<logger name="hascofe"> -->

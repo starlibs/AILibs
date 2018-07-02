@@ -39,80 +39,90 @@ public final class DataSetUtils {
 		}
 		return new FastBitmap(image);
 	}
-	
+
+	// 1024 / 1024 / 1024: red / green / blue channel
 	public static INDArray cifar10InstanceToMatrix(final Instance instance) {
-		return Nd4j.create(instance.toDoubleArray());
+		INDArray result = Nd4j.create(32, 32, 3);
+		double[] imageValues = instance.toDoubleArray();
+		if (imageValues.length != (32 * 32 * 3 + 1))
+			throw new IllegalArgumentException("Cifar 10 instances must have the dimensionality of 32 x 32 x 3");
+
+		for (int i = 0; i < 32; i++) {
+			for (int j = 0; j < 32; j++) {
+				int offset = i + 1;
+				// INDArray rgb = Nd4j.create(new double[] { imageValues[offset * j],
+				// imageValues[1024 + offset * j],
+				// imageValues[2048 + offset * j] });
+				result.putScalar(new int[] { i, j, 0 }, imageValues[offset * j]);
+				result.putScalar(new int[] { i, j, 1 }, imageValues[1024 + offset * j]);
+				result.putScalar(new int[] { i, j, 2 }, imageValues[2048 + offset * j]);
+			}
+		}
+
+		return result;
 	}
-	
+
 	public static Instances bitmapsToInstances(final List<FastBitmap> images, final Instances refInstances) {
-		
-		if(images == null || images.size() == 0)
+
+		if (images == null || images.size() == 0)
 			throw new IllegalArgumentException("Parameter 'images' must not be null or empty!");
-		
+
 		// Create attributes
 		ArrayList<Attribute> attributes = new ArrayList<>();
-		for(int i=0; i<images.iterator().next().getRGBData().length; i++) {
+		for (int i = 0; i < images.iterator().next().getRGBData().length; i++) {
 			attributes.add(new Attribute("val" + i));
 		}
 		attributes.add(refInstances.classAttribute());
-		
+
 		Instances result = new Instances("Instances", attributes, refInstances.size());
 		result.setClassIndex(result.numAttributes() - 1);
-		
-		for(int i=0; i<images.size(); i++) {
+
+		for (int i = 0; i < images.size(); i++) {
 			FastBitmap image = images.get(i);
 			int[] rgbData = image.getRGBData();
 			Instance inst = new DenseInstance(rgbData.length + 1);
-			for(int j=0; j<rgbData.length; i++) {
+			for (int j = 0; j < rgbData.length; i++) {
 				inst.setValue(j, rgbData[j]);
 			}
 			inst.setClassValue(refInstances.get(i).classValue());
 		}
-		
+
 		return result;
 	}
-	
+
 	public static Instances matricesToInstances(final List<INDArray> matrices, final Instances refInstances) {
-		if(matrices == null || matrices.size() == 0)
+		if (matrices == null || matrices.size() == 0)
 			throw new IllegalArgumentException("Parameter 'matrices' must not be null or empty!");
-		
+
 		// Create attributes
 		ArrayList<Attribute> attributes = new ArrayList<>();
-		for(int i=0; i<matrices.get(0).length(); i++) {
+		for (int i = 0; i < matrices.get(0).length(); i++) {
 			attributes.add(new Attribute("val" + i));
 		}
 		attributes.add(refInstances.classAttribute());
-		
+
 		Instances result = new Instances("Instances", attributes, refInstances.size());
 		result.setClassIndex(result.numAttributes() - 1);
-		
-		for(int i=0; i<matrices.size(); i++) {
+
+		for (int i = 0; i < matrices.size(); i++) {
 
 			// Initialize instance
 			Instance inst = new DenseInstance(attributes.size());
 			inst.setDataset(result);
-			
+
 			// Update instance entries
 			INDArray matrix = matrices.get(i);
-			for(int j=0; j< matrix.length(); j++) {
+			for (int j = 0; j < matrix.length(); j++) {
 				inst.setValue(j, matrix.getDouble(j));
 			}
-			
+
 			// Set class value
 			inst.setClassValue(refInstances.get(i).classValue());
+
+			result.add(inst);
 		}
-		
+
 		return result;
 
 	}
-	
-//	private int getArrayDepth(final double[] array) {
-//		Object object = array;
-//		int depth = 0;
-//		while(object instanceof double[]) {
-//			depth++;
-//			object = ((double[]) object)[0];
-//		}
-//		return depth;
-//	}
 }

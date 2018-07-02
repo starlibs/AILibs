@@ -17,6 +17,7 @@ import autofe.algorithm.hasco.evaluation.AbstractHASCOFEObjectEvaluator;
 import autofe.algorithm.hasco.filter.meta.FilterPipeline;
 import autofe.algorithm.hasco.filter.meta.FilterPipelineFactory;
 import autofe.util.DataSet;
+import autofe.util.FilterUtils;
 import hasco.core.HASCOFD;
 import hasco.core.Solution;
 import hasco.model.Component;
@@ -30,11 +31,16 @@ import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;
 import jaicore.search.algorithms.standard.core.INodeEvaluator;
 import jaicore.search.structure.core.Node;
 
-public class HASCOFE<T> implements IObservableGraphAlgorithm<TFDNode, String>, ILoggingCustomizable {
+/**
+ * HASCO Feature Engineering class executing a HASCO run using
+ * <code>FilterPipeline</code> objects.
+ * 
+ * @author Julian
+ *
+ */
+public class HASCOFE implements IObservableGraphAlgorithm<TFDNode, String>, ILoggingCustomizable {
 
 	// Search relevant properties
-	// private AbstractConfiguration config;
-	// TODO: Unify
 	private File configFile;
 	private HASCOFD<FilterPipeline> hasco;
 	private HASCOFD<FilterPipeline>.HASCOSolutionIterator hascoRun;
@@ -86,7 +92,6 @@ public class HASCOFE<T> implements IObservableGraphAlgorithm<TFDNode, String>, I
 		if (this.loggerName != null && this.loggerName.length() > 0)
 			this.hasco.setLoggerName(loggerName + ".hasco");
 
-		// TODO: Configure HASCO (Inject filters components)
 		try {
 			ComponentLoader cl = new ComponentLoader();
 			cl.loadComponents(this.configFile);
@@ -95,7 +100,7 @@ public class HASCOFE<T> implements IObservableGraphAlgorithm<TFDNode, String>, I
 		} catch (IOException e) {
 			logger.warn("Could not import configuration file. Using default components instead...");
 			e.printStackTrace();
-			final List<Component> components = getDefaultComponents();
+			final List<Component> components = FilterUtils.getDefaultComponents();
 			this.hasco.addComponents(components);
 		}
 
@@ -163,25 +168,6 @@ public class HASCOFE<T> implements IObservableGraphAlgorithm<TFDNode, String>, I
 
 	public HASCOFESolution getCurrentlyBestSolution() {
 		return this.solutionsFoundByHASCO.peek();
-	}
-
-	// TODO: Move this somewhere else
-	private static List<Component> getDefaultComponents() {
-		final List<Component> components = new ArrayList<>();
-
-		Component c = new Component("autofe.algorithm.hasco.filter.generic.AddConstantFilter");
-		c.addProvidedInterface("filter");
-		components.add(c);
-
-		Component c1 = new Component("autofe.algorithm.hasco.filter.generic.IdentityFilter");
-		c1.addProvidedInterface("filter");
-		components.add(c1);
-
-		Component c2 = new Component("FilterPipeline");
-		c2.addRequiredInterface("filter", "filter");
-		components.add(c2);
-
-		return components;
 	}
 
 	@Override

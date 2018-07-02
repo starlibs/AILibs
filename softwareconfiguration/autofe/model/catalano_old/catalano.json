@@ -1,9 +1,9 @@
 {
-	"repository" : "AutoFE test space",
-	"include": ["./filters.json"],
+	"repository" : "Catalano image filters",
+	"include": ["./catalano-filters.json"],
 	"components" : [ {
 	  	    "name" : "pipeline",
-	  	    "providedInterface" : [ "FilterPipeline"],
+	  	    "providedInterface" : [ "FilterPipeline" ],
 	  	    "requiredInterface" : [
 	  	    	{
 	  	    		"id": "pipe",
@@ -39,6 +39,5 @@
 	  	    	}
 			],
 	    	"parameter" : [ ]
-	    }
-	    ]
+	    }]
 }

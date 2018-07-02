@@ -1,5 +1,6 @@
 package autofe.util;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -30,16 +31,27 @@ public class DataSet {
 	public void setIntermediateInstances(List<INDArray> intermediateInstances) {
 		this.intermediateInstances = intermediateInstances;
 	}
-	
+
+	public DataSet copy() {
+		Instances copiedInstances = new Instances(this.instances);
+		List<INDArray> copiedIntermediates = null;
+		if (this.intermediateInstances != null) {
+			copiedIntermediates = new ArrayList<>();
+			for (INDArray array : this.intermediateInstances) {
+				copiedIntermediates.add(array.dup());
+			}
+		}
+		return new DataSet(copiedInstances, copiedIntermediates);
+	}
+
 	public void updateInstances() {
-		if(this.intermediateInstances != null)
+
+		if (this.intermediateInstances != null) {
+			System.out.println("Updating instances...");
+			System.out.println("Num intermediate matrices: " + this.intermediateInstances.size());
 			this.instances = DataSetUtils.matricesToInstances(this.intermediateInstances, this.instances);
-		
-		// TODO
-//		throw new UnsupportedOperationException("Not implemented yet.");
-//		if(this.intermediateInstances != null && this.intermediateInstances.get(0) instanceof FastBitmap)
-//			this.instances = DataSetUtils.bitmapsToInstances((List<FastBitmap>) getIntermediateInstances(), this.instances);
-//		else
-//			throw new UnsupportedOperationException("Not implemented yet.");
+			System.out.println("Num instances new: " + this.instances.numInstances());
+		} else
+			System.out.println("No updates");
 	}
 }
