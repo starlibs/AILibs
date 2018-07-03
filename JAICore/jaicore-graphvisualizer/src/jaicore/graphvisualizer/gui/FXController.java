@@ -28,9 +28,11 @@ import javafx.embed.swing.SwingNode;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.RadioButton;
 import javafx.scene.control.Slider;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.ToolBar;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.FileChooser;
 import javafx.util.StringConverter;
@@ -46,6 +48,9 @@ public class FXController implements Initializable, NodeListener {
     public Slider timeline;
     @FXML
     public TabPane tabPane;
+    
+    @FXML
+    public ToolBar toolbar;
 
     //control variables
     private int index;
@@ -96,6 +101,8 @@ public class FXController implements Initializable, NodeListener {
             int nIndex = (int) timeline.getValue();
             jumpTo(nIndex);
         });
+        
+       
 
     }
 
