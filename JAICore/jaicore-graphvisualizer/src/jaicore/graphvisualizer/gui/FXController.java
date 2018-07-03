@@ -24,6 +24,7 @@ import jaicore.graphvisualizer.events.controlEvents.ResetEvent;
 import jaicore.graphvisualizer.events.controlEvents.StepEvent;
 import jaicore.graphvisualizer.gui.dataSupplier.ISupplier;
 import jaicore.graphvisualizer.gui.dataVisualizer.IVisualizer;
+import jaicore.graphvisualizer.gui.dataVisualizer.NodeExpansionVisualizer;
 import javafx.embed.swing.SwingNode;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -182,9 +183,9 @@ public class FXController implements Initializable, NodeListener {
     public void save(ActionEvent actionEvent) {
         FileChooser chooser = new FileChooser();
         chooser.setTitle("Choose Event-File");
-//        File file = chooser.showSaveDialog(null);
+        File file = chooser.showSaveDialog(null);
 
-        File file = new File("/home/jkoepe/Documents/Test.txt");
+//        File file = new File("/home/jkoepe/Documents/Test.txt");
 
 
         this.controlEventBus.post(new FileEvent(false, file));
@@ -195,9 +196,9 @@ public class FXController implements Initializable, NodeListener {
     public void load(ActionEvent actionEvent) {
         FileChooser chooser = new FileChooser();
         chooser.setTitle("Choose Event-File");
-//        File file = chooser.showOpenDialog(null);
+        File file = chooser.showOpenDialog(null);
 
-        File file = new File("/home/jkoepe/Documents/Test.txt");
+//        File file = new File("/home/jkoepe/Documents/Test.txt");
 
         this.controlEventBus.post(new FileEvent(true, file));
 
@@ -238,42 +239,27 @@ public class FXController implements Initializable, NodeListener {
 
     public void registerSupplier(ISupplier supplier){
 
-//       IVisualizer visualizer = (IVisualizer) findClassByName(supplier.getVisualizerName());
-//
-
-//        if(supplier instanceof TooltipSupplier){
-//           IVisualizer visualizer= new TooltipVisualizer();
-//           supplier.registerListener(visualizer);
-//
-//           this.controlEventBus.register(supplier);
-//           this.controlEventBus.register(visualizer);
-//
-//
-//           Tab tab = new Tab();
-//           tab.setContent(visualizer.getVisualization());
-//    //       tab.setText(supplier.getVisualizerTitle());
-//           this.tabPane.getTabs().add(tab);
-//        }
-
         System.out.println(supplier.getClass().getSimpleName());
         try {
             ClassPath path = ClassPath.from(ClassLoader.getSystemClassLoader());
-            Set set = path.getAllClasses();
+            Set<?> set = path.getAllClasses();
             set.stream().forEach(cls->{
                 if(cls instanceof ClassPath.ClassInfo){
                     if(((ClassPath.ClassInfo) cls).getName().contains(".dataVisualizer.")){
                        IVisualizer v = (IVisualizer) findClassByName(((ClassPath.ClassInfo) cls).getName());
                        if(v!= null){
                             if(v.getSupplier() .equals(supplier.getClass().getSimpleName())){
-                                supplier.registerListener(v);
-                                this.controlEventBus.register(supplier);
-                               this.controlEventBus.register(v);
+                            	supplier.registerListener(v);
+                            	this.controlEventBus.register(supplier);
+                            	this.controlEventBus.register(v);
 
 
-                               Tab tab = new Tab();
-                               tab.setContent(v.getVisualization());
-                               tab.setText(v.getTitle());
-                               this.tabPane.getTabs().add(tab);
+                            	Tab tab = new Tab();
+                            	tab.setContent(v.getVisualization());
+                            	tab.setText(v.getTitle());
+                            	this.tabPane.getTabs().add(tab);
+                            	if(v instanceof NodeExpansionVisualizer)
+                            		toolbar.getItems().add(new RadioButton("NodeExpansion"));
 
                             }
                        }
