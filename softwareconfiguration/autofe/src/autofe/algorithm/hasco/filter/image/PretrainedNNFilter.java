@@ -15,16 +15,16 @@ import org.slf4j.LoggerFactory;
 import autofe.algorithm.hasco.filter.meta.IFilter;
 import autofe.util.DataSet;
 
+@SuppressWarnings("rawtypes")
 public class PretrainedNNFilter implements IFilter {
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(PretrainedNNFilter.class);
 
 	private ZooModel model;
 	private ComputationGraph compGraph;
-	
+
 	private int selectedLayer;
-	
-	
+
 	public PretrainedNNFilter(final ZooModel model, final int selectedLayer) {
 		this.model = model;
 		this.selectedLayer = selectedLayer;
@@ -36,26 +36,41 @@ public class PretrainedNNFilter implements IFilter {
 			e.printStackTrace();
 		}
 	}
-	
+
 	@Override
 	public DataSet applyFilter(DataSet inputData, boolean copy) {
-		
+
 		if (inputData.getIntermediateInstances() == null || inputData.getIntermediateInstances().size() == 0
 				|| inputData.getIntermediateInstances().get(0).rank() < 2)
 			throw new IllegalArgumentException(
 					"Intermediate instances must have a rank of at least 2 for image processing.");
-		
+
 		List<INDArray> transformedInstances = new ArrayList<>(inputData.getIntermediateInstances().size());
-		for(INDArray example : inputData.getIntermediateInstances()) {
-			Map<String, INDArray> result = this.compGraph.feedForward(example, this.selectedLayer, false);
+		for (INDArray example : inputData.getIntermediateInstances()) {
+
+			// TODO: Generic approach
+			INDArray adjustedExample = example.permute(2, 0, 1);
+			adjustedExample = adjustedExample.reshape(1, adjustedExample.shape()[0], adjustedExample.shape()[1],
+					adjustedExample.shape()[2]);
+			Map<String, INDArray> result = this.compGraph.feedForward(adjustedExample, this.selectedLayer, false);
 			Object[] values = result.values().toArray();
 			INDArray resultMatrix = (INDArray) values[values.length - 1];
 			transformedInstances.add(resultMatrix);
-			logger.info(resultMatrix.toString());
-			
 		}
-		
+
 		return new DataSet(inputData.getInstances(), transformedInstances);
 	}
-	
+
+	public ZooModel getModel() {
+		return model;
+	}
+
+	public ComputationGraph getCompGraph() {
+		return compGraph;
+	}
+
+	public int getSelectedLayer() {
+		return selectedLayer;
+	}
+
 }

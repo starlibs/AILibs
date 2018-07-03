@@ -61,7 +61,7 @@ dependencies {
 	compile files('lib/arpack_combined.jar')
 	compile files('lib/core.jar')
 	
-	compile 'org.nd4j:nd4j-native-platform:1.0.0-alpha'
+	compile 'org.nd4j:nd4j-native-platform:1.0.0-beta'
 	
 	// Deeplearning4j
 	compile "org.deeplearning4j:deeplearning4j-core:1.0.0-beta"

@@ -2,8 +2,14 @@ package autofe.util;
 
 import java.util.Arrays;
 
+import org.deeplearning4j.nn.conf.CacheMode;
+import org.deeplearning4j.nn.conf.WorkspaceMode;
+import org.deeplearning4j.nn.conf.layers.ConvolutionLayer.AlgoMode;
+import org.deeplearning4j.zoo.model.AlexNet;
+import org.deeplearning4j.zoo.model.VGG16;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
+import org.nd4j.linalg.learning.config.Nesterovs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +39,7 @@ import Catalano.Imaging.Texture.BinaryPattern.UniformLocalBinaryPattern;
 import Catalano.Imaging.Tools.ImageHistogram;
 import autofe.algorithm.hasco.filter.image.CatalanoBinaryPatternFilter;
 import autofe.algorithm.hasco.filter.image.CatalanoInPlaceFilter;
+import autofe.algorithm.hasco.filter.image.PretrainedNNFilter;
 import autofe.algorithm.hasco.filter.meta.IFilter;
 
 public final class ImageUtils {
@@ -191,6 +198,20 @@ public final class ImageUtils {
 		default:
 			// Return identity
 			return new CatalanoInPlaceFilter(null, false);
+		}
+	}
+
+	public static PretrainedNNFilter getPretrainedNNFilterByName(final String name, final int layer) {
+		switch (name) {
+		case "VGG16":
+			return new PretrainedNNFilter(new VGG16(42, new int[] { 1, 3, 32, 32 }, 10, new Nesterovs(1e-2, 0.9),
+					CacheMode.NONE, WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer);
+		case "AlexNet":
+			return new PretrainedNNFilter(new AlexNet(42, new int[] { 1, 3, 32, 32 }, 10, new Nesterovs(1e-2, 0.9),
+					CacheMode.NONE, WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer);
+		default:
+			return new PretrainedNNFilter(new VGG16(42, new int[] { 1, 3, 32, 32 }, 10, new Nesterovs(1e-2, 0.9),
+					CacheMode.NONE, WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer);
 		}
 	}
 

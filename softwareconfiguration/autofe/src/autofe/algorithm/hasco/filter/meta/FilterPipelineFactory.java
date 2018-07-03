@@ -15,6 +15,7 @@ public class FilterPipelineFactory implements Factory<FilterPipeline> {
 
 	private static final String UNION_NAME = "autofe.MakeUnion";
 	private static final String ABSTRACT_PIPE_NAME = "AbstractPipe";
+	private static final String NNPIPE_NAME = "NNPipe";
 
 	private static final Logger logger = LoggerFactory.getLogger(FilterPipelineFactory.class);
 
@@ -68,14 +69,27 @@ public class FilterPipelineFactory implements Factory<FilterPipeline> {
 
 					break;
 				case ABSTRACT_PIPE_NAME:
+				case NNPIPE_NAME:
 					// Extractor
-					ComponentInstance extractorCI = actCI.getSatisfactionOfRequiredInterfaces().get("extractor");
-					IFilter extractor = FilterUtils.getFilterForName(extractorCI.getComponent().getName(),
-							extractorCI.getParameterValues());
-					filterGraph.addItem(extractor);
-					filterGraph.addEdge(actCIFilter, extractor);
+					ComponentInstance extractorCI = null;
+					IFilter extractor = null;
+					if (actCI.getComponent().getName().equals(ABSTRACT_PIPE_NAME)) {
+						extractorCI = actCI.getSatisfactionOfRequiredInterfaces().get("extractor");
+						extractor = FilterUtils.getFilterForName(extractorCI.getComponent().getName(),
+								extractorCI.getParameterValues());
+						filterGraph.addItem(extractor);
+						filterGraph.addEdge(actCIFilter, extractor);
 
-					actCIFilter = extractor;
+						actCIFilter = extractor;
+					} else {
+						extractorCI = actCI.getSatisfactionOfRequiredInterfaces().get("net");
+						extractor = FilterUtils.getFilterForName(extractorCI.getComponent().getName(),
+								extractorCI.getParameterValues());
+						filterGraph.addItem(extractor);
+						filterGraph.addEdge(actCIFilter, extractor);
+
+						actCIFilter = extractor;
+					}
 
 					// Preprocessors
 					// Deepening pipe

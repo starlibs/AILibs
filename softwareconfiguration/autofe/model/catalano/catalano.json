@@ -53,5 +53,19 @@
 	  	    	}
 			],
 	    	"parameter" : [ ]
+	    }, {
+	    	"name": "NNPipe",
+	    	"providedInterface" : [ "AbstractFilter", "AbstractPipeline"],
+	    	"requiredInterface" : [
+	    		{
+	  	    		"id": "net",
+	  	    		"name": "PretrainedNN"
+	  	    	},
+	  	    	{
+	  	    		"id": "preprocessors",
+	  	    		"name": "Preprocessor"
+	  	    	}
+			],
+			"parameter" : [ ]
 	    }]
 }

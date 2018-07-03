@@ -28,6 +28,25 @@
     	"values" : ["NoneExtractor", "UniformLocalBinaryPattern", "RobustLocalBinaryPattern"]
     }],
   	"dependencies": []
+  }, {
+  	"name": "PretrainedNN",
+  	"requiredInterface": [],
+  	"providedInterface": ["PretrainedNN"],
+  	"parameter": [{
+    	"name" : "net",
+    	"type" : "cat",
+    	"default" : "VGG16",
+    	"values" : ["VGG16", "AlexNet"]
+    }, {
+      "name" : "layer",
+      "type" : "int",
+      "default" : 5.0,
+      "min" : 3.0,
+      "max" : 10.0,
+      "refineSplits" : 8,
+      "minInterval" : 10
+    }],
+  	"dependencies": []
   }
   ]
 }

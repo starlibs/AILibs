@@ -57,7 +57,7 @@ public class ImageAutoFETest {
 		HASCOFE hascoFE = new HASCOFE(new File("model/catalano/catalano.json"), n -> null,
 				new DataSet(split.get(0), intermediate), new ClusterEvaluator());
 		hascoFE.setLoggerName("autofe image");
-		hascoFE.runSearch(360 * 1000);
+		hascoFE.runSearch(120 * 1000);
 		HASCOFESolution solution = hascoFE.getCurrentlyBestSolution();
 		if (solution != null) {
 			logger.info(solution.toString());
