@@ -9,7 +9,7 @@
     <top>
         <BorderPane>
             <top>
-                <ToolBar>
+                <ToolBar fx:id="toolbar">
                     <Button onAction="#play" text="play" />
                     <Button onAction="#step" text="step" />
                     <Button onAction="#back" text="back" />
