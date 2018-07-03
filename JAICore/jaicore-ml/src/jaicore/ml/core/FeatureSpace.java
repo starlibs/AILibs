@@ -1,5 +1,6 @@
 package jaicore.ml.core;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -9,8 +10,12 @@ import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
 
-public class FeatureSpace {
+public class FeatureSpace implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4130427099174860007L;
 	private List<FeatureDomain> featureDomains;
 
 	public FeatureSpace() {
@@ -22,19 +27,18 @@ public class FeatureSpace {
 		for (int i = 0; i < data.numAttributes(); i++) {
 			Attribute attr = data.attribute(i);
 			if (attr.isNumeric()) {
-//				NumericFeatureDomain domain = new NumericFeatureDomain(false, attr.getLowerNumericBound(), attr.getUpperNumericBound());
-//						for debugging
+				// NumericFeatureDomain domain = new NumericFeatureDomain(false,
+				// attr.getLowerNumericBound(), attr.getUpperNumericBound());
+				// for debugging
 				NumericFeatureDomain domain = new NumericFeatureDomain(false, -5000.0d, 5000.d);
 				featureDomains.add(domain);
-			} 
-			else if(attr.isNominal() || attr.isString()) {
+			} else if (attr.isNominal() || attr.isString()) {
 				String[] attrVals = new String[attr.numValues()];
-				for(int valIndex = 0; valIndex < attr.numValues(); valIndex++)
+				for (int valIndex = 0; valIndex < attr.numValues(); valIndex++)
 					attrVals[valIndex] = attr.value(valIndex);
 				CategoricalFeatureDomain domain = new CategoricalFeatureDomain(attrVals);
 				featureDomains.add(domain);
-			}
-			else {
+			} else {
 				throw new IllegalArgumentException("Attribute type not supported!");
 			}
 		}

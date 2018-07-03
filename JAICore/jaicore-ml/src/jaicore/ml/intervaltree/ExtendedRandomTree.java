@@ -19,10 +19,8 @@ import jaicore.ml.core.FeatureDomain;
 import jaicore.ml.core.FeatureSpace;
 import jaicore.ml.core.Interval;
 import jaicore.ml.core.NumericFeatureDomain;
-import jaicore.ml.interfaces.Instance;
 import weka.classifiers.trees.RandomTree;
 //import weka.classifiers.trees.RandomTree.Tree;
-import weka.core.Instances;
 
 /**
  * Extension of a classic RandomTree to predict intervals. This class also
@@ -48,7 +46,6 @@ public class ExtendedRandomTree extends RandomTree {
 	private double totalVariance;
 	private double[][] observations;
 	private double[][] intervalSizes;
-	private double[][] leafDomainPercentages;
 
 	public ExtendedRandomTree() {
 		super();
@@ -178,7 +175,7 @@ public class ExtendedRandomTree extends RandomTree {
 				productOfFractions *= partitioning.get(leaf).getFeatureDomain(j).getRangeSize()
 						/ featureSpace.getFeatureDomain(j).getRangeSize();
 			}
-			System.out.println("prod of frac " + productOfFractions);
+			// System.out.println("prod of frac " + productOfFractions);
 			// in the regression case, this is the predicted value
 			productOfFractions *= leaf.getClassDistribution()[0];
 			// System.out.println(leaf.toString() + "s distribution: " +
@@ -238,15 +235,15 @@ public class ExtendedRandomTree extends RandomTree {
 		for (int valueIndex = 0; valueIndex < observations[featureIndex].length; valueIndex++) {
 			curObs[0] = observations[featureIndex][valueIndex];
 			double marginalPrediction = this.getMarginalPrediction(indicesOfObs, curObs);
-			System.out.println("marginal prediction: " + marginalPrediction);
+//			System.out.println("marginal prediction: " + marginalPrediction);
 			as.add(marginalPrediction);
 			double intervalSize = intervalSizes[featureIndex][valueIndex];
 			weightedSum += marginalPrediction * intervalSize;
 			weightedSumOfSquares += marginalPrediction * marginalPrediction * intervalSize;
 		}
 		double marginalVarianceContribution = weightedSumOfSquares - weightedSum * weightedSum;
-		System.out.println("marginal variance contribution: " + marginalVarianceContribution);
-		System.out.println("total variance: " + totalVariance);
+//		System.out.println("marginal variance contribution: " + marginalVarianceContribution);
+//		System.out.println("total variance: " + totalVariance);
 		fraction = marginalVarianceContribution / totalVariance;
 		return fraction;
 	}
@@ -262,12 +259,12 @@ public class ExtendedRandomTree extends RandomTree {
 			double sizeOfLeaf = partitioning.get(leaf).getRangeSizeOfFeatureSubspace(indices);
 			double sizeOfDomain = featureSpace.getRangeSizeOfFeatureSubspace(indices);
 			double fractionOfSpaceForThisLeaf = sizeOfLeaf / sizeOfDomain;
-			System.out.println("size of leaf " + sizeOfLeaf);
-			System.out.println("size of domain " + sizeOfDomain);
+//			System.out.println("size of leaf " + sizeOfLeaf);
+//			System.out.println("size of domain " + sizeOfDomain);
 			// predicted value c_i
 			double prediction = leaf.getClassDistribution()[0];
 			// System.out.println("prediction: " + prediction);
-			System.out.println("fraction of space for leave: " + fractionOfSpaceForThisLeaf);
+//			System.out.println("fraction of space for leave: " + fractionOfSpaceForThisLeaf);
 			result += prediction * fractionOfSpaceForThisLeaf;
 		}
 		return result;
@@ -320,6 +317,8 @@ public class ExtendedRandomTree extends RandomTree {
 		if (subSpace.getFeatureDomain(attribute) instanceof CategoricalFeatureDomain) {
 			for (Tree subtree : children) {
 				FeatureSpace childSubSpace = new FeatureSpace(subSpace);
+				double[] indicesOfValues = {splitPoint};
+				((CategoricalFeatureDomain) childSubSpace.getFeatureDomain(attribute)).setIndices(indicesOfValues);
 				// TODO remove all but the true elements from the categorical feature domain
 				// associated with the split attribute
 			}

@@ -14,22 +14,22 @@ import weka.core.Instance;
  */
 public class CategoricalFeatureDomain extends FeatureDomain {
 	private String[] values;
-	
+	private double[] indices;
 
 	public CategoricalFeatureDomain(final String[] values) {
 		super();
 		this.values = values;
 	}
-	
+
 	public CategoricalFeatureDomain(CategoricalFeatureDomain domain) {
 		super();
 		this.values = domain.values;
 	}
 
-	public CategoricalFeatureDomain(final Collection<String> values) {
+	public CategoricalFeatureDomain(final Collection<String> values, int[] indices) {
 		this(values.toArray(new String[] {}));
 	}
-	
+
 	public String[] getValues() {
 		return this.values;
 	}
@@ -85,14 +85,20 @@ public class CategoricalFeatureDomain extends FeatureDomain {
 
 	@Override
 	public double getRangeSize() {
-		return values.length;
+		// return values.length;
+		return indices.length;
+	}
+	
+	public void setIndices(double[] indices) {
+		this.indices = indices;
 	}
 
 	@Override
 	public boolean containsInstance(double value) {
-		boolean val = true;
-		
-		// TODO
+		for (int i = 0; i < indices.length; i++) {
+			if (indices[i] == value)
+				return true;
+		}
 		return false;
 	}
 }
