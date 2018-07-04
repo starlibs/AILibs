@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import de.upb.crc901.automl.hascowekaml.HASCOForWekaML;
 import de.upb.crc901.automl.hascowekaml.HASCOForWekaML.HASCOForWekaMLSolution;
+import hasco.model.Component;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.sets.SetUtil;
 import jaicore.concurrent.TimeoutTimer;
@@ -582,5 +583,9 @@ public class MLPlan extends AbstractClassifier implements Classifier, OptionHand
 		
 		new SimpleGraphVisualizationWindow<Node<TFDNode, Double>>(this).getPanel()
 		.setTooltipGenerator(new TFDTooltipGenerator<>());
+	}
+	
+	public Collection<Component> getComponents() {
+		return hasco.getComponents();
 	}
 }
