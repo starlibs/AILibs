@@ -3,14 +3,19 @@ package de.upb.crc901.mlplan.examples;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
 
+import de.upb.crc901.automl.hascowekaml.WEKAPipelineFactory;
 import de.upb.crc901.mlplan.multiclass.DefaultPreorder;
 import de.upb.crc901.mlplan.multiclass.MLPlan;
+import hasco.core.Util;
+import hasco.model.ComponentInstance;
 import jaicore.ml.WekaUtil;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.search.algorithms.standard.uncertainty.ISolutionDistanceMetric;
@@ -53,7 +58,18 @@ public class MLPlanExample {
 			
 			@Override
 			public double calculateSolutionDistance(TFDNode solution1, TFDNode solution2) {
-				// TODO Create correct similarity metric
+				ComponentInstance instance1;
+				if (solution1.getAppliedAction() == null) {
+					instance1 = Util.getSolutionCompositionForPlan(mlplan.getComponents(), solution1.getState(), new ArrayList<>());
+				} else {
+					instance1 = Util.getSolutionCompositionForPlan(mlplan.getComponents(), solution1.getState(), Arrays.asList(solution1.getAppliedAction()));
+				}
+				ComponentInstance instance2;
+				if (solution1.getAppliedAction() == null) {
+					instance2 = Util.getSolutionCompositionForPlan(mlplan.getComponents(), solution1.getState(), new ArrayList<>());
+				} else {
+					instance2 = Util.getSolutionCompositionForPlan(mlplan.getComponents(), solution1.getState(), Arrays.asList(solution1.getAppliedAction()));
+				}
 				return 0;
 			}
 		});

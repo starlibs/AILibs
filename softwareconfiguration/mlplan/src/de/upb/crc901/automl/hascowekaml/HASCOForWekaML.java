@@ -14,8 +14,10 @@ import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import hasco.core.HASCO;
 import hasco.core.HASCOFD;
 import hasco.core.Solution;
+import hasco.model.Component;
 import hasco.serialization.ComponentLoader;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.graph.observation.IObservableGraphAlgorithm;
@@ -45,6 +47,7 @@ public class HASCOForWekaML implements IObservableGraphAlgorithm<TFDNode, String
 	private OversearchAvoidanceConfig<TFDNode> oversearchAvoidanceConfig = new OversearchAvoidanceConfig<>(OversearchAvoidanceConfig.OversearchAvoidanceMode.NONE);
 	private Collection<Object> listeners = new ArrayList<>();
 	private HASCOFD<Classifier>.HASCOSolutionIterator hascoRun;
+	private HASCOFD<Classifier> hasco;
 	private INodeEvaluator<TFDNode, Double> preferredNodeEvaluator = n -> null;
 	private final File wekaSpaceConfigurationFile; // this is a hasco file describing the 
 	
@@ -70,7 +73,7 @@ public class HASCOForWekaML implements IObservableGraphAlgorithm<TFDNode, String
 		long deadline = start + timeoutInMS;
 
 		/* create algorithm */
-		HASCOFD<Classifier> hasco = new HASCOFD<>(new WEKAPipelineFactory(), this.preferredNodeEvaluator, "AbstractClassifier", new MonteCarloCrossValidationEvaluator(new MulticlassEvaluator(new Random(3)), 3, data, .7f), this.oversearchAvoidanceConfig);
+		hasco = new HASCOFD<>(new WEKAPipelineFactory(), this.preferredNodeEvaluator, "AbstractClassifier", new MonteCarloCrossValidationEvaluator(new MulticlassEvaluator(new Random(3)), 3, data, .7f), this.oversearchAvoidanceConfig);
 		if (this.loggerName != null && this.loggerName.length() > 0)
 			hasco.setLoggerName(loggerName + ".hasco");
 
@@ -142,4 +145,13 @@ public class HASCOForWekaML implements IObservableGraphAlgorithm<TFDNode, String
 	public void setOversearchAvoidanceMode(OversearchAvoidanceConfig oversearchAvoidanceConfig) {
 		this.oversearchAvoidanceConfig = oversearchAvoidanceConfig;
 	}
+	
+	public Collection<Component> getComponents() {
+		if (hasco == null || hasco.getComponents() == null || hasco.getComponents().size() == 0) {
+			return null;
+		} else {
+			return hasco.getComponents();
+		}
+	}
+	
 }
