@@ -49,12 +49,14 @@ public class KnapsackProblem {
 	private Set<String> objects;
 	private Map<String, Double> values;
 	private Map<String, Double> weights;
+	private Map<Set<String>, Double> bonusPoints;
 	private double knapsackCapacity;
 	
-	public KnapsackProblem(Set<String> objects, Map<String, Double> values, Map<String, Double> weights, double knapsackCapacity) {
+	public KnapsackProblem(Set<String> objects, Map<String, Double> values, Map<String, Double> weights, Map<Set<String>, Double> bonusPoints, double knapsackCapacity) {
 		this.objects = objects;
 		this.values = values;
 		this.weights = weights;
+		this.bonusPoints = bonusPoints;
 		this.knapsackCapacity = knapsackCapacity;
 	}
 	
@@ -120,6 +122,18 @@ public class KnapsackProblem {
 					double packedValue = 0.0d;
 					for (String object : packedKnapsack.getPackedObjects()) {
 						packedValue += values.get(object);
+					}
+					for (Set<String> bonusCombination : bonusPoints.keySet()) {
+						boolean allContained = true;
+						for (String object : bonusCombination ) {
+							if (!packedKnapsack.getPackedObjects().contains(object)) {
+								allContained = false;
+								break;
+							}
+						}
+						if (allContained) {
+							packedValue += bonusPoints.get(bonusCombination);
+						}
 					}
 					return packedValue;
 				}

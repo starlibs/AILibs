@@ -23,6 +23,7 @@ public class KnapsackOptimizationTest {
 	private Set<String> objects;
 	private Map<String, Double> weights;
 	private Map<String, Double> values;
+	private Map<Set<String>, Double> bonusPoints;
 	
 	@Test
 	public void testKnapsackProblem() {
@@ -52,7 +53,12 @@ public class KnapsackOptimizationTest {
 		values.put("7", 84.0d);
 		values.put("8", 87.0d);
 		values.put("9", 72.0d);
-		KnapsackProblem knapsackProblem = new KnapsackProblem(objects, values, weights, 165);
+		bonusPoints = new HashMap<>();
+		Set<String> bonusCombination = new HashSet<>();
+		bonusCombination.add("0");
+		bonusCombination.add("2");
+		bonusPoints.put(bonusCombination, 25.0d);
+		KnapsackProblem knapsackProblem = new KnapsackProblem(objects, values, weights, bonusPoints, 165);
 		ORGraphSearch<KnapsackNode, String, Double> search = new ORGraphSearch<>(
 				knapsackProblem.getGraphGenerator(),
 				new RandomCompletionEvaluator<>(
@@ -97,6 +103,7 @@ public class KnapsackOptimizationTest {
 				bestPacking += "0";
 			}
 		}
+		System.out.println("Best knapsack has the value: " + bestValue);
 		assertEquals(bestPacking, "1111010000");
 	}
 	
@@ -107,6 +114,18 @@ public class KnapsackOptimizationTest {
 			double value = 0.0d;
 			for (String object: knapsack.getPackedObjects()) {
 				value += values.get(object);
+			}
+			for (Set<String> bonusCombination : bonusPoints.keySet()) {
+				boolean allContained = true;
+				for (String object : bonusCombination ) {
+					if (!knapsack.getPackedObjects().contains(object)) {
+						allContained = false;
+						break;
+					}
+				}
+				if (allContained) {
+					value += bonusPoints.get(bonusCombination);
+				}
 			}
 			return value;
 		}
