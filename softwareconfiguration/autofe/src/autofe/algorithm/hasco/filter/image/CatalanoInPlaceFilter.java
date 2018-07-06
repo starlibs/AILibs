@@ -11,7 +11,7 @@ import Catalano.Imaging.IApplyInPlace;
 import autofe.util.DataSet;
 import autofe.util.ImageUtils;
 
-public class CatalanoInPlaceFilter extends CatalanoFilter<IApplyInPlace> {
+public class CatalanoInPlaceFilter extends AbstractCatalanoFilter<IApplyInPlace> {
 
 	public CatalanoInPlaceFilter(final IApplyInPlace filter, final boolean requiresGrayscale) {
 		this.setCatalanoFilter(filter);

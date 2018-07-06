@@ -15,14 +15,32 @@ import org.slf4j.LoggerFactory;
 import autofe.algorithm.hasco.filter.meta.IFilter;
 import autofe.util.DataSet;
 
+/**
+ * Wrapper filter for pretrained neural nets taken from Deeplearning4j framework
+ * (e. g. AlexNet, VGG16, ...).
+ * 
+ * @author Julian Lienen
+ *
+ */
 @SuppressWarnings("rawtypes")
 public class PretrainedNNFilter implements IFilter {
 
 	private static final Logger logger = LoggerFactory.getLogger(PretrainedNNFilter.class);
 
+	/**
+	 * Neural net model (description of the net)
+	 */
 	private ZooModel model;
+
+	/**
+	 * Computational graph (concrete layered structure of the net). Used to access
+	 * activations when predicting.
+	 */
 	private ComputationGraph compGraph;
 
+	/**
+	 * Layer used for feature extraction
+	 */
 	private int selectedLayer;
 
 	public PretrainedNNFilter(final ZooModel model, final int selectedLayer) {

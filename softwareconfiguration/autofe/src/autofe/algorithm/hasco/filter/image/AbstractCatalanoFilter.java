@@ -2,7 +2,15 @@ package autofe.algorithm.hasco.filter.image;
 
 import autofe.algorithm.hasco.filter.meta.IFilter;
 
-public abstract class CatalanoFilter<T> implements IFilter {
+/**
+ * Abstract wrapper filter for catalano filters.
+ * 
+ * @author Julian Lienen
+ *
+ * @param <T>
+ *            Type (interface) of the wrapped catalano filters.
+ */
+public abstract class AbstractCatalanoFilter<T> implements IFilter {
 	private T catalanoFilter;
 	private boolean requiresGrayscale;
 
@@ -20,5 +28,11 @@ public abstract class CatalanoFilter<T> implements IFilter {
 
 	public void setRequiresGrayscale(boolean requiresGrayscale) {
 		this.requiresGrayscale = requiresGrayscale;
+	}
+
+	@Override
+	public String toString() {
+		return this.getClass().getSimpleName() + " ["
+				+ (this.getCatalanoFilter() != null ? this.getCatalanoFilter().getClass().getSimpleName() : "") + "]";
 	}
 }

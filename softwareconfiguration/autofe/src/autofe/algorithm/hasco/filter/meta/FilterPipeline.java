@@ -45,7 +45,12 @@ public class FilterPipeline implements IFilter, Serializable {
 	}
 
 	@Override
-	public DataSet applyFilter(final DataSet inputData, final boolean copy) {
+	public DataSet applyFilter(final DataSet data, final boolean copy) {
+		if (this.filters == null)
+			return data;
+
+		DataSet inputData = copy ? data.copy() : data;
+
 		// Copy graph
 		Graph<FilterDataEntry> dataGraph = this.copyGraphIntoDataGraph();
 
@@ -115,8 +120,11 @@ public class FilterPipeline implements IFilter, Serializable {
 	public String toString() {
 		StringBuilder result = new StringBuilder();
 		result.append("FilterPipeline: ");
-		for (IFilter filter : this.filters.getItems())
-			result.append(filter.getClass().getSimpleName() + ", ");
+		if (this.filters == null)
+			result.append("Empty");
+		else
+			for (IFilter filter : this.filters.getItems())
+				result.append(filter.toString() + ", ");
 		return result.toString();
 	}
 

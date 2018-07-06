@@ -5,11 +5,13 @@ import java.util.List;
 import java.util.Map;
 
 import autofe.algorithm.hasco.filter.generic.AddConstantFilter;
+import autofe.algorithm.hasco.filter.generic.AddRandomFilter;
 import autofe.algorithm.hasco.filter.generic.IdentityFilter;
 import autofe.algorithm.hasco.filter.image.LocalBinaryPatternFilter;
 import autofe.algorithm.hasco.filter.meta.IFilter;
 import autofe.algorithm.hasco.filter.meta.UnionFilter;
 import hasco.model.Component;
+import hasco.model.ComponentInstance;
 
 public final class FilterUtils {
 	private FilterUtils() {
@@ -43,6 +45,8 @@ public final class FilterUtils {
 			return new AddConstantFilter();
 		case "autofe.algorithm.hasco.filter.generic.IdentityFilter":
 			return new IdentityFilter();
+		case "autofe.algorithm.hasco.filter.generic.AddRandomFilter":
+			return new AddRandomFilter();
 		case "autofe.MakeUnion":
 			return new UnionFilter();
 		default:
@@ -69,6 +73,47 @@ public final class FilterUtils {
 		c2.addRequiredInterface("filter", "filter");
 		components.add(c2);
 
+		Component c3 = new Component("autofe.algorithm.hasco.filter.generic.AddRandomFilter");
+		c3.addProvidedInterface("filter");
+		components.add(c3);
+
 		return components;
+	}
+
+	/**
+	 * Pretty print utility function used to print deep component instance
+	 * hierarchies also printing the filters of wrapper filters.
+	 * 
+	 * @param ci
+	 *            Starting component instance of the hierarchy
+	 * @param offset
+	 *            Tabular offset
+	 * @return Returns a textual representation of the component structure
+	 */
+	public static String getPrettyPrint(final ComponentInstance ci, int offset) {
+		StringBuilder sb = new StringBuilder();
+
+		switch (ci.getComponent().getName()) {
+		case "autofe.algorithm.hasco.filter.image.CatalanoWrapperFilter":
+		case "CatalanoExtractor":
+			sb.append(ci.getParameterValues().get("catFilter") + "\n");
+			break;
+		case "PretrainedNN":
+			sb.append(ci.getParameterValues().get("net") + ": " + ci.getParameterValues().get("layer") + "\n");
+			break;
+		default:
+			sb.append(ci.getComponent().getName() + "\n");
+		}
+		for (String requiredInterface : ci.getComponent().getRequiredInterfaces().keySet()) {
+			for (int i = 0; i < offset + 1; i++)
+				sb.append("\t");
+			sb.append(requiredInterface);
+			sb.append(": ");
+			if (ci.getSatisfactionOfRequiredInterfaces().containsKey(requiredInterface))
+				sb.append(getPrettyPrint(ci.getSatisfactionOfRequiredInterfaces().get(requiredInterface), offset + 1));
+			else
+				sb.append("null\n");
+		}
+		return sb.toString();
 	}
 }

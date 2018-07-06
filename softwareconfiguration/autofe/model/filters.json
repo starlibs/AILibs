@@ -3,13 +3,19 @@
   "components" : [ {
     "name" : "autofe.algorithm.hasco.filter.generic.AddConstantFilter",
     "requiredInterface" : [ ],
-    "providedInterface" : [ "AbstractFilter", "BasicFilter" ],
+    "providedInterface" : [ "AbstractFilter", "BasicFilter", "AbstractPipeline" ],
     "parameter" : [ ],
     "dependencies" : [ ]
   }, {
     "name" : "autofe.algorithm.hasco.filter.generic.IdentityFilter",
     "requiredInterface" : [ ],
-    "providedInterface" : [ "AbstractFilter" , "BasicFilter"],
+    "providedInterface" : [ "AbstractFilter" , "BasicFilter", "AbstractPipeline"],
+    "parameter" : [ ],
+    "dependencies" : [ ]
+  }, {
+    "name" : "autofe.algorithm.hasco.filter.generic.AddRandomFilter",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "AbstractFilter" , "BasicFilter", "AbstractPipeline"],
     "parameter" : [ ],
     "dependencies" : [ ]
   }

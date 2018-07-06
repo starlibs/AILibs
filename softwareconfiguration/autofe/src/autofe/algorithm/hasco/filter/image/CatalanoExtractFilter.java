@@ -11,7 +11,7 @@ import Catalano.Imaging.IExtract;
 import autofe.util.DataSet;
 import autofe.util.ImageUtils;
 
-public class CatalanoExtractFilter extends CatalanoFilter<IExtract> {
+public class CatalanoExtractFilter extends AbstractCatalanoFilter<IExtract> {
 
 	private boolean requiresRGB;
 

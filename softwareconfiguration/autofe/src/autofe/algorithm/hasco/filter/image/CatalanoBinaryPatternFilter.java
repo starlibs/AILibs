@@ -12,7 +12,7 @@ import Catalano.Imaging.Tools.ImageHistogram;
 import autofe.util.DataSet;
 import autofe.util.ImageUtils;
 
-public class CatalanoBinaryPatternFilter extends CatalanoFilter<IBinaryPattern> {
+public class CatalanoBinaryPatternFilter extends AbstractCatalanoFilter<IBinaryPattern> {
 
 	public CatalanoBinaryPatternFilter(final IBinaryPattern filter, final boolean requiresGrayscale) {
 		this.setCatalanoFilter(filter);
@@ -51,5 +51,4 @@ public class CatalanoBinaryPatternFilter extends CatalanoFilter<IBinaryPattern> 
 
 		return new DataSet(inputData.getInstances(), transformedInstances);
 	}
-
 }

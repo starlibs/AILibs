@@ -13,6 +13,7 @@ import java.util.Queue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import autofe.algorithm.hasco.evaluation.AbstractHASCOFENodeEvaluator;
 import autofe.algorithm.hasco.evaluation.AbstractHASCOFEObjectEvaluator;
 import autofe.algorithm.hasco.filter.meta.FilterPipeline;
 import autofe.algorithm.hasco.filter.meta.FilterPipelineFactory;
@@ -28,14 +29,13 @@ import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionSolution;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;
-import jaicore.search.algorithms.standard.core.INodeEvaluator;
 import jaicore.search.structure.core.Node;
 
 /**
  * HASCO Feature Engineering class executing a HASCO run using
  * <code>FilterPipeline</code> objects.
  * 
- * @author Julian
+ * @author Julian Lienen
  *
  */
 public class HASCOFE implements IObservableGraphAlgorithm<TFDNode, String>, ILoggingCustomizable {
@@ -44,7 +44,7 @@ public class HASCOFE implements IObservableGraphAlgorithm<TFDNode, String>, ILog
 	private File configFile;
 	private HASCOFD<FilterPipeline> hasco;
 	private HASCOFD<FilterPipeline>.HASCOSolutionIterator hascoRun;
-	private INodeEvaluator<TFDNode, Double> nodeEvaluator;
+	// private INodeEvaluator<TFDNode, Double> nodeEvaluator;
 
 	// Logging
 	private Logger logger = LoggerFactory.getLogger(HASCOFE.class);
@@ -73,7 +73,7 @@ public class HASCOFE implements IObservableGraphAlgorithm<TFDNode, String>, ILog
 		}
 	}
 
-	public HASCOFE(final File config, INodeEvaluator<TFDNode, Double> nodeEvaluator, final DataSet data,
+	public HASCOFE(final File config, AbstractHASCOFENodeEvaluator nodeEvaluator, final DataSet data,
 			AbstractHASCOFEObjectEvaluator benchmark) {
 
 		if (config == null || !config.exists())
@@ -81,14 +81,24 @@ public class HASCOFE implements IObservableGraphAlgorithm<TFDNode, String>, ILog
 					"The file " + config + " is null or does not exist and cannot be used by ML-Plan");
 
 		this.configFile = config;
-		this.nodeEvaluator = nodeEvaluator;
-		this.initializeHASCOSearch(data, benchmark);
+		this.initializeHASCOSearch(data, nodeEvaluator, benchmark);
 	}
 
-	private void initializeHASCOSearch(final DataSet data, AbstractHASCOFEObjectEvaluator benchmark) {
+	private void initializeHASCOSearch(final DataSet data, AbstractHASCOFENodeEvaluator nodeEvaluator,
+			AbstractHASCOFEObjectEvaluator benchmark) { // AbstractHASCOFEObjectEvaluator
+		// benchmark
 		benchmark.setData(data);
+		if (nodeEvaluator != null) {
+			nodeEvaluator.setHascoFE(this);
+			nodeEvaluator.setData(data);
 
-		this.hasco = new HASCOFD<>(new FilterPipelineFactory(), this.nodeEvaluator, "FilterPipeline", benchmark);
+			this.hasco = new HASCOFD<>(new FilterPipelineFactory(), nodeEvaluator, "FilterPipeline", benchmark);
+		} else {
+			this.hasco = new HASCOFD<>(new FilterPipelineFactory(), n -> null, "FilterPipeline", benchmark);
+		}
+
+		// TODO
+		// this.hasco.setNumberOfCPUs(4);
 		if (this.loggerName != null && this.loggerName.length() > 0)
 			this.hasco.setLoggerName(loggerName + ".hasco");
 
@@ -197,4 +207,7 @@ public class HASCOFE implements IObservableGraphAlgorithm<TFDNode, String>, ILog
 				.setTooltipGenerator(new TFDTooltipGenerator<>());
 	}
 
+	public HASCOFD<FilterPipeline> getHasco() {
+		return hasco;
+	}
 }

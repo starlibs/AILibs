@@ -1,6 +1,7 @@
 package autofe.algorithm.hasco.filter.generic;
 
 import java.util.Enumeration;
+import java.util.Random;
 
 import autofe.algorithm.hasco.filter.meta.IFilter;
 import autofe.util.DataSet;
@@ -9,26 +10,16 @@ import weka.core.Instance;
 import weka.core.Instances;
 
 /**
- * Simple filter adding a constant value to each instance attribute value.
+ * Simple filter adding noise to each instance value (to deteriorate results).
  * 
  * @author Julian Lienen
  *
  */
-public class AddConstantFilter implements IFilter {
-
-	private double constant = 1;
-
-	public AddConstantFilter() {
-		super();
-	}
-
-	public AddConstantFilter(final double constant) {
-		super();
-		this.constant = constant;
-	}
+public class AddRandomFilter implements IFilter {
 
 	@Override
-	public DataSet applyFilter(DataSet inputData, final boolean copy) {
+	public DataSet applyFilter(DataSet inputData, boolean copy) {
+		Random random = new Random();
 
 		Instances transformedInstances;
 		if (copy)
@@ -40,18 +31,11 @@ public class AddConstantFilter implements IFilter {
 			while (atts.hasMoreElements()) {
 				Attribute att = atts.nextElement();
 				if (att.isNumeric())
-					inst.setValue(att, inst.value(att) + this.constant);
+					inst.setValue(att, inst.value(att) + random.nextInt(10000));
 			}
 		}
 
 		return new DataSet(transformedInstances, inputData.getIntermediateInstances());
 	}
 
-	public double getConstant() {
-		return constant;
-	}
-
-	public void setConstant(double constant) {
-		this.constant = constant;
-	}
 }

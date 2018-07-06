@@ -17,7 +17,7 @@
 	  	    "requiredInterface" : [
 	  	    	{
 	  	    		"id": "filter1",
-	  	    		"name": "AbstractFilter"
+	  	    		"name": "AbstractPipeline"
 	  	    	},
 	  	    	{
 	  	    		"id": "filter2",
@@ -27,7 +27,7 @@
 	    	"parameter" : [ ]
 	    }, {
 	  	    "name" : "autofe.MakeForward",
-	  	    "providedInterface" : [ "AbstractFilter", "MakeForward"],
+	  	    "providedInterface" : [ "AbstractFilter", "MakeForward", "AbstractPipeline"],
 	  	    "requiredInterface" : [
 	  	    	{
 	  	    		"id": "filter",
@@ -35,7 +35,7 @@
 	  	    	},
 	  	    	{
 	  	    		"id": "source",
-	  	    		"name": "AbstractFilter"
+	  	    		"name": "AbstractPipeline"
 	  	    	}
 			],
 	    	"parameter" : [ ]
