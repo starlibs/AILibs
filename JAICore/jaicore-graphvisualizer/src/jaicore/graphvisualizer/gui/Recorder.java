@@ -28,8 +28,8 @@ import jaicore.graphvisualizer.events.controlEvents.ControlEvent;
 import jaicore.graphvisualizer.events.controlEvents.FileEvent;
 import jaicore.graphvisualizer.events.controlEvents.StepEvent;
 import jaicore.graphvisualizer.gui.dataSupplier.ISupplier;
-import jaicore.graphvisualizer.gui.dataSupplier.NodeExpansionSupplier;
 import jaicore.graphvisualizer.gui.dataSupplier.ReconstructionDataSupplier;
+
 
 public class Recorder<T> implements IObservableGraphAlgorithm {
 
@@ -191,7 +191,7 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 		}
 	}
 
-	private Object counterEvent(Object event) {
+	public Object counterEvent(Object event) {
 		Object counter = null;
 
 
@@ -356,10 +356,8 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 
 	public void addDataSupplier(ISupplier supplier){
 		this.suppliers.add(supplier);
-		if(algorithm != null && !(supplier instanceof NodeExpansionSupplier))
+		if(algorithm != null)
 			algorithm.registerListener(supplier);
-		if(supplier instanceof NodeExpansionSupplier)
-			this.registerListener(supplier);
 		this.infoBus.post(new AddSupplierEvent(supplier));
 	}
 

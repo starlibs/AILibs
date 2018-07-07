@@ -10,8 +10,8 @@ import org.junit.Test;
 import jaicore.basic.PerformanceLogger;
 import jaicore.basic.PerformanceLogger.PerformanceMeasure;
 import jaicore.graphvisualizer.gui.VisualizationWindow;
-import jaicore.graphvisualizer.gui.dataSupplier.NodeExpansionSupplier;
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
+import jaicore.search.graphvisualizer.dataSupplier.NodeExpansionSupplier;
 import jaicore.search.graphvisualizer.dataSupplier.TooltipSupplier;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
@@ -53,7 +53,7 @@ public class NodeExpansionTester {
 
 			@Override
 			public NodeGoalTester<TestNode> getGoalTester() {
-				return l -> l.value == 1000;
+				return l -> l.value == 5;
 			}
 			
 			@Override
@@ -69,7 +69,7 @@ public class NodeExpansionTester {
 			
 		};
 		
-		BestFirst<TestNode,String> bf = new BestFirst<>(gen, n -> (double)Math.round(Math.random() * 1000));
+		BestFirst<TestNode,String> bf = new BestFirst<>(gen, n -> (double)Math.round(Math.random() * 5));
 
 		
 		VisualizationWindow win = new VisualizationWindow<Node<TestNode, Double>>(bf, "BestFirst");
