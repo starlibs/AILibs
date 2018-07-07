@@ -6,6 +6,10 @@ import org.apache.commons.math3.linear.RealVector;
 
 public class AlternatingGradientDescent implements IHeterogenousSimilarityMeasureComputer {
 	
+	/**
+	 * Used to compute the RRt matrix.
+	 */
+	private IRankMatrixSimilarityComputer rankMatrixSimilarityComputer = new RankMatrixSimilarityComputer();
 	private RealMatrix U;
 	private RealMatrix V_transposed;
 
@@ -24,6 +28,20 @@ public class AlternatingGradientDescent implements IHeterogenousSimilarityMeasur
 	
 	private RealMatrix convertRealVectorToMatrix(RealVector vector) {
 		return new Array2DRowRealMatrix(vector.toArray()).transpose();
+	}
+
+	/**
+	 * @return the rankMatrixSimilarityComputer
+	 */
+	public IRankMatrixSimilarityComputer getRankMatrixSimilarityComputer() {
+		return rankMatrixSimilarityComputer;
+	}
+
+	/**
+	 * @param rankMatrixSimilarityComputer the rankMatrixSimilarityComputer to set
+	 */
+	public void setRankMatrixSimilarityComputer(IRankMatrixSimilarityComputer rankMatrixSimilarityComputer) {
+		this.rankMatrixSimilarityComputer = rankMatrixSimilarityComputer;
 	}
 
 }
