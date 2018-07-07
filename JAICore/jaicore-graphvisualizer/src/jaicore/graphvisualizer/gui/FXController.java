@@ -258,8 +258,7 @@ public class FXController implements Initializable, NodeListener {
                             	tab.setContent(v.getVisualization());
                             	tab.setText(v.getTitle());
                             	this.tabPane.getTabs().add(tab);
-                            	if(v instanceof NodeExpansionVisualizer)
-                            		toolbar.getItems().add(new RadioButton("NodeExpansion"));
+                            	
 
                             }
                        }

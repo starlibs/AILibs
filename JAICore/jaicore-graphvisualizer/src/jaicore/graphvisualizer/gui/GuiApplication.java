@@ -10,8 +10,16 @@ public class GuiApplication extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         this.gui = new FXGui();
-
-
     }
+
+
+	@Override
+	public void stop() throws Exception {
+	
+		super.stop();
+		System.exit(0);
+	}
+    
+    
 
 }
