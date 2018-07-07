@@ -5,13 +5,18 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import hasco.model.Component;
 import hasco.model.ComponentInstance;
+import hasco.model.Parameter;
 import jaicore.basic.SQLAdapter;
 import jaicore.ml.intervaltree.ExtendedRandomTree;
 
@@ -24,12 +29,28 @@ import jaicore.ml.intervaltree.ExtendedRandomTree;
 
 public class PerformanceKnowledgeBase implements IKnowledgeBase {
 
-	private final SQLAdapter sqlAdapter;
+	private SQLAdapter sqlAdapter;
 	private Map<String, HashMap<ComponentInstance, Double>> performanceSamples;
 
 	public PerformanceKnowledgeBase(final SQLAdapter sqlAdapter) {
 		super();
 		this.sqlAdapter = sqlAdapter;
+		this.performanceSamples = new HashMap<String, HashMap<ComponentInstance, Double>>();
+	}
+
+	public Set<Component> getPipeline(ComponentInstance composition) {
+		HashSet<Component> pipeline = new HashSet<Component>();
+		pipeline.add(composition.getComponent());
+		Collection<ComponentInstance> componentInstances = composition.getSatisfactionOfRequiredInterfaces().values();
+		for(ComponentInstance componentInstance : componentInstances) {
+			pipeline.add(componentInstance.getComponent());
+		}
+		// build a representation of the components in the pipeline
+		return pipeline;
+	}
+
+	public PerformanceKnowledgeBase() {
+		super();
 		this.performanceSamples = new HashMap<String, HashMap<ComponentInstance, Double>>();
 	}
 
@@ -87,6 +108,11 @@ public class PerformanceKnowledgeBase implements IKnowledgeBase {
 
 	public void loadPerformanceSamplesFromDB() {
 		// TODO
+	}
+
+	public double getImportanceOfParam(Parameter param) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 }

@@ -19,6 +19,7 @@ import com.google.common.eventbus.EventBus;
 import hasco.events.HASCORunStartedEvent;
 import hasco.events.HASCORunTerminatedEvent;
 import hasco.events.HASCOSolutionEvaluationEvent;
+import hasco.knowledgebase.PerformanceKnowledgeBase;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
 import hasco.model.NumericParameterDomain;
@@ -110,6 +111,9 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 	
 	/* list of listeners */
 	private final Collection<Object> listeners = new ArrayList<>();
+	
+	/* performance knowledge base */
+	private PerformanceKnowledgeBase performanceKB = new PerformanceKnowledgeBase();
 
 	public HASCO(final IObservableGraphBasedHTNPlanningAlgorithmFactory<R, N, A, V> plannerFactory, final IObservableORGraphSearchFactory<N, A, V> searchFactory,
 			final IHASCOSearchSpaceUtilFactory<N, A, V> searchSpaceUtilFactory, final INodeEvaluator<N, V> nodeEvaluator, final Factory<? extends T> factory,
@@ -450,7 +454,7 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 
 	private CEOCIPSTNPlanningProblem getPlanningProblem(final CEOCIPSTNPlanningDomain domain, final CNFFormula knowledge, final Monom init) {
 		Map<String, EvaluablePredicate> evaluablePredicates = new HashMap<>();
-		evaluablePredicates.put("isValidParameterRangeRefinement", new isValidParameterRangeRefinementPredicate(this.components, this.paramRefinementConfig));
+		evaluablePredicates.put("isValidParameterRangeRefinement", new isValidParameterRangeRefinementPredicate(this.components, this.paramRefinementConfig, this.performanceKB));
 		evaluablePredicates.put("notRefinable", new isNotRefinable(this.components, this.paramRefinementConfig));
 		evaluablePredicates.put("refinementCompleted", new isRefinementCompletedPredicate(this.components, this.paramRefinementConfig));
 		return new CEOCIPSTNPlanningProblem(domain, knowledge, init, new TaskNetwork(RESOLVE_COMPONENT_IFACE_PREFIX + this.nameOfRequiredInterface + "('request', 'solution')"),
