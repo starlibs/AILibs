@@ -2,6 +2,9 @@ package jaicore.graphvisualizer.gui.dataVisualizer;
 
 import javax.swing.SwingUtilities;
 
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
+
 import jaicore.graphvisualizer.SearchVisualizationPanel;
 import javafx.embed.swing.SwingNode;
 import javafx.scene.Node;
@@ -9,14 +12,17 @@ import javafx.scene.Node;
 public class NodeExpansionVisualizer implements IVisualizer {
 	
 	SwingNode node;
-	
+	SearchVisualizationPanel panel;
+	EventBus bus = new EventBus();
 	
 	public NodeExpansionVisualizer() {
 		node = new SwingNode();
 		
-		SearchVisualizationPanel panel = new SearchVisualizationPanel();
+		 panel = new SearchVisualizationPanel();
 		
 		SwingUtilities.invokeLater(()->node.setContent(panel));
+		
+		bus.register(panel);
 	}
 
 	@Override
@@ -35,6 +41,15 @@ public class NodeExpansionVisualizer implements IVisualizer {
 	public Node getVisualization() {
 		// TODO Auto-generated method stub
 		return node;
+	}
+	
+	@Subscribe
+	public void receiveEvents(Object event) {
+		bus.post(event);
+	}
+	
+	public SearchVisualizationPanel getPanel() {
+		return this.panel;
 	}
 
 }
