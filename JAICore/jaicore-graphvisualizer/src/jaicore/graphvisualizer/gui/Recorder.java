@@ -1,12 +1,26 @@
 package jaicore.graphvisualizer.gui;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
+
 import jaicore.graph.observation.IObservableGraphAlgorithm;
-import jaicore.graphvisualizer.events.*;
+import jaicore.graphvisualizer.events.GraphInitializedEvent;
+import jaicore.graphvisualizer.events.NodeReachedEvent;
+import jaicore.graphvisualizer.events.NodeRemovedEvent;
+import jaicore.graphvisualizer.events.NodeTypeSwitchEvent;
+import jaicore.graphvisualizer.events.VisuEvent;
 import jaicore.graphvisualizer.events.add.AddSupplierEvent;
 import jaicore.graphvisualizer.events.add.InfoEvent;
 import jaicore.graphvisualizer.events.add.RequestSuppliersEvent;
@@ -14,11 +28,8 @@ import jaicore.graphvisualizer.events.controlEvents.ControlEvent;
 import jaicore.graphvisualizer.events.controlEvents.FileEvent;
 import jaicore.graphvisualizer.events.controlEvents.StepEvent;
 import jaicore.graphvisualizer.gui.dataSupplier.ISupplier;
+import jaicore.graphvisualizer.gui.dataSupplier.NodeExpansionSupplier;
 import jaicore.graphvisualizer.gui.dataSupplier.ReconstructionDataSupplier;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
 
 public class Recorder<T> implements IObservableGraphAlgorithm {
 
@@ -345,8 +356,10 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 
 	public void addDataSupplier(ISupplier supplier){
 		this.suppliers.add(supplier);
-		if(algorithm != null)
+		if(algorithm != null && !(supplier instanceof NodeExpansionSupplier))
 			algorithm.registerListener(supplier);
+		if(supplier instanceof NodeExpansionSupplier)
+			this.registerListener(supplier);
 		this.infoBus.post(new AddSupplierEvent(supplier));
 	}
 
