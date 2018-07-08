@@ -42,8 +42,8 @@ public class NumericFeatureDomain extends FeatureDomain{
 		this.min = min;
 	}
 	
-	public void setMax(double min) {
-		this.min = min;
+	public void setMax(double max) {
+		this.max = max;
 	}
 
 	@Override
