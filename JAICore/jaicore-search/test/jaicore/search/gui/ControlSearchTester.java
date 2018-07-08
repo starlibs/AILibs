@@ -69,7 +69,7 @@ public class ControlSearchTester {
 			
 		};
 		
-		ControllableSearch<TestNode,String> bf = new ControllableSearch<>(gen, n -> (double)Math.round(Math.random() * 1000));
+		ControllableBestFirst<TestNode,String> bf = new ControllableBestFirst<>(gen, n -> (double)Math.round(Math.random() * 1000));
 
 		
 		VisualizationWindow win = new VisualizationWindow<Node<TestNode, Double>>(bf, "BestFirst");

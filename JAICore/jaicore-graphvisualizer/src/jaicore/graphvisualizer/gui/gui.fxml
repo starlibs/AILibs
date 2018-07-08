@@ -18,6 +18,7 @@
                     <Button onAction="#save" text="save" />
                     <Button onAction="#load" text="load" />
                     <Button onAction="#requestSupplier" text="supplier" />
+                    <RadioButton onAction="#liveButton" text="live" fx:id="livebutton"/>
                 </ToolBar>
             </top>
             <bottom>
