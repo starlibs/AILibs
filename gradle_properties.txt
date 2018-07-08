@@ -1,0 +1,7 @@
+nexusBaseUrl=https://nexus.cs.upb.de
+nexusUpRepo=sfb901
+nexusDownRepo=sfb901
+nexusUser=gradleuser
+nexusPassword=c0b11c2a6d
+systemProp.sonar.host.url=https://sonarqube.cs.upb.de
+systemProp.sonar.login=7e2c95001d242115e76fa8bb0f0377158230010d

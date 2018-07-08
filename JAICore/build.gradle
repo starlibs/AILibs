@@ -31,7 +31,7 @@ configure(subprojects.findAll()) {
 
 	//Dependencies for all(!) projects
 	dependencies {
-	
+
 		// Apache Commons Lang3
 		compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.6'
 
@@ -44,7 +44,7 @@ configure(subprojects.findAll()) {
 
 		// Weka and MEKA
 		compile group: 'de.upb.isys', name: 'meka', version: '0.0.1'
-		compile group: 'de.upb.isys', name: 'interruptable-weka', version: '0.0.1'
+		compile group: 'de.upb.isys', name: 'interruptable-weka', version: '0.0.2'
 
 		// Basics
 		compile 'com.google.guava:guava:18.0'
