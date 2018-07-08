@@ -18,10 +18,7 @@ import jaicore.graphvisualizer.SearchVisualizationPanel;
 import jaicore.graphvisualizer.events.add.AddSupplierEvent;
 import jaicore.graphvisualizer.events.add.InfoEvent;
 import jaicore.graphvisualizer.events.add.RequestSuppliersEvent;
-import jaicore.graphvisualizer.events.controlEvents.FileEvent;
-import jaicore.graphvisualizer.events.controlEvents.NodePushed;
-import jaicore.graphvisualizer.events.controlEvents.ResetEvent;
-import jaicore.graphvisualizer.events.controlEvents.StepEvent;
+import jaicore.graphvisualizer.events.controlEvents.*;
 import jaicore.graphvisualizer.gui.dataSupplier.ISupplier;
 import jaicore.graphvisualizer.gui.dataVisualizer.IVisualizer;
 import jaicore.graphvisualizer.gui.dataVisualizer.NodeExpansionVisualizer;
@@ -54,11 +51,15 @@ public class FXController implements Initializable, NodeListener {
     @FXML
     public ToolBar toolbar;
 
+    @FXML
+    public RadioButton livebutton;
+
     //control variables
     private int index;
     private int maxIndex;
     private long sleepTime;
     private int numberSuppliers;
+    private boolean live;
 
     //EventBus
     private EventBus controlEventBus;
@@ -74,6 +75,7 @@ public class FXController implements Initializable, NodeListener {
         this.maxIndex = 0;
         this.sleepTime = 50;
         this.numberSuppliers = 0;
+        this.live = false;
 
         this.controlEventBus = new EventBus();
 
@@ -141,8 +143,10 @@ public class FXController implements Initializable, NodeListener {
      */
     @FXML
     public void step(ActionEvent actionEvent) {
-        if(index == maxIndex)
+        if(index == maxIndex && ! live)
             return;
+
+
         this.controlEventBus.post(new StepEvent(true, 1));
         this.index ++;
         this.timeline.setValue(index);
@@ -204,11 +208,27 @@ public class FXController implements Initializable, NodeListener {
         this.controlEventBus.post(new FileEvent(true, file));
 
     }
-    
+
+    /**
+     * Request the suppliers of the recorder to get show the visualizers
+     * @param event
+     */
     @FXML
     public void requestSupplier(ActionEvent event) {
     	this.cleanVisualizer();
     	this.controlEventBus.post(new RequestSuppliersEvent());
+    }
+
+    @FXML
+    public void liveButton(ActionEvent event){
+        if(index == maxIndex) {
+            if (live)
+                live = false;
+            else
+                live = true;
+
+            this.controlEventBus.post(new IsLiveEvent(live));
+        }
     }
 
     private void jumpTo(int newIndex){
@@ -349,6 +369,7 @@ public class FXController implements Initializable, NodeListener {
     }
     
     public void registerObject(Object listener) {
+    	
     	this.controlEventBus.register(listener);
     }
 }

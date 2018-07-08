@@ -26,6 +26,7 @@ import jaicore.graphvisualizer.events.add.InfoEvent;
 import jaicore.graphvisualizer.events.add.RequestSuppliersEvent;
 import jaicore.graphvisualizer.events.controlEvents.ControlEvent;
 import jaicore.graphvisualizer.events.controlEvents.FileEvent;
+import jaicore.graphvisualizer.events.controlEvents.IsLiveEvent;
 import jaicore.graphvisualizer.events.controlEvents.StepEvent;
 import jaicore.graphvisualizer.gui.dataSupplier.ISupplier;
 import jaicore.graphvisualizer.gui.dataSupplier.ReconstructionDataSupplier;
@@ -47,6 +48,8 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 
 	//Index to know where in the replay the recorder is
 	private int index;
+
+	private boolean live;
 
 	//EventBuses
 	private EventBus replayBus;
@@ -76,6 +79,7 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 		this.infoBus = new EventBus();
 
 		this.nodeMap = new HashMap<>();
+		this.live = false;
 
 	}
 
@@ -110,6 +114,12 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 //		if(! dataSuppliers.isEmpty())
 //			for(INodeDataSupplier supplier : dataSuppliers)
 //				supplier.receiveEvent(event);
+
+		if(live){
+			//TODO check
+			this.replayBus.post(event);
+			this.index = receivedEvents.size()-1;
+		}
 	}
 
 	@Subscribe
@@ -118,11 +128,13 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 
 		switch(eventName){
 			case "StepEvent":
-				StepEvent stepEvent = (StepEvent) event;
-				if(stepEvent.forward())
-					forward(stepEvent.getSteps());
-				else
-					backward(stepEvent.getSteps());
+				if(!live) {
+					StepEvent stepEvent = (StepEvent) event;
+					if (stepEvent.forward())
+						forward(stepEvent.getSteps());
+					else
+						backward(stepEvent.getSteps());
+				}
 				break;
 
 			case "FileEvent":
@@ -135,6 +147,11 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 
 			case "ResetEvent":
 				reset();
+				break;
+
+			case "IsLiveEvent":
+				IsLiveEvent islive = (IsLiveEvent)event;
+				this.live= islive.isLive();
 				break;
 			default:
 //				System.out.println(eventName);
