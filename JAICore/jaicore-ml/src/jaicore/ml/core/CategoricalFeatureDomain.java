@@ -13,10 +13,9 @@ import weka.core.Instance;
  *
  */
 public class CategoricalFeatureDomain extends FeatureDomain {
-	private String[] values;
-	private double[] indices;
+	private double[] values;
 
-	public CategoricalFeatureDomain(final String[] values) {
+	public CategoricalFeatureDomain(final double[] values) {
 		super();
 		this.values = values;
 	}
@@ -26,11 +25,12 @@ public class CategoricalFeatureDomain extends FeatureDomain {
 		this.values = domain.values;
 	}
 
-	public CategoricalFeatureDomain(final Collection<String> values, int[] indices) {
-		this(values.toArray(new String[] {}));
-	}
+	// public CategoricalFeatureDomain(final Collection<String> values, int[]
+	// indices) {
+	// this(values.toArray(new String[] {}));
+	// }
 
-	public String[] getValues() {
+	public double[] getValues() {
 		return this.values;
 	}
 
@@ -56,16 +56,17 @@ public class CategoricalFeatureDomain extends FeatureDomain {
 		return true;
 	}
 
-	@Override
-	public boolean contains(Object item) {
-		if (item == null)
-			throw new IllegalArgumentException("Cannot request membership of NULL in a categorical parameter domain.");
-		String itemAsString = item.toString();
-		for (int i = 0; i < values.length; i++)
-			if (values[i].equals(itemAsString))
-				return true;
-		return false;
-	}
+	// @Override
+	// public boolean contains(Object item) {
+	// if (item == null)
+	// throw new IllegalArgumentException("Cannot request membership of NULL in a
+	// categorical parameter domain.");
+	// double itemAsDouble = (double) item;
+	// for (int i = 0; i < values.length; i++)
+	// if (values[i].equals(itemAsDouble))
+	// return true;
+	// return false;
+	// }
 
 	// TODO do I need this?
 	// @Override
@@ -80,23 +81,33 @@ public class CategoricalFeatureDomain extends FeatureDomain {
 
 	@Override
 	public String toString() {
-		return "CategoricalParameterDomain [values=" + Arrays.toString(values) + "]";
+		return "CategoricalFeatureDomain [values=" + Arrays.toString(values) + "]";
 	}
 
 	@Override
 	public double getRangeSize() {
 		// return values.length;
-		return indices.length;
+		return values.length;
 	}
-	
-	public void setIndices(double[] indices) {
-		this.indices = indices;
+
+	public void setValues(double[] values) {
+		this.values = values;
 	}
 
 	@Override
 	public boolean containsInstance(double value) {
-		for (int i = 0; i < indices.length; i++) {
-			if (indices[i] == value)
+		for (int i = 0; i < values.length; i++) {
+			if (values[i] == value)
+				return true;
+		}
+		return false;
+	}
+
+	@Override
+	public boolean contains(Object item) {
+		double value = (double) item;
+		for (int i = 0; i < values.length; i++) {
+			if (values[i] == value)
 				return true;
 		}
 		return false;

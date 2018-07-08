@@ -27,16 +27,19 @@ public class FeatureSpace implements Serializable {
 		for (int i = 0; i < data.numAttributes(); i++) {
 			Attribute attr = data.attribute(i);
 			if (attr.isNumeric()) {
-				// NumericFeatureDomain domain = new NumericFeatureDomain(false,
-				// attr.getLowerNumericBound(), attr.getUpperNumericBound());
-				// for debugging
-				NumericFeatureDomain domain = new NumericFeatureDomain(false, -5000.0d, 5000.d);
+				// for debugging!!!
+				double min = data.attributeStats(i).numericStats.min;
+				double max = data.attributeStats(i).numericStats.max;
+				NumericFeatureDomain domain = new NumericFeatureDomain(false, min, max);
 				featureDomains.add(domain);
-			} else if (attr.isNominal() || attr.isString()) {
+			} else if (attr.isNominal()) {
 				String[] attrVals = new String[attr.numValues()];
-				for (int valIndex = 0; valIndex < attr.numValues(); valIndex++)
+				double[] internalVals = new double[attr.numValues()];
+				for (int valIndex = 0; valIndex < attr.numValues(); valIndex++) {
 					attrVals[valIndex] = attr.value(valIndex);
-				CategoricalFeatureDomain domain = new CategoricalFeatureDomain(attrVals);
+					internalVals[valIndex] = (double) valIndex;
+				}
+				CategoricalFeatureDomain domain = new CategoricalFeatureDomain(internalVals);
 				featureDomains.add(domain);
 			} else {
 				throw new IllegalArgumentException("Attribute type not supported!");
