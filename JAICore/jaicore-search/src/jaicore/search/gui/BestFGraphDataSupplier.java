@@ -1,4 +1,4 @@
-package jaicore.search.graphvisualizer;
+package jaicore.search.gui;
 
 import java.util.TreeMap;
 

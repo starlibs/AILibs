@@ -1,4 +1,4 @@
-package jaicore.search.graphvisualizer.dataSupplier;
+package jaicore.search.gui.dataSupplier;
 
 import java.util.ArrayList;
 import java.util.List;

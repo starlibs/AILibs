@@ -25,6 +25,7 @@ import jaicore.graphvisualizer.events.controlEvents.StepEvent;
 import jaicore.graphvisualizer.gui.dataSupplier.ISupplier;
 import jaicore.graphvisualizer.gui.dataVisualizer.IVisualizer;
 import jaicore.graphvisualizer.gui.dataVisualizer.NodeExpansionVisualizer;
+import javafx.application.Platform;
 import javafx.embed.swing.SwingNode;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -328,12 +329,18 @@ public class FXController implements Initializable, NodeListener {
 
     @Subscribe
     public void receiveAddSupplierEvent(AddSupplierEvent event){
-        ISupplier supplier = event.getSupplier();
-        this.numberSuppliers ++;
-        this.registerSupplier(supplier);
+    	if(Platform.isFxApplicationThread()) {
+	        ISupplier supplier = event.getSupplier();
+	        this.numberSuppliers ++;
+	        this.registerSupplier(supplier);
+    	}
     }
 
     private void cleanVisualizer(){
         this.tabPane.getTabs().removeAll(tabPane.getTabs());
+    }
+    
+    public void registerObject(Object listener) {
+    	this.controlEventBus.register(listener);
     }
 }

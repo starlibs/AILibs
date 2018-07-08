@@ -1,4 +1,4 @@
-package jaicore.search.graphvisualizer.dataSupplier;
+package jaicore.search.gui.dataSupplier;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.eventbus.EventBus;
