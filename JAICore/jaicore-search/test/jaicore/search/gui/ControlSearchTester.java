@@ -83,7 +83,7 @@ public class ControlSearchTester {
 		
 		
 		NodeExpansionSupplier nodeexpansion = new NodeExpansionSupplier();
-//		win.addDataSupplier(nodeexpansion);
+		win.addDataSupplier(nodeexpansion);
 		
 		
 		

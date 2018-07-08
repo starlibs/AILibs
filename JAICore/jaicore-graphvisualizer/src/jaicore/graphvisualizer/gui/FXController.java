@@ -204,6 +204,12 @@ public class FXController implements Initializable, NodeListener {
         this.controlEventBus.post(new FileEvent(true, file));
 
     }
+    
+    @FXML
+    public void requestSupplier(ActionEvent event) {
+    	this.cleanVisualizer();
+    	this.controlEventBus.post(new RequestSuppliersEvent());
+    }
 
     private void jumpTo(int newIndex){
         if(newIndex == 0) {
@@ -314,14 +320,16 @@ public class FXController implements Initializable, NodeListener {
     }
 
 
+   
     @Subscribe
     public void receiveInfoEvent(InfoEvent event){
         this.maxIndex = event.getMaxIndex();
         //TODO
-        if (event.getNumberOfDataSupplier() != this.numberSuppliers) {
-            this.controlEventBus.post(new RequestSuppliersEvent());
-            this.cleanVisualizer();
-        }
+//        if (event.getNumberOfDataSupplier() != this.numberSuppliers && !requested) {
+//            this.controlEventBus.post(new RequestSuppliersEvent());
+//            this.cleanVisualizer();
+
+//        }
 
         updateTimeline();
 

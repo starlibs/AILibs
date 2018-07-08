@@ -19,7 +19,7 @@ public class ControllableSearch<T,A> extends BestFirst<T, A> {
 	public void receiveControlEvent(ControlEvent event) {
 		System.out.println(event);
 		if(event instanceof ResetEvent) {
-			this.nextSolution();
+			this.next();
 		}
 	}
 

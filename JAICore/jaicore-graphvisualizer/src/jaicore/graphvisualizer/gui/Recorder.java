@@ -358,7 +358,7 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 		this.suppliers.add(supplier);
 		if(algorithm != null)
 			algorithm.registerListener(supplier);
-		this.infoBus.post(new AddSupplierEvent(supplier));
+//		this.infoBus.post(new AddSupplierEvent(supplier));
 	}
 
 	@Subscribe

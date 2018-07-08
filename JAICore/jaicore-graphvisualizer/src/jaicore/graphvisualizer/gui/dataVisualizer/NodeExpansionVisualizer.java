@@ -7,6 +7,7 @@ import com.google.common.eventbus.Subscribe;
 
 import jaicore.graphvisualizer.SearchVisualizationPanel;
 import jaicore.graphvisualizer.events.GraphInitializedEvent;
+import jaicore.graphvisualizer.events.controlEvents.ResetEvent;
 import javafx.embed.swing.SwingNode;
 import javafx.scene.Node;
 
@@ -46,7 +47,7 @@ public class NodeExpansionVisualizer implements IVisualizer {
 	
 	@Subscribe
 	public void receiveEvents(Object event) {
-		if(event instanceof GraphInitializedEvent)
+		if(event instanceof GraphInitializedEvent || event instanceof ResetEvent)
 			panel.reset();
 		bus.post(event);
 	}
