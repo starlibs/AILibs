@@ -21,7 +21,7 @@ import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
-public class NodeExpansionTester {
+public class ControlSearchTester {
 
 	static class TestNode {
 		static int size = 0;
@@ -69,7 +69,7 @@ public class NodeExpansionTester {
 			
 		};
 		
-		BestFirst<TestNode,String> bf = new BestFirst<>(gen, n -> (double)Math.round(Math.random() * 1000));
+		ControllableSearch<TestNode,String> bf = new ControllableSearch<>(gen, n -> (double)Math.round(Math.random() * 1000));
 
 		
 		VisualizationWindow win = new VisualizationWindow<Node<TestNode, Double>>(bf, "BestFirst");
@@ -79,19 +79,19 @@ public class NodeExpansionTester {
 			String s = String.valueOf(n.getInternalLabel());
 			return s;
 		});
-		win.addDataSupplier(tooltipSupplier);
+//		win.addDataSupplier(tooltipSupplier);
 		
 		
 		NodeExpansionSupplier nodeexpansion = new NodeExpansionSupplier();
-		win.addDataSupplier(nodeexpansion);
+//		win.addDataSupplier(nodeexpansion);
 		
 		
 		
 		/* find solution */
 		PerformanceLogger.logStart("search");
-		List<TestNode> solutionPath = bf.nextSolution();
+//		List<TestNode> solutionPath = bf.nextSolution();
 		PerformanceLogger.logEnd("search");
-		assertNotNull(solutionPath);
+//		assertNotNull(solutionPath);
 		System.out.println("Generated " + bf.getCreatedCounter() + " nodes.");
 		PerformanceLogger.printStatsAndClear(PerformanceMeasure.TIME);
 		while (true);

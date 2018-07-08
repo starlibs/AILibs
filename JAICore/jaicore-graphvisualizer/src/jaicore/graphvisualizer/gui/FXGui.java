@@ -64,6 +64,7 @@ public class FXGui{
                 stage.setTitle(title);
                 stage.setScene(scene);
                 stage.show();
+                controller.registerObject(recorder.getAlgorithm());
             }
             catch (IllegalStateException | ExceptionInInitializerError e){
                 JFrame frame = new JFrame(title);

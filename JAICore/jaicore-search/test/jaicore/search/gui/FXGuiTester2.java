@@ -3,7 +3,7 @@ package jaicore.search.gui;
 import jaicore.graphvisualizer.gui.FXGui;
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import jaicore.search.graphgenerators.bestfirst.abstractVersioning.TestGraphGenerator;
-import jaicore.search.graphvisualizer.dataSupplier.TooltipSupplier;
+import jaicore.search.gui.dataSupplier.TooltipSupplier;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
 
