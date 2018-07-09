@@ -1,5 +1,6 @@
 package de.upb.crc901.automl.metamining;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 
@@ -14,11 +15,12 @@ import de.upb.crc901.automl.metamining.pipelinecharacterizing.PipelineCharacteri
 import de.upb.crc901.automl.metamining.similaritymeasures.AlternatingGradientDescent;
 import de.upb.crc901.automl.metamining.similaritymeasures.IHeterogenousSimilarityMeasureComputer;
 import de.upb.crc901.automl.pipeline.basic.MLPipeline;
+import hasco.metamining.IMetaMiner;
 import hasco.model.ComponentInstance;
 import weka.core.Attribute;
 import weka.core.Instances;
 
-public class Metaminer implements IMetaMiner {
+public class WEKAMetaminer implements IMetaMiner {
 	
 	private boolean hasBeenBuilt=false;
 	private WEKAPipelineFactory wekaPipelineFactory = new WEKAPipelineFactory();
@@ -31,9 +33,8 @@ public class Metaminer implements IMetaMiner {
 	
 	private IHeterogenousSimilarityMeasureComputer similarityMeasure = new AlternatingGradientDescent();
 	private IPipelineCharacterizer pipelineCharacterizer = new PipelineCharacterizer();
-	private IRankMatrixComputer rankMatrixComputer = new RankMatrixComputer();
 	
-	public Metaminer(Instances dataset) {
+	public WEKAMetaminer(Instances dataset) {
 		this.setDataset(dataset);
 	}
 
@@ -51,7 +52,7 @@ public class Metaminer implements IMetaMiner {
 		}
 	}
 	
-	public void build() throws Exception{
+	public void build() throws Exception {
 		// Check whether has been built
 		if (hasBeenBuilt) {
 			throw new Exception("MetaMiner has already been built!");
@@ -62,18 +63,17 @@ public class Metaminer implements IMetaMiner {
 		// TODO import the db connection - will result in this info
 		Instances metaFeatureInformation = null;
 		
-		// Convert to matrix (Matrix X with rows representing data sets)
-
-		RealMatrix datasetsMetafeatures = new Array2DRowRealMatrix(metaFeatureInformation.size(), metaFeatureInformation.numAttributes());
-		for (int i = 0; i < metaFeatureInformation.size(); i++) {
-			datasetsMetafeatures.setRow(i, metaFeatureInformation.get(i).toDoubleArray());
+		// Convert to matrix (Matrix X with rows representing data sets) with ascending data set indices (data set index itself excluded)
+		RealMatrix datasetsMetafeatures = new Array2DRowRealMatrix(metaFeatureInformation.size()-1, metaFeatureInformation.numAttributes());
+		for (int i = 1; i < metaFeatureInformation.size(); i++) {
+			datasetsMetafeatures.setRow(i-1, metaFeatureInformation.get(i).toDoubleArray());
 		}
 		
 		// Characterize the given data set with characterizer (set x)
 		//TODO import data set characterizer - will result in this info
 		HashMap<String,Double> datasetCharacterization = null;
 		
-		// Convert the characterization to a vector of double
+		// Convert the characterization to a vector of double (ensure same order of attributes as training data)
 		datasetMetafeatures = new ArrayRealVector(datasetCharacterization.size());
 		int i = 0;
 		for (Enumeration<Attribute> attributes = metaFeatureInformation.enumerateAttributes(); attributes.hasMoreElements(); i++) {
@@ -83,15 +83,16 @@ public class Metaminer implements IMetaMiner {
 		// ----- Pipeline Characterization -----
 		// Get PerformanceSamples from knowledge base according to given data set set
 		// TODO import knowledge base
+		// Compute Rank Matrix R
+		RealMatrix rankMatrix = null;
+		// Extract list of distinct pipelines from that (or purposefully get a only samples for a list of pipelines before!)
+		ArrayList<MLPipeline> distinctPipelines = new ArrayList<MLPipeline>();
 		
-		// Initialize PipelineCharacterizer with PerformanceSamples (or more, more concrete implementations of PerformanceSamples)
-		// TODO import performance samples and knowledge base
+		// Initialize PipelineCharacterizer with list of distinct pipelines
+		pipelineCharacterizer.build(distinctPipelines);
 		
 		// Get Characterization of base pipelines from PipelineCharacterizer (Matrix W)
 		RealMatrix pipelinesMetafeatures = new Array2DRowRealMatrix(pipelineCharacterizer.getCharacterizationsOfTrainingExamples());
-		
-		// Compute Rank Matrix R
-		RealMatrix rankMatrix = rankMatrixComputer.computeRankMatrix(datasetsMetafeatures, pipelinesMetafeatures);
 		
 		// Initialize HeterogenousSimilarityMeasures
 		similarityMeasure.build(datasetsMetafeatures, pipelinesMetafeatures, rankMatrix);
