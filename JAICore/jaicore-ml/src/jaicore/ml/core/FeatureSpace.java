@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Set;
 
 import weka.core.Attribute;
 import weka.core.Instance;
@@ -26,6 +27,9 @@ public class FeatureSpace implements Serializable {
 		this();
 		for (int i = 0; i < data.numAttributes(); i++) {
 			Attribute attr = data.attribute(i);
+			if(data.classIndex() == i) {
+				continue;
+			}
 			if (attr.isNumeric()) {
 				// for debugging!!!
 				double min = data.attributeStats(i).numericStats.min;
@@ -47,6 +51,11 @@ public class FeatureSpace implements Serializable {
 		}
 	}
 
+	/**
+	 * copy constructor
+	 * 
+	 * @param domains
+	 */
 	public FeatureSpace(List<FeatureDomain> domains) {
 		featureDomains = new ArrayList<FeatureDomain>();
 		for (FeatureDomain domain : domains) {
@@ -87,10 +96,21 @@ public class FeatureSpace implements Serializable {
 		return size;
 	}
 
-	public double getRangeSizeOfFeatureSubspace(int[] featureIndices) {
+	public double getRangeSizeOfFeatureSubspace(Set<Integer> featureIndices) {
 		double size = 1.0d;
 		for (int featureIndex : featureIndices)
 			size *= featureDomains.get(featureIndex).getRangeSize();
+		return size;
+	}
+
+	public double getRangeSizeOfAllButSubset(Set<Integer> featureIndices) {
+		double size = 1.0d;
+		for (int i = 0; i < this.getDimensionality(); i++) {
+			if (featureIndices.contains(i))
+				continue;
+			else
+				size *= featureDomains.get(i).getRangeSize();
+		}
 		return size;
 	}
 

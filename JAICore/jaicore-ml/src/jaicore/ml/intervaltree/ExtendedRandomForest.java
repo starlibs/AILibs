@@ -33,6 +33,13 @@ public class ExtendedRandomForest extends RandomForest {
 			
 	}
 	
+	public void printVariances() {
+		for(Classifier classifier : m_Classifiers) {
+			ExtendedRandomTree curTree = (ExtendedRandomTree) classifier;
+			System.out.println("cur var: " + curTree.computeTotalVariance());
+		}
+	}
+	
 	public double computeMarginalForSingleFeature(int featureIndex) {
 		double avg = 0;
 		for(Classifier classifier : m_Classifiers) {
