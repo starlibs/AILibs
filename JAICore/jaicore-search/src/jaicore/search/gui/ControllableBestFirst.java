@@ -25,7 +25,7 @@ public class ControllableBestFirst<T,A> extends BestFirst<T, A> implements Contr
 	@Subscribe
 	public void receiveControlEvent(ControlEvent event) {
 		// TODO Auto-generated method stub
-		ControllableSearch.super.receiveControlEvent(event);
+
 		if(event instanceof StepEvent && live) {
 			int steps = ((StepEvent) event).getSteps();
 			if(((StepEvent) event).forward()) {

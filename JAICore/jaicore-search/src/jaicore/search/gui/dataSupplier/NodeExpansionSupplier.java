@@ -12,7 +12,9 @@ import jaicore.graphvisualizer.events.NodeReachedEvent;
 import jaicore.graphvisualizer.events.NodeTypeSwitchEvent;
 import jaicore.graphvisualizer.events.VisuEvent;
 import jaicore.graphvisualizer.events.controlEvents.ControlEvent;
+import jaicore.graphvisualizer.events.controlEvents.IsLiveEvent;
 import jaicore.graphvisualizer.events.controlEvents.NodePushed;
+import jaicore.graphvisualizer.events.controlEvents.StepEvent;
 import jaicore.graphvisualizer.gui.dataSupplier.ISupplier;
 import jaicore.search.structure.core.Node;
 
@@ -27,6 +29,8 @@ public class NodeExpansionSupplier implements ISupplier {
 	private Node currentRoot;
 	
 	private int index;
+
+	private boolean live;
 	
 	public NodeExpansionSupplier() {
 		super();
@@ -34,6 +38,7 @@ public class NodeExpansionSupplier implements ISupplier {
 		events = new ArrayList<VisuEvent>();
 		currentRoot = null;
 		index = 0;
+		this.live = false;
 	}
 
 	@Override
@@ -54,8 +59,20 @@ public class NodeExpansionSupplier implements ISupplier {
 		if(event instanceof NodePushed) {
 			this.currentRoot = (Node) ((NodePushed) event).getNode();
 			System.out.println(((NodePushed) event).getNode());
-			forward();
+			show(0);
 		}
+
+		if (event instanceof IsLiveEvent)
+			this.live = ((IsLiveEvent) event).isLive();
+
+		if(!live && event instanceof StepEvent)
+			if(((StepEvent) event).forward()) {
+				index += ((StepEvent) event).getSteps();
+				if(currentRoot != null)
+					show(index-((StepEvent) event).getSteps());
+			}
+
+
 	
 					
 	}
@@ -68,9 +85,9 @@ public class NodeExpansionSupplier implements ISupplier {
 	
 	 
 
-	private void forward(){
+	private void show(int start){
 		
-		for (int i = 0; i < events.size(); i++) {
+		for (int i = start; i < index; i++) {
 			if(eventContains(currentRoot, events.get(i))) {
 				if(events.get(i) instanceof NodeReachedEvent) {
 					NodeReachedEvent event = (NodeReachedEvent) events.get(i);
