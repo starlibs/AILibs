@@ -121,7 +121,7 @@ public class FXController implements Initializable, NodeListener {
     public void play(ActionEvent actionEvent) {
         Runnable run = ()->{
             try{
-                while (index < maxIndex && index >= 0){
+                while ((index < maxIndex && index >= 0) || live){
                     this.step(null);
                     TimeUnit.MILLISECONDS.sleep(sleepTime);
                 }
@@ -148,7 +148,9 @@ public class FXController implements Initializable, NodeListener {
 
 
         this.controlEventBus.post(new StepEvent(true, 1));
-        this.index ++;
+
+        if(! live)
+            this.index ++;
         this.timeline.setValue(index);
     }
 
@@ -160,6 +162,10 @@ public class FXController implements Initializable, NodeListener {
             this.reset(null);
             return;
         }
+//        this.live = false;
+//        this.controlEventBus.post(new IsLiveEvent(false));
+        if(live)
+            this.livebutton.fire();
         this.controlEventBus.post(new StepEvent(false, 1));
         this.index --;
         timeline.setValue(index);
@@ -167,6 +173,10 @@ public class FXController implements Initializable, NodeListener {
 
     @FXML
     public void reset(ActionEvent actionEvent) {
+        if(this.playThread != null)
+            playThread.interrupt();
+        if(live)
+            this.livebutton.fire();
         this.controlEventBus.post(new ResetEvent());
         this.index = 0;
         SearchVisualizationPanel panel = (SearchVisualizationPanel) visuPanel.getContent();
@@ -228,7 +238,10 @@ public class FXController implements Initializable, NodeListener {
                 live = true;
 
             this.controlEventBus.post(new IsLiveEvent(live));
+            return;
         }
+        if(livebutton.isSelected())
+            livebutton.fire();
     }
 
     private void jumpTo(int newIndex){
@@ -350,8 +363,12 @@ public class FXController implements Initializable, NodeListener {
 //            this.cleanVisualizer();
 
 //        }
-
+       
         updateTimeline();
+        if(live) {
+        	this.index = maxIndex;
+        	this.timeline.setValue(index);	
+        }
 
     }
 
