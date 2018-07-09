@@ -89,7 +89,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	protected int additionalThreadsForExpansion = 0;
 	private Semaphore fComputationTickets;
 	private ExecutorService pool;
-	private final AtomicInteger activeJobs = new AtomicInteger(0);
+	protected final AtomicInteger activeJobs = new AtomicInteger(0);
 
 	private final Set<T> expanded = new HashSet<>();
 	private final boolean solutionReportingNodeEvaluator;
@@ -336,6 +336,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 				for (Node<T, V> root : roots) {
 					labelNode(root);
 					open.add(root);
+					root.setAnnotation("awa-level", 0);
 					logger.info("Labeled root with {}", root.getInternalLabel());
 				}
 			} else {
