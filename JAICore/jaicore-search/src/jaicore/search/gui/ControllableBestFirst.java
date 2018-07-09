@@ -4,10 +4,12 @@ import com.google.common.eventbus.Subscribe;
 
 import jaicore.graphvisualizer.events.controlEvents.ControlEvent;
 import jaicore.graphvisualizer.events.controlEvents.IsLiveEvent;
+import jaicore.graphvisualizer.events.controlEvents.NodePushed;
 import jaicore.graphvisualizer.events.controlEvents.StepEvent;
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import jaicore.search.algorithms.standard.core.INodeEvaluator;
 import jaicore.search.structure.core.GraphGenerator;
+import jaicore.search.structure.core.Node;
 
 public class ControllableBestFirst<T,A> extends BestFirst<T, A> implements ControllableSearch{
 
@@ -35,6 +37,9 @@ public class ControllableBestFirst<T,A> extends BestFirst<T, A> implements Contr
 				}
 			}
 		}
+		
+		if(event instanceof NodePushed && live)
+			this.step((Node<T, Double>) ((NodePushed) event).getNode());
 
 		if(event instanceof IsLiveEvent)
 			live = ((IsLiveEvent) event).isLive();
