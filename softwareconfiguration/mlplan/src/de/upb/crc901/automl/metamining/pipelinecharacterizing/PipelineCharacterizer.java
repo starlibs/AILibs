@@ -1,5 +1,7 @@
 package de.upb.crc901.automl.metamining.pipelinecharacterizing;
 
+import java.util.List;
+
 import de.upb.crc901.automl.pipeline.basic.MLPipeline;
 
 public class PipelineCharacterizer implements IPipelineCharacterizer {
@@ -8,7 +10,7 @@ public class PipelineCharacterizer implements IPipelineCharacterizer {
 	private IOntologyConnector ontologyConnector = new OntologyConnector();
 
 	@Override
-	public void build() {
+	public void build(List<MLPipeline> pipelines) {
 		// TODO Auto-generated method stub
 
 	}
