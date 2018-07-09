@@ -72,9 +72,9 @@ public class isValidParameterRangeRefinementPredicate implements EvaluablePredic
 		 * For jmhansel fANOVA feature: if the parameters importance value is below
 		 * threshold epsilon, no more refinements will be allowed
 		 */
-		if (performanceKB.getImportanceOfParam(param) < importanceThreshold) {
-			return new ArrayList<>();
-		}
+		// if (performanceKB.getImportanceOfParam(param) < importanceThreshold) {
+		// return new ArrayList<>();
+		// }
 
 		/* determine refinements for numeric parameters */
 		if (param.isNumeric()) {
