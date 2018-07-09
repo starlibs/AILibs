@@ -1,4 +1,4 @@
-package de.upb.crc901.automl.metamining;
+package hasco.metamining;
 
 import hasco.model.ComponentInstance;
 
