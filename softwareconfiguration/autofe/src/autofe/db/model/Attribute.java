@@ -2,11 +2,11 @@ package autofe.db.model;
 
 public class Attribute {
 
-	private String name;
+	protected String name;
 
-	private AttributeType type;
+	protected AttributeType type;
 
-	private boolean isTarget;
+	protected boolean isTarget;
 
 	public Attribute(String name, AttributeType type) {
 		super();
@@ -80,7 +80,10 @@ public class Attribute {
 			return false;
 		return true;
 	}
-	
-	
+
+	@Override
+	public String toString() {
+		return "Attribute [name=" + name + ", type=" + type + ", isTarget=" + isTarget + "]";
+	}
 
 }

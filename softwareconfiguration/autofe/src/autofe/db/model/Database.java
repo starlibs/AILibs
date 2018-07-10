@@ -1,5 +1,6 @@
 package autofe.db.model;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -22,6 +23,9 @@ public class Database {
 	}
 
 	public List<DatabaseOperation> getOperationHistory() {
+		if (this.operationHistory == null) {
+			operationHistory = new ArrayList<>();
+		}
 		return operationHistory;
 	}
 
@@ -45,12 +49,15 @@ public class Database {
 		this.forwards = forwards;
 	}
 
+	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((backwards == null) ? 0 : backwards.hashCode());
 		result = prime * result + ((forwards == null) ? 0 : forwards.hashCode());
+		result = prime * result + ((operationHistory == null) ? 0 : operationHistory.hashCode());
 		result = prime * result + ((tables == null) ? 0 : tables.hashCode());
 		return result;
 	}
@@ -74,6 +81,11 @@ public class Database {
 				return false;
 		} else if (!forwards.equals(other.forwards))
 			return false;
+		if (operationHistory == null) {
+			if (other.operationHistory != null)
+				return false;
+		} else if (!operationHistory.equals(other.operationHistory))
+			return false;
 		if (tables == null) {
 			if (other.tables != null)
 				return false;
@@ -81,7 +93,11 @@ public class Database {
 			return false;
 		return true;
 	}
-	
-	
+
+	@Override
+	public String toString() {
+		return "Database [tables=" + tables + ", operationHistory=" + operationHistory + ", backwards=" + backwards
+				+ ", forwards=" + forwards + "]";
+	}
 
 }

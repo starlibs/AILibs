@@ -68,6 +68,11 @@ public class BackwardRelationship {
 			return false;
 		return true;
 	}
+
+	@Override
+	public String toString() {
+		return "BackwardRelationship [commonAttribute=" + commonAttribute + ", from=" + from + ", to=" + to + "]";
+	}
 	
 	
 

@@ -41,22 +41,57 @@ public class BackwardAggregateOperation implements DatabaseOperation {
 	}
 
 	@Override
-	public Database applyTo(Database db) {
-		// Check for references
-		// TODO: Necessary?
-		if (!db.getTables().contains(backwardRelationship.getFrom())
-				|| !db.getTables().contains(backwardRelationship.getTo())) {
-			throw new RuntimeException("References are incorrect!");
-		}
-
+	public void applyTo(Database db) {
 		// New feature in from column
-		AggregatedAttribute aggregatedAttribute = new AggregatedAttribute("TBD", null, toBeAggregated,
-				aggregationFunction);
+		AggregatedAttribute aggregatedAttribute = new AggregatedAttribute(getAggregatedAttributeName(),
+				AttributeType.NUMERIC, toBeAggregated, aggregationFunction);
 		backwardRelationship.getFrom().getColumns().add(aggregatedAttribute);
 
 		db.getOperationHistory().add(this);
+	}
 
-		return db;
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((aggregationFunction == null) ? 0 : aggregationFunction.hashCode());
+		result = prime * result + ((backwardRelationship == null) ? 0 : backwardRelationship.hashCode());
+		result = prime * result + ((toBeAggregated == null) ? 0 : toBeAggregated.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		BackwardAggregateOperation other = (BackwardAggregateOperation) obj;
+		if (aggregationFunction != other.aggregationFunction)
+			return false;
+		if (backwardRelationship == null) {
+			if (other.backwardRelationship != null)
+				return false;
+		} else if (!backwardRelationship.equals(other.backwardRelationship))
+			return false;
+		if (toBeAggregated == null) {
+			if (other.toBeAggregated != null)
+				return false;
+		} else if (!toBeAggregated.equals(other.toBeAggregated))
+			return false;
+		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "BackwardAggregateOperation [backwardRelationship=" + backwardRelationship + ", aggregationFunction="
+				+ aggregationFunction + ", toBeAggregated=" + toBeAggregated + "]";
+	}
+
+	private String getAggregatedAttributeName() {
+		return aggregationFunction.name() + "(" + backwardRelationship.getTo().getName() + "." + toBeAggregated.getName() + ")";
 	}
 
 }

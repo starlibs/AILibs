@@ -3,9 +3,9 @@ package autofe.db.model;
 public class ForwardRelationship {
 
 	private Attribute commonAttribute;
-	
+
 	private Table from;
-	
+
 	private Table to;
 
 	public Attribute getCommonAttribute() {
@@ -68,7 +68,10 @@ public class ForwardRelationship {
 			return false;
 		return true;
 	}
-	
-	
-	
+
+	@Override
+	public String toString() {
+		return "ForwardRelationship [commonAttribute=" + commonAttribute + ", from=" + from + ", to=" + to + "]";
+	}
+
 }

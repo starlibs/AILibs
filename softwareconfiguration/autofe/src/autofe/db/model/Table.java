@@ -67,7 +67,10 @@ public class Table {
 			return false;
 		return true;
 	}
-	
-	
+
+	@Override
+	public String toString() {
+		return "Table [name=" + name + ", columns=" + columns + ", isTarget=" + isTarget + "]";
+	}
 
 }
