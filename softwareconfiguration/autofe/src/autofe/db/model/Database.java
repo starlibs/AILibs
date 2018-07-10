@@ -6,19 +6,19 @@ import java.util.Set;
 
 public class Database {
 
-	private Set<Table> tables;
+	private List<Table> tables;
 
 	private List<DatabaseOperation> operationHistory;
 
-	private Set<BackwardRelationship> backwards;
+	private List<BackwardRelationship> backwards;
 
-	private Set<ForwardRelationship> forwards;
+	private List<ForwardRelationship> forwards;
 
-	public Set<Table> getTables() {
+	public List<Table> getTables() {
 		return tables;
 	}
 
-	public void setTables(Set<Table> tables) {
+	public void setTables(List<Table> tables) {
 		this.tables = tables;
 	}
 
@@ -33,23 +33,21 @@ public class Database {
 		this.operationHistory = operationHistory;
 	}
 
-	public Set<BackwardRelationship> getBackwards() {
+	public List<BackwardRelationship> getBackwards() {
 		return backwards;
 	}
 
-	public void setBackwards(Set<BackwardRelationship> backwards) {
+	public void setBackwards(List<BackwardRelationship> backwards) {
 		this.backwards = backwards;
 	}
 
-	public Set<ForwardRelationship> getForwards() {
+	public List<ForwardRelationship> getForwards() {
 		return forwards;
 	}
 
-	public void setForwards(Set<ForwardRelationship> forwards) {
+	public void setForwards(List<ForwardRelationship> forwards) {
 		this.forwards = forwards;
 	}
-
-	
 
 	@Override
 	public int hashCode() {

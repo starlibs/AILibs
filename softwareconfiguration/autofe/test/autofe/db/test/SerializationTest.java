@@ -1,10 +1,9 @@
 package autofe.db.test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -35,7 +34,7 @@ public class SerializationTest {
 		Table bankAccount = new Table();
 		bankAccount.setName("BankAccount");
 		bankAccount.setTarget(true);
-		Set<Attribute> bankAccountAttributes = new HashSet<>();
+		List<Attribute> bankAccountAttributes = new ArrayList<>();
 		bankAccountAttributes.add(bankAccountId);
 		bankAccountAttributes.add(new Attribute("BankName", AttributeType.TEXT));
 		bankAccountAttributes.add(new Attribute("Credible", AttributeType.NUMERIC, true));
@@ -44,7 +43,7 @@ public class SerializationTest {
 		Table customer = new Table();
 		customer.setName("Customer");
 		customer.setTarget(false);
-		Set<Attribute> customerAttributes = new HashSet<>();
+		List<Attribute> customerAttributes = new ArrayList<>();
 		customerAttributes.add(customerId);
 		customerAttributes.add(new Attribute("FirstName", AttributeType.TEXT));
 		customerAttributes.add(bankAccountId);
@@ -53,21 +52,21 @@ public class SerializationTest {
 		Table orders = new Table();
 		orders.setName("Orders");
 		orders.setTarget(false);
-		Set<Attribute> ordersAttributes = new HashSet<>();
+		List<Attribute> ordersAttributes = new ArrayList<>();
 		ordersAttributes.add(new Attribute("OrderId", AttributeType.ID));
 		ordersAttributes.add(customerId);
 		ordersAttributes.add(new Attribute("OrderDate", AttributeType.DATE));
 		orders.setColumns(ordersAttributes);
 
 		// Add tables to DB
-		Set<Table> tables = new HashSet<>();
+		List<Table> tables = new ArrayList<>();
 		tables.add(bankAccount);
 		tables.add(customer);
 		tables.add(orders);
 		db.setTables(tables);
 
 		// Create forward relationship
-		Set<ForwardRelationship> forwardRelationships = new HashSet<>();
+		List<ForwardRelationship> forwardRelationships = new ArrayList<>();
 		ForwardRelationship forwardRelationship = new ForwardRelationship();
 		forwardRelationship.setFrom(bankAccount);
 		forwardRelationship.setTo(customer);
@@ -76,7 +75,7 @@ public class SerializationTest {
 		db.setForwards(forwardRelationships);
 
 		// Create backward relationships
-		Set<BackwardRelationship> backwardRelationships = new HashSet<>();
+		List<BackwardRelationship> backwardRelationships = new ArrayList<>();
 		BackwardRelationship backwardRelationship = new BackwardRelationship();
 		backwardRelationship.setFrom(customer);
 		backwardRelationship.setTo(orders);

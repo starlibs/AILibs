@@ -1,12 +1,12 @@
 package autofe.db.model;
 
-import java.util.Set;
+import java.util.List;
 
 public class Table {
 
 	private String name;
 
-	private Set<Attribute> columns;
+	private List<Attribute> columns;
 
 	private boolean isTarget;
 
@@ -18,11 +18,11 @@ public class Table {
 		this.name = name;
 	}
 
-	public Set<Attribute> getColumns() {
+	public List<Attribute> getColumns() {
 		return columns;
 	}
 
-	public void setColumns(Set<Attribute> columns) {
+	public void setColumns(List<Attribute> columns) {
 		this.columns = columns;
 	}
 
