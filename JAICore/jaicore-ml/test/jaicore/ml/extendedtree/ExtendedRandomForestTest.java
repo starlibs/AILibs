@@ -6,6 +6,7 @@ import java.io.BufferedReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashSet;
 
 import org.junit.Test;
 
@@ -20,7 +21,7 @@ public class ExtendedRandomForestTest {
 	private static String testFile = "resources/regression_data/cpu.small.arff";
 
 	@Test
-	public void testTrain() {
+	public void testVarianceDecompose() {
 		try (BufferedReader reader = Files.newBufferedReader(Paths.get(testFile), StandardCharsets.UTF_8)) {
 			ArffReader arffReader = new ArffReader(reader);
 			Instances data = arffReader.getData();
@@ -32,13 +33,12 @@ public class ExtendedRandomForestTest {
 			forest.buildClassifier(data);
 			System.out.println("size of forest: " + forest.getSize());
 			forest.prepareForest();
-			double sum = 0;
 			for (int i = 0; i < forest.getFeatureSpace().getDimensionality() - 1; i++) {
-				double curImp = forest.computeMarginalForSingleFeature(i);
+				HashSet<Integer> subset = new HashSet<Integer>();
+				subset.add(i);
+				double curImp = forest.computeMarginalForFeatureSubset(subset);
 				System.out.println("importance of feature " + i + ": " + curImp);
-				sum += curImp;
 			}
-			System.out.println("Sum of importance values: " + sum);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
