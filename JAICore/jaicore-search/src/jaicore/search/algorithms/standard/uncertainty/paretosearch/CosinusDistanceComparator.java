@@ -18,7 +18,7 @@ public class CosinusDistanceComparator implements Comparator<ParetoNode<?,Double
      * Compares the cosine distance of two nodes to x.
      * @param first
      * @param second
-     * @return
+     * @return negative iff first < second, 0 iff first == second, positive iff first > second
      */
     public int compare(ParetoNode<?,Double> first, ParetoNode<?,Double> second) {
 
