@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.deeplearning4j.nn.graph.ComputationGraph;
+import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.zoo.PretrainedType;
 import org.deeplearning4j.zoo.ZooModel;
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -47,7 +48,11 @@ public class PretrainedNNFilter implements IFilter {
 		this.model = model;
 		this.selectedLayer = selectedLayer;
 		try {
-			this.compGraph = (ComputationGraph) this.model.initPretrained(PretrainedType.CIFAR10);
+			this.compGraph = ((MultiLayerNetwork) this.model.initPretrained(PretrainedType.MNIST)).toComputationGraph();
+		} catch (UnsupportedOperationException ex) {
+			logger.error(ex.getMessage());
+			ex.printStackTrace();
+			logger.error(model.getClass().getName());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			logger.error(e.getMessage());
@@ -65,6 +70,10 @@ public class PretrainedNNFilter implements IFilter {
 
 		List<INDArray> transformedInstances = new ArrayList<>(inputData.getIntermediateInstances().size());
 		for (INDArray example : inputData.getIntermediateInstances()) {
+			int[] shape = example.shape();
+			if (shape.length < 3) {
+				example = example.reshape(shape[0], shape[1], 1);
+			}
 
 			// TODO: Generic approach
 			INDArray adjustedExample = example.permute(2, 0, 1);

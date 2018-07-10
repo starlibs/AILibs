@@ -13,11 +13,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import autofe.test.AutoFETest;
+import autofe.util.DataSetUtils;
 import autofe.util.EvaluationUtils;
 import jaicore.ml.WekaUtil;
 import weka.clusterers.ClusterEvaluation;
 import weka.clusterers.FilteredClusterer;
-import weka.clusterers.GenClustPlusPlus;
 import weka.clusterers.SimpleKMeans;
 import weka.core.EuclideanDistance;
 import weka.core.Instances;
@@ -34,7 +34,7 @@ public class ClusterEvaluationTest extends AutoFETest {
 
 		/* load dataset and create a train-test-split */
 		OpenmlConnector connector = new OpenmlConnector();
-		DataSetDescription ds = connector.dataGet(SEGMENT_ID);
+		DataSetDescription ds = connector.dataGet(DataSetUtils.SEGMENT_ID);
 		File file = ds.getDataset(API_KEY);
 		Instances data = new Instances(new BufferedReader(new FileReader(file)));
 		data.setClassIndex(data.numAttributes() - 1);
@@ -71,9 +71,6 @@ public class ClusterEvaluationTest extends AutoFETest {
 		// EM em = new EM();
 		// em.setNumClusters(insts.classAttribute().numValues());
 		// clusterer.setClusterer(em);
-
-		GenClustPlusPlus clust = new GenClustPlusPlus();
-		clusterer.setClusterer(clust);
 
 		/* Kernel */
 		// TODO: Kernel

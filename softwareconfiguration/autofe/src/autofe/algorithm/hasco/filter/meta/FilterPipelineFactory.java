@@ -42,7 +42,7 @@ public class FilterPipelineFactory implements Factory<FilterPipeline> {
 			openFilter.offer(actCIFilter);
 			open.offer(actCI);
 
-			logger.debug("Building pipeline: " + FilterUtils.getPrettyPrint(actCI, 0));
+			// logger.debug("Building pipeline: " + FilterUtils.getPrettyPrint(actCI, 0));
 
 			// Apply breadth-first-search
 			while (!open.isEmpty()) {
@@ -104,8 +104,10 @@ public class FilterPipelineFactory implements Factory<FilterPipeline> {
 						if (extractorCI == null)
 							break;
 
+						// logger.debug(extractorCI.getComponent().getName());
 						extractor = FilterUtils.getFilterForName(extractorCI.getComponent().getName(),
 								extractorCI.getParameterValues());
+						// logger.debug("Extractor class: " + extractor.getClass().getName());
 						filterGraph.addItem(extractor);
 						filterGraph.addEdge(actCIFilter, extractor);
 
@@ -156,8 +158,9 @@ public class FilterPipelineFactory implements Factory<FilterPipeline> {
 				}
 			}
 		}
-
-		return new FilterPipeline(filterGraph);
+		FilterPipeline result = new FilterPipeline(filterGraph);
+		// logger.debug("Result pipeline after build: " + result.toString());
+		return result;
 
 	}
 }

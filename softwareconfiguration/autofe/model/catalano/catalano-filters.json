@@ -29,20 +29,20 @@
     }],
   	"dependencies": []
   }, {
-  	"name": "PretrainedNN",
+  	"name": "autofe.algorithm.hasco.filter.image.PretrainedNN",
   	"requiredInterface": [],
   	"providedInterface": ["PretrainedNN"],
   	"parameter": [{
     	"name" : "net",
     	"type" : "cat",
-    	"default" : "VGG16",
-    	"values" : ["VGG16", "AlexNet"]
+    	"default" : "LeNet",
+    	"values" : ["LeNet"]
     }, {
       "name" : "layer",
       "type" : "int",
-      "default" : 5.0,
+      "default" : 4.0,
       "min" : 3.0,
-      "max" : 10.0,
+      "max" : 6.0,
       "refineSplits" : 8,
       "minInterval" : 10
     }],

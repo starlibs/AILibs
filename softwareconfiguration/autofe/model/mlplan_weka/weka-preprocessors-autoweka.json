@@ -27,20 +27,6 @@
     "parameter" : [ ],
     "dependencies" : [ ]
   }, {
-    "name" : "weka.attributeSelection.InfoGainAttributeEval",
-    "requiredInterface" : [ ],
-    "providedInterface" : [ "evaluator" ],
-    "parameter" : [ {
-      "name" : "M",
-      "type" : "boolean",
-      "default" : "true"
-    }, {
-      "name" : "B",
-      "type" : "boolean",
-      "default" : "true"
-    } ],
-    "dependencies" : [ ]
-  }, {
     "name" : "weka.attributeSelection.OneRAttributeEval",
     "requiredInterface" : [ ],
     "providedInterface" : [ "evaluator" ],

@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.Random;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +25,7 @@ import hasco.core.Solution;
 import hasco.model.Component;
 import hasco.serialization.ComponentLoader;
 import jaicore.basic.ILoggingCustomizable;
+import jaicore.basic.IObjectEvaluator;
 import jaicore.graph.observation.IObservableGraphAlgorithm;
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionSolution;
@@ -86,16 +88,26 @@ public class HASCOFE implements IObservableGraphAlgorithm<TFDNode, String>, ILog
 
 	private void initializeHASCOSearch(final DataSet data, AbstractHASCOFENodeEvaluator nodeEvaluator,
 			AbstractHASCOFEObjectEvaluator benchmark) { // AbstractHASCOFEObjectEvaluator
+
 		// benchmark
-		benchmark.setData(data);
+		IObjectEvaluator<FilterPipeline, Double> objectEvaluator = null;
+		if (benchmark != null) {
+			benchmark.setData(data);
+			objectEvaluator = benchmark;
+		} else {
+			objectEvaluator = n -> new Random().nextDouble();
+		}
+
 		if (nodeEvaluator != null) {
 			nodeEvaluator.setHascoFE(this);
 			nodeEvaluator.setData(data);
 
-			this.hasco = new HASCOFD<>(new FilterPipelineFactory(), nodeEvaluator, "FilterPipeline", benchmark);
+			this.hasco = new HASCOFD<>(new FilterPipelineFactory(), nodeEvaluator, "FilterPipeline", objectEvaluator);
 		} else {
-			this.hasco = new HASCOFD<>(new FilterPipelineFactory(), n -> null, "FilterPipeline", benchmark);
+			this.hasco = new HASCOFD<>(new FilterPipelineFactory(), n -> null, "FilterPipeline", objectEvaluator);
 		}
+		this.hasco.setNumberOfCPUs(Runtime.getRuntime().availableProcessors());
+		// this.hasco.setNumberOfCPUs(1);
 
 		// TODO
 		// this.hasco.setNumberOfCPUs(4);

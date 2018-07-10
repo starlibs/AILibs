@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import Catalano.Imaging.FastBitmap;
 import weka.core.Attribute;
@@ -14,8 +16,43 @@ import weka.core.Instance;
 import weka.core.Instances;
 
 public final class DataSetUtils {
+
+	public static final int CIFAR10_ID = 40927;
+	public static final int SEGMENT_ID = 40984;
+	public static final int MNIST_ID = 554;
+
+	private static final Logger logger = LoggerFactory.getLogger(DataSetUtils.class);
+
 	private DataSetUtils() {
 		// Utility class
+	}
+
+	public static INDArray instanceToMatrixByDataSet(final Instance instance, final int datasetID) {
+		switch (datasetID) {
+		case CIFAR10_ID:
+			return cifar10InstanceToMatrix(instance);
+		case MNIST_ID:
+			return mnistInstanceToMatrix(instance);
+		default:
+			logger.warn("Could not infer data set of instance to generate matrix. Returning null...");
+			return null;
+		}
+	}
+
+	// 28 / 28 / 1
+	public static INDArray mnistInstanceToMatrix(final Instance instance) {
+		INDArray result = Nd4j.create(28, 28);
+		double[] imageValues = instance.toDoubleArray();
+		if (imageValues.length != (28 * 28 + 1))
+			throw new IllegalArgumentException("MNIST instances must have the dimensionality of 28 x 28 x 1!");
+
+		for (int i = 0; i < 28; i++) {
+			for (int j = 0; j < 28; j++) {
+				int offset = i + 1;
+				result.putScalar(i, j, imageValues[offset * j]);
+			}
+		}
+		return result;
 	}
 
 	// 1024 / 1024 / 1024: red / green / blue channel
@@ -45,7 +82,7 @@ public final class DataSetUtils {
 		INDArray result = Nd4j.create(32, 32, 3);
 		double[] imageValues = instance.toDoubleArray();
 		if (imageValues.length != (32 * 32 * 3 + 1))
-			throw new IllegalArgumentException("Cifar 10 instances must have the dimensionality of 32 x 32 x 3");
+			throw new IllegalArgumentException("Cifar 10 instances must have the dimensionality of 32 x 32 x 3!");
 
 		for (int i = 0; i < 32; i++) {
 			for (int j = 0; j < 32; j++) {

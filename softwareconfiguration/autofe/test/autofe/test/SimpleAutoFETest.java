@@ -14,35 +14,212 @@ import org.slf4j.LoggerFactory;
 
 import autofe.algorithm.hasco.HASCOFE;
 import autofe.algorithm.hasco.HASCOFE.HASCOFESolution;
+import autofe.algorithm.hasco.evaluation.COCONodeEvaluator;
+import autofe.algorithm.hasco.evaluation.COCOObjectEvaluator;
 import autofe.algorithm.hasco.evaluation.ClusterNodeEvaluator;
 import autofe.algorithm.hasco.evaluation.ClusterObjectEvaluator;
+import autofe.algorithm.hasco.evaluation.EnsembleNodeEvaluator;
+import autofe.algorithm.hasco.evaluation.EnsembleObjectEvaluator;
+import autofe.algorithm.hasco.evaluation.LDANodeEvaluator;
 import autofe.util.DataSet;
+import autofe.util.DataSetUtils;
 import jaicore.ml.WekaUtil;
 import weka.core.Instances;
 
 public class SimpleAutoFETest extends AutoFETest {
+	private static final int MLPLAN_TIMEOUT = 30;
+
+	private static final int MAX_PIPELINE_SIZE = 20;
+
 	private static final Logger logger = LoggerFactory.getLogger(SimpleAutoFETest.class);
 
-	@Test
-	public void testHASCO() throws Exception {
+	private static final int USED_DATASET = DataSetUtils.SEGMENT_ID;
+
+	// @Test
+	public void testHASCOClusterNodeEvaluator() throws Exception {
 		logger.info("Starting AutoFE test...");
 
 		/* load data for segment dataset and create a train-test-split */
 		OpenmlConnector connector = new OpenmlConnector();
-		DataSetDescription ds = connector.dataGet(SEGMENT_ID);
+		DataSetDescription ds = connector.dataGet(USED_DATASET);
 		File file = ds.getDataset(API_KEY);
 		Instances data = new Instances(new BufferedReader(new FileReader(file)));
 		data.setClassIndex(data.numAttributes() - 1);
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(0), .7f);
 
-		HASCOFE hascoFE = new HASCOFE(new File("model/test.json"), new ClusterNodeEvaluator(20),
+		HASCOFE hascoFE = new HASCOFE(new File("model/test.json"), new ClusterNodeEvaluator(MAX_PIPELINE_SIZE),
 				new DataSet(split.get(0), null), new ClusterObjectEvaluator());
 		hascoFE.setLoggerName("autofe");
 		// hascoFE.enableVisualization();
-		hascoFE.runSearch(120 * 1000);
+		hascoFE.runSearch(60 * 1000);
 		HASCOFESolution solution = hascoFE.getCurrentlyBestSolution();
 
 		logger.info(hascoFE.getFoundClassifiers().toString());
-		logger.info(solution.toString());
+		if (solution != null) {
+			logger.info(solution.toString());
+			logger.info(hascoFE.getFoundClassifiers().toString());
+
+			logger.info("Testing result features using MLPlan...");
+			List<Instances> newSplit = WekaUtil.getStratifiedSplit(data, new Random(42), .7f);
+
+			DataSet resultSplit0 = solution.getSolution().applyFilter(new DataSet(newSplit.get(0), null), false);
+			DataSet resultSplit1 = solution.getSolution().applyFilter(new DataSet(newSplit.get(1), null), false);
+
+			double mlPlanResult = evaluateMLPlan(MLPLAN_TIMEOUT, resultSplit0.getInstances(),
+					resultSplit1.getInstances(), logger);
+			System.out.println(
+					"Error Rate of the solution produced by ML-Plan (Cluster): " + (100 - mlPlanResult) / 100f);
+		} else
+			logger.info("No solution could be found.");
+	}
+
+	// @Test
+	public void testHASCORandomNodeEvaluator() throws Exception {
+		logger.info("Starting AutoFE test...");
+
+		/* load data for segment dataset and create a train-test-split */
+		OpenmlConnector connector = new OpenmlConnector();
+		DataSetDescription ds = connector.dataGet(USED_DATASET);
+		File file = ds.getDataset(API_KEY);
+		Instances data = new Instances(new BufferedReader(new FileReader(file)));
+		data.setClassIndex(data.numAttributes() - 1);
+		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(0), .7f);
+
+		HASCOFE hascoFE = new HASCOFE(new File("model/test.json"), getRandomNodeEvaluator(MAX_PIPELINE_SIZE),
+				new DataSet(split.get(0), null), new ClusterObjectEvaluator());
+		hascoFE.setLoggerName("autofe");
+		// hascoFE.enableVisualization();
+		hascoFE.runSearch(60 * 1000);
+		HASCOFESolution solution = hascoFE.getCurrentlyBestSolution();
+
+		logger.info(hascoFE.getFoundClassifiers().toString());
+		if (solution != null) {
+			logger.info(solution.toString());
+			logger.info(hascoFE.getFoundClassifiers().toString());
+
+			logger.info("Testing result features using MLPlan...");
+			List<Instances> newSplit = WekaUtil.getStratifiedSplit(data, new Random(42), .7f);
+
+			DataSet resultSplit0 = solution.getSolution().applyFilter(new DataSet(newSplit.get(0), null), false);
+			DataSet resultSplit1 = solution.getSolution().applyFilter(new DataSet(newSplit.get(1), null), false);
+
+			double mlPlanResult = evaluateMLPlan(MLPLAN_TIMEOUT, resultSplit0.getInstances(),
+					resultSplit1.getInstances(), logger);
+			System.out
+					.println("Error Rate of the solution produced by ML-Plan (Random): " + (100 - mlPlanResult) / 100f);
+		} else
+			logger.info("No solution could be found.");
+	}
+
+	// @Test
+	public void testHASCOLDANodeEvaluator() throws Exception {
+		logger.info("Starting AutoFE test...");
+
+		/* load data for segment dataset and create a train-test-split */
+		OpenmlConnector connector = new OpenmlConnector();
+		DataSetDescription ds = connector.dataGet(USED_DATASET);
+		File file = ds.getDataset(API_KEY);
+		Instances data = new Instances(new BufferedReader(new FileReader(file)));
+		data.setClassIndex(data.numAttributes() - 1);
+		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(0), .7f);
+
+		HASCOFE hascoFE = new HASCOFE(new File("model/test.json"), new LDANodeEvaluator(MAX_PIPELINE_SIZE),
+				new DataSet(split.get(0), null), new ClusterObjectEvaluator());
+		hascoFE.setLoggerName("autofe");
+		// hascoFE.enableVisualization();
+		hascoFE.runSearch(60 * 1000);
+		HASCOFESolution solution = hascoFE.getCurrentlyBestSolution();
+
+		logger.info(hascoFE.getFoundClassifiers().toString());
+		if (solution != null) {
+			logger.info(solution.toString());
+			logger.info(hascoFE.getFoundClassifiers().toString());
+
+			logger.info("Testing result features using MLPlan...");
+			List<Instances> newSplit = WekaUtil.getStratifiedSplit(data, new Random(42), .7f);
+
+			DataSet resultSplit0 = solution.getSolution().applyFilter(new DataSet(newSplit.get(0), null), false);
+			DataSet resultSplit1 = solution.getSolution().applyFilter(new DataSet(newSplit.get(1), null), false);
+
+			double mlPlanResult = evaluateMLPlan(MLPLAN_TIMEOUT, resultSplit0.getInstances(),
+					resultSplit1.getInstances(), logger);
+			System.out.println("Error Rate of the solution produced by ML-Plan (LDA): " + (100 - mlPlanResult) / 100f);
+		} else
+			logger.info("No solution could be found.");
+	}
+
+	// @Test
+	public void testHASCOEnsembleNodeEvaluator() throws Exception {
+		logger.info("Starting AutoFE test...");
+
+		/* load data for segment dataset and create a train-test-split */
+		OpenmlConnector connector = new OpenmlConnector();
+		DataSetDescription ds = connector.dataGet(USED_DATASET);
+		File file = ds.getDataset(API_KEY);
+		Instances data = new Instances(new BufferedReader(new FileReader(file)));
+		data.setClassIndex(data.numAttributes() - 1);
+		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(0), .7f);
+
+		HASCOFE hascoFE = new HASCOFE(new File("model/test.json"), new EnsembleNodeEvaluator(MAX_PIPELINE_SIZE),
+				new DataSet(split.get(0), null), new EnsembleObjectEvaluator());
+		hascoFE.setLoggerName("autofe");
+		// hascoFE.enableVisualization();
+		hascoFE.runSearch(60 * 1000);
+		HASCOFESolution solution = hascoFE.getCurrentlyBestSolution();
+
+		logger.info(hascoFE.getFoundClassifiers().toString());
+		if (solution != null) {
+			logger.info(solution.toString());
+			logger.info(hascoFE.getFoundClassifiers().toString());
+
+			logger.info("Testing result features using MLPlan...");
+			List<Instances> newSplit = WekaUtil.getStratifiedSplit(data, new Random(42), .7f);
+
+			DataSet resultSplit0 = solution.getSolution().applyFilter(new DataSet(newSplit.get(0), null), false);
+			DataSet resultSplit1 = solution.getSolution().applyFilter(new DataSet(newSplit.get(1), null), false);
+
+			double mlPlanResult = evaluateMLPlan(MLPLAN_TIMEOUT, resultSplit0.getInstances(),
+					resultSplit1.getInstances(), logger);
+			System.out.println(
+					"Error Rate of the solution produced by ML-Plan (Ensemble): " + (100 - mlPlanResult) / 100f);
+		} else
+			logger.info("No solution could be found.");
+	}
+
+	@Test
+	public void testHASCOCOCONodeEvaluator() throws Exception {
+		logger.info("Starting AutoFE test...");
+
+		/* load data for segment dataset and create a train-test-split */
+		OpenmlConnector connector = new OpenmlConnector();
+		DataSetDescription ds = connector.dataGet(USED_DATASET);
+		File file = ds.getDataset(API_KEY);
+		Instances data = new Instances(new BufferedReader(new FileReader(file)));
+		data.setClassIndex(data.numAttributes() - 1);
+		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(0), .7f);
+
+		HASCOFE hascoFE = new HASCOFE(new File("model/test.json"), new COCONodeEvaluator(MAX_PIPELINE_SIZE),
+				new DataSet(split.get(0), null), new COCOObjectEvaluator());
+		hascoFE.setLoggerName("autofe");
+		// hascoFE.enableVisualization();
+		hascoFE.runSearch(60 * 1000);
+		HASCOFESolution solution = hascoFE.getCurrentlyBestSolution();
+
+		logger.info(hascoFE.getFoundClassifiers().toString());
+		if (solution != null) {
+			logger.info(solution.toString());
+			logger.info(hascoFE.getFoundClassifiers().toString());
+
+			logger.info("Testing result features using MLPlan...");
+			List<Instances> newSplit = WekaUtil.getStratifiedSplit(data, new Random(42), .7f);
+
+			DataSet resultSplit0 = solution.getSolution().applyFilter(new DataSet(newSplit.get(0), null), false);
+			DataSet resultSplit1 = solution.getSolution().applyFilter(new DataSet(newSplit.get(1), null), false);
+
+			double mlPlanResult = evaluateMLPlan(MLPLAN_TIMEOUT, resultSplit0.getInstances(),
+					resultSplit1.getInstances(), logger);
+			System.out.println("Error Rate of the solution produced by ML-Plan (COCO): " + (100 - mlPlanResult) / 100f);
+		} else
+			logger.info("No solution could be found.");
 	}
 }

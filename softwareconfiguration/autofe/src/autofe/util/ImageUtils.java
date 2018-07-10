@@ -6,6 +6,7 @@ import org.deeplearning4j.nn.conf.CacheMode;
 import org.deeplearning4j.nn.conf.WorkspaceMode;
 import org.deeplearning4j.nn.conf.layers.ConvolutionLayer.AlgoMode;
 import org.deeplearning4j.zoo.model.AlexNet;
+import org.deeplearning4j.zoo.model.LeNet;
 import org.deeplearning4j.zoo.model.VGG16;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
@@ -201,17 +202,28 @@ public final class ImageUtils {
 		}
 	}
 
-	public static PretrainedNNFilter getPretrainedNNFilterByName(final String name, final int layer) {
+	public static PretrainedNNFilter getPretrainedNNFilterByName(String name, final int layer) {
+		// TODO: MNIST, Cifar10, ...
+		// int[] shape = new int[] { 1, 3, 32, 32 };
+		int[] shape = new int[] { 1, 1, 28, 28 };
+
+		// TODO
+		if (name.equals("default"))
+			name = "LeNet";
+
 		switch (name) {
 		case "VGG16":
-			return new PretrainedNNFilter(new VGG16(42, new int[] { 1, 3, 32, 32 }, 10, new Nesterovs(1e-2, 0.9),
-					CacheMode.NONE, WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer);
+			return new PretrainedNNFilter(new VGG16(42, shape, 10, new Nesterovs(1e-2, 0.9), CacheMode.NONE,
+					WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer);
 		case "AlexNet":
-			return new PretrainedNNFilter(new AlexNet(42, new int[] { 1, 3, 32, 32 }, 10, new Nesterovs(1e-2, 0.9),
-					CacheMode.NONE, WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer);
+			return new PretrainedNNFilter(new AlexNet(42, shape, 10, new Nesterovs(1e-2, 0.9), CacheMode.NONE,
+					WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer);
+		case "LeNet":
+			return new PretrainedNNFilter(new LeNet(42, shape, 10, new Nesterovs(1e-2, 0.9), CacheMode.NONE,
+					WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer);
 		default:
-			return new PretrainedNNFilter(new VGG16(42, new int[] { 1, 3, 32, 32 }, 10, new Nesterovs(1e-2, 0.9),
-					CacheMode.NONE, WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer);
+			return new PretrainedNNFilter(new VGG16(42, shape, 10, new Nesterovs(1e-2, 0.9), CacheMode.NONE,
+					WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer);
 		}
 	}
 

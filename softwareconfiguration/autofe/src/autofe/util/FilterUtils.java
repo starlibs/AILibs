@@ -31,7 +31,7 @@ public final class FilterUtils {
 			case "CatalanoExtractor":
 				catFilter = parameters.get("catFilter");
 				return ImageUtils.getCatalanoFilterByName(catFilter);
-			case "PretrainedNN":
+			case "autofe.algorithm.hasco.filter.image.PretrainedNN":
 				String net = parameters.get("net");
 				int layer = Integer.parseInt(parameters.get("layer"));
 				return ImageUtils.getPretrainedNNFilterByName(net, layer);

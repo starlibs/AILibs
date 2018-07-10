@@ -1,6 +1,5 @@
 package autofe.algorithm.hasco.filter.generic;
 
-import java.util.Enumeration;
 import java.util.Random;
 
 import autofe.algorithm.hasco.filter.meta.IFilter;
@@ -17,9 +16,16 @@ import weka.core.Instances;
  */
 public class AddRandomFilter implements IFilter {
 
+	private double[] randomValues = null;
+
 	@Override
 	public DataSet applyFilter(DataSet inputData, boolean copy) {
 		Random random = new Random();
+		if (this.randomValues == null) {
+			randomValues = new double[inputData.getInstances().numAttributes() - 1];
+			for (int i = 0; i < randomValues.length; i++)
+				randomValues[i] = random.nextDouble() * 1000;
+		}
 
 		Instances transformedInstances;
 		if (copy)
@@ -27,11 +33,10 @@ public class AddRandomFilter implements IFilter {
 		else
 			transformedInstances = inputData.getInstances();
 		for (Instance inst : transformedInstances) {
-			Enumeration<Attribute> atts = inst.enumerateAttributes();
-			while (atts.hasMoreElements()) {
-				Attribute att = atts.nextElement();
+			for (int i = 0; i < inst.numAttributes() - 1; i++) {
+				Attribute att = inst.attribute(i);
 				if (att.isNumeric())
-					inst.setValue(att, inst.value(att) + random.nextInt(10000));
+					inst.setValue(att, inst.value(att) + this.randomValues[i]);
 			}
 		}
 

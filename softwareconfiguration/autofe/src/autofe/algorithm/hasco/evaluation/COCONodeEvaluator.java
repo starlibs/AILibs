@@ -1,26 +1,35 @@
 package autofe.algorithm.hasco.evaluation;
 
+import static autofe.algorithm.hasco.evaluation.AbstractHASCOFENodeEvaluator.MAX_EVAL_VALUE;
+
+import java.util.List;
+import java.util.Random;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import autofe.algorithm.hasco.filter.meta.FilterPipeline;
+import autofe.util.DataSet;
 import autofe.util.EvaluationUtils;
+import jaicore.ml.WekaUtil;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.search.structure.core.Node;
+import weka.core.Instances;
 
 /**
- * Evaluator used for node evaluation to guide the search using a simple
- * clustering benchmark function.
+ * Evaluator using the congenerous cosine distance (COCO) by Liu et. al., 2017
+ * (cf. https://arxiv.org/pdf/1710.00870.pdf).
  * 
  * @author Julian Lienen
  *
  */
-public class ClusterNodeEvaluator extends AbstractHASCOFENodeEvaluator {
-	public ClusterNodeEvaluator(final int maxPipelineSize) {
+public class COCONodeEvaluator extends AbstractHASCOFENodeEvaluator {
+
+	private static final Logger logger = LoggerFactory.getLogger(COCONodeEvaluator.class);
+
+	public COCONodeEvaluator(final int maxPipelineSize) {
 		super(maxPipelineSize);
 	}
-
-	private static final Logger logger = LoggerFactory.getLogger(ClusterNodeEvaluator.class);
 
 	@Override
 	public Double f(Node<TFDNode, ?> node) throws Throwable {
@@ -38,11 +47,18 @@ public class ClusterNodeEvaluator extends AbstractHASCOFENodeEvaluator {
 		FilterPipeline pipe = this.getPipelineFromNode(node);
 		if (pipe != null && pipe.getFilters() != null) {
 			try {
-				double finalScore = Math.min(EvaluationUtils.performClustering(pipe, this.data)
-						+ ATT_COUNT_PENALTY * EvaluationUtils.calculateAttributeCountPenalty(this.data.getInstances()),
-						19999.0);
-				logger.debug("Final clustering node evaluation score: " + finalScore);
-				return finalScore;
+				logger.debug("Applying and evaluating pipeline " + pipe.toString());
+				DataSet dataSet = pipe.applyFilter(this.data, true);
+
+				// TODO
+				// Get small batch
+				List<Instances> split = WekaUtil.getStratifiedSplit(dataSet.getInstances(), new Random(42), 0.01d);
+				Instances insts = split.get(0);
+
+				double loss = EvaluationUtils.calculateCOCOForBatch(insts);
+
+				logger.debug("COCO node evaluation score: " + loss);
+				return loss;
 			} catch (Exception e) {
 				e.printStackTrace();
 				logger.warn("Could not evaluate pipeline. Reason: " + e.getMessage());

@@ -1,5 +1,10 @@
 package autofe.util;
 
+import java.util.Arrays;
+
+import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
+import org.nd4j.linalg.ops.transforms.Transforms;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,7 +93,6 @@ public final class EvaluationUtils {
 		clusterEval.evaluateClusterer(insts);
 
 		double acc = predictAccuracy(insts, clusterEval.getClassesToClusters(), clusterEval.getClusterAssignments());
-		logger.debug("Cluster acc: " + acc);
 
 		return 1 - acc;
 	}
@@ -121,4 +125,87 @@ public final class EvaluationUtils {
 		}
 		return correct / total;
 	}
+
+	/**
+	 * Penalizes high count of attributes (which leads to high run times of
+	 * attribute selectors and classifier trainings).
+	 * 
+	 * @param instances
+	 * @return
+	 */
+	public static double calculateAttributeCountPenalty(final Instances instances) {
+		// TODO: Which attribute number to use?
+		return instances.numAttributes() / 15000;
+	}
+
+	public static double calculateCOCOForBatch(final Instances batch) {
+
+		final int D = batch.numAttributes() - 1;
+		final int classes = batch.classAttribute().numValues();
+
+		final double alpha = 10;
+
+		// Calculate centroids
+		int[] classCounts = new int[classes];
+		INDArray c = Nd4j.zeros(classes, D);
+		for (int i = 0; i < classes; i++) {
+			for (Instance inst : batch) {
+				if (Math.round(inst.classValue()) == i) {
+					double[] instValues = Arrays.copyOfRange(inst.toDoubleArray(), 0, inst.toDoubleArray().length - 1);
+					c.getRow(i).addiRowVector(Nd4j.create(instValues));
+					classCounts[i]++;
+				}
+			}
+		}
+		for (int i = 0; i < classes; i++) {
+			c.getRow(i).divi(classCounts[i] + 1);
+			c.getRow(i).divi(c.getRow(i).norm2Number());
+		}
+
+		// double loss = 0;
+		// for (int i = 0; i < batch.numInstances(); i++) {
+		// double[] instValues = Arrays.copyOfRange(batch.get(i).toDoubleArray(), 0,
+		// batch.get(i).toDoubleArray().length - 1);
+		// INDArray f_i = Nd4j.create(instValues);
+		//
+		// double lowerSum = 0;
+		// for (int j = 0; j < classes; j++) {
+		// if (i != j)
+		// lowerSum += Math.exp(calculateCosSim(f_i, c.getRow(j)));
+		//
+		// }
+		//
+		// loss += Math.exp(calculateCosSim(f_i, c.getRow((int)
+		// Math.round(batch.get(i).classValue()))))
+		// / (lowerSum + 1);
+		// }
+
+		double loss = 0;
+		for (int i = 0; i < batch.numInstances(); i++) {
+			double[] instValues = Arrays.copyOfRange(batch.get(i).toDoubleArray(), 0,
+					batch.get(i).toDoubleArray().length - 1);
+			INDArray f_i = Nd4j.create(instValues);
+			f_i.muli(alpha);
+			f_i.divi(f_i.norm2Number());
+
+			double lowerSum = 0;
+			for (int j = 0; j < classes; j++) {
+				if (i != j) {
+					INDArray tmp = f_i.mmul(c.getRow(j).transpose());
+					lowerSum += Math.exp(tmp.getDouble(0));
+				}
+
+			}
+			INDArray c_k = c.getRow((int) Math.round(batch.get(i).classValue()));
+			INDArray result = f_i.mmul(c_k.transpose());
+			loss += Math.log(Math.exp(result.getDouble(0)) / (lowerSum + 1));
+		}
+
+		return (-1) * loss;
+	}
+
+	private static double calculateCosSim(final INDArray f1, final INDArray f2) {
+		return Transforms.cosineSim(f1, f2);
+	}
+
 }

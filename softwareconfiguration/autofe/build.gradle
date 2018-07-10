@@ -60,6 +60,7 @@ dependencies {
 	compile files('lib/mtj.jar')
 	compile files('lib/arpack_combined.jar')
 	compile files('lib/core.jar')
+	compile files('lib/discriminantAnalysis1.0.2.jar')
 	
 	compile 'org.nd4j:nd4j-native-platform:1.0.0-beta'
 	
