@@ -1,6 +1,6 @@
 package jaicore.ml.intervaltree;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 
 import jaicore.ml.core.FeatureSpace;
 import weka.classifiers.Classifier;
@@ -40,11 +40,11 @@ public class ExtendedRandomForest extends RandomForest {
 		}
 	}
 	
-	public double computeMarginalForSingleFeature(int featureIndex) {
+	public double computeMarginalForFeatureSubset(HashSet<Integer> features) {
 		double avg = 0;
 		for(Classifier classifier : m_Classifiers) {
 			ExtendedRandomTree curTree = (ExtendedRandomTree) classifier;
-			double curMarg = curTree.computeMarginalForSingleFeature(featureIndex);
+			double curMarg = curTree.computeMarginalForSubsetOfFeatures(features);
 			avg += curMarg * 1.0/m_Classifiers.length;
 		}
 		return avg;
