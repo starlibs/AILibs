@@ -1,0 +1,23 @@
+{
+	"repository" : "ML-Plan With SKLearn + WEKA Searchspace",
+	"include": [
+		 "../weka/weka-all-autoweka.json" /*,*/
+		 /*"../scikit-learn/scikit-learn-all-tpot.json"*/ 
+	],
+	"components" : [
+	  	{
+	  	    "name" : "pipeline",
+	  	    "providedInterface" : [ "MLPipeline", "AbstractClassifier" ],
+	  	    "requiredInterface" : [
+	  	    	{
+	  	    		"id": "preprocessor",
+	  	    		"name": "AbstractPreprocessor"
+	  	    	}, { 
+	  	    		"id": "classifier",
+	  	    		"name": "BaseClassifier"
+	  	    	}
+			],
+	    	"parameter" : [ ]
+	    }
+	]
+}

@@ -1,3 +1,1 @@
-includeFlat 'JAICore', 'CrcConfigurationSetting', 'CrcConfigurationFramework', 'weka', 'JASE', 'HASCO'
-
 rootProject.name = 'ML-Plan'
