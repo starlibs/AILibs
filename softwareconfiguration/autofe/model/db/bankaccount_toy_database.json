@@ -1,0 +1,269 @@
+{
+  "tables": [
+    {
+      "name": "BankAccount",
+      "columns": [
+        {
+          "name": "BankAccountId",
+          "type": "ID",
+          "isTarget": false
+        },
+        {
+          "name": "Balance",
+          "type": "NUMERIC",
+          "isTarget": false
+        },
+        {
+          "name": "TransactionCounter",
+          "type": "NUMERIC",
+          "isTarget": false
+        },
+        {
+          "name": "BankName",
+          "type": "TEXT",
+          "isTarget": false
+        },
+        {
+          "name": "Credible",
+          "type": "TEXT",
+          "isTarget": true
+        }
+      ],
+      "isTarget": true
+    },
+    {
+      "name": "Customer",
+      "columns": [
+        {
+          "name": "CustomerId",
+          "type": "ID",
+          "isTarget": false
+        },
+        {
+          "name": "BankAccountId",
+          "type": "ID",
+          "isTarget": false
+        },
+        {
+          "name": "FirstName",
+          "type": "TEXT",
+          "isTarget": false
+        }
+      ],
+      "isTarget": false
+    },
+    {
+      "name": "Orders",
+      "columns": [
+        {
+          "name": "OrderId",
+          "type": "ID",
+          "isTarget": false
+        },
+        {
+          "name": "CustomerId",
+          "type": "ID",
+          "isTarget": false
+        },
+        {
+          "name": "OrderDate",
+          "type": "DATE",
+          "isTarget": false
+        }
+      ],
+      "isTarget": false
+    },
+    {
+      "name": "Product",
+      "columns": [
+        {
+          "name": "ProductId",
+          "type": "ID",
+          "isTarget": false
+        },
+        {
+          "name": "OrderId",
+          "type": "ID",
+          "isTarget": false
+        },
+        {
+          "name": "ProductName",
+          "type": "TEXT",
+          "isTarget": false
+        },
+        {
+          "name": "Price",
+          "type": "NUMERIC",
+          "isTarget": false
+        }
+      ],
+      "isTarget": false
+    }
+  ],
+  "forwards": [
+    {
+      "commonAttribute": {
+        "name": "BankAccountId",
+        "type": "ID",
+        "isTarget": false
+      },
+      "from": {
+        "name": "BankAccount",
+        "columns": [
+          {
+            "name": "BankAccountId",
+            "type": "ID",
+            "isTarget": false
+          },
+          {
+            "name": "Balance",
+            "type": "NUMERIC",
+            "isTarget": false
+          },
+          {
+            "name": "TransactionCounter",
+            "type": "NUMERIC",
+            "isTarget": false
+          },
+          {
+            "name": "BankName",
+            "type": "TEXT",
+            "isTarget": false
+          },
+          {
+            "name": "Credible",
+            "type": "TEXT",
+            "isTarget": true
+          }
+        ],
+        "isTarget": true
+      },
+      "to": {
+        "name": "Customer",
+        "columns": [
+          {
+            "name": "CustomerId",
+            "type": "ID",
+            "isTarget": false
+          },
+          {
+            "name": "BankAccountId",
+            "type": "ID",
+            "isTarget": false
+          },
+          {
+            "name": "FirstName",
+            "type": "TEXT",
+            "isTarget": false
+          }
+        ],
+        "isTarget": false
+      }
+    }
+  ],
+  "backwards": [
+    {
+      "commonAttribute": {
+        "name": "CustomerId",
+        "type": "ID",
+        "isTarget": false
+      },
+      "from": {
+        "name": "Customer",
+        "columns": [
+          {
+            "name": "CustomerId",
+            "type": "ID",
+            "isTarget": false
+          },
+          {
+            "name": "BankAccountId",
+            "type": "ID",
+            "isTarget": false
+          },
+          {
+            "name": "FirstName",
+            "type": "TEXT",
+            "isTarget": false
+          }
+        ],
+        "isTarget": false
+      },
+      "to": {
+        "name": "Orders",
+        "columns": [
+          {
+            "name": "OrderId",
+            "type": "ID",
+            "isTarget": false
+          },
+          {
+            "name": "CustomerId",
+            "type": "ID",
+            "isTarget": false
+          },
+          {
+            "name": "OrderDate",
+            "type": "DATE",
+            "isTarget": false
+          }
+        ],
+        "isTarget": false
+      }
+    },
+    {
+      "commonAttribute": {
+        "name": "OrderId",
+        "type": "ID",
+        "isTarget": false
+      },
+      "from": {
+        "name": "Orders",
+        "columns": [
+          {
+            "name": "OrderId",
+            "type": "ID",
+            "isTarget": false
+          },
+          {
+            "name": "CustomerId",
+            "type": "ID",
+            "isTarget": false
+          },
+          {
+            "name": "OrderDate",
+            "type": "DATE",
+            "isTarget": false
+          }
+        ],
+        "isTarget": false
+      },
+      "to": {
+        "name": "Product",
+        "columns": [
+          {
+            "name": "ProductId",
+            "type": "ID",
+            "isTarget": false
+          },
+          {
+            "name": "OrderId",
+            "type": "ID",
+            "isTarget": false
+          },
+          {
+            "name": "ProductName",
+            "type": "TEXT",
+            "isTarget": false
+          },
+          {
+            "name": "Price",
+            "type": "NUMERIC",
+            "isTarget": false
+          }
+        ],
+        "isTarget": false
+      }
+    }
+  ]
+}

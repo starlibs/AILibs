@@ -18,6 +18,7 @@ import autofe.db.model.Attribute;
 import autofe.db.model.BackwardAggregateOperation;
 import autofe.db.model.BackwardRelationship;
 import autofe.db.model.Database;
+import autofe.db.model.ForwardJoinOperation;
 import autofe.db.model.ForwardRelationship;
 import autofe.db.model.Table;
 
@@ -51,7 +52,7 @@ public class DBUtils {
 		Set<BackwardAggregateOperation> operations = new HashSet<>();
 		// Start recursion
 		for (BackwardRelationship backwardRelationship : getBackwardsFor(from, db)) {
-			getOperationsForBackwardRelation(backwardRelationship, operations,db);
+			getOperationsForBackwardRelation(backwardRelationship, operations, db);
 		}
 		return operations;
 	}
@@ -59,7 +60,7 @@ public class DBUtils {
 	private static void getOperationsForBackwardRelation(BackwardRelationship backwardRelationship,
 			Set<BackwardAggregateOperation> operations, Database db) {
 		// Add operations for all attributes in 'to' table
-		Table to = backwardRelationship.getFrom();
+		Table to = backwardRelationship.getTo();
 		for (Attribute attribute : to.getColumns()) {
 			if (attribute.isAggregable()) {
 				for (AggregationFunction af : AggregationFunction.values()) {
@@ -71,11 +72,19 @@ public class DBUtils {
 
 		// Recursion
 		for (BackwardRelationship br : getBackwardsFor(to, db)) {
-			getOperationsForBackwardRelation(br, operations,db);
+			getOperationsForBackwardRelation(br, operations, db);
 		}
 	}
 	
-	public static void serialize(Database db, String path) { 
+	public static Set<ForwardJoinOperation> getForwardJoinOperations(Table from, Database db) {
+		Set<ForwardJoinOperation> operations = new HashSet<>();
+		for(ForwardRelationship fr : getForwardsFor(from, db)) {
+			operations.add(new ForwardJoinOperation(fr));
+		}
+		return operations;
+	}
+
+	public static void serialize(Database db, String path) {
 		Gson gson = new GsonBuilder().setPrettyPrinting().create();
 		try {
 			FileWriter fw = new FileWriter(path);
@@ -87,8 +96,8 @@ public class DBUtils {
 			e.printStackTrace();
 		}
 	}
-	
-	public static Database deserialize(String path) { 
+
+	public static Database deserialize(String path) {
 		Database db = null;
 		Gson gson = new Gson();
 		try {
@@ -99,7 +108,25 @@ public class DBUtils {
 			System.out.println("ERROR!");
 		}
 		return db;
-		
+
+	}
+
+	public static Table getTableByName(String name, Database db) {
+		for (Table t : db.getTables()) {
+			if (t.getName().equals(name)) {
+				return t;
+			}
+		}
+		return null;
+	}
+
+	public static Attribute getAttributeByName(String name, Table table) {
+		for (Attribute a : table.getColumns()) {
+			if (a.getName().equals(name)) {
+				return a;
+			}
+		}
+		return null;
 	}
 
 }
