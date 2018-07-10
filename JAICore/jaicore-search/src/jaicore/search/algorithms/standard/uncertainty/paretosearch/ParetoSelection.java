@@ -19,7 +19,7 @@ public class ParetoSelection <T, V extends Comparable<V>> implements OpenCollect
 	private final Queue<ParetoNode<T,V>> pareto;
 
 	/* Node counter. */
-	private long n = 0;
+	private int n = 0;
 
 	/**
 	 * Constructor.

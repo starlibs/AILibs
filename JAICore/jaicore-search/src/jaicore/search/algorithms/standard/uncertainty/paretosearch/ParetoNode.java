@@ -12,13 +12,14 @@ public class ParetoNode<T, V extends Comparable<V>> {
 
     final Node<T, V> node;
     /* Number of creation of this pareto node. */
-    final long n;
+    final int n;
     final HashSet<ParetoNode> dominates;
     final HashSet<ParetoNode> dominatedBy;
 
 
-    ParetoNode(Node<T, V> node, long n) {
+    ParetoNode(Node<T, V> node, int n) {
         this.node = node;
+        assert n >= 0 : "n has to be non-negative";
         this.n = n;
         this.dominates = new HashSet<>();
         this.dominatedBy = new HashSet<>();
