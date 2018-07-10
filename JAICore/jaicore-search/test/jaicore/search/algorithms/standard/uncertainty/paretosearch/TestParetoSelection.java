@@ -1,30 +1,50 @@
 package jaicore.search.algorithms.standard.uncertainty.paretosearch;
 
 import jaicore.search.structure.core.Node;
+import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.PriorityQueue;
 
 public class TestParetoSelection {
+
+    private Node<String, Double> p, q, r, s, t, u;
+
+    @Before
+    public void setUp() {
+        p = new Node<>(null, "1");
+        p.setAnnotation("f", 2.0);
+        p.setAnnotation("uncertainty", 0.9d);
+
+        q = new Node<>(null, "2");
+        q.setAnnotation("f", 3.0);
+        q.setAnnotation("uncertainty", 0.6d);
+
+        r = new Node<>(null, "3");
+        r.setAnnotation("f", 5.0);
+        r.setAnnotation("uncertainty", 0.4);
+
+        s = new Node<>(null, "4");
+        s.setAnnotation("f", 2.5d);
+        s.setAnnotation("uncertainty", 0.3);
+
+        t = new Node<>(null, "5");
+        t.setAnnotation("f", 8.0);
+        t.setAnnotation("uncertainty", 0.3);
+
+        u = new Node<>(null, "6");
+        u.setAnnotation("f", 7.0);
+        u.setAnnotation("uncertainty", 0.1);
+    }
 
     @Test
     public void testCosinusDistanceComparator() {
         CosinusDistanceComparator c = new CosinusDistanceComparator(10.0, 1.0);
 
-        Node<String, Double> p = new Node<>(null, "1");
-        p.setAnnotation("f", 2.0);
-        p.setAnnotation("uncertainty", 0.9d);
         ParetoNode pp = new ParetoNode(p, 1);
-
-        Node<String, Double> s = new Node<>(null, "4");
-        s.setAnnotation("f", 2.5d);
-        s.setAnnotation("uncertainty", 0.3);
-        ParetoNode ss = new ParetoNode(p, 1);
-
-        Node<String, Double> u = new Node<>(null, "6");
-        u.setAnnotation("f", 7.0);
-        u.setAnnotation("uncertainty", 0.1);
-        ParetoNode uu = new ParetoNode(p, 1);
+        ParetoNode ss = new ParetoNode(s, 1);
+        ParetoNode uu = new ParetoNode(u, 1);
 
         double d1 = 1 - c.cosineSimilarity(2.0, 0.9);
         double d4 = 1 - c.cosineSimilarity(2.5d, 0.3d);
@@ -50,36 +70,6 @@ public class TestParetoSelection {
 
     @Test
     public void testParetoFront() {
-        Node<String, Double> p = new Node<>(null, "1");
-        p.setAnnotation("f", 2.0);
-        p.setAnnotation("uncertainty", 0.9d);
-        // ParetoNode pp = new ParetoNode(p, 1);
-
-        Node<String, Double> q = new Node<>(null, "2");
-        q.setAnnotation("f", 3.0);
-        q.setAnnotation("uncertainty", 0.6d);
-        // ParetoNode qq = new ParetoNode(q, 2);
-
-        Node<String, Double> r = new Node<>(null, "3");
-        r.setAnnotation("f", 5.0);
-        r.setAnnotation("uncertainty", 0.4);
-        // ParetoNode rr = new ParetoNode(r, 3);
-
-        Node<String, Double> s = new Node<>(null, "4");
-        s.setAnnotation("f", 2.5d);
-        s.setAnnotation("uncertainty", 0.3);
-        // ParetoNode ss = new ParetoNode(s, 4);
-
-        Node<String, Double> t = new Node<>(null, "5");
-        t.setAnnotation("f", 8.0);
-        t.setAnnotation("uncertainty", 0.3);
-        // ParetoNode tt = new ParetoNode(t, 5);
-
-        Node<String, Double> u = new Node<>(null, "6");
-        u.setAnnotation("f", 7.0);
-        u.setAnnotation("uncertainty", 0.1);
-        // ParetoNode uu = new ParetoNode(p, 6);
-
         CosinusDistanceComparator c = new CosinusDistanceComparator(10.0, 1);
         PriorityQueue pareto = new PriorityQueue<ParetoNode<String, Double>>(c);
         ParetoSelection<String, Double> paretoSelection = new ParetoSelection<String, Double>(pareto);
