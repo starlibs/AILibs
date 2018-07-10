@@ -2,6 +2,7 @@ package autofe.db.test;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,7 +18,7 @@ import autofe.db.model.Table;
 import autofe.db.util.DBUtils;
 
 public class SerializationTest {
-	
+
 	private static final String SERIALIZATION_FILE = "temp_db.json";
 
 	private Database db;
@@ -89,6 +90,9 @@ public class SerializationTest {
 		DBUtils.serialize(db, SERIALIZATION_FILE);
 		Database loadedDb = DBUtils.deserialize(SERIALIZATION_FILE);
 		assertEquals(db, loadedDb);
+		// Delete file
+		File toDelete = new File(SERIALIZATION_FILE);
+		toDelete.delete();
 	}
 
 }
