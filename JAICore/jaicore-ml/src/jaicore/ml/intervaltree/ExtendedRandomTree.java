@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 
 import jaicore.ml.core.Interval;
 import weka.classifiers.trees.RandomTree;
+import weka.core.Instance;
 
 /**
  * Extension of a classic RandomTree to predict intervals.
@@ -22,8 +23,18 @@ public class ExtendedRandomTree extends RandomTree {
 	 * 
 	 */
 	private static final long serialVersionUID = -467555221387281335L;
+	 
 
-	public Interval predictInterval(Interval[] queriedInterval) {
+	public Interval predictInterval(Instance data) {
+		Interval [] mappedData = new Interval[data.numAttributes() / 2];
+		int counter = 0;
+		for (int attrNum = 0; attrNum<data.numAttributes(); attrNum=attrNum+2) {
+			mappedData[counter] = new Interval(data.value(attrNum), data.value(attrNum+1));
+		}
+		return predictInterval(mappedData);
+	}
+	
+	public Interval predictInterval (Interval[] queriedInterval) {
 		// the stack of elements that still have to be processed.
 		Deque<Entry<Interval[], Tree>> stack = new ArrayDeque<>();
 		// initially, the root and the queried interval
@@ -40,26 +51,32 @@ public class ExtendedRandomTree extends RandomTree {
 			int attribute = nextTree.getAttribute();
 			Tree[] children = nextTree.getSuccessors();
 			double[] classDistribution = nextTree.getClassDistribution();
-			Interval intervalForAttribute = queriedInterval[attribute];
 			// process node
 			if (attribute == -1) {
 				// node is a leaf
 				// for now, assume that we have regression!
 				list.add(classDistribution[0]);
 			} else {
+				Interval intervalForAttribute = queriedInterval[attribute];
 				// no leaf node...
 				Tree leftChild = children[0];
 				Tree rightChild = children[1];
 				// traverse the tree
 				if (intervalForAttribute.getLowerBound() <= threshold) {
+					
 					if (threshold <= intervalForAttribute.getUpperBound()) {
+						// scenario: x_min <= threshold <= x_max 
+						// query [x_min, threshold] on the left child
 						Interval[] newInterval = substituteInterval(queriedInterval,
 								new Interval(intervalForAttribute.getLowerBound(), threshold), attribute);
 						stack.push(getEntry(newInterval, leftChild));
 					} else {
+						// scenario: threshold <= x_min <= x_max
+						// query [x_min, x_max] on the left child
 						stack.push(getEntry(queriedInterval, leftChild));
 					}
 				}
+				// analogously...
 				if (intervalForAttribute.getUpperBound() > threshold) {
 					if (intervalForAttribute.getLowerBound() <= threshold) {
 						Interval[] newInterval = substituteInterval(queriedInterval,

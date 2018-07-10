@@ -23,4 +23,9 @@ public class Interval {
 	public double getUpperBound() {
 		return upperBound;
 	}
+	
+	@Override
+	public String toString() {
+		return new StringBuilder("[").append(lowerBound).append(", ").append(upperBound).append("]").toString();
+	}
 }
