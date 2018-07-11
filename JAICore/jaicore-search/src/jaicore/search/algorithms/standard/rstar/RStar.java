@@ -12,17 +12,20 @@ import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 
 /**
  * Implementation of the R* algorithm.
  * @param <T> a nodes external label i.e. a state of a problem
  * @param <A> action (action space of problem)
+ * @param <D> type of Delta distance
  */
-public class RStar<T, A> {
+public class RStar<T, A, D> {
 
     /* Open list. */
-    protected OpenCollection<Node<T, K>> open;
+    protected OpenCollection<GammaNode<T, K>> open;
 
     /* Closed list of already expanded states. */
     protected ArrayList<T> closed;
@@ -30,18 +33,36 @@ public class RStar<T, A> {
     /* For actual search problem */
     protected final SingleRootGenerator<T> rootGenerator;
     protected final SuccessorGenerator<T, A> successorGenerator;
+    protected final GammaSuccessorGenerator<T, V, D> gammaSuccessorGenerator;
     protected final HeuristicEstimator<T> heuristicEstimator;
     protected final double w;
     protected final int K;
     protected final double delta;
 
-    // protected final HashMap<T, Double> g;
-    // protected final HashMap<T, T> bp;
 
-    private class GammaGraph {
+    // We need to assure that, if a state is generated more than once,
+    // the g, bp and path values do not differ between the different
+    // instances. So we need to hash the states.
 
-        // set of Node<T, V>
+    /* g values */
+//    protected final HashMap<T, Double> g = new HashMap<>();
+    /* Back pointer in Gamma graph. */
+//    protected final HashMap<T, T> bp = new HashMap<>();
+    /* Path in original graph. */
+//    protected final HashMap<StatePair, T> path = new HashMap<>();
 
+    protected final HashSet<T> alreadyGeneratedStates = new HashSet<>();
+
+    /**
+     * Captures two states and enables hashing for this pair of states.
+     */
+    public class StatePair {
+        T from;
+        T to;
+        public StatePair(T from, T to) {
+            this.from = from;
+            this.to = to;
+        }
 
     }
 
@@ -106,26 +127,33 @@ public class RStar<T, A> {
     }
 
     public void run() {
-        // Initialize root node s_start with k_start = [0, w*h(s_start)] and add it to open list.
+        // Initialize root node s_start with k_start = [0, w*h(s_start)].
         T s_start = rootGenerator.getRoot();
         K k_start = new K(false, w*heuristicEstimator.h(s_start));
-        Node<T, K> n_start = new Node(null, s_start);
+        GammaNode<T, K> n_start = new GammaNode(null, s_start);
         n_start.setInternalLabel(k_start);
-        n_start.setAnnotation("g", 0.0d);
-        this.open.add(n_start);
+
+        // Add start node to open list and add its state to already generated states.
+        open.add(n_start);
+
 
         while (!open.isEmpty()) {
             // Remove node n with smallest k-value from open.
-            Node<T, K> n = this.open.peek();
+            GammaNode<T, K> n = this.open.peek();
             T s = n.getPoint();
 
-            if ((!s.equals(s_start)) && (false)) {
+            if ((!s.equals(s_start)) && (n.pathToBp == null)) {
                 // Reevaluate state
             } else {
                 // Expand state
                 closed.add(s);
-                ArrayList<T> succ_s = generateSuccessors(K, delta);  // here same states can be generated a second time possibly.
+                Collection<T> succ_s = gammaSuccessorGenerator.generateSuccessors(s, K, delta);
                 for (T s_ : succ_s) {
+
+                    // If we already generated s_ before, use this object.
+
+                    // Else add it already generated states.
+
                     // path(s_,s) = null
                     // c_low(path(s_,s)) = h(s, s_)
 
@@ -155,6 +183,23 @@ public class RStar<T, A> {
             // for s' in succ_s
                 // add s' and s->s' to G, set bp(s')=s
 
+    }
+
+    private void reevaluateState(GammaNode<T,V> n) {
+        if ((n.g > w*h(n.getPoint())) || n.avoid) {
+            // Update n respec. state s in open.
+            open.remove(n);
+            n.setInternalLabel(new K(true, n.g + w*h(n.getPoint())));
+            open.add(n);
+        }
+    }
+
+    private double h(T s) {
+        return 0.0d;
+    }
+
+    private double h(T from, T to) {
+        return 0.0d;
     }
 
     private ArrayList<T> generateSuccessors(int k, double d) {
