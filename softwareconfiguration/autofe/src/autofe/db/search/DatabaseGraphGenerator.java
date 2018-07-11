@@ -3,14 +3,14 @@ package autofe.db.search;
 import autofe.db.model.Database;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.graphgenerator.GoalTester;
-import jaicore.search.structure.graphgenerator.RootGenerator;
+import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 public class DatabaseGraphGenerator implements GraphGenerator<DatabaseNode, String> {
 
 	private Database initialDatabase;
-	
+
 	public DatabaseGraphGenerator(Database initialDatabase) {
 		super();
 		this.initialDatabase = initialDatabase;
@@ -24,22 +24,24 @@ public class DatabaseGraphGenerator implements GraphGenerator<DatabaseNode, Stri
 			public DatabaseNode getRoot() {
 				return new DatabaseNode(initialDatabase);
 			}
-			
-			
-		
+
 		};
 	}
 
 	@Override
 	public SuccessorGenerator<DatabaseNode, String> getSuccessorGenerator() {
-		// TODO Auto-generated method stub
-		return null;
+		return new DatabaseSuccessorGenerator();
 	}
 
 	@Override
-	public GoalTester<DatabaseNode> getGoalTester() {
-		// TODO Auto-generated method stub
-		return null;
+	public NodeGoalTester<DatabaseNode> getGoalTester() {
+		return new NodeGoalTester<DatabaseNode>() {
+
+			@Override
+			public boolean isGoal(DatabaseNode node) {
+				return false;
+			}
+		};
 	}
 
 	@Override
@@ -51,7 +53,7 @@ public class DatabaseGraphGenerator implements GraphGenerator<DatabaseNode, Stri
 	@Override
 	public void setNodeNumbering(boolean nodenumbering) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

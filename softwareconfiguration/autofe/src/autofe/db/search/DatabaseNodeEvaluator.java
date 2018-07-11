@@ -10,8 +10,7 @@ public class DatabaseNodeEvaluator implements INodeEvaluator<DatabaseNode, Doubl
 
 	@Override
 	public Double f(Node<DatabaseNode, ?> node) throws Throwable {
-		// TODO Auto-generated method stub
-		return null;
+		return Math.random();
 	}
 
 }
