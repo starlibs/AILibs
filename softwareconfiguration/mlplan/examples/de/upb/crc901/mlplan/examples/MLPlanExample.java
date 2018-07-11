@@ -3,18 +3,16 @@ package de.upb.crc901.mlplan.examples;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
 
-import de.upb.crc901.automl.hascowekaml.WEKAPipelineFactory;
 import de.upb.crc901.mlplan.multiclass.DefaultPreorder;
 import de.upb.crc901.mlplan.multiclass.MLPlan;
 import hasco.core.Util;
+import hasco.model.Component;
 import hasco.model.ComponentInstance;
 import jaicore.ml.WekaUtil;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
@@ -46,7 +44,7 @@ public class MLPlanExample {
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(0), .7f);
 		
 		/* initialize mlplan, and let it run for 30 seconds */
-		int timeoutInSeconds = 30;
+		int timeoutInSeconds = 600;
 		MLPlan mlplan = new MLPlan(new File("model/weka/weka-all-autoweka.json"));
 		mlplan.setLoggerName("mlplan");
 		mlplan.setTimeout(timeoutInSeconds);
@@ -58,19 +56,20 @@ public class MLPlanExample {
 			
 			@Override
 			public double calculateSolutionDistance(TFDNode solution1, TFDNode solution2) {
-				ComponentInstance instance1;
-				if (solution1.getAppliedAction() == null) {
-					instance1 = Util.getSolutionCompositionForPlan(mlplan.getComponents(), solution1.getState(), new ArrayList<>());
+				ComponentInstance instance1 = Util.getSolutionCompositionFromState(mlplan.getComponents(), solution1.getState());
+				ComponentInstance instance2 = Util.getSolutionCompositionFromState(mlplan.getComponents(), solution1.getState());
+				if (instance1 == null || instance2 == null || instance1.getComponent() == null || instance2.getComponent() == null) {
+					return Double.MAX_VALUE;
 				} else {
-					instance1 = Util.getSolutionCompositionForPlan(mlplan.getComponents(), solution1.getState(), Arrays.asList(solution1.getAppliedAction()));
+					Component component1 = instance1.getComponent();
+					Component component2 = instance2.getComponent();
+					if (component1.getName().equals(component2.getName())) {
+						// Identical Classifier?
+						return 0.75;
+					} else {
+						return 1;
+					}
 				}
-				ComponentInstance instance2;
-				if (solution1.getAppliedAction() == null) {
-					instance2 = Util.getSolutionCompositionForPlan(mlplan.getComponents(), solution1.getState(), new ArrayList<>());
-				} else {
-					instance2 = Util.getSolutionCompositionForPlan(mlplan.getComponents(), solution1.getState(), Arrays.asList(solution1.getAppliedAction()));
-				}
-				return 0;
 			}
 		});
 		mlplan.setOversearchAvoidanceConfig(oversearchAvoidanceConfig);
