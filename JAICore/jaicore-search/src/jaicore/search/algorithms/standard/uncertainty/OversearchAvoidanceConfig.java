@@ -15,7 +15,7 @@ public class OversearchAvoidanceConfig<N> {
 	private int randomSampleAmount = 3;
 	private double exploitationScoreThreshold = 0.05d;
 	private double explorationUncertaintyThreshold = 0.05d;
-	private double minimumSolutionDistanceForExploration = 0.1d;
+	private double minimumSolutionDistanceForExploration = 0.5d;
 	private ISolutionDistanceMetric<N> solutionDistanceMetric= (s1, s2) -> 0.0d;
 
 	public OversearchAvoidanceConfig(OversearchAvoidanceMode mode) {
