@@ -55,7 +55,7 @@ public class isValidParameterRangeRefinementPredicate implements EvaluablePredic
     List<ConstantParam> partialGroundingAsList = Arrays.asList(partialGrounding);
     String containerName = partialGrounding[3].getName();
     String currentParamValue = partialGrounding[4].getName(); // this is not really used, because the current value is again read from the state
-
+    
     /* determine true domain of parameter */
     Map<Parameter, ParameterDomain> paramDomains = Util.getUpdatedDomainsOfComponentParameters(state, component, componentIdentifier);
 

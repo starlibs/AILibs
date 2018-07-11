@@ -25,11 +25,11 @@ import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 /**
- * Best first algorithm implementation.
+ * MCTS algorithm implementation.
  *
  * @author Felix Mohr
  */
-public class MCTS<T,A,V extends Comparable<V>> implements IObservableORGraphSearch<T,A,V> {
+public class MCTS<T,A,V extends Comparable<V>> implements IObservableORGraphSearch<T,A,V>, IPolicy<T,A,V> {
 	
 	private static final Logger logger = LoggerFactory.getLogger(MCTS.class);
 
@@ -43,7 +43,7 @@ public class MCTS<T,A,V extends Comparable<V>> implements IObservableORGraphSear
 	protected final PathGoalTester<T> pathGoalTester;
 	protected final NodeGoalTester<T> nodeGoalTester;
 
-	protected final IPolicy<T,A,V> treePolicy;
+	protected final IPathUpdatablePolicy<T,A,V> treePolicy;
 	protected final IPolicy<T,A,V> defaultPolicy;
 	protected final INodeEvaluator<T, V> playoutSimulator;
 	
@@ -51,9 +51,10 @@ public class MCTS<T,A,V extends Comparable<V>> implements IObservableORGraphSear
 
 	private final T root;
 	protected final LabeledGraph<T, A> exploredGraph;
+	private int timeoutInS = -1;
 	
 	@SuppressWarnings("unchecked")
-	public MCTS(GraphGenerator<T, A> graphGenerator, IPolicy<T,A,V> treePolicy, IPolicy<T,A,V> defaultPolicy, INodeEvaluator<T, V> playoutSimulator) {
+	public MCTS(GraphGenerator<T, A> graphGenerator, IPathUpdatablePolicy<T,A,V> treePolicy, IPolicy<T,A,V> defaultPolicy, INodeEvaluator<T, V> playoutSimulator) {
 		super();
 		this.rootGenerator = graphGenerator.getRootGenerator();
 		this.successorGenerator = graphGenerator.getSuccessorGenerator();
@@ -89,7 +90,7 @@ public class MCTS<T,A,V extends Comparable<V>> implements IObservableORGraphSear
 	@Override
 	public List<T> nextSolution() {
 		
-		/* walk tree until first unexpanded node */
+		/* iterate over playouts */
 		try {
 			while (true) {
 				logger.info("Starting computation of next playout path.");
@@ -110,12 +111,14 @@ public class MCTS<T,A,V extends Comparable<V>> implements IObservableORGraphSear
 	}
 	
 	private List<T> getPlayout() throws Exception {
+		logger.info("Computing a new playout ...");
 		T current = root;
 		T next;
 		Collection<T> childrenOfCurrent;
 		List<T> path = new ArrayList<>();
 		path.add(current);
 		
+		/* use tree policy to select a leaf node of the explored graph */
 		while (!(childrenOfCurrent = exploredGraph.getSuccessors(current)).isEmpty()) {
 			List<A> availableActions = new ArrayList<>();
 			Map<A,T> successorStates = new HashMap<>();
@@ -124,7 +127,7 @@ public class MCTS<T,A,V extends Comparable<V>> implements IObservableORGraphSear
 				availableActions.add(action);
 				successorStates.put(action, child);
 			}
-//			System.out.println("Available actions of expanded node: " + availableActions);
+			logger.debug("Available actions of expanded node: {}", availableActions);
 			A chosenAction = treePolicy.getAction(current, successorStates);
 			if (chosenAction == null)
 				throw new IllegalStateException("Chosen action is null!");
@@ -135,10 +138,9 @@ public class MCTS<T,A,V extends Comparable<V>> implements IObservableORGraphSear
 			logger.debug("Tree policy decides to expand {} taking action {} to {}", current, chosenAction, next);
 			current = next;
 			path.add(current);
-//			System.out.println("Chosen action: " + chosenAction + ". Successor: " + current);
+			logger.debug("Chosen action: {}. Successor: {}", chosenAction, current);
 		}
-		
-//		System.out.println("Reached child node of traveral tree. Continuing with default-policy.");
+		logger.info("Determined leaf node {} of traversal tree using tree policy. Now completing the path.", current);
 		
 		/* use default policy to proceed to a goal node */
 		while (!isGoal(current)) {
@@ -158,6 +160,7 @@ public class MCTS<T,A,V extends Comparable<V>> implements IObservableORGraphSear
 			current = successorStates.get(defaultPolicy.getAction(current, successorStates));
 			path.add(current);
 		}
+		logger.info("Draw playout path {}.", path);
 		return path;
 	}
 	
@@ -234,5 +237,15 @@ public class MCTS<T,A,V extends Comparable<V>> implements IObservableORGraphSear
 	@Override
 	public void registerListener(Object listener) {
 		this.graphEventBus.register(listener);
+	}
+
+	@Override
+	public A getAction(T node, Map<A, T> actionsWithSuccessors) {
+		
+		/* compute next solution */
+		nextSolution();
+		
+		/* choose action in root that has best reward */
+		return treePolicy.getAction(root, actionsWithSuccessors);
 	}
 }

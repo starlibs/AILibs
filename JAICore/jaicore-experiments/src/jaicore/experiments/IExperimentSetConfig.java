@@ -24,6 +24,10 @@ public interface IExperimentSetConfig extends Mutable, Reloadable {
 
 	/* the result fields define fields for results of each run */
 	public static final String RESULTFIELDS = "resultfields";
+	
+	/* the fields for ignoring time and memory information */
+	public static final String IGNORE_TIME = "ignore.time";
+	public static final String IGNORE_MEMORY = "ignore.memory";
 
 	@Key(MEM_MAX)
 	public int getMemoryLimitinMB();
@@ -54,4 +58,10 @@ public interface IExperimentSetConfig extends Mutable, Reloadable {
 
 	@Key(RESULTFIELDS)
 	public List<String> getResultFields();
+	
+	@Key(IGNORE_TIME)
+	public List<String> getFieldsForWhichToIgnoreTime();
+	
+	@Key(IGNORE_MEMORY)
+	public List<String> getFieldsForWhichToIgnoreMemory();
 }

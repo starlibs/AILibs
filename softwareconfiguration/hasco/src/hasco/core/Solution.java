@@ -1,5 +1,6 @@
 package hasco.core;
 
+import hasco.model.ComponentInstance;
 import jaicore.planning.algorithms.IPlanningSolution;
 
 /**
@@ -12,15 +13,17 @@ import jaicore.planning.algorithms.IPlanningSolution;
  */
 public class Solution<R extends IPlanningSolution, T, V extends Comparable<V>> {
 
+	private final ComponentInstance componentInstance;
 	private final R planningSolution;
 	private final T solution;
 	private final V score;
 	private final int timeToComputeScore;
 
-	public Solution(R planningSolution, T solution, V score, int timeToComputeScore) {
+	public Solution(ComponentInstance componentInstance, R planningSolution, T solution, V score, int timeToComputeScore) {
 		super();
 		if (score == null)
 			throw new IllegalArgumentException("Obtained solution without score!");
+		this.componentInstance = componentInstance;
 		this.planningSolution = planningSolution;
 		this.solution = solution;
 		this.score = score;
@@ -28,7 +31,11 @@ public class Solution<R extends IPlanningSolution, T, V extends Comparable<V>> {
 	}
 	
 	public Solution(Solution<R,T,V> s) {
-		this(s.planningSolution, s.solution, s.score, s.timeToComputeScore);
+		this(s.componentInstance, s.planningSolution, s.solution, s.score, s.timeToComputeScore);
+	}
+
+	public ComponentInstance getComponentInstance() {
+		return componentInstance;
 	}
 
 	public R getPlanningSolution() {

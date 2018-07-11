@@ -1,13 +1,5 @@
 package hasco.core;
 
-import jaicore.basic.sets.SetUtil;
-import jaicore.basic.sets.SetUtil.Pair;
-import jaicore.logic.fol.structure.Literal;
-import jaicore.logic.fol.structure.Monom;
-import jaicore.planning.model.core.Action;
-import jaicore.planning.model.core.PlannerUtil;
-import jaicore.search.structure.core.Node;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +15,13 @@ import hasco.model.Dependency;
 import hasco.model.NumericParameterDomain;
 import hasco.model.Parameter;
 import hasco.model.ParameterDomain;
+import jaicore.basic.sets.SetUtil;
+import jaicore.basic.sets.SetUtil.Pair;
+import jaicore.logic.fol.structure.Literal;
+import jaicore.logic.fol.structure.Monom;
+import jaicore.planning.model.core.Action;
+import jaicore.planning.model.core.PlannerUtil;
+import jaicore.search.structure.core.Node;
 
 public class Util {
 
