@@ -25,6 +25,11 @@ import autofe.db.model.Table;
 public class DBUtils {
 
 	public static Table getTargetTable(Database db) {
+		for(Table t : db.getTables()) {
+			if(t.isTarget()) {
+				return t;
+			}
+		}
 		return null;
 	}
 
