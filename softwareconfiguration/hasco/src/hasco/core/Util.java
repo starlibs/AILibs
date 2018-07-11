@@ -14,6 +14,8 @@ import java.util.Collection;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -241,58 +243,42 @@ public class Util {
 	}
 
 	/**
-	 * Computes a set of component names that appear in the composition
+	 * Computes a String of component names that appear in the composition which can
+	 * be used as an identifier for the composition
 	 * 
 	 * @param composition
 	 * @return Set of component names
 	 */
-	public static Set<String> getComponentNamesOfComposition(ComponentInstance composition) {
-		Set<String> components = new HashSet<String>();
+	public static String getComponentNamesOfComposition(ComponentInstance composition) {
+		StringBuilder builder = new StringBuilder();
 		Deque<ComponentInstance> componentInstances = new ArrayDeque<ComponentInstance>();
 		componentInstances.push(composition);
-		components.add(composition.getComponent().getName());
+		builder.append(composition.getComponent().getName());
 		ComponentInstance curInstance;
 		while (!componentInstances.isEmpty()) {
 			curInstance = componentInstances.pop();
-			for (ComponentInstance instance : curInstance.getSatisfactionOfRequiredInterfaces().values()) {
+			LinkedHashMap<String, String> requiredInterfaces = curInstance.getComponent().getRequiredInterfaces();
+			// TODO make sure that this is indeed orederd!
+			Set<String> requiredInterfaceNames = requiredInterfaces.keySet();
+			for (String requiredInterfaceName : requiredInterfaceNames) {
+				ComponentInstance instance = curInstance.getSatisfactionOfRequiredInterfaces()
+						.get(requiredInterfaceName);
 				componentInstances.push(instance);
-				components.add(instance.getComponent().getName());
+				builder.append(instance.getComponent().getName());
+				instance.getComponent().getRequiredInterfaces().values();
 			}
 		}
-		return components;
+		return builder.toString();
 	}
 
 	/**
-	 * Computes a partial ordered set of all parameters that appear in the
-	 * composition
+	 * Computes a list of components that appear in the composition
 	 * 
 	 * @param composition
-	 * @return Partial ordered set of parameters
+	 * @return List of components
 	 */
-	public static PartialOrderedSet<Parameter> getParametersOfComposition(ComponentInstance composition) {
-		PartialOrderedSet<Parameter> parameters = new PartialOrderedSet<Parameter>();
-		Deque<ComponentInstance> componentInstances = new ArrayDeque<ComponentInstance>();
-		componentInstances.push(composition);
-		parameters.addAll(composition.getComponent().getParameters());
-		ComponentInstance curInstance;
-		while (!componentInstances.isEmpty()) {
-			curInstance = componentInstances.pop();
-			for (ComponentInstance instance : curInstance.getSatisfactionOfRequiredInterfaces().values()) {
-				componentInstances.push(instance);
-				parameters.addAll(instance.getComponent().getParameters());
-			}
-		}
-		return parameters;
-	}
-
-	/**
-	 * Computes a set of components that appear in the composition
-	 * 
-	 * @param composition
-	 * @return Set of components
-	 */
-	public static Set<Component> getComponentsOfComposition(ComponentInstance composition) {
-		Set<Component> components = new HashSet<Component>();
+	public static List<Component> getComponentsOfComposition(ComponentInstance composition) {
+		List<Component> components = new LinkedList<Component>();
 		Deque<ComponentInstance> componentInstances = new ArrayDeque<ComponentInstance>();
 		componentInstances.push(composition);
 		components.add(composition.getComponent());
@@ -305,29 +291,6 @@ public class Util {
 			}
 		}
 		return components;
-	}
-	
-	/**
-	 * Computes a set of components that appear in the composition
-	 * 
-	 * @param composition
-	 * @return Set of components
-	 */
-	public static Map<String,String> getParameterValuesOfComposition(ComponentInstance composition) {
-		Map<String,String> parameterValues = composition.getParameterValues();
-		composition.getComponent().getParameters();
-		Deque<ComponentInstance> componentInstances = new ArrayDeque<ComponentInstance>();
-		componentInstances.push(composition);
-		parameterValues.putAll(composition.getParameterValues());;
-		ComponentInstance curInstance;
-		while (!componentInstances.isEmpty()) {
-			curInstance = componentInstances.pop();
-			for (ComponentInstance instance : curInstance.getSatisfactionOfRequiredInterfaces().values()) {
-				componentInstances.push(instance);
-				parameterValues.putAll(instance.getParameterValues());;
-			}	
-		}
-		return parameterValues;
 	}
 
 	public static Map<Parameter, ParameterDomain> getUpdatedDomainsOfComponentParameters(final Monom state,
