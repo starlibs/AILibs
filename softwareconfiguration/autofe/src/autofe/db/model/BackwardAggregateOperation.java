@@ -90,7 +90,7 @@ public class BackwardAggregateOperation implements DatabaseOperation {
 				+ aggregationFunction + ", toBeAggregated=" + toBeAggregated + "]";
 	}
 
-	private String getAggregatedAttributeName() {
+	public String getAggregatedAttributeName() {
 		return aggregationFunction.name() + "(" + backwardRelationship.getTo().getName() + "." + toBeAggregated.getName() + ")";
 	}
 
