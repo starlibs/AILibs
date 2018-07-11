@@ -30,6 +30,7 @@ public class ExtendedRandomTree extends RandomTree {
 		int counter = 0;
 		for (int attrNum = 0; attrNum<data.numAttributes(); attrNum=attrNum+2) {
 			mappedData[counter] = new Interval(data.value(attrNum), data.value(attrNum+1));
+			counter++;
 		}
 		return predictInterval(mappedData);
 	}
@@ -42,8 +43,9 @@ public class ExtendedRandomTree extends RandomTree {
 
 		// the list of all leaf values
 		ArrayList<Double> list = new ArrayList<>();
-
+		int runs = 0;
 		while (stack.peek() != null) {
+			runs++;
 			// pick the next node to process
 			Entry<Interval[], Tree> toProcess = stack.pop();
 			Tree nextTree = toProcess.getValue();
@@ -62,6 +64,7 @@ public class ExtendedRandomTree extends RandomTree {
 				Tree leftChild = children[0];
 				Tree rightChild = children[1];
 				// traverse the tree
+				
 				if (intervalForAttribute.getLowerBound() <= threshold) {
 					
 					if (threshold <= intervalForAttribute.getUpperBound()) {

@@ -1,4 +1,4 @@
-package jaicore.ml;
+package jaicore.ml.extendedtree.mathematical;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -14,7 +14,7 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import jaicore.ml.core.Interval;
-import jaicore.ml.intervaltree.ExtendedRandomTree;
+import jaicore.ml.intervaltree.ExtendedM5Tree;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
@@ -28,18 +28,18 @@ import weka.core.Instances;
  *
  */
 @RunWith(Parameterized.class)
-public class ExtendedRandomTreeTest {
+public class ExtendedM5TreeTest {
 
-	private RandomTreeParams params;
+	private M5TreeParams params;
 
-	public ExtendedRandomTreeTest(RandomTreeParams params) {
+	public ExtendedM5TreeTest(M5TreeParams params) {
 		this.params = params;
 	}
 
 	@Test
 	public void testTree() {
 		Instances trainingData = params.getTrainingData();
-		ExtendedRandomTree tree = new ExtendedRandomTree();
+		ExtendedM5Tree tree = new ExtendedM5Tree();
 		try {
 			tree.buildClassifier(trainingData);
 		} catch (Exception e1) {
@@ -53,15 +53,15 @@ public class ExtendedRandomTreeTest {
 	}
 
 	@Parameters
-	public static Collection<RandomTreeParams[]> getParameters() {
-		return Arrays.asList(new RandomTreeParams[][] {
-			{ new RandomTreeParams((x) -> Math.pow(x, 2), (x) -> 2 * x) },
-			{ new RandomTreeParams((x) -> Math.sin(x), (x) -> Math.cos(x)) },
-			{ new RandomTreeParams((x) -> Math.pow(x, 10), (x) -> 10 * Math.pow(x, 9)) }
+	public static Collection<M5TreeParams[]> getParameters() {
+		return Arrays.asList(new M5TreeParams[][] {
+			{ new M5TreeParams((x) -> Math.pow(x, 2), (x) -> 2 * x) },
+			{ new M5TreeParams((x) -> Math.sin(x), (x) -> Math.cos(x)) },
+			{ new M5TreeParams((x) -> Math.pow(x, 10), (x) -> 10 * Math.pow(x, 9)) }
 			});
 	}
 
-	static class RandomTreeParams {
+	static class M5TreeParams {
 		private static final double lowerBound = 0;
 
 		private static final double upperBound = 10;
@@ -80,7 +80,7 @@ public class ExtendedRandomTreeTest {
 
 		Function<Double, Double> fun;
 
-		public RandomTreeParams(Function<Double, Double> fun, Function<Double, Double> grad) {
+		public M5TreeParams(Function<Double, Double> fun, Function<Double, Double> grad) {
 			this.fun = fun;
 			this.grad = grad;
 		}
