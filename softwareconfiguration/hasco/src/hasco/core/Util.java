@@ -247,47 +247,49 @@ public class Util {
 	 * be used as an identifier for the composition
 	 * 
 	 * @param composition
-	 * @return Set of component names
+	 * @return String of all component names in right to left depth-first order
 	 */
 	public static String getComponentNamesOfComposition(ComponentInstance composition) {
 		StringBuilder builder = new StringBuilder();
 		Deque<ComponentInstance> componentInstances = new ArrayDeque<ComponentInstance>();
 		componentInstances.push(composition);
-		builder.append(composition.getComponent().getName());
 		ComponentInstance curInstance;
 		while (!componentInstances.isEmpty()) {
 			curInstance = componentInstances.pop();
+			builder.append(curInstance.getComponent().getName());
 			LinkedHashMap<String, String> requiredInterfaces = curInstance.getComponent().getRequiredInterfaces();
-			// TODO make sure that this is indeed orederd!
+			// This set should be ordered
 			Set<String> requiredInterfaceNames = requiredInterfaces.keySet();
 			for (String requiredInterfaceName : requiredInterfaceNames) {
 				ComponentInstance instance = curInstance.getSatisfactionOfRequiredInterfaces()
 						.get(requiredInterfaceName);
 				componentInstances.push(instance);
-				builder.append(instance.getComponent().getName());
-				instance.getComponent().getRequiredInterfaces().values();
 			}
 		}
 		return builder.toString();
 	}
 
 	/**
-	 * Computes a list of components that appear in the composition
+	 * Computes a list of all components of the given composition.
 	 * 
 	 * @param composition
-	 * @return List of components
+	 * @return List of components in right to left depth-first order
 	 */
 	public static List<Component> getComponentsOfComposition(ComponentInstance composition) {
 		List<Component> components = new LinkedList<Component>();
 		Deque<ComponentInstance> componentInstances = new ArrayDeque<ComponentInstance>();
 		componentInstances.push(composition);
-		components.add(composition.getComponent());
 		ComponentInstance curInstance;
 		while (!componentInstances.isEmpty()) {
 			curInstance = componentInstances.pop();
-			for (ComponentInstance instance : curInstance.getSatisfactionOfRequiredInterfaces().values()) {
+			components.add(curInstance.getComponent());
+			LinkedHashMap<String, String> requiredInterfaces = curInstance.getComponent().getRequiredInterfaces();
+			// This set should be ordered
+			Set<String> requiredInterfaceNames = requiredInterfaces.keySet();
+			for (String requiredInterfaceName : requiredInterfaceNames) {
+				ComponentInstance instance = curInstance.getSatisfactionOfRequiredInterfaces()
+						.get(requiredInterfaceName);
 				componentInstances.push(instance);
-				components.add(instance.getComponent());
 			}
 		}
 		return components;

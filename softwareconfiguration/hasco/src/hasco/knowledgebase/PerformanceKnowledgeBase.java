@@ -149,6 +149,7 @@ public class PerformanceKnowledgeBase implements IKnowledgeBase {
 		Instances instances = null;
 		// Add parameter domains as attributes
 		List<Component> components = Util.getComponentsOfComposition(pipeline);
+		ArrayList<Attribute> allAttributes = new ArrayList<Attribute>();
 		for (Component component : components) {
 			PartialOrderedSet<Parameter> parameters = component.getParameters();
 			ArrayList<Attribute> attributes = new ArrayList<Attribute>(parameters.size());
@@ -169,8 +170,13 @@ public class PerformanceKnowledgeBase implements IKnowledgeBase {
 				}
 				attributes.add(attr);
 			}
+			allAttributes.addAll(attributes);
 		}
-		// Add performance score as class attribute
+		// Add performance score as class attribute TODO make score numeric?
+		Attribute score = new Attribute("performance_score");
+		allAttributes.add(score);
+		instances = new Instances("performance_samples", allAttributes, 15);
+		instances.setClass(score);
 		return instances;
 	}
 
