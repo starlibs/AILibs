@@ -87,8 +87,8 @@ public class SerializationTest {
 
 	@Test
 	public void testSerialization() {
-		DBUtils.serialize(db, SERIALIZATION_FILE);
-		Database loadedDb = DBUtils.deserialize(SERIALIZATION_FILE);
+		DBUtils.serializeToFile(db, SERIALIZATION_FILE);
+		Database loadedDb = DBUtils.deserializeFromFile(SERIALIZATION_FILE);
 		assertEquals(db, loadedDb);
 		// Delete file
 		File toDelete = new File(SERIALIZATION_FILE);

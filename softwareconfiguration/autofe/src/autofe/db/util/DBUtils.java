@@ -75,16 +75,16 @@ public class DBUtils {
 			getOperationsForBackwardRelation(br, operations, db);
 		}
 	}
-	
+
 	public static Set<ForwardJoinOperation> getForwardJoinOperations(Table from, Database db) {
 		Set<ForwardJoinOperation> operations = new HashSet<>();
-		for(ForwardRelationship fr : getForwardsFor(from, db)) {
+		for (ForwardRelationship fr : getForwardsFor(from, db)) {
 			operations.add(new ForwardJoinOperation(fr));
 		}
 		return operations;
 	}
 
-	public static void serialize(Database db, String path) {
+	public static void serializeToFile(Database db, String path) {
 		Gson gson = new GsonBuilder().setPrettyPrinting().create();
 		try {
 			FileWriter fw = new FileWriter(path);
@@ -97,7 +97,7 @@ public class DBUtils {
 		}
 	}
 
-	public static Database deserialize(String path) {
+	public static Database deserializeFromFile(String path) {
 		Database db = null;
 		Gson gson = new Gson();
 		try {
@@ -105,10 +105,36 @@ public class DBUtils {
 		} catch (JsonSyntaxException | JsonIOException | FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			System.out.println("ERROR!");
 		}
 		return db;
+	}
 
+	public static String serializeToString(Database db) {
+		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+		try {
+			return gson.toJson(db);
+		} catch (JsonIOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public static Database deserializeFromString(String serialized) {
+		Database db = null;
+		Gson gson = new Gson();
+		try {
+			db = gson.fromJson(serialized, Database.class);
+		} catch (JsonSyntaxException | JsonIOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return db;
+	}
+
+	public static Database clone(Database db) {
+		String serialized = serializeToString(db);
+		return deserializeFromString(serialized);
 	}
 
 	public static Table getTableByName(String name, Database db) {

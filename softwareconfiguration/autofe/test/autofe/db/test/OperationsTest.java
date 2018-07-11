@@ -29,7 +29,7 @@ public class OperationsTest {
 	
 	@Before
 	public void loadDatabase() {
-		db = DBUtils.deserialize(DATABASE_MODEL_FILE);
+		db = DBUtils.deserializeFromFile(DATABASE_MODEL_FILE);
 	}
 	
 	@Test
@@ -101,7 +101,7 @@ public class OperationsTest {
 	}
 	
 	private Database applyBackwardOperationManually() {
-		Database modifiedDb = DBUtils.deserialize(DATABASE_MODEL_FILE);
+		Database modifiedDb = DBUtils.deserializeFromFile(DATABASE_MODEL_FILE);
 		Table orders = DBUtils.getTableByName("Orders", modifiedDb);
 		Table product = DBUtils.getTableByName("Product", modifiedDb);
 		Attribute price = DBUtils.getAttributeByName("Price", product);
