@@ -14,11 +14,14 @@ import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.upb.crc901.automl.PreferenceBasedNodeEvaluator;
 import hasco.core.HASCOFD;
 import hasco.core.Solution;
 import hasco.serialization.ComponentLoader;
+import jaicore.basic.FileUtil;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.graph.observation.IObservableGraphAlgorithm;
+import jaicore.logging.LoggerUtil;
 import jaicore.ml.evaluation.MonteCarloCrossValidationEvaluator;
 import jaicore.ml.evaluation.MulticlassEvaluator;
 import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionSolution;
@@ -44,19 +47,20 @@ public class HASCOForWekaML implements IObservableGraphAlgorithm<TFDNode, String
 	private Collection<Object> listeners = new ArrayList<>();
 	private HASCOFD<Classifier>.HASCOSolutionIterator hascoRun;
 	private INodeEvaluator<TFDNode, Double> preferredNodeEvaluator = n -> null;
-	private final File wekaSpaceConfigurationFile; // this is a hasco file describing the 
-	
+	private final File wekaSpaceConfigurationFile; // this is a hasco file describing the
+
 	public HASCOForWekaML(File hascoConfigurationFile) {
 		this.wekaSpaceConfigurationFile = hascoConfigurationFile;
 	}
 
-	private Queue<HASCOForWekaMLSolution> solutionsFoundByHASCO = new PriorityQueue<>(new Comparator<HASCOForWekaMLSolution>() {
+	private Queue<HASCOForWekaMLSolution> solutionsFoundByHASCO = new PriorityQueue<>(
+			new Comparator<HASCOForWekaMLSolution>() {
 
-		@Override
-		public int compare(final HASCOForWekaMLSolution o1, final HASCOForWekaMLSolution o2) {
-			return o1.getScore().compareTo(o2.getScore());
-		}
-	});
+				@Override
+				public int compare(final HASCOForWekaMLSolution o1, final HASCOForWekaMLSolution o2) {
+					return o1.getScore().compareTo(o2.getScore());
+				}
+			});
 
 	public void gatherSolutions(final Instances data, final int timeoutInMS) throws IOException {
 
@@ -67,17 +71,30 @@ public class HASCOForWekaML implements IObservableGraphAlgorithm<TFDNode, String
 		long start = System.currentTimeMillis();
 		long deadline = start + timeoutInMS;
 
-		/* create algorithm */
-		HASCOFD<Classifier> hasco = new HASCOFD<>(new WEKAPipelineFactory(), this.preferredNodeEvaluator, "AbstractClassifier", new MonteCarloCrossValidationEvaluator(new MulticlassEvaluator(new Random(3)), 3, data, .7f));
-		if (this.loggerName != null && this.loggerName.length() > 0)
-			hasco.setLoggerName(loggerName + ".hasco");
-
 		/* configuring existing components */
 		ComponentLoader cl = new ComponentLoader();
 		cl.loadComponents(wekaSpaceConfigurationFile);
+
+		/* create algorithm */
+		if (this.preferredNodeEvaluator == null) {
+			try {
+				this.preferredNodeEvaluator = new PreferenceBasedNodeEvaluator(cl.getComponents(),
+						FileUtil.readFileAsList("model/combined/preferredNodeEvaluator.txt"));
+			} catch (IOException e) {
+				logger.error("Problem loading the preference-based node evaluator. Details:\n{}",
+						LoggerUtil.getExceptionInfo(e));
+				return;
+			}
+		}
+		/* create algorithm */
+		HASCOFD<Classifier> hasco = new HASCOFD<>(new WEKAPipelineFactory(), this.preferredNodeEvaluator,
+				"AbstractClassifier",
+				new MonteCarloCrossValidationEvaluator(new MulticlassEvaluator(new Random(3)), 3, data, .7f));
+		if (this.loggerName != null && this.loggerName.length() > 0)
+			hasco.setLoggerName(loggerName + ".hasco");
+
 		hasco.addComponents(cl.getComponents());
 		hasco.addParamRefinementConfigurations(cl.getParamConfigs());
-		
 
 		/* add all listeners to HASCO */
 		this.listeners.forEach(l -> hasco.registerListener(l));
@@ -85,7 +102,8 @@ public class HASCOForWekaML implements IObservableGraphAlgorithm<TFDNode, String
 		/* run HASCO */
 		this.hascoRun = hasco.iterator();
 		boolean deadlineReached = false;
-		while (!this.isCanceled && this.hascoRun.hasNext() && (timeoutInMS <= 0 || !(deadlineReached = System.currentTimeMillis() >= deadline))) {
+		while (!this.isCanceled && this.hascoRun.hasNext()
+				&& (timeoutInMS <= 0 || !(deadlineReached = System.currentTimeMillis() >= deadline))) {
 			HASCOForWekaMLSolution nextSolution = new HASCOForWekaMLSolution(this.hascoRun.next());
 			this.solutionsFoundByHASCO.add(nextSolution);
 		}
@@ -106,7 +124,7 @@ public class HASCOForWekaML implements IObservableGraphAlgorithm<TFDNode, String
 	public Queue<HASCOForWekaMLSolution> getFoundClassifiers() {
 		return new LinkedList<>(this.solutionsFoundByHASCO);
 	}
-	
+
 	public HASCOForWekaMLSolution getCurrentlyBestSolution() {
 		return this.solutionsFoundByHASCO.peek();
 	}

@@ -225,8 +225,9 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 			/* derive a map of ground components */
 			R plan = this.planIterator.next();
 			Map<String, Object> solutionAnnotations = this.planner.getAnnotationsOfSolution(plan);
+			ComponentInstance objectInstance = Util.getSolutionCompositionForPlan(HASCO.this.components, HASCO.this.getInitState(), plan.getPlan());
 			@SuppressWarnings("unchecked")
-			Solution<R, T, V> solution = new Solution<>(plan, HASCO.this.getObjectFromPlan(plan.getPlan()), (V) solutionAnnotations.get("f"),
+			Solution<R, T, V> solution = new Solution<>(objectInstance, plan, HASCO.this.getObjectFromPlan(plan.getPlan()), (V) solutionAnnotations.get("f"),
 					solutionAnnotations.containsKey("fTime") ? (int) solutionAnnotations.get("fTime") : -1);
 			return solution;
 		}

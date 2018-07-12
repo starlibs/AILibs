@@ -29,8 +29,6 @@ dependencies {
 	compile project(':JAICore:jaicore-search')
 	compile project(':JAICore:jaicore-ml')
 	
-	
-	
 	// basic dependencies
 	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.6'
 	compile group: 'org.graphstream', name: 'gs-core', version: '1.1.1'
