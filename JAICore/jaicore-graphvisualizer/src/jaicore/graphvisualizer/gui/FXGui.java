@@ -19,7 +19,11 @@ public class FXGui{
     public void open(){
        open(new Recorder(), "GUI");
     }
-
+    
+    /**
+     * Opens a GUI-Windows by creating a recorder to the algorithm
+     * @param algorithm
+     */
     public void open(IObservableGraphAlgorithm algorithm){
        open(new Recorder(algorithm),"Gui");
     }
@@ -31,7 +35,13 @@ public class FXGui{
     public void open(Recorder recorder){
         open(recorder, "GUI");
     }
-
+    /**
+     * Opens a GUI-Window with a given Recorder as the main supplier
+     * @param recorder
+     * 		The recorder which contains the recorded events
+     * @param title
+     * 		The  title of the gui window.
+     */
     public void open(Recorder recorder, String title){
         try{
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("gui.fxml"));
@@ -51,7 +61,7 @@ public class FXGui{
                 FXController controller = loader.getController();
 //                controller.setRecorder(recorder);
 //                recorder.setContoller(controller);
-                controller.registerListener(recorder);
+                controller.registerRecorder(recorder);
 
                 controllers.add(controller);
 
@@ -79,7 +89,12 @@ public class FXGui{
 
     }
 
-
+    
+    /**
+     * Tryed to implement the Graph in Swing. Not sure if this is really used anymore
+     * @param jfxPanel
+     * @param recorder
+     */
     private void initSwingFX(JFXPanel jfxPanel, Recorder recorder){
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("gui.fxml"));

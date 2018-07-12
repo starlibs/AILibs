@@ -1,7 +1,11 @@
-package jaicore.graphvisualizer.events.add;
+package jaicore.graphvisualizer.events.misc;
 
 import jaicore.graphvisualizer.gui.Recorder;
-
+/**
+ * A event which is used to add a new Recorder to the receiving objects.
+ * @author jkoepe
+ *
+ */
 public class AddRecorderEvent {
 	//TODO has to be deleted later on
 	private Recorder<?> rec;

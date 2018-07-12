@@ -5,13 +5,35 @@ import jaicore.graphvisualizer.TooltipGenerator;
 import jaicore.graphvisualizer.gui.dataSupplier.ISupplier;
 import javafx.application.Platform;
 
+/**
+ * Class which creates a Thread and a Window. For this the algorithm and a title are needed.
+ * @author jkoepe
+ *
+ * @param <T>
+ */
+
 public class VisualizationWindow<T> {
-	
+	/**
+	 * The Javafx-thread which contains the GUI
+	 */
 	Thread fxThread;
+	
+	/**
+	 * A recorder which is connected to the algorithm
+	 */
 	Recorder recorder;
 
 	
+	/**
+	 * The construction of a new VisualizationWindow. 
+	 * 
+	 * @param observable
+	 * 		The algorithm which should be observed
+	 * @param title
+	 * 		The title of the window
+	 */
 	public VisualizationWindow(IObservableGraphAlgorithm observable, String title) {
+		//if there is no fxThread, create a new one and start it
 		if(fxThread == null) {
 			try {
 
@@ -28,6 +50,9 @@ public class VisualizationWindow<T> {
 			}
 
 		}
+		
+		//try to create a recorder and start the gui in the fxthread.
+		//if it fails to create the recorder the system is exited.
 		try {
 			recorder = new Recorder<>(observable);
 			Platform.runLater(()->{
@@ -45,6 +70,11 @@ public class VisualizationWindow<T> {
 		
 	}
 
+	/**
+	 * Adds a datasupplier to the recorder.
+	 * @param supplier
+	 * 		The added supplier.
+	 */
 	public void addDataSupplier(ISupplier supplier){
 		recorder.addDataSupplier(supplier);
 	}

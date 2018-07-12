@@ -7,24 +7,31 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
-import jaicore.graphvisualizer.events.GraphInitializedEvent;
-import jaicore.graphvisualizer.events.NodeReachedEvent;
-import jaicore.graphvisualizer.events.NodeTypeSwitchEvent;
-import jaicore.graphvisualizer.events.VisuEvent;
 import jaicore.graphvisualizer.events.controlEvents.ControlEvent;
 import jaicore.graphvisualizer.events.controlEvents.IsLiveEvent;
 import jaicore.graphvisualizer.events.controlEvents.NodePushed;
 import jaicore.graphvisualizer.events.controlEvents.StepEvent;
+import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
+import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
+import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
+import jaicore.graphvisualizer.events.graphEvents.GraphEvent;
 import jaicore.graphvisualizer.gui.dataSupplier.ISupplier;
 import jaicore.search.structure.core.Node;
 
+/**
+ * A class which works similar to the recorder.
+ * In contrast to the recorder the sent graphsEvents are filtered by the branch.
+ * @author jkoepe
+ *
+ */
 public class NodeExpansionSupplier implements ISupplier {
 	
+	// variabled
 	static int i = 0;
 	
 	public EventBus eventbus;
 	
-	private List<VisuEvent> events;
+	private List<GraphEvent> events;
 	
 	private Node currentRoot;
 	
@@ -32,15 +39,19 @@ public class NodeExpansionSupplier implements ISupplier {
 
 	private boolean live;
 	
+	/**
+	 * Creates a new NodeExpansionSupplier
+	 */
 	public NodeExpansionSupplier() {
 		super();
 		this.eventbus = new EventBus();
-		events = new ArrayList<VisuEvent>();
+		events = new ArrayList<GraphEvent>();
 		currentRoot = null;
 		index = 0;
 		this.live = false;
 	}
 
+	
 	@Override
 	public void registerListener(Object listener) {
 		eventbus.register(listener);
@@ -48,7 +59,7 @@ public class NodeExpansionSupplier implements ISupplier {
 
 	@Override
 	@Subscribe
-	public void receiveGraphEvent(VisuEvent event) {
+	public void receiveGraphEvent(GraphEvent event) {
 		this.events.add(event);
 	}
 
@@ -56,6 +67,7 @@ public class NodeExpansionSupplier implements ISupplier {
 	@Subscribe
 	public void receiveControlEvent(ControlEvent event) {
 		
+		// if a node was pushed, the branch out of this node is the last pushed node
 		if(event instanceof NodePushed) {
 			this.currentRoot = (Node) ((NodePushed) event).getNode();
 			System.out.println(((NodePushed) event).getNode());
@@ -70,11 +82,7 @@ public class NodeExpansionSupplier implements ISupplier {
 				index += ((StepEvent) event).getSteps();
 				if(currentRoot != null)
 					show(index-((StepEvent) event).getSteps());
-			}
-
-
-	
-					
+			}				
 	}
 
 	@Override
@@ -84,7 +92,10 @@ public class NodeExpansionSupplier implements ISupplier {
 	}
 	
 	 
-
+/**
+ * shows the branch and post every event till the current index given by the controller
+ * @param start
+ */
 	private void show(int start){
 		
 		for (int i = start; i < index; i++) {
@@ -101,6 +112,12 @@ public class NodeExpansionSupplier implements ISupplier {
 		}
 	}
 	
+	/**
+	 * Check if the branch contains a node
+	 * @param root
+	 * @param node
+	 * @return
+	 */
 	private boolean contains(Node root, Node node) {
 		if(root.equals(node))
 			return true;
@@ -112,7 +129,13 @@ public class NodeExpansionSupplier implements ISupplier {
 		}
 	}
 	
-	private boolean eventContains(Node root, VisuEvent event ) {
+	/**
+	 * checks if the node is contained in an event
+	 * @param root
+	 * @param event
+	 * @return
+	 */
+	private boolean eventContains(Node root, GraphEvent event ) {
 		if(event instanceof GraphInitializedEvent) {
 			if(((GraphInitializedEvent) event).getRoot() instanceof Node)
 				return contains(root, (Node) ((GraphInitializedEvent) event).getRoot());

@@ -16,22 +16,31 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
 import jaicore.graph.observation.IObservableGraphAlgorithm;
-import jaicore.graphvisualizer.events.GraphInitializedEvent;
-import jaicore.graphvisualizer.events.NodeReachedEvent;
-import jaicore.graphvisualizer.events.NodeRemovedEvent;
-import jaicore.graphvisualizer.events.NodeTypeSwitchEvent;
-import jaicore.graphvisualizer.events.VisuEvent;
-import jaicore.graphvisualizer.events.add.AddSupplierEvent;
-import jaicore.graphvisualizer.events.add.InfoEvent;
-import jaicore.graphvisualizer.events.add.RequestSuppliersEvent;
 import jaicore.graphvisualizer.events.controlEvents.ControlEvent;
 import jaicore.graphvisualizer.events.controlEvents.FileEvent;
 import jaicore.graphvisualizer.events.controlEvents.IsLiveEvent;
 import jaicore.graphvisualizer.events.controlEvents.StepEvent;
+import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
+import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
+import jaicore.graphvisualizer.events.graphEvents.NodeRemovedEvent;
+import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
+import jaicore.graphvisualizer.events.graphEvents.GraphEvent;
+import jaicore.graphvisualizer.events.misc.AddSupplierEvent;
+import jaicore.graphvisualizer.events.misc.InfoEvent;
+import jaicore.graphvisualizer.events.misc.RequestSuppliersEvent;
 import jaicore.graphvisualizer.gui.dataSupplier.ISupplier;
 import jaicore.graphvisualizer.gui.dataSupplier.ReconstructionDataSupplier;
 
 
+/**
+ * A recorder class, which is used to record events created by a search-algorithm. 
+ * It is possible to store these events in a file or load them out of a file.
+ * Furthermore these class listens to controllEvents and acts accordingly.
+ * 
+ * @author jkoepe
+ *
+ * @param <T>
+ */
 public class Recorder<T> implements IObservableGraphAlgorithm {
 
 	//List of datasuppliers
@@ -59,10 +68,18 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 	private Map<Object, List> nodeMap;
 
 
+	/**
+	 * A constructor for an empty recorder.
+	 */
 	public Recorder(){
 		this(null);
 	}
 
+	/**
+	 * Creates a recorder which listens to an algorithm.
+	 * @param algorithm
+	 * 		The algorith to which the recorder should listen.
+	 */
 	public Recorder(IObservableGraphAlgorithm algorithm){
 		if(algorithm != null)
 			algorithm.registerListener(this);
@@ -88,6 +105,10 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 		this.replayBus.register(listener);
 	}
 
+	/**
+	 * Registers a listener, which wants to get the infoevents which are posted on an different eventbus then the graphevents.
+	 * @param listener
+	 */
 	public void registerInfoListener(Object listener){
 		this.infoBus.register(listener);
 		if(!receivedEvents.isEmpty())
@@ -95,28 +116,24 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 	}
 
 	@Subscribe
-	public void receiveVisuEvent(VisuEvent event){
+	public void receiveVisuEvent(GraphEvent event){
+		//receive event and save the time
 		this.receivedEvents.add(event);
 		long receiveTime = System.currentTimeMillis();
 
+		//check if it is the first event
 		if(firstEventTime == 0)
 			firstEventTime = receiveTime;
 
+		//compute the absolute time of the event in relation to the first event
 		long eventTime = receiveTime - firstEventTime;
 		receivingTimes.add(eventTime);
 
+		//post a new infoevent to update the listener.
 		this.infoBus.post(new InfoEvent(receivedEvents.size(), eventTime , this.suppliers.size()));
-//		if(contoller != null){
-////			contoller.updateEventTimes(receivingTimes);
-//			contoller.updateTimeLine();
-//		}
-//
-//		if(! dataSuppliers.isEmpty())
-//			for(INodeDataSupplier supplier : dataSuppliers)
-//				supplier.receiveEvent(event);
 
+		//if the livemodus is enabled post every event and set the index on the maxindex
 		if(live){
-			//TODO check
 			this.replayBus.post(event);
 			this.index = receivedEvents.size()-1;
 		}
@@ -127,6 +144,8 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 		String eventName = event.getClass().getSimpleName();
 
 		switch(eventName){
+//		 StepEvents are only processed if the modus is not in live mode, 
+//		since in live mode the events are posts directly by receiving the events
 			case "StepEvent":
 				if(!live) {
 					StepEvent stepEvent = (StepEvent) event;
@@ -137,6 +156,7 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 				}
 				break;
 
+//				receive an fileEvent and determine if it is for loading or storing
 			case "FileEvent":
 				FileEvent fileEvent = (FileEvent) event;
 				if(fileEvent.isLoad())
@@ -145,10 +165,12 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 					save(fileEvent.getFile());
 				break;
 
+//				receives an resetevent and resets the recorder
 			case "ResetEvent":
 				reset();
 				break;
 
+//				receive an isliveevent and set the live state accordingly
 			case "IsLiveEvent":
 				IsLiveEvent islive = (IsLiveEvent)event;
 				this.live= islive.isLive();
@@ -160,13 +182,19 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 	}
 
 
-
+	/**
+	 * Go forward the number of steps which are given as a paramter
+	 * @param steps
+	 * 		The steps to go forward.
+	 */
 	private void forward(int steps){
+		//run as long there are steps
 		while(index < receivedEvents.size() && steps != 0) {
 			this.replayBus.post(receivedEvents.get(index));
 			Object event = receivedEvents.get(index);
 
 			List<String> types;
+			//switch the event corresponding to the current events and post them to the replaybus
 			switch(event.getClass().getSimpleName()){
 				case "GraphInitializedEvent":
 					GraphInitializedEvent initializedEvent = (GraphInitializedEvent) event;
@@ -197,6 +225,11 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 
 	}
 
+	/**
+	 * Go backward the number of steps which are given as a paramter
+	 * @param steps
+	 * 		The steps to go forward.
+	 */
 	private void backward(int steps){
 		if(index == 0)
 			return;
@@ -208,16 +241,26 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 		}
 	}
 
+	/**
+	 * Creates a counterevent to the event which was given.
+	 * Currently the events which can be countered are most of the graphevents 
+	 * @param event
+	 * 		The event to which a counter event should be created
+	 * @return
+	 * 		The counter event
+	 */
 	public Object counterEvent(Object event) {
 		Object counter = null;
 
 
 		switch (event.getClass().getSimpleName()) {
+//			counter for a GraphInitializedEvent
 			case "GraphInitializedEvent":
 				//just for completion
 				counter = null;
 				break;
 
+//				counter for a nodetypeswitchevent
 			case "NodeTypeSwitchEvent":
 				NodeTypeSwitchEvent nodeTypeSwitchEvent = (NodeTypeSwitchEvent) event;
 				List<String> typeList = nodeMap.get(nodeTypeSwitchEvent.getNode());
@@ -225,6 +268,7 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 				counter = new NodeTypeSwitchEvent(nodeTypeSwitchEvent.getNode(), typeList.get(typeList.size() - 1));
 				break;
 
+//				counter for a nodereached event
 			case "NodeReachedEvent":
 				NodeReachedEvent nodeReachedEvent = (NodeReachedEvent) event;
 				counter = new NodeRemovedEvent(nodeReachedEvent.getNode());
@@ -240,6 +284,7 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 	/**Saves the Events in a file
 	 *
 	 * @param file
+	 * 		The file to which the events are stored.
 	 */
 	private void save(File file){
 		ObjectMapper mapper = new ObjectMapper();
@@ -255,7 +300,7 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 				LinkedHashMap<Long, Object> timeToEvent = new LinkedHashMap();
 				int code = 0;
 
-				//Maps times to events
+				//Maps times to the hashcodes of the events
 				switch (event.getClass().getSimpleName()){
 					case "GraphInitializedEvent":
 						GraphInitializedEvent graphInitializedEvent = (GraphInitializedEvent) event;
@@ -282,6 +327,7 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 				}
 				saveList.add(timeToEvent);
 			}
+//			add the serialized supplier to a list which gets saved
 			mapperList.add(saveList);
 			HashSet<JsonNode> supplierHashSet = new HashSet<>();
 
@@ -302,6 +348,10 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 
 	}
 
+	/**
+	 * Load events from a file
+	 * @param file
+	 */
 	private void load(File file) {
 
 		//clear existing events
@@ -314,8 +364,8 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 
 		try {
 			List mapperList = mapper.readValue(file, mapper.getTypeFactory().constructCollectionType(List.class, Object.class));
-
 			ArrayList eventList = (ArrayList) mapperList.get(0);
+//			create the events out of the stored ones. In the newly loaded events the hashcode of the nodes of the old ones are the whole node
 			eventList.stream().forEach(n->{
 				LinkedHashMap map = (LinkedHashMap) n;
 				map.keySet().stream().forEach(time->receivingTimes.add(Long.parseLong((String) time)));
@@ -348,10 +398,10 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 
 					}
 					if(event != null)
-						this.receiveVisuEvent((VisuEvent) event);
+						this.receiveVisuEvent((GraphEvent) event);
 				});
 			});
-
+			// create the supplier if possible
 			mapperList.stream().filter(o-> mapperList.indexOf(o)!=0).forEach(o->{
 				ArrayList m = (ArrayList) o;
 				LinkedHashMap map = (LinkedHashMap) m.get(0);
@@ -366,11 +416,19 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 
 	}
 
+	/**
+	 * Resets the recorder.
+	 * To do this only the current nodemap and the index a clear or set to 0.
+	 */
 	private void reset() {
 		this.index = 0;
 		nodeMap.clear();
 	}
 
+	/**
+	 * Adds a datasupplier to the recorder
+	 * @param supplier
+	 */
 	public void addDataSupplier(ISupplier supplier){
 		this.suppliers.add(supplier);
 		if(algorithm != null)
@@ -378,6 +436,10 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 //		this.infoBus.post(new AddSupplierEvent(supplier));
 	}
 
+	/**
+	 * Receive a requestSupplierEvent and  send out the current suppliers
+	 * @param event
+	 */
 	@Subscribe
 	public void receiveRequestSupplierEvent(RequestSuppliersEvent event){
 		for (ISupplier supplier : this.suppliers){
@@ -385,6 +447,10 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 		}
 	}
 
+	/**
+	 * Returns the algorithm
+	 * @return
+	 */
 	public IObservableGraphAlgorithm getAlgorithm() {
 		return algorithm;
 	}

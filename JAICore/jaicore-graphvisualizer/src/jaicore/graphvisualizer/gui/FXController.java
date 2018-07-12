@@ -15,10 +15,10 @@ import com.google.common.reflect.ClassPath;
 
 import jaicore.graphvisualizer.NodeListener;
 import jaicore.graphvisualizer.SearchVisualizationPanel;
-import jaicore.graphvisualizer.events.add.AddSupplierEvent;
-import jaicore.graphvisualizer.events.add.InfoEvent;
-import jaicore.graphvisualizer.events.add.RequestSuppliersEvent;
 import jaicore.graphvisualizer.events.controlEvents.*;
+import jaicore.graphvisualizer.events.misc.AddSupplierEvent;
+import jaicore.graphvisualizer.events.misc.InfoEvent;
+import jaicore.graphvisualizer.events.misc.RequestSuppliersEvent;
 import jaicore.graphvisualizer.gui.dataSupplier.ISupplier;
 import jaicore.graphvisualizer.gui.dataVisualizer.IVisualizer;
 import jaicore.graphvisualizer.gui.dataVisualizer.NodeExpansionVisualizer;
@@ -35,7 +35,12 @@ import javafx.scene.control.ToolBar;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.FileChooser;
 import javafx.util.StringConverter;
-
+/**
+ * A class which is used to controll the gui.
+ * The gui itself is created with a fxml-file and a file-loader.
+ * @author jkoepe
+ *
+ */
 public class FXController implements Initializable, NodeListener {
 
     //FXMl objects
@@ -47,10 +52,8 @@ public class FXController implements Initializable, NodeListener {
     public Slider timeline;
     @FXML
     public TabPane tabPane;
-    
     @FXML
-    public ToolBar toolbar;
-
+    public ToolBar toolbar;	
     @FXML
     public RadioButton livebutton;
 
@@ -110,6 +113,10 @@ public class FXController implements Initializable, NodeListener {
 
     }
 
+    /**
+     * Used to initiaize the swingNode with the SearchVisualizationPanel
+     * @param swingNode
+     */
     private void initializeVisualization(SwingNode swingNode) {
         SearchVisualizationPanel visu = new SearchVisualizationPanel();
         visu.addNodeListener(this);
@@ -117,8 +124,13 @@ public class FXController implements Initializable, NodeListener {
         SwingUtilities.invokeLater(()->swingNode.setContent(visu));
     }
 
+    /**
+     * A function which is called by pressing the play-button.
+     * @param actionEvent
+     */
     @FXML
     public void play(ActionEvent actionEvent) {
+    	//play runs in an own thread to make it stoppable 
         Runnable run = ()->{
             try{
                 while ((index < maxIndex && index >= 0) || live){
@@ -154,6 +166,11 @@ public class FXController implements Initializable, NodeListener {
         this.timeline.setValue(index);
     }
 
+
+    /**
+     * Posts a stepEvent which goes one step backward
+     * @param actionEvent
+     */
     @FXML
     public void back(ActionEvent actionEvent) {
         if(index == 0)
@@ -171,6 +188,10 @@ public class FXController implements Initializable, NodeListener {
         timeline.setValue(index);
     }
 
+    /**
+     * Sends a reset-Event and resets every part which is implemented in this class
+     * @param actionEvent
+     */
     @FXML
     public void reset(ActionEvent actionEvent) {
         if(this.playThread != null)
@@ -194,6 +215,10 @@ public class FXController implements Initializable, NodeListener {
             playThread.interrupt();
     }
 
+    /**Sends a File-Event to save the record.
+     * 
+     * @param actionEvent
+     */
     @FXML
     public void save(ActionEvent actionEvent) {
         FileChooser chooser = new FileChooser();
@@ -207,6 +232,10 @@ public class FXController implements Initializable, NodeListener {
 
     }
 
+    /**
+     * Sends a File-Event which is used to load information.
+     * @param actionEvent
+     */
     @FXML
     public void load(ActionEvent actionEvent) {
         FileChooser chooser = new FileChooser();
@@ -229,6 +258,11 @@ public class FXController implements Initializable, NodeListener {
     	this.controlEventBus.post(new RequestSuppliersEvent());
     }
 
+    /**
+     * Sends an IsLiveEvent and switches the current state.
+     * If the Gui is in an replay state, it is not possible to switch to Live.
+     * @param event
+     */
     @FXML
     public void liveButton(ActionEvent event){
         if(index == maxIndex) {
@@ -244,6 +278,11 @@ public class FXController implements Initializable, NodeListener {
             livebutton.fire();
     }
 
+    /**
+     * A function which gets a new index and posts a step-event which goes to the new index.
+     * @param newIndex
+     * 		The newIndex which should be achieved after the jumpto-call.
+     */
     private void jumpTo(int newIndex){
         if(newIndex == 0) {
             this.reset(null);
@@ -258,8 +297,12 @@ public class FXController implements Initializable, NodeListener {
     }
 
 
-    public void registerListener(Recorder listener){
-        //TODO
+    /**
+     * Registers an existing recorder to the controller.
+     * @param listener
+     */
+    public void registerRecorder(Recorder listener){
+        
         this.controlEventBus.register(listener);
         SearchVisualizationPanel visu = (SearchVisualizationPanel) visuPanel.getContent();
         listener.registerListener(visu);
@@ -268,7 +311,9 @@ public class FXController implements Initializable, NodeListener {
 
     }
 
-
+    /**
+     * Updates the timeline.
+     */
     private void updateTimeline(){
         if(maxIndex == 0)
             return;
@@ -276,7 +321,12 @@ public class FXController implements Initializable, NodeListener {
         timeline.setMax(maxIndex);
     }
 
-
+    /**
+     * Registers a new supplier to the Controller.
+     * In addition the cooresponging Visualizers are searched and also added.
+     * @param supplier
+     * 		The new supplier.
+     */
     public void registerSupplier(ISupplier supplier){
 
         System.out.println(supplier.getClass().getSimpleName());
@@ -285,9 +335,12 @@ public class FXController implements Initializable, NodeListener {
             Set<?> set = path.getAllClasses();
             set.stream().forEach(cls->{
                 if(cls instanceof ClassPath.ClassInfo){
+                	//search for a Visualizer. 
+//                	To identify a visualizer the package name has to contain .dataVisualizer.
                     if(((ClassPath.ClassInfo) cls).getName().contains(".dataVisualizer.")){
                        IVisualizer v = (IVisualizer) findClassByName(((ClassPath.ClassInfo) cls).getName());
                        if(v!= null){
+                    	   //if the supplier of the visualizer matches the current one, add the visualizer to the tabpane
                             if(v.getSupplier() .equals(supplier.getClass().getSimpleName())){
                             	supplier.registerListener(v);
                             	this.controlEventBus.register(supplier);
@@ -298,8 +351,6 @@ public class FXController implements Initializable, NodeListener {
                             	tab.setContent(v.getVisualization());
                             	tab.setText(v.getTitle());
                             	this.tabPane.getTabs().add(tab);
-                            	
-
                             }
                        }
                     }
@@ -313,7 +364,12 @@ public class FXController implements Initializable, NodeListener {
 
     }
 
-
+    /**
+     * Searches the loaded classes for class with a specific name.
+     * @param name
+     * 		The name of the searched class.
+     * @return
+     */
     private Object findClassByName(String name){
         try{
             Class<?> cls = Class.forName(name);
@@ -353,7 +409,11 @@ public class FXController implements Initializable, NodeListener {
     }
 
 
-   
+    /**
+     * A function which is called by receiveing an infoEvent.
+     * By receiving such an event, the maxindex and the timeline are updated.
+     * @param event
+     */
     @Subscribe
     public void receiveInfoEvent(InfoEvent event){
         this.maxIndex = event.getMaxIndex();
@@ -372,6 +432,10 @@ public class FXController implements Initializable, NodeListener {
 
     }
 
+    /**
+     * This function is called if a AddSupplierEvent is received.
+     * @param event
+     */
     @Subscribe
     public void receiveAddSupplierEvent(AddSupplierEvent event){
     	if(Platform.isFxApplicationThread()) {
@@ -381,10 +445,17 @@ public class FXController implements Initializable, NodeListener {
     	}
     }
 
+    /**
+     * removes every tab which are currently in the tabpane.
+     */
     private void cleanVisualizer(){
         this.tabPane.getTabs().removeAll(tabPane.getTabs());
     }
     
+    /**
+     * Registers an arbitray object as a listener to this.
+     * @param listener
+     */
     public void registerObject(Object listener) {
     	
     	this.controlEventBus.register(listener);

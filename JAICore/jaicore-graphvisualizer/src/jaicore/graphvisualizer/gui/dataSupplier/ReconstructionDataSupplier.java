@@ -4,15 +4,22 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
-import jaicore.graphvisualizer.events.VisuEvent;
-import jaicore.graphvisualizer.events.add.HTMLEvent;
+
 import jaicore.graphvisualizer.events.controlEvents.ControlEvent;
 import jaicore.graphvisualizer.events.controlEvents.NodePushed;
-
+import jaicore.graphvisualizer.events.graphEvents.GraphEvent;
+import jaicore.graphvisualizer.events.misc.HTMLEvent;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
+/**
+ * A Datasupplier which should be able to reconstruct an HTML-Supplier
+ * @author jkoepe
+ *
+ */
+
+//TODO reevaluate usefullness here
 public class ReconstructionDataSupplier implements ISupplier {
 
     private LinkedHashMap map;
@@ -51,7 +58,7 @@ public class ReconstructionDataSupplier implements ISupplier {
 //    }
 
     @Override
-    public void receiveGraphEvent(VisuEvent event) {
+    public void receiveGraphEvent(GraphEvent event) {
 
     }
 

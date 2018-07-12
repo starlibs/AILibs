@@ -1,6 +1,6 @@
-package jaicore.graphvisualizer.events;
+package jaicore.graphvisualizer.events.graphEvents;
 
-public class NodeReachedEvent<T> implements VisuEvent {
+public class NodeReachedEvent<T> implements GraphEvent {
 
 	private final T parent, node;
 	private final String type;

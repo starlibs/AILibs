@@ -11,10 +11,22 @@ import jaicore.search.algorithms.standard.core.INodeEvaluator;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
 
+/**
+ * A test-implementation of the controllable search.
+ * @author jkoepe
+ *
+ * @param <T>
+ * @param <A>
+ */
 public class ControllableBestFirst<T,A> extends BestFirst<T, A> implements ControllableSearch{
 
 	public boolean live;
 
+	/**
+	 * Create a new Search which contains a state for live play and replay.
+	 * @param graphGenerator
+	 * @param pNodeEvaluator
+	 */
 	public ControllableBestFirst(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, Double> pNodeEvaluator) {
 		super(graphGenerator, pNodeEvaluator);
 		// TODO Auto-generated constructor stub

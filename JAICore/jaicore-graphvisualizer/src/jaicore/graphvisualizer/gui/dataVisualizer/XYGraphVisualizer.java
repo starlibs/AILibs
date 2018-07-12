@@ -1,13 +1,19 @@
 package jaicore.graphvisualizer.gui.dataVisualizer;
 
 import com.google.common.eventbus.Subscribe;
-import jaicore.graphvisualizer.events.add.XYEvent;
+
+import jaicore.graphvisualizer.events.misc.XYEvent;
 import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
-
+/**
+ * A Visualizer which draws a x-y-Graph.
+ * The default-supplier is the BestFSupplier.
+ * @author jkoepe
+ *
+ */
 public class XYGraphVisualizer implements IVisualizer {
 
     LineChart<Number, Number> chart;

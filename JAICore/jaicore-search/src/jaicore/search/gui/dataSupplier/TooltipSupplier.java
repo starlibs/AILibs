@@ -6,13 +6,13 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import jaicore.graphvisualizer.TooltipGenerator;
-import jaicore.graphvisualizer.events.GraphInitializedEvent;
-import jaicore.graphvisualizer.events.NodeReachedEvent;
-import jaicore.graphvisualizer.events.NodeTypeSwitchEvent;
-import jaicore.graphvisualizer.events.VisuEvent;
-import jaicore.graphvisualizer.events.add.HTMLEvent;
 import jaicore.graphvisualizer.events.controlEvents.ControlEvent;
 import jaicore.graphvisualizer.events.controlEvents.NodePushed;
+import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
+import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
+import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
+import jaicore.graphvisualizer.events.graphEvents.GraphEvent;
+import jaicore.graphvisualizer.events.misc.HTMLEvent;
 import jaicore.graphvisualizer.gui.dataSupplier.ISupplier;
 import jaicore.search.structure.core.Node;
 
@@ -21,6 +21,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * A Supplier which contains tooltips for the nodes and post them so that a tooltip supplier can show them.
+ * @author jkoepe
+ *
+ */
 public class TooltipSupplier implements ISupplier {
 
     private EventBus dataBus;
@@ -82,7 +87,7 @@ public class TooltipSupplier implements ISupplier {
     }
 
     @Subscribe
-    public void receiveGraphEvent(VisuEvent event) {
+    public void receiveGraphEvent(GraphEvent event) {
         switch(event.getClass().getSimpleName()){
             case "GraphInitializedEvent":
                 GraphInitializedEvent initializedEvent = (GraphInitializedEvent) event;

@@ -1,6 +1,6 @@
-package jaicore.graphvisualizer.events;
+package jaicore.graphvisualizer.events.graphEvents;
 
-public class NodeRemovedEvent<T> implements VisuEvent{
+public class NodeRemovedEvent<T> implements GraphEvent{
 
 	private final T node;
 	public final String name = "§NodeRemovedEvent";

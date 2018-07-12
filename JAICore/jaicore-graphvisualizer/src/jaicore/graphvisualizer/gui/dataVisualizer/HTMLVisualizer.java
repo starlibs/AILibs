@@ -1,17 +1,26 @@
 package jaicore.graphvisualizer.gui.dataVisualizer;
 
 import com.google.common.eventbus.Subscribe;
-import jaicore.graphvisualizer.events.add.HTMLEvent;
+
+import jaicore.graphvisualizer.events.misc.HTMLEvent;
 import javafx.embed.swing.SwingNode;
 import javafx.scene.Node;
 
 import javax.swing.*;
 
+/**
+ * The HTML-Visualizer is able to display text written in HTML.
+ * @author jkoepe
+ *
+ */
 public class HTMLVisualizer implements IVisualizer {
 
     SwingNode node;
     JLabel label;
 
+    /**
+     * Creates a new HTMLVisualizer
+     */
     public HTMLVisualizer(){
         label = new JLabel();
         label.setText("<html></html>");

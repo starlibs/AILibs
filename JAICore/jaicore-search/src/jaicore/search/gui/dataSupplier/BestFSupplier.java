@@ -3,13 +3,14 @@ package jaicore.search.gui.dataSupplier;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
-import jaicore.graphvisualizer.events.GraphInitializedEvent;
-import jaicore.graphvisualizer.events.NodeReachedEvent;
-import jaicore.graphvisualizer.events.NodeTypeSwitchEvent;
-import jaicore.graphvisualizer.events.VisuEvent;
-import jaicore.graphvisualizer.events.add.XYEvent;
+
 import jaicore.graphvisualizer.events.controlEvents.ControlEvent;
 import jaicore.graphvisualizer.events.controlEvents.StepEvent;
+import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
+import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
+import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
+import jaicore.graphvisualizer.events.graphEvents.GraphEvent;
+import jaicore.graphvisualizer.events.misc.XYEvent;
 import jaicore.graphvisualizer.gui.dataSupplier.ISupplier;
 import jaicore.search.structure.core.Node;
 import javafx.scene.chart.XYChart;
@@ -48,7 +49,7 @@ public class BestFSupplier implements ISupplier {
 //    }
 
     @Subscribe
-    public void receiveGraphEvent(VisuEvent event) {
+    public void receiveGraphEvent(GraphEvent event) {
         Node n;
         Comparable f;
         switch(event.getClass().getSimpleName()){

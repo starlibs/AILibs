@@ -72,14 +72,14 @@ public class ControlSearchTester {
 		ControllableBestFirst<TestNode,String> bf = new ControllableBestFirst<>(gen, n -> (double)Math.round(Math.random() * 1000));
 
 		
-		VisualizationWindow win = new VisualizationWindow<Node<TestNode, Double>>(bf, "BestFirst");
+		VisualizationWindow win = new VisualizationWindow<Node<TestNode, Double>>(bf, "Control-Check");
 		TooltipSupplier tooltipSupplier = new TooltipSupplier();
 		tooltipSupplier.setGenerator(node ->{
 			Node<?, ?> n = (Node<?, ?>) node;
 			String s = String.valueOf(n.getInternalLabel());
 			return s;
 		});
-//		win.addDataSupplier(tooltipSupplier);
+		win.addDataSupplier(tooltipSupplier);
 		
 		
 		NodeExpansionSupplier nodeexpansion = new NodeExpansionSupplier();

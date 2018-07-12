@@ -1,7 +1,11 @@
-package jaicore.graphvisualizer.events.add;
+package jaicore.graphvisualizer.events.misc;
 
 import javafx.scene.chart.XYChart;
-
+/**
+ * A event which is used to add data to the xyGraphVisualizer
+ * @author jkoepe
+ *
+ */
 public class XYEvent {
     private XYChart.Data data;
 

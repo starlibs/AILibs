@@ -1,8 +1,8 @@
-package jaicore.graphvisualizer.events;
+package jaicore.graphvisualizer.events.graphEvents;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public class GraphInitializedEvent<T> implements VisuEvent {
+public class GraphInitializedEvent<T> implements GraphEvent {
 	
 	
 	
