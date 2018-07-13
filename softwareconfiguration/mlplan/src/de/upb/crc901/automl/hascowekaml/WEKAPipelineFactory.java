@@ -12,6 +12,7 @@ import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
+import weka.classifiers.meta.AdaBoostM1;
 
 public class WEKAPipelineFactory implements Factory<MLPipeline> {
 
