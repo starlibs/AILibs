@@ -1,24 +1,33 @@
 package autofe.algorithm.hasco;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Random;
 
+import org.nd4j.linalg.api.ndarray.INDArray;
+import org.openml.apiconnector.io.OpenmlConnector;
+import org.openml.apiconnector.xml.DataSetDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import autofe.algorithm.hasco.evaluation.AbstractHASCOFEEvaluator;
 import autofe.algorithm.hasco.evaluation.AbstractHASCOFENodeEvaluator;
 import autofe.algorithm.hasco.evaluation.AbstractHASCOFEObjectEvaluator;
 import autofe.algorithm.hasco.filter.meta.FilterPipeline;
 import autofe.algorithm.hasco.filter.meta.FilterPipelineFactory;
 import autofe.util.DataSet;
+import autofe.util.DataSetUtils;
+import autofe.util.EvaluationUtils;
 import autofe.util.FilterUtils;
 import hasco.core.HASCOFD;
 import hasco.core.Solution;
@@ -28,10 +37,13 @@ import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.IObjectEvaluator;
 import jaicore.graph.observation.IObservableGraphAlgorithm;
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
+import jaicore.ml.WekaUtil;
 import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionSolution;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;
 import jaicore.search.structure.core.Node;
+import weka.core.Instance;
+import weka.core.Instances;
 
 /**
  * HASCO Feature Engineering class executing a HASCO run using
@@ -48,8 +60,10 @@ public class HASCOFE implements IObservableGraphAlgorithm<TFDNode, String>, ILog
 	private HASCOFD<FilterPipeline>.HASCOSolutionIterator hascoRun;
 	// private INodeEvaluator<TFDNode, Double> nodeEvaluator;
 
+	private final int[] inputShape;
+
 	// Logging
-	private Logger logger = LoggerFactory.getLogger(HASCOFE.class);
+	private static Logger logger = LoggerFactory.getLogger(HASCOFE.class);
 	private String loggerName;
 
 	// Utility variables
@@ -76,12 +90,13 @@ public class HASCOFE implements IObservableGraphAlgorithm<TFDNode, String>, ILog
 	}
 
 	public HASCOFE(final File config, AbstractHASCOFENodeEvaluator nodeEvaluator, final DataSet data,
-			AbstractHASCOFEObjectEvaluator benchmark) {
+			AbstractHASCOFEObjectEvaluator benchmark, final int[] inputShape) {
 
 		if (config == null || !config.exists())
 			throw new IllegalArgumentException(
 					"The file " + config + " is null or does not exist and cannot be used by ML-Plan");
 
+		this.inputShape = inputShape;
 		this.configFile = config;
 		this.initializeHASCOSearch(data, nodeEvaluator, benchmark);
 	}
@@ -95,22 +110,27 @@ public class HASCOFE implements IObservableGraphAlgorithm<TFDNode, String>, ILog
 			benchmark.setData(data);
 			objectEvaluator = benchmark;
 		} else {
-			objectEvaluator = n -> new Random().nextDouble();
+			objectEvaluator = (n) -> {
+				// Empty pipe
+				if (n.getFilters() == null)
+					return AbstractHASCOFEEvaluator.MAX_EVAL_VALUE;
+				else
+					return new Random().nextDouble();
+			};
 		}
 
 		if (nodeEvaluator != null) {
 			nodeEvaluator.setHascoFE(this);
 			nodeEvaluator.setData(data);
 
-			this.hasco = new HASCOFD<>(new FilterPipelineFactory(), nodeEvaluator, "FilterPipeline", objectEvaluator);
+			this.hasco = new HASCOFD<>(new FilterPipelineFactory(this.inputShape), nodeEvaluator, "FilterPipeline",
+					objectEvaluator);
 		} else {
-			this.hasco = new HASCOFD<>(new FilterPipelineFactory(), n -> null, "FilterPipeline", objectEvaluator);
+			this.hasco = new HASCOFD<>(new FilterPipelineFactory(this.inputShape), n -> null, "FilterPipeline",
+					objectEvaluator);
 		}
 		this.hasco.setNumberOfCPUs(Runtime.getRuntime().availableProcessors());
-		// this.hasco.setNumberOfCPUs(1);
 
-		// TODO
-		// this.hasco.setNumberOfCPUs(4);
 		if (this.loggerName != null && this.loggerName.length() > 0)
 			this.hasco.setLoggerName(loggerName + ".hasco");
 
@@ -221,5 +241,51 @@ public class HASCOFE implements IObservableGraphAlgorithm<TFDNode, String>, ILog
 
 	public HASCOFD<FilterPipeline> getHasco() {
 		return hasco;
+	}
+
+	public static List<Instances> generateRandomDataSets(final int dataset, final double usedDataSetSize,
+			final int maxSolutionCount, final int maxPipelineSize, final int timeout) throws Exception {
+		/* load image dataset and create a train-test-split */
+		OpenmlConnector connector = new OpenmlConnector();
+		DataSetDescription ds = connector.dataGet(dataset);
+		File file = ds.getDataset(DataSetUtils.API_KEY);
+		Instances data = new Instances(new BufferedReader(new FileReader(file)));
+		data.setClassIndex(data.numAttributes() - 1);
+		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(42), usedDataSetSize);
+
+		logger.info("Calculating intermediates...");
+		List<INDArray> intermediate = new ArrayList<>();
+		for (Instance inst : split.get(0)) {
+			intermediate.add(DataSetUtils.instanceToMatrixByDataSet(inst, dataset));
+		}
+		logger.info("Finished intermediate calculations.");
+		DataSet originDataSet = new DataSet(split.get(0), intermediate);
+
+		HASCOFE hascoFE = new HASCOFE(new File("model/catalano/catalano.json"),
+				EvaluationUtils.getRandomNodeEvaluator(maxPipelineSize), new DataSet(split.get(0), intermediate), null,
+				DataSetUtils.getInputShapeByDataSet(dataset));
+		hascoFE.setLoggerName("autofe");
+		hascoFE.runSearch(timeout);
+
+		// Calculate solution data sets
+		List<Instances> result = new ArrayList<>();
+		logger.debug("Found solutions: " + hascoFE.getFoundClassifiers().toString());
+		Iterator<HASCOFESolution> solIt = hascoFE.getFoundClassifiers().iterator();
+		int solCounter = 0;
+		while (solIt.hasNext() && solCounter < maxSolutionCount) {
+			HASCOFESolution nextSol = solIt.next();
+
+			FilterPipeline pipe = nextSol.getSolution();
+
+			// Skip empty pipes
+			if (pipe.getFilters() == null)
+				continue;
+
+			logger.debug("Applying solution pipe " + pipe.toString());
+			result.add(pipe.applyFilter(originDataSet, true).getInstances());
+			solCounter++;
+		}
+
+		return result;
 	}
 }

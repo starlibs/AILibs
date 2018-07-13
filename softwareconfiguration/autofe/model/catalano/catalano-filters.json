@@ -35,8 +35,8 @@
   	"parameter": [{
     	"name" : "net",
     	"type" : "cat",
-    	"default" : "LeNet",
-    	"values" : ["LeNet"]
+    	"default" : "AlexNet",
+    	"values" : ["AlexNet", "LeNet", "ResNet50", "VGG16", "VGG19"]
     }, {
       "name" : "layer",
       "type" : "int",

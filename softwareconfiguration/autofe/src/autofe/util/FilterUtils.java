@@ -18,7 +18,8 @@ public final class FilterUtils {
 		// Utility class
 	}
 
-	public static IFilter getFilterForName(final String name, final Map<String, String> parameters) {
+	public static IFilter getFilterForName(final String name, final Map<String, String> parameters,
+			final int[] inputShape) {
 		// Image filters
 		if (name.startsWith("autofe.algorithm.hasco.filter.image")) {
 			String catFilter;
@@ -34,7 +35,7 @@ public final class FilterUtils {
 			case "autofe.algorithm.hasco.filter.image.PretrainedNN":
 				String net = parameters.get("net");
 				int layer = Integer.parseInt(parameters.get("layer"));
-				return ImageUtils.getPretrainedNNFilterByName(net, layer);
+				return ImageUtils.getPretrainedNNFilterByName(net, layer, inputShape);
 			// case "NoneExtractor":
 			// return getDefaultFilter();
 			}

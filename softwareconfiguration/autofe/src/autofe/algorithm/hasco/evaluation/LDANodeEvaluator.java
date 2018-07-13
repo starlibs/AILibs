@@ -1,20 +1,13 @@
 package autofe.algorithm.hasco.evaluation;
 
-import java.util.List;
-import java.util.Random;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import autofe.algorithm.hasco.filter.meta.FilterPipeline;
 import autofe.util.DataSet;
 import autofe.util.EvaluationUtils;
-import jaicore.ml.WekaUtil;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.search.structure.core.Node;
-import weka.classifiers.Evaluation;
-import weka.classifiers.functions.LDA;
-import weka.core.Instances;
 
 public class LDANodeEvaluator extends AbstractHASCOFENodeEvaluator {
 
@@ -44,21 +37,13 @@ public class LDANodeEvaluator extends AbstractHASCOFENodeEvaluator {
 				logger.debug("Applying and evaluating pipeline " + pipe.toString());
 				DataSet dataSet = pipe.applyFilter(this.data, true);
 
-				List<Instances> split = WekaUtil.getStratifiedSplit(dataSet.getInstances(), new Random(42), .7f);
-
-				// TODO: Perform LDA
-				LDA lda = new LDA();
-				// FLDA lda = new FLDA();
-				lda.buildClassifier(split.get(0));
-
-				Evaluation eval = new Evaluation(split.get(0));
-				eval.evaluateModel(lda, split.get(1));
+				double ldaScore = EvaluationUtils.performLDA(dataSet.getInstances());
 
 				double finalScore = Math.min(
-						1 - (eval.pctCorrect() / 100.0)
+						1 - ldaScore
 								+ ATT_COUNT_PENALTY
 										* EvaluationUtils.calculateAttributeCountPenalty(this.data.getInstances()),
-						19999.0);
+						MAX_EVAL_VALUE - 1);
 
 				logger.debug("Final LDA score: " + finalScore);
 				return finalScore;
@@ -68,9 +53,12 @@ public class LDANodeEvaluator extends AbstractHASCOFENodeEvaluator {
 				logger.warn("Could not evaluate pipeline. Reason: " + e.getMessage());
 				return null;
 			}
-		} else {
+		} else if (pipe == null) {
 			logger.debug("Null pipe");
 			return null;
+		} else {
+			logger.debug("Found a non-working pipeline.");
+			return MAX_EVAL_VALUE;
 		}
 	}
 }

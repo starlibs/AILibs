@@ -1,7 +1,5 @@
 package autofe.algorithm.hasco.evaluation;
 
-import static autofe.algorithm.hasco.evaluation.AbstractHASCOFENodeEvaluator.MAX_EVAL_VALUE;
-
 import java.util.List;
 import java.util.Random;
 
@@ -64,9 +62,12 @@ public class COCONodeEvaluator extends AbstractHASCOFENodeEvaluator {
 				logger.warn("Could not evaluate pipeline. Reason: " + e.getMessage());
 				return null;
 			}
-		} else {
+		} else if (pipe == null) {
 			logger.debug("Null pipe");
 			return null;
+		} else {
+			logger.debug("Found a non-working pipeline.");
+			return MAX_EVAL_VALUE;
 		}
 	}
 }

@@ -29,7 +29,7 @@ public class LDAEvaluationTest extends AutoFETest {
 		/* load dataset and create a train-test-split */
 		OpenmlConnector connector = new OpenmlConnector();
 		DataSetDescription ds = connector.dataGet(DataSetUtils.CIFAR10_ID);
-		File file = ds.getDataset(API_KEY);
+		File file = ds.getDataset(DataSetUtils.API_KEY);
 		Instances data = new Instances(new BufferedReader(new FileReader(file)));
 		data.setClassIndex(data.numAttributes() - 1);
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(42), .25f);
@@ -45,9 +45,7 @@ public class LDAEvaluationTest extends AutoFETest {
 
 		long timeStart = System.currentTimeMillis();
 
-		// TODO: Perform LDA
 		LDA lda = new LDA();
-		// FLDA lda = new FLDA();
 		lda.buildClassifier(split.get(0));
 
 		long timeStartEval = System.currentTimeMillis();

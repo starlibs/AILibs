@@ -2,6 +2,8 @@ package autofe.algorithm.hasco.filter.image;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -35,26 +37,50 @@ public class PretrainedNNFilter implements IFilter {
 
 	/**
 	 * Computational graph (concrete layered structure of the net). Used to access
-	 * activations when predicting.
+	 * activations when predicting. Is null if neural net can not be applied to
+	 * given input shape.
 	 */
-	private ComputationGraph compGraph;
+	private ComputationGraph compGraph = null;
+
+	public static final Map<String, PretrainedType> PRETRAINED_WEIGHTS_MAPPING = new HashMap<>();
 
 	/**
 	 * Layer used for feature extraction
 	 */
 	private int selectedLayer;
 
-	public PretrainedNNFilter(final ZooModel model, final int selectedLayer) {
+	static {
+		PRETRAINED_WEIGHTS_MAPPING.put("AlexNet", PretrainedType.IMAGENET);
+		PRETRAINED_WEIGHTS_MAPPING.put("LeNet", PretrainedType.MNIST);
+		PRETRAINED_WEIGHTS_MAPPING.put("ResNet50", PretrainedType.IMAGENET);
+		PRETRAINED_WEIGHTS_MAPPING.put("VGG16", PretrainedType.IMAGENET);
+		PRETRAINED_WEIGHTS_MAPPING.put("VGG19", PretrainedType.IMAGENET);
+	}
+
+	public PretrainedNNFilter(final ZooModel model, final int selectedLayer, final int[] shape) {
+		if (shape[0] != 1)
+			throw new IllegalArgumentException(
+					"Given input shape assumes one example as batch input (first input dimension has to be 1).");
+		if (shape.length < 3)
+			throw new IllegalArgumentException(
+					"Given input shape assumes to have spatial structure (at least two dimensions plus batch size dimension).");
+
 		this.model = model;
 		this.selectedLayer = selectedLayer;
+
 		try {
-			this.compGraph = ((MultiLayerNetwork) this.model.initPretrained(PretrainedType.MNIST)).toComputationGraph();
+			PretrainedType type = inferPretrainedTypeFromShape(shape);
+			if (this.model.pretrainedAvailable(type))
+				this.compGraph = ((MultiLayerNetwork) this.model.initPretrained(PretrainedType.MNIST))
+						.toComputationGraph();
+			else
+				logger.warn("Given model " + this.model.getClass().getSimpleName()
+						+ " does not provide pretrained weights for input shape " + Arrays.toString(shape)
+						+ " (pretrained type " + type + ").");
 		} catch (UnsupportedOperationException ex) {
-			logger.error(ex.getMessage());
-			ex.printStackTrace();
-			logger.error(model.getClass().getName());
+			logger.warn(ex.getMessage());
+			logger.warn(model.getClass().getName());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			logger.error(e.getMessage());
 			e.printStackTrace();
 		}
@@ -62,7 +88,6 @@ public class PretrainedNNFilter implements IFilter {
 
 	@Override
 	public DataSet applyFilter(DataSet inputData, boolean copy) {
-
 		if (inputData.getIntermediateInstances() == null || inputData.getIntermediateInstances().size() == 0
 				|| inputData.getIntermediateInstances().get(0).rank() < 2)
 			throw new IllegalArgumentException(
@@ -71,14 +96,18 @@ public class PretrainedNNFilter implements IFilter {
 		List<INDArray> transformedInstances = new ArrayList<>(inputData.getIntermediateInstances().size());
 		for (INDArray example : inputData.getIntermediateInstances()) {
 			int[] shape = example.shape();
+
+			// Add channel dimension
 			if (shape.length < 3) {
 				example = example.reshape(shape[0], shape[1], 1);
 			}
 
-			// TODO: Generic approach
+			// Transforms example to (batch size, channel, width, height) shape
 			INDArray adjustedExample = example.permute(2, 0, 1);
 			adjustedExample = adjustedExample.reshape(1, adjustedExample.shape()[0], adjustedExample.shape()[1],
 					adjustedExample.shape()[2]);
+
+			// Get activations of neural net per layer and store them
 			Map<String, INDArray> result = this.compGraph.feedForward(adjustedExample, this.selectedLayer, false);
 			Object[] values = result.values().toArray();
 			INDArray resultMatrix = (INDArray) values[values.length - 1];
@@ -98,6 +127,18 @@ public class PretrainedNNFilter implements IFilter {
 
 	public int getSelectedLayer() {
 		return selectedLayer;
+	}
+
+	// Assumes input shape (batch size, channels, width, height, [depth])
+	private static PretrainedType inferPretrainedTypeFromShape(final int[] shape) {
+		// Grayscale structure
+		if (shape.length == 3)
+			return PretrainedType.MNIST;
+		if (shape.length > 3) {
+			if (shape[2] > 32)
+				return PretrainedType.IMAGENET;
+		}
+		return PretrainedType.CIFAR10;
 	}
 
 }

@@ -11,8 +11,6 @@ import jaicore.search.structure.core.Node;
 public abstract class AbstractHASCOFENodeEvaluator extends AbstractHASCOFEEvaluator
 		implements INodeEvaluator<TFDNode, Double> {
 
-	protected static final double MAX_EVAL_VALUE = 20000d;
-
 	private HASCOFE hascoFE;
 
 	// Maximum size of a pipeline

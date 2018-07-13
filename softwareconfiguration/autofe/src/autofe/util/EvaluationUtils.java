@@ -1,6 +1,9 @@
 package autofe.util;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+import java.util.function.Function;
 
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
@@ -8,7 +11,16 @@ import org.nd4j.linalg.ops.transforms.Transforms;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import autofe.algorithm.hasco.evaluation.AbstractHASCOFENodeEvaluator;
 import autofe.algorithm.hasco.filter.meta.FilterPipeline;
+import fantail.core.Correlation;
+import jaicore.ml.WekaUtil;
+import jaicore.planning.graphgenerators.task.tfd.TFDNode;
+import jaicore.search.structure.core.Node;
+import weka.attributeSelection.ReliefFAttributeEval;
+import weka.classifiers.Evaluation;
+import weka.classifiers.functions.LDA;
+import weka.classifiers.lazy.IBk;
 import weka.clusterers.ClusterEvaluation;
 import weka.clusterers.FilteredClusterer;
 import weka.clusterers.SimpleKMeans;
@@ -70,7 +82,7 @@ public final class EvaluationUtils {
 
 		// TODO: Kernel
 		// Nystroem kernelFilter = new Nystroem();
-		// TODO: Initialize kernel? (using data, cache size 250007, gamma 0.01)? =>
+		// Initialize kernel? (using data, cache size 250007, gamma 0.01)? =>
 		// Defaults
 
 		// kernelFilter.setKernel(new RBFKernel(insts, 250007, 0.01)); // insts, 250007,
@@ -206,6 +218,110 @@ public final class EvaluationUtils {
 
 	private static double calculateCosSim(final INDArray f1, final INDArray f2) {
 		return Transforms.cosineSim(f1, f2);
+	}
+
+	public static double performLDA(final Instances instances) throws Exception {
+		List<Instances> split = WekaUtil.getStratifiedSplit(instances, new Random(42), .7f);
+
+		LDA lda = new LDA();
+		// FLDA lda = new FLDA();
+		lda.buildClassifier(split.get(0));
+
+		Evaluation eval = new Evaluation(split.get(0));
+		eval.evaluateModel(lda, split.get(1));
+
+		return eval.pctCorrect() / 100.0;
+	}
+
+	public static double performEnsemble(final Instances instances) throws Exception {
+		/* Relief */
+		ReliefFAttributeEval relief = new ReliefFAttributeEval();
+		relief.buildEvaluator(instances);
+		double attEvalSum = 0;
+		for (int i = 0; i < instances.numAttributes() - 1; i++) {
+			attEvalSum += relief.evaluateAttribute(i);
+		}
+		attEvalSum /= instances.numAttributes();
+
+		/* Variance */
+		double varianceMean = 0;
+		int totalNumericCount = 0;
+		for (int i = 0; i < instances.numAttributes() - 1; i++) {
+			if (instances.attribute(i).isNumeric()) {
+				instances.attributeStats(i).numericStats.calculateDerived();
+				varianceMean += Math.pow(instances.attributeStats(i).numericStats.stdDev, 2);
+				totalNumericCount++;
+			}
+		}
+		varianceMean /= totalNumericCount;
+
+		/* KNN */
+		List<Instances> split = WekaUtil.getStratifiedSplit(instances, new Random(42), .7f);
+		IBk knn = new IBk(10);
+		knn.buildClassifier(split.get(0));
+		Evaluation eval = new Evaluation(split.get(0));
+		eval.evaluateModel(knn, split.get(1));
+		double knnResult = eval.pctCorrect() / 100d;
+
+		return 1 - (0.33 * attEvalSum + 0.33 * knnResult + 0.33 * varianceMean);
+	}
+
+	public static Function<Instances, Double> getBenchmarkFuntionByName(final String name) {
+		switch (name) {
+		case "Cluster":
+			return (data) -> {
+				try {
+					return performClustering(data);
+				} catch (Exception e1) {
+					logger.error("Could not perform clustering benchmark. Reason: " + e1.getMessage());
+					return 1d;
+				}
+			};
+		case "COCO":
+			return (data) -> calculateCOCOForBatch(data);
+		case "LDA":
+			return (data) -> {
+				try {
+					return performLDA(data);
+				} catch (Exception e) {
+					logger.error("Could not perform LDA benchmark. Reason: " + e.getMessage());
+					return 1d;
+				}
+			};
+		case "Ensemble":
+			return (data) -> {
+				try {
+					return performEnsemble(data);
+				} catch (Exception e) {
+					logger.error("Could not perform ensemble benchmark. Reason: " + e.getMessage());
+					return 1d;
+				}
+			};
+		// case "Random":
+		default:
+			return (data) -> new Random().nextDouble();
+		}
+	}
+
+	public static AbstractHASCOFENodeEvaluator getRandomNodeEvaluator(final int maxPipelineSize) {
+		return new AbstractHASCOFENodeEvaluator(maxPipelineSize) {
+
+			@Override
+			public Double f(Node<TFDNode, ?> node) throws Throwable {
+				if (node.getParent() == null)
+					return null;
+
+				// If pipeline is too deep, assign worst value
+				if (node.path().size() > this.maxPipelineSize)
+					return AbstractHASCOFENodeEvaluator.MAX_EVAL_VALUE;
+
+				return null;
+			}
+		};
+	}
+
+	public static double rankKendallsTau(final double[] ranking1, final double[] ranking2) {
+		return Correlation.rankKendallTauBeta(ranking1, ranking2);
 	}
 
 }

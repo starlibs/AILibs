@@ -1,19 +1,18 @@
 package autofe.test;
 
 import java.io.File;
+import java.util.List;
+import java.util.Random;
 
 import org.slf4j.Logger;
 
-import autofe.algorithm.hasco.evaluation.AbstractHASCOFENodeEvaluator;
 import de.upb.crc901.mlplan.multiclass.DefaultPreorder;
 import de.upb.crc901.mlplan.multiclass.MLPlan;
-import jaicore.planning.graphgenerators.task.tfd.TFDNode;
-import jaicore.search.structure.core.Node;
+import jaicore.ml.WekaUtil;
 import weka.classifiers.Evaluation;
 import weka.core.Instances;
 
 public class AutoFETest {
-	public static final String API_KEY = "4350e421cdc16404033ef1812ea38c01";
 
 	public static double evaluateMLPlan(final int timeout, final Instances training, final Instances test,
 			final Logger logger) throws Exception {
@@ -38,20 +37,12 @@ public class AutoFETest {
 		return eval.pctCorrect();
 	}
 
-	public static AbstractHASCOFENodeEvaluator getRandomNodeEvaluator(final int maxPipelineSize) {
-		return new AbstractHASCOFENodeEvaluator(maxPipelineSize) {
+	public static double evaluateMLPlan(final int timeout, final Instances instances, final double trainRatio,
+			final Logger logger) throws Exception {
 
-			@Override
-			public Double f(Node<TFDNode, ?> node) throws Throwable {
-				if (node.getParent() == null)
-					return null;
+		List<Instances> split = WekaUtil.getStratifiedSplit(instances, new Random(42), trainRatio);
 
-				// If pipeline is too deep, assign worst value
-				if (node.path().size() > this.maxPipelineSize)
-					return 1.0;
-
-				return null;
-			}
-		};
+		return evaluateMLPlan(timeout, split.get(0), split.get(1), logger);
 	}
+
 }

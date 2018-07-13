@@ -6,6 +6,7 @@ import java.util.Queue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import autofe.algorithm.hasco.filter.image.PretrainedNNFilter;
 import autofe.util.FilterUtils;
 import hasco.model.ComponentInstance;
 import hasco.query.Factory;
@@ -18,6 +19,12 @@ public class FilterPipelineFactory implements Factory<FilterPipeline> {
 	private static final String NNPIPE_NAME = "NNPipe";
 
 	private static final Logger logger = LoggerFactory.getLogger(FilterPipelineFactory.class);
+
+	private final int[] inputShape;
+
+	public FilterPipelineFactory(final int[] inputShape) {
+		this.inputShape = inputShape;
+	}
 
 	@Override
 	public FilterPipeline getComponentInstantiation(final ComponentInstance groundComponent) throws Exception {
@@ -33,11 +40,13 @@ public class FilterPipelineFactory implements Factory<FilterPipeline> {
 		case "pipeline":
 
 			ComponentInstance actCI = groundComponent.getSatisfactionOfRequiredInterfaces().get("pipe");
+			// ComponentInstance initCI =
+			// groundComponent.getSatisfactionOfRequiredInterfaces().get("pipe");
 			if (actCI == null)
 				return new FilterPipeline(null);
 
 			IFilter actCIFilter = FilterUtils.getFilterForName(actCI.getComponent().getName(),
-					actCI.getParameterValues());
+					actCI.getParameterValues(), this.inputShape);
 			filterGraph.addItem(actCIFilter);
 			openFilter.offer(actCIFilter);
 			open.offer(actCI);
@@ -59,7 +68,7 @@ public class FilterPipelineFactory implements Factory<FilterPipeline> {
 					ComponentInstance filter1CI = actCI.getSatisfactionOfRequiredInterfaces().get("filter1");
 					if (filter1CI != null) {
 						IFilter filter1 = FilterUtils.getFilterForName(filter1CI.getComponent().getName(),
-								filter1CI.getParameterValues());
+								filter1CI.getParameterValues(), this.inputShape);
 
 						open.offer(filter1CI);
 						openFilter.offer(filter1);
@@ -72,7 +81,7 @@ public class FilterPipelineFactory implements Factory<FilterPipeline> {
 					ComponentInstance filter2CI = actCI.getSatisfactionOfRequiredInterfaces().get("filter2");
 					if (filter2CI != null) {
 						IFilter filter2 = FilterUtils.getFilterForName(filter2CI.getComponent().getName(),
-								filter2CI.getParameterValues());
+								filter2CI.getParameterValues(), this.inputShape);
 
 						open.offer(filter2CI);
 						openFilter.offer(filter2);
@@ -94,7 +103,7 @@ public class FilterPipelineFactory implements Factory<FilterPipeline> {
 							break;
 
 						extractor = FilterUtils.getFilterForName(extractorCI.getComponent().getName(),
-								extractorCI.getParameterValues());
+								extractorCI.getParameterValues(), this.inputShape);
 						filterGraph.addItem(extractor);
 						filterGraph.addEdge(actCIFilter, extractor);
 
@@ -104,10 +113,16 @@ public class FilterPipelineFactory implements Factory<FilterPipeline> {
 						if (extractorCI == null)
 							break;
 
-						// logger.debug(extractorCI.getComponent().getName());
 						extractor = FilterUtils.getFilterForName(extractorCI.getComponent().getName(),
-								extractorCI.getParameterValues());
-						// logger.debug("Extractor class: " + extractor.getClass().getName());
+								extractorCI.getParameterValues(), this.inputShape);
+
+						// If pretrained neural net can not be applied to given input shape (e. g. due
+						// to different channel amount) return empty filter pipeline (checked in node
+						// evaluators)
+						if (((PretrainedNNFilter) extractor).getCompGraph() == null) {
+							return new FilterPipeline(null);
+						}
+
 						filterGraph.addItem(extractor);
 						filterGraph.addEdge(actCIFilter, extractor);
 
@@ -124,13 +139,13 @@ public class FilterPipelineFactory implements Factory<FilterPipeline> {
 					if (!preprocessorCI.getComponent().getName().equals("PrepPipe")) {
 						// Just one basic filter
 						preprocessor = FilterUtils.getFilterForName(preprocessorCI.getComponent().getName(),
-								preprocessorCI.getParameterValues());
+								preprocessorCI.getParameterValues(), this.inputShape);
 						filterGraph.addItem(preprocessor);
 						filterGraph.addEdge(actCIFilter, preprocessor);
 					} else {
 						// Preprocessor pipeline
 						IFilter newActCIFilter = actCIFilter;
-						while (preprocessorCI.getComponent().getName().equals("PrepPipe")) {
+						while (preprocessorCI != null && preprocessorCI.getComponent().getName().equals("PrepPipe")) {
 							ComponentInstance childCI = preprocessorCI.getSatisfactionOfRequiredInterfaces()
 									.get("preprocessor");
 
@@ -138,18 +153,21 @@ public class FilterPipelineFactory implements Factory<FilterPipeline> {
 								break;
 
 							IFilter childFilter = FilterUtils.getFilterForName(childCI.getComponent().getName(),
-									childCI.getParameterValues());
+									childCI.getParameterValues(), this.inputShape);
 							filterGraph.addItem(childFilter);
 							filterGraph.addEdge(newActCIFilter, childFilter);
 
 							newActCIFilter = childFilter;
 							preprocessorCI = preprocessorCI.getSatisfactionOfRequiredInterfaces().get("further");
 						}
+
 						// End of pipeline reached
-						preprocessor = FilterUtils.getFilterForName(preprocessorCI.getComponent().getName(),
-								preprocessorCI.getParameterValues());
-						filterGraph.addItem(preprocessor);
-						filterGraph.addEdge(newActCIFilter, preprocessor);
+						if (preprocessorCI != null) {
+							preprocessor = FilterUtils.getFilterForName(preprocessorCI.getComponent().getName(),
+									preprocessorCI.getParameterValues(), this.inputShape);
+							filterGraph.addItem(preprocessor);
+							filterGraph.addEdge(newActCIFilter, preprocessor);
+						}
 					}
 
 				default:

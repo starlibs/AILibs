@@ -33,7 +33,8 @@ public class PretrainedNNFilterTest {
 	@Test
 	public void cifar10Test() throws Exception {
 		PretrainedNNFilter filter = new PretrainedNNFilter(new VGG16(42, new int[] { 1, 3, 32, 32 }, 10,
-				new Nesterovs(1e-2, 0.9), CacheMode.NONE, WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), 5);
+				new Nesterovs(1e-2, 0.9), CacheMode.NONE, WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), 5,
+				new int[] { 1, 3, 32, 32 });
 
 		// for (Layer layer : filter.getCompGraph().getLayers()) {
 		// logger.debug("Layer: " + layer.toString());
@@ -64,7 +65,8 @@ public class PretrainedNNFilterTest {
 	@Test
 	public void mnistTest() throws Exception {
 		PretrainedNNFilter filter = new PretrainedNNFilter(new LeNet(42, new int[] { 1, 1, 28, 28 }, 10,
-				new Nesterovs(1e-2, 0.9), CacheMode.NONE, WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), 5);
+				new Nesterovs(1e-2, 0.9), CacheMode.NONE, WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), 5,
+				new int[] { 1, 1, 28, 28 });
 
 		// for (Layer layer : filter.getCompGraph().getLayers()) {
 		// logger.debug("Layer: " + layer.toString());

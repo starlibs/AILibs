@@ -1,21 +1,13 @@
 package autofe.algorithm.hasco.evaluation;
 
-import java.util.List;
-import java.util.Random;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import autofe.algorithm.hasco.filter.meta.FilterPipeline;
 import autofe.util.DataSet;
 import autofe.util.EvaluationUtils;
-import jaicore.ml.WekaUtil;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.search.structure.core.Node;
-import weka.attributeSelection.ReliefFAttributeEval;
-import weka.classifiers.Evaluation;
-import weka.classifiers.lazy.IBk;
-import weka.core.Instances;
 
 public class EnsembleNodeEvaluator extends AbstractHASCOFENodeEvaluator {
 
@@ -45,43 +37,13 @@ public class EnsembleNodeEvaluator extends AbstractHASCOFENodeEvaluator {
 				DataSet dataSet = pipe.applyFilter(this.data, true);
 				logger.debug("Applied pipeline. Starting benchmarking...");
 
-				// TODO
-				/* Relief */
-				ReliefFAttributeEval relief = new ReliefFAttributeEval();
-				relief.buildEvaluator(dataSet.getInstances());
-				double attEvalSum = 0;
-				for (int i = 0; i < dataSet.getInstances().numAttributes() - 1; i++) {
-					attEvalSum += relief.evaluateAttribute(i);
-				}
-				attEvalSum /= dataSet.getInstances().numAttributes();
-
-				/* Variance */
-				double varianceMean = 0;
-				int totalNumericCount = 0;
-				for (int i = 0; i < dataSet.getInstances().numAttributes() - 1; i++) {
-					if (dataSet.getInstances().attribute(i).isNumeric()) {
-						dataSet.getInstances().attributeStats(i).numericStats.calculateDerived();
-						varianceMean += Math.pow(dataSet.getInstances().attributeStats(i).numericStats.stdDev, 2);
-						totalNumericCount++;
-					}
-				}
-				varianceMean /= totalNumericCount;
-
-				/* KNN */
-				List<Instances> split = WekaUtil.getStratifiedSplit(this.data.getInstances(), new Random(42), .7f);
-				IBk knn = new IBk(10);
-				knn.buildClassifier(split.get(0));
-				Evaluation eval = new Evaluation(split.get(0));
-				eval.evaluateModel(knn, split.get(1));
-				double knnResult = eval.pctCorrect() / 100d;
-
+				double ensembleScore = EvaluationUtils.performEnsemble(dataSet.getInstances());
 				double finalScore = Math.min(
-						1 - (0.33 * attEvalSum + 0.33 * knnResult + 0.33 * varianceMean)
-								+ ATT_COUNT_PENALTY
-										* EvaluationUtils.calculateAttributeCountPenalty(this.data.getInstances()),
-						19999.0);
+						ensembleScore + ATT_COUNT_PENALTY
+								* EvaluationUtils.calculateAttributeCountPenalty(this.data.getInstances()),
+						MAX_EVAL_VALUE - 1);
 
-				logger.info("Ensemble result: " + finalScore);
+				logger.debug("Ensemble benchmark result: " + finalScore);
 
 				return finalScore;
 
@@ -90,9 +52,12 @@ public class EnsembleNodeEvaluator extends AbstractHASCOFENodeEvaluator {
 				logger.warn("Could not evaluate pipeline. Reason: " + e.getMessage());
 				return null;
 			}
-		} else {
+		} else if (pipe == null) {
 			logger.debug("Null pipe");
 			return null;
+		} else {
+			logger.debug("Found a non-working pipeline.");
+			return MAX_EVAL_VALUE;
 		}
 	}
 

@@ -12,6 +12,12 @@ import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
+/**
+ * Union filter which merges two given data sets by concatenating the features.
+ * 
+ * @author Julian Lienen
+ *
+ */
 public class UnionFilter implements IFilter, IAbstractFilter {
 
 	@Override
@@ -75,8 +81,6 @@ public class UnionFilter implements IFilter, IAbstractFilter {
 			List<INDArray> unitedIntermediateInsts = new ArrayList<>(
 					intermediateInsts1.get(0).length() + intermediateInsts2.get(0).length());
 			for (int i = 0; i < intermediateInsts1.size(); i++) {
-				// TODO: Maybe dynamic concatenation? (e. g. if same shape, then entrywise
-				// concatenation (axis=-1)?)
 				INDArray intermediateInst = Nd4j.hstack(intermediateInsts1.get(i).ravel(),
 						intermediateInsts2.get(i).ravel());
 				unitedIntermediateInsts.add(intermediateInst);

@@ -29,7 +29,7 @@ public class COCOEvaluationTest extends AutoFETest {
 		/* load dataset and create a train-test-split */
 		OpenmlConnector connector = new OpenmlConnector();
 		DataSetDescription ds = connector.dataGet(DataSetUtils.MNIST_ID);
-		File file = ds.getDataset(API_KEY);
+		File file = ds.getDataset(DataSetUtils.API_KEY);
 		Instances data = new Instances(new BufferedReader(new FileReader(file)));
 		data.setClassIndex(data.numAttributes() - 1);
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(42), .01f);

@@ -23,6 +23,7 @@ import autofe.algorithm.hasco.evaluation.EnsembleObjectEvaluator;
 import autofe.algorithm.hasco.evaluation.LDANodeEvaluator;
 import autofe.util.DataSet;
 import autofe.util.DataSetUtils;
+import autofe.util.EvaluationUtils;
 import jaicore.ml.WekaUtil;
 import weka.core.Instances;
 
@@ -34,6 +35,8 @@ public class SimpleAutoFETest extends AutoFETest {
 	private static final Logger logger = LoggerFactory.getLogger(SimpleAutoFETest.class);
 
 	private static final int USED_DATASET = DataSetUtils.SEGMENT_ID;
+	// Shape has only to be used if pretrained neural nets are used
+	private static final int[] DATASET_INPUT_SHAPE = null;
 
 	// @Test
 	public void testHASCOClusterNodeEvaluator() throws Exception {
@@ -42,13 +45,13 @@ public class SimpleAutoFETest extends AutoFETest {
 		/* load data for segment dataset and create a train-test-split */
 		OpenmlConnector connector = new OpenmlConnector();
 		DataSetDescription ds = connector.dataGet(USED_DATASET);
-		File file = ds.getDataset(API_KEY);
+		File file = ds.getDataset(DataSetUtils.API_KEY);
 		Instances data = new Instances(new BufferedReader(new FileReader(file)));
 		data.setClassIndex(data.numAttributes() - 1);
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(0), .7f);
 
 		HASCOFE hascoFE = new HASCOFE(new File("model/test.json"), new ClusterNodeEvaluator(MAX_PIPELINE_SIZE),
-				new DataSet(split.get(0), null), new ClusterObjectEvaluator());
+				new DataSet(split.get(0), null), new ClusterObjectEvaluator(), DATASET_INPUT_SHAPE);
 		hascoFE.setLoggerName("autofe");
 		// hascoFE.enableVisualization();
 		hascoFE.runSearch(60 * 1000);
@@ -80,13 +83,14 @@ public class SimpleAutoFETest extends AutoFETest {
 		/* load data for segment dataset and create a train-test-split */
 		OpenmlConnector connector = new OpenmlConnector();
 		DataSetDescription ds = connector.dataGet(USED_DATASET);
-		File file = ds.getDataset(API_KEY);
+		File file = ds.getDataset(DataSetUtils.API_KEY);
 		Instances data = new Instances(new BufferedReader(new FileReader(file)));
 		data.setClassIndex(data.numAttributes() - 1);
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(0), .7f);
 
-		HASCOFE hascoFE = new HASCOFE(new File("model/test.json"), getRandomNodeEvaluator(MAX_PIPELINE_SIZE),
-				new DataSet(split.get(0), null), new ClusterObjectEvaluator());
+		HASCOFE hascoFE = new HASCOFE(new File("model/test.json"),
+				EvaluationUtils.getRandomNodeEvaluator(MAX_PIPELINE_SIZE), new DataSet(split.get(0), null),
+				new ClusterObjectEvaluator(), DATASET_INPUT_SHAPE);
 		hascoFE.setLoggerName("autofe");
 		// hascoFE.enableVisualization();
 		hascoFE.runSearch(60 * 1000);
@@ -118,13 +122,13 @@ public class SimpleAutoFETest extends AutoFETest {
 		/* load data for segment dataset and create a train-test-split */
 		OpenmlConnector connector = new OpenmlConnector();
 		DataSetDescription ds = connector.dataGet(USED_DATASET);
-		File file = ds.getDataset(API_KEY);
+		File file = ds.getDataset(DataSetUtils.API_KEY);
 		Instances data = new Instances(new BufferedReader(new FileReader(file)));
 		data.setClassIndex(data.numAttributes() - 1);
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(0), .7f);
 
 		HASCOFE hascoFE = new HASCOFE(new File("model/test.json"), new LDANodeEvaluator(MAX_PIPELINE_SIZE),
-				new DataSet(split.get(0), null), new ClusterObjectEvaluator());
+				new DataSet(split.get(0), null), new ClusterObjectEvaluator(), DATASET_INPUT_SHAPE);
 		hascoFE.setLoggerName("autofe");
 		// hascoFE.enableVisualization();
 		hascoFE.runSearch(60 * 1000);
@@ -155,13 +159,13 @@ public class SimpleAutoFETest extends AutoFETest {
 		/* load data for segment dataset and create a train-test-split */
 		OpenmlConnector connector = new OpenmlConnector();
 		DataSetDescription ds = connector.dataGet(USED_DATASET);
-		File file = ds.getDataset(API_KEY);
+		File file = ds.getDataset(DataSetUtils.API_KEY);
 		Instances data = new Instances(new BufferedReader(new FileReader(file)));
 		data.setClassIndex(data.numAttributes() - 1);
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(0), .7f);
 
 		HASCOFE hascoFE = new HASCOFE(new File("model/test.json"), new EnsembleNodeEvaluator(MAX_PIPELINE_SIZE),
-				new DataSet(split.get(0), null), new EnsembleObjectEvaluator());
+				new DataSet(split.get(0), null), new EnsembleObjectEvaluator(), DATASET_INPUT_SHAPE);
 		hascoFE.setLoggerName("autofe");
 		// hascoFE.enableVisualization();
 		hascoFE.runSearch(60 * 1000);
@@ -193,13 +197,13 @@ public class SimpleAutoFETest extends AutoFETest {
 		/* load data for segment dataset and create a train-test-split */
 		OpenmlConnector connector = new OpenmlConnector();
 		DataSetDescription ds = connector.dataGet(USED_DATASET);
-		File file = ds.getDataset(API_KEY);
+		File file = ds.getDataset(DataSetUtils.API_KEY);
 		Instances data = new Instances(new BufferedReader(new FileReader(file)));
 		data.setClassIndex(data.numAttributes() - 1);
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(0), .7f);
 
 		HASCOFE hascoFE = new HASCOFE(new File("model/test.json"), new COCONodeEvaluator(MAX_PIPELINE_SIZE),
-				new DataSet(split.get(0), null), new COCOObjectEvaluator());
+				new DataSet(split.get(0), null), new COCOObjectEvaluator(), DATASET_INPUT_SHAPE);
 		hascoFE.setLoggerName("autofe");
 		// hascoFE.enableVisualization();
 		hascoFE.runSearch(60 * 1000);

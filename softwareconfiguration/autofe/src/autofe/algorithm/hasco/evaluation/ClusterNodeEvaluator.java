@@ -38,9 +38,10 @@ public class ClusterNodeEvaluator extends AbstractHASCOFENodeEvaluator {
 		FilterPipeline pipe = this.getPipelineFromNode(node);
 		if (pipe != null && pipe.getFilters() != null) {
 			try {
-				double finalScore = Math.min(EvaluationUtils.performClustering(pipe, this.data)
-						+ ATT_COUNT_PENALTY * EvaluationUtils.calculateAttributeCountPenalty(this.data.getInstances()),
-						19999.0);
+				double finalScore = Math.min(
+						EvaluationUtils.performClustering(pipe, this.data) + ATT_COUNT_PENALTY
+								* EvaluationUtils.calculateAttributeCountPenalty(this.data.getInstances()),
+						MAX_EVAL_VALUE - 1);
 				logger.debug("Final clustering node evaluation score: " + finalScore);
 				return finalScore;
 			} catch (Exception e) {
@@ -48,9 +49,12 @@ public class ClusterNodeEvaluator extends AbstractHASCOFENodeEvaluator {
 				logger.warn("Could not evaluate pipeline. Reason: " + e.getMessage());
 				return null;
 			}
-		} else {
+		} else if (pipe == null) {
 			logger.debug("Null pipe");
 			return null;
+		} else {
+			logger.debug("Found a non-working pipeline.");
+			return MAX_EVAL_VALUE;
 		}
 	}
 }

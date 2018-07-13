@@ -17,9 +17,13 @@ import weka.core.Instances;
 
 public final class DataSetUtils {
 
+	public static final String API_KEY = "4350e421cdc16404033ef1812ea38c01";
+
 	public static final int CIFAR10_ID = 40927;
+	public static final int[] CIFAR10_INPUT_SHAPE = new int[] { 1, 3, 32, 32 };
 	public static final int SEGMENT_ID = 40984;
 	public static final int MNIST_ID = 554;
+	public static final int[] MNIST_INPUT_SHAPE = new int[] { 1, 1, 28, 28 };
 
 	private static final Logger logger = LoggerFactory.getLogger(DataSetUtils.class);
 
@@ -161,5 +165,16 @@ public final class DataSetUtils {
 
 		return result;
 
+	}
+
+	public static int[] getInputShapeByDataSet(final int dataSetID) {
+		switch (dataSetID) {
+		case MNIST_ID:
+			return MNIST_INPUT_SHAPE;
+		case CIFAR10_ID:
+			return CIFAR10_INPUT_SHAPE;
+		default:
+			return new int[] { 1 };
+		}
 	}
 }

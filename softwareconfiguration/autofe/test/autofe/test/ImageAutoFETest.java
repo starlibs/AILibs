@@ -26,6 +26,7 @@ import autofe.algorithm.hasco.evaluation.LDANodeEvaluator;
 import autofe.algorithm.hasco.evaluation.LDAObjectEvaluator;
 import autofe.util.DataSet;
 import autofe.util.DataSetUtils;
+import autofe.util.EvaluationUtils;
 import jaicore.ml.WekaUtil;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -39,6 +40,7 @@ public class ImageAutoFETest extends AutoFETest {
 	private static final int MAX_PIPELINE_SIZE = 12;
 
 	private static final int USED_DATASET = DataSetUtils.MNIST_ID;
+	private static final int[] DATASET_INPUT_SHAPE = DataSetUtils.getInputShapeByDataSet(USED_DATASET);
 
 	// @Test
 	public void testImageAutoFEClusterEval() throws Exception {
@@ -47,7 +49,7 @@ public class ImageAutoFETest extends AutoFETest {
 		/* load image dataset and create a train-test-split */
 		OpenmlConnector connector = new OpenmlConnector();
 		DataSetDescription ds = connector.dataGet(USED_DATASET);
-		File file = ds.getDataset(API_KEY);
+		File file = ds.getDataset(DataSetUtils.API_KEY);
 		Instances data = new Instances(new BufferedReader(new FileReader(file)));
 		data.setClassIndex(data.numAttributes() - 1);
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(42), .01f);
@@ -61,7 +63,7 @@ public class ImageAutoFETest extends AutoFETest {
 
 		HASCOFE hascoFE = new HASCOFE(new File("model/catalano/catalano.json"),
 				new ClusterNodeEvaluator(MAX_PIPELINE_SIZE), new DataSet(split.get(0), intermediate),
-				new ClusterObjectEvaluator());
+				new ClusterObjectEvaluator(), DATASET_INPUT_SHAPE);
 		// hascoFE.enableVisualization();
 		hascoFE.setLoggerName("autofe image");
 		hascoFE.runSearch(AUTOFE_TIMEOUT);
@@ -103,7 +105,7 @@ public class ImageAutoFETest extends AutoFETest {
 		/* load image dataset and create a train-test-split */
 		OpenmlConnector connector = new OpenmlConnector();
 		DataSetDescription ds = connector.dataGet(USED_DATASET);
-		File file = ds.getDataset(API_KEY);
+		File file = ds.getDataset(DataSetUtils.API_KEY);
 		Instances data = new Instances(new BufferedReader(new FileReader(file)));
 		data.setClassIndex(data.numAttributes() - 1);
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(42), .01f);
@@ -116,7 +118,7 @@ public class ImageAutoFETest extends AutoFETest {
 		logger.info("Finished intermediate calculations.");
 
 		HASCOFE hascoFE = new HASCOFE(new File("model/catalano/catalano.json"), new LDANodeEvaluator(MAX_PIPELINE_SIZE),
-				new DataSet(split.get(0), intermediate), new LDAObjectEvaluator());
+				new DataSet(split.get(0), intermediate), new LDAObjectEvaluator(), DATASET_INPUT_SHAPE);
 		// hascoFE.enableVisualization();
 		hascoFE.setLoggerName("autofe image");
 		hascoFE.runSearch(AUTOFE_TIMEOUT);
@@ -159,7 +161,7 @@ public class ImageAutoFETest extends AutoFETest {
 		/* load image dataset and create a train-test-split */
 		OpenmlConnector connector = new OpenmlConnector();
 		DataSetDescription ds = connector.dataGet(USED_DATASET);
-		File file = ds.getDataset(API_KEY);
+		File file = ds.getDataset(DataSetUtils.API_KEY);
 		Instances data = new Instances(new BufferedReader(new FileReader(file)));
 		data.setClassIndex(data.numAttributes() - 1);
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(42), .01f);
@@ -172,7 +174,8 @@ public class ImageAutoFETest extends AutoFETest {
 		logger.info("Finished intermediate calculations.");
 
 		HASCOFE hascoFE = new HASCOFE(new File("model/catalano/catalano.json"),
-				getRandomNodeEvaluator(MAX_PIPELINE_SIZE), new DataSet(split.get(0), intermediate), null);
+				EvaluationUtils.getRandomNodeEvaluator(MAX_PIPELINE_SIZE), new DataSet(split.get(0), intermediate),
+				null, DATASET_INPUT_SHAPE);
 		// hascoFE.enableVisualization();
 		hascoFE.setLoggerName("autofe image");
 		hascoFE.runSearch(AUTOFE_TIMEOUT);
@@ -207,14 +210,14 @@ public class ImageAutoFETest extends AutoFETest {
 
 	}
 
-	// @Test
+	@Test
 	public void testImageAutoFEEnsembleEvaluator() throws Exception {
 		logger.info("Starting Image AutoFE test...");
 
 		/* load image dataset and create a train-test-split */
 		OpenmlConnector connector = new OpenmlConnector();
 		DataSetDescription ds = connector.dataGet(USED_DATASET);
-		File file = ds.getDataset(API_KEY);
+		File file = ds.getDataset(DataSetUtils.API_KEY);
 		Instances data = new Instances(new BufferedReader(new FileReader(file)));
 		data.setClassIndex(data.numAttributes() - 1);
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(42), .01f);
@@ -228,7 +231,7 @@ public class ImageAutoFETest extends AutoFETest {
 
 		HASCOFE hascoFE = new HASCOFE(new File("model/catalano/catalano.json"),
 				new EnsembleNodeEvaluator(MAX_PIPELINE_SIZE), new DataSet(split.get(0), intermediate),
-				new EnsembleObjectEvaluator());
+				new EnsembleObjectEvaluator(), DATASET_INPUT_SHAPE);
 		// hascoFE.enableVisualization();
 		hascoFE.setLoggerName("autofe image");
 		hascoFE.runSearch(AUTOFE_TIMEOUT);
@@ -264,14 +267,14 @@ public class ImageAutoFETest extends AutoFETest {
 			logger.info("No solution could be found.");
 	}
 
-	// @Test
+	@Test
 	public void testImageAutoFECOCOEvaluator() throws Exception {
 		logger.info("Starting Image AutoFE test...");
 
 		/* load image dataset and create a train-test-split */
 		OpenmlConnector connector = new OpenmlConnector();
 		DataSetDescription ds = connector.dataGet(USED_DATASET);
-		File file = ds.getDataset(API_KEY);
+		File file = ds.getDataset(DataSetUtils.API_KEY);
 		Instances data = new Instances(new BufferedReader(new FileReader(file)));
 		data.setClassIndex(data.numAttributes() - 1);
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(42), .01f);
@@ -285,7 +288,7 @@ public class ImageAutoFETest extends AutoFETest {
 
 		HASCOFE hascoFE = new HASCOFE(new File("model/catalano/catalano.json"),
 				new COCONodeEvaluator(MAX_PIPELINE_SIZE), new DataSet(split.get(0), intermediate),
-				new COCOObjectEvaluator());
+				new COCOObjectEvaluator(), DATASET_INPUT_SHAPE);
 		// hascoFE.enableVisualization();
 		hascoFE.setLoggerName("autofe image");
 		hascoFE.runSearch(AUTOFE_TIMEOUT);

@@ -29,6 +29,7 @@ dependencies {
 	compile project(':JAICore:jaicore-planning')
 	compile project(':JAICore:jaicore-search')
 	compile project(':JAICore:jaicore-ml')
+	compile project(':JAICore:jaicore-experiments')
 	
 	// Graph Stream
 	compile group: 'org.graphstream', name: 'gs-core', version: '1.1.1'
@@ -61,6 +62,7 @@ dependencies {
 	compile files('lib/arpack_combined.jar')
 	compile files('lib/core.jar')
 	compile files('lib/discriminantAnalysis1.0.2.jar')
+	compile files('lib/RankCorrelation.jar')
 	
 	compile 'org.nd4j:nd4j-native-platform:1.0.0-beta'
 	
