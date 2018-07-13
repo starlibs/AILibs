@@ -10,11 +10,12 @@ import com.google.common.eventbus.Subscribe;
 import jaicore.graphvisualizer.events.controlEvents.ControlEvent;
 import jaicore.graphvisualizer.events.controlEvents.IsLiveEvent;
 import jaicore.graphvisualizer.events.controlEvents.NodePushed;
+import jaicore.graphvisualizer.events.controlEvents.ResetEvent;
 import jaicore.graphvisualizer.events.controlEvents.StepEvent;
+import jaicore.graphvisualizer.events.graphEvents.GraphEvent;
 import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
-import jaicore.graphvisualizer.events.graphEvents.GraphEvent;
 import jaicore.graphvisualizer.gui.dataSupplier.ISupplier;
 import jaicore.search.structure.core.Node;
 
@@ -82,7 +83,10 @@ public class NodeExpansionSupplier implements ISupplier {
 				index += ((StepEvent) event).getSteps();
 				if(currentRoot != null)
 					show(index-((StepEvent) event).getSteps());
-			}				
+			}
+		if (event instanceof ResetEvent) {
+			this.index = 0;
+		}
 	}
 
 	@Override
