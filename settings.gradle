@@ -9,6 +9,7 @@ include ":JAICore:jaicore-experiments"
 include ":JAICore:jaicore-graph"
 include ":JAICore:jaicore-graphvisualizer"
 include ":JAICore:jaicore-logic"
+include ":JAICore:jaicore-math"
 include ":JAICore:jaicore-ml"
 
 include ":JAICore:jaicore-planning"
