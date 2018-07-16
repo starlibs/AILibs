@@ -20,8 +20,8 @@ import jaicore.search.graphgenerators.bestfirst.abstractVersioning.TestGraphGene
 import jaicore.search.graphgenerators.bestfirst.abstractVersioning.TestNode;
 import jaicore.search.graphgenerators.nqueens.NQueenGenerator;
 import jaicore.search.graphgenerators.nqueens.QueenNode;
-import jaicore.search.graphvisualizer.dataSupplier.BestFSupplier;
-import jaicore.search.graphvisualizer.dataSupplier.TooltipSupplier;
+import jaicore.search.gui.dataSupplier.BestFSupplier;
+import jaicore.search.gui.dataSupplier.TooltipSupplier;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
 import javafx.application.Application;
