@@ -9,6 +9,8 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+import autofe.db.model.database.AggregatedAttribute;
+import autofe.db.model.database.AggregationFunction;
 import autofe.db.model.database.Attribute;
 import autofe.db.model.database.AttributeType;
 import autofe.db.model.database.BackwardRelationship;
@@ -57,6 +59,10 @@ public class SerializationTest {
 		ordersAttributes.add(new Attribute("OrderId", AttributeType.ID));
 		ordersAttributes.add(customerId);
 		ordersAttributes.add(new Attribute("OrderDate", AttributeType.DATE));
+
+		AggregatedAttribute aggregatedAttribute = new AggregatedAttribute("MAX(Product.Price)", AttributeType.NUMERIC,
+				new Attribute("Price", AttributeType.NUMERIC), AggregationFunction.MAX);
+		ordersAttributes.add(aggregatedAttribute);
 		orders.setColumns(ordersAttributes);
 
 		// Add tables to DB
