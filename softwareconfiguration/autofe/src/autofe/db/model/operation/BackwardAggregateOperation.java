@@ -137,4 +137,11 @@ public class BackwardAggregateOperation implements DatabaseOperation {
 		return aggregationFunction.name() + "(" + toTableName + "." + toBeAggregatedName + ")";
 	}
 
+	@Override
+	public String toString() {
+		return "BackwardAggregateOperation [fromTableName=" + fromTableName + ", toTableName=" + toTableName
+				+ ", commonAttributeName=" + commonAttributeName + ", toBeAggregatedName=" + toBeAggregatedName
+				+ ", aggregationFunction=" + aggregationFunction + "]";
+	}
+
 }

@@ -141,4 +141,10 @@ public class ForwardJoinOperation implements DatabaseOperation {
 		db.getOperationHistory().add(this);
 	}
 
+	@Override
+	public String toString() {
+		return "ForwardJoinOperation [fromTableName=" + fromTableName + ", toTableName=" + toTableName
+				+ ", commonAttributeName=" + commonAttributeName + "]";
+	}
+
 }
