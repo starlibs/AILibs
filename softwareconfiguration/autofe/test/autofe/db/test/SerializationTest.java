@@ -9,9 +9,10 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+import autofe.db.model.database.AbstractAttribute;
 import autofe.db.model.database.AggregatedAttribute;
 import autofe.db.model.database.AggregationFunction;
-import autofe.db.model.database.Attribute;
+import autofe.db.model.database.SimpleAttribute;
 import autofe.db.model.database.AttributeType;
 import autofe.db.model.database.BackwardRelationship;
 import autofe.db.model.database.Database;
@@ -31,37 +32,37 @@ public class SerializationTest {
 
 		// Create tables
 
-		Attribute customerId = new Attribute("CustomerId", AttributeType.ID);
-		Attribute bankAccountId = new Attribute("BankAccountId", AttributeType.ID);
+		SimpleAttribute customerId = new SimpleAttribute("CustomerId", AttributeType.ID);
+		SimpleAttribute bankAccountId = new SimpleAttribute("BankAccountId", AttributeType.ID);
 
 		Table bankAccount = new Table();
 		bankAccount.setName("BankAccount");
 		bankAccount.setTarget(true);
-		List<Attribute> bankAccountAttributes = new ArrayList<>();
+		List<AbstractAttribute> bankAccountAttributes = new ArrayList<>();
 		bankAccountAttributes.add(bankAccountId);
-		bankAccountAttributes.add(new Attribute("BankName", AttributeType.TEXT));
-		bankAccountAttributes.add(new Attribute("Credible", AttributeType.NUMERIC, true));
+		bankAccountAttributes.add(new SimpleAttribute("BankName", AttributeType.TEXT));
+		bankAccountAttributes.add(new SimpleAttribute("Credible", AttributeType.NUMERIC, true));
 		bankAccount.setColumns(bankAccountAttributes);
 
 		Table customer = new Table();
 		customer.setName("Customer");
 		customer.setTarget(false);
-		List<Attribute> customerAttributes = new ArrayList<>();
+		List<AbstractAttribute> customerAttributes = new ArrayList<>();
 		customerAttributes.add(customerId);
-		customerAttributes.add(new Attribute("FirstName", AttributeType.TEXT));
+		customerAttributes.add(new SimpleAttribute("FirstName", AttributeType.TEXT));
 		customerAttributes.add(bankAccountId);
 		customer.setColumns(customerAttributes);
 
 		Table orders = new Table();
 		orders.setName("Orders");
 		orders.setTarget(false);
-		List<Attribute> ordersAttributes = new ArrayList<>();
-		ordersAttributes.add(new Attribute("OrderId", AttributeType.ID));
+		List<AbstractAttribute> ordersAttributes = new ArrayList<>();
+		ordersAttributes.add(new SimpleAttribute("OrderId", AttributeType.ID));
 		ordersAttributes.add(customerId);
-		ordersAttributes.add(new Attribute("OrderDate", AttributeType.DATE));
+		ordersAttributes.add(new SimpleAttribute("OrderDate", AttributeType.DATE));
 
 		AggregatedAttribute aggregatedAttribute = new AggregatedAttribute("MAX(Product.Price)", AttributeType.NUMERIC,
-				new Attribute("Price", AttributeType.NUMERIC), AggregationFunction.MAX);
+				new SimpleAttribute("Price", AttributeType.NUMERIC), AggregationFunction.MAX);
 		ordersAttributes.add(aggregatedAttribute);
 		orders.setColumns(ordersAttributes);
 

@@ -2,7 +2,7 @@ package autofe.db.model.operation;
 
 import autofe.db.model.database.AggregatedAttribute;
 import autofe.db.model.database.AggregationFunction;
-import autofe.db.model.database.Attribute;
+import autofe.db.model.database.AbstractAttribute;
 import autofe.db.model.database.AttributeType;
 import autofe.db.model.database.BackwardRelationship;
 import autofe.db.model.database.Database;
@@ -123,7 +123,7 @@ public class BackwardAggregateOperation implements DatabaseOperation {
 		// Create context
 		Table from = DBUtils.getTableByName(fromTableName, db);
 		Table to = DBUtils.getTableByName(toTableName, db);
-		Attribute toBeAggregated = DBUtils.getAttributeByName(toBeAggregatedName, to);
+		AbstractAttribute toBeAggregated = DBUtils.getAttributeByName(toBeAggregatedName, to);
 
 		// New feature in from column
 		String aggregatedAttributeName = DBUtils.getAggregatedAttributeName(aggregationFunction, toTableName,

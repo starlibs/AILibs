@@ -6,7 +6,7 @@ public class Table {
 
 	private String name;
 
-	private List<Attribute> columns;
+	private List<AbstractAttribute> columns;
 
 	private boolean isTarget;
 
@@ -18,11 +18,11 @@ public class Table {
 		this.name = name;
 	}
 
-	public List<Attribute> getColumns() {
+	public List<AbstractAttribute> getColumns() {
 		return columns;
 	}
 
-	public void setColumns(List<Attribute> columns) {
+	public void setColumns(List<AbstractAttribute> columns) {
 		this.columns = columns;
 	}
 

@@ -1,23 +1,23 @@
 package autofe.db.model.database;
 
-public class AggregatedAttribute extends Attribute {
+public class AggregatedAttribute extends AbstractAttribute {
 
-	private Attribute parent;
+	private AbstractAttribute parent;
 
 	private AggregationFunction aggregationFunction;
 
-	public AggregatedAttribute(String name, AttributeType type, Attribute parent,
+	public AggregatedAttribute(String name, AttributeType type, AbstractAttribute parent,
 			AggregationFunction aggregationFunction) {
 		super(name, type);
 		this.parent = parent;
 		this.aggregationFunction = aggregationFunction;
 	}
 
-	public Attribute getParent() {
+	public AbstractAttribute getParent() {
 		return parent;
 	}
 
-	public void setParent(Attribute parent) {
+	public void setParent(AbstractAttribute parent) {
 		this.parent = parent;
 	}
 

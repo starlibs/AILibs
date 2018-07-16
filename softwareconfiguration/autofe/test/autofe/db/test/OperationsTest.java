@@ -11,7 +11,7 @@ import org.junit.Test;
 
 import autofe.db.model.database.AggregatedAttribute;
 import autofe.db.model.database.AggregationFunction;
-import autofe.db.model.database.Attribute;
+import autofe.db.model.database.AbstractAttribute;
 import autofe.db.model.database.AttributeType;
 import autofe.db.model.database.BackwardRelationship;
 import autofe.db.model.database.Database;
@@ -43,7 +43,7 @@ public class OperationsTest {
 		br.setTo(product);
 		br.setCommonAttribute(DBUtils.getAttributeByName("OrderId", orders));
 
-		Attribute price = DBUtils.getAttributeByName("Price", product);
+		AbstractAttribute price = DBUtils.getAttributeByName("Price", product);
 
 		Set<BackwardAggregateOperation> operations = new HashSet<>();
 		operations.add(new BackwardAggregateOperation(br, AggregationFunction.AVG, price.getName()));
@@ -69,7 +69,7 @@ public class OperationsTest {
 		ForwardRelationship fr = new ForwardRelationship();
 		Table customer = DBUtils.getTableByName("Customer", db);
 		Table bankAccount = DBUtils.getTableByName("BankAccount", db);
-		Attribute bankAccountId = DBUtils.getAttributeByName("BankAccountId", customer);
+		AbstractAttribute bankAccountId = DBUtils.getAttributeByName("BankAccountId", customer);
 		fr.setFrom(bankAccount);
 		fr.setTo(customer);
 		fr.setCommonAttribute(bankAccountId);
@@ -92,7 +92,7 @@ public class OperationsTest {
 		br.setFrom(orders);
 		br.setTo(product);
 		br.setCommonAttribute(DBUtils.getAttributeByName("OrderId", orders));
-		Attribute price = DBUtils.getAttributeByName("Price", product);
+		AbstractAttribute price = DBUtils.getAttributeByName("Price", product);
 		BackwardAggregateOperation operation = new BackwardAggregateOperation(br, AggregationFunction.MAX,
 				price.getName());
 
@@ -105,7 +105,7 @@ public class OperationsTest {
 		Database modifiedDb = DBUtils.deserializeFromFile(DATABASE_MODEL_FILE);
 		Table orders = DBUtils.getTableByName("Orders", modifiedDb);
 		Table product = DBUtils.getTableByName("Product", modifiedDb);
-		Attribute price = DBUtils.getAttributeByName("Price", product);
+		AbstractAttribute price = DBUtils.getAttributeByName("Price", product);
 		AggregatedAttribute aggregatedAttribute = new AggregatedAttribute("MAX(Product.Price)", AttributeType.NUMERIC,
 				price, AggregationFunction.MAX);
 		orders.getColumns().add(aggregatedAttribute);

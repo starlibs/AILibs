@@ -40,7 +40,7 @@ public class DatabaseGraphGenerator implements GraphGenerator<DatabaseNode, Stri
 			@Override
 			public boolean isGoal(DatabaseNode node) {
 				Database db = node.getDatabase();
-				if(db.getOperationHistory().size() > 1) {
+				if(db.getOperationHistory().size() > 5) {
 					return true;
 				}
 				return false;

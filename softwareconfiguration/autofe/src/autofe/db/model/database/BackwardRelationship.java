@@ -2,17 +2,17 @@ package autofe.db.model.database;
 
 public class BackwardRelationship {
 	
-	private Attribute commonAttribute;
+	private AbstractAttribute commonAttribute;
 	
 	private Table from;
 	
 	private Table to;
 
-	public Attribute getCommonAttribute() {
+	public AbstractAttribute getCommonAttribute() {
 		return commonAttribute;
 	}
 
-	public void setCommonAttribute(Attribute commonAttribute) {
+	public void setCommonAttribute(AbstractAttribute commonAttribute) {
 		this.commonAttribute = commonAttribute;
 	}
 

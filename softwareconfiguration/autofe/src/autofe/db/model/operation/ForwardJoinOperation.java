@@ -3,7 +3,7 @@ package autofe.db.model.operation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import autofe.db.model.database.Attribute;
+import autofe.db.model.database.AbstractAttribute;
 import autofe.db.model.database.BackwardRelationship;
 import autofe.db.model.database.Database;
 import autofe.db.model.database.DatabaseOperation;
@@ -103,14 +103,14 @@ public class ForwardJoinOperation implements DatabaseOperation {
 		// Create context
 		Table from = DBUtils.getTableByName(fromTableName, db);
 		Table to = DBUtils.getTableByName(toTableName, db);
-		Attribute commonAttribute = DBUtils.getAttributeByName(commonAttributeName, from);
+		AbstractAttribute commonAttribute = DBUtils.getAttributeByName(commonAttributeName, from);
 		ForwardRelationship fr = new ForwardRelationship();
 		fr.setFrom(from);
 		fr.setTo(to);
 		fr.setCommonAttribute(commonAttribute);
 
 		// 1. Add columns to origin table
-		for (Attribute attribute : to.getColumns()) {
+		for (AbstractAttribute attribute : to.getColumns()) {
 			if (!from.getColumns().contains(attribute)) {
 				LOG.debug("Add attribute {}", attribute.getName());
 				from.getColumns().add(attribute);

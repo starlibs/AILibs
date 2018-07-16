@@ -10,7 +10,6 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonIOException;
@@ -18,7 +17,7 @@ import com.google.gson.JsonSyntaxException;
 
 import autofe.db.model.database.AggregatedAttribute;
 import autofe.db.model.database.AggregationFunction;
-import autofe.db.model.database.Attribute;
+import autofe.db.model.database.AbstractAttribute;
 import autofe.db.model.database.AttributeType;
 import autofe.db.model.database.BackwardRelationship;
 import autofe.db.model.database.Database;
@@ -78,7 +77,7 @@ public class DBUtils {
 		// Add operations for all attributes in 'to' table
 		Table from = backwardRelationship.getFrom();
 		Table to = backwardRelationship.getTo();
-		for (Attribute attribute : to.getColumns()) {
+		for (AbstractAttribute attribute : to.getColumns()) {
 			if (attribute.isAggregable()) {
 				for (AggregationFunction af : AggregationFunction.values()) {
 					// Check whether from table already contains the aggregated attribute
@@ -117,8 +116,7 @@ public class DBUtils {
 	}
 
 	public static void serializeToFile(Database db, String path) {
-		Gson gson = new GsonBuilder().setPrettyPrinting()
-				.registerTypeAdapter(DatabaseOperation.class, new InterfaceAdapter<>()).create();
+		Gson gson = initGson();
 		try {
 			FileWriter fw = new FileWriter(path);
 			gson.toJson(db, fw);
@@ -132,7 +130,7 @@ public class DBUtils {
 
 	public static Database deserializeFromFile(String path) {
 		Database db = null;
-		Gson gson = new GsonBuilder().registerTypeAdapter(DatabaseOperation.class, new InterfaceAdapter<>()).create();
+		Gson gson = initGson();
 		try {
 			db = gson.fromJson(new FileReader(path), Database.class);
 		} catch (JsonSyntaxException | JsonIOException | FileNotFoundException e) {
@@ -143,8 +141,7 @@ public class DBUtils {
 	}
 
 	public static String serializeToString(Database db) {
-		Gson gson = new GsonBuilder().setPrettyPrinting()
-				.registerTypeAdapter(DatabaseOperation.class, new InterfaceAdapter<>()).create();
+		Gson gson = initGson();
 		try {
 			return gson.toJson(db);
 		} catch (JsonIOException e) {
@@ -156,7 +153,7 @@ public class DBUtils {
 
 	public static Database deserializeFromString(String serialized) {
 		Database db = null;
-		Gson gson = new GsonBuilder().registerTypeAdapter(DatabaseOperation.class, new InterfaceAdapter<>()).create();
+		Gson gson = initGson();
 		try {
 			db = gson.fromJson(serialized, Database.class);
 		} catch (JsonSyntaxException | JsonIOException e) {
@@ -164,6 +161,12 @@ public class DBUtils {
 			e.printStackTrace();
 		}
 		return db;
+	}
+
+	private static Gson initGson() {
+		Gson gson = new GsonBuilder().registerTypeAdapter(DatabaseOperation.class, new InterfaceAdapter<>())
+				.registerTypeAdapter(AbstractAttribute.class, new InterfaceAdapter<>()).create();
+		return gson;
 	}
 
 	public static Database clone(Database db) {
@@ -180,8 +183,8 @@ public class DBUtils {
 		return null;
 	}
 
-	public static Attribute getAttributeByName(String name, Table table) {
-		for (Attribute a : table.getColumns()) {
+	public static AbstractAttribute getAttributeByName(String name, Table table) {
+		for (AbstractAttribute a : table.getColumns()) {
 			if (a.getName().equals(name)) {
 				return a;
 			}

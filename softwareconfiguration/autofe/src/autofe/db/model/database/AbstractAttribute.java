@@ -1,6 +1,6 @@
 package autofe.db.model.database;
 
-public class Attribute {
+public abstract class AbstractAttribute {
 
 	protected String name;
 
@@ -8,14 +8,14 @@ public class Attribute {
 
 	protected boolean isTarget;
 
-	public Attribute(String name, AttributeType type) {
+	public AbstractAttribute(String name, AttributeType type) {
 		super();
 		this.name = name;
 		this.type = type;
 		this.isTarget = false;
 	}
 
-	public Attribute(String name, AttributeType type, boolean isTarget) {
+	public AbstractAttribute(String name, AttributeType type, boolean isTarget) {
 		super();
 		this.name = name;
 		this.type = type;
@@ -68,7 +68,7 @@ public class Attribute {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Attribute other = (Attribute) obj;
+		AbstractAttribute other = (AbstractAttribute) obj;
 		if (isTarget != other.isTarget)
 			return false;
 		if (name == null) {
