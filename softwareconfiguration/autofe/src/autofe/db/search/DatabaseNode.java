@@ -1,6 +1,6 @@
 package autofe.db.search;
 
-import autofe.db.model.Database;
+import autofe.db.model.database.Database;
 
 public class DatabaseNode {
 

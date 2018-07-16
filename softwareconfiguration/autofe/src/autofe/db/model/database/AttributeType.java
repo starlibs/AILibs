@@ -1,4 +1,4 @@
-package autofe.db.model;
+package autofe.db.model.database;
 
 public enum AttributeType {
 	

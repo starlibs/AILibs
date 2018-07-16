@@ -1,11 +1,11 @@
-package autofe.db.model;
+package autofe.db.model.database;
 
-public class ForwardRelationship {
-
+public class BackwardRelationship {
+	
 	private Attribute commonAttribute;
-
+	
 	private Table from;
-
+	
 	private Table to;
 
 	public Attribute getCommonAttribute() {
@@ -50,7 +50,7 @@ public class ForwardRelationship {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		ForwardRelationship other = (ForwardRelationship) obj;
+		BackwardRelationship other = (BackwardRelationship) obj;
 		if (commonAttribute == null) {
 			if (other.commonAttribute != null)
 				return false;
@@ -71,7 +71,9 @@ public class ForwardRelationship {
 
 	@Override
 	public String toString() {
-		return "ForwardRelationship [commonAttribute=" + commonAttribute + ", from=" + from + ", to=" + to + "]";
+		return "BackwardRelationship [commonAttribute=" + commonAttribute + ", from=" + from + ", to=" + to + "]";
 	}
+	
+	
 
 }

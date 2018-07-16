@@ -1,6 +1,6 @@
 package autofe.db.util;
 
-import autofe.db.model.Table;
+import autofe.db.model.database.Table;
 
 public class SqlUtils {
 	

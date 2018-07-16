@@ -9,12 +9,12 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import autofe.db.model.Attribute;
-import autofe.db.model.AttributeType;
-import autofe.db.model.BackwardRelationship;
-import autofe.db.model.Database;
-import autofe.db.model.ForwardRelationship;
-import autofe.db.model.Table;
+import autofe.db.model.database.Attribute;
+import autofe.db.model.database.AttributeType;
+import autofe.db.model.database.BackwardRelationship;
+import autofe.db.model.database.Database;
+import autofe.db.model.database.ForwardRelationship;
+import autofe.db.model.database.Table;
 import autofe.db.util.DBUtils;
 
 public class SerializationTest {

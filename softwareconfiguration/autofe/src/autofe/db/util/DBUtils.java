@@ -16,15 +16,15 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 
-import autofe.db.model.AggregationFunction;
-import autofe.db.model.Attribute;
-import autofe.db.model.BackwardAggregateOperation;
-import autofe.db.model.BackwardRelationship;
-import autofe.db.model.Database;
-import autofe.db.model.DatabaseOperation;
-import autofe.db.model.ForwardJoinOperation;
-import autofe.db.model.ForwardRelationship;
-import autofe.db.model.Table;
+import autofe.db.model.database.AggregationFunction;
+import autofe.db.model.database.Attribute;
+import autofe.db.model.database.BackwardRelationship;
+import autofe.db.model.database.Database;
+import autofe.db.model.database.DatabaseOperation;
+import autofe.db.model.database.ForwardRelationship;
+import autofe.db.model.database.Table;
+import autofe.db.model.operation.BackwardAggregateOperation;
+import autofe.db.model.operation.ForwardJoinOperation;
 
 public class DBUtils {
 
@@ -81,7 +81,7 @@ public class DBUtils {
 		for (Attribute attribute : to.getColumns()) {
 			if (attribute.isAggregable()) {
 				for (AggregationFunction af : AggregationFunction.values()) {
-					BackwardAggregateOperation op = new BackwardAggregateOperation(backwardRelationship, af, attribute);
+					BackwardAggregateOperation op = new BackwardAggregateOperation(backwardRelationship, af, attribute.getName());
 					operations.add(op);
 				}
 			}

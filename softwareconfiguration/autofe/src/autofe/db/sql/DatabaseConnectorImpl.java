@@ -7,11 +7,12 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import autofe.db.model.BackwardAggregateOperation;
-import autofe.db.model.BackwardRelationship;
-import autofe.db.model.Database;
-import autofe.db.model.DatabaseOperation;
-import autofe.db.model.Table;
+import autofe.db.model.database.BackwardRelationship;
+import autofe.db.model.database.Database;
+import autofe.db.model.database.DatabaseOperation;
+import autofe.db.model.database.Table;
+import autofe.db.model.operation.BackwardAggregateOperation;
+import autofe.db.util.DBUtils;
 import autofe.db.util.SqlUtils;
 import weka.core.Instances;
 
@@ -64,7 +65,7 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 	@Override
 	public void applyOperations() {
 		for (DatabaseOperation operation : db.getOperationHistory()) {
-			if(operation instanceof BackwardAggregateOperation) {
+			if (operation instanceof BackwardAggregateOperation) {
 				applyBackwardOperation((BackwardAggregateOperation) operation);
 			}
 		}
@@ -72,10 +73,9 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 	}
 
 	private void applyBackwardOperation(BackwardAggregateOperation operation) {
-		BackwardRelationship br = operation.getBackwardRelationship();
-		Table from = br.getFrom();
-		Table to = br.getTo();
-		
+		Table from = DBUtils.getTableByName(operation.getFromTableName(), db);
+		Table to = DBUtils.getTableByName(operation.getToBeAggregatedName(), db);
+
 		// Generate temp view from current view of from table
 		String fromViewName = SqlUtils.getViewNameForTable(from);
 		String fromTempViewName = generateTempView(fromViewName);
@@ -88,9 +88,9 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 		sql = SqlUtils.replacePlaceholder(sql, 1, fromViewName);
 		sql = SqlUtils.replacePlaceholder(sql, 2, operation.getAggregatedAttributeName());
 		sql = SqlUtils.replacePlaceholder(sql, 3, fromTempViewName);
-		sql = SqlUtils.replacePlaceholder(sql, 4, br.getCommonAttribute().getName());
+		sql = SqlUtils.replacePlaceholder(sql, 4, operation.getCommonAttributeName());
 		sql = SqlUtils.replacePlaceholder(sql, 5, operation.getAggregationFunction().name());
-		sql = SqlUtils.replacePlaceholder(sql, 6, operation.getToBeAggregated().getName());
+		sql = SqlUtils.replacePlaceholder(sql, 6, operation.getToBeAggregatedName());
 		sql = SqlUtils.replacePlaceholder(sql, 7, SqlUtils.getViewNameForTable(to));
 		Statement stmt = null;
 		try {

@@ -6,11 +6,11 @@ import java.util.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import autofe.db.model.BackwardAggregateOperation;
-import autofe.db.model.Database;
-import autofe.db.model.ForwardJoinOperation;
-import autofe.db.model.ForwardRelationship;
-import autofe.db.model.Table;
+import autofe.db.model.database.Database;
+import autofe.db.model.database.ForwardRelationship;
+import autofe.db.model.database.Table;
+import autofe.db.model.operation.BackwardAggregateOperation;
+import autofe.db.model.operation.ForwardJoinOperation;
 import autofe.db.util.DBUtils;
 import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.core.NodeType;
