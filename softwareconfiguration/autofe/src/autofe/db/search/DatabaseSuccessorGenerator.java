@@ -3,6 +3,9 @@ package autofe.db.search;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import autofe.db.model.BackwardAggregateOperation;
 import autofe.db.model.Database;
 import autofe.db.model.ForwardJoinOperation;
@@ -14,6 +17,8 @@ import jaicore.search.structure.core.NodeType;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNode, String> {
+
+	private static Logger LOG = LoggerFactory.getLogger(DatabaseSuccessorGenerator.class);
 
 	@Override
 	public Collection<NodeExpansionDescription<DatabaseNode, String>> generateSuccessors(DatabaseNode node) {
@@ -40,6 +45,7 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 					NodeType.OR));
 		}
 
+		LOG.info("Found {} successor nodes", toReturn.size());
 		return toReturn;
 	}
 

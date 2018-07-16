@@ -1,6 +1,13 @@
 package autofe.db.model;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import autofe.db.search.DatabaseSuccessorGenerator;
+import autofe.db.util.DBUtils;
+
 public class ForwardJoinOperation implements DatabaseOperation {
+	private static Logger LOG = LoggerFactory.getLogger(ForwardJoinOperation.class);
 
 	private ForwardRelationship forwardRelationship;
 
@@ -11,44 +18,45 @@ public class ForwardJoinOperation implements DatabaseOperation {
 
 	@Override
 	public void applyTo(Database db) {
-		// //Check for references
-		// //TODO: Necessary?
-		// if(!db.getTables().contains(forwardRelationship.getFrom()) ||
-		// !db.getTables().contains(forwardRelationship.getTo())){
-		// throw new RuntimeException("References are incorrect!");
-		// }
-		//
-		// Table from = forwardRelationship.getFrom();
-		// Table to = forwardRelationship.getTo();
-		//
-		// //1. Add columns to origin table
-		// from.getColumns().addAll(to.getColumns());
-		//
-		// // Remove forward relationship from origin table
-		// from.getFowards().remove(forwardRelationship);
-		//
-		// //2. Update forward relationships of origin table
-		// for(ForwardRelationship forwardRelationship : to.getFowards()) {
-		// ForwardRelationship newFR = new ForwardRelationship();
-		// newFR.setFrom(from);
-		// newFR.setTo(forwardRelationship.getTo());
-		// newFR.setCommonAttribute(forwardRelationship.getCommonAttribute());
-		// from.getFowards().add(newFR);
-		// }
-		//
-		// //3. Update backward relationships of origin table
-		// for(BackwardRelationship backwardRelationship : to.getBackwards()) {
-		// BackwardRelationship newBR = new BackwardRelationship();
-		// newBR.setFrom(from);
-		// newBR.setTo(backwardRelationship.getTo());
-		// newBR.setCommonAttribute(backwardRelationship.getCommonAttribute());
-		// from.getBackwards().add(newBR);
-		// }
-		//
-		// db.getOperationHistory().add(this);
-		//
-		// return db;
-		return;
+
+		//TODO: applyTo() mit clone => Returned geclonte DB
+		LOG.debug("Database before application: {}", DBUtils.serializeToString(db));
+
+		Table from = forwardRelationship.getFrom();
+		Table to = forwardRelationship.getTo();
+
+		// 1. Add columns to origin table
+		for (Attribute attribute : to.getColumns()) {
+			if (!from.getColumns().contains(attribute)) {
+				LOG.debug("Add attribute {}", attribute.getName());
+				from.getColumns().add(attribute);
+			}
+		}
+
+		// Remove forward relationship from origin table
+		db.getForwards().remove(forwardRelationship);
+
+		// 2. Update forward relationships of origin table
+		for (ForwardRelationship forwardRelationship : DBUtils.getForwardsFor(to, db)) {
+			ForwardRelationship newFR = new ForwardRelationship();
+			newFR.setFrom(from);
+			newFR.setTo(forwardRelationship.getTo());
+			newFR.setCommonAttribute(forwardRelationship.getCommonAttribute());
+			db.getForwards().add(newFR);
+		}
+
+		// 3. Update backward relationships of origin table
+		for (BackwardRelationship backwardRelationship : DBUtils.getBackwardsFor(to, db)) {
+			BackwardRelationship newBR = new BackwardRelationship();
+			newBR.setFrom(from);
+			newBR.setTo(backwardRelationship.getTo());
+			newBR.setCommonAttribute(backwardRelationship.getCommonAttribute());
+			db.getBackwards().add(newBR);
+		}
+
+		db.getOperationHistory().add(this);
+
+		LOG.debug("Database after application: {}", DBUtils.serializeToString(db));
 	}
 
 	public ForwardRelationship getForwardRelationship() {
