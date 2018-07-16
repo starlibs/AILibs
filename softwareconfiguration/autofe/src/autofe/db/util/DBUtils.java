@@ -33,7 +33,6 @@ public class DBUtils {
 	public static Table getTargetTable(Database db) {
 		for (Table t : db.getTables()) {
 			if (t.isTarget()) {
-				LOG.debug("Target table is {}", t.getName());
 				return t;
 			}
 		}
@@ -41,11 +40,9 @@ public class DBUtils {
 	}
 
 	public static Set<ForwardRelationship> getForwardsFor(Table table, Database db) {
-		LOG.info("Computing forward relationships for table {}", table.getName());
 		Set<ForwardRelationship> toReturn = new HashSet<>();
 		for (ForwardRelationship forwardRelationship : db.getForwards()) {
 			if (forwardRelationship.getFrom().equals(table)) {
-				LOG.debug("Found {}", forwardRelationship);
 				toReturn.add(forwardRelationship);
 			}
 		}
@@ -54,7 +51,6 @@ public class DBUtils {
 	}
 
 	public static Set<BackwardRelationship> getBackwardsFor(Table table, Database db) {
-		LOG.info("Computing backward relationships for table {}", table.getName());
 		Set<BackwardRelationship> toReturn = new HashSet<>();
 		for (BackwardRelationship backwardRelationship : db.getBackwards()) {
 			if (backwardRelationship.getFrom().equals(table)) {
@@ -71,6 +67,7 @@ public class DBUtils {
 		for (BackwardRelationship backwardRelationship : getBackwardsFor(from, db)) {
 			getOperationsForBackwardRelation(backwardRelationship, operations, db);
 		}
+		LOG.info("There are {} backward operations possible from {}", operations.size(), from.getName());
 		return operations;
 	}
 
@@ -81,7 +78,8 @@ public class DBUtils {
 		for (Attribute attribute : to.getColumns()) {
 			if (attribute.isAggregable()) {
 				for (AggregationFunction af : AggregationFunction.values()) {
-					BackwardAggregateOperation op = new BackwardAggregateOperation(backwardRelationship, af, attribute.getName());
+					BackwardAggregateOperation op = new BackwardAggregateOperation(backwardRelationship, af,
+							attribute.getName());
 					operations.add(op);
 				}
 			}
@@ -98,6 +96,7 @@ public class DBUtils {
 		for (ForwardRelationship fr : getForwardsFor(from, db)) {
 			operations.add(new ForwardJoinOperation(fr));
 		}
+		LOG.info("There are {} forward operations possible from {}", operations.size(), from.getName());
 		return operations;
 	}
 

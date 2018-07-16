@@ -27,8 +27,11 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 		Database db = node.getDatabase();
 		Table targetTable = DBUtils.getTargetTable(db);
 
+		LOG.debug("Expanding node {}", node);
+
 		// Successors for forward relationships
 		for (ForwardJoinOperation operation : DBUtils.getForwardJoinOperations(targetTable, db)) {
+			LOG.debug("Found forward operation: " + operation);
 			Database clone = DBUtils.clone(node.getDatabase());
 			operation.applyTo(clone);
 			DatabaseNode successor = new DatabaseNode(clone);
@@ -38,6 +41,7 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 
 		// Successors for backward relationships
 		for (BackwardAggregateOperation operation : DBUtils.getBackwardAggregateOperations(targetTable, db)) {
+			LOG.debug("Found backward operation: " + operation);
 			Database clone = DBUtils.clone(node.getDatabase());
 			operation.applyTo(clone);
 			DatabaseNode successor = new DatabaseNode(clone);
