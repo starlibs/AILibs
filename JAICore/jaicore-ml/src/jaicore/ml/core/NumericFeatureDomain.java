@@ -3,22 +3,23 @@ package jaicore.ml.core;
 import weka.core.Instance;
 
 /**
- * Description of a numeric feature domain. Needed for fANOVA application in the {@link ExtendedRandomTree}.
+ * Description of a numeric feature domain. Needed for fANOVA application in the
+ * {@link ExtendedRandomTree}.
  * 
  * @author jmhansel
  *
  */
-public class NumericFeatureDomain extends FeatureDomain{
+public class NumericFeatureDomain extends FeatureDomain {
 	private final boolean isInteger;
 	private double min, max;
-	
+
 	public NumericFeatureDomain(final boolean isInteger, final double min, final double max) {
 		super();
 		this.isInteger = isInteger;
 		this.min = min;
 		this.max = max;
 	}
-	
+
 	public NumericFeatureDomain(NumericFeatureDomain domain) {
 		super();
 		this.isInteger = domain.isInteger;
@@ -37,11 +38,11 @@ public class NumericFeatureDomain extends FeatureDomain{
 	public double getMax() {
 		return this.max;
 	}
-	
+
 	public void setMin(double min) {
 		this.min = min;
 	}
-	
+
 	public void setMax(double max) {
 		this.max = max;
 	}
@@ -55,20 +56,22 @@ public class NumericFeatureDomain extends FeatureDomain{
 	public boolean contains(Object item) {
 		if (!(item instanceof Number))
 			return false;
-		Double n = (Double)item;
+		Double n = (Double) item;
 		return n >= min && n <= max;
 	}
 
-//	TODO do I need this?
-//	@Override
-//	public boolean subsumes(ParameterDomain otherDomain) {
-//		if (!(otherDomain instanceof NumericParameterDomain))
-//			return false;
-//		NumericParameterDomain otherNumericDomain = (NumericParameterDomain)otherDomain;
-//		if (this.isInteger && !otherNumericDomain.isInteger)
-//			return false;
-//		return this.min <= otherNumericDomain.getMin() && this.max >= otherNumericDomain.getMax();
-//	}
+	// TODO do I need this?
+	// @Override
+	// public boolean subsumes(ParameterDomain otherDomain) {
+	// if (!(otherDomain instanceof NumericParameterDomain))
+	// return false;
+	// NumericParameterDomain otherNumericDomain =
+	// (NumericParameterDomain)otherDomain;
+	// if (this.isInteger && !otherNumericDomain.isInteger)
+	// return false;
+	// return this.min <= otherNumericDomain.getMin() && this.max >=
+	// otherNumericDomain.getMax();
+	// }
 
 	@Override
 	public int hashCode() {
@@ -103,11 +106,12 @@ public class NumericFeatureDomain extends FeatureDomain{
 
 	@Override
 	public double getRangeSize() {
-		return max-min;
+		return max - min;
 	}
 
 	@Override
 	public boolean containsInstance(double value) {
+		// TODO
 		return ((value >= min) && (value <= max));
 	}
 }

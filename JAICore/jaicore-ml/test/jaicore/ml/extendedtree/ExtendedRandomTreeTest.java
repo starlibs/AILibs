@@ -16,7 +16,7 @@ import weka.core.Instances;
 import weka.core.converters.ArffLoader.ArffReader;
 
 public class ExtendedRandomTreeTest {
-	private static String testFile = "resources/regression_data/cpu.small.arff";
+	private static String testFile = "resources/regression_data/cpu_verysmall.arff";
 	
 	@Test
 	public void testTrain(){
@@ -30,12 +30,18 @@ public class ExtendedRandomTreeTest {
 			tree.setFeatureSpace(new FeatureSpace(data));
 			tree.buildClassifier(data);
 			tree.preprocess();
+			double sum = 0.0d;
+			for(int i = 0; i < tree.getFeatureSpace().getDimensionality(); i++) {
 			HashSet<Integer> subset = new HashSet<Integer>();
-			subset.add(2);
-			System.out.println("single new: " + 2 + ": " + tree.computeMarginalForSubsetOfFeatures(subset));
-			subset.add(3);
-			System.out.println("single new: " + 2 + ": " + tree.computeMarginalForSubsetOfFeatures(subset));
-			
+			subset.add(i);
+			double value = tree.computeMarginalForSubsetOfFeatures(subset);
+			System.out.println("single new: " + i + ": " + value);
+			}
+			HashSet<Integer> subset = new HashSet<Integer>();
+			subset.add(0);
+			subset.add(1);
+			double value = tree.computeMarginalForSubsetOfFeatures(subset);
+			System.out.println("double new {0,1}: " + ": " + value);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

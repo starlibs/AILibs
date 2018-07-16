@@ -1,5 +1,7 @@
 package jaicore.ml.intervaltree;
 
+import static org.junit.Assert.assertTrue;
+
 import java.util.AbstractMap;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -52,6 +54,7 @@ public class ExtendedRandomTree extends RandomTree {
 	private double[][] observations;
 	private double[][] intervalSizes;
 	private HashMap<Set<Integer>, Double> componentsForSubsets;
+	private HashMap<Set<Integer>, Double> varianceOfSubsetIndividual, varianceOfSubsetTotal;
 
 	public ExtendedRandomTree() {
 		super();
@@ -59,6 +62,8 @@ public class ExtendedRandomTree extends RandomTree {
 		this.sizeOfPartitions = new HashMap<Tree, Double>();
 		this.leaves = new ArrayList<Tree>();
 		componentsForSubsets = new HashMap<Set<Integer>, Double>();
+		varianceOfSubsetTotal = new HashMap<Set<Integer>, Double>();
+		varianceOfSubsetIndividual = new HashMap<Set<Integer>, Double>();
 	}
 
 	public ExtendedRandomTree(FeatureSpace featureSpace) {
@@ -165,8 +170,9 @@ public class ExtendedRandomTree extends RandomTree {
 				prediction = 1.0;
 			productOfFractions *= prediction;
 			meanAcrossDomain += productOfFractions;
+			System.out.println("prediction = " + prediction);
 		}
-
+		System.out.println("mean across domain = " + meanAcrossDomain);
 		fEmpty = meanAcrossDomain;
 		// compute total variance
 		for (Tree leaf : leaves) {
@@ -182,34 +188,14 @@ public class ExtendedRandomTree extends RandomTree {
 				productOfFractions *= partitioning.get(leaf).getFeatureDomain(j).getRangeSize()
 						/ featureSpace.getFeatureDomain(j).getRangeSize();
 			}
-			// in the regression case, this is the predicted value
-			productOfFractions *= ((prediction - meanAcrossDomain) * (prediction - meanAcrossDomain));
+			double squareOfDifference = Math.pow((prediction - meanAcrossDomain), 2);
+			productOfFractions *= squareOfDifference;
 			var += productOfFractions;
+			System.out.println("total variance = " + var);
 		}
 		this.totalVariance = var;
 		return var;
 	}
-
-	// public double computeMarginalForSingleFeature(int featureIndex) {
-	// double fraction = 0;
-	// Set<Integer> indicatorsOfSubset = new HashSet<Integer>();
-	// indicatorsOfSubset.add(featureIndex);
-	// double[] curObs = new double[1];
-	// double vU = 0.0d;
-	// for (int valueIndex = 0; valueIndex < observations[featureIndex].length;
-	// valueIndex++) {
-	// curObs[0] = observations[featureIndex][valueIndex];
-	// double marginalPrediction = this.getMarginalPrediction(indicatorsOfSubset,
-	// curObs);
-	// double fU = 0.0d;
-	// fU = marginalPrediction - fEmpty;
-	// vU += 1.0 / featureSpace.getRangeSizeOfFeatureSubspace(indicatorsOfSubset) *
-	// (fU * fU);
-	// }
-	// fraction = vU / totalVariance;
-	// varianceContributions.add(fraction);
-	// return fraction;
-	// }
 
 	/**
 	 * Computes variance contribution of a subset of features
@@ -219,6 +205,7 @@ public class ExtendedRandomTree extends RandomTree {
 	 */
 	public double computeMarginalForSubsetOfFeatures(HashSet<Integer> features) {
 		double fraction = 0;
+		// create cartesian product of observations for the features
 		List<Set<Double>> observationSet = new LinkedList<Set<Double>>();
 		for (int featureIndex : features) {
 			List list = Arrays.stream(observations[featureIndex]).boxed().collect(Collectors.toList());
@@ -228,57 +215,50 @@ public class ExtendedRandomTree extends RandomTree {
 		}
 		Set<List<Double>> observationProduct = Sets.cartesianProduct(observationSet);
 		double vU = 0.0d;
+		List<Double> marginals = new LinkedList<Double>();
+		System.out.println("size of obsprod = " + observationProduct.size());
 		for (List<Double> curObs : observationProduct) {
-			double marginalPrediction = this.getMarginalPrediction(features, curObs);
+			ArrayList<Integer> featureList = new ArrayList<Integer>();
+			featureList.addAll(features);
+			Collections.sort(featureList);
+			double marginalPrediction = this.getMarginalPrediction(featureList, curObs);
+			marginals.add(marginalPrediction);
+			// System.out.println("marg = " + marginalPrediction);
+			// weightedSum += (1.0 / featureSpace.getRangeSizeOfFeatureSubspace(features)) *
+			// marginalPrediction;
+			// weightedSumOfSquares += (1.0 /
+			// featureSpace.getRangeSizeOfFeatureSubspace(features))
+			// * (marginalPrediction * marginalPrediction);
 			double fU = 0.0d;
+			// is this correct? Does fEmpty need to be substracted?
 			fU = marginalPrediction - fEmpty;
-			vU += 1.0 / featureSpace.getRangeSizeOfFeatureSubspace(features) * (fU * fU);
+			if (fU < 0.0d)
+				fU = 0.0d;
+			vU += (1.0 / featureSpace.getRangeSizeOfFeatureSubspace(features)) * (fU * fU);
 		}
-		fraction = vU / totalVariance;
+		System.out.println("factor: " + (1.0 / featureSpace.getRangeSizeOfFeatureSubspace(features)));
+
+		varianceOfSubsetTotal.put(features, vU);
+		System.out.println("current total variance = " + vU);
 		for (int k = 1; k < features.size(); k++) {
+			// generate all subsets of size k
 			Set<Set<Integer>> subsets = Sets.combinations(features, k);
 			for (Set<Integer> subset : subsets) {
-				if (componentsForSubsets.containsKey(subset))
-					fraction -= componentsForSubsets.get(subset);
+				if (varianceOfSubsetTotal.containsKey(subset)) {
+					// subtract variances of all feature subsets
+					vU -= varianceOfSubsetTotal.get(subset);
+					System.out.println("subtracting " + varianceOfSubsetTotal.get(subset));
+				}
 			}
 		}
+		fraction = vU / totalVariance;
 		componentsForSubsets.put(features, fraction);
 		return fraction;
 	}
 
-	// public double computeMarginalForPairsOfFeatures(int featureIndex1, int
-	// featureIndex2) {
-	// double fraction = 0;
-	// Set<Integer> indicatorsOfSubset = new HashSet<Integer>();
-	//
-	// indicatorsOfSubset.add(featureIndex1);
-	// indicatorsOfSubset.add(featureIndex2);
-	// System.out.println(indicatorsOfSubset);
-	// double[] curObs = new double[2];
-	// double vU = 0.0d;
-	// for (int valueIndex1 = 0; valueIndex1 < observations[featureIndex1].length;
-	// valueIndex1++) {
-	// for (int valueIndex2 = 0; valueIndex2 < observations[featureIndex2].length;
-	// valueIndex2++) {
-	// curObs[0] = observations[featureIndex1][valueIndex1];
-	// curObs[1] = observations[featureIndex2][valueIndex2];
-	// double marginalPrediction = this.getMarginalPrediction(indicatorsOfSubset,
-	// curObs);
-	// double fU = 0.0d;
-	// fU = marginalPrediction - fEmpty;
-	// vU += 1.0 / featureSpace.getRangeSizeOfFeatureSubspace(indicatorsOfSubset) *
-	// (fU * fU);
-	// }
-	// }
-	// fraction = vU / totalVariance;
-	// fraction -= varianceContributions.get(featureIndex1);
-	// fraction -= varianceContributions.get(featureIndex2);
-	// return fraction;
-	// }
-
 	/**
 	 * Computes a marginal prediction for a subset of features and a set of
-	 * observations
+	 * observations (\hat{a}_U in the paper)
 	 * 
 	 * @param indices
 	 * @param observations
@@ -305,28 +285,33 @@ public class ExtendedRandomTree extends RandomTree {
 
 	/**
 	 * Computes a marginal prediction for a subset of features and a set of
-	 * observations
+	 * observations (\hat{a}_U in the paper)
 	 * 
 	 * @param indices
 	 * @param observations
 	 * @return Marginal prediction for the subset of features.
 	 */
-	private double getMarginalPrediction(Set<Integer> indices, List<Double> observations) {
+	private double getMarginalPrediction(List<Integer> indices, List<Double> observations) {
 		double result = 0;
+		int numConsistent = 0;
+		Set<Integer> subset = new HashSet<Integer>();
+		subset.addAll(indices);
 		for (Tree leaf : leaves) {
-			if (!observationConsistentWithLeaf(indices, observations, leaf)) {
-				continue;
+			if (observationConsistentWithLeaf(indices, observations, leaf)) {
+				numConsistent++;
+				double sizeOfLeaf = partitioning.get(leaf).getRangeSizeOfAllButSubset(subset);
+				double sizeOfDomain = featureSpace.getRangeSizeOfAllButSubset(subset);
+				double fractionOfSpaceForThisLeaf = sizeOfLeaf / sizeOfDomain;
+				double prediction;
+				if (leaf.getClassDistribution() != null) {
+					prediction = leaf.getClassDistribution()[0];
+				} else
+					prediction = 1.0;
+				result += prediction * fractionOfSpaceForThisLeaf;
 			}
-			double sizeOfLeaf = partitioning.get(leaf).getRangeSizeOfAllButSubset(indices);
-			double sizeOfDomain = featureSpace.getRangeSizeOfAllButSubset(indices);
-			double fractionOfSpaceForThisLeaf = sizeOfLeaf / sizeOfDomain;
-			double prediction;
-			if (leaf.getClassDistribution() != null) {
-				prediction = leaf.getClassDistribution()[0];
-			} else
-				prediction = 1.0;
-			result += prediction * fractionOfSpaceForThisLeaf;
 		}
+		// System.out.println("indices: " + indices + " num consistent: " +
+		// numConsistent);
 		return result;
 	}
 
@@ -348,20 +333,41 @@ public class ExtendedRandomTree extends RandomTree {
 		for (int i = 0; i < indicesArr.length; i++) {
 			int observationIndex = indicesArr[i];
 			double value = observations[i];
+			if (subSpace.getFeatureDomain(i) instanceof NumericFeatureDomain) {
+				NumericFeatureDomain numDom = (NumericFeatureDomain) subSpace.getFeatureDomain(i);
+				System.out.println(numDom.getMin() + "," + value + "," + numDom.getMax());
+
+			}
 			if (!subSpace.getFeatureDomain(observationIndex).containsInstance(value))
 				return false;
 		}
 		return true;
 	}
 
-	private boolean observationConsistentWithLeaf(Set<Integer> indices, List<Double> observations, Tree leaf) {
+	/**
+	 * checks whether the observations are consistent with a leaf (for implementing
+	 * the indicator function in algorithm 2)
+	 * 
+	 * @param indices
+	 * @param observations
+	 * @param leaf
+	 * @return
+	 */
+	private boolean observationConsistentWithLeaf(List<Integer> indices, List<Double> observations, Tree leaf) {
 		if (indices == null && observations == null)
 			return true;
 		FeatureSpace subSpace = partitioning.get(leaf);
-		int[] indicesArr = indices.stream().mapToInt(Number::intValue).toArray();
-		for (int i = 0; i < indicesArr.length; i++) {
-			int observationIndex = indicesArr[i];
+		// int[] indicesArr = indices.stream().mapToInt(Number::intValue).toArray();
+		for (int i = 0; i < indices.size(); i++) {
+			int observationIndex = indices.get(i);
 			double value = observations.get(i).doubleValue();
+			// if(subSpace.getFeatureDomain(i) instanceof NumericFeatureDomain) {
+			// NumericFeatureDomain numDom = (NumericFeatureDomain)
+			// subSpace.getFeatureDomain(i);
+			// System.out.println(numDom.getMin() + ", " + value + ", " + numDom.getMax() +
+			// " in there = " + numDom.containsInstance(value));
+			//
+			// }
 			if (!subSpace.getFeatureDomain(observationIndex).containsInstance(value))
 				return false;
 		}
@@ -487,11 +493,148 @@ public class ExtendedRandomTree extends RandomTree {
 		}
 	}
 
+	private double computeMean(List<Double> data) {
+		double result = 0.0d;
+		for (double point : data) {
+			result += point;
+		}
+		result /= data.size();
+		return result;
+	}
+
+	private double computeVariance(List<Double> data) {
+		double mean = this.computeMean(data);
+		double result = 0.0d;
+		for (double point : data) {
+			result += (point - mean) * (point - mean);
+		}
+		result /= (data.size() - 1);
+		return result;
+	}
+
 	public void preprocess() {
 		this.computePartitioning(featureSpace, m_Tree);
 		this.computeTotalVariance();
 		this.collectSplitPointsAndIntervalSizes(m_Tree);
 		this.computeObservations();
+		System.out.println("num leaves = " + leaves.size());
 	}
 
 }
+
+/**
+ * Computes variance contribution of a subset of features
+ * 
+ * @param features
+ * @return Variance contribution of the feature subset
+ */
+// public double computeMarginalForSubsetOfFeaturesAlternative(HashSet<Integer>
+// features) {
+// double fraction = 0;
+// List<Set<Double>> observationSet = new LinkedList<Set<Double>>();
+// for (int featureIndex : features) {
+// List list =
+// Arrays.stream(observations[featureIndex]).boxed().collect(Collectors.toList());
+// HashSet<Double> hSet = new HashSet<Double>();
+// hSet.addAll(list);
+// observationSet.add(hSet);
+// }
+//
+// List<Set<Double>> sizeSet = new LinkedList<Set<Double>>();
+// for (int featureIndex : features) {
+// List list =
+// Arrays.stream(observations[featureIndex]).boxed().collect(Collectors.toList());
+// HashSet<Double> hSet = new HashSet<Double>();
+// hSet.addAll(list);
+// sizeSet.add(hSet);
+// }
+//
+// System.out.println("Observation set = " + observationSet);
+// OrderedSet<List<Double>> observationProduct =
+// Sets.cartesianProduct(observationSet);
+// Set<List<Double>> sizeProduct = Sets.cartesianProduct(sizeSet);
+// double vU = 0.0d;
+// double sumOfMargs = 0.0d;
+// System.out.println(this.computeTotalVariance());
+// // System.out.println("size of obs product = " + observationProduct.size());
+// // System.out.println("obs product = " + observationProduct.toString());
+// if(observationProduct.size() != sizeProduct.size())
+// throw new IllegalArgumentException("Observation and Interval Sizes are not of
+// same cardinality!");
+// for (int i = 0; i < observationProduct.size(); i++) {
+// System.out.println("curObs = " + curObs);
+// double marginalPrediction = this.getMarginalPrediction(features, curObs);
+// System.out.println("marg = " + marginalPrediction);
+// sumOfMargs += marginalPrediction;
+// double fU = 0.0d;
+// fU = marginalPrediction;
+// // System.out.println("fU = " + fU);
+// vU += (1.0 / featureSpace.getRangeSizeOfFeatureSubspace(features)) * (fU *
+// fU);
+// }
+// // System.out.println("\nsum of marginals = " + sumOfMargs);
+// // System.out.println("V_U = " + vU);
+// // System.out.println("V = " + totalVariance);
+// assertTrue(vU < totalVariance);
+// fraction = vU / totalVariance;
+// for (int k = 1; k < features.size(); k++) {
+// Set<Set<Integer>> subsets = Sets.combinations(features, k);
+// for (Set<Integer> subset : subsets) {
+// if (componentsForSubsets.containsKey(subset))
+// fraction -= componentsForSubsets.get(subset);
+// }
+// }
+// componentsForSubsets.put(features, fraction);
+// return fraction;
+// }
+
+// public double computeMarginalForPairsOfFeatures(int featureIndex1, int
+// featureIndex2) {
+// double fraction = 0;
+// Set<Integer> indicatorsOfSubset = new HashSet<Integer>();
+//
+// indicatorsOfSubset.add(featureIndex1);
+// indicatorsOfSubset.add(featureIndex2);
+// System.out.println(indicatorsOfSubset);
+// double[] curObs = new double[2];
+// double vU = 0.0d;
+// for (int valueIndex1 = 0; valueIndex1 < observations[featureIndex1].length;
+// valueIndex1++) {
+// for (int valueIndex2 = 0; valueIndex2 < observations[featureIndex2].length;
+// valueIndex2++) {
+// curObs[0] = observations[featureIndex1][valueIndex1];
+// curObs[1] = observations[featureIndex2][valueIndex2];
+// double marginalPrediction = this.getMarginalPrediction(indicatorsOfSubset,
+// curObs);
+// double fU = 0.0d;
+// fU = marginalPrediction - fEmpty;
+// vU += 1.0 / featureSpace.getRangeSizeOfFeatureSubspace(indicatorsOfSubset) *
+// (fU * fU);
+// }
+// }
+// fraction = vU / totalVariance;
+// fraction -= varianceContributions.get(featureIndex1);
+// fraction -= varianceContributions.get(featureIndex2);
+// return fraction;
+// }
+
+// public double computeMarginalForSingleFeature(int featureIndex) {
+// double fraction = 0;
+// Set<Integer> indicatorsOfSubset = new HashSet<Integer>();
+// indicatorsOfSubset.add(featureIndex);
+// double[] curObs = new double[1];
+// double vU = 0.0d;
+// for (int valueIndex = 0; valueIndex < observations[featureIndex].length;
+// valueIndex++) {
+// curObs[0] = observations[featureIndex][valueIndex];
+// double marginalPrediction = this.getMarginalPrediction(indicatorsOfSubset,
+// curObs);
+// double fU = 0.0d;
+// fU = marginalPrediction - fEmpty;
+// vU += 1.0 / featureSpace.getRangeSizeOfFeatureSubspace(indicatorsOfSubset) *
+// (fU * fU);
+// }
+// fraction = vU / totalVariance;
+// varianceContributions.add(fraction);
+// return fraction;
+// }
