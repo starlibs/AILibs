@@ -7,6 +7,9 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -18,15 +21,19 @@ import autofe.db.model.Attribute;
 import autofe.db.model.BackwardAggregateOperation;
 import autofe.db.model.BackwardRelationship;
 import autofe.db.model.Database;
+import autofe.db.model.DatabaseOperation;
 import autofe.db.model.ForwardJoinOperation;
 import autofe.db.model.ForwardRelationship;
 import autofe.db.model.Table;
 
 public class DBUtils {
 
+	private static Logger LOG = LoggerFactory.getLogger(DBUtils.class);
+
 	public static Table getTargetTable(Database db) {
-		for(Table t : db.getTables()) {
-			if(t.isTarget()) {
+		for (Table t : db.getTables()) {
+			if (t.isTarget()) {
+				LOG.debug("Target table is {}", t.getName());
 				return t;
 			}
 		}
@@ -34,22 +41,27 @@ public class DBUtils {
 	}
 
 	public static Set<ForwardRelationship> getForwardsFor(Table table, Database db) {
+		LOG.info("Computing forward relationships for table {}", table.getName());
 		Set<ForwardRelationship> toReturn = new HashSet<>();
 		for (ForwardRelationship forwardRelationship : db.getForwards()) {
 			if (forwardRelationship.getFrom().equals(table)) {
+				LOG.debug("Found {}", forwardRelationship);
 				toReturn.add(forwardRelationship);
 			}
 		}
+		LOG.info("There are {} forward relationships from table {}", toReturn.size(), table.getName());
 		return toReturn;
 	}
 
 	public static Set<BackwardRelationship> getBackwardsFor(Table table, Database db) {
+		LOG.info("Computing backward relationships for table {}", table.getName());
 		Set<BackwardRelationship> toReturn = new HashSet<>();
 		for (BackwardRelationship backwardRelationship : db.getBackwards()) {
 			if (backwardRelationship.getFrom().equals(table)) {
 				toReturn.add(backwardRelationship);
 			}
 		}
+		LOG.info("There are {} backward relationships from table {}", toReturn.size(), table.getName());
 		return toReturn;
 	}
 
@@ -90,7 +102,8 @@ public class DBUtils {
 	}
 
 	public static void serializeToFile(Database db, String path) {
-		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+		Gson gson = new GsonBuilder().setPrettyPrinting()
+				.registerTypeAdapter(DatabaseOperation.class, new InterfaceAdapter<>()).create();
 		try {
 			FileWriter fw = new FileWriter(path);
 			gson.toJson(db, fw);
@@ -104,7 +117,7 @@ public class DBUtils {
 
 	public static Database deserializeFromFile(String path) {
 		Database db = null;
-		Gson gson = new Gson();
+		Gson gson = new GsonBuilder().registerTypeAdapter(DatabaseOperation.class, new InterfaceAdapter<>()).create();
 		try {
 			db = gson.fromJson(new FileReader(path), Database.class);
 		} catch (JsonSyntaxException | JsonIOException | FileNotFoundException e) {
@@ -115,7 +128,8 @@ public class DBUtils {
 	}
 
 	public static String serializeToString(Database db) {
-		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+		Gson gson = new GsonBuilder().setPrettyPrinting()
+				.registerTypeAdapter(DatabaseOperation.class, new InterfaceAdapter<>()).create();
 		try {
 			return gson.toJson(db);
 		} catch (JsonIOException e) {
@@ -127,7 +141,7 @@ public class DBUtils {
 
 	public static Database deserializeFromString(String serialized) {
 		Database db = null;
-		Gson gson = new Gson();
+		Gson gson = new GsonBuilder().registerTypeAdapter(DatabaseOperation.class, new InterfaceAdapter<>()).create();
 		try {
 			db = gson.fromJson(serialized, Database.class);
 		} catch (JsonSyntaxException | JsonIOException e) {
