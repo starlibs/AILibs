@@ -126,15 +126,13 @@ public class BackwardAggregateOperation implements DatabaseOperation {
 		Attribute toBeAggregated = DBUtils.getAttributeByName(toBeAggregatedName, to);
 
 		// New feature in from column
-		AggregatedAttribute aggregatedAttribute = new AggregatedAttribute(getAggregatedAttributeName(),
+		String aggregatedAttributeName = DBUtils.getAggregatedAttributeName(aggregationFunction, toTableName,
+				toBeAggregated.getName());
+		AggregatedAttribute aggregatedAttribute = new AggregatedAttribute(aggregatedAttributeName,
 				AttributeType.NUMERIC, toBeAggregated, aggregationFunction);
 		from.getColumns().add(aggregatedAttribute);
 
 		db.getOperationHistory().add(this);
-	}
-
-	public String getAggregatedAttributeName() {
-		return aggregationFunction.name() + "(" + toTableName + "." + toBeAggregatedName + ")";
 	}
 
 	@Override

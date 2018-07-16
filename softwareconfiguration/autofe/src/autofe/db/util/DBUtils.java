@@ -16,8 +16,10 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 
+import autofe.db.model.database.AggregatedAttribute;
 import autofe.db.model.database.AggregationFunction;
 import autofe.db.model.database.Attribute;
+import autofe.db.model.database.AttributeType;
 import autofe.db.model.database.BackwardRelationship;
 import autofe.db.model.database.Database;
 import autofe.db.model.database.DatabaseOperation;
@@ -74,10 +76,24 @@ public class DBUtils {
 	private static void getOperationsForBackwardRelation(BackwardRelationship backwardRelationship,
 			Set<BackwardAggregateOperation> operations, Database db) {
 		// Add operations for all attributes in 'to' table
+		Table from = backwardRelationship.getFrom();
 		Table to = backwardRelationship.getTo();
 		for (Attribute attribute : to.getColumns()) {
 			if (attribute.isAggregable()) {
 				for (AggregationFunction af : AggregationFunction.values()) {
+					// Check whether from table already contains the aggregated attribute
+					String aggregatedAttributeName = DBUtils.getAggregatedAttributeName(af, to.getName(),
+							attribute.getName());
+					AggregatedAttribute aggregatedAttribute = new AggregatedAttribute(aggregatedAttributeName,
+							AttributeType.NUMERIC, attribute, af);
+					if (from.getColumns().contains(aggregatedAttribute)) {
+						LOG.warn("Table {} already contains aggregated attribute {} => Skipping", from.getName(),
+								aggregatedAttribute);
+						continue;
+					} else {
+						LOG.warn("Table {} does not contain aggregated attribute {}. Colums are {}", from.getName(),
+								aggregatedAttribute, from.getColumns());
+					}
 					BackwardAggregateOperation op = new BackwardAggregateOperation(backwardRelationship, af,
 							attribute.getName());
 					operations.add(op);
@@ -171,6 +187,11 @@ public class DBUtils {
 			}
 		}
 		return null;
+	}
+
+	public static String getAggregatedAttributeName(AggregationFunction aggregationFunction, String toTableName,
+			String toBeAggregatedName) {
+		return aggregationFunction.name() + "(" + toTableName + "." + toBeAggregatedName + ")";
 	}
 
 }
