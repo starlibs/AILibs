@@ -4,10 +4,9 @@ import autofe.db.model.database.AggregatedAttribute;
 import autofe.db.model.database.AggregationFunction;
 import autofe.db.model.database.AbstractAttribute;
 import autofe.db.model.database.AttributeType;
-import autofe.db.model.database.BackwardRelationship;
 import autofe.db.model.database.Database;
-import autofe.db.model.database.DatabaseOperation;
 import autofe.db.model.database.Table;
+import autofe.db.model.relation.BackwardRelationship;
 import autofe.db.util.DBUtils;
 
 public class BackwardAggregateOperation implements DatabaseOperation {
@@ -25,9 +24,9 @@ public class BackwardAggregateOperation implements DatabaseOperation {
 	public BackwardAggregateOperation(BackwardRelationship backwardRelationship,
 			AggregationFunction aggregationFunction, String toBeAggregatedName) {
 		super();
-		this.fromTableName = backwardRelationship.getFrom().getName();
-		this.toTableName = backwardRelationship.getTo().getName();
-		this.commonAttributeName = backwardRelationship.getCommonAttribute().getName();
+		this.fromTableName = backwardRelationship.getFromTableName();
+		this.toTableName = backwardRelationship.getToTableName();
+		this.commonAttributeName = backwardRelationship.getCommonAttributeName();
 		this.aggregationFunction = aggregationFunction;
 		this.toBeAggregatedName = toBeAggregatedName;
 	}

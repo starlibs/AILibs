@@ -7,11 +7,11 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import autofe.db.model.database.BackwardRelationship;
 import autofe.db.model.database.Database;
-import autofe.db.model.database.DatabaseOperation;
 import autofe.db.model.database.Table;
 import autofe.db.model.operation.BackwardAggregateOperation;
+import autofe.db.model.operation.DatabaseOperation;
+import autofe.db.model.relation.BackwardRelationship;
 import autofe.db.util.DBUtils;
 import autofe.db.util.SqlUtils;
 import weka.core.Instances;

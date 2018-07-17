@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import autofe.db.model.operation.DatabaseOperation;
+import autofe.db.model.relation.BackwardRelationship;
+import autofe.db.model.relation.ForwardRelationship;
+
 public class Database {
 
 	private List<Table> tables;

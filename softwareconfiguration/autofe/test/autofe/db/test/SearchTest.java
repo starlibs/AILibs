@@ -19,7 +19,7 @@ import jaicore.search.structure.core.NodeExpansionDescription;
 public class SearchTest {
 
 	private static final String DATABASE_MODEL_FILE = "model/db/bankaccount_toy_database.json";
-
+	
 	@Test
 	public void testSearch() {
 		Database initialDatabase = DBUtils.deserializeFromFile(DATABASE_MODEL_FILE);

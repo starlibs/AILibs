@@ -13,12 +13,12 @@ import autofe.db.model.database.AggregatedAttribute;
 import autofe.db.model.database.AggregationFunction;
 import autofe.db.model.database.AbstractAttribute;
 import autofe.db.model.database.AttributeType;
-import autofe.db.model.database.BackwardRelationship;
 import autofe.db.model.database.Database;
-import autofe.db.model.database.ForwardRelationship;
 import autofe.db.model.database.Table;
 import autofe.db.model.operation.BackwardAggregateOperation;
 import autofe.db.model.operation.ForwardJoinOperation;
+import autofe.db.model.relation.BackwardRelationship;
+import autofe.db.model.relation.ForwardRelationship;
 import autofe.db.util.DBUtils;
 
 public class OperationsTest {
@@ -39,9 +39,9 @@ public class OperationsTest {
 		Table customer = DBUtils.getTableByName("Customer", db);
 		Table orders = DBUtils.getTableByName("Orders", db);
 		Table product = DBUtils.getTableByName("Product", db);
-		br.setFrom(orders);
-		br.setTo(product);
-		br.setCommonAttribute(DBUtils.getAttributeByName("OrderId", orders));
+		br.setFromTableName("Orders");
+		br.setToTableName("Product");
+		br.setCommonAttributeName("OrderId");
 
 		AbstractAttribute price = DBUtils.getAttributeByName("Price", product);
 
@@ -70,9 +70,9 @@ public class OperationsTest {
 		Table customer = DBUtils.getTableByName("Customer", db);
 		Table bankAccount = DBUtils.getTableByName("BankAccount", db);
 		AbstractAttribute bankAccountId = DBUtils.getAttributeByName("BankAccountId", customer);
-		fr.setFrom(bankAccount);
-		fr.setTo(customer);
-		fr.setCommonAttribute(bankAccountId);
+		fr.setFromTableName("BankAccount");
+		fr.setToTableName("Customer");
+		fr.setCommonAttributeName("BankAccountId");
 
 		Set<ForwardJoinOperation> operations = new HashSet<>();
 		operations.add(new ForwardJoinOperation(fr));
@@ -89,9 +89,9 @@ public class OperationsTest {
 		BackwardRelationship br = new BackwardRelationship();
 		Table orders = DBUtils.getTableByName("Orders", db);
 		Table product = DBUtils.getTableByName("Product", db);
-		br.setFrom(orders);
-		br.setTo(product);
-		br.setCommonAttribute(DBUtils.getAttributeByName("OrderId", orders));
+		br.setFromTableName("Orders");
+		br.setToTableName("Product");
+		br.setCommonAttributeName("OrderId");
 		AbstractAttribute price = DBUtils.getAttributeByName("Price", product);
 		BackwardAggregateOperation operation = new BackwardAggregateOperation(br, AggregationFunction.MAX,
 				price.getName());
@@ -111,9 +111,9 @@ public class OperationsTest {
 		orders.getColumns().add(aggregatedAttribute);
 
 		BackwardRelationship br = new BackwardRelationship();
-		br.setFrom(orders);
-		br.setTo(product);
-		br.setCommonAttribute(DBUtils.getAttributeByName("OrderId", orders));
+		br.setFromTableName("Orders");
+		br.setToTableName("Product");
+		br.setCommonAttributeName("OrderId");
 		BackwardAggregateOperation operation = new BackwardAggregateOperation(br, AggregationFunction.MAX,
 				price.getName());
 

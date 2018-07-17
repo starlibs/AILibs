@@ -14,15 +14,17 @@ import autofe.db.model.database.AggregatedAttribute;
 import autofe.db.model.database.AggregationFunction;
 import autofe.db.model.database.SimpleAttribute;
 import autofe.db.model.database.AttributeType;
-import autofe.db.model.database.BackwardRelationship;
 import autofe.db.model.database.Database;
-import autofe.db.model.database.ForwardRelationship;
 import autofe.db.model.database.Table;
+import autofe.db.model.relation.BackwardRelationship;
+import autofe.db.model.relation.ForwardRelationship;
 import autofe.db.util.DBUtils;
 
 public class SerializationTest {
 
 	private static final String SERIALIZATION_FILE = "temp_db.json";
+
+	private static final String TOY_DATABASE_FILE = "model/db/bankaccount_toy_database.json";
 
 	private Database db;
 
@@ -76,18 +78,18 @@ public class SerializationTest {
 		// Create forward relationship
 		List<ForwardRelationship> forwardRelationships = new ArrayList<>();
 		ForwardRelationship forwardRelationship = new ForwardRelationship();
-		forwardRelationship.setFrom(bankAccount);
-		forwardRelationship.setTo(customer);
-		forwardRelationship.setCommonAttribute(bankAccountId);
+		forwardRelationship.setFromTableName(bankAccount.getName());
+		forwardRelationship.setToTableName(customer.getName());
+		forwardRelationship.setCommonAttributeName(bankAccountId.getName());
 		forwardRelationships.add(forwardRelationship);
 		db.setForwards(forwardRelationships);
 
 		// Create backward relationships
 		List<BackwardRelationship> backwardRelationships = new ArrayList<>();
 		BackwardRelationship backwardRelationship = new BackwardRelationship();
-		backwardRelationship.setFrom(customer);
-		backwardRelationship.setTo(orders);
-		backwardRelationship.setCommonAttribute(customerId);
+		backwardRelationship.setFromTableName(customer.getName());
+		backwardRelationship.setToTableName(orders.getName());
+		backwardRelationship.setCommonAttributeName(customerId.getName());
 		backwardRelationships.add(backwardRelationship);
 		db.setBackwards(backwardRelationships);
 	}

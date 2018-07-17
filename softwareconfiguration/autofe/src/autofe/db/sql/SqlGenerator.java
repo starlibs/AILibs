@@ -1,6 +1,6 @@
 package autofe.db.sql;
 
-import autofe.db.model.database.DatabaseOperation;
+import autofe.db.model.operation.DatabaseOperation;
 
 public class SqlGenerator {
 	

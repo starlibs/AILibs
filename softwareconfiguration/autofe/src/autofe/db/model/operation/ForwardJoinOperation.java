@@ -4,11 +4,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import autofe.db.model.database.AbstractAttribute;
-import autofe.db.model.database.BackwardRelationship;
 import autofe.db.model.database.Database;
-import autofe.db.model.database.DatabaseOperation;
-import autofe.db.model.database.ForwardRelationship;
 import autofe.db.model.database.Table;
+import autofe.db.model.relation.BackwardRelationship;
+import autofe.db.model.relation.ForwardRelationship;
 import autofe.db.search.DatabaseSuccessorGenerator;
 import autofe.db.util.DBUtils;
 
@@ -23,9 +22,9 @@ public class ForwardJoinOperation implements DatabaseOperation {
 
 	public ForwardJoinOperation(ForwardRelationship forwardRelationship) {
 		super();
-		this.fromTableName = forwardRelationship.getFrom().getName();
-		this.toTableName = forwardRelationship.getTo().getName();
-		this.commonAttributeName = forwardRelationship.getCommonAttribute().getName();
+		this.fromTableName = forwardRelationship.getFromTableName();
+		this.toTableName = forwardRelationship.getToTableName();
+		this.commonAttributeName = forwardRelationship.getCommonAttributeName();
 	}
 
 	public static Logger getLOG() {
@@ -105,9 +104,9 @@ public class ForwardJoinOperation implements DatabaseOperation {
 		Table to = DBUtils.getTableByName(toTableName, db);
 		AbstractAttribute commonAttribute = DBUtils.getAttributeByName(commonAttributeName, from);
 		ForwardRelationship fr = new ForwardRelationship();
-		fr.setFrom(from);
-		fr.setTo(to);
-		fr.setCommonAttribute(commonAttribute);
+		fr.setFromTableName(fromTableName);
+		fr.setToTableName(toTableName);
+		fr.setCommonAttributeName(commonAttributeName);
 
 		// 1. Add columns to origin table
 		for (AbstractAttribute attribute : to.getColumns()) {
@@ -123,18 +122,18 @@ public class ForwardJoinOperation implements DatabaseOperation {
 		// 2. Update forward relationships of origin table
 		for (ForwardRelationship forwardRelationship : DBUtils.getForwardsFor(to, db)) {
 			ForwardRelationship newFR = new ForwardRelationship();
-			newFR.setFrom(from);
-			newFR.setTo(forwardRelationship.getTo());
-			newFR.setCommonAttribute(forwardRelationship.getCommonAttribute());
+			newFR.setFromTableName(from.getName());
+			newFR.setToTableName(forwardRelationship.getToTableName());
+			newFR.setCommonAttributeName(forwardRelationship.getCommonAttributeName());
 			db.getForwards().add(newFR);
 		}
 
 		// 3. Update backward relationships of origin table
 		for (BackwardRelationship backwardRelationship : DBUtils.getBackwardsFor(to, db)) {
 			BackwardRelationship newBR = new BackwardRelationship();
-			newBR.setFrom(from);
-			newBR.setTo(backwardRelationship.getTo());
-			newBR.setCommonAttribute(backwardRelationship.getCommonAttribute());
+			newBR.setFromTableName(from.getName());
+			newBR.setToTableName(backwardRelationship.getToTableName());
+			newBR.setCommonAttributeName(backwardRelationship.getCommonAttributeName());
 			db.getBackwards().add(newBR);
 		}
 

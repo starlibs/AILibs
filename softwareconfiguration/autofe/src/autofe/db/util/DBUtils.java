@@ -19,13 +19,14 @@ import autofe.db.model.database.AggregatedAttribute;
 import autofe.db.model.database.AggregationFunction;
 import autofe.db.model.database.AbstractAttribute;
 import autofe.db.model.database.AttributeType;
-import autofe.db.model.database.BackwardRelationship;
 import autofe.db.model.database.Database;
-import autofe.db.model.database.DatabaseOperation;
-import autofe.db.model.database.ForwardRelationship;
 import autofe.db.model.database.Table;
 import autofe.db.model.operation.BackwardAggregateOperation;
+import autofe.db.model.operation.DatabaseOperation;
 import autofe.db.model.operation.ForwardJoinOperation;
+import autofe.db.model.relation.AbstractRelationship;
+import autofe.db.model.relation.BackwardRelationship;
+import autofe.db.model.relation.ForwardRelationship;
 
 public class DBUtils {
 
@@ -43,6 +44,7 @@ public class DBUtils {
 	public static Set<ForwardRelationship> getForwardsFor(Table table, Database db) {
 		Set<ForwardRelationship> toReturn = new HashSet<>();
 		for (ForwardRelationship forwardRelationship : db.getForwards()) {
+			forwardRelationship.setContext(db);
 			if (forwardRelationship.getFrom().equals(table)) {
 				toReturn.add(forwardRelationship);
 			}
@@ -53,7 +55,11 @@ public class DBUtils {
 
 	public static Set<BackwardRelationship> getBackwardsFor(Table table, Database db) {
 		Set<BackwardRelationship> toReturn = new HashSet<>();
+		// TODO: Tables are not equal here
+		// TODO: Problem: In den Relations werden andere Objekte referenziert als in den
+		// Tabellen
 		for (BackwardRelationship backwardRelationship : db.getBackwards()) {
+			backwardRelationship.setContext(db);
 			if (backwardRelationship.getFrom().equals(table)) {
 				toReturn.add(backwardRelationship);
 			}
@@ -63,6 +69,7 @@ public class DBUtils {
 	}
 
 	public static Set<BackwardAggregateOperation> getBackwardAggregateOperations(Table from, Database db) {
+
 		Set<BackwardAggregateOperation> operations = new HashSet<>();
 		// Start recursion
 		for (BackwardRelationship backwardRelationship : getBackwardsFor(from, db)) {
@@ -85,12 +92,13 @@ public class DBUtils {
 							attribute.getName());
 					AggregatedAttribute aggregatedAttribute = new AggregatedAttribute(aggregatedAttributeName,
 							AttributeType.NUMERIC, attribute, af);
+					// Fix for OTFML-194
 					if (from.getColumns().contains(aggregatedAttribute)) {
-						LOG.warn("Table {} already contains aggregated attribute {} => Skipping", from.getName(),
+						LOG.info("Table {} already contains aggregated attribute {} => Skipping", from.getName(),
 								aggregatedAttribute);
 						continue;
 					} else {
-						LOG.warn("Table {} does not contain aggregated attribute {}. Colums are {}", from.getName(),
+						LOG.debug("Table {} does not contain aggregated attribute {}.", from.getName(),
 								aggregatedAttribute, from.getColumns());
 					}
 					BackwardAggregateOperation op = new BackwardAggregateOperation(backwardRelationship, af,
@@ -141,6 +149,7 @@ public class DBUtils {
 	}
 
 	public static String serializeToString(Database db) {
+		System.out.println(db);
 		Gson gson = initGson();
 		try {
 			return gson.toJson(db);
@@ -165,7 +174,8 @@ public class DBUtils {
 
 	private static Gson initGson() {
 		Gson gson = new GsonBuilder().registerTypeAdapter(DatabaseOperation.class, new InterfaceAdapter<>())
-				.registerTypeAdapter(AbstractAttribute.class, new InterfaceAdapter<>()).create();
+				.registerTypeAdapter(AbstractAttribute.class, new InterfaceAdapter<>())
+				.registerTypeAdapter(AbstractRelationship.class, new InterfaceAdapter<>()).create();
 		return gson;
 	}
 
