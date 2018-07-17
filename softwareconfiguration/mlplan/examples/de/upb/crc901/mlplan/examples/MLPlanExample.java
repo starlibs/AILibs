@@ -44,7 +44,7 @@ public class MLPlanExample {
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(0), .7f);
 		
 		/* initialize mlplan, and let it run for 30 seconds */
-		int timeoutInSeconds = 600;
+		int timeoutInSeconds = 18000;
 		MLPlan mlplan = new MLPlan(new File("model/weka/weka-all-autoweka.json"));
 		mlplan.setLoggerName("mlplan");
 		mlplan.setTimeout(timeoutInSeconds);
@@ -56,13 +56,20 @@ public class MLPlanExample {
 			
 			@Override
 			public double calculateSolutionDistance(TFDNode solution1, TFDNode solution2) {
-				ComponentInstance instance1 = Util.getSolutionCompositionFromState(mlplan.getComponents(), solution1.getState());
-				ComponentInstance instance2 = Util.getSolutionCompositionFromState(mlplan.getComponents(), solution1.getState());
+				ComponentInstance instance1, instance2;
+				try {
+					instance1 = Util.getSolutionCompositionFromState(mlplan.getComponents(), solution1.getState());
+					instance2 = Util.getSolutionCompositionFromState(mlplan.getComponents(), solution1.getState());
+				} catch (Exception e) {
+					return Double.MAX_VALUE;
+				}
 				if (instance1 == null || instance2 == null || instance1.getComponent() == null || instance2.getComponent() == null) {
 					return Double.MAX_VALUE;
 				} else {
 					Component component1 = instance1.getComponent();
 					Component component2 = instance2.getComponent();
+					List<Component> composition1 = Util.getComponentsOfComposition(instance1);
+					String names1 = Util.getComponentNamesOfComposition(instance1);
 					if (component1.getName().equals(component2.getName())) {
 						// Identical Classifier?
 						return 0.75;
