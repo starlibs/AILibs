@@ -7,8 +7,11 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashSet;
+import java.util.Set;
 
 import org.junit.Test;
+
+import com.google.common.collect.Sets;
 
 import jaicore.ml.core.FeatureSpace;
 import jaicore.ml.intervaltree.ExtendedRandomForest;
@@ -18,10 +21,11 @@ import weka.core.converters.ArffLoader.ArffReader;
 
 public class ExtendedRandomForestTest {
 
-	private static String testFile = "resources/regression_data/cpu.small.arff";
+	private static String testFile = "resources/regression_data/cloud.arff";
 
 	@Test
 	public void testVarianceDecompose() {
+
 		try (BufferedReader reader = Files.newBufferedReader(Paths.get(testFile), StandardCharsets.UTF_8)) {
 			ArffReader arffReader = new ArffReader(reader);
 			Instances data = arffReader.getData();
@@ -32,13 +36,20 @@ public class ExtendedRandomForestTest {
 			forest.setNumIterations(20);
 			forest.buildClassifier(data);
 			System.out.println("size of forest: " + forest.getSize());
-			forest.prepareForest();
-			for (int i = 0; i < forest.getFeatureSpace().getDimensionality() - 1; i++) {
-				HashSet<Integer> subset = new HashSet<Integer>();
-				subset.add(i);
-				double curImp = forest.computeMarginalForFeatureSubset(subset);
-				System.out.println("importance of feature " + i + ": " + curImp);
+			double sum = 0.0d;
+			HashSet<Integer> allFeatures = new HashSet<Integer>();
+			for(int i = 0; i < forest.getFeatureSpace().getDimensionality(); i++) {
+				allFeatures.add(i);
 			}
+			Set<Set<Integer>> powerset = Sets.powerSet(allFeatures);
+			for(Set<Integer> features : powerset) {
+				if(features.size() > 0) {
+					double cont = forest.computeMarginalForFeatureSubset(features);
+					System.out.println("Variance contribution of " + features.toString() + ": " + cont);
+					sum += cont;
+				}
+			}
+			System.out.println("sum of contributions = " + sum);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

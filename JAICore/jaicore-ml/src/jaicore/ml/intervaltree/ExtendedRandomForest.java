@@ -1,6 +1,7 @@
 package jaicore.ml.intervaltree;
 
 import java.util.HashSet;
+import java.util.Set;
 
 import jaicore.ml.core.FeatureSpace;
 import weka.classifiers.Classifier;
@@ -40,7 +41,7 @@ public class ExtendedRandomForest extends RandomForest {
 		}
 	}
 	
-	public double computeMarginalForFeatureSubset(HashSet<Integer> features) {
+	public double computeMarginalForFeatureSubset(Set<Integer> features) {
 		double avg = 0;
 		for(Classifier classifier : m_Classifiers) {
 			ExtendedRandomTree curTree = (ExtendedRandomTree) classifier;
