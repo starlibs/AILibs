@@ -7,8 +7,11 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashSet;
+import java.util.Set;
 
 import org.junit.Test;
+
+import com.google.common.collect.Sets;
 
 import jaicore.ml.core.FeatureSpace;
 import jaicore.ml.intervaltree.ExtendedRandomTree;
@@ -16,7 +19,7 @@ import weka.core.Instances;
 import weka.core.converters.ArffLoader.ArffReader;
 
 public class ExtendedRandomTreeTest {
-	private static String testFile = "resources/regression_data/cpu_verysmall.arff";
+	private static String testFile = "resources/regression_data/cloud.arff";
 	
 	@Test
 	public void testTrain(){
@@ -27,21 +30,24 @@ public class ExtendedRandomTreeTest {
 
 			
 			ExtendedRandomTree tree = new ExtendedRandomTree();
+			tree.setMinNum(5);
 			tree.setFeatureSpace(new FeatureSpace(data));
 			tree.buildClassifier(data);
 			tree.preprocess();
 			double sum = 0.0d;
+			HashSet<Integer> allFeatures = new HashSet<Integer>();
 			for(int i = 0; i < tree.getFeatureSpace().getDimensionality(); i++) {
-			HashSet<Integer> subset = new HashSet<Integer>();
-			subset.add(i);
-			double value = tree.computeMarginalForSubsetOfFeatures(subset);
-			System.out.println("single new: " + i + ": " + value);
+				allFeatures.add(i);
 			}
-			HashSet<Integer> subset = new HashSet<Integer>();
-			subset.add(0);
-			subset.add(1);
-			double value = tree.computeMarginalForSubsetOfFeatures(subset);
-			System.out.println("double new {0,1}: " + ": " + value);
+			Set<Set<Integer>> powerset = Sets.powerSet(allFeatures);
+			for(Set<Integer> features : powerset) {
+				if(features.size() > 0) {
+					double cont = tree.computeMarginalForSubsetOfFeatures(features);
+					System.out.println("Variance contribution of " + features.toString() + ": " + cont);
+					sum += cont;
+				}
+			}
+			System.out.println("sum of contributions = " + sum);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
