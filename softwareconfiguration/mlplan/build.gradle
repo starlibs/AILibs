@@ -49,8 +49,8 @@ dependencies {
 	compile group: 'org.openml', name: 'apiconnector', version: '1.0.18'
 
 	// servicification dependencies
-	//compile group: 'de.upb.isys', name: 'jase', version: '0.0.3'
-	compile project(':JASE')
+	compile group: 'de.upb.isys', name: 'jase', version: '0.0.3'
+	//compile project(':JASE')
 
 	// wrapped library dependencies
 	compile group: 'de.upb.isys', name: 'meka', version: '0.0.1'

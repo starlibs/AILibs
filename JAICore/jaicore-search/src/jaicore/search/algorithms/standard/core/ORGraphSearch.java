@@ -136,14 +136,14 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 				/* compute node label */
 				V label = null;
 				boolean computationTimedout = false;
+				long startComputation = System.currentTimeMillis();
 				try {
-					long startComputation = System.currentTimeMillis();
 					label = nodeEvaluator.f(newNode);
-
+					
 					/* check whether the required time exceeded the timeout */
-					long computationTime = System.currentTimeMillis() - startComputation;
-					if (timeoutForComputationOfF > 0 && computationTime > timeoutForComputationOfF + 1000)
-						logger.warn("Computation of f for node {} took {}ms, which is more than the allowed {}ms", newNode, computationTime, timeoutForComputationOfF);
+					long fTime = System.currentTimeMillis() - startComputation;
+					if (timeoutForComputationOfF > 0 && fTime > timeoutForComputationOfF + 1000)
+						logger.warn("Computation of f for node {} took {}ms, which is more than the allowed {}ms", newNode, fTime, timeoutForComputationOfF);
 				} catch (InterruptedException e) {
 					logger.debug("Received interrupt during computation of f.");
 					graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_timedout"));
@@ -161,7 +161,11 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 				}
 				if (taskId >= 0)
 					timeoutSubmitter.cancelTimeout(taskId);
-
+				
+				/* register time required to compute this node label */
+				long fTime = System.currentTimeMillis() - startComputation;
+				newNode.setAnnotation("fTime", fTime);
+				
 				/* if no label was computed, prune the node and cancel the computation */
 				if (label == null) {
 					if (!computationTimedout)
@@ -842,6 +846,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	public void receiveNodeAnnotationEvent(NodeAnnotationEvent<T> event) {
 		try {
 			T nodeExt = event.getNode();
+			logger.debug("Received annotation {} with value {} for node {}", event.getAnnotationName(), event.getAnnotationValue(), event.getNode());
 			if (!ext2int.containsKey(nodeExt))
 				throw new IllegalArgumentException("Received annotation for a node I don't know!");
 			Node<T, V> nodeInt = ext2int.get(nodeExt);
