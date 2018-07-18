@@ -12,7 +12,6 @@ import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
-import weka.classifiers.meta.AdaBoostM1;
 
 public class WEKAPipelineFactory implements Factory<MLPipeline> {
 
@@ -52,6 +51,12 @@ public class WEKAPipelineFactory implements Factory<MLPipeline> {
 
 		classifierCI.getParameterValues();
 		List<String> parameters = this.getParameterList(classifierCI);
+		System.out.println(classifierCI.getComponent().getName());
+
+		String[] options = new String[] {};
+		if (classifierCI.getComponent().getName().equals("weka.classifiers.trees.RandomForest"))
+			options = new String[] { "-num-slots", "0" };
+
 		Classifier c = AbstractClassifier.forName(classifierCI.getComponent().getName(),
 				parameters.toArray(new String[] {}));
 		return new MLPipeline(search, eval, c);

@@ -202,10 +202,12 @@ public final class EvaluationUtils {
 
 			double lowerSum = 0;
 			for (int j = 0; j < classes; j++) {
-				if (i != j) {
-					INDArray tmp = f_i.mmul(c.getRow(j).transpose());
-					lowerSum += Math.exp(tmp.getDouble(0));
-				}
+
+				// TODO: In paper, the case i != j is NOT excluded!
+				// if (i != j) {
+				INDArray tmp = f_i.mmul(c.getRow(j).transpose());
+				lowerSum += Math.exp(tmp.getDouble(0));
+				// }
 
 			}
 			INDArray c_k = c.getRow((int) Math.round(batch.get(i).classValue()));

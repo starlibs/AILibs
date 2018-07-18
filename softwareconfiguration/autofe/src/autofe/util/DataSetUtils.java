@@ -177,4 +177,29 @@ public final class DataSetUtils {
 			return new int[] { 1 };
 		}
 	}
+
+	/**
+	 * Function determines how much of the input data should be used to infer a
+	 * filter pipeline.
+	 * 
+	 * @param instances
+	 *            Complete input instances
+	 * @return Returns a split ratio where this double indicates which percentage of
+	 *         the given input instances should be used to automatically generate
+	 *         features.
+	 */
+	public static double getSplitRatioToUse(final Instances instances) {
+		if (instances == null)
+			throw new IllegalArgumentException("Parameter 'instances' must not be null!");
+
+		int numAttributes = instances.numAttributes();
+		int numInstances = instances.numInstances();
+
+		if (numAttributes > 500 && numInstances > 10000)
+			return 5000d / (double) numInstances;
+		else if (numAttributes > 1000 && numInstances > 7500)
+			return 3000d / (double) numInstances;
+
+		return 1d;
+	}
 }

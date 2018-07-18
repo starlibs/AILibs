@@ -42,9 +42,6 @@ public class RankingExperimentEvaluator implements IExperimentSetEvaluator {
 		String benchmark = description.get("benchmark");
 		Function<Instances, Double> benchmarkFunction = EvaluationUtils.getBenchmarkFuntionByName(benchmark);
 
-		// TODO: Currently unused
-		int seed = Integer.valueOf(description.get("seed"));
-
 		Map<String, Object> results = new HashMap<>();
 
 		// Calculate ranking scores for all data sets

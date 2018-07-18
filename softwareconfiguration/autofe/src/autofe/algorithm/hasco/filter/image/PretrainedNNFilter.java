@@ -129,12 +129,19 @@ public class PretrainedNNFilter implements IFilter {
 		return selectedLayer;
 	}
 
+	// // Assumes input shape (batch size, channels, width, height, [depth])
+	// private static PretrainedType inferPretrainedTypeFromShape(final int[] shape)
+	// {
+	//
+	// return PretrainedType.CIFAR10;
+	// }
+
 	// Assumes input shape (batch size, channels, width, height, [depth])
 	private static PretrainedType inferPretrainedTypeFromShape(final int[] shape) {
 		// Grayscale structure
-		if (shape.length == 3)
+		if (shape.length == 4 && shape[1] == 1)
 			return PretrainedType.MNIST;
-		if (shape.length > 3) {
+		if (shape.length == 4 && shape[2] > 32) {
 			if (shape[2] > 32)
 				return PretrainedType.IMAGENET;
 		}

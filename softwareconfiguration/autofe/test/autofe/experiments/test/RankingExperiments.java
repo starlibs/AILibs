@@ -2,6 +2,7 @@ package autofe.experiments.test;
 
 import java.io.File;
 import java.util.List;
+import java.util.Random;
 
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -13,6 +14,7 @@ import autofe.test.AutoFETest;
 import autofe.util.DataSetUtils;
 import autofe.util.FileUtils;
 import jaicore.experiments.ExperimentRunner;
+import jaicore.ml.WekaUtil;
 import weka.core.Instances;
 
 /**
@@ -32,13 +34,14 @@ public class RankingExperiments {
 	private static final int DATASET = DataSetUtils.MNIST_ID;
 	private static final int DATASET_GENERATION_TIMEOUT = 60 * 1000;
 	private static final String DATASET_NAME_PREFIX = "mnist";
-	private static final double USED_DATASET_RATIO = 0.1;
+	private static final double USED_DATASET_RATIO = 0.05;
 	private static final int MAX_PIPELINE_SIZE = 15;
-	private static final int MAX_DATASET_CREATIONS = 10;
+	private static final int MAX_DATASET_CREATIONS = 7;
 
 	/* ML-Plan ranking parameters */
-	private static final int MLPLAN_EVAL_TIMEOUT = 300;
+	private static final int MLPLAN_EVAL_TIMEOUT = 600;
 	private static final double MLPLAN_SPLIT_RATIO = 0.75;
+	private static final boolean MLPLAN_ENABLE_VIS = true;
 
 	private static final String RANKING_DELIMITER = ",";
 	private static final String RANKING_DIR = "D:\\Data\\Ranking";
@@ -101,7 +104,11 @@ public class RankingExperiments {
 
 		double[] scores = new double[dataSets.size()];
 		for (int i = 0; i < dataSets.size(); i++) {
-			scores[i] = AutoFETest.evaluateMLPlan(MLPLAN_EVAL_TIMEOUT, dataSets.get(i), MLPLAN_SPLIT_RATIO, logger);
+			List<Instances> split = WekaUtil.getStratifiedSplit(dataSets.get(i), new Random(new Random().nextInt(1000)),
+					.75f);
+			scores[i] = AutoFETest.evaluateMLPlan(MLPLAN_EVAL_TIMEOUT, split.get(0), MLPLAN_SPLIT_RATIO, logger,
+					MLPLAN_ENABLE_VIS);
+			logger.debug("Score for data set " + i + ": " + scores[i]);
 		}
 		return scores;
 	}

@@ -77,6 +77,11 @@
 		<appender-ref ref="traceFileAppender" />
 		<appender-ref ref="debugFileAppender" />
 	</logger>
+	
+	<logger name="mlplan">
+		<level value="debug" />
+		<appender-ref ref="console" />
+	</logger>
 
 <!-- 	<logger name="hascofe"> -->
 <!-- 		<level value="info" /> -->

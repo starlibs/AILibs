@@ -38,6 +38,8 @@ public class SimpleAutoFETest extends AutoFETest {
 	// Shape has only to be used if pretrained neural nets are used
 	private static final int[] DATASET_INPUT_SHAPE = null;
 
+	private static final boolean ENABLE_MLPLAN_VIS = true;
+
 	// @Test
 	public void testHASCOClusterNodeEvaluator() throws Exception {
 		logger.info("Starting AutoFE test...");
@@ -69,7 +71,7 @@ public class SimpleAutoFETest extends AutoFETest {
 			DataSet resultSplit1 = solution.getSolution().applyFilter(new DataSet(newSplit.get(1), null), false);
 
 			double mlPlanResult = evaluateMLPlan(MLPLAN_TIMEOUT, resultSplit0.getInstances(),
-					resultSplit1.getInstances(), logger);
+					resultSplit1.getInstances(), logger, ENABLE_MLPLAN_VIS);
 			System.out.println(
 					"Error Rate of the solution produced by ML-Plan (Cluster): " + (100 - mlPlanResult) / 100f);
 		} else
@@ -108,7 +110,7 @@ public class SimpleAutoFETest extends AutoFETest {
 			DataSet resultSplit1 = solution.getSolution().applyFilter(new DataSet(newSplit.get(1), null), false);
 
 			double mlPlanResult = evaluateMLPlan(MLPLAN_TIMEOUT, resultSplit0.getInstances(),
-					resultSplit1.getInstances(), logger);
+					resultSplit1.getInstances(), logger, ENABLE_MLPLAN_VIS);
 			System.out
 					.println("Error Rate of the solution produced by ML-Plan (Random): " + (100 - mlPlanResult) / 100f);
 		} else
@@ -146,7 +148,7 @@ public class SimpleAutoFETest extends AutoFETest {
 			DataSet resultSplit1 = solution.getSolution().applyFilter(new DataSet(newSplit.get(1), null), false);
 
 			double mlPlanResult = evaluateMLPlan(MLPLAN_TIMEOUT, resultSplit0.getInstances(),
-					resultSplit1.getInstances(), logger);
+					resultSplit1.getInstances(), logger, ENABLE_MLPLAN_VIS);
 			System.out.println("Error Rate of the solution produced by ML-Plan (LDA): " + (100 - mlPlanResult) / 100f);
 		} else
 			logger.info("No solution could be found.");
@@ -183,7 +185,7 @@ public class SimpleAutoFETest extends AutoFETest {
 			DataSet resultSplit1 = solution.getSolution().applyFilter(new DataSet(newSplit.get(1), null), false);
 
 			double mlPlanResult = evaluateMLPlan(MLPLAN_TIMEOUT, resultSplit0.getInstances(),
-					resultSplit1.getInstances(), logger);
+					resultSplit1.getInstances(), logger, ENABLE_MLPLAN_VIS);
 			System.out.println(
 					"Error Rate of the solution produced by ML-Plan (Ensemble): " + (100 - mlPlanResult) / 100f);
 		} else
@@ -221,7 +223,7 @@ public class SimpleAutoFETest extends AutoFETest {
 			DataSet resultSplit1 = solution.getSolution().applyFilter(new DataSet(newSplit.get(1), null), false);
 
 			double mlPlanResult = evaluateMLPlan(MLPLAN_TIMEOUT, resultSplit0.getInstances(),
-					resultSplit1.getInstances(), logger);
+					resultSplit1.getInstances(), logger, ENABLE_MLPLAN_VIS);
 			System.out.println("Error Rate of the solution produced by ML-Plan (COCO): " + (100 - mlPlanResult) / 100f);
 		} else
 			logger.info("No solution could be found.");

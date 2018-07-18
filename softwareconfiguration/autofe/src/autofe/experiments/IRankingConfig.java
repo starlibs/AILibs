@@ -10,7 +10,6 @@ import jaicore.experiments.IExperimentSetConfig;
 public interface IRankingConfig extends IExperimentSetConfig {
 	public static final String DATASETS = "datasets";
 	public static final String BENCHMARKS = "benchmarks";
-	public static final String SEEDS = "seeds";
 	public static final String TIMEOUTS_IN_SECONDS = "timeouts";
 
 	@Key(DATASETS)
@@ -18,9 +17,6 @@ public interface IRankingConfig extends IExperimentSetConfig {
 
 	@Key(BENCHMARKS)
 	public List<String> getBenchmarks();
-
-	@Key(SEEDS)
-	public List<String> getSeeds();
 
 	@Key(TIMEOUTS_IN_SECONDS)
 	public List<String> getTimeouts();

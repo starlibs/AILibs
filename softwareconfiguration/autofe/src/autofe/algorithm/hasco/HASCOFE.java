@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -115,7 +116,7 @@ public class HASCOFE implements IObservableGraphAlgorithm<TFDNode, String>, ILog
 				if (n.getFilters() == null)
 					return AbstractHASCOFEEvaluator.MAX_EVAL_VALUE;
 				else
-					return new Random().nextDouble();
+					return new Random(new Random().nextInt(1000)).nextDouble();
 			};
 		}
 
@@ -251,7 +252,8 @@ public class HASCOFE implements IObservableGraphAlgorithm<TFDNode, String>, ILog
 		File file = ds.getDataset(DataSetUtils.API_KEY);
 		Instances data = new Instances(new BufferedReader(new FileReader(file)));
 		data.setClassIndex(data.numAttributes() - 1);
-		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(42), usedDataSetSize);
+		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(new Random().nextInt() * 1000),
+				usedDataSetSize);
 
 		logger.info("Calculating intermediates...");
 		List<INDArray> intermediate = new ArrayList<>();
@@ -269,8 +271,15 @@ public class HASCOFE implements IObservableGraphAlgorithm<TFDNode, String>, ILog
 
 		// Calculate solution data sets
 		List<Instances> result = new ArrayList<>();
+		result.add(originDataSet.getInstances());
+
 		logger.debug("Found solutions: " + hascoFE.getFoundClassifiers().toString());
-		Iterator<HASCOFESolution> solIt = hascoFE.getFoundClassifiers().iterator();
+		List<HASCOFESolution> solutions = new ArrayList<>(hascoFE.getFoundClassifiers());
+		logger.debug("Found " + solutions.size() + " solutions.");
+		Collections.shuffle(solutions);
+
+		Iterator<HASCOFESolution> solIt = solutions.iterator();
+
 		int solCounter = 0;
 		while (solIt.hasNext() && solCounter < maxSolutionCount) {
 			HASCOFESolution nextSol = solIt.next();
@@ -282,9 +291,12 @@ public class HASCOFE implements IObservableGraphAlgorithm<TFDNode, String>, ILog
 				continue;
 
 			logger.debug("Applying solution pipe " + pipe.toString());
+
 			result.add(pipe.applyFilter(originDataSet, true).getInstances());
 			solCounter++;
 		}
+
+		logger.debug("Got all randomly generated data sets.");
 
 		return result;
 	}
