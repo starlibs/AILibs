@@ -15,8 +15,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.upb.crc901.automl.PreferenceBasedNodeEvaluator;
+import hasco.core.HASCO;
 import hasco.core.HASCOFD;
 import hasco.core.Solution;
+import hasco.model.Component;
 import hasco.serialization.ComponentLoader;
 import jaicore.basic.FileUtil;
 import jaicore.basic.ILoggingCustomizable;
@@ -27,6 +29,7 @@ import jaicore.ml.evaluation.MulticlassEvaluator;
 import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionSolution;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.search.algorithms.standard.core.INodeEvaluator;
+import jaicore.search.algorithms.standard.uncertainty.OversearchAvoidanceConfig;
 import weka.classifiers.Classifier;
 import weka.core.Instances;
 
@@ -44,8 +47,10 @@ public class HASCOForWekaML implements IObservableGraphAlgorithm<TFDNode, String
 	}
 
 	private boolean isCanceled = false;
+	private OversearchAvoidanceConfig<TFDNode> oversearchAvoidanceConfig = new OversearchAvoidanceConfig<>(OversearchAvoidanceConfig.OversearchAvoidanceMode.NONE);
 	private Collection<Object> listeners = new ArrayList<>();
 	private HASCOFD<Classifier>.HASCOSolutionIterator hascoRun;
+	private HASCOFD<Classifier> hasco;
 	private INodeEvaluator<TFDNode, Double> preferredNodeEvaluator = n -> null;
 	private final File wekaSpaceConfigurationFile; // this is a hasco file describing the
 
@@ -87,9 +92,13 @@ public class HASCOForWekaML implements IObservableGraphAlgorithm<TFDNode, String
 			}
 		}
 		/* create algorithm */
-		HASCOFD<Classifier> hasco = new HASCOFD<>(new WEKAPipelineFactory(), this.preferredNodeEvaluator,
+		HASCOFD<Classifier> hasco = new HASCOFD<>(
+				new WEKAPipelineFactory(),
+				this.preferredNodeEvaluator,
 				"AbstractClassifier",
-				new MonteCarloCrossValidationEvaluator(new MulticlassEvaluator(new Random(3)), 3, data, .7f));
+				new MonteCarloCrossValidationEvaluator(new MulticlassEvaluator(new Random(3)), 3, data, .7f),
+				this.oversearchAvoidanceConfig
+		);
 		if (this.loggerName != null && this.loggerName.length() > 0)
 			hasco.setLoggerName(loggerName + ".hasco");
 
@@ -154,4 +163,17 @@ public class HASCOForWekaML implements IObservableGraphAlgorithm<TFDNode, String
 	public String getLoggerName() {
 		return loggerName;
 	}
+
+	public void setOversearchAvoidanceMode(OversearchAvoidanceConfig oversearchAvoidanceConfig) {
+		this.oversearchAvoidanceConfig = oversearchAvoidanceConfig;
+	}
+
+	public Collection<Component> getComponents() {
+		if (hasco == null || hasco.getComponents() == null || hasco.getComponents().size() == 0) {
+			return null;
+		} else {
+			return hasco.getComponents();
+		}
+	}
+
 }

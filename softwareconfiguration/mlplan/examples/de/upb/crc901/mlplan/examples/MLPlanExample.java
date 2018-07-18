@@ -11,7 +11,13 @@ import org.openml.apiconnector.xml.DataSetDescription;
 
 import de.upb.crc901.mlplan.multiclass.DefaultPreorder;
 import de.upb.crc901.mlplan.multiclass.MLPlan;
+import hasco.core.Util;
+import hasco.model.Component;
+import hasco.model.ComponentInstance;
 import jaicore.ml.WekaUtil;
+import jaicore.planning.graphgenerators.task.tfd.TFDNode;
+import jaicore.search.algorithms.standard.uncertainty.ISolutionDistanceMetric;
+import jaicore.search.algorithms.standard.uncertainty.OversearchAvoidanceConfig;
 import weka.classifiers.Evaluation;
 import weka.core.Instances;
 
@@ -38,11 +44,42 @@ public class MLPlanExample {
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(0), .7f);
 		
 		/* initialize mlplan, and let it run for 30 seconds */
+		int timeoutInSeconds = 18000;
 		MLPlan mlplan = new MLPlan(new File("model/weka/weka-all-autoweka.json"));
 		mlplan.setLoggerName("mlplan");
-		mlplan.setTimeout(30);
+		mlplan.setTimeout(timeoutInSeconds);
 		mlplan.setPortionOfDataForPhase2(.3f);
 		mlplan.setNodeEvaluator(new DefaultPreorder());
+		OversearchAvoidanceConfig<TFDNode> oversearchAvoidanceConfig = new OversearchAvoidanceConfig<>(OversearchAvoidanceConfig.OversearchAvoidanceMode.TWO_PHASE_SELECTION);
+		oversearchAvoidanceConfig.activateDynamicPhaseLengthsAdjustment((long)timeoutInSeconds * 1000000000l);
+		oversearchAvoidanceConfig.setSolutionDistanceMetric(new ISolutionDistanceMetric<TFDNode>() {
+			
+			@Override
+			public double calculateSolutionDistance(TFDNode solution1, TFDNode solution2) {
+				ComponentInstance instance1, instance2;
+				try {
+					instance1 = Util.getSolutionCompositionFromState(mlplan.getComponents(), solution1.getState());
+					instance2 = Util.getSolutionCompositionFromState(mlplan.getComponents(), solution1.getState());
+				} catch (Exception e) {
+					return Double.MAX_VALUE;
+				}
+				if (instance1 == null || instance2 == null || instance1.getComponent() == null || instance2.getComponent() == null) {
+					return Double.MAX_VALUE;
+				} else {
+					Component component1 = instance1.getComponent();
+					Component component2 = instance2.getComponent();
+					List<Component> composition1 = Util.getComponentsOfComposition(instance1);
+					String names1 = Util.getComponentNamesOfComposition(instance1);
+					if (component1.getName().equals(component2.getName())) {
+						// Identical Classifier?
+						return 0.75;
+					} else {
+						return 1;
+					}
+				}
+			}
+		});
+		mlplan.setOversearchAvoidanceConfig(oversearchAvoidanceConfig);
 		mlplan.enableVisualization();
 		mlplan.buildClassifier(split.get(0));
 
