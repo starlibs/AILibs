@@ -49,26 +49,61 @@ import weka.core.ProtectedProperties;
  */
 
 public class PerformanceKnowledgeBase implements IKnowledgeBase {
+	
+	
 
 	private SQLAdapter sqlAdapter;
 	private Map<String, HashMap<ComponentInstance, Double>> performanceSamples;
 	/** This is map contains a String */
-	private Map<String, HashMap<String, Double>> performanceSamplesByIdentifier;
+	private Map<String, HashMap<String, List<Pair<ParameterConfiguration, Double>>>> performanceSamplesByIdentifier;
 
+	/**
+	 * Inner helper class for managing parameter configurations easily.
+	 * 
+	 * @author jmhansel
+	 *
+	 */
+	private class ParameterConfiguration {
+		private final List<Pair<Parameter, String>> values;
+
+		public ParameterConfiguration(ComponentInstance composition) {
+			ArrayList<Pair<Parameter, String>> temp = new ArrayList<Pair<Parameter, String>>();
+			List<ComponentInstance> componentInstances = Util.getComponentInstancesOfComposition(composition);
+			for (ComponentInstance compInst : componentInstances) {
+				PartialOrderedSet<Parameter> parameters = compInst.getComponent().getParameters();
+				for (Parameter parameter : parameters) {
+					temp.add(Pair.of(parameter, compInst.getParameterValues().get(parameter.getName())));
+				}
+			}
+			// Make the list immutable to avoid problems with hashCode
+			values = Collections.unmodifiableList(temp);
+		}
+
+		@Override
+		public int hashCode() {
+			return values.hashCode();
+		}
+		
+		public List<Pair<Parameter, String>> getValues(){
+			return this.values;
+		}
+	}
+	
 	public PerformanceKnowledgeBase(final SQLAdapter sqlAdapter) {
 		super();
 		this.sqlAdapter = sqlAdapter;
 		this.performanceSamples = new HashMap<String, HashMap<ComponentInstance, Double>>();
-		this.performanceSamplesByIdentifier = new HashMap<String, HashMap<String, Double>>();
+		this.performanceSamplesByIdentifier = new HashMap<String, HashMap<String, List<Pair<ParameterConfiguration, Double>>>>();
 	}
 
 	public PerformanceKnowledgeBase() {
 		super();
 		this.performanceSamples = new HashMap<String, HashMap<ComponentInstance, Double>>();
-		this.performanceSamplesByIdentifier = new HashMap<String, HashMap<String, Double>>();
+		this.performanceSamplesByIdentifier = new HashMap<String, HashMap<String, List<Pair<ParameterConfiguration, Double>>>>();
 	}
 
 	public void addPerformanceSample(String benchmarkName, ComponentInstance componentInstance, double score) {
+		String identifier = Util.getComponentNamesOfComposition(componentInstance);
 		if (performanceSamples.get(benchmarkName) == null) {
 			HashMap<ComponentInstance, Double> newMap = new HashMap<ComponentInstance, Double>();
 			newMap.put(componentInstance, score);
@@ -77,12 +112,19 @@ public class PerformanceKnowledgeBase implements IKnowledgeBase {
 			performanceSamples.get(benchmarkName).put(componentInstance, score);
 		}
 		if (performanceSamplesByIdentifier.get(benchmarkName) == null) {
-			HashMap<String, Double> newMap = new HashMap<String, Double>();
-			newMap.put(Util.getComponentNamesOfComposition(componentInstance), score);
+			HashMap<String, List<Pair<ParameterConfiguration, Double>>> newMap = new HashMap<String, List<Pair<ParameterConfiguration, Double>>>();
+			LinkedList<Pair<ParameterConfiguration,Double>> sampleList = new LinkedList<Pair<ParameterConfiguration,Double>>();
+			sampleList.add(Pair.of(new ParameterConfiguration(componentInstance), score));
+			newMap.put(identifier, new LinkedList<Pair<ParameterConfiguration,Double>>());
 			performanceSamplesByIdentifier.put(benchmarkName, newMap);
 		} else {
-			performanceSamplesByIdentifier.get(benchmarkName)
-					.put(Util.getComponentNamesOfComposition(componentInstance), score);
+			if(performanceSamplesByIdentifier.get(benchmarkName).containsKey(identifier)) {
+				performanceSamplesByIdentifier.get(benchmarkName).get(identifier).add(Pair.of(new ParameterConfiguration(componentInstance), score));
+			}
+			else {
+				performanceSamplesByIdentifier.get(benchmarkName).put(identifier, new LinkedList<Pair<ParameterConfiguration, Double>>());
+				performanceSamplesByIdentifier.get(benchmarkName).get(identifier).add(Pair.of(new ParameterConfiguration(componentInstance), score));
+			}
 		}
 	}
 
@@ -197,44 +239,8 @@ public class PerformanceKnowledgeBase implements IKnowledgeBase {
 		allAttributes.add(score);
 		instances = new Instances("performance_samples", allAttributes,
 				this.performanceSamples.get(benchmarkName).size());
-		ArrayList<Pair<String, String>> parameterValuesForPipeline = new ArrayList<Pair<String, String>>();
-		
-		// Map<String, Double> samples =
-		// performanceSamplesByIdentifier.get(benchmarkName);
-		// ArrayList<Double> instanceValues = new ArrayList<Double>();
-		// Map<String, String> parameters = new HashMap<String, String>();
-		// List<ComponentInstance> listOfComponentInstances =
-		// Util.getComponentInstancesOfComposition(pipeline);
-		// // TODO namespace the parameter values!!!
-		// for (ComponentInstance componentInstance : listOfComponentInstances)
-		// parameters.putAll(componentInstance.getParameterValues());
 		instances.setClass(score);
 		return instances;
 	}
-	
-	/**
-	 * Inner helper class for managing parameter configurations easily.
-	 * @author jmhansel
-	 *
-	 */
-	private class ParameterConfiguration{
-		private final List<Pair<Parameter,String>> values;
-		public ParameterConfiguration(ComponentInstance composition) {
-			ArrayList<Pair<Parameter, String>> temp = new ArrayList<Pair<Parameter,String>>();
-			List<ComponentInstance> componentInstances = Util.getComponentInstancesOfComposition(composition);
-			for(ComponentInstance compInst : componentInstances) {
-				PartialOrderedSet<Parameter> parameters = compInst.getComponent().getParameters();
-				for(Parameter parameter : parameters) {
-					temp.add(Pair.of(parameter, compInst.getParameterValues().get(parameter.getName())));
-				}
-			}
-			// Make the list immutable to avoid problems with hashCode
-			values = Collections.unmodifiableList(temp);
-		}
-		
-		@Override
-		public int hashCode() {
-			return values.hashCode();
-		}
-	}
+
 }
