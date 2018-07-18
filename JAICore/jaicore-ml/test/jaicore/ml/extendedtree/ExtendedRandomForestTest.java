@@ -21,7 +21,7 @@ import weka.core.converters.ArffLoader.ArffReader;
 
 public class ExtendedRandomForestTest {
 
-	private static String testFile = "resources/regression_data/cloud.arff";
+	private static String testFile = "resources/regression_data/cpu_verysmall.arff";
 
 	@Test
 	public void testVarianceDecompose() {

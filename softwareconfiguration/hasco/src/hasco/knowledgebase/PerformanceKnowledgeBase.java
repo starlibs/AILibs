@@ -3,10 +3,10 @@ package hasco.knowledgebase;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+
+import org.apache.commons.lang3.tuple.Pair;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -151,21 +153,29 @@ public class PerformanceKnowledgeBase implements IKnowledgeBase {
 		return 0;
 	}
 
+	/**
+	 * Creates an Instances object containing all performance samples observed for
+	 * pipelines of the type of the given ComponentInstance for the given benchmark.
+	 * 
+	 * @param benchmarkName
+	 * @param pipeline
+	 * @return Instances
+	 */
 	public Instances createInstancesForPerformanceSamples(String benchmarkName, ComponentInstance pipeline) {
 		Instances instances = null;
 		// Add parameter domains as attributes
-		List<Component> components = Util.getComponentsOfComposition(pipeline);
+		List<ComponentInstance> componentInstances = Util.getComponentInstancesOfComposition(pipeline);
 		ArrayList<Attribute> allAttributes = new ArrayList<Attribute>();
-		for (Component component : components) {
-			PartialOrderedSet<Parameter> parameters = component.getParameters();
+		for (ComponentInstance componentInstance : componentInstances) {
+			PartialOrderedSet<Parameter> parameters = componentInstance.getComponent().getParameters();
 			ArrayList<Attribute> attributes = new ArrayList<Attribute>(parameters.size());
 			for (Parameter parameter : parameters) {
 				ParameterDomain domain = parameter.getDefaultDomain();
 				Attribute attr = null;
 				if (domain instanceof CategoricalParameterDomain) {
 					CategoricalParameterDomain catDomain = (CategoricalParameterDomain) domain;
-					// TODO further namespacing of attributes!!! 
-					attr = new Attribute(component.toString() + "::" + parameter.getName(),
+					// TODO further namespacing of attributes!!!
+					attr = new Attribute(componentInstance.toString() + "::" + parameter.getName(),
 							Arrays.asList(catDomain.getValues()));
 				} else if (domain instanceof NumericParameterDomain) {
 					NumericParameterDomain numDomain = (NumericParameterDomain) domain;
@@ -174,10 +184,10 @@ public class PerformanceKnowledgeBase implements IKnowledgeBase {
 					Properties prop = new Properties();
 					prop.setProperty("range", range);
 					ProtectedProperties metaInfo = new ProtectedProperties(prop);
-					attr = new Attribute(component.toString() + "::" + parameter.getName(), metaInfo);
+					attr = new Attribute(componentInstance.toString() + "::" + parameter.getName(), metaInfo);
 				}
-				System.out
-						.println("Trying to add parameter: " + attr.name() + " for component: " + component.getName());
+				System.out.println("Trying to add parameter: " + attr.name() + " for component: "
+						+ componentInstance.getComponent().getName());
 				attributes.add(attr);
 			}
 			allAttributes.addAll(attributes);
@@ -187,6 +197,8 @@ public class PerformanceKnowledgeBase implements IKnowledgeBase {
 		allAttributes.add(score);
 		instances = new Instances("performance_samples", allAttributes,
 				this.performanceSamples.get(benchmarkName).size());
+		ArrayList<Pair<String, String>> parameterValuesForPipeline = new ArrayList<Pair<String, String>>();
+		
 		// Map<String, Double> samples =
 		// performanceSamplesByIdentifier.get(benchmarkName);
 		// ArrayList<Double> instanceValues = new ArrayList<Double>();
@@ -199,5 +211,30 @@ public class PerformanceKnowledgeBase implements IKnowledgeBase {
 		instances.setClass(score);
 		return instances;
 	}
-
+	
+	/**
+	 * Inner helper class for managing parameter configurations easily.
+	 * @author jmhansel
+	 *
+	 */
+	private class ParameterConfiguration{
+		private final List<Pair<Parameter,String>> values;
+		public ParameterConfiguration(ComponentInstance composition) {
+			ArrayList<Pair<Parameter, String>> temp = new ArrayList<Pair<Parameter,String>>();
+			List<ComponentInstance> componentInstances = Util.getComponentInstancesOfComposition(composition);
+			for(ComponentInstance compInst : componentInstances) {
+				PartialOrderedSet<Parameter> parameters = compInst.getComponent().getParameters();
+				for(Parameter parameter : parameters) {
+					temp.add(Pair.of(parameter, compInst.getParameterValues().get(parameter.getName())));
+				}
+			}
+			// Make the list immutable to avoid problems with hashCode
+			values = Collections.unmodifiableList(temp);
+		}
+		
+		@Override
+		public int hashCode() {
+			return values.hashCode();
+		}
+	}
 }
