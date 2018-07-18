@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jaicore.graph.observation.IObservableGraphAlgorithm;
+import jaicore.graphvisualizer.events.NodeTypeSwitchEvent;
 import jaicore.search.algorithms.standard.core.INodeEvaluator;
 import jaicore.search.structure.core.GraphEventBus;
 import jaicore.search.structure.core.GraphGenerator;
@@ -81,7 +82,8 @@ public class AwaStarSearch<T, A, V extends Comparable<V>> implements IObservable
 							if (nLevel > currentLevel) {
 								currentLevel = nLevel;
 							}
-							if (goalTester.isGoal(n.getPoint())) {
+							if (n.isGoal()) {
+								n.setGoal(true);
 								bestScore = n.getInternalLabel();
 								bestSolution = n;
 								return bestSolution;
@@ -89,6 +91,8 @@ public class AwaStarSearch<T, A, V extends Comparable<V>> implements IObservable
 							Collection<NodeExpansionDescription<T, A>> successors = successorGenerator.generateSuccessors(n.getPoint());
 							for (NodeExpansionDescription<T, A> expansionDescription : successors) {
 								Node<T, V> nPrime = new Node<T, V>(null, expansionDescription.getTo());
+								nPrime.setGoal(goalTester.isGoal(nPrime.getPoint()));
+								graphEventBus.post(new NodeTypeSwitchEvent<>(nPrime, "or_" + (nPrime.isGoal() ? "solution" : "open")));
 								V nPrimeScore;
 								try {
 									nPrimeScore = nodeEvaluator.f(nPrime);
@@ -118,6 +122,7 @@ public class AwaStarSearch<T, A, V extends Comparable<V>> implements IObservable
 										openList.add(nPrime);
 									}
 								} catch (Throwable e) {
+									graphEventBus.post(new NodeTypeSwitchEvent<>(nPrime, "or_ffail"));
 									logger.error(e.getMessage());
 								}
 								
