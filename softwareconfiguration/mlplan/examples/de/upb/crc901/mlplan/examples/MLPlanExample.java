@@ -43,7 +43,7 @@ public class MLPlanExample {
 		mlplan.setTimeout(30);
 		mlplan.setPortionOfDataForPhase2(.3f);
 		mlplan.setNodeEvaluator(new DefaultPreorder());
-		mlplan.enableVisualization();
+//		mlplan.enableVisualization();
 		mlplan.buildClassifier(split.get(0));
 
 		/* evaluate solution produced by mlplan */

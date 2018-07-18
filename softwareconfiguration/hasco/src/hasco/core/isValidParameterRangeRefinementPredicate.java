@@ -18,6 +18,7 @@ import java.util.Stack;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.math3.geometry.euclidean.oned.Interval;
 
+import hasco.knowledgebase.ParameterImportanceEstimator;
 import hasco.knowledgebase.PerformanceKnowledgeBase;
 import hasco.model.CategoricalParameterDomain;
 import hasco.model.Component;
@@ -33,15 +34,17 @@ public class isValidParameterRangeRefinementPredicate implements EvaluablePredic
 	private final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration;
 	private final Map<ComponentInstance, Double> knownCompositionsAndTheirScore = new HashMap<>();
 	private final PerformanceKnowledgeBase performanceKB;
+	private final ParameterImportanceEstimator parameterImportanceEstimator;
 	private double importanceThreshold;
 
 	public isValidParameterRangeRefinementPredicate(final Collection<Component> components,
 			final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration,
-			final PerformanceKnowledgeBase performanceKB) {
+			final PerformanceKnowledgeBase performanceKB, final ParameterImportanceEstimator parameterImportanceEstimator) {
 		super();
 		this.components = components;
 		this.refinementConfiguration = refinementConfiguration;
 		this.performanceKB = performanceKB;
+		this.parameterImportanceEstimator = parameterImportanceEstimator;
 	}
 
 	@Override

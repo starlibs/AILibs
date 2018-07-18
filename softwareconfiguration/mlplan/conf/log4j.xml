@@ -48,30 +48,32 @@
 
 	<logger name="jaicore">
 		<level value="warn" />
-		<appender-ref ref="console" />
+<!-- 		<appender-ref ref="console" />
 		<appender-ref ref="infoFileAppender" />
-		<appender-ref ref="warnFileAppender" />
-		<appender-ref ref="errFileAppender" />
+ -->		<appender-ref ref="warnFileAppender" />
+<!-- 		<appender-ref ref="errFileAppender" />
 		<appender-ref ref="traceFileAppender" />
-	</logger>
+ -->	</logger>
 
 	<logger name="de.upb.crc901">
 		<level value="warn" />
 		<appender-ref ref="console" />
-		<appender-ref ref="infoFileAppender" />
-		<appender-ref ref="warnFileAppender" />
-		<appender-ref ref="errFileAppender" />
-		<appender-ref ref="traceFileAppender" />
+<!-- 		<appender-ref ref="infoFileAppender" />
+ -->		<appender-ref ref="warnFileAppender" />
+<!-- 		<appender-ref ref="errFileAppender" />
+		<appender-ref ref="traceFileAppender" /> -->
 	</logger>
 	
 	<logger name="hasco">
 		<level value="warn" />
 		<appender-ref ref="console" />
+		<appender-ref ref="infoFileAppender"/>
 	</logger>
 	
 	<logger name="mlplan">
 		<level value="info" />
 		<appender-ref ref="console" />
+		<appender-ref ref="infoFileAppender"/>
 	</logger>
 	
 	

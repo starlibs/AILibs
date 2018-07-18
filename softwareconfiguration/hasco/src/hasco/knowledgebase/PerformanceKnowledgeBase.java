@@ -18,6 +18,7 @@ import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import hasco.core.HASCO;
 import hasco.core.Util;
 import hasco.model.CategoricalParameterDomain;
 import hasco.model.Component;
@@ -33,6 +34,8 @@ import jaicore.ml.intervaltree.ExtendedRandomForest;
 import jaicore.ml.intervaltree.ExtendedRandomTree;
 import weka.core.Attribute;
 import weka.core.AttributeMetaInfo;
+import weka.core.DenseInstance;
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.ProtectedProperties;
 
@@ -47,18 +50,20 @@ public class PerformanceKnowledgeBase implements IKnowledgeBase {
 
 	private SQLAdapter sqlAdapter;
 	private Map<String, HashMap<ComponentInstance, Double>> performanceSamples;
-	private Map<String, ExtendedRandomForest> forests;
+	/** This is map contains a String */
+	private Map<String, HashMap<String, Double>> performanceSamplesByIdentifier;
 
 	public PerformanceKnowledgeBase(final SQLAdapter sqlAdapter) {
 		super();
 		this.sqlAdapter = sqlAdapter;
 		this.performanceSamples = new HashMap<String, HashMap<ComponentInstance, Double>>();
-		forests = new HashMap<String, ExtendedRandomForest>();
+		this.performanceSamplesByIdentifier = new HashMap<String, HashMap<String, Double>>();
 	}
 
 	public PerformanceKnowledgeBase() {
 		super();
 		this.performanceSamples = new HashMap<String, HashMap<ComponentInstance, Double>>();
+		this.performanceSamplesByIdentifier = new HashMap<String, HashMap<String, Double>>();
 	}
 
 	public void addPerformanceSample(String benchmarkName, ComponentInstance componentInstance, double score) {
@@ -69,17 +74,18 @@ public class PerformanceKnowledgeBase implements IKnowledgeBase {
 		} else {
 			performanceSamples.get(benchmarkName).put(componentInstance, score);
 		}
+		if (performanceSamplesByIdentifier.get(benchmarkName) == null) {
+			HashMap<String, Double> newMap = new HashMap<String, Double>();
+			newMap.put(Util.getComponentNamesOfComposition(componentInstance), score);
+			performanceSamplesByIdentifier.put(benchmarkName, newMap);
+		} else {
+			performanceSamplesByIdentifier.get(benchmarkName)
+					.put(Util.getComponentNamesOfComposition(componentInstance), score);
+		}
 	}
 
-	private void initiliazeForests() {
-		for (HashMap<ComponentInstance, Double> samples : performanceSamples.values()) {
-			for (ComponentInstance componentInstance : samples.keySet()) {
-				if (forests.get(componentInstance) == null) {
-					ExtendedRandomForest curForest = new ExtendedRandomForest();
-					forests.put(Util.getComponentNamesOfComposition(componentInstance), curForest);
-				}
-			}
-		}
+	public Map<String, HashMap<ComponentInstance, Double>> getPerformanceSamples() {
+		return this.performanceSamples;
 	}
 
 	public String getStringOfMaps() {
@@ -158,7 +164,9 @@ public class PerformanceKnowledgeBase implements IKnowledgeBase {
 				Attribute attr = null;
 				if (domain instanceof CategoricalParameterDomain) {
 					CategoricalParameterDomain catDomain = (CategoricalParameterDomain) domain;
-					attr = new Attribute(parameter.getName(), Arrays.asList(catDomain.getValues()));
+					// TODO further namespacing of attributes!!! 
+					attr = new Attribute(component.toString() + "::" + parameter.getName(),
+							Arrays.asList(catDomain.getValues()));
 				} else if (domain instanceof NumericParameterDomain) {
 					NumericParameterDomain numDomain = (NumericParameterDomain) domain;
 					// TODO is there a better way to set the range of this attribute?
@@ -166,8 +174,10 @@ public class PerformanceKnowledgeBase implements IKnowledgeBase {
 					Properties prop = new Properties();
 					prop.setProperty("range", range);
 					ProtectedProperties metaInfo = new ProtectedProperties(prop);
-					attr = new Attribute(parameter.getName(), metaInfo);
+					attr = new Attribute(component.toString() + "::" + parameter.getName(), metaInfo);
 				}
+				System.out
+						.println("Trying to add parameter: " + attr.name() + " for component: " + component.getName());
 				attributes.add(attr);
 			}
 			allAttributes.addAll(attributes);
@@ -175,7 +185,17 @@ public class PerformanceKnowledgeBase implements IKnowledgeBase {
 		// Add performance score as class attribute TODO make score numeric?
 		Attribute score = new Attribute("performance_score");
 		allAttributes.add(score);
-		instances = new Instances("performance_samples", allAttributes, 15);
+		instances = new Instances("performance_samples", allAttributes,
+				this.performanceSamples.get(benchmarkName).size());
+		// Map<String, Double> samples =
+		// performanceSamplesByIdentifier.get(benchmarkName);
+		// ArrayList<Double> instanceValues = new ArrayList<Double>();
+		// Map<String, String> parameters = new HashMap<String, String>();
+		// List<ComponentInstance> listOfComponentInstances =
+		// Util.getComponentInstancesOfComposition(pipeline);
+		// // TODO namespace the parameter values!!!
+		// for (ComponentInstance componentInstance : listOfComponentInstances)
+		// parameters.putAll(componentInstance.getParameterValues());
 		instances.setClass(score);
 		return instances;
 	}
