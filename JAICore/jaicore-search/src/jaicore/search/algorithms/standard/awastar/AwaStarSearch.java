@@ -1,8 +1,7 @@
 package jaicore.search.algorithms.standard.awastar;
 
 import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -11,10 +10,7 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jaicore.graph.observation.IObservableGraphAlgorithm;
-import jaicore.graphvisualizer.events.NodeTypeSwitchEvent;
 import jaicore.search.algorithms.standard.core.INodeEvaluator;
-import jaicore.search.structure.core.GraphEventBus;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
 import jaicore.search.structure.core.NodeExpansionDescription;
@@ -24,11 +20,11 @@ import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
-public class AwaStarSearch<T, A, V extends Comparable<V>> implements IObservableGraphAlgorithm<V, A>{
+public class AwaStarSearch<T, A, V extends Comparable<V>>{
 
 	private static final Logger logger = LoggerFactory.getLogger(AwaStarSearch.class);
 
-	private class Search implements Runnable {
+	private class Search implements Callable<T> {
 		
 		private SuccessorGenerator<T, A> successorGenerator;
 		private NodeGoalTester<T> goalTester;
@@ -36,6 +32,7 @@ public class AwaStarSearch<T, A, V extends Comparable<V>> implements IObservable
 		private OpenCollection<Node<T, V>> closedList, suspendList, openList;
 		private int windowSize;
 		private V bestScore;
+		private T bestSolution;
 		
 		public Search(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, V> nodeEvaluator) throws Throwable {
 			successorGenerator = graphGenerator.getSuccessorGenerator();
@@ -53,17 +50,18 @@ public class AwaStarSearch<T, A, V extends Comparable<V>> implements IObservable
 		}
 
 		@Override
-		public void run() {
+		public T call() throws Exception {
 			do {
-				bestSolution = windowAStar();
 				closedList.addAll(openList);
 				openList.addAll(suspendList);
 				suspendList.clear();
+				bestSolution = windowAStar();
 				windowSize++;
 			} while (!suspendList.isEmpty());
+			return bestSolution;
 		}
 		
-		private Node<T, V> windowAStar() {
+		private T windowAStar() {
 			int currentLevel = -1;
 			while (!openList.isEmpty()) {
 				Node<T, V> n = openList.peek();
@@ -71,61 +69,55 @@ public class AwaStarSearch<T, A, V extends Comparable<V>> implements IObservable
 				closedList.add(n);
 				V nScore = n.getInternalLabel();
 				int nLevel = (int) n.getAnnotation("level");
-				if (nScore != null && bestScore != null) {
-					if (nScore.compareTo(bestScore) >= 0) {
-						return bestSolution;
+				if (nScore != null && bestScore != null && nScore.compareTo(bestScore) >= 0) {
+					return bestSolution;
+				} else {
+					if (nLevel <= (currentLevel - windowSize)) {
+						closedList.remove(n);
+						suspendList.add(n);
 					} else {
-						if (nLevel <= (currentLevel - windowSize)) {
-							closedList.remove(n);
-							suspendList.add(n);
-						} else {
-							if (nLevel > currentLevel) {
-								currentLevel = nLevel;
-							}
-							if (n.isGoal()) {
-								n.setGoal(true);
-								bestScore = n.getInternalLabel();
-								bestSolution = n;
-								return bestSolution;
-							}
-							Collection<NodeExpansionDescription<T, A>> successors = successorGenerator.generateSuccessors(n.getPoint());
-							for (NodeExpansionDescription<T, A> expansionDescription : successors) {
-								Node<T, V> nPrime = new Node<T, V>(null, expansionDescription.getTo());
-								nPrime.setGoal(goalTester.isGoal(nPrime.getPoint()));
-								graphEventBus.post(new NodeTypeSwitchEvent<>(nPrime, "or_" + (nPrime.isGoal() ? "solution" : "open")));
-								V nPrimeScore;
-								try {
-									nPrimeScore = nodeEvaluator.f(nPrime);
-									if (!openList.contains(nPrime) && !closedList.contains(nPrime) && !suspendList.contains(nPrime)) {
+						if (nLevel > currentLevel) {
+							currentLevel = nLevel;
+						}
+						if (n.isGoal()) {
+							n.setGoal(true);
+							bestScore = n.getInternalLabel();
+							bestSolution = n.getPoint();
+							return bestSolution;
+						}
+						Collection<NodeExpansionDescription<T, A>> successors = successorGenerator.generateSuccessors(n.getPoint());
+						for (NodeExpansionDescription<T, A> expansionDescription : successors) {
+							Node<T, V> nPrime = new Node<>(n, expansionDescription.getTo());
+							nPrime.setGoal(goalTester.isGoal(nPrime.getPoint()));
+							V nPrimeScore;
+							try {
+								nPrimeScore = nodeEvaluator.f(nPrime);
+								if (!openList.contains(nPrime) && !closedList.contains(nPrime) && !suspendList.contains(nPrime)) {
+									nPrime.setParent(n);
+									nPrime.setInternalLabel(nPrimeScore);
+									nPrime.setAnnotation("level", ((int)n.getAnnotation("level")) + 1);
+									openList.add(nPrime);
+								} else if(openList.contains(nPrime) || suspendList.contains(nPrime)) {
+									V oldScore = nPrime.getInternalLabel();
+									if (oldScore != null) {
+										if (oldScore.compareTo(nPrimeScore) > 0) {
+											nPrime.setParent(n);
+											nPrime.setInternalLabel(nPrimeScore);
+											nPrime.setAnnotation("level", ((int)n.getAnnotation("level")) + 1);
+										}
+									}
+								} else if(closedList.contains(nPrime)) {
+									V oldScore = nPrime.getInternalLabel();
+									if (oldScore != null && oldScore.compareTo(nPrimeScore) > 0) {
 										nPrime.setParent(n);
 										nPrime.setInternalLabel(nPrimeScore);
 										nPrime.setAnnotation("level", ((int)n.getAnnotation("level")) + 1);
-										openList.add(nPrime);
-									} else if(openList.contains(nPrime) || suspendList.contains(nPrime)) {
-										V oldScore = nPrime.getInternalLabel();
-										if (oldScore != null) {
-											if (oldScore.compareTo(nPrimeScore) > 0) {
-												nPrime.setParent(n);
-												nPrime.setInternalLabel(nPrimeScore);
-												nPrime.setAnnotation("level", ((int)n.getAnnotation("level")) + 1);
-											}
-										}
-									} else if(closedList.contains(nPrime)) {
-										V oldScore = nPrime.getInternalLabel();
-										if (oldScore != null) {
-											if (oldScore.compareTo(nPrimeScore) > 0) {
-												nPrime.setParent(n);
-												nPrime.setInternalLabel(nPrimeScore);
-												nPrime.setAnnotation("level", ((int)n.getAnnotation("level")) + 1);
-											}
-										}
-										openList.add(nPrime);
 									}
-								} catch (Throwable e) {
-									graphEventBus.post(new NodeTypeSwitchEvent<>(nPrime, "or_ffail"));
-									logger.error(e.getMessage());
+									openList.add(nPrime);
 								}
 								
+							} catch (Throwable e) {
+								logger.error(e.getMessage());
 							}
 						}
 					}
@@ -136,39 +128,26 @@ public class AwaStarSearch<T, A, V extends Comparable<V>> implements IObservable
 
 	}
 
-	private GraphEventBus<Node<T, V>> graphEventBus = new GraphEventBus<>();
-	private Node<T, V> bestSolution;
 	private AwaStarSearch.Search search; 
 	
 	public AwaStarSearch(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, V> nodeEvaluator) throws Throwable {
 		this.search = new Search(graphGenerator, nodeEvaluator);
-		this.bestSolution = null;
 	}
 
-	public List<Node<T, V>> search(int timeout) throws Exception {
+	public T search(int timeout) throws Exception {
 		ExecutorService executor = Executors.newSingleThreadExecutor();
-		Future future =  executor.submit(search);
+		Future<T> future =  executor.submit(search);
 		executor.shutdown();
-		try { 
-			future.get(5, TimeUnit.MINUTES);
+		T bestSolution = null;
+		try {
+			bestSolution = future.get(timeout, TimeUnit.SECONDS);
 		}
 		finally {
 			if (!executor.isTerminated()) {
 				executor.shutdownNow();
 			}
 		}
-		List<Node<T, V>> solution = new LinkedList<>();
-		Node<T, V> node = bestSolution;
-		while (node != null) {
-			solution.add(0, node);
-			node = node.getParent();
-		}
-		return solution;
-	}
-
-	@Override
-	public void registerListener(Object listener) {
-		this.graphEventBus.register(listener);
+		return bestSolution;
 	}
 
 }
