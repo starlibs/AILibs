@@ -20,9 +20,9 @@ import weka.core.converters.ArffLoader.ArffReader;
 
 public class ExtendedRandomForestTest {
 	
-	private static String trainFile = "resources/regression_data/cpu.small.arff_RQPtrain.arff";
+	private static String trainFile = "resources/regression_data/boston.arff_RQPtrain.arff";
 	
-	private static String testFile = "resources/regression_data/cpu.small.arff_RQPtest.arff";
+	private static String testFile = "resources/regression_data/boston.arff_RQPtest.arff";
 
 	
 	private ExtendedRandomForest classifier;

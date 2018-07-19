@@ -56,17 +56,18 @@ public class ExtendedM5Tree extends M5Base {
 			int attribute = nextTree.splitAtt();
 			// process node
 			if (nextTree.isLeaf()) {
+				Interval [] usedBounds = toProcess.getKey();
 				PreConstructedLinearModel model = nextTree.getModel();
 				// calculate the values at the edges of the interval
 				// we know that by linearity this will yield the extremal values
-				Instance instanceLower = new DenseInstance(queriedInterval.length+1);
-				Instance instanceUpper = new DenseInstance(queriedInterval.length+1);
-				for (int i = 0; i < queriedInterval.length; i++) {
-					instanceLower.setValue(i, queriedInterval[i].getLowerBound());
-					instanceUpper.setValue(i, queriedInterval[i].getUpperBound());
+				Instance instanceLower = new DenseInstance(usedBounds.length+1);
+				Instance instanceUpper = new DenseInstance(usedBounds.length+1);
+				for (int i = 0; i < usedBounds.length; i++) {
+					instanceLower.setValue(i, usedBounds[i].getLowerBound());
+					instanceUpper.setValue(i, usedBounds[i].getUpperBound());
 				}
-				instanceLower.setValue(queriedInterval.length, 1);
-				instanceUpper.setValue(queriedInterval.length, 1);
+				instanceLower.setValue(usedBounds.length, 1);
+				instanceUpper.setValue(usedBounds.length, 1);
 				instanceLower.setDataset(queriedDataset);
 				instanceUpper.setDataset(queriedDataset);
 				try {
@@ -90,24 +91,19 @@ public class ExtendedM5Tree extends M5Base {
 					if (threshold <= intervalForAttribute.getUpperBound()) {
 						// scenario: x_min <= threshold <= x_max
 						// query [x_min, threshold] on the left child
-						Interval[] newInterval = substituteInterval(queriedInterval,
+						// query [threshold, x_max] on the right child
+						Interval[] leftInterval = substituteInterval(toProcess.getKey(),
 								new Interval(intervalForAttribute.getLowerBound(), threshold), attribute);
-						stack.push(getEntry(newInterval, leftChild));
+						stack.push(getEntry(leftInterval, leftChild));
+						Interval [] rightInterval = substituteInterval(toProcess.getKey(), new Interval(threshold, intervalForAttribute.getUpperBound()), attribute);
+						stack.push(getEntry(rightInterval, rightChild));
 					} else {
-						// scenario: threshold <= x_min <= x_max
+						// scenario: x_min <= x_max < threshold
 						// query [x_min, x_max] on the left child
-						stack.push(getEntry(queriedInterval, leftChild));
+						stack.push(getEntry(toProcess.getKey(), leftChild));
 					}
-				}
-				// analogously...
-				if (intervalForAttribute.getUpperBound() > threshold) {
-					if (intervalForAttribute.getLowerBound() <= threshold) {
-						Interval[] newInterval = substituteInterval(queriedInterval,
-								new Interval(threshold, intervalForAttribute.getUpperBound()), attribute);
-						stack.push(getEntry(newInterval, rightChild));
-					} else {
-						stack.push(getEntry(queriedInterval, rightChild));
-					}
+				} else {
+					stack.push(getEntry(toProcess.getKey(), rightChild));
 				}
 			}
 		}

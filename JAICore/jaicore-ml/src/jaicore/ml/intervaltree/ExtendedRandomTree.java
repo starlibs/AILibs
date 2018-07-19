@@ -43,9 +43,7 @@ public class ExtendedRandomTree extends RandomTree {
 
 		// the list of all leaf values
 		ArrayList<Double> list = new ArrayList<>();
-		int runs = 0;
 		while (stack.peek() != null) {
-			runs++;
 			// pick the next node to process
 			Entry<Interval[], Tree> toProcess = stack.pop();
 			Tree nextTree = toProcess.getValue();
@@ -70,23 +68,23 @@ public class ExtendedRandomTree extends RandomTree {
 					if (threshold <= intervalForAttribute.getUpperBound()) {
 						// scenario: x_min <= threshold <= x_max 
 						// query [x_min, threshold] on the left child
-						Interval[] newInterval = substituteInterval(queriedInterval,
+						Interval[] newInterval = substituteInterval(toProcess.getKey(),
 								new Interval(intervalForAttribute.getLowerBound(), threshold), attribute);
 						stack.push(getEntry(newInterval, leftChild));
 					} else {
 						// scenario: threshold <= x_min <= x_max
 						// query [x_min, x_max] on the left child
-						stack.push(getEntry(queriedInterval, leftChild));
+						stack.push(getEntry(toProcess.getKey(), leftChild));
 					}
 				}
 				// analogously...
 				if (intervalForAttribute.getUpperBound() > threshold) {
 					if (intervalForAttribute.getLowerBound() <= threshold) {
-						Interval[] newInterval = substituteInterval(queriedInterval,
+						Interval[] newInterval = substituteInterval(toProcess.getKey(),
 								new Interval(threshold, intervalForAttribute.getUpperBound()), attribute);
 						stack.push(getEntry(newInterval, rightChild));
 					} else {
-						stack.push(getEntry(queriedInterval, rightChild));
+						stack.push(getEntry(toProcess.getKey(), rightChild));
 					}
 				}
 			}

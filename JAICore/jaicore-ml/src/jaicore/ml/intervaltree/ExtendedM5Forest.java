@@ -1,6 +1,10 @@
 package jaicore.ml.intervaltree;
 
 import java.util.Arrays;
+import java.util.function.DoubleBinaryOperator;
+import java.util.function.ToDoubleFunction;
+import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 
 import jaicore.ml.core.Interval;
 import weka.classifiers.meta.Bagging;
@@ -8,12 +12,19 @@ import weka.core.Instance;
 
 public class ExtendedM5Forest extends Bagging {
 
+	private DoubleBinaryOperator forestLowerAggregationFunction;
+	
+	private DoubleBinaryOperator forestUpperAggregationFunction;
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 
 	public ExtendedM5Forest() {
+		this(null, null);
+	}
+	
+	public ExtendedM5Forest  (DoubleBinaryOperator forestLowerAggregationFunction, DoubleBinaryOperator forestUpperAggregationFunction) {
 		ExtendedM5Tree rTree = new ExtendedM5Tree();
 		rTree.setDoNotCheckCapabilities(true);
 		super.setClassifier(rTree);
