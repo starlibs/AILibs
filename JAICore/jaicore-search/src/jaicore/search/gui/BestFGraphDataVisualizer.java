@@ -1,4 +1,4 @@
-package jaicore.search.graphvisualizer;
+package jaicore.search.gui;
 
 import jaicore.graphvisualizer.IDataVisualizer;
 import javafx.application.Platform;

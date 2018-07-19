@@ -9,7 +9,7 @@
     <top>
         <BorderPane>
             <top>
-                <ToolBar>
+                <ToolBar fx:id="toolbar">
                     <Button onAction="#play" text="play" />
                     <Button onAction="#step" text="step" />
                     <Button onAction="#back" text="back" />
@@ -17,7 +17,8 @@
                     <Button onAction="#stop" text="stop" />
                     <Button onAction="#save" text="save" />
                     <Button onAction="#load" text="load" />
-                    <Button onAction="#test" text="test"/>
+                    <Button onAction="#requestSupplier" text="supplier" />
+                    <RadioButton onAction="#liveButton" text="live" fx:id="livebutton"/>
                 </ToolBar>
             </top>
             <bottom>
