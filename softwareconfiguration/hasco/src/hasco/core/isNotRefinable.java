@@ -5,6 +5,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import hasco.knowledgebase.ParameterImportanceEstimator;
+import hasco.knowledgebase.PerformanceKnowledgeBase;
 import hasco.model.Component;
 import hasco.model.Parameter;
 import hasco.model.ParameterRefinementConfiguration;
@@ -17,14 +19,20 @@ public class isNotRefinable implements EvaluablePredicate {
 	private final Collection<Component> components;
 	private final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration;
 	private final isValidParameterRangeRefinementPredicate p;
+	private final PerformanceKnowledgeBase performanceKB;
+	private final ParameterImportanceEstimator parameterImportanceEstimator;
 
 	public isNotRefinable(Collection<Component> components,
-			Map<Component, Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration) {
+			Map<Component, Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration,
+			PerformanceKnowledgeBase performanceKB, ParameterImportanceEstimator parameterImportanceEstimator) {
 		super();
 		this.components = components;
 		this.refinementConfiguration = refinementConfiguration;
 		// TODO
-		this.p = new isValidParameterRangeRefinementPredicate(components, refinementConfiguration, null, null);
+		this.performanceKB = performanceKB;
+		this.parameterImportanceEstimator = parameterImportanceEstimator;
+		this.p = new isValidParameterRangeRefinementPredicate(components, refinementConfiguration, performanceKB,
+				parameterImportanceEstimator);
 	}
 
 	@Override

@@ -49,8 +49,6 @@ import weka.core.ProtectedProperties;
  */
 
 public class PerformanceKnowledgeBase implements IKnowledgeBase {
-	
-	
 
 	private SQLAdapter sqlAdapter;
 	private Map<String, HashMap<ComponentInstance, Double>> performanceSamples;
@@ -83,12 +81,12 @@ public class PerformanceKnowledgeBase implements IKnowledgeBase {
 		public int hashCode() {
 			return values.hashCode();
 		}
-		
-		public List<Pair<Parameter, String>> getValues(){
+
+		public List<Pair<Parameter, String>> getValues() {
 			return this.values;
 		}
 	}
-	
+
 	public PerformanceKnowledgeBase(final SQLAdapter sqlAdapter) {
 		super();
 		this.sqlAdapter = sqlAdapter;
@@ -113,17 +111,19 @@ public class PerformanceKnowledgeBase implements IKnowledgeBase {
 		}
 		if (performanceSamplesByIdentifier.get(benchmarkName) == null) {
 			HashMap<String, List<Pair<ParameterConfiguration, Double>>> newMap = new HashMap<String, List<Pair<ParameterConfiguration, Double>>>();
-			LinkedList<Pair<ParameterConfiguration,Double>> sampleList = new LinkedList<Pair<ParameterConfiguration,Double>>();
+			LinkedList<Pair<ParameterConfiguration, Double>> sampleList = new LinkedList<Pair<ParameterConfiguration, Double>>();
 			sampleList.add(Pair.of(new ParameterConfiguration(componentInstance), score));
-			newMap.put(identifier, new LinkedList<Pair<ParameterConfiguration,Double>>());
+			newMap.put(identifier, new LinkedList<Pair<ParameterConfiguration, Double>>());
 			performanceSamplesByIdentifier.put(benchmarkName, newMap);
 		} else {
-			if(performanceSamplesByIdentifier.get(benchmarkName).containsKey(identifier)) {
-				performanceSamplesByIdentifier.get(benchmarkName).get(identifier).add(Pair.of(new ParameterConfiguration(componentInstance), score));
-			}
-			else {
-				performanceSamplesByIdentifier.get(benchmarkName).put(identifier, new LinkedList<Pair<ParameterConfiguration, Double>>());
-				performanceSamplesByIdentifier.get(benchmarkName).get(identifier).add(Pair.of(new ParameterConfiguration(componentInstance), score));
+			if (performanceSamplesByIdentifier.get(benchmarkName).containsKey(identifier)) {
+				performanceSamplesByIdentifier.get(benchmarkName).get(identifier)
+						.add(Pair.of(new ParameterConfiguration(componentInstance), score));
+			} else {
+				performanceSamplesByIdentifier.get(benchmarkName).put(identifier,
+						new LinkedList<Pair<ParameterConfiguration, Double>>());
+				performanceSamplesByIdentifier.get(benchmarkName).get(identifier)
+						.add(Pair.of(new ParameterConfiguration(componentInstance), score));
 			}
 		}
 	}
@@ -185,6 +185,15 @@ public class PerformanceKnowledgeBase implements IKnowledgeBase {
 			e.printStackTrace();
 		}
 	}
+	
+	public int getNumSamples(String benchmarkName, String identifier) {
+		if(performanceSamplesByIdentifier.containsKey(benchmarkName)) {
+			if(performanceSamplesByIdentifier.get(benchmarkName).containsKey(identifier))
+				return performanceSamplesByIdentifier.get(benchmarkName).get(identifier).size();
+			else return 0;
+		}
+		else return 0;
+	}
 
 	public void loadPerformanceSamplesFromDB() {
 		// TODO
@@ -203,10 +212,11 @@ public class PerformanceKnowledgeBase implements IKnowledgeBase {
 	 * @param pipeline
 	 * @return Instances
 	 */
-	public Instances createInstancesForPerformanceSamples(String benchmarkName, ComponentInstance pipeline) {
+	public Instances createInstancesForPerformanceSamples(String benchmarkName, ComponentInstance composition) {
 		Instances instances = null;
+		String identifier = Util.getComponentNamesOfComposition(composition);
 		// Add parameter domains as attributes
-		List<ComponentInstance> componentInstances = Util.getComponentInstancesOfComposition(pipeline);
+		List<ComponentInstance> componentInstances = Util.getComponentInstancesOfComposition(composition);
 		ArrayList<Attribute> allAttributes = new ArrayList<Attribute>();
 		for (ComponentInstance componentInstance : componentInstances) {
 			PartialOrderedSet<Parameter> parameters = componentInstance.getComponent().getParameters();
@@ -217,7 +227,7 @@ public class PerformanceKnowledgeBase implements IKnowledgeBase {
 				if (domain instanceof CategoricalParameterDomain) {
 					CategoricalParameterDomain catDomain = (CategoricalParameterDomain) domain;
 					// TODO further namespacing of attributes!!!
-					attr = new Attribute(componentInstance.toString() + "::" + parameter.getName(),
+					attr = new Attribute(componentInstance.getComponent().getName() + "::" + parameter.getName(),
 							Arrays.asList(catDomain.getValues()));
 				} else if (domain instanceof NumericParameterDomain) {
 					NumericParameterDomain numDomain = (NumericParameterDomain) domain;
@@ -235,11 +245,34 @@ public class PerformanceKnowledgeBase implements IKnowledgeBase {
 			allAttributes.addAll(attributes);
 		}
 		// Add performance score as class attribute TODO make score numeric?
-		Attribute score = new Attribute("performance_score");
-		allAttributes.add(score);
+		Attribute scoreAttr = new Attribute("performance_score");
+		allAttributes.add(scoreAttr);
 		instances = new Instances("performance_samples", allAttributes,
 				this.performanceSamples.get(benchmarkName).size());
-		instances.setClass(score);
+		instances.setClass(scoreAttr);
+		List<Pair<ParameterConfiguration, Double>> samples = performanceSamplesByIdentifier.get(benchmarkName)
+				.get(identifier);
+		for (Pair<ParameterConfiguration, Double> sample : samples) {
+			DenseInstance instance = new DenseInstance(instances.numAttributes());
+			ParameterConfiguration config = sample.getLeft();
+			double score = sample.getRight();
+			List<Pair<Parameter, String>> values = config.getValues();
+			for (int i = 0; i < instances.numAttributes() - 1; i++) {
+				Attribute attr = instances.attribute(i);
+				Parameter param = values.get(i).getLeft();
+				if (param.isCategorical()) {
+					String value = values.get(i).getRight();
+					instance.setValue(attr, value);
+				}
+				else if(param.isNumeric()) {
+					double value = Double.parseDouble(values.get(i).getRight());
+					instance.setValue(attr, value);
+//					System.out.println("bounds: [" + attr.getLowerNumericBound() + "," + attr.getUpperNumericBound() + "]");
+				}
+			}
+			instance.setValue(scoreAttr, score);
+			instances.add(instance);
+		}
 		return instances;
 	}
 

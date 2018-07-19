@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.Stack;
 
 import org.apache.commons.lang3.NotImplementedException;
@@ -50,6 +51,9 @@ public class isValidParameterRangeRefinementPredicate implements EvaluablePredic
 	@Override
 	public Collection<List<ConstantParam>> getParamsForPositiveEvaluation(final Monom state,
 			final ConstantParam... partialGrounding) {
+		
+		ComponentInstance ci = Util.getSolutionCompositionFromState(components, state);
+		String compositionIdentifier = Util.getComponentNamesOfComposition(ci);
 
 		/* determine the context for which the interval refinement should be oracled */
 		if (partialGrounding.length != 6) {
@@ -71,6 +75,20 @@ public class isValidParameterRangeRefinementPredicate implements EvaluablePredic
 		Map<Parameter, ParameterDomain> paramDomains = Util.getUpdatedDomainsOfComponentParameters(state, component,
 				componentIdentifier);
 
+		if(performanceKB.getNumSamples("test", compositionIdentifier)>10) {
+//			try {
+//				Set<Integer> importantParams = parameterImportanceEstimator.extractImportanceParameters(ci, 0.4, 2);
+//				System.out.println("parameters estimated to be important: ");
+//				for(int parameterIndex : importantParams) {
+//					System.out.println("parameter " + parameterIndex);
+//				}
+//			} catch (Exception e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+		}
+
+		
 		/*
 		 * For jmhansel fANOVA feature: if the parameters importance value is below
 		 * threshold epsilon, no more refinements will be allowed

@@ -144,14 +144,18 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 						V scoreOfSolution = benchmark.evaluate(solution);
 						// TODO is this cast feasible?
 						double score = (double) scoreOfSolution;
+						String identifier = Util.getComponentNamesOfComposition(composition);
+						System.out.println("add performance sample");
 						performanceKB.addPerformanceSample(benchmarkName, composition, score);
-						if (performanceKB.getPerformanceSamples().get(benchmarkName).size() > 2) {
-							logger.info("performanceKB has enough samples to copmute importance");
-							logger.info(performanceKB.getPerformanceSamples().get(benchmarkName).toString());
-							// Try epsilon = 0.4, k = 2
-							logger.info("important params: "
-									+ parameterImportanceEstimator.extractImportanceParameters(composition, 0.4, 2));
-						}
+						// logger.info("performanceKB has enough samples to copmute importance");
+						if (performanceKB.getNumSamples(benchmarkName, identifier) > 10)
+							logger.info(performanceKB.createInstancesForPerformanceSamples(benchmarkName, composition)
+									.toString());
+
+						// Try epsilon = 0.4, k = 2
+						// logger.info("important params: "
+						// + parameterImportanceEstimator.extractImportanceParameters(composition, 0.4,
+						// 2));
 						if (HASCO.this.scoreOfBestRecognizedSolution == null
 								|| HASCO.this.scoreOfBestRecognizedSolution.compareTo(scoreOfSolution) > 0) {
 							HASCO.this.bestRecognizedSolution = solution;
@@ -514,7 +518,8 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 		Map<String, EvaluablePredicate> evaluablePredicates = new HashMap<>();
 		evaluablePredicates.put("isValidParameterRangeRefinement", new isValidParameterRangeRefinementPredicate(
 				this.components, this.paramRefinementConfig, this.performanceKB, this.parameterImportanceEstimator));
-		evaluablePredicates.put("notRefinable", new isNotRefinable(this.components, this.paramRefinementConfig));
+		evaluablePredicates.put("notRefinable", new isNotRefinable(this.components, this.paramRefinementConfig,
+				this.performanceKB, this.parameterImportanceEstimator));
 		evaluablePredicates.put("refinementCompleted",
 				new isRefinementCompletedPredicate(this.components, this.paramRefinementConfig));
 		return new CEOCIPSTNPlanningProblem(domain, knowledge, init,
