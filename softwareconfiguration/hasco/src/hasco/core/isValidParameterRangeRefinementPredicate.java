@@ -75,17 +75,17 @@ public class isValidParameterRangeRefinementPredicate implements EvaluablePredic
 		Map<Parameter, ParameterDomain> paramDomains = Util.getUpdatedDomainsOfComponentParameters(state, component,
 				componentIdentifier);
 
-		if(performanceKB.getNumSamples("test", compositionIdentifier)>10) {
-//			try {
-//				Set<Integer> importantParams = parameterImportanceEstimator.extractImportanceParameters(ci, 0.4, 2);
-//				System.out.println("parameters estimated to be important: ");
-//				for(int parameterIndex : importantParams) {
-//					System.out.println("parameter " + parameterIndex);
-//				}
-//			} catch (Exception e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
+		if(performanceKB.getNumSamples("test", compositionIdentifier)>1) {
+			try {
+				Set<Integer> importantParams = parameterImportanceEstimator.extractImportanceParameters(ci, 0.1, 2);
+				System.out.println("parameters estimated to be important: ");
+				for(int parameterIndex : importantParams) {
+					System.out.println("parameter " + parameterIndex);
+				}
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 
 		

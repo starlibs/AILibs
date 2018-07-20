@@ -14,13 +14,13 @@ import weka.core.Instances;
 
 public class ParameterImportanceEstimator {
 	private Map<String, ExtendedRandomForest> forests;
-	private Map<String, HashMap<ComponentInstance, Double>> performanceSamples;
+//	private Map<String, HashMap<ComponentInstance, Double>> performanceSamples;
 	private PerformanceKnowledgeBase performanceKnowledgeBase;
 	private String benchmarkName;
 
 	public ParameterImportanceEstimator(PerformanceKnowledgeBase performanceKnowledgeBase, String benchmarkName) {
 		forests = new HashMap<String, ExtendedRandomForest>();
-		this.performanceSamples = performanceSamples;
+//		this.performanceSamples = performanceSamples;
 		this.performanceKnowledgeBase = performanceKnowledgeBase;
 		this.benchmarkName = benchmarkName;
 	}
@@ -31,12 +31,10 @@ public class ParameterImportanceEstimator {
 	 * @param benchmarkName
 	 */
 	private void initiliazeForests(String benchmarkName) {
-		for (HashMap<ComponentInstance, Double> samples : performanceSamples.values()) {
-			for (ComponentInstance componentInstance : samples.keySet()) {
-				if (forests.get(componentInstance) == null) {
+		for (String identifier : performanceKnowledgeBase.getPerformanceSamplesByIdentifier().get(benchmarkName).keySet()) {
+				if (forests.get(identifier) == null) {
 					ExtendedRandomForest curForest = new ExtendedRandomForest();
-					forests.put(Util.getComponentNamesOfComposition(componentInstance), curForest);
-				}
+					forests.put(identifier, curForest);
 			}
 		}
 	}
@@ -47,20 +45,27 @@ public class ParameterImportanceEstimator {
 		String pipelineIdentifier = Util.getComponentNamesOfComposition(composition);
 		ExtendedRandomForest forest = forests.get(pipelineIdentifier);
 		Instances data = performanceKnowledgeBase.createInstancesForPerformanceSamples(benchmarkName, composition);
+		if(forest==null) {
+			this.initiliazeForests(benchmarkName);
+		}
 		forest.buildClassifier(data);
-		forest.prepareForest();
+		forest.prepareForest(data);
 		Set<Integer> parameterIndices = new HashSet<Integer>();
-		for (int i = 0; i < data.numAttributes(); i++)
+		for (int i = 0; i < data.numAttributes()-1; i++)
 			parameterIndices.add(i);
 		// TODO initialize parameter indices
 		// query importance values of extended random forest
 		for (int k = 1; k <= sizeOfLargestSubsetsToConsider; k++) {
 			Set<Set<Integer>> currentSubsets = Sets.combinations(parameterIndices, k);
+			System.out.println("computing for parameter subsets: " + currentSubsets);
 			for (Set<Integer> subset : currentSubsets) {
 				double currentImportance = forest.computeMarginalForFeatureSubset(subset);
 				if (currentImportance >= importanceThreshold)
 					importantParameters.addAll(subset);
 			}
+		}
+		for(int i : importantParameters) {
+			System.out.println("important parameter: " + forest.getFeatureSpace().getFeatureDomain(i).getName());
 		}
 		return importantParameters;
 	}

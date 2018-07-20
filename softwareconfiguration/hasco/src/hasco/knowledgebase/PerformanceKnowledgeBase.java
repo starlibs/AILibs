@@ -131,6 +131,10 @@ public class PerformanceKnowledgeBase implements IKnowledgeBase {
 	public Map<String, HashMap<ComponentInstance, Double>> getPerformanceSamples() {
 		return this.performanceSamples;
 	}
+	
+	public Map<String, HashMap<String, List<Pair<ParameterConfiguration, Double>>>> getPerformanceSamplesByIdentifier(){
+		return performanceSamplesByIdentifier;
+	}
 
 	public String getStringOfMaps() {
 		return performanceSamples.toString();

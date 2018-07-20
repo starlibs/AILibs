@@ -12,6 +12,24 @@ import weka.core.Instance;
  *
  */
 public abstract class FeatureDomain implements Serializable {
+	
+	private String name;
+	
+	/**
+	 * Setter for name attribute.
+	 * @param name
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	/**
+	 * Getter for name attribute.
+	 * @return
+	 */
+	public String getName() {
+		return this.name;
+	}
 
 	/**
 		 * 

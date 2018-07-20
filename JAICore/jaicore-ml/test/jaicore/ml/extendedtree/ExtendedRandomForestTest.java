@@ -35,7 +35,7 @@ public class ExtendedRandomForestTest {
 			// forest.setFeatureSpace(new FeatureSpace(data));
 			forest.setNumIterations(20);
 			forest.buildClassifier(data);
-			forest.prepareForest();
+			forest.prepareForest(data);
 			System.out.println("size of forest: " + forest.getSize());
 			double sum = 0.0d;
 			HashSet<Integer> allFeatures = new HashSet<Integer>();

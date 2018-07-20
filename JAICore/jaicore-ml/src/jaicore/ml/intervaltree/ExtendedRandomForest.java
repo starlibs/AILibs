@@ -6,6 +6,7 @@ import java.util.Set;
 import jaicore.ml.core.FeatureSpace;
 import weka.classifiers.Classifier;
 import weka.classifiers.trees.RandomForest;
+import weka.core.Instances;
 
 public class ExtendedRandomForest extends RandomForest {
 
@@ -18,6 +19,12 @@ public class ExtendedRandomForest extends RandomForest {
 		this.setClassifier(erTree);
 	}
 	
+	@Override
+	public void buildClassifier(Instances data) throws Exception {
+		super.buildClassifier(data);
+		
+	}
+	
 	public ExtendedRandomForest(FeatureSpace featureSpace) {
 		super();
 		ExtendedRandomTree erTree = new ExtendedRandomTree();
@@ -26,9 +33,11 @@ public class ExtendedRandomForest extends RandomForest {
 		this.setClassifier(erTree);
 	}
 	
-	public void prepareForest() {
+	public void prepareForest(Instances data) {
+		FeatureSpace fSpace = new FeatureSpace(data);
 		for(Classifier classifier : m_Classifiers) {
 			ExtendedRandomTree curTree = (ExtendedRandomTree) classifier;
+			curTree.setFeatureSpace(fSpace);
 			curTree.preprocess();
 		}
 			
