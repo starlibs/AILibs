@@ -1,5 +1,6 @@
 package hasco.knowledgebase;
 
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -18,6 +19,8 @@ import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import hasco.core.HASCO;
@@ -100,7 +103,7 @@ public class PerformanceKnowledgeBase implements IKnowledgeBase {
 		this.performanceSamplesByIdentifier = new HashMap<String, HashMap<String, List<Pair<ParameterConfiguration, Double>>>>();
 	}
 
-	public void addPerformanceSample(String benchmarkName, ComponentInstance componentInstance, double score) {
+	public void addPerformanceSample(String benchmarkName, ComponentInstance componentInstance, double score, boolean addToDB) {
 		String identifier = Util.getComponentNamesOfComposition(componentInstance);
 		if (performanceSamples.get(benchmarkName) == null) {
 			HashMap<ComponentInstance, Double> newMap = new HashMap<ComponentInstance, Double>();
@@ -126,13 +129,15 @@ public class PerformanceKnowledgeBase implements IKnowledgeBase {
 						.add(Pair.of(new ParameterConfiguration(componentInstance), score));
 			}
 		}
+		if(addToDB)
+		this.addPerformanceSampleToDB(benchmarkName, componentInstance, score);
 	}
 
 	public Map<String, HashMap<ComponentInstance, Double>> getPerformanceSamples() {
 		return this.performanceSamples;
 	}
-	
-	public Map<String, HashMap<String, List<Pair<ParameterConfiguration, Double>>>> getPerformanceSamplesByIdentifier(){
+
+	public Map<String, HashMap<String, List<Pair<ParameterConfiguration, Double>>>> getPerformanceSamplesByIdentifier() {
 		return performanceSamplesByIdentifier;
 	}
 
@@ -155,7 +160,7 @@ public class PerformanceKnowledgeBase implements IKnowledgeBase {
 			boolean havePerformanceTable = false;
 			while (rs.next()) {
 				String tableName = rs.getString(1);
-				if (tableName.equals("performance")) {
+				if (tableName.equals("performance_samples")) {
 					havePerformanceTable = true;
 				}
 			}
@@ -163,7 +168,7 @@ public class PerformanceKnowledgeBase implements IKnowledgeBase {
 			if (!havePerformanceTable) {
 				System.out.println("Creating table for performance samples");
 				sqlAdapter.update(
-						"CREATE TABLE `performance` (\r\n" + " `sample_id` int(10) NOT NULL AUTO_INCREMENT,\r\n"
+						"CREATE TABLE `performance_samples` (\r\n" + " `sample_id` int(10) NOT NULL AUTO_INCREMENT,\r\n"
 								+ " `benchmark` varchar(200) COLLATE utf8_bin DEFAULT NULL,\r\n"
 								+ " `composition` json NOT NULL,\r\n" + " `score` double NOT NULL,\r\n"
 								+ " PRIMARY KEY (`sample_id`)\r\n"
@@ -184,28 +189,44 @@ public class PerformanceKnowledgeBase implements IKnowledgeBase {
 			String composition = mapper.writeValueAsString(componentInstance);
 			map.put("composition", composition);
 			map.put("score", "" + score);
-			this.sqlAdapter.insert("evaluations", map);
+			this.sqlAdapter.insert("performance_samples", map);
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public int getNumSamples(String benchmarkName, String identifier) {
-		if(performanceSamplesByIdentifier.containsKey(benchmarkName)) {
-			if(performanceSamplesByIdentifier.get(benchmarkName).containsKey(identifier))
+		if (performanceSamplesByIdentifier.containsKey(benchmarkName)) {
+			if (performanceSamplesByIdentifier.get(benchmarkName).containsKey(identifier))
 				return performanceSamplesByIdentifier.get(benchmarkName).get(identifier).size();
-			else return 0;
-		}
-		else return 0;
+			else
+				return 0;
+		} else
+			return 0;
 	}
 
 	public void loadPerformanceSamplesFromDB() {
-		// TODO
-	}
-
-	public double getImportanceOfParam(Parameter param) {
-		// TODO Auto-generated method stub
-		return 0;
+		try {
+			ResultSet rs = sqlAdapter
+					.getResultsOfQuery("SELECT benchmark, composition, score FROM performance_samples");
+			ObjectMapper mapper = new ObjectMapper();
+			while (rs.next()) {
+				String benchmarkName = rs.getString(1);
+				String ciString = rs.getString(2);
+				System.out.println(ciString);
+				ComponentInstance composition = mapper.readValue(ciString, ComponentInstance.class);
+				double score = rs.getDouble(3);
+				this.addPerformanceSample(benchmarkName, composition, score, false);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace(); 
+		} catch (JsonParseException e) {
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -267,11 +288,11 @@ public class PerformanceKnowledgeBase implements IKnowledgeBase {
 				if (param.isCategorical()) {
 					String value = values.get(i).getRight();
 					instance.setValue(attr, value);
-				}
-				else if(param.isNumeric()) {
+				} else if (param.isNumeric()) {
 					double value = Double.parseDouble(values.get(i).getRight());
 					instance.setValue(attr, value);
-//					System.out.println("bounds: [" + attr.getLowerNumericBound() + "," + attr.getUpperNumericBound() + "]");
+					// System.out.println("bounds: [" + attr.getLowerNumericBound() + "," +
+					// attr.getUpperNumericBound() + "]");
 				}
 			}
 			instance.setValue(scoreAttr, score);
