@@ -11,5 +11,7 @@ public interface DatabaseConnector {
 	public Instances getInstances();
 	
 	public void cleanup();
+	
+	public void close();
 
 }

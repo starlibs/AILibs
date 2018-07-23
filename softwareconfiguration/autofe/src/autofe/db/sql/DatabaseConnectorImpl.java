@@ -8,6 +8,10 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jfree.util.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import autofe.db.model.database.AbstractAttribute;
 import autofe.db.model.database.AttributeType;
 import autofe.db.model.database.Database;
@@ -24,48 +28,38 @@ import weka.core.Instances;
 
 public class DatabaseConnectorImpl implements DatabaseConnector {
 
+	private static Logger LOG = LoggerFactory.getLogger(DatabaseConnectorImpl.class);
+
 	private Database db;
 
-	private Connection con;
+	private DatabaseHelper dbHelper;
 
 	private List<String> createdViews;
 
 	public DatabaseConnectorImpl(Database db) {
 		this.db = db;
 		createdViews = new ArrayList<>();
-		try {
-			initConnection();
-		} catch (ClassNotFoundException | SQLException e) {
-			throw new RuntimeException("Cannot establish JDBC connection", e);
-		}
+		dbHelper = new DatabaseHelper(db);
 	}
 
 	@Override
 	public void prepareDatabase() {
 		// Create view for each table
-		for (Table t : db.getTables()) {
-			String createViewStatement = SqlStatement.CREATE_VIEW_AS_COPY;
-			String viewName = SqlUtils.getViewNameForTable(t);
-			createViewStatement = SqlUtils.replacePlaceholder(createViewStatement, 1, viewName);
-			createViewStatement = SqlUtils.replacePlaceholder(createViewStatement, 2, t.getName());
-			Statement stmt = null;
-			try {
-				stmt = con.createStatement();
-				stmt.execute(createViewStatement);
-			} catch (SQLException e) {
-				String err = String.format("Cannot create view {} for table {}", viewName, t.getName());
-				throw new RuntimeException(err, e);
-			} finally {
-				try {
-					stmt.close();
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+		try {
+			for (Table t : db.getTables()) {
+				String createViewStatement = SqlStatement.CREATE_VIEW_AS_COPY;
+				String viewName = SqlUtils.getViewNameForTable(t);
+				createViewStatement = SqlUtils.replacePlaceholder(createViewStatement, 1, viewName);
+				createViewStatement = SqlUtils.replacePlaceholder(createViewStatement, 2, t.getName());
+				dbHelper.executeSql(createViewStatement);
+				createdViews.add(viewName);
 			}
-			createdViews.add(viewName);
-
+		} catch (Exception e) {
+			LOG.error("Cannot prepare database", e);
+			dbHelper.rollback();
+			throw e;
 		}
+		dbHelper.commit();
 	}
 
 	@Override
@@ -86,101 +80,85 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 
 		// Generate temp view from current view of from table
 		String fromViewName = SqlUtils.getViewNameForTable(from);
-		String fromTempViewName = generateTempView(fromViewName);
 
-		// Delete current view
-		deleteView(fromViewName);
-
-		// Create new current view
-		String sql = SqlStatement.BACKWARD_AGGREGATION;
-		sql = SqlUtils.replacePlaceholder(sql, 1, fromViewName);
-		String aggregatedAttributeName = DBUtils.getAggregatedAttributeName(operation.getAggregationFunction(),
-				operation.getToTableName(), operation.getToBeAggregatedName());
-		sql = SqlUtils.replacePlaceholder(sql, 2, aggregatedAttributeName);
-		sql = SqlUtils.replacePlaceholder(sql, 3, fromTempViewName);
-		sql = SqlUtils.replacePlaceholder(sql, 4, operation.getCommonAttributeName());
-		sql = SqlUtils.replacePlaceholder(sql, 5, operation.getAggregationFunction().name());
-		sql = SqlUtils.replacePlaceholder(sql, 6, operation.getToBeAggregatedName());
-		sql = SqlUtils.replacePlaceholder(sql, 7, SqlUtils.getViewNameForTable(to));
-
-		// Fire SQL
-		Statement stmt = null;
 		try {
-			stmt = con.createStatement();
-			stmt.execute(sql);
-		} catch (SQLException e) {
-			String err = String.format("Cannot create view {}", fromViewName);
-			throw new RuntimeException(err, e);
-		} finally {
-			try {
-				stmt.close();
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+
+			String fromTempViewName = generateTempView(fromViewName);
+
+			// Delete current view
+			deleteView(fromViewName);
+
+			// Create new current view
+			String sql = SqlStatement.BACKWARD_AGGREGATION;
+			sql = SqlUtils.replacePlaceholder(sql, 1, fromViewName);
+			String aggregatedAttributeName = DBUtils.getAggregatedAttributeName(operation.getAggregationFunction(),
+					operation.getToTableName(), operation.getToBeAggregatedName());
+			sql = SqlUtils.replacePlaceholder(sql, 2, aggregatedAttributeName);
+			sql = SqlUtils.replacePlaceholder(sql, 3, fromTempViewName);
+			sql = SqlUtils.replacePlaceholder(sql, 4, operation.getCommonAttributeName());
+			sql = SqlUtils.replacePlaceholder(sql, 5, operation.getAggregationFunction().name());
+			sql = SqlUtils.replacePlaceholder(sql, 6, operation.getToBeAggregatedName());
+			sql = SqlUtils.replacePlaceholder(sql, 7, SqlUtils.getViewNameForTable(to));
+
+			// Fire SQL
+			dbHelper.executeSql(sql);
+
+			// Delete temp view
+			deleteTable(fromTempViewName);
+
+		} catch (Exception e) {
+			LOG.error("Cannot apply backward operation", e);
+			dbHelper.rollback();
+			throw e;
 		}
 
-		// Delete temp view
-		deleteView(fromTempViewName);
+		dbHelper.commit();
+
 	}
 
 	private void applyForwardOperation(ForwardJoinOperation operation) {
 		Table from = DBUtils.getTableByName(operation.getFromTableName(), db);
+		Table to = DBUtils.getTableByName(operation.getToTableName(), db);
 
 		// Generate temp view from current view of from table
 		String fromViewName = SqlUtils.getViewNameForTable(from);
-		String fromTempViewName = generateTempView(fromViewName);
 
-		// Delete current view
-		deleteView(fromViewName);
-
-		// Create new current view
-		String sql = SqlStatement.FORWARD_JOIN;
-		sql = SqlUtils.replacePlaceholder(sql, 1, fromViewName);
-		sql = SqlUtils.replacePlaceholder(sql, 2, operation.getFromTableName());
-		sql = SqlUtils.replacePlaceholder(sql, 3, operation.getToTableName());
-
-		// Fire SQL
-		Statement stmt = null;
 		try {
-			stmt = con.createStatement();
-			stmt.execute(sql);
-		} catch (SQLException e) {
-			String err = String.format("Cannot create view {}", fromViewName);
-			throw new RuntimeException(err, e);
-		} finally {
-			try {
-				stmt.close();
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+
+			String fromTempViewName = generateTempView(fromViewName);
+
+			// Delete current view
+			deleteView(fromViewName);
+
+			// Create new current view
+			String sql = SqlStatement.FORWARD_JOIN;
+			sql = SqlUtils.replacePlaceholder(sql, 1, fromViewName);
+			String fromName = SqlUtils.getTempViewName(fromViewName);
+			String toName = SqlUtils.getViewNameForTable(to);
+			sql = SqlUtils.replacePlaceholder(sql, 2, fromName);
+			sql = SqlUtils.replacePlaceholder(sql, 3, toName);
+
+			// Fire SQL
+			dbHelper.executeSql(sql);
+
+			// Delete temp view
+			deleteTable(fromTempViewName);
+
+		} catch (Exception e) {
+			LOG.error("Cannot apply forward operation", e);
+			dbHelper.rollback();
+			throw e;
 		}
 
-		// Delete temp view
-		deleteView(fromTempViewName);
+		dbHelper.commit();
 	}
 
 	private String generateTempView(String viewName) {
-		String sql = SqlStatement.CREATE_VIEW_AS_COPY;
+		String sql = SqlStatement.CREATE_TABLE_AS_COPY;
 		String tempViewName = SqlUtils.getTempViewName(viewName);
-		SqlUtils.replacePlaceholder(sql, 1, tempViewName);
-		SqlUtils.replacePlaceholder(sql, 2, viewName);
-		Statement stmt = null;
-		try {
-			stmt = con.createStatement();
-			stmt.execute(sql);
-		} catch (SQLException e) {
-			String err = String.format("Cannot create temp view {} from {}", tempViewName, viewName);
-			throw new RuntimeException(err, e);
-		} finally {
-			try {
-				stmt.close();
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+		sql = SqlUtils.replacePlaceholder(sql, 1, tempViewName);
+		sql = SqlUtils.replacePlaceholder(sql, 2, viewName);
+		dbHelper.executeSql(sql);
 		return tempViewName;
 	}
 
@@ -201,36 +179,25 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 		}
 
 		// Remove final comma
-		attributeString.substring(0, attributeString.length() - 1);
+		String attributeStr = attributeString.substring(0, attributeString.length() - 1);
 
 		// Build SQL
 		String sql = SqlStatement.LOAD_INSTANCES;
-		SqlUtils.replacePlaceholder(sql, 1, attributeString.toString());
-		SqlUtils.replacePlaceholder(sql, 2, targetTableName);
+		sql = SqlUtils.replacePlaceholder(sql, 1, attributeStr);
+		sql = SqlUtils.replacePlaceholder(sql, 2, targetTableName);
 
 		// Fire SQL and create instances
 		Instances instances = prepareInstances(attributeList);
-		Statement stmt = null;
+		ResultSet rs = dbHelper.executeSelect(sql);
 		try {
-			stmt = con.createStatement();
-			stmt.execute(sql);
-			ResultSet rs = stmt.getResultSet();
 			while (rs.next()) {
-				instances.add(createInstance(rs, attributeList));
+				instances.add(createInstance(rs, attributeList, instances));
 			}
-
+			dbHelper.close(rs);
 		} catch (SQLException e) {
-			String err = String.format("Cannot load instances from target table {}", targetTableName);
-			throw new RuntimeException(err, e);
-		} finally {
-			try {
-				stmt.close();
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			LOG.error("Cannot create instances!", e);
+			throw new RuntimeException("Cannot create instances!", e);
 		}
-
 		return instances;
 	}
 
@@ -250,14 +217,16 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 		return new Instances("Name", wekaAttributes, 1000);
 	}
 
-	private Instance createInstance(ResultSet rs, List<AbstractAttribute> attributeList) throws SQLException {
+	private Instance createInstance(ResultSet rs, List<AbstractAttribute> attributeList, Instances instances)
+			throws SQLException {
 		Instance instance = new DenseInstance(attributeList.size());
+		instance.setDataset(instances);
 		for (int i = 0; i < attributeList.size(); i++) {
 			AbstractAttribute att = attributeList.get(i);
 			if (att.getType() == AttributeType.TEXT) {
-				instance.setValue(i, rs.getString(i));
+				instance.setValue(i, rs.getString(i + 1));
 			} else if (att.getType() == AttributeType.NUMERIC) {
-				instance.setValue(i, rs.getInt(i));
+				instance.setValue(i, rs.getInt(i + 1));
 			} else {
 				throw new RuntimeException("Unsupported attribute type: " + att.getType());
 			}
@@ -272,33 +241,26 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 		for (String viewName : this.createdViews) {
 			deleteView(viewName);
 		}
+		dbHelper.commit();
+
+	}
+
+	@Override
+	public void close() {
+		this.dbHelper.closeConnection();
 
 	}
 
 	private void deleteView(String viewName) {
 		String deleteViewStatement = SqlStatement.DELETE_VIEW;
-		SqlUtils.replacePlaceholder(deleteViewStatement, 1, viewName);
-		Statement stmt = null;
-		try {
-			stmt = con.createStatement();
-			stmt.execute(deleteViewStatement);
-		} catch (SQLException e) {
-			String err = String.format("Cannot delete view {}", viewName);
-			throw new RuntimeException(err, e);
-		} finally {
-			try {
-				stmt.close();
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+		deleteViewStatement = SqlUtils.replacePlaceholder(deleteViewStatement, 1, viewName);
+		dbHelper.executeSql(deleteViewStatement);
 	}
 
-	private void initConnection() throws ClassNotFoundException, SQLException {
-		Class.forName(db.getJdbcDriver());
-		con = DriverManager.getConnection(db.getJdbcUrl(), db.getJdbcUsername(), db.getJdbcPassword());
-		con.setAutoCommit(false);
+	private void deleteTable(String tableName) {
+		String deleteTableStatement = SqlStatement.DELETE_TABLE;
+		deleteTableStatement = SqlUtils.replacePlaceholder(deleteTableStatement, 1, tableName);
+		dbHelper.executeSql(deleteTableStatement);
 	}
 
 }
