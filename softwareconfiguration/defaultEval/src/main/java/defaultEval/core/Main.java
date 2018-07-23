@@ -32,6 +32,17 @@ public class Main {
 	private ArrayList<PipelineResultPair> defaultPipelines = new ArrayList<>();
 	private ArrayList<PipelineResultPair> optimizedPipelines = new ArrayList<>();
 
+	
+	private static File environment = new File("F:\\Data\\Uni\\PG\\DefaultEvalEnvironment"); // TODO temp replace with sysarg
+	
+	public static String getEnvironmentPath() {
+		return environment.getAbsolutePath();
+	}
+	
+	public static File getEnvironment() {
+		return environment;
+	}
+	
 	public Main() {
 		try {
 			Util.loadClassifierComponents(classifierComponents);
@@ -39,6 +50,11 @@ public class Main {
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
+		
+		// TEST TODO
+		
+		
+		
 
 	}
 

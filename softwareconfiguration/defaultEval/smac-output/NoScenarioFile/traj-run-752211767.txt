@@ -1,0 +1,5 @@
+"CPU Time Used","Estimated Training Performance","Wallclock Time","Incumbent ID","Automatic Configurator (CPU) Time","Configuration..."
+0.0, 1.7976931348623157E308, 0.0, 1, 0.0,  R='1.0E-7'
+0.38125, 32.167832, 0.78, 1, 0.28125,  R='1.0E-7'
+0.60625, 26.573427, 1.535, 2, 0.40625,  R='9.708860519428377'
+1.484375, 26.573427, 6.593, 2, 0.484375,  R='9.708860519428377'

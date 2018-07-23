@@ -1,0 +1,8 @@
+L real [0.1, 1.0] [0.3]
+M real [0.1, 1.0] [0.2]
+D categorical {true, false} [true]
+C categorical {true, false} [true]
+H categorical {a,i,o,t} [a]
+R categorical {true, false} [true]
+B categorical {true, false} [true]
+S categorical {1} [1]

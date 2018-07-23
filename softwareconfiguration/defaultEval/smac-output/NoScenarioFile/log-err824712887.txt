@@ -1,0 +1,22 @@
+22:03:07.751 [main] ERROR c.u.c.b.smac.executors.SMACExecutor - Message: Min must be strictly less than max: 0.0 >= 0.0; error occured while parsing line: W real [0.0, 0.0] [0.0]
+22:03:07.751 [main] ERROR c.u.c.b.smac.executors.SMACExecutor - Exception:java.lang.IllegalArgumentException
+22:03:07.752 [main] ERROR c.u.c.b.smac.executors.SMACExecutor - StackTrace:java.lang.IllegalArgumentException: Min must be strictly less than max: 0.0 >= 0.0; error occured while parsing line: W real [0.0, 0.0] [0.0]
+	at ca.ubc.cs.beta.aeatk.parameterconfigurationspace.ParameterConfigurationSpace.createNumericParameter(ParameterConfigurationSpace.java:855)
+	at ca.ubc.cs.beta.aeatk.parameterconfigurationspace.ParameterConfigurationSpace.parseAClibLine(ParameterConfigurationSpace.java:793)
+	at ca.ubc.cs.beta.aeatk.parameterconfigurationspace.ParameterConfigurationSpace.<init>(ParameterConfigurationSpace.java:424)
+	at ca.ubc.cs.beta.aeatk.parameterconfigurationspace.ParameterConfigurationSpace.<init>(ParameterConfigurationSpace.java:386)
+	at ca.ubc.cs.beta.aeatk.parameterconfigurationspace.ParameterConfigurationSpace.<init>(ParameterConfigurationSpace.java:373)
+	at ca.ubc.cs.beta.aeatk.parameterconfigurationspace.ParamFileHelper.getParamFileParser(ParamFileHelper.java:43)
+	at ca.ubc.cs.beta.aeatk.parameterconfigurationspace.ParamFileHelper.getParamFileParser(ParamFileHelper.java:31)
+	at ca.ubc.cs.beta.aeatk.parameterconfigurationspace.ParamConfigurationSpaceOptions.getParamConfigurationSpace(ParamConfigurationSpaceOptions.java:184)
+	at ca.ubc.cs.beta.aeatk.algorithmexecutionconfiguration.AlgorithmExecutionOptions.getAlgorithmExecutionConfig(AlgorithmExecutionOptions.java:159)
+	at ca.ubc.cs.beta.aeatk.options.scenario.ScenarioOptions.getAlgorithmExecutionConfig(ScenarioOptions.java:129)
+	at ca.ubc.cs.beta.aeatk.smac.SMACOptions.getAlgorithmExecutionConfig(SMACOptions.java:278)
+	at ca.ubc.cs.beta.smac.executors.SMACExecutor.oldMain(SMACExecutor.java:133)
+	at ca.ubc.cs.beta.smac.executors.SMACExecutor.main(SMACExecutor.java:104)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(Unknown Source)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(Unknown Source)
+	at java.lang.reflect.Method.invoke(Unknown Source)
+	at ca.ubc.cs.beta.aeatk.ant.execscript.Launcher.main(Launcher.java:37)
+

@@ -1,0 +1,2 @@
+"Validation Configuration ID","Configuration ","Sample Call String"
+"1","-R '6.026302777851331'","python F:\Data\Uni\PG\DefaultEvalEnvironment/py_wrapper/null_weka.classifiers.functions.Logistic_breast-cancer.py no_instance 0 1.7976931348623157E308 2147483647 -1 -R '6.026302777851331' "

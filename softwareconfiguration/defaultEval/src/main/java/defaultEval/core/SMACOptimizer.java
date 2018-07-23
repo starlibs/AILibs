@@ -3,7 +3,9 @@ package defaultEval.core;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
+import java.util.Scanner;
 
 import hasco.model.BooleanParameterDomain;
 import hasco.model.CategoricalParameterDomain;
@@ -12,6 +14,8 @@ import hasco.model.ComponentInstance;
 import hasco.model.NumericParameterDomain;
 import hasco.model.Parameter;
 import hasco.model.ParameterDomain;
+import hasco.serialization.ComponentLoader;
+import scala.annotation.elidable;
 
 public class SMACOptimizer extends Optimizer{
 	
@@ -23,15 +27,13 @@ public class SMACOptimizer extends Optimizer{
 
 	@Override
 	public ComponentInstance optimize() {
-		// generate params datei
+		// generate params file
 		PrintStream pcsStream = null;
 		try {
-			pcsStream = new PrintStream(new FileOutputStream(new File("test.pcs")));
-		
+			pcsStream = new PrintStream(new FileOutputStream(new File(Main.getEnvironmentPath()+"/pcs/"+buildFileName()+".pcs")));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
-		
 		
 		for (Parameter p : parameterList) {
 			ParameterDomain pd = p.getDefaultDomain();
@@ -58,7 +60,7 @@ public class SMACOptimizer extends Optimizer{
 						pcsStream.print(",");
 					}
 				}
-				pcsStream.println("} [" + p.getDefaultValue() + "]");
+				pcsStream.println("} [" + p.getDefaultValue().toString() + "]");
 			}
 		}
 		
@@ -70,7 +72,7 @@ public class SMACOptimizer extends Optimizer{
 		// TODO do not generate if allready there
 		
 		try {
-			pyWrapperStream = new PrintStream(new FileOutputStream(new File("run_" + preProcessor.getName() + classifier.getName() + ".py")));
+			pyWrapperStream = new PrintStream(new FileOutputStream(new File(Main.getEnvironmentPath() + "/py_wrapper/" + buildFileName() + ".py")));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -98,23 +100,36 @@ public class SMACOptimizer extends Optimizer{
 		}
 		
 		// run java programm
-		pyWrapperStream.print("call(\"java");
+		pyWrapperStream.print("call(\"java -jar "+Main.getEnvironmentPath()+"/PipelineEvaluator.jar");
 		
 		pyWrapperStream.print(" " + dataSet);
 		
-		for (Parameter parameter : parameterList) {
-			pyWrapperStream.print(" " + parameter.getName());
+		
+		if(preProcessor != null) {
+			pyWrapperStream.print(" " + preProcessor.getName());
+			
+			for (Parameter parameter : preProcessor.getParameters()) {
+				pyWrapperStream.print(" \"+ \"{:.9f}\".format("+parameter.getName()+") + \""); // TODO only for floats 
+			}	
+		}else {
+			pyWrapperStream.print(" null");
 		}
 		
-		pyWrapperStream.print(" " + preProcessor.getName() + classifier.getName() + dataSet);
+		pyWrapperStream.print(" " + classifier.getName());
+		
+		for (Parameter parameter : classifier.getParameters()) {
+			pyWrapperStream.print(" \"+ \"{:.9f}\".format("+parameter.getName()+") + \"");
+		}
+		
+		
+		pyWrapperStream.print(" " + Main.getEnvironmentPath()+"/results/" + buildFileName() + ".txt");
 		
 		pyWrapperStream.println("\")");
 		
 		
-		
 		// read result file
 		
-		pyWrapperStream.println("file = open(\"Results/"+getResultName()+".txt\", \"r\")");
+		pyWrapperStream.println("file = open(\""+Main.getEnvironmentPath()+"\\\\results\\\\"+buildFileName()+".txt\", \"r\")");
 		pyWrapperStream.println("yValue = float(file.read())");
 		
 		
@@ -124,23 +139,81 @@ public class SMACOptimizer extends Optimizer{
 		
 		
 		// start SMAC
-		
-		
+		try {
+			Runtime rt = Runtime.getRuntime();
+			
+			// TODO build better
+			System.out.println(Main.getEnvironmentPath() + "/optimizer/smac/smac.bat "+
+									"--run-obj QUALITY " + 
+									"--use-instances false "+
+							"--numberOfRunsLimit 10 "+
+							"--pcs-file "+Main.getEnvironmentPath()+"/pcs/"+buildFileName()+".pcs "+
+							"--algo \"python "+Main.getEnvironmentPath()+"/py_wrapper/"+buildFileName()+".py\"\" ");
+			
+			Process proc = rt.exec(
+							Main.getEnvironmentPath() + "/optimizer/smac/smac.bat "+
+									"--run-obj QUALITY " + 
+									"--use-instances false "+
+							"--numberOfRunsLimit 10 "+
+							"--pcs-file "+Main.getEnvironmentPath()+"/pcs/"+buildFileName()+".pcs "+
+							"--algo \"python "+Main.getEnvironmentPath()+"/py_wrapper/"+buildFileName()+".py\"\" "
+					); // TODO settings
+			proc.waitFor();
+			int exitValue = proc.exitValue();
+			System.out.println("aksd: " + exitValue);
+			
+//			Scanner sc = new Scanner(proc.getInputStream());
+//			while (sc.hasNextLine()) {
+//				String string = (String) sc.nextLine();
+//				System.out.println(string);
+//			}
+//			sc.close();
+			
+		} catch (IOException | InterruptedException e) {
+			// TODO
+			e.printStackTrace();
+		}
 		
 		
 		return null;
 	}
 	
-
-	private String getResultName() {
-		return preProcessor.getName() + classifier.getName() + dataSet;
+	
+	public static void main(String[] args) {
+		ComponentLoader cloader = new ComponentLoader();
+		ComponentLoader ploader = new ComponentLoader();
+		
+		try {
+			Util.loadClassifierComponents(cloader);
+			Util.loadPreprocessorComponents(ploader);
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		
+		Component classifier = null;
+		for (Component c : cloader.getComponents()) {
+			if(c.getName().equals("weka.classifiers.functions.Logistic")) {
+				classifier = c;
+			}
+		}
+		
+		
+		new SMACOptimizer(null, classifier, "breast-cancer").optimize();
+		
+		
 	}
 	
+	
+	
+	private String buildFileName() {
+		return (preProcessor != null) ? preProcessor.getName() : "null" + "_" + classifier.getName() + "_" + dataSet;
+	}
+
 	
 	private String getConverter(ParameterDomain pd) {
 		if(pd instanceof NumericParameterDomain) {
 			NumericParameterDomain n_pd = (NumericParameterDomain) pd;
-			return n_pd.isInteger() ? "integer" : "float";
+			return n_pd.isInteger() ? "int" : "float";
 		}
 		return "";
 	}

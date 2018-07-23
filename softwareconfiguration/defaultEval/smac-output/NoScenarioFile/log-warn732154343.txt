@@ -1,0 +1,37 @@
+22:34:05.441 [CLI TAE (STDERR Thread - #0)] WARN  c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - [PROCESS-ERR]  weka.core.Version: Unable to load version information!
+22:34:05.642 [CLI TAE (STDERR Thread - #0)] WARN  c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - [PROCESS-ERR]  java.lang.IllegalArgumentException: Can't use both kernel density estimation and discretization!
+22:34:05.642 [CLI TAE (STDERR Thread - #0)] WARN  c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - [PROCESS-ERR]  	at weka.classifiers.bayes.NaiveBayes.setOptions(NaiveBayes.java:441)
+22:34:05.642 [CLI TAE (STDERR Thread - #0)] WARN  c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - [PROCESS-ERR]  	at weka.core.ResourceUtils.forName(ResourceUtils.java:109)
+22:34:05.642 [CLI TAE (STDERR Thread - #0)] WARN  c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - [PROCESS-ERR]  	at weka.core.Utils.forName(Utils.java:1043)
+22:34:05.642 [CLI TAE (STDERR Thread - #0)] WARN  c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - [PROCESS-ERR]  	at weka.classifiers.AbstractClassifier.forName(AbstractClassifier.java:89)
+22:34:05.643 [CLI TAE (STDERR Thread - #0)] WARN  c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - [PROCESS-ERR]  	at de.upb.crc901.automl.hascocombinedml.MLServicePipelineFactory.addWEKAClassifier(MLServicePipelineFactory.java:115)
+22:34:05.643 [CLI TAE (STDERR Thread - #0)] WARN  c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - [PROCESS-ERR]  	at de.upb.crc901.automl.hascocombinedml.MLServicePipelineFactory.getComponentInstantiation(MLServicePipelineFactory.java:57)
+22:34:05.643 [CLI TAE (STDERR Thread - #0)] WARN  c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - [PROCESS-ERR]  	at defaultEval.core.Util.createPipeline(Util.java:49)
+22:34:05.643 [CLI TAE (STDERR Thread - #0)] WARN  c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - [PROCESS-ERR]  	at defaultEval.core.PipelineEvaluator.main(PipelineEvaluator.java:98)
+22:34:05.743 [CLI TAE (STDERR Thread - #0)] WARN  c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - [PROCESS-ERR]  java.lang.RuntimeException: The given plan is not valid..
+22:34:05.743 [CLI TAE (STDERR Thread - #0)] WARN  c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - [PROCESS-ERR]  	at de.upb.crc901.automl.pipeline.service.MLServicePipeline.<init>(MLServicePipeline.java:61)
+22:34:05.743 [CLI TAE (STDERR Thread - #0)] WARN  c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - [PROCESS-ERR]  	at de.upb.crc901.automl.hascocombinedml.MLServicePipelineFactory.getComponentInstantiation(MLServicePipelineFactory.java:65)
+22:34:05.743 [CLI TAE (STDERR Thread - #0)] WARN  c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - [PROCESS-ERR]  	at defaultEval.core.Util.createPipeline(Util.java:49)
+22:34:05.743 [CLI TAE (STDERR Thread - #0)] WARN  c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - [PROCESS-ERR]  	at defaultEval.core.PipelineEvaluator.main(PipelineEvaluator.java:98)
+22:34:05.743 [CLI TAE (STDERR Thread - #0)] WARN  c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - [PROCESS-ERR]  Traceback (most recent call last):
+22:34:05.743 [CLI TAE (STDERR Thread - #0)] WARN  c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - [PROCESS-ERR]    File "F:\Data\Uni\PG\DefaultEvalEnvironment/py_wrapper/null_weka.classifiers.bayes.NaiveBayes_breast-cancer.py", line 12, in <module>
+22:34:05.744 [CLI TAE (STDERR Thread - #0)] WARN  c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - [PROCESS-ERR]      file = open("results/null_weka.classifiers.bayes.NaiveBayes_breast-cancer.txt", "r")
+22:34:05.744 [CLI TAE (STDERR Thread - #0)] WARN  c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - [PROCESS-ERR]  IOError: [Errno 2] No such file or directory: 'results/null_weka.classifiers.bayes.NaiveBayes_breast-cancer.txt'
+22:34:05.744 [CLI TAE (Master Thread - #0)] ERROR c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - The following algorithm call failed: cd "F:\Data\Uni\PG\AILibs\softwareconfiguration\defaultEval" &  python F:\Data\Uni\PG\DefaultEvalEnvironment/py_wrapper/null_weka.classifiers.bayes.NaiveBayes_breast-cancer.py no_instance 0 1.7976931348623157E308 2147483647 -1 -D 'true' -K 'true'  
+22:34:05.744 [CLI TAE (Master Thread - #0)] ERROR c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - The last 2 lines of output we saw were:
+22:34:05.745 [CLI TAE (Master Thread - #0)] ERROR c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - > Parse file F:\Data\Uni\PG\AILibs\softwareconfiguration\mlplan\model\weka\weka-classifiers-autoweka.json
+22:34:05.745 [CLI TAE (Master Thread - #0)] ERROR c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - > Parse file F:\Data\Uni\PG\AILibs\softwareconfiguration\mlplan\model\weka\weka-preprocessors-autoweka.json
+22:34:05.777 [main] ERROR c.u.c.b.smac.executors.SMACExecutor - Message:  Wrapper did not output anything that matched the expected output ("Result of algorithm run:..."). Please try executing the wrapper directly
+22:34:05.780 [main] ERROR c.u.c.b.smac.executors.SMACExecutor - A serious problem occured during target algorithm execution and we are aborting execution 
+ca.ubc.cs.beta.aeatk.targetalgorithmevaluator.exceptions.TargetAlgorithmAbortException:  Wrapper did not output anything that matched the expected output ("Result of algorithm run:..."). Please try executing the wrapper directly
+	at ca.ubc.cs.beta.aeatk.targetalgorithmevaluator.decorators.safety.AbortOnFirstRunCrashTargetAlgorithmEvaluator.validate(AbortOnFirstRunCrashTargetAlgorithmEvaluator.java:55) ~[aeatk.jar:na]
+	at ca.ubc.cs.beta.aeatk.targetalgorithmevaluator.decorators.safety.AbortOnFirstRunCrashTargetAlgorithmEvaluator.access$000(AbortOnFirstRunCrashTargetAlgorithmEvaluator.java:23) ~[aeatk.jar:na]
+	at ca.ubc.cs.beta.aeatk.targetalgorithmevaluator.decorators.safety.AbortOnFirstRunCrashTargetAlgorithmEvaluator$1.onSuccess(AbortOnFirstRunCrashTargetAlgorithmEvaluator.java:80) ~[aeatk.jar:na]
+	at ca.ubc.cs.beta.aeatk.targetalgorithmevaluator.base.cli.CommandLineTargetAlgorithmEvaluator$1$1.run(CommandLineTargetAlgorithmEvaluator.java:164) ~[aeatk.jar:na]
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source) ~[na:1.8.0_152]
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source) ~[na:1.8.0_152]
+	at java.lang.Thread.run(Unknown Source) ~[na:1.8.0_152]
+22:34:05.781 [main] ERROR c.u.c.b.smac.executors.SMACExecutor - We tried to call the target algorithm wrapper, but this call failed.
+22:34:05.781 [main] ERROR c.u.c.b.smac.executors.SMACExecutor - The problem is (most likely) somewhere in the wrapper or with the arguments to SMAC.
+22:34:05.781 [main] ERROR c.u.c.b.smac.executors.SMACExecutor - The easiest way to debug this problem is to manually execute the call we tried and see why it did not return the correct result
+22:34:05.781 [main] ERROR c.u.c.b.smac.executors.SMACExecutor - The required output of the wrapper is something like "Result for ParamILS: x,x,x,x,x".);

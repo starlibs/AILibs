@@ -1,0 +1,3 @@
+N categorical {0,1,2} [0]
+C real [0.5, 1.5] [1.0]
+M categorical {true, false} [true]

@@ -1,0 +1,11 @@
+23:15:00.991 [CLI TAE (STDERR Thread - #0)] WARN  c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - [PROCESS-ERR]  weka.core.Version: Unable to load version information!
+23:15:01.789 [CLI TAE (STDERR Thread - #0)] WARN  c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - [PROCESS-ERR]  weka.core.Version: Unable to load version information!
+23:15:02.513 [CLI TAE (STDERR Thread - #0)] WARN  c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - [PROCESS-ERR]  weka.core.Version: Unable to load version information!
+23:15:03.185 [CLI TAE (STDERR Thread - #0)] WARN  c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - [PROCESS-ERR]  weka.core.Version: Unable to load version information!
+23:15:03.797 [CLI TAE (STDERR Thread - #0)] WARN  c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - [PROCESS-ERR]  weka.core.Version: Unable to load version information!
+23:15:04.421 [CLI TAE (STDERR Thread - #0)] WARN  c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - [PROCESS-ERR]  weka.core.Version: Unable to load version information!
+23:15:05.086 [CLI TAE (STDERR Thread - #0)] WARN  c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - [PROCESS-ERR]  weka.core.Version: Unable to load version information!
+23:15:05.763 [CLI TAE (STDERR Thread - #0)] WARN  c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - [PROCESS-ERR]  weka.core.Version: Unable to load version information!
+23:15:06.377 [CLI TAE (STDERR Thread - #0)] WARN  c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - [PROCESS-ERR]  weka.core.Version: Unable to load version information!
+23:15:07.092 [CLI TAE (STDERR Thread - #0)] WARN  c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - [PROCESS-ERR]  weka.core.Version: Unable to load version information!
+23:15:07.728 [CLI TAE (STDERR Thread - #0)] WARN  c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - [PROCESS-ERR]  weka.core.Version: Unable to load version information!

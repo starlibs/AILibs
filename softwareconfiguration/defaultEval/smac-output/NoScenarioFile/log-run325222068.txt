@@ -1,0 +1,484 @@
+22:23:01.539 [main] INFO  c.u.c.b.a.l.ComplexLoggingOptions - Logging to: F:\Data\Uni\PG\AILibs\softwareconfiguration\defaultEval\smac-output\NoScenarioFile\log-run325222068.txt
+22:23:01.548 [main] INFO  c.u.c.b.a.m.version.VersionTracker - Version of Algorithm Execution & Abstraction Toolkit is v2.10.03-master-814 (ebf4c8c913d5) 
+22:23:01.548 [main] INFO  c.u.c.b.a.m.version.VersionTracker - Version of Java Runtime Environment is Java HotSpot(TM) 64-Bit Server VM (1.8.0_152) 
+22:23:01.548 [main] INFO  c.u.c.b.a.m.version.VersionTracker - Version of OS is Windows 10 10.0 (amd64) 
+22:23:01.548 [main] INFO  c.u.c.b.a.m.version.VersionTracker - Version of Random Forest Library is v1.10.01-master-120 (b68439c2c391) 
+22:23:01.548 [main] INFO  c.u.c.b.a.m.version.VersionTracker - Version of SMAC is v2.10.03-master-778 (3ee628ef9bf2) 
+22:23:01.549 [main] INFO  c.u.c.b.a.m.j.JCommanderHelper - Call String: smac.bat --run-obj QUALITY --use-instances false --numberOfRunsLimit 10 --pcs-file F:\Data\Uni\PG\DefaultEvalEnvironment/pcs/null_weka.classifiers.bayes.NaiveBayes_breast-cancer.pcs --algo "python F:\Data\Uni\PG\DefaultEvalEnvironment/py_wrapper/null_weka.classifiers.bayes.NaiveBayes_breast-cancer.py"" 
+22:23:01.549 [main] INFO  c.u.c.b.smac.executors.SMACExecutor - ********** The next bit of output can be ignored, it is merely useful for debugging **********
+22:23:01.549 [main] INFO  c.u.c.b.smac.executors.SMACExecutor - ==========Enviroment Variables===========
+=::=::\
+=C:=C:\
+=F:=F:\Data\Uni\PG\AILibs\softwareconfiguration\defaultEval
+ALLUSERSPROFILE=C:\ProgramData
+APPDATA=C:\Users\Joshua\AppData\Roaming
+COMPUTERNAME=MEINPC
+ComSpec=C:\WINDOWS\system32\cmd.exe
+CommonProgramFiles=C:\Program Files\Common Files
+CommonProgramFiles(x86)=C:\Program Files (x86)\Common Files
+CommonProgramW6432=C:\Program Files\Common Files
+DIR=F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\
+EXEC=ca.ubc.cs.beta.smac.executors.SMACExecutor
+FPS_BROWSER_APP_PROFILE_STRING=Internet Explorer
+FPS_BROWSER_USER_PROFILE_STRING=Default
+FP_NO_HOST_CHECK=NO
+GTK_BASEPATH=C:\Program Files (x86)\GtkSharp\2.12\
+HOMEDRIVE=C:
+HOMEPATH=\Users\Joshua
+JAVA_HOME=C:\Program Files\Java\jdk1.8.0_152
+LOCALAPPDATA=C:\Users\Joshua\AppData\Local
+LOGONSERVER=\\MEINPC
+NUMBER_OF_PROCESSORS=8
+OS=Windows_NT
+OneDrive=C:\Users\Joshua\SkyDrive
+PATHEXT=.COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
+PROCESSOR_ARCHITECTURE=AMD64
+PROCESSOR_IDENTIFIER=Intel64 Family 6 Model 58 Stepping 9, GenuineIntel
+PROCESSOR_LEVEL=6
+PROCESSOR_REVISION=3a09
+PROMPT=$P$G
+PSModulePath=C:\WINDOWS\system32\WindowsPowerShell\v1.0\Modules\
+PUBLIC=C:\Users\Public
+Path=C:/Program Files/Java/jre1.8.0_152/bin/server;C:/Program Files/Java/jre1.8.0_152/bin;C:/Program Files/Java/jre1.8.0_152/lib/amd64;C:\ProgramData\Oracle\Java\javapath;C:\Program Files (x86)\Intel\iCLS Client\;C:\Program Files\Intel\iCLS Client\;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\Program Files\Intel\Intel(R) Management Engine Components\DAL;C:\Program Files\Intel\Intel(R) Management Engine Components\IPT;C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\DAL;C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\IPT;C:\Program Files (x86)\Windows Live\Shared;C:\Program Files\Java\jdk1.7.0_45\bin;E:\Users\Joshua\uniWorkspace\GP2-Heim-02\koalares\protobuf;E:\Program Files\MiKTeX 2.9\miktex\bin\x64\;C:\Program Files\Microsoft SQL Server\110\Tools\Binn\;C:\Program Files (x86)\Microsoft SDKs\TypeScript\1.0\;C:\Program Files\Microsoft SQL Server\120\Tools\Binn\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\TortoiseSVN\bin;C:\WINDOWS\system32\config\systemprofile\.dnx\bin;C:\Program Files\Microsoft DNX\Dnvm\;C:\Program Files (x86)\GtkSharp\2.12\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;E:\Program Files (x86)\aLobby\openvpn\bin;C:\Program Files (x86)\Skype\Phone\;C:\Program Files\Microsoft SQL Server\130\Tools\Binn\;C:\Program Files\Git\cmd;C:\Users\Joshua\AppData\Local\Microsoft\WindowsApps;C:\Program Files\CMake\bin;C:\Python27;;F:\Data\Tools\eclipse-jee-oxygen-2-win32-x86_64\eclipse;
+ProgramData=C:\ProgramData
+ProgramFiles=C:\Program Files
+ProgramFiles(x86)=C:\Program Files (x86)
+ProgramW6432=C:\Program Files
+SESSIONNAME=Console
+SMACMEM=1024
+SMLNJ_HOME=E:\Program Files (x86)\SMLNJ\
+SystemDrive=C:
+SystemRoot=C:\WINDOWS
+TEMP=C:\Users\Joshua\AppData\Local\Temp
+TMP=C:\Users\Joshua\AppData\Local\Temp
+USERDOMAIN=MEINPC
+USERDOMAIN_ROAMINGPROFILE=MEINPC
+USERNAME=Joshua
+USERPROFILE=C:\Users\Joshua
+VS110COMNTOOLS=C:\Program Files (x86)\Microsoft Visual Studio 11.0\Common7\Tools\
+VS120COMNTOOLS=E:\Programme (x86)\Microsoft Visual Studio 12.0\Common7\Tools\
+VS140COMNTOOLS=E:\Programme (x86)\Microsoft Visual Studio 14.0\Common7\Tools\
+VSSDK140Install=E:\Programme (x86)\Microsoft Visual Studio 14.0\VSSDK\
+jarconcat=F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\spi-0.2.4.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\smac.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\smac-src.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\slf4j-api-1.7.5.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\opencsv-2.3.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\numerics4j-1.3.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\logback-core-1.1.2.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\logback-classic-1.1.2.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\logback-access-1.1.2.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\jmatharray.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\jcommander.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\jcip-annotations.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\jcip-annotations-src.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\Jama-1.0.2.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\jackson-databind-2.3.1.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\jackson-core-2.3.1.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\jackson-annotations-2.3.1.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\guava-14.0.1.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\fastrf.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\fastrf-src.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\exp4j-0.4.3.BETA-3.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\exp4j-0.3.10.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\DomainInter.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\commons-math3-3.3.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\commons-math-2.2.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\commons-io-2.1.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\commons-collections-3.2.1.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\commons-collections-3.2.1-sources.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\aeatk.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\aeatk-src.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\spi-0.2.4.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\smac.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\smac-src.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\slf4j-api-1.7.5.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\opencsv-2.3.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\numerics4j-1.3.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\logback-core-1.1.2.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\logback-classic-1.1.2.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\logback-access-1.1.2.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\jmatharray.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\jcommander.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\jcip-annotations.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\jcip-annotations-src.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\Jama-1.0.2.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\jackson-databind-2.3.1.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\jackson-core-2.3.1.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\jackson-annotations-2.3.1.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\guava-14.0.1.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\fastrf.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\fastrf-src.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\exp4j-0.4.3.BETA-3.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\exp4j-0.3.10.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\DomainInter.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\commons-math3-3.3.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\commons-math-2.2.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\commons-io-2.1.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\commons-collections-3.2.1.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\commons-collections-3.2.1-sources.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\aeatk.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\aeatk-src.jar;
+windir=C:\WINDOWS
+
+22:23:01.550 [main] INFO  c.u.c.b.smac.executors.SMACExecutor - Hostname:MeinPC
+22:23:01.550 [main] INFO  c.u.c.b.smac.executors.SMACExecutor - ==========System Properties==============
+ERRLOG=F:\Data\Uni\PG\AILibs\softwareconfiguration\defaultEval\smac-output\NoScenarioFile\log-err325222068.txt
+NUMRUN=325222068
+OUTPUTDIR=F:\Data\Uni\PG\AILibs\softwareconfiguration\defaultEval\smac-output\NoScenarioFile
+ROOT-LEVEL=INFO
+RUNLOG=F:\Data\Uni\PG\AILibs\softwareconfiguration\defaultEval\smac-output\NoScenarioFile\log-run325222068.txt
+STDOUT-LEVEL=INFO
+WARNLOG=F:\Data\Uni\PG\AILibs\softwareconfiguration\defaultEval\smac-output\NoScenarioFile\log-warn325222068.txt
+awt.toolkit=sun.awt.windows.WToolkit
+file.encoding=Cp1252
+file.encoding.pkg=sun.io
+file.separator=\
+java.awt.graphicsenv=sun.awt.Win32GraphicsEnvironment
+java.awt.printerjob=sun.awt.windows.WPrinterJob
+java.class.path=F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\conf\;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\patches\;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\spi-0.2.4.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\smac.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\smac-src.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\slf4j-api-1.7.5.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\opencsv-2.3.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\numerics4j-1.3.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\logback-core-1.1.2.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\logback-classic-1.1.2.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\logback-access-1.1.2.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\jmatharray.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\jcommander.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\jcip-annotations.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\jcip-annotations-src.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\Jama-1.0.2.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\jackson-databind-2.3.1.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\jackson-core-2.3.1.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\jackson-annotations-2.3.1.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\guava-14.0.1.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\fastrf.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\fastrf-src.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\exp4j-0.4.3.BETA-3.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\exp4j-0.3.10.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\DomainInter.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\commons-math3-3.3.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\commons-math-2.2.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\commons-io-2.1.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\commons-collections-3.2.1.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\commons-collections-3.2.1-sources.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\aeatk.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\aeatk-src.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\spi-0.2.4.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\smac.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\smac-src.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\slf4j-api-1.7.5.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\opencsv-2.3.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\numerics4j-1.3.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\logback-core-1.1.2.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\logback-classic-1.1.2.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\logback-access-1.1.2.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\jmatharray.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\jcommander.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\jcip-annotations.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\jcip-annotations-src.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\Jama-1.0.2.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\jackson-databind-2.3.1.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\jackson-core-2.3.1.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\jackson-annotations-2.3.1.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\guava-14.0.1.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\fastrf.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\fastrf-src.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\exp4j-0.4.3.BETA-3.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\exp4j-0.3.10.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\DomainInter.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\commons-math3-3.3.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\commons-math-2.2.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\commons-io-2.1.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\commons-collections-3.2.1.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\commons-collections-3.2.1-sources.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\aeatk.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\lib\aeatk-src.jar;F:\Data\Uni\PG\DefaultEvalEnvironment\optimizer\smac\patches\ 
+java.class.version=52.0
+java.endorsed.dirs=C:\Program Files\Java\jre1.8.0_152\lib\endorsed
+java.ext.dirs=C:\Program Files\Java\jre1.8.0_152\lib\ext;C:\WINDOWS\Sun\Java\lib\ext
+java.home=C:\Program Files\Java\jre1.8.0_152
+java.io.tmpdir=C:\Users\Joshua\AppData\Local\Temp\
+java.library.path=C:\Program Files\Java\jre1.8.0_152\bin;C:\WINDOWS\Sun\Java\bin;C:\WINDOWS\system32;C:\WINDOWS;C:/Program Files/Java/jre1.8.0_152/bin/server;C:/Program Files/Java/jre1.8.0_152/bin;C:/Program Files/Java/jre1.8.0_152/lib/amd64;C:\ProgramData\Oracle\Java\javapath;C:\Program Files (x86)\Intel\iCLS Client\;C:\Program Files\Intel\iCLS Client\;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\Program Files\Intel\Intel(R) Management Engine Components\DAL;C:\Program Files\Intel\Intel(R) Management Engine Components\IPT;C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\DAL;C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\IPT;C:\Program Files (x86)\Windows Live\Shared;C:\Program Files\Java\jdk1.7.0_45\bin;E:\Users\Joshua\uniWorkspace\GP2-Heim-02\koalares\protobuf;E:\Program Files\MiKTeX 2.9\miktex\bin\x64\;C:\Program Files\Microsoft SQL Server\110\Tools\Binn\;C:\Program Files (x86)\Microsoft SDKs\TypeScript\1.0\;C:\Program Files\Microsoft SQL Server\120\Tools\Binn\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\TortoiseSVN\bin;C:\WINDOWS\system32\config\systemprofile\.dnx\bin;C:\Program Files\Microsoft DNX\Dnvm\;C:\Program Files (x86)\GtkSharp\2.12\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;E:\Program Files (x86)\aLobby\openvpn\bin;C:\Program Files (x86)\Skype\Phone\;C:\Program Files\Microsoft SQL Server\130\Tools\Binn\;C:\Program Files\Git\cmd;C:\Users\Joshua\AppData\Local\Microsoft\WindowsApps;C:\Program Files\CMake\bin;C:\Python27;;F:\Data\Tools\eclipse-jee-oxygen-2-win32-x86_64\eclipse;;.
+java.runtime.name=Java(TM) SE Runtime Environment
+java.runtime.version=1.8.0_152-b16
+java.specification.name=Java Platform API Specification
+java.specification.vendor=Oracle Corporation
+java.specification.version=1.8
+java.vendor=Oracle Corporation
+java.vendor.url=http://java.oracle.com/
+java.vendor.url.bug=http://bugreport.sun.com/bugreport/
+java.version=1.8.0_152
+java.vm.info=mixed mode
+java.vm.name=Java HotSpot(TM) 64-Bit Server VM
+java.vm.specification.name=Java Virtual Machine Specification
+java.vm.specification.vendor=Oracle Corporation
+java.vm.specification.version=1.8
+java.vm.vendor=Oracle Corporation
+java.vm.version=25.152-b16
+line.separator=
+
+logback.configurationFile=ca/ubc/cs/beta/aeatk/logging/complex-logback.xml
+os.arch=amd64
+os.name=Windows 10
+os.version=10.0
+path.separator=;
+sun.arch.data.model=64
+sun.boot.class.path=C:\Program Files\Java\jre1.8.0_152\lib\resources.jar;C:\Program Files\Java\jre1.8.0_152\lib\rt.jar;C:\Program Files\Java\jre1.8.0_152\lib\sunrsasign.jar;C:\Program Files\Java\jre1.8.0_152\lib\jsse.jar;C:\Program Files\Java\jre1.8.0_152\lib\jce.jar;C:\Program Files\Java\jre1.8.0_152\lib\charsets.jar;C:\Program Files\Java\jre1.8.0_152\lib\jfr.jar;C:\Program Files\Java\jre1.8.0_152\classes
+sun.boot.library.path=C:\Program Files\Java\jre1.8.0_152\bin
+sun.cpu.endian=little
+sun.cpu.isalist=amd64
+sun.desktop=windows
+sun.io.unicode.encoding=UnicodeLittle
+sun.java.command=ca.ubc.cs.beta.aeatk.ant.execscript.Launcher ca.ubc.cs.beta.smac.executors.SMACExecutor --run-obj QUALITY --use-instances false --numberOfRunsLimit 10 --pcs-file F:\Data\Uni\PG\DefaultEvalEnvironment/pcs/null_weka.classifiers.bayes.NaiveBayes_breast-cancer.pcs --algo python F:\Data\Uni\PG\DefaultEvalEnvironment/py_wrapper/null_weka.classifiers.bayes.NaiveBayes_breast-cancer.py"
+sun.java.launcher=SUN_STANDARD
+sun.jnu.encoding=Cp1252
+sun.management.compiler=HotSpot 64-Bit Tiered Compilers
+sun.os.patch.level=
+user.country=DE
+user.dir=F:\Data\Uni\PG\AILibs\softwareconfiguration\defaultEval
+user.home=C:\Users\Joshua
+user.language=de
+user.name=Joshua
+user.script=
+user.timezone=Europe/Berlin
+user.variant=
+
+22:23:01.552 [main] INFO  c.u.c.b.a.m.j.JCommanderHelper - ==========Configuration Options==========
+[SMACOptions]
+ adaptiveCapping = false
+ alwaysRunInitialConfiguration = false
+ capAddSlack = 1.0
+ capSlack = 1.3
+classicInitModeOpts = [ClassicInitializationProcedureOptions]
+		 initialIncumbentRuns = 1
+
+dciModeOpts = [DoublingCappingInitializationProcedureOptions]
+		 numberOfChallengers = 2
+		 numberOfRunsPerChallenger = 2
+
+ucip = [UnbiasChallengerInitializationProcedureOptions]
+		 numberOfChallengers = 2
+		 numberOfRunsPerChallenger = 2
+		 cpulimit = 0
+
+ deterministicInstanceOrdering = false
+ doValidation = true
+ execMode = SMAC
+ experimentDir = F:\Data\Uni\PG\AILibs\softwareconfiguration\defaultEval\
+ expFunc = null
+help = [HelpOptions]
+		 showHiddenParameters = false
+		 showHelp = false
+		 helpLevel = BASIC
+		 showVersion = false
+		 helpDefaults = C:\Users\Joshua\.aeatk\help.opt
+
+ initialChallengeRuns = 1
+ initialIncumbent = DEFAULT
+ initializationMode = CLASSIC
+ intensificationPercentage = 0.5
+ initialChallengers = []
+ initialChallengersIntensificationTime = 2147483647
+ iterativeCappingBreakOnFirstCompletion = false
+ iterativeCappingK = 1
+logOptions = [ComplexLoggingOptions]
+		 consoleLogLevel = INFO
+		 logLevel = INFO
+
+ maxIncumbentRuns = 2000
+mbOptions = [ModelBuildingOptions]
+		 maskCensoredDataAsKappaMax = false
+		 maskInactiveConditionalParametersAsDefaultValue = true
+		 maskCensoredDataAsUncensored = false
+		 imputationIterations = 2
+
+ modelHashCodeFile = null
+ numberOfChallengers = 10
+ numberOfRandomConfigsInEI = 10000
+ numberOfRandomConfigsUsedForLocalSearch = 0
+ numPCA = 7
+ optionFile = null
+ optionFile2 = null
+randomForestOptions = [RandomForestOptions]
+		 brokenVarianceCalculation = false
+		 freeMemoryPercentageToSubsample = 0.25
+		 fullTreeBootstrap = false
+		 ignoreConditionality = false
+		 imputeMean = false
+		 logModel = false
+		 minVariance = 1.0E-14
+		 numTrees = 10
+		 penalizeImputedValues = false
+		 preprocessMarginal = true
+		 ratioFeatures = 0.8333333333333334
+		 shuffleImputedValues = false
+		 splitMin = 10
+		 storeDataInLeaves = false
+		 subsamplePercentage = 0.9
+		 subsampleValuesWhenLowMemory = false
+
+runGroupOptions = [RunGroupOptions]
+		 runGroupName = %SCENARIO_NAME
+		 runGroupExit = false
+		 replacementChar = %
+
+scenarioConfig = [ScenarioOptions]
+		 _runObj = QUALITY
+		 intraInstanceObj = null
+		 interInstanceObj = MEAN
+		limitOptions = [TerminationCriteriaOptions]
+				 tunerTimeout = 2147483647
+				 numIterations = 2147483647
+				 runtimeLimit = 2147483647
+				 totalNumRunsLimit = 10
+				 countSMACTimeAsTunerTime = true
+				 challengeIncumbentAttempts = 1000
+				 fileToWatch = null
+
+		instanceOptions = [ProblemInstanceOptions]
+				 instanceFile = null
+				 instanceFeatureFile = null
+				 testInstanceFile = null
+				 checkInstanceFilesExist = false
+				 useInstances = false
+				 instanceSuffix = null
+				 testInstanceSuffix = null
+				 ignoreFeatures = false
+
+		 scenarioFile = null
+		 outputDirectory = F:\Data\Uni\PG\AILibs\softwareconfiguration\defaultEval\smac-output
+		 invalidScenarioReason = null
+		algoExecOptions = [AlgorithmExecutionOptions]
+				 algoExec = python F:\Data\Uni\PG\DefaultEvalEnvironment/py_wrapper/null_weka.classifiers.bayes.NaiveBayes_breast-cancer.py"
+				 algoExecDir = F:\Data\Uni\PG\AILibs\softwareconfiguration\defaultEval
+				 deterministic = true
+				 cutoffTime = 1.7976931348623157E308
+				 cutoffLength = -1.0
+				 additionalContext = {}
+				taeOpts = [TargetAlgorithmEvaluatorOptions]
+						 targetAlgorithmEvaluator = CLI
+						 abortOnCrash = false
+						 abortOnFirstRunCrash = true
+						 retryCount = 0
+						 cacheRuns = false
+						 cacheDebug = false
+						 useDynamicCappingExclusively = false
+						 reportStrictlyIncreasingRuntimes = false
+						 boundRuns = false
+						 maxConcurrentAlgoExecs = 1
+						 exitOnFailure = false
+						 runHashCodeFile = null
+						 leakMemory = false
+						 leakMemoryAmount = 1024
+						 verifySAT = null
+						 checkSATConsistency = true
+						 checkSATConsistencyException = true
+						 callObserverBeforeCompletion = true
+						prePostOptions = [PrePostCommandOptions]
+								 preCommand = null
+								 postCommand = null
+								 exceptionOnError = false
+								 logOutput = true
+								 directory = F:\Data\Uni\PG\AILibs\softwareconfiguration\defaultEval\.
+
+						 checkResultOrderConsistent = false
+						 skipOutstandingEvaluationsTAE = false
+						 logRequestResponses = false
+						 logRequestResponsesRCOnly = false
+						 trackRunsScheduled = false
+						 trackRunsScheduledResolution = 1.0
+						 uncleanShutdownCheck = true
+						 killCaptimeExceedingRun = true
+						 killCaptimeExceedingRunFactor = 10.0
+						 checkRunConfigsUnique = true
+						 checkRunConfigsUniqueException = true
+						 observeWalltimeIfNoRuntime = true
+						 observeWalltimeScale = 0.95
+						 observeWalltimeDelay = 5.0
+						 synchronousObserver = true
+						 taeDefaults = C:\Users\Joshua\.aeatk\tae.opt
+						ttaedo = [TransformTargetAlgorithmEvaluatorDecoratorOptions]
+								 transform = false
+								 transformValidValuesOnly = true
+								 SAT_runtime_transform = R
+								 SAT_quality_transform = Q
+								 UNSAT_runtime_transform = R
+								 UNSAT_quality_transform = Q
+								 TIMEOUT_runtime_transform = R
+								 TIMEOUT_quality_transform = Q
+								 other_runtime_transform = R
+								 other_quality_transform = Q
+
+						tForkOptions = [ForkingTargetAlgorithmEvaluatorDecoratorOptions]
+								 forkToTAE = null
+								fPolicyOptions = [ForkingTargetAlgorithmEvaluatorDecoratorPolicyOptions]
+										 fPolicy = null
+										 duplicateOnSlaveQuickTimeout = 5
+
+
+						 fileToWatch = null
+						 warnIfNoResponseFromTAE = 120
+						 taeStopProcessingOnShutdown = true
+						 filecache = false
+						 fileCacheSource = F:\Data\Uni\PG\AILibs\softwareconfiguration\defaultEval\.\runcache
+						 fileCacheOutput = F:\Data\Uni\PG\AILibs\softwareconfiguration\defaultEval\.\runcache
+						 fileCacheCrashOnMiss = false
+						 transformCrashedQuality = true
+						 transformCrashedQualityValue = 1.0E9
+						 filterZeroCutoffRuns = true
+
+				paramFileDelegate = [ParamConfigurationSpaceOptions]
+						 paramFile = F:\Data\Uni\PG\DefaultEvalEnvironment/pcs/null_weka.classifiers.bayes.NaiveBayes_breast-cancer.pcs
+						 searchSubspace = null
+						 searchSubspaceFile = null
+						 continuousNeighbours = 4
+
+
+
+seedOptions = [SeedOptions]
+		 seedOffset = 0
+		 numRun = 325222068
+		 initialSeedMap = {}
+
+ smacDefaults = C:\Users\Joshua\.aeatk\smac.opt
+stateOpts = [StateFactoryOptions]
+		 stateSerializer = LEGACY
+		 statedeSerializer = LEGACY
+		 restoreStateFrom = null
+		 restoreIteration = null
+		 restoreScenario = null
+		 cleanOldStatesOnSuccess = true
+		 saveContextWithState = true
+
+trackingOptions = [ParamConfigurationOriginTrackingOptions]
+		 configTracking = false
+
+validationOptions = [ValidationOptions]
+		 maxTimestamp = -1.0
+		 minTimestamp = 0.0
+		 multFactor = 2.0
+		 numberOfTestInstances = 2147483647
+		 numberOfTestSeedsPerInstance = 1000
+		 numberOfValidationRuns = 1
+		 outputFileSuffix = 
+		 saveStateFile = false
+		 useWallClockTime = true
+		 validateAll = false
+		 validateOnlyIfTunerTimeReached = 0.0
+		 validateOnlyIfWallTimeReached = 0.0
+		 validateOnlyLastIncumbent = true
+		 validationHeaders = true
+		 validationRoundingMode = UP
+
+warmStartOptions = [WarmStartOptions]
+		 warmStartStateFrom = null
+		 restoreIteration = 2147483647
+
+ validationSeed = 0
+ saveRunsEveryIteration = false
+ stateQuickSaves = true
+ shutdownTAEWhenDone = true
+ validationCores = null
+ shareModelMode = false
+ shareRunDataFrequency = 300
+ shareModeModeTAE = true
+ writeRunData = true
+ defaultHandler = USE_ALL
+ sharedModeModeAssymetricMode = false
+
+[AnalyticTargetAlgorithmEvaluatorOptions]
+ simulateDelay = false
+ cores = 0
+ observerFrequency = 100
+ func = CAMELBACK
+ scaleDelay = 1.0
+
+[BlackHoleTargetAlgorithmEvaluatorOptions]
+ warnings = true
+
+[CommandLineTargetAlgorithmEvaluatorOptions]
+ observerFrequency = 500
+ concurrentExecution = true
+ cores = 1
+ logAllCallStrings = false
+ logAllResultLines = false
+ logAllCallsAndResultLines = false
+ logAllProcessOutput = false
+ listenForUpdates = true
+ paramArgumentsContainQuotes = false
+ pgEnvKillCommand = null
+ pgNiceKillCommand = bash -c "kill -s TERM -%pid"
+ pgForceKillCommand = bash -c "kill -s KILL -%pid"
+ procNiceKillCommand = kill -s TERM %pid
+ procForceKillCommand = kill -s KILL %pid
+ smacDefaults = C:\Users\Joshua\.aeatk\cli-tae.opt
+
+[ConstantTargetAlgorithmEvaluatorOptions]
+ runResult = SAT
+ runtime = 1.0
+ quality = 0.0
+ runlength = 0.0
+ additionalRunData = 
+
+[IPCTargetAlgorithmEvaluatorOptions]
+ persistent = false
+ ipcMechanism = UDP
+ encodingMechanism = CALL_STRING
+ remoteHost = 127.0.0.1
+ remotePort = 5050
+ udpPacketSize = 4096
+ localPort = 0
+ execScript = null
+ execScriptOutput = false
+ poolConnections = false
+ ipcDefaults = C:\Users\Joshua\.aeatk\ipc-tae.opt
+ asyncThreads = 9
+
+[PreloadedResponseTargetAlgorithmEvaluatorOptions]
+ preloadedResponses = 
+ runLength = -1.0
+ quality = 0.0
+ additionalRunData = 
+
+[RandomResponseTargetAlgorithmEvaluatorOptions]
+ simulateDelay = false
+ additionalRunData = 
+ cores = 0
+ maxResponse = 10.0
+ minResponse = 0.0
+ observerFrequency = 500
+ trendCoefficient = 0.0
+ seed = 1531426981142
+ persistent = false
+ scaleDelay = 1.0
+
+
+22:23:01.755 [main] INFO  c.u.c.b.s.c.SequentialModelBasedAlgorithmConfiguration - SMAC started at: 12.07.2018 22:23:01. Minimizing mean quality.
+22:23:02.251 [CLI TAE (STDERR Thread - #0)] WARN  c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - [PROCESS-ERR]  weka.core.Version: Unable to load version information!
+22:23:02.452 [CLI TAE (STDERR Thread - #0)] WARN  c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - [PROCESS-ERR]  java.lang.IllegalArgumentException: Can't use both kernel density estimation and discretization!
+22:23:02.453 [CLI TAE (STDERR Thread - #0)] WARN  c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - [PROCESS-ERR]  	at weka.classifiers.bayes.NaiveBayes.setOptions(NaiveBayes.java:441)
+22:23:02.453 [CLI TAE (STDERR Thread - #0)] WARN  c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - [PROCESS-ERR]  	at weka.core.ResourceUtils.forName(ResourceUtils.java:109)
+22:23:02.453 [CLI TAE (STDERR Thread - #0)] WARN  c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - [PROCESS-ERR]  	at weka.core.Utils.forName(Utils.java:1043)
+22:23:02.453 [CLI TAE (STDERR Thread - #0)] WARN  c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - [PROCESS-ERR]  	at weka.classifiers.AbstractClassifier.forName(AbstractClassifier.java:89)
+22:23:02.453 [CLI TAE (STDERR Thread - #0)] WARN  c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - [PROCESS-ERR]  	at de.upb.crc901.automl.hascocombinedml.MLServicePipelineFactory.addWEKAClassifier(MLServicePipelineFactory.java:115)
+22:23:02.454 [CLI TAE (STDERR Thread - #0)] WARN  c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - [PROCESS-ERR]  	at de.upb.crc901.automl.hascocombinedml.MLServicePipelineFactory.getComponentInstantiation(MLServicePipelineFactory.java:57)
+22:23:02.454 [CLI TAE (STDERR Thread - #0)] WARN  c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - [PROCESS-ERR]  	at defaultEval.core.Util.createPipeline(Util.java:49)
+22:23:02.454 [CLI TAE (STDERR Thread - #0)] WARN  c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - [PROCESS-ERR]  	at defaultEval.core.PipelineEvaluator.main(PipelineEvaluator.java:98)
+22:23:02.554 [CLI TAE (Master Thread - #0)] ERROR c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - The following algorithm call failed: cd "F:\Data\Uni\PG\AILibs\softwareconfiguration\defaultEval" &  python F:\Data\Uni\PG\DefaultEvalEnvironment/py_wrapper/null_weka.classifiers.bayes.NaiveBayes_breast-cancer.py no_instance 0 1.7976931348623157E308 2147483647 -1 -D 'true' -K 'true'  
+22:23:02.554 [CLI TAE (Master Thread - #0)] ERROR c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - The last 2 lines of output we saw were:
+22:23:02.554 [CLI TAE (STDERR Thread - #0)] WARN  c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - [PROCESS-ERR] java.lang.RuntimeException: The given plan is not valid..
+	at de.upb.crc901.automl.pipeline.service.MLServicePipeline.<init>(MLServicePipeline.java:61)
+	at de.upb.crc901.automl.hascocombinedml.MLServicePipelineFactory.getComponentInstantiation(MLServicePipelineFactory.java:65)
+	at defaultEval.core.Util.createPipeline(Util.java:49)
+	at defaultEval.core.PipelineEvaluator.main(PipelineEvaluator.java:98)
+Traceback (most recent call last):
+  File "F:\Data\Uni\PG\DefaultEvalEnvironment/py_wrapper/null_weka.classifiers.bayes.NaiveBayes_breast-cancer.py", line 12, in <module>
+    file = open("results/null_weka.classifiers.bayes.NaiveBayes_breast-cancer.txt", "r")
+IOError: [Errno 2] No such file or directory: 'results/null_weka.classifiers.bayes.NaiveBayes_breast-cancer.txt'
+22:23:02.554 [CLI TAE (Master Thread - #0)] ERROR c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - > Parse file F:\Data\Uni\PG\AILibs\softwareconfiguration\mlplan\model\weka\weka-classifiers-autoweka.json
+22:23:02.555 [CLI TAE (Master Thread - #0)] ERROR c.u.c.b.a.t.b.c.CommandLineAlgorithmRun - > Parse file F:\Data\Uni\PG\AILibs\softwareconfiguration\mlplan\model\weka\weka-preprocessors-autoweka.json
+22:23:02.589 [main] ERROR c.u.c.b.smac.executors.SMACExecutor - Message:  Wrapper did not output anything that matched the expected output ("Result of algorithm run:..."). Please try executing the wrapper directly
+22:23:02.592 [main] ERROR c.u.c.b.smac.executors.SMACExecutor - A serious problem occured during target algorithm execution and we are aborting execution 
+ca.ubc.cs.beta.aeatk.targetalgorithmevaluator.exceptions.TargetAlgorithmAbortException:  Wrapper did not output anything that matched the expected output ("Result of algorithm run:..."). Please try executing the wrapper directly
+	at ca.ubc.cs.beta.aeatk.targetalgorithmevaluator.decorators.safety.AbortOnFirstRunCrashTargetAlgorithmEvaluator.validate(AbortOnFirstRunCrashTargetAlgorithmEvaluator.java:55) ~[aeatk.jar:na]
+	at ca.ubc.cs.beta.aeatk.targetalgorithmevaluator.decorators.safety.AbortOnFirstRunCrashTargetAlgorithmEvaluator.access$000(AbortOnFirstRunCrashTargetAlgorithmEvaluator.java:23) ~[aeatk.jar:na]
+	at ca.ubc.cs.beta.aeatk.targetalgorithmevaluator.decorators.safety.AbortOnFirstRunCrashTargetAlgorithmEvaluator$1.onSuccess(AbortOnFirstRunCrashTargetAlgorithmEvaluator.java:80) ~[aeatk.jar:na]
+	at ca.ubc.cs.beta.aeatk.targetalgorithmevaluator.base.cli.CommandLineTargetAlgorithmEvaluator$1$1.run(CommandLineTargetAlgorithmEvaluator.java:164) ~[aeatk.jar:na]
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source) ~[na:1.8.0_152]
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source) ~[na:1.8.0_152]
+	at java.lang.Thread.run(Unknown Source) ~[na:1.8.0_152]
+22:23:02.593 [main] ERROR c.u.c.b.smac.executors.SMACExecutor - We tried to call the target algorithm wrapper, but this call failed.
+22:23:02.593 [main] ERROR c.u.c.b.smac.executors.SMACExecutor - The problem is (most likely) somewhere in the wrapper or with the arguments to SMAC.
+22:23:02.593 [main] ERROR c.u.c.b.smac.executors.SMACExecutor - The easiest way to debug this problem is to manually execute the call we tried and see why it did not return the correct result
+22:23:02.593 [main] ERROR c.u.c.b.smac.executors.SMACExecutor - The required output of the wrapper is something like "Result for ParamILS: x,x,x,x,x".);
+22:23:02.593 [main] INFO  c.u.c.b.smac.executors.SMACExecutor - Exiting SMAC with failure. Log: F:\Data\Uni\PG\AILibs\softwareconfiguration\defaultEval\smac-output\NoScenarioFile\log-run325222068.txt
+22:23:02.593 [main] INFO  c.u.c.b.smac.executors.SMACExecutor - For a list of available commands use:  --help
+22:23:02.594 [main] INFO  c.u.c.b.smac.executors.SMACExecutor - The Quickstart guide at available at: http://www.cs.ubc.ca/labs/beta/Projects/SMAC/ or alternatively (doc/quickstart.html) gives simple examples for getting up and running.
+22:23:02.594 [main] INFO  c.u.c.b.smac.executors.SMACExecutor - The FAQ (doc/faq.pdf) contains commonly asked questions regarding troubleshooting, and usage.
+22:27:03.930 [main] INFO  c.u.c.b.smac.executors.SMACExecutor - The Manual (doc/manual.pdf) contains detailed information on file format semantics.
+22:27:03.930 [main] INFO  c.u.c.b.smac.executors.SMACExecutor - If you are stuck, please ask a question in the SMAC forum: https://groups.google.com/forum/#!forum/smac-forum

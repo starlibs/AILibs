@@ -20,8 +20,10 @@ public abstract class Optimizer {
 		
 		this.dataSet = dataSet;
 		
-		for (Parameter p : preProcessor.getParameters()) {
-			parameterList.add(p);
+		if(preProcessor != null) {
+			for (Parameter p : preProcessor.getParameters()) {
+				parameterList.add(p);
+			}
 		}
 		
 		for (Parameter p : classifier.getParameters()) {

@@ -1,0 +1,3 @@
+M categorical {true, false} [true]
+S categorical {1} [default]
+R categorical {AVG,PROD,MAJ,MIN,MAX} [default]

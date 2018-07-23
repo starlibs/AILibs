@@ -25,33 +25,31 @@ public class Util {
 	
 	
 	
-	public static MLServicePipeline createPipeline(Component prePorcessor, Map<String, String> prePorcessorParameter, Component classifier, Map<String, String> classifierParameter) {
+	public static ComponentInstance createPipeline(Component searcher, Map<String, String> searcherParameter, Component evaluator, Map<String, String> evaluatorParameter, Component classifier, Map<String, String> classifierParameter) {
 		
-		MLServicePipeline mlPipeline = null;
-		
-		if(prePorcessor != null) {
-			ComponentInstance preProcessorInstance = new ComponentInstance(prePorcessor, prePorcessorParameter, new HashMap<>());
+		if(searcher != null) {
+			ComponentInstance searcherInstance = new ComponentInstance(searcher, searcherParameter, new HashMap<>());
+			ComponentInstance evaluatorInstance = new ComponentInstance(evaluator, evaluatorParameter, new HashMap<>());
 			ComponentInstance classifierInstance = new ComponentInstance(classifier, classifierParameter, new HashMap<>());	// TODO req.!
 			
-			Map<String, ComponentInstance> satisfactionOfRequiredInterfaces = new HashMap<>();
-			satisfactionOfRequiredInterfaces.put("preprocessor", preProcessorInstance);
-			satisfactionOfRequiredInterfaces.put("classifier", classifierInstance);
+			Map<String, ComponentInstance> satisfactionOfRequiredInterfacesPreprocessor = new HashMap<>();
+			satisfactionOfRequiredInterfacesPreprocessor.put("eval", evaluatorInstance);
+			satisfactionOfRequiredInterfacesPreprocessor.put("search", searcherInstance);
 			
-			ComponentInstance pipelineInstance = new ComponentInstance(new Component("pipeline"), new HashMap<>(), satisfactionOfRequiredInterfaces);
+			Map<String, ComponentInstance> satisfactionOfRequiredInterfacesPipeline = new HashMap<>();
+			satisfactionOfRequiredInterfacesPipeline.put("preprocessor", new ComponentInstance(new Component("preprocessor"), new HashMap<>(), satisfactionOfRequiredInterfacesPreprocessor));
+			satisfactionOfRequiredInterfacesPipeline.put("classifier", classifierInstance);
 			
-			MLServicePipelineFactory pipilineFactory = new MLServicePipelineFactory();
-			mlPipeline = pipilineFactory.getComponentInstantiation(pipelineInstance);
+			return new ComponentInstance(new Component("pipeline"), new HashMap<>(), satisfactionOfRequiredInterfacesPipeline);
 			
 		}else {
-			ComponentInstance classifierInstance = new ComponentInstance(classifier, classifierParameter, new HashMap<>());	// TODO req.!
-			
-			MLServicePipelineFactory pipilineFactory = new MLServicePipelineFactory();
-			mlPipeline = pipilineFactory.getComponentInstantiation(classifierInstance);
+			return new ComponentInstance(classifier, classifierParameter, new HashMap<>());	// TODO req.!
 		}
 		
-		return mlPipeline;
-		
 	}
+	
+	
+	
 	
 
 }
