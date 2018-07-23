@@ -29,6 +29,7 @@ import hasco.model.ParameterRefinementConfiguration;
 import hasco.query.Factory;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.IObjectEvaluator;
+import jaicore.basic.SQLAdapter;
 import jaicore.graph.observation.IObservableGraphAlgorithm;
 import jaicore.logging.LoggerUtil;
 import jaicore.logic.fol.structure.CNFFormula;
@@ -118,11 +119,13 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 	private final String benchmarkName = "test";
 
 	/* performance knowledge base */
-	private final PerformanceKnowledgeBase performanceKB = new PerformanceKnowledgeBase();
+	private final PerformanceKnowledgeBase performanceKB;
 
 	/* parameter importance estimator */
-	private final ParameterImportanceEstimator parameterImportanceEstimator = new ParameterImportanceEstimator(
-			performanceKB, benchmarkName);
+	private final ParameterImportanceEstimator parameterImportanceEstimator;
+	
+	/* SQL adapter for performance samples */
+//	private final SQLAdapter adapter = new SQLAdapter("localhost", "jonas", "password", "mlplan_test");
 
 	public HASCO(final IObservableGraphBasedHTNPlanningAlgorithmFactory<R, N, A, V> plannerFactory,
 			final IObservableORGraphSearchFactory<N, A, V> searchFactory,
@@ -132,6 +135,9 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 		super();
 		this.plannerFactory = plannerFactory;
 		this.searchFactory = searchFactory;
+		this.performanceKB = new PerformanceKnowledgeBase();
+		this.parameterImportanceEstimator = new ParameterImportanceEstimator(performanceKB, benchmarkName);
+//		this.performanceKB.initializeDBTables();
 		this.randomCompletionEvaluator = new RandomCompletionEvaluator<>(new Random(this.randomSeed), 1,
 				searchSpaceUtilFactory.getPathUnifier(), new ISolutionEvaluator<N, V>() {
 					@Override
@@ -146,11 +152,14 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 						double score = (double) scoreOfSolution;
 						String identifier = Util.getComponentNamesOfComposition(composition);
 						System.out.println("add performance sample");
-						performanceKB.addPerformanceSample(benchmarkName, composition, score);
+						performanceKB.addPerformanceSample(benchmarkName, composition, score, false);
 						// logger.info("performanceKB has enough samples to copmute importance");
-						if (performanceKB.getNumSamples(benchmarkName, identifier) > 10)
-							logger.info(performanceKB.createInstancesForPerformanceSamples(benchmarkName, composition)
-									.toString());
+//						if (performanceKB.getNumSamples(benchmarkName, identifier) > 2) {
+//							logger.info(performanceKB.createInstancesForPerformanceSamples(benchmarkName, composition)
+//									.toString());
+//								HASCO.this.performanceKB.addPerformanceSampleToDB(benchmarkName, composition, score);
+//								logger.info("ADDED!");
+//						}
 
 						// Try epsilon = 0.4, k = 2
 						// logger.info("important params: "

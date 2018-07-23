@@ -2,6 +2,9 @@ package hasco.model;
 
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * For a given component, a composition defines all parameter values and the
  * required interfaces (recursively)
@@ -18,8 +21,10 @@ public class ComponentInstance {
 	 */
 	private final Map<String, ComponentInstance> satisfactionOfRequiredInterfaces;
 
-	public ComponentInstance(final Component component, final Map<String, String> parameterValues,
-			final Map<String, ComponentInstance> satisfactionOfRequiredInterfaces) {
+	@JsonCreator
+	public ComponentInstance(@JsonProperty("component") final Component component,
+			@JsonProperty("parameterValues") final Map<String, String> parameterValues,
+			@JsonProperty("satisfactionOfRequiredInterfaces") final Map<String, ComponentInstance> satisfactionOfRequiredInterfaces) {
 		super();
 		this.component = component;
 		this.parameterValues = parameterValues;

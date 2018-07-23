@@ -16,6 +16,7 @@ public class ExtendedRandomForest extends RandomForest {
 	public ExtendedRandomForest() {
 		super();
 		ExtendedRandomTree erTree = new ExtendedRandomTree();
+		erTree.setMinNum(5);
 		this.setClassifier(erTree);
 	}
 	
@@ -34,10 +35,10 @@ public class ExtendedRandomForest extends RandomForest {
 	}
 	
 	public void prepareForest(Instances data) {
-		FeatureSpace fSpace = new FeatureSpace(data);
+		this.featureSpace = new FeatureSpace(data);
 		for(Classifier classifier : m_Classifiers) {
 			ExtendedRandomTree curTree = (ExtendedRandomTree) classifier;
-			curTree.setFeatureSpace(fSpace);
+			curTree.setFeatureSpace(this.featureSpace);
 			curTree.preprocess();
 		}
 			

@@ -40,7 +40,8 @@ public class isValidParameterRangeRefinementPredicate implements EvaluablePredic
 
 	public isValidParameterRangeRefinementPredicate(final Collection<Component> components,
 			final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration,
-			final PerformanceKnowledgeBase performanceKB, final ParameterImportanceEstimator parameterImportanceEstimator) {
+			final PerformanceKnowledgeBase performanceKB,
+			final ParameterImportanceEstimator parameterImportanceEstimator) {
 		super();
 		this.components = components;
 		this.refinementConfiguration = refinementConfiguration;
@@ -51,7 +52,7 @@ public class isValidParameterRangeRefinementPredicate implements EvaluablePredic
 	@Override
 	public Collection<List<ConstantParam>> getParamsForPositiveEvaluation(final Monom state,
 			final ConstantParam... partialGrounding) {
-		
+
 		ComponentInstance ci = Util.getSolutionCompositionFromState(components, state);
 		String compositionIdentifier = Util.getComponentNamesOfComposition(ci);
 
@@ -75,12 +76,21 @@ public class isValidParameterRangeRefinementPredicate implements EvaluablePredic
 		Map<Parameter, ParameterDomain> paramDomains = Util.getUpdatedDomainsOfComponentParameters(state, component,
 				componentIdentifier);
 
-		if(performanceKB.getNumSamples("test", compositionIdentifier)>1) {
+		String paramName = component.getName() + "::" + param.getName();
+
+		if (performanceKB.getNumSamples("test", compositionIdentifier) > 5) {
 			try {
-				Set<Integer> importantParams = parameterImportanceEstimator.extractImportanceParameters(ci, 0.1, 2);
+				Set<String> importantParams = parameterImportanceEstimator.extractImportantParameters(ci, 0.1);
 				System.out.println("parameters estimated to be important: ");
-				for(int parameterIndex : importantParams) {
-					System.out.println("parameter " + parameterIndex);
+//				for (String parameterIndex : importantParams) {
+//					System.out.println("parameter " + parameterIndex);
+//				}
+				if (importantParams.contains(paramName)) {
+					System.out.println("Parameter " + paramName + " is important and will be refined!");
+				} else {
+					System.out.println("Parameter " + paramName
+							+ " is not important and will be discarded from further refinement!");
+					return new ArrayList<>();
 				}
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
@@ -88,7 +98,6 @@ public class isValidParameterRangeRefinementPredicate implements EvaluablePredic
 			}
 		}
 
-		
 		/*
 		 * For jmhansel fANOVA feature: if the parameters importance value is below
 		 * threshold epsilon, no more refinements will be allowed

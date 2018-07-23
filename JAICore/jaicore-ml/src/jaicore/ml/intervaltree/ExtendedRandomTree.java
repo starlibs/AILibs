@@ -222,20 +222,26 @@ public class ExtendedRandomTree extends RandomTree {
 			vU = varianceOfSubsetTotal.get(features);
 		else
 			vU = computeTotalVarianceOfSubset(features);
-//		System.out.println("current total variance for " + features.toString() + " = " + vU);
+		System.out.println("current total variance for " + features.toString() + " = " + vU);
+		double subtractor = 0;
 		for (int k = 1; k < features.size(); k++) {
 			// generate all subsets of size k
 			Set<Set<Integer>> subsets = Sets.combinations(features, k);
 			for (Set<Integer> subset : subsets) {
 				if (subset.size() < 1)
 					continue;
-				if (!varianceOfSubsetIndividual.containsKey(subset)) {
-					double temp = computeMarginalForSubsetOfFeatures(subset);
-					varianceOfSubsetIndividual.put(subset, temp);
-				}
+//				if (!varianceOfSubsetIndividual.containsKey(subset)) {
+//					double temp = computeMarginalForSubsetOfFeatures(subset);
+				//				}
+//				System.out.println("Subtracting " + varianceOfSubsetIndividual.get(subset) + " for " + subset);
 				vU -= varianceOfSubsetIndividual.get(subset);
+				subtractor += varianceOfSubsetIndividual.get(subset);
 			}
 		}
+//		if(vU < 0.0d)
+//			vU = 0.0d;
+		System.out.println("subtracting for " + features.toString() + " = " + subtractor );
+		System.out.println("result: " + vU);
 		varianceOfSubsetIndividual.put(features, vU);
 		double fraction = vU / totalVariance;
 		// componentsForSubsets.put(features, fraction);

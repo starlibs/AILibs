@@ -21,7 +21,7 @@ import weka.core.converters.ArffLoader.ArffReader;
 
 public class ExtendedRandomForestTest {
 
-	private static String testFile = "resources/regression_data/cpu_verysmall.arff";
+	private static String testFile = "resources/regression_data/cloud.arff";
 
 	@Test
 	public void testVarianceDecompose() {
@@ -30,7 +30,7 @@ public class ExtendedRandomForestTest {
 			ArffReader arffReader = new ArffReader(reader);
 			Instances data = arffReader.getData();
 			data.setClassIndex(data.numAttributes() - 1);
-
+			System.out.println(data);
 			ExtendedRandomForest forest = new ExtendedRandomForest(new FeatureSpace(data));
 			// forest.setFeatureSpace(new FeatureSpace(data));
 			forest.setNumIterations(20);
@@ -43,6 +43,7 @@ public class ExtendedRandomForestTest {
 				allFeatures.add(i);
 			}
 			Set<Set<Integer>> powerset = Sets.powerSet(allFeatures);
+			System.out.println("size: " + allFeatures.size());
 			for(Set<Integer> features : powerset) {
 				if(features.size() > 0) {
 					double cont = forest.computeMarginalForFeatureSubset(features);
@@ -51,6 +52,7 @@ public class ExtendedRandomForestTest {
 				}
 			}
 			System.out.println("sum of contributions = " + sum);
+			assertEquals(sum, 1.0d, 0.000000001);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

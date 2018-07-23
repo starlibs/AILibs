@@ -3,19 +3,14 @@ package hasco.knowledgebase;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -23,24 +18,17 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import hasco.core.HASCO;
 import hasco.core.Util;
 import hasco.model.CategoricalParameterDomain;
-import hasco.model.Component;
 import hasco.model.ComponentInstance;
 import hasco.model.NumericParameterDomain;
 import hasco.model.Parameter;
 import hasco.model.ParameterDomain;
 import jaicore.basic.SQLAdapter;
 import jaicore.basic.sets.PartialOrderedSet;
-import jaicore.ml.core.CategoricalFeatureDomain;
 import jaicore.ml.core.FeatureSpace;
-import jaicore.ml.intervaltree.ExtendedRandomForest;
-import jaicore.ml.intervaltree.ExtendedRandomTree;
 import weka.core.Attribute;
-import weka.core.AttributeMetaInfo;
 import weka.core.DenseInstance;
-import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.ProtectedProperties;
 
@@ -263,8 +251,8 @@ public class PerformanceKnowledgeBase implements IKnowledgeBase {
 					ProtectedProperties metaInfo = new ProtectedProperties(prop);
 					attr = new Attribute(componentInstance.toString() + "::" + parameter.getName(), metaInfo);
 				}
-				System.out.println("Trying to add parameter: " + attr.name() + " for component: "
-						+ componentInstance.getComponent().getName());
+//				System.out.println("Trying to add parameter: " + attr.name() + " for component: "
+//						+ componentInstance.getComponent().getName());
 				attributes.add(attr);
 			}
 			allAttributes.addAll(attributes);
