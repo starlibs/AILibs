@@ -15,6 +15,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import jaicore.ml.core.CategoricalFeatureDomain;
@@ -230,17 +231,18 @@ public class ExtendedRandomTree extends RandomTree {
 			for (Set<Integer> subset : subsets) {
 				if (subset.size() < 1)
 					continue;
-//				if (!varianceOfSubsetIndividual.containsKey(subset)) {
-//					double temp = computeMarginalForSubsetOfFeatures(subset);
-				//				}
-//				System.out.println("Subtracting " + varianceOfSubsetIndividual.get(subset) + " for " + subset);
+				// if (!varianceOfSubsetIndividual.containsKey(subset)) {
+				// double temp = computeMarginalForSubsetOfFeatures(subset);
+				// }
+				// System.out.println("Subtracting " + varianceOfSubsetIndividual.get(subset) +
+				// " for " + subset);
 				vU -= varianceOfSubsetIndividual.get(subset);
 				subtractor += varianceOfSubsetIndividual.get(subset);
 			}
 		}
-//		if(vU < 0.0d)
-//			vU = 0.0d;
-		System.out.println("subtracting for " + features.toString() + " = " + subtractor );
+		// if(vU < 0.0d)
+		// vU = 0.0d;
+		System.out.println("subtracting for " + features.toString() + " = " + subtractor);
 		System.out.println("result: " + vU);
 		varianceOfSubsetIndividual.put(features, vU);
 		double fraction = vU / totalVariance;
@@ -491,6 +493,7 @@ public class ExtendedRandomTree extends RandomTree {
 
 	private double computeTotalVarianceOfSubset(Set<Integer> features) {
 		double fraction = 0;
+		List<List<Observation>> observationList = new LinkedList<List<Observation>>();
 		List<Set<Observation>> observationSet = new LinkedList<Set<Observation>>();
 		for (int featureIndex : features) {
 			// List<Observation> list =
@@ -498,10 +501,28 @@ public class ExtendedRandomTree extends RandomTree {
 			List<Observation> list = Arrays.stream(allObservations[featureIndex]).collect(Collectors.toList());
 			HashSet<Observation> hSet = new HashSet<Observation>();
 			hSet.addAll(list);
-			observationSet.add(hSet);
+			observationList.add(list);
+			// if(list.size() > hSet.size()) {
+			// System.out.println("ALARM!!!");
+			// }
+			// observationList.add(list);
+			 observationSet.add(hSet);
 		}
-
-		Set<List<Observation>> observationProduct = Sets.cartesianProduct(observationSet);
+		System.out.println("list size: " + observationList.size() + " \t set size: " + observationSet.size());
+		List<List<Observation>> observationProduct = Lists.cartesianProduct(observationList);
+		Set<List<Observation>> observationSetProduct = Sets.cartesianProduct(observationSet);
+//		Set<List<Observation>> observationProduct = Sets.cartesianProduct(observationSet);
+		int sumList = 0, sumSet = 0;
+		for(List<Observation> list : observationProduct)
+			sumList += list.size();
+		for(List<Observation> list : observationSetProduct)
+			sumSet += list.size();
+		System.out.println("Problem: " + (sumList!=sumSet));
+		//		System.out.println("sum list: " + sumList + "\t sum set: " + sumSet);
+		
+//		System.out.println("list product: " + observationProduct.size() + " \t set product: " + observationSetProduct.size());
+//		System.out.println("set: " + observationSetProduct);
+//		System.out.println("list: " + observationProduct);
 		// Set<List<Double>> sizesProduct = Sets.cartesianProduct(sizesSet);
 		double vU = 0.0d;
 		List<Double> marginals = new LinkedList<Double>();
@@ -525,8 +546,11 @@ public class ExtendedRandomTree extends RandomTree {
 			// double weight = this.featureSpace.getRangeSizeOfFeatureSubspace(features) *
 			// prodOfIntSizes;
 			// System.out.println("resulting product = " + weight);
-			weightedSum += marginalPrediction;
-			weightedSumOfSquares += marginalPrediction * marginalPrediction;
+			double intervalSizeProduct = 1.0d;
+			for(Observation obs : curObs)
+				intervalSizeProduct *= obs.intervalSize;
+			weightedSum += marginalPrediction * intervalSizeProduct;
+			weightedSumOfSquares += marginalPrediction * marginalPrediction * intervalSizeProduct;
 			num++;
 		}
 		weightedSumOfSquares /= num;
@@ -534,25 +558,6 @@ public class ExtendedRandomTree extends RandomTree {
 		vU = weightedSumOfSquares - (weightedSum * weightedSum);
 		varianceOfSubsetTotal.put(features, vU);
 		return vU;
-	}
-
-	private double computeMean(List<Double> data) {
-		double result = 0.0d;
-		for (double point : data) {
-			result += point;
-		}
-		result /= data.size();
-		return result;
-	}
-
-	private double computeVariance(List<Double> data) {
-		double mean = this.computeMean(data);
-		double result = 0.0d;
-		for (double point : data) {
-			result += (point - mean) * (point - mean);
-		}
-		result /= (data.size() - 1);
-		return result;
 	}
 
 	public void preprocess() {
@@ -565,8 +570,8 @@ public class ExtendedRandomTree extends RandomTree {
 			set.add(i);
 		}
 		this.totalVariance = computeTotalVarianceOfSubset(set);
-//		System.out.println("trees total variance = " + this.totalVariance);
-//		System.out.println("num leaves = " + leaves.size());
+		// System.out.println("trees total variance = " + this.totalVariance);
+		// System.out.println("num leaves = " + leaves.size());
 
 		double sum = 1.0d;
 		for (int i = 0; i < allObservations.length; i++) {

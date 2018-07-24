@@ -22,7 +22,8 @@ import weka.core.Instances;
 import weka.core.converters.ArffLoader.ArffReader;
 
 public class ExtendedRandomTreeTest {
-	private static String testFile = "resources/regression_data/cloud.arff";
+	private static String testFile = "resources/regression_data/cpu-medium.arff";
+//	private static String testFile = "resources/regression_data/cloud.arff";
 
 	@Test
 	public void testTrain() {
@@ -33,7 +34,7 @@ public class ExtendedRandomTreeTest {
 
 			ExtendedRandomTree tree = new ExtendedRandomTree();
 			tree.setSeed(ThreadLocalRandom.current().nextInt());
-//			tree.setMinNum(5);
+			tree.setMinNum(5);
 			tree.setFeatureSpace(new FeatureSpace(data));
 			tree.buildClassifier(data);
 			tree.preprocess();
@@ -46,17 +47,22 @@ public class ExtendedRandomTreeTest {
 			List<Set<Integer>> powerlist = new ArrayList<Set<Integer>>();
 			powerlist.addAll(powerset);
 			// for(int k = 1; k < allFeatures.size(); k++) {
-			for (int k = 1; k < 3; k++) {
+			for (int k = 1; k < allFeatures.size(); k++) {
 				for (int i = 0; i < powerlist.size(); i++) {
 					Set<Integer> features = powerlist.get(i);
 					if (features.size() == k) {
 						double cont = tree.computeMarginalForSubsetOfFeatures(features);
+						System.out.println("cont: " + cont);
 						// System.out.printf("Variance contribution of %s : %f\n", features.toString(),
 						// cont);
 						sum += cont;
 					}
 				}
 			}
+//			Set<Integer> cSet = new HashSet<Integer>();
+//			cSet.add(0);
+//			cSet.add(1);
+//			System.out.println("cont: " + tree.computeMarginalForSubsetOfFeatures(cSet));
 			System.out.println("sum of contributions = " + sum);
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -21,6 +21,7 @@ public class ParameterImportanceEstimator {
 	private PerformanceKnowledgeBase performanceKnowledgeBase;
 	private String benchmarkName;
 	private Map<String, HashMap<Set<Integer>, Double>> importanceDictionary;
+	private Map<String, HashMap<String, Double>> importanceDictionaryForSingleComponents;
 
 	public ParameterImportanceEstimator(PerformanceKnowledgeBase performanceKnowledgeBase, String benchmarkName) {
 		forests = new HashMap<String, ExtendedRandomForest>();
@@ -28,6 +29,7 @@ public class ParameterImportanceEstimator {
 		this.performanceKnowledgeBase = performanceKnowledgeBase;
 		this.benchmarkName = benchmarkName;
 		this.importanceDictionary = new HashMap<String, HashMap<Set<Integer>, Double>>();
+		this.importanceDictionaryForSingleComponents = new HashMap<String, HashMap<String, Double>>();
 	}
 
 	/**
@@ -93,5 +95,9 @@ public class ParameterImportanceEstimator {
 		// largest subset size = all attributes minus class attribute
 		int k = data.numAttributes() - 1;
 		return extractImportantParameters(composition, importanceThreshold, k);
+	}
+	
+	public void extractImportanceForSingleComponents() {
+		
 	}
 }
