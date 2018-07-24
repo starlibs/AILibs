@@ -8,11 +8,11 @@ import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 public class DatabaseGraphGenerator implements GraphGenerator<DatabaseNode, String> {
 
-	private Database initialDatabase;
+	private Database database;
 
-	public DatabaseGraphGenerator(Database initialDatabase) {
+	public DatabaseGraphGenerator(Database database) {
 		super();
-		this.initialDatabase = initialDatabase;
+		this.database = database;
 	}
 
 	@Override
@@ -21,8 +21,7 @@ public class DatabaseGraphGenerator implements GraphGenerator<DatabaseNode, Stri
 
 			@Override
 			public DatabaseNode getRoot() {
-				// TODO: Implement me
-				return null;
+				return new DatabaseNode();
 			}
 
 		};
@@ -30,7 +29,7 @@ public class DatabaseGraphGenerator implements GraphGenerator<DatabaseNode, Stri
 
 	@Override
 	public SuccessorGenerator<DatabaseNode, String> getSuccessorGenerator() {
-		return new DatabaseSuccessorGenerator();
+		return new DatabaseSuccessorGenerator(database);
 	}
 
 	@Override
