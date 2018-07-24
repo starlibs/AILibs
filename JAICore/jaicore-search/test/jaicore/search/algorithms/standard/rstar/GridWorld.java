@@ -1,6 +1,5 @@
 package jaicore.search.algorithms.standard.rstar;
 
-import scala.Int;
 
 public class GridWorld  {
 
@@ -26,8 +25,8 @@ public class GridWorld  {
     private int posx, posy;
 
     public GridWorld(int x, int y) {
-        assert x >= 0 && x < 16 : "x has to be greater equals zero and less 16.";
-        assert y <= 0 && x < 16 : "y has to be greater equals zero and less 16.";
+        assert x >= 0 && x < 16 : "x has to be greater equals zero and less 16. Given x = " + x;
+        assert y >= 0 && x < 16 : "y has to be greater equals zero and less 16. Given y = " + y;
 
         posx = x;
         posy = y;
@@ -56,5 +55,37 @@ public class GridWorld  {
         } else {
             return false;
         }
+    }
+
+    /**
+     * Calculate resulting GridWorld when taking action a.
+     * @param a
+     * @return null, if we would land outside the grid. A new Gridworld otherwise.
+     */
+    public GridWorld onAction(int a) {
+        // x direction movement
+        int dx = 1;
+        if (a==2 || a==7)
+            dx = 0;
+        if (a==1 || a==4 || a==6)
+            dx = -1;
+
+        // y direction movement
+        int dy = 1;
+        if (a==4 || a==5)
+            dy = 0;
+        if (a==1 || a==2 || a==3)
+            dy = -1;
+
+        if (posx + dx < 0 || posy + dy < 0 || posx + dx > 15 || posy + dy > 15) {
+            return null;
+        } else {
+            return new GridWorld(posx+dx, posy+dy);
+        }
+    }
+
+    @Override
+    public String toString() {
+        return String.format("(%d, %d)", posx, posy);
     }
 }
