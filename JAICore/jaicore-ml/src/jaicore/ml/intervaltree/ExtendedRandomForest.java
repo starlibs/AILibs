@@ -47,7 +47,7 @@ public class ExtendedRandomForest extends RandomForest {
 	public void printVariances() {
 		for(Classifier classifier : m_Classifiers) {
 			ExtendedRandomTree curTree = (ExtendedRandomTree) classifier;
-			System.out.println("cur var: " + curTree.computeTotalVariance());
+			System.out.println("cur var: " + curTree.getTotalVariance());
 		}
 	}
 	
@@ -55,7 +55,7 @@ public class ExtendedRandomForest extends RandomForest {
 		double avg = 0;
 		for(Classifier classifier : m_Classifiers) {
 			ExtendedRandomTree curTree = (ExtendedRandomTree) classifier;
-			double curMarg = curTree.computeMarginalForSubsetOfFeatures(features);
+			double curMarg = curTree.computeMarginalVarianceContributionForSubsetOfFeatures(features);
 			avg += curMarg * 1.0/m_Classifiers.length;
 		}
 		return avg;

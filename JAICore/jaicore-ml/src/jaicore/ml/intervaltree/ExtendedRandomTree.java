@@ -167,49 +167,51 @@ public class ExtendedRandomTree extends RandomTree {
 	 * 
 	 * @return Total variance
 	 */
-	public double computeTotalVariance() {
-		double var = 0.0d;
-		double meanAcrossDomain = 0.0d;
-		// compute mean of predicted value across entire domain
-		for (Tree leaf : leaves) {
-			double productOfFractions = 1.0d;
-			for (int j = 0; j < featureSpace.getDimensionality(); j++) {
-				productOfFractions *= (partitioning.get(leaf).getFeatureDomain(j).getRangeSize()
-						/ featureSpace.getFeatureDomain(j).getRangeSize());
-			}
-			double prediction;
-			if (leaf.getClassDistribution() != null) {
-				prediction = leaf.getClassDistribution()[0];
-			} else
-				prediction = 1.0;
-			productOfFractions *= prediction;
-			meanAcrossDomain += productOfFractions;
-			// System.out.println("prediction = " + prediction);
-		}
-		// System.out.println("mean across domain = " + meanAcrossDomain);
-		fEmpty = meanAcrossDomain;
-		// compute total variance
-		for (Tree leaf : leaves) {
-
-			double prediction;
-			if (leaf.getClassDistribution() != null)
-				prediction = leaf.getClassDistribution()[0];
-			else
-				prediction = 1.0;
-
-			double productOfFractions = 1.0d;
-			for (int j = 0; j < featureSpace.getDimensionality(); j++) {
-				productOfFractions *= partitioning.get(leaf).getFeatureDomain(j).getRangeSize()
-						/ featureSpace.getFeatureDomain(j).getRangeSize();
-			}
-			double squareOfDifference = Math.pow((prediction - meanAcrossDomain), 2);
-			productOfFractions *= squareOfDifference;
-			var += productOfFractions;
-			// System.out.println("total variance = " + var);
-		}
-		this.totalVariance = var;
-		return var;
-	}
+	// public double computeTotalVariance() {
+	// double var = 0.0d;
+	// double meanAcrossDomain = 0.0d;
+	// // compute mean of predicted value across entire domain
+	// for (Tree leaf : leaves) {
+	// double productOfFractions = 1.0d;
+	// for (int j = 0; j < featureSpace.getDimensionality(); j++) {
+	// productOfFractions *=
+	// (partitioning.get(leaf).getFeatureDomain(j).getRangeSize()
+	// / featureSpace.getFeatureDomain(j).getRangeSize());
+	// }
+	// double prediction;
+	// if (leaf.getClassDistribution() != null) {
+	// prediction = leaf.getClassDistribution()[0];
+	// } else
+	// prediction = 1.0;
+	// productOfFractions *= prediction;
+	// meanAcrossDomain += productOfFractions;
+	// // System.out.println("prediction = " + prediction);
+	// }
+	// // System.out.println("mean across domain = " + meanAcrossDomain);
+	// fEmpty = meanAcrossDomain;
+	// // compute total variance
+	// for (Tree leaf : leaves) {
+	//
+	// double prediction;
+	// if (leaf.getClassDistribution() != null)
+	// prediction = leaf.getClassDistribution()[0];
+	// else
+	// prediction = 1.0;
+	//
+	// double productOfFractions = 1.0d;
+	// for (int j = 0; j < featureSpace.getDimensionality(); j++) {
+	// productOfFractions *=
+	// partitioning.get(leaf).getFeatureDomain(j).getRangeSize()
+	// / featureSpace.getFeatureDomain(j).getRangeSize();
+	// }
+	// double squareOfDifference = Math.pow((prediction - meanAcrossDomain), 2);
+	// productOfFractions *= squareOfDifference;
+	// var += productOfFractions;
+	// // System.out.println("total variance = " + var);
+	// }
+	// this.totalVariance = var;
+	// return var;
+	// }
 
 	/**
 	 * Computes variance contribution of a subset of features
@@ -217,7 +219,7 @@ public class ExtendedRandomTree extends RandomTree {
 	 * @param features
 	 * @return Variance contribution of the feature subset
 	 */
-	public double computeMarginalForSubsetOfFeatures(Set<Integer> features) {
+	public double computeMarginalVarianceContributionForSubsetOfFeatures(Set<Integer> features) {
 		double vU;
 		if (varianceOfSubsetTotal.containsKey(features))
 			vU = varianceOfSubsetTotal.get(features);
@@ -258,33 +260,6 @@ public class ExtendedRandomTree extends RandomTree {
 	 * @param observations
 	 * @return Marginal prediction for the subset of features.
 	 */
-	private double getMarginalPrediction(Set<Integer> indices, Observation[] observations) {
-		double result = 0;
-		for (Tree leaf : leaves) {
-			if (!observationConsistentWithLeaf(indices, observations, leaf)) {
-				continue;
-			}
-			double sizeOfLeaf = partitioning.get(leaf).getRangeSizeOfAllButSubset(indices);
-			double sizeOfDomain = featureSpace.getRangeSizeOfAllButSubset(indices);
-			double fractionOfSpaceForThisLeaf = sizeOfLeaf / sizeOfDomain;
-			double prediction;
-			if (leaf.getClassDistribution() != null) {
-				prediction = leaf.getClassDistribution()[0];
-			} else
-				prediction = 1.0;
-			result += prediction * fractionOfSpaceForThisLeaf;
-		}
-		return result;
-	}
-
-	/**
-	 * Computes a marginal prediction for a subset of features and a set of
-	 * observations (\hat{a}_U in the paper)
-	 * 
-	 * @param indices
-	 * @param observations
-	 * @return Marginal prediction for the subset of features.
-	 */
 	private double getMarginalPrediction(List<Integer> indices, List<Observation> observations) {
 		double result = 0;
 		Set<Integer> subset = new HashSet<Integer>();
@@ -308,37 +283,9 @@ public class ExtendedRandomTree extends RandomTree {
 		return result;
 	}
 
-	/**
-	 * Checks whether all observations are consistent with the feature space
-	 * associated with a leaf
-	 * 
-	 * @param indices
-	 * @param observations
-	 * @param leaf
-	 * @return true of the observations are consistent with the leaf in the
-	 *         specified feature dimensions, false otherwise.
-	 */
-	private boolean observationConsistentWithLeaf(Set<Integer> indices, Observation[] observations, Tree leaf) {
-		if (indices == null && observations == null)
-			return true;
-		FeatureSpace subSpace = partitioning.get(leaf);
-		int[] indicesArr = indices.stream().mapToInt(Number::intValue).toArray();
-		for (int i = 0; i < indicesArr.length; i++) {
-			int observationIndex = indicesArr[i];
-			double value = observations[i].midPoint;
-			if (subSpace.getFeatureDomain(i) instanceof NumericFeatureDomain) {
-				NumericFeatureDomain numDom = (NumericFeatureDomain) subSpace.getFeatureDomain(i);
-				// System.out.println(numDom.getMin() + "," + value + "," + numDom.getMax());
-
-			}
-			if (!subSpace.getFeatureDomain(observationIndex).containsInstance(value))
-				return false;
-		}
-		return true;
-	}
 
 	/**
-	 * checks whether the observations are consistent with a leaf (for implementing
+	 * Checks whether the observations are consistent with a leaf (for implementing
 	 * the indicator function in algorithm 2)
 	 * 
 	 * @param indices
@@ -491,6 +438,13 @@ public class ExtendedRandomTree extends RandomTree {
 		}
 	}
 
+	/**
+	 * Computes the total variance of marginal predictions for a given set of
+	 * features.
+	 * 
+	 * @param features
+	 * @return
+	 */
 	private double computeTotalVarianceOfSubset(Set<Integer> features) {
 		double fraction = 0;
 		List<List<Observation>> observationList = new LinkedList<List<Observation>>();
@@ -506,23 +460,25 @@ public class ExtendedRandomTree extends RandomTree {
 			// System.out.println("ALARM!!!");
 			// }
 			// observationList.add(list);
-			 observationSet.add(hSet);
+			observationSet.add(hSet);
 		}
 		System.out.println("list size: " + observationList.size() + " \t set size: " + observationSet.size());
 		List<List<Observation>> observationProduct = Lists.cartesianProduct(observationList);
 		Set<List<Observation>> observationSetProduct = Sets.cartesianProduct(observationSet);
-//		Set<List<Observation>> observationProduct = Sets.cartesianProduct(observationSet);
+		// Set<List<Observation>> observationProduct =
+		// Sets.cartesianProduct(observationSet);
 		int sumList = 0, sumSet = 0;
-		for(List<Observation> list : observationProduct)
+		for (List<Observation> list : observationProduct)
 			sumList += list.size();
-		for(List<Observation> list : observationSetProduct)
+		for (List<Observation> list : observationSetProduct)
 			sumSet += list.size();
-		System.out.println("Problem: " + (sumList!=sumSet));
-		//		System.out.println("sum list: " + sumList + "\t sum set: " + sumSet);
-		
-//		System.out.println("list product: " + observationProduct.size() + " \t set product: " + observationSetProduct.size());
-//		System.out.println("set: " + observationSetProduct);
-//		System.out.println("list: " + observationProduct);
+		System.out.println("Problem: " + (sumList != sumSet));
+		// System.out.println("sum list: " + sumList + "\t sum set: " + sumSet);
+
+		// System.out.println("list product: " + observationProduct.size() + " \t set
+		// product: " + observationSetProduct.size());
+		// System.out.println("set: " + observationSetProduct);
+		// System.out.println("list: " + observationProduct);
 		// Set<List<Double>> sizesProduct = Sets.cartesianProduct(sizesSet);
 		double vU = 0.0d;
 		List<Double> marginals = new LinkedList<Double>();
@@ -534,7 +490,7 @@ public class ExtendedRandomTree extends RandomTree {
 			featureList.addAll(features);
 			Collections.sort(featureList);
 			double marginalPrediction = this.getMarginalPrediction(featureList, curObs);
-//			marginals.add(marginalPrediction);
+			// marginals.add(marginalPrediction);
 			System.out.println(marginalPrediction);
 			weightedSum += marginalPrediction;
 			weightedSumOfSquares += marginalPrediction * marginalPrediction;
@@ -542,18 +498,26 @@ public class ExtendedRandomTree extends RandomTree {
 		}
 		weightedSumOfSquares /= num;
 		weightedSum /= num;
-//		System.out.println("wsos = " + weightedSumOfSquares + "\t ws = " + weightedSum);
+		// System.out.println("wsos = " + weightedSumOfSquares + "\t ws = " +
+		// weightedSum);
 		vU = weightedSumOfSquares - (weightedSum * weightedSum);
 		varianceOfSubsetTotal.put(features, vU);
 		System.out.println("Total var for " + features + " = " + vU);
 		return vU;
 	}
+	
+	public double getTotalVariance() {
+		return this.totalVariance;
+	}
 
+	/**
+	 * Sets up the tree for fANOVA
+	 */
 	public void preprocess() {
 		this.computePartitioning(featureSpace, m_Tree);
 		this.collectSplitPointsAndIntervalSizes(m_Tree);
 		this.computeObservations();
-//		this.computeTotalVariance();
+		// this.computeTotalVariance();
 		HashSet<Integer> set = new HashSet<Integer>();
 		for (int i = 0; i < this.featureSpace.getDimensionality(); i++) {
 			set.add(i);
@@ -562,9 +526,9 @@ public class ExtendedRandomTree extends RandomTree {
 		// System.out.println("trees total variance = " + this.totalVariance);
 		// System.out.println("num leaves = " + leaves.size());
 
-//		double sum = 1.0d;
-//		for (int i = 0; i < allObservations.length; i++) {
-//			sum *= allObservations[i].length;
-//		}
+		// double sum = 1.0d;
+		// for (int i = 0; i < allObservations.length; i++) {
+		// sum *= allObservations[i].length;
+		// }
 	}
 }

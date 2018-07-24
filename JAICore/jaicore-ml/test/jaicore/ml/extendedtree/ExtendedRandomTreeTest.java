@@ -51,7 +51,7 @@ public class ExtendedRandomTreeTest {
 				for (int i = 0; i < powerlist.size(); i++) {
 					Set<Integer> features = powerlist.get(i);
 					if (features.size() == k) {
-						double cont = tree.computeMarginalForSubsetOfFeatures(features);
+						double cont = tree.computeMarginalVarianceContributionForSubsetOfFeatures(features);
 						System.out.println("cont: " + cont);
 						// System.out.printf("Variance contribution of %s : %f\n", features.toString(),
 						// cont);
