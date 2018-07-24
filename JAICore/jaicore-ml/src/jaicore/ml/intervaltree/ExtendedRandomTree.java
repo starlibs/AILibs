@@ -534,29 +534,18 @@ public class ExtendedRandomTree extends RandomTree {
 			featureList.addAll(features);
 			Collections.sort(featureList);
 			double marginalPrediction = this.getMarginalPrediction(featureList, curObs);
-			marginals.add(marginalPrediction);
-			// System.out.println(marginalPrediction + ",");
-			// double prodOfIntSizes = 1.0d;
-			// for (Observation obs : curObs) {
-			// prodOfIntSizes *= obs.intervalSize;
-			// }
-			// double sumOfWeights = this.featureSpace.getRangeSizeOfAllButSubset(features);
-			// System.out.println("sum of weights = " + sumOfWeights);
-			// System.out.println("prod of interval sizes = " + prodOfIntSizes);
-			// double weight = this.featureSpace.getRangeSizeOfFeatureSubspace(features) *
-			// prodOfIntSizes;
-			// System.out.println("resulting product = " + weight);
-			double intervalSizeProduct = 1.0d;
-			for(Observation obs : curObs)
-				intervalSizeProduct *= obs.intervalSize;
-			weightedSum += marginalPrediction * intervalSizeProduct;
-			weightedSumOfSquares += marginalPrediction * marginalPrediction * intervalSizeProduct;
+//			marginals.add(marginalPrediction);
+			System.out.println(marginalPrediction);
+			weightedSum += marginalPrediction;
+			weightedSumOfSquares += marginalPrediction * marginalPrediction;
 			num++;
 		}
 		weightedSumOfSquares /= num;
 		weightedSum /= num;
+//		System.out.println("wsos = " + weightedSumOfSquares + "\t ws = " + weightedSum);
 		vU = weightedSumOfSquares - (weightedSum * weightedSum);
 		varianceOfSubsetTotal.put(features, vU);
+		System.out.println("Total var for " + features + " = " + vU);
 		return vU;
 	}
 
@@ -564,7 +553,7 @@ public class ExtendedRandomTree extends RandomTree {
 		this.computePartitioning(featureSpace, m_Tree);
 		this.collectSplitPointsAndIntervalSizes(m_Tree);
 		this.computeObservations();
-		this.computeTotalVariance();
+//		this.computeTotalVariance();
 		HashSet<Integer> set = new HashSet<Integer>();
 		for (int i = 0; i < this.featureSpace.getDimensionality(); i++) {
 			set.add(i);
@@ -573,9 +562,9 @@ public class ExtendedRandomTree extends RandomTree {
 		// System.out.println("trees total variance = " + this.totalVariance);
 		// System.out.println("num leaves = " + leaves.size());
 
-		double sum = 1.0d;
-		for (int i = 0; i < allObservations.length; i++) {
-			sum *= allObservations[i].length;
-		}
+//		double sum = 1.0d;
+//		for (int i = 0; i < allObservations.length; i++) {
+//			sum *= allObservations[i].length;
+//		}
 	}
 }
