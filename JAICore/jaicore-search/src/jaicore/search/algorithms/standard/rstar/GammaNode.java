@@ -68,7 +68,7 @@ public class GammaNode<T, V extends Comparable<V>> extends Node<T, V> {
      */
     public void setSuccessors(Collection<GammaNode<T,V>> succ) {
         if (successors != null) {
-            throw new IllegalStateException("The successor of this Gamma node have already been set. Setting twice is not allowed.");
+            throw new IllegalStateException("The successor of this Gamma node " + this + " have already been set. Setting twice is not allowed.");
         }
         successors = succ;
     }
@@ -86,6 +86,23 @@ public class GammaNode<T, V extends Comparable<V>> extends Node<T, V> {
     }
 
 
+    @Override
+    public int compareTo(Node<T, V> o) {
+
+
+        if (o instanceof GammaNode) {
+
+            Object k = getInternalLabel();
+            Object k_ = o.getInternalLabel();
+
+            if ((k instanceof RStarK) && (k_ instanceof RStarK)) {
+                return ((RStarK) k).compareTo((RStarK)k_);
+            } else {
+                throw new IllegalArgumentException();
+            }
+        }
+        return super.compareTo(o);
+    }
 
     /**
      * Checks equalitiy to other gamma node by checking equality of its points.
