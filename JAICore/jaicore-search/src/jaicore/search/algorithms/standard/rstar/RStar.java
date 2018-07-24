@@ -1,9 +1,12 @@
 package jaicore.search.algorithms.standard.rstar;
 
+import jaicore.search.structure.core.Node;
 import jaicore.search.structure.core.OpenCollection;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.PriorityQueue;
 
 /**
  * Implementation of the R* algorithm.
@@ -12,13 +15,13 @@ import java.util.Collection;
  * @param <A> action (action space of problem)
  * @param <D> type of Delta distance
  */
-public class RStar<T, A, D> {
+public class RStar<T, A, D> extends Thread {
 
     /* Open list. */
-    protected OpenCollection<GammaNode<T, RStarK>> open;
+    protected PriorityQueue<GammaNode<T, RStarK>> open = new PriorityQueue<GammaNode<T, RStarK>>();
 
     /* Closed list of already expanded states. */
-    protected ArrayList<GammaNode<T, RStarK>> closed;
+    protected ArrayList<GammaNode<T, RStarK>> closed = new ArrayList<>();
 
     /* For actual search problem */
     GammaGraphGenerator<T,D> gammaGraphGenerator;
@@ -28,6 +31,7 @@ public class RStar<T, A, D> {
 
     private final GammaNode<T, RStarK> n_start;
     private final GammaNode<T, RStarK> n_goal;
+
 
     /**
      * 
@@ -56,6 +60,7 @@ public class RStar<T, A, D> {
         n_start = gammaGraphGenerator.getRoot();
         RStarK k_start = new RStarK(false, w*h(n_start, n_goal));
         n_start.setInternalLabel(k_start);
+        n_start.g = 0;
     }
 
     /**
@@ -66,6 +71,16 @@ public class RStar<T, A, D> {
     private void updateState(GammaNode<T, RStarK> n) {
         T s = n.getPoint();
         open.remove(n);  // What if n is not in open list.
+
+//        System.out.println(String.format(
+//                "%b, %b, %b",
+//                (n.g > w*h(n_start, n)),
+//                n.backpointer == null || (n.backpointer.path.get(n) == null),
+//                n.avoid
+//        ));
+//        System.out.println(n);
+//        System.out.println("n.g = " + n.g + ", h(n_start, n) = " + h(n_start, n));
+
         if ((n.g > w*h(n_start, n)) || ((n.backpointer == null || (n.backpointer.path.get(n) == null)) && n.avoid)) {
             n.setInternalLabel(new RStarK(true, n.g + w*h(n, n_goal)));
         } else {
@@ -74,6 +89,10 @@ public class RStar<T, A, D> {
         open.add(n);
     }
 
+    /**
+     * Tries to compute the local path
+     * @param n
+     */
     private void reevaluateState(GammaNode<T, RStarK> n) {
         /**
          * Try to compute the local path from bp(n) to n.
@@ -84,7 +103,13 @@ public class RStar<T, A, D> {
         if (pac.path != null) {
             n.backpointer.c_low.put(n, pac.cost);
         }
+        // System.out.println("Path and cost from " + n.backpointer.getPoint() + " to " + n.getPoint() + ": " + pac);
 
+        /**
+         * If no path bp(n)->n could be computed or
+         * the g = "cost from n_start to bp(n)" + the cost of the found path is greater than w*h(n_start, n)
+         * the state n should be avoided.
+         */
         // Line 8
         if ((n.backpointer.path.get(n) == null) || (n.backpointer.g + n.backpointer.c_low.get(n) > w*h(n_start, n))) {
             n.backpointer = argminCostToStateOverPredecessors(n);
@@ -94,9 +119,11 @@ public class RStar<T, A, D> {
         updateState(n);
     }
 
+    @Override
     public void run() {
         // Line 14 to 16: see constructor.
         // Line 17
+//        System.out.println("Staring RStar");
         open.add(n_start);
 
         /**
@@ -104,12 +131,23 @@ public class RStar<T, A, D> {
          * with higher priority i.e. less k than k_n_goal = [1, inf].
          */
         // Line 18
-        while (!open.isEmpty() && open.peek().compareTo(n_goal) <= 0) {
+        while (!isInterrupted() && !open.isEmpty() && open.peek().compareTo(n_goal) <= 0) {
             /**
              * Remove node n with highest priority i.e. smallest k-value from open.
              */
-            GammaNode<T, RStarK> n = open.peek();
-            open.remove(n);
+            GammaNode<T, RStarK> n = open.poll(); //eek();
+            //open.remove(n);
+            System.out.println("Rstar: " + n);
+
+            if (n != n_start && n.g == 0 && (Double)n.getAnnotation("f") == 0) {
+                System.out.println("FAILED AT " + n);
+                break;
+            }
+
+            if (closed.contains(n)) {
+                System.out.println("Continue " + n);
+                continue;
+            }
 
             // Line 20
             if ((!n.equals(n_start)) && (n.backpointer == null || (n.backpointer.path.get(n) == null))) {
@@ -133,6 +171,11 @@ public class RStar<T, A, D> {
                 // Line 28
                 for (GammaNode<T, RStarK> n_ : succ_s) {
 
+                    // Ignore n_start
+//                    if (n_ == n_start) {
+//                        continue;
+//                    }
+
                     /**
                      * Initialize successors by setting the path from s to s_ to null,
                      * and by estimating the lowest cost from s to s_ with the heuristic h(s, s_).
@@ -152,6 +195,7 @@ public class RStar<T, A, D> {
                      */
                     // Line 32
                     if ((n_.backpointer == null) || (n.g + n.c_low.get(n_) < n_.g)) {
+                        // System.out.println(String.format("Line 32: n.g = %g, c_low(n, n_) = %g", n.g, n.c_low.get(n_)));
                         n_.g = n.g + n.c_low.get(n_);
                         n_.backpointer = n;
                         updateState(n_); // updates priority of n_ in open list.
@@ -159,15 +203,89 @@ public class RStar<T, A, D> {
                 }
             }
         }
+        // After the while loop of R* terminates, the solution can be re-constructed
+        // by following backpointers bp backwards starting at state n_goal until s_start is reached.
+        // use getSolution() for this
 
-        // After the wile loop of R* terminates, the solution can be re-constructed
-        // by following backpointers bp backwards starting at state s_gaol until s_start is reached.
     }
 
+
+    /**
+     *
+     * @return
+     */
+    public double getSolutionCost() {
+        double cost = 0;
+
+        if (n_goal.backpointer != null) {
+            GammaNode<T, RStarK> current = n_goal;
+            while (current != n_start) {
+                cost += current.backpointer.c_low.get(current);
+                current = current.backpointer;
+            }
+        }
+
+        return cost;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public List<Node<T, RStarK>> getSolutionPath() {
+
+        List<Node<T, RStarK>> solution = new ArrayList<>();
+
+        if (n_goal.backpointer != null) {
+            GammaNode<T, RStarK> current = n_goal;
+            while (current != n_start) {
+                List<Node<T,RStarK>> pathBpToCurrent = current.backpointer.path.get(current);
+                pathBpToCurrent.addAll(solution);
+                solution = pathBpToCurrent;
+                current = current.backpointer;
+            }
+        } else {
+            solution = null;
+        }
+        return solution;
+    }
+
+    /**
+     * Samples the backpointers from n_goal onwards to n_start.
+     * @return
+     */
+    public List<GammaNode<T, RStarK>> getGammaSolutionPath()  {
+
+        List<GammaNode<T, RStarK>> solution = new ArrayList<>();
+
+        if (n_goal.backpointer != null) {
+            GammaNode<T, RStarK> current = n_goal;
+            while (current != n_start) {
+                solution.add(0, current);
+                current = current.backpointer;
+            }
+            solution.add(0, n_start);
+        } else {
+            solution = null;
+        }
+        return solution;
+    }
+
+    /**
+     *
+     * @param from
+     * @param to
+     * @return
+     */
     private double h(GammaNode<T, RStarK> from, GammaNode<T, RStarK> to) {
         return gammaGraphGenerator.h(from, to);
     }
 
+    /**
+     *
+     * @param n
+     * @return
+     */
     private GammaNode<T, RStarK> argminCostToStateOverPredecessors(GammaNode<T, RStarK> n) {
         GammaNode<T, RStarK> argmin = null;
         for (GammaNode<T, RStarK> p : n.getPredecessors()) {
@@ -183,7 +301,7 @@ public class RStar<T, A, D> {
      * Queries the this.gammaSuccessorGenerator and checks if a generate state has been
      * visited i.e. generated in Gamma before. If yes, it takes the old reference from
      * the this.alreadyGeneratedStates list.
-     * TODO: Also maintains predecessor sets of nodes.
+     * Also maintains the predecessor set of nodes.
      *
      * @param n Gamma node to generate successors for.
      * @return List of Gamma nodes.
