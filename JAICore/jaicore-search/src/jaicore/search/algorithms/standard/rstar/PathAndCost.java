@@ -14,4 +14,8 @@ public class PathAndCost<T,V extends Comparable<V>> {
         this.cost = cost;
     }
 
+    @Override
+    public String toString() {
+        return String.format("PAC[%b, %f]", path, cost);
+    }
 }
