@@ -4,7 +4,7 @@ import java.util.List;
 
 import javax.swing.JFrame;
 
-import jaicore.graph.observation.IObservableGraphAlgorithm;
+import jaicore.graph.IObservableGraphAlgorithm;
 import jaicore.graphvisualizer.IGraphDataSupplier;
 import jaicore.graphvisualizer.INodeDataSupplier;
 import javafx.application.Platform;

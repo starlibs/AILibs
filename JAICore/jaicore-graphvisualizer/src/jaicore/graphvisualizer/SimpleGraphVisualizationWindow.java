@@ -11,7 +11,7 @@ import javax.swing.JFrame;
 import com.google.common.eventbus.EventBus;
 
 import jaicore.graph.Graph;
-import jaicore.graph.observation.IObservableGraphAlgorithm;
+import jaicore.graph.IObservableGraphAlgorithm;
 import jaicore.graphvisualizer.events.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.NodeReachedEvent;
 

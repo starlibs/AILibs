@@ -3,7 +3,7 @@ package de.upb.crc901.automl.hascoscikitlearnml;
 import de.upb.crc901.automl.hascowekaml.HASCOForMEKA;
 
 import jaicore.basic.SQLAdapter;
-import jaicore.graph.observation.IObservableGraphAlgorithm;
+import jaicore.graph.IObservableGraphAlgorithm;
 import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionSolution;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.search.algorithms.standard.core.INodeEvaluator;

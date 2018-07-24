@@ -20,7 +20,7 @@ import hasco.core.Solution;
 import hasco.serialization.ComponentLoader;
 import jaicore.basic.FileUtil;
 import jaicore.basic.ILoggingCustomizable;
-import jaicore.graph.observation.IObservableGraphAlgorithm;
+import jaicore.graph.IObservableGraphAlgorithm;
 import jaicore.logging.LoggerUtil;
 import jaicore.ml.evaluation.MonteCarloCrossValidationEvaluator;
 import jaicore.ml.evaluation.MulticlassEvaluator;

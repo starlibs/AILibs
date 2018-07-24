@@ -5,7 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
-import jaicore.graph.observation.IObservableGraphAlgorithm;
+
+import jaicore.graph.IObservableGraphAlgorithm;
 import jaicore.graphvisualizer.IGraphDataSupplier;
 import jaicore.graphvisualizer.INodeDataSupplier;
 import jaicore.graphvisualizer.events.GraphInitializedEvent;

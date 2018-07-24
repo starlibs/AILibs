@@ -10,8 +10,8 @@ import java.util.Set;
 
 import jaicore.basic.PerformanceLogger;
 import jaicore.graph.Graph;
+import jaicore.graph.IObservableGraphAlgorithm;
 import jaicore.graph.LabeledGraph;
-import jaicore.graph.observation.IObservableGraphAlgorithm;
 import jaicore.search.structure.core.AndNode;
 import jaicore.search.structure.core.GraphEventBus;
 import jaicore.search.structure.core.Node;
