@@ -38,8 +38,7 @@ public class DatabaseGraphGenerator implements GraphGenerator<DatabaseNode, Stri
 
 			@Override
 			public boolean isGoal(DatabaseNode node) {
-				// TODO: Implement me
-				return false;
+				return node.isFinished();
 			}
 		};
 	}

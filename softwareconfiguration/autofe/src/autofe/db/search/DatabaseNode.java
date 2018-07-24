@@ -30,4 +30,27 @@ public class DatabaseNode {
 		this.selectedAttributes = selectedAttributes;
 	}
 
+	public boolean isFinished() {
+		return isFinished;
+	}
+
+	public void setFinished(boolean isFinished) {
+		this.isFinished = isFinished;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		if (selectedAttributes.isEmpty()) {
+			sb.append("{}");
+		} else {
+			for (AbstractAttribute att : selectedAttributes) {
+				sb.append(att.getName());
+				sb.append(",");
+			}
+		}
+		return "DatabaseNode [selectedAttributes=" + sb.substring(0, sb.length() - 1) + ", isFinished=" + isFinished
+				+ "]";
+	}
+
 }

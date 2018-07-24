@@ -55,6 +55,10 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 					NodeType.OR));
 		}
 
+		// Exit edge
+		DatabaseNode exitNode = new DatabaseNode(new ArrayList<>(currentAttributes), true);
+		toReturn.add(new NodeExpansionDescription<DatabaseNode, String>(node, exitNode, "Exit", NodeType.OR));
+
 		return toReturn;
 	}
 
