@@ -1,8 +1,14 @@
 package jaicore.search.algorithms.standard.rstar;
 
+import jaicore.search.algorithms.standard.astar.AStar;
+import jaicore.search.algorithms.standard.core.INodeEvaluator;
 import jaicore.search.structure.core.GraphGenerator;
+import jaicore.search.structure.core.Node;
+import jaicore.search.structure.core.NodeExpansionDescription;
+import jaicore.search.structure.core.NodeType;
 import jaicore.search.structure.graphgenerator.*;
 
+import java.lang.reflect.Array;
 import java.util.*;
 
 public class GridWorldGammaGraphGenerator implements GammaGraphGenerator<GridWorld, Integer> {
@@ -12,7 +18,7 @@ public class GridWorldGammaGraphGenerator implements GammaGraphGenerator<GridWor
     GraphGenerator<GridWorld, Integer> gg;
     HashMap<GammaNode, GammaNode> alreadyGeneratedStates = new HashMap<>();
 
-    public GridWorldGammaGraphGenerator(GraphGenerator<GridWorld, Integer> graphGenerator) {
+    public GridWorldGammaGraphGenerator() {
         nstart = new GammaNode<>(new GridWorld(0, 0));
         ngoal = new GammaNode<>(new GridWorld(15, 15));
 
@@ -54,7 +60,13 @@ public class GridWorldGammaGraphGenerator implements GammaGraphGenerator<GridWor
             int dx = r.nextInt(dx_max + 1 - dx_min) + dx_min;
             int dy = r.nextInt(dy_max + 1 - dy_min) + dy_min;
 
-            assert posx + dx >= 0 && posx + dx <= 15 && posy + dy >= 0 && posy + dy <= 15 :
+            // Regenerate successor if dx and dx are zero (force moving).
+            while (dx == 0 && dy == 0) {
+                dx = r.nextInt(dx_max + 1 - dx_min) + dx_min;
+                dy = r.nextInt(dy_max + 1 - dy_min) + dy_min;
+            }
+
+            assert posx + dx >= 0 || posx + dx <= 15 || posy + dy >= 0 || posy + dy <= 15 :
                     String.format("Calc wrong: dx=%d, dy=%d, posx=%d, posy=%d", dx, dy, posx, posy);
 
 
@@ -66,11 +78,11 @@ public class GridWorldGammaGraphGenerator implements GammaGraphGenerator<GridWor
              */
             GammaNode<GridWorld, RStarK> g = new GammaNode<>(new GridWorld(posx + dx, posy + dy));
             if (alreadyGeneratedStates.containsKey(g)) {
-                g = alreadyGeneratedStates.get(g);
+                succ.add(alreadyGeneratedStates.get(g));
             } else {
                 alreadyGeneratedStates.put(g, g);
+                succ.add(g);
             }
-            succ.add(g);
         }
 
         /**
@@ -102,7 +114,19 @@ public class GridWorldGammaGraphGenerator implements GammaGraphGenerator<GridWor
 
             @Override
             public SuccessorGenerator<GridWorld, Integer> getSuccessorGenerator() {
-                return null;
+                return new SuccessorGenerator<GridWorld, Integer>() {
+                    @Override
+                    public Collection<NodeExpansionDescription<GridWorld, Integer>> generateSuccessors(GridWorld node) {
+                        ArrayList<NodeExpansionDescription<GridWorld, Integer>> succ = new ArrayList<>();
+                        for (int a = 1; a <= 9; a++) {
+                            GridWorld n_ = node.onAction(a);
+                            if (n_ != null) {
+                                succ.add(new NodeExpansionDescription<>(node, n_, a, NodeType.AND));
+                            }
+                        }
+                        return succ;
+                    }
+                };
             }
 
             @Override
@@ -129,14 +153,27 @@ public class GridWorldGammaGraphGenerator implements GammaGraphGenerator<GridWor
         /**
          * Use A* to generate the path.
          */
+        INodeEvaluator<GridWorld, Double> h = new INodeEvaluator<GridWorld, Double>() {
+            @Override
+            public Double f(Node<GridWorld, ?> node) throws Throwable {
+                int x_ = Math.abs(end.getPoint().getX() - node.getPoint().getX());
+                int y_ = Math.abs(end.getPoint().getY() - node.getPoint().getY());
+                return new Double(x_+y_);
+            }
+        };
+        SimpleAStarGraphSearch<GridWorld, Integer> astar = new SimpleAStarGraphSearch<GridWorld, Integer>(
+                gg,
+                (n1, n2)->GridWorld.myGrid[n2.getPoint().getX()][n2.getPoint().getY()],
+                h);
 
-        return null;
+        PathAndCost pac = astar.solution();
+        return pac;
 
     }
 
     @Override
     public double h(GammaNode<GridWorld, RStarK> n1, GammaNode<GridWorld, RStarK> n2) {
-        return 0;
+        return Math.abs(n1.getPoint().getX() - n2.getPoint().getX()) + Math.abs(n1.getPoint().getY() - n2.getPoint().getY());
     }
 
     @Override
