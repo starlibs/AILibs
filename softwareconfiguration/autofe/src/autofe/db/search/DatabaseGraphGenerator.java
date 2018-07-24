@@ -2,7 +2,6 @@ package autofe.db.search;
 
 import autofe.db.model.database.Database;
 import jaicore.search.structure.core.GraphGenerator;
-import jaicore.search.structure.graphgenerator.GoalTester;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
@@ -22,7 +21,8 @@ public class DatabaseGraphGenerator implements GraphGenerator<DatabaseNode, Stri
 
 			@Override
 			public DatabaseNode getRoot() {
-				return new DatabaseNode(initialDatabase);
+				// TODO: Implement me
+				return null;
 			}
 
 		};
@@ -39,10 +39,7 @@ public class DatabaseGraphGenerator implements GraphGenerator<DatabaseNode, Stri
 
 			@Override
 			public boolean isGoal(DatabaseNode node) {
-				Database db = node.getDatabase();
-				if(db.getOperationHistory().size() > 5) {
-					return true;
-				}
+				// TODO: Implement me
 				return false;
 			}
 		};

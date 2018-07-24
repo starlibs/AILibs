@@ -1,18 +1,13 @@
 package autofe.db.model.database;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
-import autofe.db.model.operation.DatabaseOperation;
 import autofe.db.model.relation.BackwardRelationship;
 import autofe.db.model.relation.ForwardRelationship;
 
 public class Database {
 
 	private List<Table> tables;
-
-	private List<DatabaseOperation> operationHistory;
 
 	private List<BackwardRelationship> backwards;
 
@@ -32,17 +27,6 @@ public class Database {
 
 	public void setTables(List<Table> tables) {
 		this.tables = tables;
-	}
-
-	public List<DatabaseOperation> getOperationHistory() {
-		if (this.operationHistory == null) {
-			operationHistory = new ArrayList<>();
-		}
-		return operationHistory;
-	}
-
-	public void setOperationHistory(List<DatabaseOperation> operationHistory) {
-		this.operationHistory = operationHistory;
 	}
 
 	public List<BackwardRelationship> getBackwards() {
@@ -103,7 +87,6 @@ public class Database {
 		result = prime * result + ((jdbcPassword == null) ? 0 : jdbcPassword.hashCode());
 		result = prime * result + ((jdbcUrl == null) ? 0 : jdbcUrl.hashCode());
 		result = prime * result + ((jdbcUsername == null) ? 0 : jdbcUsername.hashCode());
-		result = prime * result + ((operationHistory == null) ? 0 : operationHistory.hashCode());
 		result = prime * result + ((tables == null) ? 0 : tables.hashCode());
 		return result;
 	}
@@ -147,11 +130,6 @@ public class Database {
 				return false;
 		} else if (!jdbcUsername.equals(other.jdbcUsername))
 			return false;
-		if (operationHistory == null) {
-			if (other.operationHistory != null)
-				return false;
-		} else if (!operationHistory.equals(other.operationHistory))
-			return false;
 		if (tables == null) {
 			if (other.tables != null)
 				return false;
@@ -162,9 +140,9 @@ public class Database {
 
 	@Override
 	public String toString() {
-		return "Database [tables=" + tables + ", operationHistory=" + operationHistory + ", backwards=" + backwards
-				+ ", forwards=" + forwards + ", jdbcDriver=" + jdbcDriver + ", jdbcUrl=" + jdbcUrl + ", jdbcUsername="
-				+ jdbcUsername + ", jdbcPassword=" + jdbcPassword + "]";
+		return "Database [tables=" + tables + ", backwards=" + backwards + ", forwards=" + forwards + ", jdbcDriver="
+				+ jdbcDriver + ", jdbcUrl=" + jdbcUrl + ", jdbcUsername=" + jdbcUsername + ", jdbcPassword="
+				+ jdbcPassword + "]";
 	}
 
 }

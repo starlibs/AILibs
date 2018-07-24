@@ -15,15 +15,10 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 
-import autofe.db.model.database.AggregatedAttribute;
-import autofe.db.model.database.AggregationFunction;
 import autofe.db.model.database.AbstractAttribute;
-import autofe.db.model.database.AttributeType;
+import autofe.db.model.database.AggregationFunction;
 import autofe.db.model.database.Database;
 import autofe.db.model.database.Table;
-import autofe.db.model.operation.BackwardAggregateOperation;
-import autofe.db.model.operation.DatabaseOperation;
-import autofe.db.model.operation.ForwardJoinOperation;
 import autofe.db.model.relation.AbstractRelationship;
 import autofe.db.model.relation.BackwardRelationship;
 import autofe.db.model.relation.ForwardRelationship;
@@ -66,61 +61,6 @@ public class DBUtils {
 		}
 		LOG.info("There are {} backward relationships from table {}", toReturn.size(), table.getName());
 		return toReturn;
-	}
-
-	public static Set<BackwardAggregateOperation> getBackwardAggregateOperations(Table from, Database db) {
-
-		Set<BackwardAggregateOperation> operations = new HashSet<>();
-		// Start recursion
-		for (BackwardRelationship backwardRelationship : getBackwardsFor(from, db)) {
-			getOperationsForBackwardRelation(backwardRelationship, operations, db);
-		}
-		LOG.info("There are {} backward operations possible from {}", operations.size(), from.getName());
-		return operations;
-	}
-
-	private static void getOperationsForBackwardRelation(BackwardRelationship backwardRelationship,
-			Set<BackwardAggregateOperation> operations, Database db) {
-		// Add operations for all attributes in 'to' table
-		Table from = backwardRelationship.getFrom();
-		Table to = backwardRelationship.getTo();
-		for (AbstractAttribute attribute : to.getColumns()) {
-			if (attribute.isAggregable()) {
-				for (AggregationFunction af : AggregationFunction.values()) {
-					// Check whether from table already contains the aggregated attribute
-					String aggregatedAttributeName = DBUtils.getAggregatedAttributeName(af, to.getName(),
-							attribute.getName());
-					AggregatedAttribute aggregatedAttribute = new AggregatedAttribute(aggregatedAttributeName,
-							AttributeType.NUMERIC, attribute, af);
-					// Fix for OTFML-194
-					if (from.getColumns().contains(aggregatedAttribute)) {
-						LOG.info("Table {} already contains aggregated attribute {} => Skipping", from.getName(),
-								aggregatedAttribute);
-						continue;
-					} else {
-						LOG.debug("Table {} does not contain aggregated attribute {}.", from.getName(),
-								aggregatedAttribute, from.getColumns());
-					}
-					BackwardAggregateOperation op = new BackwardAggregateOperation(backwardRelationship, af,
-							attribute.getName());
-					operations.add(op);
-				}
-			}
-		}
-
-		// Recursion
-		for (BackwardRelationship br : getBackwardsFor(to, db)) {
-			getOperationsForBackwardRelation(br, operations, db);
-		}
-	}
-
-	public static Set<ForwardJoinOperation> getForwardJoinOperations(Table from, Database db) {
-		Set<ForwardJoinOperation> operations = new HashSet<>();
-		for (ForwardRelationship fr : getForwardsFor(from, db)) {
-			operations.add(new ForwardJoinOperation(fr));
-		}
-		LOG.info("There are {} forward operations possible from {}", operations.size(), from.getName());
-		return operations;
 	}
 
 	public static void serializeToFile(Database db, String path) {
@@ -173,8 +113,7 @@ public class DBUtils {
 	}
 
 	private static Gson initGson() {
-		Gson gson = new GsonBuilder().registerTypeAdapter(DatabaseOperation.class, new InterfaceAdapter<>())
-				.registerTypeAdapter(AbstractAttribute.class, new InterfaceAdapter<>())
+		Gson gson = new GsonBuilder().registerTypeAdapter(AbstractAttribute.class, new InterfaceAdapter<>())
 				.registerTypeAdapter(AbstractRelationship.class, new InterfaceAdapter<>()).create();
 		return gson;
 	}
