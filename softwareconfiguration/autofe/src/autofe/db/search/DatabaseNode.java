@@ -38,19 +38,26 @@ public class DatabaseNode {
 		this.isFinished = isFinished;
 	}
 
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
+	public String featureString() {
+		String toReturn = null;
 		if (selectedAttributes.isEmpty()) {
-			sb.append("{}");
+			toReturn = "{}";
 		} else {
+			StringBuilder sb = new StringBuilder();
 			for (AbstractAttribute att : selectedAttributes) {
 				sb.append(att.getName());
 				sb.append(",");
 			}
+			toReturn = sb.substring(0, sb.length() - 1);
+
 		}
-		return "DatabaseNode [selectedAttributes=" + sb.substring(0, sb.length() - 1) + ", isFinished=" + isFinished
-				+ "]";
+		return toReturn;
+	}
+
+	@Override
+	public String toString() {
+
+		return "DatabaseNode [selectedAttributes=" + featureString() + ", isFinished=" + isFinished + "]";
 	}
 
 }
