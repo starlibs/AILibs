@@ -50,6 +50,10 @@ public abstract class AbstractAttribute {
 		return this.type.isAggregable();
 	}
 
+	public boolean isFeature() {
+		return !(this.type == AttributeType.ID);
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

@@ -1,9 +1,12 @@
 package autofe.db.model.database;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import autofe.db.model.relation.BackwardRelationship;
 import autofe.db.model.relation.ForwardRelationship;
+import autofe.db.util.DBUtils;
 
 public class Database {
 
@@ -143,6 +146,34 @@ public class Database {
 		return "Database [tables=" + tables + ", backwards=" + backwards + ", forwards=" + forwards + ", jdbcDriver="
 				+ jdbcDriver + ", jdbcUrl=" + jdbcUrl + ", jdbcUsername=" + jdbcUsername + ", jdbcPassword="
 				+ jdbcPassword + "]";
+	}
+
+	public Set<AbstractAttribute> getForwardAttributes() {
+		Set<AbstractAttribute> toReturn = new HashSet<>();
+
+		Table targetTable = DBUtils.getTargetTable(this);
+		for (Table t : DBUtils.getForwardReachableTables(targetTable, this)) {
+			for (AbstractAttribute att : t.getColumns()) {
+				if (att.isFeature()) {
+					toReturn.add(att);
+				}
+			}
+		}
+		return toReturn;
+	}
+
+	public Set<AbstractAttribute> getBackwardAttributes() {
+		Set<AbstractAttribute> toReturn = new HashSet<>();
+
+		Table targetTable = DBUtils.getTargetTable(this);
+		for (Table t : DBUtils.getBackwardReachableTables(targetTable, this)) {
+			for (AbstractAttribute att : t.getColumns()) {
+				if (att.isFeature()) {
+					toReturn.add(att);
+				}
+			}
+		}
+		return toReturn;
 	}
 
 }

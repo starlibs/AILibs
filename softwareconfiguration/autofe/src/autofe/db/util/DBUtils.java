@@ -50,9 +50,6 @@ public class DBUtils {
 
 	public static Set<BackwardRelationship> getBackwardsFor(Table table, Database db) {
 		Set<BackwardRelationship> toReturn = new HashSet<>();
-		// TODO: Tables are not equal here
-		// TODO: Problem: In den Relations werden andere Objekte referenziert als in den
-		// Tabellen
 		for (BackwardRelationship backwardRelationship : db.getBackwards()) {
 			backwardRelationship.setContext(db);
 			if (backwardRelationship.getFrom().equals(table)) {
@@ -61,6 +58,36 @@ public class DBUtils {
 		}
 		LOG.info("There are {} backward relationships from table {}", toReturn.size(), table.getName());
 		return toReturn;
+	}
+
+	public static Set<Table> getForwardReachableTables(Table from, Database db) {
+		Set<Table> tables = new HashSet<>();
+
+		addForwardTables(from, db, tables);
+		return tables;
+	}
+
+	private static void addForwardTables(Table from, Database db, Set<Table> tables) {
+		tables.add(from);
+		for (ForwardRelationship fr : getForwardsFor(from, db)) {
+			addForwardTables(fr.getTo(), db, tables);
+		}
+	}
+
+	public static Set<Table> getBackwardReachableTables(Table from, Database db) {
+		Set<Table> tables = new HashSet<>();
+		Set<Table> forwardTables = getForwardReachableTables(from, db);
+		for (Table t : forwardTables) {
+			addBackwardTables(t, db, tables);
+		}
+		return tables;
+	}
+
+	private static void addBackwardTables(Table from, Database db, Set<Table> tables) {
+		for (BackwardRelationship br : getBackwardsFor(from, db)) {
+			tables.add(br.getTo());
+			addBackwardTables(br.getTo(), db, tables);
+		}
 	}
 
 	public static void serializeToFile(Database db, String path) {
