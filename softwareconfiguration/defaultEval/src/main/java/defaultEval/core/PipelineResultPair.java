@@ -2,6 +2,7 @@ package defaultEval.core;
 
 import de.upb.crc901.automl.pipeline.service.MLServicePipeline;
 
+@Deprecated
 public class PipelineResultPair{
 	public MLServicePipeline pipeline;
 	public double result = -1;

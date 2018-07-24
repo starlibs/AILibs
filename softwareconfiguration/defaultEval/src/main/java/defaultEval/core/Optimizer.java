@@ -1,5 +1,6 @@
 package defaultEval.core;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import hasco.model.Component;
@@ -8,20 +9,32 @@ import hasco.model.Parameter;
 
 public abstract class Optimizer {
 
-	protected Component preProcessor;
+	protected Component searcher;
+	protected Component evaluator;
 	protected Component classifier;
 	protected String dataSet;
 	
 	protected ArrayList<Parameter> parameterList = new ArrayList<>();
 	
-	public Optimizer(Component preProcessor, Component classifier, String dataSet) {
-		this.preProcessor = preProcessor;
-		this.classifier = classifier;		
+	protected ComponentInstance finalSearcher;
+	protected ComponentInstance finalEvaluator;
+	protected ComponentInstance finalClassifier;
+	
+	protected File environment;
+	
+	public Optimizer(Component searcher, Component evaluator, Component classifier, String dataSet, File environment) {
+		this.searcher = searcher;
+		this.evaluator = evaluator;
+		
+		this.classifier = classifier;
 		
 		this.dataSet = dataSet;
 		
-		if(preProcessor != null) {
-			for (Parameter p : preProcessor.getParameters()) {
+		if(searcher != null) {
+			for (Parameter p : searcher.getParameters()) {
+				parameterList.add(p);
+			}
+			for (Parameter p : evaluator.getParameters()) {
 				parameterList.add(p);
 			}
 		}
@@ -29,10 +42,25 @@ public abstract class Optimizer {
 		for (Parameter p : classifier.getParameters()) {
 			parameterList.add(p);
 		}
+		
+		this.environment = environment;
+		
 	}
 
+	public abstract void optimize();
+
 	
-	public abstract ComponentInstance optimize();
 	
+	public ComponentInstance getFinalClassifier() {
+		return finalClassifier;
+	}
+	
+	public ComponentInstance getFinalEvaluator() {
+		return finalEvaluator;
+	}
+	
+	public ComponentInstance getFinalSearcher() {
+		return finalSearcher;
+	}
 	
 }

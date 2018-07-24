@@ -1,1 +1,0 @@
-18:21:02.585 [main] ERROR c.u.c.b.smac.executors.SMACExecutor - Message: --run-obj must be set

@@ -17,6 +17,8 @@ import weka.classifiers.evaluation.Evaluation;
 import weka.classifiers.evaluation.EvaluationUtils;
 import weka.core.Instances;
 
+
+@Deprecated
 public class Main {
 
 	enum Optimizer {
