@@ -12,17 +12,18 @@ import jaicore.basic.PerformanceLogger;
 import jaicore.graph.Graph;
 import jaicore.graph.IObservableGraphAlgorithm;
 import jaicore.graph.LabeledGraph;
+import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
+import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
+import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
 import jaicore.search.structure.core.AndNode;
 import jaicore.search.structure.core.GraphEventBus;
 import jaicore.search.structure.core.Node;
 import jaicore.search.structure.core.OrNode;
-import jaicore.graphvisualizer.events.GraphInitializedEvent;
-import jaicore.graphvisualizer.events.NodeReachedEvent;
-import jaicore.graphvisualizer.events.NodeTypeSwitchEvent;
 import jaicore.search.structure.graphgenerator.GoalTester;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
+import meka.core.A;
 
 public abstract class ANDORGraphSearch<T, A, V extends Comparable<V>> implements IObservableGraphAlgorithm<T,A> {
 

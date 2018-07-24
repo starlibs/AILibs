@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.Subscribe;
 
+import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.events.NodePassedToCoworkerEvent;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.DistributedSearchCommunicationLayer;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.DistributionSearchAdapter;
@@ -15,7 +16,6 @@ import jaicore.search.algorithms.parallel.parallelexploration.distributed.interf
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableNodeEvaluator;
 import jaicore.search.algorithms.standard.core.ORGraphSearch;
 import jaicore.search.structure.core.Node;
-import jaicore.graphvisualizer.events.NodeTypeSwitchEvent;
 
 public class DistributedOrSearch<T, A, V extends Comparable<V>> extends ORGraphSearch<T, A, V> implements DistributionSearchAdapter<T, V> {
 

@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import de.upb.crc901.automl.hascowekaml.HASCOForWekaML;
 import de.upb.crc901.automl.hascowekaml.HASCOForWekaML.HASCOForWekaMLSolution;
+import hasco.model.Component;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.sets.SetUtil;
 import jaicore.concurrent.TimeoutTimer;
@@ -35,6 +36,7 @@ import jaicore.ml.evaluation.MulticlassEvaluator;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;
 import jaicore.search.algorithms.standard.core.INodeEvaluator;
+import jaicore.search.algorithms.standard.uncertainty.OversearchAvoidanceConfig;
 import jaicore.search.structure.core.Node;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
@@ -210,6 +212,10 @@ public class MLPlan extends AbstractClassifier implements Classifier, OptionHand
 
 	public void setTimeout(final int timeoutInS) {
 		this.timeoutInS = timeoutInS;
+	}
+	
+	public void setOversearchAvoidanceConfig (OversearchAvoidanceConfig config) {
+		hasco.setOversearchAvoidanceMode(config);
 	}
 
 	public void setRandom(final int randomSeed) {
@@ -577,5 +583,9 @@ public class MLPlan extends AbstractClassifier implements Classifier, OptionHand
 		
 		new SimpleGraphVisualizationWindow<Node<TFDNode, Double>>(this).getPanel()
 		.setTooltipGenerator(new TFDTooltipGenerator<>());
+	}
+	
+	public Collection<Component> getComponents() {
+		return hasco.getComponents();
 	}
 }

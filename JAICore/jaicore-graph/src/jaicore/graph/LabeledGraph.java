@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import jaicore.basic.sets.SetUtil;
+import jaicore.basic.sets.SetUtil.Pair;
 
 @SuppressWarnings("serial")
 public class LabeledGraph<T, L> extends Graph<T> {
@@ -98,6 +99,10 @@ public class LabeledGraph<T, L> extends Graph<T> {
 				addEdge(t1, t2, g.getEdgeLabel(t1, t2));
 			}
 		}
+	}
+	
+	public L getEdgeLabel(Pair<T,T> edge) {
+		return getEdgeLabel(edge.getX(), edge.getY());
 	}
 
 	public L getEdgeLabel(T from, T to) {
