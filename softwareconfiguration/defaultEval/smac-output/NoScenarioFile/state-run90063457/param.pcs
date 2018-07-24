@@ -1,2 +1,0 @@
-S categorical {1} [1]
-R categorical {AVG,PROD,MAJ,MIN,MAX} [AVG]

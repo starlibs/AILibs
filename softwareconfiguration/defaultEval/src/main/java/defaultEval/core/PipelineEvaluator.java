@@ -31,7 +31,8 @@ import weka.core.converters.ConverterUtils.DataSource;
 
 public class PipelineEvaluator {
 	
-	
+	//TODO remove
+	static String pat = "F:\\Data\\Uni\\PG\\DefaultEvalEnvironment";
 	
 	public static void main(String[] args) {
 		// TODO write result file even if no result
@@ -63,7 +64,7 @@ public class PipelineEvaluator {
 			DataSource ds;
 			Instances instances = null;
 			try {
-				ds = new DataSource(Main.getEnvironmentPath() + "/datasets/" + args[index++] + ".arff");
+				ds = new DataSource(pat + "/datasets/" + args[index++] + ".arff");	// TODO keep path
 				instances = new Instances(ds.getDataSet());
 				instances.setClassIndex(instances.numAttributes()-1); // last one as class
 			} catch (Exception e) {
@@ -74,6 +75,12 @@ public class PipelineEvaluator {
 			// create Searcher
 			Component searcher = null;
 			Map<String, String> searcherParameter = new HashMap<>();
+			
+			// create Evaluator
+			Component evaluator = null;
+			Map<String, String> evaluatorParameter = new HashMap<>();
+			String evaluatorName = null;
+						
 			
 			String searcherName = args[index++];
 			if(!searcherName.equals("null")) {
@@ -88,14 +95,7 @@ public class PipelineEvaluator {
 					}
 				}
 				
-			}
-			
-			// create Searcher
-			Component evaluator = null;
-			Map<String, String> evaluatorParameter = new HashMap<>();
-			
-			String evaluatorName = args[index++];
-			if(!evaluatorName.equals("null")) {
+				evaluatorName = args[index++];
 				for (Component c : cl_p.getComponents()) {
 					if(c.getName().equals(evaluatorName)) {
 						evaluator = c; 
@@ -106,7 +106,8 @@ public class PipelineEvaluator {
 						}
 					}
 				}
-			}		
+				
+			}
 			
 			// create Classifier
 			Component classifier = null;
@@ -126,9 +127,8 @@ public class PipelineEvaluator {
 			System.out.println("Build Pipeline...");
 			
 			WEKAPipelineFactory factory = new WEKAPipelineFactory();
-			MLPipeline mlPipeline = factory.getComponentInstantiation(Util.createPipeline(searcher, searcherParameter, evaluator, evaluatorParameter, classifier, classifierParameter));
-			
-			
+			ComponentInstance pipeline = Util.createPipeline(searcher, searcherParameter, evaluator, evaluatorParameter, classifier, classifierParameter);
+			MLPipeline mlPipeline = factory.getComponentInstantiation(pipeline);
 			
 			System.out.println("Evaluate Pipeline...");
 			
@@ -157,7 +157,7 @@ public class PipelineEvaluator {
 			try {
 				resultFile.createNewFile();
 				PrintStream out = new PrintStream(new FileOutputStream(resultFile));
-				out.println(pctCorrect);
+				out.println(pctIncorrect);
 				out.close();
 			} catch (IOException e) {
 				e.printStackTrace();

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.Scanner;
 
@@ -35,24 +36,44 @@ public class SMACOptimizer extends Optimizer{
 		try {
 			Runtime rt = Runtime.getRuntime();
 			
+			System.out.println(environment.getAbsolutePath() + "/optimizer/smac/smac.bat "+
+									"--run-obj QUALITY " + 
+									"--use-instances false "+
+							"--numberOfRunsLimit 10 "+
+							"--pcs-file "+environment.getAbsolutePath()+"/pcs/"+buildFileName()+".pcs "+
+							"--output-dir " +environment.getAbsolutePath() + "/smac-output/"+buildFileName()+" " +
+							"--algo \"python "+environment.getAbsolutePath()+"/py_wrapper/"+buildFileName()+".py\"\" "
+					);
+			
 			Process proc = rt.exec(
 							environment.getAbsolutePath() + "/optimizer/smac/smac.bat "+
 									"--run-obj QUALITY " + 
 									"--use-instances false "+
 							"--numberOfRunsLimit 10 "+
 							"--pcs-file "+environment.getAbsolutePath()+"/pcs/"+buildFileName()+".pcs "+
+							"--output-dir " +environment.getAbsolutePath() + "/smac-output/"+buildFileName()+" " +
 							"--algo \"python "+environment.getAbsolutePath()+"/py_wrapper/"+buildFileName()+".py\"\" "
-					);
-			proc.waitFor();
+							);
+			
+			InputStream i = proc.getInputStream();
+			int r = 0;
+			while ((r = i.read()) != -1) {
+				System.out.write(r);
+			}
+			
 			int exitValue = proc.exitValue();
-			System.out.println("aksd: " + exitValue);
 			
-			//TODO get default values back
 			
-		} catch (IOException | InterruptedException e) {
+			
+			
+		} catch (IOException e) {
 			// TODO
 			e.printStackTrace();
-		}	
+		}
+		
+		System.out.println("final-searcher: " + finalSearcher);
+		System.out.println("final-evaluator: " + finalEvaluator);
+		System.out.println("final-classifier: " + finalClassifier);
 	}
 	
 	
@@ -99,13 +120,13 @@ public class SMACOptimizer extends Optimizer{
 			pyWrapperStream.print(" " + searcher.getName());
 			
 			for (Parameter parameter : searcher.getParameters()) {
-				pyWrapperStream.print(" \"+ \"{:.9f}\".format("+parameter.getName()+") + \""); // TODO only for floats 
+				pyWrapperStream.print(" \"+"+parameter.getName()+" + \""); // TODO only for floats 
 			}
 			
 			pyWrapperStream.print(" " + evaluator.getName());
 			
 			for (Parameter parameter : evaluator.getParameters()) {
-				pyWrapperStream.print(" \"+ \"{:.9f}\".format("+parameter.getName()+") + \""); // TODO only for floats 
+				pyWrapperStream.print(" \"+ "+parameter.getName()+" + \""); // TODO only for floats 
 			}
 			
 		}else {
@@ -188,6 +209,46 @@ public class SMACOptimizer extends Optimizer{
 			return n_pd.isInteger() ? "int" : "float";
 		}
 		return "";
+	}
+	
+	
+	public static void main(String[] args) {
+		
+		ComponentLoader cl_p = new ComponentLoader();
+		ComponentLoader cl_c = new ComponentLoader();
+		
+		try {
+			Util.loadClassifierComponents(cl_c);
+			Util.loadPreprocessorComponents(cl_p);	
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		Component searcher = null;
+		Component evaluator = null;
+		Component classifier = null;
+		
+		for (Component c : cl_p.getComponents()) {
+			if(c.getName().equals("weka.attributeSelection.BestFirst")) {
+				searcher = c;
+			}
+		}
+		
+		for (Component c : cl_p.getComponents()) {
+			if(c.getName().equals("weka.attributeSelection.CorrelationAttributeEval")) {
+				evaluator = c;
+			}
+		}
+		
+		for (Component c : cl_c.getComponents()) {
+			if(c.getName().equals("weka.classifiers.functions.Logistic")) {
+				classifier = c;
+			}
+		}
+		
+		SMACOptimizer o = new SMACOptimizer(searcher, evaluator, classifier, "breast-cancer", new File("F:\\Data\\Uni\\PG\\DefaultEvalEnvironment"));
+		o.optimize();
+		
+		
 	}
 	
 	

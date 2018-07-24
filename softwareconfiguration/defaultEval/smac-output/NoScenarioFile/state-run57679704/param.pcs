@@ -1,3 +1,0 @@
-M categorical {a,d,m,n} [a]
-E categorical {true, false} [true]
-B integer [1.0, 100.0] [20.0]
