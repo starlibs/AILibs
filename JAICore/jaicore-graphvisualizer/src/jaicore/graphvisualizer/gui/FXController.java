@@ -155,9 +155,12 @@ public class FXController implements Initializable, NodeListener {
      */
     @FXML
     public void step(ActionEvent actionEvent) {
-        if(index == maxIndex && ! live)
-            return;
-
+//        if(index == maxIndex && ! live)
+//            return;
+    	if(index == maxIndex) {
+    		this.controlEventBus.post(new AlgorithmEvent(null));
+    		return;
+    	}
 
         this.controlEventBus.post(new StepEvent(true, 1));
 
@@ -265,17 +268,17 @@ public class FXController implements Initializable, NodeListener {
      */
     @FXML
     public void liveButton(ActionEvent event){
-        if(index == maxIndex) {
-            if (live)
-                live = false;
-            else
-                live = true;
-
-            this.controlEventBus.post(new IsLiveEvent(live));
-            return;
-        }
-        if(livebutton.isSelected())
-            livebutton.fire();
+//        if(index == maxIndex) {
+//            if (live)
+//                live = false;
+//            else
+//                live = true;
+//
+//            this.controlEventBus.post(new IsLiveEvent(live));
+//            return;
+//        }
+//        if(livebutton.isSelected())
+//            livebutton.fire();
     }
 
     /**
@@ -406,6 +409,9 @@ public class FXController implements Initializable, NodeListener {
     @Override
     public void buttonPushed(Object node) {
        this.controlEventBus.post(new NodePushed(node));
+       if(index == maxIndex) {
+    	   this.controlEventBus.post(new AlgorithmEvent(node));
+       }
     }
 
 
