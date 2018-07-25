@@ -1,16 +1,19 @@
 package jaicore.graphvisualizer.gui;
 
-import jaicore.graph.observation.IObservableGraphAlgorithm;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.JFrame;
+
+import jaicore.graph.IObservableGraphAlgorithm;
+import jaicore.graphvisualizer.IGraphDataSupplier;
+import jaicore.graphvisualizer.INodeDataSupplier;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-
-import javax.swing.*;
-import java.util.ArrayList;
-import java.util.List;
 
 public class FXGui{
 

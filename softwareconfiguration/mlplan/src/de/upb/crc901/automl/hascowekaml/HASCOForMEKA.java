@@ -23,7 +23,7 @@ import hasco.model.Parameter;
 import hasco.query.Factory;
 import hasco.serialization.ComponentLoader;
 import jaicore.basic.IObjectEvaluator;
-import jaicore.graph.observation.IObservableGraphAlgorithm;
+import jaicore.graph.IObservableGraphAlgorithm;
 import jaicore.ml.multilabel.evaluators.F1AverageMultilabelEvaluator;
 import jaicore.ml.multilabel.evaluators.MonteCarloCrossValidationEvaluator;
 import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionSolution;

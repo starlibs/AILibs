@@ -1,7 +1,6 @@
 package jaicore.graphvisualizer.gui;
 
-import jaicore.graph.observation.IObservableGraphAlgorithm;
-import jaicore.graphvisualizer.TooltipGenerator;
+import jaicore.graph.IObservableGraphAlgorithm;
 import jaicore.graphvisualizer.gui.dataSupplier.ISupplier;
 import javafx.application.Platform;
 
