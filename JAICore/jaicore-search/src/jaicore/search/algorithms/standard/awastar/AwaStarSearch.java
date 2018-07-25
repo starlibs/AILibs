@@ -18,7 +18,9 @@ import jaicore.search.structure.core.Node;
 import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.core.OpenCollection;
 import jaicore.search.structure.core.PriorityQueueOpen;
+import jaicore.search.structure.graphgenerator.GoalTester;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
+import jaicore.search.structure.graphgenerator.PathGoalTester;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
@@ -29,7 +31,7 @@ public class AwaStarSearch<T, A, V extends Comparable<V>>{
 	private class Search implements Callable<List<Node<T, V>>> {
 		
 		private SuccessorGenerator<T, A> successorGenerator;
-		private NodeGoalTester<T> goalTester;
+		private GoalTester<T> goalTester;
 		private INodeEvaluator<T, V> nodeEvaluator;
 		private OpenCollection<Node<T, V>> closedList, suspendList, openList;
 		private int windowSize;
@@ -38,7 +40,7 @@ public class AwaStarSearch<T, A, V extends Comparable<V>>{
 		
 		public Search(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, V> nodeEvaluator) throws Throwable {
 			successorGenerator = graphGenerator.getSuccessorGenerator();
-			goalTester = (NodeGoalTester<T>)graphGenerator.getGoalTester();
+			goalTester = graphGenerator.getGoalTester();
 			this.nodeEvaluator = nodeEvaluator;
 			closedList = new PriorityQueueOpen<>();
 			suspendList = new PriorityQueueOpen<>();
@@ -90,7 +92,11 @@ public class AwaStarSearch<T, A, V extends Comparable<V>>{
 						Collection<NodeExpansionDescription<T, A>> successors = successorGenerator.generateSuccessors(n.getPoint());
 						for (NodeExpansionDescription<T, A> expansionDescription : successors) {
 							Node<T, V> nPrime = new Node<>(n, expansionDescription.getTo());
-							nPrime.setGoal(goalTester.isGoal(nPrime.getPoint()));
+							if (goalTester instanceof NodeGoalTester<?>) {
+								nPrime.setGoal(((NodeGoalTester<T>)goalTester).isGoal(nPrime.getPoint()));
+							} else if (goalTester instanceof PathGoalTester<?>) {
+								nPrime.setGoal(((PathGoalTester<T>) goalTester).isGoal(nPrime.externalPath()));
+							}
 							V nPrimeScore;
 							try {
 								nPrimeScore = nodeEvaluator.f(nPrime);
