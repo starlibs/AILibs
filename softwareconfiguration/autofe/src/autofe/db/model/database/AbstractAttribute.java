@@ -1,6 +1,6 @@
 package autofe.db.model.database;
 
-public abstract class AbstractAttribute {
+public abstract class AbstractAttribute implements Comparable<AbstractAttribute> {
 
 	protected String name;
 
@@ -83,6 +83,11 @@ public abstract class AbstractAttribute {
 		if (type != other.type)
 			return false;
 		return true;
+	}
+
+	@Override
+	public int compareTo(AbstractAttribute o) {
+		return name.compareTo(o.name);
 	}
 
 	@Override

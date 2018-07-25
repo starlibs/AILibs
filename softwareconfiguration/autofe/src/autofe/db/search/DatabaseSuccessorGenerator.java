@@ -2,6 +2,7 @@ package autofe.db.search;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -10,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import autofe.db.model.database.AbstractAttribute;
 import autofe.db.model.database.Database;
+import autofe.db.model.database.SimpleAttribute;
 import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.core.NodeType;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
@@ -36,14 +38,29 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 		backwardAttributes.removeAll(node.getSelectedAttributes());
 
 		List<AbstractAttribute> currentAttributes = node.getSelectedAttributes();
+		List<SimpleAttribute> currentForwardAttributes = new ArrayList<>();
+		for (AbstractAttribute att : currentAttributes) {
+			if (att instanceof SimpleAttribute) {
+				currentForwardAttributes.add((SimpleAttribute) att);
+			}
+		}
+
+		// Lexicographic order
+		boolean addOnlyLargerFeatures = !currentForwardAttributes.isEmpty();
+		AbstractAttribute maxForwardAttribute = null;
+		if (addOnlyLargerFeatures) {
+			maxForwardAttribute = Collections.max(currentForwardAttributes);
+		}
 
 		// One successor node for each forward feature
 		for (AbstractAttribute att : forwardAttributes) {
-			List<AbstractAttribute> extended = new ArrayList<>(currentAttributes);
-			extended.add(att);
-			DatabaseNode to = new DatabaseNode(extended, false);
-			toReturn.add(new NodeExpansionDescription<DatabaseNode, String>(node, to, "Forward: " + att.getName(),
-					NodeType.OR));
+			if ((addOnlyLargerFeatures && att.compareTo(maxForwardAttribute) > 0) || !addOnlyLargerFeatures) {
+				List<AbstractAttribute> extended = new ArrayList<>(currentAttributes);
+				extended.add(att);
+				DatabaseNode to = new DatabaseNode(extended, false);
+				toReturn.add(new NodeExpansionDescription<DatabaseNode, String>(node, to, "Forward: " + att.getName(),
+						NodeType.OR));
+			}
 		}
 
 		// One successor node for each backward feature

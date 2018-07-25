@@ -1,10 +1,17 @@
 package autofe.db.test;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Test;
 
+import autofe.db.model.database.AbstractAttribute;
 import autofe.db.model.database.Database;
+import autofe.db.model.database.Table;
 import autofe.db.search.DatabaseGraphGenerator;
 import autofe.db.search.DatabaseNode;
 import autofe.db.search.DatabaseNodeEvaluator;
@@ -12,6 +19,8 @@ import autofe.db.util.DBUtils;
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import jaicore.search.structure.core.Node;
+import jaicore.search.structure.core.NodeExpansionDescription;
+import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 public class SearchTest {
 
@@ -37,6 +46,53 @@ public class SearchTest {
 		while ((solutions = search.nextSolution()) != null) {
 			System.out.println(solutions.get(solutions.size() - 1));
 		}
+	}
+
+	@Test
+	public void testLexicographicOrderEmptyFeatureList() {
+		Database db = DBUtils.deserializeFromFile(DATABASE_MODEL_FILE);
+		DatabaseGraphGenerator generator = new DatabaseGraphGenerator(db);
+		SuccessorGenerator<DatabaseNode, String> sg = generator.getSuccessorGenerator();
+		DatabaseNode node = new DatabaseNode();
+		Collection<NodeExpansionDescription<DatabaseNode, String>> successors = sg.generateSuccessors(node);
+
+		String descriptions = concatExpansionDescriptions(successors);
+		assertTrue(descriptions.contains("Forward: Balance"));
+		assertTrue(descriptions.contains("Forward: BankName"));
+		assertTrue(descriptions.contains("Forward: Credible"));
+		assertTrue(descriptions.contains("Forward: FirstName"));
+		assertTrue(descriptions.contains("Forward: TransactionCounter"));
+	}
+
+	@Test
+	public void testLexicographicOrderForwardFeatureList() {
+		Database db = DBUtils.deserializeFromFile(DATABASE_MODEL_FILE);
+		DatabaseGraphGenerator generator = new DatabaseGraphGenerator(db);
+		SuccessorGenerator<DatabaseNode, String> sg = generator.getSuccessorGenerator();
+
+		Table bankAccount = DBUtils.getTableByName("BankAccount", db);
+		AbstractAttribute credible = DBUtils.getAttributeByName("Credible", bankAccount);
+
+		DatabaseNode node = new DatabaseNode(Collections.singletonList(credible), false);
+		Collection<NodeExpansionDescription<DatabaseNode, String>> successors = sg.generateSuccessors(node);
+
+		String descriptions = concatExpansionDescriptions(successors);
+		assertFalse(descriptions.contains("Forward: Balance"));
+		assertFalse(descriptions.contains("Forward: BankName"));
+		assertFalse(descriptions.contains("Forward: Credible"));
+		assertTrue(descriptions.contains("Forward: FirstName"));
+		assertTrue(descriptions.contains("Forward: TransactionCounter"));
+	}
+
+	// TODO: Add test case for a feature list containing a backward feature
+
+	private String concatExpansionDescriptions(Collection<NodeExpansionDescription<DatabaseNode, String>> successors) {
+		StringBuilder sb = new StringBuilder();
+		for (NodeExpansionDescription<DatabaseNode, String> description : successors) {
+			sb.append(description.getAction());
+			sb.append("|");
+		}
+		return sb.toString();
 	}
 
 }
