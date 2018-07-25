@@ -22,7 +22,10 @@ public abstract class Optimizer {
 	
 	protected File environment;
 	
-	public Optimizer(Component searcher, Component evaluator, Component classifier, String dataSet, File environment) {
+	int seed = 0;
+	
+	
+	public Optimizer(Component searcher, Component evaluator, Component classifier, String dataSet, File environment, int seed) {
 		this.searcher = searcher;
 		this.evaluator = evaluator;
 		
@@ -44,7 +47,7 @@ public abstract class Optimizer {
 		}
 		
 		this.environment = environment;
-		
+		this.seed = seed;
 	}
 
 	public abstract void optimize();

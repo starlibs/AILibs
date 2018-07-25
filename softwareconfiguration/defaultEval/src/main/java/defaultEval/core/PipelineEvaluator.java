@@ -45,8 +45,8 @@ public class PipelineEvaluator {
 			try {
 				Util.loadClassifierComponents(cl_c);
 				Util.loadPreprocessorComponents(cl_p);	
-			} catch (IOException e1) {
-				e1.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace(System.out);
 			}
 			
 			// read args
@@ -68,8 +68,7 @@ public class PipelineEvaluator {
 				instances = new Instances(ds.getDataSet());
 				instances.setClassIndex(instances.numAttributes()-1); // last one as class
 			} catch (Exception e) {
-				// TODO
-				e.printStackTrace();
+				e.printStackTrace(System.out);
 			}
 			
 			// create Searcher
@@ -145,7 +144,7 @@ public class PipelineEvaluator {
 				pctCorrect = eval.pctCorrect();
 				
 			} catch (Exception e) {
-				e.printStackTrace();
+				e.printStackTrace(System.out);
 			}
 			
 			// print result
@@ -160,11 +159,11 @@ public class PipelineEvaluator {
 				out.println(pctIncorrect);
 				out.close();
 			} catch (IOException e) {
-				e.printStackTrace();
+				e.printStackTrace(System.out);
 			}
 			
 		} catch (Exception e) {
-			e.printStackTrace();
+			e.printStackTrace(System.out);
 		}
 		
 	}

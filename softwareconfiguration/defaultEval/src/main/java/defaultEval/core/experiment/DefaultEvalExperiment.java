@@ -70,6 +70,8 @@ public class DefaultEvalExperiment {
 				String evaluatorName = description.get("evaluator");
 				String optimizerName = description.get("optimizer");
 				String datasetName = description.get("dataset");
+				int seed = Integer.valueOf(description.get("seed"));
+				
 				
 				Map<String, Object> results = new HashMap<>();
 				Optimizer optimizer = null;
@@ -81,11 +83,11 @@ public class DefaultEvalExperiment {
 				
 				switch (optimizerName) {
 				case "SMAC":
-					optimizer = new SMACOptimizer(searcher, evaluator, classifier, datasetName, m.getEnvironment());
+					optimizer = new SMACOptimizer(searcher, evaluator, classifier, datasetName, m.getEnvironment(), seed);
 					break;
 
 				case "default":
-					optimizer = new DefaultOptimizer(searcher, evaluator, classifier, datasetName, m.getEnvironment());
+					optimizer = new DefaultOptimizer(searcher, evaluator, classifier, datasetName, m.getEnvironment(), seed);
 					break;
 					
 				default:

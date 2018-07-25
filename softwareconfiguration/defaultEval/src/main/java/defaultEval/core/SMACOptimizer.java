@@ -3,10 +3,16 @@ package defaultEval.core;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.util.HashMap;
 import java.util.Scanner;
+
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 
 import hasco.model.BooleanParameterDomain;
 import hasco.model.CategoricalParameterDomain;
@@ -21,8 +27,8 @@ import scala.annotation.elidable;
 public class SMACOptimizer extends Optimizer{
 	
 
-	public SMACOptimizer(Component searcher, Component evaluator, Component classifier, String dataSet, File environment) {
-		super(searcher, evaluator, classifier, dataSet, environment);
+	public SMACOptimizer(Component searcher, Component evaluator, Component classifier, String dataSet, File environment, int seed) {
+		super(searcher, evaluator, classifier, dataSet, environment, seed);
 	}
 
 	@Override
@@ -36,10 +42,12 @@ public class SMACOptimizer extends Optimizer{
 		try {
 			Runtime rt = Runtime.getRuntime();
 			
+			
 			System.out.println(environment.getAbsolutePath() + "/optimizer/smac/smac.bat "+
 									"--run-obj QUALITY " + 
 									"--use-instances false "+
 							"--numberOfRunsLimit 10 "+
+							"--seed " + seed + " "+
 							"--pcs-file "+environment.getAbsolutePath()+"/pcs/"+buildFileName()+".pcs "+
 							"--output-dir " +environment.getAbsolutePath() + "/smac-output/"+buildFileName()+" " +
 							"--algo \"python "+environment.getAbsolutePath()+"/py_wrapper/"+buildFileName()+".py\"\" "
@@ -50,6 +58,7 @@ public class SMACOptimizer extends Optimizer{
 									"--run-obj QUALITY " + 
 									"--use-instances false "+
 							"--numberOfRunsLimit 10 "+
+							"--seed " + seed + " "+
 							"--pcs-file "+environment.getAbsolutePath()+"/pcs/"+buildFileName()+".pcs "+
 							"--output-dir " +environment.getAbsolutePath() + "/smac-output/"+buildFileName()+" " +
 							"--algo \"python "+environment.getAbsolutePath()+"/py_wrapper/"+buildFileName()+".py\"\" "
@@ -60,10 +69,9 @@ public class SMACOptimizer extends Optimizer{
 			while ((r = i.read()) != -1) {
 				System.out.write(r);
 			}
-			
 			int exitValue = proc.exitValue();
 			
-			
+			createFinalInstances();
 			
 			
 		} catch (IOException e) {
@@ -74,6 +82,58 @@ public class SMACOptimizer extends Optimizer{
 		System.out.println("final-searcher: " + finalSearcher);
 		System.out.println("final-evaluator: " + finalEvaluator);
 		System.out.println("final-classifier: " + finalClassifier);
+	}
+
+	private void createFinalInstances() throws IOException, FileNotFoundException {
+		// read outputs
+		File outputRunsAndResults = new File(environment.getAbsolutePath() + "/smac-output/"+buildFileName() + "/NoScenarioFile/state-run" + seed + "/runs_and_results-it1.csv");
+		File outputUniqConfigurations = new File(environment.getAbsolutePath() + "/smac-output/"+buildFileName() + "/NoScenarioFile/state-run" + seed + "/uniq_configurations-it1.csv");
+		
+		CSVParser parserRunsAndResults = new CSVParser(new FileReader(outputRunsAndResults), CSVFormat.DEFAULT.withHeader());
+		CSVParser parserUniqConfigurations = new CSVParser(new FileReader(outputUniqConfigurations), CSVFormat.DEFAULT);
+		
+		// find opt
+		int bestIndex = 0;
+		double bestScore = 100;
+		for (CSVRecord result : parserRunsAndResults) {
+			try {
+				double newScore = Double.valueOf(result.get(3));
+				if(newScore < bestScore) {
+					bestScore = newScore;
+					bestIndex = Integer.valueOf(result.get(0));
+				}
+			} catch (NumberFormatException e) {
+				//skip
+			}
+		}
+		
+		for (CSVRecord resultConfig : parserUniqConfigurations) {
+			if(Integer.valueOf(resultConfig.get(0)) == bestIndex) {
+				int index = 1;
+				HashMap<String, String> searcherParameter = new HashMap<>();
+				HashMap<String, String> evaluatorParameter = new HashMap<>();
+				HashMap<String, String> classifierParameter = new HashMap<>();
+				
+				if(searcher != null) {
+					// get preprocessor config
+					for (Parameter parameter : searcher.getParameters()) {
+						searcherParameter.put(parameter.getName(), resultConfig.get(index++));
+					}
+					for (Parameter parameter : evaluator.getParameters()) {
+						evaluatorParameter.put(parameter.getName(), resultConfig.get(index++));
+					}
+				}
+				for (Parameter parameter : classifier.getParameters()) {
+					classifierParameter.put(parameter.getName(), resultConfig.get(index++));
+				}
+				
+				finalSearcher = new ComponentInstance(searcher, searcherParameter, new HashMap<>());
+				finalEvaluator = new ComponentInstance(evaluator, evaluatorParameter, new HashMap<>());
+				finalClassifier = new ComponentInstance(classifier, classifierParameter, new HashMap<>());
+			}
+		}
+		parserRunsAndResults.close();
+		parserUniqConfigurations.close();
 	}
 	
 	
@@ -120,13 +180,13 @@ public class SMACOptimizer extends Optimizer{
 			pyWrapperStream.print(" " + searcher.getName());
 			
 			for (Parameter parameter : searcher.getParameters()) {
-				pyWrapperStream.print(" \"+"+parameter.getName()+" + \""); // TODO only for floats 
+				pyWrapperStream.print(" \"+"+createDomainWrapper(parameter.getName(), parameter.getDefaultDomain())+" + \""); // TODO only for floats 
 			}
 			
 			pyWrapperStream.print(" " + evaluator.getName());
 			
 			for (Parameter parameter : evaluator.getParameters()) {
-				pyWrapperStream.print(" \"+ "+parameter.getName()+" + \""); // TODO only for floats 
+				pyWrapperStream.print(" \"+ "+createDomainWrapper(parameter.getName(), parameter.getDefaultDomain())+" + \""); // TODO only for floats 
 			}
 			
 		}else {
@@ -136,7 +196,7 @@ public class SMACOptimizer extends Optimizer{
 		pyWrapperStream.print(" " + classifier.getName());
 		
 		for (Parameter parameter : classifier.getParameters()) {
-			pyWrapperStream.print(" \"+ \"{:.9f}\".format("+parameter.getName()+") + \"");
+			pyWrapperStream.print(" \"+"+createDomainWrapper(parameter.getName(), parameter.getDefaultDomain())+" + \"");
 		}
 		
 		
@@ -211,6 +271,16 @@ public class SMACOptimizer extends Optimizer{
 		return "";
 	}
 	
+	private String createDomainWrapper(String input, ParameterDomain pd) {
+		if(pd instanceof NumericParameterDomain) {
+			NumericParameterDomain n_pd = (NumericParameterDomain) pd;
+			return n_pd.isInteger() ? input : "\"{:.9f}\".format("+input+")";
+		}
+		
+		return input;
+	}
+	
+	
 	
 	public static void main(String[] args) {
 		
@@ -245,7 +315,7 @@ public class SMACOptimizer extends Optimizer{
 			}
 		}
 		
-		SMACOptimizer o = new SMACOptimizer(searcher, evaluator, classifier, "breast-cancer", new File("F:\\Data\\Uni\\PG\\DefaultEvalEnvironment"));
+		SMACOptimizer o = new SMACOptimizer(searcher, evaluator, classifier, "breast-cancer", new File("F:\\Data\\Uni\\PG\\DefaultEvalEnvironment"), 0);
 		o.optimize();
 		
 		
