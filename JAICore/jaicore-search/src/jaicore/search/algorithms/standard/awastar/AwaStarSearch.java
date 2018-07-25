@@ -142,20 +142,21 @@ public class AwaStarSearch<T, A, V extends Comparable<V>>{
 		this.search = new Search(graphGenerator, nodeEvaluator);
 	}
 
-	public List<Node<T, V>> search(int timeout) throws Exception {
+	public List<Node<T, V>> search(int timeout) {
 		ExecutorService executor = Executors.newSingleThreadExecutor();
 		Future<List<Node<T, V>>> future =  executor.submit(search);
 		executor.shutdown();
 		List<Node<T, V>> bestSolution = null;
 		try {
-			bestSolution = future.get(timeout, TimeUnit.SECONDS);
+			return future.get(timeout, TimeUnit.SECONDS);
+		} catch (Exception e) {
+			return null;
 		}
 		finally {
 			if (!executor.isTerminated()) {
 				executor.shutdownNow();
 			}
 		}
-		return bestSolution;
 	}
 
 }
