@@ -3,31 +3,32 @@ package autofe.db.search;
 import java.util.ArrayList;
 import java.util.List;
 
-import autofe.db.model.database.AbstractAttribute;
+import autofe.db.model.database.AbstractFeature;
+import autofe.db.model.database.Attribute;
 
 public class DatabaseNode {
 
-	private List<AbstractAttribute> selectedAttributes;
+	private List<AbstractFeature> selectedFeatures;
 
 	private boolean isFinished;
 
 	public DatabaseNode() {
-		selectedAttributes = new ArrayList<>();
+		selectedFeatures = new ArrayList<>();
 		isFinished = false;
 	}
 
-	public DatabaseNode(List<AbstractAttribute> selectedAttributes, boolean isFinished) {
+	public DatabaseNode(List<AbstractFeature> selectedFeatures, boolean isFinished) {
 		super();
-		this.selectedAttributes = selectedAttributes;
+		this.selectedFeatures = selectedFeatures;
 		this.isFinished = isFinished;
 	}
 
-	public List<AbstractAttribute> getSelectedAttributes() {
-		return selectedAttributes;
+	public List<AbstractFeature> getSelectedFeatures() {
+		return selectedFeatures;
 	}
 
-	public void setSelectedAttributes(List<AbstractAttribute> selectedAttributes) {
-		this.selectedAttributes = selectedAttributes;
+	public void setSelectedFeatures(List<AbstractFeature> selectedFeatures) {
+		this.selectedFeatures = selectedFeatures;
 	}
 
 	public boolean isFinished() {
@@ -40,12 +41,12 @@ public class DatabaseNode {
 
 	public String featureString() {
 		String toReturn = null;
-		if (selectedAttributes.isEmpty()) {
+		if (selectedFeatures.isEmpty()) {
 			toReturn = "{}";
 		} else {
 			StringBuilder sb = new StringBuilder();
-			for (AbstractAttribute att : selectedAttributes) {
-				sb.append(att.getName());
+			for (AbstractFeature feature : selectedFeatures) {
+				sb.append(feature.getName());
 				sb.append(",");
 			}
 			toReturn = sb.substring(0, sb.length() - 1);
@@ -54,10 +55,19 @@ public class DatabaseNode {
 		return toReturn;
 	}
 
+	public boolean containsAttribute(Attribute attribute) {
+		for (AbstractFeature abstractFeature : selectedFeatures) {
+			if (abstractFeature.getParent().equals(attribute)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	@Override
 	public String toString() {
 
-		return "DatabaseNode [selectedAttributes=" + featureString() + ", isFinished=" + isFinished + "]";
+		return "DatabaseNode [selectedFeatures=" + featureString() + ", isFinished=" + isFinished + "]";
 	}
 
 }

@@ -4,44 +4,29 @@
       "name": "BankAccount",
       "columns": [
         {
-          "type": "autofe.db.model.database.SimpleAttribute",
-          "data": {
-            "name": "BankAccountId",
-            "type": "ID",
-            "isTarget": false
-          }
+          "name": "BankAccountId",
+          "type": "ID",
+          "isTarget": false
         },
         {
-          "type": "autofe.db.model.database.SimpleAttribute",
-          "data": {
-            "name": "Balance",
-            "type": "NUMERIC",
-            "isTarget": false
-          }
+          "name": "Balance",
+          "type": "NUMERIC",
+          "isTarget": false
         },
         {
-          "type": "autofe.db.model.database.SimpleAttribute",
-          "data": {
-            "name": "TransactionCounter",
-            "type": "NUMERIC",
-            "isTarget": false
-          }
+          "name": "TransactionCounter",
+          "type": "NUMERIC",
+          "isTarget": false
         },
         {
-          "type": "autofe.db.model.database.SimpleAttribute",
-          "data": {
-            "name": "BankName",
-            "type": "TEXT",
-            "isTarget": false
-          }
+          "name": "BankName",
+          "type": "TEXT",
+          "isTarget": false
         },
         {
-          "type": "autofe.db.model.database.SimpleAttribute",
-          "data": {
-            "name": "Credible",
-            "type": "TEXT",
-            "isTarget": true
-          }
+          "name": "Credible",
+          "type": "TEXT",
+          "isTarget": true
         }
       ],
       "isTarget": true
@@ -50,28 +35,19 @@
       "name": "Customer",
       "columns": [
         {
-          "type": "autofe.db.model.database.SimpleAttribute",
-          "data": {
-            "name": "CustomerId",
-            "type": "ID",
-            "isTarget": false
-          }
+          "name": "CustomerId",
+          "type": "ID",
+          "isTarget": false
         },
         {
-          "type": "autofe.db.model.database.SimpleAttribute",
-          "data": {
-            "name": "BankAccountId",
-            "type": "ID",
-            "isTarget": false
-          }
+          "name": "BankAccountId",
+          "type": "ID",
+          "isTarget": false
         },
         {
-          "type": "autofe.db.model.database.SimpleAttribute",
-          "data": {
-            "name": "FirstName",
-            "type": "TEXT",
-            "isTarget": false
-          }
+          "name": "FirstName",
+          "type": "TEXT",
+          "isTarget": false
         }
       ],
       "isTarget": false
@@ -80,28 +56,19 @@
       "name": "Orders",
       "columns": [
         {
-          "type": "autofe.db.model.database.SimpleAttribute",
-          "data": {
-            "name": "OrderId",
-            "type": "ID",
-            "isTarget": false
-          }
+          "name": "OrderId",
+          "type": "ID",
+          "isTarget": false
         },
         {
-          "type": "autofe.db.model.database.SimpleAttribute",
-          "data": {
-            "name": "CustomerId",
-            "type": "ID",
-            "isTarget": false
-          }
+          "name": "CustomerId",
+          "type": "ID",
+          "isTarget": false
         },
         {
-          "type": "autofe.db.model.database.SimpleAttribute",
-          "data": {
-            "name": "OrderDate",
-            "type": "DATE",
-            "isTarget": false
-          }
+          "name": "OrderDate",
+          "type": "DATE",
+          "isTarget": false
         }
       ],
       "isTarget": false
@@ -110,36 +77,24 @@
       "name": "Product",
       "columns": [
         {
-          "type": "autofe.db.model.database.SimpleAttribute",
-          "data": {
-            "name": "ProductId",
-            "type": "ID",
-            "isTarget": false
-          }
+          "name": "ProductId",
+          "type": "ID",
+          "isTarget": false
         },
         {
-          "type": "autofe.db.model.database.SimpleAttribute",
-          "data": {
-            "name": "OrderId",
-            "type": "ID",
-            "isTarget": false
-          }
+          "name": "OrderId",
+          "type": "ID",
+          "isTarget": false
         },
         {
-          "type": "autofe.db.model.database.SimpleAttribute",
-          "data": {
-            "name": "ProductName",
-            "type": "TEXT",
-            "isTarget": false
-          }
+          "name": "ProductName",
+          "type": "TEXT",
+          "isTarget": false
         },
         {
-          "type": "autofe.db.model.database.SimpleAttribute",
-          "data": {
-            "name": "Price",
-            "type": "NUMERIC",
-            "isTarget": false
-          }
+          "name": "Price",
+          "type": "NUMERIC",
+          "isTarget": false
         }
       ],
       "isTarget": false

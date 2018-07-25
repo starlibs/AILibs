@@ -15,7 +15,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 
-import autofe.db.model.database.AbstractAttribute;
+import autofe.db.model.database.Attribute;
 import autofe.db.model.database.AggregationFunction;
 import autofe.db.model.database.Database;
 import autofe.db.model.database.Table;
@@ -140,8 +140,8 @@ public class DBUtils {
 	}
 
 	private static Gson initGson() {
-		Gson gson = new GsonBuilder().registerTypeAdapter(AbstractAttribute.class, new InterfaceAdapter<>())
-				.registerTypeAdapter(AbstractRelationship.class, new InterfaceAdapter<>()).create();
+		Gson gson = new GsonBuilder().registerTypeAdapter(AbstractRelationship.class, new InterfaceAdapter<>())
+				.create();
 		return gson;
 	}
 
@@ -159,8 +159,8 @@ public class DBUtils {
 		return null;
 	}
 
-	public static AbstractAttribute getAttributeByName(String name, Table table) {
-		for (AbstractAttribute a : table.getColumns()) {
+	public static Attribute getAttributeByName(String name, Table table) {
+		for (Attribute a : table.getColumns()) {
 			if (a.getName().equals(name)) {
 				return a;
 			}

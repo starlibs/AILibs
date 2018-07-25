@@ -148,12 +148,12 @@ public class Database {
 				+ jdbcPassword + "]";
 	}
 
-	public Set<AbstractAttribute> getForwardAttributes() {
-		Set<AbstractAttribute> toReturn = new HashSet<>();
+	public Set<Attribute> getForwardAttributes() {
+		Set<Attribute> toReturn = new HashSet<>();
 
 		Table targetTable = DBUtils.getTargetTable(this);
 		for (Table t : DBUtils.getForwardReachableTables(targetTable, this)) {
-			for (AbstractAttribute att : t.getColumns()) {
+			for (Attribute att : t.getColumns()) {
 				if (att.isFeature()) {
 					toReturn.add(att);
 				}
@@ -162,12 +162,12 @@ public class Database {
 		return toReturn;
 	}
 
-	public Set<AbstractAttribute> getBackwardAttributes() {
-		Set<AbstractAttribute> toReturn = new HashSet<>();
+	public Set<Attribute> getBackwardAttributes() {
+		Set<Attribute> toReturn = new HashSet<>();
 
 		Table targetTable = DBUtils.getTargetTable(this);
 		for (Table t : DBUtils.getBackwardReachableTables(targetTable, this)) {
-			for (AbstractAttribute att : t.getColumns()) {
+			for (Attribute att : t.getColumns()) {
 				if (att.isFeature()) {
 					toReturn.add(att);
 				}

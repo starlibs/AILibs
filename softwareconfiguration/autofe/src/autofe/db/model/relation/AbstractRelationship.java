@@ -1,6 +1,6 @@
 package autofe.db.model.relation;
 
-import autofe.db.model.database.AbstractAttribute;
+import autofe.db.model.database.Attribute;
 import autofe.db.model.database.Database;
 import autofe.db.model.database.Table;
 import autofe.db.util.DBUtils;
@@ -64,7 +64,7 @@ public abstract class AbstractRelationship {
 		return DBUtils.getTableByName(toTableName, context);
 	}
 
-	public AbstractAttribute getCommonAttribute() {
+	public Attribute getCommonAttribute() {
 		if (context == null) {
 			throw new IllegalStateException("Context not set!");
 		}

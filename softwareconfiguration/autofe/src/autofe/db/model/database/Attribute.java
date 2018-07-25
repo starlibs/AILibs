@@ -1,6 +1,6 @@
 package autofe.db.model.database;
 
-public abstract class AbstractAttribute implements Comparable<AbstractAttribute> {
+public class Attribute implements Comparable<Attribute> {
 
 	protected String name;
 
@@ -8,14 +8,14 @@ public abstract class AbstractAttribute implements Comparable<AbstractAttribute>
 
 	protected boolean isTarget;
 
-	public AbstractAttribute(String name, AttributeType type) {
+	public Attribute(String name, AttributeType type) {
 		super();
 		this.name = name;
 		this.type = type;
 		this.isTarget = false;
 	}
 
-	public AbstractAttribute(String name, AttributeType type, boolean isTarget) {
+	public Attribute(String name, AttributeType type, boolean isTarget) {
 		super();
 		this.name = name;
 		this.type = type;
@@ -72,7 +72,7 @@ public abstract class AbstractAttribute implements Comparable<AbstractAttribute>
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		AbstractAttribute other = (AbstractAttribute) obj;
+		Attribute other = (Attribute) obj;
 		if (isTarget != other.isTarget)
 			return false;
 		if (name == null) {
@@ -86,7 +86,7 @@ public abstract class AbstractAttribute implements Comparable<AbstractAttribute>
 	}
 
 	@Override
-	public int compareTo(AbstractAttribute o) {
+	public int compareTo(Attribute o) {
 		return name.compareTo(o.name);
 	}
 

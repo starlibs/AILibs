@@ -9,8 +9,9 @@ import java.util.List;
 
 import org.junit.Test;
 
-import autofe.db.model.database.AbstractAttribute;
+import autofe.db.model.database.Attribute;
 import autofe.db.model.database.Database;
+import autofe.db.model.database.ForwardFeature;
 import autofe.db.model.database.Table;
 import autofe.db.search.DatabaseGraphGenerator;
 import autofe.db.search.DatabaseNode;
@@ -26,7 +27,7 @@ public class SearchTest {
 
 	private static final String DATABASE_MODEL_FILE = "model/db/bankaccount_toy_database.json";
 
-	@Test
+	//@Test
 	public void testSearch() {
 		Database initialDatabase = DBUtils.deserializeFromFile(DATABASE_MODEL_FILE);
 		DatabaseGraphGenerator generator = new DatabaseGraphGenerator(initialDatabase);
@@ -71,9 +72,10 @@ public class SearchTest {
 		SuccessorGenerator<DatabaseNode, String> sg = generator.getSuccessorGenerator();
 
 		Table bankAccount = DBUtils.getTableByName("BankAccount", db);
-		AbstractAttribute credible = DBUtils.getAttributeByName("Credible", bankAccount);
+		Attribute credible = DBUtils.getAttributeByName("Credible", bankAccount);
+		ForwardFeature ff = new ForwardFeature(credible);
 
-		DatabaseNode node = new DatabaseNode(Collections.singletonList(credible), false);
+		DatabaseNode node = new DatabaseNode(Collections.singletonList(ff), false);
 		Collection<NodeExpansionDescription<DatabaseNode, String>> successors = sg.generateSuccessors(node);
 
 		String descriptions = concatExpansionDescriptions(successors);
