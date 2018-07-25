@@ -50,36 +50,6 @@ public class MLPlanExample {
 		mlplan.setTimeout(timeoutInSeconds);
 		mlplan.setPortionOfDataForPhase2(.3f);
 		mlplan.setNodeEvaluator(new DefaultPreorder());
-		OversearchAvoidanceConfig<TFDNode> oversearchAvoidanceConfig = new OversearchAvoidanceConfig<>(OversearchAvoidanceConfig.OversearchAvoidanceMode.TWO_PHASE_SELECTION);
-		oversearchAvoidanceConfig.activateDynamicPhaseLengthsAdjustment((long)timeoutInSeconds * 1000000000l);
-		oversearchAvoidanceConfig.setSolutionDistanceMetric(new ISolutionDistanceMetric<TFDNode>() {
-			
-			@Override
-			public double calculateSolutionDistance(TFDNode solution1, TFDNode solution2) {
-				ComponentInstance instance1, instance2;
-				try {
-					instance1 = Util.getSolutionCompositionFromState(mlplan.getComponents(), solution1.getState());
-					instance2 = Util.getSolutionCompositionFromState(mlplan.getComponents(), solution1.getState());
-				} catch (Exception e) {
-					return Double.MAX_VALUE;
-				}
-				if (instance1 == null || instance2 == null || instance1.getComponent() == null || instance2.getComponent() == null) {
-					return Double.MAX_VALUE;
-				} else {
-					Component component1 = instance1.getComponent();
-					Component component2 = instance2.getComponent();
-					List<Component> composition1 = Util.getComponentsOfComposition(instance1);
-					String names1 = Util.getComponentNamesOfComposition(instance1);
-					if (component1.getName().equals(component2.getName())) {
-						// Identical Classifier?
-						return 0.75;
-					} else {
-						return 1;
-					}
-				}
-			}
-		});
-		mlplan.setOversearchAvoidanceConfig(oversearchAvoidanceConfig);
 		mlplan.enableVisualization();
 		mlplan.buildClassifier(split.get(0));
 
