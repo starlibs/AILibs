@@ -44,6 +44,44 @@ public class KnapsackProblem {
 		public double getUsedCapacity() {
 			return this.usedCapacity;
 		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + getOuterType().hashCode();
+			result = prime * result + ((packedObjects == null) ? 0 : packedObjects.hashCode());
+			long temp;
+			temp = Double.doubleToLongBits(usedCapacity);
+			result = prime * result + (int) (temp ^ (temp >>> 32));
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			KnapsackNode other = (KnapsackNode) obj;
+			if (!getOuterType().equals(other.getOuterType()))
+				return false;
+			if (packedObjects == null) {
+				if (other.packedObjects != null)
+					return false;
+			} else if (!packedObjects.equals(other.packedObjects))
+				return false;
+			if (Double.doubleToLongBits(usedCapacity) != Double.doubleToLongBits(other.usedCapacity))
+				return false;
+			return true;
+		}
+
+		private KnapsackProblem getOuterType() {
+			return KnapsackProblem.this;
+		}
+
 	}
 	
 	private Set<String> objects;
