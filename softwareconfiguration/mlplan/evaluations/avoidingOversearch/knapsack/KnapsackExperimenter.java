@@ -3,6 +3,7 @@ package avoidingOversearch.knapsack;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -21,6 +22,7 @@ import jaicore.experiments.IExperimentIntermediateResultProcessor;
 import jaicore.experiments.IExperimentSetConfig;
 import jaicore.experiments.IExperimentSetEvaluator;
 import jaicore.ml.WekaUtil;
+import jaicore.search.algorithms.standard.awastar.AwaStarSearch;
 import jaicore.search.evaluationproblems.KnapsackProblem;
 import jaicore.search.evaluationproblems.KnapsackProblem.KnapsackNode;
 import jaicore.search.structure.core.Node;
@@ -53,25 +55,32 @@ public class KnapsackExperimenter {
 				int seed = Integer.valueOf(description.get("seed"));
 				double problemSize = Double.valueOf(description.get("problem-size"));
 				int timeout = Integer.valueOf(description.get("timeout"));
-
+				double score = Double.MAX_VALUE;
 				// Calculate experiment score
 				KnapsackProblem knapsackProblem = createRandomKnapsackProblem(problemSize);
-				// TODO: Configure search
 				switch (algorithmName) {
 					case "two-phase":
 						break;
 					case "pareto":
 						break;
 					case "awa-star":
+						AwaStarSearch<KnapsackNode, String, Double> search;
+						try {
+							search = new AwaStarSearch<>(knapsackProblem.getGraphGenerator(), knapsackProblem.getNodeEvaluator(), knapsackProblem.getSolutionEvaluator());
+							List<Node<KnapsackNode, Double>>solution = search.search(timeout);
+							List<KnapsackNode> solutionPath = new ArrayList<>();
+							solution.forEach(n -> solutionPath.add(n.getPoint()));
+							score = knapsackProblem.getSolutionEvaluator().evaluateSolution(solutionPath);
+						} catch (Throwable e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 						break;
 					case "r-star":
 						break;
 					case "mcts":
 						break;
 				}
-				List<KnapsackNode> solutionPath = null;
-				double score = knapsackProblem.getSolutionEvaluator().evaluateSolution(solutionPath);
-				
 				Map<String, Object> results = new HashMap<>();
 				results.put("score", score);
 				processor.processResults(results);

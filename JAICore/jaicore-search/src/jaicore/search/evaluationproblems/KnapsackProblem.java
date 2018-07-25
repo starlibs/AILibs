@@ -8,6 +8,7 @@ import java.util.Set;
 
 import jaicore.search.algorithms.interfaces.ISolutionEvaluator;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
+import jaicore.search.algorithms.standard.core.INodeEvaluator;
 import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.core.NodeType;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
@@ -107,7 +108,8 @@ public class KnapsackProblem {
 			public SingleRootGenerator<KnapsackNode> getRootGenerator() {
 				return () -> new KnapsackNode();
 			}
-
+			
+			// TODO: Change to single successor generator
 			@Override
 			public SuccessorGenerator<KnapsackNode, String> getSuccessorGenerator() {
 				return n -> {
@@ -182,6 +184,11 @@ public class KnapsackProblem {
 				return true;
 			}
 		};
+	}
+	
+	public INodeEvaluator<KnapsackNode, Double> getNodeEvaluator() {
+		//TODO: Implement node evaluator
+		return n -> 0.0d;
 	}
 	
 }
