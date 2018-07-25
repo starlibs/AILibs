@@ -3,6 +3,8 @@ package jaicore.search.algorithms.standard.rstar;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
 import jaicore.search.structure.graphgenerator.*;
+
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -10,6 +12,7 @@ import org.junit.Test;
 import java.util.Collection;
 import java.util.List;
 import java.util.PriorityQueue;
+import java.util.stream.Collectors;
 
 public class GridWorldRStar {
 
@@ -54,7 +57,17 @@ public class GridWorldRStar {
     @Test
     public void gridWorldRStar() {
 
-        RStar<GridWorld, Integer, Integer> rStar = new RStar<>(ggg, 100.0, 88, 5);
+    	/* compute reference solution */
+    	SimpleAStarGraphSearch<GridWorld, Integer> astar = new SimpleAStarGraphSearch<GridWorld, Integer>(
+                new GridWorldBasicGraphGenerator(0, 0, 15, 15),
+                (n1, n2)->GridWorld.myGrid[n2.getPoint().getX()][n2.getPoint().getY()],
+                new GridWorldHeuristic(new GridWorld(15, 15)));
+    	PathAndCost<GridWorld, Double> referenceSolution = astar.solution();
+    	List<GridWorld> referenceSolutionPath = referenceSolution.path.stream().map(n -> n.getPoint()).collect(Collectors.toList());
+    	System.out.println(referenceSolutionPath);
+    	System.out.println(referenceSolution.cost);
+    	
+        RStar<GridWorld, Integer, Integer> rStar = new RStar<>(ggg, 1.0, 88, 5);
         rStar.start();
 
         try {
@@ -63,12 +76,22 @@ public class GridWorldRStar {
             System.out.println("Exception while slpeeing.");
         }
         rStar.interrupt();
-        List<Node<GridWorld, RStarK>> solution = rStar.getSolutionPath();
+        List<GridWorld> solution = rStar.getSolutionPath().stream().map(n -> n.getPoint()).collect(Collectors.toList());
+        double costOfSolution = 0;
+        for (GridWorld pos : solution)
+        	costOfSolution += GridWorld.myGrid[pos.getX()][pos.getY()];
+        
+        List<GammaNode<GridWorld, RStarK>> gammaSolution = rStar.getGammaSolutionPath();
+        List<GridWorld> intermediateHopsChosenByGammaSolution = gammaSolution.stream().map(n -> n.getPoint()).collect(Collectors.toList());
+        System.out.println(gammaSolution);
+        System.out.println(intermediateHopsChosenByGammaSolution);
+        
         System.out.println(solution);
+        System.out.println(costOfSolution);
+        
+        
 
-        System.out.println(rStar.getGammaSolutionPath());
-
-
+        Assert.assertTrue(costOfSolution == referenceSolution.cost);
 
 
     }

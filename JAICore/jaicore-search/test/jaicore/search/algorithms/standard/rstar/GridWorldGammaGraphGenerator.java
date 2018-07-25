@@ -1,21 +1,28 @@
 package jaicore.search.algorithms.standard.rstar;
 
-import jaicore.search.algorithms.standard.astar.AStar;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
+
 import jaicore.search.algorithms.standard.core.INodeEvaluator;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
 import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.core.NodeType;
-import jaicore.search.structure.graphgenerator.*;
-
-import java.lang.reflect.Array;
-import java.util.*;
+import jaicore.search.structure.graphgenerator.GoalTester;
+import jaicore.search.structure.graphgenerator.NodeGoalTester;
+import jaicore.search.structure.graphgenerator.RootGenerator;
+import jaicore.search.structure.graphgenerator.SingleRootGenerator;
+import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 public class GridWorldGammaGraphGenerator implements GammaGraphGenerator<GridWorld, Integer> {
 
     GammaNode<GridWorld, RStarK> nstart;
     GammaNode<GridWorld, RStarK> ngoal;
-    GraphGenerator<GridWorld, Integer> gg;
+//    GraphGenerator<GridWorld, Integer> gg;
     HashMap<GammaNode, GammaNode> alreadyGeneratedStates = new HashMap<>();
 
     public GridWorldGammaGraphGenerator() {
@@ -98,73 +105,10 @@ public class GridWorldGammaGraphGenerator implements GammaGraphGenerator<GridWor
     @Override
     public PathAndCost computePath(GammaNode<GridWorld, RStarK> start, GammaNode<GridWorld, RStarK> end) {
 
-        /**
-         * Graph generator from `start` to `end`.
-         */
-        GraphGenerator<GridWorld, Integer> gg = new GraphGenerator<GridWorld, Integer>() {
-            @Override
-            public RootGenerator<GridWorld> getRootGenerator() {
-                return new SingleRootGenerator<GridWorld>() {
-                    @Override
-                    public GridWorld getRoot() {
-                        return start.getPoint();
-                    }
-                };
-            }
-
-            @Override
-            public SuccessorGenerator<GridWorld, Integer> getSuccessorGenerator() {
-                return new SuccessorGenerator<GridWorld, Integer>() {
-                    @Override
-                    public Collection<NodeExpansionDescription<GridWorld, Integer>> generateSuccessors(GridWorld node) {
-                        ArrayList<NodeExpansionDescription<GridWorld, Integer>> succ = new ArrayList<>();
-                        for (int a = 1; a <= 9; a++) {
-                            GridWorld n_ = node.onAction(a);
-                            if (n_ != null) {
-                                succ.add(new NodeExpansionDescription<>(node, n_, a, NodeType.AND));
-                            }
-                        }
-                        return succ;
-                    }
-                };
-            }
-
-            @Override
-            public GoalTester<GridWorld> getGoalTester() {
-                return new NodeGoalTester<GridWorld>() {
-                    @Override
-                    public boolean isGoal(GridWorld node) {
-                        return node.getX() == end.getPoint().getX() && node.getY() == end.getPoint().getY();
-                    }
-                };
-            }
-
-            @Override
-            public boolean isSelfContained() {
-                return false;
-            }
-
-            @Override
-            public void setNodeNumbering(boolean nodenumbering) {
-
-            }
-        };
-
-        /**
-         * Use A* to generate the path.
-         */
-        INodeEvaluator<GridWorld, Double> h = new INodeEvaluator<GridWorld, Double>() {
-            @Override
-            public Double f(Node<GridWorld, ?> node) throws Throwable {
-                int x_ = Math.abs(end.getPoint().getX() - node.getPoint().getX());
-                int y_ = Math.abs(end.getPoint().getY() - node.getPoint().getY());
-                return new Double(x_+y_);
-            }
-        };
         SimpleAStarGraphSearch<GridWorld, Integer> astar = new SimpleAStarGraphSearch<GridWorld, Integer>(
-                gg,
+                new GridWorldBasicGraphGenerator(start.getPoint(), end.getPoint()),
                 (n1, n2)->GridWorld.myGrid[n2.getPoint().getX()][n2.getPoint().getY()],
-                h);
+                new GridWorldHeuristic(end.getPoint()));
 
         PathAndCost pac = astar.solution();
         return pac;

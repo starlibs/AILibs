@@ -240,6 +240,8 @@ public class RStar<T, A, D> extends Thread {
             GammaNode<T, RStarK> current = n_goal;
             while (current != n_start) {
                 List<Node<T,RStarK>> pathBpToCurrent = current.backpointer.path.get(current);
+                if (current.backpointer != n_start)
+                	pathBpToCurrent.remove(0);
                 pathBpToCurrent.addAll(solution);
                 solution = pathBpToCurrent;
                 current = current.backpointer;
