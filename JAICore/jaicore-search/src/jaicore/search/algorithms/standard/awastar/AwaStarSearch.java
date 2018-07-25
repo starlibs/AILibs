@@ -146,7 +146,6 @@ public class AwaStarSearch<T, A, V extends Comparable<V>>{
 		ExecutorService executor = Executors.newSingleThreadExecutor();
 		Future<List<Node<T, V>>> future =  executor.submit(search);
 		executor.shutdown();
-		List<Node<T, V>> bestSolution = null;
 		try {
 			return future.get(timeout, TimeUnit.SECONDS);
 		} catch (Exception e) {
