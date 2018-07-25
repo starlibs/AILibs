@@ -1,6 +1,8 @@
 package jaicore.search.algorithms.standard.awastar;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -24,7 +26,7 @@ public class AwaStarSearch<T, A, V extends Comparable<V>>{
 
 	private static final Logger logger = LoggerFactory.getLogger(AwaStarSearch.class);
 
-	private class Search implements Callable<T> {
+	private class Search implements Callable<List<Node<T, V>>> {
 		
 		private SuccessorGenerator<T, A> successorGenerator;
 		private NodeGoalTester<T> goalTester;
@@ -32,7 +34,7 @@ public class AwaStarSearch<T, A, V extends Comparable<V>>{
 		private OpenCollection<Node<T, V>> closedList, suspendList, openList;
 		private int windowSize;
 		private V bestScore;
-		private T bestSolution;
+		private List<Node<T, V>> bestSolution;
 		
 		public Search(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, V> nodeEvaluator) throws Throwable {
 			successorGenerator = graphGenerator.getSuccessorGenerator();
@@ -50,7 +52,7 @@ public class AwaStarSearch<T, A, V extends Comparable<V>>{
 		}
 
 		@Override
-		public T call() throws Exception {
+		public List<Node<T, V>> call() throws Exception {
 			do {
 				closedList.addAll(openList);
 				openList.addAll(suspendList);
@@ -61,7 +63,7 @@ public class AwaStarSearch<T, A, V extends Comparable<V>>{
 			return bestSolution;
 		}
 		
-		private T windowAStar() {
+		private List<Node<T, V>> windowAStar() {
 			int currentLevel = -1;
 			while (!openList.isEmpty()) {
 				Node<T, V> n = openList.peek();
@@ -82,7 +84,7 @@ public class AwaStarSearch<T, A, V extends Comparable<V>>{
 						if (n.isGoal()) {
 							n.setGoal(true);
 							bestScore = n.getInternalLabel();
-							bestSolution = n.getPoint();
+							bestSolution = n.path();
 							return bestSolution;
 						}
 						Collection<NodeExpansionDescription<T, A>> successors = successorGenerator.generateSuccessors(n.getPoint());
@@ -134,11 +136,11 @@ public class AwaStarSearch<T, A, V extends Comparable<V>>{
 		this.search = new Search(graphGenerator, nodeEvaluator);
 	}
 
-	public T search(int timeout) throws Exception {
+	public List<Node<T, V>> search(int timeout) throws Exception {
 		ExecutorService executor = Executors.newSingleThreadExecutor();
-		Future<T> future =  executor.submit(search);
+		Future<List<Node<T, V>>> future =  executor.submit(search);
 		executor.shutdown();
-		T bestSolution = null;
+		List<Node<T, V>> bestSolution = null;
 		try {
 			bestSolution = future.get(timeout, TimeUnit.SECONDS);
 		}
