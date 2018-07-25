@@ -43,7 +43,7 @@ public class UncertaintyORGraphSearchFactory <T, A> implements IObservableORGrap
 			search = new ORGraphSearch<>(
 					graphGenerator,
 					new UncertaintyRandomCompletionEvaluator<T, A, Double>(
-						new Random(123l),
+						new Random(oversearchAvoidanceConfig.getSeed()),
 						oversearchAvoidanceConfig.getRandomSampleAmount(),
 						pathUnification,
 						this.solutionEvaluator,

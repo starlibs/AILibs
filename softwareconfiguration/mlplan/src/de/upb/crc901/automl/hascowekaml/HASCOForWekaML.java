@@ -15,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.upb.crc901.automl.PreferenceBasedNodeEvaluator;
-import hasco.core.HASCO;
 import hasco.core.HASCOFD;
 import hasco.core.Solution;
 import hasco.model.Component;
@@ -47,7 +46,7 @@ public class HASCOForWekaML implements IObservableGraphAlgorithm<TFDNode, String
 	}
 
 	private boolean isCanceled = false;
-	private OversearchAvoidanceConfig<TFDNode> oversearchAvoidanceConfig = new OversearchAvoidanceConfig<>(OversearchAvoidanceConfig.OversearchAvoidanceMode.NONE);
+	private OversearchAvoidanceConfig<TFDNode> oversearchAvoidanceConfig = new OversearchAvoidanceConfig<>(OversearchAvoidanceConfig.OversearchAvoidanceMode.NONE, 123l);
 	private Collection<Object> listeners = new ArrayList<>();
 	private HASCOFD<Classifier>.HASCOSolutionIterator hascoRun;
 	private HASCOFD<Classifier> hasco;
@@ -164,7 +163,7 @@ public class HASCOForWekaML implements IObservableGraphAlgorithm<TFDNode, String
 		return loggerName;
 	}
 
-	public void setOversearchAvoidanceMode(OversearchAvoidanceConfig oversearchAvoidanceConfig) {
+	public void setOversearchAvoidanceMode(OversearchAvoidanceConfig<TFDNode> oversearchAvoidanceConfig) {
 		this.oversearchAvoidanceConfig = oversearchAvoidanceConfig;
 	}
 

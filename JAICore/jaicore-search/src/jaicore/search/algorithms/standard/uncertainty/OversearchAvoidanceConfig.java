@@ -9,6 +9,7 @@ public class OversearchAvoidanceConfig<N> {
 	}
 	
 	private OversearchAvoidanceMode oversearchAvoidanceMode;
+	private long seed;
 	private boolean adjustPhaseLengthsDynamically = false;
 	private long timeout;
 	private int interval = 20;
@@ -18,8 +19,9 @@ public class OversearchAvoidanceConfig<N> {
 	private double minimumSolutionDistanceForExploration = 0.5d;
 	private ISolutionDistanceMetric<N> solutionDistanceMetric= (s1, s2) -> 0.0d;
 
-	public OversearchAvoidanceConfig(OversearchAvoidanceMode mode) {
+	public OversearchAvoidanceConfig(OversearchAvoidanceMode mode, long seed) {
 		this.oversearchAvoidanceMode = mode;
+		this.seed = seed;
 	}
 
 	public OversearchAvoidanceMode getOversearchAvoidanceMode() {
@@ -86,6 +88,10 @@ public class OversearchAvoidanceConfig<N> {
 
 	public void setMinimumSolutionDistanceForExploration(double minimumSolutionDistanceForExploration) {
 		this.minimumSolutionDistanceForExploration = minimumSolutionDistanceForExploration;
+	}
+	
+	public long getSeed() {
+		return this.seed;
 	}
 
 }
