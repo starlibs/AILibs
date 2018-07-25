@@ -131,7 +131,9 @@ public class UncertaintyRandomCompletionEvaluator<T, N, V extends Comparable<V>>
 							/* now evaluate this solution */
 							j++;
 							try {
+								logger.info("Computing value.");
 								V val = getFValueOfSolutionPath(completedPath);
+								logger.info("Computed value {}.", val);
 								if (val != null) {
 									evaluations.add(val);
 									if (best == null || val.compareTo(best) < 0) {
@@ -141,8 +143,10 @@ public class UncertaintyRandomCompletionEvaluator<T, N, V extends Comparable<V>>
 								}
 							} catch (InterruptedException e) {
 								interrupted = true;
+								logger.info("Computation of quality of solution {} has been interrupted. Canceling.", pathCompletion);
 								break;
 							} catch (Throwable ex) {
+								logger.info("Computation of quality of solution {} failed. Trying another one.", pathCompletion);
 								if (j ==maxSamples) {
 									logger.warn("Too many retry attempts, giving up.");
 									throw ex;

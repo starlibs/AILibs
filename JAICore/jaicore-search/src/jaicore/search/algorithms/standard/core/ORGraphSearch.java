@@ -326,7 +326,10 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	}
 
 	private void labelNode(Node<T, V> node) throws Throwable {
-		node.setInternalLabel(nodeEvaluator.f(node));
+		logger.debug("Calling {} to compute label of node {}", nodeEvaluator, node.getPoint());
+		V fValue = nodeEvaluator.f(node);
+		logger.trace("Setting label of node {}", node.getPoint());
+		node.setInternalLabel(fValue);
 	}
 
 	/**
@@ -338,7 +341,9 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 			if (rootGenerator instanceof MultipleRootGenerator) {
 				Collection<Node<T, V>> roots = ((MultipleRootGenerator<T>) rootGenerator).getRoots().stream().map(n -> newNode(null, n)).collect(Collectors.toList());
 				for (Node<T, V> root : roots) {
+					logger.debug("Computing label for root {}", root);
 					labelNode(root);
+					logger.debug("Adding root {} to OPEN", root);
 					open.add(root);
 					root.setAnnotation("awa-level", 0);
 					logger.info("Labeled root with {}", root.getInternalLabel());
@@ -396,6 +401,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 		logger.info("Starting search for next solution. Size of OPEN is {}", open.size());
 		try {
 			initGraph();
+			logger.info("Initialized graph. Size of OPEN is {}", open.size());
 		} catch (Throwable e) {
 			e.printStackTrace();
 			return null;
