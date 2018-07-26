@@ -89,20 +89,20 @@ public class Util {
 	 * all the same
 	 */
 	public static double evaluate(Instances instances, Classifier classifier) {
-		double pctCorrect = 0;
+		double pctIncorrect = 0;
 
 		try {
 			Evaluation eval = new Evaluation(instances);
 
 			eval.crossValidateModel(classifier, instances, 10, new Random());
 
-			pctCorrect = eval.pctIncorrect();
+			pctIncorrect = eval.pctIncorrect();
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
-		return pctCorrect;
+		return pctIncorrect;
 	}
 
 	public static Instances loadInstances(String path, String name) {

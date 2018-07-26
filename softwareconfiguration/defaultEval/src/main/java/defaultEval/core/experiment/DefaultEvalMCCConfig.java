@@ -13,7 +13,7 @@ import jaicore.experiments.IExperimentSetConfig;
  * @author fmohr
  *
  */
-@Sources({ "file:./examples/mlexample/setup.properties" })
+@Sources({ "file:setup.properties" })
 public interface DefaultEvalMCCConfig extends IExperimentSetConfig {
 	public static final String DATASETS = "datasets";
 	public static final String Classifiers = "classifiers";

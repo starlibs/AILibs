@@ -104,10 +104,10 @@ public class DefaultEvalExperiment {
 				optimizer.optimize();
 				
 				WEKAPipelineFactory factory = new WEKAPipelineFactory();
-				double pctCorrect = Util.evaluate(Util.loadInstances(m.getDatasetFolder().getAbsolutePath(), datasetName), factory.getComponentInstantiation(Util.createPipeline(optimizer.getFinalSearcher(), optimizer.getFinalEvaluator(), optimizer.getFinalClassifier())));
+				double pctIncorrect = Util.evaluate(Util.loadInstances(m.getDatasetFolder().getAbsolutePath(), datasetName), factory.getComponentInstantiation(Util.createPipeline(optimizer.getFinalSearcher(), optimizer.getFinalEvaluator(), optimizer.getFinalClassifier())));
 				
 				/* report results */
-				results.put("pctCorrect", pctCorrect);
+				results.put("pctIncorrect", pctIncorrect);
 				processor.processResults(results);
 			}
 		});

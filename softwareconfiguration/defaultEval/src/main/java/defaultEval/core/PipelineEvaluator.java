@@ -86,7 +86,7 @@ public class PipelineEvaluator {
 						
 						// add parameter
 						for (Parameter p : searcher.getParameters()) {
-							searcherParameter.put(p.getName(), args[index++]);
+							searcherParameter.put(args[index++], args[index++]);
 						}
 					}
 				}
@@ -98,11 +98,10 @@ public class PipelineEvaluator {
 						
 						// add parameter
 						for (Parameter p : evaluator.getParameters()) {
-							evaluatorParameter.put(p.getName(), args[index++]);
+							evaluatorParameter.put(args[index++], args[index++]);
 						}
 					}
-				}
-				
+				}	
 			}
 			
 			// create Classifier
@@ -115,7 +114,7 @@ public class PipelineEvaluator {
 					classifier = c; 
 					// add parameter
 					for (Parameter p : classifier.getParameters()) {
-						classifierParameter.put(p.getName(), args[index++]);
+						classifierParameter.put(args[index++], args[index++]);
 					}
 				}
 			}

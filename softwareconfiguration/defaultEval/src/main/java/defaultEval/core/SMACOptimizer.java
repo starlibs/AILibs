@@ -177,17 +177,18 @@ public class SMACOptimizer extends Optimizer{
 		
 		pyWrapperStream.print(" " + dataSetFolder.getAbsolutePath() + "/" + dataSet + ".arff");
 		
-		
 		if(searcher != null) {
 			pyWrapperStream.print(" " + searcher.getName());
 			
 			for (Parameter parameter : searcher.getParameters()) {
+				pyWrapperStream.print(" " + parameter.getName());
 				pyWrapperStream.print(" \"+"+createDomainWrapper(getUniqueParamName(parameter, ParamType.searcher), parameter.getDefaultDomain())+" + \"");
 			}
 			
 			pyWrapperStream.print(" " + evaluator.getName());
 			
 			for (Parameter parameter : evaluator.getParameters()) {
+				pyWrapperStream.print(" " + parameter.getName());
 				pyWrapperStream.print(" \"+ "+createDomainWrapper(getUniqueParamName(parameter, ParamType.evaluator), parameter.getDefaultDomain())+" + \"");
 			}
 			
@@ -198,6 +199,7 @@ public class SMACOptimizer extends Optimizer{
 		pyWrapperStream.print(" " + classifier.getName());
 		
 		for (Parameter parameter : classifier.getParameters()) {
+			pyWrapperStream.print(" " + parameter.getName());
 			pyWrapperStream.print(" \"+"+createDomainWrapper(getUniqueParamName(parameter, ParamType.classifier), parameter.getDefaultDomain())+" + \"");
 		}
 		

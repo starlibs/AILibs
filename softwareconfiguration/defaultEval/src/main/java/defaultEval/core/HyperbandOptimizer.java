@@ -253,8 +253,6 @@ public class HyperbandOptimizer extends Optimizer{
 		
 		HyperbandOptimizer o = new HyperbandOptimizer(searcher, evaluator, classifier, "breast-cancer", new File("F:\\Data\\Uni\\PG\\DefaultEvalEnvironment"),new File("F:\\Data\\Uni\\PG\\DefaultEvalEnvironment\\datasets"), 0);
 		o.optimize();
-		
-		
 	}
 	
 	
@@ -262,6 +260,7 @@ public class HyperbandOptimizer extends Optimizer{
 		StringBuilder sb = new StringBuilder();
 		
 		for (Parameter parameter : c.getParameters()) {
+			sb.append(" " + parameter.getName());
 			sb.append(String.format(" \"+ %s + \"", createDomainWrapper(String.format("params['%s']", getUniqueParamName(parameter, t)), parameter.getDefaultDomain())));
 		}
 		
