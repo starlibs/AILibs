@@ -13,7 +13,9 @@ import java.util.Scanner;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.math3.util.Pair;
 
+import defaultEval.core.Util.ParamType;
 import hasco.model.BooleanParameterDomain;
 import hasco.model.CategoricalParameterDomain;
 import hasco.model.Component;
@@ -27,8 +29,8 @@ import scala.annotation.elidable;
 public class SMACOptimizer extends Optimizer{
 	
 
-	public SMACOptimizer(Component searcher, Component evaluator, Component classifier, String dataSet, File environment, int seed) {
-		super(searcher, evaluator, classifier, dataSet, environment, seed);
+	public SMACOptimizer(Component searcher, Component evaluator, Component classifier, String dataSet, File environment, File dataSetFolder, int seed) {
+		super(searcher, evaluator, classifier, dataSet, environment, dataSetFolder, seed);
 	}
 
 	@Override
@@ -152,41 +154,41 @@ public class SMACOptimizer extends Optimizer{
 		pyWrapperStream.println("import sys, math");
 		pyWrapperStream.println("from subprocess import call");
 		
-		for (Parameter parameter : parameterList) {
-			pyWrapperStream.println( parameter.getName() + " = " + getInitialValue(parameter.getDefaultDomain()));
+		for (Pair<Parameter, ParamType> parameterPair : parameterList) {
+			pyWrapperStream.println( getUniqueParamName(parameterPair) + " = " + getInitialValue(parameterPair.getFirst().getDefaultDomain()));
 		}
 		
 		pyWrapperStream.println("for i in range(len(sys.argv)-1): ");
 		int i = 0;
-		for (Parameter parameter : parameterList) {
+		for (Pair<Parameter, ParamType> parameterPair : parameterList) {
 			if(i == 0) {
-				pyWrapperStream.println("\t if (sys.argv[i] == '-" + parameter.getName() + "'):");
+				pyWrapperStream.println("\t if (sys.argv[i] == '-" + getUniqueParamName(parameterPair) + "'):");
 				
 			}else {
-				pyWrapperStream.println("\t elif(sys.argv[i] == '-" + parameter.getName() + "'):");
+				pyWrapperStream.println("\t elif(sys.argv[i] == '-" + getUniqueParamName(parameterPair) + "'):");
 			}
 			
-			pyWrapperStream.println("\t \t " + parameter.getName() + " = "+getConverter(parameter.getDefaultDomain())+"(sys.argv[i+1])");
+			pyWrapperStream.println("\t \t " + getUniqueParamName(parameterPair) + " = "+getConverter(parameterPair.getFirst().getDefaultDomain())+"(sys.argv[i+1])");
 			i++;
 		}
 		
 		// run java programm
 		pyWrapperStream.print("call(\"java -jar "+environment.getAbsolutePath()+"/PipelineEvaluator.jar");
 		
-		pyWrapperStream.print(" " + dataSet);
+		pyWrapperStream.print(" " + dataSetFolder.getAbsolutePath() + "/" + dataSet + ".arff");
 		
 		
 		if(searcher != null) {
 			pyWrapperStream.print(" " + searcher.getName());
 			
 			for (Parameter parameter : searcher.getParameters()) {
-				pyWrapperStream.print(" \"+"+createDomainWrapper(parameter.getName(), parameter.getDefaultDomain())+" + \""); // TODO only for floats 
+				pyWrapperStream.print(" \"+"+createDomainWrapper(getUniqueParamName(parameter, ParamType.searcher), parameter.getDefaultDomain())+" + \"");
 			}
 			
 			pyWrapperStream.print(" " + evaluator.getName());
 			
 			for (Parameter parameter : evaluator.getParameters()) {
-				pyWrapperStream.print(" \"+ "+createDomainWrapper(parameter.getName(), parameter.getDefaultDomain())+" + \""); // TODO only for floats 
+				pyWrapperStream.print(" \"+ "+createDomainWrapper(getUniqueParamName(parameter, ParamType.evaluator), parameter.getDefaultDomain())+" + \"");
 			}
 			
 		}else {
@@ -196,7 +198,7 @@ public class SMACOptimizer extends Optimizer{
 		pyWrapperStream.print(" " + classifier.getName());
 		
 		for (Parameter parameter : classifier.getParameters()) {
-			pyWrapperStream.print(" \"+"+createDomainWrapper(parameter.getName(), parameter.getDefaultDomain())+" + \"");
+			pyWrapperStream.print(" \"+"+createDomainWrapper(getUniqueParamName(parameter, ParamType.classifier), parameter.getDefaultDomain())+" + \"");
 		}
 		
 		
@@ -225,33 +227,32 @@ public class SMACOptimizer extends Optimizer{
 			e.printStackTrace();
 		}
 		
-		// TODO Namensueberschneidungen?
-		for (Parameter p : parameterList) {
-			ParameterDomain pd = p.getDefaultDomain();
+		for (Pair<Parameter, ParamType> parameterPair : parameterList) {
+			ParameterDomain pd = parameterPair.getFirst().getDefaultDomain();
 
 			// Numeric (integer or real/double)
 			if(pd instanceof NumericParameterDomain) {
 				NumericParameterDomain n_pd = (NumericParameterDomain) pd;
-				pcsStream.println(p.getName() + " " + (n_pd.isInteger() ? "integer" : "real") + " [" + n_pd.getMin() + ", " +n_pd.getMax() + "] [" + p.getDefaultValue().toString() + "]" );
+				pcsStream.println(getUniqueParamName(parameterPair) + " " + (n_pd.isInteger() ? "integer" : "real") + " [" + n_pd.getMin() + ", " +n_pd.getMax() + "] [" + parameterPair.getFirst().getDefaultValue().toString() + "]" );
 			}
 			
 			// Boolean (categorical)
 			else if(pd instanceof BooleanParameterDomain) {
 				BooleanParameterDomain b_pd = (BooleanParameterDomain) pd;
-				pcsStream.println(p.getName() + " categorical {true, false} [" + p.getDefaultValue().toString() + "]" );
+				pcsStream.println(getUniqueParamName(parameterPair) + " categorical {true, false} [" + parameterPair.getFirst().getDefaultValue().toString() + "]" );
 			}
 			
 			//categorical
 			else if(pd instanceof CategoricalParameterDomain) {
 				CategoricalParameterDomain c_pd = (CategoricalParameterDomain) pd;
-				pcsStream.print(p.getName() + " categorical {");
+				pcsStream.print(getUniqueParamName(parameterPair) + " categorical {");
 				for (int i = 0; i < c_pd.getValues().length; i++) {
 					pcsStream.print(c_pd.getValues()[i]);
 					if(i != c_pd.getValues().length - 1) {
 						pcsStream.print(",");
 					}
 				}
-				pcsStream.println("} [" + p.getDefaultValue().toString() + "]");
+				pcsStream.println("} [" + parameterPair.getFirst().getDefaultValue().toString() + "]");
 			}
 		}
 		
@@ -259,9 +260,7 @@ public class SMACOptimizer extends Optimizer{
 	}
 	
 	
-	private String buildFileName() {
-		return (searcher != null) ? (searcher.getName()+"_"+evaluator.getName()) : "null" + "_" + classifier.getName() + "_" + dataSet;
-	}
+	
 	
 	private String getConverter(ParameterDomain pd) {
 		if(pd instanceof NumericParameterDomain) {
@@ -315,7 +314,7 @@ public class SMACOptimizer extends Optimizer{
 			}
 		}
 		
-		SMACOptimizer o = new SMACOptimizer(searcher, evaluator, classifier, "breast-cancer", new File("F:\\Data\\Uni\\PG\\DefaultEvalEnvironment"), 0);
+		SMACOptimizer o = new SMACOptimizer(searcher, evaluator, classifier, "breast-cancer", new File("F:\\Data\\Uni\\PG\\DefaultEvalEnvironment"),new File("F:\\Data\\Uni\\PG\\DefaultEvalEnvironment\\datasets"), 0);
 		o.optimize();
 		
 		

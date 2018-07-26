@@ -13,6 +13,7 @@ import org.aeonbits.owner.ConfigCache;
 import de.upb.crc901.automl.hascowekaml.WEKAPipelineFactory;
 import de.upb.crc901.automl.pipeline.basic.MLPipeline;
 import defaultEval.core.DefaultOptimizer;
+import defaultEval.core.HyperbandOptimizer;
 import defaultEval.core.Optimizer;
 import defaultEval.core.SMACOptimizer;
 import defaultEval.core.Util;
@@ -83,11 +84,17 @@ public class DefaultEvalExperiment {
 				
 				switch (optimizerName) {
 				case "SMAC":
-					optimizer = new SMACOptimizer(searcher, evaluator, classifier, datasetName, m.getEnvironment(), seed);
+					optimizer = new SMACOptimizer(searcher, evaluator, classifier, datasetName, m.getEnvironment(), m.getDatasetFolder(), seed);
 					break;
-
+					
+				case "Hyperband":
+					optimizer = new HyperbandOptimizer(searcher, evaluator, classifier, datasetName, m.getEnvironment(), m.getDatasetFolder(), seed);
+					break;
+				
+				case "DGGA":
+					
 				case "default":
-					optimizer = new DefaultOptimizer(searcher, evaluator, classifier, datasetName, m.getEnvironment(), seed);
+					optimizer = new DefaultOptimizer(searcher, evaluator, classifier, datasetName, m.getEnvironment(), m.getDatasetFolder(), seed);
 					break;
 					
 				default:

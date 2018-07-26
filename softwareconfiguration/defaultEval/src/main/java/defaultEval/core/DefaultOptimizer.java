@@ -17,8 +17,8 @@ import hasco.model.Parameter;
 public class DefaultOptimizer extends Optimizer{
 
 	
-	public DefaultOptimizer(Component searcher, Component evaluator, Component classifier, String dataSet, File environment, int seed) {
-		super(searcher, evaluator, classifier, dataSet, environment, seed);
+	public DefaultOptimizer(Component searcher, Component evaluator, Component classifier, String dataSet, File environment, File dataSetFolder, int seed) {
+		super(searcher, evaluator, classifier, dataSet, environment, dataSetFolder, seed);
 	}
 	
 	@Override

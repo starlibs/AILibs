@@ -14,11 +14,13 @@ import java.util.Scanner;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.math3.util.Pair;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import defaultEval.core.Util.ParamType;
 import hasco.model.BooleanParameterDomain;
 import hasco.model.CategoricalParameterDomain;
 import hasco.model.Component;
@@ -32,8 +34,8 @@ import scala.annotation.elidable;
 public class HyperbandOptimizer extends Optimizer{
 	
 
-	public HyperbandOptimizer(Component searcher, Component evaluator, Component classifier, String dataSet, File environment, int seed) {
-		super(searcher, evaluator, classifier, dataSet, environment, seed);
+	public HyperbandOptimizer(Component searcher, Component evaluator, Component classifier, String dataSet, File environment, File dataSetFolder, int seed) {
+		super(searcher, evaluator, classifier, dataSet, environment, dataSetFolder, seed);
 	}
 
 	@Override
@@ -119,14 +121,14 @@ public class HyperbandOptimizer extends Optimizer{
 		if(searcher != null) {
 			// get preprocessor config
 			for (Parameter parameter : searcher.getParameters()) {
-				searcherParameter.put(parameter.getName(), params.get(parameter.getName()).toString());
+				searcherParameter.put(parameter.getName(), params.get(getUniqueParamName(parameter, ParamType.searcher)).toString());
 			}
 			for (Parameter parameter : evaluator.getParameters()) {
-				evaluatorParameter.put(parameter.getName(), params.get(parameter.getName()).toString());
+				evaluatorParameter.put(parameter.getName(), params.get(getUniqueParamName(parameter, ParamType.evaluator)).toString());
 			}
 		}
 		for (Parameter parameter : classifier.getParameters()) {
-			classifierParameter.put(parameter.getName(), params.get(parameter.getName()).toString());
+			classifierParameter.put(parameter.getName(), params.get(getUniqueParamName(parameter, ParamType.classifier)).toString());
 		}
 		
 		finalSearcher = new ComponentInstance(searcher, searcherParameter, new HashMap<>());
@@ -150,8 +152,8 @@ public class HyperbandOptimizer extends Optimizer{
 		pyWrapperStream.println("from subprocess import call");
 		
 		pyWrapperStream.println("space = { ");
-		for (Parameter parameter : parameterList) {
-			pyWrapperStream.println("\t" + getSpaceEntryByDomain(parameter) + ",");	
+		for (Pair<Parameter, ParamType> parameterPair : parameterList) {
+			pyWrapperStream.println("\t" + getSpaceEntryByDomain(parameterPair) + ",");	
 		}
 		pyWrapperStream.println("}");
 		
@@ -163,13 +165,13 @@ public class HyperbandOptimizer extends Optimizer{
 		pyWrapperStream.println("def try_params( n_iterations, params ):");
 		pyWrapperStream.println(String.format("\tcall(\"java -jar %s/PipelineEvaluator.jar %s %s %s %s %s %s %s %s\")",
 				environment.getAbsolutePath(),
-				dataSet,
+				dataSetFolder.getAbsolutePath() + "/" + dataSet + ".arff",
 				(searcher != null) ? searcher.getName() : "null",
-				(searcher != null) ? generateParamList(searcher) : "",
+				(searcher != null) ? generateParamList(searcher, ParamType.searcher) : "",
 				(searcher != null) ? evaluator.getName() : "",
-				(searcher != null) ? generateParamList(evaluator) : "",
+				(searcher != null) ? generateParamList(evaluator, ParamType.evaluator) : "",
 				classifier.getName(),
-				generateParamList(classifier),
+				generateParamList(classifier, ParamType.classifier),
 				environment.getAbsolutePath() + "/results/" + buildFileName() + ".txt"
 				));
 		pyWrapperStream.println(String.format("\tfile = open(\"%s/results/%s.txt\", \"r\")", environment.getAbsolutePath(), buildFileName()));
@@ -203,11 +205,6 @@ public class HyperbandOptimizer extends Optimizer{
 		pyWrapperStream.println("f.close()");
 		
 		pyWrapperStream.close();
-	}
-	
-	
-	private String buildFileName() {
-		return (((searcher != null) ? (searcher.getName()+"_"+evaluator.getName()) : "null") + "_" + classifier.getName() + "_" + dataSet).replaceAll("\\.", "").replaceAll("-", "_");
 	}
 	
 	private String createDomainWrapper(String input, ParameterDomain pd) {
@@ -254,26 +251,26 @@ public class HyperbandOptimizer extends Optimizer{
 			}
 		}
 		
-		HyperbandOptimizer o = new HyperbandOptimizer(searcher, evaluator, classifier, "breast-cancer", new File("F:\\Data\\Uni\\PG\\DefaultEvalEnvironment"), 0);
+		HyperbandOptimizer o = new HyperbandOptimizer(searcher, evaluator, classifier, "breast-cancer", new File("F:\\Data\\Uni\\PG\\DefaultEvalEnvironment"),new File("F:\\Data\\Uni\\PG\\DefaultEvalEnvironment\\datasets"), 0);
 		o.optimize();
 		
 		
 	}
 	
 	
-	private String generateParamList(Component c) {
+	private String generateParamList(Component c, ParamType t) {
 		StringBuilder sb = new StringBuilder();
 		
 		for (Parameter parameter : c.getParameters()) {
-			sb.append(String.format(" \"+ %s + \"", createDomainWrapper(String.format("params['%s']", parameter.getName()), parameter.getDefaultDomain())));
+			sb.append(String.format(" \"+ %s + \"", createDomainWrapper(String.format("params['%s']", getUniqueParamName(parameter, t)), parameter.getDefaultDomain())));
 		}
 		
 		return sb.toString();
 	}
 	
 	
-	private String getSpaceEntryByDomain(Parameter p) {
-		ParameterDomain pd = p.getDefaultDomain();
+	private String getSpaceEntryByDomain(Pair<Parameter, ParamType> p) {
+		ParameterDomain pd = p.getFirst().getDefaultDomain();
 
 		// Numeric (integer or real/double)
 		if(pd instanceof NumericParameterDomain) {
@@ -281,24 +278,24 @@ public class HyperbandOptimizer extends Optimizer{
 			
 			if(n_pd.isInteger()) {
 				// int
-				return String.format("'%s': hp.choice( '%s', range(%d, %d, 1))", p.getName(), p.getName(), n_pd.getMin(), n_pd.getMax()+1);
+				return String.format("'%s': hp.choice( '%s', range(%d, %d, 1))", getUniqueParamName(p), getUniqueParamName(p), n_pd.getMin(), n_pd.getMax()+1);
 			}else {
 				// float
-				return String.format("'%s': hp.uniform( '%s', %f, %f)", p.getName(), p.getName(), n_pd.getMin(), n_pd.getMax());
+				return String.format("'%s': hp.uniform( '%s', %f, %f)", getUniqueParamName(p),getUniqueParamName(p), n_pd.getMin(), n_pd.getMax());
 			}	
 		}
 		
 		// Boolean (categorical)
 		else if(pd instanceof BooleanParameterDomain) {
 			BooleanParameterDomain b_pd = (BooleanParameterDomain) pd;
-			return String.format("'%s': hp.choice( '%s', (True, False))", p.getName(), p.getName());
+			return String.format("'%s': hp.choice( '%s', (True, False))",getUniqueParamName(p),getUniqueParamName(p));
 		}
 		
 		//categorical
 		else if(pd instanceof CategoricalParameterDomain) {
 			CategoricalParameterDomain c_pd = (CategoricalParameterDomain) pd;
 			
-			StringBuilder sb = new StringBuilder(String.format("'%s': hp.choice( '%s', (", p.getName(), p.getName()));
+			StringBuilder sb = new StringBuilder(String.format("'%s': hp.choice( '%s', (", getUniqueParamName(p), getUniqueParamName(p)));
 			for (int i = 0; i < c_pd.getValues().length; i++) {
 				sb.append("'" + c_pd.getValues()[i] + "'");
 				
@@ -312,25 +309,6 @@ public class HyperbandOptimizer extends Optimizer{
 		}
 		return "";
 	}
-	
-	private String getInitialValue(ParameterDomain pd) {
-		if(pd instanceof NumericParameterDomain) {
-			return "0";
-		}
-		
-		// Boolean (categorical)
-		else if(pd instanceof BooleanParameterDomain) {
-			return "'true'";
-		}
-		
-		//categorical
-		else if(pd instanceof CategoricalParameterDomain) {
-			return "''";
-		}
-		
-		return "0";
-	}
-	
 	
 	
 	

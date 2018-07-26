@@ -31,9 +31,6 @@ import weka.core.converters.ConverterUtils.DataSource;
 
 public class PipelineEvaluator {
 	
-	//TODO remove
-	static String pat = "F:\\Data\\Uni\\PG\\DefaultEvalEnvironment";
-	
 	public static void main(String[] args) {
 		// TODO write result file even if no result
 		
@@ -64,7 +61,7 @@ public class PipelineEvaluator {
 			DataSource ds;
 			Instances instances = null;
 			try {
-				ds = new DataSource(pat + "/datasets/" + args[index++] + ".arff");	// TODO keep path
+				ds = new DataSource(args[index++]);	
 				instances = new Instances(ds.getDataSet());
 				instances.setClassIndex(instances.numAttributes()-1); // last one as class
 			} catch (Exception e) {

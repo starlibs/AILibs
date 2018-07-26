@@ -3,6 +3,9 @@ package defaultEval.core;
 import java.io.File;
 import java.util.ArrayList;
 
+import org.apache.commons.math3.util.Pair;
+
+import defaultEval.core.Util.ParamType;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
 import hasco.model.Parameter;
@@ -14,18 +17,20 @@ public abstract class Optimizer {
 	protected Component classifier;
 	protected String dataSet;
 	
-	protected ArrayList<Parameter> parameterList = new ArrayList<>();
+	protected ArrayList<Pair<Parameter, ParamType>> parameterList = new ArrayList<>();
+	
 	
 	protected ComponentInstance finalSearcher;
 	protected ComponentInstance finalEvaluator;
 	protected ComponentInstance finalClassifier;
 	
 	protected File environment;
+	protected File dataSetFolder;
 	
 	int seed = 0;
 	
 	
-	public Optimizer(Component searcher, Component evaluator, Component classifier, String dataSet, File environment, int seed) {
+	public Optimizer(Component searcher, Component evaluator, Component classifier, String dataSet, File environment, File dataSetFolder, int seed) {
 		this.searcher = searcher;
 		this.evaluator = evaluator;
 		
@@ -35,23 +40,44 @@ public abstract class Optimizer {
 		
 		if(searcher != null) {
 			for (Parameter p : searcher.getParameters()) {
-				parameterList.add(p);
+				parameterList.add(new Pair<>(p, ParamType.searcher));
 			}
 			for (Parameter p : evaluator.getParameters()) {
-				parameterList.add(p);
+				parameterList.add(new Pair<>(p, ParamType.evaluator));
 			}
 		}
 		
 		for (Parameter p : classifier.getParameters()) {
-			parameterList.add(p);
+			parameterList.add(new Pair<>(p, ParamType.classifier));
 		}
 		
 		this.environment = environment;
+		this.dataSetFolder = dataSetFolder;
 		this.seed = seed;
 	}
 
 	public abstract void optimize();
 
+	
+	protected String buildFileName() {
+		StringBuilder sb = new StringBuilder((searcher != null) ? (searcher.getName()+"_"+evaluator.getName()) : "null");
+		sb.append("_");
+		sb.append(classifier.getName());
+		sb.append("_");
+		sb.append(dataSet);
+		sb.append("_");
+		sb.append(seed);
+		return sb.toString().replaceAll("\\.", "").replaceAll("-", "_");
+	}
+	
+	
+	protected String getUniqueParamName(Parameter p, ParamType t) {
+		return Util.convertToUniqueParamName(p.getName(), t);
+	}
+	
+	protected String getUniqueParamName(Pair<Parameter, ParamType> p) {
+		return Util.convertToUniqueParamName(p.getFirst().getName(), p.getSecond());
+	}
 	
 	
 	public ComponentInstance getFinalClassifier() {
