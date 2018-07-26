@@ -61,5 +61,6 @@ public abstract class FeatureDomain implements Serializable {
 	 * @return true iff contained in the domain
 	 */
 	abstract public boolean containsInstance(double value);
-
+	
+	public abstract String compactString();
 }

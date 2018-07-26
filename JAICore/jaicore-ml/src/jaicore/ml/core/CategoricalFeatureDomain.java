@@ -112,4 +112,9 @@ public class CategoricalFeatureDomain extends FeatureDomain {
 		}
 		return false;
 	}
+
+	@Override
+	public String compactString() {
+		return "yet to implement";
+	}
 }

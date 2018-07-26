@@ -112,6 +112,13 @@ public class NumericFeatureDomain extends FeatureDomain {
 	@Override
 	public boolean containsInstance(double value) {
 		// TODO
+//		System.out.println("Check: " + min + " <= " + value + " <= " + max + " " + ((value >= min) && (value <= max)));
 		return ((value >= min) && (value <= max));
+	}
+
+	@Override
+	public String compactString() {
+		String result = "[" + this.min + "," + this.max + "]";
+		return result;
 	}
 }

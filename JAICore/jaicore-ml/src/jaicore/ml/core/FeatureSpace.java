@@ -132,6 +132,16 @@ public class FeatureSpace implements Serializable {
 		return featureDomains.get(index);
 	}
 
+	public boolean containsPartialInstance(List<Integer> indices, List<Double> values) {
+		for(int i = 0; i < indices.size(); i++) {
+			int featureIndex = indices.get(i);
+			double value = values.get(i);
+			if(!featureDomains.get(featureIndex).containsInstance(value))
+				return false;
+		}
+		return true;
+	}
+	
 	public boolean containsInstance(Instance instance) {
 		boolean val = true;
 		for (int i = 0; i < featureDomains.size(); i++) {
