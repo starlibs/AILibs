@@ -5,6 +5,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -15,8 +16,9 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 
-import autofe.db.model.database.Attribute;
 import autofe.db.model.database.AggregationFunction;
+import autofe.db.model.database.Attribute;
+import autofe.db.model.database.BackwardFeature;
 import autofe.db.model.database.Database;
 import autofe.db.model.database.Table;
 import autofe.db.model.relation.AbstractRelationship;
@@ -166,6 +168,23 @@ public class DBUtils {
 			}
 		}
 		return null;
+	}
+
+	public static boolean isIntermediate(BackwardFeature bf, Database db) {
+		List<Tuple<AbstractRelationship, AggregationFunction>> path = bf.getPath();
+
+		if (path.size() < 2) {
+			return false;
+		}
+
+		// Check whether last edge goes to the target or is forward reachable
+		Table lastTable = path.get(path.size() - 1).getT().getTo();
+		Set<Table> forwardReachable = getForwardReachableTables(getTargetTable(db), db);
+		if ((!lastTable.isTarget()) && !(forwardReachable.contains(lastTable))) {
+			return false;
+		}
+
+		return true;
 	}
 
 	public static String getAggregatedAttributeName(AggregationFunction aggregationFunction, String toTableName,
