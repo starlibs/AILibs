@@ -28,7 +28,7 @@ public class AwaStarSearch<T, A, V extends Comparable<V>>{
 
 	private static final Logger logger = LoggerFactory.getLogger(AwaStarSearch.class);
 
-	private class Search implements Callable<List<Node<T, V>>> {
+	private class Search{
 		
 		private SuccessorGenerator<T, A> successorGenerator;
 		private GoalTester<T> goalTester;
@@ -58,15 +58,16 @@ public class AwaStarSearch<T, A, V extends Comparable<V>>{
 			bestSolutionScore = null;
 		}
 
-		@Override
-		public List<Node<T, V>> call() throws Exception {
+		public List<Node<T, V>> search(long timeout){
+			long t = System.currentTimeMillis();
+			long end = t + timeout * 1000;
 			do {
 				closedList.addAll(openList);
 				openList.addAll(suspendList);
 				suspendList.clear();
 				bestSolution = windowAStar();
 				windowSize++;
-			} while (!suspendList.isEmpty());
+			} while (!suspendList.isEmpty() && System.currentTimeMillis() < end);
 			return bestCompleteSolution;
 		}
 		
@@ -125,12 +126,10 @@ public class AwaStarSearch<T, A, V extends Comparable<V>>{
 									openList.add(nPrime);
 								} else if(openList.contains(nPrime) || suspendList.contains(nPrime)) {
 									V oldScore = nPrime.getInternalLabel();
-									if (oldScore != null) {
-										if (oldScore.compareTo(nPrimeScore) > 0) {
+									if (oldScore != null && oldScore.compareTo(nPrimeScore) > 0) {
 											nPrime.setParent(n);
 											nPrime.setInternalLabel(nPrimeScore);
 											nPrime.setAnnotation("level", ((int)n.getAnnotation("level")) + 1);
-										}
 									}
 								} else if(closedList.contains(nPrime)) {
 									V oldScore = nPrime.getInternalLabel();
@@ -161,19 +160,7 @@ public class AwaStarSearch<T, A, V extends Comparable<V>>{
 	}
 
 	public List<Node<T, V>> search(int timeout) {
-		ExecutorService executor = Executors.newSingleThreadExecutor();
-		Future<List<Node<T, V>>> future =  executor.submit(search);
-		executor.shutdown();
-		try {
-			return future.get(timeout, TimeUnit.SECONDS);
-		} catch (Exception e) {
-			return null;
-		}
-		finally {
-			if (!executor.isTerminated()) {
-				executor.shutdownNow();
-			}
-		}
+		return search.search(timeout);
 	}
 
 }
