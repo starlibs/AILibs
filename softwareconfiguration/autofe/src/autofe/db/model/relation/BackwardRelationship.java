@@ -1,9 +1,9 @@
 package autofe.db.model.relation;
 
 public class BackwardRelationship extends AbstractRelationship {
-	
-	public BackwardRelationship() {
-		// TODO Auto-generated constructor stub
+
+	public BackwardRelationship(String fromTableName, String toTableName) {
+		super(fromTableName, toTableName);
 	}
 
 	@Override

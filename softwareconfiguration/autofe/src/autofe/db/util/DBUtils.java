@@ -190,6 +190,15 @@ public class DBUtils {
 		return null;
 	}
 
+	public static Table getAttributeTable(Attribute attribute, Database db) {
+		for (Table t : db.getTables()) {
+			if (t.getColumns().contains(attribute)) {
+				return t;
+			}
+		}
+		return null;
+	}
+
 	public static boolean isIntermediate(BackwardFeature bf, Database db) {
 		List<Tuple<AbstractRelationship, AggregationFunction>> path = bf.getPath();
 
@@ -198,7 +207,9 @@ public class DBUtils {
 		}
 
 		// Check whether last edge goes to the target or is forward reachable
-		Table lastTable = path.get(path.size() - 1).getT().getTo();
+		AbstractRelationship relationship = path.get(path.size() - 1).getT();
+		relationship.setContext(db);
+		Table lastTable = relationship.getFrom();
 		Set<Table> forwardReachable = getForwardReachableTables(getTargetTable(db), db);
 		if ((!lastTable.isTarget()) && !(forwardReachable.contains(lastTable))) {
 			return true;

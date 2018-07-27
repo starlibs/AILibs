@@ -1,5 +1,6 @@
 package autofe.db.test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -10,6 +11,7 @@ import java.util.List;
 import org.junit.Test;
 
 import autofe.db.model.database.Attribute;
+import autofe.db.model.database.BackwardFeature;
 import autofe.db.model.database.Database;
 import autofe.db.model.database.ForwardFeature;
 import autofe.db.model.database.Table;
@@ -27,7 +29,7 @@ public class SearchTest {
 
 	private static final String DATABASE_MODEL_FILE = "model/db/bankaccount_toy_database.json";
 
-	//@Test
+	// @Test
 	public void testSearch() {
 		Database initialDatabase = DBUtils.deserializeFromFile(DATABASE_MODEL_FILE);
 		DatabaseGraphGenerator generator = new DatabaseGraphGenerator(initialDatabase);
@@ -56,13 +58,24 @@ public class SearchTest {
 		SuccessorGenerator<DatabaseNode, String> sg = generator.getSuccessorGenerator();
 		DatabaseNode node = new DatabaseNode();
 		Collection<NodeExpansionDescription<DatabaseNode, String>> successors = sg.generateSuccessors(node);
-
+		assertEquals(9, successors.size());
+		
 		String descriptions = concatExpansionDescriptions(successors);
+		
+		//Forward features
 		assertTrue(descriptions.contains("Forward: Balance"));
 		assertTrue(descriptions.contains("Forward: BankName"));
 		assertTrue(descriptions.contains("Forward: Credible"));
 		assertTrue(descriptions.contains("Forward: FirstName"));
 		assertTrue(descriptions.contains("Forward: TransactionCounter"));
+
+		// Backward features
+		assertTrue(descriptions.contains("Backward: Price"));
+		assertTrue(descriptions.contains("Backward: OrderDate"));
+		assertTrue(descriptions.contains("Backward: ProductName"));
+
+		// Exit edge
+		assertTrue(descriptions.contains("Exit"));
 	}
 
 	@Test
@@ -77,13 +90,25 @@ public class SearchTest {
 
 		DatabaseNode node = new DatabaseNode(Collections.singletonList(ff), false);
 		Collection<NodeExpansionDescription<DatabaseNode, String>> successors = sg.generateSuccessors(node);
+		assertEquals(6, successors.size());
 
 		String descriptions = concatExpansionDescriptions(successors);
+
+		// Forward features
 		assertFalse(descriptions.contains("Forward: Balance"));
 		assertFalse(descriptions.contains("Forward: BankName"));
 		assertFalse(descriptions.contains("Forward: Credible"));
 		assertTrue(descriptions.contains("Forward: FirstName"));
 		assertTrue(descriptions.contains("Forward: TransactionCounter"));
+
+		// Backward features
+		assertTrue(descriptions.contains("Backward: Price"));
+		assertTrue(descriptions.contains("Backward: OrderDate"));
+		assertTrue(descriptions.contains("Backward: ProductName"));
+
+		// Exit edge
+		assertTrue(descriptions.contains("Exit"));
+
 	}
 
 	// TODO: Add test case for a feature list containing a backward feature
@@ -95,6 +120,29 @@ public class SearchTest {
 			sb.append("|");
 		}
 		return sb.toString();
+	}
+
+	@Test
+	public void testIntermediateNode() {
+		Database db = DBUtils.deserializeFromFile(DATABASE_MODEL_FILE);
+		DatabaseGraphGenerator generator = new DatabaseGraphGenerator(db);
+		SuccessorGenerator<DatabaseNode, String> sg = generator.getSuccessorGenerator();
+		Table product = DBUtils.getTableByName("Product", db);
+		Attribute price = DBUtils.getAttributeByName("Price", product);
+
+		// Create intermediate feature
+		BackwardFeature bf = new BackwardFeature(price);
+		DatabaseNode node = new DatabaseNode(Collections.singletonList(bf), false);
+
+		Collection<NodeExpansionDescription<DatabaseNode, String>> successors = sg.generateSuccessors(node);
+		assertEquals(4, successors.size());
+
+		String descriptions = concatExpansionDescriptions(successors);
+		assertTrue(descriptions.contains("Intermediate: <[Orders -> Product], SUM>"));
+		assertTrue(descriptions.contains("Intermediate: <[Orders -> Product], MIN>"));
+		assertTrue(descriptions.contains("Intermediate: <[Orders -> Product], MAX>"));
+		assertTrue(descriptions.contains("Intermediate: <[Orders -> Product], AVG>"));
+
 	}
 
 }

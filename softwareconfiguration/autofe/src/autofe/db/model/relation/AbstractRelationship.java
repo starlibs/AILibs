@@ -19,6 +19,12 @@ public abstract class AbstractRelationship {
 		// TODO Auto-generated constructor stub
 	}
 
+	public AbstractRelationship(String fromTableName, String toTableName) {
+		super();
+		this.fromTableName = fromTableName;
+		this.toTableName = toTableName;
+	}
+
 	public String getFromTableName() {
 		return fromTableName;
 	}
