@@ -158,6 +158,9 @@ public class PipelineEvaluator {
 				e.printStackTrace(System.out);
 			}
 			
+			// print result for gga TODO use with others to
+			System.out.println(pctIncorrect);
+			
 		} catch (Exception e) {
 			e.printStackTrace(System.out);
 		}
