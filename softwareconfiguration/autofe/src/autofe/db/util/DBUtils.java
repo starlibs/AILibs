@@ -38,7 +38,7 @@ public class DBUtils {
 		return null;
 	}
 
-	public static Set<ForwardRelationship> getForwardsFor(Table table, Database db) {
+	public static Set<ForwardRelationship> getForwardsFrom(Table table, Database db) {
 		Set<ForwardRelationship> toReturn = new HashSet<>();
 		for (ForwardRelationship forwardRelationship : db.getForwards()) {
 			forwardRelationship.setContext(db);
@@ -46,11 +46,10 @@ public class DBUtils {
 				toReturn.add(forwardRelationship);
 			}
 		}
-		LOG.info("There are {} forward relationships from table {}", toReturn.size(), table.getName());
 		return toReturn;
 	}
 
-	public static Set<BackwardRelationship> getBackwardsFor(Table table, Database db) {
+	public static Set<BackwardRelationship> getBackwardsFrom(Table table, Database db) {
 		Set<BackwardRelationship> toReturn = new HashSet<>();
 		for (BackwardRelationship backwardRelationship : db.getBackwards()) {
 			backwardRelationship.setContext(db);
@@ -58,7 +57,28 @@ public class DBUtils {
 				toReturn.add(backwardRelationship);
 			}
 		}
-		LOG.info("There are {} backward relationships from table {}", toReturn.size(), table.getName());
+		return toReturn;
+	}
+
+	public static Set<ForwardRelationship> getForwardsTo(Table table, Database db) {
+		Set<ForwardRelationship> toReturn = new HashSet<>();
+		for (ForwardRelationship forwardRelationship : db.getForwards()) {
+			forwardRelationship.setContext(db);
+			if (forwardRelationship.getTo().equals(table)) {
+				toReturn.add(forwardRelationship);
+			}
+		}
+		return toReturn;
+	}
+
+	public static Set<BackwardRelationship> getBackwardsTo(Table table, Database db) {
+		Set<BackwardRelationship> toReturn = new HashSet<>();
+		for (BackwardRelationship backwardRelationship : db.getBackwards()) {
+			backwardRelationship.setContext(db);
+			if (backwardRelationship.getTo().equals(table)) {
+				toReturn.add(backwardRelationship);
+			}
+		}
 		return toReturn;
 	}
 
@@ -71,7 +91,7 @@ public class DBUtils {
 
 	private static void addForwardTables(Table from, Database db, Set<Table> tables) {
 		tables.add(from);
-		for (ForwardRelationship fr : getForwardsFor(from, db)) {
+		for (ForwardRelationship fr : getForwardsFrom(from, db)) {
 			addForwardTables(fr.getTo(), db, tables);
 		}
 	}
@@ -86,7 +106,7 @@ public class DBUtils {
 	}
 
 	private static void addBackwardTables(Table from, Database db, Set<Table> tables) {
-		for (BackwardRelationship br : getBackwardsFor(from, db)) {
+		for (BackwardRelationship br : getBackwardsFrom(from, db)) {
 			tables.add(br.getTo());
 			addBackwardTables(br.getTo(), db, tables);
 		}
