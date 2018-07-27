@@ -157,7 +157,7 @@ public class KnapsackProblem {
 			public Double evaluateSolution(List<KnapsackNode> solutionPath) throws Exception {
 				KnapsackNode packedKnapsack = solutionPath.get(solutionPath.size() - 1);
 				if (packedKnapsack == null || packedKnapsack.usedCapacity > knapsackCapacity) {
-					return 0.0d;
+					return Double.MAX_VALUE;
 				} else {
 					double packedValue = 0.0d;
 					for (String object : packedKnapsack.getPackedObjects()) {
@@ -175,7 +175,7 @@ public class KnapsackProblem {
 							packedValue += bonusPoints.get(bonusCombination);
 						}
 					}
-					return packedValue;
+					return packedValue * -1;
 				}
 			}
 
@@ -184,11 +184,6 @@ public class KnapsackProblem {
 				return true;
 			}
 		};
-	}
-	
-	public INodeEvaluator<KnapsackNode, Double> getNodeEvaluator() {
-		//TODO: Implement node evaluator
-		return n -> 0.0d;
 	}
 	
 }
