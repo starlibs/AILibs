@@ -33,25 +33,23 @@ import weka.core.Instances;
 
 public class DefaultEvalExperiment {
 	
-	
-	
 	// usable Components
 	private static ComponentLoader classifierComponents = new ComponentLoader();
 	private static ComponentLoader preProcessorComponents = new ComponentLoader();
 		
 		
 	public static void main(String[] args) {
-		try {
-			Util.loadClassifierComponents(classifierComponents);
-			Util.loadPreprocessorComponents(preProcessorComponents);
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
-		
 		DefaultEvalMCCConfig m = ConfigCache.getOrCreate(DefaultEvalMCCConfig.class);
 		if (m.getDatasetFolder() == null || !m.getDatasetFolder().exists())
 			throw new IllegalArgumentException("config specifies invalid dataset folder " + m.getDatasetFolder());
 
+		try {
+			Util.loadClassifierComponents(classifierComponents, m.getEnvironment().getAbsolutePath());
+			Util.loadPreprocessorComponents(preProcessorComponents, m.getEnvironment().getAbsolutePath());
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		
 		ExperimentRunner runner = new ExperimentRunner(new IExperimentSetEvaluator() {
 
 			@Override

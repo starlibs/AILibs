@@ -66,6 +66,22 @@ public class SMACOptimizer extends Optimizer{
 							"--algo \"python "+environment.getAbsolutePath()+"/py_wrapper/"+buildFileName()+".py\"\" "
 							);
 			
+			
+			new Thread(new Runnable() {
+				
+				@Override
+				public void run() {
+					int r = 0;
+					try {
+						while ((r = proc.getErrorStream().read()) != -1) {
+							System.err.write(r);
+						}
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}).start();
+			
 			InputStream i = proc.getInputStream();
 			int r = 0;
 			while ((r = i.read()) != -1) {
@@ -289,8 +305,8 @@ public class SMACOptimizer extends Optimizer{
 		ComponentLoader cl_c = new ComponentLoader();
 		
 		try {
-			Util.loadClassifierComponents(cl_c);
-			Util.loadPreprocessorComponents(cl_p);	
+			Util.loadClassifierComponents(cl_c, "F:\\Data\\Uni\\PG\\DefaultEvalEnvironment");
+			Util.loadPreprocessorComponents(cl_p, "F:\\Data\\Uni\\PG\\DefaultEvalEnvironment");	
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}

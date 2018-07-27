@@ -40,8 +40,8 @@ public class PipelineEvaluator {
 			ComponentLoader cl_c = new ComponentLoader();
 			
 			try {
-				Util.loadClassifierComponents(cl_c);
-				Util.loadPreprocessorComponents(cl_p);	
+				cl_c.loadComponents(new File("models/weka-classifiers.json"));
+				cl_p.loadComponents(new File("models/weka-preprocessors.json"));
 			} catch (IOException e) {
 				e.printStackTrace(System.out);
 			}

@@ -240,8 +240,8 @@ public class GGAOptimizer extends Optimizer {
 		ComponentLoader cl_c = new ComponentLoader();
 
 		try {
-			Util.loadClassifierComponents(cl_c);
-			Util.loadPreprocessorComponents(cl_p);
+			Util.loadClassifierComponents(cl_c, "F:\\Data\\Uni\\PG\\DefaultEvalEnvironment");
+			Util.loadPreprocessorComponents(cl_p, "F:\\Data\\Uni\\PG\\DefaultEvalEnvironment");
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}

@@ -19,21 +19,18 @@ import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSource;
 
 public class Util {
-	// TODO remove absolute Path
-
+	
 	/** Suffix Types for unique params */
 	enum ParamType {
 		searcher, evaluator, classifier
 	}
 
-	public static void loadClassifierComponents(ComponentLoader cl) throws IOException {
-		cl.loadComponents(new File(
-				"F:\\Data\\Uni\\PG\\AILibs\\softwareconfiguration\\mlplan\\model\\weka\\weka-classifiers-autoweka.json"));
+	public static void loadClassifierComponents(ComponentLoader cl, String envPath) throws IOException {
+		cl.loadComponents(new File(envPath + "/models/weka-classifiers.json"));
 	}
 
-	public static void loadPreprocessorComponents(ComponentLoader cl) throws IOException {
-		cl.loadComponents(new File(
-				"F:\\Data\\Uni\\PG\\AILibs\\softwareconfiguration\\mlplan\\model\\weka\\weka-preprocessors-autoweka.json"));
+	public static void loadPreprocessorComponents(ComponentLoader cl, String envPath) throws IOException {
+		cl.loadComponents(new File(envPath + "/models/weka-preprocessors.json"));
 	}
 
 	public static ComponentInstance createPipeline(Component searcher, Map<String, String> searcherParameter,
