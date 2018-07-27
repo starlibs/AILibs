@@ -6,6 +6,12 @@ public class Tuple<T, U> {
 
 	private U u;
 
+	public Tuple(T t, U u) {
+		super();
+		this.t = t;
+		this.u = u;
+	}
+
 	public T getT() {
 		return t;
 	}
