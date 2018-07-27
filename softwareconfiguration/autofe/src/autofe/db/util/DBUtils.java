@@ -194,17 +194,17 @@ public class DBUtils {
 		List<Tuple<AbstractRelationship, AggregationFunction>> path = bf.getPath();
 
 		if (path.size() < 2) {
-			return false;
+			return true;
 		}
 
 		// Check whether last edge goes to the target or is forward reachable
 		Table lastTable = path.get(path.size() - 1).getT().getTo();
 		Set<Table> forwardReachable = getForwardReachableTables(getTargetTable(db), db);
 		if ((!lastTable.isTarget()) && !(forwardReachable.contains(lastTable))) {
-			return false;
+			return true;
 		}
 
-		return true;
+		return false;
 	}
 
 	public static String getAggregatedAttributeName(AggregationFunction aggregationFunction, String toTableName,
