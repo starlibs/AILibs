@@ -10,11 +10,13 @@ import java.util.List;
 
 import org.junit.Test;
 
+import autofe.db.model.database.AggregationFunction;
 import autofe.db.model.database.Attribute;
 import autofe.db.model.database.BackwardFeature;
 import autofe.db.model.database.Database;
 import autofe.db.model.database.ForwardFeature;
 import autofe.db.model.database.Table;
+import autofe.db.model.relation.BackwardRelationship;
 import autofe.db.search.DatabaseGraphGenerator;
 import autofe.db.search.DatabaseNode;
 import autofe.db.search.DatabaseNodeEvaluator;
@@ -59,10 +61,10 @@ public class SearchTest {
 		DatabaseNode node = new DatabaseNode();
 		Collection<NodeExpansionDescription<DatabaseNode, String>> successors = sg.generateSuccessors(node);
 		assertEquals(9, successors.size());
-		
+
 		String descriptions = concatExpansionDescriptions(successors);
-		
-		//Forward features
+
+		// Forward features
 		assertTrue(descriptions.contains("Forward: Balance"));
 		assertTrue(descriptions.contains("Forward: BankName"));
 		assertTrue(descriptions.contains("Forward: Credible"));
@@ -111,7 +113,41 @@ public class SearchTest {
 
 	}
 
-	// TODO: Add test case for a feature list containing a backward feature
+	@Test
+	public void testLexicographicOrderBackwardFeatureList() {
+		Database db = DBUtils.deserializeFromFile(DATABASE_MODEL_FILE);
+		DatabaseGraphGenerator generator = new DatabaseGraphGenerator(db);
+		SuccessorGenerator<DatabaseNode, String> sg = generator.getSuccessorGenerator();
+
+		Table product = DBUtils.getTableByName("Product", db);
+		Attribute price = DBUtils.getAttributeByName("Price", product);
+		BackwardFeature bf = new BackwardFeature(price);
+		// Complete path
+		bf.addToPath(new BackwardRelationship("Orders", "Product"), AggregationFunction.MAX);
+		bf.addToPath(new BackwardRelationship("Customer", "Orders"), AggregationFunction.AVG);
+
+		DatabaseNode node = new DatabaseNode(Collections.singletonList(bf), false);
+		Collection<NodeExpansionDescription<DatabaseNode, String>> successors = sg.generateSuccessors(node);
+		assertEquals(9, successors.size());
+
+		String descriptions = concatExpansionDescriptions(successors);
+		
+		// Forward features
+		assertTrue(descriptions.contains("Forward: Balance"));
+		assertTrue(descriptions.contains("Forward: BankName"));
+		assertTrue(descriptions.contains("Forward: Credible"));
+		assertTrue(descriptions.contains("Forward: FirstName"));
+		assertTrue(descriptions.contains("Forward: TransactionCounter"));
+
+		// Backward features
+		assertTrue(descriptions.contains("Backward: Price"));
+		assertTrue(descriptions.contains("Backward: OrderDate"));
+		assertTrue(descriptions.contains("Backward: ProductName"));
+
+		// Exit edge
+		assertTrue(descriptions.contains("Exit"));
+
+	}
 
 	private String concatExpansionDescriptions(Collection<NodeExpansionDescription<DatabaseNode, String>> successors) {
 		StringBuilder sb = new StringBuilder();
