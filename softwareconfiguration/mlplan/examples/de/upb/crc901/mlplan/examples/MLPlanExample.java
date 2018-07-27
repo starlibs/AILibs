@@ -40,10 +40,10 @@ public class MLPlanExample {
 		/* initialize mlplan, and let it run for 30 seconds */
 		MLPlan mlplan = new MLPlan(new File("model/weka/weka-all-autoweka.json"));
 		mlplan.setLoggerName("mlplan");
-		mlplan.setTimeout(180);
+		mlplan.setTimeout(60);
 		mlplan.setPortionOfDataForPhase2(.3f);
 		mlplan.setNodeEvaluator(new DefaultPreorder());
-//		mlplan.enableVisualization();
+		mlplan.enableVisualization();
 		mlplan.buildClassifier(split.get(0));
 
 		/* evaluate solution produced by mlplan */

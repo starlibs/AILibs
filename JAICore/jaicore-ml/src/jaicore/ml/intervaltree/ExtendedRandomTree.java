@@ -221,6 +221,10 @@ public class ExtendedRandomTree extends RandomTree {
 	 */
 	public double computeMarginalVarianceContributionForSubsetOfFeatures(Set<Integer> features) {
 		double vU;
+		if(this.totalVariance == 0.0d) {
+			System.out.println("The trees total variance is zero, predictions make no sense at this point!");
+			return Double.NaN;
+		}
 		if (varianceOfSubsetTotal.containsKey(features))
 			vU = varianceOfSubsetTotal.get(features);
 		else
