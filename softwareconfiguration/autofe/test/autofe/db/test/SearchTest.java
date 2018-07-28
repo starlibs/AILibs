@@ -60,7 +60,7 @@ public class SearchTest {
 		SuccessorGenerator<DatabaseNode, String> sg = generator.getSuccessorGenerator();
 		DatabaseNode node = new DatabaseNode();
 		Collection<NodeExpansionDescription<DatabaseNode, String>> successors = sg.generateSuccessors(node);
-		assertEquals(9, successors.size());
+		assertEquals(7, successors.size());
 
 		String descriptions = concatExpansionDescriptions(successors);
 
@@ -73,8 +73,8 @@ public class SearchTest {
 
 		// Backward features
 		assertTrue(descriptions.contains("Backward: Price"));
-		assertTrue(descriptions.contains("Backward: OrderDate"));
-		assertTrue(descriptions.contains("Backward: ProductName"));
+		assertFalse(descriptions.contains("Backward: OrderDate"));
+		assertFalse(descriptions.contains("Backward: ProductName"));
 
 		// Exit edge
 		assertTrue(descriptions.contains("Exit"));
@@ -92,7 +92,7 @@ public class SearchTest {
 
 		DatabaseNode node = new DatabaseNode(Collections.singletonList(ff), false);
 		Collection<NodeExpansionDescription<DatabaseNode, String>> successors = sg.generateSuccessors(node);
-		assertEquals(6, successors.size());
+		assertEquals(4, successors.size());
 
 		String descriptions = concatExpansionDescriptions(successors);
 
@@ -105,8 +105,8 @@ public class SearchTest {
 
 		// Backward features
 		assertTrue(descriptions.contains("Backward: Price"));
-		assertTrue(descriptions.contains("Backward: OrderDate"));
-		assertTrue(descriptions.contains("Backward: ProductName"));
+		assertFalse(descriptions.contains("Backward: OrderDate"));
+		assertFalse(descriptions.contains("Backward: ProductName"));
 
 		// Exit edge
 		assertTrue(descriptions.contains("Exit"));
@@ -128,10 +128,10 @@ public class SearchTest {
 
 		DatabaseNode node = new DatabaseNode(Collections.singletonList(bf), false);
 		Collection<NodeExpansionDescription<DatabaseNode, String>> successors = sg.generateSuccessors(node);
-		assertEquals(9, successors.size());
+		assertEquals(7, successors.size());
 
 		String descriptions = concatExpansionDescriptions(successors);
-		
+
 		// Forward features
 		assertTrue(descriptions.contains("Forward: Balance"));
 		assertTrue(descriptions.contains("Forward: BankName"));
@@ -141,8 +141,8 @@ public class SearchTest {
 
 		// Backward features
 		assertTrue(descriptions.contains("Backward: Price"));
-		assertTrue(descriptions.contains("Backward: OrderDate"));
-		assertTrue(descriptions.contains("Backward: ProductName"));
+		assertFalse(descriptions.contains("Backward: OrderDate"));
+		assertFalse(descriptions.contains("Backward: ProductName"));
 
 		// Exit edge
 		assertTrue(descriptions.contains("Exit"));

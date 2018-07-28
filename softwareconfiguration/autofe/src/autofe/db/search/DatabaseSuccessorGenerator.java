@@ -87,6 +87,10 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 
 		// One successor node for each backward feature
 		for (Attribute att : backwardAttributes) {
+			// Do not consider non-aggregable attributes
+			if (!att.isAggregable()) {
+				continue;
+			}
 			List<AbstractFeature> extended = cloneFeatureList(currentFeatures);
 			extended.add(new BackwardFeature(att));
 			DatabaseNode to = new DatabaseNode(extended, false);
