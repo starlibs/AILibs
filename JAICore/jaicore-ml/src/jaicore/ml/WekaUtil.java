@@ -40,6 +40,9 @@ import jaicore.ml.interfaces.LabeledInstance;
 import jaicore.ml.interfaces.LabeledInstances;
 import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
+import weka.attributeSelection.BestFirst;
+import weka.attributeSelection.InfoGainAttributeEval;
+import weka.attributeSelection.Ranker;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.trees.RandomForest;
@@ -53,6 +56,7 @@ import weka.core.OptionHandler;
 import weka.core.json.JSONInstances;
 import weka.core.json.JSONNode;
 import weka.filters.Filter;
+import weka.filters.supervised.attribute.AttributeSelection;
 import weka.filters.unsupervised.attribute.Remove;
 
 public class WekaUtil {
@@ -169,14 +173,14 @@ public class WekaUtil {
 	 * 
 	 * @return a Pair&ltString, String> List where the first entry is the searcher and the second the evaluator.
 	 */
-	public static Collection<Pair<String, String>> getValidPreprocessorCombination(){
+	public static Collection<Pair<String, String>> getValidPreprocessorCombinations(){
 		Collection<Pair<String, String>> result = new LinkedList<>();
 		
 		for (String searcher : getSearchers()) {
 			for (String evaluator : getFeatureEvaluators()) {
 				
 				boolean isSetEvaluator = evaluator.toLowerCase().matches(
-						".*(subseteval|relief|gainratio|principalcomponents|onerattributeeval|infogainattributeeval|correlationattributeeval|symmetricaluncertattributeeval).*");
+						".*([^cfs]subseteval|relief|gainratio|principalcomponents|onerattributeeval|infogainattributeeval|correlationattributeeval|symmetricaluncertattributeeval).*");
 				boolean isNonRankerEvaluator = evaluator.toLowerCase().matches(".*(cfssubseteval).*");
 				
 				boolean isRanker = searcher.toLowerCase().contains("ranker");
@@ -192,6 +196,7 @@ public class WekaUtil {
 		}
 		return result;
 	}
+
 	
 	
 	public static <L> Instances fromJAICoreInstances(final WekaCompatibleInstancesImpl instances) {
