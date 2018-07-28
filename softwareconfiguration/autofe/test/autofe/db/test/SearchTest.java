@@ -4,12 +4,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
 import org.junit.Test;
 
+import autofe.db.model.database.AbstractFeature;
 import autofe.db.model.database.AggregationFunction;
 import autofe.db.model.database.Attribute;
 import autofe.db.model.database.BackwardFeature;
@@ -179,6 +181,90 @@ public class SearchTest {
 		assertTrue(descriptions.contains("Intermediate: <[Orders -> Product], MAX>"));
 		assertTrue(descriptions.contains("Intermediate: <[Orders -> Product], AVG>"));
 
+	}
+
+	@Test
+	public void testDuplicateCheck2Path() {
+		Database db = DBUtils.deserializeFromFile(DATABASE_MODEL_FILE);
+		DatabaseGraphGenerator generator = new DatabaseGraphGenerator(db);
+		SuccessorGenerator<DatabaseNode, String> sg = generator.getSuccessorGenerator();
+		Table product = DBUtils.getTableByName("Product", db);
+		Attribute price = DBUtils.getAttributeByName("Price", product);
+
+		// Create complete backward feature
+		BackwardFeature completeBf = new BackwardFeature(price);
+		completeBf.addToPath(new BackwardRelationship("Orders", "Product"), AggregationFunction.MAX);
+		completeBf.addToPath(new BackwardRelationship("Customer", "Orders"), AggregationFunction.AVG);
+
+		// Create intermediate backward feature
+		BackwardFeature intermediateBf = new BackwardFeature(price);
+
+		// Create node containing the features
+		List<AbstractFeature> features = new ArrayList<>();
+		features.add(completeBf);
+		features.add(intermediateBf);
+		DatabaseNode node = new DatabaseNode(features, false);
+
+		Collection<NodeExpansionDescription<DatabaseNode, String>> successors = sg.generateSuccessors(node);
+		assertEquals(4, successors.size());
+
+		String descriptions = concatExpansionDescriptions(successors);
+		assertTrue(descriptions.contains("Intermediate: <[Orders -> Product], SUM>"));
+		assertTrue(descriptions.contains("Intermediate: <[Orders -> Product], MIN>"));
+		assertTrue(descriptions.contains("Intermediate: <[Orders -> Product], MAX>"));
+		assertTrue(descriptions.contains("Intermediate: <[Orders -> Product], AVG>"));
+
+		// Get successor node for which the MAX aggregation function has been used
+		DatabaseNode nextNode = null;
+		for (NodeExpansionDescription<DatabaseNode, String> successor : successors) {
+			if (successor.getAction().equals("Intermediate: <[Orders -> Product], MAX>")) {
+				nextNode = successor.getTo();
+			}
+		}
+
+		// Expand node
+		successors = sg.generateSuccessors(nextNode);
+
+		assertEquals(3, successors.size());
+		descriptions = concatExpansionDescriptions(successors);
+		assertTrue(descriptions.contains("Intermediate: <[Customer -> Orders], SUM>"));
+		assertTrue(descriptions.contains("Intermediate: <[Customer -> Orders], MIN>"));
+		assertTrue(descriptions.contains("Intermediate: <[Customer -> Orders], MAX>"));
+		assertFalse(descriptions.contains("Intermediate: <[Customer -> Orders], AVG>"));
+	}
+
+	@Test
+	public void testDuplicateCheck1Path() {
+		Database db = DBUtils.deserializeFromFile(DATABASE_MODEL_FILE);
+		DatabaseGraphGenerator generator = new DatabaseGraphGenerator(db);
+		SuccessorGenerator<DatabaseNode, String> sg = generator.getSuccessorGenerator();
+		Table product = DBUtils.getTableByName("Product", db);
+		Attribute price = DBUtils.getAttributeByName("Price", product);
+
+		// Create all backward feature starting with aggregation function MAX
+		List<AbstractFeature> features = new ArrayList<>();
+		for (AggregationFunction af : AggregationFunction.values()) {
+			BackwardFeature completeBf = new BackwardFeature(price);
+			completeBf.addToPath(new BackwardRelationship("Orders", "Product"), AggregationFunction.MAX);
+			completeBf.addToPath(new BackwardRelationship("Customer", "Orders"), af);
+			features.add(completeBf);
+		}
+
+		// Create intermediate backward feature
+		BackwardFeature intermediateBf = new BackwardFeature(price);
+
+		// Create node containing the features
+		features.add(intermediateBf);
+		DatabaseNode node = new DatabaseNode(features, false);
+
+		Collection<NodeExpansionDescription<DatabaseNode, String>> successors = sg.generateSuccessors(node);
+		assertEquals(3, successors.size());
+
+		String descriptions = concatExpansionDescriptions(successors);
+		assertTrue(descriptions.contains("Intermediate: <[Orders -> Product], SUM>"));
+		assertTrue(descriptions.contains("Intermediate: <[Orders -> Product], MIN>"));
+		assertFalse(descriptions.contains("Intermediate: <[Orders -> Product], MAX>"));
+		assertTrue(descriptions.contains("Intermediate: <[Orders -> Product], AVG>"));
 	}
 
 }
