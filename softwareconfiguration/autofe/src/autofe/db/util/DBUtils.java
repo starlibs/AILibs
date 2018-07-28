@@ -202,7 +202,7 @@ public class DBUtils {
 	public static boolean isIntermediate(BackwardFeature bf, Database db) {
 		List<Tuple<AbstractRelationship, AggregationFunction>> path = bf.getPath();
 
-		if (path.size() < 2) {
+		if (path.isEmpty()) {
 			return true;
 		}
 
