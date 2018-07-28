@@ -6,6 +6,10 @@ public class ForwardFeature extends AbstractFeature {
 		super(parent.getName(), parent);
 	}
 
+	public ForwardFeature(ForwardFeature toClone) {
+		super(toClone.name, toClone.parent);
+	}
+
 	@Override
 	public String toString() {
 		return "ForwardFeature [name=" + name + ", parent=" + parent + "]";

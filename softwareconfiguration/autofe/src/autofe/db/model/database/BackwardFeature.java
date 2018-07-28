@@ -16,6 +16,11 @@ public class BackwardFeature extends AbstractFeature {
 		path = new ArrayList<>();
 	}
 
+	public BackwardFeature(BackwardFeature toClone) {
+		super(toClone.name, toClone.parent);
+		this.path = new ArrayList<>(toClone.path);
+	}
+
 	/**
 	 * Path from the table containing this feature to the target table or a forward
 	 * reachable table

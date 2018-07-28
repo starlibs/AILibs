@@ -40,6 +40,7 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 	public Collection<NodeExpansionDescription<DatabaseNode, String>> generateSuccessors(DatabaseNode node) {
 		// Check whether node contains intermediate feature
 		BackwardFeature intermediateFeature = getIntermediateFeature(node.getSelectedFeatures());
+
 		if (intermediateFeature == null) {
 			return computeForNonIntermediateNode(node);
 		} else {
@@ -52,10 +53,8 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 		Collection<NodeExpansionDescription<DatabaseNode, String>> toReturn = new ArrayList<>();
 
 		Set<Attribute> forwardAttributes = db.getForwardAttributes();
-		// forwardAttributes.removeAll(node.getSelectedAttributes());
 
 		Set<Attribute> backwardAttributes = db.getBackwardAttributes();
-		// backwardAttributes.removeAll(node.getSelectedAttributes());
 
 		List<AbstractFeature> currentFeatures = node.getSelectedFeatures();
 		List<ForwardFeature> currentForwardFeatures = new ArrayList<>();
@@ -78,7 +77,7 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 				continue;
 			}
 			if ((addOnlyLargerFeatures && att.compareTo(maxForwardAttribute) > 0) || !addOnlyLargerFeatures) {
-				List<AbstractFeature> extended = new ArrayList<>(currentFeatures);
+				List<AbstractFeature> extended = cloneFeatureList(currentFeatures);
 				extended.add(new ForwardFeature(att));
 				DatabaseNode to = new DatabaseNode(extended, false);
 				toReturn.add(new NodeExpansionDescription<DatabaseNode, String>(node, to, "Forward: " + att.getName(),
@@ -88,7 +87,7 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 
 		// One successor node for each backward feature
 		for (Attribute att : backwardAttributes) {
-			List<AbstractFeature> extended = new ArrayList<>(currentFeatures);
+			List<AbstractFeature> extended = cloneFeatureList(currentFeatures);
 			extended.add(new BackwardFeature(att));
 			DatabaseNode to = new DatabaseNode(extended, false);
 			toReturn.add(new NodeExpansionDescription<DatabaseNode, String>(node, to, "Backward: " + att.getName(),
@@ -125,7 +124,7 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 
 		for (BackwardRelationship br : backwards) {
 			for (AggregationFunction af : AggregationFunction.values()) {
-				List<AbstractFeature> extendedFeatures = new ArrayList<>(node.getSelectedFeatures());
+				List<AbstractFeature> extendedFeatures = cloneFeatureList(node.getSelectedFeatures());
 				BackwardFeature extendedintermediateFeature = getIntermediateFeature(extendedFeatures);
 				if (extendedintermediateFeature == null) {
 					throw new IllegalStateException("The intermediate feature must not be null in the current state!");
@@ -173,6 +172,18 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 			}
 		}
 		return null;
+	}
+
+	private List<AbstractFeature> cloneFeatureList(List<AbstractFeature> featureList) {
+		List<AbstractFeature> toReturn = new ArrayList<>();
+		for (AbstractFeature feature : featureList) {
+			if (feature instanceof ForwardFeature) {
+				toReturn.add(new ForwardFeature((ForwardFeature) feature));
+			} else if (feature instanceof BackwardFeature) {
+				toReturn.add(new BackwardFeature((BackwardFeature) feature));
+			}
+		}
+		return toReturn;
 	}
 
 }
