@@ -68,4 +68,11 @@ dependencies {
 	
 	// TreeMiner
 	compile 'com.github.helegraf:TreeMiner:-SNAPSHOT'
+	
+	// linear algebra
+	compile group: 'org.nd4j', name: 'nd4j-native-platform', version: '0.9.1'
+	compile group: 'org.nd4j', name: 'nd4j-api', version: '0.9.1'
+	
+	// gradient descent
+	compile group: 'de.jungblut.common', name: 'thomasjungblut-common', version: '1.1'
 }
