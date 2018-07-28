@@ -31,6 +31,7 @@ import com.google.common.collect.ContiguousSet;
 import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.Range;
 
+import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.ml.core.SimpleInstanceImpl;
 import jaicore.ml.core.SimpleInstancesImpl;
 import jaicore.ml.core.SimpleLabeledInstanceImpl;
@@ -163,6 +164,36 @@ public class WekaUtil {
 		return classifiers;
 	}
 
+	/**
+	 *  Returns a List of all valid combinations of searchers and evaluators
+	 * 
+	 * @return a Pair&ltString, String> List where the first entry is the searcher and the second the evaluator.
+	 */
+	public static Collection<Pair<String, String>> getValidPreprocessorCombination(){
+		Collection<Pair<String, String>> result = new LinkedList<>();
+		
+		for (String searcher : getSearchers()) {
+			for (String evaluator : getFeatureEvaluators()) {
+				
+				boolean isSetEvaluator = evaluator.toLowerCase().matches(
+						".*(subseteval|relief|gainratio|principalcomponents|onerattributeeval|infogainattributeeval|correlationattributeeval|symmetricaluncertattributeeval).*");
+				boolean isNonRankerEvaluator = evaluator.toLowerCase().matches(".*(cfssubseteval).*");
+				
+				boolean isRanker = searcher.toLowerCase().contains("ranker");
+				
+				if (isSetEvaluator && !isRanker) {
+					continue;
+				}
+				if (isNonRankerEvaluator && isRanker) {
+					continue;
+				}
+				result.add(new Pair<String, String>(searcher, evaluator));
+			}
+		}
+		return result;
+	}
+	
+	
 	public static <L> Instances fromJAICoreInstances(final WekaCompatibleInstancesImpl instances) {
 
 		/* create basic attribute entries */
