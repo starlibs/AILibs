@@ -1,123 +1,118 @@
 package de.upb.crc901.automl.metamining.pipelinecharacterizing;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
-import org.apache.commons.io.IOUtils;
-import org.semanticweb.HermiT.Reasoner;
-import org.semanticweb.HermiT.ReasonerFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.ClassExpressionType;
-import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLDataFactory;
-import org.semanticweb.owlapi.model.OWLObjectVisitor;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.model.OWLOntologyStorageException;
-import org.semanticweb.owlapi.reasoner.InferenceType;
-import org.semanticweb.owlapi.reasoner.OWLReasoner;
-import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 
 public class WEKAOntologyConnector implements IOntologyConnector {
-	
-	private HashMap<String, String> mapAlgorithmsToOperators;
 
-	private static String dmopObsolete = "DMOPobsolete.owl";
-	private static String defaultOntology = "DMOP.owl";
+	private String ontologyFileName = "DMOP.owl";
+	// TODO can get this from ontology object
+	private String ontologyURI = "http://www.e-lico.eu/ontologies/dmo/DMOP/DMOP.owl";
+	private String ontologyURISeparator = "#";
+	private OWLDataFactory dataFactory;
+	private OWLOntology ontology;
 
-	public void loadOntology() throws OWLOntologyCreationException, IOException, OWLOntologyStorageException {
+	// TODO fill this in
+	private String classifierTopNode = "";
+	private String searcherTopNode = "";
+	private String evaluatorTopNode = "";
+
+	/**
+	 * Creates an ontology connector using the specified ontology.
+	 * 
+	 * @param ontology
+	 *            The ontology this connector will reference
+	 * @throws OWLOntologyCreationException
+	 *             If the ontology cannot be created
+	 */
+	public WEKAOntologyConnector(String ontology) throws OWLOntologyCreationException {
+		// TODO
+	}
+
+	/**
+	 * Creates an ontology connector using the standard ontology.
+	 * 
+	 * @throws OWLOntologyCreationException
+	 *             If the ontology cannot be created
+	 */
+	public WEKAOntologyConnector() throws OWLOntologyCreationException {
 		OWLOntologyManager ontologyManager = OWLManager.createOWLOntologyManager();
-		OWLDataFactory dataFactory = ontologyManager.getOWLDataFactory();
-		InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(defaultOntology);
-		OWLOntology ontology = ontologyManager.loadOntologyFromOntologyDocument(inputStream);
-		// OWLOntology ontology =
-		// ontologyManager.loadOntology(IRI.create("http://www.e-lico.eu/ontologies/dmo/DMOP/DMOP.owl#"));
-		// OutputStream outputStream = new
-		// FileOutputStream("resources/DMOPobsolete.owl");
-		// ontologyManager.saveOntology(ontology, outputStream);
+		dataFactory = ontologyManager.getOWLDataFactory();
+		InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(ontologyFileName);
+		ontology = ontologyManager.loadOntologyFromOntologyDocument(inputStream);
+	}
 
-		// inputStream =
-		// Thread.currentThread().getContextClassLoader().getResourceAsStream(defaultOntology);
-		// OWLOntology dmop =
-		// ontologyManager.loadOntologyFromOntologyDocument(inputStream);
-		System.out.println(ontology);
+	@Override
+	public List<String> getAncestorsOfClassifier(String classifierName) {
+		return getAncestorsOfAlgorithmUntil(classifierName, classifierTopNode);
+	}
 
-		// Reasoner hermit = new Reasoner(null, ontology);
-		// OWLReasonerFactory reasonerFactory = new ReasonerFactory();
-		// OWLReasoner reasoner = reasonerFactory.createReasoner(ontology);
-		// reasoner.precomputeInferences(InferenceType.CLASS_HIERARCHY);
+	@Override
+	public List<String> getAncestorsOfSearcher(String searcher) {
+		return getAncestorsOfAlgorithmUntil(searcher, searcherTopNode);
+	}
 
-		OWLClass naiveBayes = dataFactory
-				.getOWLClass("http://www.e-lico.eu/ontologies/dmo/DMOP/DMOP.owl#NaiveBayesAlgorithm");
-		// reasoner.getSuperClasses(naiveBayes).forEach(node -> {
-		// System.out.println(node);
-		// });
-		//
-		// reasoner.load
-//		OWLClass hasQuality = dataFactory.getOWLClass("http://www.e-lico.eu/ontologies/dmo/DMOP/DMOP.owl#has-quality");
-//
-//		ontology.subClassAxiomsForSubClass(naiveBayes).forEach(classs -> {
-//			System.out.println(classs.getSuperClass().getClassExpressionType() == ClassExpressionType.OWL_CLASS);
-//			System.out.println(classs);
-//			if (classs.getSuperClass().getClassExpressionType() == ClassExpressionType.OWL_CLASS) {
-//
-//			}
-//		});
+	@Override
+	public List<String> getAncestorsOfEvaluator(String evaluator) {
+		return getAncestorsOfAlgorithmUntil(evaluator, evaluatorTopNode);
+	}
 
-		// have found, class, now iteratively get all equals & ancestors
+	/**
+	 * Get the list of ancestors from most general to most specific concept up until
+	 * the specified concept including the specified child and highest concept.
+	 * 
+	 * @param algorithm
+	 *            The child algorithm
+	 * @param until
+	 *            The highest ancestor
+	 * @return The ancestors of the child algorithm from the highest ancestor to the
+	 *         child algorithm itself
+	 */
+	protected List<String> getAncestorsOfAlgorithmUntil(String algorithm, String until) {
+		// Get the algorithm
+		StringBuilder builder = new StringBuilder();
+		builder.append(ontologyURI);
+		builder.append(ontologyURISeparator);
+		builder.append(algorithm);
+		OWLClass child = dataFactory.getOWLClass(builder.toString());
+
+		// Get ancestors
 		ArrayList<OWLClass> ancestors = new ArrayList<OWLClass>();
-		ancestors.add(naiveBayes);
+		ancestors.add(child);
 		for (int i = 0; i < ancestors.size(); i++) {
-			ontology.subClassAxiomsForSubClass(ancestors.get(i)).forEach(axiom -> System.out.println("Found: " + axiom));
-			
-			// get ancestors
 			ontology.subClassAxiomsForSubClass(ancestors.get(i))
-					.filter(axiom -> axiom.getSuperClass().getClassExpressionType() == ClassExpressionType.OWL_CLASS)
+					.filter(axiom -> axiom.getSuperClass().getClassExpressionType() == ClassExpressionType.OWL_CLASS
+							&& axiom.getSuperClass().asOWLClass().getIRI().getShortForm().equals(until))
 					.forEach(axiom -> {
 						OWLClass toAdd = axiom.getSuperClass().asOWLClass();
-						System.out.println("Adding: " + toAdd);
 						ancestors.add(toAdd);
 					});
 		}
-	}
-	
-	
 
-	public static void main(String[] args)
-			throws OWLOntologyCreationException, IOException, OWLOntologyStorageException {
-		new WEKAOntologyConnector().loadOntology();
+		// Get names and invert order
+		List<String> ancestorNames = new ArrayList<String>();
+		for (int i = ancestors.size() - 1; i >= 0; i++) {
+			ancestorNames.add(ancestors.get(i).getIRI().getShortForm());
+		}
 
-	}
-
-
-
-	@Override
-	public List<String> getParentsOfClassifier(String classifierName) {
-		// TODO Auto-generated method stub
-		return null;
+		return ancestorNames;
 	}
 
-
-
-	@Override
-	public List<String> getParentsOfSearcher(String searcher) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
-
-	@Override
-	public List<String> getParentsOfEvaluator(String evaluator) {
-		// TODO Auto-generated method stub
-		return null;
+	/**
+	 * Get ontology this connector uses.
+	 * 
+	 * @return THe used ontology
+	 */
+	public OWLOntology getOntology() {
+		return ontology;
 	}
 }

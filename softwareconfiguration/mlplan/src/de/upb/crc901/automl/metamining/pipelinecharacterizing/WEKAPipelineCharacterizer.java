@@ -4,21 +4,40 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+
 import de.upb.crc901.automl.pipeline.basic.MLPipeline;
 import de.upb.crc901.automl.pipeline.basic.SupervisedFilterSelector;
 import treeminer.FrequentSubtreeFinder;
 import treeminer.TreeMiner;
 import treeminer.TreeRepresentationUtils;
 
-public class PipelineCharacterizer implements IPipelineCharacterizer {
+/**
+ * A characterizer for MLPipelines that characterizes them using an ontology and
+ * a tree mining algorithm.
+ * 
+ * @author Helena Graf
+ *
+ */
+public class WEKAPipelineCharacterizer implements IPipelineCharacterizer {
 
-	private FrequentSubtreeFinder treeMiner = new TreeMiner();
-	private IOntologyConnector ontologyConnector = new WEKAOntologyConnector();
+	private FrequentSubtreeFinder treeMiner;
+	private IOntologyConnector ontologyConnector;
 	private String[] patterns;
-	private int minSupport;
+	private int minSupport = 1;
 	private String preprocessorSubTreeName = "Preprocessor";
 	private String preprocessorsSubTreeName = "Preprocessors";
 	private String pipelineTreeName = "Pipeline";
+
+	public WEKAPipelineCharacterizer() {
+		treeMiner = new TreeMiner();
+		try {
+			ontologyConnector = new WEKAOntologyConnector();
+		} catch (OWLOntologyCreationException e) {
+			System.err.println("Cannot connect to Ontology!");
+			throw new RuntimeException(e);
+		}
+	}
 
 	@Override
 	public void build(List<MLPipeline> pipelines) {
@@ -66,12 +85,12 @@ public class PipelineCharacterizer implements IPipelineCharacterizer {
 		preprocessors.forEach(preprocessor -> {
 			// Get searcher annotation
 			String searcher = preprocessor.getSearcher().getClass().getName();
-			List<String> searcherBranch = ontologyConnector.getParentsOfSearcher(searcher);
+			List<String> searcherBranch = ontologyConnector.getAncestorsOfSearcher(searcher);
 			String searcherBranchRepresentation = TreeRepresentationUtils.makeRepresentationForBranch(searcherBranch);
 
 			// Get evaluator annotation
 			String evaluator = preprocessor.getEvaluator().getClass().getName();
-			List<String> evaluatorBranch = ontologyConnector.getParentsOfEvaluator(evaluator);
+			List<String> evaluatorBranch = ontologyConnector.getAncestorsOfEvaluator(evaluator);
 			String evaluatorBranchRepresentation = TreeRepresentationUtils.makeRepresentationForBranch(evaluatorBranch);
 
 			// Merge both annotations
@@ -85,7 +104,7 @@ public class PipelineCharacterizer implements IPipelineCharacterizer {
 
 		// Get annotations for classifier
 		String classifier = pipeline.getBaseClassifier().getClass().getName();
-		List<String> classifierBranch = ontologyConnector.getParentsOfClassifier(classifier);
+		List<String> classifierBranch = ontologyConnector.getAncestorsOfClassifier(classifier);
 		String classifierBranchRepresentation = TreeRepresentationUtils.makeRepresentationForBranch(classifierBranch);
 
 		// Merge preprocessors and classifiers
@@ -95,7 +114,7 @@ public class PipelineCharacterizer implements IPipelineCharacterizer {
 
 	@Override
 	public double[][] getCharacterizationsOfTrainingExamples() {
-		// TODO Auto-generated method stub
+		// TODO Implement
 		// TODO maybe adjust return parameter type here
 		return null;
 	}
@@ -115,10 +134,25 @@ public class PipelineCharacterizer implements IPipelineCharacterizer {
 		this.ontologyConnector = ontologyConnector;
 	}
 
+	/**
+	 * Get the minimum support required for a pattern to be considered frequent for
+	 * the tree mining algorithm.
+	 * 
+	 * @return The minimum support a tree pattern must have to be considered
+	 *         frequent
+	 */
 	public int getMinSupport() {
 		return minSupport;
 	}
 
+	/**
+	 * Set the minimum support required for a pattern to be considered frequent for
+	 * the tree mining algorithm.
+	 * 
+	 * @param minSupport
+	 *            The minimum support a tree pattern must have to be considered
+	 *            frequent
+	 */
 	public void setMinSupport(int minSupport) {
 		this.minSupport = minSupport;
 	}

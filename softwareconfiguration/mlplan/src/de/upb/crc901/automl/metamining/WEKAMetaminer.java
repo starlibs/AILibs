@@ -11,7 +11,7 @@ import org.apache.commons.math3.linear.RealVector;
 
 import de.upb.crc901.automl.hascowekaml.WEKAPipelineFactory;
 import de.upb.crc901.automl.metamining.pipelinecharacterizing.IPipelineCharacterizer;
-import de.upb.crc901.automl.metamining.pipelinecharacterizing.PipelineCharacterizer;
+import de.upb.crc901.automl.metamining.pipelinecharacterizing.WEKAPipelineCharacterizer;
 import de.upb.crc901.automl.metamining.similaritymeasures.AlternatingGradientDescent;
 import de.upb.crc901.automl.metamining.similaritymeasures.IHeterogenousSimilarityMeasureComputer;
 import de.upb.crc901.automl.pipeline.basic.MLPipeline;
@@ -32,7 +32,7 @@ public class WEKAMetaminer implements IMetaMiner {
 	private String metafeatureSet="all";
 	
 	private IHeterogenousSimilarityMeasureComputer similarityMeasure = new AlternatingGradientDescent();
-	private IPipelineCharacterizer pipelineCharacterizer = new PipelineCharacterizer();
+	private IPipelineCharacterizer pipelineCharacterizer = new WEKAPipelineCharacterizer();
 	
 	public WEKAMetaminer(Instances dataset) {
 		this.setDataset(dataset);
