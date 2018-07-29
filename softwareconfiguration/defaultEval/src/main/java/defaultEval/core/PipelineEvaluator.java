@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -19,7 +20,10 @@ import hasco.model.Component;
 import hasco.model.ComponentInstance;
 import hasco.model.Parameter;
 import hasco.serialization.ComponentLoader;
+import jaicore.ml.WekaUtil;
 import jaicore.ml.classification.multiclass.reduction.PipelineOptimizer;
+import jaicore.ml.evaluation.MonteCarloCrossValidationEvaluator;
+import jaicore.ml.evaluation.MulticlassEvaluator;
 import scala.annotation.elidable;
 import scala.util.parsing.combinator.testing.Str;
 import weka.classifiers.Classifier;
@@ -48,6 +52,7 @@ public class PipelineEvaluator {
 			
 			// read args
 				// Data path
+				// seed
 				// Searcher (or null)
 				// ... Parmas
 				// Evaluator 
@@ -67,6 +72,9 @@ public class PipelineEvaluator {
 			} catch (Exception e) {
 				e.printStackTrace(System.out);
 			}
+			
+			// get Seed
+			int seed = Integer.valueOf(args[index++]);
 			
 			// create Searcher
 			Component searcher = null;
@@ -128,38 +136,38 @@ public class PipelineEvaluator {
 			System.out.println("Evaluate Pipeline...");
 			
 			// evaluate Pipeline
-			double pctIncorrect = 100;
-			double pctCorrect = 0;
+			double loss = 1;
+			
+			List<Instances> instancesList =  WekaUtil.getStratifiedSplit(instances, new Random(seed), 0.7, 0.3);
 			
 			try {
 				Evaluation eval = new Evaluation(instances);
+				MulticlassEvaluator  multiclassEvaluator = new MulticlassEvaluator(new Random(seed));
+				MonteCarloCrossValidationEvaluator crossValidationEvaluator = new MonteCarloCrossValidationEvaluator(multiclassEvaluator, 10, instancesList.get(0), 0.7f);
 				
-				eval.crossValidateModel(mlPipeline, instances, 2, new Random());
 				
-				pctIncorrect = eval.pctIncorrect();
-				pctCorrect = eval.pctCorrect();
+				loss = crossValidationEvaluator.evaluate(mlPipeline);
 				
 			} catch (Exception e) {
 				e.printStackTrace(System.out);
 			}
 			
 			// print result
-			System.out.println("RESULT-INCORRECT: " + pctIncorrect);
-			System.out.println("RESULT-CORRECT: " + pctCorrect);
+			System.out.println("LOSS: " + loss);
 			
 			// return result
 			File resultFile = new File(args[index++]);
 			try {
 				resultFile.createNewFile();
 				PrintStream out = new PrintStream(new FileOutputStream(resultFile));
-				out.println(pctIncorrect);
+				out.println(loss);
 				out.close();
 			} catch (IOException e) {
 				e.printStackTrace(System.out);
 			}
 			
 			// print result for gga TODO use with others to
-			System.out.println(pctIncorrect);
+			System.out.println(loss);
 			
 		} catch (Exception e) {
 			e.printStackTrace(System.out);

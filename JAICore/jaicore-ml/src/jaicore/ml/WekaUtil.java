@@ -41,6 +41,8 @@ import jaicore.ml.interfaces.LabeledInstances;
 import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
 import weka.attributeSelection.BestFirst;
+import weka.attributeSelection.CfsSubsetEval;
+import weka.attributeSelection.GainRatioAttributeEval;
 import weka.attributeSelection.InfoGainAttributeEval;
 import weka.attributeSelection.Ranker;
 import weka.classifiers.AbstractClassifier;
@@ -185,6 +187,8 @@ public class WekaUtil {
 				
 				boolean isRanker = searcher.toLowerCase().contains("ranker");
 				
+				//System.out.println(searcher + "  -  " + evaluator + " " +isSetEvaluator + isNonRankerEvaluator + isRanker);
+				
 				if (isSetEvaluator && !isRanker) {
 					continue;
 				}
@@ -196,7 +200,25 @@ public class WekaUtil {
 		}
 		return result;
 	}
-
+	
+	public static void main(String[] args) {
+		for (Pair<String, String> s : getValidPreprocessorCombinations()) {
+			System.out.println(s.getX() + "  -  " + s.getY());
+			
+			
+		}
+		weka.attributeSelection.AttributeSelection as = new weka.attributeSelection.AttributeSelection();
+		as.setSearch(new BestFirst());
+		as.setEvaluator(new GainRatioAttributeEval());
+	
+		try {
+			as.SelectAttributes(new Instances("t", new ArrayList<>(), 0));
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
 	
 	
 	public static <L> Instances fromJAICoreInstances(final WekaCompatibleInstancesImpl instances) {
