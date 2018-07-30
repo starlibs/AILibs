@@ -200,14 +200,14 @@ public class DBUtils {
 	}
 
 	public static boolean isIntermediate(BackwardFeature bf, Database db) {
-		List<Tuple<AbstractRelationship, AggregationFunction>> path = bf.getPath();
+		List<Tuple<AbstractRelationship, AggregationFunction>> pathElements = bf.getPath().getPathElements();
 
-		if (path.isEmpty()) {
+		if (pathElements.isEmpty()) {
 			return true;
 		}
 
 		// Check whether last edge goes to the target or is forward reachable
-		AbstractRelationship relationship = path.get(path.size() - 1).getT();
+		AbstractRelationship relationship = pathElements.get(pathElements.size() - 1).getT();
 		relationship.setContext(db);
 		Table lastTable = relationship.getFrom();
 		Set<Table> forwardReachable = getForwardReachableTables(getTargetTable(db), db);

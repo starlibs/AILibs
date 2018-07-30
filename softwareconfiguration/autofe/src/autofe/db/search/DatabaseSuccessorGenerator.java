@@ -15,6 +15,7 @@ import autofe.db.model.database.Attribute;
 import autofe.db.model.database.BackwardFeature;
 import autofe.db.model.database.Database;
 import autofe.db.model.database.ForwardFeature;
+import autofe.db.model.database.Path;
 import autofe.db.model.database.Table;
 import autofe.db.model.relation.AbstractRelationship;
 import autofe.db.model.relation.BackwardRelationship;
@@ -111,14 +112,40 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 		BackwardFeature intermediateFeature = getIntermediateFeature(node.getSelectedFeatures());
 
 		// Get last table
-		Table lastTable = null;
-		List<Tuple<AbstractRelationship, AggregationFunction>> path = intermediateFeature.getPath();
-		if (path.isEmpty()) {
+		Table lastTable = intermediateFeature.getPath().getLastTable();
+		if (lastTable == null) {
 			lastTable = DBUtils.getAttributeTable(intermediateFeature.getParent(), db);
-		} else {
-			AbstractRelationship lastRelationsihp = path.get(path.size() - 1).getT();
-			lastTable = lastRelationsihp.getFrom();
+		} 
+
+		// Compute possible next path elements
+		List<Tuple<AbstractRelationship, AggregationFunction>> nextPathElements = nextIntermediatePathElements(
+				lastTable);
+
+		// TODO: Validate path elements
+
+		for (Tuple<AbstractRelationship, AggregationFunction> nextPathElement : nextPathElements) {
+			List<AbstractFeature> extendedFeatures = cloneFeatureList(node.getSelectedFeatures());
+			BackwardFeature extendedintermediateFeature = getIntermediateFeature(extendedFeatures);
+			if (extendedintermediateFeature == null) {
+				throw new IllegalStateException("The intermediate feature must not be null in the current state!");
+			}
+			Path extendedPath = new Path(intermediateFeature.getPath());
+			extendedPath.addPathElement(nextPathElement);
+			extendedintermediateFeature.setPath(extendedPath);
+			DatabaseNode extendedNode = new DatabaseNode(extendedFeatures, false);
+			AbstractRelationship ar = nextPathElement.getT();
+			String description = String.format("Intermediate: <[%s -> %s], %s>", ar.getFrom().getName(),
+					ar.getTo().getName(), nextPathElement.getU());
+			toReturn.add(
+					new NodeExpansionDescription<DatabaseNode, String>(node, extendedNode, description, NodeType.OR));
 		}
+
+		return toReturn;
+
+	}
+
+	private List<Tuple<AbstractRelationship, AggregationFunction>> nextIntermediatePathElements(Table lastTable) {
+		List<Tuple<AbstractRelationship, AggregationFunction>> toReturn = new ArrayList<>();
 
 		// Find all possible next tables
 		Set<BackwardRelationship> backwards = DBUtils.getBackwardsTo(lastTable, db);
@@ -128,45 +155,19 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 
 		for (BackwardRelationship br : backwards) {
 			for (AggregationFunction af : AggregationFunction.values()) {
-				List<AbstractFeature> extendedFeatures = cloneFeatureList(node.getSelectedFeatures());
-				BackwardFeature extendedintermediateFeature = getIntermediateFeature(extendedFeatures);
-				if (extendedintermediateFeature == null) {
-					throw new IllegalStateException("The intermediate feature must not be null in the current state!");
-				}
-				List<Tuple<AbstractRelationship, AggregationFunction>> extendedPath = new ArrayList<>(path);
 				Tuple<AbstractRelationship, AggregationFunction> toAdd = new Tuple<AbstractRelationship, AggregationFunction>(
 						br, af);
-				extendedPath.add(toAdd);
-				extendedintermediateFeature.setPath(extendedPath);
-				DatabaseNode extendedNode = new DatabaseNode(extendedFeatures, false);
-				String description = String.format("Intermediate: <[%s -> %s], %s>", br.getFrom().getName(),
-						br.getTo().getName(), af.name());
-				toReturn.add(new NodeExpansionDescription<DatabaseNode, String>(node, extendedNode, description,
-						NodeType.OR));
+				toReturn.add(toAdd);
 			}
-
 		}
 
 		for (ForwardRelationship fr : forwards) {
-			List<AbstractFeature> extendedFeatures = new ArrayList<>(node.getSelectedFeatures());
-			BackwardFeature extendedintermediateFeature = getIntermediateFeature(extendedFeatures);
-			if (extendedintermediateFeature == null) {
-				throw new IllegalStateException("The intermediate feature must not be null in the current state!");
-			}
-			List<Tuple<AbstractRelationship, AggregationFunction>> extendedPath = new ArrayList<>(path);
 			Tuple<AbstractRelationship, AggregationFunction> toAdd = new Tuple<AbstractRelationship, AggregationFunction>(
 					fr, null);
-			extendedPath.add(toAdd);
-			extendedintermediateFeature.setPath(extendedPath);
-			DatabaseNode extendedNode = new DatabaseNode(extendedFeatures, false);
-			String description = String.format("Intermediate: <[%s -> %s], null>", fr.getFrom().getName(),
-					fr.getTo().getName());
-			toReturn.add(
-					new NodeExpansionDescription<DatabaseNode, String>(node, extendedNode, description, NodeType.OR));
+			toReturn.add(toAdd);
 		}
 
 		return toReturn;
-
 	}
 
 	private BackwardFeature getIntermediateFeature(List<AbstractFeature> features) {
