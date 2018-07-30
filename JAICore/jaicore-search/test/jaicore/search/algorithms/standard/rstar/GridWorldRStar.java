@@ -76,7 +76,7 @@ public class GridWorldRStar {
             System.out.println("Exception while slpeeing.");
         }
         rStar.interrupt();
-        List<GridWorld> solution = rStar.getSolutionPath().stream().map(n -> n.getPoint()).collect(Collectors.toList());
+        List<GridWorld> solution = rStar.getSolutionPath();
         double costOfSolution = 0;
         for (GridWorld pos : solution)
         	costOfSolution += GridWorld.myGrid[pos.getX()][pos.getY()];
