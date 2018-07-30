@@ -16,6 +16,8 @@ import de.upb.crc901.automl.pipeline.basic.MLPipeline;
 import de.upb.crc901.automl.pipeline.basic.SupervisedFilterSelector;
 import de.upb.crc901.automl.pipeline.service.MLServicePipeline;
 import de.upb.crc901.services.wrappers.WekaClassifierWrapper;
+import hasco.model.BooleanParameterDomain;
+import hasco.model.CategoricalParameterDomain;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
 import hasco.model.Parameter;
@@ -36,7 +38,20 @@ import weka.core.converters.ConverterUtils.DataSource;
 public class PipelineEvaluator {
 	
 	public static void main(String[] args) {
-		// TODO write result file even if no result
+		// read args
+		// result File	
+		// Data path
+		// seed
+		// Searcher (or null)
+		// ... Parmas
+		// Evaluator 
+		// ... Parmas
+		// Classifier
+		// ... Params
+		
+		int index = 0;
+		double loss = 1000000;
+		String resultFile = args[index++];
 		
 		try {
 			// load Components that can be used to create the pipeline
@@ -49,18 +64,6 @@ public class PipelineEvaluator {
 			} catch (IOException e) {
 				e.printStackTrace(System.out);
 			}
-			
-			// read args
-				// Data path
-				// seed
-				// Searcher (or null)
-				// ... Parmas
-				// Evaluator 
-				// ... Parmas
-				// Classifier
-				// ... Params
-				// result File
-			int index = 0;
 			
 			// read Data
 			DataSource ds;
@@ -122,12 +125,18 @@ public class PipelineEvaluator {
 					classifier = c; 
 					// add parameter
 					for (Parameter p : classifier.getParameters()) {
-						classifierParameter.put(args[index++], args[index++]);
+						if(c.getParameter(args[index]).getDefaultDomain() instanceof BooleanParameterDomain) {
+							// true and false must always be lower case
+							classifierParameter.put(args[index++], args[index++].toLowerCase());
+						}else {
+							classifierParameter.put(args[index++], args[index++]);	
+						}
 					}
 				}
 			}
 		
 			System.out.println("Build Pipeline...");
+			
 			
 			WEKAPipelineFactory factory = new WEKAPipelineFactory();
 			ComponentInstance pipeline = Util.createPipeline(searcher, searcherParameter, evaluator, evaluatorParameter, classifier, classifierParameter);
@@ -136,8 +145,6 @@ public class PipelineEvaluator {
 			System.out.println("Evaluate Pipeline...");
 			
 			// evaluate Pipeline
-			double loss = 1;
-			
 			List<Instances> instancesList =  WekaUtil.getStratifiedSplit(instances, new Random(seed), 0.7, 0.3);
 			
 			try {
@@ -150,27 +157,33 @@ public class PipelineEvaluator {
 				e.printStackTrace(System.out);
 			}
 			
-			// print result
-			System.out.println("LOSS: " + loss);
-			
-			// return result
-			File resultFile = new File(args[index++]);
-			try {
-				resultFile.createNewFile();
-				PrintStream out = new PrintStream(new FileOutputStream(resultFile));
-				out.println(loss);
-				out.close();
-			} catch (IOException e) {
-				e.printStackTrace(System.out);
-			}
-			
-			// print result for gga TODO use with others to
-			System.out.println(loss);
+			createOutput(loss, resultFile);
 			
 		} catch (Exception e) {
 			e.printStackTrace(System.out);
+			
+			createOutput(loss, resultFile);
+		}
+	}
+	
+	private static void createOutput(double loss, String path) {
+		// print result
+		System.out.println("LOSS: " + loss);
+		
+		// return result
+		File resultFile = new File(path);
+		try {
+			resultFile.createNewFile();
+			PrintStream out = new PrintStream(new FileOutputStream(resultFile));
+			out.println(loss);
+			out.close();
+		} catch (IOException e) {
+			e.printStackTrace(System.out);
 		}
 		
+		// print result for gga TODO use with others too
+		System.out.println(loss);
 	}
+	
 	
 }

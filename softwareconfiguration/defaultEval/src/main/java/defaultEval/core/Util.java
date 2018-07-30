@@ -137,5 +137,16 @@ public class Util {
 		return name.substring(0, name.length()-2);
 	}
 	
+	public static ParamType getTypeFromUniqueParamName(String name) {
+		if(name.endsWith("s")) {
+			return ParamType.searcher;
+		}else if (name.endsWith("e")) {
+			return ParamType.evaluator;
+		}else if (name.endsWith("c")) {
+			return ParamType.classifier;
+		}else {
+			throw new IllegalArgumentException("Not a unique param Name: " + name);
+		}
+	}
 
 }

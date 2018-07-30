@@ -53,7 +53,7 @@ public class PreprocessorListHelper {
 			
 			if(!failed) {
 				if(!first) {
-					sb.append(";");
+					sb.append(",");
 				}
 				first = false;
 				sb.append(s.getX());

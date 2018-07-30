@@ -117,6 +117,7 @@ public class DefaultEvalExperiment {
 				results.put("searcher_parameters", optimizer.getFinalSearcher().getParameterValues());
 				results.put("evaluator_parameters", optimizer.getFinalEvaluator().getParameterValues());
 				results.put("classifier_parameters", optimizer.getFinalClassifier().getParameterValues());
+				results.put("timeout_output", m.getMaxRuntimeParam());
 				
 				processor.processResults(results);
 			}

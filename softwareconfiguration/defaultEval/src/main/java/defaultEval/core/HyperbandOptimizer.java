@@ -61,8 +61,8 @@ public class HyperbandOptimizer extends Optimizer{
 			
 			ProcessBuilder pb = new ProcessBuilder(cmd);
 			pb.directory(environment.getAbsoluteFile());
-			pb.redirectErrorStream(true);
-			pb.redirectOutput(Redirect.PIPE);
+			//pb.redirectErrorStream(true);
+			//pb.redirectOutput(Redirect.PIPE);
 			final Process proc = pb.start();
 			
 			InputStream i = proc.getInputStream();
@@ -72,7 +72,7 @@ public class HyperbandOptimizer extends Optimizer{
 				public void run() {
 					long start_time = System.currentTimeMillis();
 					
-					while (System.currentTimeMillis() - start_time < maxRuntime*1000) {
+					while (System.currentTimeMillis() - start_time < maxRuntime*1000 && proc.isAlive()) {
 						try {
 							Thread.sleep(100);
 						} catch (InterruptedException e) {
@@ -83,7 +83,10 @@ public class HyperbandOptimizer extends Optimizer{
 					
 					int id = ProcessUtil.getPID(proc);
 					try {
-						ProcessUtil.killProcess(id);
+						if(proc.isAlive()) {
+							System.err.println("Kill process...");
+							ProcessUtil.killProcess(id);		
+						}
 					} catch (IOException e) {
 						// TODO
 						e.printStackTrace();
@@ -91,12 +94,36 @@ public class HyperbandOptimizer extends Optimizer{
 				}
 			}).start();
 			
-			int r = 0;
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					int r = 0;
+					try {
+						while ((r = proc.getErrorStream().read()) != -1) {
+							System.out.write(r);
+						}
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}).start();
 			
 			
-			while ((r = i.read()) != -1) {
-				System.out.write(r);
-			}
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					int r = 0;
+					try {
+						while ((r = proc.getInputStream().read()) != -1) {
+							System.out.write(r);
+						}
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}).start();
+			
+			proc.waitFor();
 			
 			int exitValue = proc.exitValue();
 			
@@ -104,6 +131,9 @@ public class HyperbandOptimizer extends Optimizer{
 			
 			
 		} catch (IOException | ParseException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO 
 			e.printStackTrace();
 		}
 
@@ -181,8 +211,9 @@ public class HyperbandOptimizer extends Optimizer{
 		
 		
 		pyWrapperStream.println("def try_params( n_iterations, params ):");
-		pyWrapperStream.println(String.format("\tcall(\"java -jar %s/PipelineEvaluator.jar %s %d %s %s %s %s %s %s %s\")",
+		pyWrapperStream.println(String.format("\tcall(\"java -jar %s/PipelineEvaluator.jar %s %s %d %s %s %s %s %s %s\")",
 				environment.getAbsolutePath(),
+				environment.getAbsolutePath() + "/results/" + buildFileName() + ".txt", 
 				dataSetFolder.getAbsolutePath() + "/" + dataSet + ".arff",
 				seed,
 				(searcher != null) ? searcher.getName() : "null",
@@ -190,8 +221,7 @@ public class HyperbandOptimizer extends Optimizer{
 				(searcher != null) ? evaluator.getName() : "",
 				(searcher != null) ? generateParamList(evaluator, ParamType.evaluator) : "",
 				classifier.getName(),
-				generateParamList(classifier, ParamType.classifier),
-				environment.getAbsolutePath() + "/results/" + buildFileName() + ".txt"
+				generateParamList(classifier, ParamType.classifier)
 				));
 		pyWrapperStream.println(String.format("\tfile = open(\"%s/results/%s.txt\", \"r\")", environment.getAbsolutePath(), buildFileName()));
 		
@@ -225,12 +255,16 @@ public class HyperbandOptimizer extends Optimizer{
 	private String createDomainWrapper(String input, ParameterDomain pd) {
 		if(pd instanceof NumericParameterDomain) {
 			NumericParameterDomain n_pd = (NumericParameterDomain) pd;
-			return n_pd.isInteger() ? input : "\"{:.9f}\".format("+input+")";
+			return n_pd.isInteger() ? "str(" + input + ")" : "\"{:.9f}\".format("+input+")";
 		}
 		
-		return input;
+		return "str(" + input + ")";
 	}
 	
+	@Override
+	protected String buildFileName() {
+		return super.buildFileName() + "Hyperband";
+	}
 	
 	
 	public static void main(String[] args) {
@@ -283,6 +317,8 @@ public class HyperbandOptimizer extends Optimizer{
 	}
 	
 	
+	
+	
 	private String getSpaceEntryByDomain(Pair<Parameter, ParamType> p) {
 		ParameterDomain pd = p.getFirst().getDefaultDomain();
 
@@ -292,7 +328,7 @@ public class HyperbandOptimizer extends Optimizer{
 			
 			if(n_pd.isInteger()) {
 				// int
-				return String.format("'%s': hp.choice( '%s', range(%d, %d, 1))", getUniqueParamName(p), getUniqueParamName(p), n_pd.getMin(), n_pd.getMax()+1);
+				return String.format("'%s': hp.choice( '%s', range(%d, %d, 1))", getUniqueParamName(p), getUniqueParamName(p), (int)n_pd.getMin(), (int)n_pd.getMax()+1);
 			}else {
 				// float
 				return String.format("'%s': hp.uniform( '%s', %f, %f)", getUniqueParamName(p),getUniqueParamName(p), n_pd.getMin(), n_pd.getMax());
