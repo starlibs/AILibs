@@ -225,64 +225,46 @@ public class GGAOptimizer extends Optimizer {
 
 	}
 
-	private String createDomainWrapper(String input, ParameterDomain pd) {
-		if (pd instanceof NumericParameterDomain) {
-			NumericParameterDomain n_pd = (NumericParameterDomain) pd;
-			return n_pd.isInteger() ? input : "\"{:.9f}\".format(" + input + ")";
-		}
+	
 
-		return input;
-	}
+//	public static void main(String[] args) {
+//
+//		ComponentLoader cl_p = new ComponentLoader();
+//		ComponentLoader cl_c = new ComponentLoader();
+//
+//		try {
+//			Util.loadClassifierComponents(cl_c, "F:\\Data\\Uni\\PG\\DefaultEvalEnvironment");
+//			Util.loadPreprocessorComponents(cl_p, "F:\\Data\\Uni\\PG\\DefaultEvalEnvironment");
+//		} catch (IOException e1) {
+//			e1.printStackTrace();
+//		}
+//		Component searcher = null;
+//		Component evaluator = null;
+//		Component classifier = null;
+//
+//		for (Component c : cl_p.getComponents()) {
+//			if (c.getName().equals("weka.attributeSelection.BestFirst")) {
+//				searcher = c;
+//			}
+//		}
+//
+//		for (Component c : cl_p.getComponents()) {
+//			if (c.getName().equals("weka.attributeSelection.CorrelationAttributeEval")) {
+//				evaluator = c;
+//			}
+//		}
+//
+//		for (Component c : cl_c.getComponents()) {
+//			if (c.getName().equals("weka.classifiers.functions.Logistic")) {
+//				classifier = c;
+//			}
+//		}
+//
+//		GGAOptimizer o = new GGAOptimizer(searcher, evaluator, classifier, "breast-cancer",
+//				new File("F:\\Data\\Uni\\PG\\DefaultEvalEnvironment"),
+//				new File("F:\\Data\\Uni\\PG\\DefaultEvalEnvironment\\datasets"), 0, 900, 1200);
+//		o.optimize();
+//	}
 
-	public static void main(String[] args) {
-
-		ComponentLoader cl_p = new ComponentLoader();
-		ComponentLoader cl_c = new ComponentLoader();
-
-		try {
-			Util.loadClassifierComponents(cl_c, "F:\\Data\\Uni\\PG\\DefaultEvalEnvironment");
-			Util.loadPreprocessorComponents(cl_p, "F:\\Data\\Uni\\PG\\DefaultEvalEnvironment");
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
-		Component searcher = null;
-		Component evaluator = null;
-		Component classifier = null;
-
-		for (Component c : cl_p.getComponents()) {
-			if (c.getName().equals("weka.attributeSelection.BestFirst")) {
-				searcher = c;
-			}
-		}
-
-		for (Component c : cl_p.getComponents()) {
-			if (c.getName().equals("weka.attributeSelection.CorrelationAttributeEval")) {
-				evaluator = c;
-			}
-		}
-
-		for (Component c : cl_c.getComponents()) {
-			if (c.getName().equals("weka.classifiers.functions.Logistic")) {
-				classifier = c;
-			}
-		}
-
-		GGAOptimizer o = new GGAOptimizer(searcher, evaluator, classifier, "breast-cancer",
-				new File("F:\\Data\\Uni\\PG\\DefaultEvalEnvironment"),
-				new File("F:\\Data\\Uni\\PG\\DefaultEvalEnvironment\\datasets"), 0, 900, 1200);
-		o.optimize();
-	}
-
-	private String generateParamList(Component c, ParamType t) {
-		StringBuilder sb = new StringBuilder();
-
-		for (Parameter parameter : c.getParameters()) {
-			sb.append(" " + parameter.getName());
-			sb.append(String.format(" \"+ %s + \"", createDomainWrapper(
-					String.format("params['%s']", getUniqueParamName(parameter, t)), parameter.getDefaultDomain())));
-		}
-
-		return sb.toString();
-	}
 
 }

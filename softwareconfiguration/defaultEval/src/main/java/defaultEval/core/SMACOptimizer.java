@@ -43,14 +43,13 @@ public class SMACOptimizer extends Optimizer {
 	public void optimize() {
 
 		generatePCSFile();
-
 		generatePyWrapper();
 
 		// start SMAC
 		try {
 
 			ArrayList<String> cmd = new ArrayList<>();
-			cmd.add(environment.getAbsolutePath() + "\\optimizer\\smac\\smac.bat ");
+			cmd.add(environment.getAbsolutePath() + "\\optimizer\\smac\\smac ");
 			cmd.add("--run-obj");
 			cmd.add("QUALITY");
 			cmd.add("--use-instances");
@@ -242,34 +241,6 @@ public class SMACOptimizer extends Optimizer {
 		scanner.close();
 	}
 
-	private void putFinalParam(HashMap<String, String> target, Parameter parameter, String value) {
-
-		if (parameter.getDefaultDomain() instanceof NumericParameterDomain) {
-			if (((NumericParameterDomain) parameter.getDefaultDomain()).isInteger()) {
-				target.put(parameter.getName(), Integer.toString((int) Double.valueOf(value).doubleValue())); // SMAC
-																												// gives
-																												// all
-																												// numeric
-																												// in
-																												// the
-																												// form
-																												// 1.0
-			} else {
-				target.put(parameter.getName(), value);
-			}
-		}
-
-		// categorical
-		else if (parameter.getDefaultDomain() instanceof CategoricalParameterDomain) {
-			CategoricalParameterDomain c = (CategoricalParameterDomain) parameter.getDefaultDomain();
-			target.put(parameter.getName(), c.getValues()[(int) Double.valueOf(value).doubleValue() - 1]); // SMAC is
-																											// weird
-		} else {
-			target.put(parameter.getName(), value);
-		}
-
-	}
-
 	private void generatePyWrapper() {
 		// generate py-wrapper file
 		PrintStream pyWrapperStream = null;
@@ -424,45 +395,6 @@ public class SMACOptimizer extends Optimizer {
 		return "str(" + input + ")";
 	}
 
-	public static void main(String[] args) {
-
-		ComponentLoader cl_p = new ComponentLoader();
-		ComponentLoader cl_c = new ComponentLoader();
-
-		try {
-			Util.loadClassifierComponents(cl_c, "F:\\Data\\Uni\\PG\\DefaultEvalEnvironment");
-			Util.loadPreprocessorComponents(cl_p, "F:\\Data\\Uni\\PG\\DefaultEvalEnvironment");
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
-		Component searcher = null;
-		Component evaluator = null;
-		Component classifier = null;
-
-		for (Component c : cl_p.getComponents()) {
-			if (c.getName().equals("weka.attributeSelection.Ranker")) {
-				searcher = c;
-			}
-		}
-
-		for (Component c : cl_p.getComponents()) {
-			if (c.getName().equals("weka.attributeSelection.InfoGainAttributeEval")) {
-				evaluator = c;
-			}
-		}
-
-		for (Component c : cl_c.getComponents()) {
-			if (c.getName().equals("weka.classifiers.functions.Logistic")) {
-				classifier = c;
-			}
-		}
-
-		SMACOptimizer o = new SMACOptimizer(searcher, evaluator, classifier, "breast-cancer",
-				new File("F:\\Data\\Uni\\PG\\DefaultEvalEnvironment"),
-				new File("F:\\Data\\Uni\\PG\\DefaultEvalEnvironment\\datasets"), 0, 1200, 10);
-		o.optimize();
-
-	}
 
 	private String getInitialValue(ParameterDomain pd) {
 		if (pd instanceof NumericParameterDomain) {

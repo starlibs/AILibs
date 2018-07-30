@@ -10,7 +10,7 @@ import jaicore.experiments.IExperimentSetConfig;
 
 /**
  * 
- * @author fmohr
+ * @author jnowack
  *
  */
 @Sources({ "file:../../../setup.properties" })
