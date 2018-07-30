@@ -7,6 +7,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.lang.ProcessBuilder.Redirect;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Scanner;
@@ -29,6 +31,7 @@ import hasco.model.NumericParameterDomain;
 import hasco.model.Parameter;
 import hasco.model.ParameterDomain;
 import hasco.serialization.ComponentLoader;
+import jaicore.processes.ProcessUtil;
 import scala.annotation.elidable;
 
 public class HyperbandOptimizer extends Optimizer{
@@ -50,29 +53,47 @@ public class HyperbandOptimizer extends Optimizer{
 		try {
 			Runtime rt = Runtime.getRuntime();
 			
-			String command = String.format("python -u %s/optimizer/hyperband/main_%s.py", environment.getAbsolutePath(), buildFileName());
+			ArrayList<String> cmd = new ArrayList<>();
+			cmd.add("python");
+			cmd.add("-u");
+			cmd.add(String.format("%s/optimizer/hyperband/main_%s.py", environment.getAbsolutePath(), buildFileName()));
 			
-			final Process proc = rt.exec(command);
 			
+			ProcessBuilder pb = new ProcessBuilder(cmd);
+			pb.directory(environment.getAbsoluteFile());
+			pb.redirectErrorStream(true);
+			pb.redirectOutput(Redirect.PIPE);
+			final Process proc = pb.start();
 			
 			InputStream i = proc.getInputStream();
 			
 			new Thread(new Runnable() {
-				
 				@Override
 				public void run() {
-					int r = 0;
-					try {
-						while ((r = proc.getErrorStream().read()) != -1) {
-							System.err.write(r);
+					long start_time = System.currentTimeMillis();
+					
+					while (System.currentTimeMillis() - start_time < maxRuntime*1000) {
+						try {
+							Thread.sleep(100);
+						} catch (InterruptedException e) {
+							// TODO 
+							e.printStackTrace();
 						}
+					}
+					
+					int id = ProcessUtil.getPID(proc);
+					try {
+						ProcessUtil.killProcess(id);
 					} catch (IOException e) {
+						// TODO
 						e.printStackTrace();
 					}
 				}
 			}).start();
 			
 			int r = 0;
+			
+			
 			while ((r = i.read()) != -1) {
 				System.out.write(r);
 			}
@@ -245,7 +266,7 @@ public class HyperbandOptimizer extends Optimizer{
 			}
 		}
 		
-		HyperbandOptimizer o = new HyperbandOptimizer(searcher, evaluator, classifier, "breast-cancer", new File("F:\\Data\\Uni\\PG\\DefaultEvalEnvironment"),new File("F:\\Data\\Uni\\PG\\DefaultEvalEnvironment\\datasets"), 0, 5, 1200);
+		HyperbandOptimizer o = new HyperbandOptimizer(searcher, evaluator, classifier, "breast-cancer", new File("F:\\Data\\Uni\\PG\\DefaultEvalEnvironment"),new File("F:\\Data\\Uni\\PG\\DefaultEvalEnvironment\\datasets"), 0, 200, 10);
 		o.optimize();
 	}
 	

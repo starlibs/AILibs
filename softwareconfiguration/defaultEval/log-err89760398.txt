@@ -1,0 +1,26 @@
+03:04:29.231 [main] ERROR c.u.c.b.smac.executors.SMACExecutor - Message: For input string: "900--numberOfRunsLimit"
+03:04:29.232 [main] ERROR c.u.c.b.smac.executors.SMACExecutor - Exception:java.lang.NumberFormatException
+03:04:29.233 [main] ERROR c.u.c.b.smac.executors.SMACExecutor - StackTrace:java.lang.NumberFormatException: For input string: "900--numberOfRunsLimit"
+	at java.lang.NumberFormatException.forInputString(Unknown Source)
+	at java.lang.Integer.parseInt(Unknown Source)
+	at java.lang.Integer.parseInt(Unknown Source)
+	at ca.ubc.cs.beta.aeatk.misc.jcommander.validator.FixedPositiveInteger.validate(FixedPositiveInteger.java:12)
+	at com.beust.jcommander.ParameterDescription.validateParameter(ParameterDescription.java:300)
+	at com.beust.jcommander.ParameterDescription.validateParameter(ParameterDescription.java:269)
+	at com.beust.jcommander.ParameterDescription.addValue(ParameterDescription.java:238)
+	at com.beust.jcommander.ParameterDescription.addValue(ParameterDescription.java:210)
+	at com.beust.jcommander.JCommander.processFixedArity(JCommander.java:1164)
+	at com.beust.jcommander.JCommander.processFixedArity(JCommander.java:1141)
+	at com.beust.jcommander.JCommander.parseValues(JCommander.java:911)
+	at com.beust.jcommander.JCommander.parseValues(JCommander.java:862)
+	at com.beust.jcommander.JCommander.parse(JCommander.java:453)
+	at com.beust.jcommander.JCommander.parse(JCommander.java:435)
+	at ca.ubc.cs.beta.smac.executors.SMACExecutor.parseCLIOptions(SMACExecutor.java:443)
+	at ca.ubc.cs.beta.smac.executors.SMACExecutor.oldMain(SMACExecutor.java:128)
+	at ca.ubc.cs.beta.smac.executors.SMACExecutor.main(SMACExecutor.java:104)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(Unknown Source)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(Unknown Source)
+	at java.lang.reflect.Method.invoke(Unknown Source)
+	at ca.ubc.cs.beta.aeatk.ant.execscript.Launcher.main(Launcher.java:37)
+

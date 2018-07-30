@@ -34,9 +34,9 @@ public class PreprocessorListHelper {
 				DataSource ds;
 				Instances instances = null;
 				try {
-					ds = new DataSource("F:\\Data\\Uni\\PG\\DefaultEvalEnvironment\\datasets\\breast-cancer.arff");	
+					ds = new DataSource("F:\\Data\\Uni\\PG\\DefaultEvalEnvironment\\datasets\\breast-cancer.arff"); // use your own
 					instances = new Instances(ds.getDataSet());
-					instances.setClassIndex(instances.numAttributes()-1); // last one as class
+					instances.setClassIndex(instances.numAttributes()-1);
 				} catch (Exception e) {
 					e.printStackTrace(System.out);
 				}

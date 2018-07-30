@@ -8,6 +8,8 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.lang.ProcessBuilder.Redirect;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -27,6 +29,7 @@ import hasco.model.NumericParameterDomain;
 import hasco.model.Parameter;
 import hasco.model.ParameterDomain;
 import hasco.serialization.ComponentLoader;
+import jaicore.processes.ProcessUtil;
 import scala.annotation.elidable;
 
 public class SMACOptimizer extends Optimizer{
@@ -45,47 +48,57 @@ public class SMACOptimizer extends Optimizer{
 		
 		// start SMAC
 		try {
-			Runtime rt = Runtime.getRuntime();
 			
+			ArrayList<String> cmd = new ArrayList<>();
+			cmd.add(environment.getAbsolutePath() + "\\optimizer\\smac\\smac.bat ");
+			cmd.add("--run-obj");
+			cmd.add("QUALITY");
+			cmd.add("--use-instances");
+			cmd.add("false");
+			cmd.add("--wallclock_limit");
+			cmd.add("" + maxRuntimeParam);
+			cmd.add("--numberOfRunsLimit");
+			cmd.add("100");
+			cmd.add("--seed");
+			cmd.add("" + seed);
+			cmd.add("--pcs-file");
+			cmd.add(environment.getAbsolutePath()+"/pcs/"+buildFileName()+".pcs ");
+			cmd.add("--output-dir");
+			cmd.add(environment.getAbsolutePath() + "/smac-output/"+buildFileName()+" ");
+			cmd.add("--algo");
+			cmd.add("\"python "+environment.getAbsolutePath()+"/py_wrapper/"+buildFileName()+".py\"");
 			
-			System.out.println(environment.getAbsolutePath() + "/optimizer/smac/smac.bat "+
-									"--run-obj QUALITY " + 
-									"--use-instances false "+
-									"--wallclock_limit " + maxRuntimeParam +
-							"--numberOfRunsLimit 100 "+
-							"--seed " + seed + " "+
-							"--pcs-file "+environment.getAbsolutePath()+"/pcs/"+buildFileName()+".pcs "+
-							"--output-dir " +environment.getAbsolutePath() + "/smac-output/"+buildFileName()+" " +
-							"--algo \"python "+environment.getAbsolutePath()+"/py_wrapper/"+buildFileName()+".py\"\" "
-					);
-			
-			Process proc = rt.exec(
-							environment.getAbsolutePath() + "/optimizer/smac/smac.bat "+
-									"--run-obj QUALITY " + 
-									"--use-instances false "+
-									"--wallclock_limit " + maxRuntimeParam +
-							"--numberOfRunsLimit 100 "+
-							"--seed " + seed + " "+
-							"--pcs-file "+environment.getAbsolutePath()+"/pcs/"+buildFileName()+".pcs "+
-							"--output-dir " +environment.getAbsolutePath() + "/smac-output/"+buildFileName()+" " +
-							"--algo \"python "+environment.getAbsolutePath()+"/py_wrapper/"+buildFileName()+".py\"\" "
-							);
+			ProcessBuilder pb = new ProcessBuilder(cmd);
+			pb.directory(environment.getAbsoluteFile());
+			pb.redirectErrorStream(true);
+			pb.redirectOutput(Redirect.PIPE);
+			Process proc = pb.start();
 			
 			
 			new Thread(new Runnable() {
-				
 				@Override
 				public void run() {
-					int r = 0;
-					try {
-						while ((r = proc.getErrorStream().read()) != -1) {
-							System.err.write(r);
+					long start_time = System.currentTimeMillis();
+					
+					while (System.currentTimeMillis() - start_time < maxRuntime*1000) {
+						try {
+							Thread.sleep(100);
+						} catch (InterruptedException e) {
+							// TODO 
+							e.printStackTrace();
 						}
+					}
+					System.err.println("Timeout reached, kill process...");
+					int id = ProcessUtil.getPID(proc);
+					try {
+						ProcessUtil.killProcess(id);
 					} catch (IOException e) {
+						// TODO
 						e.printStackTrace();
 					}
 				}
 			}).start();
+			
 			
 			InputStream i = proc.getInputStream();
 			int r = 0;
@@ -367,7 +380,7 @@ public class SMACOptimizer extends Optimizer{
 			}
 		}
 		
-		SMACOptimizer o = new SMACOptimizer(searcher, evaluator, classifier, "breast-cancer", new File("F:\\Data\\Uni\\PG\\DefaultEvalEnvironment"),new File("F:\\Data\\Uni\\PG\\DefaultEvalEnvironment\\datasets"), 0, 900, 1200);
+		SMACOptimizer o = new SMACOptimizer(searcher, evaluator, classifier, "breast-cancer", new File("F:\\Data\\Uni\\PG\\DefaultEvalEnvironment"),new File("F:\\Data\\Uni\\PG\\DefaultEvalEnvironment\\datasets"), 0, 1200, 10);
 		o.optimize();
 		
 		

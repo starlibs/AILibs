@@ -1,0 +1,39 @@
+03:04:29.220 [main] INFO  c.u.c.b.a.l.ComplexLoggingOptions - Logging to: F:\Data\Uni\PG\AILibs\softwareconfiguration\defaultEval\log-run89760398.txt
+03:04:29.230 [main] INFO  c.u.c.b.a.m.version.VersionTracker - Version of Algorithm Execution & Abstraction Toolkit is v2.10.03-master-814 (ebf4c8c913d5) 
+03:04:29.230 [main] INFO  c.u.c.b.a.m.version.VersionTracker - Version of Java Runtime Environment is Java HotSpot(TM) 64-Bit Server VM (1.8.0_152) 
+03:04:29.230 [main] INFO  c.u.c.b.a.m.version.VersionTracker - Version of OS is Windows 10 10.0 (amd64) 
+03:04:29.230 [main] INFO  c.u.c.b.a.m.version.VersionTracker - Version of Random Forest Library is v1.10.01-master-120 (b68439c2c391) 
+03:04:29.230 [main] INFO  c.u.c.b.a.m.version.VersionTracker - Version of SMAC is v2.10.03-master-778 (3ee628ef9bf2) 
+03:04:29.231 [main] ERROR c.u.c.b.smac.executors.SMACExecutor - Message: For input string: "900--numberOfRunsLimit"
+03:04:29.232 [main] INFO  c.u.c.b.smac.executors.SMACExecutor - Maybe try running in DEBUG mode if you are missing information
+03:04:29.232 [main] ERROR c.u.c.b.smac.executors.SMACExecutor - Exception:java.lang.NumberFormatException
+03:04:29.233 [main] ERROR c.u.c.b.smac.executors.SMACExecutor - StackTrace:java.lang.NumberFormatException: For input string: "900--numberOfRunsLimit"
+	at java.lang.NumberFormatException.forInputString(Unknown Source)
+	at java.lang.Integer.parseInt(Unknown Source)
+	at java.lang.Integer.parseInt(Unknown Source)
+	at ca.ubc.cs.beta.aeatk.misc.jcommander.validator.FixedPositiveInteger.validate(FixedPositiveInteger.java:12)
+	at com.beust.jcommander.ParameterDescription.validateParameter(ParameterDescription.java:300)
+	at com.beust.jcommander.ParameterDescription.validateParameter(ParameterDescription.java:269)
+	at com.beust.jcommander.ParameterDescription.addValue(ParameterDescription.java:238)
+	at com.beust.jcommander.ParameterDescription.addValue(ParameterDescription.java:210)
+	at com.beust.jcommander.JCommander.processFixedArity(JCommander.java:1164)
+	at com.beust.jcommander.JCommander.processFixedArity(JCommander.java:1141)
+	at com.beust.jcommander.JCommander.parseValues(JCommander.java:911)
+	at com.beust.jcommander.JCommander.parseValues(JCommander.java:862)
+	at com.beust.jcommander.JCommander.parse(JCommander.java:453)
+	at com.beust.jcommander.JCommander.parse(JCommander.java:435)
+	at ca.ubc.cs.beta.smac.executors.SMACExecutor.parseCLIOptions(SMACExecutor.java:443)
+	at ca.ubc.cs.beta.smac.executors.SMACExecutor.oldMain(SMACExecutor.java:128)
+	at ca.ubc.cs.beta.smac.executors.SMACExecutor.main(SMACExecutor.java:104)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(Unknown Source)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(Unknown Source)
+	at java.lang.reflect.Method.invoke(Unknown Source)
+	at ca.ubc.cs.beta.aeatk.ant.execscript.Launcher.main(Launcher.java:37)
+
+03:04:29.234 [main] INFO  c.u.c.b.smac.executors.SMACExecutor - Exiting SMAC with failure. Log: F:\Data\Uni\PG\AILibs\softwareconfiguration\defaultEval\log-run89760398.txt
+03:04:29.234 [main] INFO  c.u.c.b.smac.executors.SMACExecutor - For a list of available commands use:  --help
+03:04:29.234 [main] INFO  c.u.c.b.smac.executors.SMACExecutor - The Quickstart guide at available at: http://www.cs.ubc.ca/labs/beta/Projects/SMAC/ or alternatively (doc/quickstart.html) gives simple examples for getting up and running.
+03:04:29.234 [main] INFO  c.u.c.b.smac.executors.SMACExecutor - The FAQ (doc/faq.pdf) contains commonly asked questions regarding troubleshooting, and usage.
+03:04:29.234 [main] INFO  c.u.c.b.smac.executors.SMACExecutor - The Manual (doc/manual.pdf) contains detailed information on file format semantics.
+03:04:29.234 [main] INFO  c.u.c.b.smac.executors.SMACExecutor - If you are stuck, please ask a question in the SMAC forum: https://groups.google.com/forum/#!forum/smac-forum
