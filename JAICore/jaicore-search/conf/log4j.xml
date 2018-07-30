@@ -55,15 +55,6 @@
 		<appender-ref ref="traceFileAppender" />
 	</logger>
 	
-	<logger name="jaicore.concurrent">
-		<level value="info" />
-	</logger>
-
-	<logger name="outer">
-		<level value="warn" />
-		<appender-ref ref="console" />
-	</logger>
-	
 	<logger name="jaicore.search.algorithms.standard.mcts">
 		<level value="warn" />
 	</logger>
