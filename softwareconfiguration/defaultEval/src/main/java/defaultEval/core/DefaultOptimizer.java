@@ -27,18 +27,16 @@ public class DefaultOptimizer extends Optimizer{
 		if(searcher != null) {
 			// add parameter
 			for (Parameter p : searcher.getParameters()) {
-				searcherParameter.put(p.getName(), p.getDefaultValue().toString());
+				searcherParameter.put(p.getName(), correctParameterSyntax( p.getDefaultValue().toString(), p.getDefaultDomain()));
 			}
 		}
 		finalSearcher = new ComponentInstance(searcher, searcherParameter, new HashMap<>());
-		
-		
 		
 		Map<String, String> evaluatorParameter = new HashMap<>();
 		if(evaluator != null) {
 			// add parameter
 			for (Parameter p : evaluator.getParameters()) {
-				evaluatorParameter.put(p.getName(), p.getDefaultValue().toString());
+				evaluatorParameter.put(p.getName(), correctParameterSyntax( p.getDefaultValue().toString(), p.getDefaultDomain()));
 			}
 		}
 		finalEvaluator = new ComponentInstance(evaluator, evaluatorParameter, new HashMap<>());
@@ -47,7 +45,7 @@ public class DefaultOptimizer extends Optimizer{
 		if(classifier != null) {
 			// add parameter
 			for (Parameter p : classifier.getParameters()) {
-				classifierParameter.put(p.getName(), p.getDefaultValue().toString());
+				classifierParameter.put(p.getName(), correctParameterSyntax( p.getDefaultValue().toString(), p.getDefaultDomain()));
 			}
 		}
 		finalClassifier = new ComponentInstance(classifier, classifierParameter, new HashMap<>());

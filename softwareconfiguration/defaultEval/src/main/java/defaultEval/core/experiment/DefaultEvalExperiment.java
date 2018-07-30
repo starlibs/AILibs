@@ -74,12 +74,16 @@ public class DefaultEvalExperiment {
 				Map<String, Object> results = new HashMap<>();
 				Optimizer optimizer = null;
 				
-				String searcherName = preprocessorName.split(";")[0];
-				String evaluatorName = preprocessorName.split(";")[1];
+				String searcherName = (preprocessorName.equals("null")) ? "null" : preprocessorName.split(";")[0];
+				String evaluatorName = (preprocessorName.equals("null")) ? "null" : preprocessorName.split(";")[1];
 				
 				Component classifier = classifierComponents.getComponents().stream().filter(e -> e.getName().equals(classifierName)).findAny().get();
-				Component searcher = preProcessorComponents.getComponents().stream().filter(e -> e.getName().equals(searcherName)).findAny().get();
-				Component evaluator = preProcessorComponents.getComponents().stream().filter(e -> e.getName().equals(evaluatorName)).findAny().get();
+				Component searcher = null;
+				Component evaluator = null;
+				if(!preprocessorName.equals("null")) {
+					searcher = preProcessorComponents.getComponents().stream().filter(e -> e.getName().equals(searcherName)).findAny().get();
+					evaluator = preProcessorComponents.getComponents().stream().filter(e -> e.getName().equals(evaluatorName)).findAny().get();	
+				}
 				
 				switch (optimizerName) {
 				case "SMAC":

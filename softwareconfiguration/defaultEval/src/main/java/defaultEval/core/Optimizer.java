@@ -8,7 +8,9 @@ import org.apache.commons.math3.util.Pair;
 import defaultEval.core.Util.ParamType;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
+import hasco.model.NumericParameterDomain;
 import hasco.model.Parameter;
+import hasco.model.ParameterDomain;
 
 public abstract class Optimizer {
 
@@ -76,6 +78,21 @@ public abstract class Optimizer {
 		return sb.toString().replaceAll("\\.", "").replaceAll("-", "_");
 	}
 	
+	
+	public int getDoubleStringAsInt(String str) {
+		return (int)Double.valueOf(str).doubleValue();
+	}
+	
+	
+	public String correctParameterSyntax(String input, ParameterDomain pd) {
+		if(pd instanceof NumericParameterDomain) {
+			NumericParameterDomain d = (NumericParameterDomain) pd;
+			if(d.isInteger()) {
+				return Integer.toString(getDoubleStringAsInt(input));
+			}
+		}
+		return input;
+	}
 	
 	protected String getUniqueParamName(Parameter p, ParamType t) {
 		return Util.convertToUniqueParamName(p.getName(), t);
