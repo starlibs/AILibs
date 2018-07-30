@@ -4,9 +4,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -29,8 +32,8 @@ import scala.annotation.elidable;
 public class SMACOptimizer extends Optimizer{
 	
 
-	public SMACOptimizer(Component searcher, Component evaluator, Component classifier, String dataSet, File environment, File dataSetFolder, int seed) {
-		super(searcher, evaluator, classifier, dataSet, environment, dataSetFolder, seed);
+	public SMACOptimizer(Component searcher, Component evaluator, Component classifier, String dataSet, File environment, File dataSetFolder, int seed, int maxRuntimeParam, int maxRuntime) {
+		super(searcher, evaluator, classifier, dataSet, environment, dataSetFolder, seed, maxRuntimeParam, maxRuntime);
 	}
 
 	@Override
@@ -48,7 +51,8 @@ public class SMACOptimizer extends Optimizer{
 			System.out.println(environment.getAbsolutePath() + "/optimizer/smac/smac.bat "+
 									"--run-obj QUALITY " + 
 									"--use-instances false "+
-							"--numberOfRunsLimit 10 "+
+									"--wallclock_limit " + maxRuntimeParam +
+							"--numberOfRunsLimit 100 "+
 							"--seed " + seed + " "+
 							"--pcs-file "+environment.getAbsolutePath()+"/pcs/"+buildFileName()+".pcs "+
 							"--output-dir " +environment.getAbsolutePath() + "/smac-output/"+buildFileName()+" " +
@@ -59,7 +63,8 @@ public class SMACOptimizer extends Optimizer{
 							environment.getAbsolutePath() + "/optimizer/smac/smac.bat "+
 									"--run-obj QUALITY " + 
 									"--use-instances false "+
-							"--numberOfRunsLimit 10 "+
+									"--wallclock_limit " + maxRuntimeParam +
+							"--numberOfRunsLimit 100 "+
 							"--seed " + seed + " "+
 							"--pcs-file "+environment.getAbsolutePath()+"/pcs/"+buildFileName()+".pcs "+
 							"--output-dir " +environment.getAbsolutePath() + "/smac-output/"+buildFileName()+" " +
@@ -104,8 +109,36 @@ public class SMACOptimizer extends Optimizer{
 
 	private void createFinalInstances() throws IOException, FileNotFoundException {
 		// read outputs
-		File outputRunsAndResults = new File(environment.getAbsolutePath() + "/smac-output/"+buildFileName() + "/NoScenarioFile/state-run" + seed + "/runs_and_results-it1.csv");
-		File outputUniqConfigurations = new File(environment.getAbsolutePath() + "/smac-output/"+buildFileName() + "/NoScenarioFile/state-run" + seed + "/uniq_configurations-it1.csv");
+		File dir = new File(environment.getAbsolutePath() + "/smac-output/"+buildFileName() + "/NoScenarioFile/state-run" + seed);
+		File [] outputRunsAndResultFiles = dir.listFiles(new FilenameFilter() {
+		    @Override
+		    public boolean accept(File dir, String name) {
+		    	return name.startsWith("runs_and_results");
+		    }
+		});
+		
+		File [] outputUniqConfigurationFiles = dir.listFiles(new FilenameFilter() {
+		    @Override
+		    public boolean accept(File dir, String name) {
+		        return name.startsWith("uniq_configurations");
+		    }
+		});
+
+		Arrays.sort(outputRunsAndResultFiles, new Comparator<File>() {
+			@Override
+			public int compare(File arg0, File arg1) {
+				return -arg0.getName().compareToIgnoreCase(arg1.getName());
+			}
+		});
+		Arrays.sort(outputUniqConfigurationFiles, new Comparator<File>() {
+			@Override
+			public int compare(File arg0, File arg1) {
+				return -arg0.getName().compareToIgnoreCase(arg1.getName());
+			}
+		});
+		
+		File outputRunsAndResults = outputRunsAndResultFiles[0];
+		File outputUniqConfigurations = outputUniqConfigurationFiles[0];
 		
 		CSVParser parserRunsAndResults = new CSVParser(new FileReader(outputRunsAndResults), CSVFormat.DEFAULT.withHeader());
 		CSVParser parserUniqConfigurations = new CSVParser(new FileReader(outputUniqConfigurations), CSVFormat.DEFAULT);
@@ -192,6 +225,8 @@ public class SMACOptimizer extends Optimizer{
 		pyWrapperStream.print("call(\"java -jar "+environment.getAbsolutePath()+"/PipelineEvaluator.jar");
 		
 		pyWrapperStream.print(" " + dataSetFolder.getAbsolutePath() + "/" + dataSet + ".arff");
+		
+		pyWrapperStream.print(" " + seed);
 		
 		if(searcher != null) {
 			pyWrapperStream.print(" " + searcher.getName());
@@ -315,13 +350,13 @@ public class SMACOptimizer extends Optimizer{
 		Component classifier = null;
 		
 		for (Component c : cl_p.getComponents()) {
-			if(c.getName().equals("weka.attributeSelection.BestFirst")) {
+			if(c.getName().equals("weka.attributeSelection.Ranker")) {
 				searcher = c;
 			}
 		}
 		
 		for (Component c : cl_p.getComponents()) {
-			if(c.getName().equals("weka.attributeSelection.CorrelationAttributeEval")) {
+			if(c.getName().equals("weka.attributeSelection.InfoGainAttributeEval")) {
 				evaluator = c;
 			}
 		}
@@ -332,7 +367,7 @@ public class SMACOptimizer extends Optimizer{
 			}
 		}
 		
-		SMACOptimizer o = new SMACOptimizer(searcher, evaluator, classifier, "breast-cancer", new File("F:\\Data\\Uni\\PG\\DefaultEvalEnvironment"),new File("F:\\Data\\Uni\\PG\\DefaultEvalEnvironment\\datasets"), 0);
+		SMACOptimizer o = new SMACOptimizer(searcher, evaluator, classifier, "breast-cancer", new File("F:\\Data\\Uni\\PG\\DefaultEvalEnvironment"),new File("F:\\Data\\Uni\\PG\\DefaultEvalEnvironment\\datasets"), 0, 900, 1200);
 		o.optimize();
 		
 		

@@ -29,8 +29,11 @@ public abstract class Optimizer {
 	
 	int seed = 0;
 	
+	protected int maxRuntimeParam;
+	protected int maxRuntime;
 	
-	public Optimizer(Component searcher, Component evaluator, Component classifier, String dataSet, File environment, File dataSetFolder, int seed) {
+	
+	public Optimizer(Component searcher, Component evaluator, Component classifier, String dataSet, File environment, File dataSetFolder, int seed, int maxRuntimeParam, int maxRuntime) {
 		this.searcher = searcher;
 		this.evaluator = evaluator;
 		
@@ -54,6 +57,9 @@ public abstract class Optimizer {
 		this.environment = environment;
 		this.dataSetFolder = dataSetFolder;
 		this.seed = seed;
+		this.maxRuntimeParam = maxRuntimeParam;
+		this.maxRuntime = maxRuntime;
+		
 	}
 
 	public abstract void optimize();

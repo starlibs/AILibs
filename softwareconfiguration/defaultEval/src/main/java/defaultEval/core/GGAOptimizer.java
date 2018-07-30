@@ -22,8 +22,8 @@ import hasco.serialization.ComponentLoader;
 public class GGAOptimizer extends Optimizer {
 
 	public GGAOptimizer(Component searcher, Component evaluator, Component classifier, String dataSet, File environment,
-			File dataSetFolder, int seed) {
-		super(searcher, evaluator, classifier, dataSet, environment, dataSetFolder, seed);
+			File dataSetFolder, int seed, int maxRuntimeParam, int maxRuntime) {
+		super(searcher, evaluator, classifier, dataSet, environment, dataSetFolder, seed, maxRuntimeParam, maxRuntime);
 	}
 
 	@Override
@@ -269,7 +269,7 @@ public class GGAOptimizer extends Optimizer {
 
 		GGAOptimizer o = new GGAOptimizer(searcher, evaluator, classifier, "breast-cancer",
 				new File("F:\\Data\\Uni\\PG\\DefaultEvalEnvironment"),
-				new File("F:\\Data\\Uni\\PG\\DefaultEvalEnvironment\\datasets"), 0);
+				new File("F:\\Data\\Uni\\PG\\DefaultEvalEnvironment\\datasets"), 0, 900, 1200);
 		o.optimize();
 	}
 

@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -26,6 +27,7 @@ import jaicore.experiments.ExperimentRunner;
 import jaicore.experiments.IExperimentIntermediateResultProcessor;
 import jaicore.experiments.IExperimentSetConfig;
 import jaicore.experiments.IExperimentSetEvaluator;
+import jaicore.ml.WekaUtil;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
@@ -61,38 +63,37 @@ public class DefaultEvalExperiment {
 			public void evaluate(ExperimentDBEntry experimentEntry, SQLAdapter adapter,
 					IExperimentIntermediateResultProcessor processor) throws Exception {
 
-				
 				/* get experiment setup */
 				Map<String, String> description = experimentEntry.getExperiment().getValuesOfKeyFields();
 				String classifierName = description.get("classifier");
-				String searcherName = description.get("searcher");
-				String evaluatorName = description.get("evaluator");
+				String preprocessorName = description.get("preprocessor");
 				String optimizerName = description.get("optimizer");
 				String datasetName = description.get("dataset");
 				int seed = Integer.valueOf(description.get("seed"));
 				
-				
 				Map<String, Object> results = new HashMap<>();
 				Optimizer optimizer = null;
 				
-				// TODO fix if wrong input
+				String searcherName = preprocessorName.split(";")[0];
+				String evaluatorName = preprocessorName.split(";")[1];
+				
 				Component classifier = classifierComponents.getComponents().stream().filter(e -> e.getName().equals(classifierName)).findAny().get();
 				Component searcher = preProcessorComponents.getComponents().stream().filter(e -> e.getName().equals(searcherName)).findAny().get();
 				Component evaluator = preProcessorComponents.getComponents().stream().filter(e -> e.getName().equals(evaluatorName)).findAny().get();
 				
 				switch (optimizerName) {
 				case "SMAC":
-					optimizer = new SMACOptimizer(searcher, evaluator, classifier, datasetName, m.getEnvironment(), m.getDatasetFolder(), seed);
+					optimizer = new SMACOptimizer(searcher, evaluator, classifier, datasetName, m.getEnvironment(), m.getDatasetFolder(), seed, m.getMaxRuntimeParam(), m.getMaxRuntime());
 					break;
 					
 				case "Hyperband":
-					optimizer = new HyperbandOptimizer(searcher, evaluator, classifier, datasetName, m.getEnvironment(), m.getDatasetFolder(), seed);
+					optimizer = new HyperbandOptimizer(searcher, evaluator, classifier, datasetName, m.getEnvironment(), m.getDatasetFolder(), seed, m.getMaxRuntimeParam(), m.getMaxRuntime());
 					break;
 				
 				case "DGGA":
 					
 				case "default":
-					optimizer = new DefaultOptimizer(searcher, evaluator, classifier, datasetName, m.getEnvironment(), m.getDatasetFolder(), seed);
+					optimizer = new DefaultOptimizer(searcher, evaluator, classifier, datasetName, m.getEnvironment(), m.getDatasetFolder(), seed, m.getMaxRuntimeParam(), m.getMaxRuntime());
 					break;
 					
 				default:
@@ -102,10 +103,21 @@ public class DefaultEvalExperiment {
 				optimizer.optimize();
 				
 				WEKAPipelineFactory factory = new WEKAPipelineFactory();
-				double pctIncorrect = Util.evaluate(Util.loadInstances(m.getDatasetFolder().getAbsolutePath(), datasetName), factory.getComponentInstantiation(Util.createPipeline(optimizer.getFinalSearcher(), optimizer.getFinalEvaluator(), optimizer.getFinalClassifier())));
+				Classifier wekaClassifier = factory.getComponentInstantiation(Util.createPipeline(optimizer.getFinalSearcher(), optimizer.getFinalEvaluator(), optimizer.getFinalClassifier()));
+				Instances instances = Util.loadInstances(m.getDatasetFolder().getAbsolutePath(), datasetName);
+				
+				List<Instances> instancesList = WekaUtil.getStratifiedSplit(instances, new Random(seed), 0.7, 0.3);
+				
+				Evaluation evaluation = new Evaluation(instancesList.get(0));
+				wekaClassifier.buildClassifier(instancesList.get(0));
+				evaluation.evaluateModel(wekaClassifier, instancesList.get(1));
 				
 				/* report results */
-				results.put("pctIncorrect", pctIncorrect);
+				results.put("pctIncorrect", evaluation.pctIncorrect());
+				results.put("searcher_parameters", optimizer.getFinalSearcher().getParameterValues());
+				results.put("evaluator_parameters", optimizer.getFinalEvaluator().getParameterValues());
+				results.put("classifier_parameters", optimizer.getFinalClassifier().getParameterValues());
+				
 				processor.processResults(results);
 			}
 		});

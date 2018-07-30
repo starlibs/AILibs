@@ -85,13 +85,13 @@ public class Util {
 	 * Method to evaluate the pipelines of defaultEval to be sure the Settings are
 	 * all the same
 	 */
-	public static double evaluate(Instances instances, Classifier classifier) {
+	public static double evaluate(Instances instances, Classifier classifier, int seed) {
 		double pctIncorrect = 0;
 
 		try {
 			Evaluation eval = new Evaluation(instances);
 
-			eval.crossValidateModel(classifier, instances, 10, new Random());
+			eval.crossValidateModel(classifier, instances, 10, new Random(seed));
 
 			pctIncorrect = eval.pctIncorrect();
 

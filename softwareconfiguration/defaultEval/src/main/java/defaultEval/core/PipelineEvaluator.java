@@ -141,11 +141,9 @@ public class PipelineEvaluator {
 			List<Instances> instancesList =  WekaUtil.getStratifiedSplit(instances, new Random(seed), 0.7, 0.3);
 			
 			try {
-				Evaluation eval = new Evaluation(instances);
 				MulticlassEvaluator  multiclassEvaluator = new MulticlassEvaluator(new Random(seed));
-				MonteCarloCrossValidationEvaluator crossValidationEvaluator = new MonteCarloCrossValidationEvaluator(multiclassEvaluator, 10, instancesList.get(0), 0.7f);
-				
-				
+				MonteCarloCrossValidationEvaluator crossValidationEvaluator = new MonteCarloCrossValidationEvaluator(multiclassEvaluator, 5, instancesList.get(0), 0.7f);
+							
 				loss = crossValidationEvaluator.evaluate(mlPipeline);
 				
 			} catch (Exception e) {

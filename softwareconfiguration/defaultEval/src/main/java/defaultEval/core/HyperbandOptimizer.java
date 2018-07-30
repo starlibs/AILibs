@@ -34,8 +34,8 @@ import scala.annotation.elidable;
 public class HyperbandOptimizer extends Optimizer{
 	
 
-	public HyperbandOptimizer(Component searcher, Component evaluator, Component classifier, String dataSet, File environment, File dataSetFolder, int seed) {
-		super(searcher, evaluator, classifier, dataSet, environment, dataSetFolder, seed);
+	public HyperbandOptimizer(Component searcher, Component evaluator, Component classifier, String dataSet, File environment, File dataSetFolder, int seed, int maxRuntimeParam, int maxRuntime) {
+		super(searcher, evaluator, classifier, dataSet, environment, dataSetFolder, seed, maxRuntimeParam, maxRuntime);
 	}
 
 	@Override
@@ -53,7 +53,6 @@ public class HyperbandOptimizer extends Optimizer{
 			String command = String.format("python -u %s/optimizer/hyperband/main_%s.py", environment.getAbsolutePath(), buildFileName());
 			
 			final Process proc = rt.exec(command);
-			
 			
 			
 			InputStream i = proc.getInputStream();
@@ -87,8 +86,6 @@ public class HyperbandOptimizer extends Optimizer{
 			e.printStackTrace();
 		}
 
-		
-		
 		System.out.println("final-searcher: " + finalSearcher);
 		System.out.println("final-evaluator: " + finalEvaluator);
 		System.out.println("final-classifier: " + finalClassifier);
@@ -163,9 +160,10 @@ public class HyperbandOptimizer extends Optimizer{
 		
 		
 		pyWrapperStream.println("def try_params( n_iterations, params ):");
-		pyWrapperStream.println(String.format("\tcall(\"java -jar %s/PipelineEvaluator.jar %s %s %s %s %s %s %s %s\")",
+		pyWrapperStream.println(String.format("\tcall(\"java -jar %s/PipelineEvaluator.jar %s %d %s %s %s %s %s %s %s\")",
 				environment.getAbsolutePath(),
 				dataSetFolder.getAbsolutePath() + "/" + dataSet + ".arff",
+				seed,
 				(searcher != null) ? searcher.getName() : "null",
 				(searcher != null) ? generateParamList(searcher, ParamType.searcher) : "",
 				(searcher != null) ? evaluator.getName() : "",
@@ -198,11 +196,7 @@ public class HyperbandOptimizer extends Optimizer{
 		pyWrapperStream.println(String.format("from generated.wrapper_%s import get_params, try_params", buildFileName()));
 		
 		pyWrapperStream.println("hb = Hyperband( get_params, try_params )");
-		pyWrapperStream.println("results = hb.run()");
-		
-		pyWrapperStream.println("f = open( \""+ environment.getAbsolutePath() + "/hyperband-output/" + buildFileName() +".json\", 'wb' )");
-		pyWrapperStream.println("f.write(json.dumps(results))");
-		pyWrapperStream.println("f.close()");
+		pyWrapperStream.println(String.format("results = hb.run(output_path=\"%s\", timeout=%d)", environment.getAbsolutePath() + "/hyperband-output/" + buildFileName() + ".json", maxRuntimeParam));
 		
 		pyWrapperStream.close();
 	}
@@ -251,7 +245,7 @@ public class HyperbandOptimizer extends Optimizer{
 			}
 		}
 		
-		HyperbandOptimizer o = new HyperbandOptimizer(searcher, evaluator, classifier, "breast-cancer", new File("F:\\Data\\Uni\\PG\\DefaultEvalEnvironment"),new File("F:\\Data\\Uni\\PG\\DefaultEvalEnvironment\\datasets"), 0);
+		HyperbandOptimizer o = new HyperbandOptimizer(searcher, evaluator, classifier, "breast-cancer", new File("F:\\Data\\Uni\\PG\\DefaultEvalEnvironment"),new File("F:\\Data\\Uni\\PG\\DefaultEvalEnvironment\\datasets"), 0, 5, 1200);
 		o.optimize();
 	}
 	
