@@ -35,6 +35,10 @@ import jaicore.graphvisualizer.events.NodeRemovedEvent;
 import jaicore.graphvisualizer.events.NodeTypeSwitchEvent;
 import jaicore.logging.LoggerUtil;
 import jaicore.search.algorithms.interfaces.IObservableORGraphSearch;
+import jaicore.search.algorithms.standard.core.events.NodeAnnotationEvent;
+import jaicore.search.algorithms.standard.core.events.SolutionAnnotationEvent;
+import jaicore.search.algorithms.standard.core.events.SolutionFoundEvent;
+import jaicore.search.algorithms.standard.core.events.SuccessorComputationCompletedEvent;
 import jaicore.search.structure.core.GraphEventBus;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
@@ -397,6 +401,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 		}
 		if (!solutions.isEmpty()) {
 			logger.debug("Still have solution in cache, return it.");
+			logger.info("Returning solution {} with score {}", solutions.peek(), getAnnotationsOfReturnedSolution(solutions.peek()));
 			return solutions.poll();
 		}
 		do {
@@ -422,6 +427,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 			if (!solutions.isEmpty()) {
 				List<T> solution = solutions.poll();
 				logger.debug("Iteration of main loop terminated. Found a solution to return. Size of OPEN now {}", open.size());
+				logger.info("Returning solution {} with score {}", solution, getAnnotationsOfReturnedSolution(solution));
 				return solution;
 			}
 			logger.debug("Iteration of main loop terminated. Size of OPEN now {}. Number of active jobs: {}", open.size(), activeJobs.get());
@@ -506,7 +512,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 
 		/* compute successors */
 		logger.debug("Start computation of successors");
-		final Collection<NodeExpansionDescription<T, A>> successorDescriptions = new ArrayList<>();
+		final List<NodeExpansionDescription<T, A>> successorDescriptions = new ArrayList<>();
 		{
 			Thread t = new Thread(new Runnable() {
 
@@ -537,6 +543,10 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 			}
 			logger.debug("Finished computation of successors");
 		}
+		
+		/* send event that successor nodes have been computed */
+		logger.debug("Sending SuccessorComputationCompletedEvent with {} successors for {}", successorDescriptions.size(), expandedNodeInternal);
+		graphEventBus.post(new SuccessorComputationCompletedEvent<>(expandedNodeInternal, successorDescriptions));
 		
 		/* attach successors to search graph */
 //		System.out.println(expanded.contains(expandedNodeInternal.getPoint()));
