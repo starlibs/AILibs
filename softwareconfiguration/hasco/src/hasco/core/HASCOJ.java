@@ -20,7 +20,8 @@ import hasco.core.HASCOFDJ.TFDSearchSpaceUtilFactory;
 import hasco.events.HASCORunStartedEvent;
 import hasco.events.HASCORunTerminatedEvent;
 import hasco.events.HASCOSolutionEvaluationEvent;
-import hasco.knowledgebase.ParameterImportanceEstimator;
+import hasco.knowledgebase.IParameterImportanceEstimator;
+import hasco.knowledgebase.FANOVAParameterImportanceEstimator;
 import hasco.knowledgebase.PerformanceKnowledgeBase;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
@@ -125,7 +126,7 @@ public class HASCOJ<T, N, A, V extends Comparable<V>, R extends IPlanningSolutio
 	private final PerformanceKnowledgeBase performanceKB;
 
 	/* parameter importance estimator */
-	private final ParameterImportanceEstimator parameterImportanceEstimator;
+	private final IParameterImportanceEstimator parameterImportanceEstimator;
 
 	/* threshold below which parameters are estimated to be unimportant */
 	private final double importanceThreshold;
@@ -165,7 +166,7 @@ public class HASCOJ<T, N, A, V extends Comparable<V>, R extends IPlanningSolutio
 		this.plannerFactory = plannerFactory;
 		this.searchFactory = searchFactory;
 		this.performanceKB = new PerformanceKnowledgeBase();
-		this.parameterImportanceEstimator = new ParameterImportanceEstimator(performanceKB, benchmarkName);
+		this.parameterImportanceEstimator = new FANOVAParameterImportanceEstimator(performanceKB, benchmarkName);
 		this.importanceThreshold = importanceThreshold;
 		this.minNumSamplesForImportanceEstimation = minNumSamplesForImportanceEstimation;
 		this.useParameterImportanceEstimation = useParameterImportanceEstimation;

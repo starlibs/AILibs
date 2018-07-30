@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import hasco.knowledgebase.ParameterImportanceEstimator;
+import hasco.knowledgebase.IParameterImportanceEstimator;
 import hasco.knowledgebase.PerformanceKnowledgeBase;
 import hasco.model.Component;
 import hasco.model.Parameter;
@@ -22,7 +22,7 @@ public class isNotRefinableJ implements EvaluablePredicate {
 
 	public isNotRefinableJ(Collection<Component> components,
 			Map<Component, Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration,
-			PerformanceKnowledgeBase performanceKB, ParameterImportanceEstimator parameterImportanceEstimator,
+			PerformanceKnowledgeBase performanceKB, IParameterImportanceEstimator parameterImportanceEstimator,
 			double importanceThreshold, int minNumSamplesForImportanceEstimation, boolean useImportanceEstimation) {
 		super();
 		this.components = components;

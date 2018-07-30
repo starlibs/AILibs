@@ -11,6 +11,7 @@ import org.openml.apiconnector.xml.DataSetDescription;
 
 import de.upb.crc901.mlplan.multiclass.DefaultPreorder;
 import de.upb.crc901.mlplan.multiclass.MLPlan;
+import de.upb.crc901.mlplan.multiclass.MLPlanJ;
 import jaicore.ml.WekaUtil;
 import weka.classifiers.Evaluation;
 import weka.core.Instances;
@@ -38,7 +39,7 @@ public class MLPlanExample {
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(0), .7f);
 		
 		/* initialize mlplan, and let it run for 30 seconds */
-		MLPlan mlplan = new MLPlan(new File("model/weka/weka-all-autoweka.json"));
+		MLPlanJ mlplan = new MLPlanJ(new File("model/weka/weka-all-autoweka.json"),1.0d,2,false);
 		mlplan.setLoggerName("mlplan");
 		mlplan.setTimeout(60);
 		mlplan.setPortionOfDataForPhase2(.3f);

@@ -19,7 +19,7 @@ import java.util.Stack;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.math3.geometry.euclidean.oned.Interval;
 
-import hasco.knowledgebase.ParameterImportanceEstimator;
+import hasco.knowledgebase.IParameterImportanceEstimator;
 import hasco.knowledgebase.PerformanceKnowledgeBase;
 import hasco.model.CategoricalParameterDomain;
 import hasco.model.Component;
@@ -35,7 +35,7 @@ public class isValidParameterRangeRefinementPredicateJ implements EvaluablePredi
 	private final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration;
 	private final Map<ComponentInstance, Double> knownCompositionsAndTheirScore = new HashMap<>();
 	private final PerformanceKnowledgeBase performanceKB;
-	private final ParameterImportanceEstimator parameterImportanceEstimator;
+	private final IParameterImportanceEstimator parameterImportanceEstimator;
 	private final double importanceThreshold;
 	private final int minNumSamplesForImportanceEstimation;
 	private final boolean useImportanceEstimation;
@@ -43,10 +43,8 @@ public class isValidParameterRangeRefinementPredicateJ implements EvaluablePredi
 	public isValidParameterRangeRefinementPredicateJ(final Collection<Component> components,
 			final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration,
 			final PerformanceKnowledgeBase performanceKB,
-			final ParameterImportanceEstimator parameterImportanceEstimator,
-			final double importanceThreshold,
-			final int minNumSamplesForImportanceEstimation,
-			final boolean useImportanceEstimation) {
+			final IParameterImportanceEstimator parameterImportanceEstimator, final double importanceThreshold,
+			final int minNumSamplesForImportanceEstimation, final boolean useImportanceEstimation) {
 		super();
 		this.components = components;
 		this.refinementConfiguration = refinementConfiguration;
@@ -91,11 +89,13 @@ public class isValidParameterRangeRefinementPredicateJ implements EvaluablePredi
 		String paramName = component.getName() + "::" + param.getName();
 		if (performanceKB.getNumSamples("test", compositionIdentifier) > this.minNumSamplesForImportanceEstimation) {
 			try {
-				Set<String> importantParams = parameterImportanceEstimator.extractImportantParameters(ci, this.importanceThreshold);
+				// for now, only consider parameter subsets of size at most 2
+				Set<String> importantParams = parameterImportanceEstimator.extractImportantParameters(ci,
+						this.importanceThreshold, 2, false);
 				System.out.println("parameters estimated to be important: ");
-//				for (String parameterIndex : importantParams) {
-//					System.out.println("parameter " + parameterIndex);
-//				}
+				// for (String parameterIndex : importantParams) {
+				// System.out.println("parameter " + parameterIndex);
+				// }
 				if (importantParams.contains(paramName)) {
 					System.out.println("Parameter " + paramName + " is important and will be refined!");
 				} else {
