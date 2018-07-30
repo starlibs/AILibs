@@ -1,7 +1,12 @@
 package jaicore.search.algorithms.standard.rstar;
 
+import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
 import jaicore.search.structure.core.OpenCollection;
+import jaicore.search.structure.graphgenerator.MultipleRootGenerator;
+import jaicore.search.structure.graphgenerator.NodeGoalTester;
+import jaicore.search.structure.graphgenerator.RootGenerator;
+import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,8 +34,8 @@ public class RStar<T, A, D> extends Thread {
     protected final int K;
     protected final D delta;
 
-    private final GammaNode<T, RStarK> n_start;
-    private final GammaNode<T, RStarK> n_goal;
+    private final ArrayList<GammaNode<T, RStarK>> startStates = new ArrayList<>();
+    private GammaNode<T, RStarK> n_goal = null;
 
 
     /**
@@ -50,18 +55,33 @@ public class RStar<T, A, D> extends Thread {
         /**
          * Initialize empty goal node.
          */
-        n_goal = gammaGraphGenerator.getGoal();
-        RStarK k_goal = new RStarK(true, Double.MAX_VALUE);
-        n_goal.setInternalLabel(k_goal);
+        // n_goal = gammaGraphGenerator.getGoal();
+        // RStarK k_goal = new RStarK(true, Double.MAX_VALUE);
+        // n_goal.setInternalLabel(k_goal);
 
         /**
-         * Initialize root node.
+         * Initialize root nodes.
          */
-        n_start = gammaGraphGenerator.getRoot();
-        RStarK k_start = new RStarK(false, w*h(n_start, n_goal));
-        n_start.setInternalLabel(k_start);
-        n_start.g = 0;
+        RootGenerator<GammaNode<T, RStarK>> rootGenerator = gammaGraphGenerator.getRootGenerator();
+        if (rootGenerator instanceof MultipleRootGenerator) {
+            for (GammaNode<T,RStarK> root : ((MultipleRootGenerator<GammaNode<T,RStarK>>) rootGenerator).getRoots()) {
+                RStarK k = new RStarK(false, w*hToGoal(root));
+                root.setInternalLabel(k);
+                root.g = 0;
+                startStates.add(root);
+            }
+        } else if (rootGenerator instanceof SingleRootGenerator) {
+            GammaNode<T,RStarK> root = ((SingleRootGenerator<GammaNode<T,RStarK>>) rootGenerator).getRoot();
+            RStarK k = new RStarK(false, w*hToGoal(root));
+            root.setInternalLabel(k);
+            root.g = 0;
+            startStates.add(root);
+        } else {
+            assert false : "Only MultipleRootGenerator or SingleRootGenerators allowed.";
+        }
     }
+
+
 
     /**
      * Updates a state i.e. node n in the open list.
@@ -81,10 +101,10 @@ public class RStar<T, A, D> extends Thread {
 //        System.out.println(n);
 //        System.out.println("n.g = " + n.g + ", h(n_start, n) = " + h(n_start, n));
 
-        if ((n.g > w*h(n_start, n)) || ((n.backpointer == null || (n.backpointer.path.get(n) == null)) && n.avoid)) {
-            n.setInternalLabel(new RStarK(true, n.g + w*h(n, n_goal)));
+        if ((n.g > w*hFromStart(n)) || ((n.backpointer == null || (n.backpointer.path.get(n) == null)) && n.avoid)) {
+            n.setInternalLabel(new RStarK(true, n.g + w*hToGoal(n)));
         } else {
-            n.setInternalLabel(new RStarK(false, n.g + w*h(n, n_goal)));
+            n.setInternalLabel(new RStarK(false, n.g + w*hToGoal(n)));
         }
         open.add(n);
     }
@@ -111,7 +131,7 @@ public class RStar<T, A, D> extends Thread {
          * the state n should be avoided.
          */
         // Line 8
-        if ((n.backpointer.path.get(n) == null) || (n.backpointer.g + n.backpointer.c_low.get(n) > w*h(n_start, n))) {
+        if ((n.backpointer.path.get(n) == null) || (n.backpointer.g + n.backpointer.c_low.get(n) > w*hFromStart(n))) {
             n.backpointer = argminCostToStateOverPredecessors(n);
             n.avoid = true;
         }
@@ -124,33 +144,33 @@ public class RStar<T, A, D> extends Thread {
         // Line 14 to 16: see constructor.
         // Line 17
 //        System.out.println("Staring RStar");
-        open.add(n_start);
+        for (GammaNode<T,RStarK> n_start : startStates) {
+            open.add(n_start);
+        }
 
         /**
          * Run while the open list is not empty and there exists a node in the open list
-         * with higher priority i.e. less k than k_n_goal = [1, inf].
+         * with higher priority i.e. less k than k_n_goal (if the highest priority is a
+         * goal node, then we return in th next lines).
          */
         // Line 18
-        while (!isInterrupted() && !open.isEmpty() && open.peek().compareTo(n_goal) <= 0) {
+        while (!isInterrupted() && !open.isEmpty()) {
             /**
              * Remove node n with highest priority i.e. smallest k-value from open.
              */
             GammaNode<T, RStarK> n = open.poll(); //eek();
-            //open.remove(n);
-            System.out.println("Rstar: " + n);
 
-            if (n != n_start && n.g == 0 && (Double)n.getAnnotation("f") == 0) {
-                System.out.println("FAILED AT " + n);
-                break;
-            }
-
-            if (closed.contains(n)) {
-                System.out.println("Continue " + n);
-                continue;
+            /**
+             * If node with highest priority is a goal node, we found our goal.
+             */
+            if (isGoalNode(n)) {
+                reevaluateState(n);  // TODO: Figure out why this is necessary.
+                n_goal = n;
+                return;
             }
 
             // Line 20
-            if ((!n.equals(n_start)) && (n.backpointer == null || (n.backpointer.path.get(n) == null))) {
+            if ((!isStartNode(n)) && (n.backpointer == null || (n.backpointer.path.get(n) == null))) {
                 /**
                  * The path that corresponds to the edge bp(s)->s has not been computed yet.
                  * Try to compute it using reevaluateState.
@@ -170,11 +190,6 @@ public class RStar<T, A, D> extends Thread {
 
                 // Line 28
                 for (GammaNode<T, RStarK> n_ : succ_s) {
-
-                    // Ignore n_start
-//                    if (n_ == n_start) {
-//                        continue;
-//                    }
 
                     /**
                      * Initialize successors by setting the path from s to s_ to null,
@@ -219,7 +234,7 @@ public class RStar<T, A, D> extends Thread {
 
         if (n_goal.backpointer != null) {
             GammaNode<T, RStarK> current = n_goal;
-            while (current != n_start) {
+            while (!isStartNode(current)) {
                 cost += current.backpointer.c_low.get(current);
                 current = current.backpointer;
             }
@@ -236,11 +251,11 @@ public class RStar<T, A, D> extends Thread {
 
         List<Node<T, RStarK>> solution = new ArrayList<>();
 
-        if (n_goal.backpointer != null) {
+        if (n_goal != null && n_goal.backpointer != null) {
             GammaNode<T, RStarK> current = n_goal;
-            while (current != n_start) {
-                List<Node<T,RStarK>> pathBpToCurrent = current.backpointer.path.get(current);
-                if (current.backpointer != n_start)
+            while (!isStartNode(current)) {
+                List<Node<T,RStarK>> pathBpToCurrent = current.backpointer.path.get(current); // null because of line
+                if (!isStartNode(current.backpointer))
                 	pathBpToCurrent.remove(0);
                 pathBpToCurrent.addAll(solution);
                 solution = pathBpToCurrent;
@@ -262,11 +277,12 @@ public class RStar<T, A, D> extends Thread {
 
         if (n_goal.backpointer != null) {
             GammaNode<T, RStarK> current = n_goal;
-            while (current != n_start) {
-                solution.add(0, current);
+            solution.add(0, current);
+            // Add the backpointers in front up to the start node.
+            while (!isStartNode(current)) {
+                solution.add(0, current.backpointer);
                 current = current.backpointer;
             }
-            solution.add(0, n_start);
         } else {
             solution = null;
         }
@@ -281,6 +297,27 @@ public class RStar<T, A, D> extends Thread {
      */
     private double h(GammaNode<T, RStarK> from, GammaNode<T, RStarK> to) {
         return gammaGraphGenerator.h(from, to);
+    }
+
+    private double hFromStart(GammaNode<T, RStarK> to) {
+        return gammaGraphGenerator.hFromStart(to);
+    }
+
+    private double hToGoal(GammaNode<T, RStarK> from) {
+        return gammaGraphGenerator.hToGoal(from);
+    }
+
+    private boolean isStartNode(GammaNode<T, RStarK> n) {
+        return startStates.contains(n);
+    }
+
+    private boolean isGoalNode(GammaNode<T, RStarK> n ) {
+        if (gammaGraphGenerator.getGoalTester() instanceof NodeGoalTester) {
+            return ((NodeGoalTester)gammaGraphGenerator.getGoalTester()).isGoal(n.getPoint());
+        } else {
+            assert false : "GoalTester has to be a NodeGoalTester";
+        }
+        return false;
     }
 
     /**
@@ -310,10 +347,15 @@ public class RStar<T, A, D> extends Thread {
      */
     private Collection<GammaNode<T, RStarK>> generateGammaSuccessors(GammaNode<T, RStarK> n) {
         Collection<GammaNode<T, RStarK>> succ = gammaGraphGenerator.generateRandomSuccessors(n, K, delta);
+        ArrayList<GammaNode<T, RStarK>> succWithoutClosed = new ArrayList<>();
+
         for (GammaNode<T, RStarK> s : succ) {
             s.addPredecessor(n);
+            if (!closed.contains(s)) {
+                succWithoutClosed.add(s);
+            }
         }
-        return succ;
+        return succWithoutClosed;
     }
 
 }

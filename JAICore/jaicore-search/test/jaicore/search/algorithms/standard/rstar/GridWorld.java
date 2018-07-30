@@ -57,6 +57,12 @@ public class GridWorld  {
         }
     }
 
+    public GridWorld onAction(String a) {
+
+        int corr_a = Integer.parseInt(a);
+        return onAction(corr_a);
+    }
+
     /**
      * Calculate resulting GridWorld when taking action a.
      * @param a

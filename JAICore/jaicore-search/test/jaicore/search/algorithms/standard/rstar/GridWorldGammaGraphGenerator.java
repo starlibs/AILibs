@@ -34,13 +34,13 @@ public class GridWorldGammaGraphGenerator implements GammaGraphGenerator<GridWor
     }
 
     @Override
-    public GammaNode<GridWorld, RStarK> getRoot() {
-        return nstart;
-    }
-
-    @Override
-    public GammaNode<GridWorld, RStarK> getGoal() {
-        return ngoal;
+    public RootGenerator<GammaNode<GridWorld, RStarK>> getRootGenerator() {
+        return new SingleRootGenerator<GammaNode<GridWorld, RStarK>>() {
+            @Override
+            public GammaNode<GridWorld, RStarK> getRoot() {
+                return nstart;
+            }
+        };
     }
 
     @Override
@@ -105,7 +105,7 @@ public class GridWorldGammaGraphGenerator implements GammaGraphGenerator<GridWor
     @Override
     public PathAndCost computePath(GammaNode<GridWorld, RStarK> start, GammaNode<GridWorld, RStarK> end) {
 
-        SimpleAStarGraphSearch<GridWorld, Integer> astar = new SimpleAStarGraphSearch<GridWorld, Integer>(
+        SimpleAStarGraphSearch<GridWorld, String> astar = new SimpleAStarGraphSearch<GridWorld, String>(
                 new GridWorldBasicGraphGenerator(start.getPoint(), end.getPoint()),
                 (n1, n2)->GridWorld.myGrid[n2.getPoint().getX()][n2.getPoint().getY()],
                 new GridWorldHeuristic(end.getPoint()));
@@ -121,8 +121,23 @@ public class GridWorldGammaGraphGenerator implements GammaGraphGenerator<GridWor
     }
 
     @Override
-    public boolean isGoal(GammaNode<GridWorld, RStarK> n) {
-        return false;
+    public double hFromStart(GammaNode<GridWorld, RStarK> to) {
+        return h(nstart, to);
+    }
+
+    @Override
+    public double hToGoal(GammaNode<GridWorld, RStarK> from) {
+        return h(from, ngoal);
+    }
+
+    @Override
+    public GoalTester<GridWorld> getGoalTester() {
+        return new NodeGoalTester<GridWorld>() {
+            @Override
+            public boolean isGoal(GridWorld node) {
+                return node.equals(ngoal.getPoint());
+            }
+        };
     }
 
 }

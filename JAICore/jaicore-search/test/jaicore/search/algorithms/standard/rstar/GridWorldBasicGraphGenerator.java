@@ -3,6 +3,7 @@ package jaicore.search.algorithms.standard.rstar;
 import java.util.ArrayList;
 import java.util.List;
 
+import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.core.NodeType;
@@ -12,7 +13,7 @@ import jaicore.search.structure.graphgenerator.RootGenerator;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
-public class GridWorldBasicGraphGenerator implements GraphGenerator<GridWorld, Integer> {
+public class GridWorldBasicGraphGenerator implements SerializableGraphGenerator<GridWorld, String> {
 
 	private final int startX, startY, endX, endY;
 
@@ -43,15 +44,15 @@ public class GridWorldBasicGraphGenerator implements GraphGenerator<GridWorld, I
 	}
 
 	@Override
-	public SuccessorGenerator<GridWorld, Integer> getSuccessorGenerator() {
-		return new SuccessorGenerator<GridWorld, Integer>() {
+	public SuccessorGenerator<GridWorld, String> getSuccessorGenerator() {
+		return new SuccessorGenerator<GridWorld, String>() {
 			@Override
-			public List<NodeExpansionDescription<GridWorld, Integer>> generateSuccessors(GridWorld node) {
-				ArrayList<NodeExpansionDescription<GridWorld, Integer>> succ = new ArrayList<>();
-				for (int a = 1; a <= 9; a++) {
-					GridWorld n_ = node.onAction(a);
+			public List<NodeExpansionDescription<GridWorld, String>> generateSuccessors(GridWorld node) {
+				ArrayList<NodeExpansionDescription<GridWorld, String>> succ = new ArrayList<>();
+				for (int a = 4; a <= 9; a++) {
+					GridWorld n_ = node.onAction(Integer.toString(a));
 					if (n_ != null) {
-						succ.add(new NodeExpansionDescription<>(node, n_, a, NodeType.OR));
+						succ.add(new NodeExpansionDescription<>(node, n_, Integer.toString(a), NodeType.OR));
 					}
 				}
 				return succ;

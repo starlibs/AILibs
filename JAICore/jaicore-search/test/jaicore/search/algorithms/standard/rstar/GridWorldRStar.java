@@ -22,7 +22,7 @@ public class GridWorldRStar {
     @BeforeClass
     public static void setUp() {
         ggg = new GridWorldGammaGraphGenerator();
-        root = ggg.getRoot();
+        root = ((SingleRootGenerator<GammaNode<GridWorld, RStarK>>) ggg.getRootGenerator()).getRoot();
     }
     /*
     @Test
@@ -58,7 +58,7 @@ public class GridWorldRStar {
     public void gridWorldRStar() {
 
     	/* compute reference solution */
-    	SimpleAStarGraphSearch<GridWorld, Integer> astar = new SimpleAStarGraphSearch<GridWorld, Integer>(
+    	SimpleAStarGraphSearch<GridWorld, String> astar = new SimpleAStarGraphSearch<GridWorld, String>(
                 new GridWorldBasicGraphGenerator(0, 0, 15, 15),
                 (n1, n2)->GridWorld.myGrid[n2.getPoint().getX()][n2.getPoint().getY()],
                 new GridWorldHeuristic(new GridWorld(15, 15)));

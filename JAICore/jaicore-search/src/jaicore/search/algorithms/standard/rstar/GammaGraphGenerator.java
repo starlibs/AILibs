@@ -2,7 +2,9 @@ package jaicore.search.algorithms.standard.rstar;
 
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
+import jaicore.search.structure.graphgenerator.GoalTester;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
+import jaicore.search.structure.graphgenerator.RootGenerator;
 
 import java.util.Collection;
 import java.util.List;
@@ -17,9 +19,11 @@ import java.util.List;
  */
 public interface GammaGraphGenerator<T, D> {
 
-    public GammaNode<T, RStarK> getRoot();
+    // public GammaNode<T, RStarK> getRoot();
 
-    public GammaNode<T, RStarK> getGoal();
+    // public GammaNode<T, RStarK> getGoal();
+
+    public RootGenerator<GammaNode<T, RStarK>> getRootGenerator();
 
     /**
      * Generates random successors for a gamma node.
@@ -32,7 +36,7 @@ public interface GammaGraphGenerator<T, D> {
      * @param delta Maximal distance of the successors to n
      * @return Generated successors.
      */
-    public Collection<GammaNode<T,RStarK>> generateRandomSuccessors(GammaNode<T,RStarK> n, int K, D delta);
+    public Collection<GammaNode<T,RStarK>> generateRandomSuccessors(GammaNode<T,RStarK> n, int K, D delta) throws IllegalArgumentException;
 
     /**
      * Try to compute local path.
@@ -53,7 +57,21 @@ public interface GammaGraphGenerator<T, D> {
      */
     public double h(GammaNode<T,RStarK> n1, GammaNode<T,RStarK> n2);
 
-    public boolean isGoal(GammaNode<T,RStarK> n);
+    /**
+     * Heurisitc estimation of the cost of path from a start state to a state `to`.
+     * @param to
+     * @return
+     */
+    public double hFromStart(GammaNode<T,RStarK> to);
 
+    /**
+     * Heurisic estimation of the cost of path from a state `from` to a goal state.
+     * @param from
+     * @return
+     */
+    public double hToGoal(GammaNode<T,RStarK> from);
+
+
+    public GoalTester<T> getGoalTester();
 
 }
