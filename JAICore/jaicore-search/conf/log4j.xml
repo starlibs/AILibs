@@ -63,7 +63,7 @@
 		<level value="warn" />
 	</logger>
 	
-	<logger name="de.upb.crc901.taskconfigurator">
+	<logger name="jaicore.search.algorithms.standard.lds">
 		<level value="info" />
 	</logger>
 	
