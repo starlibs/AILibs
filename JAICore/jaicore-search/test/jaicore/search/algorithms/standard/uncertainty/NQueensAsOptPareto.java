@@ -2,11 +2,12 @@ package jaicore.search.algorithms.standard.uncertainty;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
+
+import jaicore.search.algorithms.standard.uncertainty.paretosearch.ParetoNode;
+import jaicore.search.algorithms.standard.uncertainty.paretosearch.CosinusDistanceComparator;
+import jaicore.search.structure.core.Node;
 import org.junit.Test;
 
 import jaicore.search.algorithms.interfaces.IPathUnification;
@@ -107,7 +108,9 @@ public class NQueensAsOptPareto {
 						new BasicUncertaintySource<>()
 				)
 		);
-		search.setOpen(new ParetoSelection<>(true));
+		CosinusDistanceComparator c = new CosinusDistanceComparator(1.0, 1.0);
+		PriorityQueue pareto = new PriorityQueue<ParetoNode<Double, Double>>(c);
+		search.setOpen(new ParetoSelection(pareto));
 
 		int foundCorrectSolutions = 0;
 		int solutions = 0;
