@@ -127,8 +127,8 @@ public class SearchTest {
 		BackwardFeature bf = new BackwardFeature(price);
 		Path path = bf.getPath();
 		// Complete path
-		path.addPathElement(new BackwardRelationship("Orders", "Product","OrderId"), AggregationFunction.MAX);
-		path.addPathElement(new BackwardRelationship("Customer", "Orders","CustomerId"), AggregationFunction.AVG);
+		path.addPathElement(new BackwardRelationship("Orders", "Product", "OrderId"), AggregationFunction.MAX);
+		path.addPathElement(new BackwardRelationship("Customer", "Orders", "CustomerId"), AggregationFunction.AVG);
 
 		DatabaseNode node = new DatabaseNode(Collections.singletonList(bf), false);
 		Collection<NodeExpansionDescription<DatabaseNode, String>> successors = sg.generateSuccessors(node);
@@ -186,7 +186,7 @@ public class SearchTest {
 	}
 
 	@Test
-	public void testDuplicateCheck2Path() {
+	public void testIntermediateNodeDuplicateCheck2Path() {
 		Database db = DBUtils.deserializeFromFile(DATABASE_MODEL_FILE);
 		DatabaseGraphGenerator generator = new DatabaseGraphGenerator(db);
 		SuccessorGenerator<DatabaseNode, String> sg = generator.getSuccessorGenerator();
@@ -196,8 +196,8 @@ public class SearchTest {
 		// Create complete backward feature
 		BackwardFeature completeBf = new BackwardFeature(price);
 		Path path = completeBf.getPath();
-		path.addPathElement(new BackwardRelationship("Orders", "Product","OrderId"), AggregationFunction.MAX);
-		path.addPathElement(new BackwardRelationship("Customer", "Orders","CustomerId"), AggregationFunction.AVG);
+		path.addPathElement(new BackwardRelationship("Orders", "Product", "OrderId"), AggregationFunction.MAX);
+		path.addPathElement(new BackwardRelationship("Customer", "Orders", "CustomerId"), AggregationFunction.AVG);
 
 		// Create intermediate backward feature
 		BackwardFeature intermediateBf = new BackwardFeature(price);
@@ -237,7 +237,7 @@ public class SearchTest {
 	}
 
 	@Test
-	public void testDuplicateCheck1Path() {
+	public void testIntermediateNodeDuplicateCheck1Path() {
 		Database db = DBUtils.deserializeFromFile(DATABASE_MODEL_FILE);
 		DatabaseGraphGenerator generator = new DatabaseGraphGenerator(db);
 		SuccessorGenerator<DatabaseNode, String> sg = generator.getSuccessorGenerator();
@@ -249,8 +249,8 @@ public class SearchTest {
 		for (AggregationFunction af : AggregationFunction.values()) {
 			BackwardFeature completeBf = new BackwardFeature(price);
 			Path path = completeBf.getPath();
-			path.addPathElement(new BackwardRelationship("Orders", "Product","OrderId"), AggregationFunction.MAX);
-			path.addPathElement(new BackwardRelationship("Customer", "Orders","CustomerId"), af);
+			path.addPathElement(new BackwardRelationship("Orders", "Product", "OrderId"), AggregationFunction.MAX);
+			path.addPathElement(new BackwardRelationship("Customer", "Orders", "CustomerId"), af);
 			features.add(completeBf);
 		}
 
@@ -269,6 +269,75 @@ public class SearchTest {
 		assertTrue(descriptions.contains("Intermediate: <[Orders -> Product], MIN>"));
 		assertFalse(descriptions.contains("Intermediate: <[Orders -> Product], MAX>"));
 		assertTrue(descriptions.contains("Intermediate: <[Orders -> Product], AVG>"));
+	}
+
+	@Test
+	public void testStandardNodeDuplicateCheck() {
+		Database db = DBUtils.deserializeFromFile(DATABASE_MODEL_FILE);
+		DatabaseGraphGenerator generator = new DatabaseGraphGenerator(db);
+		SuccessorGenerator<DatabaseNode, String> sg = generator.getSuccessorGenerator();
+		Table product = DBUtils.getTableByName("Product", db);
+		Attribute price = DBUtils.getAttributeByName("Price", product);
+
+		List<AbstractFeature> features = new ArrayList<>();
+		// Create all backward feature starting with aggregation function MAX
+		for (AggregationFunction af : AggregationFunction.values()) {
+			BackwardFeature completeBf = new BackwardFeature(price);
+			Path path = completeBf.getPath();
+			path.addPathElement(new BackwardRelationship("Orders", "Product", "OrderId"), AggregationFunction.MAX);
+			path.addPathElement(new BackwardRelationship("Customer", "Orders", "CustomerId"), af);
+			features.add(completeBf);
+		}
+
+		// Create all backward feature starting with aggregation function MIN
+		for (AggregationFunction af : AggregationFunction.values()) {
+			BackwardFeature completeBf = new BackwardFeature(price);
+			Path path = completeBf.getPath();
+			path.addPathElement(new BackwardRelationship("Orders", "Product", "OrderId"), AggregationFunction.MIN);
+			path.addPathElement(new BackwardRelationship("Customer", "Orders", "CustomerId"), af);
+			features.add(completeBf);
+		}
+
+		// Create all backward feature starting with aggregation function AVG
+		for (AggregationFunction af : AggregationFunction.values()) {
+			BackwardFeature completeBf = new BackwardFeature(price);
+			Path path = completeBf.getPath();
+			path.addPathElement(new BackwardRelationship("Orders", "Product", "OrderId"), AggregationFunction.AVG);
+			path.addPathElement(new BackwardRelationship("Customer", "Orders", "CustomerId"), af);
+			features.add(completeBf);
+		}
+
+		// Create all backward feature starting with aggregation function SUM
+		for (AggregationFunction af : AggregationFunction.values()) {
+			BackwardFeature completeBf = new BackwardFeature(price);
+			Path path = completeBf.getPath();
+			path.addPathElement(new BackwardRelationship("Orders", "Product", "OrderId"), AggregationFunction.SUM);
+			path.addPathElement(new BackwardRelationship("Customer", "Orders", "CustomerId"), af);
+			features.add(completeBf);
+		}
+
+		DatabaseNode node = new DatabaseNode(features, false);
+
+		Collection<NodeExpansionDescription<DatabaseNode, String>> successors = sg.generateSuccessors(node);
+		assertEquals(6, successors.size());
+
+		String descriptions = concatExpansionDescriptions(successors);
+
+		// Forward features
+		assertTrue(descriptions.contains("Forward: Balance"));
+		assertTrue(descriptions.contains("Forward: BankName"));
+		assertTrue(descriptions.contains("Forward: Credible"));
+		assertTrue(descriptions.contains("Forward: FirstName"));
+		assertTrue(descriptions.contains("Forward: TransactionCounter"));
+
+		// Backward features
+		assertTrue(descriptions.contains("Backward: Price"));
+		assertTrue(descriptions.contains("Backward: OrderDate"));
+		assertTrue(descriptions.contains("Backward: ProductName"));
+
+		// Exit edge
+		assertTrue(descriptions.contains("Exit"));
+
 	}
 
 }
