@@ -126,7 +126,7 @@ public class DefaultEvalExperiment {
 				processor.processResults(results);
 			}
 		});
-		runner.randomlyConductExperiments(true);
+		runner.randomlyConductExperiments(1, true);
 	}
 
 }

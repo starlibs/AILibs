@@ -49,7 +49,7 @@ public class SMACOptimizer extends Optimizer {
 		try {
 
 			ArrayList<String> cmd = new ArrayList<>();
-			cmd.add(environment.getAbsolutePath() + "\\optimizer\\smac\\smac ");
+			cmd.add(environment.getAbsolutePath() + "/optimizer/smac/smac");
 			cmd.add("--run-obj");
 			cmd.add("QUALITY");
 			cmd.add("--use-instances");
@@ -278,48 +278,48 @@ public class SMACOptimizer extends Optimizer {
 		}
 
 		// run java programm
-		pyWrapperStream.print("call(\"java -jar " + environment.getAbsolutePath() + "/PipelineEvaluator.jar");
+		pyWrapperStream.print("call([\"java\", \"-jar\", \"" + environment.getAbsolutePath() + "/PipelineEvaluator.jar\",");
 
-		pyWrapperStream.print(" " + environment.getAbsolutePath() + "/results/" + buildFileName() + ".txt");
+		pyWrapperStream.print("\"" + environment.getAbsolutePath() + "/results/" + buildFileName() + ".txt\", ");
 
-		pyWrapperStream.print(" " + dataSetFolder.getAbsolutePath() + "/" + dataSet + ".arff");
+		pyWrapperStream.print("\"" + dataSetFolder.getAbsolutePath() + "/" + dataSet + ".arff\", ");
 
-		pyWrapperStream.print(" " + seed);
+		pyWrapperStream.print("\"" + seed + "\", ");
 
 		if (searcher != null) {
-			pyWrapperStream.print(" " + searcher.getName());
+			pyWrapperStream.print("\"" + searcher.getName() + "\", ");
 
 			for (Parameter parameter : searcher.getParameters()) {
-				pyWrapperStream.print(" " + parameter.getName());
-				pyWrapperStream.print(" \"+" + createDomainWrapper(getUniqueParamName(parameter, ParamType.searcher),
-						parameter.getDefaultDomain()) + " + \"");
+				pyWrapperStream.print("\"" + parameter.getName() + "\", ");
+				pyWrapperStream.print(" str(" + createDomainWrapper(getUniqueParamName(parameter, ParamType.searcher),
+						parameter.getDefaultDomain()) + "), ");
 			}
 
-			pyWrapperStream.print(" " + evaluator.getName());
+			pyWrapperStream.print("\"" + evaluator.getName() + "\", ");
 
 			for (Parameter parameter : evaluator.getParameters()) {
-				pyWrapperStream.print(" " + parameter.getName());
-				pyWrapperStream.print(" \"+ " + createDomainWrapper(getUniqueParamName(parameter, ParamType.evaluator),
-						parameter.getDefaultDomain()) + " + \"");
+				pyWrapperStream.print("\"" + parameter.getName() + "\", ");
+				pyWrapperStream.print(" str(" + createDomainWrapper(getUniqueParamName(parameter, ParamType.evaluator),
+						parameter.getDefaultDomain()) + "), ");
 			}
 
 		} else {
-			pyWrapperStream.print(" null");
+			pyWrapperStream.print("\"null\", ");
 		}
 
-		pyWrapperStream.print(" " + classifier.getName());
+		pyWrapperStream.print("\"" + classifier.getName() + "\", ");
 
 		for (Parameter parameter : classifier.getParameters()) {
-			pyWrapperStream.print(" " + parameter.getName());
-			pyWrapperStream.print(" \"+" + createDomainWrapper(getUniqueParamName(parameter, ParamType.classifier),
-					parameter.getDefaultDomain()) + " + \"");
+			pyWrapperStream.print("\"" + parameter.getName() + "\", ");
+			pyWrapperStream.print("str(" + createDomainWrapper(getUniqueParamName(parameter, ParamType.classifier),
+					parameter.getDefaultDomain()) + "), ");
 		}
 
-		pyWrapperStream.println("\")");
+		pyWrapperStream.println("])");
 
 		// read result file
 
-		pyWrapperStream.println("file = open(\"" + environment.getAbsolutePath() + "\\\\results\\\\" + buildFileName()
+		pyWrapperStream.println("file = open(\"" + environment.getAbsolutePath() + "/results/" + buildFileName()
 				+ ".txt\", \"r\")");
 		pyWrapperStream.println("yValue = float(file.read())");
 
