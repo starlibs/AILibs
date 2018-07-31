@@ -1,6 +1,8 @@
 package jaicore.ml.extendedtree;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.BufferedReader;
 import java.nio.charset.StandardCharsets;
@@ -27,6 +29,7 @@ public class ExtendedRandomTreeTest {
 	private static String testFile = "resources/regression_data/cpu-medium.arff";
 //	private static String testFile = "resources/regression_data/cpu_verysmall.arff";
 //	private static String testFile = "resources/regression_data/cloud.arff";
+	
 
 	@Test
 	public void testTrain() {
@@ -42,7 +45,7 @@ public class ExtendedRandomTreeTest {
 //			System.out.println(data);
 			ExtendedRandomTree tree = new ExtendedRandomTree();
 			tree.setSeed(ThreadLocalRandom.current().nextInt());
-			tree.setMinNum(10);
+			tree.setMinNum(5);
 			tree.setFeatureSpace(new FeatureSpace(data));
 			tree.buildClassifier(data);
 			tree.preprocess();
@@ -54,23 +57,25 @@ public class ExtendedRandomTreeTest {
 			Set<Set<Integer>> powerset = Sets.powerSet(allFeatures);
 			List<Set<Integer>> powerlist = new ArrayList<Set<Integer>>();
 			powerlist.addAll(powerset);
-//			for (int k = 1; k < allFeatures.size(); k++) {
-//				for (int i = 0; i < powerlist.size(); i++) {
-//					Set<Integer> features = powerlist.get(i);
-//					if (features.size() == k) {
-//						double cont = tree.computeMarginalVarianceContributionForSubsetOfFeatures(features);
-////						System.out.println("contribution for " + features + ": " + cont);
-//						// System.out.printf("Variance contribution of %s : %f\n", features.toString(),
-//						// cont);
-//						sum += cont;
-//					}
-//				}
-//			}
-			Set<Integer> cSet = new HashSet<Integer>();
-			cSet.add(0);
-			cSet.add(1);
-			System.out.println("cont: " + tree.computeMarginalVarianceContributionForSubsetOfFeatures(cSet));
+			for (int k = 1; k < allFeatures.size(); k++) {
+				for (int i = 0; i < powerlist.size(); i++) {
+					Set<Integer> features = powerlist.get(i);
+					if (features.size() == k) {
+						double cont = tree.computeMarginalVarianceContributionForSubsetOfFeatures(features);
+//						System.out.println("contribution for " + features + ": " + cont);
+						// System.out.printf("Variance contribution of %s : %f\n", features.toString(),
+						// cont);
+						assertTrue(cont >= 0.0d);
+						sum += cont;
+					}
+				}
+			}
+//			Set<Integer> cSet = new HashSet<Integer>();
+//			cSet.add(0);
+//			cSet.add(1);
+//			System.out.println("cont: " + tree.computeMarginalVarianceContributionForSubsetOfFeatures(cSet));
 			System.out.println("sum of contributions = " + sum);
+			assertEquals(1.0d, sum, 0.001d);
 //			for(FeatureDomain domain : tree.getFeatureSpace().getFeatureDomains()) {
 //				System.out.println(domain.compactString());
 //			}
