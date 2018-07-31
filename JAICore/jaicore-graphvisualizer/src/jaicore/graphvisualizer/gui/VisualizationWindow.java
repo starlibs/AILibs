@@ -57,7 +57,8 @@ public class VisualizationWindow<T> {
 			Platform.runLater(()->{
 				GuiApplication app = new GuiApplication();
 
-					new FXGui().open(recorder,title);
+//					new FXGui().open(recorder,title);
+					new FXCode().open(recorder);
 
 			});
 

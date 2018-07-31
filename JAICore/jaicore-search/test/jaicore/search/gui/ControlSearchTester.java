@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import jaicore.basic.PerformanceLogger;
 import jaicore.basic.PerformanceLogger.PerformanceMeasure;
+import jaicore.graphvisualizer.gui.FXCode;
 import jaicore.graphvisualizer.gui.VisualizationWindow;
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import jaicore.search.gui.dataSupplier.NodeExpansionSupplier;
@@ -81,6 +82,7 @@ public class ControlSearchTester {
 		});
 		win.addDataSupplier(tooltipSupplier);
 		
+				
 		
 		NodeExpansionSupplier nodeexpansion = new NodeExpansionSupplier();
 		win.addDataSupplier(nodeexpansion);
