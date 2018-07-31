@@ -16,23 +16,25 @@ import org.junit.Test;
 import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.graph.LabeledGraph;
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
+import jaicore.search.algorithms.interfaces.IObservableORGraphSearch;
 import jaicore.search.algorithms.interfaces.IPathUnification;
-import jaicore.search.algorithms.standard.astar.AStar;
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import jaicore.search.algorithms.standard.bestfirst.BestFirstEpsilon;
 import jaicore.search.algorithms.standard.bestfirst.RandomCompletionEvaluator;
 import jaicore.search.algorithms.standard.core.INodeEvaluator;
 import jaicore.search.algorithms.standard.core.ORGraphSearch;
+import jaicore.search.algorithms.standard.mcts.MCTS;
+import jaicore.search.algorithms.standard.mcts.UCT;
 import jaicore.search.algorithms.standard.rdfs.RandomizedDepthFirstSearch;
 import jaicore.search.evaluationproblems.EnhancedTTSP.EnhancedTTSPNode;
 import jaicore.search.structure.core.Node;
 
 public class EnhancedTTSPTest {
 
-	private static final int N = 100;
+	private static final int N = 10;
 	private static final int MAX_DISTANCE = 12;
 	private static final int TIMEOUT_IN_MS = 5 * 60 * 1000;
-	private static final boolean VISUALIZE = false;
+	private static final boolean VISUALIZE = true;
 
 	private static EnhancedTTSP ttsp;
 	private static LabeledGraph<Short, Double> travelGraph;
@@ -74,12 +76,12 @@ public class EnhancedTTSPTest {
 		System.out.println("Problem created ...");
 	}
 
-	 @Test
+//	 @Test
 	public void testRandomHillClimbing() {
 		runAlgorithm("Random Hill Climbing", new RandomizedDepthFirstSearch<>(ttsp.getGraphGenerator(), new Random(0)), true);
 	}
 
-	 @Test
+//	 @Test
 	public void testDFS() {
 		runAlgorithm("DFS", new ORGraphSearch<>(ttsp.getGraphGenerator(), n -> n.externalPath().size() * -1.0), false);
 	}
@@ -118,18 +120,23 @@ public class EnhancedTTSPTest {
 		
 	}
 
-	@Test
+//	@Test
 	public void testAStar() {
 		runAlgorithm("AStar", new BestFirst<>(ttsp.getGraphGenerator(), new AStarNodeEvaluator()), true);
 	}
 	
-	@Test
+//	@Test
 	public void testAStarEpsilon() {
 		runAlgorithm("AStarEpsilon", new BestFirstEpsilon<EnhancedTTSPNode,String,Integer>(ttsp.getGraphGenerator(),
 				new AStarNodeEvaluator(), n -> n.getPoint().getUnvisitedLocations().size(), 1.3, false), true);
 	}
+	
+	@Test
+	public void testMCTS() {
+		runAlgorithm("MCTS", new UCT<EnhancedTTSPNode,String>(ttsp.getGraphGenerator(), n -> ttsp.getSolutionEvaluator().evaluateSolution(n.externalPath()), 0), false);
+	}
 
-	 @Test
+//	 @Test
 	public void testRandomCompletor() {
 		INodeEvaluator<EnhancedTTSPNode, Double> rc = new RandomCompletionEvaluator<>(new Random(123l), 100,
 				new IPathUnification<EnhancedTTSPNode>() {
@@ -146,12 +153,12 @@ public class EnhancedTTSPTest {
 		runAlgorithm("BFS with random completion", bf, false);
 	}
 
-	@After
+//	@After
 	public void stay() {
 		// while (true);
 	}
 
-	private void runAlgorithm(String name, ORGraphSearch<EnhancedTTSPNode, String, Double> search, boolean stopOnFirst) {
+	private void runAlgorithm(String name, IObservableORGraphSearch<EnhancedTTSPNode, String, Double> search, boolean stopOnFirst) {
 		System.out.println("Running " + name);
 		long start = System.currentTimeMillis();
 		Pair<List<EnhancedTTSPNode>, Double> answer = runSearch(search, stopOnFirst, VISUALIZE);
@@ -162,7 +169,7 @@ public class EnhancedTTSPTest {
 		System.out.println("Time of best tour is: " + answer.getY());
 	}
 
-	private Pair<List<EnhancedTTSPNode>, Double> runSearch(ORGraphSearch<EnhancedTTSPNode, String, Double> search, boolean stopOnFirst,
+	private Pair<List<EnhancedTTSPNode>, Double> runSearch(IObservableORGraphSearch<EnhancedTTSPNode, String, Double> search, boolean stopOnFirst,
 			boolean visualize) {
 
 		/* activate visualizer if desired */
@@ -195,7 +202,7 @@ public class EnhancedTTSPTest {
 		List<EnhancedTTSPNode> bestSolution = null;
 		double bestValue = Double.MAX_VALUE;
 		List<EnhancedTTSPNode> solution;
-		while (!search.isInterrupted() && (solution = search.nextSolution()) != null) {
+		while (!Thread.currentThread().isInterrupted() && (solution = search.nextSolution()) != null) {
 			double value = solution.get(solution.size() - 1).getTime();
 			if (value < bestValue) {
 				bestSolution = solution;
