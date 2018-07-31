@@ -1,6 +1,5 @@
 package autofe.db.model.database;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import autofe.db.model.relation.AbstractRelationship;
@@ -11,13 +10,12 @@ import autofe.db.util.Tuple;
 public class BackwardFeature extends AbstractFeature {
 
 	public BackwardFeature(Attribute parent) {
-		// TODO: Compute name for backward features
-		super(parent.getName(), parent);
+		super(parent);
 		path = new Path();
 	}
 
 	public BackwardFeature(BackwardFeature toClone) {
-		super(toClone.name, toClone.parent);
+		super(toClone.parent);
 		this.path = new Path(toClone.getPath());
 	}
 
@@ -33,15 +31,14 @@ public class BackwardFeature extends AbstractFeature {
 
 	public void setPath(Path path) {
 		this.path = path;
-		updateName();
 	}
 
-	private void updateName() {
+	@Override
+	public String getName() {
 		List<Tuple<AbstractRelationship, AggregationFunction>> pathElements = path.getPathElements();
-		
+
 		if (pathElements == null || pathElements.isEmpty()) {
-			this.name = parent.getName();
-			return;
+			return parent.getName();
 		}
 
 		String parentTableName = pathElements.get(0).getT().getToTableName();
@@ -56,13 +53,38 @@ public class BackwardFeature extends AbstractFeature {
 			}
 		}
 
-		this.name = updatedName;
+		return updatedName;
 
 	}
 
 	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((path == null) ? 0 : path.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		BackwardFeature other = (BackwardFeature) obj;
+		if (path == null) {
+			if (other.path != null)
+				return false;
+		} else if (!path.equals(other.path))
+			return false;
+		return true;
+	}
+
+	@Override
 	public String toString() {
-		return "BackwardFeature [path=" + path + ", name=" + name + ", parent=" + parent + "]";
+		return "BackwardFeature [path=" + path + ", parent=" + parent + ", getName()=" + getName() + "]";
 	}
 
 }

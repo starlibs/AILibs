@@ -17,6 +17,7 @@ import autofe.db.model.database.Attribute;
 import autofe.db.model.database.BackwardFeature;
 import autofe.db.model.database.Database;
 import autofe.db.model.database.ForwardFeature;
+import autofe.db.model.database.Path;
 import autofe.db.model.database.Table;
 import autofe.db.model.relation.BackwardRelationship;
 import autofe.db.search.DatabaseGraphGenerator;
@@ -124,9 +125,10 @@ public class SearchTest {
 		Table product = DBUtils.getTableByName("Product", db);
 		Attribute price = DBUtils.getAttributeByName("Price", product);
 		BackwardFeature bf = new BackwardFeature(price);
+		Path path = bf.getPath();
 		// Complete path
-		bf.addToPath(new BackwardRelationship("Orders", "Product"), AggregationFunction.MAX);
-		bf.addToPath(new BackwardRelationship("Customer", "Orders"), AggregationFunction.AVG);
+		path.addPathElement(new BackwardRelationship("Orders", "Product","OrderId"), AggregationFunction.MAX);
+		path.addPathElement(new BackwardRelationship("Customer", "Orders","CustomerId"), AggregationFunction.AVG);
 
 		DatabaseNode node = new DatabaseNode(Collections.singletonList(bf), false);
 		Collection<NodeExpansionDescription<DatabaseNode, String>> successors = sg.generateSuccessors(node);
@@ -193,8 +195,9 @@ public class SearchTest {
 
 		// Create complete backward feature
 		BackwardFeature completeBf = new BackwardFeature(price);
-		completeBf.addToPath(new BackwardRelationship("Orders", "Product"), AggregationFunction.MAX);
-		completeBf.addToPath(new BackwardRelationship("Customer", "Orders"), AggregationFunction.AVG);
+		Path path = completeBf.getPath();
+		path.addPathElement(new BackwardRelationship("Orders", "Product","OrderId"), AggregationFunction.MAX);
+		path.addPathElement(new BackwardRelationship("Customer", "Orders","CustomerId"), AggregationFunction.AVG);
 
 		// Create intermediate backward feature
 		BackwardFeature intermediateBf = new BackwardFeature(price);
@@ -245,8 +248,9 @@ public class SearchTest {
 		List<AbstractFeature> features = new ArrayList<>();
 		for (AggregationFunction af : AggregationFunction.values()) {
 			BackwardFeature completeBf = new BackwardFeature(price);
-			completeBf.addToPath(new BackwardRelationship("Orders", "Product"), AggregationFunction.MAX);
-			completeBf.addToPath(new BackwardRelationship("Customer", "Orders"), af);
+			Path path = completeBf.getPath();
+			path.addPathElement(new BackwardRelationship("Orders", "Product","OrderId"), AggregationFunction.MAX);
+			path.addPathElement(new BackwardRelationship("Customer", "Orders","CustomerId"), af);
 			features.add(completeBf);
 		}
 

@@ -6,8 +6,8 @@ public class BackwardRelationship extends AbstractRelationship {
 		super();
 	}
 
-	public BackwardRelationship(String fromTableName, String toTableName) {
-		super(fromTableName, toTableName);
+	public BackwardRelationship(String fromTableName, String toTableName, String commonAttributeName) {
+		super(fromTableName, toTableName, commonAttributeName);
 	}
 
 	@Override

@@ -18,8 +18,8 @@ import com.google.gson.JsonSyntaxException;
 
 import autofe.db.model.database.AggregationFunction;
 import autofe.db.model.database.Attribute;
-import autofe.db.model.database.BackwardFeature;
 import autofe.db.model.database.Database;
+import autofe.db.model.database.Path;
 import autofe.db.model.database.Table;
 import autofe.db.model.relation.AbstractRelationship;
 import autofe.db.model.relation.BackwardRelationship;
@@ -199,8 +199,8 @@ public class DBUtils {
 		return null;
 	}
 
-	public static boolean isIntermediate(BackwardFeature bf, Database db) {
-		List<Tuple<AbstractRelationship, AggregationFunction>> pathElements = bf.getPath().getPathElements();
+	public static boolean isIntermediate(Path path, Database db) {
+		List<Tuple<AbstractRelationship, AggregationFunction>> pathElements = path.getPathElements();
 
 		if (pathElements.isEmpty()) {
 			return true;

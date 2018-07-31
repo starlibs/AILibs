@@ -3,6 +3,7 @@ package autofe.db.search;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -115,15 +116,40 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 		Table lastTable = intermediateFeature.getPath().getLastTable();
 		if (lastTable == null) {
 			lastTable = DBUtils.getAttributeTable(intermediateFeature.getParent(), db);
-		} 
+		}
 
 		// Compute possible next path elements
 		List<Tuple<AbstractRelationship, AggregationFunction>> nextPathElements = nextIntermediatePathElements(
 				lastTable);
 
-		// TODO: Validate path elements
+		List<Tuple<AbstractRelationship, AggregationFunction>> validNextPathElements = new ArrayList<>();
 
+		// Check whether the candidates are duplicates
 		for (Tuple<AbstractRelationship, AggregationFunction> nextPathElement : nextPathElements) {
+			// Compute all possible path from there
+			AbstractRelationship ar = nextPathElement.getT();
+			ar.setContext(db);
+			Path prefix = new Path(intermediateFeature.getPath());
+			prefix.addPathElement(nextPathElement);
+			Set<Path> allPaths = getAllPathsFrom(prefix);
+
+			// Generate feature for each path
+			List<BackwardFeature> allFeatures = new ArrayList<>();
+			for (Path path : allPaths) {
+				BackwardFeature bf = new BackwardFeature(intermediateFeature);
+				bf.setPath(path);
+				allFeatures.add(bf);
+			}
+
+			if (node.getSelectedFeatures().containsAll(allFeatures)) {
+				LOG.info("Node already contains all possible featuers => Skip successor");
+			} else {
+				validNextPathElements.add(nextPathElement);
+			}
+
+		}
+
+		for (Tuple<AbstractRelationship, AggregationFunction> nextPathElement : validNextPathElements) {
 			List<AbstractFeature> extendedFeatures = cloneFeatureList(node.getSelectedFeatures());
 			BackwardFeature extendedintermediateFeature = getIntermediateFeature(extendedFeatures);
 			if (extendedintermediateFeature == null) {
@@ -172,7 +198,8 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 
 	private BackwardFeature getIntermediateFeature(List<AbstractFeature> features) {
 		for (AbstractFeature feature : features) {
-			if (feature instanceof BackwardFeature && DBUtils.isIntermediate((BackwardFeature) feature, db)) {
+			if (feature instanceof BackwardFeature
+					&& DBUtils.isIntermediate(((BackwardFeature) feature).getPath(), db)) {
 				return (BackwardFeature) feature;
 			}
 		}
@@ -189,6 +216,34 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 			}
 		}
 		return toReturn;
+	}
+
+	public Set<Path> getAllPathsFrom(Path prefix) {
+		Set<Path> allPaths = new HashSet<>();
+
+		// Start recursion
+		addPaths(prefix, allPaths);
+
+		return allPaths;
+	}
+
+	private void addPaths(Path prefix, Set<Path> allPaths) {
+		if (!DBUtils.isIntermediate(prefix, db)) {
+			allPaths.add(prefix);
+			return;
+		}
+		Table from = prefix.getLastTable();
+		List<Tuple<AbstractRelationship, AggregationFunction>> nextElements = nextIntermediatePathElements(from);
+		for (Tuple<AbstractRelationship, AggregationFunction> nextElement : nextElements) {
+			Path extended = new Path(prefix);
+			extended.addPathElement(nextElement);
+			// Found complete path
+			if (!DBUtils.isIntermediate(extended, db)) {
+				allPaths.add(extended);
+			} else {
+				addPaths(extended, allPaths);
+			}
+		}
 	}
 
 }

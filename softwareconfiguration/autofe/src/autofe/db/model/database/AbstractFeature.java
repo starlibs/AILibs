@@ -1,24 +1,15 @@
 package autofe.db.model.database;
 
-public abstract class AbstractFeature implements Comparable<AbstractFeature>{
-
-	protected String name;
+public abstract class AbstractFeature implements Comparable<AbstractFeature> {
 
 	protected Attribute parent;
 
-	public AbstractFeature(String name, Attribute parent) {
+	public AbstractFeature(Attribute parent) {
 		super();
-		this.name = name;
 		this.parent = parent;
 	}
 
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
+	public abstract String getName();
 
 	public Attribute getParent() {
 		return parent;
@@ -32,7 +23,7 @@ public abstract class AbstractFeature implements Comparable<AbstractFeature>{
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((parent == null) ? 0 : parent.hashCode());
 		return result;
 	}
 
@@ -45,10 +36,10 @@ public abstract class AbstractFeature implements Comparable<AbstractFeature>{
 		if (getClass() != obj.getClass())
 			return false;
 		AbstractFeature other = (AbstractFeature) obj;
-		if (name == null) {
-			if (other.name != null)
+		if (parent == null) {
+			if (other.parent != null)
 				return false;
-		} else if (!name.equals(other.name))
+		} else if (!parent.equals(other.parent))
 			return false;
 		return true;
 	}
@@ -57,6 +48,5 @@ public abstract class AbstractFeature implements Comparable<AbstractFeature>{
 	public int compareTo(AbstractFeature o) {
 		return this.parent.compareTo(o.parent);
 	}
-	
 
 }
