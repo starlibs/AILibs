@@ -1,11 +1,11 @@
 package de.upb.crc901.automl.metamining.similaritymeasures;
 
-import org.apache.commons.math3.linear.RealMatrix;
+import org.nd4j.linalg.api.ndarray.INDArray;
 
 public class RankMatrixSimilarityComputer implements IRankMatrixSimilarityComputer {
 
 	@Override
-	public RealMatrix computeSimilarityOfRankMatrix(RealMatrix R) {
+	public INDArray computeSimilarityOfRankMatrix(INDArray R) {
 		// TODO Auto-generated method stub
 		return null;
 	}

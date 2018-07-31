@@ -1,9 +1,8 @@
 package de.upb.crc901.automl.metamining.similaritymeasures;
 
-import org.apache.commons.math3.linear.RealMatrix;
-import org.apache.commons.math3.linear.RealVector;
+import org.nd4j.linalg.api.ndarray.INDArray;
 
 public interface IHeterogenousSimilarityMeasureComputer {
-	public void build(RealMatrix X, RealMatrix W, RealMatrix R);
-	public double computeSimilarity(RealVector x, RealVector w);
+	public void build(INDArray X, INDArray W, INDArray R);
+	public double computeSimilarity(INDArray x, INDArray w);
 }

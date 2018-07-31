@@ -3,6 +3,7 @@ package de.upb.crc901.automl.metamining.similaritymeasures;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
+import org.nd4j.linalg.api.ndarray.INDArray;
 
 public class AlternatingGradientDescent implements IHeterogenousSimilarityMeasureComputer {
 	
@@ -10,20 +11,18 @@ public class AlternatingGradientDescent implements IHeterogenousSimilarityMeasur
 	 * Used to compute the RRt matrix.
 	 */
 	private IRankMatrixSimilarityComputer rankMatrixSimilarityComputer = new RankMatrixSimilarityComputer();
-	private RealMatrix U;
-	private RealMatrix V_transposed;
+	private INDArray U;
+	private INDArray V_transposed;
 
 	@Override
-	public void build(RealMatrix X, RealMatrix W, RealMatrix R) {
+	public void build(INDArray X, INDArray W, INDArray R) {
 		// TODO Auto-generated method stub
 		// set U and V here
 	}
 
 	@Override
-	public double computeSimilarity(RealVector x, RealVector w) {
-		RealMatrix xNew = convertRealVectorToMatrix(x);
-		RealMatrix wNew = convertRealVectorToMatrix(w); 
-		return xNew.multiply(U).multiply(V_transposed).multiply(wNew.transpose()).getEntry(0, 0);
+	public double computeSimilarity(INDArray x, INDArray w) {
+		return x.mmul(U).mmul(V_transposed).mmul(w).getDouble(0, 0);
 	}
 	
 	private RealMatrix convertRealVectorToMatrix(RealVector vector) {

@@ -9,7 +9,7 @@ import de.jungblut.math.minimize.CostFunction;
 import de.jungblut.math.minimize.CostGradientTuple;
 import de.jungblut.math.minimize.GradientDescent;
 
-public class F1Optimizer {
+public class F1Optimizer implements IHeterogenousSimilarityMeasureComputer {
 	private final static double ALPHA_START = 0.000000001; // learning rate
 	private final static double ALPHA_MAX = 1e-5;
 	private final static int ITERATIONS_PER_PROBE = 100;
@@ -17,21 +17,19 @@ public class F1Optimizer {
 	private final static boolean VERBOSE = false;
 	private final static double MAX_DESIRED_ERROR = 0;
 	
-	private final INDArray RRT;
-	private final INDArray X;
-	
-	public F1Optimizer(INDArray R, INDArray X) {
-		super();
-		this.RRT = R.mmul(R.transpose());
-		this.X = X;
-	}
+	private INDArray RRT;
+	private INDArray X;
+	private INDArray U; // the learned matrix
 	
 	/**
-	 * Learns a matrix U that minimizes F1
+	 * Learns a matrix U that minimizes F1 (W is ignored here)
 	 * 
 	 * @return
 	 */
-	public INDArray learnU() {
+	public void build(INDArray X, INDArray W, INDArray R) {
+		this.RRT = R.mmul(R.transpose());
+		this.X = X;
+		
 		final int m = X.columns();
 		
 		/* generate initial U vector */
@@ -81,7 +79,7 @@ public class F1Optimizer {
 			alpha = Math.min(alpha, ALPHA_MAX);
 			System.out.println(currentCost + " (alpha = " + alpha +")");
 		}
-		return currentSolutionAsMatrix;
+		U = currentSolutionAsMatrix;
 	}
 	
 	/**
@@ -194,5 +192,18 @@ public class F1Optimizer {
 			}
 		}
 		return derivative;
+	}
+
+	@Override
+	public double computeSimilarity(INDArray x, INDArray w) {
+		return 0;
+	}
+
+	public INDArray getX() {
+		return X;
+	}
+
+	public INDArray getU() {
+		return U;
 	}
 }

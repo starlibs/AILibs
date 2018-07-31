@@ -8,6 +8,8 @@ import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
+import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
 
 import de.upb.crc901.automl.hascowekaml.WEKAPipelineFactory;
 import de.upb.crc901.automl.metamining.pipelinecharacterizing.IPipelineCharacterizer;
@@ -26,7 +28,7 @@ public class WEKAMetaminer implements IMetaMiner {
 	private WEKAPipelineFactory wekaPipelineFactory = new WEKAPipelineFactory();
 	
 	private Instances dataset;
-	private RealVector datasetMetafeatures;
+	private INDArray datasetMetafeatures;
 	
 	private String datasetSet="all";
 	private String metafeatureSet="all";
@@ -46,7 +48,7 @@ public class WEKAMetaminer implements IMetaMiner {
 		try {
 			MLPipeline pipeline = wekaPipelineFactory.getComponentInstantiation(componentInstance);
 			double [] pipelineMetafeatures = pipelineCharacterizer.characterize(pipeline);
-			return similarityMeasure.computeSimilarity(datasetMetafeatures, new ArrayRealVector(pipelineMetafeatures));
+			return similarityMeasure.computeSimilarity(datasetMetafeatures, Nd4j.create(pipelineMetafeatures));
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -64,9 +66,9 @@ public class WEKAMetaminer implements IMetaMiner {
 		Instances metaFeatureInformation = null;
 		
 		// Convert to matrix (Matrix X with rows representing data sets) with ascending data set indices (data set index itself excluded)
-		RealMatrix datasetsMetafeatures = new Array2DRowRealMatrix(metaFeatureInformation.size()-1, metaFeatureInformation.numAttributes());
+		INDArray datasetsMetafeatures = Nd4j.create(metaFeatureInformation.size()-1, metaFeatureInformation.numAttributes());
 		for (int i = 1; i < metaFeatureInformation.size(); i++) {
-			datasetsMetafeatures.setRow(i-1, metaFeatureInformation.get(i).toDoubleArray());
+			datasetsMetafeatures.putRow(i-1, Nd4j.create(metaFeatureInformation.get(i).toDoubleArray()));
 		}
 		
 		// Characterize the given data set with characterizer (set x)
@@ -74,17 +76,17 @@ public class WEKAMetaminer implements IMetaMiner {
 		HashMap<String,Double> datasetCharacterization = null;
 		
 		// Convert the characterization to a vector of double (ensure same order of attributes as training data)
-		datasetMetafeatures = new ArrayRealVector(datasetCharacterization.size());
+		datasetMetafeatures = Nd4j.create(datasetCharacterization.size());
 		int i = 0;
 		for (Enumeration<Attribute> attributes = metaFeatureInformation.enumerateAttributes(); attributes.hasMoreElements(); i++) {
-			datasetMetafeatures.setEntry(i,datasetCharacterization.get(attributes.nextElement().name()));
+			datasetMetafeatures.putScalar(i, datasetCharacterization.get(attributes.nextElement().name()));
 		};
 
 		// ----- Pipeline Characterization -----
 		// Get PerformanceSamples from knowledge base according to given data set set
 		// TODO import knowledge base
 		// Compute Rank Matrix R
-		RealMatrix rankMatrix = null;
+		INDArray rankMatrix = null;
 		// Extract list of distinct pipelines from that (or purposefully get a only samples for a list of pipelines before!)
 		ArrayList<MLPipeline> distinctPipelines = new ArrayList<MLPipeline>();
 		
@@ -92,7 +94,7 @@ public class WEKAMetaminer implements IMetaMiner {
 		pipelineCharacterizer.build(distinctPipelines);
 		
 		// Get Characterization of base pipelines from PipelineCharacterizer (Matrix W)
-		RealMatrix pipelinesMetafeatures = new Array2DRowRealMatrix(pipelineCharacterizer.getCharacterizationsOfTrainingExamples());
+		INDArray pipelinesMetafeatures = Nd4j.create(pipelineCharacterizer.getCharacterizationsOfTrainingExamples());
 		
 		// Initialize HeterogenousSimilarityMeasures
 		similarityMeasure.build(datasetsMetafeatures, pipelinesMetafeatures, rankMatrix);

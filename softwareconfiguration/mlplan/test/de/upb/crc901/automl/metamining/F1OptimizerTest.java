@@ -16,10 +16,10 @@ public class F1OptimizerTest {
 		INDArray X = Nd4j.create(new float[] { 1, 2, 3, 4, 5, 6, 7, 8 }, new int[] { 2, 3 });
 
 		/* learn the U matrix */
-		F1Optimizer uLearner = new F1Optimizer(R, X);
-		INDArray U = uLearner.learnU();
-		System.out.println("learned U = " + U);
-		System.out.println("loss of U: " + uLearner.getCost(U));
+		F1Optimizer uLearner = new F1Optimizer();
+		uLearner.build(X, null, R);
+		System.out.println("learned U = " + uLearner.getU());
+		System.out.println("loss of U: " + uLearner.getCost(uLearner.getU()));
 	}
 
 }
