@@ -1,5 +1,6 @@
 package jaicore.search.algorithms.standard.uncertainty;
 
+import java.util.PriorityQueue;
 import java.util.Random;
 
 import org.slf4j.Logger;
@@ -15,6 +16,7 @@ import jaicore.search.algorithms.standard.uncertainty.explorationexploitationsea
 import jaicore.search.algorithms.standard.uncertainty.explorationexploitationsearch.BasicExplorationCandidateSelector;
 import jaicore.search.algorithms.standard.uncertainty.explorationexploitationsearch.IPhaseLengthAdjuster;
 import jaicore.search.algorithms.standard.uncertainty.explorationexploitationsearch.UncertaintyExplorationOpenSelection;
+import jaicore.search.algorithms.standard.uncertainty.paretosearch.ParetoNode;
 import jaicore.search.algorithms.standard.uncertainty.paretosearch.ParetoSelection;
 import jaicore.search.structure.core.GraphGenerator;
 
@@ -86,7 +88,8 @@ public class UncertaintyORGraphSearchFactory <T, A> implements IObservableORGrap
 					));
 				}
 			} else {
-				new ParetoSelection<>(false);
+				PriorityQueue<ParetoNode<T, Double>> pareto = new PriorityQueue<>(oversearchAvoidanceConfig.getParetoComperator());
+				search.setOpen(new ParetoSelection<>(pareto));
 			}
 		}
 		
