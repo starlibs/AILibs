@@ -331,9 +331,9 @@ public class SearchTest {
 		assertTrue(descriptions.contains("Forward: TransactionCounter"));
 
 		// Backward features
-		assertTrue(descriptions.contains("Backward: Price"));
-		assertTrue(descriptions.contains("Backward: OrderDate"));
-		assertTrue(descriptions.contains("Backward: ProductName"));
+		assertFalse(descriptions.contains("Backward: Price"));
+		assertFalse(descriptions.contains("Backward: OrderDate"));
+		assertFalse(descriptions.contains("Backward: ProductName"));
 
 		// Exit edge
 		assertTrue(descriptions.contains("Exit"));
