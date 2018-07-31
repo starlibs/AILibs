@@ -2,17 +2,20 @@ package autofe.db.model.database;
 
 public class Attribute implements Comparable<Attribute> {
 
-	protected String name;
+	private String name;
 
-	protected AttributeType type;
+	private AttributeType type;
 
-	protected boolean isTarget;
+	private boolean isTarget;
+
+	private boolean isPrimaryKey;
 
 	public Attribute(String name, AttributeType type) {
 		super();
 		this.name = name;
 		this.type = type;
 		this.isTarget = false;
+		this.isPrimaryKey = false;
 	}
 
 	public Attribute(String name, AttributeType type, boolean isTarget) {
@@ -20,6 +23,15 @@ public class Attribute implements Comparable<Attribute> {
 		this.name = name;
 		this.type = type;
 		this.isTarget = isTarget;
+		this.isPrimaryKey = false;
+	}
+
+	public Attribute(String name, AttributeType type, boolean isTarget, boolean isPrimaryKey) {
+		super();
+		this.name = name;
+		this.type = type;
+		this.isTarget = isTarget;
+		this.isPrimaryKey = isPrimaryKey;
 	}
 
 	public String getName() {
@@ -54,10 +66,24 @@ public class Attribute implements Comparable<Attribute> {
 		return !(this.type == AttributeType.ID);
 	}
 
+	public boolean isPrimaryKey() {
+		return isPrimaryKey;
+	}
+
+	public void setPrimaryKey(boolean isPrimaryKey) {
+		this.isPrimaryKey = isPrimaryKey;
+	}
+
+	@Override
+	public int compareTo(Attribute o) {
+		return name.compareTo(o.name);
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + (isPrimaryKey ? 1231 : 1237);
 		result = prime * result + (isTarget ? 1231 : 1237);
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + ((type == null) ? 0 : type.hashCode());
@@ -73,6 +99,8 @@ public class Attribute implements Comparable<Attribute> {
 		if (getClass() != obj.getClass())
 			return false;
 		Attribute other = (Attribute) obj;
+		if (isPrimaryKey != other.isPrimaryKey)
+			return false;
 		if (isTarget != other.isTarget)
 			return false;
 		if (name == null) {
@@ -86,13 +114,9 @@ public class Attribute implements Comparable<Attribute> {
 	}
 
 	@Override
-	public int compareTo(Attribute o) {
-		return name.compareTo(o.name);
-	}
-
-	@Override
 	public String toString() {
-		return "Attribute [name=" + name + ", type=" + type + ", isTarget=" + isTarget + "]";
+		return "Attribute [name=" + name + ", type=" + type + ", isTarget=" + isTarget + ", isPrimaryKey="
+				+ isPrimaryKey + "]";
 	}
 
 }

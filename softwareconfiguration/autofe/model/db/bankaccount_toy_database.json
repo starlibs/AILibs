@@ -6,27 +6,32 @@
         {
           "name": "BankAccountId",
           "type": "ID",
-          "isTarget": false
+          "isTarget": false,
+          "isPrimaryKey": true
         },
         {
           "name": "Balance",
           "type": "NUMERIC",
-          "isTarget": false
+          "isTarget": false,
+          "isPrimaryKey": false
         },
         {
           "name": "TransactionCounter",
           "type": "NUMERIC",
-          "isTarget": false
+          "isTarget": false,
+          "isPrimaryKey": false
         },
         {
           "name": "BankName",
           "type": "TEXT",
-          "isTarget": false
+          "isTarget": false,
+          "isPrimaryKey": false
         },
         {
           "name": "Credible",
           "type": "TEXT",
-          "isTarget": true
+          "isTarget": true,
+          "isPrimaryKey": false
         }
       ],
       "isTarget": true
@@ -37,17 +42,20 @@
         {
           "name": "CustomerId",
           "type": "ID",
-          "isTarget": false
+          "isTarget": false,
+          "isPrimaryKey": true
         },
         {
           "name": "BankAccountId",
           "type": "ID",
-          "isTarget": false
+          "isTarget": false,
+          "isPrimaryKey": false
         },
         {
           "name": "FirstName",
           "type": "TEXT",
-          "isTarget": false
+          "isTarget": false,
+          "isPrimaryKey": false
         }
       ],
       "isTarget": false
@@ -58,17 +66,20 @@
         {
           "name": "OrderId",
           "type": "ID",
-          "isTarget": false
+          "isTarget": false,
+          "isPrimaryKey": true
         },
         {
           "name": "CustomerId",
           "type": "ID",
-          "isTarget": false
+          "isTarget": false,
+          "isPrimaryKey": false
         },
         {
           "name": "OrderDate",
           "type": "DATE",
-          "isTarget": false
+          "isTarget": false,
+          "isPrimaryKey": false
         }
       ],
       "isTarget": false
@@ -79,22 +90,26 @@
         {
           "name": "ProductId",
           "type": "ID",
-          "isTarget": false
+          "isTarget": false,
+          "isPrimaryKey": true
         },
         {
           "name": "OrderId",
           "type": "ID",
-          "isTarget": false
+          "isTarget": false,
+          "isPrimaryKey": false
         },
         {
           "name": "ProductName",
           "type": "TEXT",
-          "isTarget": false
+          "isTarget": false,
+          "isPrimaryKey": false
         },
         {
           "name": "Price",
           "type": "NUMERIC",
-          "isTarget": false
+          "isTarget": false,
+          "isPrimaryKey": false
         }
       ],
       "isTarget": false

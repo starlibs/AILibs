@@ -218,9 +218,9 @@ public class DBUtils {
 		return false;
 	}
 
-	public static String getAggregatedAttributeName(AggregationFunction aggregationFunction, String toTableName,
-			String toBeAggregatedName) {
-		return aggregationFunction.name() + "(" + toTableName + "." + toBeAggregatedName + ")";
+	public static List<ForwardRelationship> getJoinTables(Table from, Table to, Database db) {
+
+		return null;
 	}
 
 }
