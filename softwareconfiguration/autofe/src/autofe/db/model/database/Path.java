@@ -41,8 +41,10 @@ public class Path {
 		Tuple<AbstractRelationship, AggregationFunction> lastPathElement = pathElements.get(pathElements.size() - 1);
 		return lastPathElement.getT().getFrom();
 	}
-	
-	
+
+	public int length() {
+		return this.pathElements.size();
+	}
 
 	@Override
 	public int hashCode() {
@@ -75,13 +77,13 @@ public class Path {
 			return "[{}]";
 		}
 		StringBuilder sb = new StringBuilder();
-		for(Tuple<AbstractRelationship, AggregationFunction> pathElement : pathElements) {
+		for (Tuple<AbstractRelationship, AggregationFunction> pathElement : pathElements) {
 			sb.append(pathElement.getT().getFromTableName());
-			sb.append("<-("+pathElement.getU() + ")-");
+			sb.append("<-(" + pathElement.getU() + ")-");
 			sb.append(pathElement.getT().getToTableName());
 			sb.append("|");
 		}
-		return sb.substring(0, sb.length() -1);
+		return sb.substring(0, sb.length() - 1);
 	}
 
 }
