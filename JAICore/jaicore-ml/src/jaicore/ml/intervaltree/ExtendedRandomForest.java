@@ -16,7 +16,7 @@ public class ExtendedRandomForest extends RandomForest {
 	public ExtendedRandomForest() {
 		super();
 		ExtendedRandomTree erTree = new ExtendedRandomTree();
-		erTree.setMinNum(5);
+		erTree.setMinNum(25);
 		this.setClassifier(erTree);
 	}
 	

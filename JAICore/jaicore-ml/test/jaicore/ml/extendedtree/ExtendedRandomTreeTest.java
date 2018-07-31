@@ -26,9 +26,10 @@ import weka.core.Instances;
 import weka.core.converters.ArffLoader.ArffReader;
 
 public class ExtendedRandomTreeTest {
-	private static String testFile = "resources/regression_data/cpu-medium.arff";
-//	private static String testFile = "resources/regression_data/cpu_verysmall.arff";
+//	private static String testFile = "resources/regression_data/cpu-medium.arff";
+	private static String testFile = "resources/regression_data/cpu_verysmall.arff";
 //	private static String testFile = "resources/regression_data/cloud.arff";
+//	private static String testFile = "resources/regression_data/cpu.small.arff";
 	
 
 	@Test
@@ -36,7 +37,9 @@ public class ExtendedRandomTreeTest {
 		try (BufferedReader reader = Files.newBufferedReader(Paths.get(testFile), StandardCharsets.UTF_8)) {
 			ArffReader arffReader = new ArffReader(reader);
 			Instances data = arffReader.getData();
+			
 			data.setClassIndex(data.numAttributes() - 1);
+			System.out.println(data);
 //			for(int i = 0; i < data.numInstances(); i++) {
 //				Instance instance = data.get(i);
 //				if(instance.classValue() == 0.0d)
@@ -44,8 +47,7 @@ public class ExtendedRandomTreeTest {
 //			}
 //			System.out.println(data);
 			ExtendedRandomTree tree = new ExtendedRandomTree();
-			tree.setSeed(ThreadLocalRandom.current().nextInt());
-			tree.setMinNum(5);
+			tree.setMinNum(7);
 			tree.setFeatureSpace(new FeatureSpace(data));
 			tree.buildClassifier(data);
 			tree.preprocess();
@@ -60,13 +62,12 @@ public class ExtendedRandomTreeTest {
 			for (int k = 1; k < allFeatures.size(); k++) {
 				for (int i = 0; i < powerlist.size(); i++) {
 					Set<Integer> features = powerlist.get(i);
+					System.out.println("Features in this iteration = " + features);
 					if (features.size() == k) {
 						double cont = tree.computeMarginalVarianceContributionForSubsetOfFeatures(features);
-//						System.out.println("contribution for " + features + ": " + cont);
-						// System.out.printf("Variance contribution of %s : %f\n", features.toString(),
-						// cont);
 						assertTrue(cont >= 0.0d);
 						sum += cont;
+						System.out.println("Contribution of " + features + ": " + cont);
 					}
 				}
 			}

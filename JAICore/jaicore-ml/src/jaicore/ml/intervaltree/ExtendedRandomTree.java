@@ -75,6 +75,8 @@ public class ExtendedRandomTree extends RandomTree {
 		this.partitioning = new HashMap<Tree, FeatureSpace>();
 		this.sizeOfPartitions = new HashMap<Tree, Double>();
 		this.leaves = new ArrayList<Tree>();
+		// important, otherwise some classdistributions may be null
+		this.setAllowUnclassifiedInstances(false);
 		componentsForSubsets = new HashMap<Set<Integer>, Double>();
 		varianceOfSubsetTotal = new HashMap<Set<Integer>, Double>();
 		varianceOfSubsetIndividual = new HashMap<Set<Integer>, Double>();
@@ -221,7 +223,7 @@ public class ExtendedRandomTree extends RandomTree {
 	 */
 	public double computeMarginalVarianceContributionForSubsetOfFeatures(Set<Integer> features) {
 		double vU;
-		if(this.totalVariance == 0.0d) {
+		if (this.totalVariance == 0.0d) {
 			System.out.println("The trees total variance is zero, predictions make no sense at this point!");
 			return Double.NaN;
 		}
@@ -241,23 +243,25 @@ public class ExtendedRandomTree extends RandomTree {
 				if (!varianceOfSubsetIndividual.containsKey(subset)) {
 					double temp = computeMarginalVarianceContributionForSubsetOfFeatures(subset);
 				}
-//				System.out.println("Subtracting " + varianceOfSubsetIndividual.get(subset) + " for " + subset);
+				// System.out.println("Subtracting " + varianceOfSubsetIndividual.get(subset) +
+				// " for " + subset);
 				vU -= varianceOfSubsetIndividual.get(subset);
-//				subtractor += varianceOfSubsetIndividual.get(subset);
+				// subtractor += varianceOfSubsetIndividual.get(subset);
 			}
 		}
-//		System.out.println("Individual var for \t\t" + features + ": " + vU);
+		// System.out.println("Individual var for \t\t" + features + ": " + vU);
 		// TODO check this
-//		if (vU < 0.0d)
-//			vU = 0.0d;
+		// if (vU < 0.0d)
+		// vU = 0.0d;
 		// System.out.println("subtracting for " + features.toString() + " = " +
 		// subtractor);
 		// System.out.println("result: " + vU);
-		if(vU < 0.0d)
+		if (vU < 0.0d)
 			vU = 0.0d;
 		varianceOfSubsetIndividual.put(features, vU);
 		double fraction = vU / totalVariance;
-//		System.out.println("Variance contribution for \t" + features + ": " + fraction);
+		// System.out.println("Variance contribution for \t" + features + ": " +
+		// fraction);
 		// componentsForSubsets.put(features, fraction);
 		return fraction;
 	}
@@ -291,10 +295,12 @@ public class ExtendedRandomTree extends RandomTree {
 				double prediction;
 				if (leaf.getClassDistribution() != null) {
 					prediction = leaf.getClassDistribution()[0];
-				} else
+				} else {
+					System.out.println("class distribution of leaf is null!");
 					return Double.NaN;
+				}
 				result += prediction * fractionOfSpaceForThisLeaf;
-				if(prediction == 0.0d)
+				if (prediction == 0.0d)
 					System.out.println("Prediction is zero!");
 				consistentWithAnyLeaf = true;
 			}
@@ -347,6 +353,7 @@ public class ExtendedRandomTree extends RandomTree {
 	 * 
 	 * @param subSpace
 	 * @param node
+	 * @throws Exception 
 	 */
 	private void computePartitioning(FeatureSpace subSpace, Tree node) {
 
@@ -354,12 +361,24 @@ public class ExtendedRandomTree extends RandomTree {
 		int attribute = node.getAttribute();
 		Tree[] children = node.getSuccessors();
 
-		// if node is leaf add partition to the map
+//		boolean allChildrenEmpty = true;
+		if (children != null) {
+			for (Tree child : children) {
+				if ((child.getClassDistribution() == null) && (child.getAttribute() == -1))
+					System.out.println(node);
+			}
+		}
+		// if node is leaf add partition to the map or
 		if (attribute == -1) {
 			double rangeSize = subSpace.getRangeSize();
-			leaves.add(node);
-			partitioning.put(node, subSpace);
-			sizeOfPartitions.put(node, rangeSize);
+			if (node.getClassDistribution() != null) {
+				leaves.add(node);
+				partitioning.put(node, subSpace);
+				sizeOfPartitions.put(node, rangeSize);
+			}else
+			{
+				System.out.println("Nodes class distribution is null. Corresponding Feature Space Size : " + subSpace.getRangeSize());
+			}
 			// System.out.println("range size: " + rangeSize);
 			return;
 		}
@@ -501,7 +520,7 @@ public class ExtendedRandomTree extends RandomTree {
 		double weightedSum = 0, weightedSumOfSquares = 0;
 		double num = 0;
 		WeightedVarianceHelper stat = new WeightedVarianceHelper();
-		//		 System.out.println("marginal predictions for: " + features);
+		// System.out.println("marginal predictions for: " + features);
 		for (List<Observation> curObs : observationProduct) {
 			ArrayList<Integer> featureList = new ArrayList<Integer>();
 			featureList.addAll(features);
@@ -523,23 +542,24 @@ public class ExtendedRandomTree extends RandomTree {
 			System.out.println();
 			System.out.println("marginal pred = \t" + marginalPrediction);
 			double sizeOfAllButFeatures = this.getFeatureSpace().getRangeSizeOfAllButSubset(features);
-            System.out.println("sum_of_weights = \t" + sizeOfAllButFeatures);
-            System.out.println("prod of int sizes = \t" + prodOfIntervalSizes);
-			System.out.println("weight for var = \t" + prodOfIntervalSizes*sizeOfAllButFeatures);
-			stat.push(marginalPrediction, sizeOfAllButFeatures*prodOfIntervalSizes);
-//			weightedSum += marginalPrediction;
-//			weightedSumOfSquares += marginalPrediction * marginalPrediction;
-//			num++;
-			
+			System.out.println("sum_of_weights = \t" + sizeOfAllButFeatures);
+			System.out.println("prod of int sizes = \t" + prodOfIntervalSizes);
+			System.out.println("weight for var = \t" + prodOfIntervalSizes * sizeOfAllButFeatures);
+			if (!Double.isNaN(marginalPrediction))
+				stat.push(marginalPrediction, sizeOfAllButFeatures * prodOfIntervalSizes);
+			// weightedSum += marginalPrediction;
+			// weightedSumOfSquares += marginalPrediction * marginalPrediction;
+			// num++;
+
 		}
-//		weightedSumOfSquares /= num;
-//		weightedSum /= num;
+		// weightedSumOfSquares /= num;
+		// weightedSum /= num;
 		// System.out.println("wsos = " + weightedSumOfSquares + "\t ws = " +
 		// weightedSum);
-//		vU = weightedSumOfSquares - (weightedSum * weightedSum);
+		// vU = weightedSumOfSquares - (weightedSum * weightedSum);
 		vU = stat.getVariancePopulaion();
 		varianceOfSubsetTotal.put(features, vU);
-//		System.out.println("Total var for \t\t\t" + features + ": " + vU);
+		// System.out.println("Total var for \t\t\t" + features + ": " + vU);
 		return vU;
 	}
 
@@ -590,31 +610,30 @@ public class ExtendedRandomTree extends RandomTree {
 			System.out.println(sorted);
 		}
 	}
-	
-	private class WeightedVarianceHelper{
+
+	private class WeightedVarianceHelper {
 		private int numberOfSamples;
-		private double average,squaredDistanceToMean,sumOfWeights;
-		
+		private double average, squaredDistanceToMean, sumOfWeights;
+
 		public WeightedVarianceHelper() {
 			this.average = 0.0d;
 			this.squaredDistanceToMean = 0.0d;
 			this.sumOfWeights = 0.0d;
 		};
-		
+
 		public void push(double x, double weight) {
-			if(weight <= 0.0d)
+			if (weight <= 0.0d)
 				throw new IllegalArgumentException("Weights have to be strictly positive!");
 			double delta = x - average;
-			sumOfWeights+=weight;
+			sumOfWeights += weight;
 			average += delta * weight / sumOfWeights;
-			squaredDistanceToMean += weight*delta*(x-average);
+			squaredDistanceToMean += weight * delta * (x - average);
 		}
-		
+
 		public double getVariancePopulaion() {
-			if(sumOfWeights>0.0d) {
-				return Math.max(0.0d, squaredDistanceToMean/sumOfWeights);
-			}
-			else
+			if (sumOfWeights > 0.0d) {
+				return Math.max(0.0d, squaredDistanceToMean / sumOfWeights);
+			} else
 				return Double.NaN;
 		}
 	}
