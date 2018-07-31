@@ -58,15 +58,15 @@ public class FXCode extends Application{
      * Opens a new Gui-Window
      */
     
-    public void open() {
-    	open(null, "Test");
+    public boolean open() {
+    	return open(null, "Test");
     }
     
-    public void open(Recorder recorder) {
-    	open(recorder, "Test");
+    public boolean open(Recorder recorder) {
+    	return open(recorder, "Test");
     }
     
-    public void open(Recorder recorder, String title){
+    public boolean open(Recorder recorder, String title){
         //FX-elements
         BorderPane root = new BorderPane();
         BorderPane top = new BorderPane();
@@ -131,6 +131,8 @@ public class FXCode extends Application{
         stage.show();
         
         this.registerRecorder(recorder);
+        
+        return true;
 
     }
     

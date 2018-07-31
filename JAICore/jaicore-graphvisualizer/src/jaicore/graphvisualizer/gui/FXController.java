@@ -268,17 +268,17 @@ public class FXController implements Initializable, NodeListener {
      */
     @FXML
     public void liveButton(ActionEvent event){
-//        if(index == maxIndex) {
-//            if (live)
-//                live = false;
-//            else
-//                live = true;
-//
-//            this.controlEventBus.post(new IsLiveEvent(live));
-//            return;
-//        }
-//        if(livebutton.isSelected())
-//            livebutton.fire();
+        if(index == maxIndex) {
+            if (live)
+                live = false;
+            else
+                live = true;
+
+            this.controlEventBus.post(new IsLiveEvent(live));
+            return;
+        }
+        if(livebutton.isSelected())
+            livebutton.fire();
     }
 
     /**
