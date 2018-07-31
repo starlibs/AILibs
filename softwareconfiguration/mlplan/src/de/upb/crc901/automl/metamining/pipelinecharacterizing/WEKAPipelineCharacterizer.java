@@ -11,6 +11,8 @@ import de.upb.crc901.automl.pipeline.basic.SupervisedFilterSelector;
 import treeminer.FrequentSubtreeFinder;
 import treeminer.TreeMiner;
 import treeminer.TreeRepresentationUtils;
+import weka.classifiers.AbstractClassifier;
+import weka.classifiers.Classifier;
 
 /**
  * A characterizer for MLPipelines that characterizes them using an ontology and
@@ -110,6 +112,23 @@ public class WEKAPipelineCharacterizer implements IPipelineCharacterizer {
 		// Merge preprocessors and classifiers
 		return TreeRepresentationUtils.addChildrenToNode(pipelineTreeName,
 				Arrays.asList(preprocessorsSubTreeRepresentation, classifierBranchRepresentation));
+	}
+	
+	private List<String> getParametersForClassifier(Classifier classifier) {
+		List<String> parameters = new ArrayList<String>();
+		
+		// Check if classifier has options
+		if (classifier instanceof AbstractClassifier) {
+			AbstractClassifier abstractClassifier = (AbstractClassifier) classifier;
+			if (abstractClassifier.getOptions() != null && abstractClassifier.getOptions().length > 0) {
+				
+				// Get options
+				abstractClassifier.getOptions();
+				//TODO
+			}
+		} 
+		
+		return parameters;
 	}
 
 	@Override
