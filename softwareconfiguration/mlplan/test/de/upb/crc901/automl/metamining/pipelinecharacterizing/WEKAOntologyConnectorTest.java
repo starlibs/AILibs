@@ -37,7 +37,7 @@ public class WEKAOntologyConnectorTest {
 	
 	@Test
 	public void testGetAncestorsOfSearchers() {
-		connector.getAvailableEvaluators().forEach(searcher -> {
+		connector.getAvailableSearchers().forEach(searcher -> {
 			List<String> ancestors = connector.getAncestorsOfSearcher(searcher);
 			assertEquals(ancestors.get(0), connector.getSearcherTopNode());
 			assertEquals(ancestors.get(ancestors.size()-1), searcher);
