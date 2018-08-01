@@ -2,6 +2,9 @@ package autofe.db.test;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.junit.Test;
 
 import autofe.db.model.database.AggregationFunction;
@@ -47,9 +50,26 @@ public class SqlUtilsTest {
 		Path path = bf.getPath();
 		path.addPathElement(new BackwardRelationship("Orders", "Product", "OrderId"), AggregationFunction.AVG);
 		path.addPathElement(new ForwardRelationship("TestTable", "Orders", "TestTableId"), null);
-		path.addPathElement(new BackwardRelationship("TargetTable", "TestTable", "TargetTableId"), AggregationFunction.SUM);
-		
+		path.addPathElement(new BackwardRelationship("TargetTable", "TestTable", "TargetTableId"),
+				AggregationFunction.SUM);
+
 		assertEquals("FE_BWD_PRICE_AVGORDERS_TESTTABLE_SUMTARGETTABLE", SqlUtils.getTableNameForFeature(bf));
+	}
+
+	@Test
+	public void testForwardFeatureSql() {
+		Database db = DBUtils.deserializeFromFile(DATABASE_MODEL_FILE);
+		Table customer = DBUtils.getTableByName("Customer", db);
+		Attribute firstName = DBUtils.getAttributeByName("FirstName", customer);
+		ForwardFeature credibleFeature = new ForwardFeature(firstName);
+
+		List<ForwardRelationship> joinPath = Collections
+				.singletonList(new ForwardRelationship("BankAccount", "Customer", "BankAccountId"));
+
+		String expected = "SELECT BankAccount.BankAccountId, Customer.FirstName FROM BankAccount JOIN Customer ON (Customer.BankAccountId = BankAccount.BankAccountId)";
+
+		assertEquals(expected, SqlUtils.generateForwardSql(joinPath, credibleFeature, db));
+
 	}
 
 }

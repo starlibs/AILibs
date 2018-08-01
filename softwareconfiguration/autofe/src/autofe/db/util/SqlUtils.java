@@ -1,11 +1,16 @@
 package autofe.db.util;
 
+import java.util.List;
+
 import autofe.db.model.database.AbstractFeature;
 import autofe.db.model.database.AggregationFunction;
+import autofe.db.model.database.Attribute;
 import autofe.db.model.database.BackwardFeature;
+import autofe.db.model.database.Database;
 import autofe.db.model.database.ForwardFeature;
 import autofe.db.model.database.Path;
 import autofe.db.model.relation.AbstractRelationship;
+import autofe.db.model.relation.ForwardRelationship;
 
 public class SqlUtils {
 
@@ -44,6 +49,24 @@ public class SqlUtils {
 			}
 		}
 		return sb.toString().toUpperCase();
+	}
+
+	public static String generateForwardSql(List<ForwardRelationship> joins, ForwardFeature feature, Database db) {
+		String startTableName = joins.get(0).getFromTableName();
+		String toTableName = joins.get(joins.size() - 1).getToTableName();
+
+		ForwardRelationship firstJoin = joins.get(0);
+		firstJoin.setContext(db);
+		Attribute primaryKey = DBUtils.getPrimaryKey(firstJoin.getFrom(), db);
+
+		StringBuilder sb = new StringBuilder();
+		sb.append(String.format("SELECT %1$s.%2$s, %3$s.%4$s FROM %1$s ", startTableName, primaryKey.getName(), toTableName,
+				feature.getParent().getName()));
+		for (ForwardRelationship join : joins) {
+			sb.append(String.format("JOIN %1s ON (%1$s.%2$s = %3$s.%2$s)", join.getToTableName(),
+					join.getCommonAttributeName(), join.getFromTableName()));
+		}
+		return sb.toString();
 	}
 
 }

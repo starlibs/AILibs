@@ -218,6 +218,16 @@ public class DBUtils {
 		return false;
 	}
 
+	public static Attribute getPrimaryKey(Table table, Database db) {
+		for (Attribute attribute : table.getColumns()) {
+			if (attribute.isPrimaryKey()) {
+				return attribute;
+			}
+		}
+
+		return null;
+	}
+
 	public static List<ForwardRelationship> getJoinTables(Table from, Table to, Database db) {
 
 		return null;
