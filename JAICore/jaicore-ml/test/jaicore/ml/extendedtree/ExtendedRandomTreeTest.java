@@ -27,8 +27,8 @@ import weka.core.converters.ArffLoader.ArffReader;
 
 public class ExtendedRandomTreeTest {
 //	private static String testFile = "resources/regression_data/cpu-medium.arff";
-	private static String testFile = "resources/regression_data/cpu_verysmall.arff";
-//	private static String testFile = "resources/regression_data/cloud.arff";
+//	private static String testFile = "resources/regression_data/cpu_verysmall.arff";
+	private static String testFile = "resources/regression_data/cloud.arff";
 //	private static String testFile = "resources/regression_data/cpu.small.arff";
 	
 
@@ -47,7 +47,6 @@ public class ExtendedRandomTreeTest {
 //			}
 //			System.out.println(data);
 			ExtendedRandomTree tree = new ExtendedRandomTree();
-			tree.setMinNum(10);
 			tree.setFeatureSpace(new FeatureSpace(data));
 			tree.buildClassifier(data);
 			tree.preprocess();

@@ -41,7 +41,7 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 		for (String identifier : performanceKnowledgeBase.getPerformanceSamplesByIdentifier().get(benchmarkName)
 				.keySet()) {
 			if (forests.get(identifier) == null) {
-				ExtendedRandomForest curForest = new ExtendedRandomForest();
+				ExtendedRandomForest curForest = new ExtendedRandomForest(5.0d,16);
 				forests.put(identifier, curForest);
 			}
 			if (importanceDictionary.get(identifier) == null) {
@@ -69,6 +69,7 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 		String pipelineIdentifier = Util.getComponentNamesOfComposition(composition);
 		ExtendedRandomForest forest = forests.get(pipelineIdentifier);
 		Instances data = performanceKnowledgeBase.createInstancesForPerformanceSamples(benchmarkName, composition);
+		System.out.println(data);
 		if (forest == null) {
 			this.initializeForests(benchmarkName);
 		}
@@ -92,6 +93,7 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 					// sum += currentImportance;
 					importanceDictionary.get(pipelineIdentifier).put(subset, currentImportance);
 				} else if (importanceDictionary.get(pipelineIdentifier).containsKey(subset)) {
+					System.out.println("Taking value from dictionary");
 					currentImportance = importanceDictionary.get(pipelineIdentifier).get(subset);
 				}
 				// if no value is available in the dictionary, compute it
@@ -120,8 +122,8 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 	 * @return
 	 * @throws Exception
 	 */
-	public Set<String> extractImportantParameters(ComponentInstance composition, double importanceThreshold, boolean recompute)
-			throws Exception {
+	public Set<String> extractImportantParameters(ComponentInstance composition, double importanceThreshold,
+			boolean recompute) throws Exception {
 		String pipelineIdentifier = Util.getComponentNamesOfComposition(composition);
 		Instances data = performanceKnowledgeBase.createInstancesForPerformanceSamples(benchmarkName, composition);
 		// largest subset size = all attributes minus class attribute

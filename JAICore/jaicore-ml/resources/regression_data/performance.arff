@@ -1,0 +1,19 @@
+@relation performance_samples
+
+@attribute weka.classifiers.trees.RandomForest::featuresActivator {0,1}
+@attribute weka.classifiers.trees.RandomForest::depthActivator {0,1}
+@attribute '[AbstractClassifier, BaseClassifier, AtomicClassifier]:weka.classifiers.trees.RandomForest(featuresActivator,depthActivator,depth,I,K):{}{depth=0, depthActivator=0, I=101, K=0, featuresActivator=0}::depth' numeric
+@attribute '[AbstractClassifier, BaseClassifier, AtomicClassifier]:weka.classifiers.trees.RandomForest(featuresActivator,depthActivator,depth,I,K):{}{depth=0, depthActivator=0, I=101, K=0, featuresActivator=0}::I' numeric
+@attribute '[AbstractClassifier, BaseClassifier, AtomicClassifier]:weka.classifiers.trees.RandomForest(featuresActivator,depthActivator,depth,I,K):{}{depth=0, depthActivator=0, I=101, K=0, featuresActivator=0}::K' numeric
+@attribute performance_score numeric
+
+@data
+0,1,1,76,0,0.30715
+1,0,0,11,4,0.046324
+1,1,4,25,3,0.081571
+0,0,0,6,0,0.066465
+0,0,0,20,0,0.030211
+0,0,0,14,0,0.036254
+0,0,0,11,0,0.042296
+0,0,0,40,0,0.036254
+0,0,0,35,0,0.06143

@@ -19,6 +19,16 @@ public class ExtendedRandomForest extends RandomForest {
 		this.setClassifier(erTree);
 	}
 	
+	
+	public ExtendedRandomForest(double minNum, int numTrees, FeatureSpace featureSpace) {
+		super();
+		ExtendedRandomTree erTree = new ExtendedRandomTree();
+		erTree.setFeatureSpace(featureSpace);
+		erTree.setMinNum(minNum);
+		this.setClassifier(erTree);
+		this.setNumIterations(numTrees);
+	}
+	
 	public ExtendedRandomForest(double minNum, int numTrees) {
 		super();
 		ExtendedRandomTree erTree = new ExtendedRandomTree();

@@ -186,20 +186,6 @@ public class HASCOWithParameterPruning<T, N, A, V extends Comparable<V>, R exten
 						String identifier = Util.getComponentNamesOfComposition(composition);
 						System.out.println("add performance sample");
 						performanceKB.addPerformanceSample(benchmarkName, composition, score, false);
-						// logger.info("performanceKB has enough samples to copmute importance");
-						// if (performanceKB.getNumSamples(benchmarkName, identifier) > 2) {
-						// logger.info(performanceKB.createInstancesForPerformanceSamples(benchmarkName,
-						// composition)
-						// .toString());
-						// HASCOJ.this.performanceKB.addPerformanceSampleToDB(benchmarkName, composition,
-						// score);
-						// logger.info("ADDED!");
-						// }
-
-						// Try epsilon = 0.4, k = 2
-						// logger.info("important params: "
-						// + parameterImportanceEstimator.extractImportanceParameters(composition, 0.4,
-						// 2));
 						System.out.println("Using importance estimation: " + useParameterImportanceEstimation);
 						if (HASCOWithParameterPruning.this.scoreOfBestRecognizedSolution == null
 								|| HASCOWithParameterPruning.this.scoreOfBestRecognizedSolution.compareTo(scoreOfSolution) > 0) {
