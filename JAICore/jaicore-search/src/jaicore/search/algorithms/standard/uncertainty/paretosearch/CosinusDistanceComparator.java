@@ -1,10 +1,8 @@
 package jaicore.search.algorithms.standard.uncertainty.paretosearch;
 
-import jaicore.search.structure.core.Node;
 import java.util.Comparator;
-import java.lang.Double;
 
-public class CosinusDistanceComparator implements Comparator<ParetoNode<?,Double>> {
+public class CosinusDistanceComparator<T, V extends Comparable<V>> implements Comparator<ParetoNode<T,V>> {
 
     public final double x1;
     public final double x2;
@@ -20,7 +18,7 @@ public class CosinusDistanceComparator implements Comparator<ParetoNode<?,Double
      * @param second
      * @return negative iff first < second, 0 iff first == second, positive iff first > second
      */
-    public int compare(ParetoNode<?,Double> first, ParetoNode<?,Double> second) {
+    public int compare(ParetoNode<T,V> first, ParetoNode<T,V> second) {
 
         Double firstF = (Double) first.node.getAnnotation("f");
         Double firstU = (Double) first.node.getAnnotation("uncertainty");

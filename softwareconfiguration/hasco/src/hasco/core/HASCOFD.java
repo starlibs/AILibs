@@ -41,8 +41,8 @@ public class HASCOFD<T,V extends Comparable<V>> extends HASCO<T, TFDNode, String
 		this(new ORGraphSearchFactory<>(), converter, nodeEvaluator, nameOfRequiredInterface, benchmark);
 	}
 	
-	public HASCOFD(Factory<? extends T> converter, INodeEvaluator<TFDNode, V> nodeEvaluator, String nameOfRequiredInterface, IObjectEvaluator<T, V> benchmark, OversearchAvoidanceConfig<TFDNode> oversearchAvoidanceConfig) {
+	public HASCOFD(Factory<? extends T> converter, INodeEvaluator<TFDNode, V> nodeEvaluator, String nameOfRequiredInterface, IObjectEvaluator<T, V> benchmark, OversearchAvoidanceConfig<TFDNode, V> oversearchAvoidanceConfig) {
 		this(new UncertaintyORGraphSearchFactory<>(oversearchAvoidanceConfig, new CEOCTFDPathUnifier()), converter, nodeEvaluator, nameOfRequiredInterface, benchmark);
-		((UncertaintyORGraphSearchFactory)getSearchFactory()).setSolutionEvaluator(getSolutionEvaluator());
+		((UncertaintyORGraphSearchFactory<TFDNode, String, V>)getSearchFactory()).setSolutionEvaluator(getSolutionEvaluator());
 	}
 }

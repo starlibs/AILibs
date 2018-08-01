@@ -49,7 +49,7 @@ public class HASCOForWekaML implements IObservableGraphAlgorithm<TFDNode, String
 
 	private boolean isCanceled = false;
 
-	private OversearchAvoidanceConfig<TFDNode> oversearchAvoidanceConfig = new OversearchAvoidanceConfig<>(
+	private OversearchAvoidanceConfig<TFDNode, Double> oversearchAvoidanceConfig = new OversearchAvoidanceConfig<>(
 			OversearchAvoidanceConfig.OversearchAvoidanceMode.NONE, 123l);
 	private Collection<Object> listeners = new ArrayList<>();
 	private HASCOFD<Classifier, Double>.HASCOSolutionIterator hascoRun;
@@ -180,7 +180,7 @@ public class HASCOForWekaML implements IObservableGraphAlgorithm<TFDNode, String
 		return this.loggerName;
 	}
 
-	public void setOversearchAvoidanceMode(final OversearchAvoidanceConfig oversearchAvoidanceConfig) {
+	public void setOversearchAvoidanceMode(final OversearchAvoidanceConfig<TFDNode, Double> oversearchAvoidanceConfig) {
 		this.oversearchAvoidanceConfig = oversearchAvoidanceConfig;
 	}
 
