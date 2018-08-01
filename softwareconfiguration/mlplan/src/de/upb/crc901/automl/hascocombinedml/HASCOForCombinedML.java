@@ -171,7 +171,7 @@ public class HASCOForCombinedML implements IObservableGraphAlgorithm<TFDNode, St
 				return;
 			}
 		}
-		HASCOFD<MLServicePipeline> hasco = new HASCOFD<>(new MLServicePipelineFactory(), this.preferredNodeEvaluator,
+		HASCOFD<MLServicePipeline,Double> hasco = new HASCOFD<>(new MLServicePipelineFactory(), this.preferredNodeEvaluator,
 				CONFIG.getRequestedInterface(), searchBenchmark);
 		hasco.addComponents(this.cl.getComponents());
 		hasco.addParamRefinementConfigurations(this.cl.getParamConfigs());

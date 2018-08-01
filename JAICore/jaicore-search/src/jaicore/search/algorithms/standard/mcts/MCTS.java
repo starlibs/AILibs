@@ -11,6 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jaicore.graph.LabeledGraph;
+import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
+import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
+import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
 import jaicore.search.algorithms.interfaces.IObservableORGraphSearch;
 import jaicore.search.algorithms.standard.core.IGraphDependentNodeEvaluator;
 import jaicore.search.algorithms.standard.core.INodeEvaluator;
@@ -49,6 +52,7 @@ public class MCTS<T,A,V extends Comparable<V>> implements IObservableORGraphSear
 	
 	protected final Map<List<T>, V> playouts = new HashMap<>();
 
+	private boolean initialized = false;
 	private final T root;
 	protected final LabeledGraph<T, A> exploredGraph;
 	private int timeoutInS = -1;
@@ -89,6 +93,11 @@ public class MCTS<T,A,V extends Comparable<V>> implements IObservableORGraphSear
 
 	@Override
 	public List<T> nextSolution() {
+		
+		if (!initialized) {
+			initialized = true;
+			graphEventBus.post(new GraphInitializedEvent<T>(root));
+		}
 		
 		/* iterate over playouts */
 		try {
@@ -137,6 +146,7 @@ public class MCTS<T,A,V extends Comparable<V>> implements IObservableORGraphSear
 				
 			logger.debug("Tree policy decides to expand {} taking action {} to {}", current, chosenAction, next);
 			current = next;
+			graphEventBus.post(new NodeTypeSwitchEvent<T>(next, "expanding"));
 			path.add(current);
 			logger.debug("Chosen action: {}. Successor: {}", chosenAction, current);
 		}
@@ -155,12 +165,21 @@ public class MCTS<T,A,V extends Comparable<V>> implements IObservableORGraphSear
 				logger.debug("Adding edge {} -> {} with label {}", d.getFrom(), d.getTo(), d.getAction());
 				exploredGraph.addItem(d.getTo());
 				exploredGraph.addEdge(d.getFrom(), d.getTo(), d.getAction());
+				graphEventBus.post(new NodeReachedEvent<>(d.getFrom(), d.getTo(), isGoal(d.getTo()) ? "or_solution" : "or_open"));
 				actions.add(d.getAction());
 			}
 			current = successorStates.get(defaultPolicy.getAction(current, successorStates));
 			path.add(current);
 		}
 		logger.info("Draw playout path {}.", path);
+		
+		/* change all node types on path to closed again */
+		while (true) {
+			if (exploredGraph.getPredecessors(current).isEmpty())
+				break;
+			current = exploredGraph.getPredecessors(current).iterator().next();
+			graphEventBus.post(new NodeTypeSwitchEvent<T>(current, "or_closed"));
+		}
 		return path;
 	}
 	

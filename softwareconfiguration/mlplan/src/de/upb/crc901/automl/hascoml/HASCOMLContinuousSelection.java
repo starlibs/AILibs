@@ -188,7 +188,7 @@ public class HASCOMLContinuousSelection<C> implements IObservableGraphAlgorithm<
 				return;
 			}
 		}
-		HASCOFD<C> hasco = new HASCOFD<>(converter, this.preferredNodeEvaluator, this.requestedInterface,
+		HASCOFD<C, Double> hasco = new HASCOFD<>(converter, this.preferredNodeEvaluator, this.requestedInterface,
 				this.searchBenchmark);
 		hasco.addComponents(this.cl.getComponents());
 		hasco.addParamRefinementConfigurations(this.cl.getParamConfigs());

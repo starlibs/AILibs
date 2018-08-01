@@ -1,12 +1,5 @@
 package hasco.test;
 
-import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
-import jaicore.ml.WekaUtil;
-import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionSolution;
-import jaicore.planning.graphgenerators.task.tfd.TFDNode;
-import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;
-import jaicore.search.structure.core.Node;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -17,7 +10,6 @@ import java.util.Map;
 import java.util.Random;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.junit.Test;
 
 import hasco.core.HASCOFD;
 import hasco.core.Solution;
@@ -25,6 +17,12 @@ import hasco.model.Component;
 import hasco.model.NumericParameterDomain;
 import hasco.model.Parameter;
 import hasco.model.ParameterRefinementConfiguration;
+import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
+import jaicore.ml.WekaUtil;
+import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionSolution;
+import jaicore.planning.graphgenerators.task.tfd.TFDNode;
+import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;
+import jaicore.search.structure.core.Node;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
@@ -41,7 +39,7 @@ public class SimpleAutoMLTest {
 
     /* create algorithm */
     Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramConfigs = new HashMap<>();
-    HASCOFD<Classifier> hasco = new HASCOFD<>(groundComponent -> {
+    HASCOFD<Classifier,Double> hasco = new HASCOFD<>(groundComponent -> {
       Component component = groundComponent.getComponent();
       Map<String, String> paramValues = groundComponent.getParameterValues();
       String className = component.getName();
