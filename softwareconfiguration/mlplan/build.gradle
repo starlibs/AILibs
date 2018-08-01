@@ -54,7 +54,7 @@ dependencies {
 
 	// wrapped library dependencies
 	compile group: 'de.upb.isys', name: 'meka', version: '0.0.1'
-	compile group: 'de.upb.isys', name: 'interruptable-weka', version: '0.0.2'
+	compile group: 'de.upb.isys', name: 'interruptable-weka', version: '0.0.1'
 
 	// OWL API
 	compile 'net.sourceforge.owlapi:owlapi-distribution:5.1.0'

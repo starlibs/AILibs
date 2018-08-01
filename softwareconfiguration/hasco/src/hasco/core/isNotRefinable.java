@@ -23,8 +23,7 @@ public class isNotRefinable implements EvaluablePredicate {
 		super();
 		this.components = components;
 		this.refinementConfiguration = refinementConfiguration;
-		// TODO
-		this.p = new isValidParameterRangeRefinementPredicate(components, refinementConfiguration, null);
+		this.p = new isValidParameterRangeRefinementPredicate(components, refinementConfiguration);
 	}
 
 	@Override

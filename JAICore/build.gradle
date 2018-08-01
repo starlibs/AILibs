@@ -44,7 +44,7 @@ configure(subprojects.findAll()) {
 
 		// Weka and MEKA
 		compile group: 'de.upb.isys', name: 'meka', version: '0.0.1'
-		compile group: 'de.upb.isys', name: 'interruptable-weka', version: '0.0.2'
+		compile group: 'de.upb.isys', name: 'interruptable-weka', version: '0.0.1'
 
 		// Basics
 		compile 'com.google.guava:guava:18.0'
