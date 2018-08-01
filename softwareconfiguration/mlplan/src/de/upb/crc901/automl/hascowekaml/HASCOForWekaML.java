@@ -23,8 +23,10 @@ import jaicore.basic.FileUtil;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.graph.IObservableGraphAlgorithm;
 import jaicore.logging.LoggerUtil;
+import jaicore.ml.evaluation.ClassifierEvaluator;
 import jaicore.ml.evaluation.MonteCarloCrossValidationEvaluator;
 import jaicore.ml.evaluation.MulticlassEvaluator;
+import jaicore.ml.evaluation.TimeoutableEvaluator;
 import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionSolution;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.search.algorithms.standard.core.INodeEvaluator;
@@ -40,20 +42,23 @@ public class HASCOForWekaML implements IObservableGraphAlgorithm<TFDNode, String
 
 	public static class HASCOForWekaMLSolution extends Solution<ForwardDecompositionSolution, Classifier, Double> {
 
-		public HASCOForWekaMLSolution(Solution<ForwardDecompositionSolution, Classifier, Double> solution) {
+		public HASCOForWekaMLSolution(final Solution<ForwardDecompositionSolution, Classifier, Double> solution) {
 			super(solution);
 		}
 	}
 
 	private boolean isCanceled = false;
-	private OversearchAvoidanceConfig<TFDNode> oversearchAvoidanceConfig = new OversearchAvoidanceConfig<>(OversearchAvoidanceConfig.OversearchAvoidanceMode.NONE, 123l);
-	private Collection<Object> listeners = new ArrayList<>();
-	private HASCOFD<Classifier>.HASCOSolutionIterator hascoRun;
-	private HASCOFD<Classifier> hasco;
-	private INodeEvaluator<TFDNode, Double> preferredNodeEvaluator = n -> null;
-	private final File wekaSpaceConfigurationFile; // this is a hasco file describing the
 
-	public HASCOForWekaML(File hascoConfigurationFile) {
+	private OversearchAvoidanceConfig<TFDNode> oversearchAvoidanceConfig = new OversearchAvoidanceConfig<>(
+			OversearchAvoidanceConfig.OversearchAvoidanceMode.NONE, 123l);
+	private Collection<Object> listeners = new ArrayList<>();
+	private HASCOFD<Classifier, Double>.HASCOSolutionIterator hascoRun;
+	private HASCOFD<Classifier, Double> hasco;
+	private INodeEvaluator<TFDNode, Double> preferredNodeEvaluator = null;
+	private final File wekaSpaceConfigurationFile; // this is a hasco file describing the
+	private int timeoutForSingleFEvaluation = -1;
+
+	public HASCOForWekaML(final File hascoConfigurationFile) {
 		this.wekaSpaceConfigurationFile = hascoConfigurationFile;
 	}
 
@@ -77,7 +82,7 @@ public class HASCOForWekaML implements IObservableGraphAlgorithm<TFDNode, String
 
 		/* configuring existing components */
 		ComponentLoader cl = new ComponentLoader();
-		cl.loadComponents(wekaSpaceConfigurationFile);
+		cl.loadComponents(this.wekaSpaceConfigurationFile);
 
 		/* create algorithm */
 		if (this.preferredNodeEvaluator == null) {
@@ -85,21 +90,28 @@ public class HASCOForWekaML implements IObservableGraphAlgorithm<TFDNode, String
 				this.preferredNodeEvaluator = new PreferenceBasedNodeEvaluator(cl.getComponents(),
 						FileUtil.readFileAsList("model/combined/preferredNodeEvaluator.txt"));
 			} catch (IOException e) {
-				logger.error("Problem loading the preference-based node evaluator. Details:\n{}",
+				this.logger.error("Problem loading the preference-based node evaluator. Details:\n{}",
 						LoggerUtil.getExceptionInfo(e));
 				return;
 			}
 		}
+
+		ClassifierEvaluator ce;
+		if (this.timeoutForSingleFEvaluation > 0) {
+			ce = new TimeoutableEvaluator(
+					new MonteCarloCrossValidationEvaluator(new MulticlassEvaluator(new Random(3)), 3, data, .7f),
+					this.timeoutForSingleFEvaluation * 1000);
+		} else {
+			ce = new MonteCarloCrossValidationEvaluator(new MulticlassEvaluator(new Random(3)), 3, data, .7f);
+		}
+
 		/* create algorithm */
-		HASCOFD<Classifier> hasco = new HASCOFD<>(
-				new WEKAPipelineFactory(),
-				this.preferredNodeEvaluator,
-				"AbstractClassifier",
-				new MonteCarloCrossValidationEvaluator(new MulticlassEvaluator(new Random(3)), 3, data, .7f),
-				this.oversearchAvoidanceConfig
-		);
-		if (this.loggerName != null && this.loggerName.length() > 0)
-			hasco.setLoggerName(loggerName + ".hasco");
+		HASCOFD<Classifier, Double> hasco = new HASCOFD<>(new WEKAPipelineFactory(), this.preferredNodeEvaluator,
+				"AbstractClassifier", ce, this.oversearchAvoidanceConfig);
+
+		if (this.loggerName != null && this.loggerName.length() > 0) {
+			hasco.setLoggerName(this.loggerName + ".hasco");
+		}
 
 		hasco.addComponents(cl.getComponents());
 		hasco.addParamRefinementConfigurations(cl.getParamConfigs());
@@ -116,9 +128,9 @@ public class HASCOForWekaML implements IObservableGraphAlgorithm<TFDNode, String
 			this.solutionsFoundByHASCO.add(nextSolution);
 		}
 		if (deadlineReached) {
-			logger.info("Deadline has been reached");
+			this.logger.info("Deadline has been reached");
 		} else if (this.isCanceled) {
-			logger.info("Interrupting HASCO due to cancel.");
+			this.logger.info("Interrupting HASCO due to cancel.");
 		}
 	}
 
@@ -150,28 +162,33 @@ public class HASCOForWekaML implements IObservableGraphAlgorithm<TFDNode, String
 		this.preferredNodeEvaluator = preferredNodeEvaluator;
 	}
 
+	public void setTimeoutForSingleFEvaluation(final int timeoutForSingleFEvaluation) {
+		System.out.println("timeoutForSingleFEvaluation=" + timeoutForSingleFEvaluation);
+		this.timeoutForSingleFEvaluation = timeoutForSingleFEvaluation;
+	}
+
 	@Override
-	public void setLoggerName(String name) {
-		logger.info("Switching logger from {} to {}", logger.getName(), name);
+	public void setLoggerName(final String name) {
+		this.logger.info("Switching logger from {} to {}", this.logger.getName(), name);
 		this.loggerName = name;
-		logger = LoggerFactory.getLogger(name);
-		logger.info("Activated logger {} with name {}", name, logger.getName());
+		this.logger = LoggerFactory.getLogger(name);
+		this.logger.info("Activated logger {} with name {}", name, this.logger.getName());
 	}
 
 	@Override
 	public String getLoggerName() {
-		return loggerName;
+		return this.loggerName;
 	}
 
-	public void setOversearchAvoidanceMode(OversearchAvoidanceConfig<TFDNode> oversearchAvoidanceConfig) {
+	public void setOversearchAvoidanceMode(final OversearchAvoidanceConfig oversearchAvoidanceConfig) {
 		this.oversearchAvoidanceConfig = oversearchAvoidanceConfig;
 	}
 
 	public Collection<Component> getComponents() {
-		if (hasco == null || hasco.getComponents() == null || hasco.getComponents().size() == 0) {
+		if (this.hasco == null || this.hasco.getComponents() == null || this.hasco.getComponents().size() == 0) {
 			return null;
 		} else {
-			return hasco.getComponents();
+			return this.hasco.getComponents();
 		}
 	}
 

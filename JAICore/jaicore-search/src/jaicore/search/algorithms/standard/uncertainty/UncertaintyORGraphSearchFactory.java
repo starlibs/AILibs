@@ -20,16 +20,17 @@ import jaicore.search.algorithms.standard.uncertainty.paretosearch.ParetoNode;
 import jaicore.search.algorithms.standard.uncertainty.paretosearch.ParetoSelection;
 import jaicore.search.structure.core.GraphGenerator;
 
-public class UncertaintyORGraphSearchFactory <T, A> implements IObservableORGraphSearchFactory<T, A, Double>{
+public class UncertaintyORGraphSearchFactory <T, A, V extends Comparable<V>> implements IObservableORGraphSearchFactory<T, A, V>{
 
 	private static final Logger logger = LoggerFactory.getLogger(UncertaintyORGraphSearchFactory.class);
 
 	private OversearchAvoidanceConfig<T> oversearchAvoidanceConfig;
 	private IPathUnification<T> pathUnification;
-	private ISolutionEvaluator<T, Double> solutionEvaluator;
+	private ISolutionEvaluator<T, V> solutionEvaluator;
 	private int timeoutForFInMS;
-	private INodeEvaluator<T, Double> timeoutEvaluator;
+	private INodeEvaluator<T, V> timeoutEvaluator;
 	private String loggerName;
+	private IUncertaintySource<T, V> uncertaintySource;
 	
 	public UncertaintyORGraphSearchFactory(OversearchAvoidanceConfig<T> oversearchAvoidanceConfig, IPathUnification<T> pathUnification) {
 		this.oversearchAvoidanceConfig = oversearchAvoidanceConfig;
@@ -37,35 +38,37 @@ public class UncertaintyORGraphSearchFactory <T, A> implements IObservableORGrap
 	}
 	
 	@Override
-	public IObservableORGraphSearch<T, A, Double> createSearch(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, Double> nodeEvaluator, int numberOfCPUs) {
-		ORGraphSearch<T, A, Double> search;
+	public IObservableORGraphSearch<T, A, V> createSearch(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, V> nodeEvaluator, int numberOfCPUs) {
+		ORGraphSearch<T, A, V> search;
 		if (oversearchAvoidanceConfig.getOversearchAvoidanceMode() == OversearchAvoidanceConfig.OversearchAvoidanceMode.NONE) {
 			search = new ORGraphSearch<>(graphGenerator, nodeEvaluator);
 		} else {
-			search = new ORGraphSearch<>(
+			if (uncertaintySource == null)
+				throw new IllegalArgumentException("Cannot create search as uncertainty source has not been set. Use the respective getter.");
+			search = new ORGraphSearch<T,A,V>(
 					graphGenerator,
-					new UncertaintyRandomCompletionEvaluator<T, A, Double>(
+					new UncertaintyRandomCompletionEvaluator<T, A, V>(
 						new Random(oversearchAvoidanceConfig.getSeed()),
 						oversearchAvoidanceConfig.getRandomSampleAmount(),
 						pathUnification,
 						this.solutionEvaluator,
-						new BasicUncertaintySource<T>()
+						uncertaintySource
 					)
 			);
 			
 			if (oversearchAvoidanceConfig.getOversearchAvoidanceMode() == OversearchAvoidanceConfig.OversearchAvoidanceMode.TWO_PHASE_SELECTION) {
 				if (oversearchAvoidanceConfig.getAdjustPhaseLengthsDynamically()) {
-					search.setOpen(new UncertaintyExplorationOpenSelection<T, Double>(
+					search.setOpen(new UncertaintyExplorationOpenSelection<T, V>(
 							oversearchAvoidanceConfig.getTimeout(),
 							oversearchAvoidanceConfig.getInterval(),
 							oversearchAvoidanceConfig.getExploitationScoreThreshold(),
 							oversearchAvoidanceConfig.getExplorationUncertaintyThreshold(),
 							new BasicClockModelPhaseLengthAdjuster(),
 							oversearchAvoidanceConfig.getSolutionDistanceMetric(),
-							new BasicExplorationCandidateSelector<T, Double>(oversearchAvoidanceConfig.getMinimumSolutionDistanceForExploration())
+							new BasicExplorationCandidateSelector<T, V>(oversearchAvoidanceConfig.getMinimumSolutionDistanceForExploration())
 					));
 				} else {
-					search.setOpen(new UncertaintyExplorationOpenSelection<T, Double>(
+					search.setOpen(new UncertaintyExplorationOpenSelection<T, V>(
 							oversearchAvoidanceConfig.getTimeout(),
 							oversearchAvoidanceConfig.getInterval(),
 							oversearchAvoidanceConfig.getExploitationScoreThreshold(),
@@ -84,7 +87,7 @@ public class UncertaintyORGraphSearchFactory <T, A> implements IObservableORGrap
 								}
 							},
 							oversearchAvoidanceConfig.getSolutionDistanceMetric(),
-							new BasicExplorationCandidateSelector<T, Double>(5.0d)
+							new BasicExplorationCandidateSelector<T, V>(5.0d)
 					));
 				}
 			} else {
@@ -100,7 +103,7 @@ public class UncertaintyORGraphSearchFactory <T, A> implements IObservableORGrap
 		return search;
 	}
 	
-	public void setTimeoutForFComputation(final int timeoutInMS, final INodeEvaluator<T, Double> timeoutEvaluator) {
+	public void setTimeoutForFComputation(final int timeoutInMS, final INodeEvaluator<T, V> timeoutEvaluator) {
 		this.timeoutForFInMS = timeoutInMS;
 		this.timeoutEvaluator = timeoutEvaluator;
 	}
@@ -109,7 +112,7 @@ public class UncertaintyORGraphSearchFactory <T, A> implements IObservableORGrap
 		return this.timeoutForFInMS;
 	}
 
-	public INodeEvaluator<T, Double> getTimeoutEvaluator() {
+	public INodeEvaluator<T, V> getTimeoutEvaluator() {
 		return this.timeoutEvaluator;
 	}
 
@@ -121,9 +124,16 @@ public class UncertaintyORGraphSearchFactory <T, A> implements IObservableORGrap
 		this.loggerName = loggerName;
 	}
 
-	public UncertaintyORGraphSearchFactory<T, A> setSolutionEvaluator(ISolutionEvaluator<T, Double> solutionEvaluator) {
+	public UncertaintyORGraphSearchFactory<T, A, V> setSolutionEvaluator(ISolutionEvaluator<T, V> solutionEvaluator) {
 		this.solutionEvaluator = solutionEvaluator;
 		return this;
 	}
-	
+
+	public IUncertaintySource<T, V> getUncertaintySource() {
+		return uncertaintySource;
+	}
+
+	public void setUncertaintySource(IUncertaintySource<T, V> uncertaintySource) {
+		this.uncertaintySource = uncertaintySource;
+	}
 }

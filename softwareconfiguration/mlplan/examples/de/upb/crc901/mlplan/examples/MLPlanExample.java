@@ -11,13 +11,7 @@ import org.openml.apiconnector.xml.DataSetDescription;
 
 import de.upb.crc901.mlplan.multiclass.DefaultPreorder;
 import de.upb.crc901.mlplan.multiclass.MLPlan;
-import hasco.core.Util;
-import hasco.model.Component;
-import hasco.model.ComponentInstance;
 import jaicore.ml.WekaUtil;
-import jaicore.planning.graphgenerators.task.tfd.TFDNode;
-import jaicore.search.algorithms.standard.uncertainty.ISolutionDistanceMetric;
-import jaicore.search.algorithms.standard.uncertainty.OversearchAvoidanceConfig;
 import weka.classifiers.Evaluation;
 import weka.core.Instances;
 

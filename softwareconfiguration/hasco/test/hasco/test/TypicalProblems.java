@@ -15,7 +15,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
-import org.junit.Test;
 
 import com.google.common.util.concurrent.AtomicDouble;
 
@@ -25,17 +24,14 @@ import hasco.core.HASCOFD.TFDSearchSpaceUtilFactory;
 import hasco.core.Util;
 import hasco.model.CategoricalParameterDomain;
 import hasco.model.Component;
-import hasco.model.ComponentInstance;
 import hasco.model.Parameter;
 import jaicore.basic.FileUtil;
 import jaicore.basic.sets.SetUtil.Pair;
-import jaicore.graphvisualizer.gui.FXController;
-import jaicore.graphvisualizer.gui.FXGui;
 import jaicore.graphvisualizer.gui.Recorder;
+import jaicore.logic.fol.structure.ConstantParam;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionSolution;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
-import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;
 import jaicore.search.structure.core.Node;
 
 public class TypicalProblems {
@@ -125,7 +121,7 @@ public class TypicalProblems {
 	private Pair<List<String>, Double> getSolutionAndScoreForHASCO(Problem prob, float shareOfVisibleData) {
 		Collection<Component> components = new ArrayList<>();
 		components.add(prob.component);
-		final TFDSearchSpaceUtilFactory searchSpaceFactory = new TFDSearchSpaceUtilFactory();
+		final TFDSearchSpaceUtilFactory<Double> searchSpaceFactory = new TFDSearchSpaceUtilFactory<>();
 		final int maxEvaluations = Math.round(shareOfVisibleData * prob.scores.size());
 		// System.out.println("Allowing maximum " + maxEvaluations + " evaluations.");
 		final AtomicInteger evaluationCounter = new AtomicInteger(0);
@@ -133,13 +129,12 @@ public class TypicalProblems {
 		List<List<String>> bestFoundSolution = new ArrayList<>(); // dummy, only setting first value
 		bestFoundSolution.add(null);
 
-		final HASCOFD<List<String>> hascoalg = new HASCOFD<>(ci -> {
+		final HASCOFD<List<String>,Double> hascoalg = new HASCOFD<>(ci -> {
 			List<String> vals = prob.parameters.stream().map(p -> ci.getParameterValues().get(p)).collect(Collectors.toList());
 			return vals;
 		}, n -> {
 
 			/* get the random score of a completion */
-			ComponentInstance inst = hasco.core.Util.getSolutionCompositionForNode(searchSpaceFactory, components, new Monom(), n);
 			Monom finalState = hasco.core.Util.getFinalStateOfPlan(new Monom(), searchSpaceFactory.getPathToPlanConverter().getPlan(n.externalPath()));
 			Map<Parameter, String> partialParametrization = Util.getParametrizations(finalState, components, true).get("solution");
 			if (partialParametrization == null)
@@ -179,8 +174,6 @@ public class TypicalProblems {
 		hascoalg.addComponent(prob.component);
 //		 new SimpleGraphVisualizationWindow<Node<TFDNode,Double>>(hascoalg).getPanel().setTooltipGenerator(new TFDTooltipGenerator<>());
 
-		/* */
-		int maxIterations = Math.round(prob.scores.size() * shareOfVisibleData);
 		// System.out.println("Admitting " + Math.round(shareOfVisibleData * 100) + "% of the data, which are " + maxIterations + "/" + prob.scores.size() + " data points.");
 		int i = 0;
 		HASCO<List<String>, TFDNode, String, Double, ForwardDecompositionSolution>.HASCOSolutionIterator it = hascoalg.iterator();
