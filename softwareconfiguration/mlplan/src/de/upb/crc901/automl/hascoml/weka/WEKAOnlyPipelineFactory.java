@@ -1,4 +1,4 @@
-package de.upb.crc901.automl.hascowekaml;
+package de.upb.crc901.automl.hascoml.weka;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -13,7 +13,7 @@ import weka.attributeSelection.ASSearch;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 
-public class WEKAPipelineFactory implements Factory<MLPipeline> {
+public class WEKAOnlyPipelineFactory implements Factory<Classifier> {
 
 	@Override
 	public MLPipeline getComponentInstantiation(final ComponentInstance groundComponent) throws Exception {
@@ -51,18 +51,13 @@ public class WEKAPipelineFactory implements Factory<MLPipeline> {
 
 		classifierCI.getParameterValues();
 		List<String> parameters = this.getParameterList(classifierCI);
-		System.out.println(classifierCI.getComponent().getName());
-
-		String[] options = new String[] {};
-		if (classifierCI.getComponent().getName().equals("weka.classifiers.trees.RandomForest"))
-			options = new String[] { "-num-slots", "0" };
-
 		Classifier c = AbstractClassifier.forName(classifierCI.getComponent().getName(),
 				parameters.toArray(new String[] {}));
-		// System.out.println(((search != null) ? search.getClass().getName() : "") + "
-		// "
-		// + ((eval != null) ? eval.getClass().getName() : "") + " " +
-		// c.getClass().getName());
+
+		if (c == null) {
+			System.out.println(classifierCI.getComponent().getName());
+			System.exit(0);
+		}
 		return new MLPipeline(search, eval, c);
 	}
 

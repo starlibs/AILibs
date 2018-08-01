@@ -28,9 +28,15 @@ import org.apache.commons.lang3.math.NumberUtils;
 @SuppressWarnings("serial")
 public class SQLAdapter implements Serializable, AutoCloseable {
 	private final String driver, host, user, password, database;
+	private final boolean ssl;
 	private Connection connect;
 	private long timestampOfLastAction = Long.MIN_VALUE;
 	private final Properties connectionProperties;
+
+	public SQLAdapter(final String host, final String user, final String password, final String database,
+			final boolean ssl) {
+		this("mysql", host, user, password, database, new Properties(), ssl);
+	}
 
 	public SQLAdapter(final String host, final String user, final String password, final String database) {
 		this("mysql", host, user, password, database, new Properties());
@@ -38,7 +44,13 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 
 	public SQLAdapter(final String driver, final String host, final String user, final String password,
 			final String database, final Properties connectionProperties) {
+		this(driver, host, user, password, database, connectionProperties, true);
+	}
+
+	public SQLAdapter(final String driver, final String host, final String user, final String password,
+			final String database, final Properties connectionProperties, final boolean ssl) {
 		super();
+		this.ssl = ssl;
 		this.driver = driver;
 		this.host = host;
 		this.user = user;
@@ -63,11 +75,10 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 				Properties connectionProps = new Properties(this.connectionProperties);
 				connectionProps.put("user", this.user);
 				connectionProps.put("password", this.password);
-				this.connect = DriverManager
-						.getConnection(
-								"jdbc:" + this.driver + "://" + this.host + "/" + this.database
-										+ "?verifyServerCertificate=false&requireSSL=true&useSSL=true",
-								connectionProps);
+				this.connect = DriverManager.getConnection(
+						"jdbc:" + this.driver + "://" + this.host + "/" + this.database
+								+ ((this.ssl) ? "?verifyServerCertificate=false&requireSSL=true&useSSL=true" : ""),
+						connectionProps);
 				return;
 			} catch (SQLException e) {
 				tries++;

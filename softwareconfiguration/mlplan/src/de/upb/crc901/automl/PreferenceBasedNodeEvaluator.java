@@ -3,7 +3,6 @@ package de.upb.crc901.automl;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import hasco.core.Util;
 import hasco.model.Component;
@@ -17,14 +16,15 @@ public class PreferenceBasedNodeEvaluator implements INodeEvaluator<TFDNode, Dou
 	private final Collection<Component> components;
 	private final List<String> ORDERING_OF_CLASSIFIERS;
 
-	public PreferenceBasedNodeEvaluator(Collection<Component> components, List<String> oRDERING_OF_CLASSIFIERS) {
+	public PreferenceBasedNodeEvaluator(final Collection<Component> components,
+			final List<String> ORDERING_OF_CLASSIFIERS) {
 		super();
 		this.components = components;
-		ORDERING_OF_CLASSIFIERS = oRDERING_OF_CLASSIFIERS;
+		this.ORDERING_OF_CLASSIFIERS = ORDERING_OF_CLASSIFIERS;
 	}
 
 	@Override
-	public Double f(Node<TFDNode, ?> n) throws Throwable {
+	public Double f(final Node<TFDNode, ?> n) throws Throwable {
 
 		List<String> appliedMethods = new LinkedList<>();
 		boolean last = false;
@@ -38,7 +38,7 @@ public class PreferenceBasedNodeEvaluator implements INodeEvaluator<TFDNode, Dou
 		}
 
 		/* get partial component */
-		ComponentInstance instance = Util.getSolutionCompositionFromState(components, n.getPoint().getState());
+		ComponentInstance instance = Util.getSolutionCompositionFromState(this.components, n.getPoint().getState());
 
 		if (instance != null) {
 			ComponentInstance pp = instance.getSatisfactionOfRequiredInterfaces().get("preprocessor");
@@ -61,66 +61,43 @@ public class PreferenceBasedNodeEvaluator implements INodeEvaluator<TFDNode, Dou
 			}
 		}
 
-		if (!appliedMethods.isEmpty() && instance != null && last) {
-			try {
-				boolean isPipeline = appliedMethods.stream().anyMatch(x -> x.contains("pipeline"));
-				boolean containsResolveClassifier = false;
-				String resolvedClassifier = "";
+		boolean isPipeline = appliedMethods.stream().anyMatch(x -> x.toLowerCase().contains("pipeline"));
+		boolean lastMethod = false;
+		String classifierName = null;
 
-				boolean lastMethod = false;
-				if (isPipeline) {
-					List<String> classifiers = appliedMethods.stream()
-							.filter(x -> x.startsWith("resolveBaseClassifierWith")).collect(Collectors.toList());
-					containsResolveClassifier = !classifiers.isEmpty();
-					if (containsResolveClassifier) {
-						resolvedClassifier = classifiers.get(0);
-					}
-					lastMethod = lastMethod
-							|| appliedMethods.get(appliedMethods.size() - 1).startsWith("resolveBaseClassifierWith");
-				} else {
-					List<String> classifiers = appliedMethods.stream()
-							.filter(x -> x.startsWith("resolveAbstractClassifierWith")).collect(Collectors.toList());
-					containsResolveClassifier = !classifiers.isEmpty();
-					if (containsResolveClassifier) {
-						resolvedClassifier = classifiers.get(0);
-					}
-					lastMethod = lastMethod
-							|| appliedMethods.get(appliedMethods.size() - 1).startsWith("resolveBaseClassifierWith");
-				}
-				boolean containsResolvePreprocessor = appliedMethods.stream()
-						.anyMatch(x -> x.startsWith("resolveAbstractPreprocessorWith"));
+		Double score = 0.0;
+		if (instance != null) {
+			if (instance.getComponent().getName().toLowerCase().contains("pipeline")) {
 				lastMethod = lastMethod
-						|| appliedMethods.get(appliedMethods.size() - 1).startsWith("resolveAbstractPreprocessorWith");
+						|| appliedMethods.get(appliedMethods.size() - 1).startsWith("resolveBaseClassifierWith");
 
-				double score = 0d;
-				if (isPipeline && !containsResolveClassifier) {
-					return 0d;
-				}
-
-				if (lastMethod) {
-					String classifierName = null;
-					if (containsResolveClassifier) {
-						classifierName = resolvedClassifier.substring(25);
-					}
-					if (isPipeline && containsResolveClassifier && containsResolvePreprocessor) {
-						score += this.ORDERING_OF_CLASSIFIERS.size() + 1;
-					}
-
-					if (classifierName != null) {
-						score += this.ORDERING_OF_CLASSIFIERS.indexOf(classifierName) + 1;
-						return score / 100000;
-					} else {
-						return 0d;
-					}
+				if (instance.getSatisfactionOfRequiredInterfaces().containsKey("classifier")) {
+					classifierName = instance.getSatisfactionOfRequiredInterfaces().get("classifier").getComponent()
+							.getName();
 				} else {
-					return null;
+					return 0.0;
 				}
-			} catch (NullPointerException e) {
-				e.printStackTrace();
-				return null;
+			} else {
+				classifierName = instance.getComponent().getName();
+				lastMethod = lastMethod
+						|| appliedMethods.get(appliedMethods.size() - 1).startsWith("resolveAbstractClassifierWith");
 			}
-		} else {
-			return 0d;
+
+			if (lastMethod) {
+				if (isPipeline) {
+					score += this.ORDERING_OF_CLASSIFIERS.size() + 1;
+				}
+
+				score += (this.ORDERING_OF_CLASSIFIERS.contains(classifierName)
+						? this.ORDERING_OF_CLASSIFIERS.indexOf(classifierName) + 1
+						: this.ORDERING_OF_CLASSIFIERS.size() + 1);
+				score /= 100000;
+			} else {
+				score = null;
+			}
 		}
+
+		return score;
+
 	}
 }

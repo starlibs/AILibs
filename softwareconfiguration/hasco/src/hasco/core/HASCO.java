@@ -27,7 +27,7 @@ import hasco.model.ParameterRefinementConfiguration;
 import hasco.query.Factory;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.IObjectEvaluator;
-import jaicore.graph.observation.IObservableGraphAlgorithm;
+import jaicore.graph.IObservableGraphAlgorithm;
 import jaicore.logging.LoggerUtil;
 import jaicore.logic.fol.structure.CNFFormula;
 import jaicore.logic.fol.structure.ConstantParam;
@@ -61,7 +61,8 @@ import jaicore.search.algorithms.standard.core.INodeEvaluator;
  *
  * @param <T>
  */
-public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution> implements Iterable<Solution<R, T, V>>, IObservableGraphAlgorithm<N, A>, ILoggingCustomizable {
+public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution>
+		implements Iterable<Solution<R, T, V>>, IObservableGraphAlgorithm<N, A>, ILoggingCustomizable {
 
 	// component selection
 	private static final String RESOLVE_COMPONENT_IFACE_PREFIX = "1_tResolve";
@@ -103,47 +104,63 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 	private T bestRecognizedSolution;
 	private ComponentInstance compositionOfBestRecognizedSolution;
 	private V scoreOfBestRecognizedSolution;
-	
+
 	/* logging */
 	private Logger logger = LoggerFactory.getLogger(HASCO.class);
 	private String loggerName;
-	
+
+	private ISolutionEvaluator<N, V> solutionEvaluator = new ISolutionEvaluator<N, V>() {
+		@Override
+		public V evaluateSolution(final List<N> solutionPath) throws Exception {
+			List<Action> plan = HASCO.this.searchSpaceUtilFactory.getPathToPlanConverter().getPlan(solutionPath);
+			ComponentInstance composition = Util.getSolutionCompositionForPlan(HASCO.this.components,
+					HASCO.this.getInitState(), plan);
+			T solution = HASCO.this.getObjectFromPlan(plan);
+			V scoreOfSolution = HASCO.this.benchmark.evaluate(solution);
+			if (HASCO.this.scoreOfBestRecognizedSolution == null
+					|| HASCO.this.scoreOfBestRecognizedSolution.compareTo(scoreOfSolution) > 0) {
+				HASCO.this.bestRecognizedSolution = solution;
+				HASCO.this.compositionOfBestRecognizedSolution = composition;
+				HASCO.this.scoreOfBestRecognizedSolution = scoreOfSolution;
+			}
+			HASCO.this.solutionEvaluationEventBus
+					.post(new HASCOSolutionEvaluationEvent<>(composition, solution, scoreOfSolution));
+			return scoreOfSolution;
+		}
+
+		@Override
+		public boolean doesLastActionAffectScoreOfAnySubsequentSolution(final List<N> partialSolutionPath) {
+			return true;
+		}
+	};
+
 	/* list of listeners */
 	private final Collection<Object> listeners = new ArrayList<>();
 
-	public HASCO(final IObservableGraphBasedHTNPlanningAlgorithmFactory<R, N, A, V> plannerFactory, final IObservableORGraphSearchFactory<N, A, V> searchFactory,
-			final IHASCOSearchSpaceUtilFactory<N, A, V> searchSpaceUtilFactory, final INodeEvaluator<N, V> nodeEvaluator, final Factory<? extends T> factory,
-			final String nameOfRequiredInterface,
-			final IObjectEvaluator<T, V> benchmark) {
+	public HASCO(final IObservableGraphBasedHTNPlanningAlgorithmFactory<R, N, A, V> plannerFactory,
+			final IObservableORGraphSearchFactory<N, A, V> searchFactory,
+			final IHASCOSearchSpaceUtilFactory<N, A, V> searchSpaceUtilFactory,
+			final INodeEvaluator<N, V> nodeEvaluator, final Factory<? extends T> factory,
+			final String nameOfRequiredInterface, final IObjectEvaluator<T, V> benchmark) {
 		super();
 		this.plannerFactory = plannerFactory;
 		this.searchFactory = searchFactory;
-		this.randomCompletionEvaluator = new RandomCompletionEvaluator<>(new Random(this.randomSeed), 1, searchSpaceUtilFactory.getPathUnifier(), new ISolutionEvaluator<N, V>() {
-			@Override
-			public V evaluateSolution(final List<N> solutionPath) throws Exception {
-				List<Action> plan = HASCO.this.searchSpaceUtilFactory.getPathToPlanConverter().getPlan(solutionPath);
-				ComponentInstance composition = Util.getSolutionCompositionForPlan(HASCO.this.components, HASCO.this.getInitState(), plan);
-				T solution = HASCO.this.getObjectFromPlan(plan);
-				V scoreOfSolution = benchmark.evaluate(solution);
-				if (HASCO.this.scoreOfBestRecognizedSolution == null || HASCO.this.scoreOfBestRecognizedSolution.compareTo(scoreOfSolution) > 0) {
-					HASCO.this.bestRecognizedSolution = solution;
-					HASCO.this.compositionOfBestRecognizedSolution = composition;
-					HASCO.this.scoreOfBestRecognizedSolution = scoreOfSolution;
-				}
-				HASCO.this.solutionEvaluationEventBus.post(new HASCOSolutionEvaluationEvent<>(composition, solution, scoreOfSolution));
-				return scoreOfSolution;
-			}
-
-			@Override
-			public boolean doesLastActionAffectScoreOfAnySubsequentSolution(final List<N> partialSolutionPath) {
-				return true;
-			}
-		});
+		// FIXME number of random sub samples should be configurable from the outside!
+		this.randomCompletionEvaluator = new RandomCompletionEvaluator<>(new Random(this.randomSeed), 3,
+				searchSpaceUtilFactory.getPathUnifier(), this.solutionEvaluator);
 		this.nodeEvaluator = new AlternativeNodeEvaluator<>(nodeEvaluator, this.randomCompletionEvaluator);
 		this.factory = factory;
 		this.searchSpaceUtilFactory = searchSpaceUtilFactory;
 		this.nameOfRequiredInterface = nameOfRequiredInterface;
 		this.benchmark = benchmark;
+	}
+
+	public IObservableORGraphSearchFactory<N, A, V> getSearchFactory() {
+		return this.searchFactory;
+	}
+
+	public ISolutionEvaluator<N, V> getSolutionEvaluator() {
+		return this.solutionEvaluator;
 	}
 
 	public void setNumberOfRandomCompletions(final int randomCompletions) {
@@ -170,9 +187,11 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 			this.knowledge = new CNFFormula();
 			this.init = HASCO.this.getInitState();
 			this.problem = HASCO.this.getPlanningProblem(this.domain, this.knowledge, this.init);
-			this.planner = HASCO.this.plannerFactory.newAlgorithm(this.problem, HASCO.this.searchFactory, HASCO.this.nodeEvaluator, HASCO.this.numberOfCPUs);
-			if (loggerName != null && loggerName.length() > 0 && this.planner instanceof ILoggingCustomizable) {
-				((ILoggingCustomizable)this.planner).setLoggerName(loggerName + ".planner");
+			this.planner = HASCO.this.plannerFactory.newAlgorithm(this.problem, HASCO.this.searchFactory,
+					HASCO.this.nodeEvaluator, HASCO.this.numberOfCPUs);
+			if (HASCO.this.loggerName != null && HASCO.this.loggerName.length() > 0
+					&& this.planner instanceof ILoggingCustomizable) {
+				((ILoggingCustomizable) this.planner).setLoggerName(HASCO.this.loggerName + ".planner");
 			}
 			this.planIterator = this.planner.iterator();
 		}
@@ -180,24 +199,27 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 		@Override
 		public boolean hasNext() {
 			if (!this.isInitialized) {
-				logger.info("Starting HASCO run.");
-				logger.debug("Init State: " + this.init);
+				HASCO.this.logger.info("Starting HASCO run.");
+				HASCO.this.logger.debug("Init State: " + this.init);
 
-				logger.debug("Methods:\n------------------------------------------");
+				HASCO.this.logger.debug("Methods:\n------------------------------------------");
 				for (Method m : this.problem.getDomain().getMethods()) {
-					logger.debug(m.toString());
+					HASCO.this.logger.debug(m.toString());
 				}
 
-				logger.debug("Operations:\n------------------------------------------");
+				HASCO.this.logger.debug("Operations:\n------------------------------------------");
 				for (Operation o : this.problem.getDomain().getOperations()) {
-					logger.debug(o.toString());
+					HASCO.this.logger.debug(o.toString());
 				}
 
 				/* check whether there is a refinement config for each numeric parameter */
 				for (Component c : HASCO.this.components) {
 					for (Parameter p : c.getParameters()) {
-						if (p.isNumeric() && (!HASCO.this.paramRefinementConfig.containsKey(c) || !HASCO.this.paramRefinementConfig.get(c).containsKey(p))) {
-							throw new IllegalArgumentException("No refinement config was delivered for numeric parameter " + p.getName() + " of component " + c.getName());
+						if (p.isNumeric() && (!HASCO.this.paramRefinementConfig.containsKey(c)
+								|| !HASCO.this.paramRefinementConfig.get(c).containsKey(p))) {
+							throw new IllegalArgumentException(
+									"No refinement config was delivered for numeric parameter " + p.getName()
+											+ " of component " + c.getName());
 						}
 					}
 				}
@@ -205,17 +227,20 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 				/* register listeners if the */
 				if (this.planner instanceof IObservableGraphAlgorithm<?, ?>) {
 					synchronized (HASCO.this.listeners) {
-						HASCO.this.listeners.forEach(l -> ((IObservableGraphAlgorithm<?, ?>) this.planner).registerListener(l));
+						HASCO.this.listeners
+								.forEach(l -> ((IObservableGraphAlgorithm<?, ?>) this.planner).registerListener(l));
 					}
 				}
-				HASCO.this.solutionEvaluationEventBus.post(new HASCORunStartedEvent<>(HASCO.this.randomSeed, HASCO.this.timeout, HASCO.this.numberOfCPUs, HASCO.this.benchmark));
+				HASCO.this.solutionEvaluationEventBus.post(new HASCORunStartedEvent<>(HASCO.this.randomSeed,
+						HASCO.this.timeout, HASCO.this.numberOfCPUs, HASCO.this.benchmark));
 				this.isInitialized = true;
 			}
 			if (this.canceled) {
 				throw new IllegalStateException("HASCO has already been canceled. Cannot compute more solutions.");
 			}
 
-			logger.info("Now asking the planning algorithm iterator {} whether there is a next solution.", this.planIterator.getClass().getName());
+			HASCO.this.logger.info("Now asking the planning algorithm iterator {} whether there is a next solution.",
+					this.planIterator.getClass().getName());
 			return this.planIterator.hasNext();
 		}
 
@@ -225,9 +250,11 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 			/* derive a map of ground components */
 			R plan = this.planIterator.next();
 			Map<String, Object> solutionAnnotations = this.planner.getAnnotationsOfSolution(plan);
-			ComponentInstance objectInstance = Util.getSolutionCompositionForPlan(HASCO.this.components, HASCO.this.getInitState(), plan.getPlan());
+			ComponentInstance objectInstance = Util.getSolutionCompositionForPlan(HASCO.this.components,
+					HASCO.this.getInitState(), plan.getPlan());
 			@SuppressWarnings("unchecked")
-			Solution<R, T, V> solution = new Solution<>(objectInstance, plan, HASCO.this.getObjectFromPlan(plan.getPlan()), (V) solutionAnnotations.get("f"),
+			Solution<R, T, V> solution = new Solution<>(objectInstance, plan,
+					HASCO.this.getObjectFromPlan(plan.getPlan()), (V) solutionAnnotations.get("f"),
 					solutionAnnotations.containsKey("fTime") ? (int) solutionAnnotations.get("fTime") : -1);
 			return solution;
 		}
@@ -245,7 +272,8 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 
 	private void triggerTerminationEvent() {
 		HASCO.this.solutionEvaluationEventBus
-				.post(new HASCORunTerminatedEvent<>(this.compositionOfBestRecognizedSolution, this.bestRecognizedSolution, this.scoreOfBestRecognizedSolution));
+				.post(new HASCORunTerminatedEvent<>(this.compositionOfBestRecognizedSolution,
+						this.bestRecognizedSolution, this.scoreOfBestRecognizedSolution));
 	}
 
 	public T getObjectFromPlan(final List<Action> plan) {
@@ -255,9 +283,9 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 		}
 		try {
 			return this.getObjectFromState(state);
-		}
-		catch (Exception e) {
-			logger.error("Could not retrieve target object from plan. Details:\n{}", LoggerUtil.getExceptionInfo(e));
+		} catch (Exception e) {
+			this.logger.error("Could not retrieve target object from plan. Details:\n{}",
+					LoggerUtil.getExceptionInfo(e));
 			return null;
 		}
 	}
@@ -295,7 +323,8 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 				params.add(new VariableParam("c2"));
 				int j = 0;
 				Map<CNFFormula, Monom> addList = new HashMap<>();
-				Monom standardKnowledgeAboutNewComponent = new Monom("component(c2) & resolves(c1, '" + i + "', '" + c.getName() + "', c2)");
+				Monom standardKnowledgeAboutNewComponent = new Monom(
+						"component(c2) & resolves(c1, '" + i + "', '" + c.getName() + "', c2)");
 				for (Parameter p : c.getParameters()) {
 					String paramIdentifier = "p" + (++j);
 					params.add(new VariableParam(paramIdentifier));
@@ -313,7 +342,8 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 					List<LiteralParam> valParams = new ArrayList<>();
 					valParams.add(new VariableParam(paramIdentifier));
 					if (p.isNumeric()) {
-						standardKnowledgeAboutNewComponent.add(new Literal("parameterFocus(c2, '" + p.getName() + "', '" + p.getDefaultValue() + "')"));
+						standardKnowledgeAboutNewComponent.add(new Literal(
+								"parameterFocus(c2, '" + p.getName() + "', '" + p.getDefaultValue() + "')"));
 						NumericParameterDomain np = (NumericParameterDomain) p.getDefaultDomain();
 						valParams.add(new ConstantParam("[" + np.getMin() + "," + np.getMax() + "]"));
 					} else {
@@ -336,7 +366,8 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 				}
 
 				addList.put(new CNFFormula(), standardKnowledgeAboutNewComponent);
-				CEOCOperation newOp = new CEOCOperation(SATISFY_PREFIX + i + "With" + c.getName(), params, new Monom("component(c1)"), addList, new HashMap<>(), new ArrayList<>());
+				CEOCOperation newOp = new CEOCOperation(SATISFY_PREFIX + i + "With" + c.getName(), params,
+						new Monom("component(c1)"), addList, new HashMap<>(), new ArrayList<>());
 				operations.add(newOp);
 			}
 		}
@@ -347,7 +378,8 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 			addList.put(new CNFFormula(), new Monom("val(container,newValue) & overwritten(container)"));
 			Map<CNFFormula, Monom> deleteList = new HashMap<>();
 			deleteList.put(new CNFFormula(), new Monom("val(container,previousValue)"));
-			operations.add(new CEOCOperation(REDEF_VALUE_PREFIX, "container,previousValue,newValue", new Monom("val(container,previousValue)"), addList, deleteList, ""));
+			operations.add(new CEOCOperation(REDEF_VALUE_PREFIX, "container,previousValue,newValue",
+					new Monom("val(container,previousValue)"), addList, deleteList, ""));
 			addList = new HashMap<>();
 			addList.put(new CNFFormula(), new Monom("closed(container)"));
 			deleteList = new HashMap<>();
@@ -358,7 +390,9 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 		Collection<OCIPMethod> methods = new ArrayList<>();
 		for (Component c : this.components) {
 
-			/* create methods for the refinement of the interfaces offered by this component */
+			/*
+			 * create methods for the refinement of the interfaces offered by this component
+			 */
 			for (String i : c.getProvidedInterfaces()) {
 				List<VariableParam> params = new ArrayList<>();
 				VariableParam inputParam = new VariableParam("c1");
@@ -381,11 +415,13 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 				}
 
 				int sc = 0;
-				network.add(new Literal(SATISFY_PREFIX + i + "With" + c.getName() + "(c1,c2" + refinementArguments + ")"));
+				network.add(
+						new Literal(SATISFY_PREFIX + i + "With" + c.getName() + "(c1,c2" + refinementArguments + ")"));
 				for (Entry<String, String> requiredInterface : requiredInterfaces.entrySet()) {
 					String paramName = "sc" + (++sc);
 					params.add(new VariableParam(paramName));
-					network.add(new Literal(RESOLVE_COMPONENT_IFACE_PREFIX + requiredInterface.getValue() + "(c2," + paramName + ")"));
+					network.add(new Literal(
+							RESOLVE_COMPONENT_IFACE_PREFIX + requiredInterface.getValue() + "(c2," + paramName + ")"));
 				}
 
 				refinementArguments = "";
@@ -399,7 +435,8 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 				network.add(new Literal(REFINE_PARAMETERS_PREFIX + c.getName() + "(c1,c2" + refinementArguments + ")"));
 				List<VariableParam> outputs = new ArrayList<>(params);
 				outputs.remove(inputParam);
-				methods.add(new OCIPMethod("resolve" + i + "With" + c.getName(), params, new Literal(RESOLVE_COMPONENT_IFACE_PREFIX + i + "(c1,c2)"), new Monom("component(c1)"),
+				methods.add(new OCIPMethod("resolve" + i + "With" + c.getName(), params,
+						new Literal(RESOLVE_COMPONENT_IFACE_PREFIX + i + "(c1,c2)"), new Monom("component(c1)"),
 						new TaskNetwork(network), false, outputs, new Monom()));
 			}
 
@@ -411,50 +448,70 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 			int j = 0;
 
 			/*
-			 * go, in an ordering that is consistent with the pre-order on the params imposed by the dependencies, over the set of params
+			 * go, in an ordering that is consistent with the pre-order on the params
+			 * imposed by the dependencies, over the set of params
 			 */
 			if (this.configureParams) {
 				for (Parameter p : c.getParameters()) {
 					String paramName = "p" + (++j);
 					refinementArguments += ", " + paramName;
 					params.add(new VariableParam(paramName));
-					initNetwork.add(new Literal(REFINE_PARAMETER_PREFIX + p.getName() + "Of" + c.getName() + "(c2, " + paramName + ")"));
+					initNetwork.add(new Literal(
+							REFINE_PARAMETER_PREFIX + p.getName() + "Of" + c.getName() + "(c2, " + paramName + ")"));
 					// if (p instanceof NumericParameter) {
-					methods.add(new OCIPMethod("ignoreParamRefinementFor" + p.getName() + "Of" + c.getName(), "object, container, curval",
-							new Literal(REFINE_PARAMETER_PREFIX + p.getName() + "Of" + c.getName() + "(object,container)"),
-							new Monom("parameterContainer('" + c.getName() + "', '" + p.getName() + "', object, container) & val(container,curval)"),
+					methods.add(new OCIPMethod("ignoreParamRefinementFor" + p.getName() + "Of" + c.getName(),
+							"object, container, curval",
+							new Literal(
+									REFINE_PARAMETER_PREFIX + p.getName() + "Of" + c.getName() + "(object,container)"),
+							new Monom("parameterContainer('" + c.getName() + "', '" + p.getName()
+									+ "', object, container) & val(container,curval)"),
 							new TaskNetwork(DECLARE_CLOSED_PREFIX + "(container)"), false, "",
-							new Monom("notRefinable('" + c.getName() + "', object, '" + p.getName() + "', container, curval)")));
+							new Monom("notRefinable('" + c.getName() + "', object, '" + p.getName()
+									+ "', container, curval)")));
 
-					methods.add(new OCIPMethod("refineParam" + p.getName() + "Of" + c.getName(), "object, container, curval, newval",
-							new Literal(REFINE_PARAMETER_PREFIX + p.getName() + "Of" + c.getName() + "(object,container)"),
-							new Monom("parameterContainer('" + c.getName() + "', '" + p.getName() + "', object, container) & val(container,curval)"),
+					methods.add(new OCIPMethod("refineParam" + p.getName() + "Of" + c.getName(),
+							"object, container, curval, newval",
+							new Literal(
+									REFINE_PARAMETER_PREFIX + p.getName() + "Of" + c.getName() + "(object,container)"),
+							new Monom("parameterContainer('" + c.getName() + "', '" + p.getName()
+									+ "', object, container) & val(container,curval)"),
 							new TaskNetwork(REDEF_VALUE_PREFIX + "(container,curval,newval)"), false, "",
-							new Monom("isValidParameterRangeRefinement('" + c.getName() + "', object, '" + p.getName() + "', container, curval, newval)")));
+							new Monom("isValidParameterRangeRefinement('" + c.getName() + "', object, '" + p.getName()
+									+ "', container, curval, newval)")));
 					// else
 					// throw new IllegalArgumentException(
-					// "Parameter " + p.getName() + " of type \"" + p.getClass() + "\" in component \"" + c.getName() +
+					// "Parameter " + p.getName() + " of type \"" + p.getClass() + "\" in component
+					// \"" + c.getName() +
 					// "\" is currently not supported.");
 				}
-				initNetwork.add(new Literal(REFINE_PARAMETERS_PREFIX + c.getName() + "(c1,c2" + refinementArguments + ")"));
+				initNetwork.add(
+						new Literal(REFINE_PARAMETERS_PREFIX + c.getName() + "(c1,c2" + refinementArguments + ")"));
 				params = new ArrayList<>(params);
 				params.add(1, new VariableParam("c2"));
-				methods.add(new OCIPMethod("refineParamsOf" + c.getName(), params, new Literal(REFINE_PARAMETERS_PREFIX + c.getName() + "(c1,c2" + refinementArguments + ")"),
-						new Monom("component(c1)"), new TaskNetwork(initNetwork), false, new ArrayList<>(), new Monom("!refinementCompleted('" + c.getName() + "', c2)")));
+				methods.add(new OCIPMethod("refineParamsOf" + c.getName(), params,
+						new Literal(REFINE_PARAMETERS_PREFIX + c.getName() + "(c1,c2" + refinementArguments + ")"),
+						new Monom("component(c1)"), new TaskNetwork(initNetwork), false, new ArrayList<>(),
+						new Monom("!refinementCompleted('" + c.getName() + "', c2)")));
 				methods.add(new OCIPMethod("closeRefinementOfParamsOf" + c.getName(), params,
-						new Literal(REFINE_PARAMETERS_PREFIX + c.getName() + "(c1,c2" + refinementArguments + ")"), new Monom("component(c1)"), new TaskNetwork(), false,
-						new ArrayList<>(), new Monom("refinementCompleted('" + c.getName() + "', c2)")));
+						new Literal(REFINE_PARAMETERS_PREFIX + c.getName() + "(c1,c2" + refinementArguments + ")"),
+						new Monom("component(c1)"), new TaskNetwork(), false, new ArrayList<>(),
+						new Monom("refinementCompleted('" + c.getName() + "', c2)")));
 			}
 		}
 		return new CEOCIPSTNPlanningDomain(operations, methods);
 	}
 
-	private CEOCIPSTNPlanningProblem getPlanningProblem(final CEOCIPSTNPlanningDomain domain, final CNFFormula knowledge, final Monom init) {
+	private CEOCIPSTNPlanningProblem getPlanningProblem(final CEOCIPSTNPlanningDomain domain,
+			final CNFFormula knowledge, final Monom init) {
 		Map<String, EvaluablePredicate> evaluablePredicates = new HashMap<>();
-		evaluablePredicates.put("isValidParameterRangeRefinement", new isValidParameterRangeRefinementPredicate(this.components, this.paramRefinementConfig));
+		evaluablePredicates.put("isValidParameterRangeRefinement",
+				new isValidParameterRangeRefinementPredicate(this.components, this.paramRefinementConfig));
 		evaluablePredicates.put("notRefinable", new isNotRefinable(this.components, this.paramRefinementConfig));
-		evaluablePredicates.put("refinementCompleted", new isRefinementCompletedPredicate(this.components, this.paramRefinementConfig));
-		return new CEOCIPSTNPlanningProblem(domain, knowledge, init, new TaskNetwork(RESOLVE_COMPONENT_IFACE_PREFIX + this.nameOfRequiredInterface + "('request', 'solution')"),
+		evaluablePredicates.put("refinementCompleted",
+				new isRefinementCompletedPredicate(this.components, this.paramRefinementConfig));
+		return new CEOCIPSTNPlanningProblem(domain, knowledge, init,
+				new TaskNetwork(
+						RESOLVE_COMPONENT_IFACE_PREFIX + this.nameOfRequiredInterface + "('request', 'solution')"),
 				evaluablePredicates, new HashMap<>());
 	}
 
@@ -492,8 +549,9 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 	public void addComponent(final Component component) {
 		this.components.add(component);
 	}
-	
-	public void addParamRefinementConfigurations(final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig) {
+
+	public void addParamRefinementConfigurations(
+			final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig) {
 		this.paramRefinementConfig.putAll(paramRefinementConfig);
 	}
 
@@ -534,15 +592,15 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 	}
 
 	@Override
-	public void setLoggerName(String name) {
-		logger.info("Switching logger from {} to {}", logger.getName(), name);
+	public void setLoggerName(final String name) {
+		this.logger.info("Switching logger from {} to {}", this.logger.getName(), name);
 		this.loggerName = name;
-		logger = LoggerFactory.getLogger(name);
-		logger.info("Activated logger {} with name {}", name, logger.getName());
+		this.logger = LoggerFactory.getLogger(name);
+		this.logger.info("Activated logger {} with name {}", name, this.logger.getName());
 	}
 
 	@Override
 	public String getLoggerName() {
-		return loggerName;
+		return this.loggerName;
 	}
 }
