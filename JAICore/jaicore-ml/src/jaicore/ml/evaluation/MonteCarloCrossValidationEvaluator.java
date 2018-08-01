@@ -16,12 +16,14 @@ public class MonteCarloCrossValidationEvaluator implements ClassifierEvaluator {
 	private final int repeats;
 	private final float trainingPortion;
 
-	public MonteCarloCrossValidationEvaluator(BasicMLEvaluator basicEvaluator, int repeats, Instances data, float trainingPortion) {
+	public MonteCarloCrossValidationEvaluator(final BasicMLEvaluator basicEvaluator, final int repeats,
+			final Instances data, final float trainingPortion) {
 		super();
 		this.basicEvaluator = basicEvaluator;
 		this.repeats = repeats;
-		if (data == null)
+		if (data == null) {
 			throw new IllegalArgumentException("NULL data given to MCCV!");
+		}
 		this.data = data;
 		this.trainingPortion = trainingPortion;
 	}
@@ -30,19 +32,20 @@ public class MonteCarloCrossValidationEvaluator implements ClassifierEvaluator {
 		logger.info("Received cancel");
 		this.canceled = true;
 	}
-	
-	public Double evaluate(Classifier pl) throws Exception {
-		
-		if (pl == null)
+
+	@Override
+	public Double evaluate(final Classifier pl) throws Exception {
+		if (pl == null) {
 			throw new IllegalArgumentException("Cannot compute score for null pipeline!");
+		}
 
 		/* perform random stratified split */
 		DescriptiveStatistics stats = new DescriptiveStatistics();
 		logger.info("Starting evaluation of {}", pl);
-		for (int i = 0; i < repeats && !canceled; i++) {
-			logger.info("Evaluating {} with split #{}/{}", pl, i + 1, repeats);
-			double score = basicEvaluator.getErrorRateForRandomSplit(pl, data, trainingPortion);
-			logger.info("Score for evaluation of {} with split #{}/{}: {}", pl, i + 1, repeats, score);
+		for (int i = 0; i < this.repeats && !this.canceled; i++) {
+			logger.info("Evaluating {} with split #{}/{}", pl, i + 1, this.repeats);
+			double score = this.basicEvaluator.getErrorRateForRandomSplit(pl, this.data, this.trainingPortion);
+			logger.info("Score for evaluation of {} with split #{}/{}: {}", pl, i + 1, this.repeats, score);
 			stats.addValue(score);
 		}
 
@@ -52,6 +55,6 @@ public class MonteCarloCrossValidationEvaluator implements ClassifierEvaluator {
 	}
 
 	public BasicMLEvaluator getEvaluator() {
-		return basicEvaluator;
+		return this.basicEvaluator;
 	}
 }
