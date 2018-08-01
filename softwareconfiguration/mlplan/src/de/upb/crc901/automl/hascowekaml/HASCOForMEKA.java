@@ -149,7 +149,7 @@ public class HASCOForMEKA implements IObservableGraphAlgorithm<TFDNode, String> 
 	private boolean isCanceled = false;
 	private int numberOfCPUs = 1;
 	private Collection<Object> listeners = new ArrayList<>();
-	private HASCOFD<MultiLabelClassifier>.HASCOSolutionIterator hascoRun;
+	private HASCOFD<MultiLabelClassifier,Double>.HASCOSolutionIterator hascoRun;
 	private INodeEvaluator<TFDNode, Double> preferredNodeEvaluator = n -> null;
 
 	private Queue<HASCOForMEKASolution> solutionsFoundByHASCO = new PriorityQueue<>(new Comparator<HASCOForMEKASolution>() {
@@ -179,7 +179,7 @@ public class HASCOForMEKA implements IObservableGraphAlgorithm<TFDNode, String> 
 
 		/* create algorithm */
 		IObjectEvaluator<MultiLabelClassifier, Double> mccv = new MonteCarloCrossValidationEvaluator(new F1AverageMultilabelEvaluator(new Random(0)), 1, data, 0.7f);
-		HASCOFD<MultiLabelClassifier> hasco = new HASCOFD<MultiLabelClassifier>(new MEKAFactory(), preferredNodeEvaluator, "MLClassifier", mccv);
+		HASCOFD<MultiLabelClassifier,Double> hasco = new HASCOFD<MultiLabelClassifier,Double>(new MEKAFactory(), preferredNodeEvaluator, "MLClassifier", mccv);
 		hasco.addComponents(cl.getComponents());
 		hasco.addParamRefinementConfigurations(cl.getParamConfigs());
 		hasco.setNumberOfCPUs(numberOfCPUs);

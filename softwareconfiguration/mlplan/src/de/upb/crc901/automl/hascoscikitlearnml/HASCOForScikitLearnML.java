@@ -185,7 +185,7 @@ public class HASCOForScikitLearnML implements IObservableGraphAlgorithm<TFDNode,
     }
 
     /* create algorithm */
-    HASCOFD<ScikitLearnComposition> hasco = new HASCOFD<>(new ScikitLearnCompositionFactory(), this.preferredNodeEvaluator, CONFIG.getRequestedInterface(),
+    HASCOFD<ScikitLearnComposition,Double> hasco = new HASCOFD<>(new ScikitLearnCompositionFactory(), this.preferredNodeEvaluator, CONFIG.getRequestedInterface(),
         searchBenchmark);
     hasco.addComponents(cl.getComponents());
     hasco.addParamRefinementConfigurations(cl.getParamConfigs());

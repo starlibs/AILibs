@@ -49,8 +49,8 @@ public class HASCOForWekaML implements IObservableGraphAlgorithm<TFDNode, String
 	private boolean isCanceled = false;
 	private OversearchAvoidanceConfig<TFDNode> oversearchAvoidanceConfig = new OversearchAvoidanceConfig<>(OversearchAvoidanceConfig.OversearchAvoidanceMode.NONE);
 	private Collection<Object> listeners = new ArrayList<>();
-	private HASCOFD<Classifier>.HASCOSolutionIterator hascoRun;
-	private HASCOFD<Classifier> hasco;
+	private HASCOFD<Classifier,Double>.HASCOSolutionIterator hascoRun;
+	private HASCOFD<Classifier,Double> hasco;
 	private INodeEvaluator<TFDNode, Double> preferredNodeEvaluator = n -> null;
 	private final File wekaSpaceConfigurationFile; // this is a hasco file describing the
 
@@ -92,7 +92,7 @@ public class HASCOForWekaML implements IObservableGraphAlgorithm<TFDNode, String
 			}
 		}
 		/* create algorithm */
-		HASCOFD<Classifier> hasco = new HASCOFD<>(
+		HASCOFD<Classifier,Double> hasco = new HASCOFD<>(
 				new WEKAPipelineFactory(),
 				this.preferredNodeEvaluator,
 				"AbstractClassifier",
