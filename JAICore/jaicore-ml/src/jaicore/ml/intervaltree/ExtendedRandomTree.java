@@ -231,8 +231,7 @@ public class ExtendedRandomTree extends RandomTree {
 			vU = varianceOfSubsetTotal.get(features);
 		else
 			vU = computeTotalVarianceOfSubset(features);
-		// System.out.println("current total variance for " + features.toString() + " =
-		// " + vU);
+		System.out.println("current total variance for " + features.toString() + " = " + vU);
 		double subtractor = 0;
 		for (int k = 1; k < features.size(); k++) {
 			// generate all subsets of size k
@@ -249,20 +248,11 @@ public class ExtendedRandomTree extends RandomTree {
 				// subtractor += varianceOfSubsetIndividual.get(subset);
 			}
 		}
-		// System.out.println("Individual var for \t\t" + features + ": " + vU);
-		// TODO check this
-		// if (vU < 0.0d)
-		// vU = 0.0d;
-		// System.out.println("subtracting for " + features.toString() + " = " +
-		// subtractor);
-		// System.out.println("result: " + vU);
+		 System.out.println("Individual var for " + features + " = " + vU);
 		if (vU < 0.0d)
 			vU = 0.0d;
 		varianceOfSubsetIndividual.put(features, vU);
 		double fraction = vU / totalVariance;
-		// System.out.println("Variance contribution for \t" + features + ": " +
-		// fraction);
-		// componentsForSubsets.put(features, fraction);
 		return fraction;
 	}
 
@@ -300,8 +290,8 @@ public class ExtendedRandomTree extends RandomTree {
 					return Double.NaN;
 				}
 				result += prediction * fractionOfSpaceForThisLeaf;
-				if (prediction == 0.0d)
-					System.out.println("Prediction is zero!");
+				// if (prediction == 0.0d)
+				// System.out.println("Prediction is zero!");
 				consistentWithAnyLeaf = true;
 			}
 		}
@@ -309,10 +299,10 @@ public class ExtendedRandomTree extends RandomTree {
 			System.out.println("Observation " + obsList + " is not consistent with any leaf with indices: " + indices);
 			for (Tree leaf : partitioning.keySet()) {
 				// for (int index : indices)
-				for (int i = 0; i < this.getFeatureSpace().getDimensionality(); i++)
-					System.out.print(
-							"Domain " + i + ": " + partitioning.get(leaf).getFeatureDomain(i).compactString() + "\t");
-				System.out.println();
+//				for (int i = 0; i < this.getFeatureSpace().getDimensionality(); i++)
+//					System.out.print(
+//							"Domain " + i + ": " + partitioning.get(leaf).getFeatureDomain(i).compactString() + "\t");
+//				System.out.println();
 			}
 		}
 		return result;
@@ -353,7 +343,7 @@ public class ExtendedRandomTree extends RandomTree {
 	 * 
 	 * @param subSpace
 	 * @param node
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	private void computePartitioning(FeatureSpace subSpace, Tree node) {
 
@@ -361,7 +351,7 @@ public class ExtendedRandomTree extends RandomTree {
 		int attribute = node.getAttribute();
 		Tree[] children = node.getSuccessors();
 
-//		boolean allChildrenEmpty = true;
+		// boolean allChildrenEmpty = true;
 		if (children != null) {
 			for (Tree child : children) {
 				if ((child.getClassDistribution() == null) && (child.getAttribute() == -1))
@@ -375,9 +365,9 @@ public class ExtendedRandomTree extends RandomTree {
 				leaves.add(node);
 				partitioning.put(node, subSpace);
 				sizeOfPartitions.put(node, rangeSize);
-			}else
-			{
-				System.out.println("Nodes class distribution is null. Corresponding Feature Space Size : " + subSpace.getRangeSize());
+			} else {
+				System.out.println("Nodes class distribution is null. Corresponding Feature Space Size : "
+						+ subSpace.getRangeSize());
 			}
 			// System.out.println("range size: " + rangeSize);
 			return;
@@ -527,24 +517,25 @@ public class ExtendedRandomTree extends RandomTree {
 			Collections.sort(featureList);
 			double marginalPrediction = this.getMarginalPrediction(featureList, curObs);
 
-			System.out.println("current feautres = \t" + features);
-			System.out.print("midpoints = \t\t");
-			for (Observation obs : curObs) {
-				System.out.print(obs.midPoint + ", ");
-			}
+			// System.out.println("current feautres = \t" + features);
+			// System.out.print("midpoints = \t\t");
+			// for (Observation obs : curObs) {
+			// System.out.print(obs.midPoint + ", ");
+			// }
+			// System.out.println();
+			// System.out.print("interval sizes = \t");
 			double prodOfIntervalSizes = 1.0d;
-			System.out.println();
-			System.out.print("interval sizes = \t");
 			for (Observation obs : curObs) {
-				System.out.print(obs.intervalSize + ", ");
+				// System.out.print(obs.intervalSize + ", ");
 				prodOfIntervalSizes *= obs.intervalSize;
 			}
-			System.out.println();
-			System.out.println("marginal pred = \t" + marginalPrediction);
+			// System.out.println();
+			// System.out.println("marginal pred = \t" + marginalPrediction);
 			double sizeOfAllButFeatures = this.getFeatureSpace().getRangeSizeOfAllButSubset(features);
-			System.out.println("sum_of_weights = \t" + sizeOfAllButFeatures);
-			System.out.println("prod of int sizes = \t" + prodOfIntervalSizes);
-			System.out.println("weight for var = \t" + prodOfIntervalSizes * sizeOfAllButFeatures);
+			// System.out.println("sum_of_weights = \t" + sizeOfAllButFeatures);
+			// System.out.println("prod of int sizes = \t" + prodOfIntervalSizes);
+			// System.out.println("weight for var = \t" + prodOfIntervalSizes *
+			// sizeOfAllButFeatures);
 			if (!Double.isNaN(marginalPrediction))
 				stat.push(marginalPrediction, sizeOfAllButFeatures * prodOfIntervalSizes);
 			// weightedSum += marginalPrediction;

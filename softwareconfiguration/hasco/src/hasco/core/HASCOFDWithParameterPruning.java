@@ -14,7 +14,7 @@ import jaicore.search.algorithms.interfaces.IPathUnification;
 import jaicore.search.algorithms.standard.core.INodeEvaluator;
 import jaicore.search.algorithms.standard.core.ORGraphSearchFactory;
 
-public class HASCOFDJ<T> extends HASCOJ<T, TFDNode, String, Double, ForwardDecompositionSolution> {
+public class HASCOFDWithParameterPruning<T> extends HASCOWithParameterPruning<T, TFDNode, String, Double, ForwardDecompositionSolution> {
 
 	public static class TFDSearchSpaceUtilFactory implements IHASCOSearchSpaceUtilFactory<TFDNode, String, Double> {
 
@@ -30,7 +30,7 @@ public class HASCOFDJ<T> extends HASCOJ<T, TFDNode, String, Double, ForwardDecom
 		}
 	}
 
-	public HASCOFDJ(IObservableORGraphSearchFactory<TFDNode, String, Double> searchFactory,
+	public HASCOFDWithParameterPruning(IObservableORGraphSearchFactory<TFDNode, String, Double> searchFactory,
 			Factory<? extends T> converter, INodeEvaluator<TFDNode, Double> nodeEvaluator,
 			String nameOfRequiredInterface, IObjectEvaluator<T, Double> benchmark) {
 		super(new ForwardDecompositionHTNPlannerFactory<>(), searchFactory, new TFDSearchSpaceUtilFactory(),
@@ -40,7 +40,7 @@ public class HASCOFDJ<T> extends HASCOJ<T, TFDNode, String, Double, ForwardDecom
 	/*
 	 * Constructor with arguments for jmhansel parameter importance feature
 	 */
-	public HASCOFDJ(IObservableORGraphSearchFactory<TFDNode, String, Double> searchFactory,
+	public HASCOFDWithParameterPruning(IObservableORGraphSearchFactory<TFDNode, String, Double> searchFactory,
 			Factory<? extends T> converter, INodeEvaluator<TFDNode, Double> nodeEvaluator,
 			String nameOfRequiredInterface, IObjectEvaluator<T, Double> benchmark, double importanceThreshold,
 			int minNumSamplesForImportanceEstimation, boolean useImportanceEstimation) {
@@ -49,7 +49,7 @@ public class HASCOFDJ<T> extends HASCOJ<T, TFDNode, String, Double, ForwardDecom
 				minNumSamplesForImportanceEstimation, useImportanceEstimation);
 	}
 
-	public HASCOFDJ(Factory<? extends T> converter, INodeEvaluator<TFDNode, Double> nodeEvaluator,
+	public HASCOFDWithParameterPruning(Factory<? extends T> converter, INodeEvaluator<TFDNode, Double> nodeEvaluator,
 			String nameOfRequiredInterface, IObjectEvaluator<T, Double> benchmark, double importanceThreshold,
 			int minNumSamplesForImportanceEstimation, boolean useImportanceEstimation) {
 		this(new ORGraphSearchFactory<>(), converter, nodeEvaluator, nameOfRequiredInterface, benchmark,

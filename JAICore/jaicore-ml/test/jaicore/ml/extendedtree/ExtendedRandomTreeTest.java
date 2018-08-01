@@ -47,7 +47,7 @@ public class ExtendedRandomTreeTest {
 //			}
 //			System.out.println(data);
 			ExtendedRandomTree tree = new ExtendedRandomTree();
-			tree.setMinNum(7);
+			tree.setMinNum(10);
 			tree.setFeatureSpace(new FeatureSpace(data));
 			tree.buildClassifier(data);
 			tree.preprocess();
@@ -59,7 +59,7 @@ public class ExtendedRandomTreeTest {
 			Set<Set<Integer>> powerset = Sets.powerSet(allFeatures);
 			List<Set<Integer>> powerlist = new ArrayList<Set<Integer>>();
 			powerlist.addAll(powerset);
-			for (int k = 1; k < allFeatures.size(); k++) {
+			for (int k = 1; k <= allFeatures.size(); k++) {
 				for (int i = 0; i < powerlist.size(); i++) {
 					Set<Integer> features = powerlist.get(i);
 					System.out.println("Features in this iteration = " + features);

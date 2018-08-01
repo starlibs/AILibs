@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.EventBus;
 
-import hasco.core.HASCOFDJ.TFDSearchSpaceUtilFactory;
+import hasco.core.HASCOFDWithParameterPruning.TFDSearchSpaceUtilFactory;
 import hasco.events.HASCORunStartedEvent;
 import hasco.events.HASCORunTerminatedEvent;
 import hasco.events.HASCOSolutionEvaluationEvent;
@@ -68,7 +68,7 @@ import jaicore.search.algorithms.standard.core.INodeEvaluator;
  *
  * @param <T>
  */
-public class HASCOJ<T, N, A, V extends Comparable<V>, R extends IPlanningSolution>
+public class HASCOWithParameterPruning<T, N, A, V extends Comparable<V>, R extends IPlanningSolution>
 		implements Iterable<Solution<R, T, V>>, IObservableGraphAlgorithm<N, A>, ILoggingCustomizable {
 
 	// component selection
@@ -113,7 +113,7 @@ public class HASCOJ<T, N, A, V extends Comparable<V>, R extends IPlanningSolutio
 	private V scoreOfBestRecognizedSolution;
 
 	/* logging */
-	private Logger logger = LoggerFactory.getLogger(HASCOJ.class);
+	private Logger logger = LoggerFactory.getLogger(HASCOWithParameterPruning.class);
 	private String loggerName;
 
 	/* list of listeners */
@@ -155,7 +155,7 @@ public class HASCOJ<T, N, A, V extends Comparable<V>, R extends IPlanningSolutio
 //		// TODO Auto-generated constructor stub
 //	}
 
-	public HASCOJ(final IObservableGraphBasedHTNPlanningAlgorithmFactory<R, N, A, V> plannerFactory,
+	public HASCOWithParameterPruning(final IObservableGraphBasedHTNPlanningAlgorithmFactory<R, N, A, V> plannerFactory,
 			final IObservableORGraphSearchFactory<N, A, V> searchFactory,
 			final IHASCOSearchSpaceUtilFactory<N, A, V> searchSpaceUtilFactory,
 			final INodeEvaluator<N, V> nodeEvaluator, final Factory<? extends T> factory,
@@ -175,11 +175,11 @@ public class HASCOJ<T, N, A, V extends Comparable<V>, R extends IPlanningSolutio
 				searchSpaceUtilFactory.getPathUnifier(), new ISolutionEvaluator<N, V>() {
 					@Override
 					public V evaluateSolution(final List<N> solutionPath) throws Exception {
-						List<Action> plan = HASCOJ.this.searchSpaceUtilFactory.getPathToPlanConverter()
+						List<Action> plan = HASCOWithParameterPruning.this.searchSpaceUtilFactory.getPathToPlanConverter()
 								.getPlan(solutionPath);
-						ComponentInstance composition = Util.getSolutionCompositionForPlan(HASCOJ.this.components,
-								HASCOJ.this.getInitState(), plan);
-						T solution = HASCOJ.this.getObjectFromPlan(plan);
+						ComponentInstance composition = Util.getSolutionCompositionForPlan(HASCOWithParameterPruning.this.components,
+								HASCOWithParameterPruning.this.getInitState(), plan);
+						T solution = HASCOWithParameterPruning.this.getObjectFromPlan(plan);
 						V scoreOfSolution = benchmark.evaluate(solution);
 						// TODO is this cast feasible?
 						double score = (double) scoreOfSolution;
@@ -201,13 +201,13 @@ public class HASCOJ<T, N, A, V extends Comparable<V>, R extends IPlanningSolutio
 						// + parameterImportanceEstimator.extractImportanceParameters(composition, 0.4,
 						// 2));
 						System.out.println("Using importance estimation: " + useParameterImportanceEstimation);
-						if (HASCOJ.this.scoreOfBestRecognizedSolution == null
-								|| HASCOJ.this.scoreOfBestRecognizedSolution.compareTo(scoreOfSolution) > 0) {
-							HASCOJ.this.bestRecognizedSolution = solution;
-							HASCOJ.this.compositionOfBestRecognizedSolution = composition;
-							HASCOJ.this.scoreOfBestRecognizedSolution = scoreOfSolution;
+						if (HASCOWithParameterPruning.this.scoreOfBestRecognizedSolution == null
+								|| HASCOWithParameterPruning.this.scoreOfBestRecognizedSolution.compareTo(scoreOfSolution) > 0) {
+							HASCOWithParameterPruning.this.bestRecognizedSolution = solution;
+							HASCOWithParameterPruning.this.compositionOfBestRecognizedSolution = composition;
+							HASCOWithParameterPruning.this.scoreOfBestRecognizedSolution = scoreOfSolution;
 						}
-						HASCOJ.this.solutionEvaluationEventBus
+						HASCOWithParameterPruning.this.solutionEvaluationEventBus
 								.post(new HASCOSolutionEvaluationEvent<>(composition, solution, scoreOfSolution));
 						return scoreOfSolution;
 					}
@@ -244,12 +244,12 @@ public class HASCOJ<T, N, A, V extends Comparable<V>, R extends IPlanningSolutio
 		private boolean canceled = false;
 
 		private HASCOSolutionIterator() {
-			this.domain = HASCOJ.this.getPlanningDomain();
+			this.domain = HASCOWithParameterPruning.this.getPlanningDomain();
 			this.knowledge = new CNFFormula();
-			this.init = HASCOJ.this.getInitState();
-			this.problem = HASCOJ.this.getPlanningProblem(this.domain, this.knowledge, this.init);
-			this.planner = HASCOJ.this.plannerFactory.newAlgorithm(this.problem, HASCOJ.this.searchFactory,
-					HASCOJ.this.nodeEvaluator, HASCOJ.this.numberOfCPUs);
+			this.init = HASCOWithParameterPruning.this.getInitState();
+			this.problem = HASCOWithParameterPruning.this.getPlanningProblem(this.domain, this.knowledge, this.init);
+			this.planner = HASCOWithParameterPruning.this.plannerFactory.newAlgorithm(this.problem, HASCOWithParameterPruning.this.searchFactory,
+					HASCOWithParameterPruning.this.nodeEvaluator, HASCOWithParameterPruning.this.numberOfCPUs);
 			if (loggerName != null && loggerName.length() > 0 && this.planner instanceof ILoggingCustomizable) {
 				((ILoggingCustomizable) this.planner).setLoggerName(loggerName + ".planner");
 			}
@@ -273,10 +273,10 @@ public class HASCOJ<T, N, A, V extends Comparable<V>, R extends IPlanningSolutio
 				}
 
 				/* check whether there is a refinement config for each numeric parameter */
-				for (Component c : HASCOJ.this.components) {
+				for (Component c : HASCOWithParameterPruning.this.components) {
 					for (Parameter p : c.getParameters()) {
-						if (p.isNumeric() && (!HASCOJ.this.paramRefinementConfig.containsKey(c)
-								|| !HASCOJ.this.paramRefinementConfig.get(c).containsKey(p))) {
+						if (p.isNumeric() && (!HASCOWithParameterPruning.this.paramRefinementConfig.containsKey(c)
+								|| !HASCOWithParameterPruning.this.paramRefinementConfig.get(c).containsKey(p))) {
 							throw new IllegalArgumentException(
 									"No refinement config was delivered for numeric parameter " + p.getName()
 											+ " of component " + c.getName());
@@ -286,13 +286,13 @@ public class HASCOJ<T, N, A, V extends Comparable<V>, R extends IPlanningSolutio
 
 				/* register listeners if the */
 				if (this.planner instanceof IObservableGraphAlgorithm<?, ?>) {
-					synchronized (HASCOJ.this.listeners) {
-						HASCOJ.this.listeners
+					synchronized (HASCOWithParameterPruning.this.listeners) {
+						HASCOWithParameterPruning.this.listeners
 								.forEach(l -> ((IObservableGraphAlgorithm<?, ?>) this.planner).registerListener(l));
 					}
 				}
-				HASCOJ.this.solutionEvaluationEventBus.post(new HASCORunStartedEvent<>(HASCOJ.this.randomSeed,
-						HASCOJ.this.timeout, HASCOJ.this.numberOfCPUs, HASCOJ.this.benchmark));
+				HASCOWithParameterPruning.this.solutionEvaluationEventBus.post(new HASCORunStartedEvent<>(HASCOWithParameterPruning.this.randomSeed,
+						HASCOWithParameterPruning.this.timeout, HASCOWithParameterPruning.this.numberOfCPUs, HASCOWithParameterPruning.this.benchmark));
 				this.isInitialized = true;
 			}
 			if (this.canceled) {
@@ -311,7 +311,7 @@ public class HASCOJ<T, N, A, V extends Comparable<V>, R extends IPlanningSolutio
 			R plan = this.planIterator.next();
 			Map<String, Object> solutionAnnotations = this.planner.getAnnotationsOfSolution(plan);
 			@SuppressWarnings("unchecked")
-			Solution<R, T, V> solution = new Solution<>(plan, HASCOJ.this.getObjectFromPlan(plan.getPlan()),
+			Solution<R, T, V> solution = new Solution<>(plan, HASCOWithParameterPruning.this.getObjectFromPlan(plan.getPlan()),
 					(V) solutionAnnotations.get("f"),
 					solutionAnnotations.containsKey("fTime") ? (int) solutionAnnotations.get("fTime") : -1);
 			return solution;
@@ -324,12 +324,12 @@ public class HASCOJ<T, N, A, V extends Comparable<V>, R extends IPlanningSolutio
 		public void cancel() {
 			this.canceled = true;
 			this.planner.cancel();
-			HASCOJ.this.triggerTerminationEvent();
+			HASCOWithParameterPruning.this.triggerTerminationEvent();
 		}
 	}
 
 	private void triggerTerminationEvent() {
-		HASCOJ.this.solutionEvaluationEventBus
+		HASCOWithParameterPruning.this.solutionEvaluationEventBus
 				.post(new HASCORunTerminatedEvent<>(this.compositionOfBestRecognizedSolution,
 						this.bestRecognizedSolution, this.scoreOfBestRecognizedSolution));
 	}
@@ -562,11 +562,11 @@ public class HASCOJ<T, N, A, V extends Comparable<V>, R extends IPlanningSolutio
 			final CNFFormula knowledge, final Monom init) {
 		Map<String, EvaluablePredicate> evaluablePredicates = new HashMap<>();
 		evaluablePredicates.put("isValidParameterRangeRefinement",
-				new isValidParameterRangeRefinementPredicateJ(this.components, this.paramRefinementConfig,
+				new isValidParameterRangeRefinementPredicatePruning(this.components, this.paramRefinementConfig,
 						this.performanceKB, this.parameterImportanceEstimator, this.importanceThreshold,
 						this.minNumSamplesForImportanceEstimation, this.useParameterImportanceEstimation));
 		evaluablePredicates.put("notRefinable",
-				new isNotRefinableJ(this.components, this.paramRefinementConfig, this.performanceKB,
+				new isNotRefinablePredicateWithParameterPruning(this.components, this.paramRefinementConfig, this.performanceKB,
 						this.parameterImportanceEstimator, this.importanceThreshold,
 						this.minNumSamplesForImportanceEstimation, this.useParameterImportanceEstimation));
 		evaluablePredicates.put("refinementCompleted",

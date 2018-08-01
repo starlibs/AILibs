@@ -29,7 +29,7 @@ import hasco.model.Parameter;
 import hasco.model.ParameterDomain;
 import hasco.model.ParameterRefinementConfiguration;
 
-public class isValidParameterRangeRefinementPredicateJ implements EvaluablePredicate {
+public class isValidParameterRangeRefinementPredicatePruning implements EvaluablePredicate {
 
 	private final Collection<Component> components;
 	private final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration;
@@ -40,7 +40,7 @@ public class isValidParameterRangeRefinementPredicateJ implements EvaluablePredi
 	private final int minNumSamplesForImportanceEstimation;
 	private final boolean useImportanceEstimation;
 
-	public isValidParameterRangeRefinementPredicateJ(final Collection<Component> components,
+	public isValidParameterRangeRefinementPredicatePruning(final Collection<Component> components,
 			final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration,
 			final PerformanceKnowledgeBase performanceKB,
 			final IParameterImportanceEstimator parameterImportanceEstimator, final double importanceThreshold,

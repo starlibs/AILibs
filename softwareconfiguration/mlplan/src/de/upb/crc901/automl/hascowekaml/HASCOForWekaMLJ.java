@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import hasco.core.HASCO;
 import hasco.core.HASCOFD;
-import hasco.core.HASCOFDJ;
+import hasco.core.HASCOFDWithParameterPruning;
 import hasco.core.Solution;
 import hasco.serialization.ComponentLoader;
 import jaicore.basic.ILoggingCustomizable;
@@ -49,7 +49,7 @@ public class HASCOForWekaMLJ implements IObservableGraphAlgorithm<TFDNode, Strin
 
 	private boolean isCanceled = false;
 	private Collection<Object> listeners = new ArrayList<>();
-	private HASCOFDJ<Classifier>.HASCOSolutionIterator hascoRun;
+	private HASCOFDWithParameterPruning<Classifier>.HASCOSolutionIterator hascoRun;
 	private INodeEvaluator<TFDNode, Double> preferredNodeEvaluator = n -> null;
 	private final File wekaSpaceConfigurationFile; // this is a hasco file describing the
 
@@ -80,7 +80,7 @@ public class HASCOForWekaMLJ implements IObservableGraphAlgorithm<TFDNode, Strin
 		long deadline = start + timeoutInMS;
 
 		/* create algorithm */
-		HASCOFDJ<Classifier> hasco = new HASCOFDJ<>(new WEKAPipelineFactory(), this.preferredNodeEvaluator, "AbstractClassifier", new MonteCarloCrossValidationEvaluator(new MulticlassEvaluator(new Random(3)), 3, data, .7f), this.importanceThreshold, this.minNumSamplesForImportanceEstimation, this.useImportanceEstimation);
+		HASCOFDWithParameterPruning<Classifier> hasco = new HASCOFDWithParameterPruning<>(new WEKAPipelineFactory(), this.preferredNodeEvaluator, "AbstractClassifier", new MonteCarloCrossValidationEvaluator(new MulticlassEvaluator(new Random(3)), 3, data, .7f), this.importanceThreshold, this.minNumSamplesForImportanceEstimation, this.useImportanceEstimation);
 		if (this.loggerName != null && this.loggerName.length() > 0)
 			hasco.setLoggerName(loggerName + ".hasco");
 

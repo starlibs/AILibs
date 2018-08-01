@@ -14,13 +14,13 @@ import jaicore.logic.fol.structure.ConstantParam;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.logic.fol.theories.EvaluablePredicate;
 
-public class isNotRefinableJ implements EvaluablePredicate {
+public class isNotRefinablePredicateWithParameterPruning implements EvaluablePredicate {
 
 	private final Collection<Component> components;
 	private final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration;
-	private final isValidParameterRangeRefinementPredicateJ p;
+	private final isValidParameterRangeRefinementPredicatePruning p;
 
-	public isNotRefinableJ(Collection<Component> components,
+	public isNotRefinablePredicateWithParameterPruning(Collection<Component> components,
 			Map<Component, Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration,
 			PerformanceKnowledgeBase performanceKB, IParameterImportanceEstimator parameterImportanceEstimator,
 			double importanceThreshold, int minNumSamplesForImportanceEstimation, boolean useImportanceEstimation) {
@@ -28,7 +28,7 @@ public class isNotRefinableJ implements EvaluablePredicate {
 		this.components = components;
 		this.refinementConfiguration = refinementConfiguration;
 		// TODO
-		this.p = new isValidParameterRangeRefinementPredicateJ(components, refinementConfiguration, performanceKB,
+		this.p = new isValidParameterRangeRefinementPredicatePruning(components, refinementConfiguration, performanceKB,
 				parameterImportanceEstimator, importanceThreshold, minNumSamplesForImportanceEstimation, useImportanceEstimation);
 	}
 
