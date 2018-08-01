@@ -10,4 +10,4 @@ Navigate to the folder where you cloned this repository and run
 ```
   ./gradlew eclipse
 ```
-Then open Eclipse, and go to the import menu, e.g., in the package manager. Choose to import ***Existing Projects into Workspace***, select the folder where you cloned the repository, and make sure to check the ***Search for nested projects*** option.
+Then open Eclipse, and go to the import menu, e.g., in the package manager. Choose to import *Existing Projects into Workspace*, select the folder where you cloned the repository, and make sure to check the *Search for nested projects* option.
