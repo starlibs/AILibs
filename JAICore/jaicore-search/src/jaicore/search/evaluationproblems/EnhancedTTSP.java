@@ -323,6 +323,9 @@ public class EnhancedTTSP {
 
 			@Override
 			public Double evaluateSolution(List<EnhancedTTSPNode> solutionPath) throws Exception {
+				if (solutionPath == null || solutionPath.size() == 0) {
+					return Double.MAX_VALUE;
+				}
 				return solutionPath.get(solutionPath.size() - 1).time - hourOfDeparture;
 			}
 
