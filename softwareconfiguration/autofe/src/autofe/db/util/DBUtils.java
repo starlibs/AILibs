@@ -4,8 +4,11 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -229,8 +232,23 @@ public class DBUtils {
 	}
 
 	public static List<ForwardRelationship> getJoinTables(Table from, Table to, Database db) {
+		// TODO: Avoid cycles!
+		Map<Table, List<ForwardRelationship>> paths = new HashMap<>();
+		for (ForwardRelationship fr : getForwardsFrom(from, db)) {
+			addJoinTable(new ArrayList<>(), fr, db, paths);
+		}
+		return paths.get(to);
+	}
 
-		return null;
+	private static void addJoinTable(List<ForwardRelationship> currentPath, ForwardRelationship currentRelationship,
+			Database db, Map<Table, List<ForwardRelationship>> paths) {
+		currentRelationship.setContext(db);
+		List<ForwardRelationship> extendedPath = new ArrayList<>(currentPath);
+		extendedPath.add(currentRelationship);
+		paths.put(currentRelationship.getTo(), extendedPath);
+		for (ForwardRelationship fr : getForwardsFrom(currentRelationship.getTo(), db)) {
+			addJoinTable(extendedPath, fr, db, paths);
+		}
 	}
 
 }
