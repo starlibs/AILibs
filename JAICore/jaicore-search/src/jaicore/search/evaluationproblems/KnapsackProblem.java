@@ -12,21 +12,25 @@ import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.core.NodeType;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
-import jaicore.search.structure.graphgenerator.SuccessorGenerator;
+import jaicore.search.structure.graphgenerator.SingleSuccessorGenerator;
 
 public class KnapsackProblem {
 	
 	public class KnapsackNode {
 		
 		private Set<String> packedObjects;
+		private Set<String> remainingObjects;
 		private double usedCapacity;
 		
 		public KnapsackNode() {
+			this.remainingObjects = new HashSet<>(objects);
 			this.packedObjects = new HashSet<>();
 			this.usedCapacity = 0.0d;
 		}
 		
-		public KnapsackNode(Set<String> packedObjects, String newObject) {
+		public KnapsackNode(Set<String> packedObjects, Set<String> remainingObjects, String newObject) {
+			this.remainingObjects = new HashSet<>(remainingObjects);
+			this.remainingObjects.remove(newObject);
 			this.packedObjects = new HashSet<>();
 			this.usedCapacity = 0.0d;
 			for (String object : packedObjects) {
@@ -45,12 +49,17 @@ public class KnapsackProblem {
 			return this.usedCapacity;
 		}
 
+		public Set<String> getRemainingObjects() {
+			return remainingObjects;
+		}
+
 		@Override
 		public int hashCode() {
 			final int prime = 31;
 			int result = 1;
 			result = prime * result + getOuterType().hashCode();
 			result = prime * result + ((packedObjects == null) ? 0 : packedObjects.hashCode());
+			result = prime * result + ((remainingObjects == null) ? 0 : remainingObjects.hashCode());
 			long temp;
 			temp = Double.doubleToLongBits(usedCapacity);
 			result = prime * result + (int) (temp ^ (temp >>> 32));
@@ -72,6 +81,11 @@ public class KnapsackProblem {
 				if (other.packedObjects != null)
 					return false;
 			} else if (!packedObjects.equals(other.packedObjects))
+				return false;
+			if (remainingObjects == null) {
+				if (other.remainingObjects != null)
+					return false;
+			} else if (!remainingObjects.equals(other.remainingObjects))
 				return false;
 			if (Double.doubleToLongBits(usedCapacity) != Double.doubleToLongBits(other.usedCapacity))
 				return false;
@@ -99,7 +113,7 @@ public class KnapsackProblem {
 	}
 	
 	public SerializableGraphGenerator<KnapsackNode, String> getGraphGenerator() {
-		return new SerializableGraphGenerator<KnapsackProblem.KnapsackNode, String>() {
+		return new SerializableGraphGenerator<KnapsackNode, String>() {
 
 			private static final long serialVersionUID = 1L;
 
@@ -108,19 +122,46 @@ public class KnapsackProblem {
 				return () -> new KnapsackNode();
 			}
 			
-			// TODO: Change to single successor generator
 			@Override
-			public SuccessorGenerator<KnapsackNode, String> getSuccessorGenerator() {
-				return n -> {
-					List<NodeExpansionDescription<KnapsackNode,String>> l = new ArrayList<>();
-					for (String object : objects) {
-						if(!n.getPackedObjects().contains(object)) {
+			public SingleSuccessorGenerator<KnapsackNode, String> getSuccessorGenerator() {
+				
+				return new SingleSuccessorGenerator<KnapsackNode, String>() {
+					
+					private List<String> getPossiblePackingObjects(KnapsackNode n) {
+						List<String> possibleObjects = new ArrayList<>();
+						for (String object : n.getRemainingObjects()) {
 							if (n.getUsedCapacity() + weights.get(object) <= knapsackCapacity) {
-								l.add(new NodeExpansionDescription<>(n, new KnapsackNode(n.getPackedObjects(), object), "(" + n.getPackedObjects().toString() + ", " + object + ")", NodeType.OR));
+								possibleObjects.add(object);
 							}
 						}
+						return possibleObjects;
 					}
-					return l;
+					
+					@Override
+					public List<NodeExpansionDescription<KnapsackNode, String>> generateSuccessors(
+							KnapsackNode node) {
+						List<NodeExpansionDescription<KnapsackNode, String>> l = new ArrayList<>();
+						List<String> possibleDestinations = getPossiblePackingObjects(node);
+						int N = possibleDestinations.size();
+						for (int i = 0; i < N; i++)
+							l.add(generateSuccessor(node, possibleDestinations, i));
+						return l;
+					}
+
+					public NodeExpansionDescription<KnapsackNode, String> generateSuccessor(KnapsackNode n, List<String> objetcs,
+							int i) {
+						int N = objetcs.size();
+						String object = objetcs.get(i % N);
+						KnapsackNode newNode = new KnapsackNode(n.getPackedObjects(), n.getRemainingObjects(), object);
+						return new NodeExpansionDescription<KnapsackNode, String>(n, newNode,
+								"(" + n.getPackedObjects().toString() + ", " + object + ")", NodeType.OR);
+					}
+
+					@Override
+					public NodeExpansionDescription<KnapsackNode, String> generateSuccessor(KnapsackNode node,
+							int i) {
+						return generateSuccessor(node, getPossiblePackingObjects(node), i);
+					}
 				};
 			}
 
