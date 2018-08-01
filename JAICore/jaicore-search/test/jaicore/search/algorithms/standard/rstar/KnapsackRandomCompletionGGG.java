@@ -35,16 +35,16 @@ public class KnapsackRandomCompletionGGG {
             objects.add(String.valueOf(i));
         }
         weights = new HashMap<>();
-        weights.put("0", 23.0d);
-        weights.put("1", 31.0d);
-        weights.put("2", 29.0d);
-        weights.put("3", 44.0d);
-        weights.put("4", 53.0d);
-        weights.put("5", 38.0d);
-        weights.put("6", 63.0d);
-        weights.put("7", 85.0d);
-        weights.put("8", 89.0d);
-        weights.put("9", 82.0d);
+        weights.put("0", 2.30d);
+        weights.put("1", 3.10d);
+        weights.put("2", 2.90d);
+        weights.put("3", 4.40d);
+        weights.put("4", 5.30d);
+        weights.put("5", 3.80d);
+        weights.put("6", 6.30d);
+        weights.put("7", 8.50d);
+        weights.put("8", 8.90d);
+        weights.put("9", 8.20d);
         values = new HashMap<>();
         values.put("0", 92.0d);
         values.put("1", 57.0d);

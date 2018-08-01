@@ -8,11 +8,13 @@ import jaicore.search.algorithms.interfaces.IPathUnification;
 import jaicore.search.algorithms.interfaces.ISolutionEvaluator;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
 import jaicore.search.algorithms.standard.bestfirst.RandomCompletionEvaluator;
+import jaicore.search.evaluationproblems.KnapsackProblem;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
 import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.graphgenerator.*;
 
+import javax.xml.crypto.dom.DOMCryptoContext;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -31,6 +33,7 @@ public class RandomCompletionGammaGraphGenerator<T> implements GammaGraphGenerat
     private final RootGenerator<GammaNode<T,RStarK>> gammaRootGenerator;
     private final NodeGoalTester<T> gammaGoalTester;
     private final RandomCompletionEvaluator<T, Double> randomCompletionEvaluator;
+    private final ISolutionEvaluator<T, Double> solutionEvaluator;
 
     /* Timeout stuff for Random Completions. */
     private int timeoutForComputationOfH = 1000;
@@ -100,6 +103,7 @@ public class RandomCompletionGammaGraphGenerator<T> implements GammaGraphGenerat
                 return null;
             }
         };
+        this.solutionEvaluator = solutionEvaluator;
         randomCompletionEvaluator = new RandomCompletionEvaluator<>(new Random(seed), samples, pathUnification, solutionEvaluator);
         randomCompletionEvaluator.setGenerator(graphGenerator);
     }
@@ -121,55 +125,63 @@ public class RandomCompletionGammaGraphGenerator<T> implements GammaGraphGenerat
 
         computedPaths.put(s, new HashMap<T, Node<T, String>>());
 
-        Node<T, String> parent = null;
-        T currentState = s;
-        Node<T, String> currentNode = new Node(parent, currentState);
-        for(int k=0; k < K; k++) {
-            // Generate successor in depth delta.
-            List<Node<T, String>> path = new ArrayList<>(K);
-            path.add(currentNode);
-            for (int i = 0; i < delta; i++) {
-                if (!gammaGoalTester.isGoal(currentState)) {
-                    if (graphGenerator.getSuccessorGenerator() instanceof SingleSuccessorGenerator) {
-                        int random = new Random().nextInt(Integer.MAX_VALUE);
-                        NodeExpansionDescription<T, String> succ = ((SingleSuccessorGenerator) graphGenerator.getSuccessorGenerator()).generateSuccessor(currentState, random);
-                        if (succ == null) {
-                            throw new IllegalStateException("SingleSucessorGenerator generated no successor for " + currentState.toString());
+        Node<T, String> parent;
+        T currentState;
+        Node<T, String> currentNode; ;
+        if (!isGoal(s)) {
+            for (int k = 0; k < K; k++) {
+                // Generate successor in depth delta.
+                List<Node<T, String>> path = new ArrayList<>(K);
+                parent = null;
+                currentState = s;
+                currentNode = new Node(parent, currentState);
+                path.add(currentNode);
+                for (int i = 0; i < delta; i++) {
+                    if (!gammaGoalTester.isGoal(currentState)) {
+
+                        if (graphGenerator.getSuccessorGenerator() instanceof SingleSuccessorGenerator) {
+                            int random = new Random().nextInt(Integer.MAX_VALUE);
+                            NodeExpansionDescription<T, String> succ = ((SingleSuccessorGenerator) graphGenerator.getSuccessorGenerator()).generateSuccessor(currentState, random);
+                            if (succ == null) {
+                                throw new IllegalStateException("SingleSucessorGenerator generated no successor for " + currentState.toString());
+                            }
+                            currentState = succ.getTo();
+                            parent = currentNode;
+                            currentNode = new Node<>(parent, currentState);
+                        } else {
+                            List<NodeExpansionDescription<T, String>> succ = graphGenerator.getSuccessorGenerator().generateSuccessors(currentState);
+                            if (succ.size() == 0) {
+                                boolean goal = gammaGoalTester.isGoal(currentState);
+                                throw new IllegalStateException("SuccessorGenerator generated no successor for " + currentState.toString());
+                            }
+                            int random = new Random().nextInt(succ.size());
+                            currentState = succ.get(random).getTo();
+                            parent = currentNode;
+                            currentNode = new Node<>(parent, currentState);
                         }
-                        currentState = succ.getTo();
-                        parent = currentNode;
-                        currentNode = new Node<>(parent, currentState);
-                    } else {
-                        List<NodeExpansionDescription<T, String>> succ = graphGenerator.getSuccessorGenerator().generateSuccessors(currentState);
-                        if (succ.size() == 0) {
-                            boolean goal = gammaGoalTester.isGoal(currentState);
-                            throw new IllegalStateException("SuccessorGenerator generated no successor for " + currentState.toString());
-                        }
-                        int random = new Random().nextInt(succ.size());
-                        currentState = succ.get(random).getTo();
-                        parent = currentNode;
-                        currentNode = new Node<>(parent, currentState);
+                        path.add(currentNode);
                     }
-                    path.add(currentNode);
                 }
-            }
+                // System.out.println(String.format("k=%d, Current node = %s, path=%s", k, currentNode, path));
+                // Save path in computed paths.
+                computedPaths.get(s).put(currentState, currentNode);
+                // Create gamma successor and add it, or the previously generate equal gamma node
+                // to the list of successors.
+                GammaNode<T, RStarK> gammaSucc = new GammaNode<>(currentState);
+                if (alreadyGeneratedStates.containsKey(gammaSucc)) {
+                    // Already generated before. Take this gamma node instead of the newly generated.
+                    gammaSucc = alreadyGeneratedStates.get(gammaSucc);
+                } else {
+                    alreadyGeneratedStates.put(gammaSucc, gammaSucc);
+                }
+                // TODO: Since this is a set, there will possible not K successors generated.
 
-            // Save path in computed paths.
-            computedPaths.get(s).put(currentState, currentNode);
-
-            // Create gamma successor and add it, or the previously generate equal gamma node
-            // to the list of successors.
-            GammaNode<T, RStarK> gammaSucc = new GammaNode<>(currentState);
-            if (alreadyGeneratedStates.containsKey(gammaSucc)) {
-                // Already generated before. Take this gamma node instead of the newly generated.
-                gammaSucc = alreadyGeneratedStates.get(gammaSucc);
-            } else {
-                alreadyGeneratedStates.put(gammaSucc, gammaSucc);
+                gammaSuccessors.add(gammaSucc);
             }
-            // TODO: Since this is a set, there will possible not K successors generated.
-            gammaSuccessors.add(gammaSucc);
+        }else {
+            gammaSuccessors = null;
         }
-
+        // System.out.println("Generated successors " + gammaSuccessors.size() + "is goal = " + isGoal(n.getPoint()));
         return gammaSuccessors;
     }
 
@@ -179,76 +191,31 @@ public class RandomCompletionGammaGraphGenerator<T> implements GammaGraphGenerat
     }
 
 
-
+    private boolean isGoal(T n) {
+        return ((NodeGoalTester)getGoalTester()).isGoal(n);
+    }
 
     private double h(GammaNode<T, RStarK> n) {
         if (n.getAnnotation("h") != null) {
             return (Double) n.getAnnotation("h");
         } else {
-            ArrayList<Double> results = new ArrayList<>();
-            Thread t = new Thread(new Runnable() {
-                @Override
-                public void run() {
-
-                    /* compute node label */
-                    Double h = null;
-                    boolean computationTimedout = false;
-                    long startComputation = System.currentTimeMillis();
-
-                    /* set timeout on thread that interrupts it after the timeout */
-                    int taskId = -1;
-                    if (timeoutForComputationOfH > 0) {
-                        if (timeoutSubmitter == null) {
-                            timeoutSubmitter = TimeoutTimer.getInstance().getSubmitter();
-                        }
-                        taskId = timeoutSubmitter.interruptMeAfterMS(timeoutForComputationOfH);
-                    }
-
-                    try {
-                        h = randomCompletionEvaluator.f(n);
-
-                        /* check whether the required time exceeded the timeout */
-                        long fTime = System.currentTimeMillis() - startComputation;
-
-                    } catch (InterruptedException e) {
-                        n.setAnnotation("fError", "Timeout");
-                        computationTimedout = true;
-                        try {
-                            h = Double.MAX_VALUE;
-                        } catch (Throwable e2) {
-                            e2.printStackTrace();
-                        }
-                    } catch (Throwable e) {
-                        System.err.println("Observed an execution during computation of h:");
-                        System.err.println(e);
-                    } finally {
-                        results.add(h);
-                    }
-                    if (taskId >= 0)
-                        timeoutSubmitter.cancelTimeout(taskId);
-                    /* register time required to compute this node label */
-                    long fTime = System.currentTimeMillis() - startComputation;
-                    n.setAnnotation("fTime", fTime);
-
+            double h = Double.MAX_VALUE;
+            if (isGoal(n.getPoint())) {
+                try {
+                    h = solutionEvaluator.evaluateSolution(n.externalPath());
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-            });
-
-            t.start();
-            try {
-                t.join();
-            } catch (InterruptedException e) {
-                System.err.println("Random compeltion of " + n + " was interrupted.");
-            }
-            Double h = null;
-            if (!results.isEmpty()) {
-                System.err.println("No random completion result for node " + n + "found. Using maximal Double value instead.");
-                h =  Double.MAX_VALUE;
             } else {
-                System.out.println("Random completion h value = " + results.get(0));
-                h = results.get(0);
+                h = Double.MAX_VALUE;
+                try {
+                    h = randomCompletionEvaluator.f(n);
+                } catch (Throwable w) {
+                    System.err.println("Error while trying to compute random completion evaluation." + n + "is goal = " + isGoal(n.getPoint()));
+                    w.printStackTrace();
+                }
             }
-
-            n.setAnnotation("h", h);
+            // System.out.println("Evaluated node " + n + ", h= " + h);
             return h;
         }
     }

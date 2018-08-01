@@ -171,7 +171,7 @@ public class RStar<T, A, D> extends Thread {
              * Remove node n with highest priority i.e. smallest k-value from open.
              */
             GammaNode<T, RStarK> n = open.poll(); //eek();
-            System.out.println("Expanding node " + n);
+            // System.out.println("Expanding node " + n);
 
             /**
              * If node with highest priority is a goal node, we found our goal.
@@ -318,9 +318,6 @@ public class RStar<T, A, D> extends Thread {
      */
     public List<T> inferProblemPath(List<Node<T, RStarK>> nodePath) {
         List<T> path = new ArrayList<>(nodePath.size());
-        for (Object o : nodePath) {
-            System.out.println(o);
-        }
         for (Node<T, RStarK> n : nodePath) {
             path.add(n.getPoint());
         }
