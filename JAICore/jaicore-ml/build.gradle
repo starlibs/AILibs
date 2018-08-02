@@ -16,6 +16,6 @@ dependencies {
 	compile project(":JAICore:jaicore-graphvisualizer")
 	compile project(":JAICore:jaicore-experiments")
 	compile group: 'org.openml', name: 'apiconnector', version: '1.0.16'
-	compile group: 'de.upb.isys', name: 'interruptable-weka', version: '0.0.1'
+	compile group: 'de.upb.isys', name: 'interruptable-weka', version: '0.0.2'
 	compile 'de.upb.isys:omlwebapp:0.0.1'
 }

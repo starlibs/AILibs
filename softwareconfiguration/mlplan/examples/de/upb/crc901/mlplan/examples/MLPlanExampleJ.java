@@ -17,11 +17,11 @@ import weka.classifiers.Evaluation;
 import weka.core.Instances;
 
 /**
- * This is an example class that illustrates the usage of ML-Plan on
- * the segment dataset of OpenML. It is configured to run for 30 seconds
- * and to use 70% of the data for search and 30% for selection in its second phase.
+ * This is an example class that illustrates the usage of ML-Plan on the segment
+ * dataset of OpenML. It is configured to run for 30 seconds and to use 70% of
+ * the data for search and 30% for selection in its second phase.
  * 
- * The API key used for OpenML is ML-Plan's key (read only). 
+ * The API key used for OpenML is ML-Plan's key (read only).
  * 
  * @author jmhansel
  *
@@ -29,7 +29,7 @@ import weka.core.Instances;
 public class MLPlanExampleJ {
 
 	public static void main(String[] args) throws Exception {
-		
+
 		/* load data for segment dataset and create a train-test-split */
 		OpenmlConnector connector = new OpenmlConnector();
 		DataSetDescription ds = connector.dataGet(40984);
@@ -37,11 +37,11 @@ public class MLPlanExampleJ {
 		Instances data = new Instances(new BufferedReader(new FileReader(file)));
 		data.setClassIndex(data.numAttributes() - 1);
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(0), .7f);
-		
+
 		/* initialize mlplan, and let it run for 30 seconds */
 		MLPlanJ mlplan = new MLPlanJ(new File("model/weka/weka-all-autoweka.json"), 0.32d, 8, true);
 		mlplan.setLoggerName("mlplan");
-		mlplan.setTimeout(180);
+		mlplan.setTimeout(300);
 		mlplan.setPortionOfDataForPhase2(.3f);
 		mlplan.setNodeEvaluator(new DefaultPreorder());
 		mlplan.enableVisualization();

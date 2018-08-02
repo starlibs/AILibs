@@ -347,7 +347,6 @@ public class ExtendedRandomTree extends RandomTree {
 	 * @throws Exception
 	 */
 	private void computePartitioning(FeatureSpace subSpace, Tree node) {
-
 		double splitPoint = node.getSplitPoint();
 		int attribute = node.getAttribute();
 		Tree[] children = node.getSuccessors();

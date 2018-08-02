@@ -25,7 +25,7 @@ import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.sets.SetUtil;
 import jaicore.concurrent.TimeoutTimer;
 import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
-import jaicore.graph.observation.IObservableGraphAlgorithm;
+import jaicore.graph.IObservableGraphAlgorithm;
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.logging.LoggerUtil;
 import jaicore.ml.WekaUtil;
