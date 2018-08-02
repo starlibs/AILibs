@@ -11,6 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jaicore.graph.LabeledGraph;
+import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
+import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
+import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
 import jaicore.search.algorithms.interfaces.IObservableORGraphSearch;
 import jaicore.search.algorithms.standard.core.IGraphDependentNodeEvaluator;
 import jaicore.search.algorithms.standard.core.INodeEvaluator;
@@ -25,11 +28,11 @@ import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 /**
- * Best first algorithm implementation.
+ * MCTS algorithm implementation.
  *
  * @author Felix Mohr
  */
-public class MCTS<T,A,V extends Comparable<V>> implements IObservableORGraphSearch<T,A,V> {
+public class MCTS<T,A,V extends Comparable<V>> implements IObservableORGraphSearch<T,A,V>, IPolicy<T,A,V> {
 	
 	private static final Logger logger = LoggerFactory.getLogger(MCTS.class);
 
@@ -37,24 +40,28 @@ public class MCTS<T,A,V extends Comparable<V>> implements IObservableORGraphSear
 	protected final GraphEventBus<Node<T, V>> graphEventBus = new GraphEventBus<>();
 	protected final Map<T, Node<T, V>> ext2int = new HashMap<>();	
 
+	protected final GraphGenerator<T, A> graphGenerator;
 	protected final RootGenerator<T> rootGenerator;
 	protected final SuccessorGenerator<T, A> successorGenerator;
 	protected final boolean checkGoalPropertyOnEntirePath;
 	protected final PathGoalTester<T> pathGoalTester;
 	protected final NodeGoalTester<T> nodeGoalTester;
 
-	protected final IPolicy<T,A,V> treePolicy;
+	protected final IPathUpdatablePolicy<T,A,V> treePolicy;
 	protected final IPolicy<T,A,V> defaultPolicy;
 	protected final INodeEvaluator<T, V> playoutSimulator;
 	
 	protected final Map<List<T>, V> playouts = new HashMap<>();
 
+	private boolean initialized = false;
 	private final T root;
 	protected final LabeledGraph<T, A> exploredGraph;
+	private int timeoutInS = -1;
 	
 	@SuppressWarnings("unchecked")
-	public MCTS(GraphGenerator<T, A> graphGenerator, IPolicy<T,A,V> treePolicy, IPolicy<T,A,V> defaultPolicy, INodeEvaluator<T, V> playoutSimulator) {
+	public MCTS(GraphGenerator<T, A> graphGenerator, IPathUpdatablePolicy<T,A,V> treePolicy, IPolicy<T,A,V> defaultPolicy, INodeEvaluator<T, V> playoutSimulator) {
 		super();
+		this.graphGenerator = graphGenerator;
 		this.rootGenerator = graphGenerator.getRootGenerator();
 		this.successorGenerator = graphGenerator.getSuccessorGenerator();
 		checkGoalPropertyOnEntirePath = !(graphGenerator.getGoalTester() instanceof NodeGoalTester);
@@ -89,7 +96,12 @@ public class MCTS<T,A,V extends Comparable<V>> implements IObservableORGraphSear
 	@Override
 	public List<T> nextSolution() {
 		
-		/* walk tree until first unexpanded node */
+		if (!initialized) {
+			initialized = true;
+			graphEventBus.post(new GraphInitializedEvent<T>(root));
+		}
+		
+		/* iterate over playouts */
 		try {
 			while (true) {
 				logger.info("Starting computation of next playout path.");
@@ -110,12 +122,14 @@ public class MCTS<T,A,V extends Comparable<V>> implements IObservableORGraphSear
 	}
 	
 	private List<T> getPlayout() throws Exception {
+		logger.info("Computing a new playout ...");
 		T current = root;
 		T next;
 		Collection<T> childrenOfCurrent;
 		List<T> path = new ArrayList<>();
 		path.add(current);
 		
+		/* use tree policy to select a leaf node of the explored graph */
 		while (!(childrenOfCurrent = exploredGraph.getSuccessors(current)).isEmpty()) {
 			List<A> availableActions = new ArrayList<>();
 			Map<A,T> successorStates = new HashMap<>();
@@ -124,7 +138,7 @@ public class MCTS<T,A,V extends Comparable<V>> implements IObservableORGraphSear
 				availableActions.add(action);
 				successorStates.put(action, child);
 			}
-//			System.out.println("Available actions of expanded node: " + availableActions);
+			logger.debug("Available actions of expanded node: {}", availableActions);
 			A chosenAction = treePolicy.getAction(current, successorStates);
 			if (chosenAction == null)
 				throw new IllegalStateException("Chosen action is null!");
@@ -134,11 +148,11 @@ public class MCTS<T,A,V extends Comparable<V>> implements IObservableORGraphSear
 				
 			logger.debug("Tree policy decides to expand {} taking action {} to {}", current, chosenAction, next);
 			current = next;
+			graphEventBus.post(new NodeTypeSwitchEvent<T>(next, "expanding"));
 			path.add(current);
-//			System.out.println("Chosen action: " + chosenAction + ". Successor: " + current);
+			logger.debug("Chosen action: {}. Successor: {}", chosenAction, current);
 		}
-		
-//		System.out.println("Reached child node of traveral tree. Continuing with default-policy.");
+		logger.info("Determined leaf node {} of traversal tree using tree policy. Now completing the path.", current);
 		
 		/* use default policy to proceed to a goal node */
 		while (!isGoal(current)) {
@@ -153,10 +167,20 @@ public class MCTS<T,A,V extends Comparable<V>> implements IObservableORGraphSear
 				logger.debug("Adding edge {} -> {} with label {}", d.getFrom(), d.getTo(), d.getAction());
 				exploredGraph.addItem(d.getTo());
 				exploredGraph.addEdge(d.getFrom(), d.getTo(), d.getAction());
+				graphEventBus.post(new NodeReachedEvent<>(d.getFrom(), d.getTo(), isGoal(d.getTo()) ? "or_solution" : "or_open"));
 				actions.add(d.getAction());
 			}
 			current = successorStates.get(defaultPolicy.getAction(current, successorStates));
 			path.add(current);
+		}
+		logger.info("Draw playout path {}.", path);
+		
+		/* change all node types on path to closed again */
+		while (true) {
+			if (exploredGraph.getPredecessors(current).isEmpty())
+				break;
+			current = exploredGraph.getPredecessors(current).iterator().next();
+			graphEventBus.post(new NodeTypeSwitchEvent<T>(current, "or_closed"));
 		}
 		return path;
 	}
@@ -234,5 +258,20 @@ public class MCTS<T,A,V extends Comparable<V>> implements IObservableORGraphSear
 	@Override
 	public void registerListener(Object listener) {
 		this.graphEventBus.register(listener);
+	}
+
+	@Override
+	public A getAction(T node, Map<A, T> actionsWithSuccessors) {
+		
+		/* compute next solution */
+		nextSolution();
+		
+		/* choose action in root that has best reward */
+		return treePolicy.getAction(root, actionsWithSuccessors);
+	}
+
+	@Override
+	public GraphGenerator<T, A> getGraphGenerator() {
+		return graphGenerator;
 	}
 }

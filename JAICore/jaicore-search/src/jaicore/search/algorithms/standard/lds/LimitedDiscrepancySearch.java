@@ -13,8 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jaicore.graph.TreeNode;
-import jaicore.graphvisualizer.events.GraphInitializedEvent;
-import jaicore.graphvisualizer.events.NodeReachedEvent;
+import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
+import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
 import jaicore.search.algorithms.interfaces.IObservableORGraphSearch;
 import jaicore.search.algorithms.standard.core.INodeEvaluator;
 import jaicore.search.structure.core.GraphEventBus;
@@ -227,5 +227,11 @@ public class LimitedDiscrepancySearch<T> implements IObservableORGraphSearch<T, 
 	public INodeEvaluator<T, Double> getNodeEvaluator() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public GraphGenerator<T, String> getGraphGenerator() {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException();
 	}
 }

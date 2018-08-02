@@ -1,6 +1,6 @@
 package jaicore.search.algorithms.standard.mcts;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
 
 import java.util.List;
 import java.util.Random;
@@ -15,12 +15,12 @@ public class NQueenTester {
 	
 	@Test
 	public void test(){
-		final int x = 20;
+		final int x = 10;
 				
 		NQueenGenerator gen = new NQueenGenerator(x);
 		
 		IPolicy<QueenNode, String, Double> randomPolicy = new UniformRandomPolicy<>(new Random(1));
-		IPolicy<QueenNode, String, Double> ucb = new UCBPolicy<>();
+		IPathUpdatablePolicy<QueenNode, String, Double> ucb = new UCBPolicy<>();
 		
 		
 		MCTS<QueenNode, String, Double> search = new MCTS<>(gen, ucb, randomPolicy, n-> (double)n.getPoint().getNumberOfQueens());

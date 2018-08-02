@@ -6,9 +6,9 @@ import java.util.List;
 
 import org.junit.Test;
 
+import jaicore.graphvisualizer.gui.FXController;
 import jaicore.graphvisualizer.gui.FXGui;
 import jaicore.graphvisualizer.gui.Recorder;
-import jaicore.graphvisualizer.gui.TooltipGraphDataSupplier;
 import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionHTNPlanner;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;
@@ -20,7 +20,8 @@ import jaicore.search.graphgenerators.bestfirst.abstractVersioning.TestGraphGene
 import jaicore.search.graphgenerators.bestfirst.abstractVersioning.TestNode;
 import jaicore.search.graphgenerators.nqueens.NQueenGenerator;
 import jaicore.search.graphgenerators.nqueens.QueenNode;
-import jaicore.search.graphvisualizer.BestFGraphDataSupplier;
+import jaicore.search.gui.dataSupplier.BestFSupplier;
+import jaicore.search.gui.dataSupplier.TooltipSupplier;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
 import javafx.application.Application;
@@ -40,11 +41,13 @@ public class FXGuiTester extends Application {
 	    gui = new FXGui();
 //		bestFirstTest();
 
-		tooltipTest();
-
-		dataSupplierTest();
-
+//		tooltipTest();
+//
+//		dataSupplierTest();
+//
 		bestFTest();
+
+
 	}
 
 	private void bestFirstTest(){
@@ -54,12 +57,23 @@ public class FXGuiTester extends Application {
 
 		Recorder rec = new Recorder(bf);
 
+
 		gui.open(rec, "Recorder");
 
-//		rec.setTooltipGenerator(n->{
-//			Node node = (Node) n;
-//			return String.valueOf(node.getInternalLabel());
+//		TooltipSupplier supplier = new TooltipSupplier();
+//		supplier.setGenerator(n->{
+//			Node node =(Node) n;
+//			return String.valueOf(((Node) n).getInternalLabel());
 //		});
+
+//		rec.addDataSupplier(supplier);
+
+
+//		FXController controller = gui.getControllers().get(gui.getControllers().size()-1);
+//		if(controller != null)
+//			controller.registerSupplier(sup);
+
+//		bf.registerListener(supplier);
 		bf.nextSolution();
 
 	}
@@ -75,7 +89,10 @@ public class FXGuiTester extends Application {
 
 		Recorder<Node<TFDNode,Double>> recorder = new Recorder<>(plannerRun.getSearch());
 //		recorder.setTooltipGenerator(new TFDTooltipGenerator<>());
+		TooltipSupplier dataSupplier = new TooltipSupplier();
+		dataSupplier.setGenerator(new TFDTooltipGenerator());
 
+		plannerRun.getSearch().registerListener(dataSupplier);
 		/* solve problem */
 		System.out.println("Starting search. Waiting for solutions:");
 		while (plannerRun.hasNext()) {
@@ -85,13 +102,17 @@ public class FXGuiTester extends Application {
 		System.out.println("Algorithm has finished.");
 
 
-		TooltipGraphDataSupplier dataSupplier = new TooltipGraphDataSupplier();
-		dataSupplier.setTooltipGenerator(new TFDTooltipGenerator());
 
-		recorder.addNodeDataSupplier(dataSupplier);
+//		recorder.addNodeDataSupplier(dataSupplier);
+
+
+
 
 
 		gui.open(recorder, "TooltipTest");
+		FXController controller = gui.getControllers().get(gui.getControllers().size()-1);
+		if(controller != null)
+			controller.registerSupplier(dataSupplier);
 	}
 
 	private void dataSupplierTest(){
@@ -109,16 +130,16 @@ public class FXGuiTester extends Application {
 //			return String.valueOf(node.getInternalLabel());
 //		});
 
-		TooltipGraphDataSupplier dataSupplier = new TooltipGraphDataSupplier();
+		TooltipSupplier dataSupplier = new TooltipSupplier();
 
-		dataSupplier.setTooltipGenerator((n -> {
+		dataSupplier.setGenerator((n -> {
 			Node node = (Node) n;
 			Comparable c = node.getInternalLabel();
 			String s = String.valueOf(c);
 			return String.valueOf(s);
 		}));
 
-		rec.addNodeDataSupplier(dataSupplier);
+		rec.addDataSupplier(dataSupplier);
 
 		bf.nextSolution();
 
@@ -134,9 +155,15 @@ public class FXGuiTester extends Application {
 		Recorder rec = new Recorder(search);
 		gui.open(rec,"Queens");
 
-		BestFGraphDataSupplier dataSupplier = new BestFGraphDataSupplier();
+		BestFSupplier dataSupplier = new BestFSupplier();
 
-		rec.addGraphDataSupplier(dataSupplier);
+		rec.registerListener(dataSupplier);
+
+//		rec.addGraphDataSupplier(dataSupplier);
+
+		FXController controller = gui.getControllers().get(gui.getControllers().size()-1);
+		if(controller != null)
+			controller.registerSupplier(dataSupplier);
 
 		search.nextSolution();
 

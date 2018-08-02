@@ -53,7 +53,7 @@ dependencies {
 	compile group: 'de.upb.isys', name: 'jase', version: '0.0.2'
 
 	// wrapped library dependencies
-	compile group: 'de.upb.isys', name: 'meka', version: '0.0.1'
+	//compile group: 'de.upb.isys', name: 'meka', version: '0.0.1'
 	compile group: 'de.upb.isys', name: 'interruptable-weka', version: '0.0.1'
 
 	// OWL API

@@ -4,7 +4,7 @@ sourceSets {
           srcDir 'src'
       }
       resources {
-       	srcDir 'conf'
+          srcDir 'conf'
       }
     }
     test {

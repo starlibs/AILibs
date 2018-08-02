@@ -1,20 +1,16 @@
 package hasco.core;
 
-import jaicore.basic.sets.SetUtil;
-import jaicore.basic.sets.SetUtil.Pair;
-import jaicore.logic.fol.structure.Literal;
-import jaicore.logic.fol.structure.Monom;
-import jaicore.planning.model.core.Action;
-import jaicore.planning.model.core.PlannerUtil;
-import jaicore.search.structure.core.Node;
-
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Set;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
@@ -28,6 +24,13 @@ import hasco.model.NumericParameterDomain;
 import hasco.model.Parameter;
 import hasco.model.ParameterDomain;
 import hasco.model.ParameterRefinementConfiguration;
+import jaicore.basic.sets.SetUtil;
+import jaicore.basic.sets.SetUtil.Pair;
+import jaicore.logic.fol.structure.Literal;
+import jaicore.logic.fol.structure.Monom;
+import jaicore.planning.model.core.Action;
+import jaicore.planning.model.core.PlannerUtil;
+import jaicore.search.structure.core.Node;
 
 public class Util {
 
@@ -56,8 +59,8 @@ public class Util {
       String[] params = l.getParameters().stream().map(p -> p.getName()).collect(Collectors.toList()).toArray(new String[] {});
       switch (l.getPropertyName()) {
         case "resolves":
-          String parentObjectName = params[0];
-          String interfaceName = params[1];
+//          String parentObjectName = params[0];
+//          String interfaceName = params[1];
           String componentName = params[2];
           String objectName = params[3];
           Component component = components.stream().filter(c -> c.getName().equals(componentName)).findAny().get();
@@ -136,8 +139,8 @@ public class Util {
       String[] params = l.getParameters().stream().map(p -> p.getName()).collect(Collectors.toList()).toArray(new String[] {});
       switch (l.getPropertyName()) {
         case "resolves":
-          String parentObjectName = params[0];
-          String interfaceName = params[1];
+//          String parentObjectName = params[0];
+//          String interfaceName = params[1];
           String componentName = params[2];
           String objectName = params[3];
 
@@ -164,7 +167,7 @@ public class Util {
     state.stream().filter(l -> l.getPropertyName().equals("resolves")).forEach(l -> {
       String[] params = l.getParameters().stream().map(p -> p.getName()).collect(Collectors.toList()).toArray(new String[] {});
       String parentObjectName = params[0];
-      String interfaceName = params[1];
+//      String interfaceName = params[1];
       String objectName = params[3];
 
       ComponentInstance object = objectMap.get(objectName);
@@ -213,6 +216,60 @@ public class Util {
   public static ComponentInstance getSolutionCompositionFromState(final Collection<Component> components, final Monom state) {
     return Util.getGroundComponentsFromState(state, components, true).get("solution");
   }
+  
+
+	/**
+	 * Computes a String of component names that appear in the composition which can
+	 * be used as an identifier for the composition
+	 * 
+	 * @param composition
+	 * @return String of all component names in right to left depth-first order
+	 */
+	public static String getComponentNamesOfComposition(ComponentInstance composition) {
+		StringBuilder builder = new StringBuilder();
+		Deque<ComponentInstance> componentInstances = new ArrayDeque<ComponentInstance>();
+		componentInstances.push(composition);
+		ComponentInstance curInstance;
+		while (!componentInstances.isEmpty()) {
+			curInstance = componentInstances.pop();
+			builder.append(curInstance.getComponent().getName());
+			LinkedHashMap<String, String> requiredInterfaces = curInstance.getComponent().getRequiredInterfaces();
+			// This set should be ordered
+			Set<String> requiredInterfaceNames = requiredInterfaces.keySet();
+			for (String requiredInterfaceName : requiredInterfaceNames) {
+				ComponentInstance instance = curInstance.getSatisfactionOfRequiredInterfaces()
+						.get(requiredInterfaceName);
+				componentInstances.push(instance);
+			}
+		}
+		return builder.toString();
+	}
+
+	/**
+	 * Computes a list of all components of the given composition.
+	 * 
+	 * @param composition
+	 * @return List of components in right to left depth-first order
+	 */
+	public static List<Component> getComponentsOfComposition(ComponentInstance composition) {
+		List<Component> components = new LinkedList<Component>();
+		Deque<ComponentInstance> componentInstances = new ArrayDeque<ComponentInstance>();
+		componentInstances.push(composition);
+		ComponentInstance curInstance;
+		while (!componentInstances.isEmpty()) {
+			curInstance = componentInstances.pop();
+			components.add(curInstance.getComponent());
+			LinkedHashMap<String, String> requiredInterfaces = curInstance.getComponent().getRequiredInterfaces();
+			// This set should be ordered
+			Set<String> requiredInterfaceNames = requiredInterfaces.keySet();
+			for (String requiredInterfaceName : requiredInterfaceNames) {
+				ComponentInstance instance = curInstance.getSatisfactionOfRequiredInterfaces()
+						.get(requiredInterfaceName);
+				componentInstances.push(instance);
+			}
+		}
+		return components;
+	}
 
   public static Map<Parameter, ParameterDomain> getUpdatedDomainsOfComponentParameters(final Monom state, final Component component, final String objectIdentifierInState) {
     Map<String, String> parameterContainerMap = new HashMap<>();
