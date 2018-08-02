@@ -38,40 +38,10 @@ public class SimpleAutoMLTest {
     data.setClassIndex(data.numAttributes() - 1);
 
     /* create algorithm */
+    List<Component> components = new ArrayList<>();
     Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramConfigs = new HashMap<>();
-    HASCOFD<Classifier,Double> hasco = new HASCOFD<>(groundComponent -> {
-      Component component = groundComponent.getComponent();
-      Map<String, String> paramValues = groundComponent.getParameterValues();
-      String className = component.getName();
-      try {
-        List<String> params = new ArrayList<>();
-        for (Parameter p : component.getParameters()) {
-          if (paramValues.containsKey(p.getName())) {
-            params.add("-" + p.getName());
-            params.add(paramValues.get(p.getName()));
-          }
-        }
-        String[] paramsAsArray = params.toArray(new String[] {});
-        return AbstractClassifier.forName(className, paramsAsArray);
-      } catch (Exception e) {
-        e.printStackTrace();
-        return null;
-      }
-    }, n -> null, "classifier", c -> {
 
-      System.out.print("Evaluating solution ... ");
-      DescriptiveStatistics stats = new DescriptiveStatistics();
-      for (int i = 0; i < 2; i++) {
-        List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(i), .7f);
-        c.buildClassifier(split.get(0));
-        Evaluation eval = new Evaluation(split.get(0));
-        eval.evaluateModel(c, split.get(1));
-        stats.addValue((100 - eval.pctCorrect()) / 100);
-      }
-      System.out.println("done");
-      return stats.getMean();
-    });
-
+    {
     Component c = null;
     Parameter p;
     Map<Parameter, ParameterRefinementConfiguration> paramConfig;
@@ -113,8 +83,41 @@ public class SimpleAutoMLTest {
     paramConfig.put(p, new ParameterRefinementConfiguration(2, 1));
     c.addParameter(p);
     paramConfigs.put(c, paramConfig);
-    hasco.addComponent(c);
-    hasco.addParamRefinementConfigurations(paramConfigs);
+    components.add(c);
+    }
+    
+    HASCOFD<Classifier,Double> hasco = new HASCOFD<>(components, paramConfigs, groundComponent -> {
+        Component component = groundComponent.getComponent();
+        Map<String, String> paramValues = groundComponent.getParameterValues();
+        String className = component.getName();
+        try {
+          List<String> params = new ArrayList<>();
+          for (Parameter p : component.getParameters()) {
+            if (paramValues.containsKey(p.getName())) {
+              params.add("-" + p.getName());
+              params.add(paramValues.get(p.getName()));
+            }
+          }
+          String[] paramsAsArray = params.toArray(new String[] {});
+          return AbstractClassifier.forName(className, paramsAsArray);
+        } catch (Exception e) {
+          e.printStackTrace();
+          return null;
+        }
+      }, n -> null, "classifier", c -> {
+
+        System.out.print("Evaluating solution ... ");
+        DescriptiveStatistics stats = new DescriptiveStatistics();
+        for (int i = 0; i < 2; i++) {
+          List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(i), .7f);
+          c.buildClassifier(split.get(0));
+          Evaluation eval = new Evaluation(split.get(0));
+          eval.evaluateModel(c, split.get(1));
+          stats.addValue((100 - eval.pctCorrect()) / 100);
+        }
+        System.out.println("done");
+        return stats.getMean();
+      });
 
     new SimpleGraphVisualizationWindow<Node<TFDNode, String>>(hasco).getPanel().setTooltipGenerator(new TFDTooltipGenerator<>());
     for (Solution<ForwardDecompositionSolution, Classifier, Double> candidate : hasco) {

@@ -70,6 +70,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	/* search related objects */
 	protected OpenCollection<Node<T, V>> open = new PriorityQueueOpen<>();
 
+	protected final GraphGenerator<T, A> graphGenerator;
 	protected final RootGenerator<T> rootGenerator;
 	protected final SuccessorGenerator<T, A> successorGenerator;
 	protected final boolean checkGoalPropertyOnEntirePath;
@@ -265,6 +266,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	@SuppressWarnings("unchecked")
 	public ORGraphSearch(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, V> pNodeEvaluator, ParentDiscarding pd) {
 		super();
+		this.graphGenerator = graphGenerator;
 		this.rootGenerator = graphGenerator.getRootGenerator();
 		this.successorGenerator = graphGenerator.getSuccessorGenerator();
 		checkGoalPropertyOnEntirePath = !(graphGenerator.getGoalTester() instanceof NodeGoalTester);
@@ -918,5 +920,10 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	@Override
 	public void registerListener(Object listener) {
 		this.graphEventBus.register(listener);
+	}
+
+	@Override
+	public GraphGenerator<T, A> getGraphGenerator() {
+		return graphGenerator;
 	}
 }

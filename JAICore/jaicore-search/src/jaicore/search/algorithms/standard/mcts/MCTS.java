@@ -40,6 +40,7 @@ public class MCTS<T,A,V extends Comparable<V>> implements IObservableORGraphSear
 	protected final GraphEventBus<Node<T, V>> graphEventBus = new GraphEventBus<>();
 	protected final Map<T, Node<T, V>> ext2int = new HashMap<>();	
 
+	protected final GraphGenerator<T, A> graphGenerator;
 	protected final RootGenerator<T> rootGenerator;
 	protected final SuccessorGenerator<T, A> successorGenerator;
 	protected final boolean checkGoalPropertyOnEntirePath;
@@ -60,6 +61,7 @@ public class MCTS<T,A,V extends Comparable<V>> implements IObservableORGraphSear
 	@SuppressWarnings("unchecked")
 	public MCTS(GraphGenerator<T, A> graphGenerator, IPathUpdatablePolicy<T,A,V> treePolicy, IPolicy<T,A,V> defaultPolicy, INodeEvaluator<T, V> playoutSimulator) {
 		super();
+		this.graphGenerator = graphGenerator;
 		this.rootGenerator = graphGenerator.getRootGenerator();
 		this.successorGenerator = graphGenerator.getSuccessorGenerator();
 		checkGoalPropertyOnEntirePath = !(graphGenerator.getGoalTester() instanceof NodeGoalTester);
@@ -266,5 +268,10 @@ public class MCTS<T,A,V extends Comparable<V>> implements IObservableORGraphSear
 		
 		/* choose action in root that has best reward */
 		return treePolicy.getAction(root, actionsWithSuccessors);
+	}
+
+	@Override
+	public GraphGenerator<T, A> getGraphGenerator() {
+		return graphGenerator;
 	}
 }

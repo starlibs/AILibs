@@ -36,7 +36,7 @@ import jaicore.logic.fol.structure.LiteralParam;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.logic.fol.structure.VariableParam;
 import jaicore.logic.fol.theories.EvaluablePredicate;
-import jaicore.planning.algorithms.IHTNPlanningAlgorithm;
+import jaicore.planning.algorithms.IObservableGraphBasedHTNPlanningAlgorithm;
 import jaicore.planning.algorithms.IObservableGraphBasedHTNPlanningAlgorithmFactory;
 import jaicore.planning.algorithms.IPlanningSolution;
 import jaicore.planning.model.ceoc.CEOCOperation;
@@ -53,6 +53,7 @@ import jaicore.search.algorithms.interfaces.ISolutionEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.RandomCompletionEvaluator;
 import jaicore.search.algorithms.standard.core.AlternativeNodeEvaluator;
 import jaicore.search.algorithms.standard.core.INodeEvaluator;
+import jaicore.search.structure.core.GraphGenerator;
 
 /**
  * Hierarchically create an object of type T
@@ -72,12 +73,12 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 	private static final String REFINE_PARAMETERS_PREFIX = "2_tRefineParamsOf";
 	private static final String REFINE_PARAMETER_PREFIX = "2_tRefineParam";
 	private static final String DECLARE_CLOSED_PREFIX = "2_declareClosed";
-	private static final String REDEF_CLOSED_PREFIX = "2_satisfy";
+//	private static final String REDEF_CLOSED_PREFIX = "2_satisfy";
 	private static final String REDEF_VALUE_PREFIX = "2_redefValue";
 
 	/* domain description */
-	private final Collection<Component> components = new ArrayList<>();
-	private final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig = new HashMap<>();
+	private final Collection<Component> components;
+	private final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig;
 	private Factory<? extends T> factory;
 
 	/* query */
@@ -108,7 +109,14 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 	/* logging */
 	private Logger logger = LoggerFactory.getLogger(HASCO.class);
 	private String loggerName;
-
+	
+	/* run-specific options */
+	private final CEOCIPSTNPlanningDomain domain;
+	private final CEOCIPSTNPlanningProblem problem;
+	private final CNFFormula knowledge;
+	private final Monom init;
+	private final IObservableGraphBasedHTNPlanningAlgorithm<R,N,A,V> planner;
+	
 	private ISolutionEvaluator<N, V> solutionEvaluator = new ISolutionEvaluator<N, V>() {
 		@Override
 		public V evaluateSolution(final List<N> solutionPath) throws Exception {
@@ -137,12 +145,18 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 	/* list of listeners */
 	private final Collection<Object> listeners = new ArrayList<>();
 
-	public HASCO(final IObservableGraphBasedHTNPlanningAlgorithmFactory<R, N, A, V> plannerFactory,
+	public HASCO(final Collection<Component> components, final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig, final IObservableGraphBasedHTNPlanningAlgorithmFactory<R, N, A, V> plannerFactory,
 			final IObservableORGraphSearchFactory<N, A, V> searchFactory,
 			final IHASCOSearchSpaceUtilFactory<N, A, V> searchSpaceUtilFactory,
 			final INodeEvaluator<N, V> nodeEvaluator, final Factory<? extends T> factory,
 			final String nameOfRequiredInterface, final IObjectEvaluator<T, V> benchmark) {
 		super();
+		
+		/* set components and refinement configs */
+		this.components = components;
+		this.paramRefinementConfig = paramRefinementConfig;
+		
+		/* define search relevant factories and evaluators */
 		this.plannerFactory = plannerFactory;
 		this.searchFactory = searchFactory;
 		// FIXME number of random sub samples should be configurable from the outside!
@@ -153,6 +167,27 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 		this.searchSpaceUtilFactory = searchSpaceUtilFactory;
 		this.nameOfRequiredInterface = nameOfRequiredInterface;
 		this.benchmark = benchmark;
+		
+		/* set run specific options */
+		this.domain = this.getPlanningDomain();
+		this.knowledge = new CNFFormula();
+		this.init = HASCO.this.getInitState();
+		this.problem = HASCO.this.getPlanningProblem(this.domain, this.knowledge, this.init);
+		if (logger.isDebugEnabled()) {
+			StringBuilder opSB = new StringBuilder();
+			for (Operation op : problem.getDomain().getOperations()) {
+				opSB.append("\n\t\t");
+				opSB.append(op);
+			}
+			StringBuilder methodSB = new StringBuilder();
+			for (Method method : problem.getDomain().getMethods()) {
+				methodSB.append("\n\t\t");
+				methodSB.append(method);
+			}
+			logger.debug("The HTN problem created by HASCO is defined as follows:\n\tInit State: {}\n\tOperations:{}\n\tMethods:{}", init, opSB.toString(), methodSB.toString());
+		}
+		this.planner = HASCO.this.plannerFactory.newAlgorithm(this.problem, HASCO.this.searchFactory,
+				HASCO.this.nodeEvaluator, HASCO.this.numberOfCPUs);
 	}
 
 	public IObservableORGraphSearchFactory<N, A, V> getSearchFactory() {
@@ -173,45 +208,19 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 
 	public class HASCOSolutionIterator implements Iterator<Solution<R, T, V>> {
 
-		private final CEOCIPSTNPlanningDomain domain;
-		private final CEOCIPSTNPlanningProblem problem;
-		private final CNFFormula knowledge;
-		private final Monom init;
-		private final IHTNPlanningAlgorithm<R> planner;
 		private boolean isInitialized = false;
 		private Iterator<R> planIterator;
 		private boolean canceled = false;
 
 		private HASCOSolutionIterator() {
-			this.domain = HASCO.this.getPlanningDomain();
-			this.knowledge = new CNFFormula();
-			this.init = HASCO.this.getInitState();
-			this.problem = HASCO.this.getPlanningProblem(this.domain, this.knowledge, this.init);
-			this.planner = HASCO.this.plannerFactory.newAlgorithm(this.problem, HASCO.this.searchFactory,
-					HASCO.this.nodeEvaluator, HASCO.this.numberOfCPUs);
-			if (HASCO.this.loggerName != null && HASCO.this.loggerName.length() > 0
-					&& this.planner instanceof ILoggingCustomizable) {
-				((ILoggingCustomizable) this.planner).setLoggerName(HASCO.this.loggerName + ".planner");
-			}
-			this.planIterator = this.planner.iterator();
+			this.planIterator = planner.iterator();
 		}
 
 		@Override
 		public boolean hasNext() {
 			if (!this.isInitialized) {
 				HASCO.this.logger.info("Starting HASCO run.");
-				HASCO.this.logger.debug("Init State: " + this.init);
-
-				HASCO.this.logger.debug("Methods:\n------------------------------------------");
-				for (Method m : this.problem.getDomain().getMethods()) {
-					HASCO.this.logger.debug(m.toString());
-				}
-
-				HASCO.this.logger.debug("Operations:\n------------------------------------------");
-				for (Operation o : this.problem.getDomain().getOperations()) {
-					HASCO.this.logger.debug(o.toString());
-				}
-
+				
 				/* check whether there is a refinement config for each numeric parameter */
 				for (Component c : HASCO.this.components) {
 					for (Parameter p : c.getParameters()) {
@@ -223,15 +232,19 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 						}
 					}
 				}
-
-				/* register listeners if the */
-				if (this.planner instanceof IObservableGraphAlgorithm<?, ?>) {
-					synchronized (HASCO.this.listeners) {
-						HASCO.this.listeners
-								.forEach(l -> ((IObservableGraphAlgorithm<?, ?>) this.planner).registerListener(l));
-					}
+				
+				/* updating logger name of the planner */
+				if (HASCO.this.loggerName != null && HASCO.this.loggerName.length() > 0
+						&& HASCO.this.planner instanceof ILoggingCustomizable) {
+					logger.info("Setting logger name of {} to {}", HASCO.this.planner, loggerName + ".planner");
+					((ILoggingCustomizable) HASCO.this.planner).setLoggerName(loggerName + ".planner");
 				}
-				HASCO.this.solutionEvaluationEventBus.post(new HASCORunStartedEvent<>(HASCO.this.randomSeed,
+
+				/* register listeners */
+				synchronized (listeners) {
+					listeners.forEach(l -> ((IObservableGraphAlgorithm<?, ?>) planner).registerListener(l));
+				}
+				solutionEvaluationEventBus.post(new HASCORunStartedEvent<>(HASCO.this.randomSeed,
 						HASCO.this.timeout, HASCO.this.numberOfCPUs, HASCO.this.benchmark));
 				this.isInitialized = true;
 			}
@@ -249,7 +262,7 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 
 			/* derive a map of ground components */
 			R plan = this.planIterator.next();
-			Map<String, Object> solutionAnnotations = this.planner.getAnnotationsOfSolution(plan);
+			Map<String, Object> solutionAnnotations = planner.getAnnotationsOfSolution(plan);
 			ComponentInstance objectInstance = Util.getSolutionCompositionForPlan(HASCO.this.components,
 					HASCO.this.getInitState(), plan.getPlan());
 			@SuppressWarnings("unchecked")
@@ -260,12 +273,12 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 		}
 
 		public Map<String, Object> getAnnotationsOfSolution(final Solution<R, T, V> solution) {
-			return this.planner.getAnnotationsOfSolution(solution.getPlanningSolution());
+			return planner.getAnnotationsOfSolution(solution.getPlanningSolution());
 		}
 
 		public void cancel() {
 			this.canceled = true;
-			this.planner.cancel();
+			planner.cancel();
 			HASCO.this.triggerTerminationEvent();
 		}
 	}
@@ -541,20 +554,7 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 	public Collection<Component> getComponents() {
 		return this.components;
 	}
-
-	public void addComponents(final Collection<Component> components) {
-		this.components.addAll(components);
-	}
-
-	public void addComponent(final Component component) {
-		this.components.add(component);
-	}
-
-	public void addParamRefinementConfigurations(
-			final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig) {
-		this.paramRefinementConfig.putAll(paramRefinementConfig);
-	}
-
+	
 	public Factory<? extends T> getFactory() {
 		return this.factory;
 	}
@@ -589,6 +589,10 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 
 	public void registerListenerForSolutionEvaluations(final Object listener) {
 		this.solutionEvaluationEventBus.register(listener);
+	}
+	
+	public GraphGenerator<N, A> getGraphGenerator() {
+		return planner.getGraphGenerator();
 	}
 
 	@Override
