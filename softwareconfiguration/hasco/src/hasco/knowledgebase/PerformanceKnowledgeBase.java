@@ -246,9 +246,13 @@ public class PerformanceKnowledgeBase implements IKnowledgeBase {
 				} else if (domain instanceof NumericParameterDomain) {
 					NumericParameterDomain numDomain = (NumericParameterDomain) domain;
 					// TODO is there a better way to set the range of this attribute?
-//					String range = "[" + numDomain.getMin() + "," + numDomain.getMax() + "]";
+					if(numDomain.getMin() == numDomain.getMax()) {
+						System.out.println("Domain has range of 0, skipping it!");
+						continue;
+					}
+					String range = "[" + numDomain.getMin() + "," + numDomain.getMax() + "]";
 					Properties prop = new Properties();
-//					prop.setProperty("range", range);
+					prop.setProperty("range", range);
 					ProtectedProperties metaInfo = new ProtectedProperties(prop);
 					attr = new Attribute(componentInstance.getComponent().getName() + "::" + parameter.getName(), metaInfo);
 				}

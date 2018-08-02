@@ -116,13 +116,13 @@ public class isRefinementCompletedPredicateWithImportanceCheck implements Evalua
 		}
 		System.out.println("Important Parameters: " + importantParams.toString());
 		for (Parameter param : component.getParameters()) {
+			String paramName = ci.getComponent().getName() + "::" + param.getName();
 			System.out.println("Checking whether parameter " + param.getName() + " for component " + component.getName() + " has completed its refinement");
-			String parameterIdentifier = component.getName() + "::" + param.getName();
-			if(!importantParams.contains(parameterIdentifier)) {
-				System.out.println("Skipping parameter: " + parameterIdentifier);
+			if(!importantParams.contains(paramName)) {
+				System.out.println("Skipping parameter: " + paramName);
 				continue;
 			} else {
-				System.out.println("Not skipping parameter: " + parameterIdentifier);
+				System.out.println("Not skipping parameter: " + paramName);
 			}
 			String containerOfParam = componentParamContainers.get(param.getName());
 			String currentValueOfParam = componentParams.get(param.getName());

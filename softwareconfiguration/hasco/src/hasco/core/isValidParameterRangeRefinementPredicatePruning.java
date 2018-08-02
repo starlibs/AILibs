@@ -102,10 +102,12 @@ public class isValidParameterRangeRefinementPredicatePruning implements Evaluabl
 //				System.out.println("important parameters: " + importantParams.toString());
 				if (importantParams.contains(paramName)) {
 //					System.out.println("Parameter " + paramName + " is important and will be refined!");
+					;
+					
 				} else {
 //					System.out.println("Important params ip: " + importantParams);
-//					System.out.println("Parameter " + paramName
-//							+ " is not important and will be discarded from further refinement!");
+					System.out.println("Parameter " + paramName
+							+ " is not important and will be discarded from further refinement!");
 					return new ArrayList<>();
 				}
 			} catch (Exception e) {

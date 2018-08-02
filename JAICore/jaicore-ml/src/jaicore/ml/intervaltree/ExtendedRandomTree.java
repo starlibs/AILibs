@@ -563,6 +563,7 @@ public class ExtendedRandomTree extends RandomTree {
 		for (int i = 0; i < this.featureSpace.getDimensionality(); i++) {
 			set.add(i);
 		}
+		System.out.println("Range size: " + this.featureSpace.getRangeSize());
 		this.totalVariance = computeTotalVarianceOfSubset(set);
 //		System.out.println("trees total variance = " + this.totalVariance);
 	}
