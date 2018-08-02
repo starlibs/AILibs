@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import de.upb.crc901.automl.PreferenceBasedNodeEvaluator;
 import hasco.core.HASCOFD;
+import hasco.core.HASCOProblemReduction;
 import hasco.core.Solution;
 import hasco.model.Component;
 import hasco.serialization.ComponentLoader;
@@ -108,8 +109,8 @@ public class HASCOForWekaML implements IObservableGraphAlgorithm<TFDNode, String
 		}
 
 		/* create algorithm */
-		hasco = new HASCOFD<>(cl.getComponents(), cl.getParamConfigs(), new WEKAPipelineFactory(), this.preferredNodeEvaluator,
-				"AbstractClassifier", ce, this.oversearchAvoidanceConfig);
+		hasco = new HASCOFD<>(cl.getComponents(), cl.getParamConfigs(), new WEKAPipelineFactory(), "AbstractClassifier", ce, this.oversearchAvoidanceConfig);
+		hasco.setPreferredNodeEvaluator(this.preferredNodeEvaluator);
 		
 		if (this.loggerName != null && this.loggerName.length() > 0) {
 			hasco.setLoggerName(this.loggerName + ".hasco");
@@ -194,12 +195,6 @@ public class HASCOForWekaML implements IObservableGraphAlgorithm<TFDNode, String
 		} else {
 			return this.hasco.getComponents();
 		}
-	}
-
-	public GraphGenerator<TFDNode,String> getGraphGenerator() {
-		if (hasco == null)
-			throw new IllegalArgumentException("HASCOForWEKAML does not produce the actual HASCO object prior to knowing the data, which are passed when invoking \"gatherSolutions\". This has apparently not happened yet, so I cannot tell the graph generator neither at this time.");
-		return hasco.getGraphGenerator();
 	}
 	
 	public ISolutionEvaluator<TFDNode, Double> getSolutionEvaluator() {

@@ -591,10 +591,6 @@ public class MLPlan extends AbstractClassifier implements Classifier, OptionHand
 		return hasco.getComponents();
 	}
 	
-	public GraphGenerator<TFDNode,String> getGraphGenerator() {
-		return hasco.getGraphGenerator();
-	}
-	
 	public ISolutionEvaluator<TFDNode,Double> getSolutionEvaluator() {
 		return hasco.getSolutionEvaluator();
 	}

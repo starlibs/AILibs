@@ -10,14 +10,14 @@ import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
 
 import de.upb.crc901.automl.hascowekaml.HASCOForWekaML;
-import de.upb.crc901.automl.metamining.WEKAMetaminer;
-import de.upb.crc901.mlplan.multiclass.DefaultPreorder;
-import de.upb.crc901.mlplan.multiclass.MLPlan;
-import hasco.metamining.MetaMinerBasedSorter;
-import hasco.metamining.factories.ImprovedLimitedDiscrepancySearchFactory;
+import hasco.core.HASCOProblemReduction;
 import hasco.serialization.ComponentLoader;
+import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.ml.WekaUtil;
-import weka.classifiers.Evaluation;
+import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionHTNPlannerFactory;
+import jaicore.planning.graphgenerators.task.tfd.TFDNode;
+import jaicore.search.algorithms.standard.bestfirst.BestFirst;
+import jaicore.search.structure.core.GraphGenerator;
 import weka.core.Instances;
 
 /**
@@ -36,26 +36,38 @@ public class MetaMinerExample {
 		Instances data = new Instances(new BufferedReader(new FileReader(file)));
 		data.setClassIndex(data.numAttributes() - 1);
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(0), .7f);
-		
+
 		/* initialize mlplan, and let it run for 30 seconds */
 		File configFile = new File("model/weka/weka-all-autoweka.json");
 		HASCOForWekaML hasco = new HASCOForWekaML(configFile);
 		ComponentLoader componentLoader = new ComponentLoader();
 		componentLoader.loadComponents(configFile);
 
-		hasco.getGraphGenerator();
-		
-//		WEKAMetaminer metaMiner = new WEKAMetaminer(data);
-//		metaMiner.build();
-//		MetaMinerBasedSorter comparator = new MetaMinerBasedSorter(metaMiner, componentLoader);
-//		mlplan.get.setOrGraphSearchFactory(new ImprovedLimitedDiscrepancySearchFactory(comparator));
+		/* get the graph generator from the reduction */
+		HASCOProblemReduction reduction = new HASCOProblemReduction(configFile, "AbstractClassifier", true);
+		GraphGenerator<TFDNode, String> graphGenerator = reduction
+				.getGraphGeneratorUsedByHASCOForSpecificPlanner(new ForwardDecompositionHTNPlannerFactory<Double>());
+		BestFirst<TFDNode, String> bf = new BestFirst<>(graphGenerator, n -> n.externalPath().size() * -1.0);
+		new SimpleGraphVisualizationWindow<>(bf);
+		while (true)
+			bf.nextSolution();
 
-//		mlplan.buildClassifier(split.get(0));
+		// System.out.println(hasco.getGraphGenerator());
+
+		// WEKAMetaminer metaMiner = new WEKAMetaminer(data);
+		// metaMiner.build();
+		// MetaMinerBasedSorter comparator = new MetaMinerBasedSorter(metaMiner,
+		// componentLoader);
+		// mlplan.get.setOrGraphSearchFactory(new
+		// ImprovedLimitedDiscrepancySearchFactory(comparator));
+
+		// mlplan.buildClassifier(split.get(0));
 
 		/* evaluate solution produced by mlplan */
-//		Evaluation eval = new Evaluation(split.get(0));
-//		eval.evaluateModel(mlplan, split.get(1));
-//		System.out.println("Error Rate of the solution produced by ML-Plan: " + (100 - eval.pctCorrect()) / 100f);
+		// Evaluation eval = new Evaluation(split.get(0));
+		// eval.evaluateModel(mlplan, split.get(1));
+		// System.out.println("Error Rate of the solution produced by ML-Plan: " + (100
+		// - eval.pctCorrect()) / 100f);
 	}
 
 }
