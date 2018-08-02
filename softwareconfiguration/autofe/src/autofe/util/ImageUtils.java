@@ -1,12 +1,16 @@
 package autofe.util;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.deeplearning4j.nn.conf.CacheMode;
 import org.deeplearning4j.nn.conf.WorkspaceMode;
 import org.deeplearning4j.nn.conf.layers.ConvolutionLayer.AlgoMode;
+import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.zoo.model.AlexNet;
 import org.deeplearning4j.zoo.model.LeNet;
+import org.deeplearning4j.zoo.model.ResNet50;
 import org.deeplearning4j.zoo.model.VGG16;
 import org.deeplearning4j.zoo.model.VGG19;
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -43,6 +47,7 @@ import autofe.algorithm.hasco.filter.image.CatalanoBinaryPatternFilter;
 import autofe.algorithm.hasco.filter.image.CatalanoInPlaceFilter;
 import autofe.algorithm.hasco.filter.image.PretrainedNNFilter;
 import autofe.algorithm.hasco.filter.meta.IFilter;
+import weka.core.Instances;
 
 public final class ImageUtils {
 
@@ -78,8 +83,7 @@ public final class ImageUtils {
 						logger.warn(Arrays.toString(shape));
 						logger.warn("...");
 					}
-					return bitmap;
-
+					break;
 				default:
 					logger.warn("Could not initialize FastBitmap due to lack of color space information.");
 					break;
@@ -207,19 +211,22 @@ public final class ImageUtils {
 		switch (name) {
 		case "VGG16":
 			return new PretrainedNNFilter(new VGG16(42, shape, 10, new Nesterovs(1e-2, 0.9), CacheMode.NONE,
-					WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer, shape);
+					WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer, shape, name);
 		case "AlexNet":
 			return new PretrainedNNFilter(new AlexNet(42, shape, 10, new Nesterovs(1e-2, 0.9), CacheMode.NONE,
-					WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer, shape);
+					WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer, shape, name);
 		case "LeNet":
 			return new PretrainedNNFilter(new LeNet(42, shape, 10, new Nesterovs(1e-2, 0.9), CacheMode.NONE,
-					WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer, shape);
+					WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer, shape, name);
 		case "VGG19":
 			return new PretrainedNNFilter(new VGG19(42, shape, 10, new Nesterovs(1e-2, 0.9), CacheMode.NONE,
-					WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer, shape);
+					WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer, shape, name);
+		case "ResNet50":
+			return new PretrainedNNFilter(new ResNet50(42, shape, 10, WeightInit.DISTRIBUTION, new Nesterovs(1e-2, 0.9),
+					CacheMode.NONE, WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer, shape, name);
 		default:
 			return new PretrainedNNFilter(new VGG16(42, shape, 10, new Nesterovs(1e-2, 0.9), CacheMode.NONE,
-					WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer, shape);
+					WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer, shape, name);
 		}
 	}
 
@@ -241,4 +248,30 @@ public final class ImageUtils {
 		result.putScalar(values.length + 8, histogram.getMax());
 		return result;
 	}
+
+	public static List<INDArray> grayscaleMatricesToRGB(final List<INDArray> matrices) {
+		List<INDArray> result = new ArrayList<>(matrices.size());
+		for (int i = 0; i < matrices.size(); i++) {
+			INDArray currMatrix = matrices.get(i);
+			INDArray resultMatrix = Nd4j.create(currMatrix.shape()[0], currMatrix.shape()[1], 3);
+			for (int j = 0; j < currMatrix.shape()[0]; j++) {
+				for (int k = 0; k < currMatrix.shape()[1]; k++) {
+					for (int l = 0; l < 3; l++) {
+						resultMatrix.putScalar(new int[] { j, k, l }, currMatrix.getDouble(j, k));
+					}
+				}
+			}
+			result.add(resultMatrix);
+		}
+
+		return result;
+	}
+
+	public static List<Instances> readRawImageDataSet(final String path) {
+		// Used for import of raw data sets on file system
+
+		// TODO
+		throw new UnsupportedOperationException("Not implemented yet.");
+	}
+
 }

@@ -130,6 +130,9 @@ public class HASCOFE implements IObservableGraphAlgorithm<TFDNode, String>, ILog
 			this.hasco = new HASCOFD<>(new FilterPipelineFactory(this.inputShape), n -> null, "FilterPipeline",
 					objectEvaluator);
 		}
+
+		// Set number of CPUs
+		// this.hasco.setNumberOfCPUs(8);
 		this.hasco.setNumberOfCPUs(Runtime.getRuntime().availableProcessors());
 
 		if (this.loggerName != null && this.loggerName.length() > 0)
@@ -244,14 +247,19 @@ public class HASCOFE implements IObservableGraphAlgorithm<TFDNode, String>, ILog
 		return hasco;
 	}
 
-	public static List<Instances> generateRandomDataSets(final int dataset, final double usedDataSetSize,
+	public static List<Instances> generateRandomDataSets(final int dataset, // final double usedDataSetSize,
 			final int maxSolutionCount, final int maxPipelineSize, final int timeout) throws Exception {
+
 		/* load image dataset and create a train-test-split */
 		OpenmlConnector connector = new OpenmlConnector();
 		DataSetDescription ds = connector.dataGet(dataset);
 		File file = ds.getDataset(DataSetUtils.API_KEY);
 		Instances data = new Instances(new BufferedReader(new FileReader(file)));
 		data.setClassIndex(data.numAttributes() - 1);
+
+		final double usedDataSetSize = DataSetUtils.getSplitRatioToUse(data);
+		logger.debug("Using split ratio '" + usedDataSetSize + "'.");
+
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(new Random().nextInt() * 1000),
 				usedDataSetSize);
 
@@ -273,21 +281,21 @@ public class HASCOFE implements IObservableGraphAlgorithm<TFDNode, String>, ILog
 		List<Instances> result = new ArrayList<>();
 		result.add(originDataSet.getInstances());
 
-		logger.debug("Found solutions: " + hascoFE.getFoundClassifiers().toString());
+		// logger.debug("Found solutions: " + hascoFE.getFoundClassifiers().toString());
 		List<HASCOFESolution> solutions = new ArrayList<>(hascoFE.getFoundClassifiers());
 		logger.debug("Found " + solutions.size() + " solutions.");
 		Collections.shuffle(solutions);
 
 		Iterator<HASCOFESolution> solIt = solutions.iterator();
 
-		int solCounter = 0;
+		int solCounter = 1;
 		while (solIt.hasNext() && solCounter < maxSolutionCount) {
 			HASCOFESolution nextSol = solIt.next();
 
 			FilterPipeline pipe = nextSol.getSolution();
 
-			// Skip empty pipes
-			if (pipe.getFilters() == null)
+			// Discard empty or oversized pipelines
+			if (pipe.getFilters() == null || pipe.getFilters().getItems().size() > maxPipelineSize)
 				continue;
 
 			logger.debug("Applying solution pipe " + pipe.toString());

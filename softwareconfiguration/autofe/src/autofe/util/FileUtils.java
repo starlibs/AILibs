@@ -1,5 +1,6 @@
 package autofe.util;
 
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -8,7 +9,11 @@ import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import javax.imageio.ImageIO;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +53,20 @@ public final class FileUtils {
 		}
 	}
 
+	public static boolean checkIfFilesWithPrefixExist(final String dirPath, final String prefix) {
+		File file = new File(dirPath);
+		if (file.isDirectory()) {
+			for (String filePath : file.list()) {
+				File tmpFile = new File(filePath);
+				if (tmpFile.getName().startsWith(prefix))
+					return true;
+
+			}
+			return false;
+		} else
+			throw new IllegalArgumentException("Parameter 'dirPath' must specify an existing directory.");
+	}
+
 	public static void saveInstances(final List<Instances> dataSets, final String dirPath, final String dataSetPrefix)
 			throws Exception {
 		for (int i = 0; i < dataSets.size(); i++) {
@@ -58,12 +77,13 @@ public final class FileUtils {
 			saver.setInstances(dataSets.get(i));
 			File destFile = new File(dirPath + "\\" + dataSetPrefix + i + ".arff");
 			saver.setFile(destFile);
-			// saver.setDestination(destFile);
+
 			saver.writeBatch();
 		}
 	}
 
-	public static List<Instances> readInstances(final String dirPath, final String dataSetPrefix) {
+	public static List<Instances> readInstances(final String dirPath, final String dataSetPrefix,
+			final String excludePostfix) {
 		List<Instances> results = new ArrayList<>();
 
 		// TODO: Implement me
@@ -72,7 +92,10 @@ public final class FileUtils {
 
 			@Override
 			public boolean accept(File dir, String name) {
-				return name.startsWith(dataSetPrefix);
+				if (excludePostfix != null)
+					return name.startsWith(dataSetPrefix) && !name.endsWith(excludePostfix);
+				else
+					return name.startsWith(dataSetPrefix);
 			}
 		});
 		for (File file : dataSetFiles) {
@@ -118,5 +141,42 @@ public final class FileUtils {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	public static Map<String, List<double[]>> readClassImages(final String path) {
+		Map<String, List<double[]>> result = new HashMap<>();
+
+		File dataSetDir = new File(path);
+		if (!dataSetDir.exists())
+			throw new IllegalArgumentException("The data set directory '" + path + "' does not exist.");
+
+		for (String subDir : dataSetDir.list()) {
+			File tmpFile = new File(subDir);
+			if (tmpFile.exists() && tmpFile.isDirectory()) {
+				String className = tmpFile.getName();
+				List<double[]> dataSamples = new ArrayList<>();
+
+				for (File dataSample : tmpFile.listFiles()) {
+					if (dataSample.isDirectory())
+						continue;
+
+					// Read image to double array
+					try {
+						BufferedImage bufferedImage = ImageIO.read(dataSample);
+						double[] imageData = bufferedImage.getData().getPixels(0, 0, bufferedImage.getWidth(),
+								bufferedImage.getHeight(), new double[] {});
+						dataSamples.add(imageData);
+
+					} catch (IOException e) {
+						e.printStackTrace();
+						logger.warn("Could not read image. Reason: " + e.getMessage() + "\nSkipping example");
+						continue;
+					}
+				}
+				result.put(className, dataSamples);
+			}
+		}
+
+		return result;
 	}
 }

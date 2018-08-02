@@ -12,7 +12,7 @@ import weka.core.Instances;
 public class DataSet {
 	private Instances instances;
 	private List<INDArray> intermediateInstances;
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(DataSet.class);
 
 	public DataSet(final Instances instances, final List<INDArray> intermediateInstances) {
@@ -38,6 +38,8 @@ public class DataSet {
 
 	public DataSet copy() {
 		Instances copiedInstances = new Instances(this.instances);
+		copiedInstances.setClassIndex(copiedInstances.numAttributes() - 1);
+
 		List<INDArray> copiedIntermediates = null;
 		if (this.intermediateInstances != null) {
 			copiedIntermediates = new ArrayList<>();
@@ -51,7 +53,7 @@ public class DataSet {
 	public void updateInstances() {
 		if (this.intermediateInstances != null) {
 			this.instances = DataSetUtils.matricesToInstances(this.intermediateInstances, this.instances);
-		} else 
+		} else
 			logger.debug("Could not update any instance due to lack of intermediate instances.");
 	}
 }

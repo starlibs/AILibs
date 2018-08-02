@@ -14,10 +14,11 @@ import java.util.TreeSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import autofe.algorithm.hasco.filter.image.PretrainedNNFilter;
 import autofe.util.DataSet;
 import jaicore.graph.Graph;
 
-// TODO: Integrate descriptive statistics
+// TODO: Integrate descriptive statistics (?)
 @SuppressWarnings("serial")
 public class FilterPipeline implements IFilter, Serializable {
 
@@ -58,7 +59,6 @@ public class FilterPipeline implements IFilter, Serializable {
 		List<FilterDataEntry> leafNodes = new ArrayList<>(dataGraph.getSinks());
 		HashSet<FilterDataEntry> nextNodes = new HashSet<>();
 		for (FilterDataEntry entry : leafNodes) {
-			// System.out.println("Leaf node: " + entry.filter.getClass().getName());
 			entry.dataset = entry.filter.applyFilter(inputData, true);
 			nextNodes.addAll(dataGraph.getPredecessors(entry));
 		}
@@ -112,7 +112,9 @@ public class FilterPipeline implements IFilter, Serializable {
 		DataSet resultDataSet = dataGraph.getRoot().dataset;
 
 		// Update intermediate instances into Weka instances
+		logger.debug("Updating instances...");
 		resultDataSet.updateInstances();
+		logger.debug("Done.");
 		return resultDataSet;
 	}
 
@@ -185,6 +187,14 @@ public class FilterPipeline implements IFilter, Serializable {
 
 	public Graph<IFilter> getFilters() {
 		return filters;
+	}
+
+	public boolean containsPretrainedNN() {
+		for (IFilter filter : this.getFilters().getItems())
+			if (filter instanceof PretrainedNNFilter)
+				return true;
+
+		return false;
 	}
 
 }

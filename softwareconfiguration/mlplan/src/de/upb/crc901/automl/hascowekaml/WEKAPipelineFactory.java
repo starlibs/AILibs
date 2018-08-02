@@ -51,11 +51,6 @@ public class WEKAPipelineFactory implements Factory<MLPipeline> {
 
 		classifierCI.getParameterValues();
 		List<String> parameters = this.getParameterList(classifierCI);
-		System.out.println(classifierCI.getComponent().getName());
-
-		String[] options = new String[] {};
-		if (classifierCI.getComponent().getName().equals("weka.classifiers.trees.RandomForest"))
-			options = new String[] { "-num-slots", "0" };
 
 		Classifier c = AbstractClassifier.forName(classifierCI.getComponent().getName(),
 				parameters.toArray(new String[] {}));

@@ -55,6 +55,7 @@ dependencies {
 	compile group: 'de.upb.isys', name: 'interruptable-weka', version: '0.0.1'
 	
 	compile files('lib/Catalano.Image.jar')
+	compile files('lib/Catalano.Core.jar')
 	compile files('lib/Catalano.Math.jar')
 	compile files('lib/Catalano.Statistics.jar')
 	compile files('lib/largeScaleKernelLearning.jar')
@@ -65,8 +66,10 @@ dependencies {
 	compile files('lib/RankCorrelation.jar')
 	
 	compile 'org.nd4j:nd4j-native-platform:1.0.0-beta'
+	// compile 'org.nd4j:nd4j-cuda-8.0-platform:1.0.0-beta'
 	
 	// Deeplearning4j
 	compile "org.deeplearning4j:deeplearning4j-core:1.0.0-beta"
 	compile "org.deeplearning4j:deeplearning4j-zoo:1.0.0-beta"
+	// compile "org.deeplearning4j:deeplearning4j-cuda-8.0:1.0.0-beta"
 }

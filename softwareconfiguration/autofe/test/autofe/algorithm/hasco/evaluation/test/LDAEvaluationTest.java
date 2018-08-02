@@ -12,14 +12,13 @@ import org.openml.apiconnector.xml.DataSetDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import autofe.test.AutoFETest;
 import autofe.util.DataSetUtils;
 import jaicore.ml.WekaUtil;
 import weka.classifiers.Evaluation;
 import weka.classifiers.functions.LDA;
 import weka.core.Instances;
 
-public class LDAEvaluationTest extends AutoFETest {
+public class LDAEvaluationTest {
 	private static final Logger logger = LoggerFactory.getLogger(LDAEvaluationTest.class);
 
 	@Test

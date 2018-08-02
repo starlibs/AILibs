@@ -12,7 +12,6 @@ import org.openml.apiconnector.xml.DataSetDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import autofe.test.AutoFETest;
 import autofe.util.DataSetUtils;
 import jaicore.ml.WekaUtil;
 import weka.attributeSelection.ReliefFAttributeEval;
@@ -20,7 +19,7 @@ import weka.classifiers.Evaluation;
 import weka.classifiers.lazy.IBk;
 import weka.core.Instances;
 
-public class EnsembleEvaluatorTest extends AutoFETest {
+public class EnsembleEvaluatorTest {
 	private static final Logger logger = LoggerFactory.getLogger(EnsembleEvaluatorTest.class);
 
 	// @Test

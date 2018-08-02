@@ -12,7 +12,6 @@ import org.openml.apiconnector.xml.DataSetDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import autofe.test.AutoFETest;
 import autofe.util.DataSetUtils;
 import autofe.util.EvaluationUtils;
 import jaicore.ml.WekaUtil;
@@ -24,7 +23,7 @@ import weka.core.Instances;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
 
-public class ClusterEvaluationTest extends AutoFETest {
+public class ClusterEvaluationTest {
 
 	private static final Logger logger = LoggerFactory.getLogger(ClusterEvaluationTest.class);
 

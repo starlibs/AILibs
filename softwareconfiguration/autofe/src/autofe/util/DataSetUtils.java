@@ -3,7 +3,10 @@ package autofe.util;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.slf4j.Logger;
@@ -15,6 +18,12 @@ import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
+/**
+ * Utility class for handling imported data sets.
+ * 
+ * @author Julian Lienen
+ *
+ */
 public final class DataSetUtils {
 
 	public static final String API_KEY = "4350e421cdc16404033ef1812ea38c01";
@@ -24,6 +33,8 @@ public final class DataSetUtils {
 	public static final int SEGMENT_ID = 40984;
 	public static final int MNIST_ID = 554;
 	public static final int[] MNIST_INPUT_SHAPE = new int[] { 1, 1, 28, 28 };
+	public static final int FASHION_MNIST_ID = 40996;
+	public static final int[] FASHION_MNIST_SHAPE = new int[] { 1, 1, 28, 28 };
 
 	private static final Logger logger = LoggerFactory.getLogger(DataSetUtils.class);
 
@@ -36,6 +47,8 @@ public final class DataSetUtils {
 		case CIFAR10_ID:
 			return cifar10InstanceToMatrix(instance);
 		case MNIST_ID:
+			return mnistInstanceToMatrix(instance);
+		case FASHION_MNIST_ID:
 			return mnistInstanceToMatrix(instance);
 		default:
 			logger.warn("Could not infer data set of instance to generate matrix. Returning null...");
@@ -113,7 +126,12 @@ public final class DataSetUtils {
 		for (int i = 0; i < images.iterator().next().getRGBData().length; i++) {
 			attributes.add(new Attribute("val" + i));
 		}
-		attributes.add(refInstances.classAttribute());
+
+		// Add class attribute
+		List<String> classValues = IntStream.range(0, refInstances.classAttribute().numValues()).asDoubleStream()
+				.mapToObj(d -> String.valueOf(d)).collect(Collectors.toList());
+		Attribute classAtt = new Attribute("classAtt", classValues);
+		attributes.add(classAtt);
 
 		Instances result = new Instances("Instances", attributes, refInstances.size());
 		result.setClassIndex(result.numAttributes() - 1);
@@ -122,9 +140,12 @@ public final class DataSetUtils {
 			FastBitmap image = images.get(i);
 			int[] rgbData = image.getRGBData();
 			Instance inst = new DenseInstance(rgbData.length + 1);
+			inst.setDataset(result);
+
 			for (int j = 0; j < rgbData.length; i++) {
 				inst.setValue(j, rgbData[j]);
 			}
+
 			inst.setClassValue(refInstances.get(i).classValue());
 		}
 
@@ -138,9 +159,14 @@ public final class DataSetUtils {
 		// Create attributes
 		ArrayList<Attribute> attributes = new ArrayList<>();
 		for (int i = 0; i < matrices.get(0).length(); i++) {
-			attributes.add(new Attribute("val" + i));
+			Attribute newAtt = new Attribute("val" + i);
+			attributes.add(newAtt);
 		}
-		attributes.add(refInstances.classAttribute());
+
+		List<String> classValues = IntStream.range(0, refInstances.classAttribute().numValues()).asDoubleStream()
+				.mapToObj(d -> String.valueOf(d)).collect(Collectors.toList());
+		Attribute classAtt = new Attribute("classAtt", classValues);
+		attributes.add(classAtt);
 
 		Instances result = new Instances("Instances", attributes, refInstances.size());
 		result.setClassIndex(result.numAttributes() - 1);
@@ -148,14 +174,10 @@ public final class DataSetUtils {
 		for (int i = 0; i < matrices.size(); i++) {
 
 			// Initialize instance
-			Instance inst = new DenseInstance(attributes.size());
+			// Instance inst = new DenseInstance(attributes.size());
+			Instance inst = new DenseInstance(1,
+					ArrayUtils.addAll(Nd4j.toFlattened(matrices.get(i)).toDoubleVector(), 0));
 			inst.setDataset(result);
-
-			// Update instance entries
-			INDArray matrix = matrices.get(i);
-			for (int j = 0; j < matrix.length(); j++) {
-				inst.setValue(j, matrix.getDouble(j));
-			}
 
 			// Set class value
 			inst.setClassValue(refInstances.get(i).classValue());
@@ -173,6 +195,8 @@ public final class DataSetUtils {
 			return MNIST_INPUT_SHAPE;
 		case CIFAR10_ID:
 			return CIFAR10_INPUT_SHAPE;
+		case FASHION_MNIST_ID:
+			return MNIST_INPUT_SHAPE;
 		default:
 			return new int[] { 1 };
 		}
@@ -195,11 +219,28 @@ public final class DataSetUtils {
 		int numAttributes = instances.numAttributes();
 		int numInstances = instances.numInstances();
 
-		if (numAttributes > 500 && numInstances > 10000)
-			return 5000d / (double) numInstances;
-		else if (numAttributes > 1000 && numInstances > 7500)
+		if (numAttributes > 1000 && numInstances > 10000)
 			return 3000d / (double) numInstances;
+		else if (numAttributes > 500 && numInstances > 7500)
+			return 5000d / (double) numInstances;
 
 		return 1d;
 	}
+
+	public static int getDataSetIDByName(final String dataSetName) {
+		if (dataSetName == null || dataSetName.equals(""))
+			throw new IllegalArgumentException("Parameter 'dataSetName' must not be null or empty!");
+
+		switch (dataSetName) {
+		case "mnist":
+			return DataSetUtils.MNIST_ID;
+		case "cifar10":
+			return DataSetUtils.CIFAR10_ID;
+		case "fashion-mnist":
+			return DataSetUtils.FASHION_MNIST_ID;
+		default:
+			throw new UnsupportedOperationException("Data set '" + dataSetName + "' is not supported yet.");
+		}
+	}
+
 }

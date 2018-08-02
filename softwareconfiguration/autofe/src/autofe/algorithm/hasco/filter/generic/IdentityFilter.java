@@ -19,4 +19,8 @@ public class IdentityFilter implements IFilter {
 			return inputData;
 	}
 
+	@Override
+	public String toString() {
+		return "IdentityFilter";
+	}
 }

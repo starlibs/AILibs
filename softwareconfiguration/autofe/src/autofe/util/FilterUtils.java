@@ -7,11 +7,13 @@ import java.util.Map;
 import autofe.algorithm.hasco.filter.generic.AddConstantFilter;
 import autofe.algorithm.hasco.filter.generic.AddRandomFilter;
 import autofe.algorithm.hasco.filter.generic.IdentityFilter;
+import autofe.algorithm.hasco.filter.generic.WEKAFilter;
 import autofe.algorithm.hasco.filter.image.LocalBinaryPatternFilter;
 import autofe.algorithm.hasco.filter.meta.IFilter;
 import autofe.algorithm.hasco.filter.meta.UnionFilter;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
+import weka.filters.unsupervised.attribute.PrincipalComponents;
 
 public final class FilterUtils {
 	private FilterUtils() {
@@ -32,6 +34,8 @@ public final class FilterUtils {
 			case "CatalanoExtractor":
 				catFilter = parameters.get("catFilter");
 				return ImageUtils.getCatalanoFilterByName(catFilter);
+			case "PCA":
+				return new WEKAFilter(new PrincipalComponents());
 			case "autofe.algorithm.hasco.filter.image.PretrainedNN":
 				String net = parameters.get("net");
 				int layer = Integer.parseInt(parameters.get("layer"));

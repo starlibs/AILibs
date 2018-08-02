@@ -2,6 +2,8 @@ package autofe.algorithm.hasco.filter.meta;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
@@ -48,7 +50,13 @@ public class UnionFilter implements IFilter, IAbstractFilter {
 			for (int i = 0; i < instances2.numAttributes() - 1; i++) {
 				attributes.add(instances2.attribute(i).copy(instances2.attribute(i).name() + "u2"));
 			}
-			attributes.add(instances1.classAttribute());
+
+			// Add class attribute
+			List<String> classValues = IntStream.range(0, instances1.classAttribute().numValues()).asDoubleStream()
+					.mapToObj(d -> String.valueOf(d)).collect(Collectors.toList());
+			Attribute classAtt = new Attribute("classAtt", classValues);
+			attributes.add(classAtt);
+
 			Instances unitedInstances = new Instances("UnitedInstances", attributes, instances1.numInstances());
 			unitedInstances.setClassIndex(unitedInstances.numAttributes() - 1);
 

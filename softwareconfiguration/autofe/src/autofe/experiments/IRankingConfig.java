@@ -11,6 +11,8 @@ public interface IRankingConfig extends IExperimentSetConfig {
 	public static final String DATASETS = "datasets";
 	public static final String BENCHMARKS = "benchmarks";
 	public static final String TIMEOUTS_IN_SECONDS = "timeouts";
+	public static final String SEEDS = "seeds";
+	public static final String datasetFolder = "datasetfolder";
 
 	@Key(DATASETS)
 	public List<String> getDatasets();
@@ -20,4 +22,10 @@ public interface IRankingConfig extends IExperimentSetConfig {
 
 	@Key(TIMEOUTS_IN_SECONDS)
 	public List<String> getTimeouts();
+
+	@Key(SEEDS)
+	public List<String> getSeeds();
+
+	@Key(datasetFolder)
+	public String getDatasetFolder();
 }

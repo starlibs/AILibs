@@ -29,20 +29,26 @@
     }],
   	"dependencies": []
   }, {
+  	"name": "PCA",
+  	"requiredInterface": [],
+  	"providedInterface": ["BasicExtractor"],
+  	"parameter": [],
+  	"dependencies": []
+  }, {
   	"name": "autofe.algorithm.hasco.filter.image.PretrainedNN",
   	"requiredInterface": [],
   	"providedInterface": ["PretrainedNN"],
   	"parameter": [{
     	"name" : "net",
     	"type" : "cat",
-    	"default" : "AlexNet",
-    	"values" : ["AlexNet", "LeNet", "ResNet50", "VGG16", "VGG19"]
+    	"default" : "VGG16",
+    	"values" : ["LeNet", "ResNet50", "VGG16"]
     }, {
       "name" : "layer",
       "type" : "int",
-      "default" : 4.0,
-      "min" : 3.0,
-      "max" : 6.0,
+      "default" : 7.0,
+      "min" : 5.0,
+      "max" : 7.0,
       "refineSplits" : 8,
       "minInterval" : 10
     }],

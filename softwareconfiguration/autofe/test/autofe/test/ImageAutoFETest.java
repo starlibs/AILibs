@@ -31,7 +31,7 @@ import jaicore.ml.WekaUtil;
 import weka.core.Instance;
 import weka.core.Instances;
 
-public class ImageAutoFETest extends AutoFETest {
+public class ImageAutoFETest {
 	private static final Logger logger = LoggerFactory.getLogger(ImageAutoFETest.class);
 
 	private static final int MLPLAN_TIMEOUT = 60;
@@ -90,8 +90,8 @@ public class ImageAutoFETest extends AutoFETest {
 			DataSet resultSplit1 = solution.getSolution().applyFilter(new DataSet(newSplit.get(1), intermediateSplit1),
 					false);
 
-			double mlPlanResult = evaluateMLPlan(MLPLAN_TIMEOUT, resultSplit0.getInstances(),
-					resultSplit1.getInstances(), logger, ENABLE_MLPLAN_VIS);
+			double mlPlanResult = EvaluationUtils.evaluateMLPlan(MLPLAN_TIMEOUT, resultSplit0.getInstances(),
+					resultSplit1.getInstances(), 42, logger, ENABLE_MLPLAN_VIS);
 			System.out.println(
 					"Error Rate of the solution produced by ML-Plan (Cluster): " + (100 - mlPlanResult) / 100f);
 
@@ -147,8 +147,8 @@ public class ImageAutoFETest extends AutoFETest {
 
 			logger.info("Feature size of generated solution: " + resultSplit0.getInstances().numAttributes());
 
-			double mlPlanResult = evaluateMLPlan(MLPLAN_TIMEOUT, resultSplit0.getInstances(),
-					resultSplit1.getInstances(), logger, ENABLE_MLPLAN_VIS);
+			double mlPlanResult = EvaluationUtils.evaluateMLPlan(MLPLAN_TIMEOUT, resultSplit0.getInstances(),
+					resultSplit1.getInstances(), 42, logger, ENABLE_MLPLAN_VIS);
 			System.out.println("Error Rate of the solution produced by ML-Plan (LDA): " + (100 - mlPlanResult) / 100f);
 
 		} else
@@ -202,8 +202,8 @@ public class ImageAutoFETest extends AutoFETest {
 			DataSet resultSplit1 = solution.getSolution().applyFilter(new DataSet(newSplit.get(1), intermediateSplit1),
 					false);
 
-			double mlPlanResult = evaluateMLPlan(MLPLAN_TIMEOUT, resultSplit0.getInstances(),
-					resultSplit1.getInstances(), logger, ENABLE_MLPLAN_VIS);
+			double mlPlanResult = EvaluationUtils.evaluateMLPlan(MLPLAN_TIMEOUT, resultSplit0.getInstances(),
+					resultSplit1.getInstances(), 42, logger, ENABLE_MLPLAN_VIS);
 			System.out
 					.println("Error Rate of the solution produced by ML-Plan (Random): " + (100 - mlPlanResult) / 100f);
 
@@ -260,8 +260,8 @@ public class ImageAutoFETest extends AutoFETest {
 
 			logger.info("Feature size of generated solution: " + resultSplit0.getInstances().numAttributes());
 
-			double mlPlanResult = evaluateMLPlan(MLPLAN_TIMEOUT, resultSplit0.getInstances(),
-					resultSplit1.getInstances(), logger, ENABLE_MLPLAN_VIS);
+			double mlPlanResult = EvaluationUtils.evaluateMLPlan(MLPLAN_TIMEOUT, resultSplit0.getInstances(),
+					resultSplit1.getInstances(), 42, logger, ENABLE_MLPLAN_VIS);
 			System.out.println(
 					"Error Rate of the solution produced by ML-Plan (Ensemble): " + (100 - mlPlanResult) / 100f);
 
@@ -317,8 +317,8 @@ public class ImageAutoFETest extends AutoFETest {
 
 			logger.info("Feature size of generated solution: " + resultSplit0.getInstances().numAttributes());
 
-			double mlPlanResult = evaluateMLPlan(MLPLAN_TIMEOUT, resultSplit0.getInstances(),
-					resultSplit1.getInstances(), logger, ENABLE_MLPLAN_VIS);
+			double mlPlanResult = EvaluationUtils.evaluateMLPlan(MLPLAN_TIMEOUT, resultSplit0.getInstances(),
+					resultSplit1.getInstances(), 42, logger, ENABLE_MLPLAN_VIS);
 			System.out.println("Error Rate of the solution produced by ML-Plan (COCO): " + (100 - mlPlanResult) / 100f);
 
 		} else

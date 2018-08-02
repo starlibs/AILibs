@@ -1,5 +1,6 @@
 package autofe.util;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -13,6 +14,9 @@ import org.slf4j.LoggerFactory;
 
 import autofe.algorithm.hasco.evaluation.AbstractHASCOFENodeEvaluator;
 import autofe.algorithm.hasco.filter.meta.FilterPipeline;
+import de.upb.crc901.automl.pipeline.basic.MLPipeline;
+import de.upb.crc901.mlplan.multiclass.DefaultPreorder;
+import de.upb.crc901.mlplan.multiclass.MLPlan;
 import fantail.core.Correlation;
 import jaicore.ml.WekaUtil;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
@@ -152,6 +156,8 @@ public final class EvaluationUtils {
 
 	public static double calculateCOCOForBatch(final Instances batch) {
 
+		batch.setClassIndex(batch.numAttributes() - 1);
+
 		final int D = batch.numAttributes() - 1;
 		final int classes = batch.classAttribute().numValues();
 
@@ -235,7 +241,10 @@ public final class EvaluationUtils {
 		return eval.pctCorrect() / 100.0;
 	}
 
-	public static double performEnsemble(final Instances instances) throws Exception {
+	public static double performEnsemble(Instances instances) throws Exception {
+		List<Instances> subsample = WekaUtil.getStratifiedSplit(instances, new Random(42), .05f);
+		instances = subsample.get(0);
+
 		/* Relief */
 		ReliefFAttributeEval relief = new ReliefFAttributeEval();
 		relief.buildEvaluator(instances);
@@ -324,6 +333,56 @@ public final class EvaluationUtils {
 
 	public static double rankKendallsTau(final double[] ranking1, final double[] ranking2) {
 		return Correlation.rankKendallTauBeta(ranking1, ranking2);
+	}
+
+	public static double evaluateMLPlan(final int timeout, final Instances training, final Instances test,
+			final int seed, final Logger logger, final boolean enableVisualization, final int numCores)
+			throws Exception {
+
+		logger.debug("Starting ML-Plan execution. Training on " + training.numInstances() + " instances with "
+				+ training.numAttributes() + " attributes.");
+
+		/* Initialize MLPlan using WEKA components */
+		MLPlan mlplan = new MLPlan(new File("model/mlplan_weka/weka-all-autoweka.json"));
+		mlplan.setRandomSeed(seed);
+		mlplan.setNumberOfCPUs(numCores);
+		mlplan.setLoggerName("mlplan");
+		mlplan.setTimeout(timeout);
+		mlplan.setPortionOfDataForPhase2(.1f);
+		mlplan.setNodeEvaluator(new DefaultPreorder());
+		if (enableVisualization)
+			mlplan.enableVisualization();
+		mlplan.buildClassifier(training);
+
+		if (mlplan.getSelectedClassifier() == null
+				|| ((MLPipeline) mlplan.getSelectedClassifier()).getBaseClassifier() == null) {
+			logger.warn("Could not find a model using ML-Plan. Returning -1...");
+			return -1;
+		}
+
+		String solutionString = ((MLPipeline) mlplan.getSelectedClassifier()).getBaseClassifier().getClass().getName()
+				+ " | " + ((MLPipeline) mlplan.getSelectedClassifier()).getPreprocessors();
+		logger.debug("Selected classifier: " + solutionString);
+
+		/* evaluate solution produced by mlplan */
+		Evaluation eval = new Evaluation(training);
+		eval.evaluateModel(mlplan, test);
+
+		return eval.pctCorrect();
+	}
+
+	public static double evaluateMLPlan(final int timeout, final Instances training, final Instances test,
+			final int seed, final Logger logger, final boolean enableVisualization) throws Exception {
+		return evaluateMLPlan(timeout, training, test, seed, logger, enableVisualization, 1);
+	}
+
+	public static double evaluateMLPlan(final int timeout, final Instances instances, final double trainRatio,
+			final int seed, final Logger logger, final boolean enableVisualization, final int numCores)
+			throws Exception {
+
+		List<Instances> split = WekaUtil.getStratifiedSplit(instances, new Random(seed), trainRatio);
+
+		return evaluateMLPlan(timeout, split.get(0), split.get(1), seed, logger, enableVisualization, numCores);
 	}
 
 }
