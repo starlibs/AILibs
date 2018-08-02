@@ -41,7 +41,7 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 		for (String identifier : performanceKnowledgeBase.getPerformanceSamplesByIdentifier().get(benchmarkName)
 				.keySet()) {
 			if (forests.get(identifier) == null) {
-				ExtendedRandomForest curForest = new ExtendedRandomForest(5.0d,16);
+				ExtendedRandomForest curForest = new ExtendedRandomForest(5.0d, 16);
 				forests.put(identifier, curForest);
 			}
 			if (importanceDictionary.get(identifier) == null) {

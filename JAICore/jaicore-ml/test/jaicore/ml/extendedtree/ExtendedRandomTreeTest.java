@@ -40,16 +40,11 @@ public class ExtendedRandomTreeTest {
 			
 			data.setClassIndex(data.numAttributes() - 1);
 			System.out.println(data);
-//			for(int i = 0; i < data.numInstances(); i++) {
-//				Instance instance = data.get(i);
-//				if(instance.classValue() == 0.0d)
-//					data.remove(i);
-//			}
-//			System.out.println(data);
 			ExtendedRandomTree tree = new ExtendedRandomTree();
 			tree.setFeatureSpace(new FeatureSpace(data));
 			tree.buildClassifier(data);
 			tree.preprocess();
+			tree.printSizeOfFeatureSpaceAndPartitioning();
 			double sum = 0.0d;
 			HashSet<Integer> allFeatures = new HashSet<Integer>();
 			for (int i = 0; i < tree.getFeatureSpace().getDimensionality(); i++) {
@@ -83,7 +78,6 @@ public class ExtendedRandomTreeTest {
 
 //			tree.printSplitPoints();
 //			tree.printObservations();
-			
 			
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -91,7 +91,8 @@ public class PerformanceKnowledgeBase implements IKnowledgeBase {
 		this.performanceSamplesByIdentifier = new HashMap<String, HashMap<String, List<Pair<ParameterConfiguration, Double>>>>();
 	}
 
-	public void addPerformanceSample(String benchmarkName, ComponentInstance componentInstance, double score, boolean addToDB) {
+	public void addPerformanceSample(String benchmarkName, ComponentInstance componentInstance, double score,
+			boolean addToDB) {
 		String identifier = Util.getComponentNamesOfComposition(componentInstance);
 		if (performanceSamples.get(benchmarkName) == null) {
 			HashMap<ComponentInstance, Double> newMap = new HashMap<ComponentInstance, Double>();
@@ -117,8 +118,8 @@ public class PerformanceKnowledgeBase implements IKnowledgeBase {
 						.add(Pair.of(new ParameterConfiguration(componentInstance), score));
 			}
 		}
-		if(addToDB)
-		this.addPerformanceSampleToDB(benchmarkName, componentInstance, score);
+		if (addToDB)
+			this.addPerformanceSampleToDB(benchmarkName, componentInstance, score);
 	}
 
 	public Map<String, HashMap<ComponentInstance, Double>> getPerformanceSamples() {
@@ -207,7 +208,7 @@ public class PerformanceKnowledgeBase implements IKnowledgeBase {
 				this.addPerformanceSample(benchmarkName, composition, score, false);
 			}
 		} catch (SQLException e) {
-			e.printStackTrace(); 
+			e.printStackTrace();
 		} catch (JsonParseException e) {
 			e.printStackTrace();
 		} catch (JsonMappingException e) {
@@ -245,14 +246,15 @@ public class PerformanceKnowledgeBase implements IKnowledgeBase {
 				} else if (domain instanceof NumericParameterDomain) {
 					NumericParameterDomain numDomain = (NumericParameterDomain) domain;
 					// TODO is there a better way to set the range of this attribute?
-					String range = "[" + numDomain.getMin() + "," + numDomain.getMax() + "]";
+//					String range = "[" + numDomain.getMin() + "," + numDomain.getMax() + "]";
 					Properties prop = new Properties();
-					prop.setProperty("range", range);
+//					prop.setProperty("range", range);
 					ProtectedProperties metaInfo = new ProtectedProperties(prop);
 					attr = new Attribute(componentInstance.toString() + "::" + parameter.getName(), metaInfo);
 				}
-//				System.out.println("Trying to add parameter: " + attr.name() + " for component: "
-//						+ componentInstance.getComponent().getName());
+				// System.out.println("Trying to add parameter: " + attr.name() + " for
+				// component: "
+				// + componentInstance.getComponent().getName());
 				attributes.add(attr);
 			}
 			allAttributes.addAll(attributes);
