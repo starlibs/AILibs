@@ -9,26 +9,25 @@ import jaicore.search.structure.core.NodeType;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SingleSuccessorGenerator;
-import meka.classifiers.multilabel.neurofuzzy.ST;
 
 public class KnapsackProblem {
 	
 	public class KnapsackNode {
 		
-		private Set<String> packedObjects;
+		private List<String> packedObjects;
 		private Set<String> remainingObjects;
 		private double usedCapacity;
 		
 		public KnapsackNode() {
 			this.remainingObjects = new HashSet<>(objects);
-			this.packedObjects = new HashSet<>();
+			this.packedObjects = new LinkedList<>();
 			this.usedCapacity = 0.0d;
 		}
 		
-		public KnapsackNode(Set<String> packedObjects, Set<String> remainingObjects, String newObject) {
+		public KnapsackNode(List<String> packedObjects, Set<String> remainingObjects, String newObject) {
 			this.remainingObjects = new HashSet<>(remainingObjects);
 			this.remainingObjects.remove(newObject);
-			this.packedObjects = new HashSet<>();
+			this.packedObjects = new LinkedList<>();
 			this.usedCapacity = 0.0d;
 			for (String object : packedObjects) {
 				this.packedObjects.add(object);
@@ -38,7 +37,7 @@ public class KnapsackProblem {
 			this.usedCapacity += weights.get(newObject);
 		}
 		
-		public Set<String> getPackedObjects() {
+		public List<String> getPackedObjects() {
 			return this.packedObjects;
 		}
 		
