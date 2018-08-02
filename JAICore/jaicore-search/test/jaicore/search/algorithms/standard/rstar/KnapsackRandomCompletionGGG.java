@@ -61,7 +61,7 @@ public class KnapsackRandomCompletionGGG {
         bonusCombination.add("0");
         bonusCombination.add("2");
         bonusPoints.put(bonusCombination, 25.0d);
-        KnapsackProblem knapsackProblem = new KnapsackProblem(objects, values, weights, bonusPoints, 165);
+        KnapsackProblem knapsackProblem = new KnapsackProblem(objects, values, weights, bonusPoints, 50);
 
 
         /**
@@ -92,7 +92,10 @@ public class KnapsackRandomCompletionGGG {
 
         List<GammaNode<KnapsackProblem.KnapsackNode, RStarK>> gammaSolution = rStar.getGammaSolutionPath();
         //List<GridWorld> intermediateHopsChosenByGammaSolution = gammaSolution.stream().map(n -> n.getPoint()).collect(Collectors.toList());
-        System.out.println(gammaSolution);
+        for (GammaNode<KnapsackProblem.KnapsackNode,?> g : gammaSolution) {
+            System.out.println(g);
+        }
+        System.out.println(rStar.getGoalState());
         //System.out.println(intermediateHopsChosenByGammaSolution);
 
 //        System.out.println(solution);

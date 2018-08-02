@@ -134,6 +134,8 @@ public class RStar<T, A, D> extends Thread {
         n.backpointer.path.put(n, pac.path);
         if (pac.path != null) {
             n.backpointer.c_low.put(n, pac.cost);
+           // n.setAnnotation("pacset_on_bp", n.backpointer.getPoint().toString());
+           //  n.setAnnotation("pacset_empty", pac.path.size());
         }
         // System.out.println("Path and cost from " + n.backpointer.getPoint() + " to " + n.getPoint() + ": " + pac);
 
@@ -143,9 +145,11 @@ public class RStar<T, A, D> extends Thread {
          * the state n should be avoided.
          */
         // Line 8
-        if ((n.backpointer.path.get(n) == null) || (n.backpointer.g + n.backpointer.c_low.get(n) > w*hFromStart(n))) {
-            n.backpointer = argminCostToStateOverPredecessors(n);
-            n.avoid = true;
+        if (!isGoalNode(n)) {
+            if ((n.backpointer.path.get(n) == null) || (n.backpointer.g + n.backpointer.c_low.get(n) > w * hFromStart(n))) {
+                n.backpointer = argminCostToStateOverPredecessors(n);
+                n.avoid = true;
+            }
         }
         n.g = n.backpointer.g + n.backpointer.c_low.get(n);
         if (!isGoalNode(n)) updateState(n);
@@ -186,7 +190,7 @@ public class RStar<T, A, D> extends Thread {
                  */
                 reevaluateState(n);
 
-                if (isGoalNode(n)) {
+                if (isGoalNode(n) && !n.avoid) {
 
                     if (stopAtFirstSolution) {
                         n_goal = n;
@@ -195,8 +199,17 @@ public class RStar<T, A, D> extends Thread {
                     } else {
                         if (n_goal != null) {
                             try {
-                                double sol_n = solutionEvaluator.evaluateSolution(inferProblemPath(n));
-                                double sol_goal = solutionEvaluator.evaluateSolution(inferProblemPath(n_goal));
+                                // List<T> currentSolutionPath = inferProblemPath(n_goal);
+                                List<T> currentSolutionPath = new ArrayList<>();
+                                currentSolutionPath.add(n_goal.getPoint());
+                                double currentSolutionCost = solutionEvaluator.evaluateSolution(currentSolutionPath);
+                                // List<T> newSolutionPath = inferProblemPath(n);
+                                List<T> newSolutionPath = new ArrayList<>();
+                                newSolutionPath.add(n_goal.getPoint());
+                                double newSolutionCost = solutionEvaluator.evaluateSolution(newSolutionPath);
+                                if (currentSolutionCost > newSolutionCost) {
+                                    n_goal = n;
+                                }
                             } catch (Exception e) {
                                 System.err.println("Exception on evaluation solutions.");
                                 e.printStackTrace();
@@ -278,30 +291,6 @@ public class RStar<T, A, D> extends Thread {
     }
 
     /**
-     * Calculates the problem path for a Gamma node.
-     * @param n
-     * @return
-     */
-    private List<Node<T, RStarK>> inferNodePath(GammaNode<T, RStarK> n) {
-        List<Node<T, RStarK>> solution = new ArrayList<>();
-
-        if (n != null && n.backpointer != null) {
-            GammaNode<T, RStarK> current = n;
-            while (!isStartNode(current)) {
-                List<Node<T,RStarK>> pathBpToCurrent = current.backpointer.path.get(current); // null because of line
-                if (!isStartNode(current.backpointer))
-                    pathBpToCurrent.remove(0);
-                pathBpToCurrent.addAll(solution);
-                solution = pathBpToCurrent;
-                current = current.backpointer;
-            }
-        } else {
-            solution = null;
-        }
-        return solution;
-    }
-
-    /**
      *
      * @return
      */
@@ -313,16 +302,66 @@ public class RStar<T, A, D> extends Thread {
         }
     }
 
+    /**
+     * Returns simply the goal state of current best solution.
+     * @return
+     */
+    public T getGoalState() {
+        return n_goal.getPoint();
+    }
+
+    /**
+     * Calculates the problem path for a Gamma node.
+     * @param n
+     * @return
+     */
+    private List<Node<T, RStarK>> inferNodePath(GammaNode<T, RStarK> n) {
+        List<Node<T, RStarK>> solution = new ArrayList<>();
+
+        if (n == null) {
+            return null;
+        }
+        if (n.backpointer == null) {
+            solution.add(new Node(null, n.getPoint()));
+            return solution;
+        }
+
+        GammaNode<T, RStarK> current = n;
+        // while we can follw the gamma path upwards
+        while (current.backpointer != null) {
+            List<Node<T,RStarK>> pathBpToCurrent = current.backpointer.path.get(current); // null because of line ??? Cant figure out why this is sometimes an empty list.
+            if (pathBpToCurrent.isEmpty()) {
+                break;
+            }
+            if (!isStartNode(current.backpointer))
+                pathBpToCurrent.remove(0);
+            pathBpToCurrent.addAll(solution);
+            solution = pathBpToCurrent;
+            current = current.backpointer;
+        }
+        return solution;
+    }
+
+    /**
+     * Infers the problem path from a given Gamma node.
+     * @param n
+     * @return
+     */
     private List<T> inferProblemPath(GammaNode<T, RStarK> n) {
         if (n!=null) {
-            return inferProblemPath(inferNodePath(n));
+            // First infer node path.
+            List<Node<T, RStarK>> nodePath = inferNodePath(n);
+            // From node path, infer problem path.
+            return inferProblemPath(nodePath);
         } else {
             return null;
         }
     }
 
     /**
-     *
+     * Infers the problem path from a given node path.
+     * @param nodePath
+     * @return
      */
     public List<T> inferProblemPath(List<Node<T, RStarK>> nodePath) {
         if (nodePath != null) {
@@ -330,7 +369,6 @@ public class RStar<T, A, D> extends Thread {
             for (Node<T, RStarK> n : nodePath) {
                 path.add(n.getPoint());
             }
-
             return path;
         } else {
             return null;
@@ -422,7 +460,8 @@ public class RStar<T, A, D> extends Thread {
 
         for (GammaNode<T, RStarK> s : succ) {
             s.addPredecessor(n);
-            if (!closed.contains(s) && !stopAtFirstSolution) {
+            // Note allow the open list
+            if (!closed.contains(s)) {
                 succWithoutClosed.add(s);
             }
         }

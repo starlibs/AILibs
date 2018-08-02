@@ -28,7 +28,7 @@ public class RandomCompletionGammaGraphGenerator<T> implements GammaGraphGenerat
     private final int seed;
 
     private final HashMap<GammaNode, GammaNode> alreadyGeneratedStates = new HashMap<>();
-    private final HashMap<T, HashMap<T, Node<T, String>>> computedPaths = new HashMap<>();
+    private final HashMap<T, HashMap<T, List<Node<T, String>>>> computedPaths = new HashMap<>();
 
     private final RootGenerator<GammaNode<T,RStarK>> gammaRootGenerator;
     private final NodeGoalTester<T> gammaGoalTester;
@@ -113,21 +113,36 @@ public class RandomCompletionGammaGraphGenerator<T> implements GammaGraphGenerat
         return gammaRootGenerator;
     }
 
+    private void savePathComputation(T from, T to, List<Node<T, String>> path) {
+        // Create new HashMap at first call for the 2from" state.
+        if (!computedPaths.containsKey(from)) {
+            computedPaths.put(from, new HashMap<T, List<Node<T, String>>>());
+        }
+        computedPaths.get(from).put(to, path);
+    }
+
+
     @Override
     public Collection<GammaNode<T, RStarK>> generateRandomSuccessors(GammaNode<T, RStarK> n, int K, Integer delta) throws IllegalArgumentException {
         T s = n.getPoint();
+
+        // The successors for this node have already been computed.
         if (computedPaths.containsKey(s)) {
-            // The successors for this node have already been computed.
             throw new IllegalArgumentException("Generate sucessors twice for the same node: " + n);
+        }
+        // Never generate successors for a node goal.
+        if (isGoal(n.getPoint())) {
+            throw new IllegalArgumentException("The given node is a goal node. Can not generate successors for a goal node.");
         }
 
         Collection<GammaNode<T,RStarK>> gammaSuccessors = new HashSet<>();
 
-        computedPaths.put(s, new HashMap<T, Node<T, String>>());
+
 
         Node<T, String> parent;
         T currentState;
-        Node<T, String> currentNode; ;
+        Node<T, String> currentNode;
+
         if (!isGoal(s)) {
             for (int k = 0; k < K; k++) {
                 // Generate successor in depth delta.
@@ -164,7 +179,7 @@ public class RandomCompletionGammaGraphGenerator<T> implements GammaGraphGenerat
                 }
                 // System.out.println(String.format("k=%d, Current node = %s, path=%s", k, currentNode, path));
                 // Save path in computed paths.
-                computedPaths.get(s).put(currentState, currentNode);
+                savePathComputation(s, currentState, path);
                 // Create gamma successor and add it, or the previously generate equal gamma node
                 // to the list of successors.
                 GammaNode<T, RStarK> gammaSucc = new GammaNode<>(currentState);
@@ -187,7 +202,8 @@ public class RandomCompletionGammaGraphGenerator<T> implements GammaGraphGenerat
 
     @Override
     public PathAndCost computePath(GammaNode<T, RStarK> from, GammaNode<T, RStarK> to) {
-        return new PathAndCost(computedPaths.get(from.getPoint()).get(to.getPoint()).path(), 0d);
+        List<Node<T, String>> path = computedPaths.get(from.getPoint()).get(to.getPoint());
+        return new PathAndCost(path, h(from, to));
     }
 
 
