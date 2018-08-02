@@ -250,7 +250,7 @@ public class PerformanceKnowledgeBase implements IKnowledgeBase {
 					Properties prop = new Properties();
 //					prop.setProperty("range", range);
 					ProtectedProperties metaInfo = new ProtectedProperties(prop);
-					attr = new Attribute(componentInstance.toString() + "::" + parameter.getName(), metaInfo);
+					attr = new Attribute(componentInstance.getComponent().getName() + "::" + parameter.getName(), metaInfo);
 				}
 				// System.out.println("Trying to add parameter: " + attr.name() + " for
 				// component: "

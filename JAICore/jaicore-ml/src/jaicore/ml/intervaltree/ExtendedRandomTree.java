@@ -1,6 +1,5 @@
 package jaicore.ml.intervaltree;
 
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.AbstractMap;
@@ -273,7 +272,6 @@ public class ExtendedRandomTree extends RandomTree {
 		double intervalProduct = 1.0d;
 		boolean consistentWithAnyLeaf = false;
 		for (Tree leaf : partitioning.keySet()) {
-			// if (observationConsistentWithLeaf(indices, observations, leaf)) {
 			if (partitioning.get(leaf).containsPartialInstance(indices, obsList)) {
 				double sizeOfLeaf = partitioning.get(leaf).getRangeSizeOfAllButSubset(subset);
 				double sizeOfDomain = featureSpace.getRangeSizeOfAllButSubset(subset);
@@ -283,12 +281,12 @@ public class ExtendedRandomTree extends RandomTree {
 
 				if (leaf.getClassDistribution() != null) {
 					prediction = leaf.getClassDistribution()[0];
-				} else if(mapForEmptyLeaves.containsKey(leaf)){
-					System.out.println("Taking prediction from map because distribution is null!");
+				} else if (mapForEmptyLeaves.containsKey(leaf)) {
 					prediction = mapForEmptyLeaves.get(leaf);
+//					System.out.println("Taking prediction " + prediction + " from map because distribution is null!");
 				} else {
-					prediction = Double.NaN;
 					System.out.println("No prediction found anywhere!");
+					prediction = Double.NaN;
 				}
 				assertTrue(prediction != Double.NaN);
 				result += prediction * fractionOfSpaceForThisLeaf;
@@ -359,9 +357,9 @@ public class ExtendedRandomTree extends RandomTree {
 
 		// if node is leaf add partition to the map or
 		if (attribute == -1) {
-				leaves.add(node);
-				partitioning.put(node, subSpace);
-				return;
+			leaves.add(node);
+			partitioning.put(node, subSpace);
+			return;
 		}
 		// if the split attribute is categorical, remove all but one from the
 		// feature space and continue
@@ -369,6 +367,8 @@ public class ExtendedRandomTree extends RandomTree {
 			for (int i = 0; i < children.length; i++) {
 				if (children[i].getClassDistribution() == null && children[i].getAttribute() == -1) {
 					mapForEmptyLeaves.put(children[i], node.getClassDistribution()[0]);
+					System.out
+							.println("Adding prediction " + node.getClassDistribution()[0] + " for empty leaf to map");
 				}
 				// important! if the children are leaves and do not contain a class
 				// distribution, treat this node as a leaf
@@ -510,7 +510,6 @@ public class ExtendedRandomTree extends RandomTree {
 			featureList.addAll(features);
 			Collections.sort(featureList);
 			double marginalPrediction = this.getMarginalPrediction(featureList, curObs);
-
 			// System.out.println("current feautres = \t" + features);
 			// System.out.print("midpoints = \t\t");
 			// for (Observation obs : curObs) {
@@ -542,6 +541,7 @@ public class ExtendedRandomTree extends RandomTree {
 		// weightedSum);
 		// vU = weightedSumOfSquares - (weightedSum * weightedSum);
 		vU = stat.getVariancePopulaion();
+//		System.out.println("Variance: " + vU);
 		varianceOfSubsetTotal.put(features, vU);
 		// System.out.println("Total var for \t\t\t" + features + ": " + vU);
 		return vU;
@@ -564,13 +564,7 @@ public class ExtendedRandomTree extends RandomTree {
 			set.add(i);
 		}
 		this.totalVariance = computeTotalVarianceOfSubset(set);
-		System.out.println("trees total variance = " + this.totalVariance);
-		// System.out.println("num leaves = " + leaves.size());
-
-		// double sum = 1.0d;
-		// for (int i = 0; i < allObservations.length; i++) {
-		// sum *= allObservations[i].length;
-		// }
+//		System.out.println("trees total variance = " + this.totalVariance);
 	}
 
 	public void printObservations() {

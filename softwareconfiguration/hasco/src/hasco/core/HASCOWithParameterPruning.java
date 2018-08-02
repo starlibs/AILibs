@@ -147,13 +147,16 @@ public class HASCOWithParameterPruning<T, N, A, V extends Comparable<V>, R exten
 	// private final SQLAdapter adapter = new SQLAdapter("localhost", "jonas",
 	// "password", "mlplan_test");
 
-//	public HASCOJ(ForwardDecompositionHTNPlannerFactory forwardDecompositionHTNPlannerFactory,
-//			IObservableORGraphSearchFactory<TFDNode, String, Double> searchFactory2,
-//			TFDSearchSpaceUtilFactory tfdSearchSpaceUtilFactory, INodeEvaluator<TFDNode, Double> nodeEvaluator2,
-//			Factory<? extends T> converter, String nameOfRequiredInterface2, IObjectEvaluator<T, Double> benchmark2,
-//			int i, int j, boolean b) {
-//		// TODO Auto-generated constructor stub
-//	}
+	// public HASCOJ(ForwardDecompositionHTNPlannerFactory
+	// forwardDecompositionHTNPlannerFactory,
+	// IObservableORGraphSearchFactory<TFDNode, String, Double> searchFactory2,
+	// TFDSearchSpaceUtilFactory tfdSearchSpaceUtilFactory, INodeEvaluator<TFDNode,
+	// Double> nodeEvaluator2,
+	// Factory<? extends T> converter, String nameOfRequiredInterface2,
+	// IObjectEvaluator<T, Double> benchmark2,
+	// int i, int j, boolean b) {
+	// // TODO Auto-generated constructor stub
+	// }
 
 	public HASCOWithParameterPruning(final IObservableGraphBasedHTNPlanningAlgorithmFactory<R, N, A, V> plannerFactory,
 			final IObservableORGraphSearchFactory<N, A, V> searchFactory,
@@ -170,14 +173,16 @@ public class HASCOWithParameterPruning<T, N, A, V extends Comparable<V>, R exten
 		this.importanceThreshold = importanceThreshold;
 		this.minNumSamplesForImportanceEstimation = minNumSamplesForImportanceEstimation;
 		this.useParameterImportanceEstimation = useParameterImportanceEstimation;
+		System.out.println("Importance Threshold in HASCO: " + this.importanceThreshold);
 		// this.performanceKB.initializeDBTables();
 		this.randomCompletionEvaluator = new RandomCompletionEvaluator<>(new Random(this.randomSeed), 1,
 				searchSpaceUtilFactory.getPathUnifier(), new ISolutionEvaluator<N, V>() {
 					@Override
 					public V evaluateSolution(final List<N> solutionPath) throws Exception {
-						List<Action> plan = HASCOWithParameterPruning.this.searchSpaceUtilFactory.getPathToPlanConverter()
-								.getPlan(solutionPath);
-						ComponentInstance composition = Util.getSolutionCompositionForPlan(HASCOWithParameterPruning.this.components,
+						List<Action> plan = HASCOWithParameterPruning.this.searchSpaceUtilFactory
+								.getPathToPlanConverter().getPlan(solutionPath);
+						ComponentInstance composition = Util.getSolutionCompositionForPlan(
+								HASCOWithParameterPruning.this.components,
 								HASCOWithParameterPruning.this.getInitState(), plan);
 						T solution = HASCOWithParameterPruning.this.getObjectFromPlan(plan);
 						V scoreOfSolution = benchmark.evaluate(solution);
@@ -188,7 +193,8 @@ public class HASCOWithParameterPruning<T, N, A, V extends Comparable<V>, R exten
 						performanceKB.addPerformanceSample(benchmarkName, composition, score, false);
 						System.out.println("Using importance estimation: " + useParameterImportanceEstimation);
 						if (HASCOWithParameterPruning.this.scoreOfBestRecognizedSolution == null
-								|| HASCOWithParameterPruning.this.scoreOfBestRecognizedSolution.compareTo(scoreOfSolution) > 0) {
+								|| HASCOWithParameterPruning.this.scoreOfBestRecognizedSolution
+										.compareTo(scoreOfSolution) > 0) {
 							HASCOWithParameterPruning.this.bestRecognizedSolution = solution;
 							HASCOWithParameterPruning.this.compositionOfBestRecognizedSolution = composition;
 							HASCOWithParameterPruning.this.scoreOfBestRecognizedSolution = scoreOfSolution;
@@ -234,8 +240,9 @@ public class HASCOWithParameterPruning<T, N, A, V extends Comparable<V>, R exten
 			this.knowledge = new CNFFormula();
 			this.init = HASCOWithParameterPruning.this.getInitState();
 			this.problem = HASCOWithParameterPruning.this.getPlanningProblem(this.domain, this.knowledge, this.init);
-			this.planner = HASCOWithParameterPruning.this.plannerFactory.newAlgorithm(this.problem, HASCOWithParameterPruning.this.searchFactory,
-					HASCOWithParameterPruning.this.nodeEvaluator, HASCOWithParameterPruning.this.numberOfCPUs);
+			this.planner = HASCOWithParameterPruning.this.plannerFactory.newAlgorithm(this.problem,
+					HASCOWithParameterPruning.this.searchFactory, HASCOWithParameterPruning.this.nodeEvaluator,
+					HASCOWithParameterPruning.this.numberOfCPUs);
 			if (loggerName != null && loggerName.length() > 0 && this.planner instanceof ILoggingCustomizable) {
 				((ILoggingCustomizable) this.planner).setLoggerName(loggerName + ".planner");
 			}
@@ -277,8 +284,9 @@ public class HASCOWithParameterPruning<T, N, A, V extends Comparable<V>, R exten
 								.forEach(l -> ((IObservableGraphAlgorithm<?, ?>) this.planner).registerListener(l));
 					}
 				}
-				HASCOWithParameterPruning.this.solutionEvaluationEventBus.post(new HASCORunStartedEvent<>(HASCOWithParameterPruning.this.randomSeed,
-						HASCOWithParameterPruning.this.timeout, HASCOWithParameterPruning.this.numberOfCPUs, HASCOWithParameterPruning.this.benchmark));
+				HASCOWithParameterPruning.this.solutionEvaluationEventBus.post(new HASCORunStartedEvent<>(
+						HASCOWithParameterPruning.this.randomSeed, HASCOWithParameterPruning.this.timeout,
+						HASCOWithParameterPruning.this.numberOfCPUs, HASCOWithParameterPruning.this.benchmark));
 				this.isInitialized = true;
 			}
 			if (this.canceled) {
@@ -297,8 +305,8 @@ public class HASCOWithParameterPruning<T, N, A, V extends Comparable<V>, R exten
 			R plan = this.planIterator.next();
 			Map<String, Object> solutionAnnotations = this.planner.getAnnotationsOfSolution(plan);
 			@SuppressWarnings("unchecked")
-			Solution<R, T, V> solution = new Solution<>(plan, HASCOWithParameterPruning.this.getObjectFromPlan(plan.getPlan()),
-					(V) solutionAnnotations.get("f"),
+			Solution<R, T, V> solution = new Solution<>(plan,
+					HASCOWithParameterPruning.this.getObjectFromPlan(plan.getPlan()), (V) solutionAnnotations.get("f"),
 					solutionAnnotations.containsKey("fTime") ? (int) solutionAnnotations.get("fTime") : -1);
 			return solution;
 		}
@@ -552,11 +560,12 @@ public class HASCOWithParameterPruning<T, N, A, V extends Comparable<V>, R exten
 						this.performanceKB, this.parameterImportanceEstimator, this.importanceThreshold,
 						this.minNumSamplesForImportanceEstimation, this.useParameterImportanceEstimation));
 		evaluablePredicates.put("notRefinable",
-				new isNotRefinablePredicateWithParameterPruning(this.components, this.paramRefinementConfig, this.performanceKB,
-						this.parameterImportanceEstimator, this.importanceThreshold,
+				new isNotRefinablePredicateWithParameterPruning(this.components, this.paramRefinementConfig,
+						this.performanceKB, this.parameterImportanceEstimator, this.importanceThreshold,
 						this.minNumSamplesForImportanceEstimation, this.useParameterImportanceEstimation));
 		evaluablePredicates.put("refinementCompleted",
-				new isRefinementCompletedPredicate(this.components, this.paramRefinementConfig));
+				new isRefinementCompletedPredicateWithImportanceCheck(this.components, this.paramRefinementConfig,
+						this.parameterImportanceEstimator, this.importanceThreshold, this.minNumSamplesForImportanceEstimation, performanceKB));
 		return new CEOCIPSTNPlanningProblem(domain, knowledge, init,
 				new TaskNetwork(
 						RESOLVE_COMPONENT_IFACE_PREFIX + this.nameOfRequiredInterface + "('request', 'solution')"),

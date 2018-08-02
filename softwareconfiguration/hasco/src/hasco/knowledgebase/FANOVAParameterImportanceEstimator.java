@@ -12,6 +12,7 @@ import com.google.common.collect.Sets;
 import hasco.core.Util;
 import hasco.model.ComponentInstance;
 import hasco.model.Parameter;
+import jaicore.ml.core.FeatureSpace;
 import jaicore.ml.intervaltree.ExtendedRandomForest;
 import weka.core.Instances;
 
@@ -21,7 +22,8 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 	private PerformanceKnowledgeBase performanceKnowledgeBase;
 	private String benchmarkName;
 	private Map<String, HashMap<Set<Integer>, Double>> importanceDictionary;
-	private Map<String, HashMap<String, Double>> importanceDictionaryForSingleComponents;
+	private Map<String,Set<String>> importantParameterMap;
+//	private Map<String, HashMap<String, Double>> importanceDictionaryForSingleComponents;
 
 	public FANOVAParameterImportanceEstimator(PerformanceKnowledgeBase performanceKnowledgeBase, String benchmarkName) {
 		forests = new HashMap<String, ExtendedRandomForest>();
@@ -29,7 +31,8 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 		this.performanceKnowledgeBase = performanceKnowledgeBase;
 		this.benchmarkName = benchmarkName;
 		this.importanceDictionary = new HashMap<String, HashMap<Set<Integer>, Double>>();
-		this.importanceDictionaryForSingleComponents = new HashMap<String, HashMap<String, Double>>();
+		this.importantParameterMap = new HashMap<String, Set<String>>();
+//		this.importanceDictionaryForSingleComponents = new HashMap<String, HashMap<String(), Double>>();
 	}
 
 	/**
@@ -67,13 +70,16 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 			int sizeOfLargestSubsetsToConsider, boolean recompute) throws Exception {
 		Set<String> importantParameters = new HashSet<String>();
 		String pipelineIdentifier = Util.getComponentNamesOfComposition(composition);
+		if(importantParameterMap.containsKey(pipelineIdentifier))
+			return importantParameterMap.get(pipelineIdentifier);
 		ExtendedRandomForest forest = forests.get(pipelineIdentifier);
 		Instances data = performanceKnowledgeBase.createInstancesForPerformanceSamples(benchmarkName, composition);
 		System.out.println(data);
 		if (forest == null) {
 			this.initializeForests(benchmarkName);
 		}
-		forest = forests.get(pipelineIdentifier);
+//		forest = forests.get(pipelineIdentifier);
+		forest = new ExtendedRandomForest(1.0d, 16, new FeatureSpace(data));
 		forest.buildClassifier(data);
 		forest.prepareForest(data);
 		double sum = 0;
@@ -90,7 +96,7 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 				// compute it
 				if (recompute) {
 					currentImportance = forest.computeMarginalForFeatureSubset(subset);
-					// sum += currentImportance;
+//					 sum += currentImportance;
 					importanceDictionary.get(pipelineIdentifier).put(subset, currentImportance);
 				} else if (importanceDictionary.get(pipelineIdentifier).containsKey(subset)) {
 					System.out.println("Taking value from dictionary");
@@ -102,6 +108,8 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 					importanceDictionary.get(pipelineIdentifier).put(subset, currentImportance);
 
 				}
+				System.out.println("Importance value for parameter subset " + subset + ": " + currentImportance);
+				System.out.println("Importance value " + currentImportance + " >= " + importanceThreshold + ": " + (currentImportance >= importanceThreshold));
 				if (currentImportance >= importanceThreshold) {
 					for (int i : subset) {
 						importantParameters.add(forest.getFeatureSpace().getFeatureDomain(i).getName());
@@ -110,6 +118,7 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 			}
 		}
 		// System.out.println("Importance overall: " + sum);
+		importantParameterMap.put(pipelineIdentifier, importantParameters);
 		return importantParameters;
 
 	}

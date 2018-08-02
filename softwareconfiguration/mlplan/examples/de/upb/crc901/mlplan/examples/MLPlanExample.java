@@ -39,9 +39,9 @@ public class MLPlanExample {
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(0), .7f);
 		
 		/* initialize mlplan, and let it run for 30 seconds */
-		MLPlanJ mlplan = new MLPlanJ(new File("model/weka/weka-all-autoweka.json"),1.0d,2,false);
+		MLPlan mlplan = new MLPlan(new File("model/weka/weka-all-autoweka.json"));
 		mlplan.setLoggerName("mlplan");
-		mlplan.setTimeout(60);
+		mlplan.setTimeout(180);
 		mlplan.setPortionOfDataForPhase2(.3f);
 		mlplan.setNodeEvaluator(new DefaultPreorder());
 		mlplan.enableVisualization();
