@@ -106,7 +106,10 @@ public class NumericFeatureDomain extends FeatureDomain {
 
 	@Override
 	public double getRangeSize() {
-		return max - min;
+		double temp = max - min;
+		if(temp == 0.0d && this.isInteger)
+			return 1.0d;
+		return temp;
 	}
 
 	@Override
