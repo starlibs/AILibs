@@ -3,7 +3,7 @@ package de.upb.crc901.automl.hascoscikitlearnml;
 import de.upb.crc901.automl.hascowekaml.HASCOForMEKA;
 
 import jaicore.basic.SQLAdapter;
-import jaicore.graph.observation.IObservableGraphAlgorithm;
+import jaicore.graph.IObservableGraphAlgorithm;
 import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionSolution;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.search.algorithms.standard.core.INodeEvaluator;
@@ -185,10 +185,9 @@ public class HASCOForScikitLearnML implements IObservableGraphAlgorithm<TFDNode,
     }
 
     /* create algorithm */
-    HASCOFD<ScikitLearnComposition> hasco = new HASCOFD<>(new ScikitLearnCompositionFactory(), this.preferredNodeEvaluator, CONFIG.getRequestedInterface(),
+    HASCOFD<ScikitLearnComposition,Double> hasco = new HASCOFD<>(cl.getComponents(), cl.getParamConfigs(), new ScikitLearnCompositionFactory(), CONFIG.getRequestedInterface(),
         searchBenchmark);
-    hasco.addComponents(cl.getComponents());
-    hasco.addParamRefinementConfigurations(cl.getParamConfigs());
+    hasco.setPreferredNodeEvaluator(preferredNodeEvaluator);
     hasco.setNumberOfCPUs(this.numberOfCPUs);
     hasco.setTimeout(CONFIG.getTimeout());
 

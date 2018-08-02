@@ -1,25 +1,5 @@
 package jaicore.search.algorithms.standard.bestfirst;
 
-import jaicore.basic.sets.SetUtil.Pair;
-import jaicore.logging.LoggerUtil;
-import jaicore.search.algorithms.interfaces.IPathUnification;
-import jaicore.search.algorithms.interfaces.ISolutionEvaluator;
-import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
-import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableNodeEvaluator;
-import jaicore.search.algorithms.standard.core.ICancelableNodeEvaluator;
-import jaicore.search.algorithms.standard.core.IGraphDependentNodeEvaluator;
-import jaicore.search.algorithms.standard.core.ISolutionReportingNodeEvaluator;
-import jaicore.search.algorithms.standard.core.NodeAnnotationEvent;
-import jaicore.search.algorithms.standard.core.SolutionAnnotationEvent;
-import jaicore.search.algorithms.standard.core.SolutionEventBus;
-import jaicore.search.algorithms.standard.core.SolutionFoundEvent;
-import jaicore.search.algorithms.standard.rdfs.RandomizedDepthFirstSearch;
-import jaicore.search.structure.core.GraphGenerator;
-import jaicore.search.structure.core.Node;
-import jaicore.search.structure.graphgenerator.GoalTester;
-import jaicore.search.structure.graphgenerator.SingleRootGenerator;
-import jaicore.search.structure.graphgenerator.SuccessorGenerator;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -32,6 +12,26 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jaicore.basic.sets.SetUtil.Pair;
+import jaicore.logging.LoggerUtil;
+import jaicore.search.algorithms.interfaces.IPathUnification;
+import jaicore.search.algorithms.interfaces.ISolutionEvaluator;
+import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
+import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableNodeEvaluator;
+import jaicore.search.algorithms.standard.core.ICancelableNodeEvaluator;
+import jaicore.search.algorithms.standard.core.IGraphDependentNodeEvaluator;
+import jaicore.search.algorithms.standard.core.ISolutionReportingNodeEvaluator;
+import jaicore.search.algorithms.standard.core.SolutionEventBus;
+import jaicore.search.algorithms.standard.core.events.NodeAnnotationEvent;
+import jaicore.search.algorithms.standard.core.events.SolutionAnnotationEvent;
+import jaicore.search.algorithms.standard.core.events.SolutionFoundEvent;
+import jaicore.search.algorithms.standard.rdfs.RandomizedDepthFirstSearch;
+import jaicore.search.structure.core.GraphGenerator;
+import jaicore.search.structure.core.Node;
+import jaicore.search.structure.graphgenerator.GoalTester;
+import jaicore.search.structure.graphgenerator.SingleRootGenerator;
+import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 @SuppressWarnings("serial")
 public class RandomCompletionEvaluator<T, V extends Comparable<V>>
@@ -52,8 +52,12 @@ public class RandomCompletionEvaluator<T, V extends Comparable<V>>
   protected final IPathUnification<T> pathUnifier;
   protected SerializableGraphGenerator<T, String> generator;
   protected long timestampOfFirstEvaluation;
+  
+  /* algorithm parameters */
+  protected boolean pathCachingActivated = false;
   protected final Random random;
   protected int samples;
+  
   protected final ISolutionEvaluator<T, V> solutionEvaluator;
   protected transient SolutionEventBus<T> eventBus = new SolutionEventBus<>();
 
@@ -137,7 +141,8 @@ public class RandomCompletionEvaluator<T, V extends Comparable<V>>
         }
         
         /* check if we have an f-value for exactly this node */
-        if (!this.completions.containsKey(path)) {
+        V score;
+        if (!isPathCachingActivated() || !this.completions.containsKey(path)) {
 
           /* determine whether we have a solution path (found by the oracle) that goes over this node */
           /* only if we have no path to a solution over this node, we compute a new one */
@@ -186,10 +191,11 @@ public class RandomCompletionEvaluator<T, V extends Comparable<V>>
                 	throw new UnsupportedOperationException();
                 }
               }, this.random);
-
+              
               /* now complete the current path by the dfs-solution */
               List<T> completedPath = new ArrayList<>(n.externalPath());
               logger.info("Starting search for next solution ...");
+//              SimpleGraphVisualizationWindow<Node<T,?>> window = new SimpleGraphVisualizationWindow<>(completer);
               List<T> pathCompletion = completer.nextSolution();
               if (pathCompletion == null) {
                 logger.warn("No completion was found for path {}. Nodes expanded in search: {}", path, completer.getExpandedCounter());
@@ -246,16 +252,22 @@ public class RandomCompletionEvaluator<T, V extends Comparable<V>>
             // assert isSolutionPath(bestCompletion) : "Identified a completion that is no solution path!";
             // assert scoresOfSolutionPaths.containsKey(CEOCSTNUtil.extractPlanFromSolutionPath(bestCompletion))
             // : "Solution was detected but its score was not saved";
-            this.completions.put(path, bestCompletion);
+            if (pathCachingActivated)
+            	this.completions.put(path, bestCompletion);
+            score = best;
           } else {
             // assert isSolutionPath(completions.get(pathWhoseCompletionSubsumesCurrentPath)) : "Identified a
             // subsuming completion "
             // + pathWhoseCompletionSubsumesCurrentPath.stream().map(l -> l.toString() +
             // "\n").collect(Collectors.toList()) + " that is no solution path!";
-            this.completions.put(path, this.completions.get(pathWhoseCompletionSubsumesCurrentPath));
+        	 if (pathCachingActivated)
+        	  this.completions.put(path, this.completions.get(pathWhoseCompletionSubsumesCurrentPath));
+        	 score = this.getFValueOfSolutionPath(this.completions.get(pathWhoseCompletionSubsumesCurrentPath));
           }
         }
-        this.fValues.put(n, this.getFValueOfSolutionPath(this.completions.get(path)));
+        else
+        	score = this.getFValueOfSolutionPath(this.completions.get(path));
+        this.fValues.put(n, score);
       }
 
       /* the node is a goal node */
@@ -407,4 +419,12 @@ public class RandomCompletionEvaluator<T, V extends Comparable<V>>
   public void setNumberOfRandomCompletions(final int randomCompletions) {
     this.samples = randomCompletions;
   }
+
+public boolean isPathCachingActivated() {
+	return pathCachingActivated;
+}
+
+public void setPathCachingActivated(boolean pathCachingActivated) {
+	this.pathCachingActivated = pathCachingActivated;
+}
 }

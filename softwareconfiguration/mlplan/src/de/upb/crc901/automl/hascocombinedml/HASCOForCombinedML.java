@@ -33,7 +33,7 @@ import hasco.serialization.ComponentLoader;
 import jaicore.basic.FileUtil;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.SQLAdapter;
-import jaicore.graph.observation.IObservableGraphAlgorithm;
+import jaicore.graph.IObservableGraphAlgorithm;
 import jaicore.logging.LoggerUtil;
 import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionSolution;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
@@ -171,10 +171,8 @@ public class HASCOForCombinedML implements IObservableGraphAlgorithm<TFDNode, St
 				return;
 			}
 		}
-		HASCOFD<MLServicePipeline> hasco = new HASCOFD<>(new MLServicePipelineFactory(), this.preferredNodeEvaluator,
-				CONFIG.getRequestedInterface(), searchBenchmark);
-		hasco.addComponents(this.cl.getComponents());
-		hasco.addParamRefinementConfigurations(this.cl.getParamConfigs());
+		HASCOFD<MLServicePipeline,Double> hasco = new HASCOFD<>(cl.getComponents(), cl.getParamConfigs(), new MLServicePipelineFactory(), CONFIG.getRequestedInterface(), searchBenchmark);
+		hasco.setPreferredNodeEvaluator(preferredNodeEvaluator);
 		hasco.setNumberOfCPUs(this.numberOfCPUs);
 		hasco.setTimeout(CONFIG.getTimeout());
 		hasco.setLoggerName(loggerName + ".hasco");

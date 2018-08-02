@@ -1,6 +1,5 @@
 package hasco.core;
 
-import java.nio.channels.UnsupportedAddressTypeException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -8,11 +7,9 @@ import java.util.Map;
 
 import org.apache.commons.lang3.NotImplementedException;
 
-import hasco.model.BooleanParameterDomain;
 import hasco.model.CategoricalParameterDomain;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
-import hasco.model.NumericParameterDomain;
 import hasco.model.Parameter;
 import hasco.model.ParameterRefinementConfiguration;
 import jaicore.basic.sets.SetUtil;

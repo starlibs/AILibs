@@ -3,6 +3,7 @@ package jaicore.search.algorithms.standard.uncertainty;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,8 +11,8 @@ import jaicore.search.algorithms.interfaces.IPathUnification;
 import jaicore.search.algorithms.interfaces.ISolutionEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import jaicore.search.algorithms.standard.bestfirst.RandomCompletionEvaluator;
-import jaicore.search.algorithms.standard.core.NodeAnnotationEvent;
 import jaicore.search.algorithms.standard.core.SolutionEventBus;
+import jaicore.search.algorithms.standard.core.events.NodeAnnotationEvent;
 import jaicore.search.algorithms.standard.rdfs.RandomizedDepthFirstSearch;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
@@ -20,10 +21,10 @@ import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 @SuppressWarnings("serial")
-public class UncertaintyRandomCompletionEvaluator<T, N extends Comparable<N>, V extends Comparable<V>> extends RandomCompletionEvaluator<T, V> {
+public class UncertaintyRandomCompletionEvaluator<T, N, V extends Comparable<V>> extends RandomCompletionEvaluator<T, V> {
 
 	private static final Logger logger = LoggerFactory.getLogger(UncertaintyRandomCompletionEvaluator.class);
-	
+
 	private IUncertaintySource<T, V> uncertaintyCalculation;
 
 	public UncertaintyRandomCompletionEvaluator(Random random, int samples, IPathUnification<T> pathUnifier, ISolutionEvaluator<T, V> solutionEvaluator, IUncertaintySource<T, V> uncertaintySource) {
@@ -53,13 +54,13 @@ public class UncertaintyRandomCompletionEvaluator<T, N extends Comparable<N>, V 
 			eventBus.post(new NodeAnnotationEvent<>(n.getPoint(), "EUBRD2OS", getExpectedUpperBoundForRelativeDistanceToOptimalSolution(n, path)));
 
 			if (!n.isGoal()) {
-				
+
 				V evaluationPriorToCompletion = computeEvaluationPriorToCompletion(n, path);
 				if (evaluationPriorToCompletion != null) {
 					fValues.put(n, evaluationPriorToCompletion);
 					return evaluationPriorToCompletion;
 				}
-				
+
 				/* if there was no relevant change in comparison to parent, apply parent's f */
 				if (path.size() > 1 && !solutionEvaluator.doesLastActionAffectScoreOfAnySubsequentSolution(path)) {
 					assert fValues.containsKey(n.getParent()) : "The solution evaluator tells that the solution on the path has not significantly changed, but no f-value has been stored before for the parent. The path is: " + path;
@@ -85,8 +86,9 @@ public class UncertaintyRandomCompletionEvaluator<T, N extends Comparable<N>, V 
 						int j = 0;
 						final int maxSamples = samples * 20;
 						List<V> evaluations = new ArrayList<>();
+						List<List<T>> completedPaths = new ArrayList<>();
 						for (; i < samples; i++) {
-							
+
 							if (Thread.interrupted()) {
 								interrupted = true;
 								break;
@@ -126,12 +128,11 @@ public class UncertaintyRandomCompletionEvaluator<T, N extends Comparable<N>, V 
 							logger.info("Found solution {}", pathCompletion);
 							pathCompletion.remove(0);
 							completedPath.addAll(pathCompletion);
-
+							completedPaths.add(completedPath);
 							/* now evaluate this solution */
 							j++;
 							try {
 								V val = getFValueOfSolutionPath(completedPath);
-								uncertainty = this.uncertaintyCalculation.calculateUncertainty(n, completedPath, evaluations);
 								if (val != null) {
 									evaluations.add(val);
 									if (best == null || val.compareTo(best) < 0) {
@@ -153,17 +154,18 @@ public class UncertaintyRandomCompletionEvaluator<T, N extends Comparable<N>, V 
 								}
 							}
 						}
-						
+
 						/* add number of samples to node  */
 						n.setAnnotation("fRPSamples", i);
-						
+						uncertainty = this.uncertaintyCalculation.calculateUncertainty(n, completedPaths, evaluations);
+
 						if (bestCompletion == null) {
 							if (interrupted)
 								throw new InterruptedException();
 							logger.warn("Did not find any completion");
 							return null;
 						}
-						
+
 						/* we have been interrupted, but there are intermediate results. We accept these */
 						if (interrupted) {
 							logger.info("Estimate {} is only based on {} instead of {} samples, because we received an interrupt.", best, i, samples);

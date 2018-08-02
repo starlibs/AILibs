@@ -6,9 +6,9 @@ import jaicore.search.structure.core.GraphGenerator;
 
 public class ORGraphSearchFactory<T, A, V extends Comparable<V>> implements IObservableORGraphSearchFactory<T, A, V> {
 
-	private int timeoutForFInMS;
-	private INodeEvaluator<T, V> timeoutEvaluator;
-	private String loggerName;
+	protected int timeoutForFInMS;
+	protected INodeEvaluator<T, V> timeoutEvaluator;
+	protected String loggerName;
 
 	public ORGraphSearchFactory() {
 		super();

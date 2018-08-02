@@ -39,7 +39,7 @@ import weka.core.ProtectedProperties;
  *
  */
 
-public class PerformanceKnowledgeBase implements IKnowledgeBase {
+public class PerformanceKnowledgeBase {
 
 	private SQLAdapter sqlAdapter;
 	private Map<String, HashMap<ComponentInstance, Double>> performanceSamples;

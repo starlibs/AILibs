@@ -14,14 +14,10 @@ import jaicore.logic.fol.theories.EvaluablePredicate;
 
 public class isNotRefinable implements EvaluablePredicate {
 	
-	private final Collection<Component> components;
-	private final Map<Component,Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration;
 	private final isValidParameterRangeRefinementPredicate p;
 	
 	public isNotRefinable(Collection<Component> components, Map<Component, Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration) {
 		super();
-		this.components = components;
-		this.refinementConfiguration = refinementConfiguration;
 		this.p = new isValidParameterRangeRefinementPredicate(components, refinementConfiguration);
 	}
 

@@ -50,7 +50,7 @@ public class BiPartitionFinder<T> {
 		@Override
 		public SuccessorGenerator<BiPartitionFinder<T>.BFNode, Boolean> getSuccessorGenerator() {
 			return n -> {
-				Collection<NodeExpansionDescription<BFNode,Boolean>> successors = new ArrayList<>();
+				List<NodeExpansionDescription<BFNode,Boolean>> successors = new ArrayList<>();
 				int k = n.itemsOnLeft.size() + n.itemsOnRight.size();
 				T newItem = items.get(k);
 				Collection<T> aLeft = new HashSet<>(n.itemsOnLeft);
