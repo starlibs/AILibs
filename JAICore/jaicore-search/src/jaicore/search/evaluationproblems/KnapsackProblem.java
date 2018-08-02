@@ -1,10 +1,6 @@
 package jaicore.search.evaluationproblems;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import jaicore.search.algorithms.interfaces.ISolutionEvaluator;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
@@ -13,6 +9,7 @@ import jaicore.search.structure.core.NodeType;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SingleSuccessorGenerator;
+import meka.classifiers.multilabel.neurofuzzy.ST;
 
 public class KnapsackProblem {
 	
@@ -90,6 +87,20 @@ public class KnapsackProblem {
 			if (Double.doubleToLongBits(usedCapacity) != Double.doubleToLongBits(other.usedCapacity))
 				return false;
 			return true;
+		}
+
+		@Override
+		public String toString() {
+			String s = "[";
+			Iterator<String> it = packedObjects.iterator();
+			while (it.hasNext()) {
+				s += it.next();
+				if (it.hasNext()) {
+					s+= ", ";
+				}
+			}
+			s += "]-<" + usedCapacity + "/" + KnapsackProblem.this.knapsackCapacity + ">";
+			return s;
 		}
 
 		private KnapsackProblem getOuterType() {
