@@ -41,10 +41,6 @@ public class FeatureSpace implements Serializable {
 					min = data.attributeStats(i).numericStats.min;
 					max = data.attributeStats(i).numericStats.max;
 				}
-//				if(min >= max) {
-//					System.out.println("The range is negative or zero, skip this domain!");
-//					continue;
-//				}
 					
 				NumericFeatureDomain domain = new NumericFeatureDomain(true, min, max);
 

@@ -86,7 +86,10 @@ public class CategoricalFeatureDomain extends FeatureDomain {
 
 	@Override
 	public double getRangeSize() {
-		// return values.length;
+		// For safety, if the domain is empty, it shouldn't effect the range size of the
+		// feature space
+		if (values.length == 0)
+			return 1;
 		return values.length;
 	}
 

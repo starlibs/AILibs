@@ -248,8 +248,9 @@ public class ExtendedRandomTree extends RandomTree {
 		if (vU < 0.0d)
 			vU = 0.0d;
 		varianceOfSubsetIndividual.put(features, vU);
-		double fraction = vU / totalVariance;
-		return fraction;
+//		double fraction = vU / totalVariance;
+		return vU;
+//		return fraction;
 	}
 
 	/**

@@ -120,16 +120,17 @@ public class HASCOWithParameterPruning<T, N, A, V extends Comparable<V>, R exten
 	private String loggerName;
 
 	/* run-specific options */
-	private final HASCOProblemReduction reduction;
+	private final HASCOProblemReductionWithParameterPruning reduction;
 	private final CEOCIPSTNPlanningProblem problem;
 	private IObservableGraphBasedHTNPlanningAlgorithm<R, N, A, V> planner;
-	
+
 	private ISolutionEvaluator<N, V> solutionEvaluator = new ISolutionEvaluator<N, V>() {
 		@Override
 		public V evaluateSolution(final List<N> solutionPath) throws Exception {
-			List<Action> plan = HASCOWithParameterPruning.this.searchSpaceUtilFactory.getPathToPlanConverter().getPlan(solutionPath);
-			ComponentInstance composition = Util.getSolutionCompositionForPlan(HASCOWithParameterPruning.this.components,
-					reduction.getInitState(), plan);
+			List<Action> plan = HASCOWithParameterPruning.this.searchSpaceUtilFactory.getPathToPlanConverter()
+					.getPlan(solutionPath);
+			ComponentInstance composition = Util.getSolutionCompositionForPlan(
+					HASCOWithParameterPruning.this.components, reduction.getInitState(), plan);
 			T solution = HASCOWithParameterPruning.this.getObjectFromPlan(plan);
 			V scoreOfSolution = HASCOWithParameterPruning.this.benchmark.evaluate(solution);
 			if (HASCOWithParameterPruning.this.scoreOfBestRecognizedSolution == null
@@ -191,7 +192,9 @@ public class HASCOWithParameterPruning<T, N, A, V extends Comparable<V>, R exten
 	// // TODO Auto-generated constructor stub
 	// }
 
-	public HASCOWithParameterPruning(final Collection<Component> components, final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig, final IObservableGraphBasedHTNPlanningAlgorithmFactory<R, N, A, V> plannerFactory,
+	public HASCOWithParameterPruning(final Collection<Component> components,
+			final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig,
+			final IObservableGraphBasedHTNPlanningAlgorithmFactory<R, N, A, V> plannerFactory,
 			final IObservableORGraphSearchFactory<N, A, V> searchFactory,
 			final IHASCOSearchSpaceUtilFactory<N, A, V> searchSpaceUtilFactory, final Factory<? extends T> factory,
 			final String nameOfRequiredInterface, final IObjectEvaluator<T, V> benchmark,
@@ -249,7 +252,14 @@ public class HASCOWithParameterPruning<T, N, A, V extends Comparable<V>, R exten
 		this.nameOfRequiredInterface = nameOfRequiredInterface;
 
 		/* set run specific options */
-		reduction = new HASCOProblemReduction(components, paramRefinementConfig, nameOfRequiredInterface, true);
+		// reduction = new HASCOProblemReductionWithParameterPruning(components,
+		// paramRefinementConfig, nameOfRequiredInterface, true,
+		// this.parameterImportanceEstimator,this.importanceThreshold,
+		// this.minNumSamplesForImportanceEstimation, this.performanceKB,true)));
+		reduction = new HASCOProblemReductionWithParameterPruning(components, paramRefinementConfig,
+				nameOfRequiredInterface, true, parameterImportanceEstimator, importanceThreshold, minNumSamplesForImportanceEstimation,
+				performanceKB, useParameterImportanceEstimation);
+
 		this.problem = reduction.getPlanningProblem();
 		if (logger.isDebugEnabled()) {
 			StringBuilder opSB = new StringBuilder();
@@ -275,15 +285,14 @@ public class HASCOWithParameterPruning<T, N, A, V extends Comparable<V>, R exten
 	public int getRandom() {
 		return this.randomSeed;
 	}
-	
+
 	public ISolutionEvaluator<N, V> getSolutionEvaluator() {
 		return this.solutionEvaluator;
 	}
-	
+
 	public IObservableORGraphSearchFactory<N, A, V> getSearchFactory() {
 		return this.searchFactory;
 	}
-
 
 	public class HASCOSolutionIterator implements Iterator<Solution<R, T, V>> {
 
@@ -399,8 +408,6 @@ public class HASCOWithParameterPruning<T, N, A, V extends Comparable<V>, R exten
 		return object;
 	}
 
-
-
 	protected void afterSearch() {
 	}
 
@@ -427,7 +434,7 @@ public class HASCOWithParameterPruning<T, N, A, V extends Comparable<V>, R exten
 	public Collection<Component> getComponents() {
 		return this.components;
 	}
-	
+
 	public Factory<? extends T> getFactory() {
 		return this.factory;
 	}
@@ -445,8 +452,6 @@ public class HASCOWithParameterPruning<T, N, A, V extends Comparable<V>, R exten
 		return new HASCOSolutionIterator();
 	}
 
-	
-
 	@Override
 	public void registerListener(final Object listener) {
 		synchronized (this.listeners) {
@@ -457,7 +462,7 @@ public class HASCOWithParameterPruning<T, N, A, V extends Comparable<V>, R exten
 	public void registerListenerForSolutionEvaluations(final Object listener) {
 		this.solutionEvaluationEventBus.register(listener);
 	}
-	
+
 	public GraphGenerator<N, A> getGraphGenerator() {
 		if (planner != null)
 			return planner.getGraphGenerator();
@@ -485,7 +490,7 @@ public class HASCOWithParameterPruning<T, N, A, V extends Comparable<V>, R exten
 	public void setPreferredNodeEvaluator(INodeEvaluator<N, V> preferredNodeEvaluator) {
 		this.preferredNodeEvaluator = preferredNodeEvaluator;
 	}
-	
+
 	public void setNumberOfSamplesOfRandomCompletion(int numSamples) {
 		randomCompletionEvaluator.setNumberOfRandomCompletions(numSamples);
 	}

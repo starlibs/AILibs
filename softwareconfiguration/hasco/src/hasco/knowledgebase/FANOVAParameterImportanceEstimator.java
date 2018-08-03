@@ -40,19 +40,19 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 	 * 
 	 * @param benchmarkName
 	 */
-	private void initializeForests(String benchmarkName) {
-		for (String identifier : performanceKnowledgeBase.getPerformanceSamplesByIdentifier().get(benchmarkName)
-				.keySet()) {
-			if (forests.get(identifier) == null) {
-				ExtendedRandomForest curForest = new ExtendedRandomForest(5.0d, 16);
-				forests.put(identifier, curForest);
-			}
-			if (importanceDictionary.get(identifier) == null) {
-				HashMap<Set<Integer>, Double> importanceMap = new HashMap<Set<Integer>, Double>();
-				importanceDictionary.put(identifier, importanceMap);
-			}
-		}
-	}
+//	private void initializeForests(String benchmarkName) {
+//		for (String identifier : performanceKnowledgeBase.getPerformanceSamplesByIdentifier().get(benchmarkName)
+//				.keySet()) {
+//			if (forests.get(identifier) == null) {
+//				ExtendedRandomForest curForest = new ExtendedRandomForest(5.0d, 16);
+//				forests.put(identifier, curForest);
+//			}
+//			if (importanceDictionary.get(identifier) == null) {
+//				HashMap<Set<Integer>, Double> importanceMap = new HashMap<Set<Integer>, Double>();
+//				importanceDictionary.put(identifier, importanceMap);
+//			}
+//		}
+//	}
 
 	/**
 	 * Extract important parameters for subsets of size
@@ -72,16 +72,19 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 		String pipelineIdentifier = Util.getComponentNamesOfComposition(composition);
 		if(importantParameterMap.containsKey(pipelineIdentifier))
 			return importantParameterMap.get(pipelineIdentifier);
-		ExtendedRandomForest forest = forests.get(pipelineIdentifier);
+//		ExtendedRandomForest forest = forests.get(pipelineIdentifier);
 		Instances data = performanceKnowledgeBase.createInstancesForPerformanceSamples(benchmarkName, composition);
+		System.out.println("Extracting important parameters!");
 		System.out.println(data);
-		if (forest == null) {
-			this.initializeForests(benchmarkName);
-		}
+//		if (forest == null) {
+//			this.initializeForests(benchmarkName);
+//		}
 //		forest = forests.get(pipelineIdentifier);
-		forest = new ExtendedRandomForest(1.0d, 16, new FeatureSpace(data));
+		ExtendedRandomForest forest = new ExtendedRandomForest(1.0d, 16, new FeatureSpace(data));
 		forest.buildClassifier(data);
 		forest.prepareForest(data);
+		if(!importanceDictionary.containsKey(pipelineIdentifier))
+			importanceDictionary.put(pipelineIdentifier, new HashMap<Set<Integer>,Double>());
 		double sum = 0;
 		Set<Integer> parameterIndices = new HashSet<Integer>();
 		for (int i = 0; i < data.numAttributes() - 1; i++)

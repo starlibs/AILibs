@@ -34,13 +34,14 @@ public class isRefinementCompletedPredicateWithImportanceCheck implements Evalua
 	private final IParameterImportanceEstimator importanceEstimator;
 	private final double importanceThreshold;
 	private final int minNumSamplesForImportanceEstimation;
+	private final boolean useImportanceEstimation;
 	// private final Map<ComponentInstance,Double> knownCompositionsAndTheirScore =
 	// new HashMap<>();
 
 	public isRefinementCompletedPredicateWithImportanceCheck(Collection<Component> components,
 			Map<Component, Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration,
-			IParameterImportanceEstimator importanceEstimator, double importanceThreshold, int minNumSamples,
-			PerformanceKnowledgeBase performanceKB) {
+			PerformanceKnowledgeBase performanceKB, IParameterImportanceEstimator importanceEstimator, double importanceThreshold, int minNumSamples,
+			boolean useImportanceEstimation) {
 		super();
 		this.components = components;
 		this.refinementConfiguration = refinementConfiguration;
@@ -48,6 +49,7 @@ public class isRefinementCompletedPredicateWithImportanceCheck implements Evalua
 		this.importanceThreshold = importanceThreshold;
 		this.minNumSamplesForImportanceEstimation = minNumSamples;
 		this.performanceKB = performanceKB;
+		this.useImportanceEstimation = useImportanceEstimation;
 	}
 
 	@Override

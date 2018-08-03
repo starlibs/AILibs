@@ -17,9 +17,10 @@ import weka.classifiers.Evaluation;
 import weka.core.Instances;
 
 /**
- * This is an example class that illustrates the usage of ML-Plan on the segment
- * dataset of OpenML. It is configured to run for 30 seconds and to use 70% of
- * the data for search and 30% for selection in its second phase.
+ * This is an example class that illustrates the usage of ML-Plan with parameter
+ * importance estimation and pruning on the segment dataset of OpenML. It is
+ * configured to run for 30 seconds and to use 70% of the data for search and
+ * 30% for selection in its second phase.
  * 
  * The API key used for OpenML is ML-Plan's key (read only).
  * 
@@ -39,9 +40,11 @@ public class MLPlanExampleJ {
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(0), .7f);
 
 		/* initialize mlplan, and let it run for 30 seconds */
-		MLPlanJ mlplan = new MLPlanJ(new File("model/weka/weka-all-autoweka.json"), 0.32d, 4, true);
+		int timeoutInSeconds = 180;
+		MLPlanJ mlplan = new MLPlanJ(new File("model/weka/weka-all-autoweka.json"), 0.04d, 4, true);
 		mlplan.setLoggerName("mlplan");
-		mlplan.setTimeout(300);
+
+		mlplan.setTimeout(timeoutInSeconds);
 		mlplan.setPortionOfDataForPhase2(.3f);
 		mlplan.setNodeEvaluator(new DefaultPreorder());
 		mlplan.enableVisualization();
