@@ -16,6 +16,11 @@ import jaicore.ml.core.FeatureSpace;
 import jaicore.ml.intervaltree.ExtendedRandomForest;
 import weka.core.Instances;
 
+/**
+ * Parameter importance estimator using fANOVA.
+ * @author jmhansel
+ *
+ */
 public class FANOVAParameterImportanceEstimator implements IParameterImportanceEstimator {
 	private Map<String, ExtendedRandomForest> forests;
 	// private Map<String, HashMap<ComponentInstance, Double>> performanceSamples;

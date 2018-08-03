@@ -107,15 +107,18 @@ public class NumericFeatureDomain extends FeatureDomain {
 	@Override
 	public double getRangeSize() {
 		double temp = max - min;
-		if(this.isInteger)
-			temp++;
+		// For safety, if the interval is empty, it shouldn't effect the range size of
+		// the feature space
+		if (temp == 0.0d)
+			return 1.0d;
 		return temp;
 	}
 
 	@Override
 	public boolean containsInstance(double value) {
 		// TODO
-//		System.out.println("Check: " + min + " <= " + value + " <= " + max + " " + ((value >= min) && (value <= max)));
+		// System.out.println("Check: " + min + " <= " + value + " <= " + max + " " +
+		// ((value >= min) && (value <= max)));
 		return ((value >= min) && (value <= max));
 	}
 
