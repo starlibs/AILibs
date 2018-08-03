@@ -34,12 +34,12 @@ public class Path {
 		pathElements.add(new Tuple<AbstractRelationship, AggregationFunction>(ar, af));
 	}
 
-	public Table getLastTable() {
+	public String getLastTableName() {
 		if (pathElements.isEmpty()) {
 			return null;
 		}
 		Tuple<AbstractRelationship, AggregationFunction> lastPathElement = pathElements.get(pathElements.size() - 1);
-		return lastPathElement.getT().getFrom();
+		return lastPathElement.getT().getFromTableName();
 	}
 
 	public int length() {

@@ -87,20 +87,24 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 		Table featureTable = DBUtils.getAttributeTable(feature.getParent(), db);
 		List<ForwardRelationship> joinRelations = DBUtils.getJoinTables(targetTarget, featureTable, db);
 		if (feature instanceof ForwardFeature) {
-			createForwardFeatureTable(joinRelations, (ForwardFeature) feature);
+			createForwardFeatureTable((ForwardFeature) feature);
 		} else {
-			createBackwardFeatureTable(joinRelations, (BackwardFeature) feature);
+			createBackwardFeatureTable((BackwardFeature) feature);
 		}
 	}
 
-	private void createForwardFeatureTable(List<ForwardRelationship> joinRelations, ForwardFeature feature)
-			throws SQLException {
+	private void createForwardFeatureTable(ForwardFeature feature) throws SQLException {
+		Table targetTarget = DBUtils.getTargetTable(db);
+		Table featureTable = DBUtils.getAttributeTable(feature.getParent(), db);
+		List<ForwardRelationship> joinRelations = DBUtils.getJoinTables(targetTarget, featureTable, db);
 		String featureSql = SqlUtils.generateForwardSql(joinRelations, feature, db);
 		createTable(SqlUtils.getTableNameForFeature(feature), featureSql);
 	}
 
-	private void createBackwardFeatureTable(List<ForwardRelationship> joinRelations, BackwardFeature feature)
-			throws SQLException {
+	private void createBackwardFeatureTable(BackwardFeature feature) throws SQLException {
+		Table targetTarget = DBUtils.getTargetTable(db);
+		Table toTable = DBUtils.getTableByName(feature.getPath().getLastTableName(), db);
+		List<ForwardRelationship> joinRelations = DBUtils.getJoinTables(targetTarget, toTable, db);
 		String featureSql = SqlUtils.generateBackwardSql(joinRelations, feature, db);
 		createTable(SqlUtils.getTableNameForFeature(feature), featureSql);
 	}
@@ -164,9 +168,9 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 		for (int i = 0; i < features.size(); i++) {
 			AbstractFeature feature = features.get(i);
 			if (feature.getType() == AttributeType.TEXT) {
-				instance.setValue(i, rs.getString(i + 1));
+				instance.setValue(i, rs.getString(i + 2));
 			} else if (feature.getType() == AttributeType.NUMERIC) {
-				instance.setValue(i, rs.getInt(i + 1));
+				instance.setValue(i, rs.getInt(i + 2));
 			} else {
 				throw new RuntimeException("Unsupoorted attribute type " + feature.getType());
 			}

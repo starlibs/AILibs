@@ -128,7 +128,7 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 		BackwardFeature intermediateFeature = getIntermediateFeature(node.getSelectedFeatures());
 
 		// Get last table
-		Table lastTable = intermediateFeature.getPath().getLastTable();
+		Table lastTable = DBUtils.getTableByName(intermediateFeature.getPath().getLastTableName(),db);
 		if (lastTable == null) {
 			lastTable = DBUtils.getAttributeTable(intermediateFeature.getParent(), db);
 		}
@@ -247,7 +247,7 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 			allPaths.add(prefix);
 			return;
 		}
-		Table from = prefix.getLastTable();
+		Table from = DBUtils.getTableByName(prefix.getLastTableName(),db);
 		if (from == null) {
 			from = DBUtils.getAttributeTable(feature.getParent(), db);
 		}
