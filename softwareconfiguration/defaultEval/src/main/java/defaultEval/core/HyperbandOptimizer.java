@@ -197,30 +197,37 @@ public class HyperbandOptimizer extends Optimizer{
 		
 		pyWrapperStream.println("from common_defs import *");
 		pyWrapperStream.println("import sys, math");
+		pyWrapperStream.println("import random");
 		pyWrapperStream.println("from subprocess import call");
 		
-		pyWrapperStream.println("space = { ");
-		for (Pair<Parameter, ParamType> parameterPair : parameterList) {
-			pyWrapperStream.println("\t" + getSpaceEntryByDomain(parameterPair) + ",");	
-		}
-		pyWrapperStream.println("}");
+//		pyWrapperStream.println("space = { ");
+//		for (Pair<Parameter, ParamType> parameterPair : parameterList) {
+//			pyWrapperStream.println("\t" + getSpaceEntryByDomain(parameterPair) + ",");	
+//		}
+//		pyWrapperStream.println("}");
 		
 		pyWrapperStream.println("def get_params():");
-		pyWrapperStream.println("\tparams = sample( space )");
+		pyWrapperStream.println("\tparams = {");
+		
+		for (Pair<Parameter, ParamType> parameterPair : parameterList) {
+			pyWrapperStream.println("\t\t" + getSpaceEntryByDomain(parameterPair) + ",");	
+		}
+		pyWrapperStream.println("\t}");
+		
 		pyWrapperStream.println("\treturn handle_integers( params )");
 		
 		
 		pyWrapperStream.println("def try_params( n_iterations, params ):");
-		pyWrapperStream.println(String.format("\tcall(\"java -jar %s/PipelineEvaluator.jar %s %s %d %s %s %s %s %s %s\")",
+		pyWrapperStream.println(String.format("\tcall([\"java\", \"-jar\", \"%s/PipelineEvaluator.jar\", \"%s\", \"%s\", \"%d\", %s %s %s %s %s %s])",
 				environment.getAbsolutePath(),
 				environment.getAbsolutePath() + "/results/" + buildFileName() + ".txt", 
 				dataSetFolder.getAbsolutePath() + "/" + dataSet + ".arff",
 				seed,
-				(searcher != null) ? searcher.getName() : "null",
+				(searcher != null) ? "\"" + searcher.getName() +"\", " : "\"null\", ",
 				(searcher != null) ? generateParamList(searcher, ParamType.searcher) : "",
-				(searcher != null) ? evaluator.getName() : "",
+				(searcher != null) ? "\""+evaluator.getName()+"\", " : "",
 				(searcher != null) ? generateParamList(evaluator, ParamType.evaluator) : "",
-				classifier.getName(),
+						"\""+classifier.getName()+"\", ",
 				generateParamList(classifier, ParamType.classifier)
 				));
 		pyWrapperStream.println(String.format("\tfile = open(\"%s/results/%s.txt\", \"r\")", environment.getAbsolutePath(), buildFileName()));
@@ -283,7 +290,7 @@ public class HyperbandOptimizer extends Optimizer{
 		Component classifier = null;
 		
 		for (Component c : cl_p.getComponents()) {
-			if(c.getName().equals("weka.attributeSelection.BestFirst")) {
+			if(c.getName().equals("weka.attributeSelection.GreedyStepwise")) {
 				searcher = c;
 			}
 		}
@@ -300,7 +307,7 @@ public class HyperbandOptimizer extends Optimizer{
 			}
 		}
 		
-		HyperbandOptimizer o = new HyperbandOptimizer(searcher, evaluator, classifier, "breast-cancer", new File("F:\\Data\\Uni\\PG\\DefaultEvalEnvironment"),new File("F:\\Data\\Uni\\PG\\DefaultEvalEnvironment\\datasets"), 0, 200, 10);
+		HyperbandOptimizer o = new HyperbandOptimizer(searcher, evaluator, classifier, "breast-cancer", new File("F:\\Data\\Uni\\PG\\DefaultEvalEnvironment"),new File("F:\\Data\\Uni\\PG\\DefaultEvalEnvironment\\datasets"), 0, 5, 100);
 		o.optimize();
 	}
 	
@@ -309,14 +316,12 @@ public class HyperbandOptimizer extends Optimizer{
 		StringBuilder sb = new StringBuilder();
 		
 		for (Parameter parameter : c.getParameters()) {
-			sb.append(" " + parameter.getName());
-			sb.append(String.format(" \"+ %s + \"", createDomainWrapper(String.format("params['%s']", getUniqueParamName(parameter, t)), parameter.getDefaultDomain())));
+			sb.append("\"" + parameter.getName() + "\", ");
+			sb.append(String.format("%s,", createDomainWrapper(String.format("params['%s']", getUniqueParamName(parameter, t)), parameter.getDefaultDomain())));
 		}
 		
 		return sb.toString();
 	}
-	
-	
 	
 	
 	private String getSpaceEntryByDomain(Pair<Parameter, ParamType> p) {
@@ -328,24 +333,24 @@ public class HyperbandOptimizer extends Optimizer{
 			
 			if(n_pd.isInteger()) {
 				// int
-				return String.format("'%s': hp.choice( '%s', range(%d, %d, 1))", getUniqueParamName(p), getUniqueParamName(p), (int)n_pd.getMin(), (int)n_pd.getMax()+1);
+				return String.format("'%s': np.random.choice(range(%d, %d, 1))", getUniqueParamName(p), (int)n_pd.getMin(), (int)n_pd.getMax()+1);
 			}else {
 				// float
-				return String.format("'%s': hp.uniform( '%s', %f, %f)", getUniqueParamName(p),getUniqueParamName(p), n_pd.getMin(), n_pd.getMax());
+				return String.format("'%s': np.random.uniform(%f, %f)", getUniqueParamName(p), n_pd.getMin(), n_pd.getMax());
 			}	
 		}
 		
 		// Boolean (categorical)
 		else if(pd instanceof BooleanParameterDomain) {
 			BooleanParameterDomain b_pd = (BooleanParameterDomain) pd;
-			return String.format("'%s': hp.choice( '%s', (True, False))",getUniqueParamName(p),getUniqueParamName(p));
+			return String.format("'%s': np.random.choice(['true', 'false'])",getUniqueParamName(p),getUniqueParamName(p));
 		}
 		
 		//categorical
 		else if(pd instanceof CategoricalParameterDomain) {
 			CategoricalParameterDomain c_pd = (CategoricalParameterDomain) pd;
 			
-			StringBuilder sb = new StringBuilder(String.format("'%s': hp.choice( '%s', (", getUniqueParamName(p), getUniqueParamName(p)));
+			StringBuilder sb = new StringBuilder(String.format("'%s': np.random.choice( [", getUniqueParamName(p), getUniqueParamName(p)));
 			for (int i = 0; i < c_pd.getValues().length; i++) {
 				sb.append("'" + c_pd.getValues()[i] + "'");
 				
@@ -353,7 +358,7 @@ public class HyperbandOptimizer extends Optimizer{
 					sb.append(",");
 				}
 			}
-			sb.append("))");
+			sb.append("])");
 
 			return sb.toString();
 		}

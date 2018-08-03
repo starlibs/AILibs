@@ -21,6 +21,7 @@ public class PreprocessorListHelper {
 	public static void main(String[] args) {
 		StringBuilder sb = new StringBuilder();
 		boolean first = true;
+		int i = 0;
 		for (Pair<String, String> s : WekaUtil.getValidPreprocessorCombinations()) {
 			boolean failed = false;
 			try {
@@ -43,6 +44,7 @@ public class PreprocessorListHelper {
 				
 				as.SelectAttributes(instances);
 				System.out.println("Status: OK");
+				i++;
 			} catch (Exception | Error e) {
 				System.out.println("Status: FAIL");
 				System.out.println(e.toString());
@@ -63,6 +65,7 @@ public class PreprocessorListHelper {
 		}
 		
 		System.out.println(sb.toString());
+		System.out.println("NUMBER: " + i);
 	}
 	
 }

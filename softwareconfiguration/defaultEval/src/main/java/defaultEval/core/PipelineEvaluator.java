@@ -97,7 +97,12 @@ public class PipelineEvaluator {
 						
 						// add parameter
 						for (Parameter p : searcher.getParameters()) {
-							searcherParameter.put(args[index++], args[index++]);
+							if(c.getParameter(args[index]).getDefaultDomain() instanceof BooleanParameterDomain) {
+								// true and false must always be lower case
+								searcherParameter.put(args[index++], args[index++].toLowerCase());
+							}else {
+								searcherParameter.put(args[index++], args[index++]);	
+							}
 						}
 					}
 				}
@@ -109,7 +114,12 @@ public class PipelineEvaluator {
 						
 						// add parameter
 						for (Parameter p : evaluator.getParameters()) {
-							evaluatorParameter.put(args[index++], args[index++]);
+							if(c.getParameter(args[index]).getDefaultDomain() instanceof BooleanParameterDomain) {
+								// true and false must always be lower case
+								evaluatorParameter.put(args[index++], args[index++].toLowerCase());
+							}else {
+								evaluatorParameter.put(args[index++], args[index++]);	
+							}
 						}
 					}
 				}	
