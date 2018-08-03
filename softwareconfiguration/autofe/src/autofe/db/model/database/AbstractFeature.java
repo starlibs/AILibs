@@ -10,6 +10,8 @@ public abstract class AbstractFeature implements Comparable<AbstractFeature> {
 	}
 
 	public abstract String getName();
+	
+	public abstract AttributeType getType();
 
 	public Attribute getParent() {
 		return parent;

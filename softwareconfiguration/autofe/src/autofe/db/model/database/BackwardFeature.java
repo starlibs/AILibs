@@ -63,6 +63,12 @@ public class BackwardFeature extends AbstractFeature {
 	}
 
 	@Override
+	public AttributeType getType() {
+		// Statically return numeric, could be changed in the feature
+		return AttributeType.NUMERIC;
+	}
+
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;

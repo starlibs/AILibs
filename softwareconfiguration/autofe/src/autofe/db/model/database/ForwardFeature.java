@@ -16,10 +16,13 @@ public class ForwardFeature extends AbstractFeature {
 	}
 
 	@Override
+	public AttributeType getType() {
+		return parent.getType();
+	}
+
+	@Override
 	public String toString() {
 		return "ForwardFeature [parent=" + parent + ", getName()=" + getName() + "]";
 	}
-	
-	
 
 }
