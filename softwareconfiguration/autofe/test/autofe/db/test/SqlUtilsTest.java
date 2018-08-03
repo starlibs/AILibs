@@ -72,4 +72,25 @@ public class SqlUtilsTest {
 
 	}
 
+	@Test
+	public void testBackwardFeatureSql() {
+		Database db = DBUtils.deserializeFromFile(DATABASE_MODEL_FILE);
+		Table product = DBUtils.getTableByName("Product", db);
+		Attribute price = DBUtils.getAttributeByName("Price", product);
+		BackwardFeature feature = new BackwardFeature(price);
+		Path path = feature.getPath();
+		path.addPathElement(new BackwardRelationship("Orders", "Product", "OrderId"), AggregationFunction.AVG);
+		path.addPathElement(new BackwardRelationship("Customer", "Orders", "CustomerId"), AggregationFunction.SUM);
+
+		List<ForwardRelationship> joinPath = Collections
+				.singletonList(new ForwardRelationship("BankAccount", "Customer", "BankAccountId"));
+
+		
+		String expected = "SELECT BankAccount.BankAccountId, TEMPFEATURE1 AS TEMPFEATURE2 FROM BankAccount LEFT OUTER JOIN (SELECT Customer.CustomerId, Customer.BankAccountId, SUM(TEMPFEATURE0) AS TEMPFEATURE1 FROM Customer LEFT OUTER JOIN (SELECT Orders.OrderId, Orders.CustomerId, AVG(Product.Price) AS TEMPFEATURE0 FROM Orders LEFT OUTER JOIN Product ON (Orders.OrderId = Product.OrderId) GROUP BY Orders.OrderId) TEMPTABLE1 ON (Customer.CustomerId = TEMPTABLE1.CustomerId) GROUP BY Customer.CustomerId) TEMPTABLE2 ON (BankAccount.BankAccountId = TEMPTABLE2.BankAccountId)";
+		String actual = SqlUtils.generateBackwardSql(joinPath, feature, db);
+		System.out.println(actual);
+
+		assertEquals(expected, actual);
+	}
+
 }
