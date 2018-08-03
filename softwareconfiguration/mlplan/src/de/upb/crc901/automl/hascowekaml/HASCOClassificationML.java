@@ -220,9 +220,9 @@ public class HASCOClassificationML implements IObservableGraphAlgorithm<TFDNode,
 		}
 
 		/* create algorithm */
-		this.hasco = new HASCOFD<>(cl.getComponents(), cl.getParamConfigs(), this.classifierFactory,
-				this.preferredNodeEvaluator, REQUEST_INTERFACE, this.classifierEvaluator,
-				this.oversearchAvoidanceConfig);
+		this.hasco = new HASCOFD<>(cl.getComponents(), cl.getParamConfigs(), this.classifierFactory, REQUEST_INTERFACE,
+				this.classifierEvaluator, this.oversearchAvoidanceConfig);
+		this.hasco.setPreferredNodeEvaluator(this.preferredNodeEvaluator);
 
 		if (this.loggerName != null && this.loggerName.length() > 0) {
 			this.hasco.setLoggerName(this.loggerName + ".hasco");

@@ -31,7 +31,7 @@ configure(subprojects.findAll()) {
 
 	//Dependencies for all(!) projects
 	dependencies {
-	
+
 		// Apache Commons Lang3
 		compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.6'
 

@@ -98,4 +98,8 @@
 	<logger name="de.upb.crc901.services.core">
 		<level value="warn" />
 	</logger>
+	
+	<logger name="de.upb.crc901.automl.metamining.similaritymeasures">
+		<level value="debug" />
+	</logger>
 </log4j:configuration>
