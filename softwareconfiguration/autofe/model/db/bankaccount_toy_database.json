@@ -133,5 +133,10 @@
       "toTableName": "Product",
       "commonAttributeName": "OrderId"
     }
-  ]
+  ],
+  "jdbcDriver": "sqlite",
+  "jdbcUrl" : "model/db/bankaccount_toy_database.db",
+  "jdbcUsername" : "",
+  "jdbcPassword" : ""
+
 }
