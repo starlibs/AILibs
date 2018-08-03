@@ -164,10 +164,10 @@ public class MLPlanMySQLConnector extends MySQLExperimentDatabaseHandle {
 
 		Classifier classifier = getClassifierOfRun(runId);
 
-		if (!(classifier instanceof MLPlan)) {
+		if (!(classifier instanceof MLPlanWEKAClassifier)) {
 			throw new UnsupportedOperationException("Currently no support for logging results for classifiers of class " + classifier.getClass().getName());
 		}
-		Classifier chosenModel = ((MLPlan) classifier).getSelectedClassifier();
+		Classifier chosenModel = ((MLPlanWEKAClassifier) classifier).getSelectedClassifier();
 		if (chosenModel instanceof MLPipeline)
 			addResultEntry(runId, (MLPipeline) chosenModel, score);
 		else if (chosenModel instanceof MLServicePipeline)

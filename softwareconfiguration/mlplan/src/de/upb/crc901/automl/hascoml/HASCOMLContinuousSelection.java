@@ -23,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.upb.crc901.automl.PreferenceBasedNodeEvaluator;
-import de.upb.crc901.automl.hascowekaml.HASCOForWekaML;
+import de.upb.crc901.automl.hascowekaml.HASCOClassificationML;
 import hasco.core.HASCO;
 import hasco.core.HASCOFD;
 import hasco.query.Factory;
@@ -44,7 +44,7 @@ public class HASCOMLContinuousSelection<C> implements IObservableGraphAlgorithm<
 
 	// debugging tools
 	private String loggerName;
-	private Logger logger = LoggerFactory.getLogger(HASCOForWekaML.class);
+	private Logger logger = LoggerFactory.getLogger(HASCOClassificationML.class);
 
 	class SelectionPhaseEval implements Runnable {
 		private HASCOMLContinuousSelectionSolution<C> solution;

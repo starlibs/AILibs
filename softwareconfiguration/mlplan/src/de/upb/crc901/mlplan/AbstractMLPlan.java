@@ -1,4 +1,4 @@
-package de.upb.crc901.automl.hascoml;
+package de.upb.crc901.mlplan;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import de.upb.crc901.automl.hascowekaml.HASCOClassificationML;
 import de.upb.crc901.automl.hascowekaml.HASCOClassificationML.HASCOClassificationMLSolution;
+import de.upb.crc901.automl.pipeline.ClassifierFactory;
 import hasco.model.Component;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.sets.SetUtil;
@@ -31,12 +32,12 @@ import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.logging.LoggerUtil;
 import jaicore.ml.WekaUtil;
 import jaicore.ml.evaluation.ClassifierEvaluator;
-import jaicore.ml.evaluation.MonteCarloCrossValidationEvaluator;
-import jaicore.ml.evaluation.MulticlassEvaluator;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;
+import jaicore.search.algorithms.interfaces.ISolutionEvaluator;
 import jaicore.search.algorithms.standard.core.INodeEvaluator;
 import jaicore.search.algorithms.standard.uncertainty.OversearchAvoidanceConfig;
+import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
@@ -47,11 +48,17 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 
-@SuppressWarnings("serial")
-public class HASCOMLTwoPhaseSelection extends AbstractClassifier
+public abstract class AbstractMLPlan extends AbstractClassifier
 		implements Classifier, OptionHandler, IObservableGraphAlgorithm<TFDNode, String>, ILoggingCustomizable {
-	/* logging */
-	private Logger logger = LoggerFactory.getLogger(HASCOMLTwoPhaseSelection.class);
+
+	/**
+	 * Automatically generated serial version UID.
+	 */
+	private static final long serialVersionUID = 3279063995384883980L;
+	/**
+	 * Logger for controlled outputs.
+	 */
+	private Logger logger = LoggerFactory.getLogger(AbstractMLPlan.class);
 	private String loggerName;
 
 	/* configuration variables */
@@ -71,7 +78,9 @@ public class HASCOMLTwoPhaseSelection extends AbstractClassifier
 	/* output variables */
 	private Classifier selectedClassifier;
 
-	public HASCOMLTwoPhaseSelection(final File configurationFile) {
+	private ClassifierEvaluator selectionPhaseEvaluator = null;
+
+	public AbstractMLPlan(final File configurationFile) {
 		super();
 		if (configurationFile == null || !configurationFile.exists()) {
 			throw new IllegalArgumentException(
@@ -80,76 +89,84 @@ public class HASCOMLTwoPhaseSelection extends AbstractClassifier
 		this.hasco = new HASCOClassificationML(configurationFile);
 	}
 
+	/**
+	 * @param classifierEvaluator
+	 *            The classifier evaluator that shall be used during search.
+	 */
+	protected void setClassifierEvaluatorForSearch(final ClassifierEvaluator classifierEvaluator) {
+		this.hasco.setClassifierEvaluator(classifierEvaluator);
+	}
+
+	/**
+	 * @param classifierFactory
+	 *            The classifier factory to compile composition instances into
+	 *            classifiers.
+	 */
+	protected void setClassifierFactory(final ClassifierFactory classifierFactory) {
+		this.hasco.setClassifierFactory(classifierFactory);
+	}
+
+	/**
+	 * @param preferredNodeEvaluator
+	 *            The preferred node evaluator that shall be used in the first
+	 *            place.
+	 */
+	protected void setPreferredNodeEvaluator(final INodeEvaluator<TFDNode, Double> preferredNodeEvaluator) {
+		this.hasco.setPreferredNodeEvaluator(preferredNodeEvaluator);
+	}
+
+	/**
+	 * @param selectionPhaseEvaluator
+	 *            The classifier evaluator that shall be used during selection
+	 *            phase.
+	 */
+	protected void setSelectionPhaseEvaluator(final ClassifierEvaluator selectionPhaseEvaluator) {
+		this.selectionPhaseEvaluator = selectionPhaseEvaluator;
+	}
+
 	@Override
 	public void buildClassifier(final Instances data) throws Exception {
 		this.timeOfStart = System.currentTimeMillis();
 		this.logger.info("Starting ML-Plan with timeout {}s, and a portion of {} for the second phase.",
 				this.timeoutInS, this.portionOfDataForPhase2);
 
-		/* split data set */
-		Instances dataForSearch;
-		Instances dataPreservedForSelection;
-		if (this.portionOfDataForPhase2 > 0) {
-			List<Instances> split = WekaUtil.realizeSplit(data,
-					WekaUtil.getArbitrarySplit(data, new Random(this.randomSeed), this.portionOfDataForPhase2));
-			dataForSearch = split.get(1);
-			dataPreservedForSelection = split.get(0);
-			if (dataForSearch.isEmpty()) {
-				throw new IllegalStateException(
-						"Cannot search on no data and select on " + dataPreservedForSelection.size() + " data points.");
-			}
-		} else {
-			dataForSearch = data;
-			dataPreservedForSelection = null;
-		}
-
-		this.logger.info(
-				"Creating search with a data split {}/{} for search/selection, which yields effectively a split of size:  {}/{}",
-				1 - this.portionOfDataForPhase2, this.portionOfDataForPhase2, dataForSearch.size(),
-				dataPreservedForSelection != null ? dataPreservedForSelection.size() : 0);
-
-		/*
-		 * we allow CPUs-1 threads for node evaluation. Setting the timeout evaluator to
-		 * null means to really prune all those
-		 */
-		if (this.numberOfCPUs < 1) {
-			throw new IllegalStateException("Cannot generate search where number of CPUs is " + this.numberOfCPUs);
+		if (this.selectionPhaseEvaluator == null) {
+			throw new IllegalArgumentException("The solution evaluator for the selection phase has not been set.");
 		}
 
 		/* phase 1: run HASCO to gather solutions */
-		// search.setTimeoutForComputationOfF(this.timeoutPerNodeFComputation, n ->
-		// null);
+		// search.setTimeoutForComputationOfF(timeoutPerNodeFComputation, n -> null);
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
 				try {
 					while (!Thread.interrupted()) {
 						Thread.sleep(100);
-						int timeElapsed = (int) (System.currentTimeMillis()
-								- HASCOMLTwoPhaseSelection.this.timeOfStart);
-						int timeRemaining = HASCOMLTwoPhaseSelection.this.timeoutInS * 1000 - timeElapsed;
-						if (HASCOMLTwoPhaseSelection.this.shouldSearchTerminate(timeRemaining)) {
-							HASCOMLTwoPhaseSelection.this.hasco.cancel();
+						int timeElapsed = (int) (System.currentTimeMillis() - AbstractMLPlan.this.timeOfStart);
+						int timeRemaining = AbstractMLPlan.this.timeoutInS * 1000 - timeElapsed;
+						if (AbstractMLPlan.this.shouldSearchTerminate(timeRemaining)) {
+							AbstractMLPlan.this.hasco.cancel();
 							return;
 						}
 					}
 				} catch (InterruptedException e) {
 				}
+
 			}
 		}, "Phase 1 time bound observer").start();
 		this.logger.info("Now invoking HASCO to gather solutions for {}s", this.timeoutInS);
-		this.hasco.setTimeoutForSingleFEvaluation(this.timeoutPerNodeFComputation);
+
 		this.hasco.gatherSolutions(this.timeoutInS * 1000);
+
 		this.logger.info("HASCO has finished. {} solutions were found.", this.hasco.getFoundClassifiers().size());
 		if (this.hasco.getFoundClassifiers().isEmpty()) {
 			System.err.println("No model built by HASCO");
 			return;
 		}
 
+		System.out.println("Enter phase 2");
 		/* phase 2: select model */
-		MonteCarloCrossValidationEvaluator solutionEvaluatorInPhase2 = new MonteCarloCrossValidationEvaluator(
-				new MulticlassEvaluator(new Random(3)), 10, data, .7f);
-		this.selectedClassifier = this.selectModel(solutionEvaluatorInPhase2);
+		this.selectedClassifier = this.selectModel(this.selectionPhaseEvaluator);
 		this.timeoutPerNodeFComputation = 1000 * (this.timeoutInS == 60 ? 15 : 300);
 
 		/* train selected model on all data */
@@ -164,30 +181,6 @@ public class HASCOMLTwoPhaseSelection extends AbstractClassifier
 	@Override
 	public double[] distributionForInstance(final Instance instance) throws Exception {
 		return this.selectedClassifier.distributionForInstance(instance);
-	}
-
-	@Override
-	public Capabilities getCapabilities() {
-		Capabilities result = super.getCapabilities();
-		result.disableAll();
-
-		// attributes
-		result.enable(Capability.NOMINAL_ATTRIBUTES);
-		result.enable(Capability.NUMERIC_ATTRIBUTES);
-		result.enable(Capability.DATE_ATTRIBUTES);
-		result.enable(Capability.STRING_ATTRIBUTES);
-		result.enable(Capability.RELATIONAL_ATTRIBUTES);
-		result.enable(Capability.MISSING_VALUES);
-
-		// class
-		result.enable(Capability.NOMINAL_CLASS);
-		result.enable(Capability.NUMERIC_CLASS);
-		result.enable(Capability.DATE_CLASS);
-		result.enable(Capability.MISSING_CLASS_VALUES);
-
-		// instances
-		result.setMinimumNumberInstances(1);
-		return result;
 	}
 
 	@Override
@@ -256,7 +249,6 @@ public class HASCOMLTwoPhaseSelection extends AbstractClassifier
 	}
 
 	private synchronized List<HASCOClassificationMLSolution> getSelectionForPhase2(final int remainingTime) {
-
 		if (this.numberOfConsideredSolutions < 1) {
 			throw new UnsupportedOperationException(
 					"Cannot determine candidates for phase 2 if their number is set to a value less than 1. Here, it has been set to "
@@ -327,8 +319,7 @@ public class HASCOMLTwoPhaseSelection extends AbstractClassifier
 	}
 
 	private int getInSearchEvaluationTimeOfSolutionSet(final Collection<HASCOClassificationMLSolution> solutions) {
-		return this.hasco.getFoundClassifiers().stream().map(x -> x.getTimeToComputeScore()).reduce(0, (a, b) -> a + b)
-				.intValue();
+		return solutions.stream().map(x -> x.getTimeToComputeScore()).reduce(0, (a, b) -> a + b).intValue();
 	}
 
 	public int getExpectedRuntimeForPhase2ForAGivenPool(final Collection<HASCOClassificationMLSolution> solutions) {
@@ -342,9 +333,10 @@ public class HASCOMLTwoPhaseSelection extends AbstractClassifier
 		double conservativenessFactor = 1;
 		int runtime = (int) (conservativenessFactor * estimateForPhase2IfSequential
 				* this.numberOfMCIterationsPerSolutionInSelectionPhase * cacheFactor / estimateForAvailableCores);
-		this.logger.debug("Expected runtime is {} = {} * {} * {} * {} / {}", runtime, conservativenessFactor,
-				estimateForPhase2IfSequential, this.numberOfMCIterationsPerSolutionInSelectionPhase, cacheFactor,
-				estimateForAvailableCores);
+		this.logger.debug("Expected runtime is {} = {} * {} * {} * {} / {} for a pool of size {}", runtime,
+				conservativenessFactor, estimateForPhase2IfSequential,
+				this.numberOfMCIterationsPerSolutionInSelectionPhase, cacheFactor, estimateForAvailableCores,
+				solutions.size());
 		return runtime;
 	}
 
@@ -422,29 +414,28 @@ public class HASCOMLTwoPhaseSelection extends AbstractClassifier
 					public void run() {
 						int taskId = -1;
 						try {
-							int indexOfCurrentlyChosenModel = HASCOMLTwoPhaseSelection.this
+							int indexOfCurrentlyChosenModel = AbstractMLPlan.this
 									.getClassifierThatWouldCurrentlyBeSelectedWithinPhase2(ensembleToSelectFrom, stats,
 											false);
 							HASCOClassificationMLSolution currentlyChosenSolution = ensembleToSelectFrom
 									.get(indexOfCurrentlyChosenModel);
 							int trainingTimeForChosenModelInsideSearch = currentlyChosenSolution
 									.getTimeToComputeScore();
+
+							/* we assume a linear growth */
 							int estimatedOverallTrainingTimeForChosenModel = (int) Math
 									.round(trainingTimeForChosenModelInsideSearch
-											/ (1 - HASCOMLTwoPhaseSelection.this.portionOfDataForPhase2) / .7); // we
-							// assume a
-							// linear
-							// growth
+											/ (1 - AbstractMLPlan.this.portionOfDataForPhase2) / .7);
+
 							int expectedTrainingTimeOfThisModel = (int) Math.round(c.getTimeToComputeScore() / .7);
-							if (HASCOMLTwoPhaseSelection.this.timeoutPerNodeFComputation > 0) {
-								taskId = ts
-										.interruptMeAfterMS(HASCOMLTwoPhaseSelection.this.timeoutPerNodeFComputation);
+							if (AbstractMLPlan.this.timeoutPerNodeFComputation > 0) {
+								taskId = ts.interruptMeAfterMS(AbstractMLPlan.this.timeoutPerNodeFComputation);
 							}
-							if (HASCOMLTwoPhaseSelection.this.timeoutInS > 0) {
+							if (AbstractMLPlan.this.timeoutInS > 0) {
 								int remainingTime = (int) (timestampOfDeadline - System.currentTimeMillis());
 								if (estimatedOverallTrainingTimeForChosenModel
 										+ expectedTrainingTimeOfThisModel >= remainingTime) {
-									HASCOMLTwoPhaseSelection.this.logger.info(
+									AbstractMLPlan.this.logger.info(
 											"Not evaluating solutiom {} anymore, because expected time is {}, overall training time of currently selected solution is {}. This adds up to {}, which exceeds the remaining time of {}!",
 											c, expectedTrainingTimeOfThisModel,
 											estimatedOverallTrainingTimeForChosenModel, expectedTrainingTimeOfThisModel
@@ -454,12 +445,12 @@ public class HASCOMLTwoPhaseSelection extends AbstractClassifier
 								}
 							}
 							Classifier clone = WekaUtil.cloneClassifier(c.getSolution());
-							double selectionScore = evaluator.evaluate(clone);
+							double selectionScore = AbstractMLPlan.this.selectionPhaseEvaluator.evaluate(clone);
 							synchronized (statsForThisCandidate) {
 								statsForThisCandidate.addValue(selectionScore);
 							}
 						} catch (Throwable e) {
-							HASCOMLTwoPhaseSelection.this.logger.error(
+							AbstractMLPlan.this.logger.error(
 									"Observed an exeption when trying to evaluate a candidate in the selection phase.\n{}",
 									LoggerUtil.getExceptionInfo(e));
 						} finally {
@@ -472,9 +463,7 @@ public class HASCOMLTwoPhaseSelection extends AbstractClassifier
 				});
 			}
 		}
-
 		try {
-
 			/* now wait for results */
 			this.logger.info("Waiting for termination of threads that compute the selection scores.");
 			sem.acquire(ensembleToSelectFrom.size() * this.numberOfMCIterationsPerSolutionInSelectionPhase);
@@ -484,9 +473,12 @@ public class HASCOMLTwoPhaseSelection extends AbstractClassifier
 			this.logger.debug("Shutting down thread pool");
 			pool.shutdownNow();
 			pool.awaitTermination(5, TimeUnit.SECONDS);
+
 			if (!pool.isShutdown()) {
 				this.logger.warn("Thread pool is not shut down yet!");
 			}
+
+			ts.close();
 
 			/* set chosen model */
 			if (ensembleToSelectFrom.isEmpty()) {
@@ -543,16 +535,12 @@ public class HASCOMLTwoPhaseSelection extends AbstractClassifier
 		return this.timeoutPerNodeFComputation;
 	}
 
-	public void setTimeoutPerNodeFComputation(final int timeoutPerNodeFComputation) {
-		this.timeoutPerNodeFComputation = timeoutPerNodeFComputation;
+	public void setTimeoutPerNodeFComputationInMS(final int timeoutPerNodeFComputationInMS) {
+		this.timeoutPerNodeFComputation = timeoutPerNodeFComputationInMS;
 	}
 
 	public int getRandomSeed() {
 		return this.randomSeed;
-	}
-
-	public void setRandomSeed(final int randomSeed) {
-		this.randomSeed = randomSeed;
 	}
 
 	public int getNumberOfCPUs() {
@@ -644,4 +632,37 @@ public class HASCOMLTwoPhaseSelection extends AbstractClassifier
 	public Collection<Component> getComponents() {
 		return this.hasco.getComponents();
 	}
+
+	public GraphGenerator<TFDNode, String> getGraphGenerator() {
+		return this.hasco.getGraphGenerator();
+	}
+
+	public ISolutionEvaluator<TFDNode, Double> getSolutionEvaluator() {
+		return this.hasco.getSolutionEvaluator();
+	}
+
+	@Override
+	public Capabilities getCapabilities() {
+		Capabilities result = super.getCapabilities();
+		result.disableAll();
+
+		// attributes
+		result.enable(Capability.NOMINAL_ATTRIBUTES);
+		result.enable(Capability.NUMERIC_ATTRIBUTES);
+		result.enable(Capability.DATE_ATTRIBUTES);
+		result.enable(Capability.STRING_ATTRIBUTES);
+		result.enable(Capability.RELATIONAL_ATTRIBUTES);
+		result.enable(Capability.MISSING_VALUES);
+
+		// class
+		result.enable(Capability.NOMINAL_CLASS);
+		result.enable(Capability.NUMERIC_CLASS);
+		result.enable(Capability.DATE_CLASS);
+		result.enable(Capability.MISSING_CLASS_VALUES);
+
+		// instances
+		result.setMinimumNumberInstances(1);
+		return result;
+	}
+
 }

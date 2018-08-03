@@ -24,7 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.upb.crc901.automl.PreferenceBasedNodeEvaluator;
-import de.upb.crc901.automl.hascowekaml.HASCOForWekaML;
+import de.upb.crc901.automl.hascowekaml.HASCOClassificationML;
 import de.upb.crc901.automl.pipeline.service.MLServicePipeline;
 import hasco.core.HASCO.HASCOSolutionIterator;
 import hasco.core.HASCOFD;
@@ -42,7 +42,7 @@ import jaicore.search.algorithms.standard.core.INodeEvaluator;
 public class HASCOForCombinedML implements IObservableGraphAlgorithm<TFDNode, String>, ILoggingCustomizable {
 
 	private String loggerName;
-	private Logger logger = LoggerFactory.getLogger(HASCOForWekaML.class);
+	private Logger logger = LoggerFactory.getLogger(HASCOClassificationML.class);
 	private static final HASCOForCombinedMLConfig CONFIG = ConfigCache.getOrCreate(HASCOForCombinedMLConfig.class);
 
 	private Lock selectedSolutionsLock = new ReentrantLock();
