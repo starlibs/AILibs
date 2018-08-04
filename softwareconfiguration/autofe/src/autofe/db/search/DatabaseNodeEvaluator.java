@@ -6,6 +6,9 @@ import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import autofe.db.model.database.AbstractFeature;
+import autofe.db.model.database.BackwardFeature;
+import autofe.db.model.database.Database;
 import autofe.db.sql.DatabaseConnector;
 import autofe.db.sql.DatabaseConnectorImpl;
 import autofe.db.util.DBUtils;
@@ -34,11 +37,14 @@ public class DatabaseNodeEvaluator implements INodeEvaluator<DatabaseNode, Doubl
 
 	private DatabaseGraphGenerator generator;
 
+	private Database db;
+
 	private Random random;
 
 	public DatabaseNodeEvaluator(DatabaseGraphGenerator generator) {
 		this.generator = generator;
-		this.databaseConnector = new DatabaseConnectorImpl(generator.getDatabase());
+		this.db = generator.getDatabase();
+		this.databaseConnector = new DatabaseConnectorImpl(db);
 		this.random = new Random(SEED);
 	}
 
@@ -77,8 +83,16 @@ public class DatabaseNodeEvaluator implements INodeEvaluator<DatabaseNode, Doubl
 													requiredNumberOfFeatures, node.getSelectedFeatures().size()));
 								} else if (node.getSelectedFeatures().size() < requiredNumberOfFeatures) {
 									return false;
+								} else {
+									// Check whether node contains intermediate features
+									for (AbstractFeature feature : node.getSelectedFeatures()) {
+										if (feature instanceof BackwardFeature
+												&& DBUtils.isIntermediate(((BackwardFeature) feature).getPath(), db)) {
+											return false;
+										}
+									}
+									return true;
 								}
-								return true;
 							}
 						};
 					}
@@ -106,7 +120,7 @@ public class DatabaseNodeEvaluator implements INodeEvaluator<DatabaseNode, Doubl
 
 	private double evaluateInstances(Instances instances) {
 		try {
-			return EvaluationUtils.performEnsemble(instances);
+			return EvaluationUtils.calculateCOCOForBatch(instances);
 		} catch (Exception e) {
 			throw new RuntimeException("Cannot evaluate instances", e);
 		}
