@@ -94,17 +94,19 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 	}
 
 	private void createForwardFeatureTable(ForwardFeature feature) throws SQLException {
-		Table targetTarget = DBUtils.getTargetTable(db);
+		Table targetTable = DBUtils.getTargetTable(db);
 		Table featureTable = DBUtils.getAttributeTable(feature.getParent(), db);
-		List<ForwardRelationship> joinRelations = DBUtils.getJoinTables(targetTarget, featureTable, db);
+		List<ForwardRelationship> joinRelations = DBUtils.getJoinTables(targetTable, featureTable, db);
+		LOG.debug("Join relations from {} to {} are {}", targetTable.getName(), featureTable.getName(), joinRelations);
 		String featureSql = SqlUtils.generateForwardSql(joinRelations, feature, db);
 		createTable(SqlUtils.getTableNameForFeature(feature), featureSql);
 	}
 
 	private void createBackwardFeatureTable(BackwardFeature feature) throws SQLException {
-		Table targetTarget = DBUtils.getTargetTable(db);
+		Table targetTable = DBUtils.getTargetTable(db);
 		Table toTable = DBUtils.getTableByName(feature.getPath().getLastTableName(), db);
-		List<ForwardRelationship> joinRelations = DBUtils.getJoinTables(targetTarget, toTable, db);
+		List<ForwardRelationship> joinRelations = DBUtils.getJoinTables(targetTable, toTable, db);
+		LOG.debug("Join relations from {} to {} are {}", targetTable.getName(), toTable.getName(), joinRelations);
 		String featureSql = SqlUtils.generateBackwardSql(joinRelations, feature, db);
 		createTable(SqlUtils.getTableNameForFeature(feature), featureSql);
 	}

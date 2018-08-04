@@ -58,16 +58,30 @@ public class SqlUtils {
 	}
 
 	public static String generateForwardSql(List<ForwardRelationship> joins, ForwardFeature feature, Database db) {
-		String startTableName = joins.get(0).getFromTableName();
-		String toTableName = joins.get(joins.size() - 1).getToTableName();
+		String startTableName, toTableName;
+		Table startTable;
 
-		ForwardRelationship firstJoin = joins.get(0);
-		firstJoin.setContext(db);
-		Attribute primaryKey = DBUtils.getPrimaryKey(firstJoin.getFrom(), db);
+		if (joins == null || joins.isEmpty()) {
+			// Feature is part of the target table
+			startTable = DBUtils.getAttributeTable(feature.getParent(), db);
+			startTableName = startTable.getName();
+			toTableName = startTableName;
+		} else {
+			// Feature is in another table
+			ForwardRelationship firstJoin = joins.get(0);
+			firstJoin.setContext(db);
+			startTable = firstJoin.getFrom();
+			startTableName = joins.get(0).getFromTableName();
+			toTableName = joins.get(joins.size() - 1).getToTableName();
+		}
 
+		Attribute primaryKey = DBUtils.getPrimaryKey(startTable, db);
 		StringBuilder sb = new StringBuilder();
 		sb.append(String.format("SELECT %1$s.%2$s, %3$s.%4$s FROM %1$s ", startTableName, primaryKey.getName(),
 				toTableName, feature.getParent().getName()));
+		if (joins == null) {
+			return sb.toString();
+		}
 		for (ForwardRelationship join : joins) {
 			sb.append(String.format("JOIN %1s ON (%1$s.%2$s = %3$s.%2$s)", join.getToTableName(),
 					join.getCommonAttributeName(), join.getFromTableName()));
