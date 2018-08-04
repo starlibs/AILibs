@@ -55,4 +55,8 @@ public class DatabaseGraphGenerator implements GraphGenerator<DatabaseNode, Stri
 
 	}
 
+	public Database getDatabase() {
+		return database;
+	}
+
 }
