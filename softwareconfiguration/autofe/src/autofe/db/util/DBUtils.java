@@ -227,7 +227,16 @@ public class DBUtils {
 				return attribute;
 			}
 		}
+		return null;
+	}
 
+	public static Attribute getTargetAttribute(Database db) {
+		Table targetTable = getTargetTable(db);
+		for (Attribute attribute : targetTable.getColumns()) {
+			if (attribute.isTarget()) {
+				return attribute;
+			}
+		}
 		return null;
 	}
 

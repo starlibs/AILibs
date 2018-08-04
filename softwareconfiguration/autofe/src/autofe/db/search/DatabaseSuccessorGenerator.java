@@ -78,6 +78,10 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 			if (node.containsAttribute(att)) {
 				continue;
 			}
+			// Do not select target attribute
+			if (att.isTarget()) {
+				continue;
+			}
 			if ((addOnlyLargerFeatures && att.compareTo(maxForwardAttribute) > 0) || !addOnlyLargerFeatures) {
 				List<AbstractFeature> extended = cloneFeatureList(currentFeatures);
 				extended.add(new ForwardFeature(att));
@@ -128,7 +132,7 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 		BackwardFeature intermediateFeature = getIntermediateFeature(node.getSelectedFeatures());
 
 		// Get last table
-		Table lastTable = DBUtils.getTableByName(intermediateFeature.getPath().getLastTableName(),db);
+		Table lastTable = DBUtils.getTableByName(intermediateFeature.getPath().getLastTableName(), db);
 		if (lastTable == null) {
 			lastTable = DBUtils.getAttributeTable(intermediateFeature.getParent(), db);
 		}
@@ -247,7 +251,7 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 			allPaths.add(prefix);
 			return;
 		}
-		Table from = DBUtils.getTableByName(prefix.getLastTableName(),db);
+		Table from = DBUtils.getTableByName(prefix.getLastTableName(), db);
 		if (from == null) {
 			from = DBUtils.getAttributeTable(feature.getParent(), db);
 		}

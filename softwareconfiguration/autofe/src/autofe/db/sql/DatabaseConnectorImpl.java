@@ -66,11 +66,17 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 					sql.append(" NATURAL JOIN ");
 				}
 			}
+			// join with target table to get the target attribute
+			Table targetTable = DBUtils.getTargetTable(db);
+			autofe.db.model.database.Attribute primaryKey = DBUtils.getPrimaryKey(targetTable, db);
+			autofe.db.model.database.Attribute target = DBUtils.getTargetAttribute(db);
+			sql.append(String.format(" NATURAL JOIN (SELECT %1$s, %2$s FROM %3$s)", primaryKey.getName(),
+					target.getName(), targetTable.getName()));
 
-			instances = setupInstances(features);
+			instances = setupInstances(features, target);
 			ResultSet rs = sqlAdapter.getResultsOfQuery(sql.toString());
 			while (rs.next()) {
-				Instance instance = createInstance(rs, features, instances);
+				Instance instance = createInstance(rs, features, target, instances);
 				instances.add(instance);
 			}
 			rs.close();
@@ -147,7 +153,7 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 		sqlAdapter.update(sql, Collections.emptyList());
 	}
 
-	private Instances setupInstances(List<AbstractFeature> features) {
+	private Instances setupInstances(List<AbstractFeature> features, autofe.db.model.database.Attribute target) {
 		ArrayList<Attribute> wekaAttributes = new ArrayList<>();
 		for (AbstractFeature feature : features) {
 			if (feature.getType() == AttributeType.TEXT) {
@@ -155,17 +161,29 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 			} else if (feature.getType() == AttributeType.NUMERIC) {
 				wekaAttributes.add(new Attribute(feature.getName(), false));
 			} else {
-				throw new RuntimeException("Unsupoorted attribute type " + feature.getType());
+				throw new RuntimeException("Unsupported attribute type " + feature.getType());
 			}
 		}
 
+		// Add target
+		if (target.getType() == AttributeType.TEXT) {
+			wekaAttributes.add(new Attribute(target.getName(), true));
+		} else if (target.getType() == AttributeType.NUMERIC) {
+			wekaAttributes.add(new Attribute(target.getName(), false));
+		} else {
+			throw new RuntimeException("Unsupported attribute type for target: " + target.getType());
+		}
+
 		// TODO: How to set name and capacity?
-		return new Instances("Name", wekaAttributes, 1000);
+		Instances instances = new Instances("Name", wekaAttributes, 1000);
+		instances.setClassIndex(wekaAttributes.size() - 1);
+
+		return instances;
 	}
 
-	private Instance createInstance(ResultSet rs, List<AbstractFeature> features, Instances instances)
-			throws SQLException {
-		Instance instance = new DenseInstance(features.size());
+	private Instance createInstance(ResultSet rs, List<AbstractFeature> features,
+			autofe.db.model.database.Attribute target, Instances instances) throws SQLException {
+		Instance instance = new DenseInstance(features.size() + 1);
 		instance.setDataset(instances);
 		for (int i = 0; i < features.size(); i++) {
 			AbstractFeature feature = features.get(i);
@@ -176,6 +194,15 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 			} else {
 				throw new RuntimeException("Unsupoorted attribute type " + feature.getType());
 			}
+		}
+
+		// Add class value (last column in result set)
+		if (target.getType() == AttributeType.TEXT) {
+			instance.setClassValue(rs.getString(features.size() + 2));
+		} else if (target.getType() == AttributeType.NUMERIC) {
+			instance.setClassValue(rs.getDouble(features.size() + 2));
+		} else {
+			throw new RuntimeException("Unsupoorted attribute type for target: " + target.getType());
 		}
 
 		return instance;
