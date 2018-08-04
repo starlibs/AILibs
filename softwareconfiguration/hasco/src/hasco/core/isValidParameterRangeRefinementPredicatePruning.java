@@ -87,25 +87,27 @@ public class isValidParameterRangeRefinementPredicatePruning implements Evaluabl
 		 * threshold epsilon, no more refinements will be allowed
 		 */
 		String paramName = ci.getComponent().getName() + "::" + param.getName();
-//		System.out.println("Composition Identifier in validpred: " + compositionIdentifier);
-		if (performanceKB.getNumSamples("test", compositionIdentifier) > this.minNumSamplesForImportanceEstimation) {
+		 if (performanceKB.getNumSamples("test", compositionIdentifier) >
+		 this.minNumSamplesForImportanceEstimation) {
+//		if (performanceKB.kDistinctSamplesAvailable("test", ci, minNumSamplesForImportanceEstimation)) {
 			try {
-//				System.out.println("Querying fANOVA with " + performanceKB.getNumSamples("test", compositionIdentifier)
-//						+ " samples!");
+				System.out.println("Querying fANOVA with " + performanceKB.getNumSamples("test", compositionIdentifier)
+						+ " samples!");
 				// for now, only consider parameter subsets of size at most 2
 				Set<String> importantParams = parameterImportanceEstimator.extractImportantParameters(ci,
 						this.importanceThreshold, 2, false);
-//				System.out.println("#Important params: " + importantParams.size());
+				// System.out.println("#Important params: " + importantParams.size());
 				// for (String parameterIndex : importantParams) {
 				// System.out.println("parameter " + parameterIndex);
 				// }
-//				System.out.println("important parameters: " + importantParams.toString());
+				// System.out.println("important parameters: " + importantParams.toString());
 				if (importantParams.contains(paramName)) {
-//					System.out.println("Parameter " + paramName + " is important and will be refined!");
+					// System.out.println("Parameter " + paramName + " is important and will be
+					// refined!");
 					;
-					
+
 				} else {
-//					System.out.println("Important params ip: " + importantParams);
+					// System.out.println("Important params ip: " + importantParams);
 					System.out.println("Parameter " + paramName
 							+ " is not important and will be discarded from further refinement!");
 					return new ArrayList<>();
@@ -115,7 +117,7 @@ public class isValidParameterRangeRefinementPredicatePruning implements Evaluabl
 				e.printStackTrace();
 			}
 		}
-		
+
 		/* determine refinements for numeric parameters */
 		if (param.isNumeric()) {
 			NumericParameterDomain currentlyActiveDomain = (NumericParameterDomain) paramDomains.get(param);

@@ -186,7 +186,7 @@ public class ComponentLoader {
               break;
             case "cat":
               if (parameter.get("values") != null && parameter.get("values").isTextual()) {
-                p = new Parameter(name, new CategoricalParameterDomain(Arrays.stream(stringParamValues[1].split(",")).collect(Collectors.toList())), stringParams[2]);
+                p = new Parameter(name, new CategoricalParameterDomain(Arrays.stream(stringParamValues[1].split(",")).collect(Collectors.toList())), stringParamValues[2]);
               } else {
                 List<String> values = new LinkedList<>();
 
@@ -201,7 +201,7 @@ public class ComponentLoader {
                 } else {
                   System.err.println("Warning: Categorical parameter " + name + " in component " + c.getName() + " without value list.");
                 }
-                p = new Parameter(name, new CategoricalParameterDomain(values), stringParams[2]);
+                p = new Parameter(name, new CategoricalParameterDomain(values), stringParamValues[2]);
               }
               break;
             default:

@@ -85,7 +85,7 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 //			this.initializeForests(benchmarkName);
 //		}
 //		forest = forests.get(pipelineIdentifier);
-		ExtendedRandomForest forest = new ExtendedRandomForest(1.0d, 16, new FeatureSpace(data));
+		ExtendedRandomForest forest = new ExtendedRandomForest(1.0d, 32, new FeatureSpace(data));
 		forest.buildClassifier(data);
 		forest.prepareForest(data);
 		if(!importanceDictionary.containsKey(pipelineIdentifier))

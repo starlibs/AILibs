@@ -40,8 +40,8 @@ public class isRefinementCompletedPredicateWithImportanceCheck implements Evalua
 
 	public isRefinementCompletedPredicateWithImportanceCheck(Collection<Component> components,
 			Map<Component, Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration,
-			PerformanceKnowledgeBase performanceKB, IParameterImportanceEstimator importanceEstimator, double importanceThreshold, int minNumSamples,
-			boolean useImportanceEstimation) {
+			PerformanceKnowledgeBase performanceKB, IParameterImportanceEstimator importanceEstimator,
+			double importanceThreshold, int minNumSamples, boolean useImportanceEstimation) {
 		super();
 		this.components = components;
 		this.refinementConfiguration = refinementConfiguration;
@@ -95,19 +95,23 @@ public class isRefinementCompletedPredicateWithImportanceCheck implements Evalua
 
 		Set<String> importantParams = new HashSet<String>();
 		for (Parameter param : component.getParameters()) {
-			String parameterIdentifier = component.getName() + "::" + param.getName();
+			String parameterIdentifier = ci.getComponent().getName() + "::" + param.getName();
 			importantParams.add(parameterIdentifier);
 		}
 
 		String compositionIdentifier = Util.getComponentNamesOfComposition(ci);
-//		System.out.println("Composition Identifier in completedpred: " + compositionIdentifier);
+		// System.out.println("Composition Identifier in completedpred: " +
+		// compositionIdentifier);
 		if (performanceKB.getNumSamples("test", compositionIdentifier) > this.minNumSamplesForImportanceEstimation) {
+//		if(performanceKB.kDistinctSamplesAvailable("test", ci, minNumSamplesForImportanceEstimation)) {
 			try {
+				System.out.println("Querying fANOVA with " + performanceKB.getNumSamples("test", compositionIdentifier)
+				+ " samples!");
 				// System.out.println("Querying fANOVA with " +
 				// performanceKB.getNumSamples("test", compositionIdentifier)
 				// + " samples!");
-				importantParams = importanceEstimator.extractImportantParameters(ci,
-						this.importanceThreshold, 2, false);
+				importantParams = importanceEstimator.extractImportantParameters(ci, this.importanceThreshold, 2,
+						false);
 				// If there are no parameters left that are estimated to be important, return
 				// true
 				if (importantParams.isEmpty())
@@ -116,15 +120,14 @@ public class isRefinementCompletedPredicateWithImportanceCheck implements Evalua
 				e.printStackTrace();
 			}
 		}
-		System.out.println("Important Parameters: " + importantParams.toString());
+//		System.out.println("Important Parameters: " + importantParams.toString());
 		for (Parameter param : component.getParameters()) {
 			String paramName = ci.getComponent().getName() + "::" + param.getName();
-			System.out.println("Checking whether parameter " + param.getName() + " for component " + component.getName() + " has completed its refinement");
-			if(!importantParams.contains(paramName)) {
-				System.out.println("Skipping parameter: " + paramName);
+//			System.out.println("Checking whether parameter " + param.getName() + " for component " + component.getName()
+//					+ " has completed its refinement");
+			if (!importantParams.contains(paramName)) {
 				continue;
 			} else {
-				System.out.println("Not skipping parameter: " + paramName);
 			}
 			String containerOfParam = componentParamContainers.get(param.getName());
 			String currentValueOfParam = componentParams.get(param.getName());
@@ -135,9 +138,6 @@ public class isRefinementCompletedPredicateWithImportanceCheck implements Evalua
 				double max = Double.parseDouble(interval.get(1));
 				double length = max - min;
 				if (length > refinementConfig.getIntervalLength()) {
-					System.out.println("Length = " + length);
-					System.out.println("Atomic Length = " + refinementConfig.getIntervalLength());
-					System.out.println("Returning false because of the length");					
 					return false;
 				}
 			} else if (param.getDefaultDomain() instanceof CategoricalParameterDomain) { // categorical params can be
@@ -152,7 +152,6 @@ public class isRefinementCompletedPredicateWithImportanceCheck implements Evalua
 						+ component.getName() + " with default domain " + param.getDefaultDomain()
 						+ " has been closed but no value has been set.";
 				if (!variableHasBeenSet && !variableHasBeenClosed) {
-					System.out.println("Returning false because it hasn't been set or closed");
 					return false;
 				}
 			} else
@@ -161,7 +160,6 @@ public class isRefinementCompletedPredicateWithImportanceCheck implements Evalua
 			// System.out.println("\t" + param.getName() + " (" +
 			// componentParams.get(param.getName()) + ") is still refinable.");
 		}
-		System.out.println("Returning true");
 		return true;
 	}
 }

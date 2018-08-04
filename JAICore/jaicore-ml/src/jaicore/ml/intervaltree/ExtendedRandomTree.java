@@ -248,9 +248,9 @@ public class ExtendedRandomTree extends RandomTree {
 		if (vU < 0.0d)
 			vU = 0.0d;
 		varianceOfSubsetIndividual.put(features, vU);
-//		double fraction = vU / totalVariance;
+//		 double fraction = vU / totalVariance;
 		return vU;
-//		return fraction;
+//		 return fraction;
 	}
 
 	/**
@@ -284,7 +284,8 @@ public class ExtendedRandomTree extends RandomTree {
 					prediction = leaf.getClassDistribution()[0];
 				} else if (mapForEmptyLeaves.containsKey(leaf)) {
 					prediction = mapForEmptyLeaves.get(leaf);
-//					System.out.println("Taking prediction " + prediction + " from map because distribution is null!");
+					// System.out.println("Taking prediction " + prediction + " from map because
+					// distribution is null!");
 				} else {
 					System.out.println("No prediction found anywhere!");
 					prediction = Double.NaN;
@@ -367,8 +368,8 @@ public class ExtendedRandomTree extends RandomTree {
 			for (int i = 0; i < children.length; i++) {
 				if (children[i].getClassDistribution() == null && children[i].getAttribute() == -1) {
 					mapForEmptyLeaves.put(children[i], node.getClassDistribution()[0]);
-					System.out
-							.println("Adding prediction " + node.getClassDistribution()[0] + " for empty leaf to map");
+//					System.out
+//							.println("Adding prediction " + node.getClassDistribution()[0] + " for empty leaf to map");
 				}
 				// important! if the children are leaves and do not contain a class
 				// distribution, treat this node as a leaf
@@ -520,7 +521,8 @@ public class ExtendedRandomTree extends RandomTree {
 			double prodOfIntervalSizes = 1.0d;
 			for (Observation obs : curObs) {
 				// System.out.print(obs.intervalSize + ", ");
-				prodOfIntervalSizes *= obs.intervalSize;
+				if (obs.intervalSize != 0)
+					prodOfIntervalSizes *= obs.intervalSize;
 			}
 			// System.out.println();
 			// System.out.println("marginal pred = \t" + marginalPrediction);
@@ -529,8 +531,12 @@ public class ExtendedRandomTree extends RandomTree {
 			// System.out.println("prod of int sizes = \t" + prodOfIntervalSizes);
 			// System.out.println("weight for var = \t" + prodOfIntervalSizes *
 			// sizeOfAllButFeatures);
-			if (!Double.isNaN(marginalPrediction))
+			if (!Double.isNaN(marginalPrediction)) {
+//				System.out.println("Size of all but features: " + sizeOfAllButFeatures);
+//				System.out.println("Prod of interval sizes: " + prodOfIntervalSizes);
 				stat.push(marginalPrediction, sizeOfAllButFeatures * prodOfIntervalSizes);
+
+			}
 			// weightedSum += marginalPrediction;
 			// weightedSumOfSquares += marginalPrediction * marginalPrediction;
 			// num++;
@@ -541,7 +547,7 @@ public class ExtendedRandomTree extends RandomTree {
 		// weightedSum);
 		// vU = weightedSumOfSquares - (weightedSum * weightedSum);
 		vU = stat.getVariancePopulaion();
-//		System.out.println("Variance: " + vU);
+		// System.out.println("Variance: " + vU);
 		varianceOfSubsetTotal.put(features, vU);
 		// System.out.println("Total var for \t\t\t" + features + ": " + vU);
 		return vU;
@@ -563,9 +569,9 @@ public class ExtendedRandomTree extends RandomTree {
 		for (int i = 0; i < this.featureSpace.getDimensionality(); i++) {
 			set.add(i);
 		}
-		System.out.println("Range size: " + this.featureSpace.getRangeSize());
+//		System.out.println("Range size: " + this.featureSpace.getRangeSize());
 		this.totalVariance = computeTotalVarianceOfSubset(set);
-//		System.out.println("trees total variance = " + this.totalVariance);
+		// System.out.println("trees total variance = " + this.totalVariance);
 	}
 
 	public void printObservations() {

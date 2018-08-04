@@ -30,6 +30,7 @@ import jaicore.basic.sets.PartialOrderedSet;
 import jaicore.ml.core.FeatureSpace;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.ProtectedProperties;
 
@@ -47,6 +48,7 @@ public class PerformanceKnowledgeBase {
 	/** This is map contains a String */
 	private Map<String, HashMap<String, List<Pair<ParameterConfiguration, Double>>>> performanceSamplesByIdentifier;
 	private Map<String, HashMap<String, Instances>> performanceInstancesByIdentifier;
+	private Map<String, HashMap<String, Integer>> numberCompletelyDistinctSamples;
 
 	/**
 	 * Inner helper class for managing parameter configurations easily.
@@ -88,6 +90,7 @@ public class PerformanceKnowledgeBase {
 		// this.performanceSamplesByIdentifier = new HashMap<String, HashMap<String,
 		// List<Pair<ParameterConfiguration, Double>>>>();
 		this.performanceInstancesByIdentifier = new HashMap<String, HashMap<String, Instances>>();
+		this.numberCompletelyDistinctSamples = new HashMap<String, HashMap<String, Integer>>();
 	}
 
 	public PerformanceKnowledgeBase() {
@@ -97,50 +100,24 @@ public class PerformanceKnowledgeBase {
 		// this.performanceSamplesByIdentifier = new HashMap<String, HashMap<String,
 		// List<Pair<ParameterConfiguration, Double>>>>();
 		this.performanceInstancesByIdentifier = new HashMap<String, HashMap<String, Instances>>();
+		this.numberCompletelyDistinctSamples = new HashMap<String, HashMap<String, Integer>>();
 	}
 
 	public void addPerformanceSample(String benchmarkName, ComponentInstance componentInstance, double score,
 			boolean addToDB) {
 		String identifier = Util.getComponentNamesOfComposition(componentInstance);
-		// if (performanceSamples.get(benchmarkName) == null) {
-		// HashMap<ComponentInstance, Double> newMap = new HashMap<ComponentInstance,
-		// Double>();
-		// newMap.put(componentInstance, score);
-		// performanceSamples.put(benchmarkName, newMap);
-		// } else {
-		// performanceSamples.get(benchmarkName).put(componentInstance, score);
-		// }
-		// if (performanceSamplesByIdentifier.get(benchmarkName) == null) {
-		// HashMap<String, List<Pair<ParameterConfiguration, Double>>> newMap = new
-		// HashMap<String, List<Pair<ParameterConfiguration, Double>>>();
-		// LinkedList<Pair<ParameterConfiguration, Double>> sampleList = new
-		// LinkedList<Pair<ParameterConfiguration, Double>>();
-		// sampleList.add(Pair.of(new ParameterConfiguration(componentInstance),
-		// score));
-		// newMap.put(identifier, new LinkedList<Pair<ParameterConfiguration,
-		// Double>>());
-		// performanceSamplesByIdentifier.put(benchmarkName, newMap);
-		// } else {
-		// if
-		// (performanceSamplesByIdentifier.get(benchmarkName).containsKey(identifier)) {
-		// performanceSamplesByIdentifier.get(benchmarkName).get(identifier)
-		// .add(Pair.of(new ParameterConfiguration(componentInstance), score));
-		// } else {
-		// performanceSamplesByIdentifier.get(benchmarkName).put(identifier,
-		// new LinkedList<Pair<ParameterConfiguration, Double>>());
-		// performanceSamplesByIdentifier.get(benchmarkName).get(identifier)
-		// .add(Pair.of(new ParameterConfiguration(componentInstance), score));
-		// }
-		// }
 
 		if (performanceInstancesByIdentifier.get(benchmarkName) == null) {
-			System.out.println("Creating new HashMap");
+//			System.out.println("Creating new HashMap");
 			HashMap<String, Instances> newMap = new HashMap<String, Instances>();
+			HashMap<String, Integer> newMap2 = new HashMap<String, Integer>();
 			performanceInstancesByIdentifier.put(benchmarkName, newMap);
+			numberCompletelyDistinctSamples.put(benchmarkName, newMap2);
+
 		}
 
 		if (!performanceInstancesByIdentifier.get(benchmarkName).containsKey(identifier)) {
-			System.out.println("Creating new Instances Object");
+//			System.out.println("Creating new Instances Object");
 			// Create Instances pipeline for this pipeline type
 			ParameterConfiguration parameterConfig = new ParameterConfiguration(componentInstance);
 			Instances instances = null;
@@ -185,50 +162,78 @@ public class PerformanceKnowledgeBase {
 			instances = new Instances("performance_samples", allAttributes, 16);
 			instances.setClass(scoreAttr);
 			performanceInstancesByIdentifier.get(benchmarkName).put(identifier, instances);
+			numberCompletelyDistinctSamples.get(benchmarkName).put(identifier, 0);
 		}
 
-		
-			// Add Instance for performance samples to corresponding Instances
-			System.out.println("Adding instance");
-			Instances instances = performanceInstancesByIdentifier.get(benchmarkName).get(identifier);
-			DenseInstance instance = new DenseInstance(instances.numAttributes());
-			ParameterConfiguration config = new ParameterConfiguration(componentInstance);
-			List<Pair<Parameter, String>> values = config.getValues();
-			for (int i = 0; i < instances.numAttributes() - 1; i++) {
-				Attribute attr = instances.attribute(i);
-				Parameter param = values.get(i).getLeft();
-				System.out.println("Adding vlaue " + values.get(i).getRight() + " for Parameter " + param);
-				if (param.isCategorical()) {
-					Enumeration<Object> e = attr.enumerateValues();
-					System.out.println("Values: ");
-					if (e == null) {
-						System.out.println("Enumeration is null");
-					} else {
-						while (e.hasMoreElements()) {
-							System.out.println(e.nextElement().toString());
-						}
-					}
-					String value = values.get(i).getRight();
-//					if (value.equals("default")) {
-//						System.out.println("Value is default!");
-//						value = (String) param.getDefaultValue();
-//						System.out.println("Default value is: " + value);
+		// Add Instance for performance samples to corresponding Instances
+//		System.out.println("Adding instance");
+		Instances instances = performanceInstancesByIdentifier.get(benchmarkName).get(identifier);
+		DenseInstance instance = new DenseInstance(instances.numAttributes());
+		ParameterConfiguration config = new ParameterConfiguration(componentInstance);
+		List<Pair<Parameter, String>> values = config.getValues();
+		for (int i = 0; i < instances.numAttributes() - 1; i++) {
+			Attribute attr = instances.attribute(i);
+			Parameter param = values.get(i).getLeft();
+//			System.out.println("Adding vlaue " + values.get(i).getRight() + " for Parameter " + param);
+			if (param.isCategorical()) {
+//				Enumeration<Object> e = attr.enumerateValues();
+//				System.out.println("Values: ");
+//				if (e == null) {
+//					System.out.println("Enumeration is null");
+//				} else {
+//					while (e.hasMoreElements()) {
+//						System.out.println(e.nextElement().toString());
 //					}
-					instance.setValue(attr, value);
-				} else if (param.isNumeric()) {
-//					String value = values.get(i).getRight();
-//					if (value.equals("default"))
-//						value = (String) param.getDefaultValue();
-					double finalValue = Double.parseDouble(values.get(i).getRight());
-					instance.setValue(attr, finalValue);
-					// System.out.println("bounds: [" + attr.getLowerNumericBound() + "," +
-					// attr.getUpperNumericBound() + "]");
-				}
+//				}
+				String value = values.get(i).getRight();
+				// if (value.equals("default")) {
+				// System.out.println("Value is default!");
+				// value = (String) param.getDefaultValue();
+				// System.out.println("Default value is: " + value);
+				// }
+				instance.setValue(attr, value);
+			} else if (param.isNumeric()) {
+				// String value = values.get(i).getRight();
+				// if (value.equals("default"))
+				// value = (String) param.getDefaultValue();
+				double finalValue = Double.parseDouble(values.get(i).getRight());
+				instance.setValue(attr, finalValue);
+				// System.out.println("bounds: [" + attr.getLowerNumericBound() + "," +
+				// attr.getUpperNumericBound() + "]");
 			}
-			Attribute scoreAttr = instances.classAttribute();
-			instance.setValue(scoreAttr, score);
-			System.out.println("Adding instance: " + instance.toString());
-			performanceInstancesByIdentifier.get(benchmarkName).get(identifier).add(instance);
+		}
+		Attribute scoreAttr = instances.classAttribute();
+		instance.setValue(scoreAttr, score);
+		// System.out.println("Adding instance: " + instance.toString());
+		// int count =
+		// numberCompletelyDistinctSamples.get(benchmarkName).get(identifier);
+		// System.out.println("Current distinct count: " + count);
+		// boolean distinctFromAll = true;
+		// for(Instance compare : instances) {
+		// for(int i = 0; i < instances.numAttributes(); i++) {
+		// System.out.println("Comparing " + instance + "\n and " + compare);
+		// if((instances.attribute(i).numValues() != 0) &&
+		// (instances.attribute(i).numValues() < count))
+		// continue;
+		// if(instance.value(i)==compare.value(i)) {
+		// distinctFromAll = false;
+		// }
+		// }
+		// }
+		int min = Integer.MAX_VALUE;
+		for (int k = 0; k < instances.numAttributes(); k++) {
+			if (instances.attribute(k).isNominal() || instances.attribute(k).isString())
+				continue;
+			if (instances.numDistinctValues(k) < min)
+				min = instances.numDistinctValues(k);
+		}
+		// System.out.println("min distinct value for attributes: " + min);
+
+		// if(distinctFromAll)
+		// numberCompletelyDistinctSamples.get(benchmarkName).put(identifier, count+1);
+		// System.out.println("New distinct count: " +
+		// numberCompletelyDistinctSamples.get(benchmarkName).get(identifier));
+		performanceInstancesByIdentifier.get(benchmarkName).get(identifier).add(instance);
 
 		if (addToDB)
 			this.addPerformanceSampleToDB(benchmarkName, componentInstance, score);
@@ -296,26 +301,90 @@ public class PerformanceKnowledgeBase {
 		}
 	}
 
-	// public int getNumSamples(String benchmarkName, String identifier) {
-	// if (performanceSamplesByIdentifier.containsKey(benchmarkName)) {
-	// if
-	// (performanceSamplesByIdentifier.get(benchmarkName).containsKey(identifier))
-	// return
-	// performanceSamplesByIdentifier.get(benchmarkName).get(identifier).size();
-	// else
-	// return 0;
-	// } else
-	// return 0;
-	// }
-
+	/**
+	 * Returns the number of samples for the given benchmark name and pipeline
+	 * identifier.
+	 * 
+	 * @param benchmarkName
+	 * @param identifier
+	 * @return
+	 */
 	public int getNumSamples(String benchmarkName, String identifier) {
-		if(!this.performanceInstancesByIdentifier.containsKey(benchmarkName))
+		if (!this.performanceInstancesByIdentifier.containsKey(benchmarkName))
 			return 0;
-		if(!this.performanceInstancesByIdentifier.get(benchmarkName).containsKey(identifier))
+		if (!this.performanceInstancesByIdentifier.get(benchmarkName).containsKey(identifier))
 			return 0;
-		
+
 		return this.performanceInstancesByIdentifier.get(benchmarkName).get(identifier).numInstances();
 	}
+
+	/**
+	 * Returns the number of significant samples for the given benchmark name and
+	 * pipeline identifier. Significant means, that
+	 * 
+	 * @param benchmarkName
+	 * @param identifier
+	 * @return
+	 */
+	public int getNumSignificantSamples(String benchmarkName, String identifier) {
+		if (!this.performanceInstancesByIdentifier.containsKey(benchmarkName))
+			return 0;
+		if (!this.performanceInstancesByIdentifier.get(benchmarkName).containsKey(identifier))
+			return 0;
+		Instances instances = this.performanceInstancesByIdentifier.get(benchmarkName).get(identifier);
+		int numDistinctValues = 1;
+		for (int i = 0; i < instances.numInstances(); i++) {
+			for (int j = 0; j < i; j++) {
+				boolean allValuesDistinct = true;
+				for (int k = 0; k < instances.numAttributes(); k++) {
+					if (instances.get(i).value(k) == instances.get(j).value(k)) {
+						allValuesDistinct = false;
+					}
+				}
+				if (allValuesDistinct)
+					numDistinctValues++;
+			}
+		}
+		return numDistinctValues;
+	}
+
+	// /**
+	// * Checks whether there is a specific amount of samples available, that are
+	// * pairwise distinct in all attributes.
+	// *
+	// * @param benchmarkName
+	// * @param identifier
+	// * @param numSamplesRequired
+	// * @return
+	// */
+	// public boolean hasSignificantSamples(String benchmarkName, String identifier,
+	// int numSamplesRequired) {
+	// if (!this.performanceInstancesByIdentifier.containsKey(benchmarkName))
+	// return false;
+	// if
+	// (!this.performanceInstancesByIdentifier.get(benchmarkName).containsKey(identifier))
+	// return false;
+	// Instances instances =
+	// this.performanceInstancesByIdentifier.get(benchmarkName).get(identifier);
+	// int numDistinctValues = 1;
+	// for (int i = 0; i < instances.numInstances(); i++) {
+	// for (int j = 0; j < i; j++) {
+	// boolean allValuesDistinct = true;
+	// for (int k = 0; k < instances.numAttributes(); k++) {
+	// int temp = numSamplesRequired;
+	// if(instances.attribute(k).isNominal() && instances.attribute(k).numValues() <
+	// numSamplesRequired)
+	// temp = instances.attribute(k).numValues();
+	// if (instances.get(i).value(k) == instances.get(j).value(k)) {
+	// allValuesDistinct = false;
+	// }
+	// }
+	// if (allValuesDistinct)
+	// numDistinctValues++;
+	// }
+	// }
+	// return numDistinctValues;
+	// }
 
 	public void loadPerformanceSamplesFromDB() {
 		try {
@@ -347,8 +416,31 @@ public class PerformanceKnowledgeBase {
 	 * @param k
 	 * @return
 	 */
-	public boolean kDistinctSamplesAvailable(String benchmarkName, ComponentInstance composition, int k) {
-		boolean result = false;
+	public boolean kDistinctSamplesAvailable(String benchmarkName, ComponentInstance composition, int minNum) {
+		String identifier = Util.getComponentNamesOfComposition(composition);
+		if (!this.performanceInstancesByIdentifier.containsKey(benchmarkName))
+			return false;
+		if (!this.performanceInstancesByIdentifier.get(benchmarkName).containsKey(identifier))
+			return false;
+		boolean result = true;
+		Instances instances = performanceInstancesByIdentifier.get(benchmarkName).get(identifier);
+		for (int i = 0; i < instances.numAttributes(); i++) {
+			// if the attribute is nominal or string but the number of values is smaller than k, skip it
+			if(instances.attribute(i).numValues()>0 && instances.attribute(i).numValues()<minNum) {
+//				System.out.println("Skipping attribute " + instances.attribute(i));
+				if(instances.numDistinctValues(i) < instances.attribute(i).numValues())
+					return false;
+			}
+			else if(instances.attribute(i).getUpperNumericBound() <= instances.attribute(i).getLowerNumericBound()) {
+//				System.out.println("Skipping Attribute becasue of bounds: " + instances.attribute(i));
+				continue;
+			}
+			else if(instances.numDistinctValues(i) < minNum) {
+//				System.out.println("Attribute values: " + instances.numDistinctValues(i));
+//				System.out.println("Required: " + minNum);
+				return false;
+			}
+		}
 
 		return result;
 	}
