@@ -113,6 +113,7 @@ public class DatabaseNodeEvaluator implements INodeEvaluator<DatabaseNode, Doubl
 		DatabaseNode goalNode = solution.get(solution.size() - 1);
 		LOG.info("Result of random completion is node with features : {}", goalNode.getSelectedFeatures());
 		Instances instances = databaseConnector.getInstances(goalNode.getSelectedFeatures());
+		LOG.debug(instances.toString());
 		double result = evaluateInstances(instances);
 		LOG.debug("Evaluation result is {}", result);
 		return result;

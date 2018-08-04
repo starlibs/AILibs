@@ -54,7 +54,7 @@ public class BackwardFeature extends AbstractFeature {
 				updatedName = String.format("%s.%s(%s)", pathElement.getT().getFromTableName(), pathElement.getU(),
 						updatedName);
 			} else if (pathElement.getT() instanceof ForwardRelationship) {
-				updatedName = String.format("%s<-(%s)", pathElement.getT().getFromTableName(), updatedName);
+				updatedName = String.format("%s.(%s)", pathElement.getT().getFromTableName(), updatedName);
 			}
 		}
 
@@ -64,7 +64,7 @@ public class BackwardFeature extends AbstractFeature {
 
 	@Override
 	public AttributeType getType() {
-		// Statically return numeric, could be changed in the feature
+		// Statically return numeric, could be changed in the future
 		return AttributeType.NUMERIC;
 	}
 

@@ -52,7 +52,11 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 			// Create feature tables (if not already existent)
 			for (AbstractFeature feature : features) {
 				if (!featureTableExists(feature)) {
+					LOG.info("Feature table for {} does not exist => Creating", feature);
 					createFeatureTable(feature);
+				} else {
+					LOG.info("Feature table for {} with name {} already exists", feature,
+							SqlUtils.getTableNameForFeature(feature));
 				}
 			}
 
@@ -74,6 +78,7 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 					target.getName(), targetTable.getName()));
 
 			instances = setupInstances(features, target);
+			LOG.info("Loading instances from DB using sql: {}", sql);
 			ResultSet rs = sqlAdapter.getResultsOfQuery(sql.toString());
 			while (rs.next()) {
 				Instance instance = createInstance(rs, features, target, instances);
@@ -118,7 +123,7 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 	}
 
 	private void createTable(String tableName, String featureSql) throws SQLException {
-		String sql = String.format("CREATE TABLE %s AS %s", tableName, featureSql);
+		String sql = String.format("CREATE TABLE IF NOT EXISTS %s AS %s", tableName, featureSql);
 		LOG.info("Creating feature table using statement {}", sql);
 		sqlAdapter.update(sql, Collections.emptyList());
 		createdTableNames.add(tableName);

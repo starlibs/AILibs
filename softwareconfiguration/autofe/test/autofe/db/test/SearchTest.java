@@ -34,13 +34,13 @@ public class SearchTest {
 
 	private static final String DATABASE_MODEL_FILE = "model/db/bankaccount_toy_database.json";
 
-	 @Test
+	@Test
 	public void testSearch() {
 		Database initialDatabase = DBUtils.deserializeFromFile(DATABASE_MODEL_FILE);
 		DatabaseGraphGenerator generator = new DatabaseGraphGenerator(initialDatabase);
 		DatabaseNodeEvaluator evaluator = new DatabaseNodeEvaluator(generator);
 		BestFirst<DatabaseNode, String> search = new BestFirst<>(generator, evaluator);
-		search.setTimeoutForComputationOfF(600000, node -> 100.0);
+		search.setTimeoutForComputationOfF(60000, node -> 100.0);
 
 		// Add graph visualizer
 		new SimpleGraphVisualizationWindow<Node<DatabaseNode, Double>>(search).getPanel().setTooltipGenerator(n -> {

@@ -123,9 +123,12 @@ public class SqlUtils {
 			if (ar instanceof BackwardRelationship) {
 
 				// Aggregated attribute
-				if (i != 0) {
+				if (i != 0 && i != path.length() - 1) {
 					selectedColumns.add(String.format("%s(%s) AS %s", pathElement.getU(), TEMP_FEATURE + (i - 1),
 							TEMP_FEATURE + i));
+				} else if (i == path.length() - 1) {
+					selectedColumns.add(String.format("%s(%s) AS '%s'", pathElement.getU(), TEMP_FEATURE + (i - 1),
+							feature.getName()));
 				} else {
 					selectedColumns.add(String.format("%s(%s.%s) AS %s", pathElement.getU(), ar.getToTableName(),
 							feature.getParent().getName(), TEMP_FEATURE + i));
@@ -134,7 +137,11 @@ public class SqlUtils {
 				sp.groupBy = String.format("%s.%s", ar.getFromTableName(), ar.getCommonAttributeName());
 
 			} else if (ar instanceof ForwardRelationship) {
-				selectedColumns.add(String.format("%s AS %s", TEMP_FEATURE + (i - 1), TEMP_FEATURE + i));
+				if (i != path.length() - 1) {
+					selectedColumns.add(String.format("%s AS %s", TEMP_FEATURE + (i - 1), TEMP_FEATURE + i));
+				} else {
+					selectedColumns.add(String.format("%s AS '%s'", TEMP_FEATURE + (i - 1), feature.getName()));
+				}
 			}
 
 			// Primary key (if not already present)
