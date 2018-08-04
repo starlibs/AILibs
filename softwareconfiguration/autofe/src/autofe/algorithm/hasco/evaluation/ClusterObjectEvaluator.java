@@ -20,7 +20,7 @@ public class ClusterObjectEvaluator extends AbstractHASCOFEObjectEvaluator {
 	@Override
 	public Double evaluate(FilterPipeline object) throws Exception {
 		double finalScore = EvaluationUtils.performClustering(object, this.data)
-				+ ATT_COUNT_PENALTY * EvaluationUtils.calculateAttributeCountPenalty(this.data.getInstances());
+				- ATT_COUNT_PENALTY * EvaluationUtils.calculateAttributeCountPenalty(this.data.getInstances());
 		logger.debug("Cluster object evaluator final score: " + finalScore);
 		return finalScore;
 	}

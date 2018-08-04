@@ -19,7 +19,7 @@ public class EnsembleObjectEvaluator extends AbstractHASCOFEObjectEvaluator {
 
 		double ensembleScore = EvaluationUtils.performEnsemble(dataSet.getInstances());
 		double finalScore = ensembleScore
-				+ ATT_COUNT_PENALTY * EvaluationUtils.calculateAttributeCountPenalty(this.data.getInstances());
+				- ATT_COUNT_PENALTY * EvaluationUtils.calculateAttributeCountPenalty(this.data.getInstances());
 
 		logger.debug("Ensemble benchmark result: " + finalScore);
 

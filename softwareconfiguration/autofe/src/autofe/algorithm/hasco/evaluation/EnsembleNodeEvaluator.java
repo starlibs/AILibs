@@ -39,8 +39,9 @@ public class EnsembleNodeEvaluator extends AbstractHASCOFENodeEvaluator {
 
 				double ensembleScore = EvaluationUtils.performEnsemble(dataSet.getInstances());
 				double finalScore = Math.min(
-						ensembleScore + ATT_COUNT_PENALTY
-								* EvaluationUtils.calculateAttributeCountPenalty(this.data.getInstances()),
+						1 - ensembleScore
+								+ ATT_COUNT_PENALTY
+										* EvaluationUtils.calculateAttributeCountPenalty(this.data.getInstances()),
 						MAX_EVAL_VALUE - 1);
 
 				logger.debug("Ensemble benchmark result: " + finalScore);

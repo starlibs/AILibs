@@ -22,17 +22,17 @@ import weka.core.Instances;
 public class EnsembleEvaluatorTest {
 	private static final Logger logger = LoggerFactory.getLogger(EnsembleEvaluatorTest.class);
 
-	// @Test
+	@Test
 	public void ensembleEvaluatorTest() throws Exception {
 		logger.info("Staring cluster evaluation test...");
 
 		/* load dataset and create a train-test-split */
 		OpenmlConnector connector = new OpenmlConnector();
-		DataSetDescription ds = connector.dataGet(DataSetUtils.SEGMENT_ID);
+		DataSetDescription ds = connector.dataGet(DataSetUtils.CIFAR10_ID);
 		File file = ds.getDataset(DataSetUtils.API_KEY);
 		Instances data = new Instances(new BufferedReader(new FileReader(file)));
 		data.setClassIndex(data.numAttributes() - 1);
-		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(42), .7f);
+		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(42), .05f);
 
 		Instances insts = split.get(0);
 
@@ -57,9 +57,9 @@ public class EnsembleEvaluatorTest {
 		logger.debug("Clustering eval took " + (timeTakenEval / 1000) + " s.");
 	}
 
-	@Test
+	// @Test
 	public void knnEvaluatorTest() throws Exception {
-		logger.info("Staring knn evaluation test...");
+		logger.info("Starting knn evaluation test...");
 
 		/* load dataset and create a train-test-split */
 		OpenmlConnector connector = new OpenmlConnector();

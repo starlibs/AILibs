@@ -27,7 +27,7 @@ public class ClusterEvaluationTest {
 
 	private static final Logger logger = LoggerFactory.getLogger(ClusterEvaluationTest.class);
 
-	@Test
+	// @Test
 	public void evaluateTest() throws Exception {
 		logger.info("Staring cluster evaluation test...");
 
@@ -106,5 +106,22 @@ public class ClusterEvaluationTest {
 		logger.debug("Acc: " + acc);
 		logger.debug("Clustering took " + (timeTaken / 1000) + " s.");
 		logger.debug("Clustering eval took " + (timeTakenEval / 1000) + " s.");
+	}
+
+	@Test
+	public void kernelClusteringTest() throws Exception {
+		logger.info("Staring cluster evaluation test...");
+
+		/* load dataset and create a train-test-split */
+		OpenmlConnector connector = new OpenmlConnector();
+		DataSetDescription ds = connector.dataGet(DataSetUtils.SEGMENT_ID);
+		File file = ds.getDataset(DataSetUtils.API_KEY);
+		Instances data = new Instances(new BufferedReader(new FileReader(file)));
+		data.setClassIndex(data.numAttributes() - 1);
+		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(42), .05f);
+
+		Instances insts = split.get(0);
+
+		System.out.println(EvaluationUtils.performKernelClustering(insts));
 	}
 }

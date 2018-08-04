@@ -4,9 +4,14 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.dataset.api.preprocessor.NormalizerStandardize;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.ops.transforms.Transforms;
 import org.slf4j.Logger;
@@ -24,13 +29,17 @@ import jaicore.search.structure.core.Node;
 import weka.attributeSelection.ReliefFAttributeEval;
 import weka.classifiers.Evaluation;
 import weka.classifiers.functions.LDA;
+import weka.classifiers.functions.supportVector.PolyKernel;
+import weka.classifiers.functions.supportVector.RBFKernel;
 import weka.classifiers.lazy.IBk;
 import weka.clusterers.ClusterEvaluation;
 import weka.clusterers.FilteredClusterer;
 import weka.clusterers.SimpleKMeans;
+import weka.core.EuclideanDistance;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.Nystroem;
 import weka.filters.unsupervised.attribute.Remove;
 
 /**
@@ -74,7 +83,7 @@ public final class EvaluationUtils {
 		return performClustering(dataSet.getInstances());
 	}
 
-	private static double performClustering(final Instances insts) throws Exception {
+	public static double performClustering(final Instances insts) throws Exception {
 		logger.debug("Starting cluster evaluation...");
 
 		FilteredClusterer clusterer = new FilteredClusterer();
@@ -85,13 +94,14 @@ public final class EvaluationUtils {
 		Instances removedClassInstances = Filter.useFilter(insts, filter);
 
 		// TODO: Kernel
-		// Nystroem kernelFilter = new Nystroem();
-		// Initialize kernel? (using data, cache size 250007, gamma 0.01)? =>
-		// Defaults
-
-		// kernelFilter.setKernel(new RBFKernel(insts, 250007, 0.01)); // insts, 250007,
-		// 0.01
-		// clusterer.setFilter(kernelFilter);
+		// // Nystroem kernelFilter = new Nystroem();
+		// // Initialize kernel? (using data, cache size 250007, gamma 0.01)? =>
+		// // Defaults
+		//
+		// // kernelFilter.setKernel(new RBFKernel(insts, 250007, 0.01)); // insts,
+		// 250007,
+		// // 0.01
+		// // clusterer.setFilter(kernelFilter);
 		((SimpleKMeans) clusterer.getClusterer())
 				.setOptions(new String[] { "-num-slots", String.valueOf(Runtime.getRuntime().availableProcessors()),
 						"-N", String.valueOf(insts.classAttribute().numValues()) });
@@ -110,7 +120,165 @@ public final class EvaluationUtils {
 
 		double acc = predictAccuracy(insts, clusterEval.getClassesToClusters(), clusterEval.getClusterAssignments());
 
-		return 1 - acc;
+		return acc;
+	}
+
+	public static double performKernelClustering(final Instances insts) throws Exception {
+		logger.debug("Starting cluster evaluation...");
+
+		// TODO: Kernel
+
+		ExecutorService execService = Executors.newFixedThreadPool(4);
+		Future<Double> clustering0 = execService.submit(() -> {
+			return performClustering(insts);
+		});
+		Future<Double> clustering1 = execService.submit(() -> {
+			FilteredClusterer clusterer = new FilteredClusterer();
+
+			Remove filter = new Remove();
+			filter.setAttributeIndices("" + (insts.classIndex() + 1));
+			filter.setInputFormat(insts);
+
+			Instances removedClassInstances = Filter.useFilter(insts, filter);
+			Nystroem kernelFilter = new Nystroem();
+
+			kernelFilter.setKernel(new RBFKernel(insts, 250007, 0.01)); // insts,
+			clusterer.setFilter(kernelFilter);
+			((SimpleKMeans) clusterer.getClusterer())
+					.setOptions(new String[] { "-num-slots", String.valueOf(Runtime.getRuntime().availableProcessors()),
+							"-N", String.valueOf(insts.classAttribute().numValues()) });
+
+			clusterer.buildClusterer(removedClassInstances);
+
+			ClusterEvaluation clusterEval = new ClusterEvaluation();
+			clusterEval.setClusterer(clusterer);
+			clusterEval.evaluateClusterer(insts);
+
+			return predictAccuracy(insts, clusterEval.getClassesToClusters(), clusterEval.getClusterAssignments());
+		});
+		Future<Double> clustering2 = execService.submit(() -> {
+			FilteredClusterer clusterer = new FilteredClusterer();
+
+			Remove filter = new Remove();
+			filter.setAttributeIndices("" + (insts.classIndex() + 1));
+			filter.setInputFormat(insts);
+
+			Instances removedClassInstances = Filter.useFilter(insts, filter);
+			Nystroem kernelFilter = new Nystroem();
+			kernelFilter.setKernel(new PolyKernel(insts, 250007, 2, false));
+
+			clusterer.setFilter(kernelFilter);
+			((SimpleKMeans) clusterer.getClusterer())
+					.setOptions(new String[] { "-num-slots", String.valueOf(Runtime.getRuntime().availableProcessors()),
+							"-N", String.valueOf(insts.classAttribute().numValues()) });
+
+			clusterer.buildClusterer(removedClassInstances);
+
+			ClusterEvaluation clusterEval = new ClusterEvaluation();
+			clusterEval.setClusterer(clusterer);
+			clusterEval.evaluateClusterer(insts);
+
+			return predictAccuracy(insts, clusterEval.getClassesToClusters(), clusterEval.getClusterAssignments());
+		});
+		Future<Double> clustering3 = execService.submit(() -> {
+			FilteredClusterer clusterer = new FilteredClusterer();
+
+			Remove filter = new Remove();
+			filter.setAttributeIndices("" + (insts.classIndex() + 1));
+			filter.setInputFormat(insts);
+
+			Instances removedClassInstances = Filter.useFilter(insts, filter);
+			Nystroem kernelFilter = new Nystroem();
+			kernelFilter.setKernel(new PolyKernel(insts, 250007, 3, false));
+
+			clusterer.setFilter(kernelFilter);
+			((SimpleKMeans) clusterer.getClusterer())
+					.setOptions(new String[] { "-num-slots", String.valueOf(Runtime.getRuntime().availableProcessors()),
+							"-N", String.valueOf(insts.classAttribute().numValues()) });
+
+			clusterer.buildClusterer(removedClassInstances);
+
+			ClusterEvaluation clusterEval = new ClusterEvaluation();
+			clusterEval.setClusterer(clusterer);
+			clusterEval.evaluateClusterer(insts);
+
+			return predictAccuracy(insts, clusterEval.getClassesToClusters(), clusterEval.getClusterAssignments());
+		});
+
+		execService.shutdown();
+		execService.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
+
+		return Math.max(Math.max(Math.max(clustering0.get(), clustering1.get()), clustering2.get()), clustering3.get());
+	}
+
+	public static double performKernelLDA(final Instances instances) throws Exception {
+
+		List<Instances> split = WekaUtil.getStratifiedSplit(instances, new Random(42), .7f);
+
+		ExecutorService execService = Executors.newFixedThreadPool(4);
+		Future<Double> result0 = execService.submit(() -> {
+			Instances insts = new Instances(split.get(0));
+
+			try {
+				return performLDA(insts);
+			} catch (Exception e) {
+				logger.warn("Could the following error message in LDA execution (no kernel): " + e.getMessage());
+				return 0d;
+			}
+		});
+		Future<Double> result1 = execService.submit(() -> {
+			Instances insts = new Instances(split.get(0));
+
+			Nystroem kernelFilter = new Nystroem();
+			kernelFilter.setInputFormat(insts);
+			kernelFilter.setKernel(new RBFKernel(insts, 250007, 0.01));
+
+			insts = Filter.useFilter(insts, kernelFilter);
+
+			try {
+				return performLDA(insts);
+			} catch (Exception e) {
+				logger.warn("Could the following error message in LDA execution (RBF kernel): " + e.getMessage());
+				return 0d;
+			}
+		});
+		Future<Double> result2 = execService.submit(() -> {
+			Instances insts = new Instances(split.get(0));
+
+			Nystroem kernelFilter = new Nystroem();
+			kernelFilter.setInputFormat(insts);
+			kernelFilter.setKernel(new PolyKernel(insts, 250007, 2, false));
+
+			insts = Filter.useFilter(insts, kernelFilter);
+
+			try {
+				return performLDA(insts);
+			} catch (Exception e) {
+				logger.warn("Could the following error message in LDA execution (poly2 kernel): " + e.getMessage());
+				return 0d;
+			}
+		});
+		Future<Double> result3 = execService.submit(() -> {
+			Instances insts = new Instances(split.get(0));
+
+			Nystroem kernelFilter = new Nystroem();
+			kernelFilter.setInputFormat(insts);
+			kernelFilter.setKernel(new PolyKernel(insts, 250007, 3, false));
+
+			insts = Filter.useFilter(insts, kernelFilter);
+
+			try {
+				return performLDA(insts);
+			} catch (Exception e) {
+				logger.warn("Could the following error message in LDA execution (poly3 kernel): " + e.getMessage());
+				return 0d;
+			}
+		});
+
+		execService.shutdown();
+		execService.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
+
+		return Math.max(Math.max(Math.max(result0.get(), result1.get()), result2.get()), result3.get());
 	}
 
 	/**
@@ -180,24 +348,6 @@ public final class EvaluationUtils {
 			c.getRow(i).divi(c.getRow(i).norm2Number());
 		}
 
-		// double loss = 0;
-		// for (int i = 0; i < batch.numInstances(); i++) {
-		// double[] instValues = Arrays.copyOfRange(batch.get(i).toDoubleArray(), 0,
-		// batch.get(i).toDoubleArray().length - 1);
-		// INDArray f_i = Nd4j.create(instValues);
-		//
-		// double lowerSum = 0;
-		// for (int j = 0; j < classes; j++) {
-		// if (i != j)
-		// lowerSum += Math.exp(calculateCosSim(f_i, c.getRow(j)));
-		//
-		// }
-		//
-		// loss += Math.exp(calculateCosSim(f_i, c.getRow((int)
-		// Math.round(batch.get(i).classValue()))))
-		// / (lowerSum + 1);
-		// }
-
 		double loss = 0;
 		for (int i = 0; i < batch.numInstances(); i++) {
 			double[] instValues = Arrays.copyOfRange(batch.get(i).toDoubleArray(), 0,
@@ -226,6 +376,107 @@ public final class EvaluationUtils {
 
 	private static double calculateCosSim(final INDArray f1, final INDArray f2) {
 		return Transforms.cosineSim(f1, f2);
+	}
+
+	public static double calculateCOEDForBatch(final Instances batch) {
+		batch.setClassIndex(batch.numAttributes() - 1);
+
+		final int D = batch.numAttributes() - 1;
+		final int classes = batch.classAttribute().numValues();
+
+		// final double alpha = 10;
+
+		INDArray features = Nd4j.zeros(batch.numInstances(), D);
+		INDArray labels = Nd4j.zeros(batch.numInstances(), 1);
+
+		for (int i = 0; i < batch.numInstances(); i++) {
+			double[] instValues = Arrays.copyOfRange(batch.get(i).toDoubleArray(), 0,
+					batch.get(i).toDoubleArray().length - 1);
+			INDArray f_i = Nd4j.create(instValues);
+			// org.nd4j.linalg.dataset.DataSet tmpDataSet = new
+			// org.nd4j.linalg.dataset.DataSet();
+			// tmpDataSet.setFeatures(f_i);
+			// dataSet.addRow(tmpDataSet, i);
+			features.getRow(i).addiRowVector(f_i);
+			labels.putScalar(i, batch.get(i).classValue());
+		}
+		org.nd4j.linalg.dataset.DataSet dataSet = new org.nd4j.linalg.dataset.DataSet(features, labels);
+		dataSet.setFeatures(features);
+		NormalizerStandardize scaler = new NormalizerStandardize();
+		scaler.fit(dataSet);
+		// scaler.transform(dataSet);
+		scaler.preProcess(dataSet);
+
+		// Calculate centroids
+		int[] classCounts = new int[classes];
+		INDArray c = Nd4j.zeros(classes, D);
+		for (int i = 0; i < classes; i++) {
+			for (Instance inst : batch) {
+				if (Math.round(inst.classValue()) == i) {
+					// double[] instValues = Arrays.copyOfRange(inst.toDoubleArray(), 0,
+					// inst.toDoubleArray().length - 1);
+					c.getRow(i).addiRowVector(dataSet.get(i).getFeatures());
+					classCounts[i]++;
+				}
+			}
+		}
+		for (int i = 0; i < classes; i++) {
+			c.getRow(i).divi(classCounts[i] + 1);
+			// c.getRow(i).divi(c.getRow(i).norm2Number());
+		}
+
+		double loss = 0;
+		for (int i = 0; i < batch.numInstances(); i++) {
+			// double[] instValues = Arrays.copyOfRange(batch.get(i).toDoubleArray(), 0,
+			// batch.get(i).toDoubleArray().length - 1);
+			INDArray f_i = dataSet.get(i).getFeatures();
+			// f_i.muli(alpha);
+			// f_i.divi(f_i.norm2Number());
+
+			double lowerSum = 0;
+			for (int j = 0; j < classes; j++) {
+
+				if (i != j) {
+					// lowerSum += Math.exp(calculateEuclideanImageDistance(f_i, c.getRow(j)));
+					lowerSum += Math.exp(calculateEuclideanImageDistance(f_i, c.getRow(j)));
+				}
+			}
+
+			INDArray c_k = c.getRow((int) Math.round(batch.get(i).classValue()));
+			double upperExp = Math.exp(calculateEuclideanImageDistance(f_i, c_k));
+
+			loss += Math.log(upperExp / (lowerSum + 1));
+		}
+
+		return (-1) * loss;
+	}
+
+	private static double calculateEuclideanImageDistance(final INDArray inst1, final INDArray inst2) {
+		// double sum = 0;
+		// for (int i = 0; i < inst1.length(); i++) {
+		// sum += Math.pow((inst1.getDouble(i) - inst2.getDouble(i)), 2);
+		// }
+		// return sum / inst1.length();
+		return inst1.distance2(inst2);
+	}
+
+	// private static double calculateExpEuclideanImageDistance(final INDArray
+	// inst1, final INDArray inst2) {
+	//// double sum = 1;
+	//// for (int i = 0; i < inst1.length(); i++) {
+	//// sum *= Math.exp(Math.pow((inst1.getDouble(i) - inst2.getDouble(i)), 2));
+	//// }
+	//// return sum; // / inst1.length();
+	// }
+
+	private static double calculateEuclideanImageDistance(final Instance inst1, final Instance inst2) {
+		// double sum = 0;
+		// for (int i = 0; i < inst1.numAttributes() - 1; i++) {
+		// sum += Math.pow((inst1.value(i) - inst2.value(i)), 2);
+		// }
+		// return sum;
+		EuclideanDistance euclDist = new EuclideanDistance();
+		return euclDist.distance(inst1, inst2);
 	}
 
 	public static double performLDA(final Instances instances) throws Exception {
@@ -285,18 +536,38 @@ public final class EvaluationUtils {
 					return performClustering(data);
 				} catch (Exception e1) {
 					logger.error("Could not perform clustering benchmark. Reason: " + e1.getMessage());
-					return 1d;
+					return 0d;
+				}
+			};
+		case "KernelCluster":
+			return (data) -> {
+				try {
+					return performKernelClustering(data);
+				} catch (Exception e1) {
+					logger.error("Could not perform kernel clustering benchmark. Reason: " + e1.getMessage());
+					return 0d;
 				}
 			};
 		case "COCO":
-			return (data) -> calculateCOCOForBatch(data);
+			return (data) -> (-1) * calculateCOCOForBatch(data);
+		case "COED":
+			return (data) -> (-1) * calculateCOEDForBatch(data);
 		case "LDA":
 			return (data) -> {
 				try {
 					return performLDA(data);
 				} catch (Exception e) {
 					logger.error("Could not perform LDA benchmark. Reason: " + e.getMessage());
-					return 1d;
+					return 0d;
+				}
+			};
+		case "KernelLDA":
+			return (data) -> {
+				try {
+					return performKernelLDA(data);
+				} catch (Exception e) {
+					logger.error("Could not perform cluster LDA benchmark. Reason: " + e.getMessage());
+					return 0d;
 				}
 			};
 		case "Ensemble":
@@ -305,7 +576,7 @@ public final class EvaluationUtils {
 					return performEnsemble(data);
 				} catch (Exception e) {
 					logger.error("Could not perform ensemble benchmark. Reason: " + e.getMessage());
-					return 1d;
+					return 0d;
 				}
 			};
 		// case "Random":

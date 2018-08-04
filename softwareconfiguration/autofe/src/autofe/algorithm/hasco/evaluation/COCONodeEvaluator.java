@@ -53,7 +53,7 @@ public class COCONodeEvaluator extends AbstractHASCOFENodeEvaluator {
 				List<Instances> split = WekaUtil.getStratifiedSplit(dataSet.getInstances(), new Random(42), 0.01d);
 				Instances insts = split.get(0);
 
-				double loss = EvaluationUtils.calculateCOCOForBatch(insts);
+				double loss = (-1) * EvaluationUtils.calculateCOCOForBatch(insts);
 
 				logger.debug("COCO node evaluation score: " + loss);
 				return loss;
