@@ -102,8 +102,9 @@ public class isRefinementCompletedPredicateWithImportanceCheck implements Evalua
 		String compositionIdentifier = Util.getComponentNamesOfComposition(ci);
 		// System.out.println("Composition Identifier in completedpred: " +
 		// compositionIdentifier);
-		if (performanceKB.getNumSamples("test", compositionIdentifier) > this.minNumSamplesForImportanceEstimation) {
-//		if(performanceKB.kDistinctSamplesAvailable("test", ci, minNumSamplesForImportanceEstimation)) {
+//		if (performanceKB.getNumSamples("test", compositionIdentifier) > this.minNumSamplesForImportanceEstimation) {
+		if(performanceKB.kDistinctAttributeValuesAvailable("test", ci, minNumSamplesForImportanceEstimation)) {
+			System.out.println(minNumSamplesForImportanceEstimation + " samples are available");
 			try {
 				System.out.println("Querying fANOVA with " + performanceKB.getNumSamples("test", compositionIdentifier)
 				+ " samples!");

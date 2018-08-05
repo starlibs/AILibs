@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import de.upb.crc901.automl.hascowekaml.HASCOForWekaMLJ;
 import de.upb.crc901.automl.hascowekaml.HASCOForWekaMLJ.HASCOForWekaMLSolutionJ;
+import hasco.core.HASCOWithParameterPruning;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.sets.SetUtil;
 import jaicore.concurrent.TimeoutTimer;
@@ -633,5 +634,9 @@ public class MLPlanJ extends AbstractClassifier
 
 		new SimpleGraphVisualizationWindow<Node<TFDNode, Double>>(this).getPanel()
 				.setTooltipGenerator(new TFDTooltipGenerator<>());
+	}
+
+	public int getNumberPrunedParameters() {
+		return HASCOWithParameterPruning.getNumberPrunedParameters();
 	}
 }

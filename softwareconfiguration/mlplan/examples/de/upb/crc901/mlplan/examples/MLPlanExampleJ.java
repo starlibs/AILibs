@@ -41,18 +41,19 @@ public class MLPlanExampleJ {
 
 		/* initialize mlplan, and let it run for 30 seconds */
 		int timeoutInSeconds = 300;
-		MLPlanJ mlplan = new MLPlanJ(new File("model/weka/weka-all-autoweka.json"), 0.08d, 8, true);
+		MLPlanJ mlplan = new MLPlanJ(new File("model/weka/weka-all-autoweka.json"), 0.08d, 2, true);
 		mlplan.setLoggerName("mlplan");
 
 		mlplan.setTimeout(timeoutInSeconds);
 		mlplan.setPortionOfDataForPhase2(.3f);
 		mlplan.setNodeEvaluator(new DefaultPreorder());
-		mlplan.enableVisualization();
+		// mlplan.enableVisualization();
 		mlplan.buildClassifier(split.get(0));
 
 		/* evaluate solution produced by mlplan */
 		Evaluation eval = new Evaluation(split.get(0));
 		eval.evaluateModel(mlplan, split.get(1));
 		System.out.println("Error Rate of the solution produced by ML-Plan: " + (100 - eval.pctCorrect()) / 100f);
+		System.out.println("Number of parameters pruned: " + mlplan.getNumberPrunedParameters());
 	}
 }

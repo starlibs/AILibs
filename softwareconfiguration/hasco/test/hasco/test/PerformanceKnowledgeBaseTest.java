@@ -7,6 +7,7 @@ import java.util.HashMap;
 
 import org.junit.Test;
 
+import hasco.core.Util;
 import hasco.knowledgebase.PerformanceKnowledgeBase;
 import hasco.model.CategoricalParameterDomain;
 import hasco.model.Component;
@@ -37,16 +38,26 @@ public class PerformanceKnowledgeBaseTest {
 		comp.addParameter(param2);
 		comp.addParameter(param3);
 		
-		HashMap<String,String> paramValues = new HashMap<String,String>();
-		paramValues.put("Param1", "4.0");
-		paramValues.put("Param2", "Val3");
-		paramValues.put("Param3", "13");
+		HashMap<String,String> paramValues1 = new HashMap<String,String>();
+		paramValues1.put("Param1", "4.0");
+		paramValues1.put("Param2", "Val1");
+		paramValues1.put("Param3", "14");
+		
+		HashMap<String,String> paramValues2 = new HashMap<String,String>();
+		paramValues2.put("Param1", "1.0");
+		paramValues2.put("Param2", "Val1");
+		paramValues2.put("Param3", "11");
+		
+		HashMap<String,String> paramValues3 = new HashMap<String,String>();
+		paramValues3.put("Param1", "2.0");
+		paramValues3.put("Param2", "Val2");
+		paramValues3.put("Param3", "13");
 		
 		HashMap<String, ComponentInstance> satisfactionOfRequiredInterfaces = new HashMap<String,ComponentInstance>();
 		
-		ComponentInstance ci1 = new ComponentInstance(comp, paramValues, satisfactionOfRequiredInterfaces);
-		ComponentInstance ci2 = new ComponentInstance(comp, paramValues, satisfactionOfRequiredInterfaces);
-		ComponentInstance ci3 = new ComponentInstance(comp, paramValues, satisfactionOfRequiredInterfaces);
+		ComponentInstance ci1 = new ComponentInstance(comp, paramValues1, satisfactionOfRequiredInterfaces);
+		ComponentInstance ci2 = new ComponentInstance(comp, paramValues2, satisfactionOfRequiredInterfaces);
+		ComponentInstance ci3 = new ComponentInstance(comp, paramValues3, satisfactionOfRequiredInterfaces);
 		
 		System.out.println(ci1.getParameterValues());
 		
@@ -55,6 +66,11 @@ public class PerformanceKnowledgeBaseTest {
 		pKB.addPerformanceSample("test", ci3, 0.3333, false);
 		
 		System.out.println(pKB.createInstancesForPerformanceSamples("test", ci1));
+		String identifier = Util.getComponentNamesOfComposition(ci1);
+//		System.out.println("Number completely distinct samples: " + pKB.getNumCompletelyDistinctSamples("test", identifier));
+
+//		System.out.println("PKB has k distinct values: " + pKB.kCompletelyDistinctSamplesAvailable("test", ci1, 3));
+		System.out.println("PKB has k distinct values: " + pKB.kDistinctAttributeValuesAvailable("test", ci1, 3));
 	}
 
 }
