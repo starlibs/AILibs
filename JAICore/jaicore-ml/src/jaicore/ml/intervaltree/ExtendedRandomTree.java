@@ -734,5 +734,4 @@ public class ExtendedRandomTree extends RandomTree {
 				return Double.NaN;
 		}
 	}
-
 }

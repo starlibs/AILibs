@@ -52,20 +52,20 @@ public class ExtendedRandomTreeTest {
 			for (int i = 0; i < tree.getFeatureSpace().getDimensionality(); i++) {
 				allFeatures.add(i);
 			}
-//			Set<Set<Integer>> powerset = Sets.powerSet(allFeatures);
+			// Set<Set<Integer>> powerset = Sets.powerSet(allFeatures);
 			List<Set<Integer>> powerlist = new ArrayList<Set<Integer>>();
 			Set<Set<Integer>> subsets;
-//			powerlist.addAll(powerset);
-			// for (int k = 1; k <= allFeatures.size(); k++) {
-			for (int k = 1; k <= 2; k++) {
+			// powerlist.addAll(powerset);
+			for (int k = 1; k <= allFeatures.size(); k++) {
+				// for (int k = 1; k <= 2; k++) {
 				subsets = Sets.combinations(allFeatures, k);
-//				for (int i = 0; i < powerlist.size(); i++) {
-//					Set<Integer> features = powerlist.get(i);
-				for(Set<Integer> features : subsets) {
+				// for (int i = 0; i < powerlist.size(); i++) {
+				// Set<Integer> features = powerlist.get(i);
+				for (Set<Integer> features : subsets) {
 					System.out.println("Features in this iteration = " + features);
 					if (features.size() == k) {
-						double cont = tree
-								.computeMarginalVarianceContributionForSubsetOfFeaturesNotNormalized(features);
+						double cont = tree.computeMarginalVarianceContributionForSubsetOfFeaturesNotNormalized(features)
+								* Math.pow(10, 4);
 						assertTrue(cont >= 0.0d);
 						sum += cont;
 						System.out.println("Contribution of " + features + ": " + cont);

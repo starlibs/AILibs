@@ -35,7 +35,7 @@ public class ExtendedRandomForestTest {
 			ArffReader arffReader = new ArffReader(reader);
 			Instances data = arffReader.getData();
 			data.setClassIndex(data.numAttributes() - 1);
-			ExtendedRandomForest forest = new ExtendedRandomForest(1.0d, 32, new FeatureSpace(data));
+			ExtendedRandomForest forest = new ExtendedRandomForest(0.25d, 16, new FeatureSpace(data));
 			// forest.setFeatureSpace(new FeatureSpace(data));
 			// forest.setNumIterations(16);
 			forest.buildClassifier(data);
@@ -51,7 +51,8 @@ public class ExtendedRandomForestTest {
 			System.out.println("size: " + allFeatures.size());
 			for (Set<Integer> features : powerset) {
 				if (features.size() > 0) {
-					double cont = forest.computeMarginalStandardDeviationFeatureSubset(features);
+					double cont = forest.computeMarginalVarianceContributionForFeatureSubsetNotNormalized(features)
+							* Math.pow(10, 4);
 					System.out.println("Individual Standard Deviation of " + features.toString() + ": " + cont);
 					contributions.put(features, cont);
 					assertTrue(cont >= 0.0d);
