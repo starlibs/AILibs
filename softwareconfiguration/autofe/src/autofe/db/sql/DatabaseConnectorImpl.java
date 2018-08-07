@@ -213,4 +213,9 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 		return instance;
 	}
 
+	@Override
+	public void close() {
+		this.sqlAdapter.close();
+	}
+
 }

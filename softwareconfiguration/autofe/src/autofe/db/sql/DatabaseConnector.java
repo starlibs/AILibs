@@ -10,5 +10,7 @@ public interface DatabaseConnector {
 	Instances getInstances(List<AbstractFeature> features);
 	
 	void cleanup();
+	
+	void close();
 
 }

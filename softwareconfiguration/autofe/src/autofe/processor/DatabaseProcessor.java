@@ -49,6 +49,8 @@ public class DatabaseProcessor {
 		// Delete created tables
 		databaseConnector.cleanup();
 
+		databaseConnector.close();
+
 		return instances;
 	}
 
