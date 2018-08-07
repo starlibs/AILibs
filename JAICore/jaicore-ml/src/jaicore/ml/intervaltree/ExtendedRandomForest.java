@@ -65,11 +65,31 @@ public class ExtendedRandomForest extends RandomForest {
 		}
 	}
 
-	public double computeMarginalForFeatureSubset(Set<Integer> features) {
+	public double computeMarginalVarianceContributionForFeatureSubset(Set<Integer> features) {
 		double avg = 0;
 		for (Classifier classifier : m_Classifiers) {
 			ExtendedRandomTree curTree = (ExtendedRandomTree) classifier;
 			double curMarg = curTree.computeMarginalVarianceContributionForSubsetOfFeatures(features);
+			avg += curMarg * 1.0 / m_Classifiers.length;
+		}
+		return avg;
+	}
+	
+	public double computeMarginalVarianceContributionForFeatureSubsetNotNormalized(Set<Integer> features) {
+		double avg = 0;
+		for (Classifier classifier : m_Classifiers) {
+			ExtendedRandomTree curTree = (ExtendedRandomTree) classifier;
+			double curMarg = curTree.computeMarginalVarianceContributionForSubsetOfFeaturesNotNormalized(features);
+			avg += curMarg * 1.0 / m_Classifiers.length;
+		}
+		return avg;
+	}	
+	
+	public double computeMarginalStandardDeviationFeatureSubset(Set<Integer> features) {
+		double avg = 0;
+		for (Classifier classifier : m_Classifiers) {
+			ExtendedRandomTree curTree = (ExtendedRandomTree) classifier;
+			double curMarg = curTree.computeMarginalStandardDeviationForSubsetOfFeatures(features);
 			avg += curMarg * 1.0 / m_Classifiers.length;
 		}
 		return avg;

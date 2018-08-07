@@ -209,9 +209,51 @@ public class ExtendedRandomTree extends RandomTree {
 	// this.totalVariance = var;
 	// return var;
 	// }
+	
+	/**
+	 * Computes the variance contribution of a subset of features.
+	 * 
+	 * @param features
+	 * @return Variance contribution of the feature subset
+	 */
+	public double computeMarginalStandardDeviationForSubsetOfFeatures(Set<Integer> features) {
+		double vU;
+		if (this.totalVariance == 0.0d) {
+			System.out.println("The trees total variance is zero, predictions make no sense at this point!");
+			return Double.NaN;
+		}
+		if (varianceOfSubsetTotal.containsKey(features))
+			vU = varianceOfSubsetTotal.get(features);
+		else
+			vU = computeTotalVarianceOfSubset(features);
+		// System.out.println("current total variance for " + features.toString() + " =
+		// " + vU);
+		double subtractor = 0;
+		for (int k = 1; k < features.size(); k++) {
+			// generate all subsets of size k
+			Set<Set<Integer>> subsets = Sets.combinations(features, k);
+			for (Set<Integer> subset : subsets) {
+				if (subset.size() < 1)
+					continue;
+				if (!varianceOfSubsetIndividual.containsKey(subset)) {
+					double temp = computeMarginalVarianceContributionForSubsetOfFeatures(subset);
+				}
+				// System.out.println("Subtracting " + varianceOfSubsetIndividual.get(subset) +
+				// " for " + subset);
+				vU -= varianceOfSubsetIndividual.get(subset);
+				// subtractor += varianceOfSubsetIndividual.get(subset);
+			}
+		}
+		// System.out.println("Individual var for " + features + " = " + vU);
+		if (vU < 0.0d)
+			vU = 0.0d;
+		varianceOfSubsetIndividual.put(features, vU);
+		double standardDeviation = Math.sqrt(vU);
+		return standardDeviation;
+	}
 
 	/**
-	 * Computes variance contribution of a subset of features
+	 * Computes the variance contribution of a subset of features.
 	 * 
 	 * @param features
 	 * @return Variance contribution of the feature subset
@@ -248,9 +290,51 @@ public class ExtendedRandomTree extends RandomTree {
 		if (vU < 0.0d)
 			vU = 0.0d;
 		varianceOfSubsetIndividual.put(features, vU);
-		 double fraction = vU / totalVariance;
-//		return vU;
-		 return fraction;
+		double fraction = vU / totalVariance;
+		// return vU;
+		return fraction;
+	}
+
+	/**
+	 * Computes the variance contribution of a subset of features without
+	 * normalizing.
+	 * 
+	 * @param features
+	 * @return Variance contribution of the feature subset
+	 */
+	public double computeMarginalVarianceContributionForSubsetOfFeaturesNotNormalized(Set<Integer> features) {
+		double vU;
+		if (this.totalVariance == 0.0d) {
+			System.out.println("The trees total variance is zero, predictions make no sense at this point!");
+			return Double.NaN;
+		}
+		if (varianceOfSubsetTotal.containsKey(features))
+			vU = varianceOfSubsetTotal.get(features);
+		else
+			vU = computeTotalVarianceOfSubset(features);
+		// System.out.println("current total variance for " + features.toString() + " =
+		// " + vU);
+		double subtractor = 0;
+		for (int k = 1; k < features.size(); k++) {
+			// generate all subsets of size k
+			Set<Set<Integer>> subsets = Sets.combinations(features, k);
+			for (Set<Integer> subset : subsets) {
+				if (subset.size() < 1)
+					continue;
+				if (!varianceOfSubsetIndividual.containsKey(subset)) {
+					double temp = computeMarginalVarianceContributionForSubsetOfFeatures(subset);
+				}
+				// System.out.println("Subtracting " + varianceOfSubsetIndividual.get(subset) +
+				// " for " + subset);
+				vU -= varianceOfSubsetIndividual.get(subset);
+				// subtractor += varianceOfSubsetIndividual.get(subset);
+			}
+		}
+		// System.out.println("Individual var for " + features + " = " + vU);
+		if (vU < 0.0d)
+			vU = 0.0d;
+		varianceOfSubsetIndividual.put(features, vU);
+		return vU;
 	}
 
 	/**
@@ -368,8 +452,9 @@ public class ExtendedRandomTree extends RandomTree {
 			for (int i = 0; i < children.length; i++) {
 				if (children[i].getClassDistribution() == null && children[i].getAttribute() == -1) {
 					mapForEmptyLeaves.put(children[i], node.getClassDistribution()[0]);
-//					System.out
-//							.println("Adding prediction " + node.getClassDistribution()[0] + " for empty leaf to map");
+					// System.out
+					// .println("Adding prediction " + node.getClassDistribution()[0] + " for empty
+					// leaf to map");
 				}
 				// important! if the children are leaves and do not contain a class
 				// distribution, treat this node as a leaf
@@ -457,10 +542,18 @@ public class ExtendedRandomTree extends RandomTree {
 				} else {
 					allObservations[featureIndex] = new Observation[curSplitPoints.size() - 1];
 					// intervalSizes[featureIndex] = new double[curSplitPoints.size() - 1];
+					Observation obs;
 					for (int lowerIntervalId = 0; lowerIntervalId < curSplitPoints.size() - 1; lowerIntervalId++) {
-						Observation obs = new Observation(
-								(curSplitPoints.get(lowerIntervalId) + curSplitPoints.get(lowerIntervalId + 1)) / 2,
-								curSplitPoints.get(lowerIntervalId + 1) - curSplitPoints.get(lowerIntervalId));
+						if (curSplitPoints.get(lowerIntervalId + 1) - curSplitPoints.get(lowerIntervalId) > 0)
+							obs = new Observation(
+									(curSplitPoints.get(lowerIntervalId) + curSplitPoints.get(lowerIntervalId + 1)) / 2,
+									curSplitPoints.get(lowerIntervalId + 1) - curSplitPoints.get(lowerIntervalId));
+						else {
+							// TODO this is a workaround for interval sizes of size 0 (which should not appear)
+							obs = new Observation(
+									(curSplitPoints.get(lowerIntervalId) + curSplitPoints.get(lowerIntervalId + 1)) / 2,
+									1);
+						}
 						allObservations[featureIndex][lowerIntervalId] = obs;
 						// intervalSizes[featureIndex][lowerIntervalId] =
 						// curSplitPoints.get(lowerIntervalId + 1)
@@ -487,8 +580,9 @@ public class ExtendedRandomTree extends RandomTree {
 	 * @param features
 	 * @return
 	 */
-	private double computeTotalVarianceOfSubset(Set<Integer> features) {
-		double fraction = 0;
+	public double computeTotalVarianceOfSubset(Set<Integer> features) {
+		if (varianceOfSubsetTotal.containsKey(features))
+			return varianceOfSubsetTotal.get(features);
 		List<List<Observation>> observationList = new LinkedList<List<Observation>>();
 		List<Set<Observation>> observationSet = new LinkedList<Set<Observation>>();
 		for (int featureIndex : features) {
@@ -505,12 +599,13 @@ public class ExtendedRandomTree extends RandomTree {
 		double weightedSum = 0, weightedSumOfSquares = 0;
 		double num = 0;
 		WeightedVarianceHelper stat = new WeightedVarianceHelper();
-		// System.out.println("marginal predictions for: " + features);
+//		System.out.println("marginal predictions for: " + features);
 		for (List<Observation> curObs : observationProduct) {
 			ArrayList<Integer> featureList = new ArrayList<Integer>();
 			featureList.addAll(features);
 			Collections.sort(featureList);
 			double marginalPrediction = this.getMarginalPrediction(featureList, curObs);
+//			System.out.println(marginalPrediction + ",");
 			// System.out.println("current feautres = \t" + features);
 			// System.out.print("midpoints = \t\t");
 			// for (Observation obs : curObs) {
@@ -532,8 +627,8 @@ public class ExtendedRandomTree extends RandomTree {
 			// System.out.println("weight for var = \t" + prodOfIntervalSizes *
 			// sizeOfAllButFeatures);
 			if (!Double.isNaN(marginalPrediction)) {
-//				System.out.println("Size of all but features: " + sizeOfAllButFeatures);
-//				System.out.println("Prod of interval sizes: " + prodOfIntervalSizes);
+				// System.out.println("Size of all but features: " + sizeOfAllButFeatures);
+				// System.out.println("Prod of interval sizes: " + prodOfIntervalSizes);
 				stat.push(marginalPrediction, sizeOfAllButFeatures * prodOfIntervalSizes);
 
 			}
@@ -569,7 +664,7 @@ public class ExtendedRandomTree extends RandomTree {
 		for (int i = 0; i < this.featureSpace.getDimensionality(); i++) {
 			set.add(i);
 		}
-//		System.out.println("Range size: " + this.featureSpace.getRangeSize());
+		// System.out.println("Range size: " + this.featureSpace.getRangeSize());
 		this.totalVariance = computeTotalVarianceOfSubset(set);
 		// System.out.println("trees total variance = " + this.totalVariance);
 	}

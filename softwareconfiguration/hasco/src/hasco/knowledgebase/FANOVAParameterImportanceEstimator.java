@@ -87,6 +87,7 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 		Instances data = performanceKnowledgeBase.createInstancesForPerformanceSamples(benchmarkName, composition);
 		System.out.println("Extracting important parameters!");
 		System.out.println(data);
+		
 		// if (forest == null) {
 		// this.initializeForests(benchmarkName);
 		// }
@@ -109,7 +110,7 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 				// if recomputation is desired of the dictionary has no importance value stored,
 				// compute it
 				if (recompute) {
-					currentImportance = forest.computeMarginalForFeatureSubset(subset);
+					currentImportance = forest.computeMarginalVarianceContributionForFeatureSubset(subset);
 					// sum += currentImportance;
 					importanceDictionary.get(pipelineIdentifier).put(subset, currentImportance);
 				} else if (importanceDictionary.get(pipelineIdentifier).containsKey(subset)) {
@@ -118,7 +119,7 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 				}
 				// if no value is available in the dictionary, compute it
 				else {
-					currentImportance = forest.computeMarginalForFeatureSubset(subset);
+					currentImportance = forest.computeMarginalVarianceContributionForFeatureSubset(subset);
 					importanceDictionary.get(pipelineIdentifier).put(subset, currentImportance);
 
 				}
