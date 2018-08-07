@@ -29,9 +29,13 @@ public class DatabaseNodeEvaluator implements INodeEvaluator<DatabaseNode, Doubl
 
 	private static Logger LOG = LoggerFactory.getLogger(DBUtils.class);
 
-	private static final int ADDITIONAL_FEATURES = 2;
+	private static final int RANDOM_COMPLETION_PATH_LENGTH = 2;
 
 	private static final long SEED = 1;
+
+	private int randomCompletionPathLength;
+
+	private long seed;
 
 	private DatabaseConnector databaseConnector;
 
@@ -42,16 +46,28 @@ public class DatabaseNodeEvaluator implements INodeEvaluator<DatabaseNode, Doubl
 	private Random random;
 
 	public DatabaseNodeEvaluator(DatabaseGraphGenerator generator) {
+		// Only use this constructor for test purposes
 		this.generator = generator;
+		this.randomCompletionPathLength = RANDOM_COMPLETION_PATH_LENGTH;
+		this.seed = SEED;
 		this.db = generator.getDatabase();
 		this.databaseConnector = new DatabaseConnectorImpl(db);
-		this.random = new Random(SEED);
+		this.random = new Random(seed);
+	}
+
+	public DatabaseNodeEvaluator(DatabaseGraphGenerator generator, int randomCompletionPathLength, long seed) {
+		this.generator = generator;
+		this.randomCompletionPathLength = randomCompletionPathLength;
+		this.seed = seed;
+		this.db = generator.getDatabase();
+		this.databaseConnector = new DatabaseConnectorImpl(db);
+		this.random = new Random(seed);
 	}
 
 	@Override
 	public Double f(Node<DatabaseNode, ?> node) throws Throwable {
 		LOG.info("Evaluation node with features : {}", node.getPoint().getSelectedFeatures());
-		int requiredNumberOfFeatures = node.getPoint().getSelectedFeatures().size() + ADDITIONAL_FEATURES;
+		int requiredNumberOfFeatures = node.getPoint().getSelectedFeatures().size() + randomCompletionPathLength;
 		LOG.debug("Required features : {}", requiredNumberOfFeatures);
 		BestFirst<DatabaseNode, String> randomCompletionSearch = new RandomizedDepthFirstSearch<>(
 				new GraphGenerator<DatabaseNode, String>() {
@@ -125,6 +141,10 @@ public class DatabaseNodeEvaluator implements INodeEvaluator<DatabaseNode, Doubl
 		} catch (Exception e) {
 			throw new RuntimeException("Cannot evaluate instances", e);
 		}
+	}
+
+	public DatabaseConnector getDatabaseConnector() {
+		return databaseConnector;
 	}
 
 }
