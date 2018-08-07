@@ -1,7 +1,12 @@
 package hasco.core;
 
+import java.util.Collection;
+import java.util.Map;
 import java.util.stream.Collectors;
 
+import hasco.model.Component;
+import hasco.model.Parameter;
+import hasco.model.ParameterRefinementConfiguration;
 import hasco.query.Factory;
 import jaicore.basic.IObjectEvaluator;
 import jaicore.planning.algorithms.IPathToPlanConverter;
@@ -13,10 +18,13 @@ import jaicore.search.algorithms.interfaces.IObservableORGraphSearchFactory;
 import jaicore.search.algorithms.interfaces.IPathUnification;
 import jaicore.search.algorithms.standard.core.INodeEvaluator;
 import jaicore.search.algorithms.standard.core.ORGraphSearchFactory;
+import jaicore.search.algorithms.standard.uncertainty.OversearchAvoidanceConfig;
+import jaicore.search.algorithms.standard.uncertainty.UncertaintyORGraphSearchFactory;
 
-public class HASCOFD<T> extends HASCO<T, TFDNode, String, Double, ForwardDecompositionSolution> {
+public class HASCOFD<T,V extends Comparable<V>> extends HASCO<T, TFDNode, String, V, ForwardDecompositionSolution> {
 
-	public static class TFDSearchSpaceUtilFactory implements IHASCOSearchSpaceUtilFactory<TFDNode, String, Double> {
+	
+	public static class TFDSearchSpaceUtilFactory<V extends Comparable<V>> implements IHASCOSearchSpaceUtilFactory<TFDNode, String, V> {
 
 		@Override
 		public IPathUnification<TFDNode> getPathUnifier() {
@@ -29,12 +37,17 @@ public class HASCOFD<T> extends HASCO<T, TFDNode, String, Double, ForwardDecompo
 		}
 	}
 
-	public HASCOFD(IObservableORGraphSearchFactory<TFDNode, String, Double> searchFactory, Factory<? extends T> converter, INodeEvaluator<TFDNode, Double> nodeEvaluator,
-			String nameOfRequiredInterface, IObjectEvaluator<T, Double> benchmark) {
-		super(new ForwardDecompositionHTNPlannerFactory<>(), searchFactory, new TFDSearchSpaceUtilFactory(), nodeEvaluator, converter, nameOfRequiredInterface, benchmark);
+	public HASCOFD(final Collection<Component> components, Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig, IObservableORGraphSearchFactory<TFDNode, String, V> searchFactory, Factory<? extends T> converter, INodeEvaluator<TFDNode, V> nodeEvaluator,
+			String nameOfRequiredInterface, IObjectEvaluator<T, V> benchmark) {
+		super(components, paramRefinementConfig, new ForwardDecompositionHTNPlannerFactory<>(), searchFactory, new TFDSearchSpaceUtilFactory<>(), nodeEvaluator, converter, nameOfRequiredInterface, benchmark);
 	}
 
-	public HASCOFD(Factory<? extends T> converter, INodeEvaluator<TFDNode, Double> nodeEvaluator, String nameOfRequiredInterface, IObjectEvaluator<T, Double> benchmark) {
-		this(new ORGraphSearchFactory<>(), converter, nodeEvaluator, nameOfRequiredInterface, benchmark);
+	public HASCOFD(final Collection<Component> components, Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig, Factory<? extends T> converter, INodeEvaluator<TFDNode, V> nodeEvaluator, String nameOfRequiredInterface, IObjectEvaluator<T, V> benchmark) {
+		this(components, paramRefinementConfig, new ORGraphSearchFactory<>(), converter, nodeEvaluator, nameOfRequiredInterface, benchmark);
+	}
+	
+	public HASCOFD(final Collection<Component> components, Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig, Factory<? extends T> converter, INodeEvaluator<TFDNode, V> nodeEvaluator, String nameOfRequiredInterface, IObjectEvaluator<T, V> benchmark, OversearchAvoidanceConfig<TFDNode> oversearchAvoidanceConfig) {
+		this(components, paramRefinementConfig, new UncertaintyORGraphSearchFactory<>(oversearchAvoidanceConfig, new CEOCTFDPathUnifier()), converter, nodeEvaluator, nameOfRequiredInterface, benchmark);
+		((UncertaintyORGraphSearchFactory<TFDNode,String,V>)getSearchFactory()).setSolutionEvaluator(getSolutionEvaluator());
 	}
 }

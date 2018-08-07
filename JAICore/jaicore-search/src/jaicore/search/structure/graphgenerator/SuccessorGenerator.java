@@ -1,6 +1,6 @@
 package jaicore.search.structure.graphgenerator;
 
-import java.util.Collection;
+import java.util.List;
 
 import jaicore.search.structure.core.NodeExpansionDescription;
 
@@ -14,7 +14,7 @@ public interface SuccessorGenerator<T,A> {
 	 * @param node The node we want to expand.
 	 * @return A list of possible next steps.
 	 */
-	public Collection<NodeExpansionDescription<T,A>> generateSuccessors(T node);
+	public List<NodeExpansionDescription<T,A>> generateSuccessors(T node);
 
 
 }

@@ -55,8 +55,8 @@ public class Util {
       String[] params = l.getParameters().stream().map(p -> p.getName()).collect(Collectors.toList()).toArray(new String[] {});
       switch (l.getPropertyName()) {
         case "resolves":
-          String parentObjectName = params[0];
-          String interfaceName = params[1];
+//          String parentObjectName = params[0];
+//          String interfaceName = params[1];
           String componentName = params[2];
           String objectName = params[3];
           Component component = components.stream().filter(c -> c.getName().equals(componentName)).findAny().get();
@@ -135,8 +135,8 @@ public class Util {
       String[] params = l.getParameters().stream().map(p -> p.getName()).collect(Collectors.toList()).toArray(new String[] {});
       switch (l.getPropertyName()) {
         case "resolves":
-          String parentObjectName = params[0];
-          String interfaceName = params[1];
+//          String parentObjectName = params[0];
+//          String interfaceName = params[1];
           String componentName = params[2];
           String objectName = params[3];
 
@@ -163,7 +163,7 @@ public class Util {
     state.stream().filter(l -> l.getPropertyName().equals("resolves")).forEach(l -> {
       String[] params = l.getParameters().stream().map(p -> p.getName()).collect(Collectors.toList()).toArray(new String[] {});
       String parentObjectName = params[0];
-      String interfaceName = params[1];
+//      String interfaceName = params[1];
       String objectName = params[3];
 
       ComponentInstance object = objectMap.get(objectName);

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import jaicore.search.algorithms.standard.core.INodeEvaluator;
+import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
 
 public interface IORGraphSearch<T, A, V extends Comparable<V>> {
@@ -28,6 +29,8 @@ public interface IORGraphSearch<T, A, V extends Comparable<V>> {
 	public Node<T, V> getInternalRepresentationOf(T node);
 
 	public List<Node<T, V>> getOpenSnapshot();
+	
+	public GraphGenerator<T, A> getGraphGenerator();
 	
 	public INodeEvaluator<T, V> getNodeEvaluator();
 }

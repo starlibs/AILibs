@@ -1,4 +1,3 @@
-
 package de.upb.crc901.automl.hascowekaml;
 
 import java.io.File;
@@ -29,8 +28,10 @@ import jaicore.ml.evaluation.MulticlassEvaluator;
 import jaicore.ml.evaluation.TimeoutableEvaluator;
 import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionSolution;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
+import jaicore.search.algorithms.interfaces.ISolutionEvaluator;
 import jaicore.search.algorithms.standard.core.INodeEvaluator;
 import jaicore.search.algorithms.standard.uncertainty.OversearchAvoidanceConfig;
+import jaicore.search.structure.core.GraphGenerator;
 import weka.classifiers.Classifier;
 import weka.core.Instances;
 
@@ -51,8 +52,8 @@ public class HASCOForWekaML implements IObservableGraphAlgorithm<TFDNode, String
 	private OversearchAvoidanceConfig<TFDNode> oversearchAvoidanceConfig = new OversearchAvoidanceConfig<>(
 			OversearchAvoidanceConfig.OversearchAvoidanceMode.NONE);
 	private Collection<Object> listeners = new ArrayList<>();
-	private HASCOFD<Classifier>.HASCOSolutionIterator hascoRun;
-	private HASCOFD<Classifier> hasco;
+	private HASCOFD<Classifier, Double>.HASCOSolutionIterator hascoRun;
+	private HASCOFD<Classifier, Double> hasco;
 	private INodeEvaluator<TFDNode, Double> preferredNodeEvaluator = null;
 	private final File wekaSpaceConfigurationFile; // this is a hasco file describing the
 	private int timeoutForSingleFEvaluation = -1;
@@ -75,11 +76,13 @@ public class HASCOForWekaML implements IObservableGraphAlgorithm<TFDNode, String
 		if (this.isCanceled) {
 			throw new IllegalStateException("HASCO has already been canceled. Cannot gather results anymore.");
 		}
+		logger.info("Starting to gather solutions for {}ms.", timeoutInMS);
 
 		long start = System.currentTimeMillis();
 		long deadline = start + timeoutInMS;
 
 		/* configuring existing components */
+		logger.debug("Loading components ...");
 		ComponentLoader cl = new ComponentLoader();
 		cl.loadComponents(this.wekaSpaceConfigurationFile);
 
@@ -105,22 +108,22 @@ public class HASCOForWekaML implements IObservableGraphAlgorithm<TFDNode, String
 		}
 
 		/* create algorithm */
-		HASCOFD<Classifier> hasco = new HASCOFD<>(new WEKAPipelineFactory(), this.preferredNodeEvaluator,
+		hasco = new HASCOFD<>(cl.getComponents(), cl.getParamConfigs(), new WEKAPipelineFactory(), this.preferredNodeEvaluator,
 				"AbstractClassifier", ce, this.oversearchAvoidanceConfig);
-
+		
 		if (this.loggerName != null && this.loggerName.length() > 0) {
 			hasco.setLoggerName(this.loggerName + ".hasco");
 		}
 
-		hasco.addComponents(cl.getComponents());
-		hasco.addParamRefinementConfigurations(cl.getParamConfigs());
 
 		/* add all listeners to HASCO */
+		logger.info("Registering listeners ...");
 		this.listeners.forEach(l -> hasco.registerListener(l));
 
 		/* run HASCO */
 		this.hascoRun = hasco.iterator();
 		boolean deadlineReached = false;
+		logger.info("Entering loop ...");
 		while (!this.isCanceled && this.hascoRun.hasNext()
 				&& (timeoutInMS <= 0 || !(deadlineReached = System.currentTimeMillis() >= deadline))) {
 			HASCOForWekaMLSolution nextSolution = new HASCOForWekaMLSolution(this.hascoRun.next());
@@ -131,6 +134,8 @@ public class HASCOForWekaML implements IObservableGraphAlgorithm<TFDNode, String
 		} else if (this.isCanceled) {
 			this.logger.info("Interrupting HASCO due to cancel.");
 		}
+		else
+			this.logger.info("HASCO finished.");
 	}
 
 	public void cancel() {
@@ -191,4 +196,13 @@ public class HASCOForWekaML implements IObservableGraphAlgorithm<TFDNode, String
 		}
 	}
 
+	public GraphGenerator<TFDNode,String> getGraphGenerator() {
+		if (hasco == null)
+			throw new IllegalArgumentException("HASCOForWEKAML does not produce the actual HASCO object prior to knowing the data, which are passed when invoking \"gatherSolutions\". This has apparently not happened yet, so I cannot tell the graph generator neither at this time.");
+		return hasco.getGraphGenerator();
+	}
+	
+	public ISolutionEvaluator<TFDNode, Double> getSolutionEvaluator() {
+		return hasco.getSolutionEvaluator();
+	}
 }

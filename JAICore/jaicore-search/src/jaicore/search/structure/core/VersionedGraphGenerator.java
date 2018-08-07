@@ -80,7 +80,7 @@ public class VersionedGraphGenerator<T,A> implements VersionedGraphGeneratorInte
 			SuccessorGenerator<T,A> successorGenerator = (SuccessorGenerator<T, A>) gen.getSuccessorGenerator();
 			Collection<NodeExpansionDescription<T,A>> successorDescriptions = successorGenerator.generateSuccessors(nodeToExpand.getNode());
 			
-			Collection<NodeExpansionDescription<VersionedDomainNode<T>,A>> versionedDescriptions = new ArrayList<>();
+			List<NodeExpansionDescription<VersionedDomainNode<T>,A>> versionedDescriptions = new ArrayList<>();
 			
 			successorDescriptions.stream().forEach(description->
 						versionedDescriptions.add(new NodeExpansionDescription<>(nodeToExpand, new VersionedDomainNode<>(description.getTo(), this.getNextID()), description.getAction(), description.getTypeOfToNode()))
