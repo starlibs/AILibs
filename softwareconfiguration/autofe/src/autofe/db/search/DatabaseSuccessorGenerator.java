@@ -39,7 +39,7 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 	}
 
 	@Override
-	public Collection<NodeExpansionDescription<DatabaseNode, String>> generateSuccessors(DatabaseNode node) {
+	public List<NodeExpansionDescription<DatabaseNode, String>> generateSuccessors(DatabaseNode node) {
 		// Check whether node contains intermediate feature
 		BackwardFeature intermediateFeature = getIntermediateFeature(node.getSelectedFeatures());
 
@@ -50,9 +50,9 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 		}
 	}
 
-	private Collection<NodeExpansionDescription<DatabaseNode, String>> computeForNonIntermediateNode(
+	private List<NodeExpansionDescription<DatabaseNode, String>> computeForNonIntermediateNode(
 			DatabaseNode node) {
-		Collection<NodeExpansionDescription<DatabaseNode, String>> toReturn = new ArrayList<>();
+		List<NodeExpansionDescription<DatabaseNode, String>> toReturn = new ArrayList<>();
 
 		Set<Attribute> forwardAttributes = db.getForwardAttributes();
 
@@ -126,8 +126,8 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 		return toReturn;
 	}
 
-	private Collection<NodeExpansionDescription<DatabaseNode, String>> computeForIntermediateNode(DatabaseNode node) {
-		Collection<NodeExpansionDescription<DatabaseNode, String>> toReturn = new ArrayList<>();
+	private List<NodeExpansionDescription<DatabaseNode, String>> computeForIntermediateNode(DatabaseNode node) {
+		List<NodeExpansionDescription<DatabaseNode, String>> toReturn = new ArrayList<>();
 
 		BackwardFeature intermediateFeature = getIntermediateFeature(node.getSelectedFeatures());
 
