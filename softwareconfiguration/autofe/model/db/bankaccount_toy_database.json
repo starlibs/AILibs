@@ -135,8 +135,6 @@
     }
   ],
   "jdbcDriver": "sqlite",
-  "jdbcUrl" : "model/db/bankaccount_toy_database.db",
-  "jdbcUsername" : "",
-  "jdbcPassword" : ""
+  "jdbcDatabase" : "model/db/bankaccount_toy_database.db"
 
 }

@@ -24,6 +24,8 @@ public class Database {
 
 	private String jdbcPassword;
 
+	private String jdbcDatabase;
+
 	public List<Table> getTables() {
 		return tables;
 	}
@@ -81,11 +83,19 @@ public class Database {
 	}
 
 	@Override
+	public String toString() {
+		return "Database [tables=" + tables + ", backwards=" + backwards + ", forwards=" + forwards + ", jdbcDriver="
+				+ jdbcDriver + ", jdbcUrl=" + jdbcUrl + ", jdbcUsername=" + jdbcUsername + ", jdbcPassword="
+				+ jdbcPassword + ", jdbcDatabase=" + jdbcDatabase + "]";
+	}
+
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((backwards == null) ? 0 : backwards.hashCode());
 		result = prime * result + ((forwards == null) ? 0 : forwards.hashCode());
+		result = prime * result + ((jdbcDatabase == null) ? 0 : jdbcDatabase.hashCode());
 		result = prime * result + ((jdbcDriver == null) ? 0 : jdbcDriver.hashCode());
 		result = prime * result + ((jdbcPassword == null) ? 0 : jdbcPassword.hashCode());
 		result = prime * result + ((jdbcUrl == null) ? 0 : jdbcUrl.hashCode());
@@ -112,6 +122,11 @@ public class Database {
 			if (other.forwards != null)
 				return false;
 		} else if (!forwards.equals(other.forwards))
+			return false;
+		if (jdbcDatabase == null) {
+			if (other.jdbcDatabase != null)
+				return false;
+		} else if (!jdbcDatabase.equals(other.jdbcDatabase))
 			return false;
 		if (jdbcDriver == null) {
 			if (other.jdbcDriver != null)
@@ -141,11 +156,12 @@ public class Database {
 		return true;
 	}
 
-	@Override
-	public String toString() {
-		return "Database [tables=" + tables + ", backwards=" + backwards + ", forwards=" + forwards + ", jdbcDriver="
-				+ jdbcDriver + ", jdbcUrl=" + jdbcUrl + ", jdbcUsername=" + jdbcUsername + ", jdbcPassword="
-				+ jdbcPassword + "]";
+	public String getJdbcDatabase() {
+		return jdbcDatabase;
+	}
+
+	public void setJdbcDatabase(String jdbcDatabase) {
+		this.jdbcDatabase = jdbcDatabase;
 	}
 
 	public Set<Attribute> getForwardAttributes() {
