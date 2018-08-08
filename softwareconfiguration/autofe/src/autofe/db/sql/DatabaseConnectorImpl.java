@@ -81,7 +81,7 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 			Table targetTable = DBUtils.getTargetTable(db);
 			autofe.db.model.database.Attribute primaryKey = DBUtils.getPrimaryKey(targetTable, db);
 			autofe.db.model.database.Attribute target = DBUtils.getTargetAttribute(db);
-			sql.append(String.format(" NATURAL JOIN (SELECT %1$s, %2$s FROM %3$s)", primaryKey.getName(),
+			sql.append(String.format(" NATURAL JOIN (SELECT %1$s, %2$s FROM %3$s) TARGET", primaryKey.getName(),
 					target.getName(), targetTable.getName()));
 
 			instances = setupInstances(features, target);
