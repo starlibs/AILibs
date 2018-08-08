@@ -441,6 +441,8 @@ public class PerformanceKnowledgeBase {
 		if (!this.performanceInstancesByIdentifier.get(benchmarkName).containsKey(identifier))
 			return false;
 		Instances instances = performanceInstancesByIdentifier.get(benchmarkName).get(identifier);
+		if(instances.numInstances()<minNum)
+			return false;
 		for (int i = 0; i < instances.numAttributes()-1; i++) {
 			// if the attribute is nominal or string but the number of values is smaller
 			// than k, skip it

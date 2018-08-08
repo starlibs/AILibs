@@ -41,7 +41,7 @@ public class MLPlanExampleJ {
 
 		/* initialize mlplan, and let it run for 30 seconds */
 		int timeoutInSeconds = 600;
-		MLPlanJ mlplan = new MLPlanJ(new File("model/weka/weka-all-autoweka.json"), 0.08d, 8, true);
+		MLPlanJ mlplan = new MLPlanJ(new File("model/weka/weka-all-autoweka.json"), 0.08d, 16, true);
 		mlplan.setLoggerName("mlplan");
 
 		mlplan.setTimeout(timeoutInSeconds);
