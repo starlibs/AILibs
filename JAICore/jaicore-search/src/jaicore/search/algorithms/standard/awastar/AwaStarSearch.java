@@ -30,7 +30,7 @@ public class AwaStarSearch<T, A, V extends Comparable<V>>{
 		private OpenCollection<Node<T, V>> closedList, suspendList, openList;
 		private int windowSize;
 		private V bestScore;
-		private List<Node<T, V>> bestSolution;
+		private List<T> bestSolution;
 		
 		public Search(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, V> nodeEvaluator) throws Throwable {
 			successorGenerator = graphGenerator.getSuccessorGenerator();
@@ -47,7 +47,7 @@ public class AwaStarSearch<T, A, V extends Comparable<V>>{
 			bestScore = null;
 		}
 
-		public List<Node<T, V>> nextSolution(){
+		public List<T> nextSolution(){
 			closedList.addAll(openList);
 			openList.addAll(suspendList);
 			suspendList.clear();
@@ -60,7 +60,7 @@ public class AwaStarSearch<T, A, V extends Comparable<V>>{
 			}
 		}
 		
-		private List<Node<T, V>> windowAStar() {
+		private List<T> windowAStar() {
 			int currentLevel = -1;
 			while (!openList.isEmpty()) {
 				Node<T, V> n = openList.peek();
@@ -81,7 +81,7 @@ public class AwaStarSearch<T, A, V extends Comparable<V>>{
 						if (n.isGoal()) {
 							n.setGoal(true);
 							bestScore = n.getInternalLabel();
-							bestSolution = n.path();
+							bestSolution = n.externalPath();
 							return bestSolution;
 						}
 						Collection<NodeExpansionDescription<T, A>> successors = successorGenerator.generateSuccessors(n.getPoint());
@@ -135,7 +135,7 @@ public class AwaStarSearch<T, A, V extends Comparable<V>>{
 		this.search = new Search(graphGenerator, nodeEvaluator);
 	}
 
-	public List<Node<T, V>> nextSolution() {
+	public List<T> nextSolution() {
 		return search.nextSolution();
 	}
 
