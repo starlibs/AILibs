@@ -2,16 +2,10 @@ package jaicore.search.algorithms.standard.awastar;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jaicore.search.algorithms.interfaces.ISolutionEvaluator;
 import jaicore.search.algorithms.standard.core.INodeEvaluator;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
@@ -33,19 +27,15 @@ public class AwaStarSearch<T, A, V extends Comparable<V>>{
 		private SuccessorGenerator<T, A> successorGenerator;
 		private GoalTester<T> goalTester;
 		private INodeEvaluator<T, V> nodeEvaluator;
-		private ISolutionEvaluator<T, V> solutionEvaluator;
 		private OpenCollection<Node<T, V>> closedList, suspendList, openList;
 		private int windowSize;
 		private V bestScore;
 		private List<Node<T, V>> bestSolution;
-		private V bestSolutionScore;
-		private List<Node<T, V>> bestCompleteSolution;
 		
-		public Search(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, V> nodeEvaluator, ISolutionEvaluator<T, V> solutionEvaluator) throws Throwable {
+		public Search(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, V> nodeEvaluator) throws Throwable {
 			successorGenerator = graphGenerator.getSuccessorGenerator();
 			goalTester = graphGenerator.getGoalTester();
 			this.nodeEvaluator = nodeEvaluator;
-			this.solutionEvaluator = solutionEvaluator;
 			closedList = new PriorityQueueOpen<>();
 			suspendList = new PriorityQueueOpen<>();
 			openList = new PriorityQueueOpen<>();
@@ -55,20 +45,19 @@ public class AwaStarSearch<T, A, V extends Comparable<V>>{
 			rootNode.setAnnotation("level", 0);
 			openList.add(rootNode);
 			bestScore = null;
-			bestSolutionScore = null;
 		}
 
-		public List<Node<T, V>> search(long timeout){
-			long t = System.currentTimeMillis();
-			long end = t + timeout * 1000;
-			do {
-				closedList.addAll(openList);
-				openList.addAll(suspendList);
-				suspendList.clear();
-				bestSolution = windowAStar();
-				windowSize++;
-			} while (!suspendList.isEmpty() && System.currentTimeMillis() < end);
-			return bestCompleteSolution;
+		public List<Node<T, V>> nextSolution(){
+			closedList.addAll(openList);
+			openList.addAll(suspendList);
+			suspendList.clear();
+			bestSolution = windowAStar();
+			windowSize++;
+			if (suspendList.isEmpty() && bestSolution == null) {
+				return null;
+			} else {
+				return bestSolution;
+			}
 		}
 		
 		private List<Node<T, V>> windowAStar() {
@@ -93,19 +82,6 @@ public class AwaStarSearch<T, A, V extends Comparable<V>>{
 							n.setGoal(true);
 							bestScore = n.getInternalLabel();
 							bestSolution = n.path();
-							V solutionScore;
-							try {
-								solutionScore = solutionEvaluator.evaluateSolution(n.externalPath());
-								if (solutionScore != null && bestSolutionScore != null && bestSolutionScore.compareTo(solutionScore) <= 0) {
-									bestSolutionScore = solutionScore;
-									bestCompleteSolution = n.path();
-								} else if (solutionScore != null && bestSolutionScore == null) {
-									bestSolutionScore = solutionScore;
-									bestCompleteSolution = n.path();
-								}
-							} catch (Exception e) {
-								logger.warn(e.getMessage());
-							}
 							return bestSolution;
 						}
 						Collection<NodeExpansionDescription<T, A>> successors = successorGenerator.generateSuccessors(n.getPoint());
@@ -155,12 +131,12 @@ public class AwaStarSearch<T, A, V extends Comparable<V>>{
 
 	private Search search; 
 	
-	public AwaStarSearch(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, V> nodeEvaluator, ISolutionEvaluator<T, V> solutionEvaluator) throws Throwable {
-		this.search = new Search(graphGenerator, nodeEvaluator, solutionEvaluator);
+	public AwaStarSearch(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, V> nodeEvaluator) throws Throwable {
+		this.search = new Search(graphGenerator, nodeEvaluator);
 	}
 
-	public List<Node<T, V>> search(int timeout) {
-		return search.search(timeout);
+	public List<Node<T, V>> nextSolution() {
+		return search.nextSolution();
 	}
 
 }
