@@ -9,7 +9,7 @@ import java.util.Random;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
 
-import de.upb.crc901.automl.hascowekaml.HASCOForWekaML;
+import de.upb.crc901.automl.hascowekaml.HASCOClassificationML;
 import hasco.core.HASCOProblemReduction;
 import hasco.serialization.ComponentLoader;
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
@@ -39,7 +39,7 @@ public class MetaMinerExample {
 
 		/* initialize mlplan, and let it run for 30 seconds */
 		File configFile = new File("model/weka/weka-all-autoweka.json");
-		HASCOForWekaML hasco = new HASCOForWekaML(configFile);
+		HASCOClassificationML hasco = new HASCOClassificationML(configFile);
 		ComponentLoader componentLoader = new ComponentLoader();
 		componentLoader.loadComponents(configFile);
 

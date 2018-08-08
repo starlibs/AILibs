@@ -61,8 +61,8 @@ public class HASCOClassificationML implements IObservableGraphAlgorithm<TFDNode,
 	}
 
 	// FIXME: this might be rather a hyperparameter than something hardcoded
-	private OversearchAvoidanceConfig<TFDNode> oversearchAvoidanceConfig = new OversearchAvoidanceConfig<>(
-			OversearchAvoidanceConfig.OversearchAvoidanceMode.NONE);
+	private OversearchAvoidanceConfig<TFDNode, Double> oversearchAvoidanceConfig = new OversearchAvoidanceConfig<>(
+			OversearchAvoidanceConfig.OversearchAvoidanceMode.NONE, 123l);
 
 	/** Flag whether the process has been canceled via external call. */
 	private boolean isCanceled = false;
