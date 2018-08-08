@@ -3,6 +3,7 @@ package jaicore.search.algorithms.standard.uncertainty;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,8 +11,8 @@ import jaicore.search.algorithms.interfaces.IPathUnification;
 import jaicore.search.algorithms.interfaces.ISolutionEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import jaicore.search.algorithms.standard.bestfirst.RandomCompletionEvaluator;
-import jaicore.search.algorithms.standard.core.NodeAnnotationEvent;
 import jaicore.search.algorithms.standard.core.SolutionEventBus;
+import jaicore.search.algorithms.standard.core.events.NodeAnnotationEvent;
 import jaicore.search.algorithms.standard.rdfs.RandomizedDepthFirstSearch;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
@@ -131,9 +132,7 @@ public class UncertaintyRandomCompletionEvaluator<T, N, V extends Comparable<V>>
 							/* now evaluate this solution */
 							j++;
 							try {
-								logger.info("Computing value.");
 								V val = getFValueOfSolutionPath(completedPath);
-								logger.info("Computed value {}.", val);
 								if (val != null) {
 									evaluations.add(val);
 									if (best == null || val.compareTo(best) < 0) {
@@ -143,10 +142,8 @@ public class UncertaintyRandomCompletionEvaluator<T, N, V extends Comparable<V>>
 								}
 							} catch (InterruptedException e) {
 								interrupted = true;
-								logger.info("Computation of quality of solution {} has been interrupted. Canceling.", pathCompletion);
 								break;
 							} catch (Throwable ex) {
-								logger.info("Computation of quality of solution {} failed. Trying another one.", pathCompletion);
 								if (j ==maxSamples) {
 									logger.warn("Too many retry attempts, giving up.");
 									throw ex;
@@ -160,7 +157,7 @@ public class UncertaintyRandomCompletionEvaluator<T, N, V extends Comparable<V>>
 
 						/* add number of samples to node  */
 						n.setAnnotation("fRPSamples", i);
-						uncertainty = this.uncertaintyCalculation.calculateUncertainty((Node<T, V>)n, completedPaths, evaluations);
+						uncertainty = this.uncertaintyCalculation.calculateUncertainty(n, completedPaths, evaluations);
 
 						if (bestCompletion == null) {
 							if (interrupted)

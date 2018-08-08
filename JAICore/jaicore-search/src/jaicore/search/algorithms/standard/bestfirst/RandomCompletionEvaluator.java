@@ -24,10 +24,10 @@ import jaicore.search.algorithms.parallel.parallelexploration.distributed.interf
 import jaicore.search.algorithms.standard.core.ICancelableNodeEvaluator;
 import jaicore.search.algorithms.standard.core.IGraphDependentNodeEvaluator;
 import jaicore.search.algorithms.standard.core.ISolutionReportingNodeEvaluator;
-import jaicore.search.algorithms.standard.core.NodeAnnotationEvent;
-import jaicore.search.algorithms.standard.core.SolutionAnnotationEvent;
 import jaicore.search.algorithms.standard.core.SolutionEventBus;
-import jaicore.search.algorithms.standard.core.SolutionFoundEvent;
+import jaicore.search.algorithms.standard.core.events.NodeAnnotationEvent;
+import jaicore.search.algorithms.standard.core.events.SolutionAnnotationEvent;
+import jaicore.search.algorithms.standard.core.events.SolutionFoundEvent;
 import jaicore.search.algorithms.standard.rdfs.RandomizedDepthFirstSearch;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;

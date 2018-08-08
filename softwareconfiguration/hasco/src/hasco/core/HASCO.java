@@ -2,13 +2,9 @@ package hasco.core;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Random;
 
 import org.slf4j.Logger;
@@ -21,7 +17,6 @@ import hasco.events.HASCORunTerminatedEvent;
 import hasco.events.HASCOSolutionEvaluationEvent;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
-import hasco.model.NumericParameterDomain;
 import hasco.model.Parameter;
 import hasco.model.ParameterRefinementConfiguration;
 import hasco.query.Factory;
@@ -29,25 +24,15 @@ import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.IObjectEvaluator;
 import jaicore.graph.IObservableGraphAlgorithm;
 import jaicore.logging.LoggerUtil;
-import jaicore.logic.fol.structure.CNFFormula;
-import jaicore.logic.fol.structure.ConstantParam;
-import jaicore.logic.fol.structure.Literal;
-import jaicore.logic.fol.structure.LiteralParam;
 import jaicore.logic.fol.structure.Monom;
-import jaicore.logic.fol.structure.VariableParam;
-import jaicore.logic.fol.theories.EvaluablePredicate;
 import jaicore.planning.algorithms.IObservableGraphBasedHTNPlanningAlgorithm;
 import jaicore.planning.algorithms.IObservableGraphBasedHTNPlanningAlgorithmFactory;
 import jaicore.planning.algorithms.IPlanningSolution;
-import jaicore.planning.model.ceoc.CEOCOperation;
 import jaicore.planning.model.core.Action;
 import jaicore.planning.model.core.Operation;
 import jaicore.planning.model.core.PlannerUtil;
-import jaicore.planning.model.task.ceocipstn.CEOCIPSTNPlanningDomain;
 import jaicore.planning.model.task.ceocipstn.CEOCIPSTNPlanningProblem;
-import jaicore.planning.model.task.ceocipstn.OCIPMethod;
 import jaicore.planning.model.task.stn.Method;
-import jaicore.planning.model.task.stn.TaskNetwork;
 import jaicore.search.algorithms.interfaces.IObservableORGraphSearchFactory;
 import jaicore.search.algorithms.interfaces.ISolutionEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.RandomCompletionEvaluator;
@@ -65,32 +50,20 @@ import jaicore.search.structure.core.GraphGenerator;
 public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution>
 		implements Iterable<Solution<R, T, V>>, IObservableGraphAlgorithm<N, A>, ILoggingCustomizable {
 
-	// component selection
-	private static final String RESOLVE_COMPONENT_IFACE_PREFIX = "1_tResolve";
-	private static final String SATISFY_PREFIX = "1_satisfy";
-
-	// component configuration
-	private static final String REFINE_PARAMETERS_PREFIX = "2_tRefineParamsOf";
-	private static final String REFINE_PARAMETER_PREFIX = "2_tRefineParam";
-	private static final String DECLARE_CLOSED_PREFIX = "2_declareClosed";
-//	private static final String REDEF_CLOSED_PREFIX = "2_satisfy";
-	private static final String REDEF_VALUE_PREFIX = "2_redefValue";
-
 	/* domain description */
 	private final Collection<Component> components;
 	private final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig;
 	private Factory<? extends T> factory;
 
 	/* query */
-	private final String nameOfRequiredInterface;
 	private final IObjectEvaluator<T, V> benchmark;
 
 	/* search algorithm configuration */
 	private final IObservableGraphBasedHTNPlanningAlgorithmFactory<R, N, A, V> plannerFactory;
 	private final IObservableORGraphSearchFactory<N, A, V> searchFactory;
 	private final IHASCOSearchSpaceUtilFactory<N, A, V> searchSpaceUtilFactory;
-	private final INodeEvaluator<N, V> nodeEvaluator;
 	private final RandomCompletionEvaluator<N, V> randomCompletionEvaluator;
+	private INodeEvaluator<N, V> preferredNodeEvaluator;
 
 	/* event buses for evaluation events */
 	private final EventBus solutionEvaluationEventBus = new EventBus();
@@ -99,7 +72,6 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 	private int timeout;
 	private int numberOfCPUs = 1;
 	private int randomSeed;
-	private boolean configureParams = true;
 
 	/* parameters for state of a single run */
 	private T bestRecognizedSolution;
@@ -111,18 +83,17 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 	private String loggerName;
 	
 	/* run-specific options */
-	private final CEOCIPSTNPlanningDomain domain;
+	private final HASCOProblemReduction reduction;
 	private final CEOCIPSTNPlanningProblem problem;
-	private final CNFFormula knowledge;
-	private final Monom init;
-	private final IObservableGraphBasedHTNPlanningAlgorithm<R,N,A,V> planner;
+	private IObservableGraphBasedHTNPlanningAlgorithm<R,N,A,V> planner;
+	
 	
 	private ISolutionEvaluator<N, V> solutionEvaluator = new ISolutionEvaluator<N, V>() {
 		@Override
 		public V evaluateSolution(final List<N> solutionPath) throws Exception {
 			List<Action> plan = HASCO.this.searchSpaceUtilFactory.getPathToPlanConverter().getPlan(solutionPath);
 			ComponentInstance composition = Util.getSolutionCompositionForPlan(HASCO.this.components,
-					HASCO.this.getInitState(), plan);
+					reduction.getInitState(), plan);
 			T solution = HASCO.this.getObjectFromPlan(plan);
 			V scoreOfSolution = HASCO.this.benchmark.evaluate(solution);
 			if (HASCO.this.scoreOfBestRecognizedSolution == null
@@ -147,8 +118,7 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 
 	public HASCO(final Collection<Component> components, final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig, final IObservableGraphBasedHTNPlanningAlgorithmFactory<R, N, A, V> plannerFactory,
 			final IObservableORGraphSearchFactory<N, A, V> searchFactory,
-			final IHASCOSearchSpaceUtilFactory<N, A, V> searchSpaceUtilFactory,
-			final INodeEvaluator<N, V> nodeEvaluator, final Factory<? extends T> factory,
+			final IHASCOSearchSpaceUtilFactory<N, A, V> searchSpaceUtilFactory, final Factory<? extends T> factory,
 			final String nameOfRequiredInterface, final IObjectEvaluator<T, V> benchmark) {
 		super();
 		
@@ -159,20 +129,15 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 		/* define search relevant factories and evaluators */
 		this.plannerFactory = plannerFactory;
 		this.searchFactory = searchFactory;
-		// FIXME number of random sub samples should be configurable from the outside!
 		this.randomCompletionEvaluator = new RandomCompletionEvaluator<>(new Random(this.randomSeed), 3,
 				searchSpaceUtilFactory.getPathUnifier(), this.solutionEvaluator);
-		this.nodeEvaluator = new AlternativeNodeEvaluator<>(nodeEvaluator, this.randomCompletionEvaluator);
 		this.factory = factory;
 		this.searchSpaceUtilFactory = searchSpaceUtilFactory;
-		this.nameOfRequiredInterface = nameOfRequiredInterface;
 		this.benchmark = benchmark;
 		
 		/* set run specific options */
-		this.domain = this.getPlanningDomain();
-		this.knowledge = new CNFFormula();
-		this.init = HASCO.this.getInitState();
-		this.problem = HASCO.this.getPlanningProblem(this.domain, this.knowledge, this.init);
+		reduction = new HASCOProblemReduction(components, paramRefinementConfig, nameOfRequiredInterface, true);
+		this.problem = reduction.getPlanningProblem();
 		if (logger.isDebugEnabled()) {
 			StringBuilder opSB = new StringBuilder();
 			for (Operation op : problem.getDomain().getOperations()) {
@@ -184,10 +149,8 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 				methodSB.append("\n\t\t");
 				methodSB.append(method);
 			}
-			logger.debug("The HTN problem created by HASCO is defined as follows:\n\tInit State: {}\n\tOperations:{}\n\tMethods:{}", init, opSB.toString(), methodSB.toString());
+			logger.debug("The HTN problem created by HASCO is defined as follows:\n\tInit State: {}\n\tOperations:{}\n\tMethods:{}", reduction.getInitState(), opSB.toString(), methodSB.toString());
 		}
-		this.planner = HASCO.this.plannerFactory.newAlgorithm(this.problem, HASCO.this.searchFactory,
-				HASCO.this.nodeEvaluator, HASCO.this.numberOfCPUs);
 	}
 
 	public IObservableORGraphSearchFactory<N, A, V> getSearchFactory() {
@@ -213,6 +176,10 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 		private boolean canceled = false;
 
 		private HASCOSolutionIterator() {
+			
+			/* set node evaluator based on the currently defined preferred node evaluator */
+			INodeEvaluator<N, V> nodeEvaluator = preferredNodeEvaluator == null ? randomCompletionEvaluator : new AlternativeNodeEvaluator<>(preferredNodeEvaluator, randomCompletionEvaluator);
+			HASCO.this.planner = HASCO.this.plannerFactory.newAlgorithm(HASCO.this.problem, HASCO.this.searchFactory, nodeEvaluator, HASCO.this.numberOfCPUs);
 			this.planIterator = planner.iterator();
 		}
 
@@ -235,9 +202,9 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 				
 				/* updating logger name of the planner */
 				if (HASCO.this.loggerName != null && HASCO.this.loggerName.length() > 0
-						&& HASCO.this.planner instanceof ILoggingCustomizable) {
-					logger.info("Setting logger name of {} to {}", HASCO.this.planner, loggerName + ".planner");
-					((ILoggingCustomizable) HASCO.this.planner).setLoggerName(loggerName + ".planner");
+						&& planner instanceof ILoggingCustomizable) {
+					logger.info("Setting logger name of {} to {}", planner, loggerName + ".planner");
+					((ILoggingCustomizable) planner).setLoggerName(loggerName + ".planner");
 				}
 
 				/* register listeners */
@@ -264,7 +231,7 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 			R plan = this.planIterator.next();
 			Map<String, Object> solutionAnnotations = planner.getAnnotationsOfSolution(plan);
 			ComponentInstance objectInstance = Util.getSolutionCompositionForPlan(HASCO.this.components,
-					HASCO.this.getInitState(), plan.getPlan());
+					reduction.getInitState(), plan.getPlan());
 			@SuppressWarnings("unchecked")
 			Solution<R, T, V> solution = new Solution<>(objectInstance, plan,
 					HASCO.this.getObjectFromPlan(plan.getPlan()), (V) solutionAnnotations.get("f"),
@@ -290,7 +257,7 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 	}
 
 	public T getObjectFromPlan(final List<Action> plan) {
-		Monom state = this.getInitState();
+		Monom state = reduction.getInitState();
 		for (Action a : plan) {
 			PlannerUtil.updateState(state, a);
 		}
@@ -309,224 +276,7 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 		return object;
 	}
 
-	private Monom getInitState() {
-		Monom init = new Monom();
-		this.getExistingInterfaces().forEach(s -> init.add(new Literal("iface('" + s + "')")));
-		init.add(new Literal("component('request')"));
-		return init;
-	}
-
-	private Collection<String> getExistingInterfaces() {
-		Collection<String> ifaces = new HashSet<>();
-		for (Component c : this.components) {
-			ifaces.addAll(c.getProvidedInterfaces());
-			ifaces.addAll(c.getRequiredInterfaces().values());
-		}
-		return ifaces;
-	}
-
-	private CEOCIPSTNPlanningDomain getPlanningDomain() {
-
-		/* create operations */
-		Collection<CEOCOperation> operations = new ArrayList<>();
-		for (Component c : this.components) {
-			for (String i : c.getProvidedInterfaces()) {
-				List<VariableParam> params = new ArrayList<>();
-				params.add(new VariableParam("c1"));
-				params.add(new VariableParam("c2"));
-				int j = 0;
-				Map<CNFFormula, Monom> addList = new HashMap<>();
-				Monom standardKnowledgeAboutNewComponent = new Monom(
-						"component(c2) & resolves(c1, '" + i + "', '" + c.getName() + "', c2)");
-				for (Parameter p : c.getParameters()) {
-					String paramIdentifier = "p" + (++j);
-					params.add(new VariableParam(paramIdentifier));
-
-					/* add the information about this parameter container */
-					List<LiteralParam> literalParams = new ArrayList<>();
-					literalParams.clear();
-					literalParams.add(new ConstantParam(c.getName()));
-					literalParams.add(new ConstantParam(p.getName()));
-					literalParams.add(new VariableParam("c2"));
-					literalParams.add(new VariableParam(paramIdentifier));
-					standardKnowledgeAboutNewComponent.add(new Literal("parameterContainer", literalParams));
-
-					/* add knowledge about initial value */
-					List<LiteralParam> valParams = new ArrayList<>();
-					valParams.add(new VariableParam(paramIdentifier));
-					if (p.isNumeric()) {
-						standardKnowledgeAboutNewComponent.add(new Literal(
-								"parameterFocus(c2, '" + p.getName() + "', '" + p.getDefaultValue() + "')"));
-						NumericParameterDomain np = (NumericParameterDomain) p.getDefaultDomain();
-						valParams.add(new ConstantParam("[" + np.getMin() + "," + np.getMax() + "]"));
-					} else {
-						valParams.add(new ConstantParam(p.getDefaultValue().toString()));
-					}
-					standardKnowledgeAboutNewComponent.add(new Literal("val", valParams));
-				}
-				int k = 0;
-				for (String requiredInterfaceID : c.getRequiredInterfaces().keySet()) {
-					String reqIntIdentifier = "sc" + (++k);
-					params.add(new VariableParam(reqIntIdentifier));
-
-					List<LiteralParam> literalParams = new ArrayList<>();
-					literalParams.clear();
-					literalParams.add(new ConstantParam(c.getName()));
-					literalParams.add(new ConstantParam(requiredInterfaceID));
-					literalParams.add(new VariableParam("c2"));
-					literalParams.add(new VariableParam(reqIntIdentifier));
-					standardKnowledgeAboutNewComponent.add(new Literal("interfaceIdentifier", literalParams));
-				}
-
-				addList.put(new CNFFormula(), standardKnowledgeAboutNewComponent);
-				CEOCOperation newOp = new CEOCOperation(SATISFY_PREFIX + i + "With" + c.getName(), params,
-						new Monom("component(c1)"), addList, new HashMap<>(), new ArrayList<>());
-				operations.add(newOp);
-			}
-		}
-
-		/* create operations for parameter initialization */
-		{
-			Map<CNFFormula, Monom> addList = new HashMap<>();
-			addList.put(new CNFFormula(), new Monom("val(container,newValue) & overwritten(container)"));
-			Map<CNFFormula, Monom> deleteList = new HashMap<>();
-			deleteList.put(new CNFFormula(), new Monom("val(container,previousValue)"));
-			operations.add(new CEOCOperation(REDEF_VALUE_PREFIX, "container,previousValue,newValue",
-					new Monom("val(container,previousValue)"), addList, deleteList, ""));
-			addList = new HashMap<>();
-			addList.put(new CNFFormula(), new Monom("closed(container)"));
-			deleteList = new HashMap<>();
-			operations.add(new CEOCOperation(DECLARE_CLOSED_PREFIX, "container", new Monom(), addList, deleteList, ""));
-		}
-
-		/* create methods */
-		Collection<OCIPMethod> methods = new ArrayList<>();
-		for (Component c : this.components) {
-
-			/*
-			 * create methods for the refinement of the interfaces offered by this component
-			 */
-			for (String i : c.getProvidedInterfaces()) {
-				List<VariableParam> params = new ArrayList<>();
-				VariableParam inputParam = new VariableParam("c1");
-				params.add(inputParam);
-				params.add(new VariableParam("c2"));
-				LinkedHashMap<String, String> requiredInterfaces = c.getRequiredInterfaces();
-				List<Literal> network = new ArrayList<>();
-
-				String refinementArguments = "";
-				int j = 0;
-				if (this.configureParams) {
-					for (j = 1; j <= c.getParameters().size(); j++) {
-						String paramIdentifier = "p" + j;
-						refinementArguments += ", " + paramIdentifier;
-					}
-				}
-
-				for (int k = 1; k <= requiredInterfaces.entrySet().size(); k++) {
-					refinementArguments += ",sc" + k;
-				}
-
-				int sc = 0;
-				network.add(
-						new Literal(SATISFY_PREFIX + i + "With" + c.getName() + "(c1,c2" + refinementArguments + ")"));
-				for (Entry<String, String> requiredInterface : requiredInterfaces.entrySet()) {
-					String paramName = "sc" + (++sc);
-					params.add(new VariableParam(paramName));
-					network.add(new Literal(
-							RESOLVE_COMPONENT_IFACE_PREFIX + requiredInterface.getValue() + "(c2," + paramName + ")"));
-				}
-
-				refinementArguments = "";
-				if (this.configureParams) {
-					for (j = 1; j <= c.getParameters().size(); j++) {
-						String paramIdentifier = "p" + j;
-						params.add(new VariableParam(paramIdentifier));
-						refinementArguments += ", " + paramIdentifier;
-					}
-				}
-				network.add(new Literal(REFINE_PARAMETERS_PREFIX + c.getName() + "(c1,c2" + refinementArguments + ")"));
-				List<VariableParam> outputs = new ArrayList<>(params);
-				outputs.remove(inputParam);
-				methods.add(new OCIPMethod("resolve" + i + "With" + c.getName(), params,
-						new Literal(RESOLVE_COMPONENT_IFACE_PREFIX + i + "(c1,c2)"), new Monom("component(c1)"),
-						new TaskNetwork(network), false, outputs, new Monom()));
-			}
-
-			/* create methods for choosing/refining parameters */
-			List<VariableParam> params = new ArrayList<>();
-			params.add(new VariableParam("c1"));
-			List<Literal> initNetwork = new ArrayList<>();
-			String refinementArguments = "";
-			int j = 0;
-
-			/*
-			 * go, in an ordering that is consistent with the pre-order on the params
-			 * imposed by the dependencies, over the set of params
-			 */
-			if (this.configureParams) {
-				for (Parameter p : c.getParameters()) {
-					String paramName = "p" + (++j);
-					refinementArguments += ", " + paramName;
-					params.add(new VariableParam(paramName));
-					initNetwork.add(new Literal(
-							REFINE_PARAMETER_PREFIX + p.getName() + "Of" + c.getName() + "(c2, " + paramName + ")"));
-					// if (p instanceof NumericParameter) {
-					methods.add(new OCIPMethod("ignoreParamRefinementFor" + p.getName() + "Of" + c.getName(),
-							"object, container, curval",
-							new Literal(
-									REFINE_PARAMETER_PREFIX + p.getName() + "Of" + c.getName() + "(object,container)"),
-							new Monom("parameterContainer('" + c.getName() + "', '" + p.getName()
-									+ "', object, container) & val(container,curval)"),
-							new TaskNetwork(DECLARE_CLOSED_PREFIX + "(container)"), false, "",
-							new Monom("notRefinable('" + c.getName() + "', object, '" + p.getName()
-									+ "', container, curval)")));
-
-					methods.add(new OCIPMethod("refineParam" + p.getName() + "Of" + c.getName(),
-							"object, container, curval, newval",
-							new Literal(
-									REFINE_PARAMETER_PREFIX + p.getName() + "Of" + c.getName() + "(object,container)"),
-							new Monom("parameterContainer('" + c.getName() + "', '" + p.getName()
-									+ "', object, container) & val(container,curval)"),
-							new TaskNetwork(REDEF_VALUE_PREFIX + "(container,curval,newval)"), false, "",
-							new Monom("isValidParameterRangeRefinement('" + c.getName() + "', object, '" + p.getName()
-									+ "', container, curval, newval)")));
-					// else
-					// throw new IllegalArgumentException(
-					// "Parameter " + p.getName() + " of type \"" + p.getClass() + "\" in component
-					// \"" + c.getName() +
-					// "\" is currently not supported.");
-				}
-				initNetwork.add(
-						new Literal(REFINE_PARAMETERS_PREFIX + c.getName() + "(c1,c2" + refinementArguments + ")"));
-				params = new ArrayList<>(params);
-				params.add(1, new VariableParam("c2"));
-				methods.add(new OCIPMethod("refineParamsOf" + c.getName(), params,
-						new Literal(REFINE_PARAMETERS_PREFIX + c.getName() + "(c1,c2" + refinementArguments + ")"),
-						new Monom("component(c1)"), new TaskNetwork(initNetwork), false, new ArrayList<>(),
-						new Monom("!refinementCompleted('" + c.getName() + "', c2)")));
-				methods.add(new OCIPMethod("closeRefinementOfParamsOf" + c.getName(), params,
-						new Literal(REFINE_PARAMETERS_PREFIX + c.getName() + "(c1,c2" + refinementArguments + ")"),
-						new Monom("component(c1)"), new TaskNetwork(), false, new ArrayList<>(),
-						new Monom("refinementCompleted('" + c.getName() + "', c2)")));
-			}
-		}
-		return new CEOCIPSTNPlanningDomain(operations, methods);
-	}
-
-	private CEOCIPSTNPlanningProblem getPlanningProblem(final CEOCIPSTNPlanningDomain domain,
-			final CNFFormula knowledge, final Monom init) {
-		Map<String, EvaluablePredicate> evaluablePredicates = new HashMap<>();
-		evaluablePredicates.put("isValidParameterRangeRefinement",
-				new isValidParameterRangeRefinementPredicate(this.components, this.paramRefinementConfig));
-		evaluablePredicates.put("notRefinable", new isNotRefinable(this.components, this.paramRefinementConfig));
-		evaluablePredicates.put("refinementCompleted",
-				new isRefinementCompletedPredicate(this.components, this.paramRefinementConfig));
-		return new CEOCIPSTNPlanningProblem(domain, knowledge, init,
-				new TaskNetwork(
-						RESOLVE_COMPONENT_IFACE_PREFIX + this.nameOfRequiredInterface + "('request', 'solution')"),
-				evaluablePredicates, new HashMap<>());
-	}
+	
 
 	protected void afterSearch() {
 	}
@@ -572,13 +322,7 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 		return new HASCOSolutionIterator();
 	}
 
-	public boolean isConfigureParams() {
-		return this.configureParams;
-	}
-
-	public void setConfigureParams(final boolean configureParams) {
-		this.configureParams = configureParams;
-	}
+	
 
 	@Override
 	public void registerListener(final Object listener) {
@@ -592,7 +336,10 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 	}
 	
 	public GraphGenerator<N, A> getGraphGenerator() {
-		return planner.getGraphGenerator();
+		if (planner != null)
+			return planner.getGraphGenerator();
+		else
+			return plannerFactory.newAlgorithm(problem, numberOfCPUs).getGraphGenerator();
 	}
 
 	@Override
@@ -606,5 +353,17 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 	@Override
 	public String getLoggerName() {
 		return this.loggerName;
+	}
+
+	public INodeEvaluator<N, V> getPreferredNodeEvaluator() {
+		return preferredNodeEvaluator;
+	}
+
+	public void setPreferredNodeEvaluator(INodeEvaluator<N, V> preferredNodeEvaluator) {
+		this.preferredNodeEvaluator = preferredNodeEvaluator;
+	}
+	
+	public void setNumberOfSamplesOfRandomCompletion(int numSamples) {
+		randomCompletionEvaluator.setNumberOfRandomCompletions(numSamples);
 	}
 }

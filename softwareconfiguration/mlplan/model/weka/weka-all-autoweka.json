@@ -3,7 +3,7 @@
 	"include": ["./weka-classifiers-autoweka.json", "./weka-preprocessors-autoweka.json"],
 	"components" : [ {
 	  	    "name" : "pipeline",
-	  	    "providedInterface" : [ "MLPipeline", "AbstractClassifier" ],
+	  	    "providedInterface" : [ "MLPipeline", "Classifier" ],
 	  	    "requiredInterface" : [
 	  	    	{
 	  	    		"id": "preprocessor",

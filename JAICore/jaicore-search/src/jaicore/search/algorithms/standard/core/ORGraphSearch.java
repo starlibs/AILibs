@@ -35,6 +35,10 @@ import jaicore.graphvisualizer.events.graphEvents.NodeRemovedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
 import jaicore.logging.LoggerUtil;
 import jaicore.search.algorithms.interfaces.IObservableORGraphSearch;
+import jaicore.search.algorithms.standard.core.events.NodeAnnotationEvent;
+import jaicore.search.algorithms.standard.core.events.SolutionAnnotationEvent;
+import jaicore.search.algorithms.standard.core.events.SolutionFoundEvent;
+import jaicore.search.algorithms.standard.core.events.SuccessorComputationCompletedEvent;
 import jaicore.search.structure.core.GraphEventBus;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
@@ -140,7 +144,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 				long startComputation = System.currentTimeMillis();
 				try {
 					label = nodeEvaluator.f(newNode);
-					
+
 					/* check whether the required time exceeded the timeout */
 					long fTime = System.currentTimeMillis() - startComputation;
 					if (timeoutForComputationOfF > 0 && fTime > timeoutForComputationOfF + 1000)
@@ -328,10 +332,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	}
 
 	private void labelNode(Node<T, V> node) throws Throwable {
-		logger.debug("Calling {} to compute label of node {}", nodeEvaluator, node.getPoint());
-		V fValue = nodeEvaluator.f(node);
-		logger.trace("Setting label of node {}", node.getPoint());
-		node.setInternalLabel(fValue);
+		node.setInternalLabel(nodeEvaluator.f(node));
 	}
 
 	/**
@@ -343,9 +344,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 			if (rootGenerator instanceof MultipleRootGenerator) {
 				Collection<Node<T, V>> roots = ((MultipleRootGenerator<T>) rootGenerator).getRoots().stream().map(n -> newNode(null, n)).collect(Collectors.toList());
 				for (Node<T, V> root : roots) {
-					logger.debug("Computing label for root {}", root);
 					labelNode(root);
-					logger.debug("Adding root {} to OPEN", root);
 					open.add(root);
 					root.setAnnotation("awa-level", 0);
 					logger.info("Labeled root with {}", root.getInternalLabel());
@@ -384,7 +383,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 		while(open.peek().getInternalLabel().compareTo(currentlyBestScore) < 0);
 		return currentlyBestSolution;
 	}
-
+	
 	/**
 	 * Find the shortest path to a goal starting from <code>start</code>.
 	 *
@@ -403,13 +402,13 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 		logger.info("Starting search for next solution. Size of OPEN is {}", open.size());
 		try {
 			initGraph();
-			logger.info("Initialized graph. Size of OPEN is {}", open.size());
 		} catch (Throwable e) {
 			e.printStackTrace();
 			return null;
 		}
 		if (!solutions.isEmpty()) {
 			logger.debug("Still have solution in cache, return it.");
+			logger.info("Returning solution {} with score {}", solutions.peek(), getAnnotationsOfReturnedSolution(solutions.peek()));
 			return solutions.poll();
 		}
 		do {
@@ -435,6 +434,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 			if (!solutions.isEmpty()) {
 				List<T> solution = solutions.poll();
 				logger.debug("Iteration of main loop terminated. Found a solution to return. Size of OPEN now {}", open.size());
+				logger.info("Returning solution {} with score {}", solution, getAnnotationsOfReturnedSolution(solution));
 				return solution;
 			}
 			logger.debug("Iteration of main loop terminated. Size of OPEN now {}. Number of active jobs: {}", open.size(), activeJobs.get());
@@ -452,7 +452,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 
 	/**
 	 * Makes a single expansion and returns solution paths.
-	 *
+	 * 
 	 * @return The last found solution path.
 	 */
 	public List<NodeExpansionDescription<T, A>> nextExpansion() {
@@ -473,10 +473,10 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 		if (beforeSelection()) {
 
 			Node<T, V> nodeToExpand = open.peek();
+			assert parentDiscarding == ParentDiscarding.ALL || !expanded.contains(nodeToExpand.getPoint()) : "Node " + nodeToExpand.getString()
+					+ " has been selected for the second time for expansion.";
 			if (nodeToExpand == null)
 				return;
-			// assert parentDiscarding == ParentDiscarding.ALL || !expanded.contains(nodeToExpand.getPoint()) : "Node " + nodeToExpand.getString()
-			// 		+ " has been selected for the second time for expansion.";
 			afterSelection(nodeToExpand);
 			step(nodeToExpand);
 		}
@@ -519,7 +519,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 
 		/* compute successors */
 		logger.debug("Start computation of successors");
-		final Collection<NodeExpansionDescription<T, A>> successorDescriptions = new ArrayList<>();
+		final List<NodeExpansionDescription<T, A>> successorDescriptions = new ArrayList<>();
 		{
 			Thread t = new Thread(new Runnable() {
 
@@ -550,7 +550,11 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 			}
 			logger.debug("Finished computation of successors");
 		}
-
+		
+		/* send event that successor nodes have been computed */
+		logger.debug("Sending SuccessorComputationCompletedEvent with {} successors for {}", successorDescriptions.size(), expandedNodeInternal);
+		graphEventBus.post(new SuccessorComputationCompletedEvent<>(expandedNodeInternal, successorDescriptions));
+		
 		/* attach successors to search graph */
 //		System.out.println(expanded.contains(expandedNodeInternal.getPoint()));
 		if (additionalThreadsForExpansion < 1) {
@@ -702,7 +706,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 
 		/* check loop */
 		assert parent == null || !parent.externalPath().contains(t2) : "There is a loop in the underlying graph. The following path contains the last node twice: " + newNode.externalPath().stream().map(n -> n.toString()).reduce("", (s,t) -> s + "\n\t\t" + t);
-
+		
 		/* currently, we only support tree search */
 		assert !ext2int.containsKey(t2) : "Reached node " + t2 + " for the second time.\nt\tFirst path:" + ext2int.get(t2).externalPath().stream().map(n -> n.toString()).reduce("", (s,t) -> s + "\n\t\t" + t)
 				+ "\n\tSecond Path:" + newNode.externalPath().stream().map(n -> n.toString()).reduce("", (s,t) -> s + "\n\t\t" + t);
