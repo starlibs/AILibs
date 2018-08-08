@@ -307,7 +307,11 @@ public class RStar<T, A, D> extends Thread {
      * @return
      */
     public T getGoalState() {
-        return n_goal.getPoint();
+        if (n_goal != null) {
+            return n_goal.getPoint();
+        } else {
+            return null;
+        }
     }
 
     /**
