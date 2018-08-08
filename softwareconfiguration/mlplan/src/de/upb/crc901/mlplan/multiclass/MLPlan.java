@@ -35,8 +35,10 @@ import jaicore.ml.evaluation.MonteCarloCrossValidationEvaluator;
 import jaicore.ml.evaluation.MulticlassEvaluator;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;
+import jaicore.search.algorithms.interfaces.ISolutionEvaluator;
 import jaicore.search.algorithms.standard.core.INodeEvaluator;
 import jaicore.search.algorithms.standard.uncertainty.OversearchAvoidanceConfig;
+import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
@@ -587,5 +589,13 @@ public class MLPlan extends AbstractClassifier implements Classifier, OptionHand
 	
 	public Collection<Component> getComponents() {
 		return hasco.getComponents();
+	}
+	
+	public GraphGenerator<TFDNode,String> getGraphGenerator() {
+		return hasco.getGraphGenerator();
+	}
+	
+	public ISolutionEvaluator<TFDNode,Double> getSolutionEvaluator() {
+		return hasco.getSolutionEvaluator();
 	}
 }

@@ -1,5 +1,7 @@
 package jaicore.graph;
 
+import jaicore.basic.ILoggingCustomizable;
+
 /**
  * 
  * @author fmohr
