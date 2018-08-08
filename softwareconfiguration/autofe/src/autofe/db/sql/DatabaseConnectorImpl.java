@@ -28,6 +28,8 @@ import weka.core.Instances;
 
 public class DatabaseConnectorImpl implements DatabaseConnector {
 
+	private static boolean TABLE_EXISTS_WORKAROUND = true;
+
 	private static Logger LOG = LoggerFactory.getLogger(DBUtils.class);
 
 	private Database db;
@@ -41,8 +43,8 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 		this.db = db;
 		this.createdTableNames = new HashSet<>();
 		// TODO: Setup SQLAdapter properly
-		this.sqlAdapter = new SQLAdapter(db.getJdbcDriver(), null, db.getJdbcUsername(), db.getJdbcPassword(),
-				db.getJdbcUrl(), null, false);
+		this.sqlAdapter = new SQLAdapter(db.getJdbcDriver(), db.getJdbcUrl(), db.getJdbcUsername(),
+				db.getJdbcPassword(), db.getJdbcDatabase(), null, false);
 	}
 
 	@Override
@@ -51,6 +53,11 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 		try {
 			// Create feature tables (if not already existent)
 			for (AbstractFeature feature : features) {
+				if (TABLE_EXISTS_WORKAROUND) {
+					LOG.info("Skip check whether Feature table for {} exists", feature);
+					createFeatureTable(feature);
+					continue;
+				}
 				if (!featureTableExists(feature)) {
 					LOG.info("Feature table for {} does not exist => Creating", feature);
 					createFeatureTable(feature);
