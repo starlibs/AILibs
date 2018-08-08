@@ -121,7 +121,11 @@ public class KnapsackProblem {
 		this.bonusPoints = bonusPoints;
 		this.knapsackCapacity = knapsackCapacity;
 	}
-	
+
+	public double getKnapsackCapacity() {
+		return knapsackCapacity;
+	}
+
 	public SerializableGraphGenerator<KnapsackNode, String> getGraphGenerator() {
 		return new SerializableGraphGenerator<KnapsackNode, String>() {
 
