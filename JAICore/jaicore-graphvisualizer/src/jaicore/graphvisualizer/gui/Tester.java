@@ -46,6 +46,9 @@ public class Tester extends Application {
         FxViewPanel v = (FxViewPanel) viewer.addDefaultView(false);
         Scene scene = new Scene(v, 800, 600);
         stage.setScene(scene);
-        stage.show();
+//        stage.show();
+
+        FXCode code = new FXCode();
+        code.open();
     }
 }

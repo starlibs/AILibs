@@ -1,5 +1,6 @@
 package jaicore.graphvisualizer.gui;
 
+import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -12,32 +13,47 @@ import javafx.stage.Stage;
 import java.util.List;
 
 public class FXCode {
-
+    
+//    Tabpane for additional tabs
     private TabPane tabPane;
+    
+//    timeline
+    private Slider timeline;
+
+
 
     public void open(){
         //create BorderPane
-        BorderPane pane = new BorderPane();
+        BorderPane root = new BorderPane();
 
 
-        //top
+//        top
         ToolBar toolBar = new ToolBar();
         fillToolbar(toolBar.getItems());
-        pane.setTop(toolBar);
+        root.setTop(toolBar);
 
-        //center
+//        center
         SplitPane splitPane = new SplitPane();
         splitPane.setDividerPosition(0,0.25);
-        //left
+//        left
         tabPane = new TabPane();
 
         splitPane.getItems().add(tabPane);
+        GraphVisualization visualization = new GraphVisualization();
+        splitPane.getItems().add(visualization.getViewPanel());
 
-        pane.setCenter(splitPane);
+        root.setCenter(splitPane);
 
 
-        Scene scene = new Scene(pane, 800,300);
+//        Bottom
+        timeline = new Slider();
+        timeline.setShowTickLabels(true);
+        timeline.setShowTickMarks(true);
+        root.setBottom(timeline);
+        
 
+
+        Scene scene = new Scene(root, 800,300);
         Stage stage = new Stage();
         stage.setScene(scene);
         stage.show();
