@@ -1,4 +1,4 @@
-package jaicore.graphvisualizer.gui;
+package jaicore.graphvisualizer.guiOld;
 
 import javafx.application.Application;
 import javafx.stage.Stage;

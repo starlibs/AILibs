@@ -5,8 +5,6 @@ import static org.junit.Assert.assertNotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
-
 import org.junit.Test;
 
 import jaicore.basic.PerformanceLogger;
@@ -19,7 +17,7 @@ import jaicore.search.structure.core.NodeType;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
-import jaicore.graphvisualizer.gui.VisualizationWindow;
+import jaicore.graphvisualizer.guiOld.VisualizationWindow;
 
 public class BestFirstTester {
 

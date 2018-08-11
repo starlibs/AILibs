@@ -1,6 +1,6 @@
 package jaicore.graphvisualizer.events.misc;
 
-import jaicore.graphvisualizer.gui.Recorder;
+import jaicore.graphvisualizer.guiOld.Recorder;
 /**
  * A event which is used to add a new Recorder to the receiving objects.
  * @author jkoepe

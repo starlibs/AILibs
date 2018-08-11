@@ -1,7 +1,7 @@
-package jaicore.graphvisualizer.gui;
+package jaicore.graphvisualizer.guiOld;
 
 import jaicore.graph.IObservableGraphAlgorithm;
-import jaicore.graphvisualizer.gui.dataSupplier.ISupplier;
+import jaicore.graphvisualizer.guiOld.dataSupplier.ISupplier;
 import javafx.application.Platform;
 
 /**

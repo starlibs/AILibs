@@ -1,4 +1,4 @@
-package jaicore.graphvisualizer.gui.dataVisualizer;
+package jaicore.graphvisualizer.guiOld.dataVisualizer;
 
 import javafx.scene.Node;
 

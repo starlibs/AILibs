@@ -1,4 +1,4 @@
-package jaicore.graphvisualizer.gui.dataSupplier;
+package jaicore.graphvisualizer.guiOld.dataSupplier;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.eventbus.EventBus;

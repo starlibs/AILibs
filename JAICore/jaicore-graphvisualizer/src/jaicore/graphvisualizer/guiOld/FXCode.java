@@ -1,4 +1,4 @@
-package jaicore.graphvisualizer.gui;
+package jaicore.graphvisualizer.guiOld;
 
 import java.io.IOException;
 import java.util.Set;
@@ -7,11 +7,9 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.common.reflect.ClassPath;
 
-import jaicore.graphvisualizer.SearchVisualizationPanel;
 import jaicore.graphvisualizer.events.misc.AddSupplierEvent;
-import jaicore.graphvisualizer.events.misc.InfoEvent;
-import jaicore.graphvisualizer.gui.dataSupplier.ISupplier;
-import jaicore.graphvisualizer.gui.dataVisualizer.IVisualizer;
+import jaicore.graphvisualizer.guiOld.dataSupplier.ISupplier;
+import jaicore.graphvisualizer.guiOld.dataVisualizer.IVisualizer;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingNode;

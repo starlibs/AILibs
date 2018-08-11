@@ -16,7 +16,7 @@ import jaicore.graphvisualizer.events.graphEvents.GraphEvent;
 import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
-import jaicore.graphvisualizer.gui.dataSupplier.ISupplier;
+import jaicore.graphvisualizer.guiOld.dataSupplier.ISupplier;
 import jaicore.search.structure.core.Node;
 
 /**

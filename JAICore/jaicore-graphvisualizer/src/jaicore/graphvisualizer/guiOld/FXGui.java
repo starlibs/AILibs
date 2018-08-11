@@ -1,4 +1,4 @@
-package jaicore.graphvisualizer.gui;
+package jaicore.graphvisualizer.guiOld;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,8 +6,6 @@ import java.util.List;
 import javax.swing.JFrame;
 
 import jaicore.graph.IObservableGraphAlgorithm;
-import jaicore.graphvisualizer.IGraphDataSupplier;
-import jaicore.graphvisualizer.INodeDataSupplier;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.fxml.FXMLLoader;

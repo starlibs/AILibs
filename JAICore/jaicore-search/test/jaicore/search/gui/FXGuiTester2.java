@@ -1,6 +1,6 @@
 package jaicore.search.gui;
 
-import jaicore.graphvisualizer.gui.FXGui;
+import jaicore.graphvisualizer.guiOld.FXGui;
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import jaicore.search.graphgenerators.bestfirst.abstractVersioning.TestGraphGenerator;
 import jaicore.search.gui.dataSupplier.TooltipSupplier;

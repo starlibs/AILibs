@@ -1,4 +1,4 @@
-package jaicore.graphvisualizer.gui;
+package jaicore.graphvisualizer.guiOld;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,9 +19,8 @@ import jaicore.graphvisualizer.events.controlEvents.*;
 import jaicore.graphvisualizer.events.misc.AddSupplierEvent;
 import jaicore.graphvisualizer.events.misc.InfoEvent;
 import jaicore.graphvisualizer.events.misc.RequestSuppliersEvent;
-import jaicore.graphvisualizer.gui.dataSupplier.ISupplier;
-import jaicore.graphvisualizer.gui.dataVisualizer.IVisualizer;
-import jaicore.graphvisualizer.gui.dataVisualizer.NodeExpansionVisualizer;
+import jaicore.graphvisualizer.guiOld.dataSupplier.ISupplier;
+import jaicore.graphvisualizer.guiOld.dataVisualizer.IVisualizer;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingNode;
 import javafx.event.ActionEvent;

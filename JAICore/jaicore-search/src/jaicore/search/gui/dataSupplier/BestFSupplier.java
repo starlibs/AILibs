@@ -5,13 +5,12 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
 import jaicore.graphvisualizer.events.controlEvents.ControlEvent;
-import jaicore.graphvisualizer.events.controlEvents.StepEvent;
 import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
 import jaicore.graphvisualizer.events.graphEvents.GraphEvent;
 import jaicore.graphvisualizer.events.misc.XYEvent;
-import jaicore.graphvisualizer.gui.dataSupplier.ISupplier;
+import jaicore.graphvisualizer.guiOld.dataSupplier.ISupplier;
 import jaicore.search.structure.core.Node;
 import javafx.scene.chart.XYChart;
 

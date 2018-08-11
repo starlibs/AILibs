@@ -9,7 +9,7 @@ import org.junit.Test;
 
 import jaicore.basic.PerformanceLogger;
 import jaicore.basic.PerformanceLogger.PerformanceMeasure;
-import jaicore.graphvisualizer.gui.VisualizationWindow;
+import jaicore.graphvisualizer.guiOld.VisualizationWindow;
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import jaicore.search.gui.dataSupplier.NodeExpansionSupplier;
 import jaicore.search.gui.dataSupplier.TooltipSupplier;

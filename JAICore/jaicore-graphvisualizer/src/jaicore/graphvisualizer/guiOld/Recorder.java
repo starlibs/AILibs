@@ -1,4 +1,4 @@
-package jaicore.graphvisualizer.gui;
+package jaicore.graphvisualizer.guiOld;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,8 +16,6 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
 import jaicore.graph.IObservableGraphAlgorithm;
-import jaicore.graphvisualizer.IGraphDataSupplier;
-import jaicore.graphvisualizer.INodeDataSupplier;
 import jaicore.graphvisualizer.events.controlEvents.ControlEvent;
 import jaicore.graphvisualizer.events.controlEvents.FileEvent;
 import jaicore.graphvisualizer.events.controlEvents.IsLiveEvent;
@@ -30,8 +28,8 @@ import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
 import jaicore.graphvisualizer.events.misc.AddSupplierEvent;
 import jaicore.graphvisualizer.events.misc.InfoEvent;
 import jaicore.graphvisualizer.events.misc.RequestSuppliersEvent;
-import jaicore.graphvisualizer.gui.dataSupplier.ISupplier;
-import jaicore.graphvisualizer.gui.dataSupplier.ReconstructionDataSupplier;
+import jaicore.graphvisualizer.guiOld.dataSupplier.ISupplier;
+import jaicore.graphvisualizer.guiOld.dataSupplier.ReconstructionDataSupplier;
 
 
 /**

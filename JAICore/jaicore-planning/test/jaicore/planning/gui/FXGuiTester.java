@@ -6,9 +6,9 @@ import java.util.List;
 
 import org.junit.Test;
 
-import jaicore.graphvisualizer.gui.FXController;
-import jaicore.graphvisualizer.gui.FXGui;
-import jaicore.graphvisualizer.gui.Recorder;
+import jaicore.graphvisualizer.guiOld.FXController;
+import jaicore.graphvisualizer.guiOld.FXGui;
+import jaicore.graphvisualizer.guiOld.Recorder;
 import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionHTNPlanner;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;

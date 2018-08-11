@@ -1,4 +1,4 @@
-package jaicore.graphvisualizer.gui.dataVisualizer;
+package jaicore.graphvisualizer.guiOld.dataVisualizer;
 
 /**
  * A Variation of the HTML-Visualizer with a different title and supplier.
