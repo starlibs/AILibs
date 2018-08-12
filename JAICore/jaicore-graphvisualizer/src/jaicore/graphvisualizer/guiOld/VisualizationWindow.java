@@ -5,7 +5,7 @@ import jaicore.graphvisualizer.guiOld.dataSupplier.ISupplier;
 import javafx.application.Platform;
 
 /**
- * Class which creates a Thread and a Window. For this the algorithm and a title are needed.
+ * Class which creates a Thread and a VisualizationWindow. For this the algorithm and a title are needed.
  * @author jkoepe
  *
  * @param <T>

@@ -51,7 +51,7 @@ public class Tester extends Application {
 //        styleSheet += "node {fill-color:red;}";
 //        graph.setAttribute("ui.stylesheet", styleSheet);
 
-        FXCode code = new FXCode();
-        code.open();
+        FXCode code = new FXCode(null);
+
     }
 }

@@ -53,7 +53,7 @@ public class FXCode extends Application{
     
     
     /**
-     * Opens a new Gui-Window
+     * Opens a new Gui-VisualizationWindow
      */
     
     public boolean open() {

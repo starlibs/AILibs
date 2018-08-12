@@ -37,7 +37,7 @@ public class FXGui{
         open(recorder, "GUI");
     }
     /**
-     * Opens a GUI-Window with a given Recorder as the main supplier
+     * Opens a GUI-VisualizationWindow with a given Recorder as the main supplier
      * @param recorder
      * 		The recorder which contains the recorded events
      * @param title

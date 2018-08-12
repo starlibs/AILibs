@@ -2,6 +2,7 @@ package jaicore.search.gui;
 
 import com.google.common.eventbus.Subscribe;
 
+import jaicore.graph.IControllableGraphAlgorithm;
 import jaicore.graphvisualizer.events.controlEvents.AlgorithmEvent;
 import jaicore.graphvisualizer.events.controlEvents.ControlEvent;
 import jaicore.graphvisualizer.events.controlEvents.IsLiveEvent;
@@ -19,7 +20,7 @@ import jaicore.search.structure.core.Node;
  * @param <T>
  * @param <A>
  */
-public class ControllableBestFirst<T,A> extends BestFirst<T, A> implements ControllableSearch{
+public class ControllableBestFirst<T,A> extends BestFirst<T, A> implements IControllableGraphAlgorithm<T,A> {
 
 	public boolean live;
 
@@ -36,7 +37,7 @@ public class ControllableBestFirst<T,A> extends BestFirst<T, A> implements Contr
 	}
 
 
-	@Override
+
 	@Subscribe
 	public void receiveControlEvent(ControlEvent event) {
 		// TODO Auto-generated method stub
@@ -49,6 +50,16 @@ public class ControllableBestFirst<T,A> extends BestFirst<T, A> implements Contr
 			
 		}
 	}
-	
-	
+
+
+	@Override
+	public void step() {
+		System.out.println("step-search");
+		super.step();
+	}
+
+	@Override
+	public void step(Object node) {
+
+	}
 }

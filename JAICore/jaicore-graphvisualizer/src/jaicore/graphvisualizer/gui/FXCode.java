@@ -1,5 +1,7 @@
 package jaicore.graphvisualizer.gui;
 
+import com.google.common.eventbus.EventBus;
+import jaicore.graphvisualizer.events.controlEvents.StepEvent;
 import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -20,9 +22,15 @@ public class FXCode {
 //    timeline
     private Slider timeline;
 
+//    EventBus
+    private EventBus eventBus;
 
 
-    public void open(){
+    public FXCode(Recorder rec){
+
+        this.eventBus = new EventBus();
+        this.eventBus.register(rec);
+
         //create BorderPane
         BorderPane root = new BorderPane();
 
@@ -40,6 +48,7 @@ public class FXCode {
 
         splitPane.getItems().add(tabPane);
         GraphVisualization visualization = new GraphVisualization();
+        rec.registerReplayListener(visualization);
         splitPane.getItems().add(visualization.getViewPanel());
 
         root.setCenter(splitPane);
@@ -57,7 +66,6 @@ public class FXCode {
         Stage stage = new Stage();
         stage.setScene(scene);
         stage.show();
-
 
     }
 
@@ -82,7 +90,8 @@ public class FXCode {
         stepButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                System.out.println("Step");
+               System.out.println("Step");
+               eventBus.post(new StepEvent(true, 1));
             }
         });
         nodeList.add(stepButton);

@@ -3,7 +3,7 @@ package jaicore.graphvisualizer.gui;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
-import jaicore.graph.IObservableGraphAlgorithm;
+import jaicore.graph.IControllableGraphAlgorithm;
 import jaicore.graphvisualizer.events.controlEvents.ControlEvent;
 import jaicore.graphvisualizer.events.controlEvents.FileEvent;
 import jaicore.graphvisualizer.events.controlEvents.IsLiveEvent;
@@ -27,7 +27,7 @@ import java.util.Map;
 public class Recorder {
 
 //    Algorithm to listen to
-    private IObservableGraphAlgorithm algorithm;
+    private IControllableGraphAlgorithm algorithm;
 
 //    List for storing the events
     private List<Object> receivedEvents;
@@ -57,7 +57,7 @@ public class Recorder {
      * @param algorithm
      *      The algorithm from which the reocrder receives the events.
      */
-    public Recorder(IObservableGraphAlgorithm algorithm){
+    public Recorder(IControllableGraphAlgorithm algorithm){
         if(algorithm != null)
             algorithm.registerListener(this);
 
@@ -137,6 +137,9 @@ public class Recorder {
 
     private void forward(int steps){
         System.out.println(steps);
+        if (this.index == this.receivedEvents.size()){
+            this.algorithm.step();
+        }
     }
 
     private void backward(int steps){
