@@ -9,6 +9,9 @@ import jaicore.graphvisualizer.events.controlEvents.FileEvent;
 import jaicore.graphvisualizer.events.controlEvents.IsLiveEvent;
 import jaicore.graphvisualizer.events.controlEvents.StepEvent;
 import jaicore.graphvisualizer.events.graphEvents.GraphEvent;
+import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
+import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
+import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
 import jaicore.graphvisualizer.events.misc.InfoEvent;
 
 import java.util.ArrayList;
@@ -103,6 +106,10 @@ public class Recorder {
      */
     @Subscribe
     public void receiveGraphEvent(GraphEvent event){
+
+        boolean updateIndex = false;
+        if(this.index == this.receivedEvents.size())
+            updateIndex = true;
         //receive event and save the time
         this.receivedEvents.add(event);
         long receiveTime = System.currentTimeMillis();
@@ -118,8 +125,11 @@ public class Recorder {
         //post a new infoevent to update the listener.
         this.infoBus.post(new InfoEvent(receivedEvents.size(), eventTime,0));
 
-        this.replayBus.post(event);
-        this.index = receivedEvents.size()-1;
+        if(updateIndex) {
+            this.replayBus.post(event);
+            this.addType(event);
+            this.index = receivedEvents.size();
+        }
 
     }
 
@@ -136,14 +146,77 @@ public class Recorder {
 
 
     private void forward(int steps){
-        System.out.println(steps);
-        if (this.index == this.receivedEvents.size()){
-            this.algorithm.step();
+        while(steps != 0) {
+            if (this.index < this.receivedEvents.size()) {
+                Object event = this.receivedEvents.get(index);
+                this.replayBus.post(event);
+
+                this.addType(event);
+                index ++;
+
+            } else if (this.index == this.receivedEvents.size()) {
+                if (this.index == 0)
+                    try {
+                        this.algorithm.initGraph();
+                    } catch (Throwable throwable) {
+                        throwable.printStackTrace();
+                    }
+                else
+                    this.algorithm.step();
+            }
+
+            steps --;
         }
+
+
+
+
+//        System.out.println(steps);
+//        if (this.index == this.receivedEvents.size()){
+//            if(index == 0) {
+//                try {
+//                    this.algorithm.initGraph();
+//                } catch (Throwable throwable) {
+//                    throwable.printStackTrace();
+//                }
+//            }
+//            else
+//                this.algorithm.step();
+//        }
+
     }
 
     private void backward(int steps){
         System.out.println(steps);
+    }
+
+    private void addType(Object event){
+        List<String> types;
+//            switch the event corresponding to the current event to get the right type of the node
+        switch (event.getClass().getSimpleName()) {
+            case "GraphInitializedEvent":
+                GraphInitializedEvent initializedEvent = (GraphInitializedEvent) event;
+                types = new ArrayList();
+                types.add("root");
+                this.nodeMap.put(initializedEvent.getRoot(), types);
+                break;
+
+            case "NodeTypeSwitchEvent":
+                NodeTypeSwitchEvent nodeTypeSwitchEvent = (NodeTypeSwitchEvent) event;
+                this.nodeMap.get(nodeTypeSwitchEvent.getNode()).add(nodeTypeSwitchEvent.getType());
+                break;
+
+            case "NodeReachedEvent":
+                NodeReachedEvent nodeReachedEvent = (NodeReachedEvent) event;
+                types = new ArrayList<>();
+                types.add(nodeReachedEvent.getType());
+                this.nodeMap.put(nodeReachedEvent.getNode(), types);
+                break;
+
+            default:
+                System.out.println("not an allowed event");
+                break;
+        }
     }
 
 

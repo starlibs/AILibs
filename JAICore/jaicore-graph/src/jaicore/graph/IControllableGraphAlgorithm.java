@@ -6,10 +6,12 @@ public interface IControllableGraphAlgorithm<V,E> extends IObservableGraphAlgori
 	 * Conduct the next step
 	 */
 	public void step();
+
+	public void initGraph()throws Throwable ;
 	
 	/**
 	 * Conduct the next step but enforce that the object on which it is conducted is the given node
 	 * @param node
 	 */
-	public void step(V node);
+//	public void step(V node);
 }

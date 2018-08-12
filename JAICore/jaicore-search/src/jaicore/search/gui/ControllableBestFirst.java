@@ -54,12 +54,6 @@ public class ControllableBestFirst<T,A> extends BestFirst<T, A> implements ICont
 
 	@Override
 	public void step() {
-		System.out.println("step-search");
 		super.step();
-	}
-
-	@Override
-	public void step(Object node) {
-
 	}
 }
