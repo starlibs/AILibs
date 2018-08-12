@@ -26,27 +26,30 @@ public class Tester extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        Graph graph = new MultiGraph("mg");
-
-        FxViewer viewer = new FxViewer(graph, FxViewer.ThreadingModel.GRAPH_IN_GUI_THREAD);
-        graph.addNode("A");
-        graph.addNode("B");
-        graph.addNode("C");
-        graph.addEdge("AB", "A", "B");
-        graph.addEdge("BC", "B", "C");
-        graph.addEdge("CA", "C", "A");
-        graph.setAttribute( "ui.antialias" );
-        graph.setAttribute( "ui.quality" );
-        graph.setAttribute( "ui.stylesheet", styleSheet );
-
-        graph.getNode("A").setAttribute("xyz", -1, 0, 0 );
-        graph.getNode("B").setAttribute("xyz",  1, 0, 0 );
-        graph.getNode("C").setAttribute("xyz", 0, 1, 0 );
-
-        FxViewPanel v = (FxViewPanel) viewer.addDefaultView(false);
-        Scene scene = new Scene(v, 800, 600);
-        stage.setScene(scene);
+//        Graph graph = new MultiGraph("mg");
+//
+//        FxViewer viewer = new FxViewer(graph, FxViewer.ThreadingModel.GRAPH_IN_GUI_THREAD);
+//        graph.addNode("A");
+//        graph.addNode("B");
+//        graph.addNode("C");
+//        graph.addEdge("AB", "A", "B");
+//        graph.addEdge("BC", "B", "C");
+//        graph.addEdge("CA", "C", "A");
+//        graph.setAttribute( "ui.antialias" );
+//        graph.setAttribute( "ui.quality" );
+//        graph.setAttribute( "ui.stylesheet", styleSheet );
+//
+//        graph.getNode("A").setAttribute("xyz", -1, 0, 0 );
+//        graph.getNode("B").setAttribute("xyz",  1, 0, 0 );
+//        graph.getNode("C").setAttribute("xyz", 0, 1, 0 );
+//
+//        FxViewPanel v = (FxViewPanel) viewer.addDefaultView(false);
+//        Scene scene = new Scene(v, 800, 600);
+//        stage.setScene(scene);
 //        stage.show();
+
+//        styleSheet += "node {fill-color:red;}";
+//        graph.setAttribute("ui.stylesheet", styleSheet);
 
         FXCode code = new FXCode();
         code.open();
