@@ -101,7 +101,7 @@ public class isValidParameterRangeRefinementPredicatePruning implements Evaluabl
 				// for (String parameterIndex : importantParams) {
 				// System.out.println("parameter " + parameterIndex);
 				// }
-				// System.out.println("important parameters: " + importantParams.toString());
+				 System.out.println("important parameters: " + importantParams.toString());
 				if (importantParams.contains(paramName)) {
 					// System.out.println("Parameter " + paramName + " is important and will be
 					// refined!");

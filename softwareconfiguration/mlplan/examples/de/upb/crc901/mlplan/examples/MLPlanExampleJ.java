@@ -40,14 +40,14 @@ public class MLPlanExampleJ {
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(0), .7f);
 
 		/* initialize mlplan, and let it run for 30 seconds */
-		int timeoutInSeconds = 600;
+		int timeoutInSeconds = 1800;
 		MLPlanJ mlplan = new MLPlanJ(new File("model/weka/weka-all-autoweka.json"), 0.08d, 16, true);
 		mlplan.setLoggerName("mlplan");
 
 		mlplan.setTimeout(timeoutInSeconds);
 		mlplan.setPortionOfDataForPhase2(.3f);
 		mlplan.setNodeEvaluator(new DefaultPreorder());
-		// mlplan.enableVisualization();
+		 mlplan.enableVisualization();
 		mlplan.buildClassifier(split.get(0));
 
 		/* evaluate solution produced by mlplan */

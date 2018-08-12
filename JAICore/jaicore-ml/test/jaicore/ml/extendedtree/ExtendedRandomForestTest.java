@@ -51,25 +51,24 @@ public class ExtendedRandomForestTest {
 			System.out.println("size: " + allFeatures.size());
 			for (Set<Integer> features : powerset) {
 				if (features.size() > 0) {
-					double cont = forest.computeMarginalVarianceContributionForFeatureSubsetNotNormalized(features)
-							* Math.pow(10, 4);
+					double cont = forest.computeMarginalVarianceContributionForFeatureSubset(features);
 					System.out.println("Individual Standard Deviation of " + features.toString() + ": " + cont);
 					contributions.put(features, cont);
 					assertTrue(cont >= 0.0d);
 					sum += cont;
 				}
 			}
-//			double max = contributions.values().stream().mapToDouble(v -> v).max()
-//					.orElseThrow(NoSuchElementException::new);
-//			for (Set<Integer> key : contributions.keySet()) {
-//				double temp = contributions.get(key);
-//				temp /= max;
-//				contributions.put(key, temp);
-//			}
-//			for (double value : contributions.values())
-//				System.out.println(value);
+			// double max = contributions.values().stream().mapToDouble(v -> v).max()
+			// .orElseThrow(NoSuchElementException::new);
+			// for (Set<Integer> key : contributions.keySet()) {
+			// double temp = contributions.get(key);
+			// temp /= max;
+			// contributions.put(key, temp);
+			// }
+			// for (double value : contributions.values())
+			// System.out.println(value);
 
-			 System.out.println("sum of contributions = " + sum);
+			System.out.println("sum of contributions = " + sum);
 			// assertEquals(sum, 1.0d, 0.0001);
 		} catch (Exception e) {
 			e.printStackTrace();

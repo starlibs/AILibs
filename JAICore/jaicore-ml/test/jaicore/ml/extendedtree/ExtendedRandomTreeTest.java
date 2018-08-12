@@ -64,8 +64,7 @@ public class ExtendedRandomTreeTest {
 				for (Set<Integer> features : subsets) {
 					System.out.println("Features in this iteration = " + features);
 					if (features.size() == k) {
-						double cont = tree.computeMarginalVarianceContributionForSubsetOfFeaturesNotNormalized(features)
-								* Math.pow(10, 4);
+						double cont = tree.computeMarginalVarianceContributionForSubsetOfFeatures(features);
 						assertTrue(cont >= 0.0d);
 						sum += cont;
 						System.out.println("Contribution of " + features + ": " + cont);

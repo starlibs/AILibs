@@ -127,9 +127,10 @@ public class isRefinementCompletedPredicateWithImportanceCheck implements Evalua
 //			System.out.println("Checking whether parameter " + param.getName() + " for component " + component.getName()
 //					+ " has completed its refinement");
 			if (!importantParams.contains(paramName)) {
+				System.out.println("Skip parameter " + paramName);
 				continue;
-			} else {
 			}
+//			System.out.println("Not skipping parameter " + paramName);
 			String containerOfParam = componentParamContainers.get(param.getName());
 			String currentValueOfParam = componentParams.get(param.getName());
 			if (param.isNumeric()) {
