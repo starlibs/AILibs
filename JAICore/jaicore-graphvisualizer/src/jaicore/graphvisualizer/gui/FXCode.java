@@ -1,7 +1,9 @@
 package jaicore.graphvisualizer.gui;
 
 import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 import jaicore.graphvisualizer.events.controlEvents.StepEvent;
+import jaicore.graphvisualizer.events.misc.InfoEvent;
 import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -13,6 +15,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class FXCode {
     
@@ -25,8 +28,18 @@ public class FXCode {
 //    EventBus
     private EventBus eventBus;
 
+    private Thread playThread;
+
+    private int index;
+    private int maxIndex;
+
+    private long sleepTime;
+
 
     public FXCode(Recorder rec){
+        this.index = 0;
+        this.maxIndex = 0;
+        this.sleepTime = 50;
 
         this.eventBus = new EventBus();
         this.eventBus.register(rec);
@@ -80,11 +93,25 @@ public class FXCode {
         playButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                System.out.println("test");
+                //play runs in an own thread to make it stoppable
+                Runnable run = ()->{
+                    try{
+                        while(index >= 0){
+                            eventBus.post(new StepEvent(true, 1));
+                            TimeUnit.MILLISECONDS.sleep(sleepTime);
+                        }
+
+                    }
+                    catch(InterruptedException e){
+//                e.printStackTrace();
+                    }
+                };
+
+                playThread = new Thread(run);
+                playThread.start();
             }
         });
         nodeList.add(playButton);
-
         //stepButton
         Button stepButton = new Button("Step");
         stepButton.setOnAction(new EventHandler<ActionEvent>() {
@@ -102,6 +129,8 @@ public class FXCode {
             @Override
             public void handle(ActionEvent actionEvent) {
                 System.out.println("Stop");
+                if(playThread!= null)
+                    playThread.interrupt();
             }
         });
         nodeList.add(stopButton);
@@ -139,6 +168,11 @@ public class FXCode {
 
     }
 
+    @Subscribe
+    public void receiveInfoEvent(InfoEvent event){
+        this.maxIndex = event.getMaxIndex();
+
+    }
 
     public TabPane getTabPane() {
         return tabPane;

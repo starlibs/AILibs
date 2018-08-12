@@ -31,13 +31,14 @@ public class GraphVisualization<T> {
     public GraphVisualization(){
         this.roots = new ArrayList<>();
         this.graph = new SingleGraph("Search-Graph");
+        this.graph.setAttribute("ui.stylesheet", "url('conf/searchgraph.css')");
         this.viewer = new FxViewer(graph, FxViewer.ThreadingModel.GRAPH_IN_ANOTHER_THREAD);
         this.viewer.enableAutoLayout();
 
 
         this.viewPanel = (FxViewPanel) viewer.addDefaultView(false);
 
-//        this.graph.setAttribute("ui.stylesheet", "url(conf/searchgraph.ccs");
+
 
     }
 
@@ -67,7 +68,7 @@ public class GraphVisualization<T> {
             if (roots == null)
                 throw new IllegalArgumentException("Root must not be NULL");
             newNode(roots.get(roots.size()-1));
-//			ext2intNodeMap.get(roots.get(roots.size()-1)).addAttribute("ui.class", "root");
+			ext2intNodeMap.get(roots.get(roots.size()-1)).setAttribute("ui.class", "root");
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -79,7 +80,7 @@ public class GraphVisualization<T> {
             if (!ext2intNodeMap.containsKey(e.getNode()))
                 newNode(e.getNode());
             newEdge(e.getParent(), e.getNode());
-//			ext2intNodeMap.get(e.getNode()).addAttribute("ui.class", e.getType());
+			ext2intNodeMap.get(e.getNode()).setAttribute("ui.class", e.getType());
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -92,7 +93,7 @@ public class GraphVisualization<T> {
                 return;
             if (!ext2intNodeMap.containsKey(e.getNode()))
                 throw new NoSuchElementException("Cannot switch type of node " + e.getNode() + ". This node has not been reached previously.");
-//			ext2intNodeMap.get(e.getNode()).addAttribute("ui.class", e.getType());
+			ext2intNodeMap.get(e.getNode()).setAttribute("ui.class", e.getType());
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -117,7 +118,7 @@ public class GraphVisualization<T> {
     public synchronized void receiveNodeRemovedEvent(NodeRemovedEvent<T> e) {
         try {
             graph.removeNode(ext2intNodeMap.get(e.getNode()));
-            // ext2intNodeMap.get(e.getNode()).addAttribute("ui.class", e.getType());
+//             ext2intNodeMap.get(e.getNode()).setAttribute("ui.class", e.getType());
             ext2intNodeMap.remove(e.getNode());
         } catch (Exception ex) {
             ex.printStackTrace();
