@@ -2,6 +2,7 @@ package jaicore.graphvisualizer.gui;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
+import jaicore.graphvisualizer.events.controlEvents.ResetEvent;
 import jaicore.graphvisualizer.events.controlEvents.StepEvent;
 import jaicore.graphvisualizer.events.misc.InfoEvent;
 import javafx.animation.Timeline;
@@ -36,6 +37,8 @@ public class FXCode {
 
     private long sleepTime;
 
+    //Visualization window
+    private GraphVisualization visualization;
 
     public FXCode(Recorder rec){
         this.index = 0;
@@ -62,7 +65,7 @@ public class FXCode {
         tabPane = new TabPane();
 
         splitPane.getItems().add(tabPane);
-        GraphVisualization visualization = new GraphVisualization();
+        visualization = new GraphVisualization();
         rec.registerReplayListener(visualization);
         splitPane.getItems().add(visualization.getViewPanel());
 
@@ -105,7 +108,6 @@ public class FXCode {
                             eventBus.post(new StepEvent(true, 1));
                             TimeUnit.MILLISECONDS.sleep(sleepTime);
                         }
-
                     }
                     catch(InterruptedException e){
 //                e.printStackTrace();
@@ -124,6 +126,8 @@ public class FXCode {
             public void handle(ActionEvent actionEvent) {
                System.out.println("Step");
                eventBus.post(new StepEvent(true, 1));
+               if(index != maxIndex)
+                   updateIndex(1, false);
             }
         });
         nodeList.add(stepButton);
@@ -146,9 +150,26 @@ public class FXCode {
             @Override
             public void handle(ActionEvent actionEvent) {
                 System.out.println("back");
+                if(index == 0)
+                    return;
+                if(index == 1) {
+                    reset();
+                    return;
+                }
+                eventBus.post(new StepEvent(false, 1));
+                updateIndex(-1, false);
             }
         });
         nodeList.add(backButton);
+
+//        resetButton
+        Button resetButton = new Button("reset");
+        resetButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                reset();
+            }
+        });
 
         //loadButton
         Button loadButton = new Button("load");
@@ -178,16 +199,28 @@ public class FXCode {
         this.maxIndex = event.getMaxIndex();
         this.timeline.setMax(this.maxIndex);
         if(event.updateIndex())
-            this.updateIndex(maxIndex);
+            this.updateIndex(maxIndex, true);
 
     }
 
-    public void updateIndex(int newIndex){
-        if(newIndex > this.maxIndex || newIndex < 0)
+    public void updateIndex(int newIndex, boolean isRealIndex){
+        if(! isRealIndex)
+            newIndex += this.index;
+
+
+        if (newIndex > this.maxIndex || newIndex < 0)
             return;
 
         this.index = newIndex;
         this.timeline.setValue(this.index);
+
+
+    }
+
+    public void reset(){
+        this.updateIndex(0, true);
+        this.visualization.reset();
+        eventBus.post(new ResetEvent());
     }
 
     public TabPane getTabPane() {

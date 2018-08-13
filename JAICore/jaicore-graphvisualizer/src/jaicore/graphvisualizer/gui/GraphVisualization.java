@@ -163,4 +163,11 @@ public class GraphVisualization<T> {
 //		}
         return false;
     }
+
+    public void reset(){
+        this.ext2intNodeMap.clear();
+        this.int2extNodeMap.clear();
+        this.graph.clear();
+        this.graph.setAttribute("ui.stylesheet", "url('conf/searchgraph.css')");
+    }
 }

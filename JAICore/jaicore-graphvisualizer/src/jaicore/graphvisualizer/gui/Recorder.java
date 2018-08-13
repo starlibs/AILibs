@@ -4,14 +4,8 @@ package jaicore.graphvisualizer.gui;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import jaicore.graph.IControllableGraphAlgorithm;
-import jaicore.graphvisualizer.events.controlEvents.ControlEvent;
-import jaicore.graphvisualizer.events.controlEvents.FileEvent;
-import jaicore.graphvisualizer.events.controlEvents.IsLiveEvent;
-import jaicore.graphvisualizer.events.controlEvents.StepEvent;
-import jaicore.graphvisualizer.events.graphEvents.GraphEvent;
-import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
-import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
-import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
+import jaicore.graphvisualizer.events.controlEvents.*;
+import jaicore.graphvisualizer.events.graphEvents.*;
 import jaicore.graphvisualizer.events.misc.InfoEvent;
 
 import java.util.ArrayList;
@@ -145,9 +139,19 @@ public class Recorder {
             else
                 backward(((StepEvent) event).getSteps());
         }
+        if(event instanceof ResetEvent)
+            reset();
     }
 
 
+    /**
+     * Goes the number of steps forward in the graph. Usually the index + steps do not get higher the number of
+     * received Events. The exeption is when there is only one step to do and the index is equal to the number of
+     * received Events. In this case the algorithm is triggered.
+     *
+     * @param steps
+     *      The number of steps to do.
+     */
     private void forward(int steps){
         while(steps != 0) {
             if (this.index < this.receivedEvents.size()) {
@@ -170,29 +174,70 @@ public class Recorder {
 
             steps --;
         }
-
-
-
-
-//        System.out.println(steps);
-//        if (this.index == this.receivedEvents.size()){
-//            if(index == 0) {
-//                try {
-//                    this.algorithm.initGraph();
-//                } catch (Throwable throwable) {
-//                    throwable.printStackTrace();
-//                }
-//            }
-//            else
-//                this.algorithm.step();
-//        }
-
     }
 
+
+    /**
+     * Go backward the number of steps which are given as a paramter
+     * @param steps
+     * 		The steps to go forward.
+     */
     private void backward(int steps){
         System.out.println(steps);
+        if(index == 0)
+            return;
+        while(index > 0 && steps != 0){
+            index --;
+            this.replayBus.post(counterEvent(receivedEvents.get(index)));
+            steps --;
+        }
     }
 
+    /**
+     * Creates a counterevent to the event which was given.
+     * Currently the events which can be countered are most of the graphevents
+     * @param event
+     * 		The event to which a counter event should be created
+     * @return
+     * 		The counter event
+     */
+    public Object counterEvent(Object event) {
+        Object counter = null;
+
+
+        switch (event.getClass().getSimpleName()) {
+//			counter for a GraphInitializedEvent
+            case "GraphInitializedEvent":
+                //just for completion
+                counter = null;
+                break;
+
+//				counter for a nodetypeswitchevent
+            case "NodeTypeSwitchEvent":
+                NodeTypeSwitchEvent nodeTypeSwitchEvent = (NodeTypeSwitchEvent) event;
+                List<String> typeList = nodeMap.get(nodeTypeSwitchEvent.getNode());
+                typeList.remove(typeList.size() - 1);
+                counter = new NodeTypeSwitchEvent(nodeTypeSwitchEvent.getNode(), typeList.get(typeList.size() - 1));
+                break;
+
+//				counter for a nodereached event
+            case "NodeReachedEvent":
+                NodeReachedEvent nodeReachedEvent = (NodeReachedEvent) event;
+                counter = new NodeRemovedEvent(nodeReachedEvent.getNode());
+                break;
+
+            default:
+                System.out.println("not an allowed event");
+                break;
+        }
+        return counter;
+    }
+
+    /**
+     * Adds the type of a node to the typelist of this node
+     * @param event
+     *      The event which contains the node
+     */
     private void addType(Object event){
         List<String> types;
 //            switch the event corresponding to the current event to get the right type of the node
@@ -220,6 +265,15 @@ public class Recorder {
                 System.out.println("not an allowed event");
                 break;
         }
+    }
+
+    /**
+     * Resets the recorder.
+     * To do this only the current nodemap and the index a clear or set to 0.
+     */
+    private void reset() {
+        this.index = 0;
+        nodeMap.clear();
     }
 
 
