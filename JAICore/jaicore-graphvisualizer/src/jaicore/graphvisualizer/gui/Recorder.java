@@ -122,14 +122,17 @@ public class Recorder {
         long eventTime = receiveTime - firstEventTime;
         receivingTimes.add(eventTime);
 
-        //post a new infoevent to update the listener.
-        this.infoBus.post(new InfoEvent(receivedEvents.size(), eventTime,0));
+
 
         if(updateIndex) {
             this.replayBus.post(event);
             this.addType(event);
             this.index = receivedEvents.size();
+            //post a new infoevent to update the listener.
+            this.infoBus.post(new InfoEvent(receivedEvents.size(), eventTime,0, true));
         }
+        else
+            this.infoBus.post(new InfoEvent(receivedEvents.size(), eventTime, 0));
 
     }
 

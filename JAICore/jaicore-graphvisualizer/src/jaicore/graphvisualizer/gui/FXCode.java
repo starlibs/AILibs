@@ -11,6 +11,7 @@ import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
@@ -43,6 +44,7 @@ public class FXCode {
 
         this.eventBus = new EventBus();
         this.eventBus.register(rec);
+        rec.registerInfoListener(this);
 
         //create BorderPane
         BorderPane root = new BorderPane();
@@ -68,10 +70,13 @@ public class FXCode {
 
 
 //        Bottom
-        timeline = new Slider();
-        timeline.setShowTickLabels(true);
-        timeline.setShowTickMarks(true);
-        root.setBottom(timeline);
+        this.timeline = new Slider();
+        this.timeline.setShowTickLabels(true);
+        this.timeline.setShowTickMarks(true);
+        this.timeline.setOnMouseReleased((MouseEvent event)->{
+            System.out.println(timeline.getValue());
+        });
+        root.setBottom(this.timeline);
         
 
 
@@ -137,10 +142,10 @@ public class FXCode {
 
         //BackButton
         Button backButton = new Button("Back");
-        stopButton.setOnAction(new EventHandler<ActionEvent>() {
+        backButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                System.out.println("stop");
+                System.out.println("back");
             }
         });
         nodeList.add(backButton);
@@ -171,7 +176,18 @@ public class FXCode {
     @Subscribe
     public void receiveInfoEvent(InfoEvent event){
         this.maxIndex = event.getMaxIndex();
+        this.timeline.setMax(this.maxIndex);
+        if(event.updateIndex())
+            this.updateIndex(maxIndex);
 
+    }
+
+    public void updateIndex(int newIndex){
+        if(newIndex > this.maxIndex || newIndex < 0)
+            return;
+
+        this.index = newIndex;
+        this.timeline.setValue(this.index);
     }
 
     public TabPane getTabPane() {
