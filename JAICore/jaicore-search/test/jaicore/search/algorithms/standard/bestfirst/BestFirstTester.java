@@ -78,7 +78,7 @@ public class BestFirstTester {
 			return s;
 		});
 		win.addDataSupplier(tooltipSupplier);
-//		new VisualizationWindow<Node<TestNode,Double>>(bf, "BestFirst2");
+		new VisualizationWindow<Node<TestNode,Double>>(bf, "BestFirst2");
 		
 		
 		/* find solution */

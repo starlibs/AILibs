@@ -1,12 +1,7 @@
 package jaicore.search.gui;
 
-import jaicore.basic.PerformanceLogger;
-import jaicore.basic.PerformanceLogger.PerformanceMeasure;
-import jaicore.graphvisualizer.gui.Recorder;
 import jaicore.graphvisualizer.gui.VisualizationWindow;
-import jaicore.search.algorithms.standard.bestfirst.BestFirst;
-import jaicore.search.gui.dataSupplier.NodeExpansionSupplier;
-import jaicore.search.gui.dataSupplier.TooltipSupplier;
+import jaicore.search.gui.dataSupplier.TooltipSupplierNew;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
 import jaicore.search.structure.core.NodeExpansionDescription;
@@ -71,11 +66,18 @@ public class ControlSearchTesterNew {
 
 		VisualizationWindow win = new VisualizationWindow(bf, "test");
 
+		TooltipSupplierNew tooltipSupplier = new TooltipSupplierNew();
+		tooltipSupplier.setGenerator(node ->{
+			Node<?, ?> n = (Node<?, ?>) node;
+			String s = String.valueOf(n.getInternalLabel());
+			return s;
+		});
+
+
+		win.addDataSupplier(tooltipSupplier);
 
 
 		while(true);
-
-		
 
 	}
 

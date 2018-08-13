@@ -78,7 +78,7 @@ public class ControlSearchTester {
 			String s = String.valueOf(n.getInternalLabel());
 			return s;
 		});
-		win.addDataSupplier(tooltipSupplier);
+		//win.addDataSupplier(tooltipSupplier);
 		
 				
 		

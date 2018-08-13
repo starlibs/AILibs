@@ -6,7 +6,10 @@ import com.google.common.eventbus.Subscribe;
 import jaicore.graph.IControllableGraphAlgorithm;
 import jaicore.graphvisualizer.events.controlEvents.*;
 import jaicore.graphvisualizer.events.graphEvents.*;
+import jaicore.graphvisualizer.events.misc.AddSupplierEvent;
+import jaicore.graphvisualizer.events.misc.AddSupplierEventNew;
 import jaicore.graphvisualizer.events.misc.InfoEvent;
+import jaicore.graphvisualizer.gui.dataSupplier.ISupplier;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -285,6 +288,11 @@ public class Recorder {
     private void reset() {
         this.index = 0;
         nodeMap.clear();
+    }
+
+
+    public void addDataSupplier(ISupplier supplier){
+        this.infoBus.post(new AddSupplierEventNew(supplier));
     }
 
 

@@ -2,12 +2,14 @@ package jaicore.graphvisualizer.gui;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
+import com.google.common.reflect.ClassPath;
 import jaicore.graphvisualizer.events.controlEvents.ResetEvent;
 import jaicore.graphvisualizer.events.controlEvents.StepEvent;
+import jaicore.graphvisualizer.events.misc.AddSupplierEventNew;
 import jaicore.graphvisualizer.events.misc.InfoEvent;
+import jaicore.graphvisualizer.gui.dataSupplier.ISupplier;
 import jaicore.graphvisualizer.gui.dataVisualizer.HTMLVisualizer;
-import javafx.animation.Timeline;
-import javafx.application.Application;
+import jaicore.graphvisualizer.gui.dataVisualizer.IVisualizer;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
@@ -18,7 +20,9 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 //TODO timeline does not alwayse update fast enough
@@ -119,6 +123,7 @@ public class FXCode {
         Scene scene = new Scene(root, 800,300);
         Stage stage = new Stage();
         stage.setScene(scene);
+        stage.setMaximized(true);
         stage.show();
 
     }
@@ -273,6 +278,80 @@ public class FXCode {
 
     public TabPane getTabPane() {
         return tabPane;
+    }
+
+
+    /**
+     * Registers a new supplier to the Controller.
+     * In addition the cooresponging Visualizers are searched and also added.
+     * @param supplier
+     * 		The new supplier.
+     */
+    public void addDataSupplier(ISupplier supplier){
+
+        System.out.println(supplier.getClass().getSimpleName());
+        try {
+            ClassPath path = ClassPath.from(ClassLoader.getSystemClassLoader());
+            Set<?> set = path.getAllClasses();
+            set.stream().forEach(cls->{
+                if(cls instanceof ClassPath.ClassInfo){
+                    //search for a Visualizer.
+//                	To identify a visualizer the package name has to contain .dataVisualizer.
+                    if(((ClassPath.ClassInfo) cls).getName().contains(".dataVisualizer.")){
+                        IVisualizer v = (IVisualizer) findClassByName(((ClassPath.ClassInfo) cls).getName());
+                        if(v!= null){
+                            //if the supplier of the visualizer matches the current one, add the visualizer to the tabpane
+                            if(v.getSupplier() .equals(supplier.getClass().getSimpleName())){
+                                supplier.registerListener(v);
+                                this.eventBus.register(supplier);
+                                this.eventBus.register(v);
+
+
+                                Tab tab = new Tab();
+                                tab.setContent(v.getVisualization());
+                                tab.setText(v.getTitle());
+                                tab.setText("test");
+                                this.tabPane.getTabs().add(tab);
+                            }
+                        }
+                    }
+                }
+            });
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+    /**
+     * Searches the loaded classes for class with a specific name.
+     * @param name
+     * 		The name of the searched class.
+     * @return
+     */
+    private Object findClassByName(String name){
+        try{
+            Class<?> cls = Class.forName(name);
+            if(cls.isInterface())
+                return null;
+            return cls.newInstance();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+            return null;
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+            return null;
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @Subscribe
+    public void receiveAddSupplierEvent(AddSupplierEventNew event){
+        this.addDataSupplier(event.getSupplier());
     }
 
 

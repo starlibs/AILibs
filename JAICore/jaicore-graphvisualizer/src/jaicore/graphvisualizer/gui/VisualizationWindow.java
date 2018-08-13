@@ -1,9 +1,7 @@
 package jaicore.graphvisualizer.gui;
 
 import jaicore.graph.IControllableGraphAlgorithm;
-import jaicore.graph.IObservableGraphAlgorithm;
-import jaicore.graphvisualizer.gui.Recorder;
-
+import jaicore.graphvisualizer.gui.dataSupplier.ISupplier;
 import javafx.application.Platform;
 
 /**
@@ -20,6 +18,8 @@ public class VisualizationWindow<T> {
      * A recorder which is connected to the algorithm
      */
     Recorder recorder;
+
+
 
 
     /**
@@ -63,6 +63,10 @@ public class VisualizationWindow<T> {
             e.printStackTrace();
             System.exit(0);
         }
+    }
+
+    public void addDataSupplier(ISupplier supplier){
+        recorder.addDataSupplier(supplier);
     }
 
 }
