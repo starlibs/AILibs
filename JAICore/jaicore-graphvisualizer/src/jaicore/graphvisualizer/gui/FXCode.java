@@ -5,6 +5,7 @@ import com.google.common.eventbus.Subscribe;
 import jaicore.graphvisualizer.events.controlEvents.ResetEvent;
 import jaicore.graphvisualizer.events.controlEvents.StepEvent;
 import jaicore.graphvisualizer.events.misc.InfoEvent;
+import jaicore.graphvisualizer.gui.dataVisualizer.HTMLVisualizer;
 import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -15,6 +16,7 @@ import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -57,17 +59,45 @@ public class FXCode {
 //        top
         ToolBar toolBar = new ToolBar();
         fillToolbar(toolBar.getItems());
-        root.setTop(toolBar);
+        BorderPane top = new BorderPane();
+        top.setTop(toolBar);
+
+        Slider sleepTimeSlider = new Slider(0,200, 150);
+        sleepTimeSlider.setShowTickLabels(true);
+        sleepTimeSlider.setShowTickMarks(true);
+        sleepTimeSlider.setOnMouseReleased((MouseEvent event) ->{
+            double sliderValue = sleepTimeSlider.getValue();
+            this.sleepTime = (long) (200- sliderValue);
+        });
+        sleepTimeSlider.setLabelFormatter(new StringConverter<Double>() {
+            @Override
+            public String toString(Double object) {
+                Double speed = 200- object;
+                return String.valueOf(speed.longValue());
+            }
+
+            @Override
+            public Double fromString(String string) {
+                return null;
+            }
+        });
+
+        top.setBottom(sleepTimeSlider);
+
+        root.setTop(top);
 
 //        center
         SplitPane splitPane = new SplitPane();
         splitPane.setDividerPosition(0,0.25);
 //        left
         tabPane = new TabPane();
+        HTMLVisualizer html = new HTMLVisualizer();
+        Tab tab = new Tab();
+        tabPane.getTabs().add(tab);
 
         splitPane.getItems().add(tabPane);
-//        visualization = new GraphVisualization();
-        visualization = new HeatVisualization();
+        visualization = new GraphVisualization();
+//        visualization = new HeatVisualization();
         rec.registerReplayListener(visualization);
         splitPane.getItems().add(visualization.getViewPanel());
 
@@ -79,7 +109,8 @@ public class FXCode {
         this.timeline.setShowTickLabels(true);
         this.timeline.setShowTickMarks(true);
         this.timeline.setOnMouseReleased((MouseEvent event)->{
-            System.out.println(timeline.getValue());
+            int newIndex = (int) timeline.getValue();
+            jumpToIndex(newIndex);
         });
         root.setBottom(this.timeline);
         
@@ -224,6 +255,20 @@ public class FXCode {
         this.updateIndex(0, true);
         this.visualization.reset();
         eventBus.post(new ResetEvent());
+    }
+
+    public void jumpToIndex(int newIndex){
+        if(this.playThread != null)
+            playThread.interrupt();
+        if(newIndex == 0){
+            this.reset();
+            return;
+        }
+        if(newIndex > this.index)
+            this.eventBus.post(new StepEvent(true, newIndex -this.index));
+        else
+            this.eventBus.post(new StepEvent(false, index-newIndex));
+        this.updateIndex(newIndex, true);
     }
 
     public TabPane getTabPane() {
