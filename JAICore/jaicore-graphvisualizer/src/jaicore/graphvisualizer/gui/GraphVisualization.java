@@ -17,16 +17,16 @@ import java.util.concurrent.ConcurrentMap;
 
 public class GraphVisualization<T> {
 
-    private Graph graph;
-    private FxViewer viewer;
-    private FxViewPanel viewPanel;
+    protected Graph graph;
+    protected FxViewer viewer;
+    protected FxViewPanel viewPanel;
 
-    private int nodeCounter = 0;
+    protected int nodeCounter = 0;
 
-    private List<T> roots;
+    protected List<T> roots;
 
-    private final ConcurrentMap<T, Node> ext2intNodeMap = new ConcurrentHashMap<>();
-    private final ConcurrentMap<Node, T> int2extNodeMap = new ConcurrentHashMap<>();
+    protected final ConcurrentMap<T, Node> ext2intNodeMap = new ConcurrentHashMap<>();
+    protected final ConcurrentMap<Node, T> int2extNodeMap = new ConcurrentHashMap<>();
 
     public GraphVisualization(){
         this.roots = new ArrayList<>();
@@ -44,18 +44,6 @@ public class GraphVisualization<T> {
 
     public FxViewPanel getViewPanel() {
         return viewPanel;
-    }
-
-    public Node newNode(){
-        String nodeid = "n";
-        Node node = this.graph.addNode(nodeid);
-        node.setAttribute("ui.stylesheet", "node {\n" +
-                "\tsize-mode: fit;\n" +
-                "\tfill-mode: plain;\n" +
-                "\tfill-color: blue;\n" +
-                "\tpadding: 5px;\n" +
-                "}");
-        return node;
     }
 
     @Subscribe
