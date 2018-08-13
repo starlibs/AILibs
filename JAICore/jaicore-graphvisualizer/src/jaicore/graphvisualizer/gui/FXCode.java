@@ -66,8 +66,8 @@ public class FXCode {
         tabPane = new TabPane();
 
         splitPane.getItems().add(tabPane);
-        visualization = new GraphVisualization();
-//        visualization = new HeatVisualization();
+//        visualization = new GraphVisualization();
+        visualization = new HeatVisualization();
         rec.registerReplayListener(visualization);
         splitPane.getItems().add(visualization.getViewPanel());
 
