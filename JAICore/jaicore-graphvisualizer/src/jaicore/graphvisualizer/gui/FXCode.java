@@ -19,6 +19,7 @@ import javafx.stage.Stage;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+//TODO timeline does not alwayse update fast enough
 public class FXCode {
     
 //    Tabpane for additional tabs
@@ -107,6 +108,7 @@ public class FXCode {
                         while(index >= 0){
                             eventBus.post(new StepEvent(true, 1));
                             TimeUnit.MILLISECONDS.sleep(sleepTime);
+                            updateIndex(1, false);
                         }
                     }
                     catch(InterruptedException e){

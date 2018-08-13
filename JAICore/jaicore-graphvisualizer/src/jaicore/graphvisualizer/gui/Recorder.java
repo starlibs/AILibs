@@ -118,14 +118,14 @@ public class Recorder {
 
 
 
-        if(updateIndex) {
-            this.replayBus.post(event);
-            this.addType(event);
-            this.index = receivedEvents.size();
-            //post a new infoevent to update the listener.
-            this.infoBus.post(new InfoEvent(receivedEvents.size(), eventTime,0, true));
-        }
-        else
+//        if(updateIndex) {
+//            this.replayBus.post(event);
+//            this.addType(event);
+//            this.index = receivedEvents.size();
+//            //post a new infoevent to update the listener.
+//            this.infoBus.post(new InfoEvent(receivedEvents.size(), eventTime,0, true));
+//        }
+//        else
             this.infoBus.post(new InfoEvent(receivedEvents.size(), eventTime, 0));
 
     }
@@ -153,6 +153,15 @@ public class Recorder {
      *      The number of steps to do.
      */
     private void forward(int steps){
+        if(this.index  == this.receivedEvents.size())
+            if(this.index == 0)
+                try {
+                    this.algorithm.initGraph();
+                } catch (Throwable throwable){
+                    throwable.printStackTrace();
+                }
+            else
+                this.algorithm.step();
         while(steps != 0) {
             if (this.index < this.receivedEvents.size()) {
                 Object event = this.receivedEvents.get(index);
@@ -161,15 +170,17 @@ public class Recorder {
                 this.addType(event);
                 index ++;
 
-            } else if (this.index == this.receivedEvents.size()) {
-                if (this.index == 0)
-                    try {
-                        this.algorithm.initGraph();
-                    } catch (Throwable throwable) {
-                        throwable.printStackTrace();
-                    }
-                else
-                    this.algorithm.step();
+//            } else if (this.index == this.receivedEvents.size()) {
+//                if (this.index == 0)
+//                    try {
+//                        this.algorithm.initGraph();
+//                    } catch (Throwable throwable) {
+//                        throwable.printStackTrace();
+//                    }
+//                else
+//                    this.algorithm.step();
+                if(this.index == this.receivedEvents.size())
+                    break;
             }
 
             steps --;
