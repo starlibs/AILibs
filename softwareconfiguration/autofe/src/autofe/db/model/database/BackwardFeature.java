@@ -42,23 +42,24 @@ public class BackwardFeature extends AbstractFeature {
 	public String getName() {
 		List<Tuple<AbstractRelationship, AggregationFunction>> pathElements = path.getPathElements();
 
+		String name;
+
 		if (pathElements == null || pathElements.isEmpty()) {
-			return parent.getName();
-		}
+			name = parent.getFullName();
+		} else {
+			String parentTableName = pathElements.get(0).getT().getToTableName();
+			name = String.format("%s.%s", parentTableName, parent.getFullName());
 
-		String parentTableName = pathElements.get(0).getT().getToTableName();
-		String updatedName = String.format("%s.%s", parentTableName, parent.getName());
-
-		for (Tuple<AbstractRelationship, AggregationFunction> pathElement : pathElements) {
-			if (pathElement.getT() instanceof BackwardRelationship) {
-				updatedName = String.format("%s.%s(%s)", pathElement.getT().getFromTableName(), pathElement.getU(),
-						updatedName);
-			} else if (pathElement.getT() instanceof ForwardRelationship) {
-				updatedName = String.format("%s.(%s)", pathElement.getT().getFromTableName(), updatedName);
+			for (Tuple<AbstractRelationship, AggregationFunction> pathElement : pathElements) {
+				if (pathElement.getT() instanceof BackwardRelationship) {
+					name = String.format("%s.%s(%s)", pathElement.getT().getFromTableName(), pathElement.getU(), name);
+				} else if (pathElement.getT() instanceof ForwardRelationship) {
+					name = String.format("%s.(%s)", pathElement.getT().getFromTableName(), name);
+				}
 			}
 		}
 
-		return updatedName;
+		return "[B:" + name + "]";
 
 	}
 
