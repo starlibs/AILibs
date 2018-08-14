@@ -50,8 +50,12 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 		}
 	}
 
-	private List<NodeExpansionDescription<DatabaseNode, String>> computeForNonIntermediateNode(
-			DatabaseNode node) {
+	private List<NodeExpansionDescription<DatabaseNode, String>> computeForNonIntermediateNode(DatabaseNode node) {
+		// Finished nodes do not have successors
+		if (node.isFinished()) {
+			return Collections.emptyList();
+		}
+
 		List<NodeExpansionDescription<DatabaseNode, String>> toReturn = new ArrayList<>();
 
 		Set<Attribute> forwardAttributes = db.getForwardAttributes();
