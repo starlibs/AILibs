@@ -2,7 +2,7 @@ package autofe.db.model.database;
 
 public class Attribute implements Comparable<Attribute> {
 
-	private String name;
+	private String fullName;
 
 	private AttributeType type;
 
@@ -12,7 +12,7 @@ public class Attribute implements Comparable<Attribute> {
 
 	public Attribute(String name, AttributeType type) {
 		super();
-		this.name = name;
+		this.fullName = name;
 		this.type = type;
 		this.isTarget = false;
 		this.isPrimaryKey = false;
@@ -20,7 +20,7 @@ public class Attribute implements Comparable<Attribute> {
 
 	public Attribute(String name, AttributeType type, boolean isTarget) {
 		super();
-		this.name = name;
+		this.fullName = name;
 		this.type = type;
 		this.isTarget = isTarget;
 		this.isPrimaryKey = false;
@@ -28,18 +28,22 @@ public class Attribute implements Comparable<Attribute> {
 
 	public Attribute(String name, AttributeType type, boolean isTarget, boolean isPrimaryKey) {
 		super();
-		this.name = name;
+		this.fullName = name;
 		this.type = type;
 		this.isTarget = isTarget;
 		this.isPrimaryKey = isPrimaryKey;
 	}
 
-	public String getName() {
-		return name;
+	public String getFullName() {
+		return fullName;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public String getName() {
+		String[] split = fullName.split("\\.");
+		if (split.length != 2) {
+			throw new RuntimeException("Invalid attribute full name: " + fullName);
+		}
+		return split[1];
 	}
 
 	public AttributeType getType() {
@@ -63,7 +67,7 @@ public class Attribute implements Comparable<Attribute> {
 	}
 
 	public boolean isFeature() {
-		return !(this.type == AttributeType.ID);
+		return (this.type == AttributeType.NUMERIC) || (this.type == AttributeType.TEXT);
 	}
 
 	public boolean isPrimaryKey() {
@@ -76,7 +80,7 @@ public class Attribute implements Comparable<Attribute> {
 
 	@Override
 	public int compareTo(Attribute o) {
-		return name.compareTo(o.name);
+		return fullName.compareTo(o.fullName);
 	}
 
 	@Override
@@ -85,7 +89,7 @@ public class Attribute implements Comparable<Attribute> {
 		int result = 1;
 		result = prime * result + (isPrimaryKey ? 1231 : 1237);
 		result = prime * result + (isTarget ? 1231 : 1237);
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((fullName == null) ? 0 : fullName.hashCode());
 		result = prime * result + ((type == null) ? 0 : type.hashCode());
 		return result;
 	}
@@ -103,10 +107,10 @@ public class Attribute implements Comparable<Attribute> {
 			return false;
 		if (isTarget != other.isTarget)
 			return false;
-		if (name == null) {
-			if (other.name != null)
+		if (fullName == null) {
+			if (other.fullName != null)
 				return false;
-		} else if (!name.equals(other.name))
+		} else if (!fullName.equals(other.fullName))
 			return false;
 		if (type != other.type)
 			return false;
@@ -115,7 +119,7 @@ public class Attribute implements Comparable<Attribute> {
 
 	@Override
 	public String toString() {
-		return "Attribute [name=" + name + ", type=" + type + ", isTarget=" + isTarget + ", isPrimaryKey="
+		return "Attribute [fullName=" + fullName + ", type=" + type + ", isTarget=" + isTarget + ", isPrimaryKey="
 				+ isPrimaryKey + "]";
 	}
 
