@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import scala.math.Numeric;
+
 /**
  * This is a simple util class for easy database access and query execution in sql. You need to make sure that the respective JDBC connector is in the class path. By default, the adapter uses the mysql driver, but any jdbc driver can be
  * used.
@@ -144,18 +146,7 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 		this.checkConnection();
 		PreparedStatement stmt = this.connect.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 		for (int i = 1; i <= values.size(); i++) {
-			Object val = values.get(i - 1);
-			if (val instanceof Double) {
-				stmt.setDouble(i, (Double) val);
-			} else if (val instanceof Float) {
-				stmt.setDouble(i, (Double) val);
-			} else if (val instanceof Integer) {
-				stmt.setInt(i, (Integer) val);
-			} else if (val instanceof String) {
-				stmt.setString(i, (String) val);
-			} else {
-				stmt.setObject(i, val);
-			}
+			this.setValue(stmt, i, values.get(i - 1));
 		}
 		stmt.executeUpdate();
 
@@ -201,13 +192,13 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 	public void update(final String table, final Map<String, ? extends Object> updateValues, final Map<String, ? extends Object> conditions) throws SQLException {
 		this.checkConnection();
 		StringBuilder updateSB = new StringBuilder();
-		List<String> values = new ArrayList<>();
+		List<Object> values = new ArrayList<>();
 		for (String key : updateValues.keySet()) {
 			if (updateSB.length() > 0) {
 				updateSB.append(", ");
 			}
 			updateSB.append(key + " = (?)");
-			values.add(updateValues.get(key).toString());
+			values.add(updateValues.get(key));
 		}
 
 		StringBuilder conditionSB = new StringBuilder();
@@ -216,15 +207,27 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 				conditionSB.append(" AND ");
 			}
 			conditionSB.append(key + " = (?)");
-			values.add(conditions.get(key).toString());
+			values.add(conditions.get(key));
 		}
 
 		String sql = "UPDATE " + table + " SET " + updateSB.toString() + " WHERE " + conditionSB.toString();
 		PreparedStatement stmt = this.connect.prepareStatement(sql);
 		for (int i = 1; i <= values.size(); i++) {
-			stmt.setString(i, values.get(i - 1));
+			this.setValue(stmt, i, values.get(i - 1));
 		}
 		stmt.executeUpdate();
+	}
+
+	private void setValue(final PreparedStatement stmt, final int index, final Object val) throws SQLException {
+		if (val instanceof Integer) {
+			stmt.setInt(index, (Integer) val);
+		} else if (val instanceof Numeric) {
+			stmt.setDouble(index, (Double) val);
+		} else if (val instanceof String) {
+			stmt.setString(index, (String) val);
+		} else {
+			stmt.setObject(index, val);
+		}
 	}
 
 	/**
@@ -233,7 +236,6 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 	@Override
 	public void close() {
 		try {
-
 			if (this.connect != null) {
 				this.connect.close();
 			}
