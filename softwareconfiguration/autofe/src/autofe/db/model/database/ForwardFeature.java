@@ -12,7 +12,7 @@ public class ForwardFeature extends AbstractFeature {
 
 	@Override
 	public String getName() {
-		return "[F:" + parent.getFullName() + "]";
+		return parent.getFullName();
 	}
 
 	@Override
@@ -22,7 +22,7 @@ public class ForwardFeature extends AbstractFeature {
 
 	@Override
 	public String toString() {
-		return "ForwardFeature [parent=" + parent + ", getName()=" + getName() + "]";
+		return "[F:" + getName() + "]";
 	}
 
 }

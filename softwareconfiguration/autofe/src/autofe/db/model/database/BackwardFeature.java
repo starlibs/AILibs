@@ -59,7 +59,7 @@ public class BackwardFeature extends AbstractFeature {
 			}
 		}
 
-		return "[B:" + name + "]";
+		return name;
 
 	}
 
@@ -96,7 +96,7 @@ public class BackwardFeature extends AbstractFeature {
 
 	@Override
 	public String toString() {
-		return "BackwardFeature [path=" + path + ", parent=" + parent + ", getName()=" + getName() + "]";
+		return "[B:" + getName() + "]";
 	}
 
 }
