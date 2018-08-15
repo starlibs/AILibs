@@ -48,7 +48,7 @@ public class BackwardFeature extends AbstractFeature {
 			name = parent.getFullName();
 		} else {
 			String parentTableName = pathElements.get(0).getT().getToTableName();
-			name = String.format("%s.%s", parentTableName, parent.getFullName());
+			name = String.format("%s.%s", parentTableName, parent.getName());
 
 			for (Tuple<AbstractRelationship, AggregationFunction> pathElement : pathElements) {
 				if (pathElement.getT() instanceof BackwardRelationship) {
