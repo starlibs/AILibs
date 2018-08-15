@@ -6,8 +6,8 @@ import org.aeonbits.owner.Config.Sources;
 
 import jaicore.experiments.IExperimentSetConfig;
 
-@Sources({ "file:./conf/rankingExpConf.txt" })
-public interface IRankingConfig extends IExperimentSetConfig {
+@Sources({ "file:./conf/benchmarkRankConf.txt" })
+public interface IBenchmarkRankConfig extends IExperimentSetConfig {
 
 	public static final String DATASETS = "datasets";
 	public static final String BENCHMARKS = "benchmarks";

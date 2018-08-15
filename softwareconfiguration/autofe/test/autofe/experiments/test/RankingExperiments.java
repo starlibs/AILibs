@@ -112,7 +112,7 @@ public class RankingExperiments {
 						logger.debug("Creating data set variations for data set '" + dsName + "'.");
 						int dataSetID = DataSetUtils.getDataSetIDByName(dsName);
 						List<Instances> dataSetVariations = HASCOFE.generateRandomDataSets(dataSetID,
-								MAX_DATASET_CREATIONS, MAX_PIPELINE_SIZE, DATASET_GENERATION_TIMEOUT);
+								MAX_DATASET_CREATIONS, MAX_PIPELINE_SIZE, DATASET_GENERATION_TIMEOUT, 42);
 						FileUtils.saveInstances(dataSetVariations, RANKING_DIR, dsName);
 
 						logger.debug("Done. Now deriving MLPlan ranking...");

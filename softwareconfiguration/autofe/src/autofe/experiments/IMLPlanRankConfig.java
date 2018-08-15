@@ -6,11 +6,10 @@ import org.aeonbits.owner.Config.Sources;
 
 import jaicore.experiments.IExperimentSetConfig;
 
-@Sources({ "file:./conf/rankingExpConf.txt" })
-public interface IRankingConfig extends IExperimentSetConfig {
-
+@Sources({ "file:./conf/mlplanRankConf.txt" })
+public interface IMLPlanRankConfig extends IExperimentSetConfig {
 	public static final String DATASETS = "datasets";
-	public static final String BENCHMARKS = "benchmarks";
+	public static final String VARIATIONS = "variations";
 	public static final String TIMEOUTS_IN_SECONDS = "timeouts";
 	public static final String SEEDS = "seeds";
 	public static final String datasetFolder = "datasetfolder";
@@ -18,8 +17,8 @@ public interface IRankingConfig extends IExperimentSetConfig {
 	@Key(DATASETS)
 	public List<String> getDatasets();
 
-	@Key(BENCHMARKS)
-	public List<String> getBenchmarks();
+	@Key(VARIATIONS)
+	public List<String> getVariations();
 
 	@Key(TIMEOUTS_IN_SECONDS)
 	public List<String> getTimeouts();

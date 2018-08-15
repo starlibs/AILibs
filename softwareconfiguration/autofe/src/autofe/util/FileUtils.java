@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
@@ -82,6 +83,16 @@ public final class FileUtils {
 		}
 	}
 
+	public static void saveSingleInstances(final Instances dataSet, final String filePath)
+			throws InterruptedException, IOException {
+		ArffSaver saver = new ArffSaver();
+		saver.setInstances(dataSet);
+		File destFile = new File(filePath);
+		saver.setFile(destFile);
+
+		saver.writeBatch();
+	}
+
 	public static List<Instances> readInstances(final String dirPath, final String dataSetPrefix,
 			final String excludePostfix) {
 		List<Instances> results = new ArrayList<>();
@@ -101,9 +112,7 @@ public final class FileUtils {
 		for (File file : dataSetFiles) {
 			try {
 				DataSource source = new DataSource(new FileInputStream(file));
-				Instances insts;
-
-				insts = source.getDataSet();
+				Instances insts = source.getDataSet();
 				insts.setClassIndex(insts.numAttributes() - 1);
 
 				results.add(insts);
@@ -116,6 +125,29 @@ public final class FileUtils {
 		}
 
 		return results;
+	}
+
+	public static Instances readSingleInstances(final String file) {
+		File inputFile = new File(file);
+		if (!inputFile.exists()) {
+			logger.warn("File '" + file + "' does not exist!");
+			return null;
+		}
+
+		try {
+			DataSource source = new DataSource(new FileInputStream(inputFile));
+
+			Instances insts = source.getDataSet();
+			insts.setClassIndex(insts.numAttributes() - 1);
+			return insts;
+		} catch (FileNotFoundException e) {
+			logger.warn("Could not find file '" + file + "'. " + e.getMessage());
+			return null;
+		} catch (Exception e) {
+			logger.warn("Got the following exception when trying to read instances from file: " + e.getMessage());
+			return null;
+		}
+
 	}
 
 	public static void writeDoubleArrayToFile(final double[] array, final String filePath, final String delimiter) {

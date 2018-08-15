@@ -248,7 +248,7 @@ public class HASCOFE implements IObservableGraphAlgorithm<TFDNode, String>, ILog
 	}
 
 	public static List<Instances> generateRandomDataSets(final int dataset, // final double usedDataSetSize,
-			final int maxSolutionCount, final int maxPipelineSize, final int timeout) throws Exception {
+			final int maxSolutionCount, final int maxPipelineSize, final int timeout, final int seed) throws Exception {
 
 		/* load image dataset and create a train-test-split */
 		OpenmlConnector connector = new OpenmlConnector();
@@ -279,16 +279,17 @@ public class HASCOFE implements IObservableGraphAlgorithm<TFDNode, String>, ILog
 
 		// Calculate solution data sets
 		List<Instances> result = new ArrayList<>();
-		result.add(originDataSet.getInstances());
+		if (maxSolutionCount > 1)
+			result.add(originDataSet.getInstances());
 
 		// logger.debug("Found solutions: " + hascoFE.getFoundClassifiers().toString());
 		List<HASCOFESolution> solutions = new ArrayList<>(hascoFE.getFoundClassifiers());
 		logger.debug("Found " + solutions.size() + " solutions.");
-		Collections.shuffle(solutions);
+		Collections.shuffle(solutions, new Random(seed));
 
 		Iterator<HASCOFESolution> solIt = solutions.iterator();
 
-		int solCounter = 1;
+		int solCounter = result.size();
 		while (solIt.hasNext() && solCounter < maxSolutionCount) {
 			HASCOFESolution nextSol = solIt.next();
 

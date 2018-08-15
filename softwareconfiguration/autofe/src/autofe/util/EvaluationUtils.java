@@ -618,6 +618,7 @@ public final class EvaluationUtils {
 		mlplan.setRandomSeed(seed);
 		mlplan.setNumberOfCPUs(numCores);
 		mlplan.setLoggerName("mlplan");
+		// Timeout in seconds
 		mlplan.setTimeout(timeout);
 		mlplan.setPortionOfDataForPhase2(.1f);
 		mlplan.setNodeEvaluator(new DefaultPreorder());

@@ -18,6 +18,7 @@ import weka.classifiers.Evaluation;
 import weka.classifiers.functions.LDA;
 import weka.classifiers.functions.supportVector.RBFKernel;
 import weka.core.Instances;
+import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Nystroem;
 
 public class LDAEvaluationTest {
@@ -96,7 +97,7 @@ public class LDAEvaluationTest {
 		//
 		kernelFilter.setKernel(new RBFKernel(newInsts, 250007, 0.01));
 		// kernelFilter.setKernel(new PolyKernel(newInsts, 250007, 2, false));
-		// newInsts = Filter.useFilter(newInsts, kernelFilter);
+		newInsts = Filter.useFilter(newInsts, kernelFilter);
 		// evalInsts = Filter.useFilter(evalInsts, kernelFilter);
 
 		LDA lda = new LDA();
