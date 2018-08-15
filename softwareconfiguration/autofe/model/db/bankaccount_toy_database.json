@@ -4,31 +4,31 @@
       "name": "BankAccount",
       "columns": [
         {
-          "name": "BankAccountId",
+          "fullName": "BankAccount.BankAccountId",
           "type": "ID",
           "isTarget": false,
           "isPrimaryKey": true
         },
         {
-          "name": "Balance",
+          "fullName": "BankAccount.Balance",
           "type": "NUMERIC",
           "isTarget": false,
           "isPrimaryKey": false
         },
         {
-          "name": "TransactionCounter",
+          "fullName": "BankAccount.TransactionCounter",
           "type": "NUMERIC",
           "isTarget": false,
           "isPrimaryKey": false
         },
         {
-          "name": "BankName",
+          "fullName": "BankAccount.BankName",
           "type": "TEXT",
           "isTarget": false,
           "isPrimaryKey": false
         },
         {
-          "name": "Credible",
+          "fullName": "BankAccount.Credible",
           "type": "TEXT",
           "isTarget": true,
           "isPrimaryKey": false
@@ -40,19 +40,19 @@
       "name": "Customer",
       "columns": [
         {
-          "name": "CustomerId",
+          "fullName": "Customer.CustomerId",
           "type": "ID",
           "isTarget": false,
           "isPrimaryKey": true
         },
         {
-          "name": "BankAccountId",
+          "fullName": "Customer.BankAccountId",
           "type": "ID",
           "isTarget": false,
           "isPrimaryKey": false
         },
         {
-          "name": "FirstName",
+          "fullName": "Customer.FirstName",
           "type": "TEXT",
           "isTarget": false,
           "isPrimaryKey": false
@@ -64,19 +64,19 @@
       "name": "Orders",
       "columns": [
         {
-          "name": "OrderId",
+          "fullName": "Orders.OrderId",
           "type": "ID",
           "isTarget": false,
           "isPrimaryKey": true
         },
         {
-          "name": "CustomerId",
+          "fullName": "Orders.CustomerId",
           "type": "ID",
           "isTarget": false,
           "isPrimaryKey": false
         },
         {
-          "name": "OrderDate",
+          "fullName": "Orders.OrderDate",
           "type": "DATE",
           "isTarget": false,
           "isPrimaryKey": false
@@ -88,25 +88,25 @@
       "name": "Product",
       "columns": [
         {
-          "name": "ProductId",
+          "fullName": "Product.ProductId",
           "type": "ID",
           "isTarget": false,
           "isPrimaryKey": true
         },
         {
-          "name": "OrderId",
+          "fullName": "Product.OrderId",
           "type": "ID",
           "isTarget": false,
           "isPrimaryKey": false
         },
         {
-          "name": "ProductName",
+          "fullName": "Product.ProductName",
           "type": "TEXT",
           "isTarget": false,
           "isPrimaryKey": false
         },
         {
-          "name": "Price",
+          "fullName": "Product.Price",
           "type": "NUMERIC",
           "isTarget": false,
           "isPrimaryKey": false
