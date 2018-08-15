@@ -38,7 +38,7 @@ public class SqlUtilsTest {
 		Attribute credible = DBUtils.getAttributeByName("Credible", bankAccount);
 		ForwardFeature credibleFeature = new ForwardFeature(credible);
 
-		assertEquals("FE_FWD_CREDIBLE", SqlUtils.getTableNameForFeature(credibleFeature));
+		assertEquals("FE_FWD_BANKACCOUNT_CREDIBLE", SqlUtils.getTableNameForFeature(credibleFeature));
 	}
 
 	@Test
@@ -53,7 +53,7 @@ public class SqlUtilsTest {
 		path.addPathElement(new BackwardRelationship("TargetTable", "TestTable", "TargetTableId"),
 				AggregationFunction.SUM);
 
-		assertEquals("FE_BWD_PRICE_AVGORDERS_TESTTABLE_SUMTARGETTABLE", SqlUtils.getTableNameForFeature(bf));
+		assertEquals("FE_BWD_PRODUCT_PRICE_AVGORDERS_TESTTABLE_SUMTARGETTABLE", SqlUtils.getTableNameForFeature(bf));
 	}
 
 	@Test

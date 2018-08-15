@@ -33,13 +33,19 @@ public class SqlUtils {
 		StringBuilder sb = new StringBuilder();
 		sb.append(GENERAL_PREFIX);
 		if (feature instanceof ForwardFeature) {
+			String parentFullName = feature.getParent().getFullName();
+			parentFullName = parentFullName.replace(".", "_");
+			parentFullName = parentFullName.toUpperCase();
 			sb.append(FORWARD_PREFIX);
 			sb.append("_");
-			sb.append(feature.getParent().getName());
+			sb.append(parentFullName);
 		} else if (feature instanceof BackwardFeature) {
+			String parentFullName = feature.getParent().getFullName();
+			parentFullName = parentFullName.replace(".", "_");
+			parentFullName = parentFullName.toUpperCase();
 			sb.append(BACKWARD_PREFIX);
 			sb.append("_");
-			sb.append(feature.getParent().getName());
+			sb.append(parentFullName);
 			sb.append("_");
 			Path path = ((BackwardFeature) feature).getPath();
 			for (int i = 0; i < path.length(); i++) {
