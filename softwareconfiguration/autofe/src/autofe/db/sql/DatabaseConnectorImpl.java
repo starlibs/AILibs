@@ -42,9 +42,16 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 		super();
 		this.db = db;
 		this.createdTableNames = new HashSet<>();
-		// TODO: Setup SQLAdapter properly
-		this.sqlAdapter = new SQLAdapter(db.getJdbcDriver(), db.getJdbcUrl(), db.getJdbcUsername(),
-				db.getJdbcPassword(), db.getJdbcDatabase(), null, false);
+		setupSqlAdapter();
+	}
+
+	private void setupSqlAdapter() {
+		String driver = db.getJdbcDriver();
+		String host = db.getJdbcUrl() != null ? db.getJdbcUrl() : "";
+		String user = db.getJdbcUsername() != null ? db.getJdbcUsername() : "";
+		String password = db.getJdbcPassword() != null ? db.getJdbcPassword() : "";
+		String database = db.getJdbcDatabase() != null ? db.getJdbcDatabase() : "";
+		this.sqlAdapter = new SQLAdapter(driver, host, user, password, database, null, false);
 	}
 
 	@Override

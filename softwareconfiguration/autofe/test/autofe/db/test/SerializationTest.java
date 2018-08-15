@@ -31,16 +31,16 @@ public class SerializationTest {
 
 		// Create tables
 
-		Attribute customerId = new Attribute("CustomerId", AttributeType.ID);
-		Attribute bankAccountId = new Attribute("BankAccountId", AttributeType.ID);
+		Attribute customerId = new Attribute("Customer.CustomerId", AttributeType.ID);
+		Attribute bankAccountId = new Attribute("BankAccount.BankAccountId", AttributeType.ID);
 
 		Table bankAccount = new Table();
 		bankAccount.setName("BankAccount");
 		bankAccount.setTarget(true);
 		List<Attribute> bankAccountAttributes = new ArrayList<>();
 		bankAccountAttributes.add(bankAccountId);
-		bankAccountAttributes.add(new Attribute("BankName", AttributeType.TEXT));
-		bankAccountAttributes.add(new Attribute("Credible", AttributeType.NUMERIC, true));
+		bankAccountAttributes.add(new Attribute("BankAccount.BankName", AttributeType.TEXT));
+		bankAccountAttributes.add(new Attribute("BankAccount.Credible", AttributeType.NUMERIC, true));
 		bankAccount.setColumns(bankAccountAttributes);
 
 		Table customer = new Table();
@@ -48,7 +48,7 @@ public class SerializationTest {
 		customer.setTarget(false);
 		List<Attribute> customerAttributes = new ArrayList<>();
 		customerAttributes.add(customerId);
-		customerAttributes.add(new Attribute("FirstName", AttributeType.TEXT));
+		customerAttributes.add(new Attribute("Customer.FirstName", AttributeType.TEXT));
 		customerAttributes.add(bankAccountId);
 		customer.setColumns(customerAttributes);
 
@@ -56,9 +56,9 @@ public class SerializationTest {
 		orders.setName("Orders");
 		orders.setTarget(false);
 		List<Attribute> ordersAttributes = new ArrayList<>();
-		ordersAttributes.add(new Attribute("OrderId", AttributeType.ID));
+		ordersAttributes.add(new Attribute("Orders.OrderId", AttributeType.ID));
 		ordersAttributes.add(customerId);
-		ordersAttributes.add(new Attribute("OrderDate", AttributeType.DATE));
+		ordersAttributes.add(new Attribute("Orders.OrderDate", AttributeType.DATE));
 		orders.setColumns(ordersAttributes);
 
 		// Add tables to DB
