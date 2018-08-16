@@ -58,6 +58,8 @@ public class isValidParameterRangeRefinementPredicatePruning implements Evaluabl
 	@Override
 	public Collection<List<ConstantParam>> getParamsForPositiveEvaluation(final Monom state,
 			final ConstantParam... partialGrounding) {
+//		if (true)
+//			return new ArrayList<>();
 
 		ComponentInstance ci = Util.getSolutionCompositionFromState(components, state);
 		String compositionIdentifier = Util.getComponentNamesOfComposition(ci);
@@ -87,9 +89,10 @@ public class isValidParameterRangeRefinementPredicatePruning implements Evaluabl
 		 * threshold epsilon, no more refinements will be allowed
 		 */
 		String paramName = ci.getComponent().getName() + "::" + param.getName();
-		// if (performanceKB.getNumSamples("test", compositionIdentifier) >
-		// this.minNumSamplesForImportanceEstimation) {
-		if (performanceKB.kDistinctAttributeValuesAvailable("test", ci, minNumSamplesForImportanceEstimation)) {
+
+		if (performanceKB.getNumSamples("test", compositionIdentifier) > this.minNumSamplesForImportanceEstimation) {
+			// if (performanceKB.kDistinctAttributeValuesAvailable("test", ci,
+			// minNumSamplesForImportanceEstimation)) {
 			System.out.println(minNumSamplesForImportanceEstimation + " samples are available");
 			try {
 				System.out.println("Querying fANOVA with " + performanceKB.getNumSamples("test", compositionIdentifier)
@@ -101,7 +104,7 @@ public class isValidParameterRangeRefinementPredicatePruning implements Evaluabl
 				// for (String parameterIndex : importantParams) {
 				// System.out.println("parameter " + parameterIndex);
 				// }
-				 System.out.println("important parameters: " + importantParams.toString());
+				System.out.println("important parameters: " + importantParams.toString());
 				if (importantParams.contains(paramName)) {
 					// System.out.println("Parameter " + paramName + " is important and will be
 					// refined!");

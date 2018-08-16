@@ -71,7 +71,8 @@ public class isRefinementCompletedPredicateWithImportanceCheck implements Evalua
 
 	@Override
 	public boolean test(Monom state, ConstantParam... params) {
-
+		// if(true)
+		// return true;
 		/* initialize routine */
 		if (params.length != 2) {
 			throw new IllegalArgumentException("There should be exactly two parameters additional to the state but "
@@ -102,12 +103,13 @@ public class isRefinementCompletedPredicateWithImportanceCheck implements Evalua
 		String compositionIdentifier = Util.getComponentNamesOfComposition(ci);
 		// System.out.println("Composition Identifier in completedpred: " +
 		// compositionIdentifier);
-//		if (performanceKB.getNumSamples("test", compositionIdentifier) > this.minNumSamplesForImportanceEstimation) {
-		if(performanceKB.kDistinctAttributeValuesAvailable("test", ci, minNumSamplesForImportanceEstimation)) {
+		if (performanceKB.getNumSamples("test", compositionIdentifier) > this.minNumSamplesForImportanceEstimation) {
+			// if(performanceKB.kDistinctAttributeValuesAvailable("test", ci,
+			// minNumSamplesForImportanceEstimation)) {
 			System.out.println(minNumSamplesForImportanceEstimation + " samples are available");
 			try {
 				System.out.println("Querying fANOVA with " + performanceKB.getNumSamples("test", compositionIdentifier)
-				+ " samples!");
+						+ " samples!");
 				// System.out.println("Querying fANOVA with " +
 				// performanceKB.getNumSamples("test", compositionIdentifier)
 				// + " samples!");
@@ -121,16 +123,24 @@ public class isRefinementCompletedPredicateWithImportanceCheck implements Evalua
 				e.printStackTrace();
 			}
 		}
-//		System.out.println("Important Parameters: " + importantParams.toString());
+
+		// System.out.println("Important Parameters: " + importantParams.toString());
 		for (Parameter param : component.getParameters()) {
-			String paramName = ci.getComponent().getName() + "::" + param.getName();
-//			System.out.println("Checking whether parameter " + param.getName() + " for component " + component.getName()
-//					+ " has completed its refinement");
+			// String paramName = ci.getComponent().getName() + "::" + param.getName();
+			String paramName = component.getName() + "::" + param.getName();
+
+			// System.out.println("Checking whether parameter " + param.getName() + " for
+			// component " + component.getName()
+			// + " has completed its refinement");
 			if (!importantParams.contains(paramName)) {
 				System.out.println("Skip parameter " + paramName);
 				continue;
 			}
-//			System.out.println("Not skipping parameter " + paramName);
+			// if(paramName.contains("pipeline")) {
+			// System.out.println("Skipping pipeline");
+			// continue;
+			// }
+			System.out.println("Not skipping parameter " + paramName);
 			String containerOfParam = componentParamContainers.get(param.getName());
 			String currentValueOfParam = componentParams.get(param.getName());
 			if (param.isNumeric()) {
@@ -159,9 +169,10 @@ public class isRefinementCompletedPredicateWithImportanceCheck implements Evalua
 			} else
 				throw new UnsupportedOperationException(
 						"Currently no support for testing parameters of type " + param.getClass().getName());
-			// System.out.println("\t" + param.getName() + " (" +
-			// componentParams.get(param.getName()) + ") is still refinable.");
+			System.out.println(
+					"\t" + param.getName() + " (" + componentParams.get(param.getName()) + ") is still refinable.");
 		}
+		System.out.println("Refinement of component " + component.getName() + " is completed." );
 		return true;
 	}
 }

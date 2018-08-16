@@ -87,7 +87,7 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 		Instances data = performanceKnowledgeBase.createInstancesForPerformanceSamples(benchmarkName, composition);
 		System.out.println("Extracting important parameters!");
 		System.out.println(data);
-		
+
 		// if (forest == null) {
 		// this.initializeForests(benchmarkName);
 		// }
@@ -119,6 +119,10 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 				}
 				// if no value is available in the dictionary, compute it
 				else {
+					if (Double.isNaN(currentImportance)) {
+						currentImportance = 1.0;
+						System.out.println("importance value is NaN, so it will be set to 1");
+					}
 					currentImportance = forest.computeMarginalVarianceContributionForFeatureSubset(subset);
 					importanceDictionary.get(pipelineIdentifier).put(subset, currentImportance);
 
@@ -134,8 +138,9 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 			}
 		}
 		// System.out.println("Importance overall: " + sum);
+		System.out.println("important params size: " + importantParameters.size());
 		importantParameterMap.put(pipelineIdentifier, importantParameters);
-		int numPruned = data.numAttributes() -1 -importantParameters.size();
+		int numPruned = data.numAttributes() - 1 - importantParameters.size();
 		HASCOWithParameterPruning.addPrunedParameters(numPruned);
 		return importantParameters;
 
