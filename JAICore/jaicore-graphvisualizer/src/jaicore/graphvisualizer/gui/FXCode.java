@@ -3,6 +3,7 @@ package jaicore.graphvisualizer.gui;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.common.reflect.ClassPath;
+import jaicore.graphvisualizer.events.controlEvents.NodePushed;
 import jaicore.graphvisualizer.events.controlEvents.ResetEvent;
 import jaicore.graphvisualizer.events.controlEvents.StepEvent;
 import jaicore.graphvisualizer.events.misc.AddSupplierEventNew;
@@ -26,7 +27,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 //TODO timeline does not alwayse update fast enough
-public class FXCode {
+public class FXCode implements NodeListener {
     
 //    Tabpane for additional tabs
     private TabPane tabPane;
@@ -95,9 +96,6 @@ public class FXCode {
         splitPane.setDividerPosition(0,0.25);
 //        left
         tabPane = new TabPane();
-        HTMLVisualizer html = new HTMLVisualizer();
-        Tab tab = new Tab();
-        tabPane.getTabs().add(tab);
 
         splitPane.getItems().add(tabPane);
         visualization = new GraphVisualization();
@@ -105,7 +103,11 @@ public class FXCode {
         rec.registerReplayListener(visualization);
         splitPane.getItems().add(visualization.getViewPanel());
 
+        visualization.addNodeListener(this);
+
         root.setCenter(splitPane);
+
+
 
 
 //        Bottom
@@ -123,9 +125,10 @@ public class FXCode {
         Scene scene = new Scene(root, 800,300);
         Stage stage = new Stage();
         stage.setScene(scene);
-        stage.setMaximized(true);
+//        stage.setMaximized(true);
         stage.show();
 
+        rec.getSupplier();
     }
 
     /**
@@ -299,20 +302,24 @@ public class FXCode {
 //                	To identify a visualizer the package name has to contain .dataVisualizer.
                     if(((ClassPath.ClassInfo) cls).getName().contains(".dataVisualizer.")){
                         IVisualizer v = (IVisualizer) findClassByName(((ClassPath.ClassInfo) cls).getName());
-                        if(v!= null){
-                            //if the supplier of the visualizer matches the current one, add the visualizer to the tabpane
-                            if(v.getSupplier() .equals(supplier.getClass().getSimpleName())){
-                                supplier.registerListener(v);
-                                this.eventBus.register(supplier);
-                                this.eventBus.register(v);
+                        try {
+                            if (v != null) {
+                                //if the supplier of the visualizer matches the current one, add the visualizer to the tabpane
+                                if (v.getSupplier().equals(supplier.getClass().getSimpleName())) {
+                                    supplier.registerListener(v);
+                                    this.eventBus.register(supplier);
+                                    this.eventBus.register(v);
 
 
-                                Tab tab = new Tab();
-                                tab.setContent(v.getVisualization());
-                                tab.setText(v.getTitle());
-                                tab.setText("test");
-                                this.tabPane.getTabs().add(tab);
+                                    Tab tab = new Tab();
+                                    tab.setContent(v.getVisualization());
+                                    tab.setText(v.getTitle());
+                                    this.tabPane.getTabs().add(tab);
+                                }
                             }
+                        }
+                        catch (Exception e){
+//                            e.printStackTrace();
                         }
                     }
                 }
@@ -355,4 +362,22 @@ public class FXCode {
     }
 
 
+    @Override
+    public void mouseOver(Object node) {
+
+    }
+
+    @Override
+    public void mouseLeft(Object node) {
+
+    }
+
+    @Override
+    public void buttonReleased(Object node) {
+    }
+
+    @Override
+    public void buttonPushed(Object node) {
+        this.eventBus.post(new NodePushed(node));
+    }
 }

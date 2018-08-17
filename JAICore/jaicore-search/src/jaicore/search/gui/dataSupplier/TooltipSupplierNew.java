@@ -30,7 +30,6 @@ public class TooltipSupplierNew implements ISupplier {
 
     private EventBus dataBus;
     private TooltipGenerator generator;
-//    private String visualizer;
     private String title;
 
     private Map<Integer, String> tooltipMap;
@@ -38,25 +37,9 @@ public class TooltipSupplierNew implements ISupplier {
     public TooltipSupplierNew() {
         this.dataBus = new EventBus();
         this.tooltipMap = new HashMap<>();
-//        this.visualizer = "HTMLVisualizer";
         this.title = "Tooltips";
     }
 
-    @Override
-    public void registerListener(Object listener) {
-        this.dataBus.register(listener);
-    }
-
-//    @Override
-//    public String getVisualizerName() {
-//        return visualizer;
-//
-//    }
-
-//    @Override
-//    public String getVisualizerTitle() {
-//        return title;
-//    }
 
     public void setGenerator(TooltipGenerator generator) {
         this.generator = generator;
@@ -84,6 +67,11 @@ public class TooltipSupplierNew implements ISupplier {
     public void receiveControlEvent(ControlEvent event){
         if(event instanceof NodePushed)
             this.dataBus.post(new HTMLEvent(tooltipMap.get(((NodePushed)event).getNode().hashCode())));
+    }
+
+    @Override
+    public void registerListener(Object listener) {
+        this.dataBus.register(listener);
     }
 
     @Subscribe

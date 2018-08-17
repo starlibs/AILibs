@@ -8,20 +8,21 @@ import javafx.scene.web.WebView;
 
 public class HTMLVisualizer implements IVisualizer {
 
-    protected WebView webview;
-    protected WebEngine webEngine;
+//    protected WebView webview;
+//    protected WebEngine webEngine;
 
     public HTMLVisualizer(){
-        this.webview = new WebView();
-        this.webEngine = this.webview.getEngine();
-        //this.webEngine.load("https://start.fedoraproject.org/");
-        this.webEngine.loadContent("test");
+//        this.webview = new WebView();
+//        this.webEngine = this.webview.getEngine();
+//        //this.webEngine.load("https://start.fedoraproject.org/");
+//        this.webEngine.loadContent("test");
 
     }
 
     @Override
     public Node getVisualization() {
-        return webview;
+//        return webview;
+        return null;
     }
 
     @Override
@@ -42,6 +43,6 @@ public class HTMLVisualizer implements IVisualizer {
         sb.append(html.getText());
         sb.append("</div></html>");
 
-        webEngine.loadContent(sb.toString());
+//        webEngine.loadContent(sb.toString());
     }
 }

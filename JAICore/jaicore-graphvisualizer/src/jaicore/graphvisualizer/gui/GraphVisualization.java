@@ -8,8 +8,13 @@ import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.SingleGraph;
 import org.graphstream.ui.fx_viewer.FxViewPanel;
 import org.graphstream.ui.fx_viewer.FxViewer;
+import org.graphstream.ui.fx_viewer.util.FxMouseManager;
+import org.graphstream.ui.view.ViewerListener;
+import org.graphstream.ui.view.ViewerPipe;
+import org.graphstream.ui.view.util.InteractiveElement;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,6 +33,11 @@ public class GraphVisualization<T> {
     protected final ConcurrentMap<T, Node> ext2intNodeMap = new ConcurrentHashMap<>();
     protected final ConcurrentMap<Node, T> int2extNodeMap = new ConcurrentHashMap<>();
 
+    protected boolean loop = true;
+
+    protected ViewerPipe pipe;
+    Thread pipeThread;
+
     public GraphVisualization(){
         this.roots = new ArrayList<>();
         this.graph = new SingleGraph("Search-Graph");
@@ -38,7 +48,20 @@ public class GraphVisualization<T> {
 
         this.viewPanel = (FxViewPanel) viewer.addDefaultView(false);
 
+        pipe = viewer.newViewerPipe();
+//        pipe.addViewerListener(new GraphListener());
 
+
+        viewer.getDefaultView().setMouseManager(new FxMouseManager(EnumSet.of(InteractiveElement.EDGE, InteractiveElement.NODE, InteractiveElement.SPRITE)));
+
+        pipeThread = new Thread(){
+            @Override
+            public void run(){
+                loopPump();
+            }
+        };
+
+        pipeThread.start();
 
     }
 
@@ -157,5 +180,52 @@ public class GraphVisualization<T> {
         this.int2extNodeMap.clear();
         this.graph.clear();
         this.graph.setAttribute("ui.stylesheet", "url('conf/searchgraph.css')");
+    }
+
+    private void loopPump(){
+        while (loop) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e){
+                e.printStackTrace();
+            }
+
+            pipe.pump();
+        }
+    }
+
+    private T getNodeOfString(String name) {
+        return int2extNodeMap.get(graph.getNode(name));
+    }
+
+    public void addNodeListener(NodeListener listener){
+        this.pipe.addViewerListener(new ViewerListener() {
+            @Override
+            public void viewClosed(String id) {
+
+            }
+
+            @Override
+            public void buttonPushed(String id) {
+                listener.buttonPushed(getNodeOfString(id));
+            }
+
+            @Override
+            public void buttonReleased(String id) {
+                listener.buttonReleased(getNodeOfString(id));
+
+            }
+
+            @Override
+            public void mouseOver(String id) {
+                listener.mouseOver(getNodeOfString(id));
+
+            }
+
+            @Override
+            public void mouseLeft(String id) {
+                listener.mouseLeft(getNodeOfString(id));
+            }
+        });
     }
 }

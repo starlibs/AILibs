@@ -44,6 +44,9 @@ public class Recorder {
 //    Nodemap to store types of nodes
     private Map<Object, List> nodeMap;
 
+//    List with every datasupplier
+    List<ISupplier> supplier;
+
     /**
      * A constructor for an empty recorder.
      * The empty recorder does not listen to an algorithm but it can load a replay.
@@ -73,6 +76,7 @@ public class Recorder {
         this.infoBus = new EventBus();
 
         this.nodeMap = new HashMap<>();
+        supplier = new ArrayList<>();
     }
 
     /**
@@ -291,9 +295,15 @@ public class Recorder {
     }
 
 
-    public void addDataSupplier(ISupplier supplier){
-        this.infoBus.post(new AddSupplierEventNew(supplier));
+    public void addDataSupplier(ISupplier iSupplier){
+//        this.infoBus.post(new AddSupplierEventNew(iSupplier));
+        this.registerReplayListener(iSupplier);
+        this.supplier.add(iSupplier);
     }
 
 
+    public void getSupplier() {
+        for(ISupplier s : supplier)
+            this.infoBus.post(new AddSupplierEventNew(s));
+    }
 }
