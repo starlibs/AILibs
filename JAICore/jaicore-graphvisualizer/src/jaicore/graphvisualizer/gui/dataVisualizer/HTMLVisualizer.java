@@ -2,27 +2,37 @@ package jaicore.graphvisualizer.gui.dataVisualizer;
 
 import com.google.common.eventbus.Subscribe;
 import jaicore.graphvisualizer.events.misc.HTMLEvent;
+import javafx.embed.swing.SwingNode;
 import javafx.scene.Node;
-import javafx.scene.web.WebEngine;
-import javafx.scene.web.WebView;
+
+import javax.swing.*;
 
 public class HTMLVisualizer implements IVisualizer {
 
-//    protected WebView webview;
-//    protected WebEngine webEngine;
+    SwingNode node;
+    JLabel label;
 
     public HTMLVisualizer(){
-//        this.webview = new WebView();
-//        this.webEngine = this.webview.getEngine();
-//        //this.webEngine.load("https://start.fedoraproject.org/");
-//        this.webEngine.loadContent("test");
+        this.label = new JLabel();
+        this.label.setText("<html></html>");
+        this.label.setVerticalAlignment(SwingConstants.TOP);
+        this.node = new SwingNode();
+        fillSwingnode(node);
 
+    }
+
+    private void fillSwingnode(SwingNode node){
+        JScrollPane pane = new JScrollPane();
+        pane.setViewportView(label);
+        SwingUtilities.invokeLater(()->{
+            node.setContent(pane);
+        });
     }
 
     @Override
     public Node getVisualization() {
-//        return webview;
-        return null;
+        return this.node;
+//        return null;
     }
 
     @Override
@@ -38,11 +48,11 @@ public class HTMLVisualizer implements IVisualizer {
     @Subscribe
     public void receiveData(HTMLEvent html){
         StringBuilder sb = new StringBuilder();
-
+//						sb.append("<html><div style='padding: 5px; background: #ffffcc; border: 1px solid black;'>");
         sb.append("<html><div style='padding: 5px;'>");
         sb.append(html.getText());
         sb.append("</div></html>");
 
-//        webEngine.loadContent(sb.toString());
+        label.setText(sb.toString());
     }
 }

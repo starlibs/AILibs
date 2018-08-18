@@ -98,8 +98,8 @@ public class FXCode implements NodeListener {
         tabPane = new TabPane();
 
         splitPane.getItems().add(tabPane);
-        visualization = new GraphVisualization();
-//        visualization = new HeatVisualization();
+//        visualization = new GraphVisualization();
+        visualization = new HeatVisualization();
         rec.registerReplayListener(visualization);
         splitPane.getItems().add(visualization.getViewPanel());
 
@@ -212,6 +212,7 @@ public class FXCode implements NodeListener {
                 reset();
             }
         });
+        nodeList.add(resetButton);
 
         //loadButton
         Button loadButton = new Button("load");
@@ -296,34 +297,37 @@ public class FXCode implements NodeListener {
         try {
             ClassPath path = ClassPath.from(ClassLoader.getSystemClassLoader());
             Set<?> set = path.getAllClasses();
-            set.stream().forEach(cls->{
-                if(cls instanceof ClassPath.ClassInfo){
-                    //search for a Visualizer.
+            try {
+                set.stream().forEach(cls -> {
+                    if (cls instanceof ClassPath.ClassInfo) {
+                        //search for a Visualizer.
 //                	To identify a visualizer the package name has to contain .dataVisualizer.
-                    if(((ClassPath.ClassInfo) cls).getName().contains(".dataVisualizer.")){
-                        IVisualizer v = (IVisualizer) findClassByName(((ClassPath.ClassInfo) cls).getName());
-                        try {
-                            if (v != null) {
-                                //if the supplier of the visualizer matches the current one, add the visualizer to the tabpane
-                                if (v.getSupplier().equals(supplier.getClass().getSimpleName())) {
-                                    supplier.registerListener(v);
-                                    this.eventBus.register(supplier);
-                                    this.eventBus.register(v);
+                        if (((ClassPath.ClassInfo) cls).getName().contains(".dataVisualizer.")) {
+                            IVisualizer v = (IVisualizer) findClassByName(((ClassPath.ClassInfo) cls).getName());
+                            try {
+                                if (v != null) {
+                                    //if the supplier of the visualizer matches the current one, add the visualizer to the tabpane
+                                    if (v.getSupplier().equals(supplier.getClass().getSimpleName())) {
+                                        supplier.registerListener(v);
+                                        this.eventBus.register(supplier);
+                                        this.eventBus.register(v);
 
 
-                                    Tab tab = new Tab();
-                                    tab.setContent(v.getVisualization());
-                                    tab.setText(v.getTitle());
-                                    this.tabPane.getTabs().add(tab);
+                                        Tab tab = new Tab();
+                                        tab.setContent(v.getVisualization());
+                                        tab.setText(v.getTitle());
+                                        this.tabPane.getTabs().add(tab);
+                                    }
                                 }
+                            } catch (Exception e) {
+//                            e.printStackTrace();
                             }
                         }
-                        catch (Exception e){
-//                            e.printStackTrace();
-                        }
                     }
-                }
-            });
+                });
+            } catch (Exception e){
+//                e.printStackTrace();
+            }
 
         } catch (IOException e) {
             e.printStackTrace();
