@@ -1,0 +1,15 @@
+edge {
+	padding: 100px;
+}
+
+node {
+	size-mode: fit;
+	fill-mode: plain;
+	fill-color: grey;
+	padding: 5px;
+}
+
+node.root {
+	padding: 10px;
+	fill-color: black;
+}
