@@ -78,6 +78,8 @@ public class BenchmarkRankExperimentEvaluator implements IExperimentSetEvaluator
 		double kendallsTau = EvaluationUtils.rankKendallsTau(priorRanking, scores);
 
 		results.put("kendallsTau", kendallsTau);
+		results.put("benchmarkRanking", Arrays.toString(scores));
+		results.put("mlplanRanking", Arrays.toString(priorRanking));
 		processor.processResults(results);
 	}
 }

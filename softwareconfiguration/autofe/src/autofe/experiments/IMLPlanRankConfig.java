@@ -6,7 +6,7 @@ import org.aeonbits.owner.Config.Sources;
 
 import jaicore.experiments.IExperimentSetConfig;
 
-@Sources({ "file:./conf/mlplanRankConf.txt" })
+@Sources({ "file:conf/mlplanRankConf.txt" })
 public interface IMLPlanRankConfig extends IExperimentSetConfig {
 	public static final String DATASETS = "datasets";
 	public static final String VARIATIONS = "variations";

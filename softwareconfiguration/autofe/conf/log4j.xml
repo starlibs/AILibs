@@ -64,25 +64,25 @@
 	</logger>
 	
 	<logger name="hasco">
-		<level value="info" />
+		<level value="warn" />
 		<appender-ref ref="console" />
 	</logger>
 	
 	<logger name="autofe">
-		<level value="debug" />
+		<level value="warn" />
 		<appender-ref ref="console" />
 		<appender-ref ref="infoFileAppender" />
 		<appender-ref ref="warnFileAppender" />
 		<appender-ref ref="errFileAppender" />
-		<appender-ref ref="traceFileAppender" />
-		<appender-ref ref="debugFileAppender" />
+<!-- 		<appender-ref ref="traceFileAppender" /> -->
+<!-- 		<appender-ref ref="debugFileAppender" /> -->
 	</logger>
 	
 	<logger name="mlplan">
-		<level value="info" />
-		<appender-ref ref="console" />
-		<appender-ref ref="infoFileAppender" />
-		<appender-ref ref="warnFileAppender" />
+		<level value="error" />
+<!-- 		<appender-ref ref="console" /> -->
+<!-- 		<appender-ref ref="infoFileAppender" /> -->
+<!-- 		<appender-ref ref="warnFileAppender" /> -->
 		<appender-ref ref="errFileAppender" />
 	</logger>
 
