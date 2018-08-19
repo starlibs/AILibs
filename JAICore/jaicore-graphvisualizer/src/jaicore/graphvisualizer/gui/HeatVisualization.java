@@ -33,10 +33,14 @@ public class HeatVisualization<T> extends GraphVisualization<T> {
         if(s.getInternalLabel() instanceof Number){
             double fvalue =  ((Number) s.getInternalLabel()).doubleValue();
 
-            if(fvalue > bestFValue)
+            if(fvalue > bestFValue) {
                 bestFValue = fvalue;
-            if(fvalue < worstFValue)
+                node.setAttribute("ui.class", "n1");
+            }
+            if(fvalue < worstFValue) {
                 worstFValue = fvalue;
+                node.setAttribute("ui.class", "2");
+            }
         }
 
         System.out.println("best: " + bestFValue + " worst: " + worstFValue);

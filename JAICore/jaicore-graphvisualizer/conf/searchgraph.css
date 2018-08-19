@@ -67,3 +67,11 @@ node.or_solution {
 	shape: circle;
 	fill-color: green;
 }
+
+node.1{
+    fill-color:blue
+}
+
+node.2{
+    fill-color: red
+}
