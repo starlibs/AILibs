@@ -1,12 +1,14 @@
 package jaicore.search.structure.core;
 
+import jaicore.graphvisualizer.gui.HeatValueSupplier;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Node<T, V extends Comparable<V>> implements Serializable, Comparable<Node<T, V>> {
+public class Node<T, V extends Comparable<V>> implements Serializable, Comparable<Node<T, V>>, HeatValueSupplier<V> {
 	private static final long serialVersionUID = -7608088086719059550L;
 	private final T externalLabel;
 	private boolean goal;
@@ -27,6 +29,7 @@ public class Node<T, V extends Comparable<V>> implements Serializable, Comparabl
 		return externalLabel;
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public V getInternalLabel() {
 		return (V)annotations.get("f");
