@@ -1,10 +1,11 @@
 package jaicore.graphvisualizer.gui;
 
-import com.google.common.eventbus.Subscribe;
-import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
 import org.graphstream.graph.Node;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
+
 
 
 public class HeatVisualization<T> extends GraphVisualization<T> {
@@ -13,6 +14,7 @@ public class HeatVisualization<T> extends GraphVisualization<T> {
 
     private double bestFValue;
     private double worstFValue;
+    private List<Node> nodes;
 
     public HeatVisualization() {
         super();
@@ -22,6 +24,7 @@ public class HeatVisualization<T> extends GraphVisualization<T> {
         random = new Random();
         bestFValue = Double.MIN_VALUE;
         worstFValue = Double.MAX_VALUE;
+        this.nodes = new ArrayList<>();
     }
 
     @Override
@@ -35,11 +38,15 @@ public class HeatVisualization<T> extends GraphVisualization<T> {
 
             if(fvalue > bestFValue) {
                 bestFValue = fvalue;
-                node.setAttribute("ui.class", "n1");
+                update();
             }
             if(fvalue < worstFValue) {
                 worstFValue = fvalue;
-                node.setAttribute("ui.class", "2");
+               update();
+            }
+            if(!roots.contains(newNodeExt)){
+                colorNode(node, fvalue);
+                nodes.add(node);
             }
         }
 
@@ -47,4 +54,25 @@ public class HeatVisualization<T> extends GraphVisualization<T> {
         return node;
 
     }
+
+    public void update(){
+        for(Node n :nodes){
+            HeatValueSupplier s = (HeatValueSupplier) this.int2extNodeMap.get(n);
+            if(s.getInternalLabel() instanceof Number) {
+                double fvalue = ((Number) s.getInternalLabel()).doubleValue();
+                colorNode(n, fvalue);
+            }
+        }
+
+    }
+
+    private void colorNode(Node node, double fvalue) {
+        float color = random.nextFloat();
+        float x = (float)(fvalue - worstFValue);
+        float y = (float)(bestFValue - worstFValue);
+        color = x/y;
+
+        node.setAttribute("ui.color", color);
+    }
+
 }
