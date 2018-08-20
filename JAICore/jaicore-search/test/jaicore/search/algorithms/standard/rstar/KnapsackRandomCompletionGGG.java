@@ -6,6 +6,7 @@ import jaicore.search.evaluationproblems.KnapsackProblem;
 import jaicore.search.graphgenerators.npuzzle.standard.NPuzzleGenerator;
 import jaicore.search.graphgenerators.npuzzle.standard.NPuzzleNode;
 import jaicore.search.structure.core.Node;
+import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -73,9 +74,9 @@ public class KnapsackRandomCompletionGGG {
 
     }
 
-    @Test
+    //@Test
     public void testRandom() {
-        RStar<KnapsackProblem.KnapsackNode, String, Integer> rStar = new RStar<>(ggg, 1, 5, 2, solutionEvaluator);
+        RStar<KnapsackProblem.KnapsackNode, String, Integer> rStar = new RStar<>(ggg, 0, 5, 2, solutionEvaluator);
         rStar.start();
 
         try {
@@ -101,6 +102,59 @@ public class KnapsackRandomCompletionGGG {
 //        System.out.println(solution);
 //        System.out.println(costOfSolution);
 
+    }
+
+    @Test
+    public void testAsInTest() {
+
+        // RandomCompletionGammaGraphGenerator<KnapsackProblem.KnapsackNode> ggg = new RandomCompletionGammaGraphGenerator<>(knapsackProblem.getGraphGenerator(), knapsackProblem.getSolutionEvaluator(), 3, seed);
+        int k, delta;
+        double score = Double.MAX_VALUE;
+        k = 5;
+        delta = 5;
+        int timeout = 10;  // seconds
+
+        RStar<KnapsackProblem.KnapsackNode, String, Integer> rstarSearch = new RStar<>(ggg, 0, k, delta, solutionEvaluator);
+
+        try {
+            rstarSearch.start();
+            rstarSearch.join(timeout * 1000);
+        } catch (InterruptedException e ) {
+            System.out.println("Interrupted while joining RStar.");
+            e.printStackTrace();
+        }
+        List<KnapsackProblem.KnapsackNode> solution = null;
+        if (rstarSearch.getGoalState() != null) {
+            try {
+                solution = rstarSearch.getSolutionPath();
+                if (solution != null) {
+                    score = solutionEvaluator.evaluateSolution(solution);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        System.out.println(solution);
+        System.out.println(score);
+        /*
+        for (GammaNode g : rstarSearch.getGammaSolutionPath()) {
+            System.out.println(g);
+        }
+
+        System.out.println("##############");
+
+        for (KnapsackProblem.KnapsackNode g : rstarSearch.getSolutionPath()) {
+            System.out.println(g);
+        }
+        */
+
+    }
+
+    @Test
+    public void testHashing() {
+        SingleRootGenerator<GammaNode<KnapsackProblem.KnapsackNode, RStarK>> rg = (SingleRootGenerator)  ggg.getRootGenerator();
+        System.out.println(rg.getRoot().getPoint().hashCode());
     }
 
 }

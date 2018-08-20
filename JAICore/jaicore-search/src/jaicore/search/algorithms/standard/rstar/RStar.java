@@ -132,10 +132,13 @@ public class RStar<T, A, D> extends Thread {
         // Line 7
         PathAndCost pac = gammaGraphGenerator.computePath(n.backpointer, n);
         n.backpointer.path.put(n, pac.path);
+
         if (pac.path != null) {
             n.backpointer.c_low.put(n, pac.cost);
-           // n.setAnnotation("pacset_on_bp", n.backpointer.getPoint().toString());
-           //  n.setAnnotation("pacset_empty", pac.path.size());
+            //n.backpointer.setAnnotation("setted path to", n);
+            //n.backpointer.setAnnotation("it is", pac.path);
+            //n.setAnnotation("pacset_on_bp", n.backpointer.getPoint().toString());
+            //n.setAnnotation("pacset_empty", pac.path.size());
         }
         // System.out.println("Path and cost from " + n.backpointer.getPoint() + " to " + n.getPoint() + ": " + pac);
 
@@ -175,7 +178,7 @@ public class RStar<T, A, D> extends Thread {
              * Remove node n with highest priority i.e. smallest k-value from open.
              */
             GammaNode<T, RStarK> n = open.poll(); //eek();
-            // tisSystem.out.println("Expanding node " + n);
+            System.out.println("Expanding node " + n);
 
             /**
              * If node with highest priority is a goal node, we found our goal.
@@ -197,21 +200,30 @@ public class RStar<T, A, D> extends Thread {
                         System.out.println("RStar finished.");
                         return;
                     } else {
-                        if (n_goal != null) {
+                        if (n_goal != null && n_goal.backpointer.path.get(n_goal).size() != 0) {
                             try {
-                                // List<T> currentSolutionPath = inferProblemPath(n_goal);
-                                List<T> currentSolutionPath = new ArrayList<>();
-                                currentSolutionPath.add(n_goal.getPoint());
+                                List<T> currentSolutionPath = inferProblemPath(n_goal);
+                                // List<T> currentSolutionPath = new ArrayList<>();
+                                // currentSolutionPath.add(n_goal.getPoint());
                                 double currentSolutionCost = solutionEvaluator.evaluateSolution(currentSolutionPath);
-                                // List<T> newSolutionPath = inferProblemPath(n);
-                                List<T> newSolutionPath = new ArrayList<>();
-                                newSolutionPath.add(n_goal.getPoint());
+                                List<T> newSolutionPath = inferProblemPath(n);
+                                // List<T> newSolutionPath = new ArrayList<>();
+                                // newSolutionPath.add(n_goal.getPoint());
                                 double newSolutionCost = solutionEvaluator.evaluateSolution(newSolutionPath);
                                 if (currentSolutionCost > newSolutionCost) {
                                     n_goal = n;
                                 }
                             } catch (Exception e) {
-                                System.err.println("Exception on evaluation solutions.");
+                                /*System.err.println("Exception on evaluation solutions.");
+                                System.err.println("Goal problem path. goal = " + n_goal);
+                                System.err.println("n_goal.backpointer = " + n_goal.backpointer);
+                                System.err.println("n_goal path to bp = " + n_goal.backpointer.path.keySet());
+                                System.err.println("n_goal path to bp = " + n_goal.backpointer.path.containsKey(n_goal));
+                                System.err.println("n_goal path to bp = " + n_goal.backpointer.path.get(n_goal));
+                                System.err.println("n_goal path to bp = " + n_goal.backpointer.path.get(n_goal).size());
+                                System.err.println(inferProblemPath(n_goal));
+                                System.err.println("new goal n problem path. n = " + n);
+                                System.err.println(inferProblemPath(n)); */
                                 e.printStackTrace();
                             }
                         } else {
@@ -347,7 +359,7 @@ public class RStar<T, A, D> extends Thread {
     }
 
     /**
-     * Infers the problem path from a given Gamma node.
+     * Infers the problem path from a given Gamma node. GammaNode -> (->GammaNodePath) -> NodePath -> ProblemPath
      * @param n
      * @return
      */
