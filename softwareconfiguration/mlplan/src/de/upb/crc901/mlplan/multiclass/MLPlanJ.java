@@ -639,4 +639,8 @@ public class MLPlanJ extends AbstractClassifier
 	public int getNumberPrunedParameters() {
 		return HASCOWithParameterPruning.getNumberPrunedParameters();
 	}
+	
+	public void resetNumberPrunedParameters() {
+		HASCOWithParameterPruning.resetPrunedParameters();
+		}
 }

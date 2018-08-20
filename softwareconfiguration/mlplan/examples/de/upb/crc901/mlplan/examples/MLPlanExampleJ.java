@@ -33,21 +33,23 @@ public class MLPlanExampleJ {
 
 		/* load data for segment dataset and create a train-test-split */
 		OpenmlConnector connector = new OpenmlConnector();
-		DataSetDescription ds = connector.dataGet(61);
-		File file = ds.getDataset("4350e421cdc16404033ef1812ea38c01");
+		DataSetDescription ds = connector.dataGet(40498);
+//		File file = ds.getDataset("4350e421cdc16404033ef1812ea38c01");
+		File file = new File("./examples/data/amazon.arff");
+		int seed = 10;
 		Instances data = new Instances(new BufferedReader(new FileReader(file)));
 		data.setClassIndex(data.numAttributes() - 1);
-		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(0), .7f);
+		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(seed), .7f);
 
 		/* initialize mlplan, and let it run for 30 seconds */
-		int timeoutInSeconds = 180;
-		MLPlanJ mlplan = new MLPlanJ(new File("model/weka/weka-all-autoweka.json"), 1.04d, 8, true);
+		int timeoutInSeconds = 300;
+		MLPlanJ mlplan = new MLPlanJ(new File("model/weka/weka-all-autoweka.json"), -0.5d, 4, true);
 		mlplan.setLoggerName("mlplan");
-		mlplan.setRandomSeed(1);
+		mlplan.setRandomSeed(seed);
 		mlplan.setTimeout(timeoutInSeconds);
 		mlplan.setPortionOfDataForPhase2(.3f);
 		mlplan.setNodeEvaluator(new DefaultPreorder());
-		mlplan.enableVisualization();
+//		mlplan.enableVisualization();
 		mlplan.buildClassifier(split.get(0));
 
 		/* evaluate solution produced by mlplan */

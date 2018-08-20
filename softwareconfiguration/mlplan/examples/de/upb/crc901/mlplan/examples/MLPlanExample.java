@@ -32,14 +32,15 @@ public class MLPlanExample {
 		
 		/* load data for segment dataset and create a train-test-split */
 		OpenmlConnector connector = new OpenmlConnector();
-		DataSetDescription ds = connector.dataGet(40984);
-		File file = ds.getDataset("4350e421cdc16404033ef1812ea38c01");
+		DataSetDescription ds = connector.dataGet(61);
+//		File file = ds.getDataset("4350e421cdc16404033ef1812ea38c01");
+		File file = new File("./examples/winequality.arff");
 		Instances data = new Instances(new BufferedReader(new FileReader(file)));
 		data.setClassIndex(data.numAttributes() - 1);
-		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(0), .7f);
+		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(1), .7f);
 		
 		/* initialize mlplan, and let it run for 30 seconds */
-		int timeoutInSeconds = 600;
+		int timeoutInSeconds = 1000;
 		MLPlan mlplan = new MLPlan(new File("model/weka/weka-all-autoweka.json"));
 //		MLPlan mlplan = new MLPlan(new File("model/weka/weka-classifiers-autoweka.json"));
 		mlplan.setLoggerName("mlplan");
@@ -47,7 +48,7 @@ public class MLPlanExample {
 		mlplan.setTimeout(timeoutInSeconds);
 		mlplan.setPortionOfDataForPhase2(.3f);
 		mlplan.setNodeEvaluator(new DefaultPreorder());
-		mlplan.enableVisualization();
+//		mlplan.enableVisualization();
 		mlplan.buildClassifier(split.get(0));
 		
 		/* evaluate solution produced by mlplan */

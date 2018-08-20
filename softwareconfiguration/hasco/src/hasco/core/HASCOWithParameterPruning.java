@@ -123,7 +123,7 @@ public class HASCOWithParameterPruning<T, N, A, V extends Comparable<V>, R exten
 	private final HASCOProblemReductionWithParameterPruning reduction;
 	private final CEOCIPSTNPlanningProblem problem;
 	private IObservableGraphBasedHTNPlanningAlgorithm<R, N, A, V> planner;
-	
+
 	private static int numberPrunedParameters = 0;
 
 	private ISolutionEvaluator<N, V> solutionEvaluator = new ISolutionEvaluator<N, V>() {
@@ -259,8 +259,8 @@ public class HASCOWithParameterPruning<T, N, A, V extends Comparable<V>, R exten
 		// this.parameterImportanceEstimator,this.importanceThreshold,
 		// this.minNumSamplesForImportanceEstimation, this.performanceKB,true)));
 		reduction = new HASCOProblemReductionWithParameterPruning(components, paramRefinementConfig,
-				nameOfRequiredInterface, true, parameterImportanceEstimator, importanceThreshold, minNumSamplesForImportanceEstimation,
-				performanceKB, useParameterImportanceEstimation);
+				nameOfRequiredInterface, true, parameterImportanceEstimator, importanceThreshold,
+				minNumSamplesForImportanceEstimation, performanceKB, useParameterImportanceEstimation);
 
 		this.problem = reduction.getPlanningProblem();
 		if (logger.isDebugEnabled()) {
@@ -295,13 +295,17 @@ public class HASCOWithParameterPruning<T, N, A, V extends Comparable<V>, R exten
 	public IObservableORGraphSearchFactory<N, A, V> getSearchFactory() {
 		return this.searchFactory;
 	}
-	
+
 	public static void addPrunedParameters(int pp) {
-		numberPrunedParameters+=pp;
+		numberPrunedParameters += pp;
 	}
-	
+
 	public static int getNumberPrunedParameters() {
 		return numberPrunedParameters;
+	}
+
+	public static void resetPrunedParameters() {
+		numberPrunedParameters = 0;
 	}
 
 	public class HASCOSolutionIterator implements Iterator<Solution<R, T, V>> {

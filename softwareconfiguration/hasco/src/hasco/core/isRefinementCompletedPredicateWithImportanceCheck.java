@@ -103,16 +103,16 @@ public class isRefinementCompletedPredicateWithImportanceCheck implements Evalua
 		String compositionIdentifier = Util.getComponentNamesOfComposition(ci);
 		// System.out.println("Composition Identifier in completedpred: " +
 		// compositionIdentifier);
-		if (performanceKB.getNumSamples("test", compositionIdentifier) > this.minNumSamplesForImportanceEstimation) {
-			// if(performanceKB.kDistinctAttributeValuesAvailable("test", ci,
-			// minNumSamplesForImportanceEstimation)) {
+//		if (performanceKB.getNumSamples("test", compositionIdentifier) > this.minNumSamplesForImportanceEstimation) {
+		if (performanceKB.kDistinctAttributeValuesAvailable("test", ci, minNumSamplesForImportanceEstimation)) {
 			System.out.println(minNumSamplesForImportanceEstimation + " samples are available");
 			try {
-				System.out.println("Querying fANOVA with " + performanceKB.getNumSamples("test", compositionIdentifier)
-						+ " samples!");
+//				System.out.println("Querying fANOVA with " + performanceKB.getNumSamples("test", compositionIdentifier)
+//						+ " samples!");
 				// System.out.println("Querying fANOVA with " +
 				// performanceKB.getNumSamples("test", compositionIdentifier)
 				// + " samples!");
+				System.out.println("extract important parameters for pipline " + Util.getComponentNamesOfComposition(ci));
 				importantParams = importanceEstimator.extractImportantParameters(ci, this.importanceThreshold, 2,
 						false);
 				// If there are no parameters left that are estimated to be important, return
@@ -133,14 +133,10 @@ public class isRefinementCompletedPredicateWithImportanceCheck implements Evalua
 			// component " + component.getName()
 			// + " has completed its refinement");
 			if (!importantParams.contains(paramName)) {
-				System.out.println("Skip parameter " + paramName);
+//				System.out.println("Skip parameter " + paramName);
 				continue;
 			}
-			// if(paramName.contains("pipeline")) {
-			// System.out.println("Skipping pipeline");
-			// continue;
-			// }
-			System.out.println("Not skipping parameter " + paramName);
+//			System.out.println("Not skipping parameter " + paramName);
 			String containerOfParam = componentParamContainers.get(param.getName());
 			String currentValueOfParam = componentParams.get(param.getName());
 			if (param.isNumeric()) {
@@ -169,8 +165,8 @@ public class isRefinementCompletedPredicateWithImportanceCheck implements Evalua
 			} else
 				throw new UnsupportedOperationException(
 						"Currently no support for testing parameters of type " + param.getClass().getName());
-			System.out.println(
-					"\t" + param.getName() + " (" + componentParams.get(param.getName()) + ") is still refinable.");
+//			System.out.println(
+//					"\t" + param.getName() + " (" + componentParams.get(param.getName()) + ") is still refinable.");
 		}
 		System.out.println("Refinement of component " + component.getName() + " is completed." );
 		return true;
