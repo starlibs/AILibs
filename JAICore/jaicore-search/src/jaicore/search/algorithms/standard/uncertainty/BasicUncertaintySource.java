@@ -44,10 +44,11 @@ public class BasicUncertaintySource<T, V extends Comparable<V>> implements IUnce
 			for (V f : simulationEvaluations) {
 				sampleVariance += ((Double)f - mean) * ((Double)f - mean);
 			}
-			sampleVariance *= 1.0d / (simulationEvaluations.size() - 1); 
-			
+			sampleVariance = Math.sqrt(sampleVariance / (simulationEvaluations.size() - 1));
 			if (mean != 0.0d) {
-				uncertainty *= 1 - (sampleVariance / mean);
+				double coefficientOfVariation = sampleVariance / mean;
+				coefficientOfVariation = Math.max(Math.abs(coefficientOfVariation), 1.0d);
+				uncertainty *= coefficientOfVariation;
 			}
 		}
 		return uncertainty;
