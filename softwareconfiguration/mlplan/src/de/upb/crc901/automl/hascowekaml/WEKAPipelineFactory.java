@@ -4,16 +4,16 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 
+import de.upb.crc901.automl.pipeline.ClassifierFactory;
 import de.upb.crc901.automl.pipeline.basic.MLPipeline;
 import hasco.model.ComponentInstance;
-import hasco.query.Factory;
 import jaicore.basic.ListHelper;
 import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 
-public class WEKAPipelineFactory implements Factory<MLPipeline> {
+public class WEKAPipelineFactory implements ClassifierFactory {
 
 	@Override
 	public MLPipeline getComponentInstantiation(final ComponentInstance groundComponent) throws Exception {

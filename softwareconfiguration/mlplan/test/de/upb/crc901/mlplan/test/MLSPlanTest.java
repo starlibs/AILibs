@@ -1,7 +1,7 @@
 package de.upb.crc901.mlplan.test;
 
 import de.upb.crc901.mlplan.multiclass.DefaultPreorder;
-import de.upb.crc901.mlplan.multiclass.MLPlan;
+import de.upb.crc901.mlplan.multiclass.MLPlanWEKAClassifier;
 
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.ml.WekaUtil;

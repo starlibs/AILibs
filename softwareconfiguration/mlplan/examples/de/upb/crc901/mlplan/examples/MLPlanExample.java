@@ -9,26 +9,25 @@ import java.util.Random;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
 
-import de.upb.crc901.mlplan.multiclass.DefaultPreorder;
-import de.upb.crc901.mlplan.multiclass.MLPlan;
+import de.upb.crc901.mlplan.multiclass.MLPlanWEKAClassifier;
 import jaicore.ml.WekaUtil;
 import weka.classifiers.Evaluation;
 import weka.core.Instances;
 
 /**
- * This is an example class that illustrates the usage of ML-Plan on
- * the segment dataset of OpenML. It is configured to run for 30 seconds
- * and to use 70% of the data for search and 30% for selection in its second phase.
- * 
- * The API key used for OpenML is ML-Plan's key (read only). 
- * 
+ * This is an example class that illustrates the usage of ML-Plan on the segment
+ * dataset of OpenML. It is configured to run for 30 seconds and to use 70% of
+ * the data for search and 30% for selection in its second phase.
+ *
+ * The API key used for OpenML is ML-Plan's key (read only).
+ *
  * @author fmohr
  *
  */
 public class MLPlanExample {
 
-	public static void main(String[] args) throws Exception {
-		
+	public static void main(final String[] args) throws Exception {
+
 		/* load data for segment dataset and create a train-test-split */
 		OpenmlConnector connector = new OpenmlConnector();
 		DataSetDescription ds = connector.dataGet(40984);
@@ -36,17 +35,16 @@ public class MLPlanExample {
 		Instances data = new Instances(new BufferedReader(new FileReader(file)));
 		data.setClassIndex(data.numAttributes() - 1);
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(0), .7f);
-		
+
 		/* initialize mlplan, and let it run for 30 seconds */
 		int timeoutInSeconds = 30;
-		MLPlan mlplan = new MLPlan(new File("model/weka/weka-all-autoweka.json"));
+		MLPlanWEKAClassifier mlplan = new MLPlanWEKAClassifier();
 		mlplan.setLoggerName("mlplan");
 		mlplan.setTimeout(timeoutInSeconds);
 		mlplan.setPortionOfDataForPhase2(.3f);
-		mlplan.setNodeEvaluator(new DefaultPreorder());
 		mlplan.enableVisualization();
 		mlplan.buildClassifier(split.get(0));
-		
+
 		/* evaluate solution produced by mlplan */
 		Evaluation eval = new Evaluation(split.get(0));
 		eval.evaluateModel(mlplan, split.get(1));

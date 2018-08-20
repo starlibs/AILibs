@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<catalog prefer="public" xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
+    <group id="Folder Repository, directory=, recursive=true, Auto-Update=true, version=2" prefer="public" xml:base="">
+        <uri id="Automatically generated entry, Timestamp=1393921822794" name="http://www.e-LICO.eu/ontologies/dmo/DMOP/DCHARS.owl" uri="DCHARS.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1393921822794" name="http://www.e-LICO.eu/ontologies/dmo/DMOP/DMEX.owl" uri="DMEX.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1393921822794" name="http://www.e-lico.eu/ontologies/dmo/DMOP/DMKB.owl" uri="DMKB.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1393921822794" name="http://www.e-lico.eu/ontologies/dmo/DMOP/DMOP.owl" uri="DMOP.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1393921822794" name="http://www.e-LICO.eu/ontologies/dmo/DMOP/DMOPobsolete.owl" uri="DMOPobsolete.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1393921822794" name="http://www.e-lico.eu/ontologies/dmo/DMOP/PD.owl" uri="PD.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1393921822794" name="duplicate:http://www.e-lico.eu/ontologies/dmo/DMOP/RMOperators.owl" uri="obsolete_RMOperators_addonsRM.owl"/>
+        <uri id="Automatically generated entry, Timestamp=1393921822794" name="duplicate:http://www.e-lico.eu/ontologies/dmo/DMOP/RMOperators.owl" uri="RMOperators.owl"/>
+    </group>
+</catalog>

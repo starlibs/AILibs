@@ -32,7 +32,7 @@ public class ExperimentRunner {
 	private final IExperimentSetEvaluator conductor;
 	private final SQLAdapter adapter;
 	private final Collection<ExperimentDBEntry> knownExperimentEntries = new HashSet<>();
-	
+
 	private final List<String> fieldsForWhichToIgnoreTime;
 	private final List<String> fieldsForWhichToIgnoreMemory;
 
@@ -65,13 +65,17 @@ public class ExperimentRunner {
 		if (this.config.getDBTableName() == null) {
 			throw new IllegalArgumentException("DB table must not be null in experiment config.");
 		}
-		
-		this.fieldsForWhichToIgnoreMemory = (this.config.getFieldsForWhichToIgnoreMemory() != null) ? this.config.getFieldsForWhichToIgnoreMemory() : new ArrayList<>();
-		this.fieldsForWhichToIgnoreTime = (this.config.getFieldsForWhichToIgnoreTime() != null) ? this.config.getFieldsForWhichToIgnoreTime() : new ArrayList<>();
+
+		this.fieldsForWhichToIgnoreMemory = (this.config.getFieldsForWhichToIgnoreMemory() != null)
+				? this.config.getFieldsForWhichToIgnoreMemory()
+				: new ArrayList<>();
+		this.fieldsForWhichToIgnoreTime = (this.config.getFieldsForWhichToIgnoreTime() != null)
+				? this.config.getFieldsForWhichToIgnoreTime()
+				: new ArrayList<>();
 
 		this.conductor = conductor;
 		this.adapter = new SQLAdapter(this.config.getDBHost(), this.config.getDBUsername(), this.config.getDBPassword(),
-				this.config.getDBDatabaseName());
+				this.config.getDBDatabaseName(), this.config.getDBSSL());
 		this.updateExperimentSetupAccordingToConfig();
 	}
 
@@ -127,7 +131,7 @@ public class ExperimentRunner {
 			} else {
 				queryStringSB.append(" AND ");
 			}
-			String keyName = getDatabaseFieldnameForConfigEntry(fieldName);
+			String keyName = this.getDatabaseFieldnameForConfigEntry(fieldName);
 
 			queryStringSB.append(keyName);
 			queryStringSB.append(" IN (");
@@ -199,10 +203,12 @@ public class ExperimentRunner {
 		values.keySet().forEach(k -> valuesToWrite.put(k, values.get(k).toString()));
 		for (String result : values.keySet()) {
 			if (this.config.getResultFields().contains(result)) {
-				if (!fieldsForWhichToIgnoreTime.contains(result))
+				if (!this.fieldsForWhichToIgnoreTime.contains(result)) {
 					valuesToWrite.put(result + "_" + FIELD_TIME, now);
-				if (!fieldsForWhichToIgnoreMemory.contains(result))
+				}
+				if (!this.fieldsForWhichToIgnoreMemory.contains(result)) {
 					valuesToWrite.put(result + "_" + FIELD_MEMORY, memoryUsageInMB);
+				}
 			}
 		}
 		Map<String, String> where = new HashMap<>();
@@ -248,8 +254,8 @@ public class ExperimentRunner {
 			return;
 		}
 
-		logger.info("Now conducting new experiment. {}/{} experiments have already been started or even been completed", this.knownExperimentEntries.size(),
-				this.totalNumberOfExperiments);
+		logger.info("Now conducting new experiment. {}/{} experiments have already been started or even been completed",
+				this.knownExperimentEntries.size(), this.totalNumberOfExperiments);
 
 		int numberOfConductedExperiments = 0;
 		while (!Thread.interrupted() && this.knownExperimentEntries.size() < this.totalNumberOfExperiments
@@ -335,10 +341,12 @@ public class ExperimentRunner {
 
 		for (String result : this.config.getResultFields()) {
 			sql.append("`" + result + "` VARCHAR(500) NULL,");
-			if (!fieldsForWhichToIgnoreTime.contains(result))
+			if (!this.fieldsForWhichToIgnoreTime.contains(result)) {
 				sql.append("`" + result + "_" + FIELD_TIME + "` TIMESTAMP NULL,");
-			if (!fieldsForWhichToIgnoreMemory.contains(result))
+			}
+			if (!this.fieldsForWhichToIgnoreMemory.contains(result)) {
 				sql.append("`" + result + "_" + FIELD_MEMORY + "` int(6) NULL,");
+			}
 		}
 		sql.append("`exception` TEXT NULL,");
 		sql.append("`" + FIELD_TIME + "_end` TIMESTAMP NULL,");

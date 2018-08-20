@@ -104,7 +104,7 @@ public class SimpleAutoMLTest {
           e.printStackTrace();
           return null;
         }
-      }, n -> null, "classifier", c -> {
+      }, "classifier", c -> {
 
         System.out.print("Evaluating solution ... ");
         DescriptiveStatistics stats = new DescriptiveStatistics();

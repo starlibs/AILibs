@@ -1,6 +1,7 @@
 package jaicore.search.algorithms.standard.bestfirst;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,6 +10,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,10 +24,10 @@ import jaicore.search.algorithms.parallel.parallelexploration.distributed.interf
 import jaicore.search.algorithms.standard.core.ICancelableNodeEvaluator;
 import jaicore.search.algorithms.standard.core.IGraphDependentNodeEvaluator;
 import jaicore.search.algorithms.standard.core.ISolutionReportingNodeEvaluator;
-import jaicore.search.algorithms.standard.core.NodeAnnotationEvent;
-import jaicore.search.algorithms.standard.core.SolutionAnnotationEvent;
 import jaicore.search.algorithms.standard.core.SolutionEventBus;
-import jaicore.search.algorithms.standard.core.SolutionFoundEvent;
+import jaicore.search.algorithms.standard.core.events.NodeAnnotationEvent;
+import jaicore.search.algorithms.standard.core.events.SolutionAnnotationEvent;
+import jaicore.search.algorithms.standard.core.events.SolutionFoundEvent;
 import jaicore.search.algorithms.standard.rdfs.RandomizedDepthFirstSearch;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
@@ -332,13 +334,14 @@ public class RandomCompletionEvaluator<T, V extends Comparable<V>>
         logger.info("Associated path was evaluated unsuccessfully in a previous run; returning NULL: {}", path);
         return null;
       }
-      logger.info("Associated plan is new. Compute f-value for complete path {}", path);
+      logger.info("Associated plan is new. Calling solution evaluator {} to compute f-value for complete path {}", solutionEvaluator, path);
 
       long start = System.currentTimeMillis();
       V val = null;
       try {
         val = this.solutionEvaluator.evaluateSolution(path);
       } catch (Throwable e) {
+    	logger.warn("Computing the solution quality of {} failed due to an exception. Here is the trace: {}", path, Arrays.asList(e.getStackTrace()).stream().map(n -> "\n\t" + n.toString()).collect(Collectors.toList()));
         this.unsuccessfulPaths.add(path);
         throw e;
       }
