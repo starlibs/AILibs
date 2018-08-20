@@ -14,6 +14,7 @@ import com.google.common.eventbus.Subscribe;
 import de.upb.crc901.automl.pipeline.basic.MLPipeline;
 import de.upb.crc901.automl.pipeline.service.MLPipelinePlan;
 import de.upb.crc901.automl.pipeline.service.MLServicePipeline;
+import de.upb.crc901.mlplan.multiclass.weka.MLPlanWekaClassifier;
 import jaicore.basic.MathExt;
 import jaicore.ml.evaluation.ClassifierMeasurementEvent;
 import jaicore.ml.experiments.MLExperiment;
@@ -31,17 +32,17 @@ public class MLPlanMySQLConnector extends MySQLExperimentDatabaseHandle {
 
 	/**
 	 * Initialize connection to database
-	 * 
+	 *
 	 * @param host
 	 * @param user
 	 * @param password
 	 * @param database
 	 */
-	public MLPlanMySQLConnector(String host, String user, String password, String database) {
+	public MLPlanMySQLConnector(final String host, final String user, final String password, final String database) {
 		super(host, user, password, database);
 	}
 
-	public void addEvaluationEntry(Classifier parentSearchAlgorithm, MLPipeline identifiedPipeline, Double errorRate, Object errorObject) {
+	public void addEvaluationEntry(final Classifier parentSearchAlgorithm, final MLPipeline identifiedPipeline, final Double errorRate, final Object errorObject) {
 
 		String searcherName = "", searcherParams = "", evaluatorName = "", evaluatorParams = "";
 		if (!identifiedPipeline.getPreprocessors().isEmpty()) {
@@ -60,7 +61,7 @@ public class MLPlanMySQLConnector extends MySQLExperimentDatabaseHandle {
 		PreparedStatement stmt = null;
 		try {
 			List<String> values = new ArrayList<>();
-			values.add(String.valueOf(getRunIdOfClassifier(parentSearchAlgorithm)));
+			values.add(String.valueOf(this.getRunIdOfClassifier(parentSearchAlgorithm)));
 			values.add(searcherName);
 			values.add(searcherParams);
 			values.add(evaluatorName);
@@ -80,23 +81,25 @@ public class MLPlanMySQLConnector extends MySQLExperimentDatabaseHandle {
 				values.add(String.valueOf(identifiedPipeline.getTimeForExecutingPreprocessor().getMean()));
 				values.add(String.valueOf(identifiedPipeline.getTimeForExecutingClassifier().getMean()));
 			}
-			values.add(getErrorObjectEncoding(errorObject));
+			values.add(this.getErrorObjectEncoding(errorObject));
 
-			insert("INSERT INTO `evaluations` (run_id, searcher, searcherparams, evaluator, evaluatorparams, classifier, classifierparams, errorRate, time_train_preprocessors, time_train_classifier, time_execute_preprocessors, time_execute_classifier, exception) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+			this.insert(
+					"INSERT INTO `evaluations` (run_id, searcher, searcherparams, evaluator, evaluatorparams, classifier, classifierparams, errorRate, time_train_preprocessors, time_train_classifier, time_execute_preprocessors, time_execute_classifier, exception) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
 					values);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
 			try {
-				if (stmt != null)
+				if (stmt != null) {
 					stmt.close();
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 	}
 
-	public void addEvaluationEntry(Classifier parentSearchAlgorithm, MLServicePipeline identifiedPipeline, Double score, Object errorObject) {
+	public void addEvaluationEntry(final Classifier parentSearchAlgorithm, final MLServicePipeline identifiedPipeline, final Double score, final Object errorObject) {
 		String preprocessor = "";
 		MLPipelinePlan plan = identifiedPipeline.getConstructionPlan();
 		if (!plan.getAttrSelections().isEmpty()) {
@@ -107,33 +110,34 @@ public class MLPlanMySQLConnector extends MySQLExperimentDatabaseHandle {
 		PreparedStatement stmt = null;
 		try {
 			List<String> values = new ArrayList<>();
-			values.add(String.valueOf(getRunIdOfClassifier(parentSearchAlgorithm)));
+			values.add(String.valueOf(this.getRunIdOfClassifier(parentSearchAlgorithm)));
 			values.add(preprocessor);
 			values.add(classifierName);
 			values.add(score != null ? String.valueOf(score / 100) : null);
 			values.add(String.valueOf(identifiedPipeline.getTimeForTrainingPipeline()));
 			values.add((score != null && identifiedPipeline.getTimesForPrediction().getN() > 0) ? String.valueOf(identifiedPipeline.getTimesForPrediction().getMean()) : null);
-			values.add(getErrorObjectEncoding(errorObject));
-			insert("INSERT INTO `evaluations_mls` (run_id, preprocessor, classifier, errorRate, time_train, time_predict,exception) VALUES (?,?,?,?,?,?,?)", values);
+			values.add(this.getErrorObjectEncoding(errorObject));
+			this.insert("INSERT INTO `evaluations_mls` (run_id, preprocessor, classifier, errorRate, time_train, time_predict,exception) VALUES (?,?,?,?,?,?,?)", values);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
 			try {
-				if (stmt != null)
+				if (stmt != null) {
 					stmt.close();
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 	}
 
-	private String getErrorObjectEncoding(Object errorObject) {
+	private String getErrorObjectEncoding(final Object errorObject) {
 		if (errorObject == null) {
 			return null;
 		} else {
-			if (!(errorObject instanceof Throwable))
+			if (!(errorObject instanceof Throwable)) {
 				return errorObject.toString();
-			else {
+			} else {
 				StringBuilder sb = new StringBuilder();
 				Throwable e = (Throwable) errorObject;
 				sb.append(errorObject.getClass().getName() + ": " + e.getMessage() + ". Stack Trace:");
@@ -145,7 +149,7 @@ public class MLPlanMySQLConnector extends MySQLExperimentDatabaseHandle {
 		}
 	}
 
-	public void addResultEntry(int runId, String preprocessor, String classifier, double score, double believedScore) {
+	public void addResultEntry(final int runId, final String preprocessor, final String classifier, final double score, final double believedScore) {
 		try {
 			List<String> values = new ArrayList<>();
 			values.add(String.valueOf(runId));
@@ -153,30 +157,31 @@ public class MLPlanMySQLConnector extends MySQLExperimentDatabaseHandle {
 			values.add(classifier);
 			values.add(String.valueOf(score));
 			values.add(String.valueOf(believedScore));
-			insert("INSERT INTO `results` (run_id, preprocessor, classifier, errorRate,believedErrorRate) VALUES (?,?,?,?,?)", values);
+			this.insert("INSERT INTO `results` (run_id, preprocessor, classifier, errorRate,believedErrorRate) VALUES (?,?,?,?,?)", values);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
 
 	@Override
-	public void addResultEntry(int runId, double score) {
+	public void addResultEntry(final int runId, final double score) {
 
-		Classifier classifier = getClassifierOfRun(runId);
+		Classifier classifier = this.getClassifierOfRun(runId);
 
-		if (!(classifier instanceof MLPlanWEKAClassifier)) {
+		if (!(classifier instanceof MLPlanWekaClassifier)) {
 			throw new UnsupportedOperationException("Currently no support for logging results for classifiers of class " + classifier.getClass().getName());
 		}
-		Classifier chosenModel = ((MLPlanWEKAClassifier) classifier).getSelectedClassifier();
-		if (chosenModel instanceof MLPipeline)
-			addResultEntry(runId, (MLPipeline) chosenModel, score);
-		else if (chosenModel instanceof MLServicePipeline)
-			addResultEntry(runId, (MLServicePipeline) chosenModel, score);
-		else
+		Classifier chosenModel = ((MLPlanWekaClassifier) classifier).getSelectedClassifier();
+		if (chosenModel instanceof MLPipeline) {
+			this.addResultEntry(runId, (MLPipeline) chosenModel, score);
+		} else if (chosenModel instanceof MLServicePipeline) {
+			this.addResultEntry(runId, (MLServicePipeline) chosenModel, score);
+		} else {
 			throw new UnsupportedOperationException("Cannot write results for classifiers of type " + chosenModel.getClass());
+		}
 	}
 
-	private void addResultEntry(int runId, MLPipeline pipeline, double score) {
+	private void addResultEntry(final int runId, final MLPipeline pipeline, final double score) {
 
 		String searcherName = "", searcherParams = "", evaluatorName = "", evaluatorParams = "";
 		if (!pipeline.getPreprocessors().isEmpty()) {
@@ -206,14 +211,13 @@ public class MLPlanMySQLConnector extends MySQLExperimentDatabaseHandle {
 			values.add(plKey);
 			values.add(String.valueOf(MathExt.round(score / 10000, 4)));
 
-			insert("INSERT INTO `results` (run_id, searcher, searcherparams, evaluator, evaluatorparams, classifier, classifierparams, pipeline, errorRate) VALUES (?,?,?,?,?,?,?,?,?)",
-					values);
+			this.insert("INSERT INTO `results` (run_id, searcher, searcherparams, evaluator, evaluatorparams, classifier, classifierparams, pipeline, errorRate) VALUES (?,?,?,?,?,?,?,?,?)", values);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
 
-	private void addResultEntry(int runId, MLServicePipeline pipeline, double score) {
+	private void addResultEntry(final int runId, final MLServicePipeline pipeline, final double score) {
 		String preprocessor = "";
 		MLPipelinePlan plan = pipeline.getConstructionPlan();
 		if (!plan.getAttrSelections().isEmpty()) {
@@ -232,13 +236,14 @@ public class MLPlanMySQLConnector extends MySQLExperimentDatabaseHandle {
 			values.add(classifierName);
 			values.add(plKey);
 			values.add(String.valueOf(score / 10000));
-			insert("INSERT INTO `results_mls` (run_id, preprocessor, classifier, pipeline, errorRate) VALUES (?,?,?,?,?)", values);
+			this.insert("INSERT INTO `results_mls` (run_id, preprocessor, classifier, pipeline, errorRate) VALUES (?,?,?,?,?)", values);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
 			try {
-				if (stmt != null)
+				if (stmt != null) {
 					stmt.close();
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -246,7 +251,7 @@ public class MLPlanMySQLConnector extends MySQLExperimentDatabaseHandle {
 	}
 
 	@Subscribe
-	public void receivePipelineMeasurementEvent(ClassifierMeasurementEvent<Double> event) {
+	public void receivePipelineMeasurementEvent(final ClassifierMeasurementEvent<Double> event) {
 
 		try {
 
@@ -258,13 +263,13 @@ public class MLPlanMySQLConnector extends MySQLExperimentDatabaseHandle {
 			/* normal pipelines */
 			if (c instanceof MLPipeline) {
 				MLPipeline pl = (MLPipeline) c;
-				addEvaluationEntry(getClassifierOfRun(jobId), pl, event.getScore(), event.getError());
+				this.addEvaluationEntry(this.getClassifierOfRun(this.jobId), pl, event.getScore(), event.getError());
 			}
 
 			/* service pipelines */
 			else if (c instanceof MLServicePipeline) {
 				MLServicePipeline pl = (MLServicePipeline) c;
-				addEvaluationEntry(getClassifierOfRun(jobId), pl, event.getScore(), event.getError());
+				this.addEvaluationEntry(this.getClassifierOfRun(this.jobId), pl, event.getScore(), event.getError());
 			} else {
 				throw new UnsupportedOperationException("Cannot process events for pipelines of type \"" + c.getClass().getName() + "\".");
 			}
@@ -274,7 +279,7 @@ public class MLPlanMySQLConnector extends MySQLExperimentDatabaseHandle {
 	}
 
 	@Override
-	protected void afterCreateRun(MLExperiment e, int jobId) {
+	protected void afterCreateRun(final MLExperiment e, final int jobId) {
 		logger.info("Setting new job id which will be used to associate incoming messages.");
 		this.jobId = jobId;
 	}

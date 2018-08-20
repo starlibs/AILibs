@@ -9,15 +9,13 @@ import java.util.Random;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
 
-import de.upb.crc901.mlplan.multiclass.MLPlanWEKAClassifier;
+import de.upb.crc901.mlplan.multiclass.weka.MLPlanWekaClassifier;
 import jaicore.ml.WekaUtil;
 import weka.classifiers.Evaluation;
 import weka.core.Instances;
 
 /**
- * This is an example class that illustrates the usage of ML-Plan on the segment
- * dataset of OpenML. It is configured to run for 30 seconds and to use 70% of
- * the data for search and 30% for selection in its second phase.
+ * This is an example class that illustrates the usage of ML-Plan on the segment dataset of OpenML. It is configured to run for 30 seconds and to use 70% of the data for search and 30% for selection in its second phase.
  *
  * The API key used for OpenML is ML-Plan's key (read only).
  *
@@ -38,11 +36,11 @@ public class MLPlanExample {
 
 		/* initialize mlplan, and let it run for 30 seconds */
 		int timeoutInSeconds = 30;
-		MLPlanWEKAClassifier mlplan = new MLPlanWEKAClassifier();
+		MLPlanWekaClassifier mlplan = new MLPlanWekaClassifier();
 		mlplan.setLoggerName("mlplan");
 		mlplan.setTimeout(timeoutInSeconds);
 		mlplan.setPortionOfDataForPhase2(.3f);
-		mlplan.enableVisualization();
+		mlplan.enableVisualization(true);
 		mlplan.buildClassifier(split.get(0));
 
 		/* evaluate solution produced by mlplan */

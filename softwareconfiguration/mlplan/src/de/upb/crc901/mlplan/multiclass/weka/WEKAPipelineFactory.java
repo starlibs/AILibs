@@ -1,4 +1,4 @@
-package de.upb.crc901.automl.hascowekaml;
+package de.upb.crc901.mlplan.multiclass.weka;
 
 import java.util.LinkedList;
 import java.util.List;

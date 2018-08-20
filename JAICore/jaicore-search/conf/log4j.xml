@@ -68,6 +68,9 @@
 	</logger>
 	
 	<logger name="jaicore.search.algorithms.standard.core">
+		<level value="warn" />
+	</logger>
+	
 	<logger name="jaicore.search.algorithms.standard.mcts">
 		<level value="warn" />
 	</logger>

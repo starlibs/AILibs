@@ -16,8 +16,7 @@ public class PreferenceBasedNodeEvaluator implements INodeEvaluator<TFDNode, Dou
 	private final Collection<Component> components;
 	private final List<String> ORDERING_OF_CLASSIFIERS;
 
-	public PreferenceBasedNodeEvaluator(final Collection<Component> components,
-			final List<String> ORDERING_OF_CLASSIFIERS) {
+	public PreferenceBasedNodeEvaluator(final Collection<Component> components, final List<String> ORDERING_OF_CLASSIFIERS) {
 		super();
 		this.components = components;
 		this.ORDERING_OF_CLASSIFIERS = ORDERING_OF_CLASSIFIERS;
@@ -25,7 +24,6 @@ public class PreferenceBasedNodeEvaluator implements INodeEvaluator<TFDNode, Dou
 
 	@Override
 	public Double f(final Node<TFDNode, ?> n) throws Throwable {
-
 		List<String> appliedMethods = new LinkedList<>();
 		boolean last = false;
 		for (TFDNode x : n.externalPath()) {
@@ -46,11 +44,10 @@ public class PreferenceBasedNodeEvaluator implements INodeEvaluator<TFDNode, Dou
 				ComponentInstance search = pp.getSatisfactionOfRequiredInterfaces().get("search");
 				ComponentInstance eval = pp.getSatisfactionOfRequiredInterfaces().get("eval");
 				if (search != null && eval != null) {
-					boolean isSetEvaluator = eval.getComponent().getName().toLowerCase().matches(
-							".*(subseteval|relief|gainratio|principalcomponents|onerattributeeval|infogainattributeeval|correlationattributeeval|symmetricaluncertattributeeval).*");
+					boolean isSetEvaluator = eval.getComponent().getName().toLowerCase()
+							.matches(".*(subseteval|relief|gainratio|principalcomponents|onerattributeeval|infogainattributeeval|correlationattributeeval|symmetricaluncertattributeeval).*");
 					boolean isRanker = search.getComponent().getName().toLowerCase().contains("ranker");
-					boolean isNonRankerEvaluator = eval.getComponent().getName().toLowerCase()
-							.matches(".*(cfssubseteval).*");
+					boolean isNonRankerEvaluator = eval.getComponent().getName().toLowerCase().matches(".*(cfssubseteval).*");
 					if (isSetEvaluator && !isRanker) {
 						return 20000d;
 					}
@@ -68,19 +65,16 @@ public class PreferenceBasedNodeEvaluator implements INodeEvaluator<TFDNode, Dou
 		Double score = 0.0;
 		if (instance != null) {
 			if (instance.getComponent().getName().toLowerCase().contains("pipeline")) {
-				lastMethod = lastMethod
-						|| appliedMethods.get(appliedMethods.size() - 1).startsWith("resolveBaseClassifierWith");
+				lastMethod = lastMethod || appliedMethods.get(appliedMethods.size() - 1).startsWith("resolveBaseClassifierWith");
 
 				if (instance.getSatisfactionOfRequiredInterfaces().containsKey("classifier")) {
-					classifierName = instance.getSatisfactionOfRequiredInterfaces().get("classifier").getComponent()
-							.getName();
+					classifierName = instance.getSatisfactionOfRequiredInterfaces().get("classifier").getComponent().getName();
 				} else {
 					return 0.0;
 				}
 			} else {
 				classifierName = instance.getComponent().getName();
-				lastMethod = lastMethod
-						|| appliedMethods.get(appliedMethods.size() - 1).startsWith("resolveAbstractClassifierWith");
+				lastMethod = lastMethod || appliedMethods.get(appliedMethods.size() - 1).startsWith("resolveAbstractClassifierWith");
 			}
 
 			if (lastMethod) {
@@ -88,9 +82,7 @@ public class PreferenceBasedNodeEvaluator implements INodeEvaluator<TFDNode, Dou
 					score += this.ORDERING_OF_CLASSIFIERS.size() + 1;
 				}
 
-				score += (this.ORDERING_OF_CLASSIFIERS.contains(classifierName)
-						? this.ORDERING_OF_CLASSIFIERS.indexOf(classifierName) + 1
-						: this.ORDERING_OF_CLASSIFIERS.size() + 1);
+				score += (this.ORDERING_OF_CLASSIFIERS.contains(classifierName) ? this.ORDERING_OF_CLASSIFIERS.indexOf(classifierName) + 1 : this.ORDERING_OF_CLASSIFIERS.size() + 1);
 				score /= 100000;
 			} else {
 				score = null;

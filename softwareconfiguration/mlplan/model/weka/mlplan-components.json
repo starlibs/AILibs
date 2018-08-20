@@ -3,7 +3,7 @@
 	"components": [
 		{
 			"name": "weka.classifiers.trees.RandomTree",
-			"providedInterface": ["Classifier"],
+			"providedInterface": ["AbstractClassifier"],
 			"requiredInterface": [],
 			"parameter": [
 			]
@@ -11,7 +11,7 @@
 		
 		{
 			"name": "weka.classifiers.trees.RandomForest",
-			"providedInterface": ["Classifier"],
+			"providedInterface": ["AbstractClassifier"],
 			"requiredInterface": [],
 			"parameter": [ {
 			      "name" : "I",

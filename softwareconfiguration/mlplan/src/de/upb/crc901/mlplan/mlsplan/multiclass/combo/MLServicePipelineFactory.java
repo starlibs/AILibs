@@ -1,4 +1,4 @@
-package de.upb.crc901.automl.hascocombinedml;
+package de.upb.crc901.mlplan.mlsplan.multiclass.combo;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -14,8 +14,9 @@ import jaicore.basic.ListHelper;
 import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
 import weka.classifiers.AbstractClassifier;
+import weka.classifiers.Classifier;
 
-public class MLServicePipelineFactory implements Factory<MLServicePipeline> {
+public class MLServicePipelineFactory implements Factory<Classifier> {
 
 	@Override
 	public MLServicePipeline getComponentInstantiation(final ComponentInstance groundComponent) {
@@ -72,10 +73,8 @@ public class MLServicePipelineFactory implements Factory<MLServicePipeline> {
 		ComponentInstance evaluatorCI = ci.getSatisfactionOfRequiredInterfaces().get("eval");
 		ComponentInstance searcherCI = ci.getSatisfactionOfRequiredInterfaces().get("search");
 
-		ASEvaluation eval = ASEvaluation.forName(evaluatorCI.getComponent().getName(),
-				this.getParameterList(evaluatorCI).toArray(new String[] {}));
-		ASSearch search = ASSearch.forName(searcherCI.getComponent().getName(),
-				this.getParameterList(searcherCI).toArray(new String[] {}));
+		ASEvaluation eval = ASEvaluation.forName(evaluatorCI.getComponent().getName(), this.getParameterList(evaluatorCI).toArray(new String[] {}));
+		ASSearch search = ASSearch.forName(searcherCI.getComponent().getName(), this.getParameterList(searcherCI).toArray(new String[] {}));
 		plan.addWekaAttributeSelection(search, eval);
 	}
 
@@ -83,24 +82,21 @@ public class MLServicePipelineFactory implements Factory<MLServicePipeline> {
 		List<String> parameters = new LinkedList<>();
 
 		for (Entry<String, String> parameterValues : ci.getParameterValues().entrySet()) {
-			if (parameterValues.getKey().toLowerCase().endsWith("activator")
-					|| parameterValues.getValue().equals("REMOVED")) {
+			if (parameterValues.getKey().toLowerCase().endsWith("activator") || parameterValues.getValue().equals("REMOVED")) {
 				continue;
 			}
 
 			if (!parameterValues.getValue().equals("false")) {
 				parameters.add("-" + parameterValues.getKey());
 			}
-			if (parameterValues.getValue() != null && !parameterValues.getValue().equals("")
-					&& !parameterValues.getValue().equals("true") && !parameterValues.getValue().equals("false")) {
+			if (parameterValues.getValue() != null && !parameterValues.getValue().equals("") && !parameterValues.getValue().equals("true") && !parameterValues.getValue().equals("false")) {
 				parameters.add(parameterValues.getValue());
 			}
 		}
 
 		for (String paramName : ci.getSatisfactionOfRequiredInterfaces().keySet()) {
 			List<String> subParams = this.getParameterList(ci.getSatisfactionOfRequiredInterfaces().get(paramName));
-			String paramValue = ci.getSatisfactionOfRequiredInterfaces().get(paramName).getComponent().getName() + " "
-					+ ListHelper.implode(subParams, " ");
+			String paramValue = ci.getSatisfactionOfRequiredInterfaces().get(paramName).getComponent().getName() + " " + ListHelper.implode(subParams, " ");
 			parameters.add("-" + paramName);
 			parameters.add(paramValue);
 		}
@@ -111,8 +107,7 @@ public class MLServicePipelineFactory implements Factory<MLServicePipeline> {
 	private void addWEKAClassifier(final ComponentInstance ci, final MLPipelinePlan plan) throws Exception {
 		ci.getParameterValues();
 		List<String> parameters = this.getParameterList(ci);
-		plan.setClassifier(
-				AbstractClassifier.forName(ci.getComponent().getName(), parameters.toArray(new String[] {})));
+		plan.setClassifier(AbstractClassifier.forName(ci.getComponent().getName(), parameters.toArray(new String[] {})));
 	}
 
 	private void addSKLearnPreprocessor(final ComponentInstance ci, final MLPipelinePlan plan) {
@@ -125,8 +120,7 @@ public class MLServicePipelineFactory implements Factory<MLServicePipeline> {
 		this.setParameters(plan, classifierPipe, ci.getParameterValues());
 	}
 
-	private void setParameters(final MLPipelinePlan plan, final MLPipe pipe,
-			final Map<String, String> parameterValues) {
+	private void setParameters(final MLPipelinePlan plan, final MLPipe pipe, final Map<String, String> parameterValues) {
 		for (String parameterName : parameterValues.keySet()) {
 			plan.addOptions(pipe, parameterName, parameterValues.get(parameterName));
 		}

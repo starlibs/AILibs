@@ -33,328 +33,330 @@ import jaicore.basic.sets.SetUtil.Pair;
 
 public class ComponentLoader {
 
-  private Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramConfigs = new HashMap<>();
-  private Collection<Component> components = new ArrayList<>();
-  private final Set<String> parsedFiles = new HashSet<>();
-  private final ObjectMapper objectMapper;
-  private Map<String, JsonNode> parameterMap = new HashMap<>();
+	private Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramConfigs = new HashMap<>();
+	private Collection<Component> components = new ArrayList<>();
+	private final Set<String> parsedFiles = new HashSet<>();
+	private final ObjectMapper objectMapper;
+	private Map<String, JsonNode> parameterMap = new HashMap<>();
 
-  public ComponentLoader() {
-    this.objectMapper = new ObjectMapper();
-  }
+	public ComponentLoader() {
+		this.objectMapper = new ObjectMapper();
+	}
 
-  private void parseFile(final File jsonFile) throws IOException {
-    System.out.println("Parse file " + jsonFile.getAbsolutePath());
-    StringBuilder stringDescriptionSB = new StringBuilder();
-    String line;
-    try (BufferedReader br = new BufferedReader(new FileReader(jsonFile))) {
-      while ((line = br.readLine()) != null) {
-        stringDescriptionSB.append(line + "\n");
-      }
-    }
-    String jsonDescription = stringDescriptionSB.toString();
-    jsonDescription = jsonDescription.replaceAll("/\\*(.*)\\*/", "");
+	public ComponentLoader(final File jsonFile) throws IOException {
+		this.objectMapper = new ObjectMapper();
+		this.parseFile(jsonFile);
+	}
 
-    JsonNode rootNode = this.objectMapper.readTree(jsonDescription);
+	private void parseFile(final File jsonFile) throws IOException {
+		System.out.println("Parse file " + jsonFile.getAbsolutePath());
+		StringBuilder stringDescriptionSB = new StringBuilder();
+		String line;
+		try (BufferedReader br = new BufferedReader(new FileReader(jsonFile))) {
+			while ((line = br.readLine()) != null) {
+				stringDescriptionSB.append(line + "\n");
+			}
+		}
+		String jsonDescription = stringDescriptionSB.toString();
+		jsonDescription = jsonDescription.replaceAll("/\\*(.*)\\*/", "");
 
-    for (JsonNode elem : rootNode.path("parameters")) {
-      this.parameterMap.put(elem.get("name").asText(), elem);
-    }
-    JsonNode includes = rootNode.path("include");
+		JsonNode rootNode = this.objectMapper.readTree(jsonDescription);
 
-    File baseFolder = new File(jsonFile.getCanonicalPath());
-    if (jsonFile.isFile()) {
-      baseFolder = new File(jsonFile.getCanonicalFile().getParentFile().getCanonicalPath());
-    }
+		for (JsonNode elem : rootNode.path("parameters")) {
+			this.parameterMap.put(elem.get("name").asText(), elem);
+		}
+		JsonNode includes = rootNode.path("include");
 
-    for (JsonNode includePathNode : includes) {
-      String path = includePathNode.asText();
-      File subFile = new File(baseFolder.getAbsolutePath() + File.separator + path);
-      if (!this.parsedFiles.contains(subFile.getCanonicalPath())) {
-        if (!subFile.exists()) {
-          throw new IllegalArgumentException("Cannot load " + subFile.getName() + " as this file or folder does not exist in " + subFile.getParent());
-        }
-        if (subFile.isFile()) {
-          this.parsedFiles.add(subFile.getCanonicalPath());
-          this.parseFile(subFile.getCanonicalFile());
-        } else {
-          for (File subsubFile : subFile.listFiles()) {
-            if (!this.parsedFiles.contains(subsubFile.getCanonicalPath()) && subsubFile.isFile() && subsubFile.getName().endsWith(".json")) {
-              this.parsedFiles.add(subsubFile.getCanonicalPath());
-              this.parseFile(subsubFile.getCanonicalFile());
-            }
-          }
-          this.parsedFiles.add(subFile.getCanonicalPath());
-        }
-      }
-    }
-    // get the array of components
-    JsonNode components = rootNode.path("components");
-    if (components != null) {
+		File baseFolder = new File(jsonFile.getCanonicalPath());
+		if (jsonFile.isFile()) {
+			baseFolder = new File(jsonFile.getCanonicalFile().getParentFile().getCanonicalPath());
+		}
 
-      Component c;
-      for (JsonNode component : components) {
-        c = new Component(component.get("name").asText());
-        // add provided interfaces
-        for (JsonNode providedInterface : component.path("providedInterface")) {
-          c.addProvidedInterface(providedInterface.asText());
-        }
+		for (JsonNode includePathNode : includes) {
+			String path = includePathNode.asText();
+			File subFile = new File(baseFolder.getAbsolutePath() + File.separator + path);
+			if (!this.parsedFiles.contains(subFile.getCanonicalPath())) {
+				if (!subFile.exists()) {
+					throw new IllegalArgumentException("Cannot load " + subFile.getName() + " as this file or folder does not exist in " + subFile.getParent());
+				}
+				if (subFile.isFile()) {
+					this.parsedFiles.add(subFile.getCanonicalPath());
+					this.parseFile(subFile.getCanonicalFile());
+				} else {
+					for (File subsubFile : subFile.listFiles()) {
+						if (!this.parsedFiles.contains(subsubFile.getCanonicalPath()) && subsubFile.isFile() && subsubFile.getName().endsWith(".json")) {
+							this.parsedFiles.add(subsubFile.getCanonicalPath());
+							this.parseFile(subsubFile.getCanonicalFile());
+						}
+					}
+					this.parsedFiles.add(subFile.getCanonicalPath());
+				}
+			}
+		}
+		// get the array of components
+		JsonNode components = rootNode.path("components");
+		if (components != null) {
 
-        // add required interfaces
-        for (JsonNode requiredInterface : component.path("requiredInterface")) {
-        	if (!requiredInterface.has("id"))
-        		throw new IOException("No id has been specified for a required interface of " + c.getName());
-        	if (!requiredInterface.has("name"))
-        		throw new IOException("No name has been specified for a required interface of " + c.getName());
-          c.addRequiredInterface(requiredInterface.get("id").asText(), requiredInterface.get("name").asText());
-        }
+			Component c;
+			for (JsonNode component : components) {
+				c = new Component(component.get("name").asText());
+				// add provided interfaces
+				for (JsonNode providedInterface : component.path("providedInterface")) {
+					c.addProvidedInterface(providedInterface.asText());
+				}
 
-        Map<Parameter, ParameterRefinementConfiguration> paramConfig = new HashMap<>();
+				// add required interfaces
+				for (JsonNode requiredInterface : component.path("requiredInterface")) {
+					if (!requiredInterface.has("id")) {
+						throw new IOException("No id has been specified for a required interface of " + c.getName());
+					}
+					if (!requiredInterface.has("name")) {
+						throw new IOException("No name has been specified for a required interface of " + c.getName());
+					}
+					c.addRequiredInterface(requiredInterface.get("id").asText(), requiredInterface.get("name").asText());
+				}
 
-        for (JsonNode parameter : component.path("parameter")) {
-          // name of the parameter
-          String name = parameter.get("name").asText();
-          // possible string params
-          String[] stringParams = new String[] { "type", "values", "default" };
-          String[] stringParamValues = new String[stringParams.length];
-          // possible boolean params
-          String[] boolParams = new String[] { "default" };
-          boolean[] boolParamValues = new boolean[boolParams.length];
-          // possible double params
-          String[] doubleParams = new String[] { "default", "min", "max", "refineSplits", "minInterval" };
-          double[] doubleParamValues = new double[doubleParams.length];
+				Map<Parameter, ParameterRefinementConfiguration> paramConfig = new HashMap<>();
 
-          if (this.parameterMap.containsKey(name)) {
-            JsonNode commonParameter = this.parameterMap.get(name);
-            // get string parameter values from common parameter
-            for (int i = 0; i < stringParams.length; i++) {
-              if (commonParameter.get(stringParams[i]) != null) {
-                stringParamValues[i] = commonParameter.get(stringParams[i]).asText();
-              }
-            }
-            // get double parameter values from common parameter
-            for (int i = 0; i < doubleParams.length; i++) {
-              if (commonParameter.get(doubleParams[i]) != null) {
-                doubleParamValues[i] = commonParameter.get(doubleParams[i]).asDouble();
-              }
-            }
-            // get boolean parameter values from common parameter
-            for (int i = 0; i < boolParams.length; i++) {
-              if (commonParameter.get(boolParams[i]) != null) {
-                boolParamValues[i] = commonParameter.get(boolParams[i]).asBoolean();
-              }
-            }
-          }
+				for (JsonNode parameter : component.path("parameter")) {
+					// name of the parameter
+					String name = parameter.get("name").asText();
+					// possible string params
+					String[] stringParams = new String[] { "type", "values", "default" };
+					String[] stringParamValues = new String[stringParams.length];
+					// possible boolean params
+					String[] boolParams = new String[] { "default" };
+					boolean[] boolParamValues = new boolean[boolParams.length];
+					// possible double params
+					String[] doubleParams = new String[] { "default", "min", "max", "refineSplits", "minInterval" };
+					double[] doubleParamValues = new double[doubleParams.length];
 
-          // get string parameter values from current parameter
-          for (int i = 0; i < stringParams.length; i++) {
-            if (parameter.get(stringParams[i]) != null) {
-              stringParamValues[i] = parameter.get(stringParams[i]).asText();
-            }
-          }
-          // get double parameter values from current parameter
-          for (int i = 0; i < doubleParams.length; i++) {
-            if (parameter.get(doubleParams[i]) != null) {
-              doubleParamValues[i] = parameter.get(doubleParams[i]).asDouble();
-            }
-          }
-          // get boolean parameter values from current parameter
-          for (int i = 0; i < boolParams.length; i++) {
-            if (parameter.get(boolParams[i]) != null) {
-              boolParamValues[i] = parameter.get(boolParams[i]).asBoolean();
-            }
-          }
+					if (this.parameterMap.containsKey(name)) {
+						JsonNode commonParameter = this.parameterMap.get(name);
+						// get string parameter values from common parameter
+						for (int i = 0; i < stringParams.length; i++) {
+							if (commonParameter.get(stringParams[i]) != null) {
+								stringParamValues[i] = commonParameter.get(stringParams[i]).asText();
+							}
+						}
+						// get double parameter values from common parameter
+						for (int i = 0; i < doubleParams.length; i++) {
+							if (commonParameter.get(doubleParams[i]) != null) {
+								doubleParamValues[i] = commonParameter.get(doubleParams[i]).asDouble();
+							}
+						}
+						// get boolean parameter values from common parameter
+						for (int i = 0; i < boolParams.length; i++) {
+							if (commonParameter.get(boolParams[i]) != null) {
+								boolParamValues[i] = commonParameter.get(boolParams[i]).asBoolean();
+							}
+						}
+					}
 
-          Parameter p = null;
-          String type = stringParamValues[Arrays.stream(stringParams).collect(Collectors.toList()).indexOf("type")];
-          switch (type) {
-            case "int":
-            case "double":
-              p = new Parameter(name, new NumericParameterDomain(type.equals("int"), doubleParamValues[1], doubleParamValues[2]), doubleParamValues[0]);
-              if (doubleParamValues[3] == 0) {
-                throw new IllegalArgumentException("Please specify the parameter \"refineSplits\" for the parameter \"" + p.getName() + "\" in component \"" + c.getName() + "\"");
-              }
-              if (doubleParamValues[4] <= 0) {
-                throw new IllegalArgumentException(
-                    "Please specify a strictly positive parameter value for \"minInterval\" for the parameter \"" + p.getName() + "\" in component \"" + c.getName() + "\"");
-              }
-              paramConfig.put(p, new ParameterRefinementConfiguration((int) doubleParamValues[3], doubleParamValues[4]));
-              break;
-            case "bool":
-            case "boolean":
-              p = new Parameter(name, new BooleanParameterDomain(), boolParamValues[0]);
-              break;
-            case "cat":
-              if (parameter.get("values") != null && parameter.get("values").isTextual()) {
-                p = new Parameter(name, new CategoricalParameterDomain(Arrays.stream(stringParamValues[1].split(",")).collect(Collectors.toList())), stringParams[2]);
-              } else {
-                List<String> values = new LinkedList<>();
+					// get string parameter values from current parameter
+					for (int i = 0; i < stringParams.length; i++) {
+						if (parameter.get(stringParams[i]) != null) {
+							stringParamValues[i] = parameter.get(stringParams[i]).asText();
+						}
+					}
+					// get double parameter values from current parameter
+					for (int i = 0; i < doubleParams.length; i++) {
+						if (parameter.get(doubleParams[i]) != null) {
+							doubleParamValues[i] = parameter.get(doubleParams[i]).asDouble();
+						}
+					}
+					// get boolean parameter values from current parameter
+					for (int i = 0; i < boolParams.length; i++) {
+						if (parameter.get(boolParams[i]) != null) {
+							boolParamValues[i] = parameter.get(boolParams[i]).asBoolean();
+						}
+					}
 
-                if (parameter.get("values") != null) {
-                  for (JsonNode value : parameter.get("values")) {
-                    values.add(value.asText());
-                  }
-                } else if (this.parameterMap.containsKey(name)) {
-                  for (JsonNode value : this.parameterMap.get(name).get("values")) {
-                    values.add(value.asText());
-                  }
-                } else {
-                  System.err.println("Warning: Categorical parameter " + name + " in component " + c.getName() + " without value list.");
-                }
-                p = new Parameter(name, new CategoricalParameterDomain(values), stringParams[2]);
-              }
-              break;
-            default:
-              throw new IllegalArgumentException("Unsupported parameter type " + type);
-          }
+					Parameter p = null;
+					String type = stringParamValues[Arrays.stream(stringParams).collect(Collectors.toList()).indexOf("type")];
+					switch (type) {
+					case "int":
+					case "double":
+						p = new Parameter(name, new NumericParameterDomain(type.equals("int"), doubleParamValues[1], doubleParamValues[2]), doubleParamValues[0]);
+						if (doubleParamValues[3] == 0) {
+							throw new IllegalArgumentException("Please specify the parameter \"refineSplits\" for the parameter \"" + p.getName() + "\" in component \"" + c.getName() + "\"");
+						}
+						if (doubleParamValues[4] <= 0) {
+							throw new IllegalArgumentException("Please specify a strictly positive parameter value for \"minInterval\" for the parameter \"" + p.getName() + "\" in component \"" + c.getName() + "\"");
+						}
+						paramConfig.put(p, new ParameterRefinementConfiguration((int) doubleParamValues[3], doubleParamValues[4]));
+						break;
+					case "bool":
+					case "boolean":
+						p = new Parameter(name, new BooleanParameterDomain(), boolParamValues[0]);
+						break;
+					case "cat":
+						if (parameter.get("values") != null && parameter.get("values").isTextual()) {
+							p = new Parameter(name, new CategoricalParameterDomain(Arrays.stream(stringParamValues[1].split(",")).collect(Collectors.toList())), stringParams[2]);
+						} else {
+							List<String> values = new LinkedList<>();
 
-          if (p != null) {
-            c.addParameter(p);
-          }
-        }
+							if (parameter.get("values") != null) {
+								for (JsonNode value : parameter.get("values")) {
+									values.add(value.asText());
+								}
+							} else if (this.parameterMap.containsKey(name)) {
+								for (JsonNode value : this.parameterMap.get(name).get("values")) {
+									values.add(value.asText());
+								}
+							} else {
+								System.err.println("Warning: Categorical parameter " + name + " in component " + c.getName() + " without value list.");
+							}
+							p = new Parameter(name, new CategoricalParameterDomain(values), stringParams[2]);
+						}
+						break;
+					default:
+						throw new IllegalArgumentException("Unsupported parameter type " + type);
+					}
 
-        /* now parse dependencies */
-        for (JsonNode dependency : component.path("dependencies")) {
+					if (p != null) {
+						c.addParameter(p);
+					}
+				}
 
-          /* parse precondition */
-          String pre = dependency.get("pre").asText();
-          Collection<Collection<Pair<Parameter, ParameterDomain>>> premise = new ArrayList<>();
-          Collection<String> monoms = Arrays.asList(pre.split("\\|"));
-          for (String monom : monoms) {
-            Collection<String> literals = Arrays.asList(monom.split("&"));
-            Collection<Pair<Parameter, ParameterDomain>> monomInPremise = new ArrayList<>();
+				/* now parse dependencies */
+				for (JsonNode dependency : component.path("dependencies")) {
 
-            for (String literal : literals) {
-              String[] parts = literal.trim().split(" ");
-              if (parts.length != 3) {
-                throw new IllegalArgumentException("Cannot parse literal " + literal + ". Literals must be of the form \"<a> P <b>\".");
-              }
+					/* parse precondition */
+					String pre = dependency.get("pre").asText();
+					Collection<Collection<Pair<Parameter, ParameterDomain>>> premise = new ArrayList<>();
+					Collection<String> monoms = Arrays.asList(pre.split("\\|"));
+					for (String monom : monoms) {
+						Collection<String> literals = Arrays.asList(monom.split("&"));
+						Collection<Pair<Parameter, ParameterDomain>> monomInPremise = new ArrayList<>();
 
-              Parameter param = c.getParameter(parts[0]);
-              String target = parts[2];
-              switch (parts[1]) {
-                case "=": {
-                  Pair<Parameter, ParameterDomain> conditionItem;
-                  if (param.isNumeric()) {
-                    double val = Double.valueOf(target);
-                    conditionItem = new Pair<>(param, new NumericParameterDomain(((NumericParameterDomain) param.getDefaultDomain()).isInteger(), val, val));
-                  } else if (param.isCategorical()) {
-                    conditionItem = new Pair<>(param, new CategoricalParameterDomain(new String[] { target }));
-                  } else {
-                    throw new IllegalArgumentException("Currently no support for parameters with domain \"" + param.getDefaultDomain().getClass().getName() + "\"");
-                  }
-                  monomInPremise.add(conditionItem);
-                  break;
-                }
-                case "in": {
-                  Pair<Parameter, ParameterDomain> conditionItem;
-                  if (param.isNumeric()) {
-                    Interval interval = SetUtil.unserializeInterval(target);
-                    conditionItem = new Pair<>(param,
-                        new NumericParameterDomain(((NumericParameterDomain) param.getDefaultDomain()).isInteger(), interval.getInf(), interval.getSup()));
-                  } else if (param.isCategorical()) {
-                    if (!target.startsWith("[") && !target.startsWith("{")) {
-                      throw new IllegalArgumentException(
-                          "Illegal literal \"" + literal + "\" in the postcondition of dependency. This should be a set, but the target is not described by [...] or {...}");
-                    }
-                    Collection<String> values = target.startsWith("[") ? SetUtil.unserializeList(target) : SetUtil.unserializeSet(target);
-                    conditionItem = new Pair<>(param, new CategoricalParameterDomain(values));
-                  } else {
-                    throw new IllegalArgumentException("Currently no support for parameters with domain \"" + param.getDefaultDomain().getClass().getName() + "\"");
-                  }
-                  monomInPremise.add(conditionItem);
-                  break;
-                }
-                default:
-                  throw new IllegalArgumentException("Cannot parse literal " + literal + ". Currently no support for predicate \"" + parts[1] + "\".");
-              }
-            }
-            premise.add(monomInPremise);
-          }
+						for (String literal : literals) {
+							String[] parts = literal.trim().split(" ");
+							if (parts.length != 3) {
+								throw new IllegalArgumentException("Cannot parse literal " + literal + ". Literals must be of the form \"<a> P <b>\".");
+							}
 
-          /* parse postcondition */
-          Collection<Pair<Parameter, ParameterDomain>> conclusion = new ArrayList<>();
-          String post = dependency.get("post").asText();
-          Collection<String> literals = Arrays.asList(post.split("&"));
+							Parameter param = c.getParameter(parts[0]);
+							String target = parts[2];
+							switch (parts[1]) {
+							case "=": {
+								Pair<Parameter, ParameterDomain> conditionItem;
+								if (param.isNumeric()) {
+									double val = Double.valueOf(target);
+									conditionItem = new Pair<>(param, new NumericParameterDomain(((NumericParameterDomain) param.getDefaultDomain()).isInteger(), val, val));
+								} else if (param.isCategorical()) {
+									conditionItem = new Pair<>(param, new CategoricalParameterDomain(new String[] { target }));
+								} else {
+									throw new IllegalArgumentException("Currently no support for parameters with domain \"" + param.getDefaultDomain().getClass().getName() + "\"");
+								}
+								monomInPremise.add(conditionItem);
+								break;
+							}
+							case "in": {
+								Pair<Parameter, ParameterDomain> conditionItem;
+								if (param.isNumeric()) {
+									Interval interval = SetUtil.unserializeInterval(target);
+									conditionItem = new Pair<>(param, new NumericParameterDomain(((NumericParameterDomain) param.getDefaultDomain()).isInteger(), interval.getInf(), interval.getSup()));
+								} else if (param.isCategorical()) {
+									if (!target.startsWith("[") && !target.startsWith("{")) {
+										throw new IllegalArgumentException("Illegal literal \"" + literal + "\" in the postcondition of dependency. This should be a set, but the target is not described by [...] or {...}");
+									}
+									Collection<String> values = target.startsWith("[") ? SetUtil.unserializeList(target) : SetUtil.unserializeSet(target);
+									conditionItem = new Pair<>(param, new CategoricalParameterDomain(values));
+								} else {
+									throw new IllegalArgumentException("Currently no support for parameters with domain \"" + param.getDefaultDomain().getClass().getName() + "\"");
+								}
+								monomInPremise.add(conditionItem);
+								break;
+							}
+							default:
+								throw new IllegalArgumentException("Cannot parse literal " + literal + ". Currently no support for predicate \"" + parts[1] + "\".");
+							}
+						}
+						premise.add(monomInPremise);
+					}
 
-          for (String literal : literals) {
-            String[] parts = literal.trim().split(" ");
-            if (parts.length < 3) {
-              throw new IllegalArgumentException("Cannot parse literal " + literal + ". Literals must be of the form \"<a> P <b>\".");
-            }
-            if (parts.length > 3) {
-              for (int i = 3; i < parts.length; i++) {
-                parts[2] += " " + parts[i];
-              }
-            }
+					/* parse postcondition */
+					Collection<Pair<Parameter, ParameterDomain>> conclusion = new ArrayList<>();
+					String post = dependency.get("post").asText();
+					Collection<String> literals = Arrays.asList(post.split("&"));
 
-            Parameter param = c.getParameter(parts[0]);
-            String target = parts[2];
-            switch (parts[1]) {
-              case "=": {
-                Pair<Parameter, ParameterDomain> conditionItem;
-                if (param.isNumeric()) {
-                  double val = Double.valueOf(target);
-                  conditionItem = new Pair<>(param, new NumericParameterDomain(((NumericParameterDomain) param.getDefaultDomain()).isInteger(), val, val));
-                } else if (param.isCategorical()) {
-                  conditionItem = new Pair<>(param, new CategoricalParameterDomain(new String[] { target }));
-                } else {
-                  throw new IllegalArgumentException("Currently no support for parameters with domain \"" + param.getDefaultDomain().getClass().getName() + "\"");
-                }
-                conclusion.add(conditionItem);
-                break;
-              }
-              case "in": {
-                Pair<Parameter, ParameterDomain> conditionItem;
-                if (param.isNumeric()) {
-                  Interval interval = SetUtil.unserializeInterval(target);
-                  conditionItem = new Pair<>(param,
-                      new NumericParameterDomain(((NumericParameterDomain) param.getDefaultDomain()).isInteger(), interval.getInf(), interval.getSup()));
-                } else if (param.isCategorical()) {
-                  if (!target.startsWith("[") && !target.startsWith("{")) {
-                    throw new IllegalArgumentException(
-                        "Illegal literal \"" + literal + "\" in the postcondition of dependency. This should be a set, but the target is not described by [...] or {...}");
-                  }
-                  Collection<String> values = target.startsWith("[") ? SetUtil.unserializeList(target) : SetUtil.unserializeSet(target);
-                  conditionItem = new Pair<>(param, new CategoricalParameterDomain(values));
-                } else {
-                  throw new IllegalArgumentException("Currently no support for parameters with domain \"" + param.getDefaultDomain().getClass().getName() + "\"");
-                }
-                conclusion.add(conditionItem);
-                break;
-              }
-              default:
-                throw new IllegalArgumentException("Cannot parse literal " + literal + ". Currently no support for predicate \"" + parts[1] + "\".");
-            }
-          }
-          /* add dependency to the component */
-          c.addDependency(new Dependency(premise, conclusion));
-        }
+					for (String literal : literals) {
+						String[] parts = literal.trim().split(" ");
+						if (parts.length < 3) {
+							throw new IllegalArgumentException("Cannot parse literal " + literal + ". Literals must be of the form \"<a> P <b>\".");
+						}
+						if (parts.length > 3) {
+							for (int i = 3; i < parts.length; i++) {
+								parts[2] += " " + parts[i];
+							}
+						}
 
-        this.paramConfigs.put(c, paramConfig);
-        this.components.add(c);
-      }
-    }
-  }
+						Parameter param = c.getParameter(parts[0]);
+						String target = parts[2];
+						switch (parts[1]) {
+						case "=": {
+							Pair<Parameter, ParameterDomain> conditionItem;
+							if (param.isNumeric()) {
+								double val = Double.valueOf(target);
+								conditionItem = new Pair<>(param, new NumericParameterDomain(((NumericParameterDomain) param.getDefaultDomain()).isInteger(), val, val));
+							} else if (param.isCategorical()) {
+								conditionItem = new Pair<>(param, new CategoricalParameterDomain(new String[] { target }));
+							} else {
+								throw new IllegalArgumentException("Currently no support for parameters with domain \"" + param.getDefaultDomain().getClass().getName() + "\"");
+							}
+							conclusion.add(conditionItem);
+							break;
+						}
+						case "in": {
+							Pair<Parameter, ParameterDomain> conditionItem;
+							if (param.isNumeric()) {
+								Interval interval = SetUtil.unserializeInterval(target);
+								conditionItem = new Pair<>(param, new NumericParameterDomain(((NumericParameterDomain) param.getDefaultDomain()).isInteger(), interval.getInf(), interval.getSup()));
+							} else if (param.isCategorical()) {
+								if (!target.startsWith("[") && !target.startsWith("{")) {
+									throw new IllegalArgumentException("Illegal literal \"" + literal + "\" in the postcondition of dependency. This should be a set, but the target is not described by [...] or {...}");
+								}
+								Collection<String> values = target.startsWith("[") ? SetUtil.unserializeList(target) : SetUtil.unserializeSet(target);
+								conditionItem = new Pair<>(param, new CategoricalParameterDomain(values));
+							} else {
+								throw new IllegalArgumentException("Currently no support for parameters with domain \"" + param.getDefaultDomain().getClass().getName() + "\"");
+							}
+							conclusion.add(conditionItem);
+							break;
+						}
+						default:
+							throw new IllegalArgumentException("Cannot parse literal " + literal + ". Currently no support for predicate \"" + parts[1] + "\".");
+						}
+					}
+					/* add dependency to the component */
+					c.addDependency(new Dependency(premise, conclusion));
+				}
 
-  public void loadComponents(final File componentDescriptionFile) throws IOException {
-    this.paramConfigs.clear();
-    this.components.clear();
+				this.paramConfigs.put(c, paramConfig);
+				this.components.add(c);
+			}
+		}
+	}
 
-    this.parseFile(componentDescriptionFile);
-  }
+	public void loadComponents(final File componentDescriptionFile) throws IOException {
+		this.paramConfigs.clear();
+		this.components.clear();
 
-  public Map<Component, Map<Parameter, ParameterRefinementConfiguration>> getParamConfigs() {
-    return this.paramConfigs;
-  }
+		this.parseFile(componentDescriptionFile);
+	}
 
-  public Collection<Component> getComponents() {
-    return this.components;
-  }
+	public Map<Component, Map<Parameter, ParameterRefinementConfiguration>> getParamConfigs() {
+		return this.paramConfigs;
+	}
 
-  public static void main(final String[] args) throws IOException {
-    ComponentLoader cl = new ComponentLoader();
-    cl.loadComponents(new File("complexMLComponents.json"));
-  }
+	public Collection<Component> getComponents() {
+		return this.components;
+	}
+
+	public static void main(final String[] args) throws IOException {
+		ComponentLoader cl = new ComponentLoader();
+		cl.loadComponents(new File("complexMLComponents.json"));
+	}
 
 }

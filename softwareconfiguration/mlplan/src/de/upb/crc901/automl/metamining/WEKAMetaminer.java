@@ -7,12 +7,12 @@ import java.util.HashMap;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
-import de.upb.crc901.automl.hascowekaml.WEKAPipelineFactory;
 import de.upb.crc901.automl.metamining.pipelinecharacterizing.IPipelineCharacterizer;
 import de.upb.crc901.automl.metamining.pipelinecharacterizing.WEKAPipelineCharacterizer;
 import de.upb.crc901.automl.metamining.similaritymeasures.F3Optimizer;
 import de.upb.crc901.automl.metamining.similaritymeasures.IHeterogenousSimilarityMeasureComputer;
 import de.upb.crc901.automl.pipeline.basic.MLPipeline;
+import de.upb.crc901.mlplan.multiclass.weka.WEKAPipelineFactory;
 import hasco.metamining.IMetaMiner;
 import hasco.model.ComponentInstance;
 import hasco.serialization.ComponentLoader;

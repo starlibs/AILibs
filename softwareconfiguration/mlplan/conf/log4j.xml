@@ -78,7 +78,6 @@
 		<level value="off" />
 	</logger>
 	
-	
 	<logger name="de.upb.crc901.services.core.HttpServiceServer">
 		<level value="warn" />
 	</logger>
@@ -92,7 +91,7 @@
 	</logger>
 	
 	<logger name="de.upb.crc901.mlplan.AbstractMLPlan">
-		<level value="debug" />
+		<level value="info" />
 	</logger>
 	
 	<logger name="de.upb.crc901.services.core">

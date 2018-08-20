@@ -22,10 +22,10 @@ sourceSets {
 }
 
 dependencies {
-
 	// basic dependencies
 	compile project(':hasco')
 
+	// JAICore dependencies
 	compile project(':JAICore:jaicore-logic')
 	compile project(':JAICore:jaicore-basic')
 	compile project(':JAICore:jaicore-graph')
@@ -55,6 +55,8 @@ dependencies {
 	// wrapped library dependencies
 	//compile group: 'de.upb.isys', name: 'meka', version: '0.0.1'
 	compile group: 'de.upb.isys', name: 'interruptable-weka', version: '0.0.1'
+	compile group: 'de.upb.isys', name: 'mtj', version: '0.0.1'
+	compile group: 'com.github.fommil.netlib', name: 'core', version: '1.1.2'
 
 	// OWL API
 	compile 'net.sourceforge.owlapi:owlapi-distribution:5.1.0'
@@ -68,4 +70,12 @@ dependencies {
 	
 	// gradient descent
 	compile group: 'de.jungblut.common', name: 'thomasjungblut-common', version: '1.1'
+	
 }
+
+repositories {
+    flatDir {
+        dirs 'lib'
+    }
+}
+
