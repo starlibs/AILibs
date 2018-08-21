@@ -11,7 +11,7 @@ node {
 
 node.root {
 	padding: 10px;
-	fill-color: black;
+	fill-color: green;
 }
 
 node.expanding {

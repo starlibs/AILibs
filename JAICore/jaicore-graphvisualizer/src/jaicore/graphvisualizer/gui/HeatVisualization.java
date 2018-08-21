@@ -22,8 +22,8 @@ public class HeatVisualization<T> extends GraphVisualization<T> {
 //        this.graph.setAttribute("ui.stylesheet", "url('conf/searchgraph.css')");
         this.graph.setAttribute("ui.stylesheet", "url('conf/heatmap.css')");
         random = new Random();
-        bestFValue = Double.MIN_VALUE;
-        worstFValue = Double.MAX_VALUE;
+        bestFValue = Double.MAX_VALUE;
+        worstFValue = Double.MIN_VALUE;
         this.nodes = new ArrayList<>();
     }
 
@@ -36,11 +36,11 @@ public class HeatVisualization<T> extends GraphVisualization<T> {
         if(s.getInternalLabel() instanceof Number){
             double fvalue =  ((Number) s.getInternalLabel()).doubleValue();
 
-            if(fvalue > bestFValue) {
+            if(fvalue < bestFValue) {
                 bestFValue = fvalue;
                 update();
             }
-            if(fvalue < worstFValue) {
+            if(fvalue > worstFValue) {
                 worstFValue = fvalue;
                update();
             }
@@ -68,8 +68,8 @@ public class HeatVisualization<T> extends GraphVisualization<T> {
 
     private void colorNode(Node node, double fvalue) {
         float color = random.nextFloat();
-        float x = (float)(fvalue - worstFValue);
-        float y = (float)(bestFValue - worstFValue);
+        float x = (float)(fvalue - bestFValue);
+        float y = (float)(worstFValue - bestFValue);
         color = x/y;
 
         node.setAttribute("ui.color", color);
