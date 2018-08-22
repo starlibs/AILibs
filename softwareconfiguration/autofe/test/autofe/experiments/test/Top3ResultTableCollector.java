@@ -1,5 +1,6 @@
 package autofe.experiments.test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -7,7 +8,10 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import jaicore.basic.ListHelper;
 import jaicore.basic.SQLAdapter;
@@ -19,7 +23,7 @@ import jaicore.basic.chunks.TaskChunkUtil;
 import jaicore.basic.chunks.TaskKeyComparator;
 import jaicore.basic.kvstore.KVStoreUtil;
 
-public class ResultTableCollector {
+public class Top3ResultTableCollector {
 
 	private static final List<String> benchmarkFunctions = Arrays.asList("Random", "KernelCluster", "LDA", "KernelLDA", // "Cluster",
 			"COCO", "COED");
@@ -61,15 +65,88 @@ public class ResultTableCollector {
 		}
 
 		for (Task t : csvChunks) {
-			List<Double> testErrorRates = t.getValueAsDoubleList("kendallsTau", ",");
-			for (int i = 0; i < testErrorRates.size(); i++)
-				testErrorRates.set(i, Math.abs(testErrorRates.get(i)));
 
-			if (testErrorRates.size() < 2) {
-				testErrorRates.add(testErrorRates.get(0));
+			// System.out.println(t.getKeyValueMap().get("kendallsTau"));
+			// System.out.println("----");
+			List<Double[]> benchmarkRanking = Stream.of(t.getKeyValueMap().get("benchmarkRanking").split("\\],\\["))
+					.map(x -> {
+						String[] values = x.split(",");
+						Double[] result = new Double[values.length];
+						for (int i = 0; i < values.length; i++) {
+							if (values[i].startsWith("[")) {
+								result[i] = Double.parseDouble(values[i].substring(1));
+							} else if (values[i].endsWith("]")) {
+								result[i] = Double.parseDouble(values[i].substring(0, values[i].length() - 1));
+							} else {
+								result[i] = Double.parseDouble(values[i]);
+							}
+						}
+						return result;
+					}).collect(Collectors.toList());
+			List<Double[]> mlplanRanking = Stream.of(t.getKeyValueMap().get("mlplanRanking").split("\\],\\["))
+					.map(x -> {
+						String[] values = x.split(",");
+						Double[] result = new Double[values.length];
+						for (int i = 0; i < values.length; i++) {
+							if (values[i].startsWith("[")) {
+								result[i] = Double.parseDouble(values[i].substring(1));
+							} else if (values[i].endsWith("]")) {
+								result[i] = Double.parseDouble(values[i].substring(0, values[i].length() - 1));
+							} else {
+								result[i] = Double.parseDouble(values[i]);
+							}
+						}
+						return result;
+					}).collect(Collectors.toList());
+
+			System.out.println(Arrays.toString(benchmarkRanking.get(0)));
+			System.out.println(Arrays.toString(mlplanRanking.get(0)));
+			System.out.println("---");
+
+			List<Double> accs = new ArrayList<>();
+
+			for (int i = 0; i < benchmarkRanking.size(); i++) {
+				Map<Integer, Double> mlplanRank = new HashMap<>();
+				Map<Integer, Double> benchmarkRank = new HashMap<>();
+
+				for (int j = 0; j < mlplanRanking.size(); j++) {
+					mlplanRank.put(j, mlplanRanking.get(i)[j]);
+				}
+				for (int j = 0; j < benchmarkRanking.size(); j++) {
+					benchmarkRank.put(j, benchmarkRanking.get(i)[j]);
+				}
+				List<Entry<Integer, Double>> mlplanRankList = new ArrayList<>(mlplanRank.entrySet());
+				mlplanRankList.sort(Entry.comparingByValue());
+				List<Entry<Integer, Double>> benchmarkRankList = new ArrayList<>(benchmarkRank.entrySet());
+				benchmarkRankList.sort(Entry.comparingByValue());
+
+				int right = 0;
+				for (int j = 0; j < 3; j++) {
+					int key = mlplanRankList.get(j).getKey();
+					boolean found = false;
+					for (int k = 0; k < 3; k++) {
+						if (benchmarkRankList.get(k).getKey() == key) {
+							found = true;
+							break;
+						}
+
+					}
+					if (found)
+						right++;
+				}
+				System.out.println(right);
+				accs.add(((double) right) / 3d);
 			}
-			t.store("kendallsTau", ListHelper.implode(testErrorRates, ","));
-			t.store("kendallsTau_mean", StatisticsUtil.mean(t.getValueAsDoubleList("kendallsTau", ",")));
+
+			// List<Double> testErrorRates = t.getValueAsDoubleList("kendallsTau", ",");
+			for (int i = 0; i < accs.size(); i++)
+				accs.set(i, Math.abs(accs.get(i)));
+
+			if (accs.size() < 2) {
+				accs.add(accs.get(0));
+			}
+			t.store("top3acc", ListHelper.implode(accs, ","));
+			t.store("top3acc_mean", StatisticsUtil.mean(accs));
 
 			if (t.getValueAsString("dataset").contains(".")) {
 				t.store("dataset",
@@ -88,12 +165,14 @@ public class ResultTableCollector {
 			t.store("dataset", "\\multicolumn{1}{l}{" + t.getValueAsString("dataset") + "}");
 		}
 
-		csvChunks.tTest("dataset", "benchmark", "kendallsTau", "Random", "ttest");
-		csvChunks.best("dataset", "benchmark", "kendallsTau_mean", "best");
+		csvChunks.tTest("dataset", "benchmark", "top3acc", "Random", "ttest");
+		csvChunks.best("dataset", "benchmark", "top3acc_mean", "best");
 		csvChunks.sort(new TaskKeyComparator(new String[] { "benchmark", "dataset" }));
 
-		for (Task t : csvChunks) {
-			t.store("entry", ValueUtil.valueToString(t.getValueAsDouble("kendallsTau_mean"), 2));
+		for (
+
+		Task t : csvChunks) {
+			t.store("entry", ValueUtil.valueToString(t.getValueAsDouble("top3acc_mean"), 2));
 
 			if (t.getValueAsBoolean("best")) {
 				t.store("entry", "\\textbf{" + t.getValueAsString("entry") + "}");
