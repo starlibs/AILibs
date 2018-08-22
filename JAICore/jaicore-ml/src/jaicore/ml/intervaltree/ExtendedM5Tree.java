@@ -111,9 +111,9 @@ public class ExtendedM5Tree extends M5Base {
 	}
 
 	private Interval combineInterval(ArrayList<Interval> list) {
-		double min = list.stream().mapToDouble(Interval::getLowerBound).average()
+		double min = list.stream().mapToDouble(Interval::getLowerBound).min()
 				.orElseThrow(() -> new IllegalStateException("Couldn't find minimum?!"));
-		double max = list.stream().mapToDouble(Interval::getUpperBound).average()
+		double max = list.stream().mapToDouble(Interval::getUpperBound).max()
 				.orElseThrow(() -> new IllegalStateException("Couldn't find maximum?!"));
 		return new Interval(min, max);
 	}

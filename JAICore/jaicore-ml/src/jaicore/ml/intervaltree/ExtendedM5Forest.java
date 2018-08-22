@@ -40,9 +40,9 @@ public class ExtendedM5Forest extends Bagging {
 			predictions[i] = classifier.predictInterval(rangeQuery);
 		}
 		// aggregate them
-		double avgLower = Arrays.stream(predictions).mapToDouble(Interval::getLowerBound).average()
+		double avgLower = Arrays.stream(predictions).mapToDouble(Interval::getLowerBound).min()
 				.orElseThrow(IllegalStateException::new);
-		double avgUpper = Arrays.stream(predictions).mapToDouble(Interval::getUpperBound).average()
+		double avgUpper = Arrays.stream(predictions).mapToDouble(Interval::getUpperBound).max()
 				.orElseThrow(IllegalStateException::new);
 		return new Interval(avgLower, avgUpper);
 	}
