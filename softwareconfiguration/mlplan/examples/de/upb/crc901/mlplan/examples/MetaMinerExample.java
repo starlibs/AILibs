@@ -35,7 +35,7 @@ public class MetaMinerExample {
 		File file = ds.getDataset("4350e421cdc16404033ef1812ea38c01");
 		Instances data = new Instances(new BufferedReader(new FileReader(file)));
 		data.setClassIndex(data.numAttributes() - 1);
-		List<Instances> ö = WekaUtil.getStratifiedSplit(data, new Random(0), .7f);
+		List<Instances> instances = WekaUtil.getStratifiedSplit(data, new Random(0), .7f);
 
 		/* initialize mlplan, and let it run for 30 seconds */
 		File configFile = new File("model/weka/weka-all-autoweka.json");

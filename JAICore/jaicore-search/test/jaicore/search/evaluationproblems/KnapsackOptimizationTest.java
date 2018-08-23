@@ -68,8 +68,8 @@ public class KnapsackOptimizationTest {
 					}
 				}, knapsackProblem.getSolutionEvaluator()));
 
-		SimpleGraphVisualizationWindow<Node<KnapsackNode, Double>> win = new SimpleGraphVisualizationWindow<>(search);
-		win.getPanel().setTooltipGenerator(n -> n.getPoint().toString());
+	//	SimpleGraphVisualizationWindow<Node<KnapsackNode, Double>> win = new SimpleGraphVisualizationWindow<>(search);
+	//	win.getPanel().setTooltipGenerator(n -> n.getPoint().toString());
 
 		KnapsackNode bestSolution = null;
 		double bestValue = 0.0d;
