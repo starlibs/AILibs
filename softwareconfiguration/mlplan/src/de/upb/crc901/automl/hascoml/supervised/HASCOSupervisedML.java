@@ -73,14 +73,10 @@ public class HASCOSupervisedML extends HASCOFD<Classifier, Double> implements IO
 	 */
 	private int timeoutNodeEvaluationInS = -1;
 
-	/**
-	 * Flag whether to enable visualization.
-	 */
+	/** Flag whether to enable visualization. */
 	private boolean enableVisualization = false;
 
-	/**
-	 * Instance of the component loader providing the collection of components and the detailed parameter refinement configuration.
-	 */
+	/** Instance of the component loader providing the collection of components and the detailed parameter refinement configuration. */
 	private ComponentLoader componentLoader;
 
 	/**

@@ -101,6 +101,7 @@ public class ComponentLoader {
 			for (JsonNode component : components) {
 				c = new Component(component.get("name").asText());
 				// add provided interfaces
+
 				for (JsonNode providedInterface : component.path("providedInterface")) {
 					c.addProvidedInterface(providedInterface.asText());
 				}

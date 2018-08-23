@@ -16,6 +16,7 @@ import com.google.common.eventbus.EventBus;
 import hasco.events.HASCORunStartedEvent;
 import hasco.events.HASCORunTerminatedEvent;
 import hasco.events.HASCOSolutionEvaluationEvent;
+import hasco.events.HASCOSolutionEvent;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
 import hasco.model.Parameter;
@@ -239,6 +240,7 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 			@SuppressWarnings("unchecked")
 			Solution<R, T, V> solution = new Solution<>(objectInstance, plan, HASCO.this.getObjectFromPlan(plan.getPlan()), (V) solutionAnnotations.get("f"),
 					solutionAnnotations.containsKey("fTime") ? (int) solutionAnnotations.get("fTime") : -1);
+			HASCO.this.solutionEvaluationEventBus.post(new HASCOSolutionEvent<R, T, V>(solution));
 			return solution;
 		}
 

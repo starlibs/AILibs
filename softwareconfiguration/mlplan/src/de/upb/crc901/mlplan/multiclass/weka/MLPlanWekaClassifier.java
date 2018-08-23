@@ -74,7 +74,7 @@ public class MLPlanWekaClassifier extends AbstractMLPlan implements Classifier, 
 
 		/* Check whether selection phase is intended to be used and if so set the classifier evaluator for the selection phase */
 		if (dataPreservedForSelection != null) {
-			IObjectEvaluator<Classifier, Double> selectionBenchmark = new MonteCarloCrossValidationEvaluator(new MulticlassEvaluator(new Random(this.getConfig().randomSeed())), this.getConfig().selectionMCIterations(), data,
+			IObjectEvaluator<Classifier, Double> selectionBenchmark = new MonteCarloCrossValidationEvaluator(new MulticlassEvaluator(new Random(this.getConfig().randomSeed())), 1, data,
 					(float) (1 - this.getConfig().selectionDataPortion()));
 			super.setSelectionPhaseEvaluator(selectionBenchmark);
 		}

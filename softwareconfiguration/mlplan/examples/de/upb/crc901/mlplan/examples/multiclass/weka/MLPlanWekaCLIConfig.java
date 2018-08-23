@@ -30,7 +30,7 @@ public interface MLPlanWekaCLIConfig extends IMultiClassClassificationExperiment
 	public File outputFile();
 
 	@Key(K_SHOW_GRAPH_VISUALIZATION)
-	@DefaultValue("false")
+	@DefaultValue("true")
 	public boolean showGraphVisualization();
 
 }

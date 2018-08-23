@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.aeonbits.owner.ConfigCache;
 
 import de.upb.crc901.automl.hascoml.supervised.HASCOSupervisedML;
+import de.upb.crc901.mlplan.multiclass.weka.WEKAPipelineFactory;
 import hasco.serialization.ComponentLoader;
 
 /**
@@ -25,6 +26,7 @@ public class HASCOForWekaML extends HASCOSupervisedML {
 	 */
 	public HASCOForWekaML() throws IOException {
 		super(new ComponentLoader(CONFIG.componentsFile()));
+		this.setFactory(new WEKAPipelineFactory());
 	}
 
 	@Override

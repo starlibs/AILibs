@@ -14,10 +14,10 @@ sourceSets {
     	}
     }
     test {
-   	java {
-   		srcDir 'test'
-   		srcDir 'examples'
-   	}
+		java {
+			srcDir 'test'
+			srcDir 'examples'
+		}
     }
 }
 
