@@ -3,7 +3,7 @@ package jaicore.search;
 import static org.junit.Assert.assertNotNull;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 
 import org.junit.Test;
 
@@ -30,7 +30,7 @@ public class SimplePathProblemTester {
 			@Override
 			public SuccessorGenerator<Integer, Object> getSuccessorGenerator() {
 				return n -> {
-					Collection<NodeExpansionDescription<Integer, Object>> succ = new ArrayList<>();
+					List<NodeExpansionDescription<Integer, Object>> succ = new ArrayList<>();
 					succ.add(new NodeExpansionDescription<Integer, Object>(n, n * 2, null, NodeType.OR));
 					succ.add(new NodeExpansionDescription<Integer, Object>(n, (n + 1) * 2, null, NodeType.OR));
 					return succ;

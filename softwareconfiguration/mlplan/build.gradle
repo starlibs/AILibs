@@ -44,7 +44,7 @@ dependencies {
 
 	// Jackson for JSON (used by JAICore but not contained in the JAR)
 	compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.0.pr4'
-	
+
 	// OpenML connector
 	compile group: 'org.openml', name: 'apiconnector', version: '1.0.18'
 
@@ -52,7 +52,13 @@ dependencies {
 	compile group: 'de.upb.isys', name: 'jase', version: '0.0.3'
 
 	// wrapped library dependencies
-	compile group: 'de.upb.isys', name: 'meka', version: '0.0.1'
+	//compile group: 'de.upb.isys', name: 'meka', version: '0.0.1'
 	compile group: 'de.upb.isys', name: 'interruptable-weka', version: '0.0.1'
+	
+	// https://mvnrepository.com/artifact/com.github.fommil.netlib/core
+	compile group: 'com.github.fommil.netlib', name: 'core', version: '1.1.2'
+
+	
+	compile name: 'mtj'
 
 }

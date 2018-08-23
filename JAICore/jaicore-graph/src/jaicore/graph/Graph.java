@@ -10,7 +10,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import jaicore.basic.sets.SetUtil;
-
+import jaicore.basic.sets.SetUtil.Pair;
 
 public class Graph<T> implements Serializable {
 	/**
@@ -26,15 +26,16 @@ public class Graph<T> implements Serializable {
 	}
 
 	private final Map<T, Node> nodes = new HashMap<>();
+	private final Set<Pair<T, T>> edges = new HashSet<>();
 
 	public Graph() {
 	}
-	
+
 	public Graph(T node) {
 		this();
 		this.addItem(node);
 	}
-	
+
 	public Graph(Collection<T> nodes) {
 		this();
 		for (T node : nodes)
@@ -84,6 +85,7 @@ public class Graph<T> implements Serializable {
 		Node nodeTo = this.nodes.get(to);
 		nodeFrom.successors.add(nodeTo);
 		nodeTo.predecessors.add(nodeFrom);
+		edges.add(new Pair<>(from, to));
 	}
 
 	public void removeEdge(T from, T to) {
@@ -93,6 +95,7 @@ public class Graph<T> implements Serializable {
 		Node nodeTo = this.nodes.get(to);
 		nodeFrom.successors.remove(nodeTo);
 		nodeTo.predecessors.remove(nodeFrom);
+		edges.remove(new Pair<>(from, to));
 	}
 
 	public Set<T> getSuccessors(T item) {
@@ -119,7 +122,7 @@ public class Graph<T> implements Serializable {
 	public final Collection<T> getSources() {
 		return nodes.keySet().stream().filter(n -> nodes.get(n).predecessors.isEmpty()).collect(Collectors.toList());
 	}
-	
+
 	public final T getRoot() {
 		Collection<T> sources = getSources();
 		if (sources.isEmpty())
@@ -132,7 +135,7 @@ public class Graph<T> implements Serializable {
 	public final Collection<T> getSinks() {
 		return nodes.keySet().stream().filter(n -> nodes.get(n).successors.isEmpty()).collect(Collectors.toList());
 	}
-	
+
 	public final void addGraph(Graph<T> g) {
 		for (T t : SetUtil.difference(g.getItems(), getItems())) {
 			this.addItem(t);
@@ -143,9 +146,13 @@ public class Graph<T> implements Serializable {
 			}
 		}
 	}
-	
+
 	public boolean isEmpty() {
 		return nodes.isEmpty();
+	}
+	
+	public Set<Pair<T, T>> getEdges() {
+		return edges;
 	}
 
 	@Override
@@ -170,7 +177,7 @@ public class Graph<T> implements Serializable {
 			if (other.nodes != null)
 				return false;
 		}
-		
+
 		for (T t : nodes.keySet()) {
 			if (!other.nodes.containsKey(t))
 				return false;

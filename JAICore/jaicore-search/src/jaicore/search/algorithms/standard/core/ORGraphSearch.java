@@ -28,11 +28,11 @@ import jaicore.basic.IIterableAlgorithm;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.concurrent.TimeoutTimer;
 import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
-import jaicore.graphvisualizer.events.GraphInitializedEvent;
-import jaicore.graphvisualizer.events.NodeParentSwitchEvent;
-import jaicore.graphvisualizer.events.NodeReachedEvent;
-import jaicore.graphvisualizer.events.NodeRemovedEvent;
-import jaicore.graphvisualizer.events.NodeTypeSwitchEvent;
+import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
+import jaicore.graphvisualizer.events.graphEvents.NodeParentSwitchEvent;
+import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
+import jaicore.graphvisualizer.events.graphEvents.NodeRemovedEvent;
+import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
 import jaicore.logging.LoggerUtil;
 import jaicore.search.algorithms.interfaces.IObservableORGraphSearch;
 import jaicore.search.structure.core.GraphEventBus;
@@ -70,6 +70,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	/* search related objects */
 	protected OpenCollection<Node<T, V>> open = new PriorityQueueOpen<>();
 
+	protected final GraphGenerator<T, A> graphGenerator;
 	protected final RootGenerator<T> rootGenerator;
 	protected final SuccessorGenerator<T, A> successorGenerator;
 	protected final boolean checkGoalPropertyOnEntirePath;
@@ -89,7 +90,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	protected int additionalThreadsForExpansion = 0;
 	private Semaphore fComputationTickets;
 	private ExecutorService pool;
-	private final AtomicInteger activeJobs = new AtomicInteger(0);
+	protected final AtomicInteger activeJobs = new AtomicInteger(0);
 
 	private final Set<T> expanded = new HashSet<>();
 	private final boolean solutionReportingNodeEvaluator;
@@ -136,14 +137,14 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 				/* compute node label */
 				V label = null;
 				boolean computationTimedout = false;
+				long startComputation = System.currentTimeMillis();
 				try {
-					long startComputation = System.currentTimeMillis();
 					label = nodeEvaluator.f(newNode);
-
+					
 					/* check whether the required time exceeded the timeout */
-					long computationTime = System.currentTimeMillis() - startComputation;
-					if (timeoutForComputationOfF > 0 && computationTime > timeoutForComputationOfF + 1000)
-						logger.warn("Computation of f for node {} took {}ms, which is more than the allowed {}ms", newNode, computationTime, timeoutForComputationOfF);
+					long fTime = System.currentTimeMillis() - startComputation;
+					if (timeoutForComputationOfF > 0 && fTime > timeoutForComputationOfF + 1000)
+						logger.warn("Computation of f for node {} took {}ms, which is more than the allowed {}ms", newNode, fTime, timeoutForComputationOfF);
 				} catch (InterruptedException e) {
 					logger.debug("Received interrupt during computation of f.");
 					graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_timedout"));
@@ -161,7 +162,11 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 				}
 				if (taskId >= 0)
 					timeoutSubmitter.cancelTimeout(taskId);
-
+				
+				/* register time required to compute this node label */
+				long fTime = System.currentTimeMillis() - startComputation;
+				newNode.setAnnotation("fTime", fTime);
+				
 				/* if no label was computed, prune the node and cancel the computation */
 				if (label == null) {
 					if (!computationTimedout)
@@ -261,6 +266,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	@SuppressWarnings("unchecked")
 	public ORGraphSearch(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, V> pNodeEvaluator, ParentDiscarding pd) {
 		super();
+		this.graphGenerator = graphGenerator;
 		this.rootGenerator = graphGenerator.getRootGenerator();
 		this.successorGenerator = graphGenerator.getSuccessorGenerator();
 		checkGoalPropertyOnEntirePath = !(graphGenerator.getGoalTester() instanceof NodeGoalTester);
@@ -336,6 +342,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 				for (Node<T, V> root : roots) {
 					labelNode(root);
 					open.add(root);
+					root.setAnnotation("awa-level", 0);
 					logger.info("Labeled root with {}", root.getInternalLabel());
 				}
 			} else {
@@ -372,7 +379,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 		while(open.peek().getInternalLabel().compareTo(currentlyBestScore) < 0);
 		return currentlyBestSolution;
 	}
-	
+
 	/**
 	 * Find the shortest path to a goal starting from <code>start</code>.
 	 *
@@ -439,7 +446,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 
 	/**
 	 * Makes a single expansion and returns solution paths.
-	 * 
+	 *
 	 * @return The last found solution path.
 	 */
 	public List<NodeExpansionDescription<T, A>> nextExpansion() {
@@ -460,10 +467,10 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 		if (beforeSelection()) {
 
 			Node<T, V> nodeToExpand = open.peek();
-			assert parentDiscarding == ParentDiscarding.ALL || !expanded.contains(nodeToExpand.getPoint()) : "Node " + nodeToExpand.getString()
-					+ " has been selected for the second time for expansion.";
 			if (nodeToExpand == null)
 				return;
+			// assert parentDiscarding == ParentDiscarding.ALL || !expanded.contains(nodeToExpand.getPoint()) : "Node " + nodeToExpand.getString()
+			// 		+ " has been selected for the second time for expansion.";
 			afterSelection(nodeToExpand);
 			step(nodeToExpand);
 		}
@@ -537,7 +544,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 			}
 			logger.debug("Finished computation of successors");
 		}
-		
+
 		/* attach successors to search graph */
 //		System.out.println(expanded.contains(expandedNodeInternal.getPoint()));
 		if (additionalThreadsForExpansion < 1) {
@@ -689,7 +696,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 
 		/* check loop */
 		assert parent == null || !parent.externalPath().contains(t2) : "There is a loop in the underlying graph. The following path contains the last node twice: " + newNode.externalPath().stream().map(n -> n.toString()).reduce("", (s,t) -> s + "\n\t\t" + t);
-		
+
 		/* currently, we only support tree search */
 		assert !ext2int.containsKey(t2) : "Reached node " + t2 + " for the second time.\nt\tFirst path:" + ext2int.get(t2).externalPath().stream().map(n -> n.toString()).reduce("", (s,t) -> s + "\n\t\t" + t)
 				+ "\n\tSecond Path:" + newNode.externalPath().stream().map(n -> n.toString()).reduce("", (s,t) -> s + "\n\t\t" + t);
@@ -842,6 +849,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	public void receiveNodeAnnotationEvent(NodeAnnotationEvent<T> event) {
 		try {
 			T nodeExt = event.getNode();
+			logger.debug("Received annotation {} with value {} for node {}", event.getAnnotationName(), event.getAnnotationValue(), event.getNode());
 			if (!ext2int.containsKey(nodeExt))
 				throw new IllegalArgumentException("Received annotation for a node I don't know!");
 			Node<T, V> nodeInt = ext2int.get(nodeExt);
@@ -912,5 +920,10 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	@Override
 	public void registerListener(Object listener) {
 		this.graphEventBus.register(listener);
+	}
+
+	@Override
+	public GraphGenerator<T, A> getGraphGenerator() {
+		return graphGenerator;
 	}
 }

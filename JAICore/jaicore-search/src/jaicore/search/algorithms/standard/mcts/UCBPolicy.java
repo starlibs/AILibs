@@ -58,7 +58,7 @@ public class UCBPolicy<T,A> implements IPathUpdatablePolicy<T,A,Double> {
 		}
 		
 		/* otherwise, play best action */
-		double best = 0;
+		double best = maximize ? 0 : Double.MAX_VALUE;
 		int n = labels.get(node).visits;
 		A choice = null;
 		for (A action : possibleActions) {

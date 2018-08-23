@@ -4,14 +4,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.IllegalFormatException;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -94,7 +91,6 @@ public class ComponentLoader {
     // get the array of components
     JsonNode components = rootNode.path("components");
     if (components != null) {
-      Iterator<JsonNode> componentsIt = components.elements();
 
       Component c;
       for (JsonNode component : components) {
@@ -280,7 +276,6 @@ public class ComponentLoader {
           Collection<Pair<Parameter, ParameterDomain>> conclusion = new ArrayList<>();
           String post = dependency.get("post").asText();
           Collection<String> literals = Arrays.asList(post.split("&"));
-          Collection<Pair<Parameter, String>> monomInPremise = new ArrayList<>();
 
           for (String literal : literals) {
             String[] parts = literal.trim().split(" ");

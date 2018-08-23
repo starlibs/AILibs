@@ -54,6 +54,10 @@ public class WEKAPipelineFactory implements Factory<MLPipeline> {
 
 		Classifier c = AbstractClassifier.forName(classifierCI.getComponent().getName(),
 				parameters.toArray(new String[] {}));
+		// System.out.println(((search != null) ? search.getClass().getName() : "") + "
+		// "
+		// + ((eval != null) ? eval.getClass().getName() : "") + " " +
+		// c.getClass().getName());
 		return new MLPipeline(search, eval, c);
 	}
 

@@ -74,7 +74,7 @@ public class ConfusionBasedOptimizingAlgorithm {
 		@Override
 		public SuccessorGenerator<BFNode, String> getSuccessorGenerator() {
 			return n -> {
-				Collection<NodeExpansionDescription<BFNode, String>> successors = new ArrayList<>();
+				List<NodeExpansionDescription<BFNode, String>> successors = new ArrayList<>();
 				if (n.leftClassifier == null) {
 					for (String classifier : classifiers) {
 						successors.add(new NodeExpansionDescription<>(n, new BFNode(classifier, null, null, null, null), "", NodeType.OR));

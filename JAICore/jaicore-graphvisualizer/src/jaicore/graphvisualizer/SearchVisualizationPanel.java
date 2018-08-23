@@ -35,11 +35,11 @@ import org.graphstream.ui.view.ViewerPipe;
 
 import com.google.common.eventbus.Subscribe;
 
-import jaicore.graphvisualizer.events.GraphInitializedEvent;
-import jaicore.graphvisualizer.events.NodeParentSwitchEvent;
-import jaicore.graphvisualizer.events.NodeReachedEvent;
-import jaicore.graphvisualizer.events.NodeRemovedEvent;
-import jaicore.graphvisualizer.events.NodeTypeSwitchEvent;
+import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
+import jaicore.graphvisualizer.events.graphEvents.NodeParentSwitchEvent;
+import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
+import jaicore.graphvisualizer.events.graphEvents.NodeRemovedEvent;
+import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
 
 @SuppressWarnings("serial")
 public class SearchVisualizationPanel<T> extends JPanel {

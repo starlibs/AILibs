@@ -1,6 +1,5 @@
 package hasco.core;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -14,19 +13,13 @@ import jaicore.logic.fol.theories.EvaluablePredicate;
 
 public class isNotRefinable implements EvaluablePredicate {
 	
-	private final Collection<Component> components;
-	private final Map<Component,Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration;
 	private final isValidParameterRangeRefinementPredicate p;
 	
 	public isNotRefinable(Collection<Component> components, Map<Component, Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration) {
 		super();
-		this.components = components;
-		this.refinementConfiguration = refinementConfiguration;
 		this.p = new isValidParameterRangeRefinementPredicate(components, refinementConfiguration);
 	}
-
 	
-
 	@Override
 	public Collection<List<ConstantParam>> getParamsForPositiveEvaluation(Monom state, ConstantParam... partialGrounding) {
 		throw new UnsupportedOperationException();
