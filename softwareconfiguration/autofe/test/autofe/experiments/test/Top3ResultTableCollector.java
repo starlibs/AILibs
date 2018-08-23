@@ -21,6 +21,7 @@ import jaicore.basic.chunks.Task;
 import jaicore.basic.chunks.TaskChunk;
 import jaicore.basic.chunks.TaskChunkUtil;
 import jaicore.basic.chunks.TaskKeyComparator;
+import jaicore.basic.kvstore.IKVFilter;
 import jaicore.basic.kvstore.KVStoreUtil;
 
 public class Top3ResultTableCollector {
@@ -29,17 +30,29 @@ public class Top3ResultTableCollector {
 			"COCO", "COED");
 
 	public static void main(final String[] args) throws Exception {
+
+		IKVFilter inverseFilter = new IKVFilter() {
+			@Override
+			public String filter(String value) {
+				String[] values = value.split(",");
+				String result = "";
+				for (int i = 0; i < values.length; i++) {
+
+					result += new Double((-1) * Double.parseDouble(values[i])).toString();
+					if (i != values.length - 1)
+						result += ",";
+				}
+				return result;
+			}
+		};
+
 		Map<String, String> commonFields = new HashMap<>();
 
 		TaskChunk<Task> csvChunks = new TaskChunk<>("chunkID=baselines");
-		// csvChunks.addAll(cMLPlan);
 
 		TaskChunk<Task> cMLPlan = null;
 		{
-			// try (SQLAdapter adapter = new SQLAdapter("localhost", "experiments2",
-			// "experiments123!", "experiments")) {
 			try (SQLAdapter adapter = new SQLAdapter("localhost", "experiments2", "experiments123!", "experiments")) {
-				// commonFields.put("candidate", C_ML_PLAN);
 				cMLPlan = TaskChunkUtil.readFromMySQLTable(adapter, "benchmarkranking", commonFields);
 
 				for (String benchmark : benchmarkFunctions) {
@@ -65,9 +78,6 @@ public class Top3ResultTableCollector {
 		}
 
 		for (Task t : csvChunks) {
-
-			// System.out.println(t.getKeyValueMap().get("kendallsTau"));
-			// System.out.println("----");
 			List<Double[]> benchmarkRanking = Stream.of(t.getKeyValueMap().get("benchmarkRanking").split("\\],\\["))
 					.map(x -> {
 						String[] values = x.split(",");
@@ -98,10 +108,6 @@ public class Top3ResultTableCollector {
 						}
 						return result;
 					}).collect(Collectors.toList());
-
-			System.out.println(Arrays.toString(benchmarkRanking.get(0)));
-			System.out.println(Arrays.toString(mlplanRanking.get(0)));
-			System.out.println("---");
 
 			List<Double> accs = new ArrayList<>();
 
@@ -134,7 +140,6 @@ public class Top3ResultTableCollector {
 					if (found)
 						right++;
 				}
-				System.out.println(right);
 				accs.add(((double) right) / 3d);
 			}
 
@@ -166,9 +171,14 @@ public class Top3ResultTableCollector {
 			t.store("dataset", "\\multicolumn{1}{l}{" + t.getValueAsString("dataset") + "}");
 		}
 
+		Map<String, IKVFilter> filterConfig = new HashMap<>();
+		filterConfig.put("top3acc", inverseFilter);
+		filterConfig.put("top3acc_mean", inverseFilter);
+		csvChunks.applyFilter(filterConfig);
 		csvChunks.tTest("dataset", "benchmark", "top3acc", "Random", "ttest");
 		csvChunks.best("dataset", "benchmark", "top3acc_mean", "best");
 		csvChunks.sort(new TaskKeyComparator(new String[] { "benchmark", "dataset" }));
+		csvChunks.applyFilter(filterConfig);
 
 		for (
 

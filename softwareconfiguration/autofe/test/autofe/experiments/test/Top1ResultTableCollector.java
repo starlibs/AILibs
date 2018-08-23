@@ -99,10 +99,6 @@ public class Top1ResultTableCollector {
 						return result;
 					}).collect(Collectors.toList());
 
-			System.out.println(Arrays.toString(benchmarkRanking.get(0)));
-			System.out.println(Arrays.toString(mlplanRanking.get(0)));
-			System.out.println("---");
-
 			List<Double> diff = new ArrayList<>();
 
 			for (int i = 0; i < benchmarkRanking.size(); i++) {

@@ -26,12 +26,18 @@ public class ResultTableCollector {
 			"COCO", "COED");
 
 	public static void main(final String[] args) throws Exception {
-		IKVFilter filter = new IKVFilter() {
-
+		IKVFilter inverseFilter = new IKVFilter() {
 			@Override
 			public String filter(String value) {
-				// TODO Auto-generated method stub
-				return null;
+				String[] values = value.split(",");
+				String result = "";
+				for (int i = 0; i < values.length; i++) {
+
+					result += new Double((-1) * Double.parseDouble(values[i])).toString();
+					if (i != values.length - 1)
+						result += ",";
+				}
+				return result;
 			}
 		};
 
@@ -87,9 +93,6 @@ public class ResultTableCollector {
 						t.getValueAsString("dataset").substring(0, t.getValueAsString("dataset").lastIndexOf(".")));
 			}
 
-			// if (t.getValueAsString("dataset").startsWith("mnistr")) {
-			// t.store("dataset", "mnistrot");
-			// }
 			if (!datasets.contains(t.getValueAsString("dataset"))) {
 				datasets.add(t.getValueAsString("dataset"));
 			}
@@ -99,9 +102,14 @@ public class ResultTableCollector {
 			t.store("dataset", "\\multicolumn{1}{l}{" + t.getValueAsString("dataset") + "}");
 		}
 
+		Map<String, IKVFilter> filterConfig = new HashMap<>();
+		filterConfig.put("kendallsTau", inverseFilter);
+		filterConfig.put("kendallsTau_mean", inverseFilter);
+		csvChunks.applyFilter(filterConfig);
 		csvChunks.tTest("dataset", "benchmark", "kendallsTau", "Random", "ttest");
 		csvChunks.best("dataset", "benchmark", "kendallsTau_mean", "best");
 		csvChunks.sort(new TaskKeyComparator(new String[] { "benchmark", "dataset" }));
+		csvChunks.applyFilter(filterConfig);
 
 		for (Task t : csvChunks) {
 			t.store("entry",
