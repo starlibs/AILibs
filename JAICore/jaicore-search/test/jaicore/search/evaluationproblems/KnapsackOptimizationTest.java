@@ -24,9 +24,9 @@ public class KnapsackOptimizationTest {
 	private Map<String, Double> weights;
 	private Map<String, Double> values;
 	private Map<Set<String>, Double> bonusPoints;
-	
+
 	@Test
-	public void testKnapsackProblem() {
+	public void testKnapsackProblem() throws InterruptedException {
 		objects = new HashSet<String>();
 		for (int i = 0; i < 10; i++) {
 			objects.add(String.valueOf(i));
@@ -59,36 +59,27 @@ public class KnapsackOptimizationTest {
 		bonusCombination.add("2");
 		bonusPoints.put(bonusCombination, 25.0d);
 		KnapsackProblem knapsackProblem = new KnapsackProblem(objects, values, weights, bonusPoints, 165);
-		ORGraphSearch<KnapsackNode, String, Double> search = new ORGraphSearch<>(
-				knapsackProblem.getGraphGenerator(),
-				new RandomCompletionEvaluator<>(
-						new Random(123l),
-						3,
-						new IPathUnification<KnapsackNode>() {
+		ORGraphSearch<KnapsackNode, String, Double> search = new ORGraphSearch<>(knapsackProblem.getGraphGenerator(),
+				new RandomCompletionEvaluator<>(new Random(123l), 3, new IPathUnification<KnapsackNode>() {
 
-							@Override
-							public List<KnapsackNode> getSubsumingKnownPathCompletion(
-									Map<List<KnapsackNode>, List<KnapsackNode>> knownPathCompletions, List<KnapsackNode> path)
-									throws InterruptedException {
-								return null;
-							}
-						},
-						knapsackProblem.getSolutionEvaluator()
-				)
-		);
-		
+					@Override
+					public List<KnapsackNode> getSubsumingKnownPathCompletion(Map<List<KnapsackNode>, List<KnapsackNode>> knownPathCompletions, List<KnapsackNode> path) throws InterruptedException {
+						return null;
+					}
+				}, knapsackProblem.getSolutionEvaluator()));
+
 		SimpleGraphVisualizationWindow<Node<KnapsackNode, Double>> win = new SimpleGraphVisualizationWindow<>(search);
-		win.getPanel().setTooltipGenerator(n->n.getPoint().toString());
+		win.getPanel().setTooltipGenerator(n -> n.getPoint().toString());
 
 		KnapsackNode bestSolution = null;
 		double bestValue = 0.0d;
-		
-		while(search.hasNext()) {
+
+		while (search.hasNext()) {
 			List<KnapsackNode> solution = search.nextSolution();
 			if (solution != null) {
 				double value = getValueOfKnapsack(solution.get(solution.size() - 1));
 				if (value > bestValue) {
-					bestSolution = solution.get(solution.size() -1);
+					bestSolution = solution.get(solution.size() - 1);
 					bestValue = value;
 				}
 			} else {
@@ -106,18 +97,18 @@ public class KnapsackOptimizationTest {
 		System.out.println("Best knapsack has the value: " + bestValue);
 		assertEquals(bestPacking, "1111010000");
 	}
-	
+
 	private double getValueOfKnapsack(KnapsackNode knapsack) {
 		if (knapsack == null || knapsack.getPackedObjects() == null || knapsack.getPackedObjects().size() == 0) {
 			return 0.0d;
 		} else {
 			double value = 0.0d;
-			for (String object: knapsack.getPackedObjects()) {
+			for (String object : knapsack.getPackedObjects()) {
 				value += values.get(object);
 			}
 			for (Set<String> bonusCombination : bonusPoints.keySet()) {
 				boolean allContained = true;
-				for (String object : bonusCombination ) {
+				for (String object : bonusCombination) {
 					if (!knapsack.getPackedObjects().contains(object)) {
 						allContained = false;
 						break;
@@ -130,5 +121,5 @@ public class KnapsackOptimizationTest {
 			return value;
 		}
 	}
-	
+
 }
