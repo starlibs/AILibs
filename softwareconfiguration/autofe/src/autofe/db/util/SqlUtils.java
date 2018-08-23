@@ -117,14 +117,19 @@ public class SqlUtils {
 			List<String> selectedColumns = new ArrayList<>();
 
 			// Join attribute
-			selectedColumns
-					.add(String.format("%s.%s", escape(ar.getFromTableName()), escape(ar.getCommonAttributeName())));
+			if (i != path.length() - 1) {
+				selectedColumns.add(
+						String.format("%s.%s", escape(ar.getFromTableName()), escape(ar.getCommonAttributeName())));
+			}
 
 			// Join attribute for next join
 			if (i != path.length() - 1) {
 				Tuple<AbstractRelationship, AggregationFunction> nextPathElement = path.getPathElements().get(i + 1);
-				selectedColumns.add(String.format("%s.%s", escape(ar.getFromTableName()),
-						escape(nextPathElement.getT().getCommonAttributeName())));
+				String joinAttribute = String.format("%s.%s", escape(ar.getFromTableName()),
+						escape(nextPathElement.getT().getCommonAttributeName()));
+				if (!selectedColumns.contains(joinAttribute)) {
+					selectedColumns.add(joinAttribute);
+				}
 			}
 
 			if (ar instanceof BackwardRelationship) {
