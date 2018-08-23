@@ -133,6 +133,7 @@ public class Top1ResultTableCollector {
 			}
 			t.store("top1diff", ListHelper.implode(diff, ","));
 			t.store("top1diff_mean", StatisticsUtil.mean(diff));
+			t.store("top1diff_stddev", StatisticsUtil.standardDeviation(diff));
 
 			if (t.getValueAsString("dataset").contains(".")) {
 				t.store("dataset",
@@ -158,7 +159,8 @@ public class Top1ResultTableCollector {
 		for (
 
 		Task t : csvChunks) {
-			t.store("entry", ValueUtil.valueToString(t.getValueAsDouble("top1diff_mean"), 2));
+			t.store("entry", ValueUtil.valueToString(t.getValueAsDouble("top1diff_mean"), 2) + " \\begin{small}($\\pm$ "
+					+ ValueUtil.valueToString(t.getValueAsDouble("top1diff_stddev"), 2) + ")\\end{small}");
 
 			if (t.getValueAsBoolean("best")) {
 				t.store("entry", "\\textbf{" + t.getValueAsString("entry") + "}");

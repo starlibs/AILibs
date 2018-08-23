@@ -17,6 +17,7 @@ import jaicore.basic.chunks.Task;
 import jaicore.basic.chunks.TaskChunk;
 import jaicore.basic.chunks.TaskChunkUtil;
 import jaicore.basic.chunks.TaskKeyComparator;
+import jaicore.basic.kvstore.IKVFilter;
 import jaicore.basic.kvstore.KVStoreUtil;
 
 public class ResultTableCollector {
@@ -25,6 +26,15 @@ public class ResultTableCollector {
 			"COCO", "COED");
 
 	public static void main(final String[] args) throws Exception {
+		IKVFilter filter = new IKVFilter() {
+
+			@Override
+			public String filter(String value) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+		};
+
 		Map<String, String> commonFields = new HashMap<>();
 
 		TaskChunk<Task> csvChunks = new TaskChunk<>("chunkID=baselines");
@@ -70,6 +80,7 @@ public class ResultTableCollector {
 			}
 			t.store("kendallsTau", ListHelper.implode(testErrorRates, ","));
 			t.store("kendallsTau_mean", StatisticsUtil.mean(t.getValueAsDoubleList("kendallsTau", ",")));
+			t.store("kendallsTau_stddev", StatisticsUtil.standardDeviation(t.getValueAsDoubleList("kendallsTau", ",")));
 
 			if (t.getValueAsString("dataset").contains(".")) {
 				t.store("dataset",
@@ -93,7 +104,9 @@ public class ResultTableCollector {
 		csvChunks.sort(new TaskKeyComparator(new String[] { "benchmark", "dataset" }));
 
 		for (Task t : csvChunks) {
-			t.store("entry", ValueUtil.valueToString(t.getValueAsDouble("kendallsTau_mean"), 2));
+			t.store("entry",
+					ValueUtil.valueToString(t.getValueAsDouble("kendallsTau_mean"), 2) + " \\begin{small}($\\pm$ "
+							+ ValueUtil.valueToString(t.getValueAsDouble("kendallsTau_stddev"), 2) + ")\\end{small}");
 
 			if (t.getValueAsBoolean("best")) {
 				t.store("entry", "\\textbf{" + t.getValueAsString("entry") + "}");

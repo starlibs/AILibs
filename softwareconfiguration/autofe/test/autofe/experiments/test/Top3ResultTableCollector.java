@@ -147,6 +147,7 @@ public class Top3ResultTableCollector {
 			}
 			t.store("top3acc", ListHelper.implode(accs, ","));
 			t.store("top3acc_mean", StatisticsUtil.mean(accs));
+			t.store("top3acc_stddev", StatisticsUtil.standardDeviation(accs));
 
 			if (t.getValueAsString("dataset").contains(".")) {
 				t.store("dataset",
@@ -172,7 +173,8 @@ public class Top3ResultTableCollector {
 		for (
 
 		Task t : csvChunks) {
-			t.store("entry", ValueUtil.valueToString(t.getValueAsDouble("top3acc_mean"), 2));
+			t.store("entry", ValueUtil.valueToString(t.getValueAsDouble("top3acc_mean"), 2) + " \\begin{small}($\\pm$ "
+					+ ValueUtil.valueToString(t.getValueAsDouble("top3acc_stddev"), 2) + ")\\end{small}");
 
 			if (t.getValueAsBoolean("best")) {
 				t.store("entry", "\\textbf{" + t.getValueAsString("entry") + "}");
