@@ -34,7 +34,7 @@ public class SearchTest {
 
 	private static final String DATABASE_MODEL_FILE = "model/db/bankaccount_toy_database.json";
 
-	@Test
+	//@Test
 	public void testSearch() {
 		Database initialDatabase = DBUtils.deserializeFromFile(DATABASE_MODEL_FILE);
 		DatabaseGraphGenerator generator = new DatabaseGraphGenerator(initialDatabase);
@@ -64,14 +64,15 @@ public class SearchTest {
 		SuccessorGenerator<DatabaseNode, String> sg = generator.getSuccessorGenerator();
 		DatabaseNode node = new DatabaseNode();
 		Collection<NodeExpansionDescription<DatabaseNode, String>> successors = sg.generateSuccessors(node);
-		assertEquals(7, successors.size());
+		assertEquals(6, successors.size());
 
 		String descriptions = concatExpansionDescriptions(successors);
 
 		// Forward features
 		assertTrue(descriptions.contains("Forward: Balance"));
 		assertTrue(descriptions.contains("Forward: BankName"));
-		assertTrue(descriptions.contains("Forward: Credible"));
+		//Target
+		assertFalse(descriptions.contains("Forward: Credible"));
 		assertTrue(descriptions.contains("Forward: FirstName"));
 		assertTrue(descriptions.contains("Forward: TransactionCounter"));
 
@@ -91,8 +92,8 @@ public class SearchTest {
 		SuccessorGenerator<DatabaseNode, String> sg = generator.getSuccessorGenerator();
 
 		Table bankAccount = DBUtils.getTableByName("BankAccount", db);
-		Attribute credible = DBUtils.getAttributeByName("Credible", bankAccount);
-		ForwardFeature ff = new ForwardFeature(credible);
+		Attribute bankName = DBUtils.getAttributeByName("BankName", bankAccount);
+		ForwardFeature ff = new ForwardFeature(bankName);
 
 		DatabaseNode node = new DatabaseNode(Collections.singletonList(ff), false);
 		Collection<NodeExpansionDescription<DatabaseNode, String>> successors = sg.generateSuccessors(node);
@@ -103,6 +104,7 @@ public class SearchTest {
 		// Forward features
 		assertFalse(descriptions.contains("Forward: Balance"));
 		assertFalse(descriptions.contains("Forward: BankName"));
+		//Target 
 		assertFalse(descriptions.contains("Forward: Credible"));
 		assertTrue(descriptions.contains("Forward: FirstName"));
 		assertTrue(descriptions.contains("Forward: TransactionCounter"));
@@ -133,14 +135,15 @@ public class SearchTest {
 
 		DatabaseNode node = new DatabaseNode(Collections.singletonList(bf), false);
 		Collection<NodeExpansionDescription<DatabaseNode, String>> successors = sg.generateSuccessors(node);
-		assertEquals(7, successors.size());
+		assertEquals(6, successors.size());
 
 		String descriptions = concatExpansionDescriptions(successors);
 
 		// Forward features
 		assertTrue(descriptions.contains("Forward: Balance"));
 		assertTrue(descriptions.contains("Forward: BankName"));
-		assertTrue(descriptions.contains("Forward: Credible"));
+		//Target
+		assertFalse(descriptions.contains("Forward: Credible"));
 		assertTrue(descriptions.contains("Forward: FirstName"));
 		assertTrue(descriptions.contains("Forward: TransactionCounter"));
 
@@ -320,14 +323,15 @@ public class SearchTest {
 		DatabaseNode node = new DatabaseNode(features, false);
 
 		Collection<NodeExpansionDescription<DatabaseNode, String>> successors = sg.generateSuccessors(node);
-		assertEquals(6, successors.size());
+		assertEquals(5, successors.size());
 
 		String descriptions = concatExpansionDescriptions(successors);
 
 		// Forward features
 		assertTrue(descriptions.contains("Forward: Balance"));
 		assertTrue(descriptions.contains("Forward: BankName"));
-		assertTrue(descriptions.contains("Forward: Credible"));
+		//Target
+		assertFalse(descriptions.contains("Forward: Credible"));
 		assertTrue(descriptions.contains("Forward: FirstName"));
 		assertTrue(descriptions.contains("Forward: TransactionCounter"));
 
