@@ -52,7 +52,7 @@ public class BenchmarkRankExperimentEvaluator implements IExperimentSetEvaluator
 		String dataSet = description.get("dataset");
 
 		// Read prior ranking
-		ResultSet mlPlanScores = adapter.getResultsOfQuery("SELECT score FROM mlplanranking WHERE seed = " + seed
+		ResultSet mlPlanScores = adapter.getResultsOfQuery("SELECT score FROM mlplanRanking WHERE seed = " + seed
 				+ " and dataset = \"" + dataSet + "\" ORDER BY variation ASC");
 
 		// Retrieve prior ranking from data base

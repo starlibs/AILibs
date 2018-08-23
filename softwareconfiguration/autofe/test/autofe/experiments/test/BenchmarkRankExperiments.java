@@ -1,6 +1,5 @@
 package autofe.experiments.test;
 
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,8 +9,9 @@ import jaicore.experiments.ExperimentRunner;
 public class BenchmarkRankExperiments {
 	private static final Logger logger = LoggerFactory.getLogger(BenchmarkRankExperiments.class);
 
-	@Test
-	public void executeMLPlanRankExperiments() {
+	// @Test
+	// public void executeMLPlanRankExperiments() {
+	public static void main(String[] args) {
 
 		logger.info("Starting benchmark ranking experiments.");
 

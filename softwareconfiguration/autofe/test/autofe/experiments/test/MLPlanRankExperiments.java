@@ -1,6 +1,5 @@
 package autofe.experiments.test;
 
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,8 +9,9 @@ import jaicore.experiments.ExperimentRunner;
 public class MLPlanRankExperiments {
 	private static final Logger logger = LoggerFactory.getLogger(MLPlanRankExperiments.class);
 
-	@Test
+	// @Test
 	public void executeMLPlanRankExperiments() {
+		// public static void main(String[] args) {
 
 		logger.info("Starting MLPLan data set generation and ranking experiments.");
 
