@@ -166,11 +166,11 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 				}
 				if (taskId >= 0)
 					timeoutSubmitter.cancelTimeout(taskId);
-				
+
 				/* register time required to compute this node label */
 				long fTime = System.currentTimeMillis() - startComputation;
 				newNode.setAnnotation("fTime", fTime);
-				
+
 				/* if no label was computed, prune the node and cancel the computation */
 				if (label == null) {
 					if (!computationTimedout)
@@ -369,7 +369,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 		}
 	}
 
-	public List<T> nextSolutionThatDominatesOpen() {
+	public List<T> nextSolutionThatDominatesOpen() throws InterruptedException {
 		List<T> currentlyBestSolution = null;
 		V currentlyBestScore = null;
 		do {
@@ -379,11 +379,10 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 				currentlyBestScore = scoreOfSolution;
 				currentlyBestSolution = solution;
 			}
-		}
-		while(open.peek().getInternalLabel().compareTo(currentlyBestScore) < 0);
+		} while (open.peek().getInternalLabel().compareTo(currentlyBestScore) < 0);
 		return currentlyBestSolution;
 	}
-	
+
 	/**
 	 * Find the shortest path to a goal starting from <code>start</code>.
 	 *
@@ -391,7 +390,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	 *            The initial node.
 	 * @return A list of nodes from the initial point to a goal, <code>null</code> if a path doesn't exist.
 	 */
-	public List<T> nextSolution() {
+	public List<T> nextSolution() throws InterruptedException {
 
 		/* check whether solution has been canceled */
 		if (canceled) {
@@ -421,7 +420,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 				} catch (InterruptedException e) {
 					logger.info("Received interrupt signal");
 					interrupted = true;
-					break;
+					throw e;
 				}
 			}
 			if (open.isEmpty() || interrupted) {
@@ -439,8 +438,10 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 			}
 			logger.debug("Iteration of main loop terminated. Size of OPEN now {}. Number of active jobs: {}", open.size(), activeJobs.get());
 		} while ((!open.isEmpty() || activeJobs.get() > 0) && !interrupted);
-		if (interrupted)
+		if (interrupted) {
 			logger.info("Algorithm was interrupted");
+			throw new InterruptedException();
+		}
 		if (open.isEmpty())
 			logger.info("OPEN is empty, terminating (possibly returning a solution)");
 		return solutions.isEmpty() ? null : solutions.poll();
@@ -550,13 +551,13 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 			}
 			logger.debug("Finished computation of successors");
 		}
-		
+
 		/* send event that successor nodes have been computed */
 		logger.debug("Sending SuccessorComputationCompletedEvent with {} successors for {}", successorDescriptions.size(), expandedNodeInternal);
 		graphEventBus.post(new SuccessorComputationCompletedEvent<>(expandedNodeInternal, successorDescriptions));
-		
+
 		/* attach successors to search graph */
-//		System.out.println(expanded.contains(expandedNodeInternal.getPoint()));
+		// System.out.println(expanded.contains(expandedNodeInternal.getPoint()));
 		if (additionalThreadsForExpansion < 1) {
 			successorDescriptions.stream().forEach(successorDescription -> {
 
@@ -696,7 +697,8 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	}
 
 	protected synchronized Node<T, V> newNode(Node<T, V> parent, T t2, V evaluation) {
-		assert parent == null || expanded.contains(parent.getPoint()) : "Generating successors of an unexpanded node " + parent + ". List of expanded nodes:\n" + expanded.stream().map(n -> "\n\t" + n.toString()).collect(Collectors.joining());
+		assert parent == null || expanded.contains(parent.getPoint()) : "Generating successors of an unexpanded node " + parent + ". List of expanded nodes:\n"
+				+ expanded.stream().map(n -> "\n\t" + n.toString()).collect(Collectors.joining());
 		assert !open.contains(parent) : "Parent node " + parent + " is still on OPEN, which must not be the case!";
 
 		/* create new node and check whether it is a goal */
@@ -705,11 +707,13 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 			newNode.setInternalLabel(evaluation);
 
 		/* check loop */
-		assert parent == null || !parent.externalPath().contains(t2) : "There is a loop in the underlying graph. The following path contains the last node twice: " + newNode.externalPath().stream().map(n -> n.toString()).reduce("", (s,t) -> s + "\n\t\t" + t);
-		
+		assert parent == null || !parent.externalPath().contains(t2) : "There is a loop in the underlying graph. The following path contains the last node twice: "
+				+ newNode.externalPath().stream().map(n -> n.toString()).reduce("", (s, t) -> s + "\n\t\t" + t);
+
 		/* currently, we only support tree search */
-		assert !ext2int.containsKey(t2) : "Reached node " + t2 + " for the second time.\nt\tFirst path:" + ext2int.get(t2).externalPath().stream().map(n -> n.toString()).reduce("", (s,t) -> s + "\n\t\t" + t)
-				+ "\n\tSecond Path:" + newNode.externalPath().stream().map(n -> n.toString()).reduce("", (s,t) -> s + "\n\t\t" + t);
+		assert !ext2int.containsKey(t2) : "Reached node " + t2 + " for the second time.\nt\tFirst path:"
+				+ ext2int.get(t2).externalPath().stream().map(n -> n.toString()).reduce("", (s, t) -> s + "\n\t\t" + t) + "\n\tSecond Path:"
+				+ newNode.externalPath().stream().map(n -> n.toString()).reduce("", (s, t) -> s + "\n\t\t" + t);
 
 		/* register node in map and create annotation object */
 		ext2int.put(t2, newNode);
@@ -729,8 +733,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	}
 
 	/**
-	 * This method can be used to create an initial graph different from just root nodes. This can be interesting if the search is distributed and we want to search only an excerpt of the original
-	 * one.
+	 * This method can be used to create an initial graph different from just root nodes. This can be interesting if the search is distributed and we want to search only an excerpt of the original one.
 	 *
 	 * @param initialNodes
 	 */

@@ -1,6 +1,12 @@
 package jaicore.search.evaluationproblems;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import jaicore.search.algorithms.interfaces.ISolutionEvaluator;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
@@ -11,19 +17,19 @@ import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SingleSuccessorGenerator;
 
 public class KnapsackProblem {
-	
+
 	public class KnapsackNode {
-		
+
 		private List<String> packedObjects;
 		private Set<String> remainingObjects;
 		private double usedCapacity;
-		
+
 		public KnapsackNode() {
 			this.remainingObjects = new HashSet<>(objects);
 			this.packedObjects = new LinkedList<>();
 			this.usedCapacity = 0.0d;
 		}
-		
+
 		public KnapsackNode(List<String> packedObjects, Set<String> remainingObjects, String newObject) {
 			this.remainingObjects = new HashSet<>(remainingObjects);
 			this.remainingObjects.remove(newObject);
@@ -36,11 +42,11 @@ public class KnapsackProblem {
 			this.packedObjects.add(newObject);
 			this.usedCapacity += weights.get(newObject);
 		}
-		
+
 		public List<String> getPackedObjects() {
 			return this.packedObjects;
 		}
-		
+
 		public double getUsedCapacity() {
 			return this.usedCapacity;
 		}
@@ -95,7 +101,7 @@ public class KnapsackProblem {
 			while (it.hasNext()) {
 				s += it.next();
 				if (it.hasNext()) {
-					s+= ", ";
+					s += ", ";
 				}
 			}
 			s += "]-<" + usedCapacity + "/" + KnapsackProblem.this.knapsackCapacity + ">";
@@ -107,13 +113,13 @@ public class KnapsackProblem {
 		}
 
 	}
-	
+
 	private Set<String> objects;
 	private Map<String, Double> values;
 	private Map<String, Double> weights;
 	private Map<Set<String>, Double> bonusPoints;
 	private double knapsackCapacity;
-	
+
 	public KnapsackProblem(Set<String> objects, Map<String, Double> values, Map<String, Double> weights, Map<Set<String>, Double> bonusPoints, double knapsackCapacity) {
 		this.objects = objects;
 		this.values = values;
@@ -135,12 +141,12 @@ public class KnapsackProblem {
 			public SingleRootGenerator<KnapsackNode> getRootGenerator() {
 				return () -> new KnapsackNode();
 			}
-			
+
 			@Override
 			public SingleSuccessorGenerator<KnapsackNode, String> getSuccessorGenerator() {
-				
+
 				return new SingleSuccessorGenerator<KnapsackNode, String>() {
-					
+
 					private List<String> getPossiblePackingObjects(KnapsackNode n) {
 						List<String> possibleObjects = new ArrayList<>();
 						for (String object : n.getRemainingObjects()) {
@@ -150,10 +156,9 @@ public class KnapsackProblem {
 						}
 						return possibleObjects;
 					}
-					
+
 					@Override
-					public List<NodeExpansionDescription<KnapsackNode, String>> generateSuccessors(
-							KnapsackNode node) {
+					public List<NodeExpansionDescription<KnapsackNode, String>> generateSuccessors(KnapsackNode node) {
 						List<NodeExpansionDescription<KnapsackNode, String>> l = new ArrayList<>();
 						List<String> possibleDestinations = getPossiblePackingObjects(node);
 						int N = possibleDestinations.size();
@@ -162,18 +167,15 @@ public class KnapsackProblem {
 						return l;
 					}
 
-					public NodeExpansionDescription<KnapsackNode, String> generateSuccessor(KnapsackNode n, List<String> objetcs,
-							int i) {
+					public NodeExpansionDescription<KnapsackNode, String> generateSuccessor(KnapsackNode n, List<String> objetcs, int i) {
 						int N = objetcs.size();
 						String object = objetcs.get(i % N);
 						KnapsackNode newNode = new KnapsackNode(n.getPackedObjects(), n.getRemainingObjects(), object);
-						return new NodeExpansionDescription<KnapsackNode, String>(n, newNode,
-								"(" + n.getPackedObjects().toString() + ", " + object + ")", NodeType.OR);
+						return new NodeExpansionDescription<KnapsackNode, String>(n, newNode, "(" + n.getPackedObjects().toString() + ", " + object + ")", NodeType.OR);
 					}
 
 					@Override
-					public NodeExpansionDescription<KnapsackNode, String> generateSuccessor(KnapsackNode node,
-							int i) {
+					public NodeExpansionDescription<KnapsackNode, String> generateSuccessor(KnapsackNode node, int i) {
 						return generateSuccessor(node, getPossiblePackingObjects(node), i);
 					}
 				};
@@ -183,7 +185,7 @@ public class KnapsackProblem {
 			public NodeGoalTester<KnapsackNode> getGoalTester() {
 				return n -> {
 					for (String object : objects) {
-						if(!n.getPackedObjects().contains(object)) {
+						if (!n.getPackedObjects().contains(object)) {
 							if (n.getUsedCapacity() + weights.get(object) <= knapsackCapacity) {
 								return false;
 							}
@@ -203,7 +205,7 @@ public class KnapsackProblem {
 			}
 		};
 	}
-	
+
 	public ISolutionEvaluator<KnapsackNode, Double> getSolutionEvaluator() {
 		return new ISolutionEvaluator<KnapsackProblem.KnapsackNode, Double>() {
 
@@ -219,7 +221,7 @@ public class KnapsackProblem {
 					}
 					for (Set<String> bonusCombination : bonusPoints.keySet()) {
 						boolean allContained = true;
-						for (String object : bonusCombination ) {
+						for (String object : bonusCombination) {
 							if (!packedKnapsack.getPackedObjects().contains(object)) {
 								allContained = false;
 								break;
@@ -239,5 +241,5 @@ public class KnapsackProblem {
 			}
 		};
 	}
-	
+
 }
