@@ -19,7 +19,6 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import jaicore.graph.IControllableGraphAlgorithm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +49,7 @@ import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 public class ORGraphSearch<T, A, V extends Comparable<V>>
-		implements IObservableORGraphSearch<T, A, V>, IIterableAlgorithm<List<NodeExpansionDescription<T, A>>>, Iterator<List<NodeExpansionDescription<T, A>>>, ILoggingCustomizable, IControllableGraphAlgorithm<T,A> {
+		implements IObservableORGraphSearch<T, A, V>, IIterableAlgorithm<List<NodeExpansionDescription<T, A>>>, Iterator<List<NodeExpansionDescription<T, A>>>, ILoggingCustomizable {
 
 	private Logger logger = LoggerFactory.getLogger(ORGraphSearch.class);
 
@@ -335,7 +334,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	/**
 	 * This method setups the graph by inserting the root nodes.
 	 */
-	public synchronized void initGraph() throws Throwable {
+	protected synchronized void initGraph() throws Throwable {
 		if (!initialized) {
 			initialized = true;
 			if (rootGenerator instanceof MultipleRootGenerator) {
@@ -464,8 +463,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 		return lastExpansion;
 	}
 
-//	protected void step() {
-    public void step(){
+	protected void step() {
 		if (beforeSelection()) {
 
 			Node<T, V> nodeToExpand = open.peek();

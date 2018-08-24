@@ -76,7 +76,7 @@ public class ControlSearchTesterNew {
 
 
 		win.addDataSupplier(tooltipSupplier);
-		bf.nextSolution();
+//		bf.nextSolution();
 
 
 		while(true);

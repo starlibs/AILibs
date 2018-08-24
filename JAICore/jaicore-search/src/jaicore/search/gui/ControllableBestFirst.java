@@ -56,4 +56,14 @@ public class ControllableBestFirst<T,A> extends BestFirst<T, A> implements ICont
 	public void step() {
 		super.step();
 	}
+
+	@Override
+	public void initGraph() throws Throwable {
+		super.initGraph();
+	}
+
+	@Override
+	public void step(Object node) {
+		super.step((Node<T, Double>) node);
+	}
 }

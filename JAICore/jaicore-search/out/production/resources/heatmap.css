@@ -5,7 +5,7 @@ edge {
 node {
 	size-mode: fit;
 	fill-mode: dyn-plain;
-	fill-color: red, blue;
+	fill-color: yellow,red, blue;
 	padding: 5px;
 }
 

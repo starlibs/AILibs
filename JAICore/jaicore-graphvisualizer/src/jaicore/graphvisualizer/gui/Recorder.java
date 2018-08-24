@@ -4,6 +4,7 @@ package jaicore.graphvisualizer.gui;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import jaicore.graph.IControllableGraphAlgorithm;
+import jaicore.graph.IObservableGraphAlgorithm;
 import jaicore.graphvisualizer.events.controlEvents.*;
 import jaicore.graphvisualizer.events.graphEvents.*;
 import jaicore.graphvisualizer.events.misc.AddSupplierEvent;
@@ -27,7 +28,7 @@ import java.util.Map;
 public class Recorder {
 
 //    Algorithm to listen to
-    private IControllableGraphAlgorithm algorithm;
+    private IObservableGraphAlgorithm algorithm;
 
 //    List for storing the events
     private List<Object> receivedEvents;
@@ -154,14 +155,16 @@ public class Recorder {
      */
     private void forward(int steps){
         if(this.index  == this.receivedEvents.size())
-            if(this.index == 0)
-                try {
-                    this.algorithm.initGraph();
-                } catch (Throwable throwable){
-                    throwable.printStackTrace();
-                }
-            else
-                this.algorithm.step();
+            if(this.algorithm instanceof IControllableGraphAlgorithm) {
+                if (this.index == 0)
+                    try {
+                        ((IControllableGraphAlgorithm) this.algorithm).initGraph();
+                    } catch (Throwable throwable) {
+                        throwable.printStackTrace();
+                    }
+                else
+                    ((IControllableGraphAlgorithm) this.algorithm).step();
+            }
         while(steps != 0) {
             if (this.index < this.receivedEvents.size()) {
                 Object event = this.receivedEvents.get(index);
@@ -295,5 +298,18 @@ public class Recorder {
     public void getSupplier() {
         for(ISupplier s : supplier)
             this.infoBus.post(new AddSupplierEventNew(s));
+    }
+
+    /**
+     * Receive a nodePushedEvent and expand the node, does not matter where the search currently is
+     */
+    @Subscribe
+    public void receiveNodePushedEvent(NodePushed event){
+        if(this.index == this.receivedEvents.size()) {
+            Object node = event.getNode();
+            if (this.algorithm instanceof IControllableGraphAlgorithm) {
+                ((IControllableGraphAlgorithm) this.algorithm).step(node);
+            }
+        }
     }
 }
