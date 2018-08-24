@@ -23,9 +23,8 @@ import jaicore.search.structure.graphgenerator.GoalTester;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
-import meka.core.A;
 
-public abstract class ANDORGraphSearch<T, A, V extends Comparable<V>> implements IObservableGraphAlgorithm<T,A> {
+public abstract class ANDORGraphSearch<T, A, V extends Comparable<V>> implements IObservableGraphAlgorithm<T, A> {
 
 	/* meta vars for controlling the general behavior */
 	private int expandedCounter;
@@ -56,11 +55,11 @@ public abstract class ANDORGraphSearch<T, A, V extends Comparable<V>> implements
 
 	abstract protected int getNumberOfOpenNodesInSolutionBase(Graph<Node<T, V>> solutionBase);
 
-	public ANDORGraphSearch(SingleRootGenerator<T> rootGenerator, SuccessorGenerator<T, A> successorGenerator, GoalTester<T> goalTester) {
+	public ANDORGraphSearch(final SingleRootGenerator<T> rootGenerator, final SuccessorGenerator<T, A> successorGenerator, final GoalTester<T> goalTester) {
 		super();
 		this.rootGenerator = rootGenerator;
 		this.successorGenerator = successorGenerator;
-		this.goalTester = (NodeGoalTester<T>)goalTester;
+		this.goalTester = (NodeGoalTester<T>) goalTester;
 	}
 
 	/**
@@ -73,62 +72,63 @@ public abstract class ANDORGraphSearch<T, A, V extends Comparable<V>> implements
 	public LabeledGraph<T, A> getSolution() {
 
 		/* create initial node */
-		if (!initialized) {
-			initialized = true;
-			root = initialize();
-			this.eventBus.post(new GraphInitializedEvent<T>(root.getPoint()));
+		if (!this.initialized) {
+			this.initialized = true;
+			this.root = this.initialize();
+			this.eventBus.post(new GraphInitializedEvent<T>(this.root.getPoint()));
 		}
 
 		/* run actual algorithm */
-		Graph<Node<T, V>> solutionBase = nextSolutionBase();
-		Node<T, V> nodeToExpandNext = nextNode(solutionBase);
-		while (nodeToExpandNext != null && !interrupted && !Thread.interrupted()) {
+		Graph<Node<T, V>> solutionBase = this.nextSolutionBase();
+		Node<T, V> nodeToExpandNext = this.nextNode(solutionBase);
+		while (nodeToExpandNext != null && !this.interrupted && !Thread.interrupted()) {
 
-			simpleSolvedLabeling(root);
-			for (Node<T, V> solvedNode : solvedNodes) {
-				eventBus.post(new NodeTypeSwitchEvent<T>(solvedNode.getPoint(), (solvedNode instanceof AndNode ? "and" : "or") + "_solution"));
+			this.simpleSolvedLabeling(this.root);
+			for (Node<T, V> solvedNode : this.solvedNodes) {
+				this.eventBus.post(new NodeTypeSwitchEvent<T>(solvedNode.getPoint(), (solvedNode instanceof AndNode ? "and" : "or") + "_solution"));
 			}
 
 			/* now return a solution if we found one; this can actually be done before */
-			if (solvedNodes.contains(root)) {
-				return getBestSolutionGraph();
+			if (this.solvedNodes.contains(this.root)) {
+				return this.getBestSolutionGraph();
 			}
-			
+
 			/* acquire next node to expand */
-			expandNode(nodeToExpandNext);
+			this.expandNode(nodeToExpandNext);
 
 			/* jump to next one */
-			solutionBase = nextSolutionBase();
-			nodeToExpandNext = nextNode(solutionBase);
+			solutionBase = this.nextSolutionBase();
+			nodeToExpandNext = this.nextNode(solutionBase);
 		}
 		return null;
 	}
 
-	protected void expandNode(Node<T, V> nodeToExpand) {
+	protected void expandNode(final Node<T, V> nodeToExpand) {
 
 		/* perform expand step */
 		T externalRepresentation = nodeToExpand.getPoint();
-		eventBus.post(new NodeTypeSwitchEvent<T>(externalRepresentation, "expanding"));
-		Set<Node<T, V>> knownNodes = new HashSet<>(traversalGraph.getItems());
+		this.eventBus.post(new NodeTypeSwitchEvent<T>(externalRepresentation, "expanding"));
+		Set<Node<T, V>> knownNodes = new HashSet<>(this.traversalGraph.getItems());
 		PerformanceLogger.logStart("successor node computation");
-		Collection<Node<T, V>> insertedChildren = expand(nodeToExpand);
+		Collection<Node<T, V>> insertedChildren = this.expand(nodeToExpand);
 		PerformanceLogger.logEnd("successor node computation");
 		PerformanceLogger.logStart("successor node labeling");
 		for (Node<T, V> successor : insertedChildren) {
 			String state = knownNodes.contains(successor) ? "closed" : "open";
-			eventBus.post(new NodeReachedEvent<T>(nodeToExpand.getPoint(), successor.getPoint(), (successor instanceof AndNode ? "and" : "or") + "_" + state));
-			exhaustiveSolvedLabeling(successor);
+			this.eventBus.post(new NodeReachedEvent<T>(nodeToExpand.getPoint(), successor.getPoint(), (successor instanceof AndNode ? "and" : "or") + "_" + state));
+			this.exhaustiveSolvedLabeling(successor);
 		}
 		PerformanceLogger.logEnd("successor node labeling");
 
 		/* if this was a dead end, then add the node to the exhausted ones (relevant for efficient solved labeling) */
 		if (insertedChildren.isEmpty()) {
-			recursivelyExhaustedNodes.add(nodeToExpand);
+			this.recursivelyExhaustedNodes.add(nodeToExpand);
 		}
 
-		expandedCounter++;
-		if (!solvedNodes.contains(nodeToExpand))
-			eventBus.post(new NodeTypeSwitchEvent<T>(externalRepresentation, (nodeToExpand instanceof AndNode ? "and" : "or") + "_closed"));
+		this.expandedCounter++;
+		if (!this.solvedNodes.contains(nodeToExpand)) {
+			this.eventBus.post(new NodeTypeSwitchEvent<T>(externalRepresentation, (nodeToExpand instanceof AndNode ? "and" : "or") + "_closed"));
+		}
 	}
 
 	/**
@@ -137,17 +137,18 @@ public abstract class ANDORGraphSearch<T, A, V extends Comparable<V>> implements
 	 * @return A counter of how many times a node was expanded.
 	 */
 	public int getExpandedCounter() {
-		return expandedCounter;
+		return this.expandedCounter;
 	}
 
 	public int getCreatedCounter() {
-		return traversalGraph.getItems().size();
+		return this.traversalGraph.getItems().size();
 	}
 
 	public int getEdgesCounter() {
 		int numEdges = 0;
-		for (Node<T, V> node : traversalGraph.getItems())
-			numEdges += traversalGraph.getSuccessors(node).size();
+		for (Node<T, V> node : this.traversalGraph.getItems()) {
+			numEdges += this.traversalGraph.getSuccessors(node).size();
+		}
 		return numEdges;
 	}
 
@@ -155,70 +156,72 @@ public abstract class ANDORGraphSearch<T, A, V extends Comparable<V>> implements
 		this.interrupted = true;
 	}
 
-	protected OrNode<T, V> getOrNode(Node<T, V> parent, T ext, A edgeLabel) {
-		if (!ext2int.containsKey(ext)) {
+	protected OrNode<T, V> getOrNode(final Node<T, V> parent, final T ext, final A edgeLabel) {
+		if (!this.ext2int.containsKey(ext)) {
 			OrNode<T, V> n = new OrNode<>(null, ext);
-			ext2int.put(ext, n);
-			traversalGraph.addItem(n);
+			this.ext2int.put(ext, n);
+			this.traversalGraph.addItem(n);
 		}
-		OrNode<T, V> n = (OrNode<T, V>) ext2int.get(ext);
+		OrNode<T, V> n = (OrNode<T, V>) this.ext2int.get(ext);
 		if (parent != null) {
-			if (edgeLabel == null)
+			if (edgeLabel == null) {
 				throw new IllegalArgumentException("Edge label must not be null!");
-			traversalGraph.addEdge(parent, n, edgeLabel);
+			}
+			this.traversalGraph.addEdge(parent, n, edgeLabel);
 		}
 		return n;
 	}
 
-	protected AndNode<T, V> getAndNode(Node<T, V> parent, T ext, A edgeLabel) {
-		if (!ext2int.containsKey(ext)) {
+	protected AndNode<T, V> getAndNode(final Node<T, V> parent, final T ext, final A edgeLabel) {
+		if (!this.ext2int.containsKey(ext)) {
 			AndNode<T, V> n = new AndNode<>(null, ext);
-			ext2int.put(ext, n);
-			traversalGraph.addItem(n);
+			this.ext2int.put(ext, n);
+			this.traversalGraph.addItem(n);
 		}
-		AndNode<T, V> n = (AndNode<T, V>) ext2int.get(ext);
+		AndNode<T, V> n = (AndNode<T, V>) this.ext2int.get(ext);
 		if (parent != null) {
-			if (edgeLabel == null)
+			if (edgeLabel == null) {
 				throw new IllegalArgumentException("Edge label must not be null!");
-			traversalGraph.addEdge(parent, n, edgeLabel);
+			}
+			this.traversalGraph.addEdge(parent, n, edgeLabel);
 		}
 		return n;
 	}
 
 	public GraphEventBus<Node<T, V>> getEventBus() {
-		return eventBus;
+		return this.eventBus;
 	}
 
-	protected void bottom2topLabeling(Node<T, V> n) {
-		boolean solution = simpleSolvedLabeling(n);
+	protected void bottom2topLabeling(final Node<T, V> n) {
+		boolean solution = this.simpleSolvedLabeling(n);
 		if (solution) {
-			Collection<Node<T, V>> parents = traversalGraph.getPredecessors(n);
+			Collection<Node<T, V>> parents = this.traversalGraph.getPredecessors(n);
 			for (Node<T, V> parent : parents) {
-				bottom2topLabeling(parent);
+				this.bottom2topLabeling(parent);
 			}
 		}
 	}
 
-	protected boolean simpleSolvedLabeling(Node<T, V> n) {
+	protected boolean simpleSolvedLabeling(final Node<T, V> n) {
 
 		/* if node is solved, announce this */
-		if (solvedNodes.contains(n)) {
+		if (this.solvedNodes.contains(n)) {
 			return true;
 		}
 
-		Collection<Node<T, V>> successors = traversalGraph.getSuccessors(n);
+		Collection<Node<T, V>> successors = this.traversalGraph.getSuccessors(n);
 		if (successors.isEmpty()) {
-			if (goalTester.isGoal(n.getPoint())) {
-				solvedNodes.add(n);
+			if (this.goalTester.isGoal(n.getPoint())) {
+				this.solvedNodes.add(n);
 				return true;
 			}
 			return false;
 		}
 
 		for (Node<T, V> successor : successors) {
-			if (simpleSolvedLabeling(successor)) {
+			if (this.simpleSolvedLabeling(successor)) {
 				if (n instanceof OrNode) {
-					solvedNodes.add(n);
+					this.solvedNodes.add(n);
 					return true;
 				}
 			} else if (n instanceof AndNode) {
@@ -230,72 +233,72 @@ public abstract class ANDORGraphSearch<T, A, V extends Comparable<V>> implements
 		if (n instanceof OrNode) {
 			return false;
 		} else {
-			solvedNodes.add(n);
+			this.solvedNodes.add(n);
 			return true;
 		}
 	}
 
-	protected boolean exhaustiveSolvedLabeling(Node<T, V> n) {
+	protected boolean exhaustiveSolvedLabeling(final Node<T, V> n) {
 
 		/* if node is solved, announce this */
-		if (solvedNodes.contains(n) && recursivelyExhaustedNodes.contains(n)) {
+		if (this.solvedNodes.contains(n) && this.recursivelyExhaustedNodes.contains(n)) {
 			return true;
 		}
 
 		/* if there is no successor, return true if the node is a goal and false otherwise (node may not have been expanded yet) */
-		Collection<Node<T, V>> successors = traversalGraph.getSuccessors(n);
+		Collection<Node<T, V>> successors = this.traversalGraph.getSuccessors(n);
 		if (successors.isEmpty()) {
-			if (goalTester.isGoal(n.getPoint())) {
-				solvedNodes.add(n);
-				recursivelyExhaustedNodes.add(n);
+			if (this.goalTester.isGoal(n.getPoint())) {
+				this.solvedNodes.add(n);
+				this.recursivelyExhaustedNodes.add(n);
 				return true;
 			}
 			return false;
 		}
 
 		/* compute solved state based on successors */
-		if (recursivelyExhaustedNodes.containsAll(successors)) {
-			recursivelyExhaustedNodes.add(n);
+		if (this.recursivelyExhaustedNodes.containsAll(successors)) {
+			this.recursivelyExhaustedNodes.add(n);
 		}
 		for (Node<T, V> successor : successors) {
-			boolean solution = exhaustiveSolvedLabeling(successor);
+			boolean solution = this.exhaustiveSolvedLabeling(successor);
 			if (solution) {
 				if (n instanceof OrNode) {
-					solvedNodes.add(n);
+					this.solvedNodes.add(n);
 				}
 			} else if (n instanceof AndNode) {
 				return false;
 			}
 		}
 		if (n instanceof OrNode) {
-			return solvedNodes.contains(n);
+			return this.solvedNodes.contains(n);
 		}
 
 		/* if this is an or-node, it has not been solved; if it is an and-node, it has been solved */
 		if (n instanceof OrNode) {
 			return false;
 		} else {
-			solvedNodes.add(n);
+			this.solvedNodes.add(n);
 			return true;
 		}
 	}
 
 	protected LabeledGraph<T, A> getBestSolutionGraph() {
-		LabeledGraph<T,A> g = new LabeledGraph<>();
-		g.addItem(root.getPoint());
+		LabeledGraph<T, A> g = new LabeledGraph<>();
+		g.addItem(this.root.getPoint());
 		Queue<Node<T, V>> open = new LinkedList<>();
-		open.add(root);
+		open.add(this.root);
 		while (!open.isEmpty()) {
 			Node<T, V> next = open.poll();
-			for (Node<T, V> succ : traversalGraph.getSuccessors(next)) {
+			for (Node<T, V> succ : this.traversalGraph.getSuccessors(next)) {
 				if (next instanceof AndNode) {
 					g.addItem(succ.getPoint());
-					g.addEdge(next.getPoint(), succ.getPoint(), traversalGraph.getEdgeLabel(next, succ));
+					g.addEdge(next.getPoint(), succ.getPoint(), this.traversalGraph.getEdgeLabel(next, succ));
 					open.add(succ);
 				} else if (next instanceof OrNode) {
-					if (solvedNodes.contains(succ)) {
+					if (this.solvedNodes.contains(succ)) {
 						g.addItem(succ.getPoint());
-						g.addEdge(next.getPoint(), succ.getPoint(), traversalGraph.getEdgeLabel(next, succ));
+						g.addEdge(next.getPoint(), succ.getPoint(), this.traversalGraph.getEdgeLabel(next, succ));
 						open.add(succ);
 						break;
 					}
@@ -306,10 +309,10 @@ public abstract class ANDORGraphSearch<T, A, V extends Comparable<V>> implements
 	}
 
 	public LabeledGraph<T, A> getExternalTraversalGraph() {
-		return getExternalGraph(traversalGraph);
+		return this.getExternalGraph(this.traversalGraph);
 	}
 
-	public LabeledGraph<T, A> getExternalGraph(LabeledGraph<Node<T, V>, A> internalGraph) {
+	public LabeledGraph<T, A> getExternalGraph(final LabeledGraph<Node<T, V>, A> internalGraph) {
 		LabeledGraph<T, A> graph = new LabeledGraph<>();
 		for (Node<T, V> n : internalGraph.getItems()) {
 			graph.addItem(n.getPoint());
@@ -322,7 +325,7 @@ public abstract class ANDORGraphSearch<T, A, V extends Comparable<V>> implements
 		return graph;
 	}
 
-	public Graph<T> getExternalGraph(Graph<Node<T, V>> internalGraph) {
+	public Graph<T> getExternalGraph(final Graph<Node<T, V>> internalGraph) {
 		Graph<T> graph = new Graph<>();
 		for (Node<T, V> n : internalGraph.getItems()) {
 			graph.addItem(n.getPoint());
@@ -403,16 +406,16 @@ public abstract class ANDORGraphSearch<T, A, V extends Comparable<V>> implements
 	// return solutions;
 	// }
 
-	public Collection<Node<T, V>> getPredecessors(Node<T, V> node) {
-		return traversalGraph.getPredecessors(node);
+	public Collection<Node<T, V>> getPredecessors(final Node<T, V> node) {
+		return this.traversalGraph.getPredecessors(node);
 	}
 
-	public Collection<Node<T, V>> getSuccessors(Node<T, V> node) {
-		return traversalGraph.getSuccessors(node);
+	public Collection<Node<T, V>> getSuccessors(final Node<T, V> node) {
+		return this.traversalGraph.getSuccessors(node);
 	}
 
 	@Override
-	public void registerListener(Object listener) {
+	public void registerListener(final Object listener) {
 		this.eventBus.register(listener);
 	}
 }
