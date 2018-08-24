@@ -75,9 +75,14 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 				Properties connectionProps = new Properties(this.connectionProperties);
 				connectionProps.put("user", this.user);
 				connectionProps.put("password", this.password);
+				String url = null;
+				if (host == null || host.isEmpty()) {
+					url = String.format("jdbc:%s:%s", this.driver, this.database);
+				} else {
+					url = String.format("jdbc:%s://%s/%s", this.driver, this.host, this.database);
+				}
 				this.connect = DriverManager.getConnection(
-						"jdbc:" + this.driver + "://" + this.host + "/" + this.database
-								+ ((this.ssl) ? "?verifyServerCertificate=false&requireSSL=true&useSSL=true" : ""),
+						url + ((this.ssl) ? "?verifyServerCertificate=false&requireSSL=true&useSSL=true" : ""),
 						connectionProps);
 				return;
 			} catch (SQLException e) {
