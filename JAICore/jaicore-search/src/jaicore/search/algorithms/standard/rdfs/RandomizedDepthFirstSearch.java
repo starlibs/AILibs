@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
+import jaicore.search.algorithms.standard.bestfirst.RandomizedDepthFirstEvaluator;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.graphgenerator.GoalTester;
@@ -64,7 +65,8 @@ public class RandomizedDepthFirstSearch<T, A> extends BestFirst<T, A> {
 				throw new UnsupportedOperationException("Not implemented");
 			}
 
-		}, n -> 0.0);
+		},
+		new RandomizedDepthFirstEvaluator<>(random));
 
 	}
 }
