@@ -261,6 +261,8 @@ public class FXCode implements NodeListener {
     }
 
     public void reset(){
+        if(this.playThread != null)
+            this.playThread.interrupt();
         this.updateIndex(0, true);
         this.visualization.reset();
         eventBus.post(new ResetEvent());

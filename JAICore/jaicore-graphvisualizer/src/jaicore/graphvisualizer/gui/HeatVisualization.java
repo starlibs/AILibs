@@ -75,4 +75,12 @@ public class HeatVisualization<T> extends GraphVisualization<T> {
         node.setAttribute("ui.color", color);
     }
 
+
+    @Override
+    public void reset() {
+        super.reset();
+        this.graph.clear();
+        this.graph.setAttribute("ui.stylesheet", "url('conf/heatmap.css')");
+    }
+
 }
