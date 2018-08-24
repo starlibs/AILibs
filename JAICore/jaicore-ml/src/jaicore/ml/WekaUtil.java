@@ -31,6 +31,7 @@ import com.google.common.collect.ContiguousSet;
 import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.Range;
 
+import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.ml.core.SimpleInstanceImpl;
 import jaicore.ml.core.SimpleInstancesImpl;
 import jaicore.ml.core.SimpleLabeledInstanceImpl;
@@ -39,6 +40,11 @@ import jaicore.ml.interfaces.LabeledInstance;
 import jaicore.ml.interfaces.LabeledInstances;
 import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
+import weka.attributeSelection.BestFirst;
+import weka.attributeSelection.CfsSubsetEval;
+import weka.attributeSelection.GainRatioAttributeEval;
+import weka.attributeSelection.InfoGainAttributeEval;
+import weka.attributeSelection.Ranker;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.trees.RandomForest;
@@ -52,6 +58,7 @@ import weka.core.OptionHandler;
 import weka.core.json.JSONInstances;
 import weka.core.json.JSONNode;
 import weka.filters.Filter;
+import weka.filters.supervised.attribute.AttributeSelection;
 import weka.filters.unsupervised.attribute.Remove;
 
 public class WekaUtil {
@@ -163,6 +170,36 @@ public class WekaUtil {
 		return classifiers;
 	}
 
+	/**
+	 *  Returns a List of all valid combinations of searchers and evaluators
+	 * 
+	 * @return a Pair&ltString, String> List where the first entry is the searcher and the second the evaluator.
+	 */
+	public static Collection<Pair<String, String>> getValidPreprocessorCombinations(){
+		Collection<Pair<String, String>> result = new LinkedList<>();
+		
+		for (String searcher : getSearchers()) {
+			for (String evaluator : getFeatureEvaluators()) {
+				
+				boolean isSetEvaluator = evaluator.toLowerCase().matches(
+						".*([^cfs]subseteval|relief|gainratio|principalcomponents|onerattributeeval|infogainattributeeval|correlationattributeeval|symmetricaluncertattributeeval).*");
+				boolean isNonRankerEvaluator = evaluator.toLowerCase().matches(".*(cfssubseteval).*");
+				
+				boolean isRanker = searcher.toLowerCase().contains("ranker");
+				
+				if (isSetEvaluator && !isRanker) {
+					continue;
+				}
+				if (isNonRankerEvaluator && isRanker) {
+					continue;
+				}
+				result.add(new Pair<String, String>(searcher, evaluator));
+			}
+		}
+		return result;
+	}
+	
+	
 	public static <L> Instances fromJAICoreInstances(final WekaCompatibleInstancesImpl instances) {
 
 		/* create basic attribute entries */

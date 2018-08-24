@@ -27,3 +27,6 @@ project(":mlplan").projectDir = new File(configPrefix,"mlplan")
 
 includeFlat 'JASE'
 project(":JASE").projectDir = new File(configPrefix, "../JASE")
+
+include 'defaultEval'
+project(":defaultEval").projectDir = new File(configPrefix,"defaultEval")
