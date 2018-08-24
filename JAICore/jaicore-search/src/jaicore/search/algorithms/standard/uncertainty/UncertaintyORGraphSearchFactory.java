@@ -1,5 +1,6 @@
 package jaicore.search.algorithms.standard.uncertainty;
 
+import java.util.PriorityQueue;
 import java.util.Random;
 
 import org.slf4j.Logger;
@@ -15,6 +16,7 @@ import jaicore.search.algorithms.standard.uncertainty.explorationexploitationsea
 import jaicore.search.algorithms.standard.uncertainty.explorationexploitationsearch.BasicExplorationCandidateSelector;
 import jaicore.search.algorithms.standard.uncertainty.explorationexploitationsearch.IPhaseLengthAdjuster;
 import jaicore.search.algorithms.standard.uncertainty.explorationexploitationsearch.UncertaintyExplorationOpenSelection;
+import jaicore.search.algorithms.standard.uncertainty.paretosearch.ParetoNode;
 import jaicore.search.algorithms.standard.uncertainty.paretosearch.ParetoSelection;
 import jaicore.search.structure.core.GraphGenerator;
 
@@ -22,15 +24,14 @@ public class UncertaintyORGraphSearchFactory <T, A, V extends Comparable<V>> imp
 
 	private static final Logger logger = LoggerFactory.getLogger(UncertaintyORGraphSearchFactory.class);
 
-	private OversearchAvoidanceConfig<T> oversearchAvoidanceConfig;
+	private OversearchAvoidanceConfig<T, V> oversearchAvoidanceConfig;
 	private IPathUnification<T> pathUnification;
 	private ISolutionEvaluator<T, V> solutionEvaluator;
 	private int timeoutForFInMS;
 	private INodeEvaluator<T, V> timeoutEvaluator;
 	private String loggerName;
-	private IUncertaintySource<T, V> uncertaintySource;
 	
-	public UncertaintyORGraphSearchFactory(OversearchAvoidanceConfig<T> oversearchAvoidanceConfig, IPathUnification<T> pathUnification) {
+	public UncertaintyORGraphSearchFactory(OversearchAvoidanceConfig<T, V> oversearchAvoidanceConfig, IPathUnification<T> pathUnification) {
 		this.oversearchAvoidanceConfig = oversearchAvoidanceConfig;
 		this.pathUnification = pathUnification;
 	}
@@ -41,16 +42,14 @@ public class UncertaintyORGraphSearchFactory <T, A, V extends Comparable<V>> imp
 		if (oversearchAvoidanceConfig.getOversearchAvoidanceMode() == OversearchAvoidanceConfig.OversearchAvoidanceMode.NONE) {
 			search = new ORGraphSearch<>(graphGenerator, nodeEvaluator);
 		} else {
-			if (uncertaintySource == null)
-				throw new IllegalArgumentException("Cannot create search as uncertainty source has not been set. Use the respective getter.");
-			search = new ORGraphSearch<T,A,V>(
+			search = new ORGraphSearch<>(
 					graphGenerator,
 					new UncertaintyRandomCompletionEvaluator<T, A, V>(
-						new Random(123l),
+						new Random(oversearchAvoidanceConfig.getSeed()),
 						oversearchAvoidanceConfig.getRandomSampleAmount(),
 						pathUnification,
 						this.solutionEvaluator,
-						uncertaintySource
+						oversearchAvoidanceConfig.getUncertaintySource()
 					)
 			);
 			
@@ -89,7 +88,8 @@ public class UncertaintyORGraphSearchFactory <T, A, V extends Comparable<V>> imp
 					));
 				}
 			} else {
-				new ParetoSelection<>(false);
+				PriorityQueue<ParetoNode<T, V>> pareto = new PriorityQueue<>(oversearchAvoidanceConfig.getParetoComperator());
+				search.setOpen(new ParetoSelection<>(pareto));
 			}
 		}
 		
@@ -127,10 +127,6 @@ public class UncertaintyORGraphSearchFactory <T, A, V extends Comparable<V>> imp
 	}
 
 	public IUncertaintySource<T, V> getUncertaintySource() {
-		return uncertaintySource;
-	}
-
-	public void setUncertaintySource(IUncertaintySource<T, V> uncertaintySource) {
-		this.uncertaintySource = uncertaintySource;
+		return oversearchAvoidanceConfig.getUncertaintySource();
 	}
 }
