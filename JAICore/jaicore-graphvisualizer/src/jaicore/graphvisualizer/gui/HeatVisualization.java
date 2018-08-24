@@ -29,29 +29,36 @@ public class HeatVisualization<T> extends GraphVisualization<T> {
 
     @Override
     protected synchronized Node newNode(final T newNodeExt) {
-        Node node = super.newNode(newNodeExt);
+        try {
+            Node node = super.newNode(newNodeExt);
 //        System.out.println("test");
 //        node.setAttribute("ui.style", "fill-color: #"+Integer.toHexString(random.nextInt(256*256*256))+";");
-        HeatValueSupplier s = (HeatValueSupplier) this.int2extNodeMap.get(node);
-        if(s.getInternalLabel() instanceof Number){
-            double fvalue =  ((Number) s.getInternalLabel()).doubleValue();
+            HeatValueSupplier s = (HeatValueSupplier) this.int2extNodeMap.get(node);
+            if (s.getInternalLabel() instanceof Number) {
+                double fvalue = ((Number) s.getInternalLabel()).doubleValue();
 
-            if(fvalue < bestFValue) {
-                bestFValue = fvalue;
-                update();
+                if (fvalue < bestFValue) {
+                    bestFValue = fvalue;
+                    update();
+                }
+                if (fvalue > worstFValue) {
+                    worstFValue = fvalue;
+                    update();
+                }
+                if (!roots.contains(newNodeExt)) {
+                    colorNode(node, fvalue);
+                    nodes.add(node);
+                }
             }
-            if(fvalue > worstFValue) {
-                worstFValue = fvalue;
-               update();
-            }
-            if(!roots.contains(newNodeExt)){
-                colorNode(node, fvalue);
-                nodes.add(node);
-            }
+
+            System.out.println("best: " + bestFValue + " worst: " + worstFValue);
+            return node;
         }
-
-        System.out.println("best: " + bestFValue + " worst: " + worstFValue);
-        return node;
+        catch(Exception e){
+            e.printStackTrace();
+            System.exit(0);
+            return null;
+        }
 
     }
 

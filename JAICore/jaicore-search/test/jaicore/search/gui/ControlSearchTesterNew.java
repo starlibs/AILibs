@@ -13,6 +13,7 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class ControlSearchTesterNew {
 
@@ -25,7 +26,7 @@ public class ControlSearchTesterNew {
 
 	@Test
 	public void test() {
-		
+		Random random = new Random(0);
 		GraphGenerator<TestNode, String> gen = new GraphGenerator<TestNode, String>() {
 
 			@Override
@@ -62,8 +63,8 @@ public class ControlSearchTesterNew {
 			
 		};
 		
-		ControllableBestFirst<TestNode,String> bf = new ControllableBestFirst<>(gen, n -> (double)Math.round(Math.random() * 1000));
-
+		//ControllableBestFirst<TestNode,String> bf = new ControllableBestFirst<>(gen, n -> (double)Math.round(Math.random() * 1000));
+		ControllableBestFirst<TestNode,String> bf = new ControllableBestFirst<>(gen, n -> random.nextDouble()*1000);
 		VisualizationWindow win = new VisualizationWindow(bf, "test");
 
 		TooltipSupplierNew tooltipSupplier = new TooltipSupplierNew();
