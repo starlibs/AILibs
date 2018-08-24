@@ -67,13 +67,10 @@
 		<level value="info" />
 	</logger>
 	
-<<<<<<< HEAD
 	<logger name="jaicore.search.algorithms.standard.core">
 		<level value="warn" />
 	</logger>
-	
-=======
->>>>>>> c350ab792a3a37a0c6ae7f914b830bd50c2ee0dd
+
 	<logger name="jaicore.search.algorithms.standard.mcts">
 		<level value="warn" />
 	</logger>

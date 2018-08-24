@@ -26,8 +26,8 @@ import jaicore.planning.model.task.stn.Method;
 import jaicore.planning.model.task.stn.STNPlanningProblem;
 import jaicore.search.algorithms.interfaces.IObservableORGraphSearch;
 import jaicore.search.algorithms.interfaces.IObservableORGraphSearchFactory;
-import jaicore.search.algorithms.standard.core.INodeEvaluator;
-import jaicore.search.algorithms.standard.core.ORGraphSearchFactory;
+import jaicore.search.algorithms.standard.bestfirst.BestFirstFactory;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.structure.core.GraphGenerator;
 
 /**
@@ -59,9 +59,9 @@ public class ForwardDecompositionHTNPlanner<V extends Comparable<V>> implements 
 	}
 
 	public ForwardDecompositionHTNPlanner(IHTNPlanningProblem problem, INodeEvaluator<TFDNode, V> nodeEvaluator, int timeoutPerNodeFComputation, int numberOfCPUs) {
-		this(problem, new ORGraphSearchFactory<>(), nodeEvaluator, numberOfCPUs);
+		this(problem, new BestFirstFactory<>(), nodeEvaluator, numberOfCPUs);
 		if (timeoutPerNodeFComputation > 0) {
-			((ORGraphSearchFactory<TFDNode, String, V>) this.searchFactory).setTimeoutForFComputation(timeoutPerNodeFComputation, n -> null);
+			((BestFirstFactory<TFDNode, String, V>) this.searchFactory).setTimeoutForFComputation(timeoutPerNodeFComputation, n -> null);
 		}
 	}
 

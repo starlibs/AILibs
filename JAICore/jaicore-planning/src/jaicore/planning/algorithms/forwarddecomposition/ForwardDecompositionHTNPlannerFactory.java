@@ -5,7 +5,7 @@ import jaicore.planning.algorithms.IObservableGraphBasedHTNPlanningAlgorithmFact
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.model.task.IHTNPlanningProblem;
 import jaicore.search.algorithms.interfaces.IObservableORGraphSearchFactory;
-import jaicore.search.algorithms.standard.core.INodeEvaluator;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 
 public class ForwardDecompositionHTNPlannerFactory<V extends Comparable<V>> implements IObservableGraphBasedHTNPlanningAlgorithmFactory<ForwardDecompositionSolution, TFDNode,String,V> {
 

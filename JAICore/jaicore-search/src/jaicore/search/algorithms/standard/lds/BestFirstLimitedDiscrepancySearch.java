@@ -8,14 +8,14 @@ import java.util.stream.Collectors;
 
 import com.google.common.eventbus.Subscribe;
 
-import jaicore.search.algorithms.standard.core.INodeEvaluator;
-import jaicore.search.algorithms.standard.core.ORGraphSearch;
+import jaicore.search.algorithms.standard.bestfirst.BestFirst;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.algorithms.standard.core.events.SuccessorComputationCompletedEvent;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
 
 
-public class BestFirstLimitedDiscrepancySearch<T,A> extends ORGraphSearch<T, A, NodeOrderList>{
+public class BestFirstLimitedDiscrepancySearch<T,A> extends BestFirst<T, A, NodeOrderList>{
 	
 	private static class OrderListNumberComputer<T> implements INodeEvaluator<T,NodeOrderList> {
 

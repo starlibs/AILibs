@@ -37,7 +37,7 @@ import jaicore.logging.LoggerUtil;
 import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionSolution;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;
-import jaicore.search.algorithms.standard.core.INodeEvaluator;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.structure.core.Node;
 
 public class HASCOMLContinuousSelection<C> implements IObservableGraphAlgorithm<TFDNode, String>, ILoggingCustomizable {

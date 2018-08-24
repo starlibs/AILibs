@@ -29,20 +29,16 @@ public class NPuzzleGeneratorTester {
 		NPuzzleGenerator gen = new NPuzzleGenerator(3, 50);
 		AStar<NPuzzleNode, String> search = new AStar<>(gen, (n1, n2) -> 1.0, n -> n.getPoint().getDistance());
 
-		SimpleGraphVisualizationWindow<Node<NPuzzleNode, Double>> win = new SimpleGraphVisualizationWindow<>(search);
-		win.getPanel().setTooltipGenerator(n -> n.getPoint().toString());
+//		SimpleGraphVisualizationWindow<Node<NPuzzleNode, Double>> win = new SimpleGraphVisualizationWindow<>(search);
+//		win.getPanel().setTooltipGenerator(n -> n.getPoint().toString());
 
 		/*search for solution*/
 		PerformanceLogger.logStart("search");
 
 		List<NPuzzleNode> solutionPath = search.nextSolution();
 
-		PerformanceLogger.logEnd("search");
 		assertNotNull(solutionPath);
 		System.out.println("Generated " + search.getCreatedCounter() + " nodes.");
-		PerformanceLogger.printStatsAndClear(PerformanceMeasure.TIME);
-		while (true)
-			;
 	}
 
 }

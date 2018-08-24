@@ -69,7 +69,7 @@ public class BestFirstTester {
 
 		};
 
-		BestFirst<TestNode, String> bf = new BestFirst<>(gen, n -> (double) Math.round(Math.random() * 1000));
+		BestFirst<TestNode, String, Double> bf = new BestFirst<>(gen, n -> (double) Math.round(Math.random() * 1000));
 		// new SimpleGraphVisualizationWindow<Node<TestNode,Double>>(bf).getPanel().setTooltipGenerator(n -> String.valueOf(n.getInternalLabel()));
 
 		VisualizationWindow win = new VisualizationWindow<Node<TestNode, Double>>(bf, "BestFirst");

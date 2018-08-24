@@ -2,7 +2,7 @@ package jaicore.planning.algorithms;
 
 import jaicore.planning.model.task.IHTNPlanningProblem;
 import jaicore.search.algorithms.interfaces.IObservableORGraphSearchFactory;
-import jaicore.search.algorithms.standard.core.INodeEvaluator;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 
 public interface IHTNPlanningAlgorithmFactory<N, A, V extends Comparable<V>,R extends IPlanningSolution> {
 	

@@ -15,7 +15,7 @@ import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;
 import jaicore.planning.model.task.ceocstn.CEOCSTNPlanningProblem;
 import jaicore.planning.model.task.ceocstn.StandardProblemFactory;
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
-import jaicore.search.algorithms.standard.core.ORGraphSearch;
+import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import jaicore.search.graphgenerators.bestfirst.abstractVersioning.TestGraphGenerator;
 import jaicore.search.graphgenerators.bestfirst.abstractVersioning.TestNode;
 import jaicore.search.graphgenerators.nqueens.NQueenGenerator;
@@ -51,7 +51,7 @@ public class FXGuiTester extends Application {
 
 	private void bestFirstTest() throws InterruptedException {
 		GraphGenerator generator = new TestGraphGenerator();
-		BestFirst<TestNode, String> bf = new BestFirst<>(generator, n -> (double) Math.round(Math.random() * 100));
+		BestFirst<TestNode, String, Double> bf = new BestFirst<>(generator, n -> (double) Math.round(Math.random() * 100));
 		// open(bf,"BestFirst");
 
 		Recorder rec = new Recorder(bf);
@@ -107,8 +107,8 @@ public class FXGuiTester extends Application {
 
 	private void dataSupplierTest() throws InterruptedException {
 
-		GraphGenerator generator = new TestGraphGenerator();
-		BestFirst bf = new BestFirst<>(generator, n -> (double) Math.round(Math.random() * 100));
+		GraphGenerator<TestNode,String> generator = new TestGraphGenerator();
+		BestFirst<TestNode,String,Double> bf = new BestFirst<>(generator, n -> (double) Math.round(Math.random() * 100));
 		// open(bf,"BestFirst");
 
 		Recorder rec = new Recorder(bf);
@@ -139,7 +139,7 @@ public class FXGuiTester extends Application {
 
 	private void bestFTest() throws InterruptedException {
 		NQueenGenerator gen = new NQueenGenerator(8);
-		ORGraphSearch<QueenNode, String, Double> search = new ORGraphSearch<>(gen, n -> (double) n.getPoint().getNumberOfNotAttackedCells());
+		BestFirst<QueenNode, String, Double> search = new BestFirst<>(gen, n -> (double) n.getPoint().getNumberOfNotAttackedCells());
 
 		Recorder rec = new Recorder(search);
 		gui.open(rec, "Queens");

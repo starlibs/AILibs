@@ -80,12 +80,12 @@ public class BiPartitionFinder<T> {
 	}
 
 	private final List<T> items;
-	private final BestFirst<BFNode, Boolean> search;
+	private final BestFirst<BFNode, Boolean, Double> search;
 
 	public BiPartitionFinder(Collection<T> items, IObjectEvaluator<Pair<Collection<T>, Collection<T>>, Double> evaluator) {
 		super();
 		this.items = new ArrayList<>(items);
-		this.search = new BestFirst<BFNode, Boolean>(new BFGraphGenerator(), n -> evaluator.evaluate(new Pair<>(n.getPoint().itemsOnLeft, n.getPoint().itemsOnRight)));
+		this.search = new BestFirst<BFNode, Boolean, Double>(new BFGraphGenerator(), n -> evaluator.evaluate(new Pair<>(n.getPoint().itemsOnLeft, n.getPoint().itemsOnRight)));
 	}
 
 	public Pair<Collection<T>, Collection<T>> getPartition() throws InterruptedException {

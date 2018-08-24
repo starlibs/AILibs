@@ -12,8 +12,8 @@ import java.util.stream.Collectors;
 
 import jaicore.basic.sets.SetUtil;
 import jaicore.graph.Graph;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.algorithms.standard.core.ANDORGraphSearch;
-import jaicore.search.algorithms.standard.core.INodeEvaluator;
 import jaicore.search.structure.core.AndNode;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;

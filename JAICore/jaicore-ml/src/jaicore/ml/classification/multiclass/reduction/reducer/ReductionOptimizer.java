@@ -18,7 +18,6 @@ import jaicore.ml.classification.multiclass.reduction.EMCNodeType;
 import jaicore.ml.classification.multiclass.reduction.MCTreeNode;
 import jaicore.ml.classification.multiclass.reduction.MCTreeNodeLeaf;
 import jaicore.search.algorithms.standard.bestfirst.BestFirstEpsilon;
-import jaicore.search.algorithms.standard.bestfirst.BestFirstEpsilonLabel;
 import jaicore.search.structure.core.Node;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;

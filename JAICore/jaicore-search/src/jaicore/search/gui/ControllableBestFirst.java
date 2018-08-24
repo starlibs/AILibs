@@ -7,7 +7,7 @@ import jaicore.graphvisualizer.events.controlEvents.IsLiveEvent;
 import jaicore.graphvisualizer.events.controlEvents.NodePushed;
 import jaicore.graphvisualizer.events.controlEvents.StepEvent;
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
-import jaicore.search.algorithms.standard.core.INodeEvaluator;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
 
@@ -18,7 +18,7 @@ import jaicore.search.structure.core.Node;
  * @param <T>
  * @param <A>
  */
-public class ControllableBestFirst<T,A> extends BestFirst<T, A> implements ControllableSearch{
+public class ControllableBestFirst<T,A> extends BestFirst<T, A, Double> implements ControllableSearch{
 
 	public boolean live;
 

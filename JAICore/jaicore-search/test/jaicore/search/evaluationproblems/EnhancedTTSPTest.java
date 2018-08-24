@@ -19,9 +19,9 @@ import jaicore.search.algorithms.interfaces.IObservableORGraphSearch;
 import jaicore.search.algorithms.interfaces.IPathUnification;
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import jaicore.search.algorithms.standard.bestfirst.BestFirstEpsilon;
-import jaicore.search.algorithms.standard.bestfirst.RandomCompletionEvaluator;
-import jaicore.search.algorithms.standard.core.INodeEvaluator;
-import jaicore.search.algorithms.standard.core.ORGraphSearch;
+import jaicore.search.algorithms.standard.bestfirst.BestFirst;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator;
 import jaicore.search.algorithms.standard.mcts.UCT;
 import jaicore.search.algorithms.standard.rdfs.RandomizedDepthFirstSearch;
 import jaicore.search.evaluationproblems.EnhancedTTSP.EnhancedTTSPNode;
@@ -81,12 +81,12 @@ public class EnhancedTTSPTest {
 
 	// @Test
 	public void testDFS() {
-		runAlgorithm("DFS", new ORGraphSearch<>(ttsp.getGraphGenerator(), n -> n.externalPath().size() * -1.0), false);
+		runAlgorithm("DFS", new BestFirst<>(ttsp.getGraphGenerator(), n -> n.externalPath().size() * -1.0), false);
 	}
 
 	// @Test
 	public void testDijkstra() {
-		runAlgorithm("Dijkstra", new ORGraphSearch<>(ttsp.getGraphGenerator(), n -> {
+		runAlgorithm("Dijkstra", new BestFirst<>(ttsp.getGraphGenerator(), n -> {
 			return n.getPoint().getTime();
 		}), true);
 	}
@@ -134,7 +134,7 @@ public class EnhancedTTSPTest {
 
 	// @Test
 	public void testRandomCompletor() {
-		INodeEvaluator<EnhancedTTSPNode, Double> rc = new RandomCompletionEvaluator<>(new Random(123l), 100, new IPathUnification<EnhancedTTSPNode>() {
+		INodeEvaluator<EnhancedTTSPNode, Double> rc = new RandomCompletionBasedNodeEvaluator<>(new Random(123l), 100, new IPathUnification<EnhancedTTSPNode>() {
 
 			@Override
 			public List<EnhancedTTSPNode> getSubsumingKnownPathCompletion(Map<List<EnhancedTTSPNode>, List<EnhancedTTSPNode>> knownPathCompletions, List<EnhancedTTSPNode> path)
@@ -142,7 +142,7 @@ public class EnhancedTTSPTest {
 				return null;
 			}
 		}, ttsp.getSolutionEvaluator());
-		BestFirst<EnhancedTTSPNode, String> bf = new BestFirst<>(ttsp.getGraphGenerator(), rc);
+		BestFirst<EnhancedTTSPNode, String, Double> bf = new BestFirst<>(ttsp.getGraphGenerator(), rc);
 		bf.setLoggerName("outer");
 		runAlgorithm("BFS with random completion", bf, false);
 	}

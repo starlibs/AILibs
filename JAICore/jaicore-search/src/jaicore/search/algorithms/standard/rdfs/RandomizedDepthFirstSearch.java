@@ -15,7 +15,7 @@ import jaicore.search.structure.graphgenerator.RootGenerator;
 import jaicore.search.structure.graphgenerator.SingleSuccessorGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
-public class RandomizedDepthFirstSearch<T, A> extends BestFirst<T, A> {
+public class RandomizedDepthFirstSearch<T, A> extends BestFirst<T, A, Double> {
 
 	private static Logger logger = LoggerFactory.getLogger(RandomizedDepthFirstSearch.class);
 

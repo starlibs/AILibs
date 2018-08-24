@@ -60,7 +60,7 @@ public class SimplePathProblemTester {
 			}
 		};
 
-		BestFirst<Integer, Object> bf = new BestFirst<>(gen, n -> 0.0);
+		BestFirst<Integer, Object, Double> bf = new BestFirst<>(gen, n -> 0.0);
 		// new SimpleGraphVisualizationWindow<>(bf.getEventBus()).getPanel().setTooltipGenerator(n -> n.getPoint().toString());
 		assertNotNull(bf.nextSolution());
 

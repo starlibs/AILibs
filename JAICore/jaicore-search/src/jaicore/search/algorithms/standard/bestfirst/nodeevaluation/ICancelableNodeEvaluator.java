@@ -1,4 +1,4 @@
-package jaicore.search.algorithms.standard.core;
+package jaicore.search.algorithms.standard.bestfirst.nodeevaluation;
 
 public interface ICancelableNodeEvaluator {
 	

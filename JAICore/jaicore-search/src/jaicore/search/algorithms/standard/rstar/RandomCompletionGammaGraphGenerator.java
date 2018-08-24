@@ -7,7 +7,7 @@ import jaicore.logging.LoggerUtil;
 import jaicore.search.algorithms.interfaces.IPathUnification;
 import jaicore.search.algorithms.interfaces.ISolutionEvaluator;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
-import jaicore.search.algorithms.standard.bestfirst.RandomCompletionEvaluator;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator;
 import jaicore.search.evaluationproblems.KnapsackProblem;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
@@ -32,7 +32,7 @@ public class RandomCompletionGammaGraphGenerator<T> implements GammaGraphGenerat
 
     private final RootGenerator<GammaNode<T,RStarK>> gammaRootGenerator;
     private final NodeGoalTester<T> gammaGoalTester;
-    private final RandomCompletionEvaluator<T, Double> randomCompletionEvaluator;
+    private final RandomCompletionBasedNodeEvaluator<T, Double> randomCompletionEvaluator;
     private final ISolutionEvaluator<T, Double> solutionEvaluator;
 
     /* Timeout stuff for Random Completions. */
@@ -104,7 +104,7 @@ public class RandomCompletionGammaGraphGenerator<T> implements GammaGraphGenerat
             }
         };
         this.solutionEvaluator = solutionEvaluator;
-        randomCompletionEvaluator = new RandomCompletionEvaluator<>(new Random(seed), samples, pathUnification, solutionEvaluator);
+        randomCompletionEvaluator = new RandomCompletionBasedNodeEvaluator<>(new Random(seed), samples, pathUnification, solutionEvaluator);
         randomCompletionEvaluator.setGenerator(graphGenerator);
     }
 

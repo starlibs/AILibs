@@ -1,4 +1,4 @@
-package jaicore.search.algorithms.standard.bestfirst;
+package jaicore.search.algorithms.standard.bestfirst.nodeevaluation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,9 +21,7 @@ import jaicore.search.algorithms.interfaces.IPathUnification;
 import jaicore.search.algorithms.interfaces.ISolutionEvaluator;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableNodeEvaluator;
-import jaicore.search.algorithms.standard.core.ICancelableNodeEvaluator;
-import jaicore.search.algorithms.standard.core.IGraphDependentNodeEvaluator;
-import jaicore.search.algorithms.standard.core.ISolutionReportingNodeEvaluator;
+import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import jaicore.search.algorithms.standard.core.SolutionEventBus;
 import jaicore.search.algorithms.standard.core.events.NodeAnnotationEvent;
 import jaicore.search.algorithms.standard.core.events.SolutionAnnotationEvent;
@@ -36,10 +34,10 @@ import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 @SuppressWarnings("serial")
-public class RandomCompletionEvaluator<T, V extends Comparable<V>>
+public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>>
 		implements IGraphDependentNodeEvaluator<T, String, V>, SerializableNodeEvaluator<T, V>, ISolutionReportingNodeEvaluator<T, V>, ICancelableNodeEvaluator {
 
-	private final static Logger logger = LoggerFactory.getLogger(RandomCompletionEvaluator.class);
+	private final static Logger logger = LoggerFactory.getLogger(RandomCompletionBasedNodeEvaluator.class);
 	protected Map<List<T>, List<T>> completions = new ConcurrentHashMap<>();
 	protected Set<List<T>> unsuccessfulPaths = Collections.synchronizedSet(new HashSet<>());
 	protected Set<List<T>> postedSolutions = new HashSet<>();
@@ -63,7 +61,7 @@ public class RandomCompletionEvaluator<T, V extends Comparable<V>>
 	protected final ISolutionEvaluator<T, V> solutionEvaluator;
 	protected transient SolutionEventBus<T> eventBus = new SolutionEventBus<>();
 
-	public RandomCompletionEvaluator(final Random random, final int samples, final IPathUnification<T> pathUnifier, final ISolutionEvaluator<T, V> solutionEvaluator) {
+	public RandomCompletionBasedNodeEvaluator(final Random random, final int samples, final IPathUnification<T> pathUnifier, final ISolutionEvaluator<T, V> solutionEvaluator) {
 		super();
 		if (random == null) {
 			throw new IllegalArgumentException("Random source must not be null!");
@@ -170,7 +168,7 @@ public class RandomCompletionEvaluator<T, V extends Comparable<V>>
 							}
 
 							/* create randomized dfs searcher */
-							BestFirst<T, String> completer = new RandomizedDepthFirstSearch<>(new GraphGenerator<T, String>() {
+							BestFirst<T, String, Double> completer = new RandomizedDepthFirstSearch<>(new GraphGenerator<T, String>() {
 								@Override
 								public SingleRootGenerator<T> getRootGenerator() {
 									return () -> n.getPoint();
@@ -178,12 +176,12 @@ public class RandomCompletionEvaluator<T, V extends Comparable<V>>
 
 								@Override
 								public SuccessorGenerator<T, String> getSuccessorGenerator() {
-									return RandomCompletionEvaluator.this.generator.getSuccessorGenerator();
+									return RandomCompletionBasedNodeEvaluator.this.generator.getSuccessorGenerator();
 								}
 
 								@Override
 								public GoalTester<T> getGoalTester() {
-									return RandomCompletionEvaluator.this.generator.getGoalTester();
+									return RandomCompletionBasedNodeEvaluator.this.generator.getGoalTester();
 								}
 
 								@Override

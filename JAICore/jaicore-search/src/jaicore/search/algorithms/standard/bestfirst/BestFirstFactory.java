@@ -1,20 +1,21 @@
-package jaicore.search.algorithms.standard.core;
+package jaicore.search.algorithms.standard.bestfirst;
 
 import jaicore.search.algorithms.interfaces.IObservableORGraphSearch;
 import jaicore.search.algorithms.interfaces.IObservableORGraphSearchFactory;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.structure.core.GraphGenerator;
 
-public class ORGraphSearchFactory<T, A, V extends Comparable<V>> implements IObservableORGraphSearchFactory<T, A, V> {
+public class BestFirstFactory<T, A, V extends Comparable<V>> implements IObservableORGraphSearchFactory<T, A, V> {
 
 	protected int timeoutForFInMS;
 	protected INodeEvaluator<T, V> timeoutEvaluator;
 	protected String loggerName;
 
-	public ORGraphSearchFactory() {
+	public BestFirstFactory() {
 		super();
 	}
 
-	public ORGraphSearchFactory(final int timeoutForFInMS) {
+	public BestFirstFactory(final int timeoutForFInMS) {
 		this();
 		if (timeoutForFInMS > 0) {
 			this.timeoutForFInMS = timeoutForFInMS;
@@ -23,7 +24,7 @@ public class ORGraphSearchFactory<T, A, V extends Comparable<V>> implements IObs
 
 	@Override
 	public IObservableORGraphSearch<T, A, V> createSearch(final GraphGenerator<T, A> graphGenerator, final INodeEvaluator<T, V> nodeEvaluator, final int numberOfCPUs) {
-		ORGraphSearch<T, A, V> search = new ORGraphSearch<>(graphGenerator, nodeEvaluator);
+		BestFirst<T, A, V> search = new BestFirst<>(graphGenerator, nodeEvaluator);
 		search.parallelizeNodeExpansion(numberOfCPUs);
 		search.setTimeoutForComputationOfF(this.timeoutForFInMS, this.timeoutEvaluator);
 		if (loggerName != null && loggerName.length() > 0)

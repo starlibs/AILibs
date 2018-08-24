@@ -8,8 +8,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jaicore.search.algorithms.standard.core.INodeEvaluator;
-import jaicore.search.algorithms.standard.core.ORGraphSearch;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
 import jaicore.search.structure.core.PriorityQueueOpen;
@@ -19,7 +18,7 @@ import jaicore.search.structure.core.PriorityQueueOpen;
  *
  * @author Felix Mohr
  */
-public class BestFirstEpsilon<T, A, W extends Comparable<W>> extends ORGraphSearch<T, A, Double> {
+public class BestFirstEpsilon<T, A, W extends Comparable<W>> extends BestFirst<T, A, Double> {
 	
 	private final static Logger logger = LoggerFactory.getLogger(BestFirstEpsilon.class);
 

@@ -2,7 +2,7 @@ package jaicore.search.algorithms.standard.mcts;
 
 import java.util.Random;
 
-import jaicore.search.algorithms.standard.core.INodeEvaluator;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.structure.core.GraphGenerator;
 
 public class UCT<T,A> extends MCTS<T,A,Double> {

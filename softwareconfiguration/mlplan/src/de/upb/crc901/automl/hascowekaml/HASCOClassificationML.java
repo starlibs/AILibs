@@ -24,7 +24,7 @@ import jaicore.ml.evaluation.TimeoutableEvaluator;
 import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionSolution;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.search.algorithms.interfaces.ISolutionEvaluator;
-import jaicore.search.algorithms.standard.core.INodeEvaluator;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.algorithms.standard.uncertainty.OversearchAvoidanceConfig;
 import jaicore.search.structure.core.GraphGenerator;
 import weka.classifiers.Classifier;

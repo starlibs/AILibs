@@ -13,8 +13,8 @@ import org.junit.Test;
 
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.search.algorithms.interfaces.IPathUnification;
-import jaicore.search.algorithms.standard.bestfirst.RandomCompletionEvaluator;
-import jaicore.search.algorithms.standard.core.ORGraphSearch;
+import jaicore.search.algorithms.standard.bestfirst.BestFirst;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator;
 import jaicore.search.evaluationproblems.KnapsackProblem.KnapsackNode;
 import jaicore.search.structure.core.Node;
 
@@ -59,8 +59,8 @@ public class KnapsackOptimizationTest {
 		bonusCombination.add("2");
 		bonusPoints.put(bonusCombination, 25.0d);
 		KnapsackProblem knapsackProblem = new KnapsackProblem(objects, values, weights, bonusPoints, 165);
-		ORGraphSearch<KnapsackNode, String, Double> search = new ORGraphSearch<>(knapsackProblem.getGraphGenerator(),
-				new RandomCompletionEvaluator<>(new Random(123l), 3, new IPathUnification<KnapsackNode>() {
+		BestFirst<KnapsackNode, String, Double> search = new BestFirst<>(knapsackProblem.getGraphGenerator(),
+				new RandomCompletionBasedNodeEvaluator<>(new Random(123l), 3, new IPathUnification<KnapsackNode>() {
 
 					@Override
 					public List<KnapsackNode> getSubsumingKnownPathCompletion(Map<List<KnapsackNode>, List<KnapsackNode>> knownPathCompletions, List<KnapsackNode> path) throws InterruptedException {

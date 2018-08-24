@@ -14,10 +14,10 @@ import jaicore.search.algorithms.parallel.parallelexploration.distributed.interf
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.DistributionSearchAdapter;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableNodeEvaluator;
-import jaicore.search.algorithms.standard.core.ORGraphSearch;
+import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import jaicore.search.structure.core.Node;
 
-public class DistributedOrSearch<T, A, V extends Comparable<V>> extends ORGraphSearch<T, A, V> implements DistributionSearchAdapter<T, V> {
+public class DistributedOrSearch<T, A, V extends Comparable<V>> extends BestFirst<T, A, V> implements DistributionSearchAdapter<T, V> {
 
 	private static final Logger logger = LoggerFactory.getLogger(DistributedOrSearch.class);
 	private final DistributedSearchManager<T, A, V> manager;

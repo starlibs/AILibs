@@ -71,7 +71,7 @@ public class NodeExpansionTester {
 
 		};
 
-		BestFirst<TestNode, String> bf = new BestFirst<>(gen, n -> (double) Math.round(Math.random() * 1000));
+		BestFirst<TestNode, String, Double> bf = new BestFirst<>(gen, n -> (double) Math.round(Math.random() * 1000));
 
 		VisualizationWindow win = new VisualizationWindow<Node<TestNode, Double>>(bf, "BestFirst");
 		TooltipSupplier tooltipSupplier = new TooltipSupplier();

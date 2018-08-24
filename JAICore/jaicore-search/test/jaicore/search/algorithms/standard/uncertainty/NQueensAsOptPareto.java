@@ -11,7 +11,7 @@ import org.junit.Test;
 import jaicore.search.algorithms.interfaces.IPathUnification;
 import jaicore.search.algorithms.interfaces.ISolutionEvaluator;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
-import jaicore.search.algorithms.standard.core.ORGraphSearch;
+import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import jaicore.search.algorithms.standard.uncertainty.paretosearch.CosinusDistanceComparator;
 import jaicore.search.algorithms.standard.uncertainty.paretosearch.ParetoNode;
 import jaicore.search.algorithms.standard.uncertainty.paretosearch.ParetoSelection;
@@ -30,7 +30,7 @@ public class NQueensAsOptPareto {
 	@Test
 	public void testNQueensProblem() throws InterruptedException {
 
-		ORGraphSearch<QueenNode, String, Double> search = new ORGraphSearch<QueenNode, String, Double>(new SerializableGraphGenerator<QueenNode, String>() {
+		BestFirst<QueenNode, String, Double> search = new BestFirst<QueenNode, String, Double>(new SerializableGraphGenerator<QueenNode, String>() {
 
 			private static final long serialVersionUID = 1L;
 

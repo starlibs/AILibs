@@ -1,6 +1,6 @@
 package jaicore.search.algorithms.standard.rstar;
 
-import jaicore.search.algorithms.standard.core.INodeEvaluator;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.structure.core.Node;
 
 public class GridWorldHeuristic implements INodeEvaluator<GridWorld, Double> {

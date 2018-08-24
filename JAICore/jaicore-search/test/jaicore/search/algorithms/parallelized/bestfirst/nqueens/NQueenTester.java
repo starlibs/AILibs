@@ -17,7 +17,7 @@ public class NQueenTester {
 			int n = i + 4;
 			System.out.print("Checking " + n + "-Queens Problem ... ");
 			NQueenGenerator gen = new NQueenGenerator(n);
-			BestFirst<QueenNode, String> search = new BestFirst<>(gen, node -> (double) node.getPoint().getNumberOfAttackedCellsInNextRow());
+			BestFirst<QueenNode, String, Double> search = new BestFirst<>(gen, node -> (double) node.getPoint().getNumberOfAttackedCellsInNextRow());
 			search.parallelizeNodeExpansion(2);
 			search.setTimeoutForComputationOfF(350, node -> 100.0);
 			int solutions = 0;

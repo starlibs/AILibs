@@ -37,9 +37,9 @@ import jaicore.planning.model.task.ceocipstn.CEOCIPSTNPlanningProblem;
 import jaicore.planning.model.task.stn.Method;
 import jaicore.search.algorithms.interfaces.IObservableORGraphSearchFactory;
 import jaicore.search.algorithms.interfaces.ISolutionEvaluator;
-import jaicore.search.algorithms.standard.bestfirst.RandomCompletionEvaluator;
-import jaicore.search.algorithms.standard.core.AlternativeNodeEvaluator;
-import jaicore.search.algorithms.standard.core.INodeEvaluator;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator;
 import jaicore.search.structure.core.GraphGenerator;
 
 /**
@@ -90,7 +90,7 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 	private INodeEvaluator<N, V> preferredNodeEvaluator;
 
 	/** The random completion evaluator sampling fully specified solutions at random. */
-	private final RandomCompletionEvaluator<N, V> randomCompletionEvaluator;
+	private final RandomCompletionBasedNodeEvaluator<N, V> randomCompletionEvaluator;
 
 	/** Factory to convert plans into objects as input for the benchmark. */
 	private Factory<? extends T> factory;
@@ -147,7 +147,7 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 		/* define search relevant factories and evaluators */
 		this.plannerFactory = plannerFactory;
 		this.searchFactory = searchFactory;
-		this.randomCompletionEvaluator = new RandomCompletionEvaluator<>(new Random(this.getConfig().randomSeed()), this.getConfig().randomCompletions(), searchSpaceUtilFactory.getPathUnifier(), this.solutionEvaluator);
+		this.randomCompletionEvaluator = new RandomCompletionBasedNodeEvaluator<>(new Random(this.getConfig().randomSeed()), this.getConfig().randomCompletions(), searchSpaceUtilFactory.getPathUnifier(), this.solutionEvaluator);
 		this.factory = factory;
 		this.searchSpaceUtilFactory = searchSpaceUtilFactory;
 		this.benchmark = benchmark;

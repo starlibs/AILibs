@@ -1,4 +1,4 @@
-package jaicore.search.algorithms.standard.core;
+package jaicore.search.algorithms.standard.bestfirst.nodeevaluation;
 
 /**
  * This interface suggests that the node evaluator MAY report solutions that he finds under a node.

@@ -10,7 +10,7 @@ import org.junit.Test;
 
 import jaicore.search.algorithms.standard.ORGraphSearchTester;
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
-import jaicore.search.algorithms.standard.core.ORGraphSearch;
+import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import jaicore.search.graphgenerators.nqueens.NQueenGenerator;
 import jaicore.search.graphgenerators.nqueens.QueenNode;
 import jaicore.search.structure.core.NodeExpansionDescription;
@@ -25,7 +25,7 @@ public class NQueenTester extends ORGraphSearchTester {
 
 		NQueenGenerator gen = new NQueenGenerator(x);
 
-		ORGraphSearch<QueenNode, String, Double> search = new ORGraphSearch<>(gen, n -> (double) n.getPoint().getNumberOfAttackedCells());
+		BestFirst<QueenNode, String, Double> search = new BestFirst<>(gen, n -> (double) n.getPoint().getNumberOfAttackedCells());
 		// SimpleGraphVisualizationWindow<Node<QueenNode, Double>> win = new SimpleGraphVisualizationWindow<>(search.getEventBus());
 		// win.getPanel().setTooltipGenerator(n->n.getPoint().toString());
 
@@ -55,7 +55,7 @@ public class NQueenTester extends ORGraphSearchTester {
 			int n = i + 4;
 			System.out.print("Checking " + n + "-Queens Problem ... ");
 			NQueenGenerator gen = new NQueenGenerator(n);
-			BestFirst<QueenNode, String> search = new BestFirst<>(gen, node -> (double) node.getPoint().getNumberOfAttackedCellsInNextRow());
+			BestFirst<QueenNode, String, Double> search = new BestFirst<>(gen, node -> (double) node.getPoint().getNumberOfAttackedCellsInNextRow());
 			int solutions = 0;
 			while (search.nextSolution() != null)
 				solutions++;
@@ -70,7 +70,7 @@ public class NQueenTester extends ORGraphSearchTester {
 			int n = i + 4;
 			System.out.print("Checking " + n + "-Queens Problem ... ");
 			NQueenGenerator gen = new NQueenGenerator(n);
-			BestFirst<QueenNode, String> search = new BestFirst<>(gen, node -> (double) node.getPoint().getNumberOfAttackedCellsInNextRow());
+			BestFirst<QueenNode, String, Double> search = new BestFirst<>(gen, node -> (double) node.getPoint().getNumberOfAttackedCellsInNextRow());
 			search.parallelizeNodeExpansion(2);
 			search.setTimeoutForComputationOfF(350, node -> 100.0);
 			int solutions = 0;

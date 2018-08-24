@@ -2,7 +2,7 @@ package jaicore.search.algorithms.standard.rstar;
 
 import jaicore.search.algorithms.standard.astar.AStar;
 import jaicore.search.algorithms.standard.astar.AStarEdgeCost;
-import jaicore.search.algorithms.standard.core.INodeEvaluator;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.NodeExpansionDescription;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;

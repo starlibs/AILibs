@@ -6,7 +6,7 @@ import java.util.Iterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jaicore.search.algorithms.standard.core.INodeEvaluator;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.structure.core.Node;
 import jaicore.search.structure.core.OpenCollection;
 import jaicore.search.structure.core.PriorityQueueOpen;

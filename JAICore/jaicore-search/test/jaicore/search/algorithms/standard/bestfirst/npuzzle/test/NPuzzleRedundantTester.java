@@ -15,7 +15,7 @@ public class NPuzzleRedundantTester {
 	@Test
 	public void test() throws InterruptedException {
 		NPuzzleRedundantGenerator gen = new NPuzzleRedundantGenerator(3, 4);
-		BestFirst<NPuzzleNode, String> search = new BestFirst<>(gen, n -> (double) n.getPoint().getNumberOfWrongTiles());
+		BestFirst<NPuzzleNode, String, Double> search = new BestFirst<>(gen, n -> (double) n.getPoint().getNumberOfWrongTiles());
 
 		// SimpleGraphVisualizationWindow<Node<NPuzzleNode,Double>> win = new SimpleGraphVisualizationWindow<>(search.getEventBus());
 		// win.getPanel().setTooltipGenerator(n->n.getPoint().toString());

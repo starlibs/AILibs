@@ -18,8 +18,8 @@ import jaicore.graphvisualizer.TooltipGenerator;
 import jaicore.search.algorithms.interfaces.IORGraphSearchFactory;
 import jaicore.search.algorithms.interfaces.IObservableORGraphSearch;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.DistributedSearchCommunicationLayer;
-import jaicore.search.algorithms.standard.core.INodeEvaluator;
-import jaicore.search.algorithms.standard.core.ORGraphSearch;
+import jaicore.search.algorithms.standard.bestfirst.BestFirst;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
 
@@ -186,7 +186,7 @@ public class DistributedOrSearchCoworker<T, A, V extends Comparable<V>> {
 		logger.info("Classpath is " + strClassPath);
 
 		IORGraphSearchFactory<T, A, V> factory = (gen, eval) -> {
-			ORGraphSearch<T, A, V> search = new jaicore.search.algorithms.standard.core.ORGraphSearch<>(gen, eval);
+			BestFirst<T, A, V> search = new jaicore.search.algorithms.standard.bestfirst.BestFirst<>(gen, eval);
 			if (threads > 1)
 				search.parallelizeNodeExpansion(threads);
 			search.setTimeoutForComputationOfF(1000, n -> null);

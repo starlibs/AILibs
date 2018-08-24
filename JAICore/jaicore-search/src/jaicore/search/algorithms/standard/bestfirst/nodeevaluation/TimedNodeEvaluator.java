@@ -1,4 +1,4 @@
-package jaicore.search.algorithms.standard.core;
+package jaicore.search.algorithms.standard.bestfirst.nodeevaluation;
 
 import jaicore.concurrent.TimeoutTimer;
 import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;

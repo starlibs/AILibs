@@ -24,7 +24,7 @@ public class AbstractVersioningTester extends ORGraphSearchTester {
 	public void testSequential() throws InterruptedException {
 		TestGraphGenerator gen = new TestGraphGenerator();
 
-		BestFirst<TestNode, String> bf = new BestFirst<>(gen, n -> (double) Math.round(Math.random() * 100));
+		BestFirst<TestNode, String, Double> bf = new BestFirst<>(gen, n -> (double) Math.round(Math.random() * 100));
 
 		// new SimpleGraphVisualizationWindow<>(bf.getEventBus()).getPanel().setTooltipGenerator(n-> String.valueOf(n.getInternalLabel()));
 
@@ -60,7 +60,7 @@ public class AbstractVersioningTester extends ORGraphSearchTester {
 		TestGraphGenerator gen = new TestGraphGenerator();
 		gen.setNodeNumbering(true);
 
-		BestFirst<TestNode, String> bf = new BestFirst<>(gen, n -> (double) Math.round(Math.random() * 100));
+		BestFirst<TestNode, String, Double> bf = new BestFirst<>(gen, n -> (double) Math.round(Math.random() * 100));
 		bf.parallelizeNodeExpansion(2);
 		bf.setTimeoutForComputationOfF(350, node -> 100.0);
 
@@ -83,7 +83,7 @@ public class AbstractVersioningTester extends ORGraphSearchTester {
 
 		Set<Integer> ids = new HashSet<Integer>();
 
-		BestFirst<TestNode, String> bf = new BestFirst<>(gen, n -> (double) Math.round(Math.random() * 100));
+		BestFirst<TestNode, String, Double> bf = new BestFirst<>(gen, n -> (double) Math.round(Math.random() * 100));
 
 		/*find the solution*/
 		List<TestNode> solutionPath = null;

@@ -28,7 +28,7 @@ import jaicore.ml.multilabel.evaluators.F1AverageMultilabelEvaluator;
 import jaicore.ml.multilabel.evaluators.MonteCarloCrossValidationEvaluator;
 import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionSolution;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
-import jaicore.search.algorithms.standard.core.INodeEvaluator;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import meka.classifiers.multilabel.MultiLabelClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.SingleClassifierEnhancer;

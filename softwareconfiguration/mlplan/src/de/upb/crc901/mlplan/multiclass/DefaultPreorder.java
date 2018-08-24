@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 import jaicore.logic.fol.structure.Literal;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.model.task.stn.MethodInstance;
-import jaicore.search.algorithms.standard.core.INodeEvaluator;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.structure.core.Node;
 
 public class DefaultPreorder implements INodeEvaluator<TFDNode,Double> {

@@ -1,4 +1,4 @@
-package jaicore.search.algorithms.standard.bestfirst;
+package jaicore.search.algorithms.standard.bestfirst.nodeevaluation;
 
 import java.util.Random;
 
@@ -6,11 +6,11 @@ import jaicore.search.algorithms.parallel.parallelexploration.distributed.interf
 import jaicore.search.structure.core.Node;
 
 @SuppressWarnings("serial")
-public class RandomizedDepthFirstEvaluator<T> implements SerializableNodeEvaluator<T,Double> {
+public class RandomizedDepthFirstNodeEvaluator<T> implements SerializableNodeEvaluator<T,Double> {
 
 	private final Random rand;
 
-	public RandomizedDepthFirstEvaluator(Random rand) {
+	public RandomizedDepthFirstNodeEvaluator(Random rand) {
 		super();
 		this.rand = rand;
 	}

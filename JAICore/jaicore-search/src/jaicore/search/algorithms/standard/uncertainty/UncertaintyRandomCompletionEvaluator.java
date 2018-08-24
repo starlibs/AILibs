@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import jaicore.search.algorithms.interfaces.IPathUnification;
 import jaicore.search.algorithms.interfaces.ISolutionEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
-import jaicore.search.algorithms.standard.bestfirst.RandomCompletionEvaluator;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator;
 import jaicore.search.algorithms.standard.core.SolutionEventBus;
 import jaicore.search.algorithms.standard.core.events.NodeAnnotationEvent;
 import jaicore.search.algorithms.standard.rdfs.RandomizedDepthFirstSearch;
@@ -21,7 +21,7 @@ import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 @SuppressWarnings("serial")
-public class UncertaintyRandomCompletionEvaluator<T, N, V extends Comparable<V>> extends RandomCompletionEvaluator<T, V> {
+public class UncertaintyRandomCompletionEvaluator<T, N, V extends Comparable<V>> extends RandomCompletionBasedNodeEvaluator<T, V> {
 
 	private static final Logger logger = LoggerFactory.getLogger(UncertaintyRandomCompletionEvaluator.class);
 
@@ -95,7 +95,7 @@ public class UncertaintyRandomCompletionEvaluator<T, N, V extends Comparable<V>>
 							}
 
 							/* create randomized dfs searcher */
-							BestFirst<T, String> completer = new RandomizedDepthFirstSearch<>(new GraphGenerator<T, String>() {
+							BestFirst<T, String, Double> completer = new RandomizedDepthFirstSearch<>(new GraphGenerator<T, String>() {
 								public SingleRootGenerator<T> getRootGenerator() {
 									return n::getPoint;
 								}

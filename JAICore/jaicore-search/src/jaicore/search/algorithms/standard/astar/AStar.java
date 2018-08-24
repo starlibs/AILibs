@@ -4,8 +4,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
-import jaicore.search.algorithms.standard.core.INodeEvaluator;
-import jaicore.search.algorithms.standard.core.ParentDiscarding;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
 
@@ -14,7 +13,7 @@ import jaicore.search.structure.core.Node;
  *
  * @author Felix Mohr
  */
-public class AStar<T, A> extends BestFirst<T, A> {
+public class AStar<T, A> extends BestFirst<T, A, Double> {
 
 	private static class FComputer<T> implements INodeEvaluator<T,Double> {
 

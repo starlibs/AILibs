@@ -1,4 +1,4 @@
-package jaicore.search.algorithms.standard.core;
+package jaicore.search.algorithms.standard.bestfirst.nodeevaluation;
 
 import jaicore.search.structure.core.Node;
 

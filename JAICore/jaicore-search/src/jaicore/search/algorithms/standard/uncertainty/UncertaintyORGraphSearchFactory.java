@@ -10,8 +10,8 @@ import jaicore.search.algorithms.interfaces.IObservableORGraphSearch;
 import jaicore.search.algorithms.interfaces.IObservableORGraphSearchFactory;
 import jaicore.search.algorithms.interfaces.IPathUnification;
 import jaicore.search.algorithms.interfaces.ISolutionEvaluator;
-import jaicore.search.algorithms.standard.core.INodeEvaluator;
-import jaicore.search.algorithms.standard.core.ORGraphSearch;
+import jaicore.search.algorithms.standard.bestfirst.BestFirst;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.algorithms.standard.uncertainty.explorationexploitationsearch.BasicClockModelPhaseLengthAdjuster;
 import jaicore.search.algorithms.standard.uncertainty.explorationexploitationsearch.BasicExplorationCandidateSelector;
 import jaicore.search.algorithms.standard.uncertainty.explorationexploitationsearch.IPhaseLengthAdjuster;
@@ -38,11 +38,11 @@ public class UncertaintyORGraphSearchFactory <T, A, V extends Comparable<V>> imp
 	
 	@Override
 	public IObservableORGraphSearch<T, A, V> createSearch(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, V> nodeEvaluator, int numberOfCPUs) {
-		ORGraphSearch<T, A, V> search;
+		BestFirst<T, A, V> search;
 		if (oversearchAvoidanceConfig.getOversearchAvoidanceMode() == OversearchAvoidanceConfig.OversearchAvoidanceMode.NONE) {
-			search = new ORGraphSearch<>(graphGenerator, nodeEvaluator);
+			search = new BestFirst<>(graphGenerator, nodeEvaluator);
 		} else {
-			search = new ORGraphSearch<>(
+			search = new BestFirst<>(
 					graphGenerator,
 					new UncertaintyRandomCompletionEvaluator<T, A, V>(
 						new Random(oversearchAvoidanceConfig.getSeed()),

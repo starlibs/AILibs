@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import jaicore.graph.Graph;
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
-import jaicore.search.algorithms.standard.core.INodeEvaluator;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.algorithms.standard.generalbestfirst.GeneralBestFirst;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;

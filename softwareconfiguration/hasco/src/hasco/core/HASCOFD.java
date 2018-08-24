@@ -16,7 +16,7 @@ import jaicore.planning.graphgenerators.task.ceoctfd.CEOCTFDPathUnifier;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.search.algorithms.interfaces.IObservableORGraphSearchFactory;
 import jaicore.search.algorithms.interfaces.IPathUnification;
-import jaicore.search.algorithms.standard.core.ORGraphSearchFactory;
+import jaicore.search.algorithms.standard.bestfirst.BestFirstFactory;
 import jaicore.search.algorithms.standard.uncertainty.OversearchAvoidanceConfig;
 import jaicore.search.algorithms.standard.uncertainty.UncertaintyORGraphSearchFactory;
 
@@ -42,7 +42,7 @@ public class HASCOFD<T,V extends Comparable<V>> extends HASCO<T, TFDNode, String
 	}
 
 	public HASCOFD(final Collection<Component> components, Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig, Factory<? extends T> converter, String nameOfRequiredInterface, IObjectEvaluator<T, V> benchmark) {
-		this(components, paramRefinementConfig, new ORGraphSearchFactory<>(), converter, nameOfRequiredInterface, benchmark);
+		this(components, paramRefinementConfig, new BestFirstFactory<>(), converter, nameOfRequiredInterface, benchmark);
 	}
 
 	public HASCOFD(final Collection<Component> components, Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig, Factory<? extends T> converter, String nameOfRequiredInterface, IObjectEvaluator<T, V> benchmark, OversearchAvoidanceConfig<TFDNode, V> oversearchAvoidanceConfig) {
