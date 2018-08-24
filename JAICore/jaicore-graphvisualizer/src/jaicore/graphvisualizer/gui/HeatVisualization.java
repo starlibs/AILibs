@@ -11,9 +11,9 @@ import java.util.Random;
 public class HeatVisualization<T> extends GraphVisualization<T> {
 
 
-    private double bestFValue;
-    private double worstFValue;
-    private List<Node> nodes;
+    protected double bestFValue;
+    protected double worstFValue;
+    protected List<Node> nodes;
 
     public HeatVisualization() {
         super();
@@ -61,7 +61,7 @@ public class HeatVisualization<T> extends GraphVisualization<T> {
 
     }
 
-    public void update(){
+    protected void update(){
         System.out.println("update");
         for(Node n :nodes){
             HeatValueSupplier s = (HeatValueSupplier) this.int2extNodeMap.get(n);
@@ -73,7 +73,7 @@ public class HeatVisualization<T> extends GraphVisualization<T> {
 
     }
 
-    private void colorNode(Node node, double fvalue) {
+    protected void colorNode(Node node, double fvalue) {
         float color = 1;
         float x = (float)(fvalue - bestFValue);
         float y = (float)(worstFValue - bestFValue);

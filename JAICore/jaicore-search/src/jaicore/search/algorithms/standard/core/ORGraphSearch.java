@@ -51,7 +51,7 @@ import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 public class ORGraphSearch<T, A, V extends Comparable<V>>
 		implements IObservableORGraphSearch<T, A, V>, IIterableAlgorithm<List<NodeExpansionDescription<T, A>>>, Iterator<List<NodeExpansionDescription<T, A>>>, ILoggingCustomizable {
 
-	private Logger logger = LoggerFactory.getLogger(ORGraphSearch.class);
+	protected Logger logger = LoggerFactory.getLogger(ORGraphSearch.class);
 
 	/* meta vars for controlling the general behavior */
 	private int createdCounter;
@@ -92,7 +92,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	private ExecutorService pool;
 	protected final AtomicInteger activeJobs = new AtomicInteger(0);
 
-	private final Set<T> expanded = new HashSet<>();
+	protected final Set<T> expanded = new HashSet<>();
 	private final boolean solutionReportingNodeEvaluator;
 
 	/**
