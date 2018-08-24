@@ -122,22 +122,15 @@ public class Recorder {
         //compute the absolute time of the event in relation to the first event
         long eventTime = receiveTime - firstEventTime;
         receivingTimes.add(eventTime);
-
-
-
-//        if(updateIndex) {
-//            this.replayBus.post(event);
-//            this.addType(event);
-//            this.index = receivedEvents.size();
-//            //post a new infoevent to update the listener.
-//            this.infoBus.post(new InfoEvent(receivedEvents.size(), eventTime,0, true));
-//        }
-//        else
-            this.infoBus.post(new InfoEvent(receivedEvents.size(), eventTime, 0));
+        this.infoBus.post(new InfoEvent(receivedEvents.size(), eventTime, 0));
 
     }
 
 
+    /**
+     * Receive a control event and make the appropiate action
+     * @param event
+     */
     @Subscribe
     public void receiveControlEvent(ControlEvent event){
         if(event instanceof StepEvent){
@@ -176,16 +169,6 @@ public class Recorder {
 
                 this.addType(event);
                 index ++;
-
-//            } else if (this.index == this.receivedEvents.size()) {
-//                if (this.index == 0)
-//                    try {
-//                        this.algorithm.initGraph();
-//                    } catch (Throwable throwable) {
-//                        throwable.printStackTrace();
-//                    }
-//                else
-//                    this.algorithm.step();
                 if(this.index == this.receivedEvents.size())
                     break;
             }
@@ -295,13 +278,20 @@ public class Recorder {
     }
 
 
+    /**
+     * Adds a new Datasupplier to the recorder. The datasupplier it self is registered at the replaybus to get
+     * graphevents from the recorder.
+     * @param iSupplier
+     */
     public void addDataSupplier(ISupplier iSupplier){
-//        this.infoBus.post(new AddSupplierEventNew(iSupplier));
         this.registerReplayListener(iSupplier);
         this.supplier.add(iSupplier);
     }
 
 
+    /**
+     * Posts every known DataSupplier as an addSupplierevent on the InfoBus
+     */
     public void getSupplier() {
         for(ISupplier s : supplier)
             this.infoBus.post(new AddSupplierEventNew(s));

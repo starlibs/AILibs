@@ -20,10 +20,12 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
+import weka.core.stopwords.Null;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 //TODO timeline does not alwayse update fast enough
@@ -48,6 +50,11 @@ public class FXCode implements NodeListener {
     //Visualization window
     private GraphVisualization visualization;
 
+
+    /**
+     * Create a new GraphvisualizerStage
+     * @param rec
+     */
     public FXCode(Recorder rec){
         this.index = 0;
         this.maxIndex = 0;
@@ -99,7 +106,8 @@ public class FXCode implements NodeListener {
 
         splitPane.getItems().add(tabPane);
 //        visualization = new GraphVisualization();
-        visualization = new HeatVisualization();
+//        visualization = new HeatVisualization();
+        visualization = new ScoreVisualization();
         rec.registerReplayListener(visualization);
         splitPane.getItems().add(visualization.getViewPanel());
 
@@ -146,6 +154,7 @@ public class FXCode implements NodeListener {
                 Runnable run = ()->{
                     try{
                         while(index >= 0){
+
                             eventBus.post(new StepEvent(true, 1));
                             TimeUnit.MILLISECONDS.sleep(sleepTime);
                             updateIndex(1, false);
@@ -166,7 +175,7 @@ public class FXCode implements NodeListener {
         stepButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-               System.out.println("Step");
+//               System.out.println("Step");
                eventBus.post(new StepEvent(true, 1));
                if(index != maxIndex)
                    updateIndex(1, false);
@@ -233,20 +242,35 @@ public class FXCode implements NodeListener {
             }
         });
         nodeList.add(saveButton);
-
-
     }
 
+    /**
+     * Receive Info-Events from the recorder to update the timeline and the maximum index
+     * @param event
+     *      The info-event.
+     */
     @Subscribe
     public void receiveInfoEvent(InfoEvent event){
-        this.maxIndex = event.getMaxIndex();
-        this.timeline.setMax(this.maxIndex);
-        if(event.updateIndex())
-            this.updateIndex(maxIndex, true);
-
+        try {
+            this.maxIndex = event.getMaxIndex();
+            this.timeline.setMax(this.maxIndex);
+            if (event.updateIndex())
+                this.updateIndex(maxIndex, true);
+        } catch(NullPointerException e){
+//            e.printStackTrace();
+        }
     }
 
-    public void updateIndex(int newIndex, boolean isRealIndex){
+    /**
+     * Updates the index if a new step is done. Depending on the type of step it is possible
+     * to either get the actual new index (<code>isRealIndex = true</code> or an additive one.
+     * @param newIndex
+     *      A variable which is used to compute the new index. Either it is the actual new index or this number has
+     *      to be added to the current index.
+     * @param isRealIndex
+     *      <code>true</code> if the newIndex is the actual new index, <code>false</code> if newIndex is additive.
+     */
+    private void updateIndex(int newIndex, boolean isRealIndex){
         if(! isRealIndex)
             newIndex += this.index;
 
@@ -260,6 +284,9 @@ public class FXCode implements NodeListener {
 
     }
 
+    /**
+     * Resets the GUI
+     */
     public void reset(){
         if(this.playThread != null)
             this.playThread.interrupt();
@@ -268,6 +295,10 @@ public class FXCode implements NodeListener {
         eventBus.post(new ResetEvent());
     }
 
+    /**
+     * Jumps to a specific index at the timeline
+     * @param newIndex
+     */
     public void jumpToIndex(int newIndex){
         if(this.playThread != null)
             playThread.interrupt();

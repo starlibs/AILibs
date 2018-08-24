@@ -1,39 +1,49 @@
 package jaicore.graphvisualizer.gui;
 
+import jaicore.basic.Score;
 import org.graphstream.graph.Node;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
-
-
-public class HeatVisualization<T> extends GraphVisualization<T> {
-
+public class ScoreVisualization<T> extends GraphVisualization<T> {
 
     private double bestFValue;
     private double worstFValue;
+
     private List<Node> nodes;
 
-    public HeatVisualization() {
+    boolean first;
+    boolean score;
+
+    public ScoreVisualization(){
         super();
+
         this.graph.clear();
-//        this.graph.setAttribute("ui.stylesheet", "url('conf/searchgraph.css')");
         this.graph.setAttribute("ui.stylesheet", "url('conf/heatmap.css')");
+
+
         bestFValue = Double.MAX_VALUE;
         worstFValue = Double.MIN_VALUE;
         this.nodes = new ArrayList<>();
+
+        first = true;
+        score = true;
+
     }
 
     @Override
     protected synchronized Node newNode(final T newNodeExt) {
+        if(first){
+            checkScore(newNodeExt);
+            first = false;
+        }
         try {
             Node node = super.newNode(newNodeExt);
-//        System.out.println("test");
-//        node.setAttribute("ui.style", "fill-color: #"+Integer.toHexString(random.nextInt(256*256*256))+";");
-            HeatValueSupplier s = (HeatValueSupplier) this.int2extNodeMap.get(node);
-            if (s.getInternalLabel() instanceof Number) {
-                double fvalue = ((Number) s.getInternalLabel()).doubleValue();
+
+            if(score) {
+                Score s = (Score) this.int2extNodeMap.get(node);
+                double fvalue = s.getScore();
 
                 if (fvalue < bestFValue) {
                     bestFValue = fvalue;
@@ -48,8 +58,8 @@ public class HeatVisualization<T> extends GraphVisualization<T> {
                     colorNode(node, fvalue);
                     nodes.add(node);
                 }
-
             }
+
             System.out.println("best: " + bestFValue + " worst: " + worstFValue);
             return node;
         }
@@ -57,6 +67,15 @@ public class HeatVisualization<T> extends GraphVisualization<T> {
             e.printStackTrace();
             System.exit(0);
             return null;
+        }
+
+    }
+
+    private void checkScore(T node ) {
+        if(!(node instanceof Score)){
+            this.graph.clear();
+            this.graph.setAttribute("ui.stylesheet", "url('conf/searchgraph.css')");
+            this.score= false;
         }
 
     }

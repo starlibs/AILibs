@@ -136,6 +136,13 @@ public class GraphVisualization<T> {
         }
     }
 
+    /**
+     * Creation of a new node in the graph
+     * @param newNodeExt
+     *      The external representation of the node
+     * @return
+     *      The internal representation of the node
+     */
     protected synchronized Node newNode(final T newNodeExt) {
 
         /* create new node */
@@ -153,6 +160,15 @@ public class GraphVisualization<T> {
         return newNodeInt;
     }
 
+    /**
+     * Creation of a new edge in the graph
+     * @param from
+     *      The source of the edge
+     * @param to
+     *      The endpoint of the edge
+     * @return
+     *      The new edge
+     */
     protected synchronized Edge newEdge(final T from, final T to) {
         final Node fromInt = this.ext2intNodeMap.get(from);
         final Node toInt = this.ext2intNodeMap.get(to);
@@ -161,7 +177,8 @@ public class GraphVisualization<T> {
         if (toInt == null)
             throw new IllegalArgumentException("Cannot insert edge between " + from + " and " + to + " since node " + to + " does not exist.");
         final String edgeId = fromInt.getId() + "-" + toInt.getId();
-//TODO		return this.graph.addEdge(edgeId, fromInt, toInt, true);
+        //TODO directed edge?
+//		return this.graph.addEdge(edgeId, fromInt, toInt, true);
         return this.graph.addEdge(edgeId, fromInt, toInt, false);
     }
 
@@ -175,6 +192,9 @@ public class GraphVisualization<T> {
         return false;
     }
 
+    /**
+     * Resets the visualization of the graph
+     */
     public void reset(){
         this.ext2intNodeMap.clear();
         this.int2extNodeMap.clear();
@@ -183,6 +203,9 @@ public class GraphVisualization<T> {
         this.graph.setAttribute("ui.stylesheet", "url('conf/searchgraph.css')");
     }
 
+    /**
+     * Used to enable node pushing etc.
+     */
     private void loopPump(){
         while (loop) {
             try {
