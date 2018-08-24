@@ -10,7 +10,7 @@ public class Node<T, V extends Comparable<V>> implements Serializable, Comparabl
 	private static final long serialVersionUID = -7608088086719059550L;
 	private final T externalLabel;
 	private boolean goal;
-	private Node<T, V> parent;
+	protected Node<T, V> parent;
 	private final Map<String, Object> annotations = new HashMap<>(); // for nodes effectively examined
 
 	public Node(Node<T, V> parent, T point) {

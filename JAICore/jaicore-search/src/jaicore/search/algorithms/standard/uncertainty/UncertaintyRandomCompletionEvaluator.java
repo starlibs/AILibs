@@ -157,7 +157,7 @@ public class UncertaintyRandomCompletionEvaluator<T, N, V extends Comparable<V>>
 
 						/* add number of samples to node  */
 						n.setAnnotation("fRPSamples", i);
-						uncertainty = this.uncertaintyCalculation.calculateUncertainty(n, completedPaths, evaluations);
+						uncertainty = this.uncertaintyCalculation.calculateUncertainty((Node<T, V>)n, completedPaths, evaluations);
 
 						if (bestCompletion == null) {
 							if (interrupted)

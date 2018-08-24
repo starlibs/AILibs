@@ -1,6 +1,11 @@
 package jaicore.search.algorithms.standard.uncertainty;
 
-public class OversearchAvoidanceConfig<N> {
+import jaicore.search.algorithms.standard.uncertainty.paretosearch.FirstInFirstOutComparator;
+import jaicore.search.algorithms.standard.uncertainty.paretosearch.ParetoNode;
+
+import java.util.Comparator;
+
+public class OversearchAvoidanceConfig<N, V extends Comparable<V>> {
 	
 	public enum OversearchAvoidanceMode {
 		PARETO_FRONT_SELECTION,
@@ -9,6 +14,7 @@ public class OversearchAvoidanceConfig<N> {
 	}
 	
 	private OversearchAvoidanceMode oversearchAvoidanceMode;
+	private long seed;
 	private boolean adjustPhaseLengthsDynamically = false;
 	private long timeout;
 	private int interval = 20;
@@ -16,10 +22,18 @@ public class OversearchAvoidanceConfig<N> {
 	private double exploitationScoreThreshold = 0.05d;
 	private double explorationUncertaintyThreshold = 0.05d;
 	private double minimumSolutionDistanceForExploration = 0.5d;
+	private IUncertaintySource<N, V> uncertaintySource = new BasicUncertaintySource<>();
 	private ISolutionDistanceMetric<N> solutionDistanceMetric= (s1, s2) -> 0.0d;
+	private Comparator<ParetoNode<N, V>> paretoComparator = new FirstInFirstOutComparator<>();
 
-	public OversearchAvoidanceConfig(OversearchAvoidanceMode mode) {
+	public OversearchAvoidanceConfig() {
+		this.oversearchAvoidanceMode = OversearchAvoidanceMode.NONE;
+		this.seed = -1;
+	}
+	
+	public OversearchAvoidanceConfig(OversearchAvoidanceMode mode, long seed) {
 		this.oversearchAvoidanceMode = mode;
+		this.seed = seed;
 	}
 
 	public OversearchAvoidanceMode getOversearchAvoidanceMode() {
@@ -30,7 +44,7 @@ public class OversearchAvoidanceConfig<N> {
 		return solutionDistanceMetric;
 	}
 
-	public OversearchAvoidanceConfig<N> setSolutionDistanceMetric(ISolutionDistanceMetric<N> solutionDistanceMetric) {
+	public OversearchAvoidanceConfig<N, V> setSolutionDistanceMetric(ISolutionDistanceMetric<N> solutionDistanceMetric) {
 		this.solutionDistanceMetric = solutionDistanceMetric;
 		return this;
 	}
@@ -86,6 +100,26 @@ public class OversearchAvoidanceConfig<N> {
 
 	public void setMinimumSolutionDistanceForExploration(double minimumSolutionDistanceForExploration) {
 		this.minimumSolutionDistanceForExploration = minimumSolutionDistanceForExploration;
+	}
+	
+	public long getSeed() {
+		return this.seed;
+	}
+
+	public void setParetoComperator(Comparator<ParetoNode<N, V>> paretoComparator) {
+		this.paretoComparator = paretoComparator;
+	}
+	
+	public Comparator<ParetoNode<N, V>> getParetoComperator() {
+		return this.paretoComparator;
+	}
+
+	public IUncertaintySource<N, V> getUncertaintySource() {
+		return uncertaintySource;
+	}
+
+	public void setUncertaintySource(IUncertaintySource<N, V> uncertaintySource) {
+		this.uncertaintySource = uncertaintySource;
 	}
 
 }

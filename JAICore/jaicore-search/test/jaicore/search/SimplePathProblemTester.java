@@ -18,9 +18,9 @@ import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 public class SimplePathProblemTester {
 
 	@Test
-	public void test() {
-		
-		GraphGenerator<Integer, Object> gen = new GraphGenerator<Integer,Object>() {
+	public void test() throws InterruptedException {
+
+		GraphGenerator<Integer, Object> gen = new GraphGenerator<Integer, Object>() {
 
 			@Override
 			public SingleRootGenerator<Integer> getRootGenerator() {
@@ -40,7 +40,7 @@ public class SimplePathProblemTester {
 			@Override
 			public PathGoalTester<Integer> getGoalTester() {
 				return p -> {
-					int sum = 0; 
+					int sum = 0;
 					for (Integer i : p) {
 						sum += i;
 					}
@@ -56,14 +56,14 @@ public class SimplePathProblemTester {
 			@Override
 			public void setNodeNumbering(boolean nodenumbering) {
 				// TODO Auto-generated method stub
-				
+
 			}
 		};
-		
+
 		BestFirst<Integer, Object> bf = new BestFirst<>(gen, n -> 0.0);
-//		new SimpleGraphVisualizationWindow<>(bf.getEventBus()).getPanel().setTooltipGenerator(n -> n.getPoint().toString());
+		// new SimpleGraphVisualizationWindow<>(bf.getEventBus()).getPanel().setTooltipGenerator(n -> n.getPoint().toString());
 		assertNotNull(bf.nextSolution());
-		
-//		while (true);
+
+		// while (true);
 	}
 }

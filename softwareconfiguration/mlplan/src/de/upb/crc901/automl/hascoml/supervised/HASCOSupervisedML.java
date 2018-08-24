@@ -102,7 +102,7 @@ public class HASCOSupervisedML extends HASCOFD<Classifier, Double> implements IO
 	 *             Throws an IOException if the components could not be loaded with the given configuration file.
 	 */
 	public HASCOSupervisedML(final ComponentLoader componentLoader) throws IOException {
-		this(componentLoader, null, null, new OversearchAvoidanceConfig<>(OversearchAvoidanceMode.NONE));
+		this(componentLoader, null, null, new OversearchAvoidanceConfig<>());
 	}
 
 	/**
@@ -119,7 +119,7 @@ public class HASCOSupervisedML extends HASCOFD<Classifier, Double> implements IO
 	 * @throws IOException
 	 *             Throws an IOException if the components could not be loaded with the given configuration file.
 	 */
-	public HASCOSupervisedML(final ComponentLoader componentLoader, final ClassifierFactory factory, final ClassifierEvaluator evaluator, final OversearchAvoidanceConfig<TFDNode> oversearchAvoidanceConfig) throws IOException {
+	public HASCOSupervisedML(final ComponentLoader componentLoader, final ClassifierFactory factory, final ClassifierEvaluator evaluator, final OversearchAvoidanceConfig<TFDNode, Double> oversearchAvoidanceConfig) throws IOException {
 		super(componentLoader.getComponents(), componentLoader.getParamConfigs(), factory, REQUESTED_INTERFACE, evaluator, oversearchAvoidanceConfig);
 	}
 
