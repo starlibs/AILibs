@@ -25,6 +25,8 @@ import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.StringToNominal;
 
 public class DatabaseConnectorImpl implements DatabaseConnector {
 
@@ -99,12 +101,25 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 				instances.add(instance);
 			}
 			rs.close();
+			instances = finalizeInstances(instances);
 
 		} catch (SQLException e) {
 			LOG.error("Cannot get instances from database", e);
 			throw new RuntimeException("Cannot get instances from database", e);
 		}
 		return instances;
+	}
+
+	private Instances finalizeInstances(Instances toFinalize) {
+		// Convert string attributes to nominal attributes
+		try {
+			StringToNominal stringToNominal = new StringToNominal();
+			stringToNominal.setInputFormat(toFinalize);
+			return Filter.useFilter(toFinalize, stringToNominal);
+		} catch (Exception e) {
+			throw new RuntimeException("Cannot finalize instances object", e);
+		}
+
 	}
 
 	private void createFeatureTable(AbstractFeature feature) throws SQLException {
