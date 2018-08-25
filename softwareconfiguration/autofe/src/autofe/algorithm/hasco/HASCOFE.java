@@ -29,20 +29,16 @@ import autofe.algorithm.hasco.filter.meta.FilterPipelineFactory;
 import autofe.util.DataSet;
 import autofe.util.DataSetUtils;
 import autofe.util.EvaluationUtils;
-import autofe.util.FilterUtils;
 import hasco.core.HASCOFD;
 import hasco.core.Solution;
-import hasco.model.Component;
 import hasco.serialization.ComponentLoader;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.IObjectEvaluator;
-import jaicore.graph.observation.IObservableGraphAlgorithm;
-import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
+import jaicore.graph.IObservableGraphAlgorithm;
 import jaicore.ml.WekaUtil;
 import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionSolution;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
-import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;
-import jaicore.search.structure.core.Node;
+import jaicore.search.algorithms.standard.uncertainty.OversearchAvoidanceConfig;
 import weka.core.Instance;
 import weka.core.Instances;
 
@@ -57,8 +53,8 @@ public class HASCOFE implements IObservableGraphAlgorithm<TFDNode, String>, ILog
 
 	// Search relevant properties
 	private File configFile;
-	private HASCOFD<FilterPipeline> hasco;
-	private HASCOFD<FilterPipeline>.HASCOSolutionIterator hascoRun;
+	private HASCOFD<FilterPipeline, Double> hasco;
+	private HASCOFD<FilterPipeline, Double>.HASCOSolutionIterator hascoRun;
 	// private INodeEvaluator<TFDNode, Double> nodeEvaluator;
 
 	private final int[] inputShape;
@@ -78,6 +74,9 @@ public class HASCOFE implements IObservableGraphAlgorithm<TFDNode, String>, ILog
 			return o1.getScore().compareTo(o2.getScore());
 		}
 	});
+
+	private OversearchAvoidanceConfig<TFDNode> oversearchAvoidanceConfig = new OversearchAvoidanceConfig<>(
+			OversearchAvoidanceConfig.OversearchAvoidanceMode.NONE);
 
 	public static class HASCOFESolution extends Solution<ForwardDecompositionSolution, FilterPipeline, Double> {
 		public HASCOFESolution(Solution<ForwardDecompositionSolution, FilterPipeline, Double> solution) {
@@ -120,34 +119,41 @@ public class HASCOFE implements IObservableGraphAlgorithm<TFDNode, String>, ILog
 			};
 		}
 
-		if (nodeEvaluator != null) {
-			nodeEvaluator.setHascoFE(this);
-			nodeEvaluator.setData(data);
-
-			this.hasco = new HASCOFD<>(new FilterPipelineFactory(this.inputShape), nodeEvaluator, "FilterPipeline",
-					objectEvaluator);
-		} else {
-			this.hasco = new HASCOFD<>(new FilterPipelineFactory(this.inputShape), n -> null, "FilterPipeline",
-					objectEvaluator);
-		}
-
-		// Set number of CPUs
-		// this.hasco.setNumberOfCPUs(8);
-		this.hasco.setNumberOfCPUs(Runtime.getRuntime().availableProcessors());
-
-		if (this.loggerName != null && this.loggerName.length() > 0)
-			this.hasco.setLoggerName(loggerName + ".hasco");
-
 		try {
 			ComponentLoader cl = new ComponentLoader();
 			cl.loadComponents(this.configFile);
-			this.hasco.addComponents(cl.getComponents());
-			this.hasco.addParamRefinementConfigurations(cl.getParamConfigs());
+			// this.hasco.addComponents(cl.getComponents());
+			// this.hasco.addParamRefinementConfigurations(cl.getParamConfigs());
+
+			if (nodeEvaluator != null) {
+				nodeEvaluator.setHascoFE(this);
+				nodeEvaluator.setData(data);
+
+				this.hasco = new HASCOFD<>(cl.getComponents(), cl.getParamConfigs(),
+						new FilterPipelineFactory(this.inputShape), nodeEvaluator, "FilterPipeline", objectEvaluator,
+						this.oversearchAvoidanceConfig);
+			} else {
+
+				this.hasco = new HASCOFD<>(cl.getComponents(), cl.getParamConfigs(),
+						new FilterPipelineFactory(this.inputShape), n -> {
+							return new Random(42).nextDouble();
+						}, "FilterPipeline", objectEvaluator, this.oversearchAvoidanceConfig);
+			}
+
+			// Set number of CPUs
+			// this.hasco.setNumberOfCPUs(8);
+			// this.hasco.setNumberOfCPUs(Runtime.getRuntime().availableProcessors());
+			this.hasco.setNumberOfCPUs(1);
+
+			if (this.loggerName != null && this.loggerName.length() > 0)
+				this.hasco.setLoggerName(loggerName + ".hasco");
+
 		} catch (IOException e) {
 			logger.warn("Could not import configuration file. Using default components instead...");
-			e.printStackTrace();
-			final List<Component> components = FilterUtils.getDefaultComponents();
-			this.hasco.addComponents(components);
+			System.exit(1);
+			// e.printStackTrace();
+			// final List<Component> components = FilterUtils.getDefaultComponents();
+			// this.hasco.addComponents(components);
 		}
 
 		// Add listeners
@@ -158,6 +164,8 @@ public class HASCOFE implements IObservableGraphAlgorithm<TFDNode, String>, ILog
 	}
 
 	public void runSearch(final int timeoutInMS) {
+
+		logger.info("Run HASCOFE search...");
 
 		long start = System.currentTimeMillis();
 		long deadline = start + timeoutInMS;
@@ -190,8 +198,11 @@ public class HASCOFE implements IObservableGraphAlgorithm<TFDNode, String>, ILog
 		boolean deadlineReached = false;
 		while (!this.isCanceled && this.hascoRun.hasNext()
 				&& (timeoutInMS <= 0 || !(deadlineReached = System.currentTimeMillis() >= deadline))) {
+			logger.debug("Searching for next...");
 			HASCOFESolution nextSolution = new HASCOFESolution(this.hascoRun.next());
+			logger.debug("Found new one.");
 			this.solutionsFoundByHASCO.add(nextSolution);
+
 		}
 		if (deadlineReached) {
 			logger.info("Deadline has been reached.");
@@ -234,16 +245,17 @@ public class HASCOFE implements IObservableGraphAlgorithm<TFDNode, String>, ILog
 		this.listeners.add(listener);
 	}
 
-	public void enableVisualization() {
-		if (this.timeOfStart >= 0)
-			throw new IllegalStateException(
-					"Cannot enable visualization after buildClassifier has been invoked. Please enable it previously.");
+	// public void enableVisualization() {
+	// if (this.timeOfStart >= 0)
+	// throw new IllegalStateException(
+	// "Cannot enable visualization after buildClassifier has been invoked. Please
+	// enable it previously.");
+	//
+	// new SimpleGraphVisualizationWindow<Node<TFDNode, Double>>(this).getPanel()
+	// .setTooltipGenerator(new TFDTooltipGenerator<>());
+	// }
 
-		new SimpleGraphVisualizationWindow<Node<TFDNode, Double>>(this).getPanel()
-				.setTooltipGenerator(new TFDTooltipGenerator<>());
-	}
-
-	public HASCOFD<FilterPipeline> getHasco() {
+	public HASCOFD<FilterPipeline, Double> getHasco() {
 		return hasco;
 	}
 

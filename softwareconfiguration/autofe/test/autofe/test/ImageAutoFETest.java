@@ -34,12 +34,12 @@ import weka.core.Instances;
 public class ImageAutoFETest {
 	private static final Logger logger = LoggerFactory.getLogger(ImageAutoFETest.class);
 
-	private static final int MLPLAN_TIMEOUT = 3600;
-	private static final int AUTOFE_TIMEOUT = 3600 * 1000;
+	private static final int MLPLAN_TIMEOUT = 60;
+	private static final int AUTOFE_TIMEOUT = 30 * 1000;
 
 	private static final int MAX_PIPELINE_SIZE = 12;
 
-	private static final int USED_DATASET = DataSetUtils.CIFAR10_ID;
+	private static final int USED_DATASET = DataSetUtils.MNIST_ID;
 	private static final int[] DATASET_INPUT_SHAPE = DataSetUtils.getInputShapeByDataSet(USED_DATASET);
 
 	private static final boolean ENABLE_MLPLAN_VIS = true;
@@ -164,13 +164,20 @@ public class ImageAutoFETest {
 
 		List<Instances> dataSetVariations = HASCOFE.generateRandomDataSets(USED_DATASET, 1, MAX_PIPELINE_SIZE,
 				AUTOFE_TIMEOUT, 42);
-
+		// OpenmlConnector connector = new OpenmlConnector();
+		// DataSetDescription ds = connector.dataGet(USED_DATASET);
+		// File file = ds.getDataset(DataSetUtils.API_KEY);
+		// Instances data = new Instances(new BufferedReader(new FileReader(file)));
+		// data.setClassIndex(data.numAttributes() - 1);
+		// List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(42),
+		// .05f);
+		//
 		long timeDataSetVar = System.currentTimeMillis();
 		System.out.println("timeDataSetVar: " + timeDataSetVar);
 
 		double mlPlanScore = EvaluationUtils.evaluateMLPlan(MLPLAN_TIMEOUT, dataSetVariations.get(0), 0.75, 42, logger,
 				false, 6);
-		System.out.println(mlPlanScore);
+		System.out.println("MLPLan Score: " + mlPlanScore);
 
 		long endTime = System.currentTimeMillis();
 		System.out.println("timeDataSetVar: " + timeDataSetVar);
