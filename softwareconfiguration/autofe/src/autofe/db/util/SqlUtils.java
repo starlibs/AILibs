@@ -96,7 +96,8 @@ public class SqlUtils {
 	}
 
 	public static String generateBackwardSql(List<ForwardRelationship> joins, BackwardFeature feature, Database db) {
-		Path path = feature.getPath();
+		Path path = new Path(feature.getPath());
+		
 		// Add joins to path
 		for (ForwardRelationship fr : joins) {
 			path.addPathElement(fr, null);
