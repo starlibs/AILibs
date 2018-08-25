@@ -13,6 +13,7 @@ import autofe.db.sql.DatabaseConnector;
 import autofe.db.sql.DatabaseConnectorImpl;
 import autofe.db.util.DBUtils;
 import autofe.util.EvaluationUtils;
+import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import jaicore.search.algorithms.standard.core.INodeEvaluator;
 import jaicore.search.algorithms.standard.rdfs.RandomizedDepthFirstSearch;
@@ -27,7 +28,7 @@ import weka.core.Instances;
 
 public class DatabaseNodeEvaluator implements INodeEvaluator<DatabaseNode, Double> {
 
-	private static Logger LOG = LoggerFactory.getLogger(DBUtils.class);
+	private static Logger LOG = LoggerFactory.getLogger(DatabaseNodeEvaluator.class);
 
 	private static final int RANDOM_COMPLETION_PATH_LENGTH = 2;
 
@@ -66,6 +67,17 @@ public class DatabaseNodeEvaluator implements INodeEvaluator<DatabaseNode, Doubl
 
 	@Override
 	public Double f(Node<DatabaseNode, ?> node) throws Throwable {
+		if (node.getPoint().getSelectedFeatures().isEmpty()) {
+			LOG.warn("Return default value (0) for empty node");
+			return new Double(0);
+		}
+		if (node.getPoint().isFinished()) {
+			LOG.warn("Skip random completion for finished node!");
+			Instances instances = databaseConnector.getInstances(node.getPoint().getSelectedFeatures());
+			double result = evaluateInstances(instances);
+			LOG.debug("Evaluation result (without random completion) is {}", result);
+			return result;
+		}
 		LOG.info("Evaluation node with features : {}", node.getPoint().getSelectedFeatures());
 		int requiredNumberOfFeatures = node.getPoint().getSelectedFeatures().size() + randomCompletionPathLength;
 		LOG.debug("Required features : {}", requiredNumberOfFeatures);
@@ -125,11 +137,14 @@ public class DatabaseNodeEvaluator implements INodeEvaluator<DatabaseNode, Doubl
 
 					}
 				}, this.random);
+
 		List<DatabaseNode> solution = randomCompletionSearch.nextSolution();
+		if (solution == null) {
+			throw new RuntimeException("Random completion did not find a solution!");
+		}
 		DatabaseNode goalNode = solution.get(solution.size() - 1);
 		LOG.info("Result of random completion is node with features : {}", goalNode.getSelectedFeatures());
 		Instances instances = databaseConnector.getInstances(goalNode.getSelectedFeatures());
-		LOG.debug(instances.toString());
 		double result = evaluateInstances(instances);
 		LOG.debug("Evaluation result is {}", result);
 		return result;
