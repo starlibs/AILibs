@@ -15,7 +15,7 @@ import weka.core.Instances;
 public class DatabaseProcessor {
 
 	private static final int TIMEOUT_F_COMPUTATION_MS = 10000;
-	
+
 	private Database database;
 
 	private DatabaseAutoFeConfiguration configuration;
@@ -32,11 +32,12 @@ public class DatabaseProcessor {
 
 	public Instances selectFeatures() {
 		long timeout = System.currentTimeMillis() + configuration.getTimeoutInMs();
-		
+
 		// Setup
 		DatabaseGraphGenerator generator = new DatabaseGraphGenerator(database);
 		DatabaseNodeEvaluator evaluator = new DatabaseNodeEvaluator(generator,
-				configuration.getRandomCompletionPathLength(), configuration.getSeed());
+				configuration.getRandomCompletionPathLength(), configuration.getSeed(),
+				configuration.getEvaluationFunction());
 		BestFirst<DatabaseNode, String> search = new BestFirst<>(generator, evaluator);
 		search.setTimeoutForComputationOfF(TIMEOUT_F_COMPUTATION_MS, node -> 100.0);
 

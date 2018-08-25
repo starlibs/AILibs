@@ -2,6 +2,7 @@ package autofe.db.search;
 
 import java.util.List;
 import java.util.Random;
+import java.util.function.Function;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +39,8 @@ public class DatabaseNodeEvaluator implements INodeEvaluator<DatabaseNode, Doubl
 
 	private long seed;
 
+	private String evaluationFunctionName;
+
 	private DatabaseConnector databaseConnector;
 
 	private DatabaseGraphGenerator generator;
@@ -54,15 +57,18 @@ public class DatabaseNodeEvaluator implements INodeEvaluator<DatabaseNode, Doubl
 		this.db = generator.getDatabase();
 		this.databaseConnector = new DatabaseConnectorImpl(db);
 		this.random = new Random(seed);
+		this.evaluationFunctionName = "COCO";
 	}
 
-	public DatabaseNodeEvaluator(DatabaseGraphGenerator generator, int randomCompletionPathLength, long seed) {
+	public DatabaseNodeEvaluator(DatabaseGraphGenerator generator, int randomCompletionPathLength, long seed,
+			String evaluationFunction) {
 		this.generator = generator;
 		this.randomCompletionPathLength = randomCompletionPathLength;
 		this.seed = seed;
 		this.db = generator.getDatabase();
 		this.databaseConnector = new DatabaseConnectorImpl(db);
 		this.random = new Random(seed);
+		this.evaluationFunctionName = evaluationFunction;
 	}
 
 	@Override
@@ -151,8 +157,10 @@ public class DatabaseNodeEvaluator implements INodeEvaluator<DatabaseNode, Doubl
 	}
 
 	private double evaluateInstances(Instances instances) {
+		Function<Instances, Double> benchmarkFunction = EvaluationUtils
+				.getBenchmarkFuntionByName(evaluationFunctionName);
 		try {
-			return EvaluationUtils.calculateCOCOForBatch(instances);
+			return benchmarkFunction.apply(instances);
 		} catch (Exception e) {
 			throw new RuntimeException("Cannot evaluate instances", e);
 		}
