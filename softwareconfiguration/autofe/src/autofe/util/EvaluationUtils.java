@@ -51,6 +51,8 @@ import weka.filters.unsupervised.attribute.Remove;
 public final class EvaluationUtils {
 	private static final Logger logger = LoggerFactory.getLogger(EvaluationUtils.class);
 
+	private static double DOUBLE_ZERO_PREC = 0.0001;
+
 	private EvaluationUtils() {
 		// Utility class
 	}
@@ -345,7 +347,9 @@ public final class EvaluationUtils {
 		}
 		for (int i = 0; i < classes; i++) {
 			c.getRow(i).divi(classCounts[i] + 1);
-			c.getRow(i).divi(c.getRow(i).norm2Number());
+			if (c.getRow(i).norm2Number().doubleValue() >= DOUBLE_ZERO_PREC
+					&& c.getRow(i).norm2Number().doubleValue() >= -DOUBLE_ZERO_PREC)
+				c.getRow(i).divi(c.getRow(i).norm2Number());
 		}
 
 		double loss = 0;
@@ -354,7 +358,9 @@ public final class EvaluationUtils {
 					batch.get(i).toDoubleArray().length - 1);
 			INDArray f_i = Nd4j.create(instValues);
 			f_i.muli(alpha);
-			f_i.divi(f_i.norm2Number());
+			if (f_i.norm2Number().doubleValue() >= DOUBLE_ZERO_PREC
+					&& f_i.norm2Number().doubleValue() >= -DOUBLE_ZERO_PREC)
+				f_i.divi(f_i.norm2Number());
 
 			double lowerSum = 0;
 			for (int j = 0; j < classes; j++) {
@@ -368,7 +374,14 @@ public final class EvaluationUtils {
 			}
 			INDArray c_k = c.getRow((int) Math.round(batch.get(i).classValue()));
 			INDArray result = f_i.mmul(c_k.transpose());
-			loss += Math.log(Math.exp(result.getDouble(0)) / (lowerSum + 1));
+
+			double expExpr = Math.exp(result.getDouble(0));
+
+			loss += Math.log(expExpr / (lowerSum + 1));
+
+			if (Double.isNaN(loss)) {
+				logger.warn("Got NaN value for COCO batch score.");
+			}
 		}
 
 		return (-1) * loss;
@@ -445,7 +458,13 @@ public final class EvaluationUtils {
 			INDArray c_k = c.getRow((int) Math.round(batch.get(i).classValue()));
 			double upperExp = Math.exp(calculateEuclideanImageDistance(f_i, c_k));
 
+			// System.out.println(loss);
+
 			loss += Math.log(upperExp / (lowerSum + 1));
+
+			if (Double.isNaN(loss)) {
+				logger.warn("Got NaN value for COED batch score.");
+			}
 		}
 
 		return (-1) * loss;
@@ -457,7 +476,7 @@ public final class EvaluationUtils {
 		// sum += Math.pow((inst1.getDouble(i) - inst2.getDouble(i)), 2);
 		// }
 		// return sum / inst1.length();
-		return inst1.distance2(inst2);
+		return inst1.distance2(inst2) / inst1.length();
 	}
 
 	// private static double calculateExpEuclideanImageDistance(final INDArray
@@ -598,6 +617,7 @@ public final class EvaluationUtils {
 					return AbstractHASCOFENodeEvaluator.MAX_EVAL_VALUE;
 
 				return null;
+				// return new Random(42).nextDouble();
 			}
 		};
 	}
