@@ -26,7 +26,8 @@ import jaicore.basic.kvstore.KVStoreUtil;
 
 public class Top3ResultTableCollector {
 
-	private static final List<String> benchmarkFunctions = Arrays.asList("Random", "KernelCluster", "LDA", "KernelLDA", // "Cluster",
+	private static final List<String> benchmarkFunctions = Arrays.asList("Random", "KernelCluster", "KernelLDA", // "Cluster",
+																													// "LDA",
 			"COCO", "COED");
 
 	public static void main(final String[] args) throws Exception {
