@@ -3,6 +3,7 @@ package autofe.processor;
 import java.util.List;
 
 import autofe.db.configuration.DatabaseAutoFeConfiguration;
+import autofe.db.model.database.AbstractFeature;
 import autofe.db.model.database.Database;
 import autofe.db.search.DatabaseGraphGenerator;
 import autofe.db.search.DatabaseNode;
@@ -20,6 +21,10 @@ public class DatabaseProcessor {
 
 	private DatabaseAutoFeConfiguration configuration;
 
+	private Instances instancesWithSelectedFeatures;
+
+	private List<AbstractFeature> selectedFeatures;
+
 	public DatabaseProcessor(DatabaseAutoFeConfiguration configuration, String databaseModelFile) {
 		this.configuration = configuration;
 		this.database = DBUtils.deserializeFromFile(databaseModelFile);
@@ -30,7 +35,7 @@ public class DatabaseProcessor {
 		this.database = database;
 	}
 
-	public Instances selectFeatures() {
+	public void doFeatureSelection() {
 		long timeout = System.currentTimeMillis() + configuration.getTimeoutInMs();
 
 		// Setup
@@ -47,16 +52,33 @@ public class DatabaseProcessor {
 			solution = search.nextSolution();
 		}
 
+		if (solution == null) {
+			throw new RuntimeException("No solution found!");
+		}
+
 		DatabaseNode goal = solution.get(solution.size() - 1);
 		DatabaseConnector databaseConnector = evaluator.getDatabaseConnector();
-		Instances instances = databaseConnector.getInstances(goal.getSelectedFeatures());
+		this.instancesWithSelectedFeatures = databaseConnector.getInstances(goal.getSelectedFeatures());
+		this.selectedFeatures = goal.getSelectedFeatures();
 
 		// Delete created tables
 		databaseConnector.cleanup();
 
 		databaseConnector.close();
+	}
 
-		return instances;
+	public Instances getInstancesWithSelectedFeatures() {
+		if (instancesWithSelectedFeatures == null) {
+			throw new IllegalStateException("Instances have not been loaded yet!");
+		}
+		return instancesWithSelectedFeatures;
+	}
+
+	public List<AbstractFeature> getSelectedFeatures() {
+		if (selectedFeatures == null) {
+			throw new IllegalStateException("Features have not been selected yet!");
+		}
+		return selectedFeatures;
 	}
 
 }
