@@ -115,6 +115,10 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 		try {
 			StringToNominal stringToNominal = new StringToNominal();
 			stringToNominal.setInputFormat(toFinalize);
+			String[] options = new String[2];
+			options[0] = "-R";
+			options[1] = "first-last";
+			stringToNominal.setOptions(options);
 			return Filter.useFilter(toFinalize, stringToNominal);
 		} catch (Exception e) {
 			throw new RuntimeException("Cannot finalize instances object", e);
@@ -123,9 +127,6 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 	}
 
 	private void createFeatureTable(AbstractFeature feature) throws SQLException {
-		Table targetTarget = DBUtils.getTargetTable(db);
-		Table featureTable = DBUtils.getAttributeTable(feature.getParent(), db);
-		List<ForwardRelationship> joinRelations = DBUtils.getJoinTables(targetTarget, featureTable, db);
 		if (feature instanceof ForwardFeature) {
 			createForwardFeatureTable((ForwardFeature) feature);
 		} else {
