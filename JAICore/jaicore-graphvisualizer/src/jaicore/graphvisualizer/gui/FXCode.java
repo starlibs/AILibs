@@ -3,6 +3,7 @@ package jaicore.graphvisualizer.gui;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.common.reflect.ClassPath;
+import jaicore.graphvisualizer.events.controlEvents.FileEvent;
 import jaicore.graphvisualizer.events.controlEvents.NodePushed;
 import jaicore.graphvisualizer.events.controlEvents.ResetEvent;
 import jaicore.graphvisualizer.events.controlEvents.StepEvent;
@@ -18,10 +19,12 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import weka.core.stopwords.Null;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
@@ -228,7 +231,10 @@ public class FXCode implements NodeListener {
         loadButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                System.out.println("load");
+//                System.out.println("load");
+                FileChooser chooser = new FileChooser();
+                File file = chooser.showOpenDialog(null);
+                eventBus.post(new FileEvent(true,file ));
             }
         });
         nodeList.add(loadButton);
@@ -238,7 +244,9 @@ public class FXCode implements NodeListener {
         saveButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                System.out.println("save");
+                FileChooser chooser = new FileChooser();
+                File file =chooser.showSaveDialog(null);
+                eventBus.post(new FileEvent(false,file));
             }
         });
         nodeList.add(saveButton);

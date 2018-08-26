@@ -83,9 +83,8 @@ public class ScoreVisualization<T> extends GraphVisualization<T> {
     public void update(){
         System.out.println("update");
         for(Node n :nodes){
-            HeatValueSupplier s = (HeatValueSupplier) this.int2extNodeMap.get(n);
-            if(s.getInternalLabel() instanceof Number) {
-                double fvalue = ((Number) s.getInternalLabel()).doubleValue();
+            if(n instanceof Score){
+                double fvalue = ((Score) n).getScore();
                 colorNode(n, fvalue);
             }
         }

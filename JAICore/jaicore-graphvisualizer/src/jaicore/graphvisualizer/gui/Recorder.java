@@ -1,6 +1,9 @@
 package jaicore.graphvisualizer.gui;
 
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import jaicore.graph.IControllableGraphAlgorithm;
@@ -12,10 +15,10 @@ import jaicore.graphvisualizer.events.misc.AddSupplierEventNew;
 import jaicore.graphvisualizer.events.misc.InfoEvent;
 import jaicore.graphvisualizer.gui.dataSupplier.ISupplier;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
 
 /**
  * A recorder class, which is used to record GraphEvents.
@@ -142,6 +145,12 @@ public class Recorder {
         }
         if(event instanceof ResetEvent)
             reset();
+        if(event instanceof FileEvent){
+            if(((FileEvent) event).isLoad())
+                this.load(((FileEvent) event).getFile());
+            else
+                this.save(((FileEvent) event).getFile());
+        }
     }
 
 
@@ -311,5 +320,141 @@ public class Recorder {
                 ((IControllableGraphAlgorithm) this.algorithm).step(node);
             }
         }
+    }
+
+
+    /**Saves the Events in a file
+     *
+     * @param file
+     * 		The file to which the events are stored.
+     */
+    private void save(File file){
+        ObjectMapper mapper = new ObjectMapper();
+
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+        try{
+            List mapperList = new ArrayList();
+
+            List<LinkedHashMap<Long,Object>> saveList = new ArrayList();
+
+            for(int i = 0; i < receivedEvents.size(); i++){
+                Object event = receivedEvents.get(i);
+                LinkedHashMap<Long, Object> timeToEvent = new LinkedHashMap();
+                int code = 0;
+
+                //Maps times to the hashcodes of the events
+                switch (event.getClass().getSimpleName()){
+                    case "GraphInitializedEvent":
+                        GraphInitializedEvent graphInitializedEvent = (GraphInitializedEvent) event;
+                        code = graphInitializedEvent.getRoot().hashCode();
+                        timeToEvent.put(receivingTimes.get(i), new GraphInitializedEvent(code));
+                        break;
+
+                    case "NodeTypeSwitchEvent":
+                        NodeTypeSwitchEvent nodeTypeSwitchEvent = (NodeTypeSwitchEvent) event;
+                        code = nodeTypeSwitchEvent.getNode().hashCode();
+
+                        timeToEvent.put(receivingTimes.get(i), new NodeTypeSwitchEvent(code, nodeTypeSwitchEvent.getType()));
+                        break;
+
+                    case "NodeReachedEvent":
+                        NodeReachedEvent nodeReachedEvent = (NodeReachedEvent) event;
+                        code = nodeReachedEvent.getNode().hashCode();
+                        timeToEvent.put(receivingTimes.get(i), new NodeReachedEvent(nodeReachedEvent.getParent().hashCode(),code, nodeReachedEvent.getType()));
+                        break;
+
+                    default:
+                        System.out.println("not an allowed event");
+                        break;
+                }
+                saveList.add(timeToEvent);
+            }
+//			add the serialized supplier to a list which gets saved
+            mapperList.add(saveList);
+            HashSet<JsonNode> supplierHashSet = new HashSet<>();
+
+            supplier.stream().forEach(supplier->{
+                supplierHashSet.add(supplier.getSerialization());
+            });
+
+            mapperList.add(supplierHashSet);
+
+            mapper.writeValue(file, mapperList);
+
+
+
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+
+
+    }
+
+    /**
+     * Load events from a file
+     * @param file
+     */
+    private void load(File file) {
+
+        //clear existing events
+        this.receivedEvents.clear();
+        this.receivingTimes.clear();
+
+        this.reset();
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        try {
+            List mapperList = mapper.readValue(file, mapper.getTypeFactory().constructCollectionType(List.class, Object.class));
+            ArrayList eventList = (ArrayList) mapperList.get(0);
+//			create the events out of the stored ones. In the newly loaded events the hashcode of the nodes of the old ones are the whole node
+            eventList.stream().forEach(n->{
+                LinkedHashMap map = (LinkedHashMap) n;
+                map.keySet().stream().forEach(time->receivingTimes.add(Long.parseLong((String) time)));
+                map.values().stream().forEach(v->{
+                    LinkedHashMap eventMap = (LinkedHashMap) v;
+
+                    int node;
+                    Object event;
+                    switch(eventMap.get("name").toString()){
+                        case "GraphInitializedEvent":
+                            int hashCode= (int) eventMap.get("root");
+                            event = new GraphInitializedEvent(Integer.parseInt(String.valueOf(eventMap.get("root"))));
+                            System.out.println(hashCode);
+                            break;
+
+                        case "NodeTypeSwitchEvent":
+                            node = Integer.parseInt(String.valueOf(eventMap.get("node")));
+                            event = new NodeTypeSwitchEvent(node, eventMap.get("type").toString());
+                            break;
+
+                        case "NodeReachedEvent":
+                            int parent = Integer.parseInt(String.valueOf(eventMap.get("parent")));
+                            node = Integer.parseInt(String.valueOf(eventMap.get("node")));
+                            event = new NodeReachedEvent(parent, node, eventMap.get("type").toString());
+                            break;
+
+                        default:
+                            event = null;
+
+
+                    }
+                    if(event != null)
+                        this.receiveGraphEvent((GraphEvent) event);
+                });
+            });
+            // create the supplier if possible
+//            mapperList.stream().filter(o-> mapperList.indexOf(o)!=0).forEach(o->{
+//                ArrayList m = (ArrayList) o;
+//                LinkedHashMap map = (LinkedHashMap) m.get(0);
+//                ReconstructionDataSupplier supplier = new ReconstructionDataSupplier(map);
+//                this.addDataSupplier(supplier);
+//            });
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 }
