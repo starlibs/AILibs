@@ -206,7 +206,7 @@ public class PerformanceKnowledgeBase {
 				}
 				Attribute scoreAttr = new Attribute("performance_score");
 				attributes.add(scoreAttr);
-				instances = new Instances("performance_samples", allAttributes, 16);
+				instances = new Instances("performance_samples", attributes, 16);
 				instances.setClass(scoreAttr);
 				performanceInstancesIndividualComponents.get(benchmarkName).put(ci.getComponent().getName(), instances);
 			}
@@ -233,7 +233,8 @@ public class PerformanceKnowledgeBase {
 		Attribute scoreAttr = instances.classAttribute();
 		instance.setValue(scoreAttr, score);
 		performanceInstancesByIdentifier.get(benchmarkName).get(identifier).add(instance);
-
+	
+		
 		// Add Instance for individual component
 		for(ComponentInstance ci : componentInstances) {
 			Instances instancesInd = performanceInstancesIndividualComponents.get(benchmarkName).get(ci.getComponent().getName());
@@ -242,13 +243,17 @@ public class PerformanceKnowledgeBase {
 				Attribute attr = instancesInd.attribute(i);
 				Parameter param = ci.getComponent().getParameter(attr.name());
 				if(param.isCategorical()) {
-					String value = ci.getParameterValues().get(param);
+					String value = ci.getParameterValues().get(param.getName());
 					instanceInd.setValue(attr, value);
 				} else if(param.isNumeric()) {
-					double finalValue = Double.parseDouble(ci.getParameterValues().get(param));
+					double finalValue = Double.parseDouble(ci.getParameterValues().get(param.getName()));
 					instanceInd.setValue(attr, finalValue);
 				}
 			}
+			Attribute scoreAttrInd = instancesInd.classAttribute();
+			instanceInd.setValue(scoreAttrInd, score);
+			System.out.println("Adding " + instanceInd.toString());
+			performanceInstancesIndividualComponents.get(benchmarkName).get(ci.getComponent().getName()).add(instanceInd);
 		}
 
 		if (addToDB)
@@ -653,5 +658,9 @@ public class PerformanceKnowledgeBase {
 	public Instances createInstancesForPerformanceSamples(String benchmarkName, ComponentInstance composition) {
 		String identifier = Util.getComponentNamesOfComposition(composition);
 		return this.performanceInstancesByIdentifier.get(benchmarkName).get(identifier);
+	}
+	
+	public Instances getPerformanceSamplesForIndividualComponent(String benchmarkName, Component component) {
+		return this.performanceInstancesIndividualComponents.get(benchmarkName).get(component.getName());
 	}
 }

@@ -59,18 +59,19 @@ public class PerformanceKnowledgeBaseTest {
 		ComponentInstance ci2 = new ComponentInstance(comp, paramValues2, satisfactionOfRequiredInterfaces);
 		ComponentInstance ci3 = new ComponentInstance(comp, paramValues3, satisfactionOfRequiredInterfaces);
 		
-		System.out.println(ci1.getParameterValues());
+//		System.out.println(ci1.getParameterValues());
 		
 		pKB.addPerformanceSample("test", ci1, 0.7754, false);
 		pKB.addPerformanceSample("test", ci2, 0.1154, false);
 		pKB.addPerformanceSample("test", ci3, 0.3333, false);
 		
-		System.out.println(pKB.createInstancesForPerformanceSamples("test", ci1));
-		String identifier = Util.getComponentNamesOfComposition(ci1);
+//		System.out.println(pKB.createInstancesForPerformanceSamples("test", ci1));
+//		String identifier = Util.getComponentNamesOfComposition(ci1);
 //		System.out.println("Number completely distinct samples: " + pKB.getNumCompletelyDistinctSamples("test", identifier));
 
 //		System.out.println("PKB has k distinct values: " + pKB.kCompletelyDistinctSamplesAvailable("test", ci1, 3));
-		System.out.println("PKB has k distinct values: " + pKB.kDistinctAttributeValuesAvailable("test", ci1, 3));
+//		System.out.println("PKB has k distinct values: " + pKB.kDistinctAttributeValuesAvailable("test", ci1, 3));
+		System.out.println(pKB.getPerformanceSamplesForIndividualComponent("test", comp));
 	}
 
 }
