@@ -1,5 +1,6 @@
 package jaicore.search.gui.dataSupplier;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,7 +17,7 @@ import jaicore.graphvisualizer.events.graphEvents.GraphEvent;
 import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
-import jaicore.graphvisualizer.guiOld.dataSupplier.ISupplier;
+import jaicore.graphvisualizer.gui.dataSupplier.ISupplier;
 import jaicore.search.structure.core.Node;
 
 /**
@@ -38,7 +39,8 @@ public class NodeExpansionSupplier implements ISupplier {
 	
 	private int index;
 
-	private boolean live;
+	private int currentIndex;
+
 	
 	/**
 	 * Creates a new NodeExpansionSupplier
@@ -49,7 +51,7 @@ public class NodeExpansionSupplier implements ISupplier {
 		events = new ArrayList<GraphEvent>();
 		currentRoot = null;
 		index = 0;
-		this.live = false;
+
 	}
 
 	
@@ -75,10 +77,9 @@ public class NodeExpansionSupplier implements ISupplier {
 			show(0);
 		}
 
-		if (event instanceof IsLiveEvent)
-			this.live = ((IsLiveEvent) event).isLive();
 
-		if(!live && event instanceof StepEvent)
+
+		if(event instanceof StepEvent)
 			if(((StepEvent) event).forward()) {
 				index += ((StepEvent) event).getSteps();
 				if(currentRoot != null)
@@ -101,19 +102,21 @@ public class NodeExpansionSupplier implements ISupplier {
  * @param start
  */
 	private void show(int start){
-		
-		for (int i = start; i < index; i++) {
-			if(eventContains(currentRoot, events.get(i))) {
-				if(events.get(i) instanceof NodeReachedEvent) {
-					NodeReachedEvent event = (NodeReachedEvent) events.get(i);
-					if(event.getNode().equals(currentRoot)) {
-						this.eventbus.post(new GraphInitializedEvent(event.getNode()));
-						continue;
-					}
-				}
-				this.eventbus.post(events.get(i));
-			}
-		}
+		int i = start;
+//		for (int i = start; i < index; i++) {
+        while(i < index && i < events.size()){
+            if (eventContains(currentRoot, events.get(i))) {
+                if (events.get(i) instanceof NodeReachedEvent) {
+                    NodeReachedEvent event = (NodeReachedEvent) events.get(i);
+                    if (event.getNode().equals(currentRoot)) {
+                        this.eventbus.post(new GraphInitializedEvent(event.getNode()));
+                        continue;
+                    }
+                }
+                this.eventbus.post(events.get(i));
+            }
+            i++;
+        }
 	}
 	
 	/**

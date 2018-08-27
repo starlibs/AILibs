@@ -11,6 +11,8 @@ import jaicore.search.structure.core.Node;
 
 public class BestFGraphDataSupplier implements IGraphDataSupplier {
 
+    //TODO
+
     TreeMap<Long, Comparable>  map;
 
     BestFGraphDataVisualizer visu;

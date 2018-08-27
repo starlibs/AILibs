@@ -8,12 +8,12 @@ import com.google.common.eventbus.Subscribe;
 import jaicore.graphvisualizer.TooltipGenerator;
 import jaicore.graphvisualizer.events.controlEvents.ControlEvent;
 import jaicore.graphvisualizer.events.controlEvents.NodePushed;
+import jaicore.graphvisualizer.events.graphEvents.GraphEvent;
 import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
-import jaicore.graphvisualizer.events.graphEvents.GraphEvent;
 import jaicore.graphvisualizer.events.misc.HTMLEvent;
-import jaicore.graphvisualizer.guiOld.dataSupplier.ISupplier;
+import jaicore.graphvisualizer.gui.dataSupplier.ISupplier;
 import jaicore.search.structure.core.Node;
 
 import java.util.ArrayList;
@@ -30,7 +30,6 @@ public class TooltipSupplier implements ISupplier {
 
     private EventBus dataBus;
     private TooltipGenerator generator;
-//    private String visualizer;
     private String title;
 
     private Map<Integer, String> tooltipMap;
@@ -38,25 +37,9 @@ public class TooltipSupplier implements ISupplier {
     public TooltipSupplier() {
         this.dataBus = new EventBus();
         this.tooltipMap = new HashMap<>();
-//        this.visualizer = "HTMLVisualizer";
         this.title = "Tooltips";
     }
 
-    @Override
-    public void registerListener(Object listener) {
-        this.dataBus.register(listener);
-    }
-
-//    @Override
-//    public String getVisualizerName() {
-//        return visualizer;
-//
-//    }
-
-//    @Override
-//    public String getVisualizerTitle() {
-//        return title;
-//    }
 
     public void setGenerator(TooltipGenerator generator) {
         this.generator = generator;
@@ -84,6 +67,11 @@ public class TooltipSupplier implements ISupplier {
     public void receiveControlEvent(ControlEvent event){
         if(event instanceof NodePushed)
             this.dataBus.post(new HTMLEvent(tooltipMap.get(((NodePushed)event).getNode().hashCode())));
+    }
+
+    @Override
+    public void registerListener(Object listener) {
+        this.dataBus.register(listener);
     }
 
     @Subscribe

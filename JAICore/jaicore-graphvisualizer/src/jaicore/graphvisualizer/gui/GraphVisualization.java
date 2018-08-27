@@ -93,7 +93,7 @@ public class GraphVisualization<T> {
             newEdge(e.getParent(), e.getNode());
 			ext2intNodeMap.get(e.getNode()).setAttribute("ui.class", e.getType());
         } catch (Exception ex) {
-            ex.printStackTrace();
+//            ex.printStackTrace();
         }
     }
 
@@ -106,7 +106,7 @@ public class GraphVisualization<T> {
                 throw new NoSuchElementException("Cannot switch type of node " + e.getNode() + ". This node has not been reached previously.");
 			ext2intNodeMap.get(e.getNode()).setAttribute("ui.class", e.getType());
         } catch (Exception ex) {
-            ex.printStackTrace();
+//            ex.printStackTrace();
         }
     }
 
@@ -121,7 +121,7 @@ public class GraphVisualization<T> {
 
         }
         catch(Exception ex) {
-            ex.printStackTrace();
+//            ex.printStackTrace();
         }
     }
 

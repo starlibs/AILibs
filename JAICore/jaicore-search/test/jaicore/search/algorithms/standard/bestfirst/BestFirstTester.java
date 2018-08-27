@@ -5,11 +5,11 @@ import static org.junit.Assert.assertNotNull;
 import java.util.ArrayList;
 import java.util.List;
 
+import jaicore.search.gui.dataSupplier.TooltipSupplier;
 import org.junit.Test;
 
 import jaicore.basic.PerformanceLogger;
 import jaicore.basic.PerformanceLogger.PerformanceMeasure;
-import jaicore.search.gui.dataSupplier.TooltipSupplier;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
 import jaicore.search.structure.core.NodeExpansionDescription;
@@ -17,7 +17,7 @@ import jaicore.search.structure.core.NodeType;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
-import jaicore.graphvisualizer.guiOld.VisualizationWindow;
+import jaicore.graphvisualizer.gui.VisualizationWindow;
 
 public class BestFirstTester {
 

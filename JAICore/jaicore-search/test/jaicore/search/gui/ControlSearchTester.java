@@ -1,16 +1,6 @@
 package jaicore.search.gui;
 
-import static org.junit.Assert.assertNotNull;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import org.junit.Test;
-
-import jaicore.basic.PerformanceLogger;
-import jaicore.basic.PerformanceLogger.PerformanceMeasure;
-import jaicore.graphvisualizer.guiOld.VisualizationWindow;
-import jaicore.search.gui.dataSupplier.NodeExpansionSupplier;
+import jaicore.graphvisualizer.gui.VisualizationWindow;
 import jaicore.search.gui.dataSupplier.TooltipSupplier;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
@@ -19,6 +9,11 @@ import jaicore.search.structure.core.NodeType;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public class ControlSearchTester {
 
@@ -31,7 +26,7 @@ public class ControlSearchTester {
 
 	@Test
 	public void test() {
-		
+		Random random = new Random(0);
 		GraphGenerator<TestNode, String> gen = new GraphGenerator<TestNode, String>() {
 
 			@Override
@@ -68,33 +63,24 @@ public class ControlSearchTester {
 			
 		};
 		
-		ControllableBestFirst<TestNode,String> bf = new ControllableBestFirst<>(gen, n -> (double)Math.round(Math.random() * 1000));
+		//ControllableBestFirst<TestNode,String> bf = new ControllableBestFirst<>(gen, n -> (double)Math.round(Math.random() * 1000));
+		ControllableBestFirst<TestNode,String> bf = new ControllableBestFirst<>(gen, n -> random.nextDouble()*1000);
+		VisualizationWindow win = new VisualizationWindow(bf, "test");
 
-		
-		VisualizationWindow win = new VisualizationWindow<Node<TestNode, Double>>(bf, "Control-Check");
 		TooltipSupplier tooltipSupplier = new TooltipSupplier();
 		tooltipSupplier.setGenerator(node ->{
 			Node<?, ?> n = (Node<?, ?>) node;
 			String s = String.valueOf(n.getInternalLabel());
 			return s;
 		});
-		//win.addDataSupplier(tooltipSupplier);
-		
-				
-		
-		NodeExpansionSupplier nodeexpansion = new NodeExpansionSupplier();
-		win.addDataSupplier(nodeexpansion);
-		
-		
-		
-		/* find solution */
-		PerformanceLogger.logStart("search");
-//		List<TestNode> solutionPath = bf.nextSolution();
-		PerformanceLogger.logEnd("search");
-//		assertNotNull(solutionPath);
-		System.out.println("Generated " + bf.getCreatedCounter() + " nodes.");
-		PerformanceLogger.printStatsAndClear(PerformanceMeasure.TIME);
-		while (true);
+
+
+//		win.addDataSupplier(tooltipSupplier);
+//		bf.nextSolution();
+
+
+		while(true);
+
 	}
 
 }

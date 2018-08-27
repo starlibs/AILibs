@@ -44,7 +44,7 @@ public class ControllableBestFirst<T,A> extends BestFirst<T, A> implements ICont
 
 
 	@Subscribe
-	public void receiveControlEvent(ControlEvent event) {
+	public void receiveControlEvent(ControlEvent event) throws Exception {
 		// TODO Auto-generated method stub
 		
 		if(event instanceof AlgorithmEvent) {
@@ -68,7 +68,7 @@ public class ControllableBestFirst<T,A> extends BestFirst<T, A> implements ICont
 	}
 
 	@Override
-	public void step(Object node) {
+	public void step(Object node){
 		super.step((Node<T, Double>) node);
 	}
 

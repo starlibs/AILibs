@@ -12,6 +12,7 @@ public class BestFGraphDataVisualizer implements IDataVisualizer{
     LineChart<Number, Number> chart;
     XYChart.Series series;
 
+    //TODO
 
     public BestFGraphDataVisualizer(){
 

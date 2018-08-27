@@ -14,6 +14,7 @@ import jaicore.graphvisualizer.events.misc.AddSupplierEvent;
 import jaicore.graphvisualizer.events.misc.AddSupplierEventNew;
 import jaicore.graphvisualizer.events.misc.InfoEvent;
 import jaicore.graphvisualizer.gui.dataSupplier.ISupplier;
+import jaicore.graphvisualizer.gui.dataSupplier.ReconstructionDataSupplier;
 
 
 import java.io.File;
@@ -64,7 +65,7 @@ public class Recorder {
      * @param algorithm
      *      The algorithm from which the reocrder receives the events.
      */
-    public Recorder(IControllableGraphAlgorithm algorithm){
+    public Recorder(IObservableGraphAlgorithm algorithm){
         if(algorithm != null)
             algorithm.registerListener(this);
 
@@ -317,7 +318,12 @@ public class Recorder {
         if(this.index == this.receivedEvents.size()) {
             Object node = event.getNode();
             if (this.algorithm instanceof IControllableGraphAlgorithm) {
-                ((IControllableGraphAlgorithm) this.algorithm).step(node);
+                try {
+                    ((IControllableGraphAlgorithm) this.algorithm).step(node);
+
+                } catch (Exception e){
+                    System.out.println("test2");
+                }
             }
         }
     }
@@ -443,13 +449,13 @@ public class Recorder {
                         this.receiveGraphEvent((GraphEvent) event);
                 });
             });
-            // create the supplier if possible
-//            mapperList.stream().filter(o-> mapperList.indexOf(o)!=0).forEach(o->{
-//                ArrayList m = (ArrayList) o;
-//                LinkedHashMap map = (LinkedHashMap) m.get(0);
-//                ReconstructionDataSupplier supplier = new ReconstructionDataSupplier(map);
-//                this.addDataSupplier(supplier);
-//            });
+//             create the supplier if possible
+            mapperList.stream().filter(o-> mapperList.indexOf(o)!=0).forEach(o->{
+                ArrayList m = (ArrayList) o;
+                LinkedHashMap map = (LinkedHashMap) m.get(0);
+                ReconstructionDataSupplier supplier = new ReconstructionDataSupplier(map);
+                this.addDataSupplier(supplier);
+            });
 
 
         } catch (IOException e) {
