@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import hasco.core.Util;
 import hasco.model.CategoricalParameterDomain;
+import hasco.model.Component;
 import hasco.model.ComponentInstance;
 import hasco.model.NumericParameterDomain;
 import hasco.model.Parameter;
@@ -48,7 +49,7 @@ public class PerformanceKnowledgeBase {
 	/** This is map contains a String */
 	private Map<String, HashMap<String, List<Pair<ParameterConfiguration, Double>>>> performanceSamplesByIdentifier;
 	private Map<String, HashMap<String, Instances>> performanceInstancesByIdentifier;
-//	private Map<String, HashMap<String, Integer>> numberCompletelyDistinctSamples;
+	private Map<String, HashMap<String, Instances>> performanceInstancesIndividualComponents;
 
 	/**
 	 * Inner helper class for managing parameter configurations easily.
@@ -90,7 +91,7 @@ public class PerformanceKnowledgeBase {
 		// this.performanceSamplesByIdentifier = new HashMap<String, HashMap<String,
 		// List<Pair<ParameterConfiguration, Double>>>>();
 		this.performanceInstancesByIdentifier = new HashMap<String, HashMap<String, Instances>>();
-//		this.numberCompletelyDistinctSamples = new HashMap<String, HashMap<String, Integer>>();
+		this.performanceInstancesIndividualComponents = new HashMap<String, HashMap<String, Instances>>();
 	}
 
 	public PerformanceKnowledgeBase() {
@@ -100,7 +101,7 @@ public class PerformanceKnowledgeBase {
 		// this.performanceSamplesByIdentifier = new HashMap<String, HashMap<String,
 		// List<Pair<ParameterConfiguration, Double>>>>();
 		this.performanceInstancesByIdentifier = new HashMap<String, HashMap<String, Instances>>();
-//		this.numberCompletelyDistinctSamples = new HashMap<String, HashMap<String, Integer>>();
+		this.performanceInstancesIndividualComponents = new HashMap<String, HashMap<String, Instances>>();
 	}
 
 	public void addPerformanceSample(String benchmarkName, ComponentInstance componentInstance, double score,
@@ -110,9 +111,9 @@ public class PerformanceKnowledgeBase {
 		if (performanceInstancesByIdentifier.get(benchmarkName) == null) {
 			// System.out.println("Creating new HashMap");
 			HashMap<String, Instances> newMap = new HashMap<String, Instances>();
-			HashMap<String, Integer> newMap2 = new HashMap<String, Integer>();
+			HashMap<String, Instances> newMap2 = new HashMap<String, Instances>();
 			performanceInstancesByIdentifier.put(benchmarkName, newMap);
-//			numberCompletelyDistinctSamples.put(benchmarkName, newMap2);
+			performanceInstancesIndividualComponents.put(benchmarkName, newMap2);
 
 		}
 
@@ -162,11 +163,56 @@ public class PerformanceKnowledgeBase {
 			instances = new Instances("performance_samples", allAttributes, 16);
 			instances.setClass(scoreAttr);
 			performanceInstancesByIdentifier.get(benchmarkName).put(identifier, instances);
-//			numberCompletelyDistinctSamples.get(benchmarkName).put(identifier, 0);
+		}
+		// TODO Test this
+		List<ComponentInstance> componentInstances = Util.getComponentInstancesOfComposition(componentInstance);
+		ArrayList<Attribute> allAttributes = new ArrayList<Attribute>();
+		for (ComponentInstance ci : componentInstances) {
+			if (!performanceInstancesIndividualComponents.get(benchmarkName).containsKey(ci.getComponent().getName())) {
+				// System.out.println("Creating new Instances Object");
+				// Create Instances pipeline for this pipeline type
+				// ParameterConfiguration parameterConfig = new
+				// ParameterConfiguration(componentInstance);
+				Instances instances = null;
+				// Add parameter domains as attributes
+				PartialOrderedSet<Parameter> parameters = ci.getComponent().getParameters();
+				ArrayList<Attribute> attributes = new ArrayList<Attribute>(parameters.size());
+				for (Parameter parameter : parameters) {
+					ParameterDomain domain = parameter.getDefaultDomain();
+					Attribute attr = null;
+					if (domain instanceof CategoricalParameterDomain) {
+						CategoricalParameterDomain catDomain = (CategoricalParameterDomain) domain;
+						// TODO further namespacing of attributes!!!
+						attr = new Attribute(parameter.getName(),
+								Arrays.asList(catDomain.getValues()));
+					} else if (domain instanceof NumericParameterDomain) {
+						NumericParameterDomain numDomain = (NumericParameterDomain) domain;
+						// TODO is there a better way to set the range of this attribute?
+						// if(numDomain.getMin() == numDomain.getMax()) {
+						// System.out.println("Domain has range of 0, skipping it!");
+						// continue;
+						// }
+						String range = "[" + numDomain.getMin() + "," + numDomain.getMax() + "]";
+						Properties prop = new Properties();
+						prop.setProperty("range", range);
+						ProtectedProperties metaInfo = new ProtectedProperties(prop);
+						attr = new Attribute(parameter.getName(), metaInfo);
+					}
+					// System.out.println("Trying to add parameter: " + attr.name() + " for
+					// component: "
+					// + componentInstance.getComponent().getName());
+
+					attributes.add(attr);
+				}
+				Attribute scoreAttr = new Attribute("performance_score");
+				attributes.add(scoreAttr);
+				instances = new Instances("performance_samples", allAttributes, 16);
+				instances.setClass(scoreAttr);
+				performanceInstancesIndividualComponents.get(benchmarkName).put(ci.getComponent().getName(), instances);
+			}
 		}
 
 		// Add Instance for performance samples to corresponding Instances
-		// System.out.println("Adding instance");
 		Instances instances = performanceInstancesByIdentifier.get(benchmarkName).get(identifier);
 		DenseInstance instance = new DenseInstance(instances.numAttributes());
 		ParameterConfiguration config = new ParameterConfiguration(componentInstance);
@@ -177,64 +223,33 @@ public class PerformanceKnowledgeBase {
 			// System.out.println("Adding vlaue " + values.get(i).getRight() + " for
 			// Parameter " + param);
 			if (param.isCategorical()) {
-				// Enumeration<Object> e = attr.enumerateValues();
-				// System.out.println("Values: ");
-				// if (e == null) {
-				// System.out.println("Enumeration is null");
-				// } else {
-				// while (e.hasMoreElements()) {
-				// System.out.println(e.nextElement().toString());
-				// }
-				// }
 				String value = values.get(i).getRight();
-				// if (value.equals("default")) {
-				// System.out.println("Value is default!");
-				// value = (String) param.getDefaultValue();
-				// System.out.println("Default value is: " + value);
-				// }
 				instance.setValue(attr, value);
 			} else if (param.isNumeric()) {
-				// String value = values.get(i).getRight();
-				// if (value.equals("default"))
-				// value = (String) param.getDefaultValue();
 				double finalValue = Double.parseDouble(values.get(i).getRight());
 				instance.setValue(attr, finalValue);
-				// System.out.println("bounds: [" + attr.getLowerNumericBound() + "," +
-				// attr.getUpperNumericBound() + "]");
 			}
 		}
 		Attribute scoreAttr = instances.classAttribute();
 		instance.setValue(scoreAttr, score);
-		// System.out.println("Adding instance: " + instance.toString());
-		// int count =
-		// numberCompletelyDistinctSamples.get(benchmarkName).get(identifier);
-		// System.out.println("Current distinct count: " + count);
-		// boolean distinctFromAll = true;
-		// for (Instance compare : instances) {
-		// for (int i = 0; i < instances.numAttributes()-1; i++) {
-		// if ((instances.attribute(i).isNominal() || instances.attribute(i).isString())
-		// && (instances.attribute(i).numValues() < count)) {
-		// System.out.println("Skipping nominal");
-		// continue;
-		// }
-		// if(instances.attribute(i).getUpperNumericBound() <=
-		// instances.attribute(i).getLowerNumericBound()) {
-		// System.out.println("Skipping numeric");
-		// continue;
-		// }
-		// System.out.println("Comparing " + instance.value(i) + " and " +
-		// compare.value(i));
-		// if (instance.value(i) == compare.value(i)) {
-		// distinctFromAll = false;
-		// }
-		// }
-		// }
-		// System.out.println("min distinct value for attributes: " + min);
-		// if (distinctFromAll)
-		// numberCompletelyDistinctSamples.get(benchmarkName).put(identifier, count+1);
-		// System.out.println("New distinct count: " +
-		// numberCompletelyDistinctSamples.get(benchmarkName).get(identifier));
 		performanceInstancesByIdentifier.get(benchmarkName).get(identifier).add(instance);
+
+		// Add Instance for individual component
+		for(ComponentInstance ci : componentInstances) {
+			Instances instancesInd = performanceInstancesIndividualComponents.get(benchmarkName).get(ci.getComponent().getName());
+			DenseInstance instanceInd = new DenseInstance(instancesInd.numAttributes());
+			for(int i = 0; i < instancesInd.numAttributes() - 1; i++) {
+				Attribute attr = instancesInd.attribute(i);
+				Parameter param = ci.getComponent().getParameter(attr.name());
+				if(param.isCategorical()) {
+					String value = ci.getParameterValues().get(param);
+					instanceInd.setValue(attr, value);
+				} else if(param.isNumeric()) {
+					double finalValue = Double.parseDouble(ci.getParameterValues().get(param));
+					instanceInd.setValue(attr, finalValue);
+				}
+			}
+		}
 
 		if (addToDB)
 			this.addPerformanceSampleToDB(benchmarkName, componentInstance, score);
@@ -327,14 +342,17 @@ public class PerformanceKnowledgeBase {
 	 * @param identifier
 	 * @return
 	 */
-//	public int getNumCompletelyDistinctSamples(String benchmarkName, String identifier) {
-//		if (!this.numberCompletelyDistinctSamples.containsKey(benchmarkName))
-//			return 0;
-//		if (!this.numberCompletelyDistinctSamples.get(benchmarkName).containsKey(identifier))
-//			return 0;
-//
-//		return this.numberCompletelyDistinctSamples.get(benchmarkName).get(identifier);
-//	}
+	// public int getNumCompletelyDistinctSamples(String benchmarkName, String
+	// identifier) {
+	// if (!this.numberCompletelyDistinctSamples.containsKey(benchmarkName))
+	// return 0;
+	// if
+	// (!this.numberCompletelyDistinctSamples.get(benchmarkName).containsKey(identifier))
+	// return 0;
+	//
+	// return
+	// this.numberCompletelyDistinctSamples.get(benchmarkName).get(identifier);
+	// }
 
 	/**
 	 * Returns the number of significant samples for the given benchmark name and
@@ -441,9 +459,9 @@ public class PerformanceKnowledgeBase {
 		if (!this.performanceInstancesByIdentifier.get(benchmarkName).containsKey(identifier))
 			return false;
 		Instances instances = performanceInstancesByIdentifier.get(benchmarkName).get(identifier);
-		if(instances.numInstances()<minNum)
+		if (instances.numInstances() < minNum)
 			return false;
-		for (int i = 0; i < instances.numAttributes()-1; i++) {
+		for (int i = 0; i < instances.numAttributes() - 1; i++) {
 			// if the attribute is nominal or string but the number of values is smaller
 			// than k, skip it
 			if (instances.attribute(i).numValues() > 0 && instances.attribute(i).numValues() < minNum) {
@@ -469,7 +487,8 @@ public class PerformanceKnowledgeBase {
 	 * 
 	 * @param benchmarkName
 	 * @param composition
-	 * @param minNum strictly positive minimum number of samples
+	 * @param minNum
+	 *            strictly positive minimum number of samples
 	 * @return
 	 */
 	public boolean kCompletelyDistinctSamplesAvailable(String benchmarkName, ComponentInstance composition,
@@ -480,40 +499,41 @@ public class PerformanceKnowledgeBase {
 		if (!this.performanceInstancesByIdentifier.get(benchmarkName).containsKey(identifier))
 			return false;
 		Instances instances = performanceInstancesByIdentifier.get(benchmarkName).get(identifier);
-		if(instances.numInstances()==0)
+		if (instances.numInstances() == 0)
 			return false;
 		int count = 0;
-		if(minNum == 1 && instances.numInstances()>0)
+		if (minNum == 1 && instances.numInstances() > 0)
 			return true;
 		for (int i = 0; i < instances.numInstances(); i++) {
 			boolean distinctFromAll = true;
 			for (int j = 0; j < i; j++) {
 				Instance instance1 = instances.get(i);
 				Instance instance2 = instances.get(j);
-				for (int k = 0; k < instances.numAttributes()-1; k++) {
+				for (int k = 0; k < instances.numAttributes() - 1; k++) {
 					if ((instances.attribute(k).isNominal() || instances.attribute(k).isString())
 							&& (instances.attribute(k).numValues() < minNum)) {
-//						System.out.println("Skipping nominal");
+						// System.out.println("Skipping nominal");
 						continue;
 					} else if (instances.attribute(k).getUpperNumericBound() <= instances.attribute(k)
 							.getLowerNumericBound()) {
-//						System.out.println(instances.attribute(k).getLowerNumericBound() + " "
-//								+ instances.attribute(k).getUpperNumericBound());
-//						System.out.println("Skipping numeric");
+						// System.out.println(instances.attribute(k).getLowerNumericBound() + " "
+						// + instances.attribute(k).getUpperNumericBound());
+						// System.out.println("Skipping numeric");
 						continue;
 					}
-//					 System.out.println("Comparing " + instance.value(i) + " and " +
-//					 compare.value(i));
+					// System.out.println("Comparing " + instance.value(i) + " and " +
+					// compare.value(i));
 					if (instance1.value(k) == instance2.value(k)) {
-//						System.out.println(instance1.value(k) + " == " + instance2.value(k) + ": " + (instance1.value(k)==instance2.value(k)));
+						// System.out.println(instance1.value(k) + " == " + instance2.value(k) + ": " +
+						// (instance1.value(k)==instance2.value(k)));
 						distinctFromAll = false;
 					}
 				}
 			}
 			if (distinctFromAll)
 				count++;
-//				System.out.println("count: " + count);
-//				System.out.println("min num: " + minNum);
+			// System.out.println("count: " + count);
+			// System.out.println("min num: " + minNum);
 			if (count >= minNum)
 				return true;
 		}
@@ -534,7 +554,8 @@ public class PerformanceKnowledgeBase {
 	// String identifier = Util.getComponentNamesOfComposition(composition);
 	// // Add parameter domains as attributes
 	// List<ComponentInstance> componentInstances =
-	// Util.getComponentInstancesOfComposition(composition);
+	// Util.getComponentInstancesOfComposEigentlich schon zu lange nicht mehr gegen
+	// Poetry-Slammer gewettertition(composition);
 	// ArrayList<Attribute> allAttributes = new ArrayList<Attribute>();
 	// for (ComponentInstance componentInstance : componentInstances) {
 	// PartialOrderedSet<Parameter> parameters =
@@ -633,5 +654,4 @@ public class PerformanceKnowledgeBase {
 		String identifier = Util.getComponentNamesOfComposition(composition);
 		return this.performanceInstancesByIdentifier.get(benchmarkName).get(identifier);
 	}
-
 }
