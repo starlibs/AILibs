@@ -21,17 +21,17 @@ sourceSets {
 
 dependencies {
 	// project dependencies
-	//compile group: 'de.upb.isys', name: 'CRCUtils', version: '0.0.1'
+	compile group: 'de.upb.isys', name: 'CRCUtils', version: '0.0.1'
 	
 	compile project(':JAICore:jaicore-basic')
-	//compile project(':JAICore:jaicore-logic')
-	//compile project(':JAICore:jaicore-graph')
-	//compile project(':JAICore:jaicore-planning')
-	//compile project(':JAICore:jaicore-search')
-	//compile project(':JAICore:jaicore-ml')
+	compile project(':JAICore:jaicore-logic')
+	compile project(':JAICore:jaicore-graph')
+	compile project(':JAICore:jaicore-planning')
+	compile project(':JAICore:jaicore-search')
+	compile project(':JAICore:jaicore-ml')
 	
 	// basic dependencies
-	//compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.6'
+	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.6'
 	//compile group: 'org.graphstream', name: 'gs-core', version: '1.1.1'
 	//compile group: 'org.graphstream', name: 'gs-ui', version: '1.3'
 	//compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.0.pr4'

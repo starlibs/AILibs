@@ -17,6 +17,7 @@ import de.upb.crc901.automl.pipeline.basic.MLPipeline;
 import de.upb.crc901.mlplan.multiclass.weka.MLPlanWekaClassifier;
 import hasco.events.HASCOSolutionEvent;
 import jaicore.basic.SQLAdapter;
+import jaicore.concurrent.TimeoutTimer;
 import jaicore.experiments.ExperimentDBEntry;
 import jaicore.experiments.ExperimentRunner;
 import jaicore.experiments.IExperimentIntermediateResultProcessor;
@@ -45,35 +46,37 @@ public class MLPlanWekaExperimenter implements IExperimentSetEvaluator {
 		Map<String, String> experimentValues = experimentEntry.getExperiment().getValuesOfKeyFields();
 
 		File datasetFile = new File(CONFIG.getDatasetFolder().getAbsolutePath() + File.separator + experimentValues.get("dataset") + ".arff");
-		System.out.println(getTime() + ": Load dataset file: " + datasetFile.getAbsolutePath());
+		print("Load dataset file: " + datasetFile.getAbsolutePath());
 
 		Instances data = new Instances(new FileReader(datasetFile));
 		data.setClassIndex(data.numAttributes() - 1);
-
+		print("Split instances");
 		List<Instances> stratifiedSplit = WekaUtil.getStratifiedSplit(data, new Random(), .7);
 
 		MLPlanWekaClassifier mlplan = new MLPlanWekaClassifier();
 		mlplan.setTimeout(new Integer(experimentValues.get("timeout")));
-		mlplan.setTimeoutForSingleFEvaluation(new Integer(experimentValues.get("evaluationTimeout")));
+		mlplan.setTimeoutForSingleFEvaluation(new Integer(experimentValues.get("evaluationTimeout")) * 1000);
 		mlplan.setRandom(new Integer(experimentValues.get("seed")));
 		mlplan.setNumberOfCPUs(experimentEntry.getExperiment().getNumCPUs());
 		mlplan.registerListenerForSolutionEvaluations(this);
 
-		System.out.println(getTime() + ": Build mlplan classifier");
+		print("Build mlplan classifier");
 		mlplan.buildClassifier(stratifiedSplit.get(0));
 
+		print("Open timeout tasks: " + TimeoutTimer.getInstance().toString());
+
 		Evaluation eval = new Evaluation(data);
-		System.out.println(getTime() + ": Assess test performance...");
+		print("Assess test performance...");
 		eval.evaluateModel(mlplan, stratifiedSplit.get(1), new Object[] {});
 
-		System.out.println(getTime() + ": Test error was " + eval.errorRate());
+		print("Test error was " + eval.errorRate());
 		Map<String, Object> results = new HashMap<>();
 		results.put("loss", eval.errorRate());
 		results.put("classifier", WekaUtil.getClassifierDescriptor(((MLPipeline) mlplan.getSelectedClassifier()).getBaseClassifier()));
 		results.put("preprocessor", ((MLPipeline) mlplan.getSelectedClassifier()).getPreprocessors().toString());
 
 		processor.processResults(results);
-		System.out.println(getTime() + ": Experiment done.");
+		print("Experiment done.");
 	}
 
 	@Subscribe
@@ -87,19 +90,24 @@ public class MLPlanWekaExperimenter implements IExperimentSetEvaluator {
 			eval.put("time_train", e.getSolution().getTimeToComputeScore());
 			eval.put("time_predict", -1);
 			try {
-				this.adapter.insert("evaluations_mls", eval);
+				this.adapter.insert(CONFIG.evaluationsTable(), eval);
 			} catch (SQLException e1) {
 				e1.printStackTrace();
 			}
 		}
 	}
 
-	private static String getTime() {
-		return new Time(System.currentTimeMillis()).toString();
+	private static void print(final String message) {
+		System.out.println(new Time(System.currentTimeMillis()).toString() + ": " + message);
 	}
 
 	public static void main(final String[] args) {
+		print("Start experiment runner...");
 		ExperimentRunner runner = new ExperimentRunner(new MLPlanWekaExperimenter());
+		print("Conduct random experiment...");
 		runner.randomlyConductExperiments(1, false);
+		print("Experiment conducted, stop timeout timer.");
+		TimeoutTimer.getInstance().stop();
+		print("Timer stopped.");
 	}
 }

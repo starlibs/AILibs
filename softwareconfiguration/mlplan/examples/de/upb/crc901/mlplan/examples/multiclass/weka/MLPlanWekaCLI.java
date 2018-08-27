@@ -50,7 +50,7 @@ public class MLPlanWekaCLI {
 		System.out.println(getTime() + " Initialize ML-Plan...");
 		MLPlanWekaClassifier mlPlan = new MLPlanWekaClassifier();
 		mlPlan.setTimeout(CLI_CONFIG.timeout());
-		mlPlan.setTimeoutForSingleFEvaluation(CLI_CONFIG.evalTimeout());
+		mlPlan.setTimeoutForSingleFEvaluation(CLI_CONFIG.evalTimeout() * 1000);
 		mlPlan.enableVisualization(CLI_CONFIG.showGraphVisualization());
 
 		System.out.println(getTime() + " Split the data into train and test set...");

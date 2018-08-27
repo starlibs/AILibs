@@ -58,7 +58,10 @@ public class MulticlassEvaluator implements BasicMLEvaluator, Serializable {
 				this.measurementEventBus.post(new ClassifierMeasurementEvent<Double>(c, 30000.0, e));
 				return 30000d;
 			}
-			logger.error("Problems with evaluation of classifier. Details:\n{}", LoggerUtil.getExceptionInfo(e));
+			// XXX uncensor this log message as soon as TEAM-80 is done.
+			if (!e.getMessage().contains("out-of-bag error")) {
+				logger.error("Problems with evaluation of classifier. Details:\n{}", LoggerUtil.getExceptionInfo(e));
+			}
 			this.measurementEventBus.post(new ClassifierMeasurementEvent<Double>(c, null, e));
 			throw e;
 		}

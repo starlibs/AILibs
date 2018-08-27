@@ -35,7 +35,7 @@ public class TimeoutableEvaluator implements ClassifierEvaluator {
 			// hide the interrupt exception as we simply want to return the default return value.
 		} catch (Throwable e) {
 			//
-			if (!e.getMessage().contains("Killed WEKA")) {
+			if (!e.getMessage().contains("Killed WEKA") && !e.getMessage().contains("Bag size needs")) {
 				throw e;
 			}
 		} finally {

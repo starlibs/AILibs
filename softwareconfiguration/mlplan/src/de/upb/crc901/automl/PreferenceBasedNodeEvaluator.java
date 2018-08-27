@@ -44,8 +44,7 @@ public class PreferenceBasedNodeEvaluator implements INodeEvaluator<TFDNode, Dou
 				ComponentInstance search = pp.getSatisfactionOfRequiredInterfaces().get("search");
 				ComponentInstance eval = pp.getSatisfactionOfRequiredInterfaces().get("eval");
 				if (search != null && eval != null) {
-					boolean isSetEvaluator = eval.getComponent().getName().toLowerCase()
-							.matches(".*(subseteval|relief|gainratio|principalcomponents|onerattributeeval|infogainattributeeval|correlationattributeeval|symmetricaluncertattributeeval).*");
+					boolean isSetEvaluator = eval.getComponent().getName().toLowerCase().matches(".*(relief|gainratio|principalcomponents|onerattributeeval|infogainattributeeval|correlationattributeeval|symmetricaluncertattributeeval).*");
 					boolean isRanker = search.getComponent().getName().toLowerCase().contains("ranker");
 					boolean isNonRankerEvaluator = eval.getComponent().getName().toLowerCase().matches(".*(cfssubseteval).*");
 					if (isSetEvaluator && !isRanker) {
