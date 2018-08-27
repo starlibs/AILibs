@@ -136,7 +136,7 @@ public class FXCode implements NodeListener {
         Scene scene = new Scene(root, 800,300);
         Stage stage = new Stage();
         stage.setScene(scene);
-//        stage.setMaximized(true);
+        stage.setMaximized(true);
         stage.show();
 
         rec.getSupplier();

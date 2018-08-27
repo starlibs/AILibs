@@ -59,8 +59,6 @@ public class ScoreVisualization<T> extends GraphVisualization<T> {
                     nodes.add(node);
                 }
             }
-
-            System.out.println("best: " + bestFValue + " worst: " + worstFValue);
             return node;
         }
         catch(Exception e){
@@ -81,7 +79,6 @@ public class ScoreVisualization<T> extends GraphVisualization<T> {
     }
 
     public void update(){
-        System.out.println("update");
         for(Node n :nodes){
             if(n instanceof Score){
                 double fvalue = ((Score) n).getScore();
@@ -96,7 +93,6 @@ public class ScoreVisualization<T> extends GraphVisualization<T> {
         float x = (float)(fvalue - bestFValue);
         float y = (float)(worstFValue - bestFValue);
         color = x/y;
-        System.out.println("current " + fvalue + " color: " + color);
         node.setAttribute("ui.color", color);
     }
 

@@ -75,7 +75,7 @@ public class ControlSearchTester {
 		});
 
 
-//		win.addDataSupplier(tooltipSupplier);
+		win.addDataSupplier(tooltipSupplier);
 //		bf.nextSolution();
 
 

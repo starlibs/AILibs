@@ -9,7 +9,7 @@ public class TooltipVisualizer extends HTMLVisualizer {
 
     @Override
     public String getSupplier(){
-        return "TooltipSupplierNew";
+        return "TooltipSupplier";
     }
 
     @Override
