@@ -376,7 +376,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 		}
 	}
 
-	public List<T> nextSolutionThatDominatesOpen() {
+	public List<T> nextSolutionThatDominatesOpen() throws InterruptedException {
 		List<T> currentlyBestSolution = null;
 		V currentlyBestScore = null;
 		do {
@@ -397,8 +397,9 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 	 *            The initial node.
 	 * @return A list of nodes from the initial point to a goal, <code>null</code> if a path doesn't exist.
 	 */
+
 	@Override
-	public List<T> nextSolution() {
+	public List<T> nextSolution() throws InterruptedException {
 
 		/* check whether solution has been canceled */
 		if (this.canceled) {
@@ -426,9 +427,9 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 				try {
 					Thread.sleep(100);
 				} catch (InterruptedException e) {
-					this.logger.info("Received interrupt signal");
-					this.interrupted = true;
-					break;
+					logger.info("Received interrupt signal");
+					interrupted = true;
+					throw e;
 				}
 			}
 			if (this.open.isEmpty() || this.interrupted) {
@@ -444,15 +445,16 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 				this.logger.info("Returning solution {} with score {}", solution, this.getAnnotationsOfReturnedSolution(solution));
 				return solution;
 			}
-			this.logger.debug("Iteration of main loop terminated. Size of OPEN now {}. Number of active jobs: {}", this.open.size(), this.activeJobs.get());
-		} while ((!this.open.isEmpty() || this.activeJobs.get() > 0) && !this.interrupted);
-		if (this.interrupted) {
-			this.logger.info("Algorithm was interrupted");
+
+			logger.debug("Iteration of main loop terminated. Size of OPEN now {}. Number of active jobs: {}", open.size(), activeJobs.get());
+		} while ((!open.isEmpty() || activeJobs.get() > 0) && !interrupted);
+		if (interrupted) {
+			logger.info("Algorithm was interrupted");
+			throw new InterruptedException();
 		}
-		if (this.open.isEmpty()) {
-			this.logger.info("OPEN is empty, terminating (possibly returning a solution)");
-		}
-		return this.solutions.isEmpty() ? null : this.solutions.poll();
+		if (open.isEmpty())
+			logger.info("OPEN is empty, terminating (possibly returning a solution)");
+		return solutions.isEmpty() ? null : solutions.poll();
 	}
 
 	protected boolean terminates() {
@@ -736,7 +738,8 @@ public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservable
 				+ newNode.externalPath().stream().map(n -> n.toString()).reduce("", (s, t) -> s + "\n\t\t" + t);
 
 		/* currently, we only support tree search */
-		assert !this.ext2int.containsKey(t2) : "Reached node " + t2 + " for the second time.\nt\tFirst path:" + this.ext2int.get(t2).externalPath().stream().map(n -> n.toString()).reduce("", (s, t) -> s + "\n\t\t" + t) + "\n\tSecond Path:"
+		assert !ext2int.containsKey(t2) : "Reached node " + t2 + " for the second time.\nt\tFirst path:"
+				+ ext2int.get(t2).externalPath().stream().map(n -> n.toString()).reduce("", (s, t) -> s + "\n\t\t" + t) + "\n\tSecond Path:"
 				+ newNode.externalPath().stream().map(n -> n.toString()).reduce("", (s, t) -> s + "\n\t\t" + t);
 
 		/* register node in map and create annotation object */
