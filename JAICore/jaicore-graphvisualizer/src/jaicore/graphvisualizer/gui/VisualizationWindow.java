@@ -13,7 +13,7 @@ public class VisualizationWindow<T> {
     /**
      * The Javafx-thread which contains the GUI
      */
-    Thread fxThread;
+    static Thread fxThread;
 
     /**
      * A recorder which is connected to the algorithm
@@ -43,7 +43,7 @@ public class VisualizationWindow<T> {
                 fxThread.start();
             }
             catch(IllegalStateException e){
-                e.printStackTrace();
+//                e.printStackTrace();
             }
         }
 
