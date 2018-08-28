@@ -11,8 +11,10 @@ import com.google.common.collect.Sets;
 
 import hasco.core.HASCOWithParameterPruning;
 import hasco.core.Util;
+import hasco.model.Component;
 import hasco.model.ComponentInstance;
 import hasco.model.Parameter;
+import jaicore.basic.sets.PartialOrderedSet;
 import jaicore.ml.core.FeatureSpace;
 import jaicore.ml.intervaltree.ExtendedRandomForest;
 import weka.core.Instances;
@@ -163,7 +165,27 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 		return extractImportantParameters(composition, importanceThreshold, k, recompute);
 	}
 
-	public void extractImportanceForSingleComponents() {
+	/**
+	 * Computes importance values for individual components.
+	 */
+	public Map<String, Double> computeImportanceForSingleComponent(Component component) {
+		HashMap<String, Double> result = new HashMap<String, Double>();
+		Instances data = performanceKnowledgeBase.getPerformanceSamplesForIndividualComponent(benchmarkName, component);
+		ExtendedRandomForest forest = new ExtendedRandomForest(1.0d, 32, new FeatureSpace(data));
+		try {
+			forest.buildClassifier(data);
 
+		forest.prepareForest(data);
+		for (int i = 0; i < data.numAttributes() - 1; i++) {
+			HashSet<Integer> set = new HashSet<Integer>();
+			set.add(i);
+			double importance = forest.computeMarginalVarianceContributionForFeatureSubset(set);
+			result.put(data.attribute(i).name(), importance);
+		}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return result;
 	}
 }

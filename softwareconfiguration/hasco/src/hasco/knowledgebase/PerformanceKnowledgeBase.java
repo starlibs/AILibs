@@ -663,4 +663,13 @@ public class PerformanceKnowledgeBase {
 	public Instances getPerformanceSamplesForIndividualComponent(String benchmarkName, Component component) {
 		return this.performanceInstancesIndividualComponents.get(benchmarkName).get(component.getName());
 	}
+	
+	public int getNumSamplesForComponent(String benchmarkName, Component component) {
+		if(this.performanceInstancesIndividualComponents.get(benchmarkName)!=null) {
+		if(this.performanceInstancesIndividualComponents.get(benchmarkName).get(component.getName())!=null) {
+			return this.performanceInstancesIndividualComponents.get(benchmarkName).get(component.getName()).size();
+		}
+		}
+		return 0;
+	}
 }
