@@ -4,8 +4,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.junit.Test;
-
 import jaicore.graphvisualizer.gui.FXController;
 import jaicore.graphvisualizer.gui.FXGui;
 import jaicore.graphvisualizer.gui.Recorder;
@@ -31,8 +29,7 @@ public class FXGuiTester extends Application {
 
 	FXGui gui;
 
-	@Test
-	public void test() {
+	public void main(String... args) {
 		launch();
 	}
 
@@ -49,7 +46,7 @@ public class FXGuiTester extends Application {
 
 	}
 
-	private void bestFirstTest() throws InterruptedException {
+	private void bestFirstTest() {
 		GraphGenerator generator = new TestGraphGenerator();
 		BestFirst<TestNode, String> bf = new BestFirst<>(generator, n -> (double) Math.round(Math.random() * 100));
 		// open(bf,"BestFirst");
@@ -69,9 +66,13 @@ public class FXGuiTester extends Application {
 		// FXController controller = gui.getControllers().get(gui.getControllers().size()-1);
 		// if(controller != null)
 		// controller.registerSupplier(sup);
-
 		// bf.registerListener(supplier);
-		bf.nextSolution();
+		try {
+			bf.nextSolution();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 	}
 
@@ -82,7 +83,6 @@ public class FXGuiTester extends Application {
 		ForwardDecompositionHTNPlanner planner = new ForwardDecompositionHTNPlanner(problem, 1);
 		ForwardDecompositionHTNPlanner.SolutionIterator plannerRun = planner.iterator();
 		// new SimpleGraphVisualizationWindow<Node<TFDNode,Double>>(plannerRun.getSearch()).getPanel().setTooltipGenerator(new TFDTooltipGenerator<>());
-
 		Recorder<Node<TFDNode, Double>> recorder = new Recorder<>(plannerRun.getSearch());
 		// recorder.setTooltipGenerator(new TFDTooltipGenerator<>());
 		TooltipSupplier dataSupplier = new TooltipSupplier();

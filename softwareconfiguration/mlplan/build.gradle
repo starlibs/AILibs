@@ -31,7 +31,7 @@ dependencies {
 	compile project(':JAICore:jaicore-planning')
 	compile project(':JAICore:jaicore-search')
 	compile project(':JAICore:jaicore-ml')
-	compile project(':JASE')
+	compile "de.upb.isys:jase:0.0.4"
 
 
 	// OWL API

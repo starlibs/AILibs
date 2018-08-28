@@ -31,8 +31,8 @@ public class EnhancedTTSPTest {
 
 	private static final int N = 10;
 	private static final int MAX_DISTANCE = 12;
-	private static final int TIMEOUT_IN_MS = 5 * 60 * 1000;
-	private static final boolean VISUALIZE = true;
+	private static final int TIMEOUT_IN_MS = 5 * 1000;
+	private static final boolean VISUALIZE = false;
 
 	private static EnhancedTTSP ttsp;
 	private static LabeledGraph<Short, Double> travelGraph;
@@ -74,17 +74,17 @@ public class EnhancedTTSPTest {
 		System.out.println("Problem created ...");
 	}
 
-	// @Test
+	@Test
 	public void testRandomHillClimbing() {
 		runAlgorithm("Random Hill Climbing", new RandomizedDepthFirstSearch<>(ttsp.getGraphGenerator(), new Random(0)), true);
 	}
 
-	// @Test
+	@Test
 	public void testDFS() {
 		runAlgorithm("DFS", new ORGraphSearch<>(ttsp.getGraphGenerator(), n -> n.externalPath().size() * -1.0), false);
 	}
 
-	// @Test
+	@Test
 	public void testDijkstra() {
 		runAlgorithm("Dijkstra", new ORGraphSearch<>(ttsp.getGraphGenerator(), n -> {
 			return n.getPoint().getTime();
@@ -116,23 +116,24 @@ public class EnhancedTTSPTest {
 
 	}
 
-	// @Test
+	@Test
 	public void testAStar() {
 		runAlgorithm("AStar", new BestFirst<>(ttsp.getGraphGenerator(), new AStarNodeEvaluator()), true);
 	}
-
-	// @Test
+	
+	@Test
 	public void testAStarEpsilon() {
 		runAlgorithm("AStarEpsilon",
 				new BestFirstEpsilon<EnhancedTTSPNode, String, Integer>(ttsp.getGraphGenerator(), new AStarNodeEvaluator(), n -> n.getPoint().getUnvisitedLocations().size(), 1.3, false), true);
 	}
 
-	@Test
+	
+	//@Test
 	public void testMCTS() {
 		runAlgorithm("MCTS", new UCT<EnhancedTTSPNode, String>(ttsp.getGraphGenerator(), n -> ttsp.getSolutionEvaluator().evaluateSolution(n.externalPath()), 0), false);
 	}
 
-	// @Test
+	@Test
 	public void testRandomCompletor() {
 		INodeEvaluator<EnhancedTTSPNode, Double> rc = new RandomCompletionEvaluator<>(new Random(123l), 100, new IPathUnification<EnhancedTTSPNode>() {
 
@@ -147,10 +148,6 @@ public class EnhancedTTSPTest {
 		runAlgorithm("BFS with random completion", bf, false);
 	}
 
-	// @After
-	public void stay() {
-		// while (true);
-	}
 
 	private void runAlgorithm(String name, IObservableORGraphSearch<EnhancedTTSPNode, String, Double> search, boolean stopOnFirst) {
 		System.out.println("Running " + name);
@@ -180,6 +177,7 @@ public class EnhancedTTSPTest {
 			public void run() {
 				System.out.println("Canceling algorithm");
 				search.cancel();
+				
 			}
 		}, TIMEOUT_IN_MS);
 

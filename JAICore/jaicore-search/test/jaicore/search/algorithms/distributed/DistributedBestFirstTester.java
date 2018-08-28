@@ -133,9 +133,9 @@ public class DistributedBestFirstTester implements Serializable {
 		}
 
 		/* run master in separate thread */
-		SimpleGraphVisualizationWindow<Node<TestNode, Integer>> window = new SimpleGraphVisualizationWindow<>(master);
-		window.setTitle("Master");
-		window.getPanel().setTooltipGenerator(n -> (n.getPoint().min + "-" + n.getPoint().max));
+	//	SimpleGraphVisualizationWindow<Node<TestNode, Integer>> window = new SimpleGraphVisualizationWindow<>(master);
+	//	window.setTitle("Master");
+	//	window.getPanel().setTooltipGenerator(n -> (n.getPoint().min + "-" + n.getPoint().max));
 
 		long start = System.currentTimeMillis();
 		List<TestNode> solution = master.nextSolution();
