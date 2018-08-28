@@ -39,9 +39,9 @@ public class BiPartitionFinder<T> {
 			return "BFNode [itemsOnLeft=" + itemsOnLeft + ", itemsOnRight=" + itemsOnRight + "]";
 		}
 	}
-	
+
 	private class BFGraphGenerator implements GraphGenerator<BFNode, Boolean> {
-		
+
 		@Override
 		public SingleRootGenerator<BFNode> getRootGenerator() {
 			return () -> new BFNode(new HashSet<>(), new HashSet<>());
@@ -50,7 +50,7 @@ public class BiPartitionFinder<T> {
 		@Override
 		public SuccessorGenerator<BiPartitionFinder<T>.BFNode, Boolean> getSuccessorGenerator() {
 			return n -> {
-				List<NodeExpansionDescription<BFNode,Boolean>> successors = new ArrayList<>();
+				List<NodeExpansionDescription<BFNode, Boolean>> successors = new ArrayList<>();
 				int k = n.itemsOnLeft.size() + n.itemsOnRight.size();
 				T newItem = items.get(k);
 				Collection<T> aLeft = new HashSet<>(n.itemsOnLeft);
@@ -78,17 +78,17 @@ public class BiPartitionFinder<T> {
 			throw new UnsupportedOperationException("No node numbering supported.");
 		}
 	}
-	
+
 	private final List<T> items;
 	private final BestFirst<BFNode, Boolean> search;
 
-	public BiPartitionFinder(Collection<T> items, IObjectEvaluator<Pair<Collection<T>,Collection<T>>, Double> evaluator) {
+	public BiPartitionFinder(Collection<T> items, IObjectEvaluator<Pair<Collection<T>, Collection<T>>, Double> evaluator) {
 		super();
 		this.items = new ArrayList<>(items);
-		this.search = new BestFirst<BFNode,Boolean>(new BFGraphGenerator(), n -> evaluator.evaluate(new Pair<>(n.getPoint().itemsOnLeft, n.getPoint().itemsOnRight)));
+		this.search = new BestFirst<BFNode, Boolean>(new BFGraphGenerator(), n -> evaluator.evaluate(new Pair<>(n.getPoint().itemsOnLeft, n.getPoint().itemsOnRight)));
 	}
-	
-	public Pair<Collection<T>,Collection<T>> getPartition() {
+
+	public Pair<Collection<T>, Collection<T>> getPartition() throws InterruptedException {
 		new SimpleGraphVisualizationWindow<>(this.search);
 		List<BFNode> solution = this.search.nextSolution();
 		BFNode lastNode = solution.get(solution.size() - 1);

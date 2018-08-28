@@ -9,10 +9,10 @@ import java.util.List;
 import java.util.Set;
 
 import jaicore.basic.StringUtil;
-import jaicore.ml.MajorityClassifier;
 import jaicore.ml.WekaUtil;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
+import weka.classifiers.rules.ZeroR;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -83,19 +83,17 @@ public class MCTreeNodeReD implements Classifier, Serializable {
 	 */
 	private boolean trained = false;
 
-	public MCTreeNodeReD(final String innerNodeClassifier, final Collection<String> leftChildClasses, final String leftChildClassifier,
-			final Collection<String> rightChildClasses, final String rightChildClassifier) throws Exception {
+	public MCTreeNodeReD(final String innerNodeClassifier, final Collection<String> leftChildClasses, final String leftChildClassifier, final Collection<String> rightChildClasses, final String rightChildClassifier) throws Exception {
 		this(innerNodeClassifier, leftChildClasses, AbstractClassifier.forName(leftChildClassifier, null), rightChildClasses, AbstractClassifier.forName(rightChildClassifier, null));
 	}
-	
+
 	@SuppressWarnings("unchecked")
-	public MCTreeNodeReD(final Classifier innerNodeClassifier, final Collection<String> leftChildClasses, final Classifier leftChildClassifier,
-			final Collection<String> rightChildClasses, final Classifier rightChildClassifier) {
-		this(innerNodeClassifier, Arrays.asList(new Collection[] { leftChildClasses, rightChildClasses}), Arrays.asList(new Classifier[] {leftChildClassifier, rightChildClassifier}));
+	public MCTreeNodeReD(final Classifier innerNodeClassifier, final Collection<String> leftChildClasses, final Classifier leftChildClassifier, final Collection<String> rightChildClasses, final Classifier rightChildClassifier) {
+		this(innerNodeClassifier, Arrays.asList(new Collection[] { leftChildClasses, rightChildClasses }), Arrays.asList(new Classifier[] { leftChildClassifier, rightChildClassifier }));
 	}
 
-	public MCTreeNodeReD(final String innerNodeClassifier, final Collection<String> leftChildClasses, final Classifier leftChildClassifier,
-			final Collection<String> rightChildClasses, final Classifier rightChildClassifier) throws Exception {
+	public MCTreeNodeReD(final String innerNodeClassifier, final Collection<String> leftChildClasses, final Classifier leftChildClassifier, final Collection<String> rightChildClasses, final Classifier rightChildClassifier)
+			throws Exception {
 		this(AbstractClassifier.forName(innerNodeClassifier, new String[] {}), leftChildClasses, leftChildClassifier, rightChildClasses, rightChildClassifier);
 	}
 
@@ -114,7 +112,7 @@ public class MCTreeNodeReD implements Classifier, Serializable {
 	}
 
 	public void addChild(final List<String> childClasses, final Classifier childClassifier) {
-		assert !trained : "Cannot insert children after the tree node has been trained!";
+		assert !this.trained : "Cannot insert children after the tree node has been trained!";
 		if (childClassifier instanceof MCTreeMergeNode) {
 			this.children.addAll(((MCTreeMergeNode) childClassifier).getChildren());
 		} else {
@@ -157,16 +155,18 @@ public class MCTreeNodeReD implements Classifier, Serializable {
 	public void buildClassifier(final Instances data) throws Exception {
 		assert !data.isEmpty() : "Cannot train MCTree with empty set of instances.";
 		assert !this.children.isEmpty() : "Cannot train MCTree without children";
-		assert !trained : "Cannot retrain MCTreeNodeReD";
-		assert this.containedClasses.containsAll(WekaUtil.getClassesActuallyContainedInDataset(data)) : "The classes for which this MCTreeNodeReD has been defined (" + this.containedClasses + ") is not a superset of the given training data (" + WekaUtil.getClassesActuallyContainedInDataset(data) + ") ...";
-		assert WekaUtil.getClassesActuallyContainedInDataset(data).containsAll(this.containedClasses) : "The classes for which this MCTreeNodeReD has been defined (" + this.containedClasses + ") is not a subset of the given training data (" + WekaUtil.getClassesActuallyContainedInDataset(data) + ") ...";
-		
+		assert !this.trained : "Cannot retrain MCTreeNodeReD";
+		assert this.containedClasses.containsAll(WekaUtil.getClassesActuallyContainedInDataset(data)) : "The classes for which this MCTreeNodeReD has been defined (" + this.containedClasses
+				+ ") is not a superset of the given training data (" + WekaUtil.getClassesActuallyContainedInDataset(data) + ") ...";
+		assert WekaUtil.getClassesActuallyContainedInDataset(data).containsAll(this.containedClasses) : "The classes for which this MCTreeNodeReD has been defined (" + this.containedClasses + ") is not a subset of the given training data ("
+				+ WekaUtil.getClassesActuallyContainedInDataset(data) + ") ...";
+
 		/* resort the contained classes based on the input data. This is necessary, because the order of classes in the given dataset might differ from the order of classes initially declared for the tree */
 		this.containedClasses.clear();
 		for (int i = 0; i < data.numClasses(); i++) {
 			this.containedClasses.add(data.classAttribute().value(i));
 		}
-		
+
 		/* create subsets of the training data filtering for the respective class values and build child classifier */
 		List<Set<String>> instancesClusters = new ArrayList<>();
 		int childNum = 0;
@@ -198,7 +198,7 @@ public class MCTreeNodeReD implements Classifier, Serializable {
 		try {
 			this.innerNodeClassifier.buildClassifier(trainingData);
 		} catch (WekaException e) {
-			this.innerNodeClassifier = new MajorityClassifier();
+			this.innerNodeClassifier = new ZeroR();
 			this.innerNodeClassifier.buildClassifier(trainingData);
 		} catch (Throwable e) {
 			throw new RuntimeException("Cannot train inner classifier", e);
@@ -225,25 +225,24 @@ public class MCTreeNodeReD implements Classifier, Serializable {
 	@Override
 	public double[] distributionForInstance(final Instance instance) throws Exception {
 		assert this.trained : "Cannot get distribution from untrained classifier " + this.toStringWithOffset();
-	
+
 		// compute distribution of the children clusters of the inner node's classifier
 		Instance refactoredInstance = WekaUtil.getRefactoredInstance(instance);
 		double[] innerNodeClassifierDistribution = this.innerNodeClassifier.distributionForInstance(refactoredInstance);
-		
+
 		// recursively compute distribution for instance for all the children and assign the probabilities
 		// to classDistribution array
 		double[] classDistribution = new double[this.getContainedClasses().size()];
 		for (int childIndex = 0; childIndex < this.children.size(); childIndex++) {
 			ChildNode child = this.children.get(childIndex);
 			double[] childDistribution = child.childNodeClassifier.distributionForInstance(WekaUtil.getRefactoredInstance(instance, child.containedClasses));
-			assert childDistribution.length == child.containedClasses.size() : "Mismatch of child classes (" + child.containedClasses.size() + ") and distribution in child ("
-					+ childDistribution.length + ")";
+			assert childDistribution.length == child.containedClasses.size() : "Mismatch of child classes (" + child.containedClasses.size() + ") and distribution in child (" + childDistribution.length + ")";
 			for (int i = 0; i < childDistribution.length; i++) {
 				String classValue = child.containedClasses.get(i);
 				classDistribution[this.getContainedClasses().indexOf(classValue)] = childDistribution[i] * innerNodeClassifierDistribution[childIndex];
 			}
 		}
-		
+
 		double sum = Arrays.stream(classDistribution).sum();
 		assert (sum - 1E-8 <= 1.0 && sum + 1E-8 >= 1.0) : "Distribution does not sum up to 1; actual some of distribution entries: " + sum;
 
@@ -340,11 +339,12 @@ public class MCTreeNodeReD implements Classifier, Serializable {
 		return sb.toString();
 	}
 
+	@Override
 	public MCTreeNodeReD clone() {
 		try {
-			Classifier lcClone = WekaUtil.cloneClassifier(children.get(0).childNodeClassifier);
-			Classifier rcClone = WekaUtil.cloneClassifier(children.get(1).childNodeClassifier);
-			return new MCTreeNodeReD(innerNodeClassifier.getClass().getName(), children.get(0).containedClasses, lcClone, children.get(1).containedClasses, rcClone);
+			Classifier lcClone = WekaUtil.cloneClassifier(this.children.get(0).childNodeClassifier);
+			Classifier rcClone = WekaUtil.cloneClassifier(this.children.get(1).childNodeClassifier);
+			return new MCTreeNodeReD(this.innerNodeClassifier.getClass().getName(), this.children.get(0).containedClasses, lcClone, this.children.get(1).containedClasses, rcClone);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;

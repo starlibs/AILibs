@@ -68,11 +68,11 @@ public class DistributedBestFirstTester implements Serializable {
 	}
 
 	@Test
-	public void test() {
-		
+	public void test() throws InterruptedException {
+
 		Random rand = new Random(1);
-		int size = (int)Math.pow(2, 20);
-		int target = (int)Math.round(rand.nextDouble() * size);
+		int size = (int) Math.pow(2, 20);
+		int target = (int) Math.round(rand.nextDouble() * size);
 		System.out.println("Trying to find " + target + " within a space of " + size + " items.");
 
 		SerializableGraphGenerator<TestNode, String> gen = new SerializableGraphGenerator<TestNode, String>() {
@@ -93,7 +93,7 @@ public class DistributedBestFirstTester implements Serializable {
 						e.printStackTrace();
 					}
 					if (parent.min < parent.max) {
-						int split = (int)Math.floor((parent.min + parent.max) / 2f);
+						int split = (int) Math.floor((parent.min + parent.max) / 2f);
 						l.add(new NodeExpansionDescription<>(parent, new TestNode(parent.depth + 1, parent.min, split), "edge label", NodeType.OR));
 						l.add(new NodeExpansionDescription<>(parent, new TestNode(parent.depth + 1, split + 1, parent.max), "edge label", NodeType.OR));
 					}
@@ -114,27 +114,26 @@ public class DistributedBestFirstTester implements Serializable {
 			@Override
 			public void setNodeNumbering(boolean nodenumbering) {
 				// TODO Auto-generated method stub
-				
+
 			}
 		};
-		
+
 		final Path folder = Paths.get("Z:/pc2/distsearch/testrsc/comm");
-		DistributedSearchCommunicationLayer<TestNode,String,Integer> masterCommunicationLayer = new FolderBasedDistributedSearchCommunicationLayer<>(folder, true);
-		
-		SerializableNodeEvaluator<TestNode,Integer> evaluator = n -> -1 * n.externalPath().size();
-		DistributedOrSearch<TestNode,String,Integer> master = new DistributedOrSearch<>(gen, evaluator, masterCommunicationLayer);
-		
+		DistributedSearchCommunicationLayer<TestNode, String, Integer> masterCommunicationLayer = new FolderBasedDistributedSearchCommunicationLayer<>(folder, true);
+
+		SerializableNodeEvaluator<TestNode, Integer> evaluator = n -> -1 * n.externalPath().size();
+		DistributedOrSearch<TestNode, String, Integer> master = new DistributedOrSearch<>(gen, evaluator, masterCommunicationLayer);
+
 		/* setup coworkers */
 		int coworkers = 5;
 		for (int i = 1; i <= coworkers; i++) {
-			final String name = "cw" + i; 
-			final String[] args = {folder.toFile().getAbsolutePath(), name, "5", "1000", "true"};
+			final String name = "cw" + i;
+			final String[] args = { folder.toFile().getAbsolutePath(), name, "5", "1000", "true" };
 			new Thread(() -> DistributedOrSearchCoworker.main(args)).start();
 		}
-		
 
 		/* run master in separate thread */
-		SimpleGraphVisualizationWindow<Node<TestNode,Integer>> window = new SimpleGraphVisualizationWindow<>(master);
+		SimpleGraphVisualizationWindow<Node<TestNode, Integer>> window = new SimpleGraphVisualizationWindow<>(master);
 		window.setTitle("Master");
 		window.getPanel().setTooltipGenerator(n -> (n.getPoint().min + "-" + n.getPoint().max));
 
@@ -143,7 +142,7 @@ public class DistributedBestFirstTester implements Serializable {
 		long end = System.currentTimeMillis();
 		org.junit.Assert.assertNotNull(solution);
 		System.out.println(solution);
-		System.out.println("Found after " + (end-start) / 1000f + " seconds.");
+		System.out.println("Found after " + (end - start) / 1000f + " seconds.");
 	}
 
 }
