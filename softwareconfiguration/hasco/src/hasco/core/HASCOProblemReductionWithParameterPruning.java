@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -248,8 +249,11 @@ public class HASCOProblemReductionWithParameterPruning {
 			/*
 			 * go, in an ordering that is consistent with the pre-order on the params
 			 * imposed by the dependencies, over the set of params
+			 * TODO change to an ordering according to parameter importance values
 			 */
 			if (this.configureParams) {
+//				List<Parameter> parameters = c.getParameters().getTotalOrder();
+//				Collections.sort(parameters);
 				for (Parameter p : c.getParameters()) {
 					String paramName = "p" + (++j);
 					refinementArguments += ", " + paramName;
