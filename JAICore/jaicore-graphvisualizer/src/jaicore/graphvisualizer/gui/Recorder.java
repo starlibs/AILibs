@@ -197,7 +197,7 @@ public class Recorder {
      * 		The steps to go forward.
      */
     private void backward(int steps){
-        System.out.println(steps);
+//        System.out.println(steps);
         if(index == 0)
             return;
         while(index > 0 && steps != 0){

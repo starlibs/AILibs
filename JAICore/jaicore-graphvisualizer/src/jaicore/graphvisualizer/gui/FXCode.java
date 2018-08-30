@@ -17,6 +17,7 @@ import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
@@ -80,10 +81,20 @@ public class FXCode implements NodeListener {
         Slider sleepTimeSlider = new Slider(0,200, 150);
         sleepTimeSlider.setShowTickLabels(true);
         sleepTimeSlider.setShowTickMarks(true);
+        sleepTimeSlider.setBlockIncrement(1);
         sleepTimeSlider.setOnMouseReleased((MouseEvent event) ->{
             double sliderValue = sleepTimeSlider.getValue();
             this.sleepTime = (long) (200- sliderValue);
         });
+        sleepTimeSlider.setOnKeyPressed((KeyEvent event) ->{
+            double sliderValue = sleepTimeSlider.getValue();
+            this.sleepTime = (long) (200-sliderValue);
+        });
+        sleepTimeSlider.setOnKeyReleased((KeyEvent event) ->{
+            double sliderValue = sleepTimeSlider.getValue();
+            this.sleepTime = (long) (200-sliderValue);
+        });
+
         sleepTimeSlider.setLabelFormatter(new StringConverter<Double>() {
             @Override
             public String toString(Double object) {
@@ -129,6 +140,17 @@ public class FXCode implements NodeListener {
             int newIndex = (int) timeline.getValue();
             jumpToIndex(newIndex);
         });
+        this.timeline.setOnKeyReleased((KeyEvent event)->{
+            int newIndex = (int) timeline.getValue();
+            System.out.println(newIndex);
+            jumpToIndex(newIndex);
+        });
+        this.timeline.setOnKeyPressed((KeyEvent event)->{
+            int newIndex = (int)timeline.getValue();
+            System.out.println(newIndex);
+            jumpToIndex(newIndex);
+        });
+        this.timeline.setBlockIncrement(1);
         root.setBottom(this.timeline);
         
 
@@ -191,7 +213,7 @@ public class FXCode implements NodeListener {
         stopButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                System.out.println("Stop");
+//                System.out.println("Stop");
                 if(playThread!= null)
                     playThread.interrupt();
             }
@@ -203,7 +225,7 @@ public class FXCode implements NodeListener {
         backButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                System.out.println("back");
+//                System.out.println("back");
                 if(index == 0)
                     return;
                 if(index == 1) {
