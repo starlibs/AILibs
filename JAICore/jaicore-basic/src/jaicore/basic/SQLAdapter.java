@@ -14,8 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import scala.math.Numeric;
-
 /**
  * This is a simple util class for easy database access and query execution in sql. You need to make sure that the respective JDBC connector is in the class path. By default, the adapter uses the mysql driver, but any jdbc driver can be
  * used.
@@ -221,7 +219,7 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 	private void setValue(final PreparedStatement stmt, final int index, final Object val) throws SQLException {
 		if (val instanceof Integer) {
 			stmt.setInt(index, (Integer) val);
-		} else if (val instanceof Numeric) {
+		} else if (val instanceof Number) {
 			stmt.setDouble(index, (Double) val);
 		} else if (val instanceof String) {
 			stmt.setString(index, (String) val);

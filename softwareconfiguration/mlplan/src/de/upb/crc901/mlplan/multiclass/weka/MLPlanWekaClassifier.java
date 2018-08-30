@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.upb.crc901.automl.PreferenceBasedNodeEvaluator;
+import de.upb.crc901.automl.SemanticNodeEvaluator;
 import de.upb.crc901.mlplan.AbstractMLPlan;
 import hasco.serialization.ComponentLoader;
 import jaicore.basic.FileUtil;
@@ -50,6 +51,11 @@ public class MLPlanWekaClassifier extends AbstractMLPlan implements Classifier, 
 			throw new IllegalStateException("Cannot generate search where number of CPUs is " + CONFIG.cpus());
 		}
 
+		// Setup preferred node evaluator
+		this.setPreferredNodeEvaluator(new PreferenceBasedNodeEvaluator(super.getComponents(), FileUtil.readFileAsList(this.getConfig().componentsPrecedenceListFile())));
+		// Extend the functionality of the preferred node evaluator and enhance it by some additional knowledge.
+		this.setPreferredNodeEvaluator(new SemanticNodeEvaluator(this.getComponents(), data, this.getPreferredNodeEvaluator()));
+
 		this.logger.info("Starting ML-Plan with timeout {}s, and a portion of {} for the second phase.", CONFIG.timeout(), CONFIG.selectionDataPortion());
 
 		Instances dataForSearch;
@@ -83,7 +89,6 @@ public class MLPlanWekaClassifier extends AbstractMLPlan implements Classifier, 
 				dataPreservedForSelection != null ? dataPreservedForSelection.size() : 0);
 
 		super.setFactory(new WEKAPipelineFactory());
-		super.setPreferredNodeEvaluator(new PreferenceBasedNodeEvaluator(super.getComponents(), FileUtil.readFileAsList(this.getConfig().componentsPrecedenceListFile())));
 
 		super.gatherSolutions();
 

@@ -13,4 +13,6 @@ sourceSets {
 }
 dependencies {
 	compile project(":JAICore:jaicore-basic")
+	
+	compile group: 'org.aeonbits.owner', name: 'owner-java8', version:'1.0.10'
 }

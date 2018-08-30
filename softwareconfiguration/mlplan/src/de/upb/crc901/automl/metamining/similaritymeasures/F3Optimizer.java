@@ -18,7 +18,7 @@ import jaicore.basic.sets.SetUtil.Pair;
 public class F3Optimizer implements IHeterogenousSimilarityMeasureComputer {
 	private final static Logger logger = LoggerFactory.getLogger(F3Optimizer.class);
 	private final static double ALPHA_START = 0.000000001; // learning rate
-	private final static double ALPHA_MAX = 1e-5;
+	private final static double ALPHA_MAX = 1e-7;
 	private final static int ITERATIONS_PER_PROBE = 100;
 	private final static int LIMIT = 1; // as long as the solution improves by at least this value, continue
 	private final static double MAX_DESIRED_ERROR = 0;

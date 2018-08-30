@@ -43,6 +43,12 @@ public abstract class AbstractMLPlan extends HASCOSupervisedML implements IGraph
 	/** Properties object holding all the parameter configurations. */
 	private static final AbstractMLPlanConfig CONFIG = ConfigCache.getOrCreate(AbstractMLPlanConfig.class);
 
+	/** Caching factor to estimate runtimes for second phase. */
+	private static final double CACHE_FACTOR = 0.8;
+
+	/** Conservativeness factor to estimate runtimes for second phase. */
+	private static final double CONSERVATIVENESS_FACTOR = 1.0;
+
 	/** The classifier selected during selection phase. */
 	private Classifier selectedClassifier;
 
@@ -62,14 +68,13 @@ public abstract class AbstractMLPlan extends HASCOSupervisedML implements IGraph
 
 	public void gatherSolutions() throws IOException {
 		this.timeOfStart = System.currentTimeMillis();
-		this.logger.info("Starting ML-Plan with timeout {}s, and a portion of {} for the second phase.", CONFIG.timeout(), CONFIG.selectionDataPortion());
+		this.logger.info("Starting ML-Plan with timeout {}s, and a portion of {} for the second phase.", this.getConfig().timeout(), this.getConfig().selectionDataPortion());
 
 		if (this.selectionPhaseEvaluator == null) {
 			throw new IllegalArgumentException("The solution evaluator for the selection phase has not been set.");
 		}
 
 		/* phase 1: run HASCO to gather solutions */
-		// search.setTimeoutForComputationOfF(timeoutPerNodeFComputation, n -> null);
 		this.timeoutControl = new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -77,7 +82,7 @@ public abstract class AbstractMLPlan extends HASCOSupervisedML implements IGraph
 					while (!Thread.interrupted()) {
 						Thread.sleep(100);
 						int timeElapsed = (int) (System.currentTimeMillis() - AbstractMLPlan.this.timeOfStart);
-						int timeRemaining = CONFIG.timeout() * 1000 - timeElapsed;
+						int timeRemaining = AbstractMLPlan.this.getConfig().timeout() * 1000 - timeElapsed;
 						if (AbstractMLPlan.this.shouldSearchTerminate(timeRemaining)) {
 							AbstractMLPlan.this.cancel();
 							return;
@@ -89,9 +94,9 @@ public abstract class AbstractMLPlan extends HASCOSupervisedML implements IGraph
 			}
 		}, "Phase 1 time bound observer");
 		this.timeoutControl.start();
-		this.logger.info("Now invoking HASCO to gather solutions for {}s", CONFIG.timeout());
+		this.logger.info("Now invoking HASCO to gather solutions for {}s", this.getConfig().timeout());
 
-		super.gatherSolutions(CONFIG.timeout() * 1000);
+		super.gatherSolutions(this.getConfig().timeout() * 1000);
 
 		this.logger.info("HASCO has finished. {} solutions were found.", super.getFoundClassifiers().size());
 		if (super.getFoundClassifiers().isEmpty()) {
@@ -106,17 +111,25 @@ public abstract class AbstractMLPlan extends HASCOSupervisedML implements IGraph
 
 	protected boolean shouldSearchTerminate(final long timeRemaining) {
 		Collection<HASCOClassificationMLSolution> currentSelection = this.getSelectionForPhase2();
+
 		int estimateForPhase2 = this.isSelectionActivated() ? this.getExpectedRuntimeForPhase2ForAGivenPool(currentSelection) : 0;
+
 		HASCOClassificationMLSolution internallyOptimalSolution = super.getCurrentlyBestSolution();
+
 		int timeToTrainBestSolutionOnEntireSet = internallyOptimalSolution != null ? (int) Math.round(internallyOptimalSolution.getTimeToComputeScore() / (1 - this.getPortionOfDataForPhase2())) : 0;
+
 		boolean terminatePhase1 = estimateForPhase2 + timeToTrainBestSolutionOnEntireSet > timeRemaining;
-		this.logger.info("{}ms remaining in total, and we estimate {}ms for phase 2. Terminate phase 1: {}", timeRemaining, estimateForPhase2, terminatePhase1);
+
+		this.logger.debug("{}ms remaining in total, and we estimate {}ms for phase 2. Terminate phase 1: {}", timeRemaining, estimateForPhase2, terminatePhase1);
+
 		return terminatePhase1;
 	}
 
 	private synchronized List<HASCOClassificationMLSolution> getSelectionForPhase2() {
 		return this.getSelectionForPhase2(Integer.MAX_VALUE);
 	}
+
+	private static final double MAX_MARGIN_FROM_BEST = 0.03;
 
 	private synchronized List<HASCOClassificationMLSolution> getSelectionForPhase2(final int remainingTime) {
 		if (this.getNumberOfConsideredSolutions() < 1) {
@@ -141,17 +154,16 @@ public abstract class AbstractMLPlan extends HASCOSupervisedML implements IGraph
 		 * compute k pipeline candidates (the k/2 best, and k/2 random ones that do not deviate too much from the best one)
 		 */
 		double optimalInternalScore = internallyOptimalSolution.getScore();
-		int maxMarginFrombest = 300;
 		int bestK = (int) Math.ceil(this.getNumberOfConsideredSolutions() / 2);
 		int randomK = this.getNumberOfConsideredSolutions() - bestK;
 		Collection<HASCOClassificationMLSolution> potentialCandidates = new ArrayList<>(super.getFoundClassifiers()).stream().filter(solution -> {
-			return solution.getScore() <= optimalInternalScore + maxMarginFrombest;
+			return solution.getScore() <= optimalInternalScore + MAX_MARGIN_FROM_BEST;
 		}).collect(Collectors.toList());
-		this.logger.debug("Computing {} best and {} random solutions for a max runtime of {}. Number of candidates that are at most {} worse than optimum {} is: {}/{}", bestK, randomK, remainingTime, maxMarginFrombest, optimalInternalScore,
-				potentialCandidates.size(), super.getFoundClassifiers().size());
+		this.logger.debug("Computing {} best and {} random solutions for a max runtime of {}. Number of candidates that are at most {} worse than optimum {} is: {}/{}", bestK, randomK, remainingTime, MAX_MARGIN_FROM_BEST,
+				optimalInternalScore, potentialCandidates.size(), super.getFoundClassifiers().size());
 		List<HASCOClassificationMLSolution> selectionCandidates = potentialCandidates.stream().limit(bestK).collect(Collectors.toList());
 		List<HASCOClassificationMLSolution> remainingCandidates = new ArrayList<>(SetUtil.difference(potentialCandidates, selectionCandidates));
-		Collections.shuffle(remainingCandidates, new Random(CONFIG.randomSeed()));
+		Collections.shuffle(remainingCandidates, new Random(this.getConfig().randomSeed()));
 		selectionCandidates.addAll(remainingCandidates.stream().limit(randomK).collect(Collectors.toList()));
 
 		/*
@@ -169,7 +181,7 @@ public abstract class AbstractMLPlan extends HASCOSupervisedML implements IGraph
 			actuallySelectedSolutions.add(pl);
 			expectedRuntime = this.getExpectedRuntimeForPhase2ForAGivenPool(actuallySelectedSolutions);
 			if (expectedRuntime > remainingTime && actuallySelectedSolutions.size() > 1) {
-				this.logger.debug("Not considering solution {} for phase 2, because the expected runtime of the whole thing would be {}/{}", pl, expectedRuntime, remainingTime);
+				this.logger.info("Not considering solution {} for phase 2, because the expected runtime of the whole thing would be {}/{}", pl, expectedRuntime, remainingTime);
 				actuallySelectedSolutions.remove(pl);
 			}
 		}
@@ -178,20 +190,19 @@ public abstract class AbstractMLPlan extends HASCOSupervisedML implements IGraph
 	}
 
 	private int getInSearchEvaluationTimeOfSolutionSet(final Collection<HASCOClassificationMLSolution> solutions) {
-		return solutions.stream().map(x -> x.getTimeToComputeScore()).reduce(0, (a, b) -> a + b).intValue();
+		return solutions.stream().map(x -> x.getTimeToComputeScore()).mapToInt(x -> x).sum();
 	}
 
 	public int getExpectedRuntimeForPhase2ForAGivenPool(final Collection<HASCOClassificationMLSolution> solutions) {
-		long estimateForPhase2IfSequential = (int) (this.getInSearchEvaluationTimeOfSolutionSet(solutions) / (1 - this.getConfig().selectionDataPortion())); // consider the fact the inner search
-		// train time was on only 70% of the
-		// data
-		long estimateForAvailableCores = CONFIG.cpus();
+		int inSearchMCEvalTime = this.getInSearchEvaluationTimeOfSolutionSet(solutions);
+		int inSearchSingleIterationEvalTime = (int) Math.round((double) inSearchMCEvalTime / this.getConfig().searchMCIterations());
+		int estimateSelectionSingleIterationEvalTime = (int) (inSearchSingleIterationEvalTime * (1 - this.getConfig().selectionDataPortion()));
+
+		// train time was on only 70% of the data
 		// double cacheFactor = Math.pow(getNumberOfCPUs(), -.6);
-		double cacheFactor = .8;
-		double conservativenessFactor = 1;
-		int runtime = (int) (conservativenessFactor * estimateForPhase2IfSequential * this.getConfig().selectionMCIterations() * cacheFactor / estimateForAvailableCores);
-		this.logger.debug("Expected runtime is {} = {} * {} * {} * {} / {} for a pool of size {}", runtime, conservativenessFactor, estimateForPhase2IfSequential, this.getConfig().selectionMCIterations(), cacheFactor,
-				estimateForAvailableCores, solutions.size());
+		int runtime = (int) (CONSERVATIVENESS_FACTOR * estimateSelectionSingleIterationEvalTime * this.getConfig().selectionMCIterations() * CACHE_FACTOR / this.getConfig().cpus());
+		this.logger.debug("Expected runtime is {} = {} * {} * {} * {} / {} for a pool of size {}", runtime, CONSERVATIVENESS_FACTOR, estimateSelectionSingleIterationEvalTime, this.getConfig().selectionMCIterations(), CACHE_FACTOR,
+				this.getConfig().cpus(), solutions.size());
 		return runtime;
 	}
 
@@ -212,8 +223,8 @@ public abstract class AbstractMLPlan extends HASCOSupervisedML implements IGraph
 		this.logger.info("Starting with phase 2: Selection of final model among the {} solutions that were identified.", solutions.size());
 		long startOfPhase2 = System.currentTimeMillis();
 		List<HASCOClassificationMLSolution> ensembleToSelectFrom;
-		if (CONFIG.timeout() > 0) {
-			int remainingTime = (int) (CONFIG.timeout() * 1000 - (System.currentTimeMillis() - this.timeOfStart));
+		if (this.getConfig().timeout() > 0) {
+			int remainingTime = (int) (this.getConfig().timeout() * 1000 - (System.currentTimeMillis() - this.timeOfStart));
 			/*
 			 * check remaining time, otherwise just return the solution with best F-Value.
 			 */
@@ -227,21 +238,20 @@ public abstract class AbstractMLPlan extends HASCOSupervisedML implements IGraph
 																				// (at least the first k)
 			int expectedTimeForSolution;
 			expectedTimeForSolution = this.getExpectedRuntimeForPhase2ForAGivenPool(ensembleToSelectFrom);
-			remainingTime = (int) (CONFIG.timeout() * 1000 - (System.currentTimeMillis() - this.timeOfStart));
+			remainingTime = (int) (this.getConfig().timeout() * 1000 - (System.currentTimeMillis() - this.timeOfStart));
 
 			if (expectedTimeForSolution > remainingTime) {
 				this.logger.warn("Only {}ms remaining. We probably cannot make it in time.", remainingTime);
 			}
 			this.logger.info("We expect phase 2 to consume {}ms for {} candidates. {}ms are permitted by timeout. The following pipelines are considered: ", expectedTimeForSolution, ensembleToSelectFrom.size(), remainingTime);
-			// ensembleToSelectFrom.stream().forEach(pl -> logger.info("\t{}: {} (f) / {}
-			// (t)", pl, hasco,
-			// getAnnotation(pl).getFTime()));
 		} else {
 			ensembleToSelectFrom = this.getSelectionForPhase2();
 		}
 
 		AtomicInteger evaluatorCounter = new AtomicInteger(0);
-		ExecutorService pool = Executors.newFixedThreadPool(CONFIG.cpus(), r -> {
+
+		this.logger.info("Create a thread pool for phase 2 of size {}.", this.getConfig().cpus());
+		ExecutorService pool = Executors.newFixedThreadPool(this.getConfig().cpus(), r -> {
 			Thread t = new Thread(r);
 			t.setName("final-evaluator-" + evaluatorCounter.incrementAndGet());
 			return t;
@@ -254,6 +264,8 @@ public abstract class AbstractMLPlan extends HASCOSupervisedML implements IGraph
 		List<DescriptiveStatistics> stats = new ArrayList<>();
 		final TimeoutSubmitter ts = TimeoutTimer.getInstance().getSubmitter();
 		ensembleToSelectFrom.forEach(c -> stats.add(new DescriptiveStatistics()));
+		System.out.println(ensembleToSelectFrom);
+
 		for (int i = 0; i < ensembleToSelectFrom.size(); i++) {
 			HASCOClassificationMLSolution c = ensembleToSelectFrom.get(i);
 			final DescriptiveStatistics statsForThisCandidate = stats.get(i);
@@ -262,25 +274,56 @@ public abstract class AbstractMLPlan extends HASCOSupervisedML implements IGraph
 				pool.submit(new Runnable() {
 					@Override
 					public void run() {
+						long timeStampStart = System.currentTimeMillis();
+
 						int taskId = -1;
+						HASCOClassificationMLSolution currentlyChosenSolution = null;
 						try {
+							/* Get the HASCOClassificationMLSolution instance for the considered model. */
 							int indexOfCurrentlyChosenModel = AbstractMLPlan.this.getClassifierThatWouldCurrentlyBeSelectedWithinPhase2(ensembleToSelectFrom, stats, false);
-							HASCOClassificationMLSolution currentlyChosenSolution = ensembleToSelectFrom.get(indexOfCurrentlyChosenModel);
+							currentlyChosenSolution = ensembleToSelectFrom.get(indexOfCurrentlyChosenModel);
+
+							/* Time needed to compute the entire score. */
+							int inSearchMCEvaluationTime = currentlyChosenSolution.getTimeToComputeScore();
+							int inSearchSingleIterationEvaluationTime = (int) Math.round((double) currentlyChosenSolution.getTimeToComputeScore() / AbstractMLPlan.this.getConfig().searchMCIterations());
+
+							/* We assume linear growth of the classifier's evaluation time here to estimate
+							 * (A) time for selection data,
+							 * (B) time for building on the entire data provided for building. */
+							int estimatedInSelectionSingleIterationEvaluationTime = (int) Math.round(inSearchSingleIterationEvaluationTime / AbstractMLPlan.this.getConfig().searchDataPortion());
+							int estimatedInSelectionMCEvaluationTime = estimatedInSelectionSingleIterationEvaluationTime * AbstractMLPlan.this.getConfig().selectionMCIterations();
+							int estimatedFinalBuildTime = (int) Math.round(estimatedInSelectionSingleIterationEvaluationTime / (1 - AbstractMLPlan.this.getConfig().selectionDataPortion()));
+							int sumOfSelectionAndFinalBuild = estimatedFinalBuildTime + estimatedInSelectionMCEvaluationTime;
+
+							AbstractMLPlan.this.logger.debug(
+									"During search, the currently chosen model {} had a total evaluation time of {}ms ({}ms per iteration). "
+											+ "We estimate an iteration in the selection phase to take {}ms ({} ms for all iterations), and the final build to take {}. " + "This yields a total time of {}ms.",
+									currentlyChosenSolution.getSolution(), inSearchMCEvaluationTime, inSearchSingleIterationEvaluationTime, estimatedInSelectionSingleIterationEvaluationTime, estimatedInSelectionMCEvaluationTime,
+									estimatedFinalBuildTime, sumOfSelectionAndFinalBuild);
+
+							/* Old computation as coded by fmohr: we assume a linear growth */
 							int trainingTimeForChosenModelInsideSearch = currentlyChosenSolution.getTimeToComputeScore();
-
-							/* we assume a linear growth */
 							int estimatedOverallTrainingTimeForChosenModel = (int) Math.round(trainingTimeForChosenModelInsideSearch / (1 - AbstractMLPlan.this.getPortionOfDataForPhase2()) / .7);
-
 							int expectedTrainingTimeOfThisModel = (int) Math.round(c.getTimeToComputeScore() / .7);
+
+							trainingTimeForChosenModelInsideSearch = inSearchMCEvaluationTime;
+							estimatedOverallTrainingTimeForChosenModel = estimatedFinalBuildTime;
+							expectedTrainingTimeOfThisModel = estimatedInSelectionSingleIterationEvaluationTime;
+
+							/* Schedule a timeout for single f evaluation if a timeout is given. */
+							// TODO: Schedule timeout according to estimates?
 							if (AbstractMLPlan.this.getTimeoutForSingleFEvaluation() > 0) {
 								taskId = ts.interruptMeAfterMS(AbstractMLPlan.this.getTimeoutForSingleFEvaluation());
 							}
-							if (CONFIG.timeout() > 0) {
+
+							/* If we have a global timeout, check whether considering this model is feasible. */
+							if (AbstractMLPlan.this.getConfig().timeout() > 0) {
 								int remainingTime = (int) (timestampOfDeadline - System.currentTimeMillis());
 								if (estimatedOverallTrainingTimeForChosenModel + expectedTrainingTimeOfThisModel >= remainingTime) {
 									AbstractMLPlan.this.logger.info(
-											"Not evaluating solutiom {} anymore, because expected time is {}, overall training time of currently selected solution is {}. This adds up to {}, which exceeds the remaining time of {}!", c,
-											expectedTrainingTimeOfThisModel, estimatedOverallTrainingTimeForChosenModel, expectedTrainingTimeOfThisModel + estimatedOverallTrainingTimeForChosenModel, remainingTime);
+											"Not evaluating solutiom {} anymore, because its insearch training time was {} expected time is {}, overall training time of currently selected solution is {}. This adds up to {}, which exceeds the remaining time of {}!",
+											c, c.getTimeToComputeScore(), expectedTrainingTimeOfThisModel, estimatedOverallTrainingTimeForChosenModel, expectedTrainingTimeOfThisModel + estimatedOverallTrainingTimeForChosenModel,
+											remainingTime);
 									return;
 								}
 							}
@@ -290,6 +333,8 @@ public abstract class AbstractMLPlan extends HASCOSupervisedML implements IGraph
 								statsForThisCandidate.addValue(selectionScore);
 							}
 						} catch (InterruptedException e) {
+							System.out.println("Selection eval of " + ((currentlyChosenSolution == null) ? "unkown" : currentlyChosenSolution.getSolution().toString()) + "got interrupted after "
+									+ (System.currentTimeMillis() - timeStampStart) + "ms. Defined timeout was: " + AbstractMLPlan.this.getTimeoutForSingleFEvaluation() + "ms");
 							// intentionally do not print anything as a timeout occurred.
 						} catch (Throwable e) {
 							/* Print only an exception if it is not expected. */
@@ -376,7 +421,7 @@ public abstract class AbstractMLPlan extends HASCOSupervisedML implements IGraph
 	 * @return Returns whether the selection phase is activated.
 	 */
 	public boolean isSelectionActivated() {
-		return CONFIG.selectionDataPortion() > 0;
+		return this.getConfig().selectionDataPortion() > 0;
 	}
 
 	/**
@@ -410,7 +455,7 @@ public abstract class AbstractMLPlan extends HASCOSupervisedML implements IGraph
 	 * @return The portion of data that is reserved for the selection phase.
 	 */
 	public double getPortionOfDataForPhase2() {
-		return CONFIG.selectionDataPortion();
+		return this.getConfig().selectionDataPortion();
 	}
 
 	/**
@@ -418,14 +463,14 @@ public abstract class AbstractMLPlan extends HASCOSupervisedML implements IGraph
 	 *            THe portion of data that is reserved for the selection phase.
 	 */
 	public void setPortionOfDataForPhase2(final double portionOfDataForPhase2) {
-		CONFIG.setProperty(AbstractMLPlanConfig.K_SELECTION_DATA_PORTION, portionOfDataForPhase2 + "");
+		this.getConfig().setProperty(AbstractMLPlanConfig.K_SELECTION_DATA_PORTION, portionOfDataForPhase2 + "");
 	}
 
 	/**
 	 * @return The number of considered solutions in the selection phase.
 	 */
 	public int getNumberOfConsideredSolutions() {
-		return CONFIG.selectionNumConsideredSolutions();
+		return this.getConfig().selectionNumConsideredSolutions();
 	}
 
 	/**
@@ -433,14 +478,14 @@ public abstract class AbstractMLPlan extends HASCOSupervisedML implements IGraph
 	 *            The number of considered solutions in the selection phase.
 	 */
 	public void setNumberOfConsideredSolutions(final int numberOfConsideredSolutions) {
-		CONFIG.setProperty(AbstractMLPlanConfig.K_SELECTION_NUM_CONSIDERED_SOLUTIONS, numberOfConsideredSolutions + "");
+		this.getConfig().setProperty(AbstractMLPlanConfig.K_SELECTION_NUM_CONSIDERED_SOLUTIONS, numberOfConsideredSolutions + "");
 	}
 
 	/**
 	 * @return The number of MC iterations per solution evaluation in the selection phase.
 	 */
 	public int getNumberOfMCIterationsPerSolutionInSelectionPhase() {
-		return CONFIG.selectionMCIterations();
+		return this.getConfig().selectionMCIterations();
 	}
 
 	/**
@@ -448,7 +493,7 @@ public abstract class AbstractMLPlan extends HASCOSupervisedML implements IGraph
 	 *            The number of MC iterations per solution evaluation in the selection phase.
 	 */
 	public void setNumberOfMCIterationsPerSolutionInSelectionPhase(final int numberOfMCIterationsPerSolutionInSelectionPhase) {
-		CONFIG.setProperty(AbstractMLPlanConfig.K_SELECTION_MC_ITERATIONS, numberOfMCIterationsPerSolutionInSelectionPhase + "");
+		this.getConfig().setProperty(AbstractMLPlanConfig.K_SELECTION_MC_ITERATIONS, numberOfMCIterationsPerSolutionInSelectionPhase + "");
 	}
 
 	@Override
