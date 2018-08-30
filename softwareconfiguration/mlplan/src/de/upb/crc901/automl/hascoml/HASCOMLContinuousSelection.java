@@ -31,16 +31,16 @@ import hasco.serialization.ComponentLoader;
 import jaicore.basic.FileUtil;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.IObjectEvaluator;
-import jaicore.graph.IObservableGraphAlgorithm;
+import jaicore.graph.IGraphAlgorithm;
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.logging.LoggerUtil;
-import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionSolution;
+import jaicore.planning.EvaluatedSearchGraphBasedPlan;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
-import jaicore.search.structure.core.Node;
+import jaicore.search.model.travesaltree.Node;
 
-public class HASCOMLContinuousSelection<C> implements IObservableGraphAlgorithm<TFDNode, String>, ILoggingCustomizable {
+public class HASCOMLContinuousSelection<C> implements IGraphAlgorithm<TFDNode, String>, ILoggingCustomizable {
 
 	// debugging tools
 	private String loggerName;
@@ -115,7 +115,7 @@ public class HASCOMLContinuousSelection<C> implements IObservableGraphAlgorithm<
 	private Double bestValidationScore = null;
 
 	private Collection<Object> listeners = new ArrayList<>();
-	private HASCO<C, TFDNode, String, Double, ForwardDecompositionSolution>.HASCOSolutionIterator hascoRun;
+	private HASCO<C, TFDNode, String, Double, EvaluatedSearchGraphBasedPlan>.HASCOSolutionIterator hascoRun;
 	private INodeEvaluator<TFDNode, Double> preferredNodeEvaluator;
 	private Queue<HASCOMLContinuousSelectionSolution<C>> solutionsFoundByHASCO = new PriorityQueue<>(
 			new Comparator<HASCOMLContinuousSelectionSolution<C>>() {

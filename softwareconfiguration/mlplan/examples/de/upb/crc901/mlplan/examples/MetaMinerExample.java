@@ -10,14 +10,14 @@ import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
 
 import de.upb.crc901.automl.hascoml.supervised.multiclass.weka.HASCOForWekaML;
-import hasco.core.HASCOProblemReduction;
+import hasco.reduction.HASCOReduction;
 import hasco.serialization.ComponentLoader;
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.ml.WekaUtil;
 import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionHTNPlannerFactory;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
-import jaicore.search.structure.core.GraphGenerator;
+import jaicore.search.core.interfaces.GraphGenerator;
 import weka.core.Instances;
 
 /**
@@ -43,7 +43,7 @@ public class MetaMinerExample {
 		ComponentLoader componentLoader = hasco.getComponentLoader();
 
 		/* get the graph generator from the reduction */
-		HASCOProblemReduction reduction = new HASCOProblemReduction(configFile, "AbstractClassifier", true);
+		HASCOReduction reduction = new HASCOReduction(configFile, "AbstractClassifier", true);
 		GraphGenerator<TFDNode, String> graphGenerator = reduction.getGraphGeneratorUsedByHASCOForSpecificPlanner(new ForwardDecompositionHTNPlannerFactory<Double>());
 		BestFirst<TFDNode, String> bf = new BestFirst<>(graphGenerator, n -> n.externalPath().size() * -1.0);
 		new SimpleGraphVisualizationWindow<>(bf);

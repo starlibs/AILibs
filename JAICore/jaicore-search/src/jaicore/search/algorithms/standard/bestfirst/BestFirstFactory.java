@@ -1,15 +1,17 @@
 package jaicore.search.algorithms.standard.bestfirst;
 
-import jaicore.search.algorithms.interfaces.IObservableORGraphSearch;
-import jaicore.search.algorithms.interfaces.IObservableORGraphSearchFactory;
+import jaicore.graph.IGraphAlgorithmListener;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
-import jaicore.search.structure.core.GraphGenerator;
+import jaicore.search.core.interfaces.StandardORGraphSearchFactory;
+import jaicore.search.model.other.EvaluatedSearchGraphPath;
+import jaicore.search.model.probleminputs.GeneralEvaluatedTraversalTree;
+import jaicore.search.model.travesaltree.Node;
 
-public class BestFirstFactory<T, A, V extends Comparable<V>> implements IObservableORGraphSearchFactory<T, A, V> {
+public class BestFirstFactory<P extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V extends Comparable<V>> extends StandardORGraphSearchFactory<P, EvaluatedSearchGraphPath<N, A, V>,N, A, V, Node<N,V>, A, IGraphAlgorithmListener<Node<N,V>, A>> {
 
-	protected int timeoutForFInMS;
-	protected INodeEvaluator<T, V> timeoutEvaluator;
-	protected String loggerName;
+	private int timeoutForFInMS;
+	private INodeEvaluator<N, V> timeoutEvaluator;
+	private String loggerName;
 
 	public BestFirstFactory() {
 		super();
@@ -23,16 +25,19 @@ public class BestFirstFactory<T, A, V extends Comparable<V>> implements IObserva
 	}
 
 	@Override
-	public IObservableORGraphSearch<T, A, V> createSearch(final GraphGenerator<T, A> graphGenerator, final INodeEvaluator<T, V> nodeEvaluator, final int numberOfCPUs) {
-		BestFirst<T, A, V> search = new BestFirst<>(graphGenerator, nodeEvaluator);
-		search.parallelizeNodeExpansion(numberOfCPUs);
+	public BestFirst<P, N, A, V> getAlgorithm() {
+		if (getProblemInput().getGraphGenerator() == null)
+			throw new IllegalStateException("Cannot produce BestFirst searches before the graph generator is set in the problem.");
+		if (getProblemInput().getNodeEvaluator() == null)
+			throw new IllegalStateException("Cannot produce BestFirst searches before the node evaluator is set.");
+		BestFirst<P, N, A, V> search = new BestFirst<>(getProblemInput());
 		search.setTimeoutForComputationOfF(this.timeoutForFInMS, this.timeoutEvaluator);
 		if (loggerName != null && loggerName.length() > 0)
 			search.setLoggerName(loggerName);
 		return search;
 	}
 
-	public void setTimeoutForFComputation(final int timeoutInMS, final INodeEvaluator<T, V> timeoutEvaluator) {
+	public void setTimeoutForFComputation(final int timeoutInMS, final INodeEvaluator<N, V> timeoutEvaluator) {
 		this.timeoutForFInMS = timeoutInMS;
 		this.timeoutEvaluator = timeoutEvaluator;
 	}
@@ -41,7 +46,7 @@ public class BestFirstFactory<T, A, V extends Comparable<V>> implements IObserva
 		return this.timeoutForFInMS;
 	}
 
-	public INodeEvaluator<T, V> getTimeoutEvaluator() {
+	public INodeEvaluator<N, V> getTimeoutEvaluator() {
 		return this.timeoutEvaluator;
 	}
 

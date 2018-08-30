@@ -9,7 +9,7 @@ import hasco.model.Component;
 import hasco.model.ComponentInstance;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
-import jaicore.search.structure.core.Node;
+import jaicore.search.model.travesaltree.Node;
 
 public class PreferenceBasedNodeEvaluator implements INodeEvaluator<TFDNode, Double> {
 

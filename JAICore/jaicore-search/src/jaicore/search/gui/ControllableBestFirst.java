@@ -6,10 +6,9 @@ import jaicore.graphvisualizer.events.controlEvents.ControlEvent;
 import jaicore.graphvisualizer.events.controlEvents.IsLiveEvent;
 import jaicore.graphvisualizer.events.controlEvents.NodePushed;
 import jaicore.graphvisualizer.events.controlEvents.StepEvent;
-import jaicore.search.algorithms.standard.bestfirst.BestFirst;
-import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
-import jaicore.search.structure.core.GraphGenerator;
-import jaicore.search.structure.core.Node;
+import jaicore.search.algorithms.standard.bestfirst.StandardBestFirst;
+import jaicore.search.model.probleminputs.GeneralEvaluatedTraversalTree;
+import jaicore.search.model.travesaltree.Node;
 
 /**
  * A test-implementation of the controllable search.
@@ -18,7 +17,7 @@ import jaicore.search.structure.core.Node;
  * @param <T>
  * @param <A>
  */
-public class ControllableBestFirst<T,A> extends BestFirst<T, A, Double> implements ControllableSearch{
+public class ControllableBestFirst<T,A> extends StandardBestFirst<T, A, Double> implements ControllableSearch{
 
 	public boolean live;
 
@@ -27,8 +26,8 @@ public class ControllableBestFirst<T,A> extends BestFirst<T, A, Double> implemen
 	 * @param graphGenerator
 	 * @param pNodeEvaluator
 	 */
-	public ControllableBestFirst(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, Double> pNodeEvaluator) {
-		super(graphGenerator, pNodeEvaluator);
+	public ControllableBestFirst(GeneralEvaluatedTraversalTree<T, A, Double> problem) {
+		super(problem);
 		// TODO Auto-generated constructor stub
 		this.live = false;
 

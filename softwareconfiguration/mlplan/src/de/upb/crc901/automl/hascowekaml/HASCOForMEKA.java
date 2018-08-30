@@ -16,17 +16,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import hasco.core.HASCOFD;
-import hasco.core.Solution;
+import hasco.core.HASCOSolutionCandidate;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
 import hasco.model.Parameter;
 import hasco.query.Factory;
 import hasco.serialization.ComponentLoader;
 import jaicore.basic.IObjectEvaluator;
-import jaicore.graph.IObservableGraphAlgorithm;
+import jaicore.graph.IGraphAlgorithm;
 import jaicore.ml.multilabel.evaluators.F1AverageMultilabelEvaluator;
 import jaicore.ml.multilabel.evaluators.MonteCarloCrossValidationEvaluator;
-import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionSolution;
+import jaicore.planning.EvaluatedSearchGraphBasedPlan;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import meka.classifiers.multilabel.MultiLabelClassifier;
@@ -36,15 +36,15 @@ import weka.classifiers.functions.SMO;
 import weka.core.Instances;
 import weka.core.OptionHandler;
 
-public class HASCOForMEKA implements IObservableGraphAlgorithm<TFDNode, String> {
+public class HASCOForMEKA implements IGraphAlgorithm<TFDNode, String> {
 
 	private static final Logger logger = LoggerFactory.getLogger(HASCOForMEKA.class);
 
 	public static class HASCOForMEKASolution {
 
-		private Solution<ForwardDecompositionSolution, MultiLabelClassifier, Double> hascoSolution;
+		private HASCOSolutionCandidate<EvaluatedSearchGraphBasedPlan, MultiLabelClassifier, Double> hascoSolution;
 
-		public HASCOForMEKASolution(Solution<ForwardDecompositionSolution, MultiLabelClassifier, Double> hascoSolution) {
+		public HASCOForMEKASolution(HASCOSolutionCandidate<EvaluatedSearchGraphBasedPlan, MultiLabelClassifier, Double> hascoSolution) {
 			super();
 			this.hascoSolution = hascoSolution;
 		}

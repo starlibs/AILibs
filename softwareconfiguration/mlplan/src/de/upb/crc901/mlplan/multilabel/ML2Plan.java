@@ -23,7 +23,7 @@ import de.upb.crc901.automl.hascowekaml.HASCOForMEKA.HASCOForMEKASolution;
 import jaicore.basic.sets.SetUtil;
 import jaicore.concurrent.TimeoutTimer;
 import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
-import jaicore.graph.IObservableGraphAlgorithm;
+import jaicore.graph.IGraphAlgorithm;
 import jaicore.logging.LoggerUtil;
 import jaicore.ml.WekaUtil;
 import jaicore.ml.evaluation.ClassifierEvaluator;
@@ -42,7 +42,7 @@ import weka.core.Option;
 import weka.core.OptionHandler;
 
 @SuppressWarnings("serial")
-public class ML2Plan extends AbstractClassifier implements Classifier, OptionHandler, IObservableGraphAlgorithm<TFDNode, String> {
+public class ML2Plan extends AbstractClassifier implements Classifier, OptionHandler, IGraphAlgorithm<TFDNode, String> {
 
 	private static final Logger logger = LoggerFactory.getLogger(ML2Plan.class);
 

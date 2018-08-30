@@ -14,19 +14,19 @@ import org.slf4j.LoggerFactory;
 
 import de.upb.crc901.automl.pipeline.ClassifierFactory;
 import hasco.core.HASCOFD;
-import hasco.core.Solution;
+import hasco.core.HASCOSolutionCandidate;
 import hasco.model.Component;
 import hasco.serialization.ComponentLoader;
 import jaicore.basic.ILoggingCustomizable;
-import jaicore.graph.IObservableGraphAlgorithm;
+import jaicore.graph.IGraphAlgorithm;
 import jaicore.ml.evaluation.ClassifierEvaluator;
 import jaicore.ml.evaluation.TimeoutableEvaluator;
-import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionSolution;
+import jaicore.planning.EvaluatedSearchGraphBasedPlan;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
-import jaicore.search.algorithms.interfaces.ISolutionEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.algorithms.standard.uncertainty.OversearchAvoidanceConfig;
-import jaicore.search.structure.core.GraphGenerator;
+import jaicore.search.core.interfaces.GraphGenerator;
+import jaicore.search.core.interfaces.ISolutionEvaluator;
 import weka.classifiers.Classifier;
 
 /**
@@ -34,7 +34,7 @@ import weka.classifiers.Classifier;
  * algorithm selection and configuration problems specifically for machine
  * learning.
  */
-public class HASCOClassificationML implements IObservableGraphAlgorithm<TFDNode, String>, ILoggingCustomizable {
+public class HASCOClassificationML implements IGraphAlgorithm<TFDNode, String>, ILoggingCustomizable {
 	/** Logger for controlled output */
 	private Logger logger = LoggerFactory.getLogger(HASCOClassificationML.class);
 	private String loggerName;
@@ -46,9 +46,9 @@ public class HASCOClassificationML implements IObservableGraphAlgorithm<TFDNode,
 	 * HASCO.
 	 */
 	public static class HASCOClassificationMLSolution
-			extends Solution<ForwardDecompositionSolution, Classifier, Double> {
+			extends HASCOSolutionCandidate<EvaluatedSearchGraphBasedPlan, Classifier, Double> {
 		public HASCOClassificationMLSolution(
-				final Solution<ForwardDecompositionSolution, Classifier, Double> solution) {
+				final HASCOSolutionCandidate<EvaluatedSearchGraphBasedPlan, Classifier, Double> solution) {
 			super(solution);
 		}
 

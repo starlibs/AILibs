@@ -18,7 +18,7 @@ import jaicore.logic.fol.structure.Monom;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.model.core.Action;
 import jaicore.planning.model.task.stn.MethodInstance;
-import jaicore.search.algorithms.interfaces.IPathUnification;
+import jaicore.search.core.interfaces.IPathUnification;
 
 public class CEOCTFDPathUnifier implements IPathUnification<TFDNode> {
 

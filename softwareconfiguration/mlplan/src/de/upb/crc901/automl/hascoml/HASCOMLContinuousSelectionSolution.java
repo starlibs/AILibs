@@ -1,15 +1,15 @@
 package de.upb.crc901.automl.hascoml;
 
-import hasco.core.Solution;
-import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionSolution;
+import hasco.core.HASCOSolutionCandidate;
+import jaicore.planning.EvaluatedSearchGraphBasedPlan;
 
 public class HASCOMLContinuousSelectionSolution<C> {
 
-	private Solution<ForwardDecompositionSolution, C, Double> hascoSolution;
+	private HASCOSolutionCandidate<EvaluatedSearchGraphBasedPlan, C, Double> hascoSolution;
 	private Double selectionScore = null;
 	private Double testScore = null;
 
-	public HASCOMLContinuousSelectionSolution(final Solution<ForwardDecompositionSolution, C, Double> hascoSolution) {
+	public HASCOMLContinuousSelectionSolution(final HASCOSolutionCandidate<EvaluatedSearchGraphBasedPlan, C, Double> hascoSolution) {
 		super();
 		this.hascoSolution = hascoSolution;
 	}

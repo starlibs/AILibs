@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-import jaicore.search.structure.core.Node;
+import jaicore.search.model.travesaltree.Node;
 
 public class SkippingNodeEvaluator<T,V extends Comparable<V>> implements INodeEvaluator<T,V> {
 
@@ -21,7 +21,7 @@ public class SkippingNodeEvaluator<T,V extends Comparable<V>> implements INodeEv
 	}
 
 	@Override
-	public V f(Node<T,?> node) throws Throwable {
+	public V f(Node<T,?> node) throws Exception {
 		int depth = node.path().size() - 1;
 		if (!fCache.containsKey(node)) {
 			if (depth == 0) {

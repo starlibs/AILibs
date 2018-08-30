@@ -2,7 +2,7 @@ package jaicore.search.algorithms.standard.bestfirst.nodeevaluation;
 
 import java.util.Map;
 
-import jaicore.search.structure.core.Node;
+import jaicore.search.model.travesaltree.Node;
 
 public class LinearCombiningNodeEvaluator<T> implements INodeEvaluator<T,Double> {
 
@@ -14,7 +14,7 @@ public class LinearCombiningNodeEvaluator<T> implements INodeEvaluator<T,Double>
 	}
 
 	@Override
-	public Double f(Node<T,?> node) throws Throwable {
+	public Double f(Node<T,?> node) throws Exception {
 		double score = 0;
 		double incr;
 		for (INodeEvaluator<T,Double> evaluator : evaluators.keySet()) {

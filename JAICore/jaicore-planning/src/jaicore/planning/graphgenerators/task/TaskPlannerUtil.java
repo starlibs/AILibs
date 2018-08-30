@@ -425,7 +425,7 @@ public class TaskPlannerUtil {
 		this.evaluablePlanningPredicates = evaluablePlanningPredicates;
 	}
 
-	public Optional<? extends Operation> getOperationWithName(STNPlanningDomain domain, String nameOfOperation) {
+	public <O extends Operation> Optional<O> getOperationWithName(STNPlanningDomain<O,?> domain, String nameOfOperation) {
 		Objects.requireNonNull(domain);
 		Objects.requireNonNull(nameOfOperation);
 		return domain.getOperations().stream().filter(o -> o.getName().equals(nameOfOperation)).findAny();

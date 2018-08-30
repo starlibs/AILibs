@@ -1,7 +1,7 @@
 package jaicore.search.algorithms.standard.bestfirst.nodeevaluation;
 
-import jaicore.search.structure.core.GraphGenerator;
-import jaicore.search.structure.core.Node;
+import jaicore.search.core.interfaces.GraphGenerator;
+import jaicore.search.model.travesaltree.Node;
 
 public abstract class DecoratingNodeEvaluator<T, V extends Comparable<V>> implements INodeEvaluator<T, V> {
 
@@ -17,7 +17,7 @@ public abstract class DecoratingNodeEvaluator<T, V extends Comparable<V>> implem
 	}
 
 	@Override
-	public V f(Node<T, ?> node) throws Throwable {
+	public V f(Node<T, ?> node) throws Exception {
 		return this.evaluator.f(node);
 	}
 

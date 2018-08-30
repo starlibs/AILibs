@@ -12,25 +12,25 @@ import org.slf4j.LoggerFactory;
 
 import de.upb.crc901.automl.pipeline.ClassifierFactory;
 import hasco.core.HASCOFD;
-import hasco.core.Solution;
+import hasco.core.HASCOSolutionCandidate;
 import hasco.serialization.ComponentLoader;
 import jaicore.basic.ILoggingCustomizable;
-import jaicore.graph.IObservableGraphAlgorithm;
+import jaicore.graph.IGraphAlgorithm;
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.ml.evaluation.ClassifierEvaluator;
 import jaicore.ml.evaluation.TimeoutableEvaluator;
-import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionSolution;
+import jaicore.planning.EvaluatedSearchGraphBasedPlan;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;
 import jaicore.search.algorithms.standard.uncertainty.OversearchAvoidanceConfig;
 import jaicore.search.algorithms.standard.uncertainty.OversearchAvoidanceConfig.OversearchAvoidanceMode;
-import jaicore.search.structure.core.Node;
+import jaicore.search.model.travesaltree.Node;
 import weka.classifiers.Classifier;
 
 /**
  * HASCOML represents the basic class for searching and optimizing hierarchical algorithm selection and configuration problems specifically for machine learning.
  */
-public class HASCOSupervisedML extends HASCOFD<Classifier, Double> implements IObservableGraphAlgorithm<TFDNode, String>, ILoggingCustomizable {
+public class HASCOSupervisedML extends HASCOFD<Classifier, Double> implements IAlgorithm<TFDNode, String>, ILoggingCustomizable {
 
 	/** HASCO parametrization specific for the use case of supervised ML. */
 	private static final HASCOSupervisedMLConfig CONFIG = ConfigCache.getOrCreate(HASCOSupervisedMLConfig.class);
@@ -47,8 +47,8 @@ public class HASCOSupervisedML extends HASCOFD<Classifier, Double> implements IO
 	/**
 	 * Namespaced class for storing evaluated classifiers that have been found by HASCO.
 	 */
-	public static class HASCOClassificationMLSolution extends Solution<ForwardDecompositionSolution, Classifier, Double> {
-		public HASCOClassificationMLSolution(final Solution<ForwardDecompositionSolution, Classifier, Double> solution) {
+	public static class HASCOClassificationMLSolution extends HASCOSolutionCandidate<EvaluatedSearchGraphBasedPlan, Classifier, Double> {
+		public HASCOClassificationMLSolution(final HASCOSolutionCandidate<EvaluatedSearchGraphBasedPlan, Classifier, Double> solution) {
 			super(solution);
 		}
 

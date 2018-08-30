@@ -1,7 +1,8 @@
 package jaicore.search.algorithms.standard.uncertainty;
 
 import java.util.List;
-import jaicore.search.structure.core.Node;
+
+import jaicore.search.model.travesaltree.Node;
 
 public class BasicUncertaintySource<T, V extends Comparable<V>> implements IUncertaintySource<T, V> {
 

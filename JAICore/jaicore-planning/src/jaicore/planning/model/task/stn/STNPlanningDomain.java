@@ -6,22 +6,22 @@ import java.util.Collection;
 import jaicore.planning.model.core.Operation;
 
 @SuppressWarnings("serial")
-public class STNPlanningDomain implements Serializable {
+public class STNPlanningDomain<O extends Operation, M extends Method> implements Serializable {
 
-	private final Collection<? extends Operation> operations;
-	private final Collection<? extends Method> methods;
+	private final Collection<O> operations;
+	private final Collection<M> methods;
 
-	public STNPlanningDomain(Collection<? extends Operation> operations, Collection<? extends Method> methods) {
+	public STNPlanningDomain(Collection<O> operations, Collection<M> methods) {
 		super();
 		this.operations = operations;
 		this.methods = methods;
 	}
 
-	public Collection<? extends Operation> getOperations() {
+	public Collection<O> getOperations() {
 		return operations;
 	}
 
-	public Collection<? extends Method> getMethods() {
+	public Collection<M> getMethods() {
 		return methods;
 	}
 

@@ -26,13 +26,13 @@ import jaicore.basic.IObjectEvaluator;
 import jaicore.basic.sets.SetUtil;
 import jaicore.concurrent.TimeoutTimer;
 import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
-import jaicore.graph.IObservableGraphAlgorithm;
+import jaicore.graph.IGraphAlgorithm;
 import jaicore.logging.LoggerUtil;
 import jaicore.ml.WekaUtil;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import weka.classifiers.Classifier;
 
-public abstract class AbstractMLPlan extends HASCOSupervisedML implements IObservableGraphAlgorithm<TFDNode, String>, ILoggingCustomizable {
+public abstract class AbstractMLPlan extends HASCOSupervisedML implements IGraphAlgorithm<TFDNode, String>, ILoggingCustomizable {
 
 	/** Logger for controlled outputs. */
 	private Logger logger = LoggerFactory.getLogger(AbstractMLPlan.class);

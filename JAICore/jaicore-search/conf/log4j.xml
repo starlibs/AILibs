@@ -71,7 +71,7 @@
 		<level value="warn" />
 	</logger>
 
-	<logger name="jaicore.search.algorithms.standard.mcts">
+	<logger name="jaicore.search.algorithms.standard.mcts.MCTS">
 		<level value="warn" />
 	</logger>
 </log4j:configuration>

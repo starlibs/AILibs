@@ -6,16 +6,19 @@ import jaicore.logic.fol.structure.CNFFormula;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.logic.fol.theories.EvaluablePredicate;
 import jaicore.planning.graphgenerators.task.ceociptfd.OracleTaskResolver;
+import jaicore.planning.model.ceoc.CEOCAction;
+import jaicore.planning.model.ceoc.CEOCOperation;
 import jaicore.planning.model.task.ceocstn.CEOCSTNPlanningDomain;
 import jaicore.planning.model.task.ceocstn.CEOCSTNPlanningProblem;
+import jaicore.planning.model.task.ceocstn.OCMethod;
 import jaicore.planning.model.task.stn.TaskNetwork;
 
 @SuppressWarnings("serial")
-public class CEOCIPSTNPlanningProblem extends CEOCSTNPlanningProblem {
+public class CEOCIPSTNPlanningProblem<O extends CEOCOperation, M extends OCMethod, A extends CEOCAction> extends CEOCSTNPlanningProblem<O, M, A> {
 	private final Map<String, EvaluablePredicate> evaluablePlanningPredicates;
 	private final Map<String, OracleTaskResolver> oracleResolvers;
 
-	public CEOCIPSTNPlanningProblem(CEOCSTNPlanningDomain domain, CNFFormula knowledge, Monom init, TaskNetwork network, Map<String, EvaluablePredicate> evaluablePredicates,
+	public CEOCIPSTNPlanningProblem(CEOCSTNPlanningDomain<O, M> domain, CNFFormula knowledge, Monom init, TaskNetwork network, Map<String, EvaluablePredicate> evaluablePredicates,
 			Map<String, OracleTaskResolver> oracleResolvers) {
 		super(domain, knowledge, init, network);
 		this.evaluablePlanningPredicates = evaluablePredicates;

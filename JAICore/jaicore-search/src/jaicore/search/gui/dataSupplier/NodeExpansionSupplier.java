@@ -17,7 +17,7 @@ import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
 import jaicore.graphvisualizer.gui.dataSupplier.ISupplier;
-import jaicore.search.structure.core.Node;
+import jaicore.search.model.travesaltree.Node;
 
 /**
  * A class which works similar to the recorder.

@@ -4,12 +4,15 @@ import jaicore.logic.fol.structure.Literal;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.planning.graphgenerators.task.tfd.TFDGraphGenerator;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
+import jaicore.planning.model.ceoc.CEOCAction;
+import jaicore.planning.model.ceoc.CEOCOperation;
 import jaicore.planning.model.task.ceocstn.CEOCSTNPlanningProblem;
+import jaicore.planning.model.task.ceocstn.OCMethod;
 
 @SuppressWarnings("serial")
-public class CEOCTFDGraphGenerator extends TFDGraphGenerator {
+public class CEOCTFDGraphGenerator<O extends CEOCOperation, M extends OCMethod, A extends CEOCAction> extends TFDGraphGenerator<O, M, A> {
 
-	public CEOCTFDGraphGenerator(CEOCSTNPlanningProblem problem) {
+	public CEOCTFDGraphGenerator(CEOCSTNPlanningProblem<O, M, A> problem) {
 		super(problem);
 	}
 

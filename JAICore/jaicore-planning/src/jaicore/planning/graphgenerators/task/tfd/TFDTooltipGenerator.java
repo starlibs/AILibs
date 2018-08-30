@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 import jaicore.graphvisualizer.TooltipGenerator;
 import jaicore.logic.fol.structure.Literal;
 import jaicore.planning.model.core.Action;
-import jaicore.search.structure.core.Node;
+import jaicore.search.model.travesaltree.Node;
 
 public class TFDTooltipGenerator<V extends Comparable<V>> implements TooltipGenerator<Node<TFDNode, V>> {
 

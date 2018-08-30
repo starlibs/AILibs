@@ -14,7 +14,7 @@ import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
 import jaicore.graphvisualizer.events.graphEvents.GraphEvent;
 import jaicore.graphvisualizer.events.misc.HTMLEvent;
 import jaicore.graphvisualizer.gui.dataSupplier.ISupplier;
-import jaicore.search.structure.core.Node;
+import jaicore.search.model.travesaltree.Node;
 
 import java.util.ArrayList;
 import java.util.HashMap;

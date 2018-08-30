@@ -3,7 +3,6 @@ package jaicore.search.algorithms.standard.bestfirst;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -16,6 +15,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -24,32 +24,39 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.Subscribe;
 
-import jaicore.basic.IIterableAlgorithm;
 import jaicore.basic.ILoggingCustomizable;
+import jaicore.basic.algorithm.AlgorithmEvent;
+import jaicore.basic.algorithm.AlgorithmFinishedEvent;
+import jaicore.basic.algorithm.AlgorithmInitializedEvent;
+import jaicore.basic.algorithm.AlgorithmState;
 import jaicore.concurrent.TimeoutTimer;
 import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
+import jaicore.graph.IGraphAlgorithmListener;
 import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeParentSwitchEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeRemovedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
 import jaicore.logging.LoggerUtil;
-import jaicore.search.algorithms.interfaces.IObservableORGraphSearch;
+import jaicore.search.algorithms.standard.AbstractORGraphSearch;
+import jaicore.search.algorithms.standard.bestfirst.events.GraphSearchSolutionCandidateFoundEvent;
+import jaicore.search.algorithms.standard.bestfirst.events.NodeAnnotationEvent;
+import jaicore.search.algorithms.standard.bestfirst.events.NodeExpansionCompletedEvent;
+import jaicore.search.algorithms.standard.bestfirst.events.SolutionAnnotationEvent;
+import jaicore.search.algorithms.standard.bestfirst.events.SuccessorComputationCompletedEvent;
+import jaicore.search.algorithms.standard.bestfirst.model.OpenCollection;
+import jaicore.search.algorithms.standard.bestfirst.model.PriorityQueueOpen;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.DecoratingNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.ICancelableNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.IGraphDependentNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.ISolutionReportingNodeEvaluator;
-import jaicore.search.algorithms.standard.core.events.NodeAnnotationEvent;
-import jaicore.search.algorithms.standard.core.events.SolutionAnnotationEvent;
-import jaicore.search.algorithms.standard.core.events.SolutionFoundEvent;
-import jaicore.search.algorithms.standard.core.events.SuccessorComputationCompletedEvent;
-import jaicore.search.structure.core.GraphEventBus;
-import jaicore.search.structure.core.GraphGenerator;
-import jaicore.search.structure.core.Node;
-import jaicore.search.structure.core.NodeExpansionDescription;
-import jaicore.search.structure.core.OpenCollection;
-import jaicore.search.structure.core.PriorityQueueOpen;
+import jaicore.search.core.interfaces.GraphGenerator;
+import jaicore.search.model.other.EvaluatedSearchGraphPath;
+import jaicore.search.model.probleminputs.GeneralEvaluatedTraversalTree;
+import jaicore.search.model.travesaltree.GraphEventBus;
+import jaicore.search.model.travesaltree.Node;
+import jaicore.search.model.travesaltree.NodeExpansionDescription;
 import jaicore.search.structure.graphgenerator.MultipleRootGenerator;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.PathGoalTester;
@@ -57,70 +64,61 @@ import jaicore.search.structure.graphgenerator.RootGenerator;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
-public class BestFirst<T, A, V extends Comparable<V>> implements IObservableORGraphSearch<T, A, V>, IIterableAlgorithm<List<NodeExpansionDescription<T, A>>>, Iterator<List<NodeExpansionDescription<T, A>>>, ILoggingCustomizable {
+public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V extends Comparable<V>> extends AbstractORGraphSearch<I, EvaluatedSearchGraphPath<N, A, V>, N, A, V, Node<N, V>, A> implements ILoggingCustomizable {
 
-	private Logger logger = LoggerFactory.getLogger(BestFirst.class);
-	
 	public enum ParentDiscarding {
-		NONE,
-		OPEN,
-		ALL
+		NONE, OPEN, ALL
 	}
 
-	/* meta vars for controlling the general behavior */
+	/* algorithm state and statistics */
 	private int createdCounter;
 	private int expandedCounter;
 	private boolean initialized = false;
 	protected boolean interrupted = false;
 	protected boolean canceled = false;
-	private Thread shutdownHook = new Thread(() -> {
-		this.cancel();
-	});
+	private AlgorithmState state = AlgorithmState.created;
+	private EvaluatedSearchGraphPath<N, A, V> bestSeenSolution;
+	private List<NodeExpansionDescription<N, A>> lastExpansion = new ArrayList<>();
 
 	/* communication */
-	protected final GraphEventBus<Node<T, V>> graphEventBus = new GraphEventBus<>();
-	protected final Map<T, Node<T, V>> ext2int = new ConcurrentHashMap<>();
+	protected final GraphEventBus<Node<N, V>> graphEventBus = new GraphEventBus<>();
+	private Logger logger = LoggerFactory.getLogger(BestFirst.class);
+	protected final Map<N, Node<N, V>> ext2int = new ConcurrentHashMap<>();
 
 	/* search related objects */
-	protected OpenCollection<Node<T, V>> open = new PriorityQueueOpen<>();
-
-	protected final GraphGenerator<T, A> graphGenerator;
-	protected final RootGenerator<T> rootGenerator;
-	protected final SuccessorGenerator<T, A> successorGenerator;
+	protected OpenCollection<Node<N, V>> open = new PriorityQueueOpen<>();
+	private final Set<N> expanded = new HashSet<>();
+	protected final GraphGenerator<N, A> graphGenerator;
+	protected final RootGenerator<N> rootGenerator;
+	protected final SuccessorGenerator<N, A> successorGenerator;
 	protected final boolean checkGoalPropertyOnEntirePath;
-	protected final PathGoalTester<T> pathGoalTester;
-	protected final NodeGoalTester<T> nodeGoalTester;
+	protected final PathGoalTester<N> pathGoalTester;
+	protected final NodeGoalTester<N> nodeGoalTester;
+	private ParentDiscarding parentDiscarding;
 
 	/* computation of f */
-	protected final INodeEvaluator<T, V> nodeEvaluator;
-	private INodeEvaluator<T, V> timeoutNodeEvaluator;
+	protected final INodeEvaluator<N, V> nodeEvaluator;
+	private final boolean solutionReportingNodeEvaluator;
+	private INodeEvaluator<N, V> timeoutNodeEvaluator;
 	private TimeoutSubmitter timeoutSubmitter;
 	private int timeoutForComputationOfF;
 
-	protected final Queue<List<T>> solutions = new LinkedBlockingQueue<>();
-	protected final Map<List<T>, Map<String, Object>> solutionAnnotations = new HashMap<>(); // for solutions that may have been acquired from some subroutine without really knowing all of the nodes
-																								// on the path
+	protected final Queue<EvaluatedSearchGraphPath<N, A, V>> solutions = new LinkedBlockingQueue<>();
+	protected final Queue<GraphSearchSolutionCandidateFoundEvent<N, A, V>> pendingSolutionFoundEvents = new LinkedBlockingQueue<>();
+
 	/* parallelization */
 	protected int additionalThreadsForExpansion = 0;
 	private Semaphore fComputationTickets;
 	private ExecutorService pool;
 	protected final AtomicInteger activeJobs = new AtomicInteger(0);
-
-	private final Set<T> expanded = new HashSet<>();
-	private final boolean solutionReportingNodeEvaluator;
-
-	/**
-	 * Memorize the last expansion for when it is requested
-	 */
-	private List<NodeExpansionDescription<T, A>> lastExpansion = new ArrayList<>();
-	private ParentDiscarding parentDiscarding;
+	private Semaphore nodeModelSemaphore = new Semaphore(1);
 
 	private class NodeBuilder implements Runnable {
 
-		private final Node<T, V> expandedNodeInternal;
-		private final NodeExpansionDescription<T, A> successorDescription;
+		private final Node<N, V> expandedNodeInternal;
+		private final NodeExpansionDescription<N, A> successorDescription;
 
-		public NodeBuilder(final Node<T, V> expandedNodeInternal, final NodeExpansionDescription<T, A> successorDescription) {
+		public NodeBuilder(final Node<N, V> expandedNodeInternal, final NodeExpansionDescription<N, A> successorDescription) {
 			super();
 			this.expandedNodeInternal = expandedNodeInternal;
 			this.successorDescription = successorDescription;
@@ -135,7 +133,7 @@ public class BestFirst<T, A, V extends Comparable<V>> implements IObservableORGr
 				BestFirst.this.logger.debug("Start node creation.");
 				BestFirst.this.lastExpansion.add(this.successorDescription);
 
-				Node<T, V> newNode = BestFirst.this.newNode(this.expandedNodeInternal, this.successorDescription.getTo());
+				Node<N, V> newNode = BestFirst.this.newNode(this.expandedNodeInternal, this.successorDescription.getTo());
 
 				/* update creation counter */
 				BestFirst.this.createdCounter++;
@@ -204,16 +202,17 @@ public class BestFirst<T, A, V extends Comparable<V>> implements IObservableORGr
 				newNode.setInternalLabel(label);
 
 				BestFirst.this.logger.info("Inserting successor {} of {} to OPEN. F-Value is {}", newNode, this.expandedNodeInternal, label);
-				// assert !open.contains(newNode) && !expanded.contains(newNode.getPoint()) : "Inserted node is already in OPEN or even expanded!";
+				// assert !open.contains(newNode) && !expanded.contains(newNode.getPoint()) :
+				// "Inserted node is already in OPEN or even expanded!";
 
 				/* if we discard (either only on OPEN or on both OPEN and CLOSED) */
 				boolean nodeProcessed = false;
 				if (BestFirst.this.parentDiscarding != ParentDiscarding.NONE) {
 
 					/* determine whether we already have the node AND it is worse than the one we want to insert */
-					Optional<Node<T, V>> existingIdenticalNodeOnOpen = BestFirst.this.open.stream().filter(n -> n.getPoint().equals(newNode.getPoint())).findFirst();
+					Optional<Node<N, V>> existingIdenticalNodeOnOpen = BestFirst.this.open.stream().filter(n -> n.getPoint().equals(newNode.getPoint())).findFirst();
 					if (existingIdenticalNodeOnOpen.isPresent()) {
-						Node<T, V> existingNode = existingIdenticalNodeOnOpen.get();
+						Node<N, V> existingNode = existingIdenticalNodeOnOpen.get();
 						if (newNode.compareTo(existingNode) < 0) {
 							BestFirst.this.graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_" + (newNode.isGoal() ? "solution" : "open")));
 							BestFirst.this.graphEventBus.post(new NodeRemovedEvent<>(existingNode));
@@ -229,17 +228,17 @@ public class BestFirst<T, A, V extends Comparable<V>> implements IObservableORGr
 					else if (BestFirst.this.parentDiscarding == ParentDiscarding.ALL) {
 
 						/* reopening, if the node is already on CLOSED */
-						Optional<T> existingIdenticalNodeOnClosed = BestFirst.this.expanded.stream().filter(n -> n.equals(newNode.getPoint())).findFirst();
+						Optional<N> existingIdenticalNodeOnClosed = BestFirst.this.expanded.stream().filter(n -> n.equals(newNode.getPoint())).findFirst();
 						if (existingIdenticalNodeOnClosed.isPresent()) {
-							Node<T, V> node = BestFirst.this.ext2int.get(existingIdenticalNodeOnClosed.get());
+							Node<N, V> node = BestFirst.this.ext2int.get(existingIdenticalNodeOnClosed.get());
 							if (newNode.compareTo(node) < 0) {
 								node.setParent(newNode.getParent());
 								node.setInternalLabel(newNode.getInternalLabel());
 								BestFirst.this.expanded.remove(node.getPoint());
 								BestFirst.this.open.add(node);
-								BestFirst.this.graphEventBus.post(new NodeParentSwitchEvent<Node<T, V>>(node, node.getParent(), newNode.getParent()));
+								BestFirst.this.graphEventBus.post(new NodeParentSwitchEvent<Node<N, V>>(node, node.getParent(), newNode.getParent()));
 							}
-							BestFirst.this.graphEventBus.post(new NodeRemovedEvent<Node<T, V>>(newNode));
+							BestFirst.this.graphEventBus.post(new NodeRemovedEvent<Node<N, V>>(newNode));
 							nodeProcessed = true;
 						}
 					}
@@ -257,13 +256,11 @@ public class BestFirst<T, A, V extends Comparable<V>> implements IObservableORGr
 
 				/* Recognize solution in cache together with annotation */
 				if (newNode.isGoal()) {
-					List<T> solution = BestFirst.this.getTraversalPath(newNode);
+					EvaluatedSearchGraphPath<N, A, V> solution = new EvaluatedSearchGraphPath<>(BestFirst.this.getTraversalPath(newNode), null, newNode.getInternalLabel());
 
-					/* if the node evaluator has not reported the solution already anyway, register the solution and store its annotation */
-					if (!BestFirst.this.solutionReportingNodeEvaluator && !BestFirst.this.solutions.contains(solution)) {
-						BestFirst.this.solutions.add(solution);
-						BestFirst.this.solutionAnnotations.put(solution, new HashMap<>());
-						BestFirst.this.solutionAnnotations.get(solution).put("f", newNode.getInternalLabel());
+					/* if the node evaluator has not reported the solution already anyway, register the solution */
+					if (!BestFirst.this.solutionReportingNodeEvaluator) {
+						registerSolutionCandidateViaEvent(new GraphSearchSolutionCandidateFoundEvent<>(solution));
 					}
 				}
 
@@ -279,37 +276,35 @@ public class BestFirst<T, A, V extends Comparable<V>> implements IObservableORGr
 		}
 	}
 
-	public BestFirst(final GraphGenerator<T, A> graphGenerator, final INodeEvaluator<T, V> pNodeEvaluator) {
-		this(graphGenerator, pNodeEvaluator, ParentDiscarding.NONE);
+	public BestFirst(final I problem) {
+		this(problem, ParentDiscarding.NONE);
 	}
 
 	@SuppressWarnings("unchecked")
-	public BestFirst(final GraphGenerator<T, A> graphGenerator, final INodeEvaluator<T, V> pNodeEvaluator, final ParentDiscarding pd) {
-		super();
-		this.graphGenerator = graphGenerator;
+	public BestFirst(final I problem, final ParentDiscarding pd) {
+		super(problem);
+		this.graphGenerator = problem.getGraphGenerator();
 		this.rootGenerator = graphGenerator.getRootGenerator();
 		this.successorGenerator = graphGenerator.getSuccessorGenerator();
 		this.checkGoalPropertyOnEntirePath = !(graphGenerator.getGoalTester() instanceof NodeGoalTester);
 		if (this.checkGoalPropertyOnEntirePath) {
 			this.nodeGoalTester = null;
-			this.pathGoalTester = (PathGoalTester<T>) graphGenerator.getGoalTester();
+			this.pathGoalTester = (PathGoalTester<N>) graphGenerator.getGoalTester();
 			;
 		} else {
-			this.nodeGoalTester = (NodeGoalTester<T>) graphGenerator.getGoalTester();
+			this.nodeGoalTester = (NodeGoalTester<N>) graphGenerator.getGoalTester();
 			this.pathGoalTester = null;
 		}
 
 		/* set parent discarding */
 		this.parentDiscarding = pd;
 
-		// /*setting a priorityqueueopen As a default open collection*/
-		//
-		// this.setOpen(new PriorityQueueOpen<Node<T,V>>());
-
 		/* if the node evaluator is graph dependent, communicate the generator to it */
-		this.nodeEvaluator = pNodeEvaluator;
-		if (pNodeEvaluator instanceof DecoratingNodeEvaluator<?, ?>) {
-			DecoratingNodeEvaluator<T, V> castedEvaluator = (DecoratingNodeEvaluator<T, V>) pNodeEvaluator;
+		this.nodeEvaluator = problem.getNodeEvaluator();
+		if (nodeEvaluator == null)
+			throw new IllegalArgumentException("Cannot work with node evaulator that is null");
+		else if (nodeEvaluator instanceof DecoratingNodeEvaluator<?, ?>) {
+			DecoratingNodeEvaluator<N, V> castedEvaluator = (DecoratingNodeEvaluator<N, V>) nodeEvaluator;
 			if (castedEvaluator.isGraphDependent()) {
 				this.logger.info("{} is a graph dependent node evaluator. Setting its graph generator now ...", castedEvaluator);
 				castedEvaluator.setGenerator(graphGenerator);
@@ -322,77 +317,62 @@ public class BestFirst<T, A, V extends Comparable<V>> implements IObservableORGr
 				this.solutionReportingNodeEvaluator = false;
 			}
 		} else {
-			if (pNodeEvaluator instanceof IGraphDependentNodeEvaluator) {
-				this.logger.info("{} is a graph dependent node evaluator. Setting its graph generator now ...", pNodeEvaluator);
-				((IGraphDependentNodeEvaluator<T, A, V>) pNodeEvaluator).setGenerator(graphGenerator);
+			if (nodeEvaluator instanceof IGraphDependentNodeEvaluator) {
+				this.logger.info("{} is a graph dependent node evaluator. Setting its graph generator now ...", nodeEvaluator);
+				((IGraphDependentNodeEvaluator<N, A, V>) nodeEvaluator).setGenerator(graphGenerator);
 			}
 
 			/* if the node evaluator is a solution reporter, register in his event bus */
-			if (pNodeEvaluator instanceof ISolutionReportingNodeEvaluator) {
-				this.logger.info("{} is a solution reporter. Register the search algo in its event bus", pNodeEvaluator);
-				((ISolutionReportingNodeEvaluator<T, V>) pNodeEvaluator).registerSolutionListener(this);
+			if (nodeEvaluator instanceof ISolutionReportingNodeEvaluator) {
+				this.logger.info("{} is a solution reporter. Register the search algo in its event bus", nodeEvaluator);
+				((ISolutionReportingNodeEvaluator<N, V>) nodeEvaluator).registerSolutionListener(this);
 				this.solutionReportingNodeEvaluator = true;
 			} else {
 				this.solutionReportingNodeEvaluator = false;
 			}
 		}
 
-		// /* if this is a decorator, go to the next one */
-		// if (currentlyConsideredEvaluator instanceof DecoratingNodeEvaluator) {
-		// logger.info("{} is decorator. Continue setup with the wrapped evaluator ...", currentlyConsideredEvaluator);
-		// currentlyConsideredEvaluator = ((DecoratingNodeEvaluator<T,V>)currentlyConsideredEvaluator).getEvaluator();
-		// }
-		// else
-		// currentlyConsideredEvaluator = null;
-		// }
-		// while (currentlyConsideredEvaluator != null);
-		Runtime.getRuntime().addShutdownHook(this.shutdownHook);
+		/* add shutdown hook so as to cancel the search once the overall program is shutdown */
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> BestFirst.this.cancel()));
 	}
 
-	private void labelNode(final Node<T, V> node) throws Throwable {
+	private void labelNode(final Node<N, V> node) throws Throwable {
 		node.setInternalLabel(this.nodeEvaluator.f(node));
 	}
 
 	/**
 	 * This method setups the graph by inserting the root nodes.
 	 */
-	protected synchronized void initGraph() throws Throwable {
+	protected void initGraph() throws Throwable {
 		if (!this.initialized) {
-			this.initialized = true;
-			if (this.rootGenerator instanceof MultipleRootGenerator) {
-				Collection<Node<T, V>> roots = ((MultipleRootGenerator<T>) this.rootGenerator).getRoots().stream().map(n -> this.newNode(null, n)).collect(Collectors.toList());
-				for (Node<T, V> root : roots) {
+			try {
+				nodeModelSemaphore.acquire();
+				this.initialized = true;
+				if (this.rootGenerator instanceof MultipleRootGenerator) {
+					Collection<Node<N, V>> roots = ((MultipleRootGenerator<N>) this.rootGenerator).getRoots().stream().map(n -> this.newNode(null, n)).collect(Collectors.toList());
+					for (Node<N, V> root : roots) {
+						this.labelNode(root);
+						this.open.add(root);
+						root.setAnnotation("awa-level", 0);
+						this.logger.info("Labeled root with {}", root.getInternalLabel());
+					}
+				} else {
+					Node<N, V> root = this.newNode(null, ((SingleRootGenerator<N>) this.rootGenerator).getRoot());
 					this.labelNode(root);
 					this.open.add(root);
-					root.setAnnotation("awa-level", 0);
-					this.logger.info("Labeled root with {}", root.getInternalLabel());
 				}
-			} else {
-				Node<T, V> root = this.newNode(null, ((SingleRootGenerator<T>) this.rootGenerator).getRoot());
-				this.labelNode(root);
-				this.open.add(root);
+			} finally {
+				nodeModelSemaphore.release();
 			}
-
-			// check if the equals method is explicitly implemented.
-			// Method [] methods = open.peek().getPoint().getClass().getDeclaredMethods();
-			// boolean containsEquals = false;
-			// for(Method m : methods)
-			// if(m.getName() == "equals") {
-			// containsEquals = true;
-			// break;
-			// }
-			//
-			// if(!containsEquals)
-			// this.parentDiscarding = ParentDiscarding.NONE;
 		}
 	}
 
-	public List<T> nextSolutionThatDominatesOpen() throws InterruptedException {
-		List<T> currentlyBestSolution = null;
+	public EvaluatedSearchGraphPath<N, A, V> nextSolutionThatDominatesOpen() throws InterruptedException {
+		EvaluatedSearchGraphPath<N, A, V> currentlyBestSolution = null;
 		V currentlyBestScore = null;
 		do {
-			List<T> solution = this.nextSolution();
-			V scoreOfSolution = this.getFOfReturnedSolution(solution);
+			EvaluatedSearchGraphPath<N, A, V> solution = this.nextSolution();
+			V scoreOfSolution = solution.getScore();
 			if (currentlyBestScore == null || scoreOfSolution.compareTo(currentlyBestScore) < 0) {
 				currentlyBestScore = scoreOfSolution;
 				currentlyBestSolution = solution;
@@ -408,9 +388,7 @@ public class BestFirst<T, A, V extends Comparable<V>> implements IObservableORGr
 	 *            The initial node.
 	 * @return A list of nodes from the initial point to a goal, <code>null</code> if a path doesn't exist.
 	 */
-
-	@Override
-	public List<T> nextSolution() throws InterruptedException {
+	public EvaluatedSearchGraphPath<N, A, V> nextSolution() throws InterruptedException {
 
 		/* check whether solution has been canceled */
 		if (this.canceled) {
@@ -427,8 +405,9 @@ public class BestFirst<T, A, V extends Comparable<V>> implements IObservableORGr
 		}
 		if (!this.solutions.isEmpty()) {
 			this.logger.debug("Still have solution in cache, return it.");
-			this.logger.info("Returning solution {} with score {}", this.solutions.peek(), this.getAnnotationsOfReturnedSolution(this.solutions.peek()));
-			return this.solutions.poll();
+			EvaluatedSearchGraphPath<N, A, V> solution = this.solutions.poll();
+			this.logger.info("Returning solution {} with score {}", solution.getNodes(), solution.getScore());
+			return solution;
 		}
 		do {
 
@@ -451,9 +430,9 @@ public class BestFirst<T, A, V extends Comparable<V>> implements IObservableORGr
 			this.logger.debug("Iteration of main loop starts. Size of OPEN now {}. Now performing next expansion step.", this.open.size());
 			this.step();
 			if (!this.solutions.isEmpty()) {
-				List<T> solution = this.solutions.poll();
+				EvaluatedSearchGraphPath<N, A, V> solution = this.solutions.poll();
 				this.logger.debug("Iteration of main loop terminated. Found a solution to return. Size of OPEN now {}", this.open.size());
-				this.logger.info("Returning solution {} with score {}", solution, this.getAnnotationsOfReturnedSolution(solution));
+				this.logger.info("Returning solution {} with score {}", solution.getNodes(), solution.getScore());
 				return solution;
 			}
 
@@ -477,7 +456,7 @@ public class BestFirst<T, A, V extends Comparable<V>> implements IObservableORGr
 	 *
 	 * @return The last found solution path.
 	 */
-	public List<NodeExpansionDescription<T, A>> nextExpansion() {
+	public List<NodeExpansionDescription<N, A>> nextExpansion() {
 		if (!this.initialized) {
 			try {
 				this.initGraph();
@@ -492,30 +471,27 @@ public class BestFirst<T, A, V extends Comparable<V>> implements IObservableORGr
 		return this.lastExpansion;
 	}
 
-	protected void step() {
-		if (this.beforeSelection()) {
-
-			Node<T, V> nodeToExpand = this.open.peek();
-			if (nodeToExpand == null) {
-				return;
-			}
-			assert this.parentDiscarding == ParentDiscarding.ALL || !this.expanded.contains(nodeToExpand.getPoint()) : "Node " + nodeToExpand.getString() + " has been selected for the second time for expansion.";
-			this.afterSelection(nodeToExpand);
-			this.step(nodeToExpand);
+	protected NodeExpansionCompletedEvent<N, A, V> step() {
+		if (!this.beforeSelection())
+			return null;
+		Node<N, V> nodeToExpand = this.open.peek();
+		if (nodeToExpand == null) {
+			return null;
 		}
+		assert this.parentDiscarding == ParentDiscarding.ALL || !this.expanded.contains(nodeToExpand.getPoint()) : "Node " + nodeToExpand.getString()
+				+ " has been selected for the second time for expansion.";
+		this.afterSelection(nodeToExpand);
+		return this.step(nodeToExpand);
 	}
 
-	public void step(final Node<T, V> nodeToExpand) {
-
-		// if (!(nodeEvaluator instanceof RandomizedDepthFirstEvaluator))
-		// System.out.println(nodeToExpand.getAnnotations());
+	public NodeExpansionCompletedEvent<N, A, V> step(final Node<N, V> nodeToExpand) {
 
 		/* if search has been interrupted, do not process next step */
 		this.logger.debug("Step starts. Size of OPEN now {}", this.open.size());
 		if (Thread.interrupted()) {
 			this.logger.debug("Received interrupt signal before step.");
 			this.interrupted = true;
-			return;
+			return null;
 		}
 		this.lastExpansion.clear();
 		assert nodeToExpand == null || !this.expanded.contains(nodeToExpand.getPoint()) : "Node selected for expansion already has been expanded: " + nodeToExpand;
@@ -524,87 +500,42 @@ public class BestFirst<T, A, V extends Comparable<V>> implements IObservableORGr
 		this.logger.debug("Removed {} from OPEN for expansion. OPEN size now {}", nodeToExpand, this.open.size());
 		assert this.ext2int.containsKey(nodeToExpand.getPoint()) : "Trying to expand a node whose point is not available in the ext2int map";
 		this.beforeExpansion(nodeToExpand);
-		this.expandNode(nodeToExpand);
+		NodeExpansionCompletedEvent<N, A, V> event = this.expandNode(nodeToExpand);
 		this.afterExpansion(nodeToExpand);
 		if (Thread.interrupted()) {
 			this.logger.debug("Received interrupt signal during step.");
 			this.interrupted = true;
 		}
 		this.logger.debug("Step ends. Size of OPEN now {}", this.open.size());
+		return event;
 	}
 
-	private void expandNode(final Node<T, V> expandedNodeInternal) {
-		this.graphEventBus.post(new NodeTypeSwitchEvent<Node<T, V>>(expandedNodeInternal, "or_expanding"));
+	private NodeExpansionCompletedEvent<N, A, V> expandNode(final Node<N, V> expandedNodeInternal) {
+		this.graphEventBus.post(new NodeTypeSwitchEvent<Node<N, V>>(expandedNodeInternal, "or_expanding"));
 		this.logger.info("Expanding node {} with f-value {}", expandedNodeInternal, expandedNodeInternal.getInternalLabel());
 		assert !this.expanded.contains(expandedNodeInternal.getPoint()) : "Node " + expandedNodeInternal + " expanded twice!!";
-		this.expanded.add(expandedNodeInternal.getPoint());
-		assert this.expanded.contains(expandedNodeInternal.getPoint()) : "Expanded node " + expandedNodeInternal + " was not inserted into the set of expanded nodes!";
 
 		/* compute successors */
 		this.logger.debug("Start computation of successors");
-		final List<NodeExpansionDescription<T, A>> successorDescriptions = new ArrayList<>();
-		{
-			Thread t = new Thread(new Runnable() {
-
-				@Override
-				public void run() {
-					if (BestFirst.this.canceled || BestFirst.this.interrupted) {
-						return;
-					}
-					int taskId = -1;
-					if (BestFirst.this.timeoutForComputationOfF > 0) {
-						if (BestFirst.this.timeoutSubmitter == null) {
-							BestFirst.this.timeoutSubmitter = TimeoutTimer.getInstance().getSubmitter();
-						}
-						taskId = BestFirst.this.timeoutSubmitter.interruptMeAfterMS(BestFirst.this.timeoutForComputationOfF);
-					}
-					successorDescriptions.addAll(BestFirst.this.successorGenerator.generateSuccessors(expandedNodeInternal.getPoint()));
-					if (taskId >= 0) {
-						BestFirst.this.timeoutSubmitter.cancelTimeout(taskId);
-					}
-				}
-			}, "Node Builder for some child of " + expandedNodeInternal);
-			this.logger.debug("Starting computation of successors in thread {}", t);
-			t.start();
-			try {
-				t.join();
-			} catch (InterruptedException e) {
-				this.logger.debug("Search has been interrupted");
-				this.interrupted = true;
-				return;
-			}
-			this.logger.debug("Finished computation of successors");
+		final List<NodeExpansionDescription<N, A>> successorDescriptions = new ArrayList<>();
+		if (BestFirst.this.canceled || BestFirst.this.interrupted) {
+			return null;
 		}
-
-		/* send event that successor nodes have been computed */
-		this.logger.debug("Sending SuccessorComputationCompletedEvent with {} successors for {}", successorDescriptions.size(), expandedNodeInternal);
+		successorDescriptions.addAll(BestFirst.this.successorGenerator.generateSuccessors(expandedNodeInternal.getPoint()));
+		this.logger.debug("Finished computation of successors. Sending SuccessorComputationCompletedEvent with {} successors for {}", successorDescriptions.size(), expandedNodeInternal);
 		this.graphEventBus.post(new SuccessorComputationCompletedEvent<>(expandedNodeInternal, successorDescriptions));
 
 		/* attach successors to search graph */
-		// System.out.println(expanded.contains(expandedNodeInternal.getPoint()));
-		if (this.additionalThreadsForExpansion < 1) {
-			successorDescriptions.stream().forEach(successorDescription -> {
-
-				/* perform synchronized computation. The computation is outourced, because it may receive an interrupt-signal, and we do not want the main-thread to be interrupted */
-				Thread t = new Thread(new NodeBuilder(expandedNodeInternal, successorDescription), "Node Builder for some child of " + expandedNodeInternal);
-				this.logger.debug("Starting computation of successor in thread {}", t);
-				t.start();
+		successorDescriptions.stream().forEach(successorDescription -> {
+			if (this.interrupted) {
+				return;
+			}
+			NodeBuilder nb = new NodeBuilder(expandedNodeInternal, successorDescription);
+			if (this.additionalThreadsForExpansion < 1) {
+				nb.run();
+			} else {
 				try {
-					t.join();
-				} catch (InterruptedException e) {
-					this.logger.debug("Search has been interrupted");
-					this.interrupted = true;
-					return;
-				}
-				this.logger.debug("Finished computation of successor", t);
-			});
-		} else {
-			successorDescriptions.stream().forEach(successorDescription -> {
-				if (this.interrupted) {
-					return;
-				}
-				try {
-					this.fComputationTickets.acquire();
+					this.fComputationTickets.acquire(); // these are necessary to not flood the thread pool with queries
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 					this.interrupted = true;
@@ -613,21 +544,25 @@ public class BestFirst<T, A, V extends Comparable<V>> implements IObservableORGr
 					return;
 				}
 				this.activeJobs.incrementAndGet();
-				this.pool.submit(new NodeBuilder(expandedNodeInternal, successorDescription));
-			});
-		}
+				this.pool.submit(nb);
+			}
+		});
 		this.logger.debug("Finished expansion of node {}. Size of OPEN is now {}. Number of active jobs is {}", expandedNodeInternal, this.open.size(), this.activeJobs.get());
 
 		/* update statistics, send closed notifications, and possibly return a solution */
 		this.expandedCounter++;
-		this.graphEventBus.post(new NodeTypeSwitchEvent<Node<T, V>>(expandedNodeInternal, "or_closed"));
+		this.expanded.add(expandedNodeInternal.getPoint());
+		assert this.expanded.contains(expandedNodeInternal.getPoint()) : "Expanded node " + expandedNodeInternal + " was not inserted into the set of expanded nodes!";
+		this.graphEventBus.post(new NodeTypeSwitchEvent<Node<N, V>>(expandedNodeInternal, "or_closed"));
+		NodeExpansionCompletedEvent<N, A, V> nodeCompletionEvent = new NodeExpansionCompletedEvent<>(expandedNodeInternal, successorDescriptions);
+		return nodeCompletionEvent;
 	}
 
-	public GraphEventBus<Node<T, V>> getEventBus() {
+	public GraphEventBus<Node<N, V>> getEventBus() {
 		return this.graphEventBus;
 	}
 
-	protected List<T> getTraversalPath(final Node<T, V> n) {
+	protected List<N> getTraversalPath(final Node<N, V> n) {
 		return n.path().stream().map(p -> p.getPoint()).collect(Collectors.toList());
 	}
 
@@ -644,45 +579,22 @@ public class BestFirst<T, A, V extends Comparable<V>> implements IObservableORGr
 		return this.createdCounter;
 	}
 
-	@Override
-	public V getFValue(final T node) {
+	public V getFValue(final N node) {
 		return this.getFValue(this.ext2int.get(node));
 	}
 
-	@Override
-	public V getFValue(final Node<T, V> node) {
+	public V getFValue(final Node<N, V> node) {
 		return node.getInternalLabel();
 	}
 
-	public Map<String, Object> getNodeAnnotations(final T node) {
-		Node<T, V> intNode = this.ext2int.get(node);
+	public Map<String, Object> getNodeAnnotations(final N node) {
+		Node<N, V> intNode = this.ext2int.get(node);
 		return intNode.getAnnotations();
 	}
 
-	public Object getNodeAnnotation(final T node, final String annotation) {
-		Node<T, V> intNode = this.ext2int.get(node);
+	public Object getNodeAnnotation(final N node, final String annotation) {
+		Node<N, V> intNode = this.ext2int.get(node);
 		return intNode.getAnnotation(annotation);
-	}
-
-	@Override
-	public Map<String, Object> getAnnotationsOfReturnedSolution(final List<T> solution) {
-		return this.solutionAnnotations.get(solution);
-	}
-
-	@Override
-	public Object getAnnotationOfReturnedSolution(final List<T> solution, final String annotation) {
-		return this.solutionAnnotations.get(solution).get(annotation);
-	}
-
-	@Override
-	public V getFOfReturnedSolution(final List<T> solution) {
-		@SuppressWarnings("unchecked")
-		V annotation = (V) this.getAnnotationOfReturnedSolution(solution, "f");
-		if (annotation == null) {
-			throw new IllegalArgumentException(
-					"There is no solution annotation for the given solution. Please check whether the solution was really produced by the algorithm. If so, please check that its annotation was added into the list of annotations before the solution itself was added to the solution set");
-		}
-		return annotation;
 	}
 
 	@Override
@@ -710,36 +622,31 @@ public class BestFirst<T, A, V extends Comparable<V>> implements IObservableORGr
 		return this.interrupted;
 	}
 
-	public List<T> getCurrentPathToNode(final T node) {
+	public List<N> getCurrentPathToNode(final N node) {
 		return this.ext2int.get(node).externalPath();
 	}
 
-	@Override
-	public Node<T, V> getInternalRepresentationOf(final T node) {
+	public Node<N, V> getInternalRepresentationOf(final N node) {
 		return this.ext2int.get(node);
 	}
 
-	@Override
-	public List<Node<T, V>> getOpenSnapshot() {
+	public List<Node<N, V>> getOpenSnapshot() {
 		return Collections.unmodifiableList(new ArrayList<>(this.open));
 	}
 
-	protected synchronized Node<T, V> newNode(final Node<T, V> parent, final T t2) {
+	protected synchronized Node<N, V> newNode(final Node<N, V> parent, final N t2) {
 		return this.newNode(parent, t2, null);
 	}
 
-	@Override
-	public INodeEvaluator<T, V> getNodeEvaluator() {
+	public INodeEvaluator<N, V> getNodeEvaluator() {
 		return this.nodeEvaluator;
 	}
 
-	protected synchronized Node<T, V> newNode(final Node<T, V> parent, final T t2, final V evaluation) {
-		assert parent == null || this.expanded.contains(parent.getPoint()) : "Generating successors of an unexpanded node " + parent + ". List of expanded nodes:\n"
-				+ this.expanded.stream().map(n -> "\n\t" + n.toString()).collect(Collectors.joining());
+	protected synchronized Node<N, V> newNode(final Node<N, V> parent, final N t2, final V evaluation) {
 		assert !this.open.contains(parent) : "Parent node " + parent + " is still on OPEN, which must not be the case!";
 
 		/* create new node and check whether it is a goal */
-		Node<T, V> newNode = new Node<>(parent, t2);
+		Node<N, V> newNode = new Node<>(parent, t2);
 		if (evaluation != null) {
 			newNode.setInternalLabel(evaluation);
 		}
@@ -763,9 +670,9 @@ public class BestFirst<T, A, V extends Comparable<V>> implements IObservableORGr
 
 		/* send events for this new node */
 		if (parent == null) {
-			this.graphEventBus.post(new GraphInitializedEvent<Node<T, V>>(newNode));
+			this.graphEventBus.post(new GraphInitializedEvent<Node<N, V>>(newNode));
 		} else {
-			this.graphEventBus.post(new NodeReachedEvent<Node<T, V>>(parent, newNode, "or_" + (newNode.isGoal() ? "solution" : "created")));
+			this.graphEventBus.post(new NodeReachedEvent<Node<N, V>>(parent, newNode, "or_" + (newNode.isGoal() ? "solution" : "created")));
 			this.logger.debug("Sent message for creation of node {} as a successor of {}", newNode, parent);
 		}
 		return newNode;
@@ -776,8 +683,7 @@ public class BestFirst<T, A, V extends Comparable<V>> implements IObservableORGr
 	 *
 	 * @param initialNodes
 	 */
-	@Override
-	public void bootstrap(final Collection<Node<T, V>> initialNodes) {
+	public void bootstrap(final Collection<Node<N, V>> initialNodes) {
 
 		if (this.initialized) {
 			throw new UnsupportedOperationException("Bootstrapping is only supported if the search has already been initialized.");
@@ -795,28 +701,66 @@ public class BestFirst<T, A, V extends Comparable<V>> implements IObservableORGr
 		this.open.clear();
 
 		/* now insert new nodes, and the leaf ones in open */
-		for (Node<T, V> node : initialNodes) {
+		for (Node<N, V> node : initialNodes) {
 			this.insertNodeIntoLocalGraph(node);
 			this.open.add(this.getLocalVersionOfNode(node));
 		}
 	}
 
-	protected void insertNodeIntoLocalGraph(final Node<T, V> node) {
-		Node<T, V> localVersionOfParent = null;
-		List<Node<T, V>> path = node.path();
-		Node<T, V> leaf = path.get(path.size() - 1);
-		for (Node<T, V> nodeOnPath : path) {
+	protected void insertNodeIntoLocalGraph(final Node<N, V> node) {
+		Node<N, V> localVersionOfParent = null;
+		List<Node<N, V>> path = node.path();
+		Node<N, V> leaf = path.get(path.size() - 1);
+		for (Node<N, V> nodeOnPath : path) {
 			if (!this.ext2int.containsKey(nodeOnPath.getPoint())) {
 				assert nodeOnPath.getParent() != null : "Want to insert a new node that has no parent. That must not be the case! Affected node is: " + nodeOnPath.getPoint();
 				assert this.ext2int.containsKey(nodeOnPath.getParent().getPoint()) : "Want to insert a node whose parent is unknown locally";
-				Node<T, V> newNode = this.newNode(localVersionOfParent, nodeOnPath.getPoint(), nodeOnPath.getInternalLabel());
+				Node<N, V> newNode = this.newNode(localVersionOfParent, nodeOnPath.getPoint(), nodeOnPath.getInternalLabel());
 				if (!newNode.isGoal() && !newNode.getPoint().equals(leaf.getPoint())) {
-					this.getEventBus().post(new NodeTypeSwitchEvent<Node<T, V>>(newNode, "or_closed"));
+					this.getEventBus().post(new NodeTypeSwitchEvent<Node<N, V>>(newNode, "or_closed"));
 				}
 				localVersionOfParent = newNode;
 			} else {
 				localVersionOfParent = this.getLocalVersionOfNode(nodeOnPath);
 			}
+		}
+	}
+
+	@Override
+	public boolean hasNext() {
+		return state != AlgorithmState.inactive;
+	}
+
+	@Override
+	public AlgorithmEvent next() {
+		try {
+			switch (state) {
+			case created: {
+				this.initGraph();
+				state = AlgorithmState.active;
+				AlgorithmEvent event = new AlgorithmInitializedEvent();
+				graphEventBus.post(event);
+				return event;
+			}
+			case active: {
+				if (!pendingSolutionFoundEvents.isEmpty()) {
+					return pendingSolutionFoundEvents.poll(); // these already have been posted over the event bus but are now returned to the controller for respective handling
+				}
+				AlgorithmEvent event = step();
+				if (event != null) {
+					graphEventBus.post(event);
+					return event;
+				}
+				state = AlgorithmState.inactive;
+				event = new AlgorithmFinishedEvent();
+				graphEventBus.post(event);
+				return event;
+			}
+			default:
+				throw new IllegalStateException("BestFirst search is in state " + state + " in which next must not be called!");
+			}
+		} catch (Throwable e) {
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -826,7 +770,7 @@ public class BestFirst<T, A, V extends Comparable<V>> implements IObservableORGr
 	 * @param node
 	 * @return
 	 */
-	protected Node<T, V> getLocalVersionOfNode(final Node<T, V> node) {
+	protected Node<N, V> getLocalVersionOfNode(final Node<N, V> node) {
 		return this.ext2int.get(node.getPoint());
 	}
 
@@ -838,82 +782,58 @@ public class BestFirst<T, A, V extends Comparable<V>> implements IObservableORGr
 		return true;
 	}
 
-	protected void afterSelection(final Node<T, V> node) {
+	protected void afterSelection(final Node<N, V> node) {
 	}
 
-	protected void beforeExpansion(final Node<T, V> node) {
+	protected void beforeExpansion(final Node<N, V> node) {
 	}
 
-	protected void afterExpansion(final Node<T, V> node) {
-	}
-
-	@Override
-	public boolean hasNext() {
-		if (!this.initialized) {
-			try {
-				this.initGraph();
-			} catch (Throwable e) {
-				e.printStackTrace();
-				return false;
-			}
-			this.step();
-		} else {
-			this.step();
-		}
-		return !this.lastExpansion.isEmpty();
+	protected void afterExpansion(final Node<N, V> node) {
 	}
 
 	@Override
-	public List<NodeExpansionDescription<T, A>> next() {
-		if (this.hasNext()) {
-			return this.lastExpansion;
-		} else {
-			return null;
-		}
-	}
-
-	@Override
-	public Iterator<List<NodeExpansionDescription<T, A>>> iterator() {
+	public Iterator<AlgorithmEvent> iterator() {
 		return this;
 	}
 
+	private void registerSolutionCandidateViaEvent(final GraphSearchSolutionCandidateFoundEvent<N, A, V> solutionEvent) {
+		EvaluatedSearchGraphPath<N, A, V> solution = solutionEvent.getSolutionCandidate();
+		this.solutions.add(solutionEvent.getSolutionCandidate());
+		this.pendingSolutionFoundEvents.add(solutionEvent);
+		graphEventBus.post(solutionEvent);
+		if (bestSeenSolution == null || solution.getScore().compareTo(bestSeenSolution.getScore()) < 0)
+			bestSeenSolution = solution;
+	}
+
 	@Subscribe
-	public void receiveSolutionEvent(final SolutionFoundEvent<T, V> solution) {
+	public void receiveSolutionCandidateEvent(final GraphSearchSolutionCandidateFoundEvent<N, A, V> solutionEvent) {
 		try {
-			this.logger.info("Received solution with f-value {}", solution.getF());
-			if (this.solutionAnnotations.containsKey(solution.getSolution())) {
-				throw new IllegalStateException("Solution is reported for the second time already!");
-			}
-			this.solutionAnnotations.put(solution.getSolution(), new HashMap<>());
-			this.solutionAnnotations.get(solution.getSolution()).put("f", solution.getF());
-			this.solutions.add(solution.getSolution());
+			this.logger.info("Received solution with f-value {}", solutionEvent.getSolutionCandidate().getScore());
+			registerSolutionCandidateViaEvent(solutionEvent);
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
 	}
 
 	@Subscribe
-	public void receiveSolutionAnnotationEvent(final SolutionAnnotationEvent<T, V> solution) {
+	public void receiveSolutionCandidateAnnotationEvent(final SolutionAnnotationEvent<N, A, V> event) {
 		try {
-			this.logger.debug("Received solution annotation: {}", solution);
-			if (!this.solutionAnnotations.containsKey(solution.getSolution())) {
-				throw new IllegalStateException("Solution annotation is reported for a solution that has not been reported previously!");
-			}
-			this.solutionAnnotations.get(solution.getSolution()).put(solution.getAnnotationName(), solution.getAnnotationValue());
+			this.logger.debug("Received solution annotation: {}", event);
+			graphEventBus.post(event);
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
 	}
 
 	@Subscribe
-	public void receiveNodeAnnotationEvent(final NodeAnnotationEvent<T> event) {
+	public void receiveNodeAnnotationEvent(final NodeAnnotationEvent<N> event) {
 		try {
-			T nodeExt = event.getNode();
+			N nodeExt = event.getNode();
 			this.logger.debug("Received annotation {} with value {} for node {}", event.getAnnotationName(), event.getAnnotationValue(), event.getNode());
 			if (!this.ext2int.containsKey(nodeExt)) {
 				throw new IllegalArgumentException("Received annotation for a node I don't know!");
 			}
-			Node<T, V> nodeInt = this.ext2int.get(nodeExt);
+			Node<N, V> nodeInt = this.ext2int.get(nodeExt);
 			nodeInt.setAnnotation(event.getAnnotationName(), event.getAnnotationValue());
 		} catch (Throwable e) {
 			e.printStackTrace();
@@ -945,7 +865,7 @@ public class BestFirst<T, A, V extends Comparable<V>> implements IObservableORGr
 		return this.timeoutForComputationOfF;
 	}
 
-	public void setTimeoutForComputationOfF(final int timeoutInMS, final INodeEvaluator<T, V> timeoutEvaluator) {
+	public void setTimeoutForComputationOfF(final int timeoutInMS, final INodeEvaluator<N, V> timeoutEvaluator) {
 		this.timeoutForComputationOfF = timeoutInMS;
 		this.timeoutNodeEvaluator = timeoutEvaluator;
 	}
@@ -953,7 +873,7 @@ public class BestFirst<T, A, V extends Comparable<V>> implements IObservableORGr
 	/**
 	 * @return the openCollection
 	 */
-	public OpenCollection<Node<T, V>> getOpen() {
+	public OpenCollection<Node<N, V>> getOpen() {
 		return this.open;
 	}
 
@@ -961,7 +881,7 @@ public class BestFirst<T, A, V extends Comparable<V>> implements IObservableORGr
 	 * @param open
 	 *            the openCollection to set
 	 */
-	public void setOpen(final OpenCollection<Node<T, V>> collection) {
+	public void setOpen(final OpenCollection<Node<N, V>> collection) {
 
 		collection.clear();
 		collection.addAll(this.open);
@@ -980,13 +900,44 @@ public class BestFirst<T, A, V extends Comparable<V>> implements IObservableORGr
 		return this.logger.getName();
 	}
 
+	public Queue<EvaluatedSearchGraphPath<N, A, V>> getSolutionQueue() {
+		return solutions;
+	}
+
 	@Override
-	public void registerListener(final Object listener) {
+	public EvaluatedSearchGraphPath<N, A, V> call() throws InterruptedException {
+		while (state != AlgorithmState.inactive)
+			next();
+		return bestSeenSolution;
+	}
+
+	@Override
+	public void setNumCPUs(int numberOfCPUs) {
+		parallelizeNodeExpansion(numberOfCPUs);
+	}
+
+	@Override
+	public void registerListener(IGraphAlgorithmListener<Node<N, V>, A> listener) {
 		this.graphEventBus.register(listener);
 	}
 
 	@Override
-	public GraphGenerator<T, A> getGraphGenerator() {
-		return this.graphGenerator;
+	public int getNumCPUs() {
+		return 0;
+	}
+
+	@Override
+	public void setTimeout(int timeout, TimeUnit timeUnit) {
+		
+	}
+
+	@Override
+	public int getTimeout() {
+		return 0;
+	}
+
+	@Override
+	public TimeUnit getTimeoutUnit() {
+		return null;
 	}
 }

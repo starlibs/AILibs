@@ -23,7 +23,7 @@ import jaicore.experiments.IExperimentIntermediateResultProcessor;
 import jaicore.experiments.IExperimentSetConfig;
 import jaicore.experiments.IExperimentSetEvaluator;
 import jaicore.ml.WekaUtil;
-import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionSolution;
+import jaicore.planning.EvaluatedSearchGraphBasedPlan;
 import weka.classifiers.evaluation.Evaluation;
 import weka.core.Instances;
 
@@ -77,7 +77,7 @@ public class MLPlanWekaExperimenter implements IExperimentSetEvaluator {
 	}
 
 	@Subscribe
-	public void rcvHASCOSolutionEvent(final HASCOSolutionEvent<ForwardDecompositionSolution, MLPipeline, Double> e) {
+	public void rcvHASCOSolutionEvent(final HASCOSolutionEvent<EvaluatedSearchGraphBasedPlan, MLPipeline, Double> e) {
 		if (this.adapter != null) {
 			Map<String, Object> eval = new HashMap<>();
 			eval.put("run_id", this.experimentID);

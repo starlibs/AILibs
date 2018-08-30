@@ -3,8 +3,8 @@ package de.upb.crc901.automl.hascoscikitlearnml;
 import de.upb.crc901.automl.hascowekaml.HASCOForMEKA;
 
 import jaicore.basic.SQLAdapter;
-import jaicore.graph.IObservableGraphAlgorithm;
-import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionSolution;
+import jaicore.graph.IGraphAlgorithm;
+import jaicore.planning.EvaluatedSearchGraphBasedPlan;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 
@@ -35,10 +35,10 @@ import org.slf4j.LoggerFactory;
 
 import hasco.core.HASCO.HASCOSolutionIterator;
 import hasco.core.HASCOFD;
-import hasco.core.Solution;
+import hasco.core.HASCOSolutionCandidate;
 import hasco.serialization.ComponentLoader;
 
-public class HASCOForScikitLearnML implements IObservableGraphAlgorithm<TFDNode, String> {
+public class HASCOForScikitLearnML implements IGraphAlgorithm<TFDNode, String> {
 
   private static final Logger logger = LoggerFactory.getLogger(HASCOForMEKA.class);
   private static final HASCOForScikitLearnMLConfig CONFIG = ConfigCache.getOrCreate(HASCOForScikitLearnMLConfig.class);
@@ -51,11 +51,11 @@ public class HASCOForScikitLearnML implements IObservableGraphAlgorithm<TFDNode,
 
   public static class HASCOForScikitLearnMLSolution {
 
-    private Solution<ForwardDecompositionSolution, ScikitLearnComposition, Double> hascoSolution;
+    private HASCOSolutionCandidate<EvaluatedSearchGraphBasedPlan, ScikitLearnComposition, Double> hascoSolution;
     private Double selectionScore = null;
     private Double testScore = null;
 
-    public HASCOForScikitLearnMLSolution(final Solution<ForwardDecompositionSolution, ScikitLearnComposition, Double> hascoSolution) {
+    public HASCOForScikitLearnMLSolution(final HASCOSolutionCandidate<EvaluatedSearchGraphBasedPlan, ScikitLearnComposition, Double> hascoSolution) {
       super();
       this.hascoSolution = hascoSolution;
     }

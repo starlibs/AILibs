@@ -3,7 +3,7 @@ package jaicore.search.algorithms.standard.bestfirst.nodeevaluation;
 import java.util.Random;
 
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableNodeEvaluator;
-import jaicore.search.structure.core.Node;
+import jaicore.search.model.travesaltree.Node;
 
 @SuppressWarnings("serial")
 public class RandomizedDepthFirstNodeEvaluator<T> implements SerializableNodeEvaluator<T,Double> {

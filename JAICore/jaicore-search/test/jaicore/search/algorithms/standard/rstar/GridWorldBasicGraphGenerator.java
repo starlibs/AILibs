@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
-import jaicore.search.structure.core.GraphGenerator;
-import jaicore.search.structure.core.NodeExpansionDescription;
-import jaicore.search.structure.core.NodeType;
+import jaicore.search.core.interfaces.GraphGenerator;
+import jaicore.search.model.travesaltree.NodeExpansionDescription;
+import jaicore.search.model.travesaltree.NodeType;
 import jaicore.search.structure.graphgenerator.GoalTester;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.RootGenerator;

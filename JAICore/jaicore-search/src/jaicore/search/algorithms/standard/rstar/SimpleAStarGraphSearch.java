@@ -3,11 +3,11 @@ package jaicore.search.algorithms.standard.rstar;
 import jaicore.search.algorithms.standard.astar.AStar;
 import jaicore.search.algorithms.standard.astar.AStarEdgeCost;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
-import jaicore.search.structure.core.GraphGenerator;
-import jaicore.search.structure.core.NodeExpansionDescription;
+import jaicore.search.core.interfaces.GraphGenerator;
+import jaicore.search.model.travesaltree.Node;
+import jaicore.search.model.travesaltree.NodeExpansionDescription;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
-import jaicore.search.structure.core.Node;
 
 import java.util.*;
 

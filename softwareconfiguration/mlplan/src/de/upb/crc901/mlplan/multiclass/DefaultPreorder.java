@@ -10,7 +10,7 @@ import jaicore.logic.fol.structure.Literal;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.model.task.stn.MethodInstance;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
-import jaicore.search.structure.core.Node;
+import jaicore.search.model.travesaltree.Node;
 
 public class DefaultPreorder implements INodeEvaluator<TFDNode,Double> {
 	

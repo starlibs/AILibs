@@ -1,6 +1,6 @@
 package jaicore.search.algorithms.standard.bestfirst.nodeevaluation;
 
-import jaicore.search.structure.core.Node;
+import jaicore.search.model.travesaltree.Node;
 
 /**
  * This node evaluator can be used
@@ -23,7 +23,7 @@ public class AlternativeNodeEvaluator<T, V extends Comparable<V>> extends Decora
 	}
 
 	@Override
-	public V f(Node<T, ?> node) throws Throwable {
+	public V f(Node<T, ?> node) throws Exception {
 		V f1 = ne1.f(node);
 		if (f1 != null)
 			return f1;

@@ -8,17 +8,17 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jaicore.search.algorithms.standard.bestfirst.model.PriorityQueueOpen;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
-import jaicore.search.structure.core.GraphGenerator;
-import jaicore.search.structure.core.Node;
-import jaicore.search.structure.core.PriorityQueueOpen;
+import jaicore.search.model.probleminputs.GeneralEvaluatedTraversalTree;
+import jaicore.search.model.travesaltree.Node;
 
 /**
  * A* algorithm implementation using the method design pattern.
  *
  * @author Felix Mohr
  */
-public class BestFirstEpsilon<T, A, W extends Comparable<W>> extends BestFirst<T, A, Double> {
+public class BestFirstEpsilon<T, A, W extends Comparable<W>> extends StandardBestFirst<T, A, Double> {
 	
 	private final static Logger logger = LoggerFactory.getLogger(BestFirstEpsilon.class);
 
@@ -53,12 +53,12 @@ public class BestFirstEpsilon<T, A, W extends Comparable<W>> extends BestFirst<T
 	}
 
 	
-	public BestFirstEpsilon(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, Double> pPrimaryNodeEvaluator, INodeEvaluator<T, W> pSecondaryNodeEvaluator, int epsilon) {
-		this(graphGenerator, pPrimaryNodeEvaluator, pSecondaryNodeEvaluator, epsilon, true);
+	public BestFirstEpsilon(GeneralEvaluatedTraversalTree<T, A, Double> problem, INodeEvaluator<T, W> pSecondaryNodeEvaluator, int epsilon) {
+		this(problem, pSecondaryNodeEvaluator, epsilon, true);
 	}
 	
-	public BestFirstEpsilon(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, Double> pPrimaryNodeEvaluator, INodeEvaluator<T, W> pSecondaryNodeEvaluator, double epsilon, boolean absolute) {
-		super(graphGenerator, pPrimaryNodeEvaluator);
+	public BestFirstEpsilon(GeneralEvaluatedTraversalTree<T, A, Double> problem, INodeEvaluator<T, W> pSecondaryNodeEvaluator, double epsilon, boolean absolute) {
+		super(problem);
 		this.secondaryNodeEvaluator = pSecondaryNodeEvaluator;
 		this.epsilon = epsilon;
 		this.absolute = absolute;

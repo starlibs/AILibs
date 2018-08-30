@@ -7,7 +7,7 @@ import jaicore.graphvisualizer.IGraphDataSupplier;
 import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
-import jaicore.search.structure.core.Node;
+import jaicore.search.model.travesaltree.Node;
 
 public class BestFGraphDataSupplier implements IGraphDataSupplier {
 

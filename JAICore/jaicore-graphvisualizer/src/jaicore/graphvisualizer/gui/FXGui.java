@@ -5,7 +5,7 @@ import java.util.List;
 
 import javax.swing.JFrame;
 
-import jaicore.graph.IObservableGraphAlgorithm;
+import jaicore.graph.IGraphAlgorithm;
 import jaicore.graphvisualizer.IGraphDataSupplier;
 import jaicore.graphvisualizer.INodeDataSupplier;
 import javafx.application.Platform;
@@ -27,11 +27,11 @@ public class FXGui{
      * Opens a GUI-Windows by creating a recorder to the algorithm
      * @param algorithm
      */
-    public void open(IObservableGraphAlgorithm algorithm){
+    public void open(IGraphAlgorithm algorithm){
        open(new Recorder(algorithm),"Gui");
     }
 
-    public void open(IObservableGraphAlgorithm algorithm, String title){
+    public void open(IGraphAlgorithm algorithm, String title){
         open(new Recorder(algorithm),title);
     }
 
