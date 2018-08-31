@@ -643,4 +643,8 @@ public class MLPlanJ extends AbstractClassifier
 	public void resetNumberPrunedParameters() {
 		HASCOWithParameterPruning.resetPrunedParameters();
 		}
+	
+	public void estimateAndSafeImportanceValuesForComponents() {
+		hasco.estimateAndSafeImportanceValuesForComponents();
+	}
 }

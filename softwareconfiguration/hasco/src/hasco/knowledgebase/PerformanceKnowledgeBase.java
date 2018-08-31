@@ -252,7 +252,6 @@ public class PerformanceKnowledgeBase {
 			}
 			Attribute scoreAttrInd = instancesInd.classAttribute();
 			instanceInd.setValue(scoreAttrInd, score);
-			System.out.println("Adding " + instanceInd.toString());
 			performanceInstancesIndividualComponents.get(benchmarkName).get(ci.getComponent().getName()).add(instanceInd);
 		}
 

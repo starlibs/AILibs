@@ -33,7 +33,7 @@ public class MLPlanExampleJ {
 
 		/* load data for segment dataset and create a train-test-split */
 		OpenmlConnector connector = new OpenmlConnector();
-		DataSetDescription ds = connector.dataGet(40498);
+		DataSetDescription ds = connector.dataGet(181);
 		File file = ds.getDataset("4350e421cdc16404033ef1812ea38c01");
 //		File file = new File("./examples/data/amazon.arff");
 		int seed = 10;
@@ -57,5 +57,6 @@ public class MLPlanExampleJ {
 		eval.evaluateModel(mlplan, split.get(1));
 		System.out.println("Error Rate of the solution produced by ML-Plan: " + (100 - eval.pctCorrect()) / 100f);
 		System.out.println("Number of parameters pruned: " + mlplan.getNumberPrunedParameters());
+		mlplan.estimateAndSafeImportanceValuesForComponents();
 	}
 }

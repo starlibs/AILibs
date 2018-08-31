@@ -209,4 +209,8 @@ public class HASCOForWekaMLJ implements IObservableGraphAlgorithm<TFDNode, Strin
 		return hasco.getSolutionEvaluator();
 	}
 	
+	public void estimateAndSafeImportanceValuesForComponents() {
+		hasco.estimateAndSafeImportanceValuesForComponents();
+	}
+	
 }

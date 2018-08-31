@@ -122,11 +122,6 @@ public class isValidParameterRangeRefinementPredicatePruning implements Evaluabl
 //			}
 //		}
 		
-		if (performanceKB.getNumSamplesForComponent("test", component) > this.minNumSamplesForImportanceEstimation) {
-			Map<String, Double> mapping = parameterImportanceEstimator.computeImportanceForSingleComponent(component);
-			System.out.println("importance for " + component.getName() + ": " + mapping);
-			System.out.println("parameters " + component.getName() + ": " + component.getParameters().toString());
-		}
 
 		/* determine refinements for numeric parameters */
 		if (param.isNumeric()) {
@@ -442,5 +437,4 @@ public class isValidParameterRangeRefinementPredicatePruning implements Evaluabl
 
 		} while (!openRefinements.isEmpty());
 	}
-
 }

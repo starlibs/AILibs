@@ -392,6 +392,8 @@ public class HASCOWithParameterPruning<T, N, A, V extends Comparable<V>, R exten
 		public void cancel() {
 			this.canceled = true;
 			planner.cancel();
+			// HASCOWithParameterPruning.this.estimateAndSafeImportanceValuesForComponents(benchmarkName,
+			// performanceKB);
 			HASCOWithParameterPruning.this.triggerTerminationEvent();
 		}
 	}
@@ -508,4 +510,16 @@ public class HASCOWithParameterPruning<T, N, A, V extends Comparable<V>, R exten
 	public void setNumberOfSamplesOfRandomCompletion(int numSamples) {
 		randomCompletionEvaluator.setNumberOfRandomCompletions(numSamples);
 	}
+
+	public void estimateAndSafeImportanceValuesForComponents() {
+		for (Component component : components) {
+			if (component.getParameters().size() > 1
+					&& performanceKB.getNumSamplesForComponent(benchmarkName, component) > 0) {
+				Map<String, Double> importanceValues = parameterImportanceEstimator
+						.computeImportanceForSingleComponent(component);
+				System.out.println("Importance for " + component.getName() + " parameters: " + importanceValues);
+			}
+		}
+	}
+
 }

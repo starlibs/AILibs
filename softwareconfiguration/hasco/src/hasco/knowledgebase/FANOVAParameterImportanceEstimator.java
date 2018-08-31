@@ -174,14 +174,13 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 		ExtendedRandomForest forest = new ExtendedRandomForest(1.0d, 32, new FeatureSpace(data));
 		try {
 			forest.buildClassifier(data);
-
-		forest.prepareForest(data);
-		for (int i = 0; i < data.numAttributes() - 1; i++) {
-			HashSet<Integer> set = new HashSet<Integer>();
-			set.add(i);
-			double importance = forest.computeMarginalVarianceContributionForFeatureSubset(set);
-			result.put(data.attribute(i).name(), importance);
-		}
+			forest.prepareForest(data);
+			for (int i = 0; i < data.numAttributes() - 1; i++) {
+				HashSet<Integer> set = new HashSet<Integer>();
+				set.add(i);
+				double importance = forest.computeMarginalVarianceContributionForFeatureSubset(set);
+				result.put(data.attribute(i).name(), importance);
+			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
