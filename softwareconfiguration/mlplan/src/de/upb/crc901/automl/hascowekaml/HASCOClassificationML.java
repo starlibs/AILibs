@@ -60,9 +60,7 @@ public class HASCOClassificationML implements IObservableGraphAlgorithm<TFDNode,
 		}
 	}
 
-	// FIXME: this might be rather a hyperparameter than something hardcoded
-	private OversearchAvoidanceConfig<TFDNode, Double> oversearchAvoidanceConfig = new OversearchAvoidanceConfig<>(
-			OversearchAvoidanceConfig.OversearchAvoidanceMode.NONE, 123l);
+	private OversearchAvoidanceConfig<TFDNode, Double> oversearchAvoidanceConfig = null;
 
 	/** Flag whether the process has been canceled via external call. */
 	private boolean isCanceled = false;
@@ -220,8 +218,13 @@ public class HASCOClassificationML implements IObservableGraphAlgorithm<TFDNode,
 		}
 
 		/* create algorithm */
-		this.hasco = new HASCOFD<>(cl.getComponents(), cl.getParamConfigs(), this.classifierFactory, REQUEST_INTERFACE,
-				this.classifierEvaluator, this.oversearchAvoidanceConfig);
+		if (this.oversearchAvoidanceConfig != null) {
+			this.hasco = new HASCOFD<>(cl.getComponents(), cl.getParamConfigs(), this.classifierFactory, REQUEST_INTERFACE,
+					this.classifierEvaluator, this.oversearchAvoidanceConfig);
+		} else {
+			this.hasco = new HASCOFD<>(cl.getComponents(), cl.getParamConfigs(), this.classifierFactory, REQUEST_INTERFACE,
+					this.classifierEvaluator);
+		}
 		this.hasco.setPreferredNodeEvaluator(this.preferredNodeEvaluator);
 
 		if (this.loggerName != null && this.loggerName.length() > 0) {
@@ -279,7 +282,7 @@ public class HASCOClassificationML implements IObservableGraphAlgorithm<TFDNode,
 		this.timeoutNodeEvaluationInS = timeoutForSingleFEvaluation;
 	}
 
-	public void setOversearchAvoidanceMode(final OversearchAvoidanceConfig oversearchAvoidanceConfig) {
+	public void setOversearchAvoidanceMode(final OversearchAvoidanceConfig<TFDNode, Double> oversearchAvoidanceConfig) {
 		this.oversearchAvoidanceConfig = oversearchAvoidanceConfig;
 	}
 

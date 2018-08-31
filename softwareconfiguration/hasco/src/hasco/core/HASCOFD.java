@@ -47,6 +47,5 @@ public class HASCOFD<T,V extends Comparable<V>> extends HASCO<T, TFDNode, String
 
 	public HASCOFD(final Collection<Component> components, Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig, Factory<? extends T> converter, String nameOfRequiredInterface, IObjectEvaluator<T, V> benchmark, OversearchAvoidanceConfig<TFDNode, V> oversearchAvoidanceConfig) {
 		this(components, paramRefinementConfig, new UncertaintyORGraphSearchFactory<>(oversearchAvoidanceConfig, new CEOCTFDPathUnifier()), converter, nameOfRequiredInterface, benchmark);
-		((UncertaintyORGraphSearchFactory<TFDNode,String,V>)getSearchFactory()).setSolutionEvaluator(getSolutionEvaluator());
 	}
 }

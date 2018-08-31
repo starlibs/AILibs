@@ -3,13 +3,9 @@ package jaicore.search.algorithms.standard.uncertainty;
 import java.util.PriorityQueue;
 import java.util.Random;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jaicore.search.algorithms.interfaces.IObservableORGraphSearch;
 import jaicore.search.algorithms.interfaces.IObservableORGraphSearchFactory;
 import jaicore.search.algorithms.interfaces.IPathUnification;
-import jaicore.search.algorithms.interfaces.ISolutionEvaluator;
 import jaicore.search.algorithms.standard.core.INodeEvaluator;
 import jaicore.search.algorithms.standard.core.ORGraphSearch;
 import jaicore.search.algorithms.standard.uncertainty.explorationexploitationsearch.BasicClockModelPhaseLengthAdjuster;
@@ -22,11 +18,8 @@ import jaicore.search.structure.core.GraphGenerator;
 
 public class UncertaintyORGraphSearchFactory <T, A, V extends Comparable<V>> implements IObservableORGraphSearchFactory<T, A, V>{
 
-	private static final Logger logger = LoggerFactory.getLogger(UncertaintyORGraphSearchFactory.class);
-
 	private OversearchAvoidanceConfig<T, V> oversearchAvoidanceConfig;
 	private IPathUnification<T> pathUnification;
-	private ISolutionEvaluator<T, V> solutionEvaluator;
 	private int timeoutForFInMS;
 	private INodeEvaluator<T, V> timeoutEvaluator;
 	private String loggerName;
@@ -48,7 +41,7 @@ public class UncertaintyORGraphSearchFactory <T, A, V extends Comparable<V>> imp
 						new Random(oversearchAvoidanceConfig.getSeed()),
 						oversearchAvoidanceConfig.getRandomSampleAmount(),
 						pathUnification,
-						this.solutionEvaluator,
+						oversearchAvoidanceConfig.getSolutionEvaluator(),
 						oversearchAvoidanceConfig.getUncertaintySource()
 					)
 			);
@@ -74,7 +67,7 @@ public class UncertaintyORGraphSearchFactory <T, A, V extends Comparable<V>> imp
 								
 								@Override
 								public int[] getInitialPhaseLengths(int interval) {
-									return new int[] {interval / 2, interval / 2};
+									return new int[] {interval / 2, interval - (interval / 2)};
 								}
 								
 								@Override
@@ -84,7 +77,7 @@ public class UncertaintyORGraphSearchFactory <T, A, V extends Comparable<V>> imp
 								}
 							},
 							oversearchAvoidanceConfig.getSolutionDistanceMetric(),
-							new BasicExplorationCandidateSelector<T, V>(5.0d)
+							new BasicExplorationCandidateSelector<T, V>(oversearchAvoidanceConfig.getMinimumSolutionDistanceForExploration())
 					));
 				}
 			} else {
@@ -119,11 +112,6 @@ public class UncertaintyORGraphSearchFactory <T, A, V extends Comparable<V>> imp
 
 	public void setLoggerName(String loggerName) {
 		this.loggerName = loggerName;
-	}
-
-	public UncertaintyORGraphSearchFactory<T, A, V> setSolutionEvaluator(ISolutionEvaluator<T, V> solutionEvaluator) {
-		this.solutionEvaluator = solutionEvaluator;
-		return this;
 	}
 
 	public IUncertaintySource<T, V> getUncertaintySource() {

@@ -1,5 +1,6 @@
 package jaicore.search.algorithms.standard.uncertainty;
 
+import jaicore.search.algorithms.interfaces.ISolutionEvaluator;
 import jaicore.search.algorithms.standard.uncertainty.paretosearch.FirstInFirstOutComparator;
 import jaicore.search.algorithms.standard.uncertainty.paretosearch.ParetoNode;
 
@@ -17,17 +18,19 @@ public class OversearchAvoidanceConfig<N, V extends Comparable<V>> {
 	private long seed;
 	private boolean adjustPhaseLengthsDynamically = false;
 	private long timeout;
-	private int interval = 20;
+	private int interval = 50;
 	private int randomSampleAmount = 3;
-	private double exploitationScoreThreshold = 0.05d;
-	private double explorationUncertaintyThreshold = 0.05d;
-	private double minimumSolutionDistanceForExploration = 0.5d;
+	private double exploitationScoreThreshold = 0.1d;
+	private double explorationUncertaintyThreshold = 0.1d;
+	private double minimumSolutionDistanceForExploration = 0.0d;
 	private IUncertaintySource<N, V> uncertaintySource = new BasicUncertaintySource<>();
-	private ISolutionDistanceMetric<N> solutionDistanceMetric= (s1, s2) -> 0.0d;
+	private ISolutionDistanceMetric<N> solutionDistanceMetric= (s1, s2) -> 1.0d;
 	private Comparator<ParetoNode<N, V>> paretoComparator = new FirstInFirstOutComparator<>();
+	private ISolutionEvaluator<N, V> solutionEvaluator;
 
-	public OversearchAvoidanceConfig(OversearchAvoidanceMode mode, long seed) {
+	public OversearchAvoidanceConfig(OversearchAvoidanceMode mode, ISolutionEvaluator<N, V> solutionEvaluator, long seed) {
 		this.oversearchAvoidanceMode = mode;
+		this.solutionEvaluator = solutionEvaluator;
 		this.seed = seed;
 	}
 
@@ -115,6 +118,10 @@ public class OversearchAvoidanceConfig<N, V extends Comparable<V>> {
 
 	public void setUncertaintySource(IUncertaintySource<N, V> uncertaintySource) {
 		this.uncertaintySource = uncertaintySource;
+	}
+	
+	public ISolutionEvaluator<N, V> getSolutionEvaluator() {
+		return this.solutionEvaluator;
 	}
 
 }
