@@ -65,7 +65,7 @@ public class GraphVisualization<T> {
 
     }
 
-    public FxViewPanel getViewPanel() {
+    public javafx.scene.Node getFXNode() {
         return viewPanel;
     }
 

@@ -10,7 +10,6 @@ import jaicore.graphvisualizer.events.controlEvents.StepEvent;
 import jaicore.graphvisualizer.events.misc.AddSupplierEventNew;
 import jaicore.graphvisualizer.events.misc.InfoEvent;
 import jaicore.graphvisualizer.gui.dataSupplier.ISupplier;
-import jaicore.graphvisualizer.gui.dataVisualizer.HTMLVisualizer;
 import jaicore.graphvisualizer.gui.dataVisualizer.IVisualizer;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -23,13 +22,11 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
-import weka.core.stopwords.Null;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 //TODO timeline does not alwayse update fast enough
@@ -123,7 +120,8 @@ public class FXCode implements NodeListener {
 //        visualization = new HeatVisualization();
         visualization = new ScoreVisualization();
         rec.registerReplayListener(visualization);
-        splitPane.getItems().add(visualization.getViewPanel());
+        splitPane.getItems().add(visualization.getFXNode());
+
 
         visualization.addNodeListener(this);
 
@@ -158,7 +156,7 @@ public class FXCode implements NodeListener {
         Scene scene = new Scene(root, 800,300);
         Stage stage = new Stage();
         stage.setScene(scene);
-        stage.setMaximized(true);
+//        stage.setMaximized(true);
         stage.show();
 
         rec.getSupplier();

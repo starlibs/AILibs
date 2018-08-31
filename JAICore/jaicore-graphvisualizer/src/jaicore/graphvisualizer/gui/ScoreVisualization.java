@@ -1,7 +1,15 @@
 package jaicore.graphvisualizer.gui;
 
 import jaicore.basic.Score;
+import javafx.geometry.Pos;
+import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.CycleMethod;
+import javafx.scene.paint.LinearGradient;
+import javafx.scene.paint.Stop;
+import javafx.scene.shape.Rectangle;
 import org.graphstream.graph.Node;
+import org.graphstream.ui.fx_viewer.FxViewPanel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -105,4 +113,20 @@ public class ScoreVisualization<T> extends GraphVisualization<T> {
         this.nodes.clear();
     }
 
+    @Override
+    public javafx.scene.Node getFXNode() {
+        StackPane stackPane = new StackPane();
+        stackPane.getChildren().add(this.viewPanel);
+        stackPane.getChildren().add(createColorGradient());
+        stackPane.setAlignment(Pos.TOP_RIGHT);
+        return stackPane;
+    }
+
+    protected javafx.scene.Node createColorGradient(){
+        Rectangle box = new Rectangle(50,500);
+        Stop[] stops = new Stop[]{new Stop(0, Color.BLUE), new Stop(1, Color.RED)};
+        LinearGradient lg = new LinearGradient(0,1,0,0, true, CycleMethod.NO_CYCLE, stops);
+        box.setFill(lg);
+        return box;
+    }
 }

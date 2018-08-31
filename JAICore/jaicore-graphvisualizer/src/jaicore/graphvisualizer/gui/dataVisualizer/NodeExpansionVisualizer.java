@@ -44,7 +44,7 @@ public class NodeExpansionVisualizer implements IVisualizer {
 
 	@Override
 	public Node getVisualization() {
-		return visualization.getViewPanel();
+		return visualization.getFXNode();
 	}
 
 	@Subscribe
