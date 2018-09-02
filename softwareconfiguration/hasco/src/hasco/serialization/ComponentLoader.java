@@ -112,6 +112,8 @@ public class ComponentLoader {
         		throw new IOException("No name has been specified for a required interface of " + c.getName());
           c.addRequiredInterface(requiredInterface.get("id").asText(), requiredInterface.get("name").asText());
         }
+        
+        
 
         Map<Parameter, ParameterRefinementConfiguration> paramConfig = new HashMap<>();
 

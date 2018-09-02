@@ -17,7 +17,7 @@ public class LoggerUtil {
 		sb.append("\n\tError class: ");
 		sb.append(e.getClass().getName());
 		sb.append("\n\tError message: ");
-		sb.append(e.getMessage().replace("\n", "\n\t\t"));
+		//sb.append(e.getMessage().replace("\n", "\n\t\t"));
 		sb.append("\n\tError trace:");
 		Arrays.asList(e.getStackTrace()).forEach(ste -> sb.append("\n\t\t" + ste.toString()));
 		while (e.getCause() != null) {

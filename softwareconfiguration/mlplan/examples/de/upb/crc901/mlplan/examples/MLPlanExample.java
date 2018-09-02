@@ -40,7 +40,7 @@ public class MLPlanExample {
 		/* initialize mlplan, and let it run for 30 seconds */
 		MLPlan mlplan = new MLPlan(new File("model/weka/weka-all-autoweka.json"));
 		mlplan.setLoggerName("mlplan");
-		mlplan.setTimeout(30);
+		mlplan.setTimeout(60);
 		mlplan.setPortionOfDataForPhase2(.3f);
 		mlplan.setNodeEvaluator(new DefaultPreorder());
 		mlplan.enableVisualization();
@@ -50,5 +50,7 @@ public class MLPlanExample {
 		Evaluation eval = new Evaluation(split.get(0));
 		eval.evaluateModel(mlplan, split.get(1));
 		System.out.println("Error Rate of the solution produced by ML-Plan: " + (100 - eval.pctCorrect()) / 100f);
+		
+		System.out.println(mlplan.getSelectedClassifier());
 	}
 }
