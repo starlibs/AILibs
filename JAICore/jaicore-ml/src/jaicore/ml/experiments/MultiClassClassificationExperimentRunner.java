@@ -29,7 +29,7 @@ import com.google.common.collect.ContiguousSet;
 import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.Range;
 
-import jaicore.basic.LoggerUtil;
+import jaicore.logging.LoggerUtil;
 import jaicore.ml.WekaUtil;
 import jaicore.ml.measures.PMMulticlass;
 import weka.classifiers.Classifier;

@@ -28,6 +28,7 @@ import hasco.query.Factory;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.IObjectEvaluator;
 import jaicore.graph.observation.IObservableGraphAlgorithm;
+import jaicore.logging.LoggerUtil;
 import jaicore.logic.fol.structure.CNFFormula;
 import jaicore.logic.fol.structure.ConstantParam;
 import jaicore.logic.fol.structure.Literal;

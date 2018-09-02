@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.math3.exception.NumberIsTooSmallException;
 import org.apache.commons.math3.stat.descriptive.StatisticalSummaryValues;
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 import org.apache.commons.math3.stat.inference.TTest;
@@ -782,24 +783,12 @@ public class TaskChunk<V extends Task> extends SimpleKVStore implements Iterable
 					StatisticalSummaryValues summaryGT = new StatisticalSummaryValues(mean1, variance1, n1, max1, min1, sum1);
 					StatisticalSummaryValues summaryComp = new StatisticalSummaryValues(mean2, variance2, n2, max2, min2, sum2);
 
-					// System.out.println(summaryGT);
-					// System.out.println(summaryComp);
-
+					try {
 					sig = test.tTest(summaryGT, summaryComp, 0.05);
-					// System.out.println("XXX " + sig);
-					//
-					// System.out.println(groundTruthEntry.getKey() + " " + name1 + " " + mean1 + " " + variance1 + "("
-					// + n1 + ")" + " <> " + mean2 + " " + variance2 + "(" + n2 + ")" + " "
-					// + name2 + " => " + sig);
-
-					// sig = false;
-					// if (errorRatesGT.length > 1 && errorRatesComp.length > 1) {
-					// double sigLevel = test.tTest(errorRatesGT, errorRatesComp);
-					// sig = sigLevel < 0.05;
-					// System.out.println(sigLevel + " - " + sig);
-					// } else {
-					// System.out.println("Not enough data for ttest!");
-					// }
+					} catch(NumberIsTooSmallException e) {
+						System.out.println("Cannot apply ttest for dataset " + groundTruthEntry.getKey() + " and comparison of " + name1 + " and " + name2);
+						throw e;
+					}
 
 					if (sig && mean1 < mean2) {
 						taskToCompareWith.store(sigOutputFN, "impr");

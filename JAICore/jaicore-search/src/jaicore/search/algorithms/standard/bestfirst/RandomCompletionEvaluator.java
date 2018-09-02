@@ -1,7 +1,7 @@
 package jaicore.search.algorithms.standard.bestfirst;
 
-import jaicore.basic.LoggerUtil;
 import jaicore.basic.sets.SetUtil.Pair;
+import jaicore.logging.LoggerUtil;
 import jaicore.search.algorithms.interfaces.IPathUnification;
 import jaicore.search.algorithms.interfaces.ISolutionEvaluator;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
@@ -38,24 +38,24 @@ public class RandomCompletionEvaluator<T, V extends Comparable<V>>
     implements IGraphDependentNodeEvaluator<T, String, V>, SerializableNodeEvaluator<T, V>, ISolutionReportingNodeEvaluator<T, V>, ICancelableNodeEvaluator {
 
   private final static Logger logger = LoggerFactory.getLogger(RandomCompletionEvaluator.class);
-  private Map<List<T>, List<T>> completions = new ConcurrentHashMap<>();
-  private Set<List<T>> unsuccessfulPaths = Collections.synchronizedSet(new HashSet<>());
-  private Set<List<T>> postedSolutions = new HashSet<>();
-  private Map<List<T>, Integer> timesToComputeEvaluations = new HashMap<>();
+  protected Map<List<T>, List<T>> completions = new ConcurrentHashMap<>();
+  protected Set<List<T>> unsuccessfulPaths = Collections.synchronizedSet(new HashSet<>());
+  protected Set<List<T>> postedSolutions = new HashSet<>();
+  protected Map<List<T>, Integer> timesToComputeEvaluations = new HashMap<>();
 
-  private Map<List<T>, V> scoresOfSolutionPaths = new ConcurrentHashMap<>();
+  protected Map<List<T>, V> scoresOfSolutionPaths = new ConcurrentHashMap<>();
   protected Map<Node<T, ?>, V> fValues = new ConcurrentHashMap<>();
   protected Map<String, Integer> ppFails = new ConcurrentHashMap<>();
   protected Map<String, Integer> plFails = new ConcurrentHashMap<>();
   protected Map<String, Integer> plSuccesses = new ConcurrentHashMap<>();
 
-  private final IPathUnification<T> pathUnifier;
-  private SerializableGraphGenerator<T, String> generator;
-  private long timestampOfFirstEvaluation;
-  private final Random random;
+  protected final IPathUnification<T> pathUnifier;
+  protected SerializableGraphGenerator<T, String> generator;
+  protected long timestampOfFirstEvaluation;
+  protected final Random random;
   protected int samples;
   protected final ISolutionEvaluator<T, V> solutionEvaluator;
-  private transient SolutionEventBus<T> eventBus = new SolutionEventBus<>();
+  protected transient SolutionEventBus<T> eventBus = new SolutionEventBus<>();
 
   public RandomCompletionEvaluator(final Random random, final int samples, final IPathUnification<T> pathUnifier, final ISolutionEvaluator<T, V> solutionEvaluator) {
     super();
@@ -306,7 +306,7 @@ public class RandomCompletionEvaluator<T, V extends Comparable<V>>
     return f;
   }
 
-  private V getFValueOfSolutionPath(final List<T> path) throws Throwable {
+  protected V getFValueOfSolutionPath(final List<T> path) throws Throwable {
     // assert isSolutionPath(path) : "Can only compute f-values for completed plans, but it is invoked
     // with a plan that does not yield a goal node!";
     // List<CEOCAction> plan = CEOCSTNUtil.extractPlanFromSolutionPath(path);

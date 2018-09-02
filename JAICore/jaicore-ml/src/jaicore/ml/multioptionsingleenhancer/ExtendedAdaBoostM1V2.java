@@ -28,6 +28,7 @@ import weka.core.TechnicalInformation.Type;
  * 
  * This is an extended version of AdaBoostM1 that does not only allow one base classifier with one configuration, but
  * multiple different configuration for one given classifier
+<<<<<<< HEAD
  * 
  * As one very easy notices, most of this code is copied from weka.classifiers.meta.AdaBoostM1
  * In fact all routines are very similar as in weka.classifiers.meta.AdaBoostM1. The only difference is, that
@@ -42,6 +43,12 @@ import weka.core.TechnicalInformation.Type;
  */
 
 public class ExtendedAdaBoostM1V2 extends SingleEnhancerDerivedRandomizableMultipleClassifiersCombiner {
+=======
+ *
+ */
+
+public class ExtendedAdaBoostM1V2 extends RandomizableMultipleClassifiersCombiner {
+>>>>>>> 4bfa518063e36c7ef208eb470dae7266fdd92489
 	
 	/** for serialization */
 	private static final long serialVersionUID = 82826486654682762L;
@@ -384,7 +391,11 @@ public class ExtendedAdaBoostM1V2 extends SingleEnhancerDerivedRandomizableMulti
 
     this.m_RandomInstance = new Random(this.m_Seed);
 
+<<<<<<< HEAD
     if ((this.m_UseResampling) || (!checkIfAnyClassifierIsInstanceOfWeightedInstancesHandler(m_Classifiers))) {
+=======
+    if ((this.m_UseResampling) || (!checkIfAllClassifierIsInstanceOfWeightedInstancesHandler(m_Classifiers))) {
+>>>>>>> 4bfa518063e36c7ef208eb470dae7266fdd92489
 
       // Normalize weights so that they sum to one and can be used as sampling probabilities
       double sumProbs = this.m_TrainingData.sumOfWeights();
@@ -431,7 +442,11 @@ public class ExtendedAdaBoostM1V2 extends SingleEnhancerDerivedRandomizableMulti
     }
 
     double epsilon = 0;
+<<<<<<< HEAD
     if ((this.m_UseResampling) || (!checkIfAnyClassifierIsInstanceOfWeightedInstancesHandler(m_Classifiers))) {
+=======
+    if ((this.m_UseResampling) || (!checkIfAllClassifierIsInstanceOfWeightedInstancesHandler(m_Classifiers))) {
+>>>>>>> 4bfa518063e36c7ef208eb470dae7266fdd92489
 
       // Resample
       int resamplingIterations = 0;
@@ -446,6 +461,10 @@ public class ExtendedAdaBoostM1V2 extends SingleEnhancerDerivedRandomizableMulti
         Instances sample = trainData.resampleWithWeights(this.m_RandomInstance, weights);
 
         // Build and evaluate classifier
+<<<<<<< HEAD
+=======
+        this.m_Classifiers[this.m_NumIterationsPerformed].buildClassifier(sample);
+>>>>>>> 4bfa518063e36c7ef208eb470dae7266fdd92489
         Evaluation evaluation = new Evaluation(this.m_TrainingData);
         evaluation.evaluateModel(this.m_Classifiers[this.m_NumIterationsPerformed], this.m_TrainingData);
         epsilon = evaluation.errorRate();
@@ -544,8 +563,12 @@ public class ExtendedAdaBoostM1V2 extends SingleEnhancerDerivedRandomizableMulti
    */
   @Override
   public double[] distributionForInstance(final Instance instance) throws Exception {
+<<<<<<< HEAD
 	System.out.println("distForInstance");
 	System.out.println(this.m_NumIterationsPerformed);
+=======
+
+>>>>>>> 4bfa518063e36c7ef208eb470dae7266fdd92489
     // default model?
     if (this.m_NumIterationsPerformed == 0) {
       return this.m_ZeroR.distributionForInstance(instance);
@@ -557,7 +580,10 @@ public class ExtendedAdaBoostM1V2 extends SingleEnhancerDerivedRandomizableMulti
     double[] sums = new double[instance.numClasses()];
 
     if (this.m_NumIterationsPerformed == 1) {
+<<<<<<< HEAD
       System.out.println(this.m_Classifiers[0].getClass().getName());
+=======
+>>>>>>> 4bfa518063e36c7ef208eb470dae7266fdd92489
       return this.m_Classifiers[0].distributionForInstance(instance);
     } else {
       for (int i = 0; i < this.m_NumIterationsPerformed; i++) {
@@ -657,7 +683,27 @@ public class ExtendedAdaBoostM1V2 extends SingleEnhancerDerivedRandomizableMulti
   public String getRevision() {
     return RevisionUtils.extract("$Revision: 10969 $");
   }
+<<<<<<< HEAD
 
+=======
+  
+  /**
+   * Checks if any element of the elements of a given array is an instance of WeightedInstancesHandler
+   * 
+   * @param classifiers an array of classifiers
+   * @return boolean if any of the elements of the given array is an instance of WeightedInstancesHandler
+   */
+  protected boolean checkIfAllClassifierIsInstanceOfWeightedInstancesHandler(Classifier[] classifiers) {
+	  boolean isAnyBaseClassifierInstanceOfWeightedInstancesHandler = true;
+	  
+	  for(Classifier baseClassifier: classifiers) {
+	    	if(!(baseClassifier instanceof WeightedInstancesHandler)) {
+	    		isAnyBaseClassifierInstanceOfWeightedInstancesHandler = false;
+	    	}
+	  }
+	  return isAnyBaseClassifierInstanceOfWeightedInstancesHandler;
+  }
+>>>>>>> 4bfa518063e36c7ef208eb470dae7266fdd92489
 
   /**
    * Main method for testing this class.
