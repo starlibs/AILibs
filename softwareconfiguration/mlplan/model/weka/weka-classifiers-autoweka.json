@@ -92,7 +92,7 @@
     }, {
       "name" : "D",
       "type" : "boolean",
-      "default" : "true"
+      "default" : "false"
     }, {
       "name" : "S",
       "type" : "cat",
@@ -784,7 +784,7 @@
     } ],
     "dependencies" : [ {
       "pre" : "P in {100}",
-      "post" : "O in {false, true}"
+      "post" : "O in {false}"
     } ]
   }, {
     "name" : "weka.classifiers.meta.ClassificationViaRegression",

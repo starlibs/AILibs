@@ -259,30 +259,64 @@ public class TaskChunk<V extends Task> extends SimpleKVStore implements Iterable
 
 	public void removeAny(final Map<String, String> condition, final boolean or) {
 		if (or) {
-			taskList.removeIf(t -> {
+			this.taskList.removeIf(t -> {
 				for (String key : condition.keySet()) {
 					String val = t.getValueAsString(key);
-					if (val == null && condition.get(key) == null || val != null && val.equals(condition.get(key)))
+					if (val == null && condition.get(key) == null || val != null && val.equals(condition.get(key))) {
 						return true;
+					}
 				}
 				return false;
 			});
 		} else {
-			taskList.removeIf(t -> {
+			this.taskList.removeIf(t -> {
 				for (String key : condition.keySet()) {
-					if (!t.getValueAsString(key).equals(condition.get(key)))
+					if (!t.getValueAsString(key).equals(condition.get(key))) {
 						return false;
+					}
 				}
 				return true;
 			});
 		}
 	}
 
-	public void removeGroupsIfNotAtLeastWithSize(int size) {
+	public void removeGroupsIfNotAtLeastWithSize(final int size) {
 		Map<String, String> groupSizeCondition = new HashMap<>();
 		for (int i = 1; i < size; i++) {
 			groupSizeCondition.put("GROUP_SIZE", "" + i);
-			removeAny(groupSizeCondition, true);
+			this.removeAny(groupSizeCondition, true);
+		}
+	}
+
+	public void removeGroupsIfNotAtLeastWithSizeButOne(final int size, final String[] groupingKeys) {
+
+		Map<String, String> groupSizeCondition = new HashMap<>();
+		for (int i = 1; i < size; i++) {
+			System.out.println("Remove any groups that dont have at least " + (i + 1) + " entries.");
+
+			int currentMinLength = i;
+			TaskChunk<V> group = new TaskChunk<>(this.getStringRepresentation());
+			group.renameAttribute("GROUP_SIZE", "size");
+			group = group.group(groupingKeys, new HashMap<>());
+
+			for (V t : group) {
+				List<Integer> sizeList = t.getValueAsIntList("size", ",").stream().filter(x -> x > currentMinLength).collect(Collectors.toList());
+				System.out.println(currentMinLength + " " + sizeList + " " + t.getValueAsIntList("size", ","));
+				if (sizeList.size() > 0) {
+					for (String groupingKey : groupingKeys) {
+						groupSizeCondition.put(groupingKey, t.getValueAsString(groupingKey));
+					}
+					groupSizeCondition.put("GROUP_SIZE", "" + i);
+					System.out.println(groupSizeCondition);
+					this.removeAny(groupSizeCondition, false);
+				}
+			}
+		}
+	}
+
+	public void renameAttribute(final String attributeName, final String replacement) {
+		for (V t : this) {
+			t.renameAttribute(attributeName, replacement);
 		}
 	}
 
@@ -492,8 +526,7 @@ public class TaskChunk<V extends Task> extends SimpleKVStore implements Iterable
 
 			boolean equals = true;
 			for (Entry<String, String> combineEntry : combineMap.entrySet()) {
-				if (!t.containsKey(combineEntry.getKey()) || !other.containsKey(combineEntry.getValue())
-						|| !t.getValueAsString(combineEntry.getKey()).equals(other.getValueAsString(combineEntry.getValue()))) {
+				if (!t.containsKey(combineEntry.getKey()) || !other.containsKey(combineEntry.getValue()) || !t.getValueAsString(combineEntry.getKey()).equals(other.getValueAsString(combineEntry.getValue()))) {
 					equals = false;
 					break;
 				}
@@ -567,9 +600,9 @@ public class TaskChunk<V extends Task> extends SimpleKVStore implements Iterable
 		}
 
 	}
-	
+
 	public void best(final String keyFieldName, final String comparatorFieldName, final String valueFieldName) {
-		best (keyFieldName, comparatorFieldName, valueFieldName, "best");
+		this.best(keyFieldName, comparatorFieldName, valueFieldName, "best");
 	}
 
 	public void best(final String keyFieldName, final String comparatorFieldName, final String valueFieldName, final String outputFieldName) {
@@ -610,23 +643,23 @@ public class TaskChunk<V extends Task> extends SimpleKVStore implements Iterable
 		}
 
 	}
-	
+
 	public void singleBest(final String keyFieldName, final String comparatorFieldName, final String valueFieldName) {
-		singleBest(keyFieldName, comparatorFieldName, valueFieldName, "best");
+		this.singleBest(keyFieldName, comparatorFieldName, valueFieldName, "best");
 	}
 
 	public void singleBest(final String keyFieldName, final String comparatorFieldName, final String valueFieldName, final String outputFieldName) {
-		best(keyFieldName, comparatorFieldName, valueFieldName, outputFieldName);
+		this.best(keyFieldName, comparatorFieldName, valueFieldName, outputFieldName);
 		List<V> distinctTasks = new ArrayList<>();
 		Set<String> consideredKeys = new HashSet<>();
-		taskList.forEach(t -> {
+		this.taskList.forEach(t -> {
 			String keyValue = t.getValueAsString(keyFieldName);
 			if (!consideredKeys.contains(keyValue) && t.getValueAsBoolean(outputFieldName)) {
 				consideredKeys.add(keyValue);
 				distinctTasks.add(t);
 			}
 		});
-		taskList = distinctTasks;
+		this.taskList = distinctTasks;
 	}
 
 	public void best(final String keyFieldName, final String comparatorFieldName, final String valueFieldName, final Set<String> compareObjects) {
@@ -784,9 +817,11 @@ public class TaskChunk<V extends Task> extends SimpleKVStore implements Iterable
 					StatisticalSummaryValues summaryComp = new StatisticalSummaryValues(mean2, variance2, n2, max2, min2, sum2);
 
 					try {
-					sig = test.tTest(summaryGT, summaryComp, 0.05);
-					} catch(NumberIsTooSmallException e) {
+						sig = test.tTest(summaryGT, summaryComp, 0.05);
+					} catch (NumberIsTooSmallException e) {
 						System.out.println("Cannot apply ttest for dataset " + groundTruthEntry.getKey() + " and comparison of " + name1 + " and " + name2);
+						System.out.println(summaryGT);
+						System.out.println(summaryComp);
 						throw e;
 					}
 

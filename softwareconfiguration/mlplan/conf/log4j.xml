@@ -74,7 +74,9 @@
 		<appender-ref ref="console" />
 	</logger>
 	
-	
+	<logger name="jaicore.search.algorithms.standard.rdfs.RandomizedDepthFirstSearch">
+		<level value="off" />
+	</logger>
 	
 	<logger name="de.upb.crc901.services.core.HttpServiceServer">
 		<level value="warn" />
@@ -88,7 +90,15 @@
 		<level value="warn" />
 	</logger>
 	
+	<logger name="de.upb.crc901.mlplan.AbstractMLPlan">
+		<level value="info" />
+	</logger>
+	
 	<logger name="de.upb.crc901.services.core">
 		<level value="warn" />
+	</logger>
+	
+	<logger name="de.upb.crc901.automl.metamining.similaritymeasures">
+		<level value="debug" />
 	</logger>
 </log4j:configuration>
