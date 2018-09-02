@@ -2,6 +2,9 @@ package autofe.processor;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import autofe.db.configuration.DatabaseAutoFeConfiguration;
 import autofe.db.model.database.AbstractFeature;
 import autofe.db.model.database.Database;
@@ -14,6 +17,8 @@ import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import weka.core.Instances;
 
 public class DatabaseProcessor {
+
+	private static Logger LOG = LoggerFactory.getLogger(DatabaseProcessor.class);
 
 	private static final int TIMEOUT_F_COMPUTATION_MS = 10000;
 
@@ -49,7 +54,11 @@ public class DatabaseProcessor {
 		// Do search
 		List<DatabaseNode> solution = null;
 		while (search.hasNext() && System.currentTimeMillis() < timeout) {
-			solution = search.nextSolution();
+			try {
+				solution = search.nextSolution();
+			} catch (InterruptedException e) {
+				LOG.warn("Search has been interrupted!");
+			}
 		}
 
 		if (solution == null) {
