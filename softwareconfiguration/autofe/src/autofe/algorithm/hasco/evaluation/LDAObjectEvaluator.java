@@ -12,14 +12,23 @@ public class LDAObjectEvaluator extends AbstractHASCOFEObjectEvaluator {
 	private static final Logger logger = LoggerFactory.getLogger(LDAObjectEvaluator.class);
 
 	@Override
-	public Double evaluate(FilterPipeline pipeline) throws Exception {
+	public Double evaluate(final FilterPipeline pipeline) throws Exception {
+		if (this.data == null) {
+			throw new IllegalArgumentException("Data must not be null");
+		}
+
+		long startTimestamp = System.currentTimeMillis();
 		logger.debug("Applying and evaluating pipeline " + pipeline.toString());
 		DataSet dataSet = pipeline.applyFilter(this.data, true);
 
+		logger.debug("Perform LDA");
 		final double ldaScore = EvaluationUtils.performLDA(dataSet.getInstances());
 
 		logger.debug("LDA object evaluator score: " + ldaScore);
-		return ldaScore - ATT_COUNT_PENALTY * EvaluationUtils.calculateAttributeCountPenalty(this.data.getInstances());
+		double score = ldaScore - ATT_COUNT_PENALTY * EvaluationUtils.calculateAttributeCountPenalty(this.data.getInstances());
+
+		this.storeResult(pipeline, score, (System.currentTimeMillis() - startTimestamp));
+		return score;
 	}
 
 }

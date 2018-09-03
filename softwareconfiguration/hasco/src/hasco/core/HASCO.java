@@ -226,7 +226,7 @@ public class HASCO<T, N, A, V extends Comparable<V>, R extends IPlanningSolution
 				throw new IllegalStateException("HASCO has already been canceled. Cannot compute more solutions.");
 			}
 
-			HASCO.this.logger.info("Now asking the planning algorithm iterator {} whether there is a next solution.", this.planIterator.getClass().getName());
+			HASCO.this.logger.debug("Now asking the planning algorithm iterator {} whether there is a next solution.", this.planIterator.getClass().getName());
 			return this.planIterator.hasNext();
 		}
 

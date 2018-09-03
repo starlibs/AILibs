@@ -1,18 +1,30 @@
 package autofe.util;
 
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import javax.imageio.ImageIO;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
+import org.openml.apiconnector.io.OpenmlConnector;
+import org.openml.apiconnector.xml.DataSetDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import Catalano.Imaging.FastBitmap;
+import jaicore.ml.WekaUtil;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
@@ -20,7 +32,7 @@ import weka.core.Instances;
 
 /**
  * Utility class for handling imported data sets.
- * 
+ *
  * @author Julian Lienen
  *
  */
@@ -58,14 +70,15 @@ public final class DataSetUtils {
 
 	// 28 / 28 / 1
 	public static INDArray mnistInstanceToMatrix(final Instance instance) {
-		INDArray result = Nd4j.create(28, 28);
-		double[] imageValues = instance.toDoubleArray();
-		if (imageValues.length != (28 * 28 + 1))
+		final INDArray result = Nd4j.create(28, 28);
+		final double[] imageValues = instance.toDoubleArray();
+		if (imageValues.length != (28 * 28 + 1)) {
 			throw new IllegalArgumentException("MNIST instances must have the dimensionality of 28 x 28 x 1!");
+		}
 
 		for (int i = 0; i < 28; i++) {
 			for (int j = 0; j < 28; j++) {
-				int offset = i + 1;
+				final int offset = i + 1;
 				result.putScalar(i, j, imageValues[offset * j]);
 			}
 		}
@@ -74,15 +87,15 @@ public final class DataSetUtils {
 
 	// 1024 / 1024 / 1024: red / green / blue channel
 	public static FastBitmap cifar10InstanceToBitmap(final Instance instance) {
-		BufferedImage image = new BufferedImage(32, 32, BufferedImage.TYPE_INT_RGB);
-		double[] imageValues = instance.toDoubleArray();
+		final BufferedImage image = new BufferedImage(32, 32, BufferedImage.TYPE_INT_RGB);
+		final double[] imageValues = instance.toDoubleArray();
 		for (int i = 0; i < 32; i++) {
 			for (int j = 0; j < 32; j++) {
-				int offset = (i + 1);
-				int a = 255;
-				int r = (int) imageValues[offset * j];
-				int g = (int) imageValues[1024 + offset * j];
-				int b = (int) imageValues[2048 + offset * j];
+				final int offset = (i + 1);
+				final int a = 255;
+				final int r = (int) imageValues[offset * j];
+				final int g = (int) imageValues[1024 + offset * j];
+				final int b = (int) imageValues[2048 + offset * j];
 				int p = 0;
 				p = p | (a << 24);
 				p = p | (r << 16);
@@ -96,14 +109,15 @@ public final class DataSetUtils {
 
 	// 1024 / 1024 / 1024: red / green / blue channel
 	public static INDArray cifar10InstanceToMatrix(final Instance instance) {
-		INDArray result = Nd4j.create(32, 32, 3);
-		double[] imageValues = instance.toDoubleArray();
-		if (imageValues.length != (32 * 32 * 3 + 1))
+		final INDArray result = Nd4j.create(32, 32, 3);
+		final double[] imageValues = instance.toDoubleArray();
+		if (imageValues.length != (32 * 32 * 3 + 1)) {
 			throw new IllegalArgumentException("Cifar 10 instances must have the dimensionality of 32 x 32 x 3!");
+		}
 
 		for (int i = 0; i < 32; i++) {
 			for (int j = 0; j < 32; j++) {
-				int offset = i + 1;
+				final int offset = i + 1;
 				// INDArray rgb = Nd4j.create(new double[] { imageValues[offset * j],
 				// imageValues[1024 + offset * j],
 				// imageValues[2048 + offset * j] });
@@ -118,31 +132,31 @@ public final class DataSetUtils {
 
 	public static Instances bitmapsToInstances(final List<FastBitmap> images, final Instances refInstances) {
 
-		if (images == null || images.size() == 0)
+		if (images == null || images.size() == 0) {
 			throw new IllegalArgumentException("Parameter 'images' must not be null or empty!");
+		}
 
 		// Create attributes
-		ArrayList<Attribute> attributes = new ArrayList<>();
+		final ArrayList<Attribute> attributes = new ArrayList<>();
 		for (int i = 0; i < images.iterator().next().getRGBData().length; i++) {
 			attributes.add(new Attribute("val" + i));
 		}
 
 		// Add class attribute
-		List<String> classValues = IntStream.range(0, refInstances.classAttribute().numValues()).asDoubleStream()
-				.mapToObj(d -> String.valueOf(d)).collect(Collectors.toList());
-		Attribute classAtt = new Attribute("classAtt", classValues);
+		final List<String> classValues = IntStream.range(0, refInstances.classAttribute().numValues()).asDoubleStream().mapToObj(d -> String.valueOf(d)).collect(Collectors.toList());
+		final Attribute classAtt = new Attribute("classAtt", classValues);
 		attributes.add(classAtt);
 
-		Instances result = new Instances("Instances", attributes, refInstances.size());
+		final Instances result = new Instances("Instances", attributes, refInstances.size());
 		result.setClassIndex(result.numAttributes() - 1);
 
 		for (int i = 0; i < images.size(); i++) {
-			FastBitmap image = images.get(i);
-			int[] rgbData = image.getRGBData();
-			Instance inst = new DenseInstance(rgbData.length + 1);
+			final FastBitmap image = images.get(i);
+			final int[] rgbData = image.getRGBData();
+			final Instance inst = new DenseInstance(rgbData.length + 1);
 			inst.setDataset(result);
 
-			for (int j = 0; j < rgbData.length; i++) {
+			for (final int j = 0; j < rgbData.length; i++) {
 				inst.setValue(j, rgbData[j]);
 			}
 
@@ -152,31 +166,34 @@ public final class DataSetUtils {
 		return result;
 	}
 
+	public static Instances matricesToInstances(final DataSet data) {
+		return matricesToInstances(data.getIntermediateInstances(), data.getInstances());
+	}
+
 	public static Instances matricesToInstances(final List<INDArray> matrices, final Instances refInstances) {
-		if (matrices == null || matrices.size() == 0)
+		if (matrices == null || matrices.size() == 0) {
 			throw new IllegalArgumentException("Parameter 'matrices' must not be null or empty!");
+		}
 
 		// Create attributes
-		ArrayList<Attribute> attributes = new ArrayList<>();
+		final ArrayList<Attribute> attributes = new ArrayList<>();
 		for (int i = 0; i < matrices.get(0).length(); i++) {
-			Attribute newAtt = new Attribute("val" + i);
+			final Attribute newAtt = new Attribute("val" + i);
 			attributes.add(newAtt);
 		}
 
-		List<String> classValues = IntStream.range(0, refInstances.classAttribute().numValues()).asDoubleStream()
-				.mapToObj(d -> String.valueOf(d)).collect(Collectors.toList());
-		Attribute classAtt = new Attribute("classAtt", classValues);
+		final List<String> classValues = IntStream.range(0, refInstances.classAttribute().numValues()).asDoubleStream().mapToObj(d -> String.valueOf(d)).collect(Collectors.toList());
+		final Attribute classAtt = new Attribute("classAtt", classValues);
 		attributes.add(classAtt);
 
-		Instances result = new Instances("Instances", attributes, refInstances.size());
+		final Instances result = new Instances("Instances", attributes, refInstances.size());
 		result.setClassIndex(result.numAttributes() - 1);
 
 		for (int i = 0; i < matrices.size(); i++) {
 
 			// Initialize instance
 			// Instance inst = new DenseInstance(attributes.size());
-			Instance inst = new DenseInstance(1,
-					ArrayUtils.addAll(Nd4j.toFlattened(matrices.get(i)).toDoubleVector(), 0));
+			final Instance inst = new DenseInstance(1, ArrayUtils.addAll(Nd4j.toFlattened(matrices.get(i)).toDoubleVector(), 0));
 			inst.setDataset(result);
 
 			// Set class value
@@ -187,6 +204,33 @@ public final class DataSetUtils {
 
 		return result;
 
+	}
+
+	public static Instance matrixToInstance(final INDArray instance, final Instances refInstances) {
+		if (instance == null || refInstances == null) {
+			throw new IllegalArgumentException("Parameter 'instance' and 'refInstances' must not be null!");
+		}
+
+		// Create attributes
+		final ArrayList<Attribute> attributes = new ArrayList<>();
+		for (int i = 0; i < instance.length(); i++) {
+			final Attribute newAtt = new Attribute("val" + i);
+			attributes.add(newAtt);
+		}
+
+		final List<String> classValues = IntStream.range(0, refInstances.classAttribute().numValues()).asDoubleStream().mapToObj(d -> String.valueOf(d)).collect(Collectors.toList());
+		final Attribute classAtt = new Attribute("classAtt", classValues);
+		attributes.add(classAtt);
+
+		final Instances result = new Instances("Instances", attributes, refInstances.size());
+		result.setClassIndex(result.numAttributes() - 1);
+
+		// Initialize instance
+		// Instance inst = new DenseInstance(attributes.size());
+		final Instance inst = new DenseInstance(1, ArrayUtils.addAll(Nd4j.toFlattened(instance).toDoubleVector(), 0));
+		inst.setDataset(result);
+
+		return inst;
 	}
 
 	public static int[] getInputShapeByDataSet(final int dataSetID) {
@@ -203,33 +247,33 @@ public final class DataSetUtils {
 	}
 
 	/**
-	 * Function determines how much of the input data should be used to infer a
-	 * filter pipeline.
-	 * 
+	 * Function determines how much of the input data should be used to infer a filter pipeline.
+	 *
 	 * @param instances
 	 *            Complete input instances
-	 * @return Returns a split ratio where this double indicates which percentage of
-	 *         the given input instances should be used to automatically generate
-	 *         features.
+	 * @return Returns a split ratio where this double indicates which percentage of the given input instances should be used to automatically generate features.
 	 */
 	public static double getSplitRatioToUse(final Instances instances) {
-		if (instances == null)
+		if (instances == null) {
 			throw new IllegalArgumentException("Parameter 'instances' must not be null!");
+		}
 
-		int numAttributes = instances.numAttributes();
-		int numInstances = instances.numInstances();
+		final int numAttributes = instances.numAttributes();
+		final int numInstances = instances.numInstances();
 
-		if (numAttributes > 1000 && numInstances > 10000)
-			return 3000d / (double) numInstances;
-		else if (numAttributes > 500 && numInstances > 7500)
-			return 5000d / (double) numInstances;
+		if (numAttributes > 1000 && numInstances > 10000) {
+			return 3000d / numInstances;
+		} else if (numAttributes > 500 && numInstances > 7500) {
+			return 5000d / numInstances;
+		}
 
 		return 1d;
 	}
 
 	public static int getDataSetIDByName(final String dataSetName) {
-		if (dataSetName == null || dataSetName.equals(""))
+		if (dataSetName == null || dataSetName.equals("")) {
 			throw new IllegalArgumentException("Parameter 'dataSetName' must not be null or empty!");
+		}
 
 		switch (dataSetName) {
 		case "mnist":
@@ -241,6 +285,76 @@ public final class DataSetUtils {
 		default:
 			throw new UnsupportedOperationException("Data set '" + dataSetName + "' is not supported yet.");
 		}
+	}
+
+	public static DataSet loadDatasetFromImageFolder(final File folder) throws IOException {
+		final List<String> classValues = new LinkedList<>();
+		for (final File subFolder : folder.listFiles()) {
+			classValues.add(subFolder.getName());
+		}
+		final ArrayList<Attribute> attributeList = new ArrayList<>();
+		final Attribute classAttribute = new Attribute("class", classValues);
+		attributeList.add(classAttribute);
+
+		final Instances refInstances = new Instances("refInstances", attributeList, 0);
+		refInstances.setClass(classAttribute);
+
+		final List<INDArray> matrixList = new LinkedList<>();
+
+		for (final File subFolder : folder.listFiles()) {
+			final String className = subFolder.getName();
+			for (final File imageFile : subFolder.listFiles()) {
+				final FastBitmap fb = new FastBitmap(ImageIO.read(imageFile));
+				INDArray matrix = null;
+				try {
+					matrix = ImageUtils.fastBitmapToMatrix(fb, fb.getColorSpace());
+				} catch (final Throwable e) {
+					e.printStackTrace();
+				}
+				matrixList.add(matrix);
+				final DenseInstance nI = new DenseInstance(attributeList.size());
+				nI.setValue(classAttribute, className);
+				nI.setDataset(refInstances);
+				refInstances.add(nI);
+			}
+		}
+
+		return new DataSet(refInstances, matrixList);
+	}
+
+	public static List<DataSet> getStratifiedSplit(final DataSet data, final Random rand, final double... portions) {
+		final List<DataSet> splits = new LinkedList<>();
+
+		final Collection<Integer>[] indices = WekaUtil.getStratifiedSplitIndices(data.getInstances(), new Random(), portions);
+
+		for (final Collection<Integer> splitIndices : indices) {
+			final List<INDArray> indArray = new LinkedList<>();
+			final Instances refInstances = new Instances(data.getInstances(), 0);
+
+			for (final Integer index : splitIndices) {
+				indArray.add(data.getIntermediateInstances().get(index));
+				refInstances.add(data.getInstances().get(index));
+			}
+
+			splits.add(new DataSet(refInstances, indArray));
+		}
+
+		return splits;
+	}
+
+	public static DataSet getDataSetByID(final int datasetID) throws Exception {
+		OpenmlConnector connector = new OpenmlConnector();
+		DataSetDescription ds = connector.dataGet(datasetID);
+		File file = ds.getDataset(API_KEY);
+		Instances data = new Instances(new BufferedReader(new FileReader(file)));
+		data.setClassIndex(data.numAttributes() - 1);
+
+		List<INDArray> indArrayList = new LinkedList<>();
+		for (Instance i : data) {
+			indArrayList.add(instanceToMatrixByDataSet(i, datasetID));
+		}
+
+		return new DataSet(data, indArrayList);
 	}
 
 }

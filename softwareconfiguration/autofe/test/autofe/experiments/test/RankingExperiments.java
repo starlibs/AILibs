@@ -12,7 +12,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import autofe.algorithm.hasco.HASCOFE;
+import autofe.algorithm.hasco.HASCOFeatureEngineering;
 import autofe.experiments.RankingExperimentEvaluator;
 import autofe.util.DataSetUtils;
 import autofe.util.EvaluationUtils;
@@ -111,7 +111,7 @@ public class RankingExperiments {
 					try {
 						logger.debug("Creating data set variations for data set '" + dsName + "'.");
 						int dataSetID = DataSetUtils.getDataSetIDByName(dsName);
-						List<Instances> dataSetVariations = HASCOFE.generateRandomDataSets(dataSetID,
+						List<Instances> dataSetVariations = HASCOFeatureEngineering.generateRandomDataSets(dataSetID,
 								MAX_DATASET_CREATIONS, MAX_PIPELINE_SIZE, DATASET_GENERATION_TIMEOUT, 42);
 						FileUtils.saveInstances(dataSetVariations, RANKING_DIR, dsName);
 

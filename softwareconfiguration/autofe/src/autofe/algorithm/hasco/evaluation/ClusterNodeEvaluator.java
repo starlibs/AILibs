@@ -9,10 +9,9 @@ import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.search.structure.core.Node;
 
 /**
- * Evaluator used for node evaluation to guide the search using a simple
- * clustering benchmark function.
- * 
- * @author Julian Lienen
+ * Evaluator used for node evaluation to guide the search using a simple clustering benchmark function.
+ *
+ * @author Julian Lienen, wever
  *
  */
 public class ClusterNodeEvaluator extends AbstractHASCOFENodeEvaluator {
@@ -23,26 +22,21 @@ public class ClusterNodeEvaluator extends AbstractHASCOFENodeEvaluator {
 	private static final Logger logger = LoggerFactory.getLogger(ClusterNodeEvaluator.class);
 
 	@Override
-	public Double f(Node<TFDNode, ?> node) throws Throwable {
-
-		if (this.getHascoFE() == null)
-			throw new IllegalStateException("HascoFE property of the cluster node evaluator must be initialized!");
-
-		if (node.getParent() == null)
-			return null;
-
-		// If pipeline is too deep, assign worst value
-		if (node.path().size() > this.maxPipelineSize)
-			return MAX_EVAL_VALUE;
+	public Double f(final Node<TFDNode, ?> node) throws Throwable {
+		if (node.getParent() == null) {
+			return 0.0;
+		}
 
 		FilterPipeline pipe = this.getPipelineFromNode(node);
+
 		if (pipe != null && pipe.getFilters() != null) {
+			// If pipeline is too deep, assign worst value
+			if (pipe.getFilters().size() > this.maxPipelineSize) {
+				return MAX_EVAL_VALUE;
+			}
+
 			try {
-				double finalScore = Math.min(
-						1 - EvaluationUtils.performClustering(pipe, this.data)
-								+ ATT_COUNT_PENALTY
-										* EvaluationUtils.calculateAttributeCountPenalty(this.data.getInstances()),
-						MAX_EVAL_VALUE - 1);
+				double finalScore = Math.min(1 - EvaluationUtils.performClustering(pipe, this.data) + ATT_COUNT_PENALTY * EvaluationUtils.calculateAttributeCountPenalty(this.data.getInstances()), MAX_EVAL_VALUE - 1);
 				logger.debug("Final clustering node evaluation score: " + finalScore);
 				return finalScore;
 			} catch (Exception e) {
@@ -52,10 +46,10 @@ public class ClusterNodeEvaluator extends AbstractHASCOFENodeEvaluator {
 			}
 		} else if (pipe == null) {
 			logger.debug("Null pipe");
-			return null;
+			return 0.0;
 		} else {
 			logger.debug("Found a non-working pipeline.");
-			return MAX_EVAL_VALUE;
+			return 0.0;
 		}
 	}
 }

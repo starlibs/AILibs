@@ -20,28 +20,28 @@ public final class FilterUtils {
 		// Utility class
 	}
 
-	public static IFilter getFilterForName(final String name, final Map<String, String> parameters,
-			final int[] inputShape) {
+	public static IFilter getFilterForName(final String name, final Map<String, String> parameters, final int[] inputShape) {
 		// Image filters
+		if (name.startsWith("autofe.algorithm.hasco.filter.image.CatalanoWrapperFilter")) {
+			String[] filterNameSplit = name.split("_");
+			return ImageUtils.getCatalanoFilterByName(filterNameSplit[1]);
+		}
+
+		if (name.startsWith("CatalanoExtractor")) {
+			String[] extractorNameSplit = name.split("_");
+			return ImageUtils.getCatalanoFilterByName(extractorNameSplit[1]);
+		}
+
 		if (name.startsWith("autofe.algorithm.hasco.filter.image")) {
-			String catFilter;
 			switch (name) {
-			case "autofe.algorithm.hasco.filter.image.CatalanoWrapperFilter":
-				catFilter = parameters.get("catFilter");
-				return ImageUtils.getCatalanoFilterByName(catFilter);
 			case "autofe.algorithm.hasco.filter.image.LocalBinaryPatternFilter":
 				return new LocalBinaryPatternFilter();
-			case "CatalanoExtractor":
-				catFilter = parameters.get("catFilter");
-				return ImageUtils.getCatalanoFilterByName(catFilter);
 			case "PCA":
 				return new WEKAFilter(new PrincipalComponents());
 			case "autofe.algorithm.hasco.filter.image.PretrainedNN":
 				String net = parameters.get("net");
 				int layer = Integer.parseInt(parameters.get("layer"));
 				return ImageUtils.getPretrainedNNFilterByName(net, layer, inputShape);
-			// case "NoneExtractor":
-			// return getDefaultFilter();
 			}
 		}
 
@@ -86,16 +86,15 @@ public final class FilterUtils {
 	}
 
 	/**
-	 * Pretty print utility function used to print deep component instance
-	 * hierarchies also printing the filters of wrapper filters.
-	 * 
+	 * Pretty print utility function used to print deep component instance hierarchies also printing the filters of wrapper filters.
+	 *
 	 * @param ci
 	 *            Starting component instance of the hierarchy
 	 * @param offset
 	 *            Tabular offset
 	 * @return Returns a textual representation of the component structure
 	 */
-	public static String getPrettyPrint(final ComponentInstance ci, int offset) {
+	public static String getPrettyPrint(final ComponentInstance ci, final int offset) {
 		StringBuilder sb = new StringBuilder();
 
 		switch (ci.getComponent().getName()) {
@@ -110,14 +109,16 @@ public final class FilterUtils {
 			sb.append(ci.getComponent().getName() + "\n");
 		}
 		for (String requiredInterface : ci.getComponent().getRequiredInterfaces().keySet()) {
-			for (int i = 0; i < offset + 1; i++)
+			for (int i = 0; i < offset + 1; i++) {
 				sb.append("\t");
+			}
 			sb.append(requiredInterface);
 			sb.append(": ");
-			if (ci.getSatisfactionOfRequiredInterfaces().containsKey(requiredInterface))
+			if (ci.getSatisfactionOfRequiredInterfaces().containsKey(requiredInterface)) {
 				sb.append(getPrettyPrint(ci.getSatisfactionOfRequiredInterfaces().get(requiredInterface), offset + 1));
-			else
+			} else {
 				sb.append("null\n");
+			}
 		}
 		return sb.toString();
 	}

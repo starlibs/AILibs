@@ -10,33 +10,32 @@ import org.aeonbits.owner.ConfigCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.upb.crc901.automl.pipeline.ClassifierFactory;
 import hasco.core.HASCOFD;
 import hasco.core.Solution;
+import hasco.query.Factory;
 import hasco.serialization.ComponentLoader;
 import jaicore.basic.ILoggingCustomizable;
+import jaicore.basic.IObjectEvaluator;
+import jaicore.basic.TimeOut;
 import jaicore.graph.IObservableGraphAlgorithm;
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
-import jaicore.ml.evaluation.ClassifierEvaluator;
 import jaicore.ml.evaluation.TimeoutableEvaluator;
 import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionSolution;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;
 import jaicore.search.algorithms.standard.uncertainty.OversearchAvoidanceConfig;
-import jaicore.search.algorithms.standard.uncertainty.OversearchAvoidanceConfig.OversearchAvoidanceMode;
 import jaicore.search.structure.core.Node;
-import weka.classifiers.Classifier;
 
 /**
  * HASCOML represents the basic class for searching and optimizing hierarchical algorithm selection and configuration problems specifically for machine learning.
  */
-public class HASCOSupervisedML extends HASCOFD<Classifier, Double> implements IObservableGraphAlgorithm<TFDNode, String>, ILoggingCustomizable {
+public class HASCOSupervisedML<V> extends HASCOFD<V, Double> implements IObservableGraphAlgorithm<TFDNode, String>, ILoggingCustomizable {
 
 	/** HASCO parametrization specific for the use case of supervised ML. */
 	private static final HASCOSupervisedMLConfig CONFIG = ConfigCache.getOrCreate(HASCOSupervisedMLConfig.class);
 
 	/** The name of the requested interface. */
-	private static final String REQUESTED_INTERFACE = "AbstractClassifier";
+	public static String REQUESTED_INTERFACE = "AbstractClassifier";
 
 	/** Logger for controlled output */
 	private Logger logger = LoggerFactory.getLogger(HASCOSupervisedML.class);
@@ -47,8 +46,8 @@ public class HASCOSupervisedML extends HASCOFD<Classifier, Double> implements IO
 	/**
 	 * Namespaced class for storing evaluated classifiers that have been found by HASCO.
 	 */
-	public static class HASCOClassificationMLSolution extends Solution<ForwardDecompositionSolution, Classifier, Double> {
-		public HASCOClassificationMLSolution(final Solution<ForwardDecompositionSolution, Classifier, Double> solution) {
+	public static class HASCOClassificationMLSolution<V> extends Solution<ForwardDecompositionSolution, V, Double> {
+		public HASCOClassificationMLSolution(final Solution<ForwardDecompositionSolution, V, Double> solution) {
 			super(solution);
 		}
 
@@ -56,6 +55,10 @@ public class HASCOSupervisedML extends HASCOFD<Classifier, Double> implements IO
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
 			sb.append(this.getSolution().toString());
+			sb.append("\n");
+			sb.append("Time to compute score: " + this.getTimeToComputeScore() + "ms");
+			sb.append("\n");
+			sb.append("Solution score: " + this.getScore());
 			return sb.toString();
 		}
 	}
@@ -66,7 +69,7 @@ public class HASCOSupervisedML extends HASCOFD<Classifier, Double> implements IO
 	/**
 	 * The iterator instance for actually running hasco.
 	 */
-	private HASCOFD<Classifier, Double>.HASCOSolutionIterator hascoRun;
+	private HASCOFD<V, Double>.HASCOSolutionIterator hascoRun;
 
 	/**
 	 * Timeout for single node evaluation in seconds. -1 denotes no timeout at all.
@@ -82,9 +85,9 @@ public class HASCOSupervisedML extends HASCOFD<Classifier, Double> implements IO
 	/**
 	 * Queue containing all solutions that have been found by hasco ordered according to their (internal) score.
 	 */
-	private Queue<HASCOClassificationMLSolution> solutionsFoundByHASCO = new PriorityQueue<>(new Comparator<HASCOClassificationMLSolution>() {
+	private Queue<HASCOClassificationMLSolution<V>> solutionsFoundByHASCO = new PriorityQueue<>(new Comparator<HASCOClassificationMLSolution<V>>() {
 		@Override
-		public int compare(final HASCOClassificationMLSolution o1, final HASCOClassificationMLSolution o2) {
+		public int compare(final HASCOClassificationMLSolution<V> o1, final HASCOClassificationMLSolution<V> o2) {
 			return o1.getScore().compareTo(o2.getScore());
 		}
 	});
@@ -115,8 +118,9 @@ public class HASCOSupervisedML extends HASCOFD<Classifier, Double> implements IO
 	 * @throws IOException
 	 *             Throws an IOException if the components could not be loaded with the given configuration file.
 	 */
-	public HASCOSupervisedML(final ComponentLoader componentLoader, final ClassifierFactory factory, final ClassifierEvaluator evaluator, final OversearchAvoidanceConfig<TFDNode, Double> oversearchAvoidanceConfig) throws IOException {
+	public HASCOSupervisedML(final ComponentLoader componentLoader, final Factory<V> factory, final IObjectEvaluator<V, Double> evaluator, final OversearchAvoidanceConfig<TFDNode, Double> oversearchAvoidanceConfig) throws IOException {
 		super(componentLoader.getComponents(), componentLoader.getParamConfigs(), factory, REQUESTED_INTERFACE, evaluator, oversearchAvoidanceConfig);
+		this.setRequestedInterface(this.getConfig().requestedInterface());
 	}
 
 	/**
@@ -125,7 +129,7 @@ public class HASCOSupervisedML extends HASCOFD<Classifier, Double> implements IO
 	 * @param timeoutInMS
 	 * @throws IOException
 	 */
-	public void gatherSolutions(final int timeoutInMS) throws IOException {
+	public void gatherSolutions(final TimeOut timeout) throws IOException {
 		if (this.isCanceled) {
 			throw new IllegalStateException("HASCO has already been canceled. Cannot gather results anymore.");
 		}
@@ -140,9 +144,9 @@ public class HASCOSupervisedML extends HASCOFD<Classifier, Double> implements IO
 			throw new IllegalArgumentException("A classifier factory has to be set before solutions can be gathered.");
 		}
 
-		this.logger.info("Starting to gather solutions for {}ms.", timeoutInMS);
+		this.logger.info("Starting to gather solutions for {}ms.", timeout.milliseconds());
 		long start = System.currentTimeMillis();
-		long deadline = start + timeoutInMS;
+		long deadline = start + timeout.milliseconds();
 
 		/* Load components */
 		this.logger.debug("Loading components ...");
@@ -152,7 +156,7 @@ public class HASCOSupervisedML extends HASCOFD<Classifier, Double> implements IO
 		 */
 		if (this.timeoutNodeEvaluationInS > 0) {
 			if (!(this.getSolutionEvaluator() instanceof TimeoutableEvaluator)) {
-				super.setBenchmark(new TimeoutableEvaluator(this.getBenchmark(), this.timeoutNodeEvaluationInS * 1000));
+				super.setBenchmark(new TimeoutableEvaluator<V>(this.getBenchmark(), this.timeoutNodeEvaluationInS * 1000));
 			}
 		}
 
@@ -170,8 +174,8 @@ public class HASCOSupervisedML extends HASCOFD<Classifier, Double> implements IO
 		boolean deadlineReached = false;
 
 		this.logger.info("Entering loop ...");
-		while (!this.isCanceled && this.hascoRun.hasNext() && (timeoutInMS <= 0 || !(deadlineReached = System.currentTimeMillis() >= deadline))) {
-			HASCOClassificationMLSolution nextSolution = new HASCOClassificationMLSolution(this.hascoRun.next());
+		while (!this.isCanceled && this.hascoRun.hasNext() && (timeout.milliseconds() <= 0 || !(deadlineReached = System.currentTimeMillis() >= deadline))) {
+			HASCOClassificationMLSolution<V> nextSolution = new HASCOClassificationMLSolution<V>(this.hascoRun.next());
 			this.solutionsFoundByHASCO.add(nextSolution);
 		}
 
@@ -182,6 +186,7 @@ public class HASCOSupervisedML extends HASCOFD<Classifier, Double> implements IO
 		} else {
 			this.logger.info("HASCO finished.");
 		}
+		this.cancel();
 	}
 
 	/**
@@ -197,14 +202,14 @@ public class HASCOSupervisedML extends HASCOFD<Classifier, Double> implements IO
 	/**
 	 * @return Returns a sorted queue of solutions with respect to the internal validation score.
 	 */
-	public Queue<HASCOClassificationMLSolution> getFoundClassifiers() {
+	public Queue<HASCOClassificationMLSolution<V>> getFoundClassifiers() {
 		return new LinkedList<>(this.solutionsFoundByHASCO);
 	}
 
 	/**
 	 * @return Returns the solution that is best with respect to the internal validation score.
 	 */
-	public HASCOClassificationMLSolution getCurrentlyBestSolution() {
+	public HASCOClassificationMLSolution<V> getCurrentlyBestSolution() {
 		return this.solutionsFoundByHASCO.peek();
 	}
 

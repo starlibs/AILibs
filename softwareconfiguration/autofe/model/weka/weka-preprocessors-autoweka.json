@@ -1,0 +1,209 @@
+{
+  "repository" : "WEKA Preprocessors Auto-WEKA",
+  "components" : [ {
+    "name" : "weka.attributeSelection.CfsSubsetEval",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "evaluator" ],
+    "parameter" : [ {
+      "name" : "M",
+      "type" : "boolean",
+      "default" : "true"
+    }, {
+      "name" : "L",
+      "type" : "boolean",
+      "default" : "true"
+    } ],
+    "dependencies" : [ ]
+  }, {
+    "name" : "weka.attributeSelection.CorrelationAttributeEval",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "evaluator" ],
+    "parameter" : [ ],
+    "dependencies" : [ ]
+  }, {
+    "name" : "weka.attributeSelection.GainRatioAttributeEval",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "evaluator" ],
+    "parameter" : [ ],
+    "dependencies" : [ ]
+  }, {
+    "name" : "weka.attributeSelection.InfoGainAttributeEval",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "evaluator" ],
+    "parameter" : [ {
+      "name" : "M",
+      "type" : "boolean",
+      "default" : "true"
+    }, {
+      "name" : "B",
+      "type" : "boolean",
+      "default" : "true"
+    } ],
+    "dependencies" : [ ]
+  }, {
+    "name" : "weka.attributeSelection.OneRAttributeEval",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "evaluator" ],
+    "parameter" : [ {
+      "name" : "S",
+      "type" : "cat",
+      "default" : "0",
+      "values" : [ "0" ]
+    }, {
+      "name" : "F",
+      "type" : "int",
+      "default" : 10.0,
+      "min" : 2.0,
+      "max" : 15.0,
+      "refineSplits" : 8,
+      "minInterval" : 10
+    }, {
+      "name" : "D",
+      "type" : "boolean",
+      "default" : "true"
+    }, {
+      "name" : "B",
+      "type" : "int",
+      "default" : 6.0,
+      "min" : 1.0,
+      "max" : 64.0,
+      "refineSplits" : 8,
+      "minInterval" : 10
+    } ],
+    "dependencies" : [ ]
+  }, {
+    "name" : "weka.attributeSelection.PrincipalComponents",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "evaluator" ],
+    "parameter" : [ {
+      "name" : "numActivator",
+      "type" : "cat",
+      "default" : "0",
+      "values" : [ "0", "1" ]
+    }, {
+      "name" : "A",
+      "type" : "int",
+      "default" : "-1",
+      "values" : [ "-1" ],
+      "min" : -1.0,
+      "max" : -1.0,
+      "refineSplits" : 8,
+      "minInterval" : 10
+    }, {
+      "name" : "C",
+      "type" : "boolean",
+      "default" : "true"
+    }, {
+      "name" : "R",
+      "type" : "double",
+      "default" : 0.95,
+      "min" : 0.5,
+      "max" : 1.0,
+      "refineSplits" : 8,
+      "minInterval" : 10
+    }, {
+      "name" : "O",
+      "type" : "boolean",
+      "default" : "true"
+    } ],
+    "dependencies" : [ {
+      "pre" : "numActivator in {0}",
+      "post" : "A in {-1}"
+    }, {
+      "pre" : "numActivator in {1}",
+      "post" : "A in [1.0,1024.0]"
+    } ]
+  }, {
+    "name" : "weka.attributeSelection.ReliefFAttributeEval",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "evaluator" ],
+    "parameter" : [ {
+      "name" : "K",
+      "type" : "int",
+      "default" : 10.0,
+      "min" : 2.0,
+      "max" : 64.0,
+      "refineSplits" : 8,
+      "minInterval" : 10
+    }, {
+      "name" : "WActivator",
+      "type" : "cat",
+      "default" : "0",
+      "values" : [ "0", "1" ]
+    }, {
+      "name" : "W",
+      "type" : "cat",
+      "default" : "REMOVED",
+      "values" : [ "REMOVED" ]
+    }, {
+      "name" : "A",
+      "type" : "int",
+      "default" : 2.0,
+      "min" : 1.0,
+      "max" : 8.0,
+      "refineSplits" : 8,
+      "minInterval" : 10
+    } ],
+    "dependencies" : [ {
+      "pre" : "WActivator in {1}",
+      "post" : "W in {false}"
+    }, {
+      "pre" : "WActivator in {1}",
+      "post" : "A in [1.0,8.0]"
+    } ]
+  }, {
+    "name" : "weka.attributeSelection.SymmetricalUncertAttributeEval",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "evaluator" ],
+    "parameter" : [ {
+      "name" : "M",
+      "type" : "boolean",
+      "default" : "true"
+    } ],
+    "dependencies" : [ ]
+  }, {
+    "name" : "weka.attributeSelection.BestFirst",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "searcher" ],
+    "parameter" : [ {
+      "name" : "D",
+      "type" : "cat",
+      "default" : "1",
+      "values": ["0","1","2"]
+    } ],
+    "dependencies" : [ ]
+  }, {
+    "name" : "weka.attributeSelection.GreedyStepwise",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "searcher" ],
+    "parameter" : [ {
+      "name" : "C",
+      "type" : "boolean",
+      "default" : "true"
+    }, {
+      "name" : "B",
+      "type" : "boolean",
+      "default" : "false"
+    } ],
+    "dependencies" : [ ]
+  },{
+    "name" : "weka.attributeSelection.Ranker",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "searcher" ],
+    "parameter" : [ ],
+    "dependencies" : [ ]
+  }, {
+    "name" : "weka.attributeSelection.AttributeSelection",
+    "providedInterface" : [ "AbstractPreprocessor" ],
+    "requiredInterface" : [ {"id": "eval", "name": "evaluator" }, {"id": "search", "name": "searcher" } ],
+    "parameter" : [ {
+      "name" : "M",
+      "type" : "boolean",
+      "default" : "true"
+    } ],
+    "dependencies" : [ ]
+  }
+  
+  
+   ]
+}

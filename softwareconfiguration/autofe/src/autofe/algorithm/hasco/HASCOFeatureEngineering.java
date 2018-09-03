@@ -39,17 +39,17 @@ import jaicore.ml.WekaUtil;
 import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionSolution;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.search.algorithms.standard.uncertainty.OversearchAvoidanceConfig;
+import jaicore.search.algorithms.standard.uncertainty.OversearchAvoidanceConfig.OversearchAvoidanceMode;
 import weka.core.Instance;
 import weka.core.Instances;
 
 /**
- * HASCO Feature Engineering class executing a HASCO run using
- * <code>FilterPipeline</code> objects.
- * 
+ * HASCO Feature Engineering class executing a HASCO run using <code>FilterPipeline</code> objects.
+ *
  * @author Julian Lienen
  *
  */
-public class HASCOFE implements IObservableGraphAlgorithm<TFDNode, String>, ILoggingCustomizable {
+public class HASCOFeatureEngineering implements IObservableGraphAlgorithm<TFDNode, String>, ILoggingCustomizable {
 
 	// Search relevant properties
 	private File configFile;
@@ -60,7 +60,7 @@ public class HASCOFE implements IObservableGraphAlgorithm<TFDNode, String>, ILog
 	private final int[] inputShape;
 
 	// Logging
-	private static Logger logger = LoggerFactory.getLogger(HASCOFE.class);
+	private static Logger logger = LoggerFactory.getLogger(HASCOFeatureEngineering.class);
 	private String loggerName;
 
 	// Utility variables
@@ -70,39 +70,37 @@ public class HASCOFE implements IObservableGraphAlgorithm<TFDNode, String>, ILog
 	private Collection<Object> listeners = new ArrayList<>();
 	private Queue<HASCOFESolution> solutionsFoundByHASCO = new PriorityQueue<>(new Comparator<HASCOFESolution>() {
 
+		@Override
 		public int compare(final HASCOFESolution o1, final HASCOFESolution o2) {
 			return o1.getScore().compareTo(o2.getScore());
 		}
 	});
 
-	private OversearchAvoidanceConfig<TFDNode> oversearchAvoidanceConfig = new OversearchAvoidanceConfig<>(
-			OversearchAvoidanceConfig.OversearchAvoidanceMode.NONE);
+	private OversearchAvoidanceConfig<TFDNode, Double> oversearchAvoidanceConfig = new OversearchAvoidanceConfig<TFDNode, Double>(OversearchAvoidanceMode.NONE, 0);
 
 	public static class HASCOFESolution extends Solution<ForwardDecompositionSolution, FilterPipeline, Double> {
-		public HASCOFESolution(Solution<ForwardDecompositionSolution, FilterPipeline, Double> solution) {
+		public HASCOFESolution(final Solution<ForwardDecompositionSolution, FilterPipeline, Double> solution) {
 			super(solution);
 		}
 
 		@Override
 		public String toString() {
-			return "HASCOFESolution [getSolution()=" + getSolution() + "]";
+			return "HASCOFESolution [getSolution()=" + this.getSolution() + "]";
 		}
 	}
 
-	public HASCOFE(final File config, AbstractHASCOFENodeEvaluator nodeEvaluator, final DataSet data,
-			AbstractHASCOFEObjectEvaluator benchmark, final int[] inputShape) {
+	public HASCOFeatureEngineering(final File config, final AbstractHASCOFENodeEvaluator nodeEvaluator, final DataSet data, final AbstractHASCOFEObjectEvaluator benchmark, final int[] inputShape) {
 
-		if (config == null || !config.exists())
-			throw new IllegalArgumentException(
-					"The file " + config + " is null or does not exist and cannot be used by ML-Plan");
+		if (config == null || !config.exists()) {
+			throw new IllegalArgumentException("The file " + config + " is null or does not exist and cannot be used by ML-Plan");
+		}
 
 		this.inputShape = inputShape;
 		this.configFile = config;
 		this.initializeHASCOSearch(data, nodeEvaluator, benchmark);
 	}
 
-	private void initializeHASCOSearch(final DataSet data, AbstractHASCOFENodeEvaluator nodeEvaluator,
-			AbstractHASCOFEObjectEvaluator benchmark) { // AbstractHASCOFEObjectEvaluator
+	private void initializeHASCOSearch(final DataSet data, final AbstractHASCOFENodeEvaluator nodeEvaluator, final AbstractHASCOFEObjectEvaluator benchmark) { // AbstractHASCOFEObjectEvaluator
 
 		// benchmark
 		IObjectEvaluator<FilterPipeline, Double> objectEvaluator = null;
@@ -112,10 +110,11 @@ public class HASCOFE implements IObservableGraphAlgorithm<TFDNode, String>, ILog
 		} else {
 			objectEvaluator = (n) -> {
 				// Empty pipe
-				if (n.getFilters() == null)
+				if (n.getFilters() == null) {
 					return AbstractHASCOFEEvaluator.MAX_EVAL_VALUE;
-				else
+				} else {
 					return new Random(new Random().nextInt(1000)).nextDouble();
+				}
 			};
 		}
 
@@ -125,19 +124,17 @@ public class HASCOFE implements IObservableGraphAlgorithm<TFDNode, String>, ILog
 			// this.hasco.addComponents(cl.getComponents());
 			// this.hasco.addParamRefinementConfigurations(cl.getParamConfigs());
 
+			FilterPipelineFactory factory = new FilterPipelineFactory(this.inputShape);
+			this.hasco = new HASCOFD<>(cl.getComponents(), cl.getParamConfigs(), factory, "FilterPipeline", objectEvaluator, this.oversearchAvoidanceConfig);
 			if (nodeEvaluator != null) {
-				nodeEvaluator.setHascoFE(this);
+				nodeEvaluator.setComponents(cl.getComponents());
+				nodeEvaluator.setFactory(factory);
 				nodeEvaluator.setData(data);
-
-				this.hasco = new HASCOFD<>(cl.getComponents(), cl.getParamConfigs(),
-						new FilterPipelineFactory(this.inputShape), nodeEvaluator, "FilterPipeline", objectEvaluator,
-						this.oversearchAvoidanceConfig);
+				this.hasco.setPreferredNodeEvaluator(nodeEvaluator);
 			} else {
-
-				this.hasco = new HASCOFD<>(cl.getComponents(), cl.getParamConfigs(),
-						new FilterPipelineFactory(this.inputShape), n -> {
-							return new Random(42).nextDouble();
-						}, "FilterPipeline", objectEvaluator, this.oversearchAvoidanceConfig);
+				this.hasco.setPreferredNodeEvaluator(n -> {
+					return new Random(42).nextDouble();
+				});
 			}
 
 			// Set number of CPUs
@@ -145,8 +142,9 @@ public class HASCOFE implements IObservableGraphAlgorithm<TFDNode, String>, ILog
 			// this.hasco.setNumberOfCPUs(Runtime.getRuntime().availableProcessors());
 			this.hasco.setNumberOfCPUs(1);
 
-			if (this.loggerName != null && this.loggerName.length() > 0)
-				this.hasco.setLoggerName(loggerName + ".hasco");
+			if (this.loggerName != null && this.loggerName.length() > 0) {
+				this.hasco.setLoggerName(this.loggerName + ".hasco");
+			}
 
 		} catch (IOException e) {
 			logger.warn("Could not import configuration file. Using default components instead...");
@@ -179,13 +177,13 @@ public class HASCOFE implements IObservableGraphAlgorithm<TFDNode, String>, ILog
 				try {
 					while (!Thread.interrupted()) {
 						Thread.sleep(100);
-						int timeElapsed = (int) (System.currentTimeMillis() - HASCOFE.this.timeOfStart);
-						int timeRemaining = HASCOFE.this.timeoutInS * 1000 - timeElapsed;
+						int timeElapsed = (int) (System.currentTimeMillis() - HASCOFeatureEngineering.this.timeOfStart);
+						int timeRemaining = HASCOFeatureEngineering.this.timeoutInS * 1000 - timeElapsed;
 
 						// TODO
 						if (timeRemaining < 0) {
 							logger.info("Cancelling search...");
-							HASCOFE.this.cancel();
+							HASCOFeatureEngineering.this.cancel();
 							return;
 						}
 					}
@@ -196,8 +194,7 @@ public class HASCOFE implements IObservableGraphAlgorithm<TFDNode, String>, ILog
 		}, "Phase 1 time bound observer").start();
 
 		boolean deadlineReached = false;
-		while (!this.isCanceled && this.hascoRun.hasNext()
-				&& (timeoutInMS <= 0 || !(deadlineReached = System.currentTimeMillis() >= deadline))) {
+		while (!this.isCanceled && this.hascoRun.hasNext() && (timeoutInMS <= 0 || !(deadlineReached = System.currentTimeMillis() >= deadline))) {
 			logger.debug("Searching for next...");
 			HASCOFESolution nextSolution = new HASCOFESolution(this.hascoRun.next());
 			logger.debug("Found new one.");
@@ -228,7 +225,7 @@ public class HASCOFE implements IObservableGraphAlgorithm<TFDNode, String>, ILog
 	}
 
 	@Override
-	public void setLoggerName(String name) {
+	public void setLoggerName(final String name) {
 		logger.info("Switching logger from {} to {}", logger.getName(), name);
 		this.loggerName = name;
 		logger = LoggerFactory.getLogger(name);
@@ -237,11 +234,11 @@ public class HASCOFE implements IObservableGraphAlgorithm<TFDNode, String>, ILog
 
 	@Override
 	public String getLoggerName() {
-		return loggerName;
+		return this.loggerName;
 	}
 
 	@Override
-	public void registerListener(Object listener) {
+	public void registerListener(final Object listener) {
 		this.listeners.add(listener);
 	}
 
@@ -256,7 +253,7 @@ public class HASCOFE implements IObservableGraphAlgorithm<TFDNode, String>, ILog
 	// }
 
 	public HASCOFD<FilterPipeline, Double> getHasco() {
-		return hasco;
+		return this.hasco;
 	}
 
 	public static List<Instances> generateRandomDataSets(final int dataset, // final double usedDataSetSize,
@@ -272,8 +269,7 @@ public class HASCOFE implements IObservableGraphAlgorithm<TFDNode, String>, ILog
 		final double usedDataSetSize = DataSetUtils.getSplitRatioToUse(data);
 		logger.debug("Using split ratio '" + usedDataSetSize + "'.");
 
-		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(new Random().nextInt() * 1000),
-				usedDataSetSize);
+		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(new Random().nextInt() * 1000), usedDataSetSize);
 
 		logger.info("Calculating intermediates...");
 		List<INDArray> intermediate = new ArrayList<>();
@@ -283,16 +279,16 @@ public class HASCOFE implements IObservableGraphAlgorithm<TFDNode, String>, ILog
 		logger.info("Finished intermediate calculations.");
 		DataSet originDataSet = new DataSet(split.get(0), intermediate);
 
-		HASCOFE hascoFE = new HASCOFE(new File("model/catalano/catalano.json"),
-				EvaluationUtils.getRandomNodeEvaluator(maxPipelineSize), new DataSet(split.get(0), intermediate), null,
+		HASCOFeatureEngineering hascoFE = new HASCOFeatureEngineering(new File("model/catalano/catalano.json"), EvaluationUtils.getRandomNodeEvaluator(maxPipelineSize), new DataSet(split.get(0), intermediate), null,
 				DataSetUtils.getInputShapeByDataSet(dataset));
 		hascoFE.setLoggerName("autofe");
 		hascoFE.runSearch(timeout);
 
 		// Calculate solution data sets
 		List<Instances> result = new ArrayList<>();
-		if (maxSolutionCount > 1)
+		if (maxSolutionCount > 1) {
 			result.add(originDataSet.getInstances());
+		}
 
 		// logger.debug("Found solutions: " + hascoFE.getFoundClassifiers().toString());
 		List<HASCOFESolution> solutions = new ArrayList<>(hascoFE.getFoundClassifiers());
@@ -308,8 +304,9 @@ public class HASCOFE implements IObservableGraphAlgorithm<TFDNode, String>, ILog
 			FilterPipeline pipe = nextSol.getSolution();
 
 			// Discard empty or oversized pipelines
-			if (pipe.getFilters() == null || pipe.getFilters().getItems().size() > maxPipelineSize)
+			if (pipe.getFilters() == null || pipe.getFilters().getItems().size() > maxPipelineSize) {
 				continue;
+			}
 
 			logger.debug("Applying solution pipe " + pipe.toString());
 

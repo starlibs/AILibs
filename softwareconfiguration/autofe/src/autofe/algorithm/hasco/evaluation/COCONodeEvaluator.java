@@ -15,9 +15,8 @@ import jaicore.search.structure.core.Node;
 import weka.core.Instances;
 
 /**
- * Evaluator using the congenerous cosine distance (COCO) by Liu et. al., 2017
- * (cf. https://arxiv.org/pdf/1710.00870.pdf).
- * 
+ * Evaluator using the congenerous cosine distance (COCO) by Liu et. al., 2017 (cf. https://arxiv.org/pdf/1710.00870.pdf).
+ *
  * @author Julian Lienen
  *
  */
@@ -30,17 +29,15 @@ public class COCONodeEvaluator extends AbstractHASCOFENodeEvaluator {
 	}
 
 	@Override
-	public Double f(Node<TFDNode, ?> node) throws Throwable {
-
-		if (this.getHascoFE() == null)
-			throw new IllegalStateException("HascoFE property of the cluster node evaluator must be initialized!");
-
-		if (node.getParent() == null)
+	public Double f(final Node<TFDNode, ?> node) throws Throwable {
+		if (node.getParent() == null) {
 			return null;
+		}
 
 		// If pipeline is too deep, assign worst value
-		if (node.path().size() > this.maxPipelineSize)
+		if (node.path().size() > this.maxPipelineSize) {
 			return MAX_EVAL_VALUE;
+		}
 
 		FilterPipeline pipe = this.getPipelineFromNode(node);
 		if (pipe != null && pipe.getFilters() != null) {

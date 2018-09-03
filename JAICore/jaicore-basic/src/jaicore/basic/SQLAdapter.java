@@ -219,6 +219,8 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 	private void setValue(final PreparedStatement stmt, final int index, final Object val) throws SQLException {
 		if (val instanceof Integer) {
 			stmt.setInt(index, (Integer) val);
+		} else if (val instanceof Long) {
+			stmt.setLong(index, (Long) val);
 		} else if (val instanceof Number) {
 			stmt.setDouble(index, (Double) val);
 		} else if (val instanceof String) {

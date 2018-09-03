@@ -1,0 +1,19 @@
+{
+	"repository" : "AutoFE-and-ML-Plan",
+	"include": ["catalano/catalano.json","weka/weka-all-autoweka.json"],
+	"components" : [ {
+	  	    "name" : "AutoFEMLPipeline",
+	  	    "providedInterface" : [ "AutoFEMLPipeline"],
+	  	    "requiredInterface" : [
+	  	    	{
+	  	    		"id": "mlPipeline",
+	  	    		"name": "AbstractClassifier"
+	  	    	},
+	  	    	{
+	  	    		"id": "filterPipeline",
+	  	    		"name": "FilterPipeline"
+	  	    	}
+			],
+	    	"parameter" : [ ]
+	    } ]
+}

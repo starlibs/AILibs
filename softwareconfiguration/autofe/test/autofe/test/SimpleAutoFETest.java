@@ -12,8 +12,8 @@ import org.openml.apiconnector.xml.DataSetDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import autofe.algorithm.hasco.HASCOFE;
-import autofe.algorithm.hasco.HASCOFE.HASCOFESolution;
+import autofe.algorithm.hasco.HASCOFeatureEngineering;
+import autofe.algorithm.hasco.HASCOFeatureEngineering.HASCOFESolution;
 import autofe.algorithm.hasco.evaluation.COCONodeEvaluator;
 import autofe.algorithm.hasco.evaluation.COCOObjectEvaluator;
 import autofe.algorithm.hasco.evaluation.ClusterNodeEvaluator;
@@ -52,7 +52,7 @@ public class SimpleAutoFETest {
 		data.setClassIndex(data.numAttributes() - 1);
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(0), .7f);
 
-		HASCOFE hascoFE = new HASCOFE(new File("model/test.json"), new ClusterNodeEvaluator(MAX_PIPELINE_SIZE),
+		HASCOFeatureEngineering hascoFE = new HASCOFeatureEngineering(new File("model/test.json"), new ClusterNodeEvaluator(MAX_PIPELINE_SIZE),
 				new DataSet(split.get(0), null), new ClusterObjectEvaluator(), DATASET_INPUT_SHAPE);
 		hascoFE.setLoggerName("autofe");
 		// hascoFE.enableVisualization();
@@ -90,7 +90,7 @@ public class SimpleAutoFETest {
 		data.setClassIndex(data.numAttributes() - 1);
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(0), .7f);
 
-		HASCOFE hascoFE = new HASCOFE(new File("model/test.json"),
+		HASCOFeatureEngineering hascoFE = new HASCOFeatureEngineering(new File("model/test.json"),
 				EvaluationUtils.getRandomNodeEvaluator(MAX_PIPELINE_SIZE), new DataSet(split.get(0), null),
 				new ClusterObjectEvaluator(), DATASET_INPUT_SHAPE);
 		hascoFE.setLoggerName("autofe");
@@ -129,7 +129,7 @@ public class SimpleAutoFETest {
 		data.setClassIndex(data.numAttributes() - 1);
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(0), .7f);
 
-		HASCOFE hascoFE = new HASCOFE(new File("model/test.json"), new LDANodeEvaluator(MAX_PIPELINE_SIZE),
+		HASCOFeatureEngineering hascoFE = new HASCOFeatureEngineering(new File("model/test.json"), new LDANodeEvaluator(MAX_PIPELINE_SIZE),
 				new DataSet(split.get(0), null), new ClusterObjectEvaluator(), DATASET_INPUT_SHAPE);
 		hascoFE.setLoggerName("autofe");
 		// hascoFE.enableVisualization();
@@ -166,7 +166,7 @@ public class SimpleAutoFETest {
 		data.setClassIndex(data.numAttributes() - 1);
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(0), .7f);
 
-		HASCOFE hascoFE = new HASCOFE(new File("model/test.json"), new EnsembleNodeEvaluator(MAX_PIPELINE_SIZE),
+		HASCOFeatureEngineering hascoFE = new HASCOFeatureEngineering(new File("model/test.json"), new EnsembleNodeEvaluator(MAX_PIPELINE_SIZE),
 				new DataSet(split.get(0), null), new EnsembleObjectEvaluator(), DATASET_INPUT_SHAPE);
 		hascoFE.setLoggerName("autofe");
 		// hascoFE.enableVisualization();
@@ -204,7 +204,7 @@ public class SimpleAutoFETest {
 		data.setClassIndex(data.numAttributes() - 1);
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(0), .7f);
 
-		HASCOFE hascoFE = new HASCOFE(new File("model/test.json"), new COCONodeEvaluator(MAX_PIPELINE_SIZE),
+		HASCOFeatureEngineering hascoFE = new HASCOFeatureEngineering(new File("model/test.json"), new COCONodeEvaluator(MAX_PIPELINE_SIZE),
 				new DataSet(split.get(0), null), new COCOObjectEvaluator(), DATASET_INPUT_SHAPE);
 		hascoFE.setLoggerName("autofe");
 		// hascoFE.enableVisualization();

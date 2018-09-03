@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 import org.aeonbits.owner.ConfigCache;
 
@@ -12,6 +13,7 @@ import de.upb.crc901.automl.hascoscikitlearnml.ScikitLearnComposition;
 import de.upb.crc901.automl.hascoscikitlearnml.ScikitLearnCompositionFactory;
 import de.upb.crc901.mlplan.AbstractMLPlan;
 import hasco.serialization.ComponentLoader;
+import jaicore.basic.TimeOut;
 import jaicore.ml.WekaUtil;
 import jaicore.ml.evaluation.IInstancesClassifier;
 import weka.classifiers.Classifier;
@@ -41,7 +43,7 @@ public class MLPlanScikitLearnClassifier extends AbstractMLPlan implements Class
 
 		this.setFactory(new ScikitLearnCompositionFactory());
 
-		super.gatherSolutions(CONFIG.timeout());
+		super.gatherSolutions(new TimeOut(CONFIG.timeout(), TimeUnit.SECONDS));
 	}
 
 	@Override

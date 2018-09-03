@@ -14,8 +14,8 @@ import org.openml.apiconnector.xml.DataSetDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import autofe.algorithm.hasco.HASCOFE;
-import autofe.algorithm.hasco.HASCOFE.HASCOFESolution;
+import autofe.algorithm.hasco.HASCOFeatureEngineering;
+import autofe.algorithm.hasco.HASCOFeatureEngineering.HASCOFESolution;
 import autofe.algorithm.hasco.evaluation.COCONodeEvaluator;
 import autofe.algorithm.hasco.evaluation.COCOObjectEvaluator;
 import autofe.algorithm.hasco.evaluation.ClusterNodeEvaluator;
@@ -37,7 +37,7 @@ public class ImageAutoFETest {
 	private static final int MLPLAN_TIMEOUT = 60;
 	private static final int AUTOFE_TIMEOUT = 30 * 1000;
 
-	private static final int MAX_PIPELINE_SIZE = 12;
+	private static final int MAX_PIPELINE_SIZE = 5;
 
 	private static final int USED_DATASET = DataSetUtils.MNIST_ID;
 	private static final int[] DATASET_INPUT_SHAPE = DataSetUtils.getInputShapeByDataSet(USED_DATASET);
@@ -63,9 +63,8 @@ public class ImageAutoFETest {
 		}
 		logger.info("Finished intermediate calculations.");
 
-		HASCOFE hascoFE = new HASCOFE(new File("model/catalano/catalano.json"),
-				new ClusterNodeEvaluator(MAX_PIPELINE_SIZE), new DataSet(split.get(0), intermediate),
-				new ClusterObjectEvaluator(), DATASET_INPUT_SHAPE);
+		HASCOFeatureEngineering hascoFE = new HASCOFeatureEngineering(new File("model/catalano/catalano.json"), new ClusterNodeEvaluator(MAX_PIPELINE_SIZE), new DataSet(split.get(0), intermediate), new ClusterObjectEvaluator(),
+				DATASET_INPUT_SHAPE);
 		// hascoFE.enableVisualization();
 		hascoFE.setLoggerName("autofe image");
 		hascoFE.runSearch(AUTOFE_TIMEOUT);
@@ -85,18 +84,15 @@ public class ImageAutoFETest {
 				intermediateSplit1.add(DataSetUtils.instanceToMatrixByDataSet(inst, USED_DATASET));
 			}
 
-			DataSet resultSplit0 = solution.getSolution().applyFilter(new DataSet(newSplit.get(0), intermediateSplit0),
-					false);
-			DataSet resultSplit1 = solution.getSolution().applyFilter(new DataSet(newSplit.get(1), intermediateSplit1),
-					false);
+			DataSet resultSplit0 = solution.getSolution().applyFilter(new DataSet(newSplit.get(0), intermediateSplit0), false);
+			DataSet resultSplit1 = solution.getSolution().applyFilter(new DataSet(newSplit.get(1), intermediateSplit1), false);
 
-			double mlPlanResult = EvaluationUtils.evaluateMLPlan(MLPLAN_TIMEOUT, resultSplit0.getInstances(),
-					resultSplit1.getInstances(), 42, logger, ENABLE_MLPLAN_VIS);
-			System.out.println(
-					"Error Rate of the solution produced by ML-Plan (Cluster): " + (100 - mlPlanResult) / 100f);
+			double mlPlanResult = EvaluationUtils.evaluateMLPlan(MLPLAN_TIMEOUT, resultSplit0.getInstances(), resultSplit1.getInstances(), 42, logger, ENABLE_MLPLAN_VIS);
+			System.out.println("Error Rate of the solution produced by ML-Plan (Cluster): " + (100 - mlPlanResult) / 100f);
 
-		} else
+		} else {
 			logger.info("No solution could be found.");
+		}
 
 	}
 
@@ -119,8 +115,8 @@ public class ImageAutoFETest {
 		}
 		logger.info("Finished intermediate calculations.");
 
-		HASCOFE hascoFE = new HASCOFE(new File("model/catalano/catalano.json"), new LDANodeEvaluator(MAX_PIPELINE_SIZE),
-				new DataSet(split.get(0), intermediate), new LDAObjectEvaluator(), DATASET_INPUT_SHAPE);
+		HASCOFeatureEngineering hascoFE = new HASCOFeatureEngineering(new File("model/catalano/catalano.json"), new LDANodeEvaluator(MAX_PIPELINE_SIZE), new DataSet(split.get(0), intermediate), new LDAObjectEvaluator(),
+				DATASET_INPUT_SHAPE);
 		// hascoFE.enableVisualization();
 		hascoFE.setLoggerName("autofe image");
 		hascoFE.runSearch(AUTOFE_TIMEOUT);
@@ -140,19 +136,17 @@ public class ImageAutoFETest {
 				intermediateSplit1.add(DataSetUtils.instanceToMatrixByDataSet(inst, USED_DATASET));
 			}
 
-			DataSet resultSplit0 = solution.getSolution().applyFilter(new DataSet(newSplit.get(0), intermediateSplit0),
-					false);
-			DataSet resultSplit1 = solution.getSolution().applyFilter(new DataSet(newSplit.get(1), intermediateSplit1),
-					false);
+			DataSet resultSplit0 = solution.getSolution().applyFilter(new DataSet(newSplit.get(0), intermediateSplit0), false);
+			DataSet resultSplit1 = solution.getSolution().applyFilter(new DataSet(newSplit.get(1), intermediateSplit1), false);
 
 			logger.info("Feature size of generated solution: " + resultSplit0.getInstances().numAttributes());
 
-			double mlPlanResult = EvaluationUtils.evaluateMLPlan(MLPLAN_TIMEOUT, resultSplit0.getInstances(),
-					resultSplit1.getInstances(), 42, logger, ENABLE_MLPLAN_VIS);
+			double mlPlanResult = EvaluationUtils.evaluateMLPlan(MLPLAN_TIMEOUT, resultSplit0.getInstances(), resultSplit1.getInstances(), 42, logger, ENABLE_MLPLAN_VIS);
 			System.out.println("Error Rate of the solution produced by ML-Plan (LDA): " + (100 - mlPlanResult) / 100f);
 
-		} else
+		} else {
 			logger.info("No solution could be found.");
+		}
 
 	}
 
@@ -162,8 +156,7 @@ public class ImageAutoFETest {
 
 		long timeStart = System.currentTimeMillis();
 
-		List<Instances> dataSetVariations = HASCOFE.generateRandomDataSets(USED_DATASET, 1, MAX_PIPELINE_SIZE,
-				AUTOFE_TIMEOUT, 42);
+		List<Instances> dataSetVariations = HASCOFeatureEngineering.generateRandomDataSets(USED_DATASET, 1, MAX_PIPELINE_SIZE, AUTOFE_TIMEOUT, 42);
 		// OpenmlConnector connector = new OpenmlConnector();
 		// DataSetDescription ds = connector.dataGet(USED_DATASET);
 		// File file = ds.getDataset(DataSetUtils.API_KEY);
@@ -175,8 +168,7 @@ public class ImageAutoFETest {
 		long timeDataSetVar = System.currentTimeMillis();
 		System.out.println("timeDataSetVar: " + timeDataSetVar);
 
-		double mlPlanScore = EvaluationUtils.evaluateMLPlan(MLPLAN_TIMEOUT, dataSetVariations.get(0), 0.75, 42, logger,
-				false, 6);
+		double mlPlanScore = EvaluationUtils.evaluateMLPlan(MLPLAN_TIMEOUT, dataSetVariations.get(0), 0.75, 42, logger, false, 6);
 		System.out.println("MLPLan Score: " + mlPlanScore);
 
 		long endTime = System.currentTimeMillis();
@@ -205,9 +197,8 @@ public class ImageAutoFETest {
 		}
 		logger.info("Finished intermediate calculations.");
 
-		HASCOFE hascoFE = new HASCOFE(new File("model/catalano/catalano.json"),
-				new EnsembleNodeEvaluator(MAX_PIPELINE_SIZE), new DataSet(split.get(0), intermediate),
-				new EnsembleObjectEvaluator(), DATASET_INPUT_SHAPE);
+		HASCOFeatureEngineering hascoFE = new HASCOFeatureEngineering(new File("model/catalano/catalano.json"), new EnsembleNodeEvaluator(MAX_PIPELINE_SIZE), new DataSet(split.get(0), intermediate), new EnsembleObjectEvaluator(),
+				DATASET_INPUT_SHAPE);
 		// hascoFE.enableVisualization();
 		hascoFE.setLoggerName("autofe image");
 		hascoFE.runSearch(AUTOFE_TIMEOUT);
@@ -227,20 +218,17 @@ public class ImageAutoFETest {
 				intermediateSplit1.add(DataSetUtils.instanceToMatrixByDataSet(inst, USED_DATASET));
 			}
 
-			DataSet resultSplit0 = solution.getSolution().applyFilter(new DataSet(newSplit.get(0), intermediateSplit0),
-					false);
-			DataSet resultSplit1 = solution.getSolution().applyFilter(new DataSet(newSplit.get(1), intermediateSplit1),
-					false);
+			DataSet resultSplit0 = solution.getSolution().applyFilter(new DataSet(newSplit.get(0), intermediateSplit0), false);
+			DataSet resultSplit1 = solution.getSolution().applyFilter(new DataSet(newSplit.get(1), intermediateSplit1), false);
 
 			logger.info("Feature size of generated solution: " + resultSplit0.getInstances().numAttributes());
 
-			double mlPlanResult = EvaluationUtils.evaluateMLPlan(MLPLAN_TIMEOUT, resultSplit0.getInstances(),
-					resultSplit1.getInstances(), 42, logger, ENABLE_MLPLAN_VIS);
-			System.out.println(
-					"Error Rate of the solution produced by ML-Plan (Ensemble): " + (100 - mlPlanResult) / 100f);
+			double mlPlanResult = EvaluationUtils.evaluateMLPlan(MLPLAN_TIMEOUT, resultSplit0.getInstances(), resultSplit1.getInstances(), 42, logger, ENABLE_MLPLAN_VIS);
+			System.out.println("Error Rate of the solution produced by ML-Plan (Ensemble): " + (100 - mlPlanResult) / 100f);
 
-		} else
+		} else {
 			logger.info("No solution could be found.");
+		}
 	}
 
 	// @Test
@@ -262,9 +250,8 @@ public class ImageAutoFETest {
 		}
 		logger.info("Finished intermediate calculations.");
 
-		HASCOFE hascoFE = new HASCOFE(new File("model/catalano/catalano.json"),
-				new COCONodeEvaluator(MAX_PIPELINE_SIZE), new DataSet(split.get(0), intermediate),
-				new COCOObjectEvaluator(), DATASET_INPUT_SHAPE);
+		HASCOFeatureEngineering hascoFE = new HASCOFeatureEngineering(new File("model/catalano/catalano.json"), new COCONodeEvaluator(MAX_PIPELINE_SIZE), new DataSet(split.get(0), intermediate), new COCOObjectEvaluator(),
+				DATASET_INPUT_SHAPE);
 		// hascoFE.enableVisualization();
 		hascoFE.setLoggerName("autofe image");
 		hascoFE.runSearch(AUTOFE_TIMEOUT);
@@ -284,18 +271,16 @@ public class ImageAutoFETest {
 				intermediateSplit1.add(DataSetUtils.instanceToMatrixByDataSet(inst, USED_DATASET));
 			}
 
-			DataSet resultSplit0 = solution.getSolution().applyFilter(new DataSet(newSplit.get(0), intermediateSplit0),
-					false);
-			DataSet resultSplit1 = solution.getSolution().applyFilter(new DataSet(newSplit.get(1), intermediateSplit1),
-					false);
+			DataSet resultSplit0 = solution.getSolution().applyFilter(new DataSet(newSplit.get(0), intermediateSplit0), false);
+			DataSet resultSplit1 = solution.getSolution().applyFilter(new DataSet(newSplit.get(1), intermediateSplit1), false);
 
 			logger.info("Feature size of generated solution: " + resultSplit0.getInstances().numAttributes());
 
-			double mlPlanResult = EvaluationUtils.evaluateMLPlan(MLPLAN_TIMEOUT, resultSplit0.getInstances(),
-					resultSplit1.getInstances(), 42, logger, ENABLE_MLPLAN_VIS);
+			double mlPlanResult = EvaluationUtils.evaluateMLPlan(MLPLAN_TIMEOUT, resultSplit0.getInstances(), resultSplit1.getInstances(), 42, logger, ENABLE_MLPLAN_VIS);
 			System.out.println("Error Rate of the solution produced by ML-Plan (COCO): " + (100 - mlPlanResult) / 100f);
 
-		} else
+		} else {
 			logger.info("No solution could be found.");
+		}
 	}
 }

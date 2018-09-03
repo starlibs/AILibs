@@ -1,17 +1,20 @@
 package autofe.algorithm.hasco.evaluation;
 
-import autofe.algorithm.hasco.HASCOFE;
+import java.util.Collection;
+
 import autofe.algorithm.hasco.filter.meta.FilterPipeline;
 import hasco.core.Util;
+import hasco.model.Component;
 import hasco.model.ComponentInstance;
+import hasco.query.Factory;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.search.algorithms.standard.core.INodeEvaluator;
 import jaicore.search.structure.core.Node;
 
-public abstract class AbstractHASCOFENodeEvaluator extends AbstractHASCOFEEvaluator
-		implements INodeEvaluator<TFDNode, Double> {
+public abstract class AbstractHASCOFENodeEvaluator extends AbstractHASCOFEEvaluator implements INodeEvaluator<TFDNode, Double> {
 
-	private HASCOFE hascoFE;
+	private Collection<Component> components;
+	private Factory<FilterPipeline> factory;
 
 	// Maximum size of a pipeline
 	protected int maxPipelineSize;
@@ -20,20 +23,31 @@ public abstract class AbstractHASCOFENodeEvaluator extends AbstractHASCOFEEvalua
 		this.maxPipelineSize = maxPipelineSize;
 	}
 
-	public HASCOFE getHascoFE() {
-		return hascoFE;
+	public void setComponents(final Collection<Component> components) {
+		this.components = components;
 	}
 
-	public void setHascoFE(HASCOFE hascoFE) {
-		this.hascoFE = hascoFE;
+	public Collection<Component> getComponents() {
+		return this.components;
+	}
+
+	public void setFactory(final Factory<FilterPipeline> factory) {
+		this.factory = factory;
+	}
+
+	public Factory<FilterPipeline> getFactory() {
+		return this.factory;
 	}
 
 	public FilterPipeline getPipelineFromNode(final Node<TFDNode, ?> node) throws Exception {
-		ComponentInstance ci = Util.getSolutionCompositionFromState(this.getHascoFE().getHasco().getComponents(),
-				node.getPoint().getState());
-		if (ci == null)
-			return null;
+		if (this.components == null || this.factory == null) {
+			throw new IllegalArgumentException("Collection of components and factory need to be set to make node evaluators work.");
+		}
 
-		return this.getHascoFE().getHasco().getFactory().getComponentInstantiation(ci);
+		ComponentInstance ci = Util.getSolutionCompositionFromState(this.getComponents(), node.getPoint().getState());
+		if (ci == null) {
+			return null;
+		}
+		return this.getFactory().getComponentInstantiation(ci);
 	}
 }

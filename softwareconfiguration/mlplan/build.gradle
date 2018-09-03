@@ -31,7 +31,8 @@ dependencies {
 	compile project(':JAICore:jaicore-planning')
 	compile project(':JAICore:jaicore-search')
 	compile project(':JAICore:jaicore-ml')
-	compile project(':JASE')
+	//compile project(':JASE')
+	compile group: 'de.upb.isys', name: 'jase', version: '0.0.4'
 
 
 	// OWL API
@@ -39,8 +40,8 @@ dependencies {
 	// TreeMiner
 	compile 'com.github.helegraf:TreeMiner:-SNAPSHOT'
 	// linear algebra
-	compile group: 'org.nd4j', name: 'nd4j-native-platform', version: '0.9.1'
-	compile group: 'org.nd4j', name: 'nd4j-api', version: '0.9.1'
+	compile group: 'org.nd4j', name: 'nd4j-native-platform', version: '1.0.0-beta'
+	compile group: 'org.nd4j', name: 'nd4j-api', version: '1.0.0-beta'
 	// gradient descent
 	compile group: 'de.jungblut.common', name: 'thomasjungblut-common', version: '1.1'
 	

@@ -6,7 +6,9 @@ import java.util.Map.Entry;
 
 import de.upb.crc901.automl.pipeline.ClassifierFactory;
 import de.upb.crc901.automl.pipeline.basic.MLPipeline;
+import hasco.model.CategoricalParameterDomain;
 import hasco.model.ComponentInstance;
+import hasco.model.Parameter;
 import jaicore.basic.ListHelper;
 import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
@@ -16,18 +18,25 @@ import weka.classifiers.Classifier;
 public class WEKAPipelineFactory implements ClassifierFactory {
 
 	@Override
-	public MLPipeline getComponentInstantiation(final ComponentInstance groundComponent) throws Exception {
+	public Classifier getComponentInstantiation(final ComponentInstance groundComponent) throws Exception {
+		if (groundComponent == null) {
+			return null;
+		}
 
 		ComponentInstance preprocessorCI = null;
 		String ppName = "";
 		ComponentInstance classifierCI = null;
+		boolean isPipeline = false;
 
 		switch (groundComponent.getComponent().getName()) {
 		case "pipeline": {
+			isPipeline = true;
 			/* Retrieve component instances of pipeline */
 			preprocessorCI = groundComponent.getSatisfactionOfRequiredInterfaces().get("preprocessor");
-			ppName = preprocessorCI.getComponent().getName();
 
+			if (preprocessorCI != null) {
+				ppName = preprocessorCI.getComponent().getName();
+			}
 			classifierCI = groundComponent.getSatisfactionOfRequiredInterfaces().get("classifier");
 			break;
 		}
@@ -37,30 +46,36 @@ public class WEKAPipelineFactory implements ClassifierFactory {
 		}
 		}
 
-		ASEvaluation eval = null;
-		ASSearch search = null;
-		if (ppName.startsWith("weka")) {
-			ComponentInstance evaluatorCI = preprocessorCI.getSatisfactionOfRequiredInterfaces().get("eval");
-			ComponentInstance searcherCI = preprocessorCI.getSatisfactionOfRequiredInterfaces().get("search");
-
-			eval = ASEvaluation.forName(evaluatorCI.getComponent().getName(), this.getParameterList(evaluatorCI).toArray(new String[] {}));
-			search = ASSearch.forName(searcherCI.getComponent().getName(), this.getParameterList(searcherCI).toArray(new String[] {}));
+		if (classifierCI == null) {
+			return null;
 		}
 
-		classifierCI.getParameterValues();
-		List<String> parameters = this.getParameterList(classifierCI);
-<<<<<<< HEAD:softwareconfiguration/mlplan/src/de/upb/crc901/automl/hascowekaml/WEKAPipelineFactory.java
+		Classifier c;
+		try {
+			List<String> parameters = this.getParameterList(classifierCI);
+			c = AbstractClassifier.forName(classifierCI.getComponent().getName(), parameters.toArray(new String[] {}));
+		} catch (IllegalArgumentException e) {
+			return null;
+		}
 
-		Classifier c = AbstractClassifier.forName(classifierCI.getComponent().getName(),
-				parameters.toArray(new String[] {}));
-=======
-		Classifier c = AbstractClassifier.forName(classifierCI.getComponent().getName(), parameters.toArray(new String[] {}));
->>>>>>> remotes/AILibsOriginal/dev:softwareconfiguration/mlplan/src/de/upb/crc901/mlplan/multiclass/weka/WEKAPipelineFactory.java
-		// System.out.println(((search != null) ? search.getClass().getName() : "") + "
-		// "
-		// + ((eval != null) ? eval.getClass().getName() : "") + " " +
-		// c.getClass().getName());
-		return new MLPipeline(search, eval, c);
+		if (isPipeline) {
+			if (preprocessorCI == null) {
+				return null;
+			}
+			ASEvaluation eval = null;
+			ASSearch search = null;
+			if (ppName.startsWith("weka")) {
+				ComponentInstance evaluatorCI = preprocessorCI.getSatisfactionOfRequiredInterfaces().get("eval");
+				ComponentInstance searcherCI = preprocessorCI.getSatisfactionOfRequiredInterfaces().get("search");
+
+				eval = ASEvaluation.forName(evaluatorCI.getComponent().getName(), this.getParameterList(evaluatorCI).toArray(new String[] {}));
+				search = ASSearch.forName(searcherCI.getComponent().getName(), this.getParameterList(searcherCI).toArray(new String[] {}));
+			}
+			return new MLPipeline(search, eval, c);
+
+		} else {
+			return c;
+		}
 	}
 
 	private List<String> getParameterList(final ComponentInstance ci) {
@@ -69,6 +84,11 @@ public class WEKAPipelineFactory implements ClassifierFactory {
 		for (Entry<String, String> parameterValues : ci.getParameterValues().entrySet()) {
 			if (parameterValues.getKey().toLowerCase().endsWith("activator") || parameterValues.getValue().equals("REMOVED")) {
 				continue;
+			}
+
+			Parameter p = ci.getComponent().getParameter(parameterValues.getKey());
+			if (p.isCategorical() && !((CategoricalParameterDomain) p.getDefaultDomain()).contains(parameterValues.getValue())) {
+				throw new IllegalArgumentException("Value of parameter is not in the domain");
 			}
 
 			if (!parameterValues.getValue().equals("false")) {

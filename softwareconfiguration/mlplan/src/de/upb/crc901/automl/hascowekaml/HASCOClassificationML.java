@@ -18,6 +18,7 @@ import hasco.core.Solution;
 import hasco.model.Component;
 import hasco.serialization.ComponentLoader;
 import jaicore.basic.ILoggingCustomizable;
+import jaicore.basic.IObjectEvaluator;
 import jaicore.graph.IObservableGraphAlgorithm;
 import jaicore.ml.evaluation.ClassifierEvaluator;
 import jaicore.ml.evaluation.TimeoutableEvaluator;
@@ -30,9 +31,7 @@ import jaicore.search.structure.core.GraphGenerator;
 import weka.classifiers.Classifier;
 
 /**
- * HASCOML represents the basic class for searching and optimizing hierarchical
- * algorithm selection and configuration problems specifically for machine
- * learning.
+ * HASCOML represents the basic class for searching and optimizing hierarchical algorithm selection and configuration problems specifically for machine learning.
  */
 public class HASCOClassificationML implements IObservableGraphAlgorithm<TFDNode, String>, ILoggingCustomizable {
 	/** Logger for controlled output */
@@ -42,13 +41,10 @@ public class HASCOClassificationML implements IObservableGraphAlgorithm<TFDNode,
 	private static final String REQUEST_INTERFACE = "Classifier";
 
 	/**
-	 * Namespaced class for storing evaluated classifiers that have been found by
-	 * HASCO.
+	 * Namespaced class for storing evaluated classifiers that have been found by HASCO.
 	 */
-	public static class HASCOClassificationMLSolution
-			extends Solution<ForwardDecompositionSolution, Classifier, Double> {
-		public HASCOClassificationMLSolution(
-				final Solution<ForwardDecompositionSolution, Classifier, Double> solution) {
+	public static class HASCOClassificationMLSolution extends Solution<ForwardDecompositionSolution, Classifier, Double> {
+		public HASCOClassificationMLSolution(final Solution<ForwardDecompositionSolution, Classifier, Double> solution) {
 			super(solution);
 		}
 
@@ -61,8 +57,7 @@ public class HASCOClassificationML implements IObservableGraphAlgorithm<TFDNode,
 	}
 
 	// FIXME: this might be rather a hyperparameter than something hardcoded
-	private OversearchAvoidanceConfig<TFDNode, Double> oversearchAvoidanceConfig = new OversearchAvoidanceConfig<>(
-			OversearchAvoidanceConfig.OversearchAvoidanceMode.NONE, 123l);
+	private OversearchAvoidanceConfig<TFDNode, Double> oversearchAvoidanceConfig = new OversearchAvoidanceConfig<>(OversearchAvoidanceConfig.OversearchAvoidanceMode.NONE, 123l);
 
 	/** Flag whether the process has been canceled via external call. */
 	private boolean isCanceled = false;
@@ -81,8 +76,7 @@ public class HASCOClassificationML implements IObservableGraphAlgorithm<TFDNode,
 	private HASCOFD<Classifier, Double>.HASCOSolutionIterator hascoRun;
 
 	/**
-	 * This is a pointer to the configuration file defining the components for
-	 * HASCO.
+	 * This is a pointer to the configuration file defining the components for HASCO.
 	 */
 	private final File componentConfigurationFile;
 
@@ -99,7 +93,7 @@ public class HASCOClassificationML implements IObservableGraphAlgorithm<TFDNode,
 	/**
 	 * The actual node evaluator executing nodes and estimating their performance.
 	 */
-	private ClassifierEvaluator classifierEvaluator = null;
+	private IObjectEvaluator<Classifier, Double> classifierEvaluator = null;
 
 	/**
 	 * Timeout for single node evaluation in seconds. -1 denotes no timeout at all.
@@ -107,16 +101,14 @@ public class HASCOClassificationML implements IObservableGraphAlgorithm<TFDNode,
 	private int timeoutNodeEvaluationInS = -1;
 
 	/**
-	 * Queue containing all solutions that have been found by hasco ordered
-	 * according to their (internal) score.
+	 * Queue containing all solutions that have been found by hasco ordered according to their (internal) score.
 	 */
-	private Queue<HASCOClassificationMLSolution> solutionsFoundByHASCO = new PriorityQueue<>(
-			new Comparator<HASCOClassificationMLSolution>() {
-				@Override
-				public int compare(final HASCOClassificationMLSolution o1, final HASCOClassificationMLSolution o2) {
-					return o1.getScore().compareTo(o2.getScore());
-				}
-			});
+	private Queue<HASCOClassificationMLSolution> solutionsFoundByHASCO = new PriorityQueue<>(new Comparator<HASCOClassificationMLSolution>() {
+		@Override
+		public int compare(final HASCOClassificationMLSolution o1, final HASCOClassificationMLSolution o2) {
+			return o1.getScore().compareTo(o2.getScore());
+		}
+	});
 
 	/**
 	 * C'tor requiring a component configuration file.
@@ -136,8 +128,7 @@ public class HASCOClassificationML implements IObservableGraphAlgorithm<TFDNode,
 	}
 
 	/**
-	 * Configure HASCO with a preferred node evaluator, e.g. first perform a
-	 * breadth-first search.
+	 * Configure HASCO with a preferred node evaluator, e.g. first perform a breadth-first search.
 	 *
 	 * @param preferredNodeEvaluator
 	 *            The preferred node evaluator to use by HASCO.
@@ -147,8 +138,7 @@ public class HASCOClassificationML implements IObservableGraphAlgorithm<TFDNode,
 	}
 
 	/**
-	 * @return Returns the classifier factory, compile component instances to
-	 *         classifiers, that is to be used by HASCO.
+	 * @return Returns the classifier factory, compile component instances to classifiers, that is to be used by HASCO.
 	 */
 	public ClassifierFactory getClassifierFactory() {
 		return this.classifierFactory;
@@ -165,7 +155,7 @@ public class HASCOClassificationML implements IObservableGraphAlgorithm<TFDNode,
 	/**
 	 * @return Returns the classifier evaluator that is to be used by HASCO.
 	 */
-	public ClassifierEvaluator getClassifierEvaluator() {
+	public IObjectEvaluator<Classifier, Double> getClassifierEvaluator() {
 		return this.classifierEvaluator;
 	}
 
@@ -190,8 +180,7 @@ public class HASCOClassificationML implements IObservableGraphAlgorithm<TFDNode,
 
 		/* Check whether a classifier evaluator has been set. */
 		if (this.classifierEvaluator == null) {
-			throw new IllegalArgumentException(
-					"A classifier evaluator has to be set before solutions can be gathered.");
+			throw new IllegalArgumentException("A classifier evaluator has to be set before solutions can be gathered.");
 		}
 
 		/* Check whether a classifier factory has been set. */
@@ -209,19 +198,16 @@ public class HASCOClassificationML implements IObservableGraphAlgorithm<TFDNode,
 		cl.loadComponents(this.componentConfigurationFile);
 
 		/*
-		 * Check whether a timeout has been defined for a single node evaluation and if
-		 * so wrap the classifier evaluator in a timeoutable evaluator.
+		 * Check whether a timeout has been defined for a single node evaluation and if so wrap the classifier evaluator in a timeoutable evaluator.
 		 */
 		if (this.timeoutNodeEvaluationInS > 0) {
 			if (!(this.classifierEvaluator instanceof TimeoutableEvaluator)) {
-				this.classifierEvaluator = new TimeoutableEvaluator(this.classifierEvaluator,
-						this.timeoutNodeEvaluationInS * 1000);
+				this.classifierEvaluator = new TimeoutableEvaluator<Classifier>(this.classifierEvaluator, this.timeoutNodeEvaluationInS * 1000);
 			}
 		}
 
 		/* create algorithm */
-		this.hasco = new HASCOFD<>(cl.getComponents(), cl.getParamConfigs(), this.classifierFactory, REQUEST_INTERFACE,
-				this.classifierEvaluator, this.oversearchAvoidanceConfig);
+		this.hasco = new HASCOFD<>(cl.getComponents(), cl.getParamConfigs(), this.classifierFactory, REQUEST_INTERFACE, this.classifierEvaluator, this.oversearchAvoidanceConfig);
 		this.hasco.setPreferredNodeEvaluator(this.preferredNodeEvaluator);
 
 		if (this.loggerName != null && this.loggerName.length() > 0) {
@@ -237,8 +223,7 @@ public class HASCOClassificationML implements IObservableGraphAlgorithm<TFDNode,
 		boolean deadlineReached = false;
 
 		this.logger.info("Entering loop ...");
-		while (!this.isCanceled && this.hascoRun.hasNext()
-				&& (timeoutInMS <= 0 || !(deadlineReached = System.currentTimeMillis() >= deadline))) {
+		while (!this.isCanceled && this.hascoRun.hasNext() && (timeoutInMS <= 0 || !(deadlineReached = System.currentTimeMillis() >= deadline))) {
 			HASCOClassificationMLSolution nextSolution = new HASCOClassificationMLSolution(this.hascoRun.next());
 			this.solutionsFoundByHASCO.add(nextSolution);
 		}

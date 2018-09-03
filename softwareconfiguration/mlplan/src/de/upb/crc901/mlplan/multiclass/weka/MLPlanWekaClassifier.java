@@ -33,7 +33,7 @@ import weka.core.OptionHandler;
  * @author wever
  *
  */
-public class MLPlanWekaClassifier extends AbstractMLPlan implements Classifier, CapabilitiesHandler, OptionHandler {
+public class MLPlanWekaClassifier extends AbstractMLPlan<Classifier> implements Classifier, CapabilitiesHandler, OptionHandler {
 
 	/** Logger for controlled output. */
 	private Logger logger = LoggerFactory.getLogger(MLPlanWekaClassifier.class);

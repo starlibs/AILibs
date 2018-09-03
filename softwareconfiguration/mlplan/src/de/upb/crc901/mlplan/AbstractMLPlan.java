@@ -23,6 +23,7 @@ import de.upb.crc901.automl.hascoml.supervised.HASCOSupervisedML;
 import hasco.serialization.ComponentLoader;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.IObjectEvaluator;
+import jaicore.basic.TimeOut;
 import jaicore.basic.sets.SetUtil;
 import jaicore.concurrent.TimeoutTimer;
 import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
@@ -30,9 +31,8 @@ import jaicore.graph.IObservableGraphAlgorithm;
 import jaicore.logging.LoggerUtil;
 import jaicore.ml.WekaUtil;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
-import weka.classifiers.Classifier;
 
-public abstract class AbstractMLPlan extends HASCOSupervisedML implements IObservableGraphAlgorithm<TFDNode, String>, ILoggingCustomizable {
+public abstract class AbstractMLPlan<V> extends HASCOSupervisedML<V> implements IObservableGraphAlgorithm<TFDNode, String>, ILoggingCustomizable {
 
 	/** Logger for controlled outputs. */
 	private Logger logger = LoggerFactory.getLogger(AbstractMLPlan.class);
@@ -50,10 +50,10 @@ public abstract class AbstractMLPlan extends HASCOSupervisedML implements IObser
 	private static final double CONSERVATIVENESS_FACTOR = 1.0;
 
 	/** The classifier selected during selection phase. */
-	private Classifier selectedClassifier;
+	private V selectedClassifier;
 
 	/** Classifier evaluator for the selection phase. */
-	private IObjectEvaluator<Classifier, Double> selectionPhaseEvaluator = null;
+	private IObjectEvaluator<V, Double> selectionPhaseEvaluator = null;
 
 	/* state variables during the run */
 
@@ -96,7 +96,7 @@ public abstract class AbstractMLPlan extends HASCOSupervisedML implements IObser
 		this.timeoutControl.start();
 		this.logger.info("Now invoking HASCO to gather solutions for {}s", this.getConfig().timeout());
 
-		super.gatherSolutions(this.getConfig().timeout() * 1000);
+		super.gatherSolutions(new TimeOut(this.getConfig().timeout(), TimeUnit.SECONDS));
 
 		this.logger.info("HASCO has finished. {} solutions were found.", super.getFoundClassifiers().size());
 		if (super.getFoundClassifiers().isEmpty()) {
@@ -104,17 +104,16 @@ public abstract class AbstractMLPlan extends HASCOSupervisedML implements IObser
 			return;
 		}
 
-		System.out.println("Enter phase 2");
 		/* phase 2: select model */
 		this.selectedClassifier = this.selectModel(this.selectionPhaseEvaluator);
 	}
 
 	protected boolean shouldSearchTerminate(final long timeRemaining) {
-		Collection<HASCOClassificationMLSolution> currentSelection = this.getSelectionForPhase2();
+		Collection<HASCOClassificationMLSolution<V>> currentSelection = this.getSelectionForPhase2();
 
 		int estimateForPhase2 = this.isSelectionActivated() ? this.getExpectedRuntimeForPhase2ForAGivenPool(currentSelection) : 0;
 
-		HASCOClassificationMLSolution internallyOptimalSolution = super.getCurrentlyBestSolution();
+		HASCOClassificationMLSolution<V> internallyOptimalSolution = super.getCurrentlyBestSolution();
 
 		int timeToTrainBestSolutionOnEntireSet = internallyOptimalSolution != null ? (int) Math.round(internallyOptimalSolution.getTimeToComputeScore() / (1 - this.getPortionOfDataForPhase2())) : 0;
 
@@ -125,13 +124,13 @@ public abstract class AbstractMLPlan extends HASCOSupervisedML implements IObser
 		return terminatePhase1;
 	}
 
-	private synchronized List<HASCOClassificationMLSolution> getSelectionForPhase2() {
+	private synchronized List<HASCOClassificationMLSolution<V>> getSelectionForPhase2() {
 		return this.getSelectionForPhase2(Integer.MAX_VALUE);
 	}
 
 	private static final double MAX_MARGIN_FROM_BEST = 0.03;
 
-	private synchronized List<HASCOClassificationMLSolution> getSelectionForPhase2(final int remainingTime) {
+	private synchronized List<HASCOClassificationMLSolution<V>> getSelectionForPhase2(final int remainingTime) {
 		if (this.getNumberOfConsideredSolutions() < 1) {
 			throw new UnsupportedOperationException("Cannot determine candidates for phase 2 if their number is set to a value less than 1. Here, it has been set to " + this.getNumberOfConsideredSolutions());
 		}
@@ -140,12 +139,12 @@ public abstract class AbstractMLPlan extends HASCOSupervisedML implements IObser
 		if (remainingTime < 0) {
 			throw new IllegalArgumentException("Cannot do anything in negative time (" + remainingTime + "ms)");
 		}
-		HASCOClassificationMLSolution internallyOptimalSolution = super.getCurrentlyBestSolution();
+		HASCOClassificationMLSolution<V> internallyOptimalSolution = super.getCurrentlyBestSolution();
 		if (internallyOptimalSolution == null) {
 			return new ArrayList<>();
 		}
 		if (!this.isSelectionActivated()) {
-			List<HASCOClassificationMLSolution> best = new ArrayList<>();
+			List<HASCOClassificationMLSolution<V>> best = new ArrayList<>();
 			best.add(internallyOptimalSolution);
 			return best;
 		}
@@ -156,13 +155,13 @@ public abstract class AbstractMLPlan extends HASCOSupervisedML implements IObser
 		double optimalInternalScore = internallyOptimalSolution.getScore();
 		int bestK = (int) Math.ceil(this.getNumberOfConsideredSolutions() / 2);
 		int randomK = this.getNumberOfConsideredSolutions() - bestK;
-		Collection<HASCOClassificationMLSolution> potentialCandidates = new ArrayList<>(super.getFoundClassifiers()).stream().filter(solution -> {
+		Collection<HASCOClassificationMLSolution<V>> potentialCandidates = new ArrayList<>(super.getFoundClassifiers()).stream().filter(solution -> {
 			return solution.getScore() <= optimalInternalScore + MAX_MARGIN_FROM_BEST;
 		}).collect(Collectors.toList());
 		this.logger.debug("Computing {} best and {} random solutions for a max runtime of {}. Number of candidates that are at most {} worse than optimum {} is: {}/{}", bestK, randomK, remainingTime, MAX_MARGIN_FROM_BEST,
 				optimalInternalScore, potentialCandidates.size(), super.getFoundClassifiers().size());
-		List<HASCOClassificationMLSolution> selectionCandidates = potentialCandidates.stream().limit(bestK).collect(Collectors.toList());
-		List<HASCOClassificationMLSolution> remainingCandidates = new ArrayList<>(SetUtil.difference(potentialCandidates, selectionCandidates));
+		List<HASCOClassificationMLSolution<V>> selectionCandidates = potentialCandidates.stream().limit(bestK).collect(Collectors.toList());
+		List<HASCOClassificationMLSolution<V>> remainingCandidates = new ArrayList<>(SetUtil.difference(potentialCandidates, selectionCandidates));
 		Collections.shuffle(remainingCandidates, new Random(this.getConfig().randomSeed()));
 		selectionCandidates.addAll(remainingCandidates.stream().limit(randomK).collect(Collectors.toList()));
 
@@ -175,9 +174,9 @@ public abstract class AbstractMLPlan extends HASCOSupervisedML implements IObser
 		}
 
 		/* otherwise return as much as can be expectedly done in the time */
-		List<HASCOClassificationMLSolution> actuallySelectedSolutions = new ArrayList<>();
+		List<HASCOClassificationMLSolution<V>> actuallySelectedSolutions = new ArrayList<>();
 		int expectedRuntime;
-		for (HASCOClassificationMLSolution pl : selectionCandidates) {
+		for (HASCOClassificationMLSolution<V> pl : selectionCandidates) {
 			actuallySelectedSolutions.add(pl);
 			expectedRuntime = this.getExpectedRuntimeForPhase2ForAGivenPool(actuallySelectedSolutions);
 			if (expectedRuntime > remainingTime && actuallySelectedSolutions.size() > 1) {
@@ -189,11 +188,11 @@ public abstract class AbstractMLPlan extends HASCOSupervisedML implements IObser
 		return actuallySelectedSolutions;
 	}
 
-	private int getInSearchEvaluationTimeOfSolutionSet(final Collection<HASCOClassificationMLSolution> solutions) {
+	private int getInSearchEvaluationTimeOfSolutionSet(final Collection<HASCOClassificationMLSolution<V>> solutions) {
 		return solutions.stream().map(x -> x.getTimeToComputeScore()).mapToInt(x -> x).sum();
 	}
 
-	public int getExpectedRuntimeForPhase2ForAGivenPool(final Collection<HASCOClassificationMLSolution> solutions) {
+	public int getExpectedRuntimeForPhase2ForAGivenPool(final Collection<HASCOClassificationMLSolution<V>> solutions) {
 		int inSearchMCEvalTime = this.getInSearchEvaluationTimeOfSolutionSet(solutions);
 		int inSearchSingleIterationEvalTime = (int) Math.round((double) inSearchMCEvalTime / this.getConfig().searchMCIterations());
 		int estimateSelectionSingleIterationEvalTime = (int) (inSearchSingleIterationEvalTime * (1 - this.getConfig().selectionDataPortion()));
@@ -206,9 +205,9 @@ public abstract class AbstractMLPlan extends HASCOSupervisedML implements IObser
 		return runtime;
 	}
 
-	protected Classifier selectModel(final IObjectEvaluator<Classifier, Double> evaluator) {
-		Queue<HASCOClassificationMLSolution> solutions = super.getFoundClassifiers();
-		HASCOClassificationMLSolution bestSolution = solutions.peek();
+	protected V selectModel(final IObjectEvaluator<V, Double> evaluator) {
+		Queue<HASCOClassificationMLSolution<V>> solutions = super.getFoundClassifiers();
+		HASCOClassificationMLSolution<V> bestSolution = solutions.peek();
 		double scoreOfBestSolution = bestSolution.getScore();
 
 		/*
@@ -222,7 +221,7 @@ public abstract class AbstractMLPlan extends HASCOSupervisedML implements IObser
 		/* determine the models from which we want to select */
 		this.logger.info("Starting with phase 2: Selection of final model among the {} solutions that were identified.", solutions.size());
 		long startOfPhase2 = System.currentTimeMillis();
-		List<HASCOClassificationMLSolution> ensembleToSelectFrom;
+		List<HASCOClassificationMLSolution<V>> ensembleToSelectFrom;
 		if (this.getConfig().timeout() > 0) {
 			int remainingTime = (int) (this.getConfig().timeout() * 1000 - (System.currentTimeMillis() - this.timeOfStart));
 			/*
@@ -256,7 +255,7 @@ public abstract class AbstractMLPlan extends HASCOSupervisedML implements IObser
 			t.setName("final-evaluator-" + evaluatorCounter.incrementAndGet());
 			return t;
 		});
-		HASCOClassificationMLSolution selectedModel = bestSolution; // backup solution
+		HASCOClassificationMLSolution<V> selectedModel = bestSolution; // backup solution
 		final Semaphore sem = new Semaphore(0);
 		long timestampOfDeadline = this.timeOfStart + this.getTimeout() * 1000;
 
@@ -264,10 +263,9 @@ public abstract class AbstractMLPlan extends HASCOSupervisedML implements IObser
 		List<DescriptiveStatistics> stats = new ArrayList<>();
 		final TimeoutSubmitter ts = TimeoutTimer.getInstance().getSubmitter();
 		ensembleToSelectFrom.forEach(c -> stats.add(new DescriptiveStatistics()));
-		System.out.println(ensembleToSelectFrom);
 
 		for (int i = 0; i < ensembleToSelectFrom.size(); i++) {
-			HASCOClassificationMLSolution c = ensembleToSelectFrom.get(i);
+			HASCOClassificationMLSolution<V> c = ensembleToSelectFrom.get(i);
 			final DescriptiveStatistics statsForThisCandidate = stats.get(i);
 
 			for (int j = 0; j < this.getNumberOfMCIterationsPerSolutionInSelectionPhase(); j++) {
@@ -277,7 +275,7 @@ public abstract class AbstractMLPlan extends HASCOSupervisedML implements IObser
 						long timeStampStart = System.currentTimeMillis();
 
 						int taskId = -1;
-						HASCOClassificationMLSolution currentlyChosenSolution = null;
+						HASCOClassificationMLSolution<V> currentlyChosenSolution = null;
 						try {
 							/* Get the HASCOClassificationMLSolution instance for the considered model. */
 							int indexOfCurrentlyChosenModel = AbstractMLPlan.this.getClassifierThatWouldCurrentlyBeSelectedWithinPhase2(ensembleToSelectFrom, stats, false);
@@ -287,9 +285,9 @@ public abstract class AbstractMLPlan extends HASCOSupervisedML implements IObser
 							int inSearchMCEvaluationTime = currentlyChosenSolution.getTimeToComputeScore();
 							int inSearchSingleIterationEvaluationTime = (int) Math.round((double) currentlyChosenSolution.getTimeToComputeScore() / AbstractMLPlan.this.getConfig().searchMCIterations());
 
-							/* We assume linear growth of the classifier's evaluation time here to estimate
-							 * (A) time for selection data,
-							 * (B) time for building on the entire data provided for building. */
+							/*
+							 * We assume linear growth of the classifier's evaluation time here to estimate (A) time for selection data, (B) time for building on the entire data provided for building.
+							 */
 							int estimatedInSelectionSingleIterationEvaluationTime = (int) Math.round(inSearchSingleIterationEvaluationTime / AbstractMLPlan.this.getConfig().searchDataPortion());
 							int estimatedInSelectionMCEvaluationTime = estimatedInSelectionSingleIterationEvaluationTime * AbstractMLPlan.this.getConfig().selectionMCIterations();
 							int estimatedFinalBuildTime = (int) Math.round(estimatedInSelectionSingleIterationEvaluationTime / (1 - AbstractMLPlan.this.getConfig().selectionDataPortion()));
@@ -327,7 +325,10 @@ public abstract class AbstractMLPlan extends HASCOSupervisedML implements IObser
 									return;
 								}
 							}
-							Classifier clone = WekaUtil.cloneClassifier(c.getSolution());
+
+							@SuppressWarnings("unchecked")
+							V clone = (V) WekaUtil.deepClone(c.getSolution());
+
 							double selectionScore = AbstractMLPlan.this.selectionPhaseEvaluator.evaluate(clone);
 							synchronized (statsForThisCandidate) {
 								statsForThisCandidate.addValue(selectionScore);
@@ -383,11 +384,11 @@ public abstract class AbstractMLPlan extends HASCOSupervisedML implements IObser
 		return selectedModel.getSolution();
 	}
 
-	private synchronized int getClassifierThatWouldCurrentlyBeSelectedWithinPhase2(final List<HASCOClassificationMLSolution> ensembleToSelectFrom, final List<DescriptiveStatistics> stats, final boolean logComputations) {
+	private synchronized int getClassifierThatWouldCurrentlyBeSelectedWithinPhase2(final List<HASCOClassificationMLSolution<V>> ensembleToSelectFrom, final List<DescriptiveStatistics> stats, final boolean logComputations) {
 		int selectedModel = 0;
 		double best = Double.MAX_VALUE;
 		for (int i = 0; i < ensembleToSelectFrom.size(); i++) {
-			HASCOClassificationMLSolution candidate = ensembleToSelectFrom.get(i);
+			HASCOClassificationMLSolution<V> candidate = ensembleToSelectFrom.get(i);
 			DescriptiveStatistics statsOfCandidate = stats.get(i);
 			if (statsOfCandidate.getN() == 0) {
 				if (logComputations) {
@@ -411,7 +412,6 @@ public abstract class AbstractMLPlan extends HASCOSupervisedML implements IObser
 
 	@Override
 	public void cancel() {
-		this.timeoutControl.interrupt();
 		super.cancel();
 	}
 
@@ -427,7 +427,7 @@ public abstract class AbstractMLPlan extends HASCOSupervisedML implements IObser
 	/**
 	 * @return The classifier selected by ML-Plan
 	 */
-	public Classifier getSelectedClassifier() {
+	public V getSelectedClassifier() {
 		return this.selectedClassifier;
 	}
 
@@ -439,7 +439,7 @@ public abstract class AbstractMLPlan extends HASCOSupervisedML implements IObser
 	/**
 	 * @return The classifier evaluator that is used in the selection phase.
 	 */
-	public IObjectEvaluator<Classifier, Double> getSelectionPhaseEvaluator() {
+	public IObjectEvaluator<V, Double> getSelectionPhaseEvaluator() {
 		return this.selectionPhaseEvaluator;
 	}
 
@@ -447,7 +447,7 @@ public abstract class AbstractMLPlan extends HASCOSupervisedML implements IObser
 	 * @param selectionBenchmark
 	 *            The classifier evaluator that is used in the selection phase.
 	 */
-	public void setSelectionPhaseEvaluator(final IObjectEvaluator<Classifier, Double> selectionBenchmark) {
+	public void setSelectionPhaseEvaluator(final IObjectEvaluator<V, Double> selectionBenchmark) {
 		this.selectionPhaseEvaluator = selectionBenchmark;
 	}
 

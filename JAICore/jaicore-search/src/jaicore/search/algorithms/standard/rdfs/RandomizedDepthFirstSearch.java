@@ -19,7 +19,7 @@ public class RandomizedDepthFirstSearch<T, A> extends BestFirst<T, A> {
 
 	private static Logger logger = LoggerFactory.getLogger(RandomizedDepthFirstSearch.class);
 
-	public RandomizedDepthFirstSearch(GraphGenerator<T, A> graphGenerator, Random random) {
+	public RandomizedDepthFirstSearch(final GraphGenerator<T, A> graphGenerator, final Random random) {
 		super(new GraphGenerator<T, A>() {
 
 			@Override
@@ -30,16 +30,14 @@ public class RandomizedDepthFirstSearch<T, A> extends BestFirst<T, A> {
 			@Override
 			public SuccessorGenerator<T, A> getSuccessorGenerator() {
 				if (!(graphGenerator.getSuccessorGenerator() instanceof SingleSuccessorGenerator)) {
-					logger.warn(
-							"The successor generator of the given graph generator does not implement SingleSuccessorGenerator. This may significantly slow down the randomized depth first search.");
+					logger.warn("The successor generator of the given graph generator does not implement SingleSuccessorGenerator. This may significantly slow down the randomized depth first search.");
 					return graphGenerator.getSuccessorGenerator();
 				} else {
-					SingleSuccessorGenerator<T, A> successorGenerator = (SingleSuccessorGenerator<T, A>) graphGenerator
-							.getSuccessorGenerator();
+					SingleSuccessorGenerator<T, A> successorGenerator = (SingleSuccessorGenerator<T, A>) graphGenerator.getSuccessorGenerator();
 					return new SuccessorGenerator<T, A>() {
 
 						@Override
-						public List<NodeExpansionDescription<T, A>> generateSuccessors(T node) {
+						public List<NodeExpansionDescription<T, A>> generateSuccessors(final T node) {
 							List<NodeExpansionDescription<T, A>> successors = new ArrayList<>();
 							int i = Math.abs(random.nextInt());
 							successors.add(successorGenerator.generateSuccessor(node, i));
@@ -60,11 +58,11 @@ public class RandomizedDepthFirstSearch<T, A> extends BestFirst<T, A> {
 			}
 
 			@Override
-			public void setNodeNumbering(boolean nodenumbering) {
+			public void setNodeNumbering(final boolean nodenumbering) {
 				throw new UnsupportedOperationException("Not implemented");
 			}
 
-		}, n -> 0.0);
+		}, n -> random.nextDouble());
 
 	}
 }

@@ -30,14 +30,14 @@ public class FilterPipeline implements IFilter, Serializable {
 		IFilter filter;
 		DataSet dataset;
 
-		public FilterDataEntry(IFilter filter, DataSet dataset) {
+		public FilterDataEntry(final IFilter filter, final DataSet dataset) {
 			this.filter = filter;
 			this.dataset = dataset;
 		}
 
 		@Override
-		public int compareTo(FilterDataEntry arg0) {
-			return filter.getClass().getName().compareTo(arg0.getClass().getName());
+		public int compareTo(final FilterDataEntry arg0) {
+			return this.filter.getClass().getName().compareTo(arg0.getClass().getName());
 		}
 	}
 
@@ -46,9 +46,10 @@ public class FilterPipeline implements IFilter, Serializable {
 	}
 
 	@Override
-	public DataSet applyFilter(final DataSet data, final boolean copy) {
-		if (this.filters == null)
+	public DataSet applyFilter(final DataSet data, final boolean copy) throws InterruptedException {
+		if (this.filters == null) {
 			return data;
+		}
 
 		DataSet inputData = copy ? data.copy() : data;
 
@@ -65,10 +66,14 @@ public class FilterPipeline implements IFilter, Serializable {
 
 		// Iterate through graph to generate data sets by applying filters
 		while (!nextNodes.isEmpty()) {
+			if (Thread.currentThread().isInterrupted()) {
+				throw new InterruptedException("Execution of filter pipeline got interrupted.");
+			}
 			FilterDataEntry nextEntry = pollRandomElementFromSet(nextNodes);
 
-			if (nextEntry == null)
+			if (nextEntry == null) {
 				throw new IllegalStateException("Could not poll first entry from tree set which is not empty.");
+			}
 
 			// Detect cycles
 			if (nextEntry.dataset != null) {
@@ -79,8 +84,7 @@ public class FilterPipeline implements IFilter, Serializable {
 			// Check for union
 			Set<FilterDataEntry> successors = dataGraph.getSuccessors(nextEntry);
 			if (successors.size() == 0) {
-				throw new IllegalStateException(
-						"Entry propagated to the working set by a successor should have successors.");
+				throw new IllegalStateException("Entry propagated to the working set by a successor should have successors.");
 			}
 			if (successors.size() > 1) {
 				// Union
@@ -98,9 +102,9 @@ public class FilterPipeline implements IFilter, Serializable {
 
 			} else {
 				FilterDataEntry successor = successors.iterator().next();
-				if (successor.dataset != null)
+				if (successor.dataset != null) {
 					nextEntry.dataset = nextEntry.filter.applyFilter(successor.dataset, false);
-				else {
+				} else {
 					nextNodes.add(nextEntry);
 					continue;
 				}
@@ -122,11 +126,19 @@ public class FilterPipeline implements IFilter, Serializable {
 	public String toString() {
 		StringBuilder result = new StringBuilder();
 		result.append("FilterPipeline: ");
-		if (this.filters == null)
+		if (this.filters == null) {
 			result.append("Empty");
-		else
-			for (IFilter filter : this.filters.getItems())
-				result.append(filter.toString() + ", ");
+		} else {
+			boolean first = true;
+			for (IFilter filter : this.filters.getItems()) {
+				if (first) {
+					first = false;
+				} else {
+					result.append(", ");
+				}
+				result.append(filter.toString());
+			}
+		}
 		return result.toString();
 	}
 
@@ -165,7 +177,7 @@ public class FilterPipeline implements IFilter, Serializable {
 		return dataGraph;
 	}
 
-	private static FilterDataEntry pollRandomElementFromSet(HashSet<FilterDataEntry> set) {
+	private static FilterDataEntry pollRandomElementFromSet(final HashSet<FilterDataEntry> set) {
 		int size = set.size();
 		FilterDataEntry selectedElem = null;
 		if (size > 1) {
@@ -179,22 +191,30 @@ public class FilterPipeline implements IFilter, Serializable {
 				i++;
 			}
 		}
-		if (selectedElem == null)
+		if (selectedElem == null) {
 			selectedElem = set.iterator().next();
+		}
 		set.remove(selectedElem);
 		return selectedElem;
 	}
 
 	public Graph<IFilter> getFilters() {
-		return filters;
+		return this.filters;
 	}
 
 	public boolean containsPretrainedNN() {
-		for (IFilter filter : this.getFilters().getItems())
-			if (filter instanceof PretrainedNNFilter)
+		for (IFilter filter : this.getFilters().getItems()) {
+			if (filter instanceof PretrainedNNFilter) {
 				return true;
+			}
+		}
 
 		return false;
+	}
+
+	public void clear() {
+		// TODO Auto-generated method stub
+
 	}
 
 }

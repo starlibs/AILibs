@@ -27,7 +27,7 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 
-public class MLSPlanCombiClassifier extends AbstractMLPlan implements Classifier, CapabilitiesHandler, OptionHandler {
+public class MLSPlanCombiClassifier extends AbstractMLPlan<Classifier> implements Classifier, CapabilitiesHandler, OptionHandler {
 
 	/** Logger for controlled output. */
 	private Logger logger = LoggerFactory.getLogger(MLPlanWekaClassifier.class);

@@ -18,16 +18,15 @@ public class EnsembleNodeEvaluator extends AbstractHASCOFENodeEvaluator {
 	}
 
 	@Override
-	public Double f(Node<TFDNode, ?> node) throws Throwable {
-		if (this.getHascoFE() == null)
-			throw new IllegalStateException("HascoFE property of the cluster node evaluator must be initialized!");
-
-		if (node.getParent() == null)
+	public Double f(final Node<TFDNode, ?> node) throws Throwable {
+		if (node.getParent() == null) {
 			return null;
+		}
 
 		// If pipeline is too deep, assign worst value
-		if (node.path().size() > this.maxPipelineSize)
+		if (node.path().size() > this.maxPipelineSize) {
 			return MAX_EVAL_VALUE;
+		}
 
 		FilterPipeline pipe = this.getPipelineFromNode(node);
 
@@ -38,11 +37,7 @@ public class EnsembleNodeEvaluator extends AbstractHASCOFENodeEvaluator {
 				logger.debug("Applied pipeline. Starting benchmarking...");
 
 				double ensembleScore = EvaluationUtils.performEnsemble(dataSet.getInstances());
-				double finalScore = Math.min(
-						1 - ensembleScore
-								+ ATT_COUNT_PENALTY
-										* EvaluationUtils.calculateAttributeCountPenalty(this.data.getInstances()),
-						MAX_EVAL_VALUE - 1);
+				double finalScore = Math.min(1 - ensembleScore + ATT_COUNT_PENALTY * EvaluationUtils.calculateAttributeCountPenalty(this.data.getInstances()), MAX_EVAL_VALUE - 1);
 
 				logger.debug("Ensemble benchmark result: " + finalScore);
 
