@@ -46,12 +46,13 @@ public class RQPExactAugSpaceSamplerExperimenter {
 				String samplerName = description.get("sampler");
 				String datasetName = description.get("dataset");
 				int seed = Integer.valueOf(description.get("seed"));
+				String noise = description.get("noise");
 
 				/* create objects for experiment */
 				Classifier c_min = AbstractClassifier.forName(classifierName, new String[] {});
 				Classifier c_max = AbstractClassifier.forName(classifierName, new String[] {});
 				Instances dataTrain = new Instances(new BufferedReader(
-						new FileReader(new File(m.getDatasetFolder() + File.separator + datasetName + "_RQPtrain.arff"))));
+						new FileReader(new File(m.getDatasetFolder() + File.separator + datasetName + "_noise_" + noise + "_RQPtrain.arff"))));
 				Instances dataTest = new Instances(new BufferedReader(
 						new FileReader(new File(m.getDatasetFolder() + File.separator + datasetName + "_RQPtest.arff"))));
 				Random rng = new Random(seed);
@@ -89,12 +90,16 @@ public class RQPExactAugSpaceSamplerExperimenter {
 				evalMax.evaluateModel(c_max, dataTest);
 				double loss_min = evalMin.meanAbsoluteError();
 				double loss_max = evalMax.meanAbsoluteError();
+				double rmse_min = evalMin.errorRate();
+				double rmse_max = evalMax.errorRate();
 
 				/* report results */
 				results.put("sampletime", endTimeSampling - startTimeSampling);
 				results.put("traintime", endTimeTrain - startTimeTrain);
 				results.put("l1_loss_min", loss_min);
 				results.put("l1_loss_max", loss_max);
+				results.put("rmse_min", rmse_min);
+				results.put("rmse_max", rmse_max);
 				processor.processResults(results);
 			}
 		});
