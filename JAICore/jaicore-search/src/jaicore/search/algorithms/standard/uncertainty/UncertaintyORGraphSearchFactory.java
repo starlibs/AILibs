@@ -44,25 +44,26 @@ public class UncertaintyORGraphSearchFactory<N, A, V extends Comparable<V>> exte
 			break;
 		}
 		case TWO_PHASE_SELECTION: {
-			if (config.getAdjustPhaseLengthsDynamically()) {
-				search.setOpen(new UncertaintyExplorationOpenSelection<N, V>(config.getTimeout(), config.getInterval(), config.getExploitationScoreThreshold(),
-						config.getExplorationUncertaintyThreshold(), new BasicClockModelPhaseLengthAdjuster(), config.getSolutionDistanceMetric(),
-						new BasicExplorationCandidateSelector<N, V>(config.getMinimumSolutionDistanceForExploration())));
-			} else {
-				search.setOpen(new UncertaintyExplorationOpenSelection<N, V>(config.getTimeout(), config.getInterval(), config.getExploitationScoreThreshold(),
-						config.getExplorationUncertaintyThreshold(), new IPhaseLengthAdjuster() {
-
-							@Override
-							public int[] getInitialPhaseLengths(int interval) {
-								return new int[] { interval / 2, interval / 2 };
-							}
-
-							@Override
-							public int[] adjustPhaseLength(int currentExplorationLength, int currentExploitationLength, long passedTime, long timeout) {
-								return new int[] { currentExplorationLength, currentExploitationLength };
-							}
-						}, config.getSolutionDistanceMetric(), new BasicExplorationCandidateSelector<N, V>(5.0d)));
-			}
+//			search.setOpen(new UncertaintyExplorationOpenSelection<N,V>(10000, 1000, 0.1, 0.2, new BasicClockModelPhaseLengthAdjuster(), (l1,l2) -> 0.0, new BasicExplorationCandidateSelector<>(0.2)));
+//			if (config.getAdjustPhaseLengthsDynamically()) {
+//				search.setOpen(new UncertaintyExplorationOpenSelection<N, V>(config.getTimeout(), config.getInterval(), config.getExploitationScoreThreshold(),
+//						config.getExplorationUncertaintyThreshold(), new BasicClockModelPhaseLengthAdjuster(), config.getSolutionDistanceMetric(),
+//						new BasicExplorationCandidateSelector<N, V>(config.getMinimumSolutionDistanceForExploration())));
+//			} else {
+//				search.setOpen(new UncertaintyExplorationOpenSelection<N, V>(config.getTimeout(), config.getInterval(), config.getExploitationScoreThreshold(),
+//						config.getExplorationUncertaintyThreshold(), new IPhaseLengthAdjuster() {
+//
+//							@Override
+//							public int[] getInitialPhaseLengths(int interval) {
+//								return new int[] { interval / 2, interval / 2 };
+//							}
+//
+//							@Override
+//							public int[] adjustPhaseLength(int currentExplorationLength, int currentExploitationLength, long passedTime, long timeout) {
+//								return new int[] { currentExplorationLength, currentExploitationLength };
+//							}
+//						}, config.getSolutionDistanceMetric(), new BasicExplorationCandidateSelector<N, V>(5.0d)));
+//			}
 			break;
 		}
 		case PARETO_FRONT_SELECTION: {

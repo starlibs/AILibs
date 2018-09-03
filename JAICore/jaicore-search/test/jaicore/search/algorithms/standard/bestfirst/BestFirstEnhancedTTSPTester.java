@@ -1,7 +1,6 @@
 package jaicore.search.algorithms.standard.bestfirst;
 
 import jaicore.basic.algorithm.AlgorithmProblemTransformer;
-import jaicore.graph.IGraphAlgorithmListener;
 import jaicore.search.core.interfaces.IGraphSearchFactory;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
 import jaicore.search.model.probleminputs.GeneralEvaluatedTraversalTree;
@@ -13,7 +12,7 @@ import jaicore.search.testproblems.enhancedttsp.EnhancedTTSPTester;
 public class BestFirstEnhancedTTSPTester extends EnhancedTTSPTester<GeneralEvaluatedTraversalTree<EnhancedTTSPNode, String, Double>, EvaluatedSearchGraphPath<EnhancedTTSPNode, String, Double>, Node<EnhancedTTSPNode,Double>, String> {
 	
 	@Override
-	public IGraphSearchFactory<GeneralEvaluatedTraversalTree<EnhancedTTSPNode, String, Double>, EvaluatedSearchGraphPath<EnhancedTTSPNode, String, Double>, EnhancedTTSPNode, String, Double, Node<EnhancedTTSPNode,Double>, String, IGraphAlgorithmListener<Node<EnhancedTTSPNode,Double>, String>> getFactory() {
+	public IGraphSearchFactory<GeneralEvaluatedTraversalTree<EnhancedTTSPNode, String, Double>, EvaluatedSearchGraphPath<EnhancedTTSPNode, String, Double>, EnhancedTTSPNode, String, Double, Node<EnhancedTTSPNode,Double>, String> getFactory() {
 		return new BestFirstFactory<>();
 	}
 

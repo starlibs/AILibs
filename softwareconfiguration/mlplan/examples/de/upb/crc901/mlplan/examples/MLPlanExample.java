@@ -4,12 +4,14 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Random;
 
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
 
-import de.upb.crc901.mlplan.multiclass.weka.MLPlanWekaClassifier;
+import de.upb.crc901.mlplan.multiclass.wekamlplan.WekaMLPlanClassifier;
+import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.WekaMLPlanWekaClassifier;
 import jaicore.ml.WekaUtil;
 import weka.classifiers.Evaluation;
 import weka.core.Instances;
@@ -35,17 +37,22 @@ public class MLPlanExample {
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(0), .7f);
 
 		/* initialize mlplan, and let it run for 30 seconds */
-		int timeoutInSeconds = 30;
-		MLPlanWekaClassifier mlplan = new MLPlanWekaClassifier();
+		WekaMLPlanClassifier mlplan = new WekaMLPlanWekaClassifier();
 		mlplan.setLoggerName("mlplan");
-		mlplan.setTimeout(timeoutInSeconds);
-		mlplan.setPortionOfDataForPhase2(.3f);
-		mlplan.enableVisualization(true);
-		mlplan.buildClassifier(split.get(0));
+		mlplan.setTimeout(60);
+		mlplan.activateVisualization();
+		try {
+			long start = System.currentTimeMillis();
+			mlplan.buildClassifier(split.get(0));
+			long trainTime = (int)(System.currentTimeMillis() - start) / 1000;
+			System.out.println("Finished build of the classifier. Training time was " + trainTime + "s.");
 
-		/* evaluate solution produced by mlplan */
-		Evaluation eval = new Evaluation(split.get(0));
-		eval.evaluateModel(mlplan, split.get(1));
-		System.out.println("Error Rate of the solution produced by ML-Plan: " + (100 - eval.pctCorrect()) / 100f);
+			/* evaluate solution produced by mlplan */
+			Evaluation eval = new Evaluation(split.get(0));
+			eval.evaluateModel(mlplan, split.get(1));
+			System.out.println("Error Rate of the solution produced by ML-Plan: " + (100 - eval.pctCorrect()) / 100f);
+		} catch (NoSuchElementException e) {
+			System.out.println("Building the classifier failed: " + e.getMessage());
+		}
 	}
 }

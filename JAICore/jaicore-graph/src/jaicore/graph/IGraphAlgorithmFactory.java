@@ -2,8 +2,8 @@ package jaicore.graph;
 
 import jaicore.basic.algorithm.IAlgorithmFactory;
 
-public interface IGraphAlgorithmFactory<I, O, N, A, L extends IGraphAlgorithmListener<N, A>> extends IAlgorithmFactory<I, O, L> {
+public interface IGraphAlgorithmFactory<I, O, N, A> extends IAlgorithmFactory<I, O> {
 	
 	@Override
-	public IGraphAlgorithm<I, O, N, A, L> getAlgorithm();
+	public IGraphAlgorithm<I, O, N, A> getAlgorithm();
 }

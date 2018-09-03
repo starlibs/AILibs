@@ -28,22 +28,22 @@ public abstract class NQueenTester<I, O, VSearch, ESearch> extends ORGraphSearch
 	private AtomicInteger seenSolutions = new AtomicInteger(0);
 	private boolean showGraphs = false;
 
-	IGraphSearchFactory<I, O, QueenNode, String, Double, VSearch, ESearch, IGraphAlgorithmListener<VSearch, ESearch>> searchFactory = getFactory();
+	IGraphSearchFactory<I, O, QueenNode, String, Double, VSearch, ESearch> searchFactory = getFactory();
 
-	private IGraphSearch<I, O, QueenNode, String, Double, VSearch, ESearch, IGraphAlgorithmListener<VSearch, ESearch>> getSearchProblemInput(int n) {
+	private IGraphSearch<I, O, QueenNode, String, Double, VSearch, ESearch> getSearchProblemInput(int n) {
 		searchFactory.setProblemInput(n, getProblemReducer());
-		IGraphSearch<I, O, QueenNode, String, Double, VSearch, ESearch, IGraphAlgorithmListener<VSearch, ESearch>> search = searchFactory.getAlgorithm();
+		IGraphSearch<I, O, QueenNode, String, Double, VSearch, ESearch> search = searchFactory.getAlgorithm();
 		return search;
 	}
 
 	@Override
-	public void testIterable() {
+	public void testThatIteratorReturnsEachPossibleSolution() {
 		if (searchFactory == null)
 			throw new IllegalArgumentException("Search factory has not been set");
 		for (int i = 0; i < numbersOfSolutions.length; i++) {
 			int n = i + 4;
 			System.out.print("Checking " + n + "-Queens Problem ... ");
-			IGraphSearch<I, O, QueenNode, String, Double, VSearch, ESearch, IGraphAlgorithmListener<VSearch, ESearch>> search = getSearchProblemInput(n);
+			IGraphSearch<I, O, QueenNode, String, Double, VSearch, ESearch> search = getSearchProblemInput(n);
 			assertNotNull("The factory has not returned any search object.", search);
 			if (showGraphs)
 				new SimpleGraphVisualizationWindow<>(search);
@@ -66,19 +66,19 @@ public abstract class NQueenTester<I, O, VSearch, ESearch> extends ORGraphSearch
 						solutions++;
 				}
 			}
-			assertEquals(numbersOfSolutions[i], solutions);
+			assertEquals("Failed to solve " + n +"-queens problem. Only found " + solutions + "/" + numbersOfSolutions[i] + " solutions.", numbersOfSolutions[i], solutions);
 			System.out.println("done");
 		}
 	}
 
 	@Override
-	public void testSequential() throws Exception {
+	public void testThatAnEventForEachPossibleSolutionIsEmittedInSimpleCall() throws Exception {
 		if (searchFactory == null)
 			throw new IllegalArgumentException("Search factory has not been set");
 		for (int i = 0; i < numbersOfSolutions.length; i++) {
 			int n = i + 4;
 			System.out.print("Checking " + n + "-Queens Problem ... ");
-			IGraphSearch<I, O, QueenNode, String, Double, VSearch, ESearch, IGraphAlgorithmListener<VSearch, ESearch>> search = getSearchProblemInput(n);
+			IGraphSearch<I, O, QueenNode, String, Double, VSearch, ESearch> search = getSearchProblemInput(n);
 			assertNotNull("The factory has not returned any search object.", search);
 			if (showGraphs)
 				new SimpleGraphVisualizationWindow<>(search);
@@ -91,13 +91,13 @@ public abstract class NQueenTester<I, O, VSearch, ESearch> extends ORGraphSearch
 	}
 
 	@Override
-	public void testParallelized() throws Exception {
+	public void testThatAnEventForEachPossibleSolutionIsEmittedInParallelizedCall() throws Exception {
 		if (searchFactory == null)
 			throw new IllegalArgumentException("Search factory has not been set");
 		for (int i = 0; i < numbersOfSolutions.length; i++) {
 			int n = i + 4;
 			System.out.print("Checking " + n + "-Queens Problem ... ");
-			IGraphSearch<I, O, QueenNode, String, Double, VSearch, ESearch, IGraphAlgorithmListener<VSearch, ESearch>> search = getSearchProblemInput(n);
+			IGraphSearch<I, O, QueenNode, String, Double, VSearch, ESearch> search = getSearchProblemInput(n);
 			assertNotNull("The factory has not returned any search object.", search);
 			if (showGraphs)
 				new SimpleGraphVisualizationWindow<>(search);
@@ -115,21 +115,23 @@ public abstract class NQueenTester<I, O, VSearch, ESearch> extends ORGraphSearch
 		seenSolutions.incrementAndGet();
 	}
 
-	@Override
-	public void testInterrupt() throws Throwable {
-
-	}
-
-	@Override
-	public void testCancel() throws Throwable {
-
-	}
-
 	public boolean isShowGraphs() {
 		return showGraphs;
 	}
 
 	public void setShowGraphs(boolean showGraphs) {
 		this.showGraphs = showGraphs;
+	}
+	
+
+
+	@Override
+	public I getSimpleProblemInputForGeneralTestPurposes() {
+		return getProblemReducer().transform(4);
+	}
+
+	@Override
+	public I getDifficultProblemInputForGeneralTestPurposes() {
+		return getProblemReducer().transform(100);
 	}
 }

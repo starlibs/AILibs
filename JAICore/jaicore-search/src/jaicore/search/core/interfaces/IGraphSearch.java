@@ -2,8 +2,8 @@ package jaicore.search.core.interfaces;
 
 import java.util.NoSuchElementException;
 
+import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.graph.IGraphAlgorithm;
-import jaicore.graph.IGraphAlgorithmListener;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
 
 /**
@@ -20,7 +20,7 @@ import jaicore.search.model.other.EvaluatedSearchGraphPath;
  * @param <ASearch>
  * @param <L>
  */
-public interface IGraphSearch<I, O, NSrc, ASrc, V extends Comparable<V>, NSearch, ASearch, L extends IGraphAlgorithmListener<NSearch, ASearch>> extends IGraphAlgorithm<I, O, NSearch, ASearch, L> {
+public interface IGraphSearch<I, O, NSrc, ASrc, V extends Comparable<V>, NSearch, ASearch> extends IGraphAlgorithm<I, O, NSearch, ASearch> {
 	public GraphGenerator<NSrc,ASrc> getGraphGenerator();
-	public EvaluatedSearchGraphPath<NSrc, ASrc, V> nextSolution() throws InterruptedException, NoSuchElementException;
+	public EvaluatedSearchGraphPath<NSrc, ASrc, V> nextSolution() throws InterruptedException, AlgorithmExecutionCanceledException, NoSuchElementException;
 }

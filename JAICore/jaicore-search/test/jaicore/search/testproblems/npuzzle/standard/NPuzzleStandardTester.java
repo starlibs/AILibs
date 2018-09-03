@@ -28,17 +28,17 @@ public abstract class NPuzzleStandardTester<I, O, VSearch, ESearch> extends ORGr
 	private AtomicInteger seenSolutions = new AtomicInteger(0);
 	private boolean showGraphs = false;
 
-	private IGraphSearch<I, O, NPuzzleNode, String, Double, VSearch, ESearch, IGraphAlgorithmListener<VSearch, ESearch>> getSearch(int n, int seed) {
-		IGraphSearchFactory<I, O, NPuzzleNode, String, Double, VSearch, ESearch, IGraphAlgorithmListener<VSearch, ESearch>> factory = getFactory();
+	private IGraphSearch<I, O, NPuzzleNode, String, Double, VSearch, ESearch> getSearch(int n, int seed) {
+		IGraphSearchFactory<I, O, NPuzzleNode, String, Double, VSearch, ESearch> factory = getFactory();
 		factory.setProblemInput(new NPuzzleProblem(n, seed), getProblemReducer());
 		return factory.getAlgorithm();
 	}
 
 	@Override
-	public void testIterable() {
+	public void testThatIteratorReturnsEachPossibleSolution() {
 		for (int n = 3; n <= max_n; n++) {
 			System.out.print("Checking first 100 solutions of " + n + "-puzzle ... ");
-			IGraphSearch<I,O,NPuzzleNode, String, Double, VSearch, ESearch, IGraphAlgorithmListener<VSearch, ESearch>> search = getSearch(n, SEED);
+			IGraphSearch<I,O,NPuzzleNode, String, Double, VSearch, ESearch> search = getSearch(n, SEED);
 			assertNotNull("The factory has not returned any search object.", search);
 			if (showGraphs)
 				new SimpleGraphVisualizationWindow<>(search);
@@ -73,31 +73,10 @@ public abstract class NPuzzleStandardTester<I, O, VSearch, ESearch> extends ORGr
 		}
 	}
 
-	@Override
-	public void testSequential() throws Exception {
-
-		/* we don't check this currently, because this is difficult due to cyclic actions */
-	}
-
-	@Override
-	public void testParallelized() throws Exception {
-
-	}
-
 	@Subscribe
 	public void registerSolution(GraphSearchSolutionCandidateFoundEvent<NPuzzleNode, String, Double> solution) {
 
 		seenSolutions.incrementAndGet();
-	}
-
-	@Override
-	public void testInterrupt() throws Throwable {
-
-	}
-
-	@Override
-	public void testCancel() throws Throwable {
-
 	}
 
 	public boolean isShowGraphs() {
@@ -106,5 +85,27 @@ public abstract class NPuzzleStandardTester<I, O, VSearch, ESearch> extends ORGr
 
 	public void setShowGraphs(boolean showGraphs) {
 		this.showGraphs = showGraphs;
+	}
+
+	@Override
+	public void testThatAnEventForEachPossibleSolutionIsEmittedInSimpleCall() throws Throwable {
+		
+	}
+
+	@Override
+	public void testThatAnEventForEachPossibleSolutionIsEmittedInParallelizedCall() throws Throwable {
+		
+	}
+	
+
+
+	@Override
+	public I getSimpleProblemInputForGeneralTestPurposes() {
+		return getProblemReducer().transform(new NPuzzleProblem(4, 0));
+	}
+
+	@Override
+	public I getDifficultProblemInputForGeneralTestPurposes() {
+		return getProblemReducer().transform(new NPuzzleProblem(10, 0));
 	}
 }

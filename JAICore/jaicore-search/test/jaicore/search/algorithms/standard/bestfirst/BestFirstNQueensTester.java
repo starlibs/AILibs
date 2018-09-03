@@ -1,7 +1,6 @@
 package jaicore.search.algorithms.standard.bestfirst;
 
 import jaicore.basic.algorithm.AlgorithmProblemTransformer;
-import jaicore.graph.IGraphAlgorithmListener;
 import jaicore.search.core.interfaces.IGraphSearchFactory;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
 import jaicore.search.model.probleminputs.GeneralEvaluatedTraversalTree;
@@ -14,7 +13,7 @@ public class BestFirstNQueensTester
 		extends NQueenTester<GeneralEvaluatedTraversalTree<QueenNode, String, Double>, EvaluatedSearchGraphPath<QueenNode, String, Double>, Node<QueenNode, Double>, String> {
 
 	@Override
-	public IGraphSearchFactory<GeneralEvaluatedTraversalTree<QueenNode, String, Double>, EvaluatedSearchGraphPath<QueenNode, String, Double>, QueenNode, String, Double, Node<QueenNode, Double>, String, IGraphAlgorithmListener<Node<QueenNode, Double>, String>> getFactory() {
+	public IGraphSearchFactory<GeneralEvaluatedTraversalTree<QueenNode, String, Double>, EvaluatedSearchGraphPath<QueenNode, String, Double>, QueenNode, String, Double, Node<QueenNode, Double>, String> getFactory() {
 		BestFirstFactory<GeneralEvaluatedTraversalTree<QueenNode, String, Double>,QueenNode, String, Double> searchFactory = new BestFirstFactory<>();
 		return searchFactory;
 	}

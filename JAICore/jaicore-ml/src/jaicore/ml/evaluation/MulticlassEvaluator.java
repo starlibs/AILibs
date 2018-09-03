@@ -88,7 +88,12 @@ public class MulticlassEvaluator implements BasicMLEvaluator, Serializable {
 			double error = mistakes * 1f / test.size();
 			this.measurementEventBus.post(new ClassifierMeasurementEvent<Double>(c, error, null));
 			return error;
-		} catch (Exception e) {
+		} catch (InterruptedException e) {
+			this.measurementEventBus.post(new ClassifierMeasurementEvent<Double>(c, null, e));
+			logger.info("Loss computation of {} was interrupted", c);
+			throw e;
+		}
+		catch (Exception e) {
 			if (e.getMessage().contains("Cannot handle multi-valued nominal class!")) {
 				this.measurementEventBus.post(new ClassifierMeasurementEvent<Double>(c, 30000.0, e));
 				return 30000d;

@@ -1,7 +1,6 @@
 package jaicore.search.algorithms.standard.awastar;
 
 import jaicore.basic.algorithm.AlgorithmProblemTransformer;
-import jaicore.graph.IGraphAlgorithmListener;
 import jaicore.search.core.interfaces.IGraphSearchFactory;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
 import jaicore.search.model.probleminputs.GeneralEvaluatedTraversalTree;
@@ -13,7 +12,7 @@ import jaicore.search.testproblems.nqueens.QueenNode;
 public class AwaStarNQueensTest extends NQueenTester<GeneralEvaluatedTraversalTree<QueenNode, String, Double>, EvaluatedSearchGraphPath<QueenNode, String, Double>, Node<QueenNode, Double>, String> {
 
 	@Override
-	public IGraphSearchFactory<GeneralEvaluatedTraversalTree<QueenNode, String, Double>, EvaluatedSearchGraphPath<QueenNode, String, Double>, QueenNode, String, Double, Node<QueenNode, Double>, String, IGraphAlgorithmListener<Node<QueenNode, Double>, String>> getFactory() {
+	public IGraphSearchFactory<GeneralEvaluatedTraversalTree<QueenNode, String, Double>, EvaluatedSearchGraphPath<QueenNode, String, Double>, QueenNode, String, Double, Node<QueenNode, Double>, String> getFactory() {
 		return new AWAStarFactory<>();
 	}
 

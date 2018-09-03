@@ -8,6 +8,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
+import de.upb.crc901.mlplan.metamining.pipelinecharacterizing.WEKAOntologyConnector;
+
 public class WEKAOntologyConnectorTest {
 	
 	private WEKAOntologyConnector connector;

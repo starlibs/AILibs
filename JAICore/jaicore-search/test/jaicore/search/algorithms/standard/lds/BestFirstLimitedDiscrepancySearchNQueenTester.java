@@ -1,7 +1,6 @@
 package jaicore.search.algorithms.standard.lds;
 
 import jaicore.basic.algorithm.AlgorithmProblemTransformer;
-import jaicore.graph.IGraphAlgorithmListener;
 import jaicore.search.core.interfaces.IGraphSearchFactory;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
 import jaicore.search.model.probleminputs.NodeRecommendedTree;
@@ -18,7 +17,7 @@ public class BestFirstLimitedDiscrepancySearchNQueenTester extends NQueenTester<
 	}
 
 	@Override
-	public IGraphSearchFactory<NodeRecommendedTree<QueenNode, String>, EvaluatedSearchGraphPath<QueenNode, String, Double>, QueenNode, String, Double, Node<QueenNode, NodeOrderList>, String, IGraphAlgorithmListener<Node<QueenNode, NodeOrderList>, String>> getFactory() {
+	public IGraphSearchFactory<NodeRecommendedTree<QueenNode, String>, EvaluatedSearchGraphPath<QueenNode, String, Double>, QueenNode, String, Double, Node<QueenNode, NodeOrderList>, String> getFactory() {
 		return new BestFirstLimitedDiscrepancySearchFactory<>();
 	}
 	

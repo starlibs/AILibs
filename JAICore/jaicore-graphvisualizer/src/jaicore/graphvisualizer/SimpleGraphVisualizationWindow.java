@@ -5,14 +5,13 @@ import java.awt.Container;
 import javax.swing.JFrame;
 
 import jaicore.graph.IGraphAlgorithm;
-import jaicore.graph.IGraphAlgorithmListener;
 
 @SuppressWarnings("serial")
 public class SimpleGraphVisualizationWindow<V,E> extends JFrame {
 	
 	private final SearchVisualizationPanel<V,E> panel;
 	
-	public SimpleGraphVisualizationWindow(IGraphAlgorithm<?, ?, V, E, IGraphAlgorithmListener<V,E>> graphAlgorithm) {
+	public SimpleGraphVisualizationWindow(IGraphAlgorithm<?, ?, V, E> graphAlgorithm) {
 		super("Visualizer for " + graphAlgorithm);
 		
 		// initialize window data

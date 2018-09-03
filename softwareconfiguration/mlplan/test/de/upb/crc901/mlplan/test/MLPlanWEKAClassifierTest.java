@@ -4,7 +4,7 @@ import java.io.FileReader;
 import java.util.List;
 import java.util.Random;
 
-import de.upb.crc901.mlplan.multiclass.weka.MLPlanWekaClassifier;
+import de.upb.crc901.mlplan.multiclass.wekamlplan.WekaMLPlanClassifier;
 import jaicore.ml.WekaUtil;
 import weka.classifiers.evaluation.Evaluation;
 import weka.core.Instances;
@@ -17,7 +17,7 @@ public class MLPlanWEKAClassifierTest {
 
 		List<Instances> dataSplit = WekaUtil.getStratifiedSplit(data, new Random(1), .7f);
 
-		MLPlanWekaClassifier mlplan = new MLPlanWekaClassifier();
+		WekaMLPlanClassifier mlplan = new WekaMLPlanClassifier();
 		mlplan.setTimeout(60);
 		mlplan.setTimeoutForSingleFEvaluation(10);
 		mlplan.enableVisualization(true);

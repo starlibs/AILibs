@@ -77,7 +77,7 @@ public class BestFirstLimitedDiscrepancySearch<T, A, V extends Comparable<V>> ex
 	}
 
 	@Override
-	public void registerListener(IGraphAlgorithmListener<Node<T, NodeOrderList>, A> listener) {
+	public void registerListener(Object listener) {
 		bestFirst.registerListener(listener);
 	}
 

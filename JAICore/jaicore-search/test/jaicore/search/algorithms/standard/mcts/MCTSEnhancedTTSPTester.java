@@ -1,7 +1,6 @@
 package jaicore.search.algorithms.standard.mcts;
 
 import jaicore.basic.algorithm.AlgorithmProblemTransformer;
-import jaicore.graph.IGraphAlgorithmListener;
 import jaicore.search.core.interfaces.IGraphSearchFactory;
 import jaicore.search.model.probleminputs.GraphSearchProblemInput;
 import jaicore.search.model.travesaltree.Node;
@@ -18,7 +17,7 @@ public class MCTSEnhancedTTSPTester extends EnhancedTTSPTester<GraphSearchProble
 	}
 
 	@Override
-	public IGraphSearchFactory<GraphSearchProblemInput<EnhancedTTSPNode, String, Double>, Object, EnhancedTTSPNode, String, Double, Node<EnhancedTTSPNode, Double>, String, IGraphAlgorithmListener<Node<EnhancedTTSPNode, Double>, String>> getFactory() {
+	public IGraphSearchFactory<GraphSearchProblemInput<EnhancedTTSPNode, String, Double>, Object, EnhancedTTSPNode, String, Double, Node<EnhancedTTSPNode, Double>, String> getFactory() {
 		return new UCTFactory<>();
 	}
 	

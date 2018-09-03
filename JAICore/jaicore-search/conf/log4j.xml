@@ -58,20 +58,12 @@
 	<logger name="jaicore.logic">
 		<level value="warn" />
 	</logger>
-
-	<logger name="jaicore.planning.graphgenerators.task">
+	
+	<logger name="jaicore.search.algorithms.standard">
 		<level value="warn" />
 	</logger>
 	
-	<logger name="jaicore.search.algorithms.standard.lds">
-		<level value="info" />
-	</logger>
-	
-	<logger name="jaicore.search.algorithms.standard.core">
-		<level value="warn" />
-	</logger>
-
-	<logger name="jaicore.search.algorithms.standard.mcts.MCTS">
-		<level value="warn" />
-	</logger>
+	 <logger name="jaicore.concurrent">
+    <level value="info" />
+  </logger>
 </log4j:configuration>

@@ -1,7 +1,6 @@
 package jaicore.search.algorithms.standard.uncertainty;
 
 import jaicore.basic.algorithm.AlgorithmProblemTransformer;
-import jaicore.graph.IGraphAlgorithmListener;
 import jaicore.search.algorithms.standard.uncertainty.OversearchAvoidanceConfig.OversearchAvoidanceMode;
 import jaicore.search.core.interfaces.IGraphSearchFactory;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
@@ -19,7 +18,7 @@ public class TwoPhaseNQueensTester extends NQueenTester<UncertainlyEvaluatedTrav
 	}
 
 	@Override
-	public IGraphSearchFactory<UncertainlyEvaluatedTraversalTree<QueenNode, String, Double>, EvaluatedSearchGraphPath<QueenNode, String, Double>, QueenNode, String, Double, Node<QueenNode, Double>, String, IGraphAlgorithmListener<Node<QueenNode, Double>, String>> getFactory() {
+	public IGraphSearchFactory<UncertainlyEvaluatedTraversalTree<QueenNode, String, Double>, EvaluatedSearchGraphPath<QueenNode, String, Double>, QueenNode, String, Double, Node<QueenNode, Double>, String> getFactory() {
 		OversearchAvoidanceConfig<QueenNode, Double> config = new OversearchAvoidanceConfig<>(OversearchAvoidanceMode.TWO_PHASE_SELECTION, 0);
 		UncertaintyORGraphSearchFactory<QueenNode, String, Double> searchFactory = new UncertaintyORGraphSearchFactory<>();
 		searchFactory.setConfig(config);

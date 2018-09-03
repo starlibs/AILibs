@@ -112,4 +112,53 @@ public class Component {
 
 		return sb.toString();
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((dependencies == null) ? 0 : dependencies.hashCode());
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((parameters == null) ? 0 : parameters.hashCode());
+		result = prime * result + ((providedInterfaces == null) ? 0 : providedInterfaces.hashCode());
+		result = prime * result + ((requiredInterfaces == null) ? 0 : requiredInterfaces.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Component other = (Component) obj;
+		if (dependencies == null) {
+			if (other.dependencies != null)
+				return false;
+		} else if (!dependencies.equals(other.dependencies))
+			return false;
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
+		if (parameters == null) {
+			if (other.parameters != null)
+				return false;
+		} else if (!parameters.equals(other.parameters))
+			return false;
+		if (providedInterfaces == null) {
+			if (other.providedInterfaces != null)
+				return false;
+		} else if (!providedInterfaces.equals(other.providedInterfaces))
+			return false;
+		if (requiredInterfaces == null) {
+			if (other.requiredInterfaces != null)
+				return false;
+		} else if (!requiredInterfaces.equals(other.requiredInterfaces))
+			return false;
+		return true;
+	}
 }

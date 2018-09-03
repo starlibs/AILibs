@@ -1,6 +1,6 @@
 package jaicore.basic.algorithm;
 
-public abstract class StandardAlgorithmFactory<I, O, L extends IAlgorithmListener> implements IAlgorithmFactory<I, O, L> {
+public abstract class StandardAlgorithmFactory<I, O> implements IAlgorithmFactory<I, O> {
 	private I problemInput;
 
 	public I getProblemInput() {

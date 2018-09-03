@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import hasco.RefinementConfiguredSoftwareConfigurationProblem;
+import hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
 import hasco.core.Util;
 import hasco.core.isNotRefinable;
 import hasco.core.isRefinementCompletedPredicate;
@@ -260,7 +260,7 @@ public class HASCOReduction<V extends Comparable<V>> implements AlgorithmProblem
 		evaluablePredicates.put("isValidParameterRangeRefinement", new isValidParameterRangeRefinementPredicate(this.components, this.paramRefinementConfig));
 		evaluablePredicates.put("notRefinable", new isNotRefinable(this.components, this.paramRefinementConfig));
 		evaluablePredicates.put("refinementCompleted", new isRefinementCompletedPredicate(this.components, this.paramRefinementConfig));
-		return new CEOCIPSTNPlanningProblem<>(domain, knowledge, init, new TaskNetwork(RESOLVE_COMPONENT_IFACE_PREFIX + originalProblem.getCoreProblem().getRequiredInterface() + "('request', 'solution')"), evaluablePredicates,
+		return new CEOCIPSTNPlanningProblem<>(domain, knowledge, init, new TaskNetwork(RESOLVE_COMPONENT_IFACE_PREFIX + originalProblem.getRequiredInterface() + "('request', 'solution')"), evaluablePredicates,
 				new HashMap<>());
 	}
 
@@ -283,7 +283,7 @@ public class HASCOReduction<V extends Comparable<V>> implements AlgorithmProblem
 		
 		/* set object variables that will be important for several methods in the reduction */
 		originalProblem = problem;
-		components = originalProblem.getCoreProblem().getComponents();
+		components = originalProblem.getComponents();
 		paramRefinementConfig = originalProblem.getParamRefinementConfig();
 		
 		/* build the cost insensitive planning problem */
@@ -295,7 +295,7 @@ public class HASCOReduction<V extends Comparable<V>> implements AlgorithmProblem
 			@Override
 			public V evaluate(Plan<CEOCAction> plan) throws Exception {
 				ComponentInstance solution = Util.getSolutionCompositionForPlan(components, getInitState(), plan);
-				return problem.getCoreProblem().getCompositionEvaluator().evaluate(solution);
+				return problem.getCompositionEvaluator().evaluate(solution);
 			}
 		};
 		CostSensitiveHTNPlanningProblem<CEOCOperation, OCMethod, CEOCAction, CEOCIPSTNPlanningProblem<CEOCOperation, OCMethod, CEOCAction>, V> costSensitiveProblem = new CostSensitiveHTNPlanningProblem<>(planningProblem, planEvaluator);

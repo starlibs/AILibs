@@ -1,6 +1,6 @@
 package hasco.variants;
 
-import hasco.RefinementConfiguredSoftwareConfigurationProblem;
+import hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.problemtransformers.GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS;

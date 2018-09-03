@@ -13,8 +13,8 @@ import org.aeonbits.owner.ConfigCache;
 
 import com.google.common.eventbus.Subscribe;
 
-import de.upb.crc901.automl.pipeline.basic.MLPipeline;
-import de.upb.crc901.mlplan.multiclass.weka.MLPlanWekaClassifier;
+import de.upb.crc901.mlplan.multiclass.wekamlplan.WekaMLPlanClassifier;
+import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import hasco.events.HASCOSolutionEvent;
 import jaicore.basic.SQLAdapter;
 import jaicore.concurrent.TimeoutTimer;
@@ -53,7 +53,7 @@ public class MLPlanWekaExperimenter implements IExperimentSetEvaluator {
 		print("Split instances");
 		List<Instances> stratifiedSplit = WekaUtil.getStratifiedSplit(data, new Random(), .7);
 
-		MLPlanWekaClassifier mlplan = new MLPlanWekaClassifier();
+		WekaMLPlanClassifier mlplan = new WekaMLPlanClassifier();
 		mlplan.setTimeout(new Integer(experimentValues.get("timeout")));
 		mlplan.setTimeoutForSingleFEvaluation(new Integer(experimentValues.get("evaluationTimeout")) * 1000);
 		mlplan.setRandom(new Integer(experimentValues.get("seed")));

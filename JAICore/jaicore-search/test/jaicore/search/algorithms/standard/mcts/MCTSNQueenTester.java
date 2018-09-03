@@ -1,7 +1,6 @@
 package jaicore.search.algorithms.standard.mcts;
 
 import jaicore.basic.algorithm.AlgorithmProblemTransformer;
-import jaicore.graph.IGraphAlgorithmListener;
 import jaicore.search.core.interfaces.IGraphSearchFactory;
 import jaicore.search.model.probleminputs.GraphSearchProblemInput;
 import jaicore.search.model.travesaltree.Node;
@@ -17,7 +16,7 @@ public class MCTSNQueenTester extends NQueenTester<GraphSearchProblemInput<Queen
 	}
 
 	@Override
-	public IGraphSearchFactory<GraphSearchProblemInput<QueenNode, String, Double>, Object, QueenNode, String, Double, Node<QueenNode, Double>, String, IGraphAlgorithmListener<Node<QueenNode, Double>, String>> getFactory() {
+	public IGraphSearchFactory<GraphSearchProblemInput<QueenNode, String, Double>, Object, QueenNode, String, Double, Node<QueenNode, Double>, String> getFactory() {
 		return new UCTFactory<>();
 	}
 

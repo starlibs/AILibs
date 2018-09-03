@@ -1,7 +1,6 @@
 package jaicore.search.algorithms.standard.astar;
 
 import jaicore.basic.algorithm.AlgorithmProblemTransformer;
-import jaicore.graph.IGraphAlgorithmListener;
 import jaicore.search.core.interfaces.IGraphSearchFactory;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
 import jaicore.search.model.probleminputs.NumberBasedAdditiveTraversalTree;
@@ -14,7 +13,7 @@ import jaicore.search.testproblems.enhancedttsp.EnhancedTTSPTester;
 public class AStarEnhancedTTSPTester extends EnhancedTTSPTester<NumberBasedAdditiveTraversalTree<EnhancedTTSPNode,String>,EvaluatedSearchGraphPath<EnhancedTTSPNode,String,Double>, Node<EnhancedTTSPNode,Double>, String> {
 	
 	@Override
-	public IGraphSearchFactory<NumberBasedAdditiveTraversalTree<EnhancedTTSPNode,String>,EvaluatedSearchGraphPath<EnhancedTTSPNode,String,Double>,EnhancedTTSPNode, String, Double, Node<EnhancedTTSPNode, Double>, String, IGraphAlgorithmListener<Node<EnhancedTTSPNode, Double>, String>> getFactory() {
+	public IGraphSearchFactory<NumberBasedAdditiveTraversalTree<EnhancedTTSPNode,String>,EvaluatedSearchGraphPath<EnhancedTTSPNode,String,Double>,EnhancedTTSPNode, String, Double, Node<EnhancedTTSPNode, Double>, String> getFactory() {
 		AStarFactory<EnhancedTTSPNode, String> factory = new AStarFactory<>();
 		return factory;
 	}

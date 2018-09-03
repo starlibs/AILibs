@@ -16,8 +16,6 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
 import jaicore.graph.IGraphAlgorithm;
-import jaicore.graphvisualizer.IGraphDataSupplier;
-import jaicore.graphvisualizer.INodeDataSupplier;
 import jaicore.graphvisualizer.events.controlEvents.ControlEvent;
 import jaicore.graphvisualizer.events.controlEvents.FileEvent;
 import jaicore.graphvisualizer.events.controlEvents.IsLiveEvent;
@@ -43,7 +41,7 @@ import jaicore.graphvisualizer.gui.dataSupplier.ReconstructionDataSupplier;
  *
  * @param <T>
  */
-public class Recorder<T> implements IGraphAlgorithm {
+public class Recorder<T> {
 
 	//List of datasuppliers
 	private List<ISupplier> suppliers;
@@ -102,7 +100,6 @@ public class Recorder<T> implements IGraphAlgorithm {
 
 	}
 
-	@Override
 	public void registerListener(Object listener) {
 		this.replayBus.register(listener);
 	}

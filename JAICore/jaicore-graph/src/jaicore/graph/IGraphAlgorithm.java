@@ -13,6 +13,6 @@ import jaicore.basic.algorithm.IAlgorithm;
  * @param <A> class of the arcs the algorithm works on
  * @param <L> class that all listeners must belong to
  */
-public interface IGraphAlgorithm<I, O, N, A, L extends IGraphAlgorithmListener<N, A>> extends IAlgorithm<I, O, L> {
+public interface IGraphAlgorithm<I, O, N, A> extends IAlgorithm<I, O> {
 
 }

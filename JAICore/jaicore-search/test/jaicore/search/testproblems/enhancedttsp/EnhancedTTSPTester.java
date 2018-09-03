@@ -23,6 +23,7 @@ import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.search.algorithms.standard.ORGraphSearchTester;
 import jaicore.search.core.interfaces.IGraphSearch;
 import jaicore.search.core.interfaces.IGraphSearchFactory;
+import jaicore.search.model.other.EvaluatedSearchGraphPath;
 
 public abstract class EnhancedTTSPTester<I, O, VSearch, ESearch> extends ORGraphSearchTester<EnhancedTTSP, I, O, EnhancedTTSPNode, String, Double, VSearch, ESearch>
 		implements IGraphAlgorithmListener<VSearch, ESearch> {
@@ -34,9 +35,9 @@ public abstract class EnhancedTTSPTester<I, O, VSearch, ESearch> extends ORGraph
 
 	
 
-	IGraphSearchFactory<I, O, EnhancedTTSPNode, String, Double, VSearch, ESearch, IGraphAlgorithmListener<VSearch, ESearch>> searchFactory = getFactory();
+	IGraphSearchFactory<I, O, EnhancedTTSPNode, String, Double, VSearch, ESearch> searchFactory = getFactory();
 
-	private IGraphSearch<I, O, EnhancedTTSPNode, String, Double, VSearch, ESearch, IGraphAlgorithmListener<VSearch, ESearch>> getSearchAlgorithmForProblem(int n) {
+	private I getSearchProblem(int n) {
 
 		/* create TTSP problem */
 		Random r = new Random(0);
@@ -65,28 +66,20 @@ public abstract class EnhancedTTSPTester<I, O, VSearch, ESearch> extends ORGraph
 		EnhancedTTSP ttsp = new EnhancedTTSP(travelGraph, (short) 0, blockedHours, 8, 4.5, 1, 10);
 
 		/* reduce problem to graph search */
-		searchFactory.setProblemInput(getProblemReducer().transform(ttsp));
+		return getProblemReducer().transform(ttsp);
+	}
+	
+	private IGraphSearch<I, O, EnhancedTTSPNode, String, Double, VSearch, ESearch> getSearchAlgorithmForProblem(int n) {
+		searchFactory.setProblemInput(getSearchProblem(n));
 		return searchFactory.getAlgorithm();
 	}
 
 	@Override
-	public void testSequential() throws Throwable {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void testParallelized() throws Throwable {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void testIterable() throws Throwable {
+	public void testThatIteratorReturnsEachPossibleSolution() throws Throwable {
 		for (int n = 3; n <= MAX_N; n++) {
 			System.out.print("Checking n = " + n + " ");
 
-			IGraphSearch<I, O, EnhancedTTSPNode, String, Double, VSearch, ESearch, IGraphAlgorithmListener<VSearch, ESearch>> search = getSearchAlgorithmForProblem(n);
+			IGraphSearch<I, O, EnhancedTTSPNode, String, Double, VSearch, ESearch> search = getSearchAlgorithmForProblem(n);
 			if (VISUALIZE)
 				new SimpleGraphVisualizationWindow<>(search);
 			Iterator<AlgorithmEvent> iterator = search.iterator();
@@ -106,26 +99,41 @@ public abstract class EnhancedTTSPTester<I, O, VSearch, ESearch> extends ORGraph
 					assertTrue(!terminated);
 					if (e instanceof SolutionCandidateFoundEvent) {
 						solutions++;
-						// List<EnhancedTTSPNode> solution = ((SolutionFoundEvent) e).getSolution().getNodes();
-						// System.out.print("\n\t");
-						// solution.forEach(node -> System.out.print( node.getCurLocation() + "-"));
+						EvaluatedSearchGraphPath<EnhancedTTSPNode, String, Double> solution = (EvaluatedSearchGraphPath)(((SolutionCandidateFoundEvent) e).getSolutionCandidate());
+						 List<EnhancedTTSPNode> solutionPath = solution.getNodes();
+						 System.out.print("\n\t");
+						 solutionPath.forEach(node -> System.out.print( node.getCurLocation() + "-"));
 					}
 				}
 			}
-			assertEquals(MathUtils.factorial(n - 1), solutions);
+			checkNumberOfSolutions(n,solutions);
+			
 			System.out.println("done");
 		}
 	}
-
+	
+	private void checkNumberOfSolutions(int n, int givenSolutions) {
+		int expected = (int)MathUtils.factorial(n - 1);
+		assertEquals("Wrong number of returned solutions for " + n + "-TTSP. Expected " + expected + " and received " + givenSolutions,expected, givenSolutions);
+	}
+	
 	@Override
-	public void testInterrupt() throws Throwable {
-		// TODO Auto-generated method stub
-
+	public void testThatAnEventForEachPossibleSolutionIsEmittedInSimpleCall() throws Throwable {
+		
 	}
 
 	@Override
-	public void testCancel() throws Throwable {
-		// TODO Auto-generated method stub
+	public void testThatAnEventForEachPossibleSolutionIsEmittedInParallelizedCall() throws Throwable {
+		
+	}
 
+	@Override
+	public I getSimpleProblemInputForGeneralTestPurposes() {
+		return getSearchProblem(4);
+	}
+	
+	@Override
+	public I getDifficultProblemInputForGeneralTestPurposes() {
+		return getSearchProblem(20);
 	}
 }

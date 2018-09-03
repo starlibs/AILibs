@@ -11,7 +11,8 @@ import java.util.Random;
 
 import org.aeonbits.owner.ConfigCache;
 
-import de.upb.crc901.mlplan.multiclass.weka.MLPlanWekaClassifier;
+import de.upb.crc901.mlplan.multiclass.wekamlplan.WekaMLPlanClassifier;
+import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.WekaMLPlanWekaClassifier;
 import jaicore.ml.WekaUtil;
 import weka.classifiers.Evaluation;
 import weka.core.Instances;
@@ -48,13 +49,14 @@ public class MLPlanWekaCLI {
 
 		/* extract all relevant information about the experiment */
 		System.out.println(getTime() + " Initialize ML-Plan...");
-		MLPlanWekaClassifier mlPlan = new MLPlanWekaClassifier();
+		WekaMLPlanClassifier mlPlan = new WekaMLPlanWekaClassifier();
 		mlPlan.setTimeout(CLI_CONFIG.timeout());
 		mlPlan.setTimeoutForSingleFEvaluation(CLI_CONFIG.evalTimeout() * 1000);
-		mlPlan.enableVisualization(CLI_CONFIG.showGraphVisualization());
+		if (CLI_CONFIG.showGraphVisualization())
+			mlPlan.activateVisualization();
 
 		System.out.println(getTime() + " Split the data into train and test set...");
-		List<Instances> testSplit = WekaUtil.getStratifiedSplit(data, new Random(mlPlan.getRandom()), 0.7);
+		List<Instances> testSplit = WekaUtil.getStratifiedSplit(data, new Random(mlPlan.getConfig().randomSeed()), 0.7);
 		System.out.println("Data split created.");
 
 		try {

@@ -16,7 +16,6 @@ import jaicore.basic.algorithm.AlgorithmEvent;
 import jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.AlgorithmState;
-import jaicore.graph.IGraphAlgorithmListener;
 import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
@@ -243,7 +242,7 @@ public class AwaStarSearch<I extends GeneralEvaluatedTraversalTree<T, A, V>, T, 
 	}
 
 	@Override
-	public void registerListener(IGraphAlgorithmListener<Node<T, V>, A> listener) {
+	public void registerListener(Object listener) {
 		eventBus.register(listener);
 	}
 

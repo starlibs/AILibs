@@ -15,15 +15,14 @@ import java.util.concurrent.TimeUnit;
  *
  * @param <I> class of which inputs stems from
  * @param <O> class of which solution candidates and the eventually returned result stem from
- * @param <L> class to which listeners that want to listen to events must belong to
  */
-public interface IAlgorithm<I,O, L extends IAlgorithmListener> extends Iterable<AlgorithmEvent>, Iterator<AlgorithmEvent>, Callable<O> {
+public interface IAlgorithm<I,O> extends Iterable<AlgorithmEvent>, Iterator<AlgorithmEvent>, Callable<O> {
 	
 	public I getInput();
 	
 	public void cancel();
 	
-	public void registerListener(L listener);
+	public void registerListener(Object listener);
 	
 	public void setNumCPUs(int numberOfCPUs);
 	

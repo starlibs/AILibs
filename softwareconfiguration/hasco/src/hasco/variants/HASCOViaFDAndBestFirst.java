@@ -1,7 +1,7 @@
 package hasco.variants;
 
 
-import hasco.RefinementConfiguredSoftwareConfigurationProblem;
+import hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
 import jaicore.basic.algorithm.AlgorithmProblemTransformer;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.search.algorithms.standard.bestfirst.BestFirstFactory;

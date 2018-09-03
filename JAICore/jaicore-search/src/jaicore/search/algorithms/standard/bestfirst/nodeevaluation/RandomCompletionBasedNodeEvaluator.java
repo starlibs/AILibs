@@ -22,7 +22,6 @@ import jaicore.search.algorithms.parallel.parallelexploration.distributed.interf
 import jaicore.search.algorithms.standard.bestfirst.StandardBestFirst;
 import jaicore.search.algorithms.standard.bestfirst.events.GraphSearchSolutionCandidateFoundEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.NodeAnnotationEvent;
-import jaicore.search.algorithms.standard.bestfirst.events.SolutionAnnotationEvent;
 import jaicore.search.algorithms.standard.gbf.SolutionEventBus;
 import jaicore.search.algorithms.standard.rdfs.RandomizedDepthFirstSearch;
 import jaicore.search.algorithms.standard.uncertainty.IUncertaintySource;
@@ -245,8 +244,8 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 
 						/* add number of samples to node */
 						n.setAnnotation("fRPSamples", i);
-
-						uncertainty = this.uncertaintySource.calculateUncertainty((Node<T, V>) n, completedPaths, evaluations);
+						if (uncertaintySource != null)
+							uncertainty = this.uncertaintySource.calculateUncertainty((Node<T, V>) n, completedPaths, evaluations);
 
 						if (bestCompletion == null) {
 							if (interrupted) {
@@ -314,9 +313,12 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 			V val = null;
 			try {
 				val = this.solutionEvaluator.evaluateSolution(path);
-			} catch (Throwable e) {
-				logger.warn("Computing the solution quality of {} failed due to an exception. Here is the trace: {}", path,
-						Arrays.asList(e.getStackTrace()).stream().map(n -> "\n\t" + n.toString()).collect(Collectors.toList()));
+			} catch (InterruptedException e) {
+				logger.info("Computing the solution quality of {} was interrupted.", path);
+			}
+			catch (Throwable e) {
+				logger.error("Computing the solution quality of {} failed due to an exception. Here is the trace:\n\t{}\n\t{}\n\t{}", path,
+						e.getClass().getName(), e.getMessage(), Arrays.asList(e.getStackTrace()).stream().map(n -> "\n\t" + n.toString()).collect(Collectors.toList()));
 				this.unsuccessfulPaths.add(path);
 				throw e;
 			}
@@ -365,10 +367,10 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 				this.eventBus = new SolutionEventBus<>();
 			}
 			EvaluatedSearchGraphPath<T, ?, V> solutionObject = new EvaluatedSearchGraphPath<>(solution, null, this.scoresOfSolutionPaths.get(solution));
+			solutionObject.setAnnotation("fTime", this.timesToComputeEvaluations.get(solution));
+			solutionObject.setAnnotation("timeToSolution", (int) (System.currentTimeMillis() - this.timestampOfFirstEvaluation));
+			solutionObject.setAnnotation("nodesEvaluatedToSolution", numberOfComputedFValues);
 			this.eventBus.post(new GraphSearchSolutionCandidateFoundEvent<>(solutionObject));
-			this.eventBus.post(new SolutionAnnotationEvent<>(solutionObject, "fTime", this.timesToComputeEvaluations.get(solution)));
-			this.eventBus.post(new SolutionAnnotationEvent<>(solutionObject, "timeToSolution", (int) (System.currentTimeMillis() - this.timestampOfFirstEvaluation)));
-			this.eventBus.post(new SolutionAnnotationEvent<>(solutionObject, "nodesExpandedToSolution", numberOfComputedFValues));
 		} catch (Throwable e) {
 			List<Pair<String, Object>> explanations = new ArrayList<>();
 			if (logger.isDebugEnabled()) {

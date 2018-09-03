@@ -1,6 +1,7 @@
 package jaicore.search.model.other;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -10,7 +11,7 @@ public class SearchGraphPath<N, A> {
 	private final Map<String, Object> annotations;
 
 	public SearchGraphPath(List<N> nodes, List<A> edges) {
-		this(nodes, edges, null);
+		this(nodes, edges, new HashMap<>());
 	}
 	
 	public SearchGraphPath(List<N> nodes, List<A> edges, Map<String, Object> annotations) {

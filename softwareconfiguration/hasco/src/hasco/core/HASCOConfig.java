@@ -1,49 +1,17 @@
 package hasco.core;
 
 import org.aeonbits.owner.Config.Sources;
-import org.aeonbits.owner.Mutable;
+
+import jaicore.basic.algorithm.IAlgorithmConfig;
 
 @Sources({ "file:conf/hasco.properties" })
-public interface HASCOConfig extends Mutable {
-
-	public static final String K_CPUS = "hasco.cpus";
-	public static final String K_MEMORY = "hasco.memory";
-	public static final String K_RANDOM_SEED = "hasco.seed";
-	public static final String K_RANDOM_COMPLETIONS = "hasco.random_completions";
-	public static final String K_TIMEOUT = "hasco.timeout";
-
+public interface HASCOConfig extends IAlgorithmConfig {
+	public static final String K_VISUALIZE = "hasco.visualize";
+	
 	/**
-	 * @return Number of CPU cores available for parallelization
+	 * @return Whether or not the search conducted by HASCO should be visualized
 	 */
-	@Key(K_CPUS)
-	@DefaultValue("1")
-	public int cpus();
-
-	/**
-	 * @return The main memory that is available to be used.
-	 */
-	@Key(K_MEMORY)
-	@DefaultValue("256")
-	public int memory();
-
-	/**
-	 * @return The seed for the pseudo randomness generator.
-	 */
-	@Key(K_RANDOM_SEED)
-	@DefaultValue("0")
-	public int randomSeed();
-
-	/**
-	 * @return Number of random completions drawn with RDFS.
-	 */
-	@Key(K_RANDOM_COMPLETIONS)
-	@DefaultValue("3")
-	public int randomCompletions();
-
-	/**
-	 * @return Overall timeout for the configuration.
-	 */
-	@Key(K_TIMEOUT)
-	@DefaultValue("60")
-	public int timeout();
+	@Key(K_VISUALIZE)
+	@DefaultValue("false")
+	public boolean visualizationEnabled();
 }

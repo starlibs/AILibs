@@ -3,6 +3,7 @@ package jaicore.search.problemtransformers;
 import java.util.Random;
 
 import jaicore.basic.algorithm.AlgorithmProblemTransformer;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator;
 import jaicore.search.model.probleminputs.GeneralEvaluatedTraversalTree;
@@ -36,8 +37,7 @@ public class GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS<N, A,
 
 	@Override
 	public GeneralEvaluatedTraversalTree<N, A, V> transform(GraphSearchProblemInput<N, A, V> problem) {
-
-		return new GeneralEvaluatedTraversalTree<>(problem.getGraphGenerator(), new RandomCompletionBasedNodeEvaluator<>(new Random(seed), numSamples, null, problem.getPathEvaluator()));
+		return new GeneralEvaluatedTraversalTree<>(problem.getGraphGenerator(), new AlternativeNodeEvaluator<>(preferredNodeEvaluator, new RandomCompletionBasedNodeEvaluator<>(new Random(seed), numSamples, (n1,n2) -> null, problem.getPathEvaluator())));
 	}
 
 }

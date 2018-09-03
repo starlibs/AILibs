@@ -51,7 +51,7 @@ import jaicore.search.structure.graphgenerator.SuccessorGenerator;
  * @author fmohr
  *
  */
-public class LimitedDiscrepancySearch<T,A, V extends Comparable<V>> implements IGraphSearch<NodeRecommendedTree<T, A>, EvaluatedSearchGraphPath<T, A, V>, T, A, V, TreeNode<T>, A, IGraphAlgorithmListener<TreeNode<T>, A>> {
+public class LimitedDiscrepancySearch<T,A, V extends Comparable<V>> implements IGraphSearch<NodeRecommendedTree<T, A>, EvaluatedSearchGraphPath<T, A, V>, T, A, V, TreeNode<T>, A> {
 
 	/* logging */
 	private final Logger logger = LoggerFactory.getLogger(LimitedDiscrepancySearch.class);
@@ -170,7 +170,7 @@ public class LimitedDiscrepancySearch<T,A, V extends Comparable<V>> implements I
 	}
 
 	@Override
-	public void registerListener(IGraphAlgorithmListener<TreeNode<T>, A> listener) {
+	public void registerListener(Object listener) {
 		this.graphEventBus.register(listener);
 	}
 

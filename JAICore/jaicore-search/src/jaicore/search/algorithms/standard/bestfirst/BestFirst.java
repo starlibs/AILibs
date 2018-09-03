@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -19,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import org.aeonbits.owner.ConfigFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,12 +29,13 @@ import com.google.common.eventbus.Subscribe;
 
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.algorithm.AlgorithmEvent;
+import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.AlgorithmState;
+import jaicore.basic.algorithm.IAlgorithmConfig;
 import jaicore.concurrent.TimeoutTimer;
 import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
-import jaicore.graph.IGraphAlgorithmListener;
 import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeParentSwitchEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
@@ -64,18 +68,23 @@ import jaicore.search.structure.graphgenerator.RootGenerator;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
-public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V extends Comparable<V>> extends AbstractORGraphSearch<I, EvaluatedSearchGraphPath<N, A, V>, N, A, V, Node<N, V>, A> implements ILoggingCustomizable {
+public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V extends Comparable<V>> extends AbstractORGraphSearch<I, EvaluatedSearchGraphPath<N, A, V>, N, A, V, Node<N, V>, A>
+		implements ILoggingCustomizable {
 
 	public enum ParentDiscarding {
 		NONE, OPEN, ALL
 	}
 
+	/* algorithm configuration */
+	private IAlgorithmConfig config;
+
 	/* algorithm state and statistics */
 	private int createdCounter;
 	private int expandedCounter;
 	private boolean initialized = false;
-	protected boolean interrupted = false;
-	protected boolean canceled = false;
+	private boolean interrupted = false;
+	private boolean canceled = false;
+	private Timer timeoutTimer;
 	private AlgorithmState state = AlgorithmState.created;
 	private EvaluatedSearchGraphPath<N, A, V> bestSeenSolution;
 	private List<NodeExpansionDescription<N, A>> lastExpansion = new ArrayList<>();
@@ -153,7 +162,10 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 				long startComputation = System.currentTimeMillis();
 				try {
 					label = BestFirst.this.nodeEvaluator.f(newNode);
-
+					if (BestFirst.this.canceled || BestFirst.this.interrupted) {
+						return;
+					}
+					
 					/* check whether the required time exceeded the timeout */
 					long fTime = System.currentTimeMillis() - startComputation;
 					if (BestFirst.this.timeoutForComputationOfF > 0 && fTime > BestFirst.this.timeoutForComputationOfF + 1000) {
@@ -277,11 +289,11 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 	}
 
 	public BestFirst(final I problem) {
-		this(problem, ParentDiscarding.NONE);
+		this(problem, ConfigFactory.create(IBestFirstConfig.class));
 	}
 
 	@SuppressWarnings("unchecked")
-	public BestFirst(final I problem, final ParentDiscarding pd) {
+	public BestFirst(final I problem, IBestFirstConfig config) {
 		super(problem);
 		this.graphGenerator = problem.getGraphGenerator();
 		this.rootGenerator = graphGenerator.getRootGenerator();
@@ -297,7 +309,8 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 		}
 
 		/* set parent discarding */
-		this.parentDiscarding = pd;
+		this.config = config;
+		this.parentDiscarding = config.parentDiscarding();
 
 		/* if the node evaluator is graph dependent, communicate the generator to it */
 		this.nodeEvaluator = problem.getNodeEvaluator();
@@ -333,17 +346,17 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 		}
 
 		/* add shutdown hook so as to cancel the search once the overall program is shutdown */
-		Runtime.getRuntime().addShutdownHook(new Thread(() -> BestFirst.this.cancel()));
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> BestFirst.this.cancel(), "Shutdown hook thread for " + BestFirst.this));
 	}
 
-	private void labelNode(final Node<N, V> node) throws Throwable {
+	private void labelNode(final Node<N, V> node) throws Exception {
 		node.setInternalLabel(this.nodeEvaluator.f(node));
 	}
 
 	/**
 	 * This method setups the graph by inserting the root nodes.
 	 */
-	protected void initGraph() throws Throwable {
+	protected void initGraph() throws Exception {
 		if (!this.initialized) {
 			try {
 				nodeModelSemaphore.acquire();
@@ -367,7 +380,7 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 		}
 	}
 
-	public EvaluatedSearchGraphPath<N, A, V> nextSolutionThatDominatesOpen() throws InterruptedException {
+	public EvaluatedSearchGraphPath<N, A, V> nextSolutionThatDominatesOpen() throws InterruptedException, AlgorithmExecutionCanceledException {
 		EvaluatedSearchGraphPath<N, A, V> currentlyBestSolution = null;
 		V currentlyBestScore = null;
 		do {
@@ -388,7 +401,7 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 	 *            The initial node.
 	 * @return A list of nodes from the initial point to a goal, <code>null</code> if a path doesn't exist.
 	 */
-	public EvaluatedSearchGraphPath<N, A, V> nextSolution() throws InterruptedException {
+	public EvaluatedSearchGraphPath<N, A, V> nextSolution() throws InterruptedException, AlgorithmExecutionCanceledException {
 
 		/* check whether solution has been canceled */
 		if (this.canceled) {
@@ -399,6 +412,8 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 		this.logger.info("Starting search for next solution. Size of OPEN is {}", this.open.size());
 		try {
 			this.initGraph();
+		} catch (InterruptedException | AlgorithmExecutionCanceledException e) {
+			throw e;
 		} catch (Throwable e) {
 			e.printStackTrace();
 			return null;
@@ -447,16 +462,12 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 		return solutions.isEmpty() ? null : solutions.poll();
 	}
 
-	protected boolean terminates() {
-		return false;
-	}
-
 	/**
 	 * Makes a single expansion and returns solution paths.
 	 *
 	 * @return The last found solution path.
 	 */
-	public List<NodeExpansionDescription<N, A>> nextExpansion() {
+	public List<NodeExpansionDescription<N, A>> nextExpansion() throws InterruptedException, AlgorithmExecutionCanceledException {
 		if (!this.initialized) {
 			try {
 				this.initGraph();
@@ -471,7 +482,7 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 		return this.lastExpansion;
 	}
 
-	protected NodeExpansionCompletedEvent<N, A, V> step() {
+	protected NodeExpansionCompletedEvent<N, A, V> step() throws InterruptedException, AlgorithmExecutionCanceledException {
 		if (!this.beforeSelection())
 			return null;
 		Node<N, V> nodeToExpand = this.open.peek();
@@ -484,15 +495,26 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 		return this.step(nodeToExpand);
 	}
 
-	public NodeExpansionCompletedEvent<N, A, V> step(final Node<N, V> nodeToExpand) {
+	private void checkTermination() throws InterruptedException, AlgorithmExecutionCanceledException {
+		if (Thread.currentThread().isInterrupted()) {
+			this.logger.debug("Received interrupt signal.");
+			this.interrupted = true;
+			shutdown();
+			logger.info("Thread that executes the algorithm has been interrupted, emitting InterruptedException");
+			throw new InterruptedException(); // if the thread itself was actively interrupted by somebody
+		}
+		if (canceled) {
+			shutdown();
+			logger.info("Algorithm has been canceled, emitting AlgorithmExecutionCanceledException");
+			throw new AlgorithmExecutionCanceledException(); // for a controlled cancel from outside on the algorithm
+		}
+	}
+
+	public NodeExpansionCompletedEvent<N, A, V> step(final Node<N, V> nodeToExpand) throws InterruptedException, AlgorithmExecutionCanceledException {
 
 		/* if search has been interrupted, do not process next step */
 		this.logger.debug("Step starts. Size of OPEN now {}", this.open.size());
-		if (Thread.interrupted()) {
-			this.logger.debug("Received interrupt signal before step.");
-			this.interrupted = true;
-			return null;
-		}
+		checkTermination();
 		this.lastExpansion.clear();
 		assert nodeToExpand == null || !this.expanded.contains(nodeToExpand.getPoint()) : "Node selected for expansion already has been expanded: " + nodeToExpand;
 		this.open.remove(nodeToExpand);
@@ -502,15 +524,12 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 		this.beforeExpansion(nodeToExpand);
 		NodeExpansionCompletedEvent<N, A, V> event = this.expandNode(nodeToExpand);
 		this.afterExpansion(nodeToExpand);
-		if (Thread.interrupted()) {
-			this.logger.debug("Received interrupt signal during step.");
-			this.interrupted = true;
-		}
+		checkTermination();
 		this.logger.debug("Step ends. Size of OPEN now {}", this.open.size());
 		return event;
 	}
 
-	private NodeExpansionCompletedEvent<N, A, V> expandNode(final Node<N, V> expandedNodeInternal) {
+	private NodeExpansionCompletedEvent<N, A, V> expandNode(final Node<N, V> expandedNodeInternal) throws InterruptedException, AlgorithmExecutionCanceledException {
 		this.graphEventBus.post(new NodeTypeSwitchEvent<Node<N, V>>(expandedNodeInternal, "or_expanding"));
 		this.logger.info("Expanding node {} with f-value {}", expandedNodeInternal, expandedNodeInternal.getInternalLabel());
 		assert !this.expanded.contains(expandedNodeInternal.getPoint()) : "Node " + expandedNodeInternal + " expanded twice!!";
@@ -518,16 +537,16 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 		/* compute successors */
 		this.logger.debug("Start computation of successors");
 		final List<NodeExpansionDescription<N, A>> successorDescriptions = new ArrayList<>();
-		if (BestFirst.this.canceled || BestFirst.this.interrupted) {
-			return null;
-		}
+		checkTermination();
+
 		successorDescriptions.addAll(BestFirst.this.successorGenerator.generateSuccessors(expandedNodeInternal.getPoint()));
 		this.logger.debug("Finished computation of successors. Sending SuccessorComputationCompletedEvent with {} successors for {}", successorDescriptions.size(), expandedNodeInternal);
 		this.graphEventBus.post(new SuccessorComputationCompletedEvent<>(expandedNodeInternal, successorDescriptions));
 
 		/* attach successors to search graph */
+		// System.out.println("Compute successors ... " + Thread.currentThread().isInterrupted());
 		successorDescriptions.stream().forEach(successorDescription -> {
-			if (this.interrupted) {
+			if (this.interrupted || this.canceled) {
 				return;
 			}
 			NodeBuilder nb = new NodeBuilder(expandedNodeInternal, successorDescription);
@@ -537,16 +556,18 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 				try {
 					this.fComputationTickets.acquire(); // these are necessary to not flood the thread pool with queries
 				} catch (InterruptedException e) {
-					e.printStackTrace();
-					this.interrupted = true;
+					Thread.currentThread().interrupt();
 				}
 				if (this.interrupted) {
 					return;
 				}
+				if (this.interrupted || this.canceled)
+					return;
 				this.activeJobs.incrementAndGet();
 				this.pool.submit(nb);
 			}
 		});
+		checkTermination();
 		this.logger.debug("Finished expansion of node {}. Size of OPEN is now {}. Number of active jobs is {}", expandedNodeInternal, this.open.size(), this.activeJobs.get());
 
 		/* update statistics, send closed notifications, and possibly return a solution */
@@ -599,14 +620,16 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 
 	@Override
 	public void cancel() {
-		StringBuilder sb = new StringBuilder();
-		for (StackTraceElement ste : Thread.currentThread().getStackTrace()) {
-			sb.append("\n" + ste.toString());
-		}
-		this.logger.info("Search has been canceled. Cancel came from: {}", sb.toString());
+		this.logger.info("Set cancel flag to true.");
 		this.canceled = true;
-		this.interrupted = true;
+		shutdown();
+	}
+
+	private void shutdown() {
+		logger.info("Invoking shutdown routine ...");
+		this.state = AlgorithmState.inactive;
 		if (this.pool != null) {
+			logger.info("Triggering shutdown of builder thread pool with interrupt");
 			this.pool.shutdownNow();
 		}
 		if (this.nodeEvaluator instanceof ICancelableNodeEvaluator) {
@@ -615,6 +638,10 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 		}
 		if (this.timeoutSubmitter != null) {
 			this.timeoutSubmitter.close();
+		}
+		if (timeoutTimer != null) {
+			logger.info("Canceling timeout.");
+			timeoutTimer.cancel();
 		}
 	}
 
@@ -736,6 +763,17 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 		try {
 			switch (state) {
 			case created: {
+				logger.info("Initializing BestFirst search {} with {} CPUs and a timeout of {}ms", this, config.cpus(), config.timeout());
+				timeoutTimer = new Timer("Timeouter-" + this);
+				timeoutTimer.schedule(new TimerTask() {
+
+					@Override
+					public void run() {
+						logger.info("Invoking cancel on BestFirst search {}", BestFirst.this);
+						BestFirst.this.cancel();
+					}
+				}, config.timeout());
+				parallelizeNodeExpansion(config.cpus());
 				this.initGraph();
 				state = AlgorithmState.active;
 				AlgorithmEvent event = new AlgorithmInitializedEvent();
@@ -746,13 +784,16 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 				if (!pendingSolutionFoundEvents.isEmpty()) {
 					return pendingSolutionFoundEvents.poll(); // these already have been posted over the event bus but are now returned to the controller for respective handling
 				}
-				AlgorithmEvent event = step();
-				if (event != null) {
-					graphEventBus.post(event);
-					return event;
+				AlgorithmEvent event;
+				try {
+					event = step();
+					if (event == null) {
+						event = new AlgorithmFinishedEvent();
+						state = AlgorithmState.inactive;
+					}
+				} catch (AlgorithmExecutionCanceledException e) {
+					event = new AlgorithmFinishedEvent();
 				}
-				state = AlgorithmState.inactive;
-				event = new AlgorithmFinishedEvent();
 				graphEventBus.post(event);
 				return event;
 			}
@@ -844,7 +885,7 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 		return this.additionalThreadsForExpansion;
 	}
 
-	public void parallelizeNodeExpansion(final int threadsForExpansion) {
+	private void parallelizeNodeExpansion(final int threadsForExpansion) {
 		if (this.pool != null) {
 			throw new UnsupportedOperationException("The number of additional threads can be only set once per search!");
 		}
@@ -905,39 +946,51 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 	}
 
 	@Override
-	public EvaluatedSearchGraphPath<N, A, V> call() throws InterruptedException {
-		while (state != AlgorithmState.inactive)
-			next();
+	public EvaluatedSearchGraphPath<N, A, V> call() throws InterruptedException, AlgorithmExecutionCanceledException {
+		logger.info("Invoking \"call\" on BestFirst");
+		try {
+			while (state != AlgorithmState.inactive)
+				next();
+		} catch (RuntimeException e) {
+			if (e.getCause() instanceof InterruptedException)
+				throw (InterruptedException) e.getCause();
+			else if (e.getCause() instanceof AlgorithmExecutionCanceledException)
+				throw (AlgorithmExecutionCanceledException) e.getCause();
+			else
+				throw e;
+		}
 		return bestSeenSolution;
 	}
 
 	@Override
 	public void setNumCPUs(int numberOfCPUs) {
-		parallelizeNodeExpansion(numberOfCPUs);
+		config.setProperty(IAlgorithmConfig.K_CPUS, String.valueOf(numberOfCPUs));
 	}
 
 	@Override
-	public void registerListener(IGraphAlgorithmListener<Node<N, V>, A> listener) {
+	public void registerListener(Object listener) {
 		this.graphEventBus.register(listener);
 	}
 
 	@Override
 	public int getNumCPUs() {
-		return 0;
+		return config.cpus();
 	}
 
 	@Override
 	public void setTimeout(int timeout, TimeUnit timeUnit) {
-		
+		if (timeUnit != TimeUnit.MILLISECONDS)
+			throw new IllegalArgumentException("Currently only support for ms");
+		config.setProperty(IAlgorithmConfig.K_TIMEOUT, String.valueOf(timeout));
 	}
 
 	@Override
 	public int getTimeout() {
-		return 0;
+		return config.timeout();
 	}
 
 	@Override
 	public TimeUnit getTimeoutUnit() {
-		return null;
+		return TimeUnit.MILLISECONDS;
 	}
 }

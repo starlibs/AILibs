@@ -17,7 +17,6 @@ import jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.AlgorithmState;
 import jaicore.basic.sets.SetUtil;
-import jaicore.graph.IGraphAlgorithmListener;
 import jaicore.graph.LabeledGraph;
 import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
@@ -247,7 +246,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AbstractORGraphSearch<G
 	}
 	
 	@Override
-	public void registerListener(IGraphAlgorithmListener<Node<N, V>, A> listener) {
+	public void registerListener(Object listener) {
 		this.graphEventBus.register(listener);
 	}
 

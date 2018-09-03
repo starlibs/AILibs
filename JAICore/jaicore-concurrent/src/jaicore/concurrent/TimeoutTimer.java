@@ -49,6 +49,7 @@ public class TimeoutTimer {
 		}
 
 		public int interruptMeAfterMS(final long delay) {
+			logger.info("Scheduling interrupt for thread {} in {}ms", Thread.currentThread(), delay);
 			return this.interruptThreadAfterMS(Thread.currentThread(), delay);
 		}
 
