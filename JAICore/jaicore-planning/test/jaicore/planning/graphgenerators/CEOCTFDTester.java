@@ -11,13 +11,18 @@ import org.junit.Before;
 import org.junit.Test;
 
 import jaicore.basic.MathExt;
+import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.planning.graphgenerators.task.ceoctfd.CEOCTFDGraphGenerator;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;
+import jaicore.planning.model.ceoc.CEOCAction;
+import jaicore.planning.model.ceoc.CEOCOperation;
 import jaicore.planning.model.task.ceocstn.CEOCSTNPlanningProblem;
+import jaicore.planning.model.task.ceocstn.OCMethod;
 import jaicore.planning.model.task.ceocstn.StandardProblemFactory;
 import jaicore.search.algorithms.standard.astar.AStar;
+import jaicore.search.model.probleminputs.NumberBasedAdditiveTraversalTree;
 import jaicore.search.model.travesaltree.Node;
 
 public class CEOCTFDTester {
@@ -34,22 +39,22 @@ public class CEOCTFDTester {
 		solveProblemUsingAStar(StandardProblemFactory.getNestedDichotomyCreationProblem("root", classes, true, 1, 1));
 	}
 
-	private void solveProblemUsingAStar(CEOCSTNPlanningProblem problem) throws InterruptedException {
+	private void solveProblemUsingAStar(CEOCSTNPlanningProblem problem) throws InterruptedException, AlgorithmExecutionCanceledException {
 
 		/* create AStar algorithm to solve the problem */
 		System.out.print("Generate problem ...");
-		CEOCTFDGraphGenerator generator = new CEOCTFDGraphGenerator(problem);
+		CEOCTFDGraphGenerator<CEOCOperation, OCMethod, CEOCAction> generator = new CEOCTFDGraphGenerator<>(problem);
 		System.out.println(" done");
 		System.out.print("Starting Search Process");
 		long start = System.currentTimeMillis();
-		AStar<TFDNode, String> astar = new AStar<>(generator, (n1, n2) -> -1 * (Math.random() * 1000), n -> 0.0);
+		AStar<TFDNode, String> astar = new AStar<TFDNode, String>(new NumberBasedAdditiveTraversalTree<TFDNode, String>(generator, (n1, n2) -> -1 * (Math.random() * 1000), n -> 0.0));
 
-		new SimpleGraphVisualizationWindow<Node<TFDNode, String>>(astar).getPanel().setTooltipGenerator(new TFDTooltipGenerator<>());
+		new SimpleGraphVisualizationWindow<Node<TFDNode, Double>, String>(astar).getPanel().setTooltipGenerator(new TFDTooltipGenerator<>());
 
 		List<TFDNode> solution = null;
 		Collection<List<TFDNode>> solutions = new HashSet<>();
 		do {
-			solution = astar.nextSolution();
+			solution = astar.nextSolution().getNodes();
 			solutions.add(solution);
 		} while (solution != null);
 		long end = System.currentTimeMillis();

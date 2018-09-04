@@ -272,6 +272,11 @@ public class EnhancedTTSP {
 			public boolean doesLastActionAffectScoreOfAnySubsequentSolution(List<EnhancedTTSPNode> partialSolutionPath) {
 				return true;
 			}
+
+			@Override
+			public void cancel() {
+				/* nothing to do here */
+			}
 		};
 	}
 

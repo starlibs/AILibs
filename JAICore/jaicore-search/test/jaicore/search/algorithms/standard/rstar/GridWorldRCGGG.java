@@ -28,6 +28,11 @@ public class GridWorldRCGGG {
             public boolean doesLastActionAffectScoreOfAnySubsequentSolution(List<GridWorld> partialSolutionPath) {
                 return false;
             }
+
+			@Override
+			public void cancel() {
+				/* nothing to do here */
+			}
         };
 
         ggg = new RandomCompletionGammaGraphGenerator(graphGenerator, solutionEvaluator, 5, 42 );

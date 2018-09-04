@@ -16,4 +16,8 @@ public class AgnosticPathEvaluator<N> implements ISolutionEvaluator<N, Double> {
 		return true;
 	}
 
+	@Override
+	public void cancel() {
+		/* not necessary to cancel */
+	}
 }

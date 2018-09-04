@@ -4,6 +4,8 @@ import java.util.Iterator;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
+import jaicore.basic.Cancelable;
+
 /**
  * The algorithms should actually also be interruptible, but since this is often not the case, we require the cancel method to
  * ensure that the authors of the algorithms provide a mechanism to stop the algorithm and free the used resources.
@@ -16,12 +18,10 @@ import java.util.concurrent.TimeUnit;
  * @param <I> class of which inputs stems from
  * @param <O> class of which solution candidates and the eventually returned result stem from
  */
-public interface IAlgorithm<I,O> extends Iterable<AlgorithmEvent>, Iterator<AlgorithmEvent>, Callable<O> {
+public interface IAlgorithm<I,O> extends Iterable<AlgorithmEvent>, Iterator<AlgorithmEvent>, Callable<O>, Cancelable {
 	
 	public I getInput();
-	
-	public void cancel();
-	
+		
 	public void registerListener(Object listener);
 	
 	public void setNumCPUs(int numberOfCPUs);

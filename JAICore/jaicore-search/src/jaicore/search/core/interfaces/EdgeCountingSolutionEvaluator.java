@@ -20,4 +20,9 @@ public class EdgeCountingSolutionEvaluator<N> implements ISolutionEvaluator<N, D
 	public boolean doesLastActionAffectScoreOfAnySubsequentSolution(List<N> partialSolutionPath) {
 		return true;
 	}
+
+	@Override
+	public void cancel() {
+		/* not necessary to explicitly cancel */
+	}
 }

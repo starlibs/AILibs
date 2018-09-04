@@ -10,7 +10,7 @@ import java.util.Random;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
 
-import de.upb.crc901.mlplan.multiclass.wekamlplan.WekaMLPlanClassifier;
+import de.upb.crc901.mlplan.multiclass.wekamlplan.MLPlanWekaClassifier;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.WekaMLPlanWekaClassifier;
 import jaicore.ml.WekaUtil;
 import weka.classifiers.Evaluation;
@@ -24,20 +24,20 @@ import weka.core.Instances;
  * @author fmohr
  *
  */
-public class MLPlanExample {
+public class MLPlanOpenMLExample {
 
 	public static void main(final String[] args) throws Exception {
 
 		/* load data for segment dataset and create a train-test-split */
 		OpenmlConnector connector = new OpenmlConnector();
-		DataSetDescription ds = connector.dataGet(40984);
+		DataSetDescription ds = connector.dataGet(40983);
 		File file = ds.getDataset("4350e421cdc16404033ef1812ea38c01");
 		Instances data = new Instances(new BufferedReader(new FileReader(file)));
 		data.setClassIndex(data.numAttributes() - 1);
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(0), .7f);
 
 		/* initialize mlplan, and let it run for 30 seconds */
-		WekaMLPlanClassifier mlplan = new WekaMLPlanWekaClassifier();
+		MLPlanWekaClassifier mlplan = new WekaMLPlanWekaClassifier();
 		mlplan.setLoggerName("mlplan");
 		mlplan.setTimeout(60);
 		mlplan.activateVisualization();

@@ -10,12 +10,15 @@ import org.aeonbits.owner.ConfigFactory;
 import de.upb.crc901.mlplan.multiclass.LossFunctionBuilder;
 import de.upb.crc901.mlplan.multiclass.MLPlanClassifierConfig;
 import de.upb.crc901.mlplan.multiclass.MultiClassPerformanceMeasure;
-import de.upb.crc901.mlplan.multiclass.wekamlplan.WekaMLPlanBuilder;
-import de.upb.crc901.mlplan.multiclass.wekamlplan.WekaMLPlanClassifier;
+import de.upb.crc901.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
+import de.upb.crc901.mlplan.multiclass.wekamlplan.MLPlanWekaClassifier;
 import hasco.serialization.ComponentLoader;
 import jaicore.basic.FileUtil;
+import jaicore.planning.graphgenerators.task.tfd.TFDNode;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
+import weka.core.Instances;
 
-public class WekaMLPlanWekaClassifier extends WekaMLPlanClassifier {
+public class WekaMLPlanWekaClassifier extends MLPlanWekaClassifier {
 	
 	static MLPlanClassifierConfig loadOwnerConfig(File configFile) throws IOException {
 		Properties props = new Properties();
@@ -24,12 +27,19 @@ public class WekaMLPlanWekaClassifier extends WekaMLPlanClassifier {
 		return ConfigFactory.create(MLPlanClassifierConfig.class, props);
 	}
 
-	public WekaMLPlanWekaClassifier(WekaMLPlanBuilder builder) throws IOException {
+	public WekaMLPlanWekaClassifier(MLPlanWekaBuilder builder) throws IOException {
 		super(builder.getSearchSpaceConfigFile(), new WEKAPipelineFactory(), new LossFunctionBuilder().getEvaluator(builder.getPerformanceMeasure()), loadOwnerConfig(builder.getAlhorithmConfigFile()));
 	}
 	
 	public WekaMLPlanWekaClassifier() throws IOException {
-		super(new File("conf/automl/searchmodels/weka/autoweka.json"), new WEKAPipelineFactory(), new LossFunctionBuilder().getEvaluator(MultiClassPerformanceMeasure.ERRORRATE), ConfigFactory.create(MLPlanClassifierConfig.class));
-		this.setPreferredNodeEvaluator(new PreferenceBasedNodeEvaluator(new ComponentLoader(getComponentFile()).getComponents(), FileUtil.readFileAsList(getConfig().preferredComponents())));
+		super(new File("conf/automl/searchmodels/weka/weka-all-autoweka.json"), new WEKAPipelineFactory(), new LossFunctionBuilder().getEvaluator(MultiClassPerformanceMeasure.ERRORRATE), ConfigFactory.create(MLPlanClassifierConfig.class));
+		
+		PreferenceBasedNodeEvaluator preferenceNodeEvaluator = new PreferenceBasedNodeEvaluator(new ComponentLoader(getComponentFile()).getComponents(), FileUtil.readFileAsList(getConfig().preferredComponents()));
+		this.setPreferredNodeEvaluator(preferenceNodeEvaluator);
+	}
+
+	@Override
+	protected INodeEvaluator<TFDNode, Double> getSemanticNodeEvaluator(Instances data) {
+		return new SemanticNodeEvaluator(getComponents(), data);
 	}
 }

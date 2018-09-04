@@ -24,11 +24,13 @@ public interface GraphGenerator<T, A> {
 	
 	
 	/**
-	 * indicates if the nodes should be get a unique id, or if all should get the same id od -1
+	 * Indicates whether the nodes should get a unique id, or if all should get the same id -1
+	 * This is important if one wants to guarantee that the explored graph is expanded as a tree 
+	 * 
 	 * @return
 	 * 		<code>true</code> if every node should get an unique id, otherwise return <code>false</code>
 	 */
-	public  void setNodeNumbering(boolean nodenumbering);
+	public void setNodeNumbering(boolean nodenumbering);
 	
 	
 	

@@ -25,7 +25,7 @@ public class ForwardDecompositionTest {
 			classes.add("C" + i);
 			
 		CEOCSTNPlanningProblem<CEOCOperation,OCMethod,CEOCAction> problem = StandardProblemFactory.getNestedDichotomyCreationProblem("root", classes, true, 0, 0);
-		ForwardDecompositionHTNPlannerBasedOnBestFirst<CEOCSTNPlanningProblem<CEOCOperation,OCMethod,CEOCAction>, CEOCAction, Double> planner = new ForwardDecompositionHTNPlannerBasedOnBestFirst<>(problem, n -> 0.0);
+		ForwardDecompositionHTNPlannerBasedOnBestFirst<CEOCOperation, OCMethod, CEOCAction, CEOCSTNPlanningProblem<CEOCOperation,OCMethod,CEOCAction>, Double> planner = new ForwardDecompositionHTNPlannerBasedOnBestFirst<>(problem, n -> 0.0);
 		
 		
 		/* solve problem */
@@ -43,17 +43,17 @@ public class ForwardDecompositionTest {
 		System.out.println("Ready, found exactly the expected " + numberOfExpectedDichotomies + " solutions.");
 	}
 	
-	//@Test
+	@Test
 	public void solveNDWith3Classes() {
 		solveNDProblem(3);
 	}
 	
-	//@Test
+	@Test
 	public void solveNDWith4Classes() {
 		solveNDProblem(4);
 	}
 	
-	//@Test
+	@Test
 	public void solveNDWith5Classes() {
 		solveNDProblem(5);
 	}

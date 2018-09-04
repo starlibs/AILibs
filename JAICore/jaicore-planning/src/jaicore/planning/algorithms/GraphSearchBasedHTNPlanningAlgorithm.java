@@ -17,7 +17,6 @@ import jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.AlgorithmState;
 import jaicore.basic.algorithm.IAlgorithm;
 import jaicore.basic.algorithm.IAlgorithmListener;
-import jaicore.graph.IGraphAlgorithmListener;
 import jaicore.planning.EvaluatedSearchGraphBasedPlan;
 import jaicore.planning.algorithms.events.PlanFoundEvent;
 import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionHTNPlanner;
@@ -33,7 +32,7 @@ import jaicore.search.core.interfaces.IGraphSearchFactory;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
 import jaicore.search.model.probleminputs.builders.SearchProblemInputBuilder;
 
-public class GraphSearchBasedHTNPlanningAlgorithm<PA extends Action, P extends IHTNPlanningProblem<?,?,PA>, ISearch, OSearch, NSrc, ASrc, V extends Comparable<V>, NSearch, ASearch, L extends IAlgorithmListener> implements IAlgorithm<P, EvaluatedSearchGraphBasedPlan<PA, V, NSrc>, L>, ILoggingCustomizable {
+public class GraphSearchBasedHTNPlanningAlgorithm<PA extends Action, P extends IHTNPlanningProblem<?,?,PA>, ISearch, OSearch, NSrc, ASrc, V extends Comparable<V>, NSearch, ASearch, L extends IAlgorithmListener> implements IAlgorithm<P, EvaluatedSearchGraphBasedPlan<PA, V, NSrc>>, ILoggingCustomizable {
 	
 	/* logging and communication */
 	private String loggerName;
@@ -43,7 +42,7 @@ public class GraphSearchBasedHTNPlanningAlgorithm<PA extends Action, P extends I
 	/* algorithm inputs */
 	private final P planningProblem;
 	private final IPlanningGraphGeneratorDeriver<?,?,PA,P, NSrc, ASrc> problemTransformer;
-	private IGraphSearch<ISearch, OSearch, NSrc, ASrc, V, NSearch, ASearch, IGraphAlgorithmListener<NSearch, ASearch>> search;
+	private IGraphSearch<ISearch, OSearch, NSrc, ASrc, V, NSearch, ASearch> search;
 
 	/* state of the algorithm */
 	private AlgorithmState state = AlgorithmState.created;
@@ -51,7 +50,7 @@ public class GraphSearchBasedHTNPlanningAlgorithm<PA extends Action, P extends I
 	
 	public GraphSearchBasedHTNPlanningAlgorithm(P problem,
 			IPlanningGraphGeneratorDeriver<?,?,PA,P, NSrc, ASrc> problemTransformer,
-			IGraphSearchFactory<ISearch, OSearch, NSrc, ASrc, V, NSearch, ASearch, IGraphAlgorithmListener<NSearch, ASearch>> searchFactory,
+			IGraphSearchFactory<ISearch, OSearch, NSrc, ASrc, V, NSearch, ASearch> searchFactory,
 			SearchProblemInputBuilder<NSrc, ASrc, ISearch> searchProblemBuilder) {
 		
 		this.planningProblem = problem;
@@ -156,7 +155,7 @@ public class GraphSearchBasedHTNPlanningAlgorithm<PA extends Action, P extends I
 	}
 
 	@Override
-	public void registerListener(L listener) {
+	public void registerListener(Object listener) {
 		eventBus.register(listener);
 	}
 
@@ -193,7 +192,7 @@ public class GraphSearchBasedHTNPlanningAlgorithm<PA extends Action, P extends I
 		return null;
 	}
 
-	public IGraphSearch<ISearch, OSearch, NSrc, ASrc, V, NSearch, ASearch, IGraphAlgorithmListener<NSearch, ASearch>> getSearch() {
+	public IGraphSearch<ISearch, OSearch, NSrc, ASrc, V, NSearch, ASearch> getSearch() {
 		return search;
 	}
 }

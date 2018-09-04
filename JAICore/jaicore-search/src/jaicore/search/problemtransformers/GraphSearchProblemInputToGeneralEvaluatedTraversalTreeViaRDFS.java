@@ -15,12 +15,16 @@ public class GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS<N, A,
 	private final INodeEvaluator<N, V> preferredNodeEvaluator;
 	private final int seed;
 	private final int numSamples;
+	private final int timeoutForSingleCompletionEvaluationInMS;
+	private final int timeoutForNodeEvaluationInMS;
 
-	public GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS(INodeEvaluator<N, V> preferredNodeEvaluator, int seed, int numSamples) {
+	public GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS(INodeEvaluator<N, V> preferredNodeEvaluator, int seed, int numSamples, int timeoutForSingleCompletionEvaluationInMS, int timeoutForNodeEvaluationInMS) {
 		super();
 		this.preferredNodeEvaluator = preferredNodeEvaluator;
 		this.seed = seed;
 		this.numSamples = numSamples;
+		this.timeoutForSingleCompletionEvaluationInMS = timeoutForSingleCompletionEvaluationInMS;
+		this.timeoutForNodeEvaluationInMS = timeoutForNodeEvaluationInMS;
 	}
 
 	public INodeEvaluator<N, V> getPreferredNodeEvaluator() {
@@ -37,7 +41,8 @@ public class GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS<N, A,
 
 	@Override
 	public GeneralEvaluatedTraversalTree<N, A, V> transform(GraphSearchProblemInput<N, A, V> problem) {
-		return new GeneralEvaluatedTraversalTree<>(problem.getGraphGenerator(), new AlternativeNodeEvaluator<>(preferredNodeEvaluator, new RandomCompletionBasedNodeEvaluator<>(new Random(seed), numSamples, (n1,n2) -> null, problem.getPathEvaluator())));
+		RandomCompletionBasedNodeEvaluator<N, V> rc = new RandomCompletionBasedNodeEvaluator<>(new Random(seed), numSamples, problem.getPathEvaluator(), timeoutForSingleCompletionEvaluationInMS, timeoutForNodeEvaluationInMS);
+		return new GeneralEvaluatedTraversalTree<>(problem.getGraphGenerator(), new AlternativeNodeEvaluator<>(preferredNodeEvaluator, rc));
 	}
 
 }

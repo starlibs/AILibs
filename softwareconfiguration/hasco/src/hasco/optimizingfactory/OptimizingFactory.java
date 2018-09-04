@@ -6,11 +6,15 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
+
 import hasco.core.SoftwareConfigurationProblem;
 import hasco.model.ComponentInstance;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.algorithm.AlgorithmEvent;
 import jaicore.basic.algorithm.IAlgorithm;
+import jaicore.basic.algorithm.SolutionCandidateFoundEvent;
 
 public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, V extends Comparable<V>> implements IAlgorithm<OptimizingFactoryProblem<P,T,V>, T>, ILoggingCustomizable {
 
@@ -19,6 +23,7 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, V e
 	private final OptimizingFactoryProblem<P, T, V> problem;
 	private final SoftwareConfigurationAlgorithmFactory<P, ?, V> factoryForOptimizationAlgorithm;
 	private T constructedObject;
+	private final EventBus eventBus = new EventBus();
 
 	public OptimizingFactory(OptimizingFactoryProblem<P, T, V> problem, SoftwareConfigurationAlgorithmFactory<P, ?, V> factoryForOptimizationAlgorithm) {
 		super();
@@ -50,6 +55,7 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, V e
 			this.logger.info("Switching the logger name of the actually used optimizer to {}", loggerName);
 			((ILoggingCustomizable)optimizer).setLoggerName(loggerName + ".optimizer");
 		}
+		optimizer.registerListener(this);
 		optimizer.call();
 		ComponentInstance solutionModel = optimizer.getOptimizationResult().getResult();
 		this.constructedObject = problem.getBaseFactory().getComponentInstantiation(solutionModel);
@@ -66,11 +72,15 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, V e
 		// TODO Auto-generated method stub
 
 	}
+	
+	@Subscribe
+	public void receiveSolutionEvent(SolutionCandidateFoundEvent<?> event) {
+		eventBus.post(event);
+	}
 
 	@Override
 	public void registerListener(Object listener) {
-		// TODO Auto-generated method stub
-
+		eventBus.register(listener);
 	}
 
 	@Override

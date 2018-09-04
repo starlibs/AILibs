@@ -72,6 +72,7 @@
 	<logger name="mlplan">
 		<level value="info" />
 		<appender-ref ref="console" />
+		<appender-ref ref="infoFileAppender" />
 	</logger>
 	
 	<logger name="jaicore.search.algorithms.standard.rdfs.RandomizedDepthFirstSearch">
@@ -92,9 +93,5 @@
 	
 	<logger name="de.upb.crc901.mlplan.AbstractMLPlan">
 		<level value="info" />
-	</logger>
-	
-	<logger name="de.upb.crc901.services.core">
-		<level value="warn" />
 	</logger>
 </log4j:configuration>

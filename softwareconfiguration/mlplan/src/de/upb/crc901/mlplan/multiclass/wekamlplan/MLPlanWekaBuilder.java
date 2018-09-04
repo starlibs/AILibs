@@ -4,12 +4,12 @@ import java.io.File;
 
 import de.upb.crc901.mlplan.multiclass.MultiClassPerformanceMeasure;
 
-public class WekaMLPlanBuilder {
+public class MLPlanWekaBuilder {
 	private File searchSpaceConfigFile;
 	private File alhorithmConfigFile;
 	private MultiClassPerformanceMeasure performanceMeasure;
 
-	public WekaMLPlanBuilder(File searchSpaceConfigFile, File alhorithmConfigFile, MultiClassPerformanceMeasure performanceMeasure) {
+	public MLPlanWekaBuilder(File searchSpaceConfigFile, File alhorithmConfigFile, MultiClassPerformanceMeasure performanceMeasure) {
 		super();
 		this.searchSpaceConfigFile = searchSpaceConfigFile;
 		this.alhorithmConfigFile = alhorithmConfigFile;
@@ -28,17 +28,17 @@ public class WekaMLPlanBuilder {
 		return performanceMeasure;
 	}
 
-	public WekaMLPlanBuilder withSearchSpaceConfigFile(File searchSpaceConfig) {
+	public MLPlanWekaBuilder withSearchSpaceConfigFile(File searchSpaceConfig) {
 		this.searchSpaceConfigFile = searchSpaceConfig;
 		return this;
 	}
 
-	public WekaMLPlanBuilder withAlgorithmConfigFile(File algorithmConfigFile) {
+	public MLPlanWekaBuilder withAlgorithmConfigFile(File algorithmConfigFile) {
 		this.alhorithmConfigFile = algorithmConfigFile;
 		return this;
 	}
 
-	public WekaMLPlanBuilder withPerformanceMeasure(MultiClassPerformanceMeasure performanceMeasure) {
+	public MLPlanWekaBuilder withPerformanceMeasure(MultiClassPerformanceMeasure performanceMeasure) {
 		this.performanceMeasure = performanceMeasure;
 		return this;
 	}

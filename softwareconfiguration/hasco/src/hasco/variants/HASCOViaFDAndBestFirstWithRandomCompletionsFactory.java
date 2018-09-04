@@ -10,7 +10,7 @@ import jaicore.search.problemtransformers.GraphSearchProblemInputToGeneralEvalua
 public class HASCOViaFDAndBestFirstWithRandomCompletionsFactory extends HASCOFactory<GeneralEvaluatedTraversalTree<TFDNode, String, Double>, TFDNode, String, Double> {
 	public HASCOViaFDAndBestFirstWithRandomCompletionsFactory() {
 		setSearchFactory(new BestFirstFactory<>());
-		setSearchProblemTransformer(new GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS<>(n -> null, 1, 3));
+		setSearchProblemTransformer(new GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS<>(n -> null, 1, 3, -1, -1));
 		setPlanningGraphGeneratorDeriver(new ForwardDecompositionReducer<>());
 	}
 }

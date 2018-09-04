@@ -1,6 +1,9 @@
 package de.upb.crc901.mlplan.multiclass.wekamlplan;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Random;
@@ -9,18 +12,26 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
+
 import de.upb.crc901.mlplan.multiclass.MLPlanClassifierConfig;
+import hasco.core.HASCOSolutionCandidate;
+import hasco.model.Component;
 import hasco.model.ComponentInstance;
 import hasco.optimizingfactory.OptimizingFactory;
 import hasco.optimizingfactory.OptimizingFactoryProblem;
+import hasco.serialization.ComponentLoader;
 import hasco.variants.twophase.TwoPhaseHASCOFactory;
 import hasco.variants.twophase.TwoPhaseSoftwareConfigurationProblem;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.IObjectEvaluator;
+import jaicore.basic.algorithm.SolutionCandidateFoundEvent;
 import jaicore.ml.WekaUtil;
 import jaicore.ml.evaluation.BasicMLEvaluator;
 import jaicore.ml.evaluation.MonteCarloCrossValidationEvaluator;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import weka.classifiers.Classifier;
 import weka.core.Capabilities;
@@ -37,25 +48,30 @@ import weka.core.OptionHandler;
  * @author wever, fmohr
  *
  */
-public class WekaMLPlanClassifier implements Classifier, CapabilitiesHandler, OptionHandler, ILoggingCustomizable {
+public abstract class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, OptionHandler, ILoggingCustomizable {
 
 	/** Logger for controlled output. */
-	private Logger logger = LoggerFactory.getLogger(WekaMLPlanClassifier.class);
+	private Logger logger = LoggerFactory.getLogger(MLPlanWekaClassifier.class);
 	private String loggerName;
 
 	private final File componentFile;
+	private final Collection<Component> components;
 	private final ClassifierFactory factory;
 	private INodeEvaluator<TFDNode, Double> preferredNodeEvaluator;
 	private final BasicMLEvaluator benchmark;
 	private final MLPlanClassifierConfig config;
 	private Classifier selectedClassifier;
+	private final EventBus eventBus = new EventBus();
 	
-	public WekaMLPlanClassifier(File componentFile, ClassifierFactory factory, BasicMLEvaluator benchmark, MLPlanClassifierConfig config) {
+	public MLPlanWekaClassifier(File componentFile, ClassifierFactory factory, BasicMLEvaluator benchmark, MLPlanClassifierConfig config) throws IOException {
 		this.componentFile = componentFile;
+		this.components = new ComponentLoader(componentFile).getComponents();
 		this.factory = factory;
 		this.benchmark = benchmark;
 		this.config = config;
 	}
+	
+	protected abstract INodeEvaluator<TFDNode, Double> getSemanticNodeEvaluator(Instances data);
 
 	@Override
 	public void buildClassifier(final Instances data) throws Exception {
@@ -69,11 +85,11 @@ public class WekaMLPlanClassifier implements Classifier, CapabilitiesHandler, Op
 //		this.setPreferredNodeEvaluator(new SemanticNodeEvaluator(this.getComponents(), data, this.getPreferredNodeEvaluator()));
 		this.logger.info("Starting ML-Plan with {} CPUs and a timeout of {}s, and a portion of {} for the second phase.", config.cpus(), config.timeout(), config.dataPortionForSelection());
 
-		float selectionDataPortion = .7f; // TODO: Configurable machen
+		float selectionDataPortion = .05f; // TODO: Configurable machen
 		Instances dataForSearch;
 		Instances dataPreservedForSelection;
 		if (selectionDataPortion > 0) {
-			List<Instances> selectionSplit = WekaUtil.getStratifiedSplit(data, new Random(config.randomSeed()), .7f);
+			List<Instances> selectionSplit = WekaUtil.getStratifiedSplit(data, new Random(config.randomSeed()), selectionDataPortion);
 			dataForSearch = selectionSplit.get(1);
 			dataPreservedForSelection = selectionSplit.get(0);
 		} else {
@@ -89,19 +105,35 @@ public class WekaMLPlanClassifier implements Classifier, CapabilitiesHandler, Op
 		IObjectEvaluator<Classifier, Double> searchBenchmark = new MonteCarloCrossValidationEvaluator(benchmark, config.numberOfMCIterationsDuringSearch(),
 				dataForSearch, (float) selectionDataPortion);
 		IObjectEvaluator<ComponentInstance, Double> wrappedSearchBenchmark = c -> searchBenchmark.evaluate(factory.getComponentInstantiation(c));
-		IObjectEvaluator<Classifier, Double> selectionBenchmark = new MonteCarloCrossValidationEvaluator(benchmark, config.numberOfMCIterationsDuringSelection(), data,
-					(float) (1 - selectionDataPortion));
+		IObjectEvaluator<Classifier, Double> selectionBenchmark = new IObjectEvaluator<Classifier, Double>() {
+
+			@Override
+			public Double evaluate(Classifier object) throws Exception {
+				
+				/* first conduct MCCV */
+				MonteCarloCrossValidationEvaluator mccv = new MonteCarloCrossValidationEvaluator(benchmark, config.numberOfMCIterationsDuringSelection(), data,
+						(float) (1 - selectionDataPortion));
+				mccv.evaluate(object);
+				
+				/* now retrieve .75-percentile from stats */
+				double mean = mccv.getStats().getMean();
+				double percentile = mccv.getStats().getPercentile(75f);
+				logger.info("Select {} as .75-percentile where {} would have been the mean. Samples size of MCCV was {}", percentile, mean, mccv.getStats().getN());
+				return percentile;
+			}
+		};
 		IObjectEvaluator<ComponentInstance, Double> wrappedSelectionBenchmark = c -> selectionBenchmark.evaluate(factory.getComponentInstantiation(c));
 		TwoPhaseSoftwareConfigurationProblem problem = new TwoPhaseSoftwareConfigurationProblem(componentFile, "AbstractClassifier", wrappedSearchBenchmark, wrappedSelectionBenchmark);
 		
 		/* configure and start optimizing factory */
 		OptimizingFactoryProblem<TwoPhaseSoftwareConfigurationProblem, Classifier, Double> optimizingFactoryProblem = new OptimizingFactoryProblem<>(factory, problem);
 		TwoPhaseHASCOFactory hascoFactory = new TwoPhaseHASCOFactory();
-		hascoFactory.setPreferredNodeEvaluator(preferredNodeEvaluator);
+		hascoFactory.setPreferredNodeEvaluator(new AlternativeNodeEvaluator<TFDNode,Double>(getSemanticNodeEvaluator(dataForSearch), preferredNodeEvaluator));
 		hascoFactory.setConfig(config);
 		OptimizingFactory<TwoPhaseSoftwareConfigurationProblem, Classifier, Double> optimizingFactory = new OptimizingFactory<>(optimizingFactoryProblem, hascoFactory);
 		optimizingFactory.setLoggerName(loggerName + ".2phasehasco");
 		optimizingFactory.setTimeout(config.timeout(), TimeUnit.SECONDS);
+		optimizingFactory.registerListener(this);
 		selectedClassifier = optimizingFactory.call();
 		
 		/* train the classifier returned by the optimizing factory */
@@ -221,7 +253,40 @@ public class WekaMLPlanClassifier implements Classifier, CapabilitiesHandler, Op
 		return componentFile;
 	}
 	
-	public void setTimeoutForSingleFEvaluation(int timeout) {
-		
+	public void setTimeoutForSingleSolutionEvaluation(int timeout) {
+		config.setProperty(MLPlanClassifierConfig.K_RANDOM_COMPLETIONS_TIMEOUT_PATH, String.valueOf(timeout));
+	}
+	
+	public void setTimeoutForNodeEvaluation(int timeout) {
+		config.setProperty(MLPlanClassifierConfig.K_RANDOM_COMPLETIONS_TIMEOUT_NODE, String.valueOf(timeout));
+	}
+
+	public Collection<Component> getComponents() {
+		return Collections.unmodifiableCollection(components);
+	}
+	
+	public void setRandomSeed(int seed) {
+		config.setProperty(MLPlanClassifierConfig.K_RANDOM_SEED, String.valueOf(seed));
+	}
+	
+	public void setNumCPUs(int num) {
+		if (num < 1)
+			throw new IllegalArgumentException("Need to work with at least one CPU");
+		if (num > Runtime.getRuntime().availableProcessors())
+			logger.warn("Warning, configuring {} CPUs where the system has only {}", num, Runtime.getRuntime().availableProcessors());
+		config.setProperty(MLPlanClassifierConfig.K_CPUS, String.valueOf(num));
+	}
+	
+	@Subscribe
+	public void receiveSolutionEvent(SolutionCandidateFoundEvent<HASCOSolutionCandidate<Double>> event) {
+		eventBus.post(event);
+	}
+	
+	public void registerListenerForSolutionEvaluations(Object listener) {
+		eventBus.register(listener);
+	}
+	
+	public Classifier getSelectedClassifier() {
+		return selectedClassifier;
 	}
 }

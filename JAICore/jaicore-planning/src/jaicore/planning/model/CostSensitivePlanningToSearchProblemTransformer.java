@@ -35,6 +35,12 @@ public class CostSensitivePlanningToSearchProblemTransformer<PO extends Operatio
 			public boolean doesLastActionAffectScoreOfAnySubsequentSolution(List<N> partialSolutionPath) {
 				return true;
 			}
+
+			@Override
+			public void cancel() {
+				// TODO Auto-generated method stub
+				
+			}
 		};
 		/* derive the concrete graph search problem input */
 		return new GraphSearchProblemInput<>(graphGeneratorDeriver.transform(problem.getCorePlanningProblem()), solutionEvaluator);

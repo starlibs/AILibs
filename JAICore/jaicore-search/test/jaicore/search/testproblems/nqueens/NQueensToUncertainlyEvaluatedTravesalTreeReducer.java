@@ -7,7 +7,6 @@ import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.IUncertaintyA
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator;
 import jaicore.search.algorithms.standard.uncertainty.IUncertaintySource;
 import jaicore.search.core.interfaces.GraphGenerator;
-import jaicore.search.core.interfaces.IPathUnification;
 import jaicore.search.core.interfaces.ISolutionEvaluator;
 import jaicore.search.model.other.AgnosticPathEvaluator;
 import jaicore.search.model.probleminputs.UncertainlyEvaluatedTraversalTree;
@@ -16,7 +15,6 @@ public class NQueensToUncertainlyEvaluatedTravesalTreeReducer implements Algorit
 	
 	private Random random = new Random(0);
 	private int samples = 3;
-	private IPathUnification<QueenNode> pathUnifier = ((a,b) -> null);
 	private ISolutionEvaluator<QueenNode, Double> solutionEvaluator = new AgnosticPathEvaluator<>();
 	private IUncertaintySource<QueenNode, Double> uncertaintySource = (n, simulationPaths, simulationEvaluations) -> 0.5;
 	
@@ -24,7 +22,7 @@ public class NQueensToUncertainlyEvaluatedTravesalTreeReducer implements Algorit
 	@Override
 	public UncertainlyEvaluatedTraversalTree<QueenNode, String, Double> transform(Integer problem) {
 		GraphGenerator<QueenNode, String> graphGenerator = new NQueenGenerator(problem);
-		IUncertaintyAnnotatingNodeEvaluator<QueenNode, Double> nodeEvaluator = new RandomCompletionBasedNodeEvaluator<>(random, samples, pathUnifier, solutionEvaluator);
+		IUncertaintyAnnotatingNodeEvaluator<QueenNode, Double> nodeEvaluator = new RandomCompletionBasedNodeEvaluator<>(random, samples, solutionEvaluator);
 		nodeEvaluator.setUncertaintySource(uncertaintySource);
 		return new UncertainlyEvaluatedTraversalTree<>(graphGenerator, nodeEvaluator);
 

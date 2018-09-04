@@ -19,6 +19,7 @@ import jaicore.planning.model.task.IHTNPlanningProblem;
 import jaicore.planning.model.task.stn.Method;
 import jaicore.planning.model.task.stn.MethodInstance;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
+import jaicore.search.core.interfaces.PathUnifyingGraphGenerator;
 import jaicore.search.model.travesaltree.NodeExpansionDescription;
 import jaicore.search.model.travesaltree.NodeType;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
@@ -26,7 +27,7 @@ import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 @SuppressWarnings("serial")
-public class TFDGraphGenerator<O extends Operation, M extends Method, A extends Action> implements SerializableGraphGenerator<TFDNode, String> {
+public class TFDGraphGenerator<O extends Operation, M extends Method, A extends Action> implements SerializableGraphGenerator<TFDNode, String>, PathUnifyingGraphGenerator<TFDNode, String> {
 
 	protected TaskPlannerUtil util = new TaskPlannerUtil(null);
 	protected final IHTNPlanningProblem<O, M, A> problem;
@@ -153,5 +154,14 @@ public class TFDGraphGenerator<O extends Operation, M extends Method, A extends 
 	@Override
 	public void setNodeNumbering(boolean nodenumbering) {
 
+	}
+
+	@Override
+	public boolean isPathSemanticallySubsumed(List<TFDNode> path, List<TFDNode> potentialSuperPath) throws InterruptedException {
+		int n = path.size();
+		for (int i = 0; i < n; i++)
+			if (!path.get(i).equals(potentialSuperPath.get(i)))
+				return false;
+		return true;
 	}
 }

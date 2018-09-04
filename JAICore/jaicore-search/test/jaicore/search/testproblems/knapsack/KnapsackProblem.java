@@ -239,6 +239,11 @@ public class KnapsackProblem {
 			public boolean doesLastActionAffectScoreOfAnySubsequentSolution(List<KnapsackNode> partialSolutionPath) {
 				return true;
 			}
+
+			@Override
+			public void cancel() {
+				/* nothing to do */
+			}
 		};
 	}
 

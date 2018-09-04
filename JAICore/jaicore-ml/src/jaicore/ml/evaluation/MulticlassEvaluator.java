@@ -54,14 +54,6 @@ public class MulticlassEvaluator implements BasicMLEvaluator, Serializable {
 			logger.info("Evaluation of classifier was interrupted.");
 			throw e;
 		} catch (Exception e) {
-			if (e.getMessage().contains("Cannot handle multi-valued nominal class!")) {
-				this.measurementEventBus.post(new ClassifierMeasurementEvent<Double>(c, 30000.0, e));
-				return 30000d;
-			}
-			// XXX uncensor this log message as soon as TEAM-80 is done.
-			if (!e.getMessage().contains("out-of-bag error")) {
-				logger.error("Problems with evaluation of classifier. Details:\n{}", LoggerUtil.getExceptionInfo(e));
-			}
 			this.measurementEventBus.post(new ClassifierMeasurementEvent<Double>(c, null, e));
 			throw e;
 		}

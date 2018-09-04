@@ -11,7 +11,7 @@ import java.util.Random;
 
 import org.aeonbits.owner.ConfigCache;
 
-import de.upb.crc901.mlplan.multiclass.wekamlplan.WekaMLPlanClassifier;
+import de.upb.crc901.mlplan.multiclass.wekamlplan.MLPlanWekaClassifier;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.WekaMLPlanWekaClassifier;
 import jaicore.ml.WekaUtil;
 import weka.classifiers.Evaluation;
@@ -49,9 +49,9 @@ public class MLPlanWekaCLI {
 
 		/* extract all relevant information about the experiment */
 		System.out.println(getTime() + " Initialize ML-Plan...");
-		WekaMLPlanClassifier mlPlan = new WekaMLPlanWekaClassifier();
+		MLPlanWekaClassifier mlPlan = new WekaMLPlanWekaClassifier();
 		mlPlan.setTimeout(CLI_CONFIG.timeout());
-		mlPlan.setTimeoutForSingleFEvaluation(CLI_CONFIG.evalTimeout() * 1000);
+		mlPlan.setTimeoutForSingleSolutionEvaluation(CLI_CONFIG.evalTimeout() * 1000);
 		if (CLI_CONFIG.showGraphVisualization())
 			mlPlan.activateVisualization();
 
