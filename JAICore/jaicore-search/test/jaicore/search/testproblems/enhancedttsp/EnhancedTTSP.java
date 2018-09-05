@@ -1,8 +1,10 @@
 package jaicore.search.testproblems.enhancedttsp;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -10,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jaicore.basic.sets.SetUtil;
+import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.graph.LabeledGraph;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
 import jaicore.search.core.interfaces.ISolutionEvaluator;
@@ -282,5 +285,33 @@ public class EnhancedTTSP {
 
 	public LabeledGraph<Short, Double> getMinTravelTimesGraph() {
 		return minTravelTimesGraph;
+	}
+	
+	public static EnhancedTTSP createRandomProblem (int problemSize, long seed) {
+		Random random = new Random(seed);
+		LabeledGraph<Short, Double> minTravelTimesGraph = new LabeledGraph<>();
+		List<Pair<Double, Double>> coordinates = new ArrayList<>();
+		for (short i = 0; i < problemSize; i++) {
+			coordinates.add(new Pair<>(random.nextDouble() * 12, random.nextDouble() * 12));
+			minTravelTimesGraph.addItem(i);
+		}
+		for (short i = 0; i < problemSize; i++) {
+			double x1 = coordinates.get(i).getX();
+			double y1 = coordinates.get(i).getY();
+			for (short j = 0; j < i; j++) {
+				double x2 = coordinates.get(j).getX();
+				double y2 = coordinates.get(j).getY();
+				double minTravelTime = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+				minTravelTimesGraph.addEdge(i, j, minTravelTime);
+				minTravelTimesGraph.addEdge(j, i, minTravelTime);
+			}
+		}
+		;
+		List<Boolean> blockedHours = Arrays.asList(
+				new Boolean[] { true, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true });
+		double maxConsecutiveDrivingTime = random.nextInt(5) + 5;
+		double durationOfShortBreak = random.nextInt(3) + 3;
+		double durationOfLongBreak = random.nextInt(6) + 6;
+		return new EnhancedTTSP(minTravelTimesGraph, (short) 0, blockedHours, 8, maxConsecutiveDrivingTime, durationOfShortBreak, durationOfLongBreak);
 	}
 }
