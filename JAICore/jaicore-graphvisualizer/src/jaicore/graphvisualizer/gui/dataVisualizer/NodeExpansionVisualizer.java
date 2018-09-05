@@ -20,7 +20,7 @@ import javafx.scene.Node;
 public class NodeExpansionVisualizer implements IVisualizer {
 	
 	SwingNode node;
-	SearchVisualizationPanel<?> panel;
+	SearchVisualizationPanel<?,?> panel;
 	EventBus bus = new EventBus();
 	
 	/**
@@ -63,7 +63,7 @@ public class NodeExpansionVisualizer implements IVisualizer {
 	 * @return
 	 * 		The visualization panel
 	 */
-	public SearchVisualizationPanel<?> getPanel() {
+	public SearchVisualizationPanel<?,?> getPanel() {
 		return this.panel;
 	}
 

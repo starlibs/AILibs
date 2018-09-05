@@ -1,8 +1,9 @@
 package jaicore.search.algorithms.standard.uncertainty.paretosearch;
 
-import jaicore.search.structure.core.Node;
 import java.lang.Comparable;
 import java.util.HashSet;
+
+import jaicore.search.model.travesaltree.Node;
 
 /**
  * Internal representation of nodes to maintain pareto front.

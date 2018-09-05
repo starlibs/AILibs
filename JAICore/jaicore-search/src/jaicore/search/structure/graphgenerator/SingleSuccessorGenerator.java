@@ -1,6 +1,6 @@
 package jaicore.search.structure.graphgenerator;
 
-import jaicore.search.structure.core.NodeExpansionDescription;
+import jaicore.search.model.travesaltree.NodeExpansionDescription;
 
 public interface SingleSuccessorGenerator<T,A> extends SuccessorGenerator<T, A> {
 

@@ -35,6 +35,7 @@ import org.graphstream.ui.view.ViewerPipe;
 
 import com.google.common.eventbus.Subscribe;
 
+import jaicore.graph.IGraphAlgorithmListener;
 import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeParentSwitchEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
@@ -42,13 +43,13 @@ import jaicore.graphvisualizer.events.graphEvents.NodeRemovedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
 
 @SuppressWarnings("serial")
-public class SearchVisualizationPanel<T> extends JPanel {
+public class SearchVisualizationPanel<V,E> extends JPanel implements IGraphAlgorithmListener<V, E> {
 
-	private TooltipGenerator<T> tooltipGenerator;
+	private TooltipGenerator<V> tooltipGenerator;
 
 	private int nodeCounter = 0;
 
-	private List<T> roots;
+	private List<V> roots;
 
 	private final Graph graph;
 	private final Viewer viewer;
@@ -61,12 +62,12 @@ public class SearchVisualizationPanel<T> extends JPanel {
 	private final JScrollPane scrollPane = new JScrollPane(tooltipLabel);
 	private Timer tooltipTimer = null;
 	
-	private final ConcurrentMap<T, Node> ext2intNodeMap = new ConcurrentHashMap<>();
-	private final ConcurrentMap<Node, T> int2extNodeMap = new ConcurrentHashMap<>();
+	private final ConcurrentMap<V, Node> ext2intNodeMap = new ConcurrentHashMap<>();
+	private final ConcurrentMap<Node, V> int2extNodeMap = new ConcurrentHashMap<>();
 
 	public SearchVisualizationPanel() {
 		super();
-		this.roots = new ArrayList<T>();
+		this.roots = new ArrayList<V>();
 
 		/* setup layout for the jPanel */
 		setLayout(new OverlayLayout(this));
@@ -108,9 +109,9 @@ public class SearchVisualizationPanel<T> extends JPanel {
 		graph.addAttribute("ui.stylesheet", "url('conf/searchgraph.css')");
 
 		/* attach a listener */
-		this.tooltipGenerator = new TooltipGenerator<T>() {
+		this.tooltipGenerator = new TooltipGenerator<V>() {
 			@Override
-			public String getTooltip(T node) {
+			public String getTooltip(V node) {
 				return node.toString();
 			}
 		};
@@ -198,7 +199,7 @@ public class SearchVisualizationPanel<T> extends JPanel {
 		});
 	}
 
-	protected synchronized Node newNode(final T newNodeExt) {
+	protected synchronized Node newNode(final V newNodeExt) {
 
 		/* create new node */
 		final String nodeId = "n" + (nodeCounter++);
@@ -215,7 +216,7 @@ public class SearchVisualizationPanel<T> extends JPanel {
 		return newNodeInt;
 	}
 
-	protected synchronized Edge newEdge(final T from, final T to) {
+	protected synchronized Edge newEdge(final V from, final V to) {
 		final Node fromInt = this.ext2intNodeMap.get(from);
 		final Node toInt = this.ext2intNodeMap.get(to);
 		if (fromInt == null)
@@ -227,7 +228,7 @@ public class SearchVisualizationPanel<T> extends JPanel {
 		return this.graph.addEdge(edgeId, fromInt, toInt, false);
 	}
 	
-	protected synchronized boolean removeEdge(final T from, final T to) {
+	protected synchronized boolean removeEdge(final V from, final V to) {
 		for(Edge e: graph.getEachEdge()) {
 			if (e.getSourceNode().equals(this.ext2intNodeMap.get(from)) && e.getTargetNode().equals(this.ext2intNodeMap.get(to))) {
 				graph.removeEdge(e);
@@ -238,7 +239,7 @@ public class SearchVisualizationPanel<T> extends JPanel {
 	}
 
 	@Subscribe
-	public synchronized void receiveGraphInitEvent(GraphInitializedEvent<T> e) {
+	public synchronized void receiveGraphInitEvent(GraphInitializedEvent<V> e) {
 		try {
 
 //			if (roots != null)
@@ -254,7 +255,7 @@ public class SearchVisualizationPanel<T> extends JPanel {
 	}
 
 	@Subscribe
-	public synchronized void receiveNewNodeEvent(NodeReachedEvent<T> e) {
+	public synchronized void receiveNewNodeEvent(NodeReachedEvent<V> e) {
 		try {
 			if (!ext2intNodeMap.containsKey(e.getNode()))
 				newNode(e.getNode());
@@ -266,7 +267,7 @@ public class SearchVisualizationPanel<T> extends JPanel {
 	}
 
 	@Subscribe
-	public synchronized void receiveNodeTypeSwitchEvent(NodeTypeSwitchEvent<T> e) {
+	public synchronized void receiveNodeTypeSwitchEvent(NodeTypeSwitchEvent<V> e) {
 		try {
 			if (roots.contains(e.getNode()))
 				return;
@@ -279,7 +280,7 @@ public class SearchVisualizationPanel<T> extends JPanel {
 	}
 	
 	@Subscribe
-	public synchronized void receivedNodeParentSwitchEvent(NodeParentSwitchEvent<T> e) {
+	public synchronized void receivedNodeParentSwitchEvent(NodeParentSwitchEvent<V> e) {
 		try {
 			if(!ext2intNodeMap.containsKey(e.getNode()) && !ext2intNodeMap.containsKey(e.getNewParent()))
 				throw new NoSuchElementException("Cannot switch parent of node " + e.getNode()+". Either the node or the new parent node has not been reached previously.");
@@ -294,7 +295,7 @@ public class SearchVisualizationPanel<T> extends JPanel {
 	}
 	
 	@Subscribe
-	public synchronized void receiveNodeRemovedEvent(NodeRemovedEvent<T> e) {
+	public synchronized void receiveNodeRemovedEvent(NodeRemovedEvent<V> e) {
 		try {
 			graph.removeNode(ext2intNodeMap.get(e.getNode()));
 			// ext2intNodeMap.get(e.getNode()).addAttribute("ui.class", e.getType());
@@ -304,11 +305,11 @@ public class SearchVisualizationPanel<T> extends JPanel {
 		}
 	}
 
-	private T getNodeOfString(String name) {
+	private V getNodeOfString(String name) {
 		return int2extNodeMap.get(graph.getNode(name));
 	}
 
-	public void addNodeListener(NodeListener<T> listener) {
+	public void addNodeListener(NodeListener<V> listener) {
 		this.viewerPipe.addViewerListener(new ViewerListener() {
 
 			@Override
@@ -337,12 +338,12 @@ public class SearchVisualizationPanel<T> extends JPanel {
 		});
 	}
 
-	public TooltipGenerator<T> getTooltipGenerator() {
+	public TooltipGenerator<V> getTooltipGenerator() {
 		return tooltipGenerator;
 	}
 
-	public void setTooltipGenerator(TooltipGenerator<T> tooltipGenerator) {
-		this.tooltipGenerator = (TooltipGenerator<T>)tooltipGenerator;
+	public void setTooltipGenerator(TooltipGenerator<V> tooltipGenerator) {
+		this.tooltipGenerator = (TooltipGenerator<V>)tooltipGenerator;
 	}
 
 	public void reset(){

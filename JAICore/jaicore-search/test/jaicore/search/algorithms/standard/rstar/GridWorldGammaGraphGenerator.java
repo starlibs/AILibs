@@ -7,11 +7,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
-import jaicore.search.algorithms.standard.core.INodeEvaluator;
-import jaicore.search.structure.core.GraphGenerator;
-import jaicore.search.structure.core.Node;
-import jaicore.search.structure.core.NodeExpansionDescription;
-import jaicore.search.structure.core.NodeType;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
+import jaicore.search.core.interfaces.GraphGenerator;
+import jaicore.search.model.travesaltree.Node;
+import jaicore.search.model.travesaltree.NodeExpansionDescription;
+import jaicore.search.model.travesaltree.NodeType;
 import jaicore.search.structure.graphgenerator.GoalTester;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.RootGenerator;

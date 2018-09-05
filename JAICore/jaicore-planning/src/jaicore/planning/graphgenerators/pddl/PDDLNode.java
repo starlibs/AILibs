@@ -1,7 +1,7 @@
 package jaicore.planning.graphgenerators.pddl;
 
 import fr.uga.pddl4j.planners.hsp.Node;
-import jaicore.search.structure.core.AbstractNode;
+import jaicore.search.model.travesaltree.AbstractNode;
 
 public class PDDLNode extends AbstractNode{
 	private Node node;

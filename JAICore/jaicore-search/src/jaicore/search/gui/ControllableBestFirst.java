@@ -2,14 +2,14 @@ package jaicore.search.gui;
 
 import com.google.common.eventbus.Subscribe;
 
+import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.graphvisualizer.events.controlEvents.ControlEvent;
 import jaicore.graphvisualizer.events.controlEvents.IsLiveEvent;
 import jaicore.graphvisualizer.events.controlEvents.NodePushed;
 import jaicore.graphvisualizer.events.controlEvents.StepEvent;
-import jaicore.search.algorithms.standard.bestfirst.BestFirst;
-import jaicore.search.algorithms.standard.core.INodeEvaluator;
-import jaicore.search.structure.core.GraphGenerator;
-import jaicore.search.structure.core.Node;
+import jaicore.search.algorithms.standard.bestfirst.StandardBestFirst;
+import jaicore.search.model.probleminputs.GeneralEvaluatedTraversalTree;
+import jaicore.search.model.travesaltree.Node;
 
 /**
  * A test-implementation of the controllable search.
@@ -18,7 +18,7 @@ import jaicore.search.structure.core.Node;
  * @param <T>
  * @param <A>
  */
-public class ControllableBestFirst<T,A> extends BestFirst<T, A> implements ControllableSearch{
+public class ControllableBestFirst<T,A> extends StandardBestFirst<T, A, Double> implements ControllableSearch{
 
 	public boolean live;
 
@@ -27,8 +27,8 @@ public class ControllableBestFirst<T,A> extends BestFirst<T, A> implements Contr
 	 * @param graphGenerator
 	 * @param pNodeEvaluator
 	 */
-	public ControllableBestFirst(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, Double> pNodeEvaluator) {
-		super(graphGenerator, pNodeEvaluator);
+	public ControllableBestFirst(GeneralEvaluatedTraversalTree<T, A, Double> problem) {
+		super(problem);
 		// TODO Auto-generated constructor stub
 		this.live = false;
 
@@ -51,7 +51,12 @@ public class ControllableBestFirst<T,A> extends BestFirst<T, A> implements Contr
 		}
 		
 		if(event instanceof NodePushed && live)
-			this.step((Node<T, Double>) ((NodePushed) event).getNode());
+			try {
+				this.step((Node<T, Double>) ((NodePushed) event).getNode());
+			} catch (InterruptedException | AlgorithmExecutionCanceledException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 
 		if(event instanceof IsLiveEvent)
 			live = ((IsLiveEvent) event).isLive();

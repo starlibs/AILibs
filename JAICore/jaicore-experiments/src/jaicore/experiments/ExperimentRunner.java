@@ -2,6 +2,7 @@ package jaicore.experiments;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -38,6 +39,7 @@ public class ExperimentRunner {
 
 	private static final String FIELD_ID = "experiment_id";
 	private static final String FIELD_MEMORY = "memory";
+	private static final String FIELD_HOST = "host";
 	private static final String FIELD_NUMCPUS = "cpus";
 	private static final String FIELD_TIME = "time";
 
@@ -65,30 +67,28 @@ public class ExperimentRunner {
 		if (this.config.getDBTableName() == null) {
 			throw new IllegalArgumentException("DB table must not be null in experiment config.");
 		}
-
-		this.fieldsForWhichToIgnoreMemory = (this.config.getFieldsForWhichToIgnoreMemory() != null)
-				? this.config.getFieldsForWhichToIgnoreMemory()
-				: new ArrayList<>();
-		this.fieldsForWhichToIgnoreTime = (this.config.getFieldsForWhichToIgnoreTime() != null)
-				? this.config.getFieldsForWhichToIgnoreTime()
-				: new ArrayList<>();
+		if (this.config.getKeyFields() == null)
+			throw new IllegalArgumentException("Key fields (keyfields) entry must be set in configuration!");
+		if (this.config.getResultFields() == null)
+			throw new IllegalArgumentException("Result fields (resultfields) entry must be set in configuration!");
+		
+		this.fieldsForWhichToIgnoreMemory = (this.config.getFieldsForWhichToIgnoreMemory() != null) ? this.config.getFieldsForWhichToIgnoreMemory() : new ArrayList<>();
+		this.fieldsForWhichToIgnoreTime = (this.config.getFieldsForWhichToIgnoreTime() != null) ? this.config.getFieldsForWhichToIgnoreTime() : new ArrayList<>();
 
 		this.conductor = conductor;
-		this.adapter = new SQLAdapter(this.config.getDBHost(), this.config.getDBUsername(), this.config.getDBPassword(),
-				this.config.getDBDatabaseName(), this.config.getDBSSL());
+		this.adapter = new SQLAdapter(this.config.getDBHost(), this.config.getDBUsername(), this.config.getDBPassword(), this.config.getDBDatabaseName(), this.config.getDBSSL());
 		this.updateExperimentSetupAccordingToConfig();
 	}
 
 	private void updateExperimentSetupAccordingToConfig() {
 		this.memoryLimit = (int) (Runtime.getRuntime().maxMemory() / 1024 / 1024);
 		if (this.memoryLimit != this.config.getMemoryLimitinMB()) {
-			System.err.println("The true memory limit is " + this.memoryLimit + ", which differs from the "
-					+ this.config.getMemoryLimitinMB() + " specified in the config! We will write " + this.memoryLimit
-					+ " into the database.");
+			System.err.println("The true memory limit is " + this.memoryLimit + ", which differs from the " + this.config.getMemoryLimitinMB() + " specified in the config! We will write " + this.memoryLimit + " into the database.");
 		}
 		this.cpuLimit = this.config.getNumberOfCPUs();
 		int numExperiments = 1;
 		try {
+			
 			/* create map of possible values for each key field */
 			for (String key : this.config.getKeyFields()) {
 				/* this is a hack needed because one cannot retrieve generic configs */
@@ -96,8 +96,7 @@ public class ExperimentRunner {
 				if (propertyVals == null) {
 					throw new IllegalArgumentException("No property values defined for key field \"" + key + "\"");
 				}
-				List<String> vals = Arrays.asList(StringUtil.explode(propertyVals, ",")).stream().map(s -> s.trim())
-						.collect(Collectors.toList());
+				List<String> vals = Arrays.asList(StringUtil.explode(propertyVals, ",")).stream().map(s -> s.trim()).collect(Collectors.toList());
 				this.config.setProperty(key, propertyVals);
 				this.valuesForKeyFields.put(key, vals);
 				numExperiments *= vals.size();
@@ -157,25 +156,21 @@ public class ExperimentRunner {
 				String dbKey = this.getDatabaseFieldnameForConfigEntry(key);
 				keyValues.put(dbKey, rs.getString(dbKey));
 			}
-			experimentEntries.add(new ExperimentDBEntry(rs.getInt(FIELD_ID),
-					new Experiment(rs.getInt(FIELD_MEMORY + "_max"), rs.getInt(FIELD_NUMCPUS), keyValues)));
+			experimentEntries.add(new ExperimentDBEntry(rs.getInt(FIELD_ID), new Experiment(rs.getInt(FIELD_MEMORY + "_max"), rs.getInt(FIELD_NUMCPUS), keyValues)));
 		}
 		return experimentEntries;
 	}
 
-	public ExperimentDBEntry createAndGetExperimentIfNotConducted(final Map<String, String> values)
-			throws FileNotFoundException, IOException, SQLException {
+	public ExperimentDBEntry createAndGetExperimentIfNotConducted(final Map<String, String> values) throws FileNotFoundException, IOException, SQLException {
 		return this.createAndGetExperimentIfNotConducted(new Experiment(this.memoryLimit, this.cpuLimit, values));
 	}
 
-	public ExperimentDBEntry createAndGetExperimentIfNotConducted(final Experiment experiment)
-			throws FileNotFoundException, IOException, SQLException {
+	public ExperimentDBEntry createAndGetExperimentIfNotConducted(final Experiment experiment) throws FileNotFoundException, IOException, SQLException {
 		/*
 		 * first check whether exactly the same experiment (with the same seed) has been
 		 * conducted previously
 		 */
-		Optional<?> existingExperiment = this.knownExperimentEntries.stream()
-				.filter(e -> e.getExperiment().equals(experiment)).findAny();
+		Optional<?> existingExperiment = this.knownExperimentEntries.stream().filter(e -> e.getExperiment().equals(experiment)).findAny();
 		if (existingExperiment.isPresent()) {
 			return null;
 		}
@@ -183,19 +178,18 @@ public class ExperimentRunner {
 		Map<String, Object> valuesToInsert = new HashMap<>(experiment.getValuesOfKeyFields());
 		valuesToInsert.put(FIELD_MEMORY + "_max", this.memoryLimit);
 		valuesToInsert.put(FIELD_NUMCPUS, this.cpuLimit);
+		valuesToInsert.put(FIELD_HOST, InetAddress.getLocalHost().getHostName());
 
 		int id = this.adapter.insert(this.config.getDBTableName(), valuesToInsert);
 		return new ExperimentDBEntry(id, experiment);
 	}
 
-	public void updateExperiment(final ExperimentDBEntry exp, final Map<String, ? extends Object> values)
-			throws SQLException {
+	public void updateExperiment(final ExperimentDBEntry exp, final Map<String, ? extends Object> values) throws SQLException {
 		Collection<String> writableFields = this.config.getResultFields();
 		writableFields.add("exception");
 		writableFields.add(FIELD_TIME + "_end");
 		if (!writableFields.containsAll(values.keySet())) {
-			throw new IllegalArgumentException(
-					"The value set contains non-result fields: " + SetUtil.difference(values.keySet(), writableFields));
+			throw new IllegalArgumentException("The value set contains non-result fields: " + SetUtil.difference(values.keySet(), writableFields));
 		}
 		String now = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
 		String memoryUsageInMB = String.valueOf((int) Runtime.getRuntime().totalMemory() / 1024 / 1024);
@@ -221,8 +215,7 @@ public class ExperimentRunner {
 			throw new IllegalArgumentException("Experiment ID must be positive!");
 		}
 		if (id >= this.totalNumberOfExperiments) {
-			throw new IllegalArgumentException("Invalid experiment ID " + id + ". Only " + this.totalNumberOfExperiments
-					+ " are possible with the given config.");
+			throw new IllegalArgumentException("Invalid experiment ID " + id + ". Only " + this.totalNumberOfExperiments + " are possible with the given config.");
 		}
 
 		/* determine the block sizes for the different iterations */
@@ -241,8 +234,7 @@ public class ExperimentRunner {
 		for (String key : this.config.getKeyFields()) {
 			int s = blockSizes.get(key);
 			int index = (int) Math.floor(k / s * 1f);
-			keyFieldValues.put(this.getDatabaseFieldnameForConfigEntry(key),
-					this.valuesForKeyFields.get(key).get(index));
+			keyFieldValues.put(this.getDatabaseFieldnameForConfigEntry(key), this.valuesForKeyFields.get(key).get(index));
 			k = k % s;
 		}
 		return new Experiment(this.memoryLimit, this.cpuLimit, keyFieldValues);
@@ -254,12 +246,10 @@ public class ExperimentRunner {
 			return;
 		}
 
-		logger.info("Now conducting new experiment. {}/{} experiments have already been started or even been completed",
-				this.knownExperimentEntries.size(), this.totalNumberOfExperiments);
+		logger.info("Now conducting new experiment. {}/{} experiments have already been started or even been completed", this.knownExperimentEntries.size(), this.totalNumberOfExperiments);
 
 		int numberOfConductedExperiments = 0;
-		while (!Thread.interrupted() && this.knownExperimentEntries.size() < this.totalNumberOfExperiments
-				&& ((maxNumberOfExperiments > 0) ? numberOfConductedExperiments < maxNumberOfExperiments : true)) {
+		while (!Thread.interrupted() && this.knownExperimentEntries.size() < this.totalNumberOfExperiments && ((maxNumberOfExperiments > 0) ? numberOfConductedExperiments < maxNumberOfExperiments : true)) {
 			if (reload) {
 				this.config.reload();
 			}
@@ -284,10 +274,7 @@ public class ExperimentRunner {
 	 *
 	 * @param exp
 	 * @throws Exception.
-	 *             These are not the exceptions thrown by the experiment itself,
-	 *             because these are logged into the database. Exceptions thrown
-	 *             here are technical exceptions that occur when arranging the
-	 *             experiment
+	 *             These are not the exceptions thrown by the experiment itself, because these are logged into the database. Exceptions thrown here are technical exceptions that occur when arranging the experiment
 	 */
 	public boolean conductExperimentIfNotAlreadyConducted(final Experiment exp) throws Exception {
 
@@ -316,8 +303,7 @@ public class ExperimentRunner {
 				e.printStackTrace();
 				System.err.println("Experiment failed due to exception, which has been logged");
 			}
-			valuesToAddAfterRun.put(FIELD_TIME + "_end",
-					new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+			valuesToAddAfterRun.put(FIELD_TIME + "_end", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
 			this.updateExperiment(expEntry, valuesToAddAfterRun);
 			return true;
 		} else {
@@ -336,6 +322,7 @@ public class ExperimentRunner {
 			keyFields.append("`" + shortKey + "`,");
 		}
 		sql.append("`" + FIELD_NUMCPUS + "` int(2) NOT NULL,");
+		sql.append("`" + FIELD_HOST + "` varchar(255) NOT NULL,");
 		sql.append("`" + FIELD_MEMORY + "_max` int(6) NOT NULL,");
 		sql.append("`" + FIELD_TIME + "_start` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,");
 
@@ -351,8 +338,7 @@ public class ExperimentRunner {
 		sql.append("`exception` TEXT NULL,");
 		sql.append("`" + FIELD_TIME + "_end` TIMESTAMP NULL,");
 		sql.append("PRIMARY KEY (`" + FIELD_ID + "`)");
-		sql.append(", UNIQUE KEY `keyFields` (" + keyFields.toString() + "`" + FIELD_NUMCPUS + "`, `" + FIELD_MEMORY
-				+ "_max`)");
+		sql.append(", UNIQUE KEY `keyFields` (" + keyFields.toString() + "`" + FIELD_NUMCPUS + "`, `" + FIELD_MEMORY + "_max`)");
 		sql.append(") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin");
 		this.adapter.update(sql.toString(), new String[] {});
 	}

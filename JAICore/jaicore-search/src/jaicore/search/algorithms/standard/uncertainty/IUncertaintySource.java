@@ -2,7 +2,7 @@ package jaicore.search.algorithms.standard.uncertainty;
 
 import java.util.List;
 
-import jaicore.search.structure.core.Node;
+import jaicore.search.model.travesaltree.Node;
 
 @FunctionalInterface
 public interface IUncertaintySource <T, V extends Comparable<V>>{

@@ -1,6 +1,6 @@
 package jaicore.graphvisualizer.gui;
 
-import jaicore.graph.IObservableGraphAlgorithm;
+import jaicore.graph.IGraphAlgorithm;
 import jaicore.graphvisualizer.gui.dataSupplier.ISupplier;
 import javafx.application.Platform;
 
@@ -31,7 +31,7 @@ public class VisualizationWindow<T> {
 	 * @param title
 	 * 		The title of the window
 	 */
-	public VisualizationWindow(IObservableGraphAlgorithm observable, String title) {
+	public VisualizationWindow(IGraphAlgorithm observable, String title) {
 		//if there is no fxThread, create a new one and start it
 		if(fxThread == null) {
 			try {

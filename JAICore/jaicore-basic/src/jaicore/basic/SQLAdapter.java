@@ -14,13 +14,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.commons.lang3.math.NumberUtils;
-
 /**
- * This is a simple util class for easy database access and query execution in
- * sql. You need to make sure that the respective JDBC connector is in the class
- * path. By default, the adapter uses the mysql driver, but any jdbc driver can
- * be used.
+ * This is a simple util class for easy database access and query execution in sql. You need to make sure that the respective JDBC connector is in the class path. By default, the adapter uses the mysql driver, but any jdbc driver can be
+ * used.
  *
  * @author fmohr
  *
@@ -33,8 +29,7 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 	private long timestampOfLastAction = Long.MIN_VALUE;
 	private final Properties connectionProperties;
 
-	public SQLAdapter(final String host, final String user, final String password, final String database,
-			final boolean ssl) {
+	public SQLAdapter(final String host, final String user, final String password, final String database, final boolean ssl) {
 		this("mysql", host, user, password, database, new Properties(), ssl);
 	}
 
@@ -42,13 +37,11 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 		this("mysql", host, user, password, database, new Properties());
 	}
 
-	public SQLAdapter(final String driver, final String host, final String user, final String password,
-			final String database, final Properties connectionProperties) {
+	public SQLAdapter(final String driver, final String host, final String user, final String password, final String database, final Properties connectionProperties) {
 		this(driver, host, user, password, database, connectionProperties, true);
 	}
 
-	public SQLAdapter(final String driver, final String host, final String user, final String password,
-			final String database, final Properties connectionProperties, final boolean ssl) {
+	public SQLAdapter(final String driver, final String host, final String user, final String password, final String database, final Properties connectionProperties, final boolean ssl) {
 		super();
 		this.ssl = ssl;
 		this.driver = driver;
@@ -75,15 +68,12 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 				Properties connectionProps = new Properties(this.connectionProperties);
 				connectionProps.put("user", this.user);
 				connectionProps.put("password", this.password);
-				this.connect = DriverManager.getConnection(
-						"jdbc:" + this.driver + "://" + this.host + "/" + this.database
-								+ ((this.ssl) ? "?verifyServerCertificate=false&requireSSL=true&useSSL=true" : ""),
-						connectionProps);
+				String connectionString = "jdbc:" + this.driver + "://" + this.host + "/" + this.database + ((this.ssl) ? "?verifyServerCertificate=false&requireSSL=true&useSSL=true" : "");
+				this.connect = DriverManager.getConnection(connectionString, connectionProps);
 				return;
 			} catch (SQLException e) {
 				tries++;
-				System.err.println("Connection to server " + this.host + " failed with JDBC driver " + this.driver
-						+ " (attempt " + tries + " of 3), waiting 3 seconds and trying again.");
+				System.err.println("Connection to server " + this.host + " failed with JDBC driver " + this.driver + " (attempt " + tries + " of 3), waiting 3 seconds and trying again.");
 				e.printStackTrace();
 				try {
 					Thread.sleep(3000);
@@ -150,22 +140,14 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 		return this.insert(sql, Arrays.asList(values));
 	}
 
-	public int insert(final String sql, final List<String> values) throws SQLException {
+	public int insert(final String sql, final List<? extends Object> values) throws SQLException {
 		this.checkConnection();
 		PreparedStatement stmt = this.connect.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 		for (int i = 1; i <= values.size(); i++) {
-			String val = values.get(i - 1);
-			if (NumberUtils.isCreatable(val)) {
-				if (val.contains(".")) {
-					stmt.setDouble(i, NumberUtils.toDouble(val));
-				} else {
-					stmt.setInt(i, NumberUtils.toInt(val));
-				}
-			} else {
-				stmt.setString(i, values.get(i - 1));
-			}
+			this.setValue(stmt, i, values.get(i - 1));
 		}
 		stmt.executeUpdate();
+
 		ResultSet rs = stmt.getGeneratedKeys();
 		rs.next();
 		return rs.getInt(1);
@@ -174,7 +156,7 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 	public int insert(final String table, final Map<String, ? extends Object> map) throws SQLException {
 		StringBuilder sb1 = new StringBuilder();
 		StringBuilder sb2 = new StringBuilder();
-		List<String> values = new ArrayList<>();
+		List<Object> values = new ArrayList<>();
 		for (String key : map.keySet()) {
 			if (map.get(key) == null) {
 				continue;
@@ -185,7 +167,7 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 			}
 			sb1.append(key);
 			sb2.append("?");
-			values.add(map.get(key).toString());
+			values.add(map.get(key));
 		}
 
 		String statement = "INSERT INTO " + table + " (" + sb1.toString() + ") VALUES (" + sb2.toString() + ")";
@@ -205,17 +187,16 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 		stmt.executeUpdate();
 	}
 
-	public void update(final String table, final Map<String, ? extends Object> updateValues,
-			final Map<String, ? extends Object> conditions) throws SQLException {
+	public void update(final String table, final Map<String, ? extends Object> updateValues, final Map<String, ? extends Object> conditions) throws SQLException {
 		this.checkConnection();
 		StringBuilder updateSB = new StringBuilder();
-		List<String> values = new ArrayList<>();
+		List<Object> values = new ArrayList<>();
 		for (String key : updateValues.keySet()) {
 			if (updateSB.length() > 0) {
 				updateSB.append(", ");
 			}
 			updateSB.append(key + " = (?)");
-			values.add(updateValues.get(key).toString());
+			values.add(updateValues.get(key));
 		}
 
 		StringBuilder conditionSB = new StringBuilder();
@@ -224,25 +205,35 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 				conditionSB.append(" AND ");
 			}
 			conditionSB.append(key + " = (?)");
-			values.add(conditions.get(key).toString());
+			values.add(conditions.get(key));
 		}
 
 		String sql = "UPDATE " + table + " SET " + updateSB.toString() + " WHERE " + conditionSB.toString();
 		PreparedStatement stmt = this.connect.prepareStatement(sql);
 		for (int i = 1; i <= values.size(); i++) {
-			stmt.setString(i, values.get(i - 1));
+			this.setValue(stmt, i, values.get(i - 1));
 		}
 		stmt.executeUpdate();
 	}
 
+	private void setValue(final PreparedStatement stmt, final int index, final Object val) throws SQLException {
+		if (val instanceof Integer) {
+			stmt.setInt(index, (Integer) val);
+		} else if (val instanceof Number) {
+			stmt.setDouble(index, (Double) val);
+		} else if (val instanceof String) {
+			stmt.setString(index, (String) val);
+		} else {
+			stmt.setObject(index, val);
+		}
+	}
+
 	/**
-	 * Close the connection. No more queries can be sent after having the access
-	 * object closed
+	 * Close the connection. No more queries can be sent after having the access object closed
 	 */
 	@Override
 	public void close() {
 		try {
-
 			if (this.connect != null) {
 				this.connect.close();
 			}

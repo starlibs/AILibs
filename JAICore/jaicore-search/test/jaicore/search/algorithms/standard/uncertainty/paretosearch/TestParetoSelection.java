@@ -1,8 +1,9 @@
 package jaicore.search.algorithms.standard.uncertainty.paretosearch;
 
-import jaicore.search.structure.core.Node;
 import org.junit.Before;
 import org.junit.Test;
+
+import jaicore.search.model.travesaltree.Node;
 
 import java.util.ArrayList;
 import java.util.PriorityQueue;

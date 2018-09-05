@@ -6,10 +6,10 @@ import java.util.Iterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jaicore.search.algorithms.standard.core.INodeEvaluator;
-import jaicore.search.structure.core.Node;
-import jaicore.search.structure.core.OpenCollection;
-import jaicore.search.structure.core.PriorityQueueOpen;
+import jaicore.search.algorithms.standard.bestfirst.model.OpenCollection;
+import jaicore.search.algorithms.standard.bestfirst.model.PriorityQueueOpen;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
+import jaicore.search.model.travesaltree.Node;
 
 public class ExplorationOpenSelection<N,V extends Comparable<V>,W extends Comparable<W>> implements OpenCollection<Node<N, V>> {
 	

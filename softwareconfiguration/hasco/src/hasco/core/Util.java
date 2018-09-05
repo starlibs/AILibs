@@ -28,9 +28,11 @@ import jaicore.basic.sets.SetUtil;
 import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.logic.fol.structure.Literal;
 import jaicore.logic.fol.structure.Monom;
+import jaicore.planning.graphgenerators.IPlanningGraphGeneratorDeriver;
 import jaicore.planning.model.core.Action;
+import jaicore.planning.model.core.Plan;
 import jaicore.planning.model.core.PlannerUtil;
-import jaicore.search.structure.core.Node;
+import jaicore.search.model.travesaltree.Node;
 
 public class Util {
 
@@ -196,20 +198,20 @@ public class Util {
     return objectMap;
   }
 
-  public static <N, A, V extends Comparable<V>> ComponentInstance getSolutionCompositionForNode(final IHASCOSearchSpaceUtilFactory<N, A, V> searchSpaceUtilFactory,
+  public static <N, A, V extends Comparable<V>> ComponentInstance getSolutionCompositionForNode(final IPlanningGraphGeneratorDeriver<?, ?, ?, ?, N, A> planningGraphDeriver,
       final Collection<Component> components, final Monom initState, final Node<N, ?> path) {
-    return getSolutionCompositionForPlan(components, initState, searchSpaceUtilFactory.getPathToPlanConverter().getPlan(path.externalPath()));
+    return getSolutionCompositionForPlan(components, initState, planningGraphDeriver.getPlan(path.externalPath()));
   }
   
-  public static Monom getFinalStateOfPlan(final Monom initState, final List<Action> plan) {
+  public static Monom getFinalStateOfPlan(final Monom initState, final Plan<? extends Action> plan) {
     Monom state = new Monom(initState);
-    for (Action a : plan) {
+    for (Action a : plan.getActions()) {
       PlannerUtil.updateState(state, a);
     }
     return state;
   }
 
-  public static ComponentInstance getSolutionCompositionForPlan(final Collection<Component> components, final Monom initState, final List<Action> plan) {
+  public static ComponentInstance getSolutionCompositionForPlan(final Collection<Component> components, final Monom initState, final Plan<? extends Action> plan) {
     return getSolutionCompositionFromState(components, getFinalStateOfPlan(initState, plan));
   }
 

@@ -15,9 +15,9 @@ public class MonteCarloCrossValidationEvaluator implements ClassifierEvaluator {
 	private boolean canceled = false;
 	private final int repeats;
 	private final float trainingPortion;
+	private final DescriptiveStatistics stats = new DescriptiveStatistics();
 
-	public MonteCarloCrossValidationEvaluator(final BasicMLEvaluator basicEvaluator, final int repeats,
-			final Instances data, final float trainingPortion) {
+	public MonteCarloCrossValidationEvaluator(final BasicMLEvaluator basicEvaluator, final int repeats, final Instances data, final float trainingPortion) {
 		super();
 		this.basicEvaluator = basicEvaluator;
 		this.repeats = repeats;
@@ -40,7 +40,6 @@ public class MonteCarloCrossValidationEvaluator implements ClassifierEvaluator {
 		}
 
 		/* perform random stratified split */
-		DescriptiveStatistics stats = new DescriptiveStatistics();
 		logger.info("Starting evaluation of {}", pl);
 		for (int i = 0; i < this.repeats && !this.canceled; i++) {
 			logger.info("Evaluating {} with split #{}/{}", pl, i + 1, this.repeats);
@@ -56,5 +55,9 @@ public class MonteCarloCrossValidationEvaluator implements ClassifierEvaluator {
 
 	public BasicMLEvaluator getEvaluator() {
 		return this.basicEvaluator;
+	}
+
+	public DescriptiveStatistics getStats() {
+		return stats;
 	}
 }

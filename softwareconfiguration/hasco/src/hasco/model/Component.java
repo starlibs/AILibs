@@ -11,106 +11,154 @@ import java.util.TreeMap;
 import jaicore.basic.sets.PartialOrderedSet;
 
 public class Component {
-  private final String name;
-  private final Collection<String> providedInterfaces = new ArrayList<>();
-  private final LinkedHashMap<String, String> requiredInterfaces = new LinkedHashMap<>();
-  private final PartialOrderedSet<Parameter> parameters = new PartialOrderedSet<>();
-  private final Collection<Dependency> dependencies = new ArrayList<>();
+	private final String name;
+	private final Collection<String> providedInterfaces = new ArrayList<>();
+	private final LinkedHashMap<String, String> requiredInterfaces = new LinkedHashMap<>();
+	private final PartialOrderedSet<Parameter> parameters = new PartialOrderedSet<>();
+	private final Collection<Dependency> dependencies = new ArrayList<>();
 
-  public Component(final String name) {
-    super();
-    this.name = name;
-  }
+	public Component(final String name) {
+		super();
+		this.name = name;
+		this.getProvidedInterfaces().add(this.name);
+	}
 
-  public Component(final String name, final TreeMap<String, String> requiredInterfaces, final Collection<String> providedInterfaces, final List<Parameter> parameters,
-      final Collection<Dependency> dependencies) {
-    this(name);
-    this.requiredInterfaces.putAll(requiredInterfaces);
-    this.providedInterfaces.addAll(providedInterfaces);
-    parameters.forEach(param -> this.addParameter(param));
-    this.dependencies.addAll(dependencies);
-  }
+	public Component(final String name, final TreeMap<String, String> requiredInterfaces, final Collection<String> providedInterfaces, final List<Parameter> parameters, final Collection<Dependency> dependencies) {
+		this(name);
+		this.requiredInterfaces.putAll(requiredInterfaces);
+		this.providedInterfaces.addAll(providedInterfaces);
+		parameters.forEach(param -> this.addParameter(param));
+		this.dependencies.addAll(dependencies);
+	}
 
-  public String getName() {
-    return this.name;
-  }
+	public String getName() {
+		return this.name;
+	}
 
-  public LinkedHashMap<String, String> getRequiredInterfaces() {
-    return this.requiredInterfaces;
-  }
+	public LinkedHashMap<String, String> getRequiredInterfaces() {
+		return this.requiredInterfaces;
+	}
 
-  public Collection<String> getProvidedInterfaces() {
-    return this.providedInterfaces;
-  }
+	public Collection<String> getProvidedInterfaces() {
+		return this.providedInterfaces;
+	}
 
-  public PartialOrderedSet<Parameter> getParameters() {
-    return this.parameters;
-  }
+	public PartialOrderedSet<Parameter> getParameters() {
+		return this.parameters;
+	}
 
-  public Parameter getParameter(final String paramName) {
-    Optional<Parameter> param = this.parameters.stream().filter(p -> p.getName().equals(paramName)).findFirst();
-    if (!param.isPresent()) {
-      throw new IllegalArgumentException("Component " + this.name + " has no parameter with name \"" + paramName + "\"");
-    }
-    return param.get();
-  }
+	public Parameter getParameter(final String paramName) {
+		Optional<Parameter> param = this.parameters.stream().filter(p -> p.getName().equals(paramName)).findFirst();
+		if (!param.isPresent()) {
+			throw new IllegalArgumentException("Component " + this.name + " has no parameter with name \"" + paramName + "\"");
+		}
+		return param.get();
+	}
 
-  public void addProvidedInterface(final String interfaceName) {
-    this.providedInterfaces.add(interfaceName);
-  }
+	public void addProvidedInterface(final String interfaceName) {
+		this.providedInterfaces.add(interfaceName);
+	}
 
-  public void addRequiredInterface(final String interfaceID, final String interfaceName) {
-    this.requiredInterfaces.put(interfaceID, interfaceName);
-  }
+	public void addRequiredInterface(final String interfaceID, final String interfaceName) {
+		this.requiredInterfaces.put(interfaceID, interfaceName);
+	}
 
-  public void addParameter(final Parameter param) {
-    assert !this.parameters.stream().filter(p -> p.getName().equals(param.getName())).findAny().isPresent() : "Component " + this.name + " already has parameter with name "
-        + param.getName();
-    this.parameters.add(param);
-  }
+	public void addParameter(final Parameter param) {
+		assert !this.parameters.stream().filter(p -> p.getName().equals(param.getName())).findAny().isPresent() : "Component " + this.name + " already has parameter with name " + param.getName();
+		this.parameters.add(param);
+	}
 
-  public void addDependency(final Dependency dependency) {
+	public void addDependency(final Dependency dependency) {
 
-    /* check whether this dependency is coherent with the current partial order on the parameters */
-    Collection<Parameter> paramsInPremise = new HashSet<>();
-    dependency.getPremise().forEach(c -> c.forEach(i -> paramsInPremise.add(i.getX())));
-    Collection<Parameter> paramsInConclusion = new HashSet<>();
-    dependency.getConclusion().forEach(i -> paramsInConclusion.add(i.getX()));
-    for (Parameter before : paramsInPremise) {
-      for (Parameter after : paramsInConclusion) {
-        this.parameters.requireABeforeB(before, after);
-      }
-    }
+		/* check whether this dependency is coherent with the current partial order on the parameters */
+		Collection<Parameter> paramsInPremise = new HashSet<>();
+		dependency.getPremise().forEach(c -> c.forEach(i -> paramsInPremise.add(i.getX())));
+		Collection<Parameter> paramsInConclusion = new HashSet<>();
+		dependency.getConclusion().forEach(i -> paramsInConclusion.add(i.getX()));
+		for (Parameter before : paramsInPremise) {
+			for (Parameter after : paramsInConclusion) {
+				this.parameters.requireABeforeB(before, after);
+			}
+		}
 
-    /* add the dependency to the set of dependencies */
-    this.dependencies.add(dependency);
-  }
+		/* add the dependency to the set of dependencies */
+		this.dependencies.add(dependency);
+	}
 
-  public Collection<Dependency> getDependencies() {
-    return this.dependencies;
-  }
+	public Collection<Dependency> getDependencies() {
+		return this.dependencies;
+	}
 
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
 
-    sb.append(this.providedInterfaces);
-    sb.append(":");
-    sb.append(this.name);
-    sb.append("(");
-    boolean first = true;
-    for (Parameter p : this.parameters) {
-      if (first) {
-        first = false;
-      } else {
-        sb.append(",");
-      }
-      sb.append(p);
-    }
-    sb.append(")");
-    sb.append(":");
-    sb.append(this.requiredInterfaces);
+		sb.append(this.providedInterfaces);
+		sb.append(":");
+		sb.append(this.name);
+		sb.append("(");
+		boolean first = true;
+		for (Parameter p : this.parameters) {
+			if (first) {
+				first = false;
+			} else {
+				sb.append(",");
+			}
+			sb.append(p);
+		}
+		sb.append(")");
+		sb.append(":");
+		sb.append(this.requiredInterfaces);
 
-    return sb.toString();
-  }
+		return sb.toString();
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((dependencies == null) ? 0 : dependencies.hashCode());
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((parameters == null) ? 0 : parameters.hashCode());
+		result = prime * result + ((providedInterfaces == null) ? 0 : providedInterfaces.hashCode());
+		result = prime * result + ((requiredInterfaces == null) ? 0 : requiredInterfaces.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Component other = (Component) obj;
+		if (dependencies == null) {
+			if (other.dependencies != null)
+				return false;
+		} else if (!dependencies.equals(other.dependencies))
+			return false;
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
+		if (parameters == null) {
+			if (other.parameters != null)
+				return false;
+		} else if (!parameters.equals(other.parameters))
+			return false;
+		if (providedInterfaces == null) {
+			if (other.providedInterfaces != null)
+				return false;
+		} else if (!providedInterfaces.equals(other.providedInterfaces))
+			return false;
+		if (requiredInterfaces == null) {
+			if (other.requiredInterfaces != null)
+				return false;
+		} else if (!requiredInterfaces.equals(other.requiredInterfaces))
+			return false;
+		return true;
+	}
 }

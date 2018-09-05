@@ -1,12 +1,13 @@
 package jaicore.search.algorithms.standard.rstar;
 
-import jaicore.search.algorithms.interfaces.ISolutionEvaluator;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
-import jaicore.search.evaluationproblems.KnapsackProblem;
-import jaicore.search.graphgenerators.npuzzle.standard.NPuzzleGenerator;
-import jaicore.search.graphgenerators.npuzzle.standard.NPuzzleNode;
-import jaicore.search.structure.core.Node;
+import jaicore.search.core.interfaces.ISolutionEvaluator;
+import jaicore.search.model.travesaltree.Node;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
+import jaicore.search.testproblems.knapsack.KnapsackProblem;
+import jaicore.search.testproblems.npuzzle.standard.NPuzzleGenerator;
+import jaicore.search.testproblems.npuzzle.standard.NPuzzleNode;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 

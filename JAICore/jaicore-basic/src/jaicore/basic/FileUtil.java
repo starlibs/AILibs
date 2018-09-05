@@ -24,6 +24,10 @@ import java.util.zip.ZipOutputStream;
 
 public abstract class FileUtil {
 
+	public static List<String> readFileAsList(final File file) throws IOException {
+		return readFileAsList(file.getAbsolutePath());
+	}
+	
 	public static List<String> readFileAsList(final String filename) throws IOException {
 		try (BufferedReader r = Files.newBufferedReader(Paths.get(filename), StandardCharsets.UTF_8)) {
 			String line;

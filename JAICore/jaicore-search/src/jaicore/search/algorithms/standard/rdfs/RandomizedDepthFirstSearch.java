@@ -7,35 +7,36 @@ import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jaicore.search.algorithms.standard.bestfirst.BestFirst;
-import jaicore.search.algorithms.standard.bestfirst.RandomizedDepthFirstEvaluator;
-import jaicore.search.structure.core.GraphGenerator;
-import jaicore.search.structure.core.NodeExpansionDescription;
+import jaicore.search.algorithms.standard.bestfirst.StandardBestFirst;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomizedDepthFirstNodeEvaluator;
+import jaicore.search.core.interfaces.GraphGenerator;
+import jaicore.search.model.probleminputs.GeneralEvaluatedTraversalTree;
+import jaicore.search.model.travesaltree.NodeExpansionDescription;
 import jaicore.search.structure.graphgenerator.GoalTester;
 import jaicore.search.structure.graphgenerator.RootGenerator;
 import jaicore.search.structure.graphgenerator.SingleSuccessorGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
-public class RandomizedDepthFirstSearch<T, A> extends BestFirst<T, A> {
+public class RandomizedDepthFirstSearch<T, A> extends StandardBestFirst<T, A, Double> {
 
 	private static Logger logger = LoggerFactory.getLogger(RandomizedDepthFirstSearch.class);
 
-	public RandomizedDepthFirstSearch(GraphGenerator<T, A> graphGenerator, Random random) {
-		super(new GraphGenerator<T, A>() {
+	public RandomizedDepthFirstSearch(GeneralEvaluatedTraversalTree<T, A, Double> problem, Random random) {
+		super(new GeneralEvaluatedTraversalTree<>(new GraphGenerator<T, A>() {
 
 			@Override
 			public RootGenerator<T> getRootGenerator() {
-				return graphGenerator.getRootGenerator();
+				return problem.getGraphGenerator().getRootGenerator();
 			}
 
 			@Override
 			public SuccessorGenerator<T, A> getSuccessorGenerator() {
-				if (!(graphGenerator.getSuccessorGenerator() instanceof SingleSuccessorGenerator)) {
+				if (!(problem.getGraphGenerator().getSuccessorGenerator() instanceof SingleSuccessorGenerator)) {
 					logger.warn(
 							"The successor generator of the given graph generator does not implement SingleSuccessorGenerator. This may significantly slow down the randomized depth first search.");
-					return graphGenerator.getSuccessorGenerator();
+					return problem.getGraphGenerator().getSuccessorGenerator();
 				} else {
-					SingleSuccessorGenerator<T, A> successorGenerator = (SingleSuccessorGenerator<T, A>) graphGenerator
+					SingleSuccessorGenerator<T, A> successorGenerator = (SingleSuccessorGenerator<T, A>) problem.getGraphGenerator()
 							.getSuccessorGenerator();
 					return new SuccessorGenerator<T, A>() {
 
@@ -52,21 +53,18 @@ public class RandomizedDepthFirstSearch<T, A> extends BestFirst<T, A> {
 
 			@Override
 			public GoalTester<T> getGoalTester() {
-				return graphGenerator.getGoalTester();
+				return problem.getGraphGenerator().getGoalTester();
 			}
 
 			@Override
 			public boolean isSelfContained() {
-				return graphGenerator.isSelfContained();
+				return problem.getGraphGenerator().isSelfContained();
 			}
 
 			@Override
 			public void setNodeNumbering(boolean nodenumbering) {
 				throw new UnsupportedOperationException("Not implemented");
 			}
-
-		},
-		new RandomizedDepthFirstEvaluator<>(random));
-
+		}, new RandomizedDepthFirstNodeEvaluator<>(random)));
 	}
 }

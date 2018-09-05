@@ -24,74 +24,87 @@ public class MulticlassEvaluator implements BasicMLEvaluator, Serializable {
 	private boolean canceled;
 	private final EventBus measurementEventBus = new EventBus();
 
-	public MulticlassEvaluator(Random r) {
+	public MulticlassEvaluator(final Random r) {
 		super();
 		this.rand = r;
 	}
 
-	public double getErrorRateForRandomSplit(Classifier c, Instances data, double splitSize) throws Exception {
-		if (c == null)
+	@Override
+	public double getErrorRateForRandomSplit(final Classifier c, final Instances data, final double splitSize) throws Exception {
+		if (c == null) {
 			throw new IllegalArgumentException("Cannnot get error rate for classifier NULL");
-		if (data == null)
+		}
+		if (data == null) {
 			throw new IllegalArgumentException("Cannnot get error rate for data NULL");
-		List<Instances> split = WekaUtil.getStratifiedSplit(data, rand, splitSize);
+		}
+		List<Instances> split = WekaUtil.getStratifiedSplit(data, this.rand, splitSize);
 		Instances train = split.get(0);
 		Instances test = split.get(1);
-		return getErrorRateForSplit(c, train, test);
+		return this.getErrorRateForSplit(c, train, test);
 	}
 
-	public double getErrorRateForSplit(Classifier c, Instances train, Instances test) throws Exception {
+	@Override
+	public double getErrorRateForSplit(final Classifier c, final Instances train, final Instances test) throws Exception {
 		logger.info("Split size is {}/{}", train.size(), test.size());
 		try {
 			Classifier cCopy = WekaUtil.cloneClassifier(c);
 			cCopy.buildClassifier(train);
-			return loss(cCopy, test);
+			return this.loss(cCopy, test);
 		} catch (InterruptedException e) {
 			logger.info("Evaluation of classifier was interrupted.");
 			throw e;
-		}
-		catch (Exception e) {
-			logger.error("Problems with evaluation of classifier. Details:\n{}", LoggerUtil.getExceptionInfo(e));
-			measurementEventBus.post(new ClassifierMeasurementEvent<Double>(c, null, e));
+		} catch (Exception e) {
+			this.measurementEventBus.post(new ClassifierMeasurementEvent<Double>(c, null, e));
 			throw e;
 		}
 	}
 
-	public double loss(Classifier c, Instances test) throws Exception {
+	public double loss(final Classifier c, final Instances test) throws Exception {
 		int mistakes = 0;
 		try {
 			if (c instanceof IInstancesClassifier) {
 				IInstancesClassifier cc = (IInstancesClassifier) c;
 				double[] predictions = cc.classifyInstances(test);
 				for (int i = 0; i < predictions.length; i++) {
-					if (predictions[i] != test.get(i).classValue())
+					if (predictions[i] != test.get(i).classValue()) {
 						mistakes++;
+					}
 				}
 			} else {
 				for (Instance i : test) {
-					if (i.classValue() != c.classifyInstance(i))
+					if (i.classValue() != c.classifyInstance(i)) {
 						mistakes++;
+					}
 				}
 			}
 			double error = mistakes * 1f / test.size();
-			measurementEventBus.post(new ClassifierMeasurementEvent<Double>(c, error, null));
+			this.measurementEventBus.post(new ClassifierMeasurementEvent<Double>(c, error, null));
 			return error;
-		} catch (Exception e) {
+		} catch (InterruptedException e) {
+			this.measurementEventBus.post(new ClassifierMeasurementEvent<Double>(c, null, e));
+			logger.info("Loss computation of {} was interrupted", c);
+			throw e;
+		}
+		catch (Exception e) {
+			if (e.getMessage().contains("Cannot handle multi-valued nominal class!")) {
+				this.measurementEventBus.post(new ClassifierMeasurementEvent<Double>(c, 30000.0, e));
+				return 30000d;
+			}
 			logger.error("Problems with evaluation of classifier. Details:\n{}", LoggerUtil.getExceptionInfo(e));
-			measurementEventBus.post(new ClassifierMeasurementEvent<Double>(c, null, e));
+			this.measurementEventBus.post(new ClassifierMeasurementEvent<Double>(c, null, e));
 			throw e;
 		}
 	}
 
 	public boolean isCanceled() {
-		return canceled;
+		return this.canceled;
 	}
 
-	public void setCanceled(boolean canceled) {
+	public void setCanceled(final boolean canceled) {
 		this.canceled = canceled;
 	}
 
 	public EventBus getMeasurementEventBus() {
-		return measurementEventBus;
+		return this.measurementEventBus;
 	}
 }

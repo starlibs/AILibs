@@ -2,8 +2,9 @@ package jaicore.search.algorithms.standard.uncertainty.paretosearch;
 
 import java.util.*;
 import java.util.concurrent.PriorityBlockingQueue;
-import jaicore.search.structure.core.Node;
-import jaicore.search.structure.core.OpenCollection;
+
+import jaicore.search.algorithms.standard.bestfirst.model.OpenCollection;
+import jaicore.search.model.travesaltree.Node;
 
 /**
  * Open collection pareto front implementation.
@@ -167,7 +168,7 @@ public class ParetoSelection <T, V extends Comparable<V>> implements OpenCollect
 	 */
 	@Override
 	public Node<T, V> peek() {
-		return this.pareto.peek().node;
+		return this.pareto.isEmpty() ? null : this.pareto.peek().node;
 	}
 
 	/**

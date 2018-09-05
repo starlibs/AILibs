@@ -6,7 +6,7 @@ import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.Test;
 
-import jaicore.search.graphgenerators.npuzzle.standard.NPuzzleNode;
+import jaicore.search.testproblems.npuzzle.standard.NPuzzleNode;
 
 public class NPuzzleNodeTester {
 

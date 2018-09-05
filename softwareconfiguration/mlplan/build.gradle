@@ -6,7 +6,7 @@ sourceSets {
     main {
         java {
             srcDir 'src'
-
+			srcDir 'examples'
         }
         resources {
         	srcDir 'conf'
@@ -14,58 +14,36 @@ sourceSets {
     	}
     }
     test {
-   	java {
-   		srcDir 'test'
-   		srcDir 'examples'
-   	}
+		java {
+			srcDir 'test'
+		}
     }
 }
 
 dependencies {
-
-	// basic dependencies
+  	// basic dependencies
 	compile project(':hasco')
 
-	compile project(':JAICore:jaicore-logic')
+	// JAICore dependencies
+	compile project(':JAICore:jaicore-logic') 
 	compile project(':JAICore:jaicore-basic')
 	compile project(':JAICore:jaicore-graph')
 	compile project(':JAICore:jaicore-planning')
 	compile project(':JAICore:jaicore-search')
 	compile project(':JAICore:jaicore-ml')
+	compile "de.upb.isys:jase:0.0.4"
 
-	// Graph Stream
-	compile group: 'org.graphstream', name: 'gs-core', version: '1.1.1'
-	compile group: 'org.graphstream', name: 'gs-ui', version: '1.3'
-
-	// Basics
-	compile group: 'org.aeonbits.owner', name: 'owner-java8', version:'1.0.6'
-
-	// DB connector
-	compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.45'
-
-	// Jackson for JSON (used by JAICore but not contained in the JAR)
-	compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.0.pr4'
-
-	// OpenML connector
-	compile group: 'org.openml', name: 'apiconnector', version: '1.0.18'
-
-	// servicification dependencies
-	compile group: 'de.upb.isys', name: 'jase', version: '0.0.2'
-
-	// wrapped library dependencies
-	//compile group: 'de.upb.isys', name: 'meka', version: '0.0.1'
-	compile group: 'de.upb.isys', name: 'interruptable-weka', version: '0.0.1'
 
 	// OWL API
 	compile 'net.sourceforge.owlapi:owlapi-distribution:5.1.0'
-	
 	// TreeMiner
 	compile 'com.github.helegraf:TreeMiner:-SNAPSHOT'
-	
 	// linear algebra
 	compile group: 'org.nd4j', name: 'nd4j-native-platform', version: '0.9.1'
 	compile group: 'org.nd4j', name: 'nd4j-api', version: '0.9.1'
-	
 	// gradient descent
 	compile group: 'de.jungblut.common', name: 'thomasjungblut-common', version: '1.1'
+	
 }
+
+

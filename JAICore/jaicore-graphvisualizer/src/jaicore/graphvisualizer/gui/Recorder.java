@@ -15,9 +15,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
-import jaicore.graph.IObservableGraphAlgorithm;
-import jaicore.graphvisualizer.IGraphDataSupplier;
-import jaicore.graphvisualizer.INodeDataSupplier;
+import jaicore.graph.IGraphAlgorithm;
 import jaicore.graphvisualizer.events.controlEvents.ControlEvent;
 import jaicore.graphvisualizer.events.controlEvents.FileEvent;
 import jaicore.graphvisualizer.events.controlEvents.IsLiveEvent;
@@ -43,13 +41,13 @@ import jaicore.graphvisualizer.gui.dataSupplier.ReconstructionDataSupplier;
  *
  * @param <T>
  */
-public class Recorder<T> implements IObservableGraphAlgorithm {
+public class Recorder<T> {
 
 	//List of datasuppliers
 	private List<ISupplier> suppliers;
 
 	//Algorithm
-	private IObservableGraphAlgorithm algorithm;
+	private IGraphAlgorithm algorithm;
 
 	//List for storing the events and the receiving times
 	private List<Object> receivedEvents;
@@ -82,7 +80,7 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 	 * @param algorithm
 	 * 		The algorith to which the recorder should listen.
 	 */
-	public Recorder(IObservableGraphAlgorithm algorithm){
+	public Recorder(IGraphAlgorithm algorithm){
 		if(algorithm != null)
 			algorithm.registerListener(this);
 
@@ -102,7 +100,6 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 
 	}
 
-	@Override
 	public void registerListener(Object listener) {
 		this.replayBus.register(listener);
 	}
@@ -453,7 +450,7 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 	 * Returns the algorithm
 	 * @return
 	 */
-	public IObservableGraphAlgorithm getAlgorithm() {
+	public IGraphAlgorithm getAlgorithm() {
 		return algorithm;
 	}
 }

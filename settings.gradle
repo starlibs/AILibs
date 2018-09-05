@@ -24,6 +24,3 @@ project(":hasco").projectDir = new File(configPrefix,"hasco")
 
 include 'mlplan'
 project(":mlplan").projectDir = new File(configPrefix,"mlplan")
-
-includeFlat 'JASE'
-project(":JASE").projectDir = new File(configPrefix, "../JASE")

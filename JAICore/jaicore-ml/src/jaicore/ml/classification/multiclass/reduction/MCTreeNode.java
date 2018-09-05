@@ -1,8 +1,5 @@
 package jaicore.ml.classification.multiclass.reduction;
 
-import jaicore.ml.MajorityClassifier;
-import jaicore.ml.WekaUtil;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,9 +17,11 @@ import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import jaicore.ml.WekaUtil;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.meta.MultiClassClassifier;
+import weka.classifiers.rules.ZeroR;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -30,344 +29,344 @@ import weka.core.WekaException;
 
 public class MCTreeNode implements Classifier, ITreeClassifier, Serializable, Iterable<MCTreeNode> {
 
-  /**
-   *
-   */
-  private static final long serialVersionUID = 8873192747068561266L;
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = 8873192747068561266L;
 
-  private EMCNodeType nodeType;
-  private List<MCTreeNode> children = new ArrayList<>();
-  private Classifier classifier;
-  private String classifierID;
-  private final List<Integer> containedClasses;
-  private boolean trained = false;
-  private boolean fromCache = false;
+	private EMCNodeType nodeType;
+	private List<MCTreeNode> children = new ArrayList<>();
+	private Classifier classifier;
+	private String classifierID;
+	private final List<Integer> containedClasses;
+	private boolean trained = false;
+	private boolean fromCache = false;
 
-  public static AtomicInteger cacheRetrievals = new AtomicInteger();
-  private static Map<String, Classifier> classifierCacheMap = new HashMap<>();
-  private static Lock classifierCacheMapLock = new ReentrantLock();
+	public static AtomicInteger cacheRetrievals = new AtomicInteger();
+	private static Map<String, Classifier> classifierCacheMap = new HashMap<>();
+	private static Lock classifierCacheMapLock = new ReentrantLock();
 
-  public MCTreeNode(Classifier left, Classifier right, String baseClassifier) {
-	  containedClasses = new ArrayList<>();
-  }
-  
-  public MCTreeNode(final List<Integer> containedClasses) {
-    this.containedClasses = containedClasses;
-  }
+	public MCTreeNode(final Classifier left, final Classifier right, final String baseClassifier) {
+		this.containedClasses = new ArrayList<>();
+	}
 
-  public MCTreeNode(final List<Integer> containedClasses, final EMCNodeType nodeType, final String classifierID) throws Exception {
-    this(containedClasses, nodeType, AbstractClassifier.forName(classifierID, null));
-  }
+	public MCTreeNode(final List<Integer> containedClasses) {
+		this.containedClasses = containedClasses;
+	}
 
-  public MCTreeNode(final List<Integer> containedClasses, final EMCNodeType nodeType, final Classifier baseClassifier) {
-    this(containedClasses);
-    this.setNodeType(nodeType);
-    this.setBaseClassifier(baseClassifier);
-  }
+	public MCTreeNode(final List<Integer> containedClasses, final EMCNodeType nodeType, final String classifierID) throws Exception {
+		this(containedClasses, nodeType, AbstractClassifier.forName(classifierID, null));
+	}
 
-  public EMCNodeType getNodeType() {
-    return this.nodeType;
-  }
+	public MCTreeNode(final List<Integer> containedClasses, final EMCNodeType nodeType, final Classifier baseClassifier) {
+		this(containedClasses);
+		this.setNodeType(nodeType);
+		this.setBaseClassifier(baseClassifier);
+	}
 
-  public void addChild(final MCTreeNode newNode) {
-    if (newNode.getNodeType() == EMCNodeType.MERGE) {
-      for (MCTreeNode child : newNode.getChildren()) {
-        this.children.add(child);
-      }
-    } else {
-      this.children.add(newNode);
-    }
-  }
+	public EMCNodeType getNodeType() {
+		return this.nodeType;
+	}
 
-  public List<MCTreeNode> getChildren() {
-    return this.children;
-  }
+	public void addChild(final MCTreeNode newNode) {
+		if (newNode.getNodeType() == EMCNodeType.MERGE) {
+			for (MCTreeNode child : newNode.getChildren()) {
+				this.children.add(child);
+			}
+		} else {
+			this.children.add(newNode);
+		}
+	}
 
-  public Collection<Integer> getContainedClasses() {
-    return this.containedClasses;
-  }
+	public List<MCTreeNode> getChildren() {
+		return this.children;
+	}
 
-  public boolean isCompletelyConfigured() {
-    if (this.classifier == null) {
-      return false;
-    }
-    if (this.children.isEmpty()) {
-      return false;
-    }
-    for (MCTreeNode child : this.children) {
-      if (!child.isCompletelyConfigured()) {
-        return false;
-      }
-    }
-    return true;
-  }
+	public Collection<Integer> getContainedClasses() {
+		return this.containedClasses;
+	}
 
-  @Override
-  public void buildClassifier(final Instances data) throws Exception {
-    assert (this.getNodeType() != EMCNodeType.MERGE) : "MERGE node detected while building classifier. This must not happen!";
-    assert !data.isEmpty() : "Cannot train MCTree with empty set of instances.";
-    assert !this.children.isEmpty() : "Cannot train MCTree without children";
+	public boolean isCompletelyConfigured() {
+		if (this.classifier == null) {
+			return false;
+		}
+		if (this.children.isEmpty()) {
+			return false;
+		}
+		for (MCTreeNode child : this.children) {
+			if (!child.isCompletelyConfigured()) {
+				return false;
+			}
+		}
+		return true;
+	}
 
-    // sort class split into clusters
-    List<Set<String>> instancesCluster = new ArrayList<>();
-    IntStream.range(0, this.children.size()).forEach(x -> instancesCluster.add(new HashSet<>()));
-    int index = 0;
-    for (MCTreeNode child : this.children) {
-      for (Integer classIndex : child.getContainedClasses()) {
-        instancesCluster.get(index).add(data.classAttribute().value(classIndex));
-      }
-      index++;
-    }
+	@Override
+	public void buildClassifier(final Instances data) throws Exception {
+		assert (this.getNodeType() != EMCNodeType.MERGE) : "MERGE node detected while building classifier. This must not happen!";
+		assert !data.isEmpty() : "Cannot train MCTree with empty set of instances.";
+		assert !this.children.isEmpty() : "Cannot train MCTree without children";
 
-    String classifierKey = this.classifier.getClass().getName() + "#" + instancesCluster + "#" + data.size() + "#" + new HashCodeBuilder().append(data.toString()).toHashCode();
+		// sort class split into clusters
+		List<Set<String>> instancesCluster = new ArrayList<>();
+		IntStream.range(0, this.children.size()).forEach(x -> instancesCluster.add(new HashSet<>()));
+		int index = 0;
+		for (MCTreeNode child : this.children) {
+			for (Integer classIndex : child.getContainedClasses()) {
+				instancesCluster.get(index).add(data.classAttribute().value(classIndex));
+			}
+			index++;
+		}
 
-    // refactor training data with respect to the split clusters and build the classifier
-    Instances trainingData = WekaUtil.mergeClassesOfInstances(data, instancesCluster);
+		String classifierKey = this.classifier.getClass().getName() + "#" + instancesCluster + "#" + data.size() + "#" + new HashCodeBuilder().append(data.toString()).toHashCode();
 
-    Classifier cachedClassifier = null;
-    classifierCacheMapLock.lock();
-    try {
-      cachedClassifier = AbstractClassifier.makeCopy(classifierCacheMap.get(classifierKey));
-      this.fromCache = true;
-    } finally {
-      classifierCacheMapLock.unlock();
-    }
-    cachedClassifier = null;
+		// refactor training data with respect to the split clusters and build the classifier
+		Instances trainingData = WekaUtil.mergeClassesOfInstances(data, instancesCluster);
 
-    if (cachedClassifier != null) {
-      this.classifier = cachedClassifier;
-    } else {
-      try {
-        this.classifier.buildClassifier(trainingData);
-      } catch (WekaException e) {
-        this.classifier = new MajorityClassifier();
-        this.classifier.buildClassifier(trainingData);
-      }
+		Classifier cachedClassifier = null;
+		classifierCacheMapLock.lock();
+		try {
+			cachedClassifier = AbstractClassifier.makeCopy(classifierCacheMap.get(classifierKey));
+			this.fromCache = true;
+		} finally {
+			classifierCacheMapLock.unlock();
+		}
+		cachedClassifier = null;
 
-      classifierCacheMapLock.lock();
-      try {
-        classifierCacheMap.put(classifierKey, this.classifier);
-      } finally {
-        classifierCacheMapLock.unlock();
-      }
+		if (cachedClassifier != null) {
+			this.classifier = cachedClassifier;
+		} else {
+			try {
+				this.classifier.buildClassifier(trainingData);
+			} catch (WekaException e) {
+				this.classifier = new ZeroR();
+				this.classifier.buildClassifier(trainingData);
+			}
 
-    }
+			classifierCacheMapLock.lock();
+			try {
+				classifierCacheMap.put(classifierKey, this.classifier);
+			} finally {
+				classifierCacheMapLock.unlock();
+			}
 
-    // recursively build classifiers for children
-    this.children.stream().parallel().forEach(child -> {
-      try {
-        child.buildClassifier(data);
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-    });
-    this.trained = true;
-  }
+		}
 
-  @Override
-  public double classifyInstance(final Instance instance) throws Exception {
-    double selection = -1;
-    double best = 0;
-    double[] dist = this.distributionForInstance(instance);
-    for (int i = 0; i < dist.length; i++) {
-      double score = dist[i];
-      if (score > best) {
-        best = score;
-        selection = i;
-      }
-    }
-    return this.containedClasses.get((int) selection);
-  }
+		// recursively build classifiers for children
+		this.children.stream().parallel().forEach(child -> {
+			try {
+				child.buildClassifier(data);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		});
+		this.trained = true;
+	}
 
-  public void distributionForInstance(final Instance instance, final double[] distribution) throws Exception {
-    Instance iNew = WekaUtil.getRefactoredInstance(instance, IntStream.range(0, this.children.size()).mapToObj(x -> x + ".0").collect(Collectors.toList()));
+	@Override
+	public double classifyInstance(final Instance instance) throws Exception {
+		double selection = -1;
+		double best = 0;
+		double[] dist = this.distributionForInstance(instance);
+		for (int i = 0; i < dist.length; i++) {
+			double score = dist[i];
+			if (score > best) {
+				best = score;
+				selection = i;
+			}
+		}
+		return this.containedClasses.get((int) selection);
+	}
 
-    double[] localDistribution = new double[this.containedClasses.size()];
-    localDistribution = this.classifier.distributionForInstance(iNew);
+	public void distributionForInstance(final Instance instance, final double[] distribution) throws Exception {
+		Instance iNew = WekaUtil.getRefactoredInstance(instance, IntStream.range(0, this.children.size()).mapToObj(x -> x + ".0").collect(Collectors.toList()));
 
-    for (MCTreeNode child : this.children) {
-      child.distributionForInstance(instance, distribution);
-      int indexOfChild = this.children.indexOf(child);
+		double[] localDistribution = new double[this.containedClasses.size()];
+		localDistribution = this.classifier.distributionForInstance(iNew);
 
-      for (Integer classContainedInChild : child.getContainedClasses()) {
-        distribution[classContainedInChild] *= localDistribution[indexOfChild];
-      }
-    }
-  }
+		for (MCTreeNode child : this.children) {
+			child.distributionForInstance(instance, distribution);
+			int indexOfChild = this.children.indexOf(child);
 
-  @Override
-  public double[] distributionForInstance(final Instance instance) throws Exception {
-    assert this.trained : "Cannot get distribution from untrained classifier " + this.toStringWithOffset();
+			for (Integer classContainedInChild : child.getContainedClasses()) {
+				distribution[classContainedInChild] *= localDistribution[indexOfChild];
+			}
+		}
+	}
 
-    double[] classDistribution = new double[this.containedClasses.size()];
-    this.distributionForInstance(instance, classDistribution);
-    return classDistribution;
-  }
+	@Override
+	public double[] distributionForInstance(final Instance instance) throws Exception {
+		assert this.trained : "Cannot get distribution from untrained classifier " + this.toStringWithOffset();
 
-  @Override
-  public Capabilities getCapabilities() {
-    return this.classifier.getCapabilities();
-  }
+		double[] classDistribution = new double[this.containedClasses.size()];
+		this.distributionForInstance(instance, classDistribution);
+		return classDistribution;
+	}
 
-  @Override
-  public int getHeight() {
-    return 1 + this.children.stream().map(x -> x.getHeight()).mapToInt(x -> (int) x).max().getAsInt();
-  }
+	@Override
+	public Capabilities getCapabilities() {
+		return this.classifier.getCapabilities();
+	}
 
-  @Override
-  public int getDepthOfFirstCommonParent(final List<Integer> classes) {
-    for (MCTreeNode child : this.children) {
-      if (child.getContainedClasses().containsAll(classes)) {
-        return 1 + child.getDepthOfFirstCommonParent(classes);
-      }
-    }
-    return 1;
-  }
+	@Override
+	public int getHeight() {
+		return 1 + this.children.stream().map(x -> x.getHeight()).mapToInt(x -> (int) x).max().getAsInt();
+	}
 
-  public static void clearCache() {
-    classifierCacheMap.clear();
-  }
+	@Override
+	public int getDepthOfFirstCommonParent(final List<Integer> classes) {
+		for (MCTreeNode child : this.children) {
+			if (child.getContainedClasses().containsAll(classes)) {
+				return 1 + child.getDepthOfFirstCommonParent(classes);
+			}
+		}
+		return 1;
+	}
 
-  public static Map<String, Classifier> getClassifierCache() {
-    return classifierCacheMap;
-  }
+	public static void clearCache() {
+		classifierCacheMap.clear();
+	}
 
-  public Classifier getClassifier() {
-    return this.classifier;
-  }
+	public static Map<String, Classifier> getClassifierCache() {
+		return classifierCacheMap;
+	}
 
-  public void setBaseClassifier(final Classifier classifier) {
+	public Classifier getClassifier() {
+		return this.classifier;
+	}
 
-    assert classifier != null : "Cannot set null classifier!";
+	public void setBaseClassifier(final Classifier classifier) {
 
-    this.classifierID = classifier.getClass().getName();
-    switch (this.nodeType) {
-      case ONEVSREST: {
-        MultiClassClassifier mcc = new MultiClassClassifier();
-        mcc.setClassifier(classifier);
-        this.classifier = mcc;
-        break;
-      }
-      case ALLPAIRS: {
-        MultiClassClassifier mcc = new MultiClassClassifier();
-        try {
-          mcc.setOptions(new String[] { "-M", "" + 3 });
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
-        mcc.setClassifier(classifier);
-        this.classifier = mcc;
-        break;
-      }
-      case DIRECT:
-        this.classifier = classifier;
-        break;
-      default:
-        break;
-    }
-  }
+		assert classifier != null : "Cannot set null classifier!";
 
-  public void setNodeType(final EMCNodeType nodeType) {
-    this.nodeType = nodeType;
-  }
+		this.classifierID = classifier.getClass().getName();
+		switch (this.nodeType) {
+		case ONEVSREST: {
+			MultiClassClassifier mcc = new MultiClassClassifier();
+			mcc.setClassifier(classifier);
+			this.classifier = mcc;
+			break;
+		}
+		case ALLPAIRS: {
+			MultiClassClassifier mcc = new MultiClassClassifier();
+			try {
+				mcc.setOptions(new String[] { "-M", "" + 3 });
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			mcc.setClassifier(classifier);
+			this.classifier = mcc;
+			break;
+		}
+		case DIRECT:
+			this.classifier = classifier;
+			break;
+		default:
+			break;
+		}
+	}
 
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
+	public void setNodeType(final EMCNodeType nodeType) {
+		this.nodeType = nodeType;
+	}
 
-    sb.append("(");
-    sb.append(this.classifierID);
-    sb.append(":");
-    sb.append(this.nodeType);
-    sb.append(")");
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
 
-    sb.append("{");
+		sb.append("(");
+		sb.append(this.classifierID);
+		sb.append(":");
+		sb.append(this.nodeType);
+		sb.append(")");
 
-    boolean first = true;
-    for (MCTreeNode child : this.children) {
-      if (first) {
-        first = false;
-      } else {
-        sb.append(",");
-      }
-      sb.append(child);
-    }
-    sb.append("}");
-    return sb.toString();
-  }
+		sb.append("{");
 
-  public String toStringWithOffset() {
-    return this.toStringWithOffset("");
-  }
+		boolean first = true;
+		for (MCTreeNode child : this.children) {
+			if (first) {
+				first = false;
+			} else {
+				sb.append(",");
+			}
+			sb.append(child);
+		}
+		sb.append("}");
+		return sb.toString();
+	}
 
-  public String toStringWithOffset(final String offset) {
-    StringBuilder sb = new StringBuilder();
+	public String toStringWithOffset() {
+		return this.toStringWithOffset("");
+	}
 
-    sb.append(offset);
-    sb.append("(");
-    sb.append(this.getContainedClasses());
-    sb.append(":");
-    sb.append(this.classifierID);
-    sb.append(":");
-    sb.append(this.nodeType);
-    sb.append(") {");
-    boolean first = true;
-    for (MCTreeNode child : this.children) {
-      if (first) {
-        first = false;
-      } else {
-        sb.append(",");
-      }
-      sb.append("\n");
-      sb.append(child.toStringWithOffset(offset + "  "));
-    }
-    sb.append("\n");
-    sb.append(offset);
-    sb.append("}");
-    return sb.toString();
-  }
+	public String toStringWithOffset(final String offset) {
+		StringBuilder sb = new StringBuilder();
 
-  @Override
-  public Iterator<MCTreeNode> iterator() {
-    Iterator<MCTreeNode> iterator = new Iterator<MCTreeNode>() {
+		sb.append(offset);
+		sb.append("(");
+		sb.append(this.getContainedClasses());
+		sb.append(":");
+		sb.append(this.classifierID);
+		sb.append(":");
+		sb.append(this.nodeType);
+		sb.append(") {");
+		boolean first = true;
+		for (MCTreeNode child : this.children) {
+			if (first) {
+				first = false;
+			} else {
+				sb.append(",");
+			}
+			sb.append("\n");
+			sb.append(child.toStringWithOffset(offset + "  "));
+		}
+		sb.append("\n");
+		sb.append(offset);
+		sb.append("}");
+		return sb.toString();
+	}
 
-      int currentlyTraversedChild = -1;
-      Iterator<MCTreeNode> childIterator = null;
+	@Override
+	public Iterator<MCTreeNode> iterator() {
+		Iterator<MCTreeNode> iterator = new Iterator<MCTreeNode>() {
 
-      @Override
-      public boolean hasNext() {
-        if (this.currentlyTraversedChild < 0) {
-          return true;
-        }
-        if (MCTreeNode.this.children.isEmpty()) {
-          return false;
-        }
-        if (this.childIterator == null) {
-          this.childIterator = MCTreeNode.this.children.get(this.currentlyTraversedChild).iterator();
-        }
-        if (this.childIterator.hasNext()) {
-          return true;
-        }
-        if (this.currentlyTraversedChild == MCTreeNode.this.children.size() - 1) {
-          return false;
-        }
+			int currentlyTraversedChild = -1;
+			Iterator<MCTreeNode> childIterator = null;
 
-        /* no set the iterator to the new child and return its val */
-        this.currentlyTraversedChild++;
-        this.childIterator = MCTreeNode.this.children.get(this.currentlyTraversedChild).iterator();
-        return this.childIterator.hasNext();
-      }
+			@Override
+			public boolean hasNext() {
+				if (this.currentlyTraversedChild < 0) {
+					return true;
+				}
+				if (MCTreeNode.this.children.isEmpty()) {
+					return false;
+				}
+				if (this.childIterator == null) {
+					this.childIterator = MCTreeNode.this.children.get(this.currentlyTraversedChild).iterator();
+				}
+				if (this.childIterator.hasNext()) {
+					return true;
+				}
+				if (this.currentlyTraversedChild == MCTreeNode.this.children.size() - 1) {
+					return false;
+				}
 
-      @Override
-      public MCTreeNode next() {
-        if (this.currentlyTraversedChild == -1) {
-          this.currentlyTraversedChild++;
-          return MCTreeNode.this;
-        } else {
-          return this.childIterator.next();
-        }
-      }
-    };
-    return iterator;
-  }
+				/* no set the iterator to the new child and return its val */
+				this.currentlyTraversedChild++;
+				this.childIterator = MCTreeNode.this.children.get(this.currentlyTraversedChild).iterator();
+				return this.childIterator.hasNext();
+			}
+
+			@Override
+			public MCTreeNode next() {
+				if (this.currentlyTraversedChild == -1) {
+					this.currentlyTraversedChild++;
+					return MCTreeNode.this;
+				} else {
+					return this.childIterator.next();
+				}
+			}
+		};
+		return iterator;
+	}
 }

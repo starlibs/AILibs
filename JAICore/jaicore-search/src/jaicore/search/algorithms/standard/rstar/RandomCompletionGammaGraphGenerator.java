@@ -1,22 +1,25 @@
 package jaicore.search.algorithms.standard.rstar;
 
-import jaicore.basic.sets.SetUtil;
-import jaicore.concurrent.TimeoutTimer;
-import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
-import jaicore.logging.LoggerUtil;
-import jaicore.search.algorithms.interfaces.IPathUnification;
-import jaicore.search.algorithms.interfaces.ISolutionEvaluator;
-import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
-import jaicore.search.algorithms.standard.bestfirst.RandomCompletionEvaluator;
-import jaicore.search.evaluationproblems.KnapsackProblem;
-import jaicore.search.structure.core.GraphGenerator;
-import jaicore.search.structure.core.Node;
-import jaicore.search.structure.core.NodeExpansionDescription;
-import jaicore.search.structure.graphgenerator.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
 
-import javax.xml.crypto.dom.DOMCryptoContext;
-import java.util.*;
-import java.util.stream.Collectors;
+import jaicore.concurrent.TimeoutTimer;
+import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator;
+import jaicore.search.core.interfaces.GraphGenerator;
+import jaicore.search.core.interfaces.ISolutionEvaluator;
+import jaicore.search.model.travesaltree.Node;
+import jaicore.search.model.travesaltree.NodeExpansionDescription;
+import jaicore.search.structure.graphgenerator.GoalTester;
+import jaicore.search.structure.graphgenerator.MultipleRootGenerator;
+import jaicore.search.structure.graphgenerator.NodeGoalTester;
+import jaicore.search.structure.graphgenerator.RootGenerator;
+import jaicore.search.structure.graphgenerator.SingleRootGenerator;
+import jaicore.search.structure.graphgenerator.SingleSuccessorGenerator;
 
 public class RandomCompletionGammaGraphGenerator<T> implements GammaGraphGenerator<T, Integer> {
 
@@ -32,7 +35,7 @@ public class RandomCompletionGammaGraphGenerator<T> implements GammaGraphGenerat
 
     private final RootGenerator<GammaNode<T,RStarK>> gammaRootGenerator;
     private final NodeGoalTester<T> gammaGoalTester;
-    private final RandomCompletionEvaluator<T, Double> randomCompletionEvaluator;
+    private final RandomCompletionBasedNodeEvaluator<T, Double> randomCompletionEvaluator;
     private final ISolutionEvaluator<T, Double> solutionEvaluator;
 
     /* Timeout stuff for Random Completions. */
@@ -94,17 +97,8 @@ public class RandomCompletionGammaGraphGenerator<T> implements GammaGraphGenerat
         assert goalTester instanceof NodeGoalTester : "RStar only supports NodeGoalTesters.";
         gammaGoalTester = (NodeGoalTester)goalTester;
 
-        /**
-         * Create RandomCompletion evaluator.
-         */
-        IPathUnification<T> pathUnification = new IPathUnification<T>() {
-            @Override
-            public List<T> getSubsumingKnownPathCompletion(Map<List<T>, List<T>> knownPathCompletions, List<T> path) throws InterruptedException {
-                return null;
-            }
-        };
         this.solutionEvaluator = solutionEvaluator;
-        randomCompletionEvaluator = new RandomCompletionEvaluator<>(new Random(seed), samples, pathUnification, solutionEvaluator);
+        randomCompletionEvaluator = new RandomCompletionBasedNodeEvaluator<>(new Random(seed), samples, solutionEvaluator);
         randomCompletionEvaluator.setGenerator(graphGenerator);
     }
 

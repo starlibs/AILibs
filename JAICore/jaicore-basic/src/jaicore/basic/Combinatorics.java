@@ -1,6 +1,7 @@
 package jaicore.basic;
 
 public abstract class Combinatorics {
+
 	public static boolean[][] getTruthTable(int n) {
 		int rowCount = (int) Math.pow(2, n);
 		boolean[][] table = new boolean[rowCount][n];

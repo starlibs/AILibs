@@ -1,9 +1,9 @@
 package jaicore.search.algorithms.standard.rstar;
 
-import jaicore.search.algorithms.interfaces.ISolutionEvaluator;
-import jaicore.search.structure.core.GraphGenerator;
-import jaicore.search.structure.core.Node;
-import jaicore.search.structure.core.OpenCollection;
+import jaicore.search.algorithms.standard.bestfirst.model.OpenCollection;
+import jaicore.search.core.interfaces.GraphGenerator;
+import jaicore.search.core.interfaces.ISolutionEvaluator;
+import jaicore.search.model.travesaltree.Node;
 import jaicore.search.structure.graphgenerator.MultipleRootGenerator;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.RootGenerator;
