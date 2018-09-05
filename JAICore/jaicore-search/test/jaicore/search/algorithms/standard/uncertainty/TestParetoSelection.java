@@ -1,8 +1,11 @@
-package jaicore.search.algorithms.standard.uncertainty.paretosearch;
+package jaicore.search.algorithms.standard.uncertainty;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import jaicore.search.algorithms.standard.uncertainty.paretosearch.CosinusDistanceComparator;
+import jaicore.search.algorithms.standard.uncertainty.paretosearch.ParetoNode;
+import jaicore.search.algorithms.standard.uncertainty.paretosearch.ParetoSelection;
 import jaicore.search.model.travesaltree.Node;
 
 import java.util.ArrayList;
