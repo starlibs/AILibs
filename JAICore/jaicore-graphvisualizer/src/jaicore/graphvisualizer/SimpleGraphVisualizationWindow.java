@@ -12,7 +12,11 @@ public class SimpleGraphVisualizationWindow<V,E> extends JFrame {
 	private final SearchVisualizationPanel<V,E> panel;
 	
 	public SimpleGraphVisualizationWindow(IGraphAlgorithm<?, ?, V, E> graphAlgorithm) {
-		super("Visualizer for " + graphAlgorithm);
+		this(graphAlgorithm,"Visualizer for " + graphAlgorithm);
+	}
+	
+	public SimpleGraphVisualizationWindow(IGraphAlgorithm<?, ?, V, E> graphAlgorithm, String windowTitle) {
+		super(windowTitle);
 		
 		// initialize window data
 		setSize(1600, 1000);

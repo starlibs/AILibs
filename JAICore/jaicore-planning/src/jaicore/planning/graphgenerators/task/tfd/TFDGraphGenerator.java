@@ -99,6 +99,8 @@ public class TFDGraphGenerator<O extends Operation, M extends Method, A extends 
 		return l -> {
 			Monom state = l.getState();
 			List<Literal> currentlyRemainingTasks = new ArrayList<>(l.getRemainingTasks());
+			if (currentlyRemainingTasks.isEmpty())
+				return new ArrayList<>();
 			Literal nextTaskTmp = currentlyRemainingTasks.get(0);
 			currentlyRemainingTasks.remove(0);
 			String nextTaskName = nextTaskTmp.getPropertyName();

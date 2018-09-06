@@ -144,6 +144,7 @@ public class HASCO<ISearch, N, A, V extends Comparable<V>> implements SoftwareCo
 				((ILoggingCustomizable) this.search).setLoggerName(this.loggerName + ".search");
 			}
 			if (config.visualizationEnabled()) {
+				logger.info("Launching graph visualization");
 				SimpleGraphVisualizationWindow<?,?> window = new SimpleGraphVisualizationWindow<>(search);
 				if (planningGraphGeneratorDeriver instanceof ForwardDecompositionReducer && search instanceof BestFirst) {
 					SearchVisualizationPanel<Node<TFDNode,Double>,String> panel = (SearchVisualizationPanel<Node<TFDNode,Double>,String>)window.getPanel();
@@ -314,5 +315,15 @@ public class HASCO<ISearch, N, A, V extends Comparable<V>> implements SoftwareCo
 	@Override
 	public IOptimizerResult<ComponentInstance, V> getOptimizationResult() {
 		return new IOptimizerResult<>(bestRecognizedSolution.getComponentInstance(), bestRecognizedSolution.getScore());
+	}
+	
+	public AlgorithmInitializedEvent init() {
+		AlgorithmEvent e = null;
+		while (hasNext()) {
+			e = next();
+			if (e instanceof AlgorithmInitializedEvent)
+				return (AlgorithmInitializedEvent)e;
+		}
+		throw new IllegalStateException("Could not complete initialization");
 	}
 }

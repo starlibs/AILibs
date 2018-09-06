@@ -19,7 +19,6 @@ import java.util.function.Predicate;
 import org.apache.commons.math3.geometry.euclidean.oned.Interval;
 
 import jaicore.basic.MathExt;
-import jaicore.basic.sets.PartialOrderedSet;
 
 /**
  * Utility class for sets.
@@ -934,6 +933,8 @@ public class SetUtil {
 	}
 
 	public static List<String> unserializeList(String listDescriptor) {
+		if (!listDescriptor.startsWith("[") || !listDescriptor.endsWith("]"))
+			throw new IllegalArgumentException("Invalid list descriptor " + listDescriptor + ". Must start with '[' and end with ']'");
 		List<String> items = new ArrayList<>();
 		for (String item : listDescriptor.substring(1, listDescriptor.length() - 1).split(",")) {
 			if (!item.trim().isEmpty())
