@@ -226,7 +226,13 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 					}
 					BestFirst.this.graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_pruned"));
 					if (BestFirst.this.pool != null) {
-						BestFirst.this.activeJobs.decrementAndGet();
+						BestFirst.this.openLock.lock();
+						try {
+							BestFirst.this.activeJobs.decrementAndGet();
+						} finally {
+							BestFirst.this.addedNodeToOpenCondition.signalAll();
+							BestFirst.this.openLock.unlock();
+						}
 						BestFirst.this.fComputationTickets.release();
 					}
 					this.communicateJobFinished();
@@ -241,7 +247,6 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 				/* if we discard (either only on OPEN or on both OPEN and CLOSED) */
 				boolean nodeProcessed = false;
 				if (BestFirst.this.parentDiscarding != ParentDiscarding.NONE) {
-
 					BestFirst.this.openLock.lock();
 					try {
 						/* determine whether we already have the node AND it is worse than the one we want to insert */
@@ -261,7 +266,6 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 
 						/* if parent discarding is not only for OPEN but also for CLOSE (and the node was not on OPEN), check the list of expanded nodes */
 						else if (BestFirst.this.parentDiscarding == ParentDiscarding.ALL) {
-
 							/* reopening, if the node is already on CLOSED */
 							Optional<N> existingIdenticalNodeOnClosed = BestFirst.this.expanded.stream().filter(n -> n.equals(newNode.getPoint())).findFirst();
 							if (existingIdenticalNodeOnClosed.isPresent()) {
@@ -284,12 +288,13 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 
 				/* if parent discarding is turned off OR if the node was node processed by a parent discarding rule, just insert it on OPEN */
 				if (!nodeProcessed) {
-
 					if (!newNode.isGoal()) {
 						BestFirst.this.openLock.lock();
 						try {
+							assert !BestFirst.this.expanded.contains(newNode.getPoint()) : "Currently only tree search is supported. But now we add a node to OPEN whose point has already been expanded before.";
 							BestFirst.this.open.add(newNode);
 						} finally {
+							BestFirst.this.addedNodeToOpenCondition.signalAll();
 							BestFirst.this.openLock.unlock();
 						}
 					}
@@ -309,7 +314,13 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 
 				/* free resources if this is computed by helper threads */
 				if (BestFirst.this.pool != null) {
-					BestFirst.this.activeJobs.decrementAndGet();
+					BestFirst.this.openLock.lock();
+					try {
+						BestFirst.this.activeJobs.decrementAndGet();
+					} finally {
+						BestFirst.this.addedNodeToOpenCondition.signalAll();
+						BestFirst.this.openLock.unlock();
+					}
 					BestFirst.this.fComputationTickets.release();
 				}
 			} catch (Throwable e) {
@@ -400,8 +411,8 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 						try {
 							this.open.add(root);
 						} finally {
-							this.openLock.unlock();
 							this.addedNodeToOpenCondition.signalAll();
+							this.openLock.unlock();
 						}
 						root.setAnnotation("awa-level", 0);
 						this.logger.info("Labeled root with {}", root.getInternalLabel());
@@ -413,14 +424,15 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 					try {
 						this.open.add(root);
 					} finally {
-						this.openLock.unlock();
 						this.addedNodeToOpenCondition.signalAll();
+						this.openLock.unlock();
 					}
 				}
 			} finally {
 				this.nodeModelSemaphore.release();
 			}
 		}
+
 	}
 
 	public EvaluatedSearchGraphPath<N, A, V> nextSolutionThatDominatesOpen() throws InterruptedException, AlgorithmExecutionCanceledException {
@@ -492,18 +504,17 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 				try {
 					this.logger.debug("Checking new nodes: OPEN size is {} and there are {} active jobs.", this.open.size(), this.activeJobs.get());
 					newNodesInOpen = !this.open.isEmpty() || this.activeJobs.get() <= 0;
+					if (!newNodesInOpen) {
+						try {
+							this.addedNodeToOpenCondition.await();
+						} catch (InterruptedException e) {
+							this.logger.info("Received interrupt signal");
+							this.interrupted = true;
+							throw e;
+						}
+					}
 				} finally {
 					this.openLock.unlock();
-				}
-
-				if (!newNodesInOpen) {
-					try {
-						this.addedNodeToOpenCondition.await();
-					} catch (InterruptedException e) {
-						this.logger.info("Received interrupt signal");
-						this.interrupted = true;
-						throw e;
-					}
 				}
 			}
 
@@ -584,15 +595,28 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 			return null;
 		}
 		Node<N, V> nodeToExpand = null;
-		this.openLock.lock();
-		try {
-			nodeToExpand = this.open.peek();
-		} finally {
-			this.openLock.unlock();
+
+		boolean nodesOnOpen = false;
+		while (!nodesOnOpen) {
+			this.openLock.lock();
+			try {
+				nodesOnOpen = !this.open.isEmpty() || this.activeJobs.get() <= 0;
+				if (!nodesOnOpen) {
+					System.out.println("Await condition as open queue is empty and active jobs is " + this.activeJobs.get() + "...");
+					this.addedNodeToOpenCondition.await();
+					System.out.println("Got signaled");
+				} else {
+					nodeToExpand = this.open.peek();
+				}
+			} finally {
+				this.openLock.unlock();
+			}
 		}
+
 		if (nodeToExpand == null) {
 			return null;
 		}
+
 		assert this.parentDiscarding == ParentDiscarding.ALL || !this.expanded.contains(nodeToExpand.getPoint()) : "Node " + nodeToExpand.getString() + " has been selected for the second time for expansion.";
 		this.afterSelection(nodeToExpand);
 		return this.step(nodeToExpand);
@@ -614,21 +638,37 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 	}
 
 	public NodeExpansionJobSubmittedEvent<N, A, V> step(final Node<N, V> nodeToExpand) throws InterruptedException, AlgorithmExecutionCanceledException {
-
 		/* if search has been interrupted, do not process next step */
-		this.logger.debug("Step starts. Size of OPEN now {}", this.open.size());
+		this.openLock.lock();
+		try {
+			this.logger.debug("Step starts. Size of OPEN now {}", this.open.size());
+		} finally {
+			this.openLock.unlock();
+		}
 		this.checkTermination();
 		this.lastExpansion.clear();
 		assert nodeToExpand == null || !this.expanded.contains(nodeToExpand.getPoint()) : "Node selected for expansion already has been expanded: " + nodeToExpand;
-		this.open.remove(nodeToExpand);
-		assert !this.open.contains(nodeToExpand) : "The selected node " + nodeToExpand + " was not really removed from OPEN!";
-		this.logger.debug("Removed {} from OPEN for expansion. OPEN size now {}", nodeToExpand, this.open.size());
+
+		this.openLock.lock();
+		try {
+			this.open.remove(nodeToExpand);
+			assert !this.open.contains(nodeToExpand) : "The selected node " + nodeToExpand + " was not really removed from OPEN!";
+			this.logger.debug("Removed {} from OPEN for expansion. OPEN size now {}", nodeToExpand, this.open.size());
+		} finally {
+			this.openLock.unlock();
+		}
+
 		assert this.ext2int.containsKey(nodeToExpand.getPoint()) : "Trying to expand a node whose point is not available in the ext2int map";
 		this.beforeExpansion(nodeToExpand);
 		NodeExpansionJobSubmittedEvent<N, A, V> event = this.expandNode(nodeToExpand);
 		this.afterExpansion(nodeToExpand);
 		this.checkTermination();
-		this.logger.debug("Step ends. Size of OPEN now {}", this.open.size());
+		this.openLock.lock();
+		try {
+			this.logger.debug("Step ends. Size of OPEN now {}", this.open.size());
+		} finally {
+			this.openLock.unlock();
+		}
 		return event;
 	}
 
@@ -672,11 +712,26 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 					return;
 				}
 				this.activeJobs.incrementAndGet();
+
+				this.openLock.lock();
+				try {
+					if (this.interrupted || this.canceled) {
+						return;
+					}
+					assert !this.open.contains(expandedNodeInternal) : "Cannot submit jobs for node expansion as long as the node is on OPEN";
+				} finally {
+					this.openLock.unlock();
+				}
 				this.pool.submit(nb);
 			}
 		});
 		this.checkTermination();
-		this.logger.debug("Finished expansion of node {}. Size of OPEN is now {}. Number of active jobs is {}", expandedNodeInternal, this.open.size(), this.activeJobs.get());
+		this.openLock.lock();
+		try {
+			this.logger.debug("Finished expansion of node {}. Size of OPEN is now {}. Number of active jobs is {}", expandedNodeInternal, this.open.size(), this.activeJobs.get());
+		} finally {
+			this.openLock.unlock();
+		}
 
 		/* update statistics, send closed notifications, and possibly return a solution */
 		this.expandedCounter++;
@@ -766,7 +821,14 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 	}
 
 	public List<Node<N, V>> getOpenSnapshot() {
-		return Collections.unmodifiableList(new ArrayList<>(this.open));
+		List<Node<N, V>> openSnapshot;
+		this.openLock.lock();
+		try {
+			openSnapshot = Collections.unmodifiableList(new ArrayList<>(this.open));
+		} finally {
+			this.openLock.unlock();
+		}
+		return openSnapshot;
 	}
 
 	protected synchronized Node<N, V> newNode(final Node<N, V> parent, final N t2) {
@@ -778,7 +840,12 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 	}
 
 	protected synchronized Node<N, V> newNode(final Node<N, V> parent, final N t2, final V evaluation) {
-		assert !this.open.contains(parent) : "Parent node " + parent + " is still on OPEN, which must not be the case!";
+		this.openLock.lock();
+		try {
+			assert !this.open.contains(parent) : "Parent node " + parent + " is still on OPEN, which must not be the case! OPEN class: " + this.open.getClass().getName() + ". OPEN size: " + this.open.size();
+		} finally {
+			this.openLock.unlock();
+		}
 
 		/* create new node and check whether it is a goal */
 		Node<N, V> newNode = new Node<>(parent, t2);
@@ -831,13 +898,17 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 			return;
 		}
 
-		/* remove previous roots from open */
-		this.open.clear();
-
-		/* now insert new nodes, and the leaf ones in open */
-		for (Node<N, V> node : initialNodes) {
-			this.insertNodeIntoLocalGraph(node);
-			this.open.add(this.getLocalVersionOfNode(node));
+		this.openLock.lock();
+		try {
+			/* remove previous roots from open */
+			this.open.clear();
+			/* now insert new nodes, and the leaf ones in open */
+			for (Node<N, V> node : initialNodes) {
+				this.insertNodeIntoLocalGraph(node);
+				this.open.add(this.getLocalVersionOfNode(node));
+			}
+		} finally {
+			this.openLock.unlock();
 		}
 	}
 
@@ -1031,10 +1102,14 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 	 *            the openCollection to set
 	 */
 	public void setOpen(final OpenCollection<Node<N, V>> collection) {
-
-		collection.clear();
-		collection.addAll(this.open);
-		this.open = collection;
+		this.openLock.lock();
+		try {
+			collection.clear();
+			collection.addAll(this.open);
+			this.open = collection;
+		} finally {
+			this.openLock.unlock();
+		}
 	}
 
 	@Override
