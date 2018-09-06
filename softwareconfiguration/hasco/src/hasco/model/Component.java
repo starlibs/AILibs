@@ -27,6 +27,10 @@ public class Component {
 		this(name);
 		this.requiredInterfaces.putAll(requiredInterfaces);
 		this.providedInterfaces.addAll(providedInterfaces);
+		if (!this.providedInterfaces.contains(name)) {
+			this.providedInterfaces.add(name);
+		}
+
 		parameters.forEach(param -> this.addParameter(param));
 		this.dependencies.addAll(dependencies);
 	}
@@ -117,48 +121,61 @@ public class Component {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((dependencies == null) ? 0 : dependencies.hashCode());
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + ((parameters == null) ? 0 : parameters.hashCode());
-		result = prime * result + ((providedInterfaces == null) ? 0 : providedInterfaces.hashCode());
-		result = prime * result + ((requiredInterfaces == null) ? 0 : requiredInterfaces.hashCode());
+		result = prime * result + ((this.dependencies == null) ? 0 : this.dependencies.hashCode());
+		result = prime * result + ((this.name == null) ? 0 : this.name.hashCode());
+		result = prime * result + ((this.parameters == null) ? 0 : this.parameters.hashCode());
+		result = prime * result + ((this.providedInterfaces == null) ? 0 : this.providedInterfaces.hashCode());
+		result = prime * result + ((this.requiredInterfaces == null) ? 0 : this.requiredInterfaces.hashCode());
 		return result;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (this.getClass() != obj.getClass()) {
 			return false;
+		}
 		Component other = (Component) obj;
-		if (dependencies == null) {
-			if (other.dependencies != null)
+		if (this.dependencies == null) {
+			if (other.dependencies != null) {
 				return false;
-		} else if (!dependencies.equals(other.dependencies))
+			}
+		} else if (!this.dependencies.equals(other.dependencies)) {
 			return false;
-		if (name == null) {
-			if (other.name != null)
+		}
+		if (this.name == null) {
+			if (other.name != null) {
 				return false;
-		} else if (!name.equals(other.name))
+			}
+		} else if (!this.name.equals(other.name)) {
 			return false;
-		if (parameters == null) {
-			if (other.parameters != null)
+		}
+		if (this.parameters == null) {
+			if (other.parameters != null) {
 				return false;
-		} else if (!parameters.equals(other.parameters))
+			}
+		} else if (!this.parameters.equals(other.parameters)) {
 			return false;
-		if (providedInterfaces == null) {
-			if (other.providedInterfaces != null)
+		}
+		if (this.providedInterfaces == null) {
+			if (other.providedInterfaces != null) {
 				return false;
-		} else if (!providedInterfaces.equals(other.providedInterfaces))
+			}
+		} else if (!this.providedInterfaces.equals(other.providedInterfaces)) {
 			return false;
-		if (requiredInterfaces == null) {
-			if (other.requiredInterfaces != null)
+		}
+		if (this.requiredInterfaces == null) {
+			if (other.requiredInterfaces != null) {
 				return false;
-		} else if (!requiredInterfaces.equals(other.requiredInterfaces))
+			}
+		} else if (!this.requiredInterfaces.equals(other.requiredInterfaces)) {
 			return false;
+		}
 		return true;
 	}
 }

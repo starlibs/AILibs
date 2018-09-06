@@ -2,7 +2,6 @@ package de.upb.crc901.mlplan.examples.multiclass.weka;
 
 import java.io.File;
 import java.io.FileReader;
-import java.sql.SQLException;
 import java.sql.Time;
 import java.util.HashMap;
 import java.util.List;
@@ -48,10 +47,12 @@ public class MLPlanWekaExperimenter implements IExperimentSetEvaluator {
 		this.experimentID = experimentEntry.getId();
 		Map<String, String> experimentValues = experimentEntry.getExperiment().getValuesOfKeyFields();
 
-		if (!experimentValues.containsKey("dataset"))
+		if (!experimentValues.containsKey("dataset")) {
 			throw new IllegalArgumentException("\"dataset\" is not configured as a keyword in the experiment config");
-		if (!experimentValues.containsKey("evaluationTimeout"))
+		}
+		if (!experimentValues.containsKey("evaluationTimeout")) {
 			throw new IllegalArgumentException("\"evaluationTimeout\" is not configured as a keyword in the experiment config");
+		}
 
 		File datasetFile = new File(CONFIG.getDatasetFolder().getAbsolutePath() + File.separator + experimentValues.get("dataset") + ".arff");
 		print("Load dataset file: " + datasetFile.getAbsolutePath());
@@ -93,7 +94,7 @@ public class MLPlanWekaExperimenter implements IExperimentSetEvaluator {
 	public void rcvHASCOSolutionEvent(final SolutionCandidateFoundEvent<HASCOSolutionCandidate<Double>> e) {
 		if (this.adapter != null) {
 			try {
-				MLPipeline pl = factory.getComponentInstantiation(e.getSolutionCandidate().getComponentInstance());
+				MLPipeline pl = this.factory.getComponentInstantiation(e.getSolutionCandidate().getComponentInstance());
 				Map<String, Object> eval = new HashMap<>();
 				eval.put("experiment_id", this.experimentID);
 				eval.put("preprocessor", pl.getPreprocessors().toString());
@@ -113,13 +114,14 @@ public class MLPlanWekaExperimenter implements IExperimentSetEvaluator {
 	}
 
 	public static void main(final String[] args) {
-		
 		/* check config */
-		if (CONFIG.getDatasetFolder() == null)
+		if (CONFIG.getDatasetFolder() == null) {
 			throw new IllegalArgumentException("No dataset folder (datasetfolder) set in config.");
-		if (CONFIG.evaluationsTable() == null)
+		}
+		if (CONFIG.evaluationsTable() == null) {
 			throw new IllegalArgumentException("No evaluations table (db.evalTable) set in config");
-		
+		}
+
 		print("Start experiment runner...");
 		ExperimentRunner runner = new ExperimentRunner(new MLPlanWekaExperimenter());
 		print("Conduct random experiment...");
