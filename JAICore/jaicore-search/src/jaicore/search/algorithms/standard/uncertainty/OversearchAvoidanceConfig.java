@@ -18,11 +18,9 @@ public class OversearchAvoidanceConfig<N, V extends Comparable<V>> {
 	private boolean adjustPhaseLengthsDynamically = false;
 	private long timeout;
 	private int interval = 50;
-	private int randomSampleAmount = 3;
 	private double exploitationScoreThreshold = 0.1d;
 	private double explorationUncertaintyThreshold = 0.1d;
 	private double minimumSolutionDistanceForExploration = 0.0d;
-	private IUncertaintySource<N, V> uncertaintySource = new BasicUncertaintySource<>();
 	private ISolutionDistanceMetric<N> solutionDistanceMetric= (s1, s2) -> 1.0d;
 	private Comparator<ParetoNode<N, V>> paretoComparator = new FirstInFirstOutComparator<>();
 
@@ -65,14 +63,6 @@ public class OversearchAvoidanceConfig<N, V extends Comparable<V>> {
 		this.interval = interval;
 	}
 
-	public int getRandomSampleAmount() {
-		return randomSampleAmount;
-	}
-
-	public void setRandomSampleAmount(int randomSampleAmount) {
-		this.randomSampleAmount = randomSampleAmount;
-	}
-
 	public double getExploitationScoreThreshold() {
 		return exploitationScoreThreshold;
 	}
@@ -107,14 +97,6 @@ public class OversearchAvoidanceConfig<N, V extends Comparable<V>> {
 	
 	public Comparator<ParetoNode<N, V>> getParetoComperator() {
 		return this.paretoComparator;
-	}
-
-	public IUncertaintySource<N, V> getUncertaintySource() {
-		return uncertaintySource;
-	}
-
-	public void setUncertaintySource(IUncertaintySource<N, V> uncertaintySource) {
-		this.uncertaintySource = uncertaintySource;
 	}
 
 }
