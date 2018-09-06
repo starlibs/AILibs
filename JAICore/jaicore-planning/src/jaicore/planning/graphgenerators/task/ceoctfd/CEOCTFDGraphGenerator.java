@@ -33,7 +33,7 @@ public class CEOCTFDGraphGenerator<O extends CEOCOperation, M extends OCMethod, 
 	}
 
 	@Override
-	protected TFDNode postProcessComplexTaskNode(TFDNode node) {
+	protected TFDNode postProcessPrimitiveTaskNode(TFDNode node) {
 		Monom state = node.getState();
 		state.getParameters().stream().filter(p -> p.getName().startsWith("newVar") && !state.contains(new Literal("def('" + p.getName() + "')")))
 				.forEach(p -> state.add(new Literal("def('" + p.getName() + "')")));

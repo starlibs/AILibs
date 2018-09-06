@@ -13,10 +13,13 @@ import hasco.core.SoftwareConfigurationProblem;
 import hasco.model.ComponentInstance;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.algorithm.AlgorithmEvent;
+import jaicore.basic.algorithm.AlgorithmFinishedEvent;
+import jaicore.basic.algorithm.AlgorithmInitializedEvent;
+import jaicore.basic.algorithm.AlgorithmState;
 import jaicore.basic.algorithm.IAlgorithm;
 import jaicore.basic.algorithm.SolutionCandidateFoundEvent;
 
-public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, V extends Comparable<V>> implements IAlgorithm<OptimizingFactoryProblem<P,T,V>, T>, ILoggingCustomizable {
+public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, V extends Comparable<V>> implements IAlgorithm<OptimizingFactoryProblem<P, T, V>, T>, ILoggingCustomizable {
 
 	private String loggerName;
 	private Logger logger = LoggerFactory.getLogger(OptimizingFactory.class);
@@ -24,6 +27,10 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, V e
 	private final SoftwareConfigurationAlgorithmFactory<P, ?, V> factoryForOptimizationAlgorithm;
 	private T constructedObject;
 	private final EventBus eventBus = new EventBus();
+
+	/* factory state */
+	private SoftwareConfigurationAlgorithm<P, ?, V> optimizer;
+	private AlgorithmState state = AlgorithmState.created;
 
 	public OptimizingFactory(OptimizingFactoryProblem<P, T, V> problem, SoftwareConfigurationAlgorithmFactory<P, ?, V> factoryForOptimizationAlgorithm) {
 		super();
@@ -38,27 +45,44 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, V e
 
 	@Override
 	public boolean hasNext() {
-		return false;
+		return state != AlgorithmState.inactive;
 	}
 
 	@Override
 	public AlgorithmEvent next() {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			switch (state) {
+			case created: {
+				factoryForOptimizationAlgorithm.setProblemInput(problem.getConfigurationProblem());
+				optimizer = factoryForOptimizationAlgorithm.getAlgorithm();
+				if (optimizer instanceof ILoggingCustomizable) {
+					this.logger.info("Switching the logger name of the actually used optimizer to {}", loggerName);
+					((ILoggingCustomizable) optimizer).setLoggerName(loggerName + ".optimizer");
+				}
+				optimizer.registerListener(this);
+				while (!(optimizer.next() instanceof AlgorithmInitializedEvent));
+				state = AlgorithmState.active;
+				return new AlgorithmInitializedEvent();
+			}
+			case active: {
+				optimizer.call();
+				ComponentInstance solutionModel = optimizer.getOptimizationResult().getResult();
+				this.constructedObject = problem.getBaseFactory().getComponentInstantiation(solutionModel);
+				state = AlgorithmState.inactive;
+				return new AlgorithmFinishedEvent();
+			}
+			default:
+				throw new IllegalStateException("Cannot do anything in state " + state);
+			}
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override
 	public T call() throws Exception {
-		factoryForOptimizationAlgorithm.setProblemInput(problem.getConfigurationProblem());
-		SoftwareConfigurationAlgorithm<P, ?, V> optimizer = factoryForOptimizationAlgorithm.getAlgorithm();
-		if (optimizer instanceof ILoggingCustomizable) {
-			this.logger.info("Switching the logger name of the actually used optimizer to {}", loggerName);
-			((ILoggingCustomizable)optimizer).setLoggerName(loggerName + ".optimizer");
-		}
-		optimizer.registerListener(this);
-		optimizer.call();
-		ComponentInstance solutionModel = optimizer.getOptimizationResult().getResult();
-		this.constructedObject = problem.getBaseFactory().getComponentInstantiation(solutionModel);
+		while (this.hasNext())
+			this.next();
 		return this.constructedObject;
 	}
 
@@ -72,7 +96,7 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, V e
 		// TODO Auto-generated method stub
 
 	}
-	
+
 	@Subscribe
 	public void receiveSolutionEvent(SolutionCandidateFoundEvent<?> event) {
 		eventBus.post(event);
@@ -123,5 +147,22 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, V e
 	@Override
 	public String getLoggerName() {
 		return loggerName;
+	}
+
+	/**
+	 * @return the optimizer that is used for building the object
+	 */
+	public SoftwareConfigurationAlgorithm<P, ?, V> getOptimizer() {
+		return optimizer;
+	}
+	
+	public AlgorithmInitializedEvent init() {
+		AlgorithmEvent e = null;
+		while (hasNext()) {
+			e = next();
+			if (e instanceof AlgorithmInitializedEvent)
+				return (AlgorithmInitializedEvent)e;
+		}
+		throw new IllegalStateException("Could not complete initialization");
 	}
 }

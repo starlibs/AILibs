@@ -256,7 +256,7 @@ public class ComponentLoader {
 							case "in": {
 								Pair<Parameter, ParameterDomain> conditionItem;
 								if (param.isNumeric()) {
-									Interval interval = SetUtil.unserializeInterval(target);
+									Interval interval = SetUtil.unserializeInterval("[" + target.substring(1, target.length() - 1) + "]");
 									conditionItem = new Pair<>(param, new NumericParameterDomain(((NumericParameterDomain) param.getDefaultDomain()).isInteger(), interval.getInf(), interval.getSup()));
 								} else if (param.isCategorical()) {
 									if (!target.startsWith("[") && !target.startsWith("{")) {
@@ -312,7 +312,7 @@ public class ComponentLoader {
 						case "in": {
 							Pair<Parameter, ParameterDomain> conditionItem;
 							if (param.isNumeric()) {
-								Interval interval = SetUtil.unserializeInterval(target);
+								Interval interval = SetUtil.unserializeInterval("[" + target.substring(1, target.length() - 1) + "]");
 								conditionItem = new Pair<>(param, new NumericParameterDomain(((NumericParameterDomain) param.getDefaultDomain()).isInteger(), interval.getInf(), interval.getSup()));
 							} else if (param.isCategorical()) {
 								if (!target.startsWith("[") && !target.startsWith("{")) {

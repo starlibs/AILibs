@@ -16,14 +16,18 @@ public class MLPlanARFFExample {
 	public static void main(final String[] args) throws Exception {
 
 		/* load data for segment dataset and create a train-test-split */
-		Instances data = new Instances(new FileReader("../../../../datasets/classification/multi-class/ecoli.arff"));
+		Instances data = new Instances(new FileReader("../../../../datasets/classification/multi-class/car.arff"));
 		data.setClassIndex(data.numAttributes() - 1);
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(0), .7f);
 
 		/* initialize mlplan, and let it run for 30 seconds */
 		MLPlanWekaClassifier mlplan = new WekaMLPlanWekaClassifier();
+		mlplan.setPortionOfDataForPhase2(0.0f);
 		mlplan.setLoggerName("mlplan");
-		mlplan.setTimeout(60);
+		mlplan.setTimeout(60000);
+		mlplan.setTimeoutForNodeEvaluation(2000);
+		mlplan.setTimeoutForSingleSolutionEvaluation(2000);
+		mlplan.setNumCPUs(8);
 		mlplan.activateVisualization();
 		try {
 			long start = System.currentTimeMillis();

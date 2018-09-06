@@ -46,6 +46,7 @@ import jaicore.search.algorithms.standard.AbstractORGraphSearch;
 import jaicore.search.algorithms.standard.bestfirst.events.GraphSearchSolutionCandidateFoundEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.NodeAnnotationEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.NodeExpansionCompletedEvent;
+import jaicore.search.algorithms.standard.bestfirst.events.NodeExpansionJobSubmittedEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.SolutionAnnotationEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.SuccessorComputationCompletedEvent;
 import jaicore.search.algorithms.standard.bestfirst.model.OpenCollection;
@@ -88,7 +89,7 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 	private AlgorithmState state = AlgorithmState.created;
 	private EvaluatedSearchGraphPath<N, A, V> bestSeenSolution;
 	private List<NodeExpansionDescription<N, A>> lastExpansion = new ArrayList<>();
-
+	
 	/* communication */
 	protected final GraphEventBus<Node<N, V>> graphEventBus = new GraphEventBus<>();
 	private Logger logger = LoggerFactory.getLogger(BestFirst.class);
@@ -124,19 +125,30 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 
 	private class NodeBuilder implements Runnable {
 
+		private final Collection<N> todoList;
 		private final Node<N, V> expandedNodeInternal;
 		private final NodeExpansionDescription<N, A> successorDescription;
 
-		public NodeBuilder(final Node<N, V> expandedNodeInternal, final NodeExpansionDescription<N, A> successorDescription) {
+		public NodeBuilder(final Collection<N> todoList, final Node<N, V> expandedNodeInternal, final NodeExpansionDescription<N, A> successorDescription) {
 			super();
+			this.todoList = todoList;
 			this.expandedNodeInternal = expandedNodeInternal;
 			this.successorDescription = successorDescription;
+		}
+		
+		private void communicateJobFinished() {
+			synchronized (todoList) {
+				todoList.remove(successorDescription.getTo());
+				if (todoList.isEmpty())
+					graphEventBus.post(new NodeExpansionCompletedEvent<>(expandedNodeInternal));
+			}
 		}
 
 		@Override
 		public void run() {
 			try {
 				if (BestFirst.this.canceled || BestFirst.this.interrupted) {
+					communicateJobFinished();
 					return;
 				}
 				BestFirst.this.logger.debug("Start node creation.");
@@ -163,6 +175,7 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 				try {
 					label = BestFirst.this.nodeEvaluator.f(newNode);
 					if (BestFirst.this.canceled || BestFirst.this.interrupted) {
+						communicateJobFinished();
 						return;
 					}
 					
@@ -209,6 +222,7 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 						BestFirst.this.activeJobs.decrementAndGet();
 						BestFirst.this.fComputationTickets.release();
 					}
+					communicateJobFinished();
 					return;
 				}
 				newNode.setInternalLabel(label);
@@ -284,7 +298,7 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 			} catch (Throwable e) {
 				e.printStackTrace();
 			}
-
+			communicateJobFinished();
 		}
 	}
 
@@ -482,7 +496,7 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 		return this.lastExpansion;
 	}
 
-	protected NodeExpansionCompletedEvent<N, A, V> step() throws InterruptedException, AlgorithmExecutionCanceledException {
+	protected NodeExpansionJobSubmittedEvent<N, A, V> step() throws InterruptedException, AlgorithmExecutionCanceledException {
 		if (!this.beforeSelection())
 			return null;
 		Node<N, V> nodeToExpand = this.open.peek();
@@ -510,7 +524,7 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 		}
 	}
 
-	public NodeExpansionCompletedEvent<N, A, V> step(final Node<N, V> nodeToExpand) throws InterruptedException, AlgorithmExecutionCanceledException {
+	public NodeExpansionJobSubmittedEvent<N, A, V> step(final Node<N, V> nodeToExpand) throws InterruptedException, AlgorithmExecutionCanceledException {
 
 		/* if search has been interrupted, do not process next step */
 		this.logger.debug("Step starts. Size of OPEN now {}", this.open.size());
@@ -522,14 +536,16 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 		this.logger.debug("Removed {} from OPEN for expansion. OPEN size now {}", nodeToExpand, this.open.size());
 		assert this.ext2int.containsKey(nodeToExpand.getPoint()) : "Trying to expand a node whose point is not available in the ext2int map";
 		this.beforeExpansion(nodeToExpand);
-		NodeExpansionCompletedEvent<N, A, V> event = this.expandNode(nodeToExpand);
+		NodeExpansionJobSubmittedEvent<N, A, V> event = this.expandNode(nodeToExpand);
 		this.afterExpansion(nodeToExpand);
 		checkTermination();
 		this.logger.debug("Step ends. Size of OPEN now {}", this.open.size());
 		return event;
 	}
 
-	private NodeExpansionCompletedEvent<N, A, V> expandNode(final Node<N, V> expandedNodeInternal) throws InterruptedException, AlgorithmExecutionCanceledException {
+	private NodeExpansionJobSubmittedEvent<N, A, V> expandNode(final Node<N, V> expandedNodeInternal) throws InterruptedException, AlgorithmExecutionCanceledException {
+		if (expandedNodeInternal == null)
+			throw new IllegalArgumentException("Cannot expand node NULL");
 		this.graphEventBus.post(new NodeTypeSwitchEvent<Node<N, V>>(expandedNodeInternal, "or_expanding"));
 		this.logger.info("Expanding node {} with f-value {}", expandedNodeInternal, expandedNodeInternal.getInternalLabel());
 		assert !this.expanded.contains(expandedNodeInternal.getPoint()) : "Node " + expandedNodeInternal + " expanded twice!!";
@@ -545,11 +561,12 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 
 		/* attach successors to search graph */
 		// System.out.println("Compute successors ... " + Thread.currentThread().isInterrupted());
+		List<N> todoList = successorDescriptions.stream().map(d -> d.getTo()).collect(Collectors.toList());
 		successorDescriptions.stream().forEach(successorDescription -> {
 			if (this.interrupted || this.canceled) {
 				return;
 			}
-			NodeBuilder nb = new NodeBuilder(expandedNodeInternal, successorDescription);
+			NodeBuilder nb = new NodeBuilder(todoList, expandedNodeInternal, successorDescription);
 			if (this.additionalThreadsForExpansion < 1) {
 				nb.run();
 			} else {
@@ -575,7 +592,7 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 		this.expanded.add(expandedNodeInternal.getPoint());
 		assert this.expanded.contains(expandedNodeInternal.getPoint()) : "Expanded node " + expandedNodeInternal + " was not inserted into the set of expanded nodes!";
 		this.graphEventBus.post(new NodeTypeSwitchEvent<Node<N, V>>(expandedNodeInternal, "or_closed"));
-		NodeExpansionCompletedEvent<N, A, V> nodeCompletionEvent = new NodeExpansionCompletedEvent<>(expandedNodeInternal, successorDescriptions);
+		NodeExpansionJobSubmittedEvent<N, A, V> nodeCompletionEvent = new NodeExpansionJobSubmittedEvent<>(expandedNodeInternal, successorDescriptions);
 		return nodeCompletionEvent;
 	}
 
@@ -849,7 +866,7 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 	@Subscribe
 	public void receiveSolutionCandidateEvent(final GraphSearchSolutionCandidateFoundEvent<N, A, V> solutionEvent) {
 		try {
-			this.logger.info("Received solution with f-value {}", solutionEvent.getSolutionCandidate().getScore());
+			this.logger.info("Received solution with f-value {} and annotations {}", solutionEvent.getSolutionCandidate().getScore(), solutionEvent.getSolutionCandidate().getAnnotations());
 			registerSolutionCandidateViaEvent(solutionEvent);
 		} catch (Throwable e) {
 			e.printStackTrace();
