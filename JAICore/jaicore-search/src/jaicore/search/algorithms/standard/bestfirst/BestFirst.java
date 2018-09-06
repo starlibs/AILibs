@@ -97,6 +97,7 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 
 	/* search related objects */
 	protected OpenCollection<Node<N, V>> open = new PriorityQueueOpen<>();
+	private final Set<Node<N,V>> expanding = new HashSet<>();
 	private final Set<N> expanded = new HashSet<>();
 	protected final GraphGenerator<N, A> graphGenerator;
 	protected final RootGenerator<N> rootGenerator;
@@ -272,8 +273,11 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 
 				/* if parent discarding is turned off OR if the node was node processed by a parent discarding rule, just insert it on OPEN */
 				if (!nodeProcessed) {
-
 					if (!newNode.isGoal()) {
+						assert !expanded.contains(newNode.getPoint()) : "Currently only tree search is supported. But now we add a node to OPEN whose point has already been expanded before.";
+						expanding.forEach(n -> {
+							assert !n.getPoint().equals(newNode.getPoint()) : "Currently only tree search is supported. But now we add a node to OPEN whose point has already been expanded before.";
+						});
 						BestFirst.this.open.add(newNode);
 					}
 					BestFirst.this.graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_" + (newNode.isGoal() ? "solution" : "open")));
@@ -552,6 +556,7 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 
 		/* compute successors */
 		this.logger.debug("Start computation of successors");
+		this.expanding.add(expandedNodeInternal);
 		final List<NodeExpansionDescription<N, A>> successorDescriptions = new ArrayList<>();
 		checkTermination();
 
@@ -581,6 +586,7 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 				if (this.interrupted || this.canceled)
 					return;
 				this.activeJobs.incrementAndGet();
+				assert !open.contains(expandedNodeInternal) : "Cannot submit jobs for node expansion as long as the node is on OPEN";
 				this.pool.submit(nb);
 			}
 		});
@@ -589,6 +595,7 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 
 		/* update statistics, send closed notifications, and possibly return a solution */
 		this.expandedCounter++;
+		this.expanding.remove(expandedNodeInternal);
 		this.expanded.add(expandedNodeInternal.getPoint());
 		assert this.expanded.contains(expandedNodeInternal.getPoint()) : "Expanded node " + expandedNodeInternal + " was not inserted into the set of expanded nodes!";
 		this.graphEventBus.post(new NodeTypeSwitchEvent<Node<N, V>>(expandedNodeInternal, "or_closed"));
@@ -687,7 +694,7 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 	}
 
 	protected synchronized Node<N, V> newNode(final Node<N, V> parent, final N t2, final V evaluation) {
-		assert !this.open.contains(parent) : "Parent node " + parent + " is still on OPEN, which must not be the case!";
+		assert !this.open.contains(parent) : "Parent node " + parent + " is still on OPEN, which must not be the case! OPEN class: " + open.getClass().getName() + ". OPEN size: " + open.size();
 
 		/* create new node and check whether it is a goal */
 		Node<N, V> newNode = new Node<>(parent, t2);
