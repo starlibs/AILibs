@@ -4,7 +4,7 @@ import java.io.File;
 
 import org.aeonbits.owner.Config.Sources;
 
-import hasco.variants.twophase.TwoPhaseHASCOConfig;
+import hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCOConfig;
 
 @Sources({ "file:conf/automl/mlplan.properties" })
 public interface MLPlanClassifierConfig extends TwoPhaseHASCOConfig {

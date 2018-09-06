@@ -43,6 +43,7 @@ import jaicore.search.core.interfaces.ISolutionEvaluator;
 import jaicore.search.core.interfaces.PathUnifyingGraphGenerator;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
 import jaicore.search.model.probleminputs.GeneralEvaluatedTraversalTree;
+import jaicore.search.model.probleminputs.GraphSearchInput;
 import jaicore.search.model.travesaltree.Node;
 
 @SuppressWarnings("serial")
@@ -71,6 +72,7 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 	/* algorithm parameters */
 	protected final Random random;
 	protected int samples;
+	private final INodeEvaluator<T, Double> preferredNodeEvaluatorForRDFS;
 
 	/* sub-tools for conducting and analyzing random completions */
 	private StandardBestFirst<T, String, Double> completer;
@@ -84,9 +86,14 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 	public RandomCompletionBasedNodeEvaluator(final Random random, final int samples, final ISolutionEvaluator<T, V> solutionEvaluator) {
 		this(random, samples, solutionEvaluator, -1, -1);
 	}
-
+	
 	public RandomCompletionBasedNodeEvaluator(final Random random, final int samples, final ISolutionEvaluator<T, V> solutionEvaluator, int timeoutForSingleCompletionEvaluationInMS,
 			int timeoutForNodeEvaluationInMS) {
+		this (random, samples, solutionEvaluator, timeoutForSingleCompletionEvaluationInMS, timeoutForNodeEvaluationInMS, null);
+	}
+
+	public RandomCompletionBasedNodeEvaluator(final Random random, final int samples, final ISolutionEvaluator<T, V> solutionEvaluator, int timeoutForSingleCompletionEvaluationInMS,
+			int timeoutForNodeEvaluationInMS, INodeEvaluator<T, Double> preferredNodeEvaluator) {
 		super();
 		if (random == null) {
 			throw new IllegalArgumentException("Random source must not be null!");
@@ -103,6 +110,7 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 		this.solutionEvaluator = solutionEvaluator;
 		this.timeoutForSingleCompletionEvaluationInMS = timeoutForSingleCompletionEvaluationInMS;
 		this.timeoutForNodeEvaluationInMS = timeoutForNodeEvaluationInMS;
+		this.preferredNodeEvaluatorForRDFS = preferredNodeEvaluator;
 
 		/* create randomized dfs searcher */
 		logger.info("Initialized RandomCompletionEvaluator with timeout {}ms for single evaluations and {}ms in total per node", timeoutForSingleCompletionEvaluationInMS,
@@ -450,8 +458,11 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 			logger.warn("The graph generator passed to the RandomCompletion algorithm does not offer path subsumption checks, which may cause inefficiencies in some domains.");
 
 		/* create the completion algorithm and initialize it */
-		GeneralEvaluatedTraversalTree<T, String, Double> completionProblem = new GeneralEvaluatedTraversalTree<>(generator, new RandomizedDepthFirstNodeEvaluator<>(random));
-		completer = new RandomizedDepthFirstSearch<>(completionProblem, this.random);
+		INodeEvaluator<T, Double> nodeEvaluator = new RandomizedDepthFirstNodeEvaluator<>(this.random);
+		if (preferredNodeEvaluatorForRDFS != null)
+			nodeEvaluator = new AlternativeNodeEvaluator<>(preferredNodeEvaluatorForRDFS, nodeEvaluator);
+		GeneralEvaluatedTraversalTree<T, String, Double> completionProblem = new GeneralEvaluatedTraversalTree<>(generator, nodeEvaluator);
+		completer = new StandardBestFirst<>(completionProblem);
 		completerOpenCollection = new EnforcedExplorationOpenSelection<>();
 		completer.setOpen(completerOpenCollection);
 		completer.registerListener(this);

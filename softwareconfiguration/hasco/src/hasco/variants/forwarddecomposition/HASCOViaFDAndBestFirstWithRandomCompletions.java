@@ -1,4 +1,4 @@
-package hasco.variants;
+package hasco.variants.forwarddecomposition;
 
 import hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
@@ -12,6 +12,6 @@ public class HASCOViaFDAndBestFirstWithRandomCompletions<V extends Comparable<V>
 	}
 	
 	public HASCOViaFDAndBestFirstWithRandomCompletions(RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem, int numSamples, int seed, int timeoutForSingleCompletionEvaluationInMS, int timeoutForNodeEvaluationInMS, INodeEvaluator<TFDNode, V> preferredNodeEvaluator) {
-		super(configurationProblem, new GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS<>(preferredNodeEvaluator, seed, numSamples, timeoutForSingleCompletionEvaluationInMS, timeoutForNodeEvaluationInMS));
+		super(configurationProblem, new GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS<>(preferredNodeEvaluator, new DefaultPathPriorizingNodeEvaluator<>(), seed, numSamples, timeoutForSingleCompletionEvaluationInMS, timeoutForNodeEvaluationInMS));
 	}
 }

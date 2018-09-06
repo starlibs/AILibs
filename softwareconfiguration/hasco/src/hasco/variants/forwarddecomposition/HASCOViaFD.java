@@ -1,5 +1,6 @@
-package hasco.variants;
+package hasco.variants.forwarddecomposition;
 
+import hasco.core.DefaultHASCOPlanningGraphGeneratorDeriver;
 import hasco.core.HASCO;
 import hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
 import jaicore.basic.algorithm.AlgorithmProblemTransformer;
@@ -12,7 +13,7 @@ public class HASCOViaFD<ISearch, V extends Comparable<V>> extends HASCO<ISearch,
 
 	public HASCOViaFD(RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem,
 			IGraphSearchFactory<ISearch, ?, TFDNode, String, V, ?, ?> searchFactory, AlgorithmProblemTransformer<GraphSearchProblemInput<TFDNode, String, V>, ISearch> searchProblemTransformer) {
-		super(configurationProblem, new ForwardDecompositionReducer<>(), searchFactory, searchProblemTransformer);
+		super(configurationProblem, new DefaultHASCOPlanningGraphGeneratorDeriver<>(new ForwardDecompositionReducer<>()), searchFactory, searchProblemTransformer);
 	}
 	
 }

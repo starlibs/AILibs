@@ -1,7 +1,7 @@
 package hasco.test;
 
 import hasco.core.HASCOFactory;
-import hasco.variants.HASCOViaFDAndBestFirstWithRandomCompletionsFactory;
+import hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstWithRandomCompletionsFactory;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.search.model.probleminputs.GeneralEvaluatedTraversalTree;
 

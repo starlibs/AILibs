@@ -31,7 +31,6 @@ import jaicore.graphvisualizer.SearchVisualizationPanel;
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.planning.EvaluatedSearchGraphBasedPlan;
 import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionReducer;
-import jaicore.planning.graphgenerators.IPlanningGraphGeneratorDeriver;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;
 import jaicore.planning.model.CostSensitiveHTNPlanningProblem;
@@ -67,7 +66,7 @@ public class HASCO<ISearch, N, A, V extends Comparable<V>> implements SoftwareCo
 	/* problem and algorithm setup */
 	private final RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem;
 	private final Collection<Component> components;
-	private final IPlanningGraphGeneratorDeriver<CEOCOperation, OCMethod, CEOCAction, CEOCIPSTNPlanningProblem<CEOCOperation, OCMethod, CEOCAction>, N, A> planningGraphGeneratorDeriver;
+	private final IHASCOPlanningGraphGeneratorDeriver<N, A> planningGraphGeneratorDeriver;
 	private final AlgorithmProblemTransformer<GraphSearchProblemInput<N, A, V>, ISearch> searchProblemTransformer;
 	private HASCOConfig config = ConfigCache.getOrCreate(HASCOConfig.class);
 	private final IGraphSearchFactory<ISearch, ?, N, A, V, ?, ?> searchFactory;
@@ -89,7 +88,7 @@ public class HASCO<ISearch, N, A, V extends Comparable<V>> implements SoftwareCo
 	private HASCOSolutionCandidate<V> bestRecognizedSolution;
 	
 	public HASCO(RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem,
-			IPlanningGraphGeneratorDeriver<CEOCOperation, OCMethod, CEOCAction, CEOCIPSTNPlanningProblem<CEOCOperation, OCMethod, CEOCAction>, N, A> planningGraphGeneratorDeriver,
+			IHASCOPlanningGraphGeneratorDeriver<N, A> planningGraphGeneratorDeriver,
 			IGraphSearchFactory<ISearch, ?, N, A, V, ?, ?> searchFactory, AlgorithmProblemTransformer<GraphSearchProblemInput<N, A, V>, ISearch> searchProblemTransformer) {
 		super();
 		if (configurationProblem == null)
@@ -296,6 +295,10 @@ public class HASCO<ISearch, N, A, V extends Comparable<V>> implements SoftwareCo
 	public RefinementConfiguredSoftwareConfigurationProblem<V> getInput() {
 		return configurationProblem;
 	}
+	
+	public CostSensitiveHTNPlanningProblem<CEOCOperation, OCMethod, CEOCAction, CEOCIPSTNPlanningProblem<CEOCOperation, OCMethod, CEOCAction>, V> getPlanningProblem() {
+		return planningProblem;
+	}
 
 	@Override
 	public void cancel() {
@@ -317,6 +320,10 @@ public class HASCO<ISearch, N, A, V extends Comparable<V>> implements SoftwareCo
 		return new IOptimizerResult<>(bestRecognizedSolution.getComponentInstance(), bestRecognizedSolution.getScore());
 	}
 	
+	public IHASCOPlanningGraphGeneratorDeriver<N,A> getPlanningGraphGeneratorDeriver() {
+		return planningGraphGeneratorDeriver;
+	}
+
 	public AlgorithmInitializedEvent init() {
 		AlgorithmEvent e = null;
 		while (hasNext()) {

@@ -276,7 +276,7 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 					if (!newNode.isGoal()) {
 						assert !expanded.contains(newNode.getPoint()) : "Currently only tree search is supported. But now we add a node to OPEN whose point has already been expanded before.";
 						expanding.forEach(n -> {
-							assert !n.getPoint().equals(newNode.getPoint()) : "Currently only tree search is supported. But now we add a node to OPEN whose point has already been expanded before.";
+							assert !n.getPoint().equals(newNode.getPoint()) : "Currently only tree search is supported. But now we add a node to OPEN whose point has already been expanded before: " + newNode.getPoint();
 						});
 						BestFirst.this.open.add(newNode);
 					}
