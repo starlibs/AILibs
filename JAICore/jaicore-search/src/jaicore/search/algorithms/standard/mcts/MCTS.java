@@ -208,7 +208,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AbstractORGraphSearch<G
 		return path;
 	}
 
-	private Map<A, N> expandNode(N node) {
+	private Map<A, N> expandNode(N node) throws InterruptedException {
 		if (!unexpandedNodes.contains(node))
 			throw new IllegalArgumentException();
 		logger.debug("Situation {} has never been analyzed before, expanding the graph at the respective point.", node);

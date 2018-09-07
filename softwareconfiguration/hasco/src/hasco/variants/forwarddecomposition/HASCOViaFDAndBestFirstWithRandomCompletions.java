@@ -7,11 +7,14 @@ import jaicore.search.problemtransformers.GraphSearchProblemInputToGeneralEvalua
 
 public class HASCOViaFDAndBestFirstWithRandomCompletions<V extends Comparable<V>> extends HASCOViaFDAndBestFirst<V> {
 
-	public HASCOViaFDAndBestFirstWithRandomCompletions(RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem, int numSamples, int seed, int timeoutForSingleCompletionEvaluationInMS, int timeoutForNodeEvaluationInMS) {
+	public HASCOViaFDAndBestFirstWithRandomCompletions(RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem, int numSamples, int seed, int timeoutForSingleCompletionEvaluationInMS,
+			int timeoutForNodeEvaluationInMS) {
 		this(configurationProblem, numSamples, seed, timeoutForSingleCompletionEvaluationInMS, timeoutForNodeEvaluationInMS, null);
 	}
-	
-	public HASCOViaFDAndBestFirstWithRandomCompletions(RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem, int numSamples, int seed, int timeoutForSingleCompletionEvaluationInMS, int timeoutForNodeEvaluationInMS, INodeEvaluator<TFDNode, V> preferredNodeEvaluator) {
-		super(configurationProblem, new GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS<>(preferredNodeEvaluator, new DefaultPathPriorizingNodeEvaluator<>(), seed, numSamples, timeoutForSingleCompletionEvaluationInMS, timeoutForNodeEvaluationInMS));
+
+	public HASCOViaFDAndBestFirstWithRandomCompletions(RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem, int numSamples, int seed, int timeoutForSingleCompletionEvaluationInMS,
+			int timeoutForNodeEvaluationInMS, INodeEvaluator<TFDNode, V> preferredNodeEvaluator) {
+		super(configurationProblem, new GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS<>(preferredNodeEvaluator, new DefaultPathPriorizingNodeEvaluator<>(), seed, numSamples,
+				timeoutForSingleCompletionEvaluationInMS, timeoutForNodeEvaluationInMS));
 	}
 }

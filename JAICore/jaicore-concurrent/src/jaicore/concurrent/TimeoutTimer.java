@@ -52,11 +52,24 @@ public class TimeoutTimer {
 			logger.info("Scheduling interrupt for thread {} in {}ms", Thread.currentThread(), delay);
 			return this.interruptThreadAfterMS(Thread.currentThread(), delay);
 		}
-
+		
+		public int interruptMeAfterMS(final long delay, Runnable preInterruptionHook) {
+			logger.info("Scheduling interrupt for thread {} in {}ms", Thread.currentThread(), delay);
+			return this.interruptThreadAfterMS(Thread.currentThread(), delay, preInterruptionHook);
+		}
+		
 		public int interruptThreadAfterMS(final Thread thread, final long delay) {
+			return interruptThreadAfterMS(thread, delay, null);
+		}
+
+		public int interruptThreadAfterMS(final Thread thread, final long delay, Runnable preInterruptionHook) {
 			return this.scheduleTask(new TimerTask() {
 				@Override
 				public void run() {
+					if (preInterruptionHook != null) {
+						logger.info("Executing pre-interruption hook.");
+						preInterruptionHook.run();
+					}
 					logger.info("interrupting thread {} after delay {}ms", thread, delay);
 					thread.interrupt();
 				}

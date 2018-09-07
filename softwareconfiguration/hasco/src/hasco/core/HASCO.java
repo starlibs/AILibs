@@ -324,6 +324,10 @@ public class HASCO<ISearch, N, A, V extends Comparable<V>> implements SoftwareCo
 		return planningGraphGeneratorDeriver;
 	}
 
+	public AlgorithmProblemTransformer<GraphSearchProblemInput<N, A, V>, ISearch> getSearchProblemTransformer() {
+		return searchProblemTransformer;
+	}
+
 	public AlgorithmInitializedEvent init() {
 		AlgorithmEvent e = null;
 		while (hasNext()) {

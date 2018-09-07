@@ -10,5 +10,5 @@ public interface SingleSuccessorGenerator<T,A> extends SuccessorGenerator<T, A> 
 	 * @param i
 	 * @return
 	 */
-	public NodeExpansionDescription<T,A> generateSuccessor(T node, int i);
+	public NodeExpansionDescription<T,A> generateSuccessor(T node, int i) throws InterruptedException;
 }

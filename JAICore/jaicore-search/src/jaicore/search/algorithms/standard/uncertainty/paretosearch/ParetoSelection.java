@@ -2,6 +2,8 @@ package jaicore.search.algorithms.standard.uncertainty.paretosearch;
 
 import java.util.*;
 import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
 
 import jaicore.search.algorithms.standard.bestfirst.model.OpenCollection;
 import jaicore.search.model.travesaltree.Node;
@@ -221,6 +223,18 @@ public class ParetoSelection <T, V extends Comparable<V>> implements OpenCollect
 		}
 		s += "]";
 		return s;
+	}
+
+	@Override
+	public void setLock(Lock openLock) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setNodeAddedToOpenCondition(Condition condition) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

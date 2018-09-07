@@ -158,16 +158,20 @@ public class KnapsackProblem {
 					}
 
 					@Override
-					public List<NodeExpansionDescription<KnapsackNode, String>> generateSuccessors(KnapsackNode node) {
+					public List<NodeExpansionDescription<KnapsackNode, String>> generateSuccessors(KnapsackNode node) throws InterruptedException {
 						List<NodeExpansionDescription<KnapsackNode, String>> l = new ArrayList<>();
 						List<String> possibleDestinations = getPossiblePackingObjects(node);
 						int N = possibleDestinations.size();
-						for (int i = 0; i < N; i++)
+						for (int i = 0; i < N; i++) {
 							l.add(generateSuccessor(node, possibleDestinations, i));
+						}
 						return l;
 					}
 
-					public NodeExpansionDescription<KnapsackNode, String> generateSuccessor(KnapsackNode n, List<String> objetcs, int i) {
+					public NodeExpansionDescription<KnapsackNode, String> generateSuccessor(KnapsackNode n, List<String> objetcs, int i) throws InterruptedException {
+						if (Thread.currentThread().isInterrupted()) {
+							throw new InterruptedException("Successor generation interrupted");
+						}
 						int N = objetcs.size();
 						String object = objetcs.get(i % N);
 						KnapsackNode newNode = new KnapsackNode(n.getPackedObjects(), n.getRemainingObjects(), object);
@@ -175,7 +179,7 @@ public class KnapsackProblem {
 					}
 
 					@Override
-					public NodeExpansionDescription<KnapsackNode, String> generateSuccessor(KnapsackNode node, int i) {
+					public NodeExpansionDescription<KnapsackNode, String> generateSuccessor(KnapsackNode node, int i) throws InterruptedException {
 						return generateSuccessor(node, getPossiblePackingObjects(node), i);
 					}
 				};

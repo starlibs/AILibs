@@ -27,14 +27,14 @@ public class MLPlanARFFExample {
 		mlplan.setTimeout(60000);
 		mlplan.setTimeoutForNodeEvaluation(2000);
 		mlplan.setTimeoutForSingleSolutionEvaluation(2000);
-		mlplan.setNumCPUs(8);
+		mlplan.setNumCPUs(1);
 		mlplan.activateVisualization();
 		try {
 			long start = System.currentTimeMillis();
 			mlplan.buildClassifier(split.get(0));
 			long trainTime = (int) (System.currentTimeMillis() - start) / 1000;
 			System.out.println("Finished build of the classifier. Training time was " + trainTime + "s.");
-
+			
 			/* evaluate solution produced by mlplan */
 			Evaluation eval = new Evaluation(split.get(0));
 			eval.evaluateModel(mlplan, split.get(1));

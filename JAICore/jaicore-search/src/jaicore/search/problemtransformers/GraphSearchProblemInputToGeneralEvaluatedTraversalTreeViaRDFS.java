@@ -33,6 +33,10 @@ public class GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS<N, A,
 		return preferredNodeEvaluator;
 	}
 
+	public INodeEvaluator<N, Double> getPreferredNodeEvaluatorForRandomCompletion() {
+		return preferredNodeEvaluatorForRandomCompletion;
+	}
+
 	public int getSeed() {
 		return seed;
 	}

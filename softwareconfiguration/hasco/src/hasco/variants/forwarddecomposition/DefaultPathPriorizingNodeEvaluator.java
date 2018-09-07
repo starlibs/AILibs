@@ -28,10 +28,14 @@ public class DefaultPathPriorizingNodeEvaluator<N,A> implements INodeEvaluator<N
 
 	@Override
 	public Double f(Node<N, ?> node) throws Exception {
+		if (hasco == null)
+			throw new IllegalStateException("HASCO has not yet been set!");
 		IHASCOPlanningGraphGeneratorDeriver<N, A> planningGraphDeriver = hasco.getPlanningGraphGeneratorDeriver();
 		Collection<Component> components = hasco.getInput().getComponents();
 		Monom initState = hasco.getPlanningProblem().getCorePlanningProblem().getInit();
 		ComponentInstance inst = Util.getSolutionCompositionForNode(planningGraphDeriver, components, initState, node);
+		if (inst == null)
+			return 0.0;
 		boolean isDefault = Util.isDefaultConfiguration(inst);
 		return isDefault ? 0.0 : null;
 	}

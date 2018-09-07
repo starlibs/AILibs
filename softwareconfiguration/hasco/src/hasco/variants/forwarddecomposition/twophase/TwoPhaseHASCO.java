@@ -28,6 +28,7 @@ import hasco.core.HASCOSolutionCandidate;
 import hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
 import hasco.model.ComponentInstance;
 import hasco.optimizingfactory.SoftwareConfigurationAlgorithm;
+import hasco.variants.forwarddecomposition.DefaultPathPriorizingNodeEvaluator;
 import hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstWithRandomCompletions;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.IObjectEvaluator;
@@ -45,6 +46,7 @@ import jaicore.logging.LoggerUtil;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.core.interfaces.GraphGenerator;
+import jaicore.search.problemtransformers.GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS;
 
 public class TwoPhaseHASCO implements SoftwareConfigurationAlgorithm<TwoPhaseSoftwareConfigurationProblem, TwoPhaseHASCOReport, Double>, ILoggingCustomizable {
 
@@ -103,13 +105,19 @@ public class TwoPhaseHASCO implements SoftwareConfigurationAlgorithm<TwoPhaseSof
 					getNumCPUs(), getTimeout(), config.timeoutForNodeEvaluation(), config.timeoutForCandidateEvaluation(), config.expectedBlowupInSelection(), config.expectedBlowupInPostprocessing(),
 					preferredNodeEvaluator);
 
-			/* phase 1: run HASCO to gather solutions */
+			/* create HASCO object */
 			RefinementConfiguredSoftwareConfigurationProblem<Double> hascoProblem = new RefinementConfiguredSoftwareConfigurationProblem<>(problem, problem.getParamRefinementConfig());
 			hasco = new HASCOViaFDAndBestFirstWithRandomCompletions<>(hascoProblem, config.randomCompletions(), config.randomSeed(), config.timeoutForCandidateEvaluation(),
 					config.timeoutForNodeEvaluation(), preferredNodeEvaluator);
 			hasco.setLoggerName(loggerName + ".hasco");
 			hasco.setConfig(config);
 			hasco.registerListener(this); // this is to register solutions during runtime
+			
+			/* set HASCO objects within the default path priorizing node evaluator */
+			GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS transformedHASCOProblem = (GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS)hasco.getSearchProblemTransformer();
+			((DefaultPathPriorizingNodeEvaluator<TFDNode, String>)transformedHASCOProblem.getPreferredNodeEvaluatorForRandomCompletion()).setHasco(hasco);
+			
+			/* initialize HASCO and set state of this algorithm to initialized */
 			hasco.init();
 			state = AlgorithmState.active;
 			return new AlgorithmInitializedEvent();
@@ -117,6 +125,8 @@ public class TwoPhaseHASCO implements SoftwareConfigurationAlgorithm<TwoPhaseSof
 		
 		/* active is only one step in this model; this could be refined */
 		case active: {
+			
+			/* phase 1: gather solutions */
 			this.timeoutControl = new Thread(new Runnable() {
 				@Override
 				public void run() {
