@@ -91,20 +91,6 @@ public class MCTS<N, A, V extends Comparable<V>> extends AbstractORGraphSearch<G
 		this.exploredGraph.addItem(root);
 	}
 
-	public EvaluatedSearchGraphPath<N, A, V> nextSolution() {
-
-		/* iterate over playouts */
-		try {
-			while (!Thread.interrupted()) {
-
-				// }
-			}
-		} catch (Throwable e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-
 	private List<N> getPlayout() throws Exception {
 		logger.info("Computing a new playout ...");
 		N current = root;
@@ -240,11 +226,15 @@ public class MCTS<N, A, V extends Comparable<V>> extends AbstractORGraphSearch<G
 	@Override
 	public A getAction(N node, Map<A, N> actionsWithSuccessors) {
 
-		/* compute next solution */
-		nextSolution();
+		try {
+			/* compute next solution */
+			nextSolution();
 
-		/* choose action in root that has best reward */
-		return treePolicy.getAction(root, actionsWithSuccessors);
+			/* choose action in root that has best reward */
+			return treePolicy.getAction(root, actionsWithSuccessors);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override
