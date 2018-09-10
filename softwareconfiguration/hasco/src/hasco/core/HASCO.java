@@ -22,6 +22,7 @@ import hasco.optimizingfactory.SoftwareConfigurationAlgorithm;
 import hasco.reduction.HASCOReduction;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.algorithm.AlgorithmEvent;
+import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.AlgorithmProblemTransformer;
@@ -41,7 +42,7 @@ import jaicore.planning.model.core.Plan;
 import jaicore.planning.model.task.ceocipstn.CEOCIPSTNPlanningProblem;
 import jaicore.planning.model.task.ceocstn.OCMethod;
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
-import jaicore.search.algorithms.standard.bestfirst.events.GraphSearchSolutionCandidateFoundEvent;
+import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.core.interfaces.IGraphSearch;
 import jaicore.search.core.interfaces.IGraphSearchFactory;
@@ -86,9 +87,8 @@ public class HASCO<ISearch, N, A, V extends Comparable<V>> implements SoftwareCo
 	/* runtime variables of algorithm */
 	private AlgorithmState state = AlgorithmState.created;
 	private HASCOSolutionCandidate<V> bestRecognizedSolution;
-	
-	public HASCO(RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem,
-			IHASCOPlanningGraphGeneratorDeriver<N, A> planningGraphGeneratorDeriver,
+
+	public HASCO(RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem, IHASCOPlanningGraphGeneratorDeriver<N, A> planningGraphGeneratorDeriver,
 			IGraphSearchFactory<ISearch, ?, N, A, V, ?, ?> searchFactory, AlgorithmProblemTransformer<GraphSearchProblemInput<N, A, V>, ISearch> searchProblemTransformer) {
 		super();
 		if (configurationProblem == null)
@@ -144,13 +144,14 @@ public class HASCO<ISearch, N, A, V extends Comparable<V>> implements SoftwareCo
 			}
 			if (config.visualizationEnabled()) {
 				logger.info("Launching graph visualization");
-				SimpleGraphVisualizationWindow<?,?> window = new SimpleGraphVisualizationWindow<>(search);
-				if (planningGraphGeneratorDeriver instanceof ForwardDecompositionReducer && search instanceof BestFirst) {
-					SearchVisualizationPanel<Node<TFDNode,Double>,String> panel = (SearchVisualizationPanel<Node<TFDNode,Double>,String>)window.getPanel();
+				SimpleGraphVisualizationWindow<?, ?> window = new SimpleGraphVisualizationWindow<>(search);
+				if ((planningGraphGeneratorDeriver instanceof DefaultHASCOPlanningGraphGeneratorDeriver
+						&& ((DefaultHASCOPlanningGraphGeneratorDeriver) planningGraphGeneratorDeriver).getWrappedDeriver() instanceof ForwardDecompositionReducer) && search instanceof BestFirst) {
+					SearchVisualizationPanel<Node<TFDNode, Double>, String> panel = (SearchVisualizationPanel<Node<TFDNode, Double>, String>) window.getPanel();
 					panel.setTooltipGenerator(new TFDTooltipGenerator<>());
 				}
 			}
-			
+
 			/* now initialize the search */
 			logger.debug("Initializing the search");
 			boolean searchInitializationObserved = false;
@@ -167,39 +168,39 @@ public class HASCO<ISearch, N, A, V extends Comparable<V>> implements SoftwareCo
 			return initEvent;
 		}
 		case active: {
-			while (true) {
-				if (search.hasNext()) {
-					AlgorithmEvent searchEvent = search.next();
+			while (search.hasNext()) {
+				AlgorithmEvent searchEvent = search.next();
 
-					/* if the underlying search algorithm finished, we also finish */
-					if (searchEvent instanceof AlgorithmFinishedEvent) {
-						return terminate();
-					}
+				/* if the underlying search algorithm finished, we also finish */
+				if (searchEvent instanceof AlgorithmFinishedEvent) {
+					return terminate();
+				}
 
-					/* otherwise, if a solution has been found, we announce this finding to our listeners and memorize if it is a new best candidate */
-					else if (searchEvent instanceof GraphSearchSolutionCandidateFoundEvent) {
-						logger.info("Received new solution from search, communicating this solution to the HASCO listeners.");
-						@SuppressWarnings("unchecked")
-						GraphSearchSolutionCandidateFoundEvent<N, A, V> solutionEvent = (GraphSearchSolutionCandidateFoundEvent<N, A, V>) searchEvent;
-						EvaluatedSearchGraphPath<N, A, V> searchPath = solutionEvent.getSolutionCandidate();
-						if (searchPath.getAnnotations() == null)
-							throw new IllegalArgumentException("Cannot process a solution event with a creation path with NULL annotation map");
-						if (!searchPath.getAnnotations().containsKey("fTime"))
-							throw new IllegalArgumentException("HASCO requires that each solution object of the graph must be tagged with fTime, which is not the case for " + searchPath + " with annotations: " + searchPath.getAnnotations());
-						Plan<CEOCAction> plan = planningGraphGeneratorDeriver.getPlan(searchPath.getNodes());
-						V score = solutionEvent.getSolutionCandidate().getScore();
-						EvaluatedSearchGraphBasedPlan<CEOCAction, V, N> evaluatedPlan = new EvaluatedSearchGraphBasedPlan<>(plan, score, searchPath);
-						ComponentInstance objectInstance = Util.getSolutionCompositionForPlan(components, planningProblem.getCorePlanningProblem().getInit(), plan);
-						HASCOSolutionCandidate<V> solution = new HASCOSolutionCandidate<>(objectInstance, evaluatedPlan);
-						if (bestRecognizedSolution == null || score.compareTo(bestRecognizedSolution.getScore()) < 0)
-							bestRecognizedSolution = solution;
-						listOfAllRecognizedSolutions.add(solution);
-						HASCOSolutionEvent<V> hascoSolutionEvent = new HASCOSolutionEvent<>(solution);
-						this.eventBus.post(hascoSolutionEvent);
-						return hascoSolutionEvent;
-					}
+				/* otherwise, if a solution has been found, we announce this finding to our listeners and memorize if it is a new best candidate */
+				else if (searchEvent instanceof EvaluatedSearchSolutionCandidateFoundEvent) {
+					logger.info("Received new solution from search, communicating this solution to the HASCO listeners.");
+					@SuppressWarnings("unchecked")
+					EvaluatedSearchSolutionCandidateFoundEvent<N, A, V> solutionEvent = (EvaluatedSearchSolutionCandidateFoundEvent<N, A, V>) searchEvent;
+					EvaluatedSearchGraphPath<N, A, V> searchPath = solutionEvent.getSolutionCandidate();
+					if (searchPath.getAnnotations() == null)
+						throw new IllegalArgumentException("Cannot process a solution event with a creation path with NULL annotation map");
+					if (!searchPath.getAnnotations().containsKey("fTime"))
+						throw new IllegalArgumentException("HASCO requires that each solution object of the graph must be tagged with fTime, which is not the case for " + searchPath
+								+ " with annotations: " + searchPath.getAnnotations());
+					Plan<CEOCAction> plan = planningGraphGeneratorDeriver.getPlan(searchPath.getNodes());
+					V score = solutionEvent.getSolutionCandidate().getScore();
+					EvaluatedSearchGraphBasedPlan<CEOCAction, V, N> evaluatedPlan = new EvaluatedSearchGraphBasedPlan<>(plan, score, searchPath);
+					ComponentInstance objectInstance = Util.getSolutionCompositionForPlan(components, planningProblem.getCorePlanningProblem().getInit(), plan);
+					HASCOSolutionCandidate<V> solution = new HASCOSolutionCandidate<>(objectInstance, evaluatedPlan);
+					if (bestRecognizedSolution == null || score.compareTo(bestRecognizedSolution.getScore()) < 0)
+						bestRecognizedSolution = solution;
+					listOfAllRecognizedSolutions.add(solution);
+					HASCOSolutionEvent<V> hascoSolutionEvent = new HASCOSolutionEvent<>(solution);
+					this.eventBus.post(hascoSolutionEvent);
+					return hascoSolutionEvent;
 				}
 			}
+			return terminate();
 		}
 		default:
 			throw new IllegalStateException("HASCO cannot do anything in state " + state);
@@ -208,7 +209,6 @@ public class HASCO<ISearch, N, A, V extends Comparable<V>> implements SoftwareCo
 	}
 
 	private AlgorithmFinishedEvent terminate() {
-		search.cancel();
 		this.state = AlgorithmState.inactive;
 		AlgorithmFinishedEvent finishedEvent = new AlgorithmFinishedEvent();
 		this.eventBus.post(finishedEvent);
@@ -224,7 +224,7 @@ public class HASCO<ISearch, N, A, V extends Comparable<V>> implements SoftwareCo
 	public HASCOConfig getConfig() {
 		return config;
 	}
-	
+
 	public void setConfig(HASCOConfig config) {
 		this.config = config;
 	}
@@ -286,22 +286,32 @@ public class HASCO<ISearch, N, A, V extends Comparable<V>> implements SoftwareCo
 
 	@Override
 	public HASCORunReport<V> call() throws Exception {
-		while (hasNext())
-			next();
-		return new HASCORunReport<>(listOfAllRecognizedSolutions);
+		try {
+			while (hasNext())
+				next();
+			return new HASCORunReport<>(listOfAllRecognizedSolutions);
+		} catch (RuntimeException e) {
+			if (e.getCause() instanceof InterruptedException)
+				throw (InterruptedException) e.getCause();
+			if (e.getCause() instanceof AlgorithmExecutionCanceledException)
+				throw (AlgorithmExecutionCanceledException) e.getCause();
+			else
+				throw e;
+		}
 	}
 
 	@Override
 	public RefinementConfiguredSoftwareConfigurationProblem<V> getInput() {
 		return configurationProblem;
 	}
-	
+
 	public CostSensitiveHTNPlanningProblem<CEOCOperation, OCMethod, CEOCAction, CEOCIPSTNPlanningProblem<CEOCOperation, OCMethod, CEOCAction>, V> getPlanningProblem() {
 		return planningProblem;
 	}
 
 	@Override
 	public void cancel() {
+		search.cancel();
 		this.terminate();
 	}
 
@@ -319,8 +329,8 @@ public class HASCO<ISearch, N, A, V extends Comparable<V>> implements SoftwareCo
 	public IOptimizerResult<ComponentInstance, V> getOptimizationResult() {
 		return new IOptimizerResult<>(bestRecognizedSolution.getComponentInstance(), bestRecognizedSolution.getScore());
 	}
-	
-	public IHASCOPlanningGraphGeneratorDeriver<N,A> getPlanningGraphGeneratorDeriver() {
+
+	public IHASCOPlanningGraphGeneratorDeriver<N, A> getPlanningGraphGeneratorDeriver() {
 		return planningGraphGeneratorDeriver;
 	}
 
@@ -333,7 +343,7 @@ public class HASCO<ISearch, N, A, V extends Comparable<V>> implements SoftwareCo
 		while (hasNext()) {
 			e = next();
 			if (e instanceof AlgorithmInitializedEvent)
-				return (AlgorithmInitializedEvent)e;
+				return (AlgorithmInitializedEvent) e;
 		}
 		throw new IllegalStateException("Could not complete initialization");
 	}

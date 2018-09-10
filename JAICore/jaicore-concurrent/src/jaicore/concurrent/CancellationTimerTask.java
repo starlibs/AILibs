@@ -17,8 +17,8 @@ public class CancellationTimerTask extends TimerTask {
 		this.hookToExecutePriorToCancel = hookToExecutePriorToInterruption;
 	}
 	
-	public CancellationTimerTask(Cancelable threadToBeInterrupted) {
-		this (threadToBeInterrupted, null);
+	public CancellationTimerTask(Cancelable thingToBeCanceled) {
+		this (thingToBeCanceled, null);
 	}
 
 	public Cancelable getCancelable() {

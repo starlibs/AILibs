@@ -188,7 +188,10 @@ public abstract class MLPlanWekaClassifier implements Classifier, CapabilitiesHa
 			default:
 				throw new IllegalStateException("Cannot do anything in state " + this.state);
 			}
-		} catch (Exception e) {
+		} catch (RuntimeException e) {
+			throw e;
+		}
+		catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}

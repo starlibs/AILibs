@@ -80,8 +80,6 @@ public class WEKAPipelineFactory implements ClassifierFactory {
 			parameters.add(paramValue);
 		}
 		
-		System.out.println(parameters);
-
 		return parameters;
 	}
 

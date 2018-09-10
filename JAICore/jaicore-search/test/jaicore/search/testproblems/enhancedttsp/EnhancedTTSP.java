@@ -72,7 +72,7 @@ public class EnhancedTTSP {
 
 			@Override
 			public SingleRootGenerator<EnhancedTTSPNode> getRootGenerator() {
-				return () -> new EnhancedTTSPNode(startLocation, minTravelTimesGraph.getItems(), hourOfDeparture, 0, 0);
+				return () -> new EnhancedTTSPNode(startLocation, new ArrayList<>(), minTravelTimesGraph.getItems(), hourOfDeparture, 0, 0);
 			}
 
 			@Override
@@ -176,7 +176,9 @@ public class EnhancedTTSP {
 						Set<Short> unvisitedLocations = new HashSet<>(n.getUnvisitedLocations());
 						unvisitedLocations.remove(destination);
 						assert unvisitedLocations.size() < n.getUnvisitedLocations().size() : "The unvisited cities haven't been reduced!";
-						EnhancedTTSPNode newNode = new EnhancedTTSPNode(destination, unvisitedLocations, timeOfArrival, timeSinceLastShortBreak, timeSinceLastLongBreak);
+						List<Short> tourToHere = new ArrayList<>(n.getCurTour());
+						tourToHere.add(destination);
+						EnhancedTTSPNode newNode = new EnhancedTTSPNode(destination, tourToHere, unvisitedLocations, timeOfArrival, timeSinceLastShortBreak, timeSinceLastLongBreak);
 						return new NodeExpansionDescription<EnhancedTTSPNode, String>(n, newNode, n.getCurLocation() + " -> " + destination, NodeType.OR);
 					}
 

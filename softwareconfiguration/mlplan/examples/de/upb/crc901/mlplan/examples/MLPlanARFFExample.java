@@ -24,11 +24,11 @@ public class MLPlanARFFExample {
 		MLPlanWekaClassifier mlplan = new WekaMLPlanWekaClassifier();
 		mlplan.setPortionOfDataForPhase2(0.0f);
 		mlplan.setLoggerName("mlplan");
-		mlplan.setTimeout(60000);
-		mlplan.setTimeoutForNodeEvaluation(2000);
-		mlplan.setTimeoutForSingleSolutionEvaluation(2000);
-		mlplan.setNumCPUs(1);
-		mlplan.activateVisualization();
+		mlplan.setTimeout(60);
+		mlplan.setTimeoutForNodeEvaluation(15);
+		mlplan.setTimeoutForSingleSolutionEvaluation(15);
+		mlplan.setNumCPUs(8);
+//		mlplan.activateVisualization();
 		try {
 			long start = System.currentTimeMillis();
 			mlplan.buildClassifier(split.get(0));

@@ -3,8 +3,9 @@ package jaicore.search.algorithms.standard.bestfirst.nodeevaluation;
 import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.model.travesaltree.Node;
 
-public abstract class DecoratingNodeEvaluator<T, V extends Comparable<V>> implements INodeEvaluator<T, V> {
+public abstract class DecoratingNodeEvaluator<T, V extends Comparable<V>> implements INodeEvaluator<T, V>, ICancelableNodeEvaluator {
 
+	private boolean canceled = false;
 	private INodeEvaluator<T, V> evaluator;
 
 	public DecoratingNodeEvaluator(INodeEvaluator<T, V> evaluator) {
@@ -23,10 +24,6 @@ public abstract class DecoratingNodeEvaluator<T, V extends Comparable<V>> implem
 
 	public boolean isDecoratedEvaluatorCancelable() {
 		return this.evaluator instanceof ICancelableNodeEvaluator;
-	}
-
-	public boolean isCancelable() {
-		return this instanceof ICancelableNodeEvaluator && isDecoratedEvaluatorCancelable();
 	}
 
 	public boolean isDecoratedEvaluatorGraphDependent() {
@@ -63,5 +60,18 @@ public abstract class DecoratingNodeEvaluator<T, V extends Comparable<V>> implem
 		if (!this.isDecoratedEvaluatorSolutionReporter())
 			throw new UnsupportedOperationException(this.getClass().getName() + " is not a solution reporting node evaluator");
 		((ISolutionReportingNodeEvaluator<T, V>) this.evaluator).registerSolutionListener(listener);
+	}
+
+	@Override
+	public void cancel() {
+		if (canceled)
+			return;
+		canceled = true;
+		if (isDecoratedEvaluatorCancelable()) {
+			((ICancelableNodeEvaluator)evaluator).cancel();
+		}
+		if (this instanceof ICancelableNodeEvaluator) {
+			((ICancelableNodeEvaluator)this).cancel();
+		}
 	}
 }

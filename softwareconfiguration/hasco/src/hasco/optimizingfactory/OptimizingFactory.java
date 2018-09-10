@@ -74,7 +74,10 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, V e
 			default:
 				throw new IllegalStateException("Cannot do anything in state " + state);
 			}
-		} catch (Exception e) {
+		} catch (RuntimeException e) {
+			throw e;
+		}
+		catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}

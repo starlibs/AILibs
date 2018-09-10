@@ -70,7 +70,7 @@
 	</logger>
 	
 	<logger name="mlplan">
-		<level value="debug" />
+		<level value="info" />
 		<appender-ref ref="console" />
 		<appender-ref ref="infoFileAppender" />
 	</logger>
@@ -78,13 +78,7 @@
 	<logger name="jaicore.search.algorithms.standard.rdfs.RandomizedDepthFirstSearch">
 		<level value="off" />
 	</logger>
-  
-   <logger name="rc-completer">
-    <appender-ref ref="console" />
-    <appender-ref ref="infoFileAppender" />
-    <level value="info" />
-  </logger>
-	
+  	
   <logger name="mlplan.2phasehasco.optimizer">
 		<level value="off" />
 	</logger>

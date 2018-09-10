@@ -15,6 +15,7 @@ import jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import jaicore.graph.IGraphAlgorithmListener;
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.search.algorithms.standard.ORGraphSearchTester;
+import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.GraphSearchSolutionCandidateFoundEvent;
 import jaicore.search.core.interfaces.IGraphSearch;
 import jaicore.search.core.interfaces.IGraphSearchFactory;
@@ -60,7 +61,7 @@ public abstract class NPuzzleStandardTester<I, O, VSearch, ESearch> extends ORGr
 					if (e instanceof GraphSearchSolutionCandidateFoundEvent) {
 						solutions++;
 						@SuppressWarnings("unchecked")
-						List<NPuzzleNode> solutionPath = ((GraphSearchSolutionCandidateFoundEvent<NPuzzleNode, String, Double>) e).getSolutionCandidate().getNodes();
+						List<NPuzzleNode> solutionPath = ((EvaluatedSearchSolutionCandidateFoundEvent<NPuzzleNode, String, Double>) e).getSolutionCandidate().getNodes();
 						NPuzzleNode finalNode = solutionPath.get(solutionPath.size() - 1);
 						assertTrue("Number of wrong tiles in solution " + finalNode.toString() + " is " + finalNode.getNumberOfWrongTiles(), finalNode.getNumberOfWrongTiles() == 0);
 						if (solutions >= max_solutions)
@@ -74,7 +75,7 @@ public abstract class NPuzzleStandardTester<I, O, VSearch, ESearch> extends ORGr
 	}
 
 	@Subscribe
-	public void registerSolution(GraphSearchSolutionCandidateFoundEvent<NPuzzleNode, String, Double> solution) {
+	public void registerSolution(EvaluatedSearchSolutionCandidateFoundEvent<NPuzzleNode, String, Double> solution) {
 
 		seenSolutions.incrementAndGet();
 	}

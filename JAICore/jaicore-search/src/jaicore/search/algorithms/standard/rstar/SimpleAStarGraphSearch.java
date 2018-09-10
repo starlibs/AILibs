@@ -1,6 +1,11 @@
 package jaicore.search.algorithms.standard.rstar;
 
-import jaicore.search.algorithms.standard.astar.AStar;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.PriorityQueue;
+
 import jaicore.search.algorithms.standard.astar.AStarEdgeCost;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.core.interfaces.GraphGenerator;
@@ -8,8 +13,6 @@ import jaicore.search.model.travesaltree.Node;
 import jaicore.search.model.travesaltree.NodeExpansionDescription;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
-
-import java.util.*;
 
 public class SimpleAStarGraphSearch<T, A> {
 
@@ -29,7 +32,7 @@ public class SimpleAStarGraphSearch<T, A> {
         this.h = h;
     }
 
-    public PathAndCost<T, Double> solution() {
+    public PathAndCost<T, Double> solution() throws InterruptedException {
 
         Node<T, Double> solution = runAstar();
         if (solution != null) {
@@ -53,7 +56,7 @@ public class SimpleAStarGraphSearch<T, A> {
         }
     }
 
-    public Node<T, Double> runAstar() {
+    public Node<T, Double> runAstar() throws InterruptedException {
         T root_state = ((SingleRootGenerator<T>)graphGenerator.getRootGenerator()).getRoot();
         Node<T, Double> root = new Node<T, Double>(null, root_state);
         root.setAnnotation("g", 0d);

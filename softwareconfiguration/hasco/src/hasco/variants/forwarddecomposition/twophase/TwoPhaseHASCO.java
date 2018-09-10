@@ -23,7 +23,6 @@ import org.slf4j.LoggerFactory;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
-import hasco.core.HASCORunReport;
 import hasco.core.HASCOSolutionCandidate;
 import hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
 import hasco.model.ComponentInstance;
@@ -33,6 +32,7 @@ import hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstWithRandomCompl
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.IObjectEvaluator;
 import jaicore.basic.algorithm.AlgorithmEvent;
+import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.AlgorithmState;
@@ -67,7 +67,6 @@ public class TwoPhaseHASCO implements SoftwareConfigurationAlgorithm<TwoPhaseSof
 
 	/** evaluator for the selection phase. */
 	private HASCOViaFDAndBestFirstWithRandomCompletions<Double> hasco;
-	private HASCORunReport<Double> hascoReport;
 
 	/* state variables during the run */
 	private AlgorithmState state = AlgorithmState.created;
@@ -150,10 +149,15 @@ public class TwoPhaseHASCO implements SoftwareConfigurationAlgorithm<TwoPhaseSof
 				}
 			}, "Phase 1 time bound observer");
 			this.timeoutControl.start();
-			hascoReport = hasco.call();
+			try {
+				hasco.call();
+			}
+			catch (AlgorithmExecutionCanceledException e) {
+				logger.info("HASCO has terminated due to a cancel.");
+			}
 			secondsSpentInPhase1 = (int) Math.round(System.currentTimeMillis() - timeOfStart / 1000.0);
 
-			this.logger.info("HASCO has finished. {} solutions were found.", hascoReport.getSolutionCandidates().size());
+			this.logger.info("HASCO has finished. {} solutions were found.", phase1ResultQueue.size());
 			if (phase1ResultQueue.isEmpty()) {
 				throw new NoSuchElementException("No classifier could be built within the given timeout.");
 			}
@@ -167,6 +171,9 @@ public class TwoPhaseHASCO implements SoftwareConfigurationAlgorithm<TwoPhaseSof
 		default:
 			throw new IllegalStateException("Cannot do anything in state " + state);
 		}
+		}
+		catch (RuntimeException e) {
+			throw e;
 		}
 		catch (Exception e) {
 			throw new RuntimeException(e);
@@ -182,7 +189,7 @@ public class TwoPhaseHASCO implements SoftwareConfigurationAlgorithm<TwoPhaseSof
 	public TwoPhaseHASCOReport call() throws Exception {
 		while (this.hasNext())
 			this.next();
-		return new TwoPhaseHASCOReport(hascoReport.getSolutionCandidates().size(), secondsSpentInPhase1, selectedHASCOSolution);
+		return new TwoPhaseHASCOReport(phase1ResultQueue.size(), secondsSpentInPhase1, selectedHASCOSolution);
 	}
 
 	protected boolean shouldSearchTerminate(final long timeRemaining) {
@@ -338,7 +345,6 @@ public class TwoPhaseHASCO implements SoftwareConfigurationAlgorithm<TwoPhaseSof
 		List<Double> stats = new ArrayList<>();
 		final TimeoutSubmitter ts = TimeoutTimer.getInstance().getSubmitter();
 		ensembleToSelectFrom.forEach(c -> stats.add(Double.MAX_VALUE));
-		System.out.println(ensembleToSelectFrom);
 
 		int n = ensembleToSelectFrom.size();
 		for (int i = 0; i < n; i++) {

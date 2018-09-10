@@ -41,4 +41,7 @@ public class DefaultHASCOPlanningGraphGeneratorDeriver<N,A> implements IHASCOPla
 		return wrappedDeriver.getPlan(path);
 	}
 
+	public IPlanningGraphGeneratorDeriver<CEOCOperation, OCMethod, CEOCAction, CEOCIPSTNPlanningProblem<CEOCOperation, OCMethod, CEOCAction>, N, A> getWrappedDeriver() {
+		return wrappedDeriver;
+	}
 }

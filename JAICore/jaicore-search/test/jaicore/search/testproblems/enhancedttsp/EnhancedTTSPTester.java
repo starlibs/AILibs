@@ -4,11 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Random;
 
 import org.apache.commons.math.util.MathUtils;
 
@@ -16,14 +13,12 @@ import jaicore.basic.algorithm.AlgorithmEvent;
 import jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.SolutionCandidateFoundEvent;
-import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.graph.IGraphAlgorithmListener;
-import jaicore.graph.LabeledGraph;
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.search.algorithms.standard.ORGraphSearchTester;
 import jaicore.search.core.interfaces.IGraphSearch;
 import jaicore.search.core.interfaces.IGraphSearchFactory;
-import jaicore.search.model.other.EvaluatedSearchGraphPath;
+import jaicore.search.model.other.SearchGraphPath;
 
 public abstract class EnhancedTTSPTester<I, O, VSearch, ESearch> extends ORGraphSearchTester<EnhancedTTSP, I, O, EnhancedTTSPNode, String, Double, VSearch, ESearch>
 		implements IGraphAlgorithmListener<VSearch, ESearch> {
@@ -39,34 +34,8 @@ public abstract class EnhancedTTSPTester<I, O, VSearch, ESearch> extends ORGraph
 
 	private I getSearchProblem(int n) {
 
-		/* create TTSP problem */
-		Random r = new Random(0);
-		List<Boolean> blockedHours = Arrays.asList(
-				new Boolean[] { true, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true });
-		LabeledGraph<Short, Double> travelGraph;
-		travelGraph = new LabeledGraph<>();
-		List<Pair<Double, Double>> coordinates = new ArrayList<>();
-		for (short i = 0; i < n; i++) {
-			coordinates.add(new Pair<>(r.nextDouble() * MAX_DISTANCE, r.nextDouble() * MAX_DISTANCE));
-			travelGraph.addItem(i);
-		}
-		for (short i = 0; i < n; i++) {
-			double x1 = coordinates.get(i).getX();
-			double y1 = coordinates.get(i).getY();
-			for (short j = 0; j < i; j++) { // we assume a symmetric travel graph
-				double x2 = coordinates.get(j).getX();
-				double y2 = coordinates.get(j).getY();
-				double minTravelTime = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
-				// System.out.println("(" + x1 + ", " + y1 + ") to (" +x2 +", " + y2 +") = "
-				// +minTravelTime);
-				travelGraph.addEdge(i, j, minTravelTime);
-				travelGraph.addEdge(j, i, minTravelTime);
-			}
-		}
-		EnhancedTTSP ttsp = new EnhancedTTSP(travelGraph, (short) 0, blockedHours, 8, 4.5, 1, 10);
-
 		/* reduce problem to graph search */
-		return getProblemReducer().transform(ttsp);
+		return getProblemReducer().transform(new EnhancedTTSPGenerator().generate(n, MAX_DISTANCE));
 	}
 	
 	private IGraphSearch<I, O, EnhancedTTSPNode, String, Double, VSearch, ESearch> getSearchAlgorithmForProblem(int n) {
@@ -99,7 +68,7 @@ public abstract class EnhancedTTSPTester<I, O, VSearch, ESearch> extends ORGraph
 					assertTrue(!terminated);
 					if (e instanceof SolutionCandidateFoundEvent) {
 						solutions++;
-						EvaluatedSearchGraphPath<EnhancedTTSPNode, String, Double> solution = (EvaluatedSearchGraphPath)(((SolutionCandidateFoundEvent) e).getSolutionCandidate());
+						SearchGraphPath<EnhancedTTSPNode, String> solution = (SearchGraphPath)(((SolutionCandidateFoundEvent) e).getSolutionCandidate());
 						 List<EnhancedTTSPNode> solutionPath = solution.getNodes();
 						 System.out.print("\n\t");
 						 solutionPath.forEach(node -> System.out.print( node.getCurLocation() + "-"));

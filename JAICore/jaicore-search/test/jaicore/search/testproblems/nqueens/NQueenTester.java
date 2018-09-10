@@ -16,6 +16,7 @@ import jaicore.basic.algorithm.SolutionCandidateFoundEvent;
 import jaicore.graph.IGraphAlgorithmListener;
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.search.algorithms.standard.ORGraphSearchTester;
+import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.GraphSearchSolutionCandidateFoundEvent;
 import jaicore.search.core.interfaces.IGraphSearch;
 import jaicore.search.core.interfaces.IGraphSearchFactory;
@@ -102,7 +103,7 @@ public abstract class NQueenTester<I, O, VSearch, ESearch> extends ORGraphSearch
 			if (showGraphs)
 				new SimpleGraphVisualizationWindow<>(search);
 			search.registerListener(this);
-			search.setNumCPUs(2);
+			search.setNumCPUs(Runtime.getRuntime().availableProcessors());
 			seenSolutions = new AtomicInteger(0);
 			search.call();
 			assertEquals(numbersOfSolutions[i], seenSolutions.get());
@@ -111,7 +112,12 @@ public abstract class NQueenTester<I, O, VSearch, ESearch> extends ORGraphSearch
 	}
 
 	@Subscribe
-	public void registerSolution(GraphSearchSolutionCandidateFoundEvent<QueenNode, String, Double> solution) {
+	public void registerSolution(EvaluatedSearchSolutionCandidateFoundEvent<QueenNode, String, Double> solution) {
+		seenSolutions.incrementAndGet();
+	}
+	
+	@Subscribe
+	public void registerSolution(GraphSearchSolutionCandidateFoundEvent<QueenNode, String> solution) {
 		seenSolutions.incrementAndGet();
 	}
 

@@ -1,11 +1,11 @@
 package jaicore.search.algorithms.standard.uncertainty.paretosearch;
 
-import java.util.*;
-import java.util.concurrent.PriorityBlockingQueue;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Queue;
 
-import jaicore.search.algorithms.standard.bestfirst.model.OpenCollection;
 import jaicore.search.model.travesaltree.Node;
 
 /**
@@ -13,7 +13,7 @@ import jaicore.search.model.travesaltree.Node;
  * @param <T> internal label of node
  * @param <V> external label of node
  */
-public class ParetoSelection <T, V extends Comparable<V>> implements OpenCollection<Node<T, V>> {
+public class ParetoSelection <T, V extends Comparable<V>> implements Queue<Node<T, V>> {
 
 	/* Contains all open nodes. */
 	private final LinkedList<ParetoNode<T,V>> open;
@@ -75,6 +75,7 @@ public class ParetoSelection <T, V extends Comparable<V>> implements OpenCollect
 	 */
 	@Override
 	public boolean add(Node<T, V> n) {
+		assert n.getInternalLabel() != null : "Cannot add nodes with value NULL to OPEN!";
 		ParetoNode p = new ParetoNode(n, this.n++);
 		for (ParetoNode q : this.open) {
 			// p dominates q
@@ -226,15 +227,24 @@ public class ParetoSelection <T, V extends Comparable<V>> implements OpenCollect
 	}
 
 	@Override
-	public void setLock(Lock openLock) {
-		// TODO Auto-generated method stub
-		
+	public Node<T, V> element() {
+		return peek();
 	}
 
 	@Override
-	public void setNodeAddedToOpenCondition(Condition condition) {
-		// TODO Auto-generated method stub
-		
+	public boolean offer(Node<T, V> arg0) {
+		return add(arg0);
 	}
 
+	@Override
+	public Node<T, V> poll() {
+		Node<T,V> n = peek();
+		remove(n);
+		return n;
+	}
+
+	@Override
+	public Node<T, V> remove() {
+		return poll();
+	}
 }
