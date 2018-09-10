@@ -81,7 +81,7 @@ public class RandomSearch<N, A> extends AbstractORGraphSearch<GraphSearchInput<N
 
 			}
 			if (drawnPath == null) {
-				switchState(AlgorithmState.inactive);
+				shutdown();
 				AlgorithmEvent event = new AlgorithmFinishedEvent();
 				postEvent(event);
 				return event;

@@ -2,7 +2,6 @@ package jaicore.search.algorithms.standard.awastar;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
@@ -248,10 +247,8 @@ public class AwaStarSearch<I extends GeneralEvaluatedTraversalTree<T, A, V>, T, 
 				event = processUntilNextEvent();
 				if (event instanceof AlgorithmFinishedEvent) {
 					super.shutdown();
-					switchState(AlgorithmState.inactive);
 				}
 			} catch (TimeoutException e) {
-				switchState(AlgorithmState.inactive);
 				super.shutdown();
 				event = new AlgorithmFinishedEvent();
 			}
