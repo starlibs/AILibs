@@ -267,7 +267,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AbstractORGraphSearch<G
 				while (getState() == AlgorithmState.active) {
 					checkTermination();
 					if (unexpandedNodes.isEmpty()) {
-						switchState(AlgorithmState.inactive);
+						shutdown();
 						AlgorithmEvent finishEvent = new AlgorithmFinishedEvent();
 						logger.info("Finishing MCTS as all nodes have been expanded; the search graph has been exhausted.");
 						postEvent(finishEvent);
@@ -296,7 +296,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AbstractORGraphSearch<G
 					}
 				}
 			} catch (TimeoutException e) {
-				switchState(AlgorithmState.inactive);
+				shutdown();
 				AlgorithmEvent finishEvent = new AlgorithmFinishedEvent();
 				logger.info("Finishing MCTS due to timeout.");
 				postEvent(finishEvent);
