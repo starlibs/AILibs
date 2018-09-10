@@ -601,4 +601,20 @@ public class Util {
 
 		} while (!openRefinements.isEmpty());
 	}
+	
+	public static boolean isDefaultConfiguration(ComponentInstance instance) {
+		Map<String,String> paramValues = instance.getParameterValues();
+		for (Parameter p : instance.getComponent().getParameters()) {
+			boolean hasDefaultValue = paramValues.get(p.getName()).equals(p.getDefaultValue().toString());
+			if (!hasDefaultValue) {
+				System.out.println(p.getName() + " has value " + paramValues.get(p.getName()) + ", which is not the default " + p.getDefaultValue().toString());
+				return false;
+			}
+		}
+		for (ComponentInstance child : instance.getSatisfactionOfRequiredInterfaces().values()) {
+			if (!isDefaultConfiguration(child))
+				return false;
+		}
+		return true;
+	}
 }

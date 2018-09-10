@@ -8,6 +8,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.junit.Test;
 
@@ -25,7 +26,7 @@ import com.google.common.eventbus.Subscribe;
 public abstract class GeneralAlgorithmTester<P, I, O> {
 
 	private static final int INTERRUPTION_DELAY = 5000;
-	private static final int INTERRUPTION_CLEANUP_TOLERANCE = 1000;
+	private static final int INTERRUPTION_CLEANUP_TOLERANCE = 2000;
 
 	public abstract AlgorithmProblemTransformer<P, I> getProblemReducer();
 
@@ -82,17 +83,19 @@ public abstract class GeneralAlgorithmTester<P, I, O> {
 
 		/* set up timer for interruption */
 		Thread t = new Thread(task, "InterruptTest Algorithm runner for " + algorithm);
+		AtomicLong interruptEvent = new AtomicLong();
 		t.start();
-		new Timer().schedule(new TimerTask() {
+		new Timer("InterruptTest Timer").schedule(new TimerTask() {
 			@Override
 			public void run() {
 				t.interrupt();
+				interruptEvent.set(System.currentTimeMillis());
 			}
 		}, INTERRUPTION_DELAY);
 
 		/* launch algorithm */
-		long start = System.currentTimeMillis();
 		boolean interruptedExceptionSeen = false;
+		long start = System.currentTimeMillis();
 		try {
 			task.get(INTERRUPTION_DELAY + INTERRUPTION_CLEANUP_TOLERANCE, TimeUnit.MILLISECONDS);
 		} catch (ExecutionException e) {
@@ -101,9 +104,10 @@ public abstract class GeneralAlgorithmTester<P, I, O> {
 		} catch (TimeoutException e) {
 		}
 		long end = System.currentTimeMillis();
-		int runtime = (int) (end - start);
+		int runtime = (int)(end - start);
+		int timeNeededToRealizeInterrupt = (int) (end - interruptEvent.get());
 		assertTrue("Runtime must be at least 5 seconds, actually should be at least 10 seconds.", runtime >= INTERRUPTION_DELAY);
-		assertTrue("The algorithm has not terminated within one second after the interrupt.", runtime < INTERRUPTION_DELAY + INTERRUPTION_CLEANUP_TOLERANCE);
+		assertTrue("The algorithm has not terminated within " + INTERRUPTION_CLEANUP_TOLERANCE + "ms after the interrupt.", timeNeededToRealizeInterrupt <= INTERRUPTION_CLEANUP_TOLERANCE);
 		assertTrue("The algorithm has not emitted an interrupted exception.", interruptedExceptionSeen);
 	}
 
@@ -118,25 +122,35 @@ public abstract class GeneralAlgorithmTester<P, I, O> {
 		FutureTask<O> task = new FutureTask<>(algorithm);
 
 		/* set up timer for interruption */
-		new Timer().schedule(new TimerTask() {
+		AtomicLong cancelEvent = new AtomicLong();
+		new Timer("CancelTest Timer").schedule(new TimerTask() {
 			@Override
 			public void run() {
 				algorithm.cancel();
+				cancelEvent.set(System.currentTimeMillis());
 			}
 		}, INTERRUPTION_DELAY);
 
 		/* launch algorithm */
 		long start = System.currentTimeMillis();
+		boolean cancellationExceptionSeen = false;
 		Thread t = new Thread(task, "CancelTest Algorithm runner for " + algorithm);
 		t.start();
 		try {
 			task.get(INTERRUPTION_DELAY + INTERRUPTION_CLEANUP_TOLERANCE, TimeUnit.MILLISECONDS);
-		} catch (TimeoutException e) {
+		} catch (ExecutionException e) {
+			if (e.getCause() instanceof AlgorithmExecutionCanceledException) {
+				cancellationExceptionSeen = true;
+			}
+		}
+		catch (TimeoutException e) {
 		}
 		long end = System.currentTimeMillis();
 		int runtime = (int) (end - start);
+		int timeNeededToRealizeCancel = (int) (end - cancelEvent.get());
 		assertTrue("Runtime must be at least 5 seconds, actually should be at least 10 seconds.", runtime >= INTERRUPTION_DELAY);
-		assertTrue("The algorithm has not terminated within one second after it has been canceled.", runtime < INTERRUPTION_DELAY + INTERRUPTION_CLEANUP_TOLERANCE);
+		assertTrue("The algorithm has not terminated within " + INTERRUPTION_CLEANUP_TOLERANCE + "ms after it has been canceled.", timeNeededToRealizeCancel < INTERRUPTION_CLEANUP_TOLERANCE);
+		assertTrue("The algorithm has not emitted an AlgorithmExecutionCanceledException.", cancellationExceptionSeen);
 	}
 
 	@Test
@@ -162,7 +176,7 @@ public abstract class GeneralAlgorithmTester<P, I, O> {
 		long end = System.currentTimeMillis();
 		int runtime = (int) (end - start);
 		assertTrue("Runtime must be at least 5 seconds, actually should be at least 10 seconds.", runtime >= INTERRUPTION_DELAY);
-		assertTrue("The algorithm has not terminated within one second after the specified timeout.", runtime < INTERRUPTION_DELAY + INTERRUPTION_CLEANUP_TOLERANCE);
+		assertTrue("The algorithm has not terminated within " + INTERRUPTION_CLEANUP_TOLERANCE + " ms after the specified timeout.", runtime < INTERRUPTION_DELAY + INTERRUPTION_CLEANUP_TOLERANCE);
 	}
 
 	private class CheckingEventListener {

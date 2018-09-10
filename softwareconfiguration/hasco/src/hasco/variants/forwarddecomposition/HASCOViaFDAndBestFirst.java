@@ -1,4 +1,4 @@
-package hasco.variants;
+package hasco.variants.forwarddecomposition;
 
 
 import hasco.core.RefinementConfiguredSoftwareConfigurationProblem;

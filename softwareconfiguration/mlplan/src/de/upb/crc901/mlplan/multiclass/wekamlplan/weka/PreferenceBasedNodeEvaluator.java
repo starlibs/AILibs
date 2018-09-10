@@ -91,4 +91,9 @@ public class PreferenceBasedNodeEvaluator implements INodeEvaluator<TFDNode, Dou
 		return score;
 
 	}
+
+	@Override
+	public String toString() {
+		return "PreferenceBasedNodeEvaluator [ORDERING_OF_CLASSIFIERS=" + ORDERING_OF_CLASSIFIERS + "]";
+	}
 }

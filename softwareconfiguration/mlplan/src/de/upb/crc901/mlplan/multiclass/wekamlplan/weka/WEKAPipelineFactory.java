@@ -79,7 +79,7 @@ public class WEKAPipelineFactory implements ClassifierFactory {
 			parameters.add("-" + paramName);
 			parameters.add(paramValue);
 		}
-
+		
 		return parameters;
 	}
 

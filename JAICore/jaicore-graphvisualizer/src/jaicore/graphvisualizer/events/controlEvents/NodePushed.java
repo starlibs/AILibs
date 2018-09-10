@@ -5,19 +5,20 @@ package jaicore.graphvisualizer.events.controlEvents;
  * @author jkoepe
  *
  */
-public class NodePushed implements ControlEvent{
+public class NodePushed<N> implements ControlEvent {
 
-    Object node;
+    N node;
+    
     /**
      * A new NodePushed event
      * @param node
      * 		The pushed node.
      */
-    public NodePushed(Object node){
+    public NodePushed(N node){
         this.node = node;
     }
 
-    public Object getNode() {
+    public N getNode() {
         return node;
     }
 }

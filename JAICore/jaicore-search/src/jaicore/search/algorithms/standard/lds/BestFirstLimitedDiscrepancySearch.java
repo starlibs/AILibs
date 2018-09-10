@@ -87,18 +87,8 @@ public class BestFirstLimitedDiscrepancySearch<T, A, V extends Comparable<V>> ex
 	}
 
 	@Override
-	public Iterator<AlgorithmEvent> iterator() {
-		return this;
-	}
-
-	@Override
-	public boolean hasNext() {
-		return bestFirst.hasNext();
-	}
-
-	@Override
-	public AlgorithmEvent next() {
-		return bestFirst.next();
+	public AlgorithmEvent nextWithException() throws Exception {
+		return bestFirst.nextWithException();
 	}
 
 	@Override
@@ -129,6 +119,11 @@ public class BestFirstLimitedDiscrepancySearch<T, A, V extends Comparable<V>> ex
 	@Override
 	public TimeUnit getTimeoutUnit() {
 		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public EvaluatedSearchGraphPath<T, A, V> getSolutionProvidedToCall() {
 		return null;
 	}
 }

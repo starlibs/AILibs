@@ -1,5 +1,6 @@
-package hasco.variants;
+package hasco.variants.forwarddecomposition;
 
+import hasco.core.DefaultHASCOPlanningGraphGeneratorDeriver;
 import hasco.core.HASCOFactory;
 import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionReducer;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
@@ -10,7 +11,7 @@ import jaicore.search.problemtransformers.GraphSearchProblemInputToGeneralEvalua
 public class HASCOViaFDAndBestFirstWithRandomCompletionsFactory extends HASCOFactory<GeneralEvaluatedTraversalTree<TFDNode, String, Double>, TFDNode, String, Double> {
 	public HASCOViaFDAndBestFirstWithRandomCompletionsFactory() {
 		setSearchFactory(new BestFirstFactory<>());
-		setSearchProblemTransformer(new GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS<>(n -> null, 1, 3, -1, -1));
-		setPlanningGraphGeneratorDeriver(new ForwardDecompositionReducer<>());
+		setSearchProblemTransformer(new GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS<>(n -> null, new DefaultPathPriorizingNodeEvaluator<>(), 1, 3, -1, -1));
+		setPlanningGraphGeneratorDeriver(new DefaultHASCOPlanningGraphGeneratorDeriver<>(new ForwardDecompositionReducer<>()));
 	}
 }

@@ -14,8 +14,8 @@ public class ParetoNode<T, V extends Comparable<V>> {
     final Node<T, V> node;
     /* Number of creation of this pareto node. */
     final int n;
-    final HashSet<ParetoNode> dominates;
-    final HashSet<ParetoNode> dominatedBy;
+    final HashSet<ParetoNode<T,V>> dominates;
+    final HashSet<ParetoNode<T,V>> dominatedBy;
 
 
     public ParetoNode(Node<T, V> node, int n) {
@@ -38,5 +38,4 @@ public class ParetoNode<T, V extends Comparable<V>> {
         s += "}";
         return s;
     }
-
 }

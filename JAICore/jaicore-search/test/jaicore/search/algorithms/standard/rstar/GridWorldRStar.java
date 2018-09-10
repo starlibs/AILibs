@@ -55,7 +55,7 @@ public class GridWorldRStar {
     */
 
     @Test
-    public void gridWorldRStar() {
+    public void gridWorldRStar() throws InterruptedException {
 
     	/* compute reference solution */
     	SimpleAStarGraphSearch<GridWorld, String> astar = new SimpleAStarGraphSearch<GridWorld, String>(

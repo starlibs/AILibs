@@ -78,20 +78,12 @@
 	<logger name="jaicore.search.algorithms.standard.rdfs.RandomizedDepthFirstSearch">
 		<level value="off" />
 	</logger>
-	
-	<logger name="de.upb.crc901.services.core.HttpServiceServer">
-		<level value="warn" />
+  	
+  <logger name="mlplan.2phasehasco.optimizer">
+		<level value="off" />
 	</logger>
 	
-	<logger name="de.upb.crc901.services.core.HttpServiceClient">
-		<level value="warn" />
-	</logger>
-	
-	<logger name="de.upb.crc901.mlplan.services">
-		<level value="warn" />
-	</logger>
-	
-	<logger name="de.upb.crc901.mlplan.AbstractMLPlan">
-		<level value="info" />
-	</logger>
+	<logger name="mlplan.2phasehasco.hasco">
+    <level value="warn" />
+  </logger>
 </log4j:configuration>

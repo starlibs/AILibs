@@ -3,7 +3,7 @@
   "components" : [ {
     "name" : "weka.classifiers.bayes.BayesNet",
     "requiredInterface" : [ ],
-    "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "BaseClassifier" ],
+    "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "BaseClassifier", "Test" ],
     "parameter" : [ {
       "name" : "D",
       "type" : "boolean",
@@ -53,18 +53,6 @@
     } ],
     "dependencies" : [ ]
   }, {
-    "name" : "weka.classifiers.functions.MultilayerPerceptron",
-    "requiredInterface" : [ ],
-    "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "BaseClassifier" ],
-    "parameter" : [ {
-      "name" : "L",
-      "type" : "double",
-      "default" : 0.3,
-      "min" : 0.1,
-      "max" : 1.0,
-      "refineSplits" : 8,
-      "minInterval" : 10
-    }, {
       "name" : "M",
       "type" : "double",
       "default" : 0.2,
@@ -387,7 +375,7 @@
   }, {
     "name" : "weka.classifiers.trees.J48",
     "requiredInterface" : [ ],
-    "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "BaseClassifier" ],
+    "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "BaseClassifier", "Test" ],
     "parameter" : [ {
       "name" : "O",
       "type" : "boolean",

@@ -117,7 +117,7 @@ public class RandomCompletionGammaGraphGenerator<T> implements GammaGraphGenerat
 
 
     @Override
-    public Collection<GammaNode<T, RStarK>> generateRandomSuccessors(GammaNode<T, RStarK> n, int K, Integer delta) throws IllegalArgumentException {
+    public Collection<GammaNode<T, RStarK>> generateRandomSuccessors(GammaNode<T, RStarK> n, int K, Integer delta) throws IllegalArgumentException, InterruptedException {
         T s = n.getPoint();
 
         // The successors for this node have already been computed.

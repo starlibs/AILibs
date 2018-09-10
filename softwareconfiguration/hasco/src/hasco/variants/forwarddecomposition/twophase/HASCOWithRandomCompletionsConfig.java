@@ -1,4 +1,4 @@
-package hasco.variants.twophase;
+package hasco.variants.forwarddecomposition.twophase;
 
 import hasco.core.HASCOConfig;
 

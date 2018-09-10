@@ -2,7 +2,6 @@ package jaicore.search.gui;
 
 import com.google.common.eventbus.Subscribe;
 
-import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.graphvisualizer.events.controlEvents.ControlEvent;
 import jaicore.graphvisualizer.events.controlEvents.IsLiveEvent;
 import jaicore.graphvisualizer.events.controlEvents.NodePushed;
@@ -52,8 +51,8 @@ public class ControllableBestFirst<T,A> extends StandardBestFirst<T, A, Double> 
 		
 		if(event instanceof NodePushed && live)
 			try {
-				this.step((Node<T, Double>) ((NodePushed) event).getNode());
-			} catch (InterruptedException | AlgorithmExecutionCanceledException e) {
+				this.selectNodeForNextExpansion(((NodePushed<Node<T,Double>>)event).getNode());
+			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}

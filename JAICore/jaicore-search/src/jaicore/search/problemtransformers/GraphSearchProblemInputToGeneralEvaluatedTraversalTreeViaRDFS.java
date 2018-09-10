@@ -13,14 +13,16 @@ public class GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS<N, A,
 		implements AlgorithmProblemTransformer<GraphSearchProblemInput<N, A, V>, GeneralEvaluatedTraversalTree<N, A, V>> {
 
 	private final INodeEvaluator<N, V> preferredNodeEvaluator;
+	private final INodeEvaluator<N, Double> preferredNodeEvaluatorForRandomCompletion;
 	private final int seed;
 	private final int numSamples;
 	private final int timeoutForSingleCompletionEvaluationInMS;
 	private final int timeoutForNodeEvaluationInMS;
 
-	public GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS(INodeEvaluator<N, V> preferredNodeEvaluator, int seed, int numSamples, int timeoutForSingleCompletionEvaluationInMS, int timeoutForNodeEvaluationInMS) {
+	public GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS(INodeEvaluator<N, V> preferredNodeEvaluator, INodeEvaluator<N, Double> preferredNodeEvaluatorForRandomCompletion, int seed, int numSamples, int timeoutForSingleCompletionEvaluationInMS, int timeoutForNodeEvaluationInMS) {
 		super();
 		this.preferredNodeEvaluator = preferredNodeEvaluator;
+		this.preferredNodeEvaluatorForRandomCompletion = preferredNodeEvaluatorForRandomCompletion;
 		this.seed = seed;
 		this.numSamples = numSamples;
 		this.timeoutForSingleCompletionEvaluationInMS = timeoutForSingleCompletionEvaluationInMS;
@@ -29,6 +31,10 @@ public class GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS<N, A,
 
 	public INodeEvaluator<N, V> getPreferredNodeEvaluator() {
 		return preferredNodeEvaluator;
+	}
+
+	public INodeEvaluator<N, Double> getPreferredNodeEvaluatorForRandomCompletion() {
+		return preferredNodeEvaluatorForRandomCompletion;
 	}
 
 	public int getSeed() {
@@ -41,7 +47,7 @@ public class GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS<N, A,
 
 	@Override
 	public GeneralEvaluatedTraversalTree<N, A, V> transform(GraphSearchProblemInput<N, A, V> problem) {
-		RandomCompletionBasedNodeEvaluator<N, V> rc = new RandomCompletionBasedNodeEvaluator<>(new Random(seed), numSamples, problem.getPathEvaluator(), timeoutForSingleCompletionEvaluationInMS, timeoutForNodeEvaluationInMS);
+		RandomCompletionBasedNodeEvaluator<N, V> rc = new RandomCompletionBasedNodeEvaluator<>(new Random(seed), numSamples, problem.getPathEvaluator(), timeoutForSingleCompletionEvaluationInMS, timeoutForNodeEvaluationInMS, preferredNodeEvaluatorForRandomCompletion);
 		return new GeneralEvaluatedTraversalTree<>(problem.getGraphGenerator(), new AlternativeNodeEvaluator<>(preferredNodeEvaluator, rc));
 	}
 

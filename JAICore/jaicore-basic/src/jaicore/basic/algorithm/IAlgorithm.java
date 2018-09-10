@@ -21,16 +21,10 @@ import jaicore.basic.Cancelable;
 public interface IAlgorithm<I,O> extends Iterable<AlgorithmEvent>, Iterator<AlgorithmEvent>, Callable<O>, Cancelable {
 	
 	public I getInput();
-		
 	public void registerListener(Object listener);
-	
 	public void setNumCPUs(int numberOfCPUs);
-	
 	public int getNumCPUs();
-	
 	public void setTimeout(int timeout, TimeUnit timeUnit);
-	
 	public int getTimeout();
-	
 	public TimeUnit getTimeoutUnit();
 }

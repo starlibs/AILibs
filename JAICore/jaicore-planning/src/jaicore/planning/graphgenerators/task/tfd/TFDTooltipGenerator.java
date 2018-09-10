@@ -17,7 +17,7 @@ public class TFDTooltipGenerator<V extends Comparable<V>> implements TooltipGene
 		StringBuilder sb = new StringBuilder();
 		TFDNode nodeRepresentation = node.getPoint();
 		Map<String,Object> annotations = node.getAnnotations();
-		sb.append("<h2>Node: " + nodeRepresentation.getID() + "</h2>");
+		sb.append("<h2>Node: " + nodeRepresentation + "</h2>");
 		sb.append("<h2>Annotation</h2><table><tr><th>Key</th><th>Value</th></tr>");
 		for (String key : annotations.keySet()) {
 			sb.append("<tr><td>" + key + "</td><td>" + annotations.get(key) + "</td></tr>");

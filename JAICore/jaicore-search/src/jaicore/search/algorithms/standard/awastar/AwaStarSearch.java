@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.PriorityQueue;
+import java.util.Queue;
+import java.util.concurrent.TimeoutException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,9 +22,7 @@ import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
 import jaicore.search.algorithms.standard.AbstractORGraphSearch;
-import jaicore.search.algorithms.standard.bestfirst.events.GraphSearchSolutionCandidateFoundEvent;
-import jaicore.search.algorithms.standard.bestfirst.model.OpenCollection;
-import jaicore.search.algorithms.standard.bestfirst.model.PriorityQueueOpen;
+import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.ISolutionReportingNodeEvaluator;
 import jaicore.search.core.interfaces.GraphGenerator;
@@ -45,34 +45,35 @@ import jaicore.search.structure.graphgenerator.SuccessorGenerator;
  * @param <A>
  * @param <V>
  */
-public class AwaStarSearch<I extends GeneralEvaluatedTraversalTree<T, A, V>, T, A, V extends Comparable<V>> extends AbstractORGraphSearch<I, EvaluatedSearchGraphPath<T, A, V>, T, A, V, Node<T, V>, A> {
+public class AwaStarSearch<I extends GeneralEvaluatedTraversalTree<T, A, V>, T, A, V extends Comparable<V>>
+		extends AbstractORGraphSearch<I, EvaluatedSearchGraphPath<T, A, V>, T, A, V, Node<T, V>, A> {
 
 	private static final Logger logger = LoggerFactory.getLogger(AwaStarSearch.class);
 
 	private final EventBus eventBus = new EventBus();
-	private boolean stopped = false;
+	private boolean timeouted = false;
 
-	private AlgorithmState state = AlgorithmState.created;
-	
 	private SingleRootGenerator<T> rootNodeGenerator;
 	private SuccessorGenerator<T, A> successorGenerator;
 	private GoalTester<T> goalTester;
 	private INodeEvaluator<T, V> nodeEvaluator;
-	private OpenCollection<Node<T, V>> closedList, suspendList, openList;
+	private Queue<Node<T, V>> closedList, suspendList, openList;
 	private int currentLevel = -1;
 	private int windowSize;
-	private List<GraphSearchSolutionCandidateFoundEvent<T, A, V>> unreturnedSolutionEvents = new ArrayList<>();
+	private List<EvaluatedSearchSolutionCandidateFoundEvent<T, A, V>> unreturnedSolutionEvents = new ArrayList<>();
 	private EvaluatedSearchGraphPath<T, A, V> bestSolution;
-	
+
+	private int timeoutInMS = Integer.MAX_VALUE;
+
 	public AwaStarSearch(I problem) {
 		super(problem);
 		rootNodeGenerator = (SingleRootGenerator<T>) problem.getGraphGenerator().getRootGenerator();
 		successorGenerator = problem.getGraphGenerator().getSuccessorGenerator();
 		goalTester = problem.getGraphGenerator().getGoalTester();
 		nodeEvaluator = problem.getNodeEvaluator();
-		closedList = new PriorityQueueOpen<>();
-		suspendList = new PriorityQueueOpen<>();
-		openList = new PriorityQueueOpen<>();
+		closedList = new PriorityQueue<>();
+		suspendList = new PriorityQueue<>();
+		openList = new PriorityQueue<>();
 		windowSize = 0;
 		if (nodeEvaluator instanceof ISolutionReportingNodeEvaluator) {
 			((ISolutionReportingNodeEvaluator) nodeEvaluator).registerSolutionListener(this);
@@ -87,11 +88,7 @@ public class AwaStarSearch<I extends GeneralEvaluatedTraversalTree<T, A, V>, T, 
 		while (unreturnedSolutionEvents.isEmpty()) {
 
 			/* check whether execution shoud be halted */
-			if (Thread.interrupted()) {
-				throw new InterruptedException("AWA* has been interrupted");
-			} else if (stopped) {
-				return new AlgorithmFinishedEvent();
-			}
+			checkTermination();
 
 			/* if the current graph has been exhausted, add all suspended nodes to OPEN and increase window size */
 			if (openList.isEmpty()) {
@@ -109,19 +106,16 @@ public class AwaStarSearch<I extends GeneralEvaluatedTraversalTree<T, A, V>, T, 
 			logger.info("Running core algorithm with window size {} and current level {}. {} items are in OPEN", windowSize, currentLevel, openList.size());
 			windowAStar();
 		}
-		GraphSearchSolutionCandidateFoundEvent<T, A, V> toReturn = unreturnedSolutionEvents.get(0);
+		EvaluatedSearchSolutionCandidateFoundEvent<T, A, V> toReturn = unreturnedSolutionEvents.get(0);
 		unreturnedSolutionEvents.remove(0);
 		return toReturn;
 	}
 
 	private void windowAStar() throws Exception {
 		while (!openList.isEmpty()) {
+			checkTermination();
 			if (!unreturnedSolutionEvents.isEmpty()) {
 				logger.info("Not doing anything because there are still unreturned solutions.");
-				return;
-			}
-			if (stopped) {
-				logger.info("Algorithm execution has been halted");
 				return;
 			}
 			Node<T, V> n = openList.peek();
@@ -145,22 +139,13 @@ public class AwaStarSearch<I extends GeneralEvaluatedTraversalTree<T, A, V>, T, 
 				logger.info("Switching level from {} to {}", currentLevel, nLevel);
 				currentLevel = nLevel;
 			}
-			if (stopped) {
-				logger.info("Algorithm execution has been halted");
-				return;
-			}
+			checkTermination();
 
 			/* compute successors of the expanded node */
 			Collection<NodeExpansionDescription<T, A>> successors = successorGenerator.generateSuccessors(n.getPoint());
 			logger.info("Expanding {}. Identified {} successors.", n.getPoint(), successors.size());
 			for (NodeExpansionDescription<T, A> expansionDescription : successors) {
-				if (Thread.interrupted()) {
-					throw new InterruptedException("AWA* has been interrupted.");
-				}
-				if (stopped) {
-					logger.info("Algorithm execution has been halted");
-					return;
-				}
+				checkTermination();
 				Node<T, V> nPrime = new Node<>(n, expansionDescription.getTo());
 				if (goalTester instanceof NodeGoalTester<?>) {
 					nPrime.setGoal(((NodeGoalTester<T>) goalTester).isGoal(nPrime.getPoint()));
@@ -215,14 +200,14 @@ public class AwaStarSearch<I extends GeneralEvaluatedTraversalTree<T, A, V>, T, 
 	}
 
 	@Subscribe
-	public void receiveSolutionEvent(GraphSearchSolutionCandidateFoundEvent<T, A, V> solutionEvent) {
+	public void receiveSolutionEvent(EvaluatedSearchSolutionCandidateFoundEvent<T, A, V> solutionEvent) {
 		registerNewSolutionCandidate(solutionEvent.getSolutionCandidate());
 	}
 
 	public void registerNewSolutionCandidate(EvaluatedSearchGraphPath<T, A, V> solution) {
 		List<T> solutionPath = solution.getNodes();
 		V score = solution.getScore();
-		GraphSearchSolutionCandidateFoundEvent<T, A, V> solutionEvent = new GraphSearchSolutionCandidateFoundEvent<>(solution);
+		EvaluatedSearchSolutionCandidateFoundEvent<T, A, V> solutionEvent = new EvaluatedSearchSolutionCandidateFoundEvent<>(solution);
 		eventBus.post(solutionEvent);
 		if (bestSolution == null || score.compareTo(bestSolution.getScore()) < 0) {
 			logger.info("Identified new best solution {} with quality {}", solutionPath, score);
@@ -237,60 +222,46 @@ public class AwaStarSearch<I extends GeneralEvaluatedTraversalTree<T, A, V>, T, 
 	}
 	
 	@Override
-	public void cancel() {
-		this.stopped = true;
-	}
-
-	@Override
 	public void registerListener(Object listener) {
 		eventBus.register(listener);
 	}
 
 	@Override
-	public Iterator<AlgorithmEvent> iterator() {
-		return this;
-	}
-
-	@Override
-	public boolean hasNext() {
-		return state != AlgorithmState.inactive;
-	}
-
-	@Override
-	public AlgorithmEvent next() {
-		try {
-			switch (state) {
-			case created: {
-				T externalRootNode = rootNodeGenerator.getRoot();
-				Node<T, V> rootNode = new Node<T, V>(null, externalRootNode);
-				logger.info("Initializing graph and OPEN with {}.", rootNode);
-				openList.add(rootNode);
-				eventBus.post(new GraphInitializedEvent<>(rootNode));
-				rootNode.setInternalLabel(this.nodeEvaluator.f(rootNode));
-				state = AlgorithmState.active;
-				return new AlgorithmInitializedEvent();
-			}
-			case active: {
-				AlgorithmEvent event = processUntilNextEvent();
+	public AlgorithmEvent nextWithException() throws Exception {
+		switch (getState()) {
+		case created: {
+			activateTimeoutTimer("AWA*-Timeouter");
+			T externalRootNode = rootNodeGenerator.getRoot();
+			Node<T, V> rootNode = new Node<T, V>(null, externalRootNode);
+			logger.info("Initializing graph and OPEN with {}.", rootNode);
+			openList.add(rootNode);
+			eventBus.post(new GraphInitializedEvent<>(rootNode));
+			rootNode.setInternalLabel(this.nodeEvaluator.f(rootNode));
+			switchState(AlgorithmState.active);
+			AlgorithmEvent e = new AlgorithmInitializedEvent();
+			eventBus.post(e);
+			return e;
+		}
+		case active: {
+			AlgorithmEvent event;
+			try {
+				event = processUntilNextEvent();
 				if (event instanceof AlgorithmFinishedEvent) {
-					state = AlgorithmState.inactive;
+					super.shutdown();
+					switchState(AlgorithmState.inactive);
 				}
-				return event;
+			} catch (TimeoutException e) {
+				switchState(AlgorithmState.inactive);
+				super.shutdown();
+				event = new AlgorithmFinishedEvent();
 			}
-			default:
-				throw new IllegalStateException("Cannot do anything in state " + state);
-			}
+			if (!(event instanceof EvaluatedSearchSolutionCandidateFoundEvent)) // solution events are sent directly over the event bus
+				eventBus.post(event);
+			return event;
 		}
-		catch (Exception e) {
-			throw new RuntimeException(e);
+		default:
+			throw new IllegalStateException("Cannot do anything in state " + getState());
 		}
-	}
-
-	@Override
-	public EvaluatedSearchGraphPath<T, A, V> call() throws Exception {
-		while (this.hasNext())
-			next();
-		return getBestSolution();
 	}
 
 	@Override
@@ -300,30 +271,16 @@ public class AwaStarSearch<I extends GeneralEvaluatedTraversalTree<T, A, V>, T, 
 
 	@Override
 	public int getNumCPUs() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public void setTimeout(int timeout, TimeUnit timeUnit) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public int getTimeout() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public TimeUnit getTimeoutUnit() {
-		// TODO Auto-generated method stub
-		return null;
+		return 1;
 	}
 
 	@Override
 	public GraphGenerator<T, A> getGraphGenerator() {
 		return problem.getGraphGenerator();
+	}
+
+	@Override
+	public EvaluatedSearchGraphPath<T, A, V> getSolutionProvidedToCall() {
+		return getBestSolution();
 	}
 }

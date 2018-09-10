@@ -36,15 +36,14 @@ public class ComponentLoader {
 	private Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramConfigs = new HashMap<>();
 	private Collection<Component> components = new ArrayList<>();
 	private final Set<String> parsedFiles = new HashSet<>();
-	private final ObjectMapper objectMapper;
+	private final ObjectMapper objectMapper = new ObjectMapper();
 	private Map<String, JsonNode> parameterMap = new HashMap<>();
+	private Set<String> uniqueComponentNames = new HashSet<>();
 
 	public ComponentLoader() {
-		this.objectMapper = new ObjectMapper();
 	}
 
 	public ComponentLoader(final File jsonFile) throws IOException {
-		this.objectMapper = new ObjectMapper();
 		this.parseFile(jsonFile);
 	}
 
@@ -100,6 +99,10 @@ public class ComponentLoader {
 			Component c;
 			for (JsonNode component : components) {
 				c = new Component(component.get("name").asText());
+				if (!this.uniqueComponentNames.add(c.getName())) {
+					throw new IllegalArgumentException("Noticed a component with duplicative component name: " + c.getName());
+				}
+
 				// add provided interfaces
 
 				for (JsonNode providedInterface : component.path("providedInterface")) {
@@ -256,7 +259,7 @@ public class ComponentLoader {
 							case "in": {
 								Pair<Parameter, ParameterDomain> conditionItem;
 								if (param.isNumeric()) {
-									Interval interval = SetUtil.unserializeInterval(target);
+									Interval interval = SetUtil.unserializeInterval("[" + target.substring(1, target.length() - 1) + "]");
 									conditionItem = new Pair<>(param, new NumericParameterDomain(((NumericParameterDomain) param.getDefaultDomain()).isInteger(), interval.getInf(), interval.getSup()));
 								} else if (param.isCategorical()) {
 									if (!target.startsWith("[") && !target.startsWith("{")) {
@@ -312,7 +315,7 @@ public class ComponentLoader {
 						case "in": {
 							Pair<Parameter, ParameterDomain> conditionItem;
 							if (param.isNumeric()) {
-								Interval interval = SetUtil.unserializeInterval(target);
+								Interval interval = SetUtil.unserializeInterval("[" + target.substring(1, target.length() - 1) + "]");
 								conditionItem = new Pair<>(param, new NumericParameterDomain(((NumericParameterDomain) param.getDefaultDomain()).isInteger(), interval.getInf(), interval.getSup()));
 							} else if (param.isCategorical()) {
 								if (!target.startsWith("[") && !target.startsWith("{")) {
@@ -343,6 +346,7 @@ public class ComponentLoader {
 	public void loadComponents(final File componentDescriptionFile) throws IOException {
 		this.paramConfigs.clear();
 		this.components.clear();
+		this.uniqueComponentNames.clear();
 
 		this.parseFile(componentDescriptionFile);
 	}

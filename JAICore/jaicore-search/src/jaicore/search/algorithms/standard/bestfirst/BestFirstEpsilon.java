@@ -3,12 +3,12 @@ package jaicore.search.algorithms.standard.bestfirst;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jaicore.search.algorithms.standard.bestfirst.model.PriorityQueueOpen;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.model.probleminputs.GeneralEvaluatedTraversalTree;
 import jaicore.search.model.travesaltree.Node;
@@ -28,7 +28,8 @@ public class BestFirstEpsilon<T, A, W extends Comparable<W>> extends StandardBes
 	private final boolean absolute;
 	private final double epsilon;
 	
-	private class OpenList extends PriorityQueueOpen<Node<T,Double>> {
+	@SuppressWarnings("serial")
+	private class OpenList extends PriorityQueue<Node<T,Double>> {
 		
 		@Override
 		public Node<T,Double> peek() {
@@ -53,11 +54,11 @@ public class BestFirstEpsilon<T, A, W extends Comparable<W>> extends StandardBes
 	}
 
 	
-	public BestFirstEpsilon(GeneralEvaluatedTraversalTree<T, A, Double> problem, INodeEvaluator<T, W> pSecondaryNodeEvaluator, int epsilon) {
+	public BestFirstEpsilon(GeneralEvaluatedTraversalTree<T, A, Double> problem, INodeEvaluator<T, W> pSecondaryNodeEvaluator, int epsilon) throws InterruptedException {
 		this(problem, pSecondaryNodeEvaluator, epsilon, true);
 	}
 	
-	public BestFirstEpsilon(GeneralEvaluatedTraversalTree<T, A, Double> problem, INodeEvaluator<T, W> pSecondaryNodeEvaluator, double epsilon, boolean absolute) {
+	public BestFirstEpsilon(GeneralEvaluatedTraversalTree<T, A, Double> problem, INodeEvaluator<T, W> pSecondaryNodeEvaluator, double epsilon, boolean absolute) throws InterruptedException {
 		super(problem);
 		this.secondaryNodeEvaluator = pSecondaryNodeEvaluator;
 		this.epsilon = epsilon;

@@ -11,13 +11,7 @@ import jaicore.planning.model.task.stn.MethodInstance;
 public class TFDNode implements Serializable {
 
 	private static final long serialVersionUID = 7710905829501897491L;
-
-	private static long maxID = 0L;
-	private long ID = maxID++;
-	public long getID() {
-		return ID;
-	}
-
+	
 	private TFDRestProblem problem;
 	private final MethodInstance appliedMethodInstance;
 	private final Action appliedAction;
@@ -82,14 +76,17 @@ public class TFDNode implements Serializable {
 
 	@Override
 	public String toString() {
-		return "TFDNode:"  + ID;
+		return "TFDNode [problem=" + problem + ", appliedMethodInstance=" + appliedMethodInstance + ", appliedAction=" + appliedAction + ", isGoal=" + isGoal + "]";
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + (int) (ID ^ (ID >>> 32));
+		result = prime * result + ((appliedAction == null) ? 0 : appliedAction.hashCode());
+		result = prime * result + ((appliedMethodInstance == null) ? 0 : appliedMethodInstance.hashCode());
+		result = prime * result + (isGoal ? 1231 : 1237);
+		result = prime * result + ((problem == null) ? 0 : problem.hashCode());
 		return result;
 	}
 
@@ -102,7 +99,22 @@ public class TFDNode implements Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		TFDNode other = (TFDNode) obj;
-		if (ID != other.ID)
+		if (appliedAction == null) {
+			if (other.appliedAction != null)
+				return false;
+		} else if (!appliedAction.equals(other.appliedAction))
+			return false;
+		if (appliedMethodInstance == null) {
+			if (other.appliedMethodInstance != null)
+				return false;
+		} else if (!appliedMethodInstance.equals(other.appliedMethodInstance))
+			return false;
+		if (isGoal != other.isGoal)
+			return false;
+		if (problem == null) {
+			if (other.problem != null)
+				return false;
+		} else if (!problem.equals(other.problem))
 			return false;
 		return true;
 	}

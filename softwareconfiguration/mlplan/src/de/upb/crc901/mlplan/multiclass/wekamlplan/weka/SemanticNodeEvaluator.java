@@ -60,11 +60,9 @@ public class SemanticNodeEvaluator implements INodeEvaluator<TFDNode, Double> {
 				
 				String classifierName = classifier.getComponent().getName().toLowerCase();
 				
-				/* forbid M5Rules on binary classes */
-				if (this.binaryClass && classifierName.matches("(.*)(m5rules|simplelinearregression|additiveregression)(.*)")) {
+				/* forbid M5regression algorithms on non-binary classes */
+				if (!this.binaryClass && classifierName.matches("(.*)(additiveregression|simplelinearregression|m5rules|votedperceptron|m5p)(.*)"))
 					return 40000d;
-				}
-				else if (!this.binaryClass && classifierName.matches("(.*)(votedperceptron|m5p)(.*)"))
 				
 				/* forbid NaiveBayesMultinomial on multi-valued nominal attributes */
 				if (multiValuedNominalAttributes && (classifierName.matches("(.*)(naivebayesmultinomial|simplelinearregression)(.*)"))) {

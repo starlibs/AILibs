@@ -8,12 +8,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
@@ -21,23 +21,26 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.eventbus.Subscribe;
+
+import jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.logging.LoggerUtil;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableNodeEvaluator;
-import jaicore.search.algorithms.standard.bestfirst.StandardBestFirst;
-import jaicore.search.algorithms.standard.bestfirst.events.GraphSearchSolutionCandidateFoundEvent;
+import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.NodeAnnotationEvent;
+import jaicore.search.algorithms.standard.bestfirst.events.NodeExpansionCompletedEvent;
 import jaicore.search.algorithms.standard.gbf.SolutionEventBus;
-import jaicore.search.algorithms.standard.rdfs.RandomizedDepthFirstSearch;
+import jaicore.search.algorithms.standard.random.RandomSearch;
 import jaicore.search.algorithms.standard.uncertainty.IUncertaintySource;
 import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.core.interfaces.ISolutionEvaluator;
 import jaicore.search.core.interfaces.PathUnifyingGraphGenerator;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
+import jaicore.search.model.other.SearchGraphPath;
 import jaicore.search.model.probleminputs.GeneralEvaluatedTraversalTree;
 import jaicore.search.model.travesaltree.Node;
-import jaicore.search.structure.graphgenerator.SubGraphGenerator;
 
 @SuppressWarnings("serial")
 public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> implements IGraphDependentNodeEvaluator<T, String, V>, SerializableNodeEvaluator<T, V>,
@@ -48,7 +51,6 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 	private final int timeoutForSingleCompletionEvaluationInMS;
 	private final int timeoutForNodeEvaluationInMS;
 
-	protected Map<List<T>, List<T>> completions = new ConcurrentHashMap<>();
 	protected Set<List<T>> unsuccessfulPaths = Collections.synchronizedSet(new HashSet<>());
 	protected Set<List<T>> postedSolutions = new HashSet<>();
 	protected Map<List<T>, Integer> timesToComputeEvaluations = new HashMap<>();
@@ -64,13 +66,18 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 	protected long timestampOfFirstEvaluation;
 
 	/* algorithm parameters */
-	protected boolean pathCachingActivated = false;
 	protected final Random random;
 	protected int samples;
+	private final INodeEvaluator<T, Double> preferredNodeEvaluatorForRDFS;
 
+	/* sub-tools for conducting and analyzing random completions */
+	private Timer timeoutTimer;
+	private RandomSearch<T, String> completer;
+	private Semaphore completerInsertionSemaphore = new Semaphore(0); // this is required since the step-method of the completer is asynchronous
 	protected final ISolutionEvaluator<T, V> solutionEvaluator;
 	protected IUncertaintySource<T, V> uncertaintySource;
 	protected transient SolutionEventBus<T> eventBus = new SolutionEventBus<>();
+	private final Map<List<T>, V> bestKnownScoreUnderNodeInCompleterGraph = new HashMap<>();
 
 	public RandomCompletionBasedNodeEvaluator(final Random random, final int samples, final ISolutionEvaluator<T, V> solutionEvaluator) {
 		this(random, samples, solutionEvaluator, -1, -1);
@@ -78,6 +85,11 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 
 	public RandomCompletionBasedNodeEvaluator(final Random random, final int samples, final ISolutionEvaluator<T, V> solutionEvaluator, int timeoutForSingleCompletionEvaluationInMS,
 			int timeoutForNodeEvaluationInMS) {
+		this(random, samples, solutionEvaluator, timeoutForSingleCompletionEvaluationInMS, timeoutForNodeEvaluationInMS, null);
+	}
+
+	public RandomCompletionBasedNodeEvaluator(final Random random, final int samples, final ISolutionEvaluator<T, V> solutionEvaluator, int timeoutForSingleCompletionEvaluationInMS,
+			int timeoutForNodeEvaluationInMS, INodeEvaluator<T, Double> preferredNodeEvaluator) {
 		super();
 		if (random == null) {
 			throw new IllegalArgumentException("Random source must not be null!");
@@ -94,7 +106,11 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 		this.solutionEvaluator = solutionEvaluator;
 		this.timeoutForSingleCompletionEvaluationInMS = timeoutForSingleCompletionEvaluationInMS;
 		this.timeoutForNodeEvaluationInMS = timeoutForNodeEvaluationInMS;
-		logger.info("Initialized RandomCompletionEvaluator with timeout {}ms for single evaluations and {}ms in total per node", timeoutForSingleCompletionEvaluationInMS, timeoutForNodeEvaluationInMS);
+		this.preferredNodeEvaluatorForRDFS = preferredNodeEvaluator;
+
+		/* create randomized dfs searcher */
+		logger.info("Initialized RandomCompletionEvaluator with timeout {}ms for single evaluations and {}ms in total per node", timeoutForSingleCompletionEvaluationInMS,
+				timeoutForNodeEvaluationInMS);
 
 		/* check whether assertions are on */
 		boolean assertOn = false;
@@ -115,7 +131,7 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 	@Override
 	public V f(final Node<T, ?> n) throws Exception {
 		long startOfComputation = System.currentTimeMillis();
-		long deadline = timeoutForNodeEvaluationInMS > 0 ? startOfComputation + timeoutForNodeEvaluationInMS - 50 : Long.MAX_VALUE;
+		long deadline = timeoutForNodeEvaluationInMS > 0 ? startOfComputation + timeoutForNodeEvaluationInMS - 50 : Long.MAX_VALUE - 86400 * 1000;
 		if (this.timestampOfFirstEvaluation == 0) {
 			this.timestampOfFirstEvaluation = startOfComputation;
 		}
@@ -152,45 +168,61 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 					return score;
 				}
 
-				/* create randomized dfs searcher */
-				GeneralEvaluatedTraversalTree<T, String, Double> completionProblem = new GeneralEvaluatedTraversalTree<>(new SubGraphGenerator<>(generator, n.getPoint()), null);
-				
-//				new SimpleGraphVisualizationWindow<>(completer);
+				/* make sure that the completer has the path from the root to the node in question */
+				if (!completer.knowsNode(n.getPoint())) {
+					synchronized (completer) {
+						completer.appendPathToNode(n.externalPath());
+					}
+				}
 
 				/* draw random completions and determine best solution */
-				V best = null;
-				List<T> bestCompletion = null;
 				int i = 0;
 				int j = 0;
+				int countedExceptions = 0;
 				final int maxSamples = this.samples * 2;
 				List<V> evaluations = new ArrayList<>();
 				List<List<T>> completedPaths = new ArrayList<>();
-				for (; i < this.samples && !Thread.currentThread().isInterrupted() && System.currentTimeMillis() < deadline; i++) {
+				logger.info("Now drawing {} successful examples but no more than {}", samples, maxSamples);
+				for (; i < this.samples; i++) {
+
+					if (Thread.currentThread().isInterrupted()) {
+						logger.info("Thread ist interrupted, canceling RDFS");
+						break;
+					}
+					if (System.currentTimeMillis() >= deadline) {
+						logger.info("Deadline for random completions hit! Finishing node evaluation.");
+						break;
+					}
 
 					/* complete the current path by the dfs-solution; we assume that this goes in almost constant time */
-					List<T> completedPath = new ArrayList<>(n.externalPath());
-					logger.info("Starting search for next solution ...");
-					StandardBestFirst<T, String, Double> completer = new RandomizedDepthFirstSearch<>(completionProblem, this.random);
-					EvaluatedSearchGraphPath<T, String, Double> solutionPathFromN = completer.nextSolution();
-					if (solutionPathFromN == null) {
-						logger.warn("No completion was found for path {}. Nodes expanded in search: {}", path, completer.getExpandedCounter());
-						return null;
+					List<T> pathCompletion = null;
+					List<T> completedPath = null;
+					synchronized (completer) {
+						completedPath = new ArrayList<>(n.externalPath());
+
+						logger.info("Starting search for next solution ...");
+
+						SearchGraphPath<T, String> solutionPathFromN = null;
+						solutionPathFromN = completer.nextSolutionUnderNode(n.getPoint());
+						if (solutionPathFromN == null) {
+							logger.info("No completion was found for path {}.", path);
+							break;
+						}
+						logger.info("Found solution {}", solutionPathFromN);
+						pathCompletion = new ArrayList<>(solutionPathFromN.getNodes());
+						pathCompletion.remove(0);
+						completedPath.addAll(pathCompletion);
 					}
-					logger.info("Found solution {}", solutionPathFromN);
-					List<T> pathCompletion = new ArrayList<>(solutionPathFromN.getNodes());
-					pathCompletion.remove(0);
-					completedPath.addAll(pathCompletion);
 					completedPaths.add(completedPath);
 
 					/* evaluate the found solution */
 					AtomicBoolean nodeEvaluationTimedOut = new AtomicBoolean(false);
 					Thread executingThread = Thread.currentThread();
-					Timer timeoutTimer = new Timer();
 					TimerTask abortionTask = new TimerTask() {
-						
+
 						@Override
 						public void run() {
-							
+
 							/* if the executing thread has not been interrupted from outside */
 							if (!executingThread.isInterrupted()) {
 								logger.info("Sending an controlled interrupt to the evaluating thread to get it back here.");
@@ -204,25 +236,24 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 						break;
 					if (timeoutForSingleCompletionEvaluationInMS > 0 && timeoutForSingleCompletionEvaluationInMS < timeoutForJob)
 						timeoutForJob = timeoutForSingleCompletionEvaluationInMS;
+					if (timeoutTimer == null)
+						timeoutTimer = new Timer("RandomCompletion-Timeouter");
 					timeoutTimer.schedule(abortionTask, timeoutForJob);
 					j++;
 					try {
 						V val = this.getFValueOfSolutionPath(completedPath);
 						if (val != null) {
 							evaluations.add(val);
-							if (best == null || val.compareTo(best) < 0) {
-								best = val;
-								bestCompletion = completedPath;
-							}
-						}
-						else
+							updateMapOfBestScoreFoundSoFar(completedPath, val);
+						} else
 							logger.warn("Got NULL result as score for path {}", completedPath);
 					} catch (InterruptedException e) {
 						boolean intentionalInterrupt = nodeEvaluationTimedOut.get();
 						logger.info("Recognized {} interrupt", intentionalInterrupt ? "intentional" : "external");
-						if (!intentionalInterrupt)
+						if (!intentionalInterrupt) {
+							abortionTask.cancel();
 							throw e;
-						else {
+						} else {
 							Thread.interrupted(); // set interrupted to false
 						}
 					} catch (Exception ex) {
@@ -230,21 +261,26 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 							logger.warn("Too many retry attempts, giving up.");
 							throw ex;
 						} else {
+							countedExceptions++;
 							logger.error("Could not evaluate solution candidate ... retry another completion. {}", LoggerUtil.getExceptionInfo(ex));
 							i--;
 						}
 					}
-					timeoutTimer.cancel();
+					abortionTask.cancel();
 				}
-				
+
 				/* the only reason why we have no score at this point is that all evaluations have failed with exception or were interrupted */
+				V best = bestKnownScoreUnderNodeInCompleterGraph.get(n.externalPath());
 				if (best == null) {
 					if (deadline < System.currentTimeMillis())
 						throw new TimeoutException("The timeout of " + timeoutForNodeEvaluationInMS + "ms for node evaluation has been exhausted.");
-					else
+					else if (countedExceptions > 0)
 						throw new NoSuchElementException("Among " + j + " evaluated candidates, we could not identify any candidate that did not throw an exception.");
+					else {
+						return null;
+					}
 				}
-				
+
 				/* if we are still interrupted, throw an exception */
 				if (Thread.currentThread().isInterrupted())
 					throw new InterruptedException("Node evaluation interrupted");
@@ -253,32 +289,31 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 				n.setAnnotation("fRPSamples", i);
 				if (uncertaintySource != null)
 					uncertainty = this.uncertaintySource.calculateUncertainty((Node<T, V>) n, completedPaths, evaluations);
-				
+
 				/* cache this result and possible determine whether we already had a solution path that goes over this node before */
-				if (pathCachingActivated) {
-					if (generatorProvidesPathUnification) {
-						Optional<List<T>> bestPreviouslyKnownPathOverThisNode = Optional.empty();
-						AtomicBoolean interruptedInCheck = new AtomicBoolean();
-						PathUnifyingGraphGenerator<T, ?> castedGenerator = (PathUnifyingGraphGenerator<T, ?>) generator;
-						bestPreviouslyKnownPathOverThisNode = this.completions.keySet().stream().filter(p -> {
-							try {
-								if (interruptedInCheck.get())
-									return false;
-								return castedGenerator.isPathSemanticallySubsumed(path, p);
-							} catch (InterruptedException e) {
-								interruptedInCheck.set(true);
-								return false;
-							}
-						}).min((p1, p2) -> this.scoresOfSolutionPaths.get(p1).compareTo(this.scoresOfSolutionPaths.get(p2)));
-						if (interruptedInCheck.get())
-							throw new InterruptedException("Node evaluation interrupted");
-						if (bestPreviouslyKnownPathOverThisNode.isPresent() && this.scoresOfSolutionPaths.get(bestPreviouslyKnownPathOverThisNode.get()).compareTo(best) < 0) {
-							bestCompletion = bestPreviouslyKnownPathOverThisNode.get();
-							best = this.scoresOfSolutionPaths.get(bestCompletion);
-						}
-					}
-					this.completions.put(path, bestCompletion);
-				}
+				// if (rememberBestScores) {
+				// if (generatorProvidesPathUnification) {
+				// Optional<List<T>> bestPreviouslyKnownPathOverThisNode = Optional.empty();
+				// AtomicBoolean interruptedInCheck = new AtomicBoolean();
+				// PathUnifyingGraphGenerator<T, ?> castedGenerator = (PathUnifyingGraphGenerator<T, ?>) generator;
+				// bestPreviouslyKnownPathOverThisNode = this.completions.keySet().stream().filter(p -> {
+				// try {
+				// if (interruptedInCheck.get())
+				// return false;
+				// return castedGenerator.isPathSemanticallySubsumed(path, p);
+				// } catch (InterruptedException e) {
+				// interruptedInCheck.set(true);
+				// return false;
+				// }
+				// }).min((p1, p2) -> this.scoresOfSolutionPaths.get(p1).compareTo(this.scoresOfSolutionPaths.get(p2)));
+				// if (interruptedInCheck.get())
+				// throw new InterruptedException("Node evaluation interrupted");
+				// if (bestPreviouslyKnownPathOverThisNode.isPresent() && this.scoresOfSolutionPaths.get(bestPreviouslyKnownPathOverThisNode.get()).compareTo(best) < 0) {
+				// bestCompletion = bestPreviouslyKnownPathOverThisNode.get();
+				// best = this.scoresOfSolutionPaths.get(bestCompletion);
+				// }
+				// }
+				// }
 				this.fValues.put(n, best);
 			}
 
@@ -303,6 +338,15 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 		V f = this.fValues.get(n);
 		logger.info("Returning f-value: {}", f);
 		return f;
+	}
+
+	private void updateMapOfBestScoreFoundSoFar(List<T> nodeInCompleterGraph, V scoreOnOriginalBenchmark) {
+		V bestKnownScore = bestKnownScoreUnderNodeInCompleterGraph.get(nodeInCompleterGraph);
+		if (bestKnownScore == null || scoreOnOriginalBenchmark.compareTo(bestKnownScore) < 0) {
+			bestKnownScoreUnderNodeInCompleterGraph.put(nodeInCompleterGraph, scoreOnOriginalBenchmark);
+			if (nodeInCompleterGraph.size() > 1)
+				updateMapOfBestScoreFoundSoFar(nodeInCompleterGraph.subList(0, nodeInCompleterGraph.size() - 1), scoreOnOriginalBenchmark);
+		}
 	}
 
 	protected V getFValueOfSolutionPath(final List<T> path) throws Exception {
@@ -330,7 +374,7 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 				throw e;
 			}
 			long duration = System.currentTimeMillis() - start;
-			
+
 			/* at this point, the value should not be NULL */
 			logger.info("Result: {}, Size: {}", val, this.scoresOfSolutionPaths.size());
 			if (val == null) {
@@ -380,7 +424,7 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 			solutionObject.setAnnotation("fTime", this.timesToComputeEvaluations.get(solution));
 			solutionObject.setAnnotation("timeToSolution", (int) (System.currentTimeMillis() - this.timestampOfFirstEvaluation));
 			solutionObject.setAnnotation("nodesEvaluatedToSolution", numberOfComputedFValues);
-			this.eventBus.post(new GraphSearchSolutionCandidateFoundEvent<>(solutionObject));
+			this.eventBus.post(new EvaluatedSearchSolutionCandidateFoundEvent<>(solutionObject));
 		} catch (Throwable e) {
 			List<Pair<String, Object>> explanations = new ArrayList<>();
 			if (logger.isDebugEnabled()) {
@@ -398,6 +442,22 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 		this.generatorProvidesPathUnification = (this.generator instanceof PathUnifyingGraphGenerator);
 		if (!this.generatorProvidesPathUnification)
 			logger.warn("The graph generator passed to the RandomCompletion algorithm does not offer path subsumption checks, which may cause inefficiencies in some domains.");
+
+		/* create the completion algorithm and initialize it */
+		INodeEvaluator<T, Double> nodeEvaluator = new RandomizedDepthFirstNodeEvaluator<>(this.random);
+		if (preferredNodeEvaluatorForRDFS != null)
+			nodeEvaluator = new AlternativeNodeEvaluator<>(preferredNodeEvaluatorForRDFS, nodeEvaluator);
+		GeneralEvaluatedTraversalTree<T, String, Double> completionProblem = new GeneralEvaluatedTraversalTree<>(generator, nodeEvaluator);
+		completer = new RandomSearch<>(completionProblem, this.random);
+		// new SimpleGraphVisualizationWindow<>(completer).getPanel().setTooltipGenerator(n -> String.valueOf(bestKnownScoreUnderNodeInCompleterGraph.get(n)));
+		while (!(completer.next() instanceof AlgorithmInitializedEvent))
+			;
+		logger.info("Generator has been set, and completer has been initialized");
+	}
+
+	@Subscribe
+	public void receiveCompleterEvent(NodeExpansionCompletedEvent<Node<T, Double>> event) {
+		completerInsertionSemaphore.release();
 	}
 
 	@Override
@@ -408,18 +468,13 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 	@Override
 	public void cancel() {
 		logger.info("Receive cancel signal.");
+		completer.cancel();
+		if (timeoutTimer != null)
+			timeoutTimer.cancel();
 	}
 
 	public void setNumberOfRandomCompletions(final int randomCompletions) {
 		this.samples = randomCompletions;
-	}
-
-	public boolean isPathCachingActivated() {
-		return pathCachingActivated;
-	}
-
-	public void setPathCachingActivated(boolean pathCachingActivated) {
-		this.pathCachingActivated = pathCachingActivated;
 	}
 
 	@Override

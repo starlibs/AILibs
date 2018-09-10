@@ -4,15 +4,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jaicore.basic.algorithm.AlgorithmEvent;
+import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.AlgorithmState;
@@ -22,12 +22,11 @@ import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
 import jaicore.search.algorithms.standard.AbstractORGraphSearch;
-import jaicore.search.algorithms.standard.bestfirst.events.GraphSearchSolutionCandidateFoundEvent;
+import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.core.interfaces.ISolutionEvaluator;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
 import jaicore.search.model.probleminputs.GraphSearchProblemInput;
-import jaicore.search.model.travesaltree.GraphEventBus;
 import jaicore.search.model.travesaltree.Node;
 import jaicore.search.model.travesaltree.NodeExpansionDescription;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
@@ -41,14 +40,13 @@ import jaicore.search.structure.graphgenerator.SuccessorGenerator;
  *
  * @author Felix Mohr
  */
-public class MCTS<N, A, V extends Comparable<V>> extends AbstractORGraphSearch<GraphSearchProblemInput<N, A, V>, Object, N, A, V, Node<N,V>, A> implements IPolicy<N, A, V> {
+public class MCTS<N, A, V extends Comparable<V>> extends AbstractORGraphSearch<GraphSearchProblemInput<N, A, V>, Object, N, A, V, Node<N, V>, A> implements IPolicy<N, A, V> {
 
 	private static final Logger logger = LoggerFactory.getLogger(MCTS.class);
 
 	/* communication */
-	protected final GraphEventBus<Node<N, V>> graphEventBus = new GraphEventBus<>();
 	protected final Map<N, Node<N, V>> ext2int = new HashMap<>();
-	
+
 	protected final GraphGenerator<N, A> graphGenerator;
 	protected final RootGenerator<N> rootGenerator;
 	protected final SuccessorGenerator<N, A> successorGenerator;
@@ -63,7 +61,6 @@ public class MCTS<N, A, V extends Comparable<V>> extends AbstractORGraphSearch<G
 	protected final Map<List<N>, V> playouts = new HashMap<>();
 	private final Map<List<N>, V> scoreCache = new HashMap<>(); // @TODO: doppelt?
 
-	private AlgorithmState state = AlgorithmState.created;
 	private final N root;
 	private Collection<N> nodesConsideredInAPlayout = new HashSet<>();
 	private Collection<N> unexpandedNodes = new HashSet<>();
@@ -119,6 +116,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AbstractORGraphSearch<G
 		/* if all children of the current node have been used at least once child that has not been used in a playout, just use any of them according to the tree policy */
 		boolean currentNodeIsDeadEnd = false;
 		while (!(childrenOfCurrent = exploredGraph.getSuccessors(current)).isEmpty() && (SetUtil.difference(childrenOfCurrent, nodesConsideredInAPlayout)).isEmpty()) {
+			checkTermination();
 			logger.debug("Using tree policy to compute choice for successor of {} among {}", current, childrenOfCurrent);
 			List<A> availableActions = new ArrayList<>();
 			Map<A, N> successorStates = new HashMap<>();
@@ -147,7 +145,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AbstractORGraphSearch<G
 				throw new IllegalStateException("Next action is null!");
 			logger.trace("Chosen action: {}. Successor: {}", chosenAction, next);
 			current = next;
-			graphEventBus.post(new NodeTypeSwitchEvent<N>(next, "expanding"));
+			postEvent(new NodeTypeSwitchEvent<N>(next, "expanding"));
 			path.add(current);
 			logger.debug("Tree policy decides to expand {} taking action {} to {}", current, chosenAction, next);
 		}
@@ -155,6 +153,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AbstractORGraphSearch<G
 				SetUtil.difference(childrenOfCurrent, nodesConsideredInAPlayout));
 
 		/* ask the tree policy among one of the remaining options */
+		checkTermination();
 		if (!currentNodeIsDeadEnd) {
 			Map<A, N> successorStates = new HashMap<>();
 			if (unexpandedNodes.contains(current)) {
@@ -179,6 +178,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AbstractORGraphSearch<G
 
 		/* use default policy to proceed to a goal node */
 		while (!currentNodeIsDeadEnd && !isGoal(current)) {
+			checkTermination();
 			Map<A, N> successorStates = new HashMap<>();
 			logger.debug("Determining possible moves for {}.", current);
 			if (unexpandedNodes.contains(current)) {
@@ -203,36 +203,38 @@ public class MCTS<N, A, V extends Comparable<V>> extends AbstractORGraphSearch<G
 			if (exploredGraph.getPredecessors(current).isEmpty())
 				break;
 			current = exploredGraph.getPredecessors(current).iterator().next();
-			graphEventBus.post(new NodeTypeSwitchEvent<N>(current, "or_closed"));
+			postEvent(new NodeTypeSwitchEvent<N>(current, "or_closed"));
 		}
 		return path;
 	}
 
-	private Map<A, N> expandNode(N node) {
+	private Map<A, N> expandNode(N node) throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {
+		checkTermination();
 		if (!unexpandedNodes.contains(node))
 			throw new IllegalArgumentException();
 		logger.debug("Situation {} has never been analyzed before, expanding the graph at the respective point.", node);
 		unexpandedNodes.remove(node);
-		Collection<NodeExpansionDescription<N, A>> availableActions = successorGenerator.generateSuccessors(node);
+		Collection<NodeExpansionDescription<N, A>> availableActions = null;
+		try {
+			availableActions = successorGenerator.generateSuccessors(node);
+		} catch (InterruptedException e) {
+			checkTermination();
+		}
 		Map<A, N> successorStates = new HashMap<>();
 		for (NodeExpansionDescription<N, A> d : availableActions) {
+			checkTermination();
 			successorStates.put(d.getAction(), d.getTo());
 			logger.debug("Adding edge {} -> {} with label {}", d.getFrom(), d.getTo(), d.getAction());
 			exploredGraph.addItem(d.getTo());
 			unexpandedNodes.add(d.getTo());
 			exploredGraph.addEdge(d.getFrom(), d.getTo(), d.getAction());
-			graphEventBus.post(new NodeReachedEvent<>(d.getFrom(), d.getTo(), isGoal(d.getTo()) ? "or_solution" : "or_open"));
+			postEvent(new NodeReachedEvent<>(d.getFrom(), d.getTo(), isGoal(d.getTo()) ? "or_solution" : "or_open"));
 		}
 		return successorStates;
 	}
 
 	private boolean isGoal(N node) {
 		return nodeGoalTester.isGoal(node);
-	}
-
-	@Override
-	public void cancel() {
-
 	}
 
 	@Override
@@ -244,40 +246,32 @@ public class MCTS<N, A, V extends Comparable<V>> extends AbstractORGraphSearch<G
 		/* choose action in root that has best reward */
 		return treePolicy.getAction(root, actionsWithSuccessors);
 	}
-	
-	@Override
-	public void registerListener(Object listener) {
-		this.graphEventBus.register(listener);
-	}
 
 	@Override
-	public Iterator<AlgorithmEvent> iterator() {
-		return this;
-	}
-
-	@Override
-	public boolean hasNext() {
-		return state != AlgorithmState.inactive;
-	}
-
-	@Override
-	public AlgorithmEvent next() {
-		switch (state) {
+	public AlgorithmEvent nextWithException() throws Exception {
+		registerActiveThread();
+		switch (getState()) {
 		case created:
-			graphEventBus.post(new GraphInitializedEvent<N>(root));
-			state = AlgorithmState.active;
-			return new AlgorithmInitializedEvent();
+			activateTimeoutTimer("MCTS-Timeouter");
+			postEvent(new GraphInitializedEvent<N>(root));
+			switchState(AlgorithmState.active);
+			AlgorithmEvent initEvent = new AlgorithmInitializedEvent();
+			postEvent(initEvent);
+			return initEvent;
 
 		case active:
+			if (playoutSimulator == null)
+				throw new IllegalStateException("no simulator has been set!");
+			logger.debug("Next algorithm iteration. Number of unexpanded nodes: {}", unexpandedNodes.size());
 			try {
-				if (playoutSimulator == null)
-					throw new IllegalStateException("no simulator has been set!");
-				logger.debug("Next algorithm iteration. Number of unexpanded nodes: {}", unexpandedNodes.size());
-				while (state == AlgorithmState.active) {
+				while (getState() == AlgorithmState.active) {
+					checkTermination();
 					if (unexpandedNodes.isEmpty()) {
-						state = AlgorithmState.inactive;
+						switchState(AlgorithmState.inactive);
+						AlgorithmEvent finishEvent = new AlgorithmFinishedEvent();
 						logger.info("Finishing MCTS as all nodes have been expanded; the search graph has been exhausted.");
-						return new AlgorithmFinishedEvent();
+						postEvent(finishEvent);
+						return finishEvent;
 					} else {
 						logger.info("There are {} known unexpanded nodes. Starting computation of next playout path.", unexpandedNodes.size());
 						List<N> path = getPlayout();
@@ -289,8 +283,11 @@ public class MCTS<N, A, V extends Comparable<V>> extends AbstractORGraphSearch<G
 							logger.debug("Determined playout score {}. Is goal: {}. Now updating the path.", playoutScore, isSolutionPlayout);
 							scoreCache.put(path, playoutScore);
 							treePolicy.updatePath(path, playoutScore);
-							if (isSolutionPlayout)
-								return new GraphSearchSolutionCandidateFoundEvent<>(new EvaluatedSearchGraphPath<>(path, null, playoutScore));
+							if (isSolutionPlayout) {
+								AlgorithmEvent solutionEvent = new EvaluatedSearchSolutionCandidateFoundEvent<>(new EvaluatedSearchGraphPath<>(path, null, playoutScore));
+								postEvent(solutionEvent);
+								return solutionEvent;
+							}
 						} else {
 							playoutScore = scoreCache.get(path);
 							logger.debug("Looking up score {} for the already evaluated path {}", playoutScore, path);
@@ -298,14 +295,18 @@ public class MCTS<N, A, V extends Comparable<V>> extends AbstractORGraphSearch<G
 						}
 					}
 				}
-			} catch (Exception e) {
-				throw new RuntimeException(e);
+			} catch (TimeoutException e) {
+				switchState(AlgorithmState.inactive);
+				AlgorithmEvent finishEvent = new AlgorithmFinishedEvent();
+				logger.info("Finishing MCTS due to timeout.");
+				postEvent(finishEvent);
+				return finishEvent;
 			}
+
 		default:
-			throw new UnsupportedOperationException("Cannot do anything in state " + state);
+			throw new UnsupportedOperationException("Cannot do anything in state " + getState());
 		}
 	}
-
 
 	@Override
 	public void setNumCPUs(int numberOfCPUs) {
@@ -313,34 +314,12 @@ public class MCTS<N, A, V extends Comparable<V>> extends AbstractORGraphSearch<G
 	}
 
 	@Override
-	public EvaluatedSearchGraphPath<N, A, V> call() throws Exception {
-		logger.warn("MCTS is not meant to return a single solution. Will enumerate the whole tree and then return null!");
-		while (this.hasNext())
-			next();
-		return null;
-	}
-
-	@Override
 	public int getNumCPUs() {
-		// TODO Auto-generated method stub
-		return 0;
+		return 1;
 	}
 
 	@Override
-	public void setTimeout(int timeout, TimeUnit timeUnit) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public int getTimeout() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public TimeUnit getTimeoutUnit() {
-		// TODO Auto-generated method stub
+	public Object getSolutionProvidedToCall() {
 		return null;
 	}
 }

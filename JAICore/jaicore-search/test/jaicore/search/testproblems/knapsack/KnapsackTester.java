@@ -19,6 +19,7 @@ import jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import jaicore.graph.IGraphAlgorithmListener;
 import jaicore.search.algorithms.standard.ORGraphSearchTester;
+import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.GraphSearchSolutionCandidateFoundEvent;
 import jaicore.search.core.interfaces.IGraphSearch;
 import jaicore.search.core.interfaces.IGraphSearchFactory;
@@ -161,9 +162,9 @@ public abstract class KnapsackTester<I, O, VSearch,ESearch> extends ORGraphSearc
 				terminated = true;
 			} else {
 				assertTrue(!terminated);
-				if (e instanceof GraphSearchSolutionCandidateFoundEvent) {
+				if (e instanceof EvaluatedSearchSolutionCandidateFoundEvent) {
 					solutions++;
-					List<KnapsackNode> solution = ((GraphSearchSolutionCandidateFoundEvent<KnapsackNode,String,Double>) e).getSolutionCandidate().getNodes();
+					List<KnapsackNode> solution = ((EvaluatedSearchSolutionCandidateFoundEvent<KnapsackNode,String,Double>) e).getSolutionCandidate().getNodes();
 					double value = getValueOfKnapsack(solution.get(solution.size() - 1));
 					System.out.println("New solution with value "+ value);
 					if (value > bestValue) {
@@ -178,6 +179,7 @@ public abstract class KnapsackTester<I, O, VSearch,ESearch> extends ORGraphSearc
 		}
 		
 		/* check best returned solution */
+		assertNotNull("The algorithm has not returned any solution.", bestSolution);
 		String bestPacking = "";
 		for (int i = 0; i < 10; i++) {
 			if (bestSolution.getPackedObjects().contains(String.valueOf(i))) {

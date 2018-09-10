@@ -103,7 +103,7 @@ public class GridWorldGammaGraphGenerator implements GammaGraphGenerator<GridWor
     }
 
     @Override
-    public PathAndCost computePath(GammaNode<GridWorld, RStarK> start, GammaNode<GridWorld, RStarK> end) {
+    public PathAndCost computePath(GammaNode<GridWorld, RStarK> start, GammaNode<GridWorld, RStarK> end) throws InterruptedException {
 
         SimpleAStarGraphSearch<GridWorld, String> astar = new SimpleAStarGraphSearch<GridWorld, String>(
                 new GridWorldBasicGraphGenerator(start.getPoint(), end.getPoint()),
