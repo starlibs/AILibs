@@ -22,7 +22,6 @@ import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
 import jaicore.search.algorithms.standard.AbstractORGraphSearch;
-import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.core.interfaces.ISolutionEvaluator;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
@@ -239,7 +238,6 @@ public class MCTS<N, A, V extends Comparable<V>> extends AbstractORGraphSearch<G
 
 	@Override
 	public AlgorithmEvent nextWithException() throws Exception {
-		registerActiveThread();
 		switch (getState()) {
 		case created:
 			activateTimeoutTimer("MCTS-Timeouter");
@@ -254,10 +252,11 @@ public class MCTS<N, A, V extends Comparable<V>> extends AbstractORGraphSearch<G
 				throw new IllegalStateException("no simulator has been set!");
 			logger.debug("Next algorithm iteration. Number of unexpanded nodes: {}", unexpandedNodes.size());
 			try {
+				registerActiveThread();
 				while (getState() == AlgorithmState.active) {
 					checkTermination();
 					if (unexpandedNodes.isEmpty()) {
-						shutdown();
+						unregisterThreadAndShutdown();
 						AlgorithmEvent finishEvent = new AlgorithmFinishedEvent();
 						logger.info("Finishing MCTS as all nodes have been expanded; the search graph has been exhausted.");
 						postEvent(finishEvent);
@@ -274,8 +273,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AbstractORGraphSearch<G
 							scoreCache.put(path, playoutScore);
 							treePolicy.updatePath(path, playoutScore);
 							if (isSolutionPlayout) {
-								AlgorithmEvent solutionEvent = new EvaluatedSearchSolutionCandidateFoundEvent<>(new EvaluatedSearchGraphPath<>(path, null, playoutScore));
-								postEvent(solutionEvent);
+								AlgorithmEvent solutionEvent = registerSolution(new EvaluatedSearchGraphPath<>(path, null, playoutScore));
 								return solutionEvent;
 							}
 						} else {
@@ -286,11 +284,16 @@ public class MCTS<N, A, V extends Comparable<V>> extends AbstractORGraphSearch<G
 					}
 				}
 			} catch (TimeoutException e) {
-				shutdown();
+				unregisterThreadAndShutdown();
+				Thread.interrupted(); // unset interrupted flag
 				AlgorithmEvent finishEvent = new AlgorithmFinishedEvent();
 				logger.info("Finishing MCTS due to timeout.");
 				postEvent(finishEvent);
 				return finishEvent;
+			} finally {
+
+				/* unregister this thread in order to avoid interruptions */
+				unregisterActiveThread();
 			}
 
 		default:

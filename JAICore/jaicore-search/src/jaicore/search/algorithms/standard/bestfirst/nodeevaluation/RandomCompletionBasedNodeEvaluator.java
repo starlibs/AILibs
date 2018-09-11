@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.Subscribe;
 
+import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.logging.LoggerUtil;
@@ -36,7 +37,6 @@ import jaicore.search.algorithms.standard.random.RandomSearch;
 import jaicore.search.algorithms.standard.uncertainty.IUncertaintySource;
 import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.core.interfaces.ISolutionEvaluator;
-import jaicore.search.core.interfaces.PathUnifyingGraphGenerator;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
 import jaicore.search.model.other.SearchGraphPath;
 import jaicore.search.model.probleminputs.GeneralEvaluatedTraversalTree;
@@ -135,6 +135,8 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 		if (this.timestampOfFirstEvaluation == 0) {
 			this.timestampOfFirstEvaluation = startOfComputation;
 		}
+		if (this.generator == null)
+			throw new IllegalStateException("Cannot compute f as no generator has been set!");
 		logger.info("Received request for f-value of node {}", n);
 
 		if (!this.fValues.containsKey(n)) {
@@ -198,12 +200,22 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 					List<T> pathCompletion = null;
 					List<T> completedPath = null;
 					synchronized (completer) {
+
+						if (completer.isCanceled()) {
+							logger.info("Completer has been canceled (perhaps due a cancel on the evaluator). Canceling RDFS");
+							break;
+						}
 						completedPath = new ArrayList<>(n.externalPath());
 
 						logger.info("Starting search for next solution ...");
 
 						SearchGraphPath<T, String> solutionPathFromN = null;
-						solutionPathFromN = completer.nextSolutionUnderNode(n.getPoint());
+						try {
+							solutionPathFromN = completer.nextSolutionUnderNode(n.getPoint());
+						} catch (AlgorithmExecutionCanceledException e) {
+							logger.info("Completer has been canceled. Returning control.");
+							break;
+						}
 						if (solutionPathFromN == null) {
 							logger.info("No completion was found for path {}.", path);
 							break;
@@ -439,9 +451,9 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 	@Override
 	public void setGenerator(final GraphGenerator<T, String> generator) {
 		this.generator = (SerializableGraphGenerator<T, String>) generator;
-		this.generatorProvidesPathUnification = (this.generator instanceof PathUnifyingGraphGenerator);
-		if (!this.generatorProvidesPathUnification)
-			logger.warn("The graph generator passed to the RandomCompletion algorithm does not offer path subsumption checks, which may cause inefficiencies in some domains.");
+		// this.generatorProvidesPathUnification = (this.generator instanceof PathUnifyingGraphGenerator);
+		// if (!this.generatorProvidesPathUnification)
+		// logger.warn("The graph generator passed to the RandomCompletion algorithm does not offer path subsumption checks, which may cause inefficiencies in some domains.");
 
 		/* create the completion algorithm and initialize it */
 		INodeEvaluator<T, Double> nodeEvaluator = new RandomizedDepthFirstNodeEvaluator<>(this.random);

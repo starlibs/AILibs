@@ -15,6 +15,8 @@ import jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.AlgorithmState;
 import jaicore.graph.LabeledGraph;
+import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
+import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
 import jaicore.search.algorithms.standard.AbstractORGraphSearch;
 import jaicore.search.algorithms.standard.bestfirst.events.GraphSearchSolutionCandidateFoundEvent;
 import jaicore.search.model.other.SearchGraphPath;
@@ -53,6 +55,7 @@ public class RandomSearch<N, A> extends AbstractORGraphSearch<GraphSearchInput<N
 			for (NodeExpansionDescription<N, A> successor : gen.generateSuccessors(node)) {
 				exploredGraph.addItem(successor.getTo());
 				exploredGraph.addEdge(node, successor.getTo(), successor.getAction());
+				postEvent(new NodeReachedEvent<>(successor.getFrom(), successor.getTo(), "or_open"));
 			}
 		} catch (InterruptedException e) {
 			e.printStackTrace();
@@ -67,6 +70,7 @@ public class RandomSearch<N, A> extends AbstractORGraphSearch<GraphSearchInput<N
 		case created: {
 			activateTimeoutTimer("RandomSearch-Timeouter");
 			switchState(AlgorithmState.active);
+			postEvent(new GraphInitializedEvent<>(root));
 			AlgorithmEvent event = new AlgorithmInitializedEvent();
 			postEvent(event);
 			return event;
@@ -172,10 +176,10 @@ public class RandomSearch<N, A> extends AbstractORGraphSearch<GraphSearchInput<N
 		}
 		return new SearchGraphPath<>(path, null);
 	}
-	
+
 	@Override
 	public void setNumCPUs(int numberOfCPUs) {
-		
+
 	}
 
 	@Override

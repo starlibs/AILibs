@@ -38,6 +38,7 @@ import jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.AlgorithmState;
 import jaicore.basic.algorithm.IAlgorithmConfig;
+import jaicore.basic.algorithm.SolutionCandidateFoundEvent;
 import jaicore.concurrent.InterruptionTimerTask;
 import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeParentSwitchEvent;
@@ -101,7 +102,6 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 	private boolean initialized = false;
 	private Timer timer;
 	private List<NodeExpansionDescription<N, A>> lastExpansion = new ArrayList<>();
-	private EvaluatedSearchGraphPath<N, A, V> bestSeenSolution;
 	protected final Queue<EvaluatedSearchGraphPath<N, A, V>> solutions = new LinkedBlockingQueue<>();
 	protected final Queue<EvaluatedSearchSolutionCandidateFoundEvent<N, A, V>> pendingSolutionFoundEvents = new LinkedBlockingQueue<>();
 
@@ -313,7 +313,7 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 
 					/* if the node evaluator has not reported the solution already anyway, register the solution */
 					if (!BestFirst.this.solutionReportingNodeEvaluator) {
-						BestFirst.this.registerSolutionCandidateViaEvent(new EvaluatedSearchSolutionCandidateFoundEvent<>(solution));
+						registerSolution(solution);
 					}
 				}
 			} catch (InterruptedException e) {
@@ -634,17 +634,14 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 		return nodeCompletionEvent;
 	}
 
-	protected void registerSolutionCandidateViaEvent(final EvaluatedSearchSolutionCandidateFoundEvent<N, A, V> solutionEvent) {
-		EvaluatedSearchGraphPath<N, A, V> solution = solutionEvent.getSolutionCandidate();
-		assert !solutions.contains(solutionEvent.getSolutionCandidate()) : "Registering a solution for the second time!";
+	protected EvaluatedSearchSolutionCandidateFoundEvent<N, A, V> registerSolution(final EvaluatedSearchGraphPath<N, A, V> solutionPath) {
+		EvaluatedSearchSolutionCandidateFoundEvent<N, A, V> solutionEvent = super.registerSolution(solutionPath); // this emits an event on the event bus
+		assert !solutions.contains(solutionEvent.getSolutionCandidate()) : "Registering solution " + solutionEvent.getSolutionCandidate() + " for the second time!";
 		this.solutions.add(solutionEvent.getSolutionCandidate());
 		synchronized (pendingSolutionFoundEvents) {
 			this.pendingSolutionFoundEvents.add(solutionEvent);
 		}
-		postEvent(solutionEvent);
-		if (this.bestSeenSolution == null || solution.getScore().compareTo(this.bestSeenSolution.getScore()) < 0) {
-			this.bestSeenSolution = solution;
-		}
+		return solutionEvent;
 	}
 
 	protected void shutdown() {
@@ -706,7 +703,7 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 	public void receiveSolutionCandidateEvent(final EvaluatedSearchSolutionCandidateFoundEvent<N, A, V> solutionEvent) {
 		try {
 			this.logger.info("Received solution with f-value {} and annotations {}", solutionEvent.getSolutionCandidate().getScore(), solutionEvent.getSolutionCandidate().getAnnotations());
-			this.registerSolutionCandidateViaEvent(solutionEvent);
+			this.registerSolution(solutionEvent.getSolutionCandidate()); // unpack this solution and plug it into the registration process
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
@@ -874,9 +871,10 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 			/* if the event is the finish event, shutdown */
 			if (event instanceof AlgorithmFinishedEvent) {
 				logger.info("Shutting down the search.");
-				shutdown();
+				unregisterThreadAndShutdown();
 			}
-			postEvent(event);
+			if (!(event instanceof SolutionCandidateFoundEvent)) // solution events are sent via the super-class
+				postEvent(event);
 			return event;
 		}
 		default:
@@ -1086,7 +1084,7 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 
 	@Override
 	public EvaluatedSearchGraphPath<N, A, V> getSolutionProvidedToCall() {
-		return bestSeenSolution;
+		return getBestSeenSolution();
 	}
 
 }
