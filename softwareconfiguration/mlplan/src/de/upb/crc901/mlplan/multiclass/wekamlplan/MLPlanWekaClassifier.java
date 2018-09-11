@@ -64,7 +64,7 @@ public abstract class MLPlanWekaClassifier implements Classifier, CapabilitiesHa
 	/** Logger for controlled output. */
 	private Logger logger = LoggerFactory.getLogger(MLPlanWekaClassifier.class);
 	private String loggerName;
-	private static final String REQUESTED_INTERFACE = "weka.classifiers.bayes.BayesNet"; // "AbstractClassifier";
+	private static final String REQUESTED_INTERFACE = "AbstractClassifier";
 
 	private final File componentFile;
 	private final Collection<Component> components;
@@ -190,8 +190,7 @@ public abstract class MLPlanWekaClassifier implements Classifier, CapabilitiesHa
 			}
 		} catch (RuntimeException e) {
 			throw e;
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
