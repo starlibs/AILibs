@@ -12,13 +12,13 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
 import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -40,6 +40,7 @@ import jaicore.basic.algorithm.AlgorithmState;
 import jaicore.basic.algorithm.IAlgorithmConfig;
 import jaicore.basic.algorithm.SolutionCandidateFoundEvent;
 import jaicore.concurrent.InterruptionTimerTask;
+import jaicore.concurrent.NamedTimerTask;
 import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeParentSwitchEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
@@ -388,8 +389,10 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 
 		/* define timeouter for label computation */
 		InterruptionTimerTask interruptionTask = null;
+		AtomicBoolean timedout = new AtomicBoolean(false);
 		if (BestFirst.this.timeoutForComputationOfF > 0) {
-			interruptionTask = new InterruptionTimerTask();
+			interruptionTask = new InterruptionTimerTask("Timeout for Node-Labeling in " + BestFirst.this, Thread.currentThread(), () -> timedout.set(true));
+			logger.debug("Scheduling timeout for f-value computation. Allowed time: {}ms", timeoutForComputationOfF);
 			timer.schedule(interruptionTask, timeoutForComputationOfF);
 		}
 
@@ -409,14 +412,21 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 				BestFirst.this.logger.warn("Computation of f for node {} took {}ms, which is more than the allowed {}ms", node, fTime, BestFirst.this.timeoutForComputationOfF);
 			}
 		} catch (InterruptedException e) {
-			BestFirst.this.logger.debug("Received interrupt during computation of f.");
-			postEvent(new NodeTypeSwitchEvent<>(node, "or_timedout"));
-			node.setAnnotation("fError", "Timeout");
-			computationTimedout = true;
-			try {
-				label = BestFirst.this.timeoutNodeEvaluator != null ? BestFirst.this.timeoutNodeEvaluator.f(node) : null;
-			} catch (Throwable e2) {
-				e2.printStackTrace();
+			logger.info("Thread {} received interrupt in node evaluation. Timeout flag is {}", Thread.currentThread(), timedout.get());
+			if (timedout.get()) {
+				BestFirst.this.logger.debug("Received interrupt during computation of f.");
+				postEvent(new NodeTypeSwitchEvent<>(node, "or_timedout"));
+				node.setAnnotation("fError", "Timeout");
+				computationTimedout = true;
+				Thread.interrupted(); // set interrupt state of thread to FALSE, because interrupt
+				try {
+					label = BestFirst.this.timeoutNodeEvaluator != null ? BestFirst.this.timeoutNodeEvaluator.f(node) : null;
+				} catch (Throwable e2) {
+					e2.printStackTrace();
+				}
+			} else {
+				logger.info("Received external interrupt. Forwarding this interrupt.");
+				throw e;
 			}
 		} catch (Throwable e) {
 			BestFirst.this.logger.error("Observed an exception during computation of f:\n{}", LoggerUtil.getExceptionInfo(e));
@@ -430,6 +440,7 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 		/* register time required to compute this node label */
 		long fTime = System.currentTimeMillis() - startComputation;
 		node.setAnnotation("fTime", fTime);
+		logger.debug("Computed label {} for {} in {}ms", label, node, fTime);
 
 		/* if no label was computed, prune the node and cancel the computation */
 		if (label == null) {
@@ -581,12 +592,7 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 		final List<NodeExpansionDescription<N, A>> successorDescriptions;
 		{
 			List<NodeExpansionDescription<N, A>> tmpSuccessorDescriptions = null;
-			try {
-				tmpSuccessorDescriptions = BestFirst.this.successorGenerator.generateSuccessors(nodeSelectedForExpansion.getPoint());
-
-			} catch (InterruptedException e) {
-				this.setInterrupted(true);
-			}
+			tmpSuccessorDescriptions = BestFirst.this.successorGenerator.generateSuccessors(nodeSelectedForExpansion.getPoint());
 			successorDescriptions = tmpSuccessorDescriptions;
 		}
 		this.checkTermination();
@@ -668,7 +674,6 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 			try {
 				this.pool.awaitTermination(10, TimeUnit.SECONDS);
 			} catch (InterruptedException e) {
-				setInterrupted(true);
 				logger.warn("Got interrupted during shutdown!");
 			}
 			if (!this.pool.isTerminated())
@@ -808,7 +813,7 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 		case created: {
 			this.logger.info("Initializing BestFirst search {} with {} CPUs and a timeout of {}ms", this, this.config.cpus(), this.config.timeout());
 			timer = new Timer("Timer of BestFirst search " + this);
-			timer.schedule(new TimerTask() {
+			timer.schedule(new NamedTimerTask("Timeout for the entire search of " + BestFirst.this) {
 
 				@Override
 				public void run() {

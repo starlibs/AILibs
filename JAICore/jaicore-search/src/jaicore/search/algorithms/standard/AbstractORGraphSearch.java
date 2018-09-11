@@ -34,7 +34,6 @@ public abstract class AbstractORGraphSearch<I extends GraphSearchInput<NSrc, ASr
 
 	private boolean shutdownInitialized = false;
 	private AlgorithmState state = AlgorithmState.created;
-	private boolean interrupted;
 	private boolean canceled;
 	private boolean timeouted;
 	private Timer timeouter;
@@ -92,10 +91,6 @@ public abstract class AbstractORGraphSearch<I extends GraphSearchInput<NSrc, ASr
 		return problem.getGraphGenerator();
 	}
 
-	public boolean isInterrupted() {
-		return interrupted;
-	}
-
 	public boolean isCanceled() {
 		return canceled;
 	}
@@ -105,11 +100,7 @@ public abstract class AbstractORGraphSearch<I extends GraphSearchInput<NSrc, ASr
 	}
 
 	public boolean isStopCriterionSatisfied() {
-		return interrupted || canceled || timeouted;
-	}
-
-	protected void setInterrupted(boolean interrupted) {
-		this.interrupted = interrupted;
+		return canceled || timeouted;
 	}
 
 	protected void setCanceled(boolean canceled) {
@@ -151,13 +142,17 @@ public abstract class AbstractORGraphSearch<I extends GraphSearchInput<NSrc, ASr
 	}
 
 	protected void checkTermination() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {
-		if (isTimeouted())
+		logger.debug("Checking Termination of {}", this);
+		if (isTimeouted()) {
+			logger.info("Timeout detected for {}, stopping execution with TimeoutException", this);
 			throw new TimeoutException();
+		}
 		if (isCanceled()) {
+			logger.info("Cancel detected for {}, stopping execution with AlgorithmExceptionCanceledException", this);
 			throw new AlgorithmExecutionCanceledException(); // for a controlled cancel from outside on the algorithm
 		}
-		if (Thread.currentThread().isInterrupted() || isInterrupted()) {
-			this.setInterrupted(true);
+		if (Thread.currentThread().isInterrupted()) {
+			logger.info("Interruption detected for {}, stopping execution with InterruptedException", this);
 			throw new InterruptedException(); // if the thread itself was actively interrupted by somebody
 		}
 	}
@@ -192,7 +187,7 @@ public abstract class AbstractORGraphSearch<I extends GraphSearchInput<NSrc, ASr
 			logger.info("Canceling timeouter {}", timeouter);
 			timeouter.cancel();
 		}
-		logger.info("Shutdown completed.");
+		logger.info("Shutdown of {} completed.", this);
 	}
 
 	protected void registerActiveThread() {
