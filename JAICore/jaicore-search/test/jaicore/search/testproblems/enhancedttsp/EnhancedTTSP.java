@@ -1,15 +1,17 @@
 package jaicore.search.testproblems.enhancedttsp;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jaicore.basic.sets.SetUtil;
+import it.unimi.dsi.fastutil.shorts.ShortArrayList;
+import it.unimi.dsi.fastutil.shorts.ShortList;
+import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.graph.LabeledGraph;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
 import jaicore.search.core.interfaces.ISolutionEvaluator;
@@ -21,8 +23,8 @@ import jaicore.search.structure.graphgenerator.SingleSuccessorGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 /**
- * This class provides a search graph generator for an augmented version of the timed TSP (TTSP) problem. In TTSP, the original route graph has not only one cost per edge (u,v) but a list of costs where each position in the list represents
- * an hour of departure from u. That is, depending on the time when leaving u, the cost to reach v may vary.
+ * This class provides a search graph generator for an augmented version of the timed TSP (TTSP) problem. In TTSP, the original route graph has not only one cost per edge (u,v) but a list of costs where each position in the list represents an hour of departure from u. That is,
+ * depending on the time when leaving u, the cost to reach v may vary.
  * 
  * The intended time measure is hours. That is, the length of the lists of all edges should be identical and reflect the number of hours considered. Typically, this is 24 or a multiple of that, e.g. 7 * 24.
  * 
@@ -50,6 +52,7 @@ public class EnhancedTTSP {
 	private final double durationOfLongBreak;
 	private final double maxConsecutiveDrivingTime;
 	private final double maxDrivingTimeBetweenLongBreaks;
+	private final ShortList possibleDestinations;
 
 	public EnhancedTTSP(LabeledGraph<Short, Double> minTravelTimesGraph, short startLocation, List<Boolean> blockedHours, double hourOfDeparture, double maxConsecutiveDrivingTime,
 			double durationOfShortBreak, double durationOfLongBreak) {
@@ -63,6 +66,7 @@ public class EnhancedTTSP {
 		this.durationOfLongBreak = durationOfLongBreak;
 		this.maxConsecutiveDrivingTime = maxConsecutiveDrivingTime;
 		this.maxDrivingTimeBetweenLongBreaks = 24 - durationOfLongBreak;
+		this.possibleDestinations = new ShortArrayList(minTravelTimesGraph.getItems().stream().sorted().collect(Collectors.toList()));
 	}
 
 	public SerializableGraphGenerator<EnhancedTTSPNode, String> getGraphGenerator() {
@@ -72,34 +76,44 @@ public class EnhancedTTSP {
 
 			@Override
 			public SingleRootGenerator<EnhancedTTSPNode> getRootGenerator() {
-				return () -> new EnhancedTTSPNode(startLocation, new ArrayList<>(), minTravelTimesGraph.getItems(), hourOfDeparture, 0, 0);
+				return () -> new EnhancedTTSPNode(startLocation, new ShortArrayList(), hourOfDeparture, 0, 0);
 			}
 
 			@Override
 			public SuccessorGenerator<EnhancedTTSPNode, String> getSuccessorGenerator() {
 				return new SingleSuccessorGenerator<EnhancedTTSPNode, String>() {
 
-					private List<Short> getPossibleDestinations(EnhancedTTSPNode n) {
-						List<Short> possibleDestinations = SetUtil.intersection(n.getUnvisitedLocations(), minTravelTimesGraph.getSuccessors(n.getCurLocation())).stream().sorted()
-								.collect(Collectors.toList());
-						
-						/* remove starting position until it is the last unvisited place */
-						if (possibleDestinations.size() > 1 && n.getCurLocation() != 0)
-							possibleDestinations.remove(0);
+					private ShortList getPossibleDestinations(EnhancedTTSPNode n) {
+						short curLoc = n.getCurLocation();
+
+						ShortList possibleDestinations = new ShortArrayList();
+						ShortList seenPlaces = n.getCurTour();
+
+						int k = 0;
+						boolean openPlaces = seenPlaces.size() < EnhancedTTSP.this.possibleDestinations.size() - 1;
+						if (openPlaces) {
+							for (short l : EnhancedTTSP.this.possibleDestinations) {
+								if (k++ == 0)
+									continue;
+								if (l != curLoc && !seenPlaces.contains(l))
+									possibleDestinations.add(l);
+							}
+						} else
+							possibleDestinations.add((short) 0);
 						return possibleDestinations;
 					}
 
 					@Override
 					public List<NodeExpansionDescription<EnhancedTTSPNode, String>> generateSuccessors(EnhancedTTSPNode node) {
 						List<NodeExpansionDescription<EnhancedTTSPNode, String>> l = new ArrayList<>();
-						List<Short> possibleDestinations = getPossibleDestinations(node);
+						ShortList possibleDestinations = getPossibleDestinations(node);
 						int N = possibleDestinations.size();
 						for (int i = 0; i < N; i++)
 							l.add(generateSuccessor(node, possibleDestinations, i));
 						return l;
 					}
 
-					public NodeExpansionDescription<EnhancedTTSPNode, String> generateSuccessor(EnhancedTTSPNode n, List<Short> destinations, int i) {
+					public NodeExpansionDescription<EnhancedTTSPNode, String> generateSuccessor(EnhancedTTSPNode n, ShortList destinations, int i) {
 
 						/*
 						 * there is one successor for going to any of the not visited places that can be
@@ -173,12 +187,9 @@ public class EnhancedTTSP {
 						double travelDuration = curTime - n.getTime();
 						logger.info("Finished travel simulation. Travel duration: " + travelDuration);
 
-						Set<Short> unvisitedLocations = new HashSet<>(n.getUnvisitedLocations());
-						unvisitedLocations.remove(destination);
-						assert unvisitedLocations.size() < n.getUnvisitedLocations().size() : "The unvisited cities haven't been reduced!";
-						List<Short> tourToHere = new ArrayList<>(n.getCurTour());
+						ShortList tourToHere = new ShortArrayList(n.getCurTour());
 						tourToHere.add(destination);
-						EnhancedTTSPNode newNode = new EnhancedTTSPNode(destination, tourToHere, unvisitedLocations, timeOfArrival, timeSinceLastShortBreak, timeSinceLastLongBreak);
+						EnhancedTTSPNode newNode = new EnhancedTTSPNode(destination, tourToHere, timeOfArrival, timeSinceLastShortBreak, timeSinceLastLongBreak);
 						return new NodeExpansionDescription<EnhancedTTSPNode, String>(n, newNode, n.getCurLocation() + " -> " + destination, NodeType.OR);
 					}
 
@@ -244,7 +255,7 @@ public class EnhancedTTSP {
 			@Override
 			public NodeGoalTester<EnhancedTTSPNode> getGoalTester() {
 				return n -> {
-					return n.getUnvisitedLocations().isEmpty() && n.getCurLocation() == startLocation;
+					return n.getCurTour().size() >= possibleDestinations.size() && n.getCurLocation() == startLocation;
 				};
 			}
 
@@ -284,5 +295,33 @@ public class EnhancedTTSP {
 
 	public LabeledGraph<Short, Double> getMinTravelTimesGraph() {
 		return minTravelTimesGraph;
+	}
+
+	public static EnhancedTTSP createRandomProblem(int problemSize, long seed) {
+		Random random = new Random(seed);
+		LabeledGraph<Short, Double> minTravelTimesGraph = new LabeledGraph<>();
+		List<Pair<Double, Double>> coordinates = new ArrayList<>();
+		for (short i = 0; i < problemSize; i++) {
+			coordinates.add(new Pair<>(random.nextDouble() * 12, random.nextDouble() * 12));
+			minTravelTimesGraph.addItem(i);
+		}
+		for (short i = 0; i < problemSize; i++) {
+			double x1 = coordinates.get(i).getX();
+			double y1 = coordinates.get(i).getY();
+			for (short j = 0; j < i; j++) {
+				double x2 = coordinates.get(j).getX();
+				double y2 = coordinates.get(j).getY();
+				double minTravelTime = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+				minTravelTimesGraph.addEdge(i, j, minTravelTime);
+				minTravelTimesGraph.addEdge(j, i, minTravelTime);
+			}
+		}
+		;
+		List<Boolean> blockedHours = Arrays.asList(
+				new Boolean[] { true, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true });
+		double maxConsecutiveDrivingTime = random.nextInt(5) + 5;
+		double durationOfShortBreak = random.nextInt(3) + 3;
+		double durationOfLongBreak = random.nextInt(6) + 6;
+		return new EnhancedTTSP(minTravelTimesGraph, (short) 0, blockedHours, 8, maxConsecutiveDrivingTime, durationOfShortBreak, durationOfLongBreak);
 	}
 }

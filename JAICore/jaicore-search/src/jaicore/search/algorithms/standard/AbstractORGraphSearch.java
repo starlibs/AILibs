@@ -9,31 +9,38 @@ import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.eventbus.EventBus;
 
 import jaicore.basic.algorithm.AlgorithmEvent;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
+import jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.AlgorithmState;
+import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.GraphSearchSolutionCandidateFoundEvent;
 import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.core.interfaces.IGraphSearch;
+import jaicore.search.model.other.EvaluatedSearchGraphPath;
 import jaicore.search.model.other.SearchGraphPath;
 import jaicore.search.model.probleminputs.GraphSearchInput;
 
 public abstract class AbstractORGraphSearch<I extends GraphSearchInput<NSrc, ASrc>, O, NSrc, ASrc, V extends Comparable<V>, NSearch, Asearch>
 		implements IGraphSearch<I, O, NSrc, ASrc, V, NSearch, Asearch> {
 
+	private Logger logger = LoggerFactory.getLogger(AbstractORGraphSearch.class);
 	private final EventBus eventBus = new EventBus();
 
 	private boolean shutdownInitialized = false;
 	private AlgorithmState state = AlgorithmState.created;
-	private boolean interrupted;
 	private boolean canceled;
 	private boolean timeouted;
 	private Timer timeouter;
 	protected final I problem;
 	private int timeoutInMS = Integer.MAX_VALUE;
 	private Set<Thread> activeThreads = new HashSet<>();
+	private EvaluatedSearchGraphPath<NSrc, ASrc, V> bestSeenSolution;
 
 	public AbstractORGraphSearch(I problem) {
 		super();
@@ -43,10 +50,35 @@ public abstract class AbstractORGraphSearch<I extends GraphSearchInput<NSrc, ASr
 	@SuppressWarnings("unchecked")
 	public <U extends SearchGraphPath<NSrc, ASrc>> U nextSolution() throws InterruptedException, AlgorithmExecutionCanceledException, NoSuchElementException {
 		for (AlgorithmEvent event : this) {
-			if (event instanceof GraphSearchSolutionCandidateFoundEvent)
+			if (event instanceof GraphSearchSolutionCandidateFoundEvent) {
+				if (event instanceof EvaluatedSearchSolutionCandidateFoundEvent) {
+					EvaluatedSearchGraphPath<NSrc, ASrc, V> solutionCandidate = (EvaluatedSearchGraphPath<NSrc, ASrc, V>) ((EvaluatedSearchSolutionCandidateFoundEvent<NSrc, ASrc, V>) event)
+							.getSolutionCandidate();
+					if (bestSeenSolution == null || solutionCandidate.getScore().compareTo(bestSeenSolution.getScore()) < 0)
+						bestSeenSolution = solutionCandidate;
+				}
 				return (U) ((GraphSearchSolutionCandidateFoundEvent<NSrc, ASrc>) event).getSolutionCandidate();
+			}
 		}
 		throw new NoSuchElementException();
+	}
+
+	protected GraphSearchSolutionCandidateFoundEvent<NSrc, ASrc> registerSolution(SearchGraphPath<NSrc, ASrc> path) {
+		GraphSearchSolutionCandidateFoundEvent<NSrc, ASrc> event = new GraphSearchSolutionCandidateFoundEvent<>(path);
+		eventBus.post(event);
+		return event;
+	}
+
+	protected EvaluatedSearchSolutionCandidateFoundEvent<NSrc, ASrc, V> registerSolution(EvaluatedSearchGraphPath<NSrc, ASrc, V> path) {
+		if (bestSeenSolution == null || path.getScore().compareTo(bestSeenSolution.getScore()) < 0)
+			bestSeenSolution = path;
+		EvaluatedSearchSolutionCandidateFoundEvent<NSrc, ASrc, V> event = new EvaluatedSearchSolutionCandidateFoundEvent<>(path);
+		eventBus.post(event);
+		return event;
+	}
+
+	public EvaluatedSearchGraphPath<NSrc, ASrc, V> getBestSeenSolution() {
+		return bestSeenSolution;
 	}
 
 	@Override
@@ -59,10 +91,6 @@ public abstract class AbstractORGraphSearch<I extends GraphSearchInput<NSrc, ASr
 		return problem.getGraphGenerator();
 	}
 
-	public boolean isInterrupted() {
-		return interrupted;
-	}
-
 	public boolean isCanceled() {
 		return canceled;
 	}
@@ -72,11 +100,7 @@ public abstract class AbstractORGraphSearch<I extends GraphSearchInput<NSrc, ASr
 	}
 
 	public boolean isStopCriterionSatisfied() {
-		return interrupted || canceled || timeouted;
-	}
-
-	protected void setInterrupted(boolean interrupted) {
-		this.interrupted = interrupted;
+		return canceled || timeouted;
 	}
 
 	protected void setCanceled(boolean canceled) {
@@ -110,19 +134,25 @@ public abstract class AbstractORGraphSearch<I extends GraphSearchInput<NSrc, ASr
 			@Override
 			public void run() {
 				AbstractORGraphSearch.this.timeouted = true;
+				logger.info("Timeout triggered. Have set the timeouted flag to true and will now invoke shutdown procedure.");
 				shutdown();
 			}
 		}, timeoutInMS);
+		logger.info("Timeouter {} activated for in {}ms", name, timeoutInMS);
 	}
 
 	protected void checkTermination() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {
-		if (isTimeouted())
+		logger.debug("Checking Termination of {}", this);
+		if (isTimeouted()) {
+			logger.info("Timeout detected for {}, stopping execution with TimeoutException", this);
 			throw new TimeoutException();
+		}
 		if (isCanceled()) {
+			logger.info("Cancel detected for {}, stopping execution with AlgorithmExceptionCanceledException", this);
 			throw new AlgorithmExecutionCanceledException(); // for a controlled cancel from outside on the algorithm
 		}
-		if (Thread.currentThread().isInterrupted() || isInterrupted()) {
-			this.setInterrupted(true);
+		if (Thread.currentThread().isInterrupted()) {
+			logger.info("Interruption detected for {}, stopping execution with InterruptedException", this);
 			throw new InterruptedException(); // if the thread itself was actively interrupted by somebody
 		}
 	}
@@ -130,20 +160,34 @@ public abstract class AbstractORGraphSearch<I extends GraphSearchInput<NSrc, ASr
 	@Override
 	public void cancel() {
 		this.canceled = true;
+		logger.info("Executing cancel on {}. Have set the cancel flag and will now invoke shutdown procedure.", this);
+		shutdown();
+	}
+
+	protected void unregisterThreadAndShutdown() {
+		unregisterActiveThread();
 		shutdown();
 	}
 
 	protected void shutdown() {
 		synchronized (this) {
 			if (shutdownInitialized) {
+				logger.info("Tried to enter shudtown for {}, but the shutdown has already been initialized in the past, so exiting the shutdown block.", this);
 				return;
 			}
 			shutdownInitialized = true;
 		}
+		logger.info("Entering shutdown procedure for {}. Setting algorithm state from {} to inactive and interrupting potentially active threads.", this, state);
 		state = AlgorithmState.inactive;
-		activeThreads.forEach(t -> t.interrupt());
-		if (timeouter != null)
+		activeThreads.forEach(t -> {
+			logger.info("Interrupting {} on behalf of shutdown of {}", t, this);
+			t.interrupt();
+		});
+		if (timeouter != null) {
+			logger.info("Canceling timeouter {}", timeouter);
 			timeouter.cancel();
+		}
+		logger.info("Shutdown of {} completed.", this);
 	}
 
 	protected void registerActiveThread() {
@@ -179,7 +223,10 @@ public abstract class AbstractORGraphSearch<I extends GraphSearchInput<NSrc, ASr
 			return nextWithException();
 		} catch (Exception e) {
 			this.state = AlgorithmState.inactive;
-			shutdown();
+			unregisterThreadAndShutdown();
+			if (e instanceof InterruptedException && timeouted) {
+				return new AlgorithmFinishedEvent();
+			}
 			throw new RuntimeException(e);
 		}
 	}
