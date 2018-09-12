@@ -15,6 +15,8 @@ import jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.AlgorithmState;
 import jaicore.graph.LabeledGraph;
+import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
+import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
 import jaicore.search.algorithms.standard.AbstractORGraphSearch;
 import jaicore.search.algorithms.standard.bestfirst.events.GraphSearchSolutionCandidateFoundEvent;
 import jaicore.search.model.other.SearchGraphPath;
@@ -47,15 +49,13 @@ public class RandomSearch<N, A> extends AbstractORGraphSearch<GraphSearchInput<N
 		this.random = random;
 	}
 
-	private void expandNode(N node) {
+	private void expandNode(N node) throws InterruptedException {
 		assert !closed.contains(node);
-		try {
-			for (NodeExpansionDescription<N, A> successor : gen.generateSuccessors(node)) {
-				exploredGraph.addItem(successor.getTo());
-				exploredGraph.addEdge(node, successor.getTo(), successor.getAction());
-			}
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+		List<NodeExpansionDescription<N, A>> successors = gen.generateSuccessors(node); // could have been interrupted here
+		for (NodeExpansionDescription<N, A> successor : successors) {
+			exploredGraph.addItem(successor.getTo());
+			exploredGraph.addEdge(node, successor.getTo(), successor.getAction());
+			postEvent(new NodeReachedEvent<>(successor.getFrom(), successor.getTo(), "or_open"));
 		}
 		closed.add(node);
 	}
@@ -67,6 +67,7 @@ public class RandomSearch<N, A> extends AbstractORGraphSearch<GraphSearchInput<N
 		case created: {
 			activateTimeoutTimer("RandomSearch-Timeouter");
 			switchState(AlgorithmState.active);
+			postEvent(new GraphInitializedEvent<>(root));
 			AlgorithmEvent event = new AlgorithmInitializedEvent();
 			postEvent(event);
 			return event;
@@ -100,7 +101,7 @@ public class RandomSearch<N, A> extends AbstractORGraphSearch<GraphSearchInput<N
 		return exploredGraph.getItems().contains(node);
 	}
 
-	public void appendPathToNode(List<N> nodes) {
+	public void appendPathToNode(List<N> nodes) throws InterruptedException {
 		for (N node : nodes) {
 			if (!closed.contains(node)) {
 				expandNode(node);
@@ -172,10 +173,10 @@ public class RandomSearch<N, A> extends AbstractORGraphSearch<GraphSearchInput<N
 		}
 		return new SearchGraphPath<>(path, null);
 	}
-	
+
 	@Override
 	public void setNumCPUs(int numberOfCPUs) {
-		
+
 	}
 
 	@Override

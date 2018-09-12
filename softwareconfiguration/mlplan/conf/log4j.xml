@@ -80,7 +80,7 @@
 	</logger>
   	
   <logger name="mlplan.2phasehasco.optimizer">
-		<level value="off" />
+		<level value="warn" />
 	</logger>
 	
 	<logger name="mlplan.2phasehasco.hasco">
