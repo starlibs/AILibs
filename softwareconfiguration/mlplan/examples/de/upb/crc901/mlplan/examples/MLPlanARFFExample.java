@@ -22,7 +22,7 @@ public class MLPlanARFFExample {
 
 		/* initialize mlplan, and let it run for 30 seconds */
 		MLPlanWekaClassifier mlplan = new WekaMLPlanWekaClassifier();
-		mlplan.setPortionOfDataForPhase2(0.0f);
+		mlplan.setPortionOfDataForPhase2(0.3f);
 		mlplan.setLoggerName("mlplan");
 		mlplan.setTimeout(60);
 		mlplan.setTimeoutForNodeEvaluation(15);
