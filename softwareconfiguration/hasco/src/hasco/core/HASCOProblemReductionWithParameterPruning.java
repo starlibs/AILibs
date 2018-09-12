@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import hasco.knowledgebase.FANOVAParameterImportanceEstimator;
+import hasco.knowledgebase.FANOVAWarmstartComparator;
 import hasco.knowledgebase.IParameterImportanceEstimator;
 import hasco.knowledgebase.PerformanceKnowledgeBase;
 import hasco.model.Component;
@@ -63,9 +65,10 @@ public class HASCOProblemReductionWithParameterPruning {
 	private final IParameterImportanceEstimator importanceEstimator;
 	private final PerformanceKnowledgeBase performanceKB;
 	private final boolean useImportanceEstimation;
+	private final String benchmarkName;
 	
 	public HASCOProblemReductionWithParameterPruning(File configurationFile, String nameOfRequiredInterface, boolean configureParams, IParameterImportanceEstimator importanceEstimator, double importanceThreshold, int minNumSamples,
-			PerformanceKnowledgeBase performanceKB, boolean useImportanceEstimation) throws IOException {
+			PerformanceKnowledgeBase performanceKB, boolean useImportanceEstimation, String benchmarkName) throws IOException {
 		ComponentLoader cl = new ComponentLoader();
 		cl.loadComponents(configurationFile);
 		this.components = cl.getComponents();
@@ -77,12 +80,13 @@ public class HASCOProblemReductionWithParameterPruning {
 		this.minNumSamples = minNumSamples;
 		this.performanceKB = performanceKB;
 		this.useImportanceEstimation = useImportanceEstimation;
+		this.benchmarkName = benchmarkName;
 	}
 	
 	public HASCOProblemReductionWithParameterPruning(Collection<Component> components,
 			Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig,
 			String nameOfRequiredInterface, boolean configureParams, IParameterImportanceEstimator importanceEstimator, double importanceThreshold, int minNumSamples,
-			PerformanceKnowledgeBase performanceKB, boolean useImportanceEstimation) {
+			PerformanceKnowledgeBase performanceKB, boolean useImportanceEstimation, String benchmarkName) {
 		super();
 		this.components = components;
 		this.paramRefinementConfig = paramRefinementConfig;
@@ -93,6 +97,7 @@ public class HASCOProblemReductionWithParameterPruning {
 		this.minNumSamples = minNumSamples;
 		this.performanceKB = performanceKB;
 		this.useImportanceEstimation = useImportanceEstimation;
+		this.benchmarkName = benchmarkName;
 	}
 
 	public Monom getInitState() {
@@ -251,10 +256,13 @@ public class HASCOProblemReductionWithParameterPruning {
 			 * imposed by the dependencies, over the set of params
 			 * TODO change to an ordering according to parameter importance values
 			 */
+			this.performanceKB.loadPerformanceSamplesFromDB();
+			FANOVAWarmstartComparator comparator = new FANOVAWarmstartComparator(performanceKB, benchmarkName, c);
 			if (this.configureParams) {
-//				List<Parameter> parameters = c.getParameters().getTotalOrder();
-//				Collections.sort(parameters);
-				for (Parameter p : c.getParameters()) {
+				List<Parameter> parameters = c.getParameters().getTotalOrder();
+				Collections.sort(parameters, comparator);
+//				for (Parameter p : c.getParameters()) {
+				for (Parameter p : parameters) {
 					String paramName = "p" + (++j);
 					refinementArguments += ", " + paramName;
 					params.add(new VariableParam(paramName));

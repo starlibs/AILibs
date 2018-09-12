@@ -35,7 +35,7 @@ public class MLPlanExampleJ {
 		OpenmlConnector connector = new OpenmlConnector();
 		DataSetDescription ds = connector.dataGet(181);
 		File file = ds.getDataset("4350e421cdc16404033ef1812ea38c01");
-//		File file = new File("./examples/data/amazon.arff");
+		// File file = new File("./examples/data/amazon.arff");
 		int seed = 10;
 		Instances data = new Instances(new BufferedReader(new FileReader(file)));
 		data.setClassIndex(data.numAttributes() - 1);
@@ -49,7 +49,7 @@ public class MLPlanExampleJ {
 		mlplan.setTimeout(timeoutInSeconds);
 		mlplan.setPortionOfDataForPhase2(.3f);
 		mlplan.setNodeEvaluator(new DefaultPreorder());
-//		mlplan.enableVisualization();
+		// mlplan.enableVisualization();
 		mlplan.buildClassifier(split.get(0));
 
 		/* evaluate solution produced by mlplan */
