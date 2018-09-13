@@ -51,7 +51,7 @@ public class Component {
 		return this.parameters;
 	}
 
-	public Parameter getParameter(final String paramName) {
+	public Parameter getParameterWithName(final String paramName) {
 		Optional<Parameter> param = this.parameters.stream().filter(p -> p.getName().equals(paramName)).findFirst();
 		if (!param.isPresent()) {
 			throw new IllegalArgumentException("Component " + this.name + " has no parameter with name \"" + paramName + "\"");

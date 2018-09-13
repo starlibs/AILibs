@@ -100,7 +100,7 @@ public class MLPlanWekaExperimenter implements IExperimentSetEvaluator {
 				eval.put("preprocessor", pl.getPreprocessors().toString());
 				eval.put("classifier", WekaUtil.getClassifierDescriptor(pl.getBaseClassifier()));
 				eval.put("errorRate", e.getSolutionCandidate().getScore());
-				eval.put("time_train", e.getSolutionCandidate().getTimeToComputeScore());
+				eval.put("time_train", e.getSolutionCandidate().getTimeToEvaluateCandidate());
 
 				this.adapter.insert(CONFIG.evaluationsTable(), eval);
 			} catch (Exception e1) {

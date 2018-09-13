@@ -9,7 +9,6 @@ import org.aeonbits.owner.ConfigFactory;
 
 import de.upb.crc901.mlplan.multiclass.LossFunctionBuilder;
 import de.upb.crc901.mlplan.multiclass.MLPlanClassifierConfig;
-import de.upb.crc901.mlplan.multiclass.MultiClassPerformanceMeasure;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.MLPlanWekaClassifier;
 import hasco.serialization.ComponentLoader;
@@ -28,14 +27,14 @@ public class WekaMLPlanWekaClassifier extends MLPlanWekaClassifier {
 	}
 
 	public WekaMLPlanWekaClassifier(MLPlanWekaBuilder builder) throws IOException {
-		super(builder.getSearchSpaceConfigFile(), new WEKAPipelineFactory(), new LossFunctionBuilder().getEvaluator(builder.getPerformanceMeasure()), loadOwnerConfig(builder.getAlhorithmConfigFile()));
+		super(builder.getSearchSpaceConfigFile(), new WEKAPipelineFactory(), new LossFunctionBuilder().getEvaluator(builder.getPerformanceMeasure()), builder.getAlhorithmConfigFile() != null ? loadOwnerConfig(builder.getAlhorithmConfigFile()) : ConfigFactory.create(MLPlanClassifierConfig.class));
+		PreferenceBasedNodeEvaluator preferenceNodeEvaluator = new PreferenceBasedNodeEvaluator(new ComponentLoader(getComponentFile()).getComponents(), FileUtil.readFileAsList(getConfig().preferredComponents()));
+		this.setPreferredNodeEvaluator(preferenceNodeEvaluator);
 	}
 	
 	public WekaMLPlanWekaClassifier() throws IOException {
-		super(new File("conf/automl/searchmodels/weka/weka-all-autoweka.json"), new WEKAPipelineFactory(), new LossFunctionBuilder().getEvaluator(MultiClassPerformanceMeasure.ERRORRATE), ConfigFactory.create(MLPlanClassifierConfig.class));
-		
-		PreferenceBasedNodeEvaluator preferenceNodeEvaluator = new PreferenceBasedNodeEvaluator(new ComponentLoader(getComponentFile()).getComponents(), FileUtil.readFileAsList(getConfig().preferredComponents()));
-		this.setPreferredNodeEvaluator(preferenceNodeEvaluator);
+		this(new MLPlanWekaBuilder().withSearchSpaceConfigFile(new File("conf/automl/searchmodels/weka/weka-all-autoweka.json")));
+
 	}
 
 	@Override

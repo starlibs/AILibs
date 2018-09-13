@@ -10,11 +10,10 @@ import jaicore.planning.model.ceoc.CEOCAction;
 import jaicore.planning.model.ceoc.CEOCOperation;
 import jaicore.planning.model.task.ceocstn.CEOCSTNPlanningDomain;
 import jaicore.planning.model.task.ceocstn.CEOCSTNPlanningProblem;
-import jaicore.planning.model.task.ceocstn.OCMethod;
 import jaicore.planning.model.task.stn.TaskNetwork;
 
 @SuppressWarnings("serial")
-public class CEOCIPSTNPlanningProblem<O extends CEOCOperation, M extends OCMethod, A extends CEOCAction> extends CEOCSTNPlanningProblem<O, M, A> {
+public class CEOCIPSTNPlanningProblem<O extends CEOCOperation, M extends OCIPMethod, A extends CEOCAction> extends CEOCSTNPlanningProblem<O, M, A> {
 	private final Map<String, EvaluablePredicate> evaluablePlanningPredicates;
 	private final Map<String, OracleTaskResolver> oracleResolvers;
 
@@ -23,10 +22,6 @@ public class CEOCIPSTNPlanningProblem<O extends CEOCOperation, M extends OCMetho
 		super(domain, knowledge, init, network);
 		this.evaluablePlanningPredicates = evaluablePredicates;
 		this.oracleResolvers = oracleResolvers;
-	}
-
-	public CEOCIPSTNPlanningDomain getDomain() {
-		return (CEOCIPSTNPlanningDomain) super.getDomain();
 	}
 
 	public Map<String, EvaluablePredicate> getEvaluablePlanningPredicates() {
@@ -54,7 +49,8 @@ public class CEOCIPSTNPlanningProblem<O extends CEOCOperation, M extends OCMetho
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		CEOCIPSTNPlanningProblem other = (CEOCIPSTNPlanningProblem) obj;
+		@SuppressWarnings("unchecked")
+		CEOCIPSTNPlanningProblem<O,M,A> other = (CEOCIPSTNPlanningProblem<O,M,A>) obj;
 		if (evaluablePlanningPredicates == null) {
 			if (other.evaluablePlanningPredicates != null)
 				return false;

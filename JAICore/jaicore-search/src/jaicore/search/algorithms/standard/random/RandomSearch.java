@@ -9,6 +9,9 @@ import java.util.Set;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jaicore.basic.algorithm.AlgorithmEvent;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.AlgorithmFinishedEvent;
@@ -17,6 +20,7 @@ import jaicore.basic.algorithm.AlgorithmState;
 import jaicore.graph.LabeledGraph;
 import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
+import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
 import jaicore.search.algorithms.standard.AbstractORGraphSearch;
 import jaicore.search.algorithms.standard.bestfirst.events.GraphSearchSolutionCandidateFoundEvent;
 import jaicore.search.model.other.SearchGraphPath;
@@ -28,6 +32,8 @@ import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 public class RandomSearch<N, A> extends AbstractORGraphSearch<GraphSearchInput<N, A>, Object, N, A, Double, N, A> {
 
+	private final Logger logger = LoggerFactory.getLogger(RandomSearch.class);
+	
 	private final N root;
 	private final SuccessorGenerator<N, A> gen;
 	private final NodeGoalTester<N> goalTester;
@@ -50,13 +56,19 @@ public class RandomSearch<N, A> extends AbstractORGraphSearch<GraphSearchInput<N
 	}
 
 	private void expandNode(N node) throws InterruptedException {
-		assert !closed.contains(node);
+		assert !closed.contains(node) && !goalTester.isGoal(node);
+		logger.info("Expanding next node {}", node);
 		List<NodeExpansionDescription<N, A>> successors = gen.generateSuccessors(node); // could have been interrupted here
+		logger.info("Identified {} successor(s), which are now appended.", successors.size());
 		for (NodeExpansionDescription<N, A> successor : successors) {
 			exploredGraph.addItem(successor.getTo());
 			exploredGraph.addEdge(node, successor.getTo(), successor.getAction());
-			postEvent(new NodeReachedEvent<>(successor.getFrom(), successor.getTo(), "or_open"));
+			boolean isGoalNode = goalTester.isGoal(successor.getTo());
+			if (isGoalNode)
+				logger.info("Found goal node {}!", successor);
+			postEvent(new NodeReachedEvent<>(successor.getFrom(), successor.getTo(), isGoalNode ? "or_solution" : "or_open"));
 		}
+		postEvent(new NodeTypeSwitchEvent<N>(node, "or_closed"));
 		closed.add(node);
 	}
 
@@ -149,7 +161,8 @@ public class RandomSearch<N, A> extends AbstractORGraphSearch<GraphSearchInput<N
 			assert n != 0 : "Ended up in a situation where only exhausted nodes can be chosen.";
 			int k = random.nextInt(n);
 			head = successors.get(k);
-			assert !path.contains(head) : "Going in circles ...";
+			final N tmpHead = head; // needed for stream
+			assert !path.contains(head) : "Going in circles ... " + path.stream().map(pn -> "\n\t[" + (pn.equals(tmpHead) ? "*" : " ") + "]" + pn.toString()).collect(Collectors.joining()) + "\n\t[*]" + head;
 			path.add(head);
 		}
 

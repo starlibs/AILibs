@@ -47,12 +47,14 @@ public class PreferenceBasedNodeEvaluator implements INodeEvaluator<TFDNode, Dou
 					boolean isSetEvaluator = eval.getComponent().getName().toLowerCase().matches(".*(relief|gainratio|principalcomponents|onerattributeeval|infogainattributeeval|correlationattributeeval|symmetricaluncertattributeeval).*");
 					boolean isRanker = search.getComponent().getName().toLowerCase().contains("ranker");
 					boolean isNonRankerEvaluator = eval.getComponent().getName().toLowerCase().matches(".*(cfssubseteval).*");
-					if (isSetEvaluator && !isRanker) {
-						return 20000d;
-					}
-					if (isNonRankerEvaluator && isRanker) {
-						return 20000d;
-					}
+//					if (isSetEvaluator && !isRanker) {
+//						return 20000d;
+//					}
+//					if (isNonRankerEvaluator && isRanker) {
+//						return 20000d;
+//					}
+					if (isSetEvaluator && !isRanker || isNonRankerEvaluator && isRanker)
+						throw new IllegalArgumentException("The given combination of searcher and evaluator cannot be benchmarked since they are incompatible.");
 				}
 			}
 		}

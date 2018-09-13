@@ -1,6 +1,11 @@
 package hasco.model;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import jaicore.basic.sets.SetUtil;
 
 /**
  * For a given component, a composition defines all parameter values and the required interfaces (recursively)
@@ -27,6 +32,24 @@ public class ComponentInstance {
 
 	public Map<String, String> getParameterValues() {
 		return this.parameterValues;
+	}
+	
+	public Collection<Parameter> getParametersThatHaveBeenSetExplicitly() {
+		if (parameterValues == null)
+			return new ArrayList<>();
+		return getComponent().getParameters().stream().filter(p -> parameterValues.containsKey(p.getName())).collect(Collectors.toList());
+	}
+	
+	public Collection<Parameter> getParametersThatHaveNotBeenSetExplicitly() {
+		return SetUtil.difference(component.getParameters(), getParametersThatHaveBeenSetExplicitly());
+	}
+	
+	public String getParameterValue(Parameter param) {
+		return getParameterValue(param.getName());
+	}
+	
+	public String getParameterValue(String param) {
+		return parameterValues.get(param);
 	}
 
 	/**

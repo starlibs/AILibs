@@ -44,14 +44,14 @@ public class CEOCIPSTN2JSHOP2 {
 //			}
 //		});
 
-		problem.getDomain().getMethods().stream().forEach(method -> {
-			try {
-				printMethod(bw, method, 2);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		});
+//		problem.getDomain().getMethods().stream().forEach(method -> {
+//			try {
+//				printMethod(bw, method, 2);
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//		});
 
 		bw.write(indent(1) + ")\n");
 		bw.write(")");

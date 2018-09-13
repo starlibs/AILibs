@@ -29,4 +29,9 @@ public class AlternativeNodeEvaluator<T, V extends Comparable<V>> extends Decora
 			return f1;
 		return super.f(node);
 	}
+
+	@Override
+	public String toString() {
+		return "AlternativeNodeEvaluator [primary=" + ne1 + ", secondary=" + super.getEvaluator() + "]";
+	}
 }

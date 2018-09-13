@@ -17,6 +17,7 @@ import com.google.common.eventbus.EventBus;
 import jaicore.basic.algorithm.AlgorithmEvent;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.AlgorithmFinishedEvent;
+import jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.AlgorithmState;
 import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.GraphSearchSolutionCandidateFoundEvent;
@@ -157,6 +158,13 @@ public abstract class AbstractORGraphSearch<I extends GraphSearchInput<NSrc, ASr
 		}
 	}
 
+	protected AlgorithmInitializedEvent activate() {
+		switchState(AlgorithmState.active);
+		AlgorithmInitializedEvent event = new AlgorithmInitializedEvent();
+		postEvent(event);
+		return event;
+	}
+
 	@Override
 	public void cancel() {
 		this.canceled = true;
@@ -235,19 +243,8 @@ public abstract class AbstractORGraphSearch<I extends GraphSearchInput<NSrc, ASr
 
 	@Override
 	public O call() throws Exception {
-		try {
-			while (hasNext()) {
-				this.next();
-			}
-		} catch (RuntimeException e) {
-			if (e.getCause() instanceof InterruptedException) {
-				throw (InterruptedException) e.getCause();
-			} else if (e.getCause() instanceof AlgorithmExecutionCanceledException) {
-				throw (AlgorithmExecutionCanceledException) e.getCause();
-			} else if (e.getCause() instanceof Exception) {
-				throw (Exception) e.getCause();
-			} else
-				throw new RuntimeException(e);
+		while (hasNext()) {
+			this.nextWithException();
 		}
 		return getSolutionProvidedToCall();
 	}

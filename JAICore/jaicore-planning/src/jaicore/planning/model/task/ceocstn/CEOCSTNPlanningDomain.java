@@ -11,4 +11,8 @@ public class CEOCSTNPlanningDomain<O extends CEOCOperation, M extends OCMethod> 
 	public CEOCSTNPlanningDomain(Collection<O> operations, Collection<M> methods) {
 		super(operations, methods);
 	}
+	
+	public Collection<O> getOperations() {
+		return super.getOperations();
+	}
 }

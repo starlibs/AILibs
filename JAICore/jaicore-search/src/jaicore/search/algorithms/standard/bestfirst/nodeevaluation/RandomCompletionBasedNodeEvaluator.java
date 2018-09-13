@@ -26,6 +26,7 @@ import com.google.common.eventbus.Subscribe;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import jaicore.basic.sets.SetUtil.Pair;
+import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.logging.LoggerUtil;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableNodeEvaluator;
@@ -461,7 +462,7 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 			nodeEvaluator = new AlternativeNodeEvaluator<>(preferredNodeEvaluatorForRDFS, nodeEvaluator);
 		GeneralEvaluatedTraversalTree<T, String, Double> completionProblem = new GeneralEvaluatedTraversalTree<>(generator, nodeEvaluator);
 		completer = new RandomSearch<>(completionProblem, this.random);
-		// new SimpleGraphVisualizationWindow<>(completer).getPanel().setTooltipGenerator(n -> String.valueOf(bestKnownScoreUnderNodeInCompleterGraph.get(n)));
+//		 new SimpleGraphVisualizationWindow<>(completer).getPanel().setTooltipGenerator(n -> String.valueOf(bestKnownScoreUnderNodeInCompleterGraph.get(n)));
 		while (!(completer.next() instanceof AlgorithmInitializedEvent))
 			;
 		logger.info("Generator has been set, and completer has been initialized");

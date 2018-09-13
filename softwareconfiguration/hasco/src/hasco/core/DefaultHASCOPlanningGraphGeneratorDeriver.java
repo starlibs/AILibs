@@ -7,7 +7,7 @@ import jaicore.planning.model.ceoc.CEOCAction;
 import jaicore.planning.model.ceoc.CEOCOperation;
 import jaicore.planning.model.core.Plan;
 import jaicore.planning.model.task.ceocipstn.CEOCIPSTNPlanningProblem;
-import jaicore.planning.model.task.ceocstn.OCMethod;
+import jaicore.planning.model.task.ceocipstn.OCIPMethod;
 import jaicore.search.core.interfaces.GraphGenerator;
 
 /**
@@ -23,16 +23,16 @@ import jaicore.search.core.interfaces.GraphGenerator;
  */
 public class DefaultHASCOPlanningGraphGeneratorDeriver<N,A> implements IHASCOPlanningGraphGeneratorDeriver<N, A> {
 
-	private final IPlanningGraphGeneratorDeriver<CEOCOperation, OCMethod, CEOCAction, CEOCIPSTNPlanningProblem<CEOCOperation, OCMethod, CEOCAction>, N, A> wrappedDeriver;
+	private final IPlanningGraphGeneratorDeriver<CEOCOperation, OCIPMethod, CEOCAction, CEOCIPSTNPlanningProblem<CEOCOperation, OCIPMethod, CEOCAction>, N, A> wrappedDeriver;
 	
 	public DefaultHASCOPlanningGraphGeneratorDeriver(
-			IPlanningGraphGeneratorDeriver<CEOCOperation, OCMethod, CEOCAction, CEOCIPSTNPlanningProblem<CEOCOperation, OCMethod, CEOCAction>, N, A> wrappedDeriver) {
+			IPlanningGraphGeneratorDeriver<CEOCOperation, OCIPMethod, CEOCAction, CEOCIPSTNPlanningProblem<CEOCOperation, OCIPMethod, CEOCAction>, N, A> wrappedDeriver) {
 		super();
 		this.wrappedDeriver = wrappedDeriver;
 	}
 
 	@Override
-	public GraphGenerator<N, A> transform(CEOCIPSTNPlanningProblem<CEOCOperation, OCMethod, CEOCAction> problem) {
+	public GraphGenerator<N, A> transform(CEOCIPSTNPlanningProblem<CEOCOperation, OCIPMethod, CEOCAction> problem) {
 		return wrappedDeriver.transform(problem);
 	}
 
@@ -41,7 +41,7 @@ public class DefaultHASCOPlanningGraphGeneratorDeriver<N,A> implements IHASCOPla
 		return wrappedDeriver.getPlan(path);
 	}
 
-	public IPlanningGraphGeneratorDeriver<CEOCOperation, OCMethod, CEOCAction, CEOCIPSTNPlanningProblem<CEOCOperation, OCMethod, CEOCAction>, N, A> getWrappedDeriver() {
+	public IPlanningGraphGeneratorDeriver<CEOCOperation, OCIPMethod, CEOCAction, CEOCIPSTNPlanningProblem<CEOCOperation, OCIPMethod, CEOCAction>, N, A> getWrappedDeriver() {
 		return wrappedDeriver;
 	}
 }
