@@ -1,10 +1,12 @@
 package de.upb.crc901.mlplan.examples;
 
+import java.io.File;
 import java.io.FileReader;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Random;
 
+import de.upb.crc901.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.MLPlanWekaClassifier;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.WekaMLPlanWekaClassifier;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
@@ -17,15 +19,15 @@ public class MLPlanARFFExample {
 	public static void main(final String[] args) throws Exception {
 
 		/* load data for segment dataset and create a train-test-split */
-		Instances data = new Instances(new FileReader("../../../../../datasets/classification/binary/convex.arff"));
+		Instances data = new Instances(new FileReader("../../../../../datasets/classification/multi-class/car.arff"));
 		data.setClassIndex(data.numAttributes() - 1);
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(0), .7f);
 
-		/* initialize mlplan, and let it run for 30 seconds */
-		MLPlanWekaClassifier mlplan = new WekaMLPlanWekaClassifier();
+		/* initialize mlplan with a tiny search space, and let it run for 30 seconds */
+		MLPlanWekaClassifier mlplan = new WekaMLPlanWekaClassifier(new MLPlanWekaBuilder().withSearchSpaceConfigFile(new File("conf/automl/searchmodels/weka/tinytest.json")));
 		mlplan.setPortionOfDataForPhase2(0.3f);
 		mlplan.setLoggerName("mlplan");
-		mlplan.setTimeout(60);
+		mlplan.setTimeout(30);
 		mlplan.setTimeoutForNodeEvaluation(15);
 		mlplan.setTimeoutForSingleSolutionEvaluation(15);
 		mlplan.setNumCPUs(8);

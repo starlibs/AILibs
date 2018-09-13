@@ -16,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -26,7 +27,6 @@ import com.google.common.eventbus.Subscribe;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import jaicore.basic.sets.SetUtil.Pair;
-import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.logging.LoggerUtil;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableNodeEvaluator;
@@ -69,7 +69,7 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 	/* algorithm parameters */
 	protected final Random random;
 	protected int samples;
-	private final INodeEvaluator<T, Double> preferredNodeEvaluatorForRDFS;
+	private final Predicate<T> priorityPredicateForRDFS;
 
 	/* sub-tools for conducting and analyzing random completions */
 	private Timer timeoutTimer;
@@ -90,7 +90,7 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 	}
 
 	public RandomCompletionBasedNodeEvaluator(final Random random, final int samples, final ISolutionEvaluator<T, V> solutionEvaluator, int timeoutForSingleCompletionEvaluationInMS,
-			int timeoutForNodeEvaluationInMS, INodeEvaluator<T, Double> preferredNodeEvaluator) {
+			int timeoutForNodeEvaluationInMS, Predicate<T> priorityPredicateForRDFS) {
 		super();
 		if (random == null) {
 			throw new IllegalArgumentException("Random source must not be null!");
@@ -107,7 +107,7 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 		this.solutionEvaluator = solutionEvaluator;
 		this.timeoutForSingleCompletionEvaluationInMS = timeoutForSingleCompletionEvaluationInMS;
 		this.timeoutForNodeEvaluationInMS = timeoutForNodeEvaluationInMS;
-		this.preferredNodeEvaluatorForRDFS = preferredNodeEvaluator;
+		this.priorityPredicateForRDFS = priorityPredicateForRDFS;
 
 		/* create randomized dfs searcher */
 		logger.info("Initialized RandomCompletionEvaluator with timeout {}ms for single evaluations and {}ms in total per node", timeoutForSingleCompletionEvaluationInMS,
@@ -458,10 +458,8 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 
 		/* create the completion algorithm and initialize it */
 		INodeEvaluator<T, Double> nodeEvaluator = new RandomizedDepthFirstNodeEvaluator<>(this.random);
-		if (preferredNodeEvaluatorForRDFS != null)
-			nodeEvaluator = new AlternativeNodeEvaluator<>(preferredNodeEvaluatorForRDFS, nodeEvaluator);
 		GeneralEvaluatedTraversalTree<T, String, Double> completionProblem = new GeneralEvaluatedTraversalTree<>(generator, nodeEvaluator);
-		completer = new RandomSearch<>(completionProblem, this.random);
+		completer = new RandomSearch<>(completionProblem, priorityPredicateForRDFS, this.random);
 //		 new SimpleGraphVisualizationWindow<>(completer).getPanel().setTooltipGenerator(n -> String.valueOf(bestKnownScoreUnderNodeInCompleterGraph.get(n)));
 		while (!(completer.next() instanceof AlgorithmInitializedEvent))
 			;

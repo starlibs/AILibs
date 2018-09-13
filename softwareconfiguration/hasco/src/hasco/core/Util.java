@@ -39,7 +39,7 @@ import jaicore.search.model.travesaltree.Node;
 public class Util {
 
 	private static final Logger logger = LoggerFactory.getLogger(Util.class);
-	
+
 	static Map<String, String> getParameterContainerMap(final Monom state, final String objectName) {
 		Map<String, String> parameterContainerMap = new HashMap<>();
 		List<Literal> containerLiterals = state.stream().filter(l -> l.getPropertyName().equals("parameterContainer") && l.getParameters().get(2).getName().equals(objectName))
@@ -130,7 +130,7 @@ public class Util {
 	public static Collection<String> getOverwrittenDatacontainersInState(final Monom state) {
 		return state.stream().filter(l -> l.getPropertyName().equals("overwritten")).map(l -> l.getParameters().get(0).getName()).collect(Collectors.toSet());
 	}
-	
+
 	public static Collection<String> getClosedDatacontainersInState(final Monom state) {
 		return state.stream().filter(l -> l.getPropertyName().equals("closed")).map(l -> l.getParameters().get(0).getName()).collect(Collectors.toSet());
 	}
@@ -206,8 +206,13 @@ public class Util {
 	}
 
 	public static <N, A, V extends Comparable<V>> ComponentInstance getSolutionCompositionForNode(final IPlanningGraphGeneratorDeriver<?, ?, ?, ?, N, A> planningGraphDeriver,
-			final Collection<Component> components, final Monom initState, final Node<N, ?> path) {
-		return getSolutionCompositionForPlan(components, initState, planningGraphDeriver.getPlan(path.externalPath()));
+			final Collection<Component> components, final Monom initState, final Node<N, ?> path, final boolean resolveIntervals) {
+		return getSolutionCompositionForPlan(components, initState, planningGraphDeriver.getPlan(path.externalPath()), resolveIntervals);
+	}
+
+	public static <N, A, V extends Comparable<V>> ComponentInstance getComponentInstanceForNode(final IPlanningGraphGeneratorDeriver<?, ?, ?, ?, N, A> planningGraphDeriver,
+			final Collection<Component> components, final Monom initState, final Node<N, ?> path, String name, final boolean resolveIntervals) {
+		return getComponentInstanceForPlan(components, initState, planningGraphDeriver.getPlan(path.externalPath()), name, resolveIntervals);
 	}
 
 	public static Monom getFinalStateOfPlan(final Monom initState, final Plan<? extends Action> plan) {
@@ -218,12 +223,17 @@ public class Util {
 		return state;
 	}
 
-	public static ComponentInstance getSolutionCompositionForPlan(final Collection<Component> components, final Monom initState, final Plan<? extends Action> plan) {
-		return getSolutionCompositionFromState(components, getFinalStateOfPlan(initState, plan));
+	public static ComponentInstance getSolutionCompositionForPlan(final Collection<Component> components, final Monom initState, final Plan<? extends Action> plan, final boolean resolveIntervals) {
+		return getSolutionCompositionFromState(components, getFinalStateOfPlan(initState, plan), resolveIntervals);
 	}
 
-	public static ComponentInstance getSolutionCompositionFromState(final Collection<Component> components, final Monom state) {
-		return getComponentInstanceFromState(components, state, "solution", true);
+	public static ComponentInstance getComponentInstanceForPlan(final Collection<Component> components, final Monom initState, final Plan<? extends Action> plan, String name,
+			final boolean resolveIntervals) {
+		return getComponentInstanceFromState(components, getFinalStateOfPlan(initState, plan), name, resolveIntervals);
+	}
+
+	public static ComponentInstance getSolutionCompositionFromState(final Collection<Component> components, final Monom state, final boolean resolveIntervals) {
+		return getComponentInstanceFromState(components, state, "solution", resolveIntervals);
 	}
 
 	public static ComponentInstance getComponentInstanceFromState(final Collection<Component> components, final Monom state, String name, final boolean resolveIntervals) {
@@ -405,13 +415,12 @@ public class Util {
 					if (!componentInstance.getParametersThatHaveBeenSetExplicitly().contains(param)) {
 						domains.put(param, concludedDomain);
 						logger.debug("Changing domain of {} from {} to {}", param, domains.get(param), concludedDomain);
-					}
-					else {
+					} else {
 						logger.debug("Not changing domain of {} since it has already been set explicitly in the past.", param);
 					}
-//					}
-//					else
-//						logger.debug("Not changing domain of {} from {} to {}, because the current domain is already narrower.", newDomain.getX(), domains.get(newDomain.getX()), newDomain.getY());
+					// }
+					// else
+					// logger.debug("Not changing domain of {} from {} to {}, because the current domain is already narrower.", newDomain.getX(), domains.get(newDomain.getX()), newDomain.getY());
 
 					// ParameterDomain intersection = null;
 					// if (param.isNumeric()) {
@@ -436,8 +445,7 @@ public class Util {
 					// a rule has failed";
 					// domains.put(param, intersection);
 				}
-			}
-			else
+			} else
 				logger.debug("Ignoring unsatisfied dependency {}.", dependency);
 		}
 		return domains;
@@ -616,12 +624,22 @@ public class Util {
 	}
 
 	public static boolean isDefaultConfiguration(ComponentInstance instance) {
-		Map<String, String> paramValues = instance.getParameterValues();
-		for (Parameter p : instance.getComponent().getParameters()) {
-			boolean hasDefaultValue = paramValues.get(p.getName()).equals(p.getDefaultValue().toString());
-			if (!hasDefaultValue) {
-				System.out.println(p.getName() + " has value " + paramValues.get(p.getName()) + ", which is not the default " + p.getDefaultValue().toString());
-				return false;
+		for (Parameter p : instance.getParametersThatHaveBeenSetExplicitly()) {
+			if (p.isNumeric()) {
+				List<String> intervalAsList = SetUtil.unserializeList(instance.getParameterValue(p));
+				double defaultValue = Double.parseDouble(p.getDefaultValue().toString());
+				boolean isCompatibleWithDefaultValue = defaultValue >= Double.parseDouble(intervalAsList.get(0)) && defaultValue <= Double.parseDouble(intervalAsList.get(1));
+				if (!isCompatibleWithDefaultValue) {
+					logger.info(p.getName() + " has value " + instance.getParameterValue(p) + ", which does not subsume the default value " + defaultValue);
+					return false;
+				}
+				else
+					logger.info(p.getName() + " has value " + instance.getParameterValue(p) + ", which IS COMPATIBLE with the default value " + defaultValue);
+			} else {
+				if (!instance.getParameterValue(p).equals(p.getDefaultValue().toString())) {
+					logger.info(p.getName() + " has value " + instance.getParameterValue(p) + ", which is not the default " + p.getDefaultValue().toString());
+					return false;
+				}
 			}
 		}
 		for (ComponentInstance child : instance.getSatisfactionOfRequiredInterfaces().values()) {

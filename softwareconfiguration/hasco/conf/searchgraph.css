@@ -27,7 +27,7 @@ node.or_distributed {
 	fill-color: orange;
 }
 
-node.or_threaded {
+node.or_prioritized {
 	fill-color: brown;
 }
 

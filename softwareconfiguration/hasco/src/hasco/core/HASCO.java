@@ -67,7 +67,7 @@ public class HASCO<ISearch, N, A, V extends Comparable<V>> implements SoftwareCo
 	private String loggerName; // Name for the logger to facilitate output level configuration.
 
 	/* problem and algorithm setup */
-	// private final RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem;
+	private final RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem;
 	private final RefinementConfiguredSoftwareConfigurationProblem<V> refactoredConfigurationProblem;
 	private final Collection<Component> components;
 	private final IHASCOPlanningGraphGeneratorDeriver<N, A> planningGraphGeneratorDeriver;
@@ -98,7 +98,7 @@ public class HASCO<ISearch, N, A, V extends Comparable<V>> implements SoftwareCo
 		super();
 		if (configurationProblem == null)
 			throw new IllegalArgumentException("Cannot work with configuration problem NULL");
-		// this.configurationProblem = configurationProblem;
+		this.configurationProblem = configurationProblem;
 		this.planningGraphGeneratorDeriver = planningGraphGeneratorDeriver;
 		this.searchFactory = searchFactory;
 		this.searchProblemTransformer = searchProblemTransformer;
@@ -219,7 +219,7 @@ public class HASCO<ISearch, N, A, V extends Comparable<V>> implements SoftwareCo
 					EvaluatedSearchSolutionCandidateFoundEvent<N, A, V> solutionEvent = (EvaluatedSearchSolutionCandidateFoundEvent<N, A, V>) searchEvent;
 					EvaluatedSearchGraphPath<N, A, V> searchPath = solutionEvent.getSolutionCandidate();
 					Plan<CEOCAction> plan = planningGraphGeneratorDeriver.getPlan(searchPath.getNodes());
-					ComponentInstance objectInstance = Util.getSolutionCompositionForPlan(components, planningProblem.getCorePlanningProblem().getInit(), plan);
+					ComponentInstance objectInstance = Util.getSolutionCompositionForPlan(components, planningProblem.getCorePlanningProblem().getInit(), plan, true);
 					V score = timeGrabbingEvaluationWrapper.hasEvaluationForComponentInstance(objectInstance) ? solutionEvent.getSolutionCandidate().getScore()
 							: timeGrabbingEvaluationWrapper.evaluate(objectInstance);
 					EvaluatedSearchGraphBasedPlan<CEOCAction, V, N> evaluatedPlan = new EvaluatedSearchGraphBasedPlan<>(plan, score, searchPath);
@@ -331,8 +331,7 @@ public class HASCO<ISearch, N, A, V extends Comparable<V>> implements SoftwareCo
 
 	@Override
 	public RefinementConfiguredSoftwareConfigurationProblem<V> getInput() {
-		// return configurationProblem;
-		return null;
+		return configurationProblem;
 	}
 
 	public RefinementConfiguredSoftwareConfigurationProblem<V> getRefactoredProblem() {

@@ -36,7 +36,7 @@ public class PreferenceBasedNodeEvaluator implements INodeEvaluator<TFDNode, Dou
 		}
 
 		/* get partial component */
-		ComponentInstance instance = Util.getSolutionCompositionFromState(this.components, n.getPoint().getState());
+		ComponentInstance instance = Util.getSolutionCompositionFromState(this.components, n.getPoint().getState(), false);
 
 		if (instance != null) {
 			ComponentInstance pp = instance.getSatisfactionOfRequiredInterfaces().get("preprocessor");

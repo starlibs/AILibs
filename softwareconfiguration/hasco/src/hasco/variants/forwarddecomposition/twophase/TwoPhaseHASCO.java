@@ -27,7 +27,7 @@ import hasco.core.HASCOSolutionCandidate;
 import hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
 import hasco.model.ComponentInstance;
 import hasco.optimizingfactory.SoftwareConfigurationAlgorithm;
-import hasco.variants.forwarddecomposition.DefaultPathPriorizingNodeEvaluator;
+import hasco.variants.forwarddecomposition.DefaultPathPriorizingPredicate;
 import hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstWithRandomCompletions;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.IObjectEvaluator;
@@ -121,8 +121,8 @@ public class TwoPhaseHASCO implements SoftwareConfigurationAlgorithm<TwoPhaseSof
 			hasco.registerListener(this); // this is to register solutions during runtime
 			
 			/* set HASCO objects within the default path priorizing node evaluator */
-			GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS transformedHASCOProblem = (GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS)hasco.getSearchProblemTransformer();
-			((DefaultPathPriorizingNodeEvaluator<TFDNode, String>)transformedHASCOProblem.getPreferredNodeEvaluatorForRandomCompletion()).setHasco(hasco);
+			GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS<TFDNode,String,Double> transformedHASCOProblem = (GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS<TFDNode,String,Double>)hasco.getSearchProblemTransformer();
+			((DefaultPathPriorizingPredicate<TFDNode, String>)transformedHASCOProblem.getPrioritizedNodePredicatesForRandomCompletion()).setHasco(hasco);
 			
 			/* initialize HASCO and set state of this algorithm to initialized */
 			hasco.init();

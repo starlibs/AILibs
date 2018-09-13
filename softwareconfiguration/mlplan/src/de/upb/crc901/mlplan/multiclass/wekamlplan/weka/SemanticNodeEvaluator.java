@@ -38,14 +38,12 @@ public class SemanticNodeEvaluator implements INodeEvaluator<TFDNode, Double> {
 			}
 		}
 		this.multiValuedNominalAttributes = multiValuedNominalAttributes;
-		
-		System.out.println("Data has multi-valued nominal attributes: " + this.multiValuedNominalAttributes);
 	}
 
 	@Override
 	public Double f(final Node<TFDNode, ?> n) throws Exception {
 		/* get partial component */
-		ComponentInstance instance = Util.getSolutionCompositionFromState(this.components, n.getPoint().getState());
+		ComponentInstance instance = Util.getSolutionCompositionFromState(this.components, n.getPoint().getState(), false);
 
 		if (instance != null) {
 			ComponentInstance classifier;
@@ -62,11 +60,11 @@ public class SemanticNodeEvaluator implements INodeEvaluator<TFDNode, Double> {
 				
 				/* forbid M5regression algorithms on non-binary classes */
 				if (!this.binaryClass && classifierName.matches("(.*)(additiveregression|simplelinearregression|m5rules|votedperceptron|m5p)(.*)"))
-					return 40000d;
+					throw new IllegalArgumentException("Cannot adopt classifier " + classifier.getClass().getName() + " on non-binary datasets.");
 				
 				/* forbid NaiveBayesMultinomial on multi-valued nominal attributes */
 				if (multiValuedNominalAttributes && (classifierName.matches("(.*)(naivebayesmultinomial|simplelinearregression)(.*)"))) {
-					return 40000d;
+					throw new IllegalArgumentException("Cannot adopt classifier " + classifier.getClass().getName() + " on datasets with multi-valued nominal attributes.");
 				}
 			}
 		}

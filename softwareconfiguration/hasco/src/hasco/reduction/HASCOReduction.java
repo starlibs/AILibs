@@ -297,7 +297,7 @@ public class HASCOReduction<V extends Comparable<V>> implements AlgorithmProblem
 
 			@Override
 			public V evaluate(Plan<CEOCAction> plan) throws Exception {
-				ComponentInstance solution = Util.getSolutionCompositionForPlan(components, getInitState(), plan);
+				ComponentInstance solution = Util.getSolutionCompositionForPlan(components, getInitState(), plan, true);
 				return problem.getCompositionEvaluator().evaluate(solution);
 			}
 		};

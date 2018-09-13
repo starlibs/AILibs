@@ -14,7 +14,7 @@ public class HASCOViaFDAndBestFirstWithRandomCompletions<V extends Comparable<V>
 
 	public HASCOViaFDAndBestFirstWithRandomCompletions(RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem, int numSamples, int seed, int timeoutForSingleCompletionEvaluationInMS,
 			int timeoutForNodeEvaluationInMS, INodeEvaluator<TFDNode, V> preferredNodeEvaluator) {
-		super(configurationProblem, new GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS<>(preferredNodeEvaluator, new DefaultPathPriorizingNodeEvaluator<>(), seed, numSamples,
+		super(configurationProblem, new GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS<>(preferredNodeEvaluator, new DefaultPathPriorizingPredicate<>(), seed, numSamples,
 				timeoutForSingleCompletionEvaluationInMS, timeoutForNodeEvaluationInMS));
 	}
 }
