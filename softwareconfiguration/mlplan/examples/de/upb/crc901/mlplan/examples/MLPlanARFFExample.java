@@ -31,8 +31,7 @@ public class MLPlanARFFExample {
 		mlplan.setTimeoutForNodeEvaluation(15);
 		mlplan.setTimeoutForSingleSolutionEvaluation(15);
 		mlplan.setNumCPUs(8);
-//		mlplan.activateVisualization();
-
+		mlplan.activateVisualization();
 		try {
 			long start = System.currentTimeMillis();
 			mlplan.buildClassifier(split.get(0));

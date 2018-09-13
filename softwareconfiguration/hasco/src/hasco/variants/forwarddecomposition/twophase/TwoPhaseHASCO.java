@@ -114,15 +114,15 @@ public class TwoPhaseHASCO implements SoftwareConfigurationAlgorithm<TwoPhaseSof
 
 			/* create HASCO object */
 			RefinementConfiguredSoftwareConfigurationProblem<Double> hascoProblem = new RefinementConfiguredSoftwareConfigurationProblem<>(problem, problem.getParamRefinementConfig());
-			hasco = new HASCOViaFDAndBestFirstWithRandomCompletions<>(hascoProblem, config.randomCompletions(), config.randomSeed(), config.timeoutForCandidateEvaluation(),
+			DefaultPathPriorizingPredicate<TFDNode,String> prioritizingPredicate = new DefaultPathPriorizingPredicate<>();
+			hasco = new HASCOViaFDAndBestFirstWithRandomCompletions<>(hascoProblem, prioritizingPredicate, config.randomCompletions(), config.randomSeed(), config.timeoutForCandidateEvaluation(),
 					config.timeoutForNodeEvaluation(), preferredNodeEvaluator);
 			hasco.setLoggerName(loggerName + ".hasco");
 			hasco.setConfig(config);
 			hasco.registerListener(this); // this is to register solutions during runtime
 			
-			/* set HASCO objects within the default path priorizing node evaluator */
-			GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS<TFDNode,String,Double> transformedHASCOProblem = (GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS<TFDNode,String,Double>)hasco.getSearchProblemTransformer();
-			((DefaultPathPriorizingPredicate<TFDNode, String>)transformedHASCOProblem.getPrioritizedNodePredicatesForRandomCompletion()).setHasco(hasco);
+			/* set HASCO objects within the default path prioritizing node evaluator */
+			prioritizingPredicate.setHasco(hasco);
 			
 			/* initialize HASCO and set state of this algorithm to initialized */
 			hasco.init();
