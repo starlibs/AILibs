@@ -117,8 +117,8 @@ public class FXCode implements NodeListener {
 
         splitPane.getItems().add(tabPane);
 //        visualization = new GraphVisualization();
-//        visualization = new HeatVisualization();
-        visualization = new ScoreVisualization();
+        visualization = new HeatVisualization();
+//        visualization = new ScoreVisualization();
         rec.registerReplayListener(visualization);
         splitPane.getItems().add(visualization.getFXNode());
 
