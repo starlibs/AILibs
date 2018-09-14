@@ -17,12 +17,15 @@ public class HeatVisualization<T> extends GraphVisualization<T> {
 
     public HeatVisualization() {
         super();
+        
         this.graph.clear();
 //        this.graph.setAttribute("ui.stylesheet", "url('conf/searchgraph.css')");
         this.graph.setAttribute("ui.stylesheet", "url('conf/heatmap.css')");
-        bestFValue = Double.MAX_VALUE;
-        worstFValue = Double.MIN_VALUE;
+        bestFValue = Double.MIN_VALUE;
+        worstFValue = Double.MAX_VALUE;
         this.nodes = new ArrayList<>();
+        
+        
     }
 
     @Override
