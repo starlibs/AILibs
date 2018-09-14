@@ -107,6 +107,7 @@ public class EnhancedTTSP {
 					public List<NodeExpansionDescription<EnhancedTTSPNode, String>> generateSuccessors(EnhancedTTSPNode node) {
 						List<NodeExpansionDescription<EnhancedTTSPNode, String>> l = new ArrayList<>();
 						ShortList possibleDestinations = getPossibleDestinations(node);
+						assert (possibleDestinations.size() == 1 && possibleDestinations.contains((short)0)) || (possibleDestinations.size() > 1 && !possibleDestinations.contains((short)0));
 						int N = possibleDestinations.size();
 						for (int i = 0; i < N; i++)
 							l.add(generateSuccessor(node, possibleDestinations, i));

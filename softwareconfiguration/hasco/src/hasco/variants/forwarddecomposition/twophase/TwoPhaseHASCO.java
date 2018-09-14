@@ -27,7 +27,7 @@ import hasco.core.HASCOSolutionCandidate;
 import hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
 import hasco.model.ComponentInstance;
 import hasco.optimizingfactory.SoftwareConfigurationAlgorithm;
-import hasco.variants.forwarddecomposition.DefaultPathPriorizingNodeEvaluator;
+import hasco.variants.forwarddecomposition.DefaultPathPriorizingPredicate;
 import hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstWithRandomCompletions;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.IObjectEvaluator;
@@ -92,10 +92,18 @@ public class TwoPhaseHASCO implements SoftwareConfigurationAlgorithm<TwoPhaseSof
 	public boolean hasNext() {
 		return state != AlgorithmState.inactive;
 	}
-
+	
 	@Override
 	public AlgorithmEvent next() {
 		try {
+			return nextWithException();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@Override
+	public AlgorithmEvent nextWithException() throws Exception {
 		switch (state) {
 		case created: {
 			this.timeOfStart = System.currentTimeMillis();
@@ -106,15 +114,15 @@ public class TwoPhaseHASCO implements SoftwareConfigurationAlgorithm<TwoPhaseSof
 
 			/* create HASCO object */
 			RefinementConfiguredSoftwareConfigurationProblem<Double> hascoProblem = new RefinementConfiguredSoftwareConfigurationProblem<>(problem, problem.getParamRefinementConfig());
-			hasco = new HASCOViaFDAndBestFirstWithRandomCompletions<>(hascoProblem, config.randomCompletions(), config.randomSeed(), config.timeoutForCandidateEvaluation(),
+			DefaultPathPriorizingPredicate<TFDNode,String> prioritizingPredicate = new DefaultPathPriorizingPredicate<>();
+			hasco = new HASCOViaFDAndBestFirstWithRandomCompletions<>(hascoProblem, prioritizingPredicate, config.randomCompletions(), config.randomSeed(), config.timeoutForCandidateEvaluation(),
 					config.timeoutForNodeEvaluation(), preferredNodeEvaluator);
 			hasco.setLoggerName(loggerName + ".hasco");
 			hasco.setConfig(config);
 			hasco.registerListener(this); // this is to register solutions during runtime
 			
-			/* set HASCO objects within the default path priorizing node evaluator */
-			GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS transformedHASCOProblem = (GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS)hasco.getSearchProblemTransformer();
-			((DefaultPathPriorizingNodeEvaluator<TFDNode, String>)transformedHASCOProblem.getPreferredNodeEvaluatorForRandomCompletion()).setHasco(hasco);
+			/* set HASCO objects within the default path prioritizing node evaluator */
+			prioritizingPredicate.setHasco(hasco);
 			
 			/* initialize HASCO and set state of this algorithm to initialized */
 			hasco.init();
@@ -171,13 +179,6 @@ public class TwoPhaseHASCO implements SoftwareConfigurationAlgorithm<TwoPhaseSof
 		default:
 			throw new IllegalStateException("Cannot do anything in state " + state);
 		}
-		}
-		catch (RuntimeException e) {
-			throw e;
-		}
-		catch (Exception e) {
-			throw new RuntimeException(e);
-		}
 	}
 
 	@Override
@@ -188,7 +189,7 @@ public class TwoPhaseHASCO implements SoftwareConfigurationAlgorithm<TwoPhaseSof
 	@Override
 	public TwoPhaseHASCOReport call() throws Exception {
 		while (this.hasNext())
-			this.next();
+			this.nextWithException();
 		return new TwoPhaseHASCOReport(phase1ResultQueue.size(), secondsSpentInPhase1, selectedHASCOSolution);
 	}
 
@@ -259,7 +260,7 @@ public class TwoPhaseHASCO implements SoftwareConfigurationAlgorithm<TwoPhaseSof
 	}
 
 	private int getInSearchEvaluationTimeOfSolutionSet(final Collection<HASCOSolutionCandidate<Double>> solutions) {
-		return solutions.stream().map(x -> x.getTimeToComputeScore()).mapToInt(x -> x).sum();
+		return solutions.stream().map(x -> x.getTimeToEvaluateCandidate()).mapToInt(x -> x).sum();
 	}
 
 	public int getExpectedTotalRemainingRuntimeForAGivenPool(final Collection<HASCOSolutionCandidate<Double>> solutions, boolean assumeCurrentlyBestCandidateToBeSelected) {
@@ -274,13 +275,13 @@ public class TwoPhaseHASCO implements SoftwareConfigurationAlgorithm<TwoPhaseSof
 	}
 	
 	public int getPostprocessingTimeOfCurrentlyBest() {
-		return (int) Math.round(currentlyBestKnownSolution.getTimeToComputeScore() * config.expectedBlowupInSelection() * config.expectedBlowupInPostprocessing());
+		return (int) Math.round(currentlyBestKnownSolution.getTimeToEvaluateCandidate() * config.expectedBlowupInSelection() * config.expectedBlowupInPostprocessing());
 	}
 	
 	public int getMaximumPostprocessingTimeOfAnyPoolMember(final Collection<HASCOSolutionCandidate<Double>> solutions) {
 		int max = 0;
 		for (HASCOSolutionCandidate<Double> candidate : solutions) {
-			int expectedPostProcessingTime = (int) Math.ceil(candidate.getTimeToComputeScore() * config.expectedBlowupInSelection() * config.expectedBlowupInPostprocessing());
+			int expectedPostProcessingTime = (int) Math.ceil(candidate.getTimeToEvaluateCandidate() * config.expectedBlowupInSelection() * config.expectedBlowupInPostprocessing());
 			max = Math.max(max, expectedPostProcessingTime);
 		}
 		return max;
@@ -358,7 +359,7 @@ public class TwoPhaseHASCO implements SoftwareConfigurationAlgorithm<TwoPhaseSof
 					long timestampStart = System.currentTimeMillis();
 
 					/* Time needed to compute the score of this solution in phase 1 */
-					int inSearchSolutionEvaluationTime = c.getTimeToComputeScore();
+					int inSearchSolutionEvaluationTime = c.getTimeToEvaluateCandidate();
 
 					/* We assume linear growth of the evaluation time here to estimate
 					 * (A) time for selection phase,
@@ -390,7 +391,7 @@ public class TwoPhaseHASCO implements SoftwareConfigurationAlgorithm<TwoPhaseSof
 						if (estimatedTotalEffortInCaseOfSelection >= remainingTime) {
 							TwoPhaseHASCO.this.logger.info(
 									"Not evaluating solution {} anymore, because its insearch evaluation time was {}, expected evaluation time for selection is {}, and expected post-processing time is {}. This adds up to {}, which exceeds the remaining time of {}!",
-									c.getComponentInstance(), c.getTimeToComputeScore(), estimatedInSelectionSingleIterationEvaluationTime, estimatedPostProcessingTime,
+									c.getComponentInstance(), c.getTimeToEvaluateCandidate(), estimatedInSelectionSingleIterationEvaluationTime, estimatedPostProcessingTime,
 									estimatedTotalEffortInCaseOfSelection, remainingTime);
 							sem.release();
 							return;
@@ -574,7 +575,7 @@ public class TwoPhaseHASCO implements SoftwareConfigurationAlgorithm<TwoPhaseSof
 		HASCOSolutionCandidate<Double> solution = solutionEvent.getSolutionCandidate();
 		if (currentlyBestKnownSolution == null || solution.getScore().compareTo(currentlyBestKnownSolution.getScore()) < 0)
 			currentlyBestKnownSolution = solution;
-		logger.info("Received new solution {} with score {} and evaluation time {}ms", solution.getComponentInstance(), solution.getScore(), solution.getTimeToComputeScore());
+		logger.info("Received new solution {} with score {} and evaluation time {}ms", solution.getComponentInstance(), solution.getScore(), solution.getTimeToEvaluateCandidate());
 		phase1ResultQueue.add(solution);
 		eventBus.post(solutionEvent);
 	}

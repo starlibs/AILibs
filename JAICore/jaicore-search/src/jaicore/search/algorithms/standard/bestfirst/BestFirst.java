@@ -227,13 +227,32 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 				BestFirst.this.createdCounter++;
 
 				/* compute node label */
-				labelNode(newNode);
-				if (newNode.getInternalLabel() == null) {
-					postEvent(new NodeTypeSwitchEvent<>(newNode, "or_pruned"));
+				try {
+					labelNode(newNode);
+					if (newNode.getInternalLabel() == null) {
+						postEvent(new NodeTypeSwitchEvent<>(newNode, "or_pruned"));
+						return;
+					}
+					if (isStopCriterionSatisfied()) {
+						this.communicateJobFinished();
+						return;
+					}
+				}
+				catch (InterruptedException e) {
+					if (!isShutdownInitialized())
+						logger.warn("Leaving node building routine due to interrupt. This leaves the search inconsistent; the node should be attached again!");
 					return;
 				}
-				if (isStopCriterionSatisfied()) {
-					this.communicateJobFinished();
+				catch (TimeoutException e) {
+					BestFirst.this.logger.debug("Node evaluation of {} has timed out.", newNode);
+					newNode.setAnnotation("fError", e);
+					postEvent(new NodeTypeSwitchEvent<>(newNode, "or_timedout"));
+					return;
+				}
+				catch (Throwable e) {
+					BestFirst.this.logger.error("Observed an exception during computation of f:\n{}", LoggerUtil.getExceptionInfo(e));
+					newNode.setAnnotation("fError", e);
+					postEvent(new NodeTypeSwitchEvent<>(newNode, "or_ffail"));
 					return;
 				}
 
@@ -428,10 +447,6 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 				logger.info("Received external interrupt. Forwarding this interrupt.");
 				throw e;
 			}
-		} catch (Throwable e) {
-			BestFirst.this.logger.error("Observed an exception during computation of f:\n{}", LoggerUtil.getExceptionInfo(e));
-			node.setAnnotation("fError", e);
-			postEvent(new NodeTypeSwitchEvent<>(node, "or_ffail"));
 		}
 		if (interruptionTask != null) {
 			interruptionTask.cancel();
@@ -486,7 +501,7 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 					throw new IllegalArgumentException("Cannot add NULL as a node to OPEN");
 				this.labelNode(root);
 				if (root.getInternalLabel() == null) {
-					throw new IllegalArgumentException("Root node has internal label NULL. Cannot initialize graph with this.");
+					throw new IllegalArgumentException("The node evaluator has assigned NULL to the root node, which impedes an initialization of the search graph. Node evaluator: " + nodeEvaluator);
 				}
 				this.openLock.lockInterruptibly();
 				try {
@@ -813,16 +828,18 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 		case created: {
 			this.logger.info("Initializing BestFirst search {} with {} CPUs and a timeout of {}ms", this, this.config.cpus(), this.config.timeout());
 			timer = new Timer("Timer of BestFirst search " + this);
-			timer.schedule(new NamedTimerTask("Timeout for the entire search of " + BestFirst.this) {
+			if (config.timeout() > 0) {
+				timer.schedule(new NamedTimerTask("Timeout for the entire search of " + BestFirst.this) {
 
-				@Override
-				public void run() {
-					logger.info("Timeout triggered. Setting timeout flag to true and initiating shutdown.");
-					setTimeouted(true);
-					shutdown();
-				}
+					@Override
+					public void run() {
+						logger.info("Timeout triggered. Setting timeout flag to true and initiating shutdown.");
+						setTimeouted(true);
+						shutdown();
+					}
 
-			}, config.timeout());
+				}, config.timeout());
+			}
 			this.parallelizeNodeExpansion(this.config.cpus());
 			this.initGraph();
 			switchState(AlgorithmState.active);

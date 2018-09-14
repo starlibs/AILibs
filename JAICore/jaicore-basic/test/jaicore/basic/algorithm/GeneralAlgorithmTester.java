@@ -100,6 +100,7 @@ public abstract class GeneralAlgorithmTester<P, I, O> {
 		new Timer("InterruptTest Timer").schedule(new TimerTask() {
 			@Override
 			public void run() {
+				System.out.println("Interrupting " + t);
 				t.interrupt();
 				interruptEvent.set(System.currentTimeMillis());
 			}
@@ -121,6 +122,9 @@ public abstract class GeneralAlgorithmTester<P, I, O> {
 		assertTrue("Runtime must be at least 5 seconds, actually should be at least 10 seconds.", runtime >= INTERRUPTION_DELAY);
 		assertTrue("The algorithm has not terminated within " + INTERRUPTION_CLEANUP_TOLERANCE + "ms after the interrupt.", timeNeededToRealizeInterrupt <= INTERRUPTION_CLEANUP_TOLERANCE);
 		assertTrue("The algorithm has not emitted an interrupted exception.", interruptedExceptionSeen);
+
+		/* now sending a cancel to make sure the algorithm structure is shutdown (this is because the interrupt only requires that the executing thread is returned but not that the algorithm is shutdown */
+		algorithm.cancel();
 		waitForThreadsToAssumeNumber(numberOfThreadsBefore);
 	}
 

@@ -192,4 +192,31 @@ public class Graph<T> implements Serializable {
 		}
 		return true;
 	}
+	
+	/**
+	 * Creates a new line for each path in the graph where the prefix common to the previous line is omitted.
+	 * The order is obtained by BFS.
+	 **/
+	public String getLineBasedStringRepresentation() {
+		StringBuilder sb = new StringBuilder();
+		for (T root : getSources()) {
+			sb.append(root);
+			sb.append(getLineBasedStringRepresentation(root, 1));
+			sb.append("\n");
+		}
+		return sb.toString();
+	}
+	
+	private String getLineBasedStringRepresentation(T node, int offset) {
+		StringBuilder sb = new StringBuilder();
+		for (T successor : getSuccessors(node)) {
+			sb.append(" -> " + successor);
+			sb.append(getLineBasedStringRepresentation(successor, offset + 1));
+			sb.append("\n");
+			for (int i = 0; i < offset; i++)
+				sb.append("\t");
+		}
+		return sb.toString();
+	}
+	
 }
