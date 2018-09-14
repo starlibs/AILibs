@@ -1,8 +1,6 @@
 package jaicore.graphvisualizer.gui.dataSupplier;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.eventbus.EventBus;
-
 import jaicore.graphvisualizer.events.controlEvents.ControlEvent;
 import jaicore.graphvisualizer.events.graphEvents.GraphEvent;
 

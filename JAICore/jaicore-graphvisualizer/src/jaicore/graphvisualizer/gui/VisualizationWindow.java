@@ -1,82 +1,94 @@
 package jaicore.graphvisualizer.gui;
 
+
 import jaicore.graph.IGraphAlgorithm;
+import jaicore.graphvisualizer.TooltipGenerator;
 import jaicore.graphvisualizer.gui.dataSupplier.ISupplier;
+import jaicore.graphvisualizer.gui.dataSupplier.TooltipSupplier;
 import javafx.application.Platform;
 
 /**
- * Class which creates a Thread and a Window. For this the algorithm and a title are needed.
+ * Class which creates a thread and a VisualizationWindow.
  * @author jkoepe
- *
- * @param <T>
  */
-
 public class VisualizationWindow<T> {
-	/**
-	 * The Javafx-thread which contains the GUI
-	 */
-	Thread fxThread;
-	
-	/**
-	 * A recorder which is connected to the algorithm
-	 */
-	Recorder recorder;
+    /**
+     * The Javafx-thread which contains the GUI
+     */
+    static Thread fxThread;
 
-	
-	/**
-	 * The construction of a new VisualizationWindow. 
-	 * 
-	 * @param observable
-	 * 		The algorithm which should be observed
-	 * @param title
-	 * 		The title of the window
-	 */
-	public VisualizationWindow(IGraphAlgorithm observable, String title) {
-		//if there is no fxThread, create a new one and start it
-		if(fxThread == null) {
-			try {
+    /**
+     * A recorder which is connected to the algorithm
+     */
+    Recorder recorder;
+    
+    
+	private TooltipSupplier tooltipSupplier;
 
-				fxThread = new Thread() {
-					@Override
-					public void run() {
-						javafx.application.Application.launch(GuiApplication.class);
-					}
-				};
-				fxThread.start();
-			}
-			catch(IllegalStateException e){
 
-			}
-
-		}
-		
-		//try to create a recorder and start the gui in the fxthread.
-		//if it fails to create the recorder the system is exited.
-		try {
-			recorder = new Recorder<>(observable);
-			Platform.runLater(()->{
-				GuiApplication app = new GuiApplication();
-
-					new FXGui().open(recorder,title);
-
-			});
-
-		}
-		catch(Exception e) {
-			e.printStackTrace();
-			System.exit(0);
-		}
-		
+    public VisualizationWindow(IGraphAlgorithm graphAlgorithm) {
+		this(graphAlgorithm,"Visualizer for " + graphAlgorithm);
 	}
 
-	/**
-	 * Adds a datasupplier to the recorder.
-	 * @param supplier
-	 * 		The added supplier.
-	 */
-	public void addDataSupplier(ISupplier supplier){
-		recorder.addDataSupplier(supplier);
-	}
+    /**
+     * The construction of a new VisualizationWindow.
+     *
+     * @param observable
+     * 		The algorithm which should be observed
+     * @param title
+     * 		The title of the window
+     */
+    public VisualizationWindow(IGraphAlgorithm observable, String title) {
+    	this.tooltipSupplier = new TooltipSupplier();
+    	this.tooltipSupplier.setGenerator(getTooltipGenerator());
+        if(fxThread == null){
+            try{
+                fxThread = new Thread(){
+                    @Override
+                    public void run(){
+                        javafx.application.Application.launch(GuiApp.class);
+                    }
+                };
+                fxThread.start();
+            }
+            catch(IllegalStateException e){
+//                e.printStackTrace();
+            }
+        }
 
+
+        //try to create a recorder and start the gui in the fxthread.
+        //if it fails to create the recorder the system is exited.
+        try {
+            recorder = new Recorder(observable);
+            
+            Platform.runLater(()->{
+                GuiApp app = new GuiApp();
+
+                FXCode code = new FXCode(recorder, title);
+
+            });
+
+        }
+        catch(Exception e) {
+            e.printStackTrace();
+            System.exit(0);
+        }
+        
+        this.addDataSupplier(tooltipSupplier);
+    }
+
+    public void addDataSupplier(ISupplier supplier){
+        recorder.addDataSupplier(supplier);
+    }
+    
+    private TooltipGenerator<T> getTooltipGenerator() {
+    	return new TooltipGenerator<T>() {
+			@Override
+			public String getTooltip(T node) {
+				return node.toString();
+			}
+		};
+    }
 
 }

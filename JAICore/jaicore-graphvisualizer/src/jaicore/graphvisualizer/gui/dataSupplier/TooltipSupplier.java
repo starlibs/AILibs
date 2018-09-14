@@ -1,35 +1,34 @@
-package jaicore.search.gui.dataSupplier;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
-import jaicore.graphvisualizer.TooltipGenerator;
-import jaicore.graphvisualizer.events.controlEvents.ControlEvent;
-import jaicore.graphvisualizer.events.controlEvents.NodePushed;
-import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
-import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
-import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
-import jaicore.graphvisualizer.events.graphEvents.GraphEvent;
-import jaicore.graphvisualizer.events.misc.HTMLEvent;
-import jaicore.graphvisualizer.gui.dataSupplier.ISupplier;
-
+package jaicore.graphvisualizer.gui.dataSupplier;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
+
+import jaicore.graphvisualizer.TooltipGenerator;
+import jaicore.graphvisualizer.events.controlEvents.ControlEvent;
+import jaicore.graphvisualizer.events.controlEvents.NodePushed;
+import jaicore.graphvisualizer.events.graphEvents.GraphEvent;
+import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
+import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
+import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
+import jaicore.graphvisualizer.events.misc.HTMLEvent;
+
 /**
  * A Supplier which contains tooltips for the nodes and post them so that a tooltip supplier can show them.
  * @author jkoepe
  *
  */
-public class TooltipSupplier<V> implements ISupplier {
+public class TooltipSupplier implements ISupplier{
 
     private EventBus dataBus;
-    private TooltipGenerator<V> generator;
+    private TooltipGenerator generator;
 //    private String visualizer;
     private String title;
 
@@ -91,25 +90,24 @@ public class TooltipSupplier<V> implements ISupplier {
         switch(event.getClass().getSimpleName()){
             case "GraphInitializedEvent":
                 GraphInitializedEvent initializedEvent = (GraphInitializedEvent) event;
-                String tooltip = generator.getTooltip((V) initializedEvent.getRoot());
+                String tooltip = generator.getTooltip(initializedEvent.getRoot());
                 tooltipMap.put(initializedEvent.getRoot().hashCode(), tooltip);
                 break;
 
             case "NodeTypeSwitchEvent":
                 NodeTypeSwitchEvent switchEvent = (NodeTypeSwitchEvent) event;
                 if(tooltipMap.containsKey(switchEvent.getNode().hashCode()))
-                    tooltipMap.put(switchEvent.getNode().hashCode(), generator.getTooltip((V) switchEvent.getNode()));
+                    tooltipMap.put(switchEvent.getNode().hashCode(), generator.getTooltip(switchEvent.getNode()));
                 break;
 
             case "NodeReachedEvent":
                 NodeReachedEvent nodeReachedEvent = (NodeReachedEvent) event;
-                tooltipMap.put(nodeReachedEvent.getNode().hashCode(), generator.getTooltip((V) nodeReachedEvent.getNode()));
+                tooltipMap.put(nodeReachedEvent.getNode().hashCode(), generator.getTooltip(nodeReachedEvent.getNode()));
                 break;
 
             default:
                 break;
         }
     }
-
 
 }

@@ -26,7 +26,6 @@ import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.SingleGraph;
-import org.graphstream.ui.view.Camera;
 import org.graphstream.ui.view.View;
 import org.graphstream.ui.view.Viewer;
 import org.graphstream.ui.view.Viewer.ThreadingModel;
@@ -78,7 +77,7 @@ public class SearchVisualizationPanel<V,E> extends JPanel implements IGraphAlgor
 		this.viewer = new Viewer(this.graph, ThreadingModel.GRAPH_IN_ANOTHER_THREAD);
 		this.viewer.enableAutoLayout();
 		this.view = this.viewer.addDefaultView(false);
-		final Camera cam = this.view.getCamera();
+		final org.graphstream.ui.view.camera.Camera cam = this.view.getCamera();
 		cam.setAutoFitView(true);
 
 		/* add containers to canvas */
@@ -106,7 +105,7 @@ public class SearchVisualizationPanel<V,E> extends JPanel implements IGraphAlgor
 		new PumpThread(viewerPipe, 50).start();
 
 		/* load css file for formatting the graph */
-		graph.addAttribute("ui.stylesheet", "url('conf/searchgraph.css')");
+		graph.setAttribute("ui.stylesheet", "url('conf/searchgraph.css')");
 
 		/* attach a listener */
 		this.tooltipGenerator = new TooltipGenerator<V>() {
@@ -196,6 +195,18 @@ public class SearchVisualizationPanel<V,E> extends JPanel implements IGraphAlgor
 
 				SwingUtilities.invokeLater(doButtonPushedAction);
 			}
+
+			@Override
+			public void mouseLeft(String arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseOver(String arg0) {
+				// TODO Auto-generated method stub
+				
+			}
 		});
 	}
 
@@ -229,12 +240,12 @@ public class SearchVisualizationPanel<V,E> extends JPanel implements IGraphAlgor
 	}
 	
 	protected synchronized boolean removeEdge(final V from, final V to) {
-		for(Edge e: graph.getEachEdge()) {
-			if (e.getSourceNode().equals(this.ext2intNodeMap.get(from)) && e.getTargetNode().equals(this.ext2intNodeMap.get(to))) {
-				graph.removeEdge(e);
-				return true;
-			}
-		}
+//		for(Edge e: graph.getEachEdge()) {
+//			if (e.getSourceNode().equals(this.ext2intNodeMap.get(from)) && e.getTargetNode().equals(this.ext2intNodeMap.get(to))) {
+//				graph.removeEdge(e);
+//				return true;
+//			}
+//		}
 		return false;
 	}
 
@@ -248,7 +259,7 @@ public class SearchVisualizationPanel<V,E> extends JPanel implements IGraphAlgor
 			if (roots == null)
 				throw new IllegalArgumentException("Root must not be NULL");
 			newNode(roots.get(roots.size()-1));
-			ext2intNodeMap.get(roots.get(roots.size()-1)).addAttribute("ui.class", "root");
+			ext2intNodeMap.get(roots.get(roots.size()-1)).setAttribute("ui.class", "root");
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
@@ -260,7 +271,7 @@ public class SearchVisualizationPanel<V,E> extends JPanel implements IGraphAlgor
 			if (!ext2intNodeMap.containsKey(e.getNode()))
 				newNode(e.getNode());
 			newEdge(e.getParent(), e.getNode());
-			ext2intNodeMap.get(e.getNode()).addAttribute("ui.class", e.getType());
+			ext2intNodeMap.get(e.getNode()).setAttribute("ui.class", e.getType());
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
@@ -273,7 +284,7 @@ public class SearchVisualizationPanel<V,E> extends JPanel implements IGraphAlgor
 				return;
 			if (!ext2intNodeMap.containsKey(e.getNode()))
 				throw new NoSuchElementException("Cannot switch type of node " + e.getNode() + ". This node has not been reached previously.");
-			ext2intNodeMap.get(e.getNode()).addAttribute("ui.class", e.getType());
+			ext2intNodeMap.get(e.getNode()).setAttribute("ui.class", e.getType());
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
@@ -335,6 +346,18 @@ public class SearchVisualizationPanel<V,E> extends JPanel implements IGraphAlgor
 			public void buttonPushed(String arg0) {
 				listener.buttonPushed(getNodeOfString(arg0));
 			}
+
+			@Override
+			public void mouseLeft(String arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseOver(String arg0) {
+				// TODO Auto-generated method stub
+				
+			}
 		});
 	}
 
@@ -350,7 +373,7 @@ public class SearchVisualizationPanel<V,E> extends JPanel implements IGraphAlgor
 		ext2intNodeMap.clear();
 		int2extNodeMap.clear();
 		graph.clear();
-		graph.addAttribute("ui.stylesheet", "url('conf/searchgraph.css')");
+		graph.setAttribute("ui.stylesheet", "url('conf/searchgraph.css')");
 
 
 	}

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
-
 import jaicore.graphvisualizer.events.controlEvents.ControlEvent;
 import jaicore.graphvisualizer.events.controlEvents.NodePushed;
 import jaicore.graphvisualizer.events.graphEvents.GraphEvent;
@@ -47,15 +46,6 @@ public class ReconstructionDataSupplier implements ISupplier {
         dataBus.register(listener);
     }
 
-//    @Override
-//    public String getVisualizerName() {
-//        return visualizer;
-//    }
-//
-//    @Override
-//    public String getVisualizerTitle() {
-//        return title;
-//    }
 
     @Override
     public void receiveGraphEvent(GraphEvent event) {

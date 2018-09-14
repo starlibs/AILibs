@@ -14,7 +14,7 @@ import jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.SolutionCandidateFoundEvent;
 import jaicore.graph.IGraphAlgorithmListener;
-import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
+import jaicore.graphvisualizer.gui.VisualizationWindow;
 import jaicore.search.algorithms.standard.ORGraphSearchTester;
 import jaicore.search.algorithms.standard.bestfirst.events.GraphSearchSolutionCandidateFoundEvent;
 import jaicore.search.core.interfaces.IGraphSearch;
@@ -47,28 +47,31 @@ public abstract class GuiTester<I, O, VSearch, ESearch> extends ORGraphSearchTes
 			IGraphSearch<I, O, QueenNode, String, Double, VSearch, ESearch> search = getSearchProblemInput(n);
 			assertNotNull("The factory has not returned any search object.", search);
 			if (showGraphs)
-				new SimpleGraphVisualizationWindow<>(search);
+//				new SimpleGraphVisualizationWindow<>(search);
+				new VisualizationWindow(search, "Test");
 			boolean initialized = false;
 			boolean terminated = false;
 			int solutions = 0;
 			Iterator<AlgorithmEvent> iterator = search.iterator();
 			assertNotNull("The search algorithm does return NULL as an iterator for itself.", iterator);
-			while (iterator.hasNext()) {
-				AlgorithmEvent e = search.next();
-				assertNotNull("The search iterator has returned NULL even though hasNext suggested that more event should come.", e);
-				if (!initialized) {
-					assertTrue(e instanceof AlgorithmInitializedEvent);
-					initialized = true;
-				} else if (e instanceof AlgorithmFinishedEvent) {
-					terminated = true;
-				} else {
-					assertTrue(!terminated);
-					if (e instanceof SolutionCandidateFoundEvent)
-						solutions++;
-				}
-			}
-			assertEquals("Failed to solve " + n + "-queens problem. Only found " + solutions + "/" + numbersOfSolutions[i] + " solutions.", numbersOfSolutions[i], solutions);
-			System.out.println("done");
+//			while (iterator.hasNext()) {
+//				AlgorithmEvent e = search.next();
+//				assertNotNull("The search iterator has returned NULL even though hasNext suggested that more event should come.", e);
+//				if (!initialized) {
+//					assertTrue(e instanceof AlgorithmInitializedEvent);
+//					initialized = true;
+//				} else if (e instanceof AlgorithmFinishedEvent) {
+//					terminated = true;
+//				} else {
+//					assertTrue(!terminated);
+//					if (e instanceof SolutionCandidateFoundEvent)
+//						solutions++;
+//				}
+//			}
+			while(true);
+				
+//			assertEquals("Failed to solve " + n + "-queens problem. Only found " + solutions + "/" + numbersOfSolutions[i] + " solutions.", numbersOfSolutions[i], solutions);
+//			System.out.println("done");
 		}
 	}
 
