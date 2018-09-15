@@ -72,7 +72,7 @@ public abstract class HASCOTester<ISearch, N, A>
 			
 			/* check on dead end */
 			GraphSanityChecker<N, A> deadEndDetector = new GraphSanityChecker<>(new GraphSearchInput<>(gen), 100000);
-//			new SimpleGraphVisualizationWindow<>(deadEndDetector).getPanel().setTooltipGenerator(n -> TFD);
+//			new VisualizationWindow<>(deadEndDetector).setTooltipGenerator(n -> TFD);
 			SanityCheckResult sanity = deadEndDetector.call();
 			assertTrue("HASCO graph has a dead end: " + sanity, !(sanity instanceof DeadEndDetectedResult));
 			assertTrue("HASCO graph has a cycle: " + sanity, !(sanity instanceof CycleDetectedResult));

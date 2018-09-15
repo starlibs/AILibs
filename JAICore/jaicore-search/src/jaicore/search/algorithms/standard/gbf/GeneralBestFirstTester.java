@@ -7,7 +7,7 @@
 //import org.junit.Test;
 //
 //import jaicore.graph.Graph;
-//import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
+//import jaicore.graphvisualizer.gui.VisualizationWindow;
 //import jaicore.search.algorithms.standard.bestfirst.model.GraphGenerator;
 //import jaicore.search.algorithms.standard.bestfirst.model.Node;
 //import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
@@ -129,13 +129,13 @@
 //		
 //		/* find solution */
 //		if (VISUALIZE) {
-//			new SimpleGraphVisualizationWindow<>(gbf);
+//			new VisualizationWindow<>(gbf);
 //		}
 //		Graph<GameNode> solutionGraph = gbf.getSolution();
 //		assertNotNull(solutionGraph);
 //		System.out.println("Generated " + gbf.getCreatedCounter() + " nodes.");
 //		if (VISUALIZE) {
-//			new SimpleGraphVisualizationWindow<GameNode>(solutionGraph);
+//			new VisualizationWindow<GameNode>(solutionGraph);
 //			int j = 0;
 //			int i = 0;
 //			while (j >= 0)

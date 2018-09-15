@@ -14,7 +14,7 @@ import jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.SolutionCandidateFoundEvent;
 import jaicore.graph.IGraphAlgorithmListener;
-import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
+import jaicore.graphvisualizer.gui.VisualizationWindow;
 import jaicore.search.algorithms.standard.ORGraphSearchTester;
 import jaicore.search.algorithms.standard.bestfirst.events.GraphSearchSolutionCandidateFoundEvent;
 import jaicore.search.core.interfaces.IGraphSearch;
@@ -46,7 +46,7 @@ public abstract class NQueenTester<I, O, VSearch, ESearch> extends ORGraphSearch
 			IGraphSearch<I, O, QueenNode, String, Double, VSearch, ESearch> search = getSearchProblemInput(n);
 			assertNotNull("The factory has not returned any search object.", search);
 			if (showGraphs)
-				new SimpleGraphVisualizationWindow<>(search);
+				new VisualizationWindow<>(search);
 			boolean initialized = false;
 			boolean terminated = false;
 			int solutions = 0;
@@ -81,7 +81,7 @@ public abstract class NQueenTester<I, O, VSearch, ESearch> extends ORGraphSearch
 			IGraphSearch<I, O, QueenNode, String, Double, VSearch, ESearch> search = getSearchProblemInput(n);
 			assertNotNull("The factory has not returned any search object.", search);
 			if (showGraphs)
-				new SimpleGraphVisualizationWindow<>(search);
+				new VisualizationWindow<>(search);
 			search.registerListener(this);
 			seenSolutions = new AtomicInteger(0);
 			search.call();
@@ -100,7 +100,7 @@ public abstract class NQueenTester<I, O, VSearch, ESearch> extends ORGraphSearch
 			IGraphSearch<I, O, QueenNode, String, Double, VSearch, ESearch> search = getSearchProblemInput(n);
 			assertNotNull("The factory has not returned any search object.", search);
 			if (showGraphs)
-				new SimpleGraphVisualizationWindow<>(search);
+				new VisualizationWindow<>(search);
 			search.registerListener(this);
 			search.setNumCPUs(Runtime.getRuntime().availableProcessors());
 			seenSolutions = new AtomicInteger(0);

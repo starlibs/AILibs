@@ -80,7 +80,7 @@
 //		CEOCSTNPlanningProblem problem = StandardProblemFactory.getNestedDichotomyCreationProblem("root", init, true, 0, 0);
 //		ForwardDecompositionHTNPlanner planner = new ForwardDecompositionHTNPlanner(problem, 1);
 //		ForwardDecompositionHTNPlanner.SolutionIterator plannerRun = planner.iterator();
-//		// new SimpleGraphVisualizationWindow<Node<TFDNode,Double>>(plannerRun.getSearch()).getPanel().setTooltipGenerator(new TFDTooltipGenerator<>());
+//		// new VisualizationWindow<Node<TFDNode,Double>>(plannerRun.getSearch()).setTooltipGenerator(new TFDTooltipGenerator<>());
 //
 //		Recorder<Node<TFDNode, Double>> recorder = new Recorder<>(plannerRun.getSearch());
 //		// recorder.setTooltipGenerator(new TFDTooltipGenerator<>());

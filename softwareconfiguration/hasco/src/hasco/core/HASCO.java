@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import jaicore.graphvisualizer.gui.VisualizationWindow;
 import org.aeonbits.owner.ConfigCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,8 +30,6 @@ import jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.AlgorithmProblemTransformer;
 import jaicore.basic.algorithm.AlgorithmState;
 import jaicore.basic.algorithm.IOptimizerResult;
-import jaicore.graphvisualizer.SearchVisualizationPanel;
-import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.planning.EvaluatedSearchGraphBasedPlan;
 import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionReducer;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
@@ -182,11 +181,10 @@ public class HASCO<ISearch, N, A, V extends Comparable<V>> implements SoftwareCo
 				}
 				if (config.visualizationEnabled()) {
 					logger.info("Launching graph visualization");
-					SimpleGraphVisualizationWindow<?, ?> window = new SimpleGraphVisualizationWindow<>(search);
+					VisualizationWindow<?, ?> window = new VisualizationWindow<>(search);
 					if ((planningGraphGeneratorDeriver instanceof DefaultHASCOPlanningGraphGeneratorDeriver
 							&& ((DefaultHASCOPlanningGraphGeneratorDeriver) planningGraphGeneratorDeriver).getWrappedDeriver() instanceof ForwardDecompositionReducer) && search instanceof BestFirst) {
-						SearchVisualizationPanel<Node<TFDNode, Double>, String> panel = (SearchVisualizationPanel<Node<TFDNode, Double>, String>) window.getPanel();
-						panel.setTooltipGenerator(new NodeTooltipGenerator<>(new TFDTooltipGenerator<>()));
+						window.setTooltipGenerator(new NodeTooltipGenerator<>(new TFDTooltipGenerator<>()));
 					}
 				}
 

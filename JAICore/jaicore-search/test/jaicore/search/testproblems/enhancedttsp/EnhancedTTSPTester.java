@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Iterator;
 import java.util.List;
 
+import jaicore.graphvisualizer.gui.VisualizationWindow;
 import org.apache.commons.math.util.MathUtils;
 
 import jaicore.basic.algorithm.AlgorithmEvent;
@@ -14,7 +15,6 @@ import jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.SolutionCandidateFoundEvent;
 import jaicore.graph.IGraphAlgorithmListener;
-import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.search.algorithms.standard.ORGraphSearchTester;
 import jaicore.search.core.interfaces.IGraphSearch;
 import jaicore.search.core.interfaces.IGraphSearchFactory;
@@ -50,7 +50,7 @@ public abstract class EnhancedTTSPTester<I, O, VSearch, ESearch> extends ORGraph
 
 			IGraphSearch<I, O, EnhancedTTSPNode, String, Double, VSearch, ESearch> search = getSearchAlgorithmForProblem(n);
 			if (VISUALIZE)
-				new SimpleGraphVisualizationWindow<>(search);
+				new VisualizationWindow<>(search);
 			Iterator<AlgorithmEvent> iterator = search.iterator();
 			assertNotNull("The search algorithm does return NULL as an iterator for itself.", iterator);
 			boolean initialized = false;

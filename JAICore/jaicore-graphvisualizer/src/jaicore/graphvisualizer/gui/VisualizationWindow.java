@@ -11,7 +11,7 @@ import javafx.application.Platform;
  * Class which creates a thread and a VisualizationWindow.
  * @author jkoepe
  */
-public class VisualizationWindow<V> {
+public class VisualizationWindow<V, E> {
     /**
      * The Javafx-thread which contains the GUI
      */
@@ -90,6 +90,8 @@ public class VisualizationWindow<V> {
 			}
 		};
     }
+
+
 
     public void setTooltipGenerator(TooltipGenerator<?> generator){
         this.tooltipSupplier.setGenerator(generator);

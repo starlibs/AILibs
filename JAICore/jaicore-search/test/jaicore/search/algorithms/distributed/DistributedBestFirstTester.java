@@ -133,7 +133,7 @@
 //		}
 //
 //		/* run master in separate thread */
-//	//	SimpleGraphVisualizationWindow<Node<TestNode, Integer>> window = new SimpleGraphVisualizationWindow<>(master);
+//	//	VisualizationWindow<Node<TestNode, Integer>> window = new VisualizationWindow<>(master);
 //	//	window.setTitle("Master");
 //	//	window.getPanel().setTooltipGenerator(n -> (n.getPoint().min + "-" + n.getPoint().max));
 //

@@ -13,7 +13,7 @@
 //import org.slf4j.Logger;
 //import org.slf4j.LoggerFactory;
 //
-//import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
+//import jaicore.graphvisualizer.VisualizationWindow;
 //import jaicore.graphvisualizer.TooltipGenerator;
 //import jaicore.search.algorithms.interfaces.IORGraphSearch;
 //import jaicore.search.algorithms.interfaces.IORGraphSearchFactory;
@@ -120,10 +120,10 @@
 //
 //				/* run the algorithm */
 //				if (showGraph) {
-//					SimpleGraphVisualizationWindow<Node<T, V>> window = new SimpleGraphVisualizationWindow<>(((IObservableORGraphSearch<T, A, V>) searchAlgorithm));
+//					VisualizationWindow<Node<T, V>> window = new VisualizationWindow<>(((IObservableORGraphSearch<T, A, V>) searchAlgorithm));
 //					window.setTitle(this.id);
 //					if (tooltipGenerator != null)
-//						window.getPanel().setTooltipGenerator((TooltipGenerator<Node<T, V>>) tooltipGenerator.getConstructor().newInstance());
+//						window.setTooltipGenerator((TooltipGenerator<Node<T, V>>) tooltipGenerator.getConstructor().newInstance());
 //				}
 //				List<T> solution;
 //				List<Node<T, V>> solutionNodes = new ArrayList<>();
