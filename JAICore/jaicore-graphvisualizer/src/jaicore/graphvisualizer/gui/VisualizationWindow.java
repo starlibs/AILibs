@@ -11,7 +11,7 @@ import javafx.application.Platform;
  * Class which creates a thread and a VisualizationWindow.
  * @author jkoepe
  */
-public class VisualizationWindow<T> {
+public class VisualizationWindow<V> {
     /**
      * The Javafx-thread which contains the GUI
      */
@@ -38,7 +38,7 @@ public class VisualizationWindow<T> {
      * @param title
      * 		The title of the window
      */
-    public VisualizationWindow(IGraphAlgorithm observable, String title) {
+    public VisualizationWindow(IGraphAlgorithm<?,?,V,E> observable, String title) {
     	this.tooltipSupplier = new TooltipSupplier();
     	this.tooltipSupplier.setGenerator(getTooltipGenerator());
         if(fxThread == null){
@@ -82,13 +82,17 @@ public class VisualizationWindow<T> {
         recorder.addDataSupplier(supplier);
     }
     
-    private TooltipGenerator<T> getTooltipGenerator() {
-    	return new TooltipGenerator<T>() {
+    private TooltipGenerator<V> getTooltipGenerator() {
+    	return new TooltipGenerator<V>() {
 			@Override
-			public String getTooltip(T node) {
+			public String getTooltip(V node) {
 				return node.toString();
 			}
 		};
+    }
+
+    public void setTooltipGenerator(TooltipGenerator<?> generator){
+        this.tooltipSupplier.setGenerator(generator);
     }
 
 }
