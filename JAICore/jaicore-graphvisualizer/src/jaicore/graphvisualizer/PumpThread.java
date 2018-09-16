@@ -3,7 +3,7 @@ package jaicore.graphvisualizer;
 import org.graphstream.ui.view.ViewerPipe;
 
 final class PumpThread extends Thread {
-	
+
 	private final int interval;
 	private final ViewerPipe pipe;
 

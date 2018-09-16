@@ -5,24 +5,20 @@ import javafx.stage.Stage;
 
 /**
  * The GuiApp is used to create the fx-Thread for the Visualization
+ * 
  * @author jkoepe
  */
 public class GuiApp extends Application {
 
-    FXCode code;
 
-    @Override
-    public void start(Stage stage) throws Exception {
+	@Override
+	public void start(Stage stage) throws Exception {
 //        this.code = new FXCode();
-    }
+	}
 
-    @Override
-    public void stop() throws Exception{
-        super.stop();
-        System.exit(0);
-    }
-
-    public FXCode getCode() {
-        return code;
-    }
+	@Override
+	public void stop() throws Exception {
+		super.stop();
+		System.exit(0);
+	}
 }
