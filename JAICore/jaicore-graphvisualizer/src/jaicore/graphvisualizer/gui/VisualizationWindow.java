@@ -61,12 +61,13 @@ public class VisualizationWindow<V, E> {
         //if it fails to create the recorder the system is exited.
         try {
             recorder = new Recorder(observable);
-            
+            Thread.sleep(500);
             Platform.runLater(()->{
-                GuiApp app = new GuiApp();
-
+            	System.out.println("Suspending vm");
+//                GuiApp app = new GuiApp();
+                System.out.println("Code");
                 FXCode code = new FXCode(recorder, title);
-
+                System.out.println("Gui started");
             });
 
         }

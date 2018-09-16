@@ -42,9 +42,13 @@ public class GraphVisualization<T> {
         this.roots = new ArrayList<>();
         this.graph = new SingleGraph("Search-Graph");
         this.graph.setAttribute("ui.stylesheet", "url('conf/searchgraph.css')");
-        this.viewer = new FxViewer(graph, FxViewer.ThreadingModel.GRAPH_IN_ANOTHER_THREAD);
-        this.viewer.enableAutoLayout();
-
+        try {
+        	this.viewer = new FxViewer(graph, FxViewer.ThreadingModel.GRAPH_IN_ANOTHER_THREAD);
+        	this.viewer.enableAutoLayout();
+        }catch(Exception e) {
+        	e.printStackTrace();
+        	System.exit(0);
+        }
 
         this.viewPanel = (FxViewPanel) viewer.addDefaultView(false);
 
