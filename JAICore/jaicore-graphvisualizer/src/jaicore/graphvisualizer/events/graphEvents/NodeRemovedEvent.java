@@ -1,6 +1,6 @@
 package jaicore.graphvisualizer.events.graphEvents;
 
-public class NodeRemovedEvent<T> implements GraphEvent{
+public class NodeRemovedEvent<T> implements GraphEvent {
 
 	private final T node;
 	public final String name = "§NodeRemovedEvent";
@@ -9,6 +9,7 @@ public class NodeRemovedEvent<T> implements GraphEvent{
 		super();
 		this.node = node;
 	}
+
 	public T getNode() {
 		return node;
 	}

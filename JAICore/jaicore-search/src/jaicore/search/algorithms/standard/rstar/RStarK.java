@@ -1,7 +1,5 @@
 package jaicore.search.algorithms.standard.rstar;
 
-import scala.util.parsing.combinator.testing.Str;
-
 /**
  * k-Values (Priorities used for expansion from open.)
  */

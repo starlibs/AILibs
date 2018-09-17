@@ -1,4 +1,4 @@
-package jaicore.graphvisualizer;
+package jaicore.graphvisualizer.gui;
 
 public interface NodeListener<T> {
 

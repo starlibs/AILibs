@@ -6,13 +6,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import jaicore.graphvisualizer.gui.VisualizationWindow;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import jaicore.basic.MathExt;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
-import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.planning.graphgenerators.task.ceoctfd.CEOCTFDGraphGenerator;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;
@@ -50,7 +50,7 @@ public class CEOCTFDTester {
 		long start = System.currentTimeMillis();
 		AStar<TFDNode, String> astar = new AStar<TFDNode, String>(new NumberBasedAdditiveTraversalTree<TFDNode, String>(generator, (n1, n2) -> -1 * (Math.random() * 1000), n -> 0.0));
 
-		new SimpleGraphVisualizationWindow<Node<TFDNode, Double>, String>(astar).getPanel().setTooltipGenerator(new NodeTooltipGenerator<>(new TFDTooltipGenerator<>()));
+		new VisualizationWindow<Node<TFDNode, Double>, String>(astar).setTooltipGenerator(new NodeTooltipGenerator<>(new TFDTooltipGenerator<>()));
 
 		List<TFDNode> solution = null;
 		Collection<List<TFDNode>> solutions = new HashSet<>();

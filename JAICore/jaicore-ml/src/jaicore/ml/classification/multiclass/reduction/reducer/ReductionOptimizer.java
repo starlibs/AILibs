@@ -8,10 +8,10 @@ import java.util.Stack;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import jaicore.graphvisualizer.gui.VisualizationWindow;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import jaicore.basic.MathExt;
-import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.graphvisualizer.TooltipGenerator;
 import jaicore.ml.WekaUtil;
 import jaicore.ml.classification.multiclass.reduction.EMCNodeType;
@@ -48,8 +48,8 @@ public class ReductionOptimizer implements Classifier {
 		BestFirstEpsilon<RestProblem, Decision, Double> search = new BestFirstEpsilon<RestProblem, Decision, Double>(new GeneralEvaluatedTraversalTree<>(new ReductionGraphGenerator(rand, train), n -> getLossForClassifier(getTreeFromSolution(n.externalPath(), data, false), data) * 1.0), n -> n.path().size() * -1.0
 		, 0.1, false);
 
-		SimpleGraphVisualizationWindow<Node<RestProblem, Double>,Decision> window = new SimpleGraphVisualizationWindow<>(search);
-		window.getPanel().setTooltipGenerator(new TooltipGenerator<Node<RestProblem, Double>>() {
+		VisualizationWindow<Node<RestProblem, Double>,Decision> window = new VisualizationWindow<>(search);
+		window.setTooltipGenerator(new TooltipGenerator<Node<RestProblem, Double>>() {
 
 			@Override
 			public String getTooltip(Node<RestProblem, Double> node) {
