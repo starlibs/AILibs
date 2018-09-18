@@ -21,8 +21,12 @@ public class WekaMLPlanWekaClassifier extends MLPlanWekaClassifier {
 	
 	static MLPlanClassifierConfig loadOwnerConfig(File configFile) throws IOException {
 		Properties props = new Properties();
-		FileInputStream fis = new FileInputStream(configFile);
-		props.load(fis);
+		if (configFile.exists()) {
+			FileInputStream fis = new FileInputStream(configFile);
+			props.load(fis);
+		}
+		else
+			System.out.println("Config file " + configFile.getAbsolutePath() + " not found, working with default parameters.");
 		return ConfigFactory.create(MLPlanClassifierConfig.class, props);
 	}
 
@@ -33,7 +37,7 @@ public class WekaMLPlanWekaClassifier extends MLPlanWekaClassifier {
 	}
 	
 	public WekaMLPlanWekaClassifier() throws IOException {
-		this(new MLPlanWekaBuilder().withSearchSpaceConfigFile(new File("conf/automl/searchmodels/weka/weka-all-autoweka.json")));
+		this(new MLPlanWekaBuilder());
 
 	}
 

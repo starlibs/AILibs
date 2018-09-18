@@ -1,5 +1,7 @@
 package hasco.test;
 
+import org.junit.AfterClass;
+
 import hasco.core.HASCOFactory;
 import hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstWithRandomCompletionsFactory;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
@@ -10,7 +12,12 @@ public class HASCOViaFDAndBestFirstWithRandomCompletionsTester extends HASCOTest
 	@Override
 	public HASCOFactory<GeneralEvaluatedTraversalTree<TFDNode, String, Double>, TFDNode, String, Double> getFactory() {
 		HASCOViaFDAndBestFirstWithRandomCompletionsFactory factory = new HASCOViaFDAndBestFirstWithRandomCompletionsFactory();
-//		factory.setVisualizationEnabled(true);
+		factory.setVisualizationEnabled(true);
 		return factory;
+	}
+	
+	@AfterClass
+	public static void waitTill() {
+		while (true);
 	}
 }

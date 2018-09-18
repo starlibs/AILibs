@@ -70,7 +70,7 @@
 	</logger>
 	
 	<logger name="mlplan">
-		<level value="info" />
+		<level value="debug" />
 		<appender-ref ref="console" />
 		<appender-ref ref="infoFileAppender" />
 	</logger>
@@ -79,15 +79,7 @@
 		<level value="off" />
 	</logger>
 	
-	<logger name="mlplan.2phasehasco">
-	 <level value="info" />
-	</logger>
-  	
-  <logger name="mlplan.2phasehasco.optimizer">
-		<level value="warn" />
-	</logger>
-	
-	<logger name="mlplan.2phasehasco.hasco">
+	<logger name="mlplan.2phasehasco.optimizer.hasco">
     <level value="warn" />
   </logger>
 </log4j:configuration>

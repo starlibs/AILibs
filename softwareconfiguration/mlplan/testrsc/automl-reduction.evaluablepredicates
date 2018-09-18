@@ -1,9 +1,0 @@
-hasAtLeastTwoClasses = de.upb.crc901.mlplan.evaluablepredicates.HasAtLeastTwoClassesPredicate
-hasExactlyTwoClasses = de.upb.crc901.mlplan.evaluablepredicates.HasExactlyTwoClassesPredicate
-hasAtLeastThreeClasses = de.upb.crc901.mlplan.evaluablepredicates.HasAtLeastThreeClassesPredicate
-contains = de.upb.crc901.mlplan.evaluablepredicates.ContainsPredicate
-validRefinementChoice = de.upb.crc901.mlplan.evaluablepredicates.ValidRefinementChoicePredicate
-partition = de.upb.crc901.mlplan.evaluablepredicates.PartitionPredicate
-oneItem= de.upb.crc901.mlplan.evaluablepredicates.OneItemPredicate
-compactClasses = de.upb.crc901.mlplan.evaluablepredicates.CompactClassesPredicate
-AllowedBaseClassifiersForMCTreeNode = de.upb.crc901.mlplan.evaluablepredicates.AllowedBaseClassifiersForMCTreeNodePredicate

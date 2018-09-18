@@ -46,7 +46,6 @@ import jaicore.logging.LoggerUtil;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.core.interfaces.GraphGenerator;
-import jaicore.search.problemtransformers.GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS;
 
 public class TwoPhaseHASCO implements SoftwareConfigurationAlgorithm<TwoPhaseSoftwareConfigurationProblem, TwoPhaseHASCOReport, Double>, ILoggingCustomizable {
 
@@ -108,8 +107,8 @@ public class TwoPhaseHASCO implements SoftwareConfigurationAlgorithm<TwoPhaseSof
 		case created: {
 			this.timeOfStart = System.currentTimeMillis();
 			this.logger.info(
-					"Starting 2-Phase HASCO with {} CPUs and a timeout of {}s in total. Timeout per node evaluation is {}ms and per candidate is {}ms. Expected blow-ups are {} (selection) and {} (post-processing). Preferred node evaluator is {}",
-					getNumCPUs(), getTimeout(), config.timeoutForNodeEvaluation(), config.timeoutForCandidateEvaluation(), config.expectedBlowupInSelection(), config.expectedBlowupInPostprocessing(),
+					"Starting 2-Phase HASCO with the following setup:\n\tCPUs:{},\n\tTimeout: {}s\n\tTimeout per node evaluation: {}ms\n\tTimeout per candidate: {}ms\n\tNumber of Random Completions: {}\n\tExpected blow-ups are {} (selection) and {} (post-processing). Preferred node evaluator is {}",
+					getNumCPUs(), getTimeout(), config.timeoutForNodeEvaluation(), config.randomCompletions(), config.timeoutForCandidateEvaluation(), config.expectedBlowupInSelection(), config.expectedBlowupInPostprocessing(),
 					preferredNodeEvaluator);
 
 			/* create HASCO object */
@@ -139,7 +138,7 @@ public class TwoPhaseHASCO implements SoftwareConfigurationAlgorithm<TwoPhaseSof
 				public void run() {
 					try {
 						while (!Thread.currentThread().isInterrupted()) {
-							Thread.sleep(100);
+							Thread.sleep(1000);
 							int timeElapsed = (int) (System.currentTimeMillis() - TwoPhaseHASCO.this.timeOfStart);
 							int timeRemaining = config.timeout() * 1000 - timeElapsed;
 							if (timeRemaining < 2000 || TwoPhaseHASCO.this.shouldSearchTerminate(timeRemaining)) {

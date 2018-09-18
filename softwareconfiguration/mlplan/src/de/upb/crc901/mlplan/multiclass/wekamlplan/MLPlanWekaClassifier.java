@@ -17,6 +17,7 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
 import de.upb.crc901.mlplan.multiclass.MLPlanClassifierConfig;
+import de.upb.crc901.mlplan.multiclass.MultiClassPerformanceMeasure;
 import hasco.core.HASCOSolutionCandidate;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
@@ -64,7 +65,6 @@ public abstract class MLPlanWekaClassifier implements Classifier, CapabilitiesHa
 	/** Logger for controlled output. */
 	private Logger logger = LoggerFactory.getLogger(MLPlanWekaClassifier.class);
 	private String loggerName;
-	private static final String REQUESTED_INTERFACE = "weka.classifiers.bayes.BayesNet"; // "AbstractClassifier";
 
 	private final File componentFile;
 	private final Collection<Component> components;
@@ -141,8 +141,8 @@ public abstract class MLPlanWekaClassifier implements Classifier, CapabilitiesHa
 
 			/* communicate the parameters with which ML-Plan will run */
 			this.logger.info(
-					"Starting ML-Plan with {} CPUs and a timeout of {}s. The portion for the second phase is {}, evaluation is {}-{}-MCCV during search and {}-{}-MCCV in selection. Blow-ups are {} for selection phase and {} for post-processing phase.",
-					this.config.cpus(), this.config.timeout(), this.config.dataPortionForSelection(), this.config.numberOfMCIterationsDuringSearch(),
+					"Starting ML-Plan with the following setup:\n\tDataset: {}\n\tTarget: {}\n\tCPUs: {}\n\tTimeout: {}s\n\tTimeout for single candidate evaluation: {}s\n\tTimeout for node evaluation: {}s\n\tRandom Completions per node evaluation: {}\n\tPortion of data for selection phase: {}%\n\tMCCV for search: {} iterations with {}% for training\n\tMCCV for select: {} iterations with {}% for training\n\tBlow-ups are {} for selection phase and {} for post-processing phase.",
+					data.relationName(), MultiClassPerformanceMeasure.ERRORRATE, this.config.cpus(), this.config.timeout(), config.timeoutForCandidateEvaluation() / 1000, config.timeoutForNodeEvaluation() / 1000, config.randomCompletions(), MathExt.round(this.config.dataPortionForSelection() * 100, 2), this.config.numberOfMCIterationsDuringSearch(),
 					(int) (100 * this.config.getMCCVTrainFoldSizeDuringSearch()), this.config.numberOfMCIterationsDuringSelection(), (int) (100 * this.config.getMCCVTrainFoldSizeDuringSelection()),
 					this.config.expectedBlowupInSelection(), this.config.expectedBlowupInPostprocessing());
 			this.logger.info("Using the following preferred node evaluator: {}", this.preferredNodeEvaluator);
@@ -190,12 +190,13 @@ public abstract class MLPlanWekaClassifier implements Classifier, CapabilitiesHa
 		case active: {
 
 			/* train the classifier returned by the optimizing factory */
+			long startOptimizationTime = System.currentTimeMillis();
 			this.selectedClassifier = this.optimizingFactory.call();
 			this.internalValidationErrorOfSelectedClassifier = optimizingFactory.getPerformanceOfObject();
 			long startBuildTime = System.currentTimeMillis();
 			this.selectedClassifier.buildClassifier(this.data);
 			long endBuildTime = System.currentTimeMillis();
-			this.logger.info("Selected model has been built on entire dataset. Build time was {}ms", endBuildTime - startBuildTime);
+			this.logger.info("Selected model has been built on entire dataset. Build time of chosen model was {}ms. Total construction time was {}ms", endBuildTime - startBuildTime, endBuildTime - startOptimizationTime);
 			this.state = AlgorithmState.inactive;
 			return new AlgorithmFinishedEvent();
 		}
