@@ -100,9 +100,9 @@ public final class ImageUtils {
 			result = Nd4j.create(bitmap.getWidth(), bitmap.getHeight(), 3);
 			for (int i = 0; i < bitmap.getWidth(); i++) {
 				for (int j = 0; j < bitmap.getHeight(); j++) {
-					result.putScalar(new int[] { i, j, 0 }, bitmapMatrix[i][j][0]);
-					result.putScalar(new int[] { i, j, 1 }, bitmapMatrix[i][j][1]);
-					result.putScalar(new int[] { i, j, 2 }, bitmapMatrix[i][j][2]);
+					result.putScalar(new int[] { i, j, 0 }, bitmapMatrix[j][i][0]);
+					result.putScalar(new int[] { i, j, 1 }, bitmapMatrix[j][i][1]);
+					result.putScalar(new int[] { i, j, 2 }, bitmapMatrix[j][i][2]);
 				}
 			}
 			break;

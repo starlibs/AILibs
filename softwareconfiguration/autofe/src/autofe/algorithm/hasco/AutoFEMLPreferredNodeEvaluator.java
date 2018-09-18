@@ -100,9 +100,36 @@ public class AutoFEMLPreferredNodeEvaluator implements INodeEvaluator<TFDNode, D
 						}
 					}
 				}
-				if (pipe.getFilterPipeline() != null && pipe.getFilterPipeline().getFilters() != null && pipe.getFilterPipeline().getFilters().size() > this.maxPipelineSize) {
-					logger.debug("We exceed the maximum number of image filters, so return {}", MAX_EVAL_VALUE);
-					return MAX_EVAL_VALUE;
+				if (pipe.getFilterPipeline() != null && pipe.getFilterPipeline().getFilters() != null) {
+					if (pipe.getFilterPipeline().getFilters().size() > this.maxPipelineSize) {
+						logger.debug("We exceed the maximum number of image filters, so return {}", MAX_EVAL_VALUE);
+						return MAX_EVAL_VALUE;
+					}
+
+					double numFilters = pipe.getFilterPipeline().getFilters().size();
+					String classifierName;
+					boolean isMLPipeline = false;
+					if (pipe.getMLPipeline() instanceof MLPipeline) {
+						isMLPipeline = true;
+						classifierName = ((MLPipeline) pipe.getMLPipeline()).getBaseClassifier().getClass().getName();
+					} else {
+						classifierName = pipe.getMLPipeline().getClass().getName();
+					}
+
+					double indexOfClassifierName = this.classifiers.indexOf(classifierName);
+					if (indexOfClassifierName < 0) {
+						indexOfClassifierName = this.classifiers.size() + 1;
+					}
+
+					double score = indexOfClassifierName;
+					if (isMLPipeline) {
+						score += this.classifiers.size() + 1;
+					}
+
+					score += numFilters * (this.classifiers.size() + 1 * 2);
+					score /= 100000d;
+
+					return score;
 				}
 
 				if (ci != null && ci.getSatisfactionOfRequiredInterfaces().containsKey("mlPipeline")) {

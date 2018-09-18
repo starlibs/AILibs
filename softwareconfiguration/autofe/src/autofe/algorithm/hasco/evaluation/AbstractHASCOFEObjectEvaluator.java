@@ -41,7 +41,11 @@ public abstract class AbstractHASCOFEObjectEvaluator extends AbstractHASCOFEEval
 	protected void storeResult(final FilterPipeline pipe, final Double score, final long timeToCompute) throws SQLException {
 		Map<String, Object> data = new HashMap<>();
 		data.put("run_id", this.experimentID);
-		data.put("errorRate", score);
+		if (!score.toString().equals("NaN")) {
+			data.put("errorRate", score);
+		} else {
+			data.put("errorRate", -1);
+		}
 		data.put("preprocessor", pipe.toString());
 		data.put("classifier", "-");
 		data.put("time_train", (int) timeToCompute);
