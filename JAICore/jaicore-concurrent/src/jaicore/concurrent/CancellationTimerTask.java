@@ -1,24 +1,23 @@
 package jaicore.concurrent;
 
-import java.util.TimerTask;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jaicore.basic.Cancelable;
 
-public class CancellationTimerTask extends TimerTask {
+public class CancellationTimerTask extends NamedTimerTask {
 	private static final Logger logger = LoggerFactory.getLogger(InterruptionTimerTask.class);
 	private final Cancelable thingToBeCanceled;
 	private final Runnable hookToExecutePriorToCancel;
-	public CancellationTimerTask(Cancelable cancelable, Runnable hookToExecutePriorToInterruption) {
-		super();
+
+	public CancellationTimerTask(String descriptor, Cancelable cancelable, Runnable hookToExecutePriorToInterruption) {
+		super(descriptor);
 		this.thingToBeCanceled = cancelable;
 		this.hookToExecutePriorToCancel = hookToExecutePriorToInterruption;
 	}
-	
-	public CancellationTimerTask(Cancelable thingToBeCanceled) {
-		this (thingToBeCanceled, null);
+
+	public CancellationTimerTask(String descriptor, Cancelable thingToBeCanceled) {
+		this(descriptor, thingToBeCanceled, null);
 	}
 
 	public Cancelable getCancelable() {
@@ -35,7 +34,7 @@ public class CancellationTimerTask extends TimerTask {
 			logger.info("Executing pre-interruption hook.");
 			hookToExecutePriorToCancel.run();
 		}
-		logger.info("Canceling {}", thingToBeCanceled);
+		logger.info("Executing cancel task {}. Canceling {}", getDescriptor(), thingToBeCanceled);
 		thingToBeCanceled.cancel();
 	}
 }

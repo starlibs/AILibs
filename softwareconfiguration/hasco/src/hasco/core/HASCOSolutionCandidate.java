@@ -1,7 +1,5 @@
 package hasco.core;
 
-import java.util.Map;
-
 import hasco.model.ComponentInstance;
 import jaicore.planning.EvaluatedPlan;
 import jaicore.planning.EvaluatedSearchGraphBasedPlan;
@@ -19,20 +17,18 @@ public class HASCOSolutionCandidate<V extends Comparable<V>> {
 
 	private final ComponentInstance componentInstance;
 	private final EvaluatedSearchGraphBasedPlan<CEOCAction, V, ?> planningSolution;
+	private final int timeToEvaluateCandidate;
 	private final long timeOfCreation = System.currentTimeMillis();
 
-	public HASCOSolutionCandidate(ComponentInstance componentInstance, EvaluatedSearchGraphBasedPlan<CEOCAction, V, ?> planningSolution) {
+	public HASCOSolutionCandidate(ComponentInstance componentInstance, EvaluatedSearchGraphBasedPlan<CEOCAction, V, ?> planningSolution, int timeToEvaluateCandidate) {
 		super();
 		this.componentInstance = componentInstance;
 		this.planningSolution = planningSolution;
+		this.timeToEvaluateCandidate = timeToEvaluateCandidate;
 		if (planningSolution == null)
 			throw new IllegalArgumentException("HASCOSolutionCandidate cannot be created with a NULL planning solution.");
 		if (planningSolution.getPath() == null)
 			throw new IllegalArgumentException("HASCOSolutionCandidate cannot be created with a planning solution that has a NULL path object.");
-		if (planningSolution.getPath().getAnnotations() == null)
-			throw new IllegalArgumentException("HASCOSolutionCandidate cannot be created with a planning solution that has a path object with a NULL annotations map.");
-		if (!planningSolution.getPath().getAnnotations().containsKey("fTime"))
-			throw new IllegalArgumentException("HASCO requires by definition that solutions are annotated with \"fTime\", which should tell the time that was necessary to evaluate the solution.");
 	}
 
 	public ComponentInstance getComponentInstance() {
@@ -47,16 +43,8 @@ public class HASCOSolutionCandidate<V extends Comparable<V>> {
 		return planningSolution.getScore();
 	}
 
-	public Map<String, Object> getAnnotations() {
-		return planningSolution.getPath().getAnnotations();
-	}
-	
-	public Object getAnnotation(String key) {
-		return planningSolution.getPath().getAnnotations().get(key);
-	}
-	
-	public int getTimeToComputeScore() {
-		return Integer.valueOf(getAnnotations().get("fTime").toString());
+	public int getTimeToEvaluateCandidate() {
+		return timeToEvaluateCandidate;
 	}
 
 	public long getTimeOfCreation() {

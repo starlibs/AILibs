@@ -13,7 +13,7 @@ import jaicore.basic.algorithm.AlgorithmEvent;
 import jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import jaicore.graph.IGraphAlgorithmListener;
-import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
+import jaicore.graphvisualizer.gui.VisualizationWindow;
 import jaicore.search.algorithms.standard.ORGraphSearchTester;
 import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.GraphSearchSolutionCandidateFoundEvent;
@@ -42,7 +42,7 @@ public abstract class NPuzzleStandardTester<I, O, VSearch, ESearch> extends ORGr
 			IGraphSearch<I,O,NPuzzleNode, String, Double, VSearch, ESearch> search = getSearch(n, SEED);
 			assertNotNull("The factory has not returned any search object.", search);
 			if (showGraphs)
-				new SimpleGraphVisualizationWindow<>(search);
+				new VisualizationWindow<>(search);
 			boolean initialized = false;
 			boolean terminated = false;
 			int solutions = 0;

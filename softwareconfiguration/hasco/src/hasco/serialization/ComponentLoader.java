@@ -196,7 +196,7 @@ public class ComponentLoader {
 						break;
 					case "cat":
 						if (parameter.get("values") != null && parameter.get("values").isTextual()) {
-							p = new Parameter(name, new CategoricalParameterDomain(Arrays.stream(stringParamValues[1].split(",")).collect(Collectors.toList())), stringParams[2]);
+							p = new Parameter(name, new CategoricalParameterDomain(Arrays.stream(stringParamValues[1].split(",")).collect(Collectors.toList())), stringParamValues[2]);
 						} else {
 							List<String> values = new LinkedList<>();
 
@@ -211,13 +211,12 @@ public class ComponentLoader {
 							} else {
 								System.err.println("Warning: Categorical parameter " + name + " in component " + c.getName() + " without value list.");
 							}
-							p = new Parameter(name, new CategoricalParameterDomain(values), stringParams[2]);
+							p = new Parameter(name, new CategoricalParameterDomain(values), stringParamValues[2]);
 						}
 						break;
 					default:
 						throw new IllegalArgumentException("Unsupported parameter type " + type);
 					}
-
 					if (p != null) {
 						c.addParameter(p);
 					}
@@ -240,7 +239,7 @@ public class ComponentLoader {
 								throw new IllegalArgumentException("Cannot parse literal " + literal + ". Literals must be of the form \"<a> P <b>\".");
 							}
 
-							Parameter param = c.getParameter(parts[0]);
+							Parameter param = c.getParameterWithName(parts[0]);
 							String target = parts[2];
 							switch (parts[1]) {
 							case "=": {
@@ -296,7 +295,7 @@ public class ComponentLoader {
 							}
 						}
 
-						Parameter param = c.getParameter(parts[0]);
+						Parameter param = c.getParameterWithName(parts[0]);
 						String target = parts[2];
 						switch (parts[1]) {
 						case "=": {

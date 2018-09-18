@@ -1,6 +1,7 @@
 package jaicore.search.problemtransformers;
 
 import java.util.Random;
+import java.util.function.Predicate;
 
 import jaicore.basic.algorithm.AlgorithmProblemTransformer;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
@@ -13,16 +14,16 @@ public class GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS<N, A,
 		implements AlgorithmProblemTransformer<GraphSearchProblemInput<N, A, V>, GeneralEvaluatedTraversalTree<N, A, V>> {
 
 	private final INodeEvaluator<N, V> preferredNodeEvaluator;
-	private final INodeEvaluator<N, Double> preferredNodeEvaluatorForRandomCompletion;
+	private final Predicate<N> prioritizedNodesInRandomCompletion;
 	private final int seed;
 	private final int numSamples;
 	private final int timeoutForSingleCompletionEvaluationInMS;
 	private final int timeoutForNodeEvaluationInMS;
 
-	public GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS(INodeEvaluator<N, V> preferredNodeEvaluator, INodeEvaluator<N, Double> preferredNodeEvaluatorForRandomCompletion, int seed, int numSamples, int timeoutForSingleCompletionEvaluationInMS, int timeoutForNodeEvaluationInMS) {
+	public GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS(INodeEvaluator<N, V> preferredNodeEvaluator, Predicate<N> preferredNodeEvaluatorForRandomCompletion, int seed, int numSamples, int timeoutForSingleCompletionEvaluationInMS, int timeoutForNodeEvaluationInMS) {
 		super();
 		this.preferredNodeEvaluator = preferredNodeEvaluator;
-		this.preferredNodeEvaluatorForRandomCompletion = preferredNodeEvaluatorForRandomCompletion;
+		this.prioritizedNodesInRandomCompletion = preferredNodeEvaluatorForRandomCompletion;
 		this.seed = seed;
 		this.numSamples = numSamples;
 		this.timeoutForSingleCompletionEvaluationInMS = timeoutForSingleCompletionEvaluationInMS;
@@ -33,8 +34,8 @@ public class GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS<N, A,
 		return preferredNodeEvaluator;
 	}
 
-	public INodeEvaluator<N, Double> getPreferredNodeEvaluatorForRandomCompletion() {
-		return preferredNodeEvaluatorForRandomCompletion;
+	public Predicate<N> getPrioritizedNodePredicatesForRandomCompletion() {
+		return prioritizedNodesInRandomCompletion;
 	}
 
 	public int getSeed() {
@@ -47,7 +48,7 @@ public class GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS<N, A,
 
 	@Override
 	public GeneralEvaluatedTraversalTree<N, A, V> transform(GraphSearchProblemInput<N, A, V> problem) {
-		RandomCompletionBasedNodeEvaluator<N, V> rc = new RandomCompletionBasedNodeEvaluator<>(new Random(seed), numSamples, problem.getPathEvaluator(), timeoutForSingleCompletionEvaluationInMS, timeoutForNodeEvaluationInMS, preferredNodeEvaluatorForRandomCompletion);
+		RandomCompletionBasedNodeEvaluator<N, V> rc = new RandomCompletionBasedNodeEvaluator<>(new Random(seed), numSamples, problem.getPathEvaluator(), timeoutForSingleCompletionEvaluationInMS, timeoutForNodeEvaluationInMS, prioritizedNodesInRandomCompletion);
 		return new GeneralEvaluatedTraversalTree<>(problem.getGraphGenerator(), new AlternativeNodeEvaluator<>(preferredNodeEvaluator, rc));
 	}
 

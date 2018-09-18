@@ -21,7 +21,7 @@
 //import hasco.model.ParameterRefinementConfiguration;
 //import hasco.variants.HASCOViaFD;
 //import hasco.variants.HASCOViaFDAndBestFirstWithRandomCompletions;
-//import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
+//import jaicore.graphvisualizer.gui.VisualizationWindow;
 //import jaicore.ml.WekaUtil;
 //import jaicore.planning.EvaluatedSearchGraphBasedPlan;
 //import jaicore.planning.graphgenerators.task.tfd.TFDNode;
@@ -127,7 +127,7 @@
 //    
 //    HASCOViaFDAndBestFirstWithRandomCompletions<Double> hasco = new HASCOViaFDAndBestFirstWithRandomCompletions<>();
 //
-//    new SimpleGraphVisualizationWindow<Node<TFDNode, String>>(hasco).getPanel().setTooltipGenerator(new TFDTooltipGenerator<>());
+//    new VisualizationWindow<Node<TFDNode, String>>(hasco).setTooltipGenerator(new TFDTooltipGenerator<>());
 //    for (HASCOSolutionCandidate<EvaluatedSearchGraphBasedPlan, Classifier, Double> candidate : hasco) {
 //      System.out.println(candidate);
 //    }

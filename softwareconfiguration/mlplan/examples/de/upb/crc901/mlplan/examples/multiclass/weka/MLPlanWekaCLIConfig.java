@@ -14,7 +14,7 @@ public interface MLPlanWekaCLIConfig extends IMultiClassClassificationExperiment
 	public static final String K_MLPLAN_DATASET_FILE = "mlplanwekacli.datasetfile";
 	public static final String K_MLPLAN_OUTFILE = "mlplanwekacli.outputfile";
 
-	public static final String K_SHOW_GRAPH_VISUALIZATION = "mlplan.weka.cli.showgrpah";
+	public static final String K_SHOW_GRAPH_VISUALIZATION = "mlplanwekacli.showgrpah";
 
 	@Key(K_MLPLAN_TIMEOUT)
 	public int timeout();

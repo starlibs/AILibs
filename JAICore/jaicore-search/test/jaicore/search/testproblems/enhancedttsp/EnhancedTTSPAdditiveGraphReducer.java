@@ -1,8 +1,5 @@
 package jaicore.search.testproblems.enhancedttsp;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import jaicore.basic.algorithm.AlgorithmProblemTransformer;
 import jaicore.graph.LabeledGraph;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
@@ -21,18 +18,18 @@ public class EnhancedTTSPAdditiveGraphReducer implements AlgorithmProblemTransfo
 		LabeledGraph<Short, Double> travelGraph = problem.getMinTravelTimesGraph();
 		INodeEvaluator<EnhancedTTSPNode, Double> h = node -> {
 			double hVal = 0;
-			List<Double> edgesOfUncoveredPlaces = travelGraph.getEdges().stream()
-					.filter(e -> node.getPoint().getUnvisitedLocations().contains(e.getX()) && node.getPoint().getUnvisitedLocations().contains(e.getY())).map(e -> travelGraph.getEdgeLabel(e))
-					.sorted().collect(Collectors.toList());
-			int m = node.getPoint().getUnvisitedLocations().size();
-			if (m > 1) {
-				for (int i = 0; i < m; i++)
-					hVal += edgesOfUncoveredPlaces.get(i);
-			} else if (m == 1)
-				hVal = travelGraph.getEdgeLabel(node.getPoint().getCurLocation(), (short) 0);
+			// List<Double> edgesOfUncoveredPlaces = travelGraph.getEdges().stream()
+			// .filter(e -> node.getPoint().getUnvisitedLocations().contains(e.getX()) && node.getPoint().getUnvisitedLocations().contains(e.getY())).map(e -> travelGraph.getEdgeLabel(e))
+			// .sorted().collect(Collectors.toList());
+			// int m = node.getPoint().getUnvisitedLocations().size();
+			// if (m > 1) {
+			// for (int i = 0; i < m; i++)
+			// hVal += edgesOfUncoveredPlaces.get(i);
+			// } else if (m == 1)
+			// hVal = travelGraph.getEdgeLabel(node.getPoint().getCurLocation(), (short) 0);
 			return hVal;
 		};
-		
+
 		return new NumberBasedAdditiveTraversalTree<>(problem.getGraphGenerator(), g, h);
 	}
 }

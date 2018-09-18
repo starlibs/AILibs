@@ -11,6 +11,7 @@ public class HASCOFactory<ISearch, N, A, V extends Comparable<V>> implements Sof
 	private IHASCOPlanningGraphGeneratorDeriver<N, A> planningGraphGeneratorDeriver;
 	private IGraphSearchFactory<ISearch, ?, N, A, V, ?, ?> searchFactory;
 	private AlgorithmProblemTransformer<GraphSearchProblemInput<N, A, V>, ISearch> searchProblemTransformer;
+	private boolean visualizationEnabled;
 
 	@Override
 	public <P> void setProblemInput(P problemInput, AlgorithmProblemTransformer<P, RefinementConfiguredSoftwareConfigurationProblem<V>> reducer) {
@@ -24,7 +25,9 @@ public class HASCOFactory<ISearch, N, A, V extends Comparable<V>> implements Sof
 
 	@Override
 	public HASCO<ISearch, N, A, V> getAlgorithm() {
-		return new HASCO<>(problem, planningGraphGeneratorDeriver, searchFactory, searchProblemTransformer);
+		HASCO<ISearch, N, A, V> hasco = new HASCO<>(problem, planningGraphGeneratorDeriver, searchFactory, searchProblemTransformer);
+		hasco.setVisualization(visualizationEnabled);
+		return hasco;
 	}
 
 	public IHASCOPlanningGraphGeneratorDeriver<N, A> getPlanningGraphGeneratorDeriver() {
@@ -49,5 +52,13 @@ public class HASCOFactory<ISearch, N, A, V extends Comparable<V>> implements Sof
 
 	public void setSearchProblemTransformer(AlgorithmProblemTransformer<GraphSearchProblemInput<N, A, V>, ISearch> searchProblemTransformer) {
 		this.searchProblemTransformer = searchProblemTransformer;
+	}
+
+	public boolean isVisualizationEnabled() {
+		return visualizationEnabled;
+	}
+
+	public void setVisualizationEnabled(boolean visualizationEnabled) {
+		this.visualizationEnabled = visualizationEnabled;
 	}
 }

@@ -16,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -23,8 +24,10 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.Subscribe;
 
+import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import jaicore.basic.sets.SetUtil.Pair;
+import jaicore.graphvisualizer.gui.VisualizationWindow;
 import jaicore.logging.LoggerUtil;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableNodeEvaluator;
@@ -36,7 +39,6 @@ import jaicore.search.algorithms.standard.random.RandomSearch;
 import jaicore.search.algorithms.standard.uncertainty.IUncertaintySource;
 import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.core.interfaces.ISolutionEvaluator;
-import jaicore.search.core.interfaces.PathUnifyingGraphGenerator;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
 import jaicore.search.model.other.SearchGraphPath;
 import jaicore.search.model.probleminputs.GeneralEvaluatedTraversalTree;
@@ -62,13 +64,13 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 	protected Map<String, Integer> plSuccesses = new ConcurrentHashMap<>();
 
 	protected SerializableGraphGenerator<T, String> generator;
-	private boolean generatorProvidesPathUnification;
+//	private boolean generatorProvidesPathUnification;
 	protected long timestampOfFirstEvaluation;
 
 	/* algorithm parameters */
 	protected final Random random;
 	protected int samples;
-	private final INodeEvaluator<T, Double> preferredNodeEvaluatorForRDFS;
+	private final Predicate<T> priorityPredicateForRDFS;
 
 	/* sub-tools for conducting and analyzing random completions */
 	private Timer timeoutTimer;
@@ -89,7 +91,7 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 	}
 
 	public RandomCompletionBasedNodeEvaluator(final Random random, final int samples, final ISolutionEvaluator<T, V> solutionEvaluator, int timeoutForSingleCompletionEvaluationInMS,
-			int timeoutForNodeEvaluationInMS, INodeEvaluator<T, Double> preferredNodeEvaluator) {
+			int timeoutForNodeEvaluationInMS, Predicate<T> priorityPredicateForRDFS) {
 		super();
 		if (random == null) {
 			throw new IllegalArgumentException("Random source must not be null!");
@@ -106,7 +108,7 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 		this.solutionEvaluator = solutionEvaluator;
 		this.timeoutForSingleCompletionEvaluationInMS = timeoutForSingleCompletionEvaluationInMS;
 		this.timeoutForNodeEvaluationInMS = timeoutForNodeEvaluationInMS;
-		this.preferredNodeEvaluatorForRDFS = preferredNodeEvaluator;
+		this.priorityPredicateForRDFS = priorityPredicateForRDFS;
 
 		/* create randomized dfs searcher */
 		logger.info("Initialized RandomCompletionEvaluator with timeout {}ms for single evaluations and {}ms in total per node", timeoutForSingleCompletionEvaluationInMS,
@@ -135,6 +137,8 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 		if (this.timestampOfFirstEvaluation == 0) {
 			this.timestampOfFirstEvaluation = startOfComputation;
 		}
+		if (this.generator == null)
+			throw new IllegalStateException("Cannot compute f as no generator has been set!");
 		logger.info("Received request for f-value of node {}", n);
 
 		if (!this.fValues.containsKey(n)) {
@@ -198,12 +202,22 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 					List<T> pathCompletion = null;
 					List<T> completedPath = null;
 					synchronized (completer) {
+
+						if (completer.isCanceled()) {
+							logger.info("Completer has been canceled (perhaps due a cancel on the evaluator). Canceling RDFS");
+							break;
+						}
 						completedPath = new ArrayList<>(n.externalPath());
 
 						logger.info("Starting search for next solution ...");
 
 						SearchGraphPath<T, String> solutionPathFromN = null;
-						solutionPathFromN = completer.nextSolutionUnderNode(n.getPoint());
+						try {
+							solutionPathFromN = completer.nextSolutionUnderNode(n.getPoint());
+						} catch (AlgorithmExecutionCanceledException e) {
+							logger.info("Completer has been canceled. Returning control.");
+							break;
+						}
 						if (solutionPathFromN == null) {
 							logger.info("No completion was found for path {}.", path);
 							break;
@@ -439,17 +453,15 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 	@Override
 	public void setGenerator(final GraphGenerator<T, String> generator) {
 		this.generator = (SerializableGraphGenerator<T, String>) generator;
-		this.generatorProvidesPathUnification = (this.generator instanceof PathUnifyingGraphGenerator);
-		if (!this.generatorProvidesPathUnification)
-			logger.warn("The graph generator passed to the RandomCompletion algorithm does not offer path subsumption checks, which may cause inefficiencies in some domains.");
+		// this.generatorProvidesPathUnification = (this.generator instanceof PathUnifyingGraphGenerator);
+		// if (!this.generatorProvidesPathUnification)
+		// logger.warn("The graph generator passed to the RandomCompletion algorithm does not offer path subsumption checks, which may cause inefficiencies in some domains.");
 
 		/* create the completion algorithm and initialize it */
 		INodeEvaluator<T, Double> nodeEvaluator = new RandomizedDepthFirstNodeEvaluator<>(this.random);
-		if (preferredNodeEvaluatorForRDFS != null)
-			nodeEvaluator = new AlternativeNodeEvaluator<>(preferredNodeEvaluatorForRDFS, nodeEvaluator);
 		GeneralEvaluatedTraversalTree<T, String, Double> completionProblem = new GeneralEvaluatedTraversalTree<>(generator, nodeEvaluator);
-		completer = new RandomSearch<>(completionProblem, this.random);
-		// new SimpleGraphVisualizationWindow<>(completer).getPanel().setTooltipGenerator(n -> String.valueOf(bestKnownScoreUnderNodeInCompleterGraph.get(n)));
+		completer = new RandomSearch<>(completionProblem, priorityPredicateForRDFS, this.random);
+		 new VisualizationWindow<>(completer).setTooltipGenerator(n -> n.toString() + "<br />f: " + String.valueOf(bestKnownScoreUnderNodeInCompleterGraph.get(n)));
 		while (!(completer.next() instanceof AlgorithmInitializedEvent))
 			;
 		logger.info("Generator has been set, and completer has been initialized");

@@ -12,13 +12,13 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
 import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -38,7 +38,9 @@ import jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.AlgorithmState;
 import jaicore.basic.algorithm.IAlgorithmConfig;
+import jaicore.basic.algorithm.SolutionCandidateFoundEvent;
 import jaicore.concurrent.InterruptionTimerTask;
+import jaicore.concurrent.NamedTimerTask;
 import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeParentSwitchEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
@@ -101,7 +103,6 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 	private boolean initialized = false;
 	private Timer timer;
 	private List<NodeExpansionDescription<N, A>> lastExpansion = new ArrayList<>();
-	private EvaluatedSearchGraphPath<N, A, V> bestSeenSolution;
 	protected final Queue<EvaluatedSearchGraphPath<N, A, V>> solutions = new LinkedBlockingQueue<>();
 	protected final Queue<EvaluatedSearchSolutionCandidateFoundEvent<N, A, V>> pendingSolutionFoundEvents = new LinkedBlockingQueue<>();
 
@@ -226,13 +227,32 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 				BestFirst.this.createdCounter++;
 
 				/* compute node label */
-				labelNode(newNode);
-				if (newNode.getInternalLabel() == null) {
-					postEvent(new NodeTypeSwitchEvent<>(newNode, "or_pruned"));
+				try {
+					labelNode(newNode);
+					if (newNode.getInternalLabel() == null) {
+						postEvent(new NodeTypeSwitchEvent<>(newNode, "or_pruned"));
+						return;
+					}
+					if (isStopCriterionSatisfied()) {
+						this.communicateJobFinished();
+						return;
+					}
+				}
+				catch (InterruptedException e) {
+					if (!isShutdownInitialized())
+						logger.warn("Leaving node building routine due to interrupt. This leaves the search inconsistent; the node should be attached again!");
 					return;
 				}
-				if (isStopCriterionSatisfied()) {
-					this.communicateJobFinished();
+				catch (TimeoutException e) {
+					BestFirst.this.logger.debug("Node evaluation of {} has timed out.", newNode);
+					newNode.setAnnotation("fError", e);
+					postEvent(new NodeTypeSwitchEvent<>(newNode, "or_timedout"));
+					return;
+				}
+				catch (Throwable e) {
+					BestFirst.this.logger.error("Observed an exception during computation of f:\n{}", LoggerUtil.getExceptionInfo(e));
+					newNode.setAnnotation("fError", e);
+					postEvent(new NodeTypeSwitchEvent<>(newNode, "or_ffail"));
 					return;
 				}
 
@@ -313,7 +333,7 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 
 					/* if the node evaluator has not reported the solution already anyway, register the solution */
 					if (!BestFirst.this.solutionReportingNodeEvaluator) {
-						BestFirst.this.registerSolutionCandidateViaEvent(new EvaluatedSearchSolutionCandidateFoundEvent<>(solution));
+						registerSolution(solution);
 					}
 				}
 			} catch (InterruptedException e) {
@@ -388,8 +408,10 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 
 		/* define timeouter for label computation */
 		InterruptionTimerTask interruptionTask = null;
+		AtomicBoolean timedout = new AtomicBoolean(false);
 		if (BestFirst.this.timeoutForComputationOfF > 0) {
-			interruptionTask = new InterruptionTimerTask();
+			interruptionTask = new InterruptionTimerTask("Timeout for Node-Labeling in " + BestFirst.this, Thread.currentThread(), () -> timedout.set(true));
+			logger.debug("Scheduling timeout for f-value computation. Allowed time: {}ms", timeoutForComputationOfF);
 			timer.schedule(interruptionTask, timeoutForComputationOfF);
 		}
 
@@ -409,19 +431,22 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 				BestFirst.this.logger.warn("Computation of f for node {} took {}ms, which is more than the allowed {}ms", node, fTime, BestFirst.this.timeoutForComputationOfF);
 			}
 		} catch (InterruptedException e) {
-			BestFirst.this.logger.debug("Received interrupt during computation of f.");
-			postEvent(new NodeTypeSwitchEvent<>(node, "or_timedout"));
-			node.setAnnotation("fError", "Timeout");
-			computationTimedout = true;
-			try {
-				label = BestFirst.this.timeoutNodeEvaluator != null ? BestFirst.this.timeoutNodeEvaluator.f(node) : null;
-			} catch (Throwable e2) {
-				e2.printStackTrace();
+			logger.info("Thread {} received interrupt in node evaluation. Timeout flag is {}", Thread.currentThread(), timedout.get());
+			if (timedout.get()) {
+				BestFirst.this.logger.debug("Received interrupt during computation of f.");
+				postEvent(new NodeTypeSwitchEvent<>(node, "or_timedout"));
+				node.setAnnotation("fError", "Timeout");
+				computationTimedout = true;
+				Thread.interrupted(); // set interrupt state of thread to FALSE, because interrupt
+				try {
+					label = BestFirst.this.timeoutNodeEvaluator != null ? BestFirst.this.timeoutNodeEvaluator.f(node) : null;
+				} catch (Throwable e2) {
+					e2.printStackTrace();
+				}
+			} else {
+				logger.info("Received external interrupt. Forwarding this interrupt.");
+				throw e;
 			}
-		} catch (Throwable e) {
-			BestFirst.this.logger.error("Observed an exception during computation of f:\n{}", LoggerUtil.getExceptionInfo(e));
-			node.setAnnotation("fError", e);
-			postEvent(new NodeTypeSwitchEvent<>(node, "or_ffail"));
 		}
 		if (interruptionTask != null) {
 			interruptionTask.cancel();
@@ -430,6 +455,7 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 		/* register time required to compute this node label */
 		long fTime = System.currentTimeMillis() - startComputation;
 		node.setAnnotation("fTime", fTime);
+		logger.debug("Computed label {} for {} in {}ms", label, node, fTime);
 
 		/* if no label was computed, prune the node and cancel the computation */
 		if (label == null) {
@@ -475,7 +501,7 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 					throw new IllegalArgumentException("Cannot add NULL as a node to OPEN");
 				this.labelNode(root);
 				if (root.getInternalLabel() == null) {
-					throw new IllegalArgumentException("Root node has internal label NULL. Cannot initialize graph with this.");
+					throw new IllegalArgumentException("The node evaluator has assigned NULL to the root node, which impedes an initialization of the search graph. Node evaluator: " + nodeEvaluator);
 				}
 				this.openLock.lockInterruptibly();
 				try {
@@ -581,12 +607,7 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 		final List<NodeExpansionDescription<N, A>> successorDescriptions;
 		{
 			List<NodeExpansionDescription<N, A>> tmpSuccessorDescriptions = null;
-			try {
-				tmpSuccessorDescriptions = BestFirst.this.successorGenerator.generateSuccessors(nodeSelectedForExpansion.getPoint());
-
-			} catch (InterruptedException e) {
-				this.setInterrupted(true);
-			}
+			tmpSuccessorDescriptions = BestFirst.this.successorGenerator.generateSuccessors(nodeSelectedForExpansion.getPoint());
 			successorDescriptions = tmpSuccessorDescriptions;
 		}
 		this.checkTermination();
@@ -634,17 +655,14 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 		return nodeCompletionEvent;
 	}
 
-	protected void registerSolutionCandidateViaEvent(final EvaluatedSearchSolutionCandidateFoundEvent<N, A, V> solutionEvent) {
-		EvaluatedSearchGraphPath<N, A, V> solution = solutionEvent.getSolutionCandidate();
-		assert !solutions.contains(solutionEvent.getSolutionCandidate()) : "Registering a solution for the second time!";
+	protected EvaluatedSearchSolutionCandidateFoundEvent<N, A, V> registerSolution(final EvaluatedSearchGraphPath<N, A, V> solutionPath) {
+		EvaluatedSearchSolutionCandidateFoundEvent<N, A, V> solutionEvent = super.registerSolution(solutionPath); // this emits an event on the event bus
+		assert !solutions.contains(solutionEvent.getSolutionCandidate()) : "Registering solution " + solutionEvent.getSolutionCandidate() + " for the second time!";
 		this.solutions.add(solutionEvent.getSolutionCandidate());
 		synchronized (pendingSolutionFoundEvents) {
 			this.pendingSolutionFoundEvents.add(solutionEvent);
 		}
-		postEvent(solutionEvent);
-		if (this.bestSeenSolution == null || solution.getScore().compareTo(this.bestSeenSolution.getScore()) < 0) {
-			this.bestSeenSolution = solution;
-		}
+		return solutionEvent;
 	}
 
 	protected void shutdown() {
@@ -671,7 +689,6 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 			try {
 				this.pool.awaitTermination(10, TimeUnit.SECONDS);
 			} catch (InterruptedException e) {
-				setInterrupted(true);
 				logger.warn("Got interrupted during shutdown!");
 			}
 			if (!this.pool.isTerminated())
@@ -706,7 +723,7 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 	public void receiveSolutionCandidateEvent(final EvaluatedSearchSolutionCandidateFoundEvent<N, A, V> solutionEvent) {
 		try {
 			this.logger.info("Received solution with f-value {} and annotations {}", solutionEvent.getSolutionCandidate().getScore(), solutionEvent.getSolutionCandidate().getAnnotations());
-			this.registerSolutionCandidateViaEvent(solutionEvent);
+			this.registerSolution(solutionEvent.getSolutionCandidate()); // unpack this solution and plug it into the registration process
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
@@ -811,16 +828,18 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 		case created: {
 			this.logger.info("Initializing BestFirst search {} with {} CPUs and a timeout of {}ms", this, this.config.cpus(), this.config.timeout());
 			timer = new Timer("Timer of BestFirst search " + this);
-			timer.schedule(new TimerTask() {
+			if (config.timeout() > 0) {
+				timer.schedule(new NamedTimerTask("Timeout for the entire search of " + BestFirst.this) {
 
-				@Override
-				public void run() {
-					logger.info("Timeout triggered. Setting timeout flag to true and initiating shutdown.");
-					setTimeouted(true);
-					shutdown();
-				}
+					@Override
+					public void run() {
+						logger.info("Timeout triggered. Setting timeout flag to true and initiating shutdown.");
+						setTimeouted(true);
+						shutdown();
+					}
 
-			}, config.timeout());
+				}, config.timeout());
+			}
 			this.parallelizeNodeExpansion(this.config.cpus());
 			this.initGraph();
 			switchState(AlgorithmState.active);
@@ -874,9 +893,10 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 			/* if the event is the finish event, shutdown */
 			if (event instanceof AlgorithmFinishedEvent) {
 				logger.info("Shutting down the search.");
-				shutdown();
+				unregisterThreadAndShutdown();
 			}
-			postEvent(event);
+			if (!(event instanceof SolutionCandidateFoundEvent)) // solution events are sent via the super-class
+				postEvent(event);
 			return event;
 		}
 		default:
@@ -1086,7 +1106,7 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 
 	@Override
 	public EvaluatedSearchGraphPath<N, A, V> getSolutionProvidedToCall() {
-		return bestSeenSolution;
+		return getBestSeenSolution();
 	}
 
 }

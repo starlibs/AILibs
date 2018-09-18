@@ -27,4 +27,6 @@ public interface IAlgorithm<I,O> extends Iterable<AlgorithmEvent>, Iterator<Algo
 	public void setTimeout(int timeout, TimeUnit timeUnit);
 	public int getTimeout();
 	public TimeUnit getTimeoutUnit();
+	
+	public AlgorithmEvent nextWithException() throws Exception;
 }

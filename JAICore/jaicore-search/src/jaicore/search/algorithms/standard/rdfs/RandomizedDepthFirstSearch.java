@@ -16,6 +16,5 @@ public class RandomizedDepthFirstSearch<T, A> extends StandardBestFirst<T, A, Do
 
 	public RandomizedDepthFirstSearch(GraphSearchInput<T, A> problem, Random random) {
 		super(new GeneralEvaluatedTraversalTree<>(problem.getGraphGenerator(), new RandomizedDepthFirstNodeEvaluator<>(random)));
-
 	}
 }

@@ -12,6 +12,7 @@ import com.google.common.eventbus.EventBus;
 
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.algorithm.AlgorithmEvent;
+import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.AlgorithmState;
@@ -32,36 +33,35 @@ import jaicore.search.core.interfaces.IGraphSearchFactory;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
 import jaicore.search.model.probleminputs.builders.SearchProblemInputBuilder;
 
-public class GraphSearchBasedHTNPlanningAlgorithm<PA extends Action, P extends IHTNPlanningProblem<?,?,PA>, ISearch, OSearch, NSrc, ASrc, V extends Comparable<V>, NSearch, ASearch, L extends IAlgorithmListener> implements IAlgorithm<P, EvaluatedSearchGraphBasedPlan<PA, V, NSrc>>, ILoggingCustomizable {
-	
+public class GraphSearchBasedHTNPlanningAlgorithm<PA extends Action, P extends IHTNPlanningProblem<?, ?, PA>, ISearch, OSearch, NSrc, ASrc, V extends Comparable<V>, NSearch, ASearch, L extends IAlgorithmListener>
+		implements IAlgorithm<P, EvaluatedSearchGraphBasedPlan<PA, V, NSrc>>, ILoggingCustomizable {
+
 	/* logging and communication */
 	private String loggerName;
 	private Logger logger = LoggerFactory.getLogger(ForwardDecompositionHTNPlanner.class);
 	private final EventBus eventBus = new EventBus();
-	
+
 	/* algorithm inputs */
 	private final P planningProblem;
-	private final IPlanningGraphGeneratorDeriver<?,?,PA,P, NSrc, ASrc> problemTransformer;
+	private final IPlanningGraphGeneratorDeriver<?, ?, PA, P, NSrc, ASrc> problemTransformer;
 	private IGraphSearch<ISearch, OSearch, NSrc, ASrc, V, NSearch, ASearch> search;
-
+	
 	/* state of the algorithm */
 	private AlgorithmState state = AlgorithmState.created;
 	private boolean canceled = false;
-	
-	public GraphSearchBasedHTNPlanningAlgorithm(P problem,
-			IPlanningGraphGeneratorDeriver<?,?,PA,P, NSrc, ASrc> problemTransformer,
-			IGraphSearchFactory<ISearch, OSearch, NSrc, ASrc, V, NSearch, ASearch> searchFactory,
-			SearchProblemInputBuilder<NSrc, ASrc, ISearch> searchProblemBuilder) {
-		
+
+	public GraphSearchBasedHTNPlanningAlgorithm(P problem, IPlanningGraphGeneratorDeriver<?, ?, PA, P, NSrc, ASrc> problemTransformer,
+			IGraphSearchFactory<ISearch, OSearch, NSrc, ASrc, V, NSearch, ASearch> searchFactory, SearchProblemInputBuilder<NSrc, ASrc, ISearch> searchProblemBuilder) {
+
 		this.planningProblem = problem;
 		this.problemTransformer = problemTransformer;
-		
+
 		/* set the problem in the search factory */
 		searchProblemBuilder.setGraphGenerator(problemTransformer.transform(problem));
 		searchFactory.setProblemInput(searchProblemBuilder.build());
 		search = searchFactory.getAlgorithm();
 	}
-	
+
 	public List<Action> getPlan(List<TFDNode> path) {
 		return path.stream().filter(n -> n.getAppliedAction() != null).map(n -> n.getAppliedAction()).collect(Collectors.toList());
 	}
@@ -97,55 +97,61 @@ public class GraphSearchBasedHTNPlanningAlgorithm<PA extends Action, P extends I
 
 	@Override
 	public AlgorithmEvent next() {
-
-		logger.debug("I'm being asked whether there is a next solution.");
 		try {
-			switch (state) {
-			case created: {
-				logger.info("Starting HTN planning process.");
-				if (logger.isDebugEnabled()) {
-					StringBuilder opSB = new StringBuilder();
-					for (Operation op : planningProblem.getDomain().getOperations()) {
-						opSB.append("\n\t\t");
-						opSB.append(op);
-					}
-					StringBuilder methodSB = new StringBuilder();
-					for (Method method : planningProblem.getDomain().getMethods()) {
-						methodSB.append("\n\t\t");
-						methodSB.append(method);
-					}
-					logger.debug("The HTN problem is defined as follows:\n\tOperations:{}\n\tMethods:{}", opSB.toString(), methodSB.toString());
-				}
-
-				if (loggerName != null && loggerName.length() > 0 && search instanceof ILoggingCustomizable) {
-					logger.info("Customizing logger of search with {}", loggerName);
-					((ILoggingCustomizable) search).setLoggerName(loggerName + ".search");
-				}
-				state = AlgorithmState.active;
-				return new AlgorithmInitializedEvent();
-			}
-			case active: {
-				if (canceled)
-					throw new IllegalStateException("The planner has already been canceled. Cannot compute more plans.");
-				logger.info("Starting/continuing search for next plan.");
-				EvaluatedSearchGraphPath<NSrc, ASrc, V> solution = search.nextSolution();
-				if (solution == null) {
-					logger.info("No more solutions will be found. Terminating algorithm.");
-					state = AlgorithmState.inactive;
-					return new AlgorithmFinishedEvent();
-				}
-				logger.info("Next solution found.");
-				List<NSrc> solutionPath = solution.getNodes();
-				Plan<PA> plan = problemTransformer.getPlan(solutionPath);
-				PlanFoundEvent<PA, V> event = new PlanFoundEvent<>(new EvaluatedSearchGraphBasedPlan<>(plan.getActions(), solution.getScore(), solution));
-				eventBus.post(event);
-				return event;
-			}
-			default:
-				throw new IllegalStateException("Don't know what to do in state " + state);
-			}
+			return nextWithException();
 		} catch (Exception e) {
 			throw new RuntimeException(e);
+		}
+	}
+
+	@Override
+	public AlgorithmEvent nextWithException() throws AlgorithmExecutionCanceledException, InterruptedException {
+
+		logger.debug("I'm being asked whether there is a next solution.");
+
+		switch (state) {
+		case created: {
+			logger.info("Starting HTN planning process.");
+			if (logger.isDebugEnabled()) {
+				StringBuilder opSB = new StringBuilder();
+				for (Operation op : planningProblem.getDomain().getOperations()) {
+					opSB.append("\n\t\t");
+					opSB.append(op);
+				}
+				StringBuilder methodSB = new StringBuilder();
+				for (Method method : planningProblem.getDomain().getMethods()) {
+					methodSB.append("\n\t\t");
+					methodSB.append(method);
+				}
+				logger.debug("The HTN problem is defined as follows:\n\tOperations:{}\n\tMethods:{}", opSB.toString(), methodSB.toString());
+			}
+
+			if (loggerName != null && loggerName.length() > 0 && search instanceof ILoggingCustomizable) {
+				logger.info("Customizing logger of search with {}", loggerName);
+				((ILoggingCustomizable) search).setLoggerName(loggerName + ".search");
+			}
+			state = AlgorithmState.active;
+			return new AlgorithmInitializedEvent();
+		}
+		case active: {
+			if (canceled)
+				throw new IllegalStateException("The planner has already been canceled. Cannot compute more plans.");
+			logger.info("Starting/continuing search for next plan.");
+			EvaluatedSearchGraphPath<NSrc, ASrc, V> solution = search.nextSolution();
+			if (solution == null) {
+				logger.info("No more solutions will be found. Terminating algorithm.");
+				state = AlgorithmState.inactive;
+				return new AlgorithmFinishedEvent();
+			}
+			logger.info("Next solution found.");
+			List<NSrc> solutionPath = solution.getNodes();
+			Plan<PA> plan = problemTransformer.getPlan(solutionPath);
+			PlanFoundEvent<PA, V> event = new PlanFoundEvent<>(new EvaluatedSearchGraphBasedPlan<>(plan.getActions(), solution.getScore(), solution));
+			eventBus.post(event);
+			return event;
+		}
+		default:
+			throw new IllegalStateException("Don't know what to do in state " + state);
 		}
 	}
 

@@ -1,5 +1,6 @@
 package jaicore.basic.algorithm;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Timer;
@@ -27,6 +28,7 @@ public abstract class GeneralAlgorithmTester<P, I, O> {
 
 	private static final int INTERRUPTION_DELAY = 5000;
 	private static final int INTERRUPTION_CLEANUP_TOLERANCE = 2000;
+	private static final int THREAD_SHUTDOWN_TOLERANCE = 10000;
 
 	public abstract AlgorithmProblemTransformer<P, I> getProblemReducer();
 
@@ -38,6 +40,7 @@ public abstract class GeneralAlgorithmTester<P, I, O> {
 
 	@Test
 	public void testStartAndFinishEventEmissionSequentially() throws Exception {
+		int numberOfThreadsBefore = Thread.activeCount();
 		IAlgorithmFactory<I, O> factory = getFactory();
 		factory.setProblemInput(getSimpleProblemInputForGeneralTestPurposes());
 		IAlgorithm<I, O> algorithm = factory.getAlgorithm();
@@ -45,6 +48,8 @@ public abstract class GeneralAlgorithmTester<P, I, O> {
 		algorithm.registerListener(listener);
 		algorithm.call();
 		listener.checkState();
+		waitForThreadsToAssumeNumber(numberOfThreadsBefore);
+		checkNotInterrupted();
 	}
 
 	@Test
@@ -55,8 +60,11 @@ public abstract class GeneralAlgorithmTester<P, I, O> {
 		algorithm.setNumCPUs(Runtime.getRuntime().availableProcessors());
 		CheckingEventListener listener = new CheckingEventListener();
 		algorithm.registerListener(listener);
+		int numberOfThreadsBefore = Thread.activeCount();
 		algorithm.call();
 		listener.checkState();
+		waitForThreadsToAssumeNumber(numberOfThreadsBefore);
+		checkNotInterrupted();
 	}
 
 	@Test
@@ -65,10 +73,13 @@ public abstract class GeneralAlgorithmTester<P, I, O> {
 		factory.setProblemInput(getSimpleProblemInputForGeneralTestPurposes());
 		IAlgorithm<I, O> algorithm = factory.getAlgorithm();
 		CheckingEventListener listener = new CheckingEventListener();
+		int numberOfThreadsBefore = Thread.activeCount();
 		for (AlgorithmEvent e : algorithm) {
 			listener.receiveEvent(e);
 		}
 		listener.checkState();
+		waitForThreadsToAssumeNumber(numberOfThreadsBefore);
+		checkNotInterrupted();
 	}
 
 	@Test
@@ -80,6 +91,7 @@ public abstract class GeneralAlgorithmTester<P, I, O> {
 		IAlgorithm<I, O> algorithm = factory.getAlgorithm();
 		algorithm.setNumCPUs(Runtime.getRuntime().availableProcessors());
 		FutureTask<O> task = new FutureTask<>(algorithm);
+		int numberOfThreadsBefore = Thread.activeCount();
 
 		/* set up timer for interruption */
 		Thread t = new Thread(task, "InterruptTest Algorithm runner for " + algorithm);
@@ -88,6 +100,7 @@ public abstract class GeneralAlgorithmTester<P, I, O> {
 		new Timer("InterruptTest Timer").schedule(new TimerTask() {
 			@Override
 			public void run() {
+				System.out.println("Interrupting " + t);
 				t.interrupt();
 				interruptEvent.set(System.currentTimeMillis());
 			}
@@ -104,11 +117,15 @@ public abstract class GeneralAlgorithmTester<P, I, O> {
 		} catch (TimeoutException e) {
 		}
 		long end = System.currentTimeMillis();
-		int runtime = (int)(end - start);
+		int runtime = (int) (end - start);
 		int timeNeededToRealizeInterrupt = (int) (end - interruptEvent.get());
 		assertTrue("Runtime must be at least 5 seconds, actually should be at least 10 seconds.", runtime >= INTERRUPTION_DELAY);
 		assertTrue("The algorithm has not terminated within " + INTERRUPTION_CLEANUP_TOLERANCE + "ms after the interrupt.", timeNeededToRealizeInterrupt <= INTERRUPTION_CLEANUP_TOLERANCE);
 		assertTrue("The algorithm has not emitted an interrupted exception.", interruptedExceptionSeen);
+
+		/* now sending a cancel to make sure the algorithm structure is shutdown (this is because the interrupt only requires that the executing thread is returned but not that the algorithm is shutdown */
+		algorithm.cancel();
+		waitForThreadsToAssumeNumber(numberOfThreadsBefore);
 	}
 
 	@Test
@@ -120,6 +137,7 @@ public abstract class GeneralAlgorithmTester<P, I, O> {
 		IAlgorithm<I, O> algorithm = factory.getAlgorithm();
 		algorithm.setNumCPUs(Runtime.getRuntime().availableProcessors());
 		FutureTask<O> task = new FutureTask<>(algorithm);
+		int numberOfThreadsBefore = Thread.activeCount();
 
 		/* set up timer for interruption */
 		AtomicLong cancelEvent = new AtomicLong();
@@ -142,8 +160,7 @@ public abstract class GeneralAlgorithmTester<P, I, O> {
 			if (e.getCause() instanceof AlgorithmExecutionCanceledException) {
 				cancellationExceptionSeen = true;
 			}
-		}
-		catch (TimeoutException e) {
+		} catch (TimeoutException e) {
 		}
 		long end = System.currentTimeMillis();
 		int runtime = (int) (end - start);
@@ -151,6 +168,8 @@ public abstract class GeneralAlgorithmTester<P, I, O> {
 		assertTrue("Runtime must be at least 5 seconds, actually should be at least 10 seconds.", runtime >= INTERRUPTION_DELAY);
 		assertTrue("The algorithm has not terminated within " + INTERRUPTION_CLEANUP_TOLERANCE + "ms after it has been canceled.", timeNeededToRealizeCancel < INTERRUPTION_CLEANUP_TOLERANCE);
 		assertTrue("The algorithm has not emitted an AlgorithmExecutionCanceledException.", cancellationExceptionSeen);
+		waitForThreadsToAssumeNumber(numberOfThreadsBefore);
+		checkNotInterrupted();
 	}
 
 	@Test
@@ -163,6 +182,7 @@ public abstract class GeneralAlgorithmTester<P, I, O> {
 		algorithm.setNumCPUs(Runtime.getRuntime().availableProcessors());
 		FutureTask<O> task = new FutureTask<>(algorithm);
 		algorithm.setTimeout(INTERRUPTION_DELAY, TimeUnit.MILLISECONDS);
+		int numberOfThreadsBefore = Thread.activeCount();
 
 		/* launch algorithm */
 		long start = System.currentTimeMillis();
@@ -170,13 +190,28 @@ public abstract class GeneralAlgorithmTester<P, I, O> {
 		t.start();
 		try {
 			task.get(INTERRUPTION_DELAY + INTERRUPTION_CLEANUP_TOLERANCE, TimeUnit.MILLISECONDS);
-		}
-		catch (TimeoutException e) {
+		} catch (TimeoutException e) {
 		}
 		long end = System.currentTimeMillis();
 		int runtime = (int) (end - start);
 		assertTrue("Runtime must be at least 5 seconds, actually should be at least 10 seconds.", runtime >= INTERRUPTION_DELAY);
 		assertTrue("The algorithm has not terminated within " + INTERRUPTION_CLEANUP_TOLERANCE + " ms after the specified timeout.", runtime < INTERRUPTION_DELAY + INTERRUPTION_CLEANUP_TOLERANCE);
+		waitForThreadsToAssumeNumber(numberOfThreadsBefore);
+		checkNotInterrupted();
+	}
+
+	private void checkNotInterrupted() {
+		assertTrue("Executing thread is interrupted, which must not be the case!", !Thread.currentThread().isInterrupted());
+	}
+
+	private void waitForThreadsToAssumeNumber(int numberOfThreads) throws InterruptedException {
+		int n = 10;
+		int numberOfThreadsAfter = Thread.activeCount();
+		for (int i = 0; i < n && numberOfThreadsAfter > numberOfThreads; i++) {
+			Thread.sleep(THREAD_SHUTDOWN_TOLERANCE / n);
+			numberOfThreadsAfter = Thread.activeCount();
+		}
+		assertEquals("Number of threads has changed during execution", numberOfThreads, numberOfThreadsAfter);
 	}
 
 	private class CheckingEventListener {

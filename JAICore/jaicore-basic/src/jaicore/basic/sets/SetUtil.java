@@ -933,8 +933,10 @@ public class SetUtil {
 	}
 
 	public static List<String> unserializeList(String listDescriptor) {
+		if (listDescriptor == null)
+			throw new IllegalArgumentException("Invalid list descriptor NULL.");
 		if (!listDescriptor.startsWith("[") || !listDescriptor.endsWith("]"))
-			throw new IllegalArgumentException("Invalid list descriptor " + listDescriptor + ". Must start with '[' and end with ']'");
+			throw new IllegalArgumentException("Invalid list descriptor \"" + listDescriptor + "\". Must start with '[' and end with ']'");
 		List<String> items = new ArrayList<>();
 		for (String item : listDescriptor.substring(1, listDescriptor.length() - 1).split(",")) {
 			if (!item.trim().isEmpty())

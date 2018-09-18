@@ -6,7 +6,6 @@ sourceSets {
     main {
         java {
             srcDir 'src'
-			srcDir 'examples'
         }
         resources {
         	srcDir 'conf'
@@ -16,6 +15,7 @@ sourceSets {
     test {
 		java {
 			srcDir 'test'
+			srcDir 'examples'
 		}
     }
 }
@@ -31,7 +31,6 @@ dependencies {
 	compile project(':JAICore:jaicore-planning')
 	compile project(':JAICore:jaicore-search')
 	compile project(':JAICore:jaicore-ml')
-	compile "de.upb.isys:jase:0.0.4"
 
 
 	// OWL API
@@ -43,7 +42,6 @@ dependencies {
 	compile group: 'org.nd4j', name: 'nd4j-api', version: '0.9.1'
 	// gradient descent
 	compile group: 'de.jungblut.common', name: 'thomasjungblut-common', version: '1.1'
-	
 }
 
 

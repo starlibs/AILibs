@@ -26,6 +26,7 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, V e
 	private final OptimizingFactoryProblem<P, T, V> problem;
 	private final SoftwareConfigurationAlgorithmFactory<P, ?, V> factoryForOptimizationAlgorithm;
 	private T constructedObject;
+	private V performanceOfObject;
 	private final EventBus eventBus = new EventBus();
 
 	/* factory state */
@@ -51,41 +52,46 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, V e
 	@Override
 	public AlgorithmEvent next() {
 		try {
-			switch (state) {
-			case created: {
-				factoryForOptimizationAlgorithm.setProblemInput(problem.getConfigurationProblem());
-				optimizer = factoryForOptimizationAlgorithm.getAlgorithm();
-				if (optimizer instanceof ILoggingCustomizable) {
-					this.logger.info("Switching the logger name of the actually used optimizer to {}", loggerName);
-					((ILoggingCustomizable) optimizer).setLoggerName(loggerName + ".optimizer");
-				}
-				optimizer.registerListener(this);
-				while (!(optimizer.next() instanceof AlgorithmInitializedEvent));
-				state = AlgorithmState.active;
-				return new AlgorithmInitializedEvent();
-			}
-			case active: {
-				optimizer.call();
-				ComponentInstance solutionModel = optimizer.getOptimizationResult().getResult();
-				this.constructedObject = problem.getBaseFactory().getComponentInstantiation(solutionModel);
-				state = AlgorithmState.inactive;
-				return new AlgorithmFinishedEvent();
-			}
-			default:
-				throw new IllegalStateException("Cannot do anything in state " + state);
-			}
-		} catch (RuntimeException e) {
-			throw e;
-		}
-		catch (Exception e) {
+			return nextWithException();
+		} catch (Exception e) {
 			throw new RuntimeException(e);
+		}
+	}
+
+	@Override
+	public AlgorithmEvent nextWithException() throws Exception {
+
+		switch (state) {
+		case created: {
+			factoryForOptimizationAlgorithm.setProblemInput(problem.getConfigurationProblem());
+			optimizer = factoryForOptimizationAlgorithm.getAlgorithm();
+			if (optimizer instanceof ILoggingCustomizable) {
+				this.logger.info("Switching the logger name of the actually used optimizer to {}", loggerName);
+				((ILoggingCustomizable) optimizer).setLoggerName(loggerName + ".optimizer");
+			}
+			optimizer.registerListener(this);
+			while (!(optimizer.next() instanceof AlgorithmInitializedEvent))
+				;
+			state = AlgorithmState.active;
+			return new AlgorithmInitializedEvent();
+		}
+		case active: {
+			optimizer.call();
+			ComponentInstance solutionModel = optimizer.getOptimizationResult().getResult();
+			this.constructedObject = problem.getBaseFactory().getComponentInstantiation(solutionModel);
+			this.performanceOfObject = optimizer.getOptimizationResult().getValue();
+			state = AlgorithmState.inactive;
+			return new AlgorithmFinishedEvent();
+		}
+		default:
+			throw new IllegalStateException("Cannot do anything in state " + state);
 		}
 	}
 
 	@Override
 	public T call() throws Exception {
 		while (this.hasNext())
-			this.next();
+			this.nextWithException();
 		return this.constructedObject;
 	}
 
@@ -158,14 +164,18 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, V e
 	public SoftwareConfigurationAlgorithm<P, ?, V> getOptimizer() {
 		return optimizer;
 	}
-	
+
 	public AlgorithmInitializedEvent init() {
 		AlgorithmEvent e = null;
 		while (hasNext()) {
 			e = next();
 			if (e instanceof AlgorithmInitializedEvent)
-				return (AlgorithmInitializedEvent)e;
+				return (AlgorithmInitializedEvent) e;
 		}
 		throw new IllegalStateException("Could not complete initialization");
+	}
+
+	public V getPerformanceOfObject() {
+		return performanceOfObject;
 	}
 }
