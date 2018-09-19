@@ -18,5 +18,6 @@ dependencies {
 	compile group: 'org.openml', name: 'apiconnector', version: '1.0.16'
 	compile group: 'de.upb.isys', name: 'omlwebapp', version: '0.0.1'
 	compile group: 'de.upb.isys', name: 'meka', version: '0.0.1'
-	compile group: 'de.upb.isys', name: 'interruptable-weka', version: '0.0.6'
+	compile group: 'de.upb.isys', name: 'interruptable-weka', version: '0.0.7'
+	compile group: 'black.ninia', name: 'jep', version: '3.8.2'
 }
