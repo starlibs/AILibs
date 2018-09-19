@@ -66,9 +66,11 @@ public class HASCOProblemReductionWithParameterPruning {
 	private final PerformanceKnowledgeBase performanceKB;
 	private final boolean useImportanceEstimation;
 	private final String benchmarkName;
-	
-	public HASCOProblemReductionWithParameterPruning(File configurationFile, String nameOfRequiredInterface, boolean configureParams, IParameterImportanceEstimator importanceEstimator, double importanceThreshold, int minNumSamples,
-			PerformanceKnowledgeBase performanceKB, boolean useImportanceEstimation, String benchmarkName) throws IOException {
+
+	public HASCOProblemReductionWithParameterPruning(File configurationFile, String nameOfRequiredInterface,
+			boolean configureParams, IParameterImportanceEstimator importanceEstimator, double importanceThreshold,
+			int minNumSamples, PerformanceKnowledgeBase performanceKB, boolean useImportanceEstimation,
+			String benchmarkName) throws IOException {
 		ComponentLoader cl = new ComponentLoader();
 		cl.loadComponents(configurationFile);
 		this.components = cl.getComponents();
@@ -82,11 +84,12 @@ public class HASCOProblemReductionWithParameterPruning {
 		this.useImportanceEstimation = useImportanceEstimation;
 		this.benchmarkName = benchmarkName;
 	}
-	
+
 	public HASCOProblemReductionWithParameterPruning(Collection<Component> components,
 			Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig,
-			String nameOfRequiredInterface, boolean configureParams, IParameterImportanceEstimator importanceEstimator, double importanceThreshold, int minNumSamples,
-			PerformanceKnowledgeBase performanceKB, boolean useImportanceEstimation, String benchmarkName) {
+			String nameOfRequiredInterface, boolean configureParams, IParameterImportanceEstimator importanceEstimator,
+			double importanceThreshold, int minNumSamples, PerformanceKnowledgeBase performanceKB,
+			boolean useImportanceEstimation, String benchmarkName) {
 		super();
 		this.components = components;
 		this.paramRefinementConfig = paramRefinementConfig;
@@ -253,15 +256,15 @@ public class HASCOProblemReductionWithParameterPruning {
 
 			/*
 			 * go, in an ordering that is consistent with the pre-order on the params
-			 * imposed by the dependencies, over the set of params
-			 * TODO change to an ordering according to parameter importance values
+			 * imposed by the dependencies, over the set of params TODO change to an
+			 * ordering according to parameter importance values
 			 */
-			this.performanceKB.loadPerformanceSamplesFromDB();
-			FANOVAWarmstartComparator comparator = new FANOVAWarmstartComparator(performanceKB, benchmarkName, c);
+//			this.performanceKB.loadPerformanceSamplesFromDB();
+//			FANOVAWarmstartComparator comparator = new FANOVAWarmstartComparator(performanceKB, benchmarkName, c);
 			if (this.configureParams) {
 				List<Parameter> parameters = c.getParameters().getTotalOrder();
-				Collections.sort(parameters, comparator);
-//				for (Parameter p : c.getParameters()) {
+//				Collections.sort(parameters, comparator);
+				// for (Parameter p : c.getParameters()) {
 				for (Parameter p : parameters) {
 					String paramName = "p" + (++j);
 					refinementArguments += ", " + paramName;
@@ -311,31 +314,40 @@ public class HASCOProblemReductionWithParameterPruning {
 		return new CEOCIPSTNPlanningDomain(operations, methods);
 	}
 
-	public CEOCIPSTNPlanningProblem getPlanningProblem(final CEOCIPSTNPlanningDomain domain,
-			final CNFFormula knowledge, final Monom init) {
+	public CEOCIPSTNPlanningProblem getPlanningProblem(final CEOCIPSTNPlanningDomain domain, final CNFFormula knowledge,
+			final Monom init) {
 		Map<String, EvaluablePredicate> evaluablePredicates = new HashMap<>();
 		evaluablePredicates.put("isValidParameterRangeRefinement",
-				new isValidParameterRangeRefinementPredicatePruning(this.components, this.paramRefinementConfig, this.performanceKB, this.importanceEstimator, this.importanceThreshold, this.minNumSamples, this.useImportanceEstimation));
-		evaluablePredicates.put("notRefinable", new isNotRefinablePredicateWithParameterPruning(this.components, this.paramRefinementConfig, this.performanceKB, this.importanceEstimator, this.importanceThreshold, this.minNumSamples, this.useImportanceEstimation));
+				new isValidParameterRangeRefinementPredicatePruning(this.components, this.paramRefinementConfig,
+						this.performanceKB, this.importanceEstimator, this.importanceThreshold, this.minNumSamples,
+						this.useImportanceEstimation));
+		evaluablePredicates.put("notRefinable",
+				new isNotRefinablePredicateWithParameterPruning(this.components, this.paramRefinementConfig,
+						this.performanceKB, this.importanceEstimator, this.importanceThreshold, this.minNumSamples,
+						this.useImportanceEstimation));
 		evaluablePredicates.put("refinementCompleted",
-				new isRefinementCompletedPredicateWithImportanceCheck(this.components, this.paramRefinementConfig, this.performanceKB, this.importanceEstimator, this.importanceThreshold, this.minNumSamples, this.useImportanceEstimation));
+				new isRefinementCompletedPredicateWithImportanceCheck(this.components, this.paramRefinementConfig,
+						this.performanceKB, this.importanceEstimator, this.importanceThreshold, this.minNumSamples,
+						this.useImportanceEstimation));
 		return new CEOCIPSTNPlanningProblem(domain, knowledge, init,
 				new TaskNetwork(
 						RESOLVE_COMPONENT_IFACE_PREFIX + this.nameOfRequiredInterface + "('request', 'solution')"),
 				evaluablePredicates, new HashMap<>());
 	}
-	
+
 	public CEOCIPSTNPlanningProblem getPlanningProblem() {
 		return getPlanningProblem(getPlanningDomain(), new CNFFormula(), getInitState());
 	}
-	
+
 	/**
-	 * This method is a utility for everybody who wants to work on the graph obtained from HASCO's reduction but without using the search logic of HASCO
+	 * This method is a utility for everybody who wants to work on the graph
+	 * obtained from HASCO's reduction but without using the search logic of HASCO
 	 * 
 	 * @param plannerFactory
 	 * @return
 	 */
-	public <T,A> GraphGenerator<T,A> getGraphGeneratorUsedByHASCOForSpecificPlanner(final IObservableGraphBasedHTNPlanningAlgorithmFactory<?,T,A,?> plannerFactory) {
+	public <T, A> GraphGenerator<T, A> getGraphGeneratorUsedByHASCOForSpecificPlanner(
+			final IObservableGraphBasedHTNPlanningAlgorithmFactory<?, T, A, ?> plannerFactory) {
 		return plannerFactory.newAlgorithm(getPlanningProblem(), 1).getGraphGenerator();
 	}
 }

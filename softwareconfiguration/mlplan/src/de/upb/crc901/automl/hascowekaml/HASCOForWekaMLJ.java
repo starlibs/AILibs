@@ -18,6 +18,7 @@ import de.upb.crc901.automl.PreferenceBasedNodeEvaluator;
 import hasco.core.HASCOFDWithParameterPruning;
 import hasco.core.HASCOProblemReduction;
 import hasco.core.Solution;
+import hasco.knowledgebase.IntermediateResultHandler;
 import hasco.model.Component;
 import hasco.serialization.ComponentLoader;
 import jaicore.basic.FileUtil;
@@ -62,12 +63,15 @@ public class HASCOForWekaMLJ implements IObservableGraphAlgorithm<TFDNode, Strin
 	private double importanceThreshold;
 	private int minNumSamples;
 	private boolean useParameterImportanceEstimation;
+	private IntermediateResultHandler intermediateResultHandler;
 
-	public HASCOForWekaMLJ(final File hascoConfigurationFile, double importanceThreshold, int minNumSamples, boolean userParameterImportanceEstimation) {
+	public HASCOForWekaMLJ(final File hascoConfigurationFile, double importanceThreshold, int minNumSamples,
+			boolean userParameterImportanceEstimation, IntermediateResultHandler intermediateResultHandler) {
 		this.wekaSpaceConfigurationFile = hascoConfigurationFile;
 		this.importanceThreshold = importanceThreshold;
 		this.minNumSamples = minNumSamples;
 		this.useParameterImportanceEstimation = userParameterImportanceEstimation;
+		this.intermediateResultHandler = intermediateResultHandler;
 	}
 
 	private Queue<HASCOForWekaMLSolutionJ> solutionsFoundByHASCO = new PriorityQueue<>(
@@ -116,14 +120,18 @@ public class HASCOForWekaMLJ implements IObservableGraphAlgorithm<TFDNode, Strin
 		}
 
 		/* create algorithm */
-//		hasco = new HASCOFDWithParameterPruning<>(cl.getComponents(), cl.getParamConfigs(), new WEKAPipelineFactory(), "AbstractClassifier", ce, this.oversearchAvoidanceConfig);
-		hasco = new HASCOFDWithParameterPruning<>(cl.getComponents(), cl.getParamConfigs(), new WEKAPipelineFactory(), "AbstractClassifier", ce, this.oversearchAvoidanceConfig, importanceThreshold, minNumSamples, useParameterImportanceEstimation);
+		// hasco = new HASCOFDWithParameterPruning<>(cl.getComponents(),
+		// cl.getParamConfigs(), new WEKAPipelineFactory(), "AbstractClassifier", ce,
+		// this.oversearchAvoidanceConfig);
+		hasco = new HASCOFDWithParameterPruning<>(cl.getComponents(), cl.getParamConfigs(), new WEKAPipelineFactory(),
+				"AbstractClassifier", ce, this.oversearchAvoidanceConfig, importanceThreshold, minNumSamples,
+				useParameterImportanceEstimation);
 		hasco.setPreferredNodeEvaluator(this.preferredNodeEvaluator);
-		
+		if (intermediateResultHandler != null)
+			hasco.registerListenerForSolutionEvaluations(intermediateResultHandler);
 		if (this.loggerName != null && this.loggerName.length() > 0) {
 			hasco.setLoggerName(this.loggerName + ".hasco");
 		}
-
 
 		/* add all listeners to HASCO */
 		logger.info("Registering listeners ...");
@@ -142,8 +150,7 @@ public class HASCOForWekaMLJ implements IObservableGraphAlgorithm<TFDNode, Strin
 			this.logger.info("Deadline has been reached");
 		} else if (this.isCanceled) {
 			this.logger.info("Interrupting HASCO due to cancel.");
-		}
-		else
+		} else
 			this.logger.info("HASCO finished.");
 	}
 
@@ -204,13 +211,17 @@ public class HASCOForWekaMLJ implements IObservableGraphAlgorithm<TFDNode, Strin
 			return this.hasco.getComponents();
 		}
 	}
-	
+
 	public ISolutionEvaluator<TFDNode, Double> getSolutionEvaluator() {
 		return hasco.getSolutionEvaluator();
 	}
-	
+
+	public void registerListenerForSolutionEvaluations(final Object listener) {
+		this.hasco.registerListenerForSolutionEvaluations(listener);
+	}
+
 	public void estimateAndSafeImportanceValuesForComponents() {
 		hasco.estimateAndSafeImportanceValuesForComponents();
 	}
-	
+
 }

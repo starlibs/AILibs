@@ -12,6 +12,8 @@ import org.openml.apiconnector.xml.DataSetDescription;
 import de.upb.crc901.mlplan.multiclass.DefaultPreorder;
 import de.upb.crc901.mlplan.multiclass.MLPlan;
 import de.upb.crc901.mlplan.multiclass.MLPlanJ;
+import hasco.knowledgebase.IntermediateResultHandler;
+import jaicore.basic.SQLAdapter;
 import jaicore.ml.WekaUtil;
 import weka.classifiers.Evaluation;
 import weka.core.Instances;
@@ -42,15 +44,19 @@ public class MLPlanExampleJ {
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(seed), .7f);
 
 		/* initialize mlplan, and let it run for 30 seconds */
-		int timeoutInSeconds = 900;
-		MLPlanJ mlplan = new MLPlanJ(new File("model/weka/weka-all-autoweka.json"), -0.5d, 150, true);
+		int timeoutInSeconds = 60;
+		SQLAdapter intermediateResultAdapter = new SQLAdapter(args[0], args[1], args[2], args[3], true);
+		IntermediateResultHandler intermediateResultHandler = new IntermediateResultHandler(intermediateResultAdapter, "test");
+		MLPlanJ mlplan = new MLPlanJ(new File("model/weka/weka-all-autoweka.json"), -0.5d, 150, true, intermediateResultHandler);
 		mlplan.setLoggerName("mlplan");
 		mlplan.setRandomSeed(seed);
 		mlplan.setTimeout(timeoutInSeconds);
 		mlplan.setPortionOfDataForPhase2(.3f);
 		mlplan.setNodeEvaluator(new DefaultPreorder());
+
 		// mlplan.enableVisualization();
 		mlplan.buildClassifier(split.get(0));
+
 
 		/* evaluate solution produced by mlplan */
 		Evaluation eval = new Evaluation(split.get(0));

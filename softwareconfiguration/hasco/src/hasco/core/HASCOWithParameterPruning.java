@@ -22,6 +22,7 @@ import hasco.events.HASCORunStartedEvent;
 import hasco.events.HASCORunTerminatedEvent;
 import hasco.events.HASCOSolutionEvaluationEvent;
 import hasco.knowledgebase.IParameterImportanceEstimator;
+import hasco.knowledgebase.IntermediateResultHandler;
 import hasco.knowledgebase.FANOVAParameterImportanceEstimator;
 import hasco.knowledgebase.PerformanceKnowledgeBase;
 import hasco.model.Component;
@@ -123,6 +124,9 @@ public class HASCOWithParameterPruning<T, N, A, V extends Comparable<V>, R exten
 	private final HASCOProblemReductionWithParameterPruning reduction;
 	private final CEOCIPSTNPlanningProblem problem;
 	private IObservableGraphBasedHTNPlanningAlgorithm<R, N, A, V> planner;
+	
+	/* intermediate result sql adapter */
+	private SQLAdapter intermediateResultAdapter;
 
 	private static int numberPrunedParameters = 0;
 
@@ -260,7 +264,7 @@ public class HASCOWithParameterPruning<T, N, A, V extends Comparable<V>, R exten
 		// this.minNumSamplesForImportanceEstimation, this.performanceKB,true)));
 		reduction = new HASCOProblemReductionWithParameterPruning(components, paramRefinementConfig,
 				nameOfRequiredInterface, true, parameterImportanceEstimator, importanceThreshold,
-				minNumSamplesForImportanceEstimation, performanceKB, useParameterImportanceEstimation);
+				minNumSamplesForImportanceEstimation, performanceKB, useParameterImportanceEstimation, benchmarkName);
 
 		this.problem = reduction.getPlanningProblem();
 		if (logger.isDebugEnabled()) {
@@ -278,6 +282,8 @@ public class HASCOWithParameterPruning<T, N, A, V extends Comparable<V>, R exten
 					"The HTN problem created by HASCO is defined as follows:\n\tInit State: {}\n\tOperations:{}\n\tMethods:{}",
 					reduction.getInitState(), opSB.toString(), methodSB.toString());
 		}
+//		IntermediateResultHandler intermediateResultHandler = new IntermediateResultHandler(intermediateResultAdapter);
+//		this.registerListenerForSolutionEvaluations(intermediateResultHandler);
 	}
 
 	public void setNumberOfRandomCompletions(final int randomCompletions) {
