@@ -28,4 +28,8 @@ dependencies {
 	
 	// basic dependencies
 	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.6'
+	// database connector	
+	compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.45'
+	
+	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArchives')
 }
