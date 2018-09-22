@@ -46,7 +46,7 @@ public class MLPlanExampleJ {
 		/* initialize mlplan, and let it run for 30 seconds */
 		int timeoutInSeconds = 60;
 		SQLAdapter intermediateResultAdapter = new SQLAdapter(args[0], args[1], args[2], args[3], true);
-		IntermediateResultHandler intermediateResultHandler = new IntermediateResultHandler(intermediateResultAdapter, "test");
+		IntermediateResultHandler intermediateResultHandler = new IntermediateResultHandler(intermediateResultAdapter, "yeast","MCCV","70/30",seed,"MCCV","70/30",10);
 		MLPlanJ mlplan = new MLPlanJ(new File("model/weka/weka-all-autoweka.json"), -0.5d, 150, true, intermediateResultHandler);
 		mlplan.setLoggerName("mlplan");
 		mlplan.setRandomSeed(seed);
