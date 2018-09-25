@@ -17,5 +17,5 @@ sourceSets {
 dependencies {
 	compile group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
 	compile group: 'org.aeonbits.owner', name: 'owner-java8', version:'1.0.6'
-  	compile group: 'com.google.guava', name: 'guava', version: '26.0-jre'
+  compile group: 'com.google.guava', name: 'guava', version: '26.0-jre'
 }

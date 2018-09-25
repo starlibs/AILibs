@@ -33,21 +33,21 @@ import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
  * @author Felix Mohr
  *
  */
-public class SubProcessWrapper {
+public class JavaMethodToProcessWrapper {
 	private static final Random random = new Random(System.currentTimeMillis());
-	private static final Logger logger = LoggerFactory.getLogger(SubProcessWrapper.class);
+	private static final Logger logger = LoggerFactory.getLogger(JavaMethodToProcessWrapper.class);
 	
-	private static final List<SubProcessWrapper> wrappers = new ArrayList<>();
+	private static final List<JavaMethodToProcessWrapper> wrappers = new ArrayList<>();
 	
 	private String memory = "256M";
 	private File tmpDir = new File("tmp");
 	private int pidOfSubProcess;
 	
-	public static List<SubProcessWrapper> getWrappers() {
+	public static List<JavaMethodToProcessWrapper> getWrappers() {
 		return wrappers;
 	}
 
-	public SubProcessWrapper() {
+	public JavaMethodToProcessWrapper() {
 		super();
 		wrappers.add(this);
 	}
@@ -55,7 +55,7 @@ public class SubProcessWrapper {
 	static public String getAbsoluteClasspath() {
 		try {
 			return System.getProperty("java.class.path") + java.io.File.pathSeparatorChar
-					+ URLDecoder.decode(SubProcessWrapper.class.getProtectionDomain().getCodeSource().getLocation().getPath(), "UTF-8");
+					+ URLDecoder.decode(JavaMethodToProcessWrapper.class.getProtectionDomain().getCodeSource().getLocation().getPath(), "UTF-8");
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}

@@ -461,7 +461,7 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 		INodeEvaluator<T, Double> nodeEvaluator = new RandomizedDepthFirstNodeEvaluator<>(this.random);
 		GeneralEvaluatedTraversalTree<T, String, Double> completionProblem = new GeneralEvaluatedTraversalTree<>(generator, nodeEvaluator);
 		completer = new RandomSearch<>(completionProblem, priorityPredicateForRDFS, this.random);
-		 new VisualizationWindow<>(completer).setTooltipGenerator(n -> n.toString() + "<br />f: " + String.valueOf(bestKnownScoreUnderNodeInCompleterGraph.get(n)));
+//		 new VisualizationWindow<>(completer).setTooltipGenerator(n -> n.toString() + "<br />f: " + String.valueOf(bestKnownScoreUnderNodeInCompleterGraph.get(n)));
 		while (!(completer.next() instanceof AlgorithmInitializedEvent))
 			;
 		logger.info("Generator has been set, and completer has been initialized");

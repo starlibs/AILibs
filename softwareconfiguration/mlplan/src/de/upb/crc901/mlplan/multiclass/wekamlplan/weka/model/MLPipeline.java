@@ -110,7 +110,8 @@ public class MLPipeline implements Classifier, Serializable {
 			throw new IllegalStateException("Cannot make predictions on untrained pipeline!");
 		int numAttributesBefore = arg0.numAttributes();
 		arg0 = applyPreprocessors(arg0);
-		logger.info("Reduced number of attributes from {} to {}", numAttributesBefore, arg0.numAttributes());
+		if (numAttributesBefore != arg0.numAttributes())
+			logger.info("Reduced number of attributes from {} to {}", numAttributesBefore, arg0.numAttributes());
 		long start = System.currentTimeMillis();
 		double result = baseClassifier.classifyInstance(arg0);
 		timeForExecutingClassifier.addValue((System.currentTimeMillis() - start));

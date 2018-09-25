@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import jaicore.graphvisualizer.gui.VisualizationWindow;
 import org.aeonbits.owner.ConfigCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,9 +29,9 @@ import jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.AlgorithmProblemTransformer;
 import jaicore.basic.algorithm.AlgorithmState;
 import jaicore.basic.algorithm.IOptimizerResult;
+import jaicore.graphvisualizer.gui.VisualizationWindow;
 import jaicore.planning.EvaluatedSearchGraphBasedPlan;
 import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionReducer;
-import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;
 import jaicore.planning.model.CostSensitiveHTNPlanningProblem;
 import jaicore.planning.model.CostSensitivePlanningToSearchProblemTransformer;
@@ -48,7 +47,6 @@ import jaicore.search.core.interfaces.IGraphSearch;
 import jaicore.search.core.interfaces.IGraphSearchFactory;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
 import jaicore.search.model.probleminputs.GraphSearchProblemInput;
-import jaicore.search.model.travesaltree.Node;
 import jaicore.search.model.travesaltree.NodeTooltipGenerator;
 
 /**
@@ -346,7 +344,8 @@ public class HASCO<ISearch, N, A, V extends Comparable<V>> implements SoftwareCo
 
 	@Override
 	public void cancel() {
-		search.cancel();
+		if (search != null)
+			search.cancel();
 		this.terminate();
 	}
 

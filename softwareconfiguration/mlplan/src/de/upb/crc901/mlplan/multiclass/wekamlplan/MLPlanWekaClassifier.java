@@ -353,6 +353,10 @@ public abstract class MLPlanWekaClassifier implements Classifier, CapabilitiesHa
 	public void activateVisualization() {
 		this.config.setProperty(MLPlanClassifierConfig.K_VISUALIZE, String.valueOf(true));
 	}
+	
+	public void deactivateVisualization() {
+		this.config.setProperty(MLPlanClassifierConfig.K_VISUALIZE, String.valueOf(false));
+	}
 
 	@Override
 	public String getLoggerName() {
