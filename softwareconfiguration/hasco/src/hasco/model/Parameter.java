@@ -1,11 +1,17 @@
 package hasco.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Parameter {
 	private final String name;
 	private final ParameterDomain defaultDomain;
 	private final Object defaultValue;
 
-	public Parameter(String name, ParameterDomain defaultDomain, Object defaultValue) {
+	@JsonCreator
+	public Parameter(@JsonProperty("name") String name, @JsonProperty("defaultDomain") ParameterDomain defaultDomain,
+			@JsonProperty("defaultValue") Object defaultValue) {
 		super();
 		this.name = name;
 		this.defaultDomain = defaultDomain;
@@ -23,11 +29,13 @@ public class Parameter {
 	public Object getDefaultValue() {
 		return defaultValue;
 	}
-	
+
+	@JsonIgnore
 	public boolean isNumeric() {
 		return defaultDomain instanceof NumericParameterDomain;
 	}
-	
+
+	@JsonIgnore
 	public boolean isCategorical() {
 		return defaultDomain instanceof CategoricalParameterDomain;
 	}

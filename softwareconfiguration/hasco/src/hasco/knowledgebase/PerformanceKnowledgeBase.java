@@ -16,16 +16,27 @@ import java.util.Properties;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import hasco.core.Util;
 import hasco.model.CategoricalParameterDomain;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
+import hasco.model.Dependency;
 import hasco.model.NumericParameterDomain;
 import hasco.model.Parameter;
 import hasco.model.ParameterDomain;
+import hasco.serialization.ParameterDeserializer;
+import hasco.serialization.ParameterDomainDeserializer;
 import jaicore.basic.SQLAdapter;
 import jaicore.basic.sets.PartialOrderedSet;
 import jaicore.ml.core.FeatureSpace;
@@ -183,8 +194,7 @@ public class PerformanceKnowledgeBase {
 					if (domain instanceof CategoricalParameterDomain) {
 						CategoricalParameterDomain catDomain = (CategoricalParameterDomain) domain;
 						// TODO further namespacing of attributes!!!
-						attr = new Attribute(parameter.getName(),
-								Arrays.asList(catDomain.getValues()));
+						attr = new Attribute(parameter.getName(), Arrays.asList(catDomain.getValues()));
 					} else if (domain instanceof NumericParameterDomain) {
 						NumericParameterDomain numDomain = (NumericParameterDomain) domain;
 						// TODO is there a better way to set the range of this attribute?
@@ -233,34 +243,35 @@ public class PerformanceKnowledgeBase {
 		Attribute scoreAttr = instances.classAttribute();
 		instance.setValue(scoreAttr, score);
 		performanceInstancesByIdentifier.get(benchmarkName).get(identifier).add(instance);
-	
-		
+
 		// Add Instance for individual component
-		for(ComponentInstance ci : componentInstances) {
-			Instances instancesInd = performanceInstancesIndividualComponents.get(benchmarkName).get(ci.getComponent().getName());
+		for (ComponentInstance ci : componentInstances) {
+			Instances instancesInd = performanceInstancesIndividualComponents.get(benchmarkName)
+					.get(ci.getComponent().getName());
 			DenseInstance instanceInd = new DenseInstance(instancesInd.numAttributes());
-			for(int i = 0; i < instancesInd.numAttributes() - 1; i++) {
+			for (int i = 0; i < instancesInd.numAttributes() - 1; i++) {
 				Attribute attr = instancesInd.attribute(i);
 				Parameter param = ci.getComponent().getParameter(attr.name());
-				if(param.isCategorical()) {
+				if (param.isCategorical()) {
 					String value = ci.getParameterValues().get(param.getName());
 					instanceInd.setValue(attr, value);
-				} else if(param.isNumeric()) {
+				} else if (param.isNumeric()) {
 					double finalValue = Double.parseDouble(ci.getParameterValues().get(param.getName()));
 					instanceInd.setValue(attr, finalValue);
 				}
 			}
 			Attribute scoreAttrInd = instancesInd.classAttribute();
 			instanceInd.setValue(scoreAttrInd, score);
-			performanceInstancesIndividualComponents.get(benchmarkName).get(ci.getComponent().getName()).add(instanceInd);
+			performanceInstancesIndividualComponents.get(benchmarkName).get(ci.getComponent().getName())
+					.add(instanceInd);
 		}
 
 		if (addToDB)
 			this.addPerformanceSampleToDB(benchmarkName, componentInstance, score);
 	}
 
-	public Map<String, HashMap<ComponentInstance, Double>> getPerformanceSamples() {
-		return this.performanceSamples;
+	public Map<String, HashMap<String, Instances>> getPerformanceSamples() {
+		return this.performanceInstancesByIdentifier;
 	}
 
 	public Map<String, HashMap<String, List<Pair<ParameterConfiguration, Double>>>> getPerformanceSamplesByIdentifier() {
@@ -295,8 +306,14 @@ public class PerformanceKnowledgeBase {
 				System.out.println("Creating table for performance samples");
 				sqlAdapter.update(
 						"CREATE TABLE `performance_samples` (\r\n" + " `sample_id` int(10) NOT NULL AUTO_INCREMENT,\r\n"
-								+ " `benchmark` varchar(200) COLLATE utf8_bin DEFAULT NULL,\r\n"
-								+ " `composition` json NOT NULL,\r\n" + " `score` double NOT NULL,\r\n"
+								+ " `dataset` varchar(200) COLLATE utf8_bin DEFAULT NULL,\r\n"
+								+ " `composition` json NOT NULL,\r\n" + " `error_rate` double NOT NULL,\r\n"
+								+ " `test_evaluation_technique` varchar(20) ,\r\n"
+								+ " `test_split_technique` varchar(20) ,\r\n"
+								+ " `val_evaluation_technique` varchar(20) ,\r\n"
+								+ " `val_split_technique` varchar(20) ,\r\n"
+								+ " `test_seed` int(11) ,\r\n"
+								+ " `val_seed` int(11) ,\r\n"
 								+ " PRIMARY KEY (`sample_id`)\r\n"
 								+ ") ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_bin",
 						new ArrayList<>());
@@ -428,16 +445,27 @@ public class PerformanceKnowledgeBase {
 
 	public void loadPerformanceSamplesFromDB() {
 		try {
-			ResultSet rs = sqlAdapter
-					.getResultsOfQuery("SELECT benchmark, composition, score FROM performance_samples");
+			ResultSet rs = sqlAdapter.getResultsOfQuery("SELECT dataset, composition, error_rate FROM performance_samples");
 			ObjectMapper mapper = new ObjectMapper();
 			while (rs.next()) {
 				String benchmarkName = rs.getString(1);
 				String ciString = rs.getString(2);
-				System.out.println(ciString);
+				if (!benchmarkName.equals("test")) {
+				SimpleModule parameterModule = new SimpleModule();
+				ParameterDeserializer des = new ParameterDeserializer();
+				parameterModule.addDeserializer(Parameter.class, des);
+				
+				SimpleModule parameterDomainModule = new SimpleModule();
+				ParameterDomainDeserializer parameterDomainDes = new ParameterDomainDeserializer();
+				parameterDomainModule.addDeserializer(Dependency.class, parameterDomainDes);
+				
+//				mapper.registerModule(parameterModule);
+//				mapper.registerModule(parameterDomainModule);
+				
 				ComponentInstance composition = mapper.readValue(ciString, ComponentInstance.class);
-				double score = rs.getDouble(3);
-				this.addPerformanceSample(benchmarkName, composition, score, false);
+					double score = rs.getDouble(3);
+					this.addPerformanceSample(benchmarkName, composition, score, false);
+				}
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -658,16 +686,16 @@ public class PerformanceKnowledgeBase {
 		String identifier = Util.getComponentNamesOfComposition(composition);
 		return this.performanceInstancesByIdentifier.get(benchmarkName).get(identifier);
 	}
-	
+
 	public Instances getPerformanceSamplesForIndividualComponent(String benchmarkName, Component component) {
 		return this.performanceInstancesIndividualComponents.get(benchmarkName).get(component.getName());
 	}
-	
+
 	public int getNumSamplesForComponent(String benchmarkName, Component component) {
-		if(this.performanceInstancesIndividualComponents.get(benchmarkName)!=null) {
-		if(this.performanceInstancesIndividualComponents.get(benchmarkName).get(component.getName())!=null) {
-			return this.performanceInstancesIndividualComponents.get(benchmarkName).get(component.getName()).size();
-		}
+		if (this.performanceInstancesIndividualComponents.get(benchmarkName) != null) {
+			if (this.performanceInstancesIndividualComponents.get(benchmarkName).get(component.getName()) != null) {
+				return this.performanceInstancesIndividualComponents.get(benchmarkName).get(component.getName()).size();
+			}
 		}
 		return 0;
 	}

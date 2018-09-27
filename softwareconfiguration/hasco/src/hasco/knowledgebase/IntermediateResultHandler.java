@@ -19,7 +19,7 @@ import jaicore.basic.SQLAdapter;
  */
 public class IntermediateResultHandler {
 
-	public static final String TABLE_NAME = "intermediate_results";
+	public static final String TABLE_NAME = "performance_samples";
 
 	private SQLAdapter adapter;
 	private String benchmarkName, testEvalTechnique, testSplitTechnique, valEvalTechnique, valSplitTechnique;
@@ -45,7 +45,7 @@ public class IntermediateResultHandler {
 			// map.put("run_id", "" + this.runId);
 			ObjectMapper mapper = new ObjectMapper();
 			String composition = mapper.writeValueAsString(solution.getComposition());
-			map.put("pipeline", composition);
+			map.put("composition", composition);
 			// map.put("dataset_id", );
 			//// origin
 			// map.put("dataset_origin", );
