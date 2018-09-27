@@ -1,0 +1,32 @@
+{
+  "repository" : "Auto-WEKA",
+  "components" : [ {
+    "name" : "weka.classifiers.meta.LogitBoost",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "AbstractClassifier", "BaseClassifier", "MetaClassifier" ],
+    "parameter" : [ {
+      "name" : "Q",
+      "type" : "boolean",
+      "default" : "true"
+    }, {
+      "name" : "P",
+      "type" : "int",
+      "default" : "100",
+      "values" : [ "100" ],
+      "min" : 100.0,
+      "max" : 100.0,
+      "refineSplits" : 8,
+      "minInterval" : 10
+    }, {
+      "name" : "S",
+      "type" : "cat",
+      "default" : "1",
+      "values" : [ "1" ]
+    } ],
+    "dependencies" : [ {
+      "pre" : "D in {true}",
+      "post" : "K in {false}"
+    } ]
+  }
+   ]
+}
