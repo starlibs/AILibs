@@ -259,11 +259,16 @@ public class HASCOProblemReductionWithParameterPruning {
 			 * imposed by the dependencies, over the set of params TODO change to an
 			 * ordering according to parameter importance values
 			 */
-//			this.performanceKB.loadPerformanceSamplesFromDB();
-//			FANOVAWarmstartComparator comparator = new FANOVAWarmstartComparator(performanceKB, benchmarkName, c);
+			this.performanceKB.loadPerformanceSamplesFromDB();
+			System.out.println("Number of samples for " + c + " " + performanceKB.getNumSamplesForComponent("yeast", c));
 			if (this.configureParams) {
 				List<Parameter> parameters = c.getParameters().getTotalOrder();
-//				Collections.sort(parameters, comparator);
+				if (parameters.size() > 1 && performanceKB.getPerformanceSamplesForIndividualComponent(benchmarkName, c) != null) {
+					FANOVAWarmstartComparator comparator = new FANOVAWarmstartComparator(performanceKB, benchmarkName, c);
+					System.out.println("before: " + parameters);
+					Collections.sort(parameters, comparator);
+					System.out.println("after: " + parameters);
+				}
 				// for (Parameter p : c.getParameters()) {
 				for (Parameter p : parameters) {
 					String paramName = "p" + (++j);

@@ -124,11 +124,13 @@ public class HASCOWithParameterPruning<T, N, A, V extends Comparable<V>, R exten
 	private final HASCOProblemReductionWithParameterPruning reduction;
 	private final CEOCIPSTNPlanningProblem problem;
 	private IObservableGraphBasedHTNPlanningAlgorithm<R, N, A, V> planner;
-	
+
 	/* intermediate result sql adapter */
 	private SQLAdapter intermediateResultAdapter;
 
 	private static int numberPrunedParameters = 0;
+	
+	private long startTime;
 
 	private ISolutionEvaluator<N, V> solutionEvaluator = new ISolutionEvaluator<N, V>() {
 		@Override
@@ -160,7 +162,7 @@ public class HASCOWithParameterPruning<T, N, A, V extends Comparable<V>, R exten
 	private final Collection<Object> listeners = new ArrayList<>();
 
 	/* benchmark name */
-	private final String benchmarkName = "test";
+	private final String benchmarkName = "yeast";
 
 	/* performance knowledge base */
 	private final PerformanceKnowledgeBase performanceKB;
@@ -205,14 +207,18 @@ public class HASCOWithParameterPruning<T, N, A, V extends Comparable<V>, R exten
 			final IHASCOSearchSpaceUtilFactory<N, A, V> searchSpaceUtilFactory, final Factory<? extends T> factory,
 			final String nameOfRequiredInterface, final IObjectEvaluator<T, V> benchmark,
 			final double importanceThreshold, final int minNumSamplesForImportanceEstimation,
-			final boolean useParameterImportanceEstimation) {
+			final boolean useParameterImportanceEstimation, final SQLAdapter warmstartAdapter) {
 		super();
+		this.startTime = System.nanoTime();
 		this.components = components;
 		this.paramRefinementConfig = paramRefinementConfig;
 		this.plannerFactory = plannerFactory;
 		this.searchFactory = searchFactory;
 		this.benchmark = benchmark;
-		this.performanceKB = new PerformanceKnowledgeBase();
+		if (warmstartAdapter == null)
+			this.performanceKB = new PerformanceKnowledgeBase();
+		else
+			this.performanceKB = new PerformanceKnowledgeBase(warmstartAdapter);
 		this.parameterImportanceEstimator = new FANOVAParameterImportanceEstimator(performanceKB, benchmarkName);
 		this.importanceThreshold = importanceThreshold;
 		this.minNumSamplesForImportanceEstimation = minNumSamplesForImportanceEstimation;
@@ -242,6 +248,9 @@ public class HASCOWithParameterPruning<T, N, A, V extends Comparable<V>, R exten
 							HASCOWithParameterPruning.this.bestRecognizedSolution = solution;
 							HASCOWithParameterPruning.this.compositionOfBestRecognizedSolution = composition;
 							HASCOWithParameterPruning.this.scoreOfBestRecognizedSolution = scoreOfSolution;
+							// Save new best solution
+							long deltaTime = System.nanoTime() - startTime;
+							System.out.println("New solution found at: " + deltaTime + " with score: " + scoreOfSolution);
 						}
 						HASCOWithParameterPruning.this.solutionEvaluationEventBus
 								.post(new HASCOSolutionEvaluationEvent<>(composition, solution, scoreOfSolution));
@@ -282,8 +291,9 @@ public class HASCOWithParameterPruning<T, N, A, V extends Comparable<V>, R exten
 					"The HTN problem created by HASCO is defined as follows:\n\tInit State: {}\n\tOperations:{}\n\tMethods:{}",
 					reduction.getInitState(), opSB.toString(), methodSB.toString());
 		}
-//		IntermediateResultHandler intermediateResultHandler = new IntermediateResultHandler(intermediateResultAdapter);
-//		this.registerListenerForSolutionEvaluations(intermediateResultHandler);
+		// IntermediateResultHandler intermediateResultHandler = new
+		// IntermediateResultHandler(intermediateResultAdapter);
+		// this.registerListenerForSolutionEvaluations(intermediateResultHandler);
 	}
 
 	public void setNumberOfRandomCompletions(final int randomCompletions) {

@@ -271,7 +271,8 @@ public class PerformanceKnowledgeBase {
 	}
 
 	public Map<String, HashMap<String, Instances>> getPerformanceSamples() {
-		return this.performanceInstancesByIdentifier;
+//		return this.performanceInstancesByIdentifier;
+		return this.performanceInstancesIndividualComponents;
 	}
 
 	public Map<String, HashMap<String, List<Pair<ParameterConfiguration, Double>>>> getPerformanceSamplesByIdentifier() {
@@ -444,6 +445,10 @@ public class PerformanceKnowledgeBase {
 	// }
 
 	public void loadPerformanceSamplesFromDB() {
+		if(sqlAdapter == null) {
+			System.out.println("please set an SQL adapter");
+			return;
+		}
 		try {
 			ResultSet rs = sqlAdapter.getResultsOfQuery("SELECT dataset, composition, error_rate FROM performance_samples");
 			ObjectMapper mapper = new ObjectMapper();
@@ -688,7 +693,12 @@ public class PerformanceKnowledgeBase {
 	}
 
 	public Instances getPerformanceSamplesForIndividualComponent(String benchmarkName, Component component) {
+		if (this.performanceInstancesIndividualComponents.get(benchmarkName) != null) {
+			if (this.performanceInstancesIndividualComponents.get(benchmarkName).get(component.getName()) != null) {
 		return this.performanceInstancesIndividualComponents.get(benchmarkName).get(component.getName());
+			}
+		}
+		return null;
 	}
 
 	public int getNumSamplesForComponent(String benchmarkName, Component component) {
