@@ -11,7 +11,7 @@ public class HASCOViaFDAndBestFirstWithRandomCompletions<V extends Comparable<V>
 
 	public HASCOViaFDAndBestFirstWithRandomCompletions(RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem, int numSamples, int seed, int timeoutForSingleCompletionEvaluationInMS,
 			int timeoutForNodeEvaluationInMS) {
-		this(configurationProblem, null, numSamples, seed, timeoutForSingleCompletionEvaluationInMS, timeoutForNodeEvaluationInMS, null);
+		this(configurationProblem, null, numSamples, seed, timeoutForSingleCompletionEvaluationInMS, timeoutForNodeEvaluationInMS, n -> null);
 	}
 
 	public HASCOViaFDAndBestFirstWithRandomCompletions(RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem, Predicate<TFDNode> prioritingPredicate, int numSamples, int seed, int timeoutForSingleCompletionEvaluationInMS,

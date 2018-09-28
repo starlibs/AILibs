@@ -21,6 +21,7 @@ import hasco.core.HASCOSolutionCandidate;
 import hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
 import hasco.events.HASCOSolutionEvent;
 import hasco.model.ComponentInstance;
+import hasco.serialization.CompositionSerializer;
 import jaicore.basic.algorithm.AlgorithmEvent;
 import jaicore.basic.algorithm.AlgorithmProblemTransformer;
 import jaicore.basic.algorithm.GeneralAlgorithmTester;
@@ -55,8 +56,8 @@ public abstract class HASCOTester<ISearch, N, A>
 		return getHASCOForProblem(getDependencyProblemInput());
 	}
 
-	private Collection<Pair<HASCO<ISearch, N, A, Double>,Integer>> getAllHASCOObjectsWithExpectedNumberOfSolutionsForTheKnownProblems() throws Exception {
-		Collection<Pair<HASCO<ISearch, N, A, Double>,Integer>> hascoObjects = new ArrayList<>();
+	private Collection<Pair<HASCO<ISearch, N, A, Double>, Integer>> getAllHASCOObjectsWithExpectedNumberOfSolutionsForTheKnownProblems() throws Exception {
+		Collection<Pair<HASCO<ISearch, N, A, Double>, Integer>> hascoObjects = new ArrayList<>();
 		hascoObjects.add(new Pair<>(getHASCOForSimpleProblem(), 6));
 		hascoObjects.add(new Pair<>(getHASCOForDifficultProblem(), -1));
 		hascoObjects.add(new Pair<>(getHASCOForProblemWithDependencies(), 12));
@@ -65,14 +66,14 @@ public abstract class HASCOTester<ISearch, N, A>
 
 	@Test
 	public void sanityCheckOfSearchGraph() throws Exception {
-		for (Pair<HASCO<ISearch, N, A, Double>,Integer> pairOfHASCOAndNumOfSolutions : getAllHASCOObjectsWithExpectedNumberOfSolutionsForTheKnownProblems()) {
+		for (Pair<HASCO<ISearch, N, A, Double>, Integer> pairOfHASCOAndNumOfSolutions : getAllHASCOObjectsWithExpectedNumberOfSolutionsForTheKnownProblems()) {
 			HASCO<ISearch, N, A, Double> hasco = pairOfHASCOAndNumOfSolutions.getX();
 			hasco.init();
 			GraphGenerator<N, A> gen = hasco.getGraphGenerator();
-			
+
 			/* check on dead end */
 			GraphSanityChecker<N, A> deadEndDetector = new GraphSanityChecker<>(new GraphSearchInput<>(gen), 100000);
-//			new VisualizationWindow<>(deadEndDetector).setTooltipGenerator(n -> TFD);
+			// new VisualizationWindow<>(deadEndDetector).setTooltipGenerator(n -> TFD);
 			SanityCheckResult sanity = deadEndDetector.call();
 			assertTrue("HASCO graph has a dead end: " + sanity, !(sanity instanceof DeadEndDetectedResult));
 			assertTrue("HASCO graph has a cycle: " + sanity, !(sanity instanceof CycleDetectedResult));
@@ -90,20 +91,22 @@ public abstract class HASCOTester<ISearch, N, A>
 
 	@Test
 	public void testThatIteratorReturnsEachPossibleSolution() throws Exception {
-		for (Pair<HASCO<ISearch, N, A, Double>,Integer> pairOfHASCOAndExpectedNumberOfSolutions : getAllHASCOObjectsWithExpectedNumberOfSolutionsForTheKnownProblems()) {
+		for (Pair<HASCO<ISearch, N, A, Double>, Integer> pairOfHASCOAndExpectedNumberOfSolutions : getAllHASCOObjectsWithExpectedNumberOfSolutionsForTheKnownProblems()) {
 			HASCO<ISearch, N, A, Double> hasco = pairOfHASCOAndExpectedNumberOfSolutions.getX();
 			int numberOfExpectedSolutions = pairOfHASCOAndExpectedNumberOfSolutions.getY();
 			if (numberOfExpectedSolutions < 0)
 				continue;
-		List<ComponentInstance> solutions = new ArrayList<>();
-		for (AlgorithmEvent e : hasco) {
-			if (e instanceof HASCOSolutionEvent) {
-				solutions.add(((HASCOSolutionCandidate<Double>) ((HASCOSolutionEvent) e).getSolutionCandidate()).getComponentInstance());
+			List<ComponentInstance> solutions = new ArrayList<>();
+			for (AlgorithmEvent e : hasco) {
+				if (e instanceof HASCOSolutionEvent) {
+					solutions.add(((HASCOSolutionCandidate<Double>) ((HASCOSolutionEvent) e).getSolutionCandidate()).getComponentInstance());
+					System.out.println(new CompositionSerializer().serializeComponentInstance(((HASCOSolutionCandidate<Double>) ((HASCOSolutionEvent) e).getSolutionCandidate()).getComponentInstance()));
+				}
 			}
-		}
-		Set<Object> uniqueSolutions = new HashSet<>(solutions);
-		assertEquals("Only found " + uniqueSolutions.size() + "/" + numberOfExpectedSolutions + " solutions", numberOfExpectedSolutions, uniqueSolutions.size());
-		assertEquals("All " + numberOfExpectedSolutions + " solutions were found, but " + solutions.size() + " solutions were returned in total, i.e. there are solutions returned twice", numberOfExpectedSolutions, solutions.size());
+			Set<Object> uniqueSolutions = new HashSet<>(solutions);
+			assertEquals("Only found " + uniqueSolutions.size() + "/" + numberOfExpectedSolutions + " solutions", numberOfExpectedSolutions, uniqueSolutions.size());
+			assertEquals("All " + numberOfExpectedSolutions + " solutions were found, but " + solutions.size() + " solutions were returned in total, i.e. there are solutions returned twice",
+					numberOfExpectedSolutions, solutions.size());
 		}
 	}
 

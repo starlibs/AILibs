@@ -15,9 +15,4 @@ public class HASCOViaFDAndBestFirstWithRandomCompletionsTester extends HASCOTest
 		factory.setVisualizationEnabled(true);
 		return factory;
 	}
-	
-	@AfterClass
-	public static void waitTill() {
-		while (true);
-	}
 }

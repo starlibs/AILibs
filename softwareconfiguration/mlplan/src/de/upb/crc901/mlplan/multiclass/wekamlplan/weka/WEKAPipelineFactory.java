@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.ClassifierFactory;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import hasco.model.ComponentInstance;
+import hasco.serialization.CompositionSerializer;
 import jaicore.basic.ListHelper;
 import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
@@ -21,6 +22,7 @@ public class WEKAPipelineFactory implements ClassifierFactory {
 		ComponentInstance preprocessorCI = null;
 		String ppName = "";
 		ComponentInstance classifierCI = null;
+		System.out.println(new CompositionSerializer().serializeComponentInstance(groundComponent));
 
 		switch (groundComponent.getComponent().getName()) {
 		case "pipeline": {
