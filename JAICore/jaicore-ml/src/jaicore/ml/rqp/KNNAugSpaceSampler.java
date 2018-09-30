@@ -17,7 +17,7 @@ import weka.core.neighboursearch.NearestNeighbourSearch;
  * @author Michael
  *
  */
-public class KNNExactAugSpaceSampler extends AbstractAugmentedSpaceSampler {
+public class KNNAugSpaceSampler extends AbstractAugmentedSpaceSampler {
 	
 	private final NearestNeighbourSearch nearestNeighbour;
 	private int k;
@@ -27,7 +27,7 @@ public class KNNExactAugSpaceSampler extends AbstractAugmentedSpaceSampler {
 	 * @author Michael
 	 *
 	 */
-	public KNNExactAugSpaceSampler(Instances preciseInsts, Random rng, int k, NearestNeighbourSearch nearestNeighbour) {
+	public KNNAugSpaceSampler(Instances preciseInsts, Random rng, int k, NearestNeighbourSearch nearestNeighbour) {
 		super(preciseInsts, rng);
 		this.k = k;
 		DistanceFunction dist = new EuclideanDistance(preciseInsts);

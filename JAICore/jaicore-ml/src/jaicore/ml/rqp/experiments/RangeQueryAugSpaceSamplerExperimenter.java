@@ -17,8 +17,7 @@ import jaicore.experiments.IExperimentSetConfig;
 import jaicore.experiments.IExperimentSetEvaluator;
 import jaicore.ml.rqp.ChooseKAugSpaceSampler;
 import jaicore.ml.rqp.IAugmentedSpaceSampler;
-import jaicore.ml.rqp.KNNApproxAugSpaceSampler;
-import jaicore.ml.rqp.KNNExactAugSpaceSampler;
+import jaicore.ml.rqp.KNNAugSpaceSampler;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
@@ -68,11 +67,8 @@ public class RangeQueryAugSpaceSamplerExperimenter {
 				case "ChooseK":
 					sampler = new ChooseKAugSpaceSampler(dataTrain, rng, k);
 					break;
-				case "KNNApprox":
-					sampler = new KNNApproxAugSpaceSampler(dataTrain, rng, k, 50);
-					break;
 				case "KNNExact":
-					sampler = new KNNExactAugSpaceSampler(dataTrain, rng, k, new BallTree());
+					sampler = new KNNAugSpaceSampler(dataTrain, rng, k, new BallTree());
 					break;
 				default:
 					throw new Exception("Invalid sampler name.");
