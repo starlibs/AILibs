@@ -1,37 +1,9 @@
 {
   "repository" : "Auto-WEKA",
   "components" : [ {
-  	"name" : "InnerMetaBuildingBlock",
-  	"requiredInterface" : [ {"id": "MultiCombinerCompatibleClassifier", "name":  "MultiCombinerCompatibleClassifier" }, {"id": "MetaBuildingBlock", "name":  "MetaBuildingBlock" } ],
-  	"providedInterface" : [ "MetaBuildingBlock" ],
-  	"parameter" : [],
-  	"dependencies" : []
-  	}, {
-  	"name" : "EndingMetaBuildingBlock", 
-  	"requiredInterface" : [ {"id": "MultiCombinerCompatibleClassifier", "name":  "MultiCombinerCompatibleClassifier" } ],
-  	"providedInterface" : [ "MetaBuildingBlock" ],
-  	"parameter" : [],
-  	"dependencies" : []
-  	}, {
-  	"name" : "weka.classifiers.meta.Vote",
-  	"requiredInterface" : [ {"id": "MultiCombinerCompatibleClassifier", "name":  "MultiCombinerCompatibleClassifier" }, {"id": "MetaBuildingBlock", "name":  "MetaBuildingBlock" } ],
-  	"providedInterface" : [ "AbstractClassifier", "BaseClassifier", "EnsembleClassifier" ],
-  	"parameter" : [ {
-      "name" : "R",
-      "type" : "cat",
-      "default" : "AVG",
-      "values" : [ "AVG", "PROD", "MAJ", "MIN", "MAX" ]
-    }, {
-      "name" : "S",
-      "type" : "cat",
-      "default" : "1",
-      "values" : [ "1" ]
-    } ],
-  	"dependencies" : []
-  	}, {
     "name" : "weka.classifiers.bayes.BayesNet",
     "requiredInterface" : [ ],
-    "providedInterface" : [ "MultiCombinerCompatibleClassifier" ],
+    "providedInterface" : [ "AbstractClassifier", "BaseClassifier", "AtomicClassifier" ],
     "parameter" : [ {
       "name" : "D",
       "type" : "boolean",
@@ -46,7 +18,7 @@
   }, {
     "name" : "weka.classifiers.bayes.NaiveBayes",
     "requiredInterface" : [ ],
-    "providedInterface" : [ "MultiCombinerCompatibleClassifier" ],
+    "providedInterface" : [ "AbstractClassifier", "BaseClassifier", "AtomicClassifier" ],
     "parameter" : [ {
       "name" : "K",
       "type" : "boolean",
@@ -63,13 +35,13 @@
   }, {
     "name" : "weka.classifiers.bayes.NaiveBayesMultinomial",
     "requiredInterface" : [ ],
-    "providedInterface" : [ "MultiCombinerCompatibleClassifier" ],
+    "providedInterface" : [ "AbstractClassifier", "BaseClassifier", "AtomicClassifier" ],
     "parameter" : [ ],
     "dependencies" : [ ]
   }, {
     "name" : "weka.classifiers.functions.Logistic",
     "requiredInterface" : [ ],
-    "providedInterface" : [ "MultiCombinerCompatibleClassifier" ],
+    "providedInterface" : [ "AbstractClassifier", "BaseClassifier", "AtomicClassifier" ],
     "parameter" : [ {
       "name" : "R",
       "type" : "double",
@@ -83,7 +55,7 @@
   }, {
     "name" : "weka.classifiers.functions.MultilayerPerceptron",
     "requiredInterface" : [ ],
-    "providedInterface" : [ "MultiCombinerCompatibleClassifier" ],
+    "providedInterface" : [ "AbstractClassifier", "BaseClassifier", "AtomicClassifier" ],
     "parameter" : [ {
       "name" : "L",
       "type" : "double",
@@ -131,13 +103,13 @@
   }, {
     "name" : "weka.classifiers.functions.SimpleLinearRegression",
     "requiredInterface" : [ ],
-    "providedInterface" : [ "MultiCombinerCompatibleClassifier" ],
+    "providedInterface" : [ "AbstractClassifier", "BaseClassifier", "AtomicClassifier" ],
     "parameter" : [ ],
     "dependencies" : [ ]
   }, {
     "name" : "weka.classifiers.functions.SimpleLogistic",
     "requiredInterface" : [ ],
-    "providedInterface" : [ "MultiCombinerCompatibleClassifier" ],
+    "providedInterface" : [ "AbstractClassifier", "BaseClassifier", "AtomicClassifier" ],
     "parameter" : [ {
       "name" : "S",
       "type" : "boolean",
@@ -186,7 +158,7 @@
   }, {
     "name" : "weka.classifiers.functions.SMO",
     "requiredInterface" : [ {"id": "K", "name":  "K" } ],
-    "providedInterface" : [ "MultiCombinerCompatibleClassifier" ],
+    "providedInterface" : [ "AbstractClassifier", "BaseClassifier", "AtomicClassifier" ],
     "parameter" : [ {
       "name" : "C",
       "type" : "double",
@@ -214,7 +186,7 @@
   }, {
     "name" : "weka.classifiers.functions.VotedPerceptron",
     "requiredInterface" : [ ],
-    "providedInterface" : [ "MultiCombinerCompatibleClassifier" ],
+    "providedInterface" : [ "AbstractClassifier", "BaseClassifier", "AtomicClassifier" ],
     "parameter" : [ {
       "name" : "I",
       "type" : "int",
@@ -244,7 +216,7 @@
   }, {
     "name" : "weka.classifiers.lazy.IBk",
     "requiredInterface" : [ ],
-    "providedInterface" : [ "MultiCombinerCompatibleClassifier" ],
+    "providedInterface" : [ "AbstractClassifier", "BaseClassifier", "AtomicClassifier" ],
     "parameter" : [ {
       "name" : "E",
       "type" : "boolean",
@@ -277,7 +249,7 @@
   }, {
     "name" : "weka.classifiers.lazy.KStar",
     "requiredInterface" : [ ],
-    "providedInterface" : [ "MultiCombinerCompatibleClassifier" ],
+    "providedInterface" : [ "AbstractClassifier", "BaseClassifier", "AtomicClassifier" ],
     "parameter" : [ {
       "name" : "B",
       "type" : "int",
@@ -300,7 +272,7 @@
   }, {
     "name" : "weka.classifiers.rules.JRip",
     "requiredInterface" : [ ],
-    "providedInterface" : [ "MultiCombinerCompatibleClassifier" ],
+    "providedInterface" : [ "AbstractClassifier", "BaseClassifier", "AtomicClassifier" ],
     "parameter" : [ {
       "name" : "N",
       "type" : "double",
@@ -330,7 +302,7 @@
   }, {
     "name" : "weka.classifiers.rules.M5Rules",
     "requiredInterface" : [ ],
-    "providedInterface" : [ "MultiCombinerCompatibleClassifier" ],
+    "providedInterface" : [ "AbstractClassifier", "BaseClassifier", "AtomicClassifier" ],
     "parameter" : [ {
       "name" : "N",
       "type" : "boolean",
@@ -356,7 +328,7 @@
   }, {
     "name" : "weka.classifiers.rules.OneR",
     "requiredInterface" : [ ],
-    "providedInterface" : [ "MultiCombinerCompatibleClassifier" ],
+    "providedInterface" : [ "AbstractClassifier", "BaseClassifier", "AtomicClassifier" ],
     "parameter" : [ {
       "name" : "B",
       "type" : "int",
@@ -370,7 +342,7 @@
   }, {
     "name" : "weka.classifiers.rules.PART",
     "requiredInterface" : [ ],
-    "providedInterface" : [ "MultiCombinerCompatibleClassifier" ],
+    "providedInterface" : [ "AbstractClassifier", "BaseClassifier", "AtomicClassifier" ],
     "parameter" : [ {
       "name" : "N",
       "type" : "int",
@@ -403,19 +375,19 @@
   }, {
     "name" : "weka.classifiers.rules.ZeroR",
     "requiredInterface" : [ ],
-    "providedInterface" : [ "MultiCombinerCompatibleClassifier" ],
+    "providedInterface" : [ "AbstractClassifier", "BaseClassifier", "AtomicClassifier" ],
     "parameter" : [ ],
     "dependencies" : [ ]
   }, {
     "name" : "weka.classifiers.trees.DecisionStump",
     "requiredInterface" : [ ],
-    "providedInterface" : [ "MultiCombinerCompatibleClassifier" ],
+    "providedInterface" : [ "AbstractClassifier", "BaseClassifier", "AtomicClassifier" ],
     "parameter" : [ ],
     "dependencies" : [ ]
   }, {
     "name" : "weka.classifiers.trees.J48",
     "requiredInterface" : [ ],
-    "providedInterface" : [ "MultiCombinerCompatibleClassifier" ],
+    "providedInterface" : [ "AbstractClassifier", "BaseClassifier", "AtomicClassifier" ],
     "parameter" : [ {
       "name" : "O",
       "type" : "boolean",
@@ -472,7 +444,7 @@
   }, {
     "name" : "weka.classifiers.trees.LMT",
     "requiredInterface" : [ ],
-    "providedInterface" : [ "MultiCombinerCompatibleClassifier" ],
+    "providedInterface" : [ "AbstractClassifier", "BaseClassifier", "AtomicClassifier" ],
     "parameter" : [ {
       "name" : "B",
       "type" : "boolean",
@@ -526,7 +498,7 @@
   }, {
     "name" : "weka.classifiers.trees.M5P",
     "requiredInterface" : [ ],
-    "providedInterface" : [ "MultiCombinerCompatibleClassifier" ],
+    "providedInterface" : [ "AbstractClassifier", "BaseClassifier", "AtomicClassifier" ],
     "parameter" : [ {
       "name" : "N",
       "type" : "boolean",
@@ -552,7 +524,7 @@
   }, {
     "name" : "weka.classifiers.trees.RandomForest",
     "requiredInterface" : [ ],
-    "providedInterface" : [ "MultiCombinerCompatibleClassifier" ],
+    "providedInterface" : [ "AbstractClassifier", "BaseClassifier", "AtomicClassifier" ],
     "parameter" : [ {
       "name" : "I",
       "type" : "int",
@@ -605,7 +577,7 @@
   }, {
     "name" : "weka.classifiers.trees.RandomTree",
     "requiredInterface" : [ ],
-    "providedInterface" : [ "MultiCombinerCompatibleClassifier" ],
+    "providedInterface" : [ "AbstractClassifier", "BaseClassifier", "AtomicClassifier" ],
     "parameter" : [ {
       "name" : "M",
       "type" : "int",
@@ -683,7 +655,7 @@
   }, {
     "name" : "weka.classifiers.trees.REPTree",
     "requiredInterface" : [ ],
-    "providedInterface" : [ "MultiCombinerCompatibleClassifier" ],
+    "providedInterface" : [ "AbstractClassifier", "BaseClassifier", "AtomicClassifier" ],
     "parameter" : [ {
       "name" : "M",
       "type" : "int",
@@ -726,6 +698,247 @@
       "pre" : "depthActivator in {1}",
       "post" : "L in [2.0,20.0]"
     } ]
+  }, {
+    "name" : "weka.classifiers.meta.AdaBoostM1",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "AbstractClassifier", "BaseClassifier", "MetaClassifier" ],
+    "parameter" : [ {
+      "name" : "pActivator",
+      "type" : "cat",
+      "default" : "0",
+      "values" : [ "0", "1" ]
+    }, {
+      "name" : "P",
+      "type" : "int",
+      "default" : "100",
+      "values" : [ "100" ],
+      "min" : 100.0,
+      "max" : 100.0,
+      "refineSplits" : 8,
+      "minInterval" : 10
+    }, {
+      "name" : "I",
+      "type" : "int",
+      "default" : 10.0,
+      "min" : 2.0,
+      "max" : 128.0,
+      "refineSplits" : 8,
+      "minInterval" : 10
+    }, {
+      "name" : "Q",
+      "type" : "boolean",
+      "default" : "true"
+    }, {
+      "name" : "S",
+      "type" : "cat",
+      "default" : "1",
+      "values" : [ "1" ]
+    } ],
+    "dependencies" : [ {
+      "pre" : "pActivator in {0}",
+      "post" : "P in {100}"
+    }, {
+      "pre" : "pActivator in {1}",
+      "post" : "P in [50.0,100.0]"
+    } ]
+  }, {
+    "name" : "weka.classifiers.meta.AdditiveRegression",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "AbstractClassifier", "BaseClassifier", "MetaClassifier" ],
+    "parameter" : [ {
+      "name" : "sActivator",
+      "type" : "cat",
+      "default" : "0",
+      "values" : [ "0", "1" ]
+    }, {
+      "name" : "S",
+      "type" : "double",
+      "default" : "1",
+      "values" : [ "1" ],
+      "min" : 1.0,
+      "max" : 1.0,
+      "refineSplits" : 8,
+      "minInterval" : 10
+    }, {
+      "name" : "I",
+      "type" : "int",
+      "default" : 10.0,
+      "min" : 2.0,
+      "max" : 128.0,
+      "refineSplits" : 8,
+      "minInterval" : 10
+    } ],
+    "dependencies" : [ {
+      "pre" : "sActivator in {0}",
+      "post" : "S in {1}"
+    }, {
+      "pre" : "sActivator in {1}",
+      "post" : "S in [0.0,1.0]"
+    } ]
+  }, {
+    "name" : "weka.classifiers.meta.Bagging",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "AbstractClassifier", "BaseClassifier", "MetaClassifier" ],
+    "parameter" : [ {
+      "name" : "P",
+      "type" : "int",
+      "default" : 100.0,
+      "min" : 10.0,
+      "max" : 100.0,
+      "refineSplits" : 8,
+      "minInterval" : 10
+    }, {
+      "name" : "I",
+      "type" : "int",
+      "default" : 10.0,
+      "min" : 2.0,
+      "max" : 128.0,
+      "refineSplits" : 8,
+      "minInterval" : 10
+    }, {
+      "name" : "S",
+      "type" : "cat",
+      "default" : "1",
+      "values" : [ "1" ]
+    }, {
+      "name" : "O",
+      "type" : "boolean",
+      "default" : "true"
+    } ],
+    "dependencies" : [ {
+      "pre" : "P in {100}",
+      "post" : "O in {false, true}"
+    } ]
+  }, {
+    "name" : "weka.classifiers.meta.ClassificationViaRegression",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "AbstractClassifier", "BaseClassifier", "MetaClassifier" ],
+    "parameter" : [ ],
+    "dependencies" : [ ]
+  }, {
+    "name" : "weka.classifiers.meta.LogitBoost",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "AbstractClassifier", "BaseClassifier", "MetaClassifier" ],
+    "parameter" : [ {
+      "name" : "Q",
+      "type" : "boolean",
+      "default" : "true"
+    }, {
+      "name" : "I",
+      "type" : "int",
+      "default" : 10.0,
+      "min" : 2.0,
+      "max" : 128.0,
+      "refineSplits" : 8,
+      "minInterval" : 10
+    }, {
+      "name" : "P",
+      "type" : "int",
+      "default" : "100",
+      "values" : [ "100" ],
+      "min" : 100.0,
+      "max" : 100.0,
+      "refineSplits" : 8,
+      "minInterval" : 10
+    }, {
+      "name" : "H",
+      "type" : "double",
+      "default" : 1.0,
+      "min" : 1.0E-2,
+      "max" : 1.0,
+      "refineSplits" : 8,
+      "minInterval" : 10
+    }, {
+      "name" : "S",
+      "type" : "cat",
+      "default" : "1",
+      "values" : [ "1" ]
+    } ],
+    "dependencies" : [ ]
+  }, {
+    "name" : "weka.classifiers.meta.MultiClassClassifier",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "AbstractClassifier", "BaseClassifier", "MetaClassifier" ],
+    "parameter" : [ ],
+    "dependencies" : [ ]
+  }, {
+    "name" : "weka.classifiers.meta.RandomCommittee",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "AbstractClassifier", "BaseClassifier", "MetaClassifier" ],
+    "parameter" : [ {
+      "name" : "I",
+      "type" : "int",
+      "default" : 10.0,
+      "min" : 2.0,
+      "max" : 64.0,
+      "refineSplits" : 8,
+      "minInterval" : 10
+    }, {
+      "name" : "S",
+      "type" : "cat",
+      "default" : "1",
+      "values" : [ "1" ]
+    } ],
+    "dependencies" : [ ]
+  }, {
+    "name" : "weka.classifiers.meta.RandomSubSpace",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "AbstractClassifier", "BaseClassifier", "MetaClassifier" ],
+    "parameter" : [ {
+      "name" : "I",
+      "type" : "int",
+      "default" : 10.0,
+      "min" : 2.0,
+      "max" : 64.0,
+      "refineSplits" : 8,
+      "minInterval" : 10
+    }, {
+      "name" : "P",
+      "type" : "double",
+      "default" : 0.5,
+      "min" : 0.1,
+      "max" : 1.0,
+      "refineSplits" : 8,
+      "minInterval" : 10
+    }, {
+      "name" : "S",
+      "type" : "cat",
+      "default" : "1",
+      "values" : [ "1" ]
+    } ],
+    "dependencies" : [ ]
+  }, {
+    "name" : "weka.classifiers.meta.Stacking",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "AbstractClassifier", "BaseClassifier", "EnsembleClassifier" ],
+    "parameter" : [ {
+      "name" : "X",
+      "type" : "cat",
+      "default" : "10",
+      "values" : [ "10" ]
+    }, {
+      "name" : "S",
+      "type" : "cat",
+      "default" : "1",
+      "values" : [ "1" ]
+    } ],
+    "dependencies" : [ ]
+  }, {
+    "name" : "weka.classifiers.meta.Vote",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "AbstractClassifier", "BaseClassifier", "EnsembleClassifier" ],
+    "parameter" : [ {
+      "name" : "R",
+      "type" : "cat",
+      "default" : "AVG",
+      "values" : [ "AVG", "PROD", "MAJ", "MIN", "MAX" ]
+    }, {
+      "name" : "S",
+      "type" : "cat",
+      "default" : "1",
+      "values" : [ "1" ]
+    } ],
+    "dependencies" : [ ]
   }
    ]
 }

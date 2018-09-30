@@ -6,13 +6,13 @@
   	"providedInterface" : [ "MetaBuildingBlock" ],
   	"parameter" : [],
   	"dependencies" : []
-  	}, {
+  }, {
   	"name" : "EndingMetaBuildingBlock", 
   	"requiredInterface" : [ {"id": "MultiCombinerCompatibleClassifier", "name":  "MultiCombinerCompatibleClassifier" } ],
   	"providedInterface" : [ "MetaBuildingBlock" ],
   	"parameter" : [],
   	"dependencies" : []
-  	}, {
+  }, {
     "name" : "jaicore.ml.multioptionsingleenhancer.ExtendedBagging",
     "requiredInterface" : [ {"id": "MultiCombinerCompatibleClassifier", "name":  "MultiCombinerCompatibleClassifier" }, {"id": "MetaBuildingBlock", "name":  "MetaBuildingBlock" } ],
   	"providedInterface" : [ "AbstractClassifier", "BaseClassifier", "EnsembleClassifier" ],
