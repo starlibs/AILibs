@@ -66,11 +66,12 @@ public class HASCOProblemReductionWithParameterPruning {
 	private final PerformanceKnowledgeBase performanceKB;
 	private final boolean useImportanceEstimation;
 	private final String benchmarkName;
+	private final String benchmarkForWarmstart;
 
 	public HASCOProblemReductionWithParameterPruning(File configurationFile, String nameOfRequiredInterface,
 			boolean configureParams, IParameterImportanceEstimator importanceEstimator, double importanceThreshold,
 			int minNumSamples, PerformanceKnowledgeBase performanceKB, boolean useImportanceEstimation,
-			String benchmarkName) throws IOException {
+			String benchmarkName, String benchmarkForWarmstart) throws IOException {
 		ComponentLoader cl = new ComponentLoader();
 		cl.loadComponents(configurationFile);
 		this.components = cl.getComponents();
@@ -83,13 +84,14 @@ public class HASCOProblemReductionWithParameterPruning {
 		this.performanceKB = performanceKB;
 		this.useImportanceEstimation = useImportanceEstimation;
 		this.benchmarkName = benchmarkName;
+		this.benchmarkForWarmstart = benchmarkForWarmstart;
 	}
 
 	public HASCOProblemReductionWithParameterPruning(Collection<Component> components,
 			Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig,
 			String nameOfRequiredInterface, boolean configureParams, IParameterImportanceEstimator importanceEstimator,
 			double importanceThreshold, int minNumSamples, PerformanceKnowledgeBase performanceKB,
-			boolean useImportanceEstimation, String benchmarkName) {
+			boolean useImportanceEstimation, String benchmarkName, String benchmarkForWarmstart) {
 		super();
 		this.components = components;
 		this.paramRefinementConfig = paramRefinementConfig;
@@ -101,6 +103,7 @@ public class HASCOProblemReductionWithParameterPruning {
 		this.performanceKB = performanceKB;
 		this.useImportanceEstimation = useImportanceEstimation;
 		this.benchmarkName = benchmarkName;
+		this.benchmarkForWarmstart = benchmarkForWarmstart;
 	}
 
 	public Monom getInitState() {
@@ -260,11 +263,11 @@ public class HASCOProblemReductionWithParameterPruning {
 			 * ordering according to parameter importance values
 			 */
 			this.performanceKB.loadPerformanceSamplesFromDB();
-			System.out.println("Number of samples for " + c + " " + performanceKB.getNumSamplesForComponent("yeast", c));
+			System.out.println("Number of samples for " + c + " " + performanceKB.getNumSamplesForComponent(benchmarkForWarmstart, c));
 			if (this.configureParams) {
 				List<Parameter> parameters = c.getParameters().getTotalOrder();
-				if (parameters.size() > 1 && performanceKB.getPerformanceSamplesForIndividualComponent(benchmarkName, c) != null) {
-					FANOVAWarmstartComparator comparator = new FANOVAWarmstartComparator(performanceKB, benchmarkName, c);
+				if (parameters.size() > 1 && performanceKB.getPerformanceSamplesForIndividualComponent(benchmarkForWarmstart, c) != null) {
+					FANOVAWarmstartComparator comparator = new FANOVAWarmstartComparator(performanceKB, benchmarkForWarmstart, c);
 					System.out.println("before: " + parameters);
 					Collections.sort(parameters, comparator);
 					System.out.println("after: " + parameters);

@@ -129,7 +129,7 @@ public class HASCOWithParameterPruning<T, N, A, V extends Comparable<V>, R exten
 	private SQLAdapter intermediateResultAdapter;
 
 	private static int numberPrunedParameters = 0;
-	
+
 	private long startTime;
 
 	private ISolutionEvaluator<N, V> solutionEvaluator = new ISolutionEvaluator<N, V>() {
@@ -146,7 +146,12 @@ public class HASCOWithParameterPruning<T, N, A, V extends Comparable<V>, R exten
 				HASCOWithParameterPruning.this.bestRecognizedSolution = solution;
 				HASCOWithParameterPruning.this.compositionOfBestRecognizedSolution = composition;
 				HASCOWithParameterPruning.this.scoreOfBestRecognizedSolution = scoreOfSolution;
+				long deltaTime = System.nanoTime() - startTime;
+				System.out
+						.println("New solution found at: " + deltaTime + " with score: " + scoreOfSolution);
+				
 			}
+			
 			HASCOWithParameterPruning.this.solutionEvaluationEventBus
 					.post(new HASCOSolutionEvaluationEvent<>(composition, solution, scoreOfSolution));
 			return scoreOfSolution;
@@ -162,7 +167,7 @@ public class HASCOWithParameterPruning<T, N, A, V extends Comparable<V>, R exten
 	private final Collection<Object> listeners = new ArrayList<>();
 
 	/* benchmark name */
-	private final String benchmarkName = "yeast";
+	private final String benchmarkName, benchmarkForWarmStart;
 
 	/* performance knowledge base */
 	private final PerformanceKnowledgeBase performanceKB;
@@ -207,7 +212,8 @@ public class HASCOWithParameterPruning<T, N, A, V extends Comparable<V>, R exten
 			final IHASCOSearchSpaceUtilFactory<N, A, V> searchSpaceUtilFactory, final Factory<? extends T> factory,
 			final String nameOfRequiredInterface, final IObjectEvaluator<T, V> benchmark,
 			final double importanceThreshold, final int minNumSamplesForImportanceEstimation,
-			final boolean useParameterImportanceEstimation, final SQLAdapter warmstartAdapter) {
+			final boolean useParameterImportanceEstimation, final SQLAdapter warmstartAdapter,
+			final String benchmarkName, final String benchmarkForWarmstart) {
 		super();
 		this.startTime = System.nanoTime();
 		this.components = components;
@@ -215,6 +221,8 @@ public class HASCOWithParameterPruning<T, N, A, V extends Comparable<V>, R exten
 		this.plannerFactory = plannerFactory;
 		this.searchFactory = searchFactory;
 		this.benchmark = benchmark;
+		this.benchmarkName = benchmarkName;
+		this.benchmarkForWarmStart = benchmarkForWarmstart;
 		if (warmstartAdapter == null)
 			this.performanceKB = new PerformanceKnowledgeBase();
 		else
@@ -250,7 +258,9 @@ public class HASCOWithParameterPruning<T, N, A, V extends Comparable<V>, R exten
 							HASCOWithParameterPruning.this.scoreOfBestRecognizedSolution = scoreOfSolution;
 							// Save new best solution
 							long deltaTime = System.nanoTime() - startTime;
-							System.out.println("New solution found at: " + deltaTime + " with score: " + scoreOfSolution);
+							System.out
+									.println("New solution found at: " + deltaTime + " with score: " + scoreOfSolution);
+							
 						}
 						HASCOWithParameterPruning.this.solutionEvaluationEventBus
 								.post(new HASCOSolutionEvaluationEvent<>(composition, solution, scoreOfSolution));
@@ -273,7 +283,7 @@ public class HASCOWithParameterPruning<T, N, A, V extends Comparable<V>, R exten
 		// this.minNumSamplesForImportanceEstimation, this.performanceKB,true)));
 		reduction = new HASCOProblemReductionWithParameterPruning(components, paramRefinementConfig,
 				nameOfRequiredInterface, true, parameterImportanceEstimator, importanceThreshold,
-				minNumSamplesForImportanceEstimation, performanceKB, useParameterImportanceEstimation, benchmarkName);
+				minNumSamplesForImportanceEstimation, performanceKB, useParameterImportanceEstimation, benchmarkName, benchmarkForWarmstart);
 
 		this.problem = reduction.getPlanningProblem();
 		if (logger.isDebugEnabled()) {

@@ -298,7 +298,7 @@ public class PerformanceKnowledgeBase {
 			boolean havePerformanceTable = false;
 			while (rs.next()) {
 				String tableName = rs.getString(1);
-				if (tableName.equals("performance_samples")) {
+				if (tableName.equals("performance_samples_J48")) {
 					havePerformanceTable = true;
 				}
 			}
@@ -306,7 +306,7 @@ public class PerformanceKnowledgeBase {
 			if (!havePerformanceTable) {
 				System.out.println("Creating table for performance samples");
 				sqlAdapter.update(
-						"CREATE TABLE `performance_samples` (\r\n" + " `sample_id` int(10) NOT NULL AUTO_INCREMENT,\r\n"
+						"CREATE TABLE `performance_samples_J48` (\r\n" + " `sample_id` int(10) NOT NULL AUTO_INCREMENT,\r\n"
 								+ " `dataset` varchar(200) COLLATE utf8_bin DEFAULT NULL,\r\n"
 								+ " `composition` json NOT NULL,\r\n" + " `error_rate` double NOT NULL,\r\n"
 								+ " `test_evaluation_technique` varchar(20) ,\r\n"
@@ -450,7 +450,7 @@ public class PerformanceKnowledgeBase {
 			return;
 		}
 		try {
-			ResultSet rs = sqlAdapter.getResultsOfQuery("SELECT dataset, composition, error_rate FROM performance_samples");
+			ResultSet rs = sqlAdapter.getResultsOfQuery("SELECT dataset, composition, error_rate FROM performance_samples_J48");
 			ObjectMapper mapper = new ObjectMapper();
 			while (rs.next()) {
 				String benchmarkName = rs.getString(1);

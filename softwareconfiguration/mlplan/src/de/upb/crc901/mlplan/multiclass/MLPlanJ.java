@@ -74,13 +74,14 @@ public class MLPlanJ extends AbstractClassifier
 	private Classifier selectedClassifier;
 
 	public MLPlanJ(File configurationFile, double importanceThreshold, int minNumSamplesForImportanceEstimation,
-			boolean useImportanceEstimation, IntermediateResultHandler intermediateResultHandler, SQLAdapter adapter) {
+			boolean useImportanceEstimation, IntermediateResultHandler intermediateResultHandler, SQLAdapter adapter,
+			final String benchmarkName, final String benchmarkForWarmstart) {
 		super();
 		if (configurationFile == null || !configurationFile.exists())
 			throw new IllegalArgumentException(
 					"The file " + configurationFile + " is null or does not exist and cannot be used by ML-Plan");
 		hasco = new HASCOForWekaMLJ(configurationFile, importanceThreshold, minNumSamplesForImportanceEstimation,
-				useImportanceEstimation, intermediateResultHandler, adapter);
+				useImportanceEstimation, intermediateResultHandler, adapter, benchmarkName, benchmarkForWarmstart);
 	}
 
 	@Override

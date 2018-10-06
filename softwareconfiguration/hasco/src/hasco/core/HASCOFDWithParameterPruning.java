@@ -89,31 +89,34 @@ public class HASCOFDWithParameterPruning<T, V extends Comparable<V>>
 			Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig,
 			IObservableORGraphSearchFactory<TFDNode, String, V> searchFactory, Factory<? extends T> converter,
 			String nameOfRequiredInterface, IObjectEvaluator<T, V> benchmark, double importanceThreshold,
-			int minNumSamplesForImportanceEstimation, boolean useParameterImportanceEstimation, SQLAdapter adapter) {
+			int minNumSamplesForImportanceEstimation, boolean useParameterImportanceEstimation, SQLAdapter adapter,
+			final String benchmarkName, final String benchmarkForWarmstart) {
 		super(components, paramRefinementConfig, new ForwardDecompositionHTNPlannerFactory<>(), searchFactory,
 				new TFDSearchSpaceUtilFactory<>(), converter, nameOfRequiredInterface, benchmark, importanceThreshold,
-				minNumSamplesForImportanceEstimation, useParameterImportanceEstimation, adapter);
+				minNumSamplesForImportanceEstimation, useParameterImportanceEstimation, adapter, benchmarkName, benchmarkForWarmstart);
 	}
 
 	public HASCOFDWithParameterPruning(final Collection<Component> components,
 			Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig,
 			Factory<? extends T> converter, String nameOfRequiredInterface, IObjectEvaluator<T, V> benchmark,
 			double importanceThreshold, int minNumSamplesForImportanceEstimation,
-			boolean useParameterImportanceEstimation, SQLAdapter adapter) {
+			boolean useParameterImportanceEstimation, SQLAdapter adapter, final String benchmarkName,
+			final String benchmarkForWarmstart) {
 		this(components, paramRefinementConfig, new ORGraphSearchFactory<>(), converter, nameOfRequiredInterface,
 				benchmark, importanceThreshold, minNumSamplesForImportanceEstimation, useParameterImportanceEstimation,
-				adapter);
+				adapter, benchmarkName, benchmarkForWarmstart);
 	}
 
 	public HASCOFDWithParameterPruning(final Collection<Component> components,
 			Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig,
 			Factory<? extends T> converter, String nameOfRequiredInterface, IObjectEvaluator<T, V> benchmark,
 			OversearchAvoidanceConfig<TFDNode> oversearchAvoidanceConfig, double importanceThreshold,
-			int minNumSamplesForImportanceEstimation, boolean useParameterImportanceEstimation, SQLAdapter adapter) {
+			int minNumSamplesForImportanceEstimation, boolean useParameterImportanceEstimation, SQLAdapter adapter,
+			final String benchmarkName, final String benchmarkForWarmstart) {
 		this(components, paramRefinementConfig,
 				new UncertaintyORGraphSearchFactory<>(oversearchAvoidanceConfig, new CEOCTFDPathUnifier()), converter,
 				nameOfRequiredInterface, benchmark, importanceThreshold, minNumSamplesForImportanceEstimation,
-				useParameterImportanceEstimation, adapter);
+				useParameterImportanceEstimation, adapter, benchmarkName, benchmarkForWarmstart);
 		((UncertaintyORGraphSearchFactory<TFDNode, String, V>) getSearchFactory())
 				.setSolutionEvaluator(getSolutionEvaluator());
 	}

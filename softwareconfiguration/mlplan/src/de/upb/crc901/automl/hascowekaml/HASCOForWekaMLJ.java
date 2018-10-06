@@ -66,16 +66,20 @@ public class HASCOForWekaMLJ implements IObservableGraphAlgorithm<TFDNode, Strin
 	private boolean useParameterImportanceEstimation;
 	private IntermediateResultHandler intermediateResultHandler;
 	private SQLAdapter adapter;
+	private String benchmarkName;
+	private String benchmarkForWarmstart;
 
 	public HASCOForWekaMLJ(final File hascoConfigurationFile, double importanceThreshold, int minNumSamples,
 			boolean userParameterImportanceEstimation, IntermediateResultHandler intermediateResultHandler,
-			SQLAdapter adapter) {
+			SQLAdapter adapter,	final String benchmarkName, final String benchmarkForWarmstart) {
 		this.wekaSpaceConfigurationFile = hascoConfigurationFile;
 		this.importanceThreshold = importanceThreshold;
 		this.minNumSamples = minNumSamples;
 		this.useParameterImportanceEstimation = userParameterImportanceEstimation;
 		this.intermediateResultHandler = intermediateResultHandler;
 		this.adapter = adapter;
+		this.benchmarkName = benchmarkName;
+		this.benchmarkForWarmstart = benchmarkForWarmstart;
 	}
 
 	private Queue<HASCOForWekaMLSolutionJ> solutionsFoundByHASCO = new PriorityQueue<>(
@@ -129,7 +133,7 @@ public class HASCOForWekaMLJ implements IObservableGraphAlgorithm<TFDNode, Strin
 		// this.oversearchAvoidanceConfig);
 		hasco = new HASCOFDWithParameterPruning<>(cl.getComponents(), cl.getParamConfigs(), new WEKAPipelineFactory(),
 				"AbstractClassifier", ce, this.oversearchAvoidanceConfig, importanceThreshold, minNumSamples,
-				useParameterImportanceEstimation, adapter);
+				useParameterImportanceEstimation, adapter, benchmarkName, benchmarkForWarmstart);
 		hasco.setPreferredNodeEvaluator(this.preferredNodeEvaluator);
 		if (intermediateResultHandler != null)
 			hasco.registerListenerForSolutionEvaluations(intermediateResultHandler);
