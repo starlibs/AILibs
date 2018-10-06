@@ -171,6 +171,9 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 	public Map<String, Double> computeImportanceForSingleComponent(Component component) {
 		HashMap<String, Double> result = new HashMap<String, Double>();
 		Instances data = performanceKnowledgeBase.getPerformanceSamplesForIndividualComponent(benchmarkName, component);
+		System.out.println(data);
+		if(data == null)
+			return null;
 		ExtendedRandomForest forest = new ExtendedRandomForest(1.0d, 32, new FeatureSpace(data));
 		try {
 			forest.buildClassifier(data);

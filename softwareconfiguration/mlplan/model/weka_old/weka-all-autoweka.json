@@ -1,6 +1,6 @@
 {
 	"repository" : "WEKA - Auto-WEKA Searchspace",
-	"include": ["./weka-classifiers-autoweka2.json", "./weka-preprocessors-autoweka.json"],
+	"include": ["./weka-classifiers-autoweka.json", "./weka-preprocessors-autoweka.json"],
 	"components" : [ {
 	  	    "name" : "pipeline",
 	  	    "providedInterface" : [ "MLPipeline", "AbstractClassifier" ],

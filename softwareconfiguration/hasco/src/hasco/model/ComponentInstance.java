@@ -3,6 +3,7 @@ package hasco.model;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -57,10 +58,12 @@ public class ComponentInstance {
 		return sb.toString();
 	}
 
+	@JsonIgnore
 	public String getPrettyPrint() {
 		return getPrettyPrint(0);
 	}
 
+	@JsonIgnore
 	private String getPrettyPrint(int offset) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(component.getName() + "\n");

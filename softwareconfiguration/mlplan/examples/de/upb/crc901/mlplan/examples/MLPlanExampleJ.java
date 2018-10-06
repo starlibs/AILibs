@@ -34,20 +34,22 @@ public class MLPlanExampleJ {
 	public static void main(String[] args) throws Exception {
 
 		/* load data for segment dataset and create a train-test-split */
-		OpenmlConnector connector = new OpenmlConnector();
-		DataSetDescription ds = connector.dataGet(181);
-		File file = ds.getDataset("4350e421cdc16404033ef1812ea38c01");
-		// File file = new File("./examples/data/amazon.arff");
+//		OpenmlConnector connector = new OpenmlConnector();
+//		DataSetDescription ds = connector.dataGet(181);
+//		File file = ds.getDataset("4350e421cdc16404033ef1812ea38c01");
+		 File file = new File("./examples/data/yeast.arff");
 		int seed = 10;
 		Instances data = new Instances(new BufferedReader(new FileReader(file)));
 		data.setClassIndex(data.numAttributes() - 1);
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(seed), .7f);
 
 		/* initialize mlplan, and let it run for 30 seconds */
-		int timeoutInSeconds = 60;
+		int timeoutInSeconds = 900;
 		SQLAdapter intermediateResultAdapter = new SQLAdapter(args[0], args[1], args[2], args[3], true);
-		IntermediateResultHandler intermediateResultHandler = new IntermediateResultHandler(intermediateResultAdapter, "test");
-		MLPlanJ mlplan = new MLPlanJ(new File("model/weka/weka-all-autoweka.json"), -0.5d, 150, true, intermediateResultHandler);
+//		IntermediateResultHandler intermediateResultHandler = new IntermediateResultHandler(intermediateResultAdapter, "yeast","MCCV","70/30",seed,"MCCV","70/30",10);
+//		MLPlanJ mlplan = new MLPlanJ(new File("model/weka/weka-all-autoweka.json"), -0.5d, 150, true, intermediateResultHandler);
+		MLPlanJ mlplan = new MLPlanJ(new File("model/weka/weka-all-autoweka.json"), -0.5d, 150, true, null, intermediateResultAdapter, "winequality", "yeast");
+//		MLPlanJ mlplan = new MLPlanJ(new File("model/weka/weka-all-autoweka.json"), -0.5d, 150, true, null, null, "","");
 		mlplan.setLoggerName("mlplan");
 		mlplan.setRandomSeed(seed);
 		mlplan.setTimeout(timeoutInSeconds);
@@ -63,6 +65,5 @@ public class MLPlanExampleJ {
 		eval.evaluateModel(mlplan, split.get(1));
 		System.out.println("Error Rate of the solution produced by ML-Plan: " + (100 - eval.pctCorrect()) / 100f);
 		System.out.println("Number of parameters pruned: " + mlplan.getNumberPrunedParameters());
-		mlplan.estimateAndSafeImportanceValuesForComponents();
 	}
 }

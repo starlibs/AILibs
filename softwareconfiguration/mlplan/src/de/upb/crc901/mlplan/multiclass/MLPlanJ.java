@@ -24,6 +24,7 @@ import de.upb.crc901.automl.hascowekaml.HASCOForWekaMLJ.HASCOForWekaMLSolutionJ;
 import hasco.core.HASCOWithParameterPruning;
 import hasco.knowledgebase.IntermediateResultHandler;
 import jaicore.basic.ILoggingCustomizable;
+import jaicore.basic.SQLAdapter;
 import jaicore.basic.sets.SetUtil;
 import jaicore.concurrent.TimeoutTimer;
 import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
@@ -73,13 +74,14 @@ public class MLPlanJ extends AbstractClassifier
 	private Classifier selectedClassifier;
 
 	public MLPlanJ(File configurationFile, double importanceThreshold, int minNumSamplesForImportanceEstimation,
-			boolean useImportanceEstimation, IntermediateResultHandler intermediateResultHandler) {
+			boolean useImportanceEstimation, IntermediateResultHandler intermediateResultHandler, SQLAdapter adapter,
+			final String benchmarkName, final String benchmarkForWarmstart) {
 		super();
 		if (configurationFile == null || !configurationFile.exists())
 			throw new IllegalArgumentException(
 					"The file " + configurationFile + " is null or does not exist and cannot be used by ML-Plan");
 		hasco = new HASCOForWekaMLJ(configurationFile, importanceThreshold, minNumSamplesForImportanceEstimation,
-				useImportanceEstimation, intermediateResultHandler);
+				useImportanceEstimation, intermediateResultHandler, adapter, benchmarkName, benchmarkForWarmstart);
 	}
 
 	@Override
