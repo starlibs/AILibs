@@ -3,6 +3,7 @@ package jaicore.graphvisualizer.gui;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -57,7 +58,7 @@ public class Recorder<V,E> {
 	private EventBus infoBus;
 
 //    Nodemap to store types of nodes
-	private Map<Object, List> nodeMap;
+	private Map<Object, List<String>> nodeMap;
 
 //    List with every datasupplier
 	List<ISupplier> supplier;
@@ -223,16 +224,16 @@ public class Recorder<V,E> {
 
 //				counter for a nodetypeswitchevent
 		case "NodeTypeSwitchEvent":
-			NodeTypeSwitchEvent nodeTypeSwitchEvent = (NodeTypeSwitchEvent) event;
+			NodeTypeSwitchEvent<?> nodeTypeSwitchEvent = (NodeTypeSwitchEvent<?>) event;
 			List<String> typeList = nodeMap.get(nodeTypeSwitchEvent.getNode());
 			typeList.remove(typeList.size() - 1);
-			counter = new NodeTypeSwitchEvent(nodeTypeSwitchEvent.getNode(), typeList.get(typeList.size() - 1));
+			counter = new NodeTypeSwitchEvent<Object>(nodeTypeSwitchEvent.getNode(), typeList.get(typeList.size() - 1));
 			break;
 
 //				counter for a nodereached event
 		case "NodeReachedEvent":
-			NodeReachedEvent nodeReachedEvent = (NodeReachedEvent) event;
-			counter = new NodeRemovedEvent(nodeReachedEvent.getNode());
+			NodeReachedEvent<?> nodeReachedEvent = (NodeReachedEvent<?>) event;
+			counter = new NodeRemovedEvent<Object>(nodeReachedEvent.getNode());
 			break;
 
 		default:
@@ -252,19 +253,19 @@ public class Recorder<V,E> {
 //            switch the event corresponding to the current event to get the right type of the node
 		switch (event.getClass().getSimpleName()) {
 		case "GraphInitializedEvent":
-			GraphInitializedEvent initializedEvent = (GraphInitializedEvent) event;
-			types = new ArrayList();
+			GraphInitializedEvent<?> initializedEvent = (GraphInitializedEvent<?>) event;
+			types = new ArrayList<String>();
 			types.add("root");
 			this.nodeMap.put(initializedEvent.getRoot(), types);
 			break;
 
 		case "NodeTypeSwitchEvent":
-			NodeTypeSwitchEvent nodeTypeSwitchEvent = (NodeTypeSwitchEvent) event;
+			NodeTypeSwitchEvent<?> nodeTypeSwitchEvent = (NodeTypeSwitchEvent<?>) event;
 			this.nodeMap.get(nodeTypeSwitchEvent.getNode()).add(nodeTypeSwitchEvent.getType());
 			break;
 
 		case "NodeReachedEvent":
-			NodeReachedEvent nodeReachedEvent = (NodeReachedEvent) event;
+			NodeReachedEvent<?> nodeReachedEvent = (NodeReachedEvent<?>) event;
 			types = new ArrayList<>();
 			types.add(nodeReachedEvent.getType());
 			this.nodeMap.put(nodeReachedEvent.getNode(), types);
@@ -309,7 +310,7 @@ public class Recorder<V,E> {
 	 * search currently is
 	 */
 	@Subscribe
-	public void receiveNodePushedEvent(NodePushed event) {
+	public void receiveNodePushedEvent(NodePushed<?> event) {
 		// TODO node pushed
 		if (this.index == this.receivedEvents.size()) {
 			Object node = event.getNode();
@@ -329,40 +330,41 @@ public class Recorder<V,E> {
 	 *
 	 * @param file The file to which the events are stored.
 	 */
+	@SuppressWarnings("rawtypes")
 	private void save(File file) {
 		ObjectMapper mapper = new ObjectMapper();
 
 		mapper.enable(SerializationFeature.INDENT_OUTPUT);
 		try {
-			List mapperList = new ArrayList();
+			List<Collection> mapperList = new ArrayList<Collection>();
 
-			List<LinkedHashMap<Long, Object>> saveList = new ArrayList();
+			List<LinkedHashMap<Long, Object>> saveList = new ArrayList<LinkedHashMap<Long, Object>>();
 
 			for (int i = 0; i < receivedEvents.size(); i++) {
 				Object event = receivedEvents.get(i);
-				LinkedHashMap<Long, Object> timeToEvent = new LinkedHashMap();
+				LinkedHashMap<Long, Object> timeToEvent = new LinkedHashMap<Long, Object>();
 				int code = 0;
 
 				// Maps times to the hashcodes of the events
 				switch (event.getClass().getSimpleName()) {
 				case "GraphInitializedEvent":
-					GraphInitializedEvent graphInitializedEvent = (GraphInitializedEvent) event;
+					GraphInitializedEvent<?> graphInitializedEvent = (GraphInitializedEvent<?>) event;
 					code = graphInitializedEvent.getRoot().hashCode();
-					timeToEvent.put(receivingTimes.get(i), new GraphInitializedEvent(code));
+					timeToEvent.put(receivingTimes.get(i), new GraphInitializedEvent<Integer>(code));
 					break;
 
 				case "NodeTypeSwitchEvent":
-					NodeTypeSwitchEvent nodeTypeSwitchEvent = (NodeTypeSwitchEvent) event;
+					NodeTypeSwitchEvent<?> nodeTypeSwitchEvent = (NodeTypeSwitchEvent<?>) event;
 					code = nodeTypeSwitchEvent.getNode().hashCode();
 
 					timeToEvent.put(receivingTimes.get(i),
-							new NodeTypeSwitchEvent(code, nodeTypeSwitchEvent.getType()));
+							new NodeTypeSwitchEvent<Integer>(code, nodeTypeSwitchEvent.getType()));
 					break;
 
 				case "NodeReachedEvent":
-					NodeReachedEvent nodeReachedEvent = (NodeReachedEvent) event;
+					NodeReachedEvent<?> nodeReachedEvent = (NodeReachedEvent<?>) event;
 					code = nodeReachedEvent.getNode().hashCode();
-					timeToEvent.put(receivingTimes.get(i), new NodeReachedEvent(nodeReachedEvent.getParent().hashCode(),
+					timeToEvent.put(receivingTimes.get(i), new NodeReachedEvent<Integer>(nodeReachedEvent.getParent().hashCode(),
 							code, nodeReachedEvent.getType()));
 					break;
 
@@ -406,34 +408,34 @@ public class Recorder<V,E> {
 		ObjectMapper mapper = new ObjectMapper();
 
 		try {
-			List mapperList = mapper.readValue(file,
+			List<?> mapperList = mapper.readValue(file,
 					mapper.getTypeFactory().constructCollectionType(List.class, Object.class));
-			ArrayList eventList = (ArrayList) mapperList.get(0);
+			ArrayList<?> eventList = (ArrayList<?>) mapperList.get(0);
 //			create the events out of the stored ones. In the newly loaded events the hashcode of the nodes of the old ones are the whole node
 			eventList.stream().forEach(n -> {
-				LinkedHashMap map = (LinkedHashMap) n;
+				LinkedHashMap<?, ?> map = (LinkedHashMap<?, ?>) n;
 				map.keySet().stream().forEach(time -> receivingTimes.add(Long.parseLong((String) time)));
 				map.values().stream().forEach(v -> {
-					LinkedHashMap eventMap = (LinkedHashMap) v;
+					LinkedHashMap<?, ?> eventMap = (LinkedHashMap<?, ?>) v;
 
 					int node;
 					Object event;
 					switch (eventMap.get("name").toString()) {
 					case "GraphInitializedEvent":
 						int hashCode = (int) eventMap.get("root");
-						event = new GraphInitializedEvent(Integer.parseInt(String.valueOf(eventMap.get("root"))));
+						event = new GraphInitializedEvent<Integer>(Integer.parseInt(String.valueOf(eventMap.get("root"))));
 						System.out.println(hashCode);
 						break;
 
 					case "NodeTypeSwitchEvent":
 						node = Integer.parseInt(String.valueOf(eventMap.get("node")));
-						event = new NodeTypeSwitchEvent(node, eventMap.get("type").toString());
+						event = new NodeTypeSwitchEvent<Integer>(node, eventMap.get("type").toString());
 						break;
 
 					case "NodeReachedEvent":
 						int parent = Integer.parseInt(String.valueOf(eventMap.get("parent")));
 						node = Integer.parseInt(String.valueOf(eventMap.get("node")));
-						event = new NodeReachedEvent(parent, node, eventMap.get("type").toString());
+						event = new NodeReachedEvent<Integer>(parent, node, eventMap.get("type").toString());
 						break;
 
 					default:
@@ -446,8 +448,8 @@ public class Recorder<V,E> {
 			});
 //             create the supplier if possible
 			mapperList.stream().filter(o -> mapperList.indexOf(o) != 0).forEach(o -> {
-				ArrayList m = (ArrayList) o;
-				LinkedHashMap map = (LinkedHashMap) m.get(0);
+				ArrayList<?> m = (ArrayList<?>) o;
+				LinkedHashMap<?, ?> map = (LinkedHashMap<?, ?>) m.get(0);
 				ReconstructionDataSupplier supplier = new ReconstructionDataSupplier(map);
 				this.addDataSupplier(supplier);
 			});

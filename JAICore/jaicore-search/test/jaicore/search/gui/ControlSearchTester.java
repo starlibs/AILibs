@@ -7,7 +7,6 @@ import jaicore.search.core.interfaces.IGraphSearchFactory;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
 import jaicore.search.model.probleminputs.GeneralEvaluatedTraversalTree;
 import jaicore.search.model.travesaltree.Node;
-import jaicore.search.testproblems.nqueens.NQueenTester;
 import jaicore.search.testproblems.nqueens.NQueensToGeneralTravesalTreeReducer;
 import jaicore.search.testproblems.nqueens.QueenNode;
 

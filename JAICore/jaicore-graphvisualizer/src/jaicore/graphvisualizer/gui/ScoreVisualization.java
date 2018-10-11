@@ -92,6 +92,11 @@ public class ScoreVisualization<V,E> extends GraphVisualization<V,E> {
 			this.graph.setAttribute("ui.stylesheet", "url('conf/searchgraph.css')");
 			this.score = false;
 		}
+		if(node instanceof Score && ((Score) node).getScore()== 1) {
+			this.graph.clear();
+			this.graph.setAttribute("ui.stylesheet", "url('conf/searchgraph.css')");
+			this.score = false;
+		}
 
 	}
 
