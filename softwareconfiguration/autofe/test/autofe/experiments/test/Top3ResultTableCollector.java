@@ -53,7 +53,8 @@ public class Top3ResultTableCollector {
 
 		TaskChunk<Task> cMLPlan = null;
 		{
-			try (SQLAdapter adapter = new SQLAdapter("localhost", "experiments2", "experiments123!", "experiments")) {
+			// TODO: host, user, password, database
+			try (SQLAdapter adapter = new SQLAdapter("", "", "", "")) {
 				cMLPlan = TaskChunkUtil.readFromMySQLTable(adapter, "benchmarkranking", commonFields);
 
 				for (String benchmark : benchmarkFunctions) {

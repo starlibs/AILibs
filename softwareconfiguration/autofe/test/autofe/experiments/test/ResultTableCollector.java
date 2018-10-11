@@ -45,14 +45,11 @@ public class ResultTableCollector {
 		Map<String, String> commonFields = new HashMap<>();
 
 		TaskChunk<Task> csvChunks = new TaskChunk<>("chunkID=baselines");
-		// csvChunks.addAll(cMLPlan);
 
 		TaskChunk<Task> cMLPlan = null;
 		{
-			// try (SQLAdapter adapter = new SQLAdapter("localhost", "experiments2",
-			// "experiments123!", "experiments")) {
-			try (SQLAdapter adapter = new SQLAdapter("localhost", "experiments2", "experiments123!", "experiments")) {
-				// commonFields.put("candidate", C_ML_PLAN);
+			// TODO: host, user, password, database
+			try (SQLAdapter adapter = new SQLAdapter("", "", "", "")) {
 				cMLPlan = TaskChunkUtil.readFromMySQLTable(adapter, "benchmarkranking", commonFields);
 
 				for (String benchmark : benchmarkFunctions) {
