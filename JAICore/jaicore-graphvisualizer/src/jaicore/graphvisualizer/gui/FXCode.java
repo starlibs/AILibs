@@ -417,6 +417,9 @@ public class FXCode<V,E> implements NodeListener<V> {
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 			return null;
+		}catch(NoClassDefFoundError e) {
+			e.printStackTrace();
+			return null;
 		}
 	}
 

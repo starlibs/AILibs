@@ -30,6 +30,9 @@ public class ScoreVisualization<V,E> extends GraphVisualization<V,E> {
 
 	private Label maxLabel;
 	private Label minLabel;
+	
+	private StackPane stackPane;
+	private Rectangle gradient;
 
 	public ScoreVisualization() {
 		super();
@@ -44,7 +47,8 @@ public class ScoreVisualization<V,E> extends GraphVisualization<V,E> {
 		this.minLabel = new Label(Double.toString(bestFValue));
 
 		first = true;
-		score = true;
+		this.score = true;
+		
 
 	}
 
@@ -88,6 +92,7 @@ public class ScoreVisualization<V,E> extends GraphVisualization<V,E> {
 
 	private void checkScore(V node) {
 		if (!(node instanceof Score)) {
+			System.out.println(node.getClass());
 			this.graph.clear();
 			this.graph.setAttribute("ui.stylesheet", "url('conf/searchgraph.css')");
 			this.score = false;
@@ -97,11 +102,17 @@ public class ScoreVisualization<V,E> extends GraphVisualization<V,E> {
 			this.graph.setAttribute("ui.stylesheet", "url('conf/searchgraph.css')");
 			this.score = false;
 		}
+		
+		if(!this.score) {
+			List<javafx.scene.Node> list = this.stackPane.getChildren();
+			list.remove(gradient);
+			list.remove(this.maxLabel);
+			list.remove(this.minLabel);
+		}
 
 	}
 
 	public void update() {
-		System.out.println("update");
 		for (Node n : nodes) {
 			if (n instanceof Score) {
 				double fvalue = ((Score) n).getScore();
@@ -129,9 +140,11 @@ public class ScoreVisualization<V,E> extends GraphVisualization<V,E> {
 
 	@Override
 	public javafx.scene.Node getFXNode() {
-		StackPane stackPane = new StackPane();
+		this.stackPane = new StackPane();
 		stackPane.getChildren().add(this.viewPanel);
-		stackPane.getChildren().add(createColorGradient());
+		System.out.println("Color");
+		if(this.score)
+			stackPane.getChildren().add(createColorGradient());
 		stackPane.setAlignment(Pos.TOP_RIGHT);
 
 		this.maxLabel.setTextFill(Color.CYAN);
@@ -174,6 +187,7 @@ public class ScoreVisualization<V,E> extends GraphVisualization<V,E> {
 		stops = list.toArray(new Stop[0]);
 		LinearGradient lg = new LinearGradient(0, 1, 0, 0, true, CycleMethod.NO_CYCLE, stops);
 		box.setFill(lg);
+		this.gradient = box;
 		return box;
 	}
 }
