@@ -9,6 +9,7 @@ Furthermore it may be attached to a KVStoreCollection via setCollection(•)
 
 ## Functional Methods
 | Method | Description |
+| --- | --- |
 | getCollection() | Returns the KVStoreCollection this KVStore is assigned to |
 | setCollection(KVStoreCollection collection) | Attaches this KVStore to a KVStoreCollection |
 | getStringRepresentation(String[] projectionFilter) | Returns a String based serialization format including only the key-value pairs for the keys provided in the array |
