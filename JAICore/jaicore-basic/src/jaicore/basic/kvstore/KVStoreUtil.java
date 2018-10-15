@@ -23,7 +23,7 @@ public class KVStoreUtil {
 			String rowValue = store.getAsString(rowIndex).replaceAll("\\_", "\\\\_");
 			String columnValue = store.getAsString(columnIndex).replaceAll("\\_", "\\\\_");
 			String tableEntry = ValueUtil.valueToString(store.getAsDouble("meanAccuracy"), 2) + "+-" + ValueUtil.valueToString(store.getAsDouble("stdAccuracy"), 2);
-			table.addEntry(columnValue, rowValue, tableEntry);
+			table.add(columnValue, rowValue, tableEntry);
 		}
 		sb.append(table.toLaTeX());
 		return sb.toString();
@@ -50,7 +50,7 @@ public class KVStoreUtil {
 				}
 			}
 
-			table.addEntry(columnValue, rowValue, tableEntryBuilder.toString());
+			table.add(columnValue, rowValue, tableEntryBuilder.toString());
 		}
 		sb.append(table.toLaTeX());
 		return sb.toString();
@@ -77,7 +77,7 @@ public class KVStoreUtil {
 				}
 			}
 
-			table.addEntry(columnValue, rowValue, tableEntryBuilder.toString());
+			table.add(columnValue, rowValue, tableEntryBuilder.toString());
 		}
 		sb.append(table.toLaTeX(missingEntry));
 		return sb.toString();
@@ -104,7 +104,7 @@ public class KVStoreUtil {
 				}
 			}
 
-			table.addEntry(columnValue, rowValue, tableEntryBuilder.toString());
+			table.add(columnValue, rowValue, tableEntryBuilder.toString());
 		}
 		sb.append(table.toCSV(standardValue));
 		return sb.toString();
@@ -129,7 +129,7 @@ public class KVStoreUtil {
 				}
 			}
 
-			table.addEntry(columnValue, rowValue, tableEntryBuilder.toString());
+			table.add(columnValue, rowValue, tableEntryBuilder.toString());
 		}
 		return table;
 	}
