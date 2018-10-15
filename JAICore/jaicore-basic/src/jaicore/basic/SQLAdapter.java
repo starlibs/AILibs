@@ -174,6 +174,10 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 		return this.insert(statement, values);
 	}
 
+	public void update(final String sql) throws SQLException {
+		this.update(sql, new ArrayList<String>());
+	}
+
 	public void update(final String sql, final String[] values) throws SQLException {
 		this.update(sql, Arrays.asList(values));
 	}
@@ -214,6 +218,43 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 			this.setValue(stmt, i, values.get(i - 1));
 		}
 		stmt.executeUpdate();
+	}
+
+	/**
+	 * Executes the given statements atomically. Only works if no other statements are sent through this adapter in parallel! Only use for single-threaded applications, otherwise side effects may happen as this changes the auto commit
+	 * settings of the connection temporarily.
+	 *
+	 * @param queries
+	 *            The queries to execute atomically
+	 * @throws SQLException
+	 *             If the status of the connection cannot be changed. If something goes wrong while executing the given statements, they are rolled back before they are committed.
+	 */
+	public void executeQueriesAtomically(final List<PreparedStatement> queries) throws SQLException {
+		this.checkConnection();
+		this.connect.setAutoCommit(false);
+
+		try {
+			for (PreparedStatement query : queries) {
+				query.execute();
+			}
+			this.connect.commit();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.err.println("Transaction is being rolled back.");
+			try {
+				this.connect.rollback();
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
+		} finally {
+			for (PreparedStatement query : queries) {
+				if (query != null) {
+					query.close();
+				}
+			}
+
+			this.connect.setAutoCommit(true);
+		}
 	}
 
 	private void setValue(final PreparedStatement stmt, final int index, final Object val) throws SQLException {
