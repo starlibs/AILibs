@@ -17,7 +17,8 @@ import java.util.Map;
  */
 public class Table<V> {
 
-	private static final String STANDARD_CSV_SEPARATOR = "\t";
+	/** Standard separator for CSV data */
+	private static final String STANDARD_CSV_SEPARATOR = ";";
 
 	/** List of existing column names. */
 	private final List<String> columnIndex = new LinkedList<>();
@@ -127,6 +128,15 @@ public class Table<V> {
 		return this.toCSV(STANDARD_CSV_SEPARATOR, standardValue);
 	}
 
+	/**
+	 * Converts the table into CSV format.
+	 *
+	 * @param separator
+	 *            The symbol to separate values in the CSV format.
+	 * @param standardValue
+	 *            Value to assign for non-existing entries.
+	 * @return String in CSV format describing the data of the table.
+	 */
 	public String toCSV(final String separator, final String standardValue) {
 		StringBuilder sb = new StringBuilder();
 
