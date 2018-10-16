@@ -14,6 +14,7 @@ import org.junit.Test;
 
 import jaicore.ml.core.Interval;
 import jaicore.ml.intervaltree.ExtendedM5Forest;
+import jaicore.ml.intervaltree.ExtendedRandomForest;
 import junit.framework.Assert;
 import weka.core.DenseInstance;
 import weka.core.Instance;
@@ -22,42 +23,51 @@ import weka.core.converters.ArffLoader.ArffReader;
 
 public class ExtendedM5ForestTest {
 
-	private static String trainFile = "resources/regression_data/autos_200_RQPtrain.arff";
+	private static String[] datasets = { "boston", "bank32nh" };
+	// , "bank8FM", "bodyfat", "cpu_small", "cal.housing",
+	// "elevator", "house8L", "kin8nm", "machine.cpu" };
+	private static double[] noise = { 0, 0.1, 0.3, 0.5 };
 
-	private static String testFile = "resources/regression_data/autos_200_RQPtest.arff";
+	private static int noise_count = noise.length;
+	private static int dataset_count = datasets.length;
 
-	private static int SIZE = 100;
-	private ExtendedM5Forest[] classifier = new ExtendedM5Forest[seedNum];
+	private ExtendedM5Forest[][][] classifier = new ExtendedM5Forest[dataset_count][noise_count][seedNum];
 	private static final int seedNum = 10;
-	
-	private static final double [] l1Lower = new double[seedNum];
-	private static final double [] l1Upper = new double[seedNum];
 
+	private static final double[][][] l1Lower = new double[dataset_count][noise_count][seedNum];
+	private static final double[][][] l1Upper = new double[dataset_count][noise_count][seedNum];
 
 	@Before
 	public void testTrain() {
-		try (BufferedReader reader = Files.newBufferedReader(Paths.get(trainFile), StandardCharsets.UTF_8)) {
-			ArffReader arffReader = new ArffReader(reader);
-			Instances data = arffReader.getData();
-			for (int seed = 0; seed < seedNum; seed++) {
-				Instances iData = randomSubset(data, seed);
-				iData.setClassIndex(iData.numAttributes() - 1);
-
-				classifier[seed] = new ExtendedM5Forest();
-				classifier[seed].buildClassifier(iData);
+		for (int dataset_index = 0; dataset_index < dataset_count; dataset_index++) {
+			for (int noise_index = 0; noise_index < noise_count; noise_index++) {
+				String dataset_name = getDatasetNameForIndex(dataset_index, noise_index);
+				try (BufferedReader reader = Files.newBufferedReader(Paths.get(dataset_name), StandardCharsets.UTF_8)) {
+					ArffReader arffReader = new ArffReader(reader);
+					Instances data = arffReader.getData();
+					for (int seed = 0; seed < seedNum; seed++) {
+						data.setClassIndex(data.numAttributes() - 1);
+						classifier[dataset_index][noise_index][seed] = new ExtendedM5Forest(seed);
+						classifier[dataset_index][noise_index][seed].buildClassifier(data);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+					Assert.fail();
+				}
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			Assert.fail();
 		}
 	}
 
-	private static Instances randomSubset(Instances data, int seed) {
-		int len = data.size() - SIZE;
-		Random rnd = new Random(seed);
-		int begin = rnd.nextInt(len);
-		Instances toReturn = new Instances(data, begin, SIZE);
-		return toReturn;
+	private static String getDatasetNameForIndex(int dataset_index, int noise_index) {
+		String dataset_name = datasets[dataset_index];
+		double noise_val = noise[noise_index];
+		String noise_str = "";
+		if (noise_val == 0.0) {
+			noise_str = "0";
+		} else {
+			noise_str = "" + noise_val;
+		}
+		return String.format("resources/regression_data/%s_noise_%s_RQPtrain.arff", dataset_name, noise_str);
 	}
 
 	/**
@@ -65,55 +75,65 @@ public class ExtendedM5ForestTest {
 	 */
 	@Test
 	public void testPredict() {
-		for (int seed = 0; seed < seedNum; seed++) {
-			try (BufferedReader reader = Files.newBufferedReader(Paths.get(testFile), StandardCharsets.UTF_8)) {
-				ArffReader arffReader = new ArffReader(reader);
-				Instances data = arffReader.getData();
-				List<Double> predictedLowers = new ArrayList<>();
-				List<Double> actualLowers = new ArrayList<>();
-				List<Double> predictedUppers = new ArrayList<>();
-				List<Double> actualUppers = new ArrayList<>();
-				for (Instance instance : data) {
-					// construct the real interval
-					double lower = instance.value(data.numAttributes() - 2);
-					double upper = instance.value(data.numAttributes() - 1);
-					Instance strippedInstance = new DenseInstance(data.numAttributes() - 2);
-					for (int i = 0; i < data.numAttributes() - 2; i++) {
-						strippedInstance.setValue(i, instance.value(i));
-					}
-					Interval actualInterval = new Interval(lower, upper);
-					Interval predictedInterval = classifier[seed].predictInterval(strippedInstance);
-				//	System.out.println(
-				//			"Actual interval: " + actualInterval + ", predicted Interval " + predictedInterval);
-					predictedLowers.add(predictedInterval.getLowerBound());
-					predictedUppers.add(predictedInterval.getUpperBound());
-					actualLowers.add(lower);
-					actualUppers.add(upper);
-				}
-				// construct R^2 loss
-		//		double r2lossLower = r2Loss(predictedLowers, actualLowers);
-		//		double r2LossUpper = r2Loss(predictedUppers, actualUppers);
-		//		System.out.println("R^2 loss for the lower bound is " + r2lossLower);
-		//		System.out.println("R^2 loss for the upper bound is " + r2LossUpper);
+		for (int dataset_index = 0; dataset_index < dataset_count; dataset_index++) {
+			for (int noise_index = 0; noise_index < noise_count; noise_index++) {
+				for (int seed = 0; seed < seedNum; seed++) {
+					String testfile_name = getTestFileName(dataset_index);
+					try (BufferedReader reader = Files.newBufferedReader(Paths.get(testfile_name),
+							StandardCharsets.UTF_8)) {
+						ArffReader arffReader = new ArffReader(reader);
+						Instances data = arffReader.getData();
+						List<Double> predictedLowers = new ArrayList<>();
+						List<Double> actualLowers = new ArrayList<>();
+						List<Double> predictedUppers = new ArrayList<>();
+						List<Double> actualUppers = new ArrayList<>();
+						for (Instance instance : data) {
+							// construct the real interval
+							double lower = instance.value(data.numAttributes() - 2);
+							double upper = instance.value(data.numAttributes() - 1);
+							Instance strippedInstance = new DenseInstance(data.numAttributes() - 2);
+							for (int i = 0; i < data.numAttributes() - 2; i++) {
+								strippedInstance.setValue(i, instance.value(i));
+							}
+							Interval predictedInterval = classifier[dataset_index][noise_index][seed]
+									.predictInterval(strippedInstance);
+							// System.out.println(
+							// "Actual interval: " + actualInterval + ", predicted Interval " +
+							// predictedInterval);
+							predictedLowers.add(predictedInterval.getLowerBound());
+							predictedUppers.add(predictedInterval.getUpperBound());
+							actualLowers.add(lower);
+							actualUppers.add(upper);
+						}
 
-				double l1LossLower = L1Loss(predictedLowers, actualLowers);
-				double l1LossUpper = L1Loss(predictedUppers, actualUppers);
-				System.out.println("L1 loss for the lower bound is " + l1LossLower);
-				System.out.println("L1 loss for the upper bound is " + l1LossUpper);
-				
-				l1Lower[seed] = l1LossLower;
-				l1Upper[seed] = l1LossUpper;
-				
-			} catch (Exception e) {
-				e.printStackTrace();
-				Assert.fail();
+						double l1LossLower = L1Loss(predictedLowers, actualLowers);
+						double l1LossUpper = L1Loss(predictedUppers, actualUppers);
+						// System.out.println("L1 loss for the lower bound is " + l1LossLower);
+						// System.out.println("L1 loss for the upper bound is " + l1LossUpper);
+
+						l1Lower[dataset_index][noise_index][seed] = l1LossLower;
+						l1Upper[dataset_index][noise_index][seed] = l1LossUpper;
+
+					} catch (Exception e) {
+						e.printStackTrace();
+						Assert.fail();
+					}
+				}
+				double lowerMax = Arrays.stream(l1Lower[dataset_index][noise_index]).max().getAsDouble();
+				double upperMax = Arrays.stream(l1Upper[dataset_index][noise_index]).max().getAsDouble();
+				double avgLower = Arrays.stream(l1Lower[dataset_index][noise_index]).filter(d -> d != lowerMax)
+						.average().getAsDouble();
+				double avgUpper = Arrays.stream(l1Upper[dataset_index][noise_index]).filter(d -> d != upperMax)
+						.average().getAsDouble();
+				double l1Loss = avgLower + avgUpper;
+				System.out.println(datasets[dataset_index] + " " + noise[noise_index] + " " + l1Loss);
 			}
 		}
-		double lowerMax = Arrays.stream(l1Lower).max().getAsDouble();
-		double upperMax = Arrays.stream(l1Upper).max().getAsDouble();
-		System.out.println(Arrays.stream(l1Lower).filter(d -> d != lowerMax).average().getAsDouble());
-		System.out.println(Arrays.stream(l1Upper).filter(d -> d != upperMax).average().getAsDouble());
+	}
 
+	private String getTestFileName(int dataset_index) {
+		String dataset_name = datasets[dataset_index];
+		return String.format("resources/regression_data/%s_RQPtest.arff", dataset_name);
 	}
 
 	private static final double L1Loss(List<Double> predicted, List<Double> actual) {

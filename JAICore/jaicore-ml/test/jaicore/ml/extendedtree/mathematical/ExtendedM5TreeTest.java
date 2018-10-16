@@ -37,6 +37,39 @@ public class ExtendedM5TreeTest {
 	}
 
 	@Test
+	public void giveData () throws Exception {
+		Instances trainingData = params.getTrainingData();
+		ExtendedM5Tree tree = new ExtendedM5Tree();
+		try {
+			tree.buildClassifier(trainingData);
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
+		StringBuilder X = new StringBuilder("[");
+		StringBuilder Y = new StringBuilder("[");
+
+		for (double i = -5; i<= 5; i+=0.01) {
+			Instance instance = new DenseInstance(1);
+			instance.setValue(0, i);
+			double y = tree.classifyInstance(instance);
+			if (i +0.01 >= 5) {
+				X.append(i + "]");
+				Y.append(y + "]");
+
+			}else {
+				X.append(i + ",");
+				Y.append(y + ",");
+			}
+		}
+		System.out.println(X.toString());
+		System.out.println(Y.toString());
+		Instance testInstance = new DenseInstance(2);
+		testInstance.setValue(0, -3.7);
+		testInstance.setValue(1, -2.3);
+		//System.out.println(tree.predictInterval(testInstance));
+	}
+	
+//	@Test
 	public void testTree() {
 		Instances trainingData = params.getTrainingData();
 		ExtendedM5Tree tree = new ExtendedM5Tree();
@@ -55,18 +88,16 @@ public class ExtendedM5TreeTest {
 	@Parameters
 	public static Collection<M5TreeParams[]> getParameters() {
 		return Arrays.asList(new M5TreeParams[][] {
-			{ new M5TreeParams((x) -> Math.pow(x, 2), (x) -> 2 * x) },
-			{ new M5TreeParams((x) -> Math.sin(x), (x) -> Math.cos(x)) },
-			{ new M5TreeParams((x) -> Math.pow(x, 10), (x) -> 10 * Math.pow(x, 9)) }
+			{ new M5TreeParams((x) -> Math.sin(x) * x + x + 0, null) }
 			});
 	}
 
 	static class M5TreeParams {
-		private static final double lowerBound = 0;
+		private static final double lowerBound = -5;
 
 		private static final double upperBound = 10;
 
-		private static final double stepSize = 0.1;
+		private static final double stepSize = 0.25;
 
 		private static final double gradientDescentStepSize = 0.01;
 

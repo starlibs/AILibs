@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 import jaicore.ml.core.Interval;
 import weka.classifiers.trees.RandomTree;
 import weka.core.Instance;
+import weka.core.Instances;
 
 /**
  * Extension of a classic RandomTree to predict intervals.
@@ -23,19 +24,19 @@ public class ExtendedRandomTree extends RandomTree {
 	 * 
 	 */
 	private static final long serialVersionUID = -467555221387281335L;
-	 
 
 	public Interval predictInterval(Instance data) {
-		Interval [] mappedData = new Interval[data.numAttributes() / 2];
+		// pruneIntervals(data);
+		Interval[] mappedData = new Interval[data.numAttributes() / 2];
 		int counter = 0;
-		for (int attrNum = 0; attrNum<data.numAttributes(); attrNum=attrNum+2) {
-			mappedData[counter] = new Interval(data.value(attrNum), data.value(attrNum+1));
+		for (int attrNum = 0; attrNum < data.numAttributes(); attrNum = attrNum + 2) {
+			mappedData[counter] = new Interval(data.value(attrNum), data.value(attrNum + 1));
 			counter++;
 		}
 		return predictInterval(mappedData);
 	}
-	
-	public Interval predictInterval (Interval[] queriedInterval) {
+
+	public Interval predictInterval(Interval[] queriedInterval) {
 		// the stack of elements that still have to be processed.
 		Deque<Entry<Interval[], Tree>> stack = new ArrayDeque<>();
 		// initially, the root and the queried interval
@@ -62,15 +63,19 @@ public class ExtendedRandomTree extends RandomTree {
 				Tree leftChild = children[0];
 				Tree rightChild = children[1];
 				// traverse the tree
-				
+
 				if (intervalForAttribute.getLowerBound() <= threshold) {
-					
+
 					if (threshold <= intervalForAttribute.getUpperBound()) {
-						// scenario: x_min <= threshold <= x_max 
+						// scenario: x_min <= threshold <= x_max
 						// query [x_min, threshold] on the left child
+						// query [threshold, x_max] right
 						Interval[] newInterval = substituteInterval(toProcess.getKey(),
 								new Interval(intervalForAttribute.getLowerBound(), threshold), attribute);
+						Interval[] newMaxInterval = substituteInterval(toProcess.getKey(),
+								new Interval(threshold, intervalForAttribute.getUpperBound()), attribute);
 						stack.push(getEntry(newInterval, leftChild));
+						stack.push(getEntry(newMaxInterval, rightChild));
 					} else {
 						// scenario: threshold <= x_min <= x_max
 						// query [x_min, x_max] on the left child
@@ -79,13 +84,7 @@ public class ExtendedRandomTree extends RandomTree {
 				}
 				// analogously...
 				if (intervalForAttribute.getUpperBound() > threshold) {
-					if (intervalForAttribute.getLowerBound() <= threshold) {
-						Interval[] newInterval = substituteInterval(toProcess.getKey(),
-								new Interval(threshold, intervalForAttribute.getUpperBound()), attribute);
-						stack.push(getEntry(newInterval, rightChild));
-					} else {
-						stack.push(getEntry(toProcess.getKey(), rightChild));
-					}
+					stack.push(getEntry(toProcess.getKey(), rightChild));
 				}
 			}
 		}
@@ -108,5 +107,24 @@ public class ExtendedRandomTree extends RandomTree {
 
 	private Entry<Interval[], Tree> getEntry(Interval[] interval, Tree tree) {
 		return new AbstractMap.SimpleEntry<>(interval, tree);
+	}
+
+	/**
+	 * Prunes the range query to the features of this bagged random tree (i.e.
+	 * removes the features that were not selected for this tree)Ï
+	 * 
+	 * @param rangeQuery
+	 * @return
+	 */
+	private Instance pruneIntervals(Instance rangeQuery) {
+		Instances header = this.m_Info;
+		System.out.println("Num attr header " + (header.numAttributes() - 1));
+		System.out.println("Num attr range query " + (rangeQuery.numAttributes() / 2));
+		for (int i = 0; i < header.numAttributes(); i++) {
+			weka.core.Attribute attribute = header.attribute(i);
+			// System.out.println("Attribute at pos "+ i + " has header "+
+			// attribute.name());
+		}
+		return rangeQuery;
 	}
 }

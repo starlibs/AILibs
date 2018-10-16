@@ -14,7 +14,7 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import jaicore.ml.core.Interval;
-import jaicore.ml.intervaltree.ExtendedRandomTree;
+import jaicore.ml.intervaltree.ExtendedRandomForest;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
@@ -39,7 +39,7 @@ public class ExtendedRandomTreeTest {
 	@Test
 	public void testTree() {
 		Instances trainingData = params.getTrainingData();
-		ExtendedRandomTree tree = new ExtendedRandomTree();
+		ExtendedRandomForest tree = new ExtendedRandomForest();
 		try {
 			tree.buildClassifier(trainingData);
 		} catch (Exception e1) {
@@ -66,7 +66,7 @@ public class ExtendedRandomTreeTest {
 
 		private static final double upperBound = 10;
 
-		private static final double stepSize = 0.1;
+		private static final double stepSize = 0.01;
 
 		private static final double gradientDescentStepSize = 0.01;
 

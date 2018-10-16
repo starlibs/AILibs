@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.DoubleStream;
 
+import com.google.common.collect.Collections2;
+
 public class RQPHelper {
 
 	public enum TREE_AGGREGATION {
@@ -29,23 +31,27 @@ public class RQPHelper {
 		throw new IllegalStateException("Unreachable Statement");
 	}
 
+	private double aggregateQuantil075(List<double[]> asList) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
 	private double aggregateAverage(DoubleStream toAggregate) {
-		return toAggregate.average().orElseThrow(() -> new NoSuchElementException());
+		return toAggregate.average().orElseThrow(NoSuchElementException::new);
 	}
 
 	private double aggregateMin(DoubleStream toAggregate) {
-		return toAggregate.min().orElseThrow(() -> new NoSuchElementException());
+		return toAggregate.min().orElseThrow(NoSuchElementException::new);
 
 	}
 
 	private double aggregateMax(DoubleStream toAggregate) {
-		return toAggregate.max().orElseThrow(() -> new NoSuchElementException());
+		return toAggregate.max().orElseThrow(NoSuchElementException::new);
 
 	}
 
 	private double aggregateQuantil075(double [] toAggregate) {
-		List<Double> list = Arrays.asList(toAggregate);
-		Collections.sort(toAggregate);
+	//	Collections.sort();
 		return 0;
 	}
 }

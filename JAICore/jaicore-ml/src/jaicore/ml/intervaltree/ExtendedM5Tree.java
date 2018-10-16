@@ -18,13 +18,21 @@ import weka.core.Instances;
 
 public class ExtendedM5Tree extends M5Base {
 
+	public ExtendedM5Tree() {
+		super();
+		try {
+			this.setOptions(new String[] { "-U" });
+		} catch (Exception e) {
+		}
+	}
+
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -467555221387281335L;
 
 	private Instances queriedDataset = null;
-	
+
 	public Interval predictInterval(Instance data) {
 		Interval[] mappedData = new Interval[data.numAttributes() / 2];
 		int counter = 0;
@@ -32,11 +40,12 @@ public class ExtendedM5Tree extends M5Base {
 		attributes.add(new Attribute("bias"));
 		for (int attrNum = 0; attrNum < data.numAttributes(); attrNum = attrNum + 2) {
 			mappedData[counter] = new Interval(data.value(attrNum), data.value(attrNum + 1));
-			attributes.add(new Attribute("xVal"+counter));
+			attributes.add(new Attribute("xVal" + counter));
 			counter++;
 		}
 		queriedDataset = new Instances("queriedInterval", attributes, 2);
 		queriedDataset.setClassIndex(-1);
+
 		return predictInterval(mappedData);
 	}
 
@@ -56,29 +65,7 @@ public class ExtendedM5Tree extends M5Base {
 			int attribute = nextTree.splitAtt();
 			// process node
 			if (nextTree.isLeaf()) {
-				Interval [] usedBounds = toProcess.getKey();
-				PreConstructedLinearModel model = nextTree.getModel();
-				// calculate the values at the edges of the interval
-				// we know that by linearity this will yield the extremal values
-				Instance instanceLower = new DenseInstance(usedBounds.length+1);
-				Instance instanceUpper = new DenseInstance(usedBounds.length+1);
-				for (int i = 0; i < usedBounds.length; i++) {
-					instanceLower.setValue(i, usedBounds[i].getLowerBound());
-					instanceUpper.setValue(i, usedBounds[i].getUpperBound());
-				}
-				instanceLower.setValue(usedBounds.length, 1);
-				instanceUpper.setValue(usedBounds.length, 1);
-				instanceLower.setDataset(queriedDataset);
-				instanceUpper.setDataset(queriedDataset);
-				try {
-					double predictionLower = model.classifyInstance(instanceLower);
-					double predictionUpper = model.classifyInstance(instanceUpper);
-
-					list.add(new Interval(Double.min(predictionLower, predictionUpper),
-							Double.max(predictionLower, predictionUpper)));
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				}
+				predictLeaf(list, toProcess, nextTree);
 			} else {
 				Interval intervalForAttribute = queriedInterval[attribute];
 				// no leaf node...
@@ -95,7 +82,8 @@ public class ExtendedM5Tree extends M5Base {
 						Interval[] leftInterval = substituteInterval(toProcess.getKey(),
 								new Interval(intervalForAttribute.getLowerBound(), threshold), attribute);
 						stack.push(getEntry(leftInterval, leftChild));
-						Interval [] rightInterval = substituteInterval(toProcess.getKey(), new Interval(threshold, intervalForAttribute.getUpperBound()), attribute);
+						Interval[] rightInterval = substituteInterval(toProcess.getKey(),
+								new Interval(threshold, intervalForAttribute.getUpperBound()), attribute);
 						stack.push(getEntry(rightInterval, rightChild));
 					} else {
 						// scenario: x_min <= x_max < threshold
@@ -108,6 +96,42 @@ public class ExtendedM5Tree extends M5Base {
 			}
 		}
 		return combineInterval(list);
+	}
+
+	private void predictLeaf(ArrayList<Interval> list, Entry<Interval[], RuleNode> toProcess, RuleNode nextTree) {
+		Interval[] usedBounds = toProcess.getKey();
+		PreConstructedLinearModel model = nextTree.getModel();
+		// calculate the values at the edges of the interval
+		// we know that by linearity this will yield the extremal values
+		Instance instanceLower = new DenseInstance(usedBounds.length + 1);
+		Instance instanceUpper = new DenseInstance(usedBounds.length + 1);
+
+		double[] coefficients = model.coefficients();
+
+		for (int i = 0; i < usedBounds.length; i++) {
+			double coefficient = coefficients[i];
+			if (coefficient < 0) {
+				instanceLower.setValue(i+ 1, usedBounds[i].getLowerBound());
+				instanceUpper.setValue(i +1 , usedBounds[i].getUpperBound());
+			} else {
+				instanceLower.setValue(i +1 , usedBounds[i].getUpperBound());
+				instanceUpper.setValue(i +1 , usedBounds[i].getLowerBound());
+			}
+		}
+		instanceLower.setValue(0, 1);
+		instanceUpper.setValue(0, 1);
+		instanceLower.setDataset(queriedDataset);
+		instanceUpper.setDataset(queriedDataset);
+		try {
+			double predictionLower = model.classifyInstance(instanceLower);
+			System.out.println("Lower "+ predictionLower);
+			double predictionUpper = model.classifyInstance(instanceUpper);
+			System.out.println("Upper "+ predictionUpper);
+			list.add(new Interval(Double.min(predictionLower, predictionUpper),
+					Double.max(predictionLower, predictionUpper)));
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	private Interval combineInterval(ArrayList<Interval> list) {
