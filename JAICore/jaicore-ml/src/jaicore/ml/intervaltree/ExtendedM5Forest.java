@@ -1,69 +1,63 @@
 package jaicore.ml.intervaltree;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.function.DoubleBinaryOperator;
-import java.util.function.ToDoubleFunction;
-import java.util.stream.Collectors;
-import java.util.stream.DoubleStream;
-
-import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 
 import jaicore.ml.core.Interval;
+import jaicore.ml.intervaltree.aggregation.AggressiveAggregator;
+import jaicore.ml.intervaltree.aggregation.IntervalAggregator;
+import jaicore.ml.intervaltree.aggregation.QuantileAggregator;
 import weka.classifiers.meta.Bagging;
 import weka.core.Instance;
 
 public class ExtendedM5Forest extends Bagging {
-	
-	private static double upper_percentile = 0.8;
-	
-	private static double lower_percentile = 1 - upper_percentile;
 
-	private DoubleBinaryOperator forestLowerAggregationFunction;
-	
-	private DoubleBinaryOperator forestUpperAggregationFunction;
 	/**
-	 * 
+	 * For serialization purposes.
 	 */
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 8774800172762290733L;
+	
+	private final IntervalAggregator forestAggregator;
 
 	public ExtendedM5Forest() {
-		this(null, null);
+		this(new QuantileAggregator(0.15), new AggressiveAggregator());
 	}
-	
-	public ExtendedM5Forest  (DoubleBinaryOperator forestLowerAggregationFunction, DoubleBinaryOperator forestUpperAggregationFunction) {
-		ExtendedM5Tree rTree = new ExtendedM5Tree();
+
+	public ExtendedM5Forest(IntervalAggregator treeAggregator, IntervalAggregator forestAggregator) {
+		ExtendedM5Tree rTree = new ExtendedM5Tree(treeAggregator);
 		rTree.setDoNotCheckCapabilities(false);
 		super.setClassifier(rTree);
 		super.setRepresentCopiesUsingWeights(false);
 		setNumIterations(defaultNumberOfIterations());
+		this.forestAggregator = forestAggregator;
+		try {
+			this.setOptions(new String[] { "-U" });
+		} catch (Exception e) {
+			throw new IllegalStateException("Couldn't unprune the forest.");
+		}
 	}
 
 	public ExtendedM5Forest(int seed) {
-		this(null, null);
+		this();
 		this.setSeed(seed);
-		try {
-			this.setOptions(new String[] {"-U"});
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	}
+	
+	@Override
+	protected String defaultClassifierString() {
+		return "jaicore.ml.intervaltree.ExtendedM5Tree";
 	}
 
 	public Interval predictInterval(Instance rangeQuery) {
 		// collect the different predictions
-		Interval[] predictions = new Interval[this.m_Classifiers.length];
-		double [] lowers = new double [this.m_Classifiers.length];
-		double [] uppers = new double [this.m_Classifiers.length];
+		List<Double> predictions = new ArrayList<>(m_Classifiers.length * 2);
 		for (int i = 0; i < this.m_Classifiers.length; i++) {
 			ExtendedM5Tree classifier = (ExtendedM5Tree) this.m_Classifiers[i];
-			predictions[i] = classifier.predictInterval(rangeQuery);
-			lowers [i] = predictions[i].getLowerBound();
-			uppers[i] = predictions[i].getUpperBound();
+			Interval prediction = classifier.predictInterval(rangeQuery);
+			predictions.add(prediction.getLowerBound());
+			predictions.add(prediction.getUpperBound());
+
 		}
-		Percentile perctl = new Percentile();
-		double lower = perctl.evaluate(lowers, lower_percentile);
-		double upper = perctl.evaluate(uppers, upper_percentile);
-		return new Interval(lower, upper);
+		// aggregate them
+		return forestAggregator.aggregate(predictions);
 	}
 }

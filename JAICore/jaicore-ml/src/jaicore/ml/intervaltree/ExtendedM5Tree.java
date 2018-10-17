@@ -1,62 +1,59 @@
 package jaicore.ml.intervaltree;
 
-import java.util.AbstractMap;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Deque;
 import java.util.Map.Entry;
 
 import jaicore.ml.core.Interval;
+import jaicore.ml.intervaltree.aggregation.AggressiveAggregator;
+import jaicore.ml.intervaltree.aggregation.IntervalAggregator;
+import jaicore.ml.intervaltree.util.RQPHelper;
+import jaicore.ml.intervaltree.util.RQPHelper.IntervalAndHeader;
 import weka.classifiers.trees.m5.M5Base;
 import weka.classifiers.trees.m5.PreConstructedLinearModel;
 import weka.classifiers.trees.m5.RuleNode;
-import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
 public class ExtendedM5Tree extends M5Base {
 
+	/**
+	 * For serialization purposes.
+	 */
+	private static final long serialVersionUID = 6099808075887732225L;
+
+	private final IntervalAggregator intervalAggregator;
+
 	public ExtendedM5Tree() {
+		this(new AggressiveAggregator());
+	}
+
+	public ExtendedM5Tree(IntervalAggregator intervalAggregator) {
 		super();
 		try {
 			this.setOptions(new String[] { "-U" });
 		} catch (Exception e) {
+			throw new IllegalStateException("Couldn't unprune the tree");
 		}
+		this.intervalAggregator = intervalAggregator;
 	}
-
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -467555221387281335L;
-
-	private Instances queriedDataset = null;
 
 	public Interval predictInterval(Instance data) {
-		Interval[] mappedData = new Interval[data.numAttributes() / 2];
-		int counter = 0;
-		ArrayList<Attribute> attributes = new ArrayList<>();
-		attributes.add(new Attribute("bias"));
-		for (int attrNum = 0; attrNum < data.numAttributes(); attrNum = attrNum + 2) {
-			mappedData[counter] = new Interval(data.value(attrNum), data.value(attrNum + 1));
-			attributes.add(new Attribute("xVal" + counter));
-			counter++;
-		}
-		queriedDataset = new Instances("queriedInterval", attributes, 2);
-		queriedDataset.setClassIndex(-1);
-
-		return predictInterval(mappedData);
+		IntervalAndHeader intervalAndHeader = RQPHelper.mapWEKAToTree(data);
+		return predictInterval(intervalAndHeader);
 	}
 
-	public Interval predictInterval(Interval[] queriedInterval) {
+	public Interval predictInterval(IntervalAndHeader intervalAndHeader) {
+		Interval[] queriedInterval = intervalAndHeader.getIntervals();
 		// the stack of elements that still have to be processed.
 		Deque<Entry<Interval[], RuleNode>> stack = new ArrayDeque<>();
 		// initially, the root and the queried interval
-		stack.push(getEntry(queriedInterval, this.getM5RootNode()));
+		stack.push(RQPHelper.getEntry(queriedInterval, this.getM5RootNode()));
 
 		// the list of all leaf values
-		ArrayList<Interval> list = new ArrayList<>();
+		ArrayList<Double> list = new ArrayList<>();
 		while (stack.peek() != null) {
 			// pick the next node to process
 			Entry<Interval[], RuleNode> toProcess = stack.pop();
@@ -65,7 +62,7 @@ public class ExtendedM5Tree extends M5Base {
 			int attribute = nextTree.splitAtt();
 			// process node
 			if (nextTree.isLeaf()) {
-				predictLeaf(list, toProcess, nextTree);
+				predictLeaf(list, toProcess, nextTree, intervalAndHeader.getHeaderInformation());
 			} else {
 				Interval intervalForAttribute = queriedInterval[attribute];
 				// no leaf node...
@@ -79,26 +76,27 @@ public class ExtendedM5Tree extends M5Base {
 						// scenario: x_min <= threshold <= x_max
 						// query [x_min, threshold] on the left child
 						// query [threshold, x_max] on the right child
-						Interval[] leftInterval = substituteInterval(toProcess.getKey(),
+						Interval[] leftInterval = RQPHelper.substituteInterval(toProcess.getKey(),
 								new Interval(intervalForAttribute.getLowerBound(), threshold), attribute);
-						stack.push(getEntry(leftInterval, leftChild));
-						Interval[] rightInterval = substituteInterval(toProcess.getKey(),
+						stack.push(RQPHelper.getEntry(leftInterval, leftChild));
+						Interval[] rightInterval = RQPHelper.substituteInterval(toProcess.getKey(),
 								new Interval(threshold, intervalForAttribute.getUpperBound()), attribute);
-						stack.push(getEntry(rightInterval, rightChild));
+						stack.push(RQPHelper.getEntry(rightInterval, rightChild));
 					} else {
 						// scenario: x_min <= x_max < threshold
 						// query [x_min, x_max] on the left child
-						stack.push(getEntry(toProcess.getKey(), leftChild));
+						stack.push(RQPHelper.getEntry(toProcess.getKey(), leftChild));
 					}
 				} else {
-					stack.push(getEntry(toProcess.getKey(), rightChild));
+					stack.push(RQPHelper.getEntry(toProcess.getKey(), rightChild));
 				}
 			}
 		}
-		return combineInterval(list);
+		return intervalAggregator.aggregate(list);
 	}
 
-	private void predictLeaf(ArrayList<Interval> list, Entry<Interval[], RuleNode> toProcess, RuleNode nextTree) {
+	private void predictLeaf(ArrayList<Double> list, Entry<Interval[], RuleNode> toProcess, RuleNode nextTree,
+			Instances header) {
 		Interval[] usedBounds = toProcess.getKey();
 		PreConstructedLinearModel model = nextTree.getModel();
 		// calculate the values at the edges of the interval
@@ -111,44 +109,24 @@ public class ExtendedM5Tree extends M5Base {
 		for (int i = 0; i < usedBounds.length; i++) {
 			double coefficient = coefficients[i];
 			if (coefficient < 0) {
-				instanceLower.setValue(i+ 1, usedBounds[i].getLowerBound());
-				instanceUpper.setValue(i +1 , usedBounds[i].getUpperBound());
+				instanceLower.setValue(i + 1, usedBounds[i].getLowerBound());
+				instanceUpper.setValue(i + 1, usedBounds[i].getUpperBound());
 			} else {
-				instanceLower.setValue(i +1 , usedBounds[i].getUpperBound());
-				instanceUpper.setValue(i +1 , usedBounds[i].getLowerBound());
+				instanceLower.setValue(i + 1, usedBounds[i].getUpperBound());
+				instanceUpper.setValue(i + 1, usedBounds[i].getLowerBound());
 			}
 		}
 		instanceLower.setValue(0, 1);
 		instanceUpper.setValue(0, 1);
-		instanceLower.setDataset(queriedDataset);
-		instanceUpper.setDataset(queriedDataset);
+		instanceLower.setDataset(header);
+		instanceUpper.setDataset(header);
 		try {
 			double predictionLower = model.classifyInstance(instanceLower);
-			System.out.println("Lower "+ predictionLower);
 			double predictionUpper = model.classifyInstance(instanceUpper);
-			System.out.println("Upper "+ predictionUpper);
-			list.add(new Interval(Double.min(predictionLower, predictionUpper),
-					Double.max(predictionLower, predictionUpper)));
+			list.add(predictionLower);
+			list.add(predictionUpper);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-	}
-
-	private Interval combineInterval(ArrayList<Interval> list) {
-		double min = list.stream().mapToDouble(Interval::getLowerBound).min()
-				.orElseThrow(() -> new IllegalStateException("Couldn't find minimum?!"));
-		double max = list.stream().mapToDouble(Interval::getUpperBound).max()
-				.orElseThrow(() -> new IllegalStateException("Couldn't find maximum?!"));
-		return new Interval(min, max);
-	}
-
-	private Interval[] substituteInterval(Interval[] original, Interval toSubstitute, int index) {
-		Interval[] copy = Arrays.copyOf(original, original.length);
-		copy[index] = toSubstitute;
-		return copy;
-	}
-
-	private Entry<Interval[], RuleNode> getEntry(Interval[] interval, RuleNode tree) {
-		return new AbstractMap.SimpleEntry<>(interval, tree);
 	}
 }
