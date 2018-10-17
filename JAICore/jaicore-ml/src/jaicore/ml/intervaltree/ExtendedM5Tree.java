@@ -17,7 +17,7 @@ import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
-public class ExtendedM5Tree extends M5Base {
+public class ExtendedM5Tree extends M5Base implements RangeQueryPredictor{
 
 	/**
 	 * For serialization purposes.
@@ -40,10 +40,6 @@ public class ExtendedM5Tree extends M5Base {
 		this.intervalAggregator = intervalAggregator;
 	}
 
-	public Interval predictInterval(Instance data) {
-		IntervalAndHeader intervalAndHeader = RQPHelper.mapWEKAToTree(data);
-		return predictInterval(intervalAndHeader);
-	}
 
 	public Interval predictInterval(IntervalAndHeader intervalAndHeader) {
 		Interval[] queriedInterval = intervalAndHeader.getIntervals();

@@ -10,7 +10,6 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.openml.apiconnector.xml.Task.Input.Data_set;
 
 import jaicore.ml.core.Interval;
 import jaicore.ml.intervaltree.ExtendedRandomForest;

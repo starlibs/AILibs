@@ -9,8 +9,8 @@ import jaicore.ml.core.Interval;
 import jaicore.ml.intervaltree.aggregation.AggressiveAggregator;
 import jaicore.ml.intervaltree.aggregation.IntervalAggregator;
 import jaicore.ml.intervaltree.util.RQPHelper;
+import jaicore.ml.intervaltree.util.RQPHelper.IntervalAndHeader;
 import weka.classifiers.trees.RandomTree;
-import weka.core.Instance;
 
 /**
  * Extension of a classic RandomTree to predict intervals.
@@ -18,7 +18,7 @@ import weka.core.Instance;
  * @author mirkoj
  *
  */
-public class ExtendedRandomTree extends RandomTree {
+public class ExtendedRandomTree extends RandomTree implements RangeQueryPredictor {
 
 	/**
 	 * For serialization purposes
@@ -41,17 +41,8 @@ public class ExtendedRandomTree extends RandomTree {
 		this.intervalAggregator = intervalAggregator;
 	}
 
-	public Interval predictInterval(Instance data) {
-		Interval[] mappedData = new Interval[data.numAttributes() / 2];
-		int counter = 0;
-		for (int attrNum = 0; attrNum < data.numAttributes(); attrNum = attrNum + 2) {
-			mappedData[counter] = new Interval(data.value(attrNum), data.value(attrNum + 1));
-			counter++;
-		}
-		return predictInterval(mappedData);
-	}
-
-	public Interval predictInterval(Interval[] queriedInterval) {
+	public Interval predictInterval(IntervalAndHeader intervalAndHeader) {
+		Interval[] queriedInterval = intervalAndHeader.getIntervals();
 		// the stack of elements that still have to be processed.
 		Deque<Entry<Interval[], Tree>> stack = new ArrayDeque<>();
 		// initially, the root and the queried interval
