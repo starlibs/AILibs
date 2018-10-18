@@ -65,6 +65,7 @@ public class ExtendedRandomTree extends RandomTree {
 	private Observation[][] allObservations;
 	private HashMap<Set<Integer>, Double> varianceOfSubsetIndividual, varianceOfSubsetTotal;
 	private HashMap<Tree, Double> mapForEmptyLeaves;
+	private boolean isPrepared;
 
 	public ExtendedRandomTree() {
 		super();
@@ -75,11 +76,13 @@ public class ExtendedRandomTree extends RandomTree {
 		varianceOfSubsetTotal = new HashMap<Set<Integer>, Double>();
 		varianceOfSubsetIndividual = new HashMap<Set<Integer>, Double>();
 		mapForEmptyLeaves = new HashMap<Tree, Double>();
+		this.isPrepared = false;
 	}
 
 	public ExtendedRandomTree(FeatureSpace featureSpace) {
 		this();
 		this.featureSpace = featureSpace;
+		this.isPrepared = false;
 	}
 
 	public Interval predictInterval(Interval[] queriedInterval) {
@@ -217,6 +220,10 @@ public class ExtendedRandomTree extends RandomTree {
 	 * @return Variance contribution of the feature subset
 	 */
 	public double computeMarginalStandardDeviationForSubsetOfFeatures(Set<Integer> features) {
+		if(!this.isPrepared) {
+			System.out.println("Tree is not prepared, preprocessing may take a while");
+			this.preprocess();
+		}
 		// as we use a set as a key, we should at least make it immutable
 		features = Collections.unmodifiableSet(features);
 		double vU;
@@ -257,6 +264,10 @@ public class ExtendedRandomTree extends RandomTree {
 	 * @return Variance contribution of the feature subset
 	 */
 	public double computeMarginalVarianceContributionForSubsetOfFeatures(Set<Integer> features) {
+		if(!this.isPrepared) {
+			System.out.println("Tree is not prepared, preprocessing may take a while");
+			this.preprocess();
+		}
 		features = Collections.unmodifiableSet(features);
 		double vU;
 		if (this.totalVariance == 0.0d) {
@@ -298,6 +309,10 @@ public class ExtendedRandomTree extends RandomTree {
 	 * @return Variance contribution of the feature subset
 	 */
 	public double computeMarginalVarianceContributionForSubsetOfFeaturesNotNormalized(Set<Integer> features) {
+		if(!this.isPrepared) {
+			System.out.println("Tree is not prepared, preprocessing may take a while");
+			this.preprocess();
+		}
 		features = Collections.unmodifiableSet(features);
 		double vU;
 		if (this.totalVariance == 0.0d) {
@@ -611,6 +626,7 @@ public class ExtendedRandomTree extends RandomTree {
 		// System.out.println("Range size: " + this.featureSpace.getRangeSize());
 		this.totalVariance = computeTotalVarianceOfSubset(set);
 		// System.out.println("trees total variance = " + this.totalVariance);
+		this.isPrepared = true;
 	}
 
 	public void printObservations() {

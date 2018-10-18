@@ -89,7 +89,7 @@ public class isRefinementCompletedPredicateWithImportanceCheck implements Evalua
 		/* determine current values for the params */
 		ComponentInstance groundComponent = Util.getGroundComponentsFromState(state, components, false)
 				.get(objectContainer);
-		ComponentInstance ci = Util.getSolutionCompositionFromState(components, state);
+		ComponentInstance ci = Util.getSolutionCompositionFromState(components, state, false);
 		Component component = groundComponent.getComponent();
 		Map<String, String> componentParamContainers = Util.getParameterContainerMap(state, objectContainer);
 		Map<String, String> componentParams = groundComponent.getParameterValues();

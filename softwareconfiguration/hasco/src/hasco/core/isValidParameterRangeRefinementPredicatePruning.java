@@ -61,7 +61,7 @@ public class isValidParameterRangeRefinementPredicatePruning implements Evaluabl
 //		if (true)
 //			return new ArrayList<>();
 
-		ComponentInstance ci = Util.getSolutionCompositionFromState(components, state);
+		ComponentInstance ci = Util.getSolutionCompositionFromState(components, state, false);
 		String compositionIdentifier = Util.getComponentNamesOfComposition(ci);
 
 		/* determine the context for which the interval refinement should be oracled */
