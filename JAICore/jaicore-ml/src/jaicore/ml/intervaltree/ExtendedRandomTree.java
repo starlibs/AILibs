@@ -209,7 +209,7 @@ public class ExtendedRandomTree extends RandomTree {
 	// this.totalVariance = var;
 	// return var;
 	// }
-	
+
 	/**
 	 * Computes the variance contribution of a subset of features.
 	 * 
@@ -217,6 +217,8 @@ public class ExtendedRandomTree extends RandomTree {
 	 * @return Variance contribution of the feature subset
 	 */
 	public double computeMarginalStandardDeviationForSubsetOfFeatures(Set<Integer> features) {
+		// as we use a set as a key, we should at least make it immutable
+		features = Collections.unmodifiableSet(features);
 		double vU;
 		if (this.totalVariance == 0.0d) {
 			System.out.println("The trees total variance is zero, predictions make no sense at this point!");
@@ -228,16 +230,12 @@ public class ExtendedRandomTree extends RandomTree {
 			vU = computeTotalVarianceOfSubset(features);
 		// System.out.println("current total variance for " + features.toString() + " =
 		// " + vU);
-		double subtractor = 0;
 		for (int k = 1; k < features.size(); k++) {
 			// generate all subsets of size k
 			Set<Set<Integer>> subsets = Sets.combinations(features, k);
 			for (Set<Integer> subset : subsets) {
 				if (subset.size() < 1)
 					continue;
-				if (!varianceOfSubsetIndividual.containsKey(subset)) {
-					double temp = computeMarginalVarianceContributionForSubsetOfFeatures(subset);
-				}
 				// System.out.println("Subtracting " + varianceOfSubsetIndividual.get(subset) +
 				// " for " + subset);
 				vU -= varianceOfSubsetIndividual.get(subset);
@@ -259,6 +257,7 @@ public class ExtendedRandomTree extends RandomTree {
 	 * @return Variance contribution of the feature subset
 	 */
 	public double computeMarginalVarianceContributionForSubsetOfFeatures(Set<Integer> features) {
+		features = Collections.unmodifiableSet(features);
 		double vU;
 		if (this.totalVariance == 0.0d) {
 			System.out.println("The trees total variance is zero, predictions make no sense at this point!");
@@ -270,16 +269,12 @@ public class ExtendedRandomTree extends RandomTree {
 			vU = computeTotalVarianceOfSubset(features);
 		// System.out.println("current total variance for " + features.toString() + " =
 		// " + vU);
-		double subtractor = 0;
 		for (int k = 1; k < features.size(); k++) {
 			// generate all subsets of size k
 			Set<Set<Integer>> subsets = Sets.combinations(features, k);
 			for (Set<Integer> subset : subsets) {
 				if (subset.size() < 1)
 					continue;
-				if (!varianceOfSubsetIndividual.containsKey(subset)) {
-					double temp = computeMarginalVarianceContributionForSubsetOfFeatures(subset);
-				}
 				// System.out.println("Subtracting " + varianceOfSubsetIndividual.get(subset) +
 				// " for " + subset);
 				vU -= varianceOfSubsetIndividual.get(subset);
@@ -303,6 +298,7 @@ public class ExtendedRandomTree extends RandomTree {
 	 * @return Variance contribution of the feature subset
 	 */
 	public double computeMarginalVarianceContributionForSubsetOfFeaturesNotNormalized(Set<Integer> features) {
+		features = Collections.unmodifiableSet(features);
 		double vU;
 		if (this.totalVariance == 0.0d) {
 			System.out.println("The trees total variance is zero, predictions make no sense at this point!");
@@ -314,16 +310,12 @@ public class ExtendedRandomTree extends RandomTree {
 			vU = computeTotalVarianceOfSubset(features);
 		// System.out.println("current total variance for " + features.toString() + " =
 		// " + vU);
-		double subtractor = 0;
 		for (int k = 1; k < features.size(); k++) {
 			// generate all subsets of size k
 			Set<Set<Integer>> subsets = Sets.combinations(features, k);
 			for (Set<Integer> subset : subsets) {
 				if (subset.size() < 1)
 					continue;
-				if (!varianceOfSubsetIndividual.containsKey(subset)) {
-					double temp = computeMarginalVarianceContributionForSubsetOfFeatures(subset);
-				}
 				// System.out.println("Subtracting " + varianceOfSubsetIndividual.get(subset) +
 				// " for " + subset);
 				vU -= varianceOfSubsetIndividual.get(subset);
@@ -354,7 +346,6 @@ public class ExtendedRandomTree extends RandomTree {
 			obsList.add(obs.midPoint);
 		}
 		double sumOfRangeSizes = 0.0d;
-		double intervalProduct = 1.0d;
 		boolean consistentWithAnyLeaf = false;
 		for (Tree leaf : partitioning.keySet()) {
 			if (partitioning.get(leaf).containsPartialInstance(indices, obsList)) {
@@ -376,53 +367,13 @@ public class ExtendedRandomTree extends RandomTree {
 				}
 				assertTrue(prediction != Double.NaN);
 				result += prediction * fractionOfSpaceForThisLeaf;
-				// if (prediction == 0.0d)
-				// System.out.println("Prediction is zero!");
 				consistentWithAnyLeaf = true;
 			}
 		}
 		if (!consistentWithAnyLeaf) {
 			System.out.println("Observation " + obsList + " is not consistent with any leaf with indices: " + indices);
-			for (Tree leaf : partitioning.keySet()) {
-				// for (int index : indices)
-				// for (int i = 0; i < this.getFeatureSpace().getDimensionality(); i++)
-				// System.out.print(
-				// "Domain " + i + ": " +
-				// partitioning.get(leaf).getFeatureDomain(i).compactString() + "\t");
-				// System.out.println();
-			}
 		}
 		return result;
-	}
-
-	/**
-	 * Checks whether the observations are consistent with a leaf (for implementing
-	 * the indicator function in algorithm 2)
-	 * 
-	 * @param indices
-	 * @param observations
-	 * @param leaf
-	 * @return
-	 */
-	private boolean observationConsistentWithLeaf(List<Integer> indices, List<Observation> observations, Tree leaf) {
-		if (indices == null && observations == null)
-			return true;
-		FeatureSpace subSpace = partitioning.get(leaf);
-		// int[] indicesArr = indices.stream().mapToInt(Number::intValue).toArray();
-		for (int i = 0; i < indices.size(); i++) {
-			int observationIndex = indices.get(i);
-			double value = observations.get(i).midPoint;
-			// if(subSpace.getFeatureDomain(i) instanceof NumericFeatureDomain) {
-			// NumericFeatureDomain numDom = (NumericFeatureDomain)
-			// subSpace.getFeatureDomain(i);
-			// System.out.println(numDom.getMin() + ", " + value + ", " + numDom.getMax() +
-			// " in there = " + numDom.containsInstance(value));
-			//
-			// }
-			if (!subSpace.getFeatureDomain(observationIndex).containsInstance(value))
-				return false;
-		}
-		return true;
 	}
 
 	/**
@@ -452,12 +403,11 @@ public class ExtendedRandomTree extends RandomTree {
 			for (int i = 0; i < children.length; i++) {
 				if (children[i].getClassDistribution() == null && children[i].getAttribute() == -1) {
 					mapForEmptyLeaves.put(children[i], node.getClassDistribution()[0]);
-					// System.out
-					// .println("Adding prediction " + node.getClassDistribution()[0] + " for empty
-					// leaf to map");
 				}
 				// important! if the children are leaves and do not contain a class
-				// distribution, treat this node as a leaf
+				// distribution, treat this node as a leaf. If the split that leads
+				// a leaf happens on a categorical feature, the leaf does not contain
+				// a class distribution in the WEKA RandomTree
 				FeatureSpace childSubSpace = new FeatureSpace(subSpace);
 				((CategoricalFeatureDomain) childSubSpace.getFeatureDomain(attribute))
 						.setValues(new double[] { (double) i });
@@ -477,7 +427,7 @@ public class ExtendedRandomTree extends RandomTree {
 	}
 
 	/**
-	 * Collect all split points of a given
+	 * Collect all split points of a given tree
 	 * 
 	 * @param root
 	 */
@@ -549,22 +499,17 @@ public class ExtendedRandomTree extends RandomTree {
 									(curSplitPoints.get(lowerIntervalId) + curSplitPoints.get(lowerIntervalId + 1)) / 2,
 									curSplitPoints.get(lowerIntervalId + 1) - curSplitPoints.get(lowerIntervalId));
 						else {
-							// TODO this is a workaround for interval sizes of size 0 (which should not appear)
+							// TODO this is a workaround for intervals of size 0 (which should not appear
+							// anyways)
 							obs = new Observation(
 									(curSplitPoints.get(lowerIntervalId) + curSplitPoints.get(lowerIntervalId + 1)) / 2,
 									1);
 						}
 						allObservations[featureIndex][lowerIntervalId] = obs;
-						// intervalSizes[featureIndex][lowerIntervalId] =
-						// curSplitPoints.get(lowerIntervalId + 1)
-						// - curSplitPoints.get(lowerIntervalId);
 					}
 				}
 			} else if (curDomain instanceof CategoricalFeatureDomain) {
 				CategoricalFeatureDomain cDomain = (CategoricalFeatureDomain) curDomain;
-				// observations[featureIndex] = cDomain.getValues().clone();
-				// intervalSizes[featureIndex] = new double[cDomain.getValues().length];
-				// Arrays.fill(intervalSizes[featureIndex], 1.0d);
 				allObservations[featureIndex] = new Observation[cDomain.getValues().length];
 				for (int i = 0; i < allObservations[featureIndex].length; i++) {
 					allObservations[featureIndex][i] = new Observation(cDomain.getValues()[i], 1.0d);
@@ -581,6 +526,7 @@ public class ExtendedRandomTree extends RandomTree {
 	 * @return
 	 */
 	public double computeTotalVarianceOfSubset(Set<Integer> features) {
+		features = Collections.unmodifiableSet(features);
 		if (varianceOfSubsetTotal.containsKey(features))
 			return varianceOfSubsetTotal.get(features);
 		List<List<Observation>> observationList = new LinkedList<List<Observation>>();
@@ -596,16 +542,14 @@ public class ExtendedRandomTree extends RandomTree {
 		double vU = 0.0d;
 		// List<Double> marginals = new LinkedList<Double>();
 		// System.out.println("size of obsprod = " + observationProduct.size());
-		double weightedSum = 0, weightedSumOfSquares = 0;
-		double num = 0;
 		WeightedVarianceHelper stat = new WeightedVarianceHelper();
-//		System.out.println("marginal predictions for: " + features);
+		// System.out.println("marginal predictions for: " + features);
 		for (List<Observation> curObs : observationProduct) {
 			ArrayList<Integer> featureList = new ArrayList<Integer>();
 			featureList.addAll(features);
 			Collections.sort(featureList);
 			double marginalPrediction = this.getMarginalPrediction(featureList, curObs);
-//			System.out.println(marginalPrediction + ",");
+			// System.out.println(marginalPrediction + ",");
 			// System.out.println("current feautres = \t" + features);
 			// System.out.print("midpoints = \t\t");
 			// for (Observation obs : curObs) {
@@ -641,7 +585,7 @@ public class ExtendedRandomTree extends RandomTree {
 		// System.out.println("wsos = " + weightedSumOfSquares + "\t ws = " +
 		// weightedSum);
 		// vU = weightedSumOfSquares - (weightedSum * weightedSum);
-		vU = stat.getVariancePopulaion();
+		vU = stat.getPopulaionVariance();
 		// System.out.println("Variance: " + vU);
 		varianceOfSubsetTotal.put(features, vU);
 		// System.out.println("Total var for \t\t\t" + features + ": " + vU);
@@ -708,6 +652,12 @@ public class ExtendedRandomTree extends RandomTree {
 		System.out.println("Complete size of intervals: " + sizeOfIntervals);
 	}
 
+	/**
+	 * Helper to compute weighted variances
+	 * 
+	 * @author jmhansel
+	 *
+	 */
 	private class WeightedVarianceHelper {
 		private int numberOfSamples;
 		private double average, squaredDistanceToMean, sumOfWeights;
@@ -727,7 +677,7 @@ public class ExtendedRandomTree extends RandomTree {
 			squaredDistanceToMean += weight * delta * (x - average);
 		}
 
-		public double getVariancePopulaion() {
+		public double getPopulaionVariance() {
 			if (sumOfWeights > 0.0d) {
 				return Math.max(0.0d, squaredDistanceToMean / sumOfWeights);
 			} else

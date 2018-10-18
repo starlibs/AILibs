@@ -49,6 +49,10 @@ public class ExtendedRandomForest extends RandomForest {
 		this.setClassifier(erTree);
 	}
 
+	/**
+	 * Needs to be called before predicting marginal variance contributions! 
+	 * @param Instances for which marginal variance contributions are to be estimated
+	 */
 	public void prepareForest(Instances data) {
 		this.featureSpace = new FeatureSpace(data);
 		for (Classifier classifier : m_Classifiers) {
@@ -85,20 +89,28 @@ public class ExtendedRandomForest extends RandomForest {
 		return avg;
 	}	
 	
-	public double computeMarginalStandardDeviationFeatureSubset(Set<Integer> features) {
-		double avg = 0;
-		for (Classifier classifier : m_Classifiers) {
-			ExtendedRandomTree curTree = (ExtendedRandomTree) classifier;
-			double curMarg = curTree.computeMarginalStandardDeviationForSubsetOfFeatures(features);
-			avg += curMarg * 1.0 / m_Classifiers.length;
-		}
-		return avg;
-	}
+//	public double computeMarginalStandardDeviationFeatureSubset(Set<Integer> features) {
+//		double avg = 0;
+//		for (Classifier classifier : m_Classifiers) {
+//			ExtendedRandomTree curTree = (ExtendedRandomTree) classifier;
+//			double curMarg = curTree.computeMarginalStandardDeviationForSubsetOfFeatures(features);
+//			avg += curMarg * 1.0 / m_Classifiers.length;
+//		}
+//		return avg;
+//	}
 
+	/**
+	 * 
+	 * @return Size of 
+	 */
 	public int getSize() {
 		return m_Classifiers.length;
 	}
 
+	/**
+	 * 
+	 * @return Feature space on which this forest operates on
+	 */
 	public FeatureSpace getFeatureSpace() {
 		return this.featureSpace;
 	}

@@ -251,7 +251,7 @@ public class PerformanceKnowledgeBase {
 			DenseInstance instanceInd = new DenseInstance(instancesInd.numAttributes());
 			for (int i = 0; i < instancesInd.numAttributes() - 1; i++) {
 				Attribute attr = instancesInd.attribute(i);
-				Parameter param = ci.getComponent().getParameter(attr.name());
+				Parameter param = ci.getComponent().getParameterWithName(attr.name());
 				if (param.isCategorical()) {
 					String value = ci.getParameterValues().get(param.getName());
 					instanceInd.setValue(attr, value);
