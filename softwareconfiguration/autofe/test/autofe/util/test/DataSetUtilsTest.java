@@ -13,7 +13,7 @@ import weka.core.Instances;
 
 public class DataSetUtilsTest {
 	@Test
-	public void cifar10InstancAttributesest() {
+	public void cifar10InstancesAttributesTest() {
 		ArrayList<Attribute> atts = new ArrayList<>();
 		for (int i = 0; i < 32 * 32 * 3 + 1; i++) {
 			atts.add(new Attribute("blub" + i));

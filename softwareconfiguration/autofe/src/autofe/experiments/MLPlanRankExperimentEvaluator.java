@@ -9,7 +9,7 @@ import org.aeonbits.owner.ConfigCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import autofe.algorithm.hasco.HASCOFE;
+import autofe.algorithm.hasco.HASCOFeatureEngineering;
 import autofe.util.DataSetUtils;
 import autofe.util.EvaluationUtils;
 import autofe.util.FileUtils;
@@ -59,7 +59,7 @@ public class MLPlanRankExperimentEvaluator implements IExperimentSetEvaluator {
 		if (dsInstances == null) {
 			// Create random
 			int dataSetID = DataSetUtils.getDataSetIDByName(dataSet);
-			List<Instances> dataSetVariations = HASCOFE.generateRandomDataSets(dataSetID, 1, MAX_PIPELINE_SIZE,
+			List<Instances> dataSetVariations = HASCOFeatureEngineering.generateRandomDataSets(dataSetID, 1, MAX_PIPELINE_SIZE,
 					DATASET_GENERATION_TIMEOUT, seed);
 
 			if (dataSetVariations.size() != 1)

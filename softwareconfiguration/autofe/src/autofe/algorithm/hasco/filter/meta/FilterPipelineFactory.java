@@ -28,25 +28,24 @@ public class FilterPipelineFactory implements Factory<FilterPipeline> {
 
 	@Override
 	public FilterPipeline getComponentInstantiation(final ComponentInstance groundComponent) throws Exception {
-
-		if (groundComponent == null || groundComponent.getComponent() == null)
-			return new FilterPipeline(null);
+		if (groundComponent == null || groundComponent.getComponent() == null) {
+			return null;
+		}
 
 		Graph<IFilter> filterGraph = new Graph<>();
 		Queue<ComponentInstance> open = new LinkedList<>();
 		Queue<IFilter> openFilter = new LinkedList<>();
 
 		switch (groundComponent.getComponent().getName()) {
-		case "pipeline":
-
+		case "FilterPipeline":
 			ComponentInstance actCI = groundComponent.getSatisfactionOfRequiredInterfaces().get("pipe");
 			// ComponentInstance initCI =
 			// groundComponent.getSatisfactionOfRequiredInterfaces().get("pipe");
-			if (actCI == null)
+			if (actCI == null) {
 				return new FilterPipeline(null);
+			}
 
-			IFilter actCIFilter = FilterUtils.getFilterForName(actCI.getComponent().getName(),
-					actCI.getParameterValues(), this.inputShape);
+			IFilter actCIFilter = FilterUtils.getFilterForName(actCI.getComponent().getName(), actCI.getParameterValues(), this.inputShape);
 			filterGraph.addItem(actCIFilter);
 			openFilter.offer(actCIFilter);
 			open.offer(actCI);
@@ -67,8 +66,7 @@ public class FilterPipelineFactory implements Factory<FilterPipeline> {
 				case UNION_NAME:
 					ComponentInstance filter1CI = actCI.getSatisfactionOfRequiredInterfaces().get("filter1");
 					if (filter1CI != null) {
-						IFilter filter1 = FilterUtils.getFilterForName(filter1CI.getComponent().getName(),
-								filter1CI.getParameterValues(), this.inputShape);
+						IFilter filter1 = FilterUtils.getFilterForName(filter1CI.getComponent().getName(), filter1CI.getParameterValues(), this.inputShape);
 
 						open.offer(filter1CI);
 						openFilter.offer(filter1);
@@ -80,8 +78,7 @@ public class FilterPipelineFactory implements Factory<FilterPipeline> {
 
 					ComponentInstance filter2CI = actCI.getSatisfactionOfRequiredInterfaces().get("filter2");
 					if (filter2CI != null) {
-						IFilter filter2 = FilterUtils.getFilterForName(filter2CI.getComponent().getName(),
-								filter2CI.getParameterValues(), this.inputShape);
+						IFilter filter2 = FilterUtils.getFilterForName(filter2CI.getComponent().getName(), filter2CI.getParameterValues(), this.inputShape);
 
 						open.offer(filter2CI);
 						openFilter.offer(filter2);
@@ -99,22 +96,22 @@ public class FilterPipelineFactory implements Factory<FilterPipeline> {
 					IFilter extractor = null;
 					if (actCI.getComponent().getName().equals(ABSTRACT_PIPE_NAME)) {
 						extractorCI = actCI.getSatisfactionOfRequiredInterfaces().get("extractor");
-						if (extractorCI == null)
+						if (extractorCI == null) {
 							break;
+						}
 
-						extractor = FilterUtils.getFilterForName(extractorCI.getComponent().getName(),
-								extractorCI.getParameterValues(), this.inputShape);
+						extractor = FilterUtils.getFilterForName(extractorCI.getComponent().getName(), extractorCI.getParameterValues(), this.inputShape);
 						filterGraph.addItem(extractor);
 						filterGraph.addEdge(actCIFilter, extractor);
 
 						actCIFilter = extractor;
 					} else {
 						extractorCI = actCI.getSatisfactionOfRequiredInterfaces().get("net");
-						if (extractorCI == null)
+						if (extractorCI == null) {
 							break;
+						}
 
-						extractor = FilterUtils.getFilterForName(extractorCI.getComponent().getName(),
-								extractorCI.getParameterValues(), this.inputShape);
+						extractor = FilterUtils.getFilterForName(extractorCI.getComponent().getName(), extractorCI.getParameterValues(), this.inputShape);
 
 						// If pretrained neural net can not be applied to given input shape (e. g. due
 						// to different channel amount) return empty filter pipeline (checked in node
@@ -132,28 +129,27 @@ public class FilterPipelineFactory implements Factory<FilterPipeline> {
 					// Preprocessors
 					// Deepening pipe
 					ComponentInstance preprocessorCI = actCI.getSatisfactionOfRequiredInterfaces().get("preprocessors");
-					if (preprocessorCI == null)
+					if (preprocessorCI == null) {
 						break;
+					}
 
 					IFilter preprocessor = null;
 					if (!preprocessorCI.getComponent().getName().equals("PrepPipe")) {
 						// Just one basic filter
-						preprocessor = FilterUtils.getFilterForName(preprocessorCI.getComponent().getName(),
-								preprocessorCI.getParameterValues(), this.inputShape);
+						preprocessor = FilterUtils.getFilterForName(preprocessorCI.getComponent().getName(), preprocessorCI.getParameterValues(), this.inputShape);
 						filterGraph.addItem(preprocessor);
 						filterGraph.addEdge(actCIFilter, preprocessor);
 					} else {
 						// Preprocessor pipeline
 						IFilter newActCIFilter = actCIFilter;
 						while (preprocessorCI != null && preprocessorCI.getComponent().getName().equals("PrepPipe")) {
-							ComponentInstance childCI = preprocessorCI.getSatisfactionOfRequiredInterfaces()
-									.get("preprocessor");
+							ComponentInstance childCI = preprocessorCI.getSatisfactionOfRequiredInterfaces().get("preprocessor");
 
-							if (childCI == null)
+							if (childCI == null) {
 								break;
+							}
 
-							IFilter childFilter = FilterUtils.getFilterForName(childCI.getComponent().getName(),
-									childCI.getParameterValues(), this.inputShape);
+							IFilter childFilter = FilterUtils.getFilterForName(childCI.getComponent().getName(), childCI.getParameterValues(), this.inputShape);
 							filterGraph.addItem(childFilter);
 							filterGraph.addEdge(newActCIFilter, childFilter);
 
@@ -163,8 +159,7 @@ public class FilterPipelineFactory implements Factory<FilterPipeline> {
 
 						// End of pipeline reached
 						if (preprocessorCI != null) {
-							preprocessor = FilterUtils.getFilterForName(preprocessorCI.getComponent().getName(),
-									preprocessorCI.getParameterValues(), this.inputShape);
+							preprocessor = FilterUtils.getFilterForName(preprocessorCI.getComponent().getName(), preprocessorCI.getParameterValues(), this.inputShape);
 							filterGraph.addItem(preprocessor);
 							filterGraph.addEdge(newActCIFilter, preprocessor);
 						}

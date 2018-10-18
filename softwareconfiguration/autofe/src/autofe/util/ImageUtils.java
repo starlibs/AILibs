@@ -21,27 +21,6 @@ import org.slf4j.LoggerFactory;
 
 import Catalano.Imaging.FastBitmap;
 import Catalano.Imaging.FastBitmap.ColorSpace;
-import Catalano.Imaging.Filters.DifferenceEdgeDetector;
-import Catalano.Imaging.Filters.Emboss;
-import Catalano.Imaging.Filters.Erosion;
-import Catalano.Imaging.Filters.ExtractBoundary;
-import Catalano.Imaging.Filters.FastVariance;
-import Catalano.Imaging.Filters.GaborFilter;
-import Catalano.Imaging.Filters.GaussianBlur;
-import Catalano.Imaging.Filters.HighBoost;
-import Catalano.Imaging.Filters.HomogenityEdgeDetector;
-import Catalano.Imaging.Filters.HorizontalRunLengthSmoothing;
-import Catalano.Imaging.Filters.ImageNormalization;
-import Catalano.Imaging.Filters.ImageQuantization;
-import Catalano.Imaging.Filters.IsotropicCompassEdgeDetector;
-import Catalano.Imaging.Filters.KirschCompassEdgeDetector;
-import Catalano.Imaging.Filters.MorphologicGradientImage;
-import Catalano.Imaging.Filters.RobertsCrossEdgeDetector;
-import Catalano.Imaging.Filters.SobelCompassEdgeDetector;
-import Catalano.Imaging.Filters.SobelEdgeDetector;
-import Catalano.Imaging.Filters.WeightedMedian;
-import Catalano.Imaging.Texture.BinaryPattern.RobustLocalBinaryPattern;
-import Catalano.Imaging.Texture.BinaryPattern.UniformLocalBinaryPattern;
 import Catalano.Imaging.Tools.ImageHistogram;
 import autofe.algorithm.hasco.filter.image.CatalanoBinaryPatternFilter;
 import autofe.algorithm.hasco.filter.image.CatalanoInPlaceFilter;
@@ -121,9 +100,9 @@ public final class ImageUtils {
 			result = Nd4j.create(bitmap.getWidth(), bitmap.getHeight(), 3);
 			for (int i = 0; i < bitmap.getWidth(); i++) {
 				for (int j = 0; j < bitmap.getHeight(); j++) {
-					result.putScalar(new int[] { i, j, 0 }, bitmapMatrix[i][j][0]);
-					result.putScalar(new int[] { i, j, 1 }, bitmapMatrix[i][j][1]);
-					result.putScalar(new int[] { i, j, 2 }, bitmapMatrix[i][j][2]);
+					result.putScalar(new int[] { i, j, 0 }, bitmapMatrix[j][i][0]);
+					result.putScalar(new int[] { i, j, 1 }, bitmapMatrix[j][i][1]);
+					result.putScalar(new int[] { i, j, 2 }, bitmapMatrix[j][i][2]);
 				}
 			}
 			break;
@@ -150,83 +129,56 @@ public final class ImageUtils {
 	public static IFilter getCatalanoFilterByName(final String name) {
 		switch (name) {
 		case "GaussianBlur":
-			return new CatalanoInPlaceFilter(new GaussianBlur(), false);
 		case "SobelEdgeDetector":
-			return new CatalanoInPlaceFilter(new SobelEdgeDetector(), true);
 		case "ExtractBoundary":
-			return new CatalanoInPlaceFilter(new ExtractBoundary(), true);
 		case "DifferenceEdgeDetector":
-			return new CatalanoInPlaceFilter(new DifferenceEdgeDetector(), true);
 		case "Erosion":
-			return new CatalanoInPlaceFilter(new Erosion(), false);
 		case "FastVariance":
-			return new CatalanoInPlaceFilter(new FastVariance(), false);
 		case "Emboss":
-			return new CatalanoInPlaceFilter(new Emboss(), false);
 		case "GaborFilter":
-			return new CatalanoInPlaceFilter(new GaborFilter(), true);
 		case "HighBoost":
-			return new CatalanoInPlaceFilter(new HighBoost(), false);
 		case "HomogenityEdgeDetector":
-			return new CatalanoInPlaceFilter(new HomogenityEdgeDetector(), true);
 		case "HorizontalRunLengthSmoothing":
-			return new CatalanoInPlaceFilter(new HorizontalRunLengthSmoothing(), true);
 		case "ImageQuantization":
-			return new CatalanoInPlaceFilter(new ImageQuantization(), true);
 		case "ImageNormalization":
-			return new CatalanoInPlaceFilter(new ImageNormalization(), true);
 		case "MorphologicGradientImage":
-			return new CatalanoInPlaceFilter(new MorphologicGradientImage(), true);
 		case "KirschCompassEdgeDetector":
-			return new CatalanoInPlaceFilter(new KirschCompassEdgeDetector(), false);
 		case "IsotropicCompassEdgeDetector":
-			return new CatalanoInPlaceFilter(new IsotropicCompassEdgeDetector(), false);
 		case "RobertsCrossEdgeDetector":
-			return new CatalanoInPlaceFilter(new RobertsCrossEdgeDetector(), true);
 		case "SobelCompassEdgeDetector":
-			return new CatalanoInPlaceFilter(new SobelCompassEdgeDetector(), false);
 		case "WeightedMedian":
-			return new CatalanoInPlaceFilter(new WeightedMedian(), false);
 		case "NonePreprocessor":
-			return new CatalanoInPlaceFilter(null, false);
+			return new CatalanoInPlaceFilter(name);
 
 		/* Binary pattern */
 		case "NoneExtractor":
-			return new CatalanoBinaryPatternFilter(null, false);
 		case "UniformLocalBinaryPattern":
-			return new CatalanoBinaryPatternFilter(new UniformLocalBinaryPattern(), true);
 		case "RobustLocalBinaryPattern":
-			return new CatalanoBinaryPatternFilter(new RobustLocalBinaryPattern(), true);
+			return new CatalanoBinaryPatternFilter(name);
 		// case "ExtractNormalizedRGBChannel":
 		// return new CatalanoExtractFilter(new ExtractNormalizedRGBChannel(), false,
 		// true);
 
 		default:
 			// Return identity
-			return new CatalanoInPlaceFilter(null, false);
+			return new CatalanoInPlaceFilter(null);
 		}
 	}
 
-	public static PretrainedNNFilter getPretrainedNNFilterByName(String name, final int layer, final int[] shape) {
+	public static PretrainedNNFilter getPretrainedNNFilterByName(final String name, final int layer, final int[] shape) {
 		switch (name) {
 		case "VGG16":
-			return new PretrainedNNFilter(new VGG16(42, shape, 10, new Nesterovs(1e-2, 0.9), CacheMode.NONE,
-					WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer, shape, name);
+			return new PretrainedNNFilter(new VGG16(42, shape, 10, new Nesterovs(1e-2, 0.9), CacheMode.NONE, WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer, shape, name);
 		case "AlexNet":
-			return new PretrainedNNFilter(new AlexNet(42, shape, 10, new Nesterovs(1e-2, 0.9), CacheMode.NONE,
-					WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer, shape, name);
+			return new PretrainedNNFilter(new AlexNet(42, shape, 10, new Nesterovs(1e-2, 0.9), CacheMode.NONE, WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer, shape, name);
 		case "LeNet":
-			return new PretrainedNNFilter(new LeNet(42, shape, 10, new Nesterovs(1e-2, 0.9), CacheMode.NONE,
-					WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer, shape, name);
+			return new PretrainedNNFilter(new LeNet(42, shape, 10, new Nesterovs(1e-2, 0.9), CacheMode.NONE, WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer, shape, name);
 		case "VGG19":
-			return new PretrainedNNFilter(new VGG19(42, shape, 10, new Nesterovs(1e-2, 0.9), CacheMode.NONE,
-					WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer, shape, name);
+			return new PretrainedNNFilter(new VGG19(42, shape, 10, new Nesterovs(1e-2, 0.9), CacheMode.NONE, WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer, shape, name);
 		case "ResNet50":
-			return new PretrainedNNFilter(new ResNet50(42, shape, 10, WeightInit.DISTRIBUTION, new Nesterovs(1e-2, 0.9),
-					CacheMode.NONE, WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer, shape, name);
+			return new PretrainedNNFilter(new ResNet50(42, shape, 10, WeightInit.DISTRIBUTION, new Nesterovs(1e-2, 0.9), CacheMode.NONE, WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer, shape, name);
 		default:
-			return new PretrainedNNFilter(new VGG16(42, shape, 10, new Nesterovs(1e-2, 0.9), CacheMode.NONE,
-					WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer, shape, name);
+			return new PretrainedNNFilter(new VGG16(42, shape, 10, new Nesterovs(1e-2, 0.9), CacheMode.NONE, WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer, shape, name);
 		}
 	}
 

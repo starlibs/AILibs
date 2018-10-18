@@ -1,5 +1,7 @@
 package autofe.algorithm.hasco.filter.generic;
 
+import java.io.Serializable;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,11 +11,16 @@ import weka.filters.Filter;
 
 /**
  * Filter containing WEKA Filter objects.
- * 
+ *
  * @author Julian Lienen
  *
  */
-public class WEKAFilter implements IFilter {
+public class WEKAFilter implements IFilter, Serializable {
+
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = 7373022098678014454L;
 
 	private static Logger logger = LoggerFactory.getLogger(WEKAFilter.class);
 
@@ -24,12 +31,13 @@ public class WEKAFilter implements IFilter {
 	}
 
 	@Override
-	public DataSet applyFilter(DataSet inputData, boolean copy) {
+	public DataSet applyFilter(DataSet inputData, final boolean copy) {
 
 		inputData.updateInstances();
 
-		if (copy)
+		if (copy) {
 			inputData = inputData.copy();
+		}
 
 		try {
 			inputData.setInstances(Filter.useFilter(inputData.getInstances(), this.wekaFilter));
@@ -44,10 +52,11 @@ public class WEKAFilter implements IFilter {
 
 	@Override
 	public String toString() {
-		if (wekaFilter != null)
-			return "WEKAFilter [wekaFilter=" + wekaFilter.getClass().getSimpleName() + "]";
-		else
-			return "WEKAFilter [wekaFilter=" + wekaFilter + "]";
+		if (this.wekaFilter != null) {
+			return "WEKAFilter [wekaFilter=" + this.wekaFilter.getClass().getSimpleName() + "]";
+		} else {
+			return "WEKAFilter [wekaFilter=" + this.wekaFilter + "]";
+		}
 	}
 
 }

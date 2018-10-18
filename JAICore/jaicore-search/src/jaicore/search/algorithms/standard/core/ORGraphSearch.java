@@ -35,6 +35,10 @@ import jaicore.graphvisualizer.events.graphEvents.NodeRemovedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
 import jaicore.logging.LoggerUtil;
 import jaicore.search.algorithms.interfaces.IObservableORGraphSearch;
+import jaicore.search.algorithms.standard.core.events.NodeAnnotationEvent;
+import jaicore.search.algorithms.standard.core.events.SolutionAnnotationEvent;
+import jaicore.search.algorithms.standard.core.events.SolutionFoundEvent;
+import jaicore.search.algorithms.standard.core.events.SuccessorComputationCompletedEvent;
 import jaicore.search.structure.core.GraphEventBus;
 import jaicore.search.structure.core.GraphGenerator;
 import jaicore.search.structure.core.Node;
@@ -48,8 +52,7 @@ import jaicore.search.structure.graphgenerator.RootGenerator;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
-public class ORGraphSearch<T, A, V extends Comparable<V>>
-		implements IObservableORGraphSearch<T, A, V>, IIterableAlgorithm<List<NodeExpansionDescription<T, A>>>, Iterator<List<NodeExpansionDescription<T, A>>>, ILoggingCustomizable {
+public class ORGraphSearch<T, A, V extends Comparable<V>> implements IObservableORGraphSearch<T, A, V>, IIterableAlgorithm<List<NodeExpansionDescription<T, A>>>, Iterator<List<NodeExpansionDescription<T, A>>>, ILoggingCustomizable {
 
 	private Logger logger = LoggerFactory.getLogger(ORGraphSearch.class);
 
@@ -106,7 +109,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 		private final Node<T, V> expandedNodeInternal;
 		private final NodeExpansionDescription<T, A> successorDescription;
 
-		public NodeBuilder(Node<T, V> expandedNodeInternal, NodeExpansionDescription<T, A> successorDescription) {
+		public NodeBuilder(final Node<T, V> expandedNodeInternal, final NodeExpansionDescription<T, A> successorDescription) {
 			super();
 			this.expandedNodeInternal = expandedNodeInternal;
 			this.successorDescription = successorDescription;
@@ -115,23 +118,24 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 		@Override
 		public void run() {
 			try {
-				if (ORGraphSearch.this.canceled || ORGraphSearch.this.interrupted)
+				if (ORGraphSearch.this.canceled || ORGraphSearch.this.interrupted) {
 					return;
-				logger.debug("Start node creation.");
-				lastExpansion.add(successorDescription);
+				}
+				ORGraphSearch.this.logger.debug("Start node creation.");
+				ORGraphSearch.this.lastExpansion.add(this.successorDescription);
 
-				Node<T, V> newNode = newNode(expandedNodeInternal, successorDescription.getTo());
+				Node<T, V> newNode = ORGraphSearch.this.newNode(this.expandedNodeInternal, this.successorDescription.getTo());
 
 				/* update creation counter */
-				createdCounter++;
+				ORGraphSearch.this.createdCounter++;
 
 				/* set timeout on thread that interrupts it after the timeout */
 				int taskId = -1;
-				if (timeoutForComputationOfF > 0) {
-					if (timeoutSubmitter == null) {
-						timeoutSubmitter = TimeoutTimer.getInstance().getSubmitter();
+				if (ORGraphSearch.this.timeoutForComputationOfF > 0) {
+					if (ORGraphSearch.this.timeoutSubmitter == null) {
+						ORGraphSearch.this.timeoutSubmitter = TimeoutTimer.getInstance().getSubmitter();
 					}
-					taskId = timeoutSubmitter.interruptMeAfterMS(timeoutForComputationOfF);
+					taskId = ORGraphSearch.this.timeoutSubmitter.interruptMeAfterMS(ORGraphSearch.this.timeoutForComputationOfF);
 				}
 
 				/* compute node label */
@@ -139,88 +143,92 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 				boolean computationTimedout = false;
 				long startComputation = System.currentTimeMillis();
 				try {
-					label = nodeEvaluator.f(newNode);
-					
+					label = ORGraphSearch.this.nodeEvaluator.f(newNode);
+
 					/* check whether the required time exceeded the timeout */
 					long fTime = System.currentTimeMillis() - startComputation;
-					if (timeoutForComputationOfF > 0 && fTime > timeoutForComputationOfF + 1000)
-						logger.warn("Computation of f for node {} took {}ms, which is more than the allowed {}ms", newNode, fTime, timeoutForComputationOfF);
+					if (ORGraphSearch.this.timeoutForComputationOfF > 0 && fTime > ORGraphSearch.this.timeoutForComputationOfF + 1000) {
+						ORGraphSearch.this.logger.warn("Computation of f for node {} took {}ms, which is more than the allowed {}ms", newNode, fTime, ORGraphSearch.this.timeoutForComputationOfF);
+					}
 				} catch (InterruptedException e) {
-					logger.debug("Received interrupt during computation of f.");
-					graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_timedout"));
+					ORGraphSearch.this.logger.debug("Received interrupt during computation of f.");
+					ORGraphSearch.this.graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_timedout"));
 					newNode.setAnnotation("fError", "Timeout");
 					computationTimedout = true;
 					try {
-						label = timeoutNodeEvaluator != null ? timeoutNodeEvaluator.f(newNode) : null;
+						label = ORGraphSearch.this.timeoutNodeEvaluator != null ? ORGraphSearch.this.timeoutNodeEvaluator.f(newNode) : null;
 					} catch (Throwable e2) {
 						e2.printStackTrace();
 					}
 				} catch (Throwable e) {
-					logger.error("Observed an execution during computation of f:\n{}", LoggerUtil.getExceptionInfo(e));
+					ORGraphSearch.this.logger.error("Observed an exception during computation of f:\n{}", LoggerUtil.getExceptionInfo(e));
 					newNode.setAnnotation("fError", e);
-					graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_ffail"));
+					ORGraphSearch.this.graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_ffail"));
 				}
-				if (taskId >= 0)
-					timeoutSubmitter.cancelTimeout(taskId);
-				
+				if (taskId >= 0) {
+					ORGraphSearch.this.timeoutSubmitter.cancelTimeout(taskId);
+				}
+
 				/* register time required to compute this node label */
 				long fTime = System.currentTimeMillis() - startComputation;
 				newNode.setAnnotation("fTime", fTime);
-				
+
 				/* if no label was computed, prune the node and cancel the computation */
 				if (label == null) {
-					if (!computationTimedout)
-						logger.info("Not inserting node {} since its label is missing!", newNode);
-					else
-						logger.info("Not inserting node {} because computation of f-value timed out.", newNode);
-					if (!newNode.getAnnotations().containsKey("fError"))
+					if (!computationTimedout) {
+						ORGraphSearch.this.logger.info("Not inserting node {} since its label is missing!", newNode);
+					} else {
+						ORGraphSearch.this.logger.info("Not inserting node {} because computation of f-value timed out.", newNode);
+					}
+					if (!newNode.getAnnotations().containsKey("fError")) {
 						newNode.setAnnotation("fError", "f-computer returned NULL");
-					graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_pruned"));
-					if (pool != null) {
-						activeJobs.decrementAndGet();
-						fComputationTickets.release();
+					}
+					ORGraphSearch.this.graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_pruned"));
+					if (ORGraphSearch.this.pool != null) {
+						ORGraphSearch.this.activeJobs.decrementAndGet();
+						ORGraphSearch.this.fComputationTickets.release();
 					}
 					return;
 				}
 				newNode.setInternalLabel(label);
 
-				logger.info("Inserting successor {} of {} to OPEN. F-Value is {}", newNode, expandedNodeInternal, label);
+				ORGraphSearch.this.logger.info("Inserting successor {} of {} to OPEN. F-Value is {}", newNode, this.expandedNodeInternal, label);
 				// assert !open.contains(newNode) && !expanded.contains(newNode.getPoint()) : "Inserted node is already in OPEN or even expanded!";
 
 				/* if we discard (either only on OPEN or on both OPEN and CLOSED) */
 				boolean nodeProcessed = false;
-				if (parentDiscarding != ParentDiscarding.NONE) {
+				if (ORGraphSearch.this.parentDiscarding != ParentDiscarding.NONE) {
 
 					/* determine whether we already have the node AND it is worse than the one we want to insert */
-					Optional<Node<T, V>> existingIdenticalNodeOnOpen = open.stream().filter(n -> n.getPoint().equals(newNode.getPoint())).findFirst();
+					Optional<Node<T, V>> existingIdenticalNodeOnOpen = ORGraphSearch.this.open.stream().filter(n -> n.getPoint().equals(newNode.getPoint())).findFirst();
 					if (existingIdenticalNodeOnOpen.isPresent()) {
 						Node<T, V> existingNode = existingIdenticalNodeOnOpen.get();
 						if (newNode.compareTo(existingNode) < 0) {
-							graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_" + (newNode.isGoal() ? "solution" : "open")));
-							graphEventBus.post(new NodeRemovedEvent<>(existingNode));
-							open.remove(existingNode);
-							open.add(newNode);
+							ORGraphSearch.this.graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_" + (newNode.isGoal() ? "solution" : "open")));
+							ORGraphSearch.this.graphEventBus.post(new NodeRemovedEvent<>(existingNode));
+							ORGraphSearch.this.open.remove(existingNode);
+							ORGraphSearch.this.open.add(newNode);
 						} else {
-							graphEventBus.post(new NodeRemovedEvent<>(newNode));
+							ORGraphSearch.this.graphEventBus.post(new NodeRemovedEvent<>(newNode));
 						}
 						nodeProcessed = true;
 					}
 
 					/* if parent discarding is not only for OPEN but also for CLOSE (and the node was not on OPEN), check the list of expanded nodes */
-					else if (parentDiscarding == ParentDiscarding.ALL) {
+					else if (ORGraphSearch.this.parentDiscarding == ParentDiscarding.ALL) {
 
 						/* reopening, if the node is already on CLOSED */
-						Optional<T> existingIdenticalNodeOnClosed = expanded.stream().filter(n -> n.equals(newNode.getPoint())).findFirst();
+						Optional<T> existingIdenticalNodeOnClosed = ORGraphSearch.this.expanded.stream().filter(n -> n.equals(newNode.getPoint())).findFirst();
 						if (existingIdenticalNodeOnClosed.isPresent()) {
-							Node<T, V> node = ext2int.get(existingIdenticalNodeOnClosed.get());
+							Node<T, V> node = ORGraphSearch.this.ext2int.get(existingIdenticalNodeOnClosed.get());
 							if (newNode.compareTo(node) < 0) {
 								node.setParent(newNode.getParent());
 								node.setInternalLabel(newNode.getInternalLabel());
-								expanded.remove(node.getPoint());
-								open.add(node);
-								graphEventBus.post(new NodeParentSwitchEvent<Node<T, V>>(node, node.getParent(), newNode.getParent()));
+								ORGraphSearch.this.expanded.remove(node.getPoint());
+								ORGraphSearch.this.open.add(node);
+								ORGraphSearch.this.graphEventBus.post(new NodeParentSwitchEvent<Node<T, V>>(node, node.getParent(), newNode.getParent()));
 							}
-							graphEventBus.post(new NodeRemovedEvent<Node<T, V>>(newNode));
+							ORGraphSearch.this.graphEventBus.post(new NodeRemovedEvent<Node<T, V>>(newNode));
 							nodeProcessed = true;
 						}
 					}
@@ -229,28 +237,29 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 				/* if parent discarding is turned off OR if the node was node processed by a parent discarding rule, just insert it on OPEN */
 				if (!nodeProcessed) {
 
-					if (!newNode.isGoal())
-						open.add(newNode);
-					graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_" + (newNode.isGoal() ? "solution" : "open")));
-					createdCounter++;
+					if (!newNode.isGoal()) {
+						ORGraphSearch.this.open.add(newNode);
+					}
+					ORGraphSearch.this.graphEventBus.post(new NodeTypeSwitchEvent<>(newNode, "or_" + (newNode.isGoal() ? "solution" : "open")));
+					ORGraphSearch.this.createdCounter++;
 				}
 
 				/* Recognize solution in cache together with annotation */
 				if (newNode.isGoal()) {
-					List<T> solution = getTraversalPath(newNode);
+					List<T> solution = ORGraphSearch.this.getTraversalPath(newNode);
 
 					/* if the node evaluator has not reported the solution already anyway, register the solution and store its annotation */
-					if (!solutionReportingNodeEvaluator && !solutions.contains(solution)) {
-						solutions.add(solution);
-						solutionAnnotations.put(solution, new HashMap<>());
-						solutionAnnotations.get(solution).put("f", newNode.getInternalLabel());
+					if (!ORGraphSearch.this.solutionReportingNodeEvaluator && !ORGraphSearch.this.solutions.contains(solution)) {
+						ORGraphSearch.this.solutions.add(solution);
+						ORGraphSearch.this.solutionAnnotations.put(solution, new HashMap<>());
+						ORGraphSearch.this.solutionAnnotations.get(solution).put("f", newNode.getInternalLabel());
 					}
 				}
 
 				/* free resources if this is computed by helper threads */
-				if (pool != null) {
-					activeJobs.decrementAndGet();
-					fComputationTickets.release();
+				if (ORGraphSearch.this.pool != null) {
+					ORGraphSearch.this.activeJobs.decrementAndGet();
+					ORGraphSearch.this.fComputationTickets.release();
 				}
 			} catch (Throwable e) {
 				e.printStackTrace();
@@ -259,18 +268,18 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 		}
 	}
 
-	public ORGraphSearch(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, V> pNodeEvaluator) {
+	public ORGraphSearch(final GraphGenerator<T, A> graphGenerator, final INodeEvaluator<T, V> pNodeEvaluator) {
 		this(graphGenerator, pNodeEvaluator, ParentDiscarding.NONE);
 	}
 
 	@SuppressWarnings("unchecked")
-	public ORGraphSearch(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, V> pNodeEvaluator, ParentDiscarding pd) {
+	public ORGraphSearch(final GraphGenerator<T, A> graphGenerator, final INodeEvaluator<T, V> pNodeEvaluator, final ParentDiscarding pd) {
 		super();
 		this.graphGenerator = graphGenerator;
 		this.rootGenerator = graphGenerator.getRootGenerator();
 		this.successorGenerator = graphGenerator.getSuccessorGenerator();
-		checkGoalPropertyOnEntirePath = !(graphGenerator.getGoalTester() instanceof NodeGoalTester);
-		if (checkGoalPropertyOnEntirePath) {
+		this.checkGoalPropertyOnEntirePath = !(graphGenerator.getGoalTester() instanceof NodeGoalTester);
+		if (this.checkGoalPropertyOnEntirePath) {
 			this.nodeGoalTester = null;
 			this.pathGoalTester = (PathGoalTester<T>) graphGenerator.getGoalTester();
 			;
@@ -280,7 +289,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 		}
 
 		/* set parent discarding */
-		parentDiscarding = pd;
+		this.parentDiscarding = pd;
 
 		// /*setting a priorityqueueopen As a default open collection*/
 		//
@@ -291,28 +300,30 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 		if (pNodeEvaluator instanceof DecoratingNodeEvaluator<?, ?>) {
 			DecoratingNodeEvaluator<T, V> castedEvaluator = (DecoratingNodeEvaluator<T, V>) pNodeEvaluator;
 			if (castedEvaluator.isGraphDependent()) {
-				logger.info("{} is a graph dependent node evaluator. Setting its graph generator now ...", castedEvaluator);
+				this.logger.info("{} is a graph dependent node evaluator. Setting its graph generator now ...", castedEvaluator);
 				castedEvaluator.setGenerator(graphGenerator);
 			}
 			if (castedEvaluator.isSolutionReporter()) {
-				logger.info("{} is a solution reporter. Register the search algo in its event bus", castedEvaluator);
+				this.logger.info("{} is a solution reporter. Register the search algo in its event bus", castedEvaluator);
 				castedEvaluator.registerSolutionListener(this);
-				solutionReportingNodeEvaluator = true;
-			} else
-				solutionReportingNodeEvaluator = false;
+				this.solutionReportingNodeEvaluator = true;
+			} else {
+				this.solutionReportingNodeEvaluator = false;
+			}
 		} else {
 			if (pNodeEvaluator instanceof IGraphDependentNodeEvaluator) {
-				logger.info("{} is a graph dependent node evaluator. Setting its graph generator now ...", pNodeEvaluator);
+				this.logger.info("{} is a graph dependent node evaluator. Setting its graph generator now ...", pNodeEvaluator);
 				((IGraphDependentNodeEvaluator<T, A, V>) pNodeEvaluator).setGenerator(graphGenerator);
 			}
 
 			/* if the node evaluator is a solution reporter, register in his event bus */
 			if (pNodeEvaluator instanceof ISolutionReportingNodeEvaluator) {
-				logger.info("{} is a solution reporter. Register the search algo in its event bus", pNodeEvaluator);
+				this.logger.info("{} is a solution reporter. Register the search algo in its event bus", pNodeEvaluator);
 				((ISolutionReportingNodeEvaluator<T, V>) pNodeEvaluator).registerSolutionListener(this);
-				solutionReportingNodeEvaluator = true;
-			} else
-				solutionReportingNodeEvaluator = false;
+				this.solutionReportingNodeEvaluator = true;
+			} else {
+				this.solutionReportingNodeEvaluator = false;
+			}
 		}
 
 		// /* if this is a decorator, go to the next one */
@@ -324,31 +335,31 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 		// currentlyConsideredEvaluator = null;
 		// }
 		// while (currentlyConsideredEvaluator != null);
-		Runtime.getRuntime().addShutdownHook(shutdownHook);
+		Runtime.getRuntime().addShutdownHook(this.shutdownHook);
 	}
 
-	private void labelNode(Node<T, V> node) throws Throwable {
-		node.setInternalLabel(nodeEvaluator.f(node));
+	private void labelNode(final Node<T, V> node) throws Throwable {
+		node.setInternalLabel(this.nodeEvaluator.f(node));
 	}
 
 	/**
 	 * This method setups the graph by inserting the root nodes.
 	 */
 	protected synchronized void initGraph() throws Throwable {
-		if (!initialized) {
-			initialized = true;
-			if (rootGenerator instanceof MultipleRootGenerator) {
-				Collection<Node<T, V>> roots = ((MultipleRootGenerator<T>) rootGenerator).getRoots().stream().map(n -> newNode(null, n)).collect(Collectors.toList());
+		if (!this.initialized) {
+			this.initialized = true;
+			if (this.rootGenerator instanceof MultipleRootGenerator) {
+				Collection<Node<T, V>> roots = ((MultipleRootGenerator<T>) this.rootGenerator).getRoots().stream().map(n -> this.newNode(null, n)).collect(Collectors.toList());
 				for (Node<T, V> root : roots) {
-					labelNode(root);
-					open.add(root);
+					this.labelNode(root);
+					this.open.add(root);
 					root.setAnnotation("awa-level", 0);
-					logger.info("Labeled root with {}", root.getInternalLabel());
+					this.logger.info("Labeled root with {}", root.getInternalLabel());
 				}
 			} else {
-				Node<T, V> root = newNode(null, ((SingleRootGenerator<T>) rootGenerator).getRoot());
-				labelNode(root);
-				open.add(root);
+				Node<T, V> root = this.newNode(null, ((SingleRootGenerator<T>) this.rootGenerator).getRoot());
+				this.labelNode(root);
+				this.open.add(root);
 			}
 
 			// check if the equals method is explicitly implemented.
@@ -365,18 +376,17 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 		}
 	}
 
-	public List<T> nextSolutionThatDominatesOpen() {
+	public List<T> nextSolutionThatDominatesOpen() throws InterruptedException {
 		List<T> currentlyBestSolution = null;
 		V currentlyBestScore = null;
 		do {
-			List<T> solution = nextSolution();
-			V scoreOfSolution = getFOfReturnedSolution(solution);
+			List<T> solution = this.nextSolution();
+			V scoreOfSolution = this.getFOfReturnedSolution(solution);
 			if (currentlyBestScore == null || scoreOfSolution.compareTo(currentlyBestScore) < 0) {
 				currentlyBestScore = scoreOfSolution;
 				currentlyBestSolution = solution;
 			}
-		}
-		while(open.peek().getInternalLabel().compareTo(currentlyBestScore) < 0);
+		} while (this.open.peek().getInternalLabel().compareTo(currentlyBestScore) < 0);
 		return currentlyBestSolution;
 	}
 
@@ -387,54 +397,61 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	 *            The initial node.
 	 * @return A list of nodes from the initial point to a goal, <code>null</code> if a path doesn't exist.
 	 */
-	public List<T> nextSolution() {
+
+	@Override
+	public List<T> nextSolution() throws InterruptedException {
 
 		/* check whether solution has been canceled */
-		if (canceled) {
+		if (this.canceled) {
 			throw new IllegalStateException("Search has been canceled, no more solutions can be requested.");
 		}
 
 		/* do preliminary stuff: init graph (only for first call) and return unreturned solutions first */
-		logger.info("Starting search for next solution. Size of OPEN is {}", open.size());
+		this.logger.info("Starting search for next solution. Size of OPEN is {}", this.open.size());
 		try {
-			initGraph();
+			this.initGraph();
 		} catch (Throwable e) {
 			e.printStackTrace();
 			return null;
 		}
-		if (!solutions.isEmpty()) {
-			logger.debug("Still have solution in cache, return it.");
-			return solutions.poll();
+		if (!this.solutions.isEmpty()) {
+			this.logger.debug("Still have solution in cache, return it.");
+			this.logger.info("Returning solution {} with score {}", this.solutions.peek(), this.getAnnotationsOfReturnedSolution(this.solutions.peek()));
+			return this.solutions.poll();
 		}
 		do {
 
 			/* busy waiting for new nodes in OPEN */
-			while (open.isEmpty() && activeJobs.get() > 0) {
-				logger.debug("Waiting 100ms, because OPEN size is {} and there are {} active jobs.", open.size(), activeJobs.get());
+			while (this.open.isEmpty() && this.activeJobs.get() > 0) {
+				this.logger.debug("Waiting 100ms, because OPEN size is {} and there are {} active jobs.", this.open.size(), this.activeJobs.get());
 				try {
 					Thread.sleep(100);
 				} catch (InterruptedException e) {
 					logger.info("Received interrupt signal");
 					interrupted = true;
-					break;
+					throw e;
 				}
 			}
-			if (open.isEmpty() || interrupted) {
-				logger.debug("OPEN has size {} and interrupted is {}", open.size(), interrupted);
+			if (this.open.isEmpty() || this.interrupted) {
+				this.logger.debug("OPEN has size {} and interrupted is {}", this.open.size(), this.interrupted);
 				break;
 			}
 
-			logger.debug("Iteration of main loop starts. Size of OPEN now {}. Now performing next expansion step.", open.size());
-			step();
-			if (!solutions.isEmpty()) {
-				List<T> solution = solutions.poll();
-				logger.debug("Iteration of main loop terminated. Found a solution to return. Size of OPEN now {}", open.size());
+			this.logger.debug("Iteration of main loop starts. Size of OPEN now {}. Now performing next expansion step.", this.open.size());
+			this.step();
+			if (!this.solutions.isEmpty()) {
+				List<T> solution = this.solutions.poll();
+				this.logger.debug("Iteration of main loop terminated. Found a solution to return. Size of OPEN now {}", this.open.size());
+				this.logger.info("Returning solution {} with score {}", solution, this.getAnnotationsOfReturnedSolution(solution));
 				return solution;
 			}
+
 			logger.debug("Iteration of main loop terminated. Size of OPEN now {}. Number of active jobs: {}", open.size(), activeJobs.get());
 		} while ((!open.isEmpty() || activeJobs.get() > 0) && !interrupted);
-		if (interrupted)
+		if (interrupted) {
 			logger.info("Algorithm was interrupted");
+			throw new InterruptedException();
+		}
 		if (open.isEmpty())
 			logger.info("OPEN is empty, terminating (possibly returning a solution)");
 		return solutions.isEmpty() ? null : solutions.poll();
@@ -452,145 +469,154 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	public List<NodeExpansionDescription<T, A>> nextExpansion() {
 		if (!this.initialized) {
 			try {
-				initGraph();
+				this.initGraph();
 			} catch (Throwable e) {
 				e.printStackTrace();
 				return null;
 			}
-			return lastExpansion;
-		} else
-			step();
-		return lastExpansion;
+			return this.lastExpansion;
+		} else {
+			this.step();
+		}
+		return this.lastExpansion;
 	}
 
 	protected void step() {
-		if (beforeSelection()) {
+		if (this.beforeSelection()) {
 
-			Node<T, V> nodeToExpand = open.peek();
-			if (nodeToExpand == null)
+			Node<T, V> nodeToExpand = this.open.peek();
+			assert this.parentDiscarding == ParentDiscarding.ALL || !this.expanded.contains(nodeToExpand.getPoint()) : "Node " + nodeToExpand.getString() + " has been selected for the second time for expansion.";
+			if (nodeToExpand == null) {
 				return;
-			// assert parentDiscarding == ParentDiscarding.ALL || !expanded.contains(nodeToExpand.getPoint()) : "Node " + nodeToExpand.getString()
-			// 		+ " has been selected for the second time for expansion.";
-			afterSelection(nodeToExpand);
-			step(nodeToExpand);
+			}
+			this.afterSelection(nodeToExpand);
+			this.step(nodeToExpand);
 		}
 	}
 
-	public void step(Node<T, V> nodeToExpand) {
+	public void step(final Node<T, V> nodeToExpand) {
 
 		// if (!(nodeEvaluator instanceof RandomizedDepthFirstEvaluator))
 		// System.out.println(nodeToExpand.getAnnotations());
 
 		/* if search has been interrupted, do not process next step */
-		logger.debug("Step starts. Size of OPEN now {}", open.size());
+		this.logger.debug("Step starts. Size of OPEN now {}", this.open.size());
 		if (Thread.interrupted()) {
-			logger.debug("Received interrupt signal before step.");
-			interrupted = true;
+			this.logger.debug("Received interrupt signal before step.");
+			this.interrupted = true;
 			return;
 		}
-		lastExpansion.clear();
-		assert nodeToExpand == null || !expanded.contains(nodeToExpand.getPoint()) : "Node selected for expansion already has been expanded: " + nodeToExpand;
-		open.remove(nodeToExpand);
-		assert !open.contains(nodeToExpand) : "The selected node " + nodeToExpand + " was not really removed from OPEN!";
-		logger.debug("Removed {} from OPEN for expansion. OPEN size now {}", nodeToExpand, open.size());
-		assert ext2int.containsKey(nodeToExpand.getPoint()) : "Trying to expand a node whose point is not available in the ext2int map";
-		beforeExpansion(nodeToExpand);
-		expandNode(nodeToExpand);
-		afterExpansion(nodeToExpand);
+		this.lastExpansion.clear();
+		assert nodeToExpand == null || !this.expanded.contains(nodeToExpand.getPoint()) : "Node selected for expansion already has been expanded: " + nodeToExpand;
+		this.open.remove(nodeToExpand);
+		assert !this.open.contains(nodeToExpand) : "The selected node " + nodeToExpand + " was not really removed from OPEN!";
+		this.logger.debug("Removed {} from OPEN for expansion. OPEN size now {}", nodeToExpand, this.open.size());
+		assert this.ext2int.containsKey(nodeToExpand.getPoint()) : "Trying to expand a node whose point is not available in the ext2int map";
+		this.beforeExpansion(nodeToExpand);
+		this.expandNode(nodeToExpand);
+		this.afterExpansion(nodeToExpand);
 		if (Thread.interrupted()) {
-			logger.debug("Received interrupt signal during step.");
-			interrupted = true;
+			this.logger.debug("Received interrupt signal during step.");
+			this.interrupted = true;
 		}
-		logger.debug("Step ends. Size of OPEN now {}", open.size());
+		this.logger.debug("Step ends. Size of OPEN now {}", this.open.size());
 	}
 
-	private void expandNode(Node<T, V> expandedNodeInternal) {
-		graphEventBus.post(new NodeTypeSwitchEvent<Node<T, V>>(expandedNodeInternal, "or_expanding"));
-		logger.info("Expanding node {} with f-value {}", expandedNodeInternal, expandedNodeInternal.getInternalLabel());
-		assert !expanded.contains(expandedNodeInternal.getPoint()) : "Node " + expandedNodeInternal + " expanded twice!!";
-		expanded.add(expandedNodeInternal.getPoint());
-		assert expanded.contains(expandedNodeInternal.getPoint()) : "Expanded node " + expandedNodeInternal + " was not inserted into the set of expanded nodes!";
+	private void expandNode(final Node<T, V> expandedNodeInternal) {
+		this.graphEventBus.post(new NodeTypeSwitchEvent<Node<T, V>>(expandedNodeInternal, "or_expanding"));
+		this.logger.info("Expanding node {} with f-value {}", expandedNodeInternal, expandedNodeInternal.getInternalLabel());
+		assert !this.expanded.contains(expandedNodeInternal.getPoint()) : "Node " + expandedNodeInternal + " expanded twice!!";
+		this.expanded.add(expandedNodeInternal.getPoint());
+		assert this.expanded.contains(expandedNodeInternal.getPoint()) : "Expanded node " + expandedNodeInternal + " was not inserted into the set of expanded nodes!";
 
 		/* compute successors */
-		logger.debug("Start computation of successors");
-		final Collection<NodeExpansionDescription<T, A>> successorDescriptions = new ArrayList<>();
+		this.logger.debug("Start computation of successors");
+		final List<NodeExpansionDescription<T, A>> successorDescriptions = new ArrayList<>();
 		{
 			Thread t = new Thread(new Runnable() {
 
 				@Override
 				public void run() {
-					if (ORGraphSearch.this.canceled || ORGraphSearch.this.interrupted)
+					if (ORGraphSearch.this.canceled || ORGraphSearch.this.interrupted) {
 						return;
-					int taskId = -1;
-					if (timeoutForComputationOfF > 0) {
-						if (timeoutSubmitter == null) {
-							timeoutSubmitter = TimeoutTimer.getInstance().getSubmitter();
-						}
-						taskId = timeoutSubmitter.interruptMeAfterMS(timeoutForComputationOfF);
 					}
-					successorDescriptions.addAll(successorGenerator.generateSuccessors(expandedNodeInternal.getPoint()));
-					if (taskId >= 0)
-						timeoutSubmitter.cancelTimeout(taskId);
+					int taskId = -1;
+					if (ORGraphSearch.this.timeoutForComputationOfF > 0) {
+						if (ORGraphSearch.this.timeoutSubmitter == null) {
+							ORGraphSearch.this.timeoutSubmitter = TimeoutTimer.getInstance().getSubmitter();
+						}
+						taskId = ORGraphSearch.this.timeoutSubmitter.interruptMeAfterMS(ORGraphSearch.this.timeoutForComputationOfF);
+					}
+					successorDescriptions.addAll(ORGraphSearch.this.successorGenerator.generateSuccessors(expandedNodeInternal.getPoint()));
+					if (taskId >= 0) {
+						ORGraphSearch.this.timeoutSubmitter.cancelTimeout(taskId);
+					}
 				}
 			}, "Node Builder for some child of " + expandedNodeInternal);
-			logger.debug("Starting computation of successors in thread {}", t);
+			this.logger.debug("Starting computation of successors in thread {}", t);
 			t.start();
 			try {
 				t.join();
 			} catch (InterruptedException e) {
-				logger.debug("Search has been interrupted");
-				interrupted = true;
+				this.logger.debug("Search has been interrupted");
+				this.interrupted = true;
 				return;
 			}
-			logger.debug("Finished computation of successors");
+			this.logger.debug("Finished computation of successors");
 		}
 
+		/* send event that successor nodes have been computed */
+		this.logger.debug("Sending SuccessorComputationCompletedEvent with {} successors for {}", successorDescriptions.size(), expandedNodeInternal);
+		this.graphEventBus.post(new SuccessorComputationCompletedEvent<>(expandedNodeInternal, successorDescriptions));
+
 		/* attach successors to search graph */
-//		System.out.println(expanded.contains(expandedNodeInternal.getPoint()));
-		if (additionalThreadsForExpansion < 1) {
+		// System.out.println(expanded.contains(expandedNodeInternal.getPoint()));
+		if (this.additionalThreadsForExpansion < 1) {
 			successorDescriptions.stream().forEach(successorDescription -> {
 
 				/* perform synchronized computation. The computation is outourced, because it may receive an interrupt-signal, and we do not want the main-thread to be interrupted */
 				Thread t = new Thread(new NodeBuilder(expandedNodeInternal, successorDescription), "Node Builder for some child of " + expandedNodeInternal);
-				logger.debug("Starting computation of successor in thread {}", t);
+				this.logger.debug("Starting computation of successor in thread {}", t);
 				t.start();
 				try {
 					t.join();
 				} catch (InterruptedException e) {
-					logger.debug("Search has been interrupted");
-					interrupted = true;
+					this.logger.debug("Search has been interrupted");
+					this.interrupted = true;
 					return;
 				}
-				logger.debug("Finished computation of successor", t);
+				this.logger.debug("Finished computation of successor", t);
 			});
 		} else {
 			successorDescriptions.stream().forEach(successorDescription -> {
-				if (interrupted)
+				if (this.interrupted) {
 					return;
+				}
 				try {
-					fComputationTickets.acquire();
+					this.fComputationTickets.acquire();
 				} catch (InterruptedException e) {
 					e.printStackTrace();
-					interrupted = true;
+					this.interrupted = true;
 				}
-				if (interrupted)
+				if (this.interrupted) {
 					return;
-				activeJobs.incrementAndGet();
-				pool.submit(new NodeBuilder(expandedNodeInternal, successorDescription));
+				}
+				this.activeJobs.incrementAndGet();
+				this.pool.submit(new NodeBuilder(expandedNodeInternal, successorDescription));
 			});
 		}
-		logger.debug("Finished expansion of node {}. Size of OPEN is now {}. Number of active jobs is {}", expandedNodeInternal, open.size(), activeJobs.get());
+		this.logger.debug("Finished expansion of node {}. Size of OPEN is now {}. Number of active jobs is {}", expandedNodeInternal, this.open.size(), this.activeJobs.get());
 
 		/* update statistics, send closed notifications, and possibly return a solution */
-		expandedCounter++;
-		graphEventBus.post(new NodeTypeSwitchEvent<Node<T, V>>(expandedNodeInternal, "or_closed"));
+		this.expandedCounter++;
+		this.graphEventBus.post(new NodeTypeSwitchEvent<Node<T, V>>(expandedNodeInternal, "or_closed"));
 	}
 
 	public GraphEventBus<Node<T, V>> getEventBus() {
-		return graphEventBus;
+		return this.graphEventBus;
 	}
 
-	protected List<T> getTraversalPath(Node<T, V> n) {
+	protected List<T> getTraversalPath(final Node<T, V> n) {
 		return n.path().stream().map(p -> p.getPoint()).collect(Collectors.toList());
 	}
 
@@ -600,42 +626,47 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	 * @return A counter of how many times a node was expanded.
 	 */
 	public int getExpandedCounter() {
-		return expandedCounter;
+		return this.expandedCounter;
 	}
 
 	public int getCreatedCounter() {
-		return createdCounter;
+		return this.createdCounter;
 	}
 
-	public V getFValue(T node) {
-		return getFValue(ext2int.get(node));
+	@Override
+	public V getFValue(final T node) {
+		return this.getFValue(this.ext2int.get(node));
 	}
 
-	public V getFValue(Node<T, V> node) {
+	@Override
+	public V getFValue(final Node<T, V> node) {
 		return node.getInternalLabel();
 	}
 
-	public Map<String, Object> getNodeAnnotations(T node) {
-		Node<T, V> intNode = ext2int.get(node);
+	public Map<String, Object> getNodeAnnotations(final T node) {
+		Node<T, V> intNode = this.ext2int.get(node);
 		return intNode.getAnnotations();
 	}
 
-	public Object getNodeAnnotation(T node, String annotation) {
-		Node<T, V> intNode = ext2int.get(node);
+	public Object getNodeAnnotation(final T node, final String annotation) {
+		Node<T, V> intNode = this.ext2int.get(node);
 		return intNode.getAnnotation(annotation);
 	}
 
-	public Map<String, Object> getAnnotationsOfReturnedSolution(List<T> solution) {
-		return solutionAnnotations.get(solution);
+	@Override
+	public Map<String, Object> getAnnotationsOfReturnedSolution(final List<T> solution) {
+		return this.solutionAnnotations.get(solution);
 	}
 
-	public Object getAnnotationOfReturnedSolution(List<T> solution, String annotation) {
-		return solutionAnnotations.get(solution).get(annotation);
+	@Override
+	public Object getAnnotationOfReturnedSolution(final List<T> solution, final String annotation) {
+		return this.solutionAnnotations.get(solution).get(annotation);
 	}
 
-	public V getFOfReturnedSolution(List<T> solution) {
+	@Override
+	public V getFOfReturnedSolution(final List<T> solution) {
 		@SuppressWarnings("unchecked")
-		V annotation = (V) getAnnotationOfReturnedSolution(solution, "f");
+		V annotation = (V) this.getAnnotationOfReturnedSolution(solution, "f");
 		if (annotation == null) {
 			throw new IllegalArgumentException(
 					"There is no solution annotation for the given solution. Please check whether the solution was really produced by the algorithm. If so, please check that its annotation was added into the list of annotations before the solution itself was added to the solution set");
@@ -643,124 +674,138 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 		return annotation;
 	}
 
+	@Override
 	public void cancel() {
 		StringBuilder sb = new StringBuilder();
 		for (StackTraceElement ste : Thread.currentThread().getStackTrace()) {
 			sb.append("\n" + ste.toString());
 		}
-		logger.info("Search has been canceled. Cancel came from: {}", sb.toString());
+		this.logger.info("Search has been canceled. Cancel came from: {}", sb.toString());
 		this.canceled = true;
 		this.interrupted = true;
-		if (this.pool != null)
+		if (this.pool != null) {
 			this.pool.shutdownNow();
-		if (nodeEvaluator instanceof ICancelableNodeEvaluator) {
-			logger.info("Canceling node evaluator.");
-			((ICancelableNodeEvaluator) nodeEvaluator).cancel();
 		}
-		if (timeoutSubmitter != null)
-			timeoutSubmitter.close();
+		if (this.nodeEvaluator instanceof ICancelableNodeEvaluator) {
+			this.logger.info("Canceling node evaluator.");
+			((ICancelableNodeEvaluator) this.nodeEvaluator).cancel();
+		}
+		if (this.timeoutSubmitter != null) {
+			this.timeoutSubmitter.close();
+		}
 	}
 
 	public boolean isInterrupted() {
 		return this.interrupted;
 	}
 
-	public List<T> getCurrentPathToNode(T node) {
-		return ext2int.get(node).externalPath();
+	public List<T> getCurrentPathToNode(final T node) {
+		return this.ext2int.get(node).externalPath();
 	}
 
-	public Node<T, V> getInternalRepresentationOf(T node) {
-		return ext2int.get(node);
+	@Override
+	public Node<T, V> getInternalRepresentationOf(final T node) {
+		return this.ext2int.get(node);
 	}
 
+	@Override
 	public List<Node<T, V>> getOpenSnapshot() {
-		return Collections.unmodifiableList(new ArrayList<>(open));
+		return Collections.unmodifiableList(new ArrayList<>(this.open));
 	}
 
-	protected synchronized Node<T, V> newNode(Node<T, V> parent, T t2) {
-		return newNode(parent, t2, null);
+	protected synchronized Node<T, V> newNode(final Node<T, V> parent, final T t2) {
+		return this.newNode(parent, t2, null);
 	}
 
+	@Override
 	public INodeEvaluator<T, V> getNodeEvaluator() {
 		return this.nodeEvaluator;
 	}
 
-	protected synchronized Node<T, V> newNode(Node<T, V> parent, T t2, V evaluation) {
-		assert parent == null || expanded.contains(parent.getPoint()) : "Generating successors of an unexpanded node " + parent + ". List of expanded nodes:\n" + expanded.stream().map(n -> "\n\t" + n.toString()).collect(Collectors.joining());
-		assert !open.contains(parent) : "Parent node " + parent + " is still on OPEN, which must not be the case!";
+	protected synchronized Node<T, V> newNode(final Node<T, V> parent, final T t2, final V evaluation) {
+		assert parent == null || this.expanded.contains(parent.getPoint()) : "Generating successors of an unexpanded node " + parent + ". List of expanded nodes:\n"
+				+ this.expanded.stream().map(n -> "\n\t" + n.toString()).collect(Collectors.joining());
+		assert !this.open.contains(parent) : "Parent node " + parent + " is still on OPEN, which must not be the case!";
 
 		/* create new node and check whether it is a goal */
 		Node<T, V> newNode = new Node<>(parent, t2);
-		if (evaluation != null)
+		if (evaluation != null) {
 			newNode.setInternalLabel(evaluation);
+		}
 
 		/* check loop */
-		assert parent == null || !parent.externalPath().contains(t2) : "There is a loop in the underlying graph. The following path contains the last node twice: " + newNode.externalPath().stream().map(n -> n.toString()).reduce("", (s,t) -> s + "\n\t\t" + t);
+		assert parent == null || !parent.externalPath().contains(t2) : "There is a loop in the underlying graph. The following path contains the last node twice: "
+				+ newNode.externalPath().stream().map(n -> n.toString()).reduce("", (s, t) -> s + "\n\t\t" + t);
 
 		/* currently, we only support tree search */
-		assert !ext2int.containsKey(t2) : "Reached node " + t2 + " for the second time.\nt\tFirst path:" + ext2int.get(t2).externalPath().stream().map(n -> n.toString()).reduce("", (s,t) -> s + "\n\t\t" + t)
-				+ "\n\tSecond Path:" + newNode.externalPath().stream().map(n -> n.toString()).reduce("", (s,t) -> s + "\n\t\t" + t);
+		assert !ext2int.containsKey(t2) : "Reached node " + t2 + " for the second time.\nt\tFirst path:"
+				+ ext2int.get(t2).externalPath().stream().map(n -> n.toString()).reduce("", (s, t) -> s + "\n\t\t" + t) + "\n\tSecond Path:"
+				+ newNode.externalPath().stream().map(n -> n.toString()).reduce("", (s, t) -> s + "\n\t\t" + t);
 
 		/* register node in map and create annotation object */
-		ext2int.put(t2, newNode);
+		this.ext2int.put(t2, newNode);
 
 		/* detect whether node is solution */
-		if (checkGoalPropertyOnEntirePath ? pathGoalTester.isGoal(newNode.externalPath()) : nodeGoalTester.isGoal(newNode.getPoint()))
+		if (this.checkGoalPropertyOnEntirePath ? this.pathGoalTester.isGoal(newNode.externalPath()) : this.nodeGoalTester.isGoal(newNode.getPoint())) {
 			newNode.setGoal(true);
+		}
 
 		/* send events for this new node */
 		if (parent == null) {
 			this.graphEventBus.post(new GraphInitializedEvent<Node<T, V>>(newNode));
 		} else {
 			this.graphEventBus.post(new NodeReachedEvent<Node<T, V>>(parent, newNode, "or_" + (newNode.isGoal() ? "solution" : "created")));
-			logger.debug("Sent message for creation of node {} as a successor of {}", newNode, parent);
+			this.logger.debug("Sent message for creation of node {} as a successor of {}", newNode, parent);
 		}
 		return newNode;
 	}
 
 	/**
-	 * This method can be used to create an initial graph different from just root nodes. This can be interesting if the search is distributed and we want to search only an excerpt of the original
-	 * one.
+	 * This method can be used to create an initial graph different from just root nodes. This can be interesting if the search is distributed and we want to search only an excerpt of the original one.
 	 *
 	 * @param initialNodes
 	 */
-	public void bootstrap(Collection<Node<T, V>> initialNodes) {
+	@Override
+	public void bootstrap(final Collection<Node<T, V>> initialNodes) {
 
-		if (initialized)
+		if (this.initialized) {
 			throw new UnsupportedOperationException("Bootstrapping is only supported if the search has already been initialized.");
+		}
 
 		/* now initialize the graph */
 		try {
-			initGraph();
+			this.initGraph();
 		} catch (Throwable e) {
 			e.printStackTrace();
 			return;
 		}
 
 		/* remove previous roots from open */
-		open.clear();
+		this.open.clear();
 
 		/* now insert new nodes, and the leaf ones in open */
 		for (Node<T, V> node : initialNodes) {
-			insertNodeIntoLocalGraph(node);
-			open.add(getLocalVersionOfNode(node));
+			this.insertNodeIntoLocalGraph(node);
+			this.open.add(this.getLocalVersionOfNode(node));
 		}
 	}
 
-	protected void insertNodeIntoLocalGraph(Node<T, V> node) {
+	protected void insertNodeIntoLocalGraph(final Node<T, V> node) {
 		Node<T, V> localVersionOfParent = null;
 		List<Node<T, V>> path = node.path();
 		Node<T, V> leaf = path.get(path.size() - 1);
 		for (Node<T, V> nodeOnPath : path) {
-			if (!ext2int.containsKey(nodeOnPath.getPoint())) {
+			if (!this.ext2int.containsKey(nodeOnPath.getPoint())) {
 				assert nodeOnPath.getParent() != null : "Want to insert a new node that has no parent. That must not be the case! Affected node is: " + nodeOnPath.getPoint();
-				assert ext2int.containsKey(nodeOnPath.getParent().getPoint()) : "Want to insert a node whose parent is unknown locally";
-				Node<T, V> newNode = newNode(localVersionOfParent, nodeOnPath.getPoint(), nodeOnPath.getInternalLabel());
-				if (!newNode.isGoal() && !newNode.getPoint().equals(leaf.getPoint()))
+				assert this.ext2int.containsKey(nodeOnPath.getParent().getPoint()) : "Want to insert a node whose parent is unknown locally";
+				Node<T, V> newNode = this.newNode(localVersionOfParent, nodeOnPath.getPoint(), nodeOnPath.getInternalLabel());
+				if (!newNode.isGoal() && !newNode.getPoint().equals(leaf.getPoint())) {
 					this.getEventBus().post(new NodeTypeSwitchEvent<Node<T, V>>(newNode, "or_closed"));
+				}
 				localVersionOfParent = newNode;
-			} else
-				localVersionOfParent = getLocalVersionOfNode(nodeOnPath);
+			} else {
+				localVersionOfParent = this.getLocalVersionOfNode(nodeOnPath);
+			}
 		}
 	}
 
@@ -770,8 +815,8 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	 * @param node
 	 * @return
 	 */
-	protected Node<T, V> getLocalVersionOfNode(Node<T, V> node) {
-		return ext2int.get(node.getPoint());
+	protected Node<T, V> getLocalVersionOfNode(final Node<T, V> node) {
+		return this.ext2int.get(node.getPoint());
 	}
 
 	/* hooks */
@@ -782,36 +827,38 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 		return true;
 	}
 
-	protected void afterSelection(Node<T, V> node) {
+	protected void afterSelection(final Node<T, V> node) {
 	}
 
-	protected void beforeExpansion(Node<T, V> node) {
+	protected void beforeExpansion(final Node<T, V> node) {
 	}
 
-	protected void afterExpansion(Node<T, V> node) {
+	protected void afterExpansion(final Node<T, V> node) {
 	}
 
 	@Override
 	public boolean hasNext() {
-		if (!initialized) {
+		if (!this.initialized) {
 			try {
-				initGraph();
+				this.initGraph();
 			} catch (Throwable e) {
 				e.printStackTrace();
 				return false;
 			}
-			step();
-		} else
-			step();
+			this.step();
+		} else {
+			this.step();
+		}
 		return !this.lastExpansion.isEmpty();
 	}
 
 	@Override
 	public List<NodeExpansionDescription<T, A>> next() {
-		if (hasNext())
+		if (this.hasNext()) {
 			return this.lastExpansion;
-		else
+		} else {
 			return null;
+		}
 	}
 
 	@Override
@@ -820,39 +867,42 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	}
 
 	@Subscribe
-	public void receiveSolutionEvent(SolutionFoundEvent<T, V> solution) {
+	public void receiveSolutionEvent(final SolutionFoundEvent<T, V> solution) {
 		try {
-			logger.info("Received solution with f-value {}", solution.getF());
-			if (solutionAnnotations.containsKey(solution.getSolution()))
+			this.logger.info("Received solution with f-value {}", solution.getF());
+			if (this.solutionAnnotations.containsKey(solution.getSolution())) {
 				throw new IllegalStateException("Solution is reported for the second time already!");
-			solutionAnnotations.put(solution.getSolution(), new HashMap<>());
-			solutionAnnotations.get(solution.getSolution()).put("f", solution.getF());
-			solutions.add(solution.getSolution());
+			}
+			this.solutionAnnotations.put(solution.getSolution(), new HashMap<>());
+			this.solutionAnnotations.get(solution.getSolution()).put("f", solution.getF());
+			this.solutions.add(solution.getSolution());
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
 	}
 
 	@Subscribe
-	public void receiveSolutionAnnotationEvent(SolutionAnnotationEvent<T, V> solution) {
+	public void receiveSolutionAnnotationEvent(final SolutionAnnotationEvent<T, V> solution) {
 		try {
-			logger.debug("Received solution annotation: {}", solution);
-			if (!solutionAnnotations.containsKey(solution.getSolution()))
+			this.logger.debug("Received solution annotation: {}", solution);
+			if (!this.solutionAnnotations.containsKey(solution.getSolution())) {
 				throw new IllegalStateException("Solution annotation is reported for a solution that has not been reported previously!");
-			solutionAnnotations.get(solution.getSolution()).put(solution.getAnnotationName(), solution.getAnnotationValue());
+			}
+			this.solutionAnnotations.get(solution.getSolution()).put(solution.getAnnotationName(), solution.getAnnotationValue());
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
 	}
 
 	@Subscribe
-	public void receiveNodeAnnotationEvent(NodeAnnotationEvent<T> event) {
+	public void receiveNodeAnnotationEvent(final NodeAnnotationEvent<T> event) {
 		try {
 			T nodeExt = event.getNode();
-			logger.debug("Received annotation {} with value {} for node {}", event.getAnnotationName(), event.getAnnotationValue(), event.getNode());
-			if (!ext2int.containsKey(nodeExt))
+			this.logger.debug("Received annotation {} with value {} for node {}", event.getAnnotationName(), event.getAnnotationValue(), event.getNode());
+			if (!this.ext2int.containsKey(nodeExt)) {
 				throw new IllegalArgumentException("Received annotation for a node I don't know!");
-			Node<T, V> nodeInt = ext2int.get(nodeExt);
+			}
+			Node<T, V> nodeInt = this.ext2int.get(nodeExt);
 			nodeInt.setAnnotation(event.getAnnotationName(), event.getAnnotationValue());
 		} catch (Throwable e) {
 			e.printStackTrace();
@@ -860,14 +910,16 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	}
 
 	public int getAdditionalThreadsForExpansion() {
-		return additionalThreadsForExpansion;
+		return this.additionalThreadsForExpansion;
 	}
 
-	public void parallelizeNodeExpansion(int threadsForExpansion) {
-		if (this.pool != null)
+	public void parallelizeNodeExpansion(final int threadsForExpansion) {
+		if (this.pool != null) {
 			throw new UnsupportedOperationException("The number of additional threads can be only set once per search!");
-		if (threadsForExpansion < 1)
+		}
+		if (threadsForExpansion < 1) {
 			throw new IllegalArgumentException("Number of threads should be at least 1 for " + this.getClass().getName());
+		}
 		this.fComputationTickets = new Semaphore(threadsForExpansion);
 		this.additionalThreadsForExpansion = threadsForExpansion;
 		AtomicInteger counter = new AtomicInteger(0);
@@ -879,10 +931,10 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	}
 
 	public int getTimeoutForComputationOfF() {
-		return timeoutForComputationOfF;
+		return this.timeoutForComputationOfF;
 	}
 
-	public void setTimeoutForComputationOfF(int timeoutInMS, INodeEvaluator<T, V> timeoutEvaluator) {
+	public void setTimeoutForComputationOfF(final int timeoutInMS, final INodeEvaluator<T, V> timeoutEvaluator) {
 		this.timeoutForComputationOfF = timeoutInMS;
 		this.timeoutNodeEvaluator = timeoutEvaluator;
 	}
@@ -891,39 +943,39 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	 * @return the openCollection
 	 */
 	public OpenCollection<Node<T, V>> getOpen() {
-		return open;
+		return this.open;
 	}
 
 	/**
 	 * @param open
 	 *            the openCollection to set
 	 */
-	public void setOpen(OpenCollection<Node<T, V>> collection) {
+	public void setOpen(final OpenCollection<Node<T, V>> collection) {
 
 		collection.clear();
-		collection.addAll(open);
-		open = collection;
+		collection.addAll(this.open);
+		this.open = collection;
 	}
 
 	@Override
-	public void setLoggerName(String name) {
-		logger.info("Switching logger from {} to {}", logger.getName(), name);
-		logger = LoggerFactory.getLogger(name);
-		logger.info("Activated logger {} with name {}", name, logger.getName());
+	public void setLoggerName(final String name) {
+		this.logger.info("Switching logger from {} to {}", this.logger.getName(), name);
+		this.logger = LoggerFactory.getLogger(name);
+		this.logger.info("Activated logger {} with name {}", name, this.logger.getName());
 	}
 
 	@Override
 	public String getLoggerName() {
-		return logger.getName();
+		return this.logger.getName();
 	}
 
 	@Override
-	public void registerListener(Object listener) {
+	public void registerListener(final Object listener) {
 		this.graphEventBus.register(listener);
 	}
 
 	@Override
 	public GraphGenerator<T, A> getGraphGenerator() {
-		return graphGenerator;
+		return this.graphGenerator;
 	}
 }

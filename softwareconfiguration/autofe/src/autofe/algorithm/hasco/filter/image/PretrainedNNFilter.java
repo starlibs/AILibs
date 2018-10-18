@@ -1,6 +1,7 @@
 package autofe.algorithm.hasco.filter.image;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -21,14 +22,13 @@ import autofe.util.DataSet;
 import autofe.util.ImageUtils;
 
 /**
- * Wrapper filter for pretrained neural nets taken from Deeplearning4j framework
- * (e. g. AlexNet, VGG16, ...).
- * 
+ * Wrapper filter for pretrained neural nets taken from Deeplearning4j framework (e. g. AlexNet, VGG16, ...).
+ *
  * @author Julian Lienen
  *
  */
 @SuppressWarnings("rawtypes")
-public class PretrainedNNFilter implements IFilter {
+public class PretrainedNNFilter implements IFilter, Serializable {
 
 	private static final Logger logger = LoggerFactory.getLogger(PretrainedNNFilter.class);
 
@@ -43,23 +43,19 @@ public class PretrainedNNFilter implements IFilter {
 	private String modelName;
 
 	/**
-	 * Computational graph (concrete layered structure of the net). Used to access
-	 * activations when predicting. Is null if neural net can not be applied to
-	 * given input shape.
+	 * Computational graph (concrete layered structure of the net). Used to access activations when predicting. Is null if neural net can not be applied to given input shape.
 	 */
 	private ComputationGraph compGraph = null;
 
 	public static final Map<String, List<PretrainedType>> PRETRAINED_WEIGHTS_MAPPING = new HashMap<>();
 
 	/**
-	 * Layer used for feature extraction (currently not used due to compatibility
-	 * issues)
+	 * Layer used for feature extraction (currently not used due to compatibility issues)
 	 */
 	private int selectedLayer;
 
 	/**
-	 * Flag if grayscale to rgb conversion is necessary (e. g. for usage of
-	 * pretrained nets using ImageNet for grayscale data)
+	 * Flag if grayscale to rgb conversion is necessary (e. g. for usage of pretrained nets using ImageNet for grayscale data)
 	 */
 	private boolean convertGrayscaleToRGB = false;
 
@@ -67,19 +63,17 @@ public class PretrainedNNFilter implements IFilter {
 		PRETRAINED_WEIGHTS_MAPPING.put("AlexNet", Arrays.asList(PretrainedType.IMAGENET));
 		PRETRAINED_WEIGHTS_MAPPING.put("LeNet", Arrays.asList(PretrainedType.MNIST));
 		PRETRAINED_WEIGHTS_MAPPING.put("ResNet50", Arrays.asList(PretrainedType.IMAGENET));
-		PRETRAINED_WEIGHTS_MAPPING.put("VGG16",
-				Arrays.asList(PretrainedType.IMAGENET, PretrainedType.CIFAR10, PretrainedType.VGGFACE));
+		PRETRAINED_WEIGHTS_MAPPING.put("VGG16", Arrays.asList(PretrainedType.IMAGENET, PretrainedType.CIFAR10, PretrainedType.VGGFACE));
 		PRETRAINED_WEIGHTS_MAPPING.put("VGG19", Arrays.asList(PretrainedType.IMAGENET));
 	}
 
-	public PretrainedNNFilter(final ZooModel model, final int selectedLayer, final int[] shape,
-			final String modelName) {
-		if (shape[0] != 1)
-			throw new IllegalArgumentException(
-					"Given input shape assumes one example as batch input (first input dimension has to be 1).");
-		if (shape.length < 3)
-			throw new IllegalArgumentException(
-					"Given input shape assumes to have spatial structure (at least two dimensions plus batch size dimension).");
+	public PretrainedNNFilter(final ZooModel model, final int selectedLayer, final int[] shape, final String modelName) {
+		if (shape[0] != 1) {
+			throw new IllegalArgumentException("Given input shape assumes one example as batch input (first input dimension has to be 1).");
+		}
+		if (shape.length < 3) {
+			throw new IllegalArgumentException("Given input shape assumes to have spatial structure (at least two dimensions plus batch size dimension).");
+		}
 
 		this.model = model;
 		this.modelName = modelName;
@@ -89,9 +83,8 @@ public class PretrainedNNFilter implements IFilter {
 			PretrainedType type = inferPretrainedTypeFromShape(shape);
 
 			if (!this.model.pretrainedAvailable(type)) {
-				logger.warn("Given model " + this.model.getClass().getSimpleName()
-						+ " does not provide pretrained weights for input shape " + Arrays.toString(shape)
-						+ " (pretrained type " + type + "). Trying to find different weights and adjust input shape.");
+				logger.warn("Given model " + this.model.getClass().getSimpleName() + " does not provide pretrained weights for input shape " + Arrays.toString(shape) + " (pretrained type " + type
+						+ "). Trying to find different weights and adjust input shape.");
 
 				List<PretrainedType> availableWeights = PRETRAINED_WEIGHTS_MAPPING.get(modelName);
 				if (availableWeights == null) {
@@ -111,26 +104,27 @@ public class PretrainedNNFilter implements IFilter {
 					}
 				} else {
 					// Special case for LeNet (can only deal with one input channel
-					if (shape[1] > 1 && modelName.equals("LeNet"))
+					if (shape[1] > 1 && modelName.equals("LeNet")) {
 						type = null;
-					else
+					} else {
 						type = availableWeights.get(0);
+					}
 				}
 			}
 
 			if (type == null) {
-				logger.warn("Could not infer any type for model '" + modelName + "' and shape '"
-						+ Arrays.toString(shape) + "'.");
+				logger.warn("Could not infer any type for model '" + modelName + "' and shape '" + Arrays.toString(shape) + "'.");
 				return;
 			}
 
 			logger.debug("Using pretrained weights " + type);
 
 			Model pretrainedModel = this.model.initPretrained(type);
-			if (pretrainedModel instanceof ComputationGraph)
+			if (pretrainedModel instanceof ComputationGraph) {
 				this.compGraph = (ComputationGraph) this.model.initPretrained(type);
-			else
+			} else {
 				this.compGraph = ((MultiLayerNetwork) this.model.initPretrained(type)).toComputationGraph();
+			}
 
 		} catch (UnsupportedOperationException ex) {
 			logger.warn(ex.getMessage());
@@ -142,11 +136,10 @@ public class PretrainedNNFilter implements IFilter {
 	}
 
 	@Override
-	public DataSet applyFilter(DataSet inputData, boolean copy) {
-		if (inputData.getIntermediateInstances() == null || inputData.getIntermediateInstances().size() == 0
-				|| inputData.getIntermediateInstances().get(0).rank() < 2)
-			throw new IllegalArgumentException(
-					"Intermediate instances must have a rank of at least 2 for image processing.");
+	public DataSet applyFilter(final DataSet inputData, final boolean copy) {
+		if (inputData.getIntermediateInstances() == null || inputData.getIntermediateInstances().size() == 0 || inputData.getIntermediateInstances().get(0).rank() < 2) {
+			throw new IllegalArgumentException("Intermediate instances must have a rank of at least 2 for image processing.");
+		}
 
 		List<INDArray> transformedInstances = new ArrayList<>(inputData.getIntermediateInstances().size());
 
@@ -166,11 +159,9 @@ public class PretrainedNNFilter implements IFilter {
 
 			// Transforms example to (batch size, channel, width, height) shape
 			INDArray adjustedExample = example.permute(2, 0, 1);
-			adjustedExample = adjustedExample.reshape(1, adjustedExample.shape()[0], adjustedExample.shape()[1],
-					adjustedExample.shape()[2]);
+			adjustedExample = adjustedExample.reshape(1, adjustedExample.shape()[0], adjustedExample.shape()[1], adjustedExample.shape()[2]);
 
-			Map<String, INDArray> result = this.compGraph.feedForward(adjustedExample,
-					this.getSelectedLayerByModelName(), false); // this.selectedLayer
+			Map<String, INDArray> result = this.compGraph.feedForward(adjustedExample, this.getSelectedLayerByModelName(), false); // this.selectedLayer
 
 			// logger.debug("Feed forward end " + this.model.getClass().getName());
 			Object[] values = result.values().toArray();
@@ -182,43 +173,46 @@ public class PretrainedNNFilter implements IFilter {
 	}
 
 	public ZooModel getModel() {
-		return model;
+		return this.model;
 	}
 
 	public ComputationGraph getCompGraph() {
-		return compGraph;
+		return this.compGraph;
 	}
 
 	public int getSelectedLayer() {
-		return selectedLayer;
+		return this.selectedLayer;
 	}
 
 	public int getSelectedLayerByModelName() {
-		if (this.modelName.equalsIgnoreCase("VGG16"))
+		if (this.modelName.equalsIgnoreCase("VGG16")) {
 			return this.compGraph.getNumLayers() - 5;
-		else
+		} else {
 			return this.compGraph.getNumLayers() - 3;
+		}
 	}
 
 	// Assumes input shape (batch size, channels, width, height, [depth])
 	private static PretrainedType inferPretrainedTypeFromShape(final int[] shape) {
 		// Grayscale structure
-		if (shape.length == 4 && shape[1] == 1)
+		if (shape.length == 4 && shape[1] == 1) {
 			return PretrainedType.MNIST;
+		}
 		if (shape.length == 4 && shape[2] > 32) {
-			if (shape[2] > 32)
+			if (shape[2] > 32) {
 				return PretrainedType.IMAGENET;
+			}
 		}
 		return PretrainedType.CIFAR10;
 	}
 
 	@Override
 	public String toString() {
-		if (model != null)
-			return "PretrainedNNFilter [model=" + model.getClass().getSimpleName() + ", selectedLayer=" + selectedLayer
-					+ "]";
-		else
-			return "PretrainedNNFilter [model=" + model + ", selectedLayer=" + selectedLayer + "]";
+		if (this.model != null) {
+			return "PretrainedNNFilter [model=" + this.model.getClass().getSimpleName() + ", selectedLayer=" + this.selectedLayer + "]";
+		} else {
+			return "PretrainedNNFilter [model=" + this.model + ", selectedLayer=" + this.selectedLayer + "]";
+		}
 	}
 
 }

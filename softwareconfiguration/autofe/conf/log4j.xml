@@ -8,7 +8,7 @@
 		<layout class="org.apache.log4j.PatternLayout">
 			<!-- <param name="ConversionPattern" value="(%d{ISO8601}) %-5p [%t] [%c{1}.%M:%L] 
 				- %m%n" /> -->
-			<param name="ConversionPattern" value="%-5p [%t] [%c{1}.%M:%L] - %m%n" />
+			<param name="ConversionPattern" value="[%d] %-5p [%t] [%c{1}.%M:%L] - %m%n" />
 		</layout>
 	</appender>
 
@@ -64,7 +64,17 @@
 	</logger>
 	
 	<logger name="hasco">
-		<level value="debug" />
+		<level value="info" />
+		<appender-ref ref="console" />
+	</logger>
+	
+	<logger name="jaicore.search">
+		<level value="error"/>
+		<appender-ref ref="console" />
+	</logger>
+	
+	<logger name="autofe.algorithm.hasco.evaluation">
+		<level value="info"/>
 		<appender-ref ref="console" />
 	</logger>
 	
@@ -78,8 +88,20 @@
 		<appender-ref ref="debugFileAppender" />
 	</logger>
 	
+	<logger name="autofe.algorithm.hasco.filter.meta">
+		<level value="info" />
+	</logger>
+	
+	<logger name="autofe.algorithm.hasco.AutoFEPreferredNodeEvaluator">
+		<level value="info" />
+	</logger>
+	
+	<logger name="autofe.algorithm.hasco.AutoFEMLPreferredNodeEvaluator">
+		<level value="info" />
+	</logger>
+	
 	<logger name="mlplan">
-		<level value="warn" />
+		<level value="info" />
 		<appender-ref ref="console" />
 <!-- 		<appender-ref ref="infoFileAppender" /> -->
 <!-- 		<appender-ref ref="warnFileAppender" /> -->

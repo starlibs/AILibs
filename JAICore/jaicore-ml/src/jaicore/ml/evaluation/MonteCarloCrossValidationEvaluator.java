@@ -14,10 +14,9 @@ public class MonteCarloCrossValidationEvaluator implements ClassifierEvaluator {
 	private final Instances data;
 	private boolean canceled = false;
 	private final int repeats;
-	private final float trainingPortion;
+	private final double trainingPortion;
 
-	public MonteCarloCrossValidationEvaluator(final BasicMLEvaluator basicEvaluator, final int repeats,
-			final Instances data, final float trainingPortion) {
+	public MonteCarloCrossValidationEvaluator(final BasicMLEvaluator basicEvaluator, final int repeats, final Instances data, final double trainingPortion) {
 		super();
 		this.basicEvaluator = basicEvaluator;
 		this.repeats = repeats;

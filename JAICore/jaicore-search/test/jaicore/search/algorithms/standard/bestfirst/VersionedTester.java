@@ -11,13 +11,13 @@ import jaicore.search.graphgenerators.npuzzle.standard.NPuzzleGenerator;
 import jaicore.search.graphgenerators.npuzzle.standard.NPuzzleNode;
 import jaicore.search.graphgenerators.nqueens.NQueenGenerator;
 import jaicore.search.graphgenerators.nqueens.QueenNode;
-import jaicore.search.structure.core.VersionedGraphGenerator;
 import jaicore.search.structure.core.VersionedDomainNode;
+import jaicore.search.structure.core.VersionedGraphGenerator;
 
 public class VersionedTester {
 
 	@Test
-	public void versionedNQueenTest() {
+	public void versionedNQueenTest() throws InterruptedException {
 		System.out.println("Testing Versioning with NQueens.");
 
 		int[] numbersOfSolutions = { 2, 10, 4, 40, 92 };
@@ -59,7 +59,7 @@ public class VersionedTester {
 	}
 
 	@Test
-	public void versionedNpuzzleTest() {
+	public void versionedNpuzzleTest() throws InterruptedException {
 		System.out.println("Testing Versioning with NPuzzle.");
 
 		// Test if the normal 8-Puzzle works with versioning

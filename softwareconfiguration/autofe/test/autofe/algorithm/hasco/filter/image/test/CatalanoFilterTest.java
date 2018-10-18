@@ -15,7 +15,6 @@ import org.openml.apiconnector.xml.DataSetDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import Catalano.Imaging.Filters.GaborFilter;
 import autofe.algorithm.hasco.filter.image.CatalanoInPlaceFilter;
 import autofe.util.DataSet;
 import autofe.util.DataSetUtils;
@@ -44,7 +43,7 @@ public class CatalanoFilterTest {
 		logger.info("Finished intermediate calculations.");
 		DataSet originDataSet = new DataSet(split.get(0), intermediate);
 
-		CatalanoInPlaceFilter filter = new CatalanoInPlaceFilter(new GaborFilter(), true);
+		CatalanoInPlaceFilter filter = new CatalanoInPlaceFilter("GaborFilter");
 		// IdentityFilter filter = new IdentityFilter();
 		DataSet transDataSet = filter.applyFilter(originDataSet, true);
 		transDataSet.updateInstances();

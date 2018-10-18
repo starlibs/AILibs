@@ -29,66 +29,62 @@ import javafx.stage.Stage;
 
 public class FXGuiTester extends Application {
 
-    FXGui gui;
+	FXGui gui;
 
 	@Test
 	public void test() {
-	    launch();
+		launch();
 	}
 
 	@Override
 	public void start(Stage stage) throws Exception {
-	    gui = new FXGui();
-//		bestFirstTest();
+		gui = new FXGui();
+		// bestFirstTest();
 
-//		tooltipTest();
-//
-//		dataSupplierTest();
-//
+		// tooltipTest();
+		//
+		// dataSupplierTest();
+		//
 		bestFTest();
-
 
 	}
 
-	private void bestFirstTest(){
+	private void bestFirstTest() throws InterruptedException {
 		GraphGenerator generator = new TestGraphGenerator();
-		BestFirst<TestNode, String> bf = new BestFirst<>(generator, n->(double)Math.round(Math.random()*100));
-//		open(bf,"BestFirst");
+		BestFirst<TestNode, String> bf = new BestFirst<>(generator, n -> (double) Math.round(Math.random() * 100));
+		// open(bf,"BestFirst");
 
 		Recorder rec = new Recorder(bf);
 
-
 		gui.open(rec, "Recorder");
 
-//		TooltipSupplier supplier = new TooltipSupplier();
-//		supplier.setGenerator(n->{
-//			Node node =(Node) n;
-//			return String.valueOf(((Node) n).getInternalLabel());
-//		});
+		// TooltipSupplier supplier = new TooltipSupplier();
+		// supplier.setGenerator(n->{
+		// Node node =(Node) n;
+		// return String.valueOf(((Node) n).getInternalLabel());
+		// });
 
-//		rec.addDataSupplier(supplier);
+		// rec.addDataSupplier(supplier);
 
+		// FXController controller = gui.getControllers().get(gui.getControllers().size()-1);
+		// if(controller != null)
+		// controller.registerSupplier(sup);
 
-//		FXController controller = gui.getControllers().get(gui.getControllers().size()-1);
-//		if(controller != null)
-//			controller.registerSupplier(sup);
-
-//		bf.registerListener(supplier);
+		// bf.registerListener(supplier);
 		bf.nextSolution();
 
 	}
 
-	private void tooltipTest(){
+	private void tooltipTest() {
 
-		Collection<String> init = Arrays.asList(new String[] {"A", "B", "C", "D"});
+		Collection<String> init = Arrays.asList(new String[] { "A", "B", "C", "D" });
 		CEOCSTNPlanningProblem problem = StandardProblemFactory.getNestedDichotomyCreationProblem("root", init, true, 0, 0);
 		ForwardDecompositionHTNPlanner planner = new ForwardDecompositionHTNPlanner(problem, 1);
 		ForwardDecompositionHTNPlanner.SolutionIterator plannerRun = planner.iterator();
-//		new SimpleGraphVisualizationWindow<Node<TFDNode,Double>>(plannerRun.getSearch()).getPanel().setTooltipGenerator(new TFDTooltipGenerator<>());
+		// new SimpleGraphVisualizationWindow<Node<TFDNode,Double>>(plannerRun.getSearch()).getPanel().setTooltipGenerator(new TFDTooltipGenerator<>());
 
-
-		Recorder<Node<TFDNode,Double>> recorder = new Recorder<>(plannerRun.getSearch());
-//		recorder.setTooltipGenerator(new TFDTooltipGenerator<>());
+		Recorder<Node<TFDNode, Double>> recorder = new Recorder<>(plannerRun.getSearch());
+		// recorder.setTooltipGenerator(new TFDTooltipGenerator<>());
 		TooltipSupplier dataSupplier = new TooltipSupplier();
 		dataSupplier.setGenerator(new TFDTooltipGenerator());
 
@@ -101,34 +97,28 @@ public class FXGuiTester extends Application {
 		}
 		System.out.println("Algorithm has finished.");
 
-
-
-//		recorder.addNodeDataSupplier(dataSupplier);
-
-
-
-
+		// recorder.addNodeDataSupplier(dataSupplier);
 
 		gui.open(recorder, "TooltipTest");
-		FXController controller = gui.getControllers().get(gui.getControllers().size()-1);
-		if(controller != null)
+		FXController controller = gui.getControllers().get(gui.getControllers().size() - 1);
+		if (controller != null)
 			controller.registerSupplier(dataSupplier);
 	}
 
-	private void dataSupplierTest(){
+	private void dataSupplierTest() throws InterruptedException {
 
 		GraphGenerator generator = new TestGraphGenerator();
-		BestFirst bf = new BestFirst<>(generator, n->(double)Math.round(Math.random()*100));
-//		open(bf,"BestFirst");
+		BestFirst bf = new BestFirst<>(generator, n -> (double) Math.round(Math.random() * 100));
+		// open(bf,"BestFirst");
 
 		Recorder rec = new Recorder(bf);
 
 		gui.open(rec, "Recorder");
 
-//		rec.setTooltipGenerator(n->{
-//			Node node = (Node) n;
-//			return String.valueOf(node.getInternalLabel());
-//		});
+		// rec.setTooltipGenerator(n->{
+		// Node node = (Node) n;
+		// return String.valueOf(node.getInternalLabel());
+		// });
 
 		TooltipSupplier dataSupplier = new TooltipSupplier();
 
@@ -147,22 +137,21 @@ public class FXGuiTester extends Application {
 
 	}
 
-
-	private void bestFTest(){
+	private void bestFTest() throws InterruptedException {
 		NQueenGenerator gen = new NQueenGenerator(8);
-		ORGraphSearch<QueenNode, String, Double> search = new ORGraphSearch<>(gen, n->(double)n.getPoint().getNumberOfNotAttackedCells());
+		ORGraphSearch<QueenNode, String, Double> search = new ORGraphSearch<>(gen, n -> (double) n.getPoint().getNumberOfNotAttackedCells());
 
 		Recorder rec = new Recorder(search);
-		gui.open(rec,"Queens");
+		gui.open(rec, "Queens");
 
 		BestFSupplier dataSupplier = new BestFSupplier();
 
 		rec.registerListener(dataSupplier);
 
-//		rec.addGraphDataSupplier(dataSupplier);
+		// rec.addGraphDataSupplier(dataSupplier);
 
-		FXController controller = gui.getControllers().get(gui.getControllers().size()-1);
-		if(controller != null)
+		FXController controller = gui.getControllers().get(gui.getControllers().size() - 1);
+		if (controller != null)
 			controller.registerSupplier(dataSupplier);
 
 		search.nextSolution();

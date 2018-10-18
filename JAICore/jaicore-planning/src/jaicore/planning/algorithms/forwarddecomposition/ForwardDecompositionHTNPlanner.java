@@ -37,10 +37,10 @@ import jaicore.search.structure.core.GraphGenerator;
  *
  * @param <T>
  */
-public class ForwardDecompositionHTNPlanner<V extends Comparable<V>> implements IObservableGraphBasedHTNPlanningAlgorithm<ForwardDecompositionSolution,TFDNode, String, V>, ILoggingCustomizable {
+public class ForwardDecompositionHTNPlanner<V extends Comparable<V>> implements IObservableGraphBasedHTNPlanningAlgorithm<ForwardDecompositionSolution, TFDNode, String, V>, ILoggingCustomizable {
 
 	private Logger logger = LoggerFactory.getLogger(ForwardDecompositionHTNPlanner.class);
-	
+
 	/* core elements of the search */
 	private SolutionIterator iterator;
 	private boolean canceled = false;
@@ -53,6 +53,7 @@ public class ForwardDecompositionHTNPlanner<V extends Comparable<V>> implements 
 	/* parameters relevant for functionality */
 	private final int numberOfCPUs;
 	private final Collection<Object> listeners = new ArrayList<>();
+
 	public ForwardDecompositionHTNPlanner(IHTNPlanningProblem problem, int numberOfCPUs) {
 		this(problem, n -> null, 0, numberOfCPUs);
 	}
@@ -64,24 +65,20 @@ public class ForwardDecompositionHTNPlanner<V extends Comparable<V>> implements 
 		}
 	}
 
-	public ForwardDecompositionHTNPlanner(IHTNPlanningProblem problem, IObservableORGraphSearchFactory<TFDNode, String, V> searchFactory,
-			INodeEvaluator<TFDNode, V> nodeEvaluator, int numberOfCPUs) {
+	public ForwardDecompositionHTNPlanner(IHTNPlanningProblem problem, IObservableORGraphSearchFactory<TFDNode, String, V> searchFactory, INodeEvaluator<TFDNode, V> nodeEvaluator, int numberOfCPUs) {
 		this.planningProblem = problem;
 		this.searchFactory = searchFactory;
 		this.nodeEvaluator = nodeEvaluator;
 		this.numberOfCPUs = numberOfCPUs;
-		
+
 		/* derive the graph generator for this planning problem */
 		if (planningProblem instanceof CEOCIPSTNPlanningProblem) {
 			graphGenerator = new CEOCIPTFDGraphGenerator((CEOCIPSTNPlanningProblem) planningProblem);
-		}
-		else if (planningProblem instanceof CEOCSTNPlanningProblem) {
+		} else if (planningProblem instanceof CEOCSTNPlanningProblem) {
 			graphGenerator = new CEOCTFDGraphGenerator((CEOCSTNPlanningProblem) planningProblem);
-		} 
-		else if (planningProblem.getClass().equals(STNPlanningProblem.class)) {
-			graphGenerator = new TFDGraphGenerator((STNPlanningProblem)planningProblem);
-		}
-		else {
+		} else if (planningProblem.getClass().equals(STNPlanningProblem.class)) {
+			graphGenerator = new TFDGraphGenerator((STNPlanningProblem) planningProblem);
+		} else {
 			throw new IllegalArgumentException("HTN problems of class \"" + planningProblem.getClass().getName() + "\" are currently not supported.");
 		}
 	}
@@ -139,14 +136,14 @@ public class ForwardDecompositionHTNPlanner<V extends Comparable<V>> implements 
 	public GraphGenerator<TFDNode, String> getGraphGenerator() {
 		return graphGenerator;
 	}
-	
+
 	public class SolutionIterator implements Iterator<ForwardDecompositionSolution> {
 
 		private boolean initialized = false;
 		private boolean moreSolutionsMightExist = true;
 		private IObservableORGraphSearch<TFDNode, String, V> search;
 		private ForwardDecompositionSolution nextSolution;
-		
+
 		public SolutionIterator() {
 			search = searchFactory.createSearch(graphGenerator, nodeEvaluator, numberOfCPUs);
 		}
@@ -176,7 +173,7 @@ public class ForwardDecompositionHTNPlanner<V extends Comparable<V>> implements 
 				}
 				if (loggerName != null && loggerName.length() > 0 && search instanceof ILoggingCustomizable) {
 					logger.info("Customizing logger of search with {}", loggerName);
-					((ILoggingCustomizable)search).setLoggerName(loggerName + ".search");
+					((ILoggingCustomizable) search).setLoggerName(loggerName + ".search");
 				}
 				initialized = true;
 			}
@@ -187,16 +184,21 @@ public class ForwardDecompositionHTNPlanner<V extends Comparable<V>> implements 
 				return false;
 			}
 			logger.info("Starting/continuing search for next plan.");
-			List<TFDNode> solution = search.nextSolution();
-			if (solution == null) {
-				logger.info("No solution found. Concluding that no more solutions can be found.");
-				moreSolutionsMightExist = false;
+			try {
+				List<TFDNode> solution = search.nextSolution();
+				if (solution == null) {
+					logger.info("No solution found. Concluding that no more solutions can be found.");
+					moreSolutionsMightExist = false;
+					return false;
+				}
+				logger.info("Next solution found.");
+				List<Action> plan = solution.stream().filter(n -> n.getAppliedAction() != null).map(n -> n.getAppliedAction()).collect(Collectors.toList());
+				nextSolution = new ForwardDecompositionSolution(plan, solution);
+				return true;
+			} catch (Throwable e) {
+				e.printStackTrace();
 				return false;
 			}
-			logger.info("Next solution found.");
-			List<Action> plan = solution.stream().filter(n -> n.getAppliedAction() != null).map(n -> n.getAppliedAction()).collect(Collectors.toList());
-			nextSolution = new ForwardDecompositionSolution(plan, solution);
-			return true;
 		}
 
 		@Override
@@ -214,7 +216,7 @@ public class ForwardDecompositionHTNPlanner<V extends Comparable<V>> implements 
 		public Map<String, Object> getSolutionAnnotations(ForwardDecompositionSolution solution) {
 			return search.getAnnotationsOfReturnedSolution(solution.getPath());
 		}
-		
+
 		public IObservableORGraphSearch<TFDNode, String, V> getSearch() {
 			return search;
 		}

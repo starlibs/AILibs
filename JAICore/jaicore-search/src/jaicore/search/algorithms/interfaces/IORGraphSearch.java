@@ -10,18 +10,18 @@ import jaicore.search.structure.core.Node;
 
 public interface IORGraphSearch<T, A, V extends Comparable<V>> {
 
-	public void bootstrap(Collection<Node<T,V>> nodes);
-	
-	public List<T> nextSolution();
+	public void bootstrap(Collection<Node<T, V>> nodes);
+
+	public List<T> nextSolution() throws Throwable;
 
 	public V getFValue(T node);
 
 	public V getFValue(Node<T, V> node);
 
-	public Map<String,Object> getAnnotationsOfReturnedSolution(List<T> solution);
-	
+	public Map<String, Object> getAnnotationsOfReturnedSolution(List<T> solution);
+
 	public Object getAnnotationOfReturnedSolution(List<T> solution, String annotation);
-	
+
 	public V getFOfReturnedSolution(List<T> solution);
 
 	public void cancel();
@@ -29,8 +29,8 @@ public interface IORGraphSearch<T, A, V extends Comparable<V>> {
 	public Node<T, V> getInternalRepresentationOf(T node);
 
 	public List<Node<T, V>> getOpenSnapshot();
-	
+
 	public GraphGenerator<T, A> getGraphGenerator();
-	
+
 	public INodeEvaluator<T, V> getNodeEvaluator();
 }

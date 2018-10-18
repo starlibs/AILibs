@@ -16,16 +16,62 @@ public class PreferenceBasedNodeEvaluator implements INodeEvaluator<TFDNode, Dou
 	private final Collection<Component> components;
 	private final List<String> ORDERING_OF_CLASSIFIERS;
 
-	public PreferenceBasedNodeEvaluator(final Collection<Component> components,
-			final List<String> ORDERING_OF_CLASSIFIERS) {
+	public PreferenceBasedNodeEvaluator(final Collection<Component> components, final List<String> ORDERING_OF_CLASSIFIERS) {
 		super();
 		this.components = components;
 		this.ORDERING_OF_CLASSIFIERS = ORDERING_OF_CLASSIFIERS;
 	}
 
+	public Double checkComponentInstance(final ComponentInstance instance, final List<String> appliedMethods) {
+		boolean lastMethod = false;
+		String classifierName = null;
+		boolean isPipeline = appliedMethods.stream().anyMatch(x -> x.toLowerCase().contains("pipeline"));
+		Double score = 0.0;
+		ComponentInstance pp = instance.getSatisfactionOfRequiredInterfaces().get("preprocessor");
+		if (pp != null && pp.getComponent().getName().contains("AttributeSelection")) {
+			ComponentInstance search = pp.getSatisfactionOfRequiredInterfaces().get("search");
+			ComponentInstance eval = pp.getSatisfactionOfRequiredInterfaces().get("eval");
+			if (search != null && eval != null) {
+				boolean isSetEvaluator = eval.getComponent().getName().toLowerCase().matches(".*(relief|gainratio|principalcomponents|onerattributeeval|infogainattributeeval|correlationattributeeval|symmetricaluncertattributeeval).*");
+				boolean isRanker = search.getComponent().getName().toLowerCase().contains("ranker");
+				boolean isNonRankerEvaluator = eval.getComponent().getName().toLowerCase().matches(".*(cfssubseteval).*");
+				if (isSetEvaluator && !isRanker) {
+					return 20000d;
+				}
+				if (isNonRankerEvaluator && isRanker) {
+					return 20000d;
+				}
+			}
+		}
+
+		if (instance.getComponent().getName().toLowerCase().contains("pipeline")) {
+			lastMethod = lastMethod || appliedMethods.get(appliedMethods.size() - 1).startsWith("resolveBaseClassifierWith");
+
+			if (instance.getSatisfactionOfRequiredInterfaces().containsKey("classifier")) {
+				classifierName = instance.getSatisfactionOfRequiredInterfaces().get("classifier").getComponent().getName();
+			} else {
+				return 0.0;
+			}
+		} else {
+			classifierName = instance.getComponent().getName();
+			lastMethod = lastMethod || appliedMethods.get(appliedMethods.size() - 1).startsWith("resolveAbstractClassifierWith");
+		}
+
+		if (lastMethod) {
+			if (isPipeline) {
+				score += this.ORDERING_OF_CLASSIFIERS.size() + 1;
+			}
+
+			score += (this.ORDERING_OF_CLASSIFIERS.contains(classifierName) ? this.ORDERING_OF_CLASSIFIERS.indexOf(classifierName) + 1 : this.ORDERING_OF_CLASSIFIERS.size() + 1);
+			score /= 100000;
+		} else {
+			score = null;
+		}
+		return score;
+	}
+
 	@Override
 	public Double f(final Node<TFDNode, ?> n) throws Throwable {
-
 		List<String> appliedMethods = new LinkedList<>();
 		boolean last = false;
 		for (TFDNode x : n.externalPath()) {
@@ -40,64 +86,11 @@ public class PreferenceBasedNodeEvaluator implements INodeEvaluator<TFDNode, Dou
 		/* get partial component */
 		ComponentInstance instance = Util.getSolutionCompositionFromState(this.components, n.getPoint().getState());
 
-		if (instance != null) {
-			ComponentInstance pp = instance.getSatisfactionOfRequiredInterfaces().get("preprocessor");
-			if (pp != null && pp.getComponent().getName().contains("AttributeSelection")) {
-				ComponentInstance search = pp.getSatisfactionOfRequiredInterfaces().get("search");
-				ComponentInstance eval = pp.getSatisfactionOfRequiredInterfaces().get("eval");
-				if (search != null && eval != null) {
-					boolean isSetEvaluator = eval.getComponent().getName().toLowerCase().matches(
-							".*(subseteval|relief|gainratio|principalcomponents|onerattributeeval|infogainattributeeval|correlationattributeeval|symmetricaluncertattributeeval).*");
-					boolean isRanker = search.getComponent().getName().toLowerCase().contains("ranker");
-					boolean isNonRankerEvaluator = eval.getComponent().getName().toLowerCase()
-							.matches(".*(cfssubseteval).*");
-					if (isSetEvaluator && !isRanker) {
-						return 20000d;
-					}
-					if (isNonRankerEvaluator && isRanker) {
-						return 20000d;
-					}
-				}
-			}
+		if (instance == null) {
+			return 0.0;
 		}
 
-		boolean isPipeline = appliedMethods.stream().anyMatch(x -> x.toLowerCase().contains("pipeline"));
-		boolean lastMethod = false;
-		String classifierName = null;
-
-		Double score = 0.0;
-		if (instance != null) {
-			if (instance.getComponent().getName().toLowerCase().contains("pipeline")) {
-				lastMethod = lastMethod
-						|| appliedMethods.get(appliedMethods.size() - 1).startsWith("resolveBaseClassifierWith");
-
-				if (instance.getSatisfactionOfRequiredInterfaces().containsKey("classifier")) {
-					classifierName = instance.getSatisfactionOfRequiredInterfaces().get("classifier").getComponent()
-							.getName();
-				} else {
-					return 0.0;
-				}
-			} else {
-				classifierName = instance.getComponent().getName();
-				lastMethod = lastMethod
-						|| appliedMethods.get(appliedMethods.size() - 1).startsWith("resolveAbstractClassifierWith");
-			}
-
-			if (lastMethod) {
-				if (isPipeline) {
-					score += this.ORDERING_OF_CLASSIFIERS.size() + 1;
-				}
-
-				score += (this.ORDERING_OF_CLASSIFIERS.contains(classifierName)
-						? this.ORDERING_OF_CLASSIFIERS.indexOf(classifierName) + 1
-						: this.ORDERING_OF_CLASSIFIERS.size() + 1);
-				score /= 100000;
-			} else {
-				score = null;
-			}
-		}
-
-		return score;
+		return this.checkComponentInstance(instance, appliedMethods);
 
 	}
 }

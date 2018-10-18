@@ -8,29 +8,52 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 import Catalano.Imaging.FastBitmap;
 import Catalano.Imaging.FastBitmap.ColorSpace;
 import Catalano.Imaging.IApplyInPlace;
+import Catalano.Imaging.Filters.DifferenceEdgeDetector;
+import Catalano.Imaging.Filters.Emboss;
+import Catalano.Imaging.Filters.Erosion;
+import Catalano.Imaging.Filters.ExtractBoundary;
+import Catalano.Imaging.Filters.FastVariance;
+import Catalano.Imaging.Filters.GaborFilter;
+import Catalano.Imaging.Filters.GaussianBlur;
+import Catalano.Imaging.Filters.HighBoost;
+import Catalano.Imaging.Filters.HomogenityEdgeDetector;
+import Catalano.Imaging.Filters.HorizontalRunLengthSmoothing;
+import Catalano.Imaging.Filters.ImageNormalization;
+import Catalano.Imaging.Filters.ImageQuantization;
+import Catalano.Imaging.Filters.IsotropicCompassEdgeDetector;
+import Catalano.Imaging.Filters.KirschCompassEdgeDetector;
+import Catalano.Imaging.Filters.MorphologicGradientImage;
+import Catalano.Imaging.Filters.RobertsCrossEdgeDetector;
+import Catalano.Imaging.Filters.SobelCompassEdgeDetector;
+import Catalano.Imaging.Filters.SobelEdgeDetector;
+import Catalano.Imaging.Filters.WeightedMedian;
 import autofe.util.DataSet;
 import autofe.util.ImageUtils;
 
 public class CatalanoInPlaceFilter extends AbstractCatalanoFilter<IApplyInPlace> {
 
-	public CatalanoInPlaceFilter(final IApplyInPlace filter, final boolean requiresGrayscale) {
-		this.setCatalanoFilter(filter);
-		this.setRequiresGrayscale(requiresGrayscale);
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = -3362311698548885139L;
+
+	public CatalanoInPlaceFilter(final String name) {
+		super(name);
 	}
 
 	@Override
-	public DataSet applyFilter(DataSet inputData, boolean copy) {
-		if (inputData.getIntermediateInstances() == null || inputData.getIntermediateInstances().size() == 0
-				|| inputData.getIntermediateInstances().get(0).rank() < 2)
-			throw new IllegalArgumentException(
-					"Intermediate instances must have a rank of at least 2 for image processing.");
+	public DataSet applyFilter(final DataSet inputData, final boolean copy) {
+		if (inputData.getIntermediateInstances() == null || inputData.getIntermediateInstances().size() == 0 || inputData.getIntermediateInstances().get(0).rank() < 2) {
+			throw new IllegalArgumentException("Intermediate instances must have a rank of at least 2 for image processing.");
+		}
 
 		// None filter
 		if (this.getCatalanoFilter() == null) {
-			if (copy)
+			if (copy) {
 				return inputData.copy();
-			else
+			} else {
 				return inputData;
+			}
 		}
 
 		ColorSpace colorSpace = ImageUtils.determineColorSpace(inputData.getIntermediateInstances().get(0));
@@ -38,8 +61,9 @@ public class CatalanoInPlaceFilter extends AbstractCatalanoFilter<IApplyInPlace>
 		for (INDArray inst : inputData.getIntermediateInstances()) {
 			FastBitmap bitmap = ImageUtils.matrixToFastBitmap(inst, colorSpace);
 
-			if (this.isRequiresGrayscale() && colorSpace != ColorSpace.Grayscale)
+			if (this.isRequiresGrayscale() && colorSpace != ColorSpace.Grayscale) {
 				bitmap.toGrayscale();
+			}
 
 			this.getCatalanoFilter().applyInPlace(bitmap);
 			INDArray result = ImageUtils.fastBitmapToMatrix(bitmap, colorSpace);
@@ -50,12 +74,91 @@ public class CatalanoInPlaceFilter extends AbstractCatalanoFilter<IApplyInPlace>
 
 	@Override
 	public String toString() {
-		if (this.getCatalanoFilter() != null)
-			return "CatalanoWrapperFilter [catalanoFilter=" + this.getCatalanoFilter().getClass().getSimpleName()
-					+ ", requiresGrayscale=" + this.isRequiresGrayscale() + "]";
-		else {
+		if (this.getCatalanoFilter() != null) {
+			return "CatalanoWrapperFilter [catalanoFilter=" + this.getName() + ", requiresGrayscale=" + ((this.getName() != null) ? this.isRequiresGrayscale() : "NaN") + "]";
+		} else {
 			return "CatalanoWrapperFilter (empty)";
 		}
 	}
 
+	public boolean isRequiresGrayscale() {
+		switch (this.getName()) {
+		case "GaussianBlur":
+		case "Erosion":
+		case "FastVariance":
+		case "Emboss":
+		case "HighBoost":
+		case "KirschCompassEdgeDetector":
+		case "IsotropicCompassEdgeDetector":
+		case "SobelCompassEdgeDetector":
+		case "WeightedMedian":
+		case "NonePreprocessor":
+			return false;
+		case "SobelEdgeDetector":
+		case "ExtractBoundary":
+		case "DifferenceEdgeDetector":
+		case "GaborFilter":
+		case "HomogenityEdgeDetector":
+		case "HorizontalRunLengthSmoothing":
+		case "ImageQuantization":
+		case "ImageNormalization":
+		case "MorphologicGradientImage":
+		case "RobertsCrossEdgeDetector":
+			return true;
+		default:
+			return false;
+		}
+	}
+
+	public IApplyInPlace getCatalanoFilter() {
+		if (this.getName() == null) {
+			return null;
+		}
+
+		switch (this.getName()) {
+		case "GaussianBlur":
+			return new GaussianBlur();
+		case "SobelEdgeDetector":
+			return new SobelEdgeDetector();
+		case "ExtractBoundary":
+			return new ExtractBoundary();
+		case "DifferenceEdgeDetector":
+			return new DifferenceEdgeDetector();
+		case "Erosion":
+			return new Erosion();
+		case "FastVariance":
+			return new FastVariance();
+		case "Emboss":
+			return new Emboss();
+		case "GaborFilter":
+			return new GaborFilter();
+		case "HighBoost":
+			return new HighBoost();
+		case "HomogenityEdgeDetector":
+			return new HomogenityEdgeDetector();
+		case "HorizontalRunLengthSmoothing":
+			return new HorizontalRunLengthSmoothing();
+		case "ImageQuantization":
+			return new ImageQuantization();
+		case "ImageNormalization":
+			return new ImageNormalization();
+		case "MorphologicGradientImage":
+			return new MorphologicGradientImage();
+		case "KirschCompassEdgeDetector":
+			return new KirschCompassEdgeDetector();
+		case "IsotropicCompassEdgeDetector":
+			return new IsotropicCompassEdgeDetector();
+		case "RobertsCrossEdgeDetector":
+			return new RobertsCrossEdgeDetector();
+		case "SobelCompassEdgeDetector":
+			return new SobelCompassEdgeDetector();
+		case "WeightedMedian":
+			return new WeightedMedian();
+		case "NonePreprocessor":
+			return null;
+		default:
+			// Return identity
+			return null;
+		}
+	}
 }

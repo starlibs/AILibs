@@ -1,5 +1,6 @@
 package autofe.algorithm.hasco.filter.meta;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,34 +17,41 @@ import weka.core.Instances;
 
 /**
  * Union filter which merges two given data sets by concatenating the features.
- * 
+ *
  * @author Julian Lienen
  *
  */
-public class UnionFilter implements IFilter, IAbstractFilter {
+public class UnionFilter implements IFilter, IAbstractFilter, Serializable {
+
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = -5008187554401629128L;
 
 	@Override
-	public DataSet applyFilter(DataSet inputData, final boolean copy) {
-		if (copy)
+	public DataSet applyFilter(final DataSet inputData, final boolean copy) {
+		if (copy) {
 			return inputData.copy();
-		else
+		} else {
 			return inputData;
+		}
 	}
 
 	public static DataSet union(final DataSet coll1, final DataSet coll2) {
-		if (coll1 == null || coll2 == null)
+		if (coll1 == null || coll2 == null) {
 			throw new IllegalArgumentException("Parameters 'coll1' and 'coll2' must not be null!");
+		}
 
 		if (coll1.getIntermediateInstances() == null || coll2.getIntermediateInstances() == null) {
 			// Merge Weka instances
 			Instances instances1 = coll1.getInstances();
 			Instances instances2 = coll2.getInstances();
 
-			if (instances1.numInstances() != instances2.numInstances())
+			if (instances1.numInstances() != instances2.numInstances()) {
 				throw new IllegalArgumentException("Data sets to be united must have the same amount of instances!");
+			}
 
-			ArrayList<Attribute> attributes = new ArrayList<>(
-					coll1.getInstances().numAttributes() + coll2.getInstances().numAttributes() - 1);
+			ArrayList<Attribute> attributes = new ArrayList<>(coll1.getInstances().numAttributes() + coll2.getInstances().numAttributes() - 1);
 			for (int i = 0; i < instances1.numAttributes() - 1; i++) {
 				attributes.add(instances1.attribute(i).copy(instances1.attribute(i).name() + "u1"));
 			}
@@ -52,8 +60,7 @@ public class UnionFilter implements IFilter, IAbstractFilter {
 			}
 
 			// Add class attribute
-			List<String> classValues = IntStream.range(0, instances1.classAttribute().numValues()).asDoubleStream()
-					.mapToObj(d -> String.valueOf(d)).collect(Collectors.toList());
+			List<String> classValues = IntStream.range(0, instances1.classAttribute().numValues()).asDoubleStream().mapToObj(d -> String.valueOf(d)).collect(Collectors.toList());
 			Attribute classAtt = new Attribute("classAtt", classValues);
 			attributes.add(classAtt);
 
@@ -79,18 +86,17 @@ public class UnionFilter implements IFilter, IAbstractFilter {
 
 			return new DataSet(unitedInstances, null);
 		} else {
-			if (coll1.getIntermediateInstances().size() == 0 || coll2.getIntermediateInstances().size() == 0)
+			if (coll1.getIntermediateInstances().size() == 0 || coll2.getIntermediateInstances().size() == 0) {
 				throw new IllegalArgumentException("There must be intermediate instances if the collection is set.");
+			}
 
 			// Merge intermediate instances
 			List<INDArray> intermediateInsts1 = coll1.getIntermediateInstances();
 			List<INDArray> intermediateInsts2 = coll2.getIntermediateInstances();
 
-			List<INDArray> unitedIntermediateInsts = new ArrayList<>(
-					intermediateInsts1.get(0).length() + intermediateInsts2.get(0).length());
+			List<INDArray> unitedIntermediateInsts = new ArrayList<>(intermediateInsts1.get(0).length() + intermediateInsts2.get(0).length());
 			for (int i = 0; i < intermediateInsts1.size(); i++) {
-				INDArray intermediateInst = Nd4j.hstack(intermediateInsts1.get(i).ravel(),
-						intermediateInsts2.get(i).ravel());
+				INDArray intermediateInst = Nd4j.hstack(intermediateInsts1.get(i).ravel(), intermediateInsts2.get(i).ravel());
 				unitedIntermediateInsts.add(intermediateInst);
 			}
 

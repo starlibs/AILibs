@@ -38,7 +38,7 @@ public class RankingExperimentEvaluator implements IExperimentSetEvaluator {
 
 		// Get benchmark function
 		String benchmark = description.get("benchmark");
-		Function<Instances, Double> benchmarkFunction = EvaluationUtils.getBenchmarkFuntionByName(benchmark);
+		Function<Instances, Double> benchmarkFunction = EvaluationUtils.getBenchmarkFunctionByName(benchmark);
 
 		Map<String, Object> results = new HashMap<>();
 

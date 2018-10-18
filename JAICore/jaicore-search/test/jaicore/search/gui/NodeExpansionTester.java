@@ -26,13 +26,15 @@ public class NodeExpansionTester {
 	static class TestNode {
 		static int size = 0;
 		int value = size++;
-		
-		public String toString() { return "" + value; }
+
+		public String toString() {
+			return "" + value;
+		}
 	}
 
 	@Test
-	public void test() {
-		
+	public void test() throws InterruptedException {
+
 		GraphGenerator<TestNode, String> gen = new GraphGenerator<TestNode, String>() {
 
 			@Override
@@ -43,7 +45,7 @@ public class NodeExpansionTester {
 			@Override
 			public SuccessorGenerator<TestNode, String> getSuccessorGenerator() {
 				return n -> {
-					List<NodeExpansionDescription<TestNode,String>> l = new ArrayList<>(3);
+					List<NodeExpansionDescription<TestNode, String>> l = new ArrayList<>(3);
 					for (int i = 0; i < 3; i++) {
 						l.add(new NodeExpansionDescription<>(n, new TestNode(), "edge label", NodeType.OR));
 					}
@@ -55,7 +57,7 @@ public class NodeExpansionTester {
 			public NodeGoalTester<TestNode> getGoalTester() {
 				return l -> l.value == 1000;
 			}
-			
+
 			@Override
 			public boolean isSelfContained() {
 				return false;
@@ -64,29 +66,25 @@ public class NodeExpansionTester {
 			@Override
 			public void setNodeNumbering(boolean nodenumbering) {
 				// TODO Auto-generated method stub
-				
-			}
-			
-		};
-		
-		BestFirst<TestNode,String> bf = new BestFirst<>(gen, n -> (double)Math.round(Math.random() * 1000));
 
-		
+			}
+
+		};
+
+		BestFirst<TestNode, String> bf = new BestFirst<>(gen, n -> (double) Math.round(Math.random() * 1000));
+
 		VisualizationWindow win = new VisualizationWindow<Node<TestNode, Double>>(bf, "BestFirst");
 		TooltipSupplier tooltipSupplier = new TooltipSupplier();
-		tooltipSupplier.setGenerator(node ->{
+		tooltipSupplier.setGenerator(node -> {
 			Node<?, ?> n = (Node<?, ?>) node;
 			String s = String.valueOf(n.getInternalLabel());
 			return s;
 		});
 		win.addDataSupplier(tooltipSupplier);
-		
-		
+
 		NodeExpansionSupplier nodeexpansion = new NodeExpansionSupplier();
 		win.addDataSupplier(nodeexpansion);
-		
-		
-		
+
 		/* find solution */
 		PerformanceLogger.logStart("search");
 		List<TestNode> solutionPath = bf.nextSolution();
@@ -94,7 +92,8 @@ public class NodeExpansionTester {
 		assertNotNull(solutionPath);
 		System.out.println("Generated " + bf.getCreatedCounter() + " nodes.");
 		PerformanceLogger.printStatsAndClear(PerformanceMeasure.TIME);
-		while (true);
+		while (true)
+			;
 	}
 
 }
