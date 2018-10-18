@@ -5,16 +5,12 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang3.tuple.Pair;
-
 import com.google.common.collect.Sets;
 
 import hasco.core.HASCOWithParameterPruning;
 import hasco.core.Util;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
-import hasco.model.Parameter;
-import jaicore.basic.sets.PartialOrderedSet;
 import jaicore.ml.core.FeatureSpace;
 import jaicore.ml.intervaltree.ExtendedRandomForest;
 import weka.core.Instances;
@@ -26,7 +22,6 @@ import weka.core.Instances;
  *
  */
 public class FANOVAParameterImportanceEstimator implements IParameterImportanceEstimator {
-	private Map<String, ExtendedRandomForest> forests;
 	// private Map<String, HashMap<ComponentInstance, Double>> performanceSamples;
 	private PerformanceKnowledgeBase performanceKnowledgeBase;
 	private String benchmarkName;
@@ -36,7 +31,6 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 	// importanceDictionaryForSingleComponents;
 
 	public FANOVAParameterImportanceEstimator(PerformanceKnowledgeBase performanceKnowledgeBase, String benchmarkName) {
-		forests = new HashMap<String, ExtendedRandomForest>();
 		// this.performanceSamples = performanceSamples;
 		this.performanceKnowledgeBase = performanceKnowledgeBase;
 		this.benchmarkName = benchmarkName;
