@@ -113,7 +113,7 @@ public class PretrainedNNFilter implements IFilter, Serializable {
 					logger.error(errorMessage);
 					throw new IllegalStateException(errorMessage);
 				}
-				if (shape[2] == 1) {
+				if (shape.length < 3 || shape[2] == 1) {
 					// Force RGB
 					this.convertGrayscaleToRGB = true;
 					if (shape[0] < 32 && shape[1] < 32 && availableWeights.contains(PretrainedType.CIFAR10)) {

@@ -118,7 +118,8 @@ public class AutoFEMLTwoPhase extends AbstractAutoFEMLClassifier {
 
 		logger.info("Prepare the dataset for the 2nd phase...");
 		DataSet transformedDataset = solution.getSolution().applyFilter(data, false);
-		Instances wekaDataset = DataSetUtils.matricesToInstances(transformedDataset);
+		transformedDataset.updateInstances();
+		Instances wekaDataset = transformedDataset.getInstances();
 		logger.info("Done transforming the dataset for 2nd phase.");
 
 		HASCOSupervisedML.REQUESTED_INTERFACE = "AbstractClassifier";

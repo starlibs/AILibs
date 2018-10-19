@@ -84,7 +84,8 @@ public class FilterPipeline implements IFilter, Serializable {
 			// Check for union
 			Set<FilterDataEntry> successors = dataGraph.getSuccessors(nextEntry);
 			if (successors.size() == 0) {
-				throw new IllegalStateException("Entry propagated to the working set by a successor should have successors.");
+				throw new IllegalStateException(
+						"Entry propagated to the working set by a successor should have successors.");
 			}
 			if (successors.size() > 1) {
 				// Union

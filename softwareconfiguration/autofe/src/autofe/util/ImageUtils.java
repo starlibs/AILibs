@@ -181,7 +181,7 @@ public final class ImageUtils {
 					CacheMode.NONE, WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer, shape, name);
 		default:
 			return new PretrainedNNFilter(new VGG16(42, shape, 10, new Nesterovs(1e-2, 0.9), CacheMode.NONE,
-					WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer, shape, name);
+					WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer, shape, "VGG16");
 		}
 	}
 

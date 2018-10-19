@@ -467,6 +467,7 @@ public final class EvaluationUtils {
 
 			if (Double.isNaN(loss)) {
 				logger.warn("Got NaN value for COED batch score.");
+				break;
 			}
 		}
 
