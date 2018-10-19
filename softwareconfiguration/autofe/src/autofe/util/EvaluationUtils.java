@@ -57,7 +57,8 @@ public final class EvaluationUtils {
 	}
 
 	/**
-	 * Performs clustering using the given FilterPipeline <code>pipeline</code> and the data set <code>data</code>.
+	 * Performs clustering using the given FilterPipeline <code>pipeline</code> and
+	 * the data set <code>data</code>.
 	 *
 	 * @param pipeline
 	 *            FilterPipeline which transforms the given data set
@@ -68,7 +69,8 @@ public final class EvaluationUtils {
 	 */
 	public static double performClustering(final FilterPipeline pipeline, final DataSet data) throws Exception {
 		if (pipeline == null || data == null) {
-			throw new IllegalArgumentException("Parameters 'pipeline' (" + (pipeline == null) + ") and 'data' (" + (data == null) + ") must not be null!");
+			throw new IllegalArgumentException("Parameters 'pipeline' (" + (pipeline == null) + ") and 'data' ("
+					+ (data == null) + ") must not be null!");
 		}
 
 		logger.debug("Applying and evaluating pipeline " + pipeline.toString());
@@ -104,7 +106,8 @@ public final class EvaluationUtils {
 		// 250007,
 		// // 0.01
 		// // clusterer.setFilter(kernelFilter);
-		((SimpleKMeans) clusterer.getClusterer()).setOptions(new String[] { "-N", String.valueOf(insts.classAttribute().numValues()) });
+		((SimpleKMeans) clusterer.getClusterer())
+				.setOptions(new String[] { "-N", String.valueOf(insts.classAttribute().numValues()) });
 
 		// ((SimpleKMeans)
 		// clusterer.getClusterer()).setNumClusters(insts.classAttribute().numValues());
@@ -144,7 +147,8 @@ public final class EvaluationUtils {
 
 			kernelFilter.setKernel(new RBFKernel(insts, 250007, 0.01)); // insts,
 			clusterer.setFilter(kernelFilter);
-			((SimpleKMeans) clusterer.getClusterer()).setOptions(new String[] { "-N", String.valueOf(insts.classAttribute().numValues()) });
+			((SimpleKMeans) clusterer.getClusterer())
+					.setOptions(new String[] { "-N", String.valueOf(insts.classAttribute().numValues()) });
 
 			clusterer.buildClusterer(removedClassInstances);
 
@@ -166,7 +170,8 @@ public final class EvaluationUtils {
 			kernelFilter.setKernel(new PolyKernel(insts, 250007, 2, false));
 
 			clusterer.setFilter(kernelFilter);
-			((SimpleKMeans) clusterer.getClusterer()).setOptions(new String[] { "-N", String.valueOf(insts.classAttribute().numValues()) });
+			((SimpleKMeans) clusterer.getClusterer())
+					.setOptions(new String[] { "-N", String.valueOf(insts.classAttribute().numValues()) });
 
 			clusterer.buildClusterer(removedClassInstances);
 
@@ -188,7 +193,8 @@ public final class EvaluationUtils {
 			kernelFilter.setKernel(new PolyKernel(insts, 250007, 3, false));
 
 			clusterer.setFilter(kernelFilter);
-			((SimpleKMeans) clusterer.getClusterer()).setOptions(new String[] { "-N", String.valueOf(insts.classAttribute().numValues()) });
+			((SimpleKMeans) clusterer.getClusterer())
+					.setOptions(new String[] { "-N", String.valueOf(insts.classAttribute().numValues()) });
 
 			clusterer.buildClusterer(removedClassInstances);
 
@@ -276,7 +282,9 @@ public final class EvaluationUtils {
 	}
 
 	/**
-	 * Prediction of the accuracy of the given <code>instances</code>, the mapping of classes to clusters <code>classesToClusters</code> and the assignments of the instances to the specific clusters <code>clusterAssignments</code>.
+	 * Prediction of the accuracy of the given <code>instances</code>, the mapping
+	 * of classes to clusters <code>classesToClusters</code> and the assignments of
+	 * the instances to the specific clusters <code>clusterAssignments</code>.
 	 *
 	 * @param instances
 	 *            Instances which were assigned to clusters
@@ -286,7 +294,8 @@ public final class EvaluationUtils {
 	 *            Assignments of the instances to the clusters
 	 * @return
 	 */
-	public static double predictAccuracy(final Instances instances, final int[] classesToClusters, final double[] clusterAssignments) {
+	public static double predictAccuracy(final Instances instances, final int[] classesToClusters,
+			final double[] clusterAssignments) {
 		if (instances.numInstances() != clusterAssignments.length) {
 			throw new IllegalArgumentException("Amount of instances must be equal to cluster assignments.");
 		}
@@ -304,7 +313,8 @@ public final class EvaluationUtils {
 	}
 
 	/**
-	 * Penalizes high count of attributes (which leads to high run times of attribute selectors and classifier trainings).
+	 * Penalizes high count of attributes (which leads to high run times of
+	 * attribute selectors and classifier trainings).
 	 *
 	 * @param instances
 	 * @return
@@ -337,17 +347,20 @@ public final class EvaluationUtils {
 		}
 		for (int i = 0; i < classes; i++) {
 			c.getRow(i).divi(classCounts[i] + 1);
-			if (c.getRow(i).norm2Number().doubleValue() >= DOUBLE_ZERO_PREC && c.getRow(i).norm2Number().doubleValue() >= -DOUBLE_ZERO_PREC) {
+			if (c.getRow(i).norm2Number().doubleValue() >= DOUBLE_ZERO_PREC
+					&& c.getRow(i).norm2Number().doubleValue() >= -DOUBLE_ZERO_PREC) {
 				c.getRow(i).divi(c.getRow(i).norm2Number());
 			}
 		}
 
 		double loss = 0;
 		for (int i = 0; i < batch.numInstances(); i++) {
-			double[] instValues = Arrays.copyOfRange(batch.get(i).toDoubleArray(), 0, batch.get(i).toDoubleArray().length - 1);
+			double[] instValues = Arrays.copyOfRange(batch.get(i).toDoubleArray(), 0,
+					batch.get(i).toDoubleArray().length - 1);
 			INDArray f_i = Nd4j.create(instValues);
 			f_i.muli(alpha);
-			if (f_i.norm2Number().doubleValue() >= DOUBLE_ZERO_PREC && f_i.norm2Number().doubleValue() >= -DOUBLE_ZERO_PREC) {
+			if (f_i.norm2Number().doubleValue() >= DOUBLE_ZERO_PREC
+					&& f_i.norm2Number().doubleValue() >= -DOUBLE_ZERO_PREC) {
 				f_i.divi(f_i.norm2Number());
 			}
 
@@ -370,6 +383,7 @@ public final class EvaluationUtils {
 
 			if (Double.isNaN(loss)) {
 				logger.warn("Got NaN value for COCO batch score.");
+				break;
 			}
 		}
 
@@ -392,7 +406,8 @@ public final class EvaluationUtils {
 		INDArray labels = Nd4j.zeros(batch.numInstances(), 1);
 
 		for (int i = 0; i < batch.numInstances(); i++) {
-			double[] instValues = Arrays.copyOfRange(batch.get(i).toDoubleArray(), 0, batch.get(i).toDoubleArray().length - 1);
+			double[] instValues = Arrays.copyOfRange(batch.get(i).toDoubleArray(), 0,
+					batch.get(i).toDoubleArray().length - 1);
 			INDArray f_i = Nd4j.create(instValues);
 			// org.nd4j.linalg.dataset.DataSet tmpDataSet = new
 			// org.nd4j.linalg.dataset.DataSet();
@@ -616,9 +631,12 @@ public final class EvaluationUtils {
 		return Correlation.rankKendallTauBeta(ranking1, ranking2);
 	}
 
-	public static double evaluateMLPlan(final int timeout, final Instances training, final Instances test, final int seed, final Logger logger, final boolean enableVisualization, final int numCores) throws Exception {
+	public static double evaluateMLPlan(final int timeout, final Instances training, final Instances test,
+			final int seed, final Logger logger, final boolean enableVisualization, final int numCores)
+			throws Exception {
 
-		logger.debug("Starting ML-Plan execution. Training on " + training.numInstances() + " instances with " + training.numAttributes() + " attributes.");
+		logger.debug("Starting ML-Plan execution. Training on " + training.numInstances() + " instances with "
+				+ training.numAttributes() + " attributes.");
 
 		/* Initialize MLPlan using WEKA components */
 		MLPlanWekaClassifier mlplan = new MLPlanWekaClassifier();
@@ -633,12 +651,14 @@ public final class EvaluationUtils {
 		}
 		mlplan.buildClassifier(training);
 
-		if (mlplan.getSelectedClassifier() == null || ((MLPipeline) mlplan.getSelectedClassifier()).getBaseClassifier() == null) {
+		if (mlplan.getSelectedClassifier() == null
+				|| ((MLPipeline) mlplan.getSelectedClassifier()).getBaseClassifier() == null) {
 			logger.warn("Could not find a model using ML-Plan. Returning -1...");
 			return -1;
 		}
 
-		String solutionString = ((MLPipeline) mlplan.getSelectedClassifier()).getBaseClassifier().getClass().getName() + " | " + ((MLPipeline) mlplan.getSelectedClassifier()).getPreprocessors();
+		String solutionString = ((MLPipeline) mlplan.getSelectedClassifier()).getBaseClassifier().getClass().getName()
+				+ " | " + ((MLPipeline) mlplan.getSelectedClassifier()).getPreprocessors();
 		logger.debug("Selected classifier: " + solutionString);
 
 		/* evaluate solution produced by mlplan */
@@ -648,11 +668,14 @@ public final class EvaluationUtils {
 		return eval.pctCorrect();
 	}
 
-	public static double evaluateMLPlan(final int timeout, final Instances training, final Instances test, final int seed, final Logger logger, final boolean enableVisualization) throws Exception {
+	public static double evaluateMLPlan(final int timeout, final Instances training, final Instances test,
+			final int seed, final Logger logger, final boolean enableVisualization) throws Exception {
 		return evaluateMLPlan(timeout, training, test, seed, logger, enableVisualization, 1);
 	}
 
-	public static double evaluateMLPlan(final int timeout, final Instances instances, final double trainRatio, final int seed, final Logger logger, final boolean enableVisualization, final int numCores) throws Exception {
+	public static double evaluateMLPlan(final int timeout, final Instances instances, final double trainRatio,
+			final int seed, final Logger logger, final boolean enableVisualization, final int numCores)
+			throws Exception {
 
 		List<Instances> split = WekaUtil.getStratifiedSplit(instances, new Random(seed), trainRatio);
 

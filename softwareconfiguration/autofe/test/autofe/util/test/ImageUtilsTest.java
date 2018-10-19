@@ -1,5 +1,7 @@
 package autofe.util.test;
 
+import java.util.Arrays;
+
 import org.junit.Test;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
@@ -38,5 +40,14 @@ public class ImageUtilsTest {
 		Assert.assertEquals(ColorSpace.ARGB, ImageUtils.determineColorSpace(Nd4j.ones(10, 10, 4)));
 		Assert.assertEquals(ColorSpace.Grayscale, ImageUtils.determineColorSpace(Nd4j.ones(10, 10, 1)));
 		Assert.assertEquals(ColorSpace.Grayscale, ImageUtils.determineColorSpace(Nd4j.ones(10, 10, 2)));
+	}
+
+	@Test
+	public void rgbMatricesToGrayscaleTest() {
+		INDArray matrix = Nd4j.ones(30, 30, 3);
+		INDArray transformedMatrix = ImageUtils.rgbMatricesToGrayscale(Arrays.asList(matrix)).get(0);
+		Assert.assertEquals(1, transformedMatrix.shape()[2]);
+		// Expected value corresponds to (1 * 0.2125 + 1 * 0.7154 + 1 * 0.07)
+		Assert.assertEquals(1.0, transformedMatrix.getDouble(0, 0, 0));
 	}
 }

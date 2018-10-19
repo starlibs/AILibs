@@ -24,7 +24,7 @@ public class EnsembleEvaluatorTest {
 
 	@Test
 	public void ensembleEvaluatorTest() throws Exception {
-		logger.info("Staring cluster evaluation test...");
+		logger.info("Starting cluster evaluation test...");
 
 		/* load dataset and create a train-test-split */
 		OpenmlConnector connector = new OpenmlConnector();

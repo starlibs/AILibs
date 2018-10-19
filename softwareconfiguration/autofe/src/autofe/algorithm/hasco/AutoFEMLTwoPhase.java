@@ -43,8 +43,9 @@ public class AutoFEMLTwoPhase extends AbstractAutoFEMLClassifier {
 	private ComponentLoader componentLoader;
 	private boolean enableVisualization = false;
 
-	public AutoFEMLTwoPhase(final int cpus, final String benchmarkType, final double subsampleRatio, final int minInstances, final long seed, final TimeOut feTimeOut, final TimeOut amlTimeOut, final TimeOut evalTimeOut,
-			final int maxPipelineSize) throws IOException {
+	public AutoFEMLTwoPhase(final int cpus, final String benchmarkType, final double subsampleRatio,
+			final int minInstances, final long seed, final TimeOut feTimeOut, final TimeOut amlTimeOut,
+			final TimeOut evalTimeOut, final int maxPipelineSize) throws IOException {
 		this.cpus = cpus;
 		this.subsampleRatio = subsampleRatio;
 		this.minInstances = minInstances;
@@ -81,7 +82,8 @@ public class AutoFEMLTwoPhase extends AbstractAutoFEMLClassifier {
 		hasco.setFactory(factory);
 
 		/* Setup node evaluators */
-		AutoFEPreferredNodeEvaluator nodeEvaluator = new AutoFEPreferredNodeEvaluator(this.componentLoader.getComponents(), factory, this.maxPipelineSize);
+		AutoFEPreferredNodeEvaluator nodeEvaluator = new AutoFEPreferredNodeEvaluator(
+				this.componentLoader.getComponents(), factory, this.maxPipelineSize);
 		hasco.setPreferredNodeEvaluator(nodeEvaluator);
 		AbstractHASCOFEObjectEvaluator benchmark = null;
 		switch (this.benchmarkType) {
@@ -105,12 +107,14 @@ public class AutoFEMLTwoPhase extends AbstractAutoFEMLClassifier {
 		hasco.setBenchmark(benchmark);
 		hasco.enableVisualization(this.enableVisualization);
 
-		logger.info("Run 1st AutoFEML phase engineering features from the provided data using {} as a benchmark.", benchmark.getClass().getName());
+		logger.info("Run 1st AutoFEML phase engineering features from the provided data using {} as a benchmark.",
+				benchmark.getClass().getName());
 		/* Run feature engineering phase */
 		hasco.gatherSolutions(this.feTimeOut);
 
 		HASCOClassificationMLSolution<FilterPipeline> solution = hasco.getCurrentlyBestSolution();
-		logger.info("Finished 1st AutoFEML phase. Found solution {} with score {} and time {}ms to compute the score.", solution.getSolution(), solution.getScore(), solution.getTimeToComputeScore());
+		logger.info("Finished 1st AutoFEML phase. Found solution {} with score {} and time {}ms to compute the score.",
+				solution.getSolution(), solution.getScore(), solution.getTimeToComputeScore());
 
 		logger.info("Prepare the dataset for the 2nd phase...");
 		DataSet transformedDataset = solution.getSolution().applyFilter(data, false);

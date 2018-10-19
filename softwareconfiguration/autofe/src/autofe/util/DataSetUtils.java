@@ -41,12 +41,13 @@ public final class DataSetUtils {
 	public static final String API_KEY = "4350e421cdc16404033ef1812ea38c01";
 
 	public static final int CIFAR10_ID = 40927;
-	public static final int[] CIFAR10_INPUT_SHAPE = new int[] { 1, 3, 32, 32 };
+	public static final int[] CIFAR10_INPUT_SHAPE = new int[] { 32, 32, 3 };
 	public static final int SEGMENT_ID = 40984;
 	public static final int MNIST_ID = 554;
-	public static final int[] MNIST_INPUT_SHAPE = new int[] { 1, 1, 28, 28 };
+	public static final int[] MNIST_INPUT_SHAPE = new int[] { 28, 28, 1 };
 	public static final int FASHION_MNIST_ID = 40996;
-	public static final int[] FASHION_MNIST_SHAPE = new int[] { 1, 1, 28, 28 };
+	// public static final int[] FASHION_MNIST_SHAPE = new int[] { 1, 1, 28, 28 };
+	public static final int[] FASHION_MNIST_SHAPE = new int[] { 28, 28, 1 };
 
 	private static final Logger logger = LoggerFactory.getLogger(DataSetUtils.class);
 
@@ -143,7 +144,8 @@ public final class DataSetUtils {
 		}
 
 		// Add class attribute
-		final List<String> classValues = IntStream.range(0, refInstances.classAttribute().numValues()).asDoubleStream().mapToObj(d -> String.valueOf(d)).collect(Collectors.toList());
+		final List<String> classValues = IntStream.range(0, refInstances.classAttribute().numValues()).asDoubleStream()
+				.mapToObj(d -> String.valueOf(d)).collect(Collectors.toList());
 		final Attribute classAtt = new Attribute("classAtt", classValues);
 		attributes.add(classAtt);
 
@@ -182,7 +184,8 @@ public final class DataSetUtils {
 			attributes.add(newAtt);
 		}
 
-		final List<String> classValues = IntStream.range(0, refInstances.classAttribute().numValues()).asDoubleStream().mapToObj(d -> String.valueOf(d)).collect(Collectors.toList());
+		final List<String> classValues = IntStream.range(0, refInstances.classAttribute().numValues()).asDoubleStream()
+				.mapToObj(d -> String.valueOf(d)).collect(Collectors.toList());
 		final Attribute classAtt = new Attribute("classAtt", classValues);
 		attributes.add(classAtt);
 
@@ -193,7 +196,8 @@ public final class DataSetUtils {
 
 			// Initialize instance
 			// Instance inst = new DenseInstance(attributes.size());
-			final Instance inst = new DenseInstance(1, ArrayUtils.addAll(Nd4j.toFlattened(matrices.get(i)).toDoubleVector(), 0));
+			final Instance inst = new DenseInstance(1,
+					ArrayUtils.addAll(Nd4j.toFlattened(matrices.get(i)).toDoubleVector(), 0));
 			inst.setDataset(result);
 
 			// Set class value
@@ -218,7 +222,8 @@ public final class DataSetUtils {
 			attributes.add(newAtt);
 		}
 
-		final List<String> classValues = IntStream.range(0, refInstances.classAttribute().numValues()).asDoubleStream().mapToObj(d -> String.valueOf(d)).collect(Collectors.toList());
+		final List<String> classValues = IntStream.range(0, refInstances.classAttribute().numValues()).asDoubleStream()
+				.mapToObj(d -> String.valueOf(d)).collect(Collectors.toList());
 		final Attribute classAtt = new Attribute("classAtt", classValues);
 		attributes.add(classAtt);
 
@@ -247,11 +252,14 @@ public final class DataSetUtils {
 	}
 
 	/**
-	 * Function determines how much of the input data should be used to infer a filter pipeline.
+	 * Function determines how much of the input data should be used to infer a
+	 * filter pipeline.
 	 *
 	 * @param instances
 	 *            Complete input instances
-	 * @return Returns a split ratio where this double indicates which percentage of the given input instances should be used to automatically generate features.
+	 * @return Returns a split ratio where this double indicates which percentage of
+	 *         the given input instances should be used to automatically generate
+	 *         features.
 	 */
 	public static double getSplitRatioToUse(final Instances instances) {
 		if (instances == null) {
@@ -326,7 +334,8 @@ public final class DataSetUtils {
 	public static List<DataSet> getStratifiedSplit(final DataSet data, final Random rand, final double... portions) {
 		final List<DataSet> splits = new LinkedList<>();
 
-		final Collection<Integer>[] indices = WekaUtil.getStratifiedSplitIndices(data.getInstances(), new Random(), portions);
+		final Collection<Integer>[] indices = WekaUtil.getStratifiedSplitIndices(data.getInstances(), new Random(),
+				portions);
 
 		for (final Collection<Integer> splitIndices : indices) {
 			final List<INDArray> indArray = new LinkedList<>();

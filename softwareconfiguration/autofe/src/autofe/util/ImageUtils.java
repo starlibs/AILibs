@@ -26,7 +26,6 @@ import autofe.algorithm.hasco.filter.image.CatalanoBinaryPatternFilter;
 import autofe.algorithm.hasco.filter.image.CatalanoInPlaceFilter;
 import autofe.algorithm.hasco.filter.image.PretrainedNNFilter;
 import autofe.algorithm.hasco.filter.meta.IFilter;
-import weka.core.Instances;
 
 public final class ImageUtils {
 
@@ -165,20 +164,24 @@ public final class ImageUtils {
 		}
 	}
 
-	public static PretrainedNNFilter getPretrainedNNFilterByName(final String name, final int layer, final int[] shape) {
+	public static PretrainedNNFilter getPretrainedNNFilterByName(final String name, final int layer,
+			final int[] shape) {
 		switch (name) {
-		case "VGG16":
-			return new PretrainedNNFilter(new VGG16(42, shape, 10, new Nesterovs(1e-2, 0.9), CacheMode.NONE, WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer, shape, name);
 		case "AlexNet":
-			return new PretrainedNNFilter(new AlexNet(42, shape, 10, new Nesterovs(1e-2, 0.9), CacheMode.NONE, WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer, shape, name);
+			return new PretrainedNNFilter(new AlexNet(42, shape, 10, new Nesterovs(1e-2, 0.9), CacheMode.NONE,
+					WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer, shape, name);
 		case "LeNet":
-			return new PretrainedNNFilter(new LeNet(42, shape, 10, new Nesterovs(1e-2, 0.9), CacheMode.NONE, WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer, shape, name);
+			return new PretrainedNNFilter(new LeNet(42, shape, 10, new Nesterovs(1e-2, 0.9), CacheMode.NONE,
+					WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer, shape, name);
 		case "VGG19":
-			return new PretrainedNNFilter(new VGG19(42, shape, 10, new Nesterovs(1e-2, 0.9), CacheMode.NONE, WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer, shape, name);
+			return new PretrainedNNFilter(new VGG19(42, shape, 10, new Nesterovs(1e-2, 0.9), CacheMode.NONE,
+					WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer, shape, name);
 		case "ResNet50":
-			return new PretrainedNNFilter(new ResNet50(42, shape, 10, WeightInit.DISTRIBUTION, new Nesterovs(1e-2, 0.9), CacheMode.NONE, WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer, shape, name);
+			return new PretrainedNNFilter(new ResNet50(42, shape, 10, WeightInit.DISTRIBUTION, new Nesterovs(1e-2, 0.9),
+					CacheMode.NONE, WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer, shape, name);
 		default:
-			return new PretrainedNNFilter(new VGG16(42, shape, 10, new Nesterovs(1e-2, 0.9), CacheMode.NONE, WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer, shape, name);
+			return new PretrainedNNFilter(new VGG16(42, shape, 10, new Nesterovs(1e-2, 0.9), CacheMode.NONE,
+					WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer, shape, name);
 		}
 	}
 
@@ -201,6 +204,14 @@ public final class ImageUtils {
 		return result;
 	}
 
+	/**
+	 * Converts grayscale matrices to RGB matrices.
+	 * 
+	 * @param matrices
+	 *            Input matrices (Grayscale with single channels, assuming shape
+	 *            [width, height, 1, [depth, ...])
+	 * @return Returns RGB matrices with same shape but only three channels
+	 */
 	public static List<INDArray> grayscaleMatricesToRGB(final List<INDArray> matrices) {
 		List<INDArray> result = new ArrayList<>(matrices.size());
 		for (int i = 0; i < matrices.size(); i++) {
@@ -219,11 +230,40 @@ public final class ImageUtils {
 		return result;
 	}
 
-	public static List<Instances> readRawImageDataSet(final String path) {
-		// Used for import of raw data sets on file system
+	/**
+	 * Converts RGB matrices to grayscale matrices using the Luminosity method (cf.
+	 * ITU-R recommendation BT.709).
+	 * 
+	 * @param matrices
+	 *            Input matrices (RGB with 3 channels, assuming shape [width,
+	 *            height, 3, [depth, ...])
+	 * @return Returns grayscale matrices with same shape but only one channel
+	 */
+	public static List<INDArray> rgbMatricesToGrayscale(final List<INDArray> matrices) {
+		if (matrices == null || matrices.size() < 1 || matrices.get(0).shape().length < 3
+				|| matrices.get(0).shape()[2] < 3)
+			throw new IllegalArgumentException("Parameter matrices must not be null and must have three channels.");
 
-		// TODO
-		throw new UnsupportedOperationException("Not implemented yet.");
+		List<INDArray> result = new ArrayList<>(matrices.size());
+		for (int i = 0; i < matrices.size(); i++) {
+			INDArray currMatrix = matrices.get(i);
+			INDArray resultMatrix = Nd4j.create(currMatrix.shape()[0], currMatrix.shape()[1], 1);
+
+			for (int j = 0; j < currMatrix.shape()[0]; j++) {
+				for (int k = 0; k < currMatrix.shape()[1]; k++) {
+					double r = currMatrix.getDouble(j, k, 0);
+					double g = currMatrix.getDouble(j, k, 1);
+					double b = currMatrix.getDouble(j, k, 2);
+
+					double gray = (int) (r * 0.2125 + g * 0.7154 + b * 0.0721);
+
+					resultMatrix.putScalar(new int[] { j, k, 0 }, gray);
+				}
+			}
+
+			result.add(resultMatrix);
+		}
+
+		return result;
 	}
-
 }

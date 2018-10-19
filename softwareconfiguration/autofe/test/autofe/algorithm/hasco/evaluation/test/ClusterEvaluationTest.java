@@ -29,7 +29,7 @@ public class ClusterEvaluationTest {
 
 	// @Test
 	public void evaluateTest() throws Exception {
-		logger.info("Staring cluster evaluation test...");
+		logger.info("Starting cluster evaluation test...");
 
 		/* load dataset and create a train-test-split */
 		OpenmlConnector connector = new OpenmlConnector();
@@ -110,7 +110,7 @@ public class ClusterEvaluationTest {
 
 	@Test
 	public void kernelClusteringTest() throws Exception {
-		logger.info("Staring cluster evaluation test...");
+		logger.info("Starting cluster evaluation test...");
 
 		/* load dataset and create a train-test-split */
 		OpenmlConnector connector = new OpenmlConnector();

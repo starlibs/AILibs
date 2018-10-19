@@ -2,6 +2,7 @@ package autofe.test;
 
 import java.io.File;
 import java.sql.Time;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -9,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 import autofe.algorithm.hasco.AutoFEPreferredNodeEvaluator;
 import autofe.algorithm.hasco.HASCOImageFeatureEngineering;
 import autofe.algorithm.hasco.evaluation.AbstractHASCOFEObjectEvaluator;
-import autofe.algorithm.hasco.evaluation.ClusterObjectEvaluator;
+import autofe.algorithm.hasco.evaluation.COCOObjectEvaluator;
 import autofe.algorithm.hasco.filter.meta.FilterPipeline;
 import autofe.algorithm.hasco.filter.meta.FilterPipelineFactory;
 import autofe.util.DataSet;
@@ -17,6 +18,7 @@ import autofe.util.DataSetUtils;
 import de.upb.crc901.automl.hascoml.supervised.HASCOSupervisedML;
 import de.upb.crc901.automl.hascoml.supervised.HASCOSupervisedML.HASCOClassificationMLSolution;
 import hasco.serialization.ComponentLoader;
+import jaicore.basic.SQLAdapter;
 import jaicore.basic.TimeOut;
 
 public class HASCOImageFeatureEngineeringTest {
@@ -27,10 +29,13 @@ public class HASCOImageFeatureEngineeringTest {
 
 	private static final double SUBSAMPLE_RATIO = 0.01;
 
+	private static final int DATASET_ID = DataSetUtils.CIFAR10_ID;
+
 	public static void main(final String[] args) throws Exception {
 		print("Load dataset...");
-		// DataSet data = DataSetUtils.loadDatasetFromImageFolder(new File("testrsc/kit/"), ColorSpace.Grayscale);
-		DataSet data = DataSetUtils.getDataSetByID(DataSetUtils.CIFAR10_ID);
+		// DataSet data = DataSetUtils.loadDatasetFromImageFolder(new
+		// File("testrsc/kit/"), ColorSpace.Grayscale);
+		DataSet data = DataSetUtils.getDataSetByID(DATASET_ID);
 
 		print("Split dataset into train and test...");
 		List<DataSet> stratifiedSplit = DataSetUtils.getStratifiedSplit(data, new Random(0), .7);
@@ -51,16 +56,20 @@ public class HASCOImageFeatureEngineeringTest {
 		HASCOSupervisedML.REQUESTED_INTERFACE = "FilterPipeline";
 		HASCOImageFeatureEngineering hasco = new HASCOImageFeatureEngineering(cl);
 
-		// setup feactory for filter pipelines
+		// setup factory for filter pipelines
+		print(Arrays.toString(data.getIntermediateInstances().get(0).shape()));
 		FilterPipelineFactory factory = new FilterPipelineFactory(data.getIntermediateInstances().get(0).shape());
 		hasco.setFactory(factory);
 
 		// setup benchmark for filter pipelines
-		AbstractHASCOFEObjectEvaluator benchmark = new ClusterObjectEvaluator();
+		AbstractHASCOFEObjectEvaluator benchmark = new COCOObjectEvaluator();
+		benchmark.setAdapter(new SQLAdapter("localhost", "autofeml", "Hallo33!", "autofeml_test"));
+		benchmark.setEvalTable("autofeml_manual_test");
 		benchmark.setData(dataForFE);
 		hasco.setBenchmark(benchmark);
 
-		AutoFEPreferredNodeEvaluator nodeEvaluator = new AutoFEPreferredNodeEvaluator(cl.getComponents(), factory, MAX_PIPELINE_SIZE);
+		AutoFEPreferredNodeEvaluator nodeEvaluator = new AutoFEPreferredNodeEvaluator(cl.getComponents(), factory,
+				MAX_PIPELINE_SIZE);
 		hasco.setPreferredNodeEvaluator(nodeEvaluator);
 
 		hasco.setNumberOfCPUs(4);
