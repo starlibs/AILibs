@@ -65,7 +65,7 @@ public class FXCode<V,E> implements NodeListener<V> {
 	public FXCode(Recorder<V,E> rec, String title) {
 		this.index = 0;
 		this.maxIndex = 0;
-		this.sleepTime = 50;
+		this.sleepTime = 1;
 
 		this.eventBus = new EventBus();
 		this.eventBus.register(rec);
@@ -80,7 +80,8 @@ public class FXCode<V,E> implements NodeListener<V> {
 		BorderPane top = new BorderPane();
 		top.setTop(toolBar);
 
-		Slider sleepTimeSlider = new Slider(0, 200, 150);
+		//Slider for setting the interval of visualizing new events
+		Slider sleepTimeSlider = new Slider(0, 200, 200-sleepTime);
 		sleepTimeSlider.setShowTickLabels(true);
 		sleepTimeSlider.setShowTickMarks(true);
 		sleepTimeSlider.setBlockIncrement(1);
@@ -121,9 +122,9 @@ public class FXCode<V,E> implements NodeListener<V> {
 		tabPane = new TabPane();
 
 		splitPane.getItems().add(tabPane);
-//		visualization = new GraphVisualization<V, E>();
+		visualization = new GraphVisualization<V, E>();
 //        visualization = new HeatVisualization();
-        visualization = new ScoreVisualization<V,E>();
+//        visualization = new ScoreVisualization<V,E>();
 		rec.registerReplayListener(visualization);
 		splitPane.getItems().add(visualization.getFXNode());
 
@@ -132,6 +133,7 @@ public class FXCode<V,E> implements NodeListener<V> {
 		root.setCenter(splitPane);
 
 //        Bottom
+		//A slider which is used as a timeline
 		this.timeline = new Slider();
 		this.timeline.setShowTickLabels(true);
 		this.timeline.setShowTickMarks(true);
@@ -160,8 +162,35 @@ public class FXCode<V,E> implements NodeListener<V> {
 		stage.show();
 
 		rec.getSupplier();
+		
+//		this.startPlayThread();
+		
 	}
 
+	/**
+	 * Uses a thread to continuously post events
+	 */
+	private void startPlayThread() {
+		// play runs in an own thread to make it stoppable
+		Runnable run = () -> {
+			while(!Thread.currentThread().isInterrupted()) {
+				try {
+					while (index >= 0) {
+	
+						eventBus.post(new StepEvent(true, 1));
+						TimeUnit.MILLISECONDS.sleep(sleepTime);
+						updateIndex(1, false);
+						
+					}
+				} catch (InterruptedException e) {
+	//        e.printStackTrace();
+				}
+			}
+		};
+
+		playThread = new Thread(run);
+		playThread.start();
+	}
 	/**
 	 * Creates the controll-buttons and adds them to the given List
 	 * 
@@ -173,24 +202,10 @@ public class FXCode<V,E> implements NodeListener<V> {
 		playButton.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent actionEvent) {
-				// play runs in an own thread to make it stoppable
-				Runnable run = () -> {
-					try {
-						while (index >= 0) {
-
-							eventBus.post(new StepEvent(true, 1));
-							TimeUnit.MILLISECONDS.sleep(sleepTime);
-							updateIndex(1, false);
-						}
-					} catch (InterruptedException e) {
-//                e.printStackTrace();
-					}
-				};
-
-				playThread = new Thread(run);
-				playThread.start();
+				startPlayThread();
 			}
 		});
+		
 		nodeList.add(playButton);
 		// stepButton
 		Button stepButton = new Button("Step");
