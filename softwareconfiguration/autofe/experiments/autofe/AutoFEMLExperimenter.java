@@ -41,7 +41,8 @@ public class AutoFEMLExperimenter implements IExperimentSetEvaluator {
 	}
 
 	@Override
-	public void evaluate(final ExperimentDBEntry experimentEntry, final SQLAdapter adapter, final IExperimentIntermediateResultProcessor processor) throws Exception {
+	public void evaluate(final ExperimentDBEntry experimentEntry, final SQLAdapter adapter,
+			final IExperimentIntermediateResultProcessor processor) throws Exception {
 		Map<String, String> experiment = experimentEntry.getExperiment().getValuesOfKeyFields();
 		LOGGER.info("Evaluate experiment: {}", experiment);
 
@@ -70,12 +71,16 @@ public class AutoFEMLExperimenter implements IExperimentSetEvaluator {
 		AbstractAutoFEMLClassifier autofeml;
 		if (experiment.get("algorithm").equals("none")) {
 			LOGGER.info("Execute AutoFEML as a complete process...");
-			autofeml = new AutoFEMLComplete(experimentEntry.getExperiment().getNumCPUs(), seed, new TimeOut(feTimeout + amlTimeout, TimeUnit.SECONDS), new TimeOut(evalTimeout, TimeUnit.SECONDS), maxPipelineSize);
+			autofeml = new AutoFEMLComplete(experimentEntry.getExperiment().getNumCPUs(), seed,
+					new TimeOut(feTimeout + amlTimeout, TimeUnit.SECONDS), new TimeOut(evalTimeout, TimeUnit.SECONDS),
+					maxPipelineSize);
 
 		} else {
 			LOGGER.info("Execute AutoFEML as a two-phase process...");
-			autofeml = new AutoFEMLTwoPhase(experimentEntry.getExperiment().getNumCPUs(), experiment.get("algorithm"), subsampleRatio, minInstances, seed, new TimeOut(feTimeout, TimeUnit.SECONDS), new TimeOut(amlTimeout, TimeUnit.SECONDS),
-					new TimeOut(evalTimeout, TimeUnit.SECONDS), maxPipelineSize);
+			autofeml = new AutoFEMLTwoPhase(experimentEntry.getExperiment().getNumCPUs(), experiment.get("algorithm"),
+					subsampleRatio, minInstances, seed, new TimeOut(feTimeout, TimeUnit.SECONDS),
+					new TimeOut(amlTimeout, TimeUnit.SECONDS), new TimeOut(evalTimeout, TimeUnit.SECONDS),
+					maxPipelineSize);
 		}
 		autofeml.setSQLAdapter(adapter, experimentEntry.getId(), CONFIG.evalTable());
 		autofeml.enableVisualization(CONFIG.enableVisualization());

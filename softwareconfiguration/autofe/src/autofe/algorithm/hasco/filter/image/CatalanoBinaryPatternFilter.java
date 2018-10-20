@@ -27,8 +27,10 @@ public class CatalanoBinaryPatternFilter extends AbstractCatalanoFilter<IBinaryP
 
 	@Override
 	public DataSet applyFilter(final DataSet inputData, final boolean copy) {
-		if (inputData.getIntermediateInstances() == null || inputData.getIntermediateInstances().size() == 0 || inputData.getIntermediateInstances().get(0).rank() < 2) {
-			throw new IllegalArgumentException("Intermediate instances must have a rank of at least 2 for image processing.");
+		if (inputData.getIntermediateInstances() == null || inputData.getIntermediateInstances().size() == 0
+				|| inputData.getIntermediateInstances().get(0).rank() < 2) {
+			throw new IllegalArgumentException(
+					"Intermediate instances must have a rank of at least 2 for image processing.");
 		}
 
 		// None filter
@@ -95,8 +97,9 @@ public class CatalanoBinaryPatternFilter extends AbstractCatalanoFilter<IBinaryP
 
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("");
-		return sb.toString();
+		if (this.getCatalanoFilter() != null) {
+			return "CatalanoBinaryPatternFilter [catalnoFilter=" + this.getName() + "]";
+		} else
+			return "CatalanoBinaryPatternFilter (empty)";
 	}
 }

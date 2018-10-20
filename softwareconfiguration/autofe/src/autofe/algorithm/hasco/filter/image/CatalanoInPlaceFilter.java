@@ -43,8 +43,10 @@ public class CatalanoInPlaceFilter extends AbstractCatalanoFilter<IApplyInPlace>
 
 	@Override
 	public DataSet applyFilter(final DataSet inputData, final boolean copy) {
-		if (inputData.getIntermediateInstances() == null || inputData.getIntermediateInstances().size() == 0 || inputData.getIntermediateInstances().get(0).rank() < 2) {
-			throw new IllegalArgumentException("Intermediate instances must have a rank of at least 2 for image processing.");
+		if (inputData.getIntermediateInstances() == null || inputData.getIntermediateInstances().size() == 0
+				|| inputData.getIntermediateInstances().get(0).rank() < 2) {
+			throw new IllegalArgumentException(
+					"Intermediate instances must have a rank of at least 2 for image processing.");
 		}
 
 		// None filter
@@ -75,9 +77,10 @@ public class CatalanoInPlaceFilter extends AbstractCatalanoFilter<IApplyInPlace>
 	@Override
 	public String toString() {
 		if (this.getCatalanoFilter() != null) {
-			return "CatalanoWrapperFilter [catalanoFilter=" + this.getName() + ", requiresGrayscale=" + ((this.getName() != null) ? this.isRequiresGrayscale() : "NaN") + "]";
+			return "CatalanoInPlaceFilter [catalanoFilter=" + this.getName() + ", requiresGrayscale="
+					+ ((this.getName() != null) ? this.isRequiresGrayscale() : "NaN") + "]";
 		} else {
-			return "CatalanoWrapperFilter (empty)";
+			return "CatalanoInPlaceFilter (empty)";
 		}
 	}
 

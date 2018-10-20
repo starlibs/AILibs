@@ -192,15 +192,17 @@ public final class ImageUtils {
 		for (int i = 0; i < values.length; i++) {
 			result.putScalar(i, values[i]);
 		}
-		result.putScalar(values.length, histogram.getMean());
-		result.putScalar(values.length + 1, histogram.getStdDev());
-		result.putScalar(values.length + 2, histogram.getEntropy());
-		result.putScalar(values.length + 3, histogram.getKurtosis());
-		result.putScalar(values.length + 4, histogram.getSkewness());
-		result.putScalar(values.length + 5, histogram.getMedian());
-		result.putScalar(values.length + 6, histogram.getMode());
-		result.putScalar(values.length + 7, histogram.getMin());
-		result.putScalar(values.length + 8, histogram.getMax());
+
+		// Also add statistical properties of image histogram
+		result.putScalar(values.length, Double.isNaN(histogram.getMean()) ? 0 : histogram.getMean());
+		result.putScalar(values.length + 1, Double.isNaN(histogram.getStdDev()) ? 0 : histogram.getStdDev());
+		result.putScalar(values.length + 2, Double.isNaN(histogram.getEntropy()) ? 0 : histogram.getEntropy());
+		result.putScalar(values.length + 3, Double.isNaN(histogram.getKurtosis()) ? 0 : histogram.getKurtosis());
+		result.putScalar(values.length + 4, Double.isNaN(histogram.getSkewness()) ? 0 : histogram.getSkewness());
+		result.putScalar(values.length + 5, Double.isNaN(histogram.getMedian()) ? 0 : histogram.getMedian());
+		result.putScalar(values.length + 6, Double.isNaN(histogram.getMode()) ? 0 : histogram.getMode());
+		result.putScalar(values.length + 7, Double.isNaN(histogram.getMin()) ? 0 : histogram.getMin());
+		result.putScalar(values.length + 8, Double.isNaN(histogram.getMax()) ? 0 : histogram.getMax());
 		return result;
 	}
 
