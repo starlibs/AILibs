@@ -65,7 +65,7 @@ public class FXCode<V,E> implements NodeListener<V> {
 	public FXCode(Recorder<V,E> rec, String title) {
 		this.index = 0;
 		this.maxIndex = 0;
-		this.sleepTime = 1;
+		this.sleepTime = 0;
 
 		this.eventBus = new EventBus();
 		this.eventBus.register(rec);
@@ -163,7 +163,7 @@ public class FXCode<V,E> implements NodeListener<V> {
 
 		rec.getSupplier();
 		
-//		this.startPlayThread();
+		this.startPlayThread();
 		
 	}
 
@@ -173,18 +173,23 @@ public class FXCode<V,E> implements NodeListener<V> {
 	private void startPlayThread() {
 		// play runs in an own thread to make it stoppable
 		Runnable run = () -> {
-			while(!Thread.currentThread().isInterrupted()) {
+			
 				try {
-					while (index >= 0) {
-	
-						eventBus.post(new StepEvent(true, 1));
-						TimeUnit.MILLISECONDS.sleep(sleepTime);
-						updateIndex(1, false);
-						
+					while(!Thread.currentThread().isInterrupted()) {
+						int i = index;
+						while (i >= 0) {
+		
+							eventBus.post(new StepEvent(true, 1));
+							TimeUnit.MILLISECONDS.sleep(sleepTime);
+							updateIndex(1, false);
+							i = index;
+							if(Thread.currentThread().isInterrupted()) {
+								i = -1;
+							}
+						}
 					}
 				} catch (InterruptedException e) {
 	//        e.printStackTrace();
-				}
 			}
 		};
 
