@@ -23,6 +23,7 @@ import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Slider;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
@@ -31,6 +32,7 @@ import javafx.scene.control.ToolBar;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
@@ -53,6 +55,9 @@ public class FXCode<V,E> implements NodeListener<V> {
 	private int maxIndex;
 
 	private long sleepTime;
+	
+	//Log
+	private Text log;
 
 	// Visualization window
 	private GraphVisualization<V,E> visualization;
@@ -163,7 +168,21 @@ public class FXCode<V,E> implements NodeListener<V> {
 
 		rec.getSupplier();
 		
-		this.startPlayThread();
+		
+		//Add a log pane
+		log = new Text();
+		Tab logTab = new Tab();
+		ScrollPane scrollPane = new ScrollPane();
+		scrollPane.setContent(log);
+		
+		logTab.setContent(scrollPane);
+		logTab.setText("Log");
+		this.tabPane.getTabs().add(logTab);
+		
+	
+		
+		
+//		this.startPlayThread();
 		
 	}
 
@@ -329,6 +348,7 @@ public class FXCode<V,E> implements NodeListener<V> {
 
 		this.index = newIndex;
 		this.timeline.setValue(this.index);
+		this.updateLog("Index: " + index);
 
 	}
 
@@ -465,5 +485,11 @@ public class FXCode<V,E> implements NodeListener<V> {
 	@Override
 	public void buttonPushed(Object node) {
 		this.eventBus.post(new NodePushed<Object>(node));
+	}
+	
+	private void updateLog(String logEntry) {
+		String currentLog = this.log.getText();
+		currentLog += "\n - " + logEntry;
+		this.log.setText(currentLog);
 	}
 }
