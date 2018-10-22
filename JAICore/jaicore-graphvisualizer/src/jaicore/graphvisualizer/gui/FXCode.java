@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 import com.google.common.eventbus.EventBus;
@@ -51,8 +52,12 @@ public class FXCode<V,E> implements NodeListener<V> {
 
 	private Thread playThread;
 
+	//Indices
 	private int index;
 	private int maxIndex;
+	
+	private int maxDisplayIndex;
+	private int displayIndex;
 
 	private long sleepTime;
 	
@@ -61,6 +66,10 @@ public class FXCode<V,E> implements NodeListener<V> {
 
 	// Visualization window
 	private GraphVisualization<V,E> visualization;
+	
+	//update restriction
+	private Semaphore sem;
+	private Thread updateThread;
 
 	/**
 	 * Create a new GraphvisualizerStage
@@ -183,6 +192,7 @@ public class FXCode<V,E> implements NodeListener<V> {
 		
 		
 //		this.startPlayThread();
+		this.startUpdateRestriction(250);
 		
 	}
 
@@ -320,7 +330,8 @@ public class FXCode<V,E> implements NodeListener<V> {
 	public void receiveInfoEvent(InfoEvent event) {
 		try {
 			this.maxIndex = event.getMaxIndex();
-			this.timeline.setMax(this.maxIndex);
+//			this.timeline.setMax(this.maxIndex);
+			this.sem.release();
 			if (event.updateIndex())
 				this.updateIndex(maxIndex, true);
 		} catch (NullPointerException e) {
@@ -347,7 +358,10 @@ public class FXCode<V,E> implements NodeListener<V> {
 			return;
 
 		this.index = newIndex;
-		this.timeline.setValue(this.index);
+		if(this.maxDisplayIndex > this.index) {
+			this.timeline.setValue(this.index);
+			this.displayIndex = index;
+		}
 		this.updateLog("Index: " + index);
 
 	}
@@ -487,9 +501,39 @@ public class FXCode<V,E> implements NodeListener<V> {
 		this.eventBus.post(new NodePushed<Object>(node));
 	}
 	
+	/**
+	 * Updates the log
+	 * @param logEntry
+	 * 		the next log entry
+	 */
 	private void updateLog(String logEntry) {
 		String currentLog = this.log.getText();
 		currentLog += "\n - " + logEntry;
 		this.log.setText(currentLog);
+	}
+	
+	private void startUpdateRestriction(long delay) {
+		sem = new Semaphore(0);
+		Runnable run  = ()->{
+			while(!Thread.currentThread().isInterrupted()) {
+				try {
+					Thread.sleep(delay);
+					sem.acquire();
+					updateTimelineIndex();
+					sem.drainPermits();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+			}
+		};
+		updateThread = new Thread(run,"Update");
+		updateThread.start();
+	}
+
+	private void updateTimelineIndex() {
+		this.timeline.setMax(maxIndex);
+		this.maxDisplayIndex = maxIndex;
 	}
 }
