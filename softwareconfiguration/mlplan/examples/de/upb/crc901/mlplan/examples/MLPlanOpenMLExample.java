@@ -39,8 +39,8 @@ public class MLPlanOpenMLExample {
 		/* initialize mlplan, and let it run for 30 seconds */
 		MLPlanWekaClassifier mlplan = new WekaMLPlanWekaClassifier();
 		mlplan.setLoggerName("mlplan");
-		mlplan.setTimeout(120);
-		mlplan.activateVisualization();
+		mlplan.setTimeout(20);
+//		mlplan.activateVisualization();
 		try {
 			long start = System.currentTimeMillis();
 			mlplan.buildClassifier(split.get(0));
