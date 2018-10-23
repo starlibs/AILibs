@@ -1,7 +1,6 @@
 package jaicore.ml.extendedtree;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.BufferedReader;
@@ -12,16 +11,13 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ThreadLocalRandom;
 
 import org.junit.Test;
 
 import com.google.common.collect.Sets;
 
-import jaicore.ml.core.FeatureDomain;
 import jaicore.ml.core.FeatureSpace;
 import jaicore.ml.intervaltree.ExtendedRandomTree;
-import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.ArffLoader.ArffReader;
 

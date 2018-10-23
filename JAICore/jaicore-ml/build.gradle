@@ -1,7 +1,7 @@
 sourceSets {
     main {
       java {
-          srcDir 'src'
+            srcDir 'src'
       }
     }
     test {
@@ -10,6 +10,7 @@ sourceSets {
      	}
     }
 }
+
 dependencies {
 	compile project(":JAICore:jaicore-basic")
 	compile project(":JAICore:jaicore-search")
@@ -20,7 +21,9 @@ dependencies {
 	compile group: 'de.upb.isys', name: 'meka', version: '0.0.1'
 	compile ('de.upb.isys:interruptable-weka:0.0.2') {
 	  exclude group: 'log4j'
-    exclude group: 'org.slf4j'
+      exclude group: 'org.slf4j'
 	}
 	compile group: 'black.ninia', name: 'jep', version: '3.8.2'
+
+	
 }

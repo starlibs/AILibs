@@ -28,4 +28,8 @@ public class Interval {
 	public String toString() {
 		return new StringBuilder("[").append(lowerBound).append(", ").append(upperBound).append("]").toString();
 	}
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> master
