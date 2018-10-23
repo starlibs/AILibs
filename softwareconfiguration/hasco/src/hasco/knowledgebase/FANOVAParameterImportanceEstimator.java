@@ -27,10 +27,12 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 	private String benchmarkName;
 	private Map<String, HashMap<Set<Integer>, Double>> importanceDictionary;
 	private Map<String, Set<String>> importantParameterMap;
+	private int minNumSamples;
 	// private Map<String, HashMap<String, Double>>
 	// importanceDictionaryForSingleComponents;
 
-	public FANOVAParameterImportanceEstimator(PerformanceKnowledgeBase performanceKnowledgeBase, String benchmarkName, int minNumSamples) {
+	public FANOVAParameterImportanceEstimator(PerformanceKnowledgeBase performanceKnowledgeBase, String benchmarkName,
+			int minNumSamples) {
 		// this.performanceSamples = performanceSamples;
 		this.performanceKnowledgeBase = performanceKnowledgeBase;
 		this.benchmarkName = benchmarkName;
@@ -38,6 +40,7 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 		this.importantParameterMap = new HashMap<String, Set<String>>();
 		// this.importanceDictionaryForSingleComponents = new HashMap<String,
 		// HashMap<String(), Double>>();
+		this.minNumSamples = minNumSamples;
 	}
 
 	/**
@@ -88,7 +91,10 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 		// this.initializeForests(benchmarkName);
 		// }
 		// forest = forests.get(pipelineIdentifier);
-		ExtendedRandomForest forest = new ExtendedRandomForest(1.0d, 32, new FeatureSpace(data));
+		FeatureSpace space = new FeatureSpace(data);
+		ExtendedRandomForest forest = new ExtendedRandomForest();
+		// forest.setMinNumSamples
+		// TODO setter for forest
 		forest.buildClassifier(data);
 		forest.prepareForest(data);
 		if (!importanceDictionary.containsKey(pipelineIdentifier))
@@ -165,9 +171,13 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 		HashMap<String, Double> result = new HashMap<String, Double>();
 		Instances data = performanceKnowledgeBase.getPerformanceSamplesForIndividualComponent(benchmarkName, component);
 		System.out.println(data);
-		if(data == null)
+		if (data == null)
 			return null;
-		ExtendedRandomForest forest = new ExtendedRandomForest(1.0d, 32, new FeatureSpace(data));
+		// ExtendedRandomForest forest = new ExtendedRandomForest(1.0d, 32, new
+		// FeatureSpace(data));
+		FeatureSpace space = new FeatureSpace(data);
+		ExtendedRandomForest forest = new ExtendedRandomForest();
+		// TODO setter for forest
 		try {
 			forest.buildClassifier(data);
 			forest.prepareForest(data);
@@ -184,8 +194,7 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 	}
 
 	@Override
-	public boolean readyToEstimateImportance() {
-		
-		return false;
+	public boolean readyToEstimateImportance(ComponentInstance composition) {
+		return this.performanceKnowledgeBase.kDistinctAttributeValuesAvailable(benchmarkName, composition, minNumSamples);
 	}
 }
