@@ -27,4 +27,10 @@ public interface IParameterImportanceEstimator {
 	 */
 	public Map<String, Double> computeImportanceForSingleComponent(Component component);
 
+	/**
+	 * Checks whether the estimator is ready to estimate parameter importance
+	 * @return true if the estimator is ready, false otherwise
+	 */
+	public boolean readyToEstimateImportance();
+
 }

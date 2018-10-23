@@ -30,7 +30,7 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 	// private Map<String, HashMap<String, Double>>
 	// importanceDictionaryForSingleComponents;
 
-	public FANOVAParameterImportanceEstimator(PerformanceKnowledgeBase performanceKnowledgeBase, String benchmarkName) {
+	public FANOVAParameterImportanceEstimator(PerformanceKnowledgeBase performanceKnowledgeBase, String benchmarkName, int minNumSamples) {
 		// this.performanceSamples = performanceSamples;
 		this.performanceKnowledgeBase = performanceKnowledgeBase;
 		this.benchmarkName = benchmarkName;
@@ -152,7 +152,6 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 	 */
 	public Set<String> extractImportantParameters(ComponentInstance composition, double importanceThreshold,
 			boolean recompute) throws Exception {
-		String pipelineIdentifier = Util.getComponentNamesOfComposition(composition);
 		Instances data = performanceKnowledgeBase.createInstancesForPerformanceSamples(benchmarkName, composition);
 		// largest subset size = all attributes minus class attribute
 		int k = data.numAttributes() - 1;
@@ -179,9 +178,14 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 				result.put(data.attribute(i).name(), importance);
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return result;
+	}
+
+	@Override
+	public boolean readyToEstimateImportance() {
+		
+		return false;
 	}
 }
