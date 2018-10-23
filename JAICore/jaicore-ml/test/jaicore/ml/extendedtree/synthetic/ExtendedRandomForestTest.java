@@ -21,17 +21,8 @@ import weka.core.converters.ArffLoader.ArffReader;
 
 public class ExtendedRandomForestTest {
 
-	private static String[] datasets = { 
-			//"boston",
-			//"bank32nh"};
-	//"bank8FM",
-	//	 "bodyfat"};
-//"cpu.small"};
-		//
-	"cal.housing"};
-	//, "elevator", "house8L",
-		//"kin8nm", "machine.cpu" };
-	private static double[] noise = { 0, 0.1, 0.3, 0.5 };
+	private static String[] datasets = { "boston" };
+	private static double[] noise = { 0 };
 
 	private static int noise_count = noise.length;
 	private static int dataset_count = datasets.length;
@@ -55,7 +46,7 @@ public class ExtendedRandomForestTest {
 						classifier[dataset_index][noise_index][seed] = new ExtendedRandomForest(seed);
 						classifier[dataset_index][noise_index][seed].buildClassifier(data);
 					}
-					System.out.println("Finished training. "+ datasets[dataset_index]+ ", "+ noise[noise_index]);
+					System.out.println("Finished training. " + datasets[dataset_index] + ", " + noise[noise_index]);
 				} catch (Exception e) {
 					e.printStackTrace();
 					Assert.fail();
@@ -124,11 +115,9 @@ public class ExtendedRandomForestTest {
 						Assert.fail();
 					}
 				}
-				double avgLower = Arrays.stream(l1Lower[dataset_index][noise_index])
-						.average().getAsDouble();
-				double avgUpper = Arrays.stream(l1Upper[dataset_index][noise_index])
-						.average().getAsDouble();
-				double l1Loss = (avgLower + avgUpper)/ 2;
+				double avgLower = Arrays.stream(l1Lower[dataset_index][noise_index]).average().getAsDouble();
+				double avgUpper = Arrays.stream(l1Upper[dataset_index][noise_index]).average().getAsDouble();
+				double l1Loss = (avgLower + avgUpper) / 2;
 				System.out.println(datasets[dataset_index] + " " + noise[noise_index] + " " + l1Loss);
 			}
 		}

@@ -7,14 +7,12 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import jaicore.ml.core.Interval;
 import jaicore.ml.intervaltree.ExtendedM5Forest;
-import jaicore.ml.intervaltree.ExtendedRandomForest;
 import junit.framework.Assert;
 import weka.core.DenseInstance;
 import weka.core.Instance;
@@ -23,10 +21,8 @@ import weka.core.converters.ArffLoader.ArffReader;
 
 public class ExtendedM5ForestTest {
 
-	private static String[] datasets = { "boston", "bank32nh" };
-	// , "bank8FM", "bodyfat", "cpu_small", "cal.housing",
-	// "elevator", "house8L", "kin8nm", "machine.cpu" };
-	private static double[] noise = { 0, 0.1, 0.3, 0.5 };
+	private static String[] datasets = { "boston" };
+	private static double[] noise = { 0 };
 
 	private static int noise_count = noise.length;
 	private static int dataset_count = datasets.length;

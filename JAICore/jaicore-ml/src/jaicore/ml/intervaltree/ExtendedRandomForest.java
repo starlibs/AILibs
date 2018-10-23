@@ -7,6 +7,7 @@ import jaicore.ml.core.Interval;
 import jaicore.ml.intervaltree.aggregation.AggressiveAggregator;
 import jaicore.ml.intervaltree.aggregation.IntervalAggregator;
 import jaicore.ml.intervaltree.aggregation.QuantileAggregator;
+import jaicore.ml.intervaltree.util.RQPHelper.IntervalAndHeader;
 import weka.classifiers.trees.RandomForest;
 import weka.core.Instance;
 
@@ -15,7 +16,7 @@ import weka.core.Instance;
  * @author elppa
  *
  */
-public class ExtendedRandomForest extends RandomForest {
+public class ExtendedRandomForest extends RandomForest implements RangeQueryPredictor {
 
 	/**
 	 * For serialization purposes.
@@ -53,6 +54,7 @@ public class ExtendedRandomForest extends RandomForest {
 		this.setSeed(seed);
 	}
 
+	@Override
 	public Interval predictInterval(Instance rangeQuery) {
 		// collect the different predictions
 		List<Double> predictions = new ArrayList<>(m_Classifiers.length * 2);
@@ -62,6 +64,20 @@ public class ExtendedRandomForest extends RandomForest {
 			predictions.add(prediction.getLowerBound());
 			predictions.add(prediction.getUpperBound());
 
+		}
+		// aggregate them
+		return forestAggregator.aggregate(predictions);
+	}
+
+	@Override
+	public Interval predictInterval(IntervalAndHeader intervalAndHeader) {
+		// collect the different predictions
+		List<Double> predictions = new ArrayList<>(m_Classifiers.length * 2);
+		for (int i = 0; i < this.m_Classifiers.length; i++) {
+			ExtendedRandomTree classifier = (ExtendedRandomTree) this.m_Classifiers[i];
+			Interval prediction = classifier.predictInterval(intervalAndHeader);
+			predictions.add(prediction.getLowerBound());
+			predictions.add(prediction.getUpperBound());
 		}
 		// aggregate them
 		return forestAggregator.aggregate(predictions);
