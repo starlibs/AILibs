@@ -248,6 +248,7 @@ public class HASCO<ISearch, N, A, V extends Comparable<V>> implements SoftwareCo
 		this.state = AlgorithmState.inactive;
 		AlgorithmFinishedEvent finishedEvent = new AlgorithmFinishedEvent();
 		this.eventBus.post(finishedEvent);
+		System.out.println("Samples: " + this.performanceKnowledgeBase.getPerformanceSamples()); 
 		return finishedEvent;
 	}
 

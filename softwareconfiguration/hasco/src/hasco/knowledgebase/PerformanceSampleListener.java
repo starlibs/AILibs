@@ -1,16 +1,11 @@
 package hasco.knowledgebase;
 
-import org.w3c.dom.events.Event;
 
 import com.google.common.eventbus.Subscribe;
 
 import hasco.core.HASCOSolutionCandidate;
-import hasco.core.Util;
 import hasco.events.HASCOSolutionEvent;
 import hasco.model.ComponentInstance;
-import jaicore.basic.algorithm.AlgorithmEvent;
-import jaicore.basic.algorithm.SolutionCandidateFoundEvent;
-import jaicore.search.model.other.EvaluatedSearchGraphPath;
 
 /**
  * 

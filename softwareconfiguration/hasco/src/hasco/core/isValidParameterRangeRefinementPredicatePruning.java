@@ -38,13 +38,12 @@ public class isValidParameterRangeRefinementPredicatePruning implements Evaluabl
 	private final IParameterImportanceEstimator parameterImportanceEstimator;
 	private final double importanceThreshold;
 	private final int minNumSamplesForImportanceEstimation;
-	private final boolean useImportanceEstimation;
 
 	public isValidParameterRangeRefinementPredicatePruning(final Collection<Component> components,
 			final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration,
 			final PerformanceKnowledgeBase performanceKB,
 			final IParameterImportanceEstimator parameterImportanceEstimator, final double importanceThreshold,
-			final int minNumSamplesForImportanceEstimation, final boolean useImportanceEstimation) {
+			final int minNumSamplesForImportanceEstimation) {
 		super();
 		this.components = components;
 		this.refinementConfiguration = refinementConfiguration;
@@ -52,7 +51,6 @@ public class isValidParameterRangeRefinementPredicatePruning implements Evaluabl
 		this.parameterImportanceEstimator = parameterImportanceEstimator;
 		this.importanceThreshold = importanceThreshold;
 		this.minNumSamplesForImportanceEstimation = minNumSamplesForImportanceEstimation;
-		this.useImportanceEstimation = useImportanceEstimation;
 	}
 
 	@Override
@@ -88,39 +86,39 @@ public class isValidParameterRangeRefinementPredicatePruning implements Evaluabl
 		 * For jmhansel fANOVA feature: if the parameters importance value is below
 		 * threshold epsilon, no more refinements will be allowed
 		 */
-//		String paramName = ci.getComponent().getName() + "::" + param.getName();
-//
-////		if (performanceKB.getNumSamples("test", compositionIdentifier) > this.minNumSamplesForImportanceEstimation) {
-//		if (performanceKB.kDistinctAttributeValuesAvailable("test", ci, minNumSamplesForImportanceEstimation)) {
+		String paramName = ci.getComponent().getName() + "::" + param.getName();
+
+//		if (performanceKB.getNumSamples("test", compositionIdentifier) > this.minNumSamplesForImportanceEstimation) {
+		if (performanceKB.kDistinctAttributeValuesAvailable("test", ci, minNumSamplesForImportanceEstimation)) {
 //			System.out.println(minNumSamplesForImportanceEstimation + " samples are available");
-//			try {
+			try {
 //				System.out.println("extract important parameters for pipline valid" + Util.getComponentNamesOfComposition(ci));
 //				System.out.println("Querying fANOVA with " + performanceKB.getNumSamples("test", compositionIdentifier)
 //						+ " samples!");
-//				// for now, only consider parameter subsets of size at most 2
-//				Set<String> importantParams = parameterImportanceEstimator.extractImportantParameters(ci,
-//						this.importanceThreshold, 2, false);
-//				// System.out.println("#Important params: " + importantParams.size());
-//				// for (String parameterIndex : importantParams) {
-//				// System.out.println("parameter " + parameterIndex);
-//				// }
-//				System.out.println("important parameters: " + importantParams.toString());
-//				if (importantParams.contains(paramName)) {
-//					// System.out.println("Parameter " + paramName + " is important and will be
-//					// refined!");
-//					;
-//
-//				} else {
-//					// System.out.println("Important params ip: " + importantParams);
-//					System.out.println("Parameter " + paramName
-//							+ " is not important and will be discarded from further refinement!");
-//					return new ArrayList<>();
-//				}
-//			} catch (Exception e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//		}
+				// for now, only consider parameter subsets of size at most 2
+				Set<String> importantParams = parameterImportanceEstimator.extractImportantParameters(ci,
+						this.importanceThreshold, 2, false);
+				// System.out.println("#Important params: " + importantParams.size());
+				// for (String parameterIndex : importantParams) {
+				// System.out.println("parameter " + parameterIndex);
+				// }
+				System.out.println("important parameters: " + importantParams.toString());
+				if (importantParams.contains(paramName)) {
+					// System.out.println("Parameter " + paramName + " is important and will be
+					// refined!");
+					;
+
+				} else {
+					// System.out.println("Important params ip: " + importantParams);
+					System.out.println("Parameter " + paramName
+							+ " is not important and will be discarded from further refinement!");
+					return new ArrayList<>();
+				}
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		
 
 		/* determine refinements for numeric parameters */

@@ -232,12 +232,16 @@ public class PerformanceKnowledgeBase {
 			Parameter param = values.get(i).getLeft();
 			// System.out.println("Adding vlaue " + values.get(i).getRight() + " for
 			// Parameter " + param);
-			if (param.isCategorical()) {
-				String value = values.get(i).getRight();
-				instance.setValue(attr, value);
-			} else if (param.isNumeric()) {
-				double finalValue = Double.parseDouble(values.get(i).getRight());
-				instance.setValue(attr, finalValue);
+			if (values.get(i).getRight() != null) {
+				if (param.isCategorical()) {
+					String value = values.get(i).getRight();
+					instance.setValue(attr, value);
+				} else if (param.isNumeric()) {
+					System.out.println("component: " + componentInstance.getComponent().getName() + " parameter: "
+							+ param + " value: " + values.get(i).getRight());
+					double finalValue = Double.parseDouble(values.get(i).getRight());
+					instance.setValue(attr, finalValue);
+				}
 			}
 		}
 		Attribute scoreAttr = instances.classAttribute();
@@ -252,12 +256,15 @@ public class PerformanceKnowledgeBase {
 			for (int i = 0; i < instancesInd.numAttributes() - 1; i++) {
 				Attribute attr = instancesInd.attribute(i);
 				Parameter param = ci.getComponent().getParameterWithName(attr.name());
-				if (param.isCategorical()) {
-					String value = ci.getParameterValues().get(param.getName());
-					instanceInd.setValue(attr, value);
-				} else if (param.isNumeric()) {
-					double finalValue = Double.parseDouble(ci.getParameterValues().get(param.getName()));
-					instanceInd.setValue(attr, finalValue);
+				String value = ci.getParameterValues().get(param.getName());
+				if (value != null) {
+					if (param.isCategorical()) {
+						// String value = ci.getParameterValues().get(param.getName());
+						instanceInd.setValue(attr, value);
+					} else if (param.isNumeric()) {
+						double finalValue = Double.parseDouble(value);
+						instanceInd.setValue(attr, finalValue);
+					}
 				}
 			}
 			Attribute scoreAttrInd = instancesInd.classAttribute();
@@ -271,7 +278,7 @@ public class PerformanceKnowledgeBase {
 	}
 
 	public Map<String, HashMap<String, Instances>> getPerformanceSamples() {
-//		return this.performanceInstancesByIdentifier;
+		// return this.performanceInstancesByIdentifier;
 		return this.performanceInstancesIndividualComponents;
 	}
 
@@ -305,19 +312,14 @@ public class PerformanceKnowledgeBase {
 
 			if (!havePerformanceTable) {
 				System.out.println("Creating table for performance samples");
-				sqlAdapter.update(
-						"CREATE TABLE `performance_samples_J48` (\r\n" + " `sample_id` int(10) NOT NULL AUTO_INCREMENT,\r\n"
-								+ " `dataset` varchar(200) COLLATE utf8_bin DEFAULT NULL,\r\n"
-								+ " `composition` json NOT NULL,\r\n" + " `error_rate` double NOT NULL,\r\n"
-								+ " `test_evaluation_technique` varchar(20) ,\r\n"
-								+ " `test_split_technique` varchar(20) ,\r\n"
-								+ " `val_evaluation_technique` varchar(20) ,\r\n"
-								+ " `val_split_technique` varchar(20) ,\r\n"
-								+ " `test_seed` int(11) ,\r\n"
-								+ " `val_seed` int(11) ,\r\n"
-								+ " PRIMARY KEY (`sample_id`)\r\n"
-								+ ") ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_bin",
-						new ArrayList<>());
+				sqlAdapter.update("CREATE TABLE `performance_samples_J48` (\r\n"
+						+ " `sample_id` int(10) NOT NULL AUTO_INCREMENT,\r\n"
+						+ " `dataset` varchar(200) COLLATE utf8_bin DEFAULT NULL,\r\n"
+						+ " `composition` json NOT NULL,\r\n" + " `error_rate` double NOT NULL,\r\n"
+						+ " `test_evaluation_technique` varchar(20) ,\r\n" + " `test_split_technique` varchar(20) ,\r\n"
+						+ " `val_evaluation_technique` varchar(20) ,\r\n" + " `val_split_technique` varchar(20) ,\r\n"
+						+ " `test_seed` int(11) ,\r\n" + " `val_seed` int(11) ,\r\n" + " PRIMARY KEY (`sample_id`)\r\n"
+						+ ") ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_bin", new ArrayList<>());
 			}
 
 		} catch (SQLException e) {
@@ -445,29 +447,30 @@ public class PerformanceKnowledgeBase {
 	// }
 
 	public void loadPerformanceSamplesFromDB() {
-		if(sqlAdapter == null) {
+		if (sqlAdapter == null) {
 			System.out.println("please set an SQL adapter");
 			return;
 		}
 		try {
-			ResultSet rs = sqlAdapter.getResultsOfQuery("SELECT dataset, composition, error_rate FROM performance_samples_J48");
+			ResultSet rs = sqlAdapter
+					.getResultsOfQuery("SELECT dataset, composition, error_rate FROM performance_samples_J48");
 			ObjectMapper mapper = new ObjectMapper();
 			while (rs.next()) {
 				String benchmarkName = rs.getString(1);
 				String ciString = rs.getString(2);
 				if (!benchmarkName.equals("test")) {
-				SimpleModule parameterModule = new SimpleModule();
-				ParameterDeserializer des = new ParameterDeserializer();
-				parameterModule.addDeserializer(Parameter.class, des);
-				
-				SimpleModule parameterDomainModule = new SimpleModule();
-				ParameterDomainDeserializer parameterDomainDes = new ParameterDomainDeserializer();
-				parameterDomainModule.addDeserializer(Dependency.class, parameterDomainDes);
-				
-//				mapper.registerModule(parameterModule);
-//				mapper.registerModule(parameterDomainModule);
-				
-				ComponentInstance composition = mapper.readValue(ciString, ComponentInstance.class);
+					SimpleModule parameterModule = new SimpleModule();
+					ParameterDeserializer des = new ParameterDeserializer();
+					parameterModule.addDeserializer(Parameter.class, des);
+
+					SimpleModule parameterDomainModule = new SimpleModule();
+					ParameterDomainDeserializer parameterDomainDes = new ParameterDomainDeserializer();
+					parameterDomainModule.addDeserializer(Dependency.class, parameterDomainDes);
+
+					// mapper.registerModule(parameterModule);
+					// mapper.registerModule(parameterDomainModule);
+
+					ComponentInstance composition = mapper.readValue(ciString, ComponentInstance.class);
 					double score = rs.getDouble(3);
 					this.addPerformanceSample(benchmarkName, composition, score, false);
 				}
@@ -695,7 +698,7 @@ public class PerformanceKnowledgeBase {
 	public Instances getPerformanceSamplesForIndividualComponent(String benchmarkName, Component component) {
 		if (this.performanceInstancesIndividualComponents.get(benchmarkName) != null) {
 			if (this.performanceInstancesIndividualComponents.get(benchmarkName).get(component.getName()) != null) {
-		return this.performanceInstancesIndividualComponents.get(benchmarkName).get(component.getName());
+				return this.performanceInstancesIndividualComponents.get(benchmarkName).get(component.getName());
 			}
 		}
 		return null;
