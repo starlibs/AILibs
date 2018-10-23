@@ -164,4 +164,9 @@ public class CatalanoInPlaceFilter extends AbstractCatalanoFilter<IApplyInPlace>
 			return null;
 		}
 	}
+
+	@Override
+	public CatalanoInPlaceFilter clone() throws CloneNotSupportedException {
+		return new CatalanoInPlaceFilter(this.getName());
+	}
 }

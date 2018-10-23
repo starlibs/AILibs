@@ -20,7 +20,8 @@ public final class FilterUtils {
 		// Utility class
 	}
 
-	public static IFilter getFilterForName(final String name, final Map<String, String> parameters, final int[] inputShape) {
+	public static IFilter getFilterForName(final String name, final Map<String, String> parameters,
+			final long[] inputShape) {
 		// Image filters
 		if (name.startsWith("autofe.algorithm.hasco.filter.image.CatalanoWrapperFilter")) {
 			String[] filterNameSplit = name.split("_");
@@ -86,7 +87,8 @@ public final class FilterUtils {
 	}
 
 	/**
-	 * Pretty print utility function used to print deep component instance hierarchies also printing the filters of wrapper filters.
+	 * Pretty print utility function used to print deep component instance
+	 * hierarchies also printing the filters of wrapper filters.
 	 *
 	 * @param ci
 	 *            Starting component instance of the hierarchy

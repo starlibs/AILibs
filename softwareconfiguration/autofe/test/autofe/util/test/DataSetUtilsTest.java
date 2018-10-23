@@ -27,6 +27,6 @@ public class DataSetUtilsTest {
 		instances.add(inst);
 
 		INDArray result = DataSetUtils.cifar10InstanceToMatrix(inst);
-		Assert.assertArrayEquals(new int[] { 32, 32, 3 }, result.shape());
+		Assert.assertArrayEquals(new long[] { 32, 32, 3 }, result.shape());
 	}
 }

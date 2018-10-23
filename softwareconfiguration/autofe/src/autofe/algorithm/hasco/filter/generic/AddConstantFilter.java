@@ -54,4 +54,9 @@ public class AddConstantFilter implements IFilter {
 	public void setConstant(double constant) {
 		this.constant = constant;
 	}
+
+	@Override
+	public AddConstantFilter clone() throws CloneNotSupportedException {
+		return new AddConstantFilter(this.constant);
+	}
 }

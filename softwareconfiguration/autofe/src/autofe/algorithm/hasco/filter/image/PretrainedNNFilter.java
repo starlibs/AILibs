@@ -73,6 +73,8 @@ public class PretrainedNNFilter implements IFilter, Serializable {
 	 */
 	private boolean convertRGBToGrayscale = false;
 
+	private long[] shape;
+
 	public static final Map<String, List<PretrainedType>> PRETRAINED_WEIGHTS_MAPPING = new HashMap<>();
 	static {
 		PRETRAINED_WEIGHTS_MAPPING.put("AlexNet", Arrays.asList(PretrainedType.IMAGENET));
@@ -83,7 +85,7 @@ public class PretrainedNNFilter implements IFilter, Serializable {
 		PRETRAINED_WEIGHTS_MAPPING.put("VGG19", Arrays.asList(PretrainedType.IMAGENET));
 	}
 
-	public PretrainedNNFilter(final ZooModel model, final int selectedLayer, final int[] shape,
+	public PretrainedNNFilter(final ZooModel model, final int selectedLayer, final long[] shape,
 			final String modelName) {
 		// if (shape.length > 3 && shape[0] != 1) {
 		// throw new IllegalArgumentException(
@@ -98,6 +100,7 @@ public class PretrainedNNFilter implements IFilter, Serializable {
 		this.model = model;
 		this.modelName = modelName;
 		this.selectedLayer = selectedLayer;
+		this.shape = shape;
 
 		try {
 			PretrainedType type = inferPretrainedTypeFromShape(shape);
@@ -181,7 +184,7 @@ public class PretrainedNNFilter implements IFilter, Serializable {
 		}
 
 		for (INDArray example : inputData.getIntermediateInstances()) {
-			int[] shape = example.shape();
+			long[] shape = example.shape();
 
 			// Add channel dimension
 			if (shape.length < 3) {
@@ -226,7 +229,7 @@ public class PretrainedNNFilter implements IFilter, Serializable {
 	}
 
 	// Assumes input shape (width, height, channels, [depth])
-	private static PretrainedType inferPretrainedTypeFromShape(final int[] shape) {
+	private static PretrainedType inferPretrainedTypeFromShape(final long[] shape) {
 
 		if (shape.length <= 2 || (shape.length == 3 && shape[2] == 1)) {
 			// Grayscale
@@ -250,4 +253,8 @@ public class PretrainedNNFilter implements IFilter, Serializable {
 		}
 	}
 
+	@Override
+	public PretrainedNNFilter clone() throws CloneNotSupportedException {
+		return ImageUtils.getPretrainedNNFilterByName(this.modelName, this.selectedLayer, this.shape);
+	}
 }

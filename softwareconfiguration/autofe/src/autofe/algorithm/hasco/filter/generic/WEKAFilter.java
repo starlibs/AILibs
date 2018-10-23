@@ -59,4 +59,13 @@ public class WEKAFilter implements IFilter, Serializable {
 		}
 	}
 
+	@Override
+	public WEKAFilter clone() throws CloneNotSupportedException {
+		try {
+			return new WEKAFilter(Filter.makeCopy(this.wekaFilter));
+		} catch (Exception e) {
+			logger.warn("Could not copy WEKA Filter due to " + e.getMessage() + " Trying to reuse filter.");
+			return new WEKAFilter(this.wekaFilter);
+		}
+	}
 }

@@ -13,6 +13,11 @@ import autofe.util.DataSet;
  */
 public class IdentityFilter implements IFilter, Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6169102560232432449L;
+
 	@Override
 	public DataSet applyFilter(final DataSet inputData, final boolean copy) {
 		if (copy) {
@@ -25,5 +30,10 @@ public class IdentityFilter implements IFilter, Serializable {
 	@Override
 	public String toString() {
 		return "IdentityFilter";
+	}
+
+	@Override
+	public IdentityFilter clone() throws CloneNotSupportedException {
+		return new IdentityFilter();
 	}
 }

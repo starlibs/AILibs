@@ -37,7 +37,8 @@ public class AutoFEMLPreferredNodeEvaluator implements INodeEvaluator<TFDNode, D
 	private PreferenceBasedNodeEvaluator wekaNodeEval;
 	List<String> classifiers;
 
-	public AutoFEMLPreferredNodeEvaluator(final Collection<Component> components, final AutoFEWekaPipelineFactory factory, final int maxPipelineSize) throws IOException {
+	public AutoFEMLPreferredNodeEvaluator(final Collection<Component> components,
+			final AutoFEWekaPipelineFactory factory, final int maxPipelineSize) throws IOException {
 		this.components = components;
 		this.maxPipelineSize = maxPipelineSize;
 		this.factory = factory;
@@ -54,7 +55,8 @@ public class AutoFEMLPreferredNodeEvaluator implements INodeEvaluator<TFDNode, D
 
 	public ComponentInstance getComponentInstanceFromNode(final Node<TFDNode, ?> node) throws Exception {
 		if (this.components == null || this.factory == null) {
-			throw new IllegalArgumentException("Collection of components and factory need to be set to make node evaluators work.");
+			throw new IllegalArgumentException(
+					"Collection of components and factory need to be set to make node evaluators work.");
 		}
 
 		ComponentInstance ci = Util.getSolutionCompositionFromState(this.components, node.getPoint().getState());
@@ -67,11 +69,15 @@ public class AutoFEMLPreferredNodeEvaluator implements INodeEvaluator<TFDNode, D
 			return 0.0;
 		}
 
-		List<String> remainingASTasks = node.getPoint().getRemainingTasks().stream().map(x -> x.getProperty()).filter(x -> x.startsWith("1_")).collect(Collectors.toList());
-		String appliedMethod = (node.getPoint().getAppliedMethodInstance() != null ? node.getPoint().getAppliedMethodInstance().getMethod().getName() : "");
+		List<String> remainingASTasks = node.getPoint().getRemainingTasks().stream().map(x -> x.getProperty())
+				.filter(x -> x.startsWith("1_")).collect(Collectors.toList());
+		String appliedMethod = (node.getPoint().getAppliedMethodInstance() != null
+				? node.getPoint().getAppliedMethodInstance().getMethod().getName()
+				: "");
 
 		logger.trace("Remaining AS Tasks: " + remainingASTasks + " applied method: " + appliedMethod);
-		boolean toDoHasAlgorithmSelection = node.getPoint().getRemainingTasks().stream().anyMatch(x -> x.getProperty().startsWith("1_"));
+		boolean toDoHasAlgorithmSelection = node.getPoint().getRemainingTasks().stream()
+				.anyMatch(x -> x.getProperty().startsWith("1_"));
 		ComponentInstance ci = this.getComponentInstanceFromNode(node);
 		AutoFEWekaPipeline pipe = this.getPipelineFromNode(node);
 		logger.trace("Todo has algorithm selection tasks {} Calculate node evaluation for {}.", pipe);
@@ -85,16 +91,21 @@ public class AutoFEMLPreferredNodeEvaluator implements INodeEvaluator<TFDNode, D
 							String evaluator = preprocessor.getEvaluator().getClass().getName();
 							String searcher = preprocessor.getSearcher().getClass().getName();
 
-							boolean isSetEvaluator = evaluator.toLowerCase().matches(".*(relief|gainratio|principalcomponents|onerattributeeval|infogainattributeeval|correlationattributeeval|symmetricaluncertattributeeval).*");
+							boolean isSetEvaluator = evaluator.toLowerCase().matches(
+									".*(relief|gainratio|principalcomponents|onerattributeeval|infogainattributeeval|correlationattributeeval|symmetricaluncertattributeeval).*");
 							boolean isRanker = searcher.toLowerCase().contains("ranker");
 							boolean isNonRankerEvaluator = evaluator.toLowerCase().matches(".*(cfssubseteval).*");
 
 							if (isSetEvaluator && !isRanker) {
-								logger.debug("We have a preprocessing step which is not a ranker but requires a set evaluator, return {}", 20000d);
+								logger.debug(
+										"We have a preprocessing step which is not a ranker but requires a set evaluator, return {}",
+										20000d);
 								return 20000d;
 							}
 							if (isNonRankerEvaluator && isRanker) {
-								logger.debug("We have a preprocessing step which is a ranker but requires a non-ranker evaluator, return {}", 20000d);
+								logger.debug(
+										"We have a preprocessing step which is a ranker but requires a non-ranker evaluator, return {}",
+										20000d);
 								return 20000d;
 							}
 						}
@@ -112,8 +123,12 @@ public class AutoFEMLPreferredNodeEvaluator implements INodeEvaluator<TFDNode, D
 					if (pipe.getMLPipeline() instanceof MLPipeline) {
 						isMLPipeline = true;
 						classifierName = ((MLPipeline) pipe.getMLPipeline()).getBaseClassifier().getClass().getName();
-					} else {
+					} else if (pipe.getMLPipeline() != null) {
 						classifierName = pipe.getMLPipeline().getClass().getName();
+					} else {
+						// TODO: Does it make sense to return 0 here?
+						// No ML pipeline
+						return 0.0;
 					}
 
 					double indexOfClassifierName = this.classifiers.indexOf(classifierName);
@@ -136,8 +151,10 @@ public class AutoFEMLPreferredNodeEvaluator implements INodeEvaluator<TFDNode, D
 					ComponentInstance mlPipeline = ci.getSatisfactionOfRequiredInterfaces().get("mlPipeline");
 					String classifierName = "";
 					double score = 0.0;
-					if (mlPipeline.getComponent().getProvidedInterfaces().contains("MLPipeline") && mlPipeline.getSatisfactionOfRequiredInterfaces().containsKey("classifier")) {
-						classifierName = mlPipeline.getSatisfactionOfRequiredInterfaces().get("classifier").getComponent().getName();
+					if (mlPipeline.getComponent().getProvidedInterfaces().contains("MLPipeline")
+							&& mlPipeline.getSatisfactionOfRequiredInterfaces().containsKey("classifier")) {
+						classifierName = mlPipeline.getSatisfactionOfRequiredInterfaces().get("classifier")
+								.getComponent().getName();
 						score += this.classifiers.size() + 1;
 					} else if (!mlPipeline.getComponent().getProvidedInterfaces().contains("MLPipeline")) {
 						classifierName = mlPipeline.getComponent().getName();
@@ -157,7 +174,7 @@ public class AutoFEMLPreferredNodeEvaluator implements INodeEvaluator<TFDNode, D
 
 				}
 			}
-			logger.trace("Still in algorthm selection phase => do BFS");
+			logger.trace("Still in algorithm selection phase => do BFS");
 			return 0.0;
 		} else {
 			logger.trace("Algorithm configuration stage => do random subsamples");

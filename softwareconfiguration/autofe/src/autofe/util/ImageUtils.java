@@ -36,8 +36,8 @@ public final class ImageUtils {
 	}
 
 	public static FastBitmap matrixToFastBitmap(final INDArray matrix, final ColorSpace colorSpace) {
-		int[] shape = matrix.shape();
-		FastBitmap bitmap = new FastBitmap(shape[0], shape[1], colorSpace);
+		long[] shape = matrix.shape();
+		FastBitmap bitmap = new FastBitmap((int) shape[0], (int) shape[1], colorSpace);
 
 		for (int i = 0; i < shape[0]; i++) {
 			for (int j = 0; j < shape[1]; j++) {
@@ -114,7 +114,7 @@ public final class ImageUtils {
 
 	public static ColorSpace determineColorSpace(final INDArray example) {
 		// ColorSpace colorSpace = null;
-		int[] exampleShape = example.shape();
+		long[] exampleShape = example.shape();
 		if (exampleShape.length >= 3) {
 			if (exampleShape[2] == 3) {
 				return ColorSpace.RGB;
@@ -165,22 +165,26 @@ public final class ImageUtils {
 	}
 
 	public static PretrainedNNFilter getPretrainedNNFilterByName(final String name, final int layer,
-			final int[] shape) {
+			final long[] shape) {
+		// Thanks to a pointless API requirement, the zoo models require int[] shapes
+		// while dl4j uses long[] at any other place
+		final int[] intShape = Arrays.stream(shape).mapToInt(i -> (int) i).toArray();
 		switch (name) {
 		case "AlexNet":
-			return new PretrainedNNFilter(new AlexNet(42, shape, 10, new Nesterovs(1e-2, 0.9), CacheMode.NONE,
+			return new PretrainedNNFilter(new AlexNet(42, intShape, 10, new Nesterovs(1e-2, 0.9), CacheMode.NONE,
 					WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer, shape, name);
 		case "LeNet":
-			return new PretrainedNNFilter(new LeNet(42, shape, 10, new Nesterovs(1e-2, 0.9), CacheMode.NONE,
+			return new PretrainedNNFilter(new LeNet(42, intShape, 10, new Nesterovs(1e-2, 0.9), CacheMode.NONE,
 					WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer, shape, name);
 		case "VGG19":
-			return new PretrainedNNFilter(new VGG19(42, shape, 10, new Nesterovs(1e-2, 0.9), CacheMode.NONE,
+			return new PretrainedNNFilter(new VGG19(42, intShape, 10, new Nesterovs(1e-2, 0.9), CacheMode.NONE,
 					WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer, shape, name);
 		case "ResNet50":
-			return new PretrainedNNFilter(new ResNet50(42, shape, 10, WeightInit.DISTRIBUTION, new Nesterovs(1e-2, 0.9),
-					CacheMode.NONE, WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer, shape, name);
+			return new PretrainedNNFilter(new ResNet50(42, intShape, 10, WeightInit.DISTRIBUTION,
+					new Nesterovs(1e-2, 0.9), CacheMode.NONE, WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer,
+					shape, name);
 		default:
-			return new PretrainedNNFilter(new VGG16(42, shape, 10, new Nesterovs(1e-2, 0.9), CacheMode.NONE,
+			return new PretrainedNNFilter(new VGG16(42, intShape, 10, new Nesterovs(1e-2, 0.9), CacheMode.NONE,
 					WorkspaceMode.ENABLED, AlgoMode.PREFER_FASTEST), layer, shape, "VGG16");
 		}
 	}

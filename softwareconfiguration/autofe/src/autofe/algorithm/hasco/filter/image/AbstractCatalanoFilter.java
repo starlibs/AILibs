@@ -28,4 +28,5 @@ public abstract class AbstractCatalanoFilter<T> implements IFilter, Serializable
 		return this.name;
 	}
 
+	public abstract AbstractCatalanoFilter<T> clone() throws CloneNotSupportedException;
 }

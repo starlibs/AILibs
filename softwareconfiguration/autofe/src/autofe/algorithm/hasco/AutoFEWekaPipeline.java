@@ -5,6 +5,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import autofe.algorithm.hasco.filter.meta.FilterPipeline;
 import autofe.util.DataSet;
@@ -16,7 +18,9 @@ import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 
-public class AutoFEWekaPipeline implements IFEMLClassifier, Serializable {
+public class AutoFEWekaPipeline implements IFEMLClassifier, Serializable, Cloneable {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(AutoFEWekaPipeline.class);
 
 	/**
 	 *
@@ -69,7 +73,8 @@ public class AutoFEWekaPipeline implements IFEMLClassifier, Serializable {
 	@Override
 	public Instances transformData(final DataSet data) throws InterruptedException {
 		DataSet intermediateData = data;
-		if (this.filterPipeline != null && this.filterPipeline.getFilters() != null && !this.filterPipeline.getFilters().isEmpty()) {
+		if (this.filterPipeline != null && this.filterPipeline.getFilters() != null
+				&& !this.filterPipeline.getFilters().isEmpty()) {
 			intermediateData = this.filterPipeline.applyFilter(intermediateData, true);
 		}
 		return DataSetUtils.matricesToInstances(intermediateData);
@@ -105,5 +110,16 @@ public class AutoFEWekaPipeline implements IFEMLClassifier, Serializable {
 
 	public Classifier getMLPipeline() {
 		return this.mlPipeline;
+	}
+
+	@Override
+	public AutoFEWekaPipeline clone() throws CloneNotSupportedException {
+		try {
+			return new AutoFEWekaPipeline(this.filterPipeline.clone(), WekaUtil.cloneClassifier(this.mlPipeline));
+		} catch (Exception e) {
+			LOGGER.error("Could not clone AutoFEWekaPipeline due to '" + e.getMessage()
+					+ "'. Returning null object instead.");
+			return null;
+		}
 	}
 }

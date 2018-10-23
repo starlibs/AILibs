@@ -98,8 +98,13 @@ public class CatalanoBinaryPatternFilter extends AbstractCatalanoFilter<IBinaryP
 	@Override
 	public String toString() {
 		if (this.getCatalanoFilter() != null) {
-			return "CatalanoBinaryPatternFilter [catalnoFilter=" + this.getName() + "]";
+			return "CatalanoBinaryPatternFilter [catalanoFilter=" + this.getName() + "]";
 		} else
 			return "CatalanoBinaryPatternFilter (empty)";
+	}
+
+	@Override
+	public CatalanoBinaryPatternFilter clone() throws CloneNotSupportedException {
+		return new CatalanoBinaryPatternFilter(this.getName());
 	}
 }

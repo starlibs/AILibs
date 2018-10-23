@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import autofe.algorithm.hasco.filter.image.PretrainedNNFilter;
 import autofe.util.DataSet;
+import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.graph.Graph;
 
 // TODO: Integrate descriptive statistics (?)
@@ -218,4 +219,23 @@ public class FilterPipeline implements IFilter, Serializable {
 
 	}
 
+	@Override
+	public FilterPipeline clone() throws CloneNotSupportedException {
+		// Filter mapping for reconstruction
+		Map<IFilter, IFilter> filterMapping = new HashMap<>();
+
+		for (IFilter filter : this.filters.getItems()) {
+			filterMapping.put(filter, (IFilter) filter.clone());
+		}
+
+		Graph<IFilter> clonedGraph = new Graph<>();
+		for (Map.Entry<IFilter, IFilter> entry : filterMapping.entrySet()) {
+			clonedGraph.addItem(entry.getValue());
+		}
+		for (Pair<IFilter, IFilter> pair : this.filters.getEdges()) {
+			clonedGraph.addEdge(filterMapping.get(pair.getX()), filterMapping.get(pair.getY()));
+		}
+
+		return new FilterPipeline(clonedGraph);
+	}
 }

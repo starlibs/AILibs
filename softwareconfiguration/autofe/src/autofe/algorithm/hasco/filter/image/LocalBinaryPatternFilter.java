@@ -20,16 +20,19 @@ public class LocalBinaryPatternFilter implements IFilter, Serializable {
 	 */
 	private static final long serialVersionUID = 924262565754950582L;
 
+	private LocalBinaryPattern lbp = new LocalBinaryPattern();
+
 	@Override
 	public DataSet applyFilter(final DataSet inputData, final boolean copy) {
 
-		if (inputData.getIntermediateInstances() == null || inputData.getIntermediateInstances().size() == 0 || inputData.getIntermediateInstances().get(0).rank() < 2) {
-			throw new IllegalArgumentException("Intermediate instances must have a rank of at least 2 for image processing.");
+		if (inputData.getIntermediateInstances() == null || inputData.getIntermediateInstances().size() == 0
+				|| inputData.getIntermediateInstances().get(0).rank() < 2) {
+			throw new IllegalArgumentException(
+					"Intermediate instances must have a rank of at least 2 for image processing.");
 		}
 
 		ColorSpace colorSpace = ImageUtils.determineColorSpace(inputData.getIntermediateInstances().get(0));
 
-		LocalBinaryPattern lbp = new LocalBinaryPattern();
 		// Assume to deal with FastBitmap instances
 		List<INDArray> transformedInstances = new ArrayList<>(inputData.getIntermediateInstances().size());
 		for (INDArray inst : inputData.getIntermediateInstances()) {
@@ -37,7 +40,7 @@ public class LocalBinaryPatternFilter implements IFilter, Serializable {
 			if (colorSpace != ColorSpace.Grayscale) {
 				bitmap.toGrayscale();
 			}
-			bitmap = lbp.toFastBitmap(bitmap);
+			bitmap = this.lbp.toFastBitmap(bitmap);
 
 			INDArray result = ImageUtils.fastBitmapToMatrix(bitmap, ColorSpace.Grayscale);
 			transformedInstances.add(result);
@@ -49,6 +52,11 @@ public class LocalBinaryPatternFilter implements IFilter, Serializable {
 	@Override
 	public String toString() {
 		return LocalBinaryPattern.class.getName() + "-[]";
+	}
+
+	@Override
+	public LocalBinaryPatternFilter clone() throws CloneNotSupportedException {
+		return new LocalBinaryPatternFilter();
 	}
 
 }

@@ -43,4 +43,8 @@ public class AddRandomFilter implements IFilter {
 		return new DataSet(transformedInstances, inputData.getIntermediateInstances());
 	}
 
+	@Override
+	public AddRandomFilter clone() throws CloneNotSupportedException {
+		return new AddRandomFilter();
+	}
 }
