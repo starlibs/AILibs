@@ -28,11 +28,13 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 	private Map<String, HashMap<Set<Integer>, Double>> importanceDictionary;
 	private Map<String, Set<String>> importantParameterMap;
 	private int minNumSamples;
+	private double importanceThreshold;
+	private int sizeOfLargestSubsetToConsider;
 	// private Map<String, HashMap<String, Double>>
 	// importanceDictionaryForSingleComponents;
 
 	public FANOVAParameterImportanceEstimator(PerformanceKnowledgeBase performanceKnowledgeBase, String benchmarkName,
-			int minNumSamples) {
+			int minNumSamples, double importanceThreshold) {
 		// this.performanceSamples = performanceSamples;
 		this.performanceKnowledgeBase = performanceKnowledgeBase;
 		this.benchmarkName = benchmarkName;
@@ -41,6 +43,9 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 		// this.importanceDictionaryForSingleComponents = new HashMap<String,
 		// HashMap<String(), Double>>();
 		this.minNumSamples = minNumSamples;
+		this.importanceThreshold = importanceThreshold;
+		// For now only consider subsets of size <= 2
+		this.sizeOfLargestSubsetToConsider = 2;
 	}
 
 	/**
@@ -64,6 +69,10 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 	// }
 	// }
 
+	public FANOVAParameterImportanceEstimator(String benchmarkName, int minNumSamples, double importanceThreshold) {
+		this(null, benchmarkName, minNumSamples, importanceThreshold);
+	}
+
 	/**
 	 * Extract important parameters for subsets of size
 	 * {@code sizeOfLargestSubsetToConsider}. Importance values are put into the
@@ -76,17 +85,13 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 	 * @return
 	 * @throws Exception
 	 */
-	public Set<String> extractImportantParameters(ComponentInstance composition, double importanceThreshold,
-			int sizeOfLargestSubsetsToConsider, boolean recompute) throws Exception {
+	public Set<String> extractImportantParameters(ComponentInstance composition, boolean recompute) throws Exception {
 		Set<String> importantParameters = new HashSet<String>();
 		String pipelineIdentifier = Util.getComponentNamesOfComposition(composition);
 		if (importantParameterMap.containsKey(pipelineIdentifier))
 			return importantParameterMap.get(pipelineIdentifier);
 		// ExtendedRandomForest forest = forests.get(pipelineIdentifier);
 		Instances data = performanceKnowledgeBase.createInstancesForPerformanceSamples(benchmarkName, composition);
-		System.out.println("Extracting important parameters!");
-		System.out.println(data);
-
 		// if (forest == null) {
 		// this.initializeForests(benchmarkName);
 		// }
@@ -103,8 +108,8 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 		Set<Integer> parameterIndices = new HashSet<Integer>();
 		for (int i = 0; i < data.numAttributes() - 1; i++)
 			parameterIndices.add(i);
-		// TODO initialize parameter indices
-		for (int k = 1; k <= sizeOfLargestSubsetsToConsider; k++) {
+		// for now we only consider subsets of size k <= 2
+		for (int k = 1; k <= this.sizeOfLargestSubsetToConsider; k++) {
 			Set<Set<Integer>> currentSubsets = Sets.combinations(parameterIndices, k);
 			// System.out.println("computing for parameter subsets: " + currentSubsets);
 			for (Set<Integer> subset : currentSubsets) {
@@ -149,22 +154,6 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 	}
 
 	/**
-	 * Extracts important parameters for all subset sizes.
-	 * 
-	 * @param composition
-	 * @param importanceThreshold
-	 * @return
-	 * @throws Exception
-	 */
-	public Set<String> extractImportantParameters(ComponentInstance composition, double importanceThreshold,
-			boolean recompute) throws Exception {
-		Instances data = performanceKnowledgeBase.createInstancesForPerformanceSamples(benchmarkName, composition);
-		// largest subset size = all attributes minus class attribute
-		int k = data.numAttributes() - 1;
-		return extractImportantParameters(composition, importanceThreshold, k, recompute);
-	}
-
-	/**
 	 * Computes importance values for individual components.
 	 */
 	public Map<String, Double> computeImportanceForSingleComponent(Component component) {
@@ -195,6 +184,21 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 
 	@Override
 	public boolean readyToEstimateImportance(ComponentInstance composition) {
-		return this.performanceKnowledgeBase.kDistinctAttributeValuesAvailable(benchmarkName, composition, minNumSamples);
+		return this.performanceKnowledgeBase.kDistinctAttributeValuesAvailable(benchmarkName, composition,
+				minNumSamples);
+	}
+
+	/**
+	 * @return the performanceKnowledgeBase
+	 */
+	public PerformanceKnowledgeBase getPerformanceKnowledgeBase() {
+		return performanceKnowledgeBase;
+	}
+
+	/**
+	 * @param performanceKnowledgeBase the performanceKnowledgeBase to set
+	 */
+	public void setPerformanceKnowledgeBase(PerformanceKnowledgeBase performanceKnowledgeBase) {
+		this.performanceKnowledgeBase = performanceKnowledgeBase;
 	}
 }

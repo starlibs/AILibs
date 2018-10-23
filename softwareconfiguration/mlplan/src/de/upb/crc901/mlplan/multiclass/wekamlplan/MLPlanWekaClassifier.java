@@ -19,6 +19,8 @@ import com.google.common.eventbus.Subscribe;
 import de.upb.crc901.mlplan.multiclass.MLPlanClassifierConfig;
 import de.upb.crc901.mlplan.multiclass.MultiClassPerformanceMeasure;
 import hasco.core.HASCOSolutionCandidate;
+import hasco.knowledgebase.FANOVAParameterImportanceEstimator;
+import hasco.knowledgebase.PerformanceKnowledgeBase;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
 import hasco.optimizingfactory.OptimizingFactory;
@@ -173,6 +175,8 @@ public abstract class MLPlanWekaClassifier implements Classifier, CapabilitiesHa
 			OptimizingFactoryProblem<TwoPhaseSoftwareConfigurationProblem, Classifier, Double> optimizingFactoryProblem = new OptimizingFactoryProblem<>(this.factory, problem);
 			this.hascoFactory = new TwoPhaseHASCOFactory();
 			this.hascoFactory.setPreferredNodeEvaluator(new AlternativeNodeEvaluator<TFDNode, Double>(this.getSemanticNodeEvaluator(this.dataShownToSearch), this.preferredNodeEvaluator));
+			this.hascoFactory.setUseParameterPruning(true);
+			this.hascoFactory.setParameterImportanceEstimator(new FANOVAParameterImportanceEstimator("test", 2, 0.08d));
 			this.hascoFactory.setConfig(this.config);
 			this.optimizingFactory = new OptimizingFactory<>(optimizingFactoryProblem, this.hascoFactory);
 			this.optimizingFactory.setLoggerName(this.loggerName + ".2phasehasco");

@@ -30,24 +30,17 @@ public class isRefinementCompletedPredicateWithImportanceCheck implements Evalua
 
 	private final Collection<Component> components;
 	private final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration;
-	private final PerformanceKnowledgeBase performanceKB;
 	private final IParameterImportanceEstimator importanceEstimator;
-	private final double importanceThreshold;
-	private final int minNumSamplesForImportanceEstimation;
 	// private final Map<ComponentInstance,Double> knownCompositionsAndTheirScore =
 	// new HashMap<>();
 
 	public isRefinementCompletedPredicateWithImportanceCheck(Collection<Component> components,
 			Map<Component, Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration,
-			PerformanceKnowledgeBase performanceKB, IParameterImportanceEstimator importanceEstimator,
-			double importanceThreshold, int minNumSamples) {
+			IParameterImportanceEstimator importanceEstimator) {
 		super();
 		this.components = components;
 		this.refinementConfiguration = refinementConfiguration;
 		this.importanceEstimator = importanceEstimator;
-		this.importanceThreshold = importanceThreshold;
-		this.minNumSamplesForImportanceEstimation = minNumSamples;
-		this.performanceKB = performanceKB;
 	}
 
 	@Override
@@ -103,7 +96,7 @@ public class isRefinementCompletedPredicateWithImportanceCheck implements Evalua
 		// compositionIdentifier);
 		// if (performanceKB.getNumSamples("test", compositionIdentifier) >
 		// this.minNumSamplesForImportanceEstimation) {
-		if (performanceKB.kDistinctAttributeValuesAvailable("test", ci, minNumSamplesForImportanceEstimation)) {
+		if (importanceEstimator.readyToEstimateImportance(ci)) {
 			// System.out.println(minNumSamplesForImportanceEstimation + " samples are
 			// available");
 			try {
@@ -115,8 +108,7 @@ public class isRefinementCompletedPredicateWithImportanceCheck implements Evalua
 				// + " samples!");
 				System.out
 						.println("extract important parameters for pipline " + Util.getComponentNamesOfComposition(ci));
-				importantParams = importanceEstimator.extractImportantParameters(ci, this.importanceThreshold, 2,
-						false);
+				importantParams = importanceEstimator.extractImportantParameters(ci, false);
 				// If there are no parameters left that are estimated to be important, return
 				// true
 				if (importantParams.isEmpty())

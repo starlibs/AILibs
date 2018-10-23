@@ -19,8 +19,7 @@ public interface IParameterImportanceEstimator {
 	 * @return
 	 * @throws Exception
 	 */
-	public Set<String> extractImportantParameters(ComponentInstance composition, double importanceThreshold,
-			int sizeOfLargestSubsetsToConsider, boolean recompute) throws Exception;
+	public Set<String> extractImportantParameters(ComponentInstance composition, boolean recompute) throws Exception;
 
 	/**
 	 * Computes importance values for an individual component
@@ -38,5 +37,11 @@ public interface IParameterImportanceEstimator {
 	 * @return true if the estimator is ready, false otherwise
 	 */
 	public boolean readyToEstimateImportance(ComponentInstance composition);
+	
+	/**
+	 * Set the performance knowledge base used for parameter importance estimation
+	 * @param performanceKB
+	 */
+	public void setPerformanceKnowledgeBase(PerformanceKnowledgeBase performanceKB);
 
 }

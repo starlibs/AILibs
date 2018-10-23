@@ -16,6 +16,7 @@ import com.google.common.eventbus.EventBus;
 
 import hasco.events.HASCOSearchInitializedEvent;
 import hasco.events.HASCOSolutionEvent;
+import hasco.knowledgebase.IParameterImportanceEstimator;
 import hasco.knowledgebase.PerformanceKnowledgeBase;
 import hasco.knowledgebase.PerformanceSampleListener;
 import hasco.model.Component;
@@ -91,9 +92,13 @@ public class HASCO<ISearch, N, A, V extends Comparable<V>> implements SoftwareCo
 	private boolean searchCreatedAndInitialized = false;
 	private final TimeRecordingEvaluationWrapper<V> timeGrabbingEvaluationWrapper;
 	private HASCOSolutionCandidate<V> bestRecognizedSolution;
+	private boolean useParameterPruning = false;
 	
 	/* storage for performance samples */
 	private final PerformanceKnowledgeBase performanceKnowledgeBase;
+	
+	/* parameter importance estimation */
+	private IParameterImportanceEstimator parameterImportanceEstimator;
 
 	public HASCO(RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem, IHASCOPlanningGraphGeneratorDeriver<N, A> planningGraphGeneratorDeriver,
 			IGraphSearchFactory<ISearch, ?, N, A, V, ?, ?> searchFactory, AlgorithmProblemTransformer<GraphSearchProblemInput<N, A, V>, ISearch> searchProblemTransformer) {
@@ -149,6 +154,9 @@ public class HASCO<ISearch, N, A, V extends Comparable<V>> implements SoftwareCo
 
 			/* derive search problem */
 			logger.debug("Deriving search problem");
+			HASCOReduction<V> reduction = new HASCOReduction<V>();
+			if(this.useParameterPruning)
+				reduction.setParameterImportanceEstimator(this.parameterImportanceEstimator);
 			planningProblem = new HASCOReduction<V>().transform(refactoredConfigurationProblem);
 			if (logger.isDebugEnabled()) {
 				String operations = planningProblem.getCorePlanningProblem().getDomain().getOperations().stream().map(o -> "\n\t\t" + o.getName() + "(" + o.getParams() + ")\n\t\t\tPre: "
@@ -248,6 +256,7 @@ public class HASCO<ISearch, N, A, V extends Comparable<V>> implements SoftwareCo
 		this.state = AlgorithmState.inactive;
 		AlgorithmFinishedEvent finishedEvent = new AlgorithmFinishedEvent();
 		this.eventBus.post(finishedEvent);
+		// TODO remove this
 		System.out.println("Samples: " + this.performanceKnowledgeBase.getPerformanceSamples()); 
 		return finishedEvent;
 	}
@@ -388,5 +397,22 @@ public class HASCO<ISearch, N, A, V extends Comparable<V>> implements SoftwareCo
 				return (AlgorithmInitializedEvent) e;
 		}
 		throw new IllegalStateException("Could not complete initialization");
+	}
+	
+	public void setParameterImportanceEstimator(IParameterImportanceEstimator parameterImportanceEstimator) {
+		this.parameterImportanceEstimator = parameterImportanceEstimator;
+		parameterImportanceEstimator.setPerformanceKnowledgeBase(this.performanceKnowledgeBase);
+	}
+	
+	public void setUseParameterPruning(boolean useParameterPruning) {
+		this.useParameterPruning = useParameterPruning;
+	}
+	
+	public boolean isUseParameterPruning() {
+		return useParameterPruning;
+	}
+
+	public IParameterImportanceEstimator getParameterImportanceEstimator() {
+		return parameterImportanceEstimator;
 	}
 }

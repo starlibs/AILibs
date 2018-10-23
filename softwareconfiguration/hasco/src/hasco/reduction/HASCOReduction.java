@@ -16,6 +16,9 @@ import hasco.core.isRefinementCompletedPredicate;
 import hasco.core.isRefinementCompletedPredicateWithImportanceCheck;
 import hasco.core.isValidParameterRangeRefinementPredicate;
 import hasco.core.isValidParameterRangeRefinementPredicatePruning;
+import hasco.knowledgebase.FANOVAParameterImportanceEstimator;
+import hasco.knowledgebase.IParameterImportanceEstimator;
+import hasco.knowledgebase.PerformanceKnowledgeBase;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
 import hasco.model.NumericParameterDomain;
@@ -76,6 +79,7 @@ public class HASCOReduction<V extends Comparable<V>> implements
 
 	/* for parameter pruning */
 	private boolean useParameterPruning = false;
+	private IParameterImportanceEstimator parameterImportanceEstimator;
 
 	public Monom getInitState() {
 		if (originalProblem == null)
@@ -291,10 +295,11 @@ public class HASCOReduction<V extends Comparable<V>> implements
 			final CEOCIPSTNPlanningDomain domain, final CNFFormula knowledge, final Monom init) {
 		Map<String, EvaluablePredicate> evaluablePredicates = new HashMap<>();
 		if (this.useParameterPruning) {
+			// Set up everything needed for importance estimation
 			evaluablePredicates.put("isValidParameterRangeRefinement",
-					new isValidParameterRangeRefinementPredicatePruning(this.components, this.paramRefinementConfig, null, null, 0, 0));
+					new isValidParameterRangeRefinementPredicatePruning(this.components, this.paramRefinementConfig, parameterImportanceEstimator));
 			evaluablePredicates.put("refinementCompleted",
-					new isRefinementCompletedPredicateWithImportanceCheck(this.components, this.paramRefinementConfig, null, null, 0, 0));
+					new isRefinementCompletedPredicateWithImportanceCheck(this.components, this.paramRefinementConfig, parameterImportanceEstimator));
 		} else {
 			evaluablePredicates.put("isValidParameterRangeRefinement",
 					new isValidParameterRangeRefinementPredicate(this.components, this.paramRefinementConfig));
@@ -351,5 +356,9 @@ public class HASCOReduction<V extends Comparable<V>> implements
 		CostSensitiveHTNPlanningProblem<CEOCOperation, OCIPMethod, CEOCAction, CEOCIPSTNPlanningProblem<CEOCOperation, OCIPMethod, CEOCAction>, V> costSensitiveProblem = new CostSensitiveHTNPlanningProblem<>(
 				planningProblem, planEvaluator);
 		return costSensitiveProblem;
+	}
+	
+	public void setParameterImportanceEstimator(IParameterImportanceEstimator parameterImportanceEstimator) {
+		this.parameterImportanceEstimator = parameterImportanceEstimator;
 	}
 }

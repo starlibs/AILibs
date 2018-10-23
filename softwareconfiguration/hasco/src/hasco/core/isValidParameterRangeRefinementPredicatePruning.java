@@ -34,33 +34,27 @@ public class isValidParameterRangeRefinementPredicatePruning implements Evaluabl
 	private final Collection<Component> components;
 	private final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration;
 	private final Map<ComponentInstance, Double> knownCompositionsAndTheirScore = new HashMap<>();
-	private final PerformanceKnowledgeBase performanceKB;
 	private final IParameterImportanceEstimator parameterImportanceEstimator;
-	private final double importanceThreshold;
-	private final int minNumSamplesForImportanceEstimation;
 
 	public isValidParameterRangeRefinementPredicatePruning(final Collection<Component> components,
 			final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration,
-			final PerformanceKnowledgeBase performanceKB,
-			final IParameterImportanceEstimator parameterImportanceEstimator, final double importanceThreshold,
-			final int minNumSamplesForImportanceEstimation) {
+			final IParameterImportanceEstimator parameterImportanceEstimator) {
 		super();
 		this.components = components;
 		this.refinementConfiguration = refinementConfiguration;
-		this.performanceKB = performanceKB;
 		this.parameterImportanceEstimator = parameterImportanceEstimator;
-		this.importanceThreshold = importanceThreshold;
-		this.minNumSamplesForImportanceEstimation = minNumSamplesForImportanceEstimation;
 	}
 
 	@Override
 	public Collection<List<ConstantParam>> getParamsForPositiveEvaluation(final Monom state,
 			final ConstantParam... partialGrounding) {
-//		if (true)
-//			return new ArrayList<>();
+		System.out.println("Miep");
+		
+		// if (true)
+		// return new ArrayList<>();
 
 		ComponentInstance ci = Util.getSolutionCompositionFromState(components, state, false);
-		String compositionIdentifier = Util.getComponentNamesOfComposition(ci);
+		// String compositionIdentifier = Util.getComponentNamesOfComposition(ci);
 
 		/* determine the context for which the interval refinement should be oracled */
 		if (partialGrounding.length != 6) {
@@ -88,16 +82,19 @@ public class isValidParameterRangeRefinementPredicatePruning implements Evaluabl
 		 */
 		String paramName = ci.getComponent().getName() + "::" + param.getName();
 
-//		if (performanceKB.getNumSamples("test", compositionIdentifier) > this.minNumSamplesForImportanceEstimation) {
-		if (performanceKB.kDistinctAttributeValuesAvailable("test", ci, minNumSamplesForImportanceEstimation)) {
-//			System.out.println(minNumSamplesForImportanceEstimation + " samples are available");
+		// if (performanceKB.getNumSamples("test", compositionIdentifier) >
+		// this.minNumSamplesForImportanceEstimation) {
+		if (parameterImportanceEstimator.readyToEstimateImportance(ci)) {
+			// System.out.println(minNumSamplesForImportanceEstimation + " samples are
+			// available");
 			try {
-//				System.out.println("extract important parameters for pipline valid" + Util.getComponentNamesOfComposition(ci));
-//				System.out.println("Querying fANOVA with " + performanceKB.getNumSamples("test", compositionIdentifier)
-//						+ " samples!");
+				// System.out.println("extract important parameters for pipline valid" +
+				// Util.getComponentNamesOfComposition(ci));
+				// System.out.println("Querying fANOVA with " +
+				// performanceKB.getNumSamples("test", compositionIdentifier)
+				// + " samples!");
 				// for now, only consider parameter subsets of size at most 2
-				Set<String> importantParams = parameterImportanceEstimator.extractImportantParameters(ci,
-						this.importanceThreshold, 2, false);
+				Set<String> importantParams = parameterImportanceEstimator.extractImportantParameters(ci, false);
 				// System.out.println("#Important params: " + importantParams.size());
 				// for (String parameterIndex : importantParams) {
 				// System.out.println("parameter " + parameterIndex);
@@ -119,7 +116,6 @@ public class isValidParameterRangeRefinementPredicatePruning implements Evaluabl
 				e.printStackTrace();
 			}
 		}
-		
 
 		/* determine refinements for numeric parameters */
 		if (param.isNumeric()) {
