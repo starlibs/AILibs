@@ -30,7 +30,7 @@ public class CacheTest {
 		String valEvaluationTechnique = "";
 		String valSplitTechnique = "";
 		int valSeed = 0;
-		SQLAdapter adapter = new SQLAdapter("isys-db.cs.upb.de", "pgotfml", "automl2018", "pgotfml_hgraf");
+		SQLAdapter adapter = new SQLAdapter("host", "user", "password", "db");
 		PipelineEvaluationCache cache = new PipelineEvaluationCache(datasetId, datasetOrigin, testEvaluationTechnique, testSplitTechnique, testSeed, valSplitTechnique, valEvaluationTechnique, valSeed, adapter);
 		ComponentLoader loader = new ComponentLoader(new File("conf/automl/searchmodels/weka/weka-all-autoweka.json"));
 		MLPipelineComponentInstanceFactory factory = new MLPipelineComponentInstanceFactory(loader.getComponents());
