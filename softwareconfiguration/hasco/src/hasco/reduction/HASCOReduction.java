@@ -294,13 +294,15 @@ public class HASCOReduction<V extends Comparable<V>> implements
 	public CEOCIPSTNPlanningProblem<CEOCOperation, OCIPMethod, CEOCAction> getPlanningProblem(
 			final CEOCIPSTNPlanningDomain domain, final CNFFormula knowledge, final Monom init) {
 		Map<String, EvaluablePredicate> evaluablePredicates = new HashMap<>();
+		System.out.println("pruning: " + this.useParameterPruning);
 		if (this.useParameterPruning) {
-			// Set up everything needed for importance estimation
+			System.out.println("using pruning");
 			evaluablePredicates.put("isValidParameterRangeRefinement",
-					new isValidParameterRangeRefinementPredicatePruning(this.components, this.paramRefinementConfig, parameterImportanceEstimator));
+					new isValidParameterRangeRefinementPredicatePruning(this.components, this.paramRefinementConfig, this.parameterImportanceEstimator));
 			evaluablePredicates.put("refinementCompleted",
-					new isRefinementCompletedPredicateWithImportanceCheck(this.components, this.paramRefinementConfig, parameterImportanceEstimator));
+					new isRefinementCompletedPredicateWithImportanceCheck(this.components, this.paramRefinementConfig, this.parameterImportanceEstimator));
 		} else {
+			System.out.println("not using pruning");
 			evaluablePredicates.put("isValidParameterRangeRefinement",
 					new isValidParameterRangeRefinementPredicate(this.components, this.paramRefinementConfig));
 			evaluablePredicates.put("refinementCompleted",
@@ -356,6 +358,11 @@ public class HASCOReduction<V extends Comparable<V>> implements
 		CostSensitiveHTNPlanningProblem<CEOCOperation, OCIPMethod, CEOCAction, CEOCIPSTNPlanningProblem<CEOCOperation, OCIPMethod, CEOCAction>, V> costSensitiveProblem = new CostSensitiveHTNPlanningProblem<>(
 				planningProblem, planEvaluator);
 		return costSensitiveProblem;
+	}
+	
+	public void setUseParameterPruning(boolean useParameterPruning) {
+		this.useParameterPruning = useParameterPruning;
+		System.out.println("Pruning set: " + this.useParameterPruning);
 	}
 	
 	public void setParameterImportanceEstimator(IParameterImportanceEstimator parameterImportanceEstimator) {

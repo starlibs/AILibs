@@ -155,9 +155,11 @@ public class HASCO<ISearch, N, A, V extends Comparable<V>> implements SoftwareCo
 			/* derive search problem */
 			logger.debug("Deriving search problem");
 			HASCOReduction<V> reduction = new HASCOReduction<V>();
-			if(this.useParameterPruning)
+			if(this.useParameterPruning) {
+				reduction.setUseParameterPruning(useParameterPruning);
 				reduction.setParameterImportanceEstimator(this.parameterImportanceEstimator);
-			planningProblem = new HASCOReduction<V>().transform(refactoredConfigurationProblem);
+			}
+			planningProblem = reduction.transform(refactoredConfigurationProblem);
 			if (logger.isDebugEnabled()) {
 				String operations = planningProblem.getCorePlanningProblem().getDomain().getOperations().stream().map(o -> "\n\t\t" + o.getName() + "(" + o.getParams() + ")\n\t\t\tPre: "
 						+ o.getPrecondition() + "\n\t\t\tAdd List: " + o.getAddLists() + "\n\t\t\tDelete List: " + o.getDeleteLists()).collect(Collectors.joining());
@@ -256,8 +258,6 @@ public class HASCO<ISearch, N, A, V extends Comparable<V>> implements SoftwareCo
 		this.state = AlgorithmState.inactive;
 		AlgorithmFinishedEvent finishedEvent = new AlgorithmFinishedEvent();
 		this.eventBus.post(finishedEvent);
-		// TODO remove this
-		System.out.println("Samples: " + this.performanceKnowledgeBase.getPerformanceSamples()); 
 		return finishedEvent;
 	}
 
