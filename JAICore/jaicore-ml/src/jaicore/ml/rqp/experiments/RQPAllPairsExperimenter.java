@@ -86,7 +86,7 @@ public class RQPAllPairsExperimenter {
 				evalMax.evaluateModel(c_max, dataTest);
 				double loss_min = evalMin.meanAbsoluteError();
 				double loss_max = evalMax.meanAbsoluteError();
-				int wrong_order = RQPExperimentUtil.countMinMaxWrongOrder(c_min, c_max, dataTestMin, dataTest);
+				double wrong_order = RQPExperimentUtil.countMinMaxWrongOrder(c_min, c_max, dataTestMin, dataTest) / ((double) dataTest.size());
 
 				/* report results */
 				results.put("sampletime", endTimeSampling - startTimeSampling);
