@@ -20,8 +20,8 @@ public class AugSpaceAllPairs implements IAugSpaceSamplingFunction {
 		int n_all_pairs = ( n_precise * (n_precise - 1) ) / 2;
 		Instances aug_instances = new Instances("aug_space_train", aug_attrs, n_all_pairs);
 		
-		for (int i = 0; i < n_all_pairs; i++) {
-			for (int j = 0; j < n_all_pairs; j++) {
+		for (int i = 0; i < n_precise; i++) {
+			for (int j = 0; j < n_precise; j++) {
 				ArrayList<Instance> sampledPoints = new ArrayList<Instance>();
 				
 				Instance x1 = input.get(i);
