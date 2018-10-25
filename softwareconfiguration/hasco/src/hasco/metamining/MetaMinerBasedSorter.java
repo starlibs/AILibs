@@ -55,7 +55,7 @@ public class MetaMinerBasedSorter implements Comparator<TFDNode> {
 	}
 
 	private ComponentInstance convertToComponentInstance(TFDNode node) {
-		return Util.getSolutionCompositionFromState(loader.getComponents(), node.getState());
+		return Util.getSolutionCompositionFromState(loader.getComponents(), node.getState(), false);
 	}
 
 	/**

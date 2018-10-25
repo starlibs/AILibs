@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import jaicore.logic.fol.structure.Literal;
+import jaicore.planning.model.ceoc.CEOCAction;
 import jaicore.planning.model.ceoc.CEOCOperation;
 import jaicore.planning.model.task.ceocstn.CEOCSTNPlanningProblem;
 import jaicore.planning.model.task.ceocstn.OCMethod;
@@ -17,7 +18,7 @@ public class StandardProblemFactory {
 	public static RTNPlanningProblem getNestedDichotomyCreationProblem(String rootClusterName, List<String> classes) {
 		
 		/* get problem on the basis of the standard CEOC STN problem */
-		CEOCSTNPlanningProblem problem = jaicore.planning.model.task.ceocstn.StandardProblemFactory.getNestedDichotomyCreationProblem(rootClusterName, classes, true, 1, 1);
+		CEOCSTNPlanningProblem<CEOCOperation, OCMethod, CEOCAction> problem = jaicore.planning.model.task.ceocstn.StandardProblemFactory.getNestedDichotomyCreationProblem(rootClusterName, classes, true, 1, 1);
 		
 		/* now derive RTN methods from the CEOC STN methods */
 		Collection<? extends CEOCOperation> operations = problem.getDomain().getOperations();

@@ -6,19 +6,13 @@ import jaicore.planning.model.ceoc.CEOCOperation;
 import jaicore.planning.model.task.stn.STNPlanningDomain;
 
 @SuppressWarnings("serial")
-public class CEOCSTNPlanningDomain extends STNPlanningDomain {
+public class CEOCSTNPlanningDomain<O extends CEOCOperation, M extends OCMethod> extends STNPlanningDomain<O, M> {
 
-	public CEOCSTNPlanningDomain(Collection<? extends CEOCOperation> operations, Collection<? extends OCMethod> methods) {
+	public CEOCSTNPlanningDomain(Collection<O> operations, Collection<M> methods) {
 		super(operations, methods);
 	}
-
-	@SuppressWarnings("unchecked")
-	public Collection<? extends CEOCOperation> getOperations() {
-		return (Collection<? extends CEOCOperation>)super.getOperations();
-	}
-
-	@SuppressWarnings("unchecked")
-	public Collection<? extends OCMethod> getMethods() {
-		return (Collection<? extends OCMethod>)super.getMethods();
+	
+	public Collection<O> getOperations() {
+		return super.getOperations();
 	}
 }

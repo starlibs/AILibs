@@ -7,15 +7,10 @@ import jaicore.planning.model.ceoc.CEOCOperation;
 import jaicore.planning.model.task.ceocstn.CEOCSTNPlanningDomain;
 
 @SuppressWarnings("serial")
-public class CEOCIPSTNPlanningDomain extends CEOCSTNPlanningDomain implements Serializable {
+public class CEOCIPSTNPlanningDomain<O extends CEOCOperation, M extends OCIPMethod> extends CEOCSTNPlanningDomain<O, M> implements Serializable {
 
 	
-	public CEOCIPSTNPlanningDomain(Collection<? extends CEOCOperation> operations, Collection<? extends OCIPMethod> methods) {
+	public CEOCIPSTNPlanningDomain(Collection<O> operations, Collection<M> methods) {
 		super(operations, methods);
-	}
-
-	@SuppressWarnings("unchecked")
-	public Collection<? extends OCIPMethod> getMethods() {
-		return (Collection<? extends OCIPMethod>)super.getMethods();
 	}
 }

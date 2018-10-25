@@ -1,22 +1,28 @@
 package de.upb.crc901.mlplan.examples.multiclass.weka;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
-import java.sql.SQLException;
+import java.io.IOException;
 import java.sql.Time;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Random;
 
-import org.aeonbits.owner.ConfigCache;
+import org.aeonbits.owner.ConfigFactory;
 
 import com.google.common.eventbus.Subscribe;
 
-import de.upb.crc901.automl.pipeline.basic.MLPipeline;
-import de.upb.crc901.mlplan.multiclass.weka.MLPlanWekaClassifier;
-import hasco.events.HASCOSolutionEvent;
+import de.upb.crc901.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
+import de.upb.crc901.mlplan.multiclass.wekamlplan.MLPlanWekaClassifier;
+import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.WEKAPipelineFactory;
+import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.WekaMLPlanWekaClassifier;
+import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
+import hasco.core.HASCOSolutionCandidate;
 import jaicore.basic.SQLAdapter;
+import jaicore.basic.algorithm.SolutionCandidateFoundEvent;
 import jaicore.concurrent.TimeoutTimer;
 import jaicore.experiments.ExperimentDBEntry;
 import jaicore.experiments.ExperimentRunner;
@@ -24,19 +30,38 @@ import jaicore.experiments.IExperimentIntermediateResultProcessor;
 import jaicore.experiments.IExperimentSetConfig;
 import jaicore.experiments.IExperimentSetEvaluator;
 import jaicore.ml.WekaUtil;
-import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionSolution;
 import weka.classifiers.evaluation.Evaluation;
 import weka.core.Instances;
 
 public class MLPlanWekaExperimenter implements IExperimentSetEvaluator {
 
-	public static final MLPlanWekaExperimenterConfig CONFIG = ConfigCache.getOrCreate(MLPlanWekaExperimenterConfig.class);
+	private static final File configFile = new File("conf/mlplan-weka-eval.properties");
+	private final MLPlanWekaExperimenterConfig experimentConfig;
 	private SQLAdapter adapter;
 	private int experimentID;
+	private WEKAPipelineFactory factory = new WEKAPipelineFactory();
+	
+	public MLPlanWekaExperimenter(File configFile) {
+		super();
+		Properties props = new Properties();
+		try {
+			props.load(new FileInputStream(configFile));
+		} catch (IOException e) {
+			System.err.println("Could not find or access config file " + configFile);
+			System.exit(1);
+		}
+		experimentConfig = ConfigFactory.create(MLPlanWekaExperimenterConfig.class, props);
+		if (experimentConfig.getDatasetFolder() == null) {
+			throw new IllegalArgumentException("No dataset folder (datasetfolder) set in config.");
+		}
+		if (experimentConfig.evaluationsTable() == null) {
+			throw new IllegalArgumentException("No evaluations table (db.evalTable) set in config");
+		}
+	}
 
 	@Override
 	public IExperimentSetConfig getConfig() {
-		return CONFIG;
+		return experimentConfig;
 	}
 
 	@Override
@@ -45,7 +70,14 @@ public class MLPlanWekaExperimenter implements IExperimentSetEvaluator {
 		this.experimentID = experimentEntry.getId();
 		Map<String, String> experimentValues = experimentEntry.getExperiment().getValuesOfKeyFields();
 
-		File datasetFile = new File(CONFIG.getDatasetFolder().getAbsolutePath() + File.separator + experimentValues.get("dataset") + ".arff");
+		if (!experimentValues.containsKey("dataset")) {
+			throw new IllegalArgumentException("\"dataset\" is not configured as a keyword in the experiment config");
+		}
+		if (!experimentValues.containsKey("evaluationTimeout")) {
+			throw new IllegalArgumentException("\"evaluationTimeout\" is not configured as a keyword in the experiment config");
+		}
+
+		File datasetFile = new File(experimentConfig.getDatasetFolder().getAbsolutePath() + File.separator + experimentValues.get("dataset") + ".arff");
 		print("Load dataset file: " + datasetFile.getAbsolutePath());
 
 		Instances data = new Instances(new FileReader(datasetFile));
@@ -53,11 +85,14 @@ public class MLPlanWekaExperimenter implements IExperimentSetEvaluator {
 		print("Split instances");
 		List<Instances> stratifiedSplit = WekaUtil.getStratifiedSplit(data, new Random(), .7);
 
-		MLPlanWekaClassifier mlplan = new MLPlanWekaClassifier();
+		/* initialize ML-Plan with the same config file that has been used to specify the experiments */
+		MLPlanWekaClassifier mlplan = new WekaMLPlanWekaClassifier(new MLPlanWekaBuilder().withAlgorithmConfigFile(configFile));
+		mlplan.setLoggerName("mlplan");
 		mlplan.setTimeout(new Integer(experimentValues.get("timeout")));
-		mlplan.setTimeoutForSingleFEvaluation(new Integer(experimentValues.get("evaluationTimeout")) * 1000);
-		mlplan.setRandom(new Integer(experimentValues.get("seed")));
-		mlplan.setNumberOfCPUs(experimentEntry.getExperiment().getNumCPUs());
+		mlplan.setTimeoutForSingleSolutionEvaluation(new Integer(experimentValues.get("evaluationTimeout")));
+		mlplan.setTimeoutForNodeEvaluation(new Integer(experimentValues.get("evaluationTimeout")));
+		mlplan.setRandomSeed(new Integer(experimentValues.get("seed")));
+		mlplan.setNumCPUs(experimentEntry.getExperiment().getNumCPUs());
 		mlplan.registerListenerForSolutionEvaluations(this);
 
 		print("Build mlplan classifier");
@@ -69,7 +104,7 @@ public class MLPlanWekaExperimenter implements IExperimentSetEvaluator {
 		print("Assess test performance...");
 		eval.evaluateModel(mlplan, stratifiedSplit.get(1), new Object[] {});
 
-		print("Test error was " + eval.errorRate());
+		print("Test error was " + eval.errorRate() + ". Internally estimated error for this model was " + mlplan.getInternalValidationErrorOfSelectedClassifier());
 		Map<String, Object> results = new HashMap<>();
 		results.put("loss", eval.errorRate());
 		results.put("classifier", WekaUtil.getClassifierDescriptor(((MLPipeline) mlplan.getSelectedClassifier()).getBaseClassifier()));
@@ -80,18 +115,19 @@ public class MLPlanWekaExperimenter implements IExperimentSetEvaluator {
 	}
 
 	@Subscribe
-	public void rcvHASCOSolutionEvent(final HASCOSolutionEvent<ForwardDecompositionSolution, MLPipeline, Double> e) {
+	public void rcvHASCOSolutionEvent(final SolutionCandidateFoundEvent<HASCOSolutionCandidate<Double>> e) {
 		if (this.adapter != null) {
-			Map<String, Object> eval = new HashMap<>();
-			eval.put("run_id", this.experimentID);
-			eval.put("preprocessor", e.getSolution().getSolution().getPreprocessors().toString());
-			eval.put("classifier", WekaUtil.getClassifierDescriptor(e.getSolution().getSolution().getBaseClassifier()));
-			eval.put("errorRate", e.getSolution().getScore());
-			eval.put("time_train", e.getSolution().getTimeToComputeScore());
-			eval.put("time_predict", -1);
 			try {
-				this.adapter.insert(CONFIG.evaluationsTable(), eval);
-			} catch (SQLException e1) {
+				MLPipeline pl = this.factory.getComponentInstantiation(e.getSolutionCandidate().getComponentInstance());
+				Map<String, Object> eval = new HashMap<>();
+				eval.put("experiment_id", this.experimentID);
+				eval.put("preprocessor", pl.getPreprocessors().toString());
+				eval.put("classifier", WekaUtil.getClassifierDescriptor(pl.getBaseClassifier()));
+				eval.put("errorRate", e.getSolutionCandidate().getScore());
+				eval.put("time_train", e.getSolutionCandidate().getTimeToEvaluateCandidate());
+
+				this.adapter.insert(experimentConfig.evaluationsTable(), eval);
+			} catch (Exception e1) {
 				e1.printStackTrace();
 			}
 		}
@@ -102,8 +138,10 @@ public class MLPlanWekaExperimenter implements IExperimentSetEvaluator {
 	}
 
 	public static void main(final String[] args) {
+		
+		/* check config */
 		print("Start experiment runner...");
-		ExperimentRunner runner = new ExperimentRunner(new MLPlanWekaExperimenter());
+		ExperimentRunner runner = new ExperimentRunner(new MLPlanWekaExperimenter(configFile));
 		print("Conduct random experiment...");
 		runner.randomlyConductExperiments(1, false);
 		print("Experiment conducted, stop timeout timer.");

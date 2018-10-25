@@ -4,9 +4,9 @@ public class NodeParentSwitchEvent<T> implements GraphEvent {
 	private final T node;
 	private final T oldParent;
 	private final T newParent;
-	public  final String name = "NodeParentSwitchEvent";
-	
-	public NodeParentSwitchEvent(T node,T oldParent, T newParent){
+	public final String name = "NodeParentSwitchEvent";
+
+	public NodeParentSwitchEvent(T node, T oldParent, T newParent) {
 		super();
 		this.node = node;
 		this.oldParent = oldParent;
@@ -20,10 +20,9 @@ public class NodeParentSwitchEvent<T> implements GraphEvent {
 	public T getOldParent() {
 		return oldParent;
 	}
+
 	public T getNewParent() {
 		return newParent;
 	}
-	
-	
 
 }

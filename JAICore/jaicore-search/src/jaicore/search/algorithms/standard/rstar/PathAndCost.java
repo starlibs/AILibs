@@ -1,8 +1,8 @@
 package jaicore.search.algorithms.standard.rstar;
 
-import jaicore.search.structure.core.Node;
-
 import java.util.List;
+
+import jaicore.search.model.travesaltree.Node;
 
 public class PathAndCost<T,V extends Comparable<V>> {
 

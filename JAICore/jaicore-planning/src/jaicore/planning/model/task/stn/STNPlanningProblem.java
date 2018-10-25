@@ -2,18 +2,20 @@ package jaicore.planning.model.task.stn;
 
 import jaicore.logic.fol.structure.CNFFormula;
 import jaicore.logic.fol.structure.Monom;
+import jaicore.planning.model.core.Action;
+import jaicore.planning.model.core.Operation;
 import jaicore.planning.model.task.IHTNPlanningProblem;
 
 @SuppressWarnings("serial")
-public class STNPlanningProblem implements IHTNPlanningProblem {
+public class STNPlanningProblem<O extends Operation, M extends Method, A extends Action> implements IHTNPlanningProblem<O, M, A> {
 
-	private final STNPlanningDomain domain;
+	private final STNPlanningDomain<O, M> domain;
 	private final CNFFormula knowledge;
 	private final Monom init;
 	private final TaskNetwork network;
 	private final boolean sortNetworkBasedOnNumberPrefixes = true;
 
-	public STNPlanningProblem(STNPlanningDomain domain, CNFFormula knowledge, Monom init, TaskNetwork network) {
+	public STNPlanningProblem(STNPlanningDomain<O,M> domain, CNFFormula knowledge, Monom init, TaskNetwork network) {
 		super();
 		this.domain = domain;
 		this.knowledge = knowledge;
@@ -21,7 +23,7 @@ public class STNPlanningProblem implements IHTNPlanningProblem {
 		this.network = network;
 	}
 
-	public STNPlanningDomain getDomain() {
+	public STNPlanningDomain<O,M> getDomain() {
 		return domain;
 	}
 

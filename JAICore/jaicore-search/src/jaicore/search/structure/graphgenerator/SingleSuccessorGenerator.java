@@ -1,6 +1,6 @@
 package jaicore.search.structure.graphgenerator;
 
-import jaicore.search.structure.core.NodeExpansionDescription;
+import jaicore.search.model.travesaltree.NodeExpansionDescription;
 
 public interface SingleSuccessorGenerator<T,A> extends SuccessorGenerator<T, A> {
 
@@ -10,5 +10,5 @@ public interface SingleSuccessorGenerator<T,A> extends SuccessorGenerator<T, A> 
 	 * @param i
 	 * @return
 	 */
-	public NodeExpansionDescription<T,A> generateSuccessor(T node, int i);
+	public NodeExpansionDescription<T,A> generateSuccessor(T node, int i) throws InterruptedException;
 }

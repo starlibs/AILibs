@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +59,7 @@ public class UCBPolicy<T,A> implements IPathUpdatablePolicy<T,A,Double> {
 		
 		/* otherwise, play best action */
 		double best = maximize ? 0 : Double.MAX_VALUE;
+		logger.debug("All actions have been tried. Label is: {}", labels.get(node));
 		int n = labels.get(node).visits;
 		A choice = null;
 		for (A action : possibleActions) {

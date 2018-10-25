@@ -1,13 +1,9 @@
 package jaicore.search.algorithms.standard.rstar;
 
-import jaicore.search.structure.core.GraphGenerator;
-import jaicore.search.structure.core.Node;
-import jaicore.search.structure.graphgenerator.GoalTester;
-import jaicore.search.structure.graphgenerator.NodeGoalTester;
-import jaicore.search.structure.graphgenerator.RootGenerator;
-
 import java.util.Collection;
-import java.util.List;
+
+import jaicore.search.structure.graphgenerator.GoalTester;
+import jaicore.search.structure.graphgenerator.RootGenerator;
 
 /**
  * Graph generator for the gamma graph of R*.
@@ -36,7 +32,7 @@ public interface GammaGraphGenerator<T, D> {
      * @param delta Maximal distance of the successors to n
      * @return Generated successors.
      */
-    public Collection<GammaNode<T,RStarK>> generateRandomSuccessors(GammaNode<T,RStarK> n, int K, D delta) throws IllegalArgumentException;
+    public Collection<GammaNode<T,RStarK>> generateRandomSuccessors(GammaNode<T,RStarK> n, int K, D delta) throws IllegalArgumentException, InterruptedException;
 
     /**
      * Try to compute local path.
@@ -46,7 +42,7 @@ public interface GammaGraphGenerator<T, D> {
      * @param to
      * @return
      */
-    public PathAndCost computePath(GammaNode<T,RStarK> from, GammaNode<T,RStarK> to);
+    public PathAndCost computePath(GammaNode<T,RStarK> from, GammaNode<T,RStarK> to) throws InterruptedException;
 
     /**
      * Heurisitc estimation of the cost of path from n1 to n2.

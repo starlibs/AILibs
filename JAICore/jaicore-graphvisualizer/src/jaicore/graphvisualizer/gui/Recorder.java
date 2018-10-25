@@ -15,12 +15,11 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
-import jaicore.graph.IObservableGraphAlgorithm;
-import jaicore.graphvisualizer.IGraphDataSupplier;
-import jaicore.graphvisualizer.INodeDataSupplier;
+import jaicore.graph.IGraphAlgorithm;
 import jaicore.graphvisualizer.events.controlEvents.ControlEvent;
 import jaicore.graphvisualizer.events.controlEvents.FileEvent;
-import jaicore.graphvisualizer.events.controlEvents.IsLiveEvent;
+import jaicore.graphvisualizer.events.controlEvents.NodePushed;
+import jaicore.graphvisualizer.events.controlEvents.ResetEvent;
 import jaicore.graphvisualizer.events.controlEvents.StepEvent;
 import jaicore.graphvisualizer.events.graphEvents.GraphEvent;
 import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
@@ -29,303 +28,347 @@ import jaicore.graphvisualizer.events.graphEvents.NodeRemovedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
 import jaicore.graphvisualizer.events.misc.AddSupplierEvent;
 import jaicore.graphvisualizer.events.misc.InfoEvent;
-import jaicore.graphvisualizer.events.misc.RequestSuppliersEvent;
 import jaicore.graphvisualizer.gui.dataSupplier.ISupplier;
 import jaicore.graphvisualizer.gui.dataSupplier.ReconstructionDataSupplier;
 
-
 /**
- * A recorder class, which is used to record events created by a search-algorithm. 
- * It is possible to store these events in a file or load them out of a file.
- * Furthermore these class listens to controllEvents and acts accordingly.
- * 
- * @author jkoepe
+ * A recorder class, which is used to record GraphEvents. These graphevents are
+ * usually created by a search-algorithm. If is possible to store the recorded
+ * events in a file and later load them from one. The recorder is controlled by
+ * controll-events.
  *
- * @param <T>
+ * @author jkoepe
  */
-public class Recorder<T> implements IObservableGraphAlgorithm {
+public class Recorder<V,E> {
 
-	//List of datasuppliers
-	private List<ISupplier> suppliers;
+//    Algorithm to listen to
+	private IGraphAlgorithm<?,?,V,E> algorithm;
 
-	//Algorithm
-	private IObservableGraphAlgorithm algorithm;
-
-	//List for storing the events and the receiving times
+//    List for storing the events
 	private List<Object> receivedEvents;
 	private List<Long> receivingTimes;
 	private long firstEventTime;
 
-
-	//Index to know where in the replay the recorder is
+//    Index to know where in the replay the recorder is
 	private int index;
 
-	private boolean live;
-
-	//EventBuses
+//    EventBuses
 	private EventBus replayBus;
 	private EventBus infoBus;
 
-	//NodeMap to store types of Nodes
+//    Nodemap to store types of nodes
 	private Map<Object, List> nodeMap;
 
+//    List with every datasupplier
+	List<ISupplier> supplier;
 
 	/**
-	 * A constructor for an empty recorder.
+	 * A constructor for an empty recorder. The empty recorder does not listen to an
+	 * algorithm but it can load a replay.
 	 */
-	public Recorder(){
+	public Recorder() {
 		this(null);
 	}
 
 	/**
 	 * Creates a recorder which listens to an algorithm.
-	 * @param algorithm
-	 * 		The algorith to which the recorder should listen.
+	 * 
+	 * @param algorithm The algorithm from which the reocrder receives the events.
 	 */
-	public Recorder(IObservableGraphAlgorithm algorithm){
-		if(algorithm != null)
+	public Recorder(IGraphAlgorithm<?, ?, V, E> algorithm) {
+		if (algorithm != null)
 			algorithm.registerListener(this);
 
 		this.algorithm = algorithm;
 
+		// initializing variables
 
 		this.index = 0;
-		this.suppliers = new ArrayList<>();
 
-		this.receivedEvents = new ArrayList();
-		this.receivingTimes = new ArrayList();
+		this.receivedEvents = new ArrayList<>();
+		this.receivingTimes = new ArrayList<>();
 		this.replayBus = new EventBus();
 		this.infoBus = new EventBus();
 
 		this.nodeMap = new HashMap<>();
-		this.live = false;
-
+		supplier = new ArrayList<>();
 	}
 
-	@Override
-	public void registerListener(Object listener) {
+	/**
+	 * Register a listener to the replay-Eventbus to receive the graphevents, that
+	 * are outgoing of the recorder.
+	 * 
+	 * @param listener The listener, which is going to receive the graph-Events.
+	 */
+	public void registerReplayListener(Object listener) {
 		this.replayBus.register(listener);
 	}
 
 	/**
-	 * Registers a listener, which wants to get the infoevents which are posted on an different eventbus then the graphevents.
-	 * @param listener
+	 * Register a listener to the info-Eventbus to receive general information of
+	 * the state of the replay and recorder. Such information are for example the
+	 * number of received events.
+	 * 
+	 * @param listener The listener, which is going to receive the Info-Events.
+	 *
 	 */
-	public void registerInfoListener(Object listener){
+	public void registerInfoListener(Object listener) {
 		this.infoBus.register(listener);
-		if(!receivedEvents.isEmpty())
-			this.infoBus.post(new InfoEvent(receivedEvents.size()-1, receivingTimes.get(receivingTimes.size()-1), this.suppliers.size() ));
 	}
 
+	/**
+	 * This method is used to receive GraphEvents
+	 * 
+	 * @param event
+	 */
 	@Subscribe
-	public void receiveVisuEvent(GraphEvent event){
-		//receive event and save the time
+	public void receiveGraphEvent(GraphEvent event) {
+
+		// receive event and save the time
 		this.receivedEvents.add(event);
 		long receiveTime = System.currentTimeMillis();
 
-		//check if it is the first event
-		if(firstEventTime == 0)
+		// check if it is the first event
+		if (firstEventTime == 0)
 			firstEventTime = receiveTime;
 
-		//compute the absolute time of the event in relation to the first event
+		// compute the absolute time of the event in relation to the first event
 		long eventTime = receiveTime - firstEventTime;
 		receivingTimes.add(eventTime);
+		this.infoBus.post(new InfoEvent(receivedEvents.size(), eventTime, 0));
 
-		//post a new infoevent to update the listener.
-		this.infoBus.post(new InfoEvent(receivedEvents.size(), eventTime , this.suppliers.size()));
-
-		//if the livemodus is enabled post every event and set the index on the maxindex
-		if(live){
-			this.replayBus.post(event);
-			this.index = receivedEvents.size()-1;
-		}
 	}
-
-	@Subscribe
-	public void receiveControlEvent(ControlEvent event){
-		String eventName = event.getClass().getSimpleName();
-
-		switch(eventName){
-//		 StepEvents are only processed if the modus is not in live mode, 
-//		since in live mode the events are posts directly by receiving the events
-			case "StepEvent":
-				if(!live) {
-					StepEvent stepEvent = (StepEvent) event;
-					if (stepEvent.forward())
-						forward(stepEvent.getSteps());
-					else
-						backward(stepEvent.getSteps());
-				}
-				break;
-
-//				receive an fileEvent and determine if it is for loading or storing
-			case "FileEvent":
-				FileEvent fileEvent = (FileEvent) event;
-				if(fileEvent.isLoad())
-					load(fileEvent.getFile());
-				else
-					save(fileEvent.getFile());
-				break;
-
-//				receives an resetevent and resets the recorder
-			case "ResetEvent":
-				reset();
-				break;
-
-//				receive an isliveevent and set the live state accordingly
-			case "IsLiveEvent":
-				IsLiveEvent islive = (IsLiveEvent)event;
-				this.live= islive.isLive();
-				break;
-			default:
-//				System.out.println(eventName);
-				break;
-		}
-	}
-
 
 	/**
-	 * Go forward the number of steps which are given as a paramter
-	 * @param steps
-	 * 		The steps to go forward.
+	 * Receive a control event and make the appropiate action
+	 * 
+	 * @param event
 	 */
-	private void forward(int steps){
-		//run as long there are steps
-		while(index < receivedEvents.size() && steps != 0) {
-			this.replayBus.post(receivedEvents.get(index));
-			Object event = receivedEvents.get(index);
+	@Subscribe
+	public void receiveControlEvent(ControlEvent event) {
+		if (event instanceof StepEvent) {
+			if (((StepEvent) event).forward())
+				forward(((StepEvent) event).getSteps());
+			else
+				backward(((StepEvent) event).getSteps());
+		}
+		if (event instanceof ResetEvent)
+			reset();
+		if (event instanceof FileEvent) {
+			if (((FileEvent) event).isLoad())
+				this.load(((FileEvent) event).getFile());
+			else
+				this.save(((FileEvent) event).getFile());
+		}
+	}
 
-			List<String> types;
-			//switch the event corresponding to the current events and post them to the replaybus
-			switch(event.getClass().getSimpleName()){
+	/**
+	 * Goes the number of steps forward in the graph. Usually the index + steps do
+	 * not get higher the number of received Events. The exeption is when there is
+	 * only one step to do and the index is equal to the number of received Events.
+	 * In this case the algorithm is triggered.
+	 *
+	 * @param steps The number of steps to do.
+	 */
+	private void forward(int steps) {
+		if (this.index == this.receivedEvents.size())
+			if (this.algorithm.hasNext())
+				this.algorithm.next();
+		while (steps != 0) {
+			if (this.index < this.receivedEvents.size()) {
+				Object event = this.receivedEvents.get(index);
+				this.replayBus.post(event);
+
+				this.addType(event);
+				index++;
+				if (this.index == this.receivedEvents.size())
+					break;
+			}
+
+			steps--;
+		}
+	}
+
+	/**
+	 * Go backward the number of steps which are given as a paramter
+	 * 
+	 * @param steps The steps to go forward.
+	 */
+	private void backward(int steps) {
+		if (index == 0)
+			return;
+		while (index > 0 && steps != 0) {
+			index--;
+			this.replayBus.post(counterEvent(receivedEvents.get(index)));
+			steps--;
+		}
+	}
+
+	/**
+	 * Creates a counterevent to the event which was given. Currently the events
+	 * which can be countered are most of the graphevents
+	 * 
+	 * @param event The event to which a counter event should be created
+	 * @return The counter event
+	 */
+	public Object counterEvent(Object event) {
+		Object counter = null;
+
+		switch (event.getClass().getSimpleName()) {
+//			counter for a GraphInitializedEvent
+		case "GraphInitializedEvent":
+			// just for completion
+			counter = null;
+			break;
+
+//				counter for a nodetypeswitchevent
+		case "NodeTypeSwitchEvent":
+			NodeTypeSwitchEvent nodeTypeSwitchEvent = (NodeTypeSwitchEvent) event;
+			List<String> typeList = nodeMap.get(nodeTypeSwitchEvent.getNode());
+			typeList.remove(typeList.size() - 1);
+			counter = new NodeTypeSwitchEvent(nodeTypeSwitchEvent.getNode(), typeList.get(typeList.size() - 1));
+			break;
+
+//				counter for a nodereached event
+		case "NodeReachedEvent":
+			NodeReachedEvent nodeReachedEvent = (NodeReachedEvent) event;
+			counter = new NodeRemovedEvent(nodeReachedEvent.getNode());
+			break;
+
+		default:
+			System.out.println("not an allowed event");
+			break;
+		}
+		return counter;
+	}
+
+	/**
+	 * Adds the type of a node to the typelist of this node
+	 * 
+	 * @param event The event which contains the node
+	 */
+	private void addType(Object event) {
+		List<String> types;
+//            switch the event corresponding to the current event to get the right type of the node
+		switch (event.getClass().getSimpleName()) {
+		case "GraphInitializedEvent":
+			GraphInitializedEvent initializedEvent = (GraphInitializedEvent) event;
+			types = new ArrayList();
+			types.add("root");
+			this.nodeMap.put(initializedEvent.getRoot(), types);
+			break;
+
+		case "NodeTypeSwitchEvent":
+			NodeTypeSwitchEvent nodeTypeSwitchEvent = (NodeTypeSwitchEvent) event;
+			this.nodeMap.get(nodeTypeSwitchEvent.getNode()).add(nodeTypeSwitchEvent.getType());
+			break;
+
+		case "NodeReachedEvent":
+			NodeReachedEvent nodeReachedEvent = (NodeReachedEvent) event;
+			types = new ArrayList<>();
+			types.add(nodeReachedEvent.getType());
+			this.nodeMap.put(nodeReachedEvent.getNode(), types);
+			break;
+
+		default:
+			System.out.println("not an allowed event");
+			break;
+		}
+	}
+
+	/**
+	 * Resets the recorder. To do this only the current nodemap and the index a
+	 * clear or set to 0.
+	 */
+	private void reset() {
+		this.index = 0;
+		nodeMap.clear();
+	}
+
+	/**
+	 * Adds a new Datasupplier to the recorder. The datasupplier it self is
+	 * registered at the replaybus to get graphevents from the recorder.
+	 * 
+	 * @param iSupplier
+	 */
+	public void addDataSupplier(ISupplier iSupplier) {
+		this.registerReplayListener(iSupplier);
+		this.supplier.add(iSupplier);
+	}
+
+	/**
+	 * Posts every known DataSupplier as an addSupplierevent on the InfoBus
+	 */
+	public void getSupplier() {
+		for (ISupplier s : supplier)
+			this.infoBus.post(new AddSupplierEvent(s));
+	}
+
+	/**
+	 * Receive a nodePushedEvent and expand the node, does not matter where the
+	 * search currently is
+	 */
+	@Subscribe
+	public void receiveNodePushedEvent(NodePushed event) {
+		// TODO node pushed
+		if (this.index == this.receivedEvents.size()) {
+			Object node = event.getNode();
+//            if (this.algorithm instanceof IControllableGraphAlgorithm) {
+//                try {
+//                    ((IControllableGraphAlgorithm) this.algorithm).step(node);
+//
+//                } catch (Exception e){
+//                    System.out.println("test2");
+//                }
+//            }
+		}
+	}
+
+	/**
+	 * Saves the Events in a file
+	 *
+	 * @param file The file to which the events are stored.
+	 */
+	private void save(File file) {
+		ObjectMapper mapper = new ObjectMapper();
+
+		mapper.enable(SerializationFeature.INDENT_OUTPUT);
+		try {
+			List mapperList = new ArrayList();
+
+			List<LinkedHashMap<Long, Object>> saveList = new ArrayList();
+
+			for (int i = 0; i < receivedEvents.size(); i++) {
+				Object event = receivedEvents.get(i);
+				LinkedHashMap<Long, Object> timeToEvent = new LinkedHashMap();
+				int code = 0;
+
+				// Maps times to the hashcodes of the events
+				switch (event.getClass().getSimpleName()) {
 				case "GraphInitializedEvent":
-					GraphInitializedEvent initializedEvent = (GraphInitializedEvent) event;
-					types = new ArrayList();
-					types.add("root");
-					nodeMap.put(initializedEvent.getRoot(), types);
+					GraphInitializedEvent graphInitializedEvent = (GraphInitializedEvent) event;
+					code = graphInitializedEvent.getRoot().hashCode();
+					timeToEvent.put(receivingTimes.get(i), new GraphInitializedEvent(code));
 					break;
 
 				case "NodeTypeSwitchEvent":
 					NodeTypeSwitchEvent nodeTypeSwitchEvent = (NodeTypeSwitchEvent) event;
-					nodeMap.get(nodeTypeSwitchEvent.getNode()).add(nodeTypeSwitchEvent.getType());
+					code = nodeTypeSwitchEvent.getNode().hashCode();
+
+					timeToEvent.put(receivingTimes.get(i),
+							new NodeTypeSwitchEvent(code, nodeTypeSwitchEvent.getType()));
 					break;
 
 				case "NodeReachedEvent":
 					NodeReachedEvent nodeReachedEvent = (NodeReachedEvent) event;
-					types = new ArrayList<>();
-					types.add(nodeReachedEvent.getType());
-					nodeMap.put(nodeReachedEvent.getNode(),types);
+					code = nodeReachedEvent.getNode().hashCode();
+					timeToEvent.put(receivingTimes.get(i), new NodeReachedEvent(nodeReachedEvent.getParent().hashCode(),
+							code, nodeReachedEvent.getType()));
 					break;
 
 				default:
 					System.out.println("not an allowed event");
 					break;
-			}
-			steps --;
-			index ++;
-		}
-
-	}
-
-	/**
-	 * Go backward the number of steps which are given as a paramter
-	 * @param steps
-	 * 		The steps to go forward.
-	 */
-	private void backward(int steps){
-		if(index == 0)
-			return;
-		while(index > 0 && steps != 0) {
-			index --;
-			this.replayBus.post(counterEvent(receivedEvents.get(index)));
-			steps --;
-
-		}
-	}
-
-	/**
-	 * Creates a counterevent to the event which was given.
-	 * Currently the events which can be countered are most of the graphevents 
-	 * @param event
-	 * 		The event to which a counter event should be created
-	 * @return
-	 * 		The counter event
-	 */
-	public Object counterEvent(Object event) {
-		Object counter = null;
-
-
-		switch (event.getClass().getSimpleName()) {
-//			counter for a GraphInitializedEvent
-			case "GraphInitializedEvent":
-				//just for completion
-				counter = null;
-				break;
-
-//				counter for a nodetypeswitchevent
-			case "NodeTypeSwitchEvent":
-				NodeTypeSwitchEvent nodeTypeSwitchEvent = (NodeTypeSwitchEvent) event;
-				List<String> typeList = nodeMap.get(nodeTypeSwitchEvent.getNode());
-				typeList.remove(typeList.size() - 1);
-				counter = new NodeTypeSwitchEvent(nodeTypeSwitchEvent.getNode(), typeList.get(typeList.size() - 1));
-				break;
-
-//				counter for a nodereached event
-			case "NodeReachedEvent":
-				NodeReachedEvent nodeReachedEvent = (NodeReachedEvent) event;
-				counter = new NodeRemovedEvent(nodeReachedEvent.getNode());
-				break;
-
-			default:
-				System.out.println("not an allowed event");
-				break;
-		}
-		return counter;
-	}
-
-	/**Saves the Events in a file
-	 *
-	 * @param file
-	 * 		The file to which the events are stored.
-	 */
-	private void save(File file){
-		ObjectMapper mapper = new ObjectMapper();
-
-		mapper.enable(SerializationFeature.INDENT_OUTPUT);
-		try{
-			List mapperList = new ArrayList();
-
-			List<LinkedHashMap<Long,Object>> saveList = new ArrayList();
-
-			for(int i = 0; i < receivedEvents.size(); i++){
-				Object event = receivedEvents.get(i);
-				LinkedHashMap<Long, Object> timeToEvent = new LinkedHashMap();
-				int code = 0;
-
-				//Maps times to the hashcodes of the events
-				switch (event.getClass().getSimpleName()){
-					case "GraphInitializedEvent":
-						GraphInitializedEvent graphInitializedEvent = (GraphInitializedEvent) event;
-						code = graphInitializedEvent.getRoot().hashCode();
-						timeToEvent.put(receivingTimes.get(i), new GraphInitializedEvent(code));
-						break;
-
-					case "NodeTypeSwitchEvent":
-						NodeTypeSwitchEvent nodeTypeSwitchEvent = (NodeTypeSwitchEvent) event;
-						code = nodeTypeSwitchEvent.getNode().hashCode();
-
-						timeToEvent.put(receivingTimes.get(i), new NodeTypeSwitchEvent(code, nodeTypeSwitchEvent.getType()));
-						break;
-
-					case "NodeReachedEvent":
-						NodeReachedEvent nodeReachedEvent = (NodeReachedEvent) event;
-						code = nodeReachedEvent.getNode().hashCode();
-						timeToEvent.put(receivingTimes.get(i), new NodeReachedEvent(nodeReachedEvent.getParent().hashCode(),code, nodeReachedEvent.getType()));
-						break;
-
-					default:
-						System.out.println("not an allowed event");
-						break;
 				}
 				saveList.add(timeToEvent);
 			}
@@ -333,84 +376,13 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 			mapperList.add(saveList);
 			HashSet<JsonNode> supplierHashSet = new HashSet<>();
 
-			suppliers.stream().forEach(supplier->{
+			supplier.stream().forEach(supplier -> {
 				supplierHashSet.add(supplier.getSerialization());
 			});
 
 			mapperList.add(supplierHashSet);
 
 			mapper.writeValue(file, mapperList);
-
-
-
-		} catch (IOException e){
-			e.printStackTrace();
-		}
-
-
-	}
-
-	/**
-	 * Load events from a file
-	 * @param file
-	 */
-	private void load(File file) {
-
-		//clear existing events
-		this.receivedEvents.clear();
-		this.receivingTimes.clear();
-
-		this.reset();
-
-		ObjectMapper mapper = new ObjectMapper();
-
-		try {
-			List mapperList = mapper.readValue(file, mapper.getTypeFactory().constructCollectionType(List.class, Object.class));
-			ArrayList eventList = (ArrayList) mapperList.get(0);
-//			create the events out of the stored ones. In the newly loaded events the hashcode of the nodes of the old ones are the whole node
-			eventList.stream().forEach(n->{
-				LinkedHashMap map = (LinkedHashMap) n;
-				map.keySet().stream().forEach(time->receivingTimes.add(Long.parseLong((String) time)));
-				map.values().stream().forEach(v->{
-					LinkedHashMap eventMap = (LinkedHashMap) v;
-
-					int node;
-					Object event;
-					switch(eventMap.get("name").toString()){
-						case "GraphInitializedEvent":
-							int hashCode= (int) eventMap.get("root");
-							event = new GraphInitializedEvent(Integer.parseInt(String.valueOf(eventMap.get("root"))));
-							System.out.println(hashCode);
-							break;
-
-						case "NodeTypeSwitchEvent":
-							node = Integer.parseInt(String.valueOf(eventMap.get("node")));
-							event = new NodeTypeSwitchEvent(node, eventMap.get("type").toString());
-							break;
-
-						case "NodeReachedEvent":
-							int parent = Integer.parseInt(String.valueOf(eventMap.get("parent")));
-							node = Integer.parseInt(String.valueOf(eventMap.get("node")));
-							event = new NodeReachedEvent(parent, node, eventMap.get("type").toString());
-							break;
-
-						default:
-							event = null;
-
-
-					}
-					if(event != null)
-						this.receiveVisuEvent((GraphEvent) event);
-				});
-			});
-			// create the supplier if possible
-			mapperList.stream().filter(o-> mapperList.indexOf(o)!=0).forEach(o->{
-				ArrayList m = (ArrayList) o;
-				LinkedHashMap map = (LinkedHashMap) m.get(0);
-				ReconstructionDataSupplier supplier = new ReconstructionDataSupplier(map);
-				this.addDataSupplier(supplier);
-			});
-
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -419,41 +391,70 @@ public class Recorder<T> implements IObservableGraphAlgorithm {
 	}
 
 	/**
-	 * Resets the recorder.
-	 * To do this only the current nodemap and the index a clear or set to 0.
+	 * Load events from a file
+	 * 
+	 * @param file
 	 */
-	private void reset() {
-		this.index = 0;
-		nodeMap.clear();
-	}
+	private void load(File file) {
 
-	/**
-	 * Adds a datasupplier to the recorder
-	 * @param supplier
-	 */
-	public void addDataSupplier(ISupplier supplier){
-		this.suppliers.add(supplier);
-		if(algorithm != null)
-			algorithm.registerListener(supplier);
-//		this.infoBus.post(new AddSupplierEvent(supplier));
-	}
+		// clear existing events
+		this.receivedEvents.clear();
+		this.receivingTimes.clear();
 
-	/**
-	 * Receive a requestSupplierEvent and  send out the current suppliers
-	 * @param event
-	 */
-	@Subscribe
-	public void receiveRequestSupplierEvent(RequestSuppliersEvent event){
-		for (ISupplier supplier : this.suppliers){
-			this.infoBus.post(new AddSupplierEvent(supplier));
+		this.reset();
+
+		ObjectMapper mapper = new ObjectMapper();
+
+		try {
+			List mapperList = mapper.readValue(file,
+					mapper.getTypeFactory().constructCollectionType(List.class, Object.class));
+			ArrayList eventList = (ArrayList) mapperList.get(0);
+//			create the events out of the stored ones. In the newly loaded events the hashcode of the nodes of the old ones are the whole node
+			eventList.stream().forEach(n -> {
+				LinkedHashMap map = (LinkedHashMap) n;
+				map.keySet().stream().forEach(time -> receivingTimes.add(Long.parseLong((String) time)));
+				map.values().stream().forEach(v -> {
+					LinkedHashMap eventMap = (LinkedHashMap) v;
+
+					int node;
+					Object event;
+					switch (eventMap.get("name").toString()) {
+					case "GraphInitializedEvent":
+						int hashCode = (int) eventMap.get("root");
+						event = new GraphInitializedEvent(Integer.parseInt(String.valueOf(eventMap.get("root"))));
+						System.out.println(hashCode);
+						break;
+
+					case "NodeTypeSwitchEvent":
+						node = Integer.parseInt(String.valueOf(eventMap.get("node")));
+						event = new NodeTypeSwitchEvent(node, eventMap.get("type").toString());
+						break;
+
+					case "NodeReachedEvent":
+						int parent = Integer.parseInt(String.valueOf(eventMap.get("parent")));
+						node = Integer.parseInt(String.valueOf(eventMap.get("node")));
+						event = new NodeReachedEvent(parent, node, eventMap.get("type").toString());
+						break;
+
+					default:
+						event = null;
+
+					}
+					if (event != null)
+						this.receiveGraphEvent((GraphEvent) event);
+				});
+			});
+//             create the supplier if possible
+			mapperList.stream().filter(o -> mapperList.indexOf(o) != 0).forEach(o -> {
+				ArrayList m = (ArrayList) o;
+				LinkedHashMap map = (LinkedHashMap) m.get(0);
+				ReconstructionDataSupplier supplier = new ReconstructionDataSupplier(map);
+				this.addDataSupplier(supplier);
+			});
+
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-	}
 
-	/**
-	 * Returns the algorithm
-	 * @return
-	 */
-	public IObservableGraphAlgorithm getAlgorithm() {
-		return algorithm;
 	}
 }

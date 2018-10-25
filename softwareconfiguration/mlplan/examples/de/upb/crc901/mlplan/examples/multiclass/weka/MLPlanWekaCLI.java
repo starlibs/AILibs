@@ -1,31 +1,38 @@
 package de.upb.crc901.mlplan.examples.multiclass.weka;
 
 import java.io.BufferedWriter;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.Time;
 import java.util.List;
+import java.util.Properties;
 import java.util.Random;
 
-import org.aeonbits.owner.ConfigCache;
+import org.aeonbits.owner.ConfigFactory;
 
-import de.upb.crc901.mlplan.multiclass.weka.MLPlanWekaClassifier;
+import de.upb.crc901.mlplan.multiclass.wekamlplan.MLPlanWekaClassifier;
+import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.WekaMLPlanWekaClassifier;
 import jaicore.ml.WekaUtil;
 import weka.classifiers.Evaluation;
 import weka.core.Instances;
 
 public class MLPlanWekaCLI {
 
-	private static final MLPlanWekaCLIConfig CLI_CONFIG = ConfigCache.getOrCreate(MLPlanWekaCLIConfig.class);
-
 	public static void main(final String[] args) throws FileNotFoundException, IOException {
+		
 		if (args.length > 0 && args[0].equals("-h")) {
 			System.out.println("Parameters to set: ");
 			System.out.println("<dataset_file> <global_timeout> <evaluation_timeout>");
 			System.exit(0);
 		}
+		
+		Properties properties = new Properties();
+		properties.load(new FileInputStream("conf/mlplan/mlplanwekacli.properties"));
+		final MLPlanWekaCLIConfig CLI_CONFIG = ConfigFactory.create(MLPlanWekaCLIConfig.class, properties);
+		System.out.println("Config " + CLI_CONFIG + " initialized.");
 
 		/* set dataset file if given */
 		if (args.length > 0) {
@@ -42,19 +49,26 @@ public class MLPlanWekaCLI {
 
 		/* set ports for pipeline plans */
 		System.out.println(getTime() + " Load dataset " + CLI_CONFIG.datasetFile() + "...");
-		Instances data = new Instances(new FileReader(CLI_CONFIG.datasetFile()));
+		Instances data = null;
+		try {
+			data = new Instances(new FileReader(CLI_CONFIG.datasetFile()));
+		} catch (IOException e) {
+			System.err.println("Could not load dataset at " + CLI_CONFIG.datasetFile());
+			System.exit(1);
+		}
 		data.setClassIndex(data.numAttributes() - 1);
 		System.out.println(getTime() + " Dataset loaded.");
 
 		/* extract all relevant information about the experiment */
 		System.out.println(getTime() + " Initialize ML-Plan...");
-		MLPlanWekaClassifier mlPlan = new MLPlanWekaClassifier();
+		MLPlanWekaClassifier mlPlan = new WekaMLPlanWekaClassifier();
 		mlPlan.setTimeout(CLI_CONFIG.timeout());
-		mlPlan.setTimeoutForSingleFEvaluation(CLI_CONFIG.evalTimeout() * 1000);
-		mlPlan.enableVisualization(CLI_CONFIG.showGraphVisualization());
+		mlPlan.setTimeoutForSingleSolutionEvaluation(CLI_CONFIG.evalTimeout() * 1000);
+		if (CLI_CONFIG.showGraphVisualization())
+			mlPlan.activateVisualization();
 
 		System.out.println(getTime() + " Split the data into train and test set...");
-		List<Instances> testSplit = WekaUtil.getStratifiedSplit(data, new Random(mlPlan.getRandom()), 0.7);
+		List<Instances> testSplit = WekaUtil.getStratifiedSplit(data, new Random(mlPlan.getConfig().randomSeed()), 0.7);
 		System.out.println("Data split created.");
 
 		try {

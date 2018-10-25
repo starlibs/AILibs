@@ -1,6 +1,6 @@
 package jaicore.graphvisualizer.events.graphEvents;
 
-public class NodeTypeSwitchEvent<T> implements GraphEvent{
+public class NodeTypeSwitchEvent<T> implements GraphEvent {
 
 	private final T node;
 	private final String type;

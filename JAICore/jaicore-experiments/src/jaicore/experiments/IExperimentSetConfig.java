@@ -34,13 +34,13 @@ public interface IExperimentSetConfig extends Mutable, Reloadable {
 	public static final String IGNORE_MEMORY = "ignore.memory";
 
 	@Key(MEM_MAX)
-	public int getMemoryLimitinMB();
+	public Integer getMemoryLimitinMB();
 
 	@Key(MEM_OPP)
-	public int getAssumedMemoryOverheadPerProcess();
+	public Integer getAssumedMemoryOverheadPerProcess();
 
 	@Key(CPU_MAX)
-	public int getNumberOfCPUs();
+	public Integer getNumberOfCPUs();
 
 	@Key(DB_HOST)
 	public String getDBHost();
@@ -58,7 +58,7 @@ public interface IExperimentSetConfig extends Mutable, Reloadable {
 	public String getDBTableName();
 
 	@Key(DB_SSL)
-	public boolean getDBSSL();
+	public Boolean getDBSSL();
 
 	@Key(KEYFIELDS)
 	public List<String> getKeyFields();

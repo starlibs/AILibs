@@ -1,23 +1,25 @@
 package jaicore.graphvisualizer.events.controlEvents;
 
 /**
- * A ControlEvent which is triggerd by pushing a node. 
+ * A ControlEvent which is triggerd by pushing a node.
+ * 
  * @author jkoepe
  *
  */
-public class NodePushed implements ControlEvent{
+public class NodePushed<N> implements ControlEvent {
 
-    Object node;
-    /**
-     * A new NodePushed event
-     * @param node
-     * 		The pushed node.
-     */
-    public NodePushed(Object node){
-        this.node = node;
-    }
+	N node;
 
-    public Object getNode() {
-        return node;
-    }
+	/**
+	 * A new NodePushed event
+	 * 
+	 * @param node The pushed node.
+	 */
+	public NodePushed(N node) {
+		this.node = node;
+	}
+
+	public N getNode() {
+		return node;
+	}
 }

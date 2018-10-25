@@ -27,6 +27,10 @@ public class Component {
 		this(name);
 		this.requiredInterfaces.putAll(requiredInterfaces);
 		this.providedInterfaces.addAll(providedInterfaces);
+		if (!this.providedInterfaces.contains(name)) {
+			this.providedInterfaces.add(name);
+		}
+
 		parameters.forEach(param -> this.addParameter(param));
 		this.dependencies.addAll(dependencies);
 	}
@@ -47,7 +51,7 @@ public class Component {
 		return this.parameters;
 	}
 
-	public Parameter getParameter(final String paramName) {
+	public Parameter getParameterWithName(final String paramName) {
 		Optional<Parameter> param = this.parameters.stream().filter(p -> p.getName().equals(paramName)).findFirst();
 		if (!param.isPresent()) {
 			throw new IllegalArgumentException("Component " + this.name + " has no parameter with name \"" + paramName + "\"");
@@ -111,5 +115,67 @@ public class Component {
 		sb.append(this.requiredInterfaces);
 
 		return sb.toString();
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((this.dependencies == null) ? 0 : this.dependencies.hashCode());
+		result = prime * result + ((this.name == null) ? 0 : this.name.hashCode());
+		result = prime * result + ((this.parameters == null) ? 0 : this.parameters.hashCode());
+		result = prime * result + ((this.providedInterfaces == null) ? 0 : this.providedInterfaces.hashCode());
+		result = prime * result + ((this.requiredInterfaces == null) ? 0 : this.requiredInterfaces.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (this.getClass() != obj.getClass()) {
+			return false;
+		}
+		Component other = (Component) obj;
+		if (this.dependencies == null) {
+			if (other.dependencies != null) {
+				return false;
+			}
+		} else if (!this.dependencies.equals(other.dependencies)) {
+			return false;
+		}
+		if (this.name == null) {
+			if (other.name != null) {
+				return false;
+			}
+		} else if (!this.name.equals(other.name)) {
+			return false;
+		}
+		if (this.parameters == null) {
+			if (other.parameters != null) {
+				return false;
+			}
+		} else if (!this.parameters.equals(other.parameters)) {
+			return false;
+		}
+		if (this.providedInterfaces == null) {
+			if (other.providedInterfaces != null) {
+				return false;
+			}
+		} else if (!this.providedInterfaces.equals(other.providedInterfaces)) {
+			return false;
+		}
+		if (this.requiredInterfaces == null) {
+			if (other.requiredInterfaces != null) {
+				return false;
+			}
+		} else if (!this.requiredInterfaces.equals(other.requiredInterfaces)) {
+			return false;
+		}
+		return true;
 	}
 }

@@ -58,23 +58,8 @@
 	<logger name="jaicore.logic">
 		<level value="warn" />
 	</logger>
-
-	<logger name="jaicore.planning.graphgenerators.task">
-		<level value="warn" />
-	</logger>
 	
-	<logger name="jaicore.search.algorithms.standard.lds">
-		<level value="info" />
-	</logger>
-	
-<<<<<<< HEAD
-	<logger name="jaicore.search.algorithms.standard.core">
-		<level value="warn" />
-	</logger>
-	
-=======
->>>>>>> c350ab792a3a37a0c6ae7f914b830bd50c2ee0dd
-	<logger name="jaicore.search.algorithms.standard.mcts">
+	<logger name="jaicore.search.algorithms.standard">
 		<level value="warn" />
 	</logger>
 </log4j:configuration>

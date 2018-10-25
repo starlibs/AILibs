@@ -36,15 +36,14 @@ public class ComponentLoader {
 	private Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramConfigs = new HashMap<>();
 	private Collection<Component> components = new ArrayList<>();
 	private final Set<String> parsedFiles = new HashSet<>();
-	private final ObjectMapper objectMapper;
+	private final ObjectMapper objectMapper = new ObjectMapper();
 	private Map<String, JsonNode> parameterMap = new HashMap<>();
+	private Set<String> uniqueComponentNames = new HashSet<>();
 
 	public ComponentLoader() {
-		this.objectMapper = new ObjectMapper();
 	}
 
 	public ComponentLoader(final File jsonFile) throws IOException {
-		this.objectMapper = new ObjectMapper();
 		this.parseFile(jsonFile);
 	}
 
@@ -100,6 +99,10 @@ public class ComponentLoader {
 			Component c;
 			for (JsonNode component : components) {
 				c = new Component(component.get("name").asText());
+				if (!this.uniqueComponentNames.add(c.getName())) {
+					throw new IllegalArgumentException("Noticed a component with duplicative component name: " + c.getName());
+				}
+
 				// add provided interfaces
 
 				for (JsonNode providedInterface : component.path("providedInterface")) {
@@ -193,7 +196,7 @@ public class ComponentLoader {
 						break;
 					case "cat":
 						if (parameter.get("values") != null && parameter.get("values").isTextual()) {
-							p = new Parameter(name, new CategoricalParameterDomain(Arrays.stream(stringParamValues[1].split(",")).collect(Collectors.toList())), stringParams[2]);
+							p = new Parameter(name, new CategoricalParameterDomain(Arrays.stream(stringParamValues[1].split(",")).collect(Collectors.toList())), stringParamValues[2]);
 						} else {
 							List<String> values = new LinkedList<>();
 
@@ -208,13 +211,12 @@ public class ComponentLoader {
 							} else {
 								System.err.println("Warning: Categorical parameter " + name + " in component " + c.getName() + " without value list.");
 							}
-							p = new Parameter(name, new CategoricalParameterDomain(values), stringParams[2]);
+							p = new Parameter(name, new CategoricalParameterDomain(values), stringParamValues[2]);
 						}
 						break;
 					default:
 						throw new IllegalArgumentException("Unsupported parameter type " + type);
 					}
-
 					if (p != null) {
 						c.addParameter(p);
 					}
@@ -237,7 +239,7 @@ public class ComponentLoader {
 								throw new IllegalArgumentException("Cannot parse literal " + literal + ". Literals must be of the form \"<a> P <b>\".");
 							}
 
-							Parameter param = c.getParameter(parts[0]);
+							Parameter param = c.getParameterWithName(parts[0]);
 							String target = parts[2];
 							switch (parts[1]) {
 							case "=": {
@@ -256,7 +258,7 @@ public class ComponentLoader {
 							case "in": {
 								Pair<Parameter, ParameterDomain> conditionItem;
 								if (param.isNumeric()) {
-									Interval interval = SetUtil.unserializeInterval(target);
+									Interval interval = SetUtil.unserializeInterval("[" + target.substring(1, target.length() - 1) + "]");
 									conditionItem = new Pair<>(param, new NumericParameterDomain(((NumericParameterDomain) param.getDefaultDomain()).isInteger(), interval.getInf(), interval.getSup()));
 								} else if (param.isCategorical()) {
 									if (!target.startsWith("[") && !target.startsWith("{")) {
@@ -293,7 +295,7 @@ public class ComponentLoader {
 							}
 						}
 
-						Parameter param = c.getParameter(parts[0]);
+						Parameter param = c.getParameterWithName(parts[0]);
 						String target = parts[2];
 						switch (parts[1]) {
 						case "=": {
@@ -312,7 +314,7 @@ public class ComponentLoader {
 						case "in": {
 							Pair<Parameter, ParameterDomain> conditionItem;
 							if (param.isNumeric()) {
-								Interval interval = SetUtil.unserializeInterval(target);
+								Interval interval = SetUtil.unserializeInterval("[" + target.substring(1, target.length() - 1) + "]");
 								conditionItem = new Pair<>(param, new NumericParameterDomain(((NumericParameterDomain) param.getDefaultDomain()).isInteger(), interval.getInf(), interval.getSup()));
 							} else if (param.isCategorical()) {
 								if (!target.startsWith("[") && !target.startsWith("{")) {
@@ -343,6 +345,7 @@ public class ComponentLoader {
 	public void loadComponents(final File componentDescriptionFile) throws IOException {
 		this.paramConfigs.clear();
 		this.components.clear();
+		this.uniqueComponentNames.clear();
 
 		this.parseFile(componentDescriptionFile);
 	}

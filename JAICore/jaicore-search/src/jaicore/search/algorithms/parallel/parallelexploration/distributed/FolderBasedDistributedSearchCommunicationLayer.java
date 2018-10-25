@@ -29,8 +29,8 @@ import jaicore.basic.FileUtil;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.DistributedSearchCommunicationLayer;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableNodeEvaluator;
-import jaicore.search.algorithms.standard.core.INodeEvaluator;
-import jaicore.search.structure.core.Node;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
+import jaicore.search.model.travesaltree.Node;
 
 public class FolderBasedDistributedSearchCommunicationLayer<T, A, V extends Comparable<V>> implements DistributedSearchCommunicationLayer<T, A, V> {
 

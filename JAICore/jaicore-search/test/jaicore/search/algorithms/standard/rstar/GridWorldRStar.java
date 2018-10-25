@@ -1,7 +1,7 @@
 package jaicore.search.algorithms.standard.rstar;
 
-import jaicore.search.structure.core.GraphGenerator;
-import jaicore.search.structure.core.Node;
+import jaicore.search.core.interfaces.GraphGenerator;
+import jaicore.search.model.travesaltree.Node;
 import jaicore.search.structure.graphgenerator.*;
 
 import org.junit.Assert;
@@ -55,7 +55,7 @@ public class GridWorldRStar {
     */
 
     @Test
-    public void gridWorldRStar() {
+    public void gridWorldRStar() throws InterruptedException {
 
     	/* compute reference solution */
     	SimpleAStarGraphSearch<GridWorld, String> astar = new SimpleAStarGraphSearch<GridWorld, String>(

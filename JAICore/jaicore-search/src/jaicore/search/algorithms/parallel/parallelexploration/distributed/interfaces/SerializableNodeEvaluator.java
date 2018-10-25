@@ -2,7 +2,7 @@ package jaicore.search.algorithms.parallel.parallelexploration.distributed.inter
 
 import java.io.Serializable;
 
-import jaicore.search.algorithms.standard.core.INodeEvaluator;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 
 public interface SerializableNodeEvaluator<T,V extends Comparable<V>> extends INodeEvaluator<T, V>, Serializable {
 

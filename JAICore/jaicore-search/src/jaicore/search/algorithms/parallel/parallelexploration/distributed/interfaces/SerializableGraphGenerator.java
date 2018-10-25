@@ -2,7 +2,7 @@ package jaicore.search.algorithms.parallel.parallelexploration.distributed.inter
 
 import java.io.Serializable;
 
-import jaicore.search.structure.core.GraphGenerator;
+import jaicore.search.core.interfaces.GraphGenerator;
 
 public interface SerializableGraphGenerator<T,A> extends GraphGenerator<T, A>, Serializable {
 

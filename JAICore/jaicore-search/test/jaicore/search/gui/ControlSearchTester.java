@@ -1,100 +1,34 @@
+
 package jaicore.search.gui;
 
-import static org.junit.Assert.assertNotNull;
+import jaicore.basic.algorithm.AlgorithmProblemTransformer;
+import jaicore.search.algorithms.standard.bestfirst.BestFirstFactory;
+import jaicore.search.core.interfaces.IGraphSearchFactory;
+import jaicore.search.model.other.EvaluatedSearchGraphPath;
+import jaicore.search.model.probleminputs.GeneralEvaluatedTraversalTree;
+import jaicore.search.model.travesaltree.Node;
+import jaicore.search.testproblems.nqueens.NQueenTester;
+import jaicore.search.testproblems.nqueens.NQueensToGeneralTravesalTreeReducer;
+import jaicore.search.testproblems.nqueens.QueenNode;
 
-import java.util.ArrayList;
-import java.util.List;
+public class ControlSearchTester
+		extends GuiTester<GeneralEvaluatedTraversalTree<QueenNode, String, Double>, EvaluatedSearchGraphPath<QueenNode, String, Double>, Node<QueenNode, Double>, String> {
 
-import org.junit.Test;
-
-import jaicore.basic.PerformanceLogger;
-import jaicore.basic.PerformanceLogger.PerformanceMeasure;
-import jaicore.graphvisualizer.gui.VisualizationWindow;
-import jaicore.search.algorithms.standard.bestfirst.BestFirst;
-import jaicore.search.gui.dataSupplier.NodeExpansionSupplier;
-import jaicore.search.gui.dataSupplier.TooltipSupplier;
-import jaicore.search.structure.core.GraphGenerator;
-import jaicore.search.structure.core.Node;
-import jaicore.search.structure.core.NodeExpansionDescription;
-import jaicore.search.structure.core.NodeType;
-import jaicore.search.structure.graphgenerator.NodeGoalTester;
-import jaicore.search.structure.graphgenerator.SingleRootGenerator;
-import jaicore.search.structure.graphgenerator.SuccessorGenerator;
-
-public class ControlSearchTester {
-
-	static class TestNode {
-		static int size = 0;
-		int value = size++;
-		
-		public String toString() { return "" + value; }
+	public ControlSearchTester() {
+		super();
+		this.setShowGraphs(true);
+	}
+	
+	@Override
+	public IGraphSearchFactory<GeneralEvaluatedTraversalTree<QueenNode, String, Double>, EvaluatedSearchGraphPath<QueenNode, String, Double>, QueenNode, String, Double, Node<QueenNode, Double>, String> getFactory() {
+		BestFirstFactory<GeneralEvaluatedTraversalTree<QueenNode, String, Double>,QueenNode, String, Double> searchFactory = new BestFirstFactory<>();
+		return searchFactory;
 	}
 
-	@Test
-	public void test() {
-		
-		GraphGenerator<TestNode, String> gen = new GraphGenerator<TestNode, String>() {
-
-			@Override
-			public SingleRootGenerator<TestNode> getRootGenerator() {
-				return () -> new TestNode();
-			}
-
-			@Override
-			public SuccessorGenerator<TestNode, String> getSuccessorGenerator() {
-				return n -> {
-					List<NodeExpansionDescription<TestNode,String>> l = new ArrayList<>(3);
-					for (int i = 0; i < 3; i++) {
-						l.add(new NodeExpansionDescription<>(n, new TestNode(), "edge label", NodeType.OR));
-					}
-					return l;
-				};
-			}
-
-			@Override
-			public NodeGoalTester<TestNode> getGoalTester() {
-				return l -> l.value == 1000;
-			}
-			
-			@Override
-			public boolean isSelfContained() {
-				return false;
-			}
-
-			@Override
-			public void setNodeNumbering(boolean nodenumbering) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-		};
-		
-		ControllableBestFirst<TestNode,String> bf = new ControllableBestFirst<>(gen, n -> (double)Math.round(Math.random() * 1000));
-
-		
-		VisualizationWindow win = new VisualizationWindow<Node<TestNode, Double>>(bf, "Control-Check");
-		TooltipSupplier tooltipSupplier = new TooltipSupplier();
-		tooltipSupplier.setGenerator(node ->{
-			Node<?, ?> n = (Node<?, ?>) node;
-			String s = String.valueOf(n.getInternalLabel());
-			return s;
-		});
-		win.addDataSupplier(tooltipSupplier);
-		
-		
-		NodeExpansionSupplier nodeexpansion = new NodeExpansionSupplier();
-		win.addDataSupplier(nodeexpansion);
-		
-		
-		
-		/* find solution */
-		PerformanceLogger.logStart("search");
-//		List<TestNode> solutionPath = bf.nextSolution();
-		PerformanceLogger.logEnd("search");
-//		assertNotNull(solutionPath);
-		System.out.println("Generated " + bf.getCreatedCounter() + " nodes.");
-		PerformanceLogger.printStatsAndClear(PerformanceMeasure.TIME);
-		while (true);
+	@Override
+	public AlgorithmProblemTransformer<Integer, GeneralEvaluatedTraversalTree<QueenNode, String, Double>> getProblemReducer() {
+		return new NQueensToGeneralTravesalTreeReducer();
 	}
-
+	
+	
 }

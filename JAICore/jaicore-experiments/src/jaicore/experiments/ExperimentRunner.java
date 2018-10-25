@@ -67,7 +67,11 @@ public class ExperimentRunner {
 		if (this.config.getDBTableName() == null) {
 			throw new IllegalArgumentException("DB table must not be null in experiment config.");
 		}
-
+		if (this.config.getKeyFields() == null)
+			throw new IllegalArgumentException("Key fields (keyfields) entry must be set in configuration!");
+		if (this.config.getResultFields() == null)
+			throw new IllegalArgumentException("Result fields (resultfields) entry must be set in configuration!");
+		
 		this.fieldsForWhichToIgnoreMemory = (this.config.getFieldsForWhichToIgnoreMemory() != null) ? this.config.getFieldsForWhichToIgnoreMemory() : new ArrayList<>();
 		this.fieldsForWhichToIgnoreTime = (this.config.getFieldsForWhichToIgnoreTime() != null) ? this.config.getFieldsForWhichToIgnoreTime() : new ArrayList<>();
 
@@ -84,6 +88,7 @@ public class ExperimentRunner {
 		this.cpuLimit = this.config.getNumberOfCPUs();
 		int numExperiments = 1;
 		try {
+			
 			/* create map of possible values for each key field */
 			for (String key : this.config.getKeyFields()) {
 				/* this is a hack needed because one cannot retrieve generic configs */

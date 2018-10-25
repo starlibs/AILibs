@@ -3,23 +3,22 @@ package jaicore.search.algorithms.standard.bestfirst;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jaicore.search.algorithms.standard.core.INodeEvaluator;
-import jaicore.search.algorithms.standard.core.ORGraphSearch;
-import jaicore.search.structure.core.GraphGenerator;
-import jaicore.search.structure.core.Node;
-import jaicore.search.structure.core.PriorityQueueOpen;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
+import jaicore.search.model.probleminputs.GeneralEvaluatedTraversalTree;
+import jaicore.search.model.travesaltree.Node;
 
 /**
  * A* algorithm implementation using the method design pattern.
  *
  * @author Felix Mohr
  */
-public class BestFirstEpsilon<T, A, W extends Comparable<W>> extends ORGraphSearch<T, A, Double> {
+public class BestFirstEpsilon<T, A, W extends Comparable<W>> extends StandardBestFirst<T, A, Double> {
 	
 	private final static Logger logger = LoggerFactory.getLogger(BestFirstEpsilon.class);
 
@@ -29,7 +28,8 @@ public class BestFirstEpsilon<T, A, W extends Comparable<W>> extends ORGraphSear
 	private final boolean absolute;
 	private final double epsilon;
 	
-	private class OpenList extends PriorityQueueOpen<Node<T,Double>> {
+	@SuppressWarnings("serial")
+	private class OpenList extends PriorityQueue<Node<T,Double>> {
 		
 		@Override
 		public Node<T,Double> peek() {
@@ -54,12 +54,12 @@ public class BestFirstEpsilon<T, A, W extends Comparable<W>> extends ORGraphSear
 	}
 
 	
-	public BestFirstEpsilon(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, Double> pPrimaryNodeEvaluator, INodeEvaluator<T, W> pSecondaryNodeEvaluator, int epsilon) {
-		this(graphGenerator, pPrimaryNodeEvaluator, pSecondaryNodeEvaluator, epsilon, true);
+	public BestFirstEpsilon(GeneralEvaluatedTraversalTree<T, A, Double> problem, INodeEvaluator<T, W> pSecondaryNodeEvaluator, int epsilon) throws InterruptedException {
+		this(problem, pSecondaryNodeEvaluator, epsilon, true);
 	}
 	
-	public BestFirstEpsilon(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, Double> pPrimaryNodeEvaluator, INodeEvaluator<T, W> pSecondaryNodeEvaluator, double epsilon, boolean absolute) {
-		super(graphGenerator, pPrimaryNodeEvaluator);
+	public BestFirstEpsilon(GeneralEvaluatedTraversalTree<T, A, Double> problem, INodeEvaluator<T, W> pSecondaryNodeEvaluator, double epsilon, boolean absolute) throws InterruptedException {
+		super(problem);
 		this.secondaryNodeEvaluator = pSecondaryNodeEvaluator;
 		this.epsilon = epsilon;
 		this.absolute = absolute;

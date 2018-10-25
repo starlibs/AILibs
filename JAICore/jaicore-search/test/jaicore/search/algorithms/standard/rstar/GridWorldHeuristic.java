@@ -1,7 +1,7 @@
 package jaicore.search.algorithms.standard.rstar;
 
-import jaicore.search.algorithms.standard.core.INodeEvaluator;
-import jaicore.search.structure.core.Node;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
+import jaicore.search.model.travesaltree.Node;
 
 public class GridWorldHeuristic implements INodeEvaluator<GridWorld, Double> {
 
@@ -13,7 +13,7 @@ public class GridWorldHeuristic implements INodeEvaluator<GridWorld, Double> {
 	}
 
 	@Override
-	public Double f(Node<GridWorld, ?> node) throws Throwable {
+	public Double f(Node<GridWorld, ?> node) throws Exception {
 		int x_ = Math.abs(end.getX() - node.getPoint().getX());
 		int y_ = Math.abs(end.getY() - node.getPoint().getY());
 		return new Double(x_ + y_);
