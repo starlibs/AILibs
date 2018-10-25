@@ -47,6 +47,7 @@ public class AutoFEMLExperimenter implements IExperimentSetEvaluator {
 		LOGGER.info("Evaluate experiment: {}", experiment);
 
 		double subsampleRatio = Double.valueOf(experiment.get("subsampleRatio"));
+		double mlplanSubsampleRatioFactor = Double.valueOf(experiment.get("mlplanSubsampleRatioFactor"));
 		long seed = Long.valueOf(experiment.get("seed"));
 		long amlTimeout = Long.valueOf(experiment.get("amlTimeout"));
 		long feTimeout = Long.valueOf(experiment.get("feTimeout"));
@@ -73,12 +74,12 @@ public class AutoFEMLExperimenter implements IExperimentSetEvaluator {
 			LOGGER.info("Execute AutoFEML as a complete process...");
 			autofeml = new AutoFEMLComplete(experimentEntry.getExperiment().getNumCPUs(), seed,
 					new TimeOut(feTimeout + amlTimeout, TimeUnit.SECONDS), new TimeOut(evalTimeout, TimeUnit.SECONDS),
-					maxPipelineSize);
+					maxPipelineSize, subsampleRatio, mlplanSubsampleRatioFactor, minInstances);
 
 		} else {
 			LOGGER.info("Execute AutoFEML as a two-phase process...");
 			autofeml = new AutoFEMLTwoPhase(experimentEntry.getExperiment().getNumCPUs(), experiment.get("algorithm"),
-					subsampleRatio, minInstances, seed, new TimeOut(feTimeout, TimeUnit.SECONDS),
+					subsampleRatio, mlplanSubsampleRatioFactor, minInstances, seed, new TimeOut(feTimeout, TimeUnit.SECONDS),
 					new TimeOut(amlTimeout, TimeUnit.SECONDS), new TimeOut(evalTimeout, TimeUnit.SECONDS),
 					maxPipelineSize);
 		}

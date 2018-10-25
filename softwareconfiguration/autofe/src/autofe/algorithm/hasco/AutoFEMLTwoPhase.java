@@ -29,6 +29,7 @@ public class AutoFEMLTwoPhase extends AbstractAutoFEMLClassifier {
 
 	private String benchmarkType;
 	private final double subsampleRatio;
+	private final double mlplanSubsampleRatioFactor;
 	private int minInstances;
 	private int maxPipelineSize;
 	private int cpus = 1;
@@ -44,10 +45,13 @@ public class AutoFEMLTwoPhase extends AbstractAutoFEMLClassifier {
 	private boolean enableVisualization = false;
 
 	public AutoFEMLTwoPhase(final int cpus, final String benchmarkType, final double subsampleRatio,
-			final int minInstances, final long seed, final TimeOut feTimeOut, final TimeOut amlTimeOut,
-			final TimeOut evalTimeOut, final int maxPipelineSize) throws IOException {
+			final double mlplanSubsampleRatioFactor, final int minInstances, final long seed, 
+			final TimeOut feTimeOut, final TimeOut amlTimeOut, final TimeOut evalTimeOut, 
+			final int maxPipelineSize) throws IOException {
+		
 		this.cpus = cpus;
 		this.subsampleRatio = subsampleRatio;
+		this.mlplanSubsampleRatioFactor = mlplanSubsampleRatioFactor;
 		this.minInstances = minInstances;
 		this.maxPipelineSize = maxPipelineSize;
 		this.rand = new Random(seed);
@@ -64,12 +68,7 @@ public class AutoFEMLTwoPhase extends AbstractAutoFEMLClassifier {
 	@Override
 	public void buildClassifier(final DataSet data) throws Exception {
 		/* Subsample dataset to reduce computational effort. */
-		double ratio = this.subsampleRatio;
-		if (data.getInstances().size() * ratio < this.minInstances) {
-			ratio = (double) this.minInstances / data.getInstances().size();
-		}
-		DataSet dataForFE = DataSetUtils.getStratifiedSplit(data, this.rand, this.subsampleRatio).get(0);
-		logger.debug("Subsampling ratio is {} and means {} many instances.", ratio, dataForFE.getInstances().size());
+		DataSet dataForFE = DataSetUtils.subsample(data, this.subsampleRatio, this.minInstances, this.rand);
 
 		HASCOSupervisedML.REQUESTED_INTERFACE = "FilterPipeline";
 		HASCOImageFeatureEngineering hasco = new HASCOImageFeatureEngineering(this.componentLoader);
@@ -117,7 +116,8 @@ public class AutoFEMLTwoPhase extends AbstractAutoFEMLClassifier {
 				solution.getSolution(), solution.getScore(), solution.getTimeToComputeScore());
 
 		logger.info("Prepare the dataset for the 2nd phase...");
-		DataSet transformedDataset = solution.getSolution().applyFilter(data, false);
+		DataSet dataForMLPlan = DataSetUtils.subsample(data, this.subsampleRatio, this.minInstances, this.rand, this.mlplanSubsampleRatioFactor);
+		DataSet transformedDataset = solution.getSolution().applyFilter(dataForMLPlan, false);
 		transformedDataset.updateInstances();
 		Instances wekaDataset = transformedDataset.getInstances();
 		logger.info("Done transforming the dataset for 2nd phase.");

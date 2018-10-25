@@ -30,11 +30,18 @@ public class AutoFEMLComplete extends AbstractAutoFEMLClassifier {
 	private final int cpus;
 	private final int maxPipelineSize;
 	private final long seed;
+	
+	/* Subsampling parameters */
+	private final double subsampleRatio;
+	private final double mlplanSubsampleRatioFactor;
+	private int minInstances;
 
 	private boolean enableVisualization = false;
 
 	public AutoFEMLComplete(final int cpus, final long seed, final TimeOut globalTimeOut, final TimeOut evalTimeOut,
-			final int maxPipelineSize) throws IOException {
+			final int maxPipelineSize, final double subsampleRatio,	final double mlplanSubsampleRatioFactor, 
+			final int minInstances) throws IOException {
+		
 		this.componentLoader = new ComponentLoader(new File("model/MLPlanFEWeka.json"));
 		this.rand = new Random(seed);
 		this.globalTimeOut = globalTimeOut;
@@ -42,11 +49,17 @@ public class AutoFEMLComplete extends AbstractAutoFEMLClassifier {
 		this.cpus = cpus;
 		this.maxPipelineSize = maxPipelineSize;
 		this.seed = seed;
+		
+		this.subsampleRatio = subsampleRatio;
+		this.mlplanSubsampleRatioFactor = mlplanSubsampleRatioFactor;
+		this.minInstances = minInstances;
 	}
 
 	@Override
 	public void buildClassifier(final DataSet data) throws Exception {
 		/* Subsample dataset to reduce computational effort. */
+		DataSet dataForComplete = DataSetUtils.subsample(data, this.subsampleRatio, this.minInstances, this.rand, this.mlplanSubsampleRatioFactor);
+		
 		LOGGER.info("Setup MLPlanWithFeatureEngineering...");
 		HASCOSupervisedML.REQUESTED_INTERFACE = "AutoFEMLPipeline";
 		MLPlanWithFeatureEngineering mlplan = new MLPlanWithFeatureEngineering(this.componentLoader);
@@ -60,7 +73,7 @@ public class AutoFEMLComplete extends AbstractAutoFEMLClassifier {
 		mlplan.setFactory(factory);
 
 		LOGGER.debug("Create search/selection split...");
-		List<DataSet> searchSelectSplit = DataSetUtils.getStratifiedSplit(data, new Random(this.seed),
+		List<DataSet> searchSelectSplit = DataSetUtils.getStratifiedSplit(dataForComplete, new Random(this.seed),
 				mlplan.getConfig().selectionDataPortion());
 
 		/* Setup node evaluators */
@@ -76,7 +89,7 @@ public class AutoFEMLComplete extends AbstractAutoFEMLClassifier {
 		benchmark.setEvalTable(this.getEvalTable());
 		benchmark.setExperimentID(this.getExperimentID());
 
-		AutoFEMLMCCVBenchmark selectionBenchmark = new AutoFEMLMCCVBenchmark(data, this.seed,
+		AutoFEMLMCCVBenchmark selectionBenchmark = new AutoFEMLMCCVBenchmark(dataForComplete, this.seed,
 				mlplan.getConfig().searchMCIterations(), mlplan.getConfig().searchDataPortion());
 		mlplan.setSelectionPhaseEvaluator(selectionBenchmark);
 		mlplan.enableVisualization(this.enableVisualization);
@@ -90,7 +103,7 @@ public class AutoFEMLComplete extends AbstractAutoFEMLClassifier {
 				"Found solution " + solution.getSolution().toString() + " with internal score: " + solution.getScore()
 						+ " and it took " + solution.getTimeToComputeScore() + "ms to compute its score.");
 		this.setSelectedPipeline(solution.getSolution());
-		this.getSelectedPipeline().buildClassifier(data);
+		this.getSelectedPipeline().buildClassifier(dataForComplete);
 
 	}
 

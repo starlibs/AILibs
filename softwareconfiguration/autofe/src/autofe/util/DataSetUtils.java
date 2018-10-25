@@ -252,7 +252,7 @@ public final class DataSetUtils {
 	}
 
 	/**
-	 * Function determines how much of the input data should be used to infer a
+	 * Function determining how much of the input data should be used to infer a
 	 * filter pipeline.
 	 *
 	 * @param instances
@@ -367,4 +367,34 @@ public final class DataSetUtils {
 		return new DataSet(data, indArrayList);
 	}
 
+	public static DataSet subsample(final DataSet originalData, final double subsampleRatio,
+			final int minInstances, final Random random) {
+		return subsample(originalData, subsampleRatio, minInstances, random, 1d);
+	}
+	
+	/**
+	 * Utility function subsampling the given <code>originalData</code>
+	 * @param originalData
+	 * @param subsampleRatio
+	 * @param minInstances
+	 * @param random
+	 * @param factor
+	 * @return
+	 */
+	public static DataSet subsample(final DataSet originalData, final double subsampleRatio,
+			final int minInstances, final Random random, final double factor) {
+		if(subsampleRatio>=1d) {
+			logger.debug("Subsampling is not performed.");
+			return originalData;
+		}
+			
+		
+		double ratio = subsampleRatio * factor;
+		if (originalData.getInstances().size() * ratio < minInstances) {
+			ratio = (double) minInstances / originalData.getInstances().size();
+		}
+		DataSet subsampledData = getStratifiedSplit(originalData, random, subsampleRatio).get(0);
+		logger.debug("Subsampling ratio is {} and means {} many instances.", ratio, subsampledData.getInstances().size());
+		return subsampledData;
+	}
 }
