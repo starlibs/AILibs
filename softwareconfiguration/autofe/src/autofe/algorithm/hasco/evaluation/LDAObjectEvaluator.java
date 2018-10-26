@@ -25,7 +25,8 @@ public class LDAObjectEvaluator extends AbstractHASCOFEObjectEvaluator {
 		final double ldaScore = EvaluationUtils.performLDA(dataSet.getInstances());
 
 		logger.debug("LDA object evaluator score: " + ldaScore);
-		double score = ldaScore - ATT_COUNT_PENALTY * EvaluationUtils.calculateAttributeCountPenalty(this.data.getInstances());
+		double score = ldaScore
+				- ATT_COUNT_PENALTY * EvaluationUtils.calculateAttributeCountPenalty(this.data.getInstances());
 
 		this.storeResult(pipeline, score, (System.currentTimeMillis() - startTimestamp));
 		return score;

@@ -62,7 +62,7 @@ public class AutoFEMLExperimenter implements IExperimentSetEvaluator {
 			int openmlID = Integer.valueOf(datasetName.substring(6));
 			data = DataSetUtils.getDataSetByID(openmlID);
 		} else {
-			File datasetFolder = new File(CONFIG.getDatasetFolder().getAbsolutePath() + "/" + datasetName);
+			File datasetFolder = new File(CONFIG.getDatasetFolder().getAbsolutePath() + File.separator + datasetName);
 			data = DataSetUtils.loadDatasetFromImageFolder(datasetFolder);
 		}
 
@@ -79,9 +79,9 @@ public class AutoFEMLExperimenter implements IExperimentSetEvaluator {
 		} else {
 			LOGGER.info("Execute AutoFEML as a two-phase process...");
 			autofeml = new AutoFEMLTwoPhase(experimentEntry.getExperiment().getNumCPUs(), experiment.get("algorithm"),
-					subsampleRatio, mlplanSubsampleRatioFactor, minInstances, seed, new TimeOut(feTimeout, TimeUnit.SECONDS),
-					new TimeOut(amlTimeout, TimeUnit.SECONDS), new TimeOut(evalTimeout, TimeUnit.SECONDS),
-					maxPipelineSize);
+					subsampleRatio, mlplanSubsampleRatioFactor, minInstances, seed,
+					new TimeOut(feTimeout, TimeUnit.SECONDS), new TimeOut(amlTimeout, TimeUnit.SECONDS),
+					new TimeOut(evalTimeout, TimeUnit.SECONDS), maxPipelineSize);
 		}
 		autofeml.setSQLAdapter(adapter, experimentEntry.getId(), CONFIG.evalTable());
 		autofeml.enableVisualization(CONFIG.enableVisualization());

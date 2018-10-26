@@ -30,7 +30,7 @@ public class AutoFEMLComplete extends AbstractAutoFEMLClassifier {
 	private final int cpus;
 	private final int maxPipelineSize;
 	private final long seed;
-	
+
 	/* Subsampling parameters */
 	private final double subsampleRatio;
 	private final double mlplanSubsampleRatioFactor;
@@ -39,9 +39,9 @@ public class AutoFEMLComplete extends AbstractAutoFEMLClassifier {
 	private boolean enableVisualization = false;
 
 	public AutoFEMLComplete(final int cpus, final long seed, final TimeOut globalTimeOut, final TimeOut evalTimeOut,
-			final int maxPipelineSize, final double subsampleRatio,	final double mlplanSubsampleRatioFactor, 
+			final int maxPipelineSize, final double subsampleRatio, final double mlplanSubsampleRatioFactor,
 			final int minInstances) throws IOException {
-		
+
 		this.componentLoader = new ComponentLoader(new File("model/MLPlanFEWeka.json"));
 		this.rand = new Random(seed);
 		this.globalTimeOut = globalTimeOut;
@@ -49,7 +49,7 @@ public class AutoFEMLComplete extends AbstractAutoFEMLClassifier {
 		this.cpus = cpus;
 		this.maxPipelineSize = maxPipelineSize;
 		this.seed = seed;
-		
+
 		this.subsampleRatio = subsampleRatio;
 		this.mlplanSubsampleRatioFactor = mlplanSubsampleRatioFactor;
 		this.minInstances = minInstances;
@@ -58,8 +58,9 @@ public class AutoFEMLComplete extends AbstractAutoFEMLClassifier {
 	@Override
 	public void buildClassifier(final DataSet data) throws Exception {
 		/* Subsample dataset to reduce computational effort. */
-		DataSet dataForComplete = DataSetUtils.subsample(data, this.subsampleRatio, this.minInstances, this.rand, this.mlplanSubsampleRatioFactor);
-		
+		DataSet dataForComplete = DataSetUtils.subsample(data, this.subsampleRatio, this.minInstances, this.rand,
+				this.mlplanSubsampleRatioFactor);
+
 		LOGGER.info("Setup MLPlanWithFeatureEngineering...");
 		HASCOSupervisedML.REQUESTED_INTERFACE = "AutoFEMLPipeline";
 		MLPlanWithFeatureEngineering mlplan = new MLPlanWithFeatureEngineering(this.componentLoader);

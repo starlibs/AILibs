@@ -64,7 +64,8 @@ public class AutoFEMLMCCVBenchmark implements IObjectEvaluator<AutoFEWekaPipelin
 	public Double evaluate(final AutoFEWekaPipeline object) throws Exception {
 		long startTimestamp = System.currentTimeMillis();
 		Instances wekaInstances = object.transformData(this.data);
-		IObjectEvaluator<Classifier, Double> internalEvaluator = new MonteCarloCrossValidationEvaluator(new MulticlassEvaluator(this.rand), this.repeats, wekaInstances, this.trainingPortion);
+		IObjectEvaluator<Classifier, Double> internalEvaluator = new MonteCarloCrossValidationEvaluator(
+				new MulticlassEvaluator(this.rand), this.repeats, wekaInstances, this.trainingPortion);
 		Double evalScore = internalEvaluator.evaluate(object);
 		logger.info("Eval score of AUtoFEWekaPipeline " + object.toString() + " was " + evalScore);
 
@@ -74,7 +75,8 @@ public class AutoFEMLMCCVBenchmark implements IObjectEvaluator<AutoFEWekaPipelin
 		return evalScore;
 	}
 
-	protected void storeResult(final AutoFEWekaPipeline pipe, final Double score, final long timeToCompute) throws SQLException {
+	protected void storeResult(final AutoFEWekaPipeline pipe, final Double score, final long timeToCompute)
+			throws SQLException {
 		Map<String, Object> data = new HashMap<>();
 		data.put("run_id", this.experimentID);
 		data.put("errorRate", score);

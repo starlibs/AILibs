@@ -367,34 +367,66 @@ public final class DataSetUtils {
 		return new DataSet(data, indArrayList);
 	}
 
-	public static DataSet subsample(final DataSet originalData, final double subsampleRatio,
-			final int minInstances, final Random random) {
+	/**
+	 * Utility function for subsampling with a fixed factor 1 multiplied to the
+	 * subsampling ratio. See
+	 * {@link #subsample(DataSet, double, int, Random, double)} for details.
+	 * 
+	 * @param originalData
+	 *            Original data set
+	 * @param subsampleRatio
+	 *            Subsample ratio
+	 * @param minInstances
+	 *            Minimum amount of instances to keep
+	 * @param random
+	 *            Randomization
+	 * @return Returns the subsampled data set
+	 */
+	public static DataSet subsample(final DataSet originalData, final double subsampleRatio, final int minInstances,
+			final Random random) {
 		return subsample(originalData, subsampleRatio, minInstances, random, 1d);
 	}
-	
+
 	/**
-	 * Utility function subsampling the given <code>originalData</code>
+	 * Utility function subsampling the given <code>originalData</code>. At least
+	 * <code>minInstances</code> many instances are kept. The
+	 * <code>subsampleRatio</code> together with <code>factor</code> (used e. g. for
+	 * ML-Plan requiring bigger samples than for AutoFE) determines the subsampled
+	 * dataset size.
+	 * 
 	 * @param originalData
+	 *            Original data set
 	 * @param subsampleRatio
+	 *            Subsample ratio
 	 * @param minInstances
+	 *            Minimum amount of instances to keep
 	 * @param random
+	 *            Randomization
 	 * @param factor
-	 * @return
+	 *            Factor multiplied to the subsampling ratio to determine final size
+	 * @return Returns the subsampled data set
 	 */
-	public static DataSet subsample(final DataSet originalData, final double subsampleRatio,
-			final int minInstances, final Random random, final double factor) {
-		if(subsampleRatio>=1d) {
+	public static DataSet subsample(DataSet originalData, final double subsampleRatio, final int minInstances,
+			final Random random, final double factor) {
+
+		if (subsampleRatio >= 1d || minInstances >= originalData.getInstances().numInstances()) {
 			logger.debug("Subsampling is not performed.");
 			return originalData;
 		}
-			
-		
+
 		double ratio = subsampleRatio * factor;
 		if (originalData.getInstances().size() * ratio < minInstances) {
 			ratio = (double) minInstances / originalData.getInstances().size();
 		}
-		DataSet subsampledData = getStratifiedSplit(originalData, random, subsampleRatio).get(0);
-		logger.debug("Subsampling ratio is {} and means {} many instances.", ratio, subsampledData.getInstances().size());
+
+		if (ratio >= 1d) {
+			logger.debug("Subsampling is not performed.");
+			return originalData;
+		}
+
+		DataSet subsampledData = getStratifiedSplit(originalData, random, ratio).get(0);
+		logger.debug("Subsampling ratio is {} and means {} many instances.", ratio,
+				subsampledData.getInstances().size());
 		return subsampledData;
 	}
 }
