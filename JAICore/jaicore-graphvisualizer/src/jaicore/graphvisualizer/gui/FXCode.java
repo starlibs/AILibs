@@ -552,7 +552,7 @@ public class FXCode<V, E> implements NodeListener<V> {
     private void updateTimelineIndex() {
         this.timeline.setMax(maxIndex);
         this.maxDisplayIndex = maxIndex;
-//        this.timeline.setValue(displayIndex);
+
     }
 
 }
