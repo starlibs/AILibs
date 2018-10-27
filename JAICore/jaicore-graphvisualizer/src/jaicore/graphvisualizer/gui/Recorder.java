@@ -172,8 +172,9 @@ public class Recorder<V,E> {
 	 */
 	private void forward(int steps) {
 		if (this.index == this.receivedEvents.size())
-			if (this.algorithm.hasNext()) {}
-//				this.algorithm.next();
+			if (this.algorithm.hasNext()) {
+				this.algorithm.next();
+			}
 		while (steps != 0) {
 			if (this.index < this.receivedEvents.size()) {
 				Object event = this.receivedEvents.get(index);

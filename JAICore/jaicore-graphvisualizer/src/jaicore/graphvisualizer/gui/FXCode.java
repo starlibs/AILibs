@@ -11,6 +11,7 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.common.reflect.ClassPath;
 
+import jaicore.graphvisualizer.events.controlEvents.EnableColouring;
 import jaicore.graphvisualizer.events.controlEvents.FileEvent;
 import jaicore.graphvisualizer.events.controlEvents.NodePushed;
 import jaicore.graphvisualizer.events.controlEvents.ResetEvent;
@@ -76,11 +77,14 @@ public class FXCode<V, E> implements NodeListener<V> {
 
     //Log
     private Text log;
+    
+    private Button colouringButton;
+    private boolean colouring;
 
     /**
      * Constructor
      */
-    public FXCode(Recorder<V, E> rec, String title) {
+    public FXCode(Recorder<V, E> rec, String title, ObjectEvaluator eval) {
         //initialize object variables;
         this.index = 0;
         this.maxIndex = 0;
@@ -109,7 +113,7 @@ public class FXCode<V, E> implements NodeListener<V> {
         //center
         SplitPane splitPane = new SplitPane();
         this.tabPane = new TabPane();
-        this.visualization = new GraphVisualization<V, E>();
+        this.visualization = new GraphVisualization<V, E>(eval);
 //		visualization = new ScoreVisualization<V, E>();
 
         //Bottom
@@ -120,15 +124,22 @@ public class FXCode<V, E> implements NodeListener<V> {
 
         //settings for the gui elements
         //top
-        fillToolbar(toolBar.getItems());
+        if(eval != null) {
+        	fillToolbar(toolBar.getItems(), true);
+        	colouring = true;
+        }
+        else
+        	fillToolbar(toolBar.getItems(), false);
         setSleepTimeSlider(sleepTimeSlider);
         top.setTop(toolBar);
         top.setBottom(sleepTimeSlider);
         root.setTop(top);
-
+        
         //Center
         rec.registerReplayListener(visualization);
         visualization.addNodeListener(this);
+        this.eventBus.register(visualization);
+        
 
         splitPane.setDividerPosition(0, 0.25);
         splitPane.getItems().add(tabPane);
@@ -141,7 +152,7 @@ public class FXCode<V, E> implements NodeListener<V> {
 
         stage.setScene(scene);
         stage.setTitle(title);
-        stage.setMaximized(true);
+//        stage.setMaximized(true);
         stage.show();
 
 
@@ -243,7 +254,7 @@ public class FXCode<V, E> implements NodeListener<V> {
      *
      * @param nodeList A list which shall contain the nodes of the buttons
      */
-    private void fillToolbar(List<Node> nodeList) {
+    private void fillToolbar(List<Node> nodeList, boolean eval) {
         // playbutton
         Button playButton = new Button("Play");
         playButton.setOnAction(new EventHandler<ActionEvent>() {
@@ -252,6 +263,7 @@ public class FXCode<V, E> implements NodeListener<V> {
                 startPlayThread();
             }
         });
+              
 
         nodeList.add(playButton);
         // stepButton
@@ -331,6 +343,27 @@ public class FXCode<V, E> implements NodeListener<V> {
             }
         });
         nodeList.add(saveButton);
+        
+        //Colouring bottom
+        colouringButton = new Button("colouring");
+        colouringButton.setOnAction(new EventHandler<ActionEvent>() {
+        	@Override
+        	public void handle(ActionEvent actionEvent) {
+        		if(!colouring) {
+        			colouring = true;
+        			
+        			
+        		}
+        		else {
+        			colouring = false;
+        		}
+        		eventBus.post(new EnableColouring(colouring));
+        	}
+        });
+        nodeList.add(colouringButton);
+        if(!eval)
+        	colouringButton.setDisable(true);
+        
     }
 
     /**

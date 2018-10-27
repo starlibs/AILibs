@@ -20,11 +20,13 @@ import org.graphstream.ui.view.util.InteractiveElement;
 
 import com.google.common.eventbus.Subscribe;
 
+import jaicore.graphvisualizer.events.controlEvents.EnableColouring;
 import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeParentSwitchEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeRemovedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
+import javafx.scene.layout.StackPane;
 
 public class GraphVisualization<V,E> {
 
@@ -43,11 +45,33 @@ public class GraphVisualization<V,E> {
 
 	protected ViewerPipe pipe;
 	Thread pipeThread;
+	
+	private ObjectEvaluator<V> evaluator;
+	private boolean evaluation;
+	
+	private double bestValue;
+	private double worstValue;
+	
+	
 
-	public GraphVisualization() {
+	public GraphVisualization(ObjectEvaluator<V> evaluator) {
+		this.evaluator = evaluator;
 		this.roots = new ArrayList<>();
 		this.graph = new SingleGraph("Search-Graph");
-		this.graph.setAttribute("ui.stylesheet", "url('conf/searchgraph.css')");
+		this.bestValue = Double.MAX_VALUE;
+		this.worstValue = -1;
+	
+		
+		
+		if(this.evaluator == null) {
+			this.graph.setAttribute("ui.stylesheet", "url('conf/searchgraph.css')");
+			System.out.println("loaded Searchgraph");
+		}
+		else {
+			this.graph.setAttribute("ui.stylesheet", "url('conf/heatmap.css')");
+			System.out.println("loaded heatmap");
+			evaluation = true;
+		}
 		try {
 			this.viewer = new FxViewer(graph, FxViewer.ThreadingModel.GRAPH_IN_ANOTHER_THREAD);
 			this.viewer.enableAutoLayout();
@@ -78,7 +102,29 @@ public class GraphVisualization<V,E> {
 	public javafx.scene.Node getFXNode() {
 		return viewPanel;
 	}
-
+	
+	@Subscribe
+	public synchronized void receiveControlEvent(EnableColouring event) {
+		this.evaluation = event.isColouring();
+		System.out.println(this.evaluation);
+		toggleColouring(this.evaluation);
+	}
+	
+	
+	private void toggleColouring(boolean colouring) {
+		if(colouring) {
+		
+			this.graph.setAttribute("ui.stylesheet", "url('conf/heatmap.css')");
+		}
+		else {
+			this.graph.clearAttributes();
+			this.graph.setAttribute("ui.stylesheet", "url('conf/searchgraph.css')");
+			update();
+		}
+		update();
+		
+	}
+	
 	@Subscribe
 	public synchronized void receiveGraphInitEvent(GraphInitializedEvent<V> e) {
 		try {
@@ -167,6 +213,29 @@ public class GraphVisualization<V,E> {
 		 */
 		this.ext2intNodeMap.put(newNodeExt, newNodeInt);
 		this.int2extNodeMap.put(newNodeInt, newNodeExt);
+		
+		
+		/*
+		 * comnpute fvalue if possible
+		 */
+		if(evaluator != null) {
+			try {
+				double value = evaluator.evaluate(newNodeExt);
+				if(value < bestValue) {
+					this.bestValue = value;
+				}
+				if(value > worstValue) {
+					this.worstValue = value;
+				}
+				
+				if(!roots.contains(newNodeExt))
+					colourNode(newNodeInt, value);
+				
+			}
+			catch(Exception e) {
+				
+			}
+		}
 
 		/* store relation between node an parent in internal model */
 		return newNodeInt;
@@ -212,7 +281,7 @@ public class GraphVisualization<V,E> {
 		this.int2extNodeMap.clear();
 		this.nodeCounter = 0;
 		this.graph.clear();
-		this.graph.setAttribute("ui.stylesheet", "url('conf/searchgraph.css')");
+		this.graph.setAttribute("ui.stylesheet", "url('conf/heatmap.css')");
 	}
 
 	/**
@@ -263,5 +332,26 @@ public class GraphVisualization<V,E> {
 				listener.mouseLeft(getNodeOfString(id));
 			}
 		});
+	}
+	
+	private void colourNode(Node node, double value) {
+		float color = 1;
+		float x = (float) (value -bestValue);
+		float y = (float)(worstValue - bestValue);
+		color = x/y;
+		if(Float.isNaN(color)) {
+			color = 1;
+		}
+			
+		if(evaluation)
+			node.setAttribute("ui.color", color);
+	}
+	
+	public void update() {
+		for(V n: this.ext2intNodeMap.keySet()) {
+			double value = evaluator.evaluate(n);
+			colourNode(ext2intNodeMap.get(n), value);
+		}
+		
 	}
 }
