@@ -145,7 +145,7 @@ public class PretrainedNNFilter implements IFilter, Serializable {
 				return;
 			}
 
-			logger.debug("Using pretrained weights " + type);
+			logger.debug("Using pretrained weights " + type + " for model " + modelName + ".");
 
 			Model pretrainedModel = this.model.initPretrained(type);
 			if (pretrainedModel instanceof ComputationGraph) {

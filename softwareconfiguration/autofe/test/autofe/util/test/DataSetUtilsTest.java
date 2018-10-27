@@ -1,11 +1,15 @@
 package autofe.util.test;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
+import autofe.algorithm.hasco.filter.image.CatalanoInPlaceFilter;
+import autofe.util.DataSet;
 import autofe.util.DataSetUtils;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
@@ -28,5 +32,13 @@ public class DataSetUtilsTest {
 
 		INDArray result = DataSetUtils.cifar10InstanceToMatrix(inst);
 		Assert.assertArrayEquals(new long[] { 32, 32, 3 }, result.shape());
+	}
+
+	@Test
+	public void croppingTest() throws IOException {
+		File datasetFolder = new File("testres/" + File.separator + "caltech101_subset");
+		DataSet data = DataSetUtils.loadDatasetFromImageFolder(datasetFolder);
+		CatalanoInPlaceFilter filter = new CatalanoInPlaceFilter("GaussianBlur");
+		filter.applyFilter(data, true);
 	}
 }

@@ -39,8 +39,8 @@ public final class ImageUtils {
 		long[] shape = matrix.shape();
 		FastBitmap bitmap = new FastBitmap((int) shape[0], (int) shape[1], colorSpace);
 
-		for (int i = 0; i < shape[0]; i++) {
-			for (int j = 0; j < shape[1]; j++) {
+		for (int i = 0; i < shape[1]; i++) {
+			for (int j = 0; j < shape[0]; j++) {
 				switch (colorSpace) {
 				case ARGB:
 					bitmap.setAlpha(i, j, matrix.getInt(i, j, 0));

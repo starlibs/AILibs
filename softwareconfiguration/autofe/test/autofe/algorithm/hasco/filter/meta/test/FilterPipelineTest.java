@@ -5,7 +5,6 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import autofe.algorithm.hasco.filter.generic.IdentityFilter;
 import autofe.algorithm.hasco.filter.image.CatalanoBinaryPatternFilter;
 import autofe.algorithm.hasco.filter.image.CatalanoInPlaceFilter;
 import autofe.algorithm.hasco.filter.meta.FilterPipeline;
@@ -21,7 +20,7 @@ public class FilterPipelineTest {
 		Graph<IFilter> graph = new Graph<>();
 
 		// UnionFilter union = new UnionFilter();
-		IdentityFilter ident = new IdentityFilter();
+		// IdentityFilter ident = new IdentityFilter();
 		// CatalanoInPlaceFilter highBoost = new CatalanoInPlaceFilter("HighBoost");
 		CatalanoBinaryPatternFilter robustLocalBinPattern = new CatalanoBinaryPatternFilter("RobustLocalBinaryPattern");
 		CatalanoInPlaceFilter homogenityEdgeDetector = new CatalanoInPlaceFilter("HomogenityEdgeDetector");

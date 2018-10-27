@@ -7,8 +7,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -24,6 +26,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import Catalano.Imaging.FastBitmap;
+import Catalano.Imaging.FastBitmap.ColorSpace;
+import Catalano.Imaging.Filters.Crop;
 import jaicore.ml.WekaUtil;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
@@ -291,7 +295,8 @@ public final class DataSetUtils {
 		case "fashion-mnist":
 			return DataSetUtils.FASHION_MNIST_ID;
 		default:
-			throw new UnsupportedOperationException("Data set '" + dataSetName + "' is not supported yet.");
+			throw new UnsupportedOperationException(
+					"Shape lookup for data set '" + dataSetName + "' is not supported yet.");
 		}
 	}
 
@@ -308,14 +313,64 @@ public final class DataSetUtils {
 		refInstances.setClass(classAttribute);
 
 		final List<INDArray> matrixList = new LinkedList<>();
+		final Map<File, FastBitmap> fileBitmapMapping = new HashMap<>();
+
+		// Check for cropping and color space transformation
+		int minWidth = Integer.MAX_VALUE;
+		int minHeight = Integer.MAX_VALUE;
+		boolean croppingNecessary = false;
+		ColorSpace colorSpace = null;
+		for (final File subFolder : folder.listFiles()) {
+			for (final File imageFile : subFolder.listFiles()) {
+				final FastBitmap fb = new FastBitmap(ImageIO.read(imageFile));
+
+				// Check for color space (Precedence: (RGB, ARGB) > Grayscale)
+				if (colorSpace == null || (colorSpace == ColorSpace.Grayscale
+						&& (fb.getColorSpace() == ColorSpace.RGB || fb.getColorSpace() == ColorSpace.ARGB))) {
+					colorSpace = fb.getColorSpace();
+				}
+
+				fileBitmapMapping.put(imageFile, fb);
+				if (fb.getWidth() < minWidth) {
+					if (minWidth != Integer.MAX_VALUE)
+						croppingNecessary = true;
+					minWidth = fb.getWidth();
+				}
+				if (fb.getHeight() < minHeight) {
+					if (minHeight != Integer.MAX_VALUE)
+						croppingNecessary = true;
+					minHeight = fb.getHeight();
+				}
+			}
+		}
+
+		// Perform cropping
+		if (croppingNecessary) {
+			cropImagesInPlace(fileBitmapMapping, minWidth, minHeight);
+		}
 
 		for (final File subFolder : folder.listFiles()) {
 			final String className = subFolder.getName();
 			for (final File imageFile : subFolder.listFiles()) {
-				final FastBitmap fb = new FastBitmap(ImageIO.read(imageFile));
+				FastBitmap fb = fileBitmapMapping.get(imageFile);
 				INDArray matrix = null;
 				try {
-					matrix = ImageUtils.fastBitmapToMatrix(fb, fb.getColorSpace());
+					if (fb.getColorSpace() != colorSpace) {
+						switch (colorSpace) {
+						case Grayscale:
+							// Should not occur since the precedence of RGB is higher than for grayscale
+							fb.toGrayscale();
+							break;
+						case RGB:
+							fb.toRGB();
+							break;
+						case ARGB:
+							fb.toARGB();
+							break;
+						}
+					}
+
+					matrix = ImageUtils.fastBitmapToMatrix(fb, colorSpace);
 				} catch (final Throwable e) {
 					System.out.println(imageFile.getAbsolutePath());
 					e.printStackTrace();
@@ -329,6 +384,20 @@ public final class DataSetUtils {
 		}
 
 		return new DataSet(refInstances, matrixList);
+	}
+
+	public static void cropImagesInPlace(final Map<File, FastBitmap> fileBitmapMapping, final int width,
+			final int height) {
+		logger.debug("Performing cropping of the images to the size " + width + " x " + height + "...");
+
+		final Crop cropFilter = new Crop(0, 0, width, height);
+		for (Map.Entry<File, FastBitmap> mapping : fileBitmapMapping.entrySet()) {
+			// height is X, width is Y
+			cropFilter.setY((mapping.getValue().getWidth() - width) / 2);
+			cropFilter.setX((mapping.getValue().getHeight() - height) / 2);
+			cropFilter.ApplyInPlace(mapping.getValue());
+		}
+		logger.debug("Performed cropping.");
 	}
 
 	public static List<DataSet> getStratifiedSplit(final DataSet data, final Random rand, final double... portions) {
