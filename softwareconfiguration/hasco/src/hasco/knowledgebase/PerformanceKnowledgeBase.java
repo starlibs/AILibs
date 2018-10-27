@@ -72,11 +72,13 @@ public class PerformanceKnowledgeBase {
 		private final List<Pair<Parameter, String>> values;
 
 		public ParameterConfiguration(ComponentInstance composition) {
+//			System.out.println("Composition: " + composition.toString());
 			ArrayList<Pair<Parameter, String>> temp = new ArrayList<Pair<Parameter, String>>();
 			List<ComponentInstance> componentInstances = Util.getComponentInstancesOfComposition(composition);
 			for (ComponentInstance compInst : componentInstances) {
-				PartialOrderedSet<Parameter> parameters = compInst.getComponent().getParameters();
+				List<Parameter> parameters = compInst.getComponent().getParameters().getTotalOrder();
 				for (Parameter parameter : parameters) {
+//					System.out.println("Parameter: " + parameter + " has value: " + compInst.getParameterValues().get(parameter.getName()));
 					temp.add(Pair.of(parameter, compInst.getParameterValues().get(parameter.getName())));
 				}
 			}
@@ -131,13 +133,13 @@ public class PerformanceKnowledgeBase {
 		if (!performanceInstancesByIdentifier.get(benchmarkName).containsKey(identifier)) {
 			// System.out.println("Creating new Instances Object");
 			// Create Instances pipeline for this pipeline type
-			ParameterConfiguration parameterConfig = new ParameterConfiguration(componentInstance);
 			Instances instances = null;
 			// Add parameter domains as attributes
 			List<ComponentInstance> componentInstances = Util.getComponentInstancesOfComposition(componentInstance);
 			ArrayList<Attribute> allAttributes = new ArrayList<Attribute>();
 			for (ComponentInstance ci : componentInstances) {
-				PartialOrderedSet<Parameter> parameters = ci.getComponent().getParameters();
+//				PartialOrderedSet<Parameter> parameters = ci.getComponent().getParameters();
+				List<Parameter> parameters = ci.getComponent().getParameters().getTotalOrder();
 				ArrayList<Attribute> attributes = new ArrayList<Attribute>(parameters.size());
 				for (Parameter parameter : parameters) {
 					ParameterDomain domain = parameter.getDefaultDomain();
@@ -186,7 +188,8 @@ public class PerformanceKnowledgeBase {
 				// ParameterConfiguration(componentInstance);
 				Instances instances = null;
 				// Add parameter domains as attributes
-				PartialOrderedSet<Parameter> parameters = ci.getComponent().getParameters();
+//				PartialOrderedSet<Parameter> parameters = ci.getComponent().getParameters();
+				List<Parameter> parameters = ci.getComponent().getParameters().getTotalOrder();
 				ArrayList<Attribute> attributes = new ArrayList<Attribute>(parameters.size());
 				for (Parameter parameter : parameters) {
 					ParameterDomain domain = parameter.getDefaultDomain();
@@ -237,8 +240,6 @@ public class PerformanceKnowledgeBase {
 					String value = values.get(i).getRight();
 					instance.setValue(attr, value);
 				} else if (param.isNumeric()) {
-					System.out.println("component: " + componentInstance.getComponent().getName() + " parameter: "
-							+ param + " value: " + values.get(i).getRight());
 					double finalValue = Double.parseDouble(values.get(i).getRight());
 					instance.setValue(attr, finalValue);
 				}
@@ -247,6 +248,8 @@ public class PerformanceKnowledgeBase {
 		Attribute scoreAttr = instances.classAttribute();
 		instance.setValue(scoreAttr, score);
 		performanceInstancesByIdentifier.get(benchmarkName).get(identifier).add(instance);
+		
+		System.out.println("added " + instance + " for benchmark " + benchmarkName + " and identifier " + identifier);
 
 		// Add Instance for individual component
 		for (ComponentInstance ci : componentInstances) {
@@ -271,6 +274,8 @@ public class PerformanceKnowledgeBase {
 			instanceInd.setValue(scoreAttrInd, score);
 			performanceInstancesIndividualComponents.get(benchmarkName).get(ci.getComponent().getName())
 					.add(instanceInd);
+			
+			System.out.println("added ind. " + instanceInd + " for benchmark " + benchmarkName + " and identifier " + identifier);
 		}
 
 		if (addToDB)
@@ -292,7 +297,8 @@ public class PerformanceKnowledgeBase {
 
 	public FeatureSpace createFeatureSpaceFromComponentInstance(ComponentInstance compInst) {
 		FeatureSpace space = new FeatureSpace();
-		for (Parameter param : compInst.getComponent().getParameters()) {
+		List<Parameter> parameters = compInst.getComponent().getParameters().getTotalOrder();
+		for (Parameter param : parameters) {
 			ParameterDomain domain = param.getDefaultDomain();
 		}
 		return space;
@@ -513,8 +519,8 @@ public class PerformanceKnowledgeBase {
 				// instances.attribute(i));
 				continue;
 			} else if (instances.numDistinctValues(i) < minNum) {
-				// System.out.println("Attribute values: " + instances.numDistinctValues(i));
-				// System.out.println("Required: " + minNum);
+				 System.out.println("Attribute values for " + identifier + ": " + instances.numDistinctValues(i));
+				 System.out.println("Required: " + minNum);
 				return false;
 			}
 		}

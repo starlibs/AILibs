@@ -1,5 +1,6 @@
 package hasco.core;
 
+import jaicore.basic.sets.SetUtil;
 import jaicore.logic.fol.structure.ConstantParam;
 import jaicore.logic.fol.structure.Literal;
 import jaicore.logic.fol.structure.Monom;
@@ -15,12 +16,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.Stack;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.math3.geometry.euclidean.oned.Interval;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import hasco.knowledgebase.IParameterImportanceEstimator;
-import hasco.knowledgebase.PerformanceKnowledgeBase;
 import hasco.model.CategoricalParameterDomain;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
@@ -31,6 +34,8 @@ import hasco.model.ParameterRefinementConfiguration;
 
 public class isValidParameterRangeRefinementPredicatePruning implements EvaluablePredicate {
 
+	private final Logger logger = LoggerFactory.getLogger(isValidParameterRangeRefinementPredicate.class);
+
 	private final Collection<Component> components;
 	private final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration;
 	private final Map<ComponentInstance, Double> knownCompositionsAndTheirScore = new HashMap<>();
@@ -38,7 +43,7 @@ public class isValidParameterRangeRefinementPredicatePruning implements Evaluabl
 
 	public isValidParameterRangeRefinementPredicatePruning(final Collection<Component> components,
 			final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration,
-			final IParameterImportanceEstimator parameterImportanceEstimator) {
+			IParameterImportanceEstimator parameterImportanceEstimator) {
 		super();
 		this.components = components;
 		this.refinementConfiguration = refinementConfiguration;
@@ -48,14 +53,6 @@ public class isValidParameterRangeRefinementPredicatePruning implements Evaluabl
 	@Override
 	public Collection<List<ConstantParam>> getParamsForPositiveEvaluation(final Monom state,
 			final ConstantParam... partialGrounding) {
-		System.out.println("Miep");
-		
-		// if (true)
-		// return new ArrayList<>();
-
-		ComponentInstance ci = Util.getSolutionCompositionFromState(components, state, false);
-		// String compositionIdentifier = Util.getComponentNamesOfComposition(ci);
-
 		/* determine the context for which the interval refinement should be oracled */
 		if (partialGrounding.length != 6) {
 			throw new IllegalArgumentException("The interpreted predicate " + this.getClass().getName()
@@ -71,15 +68,20 @@ public class isValidParameterRangeRefinementPredicatePruning implements Evaluabl
 		String containerName = partialGrounding[3].getName();
 		String currentParamValue = partialGrounding[4].getName(); // this is not really used, because the current value
 																	// is again read from the state
+		logger.info("Determining positive evaluations for isValidParameterRangeRefinementPredicate({},{},{},{},{},{})",
+				componentName, componentIdentifier, parameterName, containerName, currentParamValue,
+				partialGrounding[5]);
+		boolean hasBeenSetBefore = state.contains(new Literal("overwritten('" + containerName + "')"));
 
-		/* determine true domain of parameter */
-		Map<Parameter, ParameterDomain> paramDomains = Util.getUpdatedDomainsOfComponentParameters(state, component,
-				componentIdentifier);
+		/* determine component instance and the true domain of parameter */
+		ComponentInstance instance = Util.getComponentInstanceFromState(components, state, componentIdentifier, false);
 
 		/*
 		 * For jmhansel fANOVA feature: if the parameters importance value is below
 		 * threshold epsilon, no more refinements will be allowed
 		 */
+
+		ComponentInstance ci = Util.getSolutionCompositionFromState(components, state, false);
 		String paramName = ci.getComponent().getName() + "::" + param.getName();
 
 		// if (performanceKB.getNumSamples("test", compositionIdentifier) >
@@ -117,96 +119,119 @@ public class isValidParameterRangeRefinementPredicatePruning implements Evaluabl
 			}
 		}
 
-		/* determine refinements for numeric parameters */
-		if (param.isNumeric()) {
-			NumericParameterDomain currentlyActiveDomain = (NumericParameterDomain) paramDomains.get(param);
-			Interval currentInterval = new Interval(currentlyActiveDomain.getMin(), currentlyActiveDomain.getMax());
-
-			/* if there is nothing to refine anymore */
-			if (currentInterval.getInf() == currentInterval.getSup()) {
-				return new ArrayList<>();
+		logger.debug(
+				"Derived component instance to be refined: {}. Parameter to refine: {}. Current value of parameter: {}",
+				instance, param, currentParamValue);
+		try {
+			Map<Parameter, ParameterDomain> paramDomains = Util.getUpdatedDomainsOfComponentParameters(instance);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Parameter domains are: {}", paramDomains.keySet().stream()
+						.map(k -> "\n\t" + k + ": " + paramDomains.get(k)).collect(Collectors.joining()));
 			}
 
-			ParameterRefinementConfiguration refinementConfig = this.refinementConfiguration.get(component).get(param);
-			if (refinementConfig == null) {
-				throw new IllegalArgumentException("No refinement configuration for parameter \"" + parameterName
-						+ "\" of component \"" + componentName + "\" has been supplied!");
-			}
-
-			/*
-			 * if this is an integer and the number of comprised integers are at most as
-			 * many as the branching factor, enumerate them
-			 */
-			if (currentlyActiveDomain.isInteger() && (Math.floor(currentInterval.getSup())
-					- Math.ceil(currentInterval.getInf()) + 1 <= refinementConfig.getRefinementsPerStep())) {
-				List<Interval> proposedRefinements = new ArrayList<>();
-				for (int i = (int) Math.ceil(currentInterval.getInf()); i <= (int) Math
-						.floor(currentInterval.getSup()); i++) {
-					proposedRefinements.add(new Interval(i, i));
+			/* determine refinements for numeric parameters */
+			if (param.isNumeric()) {
+				NumericParameterDomain currentlyActiveDomain = (NumericParameterDomain) paramDomains.get(param);
+				Interval currentInterval = new Interval(currentlyActiveDomain.getMin(), currentlyActiveDomain.getMax());
+				assert (!hasBeenSetBefore || (currentInterval.getInf() == Double
+						.valueOf(SetUtil.unserializeList(currentParamValue).get(0))
+						&& currentInterval.getSup() == Double.valueOf(SetUtil.unserializeList(currentParamValue).get(
+								1)))) : "The derived currently active domain of an explicitly set parameter deviates from the domain specified in the state!";
+				ParameterRefinementConfiguration refinementConfig = this.refinementConfiguration.get(component)
+						.get(param);
+				if (refinementConfig == null) {
+					throw new IllegalArgumentException("No refinement configuration for parameter \"" + parameterName
+							+ "\" of component \"" + componentName + "\" has been supplied!");
 				}
-				return this.getGroundingsForIntervals(proposedRefinements, partialGroundingAsList);
-			}
 
-			/*
-			 * if the interval is already below the threshold for this parameter, no more
-			 * refinements will be allowed
-			 */
-			if (currentInterval.getSup() - currentInterval.getInf() < refinementConfig.getIntervalLength()) {
-				return new ArrayList<>();
-			}
+				/*
+				 * if the interval is under the distinction threshold, return an empty list of
+				 * possible refinements (predicate will always be false here)
+				 */
+				if (currentInterval.getSup() - currentInterval.getInf() < refinementConfig.getIntervalLength()) {
+					logger.info(
+							"Returning an empty list as this is a numeric parameter that has been narrowed sufficiently. Required interval length is {}, and actual interval length is {}",
+							refinementConfig.getIntervalLength(), currentInterval.getSup() - currentInterval.getInf());
+					if (!hasBeenSetBefore) {
+						List<Interval> unmodifiedRefinement = new ArrayList<>();
+						unmodifiedRefinement.add(currentInterval);
+						return this.getGroundingsForIntervals(unmodifiedRefinement, partialGroundingAsList);
+					}
+					return new ArrayList<>();
+				}
 
-			if (!refinementConfig.isInitRefinementOnLogScale()) {
-				List<Interval> proposedRefinements = this.refineOnLinearScale(currentInterval,
-						refinementConfig.getRefinementsPerStep(), refinementConfig.getIntervalLength());
+				/*
+				 * if this is an integer and the number of comprised integers are at most as
+				 * many as the branching factor, enumerate them
+				 */
+				if (currentlyActiveDomain.isInteger() && (Math.floor(currentInterval.getSup())
+						- Math.ceil(currentInterval.getInf()) + 1 <= refinementConfig.getRefinementsPerStep())) {
+					List<Interval> proposedRefinements = new ArrayList<>();
+					for (int i = (int) Math.ceil(currentInterval.getInf()); i <= (int) Math
+							.floor(currentInterval.getSup()); i++) {
+						proposedRefinements.add(new Interval(i, i));
+					}
+					logger.info("Ultimate level of integer refinement reached. Returning refinements: {}.",
+							proposedRefinements);
+					return this.getGroundingsForIntervals(proposedRefinements, partialGroundingAsList);
+				}
+				if (hasBeenSetBefore || !refinementConfig.isInitRefinementOnLogScale()) {
+					List<Interval> proposedRefinements = this.refineOnLinearScale(currentInterval,
+							refinementConfig.getRefinementsPerStep(), refinementConfig.getIntervalLength());
+					for (Interval proposedRefinement : proposedRefinements) {
+						assert proposedRefinement.getInf() >= currentInterval.getInf()
+								&& proposedRefinement.getSup() <= currentInterval.getSup() : "The proposed refinement ["
+										+ proposedRefinement.getInf() + ", " + proposedRefinement.getSup()
+										+ "] is not a sub-interval of " + currentParamValue + "].";
+						assert !proposedRefinement
+								.equals(currentInterval) : "No real refinement! Intervals are identical.";
+					}
+					logger.info("Returning linear refinements: {}.", proposedRefinements);
+					return this.getGroundingsForIntervals(proposedRefinements, partialGroundingAsList);
+				}
+				Optional<Literal> focusPredicate = state.stream()
+						.filter(l -> l.getPropertyName().equals("parameterFocus")
+								&& l.getParameters().get(0).getName().equals(componentIdentifier)
+								&& l.getParameters().get(1).getName().equals(parameterName))
+						.findAny();
+				if (!focusPredicate.isPresent()) {
+					throw new IllegalArgumentException(
+							"The given state does not specify a parameter focus for the log-scale parameter "
+									+ parameterName + " on object \"" + componentIdentifier + "\"");
+				}
+				double focus = Double.parseDouble(focusPredicate.get().getParameters().get(2).getName());
+				List<Interval> proposedRefinements = this.refineOnLogScale(currentInterval,
+						refinementConfig.getRefinementsPerStep(), 2, focus);
 				for (Interval proposedRefinement : proposedRefinements) {
-					assert proposedRefinement.getInf() >= currentInterval.getInf()
-							&& proposedRefinement.getSup() <= currentInterval.getSup() : "The proposed refinement ["
+					double epsilon = 1E-7;
+					assert proposedRefinement.getInf() + epsilon >= currentInterval.getInf() && proposedRefinement
+							.getSup() <= currentInterval.getSup() + epsilon : "The proposed refinement ["
 									+ proposedRefinement.getInf() + ", " + proposedRefinement.getSup()
 									+ "] is not a sub-interval of " + currentParamValue + "].";
 					assert !proposedRefinement.equals(currentInterval) : "No real refinement! Intervals are identical.";
 				}
+				logger.info("Returning default refinements: {}.", proposedRefinements);
 				return this.getGroundingsForIntervals(proposedRefinements, partialGroundingAsList);
+			} else if (param.isCategorical()) {
+				List<String> possibleValues = new ArrayList<>();
+				if (hasBeenSetBefore) {
+					logger.info("Returning empty list since param has been set before.");
+					return new ArrayList<>();
+				}
+				for (Object valAsObject : ((CategoricalParameterDomain) paramDomains.get(param)).getValues()) {
+					possibleValues.add(valAsObject.toString());
+				}
+				logger.info("Returning possible values {}.", possibleValues);
+				return this.getGroundingsForOracledValues(possibleValues, partialGroundingAsList);
+			} else {
+				throw new UnsupportedOperationException(
+						"Currently no support for parameters of class \"" + param.getClass().getName() + "\"");
 			}
-
-			Optional<Literal> focusPredicate = state.stream()
-					.filter(l -> l.getPropertyName().equals("parameterFocus")
-							&& l.getParameters().get(0).getName().equals(componentIdentifier)
-							&& l.getParameters().get(1).getName().equals(parameterName))
-					.findAny();
-			if (!focusPredicate.isPresent()) {
-				throw new IllegalArgumentException(
-						"The given state does not specify a parameter focus for the log-scale parameter "
-								+ parameterName + " on object \"" + componentIdentifier + "\"");
-			}
-			double focus = Double.parseDouble(focusPredicate.get().getParameters().get(2).getName());
-
-			List<Interval> proposedRefinements = this.refineOnLogScale(currentInterval,
-					refinementConfig.getRefinementsPerStep(), 2, focus);
-			for (Interval proposedRefinement : proposedRefinements) {
-				double epsilon = 1E-7;
-				assert proposedRefinement.getInf() + epsilon >= currentInterval.getInf() && proposedRefinement
-						.getSup() <= currentInterval.getSup() + epsilon : "The proposed refinement ["
-								+ proposedRefinement.getInf() + ", " + proposedRefinement.getSup()
-								+ "] is not a sub-interval of " + currentParamValue + "].";
-				assert !proposedRefinement.equals(currentInterval) : "No real refinement! Intervals are identical.";
-			}
-			return this.getGroundingsForIntervals(proposedRefinements, partialGroundingAsList);
-
-		} else if (param.isCategorical()) {
-			List<String> possibleValues = new ArrayList<>();
-			boolean hasBeenSetBefore = state.contains(new Literal("overwritten('" + containerName + "')"));
-			if (hasBeenSetBefore) {
-				return new ArrayList<>();
-			}
-			for (Object valAsObject : ((CategoricalParameterDomain) paramDomains.get(param)).getValues()) {
-				possibleValues.add(valAsObject.toString());
-			}
-			return this.getGroundingsForOracledValues(possibleValues, partialGroundingAsList);
-		} else {
-			throw new UnsupportedOperationException(
-					"Currently no support for parameters of class \"" + param.getClass().getName() + "\"");
+		} catch (Throwable e) {
+			e.printStackTrace();
+			System.exit(1);
+			return null;
 		}
-
 		// throw new NotImplementedException("Apparentely, there is an unimplemented
 		// case!");
 	}
@@ -258,13 +283,11 @@ public class isValidParameterRangeRefinementPredicatePruning implements Evaluabl
 		double max = interval.getSup();
 		double length = max - min;
 		List<Interval> intervals = new ArrayList<>();
-
 		/* if no refinement is possible, return just the interval itself */
 		if (length <= minimumLengthOfIntervals) {
 			intervals.add(interval);
 			return intervals;
 		}
-
 		/* otherwise compute the sub-intervals */
 		int numberOfIntervals = Math.min((int) Math.ceil(length / minimumLengthOfIntervals), maxNumberOfSubIntervals);
 		double stepSize = length / numberOfIntervals;
@@ -274,85 +297,12 @@ public class isValidParameterRangeRefinementPredicatePruning implements Evaluabl
 		return intervals;
 	}
 
-	// private double expM(double x, double basis, double center) {
-	// x -= center;
-	// if (x == 0)
-	// return 0;
-	// if (x > 0)
-	// return Math.pow(basis, x) - 1;
-	// else
-	// return -1 * Math.pow(basis, -1 * x) + 1;
-	// }
-	//
-	// private double logM(double x, double basis, double center) {
-	// if (x == 0)
-	// return 0;
-	// if (x > 0)
-	// return Math.log(x + 1) / Math.log(basis);
-	// else
-	// return -1 * Math.log(-1 * x + 1) / Math.log(basis);
-	// }
-
-	// private double log2lin(double point, double basis, double center) {
-	// point += -center + 1;
-	// if (point > 1)
-	// point = Math.log(point) / Math.log(basis);
-	// else if (point < 1)
-	// point = -1 * Math.log(-1 * point) / Math.log(basis);
-	// else
-	// throw new UnsupportedOperationException();
-	// return point;
-	// }
-	//
-	// private double lin2log(double point, double basis, double center) {
-	// return (point < 0 ? (-1 * Math.pow(basis, -1 * point)) : Math.pow(basis,
-	// point));
-	// }
-
-	// public List<Interval> refineOnLogScale(Interval interval, int
-	// numberOfSubIntervals, double basis,
-	// double center) {
-	//
-	// /* adjust borders by center value */
-	// double min = logM(interval.getInf(), basis, center);
-	// double max = logM(interval.getSup(), basis, center);
-	//
-	// /* perform the refinement on the linear scale */
-	// System.out.println("Now refining on linearized log-scale [" + min + ", " +
-	// max + "]");
-	// Interval modifiedInterval = new Interval(min, max);
-	// List<Interval> linearRefinements = refineOnLinearScale(modifiedInterval,
-	// numberOfSubIntervals,
-	// .0001);
-	// System.out.println("The linear refinements are:");
-	// linearRefinements.forEach(i -> System.out.println("\t" + "[" + i.getInf() +
-	// ", " + i.getSup() +
-	// "]"));
-	// System.out.println();
-	//
-	// /* recover the log-scale intervals */
-	// List<Interval> logScaleRefinements = new ArrayList<>();
-	// for (Interval i : linearRefinements) {
-	// double recoveredInf = expM(i.getInf(), basis, center);
-	// double recoveredSup = expM(i.getSup(), basis, center);
-	// // System.out.println(recoveredInf + ", ");
-	// System.out.println("[" + i.getInf() + ", " + i.getSup() + "] -> [" +
-	// recoveredInf + ", " +
-	// recoveredSup + "]");
-	// // logScaleRefinements.add(new Interval(Math.pow(basis, i.getInf()) + center,
-	// Math.pow(basis,
-	// i.getSup()) + center));
-	// }
-	// return logScaleRefinements;
-	// }
-
 	public List<Interval> refineOnLogScale(final Interval interval, final int n, final double basis,
 			final double pointOfConcentration) {
 		List<Interval> list = new ArrayList<>();
 		double min = interval.getInf();
 		double max = interval.getSup();
 		double length = max - min;
-
 		/*
 		 * if the point of concentration is exactly on the left or the right of the
 		 * interval, conduct the standard technique
@@ -377,7 +327,6 @@ public class isValidParameterRangeRefinementPredicatePruning implements Evaluabl
 			}
 			return list;
 		}
-
 		/*
 		 * if the point of concentration is in the inner of the interval, split the
 		 * interval correspondingly and recursively solve the problem
@@ -395,12 +344,10 @@ public class isValidParameterRangeRefinementPredicatePruning implements Evaluabl
 	public void refineRecursively(final Interval interval, final int maxNumberOfSubIntervalsPerRefinement,
 			final double basis, final double pointOfConcentration,
 			final double factorForMaximumLengthOfFinestIntervals) {
-
 		/* first, do a logarithmic refinement */
 		List<Interval> initRefinement = this.refineOnLogScale(interval, maxNumberOfSubIntervalsPerRefinement, basis,
 				pointOfConcentration);
 		Collections.reverse(initRefinement);
-
 		Stack<Interval> openRefinements = new Stack<>();
 		openRefinements.addAll(initRefinement);
 		int depth = 0;
@@ -410,7 +357,6 @@ public class isValidParameterRangeRefinementPredicatePruning implements Evaluabl
 				System.out.print("\t");
 			}
 			System.out.println("[" + intervalToRefine.getInf() + ", " + intervalToRefine.getSup() + "]");
-
 			/* compute desired granularity for this specific interval */
 			double distanceToPointOfContentration = Math.min(Math.abs(intervalToRefine.getInf() - pointOfConcentration),
 					Math.abs(intervalToRefine.getSup() - pointOfConcentration));
@@ -420,7 +366,6 @@ public class isValidParameterRangeRefinementPredicatePruning implements Evaluabl
 					+ factorForMaximumLengthOfFinestIntervals + " = " + maximumLengthOfFinestIntervals);
 			List<Interval> refinements = this.refineOnLinearScale(intervalToRefine,
 					maxNumberOfSubIntervalsPerRefinement, maximumLengthOfFinestIntervals);
-
 			depth++;
 			if (refinements.size() == 1 && refinements.get(0).equals(intervalToRefine)) {
 				depth--;
@@ -428,7 +373,7 @@ public class isValidParameterRangeRefinementPredicatePruning implements Evaluabl
 				Collections.reverse(refinements);
 				openRefinements.addAll(refinements);
 			}
-
 		} while (!openRefinements.isEmpty());
 	}
+
 }

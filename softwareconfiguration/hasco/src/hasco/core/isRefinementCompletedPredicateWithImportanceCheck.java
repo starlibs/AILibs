@@ -1,7 +1,5 @@
 package hasco.core;
 
-import java.nio.channels.UnsupportedAddressTypeException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -10,10 +8,10 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.NotImplementedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import hasco.knowledgebase.IParameterImportanceEstimator;
-import hasco.knowledgebase.PerformanceKnowledgeBase;
-import hasco.model.BooleanParameterDomain;
 import hasco.model.CategoricalParameterDomain;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
@@ -28,6 +26,7 @@ import jaicore.logic.fol.theories.EvaluablePredicate;
 
 public class isRefinementCompletedPredicateWithImportanceCheck implements EvaluablePredicate {
 
+	private final Logger logger = LoggerFactory.getLogger(isRefinementCompletedPredicate.class);
 	private final Collection<Component> components;
 	private final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration;
 	private final IParameterImportanceEstimator importanceEstimator;
@@ -35,8 +34,7 @@ public class isRefinementCompletedPredicateWithImportanceCheck implements Evalua
 	// new HashMap<>();
 
 	public isRefinementCompletedPredicateWithImportanceCheck(Collection<Component> components,
-			Map<Component, Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration,
-			IParameterImportanceEstimator importanceEstimator) {
+			Map<Component, Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration, IParameterImportanceEstimator importanceEstimator) {
 		super();
 		this.components = components;
 		this.refinementConfiguration = refinementConfiguration;
@@ -62,8 +60,7 @@ public class isRefinementCompletedPredicateWithImportanceCheck implements Evalua
 
 	@Override
 	public boolean test(Monom state, ConstantParam... params) {
-		// if(true)
-		// return true;
+
 		/* initialize routine */
 		if (params.length != 2) {
 			throw new IllegalArgumentException("There should be exactly two parameters additional to the state but "
@@ -83,7 +80,6 @@ public class isRefinementCompletedPredicateWithImportanceCheck implements Evalua
 		ComponentInstance ci = Util.getSolutionCompositionFromState(components, state, false);
 		Component component = groundComponent.getComponent();
 		Map<String, String> componentParamContainers = Util.getParameterContainerMap(state, objectContainer);
-		Map<String, String> componentParams = groundComponent.getParameterValues();
 
 		Set<String> importantParams = new HashSet<String>();
 		for (Parameter param : component.getParameters()) {
@@ -110,6 +106,7 @@ public class isRefinementCompletedPredicateWithImportanceCheck implements Evalua
 						.println("extract important parameters for pipline " + Util.getComponentNamesOfComposition(ci));
 				importantParams = importanceEstimator.extractImportantParameters(ci, false);
 				// If there are no parameters left that are estimated to be important, return
+				System.out.println("Important Parameters: " + importantParams);
 				// true
 				if (importantParams.isEmpty())
 					return true;
@@ -118,51 +115,61 @@ public class isRefinementCompletedPredicateWithImportanceCheck implements Evalua
 			}
 		}
 
-		// System.out.println("Important Parameters: " + importantParams.toString());
+
 		for (Parameter param : component.getParameters()) {
-			// String paramName = ci.getComponent().getName() + "::" + param.getName();
 			String paramName = component.getName() + "::" + param.getName();
 
 			if (!importantParams.contains(paramName)) {
-				// System.out.println("Skip parameter " + paramName);
+//				 System.out.println("Skip parameter " + paramName);
 				// if the parameter is not contained in the set of important parameters, skip it
 				continue;
 			}
-			// System.out.println("Not skipping parameter " + paramName);
+//			 System.out.println("Not skipping parameter " + paramName);
 			String containerOfParam = componentParamContainers.get(param.getName());
-			String currentValueOfParam = componentParams.get(param.getName());
+			String currentValueOfParam = groundComponent.getParameterValue(param);
+			boolean variableHasBeenSet = state.contains(new Literal("overwritten('" + containerOfParam + "')"));
+			boolean variableHasBeenClosed = state.contains(new Literal("closed('" + containerOfParam + "')"));
+			assert variableHasBeenSet == groundComponent.getParametersThatHaveBeenSetExplicitly().contains(param);
+			assert !variableHasBeenClosed || variableHasBeenSet : "Parameter " + param.getName() + " of component "
+					+ component.getName() + " with default domain " + param.getDefaultDomain()
+					+ " has been closed but no value has been set.";
+
 			if (param.isNumeric()) {
-				ParameterRefinementConfiguration refinementConfig = refinementConfiguration.get(component).get(param);
-				List<String> interval = SetUtil.unserializeList(currentValueOfParam);
-				double min = Double.parseDouble(interval.get(0));
-				double max = Double.parseDouble(interval.get(1));
+				double min = 0;
+				double max = 0;
+				if (currentValueOfParam != null) {
+					List<String> interval = SetUtil.unserializeList(currentValueOfParam);
+					min = Double.parseDouble(interval.get(0));
+					max = Double.parseDouble(interval.get(1));
+				} else {
+					min = ((NumericParameterDomain) param.getDefaultDomain()).getMin();
+					max = ((NumericParameterDomain) param.getDefaultDomain()).getMax();
+				}
 				double length = max - min;
-				if (length > refinementConfig.getIntervalLength()) {
+				if (length > refinementConfiguration.get(component).get(param).getIntervalLength()) {
+					logger.info(
+							"Test for isRefinementCompletedPredicate({},{}) is negative. Interval length of [{},{}] is {}. Required length to consider an interval atomic is {}",
+							params[0].getName(), objectContainer, min, max, length,
+							refinementConfiguration.get(component).get(param).getIntervalLength());
 					return false;
 				}
 			} else if (param.getDefaultDomain() instanceof CategoricalParameterDomain) { // categorical params can be
-																							// refined iff their current
-																							// value is not the default
-																							// value
-				assert currentValueOfParam != null : "Param " + param.getName() + " has currently no value!";
+																							// refined iff the have not
+																							// been set and closed
+																							// before
 				assert param.getDefaultValue() != null : "Param " + param.getName() + " has no default value!";
-				boolean variableHasBeenSet = state.contains(new Literal("overwritten('" + containerOfParam + "')"));
-				boolean variableHasBeenClosed = state.contains(new Literal("closed('" + containerOfParam + "')"));
-				assert !variableHasBeenClosed || variableHasBeenSet : "Parameter " + param.getName() + " of component "
-						+ component.getName() + " with default domain " + param.getDefaultDomain()
-						+ " has been closed but no value has been set.";
 				if (!variableHasBeenSet && !variableHasBeenClosed) {
+					logger.info("Test for isRefinementCompletedPredicate({},{}) is negative", params[0].getName(),
+							objectContainer);
 					return false;
 				}
 			} else
 				throw new UnsupportedOperationException(
 						"Currently no support for testing parameters of type " + param.getClass().getName());
-			// System.out.println(
-			// "\t" + param.getName() + " (" + componentParams.get(param.getName()) + ") is
-			// still refinable.");
+			// System.out.println("\t" + param.getName() + " (" +
+			// componentParams.get(param.getName()) + ") is still refinable.");
 		}
-		// System.out.println("Refinement of component " + component.getName() + " is
-		// completed." );
+		logger.info("Test for isRefinementCompletedPredicate({},{}) is positive", params[0].getName(), objectContainer);
 		return true;
 	}
 }
