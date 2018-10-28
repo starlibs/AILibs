@@ -90,11 +90,7 @@ public class isValidParameterRangeRefinementPredicatePruning implements Evaluabl
 			// System.out.println(minNumSamplesForImportanceEstimation + " samples are
 			// available");
 			try {
-				// System.out.println("extract important parameters for pipline valid" +
-				// Util.getComponentNamesOfComposition(ci));
-				// System.out.println("Querying fANOVA with " +
-				// performanceKB.getNumSamples("test", compositionIdentifier)
-				// + " samples!");
+				 System.out.println("extract important parameters for pipline valid" + Util.getComponentNamesOfComposition(ci));
 				// for now, only consider parameter subsets of size at most 2
 				Set<String> importantParams = parameterImportanceEstimator.extractImportantParameters(ci, false);
 				// System.out.println("#Important params: " + importantParams.size());
