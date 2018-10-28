@@ -23,8 +23,8 @@ import autofe.db.model.relation.BackwardRelationship;
 import autofe.db.model.relation.ForwardRelationship;
 import autofe.db.util.DBUtils;
 import autofe.db.util.Tuple;
-import jaicore.search.structure.core.NodeExpansionDescription;
-import jaicore.search.structure.core.NodeType;
+import jaicore.search.model.travesaltree.NodeExpansionDescription;
+import jaicore.search.model.travesaltree.NodeType;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNode, String> {

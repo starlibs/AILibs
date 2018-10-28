@@ -1,7 +1,7 @@
 package autofe.db.search;
 
 import autofe.db.model.database.Database;
-import jaicore.search.structure.core.GraphGenerator;
+import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;

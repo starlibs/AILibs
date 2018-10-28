@@ -24,32 +24,30 @@ import autofe.db.search.DatabaseGraphGenerator;
 import autofe.db.search.DatabaseNode;
 import autofe.db.search.DatabaseNodeEvaluator;
 import autofe.db.util.DBUtils;
-import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
-import jaicore.search.structure.core.Node;
-import jaicore.search.structure.core.NodeExpansionDescription;
+import jaicore.search.model.probleminputs.GeneralEvaluatedTraversalTree;
+import jaicore.search.model.travesaltree.Node;
+import jaicore.search.model.travesaltree.NodeExpansionDescription;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 public class SearchTest {
 
 	private static final String DATABASE_MODEL_FILE = "model/db/bankaccount_toy_database.json";
 
-	//@Test
-	public void testSearch() {
+	// @Test
+	public void testSearch() throws Exception {
 		Database initialDatabase = DBUtils.deserializeFromFile(DATABASE_MODEL_FILE);
 		DatabaseGraphGenerator generator = new DatabaseGraphGenerator(initialDatabase);
 		DatabaseNodeEvaluator evaluator = new DatabaseNodeEvaluator(generator);
-		BestFirst<DatabaseNode, String> search = new BestFirst<>(generator, evaluator);
+
+		GeneralEvaluatedTraversalTree<DatabaseNode, String, Double> tree = new GeneralEvaluatedTraversalTree<>(
+				generator, evaluator);
+
+		BestFirst<GeneralEvaluatedTraversalTree<DatabaseNode, String, Double>, DatabaseNode, String, Double> search = new BestFirst<>(
+				tree);
 		search.setTimeoutForComputationOfF(60000, node -> 100.0);
 
-		// Add graph visualizer
-		new SimpleGraphVisualizationWindow<Node<DatabaseNode, Double>>(search).getPanel().setTooltipGenerator(n -> {
-			StringBuilder sb = new StringBuilder();
-			sb.append(n.getPoint().toString());
-			sb.append(", score = ");
-			sb.append(String.format("%.2f", n.getInternalLabel()));
-			return sb.toString();
-		});
+		// TODO: Add graph visualizer
 
 		List<DatabaseNode> solutions = null;
 		while ((solutions = search.nextSolution()) != null) {
@@ -58,7 +56,7 @@ public class SearchTest {
 	}
 
 	@Test
-	public void testLexicographicOrderEmptyFeatureList() {
+	public void testLexicographicOrderEmptyFeatureList() throws Exception {
 		Database db = DBUtils.deserializeFromFile(DATABASE_MODEL_FILE);
 		DatabaseGraphGenerator generator = new DatabaseGraphGenerator(db);
 		SuccessorGenerator<DatabaseNode, String> sg = generator.getSuccessorGenerator();
@@ -71,7 +69,7 @@ public class SearchTest {
 		// Forward features
 		assertTrue(descriptions.contains("Forward: Balance"));
 		assertTrue(descriptions.contains("Forward: BankName"));
-		//Target
+		// Target
 		assertFalse(descriptions.contains("Forward: Credible"));
 		assertTrue(descriptions.contains("Forward: FirstName"));
 		assertTrue(descriptions.contains("Forward: TransactionCounter"));
@@ -86,7 +84,7 @@ public class SearchTest {
 	}
 
 	@Test
-	public void testLexicographicOrderForwardFeatureList() {
+	public void testLexicographicOrderForwardFeatureList() throws Exception {
 		Database db = DBUtils.deserializeFromFile(DATABASE_MODEL_FILE);
 		DatabaseGraphGenerator generator = new DatabaseGraphGenerator(db);
 		SuccessorGenerator<DatabaseNode, String> sg = generator.getSuccessorGenerator();
@@ -104,7 +102,7 @@ public class SearchTest {
 		// Forward features
 		assertFalse(descriptions.contains("Forward: Balance"));
 		assertFalse(descriptions.contains("Forward: BankName"));
-		//Target 
+		// Target
 		assertFalse(descriptions.contains("Forward: Credible"));
 		assertTrue(descriptions.contains("Forward: FirstName"));
 		assertTrue(descriptions.contains("Forward: TransactionCounter"));
@@ -120,7 +118,7 @@ public class SearchTest {
 	}
 
 	@Test
-	public void testLexicographicOrderBackwardFeatureList() {
+	public void testLexicographicOrderBackwardFeatureList() throws Exception {
 		Database db = DBUtils.deserializeFromFile(DATABASE_MODEL_FILE);
 		DatabaseGraphGenerator generator = new DatabaseGraphGenerator(db);
 		SuccessorGenerator<DatabaseNode, String> sg = generator.getSuccessorGenerator();
@@ -142,7 +140,7 @@ public class SearchTest {
 		// Forward features
 		assertTrue(descriptions.contains("Forward: Balance"));
 		assertTrue(descriptions.contains("Forward: BankName"));
-		//Target
+		// Target
 		assertFalse(descriptions.contains("Forward: Credible"));
 		assertTrue(descriptions.contains("Forward: FirstName"));
 		assertTrue(descriptions.contains("Forward: TransactionCounter"));
@@ -167,7 +165,7 @@ public class SearchTest {
 	}
 
 	@Test
-	public void testIntermediateNode() {
+	public void testIntermediateNode() throws Exception {
 		Database db = DBUtils.deserializeFromFile(DATABASE_MODEL_FILE);
 		DatabaseGraphGenerator generator = new DatabaseGraphGenerator(db);
 		SuccessorGenerator<DatabaseNode, String> sg = generator.getSuccessorGenerator();
@@ -190,7 +188,7 @@ public class SearchTest {
 	}
 
 	@Test
-	public void testIntermediateNodeDuplicateCheck2Path() {
+	public void testIntermediateNodeDuplicateCheck2Path() throws Exception {
 		Database db = DBUtils.deserializeFromFile(DATABASE_MODEL_FILE);
 		DatabaseGraphGenerator generator = new DatabaseGraphGenerator(db);
 		SuccessorGenerator<DatabaseNode, String> sg = generator.getSuccessorGenerator();
@@ -241,7 +239,7 @@ public class SearchTest {
 	}
 
 	@Test
-	public void testIntermediateNodeDuplicateCheck1Path() {
+	public void testIntermediateNodeDuplicateCheck1Path() throws Exception {
 		Database db = DBUtils.deserializeFromFile(DATABASE_MODEL_FILE);
 		DatabaseGraphGenerator generator = new DatabaseGraphGenerator(db);
 		SuccessorGenerator<DatabaseNode, String> sg = generator.getSuccessorGenerator();
@@ -276,7 +274,7 @@ public class SearchTest {
 	}
 
 	@Test
-	public void testStandardNodeDuplicateCheck() {
+	public void testStandardNodeDuplicateCheck() throws Exception {
 		Database db = DBUtils.deserializeFromFile(DATABASE_MODEL_FILE);
 		DatabaseGraphGenerator generator = new DatabaseGraphGenerator(db);
 		SuccessorGenerator<DatabaseNode, String> sg = generator.getSuccessorGenerator();
@@ -330,7 +328,7 @@ public class SearchTest {
 		// Forward features
 		assertTrue(descriptions.contains("Forward: Balance"));
 		assertTrue(descriptions.contains("Forward: BankName"));
-		//Target
+		// Target
 		assertFalse(descriptions.contains("Forward: Credible"));
 		assertTrue(descriptions.contains("Forward: FirstName"));
 		assertTrue(descriptions.contains("Forward: TransactionCounter"));

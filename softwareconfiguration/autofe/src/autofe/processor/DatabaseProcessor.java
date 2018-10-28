@@ -1,6 +1,7 @@
 package autofe.processor;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +14,9 @@ import autofe.db.search.DatabaseNode;
 import autofe.db.search.DatabaseNodeEvaluator;
 import autofe.db.sql.DatabaseConnector;
 import autofe.db.util.DBUtils;
+import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
+import jaicore.search.model.probleminputs.GeneralEvaluatedTraversalTree;
 import weka.core.Instances;
 
 public class DatabaseProcessor {
@@ -48,7 +51,9 @@ public class DatabaseProcessor {
 		DatabaseNodeEvaluator evaluator = new DatabaseNodeEvaluator(generator,
 				configuration.getRandomCompletionPathLength(), configuration.getSeed(),
 				configuration.getEvaluationFunction());
-		BestFirst<DatabaseNode, String> search = new BestFirst<>(generator, evaluator);
+		
+		GeneralEvaluatedTraversalTree<DatabaseNode, String, Double> tree = new GeneralEvaluatedTraversalTree<>(generator, evaluator);
+		BestFirst<GeneralEvaluatedTraversalTree<DatabaseNode, String, Double>,DatabaseNode, String, Double> search = new BestFirst<>(tree);
 		search.setTimeoutForComputationOfF(TIMEOUT_F_COMPUTATION_MS, node -> 100.0);
 
 		// Do search
@@ -58,6 +63,10 @@ public class DatabaseProcessor {
 				solution = search.nextSolution();
 			} catch (InterruptedException e) {
 				LOG.warn("Search has been interrupted!");
+			} catch (NoSuchElementException e) {
+				LOG.error("An error occured in the search!",e);
+			} catch (AlgorithmExecutionCanceledException e) {
+				LOG.error("Search algorithm has been canceled!",e);
 			}
 		}
 
