@@ -106,7 +106,7 @@ public class PretrainedNNFilter implements IFilter, Serializable {
 			PretrainedType type = inferPretrainedTypeFromShape(shape);
 
 			if (!this.model.pretrainedAvailable(type)) {
-				logger.warn("Given model " + this.model.getClass().getSimpleName()
+				logger.info("Given model " + this.model.getClass().getSimpleName()
 						+ " does not provide pretrained weights for input shape " + Arrays.toString(shape)
 						+ " (pretrained type " + type + "). Trying to find different weights and adjust input shape.");
 
