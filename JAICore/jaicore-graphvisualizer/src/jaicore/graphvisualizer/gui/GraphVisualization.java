@@ -30,6 +30,7 @@ import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeRemovedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
 import javafx.geometry.Pos;
+import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.CycleMethod;
@@ -63,6 +64,9 @@ public class GraphVisualization<V,E> {
 	
 	private StackPane pane;
 	private Rectangle gradient;
+	
+	private Label minLabel;
+	private Label maxLabel;
 	
 
 	public GraphVisualization(ObjectEvaluator<V> evaluator) {
@@ -111,8 +115,18 @@ public class GraphVisualization<V,E> {
 		};
 		pane.getChildren().add(this.viewPanel);
 		pipeThread.start();
+		
+		this.maxLabel = new Label();
+		this.minLabel = new Label();
 		if(evaluation) {
 			this.pane.getChildren().add(gradient);
+			
+			this.maxLabel.setTextFill(Color.CYAN);
+			this.minLabel.setTextFill(Color.CYAN);
+			pane.getChildren().add(this.maxLabel);
+
+			this.minLabel.setTranslateY(485);
+			pane.getChildren().add(this.minLabel);
 		}
 
 	}
@@ -125,7 +139,6 @@ public class GraphVisualization<V,E> {
 	@Subscribe
 	public synchronized void receiveControlEvent(EnableColouring event) {
 		this.evaluation = event.isColouring();
-		System.out.println(this.evaluation);
 		toggleColouring(this.evaluation);
 	}
 	
@@ -136,11 +149,21 @@ public class GraphVisualization<V,E> {
 			this.graph.setAttribute("ui.stylesheet", "url('conf/heatmap.css')");
 			gradient = createColorGradient();
 			pane.getChildren().add(gradient);
+			
+			this.maxLabel.setTextFill(Color.CYAN);
+			this.minLabel.setTextFill(Color.CYAN);
+			pane.getChildren().add(this.maxLabel);
+
+			this.minLabel.setTranslateY(485);
+			pane.getChildren().add(this.minLabel);
+			
 			update();
 		}
 		else {
 			this.graph.setAttribute("ui.stylesheet", "url('conf/searchgraph.css')");
 			pane.getChildren().remove(this.gradient);
+			pane.getChildren().remove(this.maxLabel);
+			pane.getChildren().remove(this.minLabel);
 			
 		}
 		update();
@@ -245,9 +268,11 @@ public class GraphVisualization<V,E> {
 				double value = evaluator.evaluate(newNodeExt);
 				if(value < bestValue) {
 					this.bestValue = value;
+					this.minLabel.setText(Double.toString(this.bestValue));
 				}
 				if(value > worstValue) {
 					this.worstValue = value;
+					this.maxLabel.setText(Double.toString(this.worstValue));
 				}
 				
 				if(!roots.contains(newNodeExt))
@@ -364,7 +389,6 @@ public class GraphVisualization<V,E> {
 		if(Float.isNaN(color)) {
 			color = 1;
 		}
-		System.out.println(color);
 		if(evaluation) {
 			node.setAttribute("ui.color", color);
 		}
@@ -380,6 +404,10 @@ public class GraphVisualization<V,E> {
 	}
 	
 	
+	/**
+	 * Create the color gradient
+	 * @return Creates the color gradient
+	 */
 	protected Rectangle createColorGradient() {
 
 		Rectangle box = new Rectangle(50, 500);
@@ -389,7 +417,7 @@ public class GraphVisualization<V,E> {
 		try {
 			Files.lines(Paths.get("/home/jkoepe/git/AILibs/JAICore/jaicore-search/conf/heatmap.css"))
 					.filter(line -> line.contains("fill-color"))
-//            Files.lines(Paths.get("url('conf/heatmap.css')")).filter(line->line.contains("fill-color"))
+
 					.filter(line -> !line.contains("/*")).forEach(line -> {
 						String s = line.replace("fill-color: ", "").replace(";", "").replace(" ", "");
 						String[] a = s.split(",");
