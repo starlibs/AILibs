@@ -152,13 +152,13 @@ public class FXCode<V, E> implements NodeListener<V> {
 
         stage.setScene(scene);
         stage.setTitle(title);
-//        stage.setMaximized(true);
+        stage.setMaximized(true);
         stage.show();
 
 
         rec.getSupplier();
         this.startPlayThread();
-        this.startUpdateRestriction(35);
+        this.startUpdateRestriction(1000);
 
     }
 
@@ -405,12 +405,14 @@ public class FXCode<V, E> implements NodeListener<V> {
             return;
 
         this.index = newIndex;
+        this.sem.release();
 		if(index > this.maxDisplayIndex) {
 	        this.timeline.setValue(this.maxDisplayIndex);
-//	        this.displayIndex = index;
+	        this.displayIndex = this.maxDisplayIndex;
 		}
 		else {
 			this.timeline.setValue(index);
+			this.displayIndex = index;
 		}
         this.updateLog("Index: " + index);
 
@@ -585,6 +587,15 @@ public class FXCode<V, E> implements NodeListener<V> {
     private void updateTimelineIndex() {
         this.timeline.setMax(maxIndex);
         this.maxDisplayIndex = maxIndex;
+        if(this.displayIndex < maxDisplayIndex || this.displayIndex < this.index) {
+        	if(index <= maxDisplayIndex) {
+        		this.displayIndex = this.index;
+        	}
+        	else {
+        		this.displayIndex = this.maxDisplayIndex;
+        	}
+        	this.timeline.setValue(displayIndex);
+        }
 
     }
 
