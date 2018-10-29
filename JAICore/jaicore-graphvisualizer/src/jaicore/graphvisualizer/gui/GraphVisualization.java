@@ -2,6 +2,7 @@ package jaicore.graphvisualizer.gui;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -421,7 +422,7 @@ public class GraphVisualization<V,E> {
 		ArrayList<Stop> list = new ArrayList<Stop>();
 
 		try {
-			Files.lines(Paths.get("/home/jkoepe/git/AILibs/JAICore/jaicore-search/conf/heatmap.css"))
+			Files.lines(Paths.get("conf/heatmap.css"))
 					.filter(line -> line.contains("fill-color"))
 
 					.filter(line -> !line.contains("/*")).forEach(line -> {
