@@ -29,6 +29,7 @@ import jaicore.graphvisualizer.events.graphEvents.NodeParentSwitchEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeRemovedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
+import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
@@ -120,6 +121,8 @@ public class GraphVisualization<V,E> {
 		this.minLabel = new Label();
 		if(evaluation) {
 			this.pane.getChildren().add(gradient);
+			Platform.runLater(()->{
+				
 			
 			this.maxLabel.setTextFill(Color.CYAN);
 			this.minLabel.setTextFill(Color.CYAN);
@@ -127,6 +130,7 @@ public class GraphVisualization<V,E> {
 
 			this.minLabel.setTranslateY(485);
 			pane.getChildren().add(this.minLabel);
+			});
 		}
 
 	}
@@ -149,13 +153,15 @@ public class GraphVisualization<V,E> {
 			this.graph.setAttribute("ui.stylesheet", "url('conf/heatmap.css')");
 			gradient = createColorGradient();
 			pane.getChildren().add(gradient);
-			
-			this.maxLabel.setTextFill(Color.CYAN);
-			this.minLabel.setTextFill(Color.CYAN);
-			pane.getChildren().add(this.maxLabel);
+			Platform.runLater(()->{
+				this.maxLabel.setTextFill(Color.CYAN);
+				this.minLabel.setTextFill(Color.CYAN);
+				pane.getChildren().add(this.maxLabel);
 
-			this.minLabel.setTranslateY(485);
-			pane.getChildren().add(this.minLabel);
+				this.minLabel.setTranslateY(485);
+				pane.getChildren().add(this.minLabel);
+			});
+			
 			
 			update();
 		}
