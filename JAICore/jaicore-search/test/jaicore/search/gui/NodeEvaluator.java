@@ -12,7 +12,7 @@ public class NodeEvaluator extends ObjectEvaluator<Node> {
 		if(object.getInternalLabel() instanceof Number) {
 			value = ((Number) object.getInternalLabel()).doubleValue();
 		}
-		value = Math.random()*10000000;
+//		value = Math.random()*10000000;
 		return value;
 	}
 	

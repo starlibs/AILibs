@@ -1,5 +1,8 @@
 package jaicore.graphvisualizer.gui;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -26,7 +29,13 @@ import jaicore.graphvisualizer.events.graphEvents.NodeParentSwitchEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeRemovedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
+import javafx.geometry.Pos;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.CycleMethod;
+import javafx.scene.paint.LinearGradient;
+import javafx.scene.paint.Stop;
+import javafx.scene.shape.Rectangle;
 
 public class GraphVisualization<V,E> {
 
@@ -52,6 +61,8 @@ public class GraphVisualization<V,E> {
 	private double bestValue;
 	private double worstValue;
 	
+	private StackPane pane;
+	private Rectangle gradient;
 	
 
 	public GraphVisualization(ObjectEvaluator<V> evaluator) {
@@ -60,6 +71,8 @@ public class GraphVisualization<V,E> {
 		this.graph = new SingleGraph("Search-Graph");
 		this.bestValue = Double.MAX_VALUE;
 		this.worstValue = -1;
+		this.pane = new StackPane();
+		pane.setAlignment(Pos.TOP_RIGHT);
 	
 		
 		
@@ -71,6 +84,8 @@ public class GraphVisualization<V,E> {
 			this.graph.setAttribute("ui.stylesheet", "url('conf/heatmap.css')");
 			System.out.println("loaded heatmap");
 			evaluation = true;
+			this.gradient = this.createColorGradient();
+			
 		}
 		try {
 			this.viewer = new FxViewer(graph, FxViewer.ThreadingModel.GRAPH_IN_ANOTHER_THREAD);
@@ -94,13 +109,17 @@ public class GraphVisualization<V,E> {
 				loopPump();
 			}
 		};
-
+		pane.getChildren().add(this.viewPanel);
 		pipeThread.start();
+		if(evaluation) {
+			this.pane.getChildren().add(gradient);
+		}
 
 	}
 
 	public javafx.scene.Node getFXNode() {
-		return viewPanel;
+//		return viewPanel;
+		return pane;
 	}
 	
 	@Subscribe
@@ -113,13 +132,16 @@ public class GraphVisualization<V,E> {
 	
 	private void toggleColouring(boolean colouring) {
 		if(colouring) {
-		
+			this.graph.clearAttributes();
 			this.graph.setAttribute("ui.stylesheet", "url('conf/heatmap.css')");
+			gradient = createColorGradient();
+			pane.getChildren().add(gradient);
+			update();
 		}
 		else {
-			this.graph.clearAttributes();
 			this.graph.setAttribute("ui.stylesheet", "url('conf/searchgraph.css')");
-			update();
+			pane.getChildren().remove(this.gradient);
+			
 		}
 		update();
 		
@@ -342,16 +364,54 @@ public class GraphVisualization<V,E> {
 		if(Float.isNaN(color)) {
 			color = 1;
 		}
-			
-		if(evaluation)
+		System.out.println(color);
+		if(evaluation) {
 			node.setAttribute("ui.color", color);
+		}
 	}
 	
 	public void update() {
 		for(V n: this.ext2intNodeMap.keySet()) {
+			
 			double value = evaluator.evaluate(n);
 			colourNode(ext2intNodeMap.get(n), value);
 		}
 		
+	}
+	
+	
+	protected Rectangle createColorGradient() {
+
+		Rectangle box = new Rectangle(50, 500);
+		Stop[] stops = new Stop[] { new Stop(0, Color.BLUE), new Stop(1, Color.RED) };
+		ArrayList<Stop> list = new ArrayList<Stop>();
+
+		try {
+			Files.lines(Paths.get("/home/jkoepe/git/AILibs/JAICore/jaicore-search/conf/heatmap.css"))
+					.filter(line -> line.contains("fill-color"))
+//            Files.lines(Paths.get("url('conf/heatmap.css')")).filter(line->line.contains("fill-color"))
+					.filter(line -> !line.contains("/*")).forEach(line -> {
+						String s = line.replace("fill-color: ", "").replace(";", "").replace(" ", "");
+						String[] a = s.split(",");
+						if (a.length > 1) {
+							double d = 1.0 / (a.length - 1);
+							for (int i = 0; i < a.length; i++) {
+
+								System.out.println(d * i);
+								System.out.println(a[i].length());
+
+								list.add(new Stop(d * i, Color.web(a[i].trim())));
+							}
+						}
+
+					});
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		stops = list.toArray(new Stop[0]);
+		LinearGradient lg = new LinearGradient(0, 1, 0, 0, true, CycleMethod.NO_CYCLE, stops);
+		box.setFill(lg);
+		this.gradient = box;
+		return box;
 	}
 }
