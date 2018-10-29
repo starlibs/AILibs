@@ -1,5 +1,8 @@
 package jaicore.graphvisualizer.gui;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -20,11 +23,20 @@ import org.graphstream.ui.view.util.InteractiveElement;
 
 import com.google.common.eventbus.Subscribe;
 
+import jaicore.graphvisualizer.events.controlEvents.EnableColouring;
 import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeParentSwitchEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeRemovedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
+import javafx.geometry.Pos;
+import javafx.scene.control.Label;
+import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.CycleMethod;
+import javafx.scene.paint.LinearGradient;
+import javafx.scene.paint.Stop;
+import javafx.scene.shape.Rectangle;
 
 public class GraphVisualization<V,E> {
 
@@ -43,11 +55,42 @@ public class GraphVisualization<V,E> {
 
 	protected ViewerPipe pipe;
 	Thread pipeThread;
+	
+	private ObjectEvaluator<V> evaluator;
+	private boolean evaluation;
+	
+	private double bestValue;
+	private double worstValue;
+	
+	private StackPane pane;
+	private Rectangle gradient;
+	
+	private Label minLabel;
+	private Label maxLabel;
+	
 
-	public GraphVisualization() {
+	public GraphVisualization(ObjectEvaluator<V> evaluator) {
+		this.evaluator = evaluator;
 		this.roots = new ArrayList<>();
 		this.graph = new SingleGraph("Search-Graph");
-		this.graph.setAttribute("ui.stylesheet", "url('conf/searchgraph.css')");
+		this.bestValue = Double.MAX_VALUE;
+		this.worstValue = -1;
+		this.pane = new StackPane();
+		pane.setAlignment(Pos.TOP_RIGHT);
+	
+		
+		
+		if(this.evaluator == null) {
+			this.graph.setAttribute("ui.stylesheet", "url('conf/searchgraph.css')");
+			System.out.println("loaded Searchgraph");
+		}
+		else {
+			this.graph.setAttribute("ui.stylesheet", "url('conf/heatmap.css')");
+			System.out.println("loaded heatmap");
+			evaluation = true;
+			this.gradient = this.createColorGradient();
+			
+		}
 		try {
 			this.viewer = new FxViewer(graph, FxViewer.ThreadingModel.GRAPH_IN_ANOTHER_THREAD);
 			this.viewer.enableAutoLayout();
@@ -70,15 +113,63 @@ public class GraphVisualization<V,E> {
 				loopPump();
 			}
 		};
-
+		pane.getChildren().add(this.viewPanel);
 		pipeThread.start();
+		
+		this.maxLabel = new Label();
+		this.minLabel = new Label();
+		if(evaluation) {
+			this.pane.getChildren().add(gradient);
+			
+			this.maxLabel.setTextFill(Color.CYAN);
+			this.minLabel.setTextFill(Color.CYAN);
+			pane.getChildren().add(this.maxLabel);
+
+			this.minLabel.setTranslateY(485);
+			pane.getChildren().add(this.minLabel);
+		}
 
 	}
 
 	public javafx.scene.Node getFXNode() {
-		return viewPanel;
+//		return viewPanel;
+		return pane;
 	}
+	
+	@Subscribe
+	public synchronized void receiveControlEvent(EnableColouring event) {
+		this.evaluation = event.isColouring();
+		toggleColouring(this.evaluation);
+	}
+	
+	
+	private void toggleColouring(boolean colouring) {
+		if(colouring) {
+			this.graph.clearAttributes();
+			this.graph.setAttribute("ui.stylesheet", "url('conf/heatmap.css')");
+			gradient = createColorGradient();
+			pane.getChildren().add(gradient);
+			
+			this.maxLabel.setTextFill(Color.CYAN);
+			this.minLabel.setTextFill(Color.CYAN);
+			pane.getChildren().add(this.maxLabel);
 
+			this.minLabel.setTranslateY(485);
+			pane.getChildren().add(this.minLabel);
+			
+			update();
+		}
+		else {
+			this.graph.setAttribute("ui.stylesheet", "url('conf/searchgraph.css')");
+			pane.getChildren().remove(this.gradient);
+			pane.getChildren().remove(this.maxLabel);
+			pane.getChildren().remove(this.minLabel);
+			
+		}
+		update();
+		
+	}
+	
 	@Subscribe
 	public synchronized void receiveGraphInitEvent(GraphInitializedEvent<V> e) {
 		try {
@@ -167,6 +258,31 @@ public class GraphVisualization<V,E> {
 		 */
 		this.ext2intNodeMap.put(newNodeExt, newNodeInt);
 		this.int2extNodeMap.put(newNodeInt, newNodeExt);
+		
+		
+		/*
+		 * comnpute fvalue if possible
+		 */
+		if(evaluator != null) {
+			try {
+				double value = evaluator.evaluate(newNodeExt);
+				if(value < bestValue) {
+					this.bestValue = value;
+					this.minLabel.setText(Double.toString(this.bestValue));
+				}
+				if(value > worstValue) {
+					this.worstValue = value;
+					this.maxLabel.setText(Double.toString(this.worstValue));
+				}
+				
+				if(!roots.contains(newNodeExt))
+					colourNode(newNodeInt, value);
+				
+			}
+			catch(Exception e) {
+				
+			}
+		}
 
 		/* store relation between node an parent in internal model */
 		return newNodeInt;
@@ -212,7 +328,7 @@ public class GraphVisualization<V,E> {
 		this.int2extNodeMap.clear();
 		this.nodeCounter = 0;
 		this.graph.clear();
-		this.graph.setAttribute("ui.stylesheet", "url('conf/searchgraph.css')");
+		this.graph.setAttribute("ui.stylesheet", "url('conf/heatmap.css')");
 	}
 
 	/**
@@ -263,5 +379,67 @@ public class GraphVisualization<V,E> {
 				listener.mouseLeft(getNodeOfString(id));
 			}
 		});
+	}
+	
+	private void colourNode(Node node, double value) {
+		float color = 1;
+		float x = (float) (value -bestValue);
+		float y = (float)(worstValue - bestValue);
+		color = x/y;
+		if(Float.isNaN(color)) {
+			color = 1;
+		}
+		if(evaluation) {
+			node.setAttribute("ui.color", color);
+		}
+	}
+	
+	public void update() {
+		for(V n: this.ext2intNodeMap.keySet()) {
+			
+			double value = evaluator.evaluate(n);
+			colourNode(ext2intNodeMap.get(n), value);
+		}
+		
+	}
+	
+	
+	/**
+	 * Create the color gradient
+	 * @return Creates the color gradient
+	 */
+	protected Rectangle createColorGradient() {
+
+		Rectangle box = new Rectangle(50, 500);
+		Stop[] stops = new Stop[] { new Stop(0, Color.BLUE), new Stop(1, Color.RED) };
+		ArrayList<Stop> list = new ArrayList<Stop>();
+
+		try {
+			Files.lines(Paths.get("/home/jkoepe/git/AILibs/JAICore/jaicore-search/conf/heatmap.css"))
+					.filter(line -> line.contains("fill-color"))
+
+					.filter(line -> !line.contains("/*")).forEach(line -> {
+						String s = line.replace("fill-color: ", "").replace(";", "").replace(" ", "");
+						String[] a = s.split(",");
+						if (a.length > 1) {
+							double d = 1.0 / (a.length - 1);
+							for (int i = 0; i < a.length; i++) {
+
+								System.out.println(d * i);
+								System.out.println(a[i].length());
+
+								list.add(new Stop(d * i, Color.web(a[i].trim())));
+							}
+						}
+
+					});
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		stops = list.toArray(new Stop[0]);
+		LinearGradient lg = new LinearGradient(0, 1, 0, 0, true, CycleMethod.NO_CYCLE, stops);
+		box.setFill(lg);
+		this.gradient = box;
+		return box;
 	}
 }

@@ -25,16 +25,19 @@ public class VisualizationWindow<V, E> {
 	private TooltipSupplier tooltipSupplier;
 
 	public VisualizationWindow(IGraphAlgorithm graphAlgorithm) {
-		this(graphAlgorithm, "Visualizer for " + graphAlgorithm);
+		this(graphAlgorithm, "Visualizer for " + graphAlgorithm, null);
 	}
 
+	public VisualizationWindow(IGraphAlgorithm graphAlgorithm, String title) {
+		this(graphAlgorithm, title, null);
+	}
 	/**
 	 * The construction of a new VisualizationWindow.
 	 *
 	 * @param observable The algorithm which should be observed
 	 * @param title      The title of the window
 	 */
-	public VisualizationWindow(IGraphAlgorithm<?, ?, V, E> observable, String title) {
+	public VisualizationWindow(IGraphAlgorithm<?, ?, V, E> observable, String title, ObjectEvaluator eval) {
 		this.tooltipSupplier = new TooltipSupplier();
 		this.tooltipSupplier.setGenerator(getTooltipGenerator());
 		if (fxThread == null) {
@@ -60,7 +63,7 @@ public class VisualizationWindow<V, E> {
 				System.out.println("Suspending vm");
 //                GuiApp app = new GuiApp();
 				System.out.println("Code");
-				FXCode code = new FXCode(recorder, title);
+				FXCode code = new FXCode(recorder, title, eval);
 				System.out.println("Gui started");
 			});
 
