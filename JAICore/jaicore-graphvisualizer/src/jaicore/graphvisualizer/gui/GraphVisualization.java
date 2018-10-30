@@ -275,11 +275,17 @@ public class GraphVisualization<V,E> {
 				double value = evaluator.evaluate(newNodeExt);
 				if(value < bestValue) {
 					this.bestValue = value;
-					this.minLabel.setText(Double.toString(this.bestValue));
+					Platform.runLater(()->{
+						this.minLabel.setText(Double.toString(bestValue));
+					});
+					
 				}
 				if(value > worstValue) {
 					this.worstValue = value;
-					this.maxLabel.setText(Double.toString(this.worstValue));
+					Platform.runLater(()->{
+						this.maxLabel.setText(Double.toString(this.worstValue));
+					});
+					
 				}
 				
 				if(!roots.contains(newNodeExt))

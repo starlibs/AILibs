@@ -158,7 +158,7 @@ public class FXCode<V, E> implements NodeListener<V> {
 
         rec.getSupplier();
         this.startPlayThread();
-        this.startUpdateRestriction(1000);
+        this.startUpdateRestriction(35);
 
     }
 
