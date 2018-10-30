@@ -8,7 +8,7 @@ import org.aeonbits.owner.Config.Sources;
 import jaicore.experiments.IExperimentSetConfig;
 import jaicore.ml.experiments.IMultiClassClassificationExperimentConfig;
 
-@Sources({ "file:./conf/rqp_aug_space_samplers.properties" })
+@Sources({ "file:./conf/rqp_aug_space_samplersV2.properties" })
 public interface IRQPAugSpaceSamplerConfig extends IMultiClassClassificationExperimentConfig {
 
 }

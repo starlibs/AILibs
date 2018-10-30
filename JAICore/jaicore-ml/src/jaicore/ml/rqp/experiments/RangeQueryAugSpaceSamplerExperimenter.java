@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -104,16 +105,18 @@ public class RangeQueryAugSpaceSamplerExperimenter {
 				evalMax.evaluateModel(c_max, dataTest);
 				double loss_min = evalMin.meanAbsoluteError();
 				double loss_max = evalMax.meanAbsoluteError();
-				double rmse_min = evalMin.errorRate();
-				double rmse_max = evalMax.errorRate();
+				List<double[]> predictions = RQPExperimentUtil.generateMinMaxPredictions(c_min, c_max, dataTestMin, dataTest);
+				double wrong_order = RQPExperimentUtil.countMinMaxWrongOrder(predictions) / ((double) dataTest.size());
+				double[] evalsSwappedOrder = RQPExperimentUtil.adjustedPredictionsEvaluation(predictions, dataTestMin, dataTest);
 
 				/* report results */
 				results.put("sampletime", endTimeSampling - startTimeSampling);
 				results.put("traintime", endTimeTrain - startTimeTrain);
 				results.put("l1_loss_min", loss_min);
 				results.put("l1_loss_max", loss_max);
-				results.put("rmse_min", rmse_min);
-				results.put("rmse_max", rmse_max);
+				results.put("l1_loss_min_swapped", evalsSwappedOrder[0]);
+				results.put("l1_loss_max_swapped", evalsSwappedOrder[1]);
+				results.put("wrong_order", wrong_order);
 				processor.processResults(results);
 			}
 		});
