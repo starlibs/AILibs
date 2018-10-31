@@ -9,4 +9,7 @@ public class StripsPlanningProblem extends PlanningProblem {
 		super(domain, initState, goalState);
 	}
 
+	public StripsPlanningProblem(StripsPlanningDomain domain, Monom initState, GoalStateFunction goalChecker) {
+		super(domain, initState, goalChecker);
+	}
 }
