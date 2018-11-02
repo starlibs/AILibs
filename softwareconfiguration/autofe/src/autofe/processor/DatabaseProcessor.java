@@ -16,6 +16,7 @@ import autofe.db.sql.DatabaseConnector;
 import autofe.db.util.DBUtils;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
+import jaicore.search.model.other.SearchGraphPath;
 import jaicore.search.model.probleminputs.GeneralEvaluatedTraversalTree;
 import weka.core.Instances;
 
@@ -57,7 +58,7 @@ public class DatabaseProcessor {
 		search.setTimeoutForComputationOfF(TIMEOUT_F_COMPUTATION_MS, node -> 100.0);
 
 		// Do search
-		List<DatabaseNode> solution = null;
+		SearchGraphPath<DatabaseNode, String> solution = null;
 		while (search.hasNext() && System.currentTimeMillis() < timeout) {
 			try {
 				solution = search.nextSolution();
@@ -74,7 +75,7 @@ public class DatabaseProcessor {
 			throw new RuntimeException("No solution found!");
 		}
 
-		DatabaseNode goal = solution.get(solution.size() - 1);
+		DatabaseNode goal = solution.getNodes().get(solution.getNodes().size() - 1);
 		DatabaseConnector databaseConnector = evaluator.getDatabaseConnector();
 		this.instancesWithSelectedFeatures = databaseConnector.getInstances(goal.getSelectedFeatures());
 		this.selectedFeatures = goal.getSelectedFeatures();

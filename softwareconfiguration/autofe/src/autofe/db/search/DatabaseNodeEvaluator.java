@@ -20,6 +20,7 @@ import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.algorithms.standard.rdfs.RandomizedDepthFirstSearch;
 import jaicore.search.core.interfaces.GraphGenerator;
+import jaicore.search.model.other.SearchGraphPath;
 import jaicore.search.model.probleminputs.GeneralEvaluatedTraversalTree;
 import jaicore.search.model.probleminputs.GraphSearchInput;
 import jaicore.search.model.travesaltree.Node;
@@ -150,7 +151,7 @@ public class DatabaseNodeEvaluator implements INodeEvaluator<DatabaseNode, Doubl
 		BestFirst<GeneralEvaluatedTraversalTree<DatabaseNode, String, Double>,DatabaseNode, String, Double> randomCompletionSearch = new RandomizedDepthFirstSearch<>(
 				problem, this.random);
 
-		List<DatabaseNode> solution = null;
+		SearchGraphPath<DatabaseNode, String> solution = null;
 		try {
 			solution = randomCompletionSearch.nextSolution();
 		} catch (NoSuchElementException | InterruptedException | AlgorithmExecutionCanceledException e) {
@@ -159,7 +160,7 @@ public class DatabaseNodeEvaluator implements INodeEvaluator<DatabaseNode, Doubl
 		if (solution == null) {
 			throw new RuntimeException("Random completion did not find a solution!");
 		}
-		DatabaseNode goalNode = solution.get(solution.size() - 1);
+		DatabaseNode goalNode = solution.getNodes().get(solution.getNodes().size() - 1);
 		LOG.info("Result of random completion is node with features : {}", goalNode.getSelectedFeatures());
 		Instances instances = databaseConnector.getInstances(goalNode.getSelectedFeatures());
 		double result = evaluateInstances(instances);
