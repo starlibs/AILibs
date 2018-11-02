@@ -58,6 +58,9 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 
 	@Override
 	public Instances getInstances(List<AbstractFeature> features) {
+		if(features == null || features.isEmpty()) {
+			throw new IllegalArgumentException("Empty feature list provided!");
+		}
 		Instances instances = null;
 		try {
 			// Create feature tables (if not already existent)
