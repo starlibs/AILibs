@@ -171,7 +171,7 @@ public class Recorder<V,E> {
 	 * @param steps The number of steps to do.
 	 */
 	private void forward(int steps) {
-		if (this.index == this.receivedEvents.size())
+		if (this.index == this.receivedEvents.size() && this.algorithm != null)
 			if (this.algorithm.hasNext()) {
 				this.algorithm.next();
 			}
@@ -312,17 +312,6 @@ public class Recorder<V,E> {
 	@Subscribe
 	public void receiveNodePushedEvent(NodePushed event) {
 		// TODO node pushed
-		if (this.index == this.receivedEvents.size()) {
-			Object node = event.getNode();
-//            if (this.algorithm instanceof IControllableGraphAlgorithm) {
-//                try {
-//                    ((IControllableGraphAlgorithm) this.algorithm).step(node);
-//
-//                } catch (Exception e){
-//                    System.out.println("test2");
-//                }
-//            }
-		}
 	}
 
 	/**
@@ -423,7 +412,6 @@ public class Recorder<V,E> {
 					case "GraphInitializedEvent":
 						int hashCode = (int) eventMap.get("root");
 						event = new GraphInitializedEvent(Integer.parseInt(String.valueOf(eventMap.get("root"))));
-						System.out.println(hashCode);
 						break;
 
 					case "NodeTypeSwitchEvent":

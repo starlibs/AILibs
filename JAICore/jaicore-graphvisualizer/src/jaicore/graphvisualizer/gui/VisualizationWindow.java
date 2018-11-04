@@ -50,21 +50,17 @@ public class VisualizationWindow<V, E> {
 				};
 				fxThread.start();
 			} catch (IllegalStateException e) {
-//                e.printStackTrace();
+
 			}
 		}
 
-		// try to create a recorder and start the gui in the fxthread.
-		// if it fails to create the recorder the system is exited.
+		/* try to create a recorder and start the gui in the fxthread.
+		 if it fails to create the recorder the system is exited.*/
 		try {
 			recorder = new Recorder(observable);
 			Thread.sleep(500);
 			Platform.runLater(() -> {
-				System.out.println("Suspending vm");
-//                GuiApp app = new GuiApp();
-				System.out.println("Code");
 				FXCode code = new FXCode(recorder, title, eval);
-				System.out.println("Gui started");
 			});
 
 		} catch (Exception e) {

@@ -84,11 +84,10 @@ public class GraphVisualization<V,E> {
 		
 		if(this.evaluator == null) {
 			this.graph.setAttribute("ui.stylesheet", "url('conf/searchgraph.css')");
-			System.out.println("loaded Searchgraph");
+
 		}
 		else {
 			this.graph.setAttribute("ui.stylesheet", "url('conf/heatmap.css')");
-			System.out.println("loaded heatmap");
 			evaluation = true;
 			this.gradient = this.createColorGradient();
 			
@@ -104,7 +103,6 @@ public class GraphVisualization<V,E> {
 		this.viewPanel = (FxViewPanel) viewer.addDefaultView(false);
 
 		pipe = viewer.newViewerPipe();
-//        pipe.addViewerListener(new GraphListener());
 
 		viewer.getDefaultView().setMouseManager(new FxMouseManager(
 				EnumSet.of(InteractiveElement.EDGE, InteractiveElement.NODE, InteractiveElement.SPRITE)));
@@ -180,9 +178,6 @@ public class GraphVisualization<V,E> {
 	@Subscribe
 	public synchronized void receiveGraphInitEvent(GraphInitializedEvent<V> e) {
 		try {
-
-//			if (roots != null)
-//				throw new UnsupportedOperationException("Cannot initialize the graph for a second time!");
 			roots.add(e.getRoot());
 			if (roots == null)
 				throw new IllegalArgumentException("Root must not be NULL");
@@ -201,7 +196,7 @@ public class GraphVisualization<V,E> {
 			newEdge(e.getParent(), e.getNode());
 			ext2intNodeMap.get(e.getNode()).setAttribute("ui.class", e.getType());
 		} catch (Exception ex) {
-//            ex.printStackTrace();
+
 		}
 	}
 
@@ -215,7 +210,7 @@ public class GraphVisualization<V,E> {
 						"Cannot switch type of node " + e.getNode() + ". This node has not been reached previously.");
 			ext2intNodeMap.get(e.getNode()).setAttribute("ui.class", e.getType());
 		} catch (Exception ex) {
-//            ex.printStackTrace();
+
 		}
 	}
 
@@ -230,7 +225,7 @@ public class GraphVisualization<V,E> {
 			newEdge(e.getNewParent(), e.getNode());
 
 		} catch (Exception ex) {
-//            ex.printStackTrace();
+
 		}
 	}
 
@@ -238,7 +233,6 @@ public class GraphVisualization<V,E> {
 	public synchronized void receiveNodeRemovedEvent(NodeRemovedEvent<V> e) {
 		try {
 			graph.removeNode(ext2intNodeMap.get(e.getNode()));
-//             ext2intNodeMap.get(e.getNode()).setAttribute("ui.class", e.getType());
 			ext2intNodeMap.remove(e.getNode());
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -341,7 +335,13 @@ public class GraphVisualization<V,E> {
 		this.int2extNodeMap.clear();
 		this.nodeCounter = 0;
 		this.graph.clear();
-		this.graph.setAttribute("ui.stylesheet", "url('conf/heatmap.css')");
+		if(this.evaluator == null) {
+			this.graph.setAttribute("ui.stylesheet", "url('conf/searchgraph.css')");
+		}
+		else {
+			this.graph.setAttribute("ui.stylesheet", "url('conf/heatmap.css')");
+			this.gradient = this.createColorGradient();
+		}
 	}
 
 	/**
@@ -437,10 +437,6 @@ public class GraphVisualization<V,E> {
 						if (a.length > 1) {
 							double d = 1.0 / (a.length - 1);
 							for (int i = 0; i < a.length; i++) {
-
-								System.out.println(d * i);
-								System.out.println(a[i].length());
-
 								list.add(new Stop(d * i, Color.web(a[i].trim())));
 							}
 						}

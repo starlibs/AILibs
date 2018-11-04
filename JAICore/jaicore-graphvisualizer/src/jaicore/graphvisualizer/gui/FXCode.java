@@ -20,11 +20,13 @@ import jaicore.graphvisualizer.events.misc.AddSupplierEvent;
 import jaicore.graphvisualizer.events.misc.InfoEvent;
 import jaicore.graphvisualizer.gui.dataSupplier.ISupplier;
 import jaicore.graphvisualizer.gui.dataVisualizer.IVisualizer;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Slider;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
@@ -155,7 +157,12 @@ public class FXCode<V, E> implements NodeListener<V> {
         stage.setMaximized(true);
         stage.show();
 
-
+        Tab logTab = new Tab("Log");
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setContent(log);
+        logTab.setContent(scrollPane);
+        this.tabPane.getTabs().add(logTab);
+        
         rec.getSupplier();
         this.startPlayThread();
         this.startUpdateRestriction(35);
@@ -174,12 +181,10 @@ public class FXCode<V, E> implements NodeListener<V> {
         });
         this.timeline.setOnKeyReleased((KeyEvent event) -> {
             int newIndex = (int) timeline.getValue();
-            System.out.println(newIndex);
             jumpToIndex(newIndex);
         });
         this.timeline.setOnKeyPressed((KeyEvent event) -> {
             int newIndex = (int) timeline.getValue();
-            System.out.println(newIndex);
             jumpToIndex(newIndex);
         });
         this.timeline.setBlockIncrement(1);
@@ -271,7 +276,7 @@ public class FXCode<V, E> implements NodeListener<V> {
         stepButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-//               System.out.println("Step");
+
                 eventBus.post(new StepEvent(true, 1));
                 if (index != maxIndex)
                     updateIndex(1, false);
@@ -284,7 +289,6 @@ public class FXCode<V, E> implements NodeListener<V> {
         stopButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-//                System.out.println("Stop");
                 if (playThread != null)
                     playThread.interrupt();
             }
@@ -296,7 +300,6 @@ public class FXCode<V, E> implements NodeListener<V> {
         backButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-//                System.out.println("back");
                 if (index == 0)
                     return;
                 if (index == 1) {
@@ -324,10 +327,10 @@ public class FXCode<V, E> implements NodeListener<V> {
         loadButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-//                System.out.println("load");
                 FileChooser chooser = new FileChooser();
                 File file = chooser.showOpenDialog(null);
-                eventBus.post(new FileEvent(true, file));
+                if(file != null)
+                	eventBus.post(new FileEvent(true, file));
             }
         });
         nodeList.add(loadButton);
@@ -339,7 +342,8 @@ public class FXCode<V, E> implements NodeListener<V> {
             public void handle(ActionEvent actionEvent) {
                 FileChooser chooser = new FileChooser();
                 File file = chooser.showSaveDialog(null);
-                eventBus.post(new FileEvent(false, file));
+                if(file != null)
+                	eventBus.post(new FileEvent(false, file));
             }
         });
         nodeList.add(saveButton);
@@ -460,7 +464,6 @@ public class FXCode<V, E> implements NodeListener<V> {
      */
     public void addDataSupplier(ISupplier supplier) {
 
-        System.out.println(supplier.getClass().getSimpleName());
         try {
             ClassPath path = ClassPath.from(ClassLoader.getSystemClassLoader());
             Set<?> set = path.getAllClasses();
@@ -559,9 +562,11 @@ public class FXCode<V, E> implements NodeListener<V> {
      * @param logEntry the next log entry
      */
     private void updateLog(String logEntry) {
-        String currentLog = this.log.getText();
-        currentLog += "\n - " + logEntry;
-        this.log.setText(currentLog);
+        String currentLog = this.log.getText()+  "\n - " + logEntry;
+        Platform.runLater(()->{
+        	 log.setText(currentLog);
+        });
+       
     }
 
     private void startUpdateRestriction(long delay) {
