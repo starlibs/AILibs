@@ -1,10 +1,10 @@
 mem.max = 16392
 cpu.max = 6
 
-db.host = localhost
-db.username = experiments2
-db.password = experiments123!
-db.database = experiments
+db.host = 
+db.username = 
+db.password = 
+db.database = 
 db.table = mlplanRanking
 
 datasets = fashion-mnist, mnist, cifar10

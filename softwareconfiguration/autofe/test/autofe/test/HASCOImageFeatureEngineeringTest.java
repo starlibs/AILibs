@@ -16,7 +16,6 @@ import autofe.algorithm.hasco.filter.meta.FilterPipeline;
 import autofe.algorithm.hasco.filter.meta.FilterPipelineFactory;
 import autofe.util.DataSet;
 import autofe.util.DataSetUtils;
-import jaicore.basic.SQLAdapter;
 
 public class HASCOImageFeatureEngineeringTest {
 
@@ -53,14 +52,14 @@ public class HASCOImageFeatureEngineeringTest {
 
 		// setup benchmark for filter pipelines
 		AbstractHASCOFEObjectEvaluator benchmark = new COCOObjectEvaluator();
-		benchmark.setAdapter(new SQLAdapter("localhost", "autofeml", "Hallo33!", "autofeml_test"));
+		// benchmark.setAdapter(new SQLAdapter("", "", "", "autofeml_test"));
 		benchmark.setEvalTable("autofeml_manual_test");
 		benchmark.setData(dataForFE);
 
 		// Setup HASCOImageFeatureEngineering
 		HASCOFeatureEngineeringConfig config = ConfigFactory.create(HASCOFeatureEngineeringConfig.class);
-		HASCOFeatureEngineering hasco = new HASCOFeatureEngineering(new File("model/catalano/catalano.json"),
-				factory, benchmark, config);
+		HASCOFeatureEngineering hasco = new HASCOFeatureEngineering(new File("model/catalano/catalano.json"), factory,
+				benchmark, config);
 
 		hasco.setNumCPUs(4);
 		System.out.println(config.timeout());

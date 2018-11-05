@@ -25,13 +25,6 @@ public class HASCOFeatureEngineeringTest {
 
 		List<DataSet> trainTestSplit = DataSetUtils.getStratifiedSplit(data, new Random(42), .7);
 
-		// System.out.println("Subsample data...");
-		// DataSet train = DataSetUtils.subsample(trainTestSplit.get(0), 0.01, 200, new
-		// Random(42));
-		// System.out.println("Subsampling done. Updating instances...");
-		// train.updateInstances();
-		// System.out.println("Done.");
-
 		HASCOFeatureEngineeringConfig config = ConfigFactory.create(HASCOFeatureEngineeringConfig.class);
 
 		HASCOFeatureEngineering hascoImageFE = new HASCOFeatureEngineering(new File("model/catalano/catalano.json"),

@@ -125,8 +125,7 @@ public class HASCOFeatureEngineering
 
 			/* check number of CPUs assigned */
 			if (this.config.cpus() < 1) {
-				throw new IllegalStateException(
-						"Cannot generate search where number of CPUs is " + this.config.getNumberOfCPUs());
+				throw new IllegalStateException("Cannot generate search where number of CPUs is " + this.config.cpus());
 			}
 
 			/* Subsample dataset to reduce computational effort. */
@@ -227,7 +226,7 @@ public class HASCOFeatureEngineering
 
 	@Override
 	public int getNumCPUs() {
-		return this.config.getNumberOfCPUs();
+		return this.config.cpus();
 	}
 
 	@Override

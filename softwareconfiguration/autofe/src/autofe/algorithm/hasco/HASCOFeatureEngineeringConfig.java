@@ -3,11 +3,9 @@ package autofe.algorithm.hasco;
 import org.aeonbits.owner.Config.Sources;
 
 import hasco.variants.forwarddecomposition.twophase.HASCOWithRandomCompletionsConfig;
-import jaicore.ml.experiments.IMultiClassClassificationExperimentConfig;
 
-@Sources({ "file:conf/hascoimagefe.properties" })
-public interface HASCOFeatureEngineeringConfig
-		extends HASCOWithRandomCompletionsConfig, IMultiClassClassificationExperimentConfig {
+@Sources({ "file:conf/autofe.properties" })
+public interface HASCOFeatureEngineeringConfig extends HASCOWithRandomCompletionsConfig {
 	public static final String SELECTION_PORTION = "autofe.maxPipelineSize";
 	public static final String K_RANDOM_SEED = "hasco.seed";
 	public static final String SUBSAMPLING_RATIO = "autofe.subsamplingRatio";

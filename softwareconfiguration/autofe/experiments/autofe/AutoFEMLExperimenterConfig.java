@@ -4,7 +4,7 @@ import org.aeonbits.owner.Config.Sources;
 
 import jaicore.ml.experiments.IMultiClassClassificationExperimentConfig;
 
-@Sources({ "file:conf/autofeml-twophase.properties" })
+@Sources({ "file:conf/autofeml-eval.properties" })
 public interface AutoFEMLExperimenterConfig extends IMultiClassClassificationExperimentConfig {
 
 	@Key("db.evalTable")
