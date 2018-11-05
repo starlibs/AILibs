@@ -106,16 +106,15 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 			rs.close();
 			instances = finalizeInstances(instances);
 
-		} catch (SQLException e) {
+		} catch (Exception e) {
 			LOG.error("Cannot get instances from database", e);
 			throw new RuntimeException("Cannot get instances from database", e);
 		}
 		return instances;
 	}
 
-	private Instances finalizeInstances(Instances toFinalize) {
+	private Instances finalizeInstances(Instances toFinalize) throws Exception {
 		// Convert string attributes to nominal attributes
-		try {
 			StringToNominal stringToNominal = new StringToNominal();
 			stringToNominal.setInputFormat(toFinalize);
 			String[] options = new String[2];
@@ -123,10 +122,6 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 			options[1] = "first-last";
 			stringToNominal.setOptions(options);
 			return Filter.useFilter(toFinalize, stringToNominal);
-		} catch (Exception e) {
-			throw new RuntimeException("Cannot finalize instances object", e);
-		}
-
 	}
 
 	private void createFeatureTable(AbstractFeature feature) throws SQLException {
@@ -228,7 +223,7 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 			if (feature.getType() == AttributeType.TEXT) {
 				instance.setValue(i, rs.getString(i + 2));
 			} else if (feature.getType() == AttributeType.NUMERIC) {
-				instance.setValue(i, rs.getInt(i + 2));
+				instance.setValue(i, rs.getLong(i + 2));
 			} else {
 				throw new RuntimeException("Unsupoorted attribute type " + feature.getType());
 			}

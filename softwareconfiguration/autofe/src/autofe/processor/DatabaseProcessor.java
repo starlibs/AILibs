@@ -76,6 +76,11 @@ public class DatabaseProcessor {
 		}
 
 		DatabaseNode goal = solution.getNodes().get(solution.getNodes().size() - 1);
+		
+		if(goal.getSelectedFeatures().isEmpty()) {
+			throw new RuntimeException("Found a solution, but the feature list is empty!");
+		}
+		
 		DatabaseConnector databaseConnector = evaluator.getDatabaseConnector();
 		this.instancesWithSelectedFeatures = databaseConnector.getInstances(goal.getSelectedFeatures());
 		this.selectedFeatures = goal.getSelectedFeatures();
