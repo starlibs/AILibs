@@ -12,15 +12,11 @@ import org.openml.apiconnector.xml.DataSetDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import autofe.algorithm.hasco.HASCOFeatureEngineering;
-import autofe.algorithm.hasco.HASCOFeatureEngineering.HASCOFESolution;
-import autofe.algorithm.hasco.evaluation.COCONodeEvaluator;
 import autofe.algorithm.hasco.evaluation.COCOObjectEvaluator;
-import autofe.algorithm.hasco.evaluation.ClusterNodeEvaluator;
 import autofe.algorithm.hasco.evaluation.ClusterObjectEvaluator;
-import autofe.algorithm.hasco.evaluation.EnsembleNodeEvaluator;
 import autofe.algorithm.hasco.evaluation.EnsembleObjectEvaluator;
-import autofe.algorithm.hasco.evaluation.LDANodeEvaluator;
+import autofe.algorithm.hasco.evaluation.LDAObjectEvaluator;
+import autofe.algorithm.hasco.filter.meta.FilterPipeline;
 import autofe.util.DataSet;
 import autofe.util.DataSetUtils;
 import autofe.util.EvaluationUtils;
@@ -40,8 +36,10 @@ public class SimpleAutoFETest {
 
 	private static final boolean ENABLE_MLPLAN_VIS = true;
 
+	private static final File MODEL_FILE = new File("model/test.json");
+
 	// @Test
-	public void testHASCOClusterNodeEvaluator() throws Exception {
+	public void testHASCOClusterObjectEvaluator() throws Exception {
 		logger.info("Starting AutoFE test...");
 
 		/* load data for segment dataset and create a train-test-split */
@@ -52,24 +50,26 @@ public class SimpleAutoFETest {
 		data.setClassIndex(data.numAttributes() - 1);
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(0), .7f);
 
-		HASCOFeatureEngineering hascoFE = new HASCOFeatureEngineering(new File("model/test.json"),
-				new ClusterNodeEvaluator(MAX_PIPELINE_SIZE), new DataSet(split.get(0), null),
-				new ClusterObjectEvaluator(), DATASET_INPUT_SHAPE);
-		hascoFE.setLoggerName("autofe");
-		// hascoFE.enableVisualization();
-		hascoFE.runSearch(60 * 1000);
-		HASCOFESolution solution = hascoFE.getCurrentlyBestSolution();
+		// HASCOFeatureEngineering hascoFE = new HASCOFeatureEngineering(new
+		// File("model/test.json"),
+		// new ClusterNodeEvaluator(MAX_PIPELINE_SIZE), new DataSet(split.get(0), null),
+		// new ClusterObjectEvaluator(), DATASET_INPUT_SHAPE);
+		// hascoFE.setLoggerName("autofe");
+		// // hascoFE.enableVisualization();
+		// hascoFE.runSearch(60 * 1000);
+		// HASCOFESolution solution = hascoFE.getCurrentlyBestSolution();
 
-		logger.info(hascoFE.getFoundClassifiers().toString());
+		FilterPipeline solution = ImageAutoFETest.runHASCOImageFE(MODEL_FILE, new ClusterObjectEvaluator(),
+				new DataSet(split.get(0), null), new long[] { split.get(0).get(0).numAttributes() });
+
 		if (solution != null) {
 			logger.info(solution.toString());
-			logger.info(hascoFE.getFoundClassifiers().toString());
 
 			logger.info("Testing result features using MLPlan...");
 			List<Instances> newSplit = WekaUtil.getStratifiedSplit(data, new Random(42), .7f);
 
-			DataSet resultSplit0 = solution.getSolution().applyFilter(new DataSet(newSplit.get(0), null), false);
-			DataSet resultSplit1 = solution.getSolution().applyFilter(new DataSet(newSplit.get(1), null), false);
+			DataSet resultSplit0 = solution.applyFilter(new DataSet(newSplit.get(0), null), false);
+			DataSet resultSplit1 = solution.applyFilter(new DataSet(newSplit.get(1), null), false);
 
 			double mlPlanResult = EvaluationUtils.evaluateMLPlan(MLPLAN_TIMEOUT, resultSplit0.getInstances(),
 					resultSplit1.getInstances(), 42, logger, ENABLE_MLPLAN_VIS);
@@ -80,7 +80,7 @@ public class SimpleAutoFETest {
 	}
 
 	// @Test
-	public void testHASCORandomNodeEvaluator() throws Exception {
+	public void testHASCOLDAObjectEvaluator() throws Exception {
 		logger.info("Starting AutoFE test...");
 
 		/* load data for segment dataset and create a train-test-split */
@@ -91,63 +91,17 @@ public class SimpleAutoFETest {
 		data.setClassIndex(data.numAttributes() - 1);
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(0), .7f);
 
-		HASCOFeatureEngineering hascoFE = new HASCOFeatureEngineering(new File("model/test.json"),
-				EvaluationUtils.getRandomNodeEvaluator(MAX_PIPELINE_SIZE), new DataSet(split.get(0), null),
-				new ClusterObjectEvaluator(), DATASET_INPUT_SHAPE);
-		hascoFE.setLoggerName("autofe");
-		// hascoFE.enableVisualization();
-		hascoFE.runSearch(60 * 1000);
-		HASCOFESolution solution = hascoFE.getCurrentlyBestSolution();
+		FilterPipeline solution = ImageAutoFETest.runHASCOImageFE(MODEL_FILE, new LDAObjectEvaluator(),
+				new DataSet(split.get(0), null), new long[] { split.get(0).get(0).numAttributes() });
 
-		logger.info(hascoFE.getFoundClassifiers().toString());
 		if (solution != null) {
 			logger.info(solution.toString());
-			logger.info(hascoFE.getFoundClassifiers().toString());
 
 			logger.info("Testing result features using MLPlan...");
 			List<Instances> newSplit = WekaUtil.getStratifiedSplit(data, new Random(42), .7f);
 
-			DataSet resultSplit0 = solution.getSolution().applyFilter(new DataSet(newSplit.get(0), null), false);
-			DataSet resultSplit1 = solution.getSolution().applyFilter(new DataSet(newSplit.get(1), null), false);
-
-			double mlPlanResult = EvaluationUtils.evaluateMLPlan(MLPLAN_TIMEOUT, resultSplit0.getInstances(),
-					resultSplit1.getInstances(), 42, logger, ENABLE_MLPLAN_VIS);
-			System.out
-					.println("Error Rate of the solution produced by ML-Plan (Random): " + (100 - mlPlanResult) / 100f);
-		} else
-			logger.info("No solution could be found.");
-	}
-
-	// @Test
-	public void testHASCOLDANodeEvaluator() throws Exception {
-		logger.info("Starting AutoFE test...");
-
-		/* load data for segment dataset and create a train-test-split */
-		OpenmlConnector connector = new OpenmlConnector();
-		DataSetDescription ds = connector.dataGet(USED_DATASET);
-		File file = ds.getDataset(DataSetUtils.API_KEY);
-		Instances data = new Instances(new BufferedReader(new FileReader(file)));
-		data.setClassIndex(data.numAttributes() - 1);
-		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(0), .7f);
-
-		HASCOFeatureEngineering hascoFE = new HASCOFeatureEngineering(new File("model/test.json"),
-				new LDANodeEvaluator(MAX_PIPELINE_SIZE), new DataSet(split.get(0), null), new ClusterObjectEvaluator(),
-				DATASET_INPUT_SHAPE);
-		hascoFE.setLoggerName("autofe");
-		// hascoFE.enableVisualization();
-		hascoFE.runSearch(60 * 1000);
-		HASCOFESolution solution = hascoFE.getCurrentlyBestSolution();
-
-		logger.info(hascoFE.getFoundClassifiers().toString());
-		if (solution != null) {
-			logger.info(solution.toString());
-			logger.info(hascoFE.getFoundClassifiers().toString());
-
-			logger.info("Testing result features using MLPlan...");
-			List<Instances> newSplit = WekaUtil.getStratifiedSplit(data, new Random(42), .7f);
-
-			DataSet resultSplit0 = solution.getSolution().applyFilter(new DataSet(newSplit.get(0), null), false);
-			DataSet resultSplit1 = solution.getSolution().applyFilter(new DataSet(newSplit.get(1), null), false);
+			DataSet resultSplit0 = solution.applyFilter(new DataSet(newSplit.get(0), null), false);
+			DataSet resultSplit1 = solution.applyFilter(new DataSet(newSplit.get(1), null), false);
 
 			double mlPlanResult = EvaluationUtils.evaluateMLPlan(MLPLAN_TIMEOUT, resultSplit0.getInstances(),
 					resultSplit1.getInstances(), 42, logger, ENABLE_MLPLAN_VIS);
@@ -157,7 +111,7 @@ public class SimpleAutoFETest {
 	}
 
 	// @Test
-	public void testHASCOEnsembleNodeEvaluator() throws Exception {
+	public void testHASCOEnsembleObjectEvaluator() throws Exception {
 		logger.info("Starting AutoFE test...");
 
 		/* load data for segment dataset and create a train-test-split */
@@ -168,24 +122,17 @@ public class SimpleAutoFETest {
 		data.setClassIndex(data.numAttributes() - 1);
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(0), .7f);
 
-		HASCOFeatureEngineering hascoFE = new HASCOFeatureEngineering(new File("model/test.json"),
-				new EnsembleNodeEvaluator(MAX_PIPELINE_SIZE), new DataSet(split.get(0), null),
-				new EnsembleObjectEvaluator(), DATASET_INPUT_SHAPE);
-		hascoFE.setLoggerName("autofe");
-		// hascoFE.enableVisualization();
-		hascoFE.runSearch(60 * 1000);
-		HASCOFESolution solution = hascoFE.getCurrentlyBestSolution();
+		FilterPipeline solution = ImageAutoFETest.runHASCOImageFE(MODEL_FILE, new EnsembleObjectEvaluator(),
+				new DataSet(split.get(0), null), new long[] { split.get(0).get(0).numAttributes() });
 
-		logger.info(hascoFE.getFoundClassifiers().toString());
 		if (solution != null) {
 			logger.info(solution.toString());
-			logger.info(hascoFE.getFoundClassifiers().toString());
 
 			logger.info("Testing result features using MLPlan...");
 			List<Instances> newSplit = WekaUtil.getStratifiedSplit(data, new Random(42), .7f);
 
-			DataSet resultSplit0 = solution.getSolution().applyFilter(new DataSet(newSplit.get(0), null), false);
-			DataSet resultSplit1 = solution.getSolution().applyFilter(new DataSet(newSplit.get(1), null), false);
+			DataSet resultSplit0 = solution.applyFilter(new DataSet(newSplit.get(0), null), false);
+			DataSet resultSplit1 = solution.applyFilter(new DataSet(newSplit.get(1), null), false);
 
 			double mlPlanResult = EvaluationUtils.evaluateMLPlan(MLPLAN_TIMEOUT, resultSplit0.getInstances(),
 					resultSplit1.getInstances(), 42, logger, ENABLE_MLPLAN_VIS);
@@ -196,7 +143,7 @@ public class SimpleAutoFETest {
 	}
 
 	@Test
-	public void testHASCOCOCONodeEvaluator() throws Exception {
+	public void testHASCOCOCOObjectEvaluator() throws Exception {
 		logger.info("Starting AutoFE test...");
 
 		/* load data for segment dataset and create a train-test-split */
@@ -207,24 +154,17 @@ public class SimpleAutoFETest {
 		data.setClassIndex(data.numAttributes() - 1);
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(0), .7f);
 
-		HASCOFeatureEngineering hascoFE = new HASCOFeatureEngineering(new File("model/test.json"),
-				new COCONodeEvaluator(MAX_PIPELINE_SIZE), new DataSet(split.get(0), null), new COCOObjectEvaluator(),
-				DATASET_INPUT_SHAPE);
-		hascoFE.setLoggerName("autofe");
-		// hascoFE.enableVisualization();
-		hascoFE.runSearch(60 * 1000);
-		HASCOFESolution solution = hascoFE.getCurrentlyBestSolution();
+		FilterPipeline solution = ImageAutoFETest.runHASCOImageFE(MODEL_FILE, new COCOObjectEvaluator(),
+				new DataSet(split.get(0), null), new long[] { split.get(0).get(0).numAttributes() });
 
-		logger.info(hascoFE.getFoundClassifiers().toString());
 		if (solution != null) {
 			logger.info(solution.toString());
-			logger.info(hascoFE.getFoundClassifiers().toString());
 
 			logger.info("Testing result features using MLPlan...");
 			List<Instances> newSplit = WekaUtil.getStratifiedSplit(data, new Random(42), .7f);
 
-			DataSet resultSplit0 = solution.getSolution().applyFilter(new DataSet(newSplit.get(0), null), false);
-			DataSet resultSplit1 = solution.getSolution().applyFilter(new DataSet(newSplit.get(1), null), false);
+			DataSet resultSplit0 = solution.applyFilter(new DataSet(newSplit.get(0), null), false);
+			DataSet resultSplit1 = solution.applyFilter(new DataSet(newSplit.get(1), null), false);
 
 			double mlPlanResult = EvaluationUtils.evaluateMLPlan(MLPLAN_TIMEOUT, resultSplit0.getInstances(),
 					resultSplit1.getInstances(), 42, logger, ENABLE_MLPLAN_VIS);

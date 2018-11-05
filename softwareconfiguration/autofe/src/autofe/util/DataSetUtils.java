@@ -47,6 +47,7 @@ public final class DataSetUtils {
 	public static final int CIFAR10_ID = 40927;
 	public static final long[] CIFAR10_INPUT_SHAPE = new long[] { 32, 32, 3 };
 	public static final int SEGMENT_ID = 40984;
+	public static final long[] SEGMENT_INPUT_SHAPE = new long[] { 20 };
 	public static final int MNIST_ID = 554;
 	public static final long[] MNIST_INPUT_SHAPE = new long[] { 28, 28, 1 };
 	public static final int FASHION_MNIST_ID = 40996;

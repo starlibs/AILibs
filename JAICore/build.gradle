@@ -1,4 +1,5 @@
-configure(subprojects.findAll()) {
+allprojects {
+
 	//IDE
 	apply plugin:"java"
 	apply plugin:"eclipse"
@@ -38,4 +39,19 @@ configure(subprojects.findAll()) {
 		// check for updates every build
 		resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
 	}
+}
+
+dependencies {
+	compile project(":JAICore:jaicore-basic")
+	compile project(":JAICore:jaicore-concurrent")
+	compile project(":JAICore:jaicore-experiments")
+	compile project(":JAICore:jaicore-graph")
+	compile project(":JAICore:jaicore-graphvisualizer")
+	compile project(":JAICore:jaicore-logic")
+	compile project(":JAICore:jaicore-math")
+	compile project(":JAICore:jaicore-ml")
+	compile project(":JAICore:jaicore-planning")
+	compile project(":JAICore:jaicore-processes")
+	compile project(":JAICore:jaicore-search")
+	compile project(":JAICore:jaicore-services")
 }

@@ -6,15 +6,16 @@ import autofe.algorithm.hasco.filter.meta.FilterPipeline;
 import hasco.core.Util;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
-import hasco.query.Factory;
+import hasco.optimizingfactory.BaseFactory;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.search.algorithms.standard.core.INodeEvaluator;
 import jaicore.search.structure.core.Node;
 
-public abstract class AbstractHASCOFENodeEvaluator extends AbstractHASCOFEEvaluator implements INodeEvaluator<TFDNode, Double> {
+public abstract class AbstractHASCOFENodeEvaluator extends AbstractHASCOFEEvaluator
+		implements INodeEvaluator<TFDNode, Double> {
 
 	private Collection<Component> components;
-	private Factory<FilterPipeline> factory;
+	private BaseFactory<FilterPipeline> factory;
 
 	// Maximum size of a pipeline
 	protected int maxPipelineSize;
@@ -31,20 +32,22 @@ public abstract class AbstractHASCOFENodeEvaluator extends AbstractHASCOFEEvalua
 		return this.components;
 	}
 
-	public void setFactory(final Factory<FilterPipeline> factory) {
+	public void setFactory(final BaseFactory<FilterPipeline> factory) {
 		this.factory = factory;
 	}
 
-	public Factory<FilterPipeline> getFactory() {
+	public BaseFactory<FilterPipeline> getFactory() {
 		return this.factory;
 	}
 
 	public FilterPipeline getPipelineFromNode(final Node<TFDNode, ?> node) throws Exception {
 		if (this.components == null || this.factory == null) {
-			throw new IllegalArgumentException("Collection of components and factory need to be set to make node evaluators work.");
+			throw new IllegalArgumentException(
+					"Collection of components and factory need to be set to make node evaluators work.");
 		}
 
-		ComponentInstance ci = Util.getSolutionCompositionFromState(this.getComponents(), node.getPoint().getState());
+		ComponentInstance ci = Util.getSolutionCompositionFromState(this.getComponents(), node.getPoint().getState(),
+				true);
 		if (ci == null) {
 			return null;
 		}

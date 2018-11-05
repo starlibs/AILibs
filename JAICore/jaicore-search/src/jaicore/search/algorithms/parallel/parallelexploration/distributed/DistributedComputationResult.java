@@ -3,7 +3,7 @@ package jaicore.search.algorithms.parallel.parallelexploration.distributed;
 import java.io.Serializable;
 import java.util.Collection;
 
-import jaicore.search.structure.core.Node;
+import jaicore.search.model.travesaltree.Node;
 
 @SuppressWarnings("serial")
 public class DistributedComputationResult<T, V extends Comparable<V>> implements Serializable {

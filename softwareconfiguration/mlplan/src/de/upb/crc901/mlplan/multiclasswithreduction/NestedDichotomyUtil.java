@@ -8,7 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
-import de.upb.crc901.automl.pipeline.basic.MLPipeline;
+import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import jaicore.basic.sets.SetUtil;
 import jaicore.ml.WekaUtil;
 import jaicore.ml.classification.multiclass.reduction.splitters.RPNDSplitter;

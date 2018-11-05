@@ -4,7 +4,7 @@ import org.junit.Test;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
-import de.upb.crc901.automl.metamining.similaritymeasures.F1Optimizer;
+import de.upb.crc901.mlplan.metamining.similaritymeasures.F1Optimizer;
 
 public class F1OptimizerTest {
 

@@ -10,9 +10,9 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.upb.crc901.automl.PreferenceBasedNodeEvaluator;
-import de.upb.crc901.automl.pipeline.basic.MLPipeline;
-import de.upb.crc901.automl.pipeline.basic.SupervisedFilterSelector;
+import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.PreferenceBasedNodeEvaluator;
+import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
+import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.SupervisedFilterSelector;
 import hasco.core.Util;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
@@ -59,7 +59,7 @@ public class AutoFEMLPreferredNodeEvaluator implements INodeEvaluator<TFDNode, D
 					"Collection of components and factory need to be set to make node evaluators work.");
 		}
 
-		ComponentInstance ci = Util.getSolutionCompositionFromState(this.components, node.getPoint().getState());
+		ComponentInstance ci = Util.getSolutionCompositionFromState(this.components, node.getPoint().getState(), true);
 		return ci;
 	}
 
@@ -112,12 +112,12 @@ public class AutoFEMLPreferredNodeEvaluator implements INodeEvaluator<TFDNode, D
 					}
 				}
 				if (pipe.getFilterPipeline() != null && pipe.getFilterPipeline().getFilters() != null) {
-					if (pipe.getFilterPipeline().getFilters().size() > this.maxPipelineSize) {
+					if (pipe.getFilterPipeline().getFilters().getItems().size() > this.maxPipelineSize) {
 						logger.debug("We exceed the maximum number of image filters, so return {}", MAX_EVAL_VALUE);
 						return MAX_EVAL_VALUE;
 					}
 
-					double numFilters = pipe.getFilterPipeline().getFilters().size();
+					double numFilters = pipe.getFilterPipeline().getFilters().getItems().size();
 					String classifierName;
 					boolean isMLPipeline = false;
 					if (pipe.getMLPipeline() instanceof MLPipeline) {

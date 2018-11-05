@@ -2,11 +2,12 @@ package jaicore.ml.evaluation;
 
 import jaicore.basic.IObjectEvaluator;
 import jaicore.concurrent.TimeoutTimer;
+import weka.classifiers.Classifier;
 
-public class TimeoutableEvaluator<T> implements IObjectEvaluator<T, Double> {
+public class TimeoutableEvaluator implements ClassifierEvaluator {
 
 	/** The object evaluator that shall actually be called. */
-	private IObjectEvaluator<T, Double> ce;
+	private IObjectEvaluator<Classifier, Double> ce;
 
 	/** The timeout in milliseconds, i.e. after what time the evaluator shall be interrupted. */
 	private int timeoutInMS;
@@ -19,13 +20,13 @@ public class TimeoutableEvaluator<T> implements IObjectEvaluator<T, Double> {
 	 * @param timeoutInMS
 	 *            The timeout in milliseconds to interrupt an evaluation with the {iSolutionEvaluator}
 	 */
-	public TimeoutableEvaluator(final IObjectEvaluator<T, Double> iSolutionEvaluator, final int timeoutInMS) {
+	public TimeoutableEvaluator(final IObjectEvaluator<Classifier, Double> iSolutionEvaluator, final int timeoutInMS) {
 		this.ce = iSolutionEvaluator;
 		this.timeoutInMS = timeoutInMS;
 	}
 
 	@Override
-	public Double evaluate(final T object) throws Exception {
+	public Double evaluate(final Classifier object) throws Exception {
 		int timeoutTaskID = TimeoutTimer.getInstance().getSubmitter().interruptMeAfterMS(this.timeoutInMS);
 		Double returnValue = 30000.0;
 		try {
@@ -33,7 +34,8 @@ public class TimeoutableEvaluator<T> implements IObjectEvaluator<T, Double> {
 		} catch (InterruptedException e) {
 			// hide the interrupt exception as we simply want to return the default return value.
 		} catch (Throwable e) {
-			if (e.getMessage() == null || !e.getMessage().contains("Killed WEKA") && !e.getMessage().contains("Bag size needs")) {
+			//
+			if (!e.getMessage().contains("Killed WEKA") && !e.getMessage().contains("Bag size needs")) {
 				throw e;
 			}
 		} finally {

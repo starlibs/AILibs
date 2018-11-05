@@ -1,8 +1,9 @@
 package jaicore.search.algorithms.standard.rstar;
 
-import jaicore.search.algorithms.interfaces.ISolutionEvaluator;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import jaicore.search.core.interfaces.ISolutionEvaluator;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,6 +28,11 @@ public class GridWorldRCGGG {
             public boolean doesLastActionAffectScoreOfAnySubsequentSolution(List<GridWorld> partialSolutionPath) {
                 return false;
             }
+
+			@Override
+			public void cancel() {
+				/* nothing to do here */
+			}
         };
 
         ggg = new RandomCompletionGammaGraphGenerator(graphGenerator, solutionEvaluator, 5, 42 );

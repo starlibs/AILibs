@@ -8,15 +8,21 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import org.aeonbits.owner.ConfigCache;
+import org.aeonbits.owner.ConfigFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import autofe.algorithm.hasco.AbstractAutoFEMLClassifier;
 import autofe.algorithm.hasco.AutoFEMLComplete;
 import autofe.algorithm.hasco.AutoFEMLTwoPhase;
+import autofe.algorithm.hasco.AutoFEWekaPipelineFactory;
+import autofe.algorithm.hasco.HASCOFeatureEngineeringConfig;
+import autofe.algorithm.hasco.MLPlanFEWekaClassifierConfig;
+import autofe.algorithm.hasco.filter.meta.FilterPipelineFactory;
 import autofe.util.DataSet;
 import autofe.util.DataSetUtils;
-import de.upb.crc901.automl.pipeline.basic.MLPipeline;
+import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.WEKAPipelineFactory;
+import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import jaicore.basic.SQLAdapter;
 import jaicore.basic.TimeOut;
 import jaicore.concurrent.TimeoutTimer;
@@ -35,6 +41,10 @@ public class AutoFEMLExperimenter implements IExperimentSetEvaluator {
 
 	private static final AutoFEMLExperimenterConfig CONFIG = ConfigCache.getOrCreate(AutoFEMLExperimenterConfig.class);
 
+	// Logging properties
+	private SQLAdapter adapter;
+	private int experimentID;
+
 	@Override
 	public IExperimentSetConfig getConfig() {
 		return CONFIG;
@@ -43,6 +53,9 @@ public class AutoFEMLExperimenter implements IExperimentSetEvaluator {
 	@Override
 	public void evaluate(final ExperimentDBEntry experimentEntry, final SQLAdapter adapter,
 			final IExperimentIntermediateResultProcessor processor) throws Exception {
+		this.adapter = adapter;
+		this.experimentID = experimentEntry.getId();
+
 		Map<String, String> experiment = experimentEntry.getExperiment().getValuesOfKeyFields();
 		LOGGER.info("Evaluate experiment: {}", experiment);
 
@@ -68,20 +81,40 @@ public class AutoFEMLExperimenter implements IExperimentSetEvaluator {
 
 		LOGGER.info("Get stratified split of training and test data...");
 		List<DataSet> trainTestSplit = DataSetUtils.getStratifiedSplit(data, new Random(seed), .7);
+		long[] shape = trainTestSplit.get(0).getIntermediateInstances().get(0).shape();
 
 		AbstractAutoFEMLClassifier autofeml;
 		if (experiment.get("algorithm").equals("none")) {
 			LOGGER.info("Execute AutoFEML as a complete process...");
-			autofeml = new AutoFEMLComplete(experimentEntry.getExperiment().getNumCPUs(), seed,
-					new TimeOut(feTimeout + amlTimeout, TimeUnit.SECONDS), new TimeOut(evalTimeout, TimeUnit.SECONDS),
-					maxPipelineSize, subsampleRatio, mlplanSubsampleRatioFactor, minInstances);
+
+			MLPlanFEWekaClassifierConfig config = ConfigFactory.create(MLPlanFEWekaClassifierConfig.class);
+
+			AutoFEWekaPipelineFactory factory = new AutoFEWekaPipelineFactory(new FilterPipelineFactory(shape),
+					new WEKAPipelineFactory());
+			autofeml = new AutoFEMLComplete(seed, subsampleRatio, mlplanSubsampleRatioFactor, minInstances, config,
+					factory);
+
+			// autofeml = new AutoFEMLComplete(experimentEntry.getExperiment().getNumCPUs(),
+			// seed,
+			// new TimeOut(feTimeout + amlTimeout, TimeUnit.SECONDS), new
+			// TimeOut(evalTimeout, TimeUnit.SECONDS),
+			// maxPipelineSize, subsampleRatio, mlplanSubsampleRatioFactor, minInstances);
 
 		} else {
 			LOGGER.info("Execute AutoFEML as a two-phase process...");
-			autofeml = new AutoFEMLTwoPhase(experimentEntry.getExperiment().getNumCPUs(), experiment.get("algorithm"),
-					subsampleRatio, mlplanSubsampleRatioFactor, minInstances, seed,
+
+			HASCOFeatureEngineeringConfig config = ConfigFactory.create(HASCOFeatureEngineeringConfig.class);
+			autofeml = new AutoFEMLTwoPhase(config, experimentEntry.getExperiment().getNumCPUs(),
+					experiment.get("algorithm"), subsampleRatio, mlplanSubsampleRatioFactor, minInstances, seed,
 					new TimeOut(feTimeout, TimeUnit.SECONDS), new TimeOut(amlTimeout, TimeUnit.SECONDS),
 					new TimeOut(evalTimeout, TimeUnit.SECONDS), maxPipelineSize);
+
+			// autofeml = new AutoFEMLTwoPhase(experimentEntry.getExperiment().getNumCPUs(),
+			// experiment.get("algorithm"),
+			// subsampleRatio, mlplanSubsampleRatioFactor, minInstances, seed,
+			// new TimeOut(feTimeout, TimeUnit.SECONDS), new TimeOut(amlTimeout,
+			// TimeUnit.SECONDS),
+			// new TimeOut(evalTimeout, TimeUnit.SECONDS), maxPipelineSize);
 		}
 		autofeml.setSQLAdapter(adapter, experimentEntry.getId(), CONFIG.evalTable());
 		autofeml.enableVisualization(CONFIG.enableVisualization());

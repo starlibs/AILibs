@@ -1,14 +1,13 @@
 package autofe.algorithm.hasco.evaluation;
 
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
 
 import autofe.algorithm.hasco.filter.meta.FilterPipeline;
 import jaicore.basic.IObjectEvaluator;
 import jaicore.basic.SQLAdapter;
 
-public abstract class AbstractHASCOFEObjectEvaluator extends AbstractHASCOFEEvaluator implements IObjectEvaluator<FilterPipeline, Double> {
+public abstract class AbstractHASCOFEObjectEvaluator extends AbstractHASCOFEEvaluator
+		implements IObjectEvaluator<FilterPipeline, Double> {
 
 	private SQLAdapter adapter;
 	private int experimentID;
@@ -38,19 +37,20 @@ public abstract class AbstractHASCOFEObjectEvaluator extends AbstractHASCOFEEval
 		this.evalTable = evalTable;
 	}
 
-	protected void storeResult(final FilterPipeline pipe, final Double score, final long timeToCompute) throws SQLException {
-		Map<String, Object> data = new HashMap<>();
-		data.put("run_id", this.experimentID);
-		if (!score.toString().equals("NaN")) {
-			data.put("errorRate", score);
-		} else {
-			data.put("errorRate", -1);
-		}
-		data.put("preprocessor", pipe.toString());
-		data.put("classifier", "-");
-		data.put("time_train", (int) timeToCompute);
-		data.put("time_predict", -1);
-		this.adapter.insert(this.evalTable, data);
+	protected void storeResult(final FilterPipeline pipe, final Double score, final long timeToCompute)
+			throws SQLException {
+		// Map<String, Object> data = new HashMap<>();
+		// data.put("run_id", this.experimentID);
+		// if (!score.toString().equals("NaN")) {
+		// data.put("errorRate", score);
+		// } else {
+		// data.put("errorRate", -1);
+		// }
+		// data.put("preprocessor", pipe.toString());
+		// data.put("classifier", "-");
+		// data.put("time_train", (int) timeToCompute);
+		// data.put("time_predict", -1);
+		// this.adapter.insert(this.evalTable, data);
 	}
 
 }

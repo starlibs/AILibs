@@ -2,17 +2,18 @@ package autofe.algorithm.hasco;
 
 import autofe.algorithm.hasco.filter.meta.FilterPipeline;
 import autofe.algorithm.hasco.filter.meta.FilterPipelineFactory;
-import de.upb.crc901.mlplan.multiclass.weka.WEKAPipelineFactory;
+import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.WEKAPipelineFactory;
 import hasco.model.ComponentInstance;
-import hasco.query.Factory;
+import hasco.optimizingfactory.BaseFactory;
 import weka.classifiers.Classifier;
 
-public class AutoFEWekaPipelineFactory implements Factory<AutoFEWekaPipeline> {
+public class AutoFEWekaPipelineFactory implements BaseFactory<AutoFEWekaPipeline> {
 
 	private FilterPipelineFactory filterPipelineFactory;
 	private final WEKAPipelineFactory wekaPipelineFactory;
 
-	public AutoFEWekaPipelineFactory(final FilterPipelineFactory filterPipelineFactory, final WEKAPipelineFactory wekaPipelineFactory) {
+	public AutoFEWekaPipelineFactory(final FilterPipelineFactory filterPipelineFactory,
+			final WEKAPipelineFactory wekaPipelineFactory) {
 		this.filterPipelineFactory = filterPipelineFactory;
 		this.wekaPipelineFactory = wekaPipelineFactory;
 	}
@@ -23,8 +24,10 @@ public class AutoFEWekaPipelineFactory implements Factory<AutoFEWekaPipeline> {
 			return null;
 		}
 
-		ComponentInstance filterPipelineInstance = groundComponent.getSatisfactionOfRequiredInterfaces().get("filterPipeline");
-		ComponentInstance wekaPipelineInstance = groundComponent.getSatisfactionOfRequiredInterfaces().get("mlPipeline");
+		ComponentInstance filterPipelineInstance = groundComponent.getSatisfactionOfRequiredInterfaces()
+				.get("filterPipeline");
+		ComponentInstance wekaPipelineInstance = groundComponent.getSatisfactionOfRequiredInterfaces()
+				.get("mlPipeline");
 
 		FilterPipeline filterPipeline = null;
 		if (filterPipelineInstance != null) {

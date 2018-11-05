@@ -1,19 +1,16 @@
 package jaicore.search.algorithms.standard.rstar;
 
-import jaicore.search.algorithms.interfaces.ISolutionEvaluator;
-import jaicore.search.structure.core.GraphGenerator;
-import jaicore.search.structure.core.Node;
-import jaicore.search.structure.core.OpenCollection;
-import jaicore.search.structure.graphgenerator.MultipleRootGenerator;
-import jaicore.search.structure.graphgenerator.NodeGoalTester;
-import jaicore.search.structure.graphgenerator.RootGenerator;
-import jaicore.search.structure.graphgenerator.SingleRootGenerator;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.PriorityQueue;
-import java.util.stream.Collectors;
+
+import jaicore.search.core.interfaces.ISolutionEvaluator;
+import jaicore.search.model.travesaltree.Node;
+import jaicore.search.structure.graphgenerator.MultipleRootGenerator;
+import jaicore.search.structure.graphgenerator.NodeGoalTester;
+import jaicore.search.structure.graphgenerator.RootGenerator;
+import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 
 /**
  * Implementation of the R* algorithm.
@@ -124,8 +121,9 @@ public class RStar<T, A, D> extends Thread {
     /**
      * Tries to compute the local path
      * @param n
+     * @throws InterruptedException 
      */
-    private void reevaluateState(GammaNode<T, RStarK> n) {
+    private void reevaluateState(GammaNode<T, RStarK> n) throws InterruptedException {
         /**
          * Try to compute the local path from bp(n) to n.
          */
@@ -160,6 +158,7 @@ public class RStar<T, A, D> extends Thread {
 
     @Override
     public void run() {
+    	try {
         // Line 14 to 16: see constructor.
         // Line 17
 //        System.out.println("Staring RStar");
@@ -280,6 +279,10 @@ public class RStar<T, A, D> extends Thread {
         // After the while loop of R* terminates, the solution can be re-constructed
         // by following backpointers bp backwards starting at state n_goal until s_start is reached.
         // use getSolution() for this
+    	}
+    	catch (Exception e) {
+    		throw new RuntimeException(e); // workaround, because run has not any checked exceptions
+    	}
 
     }
 
@@ -469,8 +472,10 @@ public class RStar<T, A, D> extends Thread {
      *
      * @param n Gamma node to generate successors for.
      * @return List of Gamma nodes.
+     * @throws InterruptedException 
+     * @throws  
      */
-    private Collection<GammaNode<T, RStarK>> generateGammaSuccessors(GammaNode<T, RStarK> n) {
+    private Collection<GammaNode<T, RStarK>> generateGammaSuccessors(GammaNode<T, RStarK> n) throws InterruptedException {
         Collection<GammaNode<T, RStarK>> succ = gammaGraphGenerator.generateRandomSuccessors(n, K, delta);
         ArrayList<GammaNode<T, RStarK>> succWithoutClosed = new ArrayList<>();
 

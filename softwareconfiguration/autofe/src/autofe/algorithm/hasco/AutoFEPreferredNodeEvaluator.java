@@ -11,10 +11,10 @@ import autofe.algorithm.hasco.filter.meta.FilterPipeline;
 import hasco.core.Util;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
-import hasco.query.Factory;
+import hasco.optimizingfactory.BaseFactory;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
-import jaicore.search.algorithms.standard.core.INodeEvaluator;
-import jaicore.search.structure.core.Node;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
+import jaicore.search.model.travesaltree.Node;
 
 public class AutoFEPreferredNodeEvaluator implements INodeEvaluator<TFDNode, Double> {
 
@@ -25,46 +25,58 @@ public class AutoFEPreferredNodeEvaluator implements INodeEvaluator<TFDNode, Dou
 	public static final double MAX_EVAL_VALUE = 20000d;
 
 	private Collection<Component> components;
-	private Factory<FilterPipeline> factory;
+	private BaseFactory<FilterPipeline> factory;
 
 	// Maximum size of a pipeline
 	protected int maxPipelineSize;
 
-	public AutoFEPreferredNodeEvaluator(final Collection<Component> components, final Factory<FilterPipeline> factory, final int maxPipelineSize) {
+	public AutoFEPreferredNodeEvaluator(final Collection<Component> components,
+			final BaseFactory<FilterPipeline> factory, final int maxPipelineSize) {
 		this.components = components;
 		this.maxPipelineSize = maxPipelineSize;
 		this.factory = factory;
 	}
 
-	public FilterPipeline getPipelineFromNode(final Node<TFDNode, ?> node) throws Exception {
+	public FilterPipeline getPipelineFromNode(final Node<TFDNode, ?> node) {
 		if (this.components == null || this.factory == null) {
-			throw new IllegalArgumentException("Collection of components and factory need to be set to make node evaluators work.");
+			throw new IllegalArgumentException(
+					"Collection of components and factory need to be set to make node evaluators work.");
 		}
 		ComponentInstance ci = this.getComponentInstanceFromNode(node);
-		return (ci == null) ? null : this.factory.getComponentInstantiation(ci);
+
+		try {
+			return (ci == null) ? null : this.factory.getComponentInstantiation(ci);
+		} catch (Exception e) {
+			logger.warn("Could not instantiate component instance '" + ci + "' due to '" + e.getMessage() + "'.");
+			return null;
+		}
 	}
 
-	private ComponentInstance getComponentInstanceFromNode(final Node<TFDNode, ?> node) throws Exception {
-		return Util.getSolutionCompositionFromState(this.components, node.getPoint().getState());
+	private ComponentInstance getComponentInstanceFromNode(final Node<TFDNode, ?> node) {
+		return Util.getSolutionCompositionFromState(this.components, node.getPoint().getState(), true);
 	}
 
-	@Override
-	public Double f(final Node<TFDNode, ?> node) throws Throwable {
+	public Double f(final Node<TFDNode, ?> node) {
 		if (node.getParent() == null) {
 			return 0.0;
 		}
 
-		List<String> remainingASTasks = node.getPoint().getRemainingTasks().stream().map(x -> x.getProperty()).filter(x -> x.startsWith("1_")).collect(Collectors.toList());
-		String appliedMethod = (node.getPoint().getAppliedMethodInstance() != null ? node.getPoint().getAppliedMethodInstance().getMethod().getName() : "");
+		List<String> remainingASTasks = node.getPoint().getRemainingTasks().stream().map(x -> x.getProperty())
+				.filter(x -> x.startsWith("1_")).collect(Collectors.toList());
+		String appliedMethod = (node.getPoint().getAppliedMethodInstance() != null
+				? node.getPoint().getAppliedMethodInstance().getMethod().getName()
+				: "");
 
 		logger.debug("Remaining AS Tasks: " + remainingASTasks + " applied method: " + appliedMethod);
-		boolean toDoHasAlgorithmSelection = node.getPoint().getRemainingTasks().stream().anyMatch(x -> x.getProperty().startsWith("1_"));
+		boolean toDoHasAlgorithmSelection = node.getPoint().getRemainingTasks().stream()
+				.anyMatch(x -> x.getProperty().startsWith("1_"));
 
 		if (toDoHasAlgorithmSelection) {
 			FilterPipeline pipe = this.getPipelineFromNode(node);
 			logger.debug("Todo has algorithm selection tasks {} Calculate node evaluation for {}.", pipe);
 
-			if (pipe != null && pipe.getFilters() != null && pipe.getFilters().size() > this.maxPipelineSize) {
+			if (pipe != null && pipe.getFilters() != null
+					&& pipe.getFilters().getItems().size() > this.maxPipelineSize) {
 				return MAX_EVAL_VALUE;
 			}
 			return 0.0;

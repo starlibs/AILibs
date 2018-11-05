@@ -65,7 +65,7 @@ public class AutoFEMLMCCVBenchmark implements IObjectEvaluator<AutoFEWekaPipelin
 		long startTimestamp = System.currentTimeMillis();
 		Instances wekaInstances = object.transformData(this.data);
 		IObjectEvaluator<Classifier, Double> internalEvaluator = new MonteCarloCrossValidationEvaluator(
-				new MulticlassEvaluator(this.rand), this.repeats, wekaInstances, this.trainingPortion);
+				new MulticlassEvaluator(this.rand), this.repeats, wekaInstances, (float) this.trainingPortion);
 		Double evalScore = internalEvaluator.evaluate(object);
 		logger.info("Eval score of AUtoFEWekaPipeline " + object.toString() + " was " + evalScore);
 

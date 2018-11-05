@@ -5,6 +5,11 @@ sourceSets {
           srcDir 'examples'
       }
     }
+    test {
+     	java {
+     		srcDir 'test'
+     	}
+    }
 }
 dependencies {
 	compile project(":JAICore:jaicore-basic")

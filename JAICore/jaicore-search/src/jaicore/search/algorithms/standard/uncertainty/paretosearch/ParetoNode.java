@@ -1,8 +1,9 @@
 package jaicore.search.algorithms.standard.uncertainty.paretosearch;
 
-import jaicore.search.structure.core.Node;
 import java.lang.Comparable;
 import java.util.HashSet;
+
+import jaicore.search.model.travesaltree.Node;
 
 /**
  * Internal representation of nodes to maintain pareto front.
@@ -13,11 +14,11 @@ public class ParetoNode<T, V extends Comparable<V>> {
     final Node<T, V> node;
     /* Number of creation of this pareto node. */
     final int n;
-    final HashSet<ParetoNode> dominates;
-    final HashSet<ParetoNode> dominatedBy;
+    final HashSet<ParetoNode<T,V>> dominates;
+    final HashSet<ParetoNode<T,V>> dominatedBy;
 
 
-    ParetoNode(Node<T, V> node, int n) {
+    public ParetoNode(Node<T, V> node, int n) {
         this.node = node;
         assert n >= 0 : "n has to be non-negative";
         this.n = n;
@@ -37,5 +38,4 @@ public class ParetoNode<T, V extends Comparable<V>> {
         s += "}";
         return s;
     }
-
 }

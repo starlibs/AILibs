@@ -74,7 +74,7 @@
 	</logger>
 	
 	<logger name="autofe.algorithm.hasco.evaluation">
-		<level value="info"/>
+		<level value="debug"/>
 		<appender-ref ref="console" />
 	</logger>
 	
@@ -89,15 +89,15 @@
 	</logger>
 	
 	<logger name="autofe.algorithm.hasco.filter.meta">
-		<level value="info" />
+		<level value="debug" />
 	</logger>
 	
 	<logger name="autofe.algorithm.hasco.AutoFEPreferredNodeEvaluator">
-		<level value="info" />
+		<level value="debug" />
 	</logger>
 	
 	<logger name="autofe.algorithm.hasco.AutoFEMLPreferredNodeEvaluator">
-		<level value="info" />
+		<level value="debug" />
 	</logger>
 	
 	<logger name="mlplan">

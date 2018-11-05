@@ -14,9 +14,10 @@ public class MonteCarloCrossValidationEvaluator implements ClassifierEvaluator {
 	private final Instances data;
 	private boolean canceled = false;
 	private final int repeats;
-	private final double trainingPortion;
+	private final float trainingPortion;
+	private final DescriptiveStatistics stats = new DescriptiveStatistics();
 
-	public MonteCarloCrossValidationEvaluator(final BasicMLEvaluator basicEvaluator, final int repeats, final Instances data, final double trainingPortion) {
+	public MonteCarloCrossValidationEvaluator(final BasicMLEvaluator basicEvaluator, final int repeats, final Instances data, final float trainingPortion) {
 		super();
 		this.basicEvaluator = basicEvaluator;
 		this.repeats = repeats;
@@ -39,14 +40,15 @@ public class MonteCarloCrossValidationEvaluator implements ClassifierEvaluator {
 		}
 
 		/* perform random stratified split */
-		DescriptiveStatistics stats = new DescriptiveStatistics();
 		logger.info("Starting evaluation of {}", pl);
-		for (int i = 0; i < this.repeats && !this.canceled; i++) {
+		for (int i = 0; i < this.repeats && !this.canceled && !Thread.currentThread().isInterrupted(); i++) {
 			logger.info("Evaluating {} with split #{}/{}", pl, i + 1, this.repeats);
 			double score = this.basicEvaluator.getErrorRateForRandomSplit(pl, this.data, this.trainingPortion);
 			logger.info("Score for evaluation of {} with split #{}/{}: {}", pl, i + 1, this.repeats, score);
 			stats.addValue(score);
 		}
+		if (Thread.currentThread().isInterrupted())
+			throw new InterruptedException("MCCV has been interrupted");
 
 		Double score = stats.getMean();
 		logger.info("Obtained score of {} for classifier {}.", score, pl);
@@ -55,5 +57,9 @@ public class MonteCarloCrossValidationEvaluator implements ClassifierEvaluator {
 
 	public BasicMLEvaluator getEvaluator() {
 		return this.basicEvaluator;
+	}
+
+	public DescriptiveStatistics getStats() {
+		return stats;
 	}
 }

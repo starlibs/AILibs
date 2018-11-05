@@ -1,8 +1,9 @@
 package hasco.events;
 
 import jaicore.basic.IObjectEvaluator;
+import jaicore.basic.algorithm.AlgorithmInitializedEvent;
 
-public class HASCORunStartedEvent<T, V extends Comparable<V>> {
+public class HASCORunStartedEvent<T, V extends Comparable<V>> extends AlgorithmInitializedEvent {
 	private final int seed, timeout, numberOfCPUS;
 	private IObjectEvaluator<T, V> benchmark;
 

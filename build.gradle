@@ -1,3 +1,14 @@
+buildscript {
+	repositories {
+		mavenLocal()
+		mavenCentral()
+		maven { url "https://plugins.gradle.org/m2/" }
+	}
+	dependencies {
+		classpath "com.github.jengelman.gradle.plugins:shadow:2.0.4"
+	}
+}
+
 // Artifact publishing and versoning
 plugins {
 	id 'nebula.release' version '6.0.2'
@@ -5,25 +16,15 @@ plugins {
 	id "nebula.maven-base-publish" version "5.1.4"
 	id "org.sonarqube" version "2.6.2"
 }
-allprojects {
-	repositories {
-		mavenCentral()
-		mavenLocal()
-		maven { url "https://jitpack.io" }
-		maven {
-			url "http://clojars.org/repo/"
-			url "https://plugins.gradle.org/m2/"
-			url "https://nexus.cs.upb.de/repository/maven-releases/"
-		}
-	}
-}
 
-// Subproject configuration (shoutout to jonsen94 ;) )
-configure(subprojects.findAll()) {
+allprojects {
+	//Shadow for fat-jars
+	apply plugin: "com.github.johnrengelman.shadow"
+
 	//IDE
-	apply plugin:"java"
-	apply plugin:"eclipse"
-	apply plugin:"idea"
+	apply plugin: "java"
+	apply plugin: "eclipse"
+	apply plugin: "idea"
 
 	//Other
 	apply plugin: "maven"
@@ -44,25 +45,22 @@ configure(subprojects.findAll()) {
 
 	//Repositories
 	repositories {
-		mavenLocal()
-		maven {
-			url "http://clojars.org/repo/"
-			url "https://jitpack.io"
-			url "https://plugins.gradle.org/m2/"
-			url "https://nexus.cs.upb.de/repository/maven-releases/"
-		}
 		mavenCentral()
-		jcenter()
+		mavenLocal()
+		maven { url "https://jitpack.io" }
+		maven { url "http://clojars.org/repo/" }
+		maven { url "https://plugins.gradle.org/m2/" }
+		maven { url "https://nexus.cs.upb.de/repository/maven-releases/" }
+		flatDir {
+			dirs 'lib'
+		}
 	}
-
 	//Dependencies for all(!) projects
 	dependencies {
 		//Logger
-		compile group: 'log4j', name:'log4j', version:'1.2.17'
 		compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
 
-		runtime group: 'org.slf4j', name:'slf4j-log4j12', version:'1.7.25'
-		runtime group: 'log4j', name:'log4j', version:'1.2.17'
+		runtimeOnly group: 'org.slf4j', name:'slf4j-log4j12', version:'1.7.25'
 
 		//Testing
 		testCompile group: 'junit', name: 'junit', version: '4.12'
@@ -77,7 +75,7 @@ configure(subprojects.findAll()) {
 	}
 
 	//Nebula releases
-	nebulaRelease { addReleaseBranchPattern('/develop/') }
+	nebulaRelease { addReleaseBranchPattern('/dev/') }
 
 	//Sonarqube config
 	sonarqube {
@@ -91,13 +89,46 @@ configure(subprojects.findAll()) {
 			properties["sonar.sourceEncoding"] = project.compileJava.options.encoding
 			properties["sonar.java.source"] = project.sourceCompatibility
 			properties["sonar.java.target"] = project.targetCompatibility
-			//properties["sonar.sources"] = sourceSets.main.allSource.srcDirs
-			//properties["sonar.tests"] = sourceSets.test.allSource.srcDirs
 			properties["sonar.java.binaries"] = sourceSets.main.output.classesDir
-			//properties["sonar.java.libraries"] = sourceSets.main.compileClasspath
 			properties["sonar.java.test.binaries"] = sourceSets.test.output.classesDir
-			//properties["sonar.java.test.libraries"] = sourceSets.test.compileClasspath
-			//properties["sonar.junit.reportsPath"] = testResultsDir
 		}
 	}
+
+	publishing {
+		publications {
+			shadow(MavenPublication) { publication ->
+				project.shadow.component(publication)
+			}
+  		}	
+		repositories {
+			maven {
+				url "${nexusBaseUrl}/repository/${nexusUpRepo}-${'snapshots'}"
+				credentials {
+					username "${nexusUser}"
+					password "${nexusPassword}"
+				}
+			}
+		}
+	}
+
 }
+
+dependencies{
+	compile project(":hasco")
+	compile project(":mlplan")
+	compile project(":autofe")
+	compile project(":JAICore:jaicore-basic")
+	compile project(":JAICore:jaicore-concurrent")
+	compile project(":JAICore:jaicore-experiments")
+	compile project(":JAICore:jaicore-graph")
+	compile project(":JAICore:jaicore-graphvisualizer")
+	compile project(":JAICore:jaicore-logic")
+	compile project(":JAICore:jaicore-math")
+	compile project(":JAICore:jaicore-ml")
+	compile project(":JAICore:jaicore-planning")
+	compile project(":JAICore:jaicore-processes")
+	compile project(":JAICore:jaicore-search")
+	compile project(":JAICore:jaicore-services")
+}
+
+publish.dependsOn shadowJar

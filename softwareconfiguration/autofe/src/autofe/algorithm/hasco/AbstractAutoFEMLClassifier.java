@@ -1,29 +1,24 @@
 package autofe.algorithm.hasco;
 
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.nd4j.linalg.api.ndarray.INDArray;
 
 import com.google.common.eventbus.Subscribe;
 
 import autofe.util.DataSet;
-import de.upb.crc901.automl.pipeline.basic.MLPipeline;
-import hasco.events.HASCOSolutionEvent;
+import hasco.core.HASCOSolutionCandidate;
 import jaicore.basic.SQLAdapter;
-import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionSolution;
+import jaicore.basic.algorithm.SolutionCandidateFoundEvent;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 
 public abstract class AbstractAutoFEMLClassifier implements IFEMLClassifier {
 
-	private AutoFEWekaPipeline selectedPipeline;
+	protected AutoFEWekaPipeline selectedPipeline;
 
-	private SQLAdapter adapter;
-	private int experimentID;
-	private String evalTable;
+	protected SQLAdapter adapter;
+	protected int experimentID;
+	protected String evalTable;
 
 	public SQLAdapter getAdapter() {
 		return this.adapter;
@@ -59,7 +54,8 @@ public abstract class AbstractAutoFEMLClassifier implements IFEMLClassifier {
 
 	@Override
 	public void buildClassifier(final Instances data) {
-		throw new UnsupportedOperationException("This operation is not supported as the features have already been engineered.");
+		throw new UnsupportedOperationException(
+				"This operation is not supported as the features have already been engineered.");
 	}
 
 	@Override
@@ -127,22 +123,30 @@ public abstract class AbstractAutoFEMLClassifier implements IFEMLClassifier {
 		this.evalTable = evalTable;
 	}
 
+	// @Subscribe
+	// public void rcvHASCOSolutionEvent(final
+	// SolutionCandidateFoundEvent<HASCOSolutionCandidate<Double>> e) {
+	// if (this.adapter != null) {
+	// new
+	// AutoFEWeka.getComponentInstantiation(e.getSolutionCandidate().getComponentInstance());
+	// Map<String, Object> eval = new HashMap<>();
+	// eval.put("run_id", this.experimentID);
+	// eval.put("preprocessor", "-");
+	// eval.put("classifier",
+	// WekaUtil.getClassifierDescriptor(pl.getBaseClassifier()));
+	// eval.put("errorRate", e.getSolutionCandidate().getScore());
+	// eval.put("time_train", e.getSolution().getTimeToComputeScore());
+	// eval.put("time_predict", -1);
+	// try {
+	// this.adapter.insert(this.evalTable, eval);
+	// } catch (SQLException e1) {
+	// e1.printStackTrace();
+	// }
+	// }
+	// }
+
 	@Subscribe
-	public void rcvHASCOSolutionEvent(final HASCOSolutionEvent<ForwardDecompositionSolution, MLPipeline, Double> e) {
-		if (this.adapter != null) {
-			Map<String, Object> eval = new HashMap<>();
-			eval.put("run_id", this.experimentID);
-			eval.put("preprocessor", "-");
-			eval.put("classifier", e.getSolution().getSolution().toString());
-			eval.put("errorRate", e.getSolution().getScore());
-			eval.put("time_train", e.getSolution().getTimeToComputeScore());
-			eval.put("time_predict", -1);
-			try {
-				this.adapter.insert(this.evalTable, eval);
-			} catch (SQLException e1) {
-				e1.printStackTrace();
-			}
-		}
-	}
+	public abstract void rcvHASCOSolutionEvent(final SolutionCandidateFoundEvent<HASCOSolutionCandidate<Double>> e)
+			throws Exception;
 
 }

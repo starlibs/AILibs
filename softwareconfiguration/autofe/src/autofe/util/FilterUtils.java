@@ -41,7 +41,10 @@ public final class FilterUtils {
 				return new WEKAFilter(new PrincipalComponents());
 			case "autofe.algorithm.hasco.filter.image.PretrainedNN":
 				String net = parameters.get("net");
-				int layer = Integer.parseInt(parameters.get("layer"));
+				net = net == null ? "" : net;
+				int layer = -1;
+				if (parameters.get("layer") != null)
+					layer = Integer.parseInt(parameters.get("layer"));
 				return ImageUtils.getPretrainedNNFilterByName(net, layer, inputShape);
 			}
 		}

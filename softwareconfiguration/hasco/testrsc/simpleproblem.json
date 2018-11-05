@@ -1,0 +1,20 @@
+{
+  "repository" : "SimpleProblem",
+  "components" : [ {
+    "name" : "A",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "IFace" ],
+    "parameter" : [ {
+      "name" : "a",
+      "type" : "boolean",
+      "default" : "true"
+    }, {
+      "name" : "b",
+      "type" : "cat",
+      "default" : "v2",
+      "values" : [ "v1", "v2", "v3" ]
+    } ],
+    "dependencies" : [ ]
+  }
+  ]
+}

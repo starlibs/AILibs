@@ -6,7 +6,6 @@ sourceSets {
     main {
         java {
             srcDir 'src'
-			srcDir 'examples'
         }
         resources {
         	srcDir 'conf'
@@ -16,6 +15,7 @@ sourceSets {
     test {
 		java {
 			srcDir 'test'
+			srcDir 'examples'
 		}
     }
 }
@@ -31,8 +31,6 @@ dependencies {
 	compile project(':JAICore:jaicore-planning')
 	compile project(':JAICore:jaicore-search')
 	compile project(':JAICore:jaicore-ml')
-	//compile project(':JASE')
-	compile group: 'de.upb.isys', name: 'jase', version: '0.0.4'
 
 
 	// OWL API
@@ -40,10 +38,16 @@ dependencies {
 	// TreeMiner
 	compile 'com.github.helegraf:TreeMiner:-SNAPSHOT'
 	// linear algebra
-	compile group: 'org.nd4j', name: 'nd4j-native-platform', version: '1.0.0-beta'
-	compile group: 'org.nd4j', name: 'nd4j-api', version: '1.0.0-beta'
-	// gradient descent
-	compile group: 'de.jungblut.common', name: 'thomasjungblut-common', version: '1.1'
+	compile group: 'org.nd4j', name: 'nd4j-native-platform', version: '0.9.1'
+	compile group: 'org.nd4j', name: 'nd4j-api', version: '0.9.1'
+	
+	// gradient descent (but forbid that the guy uses his log4j-stuff, which we will bride to slf4j)
+	compile ('de.jungblut.common:thomasjungblut-common:1.1') {
+	  exclude group: 'log4j'
+	  exclude group: 'org.slf4j'
+	  exclude group: 'org.apache.logging.log4j', module: 'log4j-core'
+	  exclude group: 'org.apache.logging.log4j', module: 'log4j-api'
+	}
 	
 }
 

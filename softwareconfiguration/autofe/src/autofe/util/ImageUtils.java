@@ -169,6 +169,7 @@ public final class ImageUtils {
 		// Thanks to a pointless API requirement, the zoo models require int[] shapes
 		// while dl4j uses long[] at any other place
 		final int[] intShape = Arrays.stream(shape).mapToInt(i -> (int) i).toArray();
+
 		switch (name) {
 		case "AlexNet":
 			return new PretrainedNNFilter(new AlexNet(42, intShape, 10, new Nesterovs(1e-2, 0.9), CacheMode.NONE,

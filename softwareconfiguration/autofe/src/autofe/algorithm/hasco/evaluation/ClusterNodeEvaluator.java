@@ -9,7 +9,8 @@ import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.search.structure.core.Node;
 
 /**
- * Evaluator used for node evaluation to guide the search using a simple clustering benchmark function.
+ * Evaluator used for node evaluation to guide the search using a simple
+ * clustering benchmark function.
  *
  * @author Julian Lienen, wever
  *
@@ -31,12 +32,16 @@ public class ClusterNodeEvaluator extends AbstractHASCOFENodeEvaluator {
 
 		if (pipe != null && pipe.getFilters() != null) {
 			// If pipeline is too deep, assign worst value
-			if (pipe.getFilters().size() > this.maxPipelineSize) {
+			if (pipe.getFilters().getItems().size() > this.maxPipelineSize) {
 				return MAX_EVAL_VALUE;
 			}
 
 			try {
-				double finalScore = Math.min(1 - EvaluationUtils.performClustering(pipe, this.data) + ATT_COUNT_PENALTY * EvaluationUtils.calculateAttributeCountPenalty(this.data.getInstances()), MAX_EVAL_VALUE - 1);
+				double finalScore = Math.min(
+						1 - EvaluationUtils.performClustering(pipe, this.data)
+								+ ATT_COUNT_PENALTY
+										* EvaluationUtils.calculateAttributeCountPenalty(this.data.getInstances()),
+						MAX_EVAL_VALUE - 1);
 				logger.debug("Final clustering node evaluation score: " + finalScore);
 				return finalScore;
 			} catch (Exception e) {

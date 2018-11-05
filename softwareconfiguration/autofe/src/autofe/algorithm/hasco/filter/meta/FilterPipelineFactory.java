@@ -9,10 +9,10 @@ import org.slf4j.LoggerFactory;
 import autofe.algorithm.hasco.filter.image.PretrainedNNFilter;
 import autofe.util.FilterUtils;
 import hasco.model.ComponentInstance;
-import hasco.query.Factory;
+import hasco.optimizingfactory.BaseFactory;
 import jaicore.graph.Graph;
 
-public class FilterPipelineFactory implements Factory<FilterPipeline> {
+public class FilterPipelineFactory implements BaseFactory<FilterPipeline> {
 
 	private static final String UNION_NAME = "autofe.MakeUnion";
 	private static final String ABSTRACT_PIPE_NAME = "AbstractPipe";
@@ -51,7 +51,7 @@ public class FilterPipelineFactory implements Factory<FilterPipeline> {
 			openFilter.offer(actCIFilter);
 			open.offer(actCI);
 
-			// logger.debug("Building pipeline: " + FilterUtils.getPrettyPrint(actCI, 0));
+			logger.debug("Building pipeline: " + FilterUtils.getPrettyPrint(actCI, 0));
 
 			// Apply breadth-first-search
 			while (!open.isEmpty()) {

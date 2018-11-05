@@ -5,25 +5,22 @@ import java.sql.Time;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.TimeUnit;
 
-import autofe.algorithm.hasco.AutoFEPreferredNodeEvaluator;
-import autofe.algorithm.hasco.HASCOImageFeatureEngineering;
+import org.aeonbits.owner.ConfigFactory;
+
+import autofe.algorithm.hasco.HASCOFeatureEngineering;
+import autofe.algorithm.hasco.HASCOFeatureEngineeringConfig;
 import autofe.algorithm.hasco.evaluation.AbstractHASCOFEObjectEvaluator;
 import autofe.algorithm.hasco.evaluation.COCOObjectEvaluator;
 import autofe.algorithm.hasco.filter.meta.FilterPipeline;
 import autofe.algorithm.hasco.filter.meta.FilterPipelineFactory;
 import autofe.util.DataSet;
 import autofe.util.DataSetUtils;
-import de.upb.crc901.automl.hascoml.supervised.HASCOSupervisedML;
-import de.upb.crc901.automl.hascoml.supervised.HASCOSupervisedML.HASCOClassificationMLSolution;
-import hasco.serialization.ComponentLoader;
 import jaicore.basic.SQLAdapter;
-import jaicore.basic.TimeOut;
 
 public class HASCOImageFeatureEngineeringTest {
 
-	private static final int MAX_PIPELINE_SIZE = 5;
+	// private static final int MAX_PIPELINE_SIZE = 5;
 
 	private static final int MIN_INSTANCES = 100;
 
@@ -50,35 +47,26 @@ public class HASCOImageFeatureEngineeringTest {
 		DataSet dataForFE = subsampledDataSet.get(0);
 		print("Subsampled dataset to use only " + dataForFE.getInstances().size() + " instances.");
 
-		print("Load components...");
-		ComponentLoader cl = new ComponentLoader(new File("model/catalano/catalano.json"));
-
-		HASCOSupervisedML.REQUESTED_INTERFACE = "FilterPipeline";
-		HASCOImageFeatureEngineering hasco = new HASCOImageFeatureEngineering(cl);
-
 		// setup factory for filter pipelines
 		print(Arrays.toString(data.getIntermediateInstances().get(0).shape()));
 		FilterPipelineFactory factory = new FilterPipelineFactory(data.getIntermediateInstances().get(0).shape());
-		hasco.setFactory(factory);
 
 		// setup benchmark for filter pipelines
 		AbstractHASCOFEObjectEvaluator benchmark = new COCOObjectEvaluator();
 		benchmark.setAdapter(new SQLAdapter("localhost", "autofeml", "Hallo33!", "autofeml_test"));
 		benchmark.setEvalTable("autofeml_manual_test");
 		benchmark.setData(dataForFE);
-		hasco.setBenchmark(benchmark);
 
-		AutoFEPreferredNodeEvaluator nodeEvaluator = new AutoFEPreferredNodeEvaluator(cl.getComponents(), factory,
-				MAX_PIPELINE_SIZE);
-		hasco.setPreferredNodeEvaluator(nodeEvaluator);
+		// Setup HASCOImageFeatureEngineering
+		HASCOFeatureEngineeringConfig config = ConfigFactory.create(HASCOFeatureEngineeringConfig.class);
+		HASCOFeatureEngineering hasco = new HASCOFeatureEngineering(new File("model/catalano/catalano.json"),
+				factory, benchmark, config);
 
-		hasco.setNumberOfCPUs(4);
+		hasco.setNumCPUs(4);
+		System.out.println(config.timeout());
+		// hasco.setTimeout(30, TimeUnit.SECONDS);
 
-		hasco.setTimeoutForSingleFEvaluation(30 * 1000);
-
-		hasco.gatherSolutions(new TimeOut(2, TimeUnit.MINUTES));
-
-		HASCOClassificationMLSolution<FilterPipeline> solution = hasco.getCurrentlyBestSolution();
+		FilterPipeline solution = hasco.build(dataForFE);
 		print(solution.toString());
 
 		print("Search finished.");

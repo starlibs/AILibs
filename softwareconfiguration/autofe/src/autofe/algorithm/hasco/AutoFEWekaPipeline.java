@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import autofe.algorithm.hasco.filter.meta.FilterPipeline;
 import autofe.util.DataSet;
 import autofe.util.DataSetUtils;
-import de.upb.crc901.automl.pipeline.basic.MLPipeline;
+import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import jaicore.ml.WekaUtil;
 import weka.classifiers.Classifier;
 import weka.core.Capabilities;

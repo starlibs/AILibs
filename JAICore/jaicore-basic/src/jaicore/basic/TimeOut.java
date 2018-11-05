@@ -4,55 +4,36 @@ import java.util.concurrent.TimeUnit;
 
 public class TimeOut {
 
-	private final TimeUnit timeUnit;
-	private final long value;
+	private TimeUnit unit;
+	private long duration;
 
-	/**
-	 * Standard c'tor to define a timeout together with its unit.
-	 *
-	 * @param value
-	 *            The quantity of the timeout in terms of the given timeunit.
-	 * @param timeUnit
-	 *            The time unit determining how to interpret the value.
-	 */
-	public TimeOut(final long value, final TimeUnit timeUnit) {
-		this.timeUnit = timeUnit;
-		this.value = value;
+	public TimeOut(final long duration, final TimeUnit unit) {
+		this.duration = duration;
+		this.unit = unit;
 	}
 
-	/**
-	 * @return Returns the value of the timeout as seconds.
-	 */
-	public long seconds() {
-		return TimeUnit.SECONDS.convert(this.value, this.timeUnit);
+	public long nanoseconds() {
+		return TimeUnit.NANOSECONDS.convert(this.duration, this.unit);
 	}
 
-	/**
-	 * @return Returns the value of the timeout as milliseconds.
-	 */
 	public long milliseconds() {
-		return TimeUnit.MILLISECONDS.convert(this.value, this.timeUnit);
+		return TimeUnit.MILLISECONDS.convert(this.duration, this.unit);
 	}
 
-	/**
-	 * @return Returns the value of the timeout as microseconds.
-	 */
-	public long microseconds() {
-		return TimeUnit.MICROSECONDS.convert(this.value, this.timeUnit);
-	}
-
-	/**
-	 * @return Returns the value of the timeout as hours.
-	 */
-	public long hours() {
-		return TimeUnit.HOURS.convert(this.value, this.timeUnit);
-	}
-
-	/**
-	 * @return Returns the value of the timeout as minutes.
-	 */
 	public long minutes() {
-		return TimeUnit.MINUTES.convert(this.value, this.timeUnit);
+		return TimeUnit.MINUTES.convert(this.duration, this.unit);
+	}
+
+	public long seconds() {
+		return TimeUnit.SECONDS.convert(this.duration, this.unit);
+	}
+
+	public long hours() {
+		return TimeUnit.HOURS.convert(this.duration, this.unit);
+	}
+
+	public long days() {
+		return TimeUnit.DAYS.convert(this.duration, this.unit);
 	}
 
 }

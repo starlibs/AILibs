@@ -75,6 +75,8 @@ public class PretrainedNNFilter implements IFilter, Serializable {
 
 	private long[] shape;
 
+	public static final int DEFAULT_LAYER = 7;
+
 	public static final Map<String, List<PretrainedType>> PRETRAINED_WEIGHTS_MAPPING = new HashMap<>();
 	static {
 		PRETRAINED_WEIGHTS_MAPPING.put("AlexNet", Arrays.asList(PretrainedType.IMAGENET));
@@ -99,7 +101,12 @@ public class PretrainedNNFilter implements IFilter, Serializable {
 
 		this.model = model;
 		this.modelName = modelName;
-		this.selectedLayer = selectedLayer;
+		// Default layer
+		if (selectedLayer == -1)
+			this.selectedLayer = PretrainedNNFilter.DEFAULT_LAYER;
+		else
+			this.selectedLayer = selectedLayer;
+
 		this.shape = shape;
 
 		try {

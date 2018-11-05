@@ -115,7 +115,9 @@ public class FilterPipeline implements IFilter, Serializable {
 			// Add predecessors to working set
 			nextNodes.addAll(dataGraph.getPredecessors(nextEntry));
 		}
-		DataSet resultDataSet = dataGraph.getRoot().dataset;
+		DataSet resultDataSet = inputData;
+		if (!dataGraph.getItems().isEmpty())
+			resultDataSet = dataGraph.getRoot().dataset;
 
 		// Update intermediate instances into Weka instances
 		logger.debug("Updating instances...");

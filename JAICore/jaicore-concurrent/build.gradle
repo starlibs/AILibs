@@ -10,3 +10,7 @@ sourceSets {
      	}
     }
 }
+
+dependencies {
+  compile project(":JAICore:jaicore-basic")
+}

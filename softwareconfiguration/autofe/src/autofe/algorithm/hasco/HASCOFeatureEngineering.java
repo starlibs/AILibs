@@ -6,237 +6,288 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.Enumeration;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.PriorityQueue;
-import java.util.Queue;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
+import org.aeonbits.owner.ConfigFactory;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import autofe.algorithm.hasco.evaluation.AbstractHASCOFEEvaluator;
-import autofe.algorithm.hasco.evaluation.AbstractHASCOFENodeEvaluator;
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
+
 import autofe.algorithm.hasco.evaluation.AbstractHASCOFEObjectEvaluator;
 import autofe.algorithm.hasco.filter.meta.FilterPipeline;
 import autofe.algorithm.hasco.filter.meta.FilterPipelineFactory;
 import autofe.util.DataSet;
 import autofe.util.DataSetUtils;
-import autofe.util.EvaluationUtils;
-import hasco.core.HASCOFD;
-import hasco.core.Solution;
+import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.SemanticNodeEvaluator;
+import hasco.core.HASCO;
+import hasco.core.HASCOSolutionCandidate;
+import hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
+import hasco.model.Component;
+import hasco.model.ComponentInstance;
+import hasco.optimizingfactory.OptimizingFactory;
+import hasco.optimizingfactory.OptimizingFactoryProblem;
 import hasco.serialization.ComponentLoader;
+import hasco.variants.forwarddecomposition.DefaultPathPriorizingPredicate;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.IObjectEvaluator;
-import jaicore.graph.IObservableGraphAlgorithm;
+import jaicore.basic.algorithm.AlgorithmEvent;
+import jaicore.basic.algorithm.AlgorithmFinishedEvent;
+import jaicore.basic.algorithm.AlgorithmInitializedEvent;
+import jaicore.basic.algorithm.AlgorithmState;
+import jaicore.basic.algorithm.IAlgorithm;
+import jaicore.basic.algorithm.SolutionCandidateFoundEvent;
 import jaicore.ml.WekaUtil;
-import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionSolution;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
-import jaicore.search.algorithms.standard.uncertainty.OversearchAvoidanceConfig;
-import jaicore.search.algorithms.standard.uncertainty.OversearchAvoidanceConfig.OversearchAvoidanceMode;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
+import jaicore.search.core.interfaces.GraphGenerator;
+import jaicore.search.problemtransformers.GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS;
+import weka.core.Capabilities;
+import weka.core.CapabilitiesHandler;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
 
-/**
- * HASCO Feature Engineering class executing a HASCO run using
- * <code>FilterPipeline</code> objects.
- *
- * @author Julian Lienen
- *
- */
-public class HASCOFeatureEngineering implements IObservableGraphAlgorithm<TFDNode, String>, ILoggingCustomizable {
+public class HASCOFeatureEngineering
+		implements CapabilitiesHandler, OptionHandler, ILoggingCustomizable, IAlgorithm<DataSet, FilterPipeline> {
 
-	// Search relevant properties
-	private File configFile;
-	private HASCOFD<FilterPipeline, Double> hasco;
-	private HASCOFD<FilterPipeline, Double>.HASCOSolutionIterator hascoRun;
-	// private INodeEvaluator<TFDNode, Double> nodeEvaluator;
+	private final HASCOFeatureEngineeringConfig config;
 
-	private final long[] inputShape;
-
-	// Logging
+	/** Logger for controlled output */
 	private static Logger logger = LoggerFactory.getLogger(HASCOFeatureEngineering.class);
+
+	/**
+	 * Logger name that can be used to customize logging outputs in a more
+	 * convenient way.
+	 */
 	private String loggerName;
 
-	// Utility variables
-	private int timeoutInS;
-	private long timeOfStart = -1;
-	private boolean isCanceled = false;
-	private Collection<Object> listeners = new ArrayList<>();
-	private Queue<HASCOFESolution> solutionsFoundByHASCO = new PriorityQueue<>(new Comparator<HASCOFESolution>() {
+	/* new */
+	private final File componentFile;
+	private final Collection<Component> components;
+	private final FilterPipelineFactory factory;
+	private FilterPipeline selectedPipeline;
+	private final EventBus eventBus = new EventBus();
+	private OnePhaseHASCOFactory hascoFactory;
+	private OptimizingFactory<RefinementConfiguredSoftwareConfigurationProblem<Double>, FilterPipeline, Double> optimizingFactory;
+	private AlgorithmState state = AlgorithmState.created;
+	private DataSet data = null;
+	private final AbstractHASCOFEObjectEvaluator benchmark;
+	private double internalValidationErrorOfSelectedClassifier;
 
-		@Override
-		public int compare(final HASCOFESolution o1, final HASCOFESolution o2) {
-			return o1.getScore().compareTo(o2.getScore());
-		}
-	});
-
-	private OversearchAvoidanceConfig<TFDNode, Double> oversearchAvoidanceConfig = new OversearchAvoidanceConfig<TFDNode, Double>(
-			OversearchAvoidanceMode.NONE, 0);
-
-	public static class HASCOFESolution extends Solution<ForwardDecompositionSolution, FilterPipeline, Double> {
-		public HASCOFESolution(final Solution<ForwardDecompositionSolution, FilterPipeline, Double> solution) {
-			super(solution);
-		}
-
-		@Override
-		public String toString() {
-			return "HASCOFESolution [getSolution()=" + this.getSolution() + "]";
-		}
+	public HASCOFeatureEngineering(final File componentFile, final FilterPipelineFactory factory,
+			final AbstractHASCOFEObjectEvaluator benchmark, HASCOFeatureEngineeringConfig config) throws IOException {
+		this.componentFile = componentFile;
+		this.components = new ComponentLoader(componentFile).getComponents();
+		this.benchmark = benchmark;
+		this.factory = factory;
+		this.config = config;
 	}
 
-	public HASCOFeatureEngineering(final File config, final AbstractHASCOFENodeEvaluator nodeEvaluator,
-			final DataSet data, final AbstractHASCOFEObjectEvaluator benchmark, final long[] inputShape) {
-
-		if (config == null || !config.exists()) {
-			throw new IllegalArgumentException(
-					"The file " + config + " is null or does not exist and cannot be used by ML-Plan");
-		}
-
-		this.inputShape = inputShape;
-		this.configFile = config;
-		this.initializeHASCOSearch(data, nodeEvaluator, benchmark);
-	}
-
-	private void initializeHASCOSearch(final DataSet data, final AbstractHASCOFENodeEvaluator nodeEvaluator,
-			final AbstractHASCOFEObjectEvaluator benchmark) { // AbstractHASCOFEObjectEvaluator
-
-		// benchmark
-		IObjectEvaluator<FilterPipeline, Double> objectEvaluator = null;
-		if (benchmark != null) {
-			benchmark.setData(data);
-			objectEvaluator = benchmark;
-		} else {
-			objectEvaluator = (n) -> {
-				// Empty pipe
-				if (n.getFilters() == null) {
-					return AbstractHASCOFEEvaluator.MAX_EVAL_VALUE;
-				} else {
-					return new Random(new Random().nextInt(1000)).nextDouble();
-				}
-			};
-		}
-
-		try {
-			ComponentLoader cl = new ComponentLoader();
-			cl.loadComponents(this.configFile);
-			// this.hasco.addComponents(cl.getComponents());
-			// this.hasco.addParamRefinementConfigurations(cl.getParamConfigs());
-
-			FilterPipelineFactory factory = new FilterPipelineFactory(this.inputShape);
-			this.hasco = new HASCOFD<>(cl.getComponents(), cl.getParamConfigs(), factory, "FilterPipeline",
-					objectEvaluator, this.oversearchAvoidanceConfig);
-			if (nodeEvaluator != null) {
-				nodeEvaluator.setComponents(cl.getComponents());
-				nodeEvaluator.setFactory(factory);
-				nodeEvaluator.setData(data);
-				this.hasco.setPreferredNodeEvaluator(nodeEvaluator);
-			} else {
-				this.hasco.setPreferredNodeEvaluator(n -> {
-					return new Random(42).nextDouble();
-				});
-			}
-
-			// Set number of CPUs
-			// this.hasco.setNumberOfCPUs(8);
-			// this.hasco.setNumberOfCPUs(Runtime.getRuntime().availableProcessors());
-			this.hasco.setNumberOfCPUs(1);
-
-			if (this.loggerName != null && this.loggerName.length() > 0) {
-				this.hasco.setLoggerName(this.loggerName + ".hasco");
-			}
-
-		} catch (IOException e) {
-			logger.warn("Could not import configuration file. Using default components instead...");
-			System.exit(1);
-			// e.printStackTrace();
-			// final List<Component> components = FilterUtils.getDefaultComponents();
-			// this.hasco.addComponents(components);
-		}
-
-		// Add listeners
-		this.listeners.forEach(l -> this.hasco.registerListener(l));
-
-		// Set run iterator used for search
-		this.hascoRun = this.hasco.iterator();
-	}
-
-	public void runSearch(final int timeoutInMS) {
-
-		logger.info("Run HASCOFE search...");
-
-		long start = System.currentTimeMillis();
-		long deadline = start + timeoutInMS;
-		this.timeOfStart = System.currentTimeMillis();
-		this.timeoutInS = timeoutInMS / 1000;
-
-		new Thread(new Runnable() {
-
-			@Override
-			public void run() {
-				try {
-					while (!Thread.interrupted()) {
-						Thread.sleep(100);
-						int timeElapsed = (int) (System.currentTimeMillis() - HASCOFeatureEngineering.this.timeOfStart);
-						int timeRemaining = HASCOFeatureEngineering.this.timeoutInS * 1000 - timeElapsed;
-
-						// TODO
-						if (timeRemaining < 0) {
-							logger.info("Cancelling search...");
-							HASCOFeatureEngineering.this.cancel();
-							return;
-						}
-					}
-				} catch (InterruptedException e) {
-				}
-
-			}
-		}, "Phase 1 time bound observer").start();
-
-		boolean deadlineReached = false;
-		while (!this.isCanceled && this.hascoRun.hasNext()
-				&& (timeoutInMS <= 0 || !(deadlineReached = System.currentTimeMillis() >= deadline))) {
-			logger.debug("Searching for next...");
-			HASCOFESolution nextSolution = new HASCOFESolution(this.hascoRun.next());
-			logger.debug("Found new one.");
-			this.solutionsFoundByHASCO.add(nextSolution);
-
-		}
-		if (deadlineReached) {
-			logger.info("Deadline has been reached.");
-		} else if (this.isCanceled) {
-			logger.info("Interrupting HASCO due to cancel.");
-		}
-
-	}
-
-	public void cancel() {
-		this.isCanceled = true;
-		if (this.hascoRun != null) {
-			this.hascoRun.cancel();
-		}
-	}
-
-	public Queue<HASCOFESolution> getFoundClassifiers() {
-		return new LinkedList<>(this.solutionsFoundByHASCO);
-	}
-
-	public HASCOFESolution getCurrentlyBestSolution() {
-		return this.solutionsFoundByHASCO.peek();
+	// TODO: Change interface?
+	public FilterPipeline build(final DataSet data) throws Exception {
+		this.setData(data);
+		return this.call();
 	}
 
 	@Override
-	public void setLoggerName(final String name) {
-		logger.info("Switching logger from {} to {}", logger.getName(), name);
+	public boolean hasNext() {
+		return this.state != AlgorithmState.inactive;
+	}
+
+	@Override
+	public AlgorithmEvent next() {
+		try {
+			return this.nextWithException();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@Override
+	public AlgorithmEvent nextWithException() throws Exception {
+		// TODO Auto-generated method stub
+		switch (this.state) {
+		case created: {
+			/* check whether data has been set */
+			if (this.data == null) {
+				throw new IllegalArgumentException("Data to work on is still null");
+			}
+
+			/* check number of CPUs assigned */
+			if (this.config.cpus() < 1) {
+				throw new IllegalStateException(
+						"Cannot generate search where number of CPUs is " + this.config.getNumberOfCPUs());
+			}
+
+			/* Subsample dataset to reduce computational effort. */
+			DataSet dataForFE = DataSetUtils.subsample(data, this.config.subsamplingRatio(), this.config.minInstances(),
+					new Random(this.config.randomSeed()));
+
+			/* communicate the parameters with which AutoFE will run */
+			// TODO
+			logger.info("Starting HASCOImageFeatureEngineering with {} cpus, max pipeline size of {}.",
+					this.config.cpus(), this.config.maxPipelineSize());
+
+			/* create HASCO problem */
+			this.benchmark.setData(dataForFE);
+			IObjectEvaluator<ComponentInstance, Double> wrappedBenchmark = c -> this.benchmark
+					.evaluate(this.factory.getComponentInstantiation(c));
+			AutoFEPreferredNodeEvaluator nodeEvaluator = new AutoFEPreferredNodeEvaluator(this.components, factory,
+					this.config.maxPipelineSize());
+			RefinementConfiguredSoftwareConfigurationProblem<Double> problem = new RefinementConfiguredSoftwareConfigurationProblem<>(
+					this.componentFile, "FilterPipeline", wrappedBenchmark);
+
+			// TwoPhaseSoftwareConfigurationProblem problem = new
+			// TwoPhaseSoftwareConfigurationProblem(this.componentFile,
+			// "FilterPipeline", wrappedBenchmark, wrappedBenchmark);
+
+			/* configure and start optimizing factory */
+			OptimizingFactoryProblem<RefinementConfiguredSoftwareConfigurationProblem<Double>, FilterPipeline, Double> optimizingFactoryProblem = new OptimizingFactoryProblem<>(
+					this.factory, problem);
+			this.hascoFactory = new OnePhaseHASCOFactory(this.config);
+			// TODO: dataShownToSearch
+
+			this.hascoFactory.setProblemInput(problem);
+
+			// TODO: Test
+			// INodeEvaluator<TFDNode, Double> finalNE = new
+			// AlternativeNodeEvaluator<TFDNode, Double>(
+			// this.getSemanticNodeEvaluator(this.data.getInstances()), nodeEvaluator);
+
+			DefaultPathPriorizingPredicate<TFDNode, String> prioritizingPredicate = new DefaultPathPriorizingPredicate<>();
+			this.hascoFactory.setSearchProblemTransformer(
+					new GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS<>(n -> null,
+							prioritizingPredicate, this.config.randomSeed(), this.config.randomCompletions(),
+							this.config.timeoutForCandidateEvaluation(), this.config.timeoutForNodeEvaluation()));
+
+			prioritizingPredicate.setHasco(this.hascoFactory.getAlgorithm());
+			this.hascoFactory.setPriorizingPredicate(prioritizingPredicate);
+
+			this.optimizingFactory = new OptimizingFactory<>(optimizingFactoryProblem, this.hascoFactory);
+			this.optimizingFactory.setLoggerName(this.loggerName + ".2phasehasco");
+			this.optimizingFactory.setTimeout(this.config.timeout(), TimeUnit.SECONDS);
+			this.optimizingFactory.registerListener(this);
+			this.optimizingFactory.init();
+
+			/* set state to active */
+			this.state = AlgorithmState.active;
+			return new AlgorithmInitializedEvent();
+		}
+		case active: {
+			// TODO: Is this necessary?
+			/* train the classifier returned by the optimizing factory */
+			long startOptimizationTime = System.currentTimeMillis();
+			this.selectedPipeline = this.optimizingFactory.call();
+			this.internalValidationErrorOfSelectedClassifier = this.optimizingFactory.getPerformanceOfObject();
+			long startBuildTime = System.currentTimeMillis();
+			// this.selectedClassifier.buildClassifier(this.data);
+			long endBuildTime = System.currentTimeMillis();
+			logger.info(
+					"Selected model has been built on entire dataset. Build time of chosen model was {}ms. Total construction time was {}ms",
+					endBuildTime - startBuildTime, endBuildTime - startOptimizationTime);
+			this.state = AlgorithmState.inactive;
+			return new AlgorithmFinishedEvent();
+		}
+		default:
+			throw new IllegalStateException("Cannot do anything in state " + this.state);
+		}
+	}
+
+	@Override
+	public FilterPipeline call() throws Exception {
+		while (this.hasNext()) {
+			this.nextWithException();
+		}
+		return this.selectedPipeline;
+	}
+
+	public void setData(final DataSet data) {
+		this.data = data;
+	}
+
+	@Override
+	public DataSet getInput() {
+		return this.data;
+	}
+
+	@Override
+	public void registerListener(Object listener) {
+		this.optimizingFactory.registerListener(listener);
+	}
+
+	@Override
+	public int getNumCPUs() {
+		return this.config.getNumberOfCPUs();
+	}
+
+	@Override
+	public void setTimeout(int timeout, TimeUnit timeUnit) {
+		double factor = 1;
+		switch (timeUnit) {
+		case MILLISECONDS:
+			factor = 1 / 1000;
+			break;
+		case MINUTES:
+			factor = 60;
+			break;
+		case HOURS:
+			factor = 60 * 60;
+			break;
+		default:
+			logger.warn("A timeout unit was used which is not supported. Timeout value '" + timeout
+					+ "' is interpreted as seconds.");
+		}
+		this.config.setProperty(HASCOFeatureEngineeringConfig.K_TIMEOUT, String.valueOf((int) (timeout * factor)));
+	}
+
+	@Override
+	public int getTimeout() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public TimeUnit getTimeoutUnit() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Iterator<AlgorithmEvent> iterator() {
+		return this;
+	}
+
+	@Override
+	public void cancel() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void setNumCPUs(int numberOfCPUs) {
+		if (numberOfCPUs < 1) {
+			throw new IllegalArgumentException("Need to work with at least one CPU");
+		}
+		if (numberOfCPUs > Runtime.getRuntime().availableProcessors()) {
+			logger.warn("Warning, configuring {} CPUs where the system has only {}", numberOfCPUs,
+					Runtime.getRuntime().availableProcessors());
+		}
+		this.config.setProperty(HASCOFeatureEngineeringConfig.K_CPUS, String.valueOf(numberOfCPUs));
+	}
+
+	@Override
+	public void setLoggerName(String name) {
 		this.loggerName = name;
-		logger = LoggerFactory.getLogger(name);
-		logger.info("Activated logger {} with name {}", name, logger.getName());
 	}
 
 	@Override
@@ -245,22 +296,67 @@ public class HASCOFeatureEngineering implements IObservableGraphAlgorithm<TFDNod
 	}
 
 	@Override
-	public void registerListener(final Object listener) {
-		this.listeners.add(listener);
+	public Enumeration<Option> listOptions() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
-	// public void enableVisualization() {
-	// if (this.timeOfStart >= 0)
-	// throw new IllegalStateException(
-	// "Cannot enable visualization after buildClassifier has been invoked. Please
-	// enable it previously.");
-	//
-	// new SimpleGraphVisualizationWindow<Node<TFDNode, Double>>(this).getPanel()
-	// .setTooltipGenerator(new TFDTooltipGenerator<>());
-	// }
+	@Override
+	public void setOptions(String[] options) throws Exception {
+		// TODO Auto-generated method stub
 
-	public HASCOFD<FilterPipeline, Double> getHasco() {
-		return this.hasco;
+	}
+
+	@Override
+	public String[] getOptions() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Capabilities getCapabilities() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Subscribe
+	public void receiveSolutionEvent(final SolutionCandidateFoundEvent<HASCOSolutionCandidate<Double>> event) {
+		HASCOSolutionCandidate<Double> solution = event.getSolutionCandidate();
+		try {
+			logger.info("Received new solution {} with score {} and evaluation time {}ms",
+					this.factory.getComponentInstantiation(solution.getComponentInstance()), solution.getScore(),
+					solution.getTimeToEvaluateCandidate());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		this.eventBus.post(event);
+	}
+
+	public void registerListenerForSolutionEvaluations(final Object listener) {
+		this.eventBus.register(listener);
+	}
+
+	public GraphGenerator<TFDNode, String> getGraphGenerator() {
+		if (this.state == AlgorithmState.created) {
+			this.init();
+		}
+		HASCO hasco = ((HASCO) this.optimizingFactory.getOptimizer());
+		return hasco.getGraphGenerator();
+	}
+
+	public AlgorithmInitializedEvent init() {
+		AlgorithmEvent e = null;
+		while (this.hasNext()) {
+			e = this.next();
+			if (e instanceof AlgorithmInitializedEvent) {
+				return (AlgorithmInitializedEvent) e;
+			}
+		}
+		throw new IllegalStateException("Could not complete initialization");
+	}
+
+	public double getInternalValidationErrorOfSelectedClassifier() {
+		return this.internalValidationErrorOfSelectedClassifier;
 	}
 
 	public static List<Instances> generateRandomDataSets(final int dataset, // final double usedDataSetSize,
@@ -287,11 +383,16 @@ public class HASCOFeatureEngineering implements IObservableGraphAlgorithm<TFDNod
 		logger.info("Finished intermediate calculations.");
 		DataSet originDataSet = new DataSet(split.get(0), intermediate);
 
-		HASCOFeatureEngineering hascoFE = new HASCOFeatureEngineering(new File("model/catalano/catalano.json"),
-				EvaluationUtils.getRandomNodeEvaluator(maxPipelineSize), new DataSet(split.get(0), intermediate), null,
-				DataSetUtils.getInputShapeByDataSet(dataset));
-		hascoFE.setLoggerName("autofe");
-		hascoFE.runSearch(timeout);
+		HASCOFeatureEngineeringConfig config = ConfigFactory.create(HASCOFeatureEngineeringConfig.class);
+		HASCOFeatureEngineering hascoImageFE = new HASCOFeatureEngineering(new File("model/catalano/catalano.json"),
+				new FilterPipelineFactory(intermediate.get(0).shape()), null, config);
+
+		// HASCOFeatureEngineering hascoFE = new HASCOFeatureEngineering(,
+		// EvaluationUtils.getRandomNodeEvaluator(maxPipelineSize), new
+		// DataSet(split.get(0), intermediate), null,
+		// DataSetUtils.getInputShapeByDataSet(dataset));
+		// hascoFE.setLoggerName("autofe");
+		// hascoFE.runSearch(timeout);
 
 		// Calculate solution data sets
 		List<Instances> result = new ArrayList<>();
@@ -300,17 +401,17 @@ public class HASCOFeatureEngineering implements IObservableGraphAlgorithm<TFDNod
 		}
 
 		// logger.debug("Found solutions: " + hascoFE.getFoundClassifiers().toString());
-		List<HASCOFESolution> solutions = new ArrayList<>(hascoFE.getFoundClassifiers());
-		logger.debug("Found " + solutions.size() + " solutions.");
-		Collections.shuffle(solutions, new Random(seed));
 
-		Iterator<HASCOFESolution> solIt = solutions.iterator();
+		// List<HASCOFESolution> solutions = new
+		// ArrayList<>(hascoFE.getFoundClassifiers());
+		// logger.debug("Found " + solutions.size() + " solutions.");
+		// Collections.shuffle(solutions, new Random(seed));
+		//
+		// Iterator<HASCOFESolution> solIt = solutions.iterator();
 
 		int solCounter = result.size();
-		while (solIt.hasNext() && solCounter < maxSolutionCount) {
-			HASCOFESolution nextSol = solIt.next();
-
-			FilterPipeline pipe = nextSol.getSolution();
+		while (hascoImageFE.hasNext() && solCounter < maxSolutionCount) {
+			FilterPipeline pipe = hascoImageFE.call();
 
 			// Discard empty or oversized pipelines
 			if (pipe.getFilters() == null || pipe.getFilters().getItems().size() > maxPipelineSize) {
@@ -326,5 +427,19 @@ public class HASCOFeatureEngineering implements IObservableGraphAlgorithm<TFDNod
 		logger.debug("Got all randomly generated data sets.");
 
 		return result;
+	}
+
+	public void setTimeoutForSingleSolutionEvaluation(final int timeoutInS) {
+		this.config.setProperty(HASCOFeatureEngineeringConfig.K_RANDOM_COMPLETIONS_TIMEOUT_PATH,
+				String.valueOf(timeoutInS * 1000));
+	}
+
+	public void setTimeoutForNodeEvaluation(final int timeoutInS) {
+		this.config.setProperty(HASCOFeatureEngineeringConfig.K_RANDOM_COMPLETIONS_TIMEOUT_NODE,
+				String.valueOf(timeoutInS * 1000));
+	}
+
+	protected INodeEvaluator<TFDNode, Double> getSemanticNodeEvaluator(Instances data) {
+		return new SemanticNodeEvaluator(this.components, data);
 	}
 }

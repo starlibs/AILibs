@@ -19,8 +19,9 @@ import org.slf4j.LoggerFactory;
 import autofe.algorithm.hasco.evaluation.AbstractHASCOFEEvaluator;
 import autofe.algorithm.hasco.evaluation.AbstractHASCOFENodeEvaluator;
 import autofe.algorithm.hasco.filter.meta.FilterPipeline;
-import de.upb.crc901.automl.pipeline.basic.MLPipeline;
-import de.upb.crc901.mlplan.multiclass.weka.MLPlanWekaClassifier;
+import de.upb.crc901.mlplan.multiclass.wekamlplan.MLPlanWekaClassifier;
+import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.WekaMLPlanWekaClassifier;
+import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import fantail.core.Correlation;
 import jaicore.ml.WekaUtil;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
@@ -131,7 +132,7 @@ public final class EvaluationUtils {
 
 		// TODO: Kernel
 
-		ExecutorService execService = Executors.newFixedThreadPool(4);
+		ExecutorService execService = Executors.newFixedThreadPool(1);
 		Future<Double> clustering0 = execService.submit(() -> {
 			return performClustering(insts);
 		});
@@ -215,7 +216,7 @@ public final class EvaluationUtils {
 
 		List<Instances> split = WekaUtil.getStratifiedSplit(instances, new Random(42), .7f);
 
-		ExecutorService execService = Executors.newFixedThreadPool(4);
+		ExecutorService execService = Executors.newFixedThreadPool(1);
 		Future<Double> result0 = execService.submit(() -> {
 			Instances insts = new Instances(split.get(0));
 
@@ -640,15 +641,15 @@ public final class EvaluationUtils {
 				+ training.numAttributes() + " attributes.");
 
 		/* Initialize MLPlan using WEKA components */
-		MLPlanWekaClassifier mlplan = new MLPlanWekaClassifier();
-		mlplan.setRandom(seed);
-		mlplan.setNumberOfCPUs(numCores);
+		MLPlanWekaClassifier mlplan = new WekaMLPlanWekaClassifier();
+		mlplan.setRandomSeed(seed);
+		mlplan.setNumCPUs(numCores);
 		mlplan.setLoggerName("mlplan");
 		// Timeout in seconds
 		mlplan.setTimeout(timeout);
 		mlplan.setPortionOfDataForPhase2(.1f);
 		if (enableVisualization) {
-			mlplan.enableVisualization(true);
+			mlplan.activateVisualization();
 		}
 		mlplan.buildClassifier(training);
 

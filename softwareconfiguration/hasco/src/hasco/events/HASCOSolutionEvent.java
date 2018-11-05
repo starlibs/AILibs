@@ -1,18 +1,11 @@
 package hasco.events;
 
-import hasco.core.Solution;
-import jaicore.planning.algorithms.IPlanningSolution;
+import hasco.core.HASCOSolutionCandidate;
+import jaicore.basic.algorithm.SolutionCandidateFoundEvent;
 
-public class HASCOSolutionEvent<R extends IPlanningSolution, T, V> {
+public class HASCOSolutionEvent<V extends Comparable<V>> extends SolutionCandidateFoundEvent<HASCOSolutionCandidate<V>> {
 
-	private Solution<R, T, ? extends Comparable<V>> solution;
-
-	public HASCOSolutionEvent(final Solution<R, T, ? extends Comparable<V>> solution) {
-		this.solution = solution;
+	public HASCOSolutionEvent(HASCOSolutionCandidate<V> solutionCandidate) {
+		super(solutionCandidate);
 	}
-
-	public Solution<R, T, ? extends Comparable<V>> getSolution() {
-		return this.solution;
-	}
-
 }
