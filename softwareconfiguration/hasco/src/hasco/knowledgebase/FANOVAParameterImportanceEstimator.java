@@ -145,7 +145,6 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 			}
 		}
 		// System.out.println("Importance overall: " + sum);
-		System.out.println("important params size: " + importantParameters.size());
 		importantParameterMap.put(pipelineIdentifier, importantParameters);
 		int numPruned = data.numAttributes() - 1 - importantParameters.size();
 		HASCOWithParameterPruning.addPrunedParameters(numPruned);
@@ -184,8 +183,11 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 
 	@Override
 	public boolean readyToEstimateImportance(ComponentInstance composition) {
-		return this.performanceKnowledgeBase.kDistinctAttributeValuesAvailable(benchmarkName, composition,
-				minNumSamples);
+		String identifier = Util.getComponentNamesOfComposition(composition);
+		System.out.println("number of samples for " + Util.getComponentNamesOfComposition(composition) + ": " + performanceKnowledgeBase.getNumSamples(benchmarkName, identifier));
+//		return this.performanceKnowledgeBase.kDistinctAttributeValuesAvailable(benchmarkName, composition,
+//				minNumSamples);
+		return performanceKnowledgeBase.getNumSamples(benchmarkName, identifier) > 100;
 	}
 
 	/**

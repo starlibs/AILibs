@@ -248,6 +248,8 @@ public class PerformanceKnowledgeBase {
 					double finalValue = Double.parseDouble(values.get(i).getRight());
 					instance.setValue(attr, finalValue);
 				}
+			} else {
+				System.out.println("right is null");
 			}
 		}
 		Attribute scoreAttr = instances.classAttribute();
@@ -510,6 +512,7 @@ public class PerformanceKnowledgeBase {
 		Instances instances = performanceInstancesByIdentifier.get(benchmarkName).get(identifier);
 		if (instances.numInstances() < minNum)
 			return false;
+		System.out.println("number of samples for " + identifier + ": " + instances.size());
 		for (int i = 0; i < instances.numAttributes() - 1; i++) {
 			// if the attribute is nominal or string but the number of values is smaller
 			// than k, skip it
