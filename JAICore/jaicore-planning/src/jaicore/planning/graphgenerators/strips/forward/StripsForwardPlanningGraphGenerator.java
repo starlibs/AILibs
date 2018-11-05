@@ -45,7 +45,7 @@ public class StripsForwardPlanningGraphGenerator implements GraphGenerator<Strip
 
 	@Override
 	public NodeGoalTester<StripsForwardPlanningNode> getGoalTester() {
-		return l -> l.getState().containsAll(problem.getGoalState());
+		return l -> problem.getGoalStateFunction().isGoalState(l.getState());
 	}
 
 	@Override

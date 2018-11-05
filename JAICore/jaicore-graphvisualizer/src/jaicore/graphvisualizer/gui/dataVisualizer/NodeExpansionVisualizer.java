@@ -26,7 +26,7 @@ public class NodeExpansionVisualizer implements IVisualizer {
 	 */
 	public NodeExpansionVisualizer() {
 
-		visualization = new GraphVisualization<>();
+		visualization = new GraphVisualization<>(null);
 
 		bus.register(visualization);
 	}
