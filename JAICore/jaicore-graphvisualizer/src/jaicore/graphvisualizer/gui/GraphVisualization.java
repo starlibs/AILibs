@@ -2,6 +2,7 @@ package jaicore.graphvisualizer.gui;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -29,6 +30,7 @@ import jaicore.graphvisualizer.events.graphEvents.NodeParentSwitchEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeRemovedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
+import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
@@ -82,11 +84,10 @@ public class GraphVisualization<V,E> {
 		
 		if(this.evaluator == null) {
 			this.graph.setAttribute("ui.stylesheet", "url('conf/searchgraph.css')");
-			System.out.println("loaded Searchgraph");
+
 		}
 		else {
 			this.graph.setAttribute("ui.stylesheet", "url('conf/heatmap.css')");
-			System.out.println("loaded heatmap");
 			evaluation = true;
 			this.gradient = this.createColorGradient();
 			
@@ -102,7 +103,6 @@ public class GraphVisualization<V,E> {
 		this.viewPanel = (FxViewPanel) viewer.addDefaultView(false);
 
 		pipe = viewer.newViewerPipe();
-//        pipe.addViewerListener(new GraphListener());
 
 		viewer.getDefaultView().setMouseManager(new FxMouseManager(
 				EnumSet.of(InteractiveElement.EDGE, InteractiveElement.NODE, InteractiveElement.SPRITE)));
@@ -120,6 +120,8 @@ public class GraphVisualization<V,E> {
 		this.minLabel = new Label();
 		if(evaluation) {
 			this.pane.getChildren().add(gradient);
+			Platform.runLater(()->{
+				
 			
 			this.maxLabel.setTextFill(Color.CYAN);
 			this.minLabel.setTextFill(Color.CYAN);
@@ -127,6 +129,7 @@ public class GraphVisualization<V,E> {
 
 			this.minLabel.setTranslateY(485);
 			pane.getChildren().add(this.minLabel);
+			});
 		}
 
 	}
@@ -149,13 +152,15 @@ public class GraphVisualization<V,E> {
 			this.graph.setAttribute("ui.stylesheet", "url('conf/heatmap.css')");
 			gradient = createColorGradient();
 			pane.getChildren().add(gradient);
-			
-			this.maxLabel.setTextFill(Color.CYAN);
-			this.minLabel.setTextFill(Color.CYAN);
-			pane.getChildren().add(this.maxLabel);
+			Platform.runLater(()->{
+				this.maxLabel.setTextFill(Color.CYAN);
+				this.minLabel.setTextFill(Color.CYAN);
+				pane.getChildren().add(this.maxLabel);
 
-			this.minLabel.setTranslateY(485);
-			pane.getChildren().add(this.minLabel);
+				this.minLabel.setTranslateY(485);
+				pane.getChildren().add(this.minLabel);
+			});
+			
 			
 			update();
 		}
@@ -173,9 +178,6 @@ public class GraphVisualization<V,E> {
 	@Subscribe
 	public synchronized void receiveGraphInitEvent(GraphInitializedEvent<V> e) {
 		try {
-
-//			if (roots != null)
-//				throw new UnsupportedOperationException("Cannot initialize the graph for a second time!");
 			roots.add(e.getRoot());
 			if (roots == null)
 				throw new IllegalArgumentException("Root must not be NULL");
@@ -194,7 +196,7 @@ public class GraphVisualization<V,E> {
 			newEdge(e.getParent(), e.getNode());
 			ext2intNodeMap.get(e.getNode()).setAttribute("ui.class", e.getType());
 		} catch (Exception ex) {
-//            ex.printStackTrace();
+
 		}
 	}
 
@@ -208,7 +210,7 @@ public class GraphVisualization<V,E> {
 						"Cannot switch type of node " + e.getNode() + ". This node has not been reached previously.");
 			ext2intNodeMap.get(e.getNode()).setAttribute("ui.class", e.getType());
 		} catch (Exception ex) {
-//            ex.printStackTrace();
+
 		}
 	}
 
@@ -223,7 +225,7 @@ public class GraphVisualization<V,E> {
 			newEdge(e.getNewParent(), e.getNode());
 
 		} catch (Exception ex) {
-//            ex.printStackTrace();
+
 		}
 	}
 
@@ -231,7 +233,6 @@ public class GraphVisualization<V,E> {
 	public synchronized void receiveNodeRemovedEvent(NodeRemovedEvent<V> e) {
 		try {
 			graph.removeNode(ext2intNodeMap.get(e.getNode()));
-//             ext2intNodeMap.get(e.getNode()).setAttribute("ui.class", e.getType());
 			ext2intNodeMap.remove(e.getNode());
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -268,11 +269,17 @@ public class GraphVisualization<V,E> {
 				double value = evaluator.evaluate(newNodeExt);
 				if(value < bestValue) {
 					this.bestValue = value;
-					this.minLabel.setText(Double.toString(this.bestValue));
+					Platform.runLater(()->{
+						this.minLabel.setText(Double.toString(bestValue));
+					});
+					
 				}
 				if(value > worstValue) {
 					this.worstValue = value;
-					this.maxLabel.setText(Double.toString(this.worstValue));
+					Platform.runLater(()->{
+						this.maxLabel.setText(Double.toString(this.worstValue));
+					});
+					
 				}
 				
 				if(!roots.contains(newNodeExt))
@@ -328,7 +335,13 @@ public class GraphVisualization<V,E> {
 		this.int2extNodeMap.clear();
 		this.nodeCounter = 0;
 		this.graph.clear();
-		this.graph.setAttribute("ui.stylesheet", "url('conf/heatmap.css')");
+		if(this.evaluator == null) {
+			this.graph.setAttribute("ui.stylesheet", "url('conf/searchgraph.css')");
+		}
+		else {
+			this.graph.setAttribute("ui.stylesheet", "url('conf/heatmap.css')");
+			this.gradient = this.createColorGradient();
+		}
 	}
 
 	/**
@@ -415,7 +428,7 @@ public class GraphVisualization<V,E> {
 		ArrayList<Stop> list = new ArrayList<Stop>();
 
 		try {
-			Files.lines(Paths.get("/home/jkoepe/git/AILibs/JAICore/jaicore-search/conf/heatmap.css"))
+			Files.lines(Paths.get("conf/heatmap.css"))
 					.filter(line -> line.contains("fill-color"))
 
 					.filter(line -> !line.contains("/*")).forEach(line -> {
@@ -424,10 +437,6 @@ public class GraphVisualization<V,E> {
 						if (a.length > 1) {
 							double d = 1.0 / (a.length - 1);
 							for (int i = 0; i < a.length; i++) {
-
-								System.out.println(d * i);
-								System.out.println(a[i].length());
-
 								list.add(new Stop(d * i, Color.web(a[i].trim())));
 							}
 						}
