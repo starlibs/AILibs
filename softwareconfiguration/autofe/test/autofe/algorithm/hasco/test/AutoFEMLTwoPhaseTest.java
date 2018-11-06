@@ -34,5 +34,9 @@ public class AutoFEMLTwoPhaseTest {
 		System.out.println("Start building AutoFEMLTwoPhase classifier...");
 
 		autofeml.buildClassifier(trainTestSplit.get(0));
+
+		System.out.println("Selected solution: " + autofeml.getSelectedPipeline());
+		System.out.println("Scores (AutoFE / MLPlan): " + autofeml.getInternalAutoFEScore() + " / "
+				+ autofeml.getInternalMlPlanScore());
 	}
 }

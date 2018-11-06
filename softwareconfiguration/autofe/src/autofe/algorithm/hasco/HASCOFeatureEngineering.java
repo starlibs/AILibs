@@ -165,7 +165,7 @@ public class HASCOFeatureEngineering
 
 			DefaultPathPriorizingPredicate<TFDNode, String> prioritizingPredicate = new DefaultPathPriorizingPredicate<>();
 			this.hascoFactory.setSearchProblemTransformer(
-					new GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS<>(n -> null,
+					new GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS<>(nodeEvaluator,
 							prioritizingPredicate, this.config.randomSeed(), this.config.randomCompletions(),
 							this.config.timeoutForCandidateEvaluation(), this.config.timeoutForNodeEvaluation()));
 

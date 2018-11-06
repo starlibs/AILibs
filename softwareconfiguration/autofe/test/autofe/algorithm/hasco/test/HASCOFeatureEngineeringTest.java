@@ -35,6 +35,7 @@ public class HASCOFeatureEngineeringTest {
 
 		FilterPipeline pipe = hascoImageFE.build(trainTestSplit.get(0));
 		System.out.println(pipe);
+		System.out.println("Final score: " + hascoImageFE.getInternalValidationErrorOfSelectedClassifier());
 	}
 
 	// @Test

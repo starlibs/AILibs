@@ -227,6 +227,7 @@ public class PretrainedNNFilter implements IFilter, Serializable {
 		return this.selectedLayer;
 	}
 
+	// TODO
 	public int getSelectedLayerByModelName() {
 		if (this.modelName.equalsIgnoreCase("VGG16")) {
 			return this.compGraph.getNumLayers() - 5;

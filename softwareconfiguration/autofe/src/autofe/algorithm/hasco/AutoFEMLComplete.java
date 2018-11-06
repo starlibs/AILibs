@@ -383,12 +383,15 @@ public class AutoFEMLComplete extends AbstractAutoFEMLClassifier
 			// AlternativeNodeEvaluator<TFDNode, Double>(
 			// this.getSemanticNodeEvaluator(this.dataShownToSearch),
 			// preferenceNodeEvaluator));
-			this.hascoFactory.setPreferredNodeEvaluator(n -> {
-				if (n.getParent() == null)
-					return 0.0;
-				else
-					return null;
-			});
+
+			// this.hascoFactory.setPreferredNodeEvaluator(n -> {
+			// if (n.getParent() == null)
+			// return 0.0;
+			// else
+			// return null;
+			// });
+			this.hascoFactory.setPreferredNodeEvaluator(
+					new AutoFEMLPreferredNodeEvaluator(this.components, this.factory, this.config.maxPipelineSize()));
 			this.hascoFactory.setConfig(this.config);
 			this.optimizingFactory = new OptimizingFactory<>(optimizingFactoryProblem, this.hascoFactory);
 			this.optimizingFactory.setLoggerName(this.loggerName + ".2phasehasco");
@@ -497,4 +500,9 @@ public class AutoFEMLComplete extends AbstractAutoFEMLClassifier
 			}
 		}
 	}
+
+	public double getInternalValidationErrorOfSelectedClassifier() {
+		return internalValidationErrorOfSelectedClassifier;
+	}
+
 }

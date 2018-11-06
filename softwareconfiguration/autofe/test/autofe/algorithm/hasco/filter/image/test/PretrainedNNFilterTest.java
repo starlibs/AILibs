@@ -35,7 +35,7 @@ public class PretrainedNNFilterTest {
 
 		/* load dataset and create a train-test-split */
 		OpenmlConnector connector = new OpenmlConnector();
-		DataSetDescription ds = connector.dataGet(DataSetUtils.CIFAR10_ID);
+		DataSetDescription ds = connector.dataGet(DataSetUtils.MNIST_ID);
 		File file = ds.getDataset("4350e421cdc16404033ef1812ea38c01");
 		Instances data = new Instances(new BufferedReader(new FileReader(file)));
 		data.setClassIndex(data.numAttributes() - 1);
@@ -43,7 +43,7 @@ public class PretrainedNNFilterTest {
 
 		logger.info("Calculating intermediates...");
 		List<INDArray> intermediate = new ArrayList<>();
-		intermediate.add(DataSetUtils.cifar10InstanceToMatrix(split.get(0).get(0)));
+		intermediate.add(DataSetUtils.mnistInstanceToMatrix(split.get(0).get(0)));
 		// for (Instance inst : split.get(0)) {
 		// intermediate.add(DataSetUtils.cifar10InstanceToBitmap(inst));
 		// intermediate.add(DataSetUtils.cifar10InstanceToMatrix(inst));
@@ -55,9 +55,10 @@ public class PretrainedNNFilterTest {
 		// new Nesterovs(1e-2, 0.9), CacheMode.NONE, WorkspaceMode.ENABLED,
 		// AlgoMode.PREFER_FASTEST), 5,
 		// intermediate.get(0).shape(), "VGG16");
-		// PretrainedNNFilter filter = ImageUtils.getPretrainedNNFilterByName("VGG16",
-		// 5, intermediate.get(0).shape());
-		PretrainedNNFilter filter = ImageUtils.getPretrainedNNFilterByName("ResNet50", 5, intermediate.get(0).shape());
+		PretrainedNNFilter filter = ImageUtils.getPretrainedNNFilterByName("VGG16", 12, intermediate.get(0).shape());
+		// PretrainedNNFilter filter =
+		// ImageUtils.getPretrainedNNFilterByName("ResNet50", 5,
+		// intermediate.get(0).shape());
 
 		logger.debug("Selected layer: " + filter.getCompGraph().getLayer(5).toString());
 

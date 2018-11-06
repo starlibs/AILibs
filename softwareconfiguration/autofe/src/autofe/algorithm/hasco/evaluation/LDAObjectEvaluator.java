@@ -22,7 +22,7 @@ public class LDAObjectEvaluator extends AbstractHASCOFEObjectEvaluator {
 		DataSet dataSet = pipeline.applyFilter(this.data, true);
 
 		logger.debug("Perform LDA");
-		final double ldaScore = EvaluationUtils.performLDA(dataSet.getInstances());
+		final double ldaScore = EvaluationUtils.performKernelLDA(dataSet.getInstances());
 
 		logger.debug("LDA object evaluator score: " + ldaScore);
 		double score = ldaScore

@@ -49,6 +49,9 @@ public class AutoFEMLTwoPhase extends AbstractAutoFEMLClassifier {
 	private HASCOFeatureEngineeringConfig config;
 	private long seed;
 
+	private double internalAutoFEScore;
+	private double internalMlPlanScore;
+
 	// TODO: Subscribe
 	// private FilterPipelineFactory fpFactory;
 	// private WEKAPipelineFactory mlPipeFactory;
@@ -109,6 +112,7 @@ public class AutoFEMLTwoPhase extends AbstractAutoFEMLClassifier {
 		logger.info("Run 1st AutoFEML phase engineering features from the provided data using {} as a benchmark.",
 				benchmark.getClass().getName());
 		FilterPipeline solution = hascoFE.build(data);
+		this.internalAutoFEScore = hascoFE.getInternalValidationErrorOfSelectedClassifier();
 		// TODO: Print out
 		// logger.info("Finished 1st AutoFEML phase. Found solution {} with score {} and
 		// time {}ms to compute the score.",
@@ -183,6 +187,7 @@ public class AutoFEMLTwoPhase extends AbstractAutoFEMLClassifier {
 
 		logger.info("Run 2nd AutoFEML phase performing AutoML");
 		mlplan.buildClassifier(wekaDataset);
+		this.internalMlPlanScore = mlplan.getInternalValidationErrorOfSelectedClassifier();
 		logger.info("Finished 2nd AutoFEML phase. Found solution {}.", mlplan.getSelectedClassifier());
 
 		this.setSelectedPipeline(new AutoFEWekaPipeline(solution, mlplan.getSelectedClassifier()));
@@ -221,5 +226,13 @@ public class AutoFEMLTwoPhase extends AbstractAutoFEMLClassifier {
 		// }
 		// }
 		logger.debug("Subscribing solution candidate found events is not implemented yet in TwoPhase AutoFEML.");
+	}
+
+	public double getInternalAutoFEScore() {
+		return internalAutoFEScore;
+	}
+
+	public double getInternalMlPlanScore() {
+		return internalMlPlanScore;
 	}
 }

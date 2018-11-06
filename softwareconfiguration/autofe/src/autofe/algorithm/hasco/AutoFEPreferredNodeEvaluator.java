@@ -52,11 +52,16 @@ public class AutoFEPreferredNodeEvaluator implements INodeEvaluator<TFDNode, Dou
 		}
 	}
 
+	public FilterPipeline getPipelineFromComponentInstance(ComponentInstance ci) throws Exception {
+		return this.factory.getComponentInstantiation(ci);
+	}
+
 	private ComponentInstance getComponentInstanceFromNode(final Node<TFDNode, ?> node) {
 		return Util.getSolutionCompositionFromState(this.components, node.getPoint().getState(), true);
 	}
 
-	public Double f(final Node<TFDNode, ?> node) {
+	@Override
+	public Double f(final Node<TFDNode, ?> node) throws Exception {
 		if (node.getParent() == null) {
 			return 0.0;
 		}
@@ -72,7 +77,8 @@ public class AutoFEPreferredNodeEvaluator implements INodeEvaluator<TFDNode, Dou
 				.anyMatch(x -> x.getProperty().startsWith("1_"));
 
 		if (toDoHasAlgorithmSelection) {
-			FilterPipeline pipe = this.getPipelineFromNode(node);
+			FilterPipeline pipe = this.getPipelineFromComponentInstance(
+					Util.getSolutionCompositionFromState(this.components, node.getPoint().getState(), false));
 			logger.debug("Todo has algorithm selection tasks {} Calculate node evaluation for {}.", pipe);
 
 			if (pipe != null && pipe.getFilters() != null

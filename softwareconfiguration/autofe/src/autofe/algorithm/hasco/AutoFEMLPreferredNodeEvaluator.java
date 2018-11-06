@@ -3,6 +3,7 @@ package autofe.algorithm.hasco;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,8 +18,8 @@ import hasco.core.Util;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
-import jaicore.search.algorithms.standard.core.INodeEvaluator;
-import jaicore.search.structure.core.Node;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
+import jaicore.search.model.travesaltree.Node;
 
 public class AutoFEMLPreferredNodeEvaluator implements INodeEvaluator<TFDNode, Double> {
 
@@ -64,23 +65,32 @@ public class AutoFEMLPreferredNodeEvaluator implements INodeEvaluator<TFDNode, D
 	}
 
 	@Override
-	public Double f(final Node<TFDNode, ?> node) throws Throwable {
+	public Double f(final Node<TFDNode, ?> node) throws Exception {
 		if (node.getParent() == null) {
 			return 0.0;
 		}
+
+		List<String> appliedMethods = new LinkedList<>();
+		for (TFDNode x : node.externalPath()) {
+			if (x.getAppliedMethodInstance() != null) {
+				appliedMethods.add(x.getAppliedMethodInstance().getMethod().getName());
+			}
+		}
+
+		/* get partial component */
+		ComponentInstance ci = Util.getSolutionCompositionFromState(this.components, node.getPoint().getState(), false);
+
+		AutoFEWekaPipeline pipe = this.getPipelineFromComponentInstance(ci);
+		logger.trace("Todo has algorithm selection tasks {} Calculate node evaluation for {}.", pipe);
 
 		List<String> remainingASTasks = node.getPoint().getRemainingTasks().stream().map(x -> x.getProperty())
 				.filter(x -> x.startsWith("1_")).collect(Collectors.toList());
 		String appliedMethod = (node.getPoint().getAppliedMethodInstance() != null
 				? node.getPoint().getAppliedMethodInstance().getMethod().getName()
 				: "");
-
 		logger.trace("Remaining AS Tasks: " + remainingASTasks + " applied method: " + appliedMethod);
 		boolean toDoHasAlgorithmSelection = node.getPoint().getRemainingTasks().stream()
 				.anyMatch(x -> x.getProperty().startsWith("1_"));
-		ComponentInstance ci = this.getComponentInstanceFromNode(node);
-		AutoFEWekaPipeline pipe = this.getPipelineFromNode(node);
-		logger.trace("Todo has algorithm selection tasks {} Calculate node evaluation for {}.", pipe);
 
 		if (toDoHasAlgorithmSelection) {
 			if (pipe != null) {
@@ -96,18 +106,10 @@ public class AutoFEMLPreferredNodeEvaluator implements INodeEvaluator<TFDNode, D
 							boolean isRanker = searcher.toLowerCase().contains("ranker");
 							boolean isNonRankerEvaluator = evaluator.toLowerCase().matches(".*(cfssubseteval).*");
 
-							if (isSetEvaluator && !isRanker) {
-								logger.debug(
-										"We have a preprocessing step which is not a ranker but requires a set evaluator, return {}",
-										20000d);
-								return 20000d;
-							}
-							if (isNonRankerEvaluator && isRanker) {
-								logger.debug(
-										"We have a preprocessing step which is a ranker but requires a non-ranker evaluator, return {}",
-										20000d);
-								return 20000d;
-							}
+							if (isSetEvaluator && !isRanker || isNonRankerEvaluator && isRanker)
+								throw new IllegalArgumentException(
+										"The given combination of searcher and evaluator cannot be benchmarked since they are incompatible.");
+
 						}
 					}
 				}

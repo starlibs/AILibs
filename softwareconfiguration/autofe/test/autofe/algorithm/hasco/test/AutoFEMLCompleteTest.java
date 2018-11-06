@@ -32,10 +32,13 @@ public class AutoFEMLCompleteTest {
 		AutoFEMLComplete autofeml = new AutoFEMLComplete(42, 0.01, 5, 200, config, factory);
 		autofeml.setTimeoutForNodeEvaluation(90);
 		autofeml.setTimeoutForSingleSolutionEvaluation(90);
-		autofeml.setTimeout(600, TimeUnit.SECONDS);
+		autofeml.setTimeout(120, TimeUnit.SECONDS);
 
 		System.out.println("Start building AutoFEML classifier...");
 
 		autofeml.buildClassifier(trainTestSplit.get(0));
+
+		System.out.println("Solution: " + autofeml.getSelectedPipeline());
+		System.out.println("Internal score: " + autofeml.getInternalValidationErrorOfSelectedClassifier());
 	}
 }
