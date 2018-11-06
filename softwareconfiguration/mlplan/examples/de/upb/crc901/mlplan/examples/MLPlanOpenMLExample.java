@@ -30,7 +30,7 @@ public class MLPlanOpenMLExample {
 
 		/* load data for segment dataset and create a train-test-split */
 		OpenmlConnector connector = new OpenmlConnector();
-		DataSetDescription ds = connector.dataGet(40983);
+		DataSetDescription ds = connector.dataGet(181);
 		File file = ds.getDataset("4350e421cdc16404033ef1812ea38c01");
 		Instances data = new Instances(new BufferedReader(new FileReader(file)));
 		data.setClassIndex(data.numAttributes() - 1);
@@ -39,7 +39,7 @@ public class MLPlanOpenMLExample {
 		/* initialize mlplan, and let it run for 30 seconds */
 		MLPlanWekaClassifier mlplan = new WekaMLPlanWekaClassifier();
 		mlplan.setLoggerName("mlplan");
-		mlplan.setTimeout(30);
+		mlplan.setTimeout(60);
 //		mlplan.activateVisualization();
 		try {
 			long start = System.currentTimeMillis();
