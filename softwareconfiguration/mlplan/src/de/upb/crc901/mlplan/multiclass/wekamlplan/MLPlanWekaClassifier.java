@@ -20,6 +20,7 @@ import de.upb.crc901.mlplan.multiclass.MLPlanClassifierConfig;
 import de.upb.crc901.mlplan.multiclass.MultiClassPerformanceMeasure;
 import hasco.core.HASCOSolutionCandidate;
 import hasco.knowledgebase.FANOVAParameterImportanceEstimator;
+import hasco.knowledgebase.IParameterImportanceEstimator;
 import hasco.knowledgebase.PerformanceKnowledgeBase;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
@@ -79,6 +80,8 @@ public abstract class MLPlanWekaClassifier implements Classifier, CapabilitiesHa
 	private final EventBus eventBus = new EventBus();
 	private TwoPhaseHASCOFactory hascoFactory;
 	private OptimizingFactory<TwoPhaseSoftwareConfigurationProblem, Classifier, Double> optimizingFactory;
+	private boolean useParameterPruning = false;
+	private IParameterImportanceEstimator parameterImportanceEstimator;
 
 	private AlgorithmState state = AlgorithmState.created;
 	private Instances dataShownToSearch = null;
@@ -175,8 +178,8 @@ public abstract class MLPlanWekaClassifier implements Classifier, CapabilitiesHa
 			OptimizingFactoryProblem<TwoPhaseSoftwareConfigurationProblem, Classifier, Double> optimizingFactoryProblem = new OptimizingFactoryProblem<>(this.factory, problem);
 			this.hascoFactory = new TwoPhaseHASCOFactory();
 			this.hascoFactory.setPreferredNodeEvaluator(new AlternativeNodeEvaluator<TFDNode, Double>(this.getSemanticNodeEvaluator(this.dataShownToSearch), this.preferredNodeEvaluator));
-			this.hascoFactory.setUseParameterPruning(true);
-			this.hascoFactory.setParameterImportanceEstimator(new FANOVAParameterImportanceEstimator("test", 2, 0.08d));
+			this.hascoFactory.setUseParameterPruning(this.useParameterPruning);
+			this.hascoFactory.setParameterImportanceEstimator(this.parameterImportanceEstimator);
 			this.hascoFactory.setConfig(this.config);
 			this.optimizingFactory = new OptimizingFactory<>(optimizingFactoryProblem, this.hascoFactory);
 			this.optimizingFactory.setLoggerName(this.loggerName + ".2phasehasco");
@@ -458,5 +461,33 @@ public abstract class MLPlanWekaClassifier implements Classifier, CapabilitiesHa
 
 	public double getInternalValidationErrorOfSelectedClassifier() {
 		return this.internalValidationErrorOfSelectedClassifier;
+	}
+
+	/**
+	 * @return the useParameterPruning
+	 */
+	public boolean isUseParameterPruning() {
+		return useParameterPruning;
+	}
+
+	/**
+	 * @param useParameterPruning the useParameterPruning to set
+	 */
+	public void setUseParameterPruning(boolean useParameterPruning) {
+		this.useParameterPruning = useParameterPruning;
+	}
+
+	/**
+	 * @return the parameterImportanceEstimator
+	 */
+	public IParameterImportanceEstimator getParameterImportanceEstimator() {
+		return parameterImportanceEstimator;
+	}
+
+	/**
+	 * @param parameterImportanceEstimator the parameterImportanceEstimator to set
+	 */
+	public void setParameterImportanceEstimator(IParameterImportanceEstimator parameterImportanceEstimator) {
+		this.parameterImportanceEstimator = parameterImportanceEstimator;
 	}
 }

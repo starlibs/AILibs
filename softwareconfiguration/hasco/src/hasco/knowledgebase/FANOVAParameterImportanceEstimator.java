@@ -183,11 +183,8 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 
 	@Override
 	public boolean readyToEstimateImportance(ComponentInstance composition) {
-		String identifier = Util.getComponentNamesOfComposition(composition);
-		System.out.println("Distinct ");
 		return this.performanceKnowledgeBase.kDistinctAttributeValuesAvailable(benchmarkName, composition,
 				minNumSamples);
-//		return performanceKnowledgeBase.getNumSamples(benchmarkName, identifier) > 50;
 	}
 
 	/**

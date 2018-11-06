@@ -93,6 +93,14 @@ public class ExtendedRandomTree extends RandomTree implements RangeQueryPredicto
 			throw new IllegalStateException("Couldn't unprune the tree");
 		}
 		this.intervalAggregator = intervalAggregator;
+		this.partitioning = new HashMap<>();
+		this.leaves = new ArrayList<>();
+		// important, otherwise some classdistributions may be null
+		this.setAllowUnclassifiedInstances(false);
+		varianceOfSubsetTotal = new HashMap<>();
+		varianceOfSubsetIndividual = new HashMap<>();
+		mapForEmptyLeaves = new HashMap<>();
+		this.isPrepared = false;
 	}
 
 	public Interval predictInterval(IntervalAndHeader intervalAndHeader) {
@@ -398,8 +406,8 @@ public class ExtendedRandomTree extends RandomTree implements RangeQueryPredicto
 
 		// if node is leaf add partition to the map or
 		if (attribute == -1) {
-			leaves.add(node);
-			partitioning.put(node, subSpace);
+			this.leaves.add(node);
+			this.partitioning.put(node, subSpace);
 			return;
 		}
 		// if the split attribute is categorical, remove all but one from the

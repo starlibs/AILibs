@@ -527,7 +527,7 @@ public class PerformanceKnowledgeBase {
 				if (instances.numDistinctValues(i) < instances.attribute(i).numValues())
 					return false;
 			} else if (instances.attribute(i).getUpperNumericBound() <= instances.attribute(i).getLowerNumericBound()) {
-				// System.out.println("Skipping Attribute becasue of bounds: " +
+				// System.out.println("Skipping Attribute because of bounds: " +
 				// instances.attribute(i));
 				continue;
 			} else if (instances.numDistinctValues(i) < minNum) {
