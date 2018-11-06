@@ -81,7 +81,7 @@ public class PerformanceKnowledgeBase {
 					// System.out.println("Parameter: " + parameter + " has value: " +
 					// compInst.getParameterValues().get(parameter.getName()));
 					// TODO check if this is feasible
-					if (compInst.getParameterValues().containsKey(parameter))
+					if (compInst.getParametersThatHaveBeenSetExplicitly().contains(parameter))
 						temp.add(Pair.of(parameter, compInst.getParameterValues().get(parameter.getName())));
 					else {
 						temp.add(Pair.of(parameter, parameter.getDefaultValue().toString()));
@@ -239,7 +239,8 @@ public class PerformanceKnowledgeBase {
 		for (int i = 0; i < instances.numAttributes() - 1; i++) {
 			Attribute attr = instances.attribute(i);
 			Parameter param = values.get(i).getLeft();
-//			System.out.println("Adding value " + values.get(i).getRight() + " for Parameter " + param);
+			// System.out.println("Adding value " + values.get(i).getRight() + " for
+			// Parameter " + param);
 			if (values.get(i).getRight() != null) {
 				if (param.isCategorical()) {
 					String value = values.get(i).getRight();
@@ -248,15 +249,14 @@ public class PerformanceKnowledgeBase {
 					double finalValue = Double.parseDouble(values.get(i).getRight());
 					instance.setValue(attr, finalValue);
 				}
-			} else {
-				System.out.println("right is null");
 			}
 		}
 		Attribute scoreAttr = instances.classAttribute();
 		instance.setValue(scoreAttr, score);
 		performanceInstancesByIdentifier.get(benchmarkName).get(identifier).add(instance);
 
-//		System.out.println("added " + instance + " for benchmark " + benchmarkName + " and identifier " + identifier);
+		// System.out.println("added " + instance + " for benchmark " + benchmarkName +
+		// " and identifier " + identifier);
 
 		// Add Instance for individual component
 		for (ComponentInstance ci : componentInstances) {
@@ -266,7 +266,11 @@ public class PerformanceKnowledgeBase {
 			for (int i = 0; i < instancesInd.numAttributes() - 1; i++) {
 				Attribute attr = instancesInd.attribute(i);
 				Parameter param = ci.getComponent().getParameterWithName(attr.name());
-				String value = ci.getParameterValues().get(param.getName());
+				String value;
+				if (ci.getParametersThatHaveBeenSetExplicitly().contains(param))
+					value = ci.getParameterValues().get(param.getName());
+				else
+					value = param.getDefaultValue().toString();
 				if (value != null) {
 					if (param.isCategorical()) {
 						// String value = ci.getParameterValues().get(param.getName());
@@ -281,6 +285,9 @@ public class PerformanceKnowledgeBase {
 			instanceInd.setValue(scoreAttrInd, score);
 			performanceInstancesIndividualComponents.get(benchmarkName).get(ci.getComponent().getName())
 					.add(instanceInd);
+
+			// System.out.println("added ind " + instanceInd + " for " +
+			// ci.getComponent().getName());
 		}
 
 		if (addToDB)
@@ -512,7 +519,6 @@ public class PerformanceKnowledgeBase {
 		Instances instances = performanceInstancesByIdentifier.get(benchmarkName).get(identifier);
 		if (instances.numInstances() < minNum)
 			return false;
-		System.out.println("number of samples for " + identifier + ": " + instances.size());
 		for (int i = 0; i < instances.numAttributes() - 1; i++) {
 			// if the attribute is nominal or string but the number of values is smaller
 			// than k, skip it
@@ -525,8 +531,6 @@ public class PerformanceKnowledgeBase {
 				// instances.attribute(i));
 				continue;
 			} else if (instances.numDistinctValues(i) < minNum) {
-				System.out.println("Attribute values for " + identifier + ": " + instances.numDistinctValues(i));
-				System.out.println("Required: " + minNum);
 				return false;
 			}
 		}

@@ -17,8 +17,9 @@ import java.util.concurrent.Semaphore;
 import java.util.function.Predicate;
 
 import org.apache.commons.math3.geometry.euclidean.oned.Interval;
-import org.nd4j.shade.jackson.annotation.JsonCreator;
-import org.nd4j.shade.jackson.annotation.JsonProperty;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jaicore.basic.MathExt;
 

@@ -25,15 +25,15 @@ public class PerformanceKnowledgeBaseTest {
 		PerformanceKnowledgeBase pKB = new PerformanceKnowledgeBase();
 		Component comp = new Component("TestComponent");
 		NumericParameterDomain domain1 = new NumericParameterDomain(false, 0.0, 5.0);
-		Parameter param1 = new Parameter("Param1", domain1, 3);
+		Parameter param1 = new Parameter("Param1", domain1, 2.0);
 		ArrayList<String> values = new ArrayList<String>();
 		values.add("Val1");
 		values.add("Val2");
 		values.add("Val3");
 		CategoricalParameterDomain domain2 = new CategoricalParameterDomain(values);
-		Parameter param2 = new Parameter("Param2", domain2, 3);
+		Parameter param2 = new Parameter("Param2", domain2, "Val2");
 		NumericParameterDomain domain3 = new NumericParameterDomain(true, 7, 19);
-		Parameter param3 = new Parameter("Param3", domain3, 3);
+		Parameter param3 = new Parameter("Param3", domain3, 7);
 		comp.addParameter(param1);
 		comp.addParameter(param2);
 		comp.addParameter(param3);
@@ -45,7 +45,7 @@ public class PerformanceKnowledgeBaseTest {
 		
 		HashMap<String,String> paramValues2 = new HashMap<String,String>();
 		paramValues2.put("Param1", "1.0");
-		paramValues2.put("Param2", "Val1");
+		paramValues2.put("Param2", "Val3");
 		paramValues2.put("Param3", "11");
 		
 		HashMap<String,String> paramValues3 = new HashMap<String,String>();
@@ -59,7 +59,7 @@ public class PerformanceKnowledgeBaseTest {
 		ComponentInstance ci2 = new ComponentInstance(comp, paramValues2, satisfactionOfRequiredInterfaces);
 		ComponentInstance ci3 = new ComponentInstance(comp, paramValues3, satisfactionOfRequiredInterfaces);
 		
-//		System.out.println(ci1.getParameterValues());
+		System.out.println(ci1.getParameterValues());
 		
 		pKB.addPerformanceSample("test", ci1, 0.7754, false);
 		pKB.addPerformanceSample("test", ci2, 0.1154, false);
@@ -69,8 +69,8 @@ public class PerformanceKnowledgeBaseTest {
 //		String identifier = Util.getComponentNamesOfComposition(ci1);
 //		System.out.println("Number completely distinct samples: " + pKB.getNumCompletelyDistinctSamples("test", identifier));
 
-//		System.out.println("PKB has k distinct values: " + pKB.kCompletelyDistinctSamplesAvailable("test", ci1, 3));
-//		System.out.println("PKB has k distinct values: " + pKB.kDistinctAttributeValuesAvailable("test", ci1, 3));
+		System.out.println("PKB has k completely distinct distinct samples: " + pKB.kCompletelyDistinctSamplesAvailable("test", ci1, 2));
+		System.out.println("PKB has k distinct values: " + pKB.kDistinctAttributeValuesAvailable("test", ci1, 4));
 		System.out.println(pKB.getPerformanceSamplesForIndividualComponent("test", comp));
 	}
 

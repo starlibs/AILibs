@@ -12,7 +12,7 @@ public class HASCOViaFDAndBestFirstWithRandomCompletionsTester extends HASCOTest
 	@Override
 	public HASCOFactory<GeneralEvaluatedTraversalTree<TFDNode, String, Double>, TFDNode, String, Double> getFactory() {
 		HASCOViaFDAndBestFirstWithRandomCompletionsFactory factory = new HASCOViaFDAndBestFirstWithRandomCompletionsFactory();
-		factory.setVisualizationEnabled(true);
+		factory.setVisualizationEnabled(false);
 		return factory;
 	}
 }
