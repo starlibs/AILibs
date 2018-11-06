@@ -7,10 +7,10 @@ import java.util.Set;
 
 import com.google.common.collect.Sets;
 
-import hasco.core.HASCOWithParameterPruning;
 import hasco.core.Util;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
+import jaicore.ml.core.FeatureDomain;
 import jaicore.ml.core.FeatureSpace;
 import jaicore.ml.intervaltree.ExtendedRandomForest;
 import weka.core.Instances;
@@ -97,6 +97,12 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 		// }
 		// forest = forests.get(pipelineIdentifier);
 		FeatureSpace space = new FeatureSpace(data);
+		if(space.getDimensionality()<2) {
+			for(FeatureDomain domain : space.getFeatureDomains()) {
+				importantParameters.add(domain.getName());
+			}
+			return importantParameters;
+		}
 		ExtendedRandomForest forest = new ExtendedRandomForest();
 		// forest.setMinNumSamples
 		// TODO setter for forest
@@ -147,7 +153,6 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 		// System.out.println("Importance overall: " + sum);
 		importantParameterMap.put(pipelineIdentifier, importantParameters);
 		int numPruned = data.numAttributes() - 1 - importantParameters.size();
-		HASCOWithParameterPruning.addPrunedParameters(numPruned);
 		return importantParameters;
 
 	}
