@@ -14,11 +14,13 @@ import jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.SolutionCandidateFoundEvent;
 import jaicore.graph.IGraphAlgorithmListener;
+import jaicore.graphvisualizer.gui.ObjectEvaluator;
 import jaicore.graphvisualizer.gui.VisualizationWindow;
 import jaicore.search.algorithms.standard.ORGraphSearchTester;
 import jaicore.search.algorithms.standard.bestfirst.events.GraphSearchSolutionCandidateFoundEvent;
 import jaicore.search.core.interfaces.IGraphSearch;
 import jaicore.search.core.interfaces.IGraphSearchFactory;
+import jaicore.search.model.travesaltree.Node;
 import jaicore.search.testproblems.nqueens.QueenNode;
 
 public abstract class GuiTester<I, O, VSearch, ESearch> extends ORGraphSearchTester<Integer, I, O, QueenNode, String, Double, VSearch, ESearch>
@@ -37,6 +39,7 @@ public abstract class GuiTester<I, O, VSearch, ESearch> extends ORGraphSearchTes
 		return search;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void testThatIteratorReturnsEachPossibleSolution() {
 		if (searchFactory == null)
@@ -46,9 +49,10 @@ public abstract class GuiTester<I, O, VSearch, ESearch> extends ORGraphSearchTes
 			System.out.print("Checking " + n + "-Queens Problem ... ");
 			IGraphSearch<I, O, QueenNode, String, Double, VSearch, ESearch> search = getSearchProblemInput(n);
 			assertNotNull("The factory has not returned any search object.", search);
+			ObjectEvaluator<Node> eval = new NodeEvaluator();
 			if (showGraphs)
 //				new SimpleGraphVisualizationWindow<>(search);
-				new VisualizationWindow(search, "Test");
+				new VisualizationWindow(search, "Test", eval);
 			boolean initialized = false;
 			boolean terminated = false;
 			int solutions = 0;

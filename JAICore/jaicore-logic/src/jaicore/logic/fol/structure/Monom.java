@@ -22,6 +22,10 @@ public class Monom extends LiteralSet {
 		super();
 	}
 	
+	public Monom(Literal l) {
+		super(l);
+	}
+	
 	public Monom(String literals) {
 		super(literals, "&");
 	}
