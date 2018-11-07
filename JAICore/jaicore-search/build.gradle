@@ -20,6 +20,5 @@ dependencies {
 	compile project(":JAICore:jaicore-graphvisualizer")
 	
 	compile group: 'org.knowm.xchart', name: 'xchart', version: '3.5.2'
-	compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.6'
 	compile group: 'it.unimi.dsi', name: 'fastutil', version: '8.2.1'
 }
