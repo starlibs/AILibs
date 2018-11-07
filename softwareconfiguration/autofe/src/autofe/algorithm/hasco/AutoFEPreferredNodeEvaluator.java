@@ -77,6 +77,7 @@ public class AutoFEPreferredNodeEvaluator implements INodeEvaluator<TFDNode, Dou
 				.anyMatch(x -> x.getProperty().startsWith("1_"));
 
 		if (toDoHasAlgorithmSelection) {
+			// TODO: Resolve true oder false (false gives better results given less time)
 			FilterPipeline pipe = this.getPipelineFromComponentInstance(
 					Util.getSolutionCompositionFromState(this.components, node.getPoint().getState(), false));
 			logger.debug("Todo has algorithm selection tasks {} Calculate node evaluation for {}.", pipe);

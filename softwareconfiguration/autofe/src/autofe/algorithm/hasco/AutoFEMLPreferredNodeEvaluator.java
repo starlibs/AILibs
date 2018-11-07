@@ -78,7 +78,7 @@ public class AutoFEMLPreferredNodeEvaluator implements INodeEvaluator<TFDNode, D
 		}
 
 		/* get partial component */
-		ComponentInstance ci = Util.getSolutionCompositionFromState(this.components, node.getPoint().getState(), false);
+		ComponentInstance ci = Util.getSolutionCompositionFromState(this.components, node.getPoint().getState(), true);
 
 		AutoFEWekaPipeline pipe = this.getPipelineFromComponentInstance(ci);
 		logger.trace("Todo has algorithm selection tasks {} Calculate node evaluation for {}.", pipe);
