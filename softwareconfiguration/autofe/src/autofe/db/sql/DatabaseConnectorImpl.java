@@ -32,7 +32,7 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 
 	private static boolean TABLE_EXISTS_WORKAROUND = true;
 
-	private static Logger LOG = LoggerFactory.getLogger(DBUtils.class);
+	private static Logger LOG = LoggerFactory.getLogger(DatabaseConnectorImpl.class);
 
 	private Database db;
 
@@ -66,15 +66,15 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 			// Create feature tables (if not already existent)
 			for (AbstractFeature feature : features) {
 				if (TABLE_EXISTS_WORKAROUND) {
-					LOG.info("Skip check whether Feature table for {} exists", feature);
+					LOG.debug("Skip check whether Feature table for {} exists", feature);
 					createFeatureTable(feature);
 					continue;
 				}
 				if (!featureTableExists(feature)) {
-					LOG.info("Feature table for {} does not exist => Creating", feature);
+					LOG.debug("Feature table for {} does not exist => Creating", feature);
 					createFeatureTable(feature);
 				} else {
-					LOG.info("Feature table for {} with name {} already exists", feature,
+					LOG.debug("Feature table for {} with name {} already exists", feature,
 							SqlUtils.getTableNameForFeature(feature));
 				}
 			}
@@ -97,7 +97,7 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 					target.getName(), targetTable.getName()));
 
 			instances = setupInstances(features, target);
-			LOG.info("Loading instances from DB using sql: {}", sql);
+			LOG.debug("Loading instances from DB using sql: {}", sql);
 			ResultSet rs = sqlAdapter.getResultsOfQuery(sql.toString());
 			while (rs.next()) {
 				Instance instance = createInstance(rs, features, target, instances);
@@ -152,7 +152,7 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 
 	private void createTable(String tableName, String featureSql) throws SQLException {
 		String sql = String.format("CREATE TABLE IF NOT EXISTS %s AS %s", tableName, featureSql);
-		LOG.info("Creating feature table using statement {}", sql);
+		LOG.debug("Creating feature table using statement {}", sql);
 		sqlAdapter.update(sql, Collections.emptyList());
 		createdTableNames.add(tableName);
 	}

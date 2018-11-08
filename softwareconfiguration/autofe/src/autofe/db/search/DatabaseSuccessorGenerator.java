@@ -112,7 +112,7 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 				allFeatures.add(bf);
 			}
 			if (node.getSelectedFeatures().containsAll(allFeatures)) {
-				LOG.info("Node already contains all possible features => Skip successor");
+				LOG.debug("Node already contains all possible features => Skip successor");
 				continue;
 			}
 
