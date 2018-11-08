@@ -224,14 +224,12 @@ public class AutoFEMLComplete extends AbstractAutoFEMLClassifier
 
 	@Override
 	public void setNumCPUs(int numberOfCPUs) {
-		// TODO Auto-generated method stub
-
+		this.config.setProperty(MLPlanFEWekaClassifierConfig.K_CPUS, String.valueOf(numberOfCPUs));
 	}
 
 	@Override
 	public int getNumCPUs() {
-		// TODO Auto-generated method stub
-		return 0;
+		return this.config.cpus();
 	}
 
 	@Override

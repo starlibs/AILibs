@@ -52,6 +52,8 @@ public final class EvaluationUtils {
 	private static final Logger logger = LoggerFactory.getLogger(EvaluationUtils.class);
 
 	private static double DOUBLE_ZERO_PREC = 0.0001;
+	
+	private static double KERNEL_SPLIT_PORTION = .3;
 
 	private EvaluationUtils() {
 		// Utility class
@@ -129,10 +131,11 @@ public final class EvaluationUtils {
 
 	public static double performKernelClustering(final Instances instances) throws Exception {
 		logger.debug("Starting kernelized cluster evaluation...");
+		
+		List<Instances> split = WekaUtil.getStratifiedSplit(instances, new Random(42), .3f);
 
-		// TODO: Kernel
-		double maxScore = performClustering(new Instances(instances));
-		for (Map.Entry<Kernel, Instances> entry : getKernelsWithInstances(instances)) {
+		double maxScore = performClustering(new Instances(split.get(0)));
+		for (Map.Entry<Kernel, Instances> entry : getKernelsWithInstances(split.get(0))) {
 			Kernel kernel = entry.getKey();
 			Instances insts = entry.getValue();
 
@@ -254,7 +257,7 @@ public final class EvaluationUtils {
 		logger.debug("Starting kernelized LDA evaluation...");
 
 		// TODO: Again splitting?
-		List<Instances> split = WekaUtil.getStratifiedSplit(instances, new Random(42), .1f);
+		List<Instances> split = WekaUtil.getStratifiedSplit(instances, new Random(42), KERNEL_SPLIT_PORTION);
 
 		double maxScore = performLDA(new Instances(split.get(0)));
 

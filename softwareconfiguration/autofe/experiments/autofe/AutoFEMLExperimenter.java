@@ -93,6 +93,7 @@ public class AutoFEMLExperimenter implements IExperimentSetEvaluator {
 					new WEKAPipelineFactory());
 			autofeml = new AutoFEMLComplete(seed, subsampleRatio, mlplanSubsampleRatioFactor, minInstances, config,
 					factory);
+			((AutoFEMLComplete) autofeml).setNumCPUs(CONFIG.getNumberOfCPUs());
 			((AutoFEMLComplete) autofeml).setTimeout((int) (feTimeout + amlTimeout), TimeUnit.SECONDS);
 			((AutoFEMLComplete) autofeml).setTimeoutForNodeEvaluation((int) evalTimeout);
 			((AutoFEMLComplete) autofeml).setTimeoutForSingleSolutionEvaluation((int) evalTimeout);

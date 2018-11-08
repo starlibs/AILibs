@@ -16,6 +16,7 @@ public class COEDObjectEvaluator extends AbstractHASCOFEObjectEvaluator {
 		if (object == null) {
 			return 20000d;
 		}
+		long startTimestamp = System.currentTimeMillis();
 
 		logger.debug("Applying and evaluating pipeline " + object.toString());
 		DataSet dataSet = object.applyFilter(this.data, true);
@@ -24,9 +25,8 @@ public class COEDObjectEvaluator extends AbstractHASCOFEObjectEvaluator {
 		double loss = EvaluationUtils.calculateCOEDForBatch(dataSet.getInstances());
 
 		logger.debug("COED object evaluation score: " + loss);
-		// TODO
-		// this.storeResult(object, loss, (System.currentTimeMillis() -
-		// startTimestamp));
+		 this.storeResult(object, loss, (System.currentTimeMillis() -
+		 startTimestamp));
 		return loss;
 	}
 

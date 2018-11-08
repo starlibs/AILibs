@@ -12,6 +12,7 @@ import com.google.common.eventbus.Subscribe;
 
 import autofe.algorithm.hasco.evaluation.AbstractHASCOFEObjectEvaluator;
 import autofe.algorithm.hasco.evaluation.COCOObjectEvaluator;
+import autofe.algorithm.hasco.evaluation.COEDObjectEvaluator;
 import autofe.algorithm.hasco.evaluation.ClusterObjectEvaluator;
 import autofe.algorithm.hasco.evaluation.EnsembleObjectEvaluator;
 import autofe.algorithm.hasco.evaluation.LDAObjectEvaluator;
@@ -98,6 +99,9 @@ public class AutoFEMLTwoPhase extends AbstractAutoFEMLClassifier {
 		case "coco":
 			benchmark = new COCOObjectEvaluator();
 			break;
+		case "coed":
+			benchmark = new COEDObjectEvaluator();
+			break;
 		}
 		benchmark.setAdapter(this.getAdapter());
 		benchmark.setEvalTable(this.getEvalTable());
@@ -109,6 +113,7 @@ public class AutoFEMLTwoPhase extends AbstractAutoFEMLClassifier {
 		hascoFE.setTimeoutForNodeEvaluation((int) this.evalTimeOut.seconds());
 		hascoFE.setTimeoutForSingleSolutionEvaluation((int) this.evalTimeOut.seconds());
 		hascoFE.setTimeout((int) this.feTimeOut.seconds(), TimeUnit.SECONDS);
+		hascoFE.setNumCPUs(this.cpus);
 		logger.info("Run 1st AutoFEML phase engineering features from the provided data using {} as a benchmark.",
 				benchmark.getClass().getName());
 		FilterPipeline solution = hascoFE.build(data);
