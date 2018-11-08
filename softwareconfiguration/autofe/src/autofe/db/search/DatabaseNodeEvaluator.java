@@ -91,80 +91,86 @@ public class DatabaseNodeEvaluator implements INodeEvaluator<DatabaseNode, Doubl
 		LOG.info("Evaluation node with features : {}", node.getPoint().getSelectedFeatures());
 		int requiredNumberOfFeatures = node.getPoint().getSelectedFeatures().size() + randomCompletionPathLength;
 		LOG.debug("Required features : {}", requiredNumberOfFeatures);
-		
-		GraphSearchInput<DatabaseNode, String> problem = new GraphSearchInput<DatabaseNode, String>(new GraphGenerator<DatabaseNode, String>() {
 
-			@Override
-			public RootGenerator<DatabaseNode> getRootGenerator() {
-				return new SingleRootGenerator<DatabaseNode>() {
+		GraphSearchInput<DatabaseNode, String> problem = new GraphSearchInput<DatabaseNode, String>(
+				new GraphGenerator<DatabaseNode, String>() {
+
 					@Override
-					public DatabaseNode getRoot() {
-						return node.getPoint();
+					public RootGenerator<DatabaseNode> getRootGenerator() {
+						return new SingleRootGenerator<DatabaseNode>() {
+							@Override
+							public DatabaseNode getRoot() {
+								return node.getPoint();
+							}
+						};
 					}
-				};
-			}
-
-			@Override
-			public SuccessorGenerator<DatabaseNode, String> getSuccessorGenerator() {
-				return generator.getSuccessorGenerator();
-			}
-
-			@Override
-			public GoalTester<DatabaseNode> getGoalTester() {
-				return new NodeGoalTester<DatabaseNode>() {
 
 					@Override
-					public boolean isGoal(DatabaseNode node) {
-						if (node.getSelectedFeatures().size() > requiredNumberOfFeatures) {
-							throw new IllegalStateException(
-									String.format("Too many features! Required: %s , Actual: %s",
-											requiredNumberOfFeatures, node.getSelectedFeatures().size()));
-						} else if (node.getSelectedFeatures().size() < requiredNumberOfFeatures) {
-							return false;
-						} else {
-							// Check whether node contains intermediate features
-							for (AbstractFeature feature : node.getSelectedFeatures()) {
-								if (feature instanceof BackwardFeature
-										&& DBUtils.isIntermediate(((BackwardFeature) feature).getPath(), db)) {
+					public SuccessorGenerator<DatabaseNode, String> getSuccessorGenerator() {
+						return generator.getSuccessorGenerator();
+					}
+
+					@Override
+					public GoalTester<DatabaseNode> getGoalTester() {
+						return new NodeGoalTester<DatabaseNode>() {
+
+							@Override
+							public boolean isGoal(DatabaseNode node) {
+								if (node.getSelectedFeatures().size() > requiredNumberOfFeatures) {
+									throw new IllegalStateException(
+											String.format("Too many features! Required: %s , Actual: %s",
+													requiredNumberOfFeatures, node.getSelectedFeatures().size()));
+								} else if (node.getSelectedFeatures().size() < requiredNumberOfFeatures) {
 									return false;
+								} else {
+									// Check whether node contains intermediate features
+									for (AbstractFeature feature : node.getSelectedFeatures()) {
+										if (feature instanceof BackwardFeature
+												&& DBUtils.isIntermediate(((BackwardFeature) feature).getPath(), db)) {
+											return false;
+										}
+									}
+									return true;
 								}
 							}
-							return true;
-						}
+						};
 					}
-				};
-			}
 
-			@Override
-			public boolean isSelfContained() {
-				// TODO Auto-generated method stub
-				return false;
-			}
+					@Override
+					public boolean isSelfContained() {
+						// TODO Auto-generated method stub
+						return false;
+					}
 
-			@Override
-			public void setNodeNumbering(boolean nodenumbering) {
-				// TODO Auto-generated method stub
+					@Override
+					public void setNodeNumbering(boolean nodenumbering) {
+						// TODO Auto-generated method stub
 
-			}
-		});
-		
-		BestFirst<GeneralEvaluatedTraversalTree<DatabaseNode, String, Double>,DatabaseNode, String, Double> randomCompletionSearch = new RandomizedDepthFirstSearch<>(
+					}
+				});
+
+		BestFirst<GeneralEvaluatedTraversalTree<DatabaseNode, String, Double>, DatabaseNode, String, Double> randomCompletionSearch = new RandomizedDepthFirstSearch<>(
 				problem, this.random);
 
 		SearchGraphPath<DatabaseNode, String> solution = null;
 		try {
 			solution = randomCompletionSearch.nextSolution();
 		} catch (NoSuchElementException | InterruptedException | AlgorithmExecutionCanceledException e) {
-			LOG.error("Error in random completion!",e);
+			LOG.error("Error in random completion!", e);
 		}
+
 		if (solution == null) {
 			throw new RuntimeException("Random completion did not find a solution!");
 		}
 		DatabaseNode goalNode = solution.getNodes().get(solution.getNodes().size() - 1);
-		LOG.info("Result of random completion is node with features : {}", goalNode.getSelectedFeatures());
+		LOG.debug("Result of random completion is node with features : {}", goalNode.getSelectedFeatures());
+
+		// Terminate search
+		randomCompletionSearch.cancel();
+
 		Instances instances = databaseConnector.getInstances(goalNode.getSelectedFeatures());
 		double result = evaluateInstances(instances);
-		LOG.debug("Evaluation result is {}", result);
+		LOG.info("Evaluation result is {}", result);
 		return result;
 	}
 

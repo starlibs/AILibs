@@ -74,6 +74,8 @@ public class DatabaseProcessor {
 		if (solution == null) {
 			throw new RuntimeException("No solution found!");
 		}
+		
+		search.cancel();
 
 		DatabaseNode goal = solution.getNodes().get(solution.getNodes().size() - 1);
 		
