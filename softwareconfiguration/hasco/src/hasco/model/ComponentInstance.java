@@ -1,4 +1,3 @@
-//<<<<<<< HEAD
 package hasco.model;
 
 import java.util.ArrayList;
