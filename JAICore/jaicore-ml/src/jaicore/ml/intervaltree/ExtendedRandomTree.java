@@ -251,7 +251,6 @@ public class ExtendedRandomTree extends RandomTree implements RangeQueryPredicto
 				}
 				log.trace("Subtracting {} for {}", varianceOfSubsetIndividual.get(subset), subset);
 				vU -= varianceOfSubsetIndividual.get(subset);
-				// subtractor += varianceOfSubsetIndividual.get(subset);
 			}
 		}
 		log.trace("Individual var for {} = {}", features, vU);
@@ -291,7 +290,6 @@ public class ExtendedRandomTree extends RandomTree implements RangeQueryPredicto
 					continue;
 				log.trace("Subtracting {} for {} ", varianceOfSubsetIndividual.get(subset), subset);
 				vU -= varianceOfSubsetIndividual.get(subset);
-				// subtractor += varianceOfSubsetIndividual.get(subset);
 			}
 		}
 		log.trace("Individual var for {} = {}", features, vU);
@@ -332,7 +330,6 @@ public class ExtendedRandomTree extends RandomTree implements RangeQueryPredicto
 					continue;
 				log.trace("Subtracting {} for {} ", varianceOfSubsetIndividual.get(subset), subset);
 				vU -= varianceOfSubsetIndividual.get(subset);
-				// subtractor += varianceOfSubsetIndividual.get(subset);
 			}
 		}
 		log.trace("Individual var for {} = {}", features, vU);
@@ -372,8 +369,6 @@ public class ExtendedRandomTree extends RandomTree implements RangeQueryPredicto
 					prediction = leaf.getClassDistribution()[0];
 				} else if (mapForEmptyLeaves.containsKey(leaf)) {
 					prediction = mapForEmptyLeaves.get(leaf);
-					// System.out.println("Taking prediction " + prediction + " from map because
-					// distribution is null!");
 				} else {
 					System.out.println("No prediction found anywhere!");
 					prediction = Double.NaN;
@@ -474,11 +469,6 @@ public class ExtendedRandomTree extends RandomTree implements RangeQueryPredicto
 				queueOfNodes.add(node.getSuccessors()[i]);
 			}
 		}
-		// System.out.println("split: ");
-		// for (List<Double> points : splitPointsList) {
-		// System.out.println(points);
-		// }
-		// System.out.println("splitpoints ende");
 	}
 
 	/**
@@ -487,7 +477,6 @@ public class ExtendedRandomTree extends RandomTree implements RangeQueryPredicto
 	 */
 	private void computeObservations() {
 		allObservations = new Observation[featureSpace.getDimensionality()][];
-		// intervalSizes = new double[featureSpace.getDimensionality()][];
 		for (int featureIndex = 0; featureIndex < featureSpace.getDimensionality(); featureIndex++) {
 			List<Double> curSplitPoints = new ArrayList<Double>();
 			curSplitPoints.addAll(splitPoints.get(featureIndex));
@@ -504,7 +493,6 @@ public class ExtendedRandomTree extends RandomTree implements RangeQueryPredicto
 					allObservations[featureIndex] = new Observation[0];
 				} else {
 					allObservations[featureIndex] = new Observation[curSplitPoints.size() - 1];
-					// intervalSizes[featureIndex] = new double[curSplitPoints.size() - 1];
 					Observation obs;
 					for (int lowerIntervalId = 0; lowerIntervalId < curSplitPoints.size() - 1; lowerIntervalId++) {
 						if (curSplitPoints.get(lowerIntervalId + 1) - curSplitPoints.get(lowerIntervalId) > 0)
@@ -553,55 +541,25 @@ public class ExtendedRandomTree extends RandomTree implements RangeQueryPredicto
 		}
 		List<List<Observation>> observationProduct = Lists.cartesianProduct(observationList);
 		double vU = 0.0d;
-		// List<Double> marginals = new LinkedList<Double>();
-		// System.out.println("size of obsprod = " + observationProduct.size());
 		WeightedVarianceHelper stat = new WeightedVarianceHelper();
-		// System.out.println("marginal predictions for: " + features);
 		for (List<Observation> curObs : observationProduct) {
 			ArrayList<Integer> featureList = new ArrayList<Integer>();
 			featureList.addAll(features);
 			Collections.sort(featureList);
 			double marginalPrediction = this.getMarginalPrediction(featureList, curObs);
-			// System.out.println(marginalPrediction + ",");
-			// System.out.println("current feautres = \t" + features);
-			// System.out.print("midpoints = \t\t");
-			// for (Observation obs : curObs) {
-			// System.out.print(obs.midPoint + ", ");
-			// }
-			// System.out.println();
-			// System.out.print("interval sizes = \t");
 			double prodOfIntervalSizes = 1.0d;
 			for (Observation obs : curObs) {
-				// System.out.print(obs.intervalSize + ", ");
 				if (obs.intervalSize != 0)
 					prodOfIntervalSizes *= obs.intervalSize;
 			}
-			// System.out.println();
-			// System.out.println("marginal pred = \t" + marginalPrediction);
 			double sizeOfAllButFeatures = this.getFeatureSpace().getRangeSizeOfAllButSubset(features);
-			// System.out.println("sum_of_weights = \t" + sizeOfAllButFeatures);
-			// System.out.println("prod of int sizes = \t" + prodOfIntervalSizes);
-			// System.out.println("weight for var = \t" + prodOfIntervalSizes *
-			// sizeOfAllButFeatures);
 			if (!Double.isNaN(marginalPrediction)) {
-				// System.out.println("Size of all but features: " + sizeOfAllButFeatures);
-				// System.out.println("Prod of interval sizes: " + prodOfIntervalSizes);
 				stat.push(marginalPrediction, sizeOfAllButFeatures * prodOfIntervalSizes);
 
 			}
-			// weightedSum += marginalPrediction;
-			// weightedSumOfSquares += marginalPrediction * marginalPrediction;
-			// num++;
 		}
-		// weightedSumOfSquares /= num;
-		// weightedSum /= num;
-		// System.out.println("wsos = " + weightedSumOfSquares + "\t ws = " +
-		// weightedSum);
-		// vU = weightedSumOfSquares - (weightedSum * weightedSum);
 		vU = stat.getPopulaionVariance();
-		// System.out.println("Variance: " + vU);
 		varianceOfSubsetTotal.put(features, vU);
-		// System.out.println("Total var for \t\t\t" + features + ": " + vU);
 		return vU;
 	}
 
@@ -616,14 +574,11 @@ public class ExtendedRandomTree extends RandomTree implements RangeQueryPredicto
 		this.computePartitioning(featureSpace, m_Tree);
 		this.collectSplitPointsAndIntervalSizes(m_Tree);
 		this.computeObservations();
-		// this.computeTotalVariance();
 		HashSet<Integer> set = new HashSet<Integer>();
 		for (int i = 0; i < this.featureSpace.getDimensionality(); i++) {
 			set.add(i);
 		}
-		// System.out.println("Range size: " + this.featureSpace.getRangeSize());
 		this.totalVariance = computeTotalVarianceOfSubset(set);
-		// System.out.println("trees total variance = " + this.totalVariance);
 		this.isPrepared = true;
 	}
 
@@ -694,8 +649,9 @@ public class ExtendedRandomTree extends RandomTree implements RangeQueryPredicto
 		public double getPopulaionVariance() {
 			if (sumOfWeights > 0.0d) {
 				return Math.max(0.0d, squaredDistanceToMean / sumOfWeights);
-			} else
+			} else {
 				return Double.NaN;
+			}
 		}
 	}
 

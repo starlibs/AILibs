@@ -115,12 +115,11 @@ public class isRefinementCompletedPredicateWithImportanceCheck implements Evalua
 			}
 		}
 
+//		System.out.println("important parameters: " + importantParams);
 
 		for (Parameter param : component.getParameters()) {
 			String paramName = component.getName() + "::" + param.getName();
-
 			if (!importantParams.contains(paramName)) {
-				System.out.println("important parameters: " + importantParams);
 				 System.out.println("Skip parameter " + paramName + " because it is unimportant");
 				// if the parameter is not contained in the set of important parameters, skip it
 				continue;

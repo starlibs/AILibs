@@ -132,13 +132,12 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 				}
 				// if no value is available in the dictionary, compute it
 				else {
+					currentImportance = forest.computeMarginalVarianceContributionForFeatureSubset(subset);
+					importanceDictionary.get(pipelineIdentifier).put(subset, currentImportance);
 					if (Double.isNaN(currentImportance)) {
 						currentImportance = 1.0;
 						System.out.println("importance value is NaN, so it will be set to 1");
 					}
-					currentImportance = forest.computeMarginalVarianceContributionForFeatureSubset(subset);
-					importanceDictionary.get(pipelineIdentifier).put(subset, currentImportance);
-
 				}
 				System.out.println("Importance value for parameter subset " + subset + ": " + currentImportance);
 				System.out.println("Importance value " + currentImportance + " >= " + importanceThreshold + ": "

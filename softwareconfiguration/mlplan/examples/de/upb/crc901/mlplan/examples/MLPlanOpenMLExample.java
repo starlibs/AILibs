@@ -42,7 +42,7 @@ public class MLPlanOpenMLExample {
 		mlplan.setLoggerName("mlplan");
 		mlplan.setUseParameterPruning(true);
 		mlplan.setParameterImportanceEstimator(new FANOVAParameterImportanceEstimator("test", 2, 0.08d));
-		mlplan.setTimeout(180);
+		mlplan.setTimeout(300);
 //		mlplan.activateVisualization();
 		try {
 			long start = System.currentTimeMillis();
