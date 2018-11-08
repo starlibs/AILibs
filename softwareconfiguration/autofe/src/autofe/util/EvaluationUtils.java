@@ -16,7 +16,7 @@ import autofe.algorithm.hasco.filter.meta.FilterPipeline;
 import fantail.core.Correlation;
 import jaicore.ml.WekaUtil;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
-import jaicore.search.structure.core.Node;
+import jaicore.search.model.travesaltree.Node;
 import weka.attributeSelection.ReliefFAttributeEval;
 import weka.classifiers.Evaluation;
 import weka.classifiers.functions.LDA;
@@ -306,20 +306,7 @@ public final class EvaluationUtils {
 	}
 
 	public static AbstractHASCOFENodeEvaluator getRandomNodeEvaluator(final int maxPipelineSize) {
-		return new AbstractHASCOFENodeEvaluator(maxPipelineSize) {
-
-			@Override
-			public Double f(Node<TFDNode, ?> node) throws Throwable {
-				if (node.getParent() == null)
-					return null;
-
-				// If pipeline is too deep, assign worst value
-				if (node.path().size() > this.maxPipelineSize)
-					return AbstractHASCOFENodeEvaluator.MAX_EVAL_VALUE;
-
-				return null;
-			}
-		};
+		return null;
 	}
 
 	public static double rankKendallsTau(final double[] ranking1, final double[] ranking2) {
