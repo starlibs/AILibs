@@ -83,7 +83,7 @@ public class isRefinementCompletedPredicateWithImportanceCheck implements Evalua
 
 		Set<String> importantParams = new HashSet<String>();
 		for (Parameter param : component.getParameters()) {
-			String parameterIdentifier = ci.getComponent().getName() + "::" + param.getName();
+			String parameterIdentifier = component.getName() + "::" + param.getName();
 			importantParams.add(parameterIdentifier);
 		}
 
@@ -120,7 +120,8 @@ public class isRefinementCompletedPredicateWithImportanceCheck implements Evalua
 			String paramName = component.getName() + "::" + param.getName();
 
 			if (!importantParams.contains(paramName)) {
-//				 System.out.println("Skip parameter " + paramName);
+				System.out.println("important parameters: " + importantParams);
+				 System.out.println("Skip parameter " + paramName + " because it is unimportant");
 				// if the parameter is not contained in the set of important parameters, skip it
 				continue;
 			}

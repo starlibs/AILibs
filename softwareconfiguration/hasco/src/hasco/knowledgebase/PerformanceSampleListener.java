@@ -30,12 +30,6 @@ public class PerformanceSampleListener {
 	public void handleEvent(HASCOSolutionEvent event) {
 		HASCOSolutionCandidate solutionCandidate = (HASCOSolutionCandidate) event.getSolutionCandidate();
 		ComponentInstance ci = solutionCandidate.getComponentInstance();
-		List<ComponentInstance> cis = Util.getComponentInstancesOfComposition(ci);
-		for(ComponentInstance i : cis) {
-//			System.out.println("set expl. " + i.getParametersThatHaveBeenSetExplicitly());
-//			System.out.println("not set expl. " + i.getParametersThatHaveNotBeenSetExplicitly());
-			System.out.println("params: " + i.getComponent().getParameters() + " vals: " + i.getParameterValues());
-		}
 		double score = (Double) solutionCandidate.getScore();
 		performanceKnowledgeBase.addPerformanceSample(benchmarkName, ci, score, false);
 	}

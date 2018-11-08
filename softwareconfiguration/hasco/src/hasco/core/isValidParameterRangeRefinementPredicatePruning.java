@@ -84,6 +84,8 @@ public class isValidParameterRangeRefinementPredicatePruning implements Evaluabl
 		ComponentInstance ci = Util.getSolutionCompositionFromState(components, state, false);
 		String paramName = ci.getComponent().getName() + "::" + param.getName();
 
+		// System.out.println("Param name valid: " + paramName);
+
 		// if (performanceKB.getNumSamples("test", compositionIdentifier) >
 		// this.minNumSamplesForImportanceEstimation) {
 		if (parameterImportanceEstimator.readyToEstimateImportance(ci)) {
@@ -96,7 +98,8 @@ public class isValidParameterRangeRefinementPredicatePruning implements Evaluabl
 				// for (String parameterIndex : importantParams) {
 				// System.out.println("parameter " + parameterIndex);
 				// }
-				System.out.println("important parameters: " + importantParams.toString());
+				// System.out.println("important parameters valid: " +
+				// importantParams.toString());
 				if (importantParams.contains(paramName)) {
 					// System.out.println("Parameter " + paramName + " is important and will be
 					// refined!");
@@ -215,8 +218,22 @@ public class isValidParameterRangeRefinementPredicatePruning implements Evaluabl
 				}
 				for (Object valAsObject : ((CategoricalParameterDomain) paramDomains.get(param)).getValues()) {
 					possibleValues.add(valAsObject.toString());
+					// if
+					// (component.getName().equals("weka.attributeSelection.ReliefFAttributeEval")
+					// && param.getName().equals("W")) {
+					// System.out.print("pos vals: ");
+					// String[] posvals = ((CategoricalParameterDomain)
+					// paramDomains.get(param)).getValues();
+					// for (String val : posvals) {
+					// if(val.equals("false"))
+					// System.out.println("fishy");
+					// }
+					// System.out.println();
+					// }
 				}
 				logger.info("Returning possible values {}.", possibleValues);
+				// System.out.println("Returning possible values " + possibleValues + " for " +
+				// component.getName() + "::" + parameterName);
 				return this.getGroundingsForOracledValues(possibleValues, partialGroundingAsList);
 			} else {
 				throw new UnsupportedOperationException(

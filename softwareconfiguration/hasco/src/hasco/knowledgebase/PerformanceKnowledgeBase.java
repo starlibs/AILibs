@@ -5,6 +5,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -14,6 +15,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.jfree.util.Log;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
@@ -81,11 +83,13 @@ public class PerformanceKnowledgeBase {
 					// System.out.println("Parameter: " + parameter + " has value: " +
 					// compInst.getParameterValues().get(parameter.getName()));
 					// TODO check if this is feasible
-					if (compInst.getParametersThatHaveBeenSetExplicitly().contains(parameter))
-						temp.add(Pair.of(parameter, compInst.getParameterValues().get(parameter.getName())));
-					else {
-						temp.add(Pair.of(parameter, parameter.getDefaultValue().toString()));
+					String value;
+					if (compInst.getParametersThatHaveBeenSetExplicitly().contains(parameter)) {
+						value = compInst.getParameterValues().get(parameter.getName());
+					} else {
+						value = parameter.getDefaultValue().toString();
 					}
+					temp.add(Pair.of(parameter, value));
 				}
 			}
 			// Make the list immutable to avoid problems with hashCode
@@ -244,7 +248,17 @@ public class PerformanceKnowledgeBase {
 			if (values.get(i).getRight() != null) {
 				if (param.isCategorical()) {
 					String value = values.get(i).getRight();
-					instance.setValue(attr, value);
+					boolean attrContainsValue = false;
+					Enumeration<Object> possibleValues = attr.enumerateValues();
+					while (possibleValues.hasMoreElements() && !attrContainsValue) {
+						Object o = possibleValues.nextElement();
+						if (o.equals(value))
+							attrContainsValue = true;
+					}
+					if (attrContainsValue)
+						instance.setValue(attr, value);
+					else
+						Log.info("The value you're trying to insert is not in the attributes range!");
 				} else if (param.isNumeric()) {
 					double finalValue = Double.parseDouble(values.get(i).getRight());
 					instance.setValue(attr, finalValue);
@@ -274,7 +288,15 @@ public class PerformanceKnowledgeBase {
 				if (value != null) {
 					if (param.isCategorical()) {
 						// String value = ci.getParameterValues().get(param.getName());
-						instanceInd.setValue(attr, value);
+						boolean attrContainsValue = false;
+						Enumeration<Object> possibleValues = attr.enumerateValues();
+						while (possibleValues.hasMoreElements() && !attrContainsValue) {
+							Object o = possibleValues.nextElement();
+							if (o.equals(value))
+								attrContainsValue = true;
+						}
+						if (attrContainsValue)
+							instanceInd.setValue(attr, value);
 					} else if (param.isNumeric()) {
 						double finalValue = Double.parseDouble(value);
 						instanceInd.setValue(attr, finalValue);
