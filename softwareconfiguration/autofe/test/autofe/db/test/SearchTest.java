@@ -24,10 +24,14 @@ import autofe.db.search.DatabaseGraphGenerator;
 import autofe.db.search.DatabaseNode;
 import autofe.db.search.DatabaseNodeEvaluator;
 import autofe.db.util.DBUtils;
+import jaicore.graphvisualizer.gui.VisualizationWindow;
+import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
+import jaicore.search.model.other.SearchGraphPath;
 import jaicore.search.model.probleminputs.GeneralEvaluatedTraversalTree;
 import jaicore.search.model.travesaltree.Node;
 import jaicore.search.model.travesaltree.NodeExpansionDescription;
+import jaicore.search.model.travesaltree.NodeTooltipGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 public class SearchTest {
@@ -48,10 +52,12 @@ public class SearchTest {
 		search.setTimeoutForComputationOfF(60000, node -> 100.0);
 
 		// TODO: Add graph visualizer
-
-		List<DatabaseNode> solutions = null;
-		while ((solutions = search.nextSolution()) != null) {
-			System.out.println(solutions.get(solutions.size() - 1));
+		// VisualizationWindow<?, ?> window = new VisualizationWindow<>(search);
+		// window.setTooltipGenerator(new NodeTooltipGenerator<>(new
+		// TFDTooltipGenerator<>()));
+		SearchGraphPath<DatabaseNode, String> solution = null;
+		while ((solution = search.nextSolution()) != null) {
+			System.out.println(solution.getNodes().get(solution.getNodes().size() - 1));
 		}
 	}
 
