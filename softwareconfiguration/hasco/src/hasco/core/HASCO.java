@@ -394,7 +394,6 @@ public class HASCO<ISearch, N, A, V extends Comparable<V>> implements
 		if (search != null)
 			search.cancel();
 		this.terminate();
-		System.out.println("samples: " + performanceKnowledgeBase.getPerformanceSamples());
 	}
 
 	@Override
