@@ -373,7 +373,7 @@ public final class DataSetUtils {
 
 					matrix = ImageUtils.fastBitmapToMatrix(fb, colorSpace);
 				} catch (final Throwable e) {
-					System.out.println(imageFile.getAbsolutePath());
+					logger.debug(imageFile.getAbsolutePath());
 					e.printStackTrace();
 				}
 				matrixList.add(matrix);
