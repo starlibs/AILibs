@@ -25,4 +25,9 @@ dependencies {
 	  	exclude group: 'log4j'
     	exclude group: 'org.slf4j'
 	}
+	
+	//JTwig template engine
+	compile "org.jtwig:jtwig-core:5.87.0.RELEASE"	
+	// https://mvnrepository.com/artifact/com.googlecode.json-simple/json-simple
+	compile group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1.1'
 }
