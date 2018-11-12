@@ -481,13 +481,11 @@ public class WekaUtil {
 	}
 
 	public static Map<String, Instances> getInstancesPerClass(final Instances data) {
-		Instances emptyInstances = new Instances(data);
-		emptyInstances.clear();
 		Map<String, Instances> classWiseSeparation = new HashMap<>();
 		for (Instance i : data) {
 			String assignedClass = data.classAttribute().value((int) i.classValue());
 			if (!classWiseSeparation.containsKey(assignedClass)) {
-				Instances inst = new Instances(emptyInstances);
+				Instances inst = new Instances(data, 0);
 				classWiseSeparation.put(assignedClass, inst);
 			}
 			classWiseSeparation.get(assignedClass).add(i);
@@ -623,7 +621,7 @@ public class WekaUtil {
 			numberOfInstancesPerClassAndFold.put(className, new HashMap<>());
 			for (int foldId = 0; foldId < portions.length; foldId++) {
 				numberOfInstancesPerClassAndFold.get(className).put(foldId,
-						(int) Math.ceil(numberOfInstancesPerClass.get(className) * portions[foldId]));
+						((int) Math.ceil(numberOfInstancesPerClass.get(className) * portions[foldId])) + 1);
 			}
 		}
 
@@ -650,6 +648,7 @@ public class WekaUtil {
 			/* update point for class */
 			numberOfInstancesPerClassAndFold.get(assignedClass).put(foldId,
 					numberOfInstancesPerClassAndFold.get(assignedClass).get(foldId) - 1);
+
 			do {
 				foldId++;
 				if (foldId >= portions.length)
@@ -659,7 +658,7 @@ public class WekaUtil {
 		}
 
 		assert Arrays.asList(folds).stream().mapToInt(l -> l.size()).sum() == data
-				.size() : "The number of instancens in the folds does not equal the number of instances in the original dataset";
+				.size() : "The number of instances in the folds does not equal the number of instances in the original dataset";
 		return folds;
 	}
 
