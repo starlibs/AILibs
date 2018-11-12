@@ -52,7 +52,7 @@ public final class EvaluationUtils {
 	private static final Logger logger = LoggerFactory.getLogger(EvaluationUtils.class);
 
 	private static double DOUBLE_ZERO_PREC = 0.0001;
-	
+
 	private static double KERNEL_SPLIT_PORTION = .3;
 
 	private EvaluationUtils() {
@@ -83,7 +83,7 @@ public final class EvaluationUtils {
 		no.uib.cipr.matrix.Vector vector;
 
 		DataSet dataSet = pipeline.applyFilter(data, true);
-		System.out.println("Number of attributes: " + dataSet.getInstances().numAttributes());
+		logger.debug("Number of attributes: " + dataSet.getInstances().numAttributes());
 
 		logger.debug("Applied pipeline.");
 
@@ -131,8 +131,8 @@ public final class EvaluationUtils {
 
 	public static double performKernelClustering(final Instances instances) throws Exception {
 		logger.debug("Starting kernelized cluster evaluation...");
-		
-		List<Instances> split = WekaUtil.getStratifiedSplit(instances, new Random(42), .3f);
+
+		List<Instances> split = WekaUtil.getStratifiedSplit(instances, new Random(42), KERNEL_SPLIT_PORTION);
 
 		double maxScore = performClustering(new Instances(split.get(0)));
 		for (Map.Entry<Kernel, Instances> entry : getKernelsWithInstances(split.get(0))) {
@@ -163,93 +163,10 @@ public final class EvaluationUtils {
 					clusterEval.getClusterAssignments());
 			maxScore = Math.max(maxScore, currAcc);
 		}
-		return maxScore;
 
-		// ExecutorService execService = Executors.newFixedThreadPool(1);
-		// Future<Double> clustering0 = execService.submit(() -> {
-		// return performClustering(insts);
-		// });
-		// Future<Double> clustering1 = execService.submit(() -> {
-		// FilteredClusterer clusterer = new FilteredClusterer();
-		//
-		// Remove filter = new Remove();
-		// filter.setAttributeIndices("" + (insts.classIndex() + 1));
-		// filter.setInputFormat(insts);
-		//
-		// Instances removedClassInstances = Filter.useFilter(insts, filter);
-		// Nystroem kernelFilter = new Nystroem();
-		//
-		// kernelFilter.setKernel(new RBFKernel(insts, 250007, 0.01)); // insts,
-		// clusterer.setFilter(kernelFilter);
-		// ((SimpleKMeans) clusterer.getClusterer())
-		// .setOptions(new String[] { "-N",
-		// String.valueOf(insts.classAttribute().numValues()) });
-		//
-		// clusterer.buildClusterer(removedClassInstances);
-		//
-		// ClusterEvaluation clusterEval = new ClusterEvaluation();
-		// clusterEval.setClusterer(clusterer);
-		// clusterEval.evaluateClusterer(insts);
-		//
-		// return predictAccuracy(insts, clusterEval.getClassesToClusters(),
-		// clusterEval.getClusterAssignments());
-		// });
-		// Future<Double> clustering2 = execService.submit(() -> {
-		// FilteredClusterer clusterer = new FilteredClusterer();
-		//
-		// Remove filter = new Remove();
-		// filter.setAttributeIndices("" + (insts.classIndex() + 1));
-		// filter.setInputFormat(insts);
-		//
-		// Instances removedClassInstances = Filter.useFilter(insts, filter);
-		// Nystroem kernelFilter = new Nystroem();
-		// kernelFilter.setKernel(new PolyKernel(insts, 250007, 2, false));
-		//
-		// clusterer.setFilter(kernelFilter);
-		// ((SimpleKMeans) clusterer.getClusterer())
-		// .setOptions(new String[] { "-N",
-		// String.valueOf(insts.classAttribute().numValues()) });
-		//
-		// clusterer.buildClusterer(removedClassInstances);
-		//
-		// ClusterEvaluation clusterEval = new ClusterEvaluation();
-		// clusterEval.setClusterer(clusterer);
-		// clusterEval.evaluateClusterer(insts);
-		//
-		// return predictAccuracy(insts, clusterEval.getClassesToClusters(),
-		// clusterEval.getClusterAssignments());
-		// });
-		// Future<Double> clustering3 = execService.submit(() -> {
-		// FilteredClusterer clusterer = new FilteredClusterer();
-		//
-		// Remove filter = new Remove();
-		// filter.setAttributeIndices("" + (insts.classIndex() + 1));
-		// filter.setInputFormat(insts);
-		//
-		// Instances removedClassInstances = Filter.useFilter(insts, filter);
-		// Nystroem kernelFilter = new Nystroem();
-		// kernelFilter.setKernel(new PolyKernel(insts, 250007, 3, false));
-		//
-		// clusterer.setFilter(kernelFilter);
-		// ((SimpleKMeans) clusterer.getClusterer())
-		// .setOptions(new String[] { "-N",
-		// String.valueOf(insts.classAttribute().numValues()) });
-		//
-		// clusterer.buildClusterer(removedClassInstances);
-		//
-		// ClusterEvaluation clusterEval = new ClusterEvaluation();
-		// clusterEval.setClusterer(clusterer);
-		// clusterEval.evaluateClusterer(insts);
-		//
-		// return predictAccuracy(insts, clusterEval.getClassesToClusters(),
-		// clusterEval.getClusterAssignments());
-		// });
-		//
-		// execService.shutdown();
-		// execService.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
-		//
-		// return Math.max(Math.max(Math.max(clustering0.get(), clustering1.get()),
-		// clustering2.get()), clustering3.get());
+		logger.debug("Kernelized cluster evaluation result: " + maxScore);
+
+		return maxScore;
 	}
 
 	public static double performKernelLDA(final Instances instances) throws Exception {
@@ -279,76 +196,6 @@ public final class EvaluationUtils {
 			}
 		}
 		return maxScore;
-
-		// ExecutorService execService = Executors.newFixedThreadPool(1);
-		// Future<Double> result0 = execService.submit(() -> {
-		// Instances insts = new Instances(split.get(0));
-		//
-		// try {
-		// return performLDA(insts);
-		// } catch (Exception e) {
-		// logger.warn("Could the following error message in LDA execution (no kernel):
-		// " + e.getMessage());
-		// return 0d;
-		// }
-		// });
-		// Future<Double> result1 = execService.submit(() -> {
-		// Instances insts = new Instances(split.get(0));
-		//
-		// Nystroem kernelFilter = new Nystroem();
-		// kernelFilter.setInputFormat(insts);
-		// kernelFilter.setKernel(new RBFKernel(insts, 250007, 0.01));
-		//
-		// insts = Filter.useFilter(insts, kernelFilter);
-		//
-		// try {
-		// return performLDA(insts);
-		// } catch (Exception e) {
-		// logger.warn("Could the following error message in LDA execution (RBF kernel):
-		// " + e.getMessage());
-		// return 0d;
-		// }
-		// });
-		// Future<Double> result2 = execService.submit(() -> {
-		// Instances insts = new Instances(split.get(0));
-		//
-		// Nystroem kernelFilter = new Nystroem();
-		// kernelFilter.setInputFormat(insts);
-		// kernelFilter.setKernel(new PolyKernel(insts, 250007, 2, false));
-		//
-		// insts = Filter.useFilter(insts, kernelFilter);
-		//
-		// try {
-		// return performLDA(insts);
-		// } catch (Exception e) {
-		// logger.warn("Could the following error message in LDA execution (poly2
-		// kernel): " + e.getMessage());
-		// return 0d;
-		// }
-		// });
-		// Future<Double> result3 = execService.submit(() -> {
-		// Instances insts = new Instances(split.get(0));
-		//
-		// Nystroem kernelFilter = new Nystroem();
-		// kernelFilter.setInputFormat(insts);
-		// kernelFilter.setKernel(new PolyKernel(insts, 250007, 3, false));
-		//
-		// insts = Filter.useFilter(insts, kernelFilter);
-		//
-		// try {
-		// return performLDA(insts);
-		// } catch (Exception e) {
-		// logger.warn("Could the following error message in LDA execution (poly3
-		// kernel): " + e.getMessage());
-		// return 0d;
-		// }
-		// });
-		//
-		// execService.shutdown();
-		// execService.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
-		//
-		// return Math.max(Math.max(Math.max(result0.get(), result1.get()),
-		// result2.get()), result3.get());
 	}
 
 	/**
@@ -530,8 +377,6 @@ public final class EvaluationUtils {
 
 			INDArray c_k = c.getRow((int) Math.round(batch.get(i).classValue()));
 			double upperExp = Math.exp(calculateEuclideanImageDistance(f_i, c_k));
-
-			// System.out.println(loss);
 
 			loss += Math.log(upperExp / (lowerSum + 1));
 

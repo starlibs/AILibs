@@ -80,7 +80,7 @@ public class AutoFEMLExperimenter implements IExperimentSetEvaluator {
 		}
 
 		LOGGER.info("Get stratified split of training and test data...");
-		List<DataSet> trainTestSplit = DataSetUtils.getStratifiedSplit(data, new Random(seed), .7);
+		List<DataSet> trainTestSplit = DataSetUtils.getStratifiedSplit(data, new Random(seed), false, .7);
 		long[] shape = trainTestSplit.get(0).getIntermediateInstances().get(0).shape();
 
 		AbstractAutoFEMLClassifier autofeml;
@@ -93,16 +93,10 @@ public class AutoFEMLExperimenter implements IExperimentSetEvaluator {
 					new WEKAPipelineFactory());
 			autofeml = new AutoFEMLComplete(seed, subsampleRatio, mlplanSubsampleRatioFactor, minInstances, config,
 					factory);
-			((AutoFEMLComplete) autofeml).setNumCPUs(CONFIG.getNumberOfCPUs());
+			((AutoFEMLComplete) autofeml).setNumCPUs(experimentEntry.getExperiment().getNumCPUs());
 			((AutoFEMLComplete) autofeml).setTimeout((int) (feTimeout + amlTimeout), TimeUnit.SECONDS);
 			((AutoFEMLComplete) autofeml).setTimeoutForNodeEvaluation((int) evalTimeout);
 			((AutoFEMLComplete) autofeml).setTimeoutForSingleSolutionEvaluation((int) evalTimeout);
-
-			// autofeml = new AutoFEMLComplete(experimentEntry.getExperiment().getNumCPUs(),
-			// seed,
-			// new TimeOut(feTimeout + amlTimeout, TimeUnit.SECONDS), new
-			// TimeOut(evalTimeout, TimeUnit.SECONDS),
-			// maxPipelineSize, subsampleRatio, mlplanSubsampleRatioFactor, minInstances);
 
 		} else {
 			LOGGER.info("Execute AutoFEML as a two-phase process...");
@@ -112,13 +106,6 @@ public class AutoFEMLExperimenter implements IExperimentSetEvaluator {
 					experiment.get("algorithm"), subsampleRatio, mlplanSubsampleRatioFactor, minInstances, seed,
 					new TimeOut(feTimeout, TimeUnit.SECONDS), new TimeOut(amlTimeout, TimeUnit.SECONDS),
 					new TimeOut(evalTimeout, TimeUnit.SECONDS), maxPipelineSize);
-
-			// autofeml = new AutoFEMLTwoPhase(experimentEntry.getExperiment().getNumCPUs(),
-			// experiment.get("algorithm"),
-			// subsampleRatio, mlplanSubsampleRatioFactor, minInstances, seed,
-			// new TimeOut(feTimeout, TimeUnit.SECONDS), new TimeOut(amlTimeout,
-			// TimeUnit.SECONDS),
-			// new TimeOut(evalTimeout, TimeUnit.SECONDS), maxPipelineSize);
 		}
 		autofeml.setSQLAdapter(adapter, experimentEntry.getId(), CONFIG.evalTable());
 		autofeml.enableVisualization(CONFIG.enableVisualization());
@@ -157,6 +144,7 @@ public class AutoFEMLExperimenter implements IExperimentSetEvaluator {
 		runner.randomlyConductExperiments(1, true);
 		TimeoutTimer.getInstance().stop();
 		LOGGER.info("Experiment runner is shutting down.");
+		System.exit(0);
 	}
 
 }
