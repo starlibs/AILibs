@@ -446,4 +446,17 @@ public class Recorder<V,E> {
 		}
 
 	}
+	/**
+	* Getter for the Events
+	*/
+	public  List<Object> getReceivedEvents(){
+		return this.receivedEvents;
+	}
+	
+	/**
+	* Getter for the index
+	*/
+	public int getIndex(){
+		return this.index;
+	}
 }
