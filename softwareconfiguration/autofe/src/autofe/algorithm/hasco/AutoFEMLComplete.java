@@ -283,6 +283,7 @@ public class AutoFEMLComplete extends AbstractAutoFEMLClassifier
 			DataSet dataForComplete = DataSetUtils.subsample(data, this.subsampleRatio, this.minInstances, this.rand,
 					this.mlplanSubsampleRatioFactor);
 			dataForComplete.updateInstances();
+			logger.debug("Finished subsampling.");
 
 			/* set up exact splits */
 			float selectionDataPortion = this.config.dataPortionForSelection();

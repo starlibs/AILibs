@@ -402,10 +402,21 @@ public final class DataSetUtils {
 	}
 
 	public static List<DataSet> getStratifiedSplit(final DataSet data, final Random rand, final double... portions) {
+		return getStratifiedSplit(data, rand, false, portions);
+	}
+
+	public static List<DataSet> getStratifiedSplit(final DataSet data, final Random rand, final boolean onlyKeepFirst,
+			final double... portions) {
 		final List<DataSet> splits = new LinkedList<>();
 
-		final Collection<Integer>[] indices = WekaUtil.getStratifiedSplitIndices(data.getInstances(), new Random(),
-				portions);
+		Collection<Integer>[] indices = WekaUtil.getStratifiedSplitIndices(data.getInstances(), rand, portions);
+
+		if (onlyKeepFirst) {
+			@SuppressWarnings("unchecked")
+			Collection<Integer>[] tmpIndices = new Collection[1];
+			tmpIndices[0] = indices[0];
+			indices = tmpIndices;
+		}
 
 		for (final Collection<Integer> splitIndices : indices) {
 			final List<INDArray> indArray = new LinkedList<>();
@@ -489,12 +500,14 @@ public final class DataSetUtils {
 			ratio = (double) minInstances / originalData.getInstances().size();
 		}
 
+		System.out.println("Ratio: " + ratio);
+
 		if (ratio >= 1d) {
 			logger.debug("Subsampling is not performed.");
 			return originalData;
 		}
 
-		DataSet subsampledData = getStratifiedSplit(originalData, random, ratio).get(0);
+		DataSet subsampledData = getStratifiedSplit(originalData, random, true, ratio).get(0);
 		logger.debug("Subsampling ratio is {} and means {} many instances.", ratio,
 				subsampledData.getInstances().size());
 		return subsampledData;

@@ -129,8 +129,13 @@ public class HASCOFeatureEngineering
 			}
 
 			/* Subsample dataset to reduce computational effort. */
+			logger.info(
+					"Subsampling with ratio {} and {} min instances. Num original instances and attributes: {} / {}...",
+					this.config.subsamplingRatio(), this.config.minInstances(), data.getInstances().numInstances(),
+					data.getInstances().numAttributes());
 			DataSet dataForFE = DataSetUtils.subsample(data, this.config.subsamplingRatio(), this.config.minInstances(),
 					new Random(this.config.randomSeed()));
+			logger.info("Finished subsampling.");
 
 			/* communicate the parameters with which AutoFE will run */
 			// TODO
@@ -176,6 +181,7 @@ public class HASCOFeatureEngineering
 			this.optimizingFactory.setLoggerName(this.loggerName + ".2phasehasco");
 			this.optimizingFactory.setTimeout(this.config.timeout(), TimeUnit.SECONDS);
 			this.optimizingFactory.registerListener(this);
+			this.optimizingFactory.setNumCPUs(this.config.cpus());
 			this.optimizingFactory.init();
 
 			/* set state to active */
@@ -322,7 +328,7 @@ public class HASCOFeatureEngineering
 	public void receiveSolutionEvent(final SolutionCandidateFoundEvent<HASCOSolutionCandidate<Double>> event) {
 		HASCOSolutionCandidate<Double> solution = event.getSolutionCandidate();
 		try {
-			logger.info("Received new solution {} with score {} and evaluation time {}ms",
+			logger.debug("Received new solution {} with score {} and evaluation time {}ms",
 					this.factory.getComponentInstantiation(solution.getComponentInstance()), solution.getScore(),
 					solution.getTimeToEvaluateCandidate());
 		} catch (Exception e) {
@@ -440,5 +446,17 @@ public class HASCOFeatureEngineering
 
 	protected INodeEvaluator<TFDNode, Double> getSemanticNodeEvaluator(Instances data) {
 		return new SemanticNodeEvaluator(this.components, data);
+	}
+
+	public void setSubsamplingRatio(final double subsamplingRatio) {
+		this.config.setProperty(HASCOFeatureEngineeringConfig.SUBSAMPLING_RATIO, String.valueOf(subsamplingRatio));
+	}
+
+	public void setMinInstances(final int minInstances) {
+		this.config.setProperty(HASCOFeatureEngineeringConfig.MIN_INSTANCES, String.valueOf(minInstances));
+	}
+
+	public void setMaxPipelineSize(final int maxPipelineSize) {
+		this.config.setProperty(HASCOFeatureEngineeringConfig.SELECTION_PORTION, String.valueOf(maxPipelineSize));
 	}
 }

@@ -3,6 +3,8 @@ package autofe.util.test;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -16,7 +18,7 @@ import weka.core.DenseInstance;
 import weka.core.Instances;
 
 public class DataSetUtilsTest {
-	@Test
+	// @Test
 	public void cifar10InstancesAttributesTest() {
 		ArrayList<Attribute> atts = new ArrayList<>();
 		for (int i = 0; i < 32 * 32 * 3 + 1; i++) {
@@ -34,11 +36,34 @@ public class DataSetUtilsTest {
 		Assert.assertArrayEquals(new long[] { 32, 32, 3 }, result.shape());
 	}
 
-	@Test
+	// @Test
 	public void croppingTest() throws IOException {
 		File datasetFolder = new File("testres/" + File.separator + "caltech101_subset");
 		DataSet data = DataSetUtils.loadDatasetFromImageFolder(datasetFolder);
 		CatalanoInPlaceFilter filter = new CatalanoInPlaceFilter("GaussianBlur");
 		filter.applyFilter(data, true);
+	}
+
+	@Test
+	public void subsamplingTest() throws Exception {
+		DataSet data = DataSetUtils.getDataSetByID(DataSetUtils.MNIST_ID);
+
+		List<DataSet> trainTestSplit = DataSetUtils.getStratifiedSplit(data, new Random(10), false, .7);
+		data = trainTestSplit.get(0);
+
+		System.out.println("Num instances / attributes: " + data.getInstances().numInstances() + " / "
+				+ data.getInstances().numAttributes());
+
+		System.out.println("Start subsampling without MLPlan factor...");
+		DataSet result = DataSetUtils.subsample(data, 0.01, 200, new Random(0));
+		System.out.println("Done. " + result.getInstances().numInstances());
+
+		System.out.println("Start subsampling with custom MLPlan factor...");
+		result = DataSetUtils.subsample(data, 0.05, 200, new Random(0));
+		System.out.println("Done. " + result.getInstances().numInstances());
+
+		System.out.println("Start subsampling with MLPlan factor...");
+		result = DataSetUtils.subsample(data, 0.01, 200, new Random(10), 10);
+		System.out.println("Done. " + result.getInstances().numInstances());
 	}
 }

@@ -84,6 +84,7 @@ public class AutoFEMLTwoPhase extends AbstractAutoFEMLClassifier {
 
 	@Override
 	public void buildClassifier(final DataSet data) throws Exception {
+
 		// Search for AutoFE pipeline
 		AbstractHASCOFEObjectEvaluator benchmark = null;
 		switch (this.benchmarkType) {
@@ -114,15 +115,16 @@ public class AutoFEMLTwoPhase extends AbstractAutoFEMLClassifier {
 		hascoFE.setTimeoutForSingleSolutionEvaluation((int) this.evalTimeOut.seconds());
 		hascoFE.setTimeout((int) this.feTimeOut.seconds(), TimeUnit.SECONDS);
 		hascoFE.setNumCPUs(this.cpus);
+		hascoFE.setMaxPipelineSize(this.maxPipelineSize);
+		hascoFE.setMinInstances(this.minInstances);
+		hascoFE.setSubsamplingRatio(this.subsampleRatio);
 		logger.info("Run 1st AutoFEML phase engineering features from the provided data using {} as a benchmark.",
 				benchmark.getClass().getName());
-		FilterPipeline solution = hascoFE.build(data);
+		FilterPipeline solution = hascoFE.build(data.copy());
 		this.internalAutoFEScore = hascoFE.getInternalValidationErrorOfSelectedClassifier();
-		// TODO: Print out
-		// logger.info("Finished 1st AutoFEML phase. Found solution {} with score {} and
-		// time {}ms to compute the score.",
-		// solution.getSolution(), solution.getScore(),
-		// solution.getTimeToComputeScore());
+
+		logger.info("Finished 1st AutoFEML phase. Found solution {} with score {}.", solution,
+				this.internalAutoFEScore);
 
 		// Old
 		// HASCOSupervisedML.REQUESTED_INTERFACE = "FilterPipeline";
@@ -163,9 +165,17 @@ public class AutoFEMLTwoPhase extends AbstractAutoFEMLClassifier {
 		// solution.getSolution(), solution.getScore(),
 		// solution.getTimeToComputeScore());
 
+		System.gc();
+
 		logger.info("Prepare the dataset for the 2nd phase...");
+		logger.info(
+				"Subsampling with ratio {}, {} min instances and mlplan ratio factor {}. Num original instances and attributes: {} / {}...",
+				this.subsampleRatio, this.minInstances, this.mlplanSubsampleRatioFactor,
+				data.getInstances().numInstances(), data.getInstances().numAttributes());
+		logger.info("Seed: " + seed);
 		DataSet dataForMLPlan = DataSetUtils.subsample(data, this.subsampleRatio, this.minInstances, this.rand,
 				this.mlplanSubsampleRatioFactor);
+		logger.info("Subsampled data.");
 		DataSet transformedDataset = solution.applyFilter(dataForMLPlan, false);
 		transformedDataset.updateInstances();
 		Instances wekaDataset = transformedDataset.getInstances();
