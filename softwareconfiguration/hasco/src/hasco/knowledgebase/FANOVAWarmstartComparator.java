@@ -18,16 +18,11 @@ import jaicore.basic.SQLAdapter;
 public class FANOVAWarmstartComparator implements Comparator<Parameter> {
 
 	private Map<String, Double> importanceValues;
-	private PerformanceKnowledgeBase performanceKB;
 	private IParameterImportanceEstimator importanceEstimator;
 
-	public FANOVAWarmstartComparator(PerformanceKnowledgeBase performanceKB, String benchmarkName,
+	public FANOVAWarmstartComparator(IParameterImportanceEstimator importanceEstimator,
 			Component component) {
-		this.performanceKB = performanceKB;
-		// System.out.println("samples for " + component + ": " +
-		// performanceKB.getPerformanceSamplesForIndividualComponent("yeast",
-		// component));
-		this.importanceEstimator = new FANOVAParameterImportanceEstimator(performanceKB, benchmarkName);
+		this.importanceEstimator = importanceEstimator;
 		this.importanceValues = this.importanceEstimator.computeImportanceForSingleComponent(component);
 		System.out.println("importance values: " + importanceValues);
 	}
@@ -37,11 +32,9 @@ public class FANOVAWarmstartComparator implements Comparator<Parameter> {
 	 */
 	@Override
 	public int compare(Parameter o1, Parameter o2) {
-		// System.out.println(o1.toString());
 		if (importanceValues == null)
 			return 0;
 		System.out.println(o1.toString() + " value: " + importanceValues.get(o1));
-		// System.out.println(o2.getName() + " value: " + importanceValues.get(o1));
 		if (importanceValues == null)
 			return 0;
 		// We want the parameters to be sorted in descending order according to their

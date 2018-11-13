@@ -5,6 +5,7 @@ import jaicore.logic.fol.structure.ConstantParam;
 import jaicore.logic.fol.structure.Literal;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.logic.fol.theories.EvaluablePredicate;
+import weka.core.Instances;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,6 +18,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.Stack;
 import java.util.stream.Collectors;
+
+import javax.swing.plaf.synth.SynthSeparatorUI;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.math3.geometry.euclidean.oned.Interval;
@@ -89,6 +92,7 @@ public class isValidParameterRangeRefinementPredicatePruning implements Evaluabl
 		// if (performanceKB.getNumSamples("test", compositionIdentifier) >
 		// this.minNumSamplesForImportanceEstimation) {
 		if (parameterImportanceEstimator.readyToEstimateImportance(ci)) {
+			Instances data = parameterImportanceEstimator.getPerformanceKnowledgeBase().getPerformanceSamples("test", ci);
 			// System.out.println(minNumSamplesForImportanceEstimation + " samples are
 			// available");
 			try {
@@ -98,8 +102,7 @@ public class isValidParameterRangeRefinementPredicatePruning implements Evaluabl
 				// for (String parameterIndex : importantParams) {
 				// System.out.println("parameter " + parameterIndex);
 				// }
-				// System.out.println("important parameters valid: " +
-				// importantParams.toString());
+				System.out.println("important parameters valid: " + importantParams.toString());
 				if (importantParams.contains(paramName)) {
 					// System.out.println("Parameter " + paramName + " is important and will be
 					// refined!");

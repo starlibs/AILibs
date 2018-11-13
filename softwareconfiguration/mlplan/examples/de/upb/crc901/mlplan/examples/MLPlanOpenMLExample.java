@@ -31,7 +31,7 @@ public class MLPlanOpenMLExample {
 
 		/* load data for segment dataset and create a train-test-split */
 		OpenmlConnector connector = new OpenmlConnector();
-		DataSetDescription ds = connector.dataGet(181);
+		DataSetDescription ds = connector.dataGet(40498);
 		File file = ds.getDataset("4350e421cdc16404033ef1812ea38c01");
 		Instances data = new Instances(new BufferedReader(new FileReader(file)));
 		data.setClassIndex(data.numAttributes() - 1);
@@ -41,7 +41,7 @@ public class MLPlanOpenMLExample {
 		MLPlanWekaClassifier mlplan = new WekaMLPlanWekaClassifier();
 		mlplan.setLoggerName("mlplan");
 		mlplan.setUseParameterPruning(true);
-		mlplan.setParameterImportanceEstimator(new FANOVAParameterImportanceEstimator("test", 2, 0.08d));
+		mlplan.setParameterImportanceEstimator(new FANOVAParameterImportanceEstimator("test", 16, 0.08d));
 		mlplan.setTimeout(300);
 //		mlplan.activateVisualization();
 		try {

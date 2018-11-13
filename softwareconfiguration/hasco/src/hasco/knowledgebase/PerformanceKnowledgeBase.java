@@ -534,4 +534,18 @@ public class PerformanceKnowledgeBase {
 		}
 		return 0;
 	}
+	
+	public void setPerformanceSamples(Instances instances, ComponentInstance composition, String benchmarkName) {
+		String identifier = Util.getComponentNamesOfComposition(composition);
+		
+		if (performanceInstancesByIdentifier.get(benchmarkName) == null) {
+			HashMap<String, Instances> newMap = new HashMap<String, Instances>();
+			HashMap<String, Instances> newMap2 = new HashMap<String, Instances>();
+			performanceInstancesByIdentifier.put(benchmarkName, newMap);
+			performanceInstancesIndividualComponents.put(benchmarkName, newMap2);
+
+		}
+		
+		this.performanceInstancesByIdentifier.get(benchmarkName).put(identifier, instances);
+	}
 }

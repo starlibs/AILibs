@@ -43,5 +43,10 @@ public interface IParameterImportanceEstimator {
 	 * @param performanceKB
 	 */
 	public void setPerformanceKnowledgeBase(PerformanceKnowledgeBase performanceKB);
+	
+	/**
+	 * Get the performance knowledge base used for parameter importance estimation
+	 */
+	public PerformanceKnowledgeBase getPerformanceKnowledgeBase();
 
 }
