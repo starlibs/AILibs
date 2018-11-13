@@ -191,7 +191,9 @@ public final class EvaluationUtils {
 			try {
 				maxScore = Math.max(maxScore, performLDA(insts));
 			} catch (Exception e) {
-				logger.warn("Could the following error message in LDA execution (no kernel): " + e.getMessage());
+				logger.warn("Could not calculate the LDA score for kernel " + kernel.getClass().getSimpleName()
+						+ " due to the following exception: " + e.getMessage() + " in (" + e.getClass().getSimpleName()
+						+ ").");
 				maxScore = Math.max(maxScore, 0d);
 			}
 		}

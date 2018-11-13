@@ -31,6 +31,6 @@ public class ClusterObjectEvaluator extends AbstractHASCOFEObjectEvaluator {
 		logger.debug("Cluster object evaluator final score: " + finalScore);
 
 		this.storeResult(pipeline, finalScore, (System.currentTimeMillis() - startTimestamp));
-		return finalScore;
+		return 1 - finalScore;
 	}
 }

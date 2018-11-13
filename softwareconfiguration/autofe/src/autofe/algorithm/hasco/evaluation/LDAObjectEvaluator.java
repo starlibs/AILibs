@@ -29,7 +29,7 @@ public class LDAObjectEvaluator extends AbstractHASCOFEObjectEvaluator {
 				- ATT_COUNT_PENALTY * EvaluationUtils.calculateAttributeCountPenalty(this.data.getInstances());
 
 		this.storeResult(pipeline, score, (System.currentTimeMillis() - startTimestamp));
-		return score;
+		return 1 - score;
 	}
 
 }

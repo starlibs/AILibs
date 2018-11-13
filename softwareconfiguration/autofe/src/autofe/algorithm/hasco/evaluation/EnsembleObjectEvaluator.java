@@ -19,11 +19,12 @@ public class EnsembleObjectEvaluator extends AbstractHASCOFEObjectEvaluator {
 		logger.debug("Applied pipeline. Starting benchmarking...");
 
 		double ensembleScore = EvaluationUtils.performEnsemble(dataSet.getInstances());
-		double finalScore = ensembleScore - ATT_COUNT_PENALTY * EvaluationUtils.calculateAttributeCountPenalty(this.data.getInstances());
+		double finalScore = ensembleScore
+				- ATT_COUNT_PENALTY * EvaluationUtils.calculateAttributeCountPenalty(this.data.getInstances());
 
 		logger.debug("Ensemble benchmark result: " + finalScore);
 
 		this.storeResult(pipeline, finalScore, (System.currentTimeMillis() - startTimestamp));
-		return finalScore;
+		return 1 - finalScore;
 	}
 }
