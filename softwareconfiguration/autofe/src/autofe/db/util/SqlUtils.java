@@ -35,6 +35,7 @@ public class SqlUtils {
 		if (feature instanceof ForwardFeature) {
 			String parentFullName = feature.getParent().getFullName();
 			parentFullName = parentFullName.replace(".", "_");
+			parentFullName = parentFullName.replace(" ", "_");
 			parentFullName = parentFullName.toUpperCase();
 			sb.append(FORWARD_PREFIX);
 			sb.append("_");
@@ -42,6 +43,7 @@ public class SqlUtils {
 		} else if (feature instanceof BackwardFeature) {
 			String parentFullName = feature.getParent().getFullName();
 			parentFullName = parentFullName.replace(".", "_");
+			parentFullName = parentFullName.replace(" ", "_");
 			parentFullName = parentFullName.toUpperCase();
 			sb.append(BACKWARD_PREFIX);
 			sb.append("_");
@@ -97,7 +99,7 @@ public class SqlUtils {
 
 	public static String generateBackwardSql(List<ForwardRelationship> joins, BackwardFeature feature, Database db) {
 		Path path = new Path(feature.getPath());
-		
+
 		// Add joins to path
 		for (ForwardRelationship fr : joins) {
 			path.addPathElement(fr, null);
