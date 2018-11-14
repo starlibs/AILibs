@@ -274,6 +274,11 @@ public class Literal implements Serializable {
 
 	@Override
 	public String toString() {
+		return toString(true);
+
+	}
+	
+	public String toString(boolean printTypesOfParams) {
 
 		StringBuilder sb = new StringBuilder();
 		sb.append(property + "(");
@@ -282,7 +287,7 @@ public class Literal implements Serializable {
 		int params = this.parameters.size();
 		int i = 1;
 		for (LiteralParam p : this.parameters) {
-			sb.append(p.toString());
+			sb.append(printTypesOfParams ? p.toString() : p.getName());
 			if (i++ < params)
 				sb.append(", ");
 		}

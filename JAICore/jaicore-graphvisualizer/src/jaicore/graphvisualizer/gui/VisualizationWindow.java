@@ -84,7 +84,7 @@ public class VisualizationWindow<V, E> {
 		};
 	}
 
-	public void setTooltipGenerator(TooltipGenerator<?> generator) {
+	public void setTooltipGenerator(TooltipGenerator<V> generator) {
 		this.tooltipSupplier.setGenerator(generator);
 	}
 

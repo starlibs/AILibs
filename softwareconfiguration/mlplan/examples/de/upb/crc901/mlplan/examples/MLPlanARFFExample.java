@@ -27,7 +27,7 @@ public class MLPlanARFFExample {
 		MLPlanWekaClassifier mlplan = new WekaMLPlanWekaClassifier(new MLPlanWekaBuilder().withSearchSpaceConfigFile(new File("conf/automl/searchmodels/weka/tinytest.json")));
 		mlplan.setPortionOfDataForPhase2(0.3f);
 		mlplan.setLoggerName("mlplan");
-		mlplan.setTimeout(30);
+		mlplan.setTimeout(300);
 		mlplan.setTimeoutForNodeEvaluation(15);
 		mlplan.setTimeoutForSingleSolutionEvaluation(15);
 		mlplan.setNumCPUs(8);

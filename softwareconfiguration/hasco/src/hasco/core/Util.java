@@ -30,7 +30,7 @@ import jaicore.basic.sets.SetUtil;
 import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.logic.fol.structure.Literal;
 import jaicore.logic.fol.structure.Monom;
-import jaicore.planning.graphgenerators.IPlanningGraphGeneratorDeriver;
+import jaicore.planning.graphgenerators.IHierarchicalPlanningGraphGeneratorDeriver;
 import jaicore.planning.model.core.Action;
 import jaicore.planning.model.core.Plan;
 import jaicore.planning.model.core.PlannerUtil;
@@ -205,12 +205,12 @@ public class Util {
 		return objectMap;
 	}
 
-	public static <N, A, V extends Comparable<V>> ComponentInstance getSolutionCompositionForNode(final IPlanningGraphGeneratorDeriver<?, ?, ?, ?, N, A> planningGraphDeriver,
+	public static <N, A, V extends Comparable<V>> ComponentInstance getSolutionCompositionForNode(final IHierarchicalPlanningGraphGeneratorDeriver<?, ?, ?, ?, N, A> planningGraphDeriver,
 			final Collection<Component> components, final Monom initState, final Node<N, ?> path, final boolean resolveIntervals) {
 		return getSolutionCompositionForPlan(components, initState, planningGraphDeriver.getPlan(path.externalPath()), resolveIntervals);
 	}
 
-	public static <N, A, V extends Comparable<V>> ComponentInstance getComponentInstanceForNode(final IPlanningGraphGeneratorDeriver<?, ?, ?, ?, N, A> planningGraphDeriver,
+	public static <N, A, V extends Comparable<V>> ComponentInstance getComponentInstanceForNode(final IHierarchicalPlanningGraphGeneratorDeriver<?, ?, ?, ?, N, A> planningGraphDeriver,
 			final Collection<Component> components, final Monom initState, final Node<N, ?> path, String name, final boolean resolveIntervals) {
 		return getComponentInstanceForPlan(components, initState, planningGraphDeriver.getPlan(path.externalPath()), name, resolveIntervals);
 	}
