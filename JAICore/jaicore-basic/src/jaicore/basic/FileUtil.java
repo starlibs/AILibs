@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -154,5 +155,11 @@ public abstract class FileUtil {
 	        }
 	    }
 		return files;
+	}
+
+	public static Properties readPropertiesFile(File propertiesFile) throws FileNotFoundException, IOException {
+		Properties props = new Properties();
+		props.load(new FileInputStream(propertiesFile));
+		return props;
 	}
 }

@@ -3,7 +3,7 @@ package jaicore.planning.model;
 import java.util.List;
 
 import jaicore.basic.algorithm.AlgorithmProblemTransformer;
-import jaicore.planning.graphgenerators.IPlanningGraphGeneratorDeriver;
+import jaicore.planning.graphgenerators.IHierarchicalPlanningGraphGeneratorDeriver;
 import jaicore.planning.model.core.Action;
 import jaicore.planning.model.core.Operation;
 import jaicore.planning.model.task.IHTNPlanningProblem;
@@ -14,9 +14,9 @@ import jaicore.search.model.probleminputs.GraphSearchProblemInput;
 public class CostSensitivePlanningToSearchProblemTransformer<PO extends Operation, PM extends Method, PA extends Action, I extends IHTNPlanningProblem<PO, PM, PA>, V extends Comparable<V>, N, A>
 		implements AlgorithmProblemTransformer<CostSensitiveHTNPlanningProblem<PO, PM, PA, I, V>, GraphSearchProblemInput<N, A, V>> {
 
-	private final IPlanningGraphGeneratorDeriver<PO, PM, PA, I, N, A> graphGeneratorDeriver;
+	private final IHierarchicalPlanningGraphGeneratorDeriver<PO, PM, PA, I, N, A> graphGeneratorDeriver;
 
-	public CostSensitivePlanningToSearchProblemTransformer(IPlanningGraphGeneratorDeriver<PO, PM, PA, I, N, A> graphGeneratorDeriver) {
+	public CostSensitivePlanningToSearchProblemTransformer(IHierarchicalPlanningGraphGeneratorDeriver<PO, PM, PA, I, N, A> graphGeneratorDeriver) {
 		super();
 		this.graphGeneratorDeriver = graphGeneratorDeriver;
 	}
@@ -46,7 +46,7 @@ public class CostSensitivePlanningToSearchProblemTransformer<PO extends Operatio
 		return new GraphSearchProblemInput<>(graphGeneratorDeriver.transform(problem.getCorePlanningProblem()), solutionEvaluator);
 	}
 
-	public IPlanningGraphGeneratorDeriver<PO, PM, PA, I, N, A> getGraphGeneratorDeriver() {
+	public IHierarchicalPlanningGraphGeneratorDeriver<PO, PM, PA, I, N, A> getGraphGeneratorDeriver() {
 		return graphGeneratorDeriver;
 	}
 }

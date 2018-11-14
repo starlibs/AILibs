@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jaicore.basic.sets.SetUtil;
 import jaicore.logic.fol.structure.CNFFormula;
 import jaicore.logic.fol.structure.Clause;
@@ -21,6 +24,8 @@ import jaicore.planning.model.strips.StripsPlanningDomain;
 
 public class PlannerUtil {
 	
+	private static final Logger logger = LoggerFactory.getLogger(PlannerUtil.class);
+	
 	public static Collection<StripsAction> getApplicableActionsInState(Monom state, StripsPlanningDomain domain) {
 		Collection<StripsAction> applicableDerivedActions = new ArrayList<>();
 		for (Operation op : domain.getOperations()) {
@@ -34,12 +39,21 @@ public class PlannerUtil {
 		
 		/* implement groundings here */
 		try {
-			for (Map<VariableParam,ConstantParam> grounding: SetUtil.allTotalMappings(operation.getParams(), state.getConstantParams())) {
+			Collection<Map<VariableParam,ConstantParam>> groundings = SetUtil.allTotalMappings(operation.getParams(), state.getConstantParams());
+			logger.info("Check {} groundings of operation {} in state {} for applicability.", groundings.size(), operation.getName(), state);
+			for (Map<VariableParam,ConstantParam> grounding: groundings) {
 				Monom precondition = new Monom(operation.getPrecondition(), grounding);
 				List<Literal> positiveLiterals = precondition.stream().filter(l -> l.isPositive()).collect(Collectors.toList());
 				List<Literal> negativeLiterals = precondition.stream().filter(l -> l.isNegated()).map(l -> l.clone().toggleNegation()).collect(Collectors.toList());
-				if (state.containsAll(positiveLiterals) && SetUtil.intersection(state, negativeLiterals).isEmpty())
+				if (state.containsAll(positiveLiterals) && SetUtil.intersection(state, negativeLiterals).isEmpty()) {
+					logger.trace("Grounding {} is applicable, because state contains positive literals {} and does not contain negative literals {}", grounding, positiveLiterals, negativeLiterals);
 					applicableDerivedActions.add(new StripsAction(operation, grounding));
+				}
+				else if (logger.isTraceEnabled()) {
+					Collection<Literal> missingPositiveLiterals = SetUtil.difference(positiveLiterals, state);
+					Collection<Literal> containedNegativeLiterals = SetUtil.intersection(negativeLiterals, state);
+					logger.trace("Grounding {} is NOT applicable. Missing positive literals not contained in state: {}. Negative literals contained in state: {}.", grounding, missingPositiveLiterals, containedNegativeLiterals);
+				}
 			}
 		} catch (InterruptedException e) {
 			e.printStackTrace();
