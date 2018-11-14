@@ -1,9 +1,15 @@
 package hasco.core;
 
 import java.util.ArrayList;
+
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.aeonbits.owner.ConfigFactory;
@@ -78,6 +84,10 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 	/* runtime variables of algorithm */
 	private boolean searchCreatedAndInitialized = false;
 	private final TimeRecordingEvaluationWrapper<V> timeGrabbingEvaluationWrapper;
+	private HASCOSolutionCandidate<V> bestRecognizedSolution;
+	
+	/**Extension: Allow other clients to listen to search events */
+	Set<Object> searchListeners = new HashSet<>();
 
 	public HASCO(final RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem, final IHASCOPlanningGraphGeneratorDeriver<N, A> planningGraphGeneratorDeriver,
 			final IOptimalPathInORGraphSearchFactory<ISearch, N, A, V, ?, ?> searchFactory, final AlgorithmProblemTransformer<GraphSearchWithPathEvaluationsInput<N, A, V>, ISearch> searchProblemTransformer) {
@@ -160,6 +170,11 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 					}
 				}
 
+				/* register external listeners */
+				for (Object listener : searchListeners) {
+					search.registerListener(listener);
+				}
+				
 				/* now initialize the search */
 				this.logger.debug("Initializing the search");
 				boolean searchInitializationObserved = false;
@@ -220,7 +235,15 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 	protected void afterSearch() {
 		// hook that is invoked after the search algorithm
 	}
+	
+	public void registerListenerForSearch (final Object listener) {
+		this.searchListeners.add(listener);
+	}
 
+	public void removeListenerForSearch(final Object listener) {
+		this.searchListeners.remove(listener);
+	}
+	
 	public GraphGenerator<N, A> getGraphGenerator() {
 		return this.searchProblem.getGraphGenerator();
 	}
