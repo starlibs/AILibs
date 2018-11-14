@@ -7,7 +7,6 @@ import java.util.Map.Entry;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.ClassifierFactory;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import hasco.model.ComponentInstance;
-import hasco.serialization.CompositionSerializer;
 import jaicore.basic.ListHelper;
 import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
@@ -22,7 +21,8 @@ public class WEKAPipelineFactory implements ClassifierFactory {
 		ComponentInstance preprocessorCI = null;
 		String ppName = "";
 		ComponentInstance classifierCI = null;
-		System.out.println(new CompositionSerializer().serializeComponentInstance(groundComponent));
+		// System.out.println(new
+		// CompositionSerializer().serializeComponentInstance(groundComponent));
 
 		switch (groundComponent.getComponent().getName()) {
 		case "pipeline": {
@@ -45,13 +45,16 @@ public class WEKAPipelineFactory implements ClassifierFactory {
 			ComponentInstance evaluatorCI = preprocessorCI.getSatisfactionOfRequiredInterfaces().get("eval");
 			ComponentInstance searcherCI = preprocessorCI.getSatisfactionOfRequiredInterfaces().get("search");
 
-			eval = ASEvaluation.forName(evaluatorCI.getComponent().getName(), this.getParameterList(evaluatorCI).toArray(new String[] {}));
-			search = ASSearch.forName(searcherCI.getComponent().getName(), this.getParameterList(searcherCI).toArray(new String[] {}));
+			eval = ASEvaluation.forName(evaluatorCI.getComponent().getName(),
+					this.getParameterList(evaluatorCI).toArray(new String[] {}));
+			search = ASSearch.forName(searcherCI.getComponent().getName(),
+					this.getParameterList(searcherCI).toArray(new String[] {}));
 		}
 
 		classifierCI.getParameterValues();
 		List<String> parameters = this.getParameterList(classifierCI);
-		Classifier c = AbstractClassifier.forName(classifierCI.getComponent().getName(), parameters.toArray(new String[] {}));
+		Classifier c = AbstractClassifier.forName(classifierCI.getComponent().getName(),
+				parameters.toArray(new String[] {}));
 		// System.out.println(((search != null) ? search.getClass().getName() : "") + "
 		// "
 		// + ((eval != null) ? eval.getClass().getName() : "") + " " +
@@ -63,25 +66,28 @@ public class WEKAPipelineFactory implements ClassifierFactory {
 		List<String> parameters = new LinkedList<>();
 
 		for (Entry<String, String> parameterValues : ci.getParameterValues().entrySet()) {
-			if (parameterValues.getKey().toLowerCase().endsWith("activator") || parameterValues.getValue().equals("REMOVED")) {
+			if (parameterValues.getKey().toLowerCase().endsWith("activator")
+					|| parameterValues.getValue().equals("REMOVED")) {
 				continue;
 			}
 
 			if (!parameterValues.getValue().equals("false")) {
 				parameters.add("-" + parameterValues.getKey());
 			}
-			if (parameterValues.getValue() != null && !parameterValues.getValue().equals("") && !parameterValues.getValue().equals("true") && !parameterValues.getValue().equals("false")) {
+			if (parameterValues.getValue() != null && !parameterValues.getValue().equals("")
+					&& !parameterValues.getValue().equals("true") && !parameterValues.getValue().equals("false")) {
 				parameters.add(parameterValues.getValue());
 			}
 		}
 
 		for (String paramName : ci.getSatisfactionOfRequiredInterfaces().keySet()) {
 			List<String> subParams = this.getParameterList(ci.getSatisfactionOfRequiredInterfaces().get(paramName));
-			String paramValue = ci.getSatisfactionOfRequiredInterfaces().get(paramName).getComponent().getName() + " " + ListHelper.implode(subParams, " ");
+			String paramValue = ci.getSatisfactionOfRequiredInterfaces().get(paramName).getComponent().getName() + " "
+					+ ListHelper.implode(subParams, " ");
 			parameters.add("-" + paramName);
 			parameters.add(paramValue);
 		}
-		
+
 		return parameters;
 	}
 
