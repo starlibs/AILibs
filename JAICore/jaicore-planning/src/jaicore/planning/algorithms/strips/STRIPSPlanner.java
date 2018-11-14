@@ -1,5 +1,6 @@
 package jaicore.planning.algorithms.strips;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -13,13 +14,16 @@ import jaicore.basic.algorithm.AlgorithmEvent;
 import jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.AlgorithmState;
+import jaicore.basic.sets.SetUtil;
 import jaicore.graphvisualizer.TooltipGenerator;
 import jaicore.graphvisualizer.gui.VisualizationWindow;
+import jaicore.logic.fol.structure.VariableParam;
 import jaicore.planning.EvaluatedPlan;
 import jaicore.planning.algorithms.IPlanningAlgorithm;
 import jaicore.planning.algorithms.events.PlanFoundEvent;
 import jaicore.planning.graphgenerators.strips.forward.StripsForwardPlanningNode;
 import jaicore.planning.graphgenerators.strips.forward.StripsTooltipGenerator;
+import jaicore.planning.model.core.Operation;
 import jaicore.planning.model.core.Plan;
 import jaicore.planning.model.strips.StripsAction;
 import jaicore.planning.model.strips.StripsOperation;
@@ -51,10 +55,25 @@ public class STRIPSPlanner<V extends Comparable<V>> implements IPlanningAlgorith
 		this.problem = problem;
 		this.nodeEvaluator = nodeEvaluator;
 		
+		/* conduct some consistency checks */
 		if (!problem.getInitState().getVariableParams().isEmpty())
 			throw new IllegalArgumentException("The initial state contains variable parameters but must only contain constants!\nList of found variables: " + problem.getInitState().getVariableParams().stream().map(n -> "\n\t" + n.getName()).collect(Collectors.joining()));
 		if (!problem.getGoalState().getVariableParams().isEmpty())
 			throw new IllegalArgumentException("The goal state contains variable parameters but must only contain constants!\nList of found variables: " + problem.getGoalState().getVariableParams().stream().map(n -> "\n\t" + n.getName()).collect(Collectors.joining()));
+		
+		/* check that every operation has only arguments in its preconditions, add lists and delete lists, that are also explicitly defined in the param list */
+		for (Operation o : problem.getDomain().getOperations()) {
+			StripsOperation so = (StripsOperation)o;
+			Collection<VariableParam> undeclaredParamsInPrecondition = SetUtil.difference(so.getPrecondition().getVariableParams(), so.getParams());
+			if (!undeclaredParamsInPrecondition.isEmpty())
+				throw new IllegalArgumentException("The precondition of operation " + so.getName() + " contains variables that are not defined in the parameter list: " + undeclaredParamsInPrecondition);
+			Collection<VariableParam> undeclaredParamsInAddList = SetUtil.difference(so.getAddList().getVariableParams(), so.getParams());
+			if (!undeclaredParamsInAddList.isEmpty())
+				throw new IllegalArgumentException("The add list of operation " + so.getName() + " contains variables that are not defined in the parameter list: " + undeclaredParamsInAddList);
+			Collection<VariableParam> undeclaredParamsInDelList = SetUtil.difference(so.getDeleteList().getVariableParams(), so.getParams());
+			if (!undeclaredParamsInDelList.isEmpty())
+				throw new IllegalArgumentException("The del list of operation " + so.getName() + " contains variables that are not defined in the parameter list: " + undeclaredParamsInDelList);
+		}
 	}
 
 	@Override
