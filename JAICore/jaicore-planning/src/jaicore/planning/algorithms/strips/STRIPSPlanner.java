@@ -128,7 +128,7 @@ public class STRIPSPlanner<V extends Comparable<V>> implements IPlanningAlgorith
 			if (visualize) {
 				VisualizationWindow<Node<StripsForwardPlanningNode,V>,String> w = new VisualizationWindow<>(search);
 				TooltipGenerator<StripsForwardPlanningNode> tt = new StripsTooltipGenerator<>();
-				w.setTooltipGenerator(n -> tt.getTooltip(n.getPoint()));
+				w.setTooltipGenerator(n -> tt.getTooltip(((Node<StripsForwardPlanningNode,V>)n).getPoint()));
 			}
 			return new AlgorithmInitializedEvent();
 		case active:
