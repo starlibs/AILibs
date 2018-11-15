@@ -176,7 +176,7 @@ public class DatabaseNodeEvaluator implements INodeEvaluator<DatabaseNode, Doubl
 
 	private double evaluateInstances(Instances instances) {
 		Function<Instances, Double> benchmarkFunction = EvaluationUtils
-				.getBenchmarkFuntionByName(evaluationFunctionName);
+				.getBenchmarkFunctionByName(evaluationFunctionName);
 		try {
 			return benchmarkFunction.apply(instances);
 		} catch (Exception e) {
