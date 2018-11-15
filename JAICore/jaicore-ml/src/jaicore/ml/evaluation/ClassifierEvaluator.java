@@ -1,5 +1,7 @@
 package jaicore.ml.evaluation;
 
+import com.google.common.eventbus.EventBus;
+
 import jaicore.basic.IObjectEvaluator;
 import weka.classifiers.Classifier;
 /**
@@ -7,4 +9,6 @@ import weka.classifiers.Classifier;
  *
  */
 public interface ClassifierEvaluator extends IObjectEvaluator<Classifier, Double> {
+	
+	void setReproducibilityEventBus(EventBus e);
 }
