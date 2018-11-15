@@ -2,7 +2,6 @@ package jaicore.graphvisualizer.gui;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -135,7 +134,6 @@ public class GraphVisualization<V,E> {
 	}
 
 	public javafx.scene.Node getFXNode() {
-//		return viewPanel;
 		return pane;
 	}
 	
@@ -312,8 +310,6 @@ public class GraphVisualization<V,E> {
 			throw new IllegalArgumentException(
 					"Cannot insert edge between " + from + " and " + to + " since node " + to + " does not exist.");
 		final String edgeId = fromInt.getId() + "-" + toInt.getId();
-		// TODO directed edge?
-//		return this.graph.addEdge(edgeId, fromInt, toInt, true);
 		return this.graph.addEdge(edgeId, fromInt, toInt, false);
 	}
 
