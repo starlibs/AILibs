@@ -29,7 +29,7 @@ public class SkikitLearnWrapper implements IInstancesClassifier, Classifier {
 	private static final File TMP_FOLDER = new File("tmp");
 	private static String SCIKIT_TEMPLATE = "/run/media/manuel/70BC41DCBC419E0A/My_Files/Documents/Meine_Dokumente/Skikit_Learn_Wrapper/AILibs/JAICore/jaicore-ml/src/jaicore/ml/skikitwrapper/skikit_template.twig.py";
 	private Map<String, Object> templateValues = new HashMap<>();
-	private String model_path = "";
+	private String modelPath = "";
 	private File script;
 
 	public SkikitLearnWrapper(String pythonClassifierFilePath, String imports, String constructorParameters)
@@ -78,23 +78,23 @@ public class SkikitLearnWrapper implements IInstancesClassifier, Classifier {
 	}
 
 	public String getModelPath() {
-		return model_path;
+		return modelPath;
 	}
 
-	public void setModelPath(String model_path) {
-		this.model_path = model_path;
+	public void setModelPath(String modelPath) {
+		this.modelPath = modelPath;
 	}
 
 	/**
 	 * Generates the Python script that is wrapped.
 	 */
 	private File generateSkikitScript(String scriptName) throws IOException {
-		File script_file = new File(TMP_FOLDER, scriptName);
-		script_file.createNewFile();
+		File scriptFile = new File(TMP_FOLDER, scriptName);
+		scriptFile.createNewFile();
 		JtwigTemplate template = JtwigTemplate.fileTemplate(SCIKIT_TEMPLATE);
 		JtwigModel model = JtwigModel.newModel(templateValues);
-		template.render(model, new FileOutputStream(script_file));
-		return script_file;
+		template.render(model, new FileOutputStream(scriptFile));
+		return scriptFile;
 	}
 
 	@Override
@@ -106,7 +106,7 @@ public class SkikitLearnWrapper implements IInstancesClassifier, Classifier {
 		String[] processParameterArray = createProcessParameterArray(trainOptionsWithArff);
 		TrainProcessListener processListener = new TrainProcessListener();
 		runProcess(processParameterArray, processListener);
-		model_path = processListener.getModelPath();
+		modelPath = processListener.getModelPath();
 	}
 
 	@Override
@@ -115,7 +115,7 @@ public class SkikitLearnWrapper implements IInstancesClassifier, Classifier {
 		Collection<String> testOptionsWithArff = new ArrayList<>();
 		testOptionsWithArff.add("test");
 		testOptionsWithArff.add(arff.getAbsolutePath());
-		testOptionsWithArff.add(model_path);
+		testOptionsWithArff.add(modelPath);
 		String[] processParameterArray = createProcessParameterArray(testOptionsWithArff);
 		TestProcessListener processListener = new TestProcessListener();
 		runProcess(processParameterArray, processListener);
