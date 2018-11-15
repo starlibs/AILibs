@@ -68,7 +68,7 @@ public class MLPlanWekaCLI {
 			mlPlan.activateVisualization();
 
 		System.out.println(getTime() + " Split the data into train and test set...");
-		List<Instances> testSplit = WekaUtil.getStratifiedSplit(data, new Random(mlPlan.getConfig().randomSeed()), 0.7);
+		List<Instances> testSplit = WekaUtil.getStratifiedSplit(data, mlPlan.getConfig().randomSeed(), 0.7);
 		System.out.println("Data split created.");
 
 		try {

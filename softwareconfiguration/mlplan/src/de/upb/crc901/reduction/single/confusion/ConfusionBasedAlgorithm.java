@@ -27,7 +27,7 @@ public class ConfusionBasedAlgorithm {
 		int numClasses = data.numClasses();
 		System.out.println("Computing confusion matrices ...");
 		for (int i = 0; i < 10; i++) {
-			List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(seed), .7f);
+			List<Instances> split = WekaUtil.getStratifiedSplit(data, seed, .7f);
 			// MulticlassEvaluator eval = new MulticlassEvaluator(new Random(seed));
 
 			/* compute confusion matrices for each classifier */
@@ -134,7 +134,7 @@ public class ConfusionBasedAlgorithm {
 			classMap.put(data.classAttribute().value(i2), "r");
 		}
 		Instances newData = WekaUtil.getRefactoredInstances(data, classMap);
-		List<Instances> binaryInnerSplit = WekaUtil.getStratifiedSplit(newData, new Random(seed), .7f);
+		List<Instances> binaryInnerSplit = WekaUtil.getStratifiedSplit(newData, seed, .7f);
 
 		/* now identify the classifier that can best separate these two clusters */
 		int leastSeenMistakes = Integer.MAX_VALUE;

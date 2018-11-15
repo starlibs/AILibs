@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.stream.Collectors;
 
 import jaicore.basic.sets.SetUtil;
@@ -22,7 +21,7 @@ public class ConfusionBasedGreedyOptimizingAlgorithm {
 
 		System.out.println("START: " + data.relationName());
 		int seed = 0;
-		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(seed), .7f);
+		List<Instances> split = WekaUtil.getStratifiedSplit(data, seed, .7f);
 		// MulticlassEvaluator eval = new MulticlassEvaluator(new Random(seed));
 		int numClasses = data.numClasses();
 
@@ -113,7 +112,7 @@ public class ConfusionBasedGreedyOptimizingAlgorithm {
 				classMap.put(data.classAttribute().value(i2), "r");
 			}
 			Instances newData = WekaUtil.getRefactoredInstances(data, classMap);
-			List<Instances> binaryInnerSplit = WekaUtil.getStratifiedSplit(newData, new Random(seed), .7f);
+			List<Instances> binaryInnerSplit = WekaUtil.getStratifiedSplit(newData, seed, .7f);
 
 			/* now identify the classifier that can best separate these two clusters */
 			for (String classifier : pClassifierNames) {

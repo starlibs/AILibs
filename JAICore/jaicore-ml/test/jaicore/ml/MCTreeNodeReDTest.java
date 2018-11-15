@@ -25,7 +25,7 @@ public class MCTreeNodeReDTest {
 		data.setClassIndex(data.numAttributes() - 1);
 
 		for (int s = 0; s < 10; s++) {
-			List<Instances> stratifiedSplit = WekaUtil.getStratifiedSplit(data, new Random(s), 0.7);
+			List<Instances> stratifiedSplit = WekaUtil.getStratifiedSplit(data, s, 0.7);
 
 			List<String> classValues = new LinkedList<>();
 			for (int i = 0; i < data.numClasses(); i++) {
