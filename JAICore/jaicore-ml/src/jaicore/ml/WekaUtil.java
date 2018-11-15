@@ -624,7 +624,7 @@ public class WekaUtil {
 		for (String className : numberOfInstancesPerClass.keySet()) {
 			numberOfInstancesPerClassAndFold.put(className, new HashMap<>());
 			for (int foldId = 0; foldId < portions.length; foldId++) {
-				numberOfInstancesPerClassAndFold.get(className).put(foldId, (int) Math.ceil(numberOfInstancesPerClass.get(className) * portions[foldId]));
+				numberOfInstancesPerClassAndFold.get(className).put(foldId, ((int) Math.ceil(numberOfInstancesPerClass.get(className) * portions[foldId])) + 1 );
 			}
 		}
 
