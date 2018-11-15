@@ -1,7 +1,5 @@
 package jaicore.ml.evaluation;
 
-import com.google.common.eventbus.EventBus;
-
 import weka.classifiers.Classifier;
 import weka.core.Instances;
 
@@ -12,8 +10,6 @@ import weka.core.Instances;
  *
  */
 public interface BasicMLEvaluator {
-	void setReproducibilityEventBus(EventBus e);
-	
 	public double getErrorRateForRandomSplit(Classifier c, Instances data, double splitSize) throws Exception;	
 	public double getErrorRateForSplit(Classifier c, Instances train, Instances test) throws Exception;	
 }
