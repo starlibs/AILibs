@@ -41,7 +41,7 @@ public class MLPlanOpenMLExample {
 		MLPlanWekaClassifier mlplan = new WekaMLPlanWekaClassifier();
 		mlplan.setLoggerName("mlplan");
 		mlplan.setUseParameterPruning(true);
-		mlplan.setParameterImportanceEstimator(new FANOVAParameterImportanceEstimator("test", 16, 0.08d));
+		mlplan.setParameterImportanceEstimator(new FANOVAParameterImportanceEstimator("test", 8, 0.08d));
 		mlplan.setTimeout(300);
 //		mlplan.activateVisualization();
 		try {
