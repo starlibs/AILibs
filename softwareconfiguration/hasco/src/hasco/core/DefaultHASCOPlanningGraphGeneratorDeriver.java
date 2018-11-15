@@ -2,7 +2,7 @@ package hasco.core;
 
 import java.util.List;
 
-import jaicore.planning.graphgenerators.IPlanningGraphGeneratorDeriver;
+import jaicore.planning.graphgenerators.IHierarchicalPlanningGraphGeneratorDeriver;
 import jaicore.planning.model.ceoc.CEOCAction;
 import jaicore.planning.model.ceoc.CEOCOperation;
 import jaicore.planning.model.core.Plan;
@@ -23,10 +23,10 @@ import jaicore.search.core.interfaces.GraphGenerator;
  */
 public class DefaultHASCOPlanningGraphGeneratorDeriver<N,A> implements IHASCOPlanningGraphGeneratorDeriver<N, A> {
 
-	private final IPlanningGraphGeneratorDeriver<CEOCOperation, OCIPMethod, CEOCAction, CEOCIPSTNPlanningProblem<CEOCOperation, OCIPMethod, CEOCAction>, N, A> wrappedDeriver;
+	private final IHierarchicalPlanningGraphGeneratorDeriver<CEOCOperation, OCIPMethod, CEOCAction, CEOCIPSTNPlanningProblem<CEOCOperation, OCIPMethod, CEOCAction>, N, A> wrappedDeriver;
 	
 	public DefaultHASCOPlanningGraphGeneratorDeriver(
-			IPlanningGraphGeneratorDeriver<CEOCOperation, OCIPMethod, CEOCAction, CEOCIPSTNPlanningProblem<CEOCOperation, OCIPMethod, CEOCAction>, N, A> wrappedDeriver) {
+			IHierarchicalPlanningGraphGeneratorDeriver<CEOCOperation, OCIPMethod, CEOCAction, CEOCIPSTNPlanningProblem<CEOCOperation, OCIPMethod, CEOCAction>, N, A> wrappedDeriver) {
 		super();
 		this.wrappedDeriver = wrappedDeriver;
 	}
@@ -41,7 +41,7 @@ public class DefaultHASCOPlanningGraphGeneratorDeriver<N,A> implements IHASCOPla
 		return wrappedDeriver.getPlan(path);
 	}
 
-	public IPlanningGraphGeneratorDeriver<CEOCOperation, OCIPMethod, CEOCAction, CEOCIPSTNPlanningProblem<CEOCOperation, OCIPMethod, CEOCAction>, N, A> getWrappedDeriver() {
+	public IHierarchicalPlanningGraphGeneratorDeriver<CEOCOperation, OCIPMethod, CEOCAction, CEOCIPSTNPlanningProblem<CEOCOperation, OCIPMethod, CEOCAction>, N, A> getWrappedDeriver() {
 		return wrappedDeriver;
 	}
 }
