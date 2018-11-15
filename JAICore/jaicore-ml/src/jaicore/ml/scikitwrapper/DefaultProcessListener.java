@@ -1,4 +1,4 @@
-package jaicore.ml.skikitwrapper;
+package jaicore.ml.scikitwrapper;
 
 public class DefaultProcessListener extends ProcessListener {
 

@@ -1,4 +1,4 @@
-package jaicore.ml.skikitwrapper;
+package jaicore.ml.scikitwrapper;
 
 public class TrainProcessListener extends DefaultProcessListener {
 	private static final String DUMP_NAME_FLAG = "dump: ";

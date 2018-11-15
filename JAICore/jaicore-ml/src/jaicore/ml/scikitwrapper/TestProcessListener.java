@@ -1,4 +1,4 @@
-package jaicore.ml.skikitwrapper;
+package jaicore.ml.scikitwrapper;
 
 import java.io.IOException;
 import java.nio.file.Files;

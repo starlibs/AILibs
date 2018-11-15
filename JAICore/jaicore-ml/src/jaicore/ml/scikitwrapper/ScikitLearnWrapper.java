@@ -1,4 +1,4 @@
-package jaicore.ml.skikitwrapper;
+package jaicore.ml.scikitwrapper;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -25,14 +25,14 @@ import weka.core.converters.ArffSaver;
  *	possible to train, predict or train and predict. When the classifier
  *	is only trained, the model is being saved with an unique ID.
  */
-public class SkikitLearnWrapper implements IInstancesClassifier, Classifier {
+public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 	private static final File TMP_FOLDER = new File("tmp");
-	private static String SCIKIT_TEMPLATE = "/run/media/manuel/70BC41DCBC419E0A/My_Files/Documents/Meine_Dokumente/Skikit_Learn_Wrapper/AILibs/JAICore/jaicore-ml/src/jaicore/ml/skikitwrapper/skikit_template.twig.py";
+	private static String SCIKIT_TEMPLATE = "/run/media/manuel/70BC41DCBC419E0A/My_Files/Documents/Meine_Dokumente/Skikit_Learn_Wrapper/AILibs/JAICore/jaicore-ml/src/jaicore/ml/scikitwrapper/scikit_template.twig.py";
 	private Map<String, Object> templateValues = new HashMap<>();
 	private String modelPath = "";
 	private File script;
 
-	public SkikitLearnWrapper(String pythonClassifierFilePath, String imports, String constructorParameters)
+	public ScikitLearnWrapper(String pythonClassifierFilePath, String imports, String constructorParameters)
 			throws IOException {	
 		initialize(pythonClassifierFilePath, imports, constructorParameters);
 		String scriptName = getScriptName(pythonClassifierFilePath, imports, constructorParameters);
