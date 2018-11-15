@@ -8,6 +8,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
+import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
+import org.deeplearning4j.nn.conf.layers.OutputLayer;
+import org.deeplearning4j.nn.conf.layers.SubsamplingLayer;
+import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.junit.Test;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.openml.apiconnector.io.OpenmlConnector;
@@ -64,6 +69,21 @@ public class PretrainedNNFilterTest {
 
 		DataSet result = filter.applyFilter(new DataSet(split.get(0), intermediate), false);
 		logger.info(Arrays.toString(result.getIntermediateInstances().get(0).shape()));
+		
+		MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder().seed(0)
+				.list().layer(0, new SubsamplingLayer.Builder(SubsamplingLayer.PoolingType.MAX).build()) // .padding(1,1).stride(2,2)..kernelSize(2,2).
+				.pretrain(false).build(); // .layer(1, new OutputLayer.Builder().nOut(4096).build())
+//		System.out.println(conf.toString());
+		
+		MultiLayerNetwork mln = new MultiLayerNetwork(conf);
+		mln.init();
+//		System.out.println(Arrays.toString(mln.getLayers()));
+		System.out.println(result.getIntermediateInstances().get(0).mean(3));
+		INDArray prediction = mln.output(result.getIntermediateInstances().get(0));
+//		System.out.println(Arrays.toString(mln.output(result.getIntermediateInstances().get(0)).shape()));
+		System.out.println("Prediction shape: " + Arrays.toString(prediction.shape()));
+		System.out.println(prediction.mean(3));
+		
 	}
 
 	// @Test

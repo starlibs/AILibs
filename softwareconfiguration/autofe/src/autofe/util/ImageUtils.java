@@ -5,8 +5,12 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.deeplearning4j.nn.conf.CacheMode;
+import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
+import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.WorkspaceMode;
+import org.deeplearning4j.nn.conf.layers.SubsamplingLayer;
 import org.deeplearning4j.nn.conf.layers.ConvolutionLayer.AlgoMode;
+import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.zoo.model.AlexNet;
 import org.deeplearning4j.zoo.model.LeNet;
@@ -272,5 +276,28 @@ public final class ImageUtils {
 		}
 
 		return result;
+	}
+	
+	/**
+	 * Constructs a simple max pooling network consisting only of a max pooling layer.
+	 * @return Returns the constructed and initialized network
+	 */
+	public static MultiLayerNetwork getMaxPoolNetwork() {
+		MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder().seed(0)
+				.list().layer(0, new SubsamplingLayer.Builder(SubsamplingLayer.PoolingType.MAX).build())
+				.pretrain(false).build(); 
+		MultiLayerNetwork mln = new MultiLayerNetwork(conf);
+		mln.init();
+		return mln;
+	}
+	
+	/**
+	 * Propagated the <code>matrix</code> to the given multi layer network and returns the network's output layer activations. 
+	 * @param matrix Matrix used as network input
+	 * @param mln Multi layer network object
+	 * @return Returns the network's output layer activations
+	 */
+	public static INDArray applyMLNToMatrix(final INDArray matrix, final MultiLayerNetwork mln) {
+		return mln.output(matrix);
 	}
 }

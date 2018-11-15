@@ -76,6 +76,11 @@ public class PretrainedNNFilter implements IFilter, Serializable {
 	private long[] shape;
 
 	public static final int DEFAULT_LAYER = 7;
+	
+	/**
+	 * Network for specific nets reducing the matrix sizes before applying the pretrained NN filter (typically by max pooling).
+	 */
+	private MultiLayerNetwork preprocessingNetwork;
 
 	public static final Map<String, List<PretrainedType>> PRETRAINED_WEIGHTS_MAPPING = new HashMap<>();
 	static {
@@ -161,6 +166,9 @@ public class PretrainedNNFilter implements IFilter, Serializable {
 				this.compGraph = ((MultiLayerNetwork) this.model.initPretrained(type)).toComputationGraph();
 			}
 
+			if(this.modelName.equalsIgnoreCase("vgg16")) {
+				this.preprocessingNetwork = ImageUtils.getMaxPoolNetwork();
+			}
 		} catch (UnsupportedOperationException ex) {
 			logger.warn(ex.getMessage());
 			logger.warn(model.getClass().getName());
@@ -202,6 +210,10 @@ public class PretrainedNNFilter implements IFilter, Serializable {
 			INDArray adjustedExample = example.permute(2, 0, 1);
 			adjustedExample = adjustedExample.reshape(1, adjustedExample.shape()[0], adjustedExample.shape()[1],
 					adjustedExample.shape()[2]);
+			
+			if(this.preprocessingNetwork != null) {
+				adjustedExample = ImageUtils.applyMLNToMatrix(adjustedExample, this.preprocessingNetwork);
+			}
 
 			Map<String, INDArray> result = this.compGraph.feedForward(adjustedExample,
 					this.getSelectedLayerByModelName(), false); // this.selectedLayer
