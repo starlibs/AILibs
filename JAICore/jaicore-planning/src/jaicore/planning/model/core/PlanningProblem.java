@@ -7,10 +7,14 @@ public class PlanningProblem {
 
 	private final PlanningDomain domain;
 	private final Monom initState;
+	private final Monom goalState;
 	private final GoalStateFunction goalStateFunction;
 
 	public PlanningProblem(PlanningDomain domain, Monom initState, Monom goalState) {
-		this(domain, initState, s -> s.equals(goalState));
+		this.domain = domain;
+		this.initState = initState;
+		this.goalState = goalState;
+		this.goalStateFunction = s -> s.equals(goalState);
 	}
 	
 	public PlanningProblem(PlanningDomain domain, Monom initState, GoalStateFunction goalStateFunction) {
@@ -18,6 +22,7 @@ public class PlanningProblem {
 		this.domain = domain;
 		this.initState = initState;
 		this.goalStateFunction = goalStateFunction;
+		this.goalState = null;
 	}
 
 	public PlanningDomain getDomain() {
@@ -30,6 +35,10 @@ public class PlanningProblem {
 
 	public GoalStateFunction getGoalStateFunction() {
 		return goalStateFunction;
+	}
+
+	public Monom getGoalState() {
+		return goalState;
 	}
 
 	@Override

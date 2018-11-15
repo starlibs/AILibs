@@ -9,7 +9,7 @@ import javafx.application.Platform;
 /**
  * Class which creates a thread and a VisualizationWindow.
  */
-public class VisualizationWindow<V, E> {
+public class VisualizationWindow<N, E> {
 	/**
 	 * The Javafx-thread which contains the GUI
 	 */
@@ -35,7 +35,7 @@ public class VisualizationWindow<V, E> {
 	 * @param observable The algorithm which should be observed
 	 * @param title      The title of the window
 	 */
-	public VisualizationWindow(IGraphAlgorithm<?, ?, V, E> observable, String title, ObjectEvaluator eval) {
+	public VisualizationWindow(IGraphAlgorithm<?, ?, N, E> observable, String title, ObjectEvaluator eval) {
 		this.tooltipSupplier = new TooltipSupplier();
 		this.tooltipSupplier.setGenerator(getTooltipGenerator());
 		if (fxThread == null) {
@@ -73,10 +73,10 @@ public class VisualizationWindow<V, E> {
 		recorder.addDataSupplier(supplier);
 	}
 
-	private TooltipGenerator<V> getTooltipGenerator() {
-		return new TooltipGenerator<V>() {
+	private TooltipGenerator<N> getTooltipGenerator() {
+		return new TooltipGenerator<N>() {
 			@Override
-			public String getTooltip(V node) {
+			public String getTooltip(N node) {
 				return node.toString();
 			}
 		};

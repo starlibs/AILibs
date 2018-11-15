@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 import jaicore.graphvisualizer.TooltipGenerator;
 import jaicore.logic.fol.structure.Literal;
 
-public class TFDTooltipGenerator<V extends Comparable<V>> implements TooltipGenerator<TFDNode> {
+public class TFDTooltipGenerator implements TooltipGenerator<TFDNode> {
 
 	@Override
 	public String getTooltip(TFDNode node) {

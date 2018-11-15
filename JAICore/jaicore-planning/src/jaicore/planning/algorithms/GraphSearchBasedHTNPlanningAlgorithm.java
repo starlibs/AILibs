@@ -21,7 +21,7 @@ import jaicore.basic.algorithm.IAlgorithmListener;
 import jaicore.planning.EvaluatedSearchGraphBasedPlan;
 import jaicore.planning.algorithms.events.PlanFoundEvent;
 import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionHTNPlanner;
-import jaicore.planning.graphgenerators.IPlanningGraphGeneratorDeriver;
+import jaicore.planning.graphgenerators.IHierarchicalPlanningGraphGeneratorDeriver;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.model.core.Action;
 import jaicore.planning.model.core.Operation;
@@ -43,14 +43,14 @@ public class GraphSearchBasedHTNPlanningAlgorithm<PA extends Action, P extends I
 
 	/* algorithm inputs */
 	private final P planningProblem;
-	private final IPlanningGraphGeneratorDeriver<?, ?, PA, P, NSrc, ASrc> problemTransformer;
+	private final IHierarchicalPlanningGraphGeneratorDeriver<?, ?, PA, P, NSrc, ASrc> problemTransformer;
 	private IGraphSearch<ISearch, OSearch, NSrc, ASrc, V, NSearch, ASearch> search;
 	
 	/* state of the algorithm */
 	private AlgorithmState state = AlgorithmState.created;
 	private boolean canceled = false;
 
-	public GraphSearchBasedHTNPlanningAlgorithm(P problem, IPlanningGraphGeneratorDeriver<?, ?, PA, P, NSrc, ASrc> problemTransformer,
+	public GraphSearchBasedHTNPlanningAlgorithm(P problem, IHierarchicalPlanningGraphGeneratorDeriver<?, ?, PA, P, NSrc, ASrc> problemTransformer,
 			IGraphSearchFactory<ISearch, OSearch, NSrc, ASrc, V, NSearch, ASearch> searchFactory, SearchProblemInputBuilder<NSrc, ASrc, ISearch> searchProblemBuilder) {
 
 		this.planningProblem = problem;

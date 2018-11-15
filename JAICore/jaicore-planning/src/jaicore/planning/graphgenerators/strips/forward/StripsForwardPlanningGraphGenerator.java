@@ -3,6 +3,9 @@ package jaicore.planning.graphgenerators.strips.forward;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jaicore.logic.fol.structure.Monom;
 import jaicore.planning.model.core.PlannerUtil;
 import jaicore.planning.model.strips.StripsAction;
@@ -18,6 +21,7 @@ import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 public class StripsForwardPlanningGraphGenerator implements GraphGenerator<StripsForwardPlanningNode,String> {
 
 	private final StripsPlanningProblem problem;
+	private static final Logger logger = LoggerFactory.getLogger(StripsForwardPlanningGraphGenerator.class);
 		
 	public StripsForwardPlanningGraphGenerator(StripsPlanningProblem problem) {
 		this.problem = problem;
@@ -31,6 +35,7 @@ public class StripsForwardPlanningGraphGenerator implements GraphGenerator<Strip
 	@Override
 	public SuccessorGenerator<StripsForwardPlanningNode,String> getSuccessorGenerator() {
 		return l -> {
+			logger.debug("Computing applicable actions for state {}", l.getState());
 			List<NodeExpansionDescription<StripsForwardPlanningNode,String>> successors = new ArrayList<>();
 			Monom state = l.getState();
 			for (StripsAction action : PlannerUtil.getApplicableActionsInState(state, (StripsPlanningDomain)problem.getDomain())) {
@@ -39,6 +44,7 @@ public class StripsForwardPlanningGraphGenerator implements GraphGenerator<Strip
 				successorState.addAll(action.getAddList());
 				successors.add(new NodeExpansionDescription<>(l, new StripsForwardPlanningNode(successorState, action), "edge label", NodeType.OR));
 			}
+			logger.debug("Identified {} applicable actions.", successors.size());
 			return successors;
 		};
 	}
