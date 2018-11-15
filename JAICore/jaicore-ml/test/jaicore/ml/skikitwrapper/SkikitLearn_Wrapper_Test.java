@@ -11,7 +11,6 @@ import java.nio.file.Paths;
 
 import org.junit.jupiter.api.Test;
 
-import jaicore.ml.skikitwrapper.SkikitLearnWrapper;
 import weka.core.Instances;
 import weka.core.converters.ArffLoader.ArffReader;
 

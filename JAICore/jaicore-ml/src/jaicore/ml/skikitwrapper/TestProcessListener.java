@@ -3,18 +3,17 @@ package jaicore.ml.skikitwrapper;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.json.simple.JSONArray;
-import org.json.simple.parser.JSONParser;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class TestProcessListener extends DefaultProcessListener {
 	private static final String TEST_RESULTS_PATH_FLAG = "test_results: ";
-	private double[] testResults;
+	private List<Double> testResults;
 
-	public double[] getTestResults() {
+	public List<Double> getTestResults() {
 		return testResults;
 	}
 
@@ -36,22 +35,11 @@ public class TestProcessListener extends DefaultProcessListener {
 				e.printStackTrace();
 			}
 			// Parse JSON response of python.
-			JSONParser parser = new JSONParser();
-			ArrayList<Double> tmpResultsList = new ArrayList<>();
+			ObjectMapper objMapper = new ObjectMapper();
 			try {
-				JSONArray content = (JSONArray) (parser.parse(fileContent));
-				JSONArray results = (JSONArray) content.get(0);
-				Iterator<Double> iterator = results.iterator();
-				while (iterator.hasNext()) {
-					tmpResultsList.add(iterator.next());
-				}
-			} catch (Exception e) {
+				testResults = (List<Double>) objMapper.readValue(fileContent, List.class).get(0);
+			} catch (IOException e) {
 				e.printStackTrace();
-			}
-			// Transform Double- to double-array.
-			testResults = new double[tmpResultsList.size()];
-			for (int i = 0; i < tmpResultsList.size(); i++) {
-				testResults[i] = tmpResultsList.get(i);
 			}
 		}
 	}

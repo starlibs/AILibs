@@ -27,13 +27,13 @@ import weka.core.converters.ArffSaver;
  */
 public class SkikitLearnWrapper implements IInstancesClassifier, Classifier {
 	private static final File TMP_FOLDER = new File("tmp");
-	private static final String SCIKIT_TEMPLATE = "skikit_template.twig.py";
+	private static String SCIKIT_TEMPLATE = "/run/media/manuel/70BC41DCBC419E0A/My_Files/Documents/Meine_Dokumente/Skikit_Learn_Wrapper/AILibs/JAICore/jaicore-ml/src/jaicore/ml/skikitwrapper/skikit_template.twig.py";
 	private Map<String, Object> templateValues = new HashMap<>();
 	private String model_path = "";
 	private File script;
 
 	public SkikitLearnWrapper(String pythonClassifierFilePath, String imports, String constructorParameters)
-			throws IOException {
+			throws IOException {	
 		initialize(pythonClassifierFilePath, imports, constructorParameters);
 		String scriptName = getScriptName(pythonClassifierFilePath, imports, constructorParameters);
 		script = generateSkikitScript(scriptName);
@@ -91,7 +91,7 @@ public class SkikitLearnWrapper implements IInstancesClassifier, Classifier {
 	private File generateSkikitScript(String scriptName) throws IOException {
 		File script_file = new File(TMP_FOLDER, scriptName);
 		script_file.createNewFile();
-		JtwigTemplate template = JtwigTemplate.classpathTemplate(SCIKIT_TEMPLATE);
+		JtwigTemplate template = JtwigTemplate.fileTemplate(SCIKIT_TEMPLATE);
 		JtwigModel model = JtwigModel.newModel(templateValues);
 		template.render(model, new FileOutputStream(script_file));
 		return script_file;
@@ -119,8 +119,12 @@ public class SkikitLearnWrapper implements IInstancesClassifier, Classifier {
 		String[] processParameterArray = createProcessParameterArray(testOptionsWithArff);
 		TestProcessListener processListener = new TestProcessListener();
 		runProcess(processParameterArray, processListener);
-		double[] results = processListener.getTestResults();
-		return results;
+		List<Double> results = processListener.getTestResults();
+		double[] resultsArray = new double[results.size()];
+		for(int i = 0 ; i < resultsArray.length;i++) {
+			resultsArray[i] = results.get(i);
+		}
+		return resultsArray;
 	}
 
 	/*
