@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jtwig.JtwigModel;
 import org.jtwig.JtwigTemplate;
 
@@ -27,23 +28,47 @@ import weka.core.converters.ArffSaver;
  */
 public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 	private static final File TMP_FOLDER = new File("tmp");
-	private static String SCIKIT_TEMPLATE = "/run/media/manuel/70BC41DCBC419E0A/My_Files/Documents/Meine_Dokumente/Skikit_Learn_Wrapper/AILibs/JAICore/jaicore-ml/src/jaicore/ml/scikitwrapper/scikit_template.twig.py";
-	private Map<String, Object> templateValues = new HashMap<>();
+	private static File SCIKIT_TEMPLATE = new File("resources/scikit_template.twig.py");
+	private static File SCIKIT_TEMPLATE_PIPELINE = new File("resources/scikit_template_pipeline.twig.py");
 	private String modelPath = "";
 	private File script;
 
-	public ScikitLearnWrapper(String pythonClassifierFilePath, String imports, String constructorParameters)
-			throws IOException {	
-		initialize(pythonClassifierFilePath, imports, constructorParameters);
-		String scriptName = getScriptName(pythonClassifierFilePath, imports, constructorParameters);
-		script = generateSkikitScript(scriptName);
+	public ScikitLearnWrapper(String constructInstruction, String imports) throws IOException {
+		Map<String, Object> templateValues = initialize(constructInstruction, imports);
+		createTmpFolder();
+		String scriptName = getScriptName(constructInstruction, imports);
+		script = generateSkikitScript(scriptName, templateValues, SCIKIT_TEMPLATE_PIPELINE);
 	}
 
-	private void initialize(String pythonClassifierFilePath, String imports, String constructorParameters)
+	public ScikitLearnWrapper(String pythonClassifierFilePath, String imports, String constructorParameters)
 			throws IOException {
+		Map<String, Object> templateValues = initialize(pythonClassifierFilePath, imports, constructorParameters);
+		createTmpFolder();
+		String scriptName = getScriptName(pythonClassifierFilePath, imports, constructorParameters);
+		script = generateSkikitScript(scriptName, templateValues, SCIKIT_TEMPLATE);
+	}
+
+	public static String getImportString(Collection<String> imports) {
+		return (imports == null || imports.isEmpty()) ? ""
+				: "import " + StringUtils.join(imports, "\nimport ");
+	}
+	
+	private Map<String, Object> initialize(String constructInstruction, String imports) {
+		if (constructInstruction == null || constructInstruction.isEmpty()) {
+			throw new AssertionError("Construction command for classifier must be stated.");
+		}
+		Map<String, Object> templateValues = new HashMap<>();
+		templateValues.put("imports", imports != null ? imports : "");
+		templateValues.put("classifier_construct", constructInstruction);
+		return templateValues;
+	}
+
+	private Map<String, Object> initialize(String pythonClassifierFilePath, String imports,
+			String constructorParameters) throws IOException {
 		if (pythonClassifierFilePath == null || pythonClassifierFilePath.isEmpty()) {
 			throw new AssertionError("A classifier must be stated.");
 		}
+		Map<String, Object> templateValues = new HashMap<>();
 		templateValues.put("imports", imports != null ? imports : "");
 		templateValues.put("constructor_parameters", constructorParameters != null ? constructorParameters : "");
 		// Get folder path and file name of the given classifier file.
@@ -64,14 +89,21 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 		if (!isModule) {
 			new File(new File(classifierPath), "__init__.py").createNewFile();
 		}
-		// Ensure temporary folder exists.
+		return templateValues;
+	}
+
+	/*
+	 * Ensure temporary folder exists.
+	 */
+	private void createTmpFolder() {
+
 		if (!TMP_FOLDER.exists()) {
 			TMP_FOLDER.mkdirs();
 		}
 	}
 
-	private String getScriptName(String pythonClassifierFilePath, String imports, String constructorParameters) {
-		String hash = "" + (pythonClassifierFilePath + imports + constructorParameters).hashCode();
+	private String getScriptName(String... parameters) {
+		String hash = "" + StringUtils.join(parameters).hashCode();
 		hash = hash.startsWith("-") ? hash.replace("-", "1") : "0" + hash;
 		hash = hash + ".py";
 		return hash;
@@ -88,10 +120,11 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 	/**
 	 * Generates the Python script that is wrapped.
 	 */
-	private File generateSkikitScript(String scriptName) throws IOException {
+	private File generateSkikitScript(String scriptName, Map<String, Object> templateValues, File templatePath)
+			throws IOException {
 		File scriptFile = new File(TMP_FOLDER, scriptName);
 		scriptFile.createNewFile();
-		JtwigTemplate template = JtwigTemplate.fileTemplate(SCIKIT_TEMPLATE);
+		JtwigTemplate template = JtwigTemplate.fileTemplate(templatePath);
 		JtwigModel model = JtwigModel.newModel(templateValues);
 		template.render(model, new FileOutputStream(scriptFile));
 		return scriptFile;
@@ -121,7 +154,7 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 		runProcess(processParameterArray, processListener);
 		List<Double> results = processListener.getTestResults();
 		double[] resultsArray = new double[results.size()];
-		for(int i = 0 ; i < resultsArray.length;i++) {
+		for (int i = 0; i < resultsArray.length; i++) {
 			resultsArray[i] = results.get(i);
 		}
 		return resultsArray;
