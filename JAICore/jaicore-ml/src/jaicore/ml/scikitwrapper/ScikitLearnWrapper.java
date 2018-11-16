@@ -40,6 +40,30 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 		script = generateSkikitScript(scriptName, templateValues, SCIKIT_TEMPLATE_PIPELINE);
 	}
 
+	public ScikitLearnWrapper(String constructInstruction, String imports, File importsFolder) throws IOException {
+		if (importsFolder != null && importsFolder.list().length > 0) {
+			String importStatementFolder = createImportStatementFromImportFolder(importsFolder);
+			imports = imports + "\n" + importStatementFolder;
+		}
+		Map<String, Object> templateValues = initialize(constructInstruction, imports);
+		createTmpFolder();
+		String scriptName = getScriptName(constructInstruction, imports);
+		script = generateSkikitScript(scriptName, templateValues, SCIKIT_TEMPLATE_PIPELINE);
+	}
+
+	private String createImportStatementFromImportFolder(File importsFolder) throws IOException {
+		// Make the folder a module.
+		if (!Arrays.asList(importsFolder.list()).contains("__init__.py")) {
+			File initFile = new File(importsFolder, "__init__.py");
+			initFile.createNewFile();
+		}
+		StringBuilder result = new StringBuilder();
+		String absolute_folderPath = importsFolder.getAbsolutePath();
+		result.append("sys.path.append('" + absolute_folderPath + "')\n");
+		result.append("import " + importsFolder.getName() + "\n");
+		return result.toString();
+	}
+
 	public ScikitLearnWrapper(String pythonClassifierFilePath, String imports, String constructorParameters)
 			throws IOException {
 		Map<String, Object> templateValues = initialize(pythonClassifierFilePath, imports, constructorParameters);
@@ -49,10 +73,9 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 	}
 
 	public static String getImportString(Collection<String> imports) {
-		return (imports == null || imports.isEmpty()) ? ""
-				: "import " + StringUtils.join(imports, "\nimport ");
+		return (imports == null || imports.isEmpty()) ? "" : "import " + StringUtils.join(imports, "\nimport ");
 	}
-	
+
 	private Map<String, Object> initialize(String constructInstruction, String imports) {
 		if (constructInstruction == null || constructInstruction.isEmpty()) {
 			throw new AssertionError("Construction command for classifier must be stated.");
