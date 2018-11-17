@@ -1,10 +1,12 @@
 import sys
-from scipy.io import arff
+#from scipy.io import arff
 import numpy as np
 import ast
 import pickle
 import os
 import json
+import arff
+import arffcontainer
 from os.path import join as path_join
 from time import sleep
 import logging
@@ -38,10 +40,13 @@ def load_arff_file(arff_path):
     """
     # np.set_printoptions(threshold=np.nan)
     # Load the arff dataset and convert the data into regular array.
+    """    
     data, meta = arff.loadarff(arff_path)
     data = np.asarray(data.tolist(), dtype=np.float64)
     if len(data) <= 1:
         raise ValueError("Not enough data points in : " + arff_path)
+    """
+    data = arffcontainer.parse(arff_path)
     return data
 
 
@@ -120,7 +125,15 @@ def run_train_mode(data):
     # Parse additional parameters.
     kwargs = ast.literal_eval(sys.argv[3:]) if len(sys.argv) > 3 else {}
     # Check if feature_indices flag parameter is given
-    targets, features = get_target_feature_matrices(data, kwargs)
+    #targets, features = get_target_feature_matrices(data, kwargs)
+    features , targets= data.input_matrix, data.output_matrix
+    y_train = []
+    for crow in targets:
+        for x in range(0,len(crow)):
+            if crow[x] == 1:
+                y_train.append(x)
+    y_train = np.array(y_train)
+    targets = y_train
     # Create instance of classifier with given parameters.
     classifier_instance = {{classifier_construct}}
     classifier_instance.fit(features, targets)
