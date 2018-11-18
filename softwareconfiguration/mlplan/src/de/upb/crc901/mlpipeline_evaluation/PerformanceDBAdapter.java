@@ -1,8 +1,11 @@
 package de.upb.crc901.mlpipeline_evaluation;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Optional;
 
 import hasco.model.ComponentInstance;
+import hasco.serialization.CompositionSerializer;
+import jaicore.basic.SQLAdapter;
 import jaicore.ml.cache.ReproducibleInstances;
 
 /**
@@ -12,8 +15,10 @@ import jaicore.ml.cache.ReproducibleInstances;
  */
 public class PerformanceDBAdapter {
 
-	public PerformanceDBAdapter() {
-		
+	private SQLAdapter sqlAdapter;
+	
+	public PerformanceDBAdapter(SQLAdapter sqlAdapter) {
+		this.sqlAdapter = sqlAdapter;
 	}
 
 	
@@ -24,7 +29,7 @@ public class PerformanceDBAdapter {
 	}
 	
 	public void store(ComponentInstance composition, ReproducibleInstances reproducableInstances, double score) {
-		
+		ObjectNode node = CompositionSerializer.serializeComponentInstance(composition);
 	}
 	
 }
