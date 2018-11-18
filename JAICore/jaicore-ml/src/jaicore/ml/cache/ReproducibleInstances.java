@@ -66,7 +66,7 @@ public class ReproducibleInstances extends Instances {
 	}
 
 	/**
-	 * returns the ordered lists of instructions or null if cach is not used
+	 * returns the ordered lists of instructions or null if cache is not used
 	 * 
 	 * @return
 	 */
