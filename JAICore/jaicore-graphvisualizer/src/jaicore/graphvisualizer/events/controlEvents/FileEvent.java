@@ -5,9 +5,6 @@ import java.io.File;
 /**
  * A ControlEvent which function is to interact with files. The main purpose of
  * this event is to load data from or store data in a file.
- * 
- * @author jkoepe
- *
  */
 public class FileEvent implements ControlEvent {
 

@@ -4,7 +4,6 @@ package jaicore.graphvisualizer.events.controlEvents;
  * A ControlEvent which is used to propagate through the search. It is possible
  * to go forward and also backwards.
  * 
- * @author jkoepe
  *
  */
 public class StepEvent implements ControlEvent {

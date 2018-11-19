@@ -11,6 +11,10 @@ import jaicore.graphvisualizer.events.misc.HTMLEvent;
 import javafx.embed.swing.SwingNode;
 import javafx.scene.Node;
 
+/**
+ * A visluaizer for text in html format
+ *
+ */
 public class HTMLVisualizer implements IVisualizer {
 
 	SwingNode node;
