@@ -1,7 +1,5 @@
 package jaicore.logic.fol.util;
 
-import static org.junit.Assume.assumeNoException;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -21,7 +19,6 @@ import jaicore.logic.fol.structure.LiteralParam;
 import jaicore.logic.fol.structure.LiteralSet;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.logic.fol.structure.Type;
-import jaicore.logic.fol.structure.TypeModule;
 import jaicore.logic.fol.structure.VariableParam;
 
 /**
