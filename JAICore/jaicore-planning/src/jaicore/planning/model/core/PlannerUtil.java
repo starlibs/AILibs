@@ -2,6 +2,7 @@ package jaicore.planning.model.core;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -15,6 +16,7 @@ import jaicore.logic.fol.structure.Clause;
 import jaicore.logic.fol.structure.ConstantParam;
 import jaicore.logic.fol.structure.Literal;
 import jaicore.logic.fol.structure.Monom;
+import jaicore.logic.fol.structure.Type;
 import jaicore.logic.fol.structure.VariableParam;
 import jaicore.planning.model.conditional.CEAction;
 import jaicore.planning.model.conditional.CEOperation;
@@ -39,9 +41,28 @@ public class PlannerUtil {
 		
 		/* implement groundings here */
 		try {
-			Collection<Map<VariableParam,ConstantParam>> groundings = SetUtil.allTotalMappings(operation.getParams(), state.getConstantParams());
-			logger.info("Check {} groundings of operation {} in state {} for applicability.", groundings.size(), operation.getName(), state);
-			for (Map<VariableParam,ConstantParam> grounding: groundings) {
+			
+			/* compute type-compatible groundings */
+			Map<Type,Collection<VariableParam>> paramsPerType = SetUtil.groupCollectionByAttribute(operation.getParams(), p -> p.getType());
+			Map<Type,Collection<ConstantParam>> constantsPerType = SetUtil.groupCollectionByAttribute(state.getConstantParams(), p -> p.getType());
+			List<Collection<Map<VariableParam,ConstantParam>>> groundingsPerType = new ArrayList<>();
+			for (Type t : paramsPerType.keySet()) {
+				if (!constantsPerType.containsKey(t)) {
+					logger.warn("There is a parameter of type {} in the operation {}, but no constant has that type!", t, operation.getName());
+					return new ArrayList<>();
+				}
+				int m = constantsPerType.get(t).size();
+				int n = paramsPerType.get(t).size();
+				logger.info("Computing {} total mappings from operation with {} params of type {} to state with {} constants of type {}", Math.pow(m, n), n, t, m, t);
+				groundingsPerType.add(SetUtil.allTotalMappings(paramsPerType.get(t), constantsPerType.get(t)));
+			}
+			
+			/* walk over the cartesian product */
+			Collection<List<Map<VariableParam,ConstantParam>>> cartesianProductofGroundings = SetUtil.cartesianProduct(groundingsPerType);
+			logger.info("Walking over {} groundings ...", cartesianProductofGroundings.size());
+			for (List<Map<VariableParam,ConstantParam>> decomposedGrounding : cartesianProductofGroundings) {
+				Map<VariableParam,ConstantParam> grounding = new HashMap<>();
+				decomposedGrounding.forEach(g -> grounding.putAll(g));
 				Monom precondition = new Monom(operation.getPrecondition(), grounding);
 				List<Literal> positiveLiterals = precondition.stream().filter(l -> l.isPositive()).collect(Collectors.toList());
 				List<Literal> negativeLiterals = precondition.stream().filter(l -> l.isNegated()).map(l -> l.clone().toggleNegation()).collect(Collectors.toList());

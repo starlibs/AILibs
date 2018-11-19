@@ -1,5 +1,7 @@
 package jaicore.logic.fol.util;
 
+import static org.junit.Assume.assumeNoException;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -18,6 +20,8 @@ import jaicore.logic.fol.structure.Literal;
 import jaicore.logic.fol.structure.LiteralParam;
 import jaicore.logic.fol.structure.LiteralSet;
 import jaicore.logic.fol.structure.Monom;
+import jaicore.logic.fol.structure.Type;
+import jaicore.logic.fol.structure.TypeModule;
 import jaicore.logic.fol.structure.VariableParam;
 
 /**
@@ -169,7 +173,21 @@ public class LogicUtil {
 	}
 
 	public static LiteralParam parseParamName(String name) {
-		return (name.startsWith("'") && name.endsWith("'")) ? new ConstantParam(name.substring(1, name.length() - 1)) : new VariableParam(name);
+		boolean isConstant = false;
+		if (name.contains("'")) {
+			if (!name.startsWith("'") || !name.endsWith("'") || (name = name.substring(1, name.length() - 1)).contains("'"))
+				throw new IllegalArgumentException("A parameter that contains simple quotes must contain EXACTLY two such quotes (one in the beginning, one in the end). Such a name indicates a constant!");
+			isConstant = true;
+		}
+		Type type = null;
+		if (name.contains(":")) {
+			String[] parts = name.split(":");
+			if (parts.length != 2)
+				throw new IllegalArgumentException("The name of a parameter must contain at most one colon! A colon is used to separate the name from the type!");
+			name = parts[0];
+			type = new Type(parts[1]);
+		}
+		return isConstant ? new ConstantParam(name, type) : new VariableParam(name, type);
 	}
 
 	public static boolean evalEquality(Literal l) {
