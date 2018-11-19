@@ -60,8 +60,8 @@ public class LogicUtil {
 	public static Collection<Map<VariableParam, LiteralParam>> getSubstitutionsThatEnableForwardChainingUnderCWA(Collection<Literal> factbase, Collection<Literal> premise) {
 		
 		/* decompose premise in positive and negative literals */
-		Collection<Literal> positiveLiterals = new ArrayList<>();
-		Collection<Literal> negativeLiterals = new ArrayList<>();
+		LiteralSet positiveLiterals = new LiteralSet();
+		LiteralSet negativeLiterals = new LiteralSet();
 		for (Literal l : premise) {
 			if (l.isPositive())
 				positiveLiterals.add(l);
@@ -71,6 +71,14 @@ public class LogicUtil {
 		
 		/* get groundings for which positive literals hold and then check each of those groundings on conformity with negative literals */
 		 Collection<Map<VariableParam, LiteralParam>> groundings = getSubstitutionsThatEnableForwardChaining(factbase, positiveLiterals);
+		 if (logger.isTraceEnabled()) {
+			 groundings.forEach(g -> {
+				 LiteralSet groundPositivePremise = new LiteralSet(positiveLiterals, g);
+				 for (Literal l : groundPositivePremise)
+					 assert factbase.contains(l) : "The factbase should contain " + l + " according to forward chaining, but it does not!";
+				 logger.trace("Grounding {} induces premise {}, which holds.", g, groundPositivePremise);
+			 });
+		 }
 		 return groundings.stream().filter(grounding ->  {
 			 LiteralSet groundNegativeLiterals = new LiteralSet(negativeLiterals, grounding);
 			 boolean negativeLiteralIsPositivelyContainedInFactbase = doesPremiseContainAGroundLiteralThatIsNotInFactBaseCWA(factbase, groundNegativeLiterals);
@@ -133,6 +141,7 @@ public class LogicUtil {
 				remainingPremise.add(premise.get(i));
 		}
 		List<VariableParam> openParams = nextLiteral.getVariableParams();
+		logger.trace("Try to see whether params {} can be ground such that literal {} holds.", openParams, nextLiteral);
 
 		/* if there are no open params, we do not need to make decisions here, so just compute subsolutions */
 		Collection<Map<VariableParam, LiteralParam>> choices = new HashSet<>();
@@ -145,22 +154,32 @@ public class LogicUtil {
 			for (Literal fact : factbase) {
 				if (!fact.getPropertyName().equals(nextLiteral.getPropertyName()) || fact.isPositive() != nextLiteral.isPositive())
 					continue;
+				logger.trace("Considering known literal {} as a literal that can be used for grounding", fact);
 				List<LiteralParam> factParams = fact.getParameters(); // should only contain constant params
 				List<LiteralParam> nextLiteralParams = nextLiteral.getParameters();
 				Map<VariableParam, LiteralParam> submap = new HashMap<>();
 
 				/* create a substitution that grounds the rest of the literal */
+				boolean paramsCanBeMatched = true;
 				for (int i = 0; i < factParams.size(); i++) {
 					if (nextLiteralParams.get(i) instanceof VariableParam) {
 						submap.put((VariableParam) nextLiteralParams.get(i), factParams.get(i));
 					}
+					else if (!nextLiteralParams.get(i).equals(factParams.get(i))) {
+						paramsCanBeMatched = false;
+						break;
+					}
 				}
+				if (!paramsCanBeMatched)
+					continue;
+				logger.trace("Adding {} as a possible such grounding.", submap);
 				choices.add(submap);
 			}
 		}
 
 		/* now apply the different possible choices substitution to the remaining premise and compute possible submappings */
 		for (Map<VariableParam, LiteralParam> submap : choices) {
+			logger.debug("Considering choice {}", submap);
 			Monom modifiedRemainingPremise = new Monom(remainingPremise, submap);
 			
 			/* if there is a ground literal in the modified remaining premise that is not in the fact base, skip this option */
@@ -170,8 +189,13 @@ public class LogicUtil {
 			/* otherwise recurse */
 			Collection<Map<VariableParam, LiteralParam>> subsolutions = getSubstitutionsThatEnableForwardChaining(factbase, modifiedRemainingPremise);
 			for (Map<VariableParam, LiteralParam> subsolution : subsolutions) {
+				logger.trace("Identified sub-solution {}", subsolution);
 				Map<VariableParam, LiteralParam> solutionToReturn = new HashMap<>(subsolution);
 				solutionToReturn.putAll(submap);
+				premise.forEach(l -> {
+					Literal lg = new Literal(l, solutionToReturn);
+					assert factbase.contains(lg) == l.isPositive() : "Derived a grounding " + solutionToReturn + ", which makes the premise require " + lg + ", which does not follow from the state!";
+				});
 				mappings.add(solutionToReturn);
 			}
 		}

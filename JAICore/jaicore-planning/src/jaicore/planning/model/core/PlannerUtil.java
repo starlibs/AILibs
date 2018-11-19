@@ -81,7 +81,9 @@ public class PlannerUtil {
 						ConstantParam cp = (ConstantParam)grounding.get(p);
 						rGrounding.put(p, cp);
 					}
-					applicableDerivedActions.add(new StripsAction(operation, rGrounding));
+					StripsAction a = new StripsAction(operation, rGrounding);
+					applicableDerivedActions.add(a);
+					logger.debug("Found action {} to be applicable.", a.getEncoding());
 //				}
 //				else if (logger.isTraceEnabled()) {
 //					Collection<Literal> missingPositiveLiterals = SetUtil.difference(positiveLiterals, state);
