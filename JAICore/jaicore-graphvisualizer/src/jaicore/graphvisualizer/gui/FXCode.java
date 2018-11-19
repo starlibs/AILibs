@@ -97,7 +97,7 @@ public class FXCode<V, E> implements NodeListener<V> {
         this.maxDisplayIndex = 0;
         this.displayIndex = 0;
 
-        this.sleepTime = 0;
+        this.sleepTime = 1;
 
         this.eventBus = new EventBus();
         this.eventBus.register(rec);
@@ -105,7 +105,7 @@ public class FXCode<V, E> implements NodeListener<V> {
         rec.registerInfoListener(this);
 
         this.log = new Text();
-        this.numberOfTicks= 250;
+        this.numberOfTicks= 150;
 
         /*declare  and initialize FX-elements*/
 
@@ -169,7 +169,7 @@ public class FXCode<V, E> implements NodeListener<V> {
         this.tabPane.getTabs().add(logTab);
         
         rec.getSupplier();
-        this.startPlayThread();
+//        this.startPlayThread();
         this.startUpdateRestriction(35);
 
     }
@@ -193,6 +193,8 @@ public class FXCode<V, E> implements NodeListener<V> {
             jumpToIndex(newIndex);
         });
         this.timeline.setBlockIncrement(1);
+//        this.timeline.setMinorTickCount(5);
+        this.timeline.setMinorTickCount(0);
     }
 
     /**
@@ -598,7 +600,8 @@ public class FXCode<V, E> implements NodeListener<V> {
     private void updateTimelineIndex() {
         this.timeline.setMax(maxIndex);
         int tickUnit= maxIndex / this.numberOfTicks;
-        this.timeline.setMajorTickUnit(tickUnit);
+        if(tickUnit != 0)
+        	this.timeline.setMajorTickUnit(tickUnit);
         this.maxDisplayIndex = maxIndex;
         if(this.displayIndex < maxDisplayIndex || this.displayIndex < this.index) {
         	if(index <= maxDisplayIndex) {
