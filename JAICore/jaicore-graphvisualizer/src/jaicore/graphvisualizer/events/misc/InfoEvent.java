@@ -3,8 +3,6 @@ package jaicore.graphvisualizer.events.misc;
 /**
  * An event which contains information over the recorder. This information is
  * used to sync the participating parts.
- * 
- * @author jkoepe
  *
  */
 public class InfoEvent {

@@ -4,8 +4,6 @@ import javafx.scene.Node;
 
 /**
  * An Interface, which describes Visualizer, which can be added to the gui.
- * 
- * @author jkoepe
  *
  */
 

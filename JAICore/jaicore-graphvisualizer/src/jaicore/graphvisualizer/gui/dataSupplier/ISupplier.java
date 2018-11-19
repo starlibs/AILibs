@@ -8,8 +8,6 @@ import jaicore.graphvisualizer.events.graphEvents.GraphEvent;
 /**
  * This interface describes a supplier, which computes data. The data is send
  * out over an eventbus and received by an IVisualizer.
- * 
- * @author jkoepe
  *
  */
 public interface ISupplier {

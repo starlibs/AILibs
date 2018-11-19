@@ -2,8 +2,6 @@ package jaicore.graphvisualizer.events.misc;
 
 /**
  * An Event which contains a html-string
- * 
- * @author jkoepe
  *
  */
 public class HTMLEvent {

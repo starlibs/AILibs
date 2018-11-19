@@ -8,8 +8,6 @@ import javafx.application.Platform;
 
 /**
  * Class which creates a thread and a VisualizationWindow.
- * 
- * @author jkoepe
  */
 public class VisualizationWindow<N, E> {
 	/**

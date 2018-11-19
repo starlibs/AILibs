@@ -24,8 +24,6 @@ import jaicore.graphvisualizer.events.misc.HTMLEvent;
  * A Supplier which contains tooltips for the nodes and post them so that a
  * tooltip supplier can show them.
  * 
- * @author jkoepe
- *
  */
 public class TooltipSupplier implements ISupplier {
 

@@ -4,8 +4,6 @@ import javafx.scene.chart.XYChart;
 
 /**
  * A event which is used to add data to the xyGraphVisualizer
- * 
- * @author jkoepe
  *
  */
 public class XYEvent {

@@ -1,5 +1,9 @@
 package jaicore.graphvisualizer.events.controlEvents;
 
+/**
+ * Event which enables or disables the node-coloring-modes
+ *
+ */
 public class EnableColouring implements ControlEvent {
 
 	private boolean colouring;
