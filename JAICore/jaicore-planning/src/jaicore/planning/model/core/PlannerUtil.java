@@ -15,9 +15,10 @@ import jaicore.logic.fol.structure.CNFFormula;
 import jaicore.logic.fol.structure.Clause;
 import jaicore.logic.fol.structure.ConstantParam;
 import jaicore.logic.fol.structure.Literal;
+import jaicore.logic.fol.structure.LiteralParam;
 import jaicore.logic.fol.structure.Monom;
-import jaicore.logic.fol.structure.Type;
 import jaicore.logic.fol.structure.VariableParam;
+import jaicore.logic.fol.util.LogicUtil;
 import jaicore.planning.model.conditional.CEAction;
 import jaicore.planning.model.conditional.CEOperation;
 import jaicore.planning.model.strips.StripsAction;
@@ -39,46 +40,58 @@ public class PlannerUtil {
 	public static Collection<StripsAction> getPossibleOperationGroundingsForState(Monom state, StripsOperation operation) {
 		Collection<StripsAction> applicableDerivedActions = new ArrayList<>();
 		
-		/* implement groundings here */
-		try {
-			
-			/* compute type-compatible groundings */
-			Map<Type,Collection<VariableParam>> paramsPerType = SetUtil.groupCollectionByAttribute(operation.getParams(), p -> p.getType());
-			Map<Type,Collection<ConstantParam>> constantsPerType = SetUtil.groupCollectionByAttribute(state.getConstantParams(), p -> p.getType());
-			List<Collection<Map<VariableParam,ConstantParam>>> groundingsPerType = new ArrayList<>();
-			for (Type t : paramsPerType.keySet()) {
-				if (!constantsPerType.containsKey(t)) {
-					logger.warn("There is a parameter of type {} in the operation {}, but no constant has that type!", t, operation.getName());
-					return new ArrayList<>();
-				}
-				int m = constantsPerType.get(t).size();
-				int n = paramsPerType.get(t).size();
-				logger.info("Computing {} total mappings from operation with {} params of type {} to state with {} constants of type {}", Math.pow(m, n), n, t, m, t);
-				groundingsPerType.add(SetUtil.allTotalMappings(paramsPerType.get(t), constantsPerType.get(t)));
+		/* decompose premise in positive and negative literals */
+		Collection<Map<VariableParam, LiteralParam>> groundings = LogicUtil.getSubstitutionsThatEnableForwardChainingUnderCWA(state, operation.getPrecondition());
+		logger.info("Computed {} groundings that yield valid deductions of premise {} in state {}", groundings.size(), operation.getPrecondition(), state);
+		
+//		/* implement groundings here */
+//		try {
+//			
+//			/* compute type-compatible groundings */
+//			Map<Type,Collection<VariableParam>> paramsPerType = SetUtil.groupCollectionByAttribute(operation.getParams(), p -> p.getType());
+//			Map<Type,Collection<ConstantParam>> constantsPerType = SetUtil.groupCollectionByAttribute(state.getConstantParams(), p -> p.getType());
+//			List<Collection<Map<VariableParam,ConstantParam>>> groundingsPerType = new ArrayList<>();
+//			for (Type t : paramsPerType.keySet()) {
+//				if (!constantsPerType.containsKey(t)) {
+//					logger.warn("There is a parameter of type {} in the operation {}, but no constant has that type!", t, operation.getName());
+//					return new ArrayList<>();
+//				}
+//				int m = constantsPerType.get(t).size();
+//				int n = paramsPerType.get(t).size();
+//				logger.info("Computing {} total mappings from operation with {} params of type {} to state with {} constants of type {}", Math.pow(m, n), n, t, m, t);
+//				groundingsPerType.add(SetUtil.allTotalMappings(paramsPerType.get(t), constantsPerType.get(t)));
+//			}
+//			
+//			/* walk over the cartesian product */
+//			Collection<List<Map<VariableParam,ConstantParam>>> cartesianProductofGroundings = SetUtil.cartesianProduct(groundingsPerType);
+//			logger.info("Walking over {} groundings ...", cartesianProductofGroundings.size());
+//			for (List<Map<VariableParam,ConstantParam>> decomposedGrounding : cartesianProductofGroundings) {
+//				Map<VariableParam,ConstantParam> grounding = new HashMap<>();
+//				decomposedGrounding.forEach(g -> grounding.putAll(g));
+			for (Map<VariableParam, LiteralParam> grounding : groundings) {
+//				Monom groundPrecondition = new Monom(operation.getPrecondition(), grounding);
+//				List<Literal> positiveLiterals = groundPrecondition.stream().filter(l -> l.isPositive()).collect(Collectors.toList());
+//				List<Literal> negativeLiterals = groundPrecondition.stream().filter(l -> l.isNegated()).map(l -> l.clone().toggleNegation()).collect(Collectors.toList());
+//				if (state.containsAll(positiveLiterals) && SetUtil.intersection(state, negativeLiterals).isEmpty()) {
+//					logger.trace("Grounding {} is applicable, because state contains positive literals {} and does not contain negative literals {}", grounding, positiveLiterals, negativeLiterals);
+//					
+					/* refactor grounding to constants only and add the respective action */
+					Map<VariableParam, ConstantParam> rGrounding = new HashMap<>();
+					for (VariableParam p : grounding.keySet()) {
+						ConstantParam cp = (ConstantParam)grounding.get(p);
+						rGrounding.put(p, cp);
+					}
+					applicableDerivedActions.add(new StripsAction(operation, rGrounding));
+//				}
+//				else if (logger.isTraceEnabled()) {
+//					Collection<Literal> missingPositiveLiterals = SetUtil.difference(positiveLiterals, state);
+//					Collection<Literal> containedNegativeLiterals = SetUtil.intersection(negativeLiterals, state);
+//					logger.trace("Grounding {} is NOT applicable. Missing positive literals not contained in state: {}. Negative literals contained in state: {}.", grounding, missingPositiveLiterals, containedNegativeLiterals);
+//				}
 			}
-			
-			/* walk over the cartesian product */
-			Collection<List<Map<VariableParam,ConstantParam>>> cartesianProductofGroundings = SetUtil.cartesianProduct(groundingsPerType);
-			logger.info("Walking over {} groundings ...", cartesianProductofGroundings.size());
-			for (List<Map<VariableParam,ConstantParam>> decomposedGrounding : cartesianProductofGroundings) {
-				Map<VariableParam,ConstantParam> grounding = new HashMap<>();
-				decomposedGrounding.forEach(g -> grounding.putAll(g));
-				Monom precondition = new Monom(operation.getPrecondition(), grounding);
-				List<Literal> positiveLiterals = precondition.stream().filter(l -> l.isPositive()).collect(Collectors.toList());
-				List<Literal> negativeLiterals = precondition.stream().filter(l -> l.isNegated()).map(l -> l.clone().toggleNegation()).collect(Collectors.toList());
-				if (state.containsAll(positiveLiterals) && SetUtil.intersection(state, negativeLiterals).isEmpty()) {
-					logger.trace("Grounding {} is applicable, because state contains positive literals {} and does not contain negative literals {}", grounding, positiveLiterals, negativeLiterals);
-					applicableDerivedActions.add(new StripsAction(operation, grounding));
-				}
-				else if (logger.isTraceEnabled()) {
-					Collection<Literal> missingPositiveLiterals = SetUtil.difference(positiveLiterals, state);
-					Collection<Literal> containedNegativeLiterals = SetUtil.intersection(negativeLiterals, state);
-					logger.trace("Grounding {} is NOT applicable. Missing positive literals not contained in state: {}. Negative literals contained in state: {}.", grounding, missingPositiveLiterals, containedNegativeLiterals);
-				}
-			}
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}
 		
 		return applicableDerivedActions;
 	}

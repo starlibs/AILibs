@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,6 +57,27 @@ public class LogicUtil {
 
 	}
 	
+	public static Collection<Map<VariableParam, LiteralParam>> getSubstitutionsThatEnableForwardChainingUnderCWA(Collection<Literal> factbase, Collection<Literal> premise) {
+		
+		/* decompose premise in positive and negative literals */
+		Collection<Literal> positiveLiterals = new ArrayList<>();
+		Collection<Literal> negativeLiterals = new ArrayList<>();
+		for (Literal l : premise) {
+			if (l.isPositive())
+				positiveLiterals.add(l);
+			else
+				negativeLiterals.add(l);
+		}
+		
+		/* get groundings for which positive literals hold and then check each of those groundings on conformity with negative literals */
+		 Collection<Map<VariableParam, LiteralParam>> groundings = getSubstitutionsThatEnableForwardChaining(factbase, positiveLiterals);
+		 return groundings.stream().filter(grounding ->  {
+			 LiteralSet groundNegativeLiterals = new LiteralSet(negativeLiterals, grounding);
+			 boolean negativeLiteralIsPositivelyContainedInFactbase = doesPremiseContainAGroundLiteralThatIsNotInFactBaseCWA(factbase, groundNegativeLiterals);
+			 return !negativeLiteralIsPositivelyContainedInFactbase;
+		 }).collect(Collectors.toList());
+	}
+	
 	public static Collection<Map<VariableParam, LiteralParam>> getSubstitutionsThatEnableForwardChaining(Collection<Literal> factbase, Collection<Literal> premise) {
 		return getSubstitutionsThatEnableForwardChaining(factbase, new ArrayList<>(premise));
 	}
@@ -83,7 +105,15 @@ public class LogicUtil {
 		}
 		return false;
 	}
-
+	
+	/**
+	 * This method answers the question for which groundings G of the variables in $premise, G[$premise] follows from $factbase.
+	 * This method does NOT adopt the closed world assumption, i.e. !L in the premise can only be followed if L is provably wrong in the factbase. 
+	 * 
+	 * @param factbase
+	 * @param premise
+	 * @return
+	 */
 	private static Collection<Map<VariableParam, LiteralParam>> getSubstitutionsThatEnableForwardChaining(Collection<Literal> factbase, List<Literal> premise) {
 		
 		logger.info("Computing substitution for {} that enable forward chaining from {}", premise, factbase);
