@@ -5,29 +5,32 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import jaicore.basic.sets.SetUtil;
 
 /**
- * For a given component, a composition defines all parameter values and the required interfaces (recursively)
+ * For a given component, a composition defines all parameter values and the
+ * required interfaces (recursively)
  *
  * @author fmohr
  *
  */
-@JsonPropertyOrder({"component", "parameterValues", "satisfactionOfRequiredInterfaces"})
+@JsonPropertyOrder({ "component", "parameterValues", "satisfactionOfRequiredInterfaces" })
 public class ComponentInstance {
 	private final Component component;
 	private final Map<String, String> parameterValues;
-	/** The satisfactionOfRequiredInterfaces map maps from Interface IDs to ComopnentInstances */
+	/**
+	 * The satisfactionOfRequiredInterfaces map maps from Interface IDs to
+	 * ComopnentInstances
+	 */
 	private final Map<String, ComponentInstance> satisfactionOfRequiredInterfaces;
 
-	public ComponentInstance(
-		@JsonProperty("component")	final Component component,
-		@JsonProperty("parameterValues") final Map<String, String> parameterValues,
-		@JsonProperty("satisfactionOfRequiredInterfaces") final Map<String, ComponentInstance> satisfactionOfRequiredInterfaces) {
+	public ComponentInstance(@JsonProperty("component") final Component component,
+			@JsonProperty("parameterValues") final Map<String, String> parameterValues,
+			@JsonProperty("satisfactionOfRequiredInterfaces") final Map<String, ComponentInstance> satisfactionOfRequiredInterfaces) {
 		super();
 		this.component = component;
 		this.parameterValues = parameterValues;
@@ -41,27 +44,29 @@ public class ComponentInstance {
 	public Map<String, String> getParameterValues() {
 		return this.parameterValues;
 	}
-	
+
 	public Collection<Parameter> getParametersThatHaveBeenSetExplicitly() {
 		if (parameterValues == null)
 			return new ArrayList<>();
-		return getComponent().getParameters().stream().filter(p -> parameterValues.containsKey(p.getName())).collect(Collectors.toList());
+		return getComponent().getParameters().stream().filter(p -> parameterValues.containsKey(p.getName()))
+				.collect(Collectors.toList());
 	}
-	
+
 	public Collection<Parameter> getParametersThatHaveNotBeenSetExplicitly() {
 		return SetUtil.difference(component.getParameters(), getParametersThatHaveBeenSetExplicitly());
 	}
-	
+
 	public String getParameterValue(Parameter param) {
 		return getParameterValue(param.getName());
 	}
-	
+
 	public String getParameterValue(String param) {
 		return parameterValues.get(param);
 	}
 
 	/**
-	 * @return This method returns a mapping of interface IDs to component instances.
+	 * @return This method returns a mapping of interface IDs to component
+	 *         instances.
 	 */
 	public Map<String, ComponentInstance> getSatisfactionOfRequiredInterfaces() {
 		return this.satisfactionOfRequiredInterfaces;
@@ -77,6 +82,7 @@ public class ComponentInstance {
 		return sb.toString();
 	}
 
+	@JsonIgnore
 	public String getPrettyPrint() {
 		return getPrettyPrint(0);
 	}
@@ -113,7 +119,8 @@ public class ComponentInstance {
 		int result = 1;
 		result = prime * result + ((component == null) ? 0 : component.hashCode());
 		result = prime * result + ((parameterValues == null) ? 0 : parameterValues.hashCode());
-		result = prime * result + ((satisfactionOfRequiredInterfaces == null) ? 0 : satisfactionOfRequiredInterfaces.hashCode());
+		result = prime * result
+				+ ((satisfactionOfRequiredInterfaces == null) ? 0 : satisfactionOfRequiredInterfaces.hashCode());
 		return result;
 	}
 
