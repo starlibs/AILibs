@@ -793,6 +793,19 @@ public class WekaUtil {
 		return instances;
 	}
 
+	
+	/**
+	 * Creates a StratifiedSplit for a given {@link ReproducibleInstances} Object. THe History will be updated to track the split.
+	 * 
+	 * @param data - Input data
+	 * @param rand - random used to get a seed, which can be used and saved
+	 * @param portions - ratios to split
+	 * @return a List of {@link ReproducibleInstances}. For each of them the history will be updated to track the split
+	 */
+	public static List<ReproducibleInstances> getStratifiedSplit(final ReproducibleInstances data, final Random rand, final double... portions) {
+		return getStratifiedSplit(data, rand.nextLong(), portions);
+	}
+	
 	/**
 	 * Creates a StratifiedSplit for a given {@link ReproducibleInstances} Object. THe History will be updated to track the split.
 	 * 
