@@ -1,10 +1,10 @@
-package jaicore.ml.evaluation;
+package jaicore.ml.evaluation.evaluators.weka;
 
 import jaicore.basic.IObjectEvaluator;
 import jaicore.concurrent.TimeoutTimer;
 import weka.classifiers.Classifier;
 
-public class TimeoutableEvaluator implements ClassifierEvaluator {
+public class TimeoutableEvaluator implements IClassifierEvaluator {
 
 	/** The object evaluator that shall actually be called. */
 	private IObjectEvaluator<Classifier, Double> ce;

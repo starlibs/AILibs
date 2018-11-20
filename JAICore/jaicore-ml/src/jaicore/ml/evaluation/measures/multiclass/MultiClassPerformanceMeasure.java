@@ -1,4 +1,4 @@
-package de.upb.crc901.mlplan.multiclass;
+package jaicore.ml.evaluation.measures.multiclass;
 
 public enum MultiClassPerformanceMeasure {
 	ERRORRATE

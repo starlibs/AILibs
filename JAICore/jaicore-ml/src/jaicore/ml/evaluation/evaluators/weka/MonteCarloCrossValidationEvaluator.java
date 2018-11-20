@@ -1,23 +1,33 @@
-package jaicore.ml.evaluation;
+package jaicore.ml.evaluation.evaluators.weka;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jaicore.ml.WekaUtil;
+import jaicore.ml.evaluation.IInstancesClassifier;
+import jaicore.ml.evaluation.measures.IMeasure;
 import weka.classifiers.Classifier;
+import weka.core.Instance;
 import weka.core.Instances;
 
-public class MonteCarloCrossValidationEvaluator implements ClassifierEvaluator {
+public class MonteCarloCrossValidationEvaluator implements IClassifierEvaluator {
 
 	static final Logger logger = LoggerFactory.getLogger(MonteCarloCrossValidationEvaluator.class);
-	private final BasicMLEvaluator basicEvaluator;
+	private final IMeasure<Double,Double> basicEvaluator;
 	private final Instances data;
 	private boolean canceled = false;
 	private final int repeats;
 	private final float trainingPortion;
+	private final int seed;
+	private final Random rand;
 	private final DescriptiveStatistics stats = new DescriptiveStatistics();
 
-	public MonteCarloCrossValidationEvaluator(final BasicMLEvaluator basicEvaluator, final int repeats, final Instances data, final float trainingPortion) {
+	public MonteCarloCrossValidationEvaluator(final IMeasure<Double,Double> basicEvaluator, final int repeats, final Instances data, final float trainingPortion, final int seed) {
 		super();
 		this.basicEvaluator = basicEvaluator;
 		this.repeats = repeats;
@@ -26,6 +36,8 @@ public class MonteCarloCrossValidationEvaluator implements ClassifierEvaluator {
 		}
 		this.data = data;
 		this.trainingPortion = trainingPortion;
+		this.seed = seed;
+		this.rand = new Random(seed);
 	}
 
 	public void cancel() {
@@ -42,8 +54,23 @@ public class MonteCarloCrossValidationEvaluator implements ClassifierEvaluator {
 		/* perform random stratified split */
 		logger.info("Starting evaluation of {}", pl);
 		for (int i = 0; i < this.repeats && !this.canceled && !Thread.currentThread().isInterrupted(); i++) {
-			logger.info("Evaluating {} with split #{}/{}", pl, i + 1, this.repeats);
-			double score = this.basicEvaluator.getErrorRateForRandomSplit(pl, this.data, this.trainingPortion);
+			logger.debug("Obtaining predictions of {} for split #{}/{}", pl, i + 1, this.repeats);
+			List<Instances> split = WekaUtil.getStratifiedSplit(data, rand, trainingPortion);
+			List<Double> actual = WekaUtil.getClassesAsList(split.get(1));
+			List<Double> predicted = new ArrayList<>();
+			pl.buildClassifier(split.get(0));
+			Instances validationData = split.get(1);
+			if (pl instanceof IInstancesClassifier) {
+				for (double prediction : ((IInstancesClassifier) pl).classifyInstances(validationData)) {
+					predicted.add(prediction);
+				}
+			}
+			else {
+				for (Instance inst : validationData) {
+					predicted.add(pl.classifyInstance(inst));
+				}
+			}
+			double score = this.basicEvaluator.calculateAvgMeasure(actual, predicted);
 			logger.info("Score for evaluation of {} with split #{}/{}: {}", pl, i + 1, this.repeats, score);
 			stats.addValue(score);
 		}
@@ -55,11 +82,15 @@ public class MonteCarloCrossValidationEvaluator implements ClassifierEvaluator {
 		return score;
 	}
 
-	public BasicMLEvaluator getEvaluator() {
+	public IMeasure<Double,Double> getMetric() {
 		return this.basicEvaluator;
 	}
 
 	public DescriptiveStatistics getStats() {
 		return stats;
+	}
+
+	public int getSeed() {
+		return seed;
 	}
 }

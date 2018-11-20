@@ -17,7 +17,6 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
 import de.upb.crc901.mlplan.multiclass.MLPlanClassifierConfig;
-import de.upb.crc901.mlplan.multiclass.MultiClassPerformanceMeasure;
 import hasco.core.HASCOSolutionCandidate;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
@@ -37,8 +36,9 @@ import jaicore.basic.algorithm.AlgorithmState;
 import jaicore.basic.algorithm.IAlgorithm;
 import jaicore.basic.algorithm.SolutionCandidateFoundEvent;
 import jaicore.ml.WekaUtil;
-import jaicore.ml.evaluation.BasicMLEvaluator;
-import jaicore.ml.evaluation.MonteCarloCrossValidationEvaluator;
+import jaicore.ml.evaluation.evaluators.weka.MonteCarloCrossValidationEvaluator;
+import jaicore.ml.evaluation.measures.ADecomposableDoubleMeasure;
+import jaicore.ml.evaluation.measures.multiclass.MultiClassPerformanceMeasure;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
@@ -70,7 +70,7 @@ public abstract class MLPlanWekaClassifier implements Classifier, CapabilitiesHa
 	private final Collection<Component> components;
 	private final ClassifierFactory factory;
 	private INodeEvaluator<TFDNode, Double> preferredNodeEvaluator;
-	private final BasicMLEvaluator benchmark;
+	private final ADecomposableDoubleMeasure<Double> performanceMeasure;
 	private final MLPlanClassifierConfig config;
 	private Classifier selectedClassifier;
 	private double internalValidationErrorOfSelectedClassifier;
@@ -82,11 +82,11 @@ public abstract class MLPlanWekaClassifier implements Classifier, CapabilitiesHa
 	private Instances dataShownToSearch = null;
 	private Instances data = null;
 
-	public MLPlanWekaClassifier(final File componentFile, final ClassifierFactory factory, final BasicMLEvaluator benchmark, final MLPlanClassifierConfig config) throws IOException {
+	public MLPlanWekaClassifier(final File componentFile, final ClassifierFactory factory, final ADecomposableDoubleMeasure<Double> performanceMeasure, final MLPlanClassifierConfig config) throws IOException {
 		this.componentFile = componentFile;
 		this.components = new ComponentLoader(componentFile).getComponents();
 		this.factory = factory;
-		this.benchmark = benchmark;
+		this.performanceMeasure = performanceMeasure;
 		this.config = config;
 	}
 
@@ -146,8 +146,8 @@ public abstract class MLPlanWekaClassifier implements Classifier, CapabilitiesHa
 			this.logger.info("Using the following preferred node evaluator: {}", this.preferredNodeEvaluator);
 
 			/* create HASCO problem */
-			IObjectEvaluator<Classifier, Double> searchBenchmark = new MonteCarloCrossValidationEvaluator(this.benchmark, this.config.numberOfMCIterationsDuringSearch(), this.dataShownToSearch,
-					this.config.getMCCVTrainFoldSizeDuringSearch());
+			IObjectEvaluator<Classifier, Double> searchBenchmark = new MonteCarloCrossValidationEvaluator(this.performanceMeasure, this.config.numberOfMCIterationsDuringSearch(), this.dataShownToSearch,
+					this.config.getMCCVTrainFoldSizeDuringSearch(), this.config.randomSeed());
 			IObjectEvaluator<ComponentInstance, Double> wrappedSearchBenchmark = c -> searchBenchmark.evaluate(this.factory.getComponentInstantiation(c));
 			IObjectEvaluator<Classifier, Double> selectionBenchmark = new IObjectEvaluator<Classifier, Double>() {
 
@@ -155,8 +155,8 @@ public abstract class MLPlanWekaClassifier implements Classifier, CapabilitiesHa
 				public Double evaluate(final Classifier object) throws Exception {
 
 					/* first conduct MCCV */
-					MonteCarloCrossValidationEvaluator mccv = new MonteCarloCrossValidationEvaluator(MLPlanWekaClassifier.this.benchmark, MLPlanWekaClassifier.this.config.numberOfMCIterationsDuringSelection(),
-							MLPlanWekaClassifier.this.data, MLPlanWekaClassifier.this.config.getMCCVTrainFoldSizeDuringSelection());
+					MonteCarloCrossValidationEvaluator mccv = new MonteCarloCrossValidationEvaluator(MLPlanWekaClassifier.this.performanceMeasure, MLPlanWekaClassifier.this.config.numberOfMCIterationsDuringSelection(),
+							MLPlanWekaClassifier.this.data, MLPlanWekaClassifier.this.config.getMCCVTrainFoldSizeDuringSelection(), config.randomSeed());
 					mccv.evaluate(object);
 
 					/* now retrieve .75-percentile from stats */

@@ -964,6 +964,23 @@ public class WekaUtil {
 		Map<String, Integer> counter = getNumberOfInstancesPerClass(data);
 		return counter.keySet().stream().filter(k -> counter.get(k) != 0).collect(Collectors.toList());
 	}
+	
+	public static double[] getClassesAsArray(Instances inst) {
+		int n = inst.size();
+		double[] vec = new double[n];
+		for (int i = 0; i < n; i++) {
+			vec[i] = inst.get(i).classValue();
+		}
+		return vec;
+	}
+	
+	public static List<Double> getClassesAsList(Instances inst) {
+		List<Double> vec = new ArrayList<>();
+		for (Instance i : inst) {
+			vec.add(i.classValue());
+		}
+		return vec;
+	}
 
 	public static String instancesToJsonString(final Instances data) {
 		StringBuilder sb = new StringBuilder();
