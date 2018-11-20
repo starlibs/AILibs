@@ -5,9 +5,11 @@ import java.util.List;
 import com.google.common.base.Optional;
 
 import hasco.model.ComponentInstance;
+import jaicore.basic.aggregate.IAggregateFunction;
 import jaicore.ml.WekaUtil;
 import jaicore.ml.cache.ReproducibleInstances;
 import jaicore.ml.evaluation.BasicMLEvaluator;
+import jaicore.ml.evaluation.measures.IMeasure;
 import weka.classifiers.Classifier;
 import weka.core.Instances;
 
@@ -18,13 +20,15 @@ import weka.core.Instances;
  * 
  * @author mirko
  *
+ * @param <I> the input type
+ * @param <O> the output type
  */
-public class DecoratedLossFunction implements BasicMLEvaluator {
+public class DecoratedLossFunction<I, O> implements IMeasure<I, O> {
 
 	/**
 	 * The decorated loss function
 	 */
-	private BasicMLEvaluator lossFunction;
+	private IMeasure<I, O> lossFunction;
 
 	/**
 	 * The component instance that will be evaluated,
@@ -36,7 +40,7 @@ public class DecoratedLossFunction implements BasicMLEvaluator {
 	 */
 	private PerformanceDBAdapter performanceDBAdapter;
 
-	public DecoratedLossFunction(BasicMLEvaluator toDecorate, PerformanceDBAdapter performanceDBAdapter) {
+	public DecoratedLossFunction(IMeasure<I, O> toDecorate, PerformanceDBAdapter performanceDBAdapter) {
 		this.lossFunction = toDecorate;
 		this.performanceDBAdapter = performanceDBAdapter;
 	}
@@ -78,6 +82,30 @@ public class DecoratedLossFunction implements BasicMLEvaluator {
 		} else {
 			return lossFunction.getErrorRateForSplit(c, train, test);
 		}
+	}
+
+	@Override
+	public O calculateMeasure(I actual, I expected) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<O> calculateMeasure(List<I> actual, List<I> expected) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public O calculateMeasure(List<I> actual, List<I> expected, IAggregateFunction<O> aggregateFunction) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public O calculateAvgMeasure(List<I> actual, List<I> expected) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
