@@ -15,7 +15,7 @@ public class SplitInstruction extends Instruction {
 	 */
 	public SplitInstruction(String ratios, long seed, int outIndex) {
 		command = "split";
-		inputs.put("ratio", ""+ratios);
+		inputs.put("ratios", ""+ratios);
 		inputs.put("seed", ""+seed);
 		inputs.put("outIndex", ""+outIndex);
 	}

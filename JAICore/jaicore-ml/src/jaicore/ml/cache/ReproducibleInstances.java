@@ -37,20 +37,20 @@ public class ReproducibleInstances extends Instances {
 	/**
 	 * Creates a {@link ReproducibleInstances} Object based on the given History. Instructions that no not modify the Instances will be ignored (No evaluation will be done). 
 	 * 
-	 * @param history - LIst of INstructions used to create the original Instances
+	 * @param history - List of INstructions used to create the original Instances
+	 * @param apiKey - apiKey in case openml.org is used
 	 * @return new {@link ReproducibleInstances} object
 	 * @throws IOException 
 	 * @throws  
 	 */
-	public static ReproducibleInstances FromHistory(List<Instruction> history) throws IOException {
-		//TODO nicer Solution 
+	public static ReproducibleInstances FromHistory(List<Instruction> history, String apiKey) throws IOException {
 		ReproducibleInstances instances = null;
 		for (int i = 0; i < history.size(); i++) {
 			Instruction inst = history.get(i);
 			switch (inst.command) {
-			case "load":
+			case "LoadDataset":
 				if(inst.inputs.get("provider").equals("openml.org")) {
-					instances = fromOpenML(inst.inputs.get("provider"), inst.inputs.get("id"));
+					instances = fromOpenML(inst.inputs.get("id"), apiKey);
 				}
 				else if(inst.inputs.get("provider").startsWith("local")) {
 					instances = fromARFF(inst.inputs.get("id"), inst.inputs.get("provider").split("_")[1]); // TODO user name extraction
@@ -60,7 +60,7 @@ public class ReproducibleInstances extends Instances {
 				String[] ratiosAsStrings = inst.getInputs().get("ratios").split(",");
 				double[] ratios = new double[ratiosAsStrings.length];
 				for (int j = 0; j < ratiosAsStrings.length; j++) {
-					ratios[j] = Double.parseDouble(ratiosAsStrings[j].trim().substring(1, ratiosAsStrings[j].length()-2));
+					ratios[j] = Double.parseDouble(ratiosAsStrings[j].trim().substring(1, ratiosAsStrings[j].length()-1));
 				}
 				instances = WekaUtil.getStratifiedSplit(instances, Long.parseLong(inst.inputs.get("seed")), ratios).get( Integer.parseInt(inst.getInputs().get("outIndex")));
 				break;
@@ -74,7 +74,7 @@ public class ReproducibleInstances extends Instances {
 	
 	public ReproducibleInstances(ReproducibleInstances dataset) {
 		super(dataset);
-		for (Iterator<Instruction> iterator = history.iterator(); iterator.hasNext();) {
+		for (Iterator<Instruction> iterator = dataset.history.iterator(); iterator.hasNext();) {
 			Instruction i = iterator.next();
 			history.add(i);
 		}

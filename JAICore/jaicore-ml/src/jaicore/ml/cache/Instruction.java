@@ -18,10 +18,10 @@ public abstract class Instruction {
 	}
 	
 	@JsonProperty
-	String command;
+	String command = "noCommand";
 	
 	@JsonProperty
-	Map<String, String> inputs;
+	Map<String, String> inputs = new HashMap<>();
 	
 	
 	public String getCommand() {

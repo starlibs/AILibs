@@ -737,8 +737,18 @@ public class WekaUtil {
 		return an;
 	}
 
+	
 	public static List<Instances> getStratifiedSplit(final Instances data, final Random rand, final double... portions) {
-
+		// if data should be reproducible use other method. 
+		if(data instanceof ReproducibleInstances) {
+			List<ReproducibleInstances> reproducibleInstancesResult = getStratifiedSplit((ReproducibleInstances)data, rand, portions);
+			ArrayList<Instances> result = new ArrayList<>(reproducibleInstancesResult.size());
+			for (int i = 0; i < reproducibleInstancesResult.size(); i++) {
+				result.add(reproducibleInstancesResult.get(i));
+			}
+			return result; 
+		}
+		
 		/* check that portions sum up to s.th. smaller than 1 */
 		double sum = 0;
 		for (double p : portions) {
@@ -830,7 +840,7 @@ public class WekaUtil {
 		List<ReproducibleInstances> instances = new ArrayList<>();
 		ReproducibleInstances emptyInstances = new ReproducibleInstances(data);
 		emptyInstances.clear(); // leaves History untouched
-
+		
 		/* compute instances per class */
 		Map<String, Instances> classWiseSeparation = getInstancesPerClass(shuffledData);
 
@@ -842,6 +852,7 @@ public class WekaUtil {
 		/* first assign one item of each class to each fold */
 		for (int i = 0; i <= portions.length; i++) {
 			ReproducibleInstances instancesForSplit = new ReproducibleInstances(emptyInstances); // Will have the same history as data but is empty
+			
 			for (String c : classWiseSeparation.keySet()) {
 				Instances availableInstances = classWiseSeparation.get(c);
 				if (!availableInstances.isEmpty()) {
@@ -855,7 +866,7 @@ public class WekaUtil {
 		/* now distribute remaining instances over the folds */
 		for (int i = 0; i <= portions.length; i++) {
 			double portion = i < portions.length ? portions[i] : 1 - sum;
-			Instances instancesForSplit = instances.get(i);
+			ReproducibleInstances instancesForSplit = instances.get(i);
 			for (String c : classWiseSeparation.keySet()) {
 				Instances availableInstances = classWiseSeparation.get(c);
 				int items = (int) Math.min(availableInstances.size(), Math.ceil(portion * classCapacities.get(c)));
