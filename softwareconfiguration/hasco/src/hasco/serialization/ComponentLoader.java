@@ -96,7 +96,6 @@ public class ComponentLoader {
 	}
 	
 	public void readFromString(String json) throws IOException {
-		System.out.println("string is "+ json);
 		ObjectMapper mapper = new ObjectMapper();
 		readFromJson(mapper.readTree(json));
 	}
