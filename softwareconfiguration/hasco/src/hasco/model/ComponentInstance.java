@@ -5,6 +5,10 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
 import jaicore.basic.sets.SetUtil;
 
 /**
@@ -13,13 +17,17 @@ import jaicore.basic.sets.SetUtil;
  * @author fmohr
  *
  */
+@JsonPropertyOrder({"component", "parameterValues", "satisfactionOfRequiredInterfaces"})
 public class ComponentInstance {
 	private final Component component;
 	private final Map<String, String> parameterValues;
 	/** The satisfactionOfRequiredInterfaces map maps from Interface IDs to ComopnentInstances */
 	private final Map<String, ComponentInstance> satisfactionOfRequiredInterfaces;
 
-	public ComponentInstance(final Component component, final Map<String, String> parameterValues, final Map<String, ComponentInstance> satisfactionOfRequiredInterfaces) {
+	public ComponentInstance(
+		@JsonProperty("component")	final Component component,
+		@JsonProperty("parameterValues") final Map<String, String> parameterValues,
+		@JsonProperty("satisfactionOfRequiredInterfaces") final Map<String, ComponentInstance> satisfactionOfRequiredInterfaces) {
 		super();
 		this.component = component;
 		this.parameterValues = parameterValues;
