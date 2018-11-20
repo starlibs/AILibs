@@ -1,5 +1,4 @@
 import sys
-#from scipy.io import arff
 import numpy as np
 import ast
 import pickle
@@ -10,6 +9,7 @@ import arffcontainer
 from os.path import join as path_join
 from time import sleep
 import logging
+import argparse
 {{imports}}
 
 SERIALIZATION_FOLDER = "model_dumps"
@@ -18,6 +18,9 @@ SERIALIZATION_FOLDER = "model_dumps"
 def get_filename(path_of_file):
     return os.path.splitext(os.path.basename(path_of_file))[0]
 
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--mode')
 
 def sanatize_args():
     """
@@ -183,4 +186,3 @@ if __name__ == "__main__":
     main()
     sys.stdout.flush()
     sys.stderr.flush()
-    sleep(1)

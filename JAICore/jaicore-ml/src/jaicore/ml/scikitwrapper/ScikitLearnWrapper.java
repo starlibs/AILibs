@@ -28,15 +28,16 @@ import weka.core.converters.ArffSaver;
  */
 public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 	private static final File TMP_FOLDER = new File("tmp");
-	private static File SCIKIT_TEMPLATE_PIPELINE = new File("resources/scikit_template_pipeline.twig.py");
+	private static File SCIKIT_TEMPLATE = new File("resources/scikit_template_pipeline.twig.py");
 	private String modelPath = "";
 	private File script;
+	private boolean isRegression;
 
 	public ScikitLearnWrapper(String constructInstruction, String imports) throws IOException {
 		Map<String, Object> templateValues = initialize(constructInstruction, imports);
 		createTmpFolder();
 		String scriptName = getScriptName(constructInstruction, imports);
-		script = generateSkikitScript(scriptName, templateValues, SCIKIT_TEMPLATE_PIPELINE);
+		script = generateSkikitScript(scriptName, templateValues);
 	}
 
 	public ScikitLearnWrapper(String constructInstruction, String imports, File importsFolder) throws IOException {
@@ -47,7 +48,7 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 		Map<String, Object> templateValues = initialize(constructInstruction, imports);
 		createTmpFolder();
 		String scriptName = getScriptName(constructInstruction, imports);
-		script = generateSkikitScript(scriptName, templateValues, SCIKIT_TEMPLATE_PIPELINE);
+		script = generateSkikitScript(scriptName, templateValues);
 	}
 
 	private String createImportStatementFromImportFolder(File importsFolder) throws IOException {
@@ -63,10 +64,6 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 		return result.toString();
 	}
 
-	public static String getImportString(Collection<String> imports) {
-		return (imports == null || imports.isEmpty()) ? "" : "import " + StringUtils.join(imports, "\nimport ");
-	}
-
 	private Map<String, Object> initialize(String constructInstruction, String imports) {
 		if (constructInstruction == null || constructInstruction.isEmpty()) {
 			throw new AssertionError("Construction command for classifier must be stated.");
@@ -77,14 +74,9 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 		return templateValues;
 	}
 
-	/*
-	 * Ensure temporary folder exists.
-	 */
 	private void createTmpFolder() {
-
-		if (!TMP_FOLDER.exists()) {
+		if (!TMP_FOLDER.exists())
 			TMP_FOLDER.mkdirs();
-		}
 	}
 
 	private String getScriptName(String... parameters) {
@@ -92,6 +84,22 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 		hash = hash.startsWith("-") ? hash.replace("-", "1") : "0" + hash;
 		hash = hash + ".py";
 		return hash;
+	}
+
+	/**
+	 * Generates the Python script that is wrapped.
+	 */
+	private File generateSkikitScript(String scriptName, Map<String, Object> templateValues) throws IOException {
+		File scriptFile = new File(TMP_FOLDER, scriptName);
+		scriptFile.createNewFile();
+		JtwigTemplate template = JtwigTemplate.fileTemplate(SCIKIT_TEMPLATE);
+		JtwigModel model = JtwigModel.newModel(templateValues);
+		template.render(model, new FileOutputStream(scriptFile));
+		return scriptFile;
+	}
+
+	public static String getImportString(Collection<String> imports) {
+		return (imports == null || imports.isEmpty()) ? "" : "import " + StringUtils.join(imports, "\nimport ");
 	}
 
 	public String getModelPath() {
@@ -102,26 +110,20 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 		this.modelPath = modelPath;
 	}
 
-	/**
-	 * Generates the Python script that is wrapped.
-	 */
-	private File generateSkikitScript(String scriptName, Map<String, Object> templateValues, File templatePath)
-			throws IOException {
-		File scriptFile = new File(TMP_FOLDER, scriptName);
-		scriptFile.createNewFile();
-		JtwigTemplate template = JtwigTemplate.fileTemplate(templatePath);
-		JtwigModel model = JtwigModel.newModel(templateValues);
-		template.render(model, new FileOutputStream(scriptFile));
-		return scriptFile;
+	public void setIsRegression(boolean isRegression) {
+		this.isRegression = isRegression;
 	}
 
 	@Override
 	public void buildClassifier(Instances data) throws Exception {
 		File arff = instancesToArffFile(data, getArffName(data));
-		Collection<String> trainOptionsWithArff = new ArrayList<>();
-		trainOptionsWithArff.add("train");
-		trainOptionsWithArff.add(arff.getAbsolutePath());
-		String[] processParameterArray = createProcessParameterArray(trainOptionsWithArff);
+		List<String> trainOptions = new ArrayList<>();
+		trainOptions.add("--mode train");
+		trainOptions.add("--arff " + arff.getAbsolutePath());
+		if (isRegression) {
+			trainOptions.add("--regression");
+		}
+		String[] processParameterArray = createProcessParameterArray(trainOptions);
 		TrainProcessListener processListener = new TrainProcessListener();
 		runProcess(processParameterArray, processListener);
 		modelPath = processListener.getModelPath();
@@ -130,11 +132,11 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 	@Override
 	public double[] classifyInstances(Instances data) throws Exception {
 		File arff = instancesToArffFile(data, getArffName(data));
-		Collection<String> testOptionsWithArff = new ArrayList<>();
-		testOptionsWithArff.add("test");
-		testOptionsWithArff.add(arff.getAbsolutePath());
-		testOptionsWithArff.add(modelPath);
-		String[] processParameterArray = createProcessParameterArray(testOptionsWithArff);
+		List<String> testOptions = new ArrayList<>();
+		testOptions.add("--mode test");
+		testOptions.add("--arff " + arff.getAbsolutePath());
+		testOptions.add("--model " + modelPath);
+		String[] processParameterArray = createProcessParameterArray(testOptions);
 		TestProcessListener processListener = new TestProcessListener();
 		runProcess(processParameterArray, processListener);
 		List<Double> results = processListener.getTestResults();
@@ -177,17 +179,15 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 	/*
 	 * Return an array with the parameters for the process.
 	 */
-	private String[] createProcessParameterArray(Collection<String> additionalParameter) {
-		int numberFixedParameters = 3;
-		String[] processParameterArray = new String[additionalParameter.size() + numberFixedParameters];
-		processParameterArray[0] = "python";
+	private String[] createProcessParameterArray(List<String> additionalParameter) {
+		List<String> processParameters = new ArrayList<>();
+		processParameters.add("python");
 		// Force python to run stdout and stderr unbuffered.
-		processParameterArray[1] = "-u";
-		processParameterArray[2] = script.getAbsolutePath();
-		List<String> additionalOptionsList = new ArrayList<>(additionalParameter);
-		for (int i = 0; i < additionalOptionsList.size(); i++) {
-			processParameterArray[i + numberFixedParameters] = additionalOptionsList.get(i);
-		}
+		processParameters.add("-u");
+		processParameters.add(script.getAbsolutePath());
+		processParameters.addAll(additionalParameter);
+		String[] processParameterArray = new String[processParameters.size()];
+		processParameterArray = processParameters.toArray(processParameterArray);
 		return processParameterArray;
 	}
 
@@ -196,10 +196,8 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 	 * the executed program.
 	 */
 	private void runProcess(String[] parameters, ProcessListener listener) throws Exception {
-		System.out.println("Starting subprocess...");
-		String a = Arrays.toString(parameters).replace(",", "");
-		a = a.substring(1, a.length() - 1);
-		System.out.println(a);
+		String call = Arrays.toString(parameters).replace(",", "");
+		System.out.println("Starting subprocess: " + call.substring(1, call.length() - 1));
 		ProcessBuilder processBuilder = new ProcessBuilder(parameters);
 		listener.listenTo(processBuilder.start());
 	}
