@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -31,6 +32,8 @@ import com.google.common.collect.ContiguousSet;
 import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.Range;
 
+import jaicore.ml.cache.ReproducibleInstances;
+import jaicore.ml.cache.SplitInstruction;
 import jaicore.ml.core.SimpleInstanceImpl;
 import jaicore.ml.core.SimpleInstancesImpl;
 import jaicore.ml.core.SimpleLabeledInstanceImpl;
@@ -790,6 +793,78 @@ public class WekaUtil {
 		return instances;
 	}
 
+	/**
+	 * Creates a StratifiedSplit for a given {@link ReproducibleInstances} Object. THe History will be updated to track the split.
+	 * 
+	 * @param data - Input data
+	 * @param seed - random seed
+	 * @param portions - ratios to split
+	 * @return a List of {@link ReproducibleInstances}. For each of them the history will be updated to track the split
+	 */
+	public static List<ReproducibleInstances> getStratifiedSplit(final ReproducibleInstances data, final long seed, final double... portions) {
+		Random rand = new Random(seed);
+		/* check that portions sum up to s.th. smaller than 1 */
+		double sum = 0;
+		for (double p : portions) {
+			sum += p;
+		}
+		if (sum > 1) {
+			throw new IllegalArgumentException("Portions must sum up to at most 1.");
+		}
+
+		Instances shuffledData = new Instances(data);
+		shuffledData.randomize(rand);
+		List<ReproducibleInstances> instances = new ArrayList<>();
+		ReproducibleInstances emptyInstances = new ReproducibleInstances(data);
+		emptyInstances.clear(); // leaves History untouched
+
+		/* compute instances per class */
+		Map<String, Instances> classWiseSeparation = getInstancesPerClass(shuffledData);
+
+		Map<String, Integer> classCapacities = new HashMap<>();
+		for (String c : classWiseSeparation.keySet()) {
+			classCapacities.put(c, classWiseSeparation.get(c).size());
+		}
+
+		/* first assign one item of each class to each fold */
+		for (int i = 0; i <= portions.length; i++) {
+			ReproducibleInstances instancesForSplit = new ReproducibleInstances(emptyInstances); // Will have the same history as data but is empty
+			for (String c : classWiseSeparation.keySet()) {
+				Instances availableInstances = classWiseSeparation.get(c);
+				if (!availableInstances.isEmpty()) {
+					instancesForSplit.add(availableInstances.get(0));
+					availableInstances.remove(0);
+				}
+			}
+			instances.add(instancesForSplit);
+		}
+
+		/* now distribute remaining instances over the folds */
+		for (int i = 0; i <= portions.length; i++) {
+			double portion = i < portions.length ? portions[i] : 1 - sum;
+			Instances instancesForSplit = instances.get(i);
+			for (String c : classWiseSeparation.keySet()) {
+				Instances availableInstances = classWiseSeparation.get(c);
+				int items = (int) Math.min(availableInstances.size(), Math.ceil(portion * classCapacities.get(c)));
+				for (int j = 0; j < items; j++) {
+					instancesForSplit.add(availableInstances.get(0));
+					availableInstances.remove(0);
+				}
+			}
+			instancesForSplit.randomize(rand);
+		}
+		assert instances.stream().mapToInt(l -> l.size()).sum() == data.size() : "The number of instances in the folds does not equal the number of instances in the original dataset";
+		
+		/* update ReproducibleInstanes History */
+		String ratiosAsString = Arrays.toString(portions);
+		for(int i = 0; i < instances.size(); i++) {
+			instances.get(i).addInstruction(new SplitInstruction(ratiosAsString, seed, i));
+		}
+		return instances;
+	}
+
+	
+	
 	public static List<File> getDatasetsInFolder(final File folder) throws IOException {
 		List<File> files = new ArrayList<>();
 		try (Stream<Path> paths = Files.walk(folder.toPath())) {

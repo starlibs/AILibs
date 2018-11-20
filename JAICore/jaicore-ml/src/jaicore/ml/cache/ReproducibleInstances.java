@@ -2,9 +2,14 @@ package jaicore.ml.cache;
 
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.json.JSONWriter;
+
+import jaicore.ml.WekaUtil;
 import jaicore.ml.openml.OpenMLHelper;
 import weka.core.Instances;
 
@@ -25,8 +30,55 @@ public class ReproducibleInstances extends Instances {
 	private List<Instruction> history = new LinkedList<>();
 	private boolean nocache = true;
 	
-	public ReproducibleInstances(Instances dataset) {
+	private ReproducibleInstances(Instances dataset) {
 		super(dataset);
+	}
+	
+	/**
+	 * Creates a {@link ReproducibleInstances} Object based on the given History. Instructions that no not modify the Instances will be ignored (No evaluation will be done). 
+	 * 
+	 * @param history - LIst of INstructions used to create the original Instances
+	 * @return new {@link ReproducibleInstances} object
+	 * @throws IOException 
+	 * @throws  
+	 */
+	public static ReproducibleInstances FromHistory(List<Instruction> history) throws IOException {
+		//TODO nicer Solution 
+		ReproducibleInstances instances = null;
+		for (int i = 0; i < history.size(); i++) {
+			Instruction inst = history.get(i);
+			switch (inst.command) {
+			case "load":
+				if(inst.inputs.get("provider").equals("openml.org")) {
+					instances = fromOpenML(inst.inputs.get("provider"), inst.inputs.get("id"));
+				}
+				else if(inst.inputs.get("provider").startsWith("local")) {
+					instances = fromARFF(inst.inputs.get("id"), inst.inputs.get("provider").split("_")[1]); // TODO user name extraction
+				}
+				break;
+			case "split":
+				String[] ratiosAsStrings = inst.getInputs().get("ratios").split(",");
+				double[] ratios = new double[ratiosAsStrings.length];
+				for (int j = 0; j < ratiosAsStrings.length; j++) {
+					ratios[j] = Double.parseDouble(ratiosAsStrings[j].trim().substring(1, ratiosAsStrings[j].length()-2));
+				}
+				instances = WekaUtil.getStratifiedSplit(instances, Long.parseLong(inst.inputs.get("seed")), ratios).get( Integer.parseInt(inst.getInputs().get("outIndex")));
+				break;
+			default:
+				break;
+			}
+		}
+		return instances;
+	}
+	
+	
+	public ReproducibleInstances(ReproducibleInstances dataset) {
+		super(dataset);
+		for (Iterator<Instruction> iterator = history.iterator(); iterator.hasNext();) {
+			Instruction i = iterator.next();
+			history.add(i);
+		}
+		nocache = dataset.nocache;
 	}
 
 	/**

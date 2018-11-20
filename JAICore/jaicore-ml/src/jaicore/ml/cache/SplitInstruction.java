@@ -13,9 +13,9 @@ public class SplitInstruction extends Instruction {
 	 * @param seed random seed
 	 * @param outInex index of the portion to use in the following
 	 */
-	public SplitInstruction(float ratio, long seed, int outIndex) {
+	public SplitInstruction(String ratios, long seed, int outIndex) {
 		command = "split";
-		inputs.put("ratio", ""+ratio);
+		inputs.put("ratio", ""+ratios);
 		inputs.put("seed", ""+seed);
 		inputs.put("outIndex", ""+outIndex);
 	}
