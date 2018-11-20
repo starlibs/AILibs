@@ -14,7 +14,7 @@ public class PlanningProblem {
 		this.domain = domain;
 		this.initState = initState;
 		this.goalState = goalState;
-		this.goalStateFunction = s -> s.equals(goalState);
+		this.goalStateFunction = s -> s.containsAll(goalState);
 	}
 	
 	public PlanningProblem(PlanningDomain domain, Monom initState, GoalStateFunction goalStateFunction) {
