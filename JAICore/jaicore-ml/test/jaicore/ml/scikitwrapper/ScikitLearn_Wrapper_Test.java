@@ -19,7 +19,7 @@ import weka.core.converters.ArffLoader.ArffReader;
 public class ScikitLearn_Wrapper_Test {
 	@Test
 	public void buildClassifier() throws Exception {
-		ScikitLearnWrapper slw = new ScikitLearnWrapper("sklearn/neural_network/MLPRegressor", "", "");
+		ScikitLearnWrapper slw = new ScikitLearnWrapper("MLPRegressor()","from sklearn.neural_network import MLPRegressor");
 		Instances dataset = loadARFF("testsrc/ml/skikitwrapper/0532052678.arff");
 		slw.buildClassifier(dataset);
 		assertNotEquals(slw.getModelPath(), "");

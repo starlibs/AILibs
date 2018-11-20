@@ -28,7 +28,6 @@ import weka.core.converters.ArffSaver;
  */
 public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 	private static final File TMP_FOLDER = new File("tmp");
-	private static File SCIKIT_TEMPLATE = new File("resources/scikit_template.twig.py");
 	private static File SCIKIT_TEMPLATE_PIPELINE = new File("resources/scikit_template_pipeline.twig.py");
 	private String modelPath = "";
 	private File script;
@@ -64,14 +63,6 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 		return result.toString();
 	}
 
-	public ScikitLearnWrapper(String pythonClassifierFilePath, String imports, String constructorParameters)
-			throws IOException {
-		Map<String, Object> templateValues = initialize(pythonClassifierFilePath, imports, constructorParameters);
-		createTmpFolder();
-		String scriptName = getScriptName(pythonClassifierFilePath, imports, constructorParameters);
-		script = generateSkikitScript(scriptName, templateValues, SCIKIT_TEMPLATE);
-	}
-
 	public static String getImportString(Collection<String> imports) {
 		return (imports == null || imports.isEmpty()) ? "" : "import " + StringUtils.join(imports, "\nimport ");
 	}
@@ -83,35 +74,6 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 		Map<String, Object> templateValues = new HashMap<>();
 		templateValues.put("imports", imports != null ? imports : "");
 		templateValues.put("classifier_construct", constructInstruction);
-		return templateValues;
-	}
-
-	private Map<String, Object> initialize(String pythonClassifierFilePath, String imports,
-			String constructorParameters) throws IOException {
-		if (pythonClassifierFilePath == null || pythonClassifierFilePath.isEmpty()) {
-			throw new AssertionError("A classifier must be stated.");
-		}
-		Map<String, Object> templateValues = new HashMap<>();
-		templateValues.put("imports", imports != null ? imports : "");
-		templateValues.put("constructor_parameters", constructorParameters != null ? constructorParameters : "");
-		// Get folder path and file name of the given classifier file.
-		File classifierFile = new File(pythonClassifierFilePath);
-		// Transform path into Python path.
-		String classifierPath = classifierFile.getParentFile().getPath();
-		classifierPath = classifierPath.replace("/", ".");
-		templateValues.put("classifier_path", classifierPath);
-		// Is some module named or a Python file?
-		boolean isModule = !classifierFile.getName().endsWith(".py");
-		String classifierName = isModule ? classifierFile.getName()
-				: classifierFile.getName().substring(0, classifierFile.getName().length() - 3);
-		templateValues.put("classifier_name", classifierName);
-		/*
-		 * Ensure folder that includes Python file being marked as module (Necessary for
-		 * the Python import). Only needed when a file is referenced and not a module.
-		 */
-		if (!isModule) {
-			new File(new File(classifierPath), "__init__.py").createNewFile();
-		}
 		return templateValues;
 	}
 
