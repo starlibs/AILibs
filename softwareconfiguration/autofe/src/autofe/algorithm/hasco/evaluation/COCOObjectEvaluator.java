@@ -19,7 +19,7 @@ public class COCOObjectEvaluator extends AbstractHASCOFEObjectEvaluator {
 		long startTimestamp = System.currentTimeMillis();
 
 		logger.debug("Applying and evaluating pipeline " + object.toString());
-		DataSet dataSet = object.applyFilter(this.data, true);
+		DataSet dataSet = object.applyFilter(this.data, false);
 
 		logger.debug("Applied pipeline. Starting benchmarking...");
 		double loss = EvaluationUtils.calculateCOCOForBatch(dataSet.getInstances());
