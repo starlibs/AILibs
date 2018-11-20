@@ -19,7 +19,8 @@ import weka.core.converters.ArffLoader.ArffReader;
 public class ScikitLearn_Wrapper_Test {
 	@Test
 	public void buildClassifier() throws Exception {
-		ScikitLearnWrapper slw = new ScikitLearnWrapper("MLPRegressor()","from sklearn.neural_network import MLPRegressor");
+		ScikitLearnWrapper slw = new ScikitLearnWrapper("MLPRegressor()",
+				"from sklearn.neural_network import MLPRegressor");
 		Instances dataset = loadARFF("testsrc/ml/skikitwrapper/0532052678.arff");
 		slw.buildClassifier(dataset);
 		assertNotEquals(slw.getModelPath(), "");
@@ -27,7 +28,8 @@ public class ScikitLearn_Wrapper_Test {
 
 	@Test
 	public void buildClassifier2() throws Exception {
-		ScikitLearnWrapper slw = new ScikitLearnWrapper("sklearn/ensemble/BaggingClassifier", "", "");
+		ScikitLearnWrapper slw = new ScikitLearnWrapper("BaggingClassifier()",
+				"from sklearn.ensemble import BaggingClassifier");
 		Instances dataset = loadARFF("testsrc/ml/skikitwrapper/0532052678.arff");
 		slw.buildClassifier(dataset);
 		assertNotEquals(slw.getModelPath(), "");
@@ -36,7 +38,8 @@ public class ScikitLearn_Wrapper_Test {
 	@Test
 	public void buildAndTestClassifier() throws Exception {
 		String test_arff = "testsrc/ml/skikitwrapper/Bayesnet_Train.arff";
-		ScikitLearnWrapper slw = new ScikitLearnWrapper("sklearn/neural_network/MLPRegressor", "", "");
+		ScikitLearnWrapper slw = new ScikitLearnWrapper("MLPRegressor()",
+				"from sklearn.neural_network import MLPRegressor");
 		Instances datasetTrain = loadARFF(test_arff);
 		Instances datasetTest = loadARFF(test_arff);
 		int numberInstance = datasetTest.numInstances();
@@ -49,7 +52,8 @@ public class ScikitLearn_Wrapper_Test {
 	@Test
 	public void testClassifier() throws Exception {
 		String test_arff = "testsrc/ml/skikitwrapper/Bayesnet_Train.arff";
-		ScikitLearnWrapper slw = new ScikitLearnWrapper("sklearn/neural_network/MLPRegressor", "", "");
+		ScikitLearnWrapper slw = new ScikitLearnWrapper("MLPRegressor()",
+				"from sklearn.neural_network import MLPRegressor");
 		Instances datasetTest = loadARFF(test_arff);
 		int numberInstance = datasetTest.numInstances();
 		slw.setModelPath(Paths.get("testsrc/ml/skikitwrapper/0532052678_MLPRegressor.pcl").toAbsolutePath().toString());
@@ -60,19 +64,11 @@ public class ScikitLearn_Wrapper_Test {
 
 	@Test
 	public void buildClassifierWithConstructorParams() throws Exception {
-		ScikitLearnWrapper slw = new ScikitLearnWrapper("sklearn/neural_network/MLPRegressor", "",
-				"activation='logistic'");
+		ScikitLearnWrapper slw = new ScikitLearnWrapper("MLPRegressor(activation='logistic')",
+				"from sklearn.neural_network import MLPRegressor");
 		Instances dataset = loadARFF("testsrc/ml/skikitwrapper/0532052678.arff");
 		slw.buildClassifier(dataset);
 		assertNotEquals(slw.getModelPath(), "");
-	}
-
-	@Test
-	public void loadModule() throws Exception {
-		ScikitLearnWrapper slw = new ScikitLearnWrapper("sklearn/neural_network/MLPRegressor",
-				"from sklearn.linear_model import LinearRegression", "");
-		Instances dataset = loadARFF("testsrc/ml/skikitwrapper/Bayesnet_Train.arff");
-		slw.buildClassifier(dataset);
 	}
 
 	@Test
