@@ -1,5 +1,6 @@
 package jaicore.ml.cache;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -13,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public abstract class Instruction {
 
 	public Instruction() {
+		inputs = new HashMap<String, String>();
 	}
 	
 	@JsonProperty
