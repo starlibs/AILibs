@@ -43,7 +43,7 @@ public class MLPlanOpenMLExample {
 		
 		/* initialize mlplan, and let it run for 30 seconds */
 
-		SQLAdapter adapter = new SQLAdapter("isys-db.cs.upb.de", "pgotfml", "automl2018", "pgotfml_jmhansel");
+		SQLAdapter adapter = new SQLAdapter(null, null, null, null);
 		PerformanceDBAdapter pAdapter = new PerformanceDBAdapter(adapter, "performance_cache");
 
 		MLPlanWekaBuilder builder = new MLPlanWekaBuilder(
