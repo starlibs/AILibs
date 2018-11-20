@@ -95,14 +95,11 @@ public class PerformanceDBAdapter {
 			md.update(trajectoryString.getBytes());
 			byte[] digest = md.digest();
 			String hexHash = (new HexBinaryAdapter()).marshal(digest);
-			ResultSet rs = sqlAdapter.getResultsOfQuery("SELECT score, composition, trajectory, hash_value FROM " + this.performanceSampleTableName
-							+ " WHERE hash_value = '" + hexHash + "'");
+			ResultSet rs = sqlAdapter.getResultsOfQuery(
+					"SELECT score FROM " + this.performanceSampleTableName + " WHERE hash_value = '" + hexHash + "'");
 			while (rs.next()) {
-			String dbCompositionString = rs.getString("composition");
-				String dbTrajectoryString = rs.getString("trajectory");
 				double score = rs.getDouble("score");
-				if (compositionString.equals(dbCompositionString) && trajectoryString.equals(dbTrajectoryString))
-					opt = Optional.of(score);
+				opt = Optional.of(score);
 			}
 		} catch (JsonProcessingException | SQLException | NoSuchAlgorithmException e) {
 			e.printStackTrace();
@@ -133,6 +130,10 @@ public class PerformanceDBAdapter {
 			// md.update(trajectoryString.getBytes());
 			byte[] digest = md.digest();
 			String hexHash = (new HexBinaryAdapter()).marshal(digest);
+			ResultSet rs = sqlAdapter.getResultsOfQuery(
+					"SELECT score FROM " + this.performanceSampleTableName + " WHERE hash_value = '" + hexHash + "'");
+			if (rs.next())
+				return;
 			Map<String, String> valueMap = new HashMap<>();
 			valueMap.put("composition", compositionString);
 			valueMap.put("trajectory", trajectoryString);
