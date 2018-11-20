@@ -8,8 +8,8 @@ import org.deeplearning4j.nn.conf.CacheMode;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.WorkspaceMode;
-import org.deeplearning4j.nn.conf.layers.SubsamplingLayer;
 import org.deeplearning4j.nn.conf.layers.ConvolutionLayer.AlgoMode;
+import org.deeplearning4j.nn.conf.layers.SubsamplingLayer;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.zoo.model.AlexNet;
@@ -42,20 +42,25 @@ public final class ImageUtils {
 	public static FastBitmap matrixToFastBitmap(final INDArray matrix, final ColorSpace colorSpace) {
 		long[] shape = matrix.shape();
 		FastBitmap bitmap = new FastBitmap((int) shape[0], (int) shape[1], colorSpace);
+		// bitmap.setCoordinateSystem(CoordinateSystem.Cartesian);
 
-		for (int i = 0; i < shape[1]; i++) {
-			for (int j = 0; j < shape[0]; j++) {
+		for (int i = 0; i < shape[0]; i++) {
+			for (int j = 0; j < shape[1]; j++) {
 				switch (colorSpace) {
 				case ARGB:
-					bitmap.setAlpha(i, j, matrix.getInt(i, j, 0));
-					bitmap.setRed(i, j, matrix.getInt(i, j, 1));
-					bitmap.setBlue(i, j, matrix.getInt(i, j, 2));
-					bitmap.setGreen(i, j, matrix.getInt(i, j, 3));
+					bitmap.setAlpha(j, i, matrix.getInt(i, j, 0));
+					bitmap.setRed(j, i, matrix.getInt(i, j, 1));
+					bitmap.setBlue(j, i, matrix.getInt(i, j, 2));
+					bitmap.setGreen(j, i, matrix.getInt(i, j, 3));
 					break;
 				case RGB:
-					bitmap.setRed(i, j, matrix.getInt(i, j, 0));
-					bitmap.setBlue(i, j, matrix.getInt(i, j, 1));
-					bitmap.setGreen(i, j, matrix.getInt(i, j, 2));
+					try {
+						bitmap.setRed(j, i, matrix.getInt(i, j, 0));
+						bitmap.setBlue(j, i, matrix.getInt(i, j, 1));
+						bitmap.setGreen(j, i, matrix.getInt(i, j, 2));
+					} catch (ArrayIndexOutOfBoundsException e) {
+						System.out.println(e);
+					}
 					break;
 				case Grayscale:
 					try {
@@ -90,10 +95,10 @@ public final class ImageUtils {
 
 			for (int i = 0; i < bitmap.getWidth(); i++) {
 				for (int j = 0; j < bitmap.getHeight(); j++) {
-					result.putScalar(new int[] { i, j, 0 }, bitmapMatrix[i][j][0]);
-					result.putScalar(new int[] { i, j, 1 }, bitmapMatrix[i][j][1]);
-					result.putScalar(new int[] { i, j, 2 }, bitmapMatrix[i][j][2]);
-					result.putScalar(new int[] { i, j, 3 }, bitmapMatrix[i][j][3]);
+					result.putScalar(new int[] { i, j, 0 }, bitmapMatrix[j][i][0]);
+					result.putScalar(new int[] { i, j, 1 }, bitmapMatrix[j][i][1]);
+					result.putScalar(new int[] { i, j, 2 }, bitmapMatrix[j][i][2]);
+					result.putScalar(new int[] { i, j, 3 }, bitmapMatrix[j][i][3]);
 				}
 			}
 			break;
@@ -277,24 +282,30 @@ public final class ImageUtils {
 
 		return result;
 	}
-	
+
 	/**
-	 * Constructs a simple max pooling network consisting only of a max pooling layer.
+	 * Constructs a simple max pooling network consisting only of a max pooling
+	 * layer.
+	 * 
 	 * @return Returns the constructed and initialized network
 	 */
 	public static MultiLayerNetwork getMaxPoolNetwork() {
-		MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder().seed(0)
-				.list().layer(0, new SubsamplingLayer.Builder(SubsamplingLayer.PoolingType.MAX).build())
-				.pretrain(false).build(); 
+		MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder().seed(0).list()
+				.layer(0, new SubsamplingLayer.Builder(SubsamplingLayer.PoolingType.MAX).build()).pretrain(false)
+				.build();
 		MultiLayerNetwork mln = new MultiLayerNetwork(conf);
 		mln.init();
 		return mln;
 	}
-	
+
 	/**
-	 * Propagated the <code>matrix</code> to the given multi layer network and returns the network's output layer activations. 
-	 * @param matrix Matrix used as network input
-	 * @param mln Multi layer network object
+	 * Propagated the <code>matrix</code> to the given multi layer network and
+	 * returns the network's output layer activations.
+	 * 
+	 * @param matrix
+	 *            Matrix used as network input
+	 * @param mln
+	 *            Multi layer network object
 	 * @return Returns the network's output layer activations
 	 */
 	public static INDArray applyMLNToMatrix(final INDArray matrix, final MultiLayerNetwork mln) {

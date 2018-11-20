@@ -36,7 +36,7 @@ public class DataSetUtilsTest {
 		Assert.assertArrayEquals(new long[] { 32, 32, 3 }, result.shape());
 	}
 
-	// @Test
+	@Test
 	public void croppingTest() throws IOException {
 		File datasetFolder = new File("testres/" + File.separator + "caltech101_subset");
 		DataSet data = DataSetUtils.loadDatasetFromImageFolder(datasetFolder);
@@ -44,7 +44,7 @@ public class DataSetUtilsTest {
 		filter.applyFilter(data, true);
 	}
 
-	@Test
+	// @Test
 	public void subsamplingTest() throws Exception {
 		DataSet data = DataSetUtils.getDataSetByID(DataSetUtils.MNIST_ID);
 
@@ -65,5 +65,29 @@ public class DataSetUtilsTest {
 		System.out.println("Start subsampling with MLPlan factor...");
 		result = DataSetUtils.subsample(data, 0.01, 200, new Random(10), 10);
 		System.out.println("Done. " + result.getInstances().numInstances());
+	}
+
+	@Test
+	public void caltech101Test() throws IOException {
+		File datasetFolder = new File("testres/" + File.separator + "caltech101");
+		DataSet data = DataSetUtils.loadDatasetFromImageFolder(datasetFolder);
+		CatalanoInPlaceFilter filter = new CatalanoInPlaceFilter("GaussianBlur");
+		filter.applyFilter(data, true);
+	}
+
+	@Test
+	public void leafBwTest() throws IOException {
+		File datasetFolder = new File("testres/" + File.separator + "leaf_bw");
+		DataSet data = DataSetUtils.loadDatasetFromImageFolder(datasetFolder);
+		CatalanoInPlaceFilter filter = new CatalanoInPlaceFilter("GaussianBlur");
+		filter.applyFilter(data, true);
+	}
+
+	@Test
+	public void leafRgbTest() throws IOException {
+		File datasetFolder = new File("testres/" + File.separator + "leaf_rgb");
+		DataSet data = DataSetUtils.loadDatasetFromImageFolder(datasetFolder);
+		CatalanoInPlaceFilter filter = new CatalanoInPlaceFilter("GaussianBlur");
+		filter.applyFilter(data, true);
 	}
 }

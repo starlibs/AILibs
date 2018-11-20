@@ -24,13 +24,13 @@ public class ImageUtilsTest {
 
 	@Test
 	public void fastBitmapToMatrixTest() {
-		INDArray matrix = Nd4j.ones(10, 10, 3);
+		INDArray matrix = Nd4j.ones(10, 20, 3);
 		ColorSpace cs = ColorSpace.RGB;
 		FastBitmap bitmap = ImageUtils.matrixToFastBitmap(matrix, cs);
 
 		INDArray result = ImageUtils.fastBitmapToMatrix(bitmap, cs);
 
-		Assert.assertEquals(matrix, result);
+		Assert.assertEquals(Arrays.toString(matrix.shape()), Arrays.toString(result.shape()));
 
 	}
 

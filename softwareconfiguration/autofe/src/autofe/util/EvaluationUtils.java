@@ -233,7 +233,7 @@ public final class EvaluationUtils {
 
 	/**
 	 * Penalizes high count of attributes (which leads to high run times of
-	 * attribute selectors and classifier trainings).
+	 * attribute selectors and classifier training).
 	 *
 	 * @param instances
 	 * @return
