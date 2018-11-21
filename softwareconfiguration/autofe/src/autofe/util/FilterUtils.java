@@ -37,8 +37,6 @@ public final class FilterUtils {
 			switch (name) {
 			case "autofe.algorithm.hasco.filter.image.LocalBinaryPatternFilter":
 				return new LocalBinaryPatternFilter();
-			case "PCA":
-				return new WEKAFilter(new PrincipalComponents());
 			case "autofe.algorithm.hasco.filter.image.PretrainedNN":
 				String net = parameters.get("net");
 				net = net == null ? "" : net;
@@ -58,6 +56,8 @@ public final class FilterUtils {
 			return new AddRandomFilter();
 		case "autofe.MakeUnion":
 			return new UnionFilter();
+		case "PCA":
+			return new WEKAFilter(new PrincipalComponents());
 		default:
 			return getDefaultFilter();
 		}

@@ -109,6 +109,11 @@ public class UnionFilter implements IFilter, IAbstractFilter, Serializable {
 	}
 
 	@Override
+	public String toString() {
+		return "UnionFilter []";
+	}
+
+	@Override
 	public UnionFilter clone() throws CloneNotSupportedException {
 		return new UnionFilter();
 	}

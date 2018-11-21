@@ -40,6 +40,7 @@ public class WEKAFilter implements IFilter, Serializable {
 		}
 
 		try {
+			this.wekaFilter.setInputFormat(inputData.getInstances());
 			inputData.setInstances(Filter.useFilter(inputData.getInstances(), this.wekaFilter));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

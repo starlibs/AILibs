@@ -52,7 +52,9 @@ public class FilterPipeline implements IFilter, Serializable {
 			return data;
 		}
 
-		DataSet inputData = copy ? data.copy() : data;
+		// Filter Pipeline copies anyway...
+		// DataSet inputData = copy ? data.copy() : data;
+		DataSet inputData = data;
 
 		// Copy graph
 		Graph<FilterDataEntry> dataGraph = this.copyGraphIntoDataGraph();
@@ -99,7 +101,8 @@ public class FilterPipeline implements IFilter, Serializable {
 					continue;
 				}
 
-				nextEntry.dataset = nextEntry.filter.applyFilter(UnionFilter.union(succ1.dataset, succ2.dataset), true);
+				nextEntry.dataset = nextEntry.filter.applyFilter(UnionFilter.union(succ1.dataset, succ2.dataset),
+						false);
 				dataGraph = this.eraseSubTreeData(dataGraph, nextEntry);
 
 			} else {

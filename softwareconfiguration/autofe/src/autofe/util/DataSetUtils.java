@@ -323,12 +323,18 @@ public final class DataSetUtils {
 		ColorSpace colorSpace = null;
 		for (final File subFolder : folder.listFiles()) {
 			for (final File imageFile : subFolder.listFiles()) {
-				final FastBitmap fb = new FastBitmap(ImageIO.read(imageFile));
+				BufferedImage image = ImageIO.read(imageFile);
+				final FastBitmap fb = new FastBitmap(image);
 
-				// Check for color space (Precedence: (RGB, ARGB) > Grayscale)
-				if (colorSpace == null || (colorSpace == ColorSpace.Grayscale
-						&& (fb.getColorSpace() == ColorSpace.RGB || fb.getColorSpace() == ColorSpace.ARGB))) {
-					colorSpace = fb.getColorSpace();
+				// Determine color space
+				if (colorSpace == null) {
+					if (image.getRaster().getNumDataElements() == 1) {
+						colorSpace = ColorSpace.Grayscale;
+					} else if (image.getRaster().getNumDataElements() <= 3) {
+						colorSpace = ColorSpace.RGB;
+					} else {
+						colorSpace = ColorSpace.ARGB;
+					}
 				}
 
 				fileBitmapMapping.put(imageFile, fb);

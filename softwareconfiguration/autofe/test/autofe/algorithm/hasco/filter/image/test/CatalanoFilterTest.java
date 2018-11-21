@@ -116,7 +116,7 @@ public class CatalanoFilterTest {
 		System.out.println("Transformed data set.");
 	}
 
-	@Test
+	// @Test
 	public void testBinaryPatternWrapperWithInstance() throws InterruptedException {
 
 		Graph<IFilter> graph = new Graph<>();
@@ -170,5 +170,29 @@ public class CatalanoFilterTest {
 
 		System.out.println(Arrays.toString(transformedData.getInstances().get(0).toDoubleArray()));
 
+	}
+
+	@Test
+	public void testBinaryPatternFilter() throws Exception {
+		Graph<IFilter> graph = new Graph<>();
+
+		CatalanoBinaryPatternFilter robustLocalBinPattern = new CatalanoBinaryPatternFilter(
+				"UniformLocalBinaryPattern");
+		CatalanoInPlaceFilter erosion = new CatalanoInPlaceFilter("Erosion");
+
+		graph.addItem(robustLocalBinPattern);
+		graph.addItem(erosion);
+		graph.addEdge(robustLocalBinPattern, erosion);
+		FilterPipeline fp = new FilterPipeline(graph);
+
+		DataSet dataSet = DataSetUtils.getDataSetByID(DataSetUtils.FASHION_MNIST_ID);
+		DataSet result = fp.applyFilter(
+				new DataSet(dataSet.getInstances(),
+						Arrays.asList(dataSet.getIntermediateInstances().get(1),
+								dataSet.getIntermediateInstances().get(0), dataSet.getIntermediateInstances().get(2))),
+				false);
+		System.out.println(result.getIntermediateInstances().get(0));
+		System.out.println(result.getIntermediateInstances().get(1));
+		System.out.println(result.getIntermediateInstances().get(2));
 	}
 }

@@ -36,10 +36,11 @@ public class DataSetUtilsTest {
 		Assert.assertArrayEquals(new long[] { 32, 32, 3 }, result.shape());
 	}
 
-	@Test
+	// @Test
 	public void croppingTest() throws IOException {
 		File datasetFolder = new File("testres/" + File.separator + "caltech101_subset");
 		DataSet data = DataSetUtils.loadDatasetFromImageFolder(datasetFolder);
+		System.out.println("Loaded data.");
 		CatalanoInPlaceFilter filter = new CatalanoInPlaceFilter("GaussianBlur");
 		filter.applyFilter(data, true);
 	}
@@ -67,10 +68,11 @@ public class DataSetUtilsTest {
 		System.out.println("Done. " + result.getInstances().numInstances());
 	}
 
-	@Test
+	// @Test
 	public void caltech101Test() throws IOException {
 		File datasetFolder = new File("testres/" + File.separator + "caltech101");
 		DataSet data = DataSetUtils.loadDatasetFromImageFolder(datasetFolder);
+		System.out.println("Loaded data.");
 		CatalanoInPlaceFilter filter = new CatalanoInPlaceFilter("GaussianBlur");
 		filter.applyFilter(data, true);
 	}
@@ -79,14 +81,17 @@ public class DataSetUtilsTest {
 	public void leafBwTest() throws IOException {
 		File datasetFolder = new File("testres/" + File.separator + "leaf_bw");
 		DataSet data = DataSetUtils.loadDatasetFromImageFolder(datasetFolder);
+		System.out.println("Loaded data.");
 		CatalanoInPlaceFilter filter = new CatalanoInPlaceFilter("GaussianBlur");
-		filter.applyFilter(data, true);
+		DataSet result = filter.applyFilter(data, true);
+		System.out.println(result.getIntermediateInstances().get(0).shapeInfoToString());
 	}
 
-	@Test
+	// @Test
 	public void leafRgbTest() throws IOException {
 		File datasetFolder = new File("testres/" + File.separator + "leaf_rgb");
 		DataSet data = DataSetUtils.loadDatasetFromImageFolder(datasetFolder);
+		System.out.println("Loaded data.");
 		CatalanoInPlaceFilter filter = new CatalanoInPlaceFilter("GaussianBlur");
 		filter.applyFilter(data, true);
 	}
