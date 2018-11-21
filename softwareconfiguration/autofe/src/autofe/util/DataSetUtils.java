@@ -18,6 +18,7 @@ import java.util.stream.IntStream;
 import javax.imageio.ImageIO;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.openml.apiconnector.io.OpenmlConnector;
@@ -517,5 +518,48 @@ public final class DataSetUtils {
 		logger.debug("Subsampling ratio is {} and means {} many instances.", ratio,
 				subsampledData.getInstances().size());
 		return subsampledData;
+	}
+
+	/**
+	 * Functions which reduces the dimensionality of the given <code>dataset</code>
+	 * by applying max pooling with kernel size and stride of 8.
+	 * 
+	 * @param dataset
+	 *            Dataset to be reduced in place
+	 */
+	public static void reduceHighDimensionalityByPoolingInPlace(final DataSet dataset) {
+		logger.info(
+				"Applying max pooling on input data due to high dimensionality.. Final result calculation will be done on original dimensionality.");
+
+		long[] shape = dataset.getIntermediateInstances().get(0).shape();
+		long[] resultingShape = null;
+		MultiLayerNetwork mln = ImageUtils.getMaxPoolNetworkSymmetricWithCustomKernelStride(8, 8);
+
+		boolean permute = shape.length > 2 && shape[2] > 1;
+		for (int i = 0; i < dataset.getIntermediateInstances().size(); i++) {
+			INDArray matrix = dataset.getIntermediateInstances().get(i);
+			if (permute)
+				matrix = matrix.permute(2, 0, 1);
+
+			if (shape.length > 2)
+				matrix = matrix.reshape(new long[] { 1, shape[2], shape[0], shape[1] });
+			else
+				matrix = matrix.reshape(new long[] { 1, 1, shape[0], shape[1] });
+			matrix = ImageUtils.applyMLNToMatrix(matrix, mln);
+
+			if (resultingShape == null)
+				resultingShape = matrix.shape();
+
+			// Reverse
+			if (permute)
+				matrix = matrix.permute(0, 2, 3, 1);
+			if (shape.length > 2)
+				matrix = matrix.reshape(new long[] { resultingShape[2], resultingShape[3], resultingShape[1] });
+			else
+				matrix = matrix.reshape(new long[] { resultingShape[2], resultingShape[3] });
+
+			dataset.getIntermediateInstances().set(i, matrix);
+		}
+		logger.info("Applied max pooling.");
 	}
 }

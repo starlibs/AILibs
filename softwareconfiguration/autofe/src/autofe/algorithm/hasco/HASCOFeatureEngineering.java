@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.LongStream;
 
 import org.aeonbits.owner.ConfigFactory;
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -36,7 +37,6 @@ import hasco.model.ComponentInstance;
 import hasco.optimizingfactory.OptimizingFactory;
 import hasco.optimizingfactory.OptimizingFactoryProblem;
 import hasco.serialization.ComponentLoader;
-import hasco.variants.forwarddecomposition.DefaultPathPriorizingPredicate;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.IObjectEvaluator;
 import jaicore.basic.algorithm.AlgorithmEvent;
@@ -137,6 +137,12 @@ public class HASCOFeatureEngineering
 					new Random(this.config.randomSeed()));
 			logger.info("Finished subsampling.");
 
+			// Apply subsampling of images
+			if (LongStream.of(dataForFE.getIntermediateInstances().get(0).shape()).reduce(1,
+					(a, b) -> a * b) > (100 * 100)) {
+				DataSetUtils.reduceHighDimensionalityByPoolingInPlace(dataForFE);
+			}
+
 			/* communicate the parameters with which AutoFE will run */
 			// TODO
 			logger.info("Starting HASCOImageFeatureEngineering with {} cpus, max pipeline size of {}.",
@@ -168,14 +174,15 @@ public class HASCOFeatureEngineering
 			// AlternativeNodeEvaluator<TFDNode, Double>(
 			// this.getSemanticNodeEvaluator(this.data.getInstances()), nodeEvaluator);
 
-			DefaultPathPriorizingPredicate<TFDNode, String> prioritizingPredicate = new DefaultPathPriorizingPredicate<>();
+			// DefaultPathPriorizingPredicate<TFDNode, String> prioritizingPredicate = new
+			// DefaultPathPriorizingPredicate<>();
 			this.hascoFactory.setSearchProblemTransformer(
-					new GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS<>(nodeEvaluator,
-							prioritizingPredicate, this.config.randomSeed(), this.config.randomCompletions(),
+					new GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS<>(nodeEvaluator, null,
+							this.config.randomSeed(), this.config.randomCompletions(),
 							this.config.timeoutForCandidateEvaluation(), this.config.timeoutForNodeEvaluation()));
 
-			prioritizingPredicate.setHasco(this.hascoFactory.getAlgorithm());
-			this.hascoFactory.setPriorizingPredicate(prioritizingPredicate);
+			// prioritizingPredicate.setHasco(this.hascoFactory.getAlgorithm());
+			// this.hascoFactory.setPriorizingPredicate(prioritizingPredicate);
 
 			this.optimizingFactory = new OptimizingFactory<>(optimizingFactoryProblem, this.hascoFactory);
 			this.optimizingFactory.setLoggerName(this.loggerName + ".2phasehasco");

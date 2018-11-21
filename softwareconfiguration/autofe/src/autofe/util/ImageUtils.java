@@ -299,6 +299,28 @@ public final class ImageUtils {
 	}
 
 	/**
+	 * Returns a symmetric max pooling networking consisting only of a max pooling
+	 * layer.
+	 * 
+	 * @param kernelSize
+	 *            Kernel size of the max pooling layer
+	 * @param stride
+	 *            Stride of the max pooling layer
+	 * @return Returns the constructed and initialized network
+	 */
+	public static MultiLayerNetwork getMaxPoolNetworkSymmetricWithCustomKernelStride(final int kernelSize,
+			final int stride) {
+		MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder().seed(0).list()
+				.layer(0,
+						new SubsamplingLayer.Builder(SubsamplingLayer.PoolingType.MAX)
+								.kernelSize(kernelSize, kernelSize).stride(stride, stride).build())
+				.pretrain(false).build();
+		MultiLayerNetwork mln = new MultiLayerNetwork(conf);
+		mln.init();
+		return mln;
+	}
+
+	/**
 	 * Propagated the <code>matrix</code> to the given multi layer network and
 	 * returns the network's output layer activations.
 	 * 

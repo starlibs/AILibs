@@ -41,6 +41,7 @@ import weka.core.Instances;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Nystroem;
 import weka.filters.unsupervised.attribute.Remove;
+import weka.filters.unsupervised.attribute.RemoveUseless;
 
 /**
  * Utility functions used for node and object evaluation classes.
@@ -423,8 +424,15 @@ public final class EvaluationUtils {
 		List<Instances> split = WekaUtil.getStratifiedSplit(instances, new Random(42), .7f);
 
 		LDA lda = new LDA();
-		// FLDA lda = new FLDA();
-		lda.buildClassifier(split.get(0));
+
+		Instances train = split.get(0);
+		if (train.numAttributes() > 5_000) {
+			RemoveUseless rem = new RemoveUseless();
+			rem.setMaximumVariancePercentageAllowed(0.9);
+			rem.setInputFormat(train);
+			train = Filter.useFilter(train, rem);
+		}
+		lda.buildClassifier(train);
 
 		Evaluation eval = new Evaluation(split.get(0));
 		eval.evaluateModel(lda, split.get(1));
