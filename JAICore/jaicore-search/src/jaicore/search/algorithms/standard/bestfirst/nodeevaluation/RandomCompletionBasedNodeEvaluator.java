@@ -27,9 +27,7 @@ import com.google.common.eventbus.Subscribe;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import jaicore.basic.sets.SetUtil.Pair;
-import jaicore.graphvisualizer.gui.VisualizationWindow;
 import jaicore.logging.LoggerUtil;
-import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.NodeAnnotationEvent;
@@ -63,7 +61,7 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 	protected Map<String, Integer> plFails = new ConcurrentHashMap<>();
 	protected Map<String, Integer> plSuccesses = new ConcurrentHashMap<>();
 
-	protected SerializableGraphGenerator<T, String> generator;
+	protected GraphGenerator<T, String> generator;
 //	private boolean generatorProvidesPathUnification;
 	protected long timestampOfFirstEvaluation;
 
@@ -452,7 +450,7 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 
 	@Override
 	public void setGenerator(final GraphGenerator<T, String> generator) {
-		this.generator = (SerializableGraphGenerator<T, String>) generator;
+		this.generator = generator;
 		// this.generatorProvidesPathUnification = (this.generator instanceof PathUnifyingGraphGenerator);
 		// if (!this.generatorProvidesPathUnification)
 		// logger.warn("The graph generator passed to the RandomCompletion algorithm does not offer path subsumption checks, which may cause inefficiencies in some domains.");

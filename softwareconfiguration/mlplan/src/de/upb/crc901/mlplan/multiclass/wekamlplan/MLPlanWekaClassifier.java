@@ -29,6 +29,7 @@ import hasco.variants.forwarddecomposition.twophase.TwoPhaseSoftwareConfiguratio
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.IObjectEvaluator;
 import jaicore.basic.MathExt;
+import jaicore.basic.TimeOut;
 import jaicore.basic.algorithm.AlgorithmEvent;
 import jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.AlgorithmInitializedEvent;
@@ -76,7 +77,7 @@ public abstract class MLPlanWekaClassifier implements Classifier, CapabilitiesHa
 	private double internalValidationErrorOfSelectedClassifier;
 	private final EventBus eventBus = new EventBus();
 	private TwoPhaseHASCOFactory hascoFactory;
-	private OptimizingFactory<TwoPhaseSoftwareConfigurationProblem, Classifier, Double> optimizingFactory;
+	private OptimizingFactory<TwoPhaseSoftwareConfigurationProblem, Classifier, HASCOSolutionCandidate<Double>, Double> optimizingFactory;
 
 	private AlgorithmState state = AlgorithmState.created;
 	private Instances dataShownToSearch = null;
@@ -222,25 +223,21 @@ public abstract class MLPlanWekaClassifier implements Classifier, CapabilitiesHa
 
 	@Override
 	public int getNumCPUs() {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
 	public void setTimeout(final int timeout, final TimeUnit timeUnit) {
-		// TODO Auto-generated method stub
+
+	}
+	
+	@Override
+	public void setTimeout(final TimeOut timeout) {
 
 	}
 
 	@Override
-	public int getTimeout() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public TimeUnit getTimeoutUnit() {
-		// TODO Auto-generated method stub
+	public TimeOut getTimeout() {
 		return null;
 	}
 
@@ -251,7 +248,7 @@ public abstract class MLPlanWekaClassifier implements Classifier, CapabilitiesHa
 
 	@Override
 	public void cancel() {
-		// TODO Auto-generated method stub
+		
 	}
 
 	protected abstract INodeEvaluator<TFDNode, Double> getSemanticNodeEvaluator(Instances data);

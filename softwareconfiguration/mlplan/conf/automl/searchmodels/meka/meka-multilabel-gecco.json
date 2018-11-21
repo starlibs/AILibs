@@ -2,7 +2,6 @@
 	"repository": "MEKA",
 	"include": ["../mlplan/autoweka.json"],
 	"parameters": [
-		/* Sets the downsampling ratio default: 0.75 (of original) */
 		{
 			"name": "_P",
 			"type": "double",
@@ -12,14 +11,12 @@
 			"refineSplits": 2,
 			"minInterval": 0.05
 		},
-		/* Determines the width of the trellis (use 0 for chain; use _1 for a square trellis, i.e., width of sqrt(number of labels)). */
 		{
 			"name": "_H",
 			"type": "cat",
 			"default": 0,
 			"values": [0, -1]
 		},
-		/* Determines the neighbourhood density (the number of neighbours for each node in the trellis). CAUTION: default obtained from source code. No idea about good other values */
 		{
 			"name": "_L",
 			"type": "int",
@@ -29,21 +26,18 @@
 			"minInterval": 1,
 			"refineSplits": 2
 		},
-		/* The dependency heuristic to use in rearranging the trellis (None by default). */
 		{
 			"name": "_X",
 			"type": "cat",
 			"default": "None",
 			"values": ["None"]
 		},
-		/* The total number of iterations. default: 1000 */
 		{
 			"name": "_I",
 			"type": "cat",
 			"default": 1000,
 			"values": [100, 1000, 10000, 20000]
 		},
-		/* The number of collection iterations. default: 100 */
 		{
 			"name": "_Ic",
 			"type": "cat",
@@ -57,7 +51,6 @@
 			"providedInterface": ["MLClassifier", "BasicMLClassifier"],
 			"requiredInterface": ["Classifier"],
 			"parameter": [
-				/* The way to measure dependencies. default: lbf (frequencies only) */
 				{
 					"name": "_X",
 					"type": "cat",
@@ -71,7 +64,6 @@
 			"providedInterface": ["MLClassifier", "BasicMLClassifier"],
 			"requiredInterface": ["Classifier"],
 			"parameter": [
-				/* Sets the number of hidden units default: 10 */
 				{
 					"name": "_H", 
 					"type": "int",
@@ -81,7 +73,6 @@
 					"refineSplits": 4,
 					"minInterval": 2
 				},
-				/* Sets the maximum number of epochs default: 1000 (auto_cut_out) */
 				{
 					"name": "_E",
 					"type": "int",
@@ -91,7 +82,6 @@
 					"refineSplits": 2,
 					"minInterval": 100
 				},
-				/* Sets the learning rate (tyically somewhere between 'very small' and 0.1) default: 0.1 */
 				{
 					"name": "_r",
 					"type": "double",
@@ -101,7 +91,6 @@
 					"refineSplits": 2,
 					"minInterval": 1E-5
 				},
-				/* Sets the momentum (typically somewhere between 0.1 and 0.9) default: 0.1 */
 				{
 					"name": "_m",
 					"type": "double",
@@ -118,7 +107,6 @@
 			"providedInterface": ["MLClassifier", "BasicMLClassifier", "meka.classifiers.multilabel.BR"],
 			"requiredInterface": ["Classifier"],
 			"parameter": [
-				/* No parameters to optimize */
 			]
 		},
 		{
@@ -126,7 +114,6 @@
 			"providedInterface": ["MLClassifier", "BasicMLClassifier"],
 			"requiredInterface": ["Classifier"],
 			"parameter": [
-				/* Sets the downsampling ratio default: 0.75 (% of original) */
 				{
 					"name": "_P"
 				}
@@ -137,7 +124,6 @@
 			"providedInterface": ["MLClassifier", "BasicMLClassifier"],
 			"requiredInterface": ["Classifier"],
 			"parameter": [
-				/* No parameters to optimize */
 			]
 		},
 		{
@@ -155,11 +141,9 @@
 			"providedInterface": ["MLClassifier", "BasicMLClassifier"],
 			"requiredInterface": ["Classifier"],
 			"parameter": [
-				/* The total number of iterations. default: 1000 */
 				{
 					"name": "_I"
 				},
-				/* The number of collection iterations. default: 100 */
 				{
 					"name": "_Ic"
 				}
@@ -170,15 +154,12 @@
 			"providedInterface": ["MLClassifier", "BasicMLClassifier"],
 			"requiredInterface": ["Classifier"],
 			"parameter": [
-				/* Determines the width of the trellis (use 0 for chain; use _1 for a square trellis, i.e., width of sqrt(number of labels)). */
 				{
 					"name": "_H"
 				},
-				/* Determines the neighbourhood density (the number of neighbours for each node in the trellis). CAUTION: no default found */
 				{
 					"name": "_L"
 				},
-				/* The dependency heuristic to use in rearranging the trellis (None by default). */
 				{
 					"name": "_X"
 				},
@@ -195,15 +176,12 @@
 			"providedInterface": ["MLClassifier", "BasicMLClassifier"],
 			"requiredInterface": ["Classifier"],
 			"parameter": [
-				/* Determines the width of the trellis (use 0 for chain; use _1 for a square trellis, i.e., width of sqrt(number of labels)). */
 				{
 					"name": "_H"
 				},
-				/* Determines the neighbourhood density (the number of neighbours for each node in the trellis). CAUTION: no default found */
 				{
 					"name": "_L"
 				},
-				/* The dependency heuristic to use in rearranging the trellis (None by default). */
 				{
 					"name": "_X"
 				},
@@ -213,7 +191,6 @@
 				{
 					"name": "_Ic"
 				},
-				/* Sets the payoff function. Any of those listed in regular evaluation output will do (e.g., 'Exact match'). default: Exact match */
 				{
 					"name": "_P",
 					"type": "cat",
@@ -236,14 +213,12 @@
 					"minInterval": 1,
 					"refineSplits": 2
 				},
-				/* Sets the number of hidden units default: 10 */
 				{
 					"name": "_H", 
 					"type": "cat",
 					"default": 10,
 					"values": [ 5, 10, 20, 50 ]
 				},
-				/* Sets the maximum number of epochs default: 1000 (auto_cut_out) */
 				{
 					"name": "_E",
 					"type": "int",
@@ -253,7 +228,6 @@
 					"refineSplits": 2,
 					"minInterval": 100
 				},
-				/* Sets the learning rate (tyically somewhere between 'very small' and 0.1) default: 0.1 */
 				{
 					"name": "_r",
 					"type": "double",
@@ -263,7 +237,6 @@
 					"refineSplits": 2,
 					"minInterval": 1E-5
 				},
-				/* Sets the momentum (typically somewhere between 0.1 and 0.9) default: 0.1 */
 				{
 					"name": "_m",
 					"type": "double",
@@ -288,8 +261,6 @@
 			"providedInterface": ["MLClassifier", "BasicMLClassifier"],
 			"requiredInterface": ["Classifier"],
 			"parameter": [
-				/* LEFT OUT: _k  The number of labels in each partition __ should be 1 <= k < (L/2) where L is the total number of labels.*/
-				/* Sets the pruning value, defining an infrequent labelset as one which occurs <= P times in the data (P = 0 defaults to LC). default: 0 (LC) */
 				{
 					"name": "_P",
 					"type": "int",
@@ -299,7 +270,6 @@
 					"minInterval": 1,
 					"refineSplits": 2
 				}
-				/* LEFT OUT: _N  Sets the (maximum) number of frequent labelsets to subsample from the infrequent labelsets. default: 0 (none) n N = n _n N = n, or 0 if LCard(D) >= 2 n_m N = random(n,m).*/
 			]
 		},
 		{
@@ -307,7 +277,6 @@
 			"providedInterface": ["MLClassifier", "BasicMLClassifier"],
 			"requiredInterface": ["Classifier"],
 			"parameter": [
-				/* No parameters to optimize */
 			]
 		},
 		{
@@ -315,7 +284,6 @@
 			"providedInterface": ["MLClassifier", "BasicMLClassifier"],
 			"requiredInterface": [],
 			"parameter": [
-				/* No parameters to optimize */
 			]
 		},
 		{
@@ -323,7 +291,6 @@
 			"providedInterface": ["MLClassifier", "BasicMLClassifier"],
 			"requiredInterface": ["Classifier"],
 			"parameter": [
-				/* The number of iterations to search the chain space at train time. default: 0*/
 				{
 					"name": "_Is",
 					"type": "int",
@@ -333,7 +300,6 @@
 					"minInterval": 1,
 					"refineSplits": 2
 				},
-				/* The number of iterations to search the output space at test time. default: 10*/
 				{
 					"name": "_Iy",
 					"type": "int",
@@ -343,7 +309,6 @@
 					"minInterval": 1,
 					"refineSplits": 2
 				},
-				/* Sets the payoff function. Any of those listed in regular evaluation output will do (e.g., 'Exact match'). default: Exact match */
 				{
 					"name": "_P",
 					"type": "cat",
@@ -365,7 +330,6 @@
 			"providedInterface": ["MLClassifier", "BasicMLClassifier"],
 			"requiredInterface": ["Classifier"],
 			"parameter": [
-				/* The population size (of chains) __ should be smaller than the total number of chains evaluated (Is) default: 10 */
 				{
 					"name": "_M",
 					"type": "int",
@@ -375,7 +339,6 @@
 					"minInterval": 1,
 					"refineSplits": 2
 				},
-				/* Use temperature: cool the chain down over time (from the beginning of the chain) __ can be faster default: 0 (no temperature) */
 				{
 					"name": "_O",
 					"type": "int",
@@ -385,7 +348,6 @@
 					"minInterval": 1,
 					"refineSplits": 2
 				},
-				/* If using O = 1 for temperature, this sets the Beta constant default: 0.03 */
 				{
 					"name": "_B",
 					"type": "double",
@@ -395,7 +357,6 @@
 					"minInterval": 1E-3,
 					"refineSplits": 2
 				},
-				/* The number of iterations to search the chain space at train time. default: 0 */
 				{
 					"name": "_Is",
 					"type": "int",
@@ -405,7 +366,6 @@
 					"minInterval": 5,
 					"refineSplits": 2
 				},
-				/* The number of iterations to search the output space at test time. default: 10 */
 				{
 					"name": "_Iy",
 					"type": "int",
@@ -415,7 +375,6 @@
 					"minInterval": 1,
 					"refineSplits": 2
 				},
-				/* Sets the payoff function. Any of those listed in regular evaluation output will do (e.g., 'Exact match'). default: Exact match */
 				{
 					"name": "_P",
 					"type": "cat",
@@ -429,7 +388,6 @@
 			"providedInterface": ["MLClassifier", "BasicMLClassifier"],
 			"requiredInterface": ["Classifier"],
 			"parameter": [
-				/* Sets the pruning value, defining an infrequent labelset as one which occurs <= P times in the data (P = 0 defaults to LC). default: 0 (LC) */
 				{
 					"name": "_P",
 					"type": "int",
@@ -439,7 +397,6 @@
 					"minInterval": 1,
 					"refineSplits": 2
 				}
-				/* LEFT OUT: _N  Sets the (maximum) number of frequent labelsets to subsample from the infrequent labelsets. default: 0 (none) n N = n _n N = n, or 0 if LCard(D) >= 2 n_m N = random(n,m).*/
 			]
 		},
 		{
@@ -447,7 +404,6 @@
 			"providedInterface": ["MLClassifier", "BasicMLClassifier"],
 			"requiredInterface": ["Classifier"],
 			"parameter": [
-				/* Sets the pruning value, defining an infrequent labelset as one which occurs <= P times in the data (P = 0 defaults to LC). default: 0 (LC) */
 				{
 					"name": "_P",
 					"type": "int",
@@ -457,7 +413,6 @@
 					"minInterval": 1,
 					"refineSplits": 2
 				}
-				/* LEFT OUT: _N  Sets the (maximum) number of frequent labelsets to subsample from the infrequent labelsets. default: 0 (none) n N = n _n N = n, or 0 if LCard(D) >= 2 n_m N = random(n,m).*/
 			]
 		},
 		{
@@ -465,7 +420,6 @@
 			"providedInterface": ["MLClassifier", "BasicMLClassifier"],
 			"requiredInterface": ["Classifier"],
 			"parameter": [
-				/* Sets M (default 10): the number of subsets */
 				{
 					"name": "_M",
 					"type": "int",
@@ -475,8 +429,6 @@
 					"refineSplits": 2,
 					"minInterval": 1
 				},
-				/* LEFT OUT: _k  The number of labels in each partition __ should be 1 <= k < (L/2) where L is the total number of labels.*/
-				/* Sets the pruning value, defining an infrequent labelset as one which occurs <= P times in the data (P = 0 defaults to LC). default: 0 (LC) */
 				{
 					"name": "_P",
 					"type": "int",
@@ -486,7 +438,6 @@
 					"minInterval": 1,
 					"refineSplits": 2
 				}
-				/* LEFT OUT: _N  Sets the (maximum) number of frequent labelsets to subsample from the infrequent labelsets. default: 0 (none) n N = n _n N = n, or 0 if LCard(D) >= 2 n_m N = random(n,m).*/
 			]
 		},
 		{
@@ -494,8 +445,6 @@
 			"providedInterface": ["MLClassifier", "BasicMLClassifier"],
 			"requiredInterface": ["Classifier"],
 			"parameter": [
-				/* LEFT OUT: _k  The number of labels in each partition __ should be 1 <= k < (L/2) where L is the total number of labels.*/
-				/* Sets the pruning value, defining an infrequent labelset as one which occurs <= P times in the data (P = 0 defaults to LC). default: 0 (LC) */
 				{
 					"name": "_P",
 					"type": "int",
@@ -505,7 +454,6 @@
 					"minInterval": 1,
 					"refineSplits": 2
 				}
-				/* LEFT OUT: _N  Sets the (maximum) number of frequent labelsets to subsample from the infrequent labelsets. default: 0 (none) n N = n _n N = n, or 0 if LCard(D) >= 2 n_m N = random(n,m).*/
 			]
 		},
 		{

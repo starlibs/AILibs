@@ -1,8 +1,7 @@
 {
 	"repository" : "ML-Plan With SKLearn + WEKA Searchspace",
 	"include": [
-		 "../weka/weka-all-autoweka.json" /*,*/
-		 /*"../scikit-learn/scikit-learn-all-tpot.json"*/ 
+		 "../weka/weka-all-autoweka.json"
 	],
 	"components" : [
 	  	{

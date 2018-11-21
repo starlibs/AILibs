@@ -5,7 +5,7 @@ import jaicore.basic.algorithm.AlgorithmProblemTransformer;
 import jaicore.search.core.interfaces.IGraphSearchFactory;
 import jaicore.search.model.probleminputs.GraphSearchProblemInput;
 
-public class HASCOFactory<ISearch, N, A, V extends Comparable<V>> implements SoftwareConfigurationAlgorithmFactory<RefinementConfiguredSoftwareConfigurationProblem<V>, HASCORunReport<V>, V> {
+public class HASCOFactory<ISearch, N, A, V extends Comparable<V>> implements SoftwareConfigurationAlgorithmFactory<RefinementConfiguredSoftwareConfigurationProblem<V>, HASCORunReport<V>, HASCOSolutionCandidate<V>, V> {
 
 	private RefinementConfiguredSoftwareConfigurationProblem<V> problem;
 	private IHASCOPlanningGraphGeneratorDeriver<N, A> planningGraphGeneratorDeriver;

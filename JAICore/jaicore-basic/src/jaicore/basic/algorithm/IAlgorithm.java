@@ -5,6 +5,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import jaicore.basic.Cancelable;
+import jaicore.basic.TimeOut;
 
 /**
  * The algorithms should actually also be interruptible, but since this is often not the case, we require the cancel method to
@@ -25,8 +26,8 @@ public interface IAlgorithm<I,O> extends Iterable<AlgorithmEvent>, Iterator<Algo
 	public void setNumCPUs(int numberOfCPUs);
 	public int getNumCPUs();
 	public void setTimeout(int timeout, TimeUnit timeUnit);
-	public int getTimeout();
-	public TimeUnit getTimeoutUnit();
+	public void setTimeout(TimeOut timeout);
+	public TimeOut getTimeout();
 	
 	public AlgorithmEvent nextWithException() throws Exception;
 }

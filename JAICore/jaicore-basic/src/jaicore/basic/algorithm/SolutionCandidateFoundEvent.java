@@ -11,7 +11,7 @@ package jaicore.basic.algorithm;
  */
 public class SolutionCandidateFoundEvent<O> implements AlgorithmEvent {
 	private final O solutionCandidate;
-
+	
 	public SolutionCandidateFoundEvent(O solutionCandidate) {
 		super();
 		this.solutionCandidate = solutionCandidate;

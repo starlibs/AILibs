@@ -10,8 +10,9 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
 import hasco.core.SoftwareConfigurationProblem;
-import hasco.model.ComponentInstance;
+import hasco.model.EvaluatedSoftwareConfigurationSolution;
 import jaicore.basic.ILoggingCustomizable;
+import jaicore.basic.TimeOut;
 import jaicore.basic.algorithm.AlgorithmEvent;
 import jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.AlgorithmInitializedEvent;
@@ -19,21 +20,21 @@ import jaicore.basic.algorithm.AlgorithmState;
 import jaicore.basic.algorithm.IAlgorithm;
 import jaicore.basic.algorithm.SolutionCandidateFoundEvent;
 
-public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, V extends Comparable<V>> implements IAlgorithm<OptimizingFactoryProblem<P, T, V>, T>, ILoggingCustomizable {
+public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C extends EvaluatedSoftwareConfigurationSolution<V>, V extends Comparable<V>> implements IAlgorithm<OptimizingFactoryProblem<P, T, V>, T>, ILoggingCustomizable {
 
 	private String loggerName;
 	private Logger logger = LoggerFactory.getLogger(OptimizingFactory.class);
 	private final OptimizingFactoryProblem<P, T, V> problem;
-	private final SoftwareConfigurationAlgorithmFactory<P, ?, V> factoryForOptimizationAlgorithm;
+	private final SoftwareConfigurationAlgorithmFactory<P, ?, C, V> factoryForOptimizationAlgorithm;
 	private T constructedObject;
 	private V performanceOfObject;
 	private final EventBus eventBus = new EventBus();
 
 	/* factory state */
-	private SoftwareConfigurationAlgorithm<P, ?, V> optimizer;
+	private SoftwareConfigurationAlgorithm<P, ?, C, V> optimizer;
 	private AlgorithmState state = AlgorithmState.created;
 
-	public OptimizingFactory(OptimizingFactoryProblem<P, T, V> problem, SoftwareConfigurationAlgorithmFactory<P, ?, V> factoryForOptimizationAlgorithm) {
+	public OptimizingFactory(OptimizingFactoryProblem<P, T, V> problem, SoftwareConfigurationAlgorithmFactory<P, ?, C, V> factoryForOptimizationAlgorithm) {
 		super();
 		this.problem = problem;
 		this.factoryForOptimizationAlgorithm = factoryForOptimizationAlgorithm;
@@ -77,8 +78,8 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, V e
 		}
 		case active: {
 			optimizer.call();
-			ComponentInstance solutionModel = optimizer.getOptimizationResult().getResult();
-			this.constructedObject = problem.getBaseFactory().getComponentInstantiation(solutionModel);
+			C solutionModel = optimizer.getOptimizationResult().getResult();
+			this.constructedObject = problem.getBaseFactory().getComponentInstantiation(solutionModel.getComponentInstance());
 			this.performanceOfObject = optimizer.getOptimizationResult().getValue();
 			state = AlgorithmState.inactive;
 			return new AlgorithmFinishedEvent();
@@ -133,16 +134,14 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, V e
 		// TODO Auto-generated method stub
 
 	}
-
+	
 	@Override
-	public int getTimeout() {
-		// TODO Auto-generated method stub
-		return 0;
+	public void setTimeout(TimeOut timeout) {
+
 	}
 
 	@Override
-	public TimeUnit getTimeoutUnit() {
-		// TODO Auto-generated method stub
+	public TimeOut getTimeout() {
 		return null;
 	}
 
@@ -161,7 +160,7 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, V e
 	/**
 	 * @return the optimizer that is used for building the object
 	 */
-	public SoftwareConfigurationAlgorithm<P, ?, V> getOptimizer() {
+	public SoftwareConfigurationAlgorithm<P, ?, C, V> getOptimizer() {
 		return optimizer;
 	}
 
