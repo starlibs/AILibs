@@ -41,7 +41,7 @@
 	    	"parameter" : [ ]
 	    }, {
 	  	    "name" : "PrepPipe",
-	  	    "providedInterface" : [ "PrepPipe", "Preprocessor"],
+	  	    "providedInterface" : [ "AbstractFilter", "PrepPipe", "Preprocessor"],
 	  	    "requiredInterface" : [
 	  	    	{
 	  	    		"id": "preprocessor",

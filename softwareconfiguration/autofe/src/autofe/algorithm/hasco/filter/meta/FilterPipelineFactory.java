@@ -17,6 +17,7 @@ public class FilterPipelineFactory implements BaseFactory<FilterPipeline> {
 	private static final String UNION_NAME = "autofe.MakeUnion";
 	private static final String ABSTRACT_PIPE_NAME = "AbstractPipe";
 	private static final String NNPIPE_NAME = "NNPipe";
+	private static final String PREP_PIPE_NAME = "PrepPipe";
 
 	private static final Logger logger = LoggerFactory.getLogger(FilterPipelineFactory.class);
 
@@ -89,6 +90,32 @@ public class FilterPipelineFactory implements BaseFactory<FilterPipeline> {
 						// Update graph
 						filterGraph.addItem(filter2);
 						filterGraph.addEdge(actCIFilter, filter2);
+					}
+
+					break;
+				case PREP_PIPE_NAME:
+					ComponentInstance prepCI = actCI.getSatisfactionOfRequiredInterfaces().get("preprocessor");
+					IFilter prep = null;
+					if (prepCI != null) {
+						prep = FilterUtils.getFilterForName(prepCI.getComponent().getName(),
+								prepCI.getParameterValues(), this.inputShape);
+						filterGraph.addItem(prep);
+						filterGraph.addEdge(actCIFilter, prep);
+						actCIFilter = prep;
+					} else {
+						break;
+					}
+
+					ComponentInstance furtherCI = actCI.getSatisfactionOfRequiredInterfaces().get("further");
+					if (furtherCI != null) {
+						IFilter furtherFilter = FilterUtils.getFilterForName(furtherCI.getComponent().getName(),
+								furtherCI.getParameterValues(), this.inputShape);
+
+						open.offer(furtherCI);
+						openFilter.offer(furtherFilter);
+
+						filterGraph.addItem(furtherFilter);
+						filterGraph.addEdge(actCIFilter, furtherFilter);
 					}
 
 					break;
@@ -180,8 +207,10 @@ public class FilterPipelineFactory implements BaseFactory<FilterPipeline> {
 				}
 			}
 		}
+
 		FilterPipeline result = new FilterPipeline(filterGraph);
-		// logger.debug("Result pipeline after build: " + result.toString());
+
+		logger.debug("Result pipeline after build: " + result.toString());
 		return result;
 
 	}
