@@ -1,4 +1,4 @@
-package jaicore.ml.evaluation.measures;
+package jaicore.ml.core.evaluation.measure;
 
 import java.util.ArrayList;
 import java.util.List;

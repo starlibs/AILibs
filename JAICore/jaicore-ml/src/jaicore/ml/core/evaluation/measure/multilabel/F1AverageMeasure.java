@@ -1,10 +1,10 @@
-package jaicore.ml.evaluation.measures.multilabel;
+package jaicore.ml.core.evaluation.measure.multilabel;
 
 import java.util.Collection;
 import java.util.HashSet;
 
 import jaicore.basic.sets.SetUtil;
-import jaicore.ml.evaluation.measures.ADecomposableDoubleMeasure;
+import jaicore.ml.core.evaluation.measure.ADecomposableDoubleMeasure;
 
 public class F1AverageMeasure extends ADecomposableDoubleMeasure<double[]> {
 	

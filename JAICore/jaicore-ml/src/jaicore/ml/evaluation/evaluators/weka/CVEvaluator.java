@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jaicore.ml.WekaUtil;
-import jaicore.ml.evaluation.measures.IMeasure;
+import jaicore.ml.core.evaluation.measure.IMeasure;
 import weka.classifiers.Classifier;
 import weka.core.Instances;
 

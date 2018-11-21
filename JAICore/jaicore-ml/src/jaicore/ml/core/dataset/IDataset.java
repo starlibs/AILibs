@@ -1,10 +1,10 @@
-package jaicore.ml.dataset;
+package jaicore.ml.core.dataset;
 
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 
-import jaicore.ml.dataset.attribute.IAttributeType;
+import jaicore.ml.core.dataset.attribute.IAttributeType;
 
 public interface IDataset {
 

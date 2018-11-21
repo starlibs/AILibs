@@ -1,6 +1,6 @@
-package jaicore.ml.dataset;
+package jaicore.ml.core.dataset;
 
-import jaicore.ml.dataset.attribute.IAttributeValue;
+import jaicore.ml.core.dataset.attribute.IAttributeValue;
 
 public interface IInstance {
 

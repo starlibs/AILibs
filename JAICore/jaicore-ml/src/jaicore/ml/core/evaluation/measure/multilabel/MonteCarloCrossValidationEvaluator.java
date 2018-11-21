@@ -1,4 +1,4 @@
-package jaicore.ml.evaluation.measures.multilabel;
+package jaicore.ml.core.evaluation.measure.multilabel;
 
 import java.util.Arrays;
 import java.util.List;

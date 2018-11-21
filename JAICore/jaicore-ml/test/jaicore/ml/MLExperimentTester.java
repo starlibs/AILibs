@@ -6,9 +6,9 @@ import jaicore.experiments.ExperimentRunner;
 import jaicore.experiments.IExperimentIntermediateResultProcessor;
 import jaicore.experiments.IExperimentSetConfig;
 import jaicore.experiments.IExperimentSetEvaluator;
+import jaicore.ml.core.evaluation.measure.singlelabel.ZeroOneLoss;
 import jaicore.ml.evaluation.evaluators.weka.IClassifierEvaluator;
 import jaicore.ml.evaluation.evaluators.weka.SingleRandomSplitClassifierEvaluator;
-import jaicore.ml.evaluation.measures.multiclass.ZeroOneLoss;
 
 import java.io.BufferedReader;
 import java.io.File;

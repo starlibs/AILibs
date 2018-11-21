@@ -1,6 +1,6 @@
-package jaicore.ml.evaluation.measures.multilabel;
+package jaicore.ml.core.evaluation.measure.multilabel;
 
-import jaicore.ml.evaluation.measures.ADecomposableDoubleMeasure;
+import jaicore.ml.core.evaluation.measure.ADecomposableDoubleMeasure;
 
 public class HammingMultilabelEvaluator extends ADecomposableDoubleMeasure<double[]> {
 

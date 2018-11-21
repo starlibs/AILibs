@@ -1,10 +1,10 @@
-package jaicore.ml.evaluation.measures.multiclass;
+package jaicore.ml.core.evaluation.measure.singlelabel;
 
 import java.io.Serializable;
 
 import com.google.common.math.DoubleMath;
 
-import jaicore.ml.evaluation.measures.ADecomposableDoubleMeasure;
+import jaicore.ml.core.evaluation.measure.ADecomposableDoubleMeasure;
 
 public class ZeroOneLoss extends ADecomposableDoubleMeasure<Double> implements Serializable {
 

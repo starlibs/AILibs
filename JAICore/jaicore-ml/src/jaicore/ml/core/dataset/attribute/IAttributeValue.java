@@ -1,4 +1,4 @@
-package jaicore.ml.dataset.attribute;
+package jaicore.ml.core.dataset.attribute;
 
 public interface IAttributeValue<TYPE> {
 

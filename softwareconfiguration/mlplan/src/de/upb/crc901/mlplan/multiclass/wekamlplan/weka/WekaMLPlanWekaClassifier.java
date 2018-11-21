@@ -12,7 +12,7 @@ import de.upb.crc901.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.MLPlanWekaClassifier;
 import hasco.serialization.ComponentLoader;
 import jaicore.basic.FileUtil;
-import jaicore.ml.evaluation.measures.multiclass.MultiClassMeasureBuilder;
+import jaicore.ml.core.evaluation.measure.singlelabel.MultiClassMeasureBuilder;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import weka.core.Instances;

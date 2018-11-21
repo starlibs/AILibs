@@ -31,7 +31,7 @@ import com.google.common.collect.Range;
 
 import jaicore.logging.LoggerUtil;
 import jaicore.ml.WekaUtil;
-import jaicore.ml.evaluation.measures.multiclass.MulticlassMetric;
+import jaicore.ml.core.evaluation.measure.singlelabel.MulticlassMetric;
 import weka.classifiers.Classifier;
 import weka.core.Instance;
 import weka.core.Instances;

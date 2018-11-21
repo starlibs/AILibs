@@ -5,4 +5,4 @@
  * @author wever
  *
  */
-package jaicore.ml.dataset.attribute;
+package jaicore.ml.core.dataset.attribute;

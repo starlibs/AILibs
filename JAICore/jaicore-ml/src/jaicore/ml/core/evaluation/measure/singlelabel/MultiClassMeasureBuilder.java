@@ -1,6 +1,6 @@
-package jaicore.ml.evaluation.measures.multiclass;
+package jaicore.ml.core.evaluation.measure.singlelabel;
 
-import jaicore.ml.evaluation.measures.ADecomposableDoubleMeasure;
+import jaicore.ml.core.evaluation.measure.ADecomposableDoubleMeasure;
 
 public class MultiClassMeasureBuilder {
 	public ADecomposableDoubleMeasure<Double> getEvaluator(MultiClassPerformanceMeasure pm) {

@@ -69,6 +69,10 @@ public class KVStore extends HashMap<String, Object> implements Serializable {
 	 */
 	public String getAsString(final String key) {
 		Object value = this.get(key);
+		if (value == null) {
+			return null;
+		}
+
 		if (value instanceof String) {
 			return (String) value;
 		} else {

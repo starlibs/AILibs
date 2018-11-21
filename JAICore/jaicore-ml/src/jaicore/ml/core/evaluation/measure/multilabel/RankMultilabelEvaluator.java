@@ -1,4 +1,4 @@
-package jaicore.ml.evaluation.measures.multilabel;
+package jaicore.ml.core.evaluation.measure.multilabel;
 
 import java.util.Iterator;
 import java.util.List;
@@ -9,7 +9,7 @@ import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.Range;
 
 import jaicore.basic.sets.SetUtil;
-import jaicore.ml.evaluation.measures.ADecomposableDoubleMeasure;
+import jaicore.ml.core.evaluation.measure.ADecomposableDoubleMeasure;
 
 public class RankMultilabelEvaluator extends ADecomposableDoubleMeasure<double[]> {
 

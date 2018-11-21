@@ -7,9 +7,9 @@ import java.util.Random;
 import org.apache.commons.lang.NotImplementedException;
 
 import jaicore.ml.WekaUtil;
+import jaicore.ml.core.evaluation.measure.singlelabel.ZeroOneLoss;
 import jaicore.ml.evaluation.evaluators.weka.IClassifierEvaluator;
 import jaicore.ml.evaluation.evaluators.weka.MonteCarloCrossValidationEvaluator;
-import jaicore.ml.evaluation.measures.multiclass.ZeroOneLoss;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.core.Instances;

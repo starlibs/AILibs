@@ -1,4 +1,4 @@
-package jaicore.ml.evaluation.measures.multiclass;
+package jaicore.ml.core.evaluation.measure.singlelabel;
 
 public enum MulticlassMetric {
     areaAboveROC,
