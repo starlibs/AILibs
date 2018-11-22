@@ -43,8 +43,8 @@ public class MLPlanOpenMLExample {
 		
 		/* initialize mlplan, and let it run for 30 seconds */
 
-		SQLAdapter adapter = new SQLAdapter("host", "user", "password", "database");
-		PerformanceDBAdapter pAdapter = new PerformanceDBAdapter(adapter, "performance_cache");
+		SQLAdapter adapter = new SQLAdapter("isys-db.cs.upb.de", "pgotfml", "automl2018", "pgotfml_jmhansel");
+        PerformanceDBAdapter pAdapter = new PerformanceDBAdapter(adapter, "performance_cache");
 
 		MLPlanWekaBuilder builder = new MLPlanWekaBuilder(
 				new File("conf/automl/searchmodels/weka/weka-all-autoweka.json"), new File("conf/mlplan.properties"),

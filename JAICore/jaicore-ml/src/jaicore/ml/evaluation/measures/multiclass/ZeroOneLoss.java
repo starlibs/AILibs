@@ -11,7 +11,4 @@ public class ZeroOneLoss extends ADecomposableDoubleMeasure<Double> implements S
 	public Double calculateMeasure(Double actual, Double expected) {
 		return actual.equals(expected)  ? 0.0 : 1.0;
 	}
-	
-	
-	
 }

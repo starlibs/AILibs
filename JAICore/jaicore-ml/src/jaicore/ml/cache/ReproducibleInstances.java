@@ -28,7 +28,8 @@ public class ReproducibleInstances extends Instances {
 	 */
 	private static final long serialVersionUID = 4318807226111536282L;
 	private List<Instruction> history = new LinkedList<>();
-	private boolean nocache = true;
+	private boolean cacheStorage = true;
+	private boolean cacheLookup = true;
 	
 	private ReproducibleInstances(Instances dataset) {
 		super(dataset);
@@ -78,7 +79,8 @@ public class ReproducibleInstances extends Instances {
 			Instruction i = iterator.next();
 			history.add(i);
 		}
-		nocache = dataset.nocache;
+		cacheLookup = dataset.cacheLookup;
+		cacheStorage = dataset.cacheStorage;
 	}
 
 	/**
@@ -95,7 +97,8 @@ public class ReproducibleInstances extends Instances {
 		OpenMLHelper.setApiKey(apiKey);
 		ReproducibleInstances result = new ReproducibleInstances(OpenMLHelper.getInstancesById(Integer.parseInt(id)));
 		result.history.add(new LoadDataSetInstruction("openml.org", id));
-		result.nocache = false;
+		result.cacheLookup = true;
+		result.cacheStorage = true;
 		return result;
 	}
 
@@ -113,7 +116,8 @@ public class ReproducibleInstances extends Instances {
 		data.setClassIndex(data.numAttributes() - 1);
 		ReproducibleInstances result = new ReproducibleInstances(data);
 		result.history.add(new LoadDataSetInstruction("local_" + user, path));
-		result.nocache = false;
+		result.cacheLookup = true;
+		result.cacheStorage = true;
 		return result;
 	}
 
@@ -123,7 +127,12 @@ public class ReproducibleInstances extends Instances {
 	 * @return
 	 */
 	public List<Instruction> getInstructions() {
-		return nocache ? null : history;
+		if(cacheLookup || cacheStorage) {
+			return history;
+		}
+		else {
+			return null;
+		}
 	}
 	
 	/**
@@ -133,6 +142,34 @@ public class ReproducibleInstances extends Instances {
 	 */
 	public void addInstruction(Instruction i) {
 		history.add(i);
+	}
+
+	/**
+	 * @return the cacheStorage
+	 */
+	public boolean isCacheStorage() {
+		return cacheStorage;
+	}
+
+	/**
+	 * @param cacheStorage the cacheStorage to set
+	 */
+	public void setCacheStorage(boolean cacheStorage) {
+		this.cacheStorage = cacheStorage;
+	}
+
+	/**
+	 * @return the cacheLookup
+	 */
+	public boolean isCacheLookup() {
+		return cacheLookup;
+	}
+
+	/**
+	 * @param cacheLookup the cacheLookup to set
+	 */
+	public void setCacheLookup(boolean cacheLookup) {
+		this.cacheLookup = cacheLookup;
 	}
 	
 }

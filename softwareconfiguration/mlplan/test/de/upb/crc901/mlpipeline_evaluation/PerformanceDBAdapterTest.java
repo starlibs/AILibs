@@ -23,8 +23,8 @@ import weka.classifiers.trees.RandomForest;
 public class PerformanceDBAdapterTest {
 	@Test
 	public void test() {
-		SQLAdapter adapter = new SQLAdapter("host", "user", "password", "database");
-		PerformanceDBAdapter pAdapter = new PerformanceDBAdapter(adapter, "performance_cache");
+		SQLAdapter adapter = new SQLAdapter("isys-db.cs.upb.de", "pgotfml", "automl2018", "pgotfml_jmhansel");
+        PerformanceDBAdapter pAdapter = new PerformanceDBAdapter(adapter, "performance_cache_test");
 		try {
 			ComponentLoader loader = new ComponentLoader(
 					new File("conf/automl/searchmodels/weka/weka-all-autoweka.json"));
