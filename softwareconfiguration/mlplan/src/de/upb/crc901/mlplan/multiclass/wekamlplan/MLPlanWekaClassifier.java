@@ -172,7 +172,7 @@ public abstract class MLPlanWekaClassifier implements Classifier, CapabilitiesHa
 				if (evaluationMeasurementBridge instanceof CacheEvaluatorMeasureBridge) {
 					CacheEvaluatorMeasureBridge bridge = ((CacheEvaluatorMeasureBridge) evaluationMeasurementBridge)
 							.getShallowCopy(c);
-					bridge.setBenchmarkType(CacheEvaluatorMeasureBridge.BENCHMARK_TYPES.SEARCH_BENCHMARK);
+				
 					
 					long seed = this.getConfig().randomSeed() + c.hashCode();
 					
@@ -189,8 +189,6 @@ public abstract class MLPlanWekaClassifier implements Classifier, CapabilitiesHa
 				AbstractEvaluatorMeasureBridge<Double, Double> bridge = evaluationMeasurementBridge;
 				if (evaluationMeasurementBridge instanceof CacheEvaluatorMeasureBridge) {
 					bridge = ((CacheEvaluatorMeasureBridge) bridge).getShallowCopy(c);
-					((CacheEvaluatorMeasureBridge) bridge)
-							.setBenchmarkType(CacheEvaluatorMeasureBridge.BENCHMARK_TYPES.SELECTION_BENCHMARK);
 
 				}
 

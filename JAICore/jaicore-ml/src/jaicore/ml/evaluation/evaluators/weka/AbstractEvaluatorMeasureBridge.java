@@ -22,4 +22,7 @@ public abstract class AbstractEvaluatorMeasureBridge <I, O>{
 	
 	public abstract O evaluateSplit(final Classifier pl, Instances trainingData, Instances validationData) throws Exception;
 
+	public IMeasure<I, O> getBasicEvaluator(){
+		return basicEvaluator;
+	}
 }

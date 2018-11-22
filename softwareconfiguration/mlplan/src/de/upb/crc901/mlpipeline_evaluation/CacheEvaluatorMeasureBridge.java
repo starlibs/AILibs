@@ -36,14 +36,16 @@ public class CacheEvaluatorMeasureBridge extends AbstractEvaluatorMeasureBridge<
 				Optional<Double> potentialCache = performanceDBAdapter.exists(evaluatedComponent,
 						(ReproducibleInstances) trainingData);
 				if (potentialCache.isPresent()) {
+					System.out.println("Cache hit!");
 					return potentialCache.get();
 				}
 			}
+			System.out.println("Cache miss!");
 			// query the underlying loss function
 			double performance = simpleEvaluatorMeasureBridge.evaluateSplit(pl, trainingData, validationData);
 			// cache it
 			if (((ReproducibleInstances) trainingData).isCacheStorage()) {
-				performanceDBAdapter.store(evaluatedComponent, (ReproducibleInstances) trainingData, performance);
+				performanceDBAdapter.store(evaluatedComponent, (ReproducibleInstances) trainingData, (ReproducibleInstances)testData, performance, simpleEvaluatorMeasureBridge.getBasicEvaluator().getClass().getName());
 			}
 			return performance;
 		} else {

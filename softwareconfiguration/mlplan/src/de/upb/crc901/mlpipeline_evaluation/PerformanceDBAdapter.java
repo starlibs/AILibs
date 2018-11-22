@@ -119,10 +119,14 @@ public class PerformanceDBAdapter implements Closeable {
 	 *            - Instances object that includes the trajectory, i.e. all
 	 *            operations that have been applied to the instances like loading,
 	 *            splitting etc.
+	 * @param testData
+	 * 			  - The reproducible instances of the test data used for this evaluation process
 	 * @param score
 	 *            - Score achieved by the composition on the reproducible instances
+	 * @param className 
+	 * 			  - the java qualified class name of the loss function that was used
 	 */
-	public void store(ComponentInstance composition, ReproducibleInstances reproducibleInstances, double score) {
+	public void store(ComponentInstance composition, ReproducibleInstances reproducibleInstances, ReproducibleInstances testData, double score, String className) {
 		ObjectMapper mapper = new ObjectMapper();
 		try {
 			String compositionString = mapper.writeValueAsString(composition);
