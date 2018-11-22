@@ -166,16 +166,19 @@ public abstract class MLPlanWekaClassifier implements Classifier, CapabilitiesHa
 			IObjectEvaluator<Classifier, Double> searchBenchmark = new MonteCarloCrossValidationEvaluator(
 					this.evaluationMeasurementBridge, this.config.numberOfMCIterationsDuringSearch(),
 					this.dataShownToSearch, this.config.getMCCVTrainFoldSizeDuringSearch(), this.config.randomSeed());
-			Random seedGenerator = new Random(config.randomSeed());
+			
 
 			IObjectEvaluator<ComponentInstance, Double> wrappedSearchBenchmark = c -> {
 				if (evaluationMeasurementBridge instanceof CacheEvaluatorMeasureBridge) {
 					CacheEvaluatorMeasureBridge bridge = ((CacheEvaluatorMeasureBridge) evaluationMeasurementBridge)
 							.getShallowCopy(c);
 					bridge.setBenchmarkType(CacheEvaluatorMeasureBridge.BENCHMARK_TYPES.SEARCH_BENCHMARK);
+					
+					long seed = this.getConfig().randomSeed() + c.hashCode();
+					
 					IObjectEvaluator<Classifier, Double> copiedSearchBenchmark = new MonteCarloCrossValidationEvaluator(
 							bridge, this.config.numberOfMCIterationsDuringSearch(), this.dataShownToSearch,
-							this.config.getMCCVTrainFoldSizeDuringSearch(), seedGenerator.nextInt());
+							this.config.getMCCVTrainFoldSizeDuringSearch(), seed);
 					return copiedSearchBenchmark.evaluate(this.factory.getComponentInstantiation(c));
 				}
 				return searchBenchmark.evaluate(this.factory.getComponentInstantiation(c));
