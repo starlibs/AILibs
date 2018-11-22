@@ -738,17 +738,17 @@ public class WekaUtil {
 	}
 
 	
-	public static List<Instances> getStratifiedSplit(final Instances data, final Random rand, final double... portions) {
+	public static List<Instances> getStratifiedSplit(final Instances data, final long seed, final double... portions) {
 		// if data should be reproducible use other method. 
 		if(data instanceof ReproducibleInstances) {
-			List<ReproducibleInstances> reproducibleInstancesResult = getStratifiedSplit((ReproducibleInstances)data, rand, portions);
+			List<ReproducibleInstances> reproducibleInstancesResult = getStratifiedSplit((ReproducibleInstances)data, seed, portions);
 			ArrayList<Instances> result = new ArrayList<>(reproducibleInstancesResult.size());
 			for (int i = 0; i < reproducibleInstancesResult.size(); i++) {
 				result.add(reproducibleInstancesResult.get(i));
 			}
 			return result; 
 		}
-		
+		Random rand = new Random(seed);
 		/* check that portions sum up to s.th. smaller than 1 */
 		double sum = 0;
 		for (double p : portions) {

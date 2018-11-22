@@ -129,7 +129,7 @@ public abstract class MLPlanWekaClassifier implements Classifier, CapabilitiesHa
 			float selectionDataPortion = this.config.dataPortionForSelection();
 			if (selectionDataPortion > 0) {
 				List<Instances> selectionSplit = WekaUtil.getStratifiedSplit(this.data,
-						new Random(this.config.randomSeed()), selectionDataPortion);
+						this.config.randomSeed(), selectionDataPortion);
 				this.dataShownToSearch = selectionSplit.get(1);
 			} else {
 				this.dataShownToSearch = this.data;
@@ -172,6 +172,7 @@ public abstract class MLPlanWekaClassifier implements Classifier, CapabilitiesHa
 				if (evaluationMeasurementBridge instanceof CacheEvaluatorMeasureBridge) {
 					CacheEvaluatorMeasureBridge bridge = ((CacheEvaluatorMeasureBridge) evaluationMeasurementBridge)
 							.getShallowCopy(c);
+					bridge.setBenchmarkType(CacheEvaluatorMeasureBridge.BENCHMARK_TYPES.SEARCH_BENCHMARK);
 					IObjectEvaluator<Classifier, Double> copiedSearchBenchmark = new MonteCarloCrossValidationEvaluator(
 							bridge, this.config.numberOfMCIterationsDuringSearch(), this.dataShownToSearch,
 							this.config.getMCCVTrainFoldSizeDuringSearch(), seedGenerator.nextInt());
@@ -179,20 +180,21 @@ public abstract class MLPlanWekaClassifier implements Classifier, CapabilitiesHa
 				}
 				return searchBenchmark.evaluate(this.factory.getComponentInstantiation(c));
 			};
-			
+
 			IObjectEvaluator<ComponentInstance, Double> wrappedSelectionBenchmark = c -> {
 				/* first conduct MCCV */
 				AbstractEvaluatorMeasureBridge<Double, Double> bridge = evaluationMeasurementBridge;
-				if(evaluationMeasurementBridge instanceof CacheEvaluatorMeasureBridge) {
+				if (evaluationMeasurementBridge instanceof CacheEvaluatorMeasureBridge) {
 					bridge = ((CacheEvaluatorMeasureBridge) bridge).getShallowCopy(c);
+					((CacheEvaluatorMeasureBridge) bridge)
+							.setBenchmarkType(CacheEvaluatorMeasureBridge.BENCHMARK_TYPES.SELECTION_BENCHMARK);
+
 				}
-				
-				MonteCarloCrossValidationEvaluator mccv = new MonteCarloCrossValidationEvaluator(
-						bridge,
+
+				MonteCarloCrossValidationEvaluator mccv = new MonteCarloCrossValidationEvaluator(bridge,
 						MLPlanWekaClassifier.this.config.numberOfMCIterationsDuringSelection(),
 						MLPlanWekaClassifier.this.data,
-						MLPlanWekaClassifier.this.config.getMCCVTrainFoldSizeDuringSelection(),
-						config.randomSeed());
+						MLPlanWekaClassifier.this.config.getMCCVTrainFoldSizeDuringSelection(), config.randomSeed());
 				mccv.evaluate(this.factory.getComponentInstantiation(c));
 
 				/* now retrieve .75-percentile from stats */
@@ -203,7 +205,7 @@ public abstract class MLPlanWekaClassifier implements Classifier, CapabilitiesHa
 						percentile, mean, mccv.getStats().getN());
 				return percentile;
 			};
-			
+
 			TwoPhaseSoftwareConfigurationProblem problem = new TwoPhaseSoftwareConfigurationProblem(this.componentFile,
 					"AbstractClassifier", wrappedSearchBenchmark, wrappedSelectionBenchmark);
 

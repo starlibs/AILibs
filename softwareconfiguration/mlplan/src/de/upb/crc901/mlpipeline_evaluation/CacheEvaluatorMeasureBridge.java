@@ -11,7 +11,11 @@ import weka.classifiers.Classifier;
 import weka.core.Instances;
 
 public class CacheEvaluatorMeasureBridge extends AbstractEvaluatorMeasureBridge<Double, Double> {
+	public enum BENCHMARK_TYPES {SELECTION_BENCHMARK, SEARCH_BENCHMARK};
 
+	
+	private BENCHMARK_TYPES type; 
+	
 	ComponentInstance evaluatedComponent;
 
 	/* Used for evaluating, when no cache entry could be found. */
@@ -34,14 +38,14 @@ public class CacheEvaluatorMeasureBridge extends AbstractEvaluatorMeasureBridge<
 			Optional<Double> potentialCache = performanceDBAdapter.exists(evaluatedComponent,
 					(ReproducibleInstances) trainingData);
 			if (potentialCache.isPresent()) {
+				System.out.println("Cache entry found."+ type);
 				return potentialCache.get();
 			} else {
 				// query the underlying loss function
+				System.out.println("No Cache Entry found." +type);
 				double performance = simpleEvaluatorMeasureBridge.evaluateSplit(pl, trainingData, validationData);
 				// cache it
-				if (trainingData instanceof ReproducibleInstances) {
-					performanceDBAdapter.store(evaluatedComponent, (ReproducibleInstances) trainingData, performance);
-				}
+				performanceDBAdapter.store(evaluatedComponent, (ReproducibleInstances) trainingData, performance);
 				return performance;
 			}
 		} else {
@@ -63,4 +67,8 @@ public class CacheEvaluatorMeasureBridge extends AbstractEvaluatorMeasureBridge<
 		return bridge;
 	}
 
+	
+	public void setBenchmarkType (BENCHMARK_TYPES type) {
+		this.type = type;
+	}
 }
