@@ -21,11 +21,13 @@ import jaicore.basic.sets.SetUtil;
 @JsonPropertyOrder(alphabetic=true)
 public class ComponentInstance {
 	private final Component component;
+	@JsonPropertyOrder(alphabetic=true)
 	private final Map<String, String> parameterValues;
 	/**
 	 * The satisfactionOfRequiredInterfaces map maps from Interface IDs to
 	 * ComopnentInstances
 	 */
+	@JsonPropertyOrder(alphabetic=true)
 	private final Map<String, ComponentInstance> satisfactionOfRequiredInterfaces;
 
 	public ComponentInstance(@JsonProperty("component") final Component component,
