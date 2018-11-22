@@ -1,6 +1,7 @@
 package autofe.algorithm.hasco.filter.generic;
 
 import java.io.Serializable;
+import java.util.stream.LongStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +40,10 @@ public class WEKAFilter implements IFilter, Serializable {
 			inputData = inputData.copy();
 		}
 
+		// Force update of instances
+		inputData.updateInstances();
+		long[] refShape = inputData.getIntermediateInstances().get(0).shape();
+
 		try {
 			this.wekaFilter.setInputFormat(inputData.getInstances());
 			inputData.setInstances(Filter.useFilter(inputData.getInstances(), this.wekaFilter));
@@ -47,6 +52,13 @@ public class WEKAFilter implements IFilter, Serializable {
 			logger.warn("Could not apply weka filter. Reason: " + e.getMessage());
 			e.printStackTrace();
 		}
+
+		// Update intermediate instances using reference shape if spatial structure is
+		// kept
+		if (inputData.getInstances().numAttributes() - 1 == LongStream.of(refShape).reduce(1, (a, b) -> a * b))
+			inputData.updateIntermediateInstances(refShape);
+		else
+			inputData.updateIntermediateInstances(null);
 
 		return inputData;
 	}

@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -242,6 +243,23 @@ public final class DataSetUtils {
 		inst.setDataset(result);
 
 		return inst;
+	}
+
+	public static INDArray instanceToMatrix(final Instance instance, final long[] refShape) {
+		INDArray result;
+
+		// If ref shape is not null, the shape has been preserved
+		if (refShape != null) {
+			result = Nd4j.zeros(refShape);
+			for (int i = 0; i < instance.numAttributes() - 1; i++)
+				result.putScalar(i, instance.value(i));
+		} else {
+			double[] data = instance.toDoubleArray();
+			// Get data without last element
+			result = Nd4j.create(Arrays.copyOf(data, data.length - 1));
+		}
+
+		return result;
 	}
 
 	public static long[] getInputShapeByDataSet(final int dataSetID) {

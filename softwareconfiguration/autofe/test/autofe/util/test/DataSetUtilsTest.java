@@ -10,12 +10,14 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
+import autofe.algorithm.hasco.filter.generic.WEKAFilter;
 import autofe.algorithm.hasco.filter.image.CatalanoInPlaceFilter;
 import autofe.util.DataSet;
 import autofe.util.DataSetUtils;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instances;
+import weka.filters.unsupervised.attribute.Standardize;
 
 public class DataSetUtilsTest {
 	// @Test
@@ -77,7 +79,7 @@ public class DataSetUtilsTest {
 		filter.applyFilter(data, true);
 	}
 
-	@Test
+	// @Test
 	public void leafBwTest() throws IOException {
 		File datasetFolder = new File("testres/" + File.separator + "leaf_bw");
 		DataSet data = DataSetUtils.loadDatasetFromImageFolder(datasetFolder);
@@ -94,5 +96,22 @@ public class DataSetUtilsTest {
 		System.out.println("Loaded data.");
 		CatalanoInPlaceFilter filter = new CatalanoInPlaceFilter("GaussianBlur");
 		filter.applyFilter(data, true);
+	}
+
+	@Test
+	public void updateIntermediateInstancesTest() throws Exception {
+		DataSet data = DataSetUtils.getDataSetByID(DataSetUtils.FASHION_MNIST_ID);
+		data = DataSetUtils.getStratifiedSplit(data, new Random(42), 0.1).get(0);
+		WEKAFilter filter = new WEKAFilter(new Standardize());
+
+		DataSet result = filter.applyFilter(data, false);
+		System.out.println(result.getInstances().get(0).value(0));
+		System.out.println(result.getIntermediateInstances().get(0).getDouble(0));
+
+		System.out.println(result.getInstances().numAttributes());
+		System.out.println(result.getIntermediateInstances().get(0).shapeInfoToString());
+
+		Assert.assertEquals(result.getInstances().get(0).value(0),
+				result.getIntermediateInstances().get(0).getDouble(0), 0.01);
 	}
 }

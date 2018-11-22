@@ -7,6 +7,7 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import weka.core.Instance;
 import weka.core.Instances;
 
 public class DataSet {
@@ -55,5 +56,16 @@ public class DataSet {
 			this.instances = DataSetUtils.matricesToInstances(this.intermediateInstances, this.instances);
 		} else
 			logger.debug("Could not update any instance due to lack of intermediate instances.");
+	}
+
+	public void updateIntermediateInstances(final long[] refShape) {
+
+		if (this.instances != null) {
+			List<INDArray> newIntermediates = new ArrayList<>();
+			for (final Instance inst : this.instances) {
+				newIntermediates.add(DataSetUtils.instanceToMatrix(inst, refShape));
+			}
+			this.intermediateInstances = newIntermediates;
+		}
 	}
 }
