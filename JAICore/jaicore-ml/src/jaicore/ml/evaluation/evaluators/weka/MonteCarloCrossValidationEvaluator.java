@@ -27,20 +27,20 @@ public class MonteCarloCrossValidationEvaluator implements IClassifierEvaluator 
 	private final int repeats;
 	private final Instances data;
 	private final float trainingPortion;
-	private final Random rand;
+	private final long seed;
 	/* Can either compute the loss or cache it */
 	private final AbstractEvaluatorMeasureBridge<Double, Double> bridge;
 
 	private final DescriptiveStatistics stats = new DescriptiveStatistics();
 
 	public MonteCarloCrossValidationEvaluator(AbstractEvaluatorMeasureBridge<Double, Double> bridge,
-			final int repeats, final Instances data, final float trainingPortion, final int seed) {
+			final int repeats, final Instances data, final float trainingPortion, final long seed) {
 		super();
 		this.repeats = repeats;
 		this.bridge = bridge;
 		this.data = data;
 		this.trainingPortion = trainingPortion;
-		this.rand = new Random(seed);
+		this.seed = seed;
 	}
 
 	public void cancel() {
@@ -58,7 +58,7 @@ public class MonteCarloCrossValidationEvaluator implements IClassifierEvaluator 
 		logger.info("Starting evaluation of {}", pl);
 		for (int i = 0; i < this.repeats && !this.canceled && !Thread.currentThread().isInterrupted(); i++) {
 			logger.debug("Obtaining predictions of {} for split #{}/{}", pl, i + 1, this.repeats);
-			List<Instances> split = WekaUtil.getStratifiedSplit(data, rand, trainingPortion);
+			List<Instances> split = WekaUtil.getStratifiedSplit(data, seed+i, trainingPortion);
 			double score = bridge.evaluateSplit(pl, split.get(0), split.get(1));
 			logger.info("Score for evaluation of {} with split #{}/{}: {}", pl, i + 1, this.repeats, score);
 		}
