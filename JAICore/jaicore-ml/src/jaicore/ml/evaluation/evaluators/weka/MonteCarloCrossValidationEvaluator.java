@@ -58,7 +58,7 @@ public class MonteCarloCrossValidationEvaluator implements IClassifierEvaluator 
 		logger.info("Starting evaluation of {}", pl);
 		for (int i = 0; i < this.repeats && !this.canceled && !Thread.currentThread().isInterrupted(); i++) {
 			logger.debug("Obtaining predictions of {} for split #{}/{}", pl, i + 1, this.repeats);
-			List<Instances> split = WekaUtil.getStratifiedSplit(data, seed, trainingPortion);
+			List<Instances> split = WekaUtil.getStratifiedSplit(data, seed+i, trainingPortion);
 			double score = bridge.evaluateSplit(pl, split.get(0), split.get(1));
 			logger.info("Score for evaluation of {} with split #{}/{}: {}", pl, i + 1, this.repeats, score);
 		}
