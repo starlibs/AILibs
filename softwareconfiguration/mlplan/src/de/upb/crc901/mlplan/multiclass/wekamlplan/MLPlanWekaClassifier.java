@@ -179,31 +179,31 @@ public abstract class MLPlanWekaClassifier implements Classifier, CapabilitiesHa
 				}
 				return searchBenchmark.evaluate(this.factory.getComponentInstantiation(c));
 			};
-			IObjectEvaluator<Classifier, Double> selectionBenchmark = new IObjectEvaluator<Classifier, Double>() {
-
-				@Override
-				public Double evaluate(final Classifier object) throws Exception {
-
-					/* first conduct MCCV */
-					MonteCarloCrossValidationEvaluator mccv = new MonteCarloCrossValidationEvaluator(
-							MLPlanWekaClassifier.this.evaluationMeasurementBridge,
-							MLPlanWekaClassifier.this.config.numberOfMCIterationsDuringSelection(),
-							MLPlanWekaClassifier.this.data,
-							MLPlanWekaClassifier.this.config.getMCCVTrainFoldSizeDuringSelection(),
-							config.randomSeed());
-					mccv.evaluate(object);
-
-					/* now retrieve .75-percentile from stats */
-					double mean = mccv.getStats().getMean();
-					double percentile = mccv.getStats().getPercentile(75f);
-					MLPlanWekaClassifier.this.logger.info(
-							"Select {} as .75-percentile where {} would have been the mean. Samples size of MCCV was {}",
-							percentile, mean, mccv.getStats().getN());
-					return percentile;
+			
+			IObjectEvaluator<ComponentInstance, Double> wrappedSelectionBenchmark = c -> {
+				/* first conduct MCCV */
+				AbstractEvaluatorMeasureBridge<Double, Double> bridge = evaluationMeasurementBridge;
+				if(evaluationMeasurementBridge instanceof CacheEvaluatorMeasureBridge) {
+					bridge = ((CacheEvaluatorMeasureBridge) bridge).getShallowCopy(c);
 				}
+				
+				MonteCarloCrossValidationEvaluator mccv = new MonteCarloCrossValidationEvaluator(
+						bridge,
+						MLPlanWekaClassifier.this.config.numberOfMCIterationsDuringSelection(),
+						MLPlanWekaClassifier.this.data,
+						MLPlanWekaClassifier.this.config.getMCCVTrainFoldSizeDuringSelection(),
+						config.randomSeed());
+				mccv.evaluate(this.factory.getComponentInstantiation(c));
+
+				/* now retrieve .75-percentile from stats */
+				double mean = mccv.getStats().getMean();
+				double percentile = mccv.getStats().getPercentile(75f);
+				MLPlanWekaClassifier.this.logger.info(
+						"Select {} as .75-percentile where {} would have been the mean. Samples size of MCCV was {}",
+						percentile, mean, mccv.getStats().getN());
+				return percentile;
 			};
-			IObjectEvaluator<ComponentInstance, Double> wrappedSelectionBenchmark = c -> selectionBenchmark
-					.evaluate(this.factory.getComponentInstantiation(c));
+			
 			TwoPhaseSoftwareConfigurationProblem problem = new TwoPhaseSoftwareConfigurationProblem(this.componentFile,
 					"AbstractClassifier", wrappedSearchBenchmark, wrappedSelectionBenchmark);
 
