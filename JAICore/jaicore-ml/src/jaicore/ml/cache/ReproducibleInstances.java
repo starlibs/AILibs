@@ -2,12 +2,9 @@ package jaicore.ml.cache;
 
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-
-import org.json.JSONWriter;
 
 import jaicore.ml.WekaUtil;
 import jaicore.ml.openml.OpenMLHelper;
@@ -53,7 +50,7 @@ public class ReproducibleInstances extends Instances {
 					instances = fromOpenML(inst.inputs.get("id"), apiKey);
 				}
 				else if(inst.inputs.get("provider").startsWith("local")) {
-					instances = fromARFF(inst.inputs.get("id"), inst.inputs.get("provider").split("_")[1]); // TODO user name extraction
+					instances = fromARFF(inst.inputs.get("id"), inst.inputs.get("provider").split("\\.")[1]);
 				}
 				break;
 			case "split":
@@ -71,6 +68,7 @@ public class ReproducibleInstances extends Instances {
 		return instances;
 	}
 	
+
 	
 	public ReproducibleInstances(ReproducibleInstances dataset) {
 		super(dataset);
@@ -112,7 +110,7 @@ public class ReproducibleInstances extends Instances {
 		Instances data = new Instances(new FileReader(path)); // TODO mirko
 		data.setClassIndex(data.numAttributes() - 1);
 		ReproducibleInstances result = new ReproducibleInstances(data);
-		result.history.add(new LoadDataSetInstruction("local_" + user, path));
+		result.history.add(new LoadDataSetInstruction("local." + user, path));
 		result.nocache = false;
 		return result;
 	}
