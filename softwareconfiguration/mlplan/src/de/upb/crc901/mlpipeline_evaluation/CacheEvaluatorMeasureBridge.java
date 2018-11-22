@@ -34,7 +34,6 @@ public class CacheEvaluatorMeasureBridge extends AbstractEvaluatorMeasureBridge<
 			Optional<Double> potentialCache = performanceDBAdapter.exists(evaluatedComponent,
 					(ReproducibleInstances) trainingData);
 			if (potentialCache.isPresent()) {
-				System.exit(0);
 				return potentialCache.get();
 			} else {
 				// query the underlying loss function

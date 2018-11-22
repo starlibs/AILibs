@@ -43,7 +43,7 @@ public class MLPlanOpenMLExample {
 		
 		/* initialize mlplan, and let it run for 30 seconds */
 
-		SQLAdapter adapter = new SQLAdapter(null, null, null, null);
+		SQLAdapter adapter = new SQLAdapter("host", "user", "password", "database");
 		PerformanceDBAdapter pAdapter = new PerformanceDBAdapter(adapter, "performance_cache");
 
 		MLPlanWekaBuilder builder = new MLPlanWekaBuilder(

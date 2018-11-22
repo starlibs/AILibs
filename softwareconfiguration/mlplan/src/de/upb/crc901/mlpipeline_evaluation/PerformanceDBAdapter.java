@@ -1,5 +1,7 @@
 package de.upb.crc901.mlpipeline_evaluation;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.ResultSet;
@@ -27,7 +29,7 @@ import jaicore.ml.cache.ReproducibleInstances;
  * @author jmhansel
  *
  */
-public class PerformanceDBAdapter {
+public class PerformanceDBAdapter implements Closeable {
 
 	private final SQLAdapter sqlAdapter;
 	private final String performanceSampleTableName;
@@ -127,7 +129,7 @@ public class PerformanceDBAdapter {
 			String trajectoryString = mapper.writeValueAsString(reproducibleInstances.getInstructions());
 			MessageDigest md = MessageDigest.getInstance("SHA-256");
 			md.update(compositionString.getBytes());
-			// md.update(trajectoryString.getBytes());
+			md.update(trajectoryString.getBytes());
 			byte[] digest = md.digest();
 			String hexHash = (new HexBinaryAdapter()).marshal(digest);
 			ResultSet rs = sqlAdapter.getResultsOfQuery(
@@ -140,12 +142,16 @@ public class PerformanceDBAdapter {
 			valueMap.put("evaluation_date",
 					new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Date.from(Instant.now())));
 			valueMap.put("hash_value", hexHash);
-			// TOOD check if this works
 			valueMap.put("score", Double.toString(score));
 			this.sqlAdapter.insert(this.performanceSampleTableName, valueMap);
 		} catch (JsonProcessingException | NoSuchAlgorithmException | SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
+
+	@Override
+	public void close() throws IOException {
+		this.sqlAdapter.close();
+	}
+
 }

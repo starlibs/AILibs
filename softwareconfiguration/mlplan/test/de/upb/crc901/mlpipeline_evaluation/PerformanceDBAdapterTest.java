@@ -34,44 +34,30 @@ public class PerformanceDBAdapterTest {
 
 			ReproducibleInstances reproducibleInstances1 = ReproducibleInstances.fromOpenML("40983",
 					"4350e421cdc16404033ef1812ea38c01");
-			double score = Math.PI / 10.0;
+			double score = Math.PI / 5.0;
 
 			// Store the first sample
 			pAdapter.store(composition1, reproducibleInstances1, score);
 
+			// These should have no entry in the db, assuming it was empty when the test was
+			// started
 			ComponentInstance composition2 = factory.convertToComponentInstance(
 					new MLPipeline(new Ranker(), new OneRAttributeEval(), new MultilayerPerceptron()));
 			ReproducibleInstances reproducibleInstances2 = ReproducibleInstances.fromOpenML("181",
 					"4350e421cdc16404033ef1812ea38c01");
 
-//			Optional<Double> shouldntExist1 = pAdapter.exists(composition1, reproducibleInstances2);
-//			Optional<Double> shouldntExist2 = pAdapter.exists(composition2, reproducibleInstances1);
-//			Optional<Double> shouldntExist3 = pAdapter.exists(composition2, reproducibleInstances2);
+			Optional<Double> shouldntExist1 = pAdapter.exists(composition1, reproducibleInstances2);
+			Optional<Double> shouldntExist2 = pAdapter.exists(composition2, reproducibleInstances1);
+			Optional<Double> shouldntExist3 = pAdapter.exists(composition2, reproducibleInstances2);
 			Optional<Double> shouldExist1 = pAdapter.exists(composition1, reproducibleInstances1);
 
-			// ObjectMapper mapper1 = new ObjectMapper();
-			//
-			// String cs1 = mapper1.writeValueAsString(composition1);
-			// String cs2 = mapper1.writeValueAsString(composition2);
-			//
-			// ObjectMapper mapper2 = new ObjectMapper();
-			//
-			// String cs3 = mapper2.writeValueAsString(composition1);
-			// String cs4 = mapper2.writeValueAsString(composition2);
-			//
-			// assertEquals(cs1, cs2);
-			// assertEquals(cs2, cs3);
-			// assertEquals(cs3, cs4);
+			assertFalse(shouldntExist1.isPresent());
+			assertFalse(shouldntExist2.isPresent());
+			assertFalse(shouldntExist3.isPresent());
+			assertTrue(shouldExist1.isPresent());
 
-			// assertFalse(shouldntExist1.isPresent());
-			// assertFalse(shouldntExist2.isPresent());
-			// assertFalse(shouldntExist3.isPresent());
-			 assertTrue(shouldExist1.isPresent());
-
-		} catch (
-
-		Exception e) {
-			// TODO Auto-generated catch block
+			pAdapter.close();
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
