@@ -15,16 +15,11 @@ import org.nd4j.linalg.ops.transforms.Transforms;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import autofe.algorithm.hasco.evaluation.AbstractHASCOFEEvaluator;
-import autofe.algorithm.hasco.evaluation.AbstractHASCOFENodeEvaluator;
-import autofe.algorithm.hasco.filter.meta.FilterPipeline;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.MLPlanWekaClassifier;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.WekaMLPlanWekaClassifier;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import fantail.core.Correlation;
 import jaicore.ml.WekaUtil;
-import jaicore.planning.graphgenerators.task.tfd.TFDNode;
-import jaicore.search.model.travesaltree.Node;
 import weka.attributeSelection.ReliefFAttributeEval;
 import weka.classifiers.Evaluation;
 import weka.classifiers.functions.LDA;
@@ -57,37 +52,6 @@ public final class EvaluationUtils {
 
 	private EvaluationUtils() {
 		// Utility class
-	}
-
-	/**
-	 * Performs clustering using the given FilterPipeline <code>pipeline</code> and
-	 * the data set <code>data</code>.
-	 *
-	 * @param pipeline
-	 *            FilterPipeline which transforms the given data set
-	 * @param data
-	 *            DataSet object which is transformed by the pipeline
-	 * @return Returns 1 - accuracy
-	 * @throws Exception
-	 */
-	public static double performClustering(final FilterPipeline pipeline, final DataSet data) throws Exception {
-		if (pipeline == null || data == null) {
-			throw new IllegalArgumentException("Parameters 'pipeline' (" + (pipeline == null) + ") and 'data' ("
-					+ (data == null) + ") must not be null!");
-		}
-
-		logger.debug("Applying and evaluating pipeline " + pipeline.toString());
-
-		// Load vector class due to load failure exception
-		@SuppressWarnings("unused")
-		no.uib.cipr.matrix.Vector vector;
-
-		DataSet dataSet = pipeline.applyFilter(data, true);
-		logger.debug("Number of attributes: " + dataSet.getInstances().numAttributes());
-
-		logger.debug("Applied pipeline.");
-
-		return performClustering(dataSet.getInstances());
 	}
 
 	public static double performClustering(final Instances insts) throws Exception {
@@ -525,9 +489,6 @@ public final class EvaluationUtils {
 		}
 	}
 
-	public static AbstractHASCOFENodeEvaluator getRandomNodeEvaluator(final int maxPipelineSize) {
-		return null;
-	}
 
 	public static double rankKendallsTau(final double[] ranking1, final double[] ranking2) {
 		return Correlation.rankKendallTauBeta(ranking1, ranking2);
