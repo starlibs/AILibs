@@ -9,6 +9,9 @@ public class ZeroOneLoss extends ADecomposableDoubleMeasure<Double> implements S
 
 	@Override
 	public Double calculateMeasure(Double actual, Double expected) {
-		return actual == expected ? 0.0 : 1.0;
+		return actual.equals(expected)  ? 0.0 : 1.0;
 	}
+	
+	
+	
 }
