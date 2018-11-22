@@ -256,9 +256,10 @@ public class FXCode<V, E> implements NodeListener<V> {
 
             }
         };
-
-        playThread = new Thread(run);
-        playThread.start();
+        if(playThread == null){
+        	playThread = new Thread(run, "play");
+        	playThread.start();
+        }
     }
 
     /**
@@ -296,8 +297,10 @@ public class FXCode<V, E> implements NodeListener<V> {
         stopButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                if (playThread != null)
+                if (playThread != null) {
                     playThread.interrupt();
+                    playThread = null;
+                }
             }
         });
         nodeList.add(stopButton);
@@ -432,8 +435,10 @@ public class FXCode<V, E> implements NodeListener<V> {
      * Resets the GUI
      */
     public void reset() {
-        if (this.playThread != null)
+        if (this.playThread != null) {
             this.playThread.interrupt();
+            this.playThread = null;
+        }
         this.updateIndex(0, true);
         this.visualization.reset();
         eventBus.post(new ResetEvent());
@@ -445,8 +450,10 @@ public class FXCode<V, E> implements NodeListener<V> {
      * @param newIndex
      */
     public void jumpToIndex(int newIndex) {
-        if (this.playThread != null)
+        if (this.playThread != null) {
             playThread.interrupt();
+            playThread = null;
+        }
         if (newIndex == 0) {
             this.reset();
             return;

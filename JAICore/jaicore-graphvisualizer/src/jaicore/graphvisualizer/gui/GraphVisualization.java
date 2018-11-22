@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -51,6 +52,7 @@ public class GraphVisualization<V,E> {
 
 	protected final ConcurrentMap<V, Node> ext2intNodeMap = new ConcurrentHashMap<>();
 	protected final ConcurrentMap<Node, V> int2extNodeMap = new ConcurrentHashMap<>();
+	protected final ConcurrentMap<Node, Double> int2ValueMap = new ConcurrentHashMap<>();
 
 	protected boolean loop = true;
 
@@ -230,8 +232,37 @@ public class GraphVisualization<V,E> {
 	@Subscribe
 	public synchronized void receiveNodeRemovedEvent(NodeRemovedEvent<V> e) {
 		try {
+			Node node = ext2intNodeMap.get(e.getNode());
 			graph.removeNode(ext2intNodeMap.get(e.getNode()));
 			ext2intNodeMap.remove(e.getNode());
+			int2extNodeMap.remove(node);
+			
+			if(this.int2ValueMap.containsKey(node)) {
+				double value = int2ValueMap.get(node);
+				int2ValueMap.remove(node);
+				if(value == this.bestValue) {
+					if(!int2ValueMap.containsValue(value)&& !int2ValueMap.isEmpty()){
+						double best = int2ValueMap.values().stream().min(Comparator.comparing(Double::valueOf)).get();
+						bestValue = best;
+						Platform.runLater(()->{
+							this.minLabel.setText(Double.toString(bestValue));
+							this.update();
+						});
+					}
+				}
+				if(value == this.worstValue) {
+					if(!int2ValueMap.containsValue(value)&& !int2ValueMap.isEmpty()){
+						double worst = int2ValueMap.values().stream().max(Comparator.comparing(Double::valueOf)).get();
+						worstValue = worst;
+						Platform.runLater(()->{
+							this.maxLabel.setText(Double.toString(this.worstValue));
+							this.update();
+						});
+					}
+				}
+			}
+			
+			
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
@@ -260,22 +291,26 @@ public class GraphVisualization<V,E> {
 		
 		
 		/*
-		 * comnpute fvalue if possible
+		 * compute fvalue if possible
 		 */
 		if(evaluator != null) {
 			try {
 				double value = evaluator.evaluate(newNodeExt);
+				this.int2ValueMap.put(newNodeInt, value);
 				if(value < bestValue) {
 					this.bestValue = value;
 					Platform.runLater(()->{
 						this.minLabel.setText(Double.toString(bestValue));
+						this.update();
 					});
+					
 					
 				}
 				if(value > worstValue) {
 					this.worstValue = value;
 					Platform.runLater(()->{
 						this.maxLabel.setText(Double.toString(this.worstValue));
+						this.update();
 					});
 					
 				}
