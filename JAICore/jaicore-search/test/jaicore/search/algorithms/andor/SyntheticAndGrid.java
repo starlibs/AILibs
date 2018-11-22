@@ -50,7 +50,7 @@ public class SyntheticAndGrid implements GraphGenerator<NodeLabel, String> {
 			List<NodeExpansionDescription<NodeLabel,String>> l = new ArrayList<>();
 			if (n.depth == depth)
 				return l;
-			boolean finalLayer = n.depth + 1 == depth;
+			boolean finalLayer = n.depth >= depth - 2;
 			for (int i = 0; i < (finalLayer ? k : b); i++) {
 				l.add(new NodeExpansionDescription<NodeLabel, String>(n, new NodeLabel(n.depth + 1, i), "" + i, finalLayer ? NodeType.OR : NodeType.AND));
 			}

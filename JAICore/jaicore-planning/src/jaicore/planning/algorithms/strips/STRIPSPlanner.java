@@ -108,6 +108,7 @@ public class STRIPSPlanner<V extends Comparable<V>>
 					gg, nodeEvaluator);
 			search = new BestFirst<GeneralEvaluatedTraversalTree<StripsForwardPlanningNode, String, V>, StripsForwardPlanningNode, String, V>(
 					searchProblem);
+			search.setTimeout(getTimeout());
 			setLoggerOfSearch();
 			if (visualize) {
 				VisualizationWindow<Node<StripsForwardPlanningNode, V>, String> w = new VisualizationWindow<>(search);
