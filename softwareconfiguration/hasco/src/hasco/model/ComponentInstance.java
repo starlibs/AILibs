@@ -18,7 +18,7 @@ import jaicore.basic.sets.SetUtil;
  * @author fmohr
  *
  */
-@JsonPropertyOrder({ "component", "parameterValues", "satisfactionOfRequiredInterfaces" })
+@JsonPropertyOrder(alphabetic=true)
 public class ComponentInstance {
 	private final Component component;
 	private final Map<String, String> parameterValues;

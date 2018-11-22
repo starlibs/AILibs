@@ -32,20 +32,20 @@ import weka.core.Instances;
 
 public class ReductionOptimizer implements Classifier {
 
-	private final Random rand;
+	private final long seed;
 	private MCTreeNode root;
 
-	public ReductionOptimizer(Random rand) {
+	public ReductionOptimizer(long seed) {
 		super();
-		this.rand = rand;
+		this.seed = seed;
 	}
 
 	@Override
 	public void buildClassifier(Instances data) throws Exception {
-		List<Instances> dataSplit = WekaUtil.getStratifiedSplit(data, rand, .6f);
+		List<Instances> dataSplit = WekaUtil.getStratifiedSplit(data, seed, .6f);
 		Instances train = dataSplit.get(0);
 		Instances validate = dataSplit.get(1);
-		BestFirstEpsilon<RestProblem, Decision, Double> search = new BestFirstEpsilon<RestProblem, Decision, Double>(new GeneralEvaluatedTraversalTree<>(new ReductionGraphGenerator(rand, train), n -> getLossForClassifier(getTreeFromSolution(n.externalPath(), data, false), data) * 1.0), n -> n.path().size() * -1.0
+		BestFirstEpsilon<RestProblem, Decision, Double> search = new BestFirstEpsilon<RestProblem, Decision, Double>(new GeneralEvaluatedTraversalTree<>(new ReductionGraphGenerator(new Random(seed), train), n -> getLossForClassifier(getTreeFromSolution(n.externalPath(), data, false), data) * 1.0), n -> n.path().size() * -1.0
 		, 0.1, false);
 
 		VisualizationWindow<Node<RestProblem, Double>,Decision> window = new VisualizationWindow<>(search);
@@ -122,7 +122,7 @@ public class ReductionOptimizer implements Classifier {
 			try {
 				DescriptiveStatistics stats = new DescriptiveStatistics();
 				for (int i = 0; i < 2; i++) {
-					List<Instances> split = (WekaUtil.getStratifiedSplit(data, rand, .6f));
+					List<Instances> split = (WekaUtil.getStratifiedSplit(data, seed + i, .6f));
 					tree.buildClassifier(split.get(0));
 
 					Evaluation eval = new Evaluation(data);

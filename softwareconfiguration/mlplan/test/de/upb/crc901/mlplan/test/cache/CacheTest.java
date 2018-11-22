@@ -28,7 +28,7 @@ public class CacheTest {
 		data.setClassIndex(data.numAttributes() - 1);
 
 		// perform a split with normal instances
-		Instances i = WekaUtil.getStratifiedSplit(data, new Random(45), 0.7).get(0);
+		Instances i = WekaUtil.getStratifiedSplit(data, 45, 0.7).get(0);
 		
 		
 		//
@@ -38,7 +38,7 @@ public class CacheTest {
 		ReproducibleInstances ri0 = WekaUtil.getStratifiedSplit(rData, new Random(45), 0.1).get(0);
 		
 		// perform a split
-		Instances ri1 = WekaUtil.getStratifiedSplit((Instances)rData, new Random(45), 0.1).get(0);
+		Instances ri1 = WekaUtil.getStratifiedSplit((Instances)rData, 45, 0.1).get(0);
 		
 		if(ri0.getInstructions().size() != 2) {
 			fail("wrong numbe rof instructions");

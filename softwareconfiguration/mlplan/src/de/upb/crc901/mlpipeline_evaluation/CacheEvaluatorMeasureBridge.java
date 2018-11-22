@@ -44,6 +44,9 @@ public class CacheEvaluatorMeasureBridge extends AbstractEvaluatorMeasureBridge<
 				// query the underlying loss function
 				System.out.println("No Cache Entry found." +type);
 				double performance = simpleEvaluatorMeasureBridge.evaluateSplit(pl, trainingData, validationData);
+				if (performance == Double.NaN) {
+					performance = 0.0;
+				}
 				// cache it
 				performanceDBAdapter.store(evaluatedComponent, (ReproducibleInstances) trainingData, performance);
 				return performance;

@@ -1074,11 +1074,7 @@ public class WekaUtil {
 	}
 	
 	public static List<Double> getClassesAsList(Instances inst) {
-		List<Double> vec = new ArrayList<>();
-		for (Instance i : inst) {
-			vec.add(i.classValue());
-		}
-		return vec;
+		return inst.stream().map(Instance::classValue).collect(Collectors.toList());
 	}
 
 	public static String instancesToJsonString(final Instances data) {

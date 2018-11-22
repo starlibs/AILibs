@@ -126,7 +126,7 @@ public abstract class MLPlanWekaClassifier implements Classifier, CapabilitiesHa
 			}
 
 			/* set up exact splits */
-			float selectionDataPortion = this.config.dataPortionForSelection();
+			double selectionDataPortion = this.config.dataPortionForSelection();
 			if (selectionDataPortion > 0) {
 				List<Instances> selectionSplit = WekaUtil.getStratifiedSplit(this.data,
 						this.config.randomSeed(), selectionDataPortion);

@@ -26,7 +26,7 @@ public class MonteCarloCrossValidationEvaluator implements IClassifierEvaluator 
 	private boolean canceled = false;
 	private final int repeats;
 	private final Instances data;
-	private final float trainingPortion;
+	private final double trainingPortion;
 	private final long seed;
 	/* Can either compute the loss or cache it */
 	private final AbstractEvaluatorMeasureBridge<Double, Double> bridge;
@@ -34,7 +34,7 @@ public class MonteCarloCrossValidationEvaluator implements IClassifierEvaluator 
 	private final DescriptiveStatistics stats = new DescriptiveStatistics();
 
 	public MonteCarloCrossValidationEvaluator(AbstractEvaluatorMeasureBridge<Double, Double> bridge,
-			final int repeats, final Instances data, final float trainingPortion, final long seed) {
+			final int repeats, final Instances data, final double trainingPortion, final long seed) {
 		super();
 		this.repeats = repeats;
 		this.bridge = bridge;
