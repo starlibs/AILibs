@@ -18,7 +18,7 @@ public interface IDataset extends List<IInstance> {
 	 *
 	 * @return The attribute type of the target attribute.
 	 */
-	public IAttributeType<?> getTargetType();
+	public <T> IAttributeType<T> getTargetType(Class<? extends T> clazz);
 
 	/**
 	 * Returns the list of attribute types.

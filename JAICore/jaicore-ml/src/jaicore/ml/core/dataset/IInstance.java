@@ -3,7 +3,7 @@ package jaicore.ml.core.dataset;
 import jaicore.ml.core.dataset.attribute.IAttributeValue;
 
 /**
- *
+ * Interface of an instance which consists of attributes and a target value.
  *
  * @author wever
  */
