@@ -12,5 +12,5 @@ sourceSets {
 }
 dependencies {
 	compile project(":JAICore:jaicore-basic")
-	implementation (group: 'com.googlecode.matrix-toolkits-java', name: 'mtj', version: '1.0.4')
+    compile group: 'de.upb.isys', name: 'mtj', version: '0.0.1'
 }
