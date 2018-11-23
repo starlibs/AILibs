@@ -158,7 +158,7 @@ def parse_args():
     parser.add_argument('--arff', required=True, help="Path or ARFF to use for training/ testing.")
     parser.add_argument('--model', help="Path to the trained model (in .pcl format) that shall be used for testing.")
     parser.add_argument('--regression', action='store_true', help="If set, the data is assumed to be a regression problem instead of a categorical one.")
-    parser.add_argument('--targets', nargs='*', help="Declare which of the columns of the ARFF to use as targets. Default is only the last column.")
+    parser.add_argument('--targets', nargs='*', type=int, help="Declare which of the columns of the ARFF to use as targets. Default is only the last column.")
     parser.add_argument('--output', help="Set the output folder for the model to be serialized to.", default="model_dumps")
     sys.argv = vars(parser.parse_args())
 
@@ -184,19 +184,17 @@ def get_feature_target_matrices(data):
     to define the matrices and the entry is removed from the map. Otherwise the last column is assumed to be the target.
     Returns a target and feature matrix.
     """
-    targets = []
-    features = []
     # If target indices are given, use them. Else assume last feature is target.
     if sys.argv["targets"]:
         target_indices = sys.argv["targets"]
-        # Each iteration yields a target/feature column and glues them together
-        for i in target_indices:
-            targets = zip(targets, [row[i] for row in data])
-        for i in ({j for j in range(len(data[0]))} - target_indices):
-            features = zip(features, [row[i] for row in data])
+        targets = data[:, target_indices]
+        feature_indices = list({j for j in range(len(data[0]))} - set(target_indices))
+        features = data[:, feature_indices]
     else:
         targets = [row[-1] for row in data]
         features = [row[:-1] for row in data]
+    features = [list(a) for a in features]
+    targets = [list(a) for a in targets]
     return features,targets
 
 

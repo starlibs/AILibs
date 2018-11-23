@@ -31,8 +31,9 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 	private static File SCIKIT_TEMPLATE = new File("resources/scikit_template.twig.py");
 	private String modelPath = "";
 	private File script;
-	private boolean isRegression;
-	private String outputFolder = null;
+	private boolean isRegression = false;
+	private String outputFolder = "";
+	private int[] targetColumns = new int[0];
 
 	public ScikitLearnWrapper(String constructInstruction, String imports) throws IOException {
 		Map<String, Object> templateValues = initialize(constructInstruction, imports);
@@ -119,21 +120,16 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 		this.outputFolder = outputFolder;
 	}
 
+	public void setTargets(int... targetColumns) {
+		this.targetColumns = targetColumns;
+	}
+
 	@Override
 	public void buildClassifier(Instances data) throws Exception {
-		File arff = instancesToArffFile(data, getArffName(data));
 		List<String> trainOptions = new ArrayList<>();
 		trainOptions.add("--mode");
 		trainOptions.add("train");
-		trainOptions.add("--arff");
-		trainOptions.add(arff.getAbsolutePath());
-		if (isRegression) {
-			trainOptions.add("--regression");
-		}
-		if (outputFolder != null) {
-			trainOptions.add("--output");
-			trainOptions.add(outputFolder);
-		}
+		parseSetOptions(trainOptions, data);
 		String[] processParameterArray = createProcessParameterArray(trainOptions);
 		TrainProcessListener processListener = new TrainProcessListener();
 		runProcess(processParameterArray, processListener);
@@ -142,21 +138,12 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 
 	@Override
 	public double[] classifyInstances(Instances data) throws Exception {
-		File arff = instancesToArffFile(data, getArffName(data));
 		List<String> testOptions = new ArrayList<>();
 		testOptions.add("--mode");
 		testOptions.add("test");
-		testOptions.add("--arff");
-		testOptions.add(arff.getAbsolutePath());
-		if (isRegression) {
-			testOptions.add("--regression");
-		}
-		if (outputFolder != null) {
-			testOptions.add("--output");
-			testOptions.add(outputFolder);
-		}
 		testOptions.add("--model");
 		testOptions.add(modelPath);
+		parseSetOptions(testOptions, data);
 		String[] processParameterArray = createProcessParameterArray(testOptions);
 		TestProcessListener processListener = new TestProcessListener();
 		runProcess(processParameterArray, processListener);
@@ -166,6 +153,25 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 			resultsArray[i] = results.get(i);
 		}
 		return resultsArray;
+	}
+
+	private void parseSetOptions(List<String> parameters, Instances data) throws IOException {
+		File arff = instancesToArffFile(data, getArffName(data));
+		parameters.add("--arff");
+		parameters.add(arff.getAbsolutePath());
+		if (isRegression) {
+			parameters.add("--regression");
+		}
+		if (outputFolder != null && !outputFolder.equals("")) {
+			parameters.add("--output");
+			parameters.add(outputFolder);
+		}
+		if (targetColumns != null && targetColumns.length > 0) {
+			parameters.add("--targets");
+			for (int i : targetColumns) {
+				parameters.add("" + i);
+			}
+		}
 	}
 
 	/*

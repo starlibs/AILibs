@@ -17,7 +17,7 @@ import weka.core.Instances;
 import weka.core.converters.ArffLoader.ArffReader;
 
 public class ScikitLearn_Wrapper_Test {
-	
+
 	@Test
 	public void buildClassifier() throws Exception {
 		ScikitLearnWrapper slw = new ScikitLearnWrapper("MLPRegressor()",
@@ -30,10 +30,12 @@ public class ScikitLearn_Wrapper_Test {
 
 	@Test
 	public void buildClassifier2() throws Exception {
-		ScikitLearnWrapper slw = new ScikitLearnWrapper("BaggingClassifier()",
-				"from sklearn.ensemble import BaggingClassifier");
+		ScikitLearnWrapper slw = new ScikitLearnWrapper("MLPRegressor()",
+				"from sklearn.neural_network import MLPRegressor");
 		Instances dataset = loadARFF("testsrc/ml/skikitwrapper/0532052678.arff");
 		slw.setIsRegression(true);
+		int s = dataset.numAttributes();
+		slw.setTargets(s - 1, s - 2, s - 3);
 		slw.buildClassifier(dataset);
 		assertNotEquals(slw.getModelPath(), "");
 	}
@@ -60,7 +62,8 @@ public class ScikitLearn_Wrapper_Test {
 				"from sklearn.neural_network import MLPRegressor");
 		Instances datasetTest = loadARFF(test_arff);
 		int numberInstance = datasetTest.numInstances();
-		slw.setModelPath(Paths.get("testsrc/ml/skikitwrapper/0532052678_MLPRegressor.pcl").toAbsolutePath().toString());
+		slw.setModelPath(
+				Paths.get("testsrc/ml/skikitwrapper/01673183575_MLPRegressor.pcl").toAbsolutePath().toString());
 		slw.setIsRegression(true);
 		double[] result = slw.classifyInstances(datasetTest);
 		assertNotNull(result);
