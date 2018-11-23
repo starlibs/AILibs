@@ -28,7 +28,7 @@ import weka.core.converters.ArffSaver;
  */
 public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 	private static final File TMP_FOLDER = new File("tmp");
-	private static File SCIKIT_TEMPLATE = new File("resources/scikit_template_pipeline.twig.py");
+	private static File SCIKIT_TEMPLATE = new File("resources/scikit_template.twig.py");
 	private String modelPath = "";
 	private File script;
 	private boolean isRegression;
