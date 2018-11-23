@@ -32,6 +32,7 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 	private String modelPath = "";
 	private File script;
 	private boolean isRegression;
+	private String outputFolder = null;
 
 	public ScikitLearnWrapper(String constructInstruction, String imports) throws IOException {
 		Map<String, Object> templateValues = initialize(constructInstruction, imports);
@@ -114,14 +115,24 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 		this.isRegression = isRegression;
 	}
 
+	public void setOutputFolder(String outputFolder) {
+		this.outputFolder = outputFolder;
+	}
+
 	@Override
 	public void buildClassifier(Instances data) throws Exception {
 		File arff = instancesToArffFile(data, getArffName(data));
 		List<String> trainOptions = new ArrayList<>();
-		trainOptions.add("--mode train");
-		trainOptions.add("--arff " + arff.getAbsolutePath());
+		trainOptions.add("--mode");
+		trainOptions.add("train");
+		trainOptions.add("--arff");
+		trainOptions.add(arff.getAbsolutePath());
 		if (isRegression) {
 			trainOptions.add("--regression");
+		}
+		if (outputFolder != null) {
+			trainOptions.add("--output");
+			trainOptions.add(outputFolder);
 		}
 		String[] processParameterArray = createProcessParameterArray(trainOptions);
 		TrainProcessListener processListener = new TrainProcessListener();
@@ -133,9 +144,19 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 	public double[] classifyInstances(Instances data) throws Exception {
 		File arff = instancesToArffFile(data, getArffName(data));
 		List<String> testOptions = new ArrayList<>();
-		testOptions.add("--mode test");
-		testOptions.add("--arff " + arff.getAbsolutePath());
-		testOptions.add("--model " + modelPath);
+		testOptions.add("--mode");
+		testOptions.add("test");
+		testOptions.add("--arff");
+		testOptions.add(arff.getAbsolutePath());
+		if (isRegression) {
+			testOptions.add("--regression");
+		}
+		if (outputFolder != null) {
+			testOptions.add("--output");
+			testOptions.add(outputFolder);
+		}
+		testOptions.add("--model");
+		testOptions.add(modelPath);
 		String[] processParameterArray = createProcessParameterArray(testOptions);
 		TestProcessListener processListener = new TestProcessListener();
 		runProcess(processParameterArray, processListener);
