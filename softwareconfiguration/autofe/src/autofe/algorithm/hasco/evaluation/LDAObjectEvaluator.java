@@ -19,6 +19,7 @@ public class LDAObjectEvaluator extends AbstractHASCOFEObjectEvaluator {
 
 		long startTimestamp = System.currentTimeMillis();
 		logger.debug("Applying and evaluating pipeline " + pipeline.toString());
+
 		DataSet dataSet = pipeline.applyFilter(this.data, false);
 
 		logger.debug("Perform LDA");

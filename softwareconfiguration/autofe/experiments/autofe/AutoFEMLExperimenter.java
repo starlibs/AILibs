@@ -140,6 +140,8 @@ public class AutoFEMLExperimenter implements IExperimentSetEvaluator {
 	}
 
 	public static void main(final String[] args) {
+		LOGGER.info("Using OMP_NUM_THREADS=" + System.getenv().get("OMP_NUM_THREADS"));
+
 		ExperimentRunner runner = new ExperimentRunner(new AutoFEMLExperimenter());
 		runner.randomlyConductExperiments(1, true);
 		TimeoutTimer.getInstance().stop();

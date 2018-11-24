@@ -525,8 +525,6 @@ public final class DataSetUtils {
 			ratio = (double) minInstances / originalData.getInstances().size();
 		}
 
-		System.out.println("Ratio: " + ratio);
-
 		if (ratio >= 1d) {
 			logger.debug("Subsampling is not performed.");
 			return originalData;

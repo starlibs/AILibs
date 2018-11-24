@@ -39,7 +39,7 @@ public class DataSetUtilsTest {
 	}
 
 	// @Test
-	public void croppingTest() throws IOException {
+	public void croppingTest() throws IOException, InterruptedException {
 		File datasetFolder = new File("testres/" + File.separator + "caltech101_subset");
 		DataSet data = DataSetUtils.loadDatasetFromImageFolder(datasetFolder);
 		System.out.println("Loaded data.");
@@ -71,7 +71,7 @@ public class DataSetUtilsTest {
 	}
 
 	// @Test
-	public void caltech101Test() throws IOException {
+	public void caltech101Test() throws IOException, InterruptedException {
 		File datasetFolder = new File("testres/" + File.separator + "caltech101");
 		DataSet data = DataSetUtils.loadDatasetFromImageFolder(datasetFolder);
 		System.out.println("Loaded data.");
@@ -80,7 +80,7 @@ public class DataSetUtilsTest {
 	}
 
 	// @Test
-	public void leafBwTest() throws IOException {
+	public void leafBwTest() throws IOException, InterruptedException {
 		File datasetFolder = new File("testres/" + File.separator + "leaf_bw");
 		DataSet data = DataSetUtils.loadDatasetFromImageFolder(datasetFolder);
 		System.out.println("Loaded data.");
@@ -90,7 +90,7 @@ public class DataSetUtilsTest {
 	}
 
 	// @Test
-	public void leafRgbTest() throws IOException {
+	public void leafRgbTest() throws IOException, InterruptedException {
 		File datasetFolder = new File("testres/" + File.separator + "leaf_rgb");
 		DataSet data = DataSetUtils.loadDatasetFromImageFolder(datasetFolder);
 		System.out.println("Loaded data.");

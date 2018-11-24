@@ -26,7 +26,7 @@ public class CatalanoBinaryPatternFilter extends AbstractCatalanoFilter<IBinaryP
 	}
 
 	@Override
-	public DataSet applyFilter(final DataSet inputData, final boolean copy) {
+	public DataSet applyFilter(final DataSet inputData, final boolean copy) throws InterruptedException {
 		if (inputData.getIntermediateInstances() == null || inputData.getIntermediateInstances().size() == 0
 				|| inputData.getIntermediateInstances().get(0).rank() < 2) {
 			throw new IllegalArgumentException(
@@ -47,6 +47,9 @@ public class CatalanoBinaryPatternFilter extends AbstractCatalanoFilter<IBinaryP
 		// Assume to deal with FastBitmap instances
 		List<INDArray> transformedInstances = new ArrayList<>(inputData.getIntermediateInstances().size());
 		for (INDArray inst : inputData.getIntermediateInstances()) {
+			if (Thread.currentThread().isInterrupted())
+				throw new InterruptedException("Thread got interrupted, thus, kill filter application.");
+
 			FastBitmap bitmap = ImageUtils.matrixToFastBitmap(inst, colorSpace);
 			if (colorSpace != ColorSpace.Grayscale && this.isRequiresGrayscale()) {
 				bitmap.toGrayscale();

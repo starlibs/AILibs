@@ -76,9 +76,10 @@ public class PretrainedNNFilter implements IFilter, Serializable {
 	private long[] shape;
 
 	public static final int DEFAULT_LAYER = 7;
-	
+
 	/**
-	 * Network for specific nets reducing the matrix sizes before applying the pretrained NN filter (typically by max pooling).
+	 * Network for specific nets reducing the matrix sizes before applying the
+	 * pretrained NN filter (typically by max pooling).
 	 */
 	private MultiLayerNetwork preprocessingNetwork;
 
@@ -166,7 +167,7 @@ public class PretrainedNNFilter implements IFilter, Serializable {
 				this.compGraph = ((MultiLayerNetwork) this.model.initPretrained(type)).toComputationGraph();
 			}
 
-			if(this.modelName.equalsIgnoreCase("vgg16")) {
+			if (this.modelName.equalsIgnoreCase("vgg16")) {
 				this.preprocessingNetwork = ImageUtils.getMaxPoolNetwork();
 			}
 		} catch (UnsupportedOperationException ex) {
@@ -179,7 +180,7 @@ public class PretrainedNNFilter implements IFilter, Serializable {
 	}
 
 	@Override
-	public DataSet applyFilter(final DataSet inputData, final boolean copy) {
+	public DataSet applyFilter(final DataSet inputData, final boolean copy) throws InterruptedException {
 		if (inputData.getIntermediateInstances() == null || inputData.getIntermediateInstances().size() == 0
 				|| inputData.getIntermediateInstances().get(0).rank() < 2) {
 			throw new IllegalArgumentException(
@@ -199,6 +200,9 @@ public class PretrainedNNFilter implements IFilter, Serializable {
 		}
 
 		for (INDArray example : inputData.getIntermediateInstances()) {
+			if (Thread.currentThread().isInterrupted())
+				throw new InterruptedException("Thread got interrupted, thus, kill filter application.");
+
 			long[] shape = example.shape();
 
 			// Add channel dimension
@@ -210,8 +214,8 @@ public class PretrainedNNFilter implements IFilter, Serializable {
 			INDArray adjustedExample = example.permute(2, 0, 1);
 			adjustedExample = adjustedExample.reshape(1, adjustedExample.shape()[0], adjustedExample.shape()[1],
 					adjustedExample.shape()[2]);
-			
-			if(this.preprocessingNetwork != null) {
+
+			if (this.preprocessingNetwork != null) {
 				adjustedExample = ImageUtils.applyMLNToMatrix(adjustedExample, this.preprocessingNetwork);
 			}
 

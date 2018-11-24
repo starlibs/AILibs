@@ -25,7 +25,7 @@ public class EvaluationUtilsTest {
 	}
 
 	@Test
-	public void cocoEvaluationTest() {
+	public void cocoEvaluationTest() throws InterruptedException {
 
 		String instString = "[0.9718934893608093, 0.001479289960116148, 0.002958579920232296, 0.0, 0.001479289960116148, 0.0, 0.0, 0.0, 0.002958579920232296, 0.0, 0.0, 0.0, "
 				+ "0.0, 0.0, 0.0, 0.0, 0.001479289960116148, 0.0, 0.001479289960116148, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.002958579920232296, "

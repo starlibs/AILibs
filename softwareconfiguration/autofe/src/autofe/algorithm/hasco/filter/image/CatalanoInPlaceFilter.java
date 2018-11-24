@@ -42,7 +42,7 @@ public class CatalanoInPlaceFilter extends AbstractCatalanoFilter<IApplyInPlace>
 	}
 
 	@Override
-	public DataSet applyFilter(final DataSet inputData, final boolean copy) {
+	public DataSet applyFilter(final DataSet inputData, final boolean copy) throws InterruptedException {
 		if (inputData.getIntermediateInstances() == null || inputData.getIntermediateInstances().size() == 0
 				|| inputData.getIntermediateInstances().get(0).rank() < 2) {
 			throw new IllegalArgumentException(
@@ -61,6 +61,9 @@ public class CatalanoInPlaceFilter extends AbstractCatalanoFilter<IApplyInPlace>
 		ColorSpace colorSpace = ImageUtils.determineColorSpace(inputData.getIntermediateInstances().get(0));
 		List<INDArray> transformedInstances = new ArrayList<>(inputData.getIntermediateInstances().size());
 		for (INDArray inst : inputData.getIntermediateInstances()) {
+			if (Thread.currentThread().isInterrupted())
+				throw new InterruptedException("Thread got interrupted, thus, kill filter application.");
+
 			FastBitmap bitmap = ImageUtils.matrixToFastBitmap(inst, colorSpace);
 
 			if (this.isRequiresGrayscale() && colorSpace != ColorSpace.Grayscale) {

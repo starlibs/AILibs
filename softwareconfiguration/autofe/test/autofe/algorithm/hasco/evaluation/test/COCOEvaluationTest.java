@@ -37,7 +37,7 @@ public class COCOEvaluationTest {
 	}
 
 	// @Test
-	public void evaluateCOCOTest() {
+	public void evaluateCOCOTest() throws InterruptedException {
 		logger.info("Starting COED evaluation test...");
 
 		/* load dataset */

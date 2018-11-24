@@ -137,6 +137,9 @@ public final class EvaluationUtils {
 
 		double maxScore = performClustering(new Instances(split.get(0)));
 		for (Map.Entry<Kernel, Instances> entry : getKernelsWithInstances(split.get(0))) {
+			if (Thread.currentThread().isInterrupted())
+				throw new InterruptedException("Evaluation has been interrupted!");
+
 			Kernel kernel = entry.getKey();
 			Instances insts = entry.getValue();
 
@@ -180,6 +183,9 @@ public final class EvaluationUtils {
 		double maxScore = performLDA(new Instances(split.get(0)));
 
 		for (Map.Entry<Kernel, Instances> entry : getKernelsWithInstances(split.get(0))) {
+			if (Thread.currentThread().isInterrupted())
+				throw new InterruptedException("Evaluation has been interrupted!");
+
 			Kernel kernel = entry.getKey();
 			Instances insts = entry.getValue();
 
@@ -244,7 +250,7 @@ public final class EvaluationUtils {
 		return instances.numAttributes() / 15000;
 	}
 
-	public static double calculateCOCOForBatch(final Instances batch) {
+	public static double calculateCOCOForBatch(final Instances batch) throws InterruptedException {
 
 		batch.setClassIndex(batch.numAttributes() - 1);
 
@@ -275,6 +281,9 @@ public final class EvaluationUtils {
 
 		double loss = 0;
 		for (int i = 0; i < batch.numInstances(); i++) {
+			if (Thread.currentThread().isInterrupted())
+				throw new InterruptedException("Evaluation has been interrupted!");
+
 			double[] instValues = Arrays.copyOfRange(batch.get(i).toDoubleArray(), 0,
 					batch.get(i).toDoubleArray().length - 1);
 			INDArray f_i = Nd4j.create(instValues);
@@ -314,7 +323,7 @@ public final class EvaluationUtils {
 		return Transforms.cosineSim(f1, f2);
 	}
 
-	public static double calculateCOEDForBatch(final Instances batch) {
+	public static double calculateCOEDForBatch(final Instances batch) throws InterruptedException {
 		batch.setClassIndex(batch.numAttributes() - 1);
 
 		final int D = batch.numAttributes() - 1;
@@ -363,6 +372,9 @@ public final class EvaluationUtils {
 
 		double loss = 0;
 		for (int i = 0; i < batch.numInstances(); i++) {
+			if (Thread.currentThread().isInterrupted())
+				throw new InterruptedException("Evaluation has been interrupted!");
+
 			// double[] instValues = Arrays.copyOfRange(batch.get(i).toDoubleArray(), 0,
 			// batch.get(i).toDoubleArray().length - 1);
 			INDArray f_i = dataSet.get(i).getFeatures();
@@ -497,9 +509,23 @@ public final class EvaluationUtils {
 				}
 			};
 		case "COCO":
-			return (data) -> calculateCOCOForBatch(data);
+			return (data) -> {
+				try {
+					return calculateCOCOForBatch(data);
+				} catch (InterruptedException e1) {
+					logger.error("Could not perform coco benchmark. Reason: " + e1.getMessage());
+					return 1d;
+				}
+			};
 		case "COED":
-			return (data) -> calculateCOEDForBatch(data);
+			return (data) -> {
+				try {
+					return calculateCOEDForBatch(data);
+				} catch (InterruptedException e1) {
+					logger.error("Could not perform coed benchmark. Reason: " + e1.getMessage());
+					return 1d;
+				}
+			};
 		case "LDA":
 			return (data) -> {
 				try {
