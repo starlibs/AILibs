@@ -52,14 +52,13 @@ public class PerformanceDBAdapter implements Closeable {
 			// trajectory and use the hash value as primary key for performance reasons.
 			if (!hasPerformanceTable) {
 				System.out.println("Creating table for evaluations");
-				sqlAdapter.update(
-						"CREATE TABLE `" + this.performanceSampleTableName + "` (\r\n"
-								+ " `evaluation_id` int(10) NOT NULL AUTO_INCREMENT,\r\n"
-								+ " `composition` json NOT NULL,\r\n" + " `trajectory` json NOT NULL,\r\n"
-								+ " `score` double NOT NULL,\r\n" + "`evaluation_date` timestamp NULL DEFAULT NULL,"
-								+ "`hash_value` CHAR(64) NOT NULL," + " PRIMARY KEY (`evaluation_id`)\r\n"
-								+ ") ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_bin",
-						new ArrayList<>());
+				sqlAdapter.update("CREATE TABLE `" + this.performanceSampleTableName + "` (\r\n"
+						+ " `evaluation_id` int(10) NOT NULL AUTO_INCREMENT,\r\n" + " `composition` json NOT NULL,\r\n"
+						+ " `train_trajectory` json NOT NULL,\r\n" + " `test_trajectory` json NOT NULL,\r\n"
+						+ " `loss_function` varchar(64) DEFAULT NULL,\r\n" + " `score` double NOT NULL,\r\n"
+						+ "`evaluation_date` timestamp NULL DEFAULT NULL," + "`hash_value` char(64) NOT NULL,"
+						+ " PRIMARY KEY (`evaluation_id`)\r\n"
+						+ ") ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_bin", new ArrayList<>());
 			}
 
 		} catch (SQLException e) {
@@ -74,27 +73,31 @@ public class PerformanceDBAdapter implements Closeable {
 	 * corresponding performance score.
 	 * 
 	 * 
-	 * @param composition
-	 *            - Solution composition.
-	 * @param reproducableInstances
-	 *            - Instances object that includes the trajectory, i.e. all
-	 *            operations that have been applied to the instances like loading,
-	 *            splitting etc.
+	 * @param composition           - Solution composition.
+	 * @param reproducableInstances - Instances object that includes the trajectory,
+	 *                              i.e. all operations that have been applied to
+	 *                              the instances like loading, splitting etc.
+	 * @param testData              - The reproducible instances of the test data
+	 *                              used for this evaluation process
+	 * @param className             - the java qualified class name of the loss
+	 *                              function that was used
 	 * @return opt - Optional that contains the score corresponding to the
 	 *         composition and the reproducible instances or is empty if no suiting
 	 *         entry is found in the database.
 	 */
-	public Optional<Double> exists(ComponentInstance composition, ReproducibleInstances reproducibleInstances) {
+	public Optional<Double> exists(ComponentInstance composition, ReproducibleInstances reproducibleInstances,
+			ReproducibleInstances testData, String className) {
 		Optional<Double> opt = Optional.empty();
 		ObjectMapper mapper = new ObjectMapper();
 		try {
 			String compositionString = mapper.writeValueAsString(composition);
-			String trajectoryString = mapper.writeValueAsString(reproducibleInstances.getInstructions());
-
-			// hash stuff for faster lookup
+			String trainTrajectoryString = mapper.writeValueAsString(reproducibleInstances.getInstructions());
+			String testTrajectoryString = mapper.writeValueAsString(testData.getInstructions());
 			MessageDigest md = MessageDigest.getInstance("SHA-256");
 			md.update(compositionString.getBytes());
-			md.update(trajectoryString.getBytes());
+			md.update(trainTrajectoryString.getBytes());
+			md.update(testTrajectoryString.getBytes());
+			md.update(className.getBytes());
 			byte[] digest = md.digest();
 			String hexHash = (new HexBinaryAdapter()).marshal(digest);
 			ResultSet rs = sqlAdapter.getResultsOfQuery(
@@ -113,27 +116,29 @@ public class PerformanceDBAdapter implements Closeable {
 	 * Stores the composition, the trajectory and the achieved score in the
 	 * database.
 	 * 
-	 * @param composition
-	 *            - Solution composition
-	 * @param reproducableInstances
-	 *            - Instances object that includes the trajectory, i.e. all
-	 *            operations that have been applied to the instances like loading,
-	 *            splitting etc.
-	 * @param testData
-	 * 			  - The reproducible instances of the test data used for this evaluation process
-	 * @param score
-	 *            - Score achieved by the composition on the reproducible instances
-	 * @param className 
-	 * 			  - the java qualified class name of the loss function that was used
+	 * @param composition           - Solution composition
+	 * @param reproducableInstances - Instances object that includes the trajectory,
+	 *                              i.e. all operations that have been applied to
+	 *                              the instances like loading, splitting etc.
+	 * @param testData              - The reproducible instances of the test data
+	 *                              used for this evaluation process
+	 * @param score                 - Score achieved by the composition on the
+	 *                              reproducible instances
+	 * @param className             - the java qualified class name of the loss
+	 *                              function that was used
 	 */
-	public void store(ComponentInstance composition, ReproducibleInstances reproducibleInstances, ReproducibleInstances testData, double score, String className) {
+	public void store(ComponentInstance composition, ReproducibleInstances reproducibleInstances,
+			ReproducibleInstances testData, double score, String className) {
 		ObjectMapper mapper = new ObjectMapper();
 		try {
 			String compositionString = mapper.writeValueAsString(composition);
-			String trajectoryString = mapper.writeValueAsString(reproducibleInstances.getInstructions());
+			String trainTrajectoryString = mapper.writeValueAsString(reproducibleInstances.getInstructions());
+			String testTrajectoryString = mapper.writeValueAsString(testData.getInstructions());
 			MessageDigest md = MessageDigest.getInstance("SHA-256");
 			md.update(compositionString.getBytes());
-			md.update(trajectoryString.getBytes());
+			md.update(trainTrajectoryString.getBytes());
+			md.update(testTrajectoryString.getBytes());
+			md.update(className.getBytes());
 			byte[] digest = md.digest();
 			String hexHash = (new HexBinaryAdapter()).marshal(digest);
 			ResultSet rs = sqlAdapter.getResultsOfQuery(
@@ -142,7 +147,9 @@ public class PerformanceDBAdapter implements Closeable {
 				return;
 			Map<String, String> valueMap = new HashMap<>();
 			valueMap.put("composition", compositionString);
-			valueMap.put("trajectory", trajectoryString);
+			valueMap.put("train_trajectory", trainTrajectoryString);
+			valueMap.put("test_trajectory", testTrajectoryString);
+			valueMap.put("loss_function", className);
 			valueMap.put("evaluation_date",
 					new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Date.from(Instant.now())));
 			valueMap.put("hash_value", hexHash);
