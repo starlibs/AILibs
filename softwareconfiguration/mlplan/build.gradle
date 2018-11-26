@@ -40,8 +40,8 @@ dependencies {
 	// TreeMiner
 	compile 'com.github.helegraf:TreeMiner:-SNAPSHOT'
 	// linear algebra
-	compile group: 'org.nd4j', name: 'nd4j-native-platform', version: '0.9.1'
-	compile group: 'org.nd4j', name: 'nd4j-api', version: '0.9.1'
+	compile group: 'org.nd4j', name: 'nd4j-native-platform', version: '1.0.0-beta2'
+	compile group: 'org.nd4j', name: 'nd4j-api', version: '1.0.0-beta2'
 	
 	// gradient descent (but forbid that the guy uses his log4j-stuff, which we will bride to slf4j)
 	compile ('de.jungblut.common:thomasjungblut-common:1.1') {
@@ -53,4 +53,6 @@ dependencies {
 	
 }
 
-
+shadowJar {
+  zip64 true
+}
