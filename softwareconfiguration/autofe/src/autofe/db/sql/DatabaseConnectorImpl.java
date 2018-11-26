@@ -58,7 +58,7 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 
 	@Override
 	public Instances getInstances(List<AbstractFeature> features) {
-		if(features == null || features.isEmpty()) {
+		if (features == null || features.isEmpty()) {
 			throw new IllegalArgumentException("Empty feature list provided!");
 		}
 		Instances instances = null;
@@ -115,13 +115,13 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 
 	private Instances finalizeInstances(Instances toFinalize) throws Exception {
 		// Convert string attributes to nominal attributes
-			StringToNominal stringToNominal = new StringToNominal();
-			stringToNominal.setInputFormat(toFinalize);
-			String[] options = new String[2];
-			options[0] = "-R";
-			options[1] = "first-last";
-			stringToNominal.setOptions(options);
-			return Filter.useFilter(toFinalize, stringToNominal);
+		StringToNominal stringToNominal = new StringToNominal();
+		stringToNominal.setInputFormat(toFinalize);
+		String[] options = new String[2];
+		options[0] = "-R";
+		options[1] = "first-last";
+		stringToNominal.setOptions(options);
+		return Filter.useFilter(toFinalize, stringToNominal);
 	}
 
 	private void createFeatureTable(AbstractFeature feature) throws SQLException {
@@ -151,7 +151,7 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 	}
 
 	private void createTable(String tableName, String featureSql) throws SQLException {
-		String sql = String.format("CREATE TABLE IF NOT EXISTS %s AS %s", tableName, featureSql);
+		String sql = String.format("CREATE TABLE IF NOT EXISTS `%s` AS %s", tableName, featureSql);
 		LOG.debug("Creating feature table using statement {}", sql);
 		sqlAdapter.update(sql, Collections.emptyList());
 		createdTableNames.add(tableName);
@@ -221,16 +221,24 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 		for (int i = 0; i < features.size(); i++) {
 			AbstractFeature feature = features.get(i);
 			if (feature.getType() == AttributeType.TEXT) {
-				instance.setValue(i, rs.getString(i + 2));
+				String value = rs.getString(i + 2);
+				if (value != null) {
+					instance.setValue(i, value);
+				}
 			} else if (feature.getType() == AttributeType.NUMERIC) {
-				instance.setValue(i, rs.getLong(i + 2));
+				long value = rs.getLong(i + 2);
+				if (!rs.wasNull()) {
+					instance.setValue(i, value);
+				}
 			} else {
 				throw new RuntimeException("Unsupoorted attribute type " + feature.getType());
 			}
 		}
 
 		// Add class value (last column in result set)
-		if (target.getType() == AttributeType.TEXT) {
+		if (target.getType() == AttributeType.TEXT)
+
+		{
 			instance.setClassValue(rs.getString(features.size() + 2));
 		} else if (target.getType() == AttributeType.NUMERIC) {
 			instance.setClassValue(rs.getDouble(features.size() + 2));
