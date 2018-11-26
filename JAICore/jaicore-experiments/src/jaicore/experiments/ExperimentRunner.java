@@ -81,9 +81,11 @@ public class ExperimentRunner {
 	}
 
 	private void updateExperimentSetupAccordingToConfig() {
-		this.memoryLimit = (int) (Runtime.getRuntime().maxMemory() / 1024 / 1024);
-		if (this.memoryLimit != this.config.getMemoryLimitinMB()) {
-			System.err.println("The true memory limit is " + this.memoryLimit + ", which differs from the " + this.config.getMemoryLimitinMB() + " specified in the config! We will write " + this.memoryLimit + " into the database.");
+		//OTFML-284: Workaround - Use always configured memory limit
+		int trueMemoryLimit = (int) (Runtime.getRuntime().maxMemory() / 1024 / 1024);
+		this.memoryLimit = this.config.getMemoryLimitinMB();
+		if (this.memoryLimit != trueMemoryLimit) {
+			System.err.println("The true memory limit is " + trueMemoryLimit+ ", which differs from the " + this.memoryLimit + " specified in the config!");
 		}
 		this.cpuLimit = this.config.getNumberOfCPUs();
 		int numExperiments = 1;
