@@ -30,7 +30,14 @@ import jaicore.logic.fol.structure.VariableParam;
 public class LogicUtil {
 
 	private static final Logger logger = LoggerFactory.getLogger(LogicUtil.class);
-
+	/* set assertionsActive to true if they are enabled */
+	private static final boolean assertionsActive;
+	static {
+		boolean aTmp = false;
+		assert aTmp = true;
+		assertionsActive = aTmp;
+	}
+	
 	/**
 	 * @param a
 	 *            The literal set A.
@@ -183,6 +190,7 @@ public class LogicUtil {
 			Monom modifiedRemainingPremise = new Monom(remainingPremise, submap);
 			
 			/* if there is a ground literal in the modified remaining premise that is not in the fact base, skip this option */
+			logger.trace("Checking whether one of the ground remaining premise {} is not in the state.", modifiedRemainingPremise);
 			if (doesPremiseContainAGroundLiteralThatIsNotInFactBase(factbase, modifiedRemainingPremise))
 				continue;
 			
@@ -192,15 +200,24 @@ public class LogicUtil {
 				logger.trace("Identified sub-solution {}", subsolution);
 				Map<VariableParam, LiteralParam> solutionToReturn = new HashMap<>(subsolution);
 				solutionToReturn.putAll(submap);
-				premise.forEach(l -> {
-					Literal lg = new Literal(l, solutionToReturn);
-					assert factbase.contains(lg) == l.isPositive() : "Derived a grounding " + solutionToReturn + ", which makes the premise require " + lg + ", which does not follow from the state!";
-				});
+				assert verifyThatGroundingEnablesPremise(factbase, modifiedRemainingPremise, solutionToReturn);
 				mappings.add(solutionToReturn);
 			}
 		}
 		logger.info("Finished computation of substitution for {} that enable forward chaining from {}: {}", premise, factbase, mappings);
 		return mappings;
+	}
+	
+	public static boolean verifyThatGroundingEnablesPremise(Collection<Literal> factbase, Collection<Literal> premise, Map<VariableParam,LiteralParam> grounding) {
+		for (Literal l : premise) {
+			Literal lg = new Literal(l, grounding);
+			if (factbase.contains(lg) != l.isPositive()) {
+				System.err.println("Literal " + l + " in premise ground to " + lg + " does not follow from state: ");
+				factbase.stream().sorted((l1,l2) -> l1.toString().compareTo(l2.toString())).forEach(lit -> System.out.println("\t" + lit));
+				return false;
+			}
+		}
+		return true;
 	}
 
 	public static boolean canLiteralBeUnifiedWithLiteralFromDatabase(Collection<Literal> set, Literal literal) {
