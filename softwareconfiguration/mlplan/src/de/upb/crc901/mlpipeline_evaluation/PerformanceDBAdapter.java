@@ -56,6 +56,7 @@ public class PerformanceDBAdapter implements Closeable {
 						+ " `evaluation_id` int(10) NOT NULL AUTO_INCREMENT,\r\n" + " `composition` json NOT NULL,\r\n"
 						+ " `train_trajectory` json NOT NULL,\r\n" + " `test_trajectory` json NOT NULL,\r\n"
 						+ " `loss_function` varchar(200) NOT NULL,\r\n" + " `score` double NOT NULL,\r\n"
+						+ " `evaluation_time_ms` bigint NOT NULL,\r\n"
 						+ "`evaluation_date` timestamp NULL DEFAULT NULL," + "`hash_value` char(64) NOT NULL,"
 						+ " PRIMARY KEY (`evaluation_id`)\r\n"
 						+ ") ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_bin", new ArrayList<>());
@@ -73,14 +74,17 @@ public class PerformanceDBAdapter implements Closeable {
 	 * corresponding performance score.
 	 * 
 	 * 
-	 * @param composition           - Solution composition.
-	 * @param reproducableInstances - Instances object that includes the trajectory,
-	 *                              i.e. all operations that have been applied to
-	 *                              the instances like loading, splitting etc.
-	 * @param testData              - The reproducible instances of the test data
-	 *                              used for this evaluation process
-	 * @param className             - the java qualified class name of the loss
-	 *                              function that was used
+	 * @param composition
+	 *            - Solution composition.
+	 * @param reproducableInstances
+	 *            - Instances object that includes the trajectory, i.e. all
+	 *            operations that have been applied to the instances like loading,
+	 *            splitting etc.
+	 * @param testData
+	 *            - The reproducible instances of the test data used for this
+	 *            evaluation process
+	 * @param className
+	 *            - the java qualified class name of the loss function that was used
 	 * @return opt - Optional that contains the score corresponding to the
 	 *         composition and the reproducible instances or is empty if no suiting
 	 *         entry is found in the database.
@@ -116,19 +120,22 @@ public class PerformanceDBAdapter implements Closeable {
 	 * Stores the composition, the trajectory and the achieved score in the
 	 * database.
 	 * 
-	 * @param composition           - Solution composition
-	 * @param reproducableInstances - Instances object that includes the trajectory,
-	 *                              i.e. all operations that have been applied to
-	 *                              the instances like loading, splitting etc.
-	 * @param testData              - The reproducible instances of the test data
-	 *                              used for this evaluation process
-	 * @param score                 - Score achieved by the composition on the
-	 *                              reproducible instances
-	 * @param className             - the java qualified class name of the loss
-	 *                              function that was used
+	 * @param composition
+	 *            - Solution composition
+	 * @param reproducableInstances
+	 *            - Instances object that includes the trajectory, i.e. all
+	 *            operations that have been applied to the instances like loading,
+	 *            splitting etc.
+	 * @param testData
+	 *            - The reproducible instances of the test data used for this
+	 *            evaluation process
+	 * @param score
+	 *            - Score achieved by the composition on the reproducible instances
+	 * @param className
+	 *            - the java qualified class name of the loss function that was used
 	 */
 	public void store(ComponentInstance composition, ReproducibleInstances reproducibleInstances,
-			ReproducibleInstances testData, double score, String className) {
+			ReproducibleInstances testData, double score, String className, long delta) {
 		ObjectMapper mapper = new ObjectMapper();
 		try {
 			String compositionString = mapper.writeValueAsString(composition);
@@ -152,6 +159,7 @@ public class PerformanceDBAdapter implements Closeable {
 			valueMap.put("loss_function", className);
 			valueMap.put("evaluation_date",
 					new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Date.from(Instant.now())));
+			valueMap.put("evaluation_time_ms", Long.toString(delta));
 			valueMap.put("hash_value", hexHash);
 			valueMap.put("score", Double.toString(score));
 			this.sqlAdapter.insert(this.performanceSampleTableName, valueMap);
