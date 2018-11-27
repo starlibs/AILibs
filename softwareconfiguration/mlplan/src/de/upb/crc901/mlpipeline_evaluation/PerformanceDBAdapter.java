@@ -55,7 +55,7 @@ public class PerformanceDBAdapter implements Closeable {
 				sqlAdapter.update("CREATE TABLE `" + this.performanceSampleTableName + "` (\r\n"
 						+ " `evaluation_id` int(10) NOT NULL AUTO_INCREMENT,\r\n" + " `composition` json NOT NULL,\r\n"
 						+ " `train_trajectory` json NOT NULL,\r\n" + " `test_trajectory` json NOT NULL,\r\n"
-						+ " `loss_function` varchar(64) DEFAULT NULL,\r\n" + " `score` double NOT NULL,\r\n"
+						+ " `loss_function` varchar(200) NOT NULL,\r\n" + " `score` double NOT NULL,\r\n"
 						+ "`evaluation_date` timestamp NULL DEFAULT NULL," + "`hash_value` char(64) NOT NULL,"
 						+ " PRIMARY KEY (`evaluation_id`)\r\n"
 						+ ") ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_bin", new ArrayList<>());
