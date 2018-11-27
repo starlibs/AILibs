@@ -84,7 +84,7 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 			sql.append("SELECT * FROM ");
 			for (int i = 0; i < features.size(); i++) {
 				AbstractFeature feature = features.get(i);
-				sql.append(SqlUtils.getTableNameForFeature(feature));
+				sql.append("`" + SqlUtils.getTableNameForFeature(feature) + "`");
 				if (i != features.size() - 1) {
 					sql.append(" NATURAL JOIN ");
 				}
