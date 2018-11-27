@@ -14,11 +14,8 @@ import de.upb.crc901.mlpipeline_evaluation.PerformanceDBAdapter;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.MLPlanWekaClassifier;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.WekaMLPlanWekaClassifier;
-<<<<<<< HEAD
 import hasco.knowledgebase.FANOVAParameterImportanceEstimator;
-=======
 import jaicore.basic.SQLAdapter;
->>>>>>> cache
 import jaicore.ml.WekaUtil;
 import jaicore.ml.cache.ReproducibleInstances;
 import jaicore.ml.evaluation.measures.multiclass.MultiClassPerformanceMeasure;
@@ -41,7 +38,7 @@ public class MLPlanOpenMLExample {
 
 		ReproducibleInstances data = ReproducibleInstances.fromOpenML("40983", "4350e421cdc16404033ef1812ea38c01");
 		data.setClassIndex(data.numAttributes() - 1);
-		List<Instances> split = WekaUtil.getStratifiedSplit((Instances)data, (new Random(0)).nextLong(), .7f);
+		List<Instances> split = WekaUtil.getStratifiedSplit((Instances)data, (new Random(0)).nextLong(), 0.7d);
 		/* initialize mlplan, and let it run for 30 seconds */
 
 		SQLAdapter adapter = new SQLAdapter("host", "user", "password", "database");

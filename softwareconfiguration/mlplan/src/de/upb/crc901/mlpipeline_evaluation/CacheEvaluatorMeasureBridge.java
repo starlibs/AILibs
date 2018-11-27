@@ -1,5 +1,7 @@
 package de.upb.crc901.mlpipeline_evaluation;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Optional;
 
 import hasco.model.ComponentInstance;
@@ -42,10 +44,13 @@ public class CacheEvaluatorMeasureBridge extends AbstractEvaluatorMeasureBridge<
 			}
 			System.out.println("Cache miss!");
 			// query the underlying loss function
+			Instant start = Instant.now();
 			double performance = simpleEvaluatorMeasureBridge.evaluateSplit(pl, trainingData, validationData);
+			Instant end = Instant.now();
+			Duration delta = Duration.between(start, end);
 			// cache it
 			if (((ReproducibleInstances) trainingData).isCacheStorage()) {
-				performanceDBAdapter.store(evaluatedComponent, (ReproducibleInstances) trainingData, (ReproducibleInstances) validationData, performance, simpleEvaluatorMeasureBridge.getBasicEvaluator().getClass().getName());
+				performanceDBAdapter.store(evaluatedComponent, (ReproducibleInstances) trainingData, (ReproducibleInstances) validationData, performance, simpleEvaluatorMeasureBridge.getBasicEvaluator().getClass().getName(), delta.toMillis());
 			}
 			return performance;
 		} else {

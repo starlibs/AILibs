@@ -41,7 +41,7 @@ public class ComponentInstanceDeserializer extends StdDeserializer<ComponentInst
 
 		ComponentLoader loader = new ComponentLoader();
 		JSONObject node = new JSONObject();
-		node.put("repository", "Jonas Hanselles privates (geheimes) repository");
+		node.put("repository", "repository");
 		node.put("components", componentList);
 		
 		loader.readFromString(node.toJSONString());
