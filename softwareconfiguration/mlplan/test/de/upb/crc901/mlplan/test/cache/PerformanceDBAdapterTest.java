@@ -1,4 +1,4 @@
-package de.upb.crc901.mlpipeline_evaluation;
+package de.upb.crc901.mlplan.test.cache;
 
 import static org.junit.Assert.*;
 
@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import de.upb.crc901.mlpipeline_evaluation.PerformanceDBAdapter;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.MLPipelineComponentInstanceFactory;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import hasco.model.ComponentInstance;
@@ -28,7 +29,7 @@ public class PerformanceDBAdapterTest {
 	@Test
 	public void test() {
 		SQLAdapter adapter = new SQLAdapter("host", "user", "password", "database");
-        PerformanceDBAdapter pAdapter = new PerformanceDBAdapter(adapter, "performance_cache_test");
+		PerformanceDBAdapter pAdapter = new PerformanceDBAdapter(adapter, "performance_cache_test");
 		try {
 			ComponentLoader loader = new ComponentLoader(
 					new File("conf/automl/searchmodels/weka/weka-all-autoweka.json"));
@@ -76,7 +77,6 @@ public class PerformanceDBAdapterTest {
 			assertFalse(shouldntExist3.isPresent());
 			assertFalse(shouldntExist4.isPresent());
 			assertTrue(shouldExist1.isPresent());
-
 			pAdapter.close();
 		} catch (Exception e) {
 			e.printStackTrace();

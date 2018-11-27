@@ -41,17 +41,17 @@ public class CacheTest {
 		Instances ri1 = WekaUtil.getStratifiedSplit((Instances)rData, 45, 0.1).get(0);
 		
 		if(ri0.getInstructions().size() != 2) {
-			fail("wrong numbe rof instructions");
+			fail("wrong number of instructions");
 		}
 		if(((ReproducibleInstances)ri1).getInstructions().size() != 2) {
-			fail("wrong numbe rof instructions");
+			fail("wrong number of instructions");
 		}
 		
 		// test reproduction
 		ReproducibleInstances r = ReproducibleInstances.FromHistory(ri0.getInstructions(), "4350e421cdc16404033ef1812ea38c01");
 		
 		if(ri0.size() != r.size()) {
-			fail("wrong numbe rof instructions");
+			fail("wrong number of instructions");
 		}
 		
 		for (int j = 0; j < r.size(); j++) {
