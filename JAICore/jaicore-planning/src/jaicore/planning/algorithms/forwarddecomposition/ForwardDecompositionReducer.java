@@ -3,7 +3,7 @@ package jaicore.planning.algorithms.forwarddecomposition;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import jaicore.planning.graphgenerators.IPlanningGraphGeneratorDeriver;
+import jaicore.planning.graphgenerators.IHierarchicalPlanningGraphGeneratorDeriver;
 import jaicore.planning.graphgenerators.task.ceociptfd.CEOCIPTFDGraphGenerator;
 import jaicore.planning.graphgenerators.task.ceoctfd.CEOCTFDGraphGenerator;
 import jaicore.planning.graphgenerators.task.tfd.TFDGraphGenerator;
@@ -21,7 +21,7 @@ import jaicore.planning.model.task.stn.Method;
 import jaicore.planning.model.task.stn.STNPlanningProblem;
 import jaicore.search.core.interfaces.GraphGenerator;
 
-public class ForwardDecompositionReducer<O extends Operation, M extends Method, A extends Action, I extends IHTNPlanningProblem<O, M, A>> implements IPlanningGraphGeneratorDeriver<O, M, A, I, TFDNode, String> {
+public class ForwardDecompositionReducer<O extends Operation, M extends Method, A extends Action, I extends IHTNPlanningProblem<O, M, A>> implements IHierarchicalPlanningGraphGeneratorDeriver<O, M, A, I, TFDNode, String> {
 
 	@Override
 	public GraphGenerator<TFDNode, String> transform(I planningProblem) {

@@ -92,6 +92,15 @@ public class ComponentLoader {
 				}
 			}
 		}
+		readFromJson(rootNode);
+	}
+	
+	public void readFromString(String json) throws IOException {
+		ObjectMapper mapper = new ObjectMapper();
+		readFromJson(mapper.readTree(json));
+	}
+
+	private void readFromJson(JsonNode rootNode) throws IOException {
 		// get the array of components
 		JsonNode components = rootNode.path("components");
 		if (components != null) {

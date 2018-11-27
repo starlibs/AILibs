@@ -13,7 +13,6 @@ import javafx.scene.chart.XYChart;
  * A Visualizer which draws a x-y-Graph. The default-supplier is the
  * BestFSupplier.
  * 
- * @author jkoepe
  *
  */
 public class XYGraphVisualizer implements IVisualizer {

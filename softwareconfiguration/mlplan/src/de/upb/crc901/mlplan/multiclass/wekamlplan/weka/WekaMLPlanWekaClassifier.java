@@ -7,12 +7,16 @@ import java.util.Properties;
 
 import org.aeonbits.owner.ConfigFactory;
 
-import de.upb.crc901.mlplan.multiclass.LossFunctionBuilder;
+import de.upb.crc901.mlpipeline_evaluation.CacheEvaluatorMeasureBridge;
 import de.upb.crc901.mlplan.multiclass.MLPlanClassifierConfig;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.MLPlanWekaClassifier;
 import hasco.serialization.ComponentLoader;
 import jaicore.basic.FileUtil;
+import jaicore.ml.evaluation.evaluators.weka.AbstractEvaluatorMeasureBridge;
+import jaicore.ml.evaluation.evaluators.weka.SimpleEvaluatorMeasureBridge;
+import jaicore.ml.evaluation.measures.ADecomposableDoubleMeasure;
+import jaicore.ml.evaluation.measures.multiclass.MultiClassMeasureBuilder;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import weka.core.Instances;
@@ -31,9 +35,20 @@ public class WekaMLPlanWekaClassifier extends MLPlanWekaClassifier {
 	}
 
 	public WekaMLPlanWekaClassifier(MLPlanWekaBuilder builder) throws IOException {
-		super(builder.getSearchSpaceConfigFile(), new WEKAPipelineFactory(), new LossFunctionBuilder().getEvaluator(builder.getPerformanceMeasure()), builder.getAlhorithmConfigFile() != null ? loadOwnerConfig(builder.getAlhorithmConfigFile()) : ConfigFactory.create(MLPlanClassifierConfig.class));
+		super(builder.getSearchSpaceConfigFile(), new WEKAPipelineFactory(), getBridge(builder), builder.getAlhorithmConfigFile() != null ? loadOwnerConfig(builder.getAlhorithmConfigFile()) : ConfigFactory.create(MLPlanClassifierConfig.class));
 		PreferenceBasedNodeEvaluator preferenceNodeEvaluator = new PreferenceBasedNodeEvaluator(new ComponentLoader(getComponentFile()).getComponents(), FileUtil.readFileAsList(getConfig().preferredComponents()));
 		this.setPreferredNodeEvaluator(preferenceNodeEvaluator);
+	}
+	
+	private static AbstractEvaluatorMeasureBridge<Double, Double> getBridge(MLPlanWekaBuilder builder){
+		ADecomposableDoubleMeasure<Double> measure = new MultiClassMeasureBuilder().getEvaluator(builder.getPerformanceMeasure());
+		
+		if(builder.getUseCache()) {
+			return new CacheEvaluatorMeasureBridge(measure, builder.getDBAdapter());	
+		}else {
+			return new SimpleEvaluatorMeasureBridge(measure);
+		}
+		
 	}
 	
 	public WekaMLPlanWekaClassifier() throws IOException {

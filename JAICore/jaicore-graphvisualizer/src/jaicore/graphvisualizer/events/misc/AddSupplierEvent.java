@@ -4,8 +4,6 @@ import jaicore.graphvisualizer.gui.dataSupplier.ISupplier;
 
 /**
  * An event which is used to inform the receiving object about a new supplier.
- * 
- * @author jkoepe
  *
  */
 public class AddSupplierEvent {

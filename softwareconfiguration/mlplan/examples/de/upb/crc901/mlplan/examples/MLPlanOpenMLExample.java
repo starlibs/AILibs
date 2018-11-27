@@ -10,15 +10,25 @@ import java.util.Random;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
 
+import de.upb.crc901.mlpipeline_evaluation.PerformanceDBAdapter;
+import de.upb.crc901.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.MLPlanWekaClassifier;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.WekaMLPlanWekaClassifier;
+<<<<<<< HEAD
 import hasco.knowledgebase.FANOVAParameterImportanceEstimator;
+=======
+import jaicore.basic.SQLAdapter;
+>>>>>>> cache
 import jaicore.ml.WekaUtil;
+import jaicore.ml.cache.ReproducibleInstances;
+import jaicore.ml.evaluation.measures.multiclass.MultiClassPerformanceMeasure;
 import weka.classifiers.Evaluation;
 import weka.core.Instances;
 
 /**
- * This is an example class that illustrates the usage of ML-Plan on the segment dataset of OpenML. It is configured to run for 30 seconds and to use 70% of the data for search and 30% for selection in its second phase.
+ * This is an example class that illustrates the usage of ML-Plan on the segment
+ * dataset of OpenML. It is configured to run for 30 seconds and to use 70% of
+ * the data for search and 30% for selection in its second phase.
  *
  * The API key used for OpenML is ML-Plan's key (read only).
  *
@@ -29,16 +39,20 @@ public class MLPlanOpenMLExample {
 
 	public static void main(final String[] args) throws Exception {
 
-		/* load data for segment dataset and create a train-test-split */
-		OpenmlConnector connector = new OpenmlConnector();
-		DataSetDescription ds = connector.dataGet(40498);
-		File file = ds.getDataset("4350e421cdc16404033ef1812ea38c01");
-		Instances data = new Instances(new BufferedReader(new FileReader(file)));
+		ReproducibleInstances data = ReproducibleInstances.fromOpenML("40983", "4350e421cdc16404033ef1812ea38c01");
 		data.setClassIndex(data.numAttributes() - 1);
-		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(0), .7f);
-
+		List<Instances> split = WekaUtil.getStratifiedSplit((Instances)data, (new Random(0)).nextLong(), .7f);
 		/* initialize mlplan, and let it run for 30 seconds */
-		MLPlanWekaClassifier mlplan = new WekaMLPlanWekaClassifier();
+
+		SQLAdapter adapter = new SQLAdapter("host", "user", "password", "database");
+        PerformanceDBAdapter pAdapter = new PerformanceDBAdapter(adapter, "performance_cache");
+
+		MLPlanWekaBuilder builder = new MLPlanWekaBuilder(
+				new File("conf/automl/searchmodels/weka/weka-all-autoweka.json"), new File("conf/mlplan.properties"),
+				MultiClassPerformanceMeasure.ERRORRATE, pAdapter);
+
+		MLPlanWekaClassifier mlplan = new WekaMLPlanWekaClassifier(builder);
+
 		mlplan.setLoggerName("mlplan");
 		mlplan.setUseParameterPruning(true);
 		mlplan.setParameterImportanceEstimator(new FANOVAParameterImportanceEstimator("test", 8, 0.08d));
@@ -47,7 +61,7 @@ public class MLPlanOpenMLExample {
 		try {
 			long start = System.currentTimeMillis();
 			mlplan.buildClassifier(split.get(0));
-			long trainTime = (int)(System.currentTimeMillis() - start) / 1000;
+			long trainTime = (int) (System.currentTimeMillis() - start) / 1000;
 			System.out.println("Finished build of the classifier. Training time was " + trainTime + "s.");
 
 			/* evaluate solution produced by mlplan */

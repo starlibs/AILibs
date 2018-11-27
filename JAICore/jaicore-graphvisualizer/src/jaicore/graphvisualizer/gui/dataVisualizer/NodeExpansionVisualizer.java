@@ -12,8 +12,6 @@ import javafx.scene.Node;
  * The NodeExpansionVisualizer is used to show the events, which happen on one
  * branch of the search tree. Usually the needed events, which are shown are
  * provided by jaicore.search.gui.dataSupplier.NodeExpansionSupplier.
- * 
- * @author jkoepe
  *
  */
 public class NodeExpansionVisualizer implements IVisualizer {

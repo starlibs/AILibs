@@ -18,9 +18,13 @@ import java.util.function.Predicate;
 
 import org.apache.commons.math3.geometry.euclidean.oned.Interval;
 
+<<<<<<< HEAD
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+=======
+import jaicore.basic.IGetter;
+>>>>>>> cache
 import jaicore.basic.MathExt;
 
 /**
@@ -966,5 +970,16 @@ public class SetUtil {
 	public static <T> List<T> addAndGet(List<T> list, T item) {
 		list.add(item);
 		return list;
+	}
+	
+	public static <T,U> Map<U,Collection<T>> groupCollectionByAttribute(Collection<T> collection, IGetter<T,U> getter) {
+		Map<U,Collection<T>> groupedCollection = new HashMap<>();
+		collection.forEach(i -> {
+			U val = getter.getPropertyOf(i);
+			if (!groupedCollection.containsKey(val))
+				groupedCollection.put(val, new ArrayList<>());
+			groupedCollection.get(val).add(i);
+		});
+		return groupedCollection;
 	}
 }

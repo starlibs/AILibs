@@ -33,7 +33,7 @@ import jaicore.logic.fol.structure.LiteralParam;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.logic.fol.structure.VariableParam;
 import jaicore.logic.fol.theories.EvaluablePredicate;
-import jaicore.planning.graphgenerators.IPlanningGraphGeneratorDeriver;
+import jaicore.planning.graphgenerators.IHierarchicalPlanningGraphGeneratorDeriver;
 import jaicore.planning.model.CostSensitiveHTNPlanningProblem;
 import jaicore.planning.model.ceoc.CEOCAction;
 import jaicore.planning.model.ceoc.CEOCOperation;
@@ -326,9 +326,14 @@ public class HASCOReduction<V extends Comparable<V>> implements
 	 * @param plannerFactory
 	 * @return
 	 */
+<<<<<<< HEAD
 	public <T, A, ISearch extends GraphSearchInput<T, A>> GraphGenerator<T, A> getGraphGeneratorUsedByHASCOForSpecificPlanner(
 			final IPlanningGraphGeneratorDeriver<? extends Operation, ? extends Method, ? extends Action, IHTNPlanningProblem<?, ?, ?>, T, A> transformer) {
 		return transformer.transform(getPlanningProblem());
+=======
+	public <T, A, ISearch extends GraphSearchInput<T, A>> GraphGenerator<T, A> getGraphGeneratorUsedByHASCOForSpecificPlanner(final IHierarchicalPlanningGraphGeneratorDeriver<? extends Operation, ? extends Method, ? extends Action, IHTNPlanningProblem<?,?,?>, T, A> transformer) {
+		return transformer.transform(getPlanningProblem()) ;
+>>>>>>> cache
 	}
 
 	@Override
