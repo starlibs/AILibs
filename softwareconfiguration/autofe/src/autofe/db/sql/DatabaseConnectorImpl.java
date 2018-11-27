@@ -198,7 +198,7 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 	}
 
 	private void deleteTable(String tableName) throws SQLException {
-		String sql = String.format("DROP TABLE %s", tableName);
+		String sql = String.format("DROP TABLE `%s`", tableName);
 		sqlAdapter.update(sql, Collections.emptyList());
 	}
 
