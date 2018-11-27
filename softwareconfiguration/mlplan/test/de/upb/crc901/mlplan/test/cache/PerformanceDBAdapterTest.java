@@ -44,7 +44,7 @@ public class PerformanceDBAdapterTest {
 			double score = Math.PI / 5.0;
 
 			// Store the first sample
-			pAdapter.store(composition1, instances1.get(0), instances1.get(1), score, className1);
+			pAdapter.store(composition1, instances1.get(0), instances1.get(1), score, className1, 6517L);
 
 			// These should have no entry in the db, assuming it was empty when the test was
 			// started
