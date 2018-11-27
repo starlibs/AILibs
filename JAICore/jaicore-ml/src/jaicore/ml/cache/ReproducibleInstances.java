@@ -46,7 +46,7 @@ public class ReproducibleInstances extends Instances {
 		for (int i = 0; i < history.size(); i++) {
 			Instruction inst = history.get(i);
 			switch (inst.command) {
-			case "LoadDataset":
+			case "loadDataset":
 				if(inst.inputs.get("provider").equals("openml.org")) {
 					instances = fromOpenML(inst.inputs.get("id"), apiKey);
 				}
