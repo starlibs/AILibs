@@ -132,10 +132,12 @@ public class PerformanceDBAdapter implements Closeable {
 	 * @param score
 	 *            - Score achieved by the composition on the reproducible instances
 	 * @param className
-	 *            - the java qualified class name of the loss function that was used
+	 *            - The java qualified class name of the loss function that was used
+	 * @param evaluationTime
+	 *            - The time it took for the corresponding evaluation in milliseconds
 	 */
 	public void store(ComponentInstance composition, ReproducibleInstances reproducibleInstances,
-			ReproducibleInstances testData, double score, String className, long delta) {
+			ReproducibleInstances testData, double score, String className, long evaluationTime) {
 		ObjectMapper mapper = new ObjectMapper();
 		try {
 			String compositionString = mapper.writeValueAsString(composition);
@@ -159,7 +161,7 @@ public class PerformanceDBAdapter implements Closeable {
 			valueMap.put("loss_function", className);
 			valueMap.put("evaluation_date",
 					new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Date.from(Instant.now())));
-			valueMap.put("evaluation_time_ms", Long.toString(delta));
+			valueMap.put("evaluation_time_ms", Long.toString(evaluationTime));
 			valueMap.put("hash_value", hexHash);
 			valueMap.put("score", Double.toString(score));
 			this.sqlAdapter.insert(this.performanceSampleTableName, valueMap);
