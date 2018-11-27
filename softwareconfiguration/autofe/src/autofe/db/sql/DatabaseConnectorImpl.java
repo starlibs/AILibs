@@ -26,6 +26,7 @@ import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.NumericToNominal;
 import weka.filters.unsupervised.attribute.StringToNominal;
 
 public class DatabaseConnectorImpl implements DatabaseConnector {
@@ -114,6 +115,8 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 	}
 
 	private Instances finalizeInstances(Instances toFinalize) throws Exception {
+		Instances toReturn = toFinalize;
+
 		// Convert string attributes to nominal attributes
 		StringToNominal stringToNominal = new StringToNominal();
 		stringToNominal.setInputFormat(toFinalize);
@@ -121,7 +124,20 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 		options[0] = "-R";
 		options[1] = "first-last";
 		stringToNominal.setOptions(options);
-		return Filter.useFilter(toFinalize, stringToNominal);
+		toReturn = Filter.useFilter(toReturn, stringToNominal);
+
+		// Transform numeric attribute to nominal
+		if (toReturn.classAttribute().isNumeric()) {
+			NumericToNominal numericToNominal = new NumericToNominal();
+			numericToNominal.setInputFormat(toReturn);
+			options = new String[2];
+			options[0] = "-R";
+			options[1] = "first-last";
+			numericToNominal.setOptions(options);
+			toReturn = Filter.useFilter(toReturn, numericToNominal);
+		}
+		
+		return toReturn;
 	}
 
 	private void createFeatureTable(AbstractFeature feature) throws SQLException {
