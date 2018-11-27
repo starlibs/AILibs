@@ -1,7 +1,7 @@
 package jaicore.ml.core.dataset.attribute;
 
 /**
- * An
+ * A general interface for attribute values.
  *
  * @author wever
  *
@@ -10,8 +10,15 @@ package jaicore.ml.core.dataset.attribute;
  */
 public interface IAttributeValue<D> {
 
+	/**
+	 * @return The value of this attribute value.
+	 */
 	public D getValue();
 
+	/**
+	 * @param value
+	 *            The value of this attribute value.
+	 */
 	public void setValue(D value);
 
 }
