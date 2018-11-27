@@ -34,7 +34,7 @@ public class CacheEvaluatorMeasureBridge extends AbstractEvaluatorMeasureBridge<
 			if (((ReproducibleInstances) trainingData).isCacheLookup()) {
 				// check in the cache if the result exists already
 				Optional<Double> potentialCache = performanceDBAdapter.exists(evaluatedComponent,
-						(ReproducibleInstances) trainingData);
+						(ReproducibleInstances) trainingData, (ReproducibleInstances) validationData, simpleEvaluatorMeasureBridge.getBasicEvaluator().getClass().getName());
 				if (potentialCache.isPresent()) {
 					System.out.println("Cache hit!");
 					return potentialCache.get();
@@ -45,7 +45,7 @@ public class CacheEvaluatorMeasureBridge extends AbstractEvaluatorMeasureBridge<
 			double performance = simpleEvaluatorMeasureBridge.evaluateSplit(pl, trainingData, validationData);
 			// cache it
 			if (((ReproducibleInstances) trainingData).isCacheStorage()) {
-				performanceDBAdapter.store(evaluatedComponent, (ReproducibleInstances) trainingData, (ReproducibleInstances)validationData, performance, simpleEvaluatorMeasureBridge.getBasicEvaluator().getClass().getName());
+				performanceDBAdapter.store(evaluatedComponent, (ReproducibleInstances) trainingData, (ReproducibleInstances) validationData, performance, simpleEvaluatorMeasureBridge.getBasicEvaluator().getClass().getName());
 			}
 			return performance;
 		} else {
