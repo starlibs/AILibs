@@ -2,6 +2,8 @@ package jaicore.ml.core.dataset.attribute.categorical;
 
 import java.util.Set;
 
+import jaicore.ml.core.dataset.attribute.IAttributeValue;
+
 /**
  * The categorical attribute type describes the domain a value of a respective categorical attribute value stems from.
  *
@@ -31,6 +33,16 @@ public class CategoricalAttributeType implements ICategoricalAttributeType {
 	@Override
 	public boolean isValidValue(final String value) {
 		return this.domain.contains(value);
+	}
+
+	@Override
+	public IAttributeValue<String> buildAttributeValue(final Object value) {
+		return this.buildAttributeValue((String) value);
+	}
+
+	@Override
+	public IAttributeValue<String> buildAttributeValue(final String stringDescription) {
+		return new CategoricalAttributeValue(this, stringDescription);
 	}
 
 }

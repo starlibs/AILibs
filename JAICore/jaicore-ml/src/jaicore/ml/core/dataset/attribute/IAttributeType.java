@@ -19,4 +19,22 @@ public interface IAttributeType<D> {
 	 */
 	public boolean isValidValue(D value);
 
+	/**
+	 * Casts the value to the respective type and returns an attribute value with the creating attribute type as the referenced type.
+	 *
+	 * @param value
+	 *            The value of the attribute.
+	 * @return An attribute value object holding the value of the attribute and referring to this attribute type.
+	 */
+	public IAttributeValue<D> buildAttributeValue(Object value);
+
+	/**
+	 * Builds an attribute value object from a string description. The attribute value references this attribute type.
+	 *
+	 * @param stringDescription
+	 *            A String-format description of the attribute's value.
+	 * @return The attribute value object holding an attribute value interpreting the string description and referring to this attribute type.
+	 */
+	public IAttributeValue<D> buildAttributeValue(String stringDescription);
+
 }

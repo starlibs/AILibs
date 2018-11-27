@@ -1,7 +1,11 @@
 package jaicore.ml.core.dataset.attribute.multivalue;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import jaicore.ml.core.dataset.attribute.IAttributeValue;
 
 /**
  * The multi-value attribute type describes the domain a value of a respective multi-value attribute value stems from.
@@ -32,6 +36,18 @@ public class MultiValueAttributeType implements IMultiValueAttributeType {
 	@Override
 	public boolean isValidValue(final Collection<String> value) {
 		return this.domain.containsAll(value);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public IAttributeValue<Collection<String>> buildAttributeValue(final Object value) {
+		return new MultiValueAttributeValue(this, (Set<String>) value);
+	}
+
+	@Override
+	public IAttributeValue<Collection<String>> buildAttributeValue(final String stringDescription) {
+		Set<String> value = Arrays.stream(stringDescription.split(",")).collect(Collectors.toSet());
+		return this.buildAttributeValue(value);
 	}
 
 }
