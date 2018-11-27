@@ -11,7 +11,7 @@
         },
         {
           "fullName": "Examination.Examination Date",
-          "type": "date",
+          "type": "DATE",
           "isTarget": false,
           "isPrimaryKey": false
         },
@@ -251,7 +251,7 @@
         },
         {
           "fullName": "Laboratory.U-PRO",
-          "type": "NUMERIC",
+          "type": "TEXT",
           "isTarget": false,
           "isPrimaryKey": false
         },
@@ -275,19 +275,19 @@
         },
         {
           "fullName": "Laboratory.CRP",
-          "type": "NUMERIC",
+          "type": "TEXT",
           "isTarget": false,
           "isPrimaryKey": false
         },
         {
           "fullName": "Laboratory.RA",
-          "type": "NUMERIC",
+          "type": "TEXT",
           "isTarget": false,
           "isPrimaryKey": false
         },
         {
           "fullName": "Laboratory.RF",
-          "type": "NUMERIC",
+          "type": "TEXT",
           "isTarget": false,
           "isPrimaryKey": false
         },
@@ -305,43 +305,43 @@
         },
         {
           "fullName": "Laboratory.RNP",
-          "type": "NUMERIC",
+          "type": "TEXT",
           "isTarget": false,
           "isPrimaryKey": false
         },
         {
           "fullName": "Laboratory.SM",
-          "type": "NUMERIC",
+          "type": "TEXT",
           "isTarget": false,
           "isPrimaryKey": false
         },
         {
           "fullName": "Laboratory.SC170",
-          "type": "NUMERIC",
+          "type": "TEXT",
           "isTarget": false,
           "isPrimaryKey": false
         },
         {
           "fullName": "Laboratory.SSA",
-          "type": "NUMERIC",
+          "type": "TEXT",
           "isTarget": false,
           "isPrimaryKey": false
         },
         {
           "fullName": "Laboratory.SSB",
-          "type": "NUMERIC",
+          "type": "TEXT",
           "isTarget": false,
           "isPrimaryKey": false
         },
         {
           "fullName": "Laboratory.CENTROMEA",
-          "type": "NUMERIC",
+          "type": "TEXT",
           "isTarget": false,
           "isPrimaryKey": false
         },
         {
           "fullName": "Laboratory.DNA",
-          "type": "NUMERIC",
+          "type": "TEXT",
           "isTarget": false,
           "isPrimaryKey": false
         },
@@ -365,37 +365,37 @@
         },
         {
           "fullName": "Patient.SEX",
-          "type": "ID",
+          "type": "TEXT",
           "isTarget": false,
           "isPrimaryKey": false
         },
         {
           "fullName": "Patient.Birthday",
-          "type": "ID",
+          "type": "DATE",
           "isTarget": false,
           "isPrimaryKey": false
         },
         {
           "fullName": "Patient.Description",
-          "type": "ID",
+          "type": "DATE",
           "isTarget": false,
           "isPrimaryKey": false
         },
         {
           "fullName": "Patient.First Date",
-          "type": "ID",
+          "type": "DATE",
           "isTarget": false,
           "isPrimaryKey": false
         },
         {
           "fullName": "Patient.Admission",
-          "type": "ID",
+          "type": "TEXT",
           "isTarget": false,
           "isPrimaryKey": false
         },
         {
           "fullName": "Patient.Diagnosis",
-          "type": "ID",
+          "type": "TEXT",
           "isTarget": false,
           "isPrimaryKey": false
         }
