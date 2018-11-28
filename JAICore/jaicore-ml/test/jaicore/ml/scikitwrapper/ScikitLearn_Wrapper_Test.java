@@ -49,6 +49,8 @@ public class ScikitLearn_Wrapper_Test {
 		Instances datasetTest = loadARFF(test_arff);
 		int numberInstance = datasetTest.numInstances();
 		slw.setIsRegression(true);
+		int s = datasetTrain.numAttributes();
+		slw.setTargets(s - 1, s - 2, s - 3);
 		slw.buildClassifier(datasetTrain);
 		double[] result = slw.classifyInstances(datasetTest);
 		assertNotNull(result);

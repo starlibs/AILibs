@@ -27,7 +27,6 @@ def parse(arff_, is_path=True, dense_mode=True):
     """
     if is_path:
         arff_data = open(arff_, 'r')
-        print("file opened")
     else:
         arff_data = arff_  # here path is actually the content of an arff file.
     try:
@@ -187,15 +186,20 @@ def get_feature_target_matrices(data):
     # If target indices are given, use them. Else assume last feature is target.
     if sys.argv["targets"]:
         target_indices = sys.argv["targets"]
-        targets = data[:, target_indices]
+        target_columns = []
+        for index in target_indices:
+            target_columns.append(data[:, index])
+        targets = np.concatenate(target_columns)
         feature_indices = list({j for j in range(len(data[0]))} - set(target_indices))
-        features = data[:, feature_indices]
+        feature_columns = []
+        for index in feature_indices:
+            feature_columns.append(data[:, index])
+        features = np.concatenate(feature_columns)
     else:
         targets = [row[-1] for row in data]
         features = [row[:-1] for row in data]
-    features = [list(a) for a in features]
-    targets = [list(a) for a in targets]
-    return features,targets
+    targets = [targets]
+    return features, targets
 
 
 def serialize_model(classifier_instance):
@@ -250,7 +254,7 @@ def run_train_mode(data):
     if sys.argv["regression"]:
         features, targets = get_feature_target_matrices(data)
     else:
-        features , targets = data.input_matrix, data.output_matrix
+        features, targets = data.input_matrix, data.output_matrix
         y_train = []
         for crow in targets:
             for x in range(0,len(crow)):
@@ -274,13 +278,13 @@ def run_test_mode(data):
     if sys.argv["regression"]:
         features, targets = get_feature_target_matrices(data)
     else:
-        features , targets = data.input_matrix, data.output_matrix
+        features, targets = data.input_matrix, data.output_matrix
         y_train = []
         for crow in targets:
-            for x in range(0,len(crow)):
-                if crow[x] == 1:
-                    y_train.append(x)
-        y_train = np.array(y_train)
+            for index, elem in enumerate(crow):
+                if elem == 1:
+                    y_train.append(index)
+        y_train = np.array(list(y_train))
         targets = y_train
     prediction = classifier_instance.predict(targets)
     return serialize_prediction(prediction)
