@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.eventbus.Subscribe;
 
 import jaicore.basic.ILoggingCustomizable;
+import jaicore.basic.TimeOut;
 import jaicore.basic.algorithm.AlgorithmEvent;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.AlgorithmFinishedEvent;
@@ -1057,20 +1058,17 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 
 	@Override
 	public void setTimeout(final int timeout, final TimeUnit timeUnit) {
-		if (timeUnit != TimeUnit.MILLISECONDS) {
-			throw new IllegalArgumentException("Currently only support for ms");
-		}
-		this.config.setProperty(IAlgorithmConfig.K_TIMEOUT, String.valueOf(timeout));
+		setTimeout(new TimeOut(timeout, timeUnit));	
+	}
+	
+	@Override
+	public void setTimeout(final TimeOut timeout) {
+		this.config.setProperty(IAlgorithmConfig.K_TIMEOUT, String.valueOf(timeout.milliseconds()));
 	}
 
 	@Override
-	public int getTimeout() {
-		return this.config.timeout();
-	}
-
-	@Override
-	public TimeUnit getTimeoutUnit() {
-		return TimeUnit.MILLISECONDS;
+	public TimeOut getTimeout() {
+		return new TimeOut(this.config.timeout(), TimeUnit.MILLISECONDS);
 	}
 
 	/**

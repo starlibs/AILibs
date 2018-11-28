@@ -14,8 +14,6 @@ import jaicore.graphvisualizer.events.misc.HTMLEvent;
 
 /**
  * A Datasupplier which should be able to reconstruct an HTML-Supplier
- * 
- * @author jkoepe
  *
  */
 

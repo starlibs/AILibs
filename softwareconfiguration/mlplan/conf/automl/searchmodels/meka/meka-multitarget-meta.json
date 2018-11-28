@@ -1,5 +1,4 @@
 {
-	/* TODO: Define parameters for all the algorithms. */
 	"repository": "MEKA-MultiTarget-META",
 	"include": [],
 	"parameters": [],
@@ -9,7 +8,6 @@
 			"providedInterface": ["MTClassifier", "MetaMTClassifier"],
 			"requiredInterface": ["BasicMTClassifier"],
 			"parameter": [
-				/* The number of models (default: 10) */
 				{
 					"name": "_I",
 					"type": "int",
@@ -19,7 +17,6 @@
 					"refineSplits": 2,
 					"minInterval": 1
 				},
-				/* Size of each bag, as a percentage of total training size (default 67) */
 				{
 					"name": "_P",
 					"type": "int",

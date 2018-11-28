@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.eventbus.EventBus;
 
 import jaicore.basic.ILoggingCustomizable;
+import jaicore.basic.TimeOut;
 import jaicore.basic.algorithm.AlgorithmEvent;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.AlgorithmFinishedEvent;
@@ -45,6 +46,7 @@ public class GraphSearchBasedHTNPlanningAlgorithm<PA extends Action, P extends I
 	private final P planningProblem;
 	private final IHierarchicalPlanningGraphGeneratorDeriver<?, ?, PA, P, NSrc, ASrc> problemTransformer;
 	private IGraphSearch<ISearch, OSearch, NSrc, ASrc, V, NSearch, ASearch> search;
+	private TimeOut timeout;
 	
 	/* state of the algorithm */
 	private AlgorithmState state = AlgorithmState.created;
@@ -182,20 +184,17 @@ public class GraphSearchBasedHTNPlanningAlgorithm<PA extends Action, P extends I
 
 	@Override
 	public void setTimeout(int timeout, TimeUnit timeUnit) {
-		// TODO Auto-generated method stub
-
+		setTimeout(new TimeOut(timeout, timeUnit));
+	}
+	
+	@Override
+	public void setTimeout(TimeOut timeout) {
+		this.timeout = timeout;
 	}
 
 	@Override
-	public int getTimeout() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public TimeUnit getTimeoutUnit() {
-		// TODO Auto-generated method stub
-		return null;
+	public TimeOut getTimeout() {
+		return timeout;
 	}
 
 	public IGraphSearch<ISearch, OSearch, NSrc, ASrc, V, NSearch, ASearch> getSearch() {

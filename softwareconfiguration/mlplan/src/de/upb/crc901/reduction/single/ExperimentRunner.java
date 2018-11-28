@@ -9,12 +9,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import org.nd4j.linalg.indexing.functions.Zero;
+
 import jaicore.ml.WekaUtil;
 import jaicore.ml.classification.multiclass.reduction.MCTreeNodeReD;
 import jaicore.ml.classification.multiclass.reduction.splitters.ISplitter;
 import jaicore.ml.classification.multiclass.reduction.splitters.ISplitterFactory;
-import jaicore.ml.evaluation.MonteCarloCrossValidationEvaluator;
-import jaicore.ml.evaluation.MulticlassEvaluator;
+import jaicore.ml.core.evaluation.measure.singlelabel.MultiClassPerformanceMeasure;
+import jaicore.ml.core.evaluation.measure.singlelabel.ZeroOneLoss;
+import jaicore.ml.evaluation.evaluators.weka.FixedSplitClassifierEvaluator;
+import jaicore.ml.evaluation.evaluators.weka.MonteCarloCrossValidationEvaluator;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.core.Instances;
@@ -45,7 +49,7 @@ public class ExperimentRunner<T extends ISplitter> {
 		Classifier innerClassifier = AbstractClassifier.forName(experiment.getNameOfInnerClassifier(), null);
 		Classifier rightClassifier = AbstractClassifier.forName(experiment.getNameOfRightClassifier(), null);
 		List<Instances> outerSplit = WekaUtil.getStratifiedSplit(data, new Random(experiment.getSeed()), .7f);
-		MonteCarloCrossValidationEvaluator mccv = new MonteCarloCrossValidationEvaluator(new MulticlassEvaluator(new Random(seed)), mccvRepeats, outerSplit.get(0), .7f);
+		MonteCarloCrossValidationEvaluator mccv = new MonteCarloCrossValidationEvaluator(new ZeroOneLoss(), mccvRepeats, outerSplit.get(0), .7f, seed);
 		ISplitter splitter = splitterFactory.getSplitter(seed);
 		
 		/* compute best of k splits */
@@ -68,10 +72,7 @@ public class ExperimentRunner<T extends ISplitter> {
 		}
 		
 		/* train classifier on all data */
-		bestFoundClassifier.buildClassifier(outerSplit.get(0));
-		MulticlassEvaluator evaluator = new MulticlassEvaluator(new Random(seed));
-		double loss = evaluator.loss(bestFoundClassifier, outerSplit.get(1));
-
+		double loss = new FixedSplitClassifierEvaluator(outerSplit.get(0), outerSplit.get(1)).evaluate(bestFoundClassifier);
 		Map<String, Object> result = new HashMap<>();
 		System.out.println("\t\t\tBest previously observed loss was " + bestFoundScore + ". The retrained classifier achieves " + loss + " on the full data.");
 		result.put("errorRate", loss);

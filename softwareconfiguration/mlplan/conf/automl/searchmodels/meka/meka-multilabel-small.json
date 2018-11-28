@@ -2,9 +2,9 @@
 	"repository": "MEKA",
 	"include": ["../mlplan"],
 	"parameters": [
-		/* Sets the downsampling ratio default: 0.75 (of original) */
 		{
 			"name": "_P",
+			"comment": "Sets the downsampling ratio default: 0.75 (of original)",
 			"type": "double",
 			"default": 0.75,
 			"min": 0.1,
@@ -12,16 +12,16 @@
 			"refineSplits": 2,
 			"minInterval": 0.05
 		},
-		/* Determines the width of the trellis (use 0 for chain; use _1 for a square trellis, i.e., width of sqrt(number of labels)). */
 		{
 			"name": "_H",
+			"comment": "Determines the width of the trellis (use 0 for chain; use _1 for a square trellis, i.e., width of sqrt(number of labels)).",
 			"type": "cat",
 			"default": 0,
 			"values": [0, -1]
 		},
-		/* Determines the neighbourhood density (the number of neighbours for each node in the trellis). CAUTION: no default found */
 		{
 			"name": "_L",
+			"comment": "Determines the neighbourhood density (the number of neighbours for each node in the trellis). CAUTION: no default found",
 			"type": "double",
 			"default": 0.5,
 			"min": 0.1,
@@ -29,23 +29,23 @@
 			"minInterval": 0.05,
 			"refineSplits": 2
 		},
-		/* The dependency heuristic to use in rearranging the trellis (None by default). */
 		{
 			"name": "_X",
+			"comment": "The dependency heuristic to use in rearranging the trellis (None by default).",
 			"type": "cat",
 			"default": "None",
 			"values": ["None"]
 		},
-		/* The total number of iterations. default: 1000 */
 		{
 			"name": "_I",
+			"comment": "The total number of iterations. default: 1000",
 			"type": "cat",
 			"default": 1000,
 			"values": [100, 1000, 10000, 20000]
 		},
-		/* The number of collection iterations. default: 100 */
 		{
 			"name": "_Ic",
+			"comment": "The number of collection iterations. default: 100",
 			"type": "cat",
 			"default": 100,
 			"values": [50, 100, 200, 500, 1000]
@@ -57,9 +57,9 @@
 			"providedInterface": ["MLClassifier", "BasicMLClassifier"],
 			"requiredInterface": ["Classifier"],
 			"parameter": [
-				/* The way to measure dependencies. default: lbf (frequencies only) */
 				{
 					"name": "_X",
+					"comment": "The way to measure dependencies. default: lbf (frequencies only)",
 					"type": "cat",
 					"default": "lbf",
 					"values": [ "lbf" ]
@@ -70,9 +70,7 @@
 			"name": "meka.classifiers.multilabel.BR",
 			"providedInterface": ["MLClassifier", "BasicMLClassifier"],
 			"requiredInterface": ["Classifier"],
-			"parameter": [
-				/* No parameters to optimize */
-			]
+			"parameter": []
 		}
 	]
 }

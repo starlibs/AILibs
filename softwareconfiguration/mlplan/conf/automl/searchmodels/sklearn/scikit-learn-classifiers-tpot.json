@@ -263,12 +263,6 @@
       "type" : "cat",
       "values" : [ "hinge", "squared_hinge" ]
     },
-    /*{*/
-    /*  "name" : "dual",*/
-    /*  "default" : "true",*/
-    /*  "type" : "cat",*/
-    /*  "values": ["true"] */
-    /* }, */
     {
       "name" : "tol",
       "default" : 1.0E-5,

@@ -7,9 +7,9 @@ import java.util.Random;
 import org.apache.commons.lang.NotImplementedException;
 
 import jaicore.ml.WekaUtil;
-import jaicore.ml.evaluation.ClassifierEvaluator;
-import jaicore.ml.evaluation.MonteCarloCrossValidationEvaluator;
-import jaicore.ml.evaluation.MulticlassEvaluator;
+import jaicore.ml.core.evaluation.measure.singlelabel.ZeroOneLoss;
+import jaicore.ml.evaluation.evaluators.weka.IClassifierEvaluator;
+import jaicore.ml.evaluation.evaluators.weka.MonteCarloCrossValidationEvaluator;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.core.Instances;
@@ -91,13 +91,13 @@ public class ConsistentMLPipelineEvaluator {
 	 * @param seed
 	 * @return
 	 */
-	public static ClassifierEvaluator getEvaluatorForSplitTechnique(String split_technique, Instances data, int seed) {
+	public static IClassifierEvaluator getEvaluatorForSplitTechnique(String split_technique, Instances data, int seed) {
 		String[] techniqueAndDescription = split_technique.split("_");
 
 		switch (techniqueAndDescription[0]) {
 		case "3MCCV":
-			return new MonteCarloCrossValidationEvaluator(new MulticlassEvaluator(new Random(seed)), 3, data,
-					Float.parseFloat(techniqueAndDescription[1]));
+			return new MonteCarloCrossValidationEvaluator(new ZeroOneLoss(), 3, data,
+					Float.parseFloat(techniqueAndDescription[1]), seed);
 		}
 
 		return null;

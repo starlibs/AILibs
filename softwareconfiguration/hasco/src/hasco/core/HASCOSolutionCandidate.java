@@ -1,6 +1,7 @@
 package hasco.core;
 
 import hasco.model.ComponentInstance;
+import hasco.model.EvaluatedSoftwareConfigurationSolution;
 import jaicore.planning.EvaluatedPlan;
 import jaicore.planning.EvaluatedSearchGraphBasedPlan;
 import jaicore.planning.model.ceoc.CEOCAction;
@@ -13,7 +14,7 @@ import jaicore.planning.model.ceoc.CEOCAction;
  *
  * @param <T>
  */
-public class HASCOSolutionCandidate<V extends Comparable<V>> {
+public class HASCOSolutionCandidate<V extends Comparable<V>> implements EvaluatedSoftwareConfigurationSolution<V> {
 
 	private final ComponentInstance componentInstance;
 	private final EvaluatedSearchGraphBasedPlan<CEOCAction, V, ?> planningSolution;

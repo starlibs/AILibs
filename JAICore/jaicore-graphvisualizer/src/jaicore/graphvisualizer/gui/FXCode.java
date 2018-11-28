@@ -47,47 +47,51 @@ import javafx.util.StringConverter;
  * @param <E>
  */
 public class FXCode<V, E> implements NodeListener<V> {
-    //Variables needed for the whole class
+    /*Variables needed for the whole class*/
 
-    //Tabpane
+    /*Tabpane*/
     private TabPane tabPane;
 
-    //Timeline
+    /*Timeline*/
     private Slider timeline;
 
-    //EventBus
+    /*EventBus*/
     private EventBus eventBus;
 
 
-    //Indices
+    /*Indices*/
     private int index;
     private int maxIndex;
 
     private int maxDisplayIndex;
     private int displayIndex;
 
-    //Visualisation window and visualizaton threads
+    /*Visualisation window and visualizaton threads*/
     private GraphVisualization<V, E> visualization;
     private Thread playThread;
 
-    //Settings
+    /*Settings*/
     private long sleepTime;
 
-    //update restriction
+    /*update restriction*/
     private Semaphore sem;
     private Thread updateThread;
 
-    //Log
+    /*Log*/
     private Text log;
     
     private Button colouringButton;
     private boolean colouring;
-
+    
+    /**
+     *Number of Ticks at the timeline. This number should not be greater then 1999  
+     */
+    private int numberOfTicks;
     /**
      * Constructor
      */
     public FXCode(Recorder<V, E> rec, String title, ObjectEvaluator eval) {
-        //initialize object variables;
+        /*initialize object variables;*/
         this.index = 0;
         this.maxIndex = 0;
         this.maxDisplayIndex = 0;
@@ -101,31 +105,32 @@ public class FXCode<V, E> implements NodeListener<V> {
         rec.registerInfoListener(this);
 
         this.log = new Text();
+        this.numberOfTicks= 250;
 
-        //declare  and initialize FX-elements
+        /*declare  and initialize FX-elements*/
 
-        //create Main-BorderPane
+        /*create Main-BorderPane*/
         BorderPane root = new BorderPane();
 
-        //top
+        /*top*/
         ToolBar toolBar = new ToolBar();
         BorderPane top = new BorderPane();
         Slider sleepTimeSlider = new Slider(0, 200, 200 - sleepTime);
 
-        //center
+        /*center*/
         SplitPane splitPane = new SplitPane();
         this.tabPane = new TabPane();
         this.visualization = new GraphVisualization<V, E>(eval);
-//		visualization = new ScoreVisualization<V, E>();
 
-        //Bottom
+
+        /*Bottom*/
         this.timeline = new Slider();
 
         Scene scene = new Scene(root, 800, 300);
         Stage stage = new Stage();
 
-        //settings for the gui elements
-        //top
+        /*settings for the gui elements*/
+        /*top*/
         if(eval != null) {
         	fillToolbar(toolBar.getItems(), true);
         	colouring = true;
@@ -137,7 +142,7 @@ public class FXCode<V, E> implements NodeListener<V> {
         top.setBottom(sleepTimeSlider);
         root.setTop(top);
         
-        //Center
+        /*Center*/
         rec.registerReplayListener(visualization);
         visualization.addNodeListener(this);
         this.eventBus.register(visualization);
@@ -148,7 +153,7 @@ public class FXCode<V, E> implements NodeListener<V> {
         splitPane.getItems().add(visualization.getFXNode());
         root.setCenter(splitPane);
 
-        //Bottom
+        /*Bottom*/
         setTimelineSlider();
         root.setBottom(this.timeline);
 
@@ -228,7 +233,7 @@ public class FXCode<V, E> implements NodeListener<V> {
      * Uses a thread to continuously post events
      */
     private void startPlayThread() {
-        // play runs in an own thread to make it stoppable
+        /* play runs in an own thread to make it stoppable*/
         Runnable run = () -> {
 
             try {
@@ -246,7 +251,7 @@ public class FXCode<V, E> implements NodeListener<V> {
                     }
                 }
             } catch (InterruptedException e) {
-                //        e.printStackTrace();
+
             }
         };
 
@@ -260,7 +265,7 @@ public class FXCode<V, E> implements NodeListener<V> {
      * @param nodeList A list which shall contain the nodes of the buttons
      */
     private void fillToolbar(List<Node> nodeList, boolean eval) {
-        // playbutton
+        /* playbutton*/
         Button playButton = new Button("Play");
         playButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -271,7 +276,7 @@ public class FXCode<V, E> implements NodeListener<V> {
               
 
         nodeList.add(playButton);
-        // stepButton
+        /* stepButton*/
         Button stepButton = new Button("Step");
         stepButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -284,7 +289,7 @@ public class FXCode<V, E> implements NodeListener<V> {
         });
         nodeList.add(stepButton);
 
-        // stopButton
+        /* stopButton*/
         Button stopButton = new Button("Stop");
         stopButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -295,7 +300,7 @@ public class FXCode<V, E> implements NodeListener<V> {
         });
         nodeList.add(stopButton);
 
-        // BackButton
+        /* BackButton*/
         Button backButton = new Button("Back");
         backButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -312,7 +317,7 @@ public class FXCode<V, E> implements NodeListener<V> {
         });
         nodeList.add(backButton);
 
-//        resetButton
+      /*  resetButton*/
         Button resetButton = new Button("reset");
         resetButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -322,7 +327,7 @@ public class FXCode<V, E> implements NodeListener<V> {
         });
         nodeList.add(resetButton);
 
-        // loadButton
+       /* loadButton*/
         Button loadButton = new Button("load");
         loadButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -335,7 +340,7 @@ public class FXCode<V, E> implements NodeListener<V> {
         });
         nodeList.add(loadButton);
 
-        // saveButton
+        /* saveButton*/
         Button saveButton = new Button("save");
         saveButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -348,7 +353,7 @@ public class FXCode<V, E> implements NodeListener<V> {
         });
         nodeList.add(saveButton);
         
-        //Colouring bottom
+        /*Colouring button*/
         colouringButton = new Button("colouring");
         colouringButton.setOnAction(new EventHandler<ActionEvent>() {
         	@Override
@@ -380,13 +385,12 @@ public class FXCode<V, E> implements NodeListener<V> {
     public void receiveInfoEvent(InfoEvent event) {
         try {
             this.maxIndex = event.getMaxIndex();
-//            this.timeline.setMax(this.maxIndex);
-            
+
             this.sem.release();
             if (event.updateIndex())
                 this.updateIndex(maxIndex, true);
         } catch (NullPointerException e) {
-//            e.printStackTrace();
+
         }
     }
 
@@ -470,14 +474,14 @@ public class FXCode<V, E> implements NodeListener<V> {
             try {
                 set.stream().forEach(cls -> {
                     if (cls instanceof ClassPath.ClassInfo) {
-                        // search for a Visualizer.
-//                	To identify a visualizer the package name has to contain .dataVisualizer.
+                       /* search for a Visualizer.
+                	To identify a visualizer the package name has to contain .dataVisualizer.*/
                         if (((ClassPath.ClassInfo) cls).getName().contains(".dataVisualizer.")) {
                             IVisualizer v = (IVisualizer) findClassByName(((ClassPath.ClassInfo) cls).getName());
                             try {
                                 if (v != null) {
-                                    // if the supplier of the visualizer matches the current one, add the visualizer
-                                    // to the tabpane
+                                   /* if the supplier of the visualizer matches the current one, add the visualizer
+                                    to the tabpane*/
                                     if (v.getSupplier().equals(supplier.getClass().getSimpleName())) {
                                         supplier.registerListener(v);
                                         this.eventBus.register(supplier);
@@ -490,13 +494,12 @@ public class FXCode<V, E> implements NodeListener<V> {
                                     }
                                 }
                             } catch (Exception e) {
-//                            e.printStackTrace();
+
                             }
                         }
                     }
                 });
             } catch (Exception e) {
-//                e.printStackTrace();
             }
 
         } catch (IOException e) {
@@ -588,9 +591,14 @@ public class FXCode<V, E> implements NodeListener<V> {
         updateThread = new Thread(run, "Update");
         updateThread.start();
     }
-
+    
+    /**
+     * Updates the timeline
+     */
     private void updateTimelineIndex() {
         this.timeline.setMax(maxIndex);
+        int tickUnit= maxIndex / this.numberOfTicks;
+        this.timeline.setMajorTickUnit(tickUnit);
         this.maxDisplayIndex = maxIndex;
         if(this.displayIndex < maxDisplayIndex || this.displayIndex < this.index) {
         	if(index <= maxDisplayIndex) {
@@ -603,5 +611,13 @@ public class FXCode<V, E> implements NodeListener<V> {
         }
 
     }
+
+	public int getNumberOfTicks() {
+		return numberOfTicks;
+	}
+
+	public void setNumberOfTicks(int numberOfTicks) {
+		this.numberOfTicks = numberOfTicks;
+	}
 
 }

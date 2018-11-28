@@ -2,10 +2,11 @@ package jaicore.planning;
 
 import java.util.List;
 
+import jaicore.basic.ScoredItem;
 import jaicore.planning.model.core.Action;
 import jaicore.planning.model.core.Plan;
 
-public class EvaluatedPlan<A extends Action, V> extends Plan<A> {
+public class EvaluatedPlan<A extends Action, V extends Comparable<V>> extends Plan<A> implements ScoredItem<V> {
 	private final V score;
 
 	public EvaluatedPlan(Plan<A> plan, V score) {

@@ -11,9 +11,9 @@
 			"providedInterface": ["MLClassifier", "MetaMLClassifier"],
 			"requiredInterface": ["BasicMLClassifier"],
 			"parameter": [
-				/* Sets the number of models (default 10) */
 				{
 					"name": "_I",
+					"comment": "Sets the number of models (default 10)",
 					"type": "int",
 					"default": 10,
 					"min": 2,

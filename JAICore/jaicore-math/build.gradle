@@ -12,4 +12,5 @@ sourceSets {
 }
 dependencies {
 	compile project(":JAICore:jaicore-basic")
+    compile group: 'de.upb.isys', name: 'mtj', version: '0.0.1'
 }

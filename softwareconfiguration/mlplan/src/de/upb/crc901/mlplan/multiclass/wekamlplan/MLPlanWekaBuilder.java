@@ -2,7 +2,7 @@ package de.upb.crc901.mlplan.multiclass.wekamlplan;
 
 import java.io.File;
 
-import de.upb.crc901.mlplan.multiclass.MultiClassPerformanceMeasure;
+import jaicore.ml.core.evaluation.measure.singlelabel.MultiClassPerformanceMeasure;
 
 public class MLPlanWekaBuilder {
 	private File searchSpaceConfigFile = new File("conf/automl/searchmodels/weka/weka-all-autoweka.json");

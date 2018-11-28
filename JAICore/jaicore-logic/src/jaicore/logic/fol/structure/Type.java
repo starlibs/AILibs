@@ -38,7 +38,7 @@ public class Type implements Serializable {
 		}
 	}
 
-	Type(String name) {
+	public Type(String name) {
 		// no legal type definition
 		if (name.trim() == "") {
 			throw new IllegalArgumentException();

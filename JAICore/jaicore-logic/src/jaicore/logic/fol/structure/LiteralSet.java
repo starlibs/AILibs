@@ -128,6 +128,24 @@ public class LiteralSet extends HashSet<Literal> {
 		return null; // no implying mapping
 	}
 
+	public LiteralSet getPositiveLiterals() {
+		LiteralSet ls = new LiteralSet();
+		for (Literal l : this) {
+			if (l.isPositive())
+				ls.add(l);
+		}
+		return ls;
+	}
+	
+	public LiteralSet getNegativeLiterals() {
+		LiteralSet ls = new LiteralSet();
+		for (Literal l : this) {
+			if (l.isNegated())
+				ls.add(l);
+		}
+		return ls;
+	}
+	
 	/**
 	 * @return All the parameters (variable and constant) from the contained literals.
 	 */

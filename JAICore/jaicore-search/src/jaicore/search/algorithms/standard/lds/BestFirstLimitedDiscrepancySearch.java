@@ -2,7 +2,6 @@ package jaicore.search.algorithms.standard.lds;
 
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -10,6 +9,7 @@ import java.util.stream.Collectors;
 
 import com.google.common.eventbus.Subscribe;
 
+import jaicore.basic.TimeOut;
 import jaicore.basic.algorithm.AlgorithmEvent;
 import jaicore.graph.IGraphAlgorithmListener;
 import jaicore.search.algorithms.standard.AbstractORGraphSearch;
@@ -99,31 +99,12 @@ public class BestFirstLimitedDiscrepancySearch<T, A, V extends Comparable<V>> ex
 	}
 
 	@Override
-	public int getNumCPUs() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public void setTimeout(int timeout, TimeUnit timeUnit) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public int getTimeout() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public TimeUnit getTimeoutUnit() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public EvaluatedSearchGraphPath<T, A, V> getSolutionProvidedToCall() {
 		return null;
+	}
+
+	@Override
+	public int getNumCPUs() {
+		return 0;
 	}
 }

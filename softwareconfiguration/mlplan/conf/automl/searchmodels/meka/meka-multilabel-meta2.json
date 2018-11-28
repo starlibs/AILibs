@@ -9,9 +9,9 @@
 			"providedInterface": ["MLClassifier", "MetaMLClassifier"],
 			"requiredInterface": ["BasicMTClassifier"],
 			"parameter": [
-				/* Size of the compressed matrix. Should be less than the number of labels and more than 1. (default: 3) */
 				{
 					"name": "_size",
+					"comment": "Size of the compressed matrix. Should be less than the number of labels and more than 1. (default: 3)",
 					"type": "int",
 					"min": 2,
 					"max": 20,

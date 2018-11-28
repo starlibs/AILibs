@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.EventBus;
 
+import jaicore.basic.TimeOut;
 import jaicore.basic.algorithm.AlgorithmEvent;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.AlgorithmFinishedEvent;
@@ -39,7 +40,7 @@ public abstract class AbstractORGraphSearch<I extends GraphSearchInput<NSrc, ASr
 	private boolean timeouted;
 	private Timer timeouter;
 	protected final I problem;
-	private int timeoutInMS = Integer.MAX_VALUE;
+	private TimeOut timeout = null;
 	private Set<Thread> activeThreads = new HashSet<>();
 	private EvaluatedSearchGraphPath<NSrc, ASrc, V> bestSeenSolution;
 
@@ -114,22 +115,22 @@ public abstract class AbstractORGraphSearch<I extends GraphSearchInput<NSrc, ASr
 
 	@Override
 	public void setTimeout(int timeout, TimeUnit timeUnit) {
-		if (timeUnit != TimeUnit.MILLISECONDS)
-			throw new IllegalArgumentException("Only ms as time unit supported for the time being.");
-		timeoutInMS = timeout;
+		setTimeout(new TimeOut(timeout, timeUnit));
+	}
+	
+	@Override
+	public void setTimeout(TimeOut timeout) {
+		this.timeout = timeout;
 	}
 
 	@Override
-	public int getTimeout() {
-		return timeoutInMS;
-	}
-
-	@Override
-	public TimeUnit getTimeoutUnit() {
-		return TimeUnit.MILLISECONDS;
+	public TimeOut getTimeout() {
+		return timeout;
 	}
 
 	protected void activateTimeoutTimer(String name) {
+		if (timeout == null)
+			return;
 		timeouter = new Timer(name);
 		timeouter.schedule(new TimerTask() {
 			@Override
@@ -138,8 +139,8 @@ public abstract class AbstractORGraphSearch<I extends GraphSearchInput<NSrc, ASr
 				logger.info("Timeout triggered. Have set the timeouted flag to true and will now invoke shutdown procedure.");
 				shutdown();
 			}
-		}, timeoutInMS);
-		logger.info("Timeouter {} activated for in {}ms", name, timeoutInMS);
+		}, timeout.milliseconds());
+		logger.info("Timeouter {} activated for in {}ms", name, timeout);
 	}
 
 	protected void checkTermination() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {

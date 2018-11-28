@@ -41,25 +41,25 @@ import jaicore.graphvisualizer.gui.dataSupplier.ReconstructionDataSupplier;
  */
 public class Recorder<V,E> {
 
-//    Algorithm to listen to
+    /*Algorithm to listen to*/
 	private IGraphAlgorithm<?,?,V,E> algorithm;
 
-//    List for storing the events
+    /*List for storing the events*/
 	private List<Object> receivedEvents;
 	private List<Long> receivingTimes;
 	private long firstEventTime;
 
-//    Index to know where in the replay the recorder is
+    /*Index to know where in the replay the recorder is*/
 	private int index;
 
-//    EventBuses
+    /*EventBuses*/
 	private EventBus replayBus;
 	private EventBus infoBus;
 
-//    Nodemap to store types of nodes
+    /*Nodemap to store types of nodes*/
 	private Map<Object, List> nodeMap;
 
-//    List with every datasupplier
+	/*List with every datasupplier*/
 	List<ISupplier> supplier;
 
 	/**
@@ -81,7 +81,7 @@ public class Recorder<V,E> {
 
 		this.algorithm = algorithm;
 
-		// initializing variables
+		/* initializing variables*/
 
 		this.index = 0;
 
@@ -124,15 +124,15 @@ public class Recorder<V,E> {
 	@Subscribe
 	public void receiveGraphEvent(GraphEvent event) {
 
-		// receive event and save the time
+		/* receive event and save the time*/
 		this.receivedEvents.add(event);
 		long receiveTime = System.currentTimeMillis();
 
-		// check if it is the first event
+		/* check if it is the first event*/
 		if (firstEventTime == 0)
 			firstEventTime = receiveTime;
 
-		// compute the absolute time of the event in relation to the first event
+		/* compute the absolute time of the event in relation to the first event*/
 		long eventTime = receiveTime - firstEventTime;
 		receivingTimes.add(eventTime);
 		this.infoBus.post(new InfoEvent(receivedEvents.size(), eventTime, 0));
@@ -216,13 +216,13 @@ public class Recorder<V,E> {
 		Object counter = null;
 
 		switch (event.getClass().getSimpleName()) {
-//			counter for a GraphInitializedEvent
+		/*counter for a GraphInitializedEvent*/
 		case "GraphInitializedEvent":
-			// just for completion
+			/* just for completion*/
 			counter = null;
 			break;
 
-//				counter for a nodetypeswitchevent
+		/*counter for a nodetypeswitchevent*/
 		case "NodeTypeSwitchEvent":
 			NodeTypeSwitchEvent nodeTypeSwitchEvent = (NodeTypeSwitchEvent) event;
 			List<String> typeList = nodeMap.get(nodeTypeSwitchEvent.getNode());
@@ -230,7 +230,7 @@ public class Recorder<V,E> {
 			counter = new NodeTypeSwitchEvent(nodeTypeSwitchEvent.getNode(), typeList.get(typeList.size() - 1));
 			break;
 
-//				counter for a nodereached event
+		/*counter for a nodereached event*/
 		case "NodeReachedEvent":
 			NodeReachedEvent nodeReachedEvent = (NodeReachedEvent) event;
 			counter = new NodeRemovedEvent(nodeReachedEvent.getNode());
@@ -250,7 +250,7 @@ public class Recorder<V,E> {
 	 */
 	private void addType(Object event) {
 		List<String> types;
-//            switch the event corresponding to the current event to get the right type of the node
+        /*switch the event corresponding to the current event to get the right type of the node*/
 		switch (event.getClass().getSimpleName()) {
 		case "GraphInitializedEvent":
 			GraphInitializedEvent initializedEvent = (GraphInitializedEvent) event;
@@ -333,7 +333,7 @@ public class Recorder<V,E> {
 				LinkedHashMap<Long, Object> timeToEvent = new LinkedHashMap();
 				int code = 0;
 
-				// Maps times to the hashcodes of the events
+				/* Maps times to the hashcodes of the events*/
 				switch (event.getClass().getSimpleName()) {
 				case "GraphInitializedEvent":
 					GraphInitializedEvent graphInitializedEvent = (GraphInitializedEvent) event;
@@ -362,7 +362,7 @@ public class Recorder<V,E> {
 				}
 				saveList.add(timeToEvent);
 			}
-//			add the serialized supplier to a list which gets saved
+			/*add the serialized supplier to a list which gets saved*/
 			mapperList.add(saveList);
 			HashSet<JsonNode> supplierHashSet = new HashSet<>();
 
@@ -387,7 +387,7 @@ public class Recorder<V,E> {
 	 */
 	private void load(File file) {
 
-		// clear existing events
+		/* clear existing events*/
 		this.receivedEvents.clear();
 		this.receivingTimes.clear();
 
@@ -399,7 +399,7 @@ public class Recorder<V,E> {
 			List mapperList = mapper.readValue(file,
 					mapper.getTypeFactory().constructCollectionType(List.class, Object.class));
 			ArrayList eventList = (ArrayList) mapperList.get(0);
-//			create the events out of the stored ones. In the newly loaded events the hashcode of the nodes of the old ones are the whole node
+			/*create the events out of the stored ones. In the newly loaded events the hashcode of the nodes of the old ones are the whole node*/
 			eventList.stream().forEach(n -> {
 				LinkedHashMap map = (LinkedHashMap) n;
 				map.keySet().stream().forEach(time -> receivingTimes.add(Long.parseLong((String) time)));
@@ -433,7 +433,7 @@ public class Recorder<V,E> {
 						this.receiveGraphEvent((GraphEvent) event);
 				});
 			});
-//             create the supplier if possible
+             /*create the supplier if possible*/
 			mapperList.stream().filter(o -> mapperList.indexOf(o) != 0).forEach(o -> {
 				ArrayList m = (ArrayList) o;
 				LinkedHashMap map = (LinkedHashMap) m.get(0);
@@ -445,5 +445,18 @@ public class Recorder<V,E> {
 			e.printStackTrace();
 		}
 
+	}
+	/**
+	* Getter for the Events
+	*/
+	public  List<Object> getReceivedEvents(){
+		return this.receivedEvents;
+	}
+	
+	/**
+	* Getter for the index
+	*/
+	public int getIndex(){
+		return this.index;
 	}
 }
