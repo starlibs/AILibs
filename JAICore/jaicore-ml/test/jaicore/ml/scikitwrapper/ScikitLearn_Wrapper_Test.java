@@ -24,6 +24,8 @@ public class ScikitLearn_Wrapper_Test {
 				"from sklearn.neural_network import MLPRegressor");
 		Instances dataset = loadARFF("testsrc/ml/skikitwrapper/0532052678.arff");
 		slw.setIsRegression(true);
+		int s = dataset.numAttributes();
+		slw.setTargets(s - 1, s - 2);
 		slw.buildClassifier(dataset);
 		assertNotEquals(slw.getModelPath(), "");
 	}

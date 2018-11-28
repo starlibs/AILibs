@@ -147,7 +147,7 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 		String[] processParameterArray = createProcessParameterArray(testOptions);
 		TestProcessListener processListener = new TestProcessListener();
 		runProcess(processParameterArray, processListener);
-		List<Double> results = processListener.getTestResults();
+		List<List<Double>> results = processListener.getTestResults();
 		double[] resultsArray = new double[results.size()];
 		for (int i = 0; i < resultsArray.length; i++) {
 			resultsArray[i] = results.get(i);

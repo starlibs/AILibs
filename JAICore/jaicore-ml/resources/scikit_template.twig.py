@@ -189,16 +189,15 @@ def get_feature_target_matrices(data):
         target_columns = []
         for index in target_indices:
             target_columns.append(data[:, index])
-        targets = np.concatenate(target_columns)
+        targets = np.transpose(np.array(target_columns))
         feature_indices = list({j for j in range(len(data[0]))} - set(target_indices))
         feature_columns = []
         for index in feature_indices:
             feature_columns.append(data[:, index])
-        features = np.concatenate(feature_columns)
+        features = np.transpose(np.array(feature_columns))
     else:
         targets = [row[-1] for row in data]
         features = [row[:-1] for row in data]
-    targets = [targets]
     return features, targets
 
 
@@ -262,6 +261,7 @@ def run_train_mode(data):
                     y_train.append(x)
         y_train = np.array(y_train)
         targets = y_train
+        features = np.array(features)
     # Create instance of classifier with given parameters.
     classifier_instance = {{classifier_construct}}
     classifier_instance.fit(features, targets)
@@ -286,7 +286,7 @@ def run_test_mode(data):
                     y_train.append(index)
         y_train = np.array(list(y_train))
         targets = y_train
-    prediction = classifier_instance.predict(targets)
+    prediction = classifier_instance.predict(features)
     return serialize_prediction(prediction)
 
 
