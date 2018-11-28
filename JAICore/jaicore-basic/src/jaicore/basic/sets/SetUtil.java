@@ -18,13 +18,7 @@ import java.util.function.Predicate;
 
 import org.apache.commons.math3.geometry.euclidean.oned.Interval;
 
-<<<<<<< HEAD
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-=======
 import jaicore.basic.IGetter;
->>>>>>> cache
 import jaicore.basic.MathExt;
 
 /**
@@ -38,8 +32,7 @@ public class SetUtil {
 		private X x;
 		private Y y;
 
-		@JsonCreator
-		public Pair(@JsonProperty("x") X x, @JsonProperty("y") Y y) {
+		public Pair(X x, Y y) {
 			super();
 			this.x = x;
 			this.y = y;

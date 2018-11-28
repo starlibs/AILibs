@@ -41,19 +41,19 @@ public class MLPlanOpenMLExample {
 		List<Instances> split = WekaUtil.getStratifiedSplit((Instances)data, (new Random(0)).nextLong(), 0.7d);
 		/* initialize mlplan, and let it run for 30 seconds */
 
-		SQLAdapter adapter = new SQLAdapter("host", "user", "password", "database");
-        PerformanceDBAdapter pAdapter = new PerformanceDBAdapter(adapter, "performance_cache");
+//		SQLAdapter adapter = new SQLAdapter("host", "user", "password", "database");
+//        PerformanceDBAdapter pAdapter = new PerformanceDBAdapter(adapter, "performance_cache");
 
 		MLPlanWekaBuilder builder = new MLPlanWekaBuilder(
-				new File("conf/automl/searchmodels/weka/weka-all-autoweka.json"), new File("conf/mlplan.properties"),
-				MultiClassPerformanceMeasure.ERRORRATE, pAdapter);
+				new File("conf/automl/searchmodels/weka/tinytest2.json"), new File("conf/mlplan.properties"),
+				MultiClassPerformanceMeasure.ERRORRATE);
 
 		MLPlanWekaClassifier mlplan = new WekaMLPlanWekaClassifier(builder);
 
 		mlplan.setLoggerName("mlplan");
 		mlplan.setUseParameterPruning(true);
 		mlplan.setParameterImportanceEstimator(new FANOVAParameterImportanceEstimator("test", 8, 0.08d));
-		mlplan.setTimeout(300);
+		mlplan.setTimeout(60);
 //		mlplan.activateVisualization();
 		try {
 			long start = System.currentTimeMillis();

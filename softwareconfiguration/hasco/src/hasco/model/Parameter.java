@@ -1,29 +1,16 @@
 package hasco.model;
 
-<<<<<<< HEAD
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-=======
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonPropertyOrder({"name", "defaultDomain", "defaultValue"})
->>>>>>> cache
 public class Parameter {
 	private final String name;
 	private final ParameterDomain defaultDomain;
 	private final Object defaultValue;
 
-<<<<<<< HEAD
-	@JsonCreator
-	public Parameter(@JsonProperty("name") String name, @JsonProperty("defaultDomain") ParameterDomain defaultDomain,
-			@JsonProperty("defaultValue") Object defaultValue) {
-=======
 	
 	public Parameter(@JsonProperty("name") String name, @JsonProperty("defaultDomain")ParameterDomain defaultDomain,@JsonProperty("defaultValue") Object defaultValue) {
->>>>>>> cache
 		super();
 		this.name = name;
 		this.defaultDomain = defaultDomain;
@@ -42,12 +29,10 @@ public class Parameter {
 		return defaultValue;
 	}
 
-	@JsonIgnore
 	public boolean isNumeric() {
 		return defaultDomain instanceof NumericParameterDomain;
 	}
 
-	@JsonIgnore
 	public boolean isCategorical() {
 		return defaultDomain instanceof CategoricalParameterDomain;
 	}

@@ -326,14 +326,8 @@ public class HASCOReduction<V extends Comparable<V>> implements
 	 * @param plannerFactory
 	 * @return
 	 */
-<<<<<<< HEAD
-	public <T, A, ISearch extends GraphSearchInput<T, A>> GraphGenerator<T, A> getGraphGeneratorUsedByHASCOForSpecificPlanner(
-			final IPlanningGraphGeneratorDeriver<? extends Operation, ? extends Method, ? extends Action, IHTNPlanningProblem<?, ?, ?>, T, A> transformer) {
-		return transformer.transform(getPlanningProblem());
-=======
 	public <T, A, ISearch extends GraphSearchInput<T, A>> GraphGenerator<T, A> getGraphGeneratorUsedByHASCOForSpecificPlanner(final IHierarchicalPlanningGraphGeneratorDeriver<? extends Operation, ? extends Method, ? extends Action, IHTNPlanningProblem<?,?,?>, T, A> transformer) {
 		return transformer.transform(getPlanningProblem()) ;
->>>>>>> cache
 	}
 
 	@Override
