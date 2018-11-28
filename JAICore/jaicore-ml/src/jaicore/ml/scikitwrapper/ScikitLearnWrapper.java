@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jtwig.JtwigModel;
@@ -27,6 +28,7 @@ import weka.core.converters.ArffSaver;
  *	is only trained, the model is being saved with an unique ID.
  */
 public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
+	private boolean verbose = false;
 	private static final File TMP_FOLDER = new File("tmp");
 	private static File SCIKIT_TEMPLATE = new File("resources/scikit_template.twig.py");
 	private String modelPath = "";
@@ -34,6 +36,7 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 	private boolean isRegression = false;
 	private String outputFolder = "";
 	private int[] targetColumns = new int[0];
+	private List<List<Double>> rawLastClassificationResults = null;
 
 	public ScikitLearnWrapper(String constructInstruction, String imports) throws IOException {
 		Map<String, Object> templateValues = initialize(constructInstruction, imports);
@@ -112,6 +115,10 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 		this.modelPath = modelPath;
 	}
 
+	public List<List<Double>> getRawLastClassificationResults() {
+		return rawLastClassificationResults;
+	}
+
 	public void setIsRegression(boolean isRegression) {
 		this.isRegression = isRegression;
 	}
@@ -124,6 +131,10 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 		this.targetColumns = targetColumns;
 	}
 
+	public void setIsVerbose(boolean verbose) {
+		this.verbose = verbose;
+	}
+
 	@Override
 	public void buildClassifier(Instances data) throws Exception {
 		List<String> trainOptions = new ArrayList<>();
@@ -131,7 +142,7 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 		trainOptions.add("train");
 		parseSetOptions(trainOptions, data);
 		String[] processParameterArray = createProcessParameterArray(trainOptions);
-		TrainProcessListener processListener = new TrainProcessListener();
+		TrainProcessListener processListener = new TrainProcessListener(verbose);
 		runProcess(processParameterArray, processListener);
 		modelPath = processListener.getModelPath();
 	}
@@ -145,18 +156,36 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 		testOptions.add(modelPath);
 		parseSetOptions(testOptions, data);
 		String[] processParameterArray = createProcessParameterArray(testOptions);
-		TestProcessListener processListener = new TestProcessListener();
+		TestProcessListener processListener = new TestProcessListener(verbose);
 		runProcess(processParameterArray, processListener);
-		List<List<Double>> results = processListener.getTestResults();
-		double[] resultsArray = new double[results.size()];
+		rawLastClassificationResults = processListener.getTestResults();
+		// Since Scikit supports multiple target results but Weka does not, the results
+		// have to be flattened.
+		// The structured results of the last classifyInstances call is accessable over
+		// getRawLastClassificationResults().
+		List<Double> flatresults = rawLastClassificationResults.stream().flatMap(List::stream)
+				.collect(Collectors.toList());
+		double[] resultsArray = new double[flatresults.size()];
 		for (int i = 0; i < resultsArray.length; i++) {
-			resultsArray[i] = results.get(i);
+			resultsArray[i] = flatresults.get(i);
 		}
 		return resultsArray;
 	}
 
-	private void parseSetOptions(List<String> parameters, Instances data) throws IOException {
+	/**
+	 * Creates a list of parameters with the set flags and also the path to the
+	 * data.
+	 * 
+	 * @param data Instances to be used for train/ test.
+	 * @return list of parameters to call the python script with.
+	 * @throws IOException During the serialization of the data as an arff file
+	 *                     something went wrong.
+	 */
+	private List<String> parseSetOptions(Instances data) throws IOException {
+		List<String> parameters = new ArrayList<>();
 		File arff = instancesToArffFile(data, getArffName(data));
+		// If these attributes are renamed for some reason take care to rename them in
+		// the script template as well.
 		parameters.add("--arff");
 		parameters.add(arff.getAbsolutePath());
 		if (isRegression) {
@@ -172,21 +201,31 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 				parameters.add("" + i);
 			}
 		}
+		return parameters;
 	}
 
-	/*
-	 * Dumps given Instances in an ARFF file if this hash does not already exist.
+	/**
+	 * Dumps given Instances in an arff file if this hash does not already exist.
+	 * 
+	 * @param data     Instances to be serialized.
+	 * @param fileName Name of the created file.
+	 * @return File object corresponding to the arff file.
+	 * @throws IOException During the serialization of the data as an arff file
+	 *                     something went wrong.
 	 */
 	private File instancesToArffFile(Instances data, String fileName) throws IOException {
 		ArffSaver saver = new ArffSaver();
 		File arffOutputFile = new File(TMP_FOLDER, fileName + ".arff");
-		// If Instances with the same Instance (granted that the hash is collision
+		// If Instances with the same Instance (given the hash is collision
 		// resistant)
 		// is already serialized, there is no need for doing it once more.
 		if (arffOutputFile.exists()) {
-			System.out.printf("Reusing %s.arff\n", fileName);
+			if (verbose) {
+				System.out.printf("Reusing %s.arff\n", fileName);
+			}
 			return arffOutputFile;
 		}
+		// ... else serialize it and the return the created file.
 		saver.setInstances(data);
 		saver.setFile(arffOutputFile);
 		try {
@@ -197,21 +236,32 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 		return arffOutputFile;
 	}
 
+	/**
+	 * Returns a hash for the given Instances based on the Weka implementation of
+	 * hashCode(). Additionally the sign is replaces by an additional 0/1.
+	 * 
+	 * @param data Instances to get a hash code for.
+	 * @return A hash for the given Instances.
+	 */
 	private String getArffName(Instances data) {
 		String hash = "" + data.hashCode();
 		hash = hash.startsWith("-") ? hash.replace("-", "1") : "0" + hash;
 		return hash;
 	}
-
-	/*
-	 * Return an array with the parameters for the process.
+	
+	/**
+	 * Return an array with all the parameters to start the process with.
+	 * @param additionalParameter Parameters that the script itself receives.
+	 * @return An array of all parameters for the process to be started with.
 	 */
 	private String[] createProcessParameterArray(List<String> additionalParameter) {
 		List<String> processParameters = new ArrayList<>();
 		processParameters.add("python");
 		// Force python to run stdout and stderr unbuffered.
 		processParameters.add("-u");
+		//Script to be executed.
 		processParameters.add(script.getAbsolutePath());
+		//All additional parameters that the script shall consider.
 		processParameters.addAll(additionalParameter);
 		String[] processParameterArray = new String[processParameters.size()];
 		processParameterArray = processParameters.toArray(processParameterArray);
@@ -223,8 +273,10 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 	 * the executed program.
 	 */
 	private void runProcess(String[] parameters, ProcessListener listener) throws Exception {
-		String call = Arrays.toString(parameters).replace(",", "");
-		System.out.println("Starting subprocess: " + call.substring(1, call.length() - 1));
+		if (verbose) {
+			String call = Arrays.toString(parameters).replace(",", "");
+			System.out.println("Starting process: " + call.substring(1, call.length() - 1));
+		}
 		ProcessBuilder processBuilder = new ProcessBuilder(parameters);
 		listener.listenTo(processBuilder.start());
 	}

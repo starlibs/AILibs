@@ -1,13 +1,13 @@
-import sys
-import numpy as np
-import pickle
-import os
-import json
 import arff
+import argparse
+import json
+import numpy as np
+import os
+import pickle
+import sys
+import warnings
 from scipy.io import arff as scipy_arff
 from os.path import join as path_join
-import logging
-import argparse
 {{imports}}
 
 SERIALIZATION_FOLDER = None
@@ -226,6 +226,8 @@ def serialize_prediction(prediction):
     Returns path to serialized predictions.
     """
     prediction = prediction.tolist()
+    if not isinstance(prediction[0],list):
+        prediction = [prediction]
     prediction_json = json.dumps(prediction)
     # Get name for serialization.
     arff_path = sys.argv["arff"]
@@ -304,6 +306,6 @@ def main():
 if __name__ == "__main__":
     parse_args()
     SERIALIZATION_FOLDER = sys.argv["output"]
-    if not sys.argv["regression"] and sys.argv["targets"]:
+    if not sys.argv["regression"] and sys.argv["targets"] and len(sys.argv["targets"]) > 1:
         raise RuntimeError("Multiple targets are not supported for categorical problems.")
     main()

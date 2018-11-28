@@ -20,12 +20,10 @@ public class ScikitLearn_Wrapper_Test {
 
 	@Test
 	public void buildClassifier() throws Exception {
-		ScikitLearnWrapper slw = new ScikitLearnWrapper("MLPRegressor()",
-				"from sklearn.neural_network import MLPRegressor");
+		ScikitLearnWrapper slw = new ScikitLearnWrapper("LinearRegression()",
+				"from sklearn.linear_model import LinearRegression");
 		Instances dataset = loadARFF("testsrc/ml/skikitwrapper/0532052678.arff");
 		slw.setIsRegression(true);
-		int s = dataset.numAttributes();
-		slw.setTargets(s - 1, s - 2);
 		slw.buildClassifier(dataset);
 		assertNotEquals(slw.getModelPath(), "");
 	}
@@ -56,7 +54,7 @@ public class ScikitLearn_Wrapper_Test {
 		slw.buildClassifier(datasetTrain);
 		double[] result = slw.classifyInstances(datasetTest);
 		assertNotNull(result);
-		assertEquals(numberInstance, result.length);
+		assertEquals(numberInstance*3, result.length);
 	}
 
 	@Test

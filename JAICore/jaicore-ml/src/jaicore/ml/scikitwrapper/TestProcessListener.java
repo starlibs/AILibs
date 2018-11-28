@@ -10,10 +10,15 @@ import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class TestProcessListener extends DefaultProcessListener {
-	private static final String TEST_RESULTS_PATH_FLAG = "test_results: ";
-	private List<Double> testResults;
 
-	public List<Double> getTestResults() {
+	private static final String TEST_RESULTS_PATH_FLAG = "test_results: ";
+	private List<List<Double>> testResults;
+
+	public TestProcessListener(boolean verbose) {
+		super(verbose);
+	}
+
+	public List<List<Double>> getTestResults() {
 		return testResults;
 	}
 
@@ -37,7 +42,7 @@ public class TestProcessListener extends DefaultProcessListener {
 			// Parse JSON response of python.
 			ObjectMapper objMapper = new ObjectMapper();
 			try {
-				testResults = (List<Double>) objMapper.readValue(fileContent, List.class).get(0);
+				testResults = (List<List<Double>>) objMapper.readValue(fileContent, List.class).get(0);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
