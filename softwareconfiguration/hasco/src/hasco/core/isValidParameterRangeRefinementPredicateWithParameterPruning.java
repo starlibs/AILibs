@@ -35,7 +35,7 @@ import hasco.model.Parameter;
 import hasco.model.ParameterDomain;
 import hasco.model.ParameterRefinementConfiguration;
 
-public class isValidParameterRangeRefinementPredicatePruning implements EvaluablePredicate {
+public class isValidParameterRangeRefinementPredicateWithParameterPruning implements EvaluablePredicate {
 
 	private final Logger logger = LoggerFactory.getLogger(isValidParameterRangeRefinementPredicate.class);
 
@@ -44,7 +44,7 @@ public class isValidParameterRangeRefinementPredicatePruning implements Evaluabl
 	private final Map<ComponentInstance, Double> knownCompositionsAndTheirScore = new HashMap<>();
 	private final IParameterImportanceEstimator parameterImportanceEstimator;
 
-	public isValidParameterRangeRefinementPredicatePruning(final Collection<Component> components,
+	public isValidParameterRangeRefinementPredicateWithParameterPruning(final Collection<Component> components,
 			final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration,
 			IParameterImportanceEstimator parameterImportanceEstimator) {
 		super();
@@ -80,7 +80,7 @@ public class isValidParameterRangeRefinementPredicatePruning implements Evaluabl
 		ComponentInstance instance = Util.getComponentInstanceFromState(components, state, componentIdentifier, false);
 
 		/*
-		 * For jmhansel fANOVA feature: if the parameters importance value is below
+		 * For fANOVA feature: if the parameters importance value is below
 		 * threshold epsilon, no more refinements will be allowed
 		 */
 

@@ -24,7 +24,7 @@ import jaicore.logic.fol.structure.Literal;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.logic.fol.theories.EvaluablePredicate;
 
-public class isRefinementCompletedPredicateWithImportanceCheck implements EvaluablePredicate {
+public class isRefinementCompletedPredicateWithParameterPruning implements EvaluablePredicate {
 
 	private final Logger logger = LoggerFactory.getLogger(isRefinementCompletedPredicate.class);
 	private final Collection<Component> components;
@@ -33,7 +33,7 @@ public class isRefinementCompletedPredicateWithImportanceCheck implements Evalua
 	// private final Map<ComponentInstance,Double> knownCompositionsAndTheirScore =
 	// new HashMap<>();
 
-	public isRefinementCompletedPredicateWithImportanceCheck(Collection<Component> components,
+	public isRefinementCompletedPredicateWithParameterPruning(Collection<Component> components,
 			Map<Component, Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration, IParameterImportanceEstimator importanceEstimator) {
 		super();
 		this.components = components;

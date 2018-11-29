@@ -18,18 +18,16 @@ public class isNotRefinablePredicateWithParameterPruning implements EvaluablePre
 
 	private final Collection<Component> components;
 	private final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration;
-	private final isValidParameterRangeRefinementPredicatePruning p;
+	private final isValidParameterRangeRefinementPredicateWithParameterPruning p;
 
 	public isNotRefinablePredicateWithParameterPruning(Collection<Component> components,
-			Map<Component, Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration,
-			PerformanceKnowledgeBase performanceKB, IParameterImportanceEstimator parameterImportanceEstimator,
-			double importanceThreshold, int minNumSamplesForImportanceEstimation, boolean useImportanceEstimation) {
+			Map<Component, Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration, IParameterImportanceEstimator parameterImportanceEstimator) {
 		super();
 		this.components = components;
 		this.refinementConfiguration = refinementConfiguration;
 		// TODO
-		this.p = new isValidParameterRangeRefinementPredicatePruning(components, refinementConfiguration, performanceKB,
-				parameterImportanceEstimator, importanceThreshold, minNumSamplesForImportanceEstimation, useImportanceEstimation);
+		this.p = new isValidParameterRangeRefinementPredicateWithParameterPruning(components, refinementConfiguration,
+				parameterImportanceEstimator);
 	}
 
 	@Override
