@@ -123,37 +123,37 @@
   },  {
     "name" : "autofe.algorithm.hasco.filter.image.LocalBinaryPatternFilter",
     "requiredInterface" : [ ],
-    "providedInterface" : [ "BasicExtractor"],
+    "providedInterface" : [ "BasicExtractor", "AbstractFilter"],
     "parameter" : [ ],
     "dependencies" : [ ]
   }, {
   	"name": "CatalanoExtractor_NoneExtractor",
   	"requiredInterface": [],
-  	"providedInterface": ["BasicExtractor"],
+  	"providedInterface": ["BasicExtractor", "AbstractFilter"],
   	"parameter": [],
   	"dependencies": []
   }, {
   	"name": "CatalanoExtractor_UniformLocalBinaryPattern",
   	"requiredInterface": [],
-  	"providedInterface": ["BasicExtractor"],
+  	"providedInterface": ["BasicExtractor", "AbstractFilter"],
   	"parameter": [],
   	"dependencies": []
   }, {
   	"name": "CatalanoExtractor_RobustLocalBinaryPattern",
   	"requiredInterface": [],
-  	"providedInterface": ["BasicExtractor"],
+  	"providedInterface": ["BasicExtractor", "AbstractFilter"],
   	"parameter": [],
   	"dependencies": []
   }, {
   	"name": "PCA",
   	"requiredInterface": [],
-  	"providedInterface": ["BasicExtractor"],
+  	"providedInterface": ["BasicExtractor", "AbstractFilter"],
   	"parameter": [],
   	"dependencies": []
   }, {
   	"name": "autofe.algorithm.hasco.filter.image.PretrainedNN",
   	"requiredInterface": [],
-  	"providedInterface": ["PretrainedNN"],
+  	"providedInterface": ["PretrainedNN", "AbstractFilter"],
   	"parameter": [{
     	"name" : "net",
     	"type" : "cat",

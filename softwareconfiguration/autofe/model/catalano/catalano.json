@@ -17,7 +17,7 @@
 	  	    "requiredInterface" : [
 	  	    	{
 	  	    		"id": "filter1",
-	  	    		"name": "AbstractPipeline"
+	  	    		"name": "AbstractFilter"
 	  	    	},
 	  	    	{
 	  	    		"id": "filter2",

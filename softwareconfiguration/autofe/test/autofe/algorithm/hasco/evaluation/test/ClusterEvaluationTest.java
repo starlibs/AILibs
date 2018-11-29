@@ -122,6 +122,6 @@ public class ClusterEvaluationTest {
 
 		Instances insts = split.get(0);
 
-		System.out.println(EvaluationUtils.performKernelClustering(insts));
+		System.out.println(EvaluationUtils.performKernelClustering(insts, 1));
 	}
 }
