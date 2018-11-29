@@ -106,6 +106,7 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 		ExtendedRandomForest forest = new ExtendedRandomForest();
 		// forest.setMinNumSamples
 		// TODO setter for forest
+		System.out.println("data for forest: " + data);
 		forest.buildClassifier(data);
 		forest.prepareForest(data);
 		if (!importanceDictionary.containsKey(pipelineIdentifier))

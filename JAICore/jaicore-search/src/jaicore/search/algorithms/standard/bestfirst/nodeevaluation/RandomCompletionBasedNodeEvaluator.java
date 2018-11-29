@@ -396,7 +396,7 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 				this.unsuccessfulPaths.add(path);
 				return null;
 			}
-
+			
 			this.scoresOfSolutionPaths.put(path, val);
 			this.timesToComputeEvaluations.put(path, (int) duration);
 			this.postSolution(path);
