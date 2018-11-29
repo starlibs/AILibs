@@ -18,12 +18,12 @@ public class LDAObjectEvaluator extends AbstractHASCOFEObjectEvaluator {
 		}
 
 		long startTimestamp = System.currentTimeMillis();
-		logger.debug("Applying and evaluating pipeline " + pipeline.toString());
+		logger.info("Applying and evaluating pipeline " + pipeline.toString());
 
 		DataSet dataSet = pipeline.applyFilter(this.data, false);
 
 		logger.debug("Perform LDA");
-		final double ldaScore = EvaluationUtils.performKernelLDA(dataSet.getInstances());
+		final double ldaScore = EvaluationUtils.performKernelLDA(dataSet.getInstances(), 1);
 
 		logger.debug("LDA object evaluator score: " + ldaScore);
 		double score = ldaScore

@@ -12,7 +12,7 @@ public class EnsembleObjectEvaluator extends AbstractHASCOFEObjectEvaluator {
 
 	@Override
 	public Double evaluate(final FilterPipeline pipeline) throws Exception {
-		logger.debug("Applying and evaluating pipeline " + pipeline.toString());
+		logger.info("Applying and evaluating pipeline " + pipeline.toString());
 		long startTimestamp = System.currentTimeMillis();
 		DataSet dataSet = pipeline.applyFilter(this.data, false);
 

@@ -2,9 +2,12 @@ package autofe.util.test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Random;
 
 import org.junit.Test;
 
+import autofe.util.DataSet;
+import autofe.util.DataSetUtils;
 import autofe.util.EvaluationUtils;
 import junit.framework.Assert;
 import weka.core.Attribute;
@@ -13,7 +16,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 
 public class EvaluationUtilsTest {
-	@Test
+	// @Test
 	public void rankKendallsTauTest() {
 
 		// double[] ranking1 = { 0.15, 0.1, 0.2 };
@@ -24,7 +27,7 @@ public class EvaluationUtilsTest {
 		Assert.assertEquals(1.0, EvaluationUtils.rankKendallsTau(ranking1, ranking2));
 	}
 
-	@Test
+	// @Test
 	public void cocoEvaluationTest() throws InterruptedException {
 
 		String instString = "[0.9718934893608093, 0.001479289960116148, 0.002958579920232296, 0.0, 0.001479289960116148, 0.0, 0.0, 0.0, 0.002958579920232296, 0.0, 0.0, 0.0, "
@@ -56,5 +59,23 @@ public class EvaluationUtilsTest {
 		batch.add(inst);
 
 		Assert.assertEquals(0.3132617035483811, EvaluationUtils.calculateCOCOForBatch(batch), 0.00001);
+	}
+
+	@Test
+	public void evaluationTimingTest() throws Exception {
+		DataSet dataSet = DataSetUtils.getDataSetByID(DataSetUtils.CIFAR10_ID);
+		DataSet train = DataSetUtils.getStratifiedSplit(dataSet, new Random(42), true, 0.7).get(0);
+
+		long startTimestamp = System.currentTimeMillis();
+
+		System.out.println("Result LDA: " + EvaluationUtils.performKernelLDA(train.getInstances(), 2));
+
+		System.out.println(
+				"LDA evaluation on complete dataset took " + (System.currentTimeMillis() - startTimestamp) + " ms.");
+		startTimestamp = System.currentTimeMillis();
+
+		System.out.println("Result clustering: " + EvaluationUtils.performKernelClustering(train.getInstances(), 2));
+		System.out.println("Cluster evaluation on complete dataset took "
+				+ (System.currentTimeMillis() - startTimestamp) + " ms.");
 	}
 }

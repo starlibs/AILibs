@@ -79,7 +79,7 @@ public class DataSetUtilsTest {
 		filter.applyFilter(data, true);
 	}
 
-	// @Test
+	@Test
 	public void leafBwTest() throws IOException, InterruptedException {
 		File datasetFolder = new File("testres/" + File.separator + "leaf_bw");
 		DataSet data = DataSetUtils.loadDatasetFromImageFolder(datasetFolder);
@@ -98,7 +98,7 @@ public class DataSetUtilsTest {
 		filter.applyFilter(data, true);
 	}
 
-	@Test
+	// @Test
 	public void updateIntermediateInstancesTest() throws Exception {
 		DataSet data = DataSetUtils.getDataSetByID(DataSetUtils.FASHION_MNIST_ID);
 		data = DataSetUtils.getStratifiedSplit(data, new Random(42), 0.1).get(0);

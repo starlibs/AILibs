@@ -24,6 +24,8 @@ public class AutoFEPreferredNodeEvaluator implements INodeEvaluator<TFDNode, Dou
 
 	public static final double MAX_EVAL_VALUE = 20000d;
 
+	private static final int MINIMUM_FILTERS = 2;
+
 	private Collection<Component> components;
 	private BaseFactory<FilterPipeline> factory;
 
@@ -82,10 +84,17 @@ public class AutoFEPreferredNodeEvaluator implements INodeEvaluator<TFDNode, Dou
 					Util.getSolutionCompositionFromState(this.components, node.getPoint().getState(), false));
 			logger.debug("Todo has algorithm selection tasks {} Calculate node evaluation for {}.", pipe);
 
-			if (pipe != null && pipe.getFilters() != null
-					&& pipe.getFilters().getItems().size() > this.maxPipelineSize) {
+			if (pipe == null || pipe.getFilters() == null || pipe.getFilters().getItems() == null
+					|| pipe.getFilters().getItems().isEmpty())
+				return 0.0;
+
+			if (pipe.getFilters().getItems().size() > this.maxPipelineSize) {
 				return MAX_EVAL_VALUE;
 			}
+
+			if (pipe.getFilters().getItems().size() >= MINIMUM_FILTERS)
+				return null;
+
 			return 0.0;
 		} else {
 			return null;

@@ -51,6 +51,7 @@ public final class FilterUtils {
 		case "autofe.algorithm.hasco.filter.generic.AddConstantFilter":
 			return new AddConstantFilter();
 		case "autofe.algorithm.hasco.filter.generic.IdentityFilter":
+			System.out.println("Returning default filter due to name occurence '" + name + "'.");
 			return new IdentityFilter();
 		case "autofe.algorithm.hasco.filter.generic.AddRandomFilter":
 			return new AddRandomFilter();
@@ -59,6 +60,7 @@ public final class FilterUtils {
 		case "PCA":
 			return new WEKAFilter(new PrincipalComponents());
 		default:
+			System.out.println("Returning default filter due to name occurence '" + name + "'.");
 			return getDefaultFilter();
 		}
 	}

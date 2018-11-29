@@ -343,6 +343,8 @@ public class AutoFEMLComplete extends AbstractAutoFEMLClassifier
 				@Override
 				public Double evaluate(final Classifier object) throws Exception {
 
+					AutoFEMLComplete.this.logger.info("Evaluating object " + object.toString() + "...");
+
 					/* first conduct MCCV */
 					MonteCarloCrossValidationEvaluator mccv = new MonteCarloCrossValidationEvaluator(
 							AutoFEMLComplete.this.benchmark,

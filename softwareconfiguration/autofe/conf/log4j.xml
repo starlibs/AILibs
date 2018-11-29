@@ -4,7 +4,7 @@
 <log4j:configuration>
 	<appender name="console" class="org.apache.log4j.ConsoleAppender">
 		<param name="Target" value="System.out" />
-		<param name="Threshold" value="debug" />
+		<param name="Threshold" value="info" />
 		<layout class="org.apache.log4j.PatternLayout">
 			<!-- <param name="ConversionPattern" value="(%d{ISO8601}) %-5p [%t] [%c{1}.%M:%L] 
 				- %m%n" /> -->
@@ -56,7 +56,7 @@
 	
 	<logger name="jaicore">
 		<level value="warn" />
-		<appender-ref ref="console" />
+<!-- 		<appender-ref ref="console" /> -->
 		<appender-ref ref="infoFileAppender" />
 		<appender-ref ref="warnFileAppender" />
 		<appender-ref ref="errFileAppender" />
@@ -64,23 +64,25 @@
 	</logger>
 	
 	<logger name="hasco">
-		<level value="info" />
-		<appender-ref ref="console" />
+		<level value="warn" />
+<!-- 		<appender-ref ref="console" /> -->
+	<appender-ref ref="warnFileAppender" />
 	</logger>
 	
 	<logger name="jaicore.search">
 		<level value="error"/>
-		<appender-ref ref="console" />
+<!-- 		<appender-ref ref="console" /> -->
+		<appender-ref ref="errFileAppender" />
 	</logger>
 	
-	<logger name="autofe.algorithm.hasco.evaluation">
-		<level value="debug"/>
-		<appender-ref ref="console" />
-	</logger>
+<!-- 	<logger name="autofe.algorithm.hasco.evaluation"> -->
+<!-- 		<level value="info"/> -->
+<!-- 		<appender-ref ref="console" /> -->
+<!-- 	</logger> -->
 	
 	<logger name="autofe">
-		<level value="debug" />
-		<appender-ref ref="console" />
+		<level value="warn" />
+<!-- 		<appender-ref ref="console" /> -->
 		<appender-ref ref="infoFileAppender" />
 		<appender-ref ref="warnFileAppender" />
 		<appender-ref ref="errFileAppender" />
@@ -88,23 +90,43 @@
 		<appender-ref ref="debugFileAppender" />
 	</logger>
 	
-	<logger name="autofe.algorithm.hasco.filter.meta">
-		<level value="debug" />
-	</logger>
 	
-	<logger name="autofe.algorithm.hasco.AutoFEPreferredNodeEvaluator">
-		<level value="debug" />
-	</logger>
-	
-	<logger name="autofe.algorithm.hasco.AutoFEMLPreferredNodeEvaluator">
-		<level value="debug" />
-	</logger>
-	
-	<logger name="mlplan">
+	<logger name="autofe.AutoFEMLExperimenter">
 		<level value="info" />
 		<appender-ref ref="console" />
+	</logger>
+	<logger name="autofe.algorithm.hasco.filter.meta.FilterPipelineFactory">
+		<level value="info" />
+		<appender-ref ref="console" />
+	</logger>
+	
+	<logger name="autofe.algorithm.hasco.evaluation">
+		<level value="info" />
+		<appender-ref ref="console" />
+	</logger>
+	<logger name="autofe.algorithm.hasco.AutoFEMLComplete">
+		<level value="info" />
+		<appender-ref ref="console" />
+	</logger>
+	
+	
+<!-- 	<logger name="autofe.algorithm.hasco.filter.meta"> -->
+<!-- 		<level value="warn" /> -->
+<!-- 	</logger> -->
+	
+<!-- 	<logger name="autofe.algorithm.hasco.AutoFEPreferredNodeEvaluator"> -->
+<!-- 		<level value="warn" /> -->
+<!-- 	</logger> -->
+	
+<!-- 	<logger name="autofe.algorithm.hasco.AutoFEMLPreferredNodeEvaluator"> -->
+<!-- 		<level value="warn" /> -->
+<!-- 	</logger> -->
+	
+	<logger name="mlplan">
+		<level value="warn" />
+<!-- 		<appender-ref ref="console" /> -->
 <!-- 		<appender-ref ref="infoFileAppender" /> -->
-<!-- 		<appender-ref ref="warnFileAppender" /> -->
+		<appender-ref ref="warnFileAppender" />
 <!-- 		<appender-ref ref="errFileAppender" /> -->
 	</logger>
 

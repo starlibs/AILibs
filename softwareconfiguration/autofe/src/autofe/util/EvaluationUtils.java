@@ -6,6 +6,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -130,81 +135,131 @@ public final class EvaluationUtils {
 		return acc;
 	}
 
-	public static double performKernelClustering(final Instances instances) throws Exception {
+	public static double performKernelClustering(final Instances instances, final int numThreads) throws Exception {
 		logger.debug("Starting kernelized cluster evaluation...");
 
 		List<Instances> split = WekaUtil.getStratifiedSplit(instances, new Random(42), KERNEL_SPLIT_PORTION);
+		// List<Instances> split = Arrays.asList(instances);
 
-		double maxScore = performClustering(new Instances(split.get(0)));
+		ExecutorService execService = Executors.newFixedThreadPool(numThreads);
+		List<Future<Double>> futures = new ArrayList<>();
+		Future<Double> result0 = execService.submit(() -> {
+			return performClustering(new Instances(split.get(0)));
+		});
+		futures.add(result0);
+
+		// double maxScore = performClustering(new Instances(split.get(0)));
+
 		for (Map.Entry<Kernel, Instances> entry : getKernelsWithInstances(split.get(0))) {
 			if (Thread.currentThread().isInterrupted())
 				throw new InterruptedException("Evaluation has been interrupted!");
 
-			Kernel kernel = entry.getKey();
-			Instances insts = entry.getValue();
+			Future<Double> result = execService.submit(() -> {
+				Kernel kernel = entry.getKey();
+				Instances insts = entry.getValue();
 
-			FilteredClusterer clusterer = new FilteredClusterer();
+				FilteredClusterer clusterer = new FilteredClusterer();
 
-			Remove filter = new Remove();
-			filter.setAttributeIndices("" + (insts.classIndex() + 1));
-			filter.setInputFormat(insts);
+				Remove filter = new Remove();
+				filter.setAttributeIndices("" + (insts.classIndex() + 1));
+				filter.setInputFormat(insts);
 
-			Instances removedClassInstances = Filter.useFilter(insts, filter);
-			Nystroem kernelFilter = new Nystroem();
+				Instances removedClassInstances = Filter.useFilter(insts, filter);
+				Nystroem kernelFilter = new Nystroem();
 
-			kernelFilter.setKernel(kernel);
-			clusterer.setFilter(kernelFilter);
-			((SimpleKMeans) clusterer.getClusterer())
-					.setOptions(new String[] { "-N", String.valueOf(insts.classAttribute().numValues()) });
+				kernelFilter.setKernel(kernel);
+				clusterer.setFilter(kernelFilter);
+				((SimpleKMeans) clusterer.getClusterer())
+						.setOptions(new String[] { "-N", String.valueOf(insts.classAttribute().numValues()) });
 
-			clusterer.buildClusterer(removedClassInstances);
+				clusterer.buildClusterer(removedClassInstances);
 
-			ClusterEvaluation clusterEval = new ClusterEvaluation();
-			clusterEval.setClusterer(clusterer);
-			clusterEval.evaluateClusterer(insts);
+				ClusterEvaluation clusterEval = new ClusterEvaluation();
+				clusterEval.setClusterer(clusterer);
+				clusterEval.evaluateClusterer(insts);
 
-			double currAcc = predictAccuracy(insts, clusterEval.getClassesToClusters(),
-					clusterEval.getClusterAssignments());
-			maxScore = Math.max(maxScore, currAcc);
+				return predictAccuracy(insts, clusterEval.getClassesToClusters(), clusterEval.getClusterAssignments());
+			});
+			futures.add(result);
+
+			// double currAcc = predictAccuracy(insts, clusterEval.getClassesToClusters(),
+			// clusterEval.getClusterAssignments());
+			// maxScore = Math.max(maxScore, currAcc);
 		}
 
-		logger.debug("Kernelized cluster evaluation result: " + maxScore);
+		// logger.debug("Kernelized cluster evaluation result: " + maxScore);
 
-		return maxScore;
+		return futures.stream().mapToDouble(future -> {
+			try {
+				return future.get();
+			} catch (InterruptedException | ExecutionException e) {
+				logger.warn("Could not calculate the LDA score for at least one kernel.");
+				return 0;
+			}
+		}).max().getAsDouble();
+
+		// return maxScore;
 	}
 
-	public static double performKernelLDA(final Instances instances) throws Exception {
+	public static double performKernelLDA(final Instances instances, final int numThreads) throws Exception {
 
 		logger.debug("Starting kernelized LDA evaluation...");
 
 		// TODO: Again splitting?
 		List<Instances> split = WekaUtil.getStratifiedSplit(instances, new Random(42), KERNEL_SPLIT_PORTION);
+		// List<Instances> split = Arrays.asList(instances);
 
-		double maxScore = performLDA(new Instances(split.get(0)));
+		ExecutorService execService = Executors.newFixedThreadPool(numThreads);
 
-		for (Map.Entry<Kernel, Instances> entry : getKernelsWithInstances(split.get(0))) {
+		List<Future<Double>> futures = new ArrayList<>();
+		Future<Double> result0 = execService.submit(() -> {
+			return performLDA(new Instances(split.get(0)));
+		});
+		futures.add(result0);
+
+		// double maxScore = performLDA(new Instances(split.get(0)));
+
+		for (final Map.Entry<Kernel, Instances> entry : getKernelsWithInstances(split.get(0))) {
 			if (Thread.currentThread().isInterrupted())
 				throw new InterruptedException("Evaluation has been interrupted!");
 
-			Kernel kernel = entry.getKey();
-			Instances insts = entry.getValue();
+			Future<Double> result = execService.submit(() -> {
+				Kernel kernel = entry.getKey();
+				Instances insts = entry.getValue();
 
-			Nystroem kernelFilter = new Nystroem();
-			kernelFilter.setInputFormat(insts);
-			kernelFilter.setKernel(kernel);
+				Nystroem kernelFilter = new Nystroem();
+				kernelFilter.setInputFormat(insts);
+				kernelFilter.setKernel(kernel);
 
-			insts = Filter.useFilter(insts, kernelFilter);
+				insts = Filter.useFilter(insts, kernelFilter);
 
-			try {
-				maxScore = Math.max(maxScore, performLDA(insts));
-			} catch (Exception e) {
-				logger.warn("Could not calculate the LDA score for kernel " + kernel.getClass().getSimpleName()
-						+ " due to the following exception: " + e.getMessage() + " in (" + e.getClass().getSimpleName()
-						+ ").");
-				maxScore = Math.max(maxScore, 0d);
-			}
+				return performLDA(insts);
+				// try {
+				// maxScore = Math.max(maxScore, performLDA(insts));
+				// } catch (Exception e) {
+				// logger.warn("Could not calculate the LDA score for kernel " +
+				// kernel.getClass().getSimpleName()
+				// + " due to the following exception: " + e.getMessage() + " in (" +
+				// e.getClass().getSimpleName()
+				// + ").");
+				// maxScore = Math.max(maxScore, 0d);
+				// }
+			});
+			futures.add(result);
 		}
-		return maxScore;
+		// return maxScore;
+
+		execService.shutdown();
+		execService.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
+
+		return futures.stream().mapToDouble(future -> {
+			try {
+				return future.get();
+			} catch (InterruptedException | ExecutionException e) {
+				logger.warn("Could not calculate the LDA score for at least one kernel.");
+				return 0;
+			}
+		}).max().getAsDouble();
 	}
 
 	/**
@@ -502,7 +557,7 @@ public final class EvaluationUtils {
 		case "KernelCluster":
 			return (data) -> {
 				try {
-					return 1 - performKernelClustering(data);
+					return 1 - performKernelClustering(data, 1);
 				} catch (Exception e1) {
 					logger.error("Could not perform kernel clustering benchmark. Reason: " + e1.getMessage());
 					return 1d;
@@ -538,7 +593,7 @@ public final class EvaluationUtils {
 		case "KernelLDA":
 			return (data) -> {
 				try {
-					return 1 - performKernelLDA(data);
+					return 1 - performKernelLDA(data, 1);
 				} catch (Exception e) {
 					logger.error("Could not perform cluster LDA benchmark. Reason: " + e.getMessage());
 					return 1d;

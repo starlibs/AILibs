@@ -6,7 +6,6 @@ import java.io.FileReader;
 import java.util.List;
 import java.util.Random;
 
-import org.junit.Test;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
 import org.slf4j.Logger;
@@ -64,7 +63,7 @@ public class LDAEvaluationTest {
 		logger.debug("LDA eval took " + (timeTakenEval / 1000) + " s.");
 	}
 
-	@Test
+	// @Test
 	public void evaluateKernelLDA() throws Exception {
 		logger.info("Starting LDA evaluation test...");
 

@@ -23,10 +23,10 @@ public class ClusterObjectEvaluator extends AbstractHASCOFEObjectEvaluator {
 		logger.debug("Evaluate filter pipeline {}", pipeline);
 		long startTimestamp = System.currentTimeMillis();
 
-		logger.debug("Applying and evaluating pipeline " + pipeline.toString());
+		logger.info("Applying and evaluating pipeline " + pipeline.toString());
 		DataSet dataSet = pipeline.applyFilter(this.data, false);
 
-		double finalScore = EvaluationUtils.performKernelClustering(dataSet.getInstances())
+		double finalScore = EvaluationUtils.performKernelClustering(dataSet.getInstances(), 1)
 				- ATT_COUNT_PENALTY * EvaluationUtils.calculateAttributeCountPenalty(this.data.getInstances());
 		logger.debug("Cluster object evaluator final score: " + finalScore);
 
