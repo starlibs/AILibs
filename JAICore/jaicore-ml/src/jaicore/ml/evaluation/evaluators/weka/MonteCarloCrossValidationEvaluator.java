@@ -61,10 +61,10 @@ public class MonteCarloCrossValidationEvaluator implements IClassifierEvaluator 
 			List<Instances> split = WekaUtil.getStratifiedSplit(data, seed+i, trainingPortion);
 			double score = bridge.evaluateSplit(pl, split.get(0), split.get(1));
 			logger.info("Score for evaluation of {} with split #{}/{}: {}", pl, i + 1, this.repeats, score);
+			stats.addValue(score);
 		}
 		if (Thread.currentThread().isInterrupted())
 			throw new InterruptedException("MCCV has been interrupted");
-
 		Double score = stats.getMean();
 		logger.info("Obtained score of {} for classifier {}.", score, pl);
 		return score;

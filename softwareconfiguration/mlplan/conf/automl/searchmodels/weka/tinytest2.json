@@ -1,50 +1,91 @@
 {
-  "repository" : "Tiny repository",
-  "components" : [
-  {
-          "name" : "pipeline",
-          "providedInterface" : [ "MLPipeline", "AbstractClassifier" ],
-          "requiredInterface" : [
-            {
-              "id": "preprocessor",
-              "name": "AbstractPreprocessor"
-            }, { 
-              "id": "classifier",
-              "name": "BaseClassifier"
-            }
-      ],
-        "parameter" : [ ]
-      },
-     {
-    "name" : "weka.classifiers.rules.JRip",
-    "requiredInterface" : [ ],
-    "providedInterface" : [ "AbstractClassifier", "BaseClassifier" ],
-    "parameter" : [ {
-      "name" : "N",
-      "type" : "double",
-      "default" : 2.0,
-      "min" : 1.0,
-      "max" : 5.0,
-      "refineSplits" : 8,
-      "minInterval" : 10
-    }, {
-      "name" : "E",
-      "type" : "boolean",
-      "default" : "true"
-    }, {
-      "name" : "P",
-      "type" : "boolean",
-      "default" : "true"
-    }, {
-      "name" : "O",
-      "type" : "int",
-      "default" : 2.0,
-      "min" : 1.0,
-      "max" : 5.0,
-      "refineSplits" : 8,
-      "minInterval" : 10
-    } ],
-    "dependencies" : [ ]
-  }
-  ]
+	"repository": "Test repository",
+	"components": [
+		{
+			"name": "pipeline",
+			"providedInterface": [
+				"MLPipeline",
+				"AbstractClassifier"
+			],
+			"requiredInterface": [
+				{
+					"id": "classifier",
+					"name": "BaseClassifier"
+				}
+			],
+			"parameter": [
+			]
+		},
+		{
+			"name": "weka.classifiers.functions.MultilayerPerceptron",
+			"requiredInterface": [
+			],
+			"providedInterface": [
+				"AbstractClassifier",
+				"WekaBaseClassifier",
+				"BaseClassifier"
+			],
+			"parameter": [
+				{
+					"name": "L",
+					"type": "double",
+					"default": 0.3,
+					"min": 0.1,
+					"max": 1.0,
+					"refineSplits": 8,
+					"minInterval": 10
+				},
+				{
+					"name": "M",
+					"type": "double",
+					"default": 0.2,
+					"min": 0.1,
+					"max": 1.0,
+					"refineSplits": 8,
+					"minInterval": 10
+				},
+				{
+					"name": "B",
+					"type": "boolean",
+					"default": "true"
+				},
+				{
+					"name": "H",
+					"type": "cat",
+					"default": "a",
+					"values": [
+						"a",
+						"i",
+						"o",
+						"t"
+					]
+				},
+				{
+					"name": "C",
+					"type": "boolean",
+					"default": "true"
+				},
+				{
+					"name": "R",
+					"type": "boolean",
+					"default": "true"
+				},
+				{
+					"name": "D",
+					"type": "boolean",
+					"default": "false"
+				},
+				{
+					"name": "S",
+					"type": "cat",
+					"default": "1",
+					"values": [
+						"1"
+					]
+				}
+			],
+			"dependencies": [
+			]
+		}
+	]
 }

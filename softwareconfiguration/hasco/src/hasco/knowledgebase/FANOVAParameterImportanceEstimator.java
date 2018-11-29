@@ -48,27 +48,6 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 		this.sizeOfLargestSubsetToConsider = 2;
 	}
 
-	/**
-	 * Initializes the random forests for the given performance benchmark.
-	 * 
-	 * @param benchmarkName
-	 */
-	// private void initializeForests(String benchmarkName) {
-	// for (String identifier :
-	// performanceKnowledgeBase.getPerformanceSamplesByIdentifier().get(benchmarkName)
-	// .keySet()) {
-	// if (forests.get(identifier) == null) {
-	// ExtendedRandomForest curForest = new ExtendedRandomForest(5.0d, 16);
-	// forests.put(identifier, curForest);
-	// }
-	// if (importanceDictionary.get(identifier) == null) {
-	// HashMap<Set<Integer>, Double> importanceMap = new HashMap<Set<Integer>,
-	// Double>();
-	// importanceDictionary.put(identifier, importanceMap);
-	// }
-	// }
-	// }
-
 	public FANOVAParameterImportanceEstimator(String benchmarkName, int minNumSamples, double importanceThreshold) {
 		this(null, benchmarkName, minNumSamples, importanceThreshold);
 	}
