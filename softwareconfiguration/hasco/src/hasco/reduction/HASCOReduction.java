@@ -12,10 +12,11 @@ import java.util.Map.Entry;
 import hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
 import hasco.core.Util;
 import hasco.core.isNotRefinable;
+import hasco.core.isNotRefinablePredicateWithParameterPruning;
 import hasco.core.isRefinementCompletedPredicate;
-import hasco.core.isRefinementCompletedPredicateWithImportanceCheck;
+import hasco.core.isRefinementCompletedPredicateWithParameterPruning;
 import hasco.core.isValidParameterRangeRefinementPredicate;
-import hasco.core.isValidParameterRangeRefinementPredicatePruning;
+import hasco.core.isValidParameterRangeRefinementPredicateWithParameterPruning;
 import hasco.knowledgebase.FANOVAParameterImportanceEstimator;
 import hasco.knowledgebase.IParameterImportanceEstimator;
 import hasco.knowledgebase.PerformanceKnowledgeBase;
@@ -294,21 +295,19 @@ public class HASCOReduction<V extends Comparable<V>> implements
 	public CEOCIPSTNPlanningProblem<CEOCOperation, OCIPMethod, CEOCAction> getPlanningProblem(
 			final CEOCIPSTNPlanningDomain domain, final CNFFormula knowledge, final Monom init) {
 		Map<String, EvaluablePredicate> evaluablePredicates = new HashMap<>();
-		System.out.println("pruning: " + this.useParameterPruning);
 		if (this.useParameterPruning) {
-			System.out.println("using pruning");
 			evaluablePredicates.put("isValidParameterRangeRefinement",
-					new isValidParameterRangeRefinementPredicatePruning(this.components, this.paramRefinementConfig, this.parameterImportanceEstimator));
+					new isValidParameterRangeRefinementPredicateWithParameterPruning(this.components, this.paramRefinementConfig, this.parameterImportanceEstimator));
 			evaluablePredicates.put("refinementCompleted",
-					new isRefinementCompletedPredicateWithImportanceCheck(this.components, this.paramRefinementConfig, this.parameterImportanceEstimator));
+					new isRefinementCompletedPredicateWithParameterPruning(this.components, this.paramRefinementConfig, this.parameterImportanceEstimator));
+			evaluablePredicates.put("notRefinable", new isNotRefinablePredicateWithParameterPruning(this.components, this.paramRefinementConfig, this.parameterImportanceEstimator));
 		} else {
-			System.out.println("not using pruning");
 			evaluablePredicates.put("isValidParameterRangeRefinement",
 					new isValidParameterRangeRefinementPredicate(this.components, this.paramRefinementConfig));
 			evaluablePredicates.put("refinementCompleted",
 					new isRefinementCompletedPredicate(this.components, this.paramRefinementConfig));
+			evaluablePredicates.put("notRefinable", new isNotRefinable(this.components, this.paramRefinementConfig));
 		}
-		evaluablePredicates.put("notRefinable", new isNotRefinable(this.components, this.paramRefinementConfig));
 		return new CEOCIPSTNPlanningProblem<>(
 				domain, knowledge, init, new TaskNetwork(RESOLVE_COMPONENT_IFACE_PREFIX
 						+ originalProblem.getRequiredInterface() + "('request', 'solution')"),
@@ -361,7 +360,6 @@ public class HASCOReduction<V extends Comparable<V>> implements
 	
 	public void setUseParameterPruning(boolean useParameterPruning) {
 		this.useParameterPruning = useParameterPruning;
-		System.out.println("Pruning set: " + this.useParameterPruning);
 	}
 	
 	public void setParameterImportanceEstimator(IParameterImportanceEstimator parameterImportanceEstimator) {
