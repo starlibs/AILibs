@@ -48,5 +48,13 @@ public interface IParameterImportanceEstimator {
 	 * Get the performance knowledge base used for parameter importance estimation
 	 */
 	public PerformanceKnowledgeBase getPerformanceKnowledgeBase();
+	
+	/**
+	 * Returns the number of parameters that have been pruned
+	 * @return number of pruned parameters
+	 */
+	public int getNumberPrunedParameters();
+	
+	public Set<String> getPrunedParameters();
 
 }

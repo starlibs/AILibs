@@ -223,7 +223,6 @@ public class PerformanceKnowledgeBase {
 			}
 		}
 		Attribute scoreAttr = instances.classAttribute();
-		System.out.println("SCore attr: " + score);
 		instance.setValue(scoreAttr, score);
 		performanceInstancesByIdentifier.get(benchmarkName).get(identifier).add(instance);
 

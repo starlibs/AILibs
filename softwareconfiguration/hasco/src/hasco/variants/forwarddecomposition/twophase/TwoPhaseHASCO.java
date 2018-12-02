@@ -83,7 +83,7 @@ public class TwoPhaseHASCO
 	private int secondsSpentInPhase1;
 
 	private Thread timeoutControl = null;
-	
+
 	/* parameter pruning */
 	private boolean useParameterPruning;
 	private IParameterImportanceEstimator parameterImportanceEstimator;
@@ -116,9 +116,10 @@ public class TwoPhaseHASCO
 			this.timeOfStart = System.currentTimeMillis();
 			this.logger.info(
 					"Starting 2-Phase HASCO with the following setup:\n\tCPUs:{},\n\tTimeout: {}s\n\tTimeout per node evaluation: {}ms\n\tTimeout per candidate: {}ms\n\tNumber of Random Completions: {}\n\tExpected blow-ups are {} (selection) and {} (post-processing). Preferred node evaluator is {}",
-					getNumCPUs(), getTimeout(), config.timeoutForNodeEvaluation(), config.randomCompletions(),
-					config.timeoutForCandidateEvaluation(), config.expectedBlowupInSelection(),
-					config.expectedBlowupInPostprocessing(), preferredNodeEvaluator);
+					getNumCPUs(), getTimeout(), config.timeoutForNodeEvaluation(),
+					config.timeoutForCandidateEvaluation(), config.randomCompletions(),
+					config.expectedBlowupInSelection(), config.expectedBlowupInPostprocessing(),
+					preferredNodeEvaluator);
 
 			/* create HASCO object */
 			RefinementConfiguredSoftwareConfigurationProblem<Double> hascoProblem = new RefinementConfiguredSoftwareConfigurationProblem<>(
@@ -580,8 +581,8 @@ public class TwoPhaseHASCO
 	}
 
 	/**
-	 * @param numberOfConsideredSolutions
-	 *            The number of considered solutions in the selection phase.
+	 * @param numberOfConsideredSolutions The number of considered solutions in the
+	 *                                    selection phase.
 	 */
 	public void setNumberOfConsideredSolutions(final int numberOfConsideredSolutions) {
 		this.getConfig().setProperty(TwoPhaseHASCOConfig.K_SELECTION_NUM_CONSIDERED_SOLUTIONS,
@@ -669,7 +670,7 @@ public class TwoPhaseHASCO
 			throw new IllegalStateException("Cannot retrieve GraphGenerator prior to algorithm initialization.");
 		return hasco.getGraphGenerator();
 	}
-	
+
 	/**
 	 * @param useParameterPruning the useParameterPruning to set
 	 */

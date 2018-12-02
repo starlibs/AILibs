@@ -36,7 +36,7 @@ public class MLPlanOpenMLExample {
 
 	public static void main(final String[] args) throws Exception {
 
-		ReproducibleInstances data = ReproducibleInstances.fromOpenML("40983", "4350e421cdc16404033ef1812ea38c01");
+		ReproducibleInstances data = ReproducibleInstances.fromOpenML("181", "4350e421cdc16404033ef1812ea38c01");
 		data.setClassIndex(data.numAttributes() - 1);
 		List<Instances> split = WekaUtil.getStratifiedSplit((Instances)data, (new Random(0)).nextLong(), 0.7d);
 		/* initialize mlplan, and let it run for 30 seconds */
@@ -45,16 +45,18 @@ public class MLPlanOpenMLExample {
 //        PerformanceDBAdapter pAdapter = new PerformanceDBAdapter(adapter, "performance_cache");
 
 		MLPlanWekaBuilder builder = new MLPlanWekaBuilder(
-				new File("conf/automl/searchmodels/weka/tinytest.json"), new File("conf/mlplan.properties"),
+				new File("conf/automl/searchmodels/weka/j48.json"), new File("conf/mlplan.properties"),
 				MultiClassPerformanceMeasure.ERRORRATE);
-
+		
 		MLPlanWekaClassifier mlplan = new WekaMLPlanWekaClassifier(builder);
-
+		
 		mlplan.setLoggerName("mlplan");
 		mlplan.setUseParameterPruning(true);
-		mlplan.setParameterImportanceEstimator(new FANOVAParameterImportanceEstimator("test", 4, 1.08d));
-		mlplan.setTimeout(60);
-//		mlplan.activateVisualization();
+		mlplan.setParameterImportanceEstimator(new FANOVAParameterImportanceEstimator("test", 6, 1.06d));
+		mlplan.setTimeout(180);
+//		mlplan.setTimeoutForNodeEvaluation(300);
+//		mlplan.setTimeoutForSingleSolutionEvaluation(300);
+		mlplan.activateVisualization();
 		try {
 			long start = System.currentTimeMillis();
 			mlplan.buildClassifier(split.get(0));
@@ -65,6 +67,8 @@ public class MLPlanOpenMLExample {
 			Evaluation eval = new Evaluation(split.get(0));
 			eval.evaluateModel(mlplan, split.get(1));
 			System.out.println("Error Rate of the solution produced by ML-Plan: " + (100 - eval.pctCorrect()) / 100f);
+			System.out.println("pruned params: " + mlplan.getParameterImportanceEstimator().getPrunedParameters());
+			System.out.println("number pruned: " + mlplan.getParameterImportanceEstimator().getNumberPrunedParameters());
 		} catch (NoSuchElementException e) {
 			System.out.println("Building the classifier failed: " + e.getMessage());
 		}

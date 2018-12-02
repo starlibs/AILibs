@@ -92,6 +92,7 @@ public class isValidParameterRangeRefinementPredicateWithParameterPruning implem
 		// if (performanceKB.getNumSamples("test", compositionIdentifier) >
 		// this.minNumSamplesForImportanceEstimation) {
 		if (parameterImportanceEstimator.readyToEstimateImportance(ci)) {
+			System.out.println("Extracting important params");
 			Instances data = parameterImportanceEstimator.getPerformanceKnowledgeBase().getPerformanceSamples("test", ci);
 			// System.out.println(minNumSamplesForImportanceEstimation + " samples are
 			// available");
@@ -102,7 +103,6 @@ public class isValidParameterRangeRefinementPredicateWithParameterPruning implem
 				// for (String parameterIndex : importantParams) {
 				// System.out.println("parameter " + parameterIndex);
 				// }
-				System.out.println("important parameters valid: " + importantParams.toString());
 				if (importantParams.contains(paramName)) {
 					// System.out.println("Parameter " + paramName + " is important and will be
 					// refined!");

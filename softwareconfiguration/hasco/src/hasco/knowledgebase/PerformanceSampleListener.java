@@ -30,7 +30,6 @@ public class PerformanceSampleListener {
 	public void handleEvent(HASCOSolutionEvent event) {
 		if(event.getSolutionCandidate() instanceof HASCOSolutionCandidate) {
 		HASCOSolutionCandidate solutionCandidate = (HASCOSolutionCandidate) event.getSolutionCandidate();
-		System.out.println("SCore sol can: " + solutionCandidate.getScore());
 		ComponentInstance ci = solutionCandidate.getComponentInstance();
 		double score = (Double) solutionCandidate.getScore();
 		performanceKnowledgeBase.addPerformanceSample(benchmarkName, ci, score, false);

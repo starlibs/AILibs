@@ -296,6 +296,7 @@ public class HASCOReduction<V extends Comparable<V>> implements
 			final CEOCIPSTNPlanningDomain domain, final CNFFormula knowledge, final Monom init) {
 		Map<String, EvaluablePredicate> evaluablePredicates = new HashMap<>();
 		if (this.useParameterPruning) {
+			System.out.println("Pruning is activated");
 			evaluablePredicates.put("isValidParameterRangeRefinement",
 					new isValidParameterRangeRefinementPredicateWithParameterPruning(this.components, this.paramRefinementConfig, this.parameterImportanceEstimator));
 			evaluablePredicates.put("refinementCompleted",

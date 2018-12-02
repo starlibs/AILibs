@@ -30,6 +30,8 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 	private int minNumSamples;
 	private double importanceThreshold;
 	private int sizeOfLargestSubsetToConsider;
+//	private int prunedParameters;
+	private Set<String> prunedParameters;
 	// private Map<String, HashMap<String, Double>>
 	// importanceDictionaryForSingleComponents;
 
@@ -46,6 +48,8 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 		this.importanceThreshold = importanceThreshold;
 		// For now only consider subsets of size <= 2
 		this.sizeOfLargestSubsetToConsider = 2;
+//		this.prunedParameters = 0;
+		this.prunedParameters = new HashSet<String>();
 	}
 
 	public FANOVAParameterImportanceEstimator(String benchmarkName, int minNumSamples, double importanceThreshold) {
@@ -76,16 +80,19 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 		// }
 		// forest = forests.get(pipelineIdentifier);
 		FeatureSpace space = new FeatureSpace(data);
-		if(space.getDimensionality()<2) {
-			for(FeatureDomain domain : space.getFeatureDomains()) {
+		if (space.getDimensionality() < 2) {
+			for (FeatureDomain domain : space.getFeatureDomains()) {
 				importantParameters.add(domain.getName());
 			}
 			return importantParameters;
 		}
+		// Set of all parameters to compute difference later
+		for (FeatureDomain domain : space.getFeatureDomains()) {
+			this.prunedParameters.add(domain.getName());
+		}
 		ExtendedRandomForest forest = new ExtendedRandomForest();
 		// forest.setMinNumSamples
 		// TODO setter for forest
-		System.out.println("data for forest: " + data);
 		forest.buildClassifier(data);
 		forest.prepareForest(data);
 		if (!importanceDictionary.containsKey(pipelineIdentifier))
@@ -131,7 +138,8 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 		}
 		// System.out.println("Importance overall: " + sum);
 		importantParameterMap.put(pipelineIdentifier, importantParameters);
-		int numPruned = data.numAttributes() - 1 - importantParameters.size();
+//		int numPruned = data.numAttributes() - 1 - importantParameters.size();
+		this.prunedParameters.removeAll(importantParameters);
 		return importantParameters;
 
 	}
@@ -183,5 +191,15 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 	 */
 	public void setPerformanceKnowledgeBase(PerformanceKnowledgeBase performanceKnowledgeBase) {
 		this.performanceKnowledgeBase = performanceKnowledgeBase;
+	}
+
+	@Override
+	public int getNumberPrunedParameters() {
+		return this.prunedParameters.size();
+	}
+
+	@Override
+	public Set<String> getPrunedParameters() {
+		return this.prunedParameters;
 	}
 }

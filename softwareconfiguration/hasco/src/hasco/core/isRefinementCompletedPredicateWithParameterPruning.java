@@ -102,11 +102,8 @@ public class isRefinementCompletedPredicateWithParameterPruning implements Evalu
 				// System.out.println("Querying fANOVA with " +
 				// performanceKB.getNumSamples("test", compositionIdentifier)
 				// + " samples!");
-				System.out
-						.println("extract important parameters for pipline " + Util.getComponentNamesOfComposition(ci));
 				importantParams = importanceEstimator.extractImportantParameters(ci, false);
 				// If there are no parameters left that are estimated to be important, return
-				System.out.println("Important Parameters: " + importantParams);
 				// true
 				if (importantParams.isEmpty())
 					return true;
@@ -120,7 +117,6 @@ public class isRefinementCompletedPredicateWithParameterPruning implements Evalu
 		for (Parameter param : component.getParameters()) {
 			String paramName = component.getName() + "::" + param.getName();
 			if (!importantParams.contains(paramName)) {
-				 System.out.println("Skip parameter " + paramName + " because it is unimportant");
 				// if the parameter is not contained in the set of important parameters, skip it
 				continue;
 			}
