@@ -28,35 +28,65 @@ import weka.core.converters.ArffSaver;
  *	is only trained, the model is being saved with an unique ID.
  */
 public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
-	private boolean verbose = false;
+	// Folder to put the serialized arff files and the scripts in.
 	private static final File TMP_FOLDER = new File("tmp");
+	// Path to the used python template.
 	private static File SCIKIT_TEMPLATE = new File("resources/scikit_template.twig.py");
+	// If true the output stream of the python process is printed.
+	private boolean verbose = false;
+	// Path to the model to be used for testing. Each buildClassifier call will set
+	// this variable to the last created model.
 	private String modelPath = "";
+	// Script of this wrapper to be executed.
 	private File script;
+	// Set to true if the dataset is a regression problem. Else its assumed to be a
+	// categorical.
 	private boolean isRegression = false;
+	// Path to but the prediction results and serialized models to.
 	private String outputFolder = "";
+	// Defines which of the columns in the arff file represent the target vectors.
+	// If not set, the last column is assumed to be the target vector.
 	private int[] targetColumns = new int[0];
+	// Since the ScikitLearn is able to do multi-target prediction but Weka is
+	// unable to depict it as a result of classifyInstances correctly, this List of
+	// Lists will keep the unflattened results until classifyInstances is called
+	// again. classifyInstances will only return a flattened representation of a
+	// multi-target prediction.
 	private List<List<Double>> rawLastClassificationResults = null;
 
+	/**
+	 * Starts a new wrapper and creates its underlying script with the given
+	 * parameters.
+	 * 
+	 * @param constructInstruction String that defines what constructor to call for
+	 *                             the classifier and with which parameters to call
+	 *                             it.
+	 * @param imports              Imports that are appended to the beginning of the
+	 *                             script. Normally only the necessary imports for
+	 *                             the constructor instruction must be added here.
+	 * @throws IOException The script could not be created.
+	 */
 	public ScikitLearnWrapper(String constructInstruction, String imports) throws IOException {
-		Map<String, Object> templateValues = initialize(constructInstruction, imports);
-		createTmpFolder();
+		Map<String, Object> templateValues = getTemplateValueMap(constructInstruction, imports);
 		String scriptName = getScriptName(constructInstruction, imports);
 		script = generateSkikitScript(scriptName, templateValues);
 	}
 
-	public ScikitLearnWrapper(String constructInstruction, String imports, File importsFolder) throws IOException {
-		if (importsFolder != null && importsFolder.list().length > 0) {
-			String importStatementFolder = createImportStatementFromImportFolder(importsFolder);
-			imports = imports + "\n" + importStatementFolder;
+	/**
+	 * Makes the given folder a module to be usable as an import for python and
+	 * creates a string that adds the folder to the python environment and then
+	 * imports the folder itself as a module.
+	 * 
+	 * @param importsFolder Folder to be added as a module.
+	 * @return String which can be appended to other imports to care for the folder
+	 *         to be added as a module.
+	 * @throws IOException The __init__.py couldn't be created in the given folder
+	 *                     (which is necessary to declare it as a module).
+	 */
+	public static String createImportStatementFromImportFolder(File importsFolder) throws IOException {
+		if (importsFolder == null || importsFolder.list().length == 0) {
+			return "";
 		}
-		Map<String, Object> templateValues = initialize(constructInstruction, imports);
-		createTmpFolder();
-		String scriptName = getScriptName(constructInstruction, imports);
-		script = generateSkikitScript(scriptName, templateValues);
-	}
-
-	private String createImportStatementFromImportFolder(File importsFolder) throws IOException {
 		// Make the folder a module.
 		if (!Arrays.asList(importsFolder.list()).contains("__init__.py")) {
 			File initFile = new File(importsFolder, "__init__.py");
@@ -64,12 +94,24 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 		}
 		StringBuilder result = new StringBuilder();
 		String absolute_folderPath = importsFolder.getAbsolutePath();
+		result.append("\n");
 		result.append("sys.path.append('" + absolute_folderPath + "')\n");
 		result.append("import " + importsFolder.getName() + "\n");
 		return result.toString();
 	}
 
-	private Map<String, Object> initialize(String constructInstruction, String imports) {
+	/**
+	 * Returns a map with the values for the script template.
+	 * 
+	 * @param constructInstruction String that defines what constructor to call for
+	 *                             the classifier and with which parameters to call
+	 *                             it.
+	 * @param imports              Imports that are appended to the beginning of the
+	 *                             script. Normally only the necessary imports for
+	 *                             the constructor instruction must be added here.
+	 * @return A map to call the template engine with.
+	 */
+	private Map<String, Object> getTemplateValueMap(String constructInstruction, String imports) {
 		if (constructInstruction == null || constructInstruction.isEmpty()) {
 			throw new AssertionError("Construction command for classifier must be stated.");
 		}
@@ -79,15 +121,12 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 		return templateValues;
 	}
 
-	private void createTmpFolder() {
-		if (!TMP_FOLDER.exists())
-			TMP_FOLDER.mkdirs();
-	}
-
 	/**
-	 * The parameters for the template are used to infer an script name from them (hopefully) unique for the parameterisation.
+	 * The parameters for the template are used to infer an script name from them
+	 * (hopefully) unique for the parameterization.
+	 * 
 	 * @param parameters Parameters that the template is filled with.
-	 * @return The proposed name for the script with this parameterisation.
+	 * @return The proposed name for the script with this parameterization.
 	 */
 	private String getScriptName(String... parameters) {
 		String hash = "" + StringUtils.join(parameters).hashCode();
@@ -106,6 +145,9 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 	 * @throws IOException During serialization of the script something went wrong.
 	 */
 	private File generateSkikitScript(String scriptName, Map<String, Object> templateValues) throws IOException {
+		if (!TMP_FOLDER.exists()) {
+			TMP_FOLDER.mkdirs();
+		}
 		File scriptFile = new File(TMP_FOLDER, scriptName);
 		scriptFile.createNewFile();
 		JtwigTemplate template = JtwigTemplate.fileTemplate(SCIKIT_TEMPLATE);
