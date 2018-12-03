@@ -84,6 +84,11 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 			TMP_FOLDER.mkdirs();
 	}
 
+	/**
+	 * The parameters for the template are used to infer an script name from them (hopefully) unique for the parameterisation.
+	 * @param parameters Parameters that the template is filled with.
+	 * @return The proposed name for the script with this parameterisation.
+	 */
 	private String getScriptName(String... parameters) {
 		String hash = "" + StringUtils.join(parameters).hashCode();
 		hash = hash.startsWith("-") ? hash.replace("-", "1") : "0" + hash;
@@ -93,6 +98,12 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 
 	/**
 	 * Generates the Python script that is wrapped.
+	 * 
+	 * @param scriptName     Name of script.
+	 * @param templateValues Values to insert into the template to make an actual
+	 *                       script from it.
+	 * @return Path to the generated script.
+	 * @throws IOException During serialization of the script something went wrong.
 	 */
 	private File generateSkikitScript(String scriptName, Map<String, Object> templateValues) throws IOException {
 		File scriptFile = new File(TMP_FOLDER, scriptName);
@@ -137,10 +148,8 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 
 	@Override
 	public void buildClassifier(Instances data) throws Exception {
-		List<String> trainOptions = new ArrayList<>();
-		trainOptions.add("--mode");
-		trainOptions.add("train");
-		parseSetOptions(trainOptions, data);
+		List<String> trainOptions = new ArrayList<>(Arrays.asList("--mode", "train"));
+		trainOptions.addAll(parseSetOptions(data));
 		String[] processParameterArray = createProcessParameterArray(trainOptions);
 		TrainProcessListener processListener = new TrainProcessListener(verbose);
 		runProcess(processParameterArray, processListener);
@@ -149,20 +158,16 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 
 	@Override
 	public double[] classifyInstances(Instances data) throws Exception {
-		List<String> testOptions = new ArrayList<>();
-		testOptions.add("--mode");
-		testOptions.add("test");
-		testOptions.add("--model");
-		testOptions.add(modelPath);
-		parseSetOptions(testOptions, data);
+		List<String> testOptions = new ArrayList<>(Arrays.asList("--mode", "test", "--model", modelPath));
+		testOptions.addAll(parseSetOptions(data));
 		String[] processParameterArray = createProcessParameterArray(testOptions);
 		TestProcessListener processListener = new TestProcessListener(verbose);
 		runProcess(processParameterArray, processListener);
-		rawLastClassificationResults = processListener.getTestResults();
 		// Since Scikit supports multiple target results but Weka does not, the results
 		// have to be flattened.
 		// The structured results of the last classifyInstances call is accessable over
 		// getRawLastClassificationResults().
+		rawLastClassificationResults = processListener.getTestResults();
 		List<Double> flatresults = rawLastClassificationResults.stream().flatMap(List::stream)
 				.collect(Collectors.toList());
 		double[] resultsArray = new double[flatresults.size()];
@@ -248,9 +253,10 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 		hash = hash.startsWith("-") ? hash.replace("-", "1") : "0" + hash;
 		return hash;
 	}
-	
+
 	/**
 	 * Return an array with all the parameters to start the process with.
+	 * 
 	 * @param additionalParameter Parameters that the script itself receives.
 	 * @return An array of all parameters for the process to be started with.
 	 */
@@ -259,9 +265,9 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 		processParameters.add("python");
 		// Force python to run stdout and stderr unbuffered.
 		processParameters.add("-u");
-		//Script to be executed.
+		// Script to be executed.
 		processParameters.add(script.getAbsolutePath());
-		//All additional parameters that the script shall consider.
+		// All additional parameters that the script shall consider.
 		processParameters.addAll(additionalParameter);
 		String[] processParameterArray = new String[processParameters.size()];
 		processParameterArray = processParameters.toArray(processParameterArray);
