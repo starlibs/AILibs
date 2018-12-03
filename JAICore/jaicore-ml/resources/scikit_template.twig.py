@@ -280,14 +280,7 @@ def run_test_mode(data):
     if sys.argv["regression"]:
         features, targets = get_feature_target_matrices(data)
     else:
-        features, targets = data.input_matrix, data.output_matrix
-        y_train = []
-        for crow in targets:
-            for index, elem in enumerate(crow):
-                if elem == 1:
-                    y_train.append(index)
-        y_train = np.array(list(y_train))
-        targets = y_train
+        features = data.input_matrix
     prediction = classifier_instance.predict(features)
     return serialize_prediction(prediction)
 
