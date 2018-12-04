@@ -1,3 +1,15 @@
+sourceSets {
+    main {
+      java {
+          srcDir 'src'
+      }
+    }
+    test {
+     	java {
+     		srcDir 'test'
+     	}
+    }
+}
 dependencies {
 	compile project(":JAICore:jaicore-basic")
 	compile project(":JAICore:jaicore-concurrent")
@@ -11,8 +23,11 @@ dependencies {
 	compile group: 'de.upb.isys', name: 'meka', version: '0.0.1'
 	compile ('de.upb.isys:interruptable-weka:0.0.7') {
 	  	exclude group: 'log4j'
-    	exclude group: 'org.slf4j'
+    	        exclude group: 'org.slf4j'
 	}
+        // d4j dependencies: https://deeplearning4j.org/docs/latest/deeplearning4j-config-buildtools
+        compile "org.deeplearning4j:deeplearning4j-core:1.0.0-beta3"
+        compile "org.nd4j:nd4j-native-platform:1.0.0-beta3"
 	
 	//JTwig template engine
 	compile "org.jtwig:jtwig-core:5.87.0.RELEASE"
@@ -22,6 +37,5 @@ dependencies {
 	
 	// https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api
 	testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.3.1'
-	//testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.3.1'
-
+	
 }
