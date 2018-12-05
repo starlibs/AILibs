@@ -10,4 +10,6 @@ import jaicore.ml.core.dataset.IDataset;
  */
 public abstract class ASamplingAlgorithm extends AAlgorithm<IDataset, IDataset> {
 
+	public abstract void setSampleSize(int size);
+	
 }
