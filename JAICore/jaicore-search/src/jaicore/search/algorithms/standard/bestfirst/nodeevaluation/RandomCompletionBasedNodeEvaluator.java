@@ -27,6 +27,7 @@ import com.google.common.eventbus.Subscribe;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import jaicore.basic.sets.SetUtil.Pair;
+import jaicore.graphvisualizer.gui.VisualizationWindow;
 import jaicore.logging.LoggerUtil;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
@@ -78,6 +79,7 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 	protected IUncertaintySource<T, V> uncertaintySource;
 	protected transient SolutionEventBus<T> eventBus = new SolutionEventBus<>();
 	private final Map<List<T>, V> bestKnownScoreUnderNodeInCompleterGraph = new HashMap<>();
+	private boolean visualizeSubSearch;
 
 	public RandomCompletionBasedNodeEvaluator(final Random random, final int samples, final ISolutionEvaluator<T, V> solutionEvaluator) {
 		this(random, samples, solutionEvaluator, -1, -1);
@@ -459,7 +461,8 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 		INodeEvaluator<T, Double> nodeEvaluator = new RandomizedDepthFirstNodeEvaluator<>(this.random);
 		GeneralEvaluatedTraversalTree<T, String, Double> completionProblem = new GeneralEvaluatedTraversalTree<>(generator, nodeEvaluator);
 		completer = new RandomSearch<>(completionProblem, priorityPredicateForRDFS, this.random);
-//		 new VisualizationWindow<>(completer).setTooltipGenerator(n -> n.toString() + "<br />f: " + String.valueOf(bestKnownScoreUnderNodeInCompleterGraph.get(n)));
+		if (visualizeSubSearch)
+			new VisualizationWindow<>(completer).setTooltipGenerator(n -> n.toString() + "<br />f: " + String.valueOf(bestKnownScoreUnderNodeInCompleterGraph.get(n)));
 		while (!(completer.next() instanceof AlgorithmInitializedEvent))
 			;
 		logger.info("Generator has been set, and completer has been initialized");
@@ -490,5 +493,13 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 	@Override
 	public void setUncertaintySource(IUncertaintySource<T, V> uncertaintySource) {
 		this.uncertaintySource = uncertaintySource;
+	}
+
+	public boolean isVisualizeSubSearch() {
+		return visualizeSubSearch;
+	}
+
+	public void setVisualizeSubSearch(boolean visualizeSubSearch) {
+		this.visualizeSubSearch = visualizeSubSearch;
 	}
 }
