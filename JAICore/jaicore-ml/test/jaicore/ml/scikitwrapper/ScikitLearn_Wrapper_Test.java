@@ -3,8 +3,10 @@ package jaicore.ml.scikitwrapper;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -54,7 +56,7 @@ public class ScikitLearn_Wrapper_Test {
 		slw.buildClassifier(datasetTrain);
 		double[] result = slw.classifyInstances(datasetTest);
 		assertNotNull(result);
-		assertEquals(numberInstance*3, result.length);
+		assertEquals(numberInstance * 3, result.length);
 	}
 
 	@Test
@@ -92,6 +94,24 @@ public class ScikitLearn_Wrapper_Test {
 		Instances dataset = loadARFF("testsrc/ml/skikitwrapper/dataset_31_credit-g.arff");
 		slw.buildClassifier(dataset);
 		assertNotEquals(slw.getModelPath(), "");
+	}
+
+	@Test
+	public void createImportStatementFromImportFolderInvalid() throws IOException {
+		assertEquals("", ScikitLearnWrapper.createImportStatementFromImportFolder(null));
+		assertEquals("",
+				ScikitLearnWrapper.createImportStatementFromImportFolder(new File("testsrc/ml/skikitwrapper/not_existing_folder")));
+		assertEquals("",
+				ScikitLearnWrapper.createImportStatementFromImportFolder(new File("testsrc/ml/skikitwrapper/importfolder_empty")));
+	}
+
+	@Test
+	public void createImportStatementFromImportFolderValid() throws IOException {
+		File importfolder = new File("testsrc/ml/skikitwrapper/importfolder_test");
+		String importStatement = ScikitLearnWrapper.createImportStatementFromImportFolder(importfolder);
+		assertTrue(importStatement.contains("sys.path.append('" + importfolder.getAbsolutePath() + "')\n"));
+		assertTrue(importStatement.contains("\nimport "+importfolder.getName()));
+		assertTrue(importfolder.listFiles())
 	}
 
 	private Instances loadARFF(String arffPath) throws IOException {

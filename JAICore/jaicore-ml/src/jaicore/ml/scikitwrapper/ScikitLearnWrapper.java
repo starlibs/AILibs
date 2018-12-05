@@ -84,7 +84,7 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 	 *                     (which is necessary to declare it as a module).
 	 */
 	public static String createImportStatementFromImportFolder(File importsFolder) throws IOException {
-		if (importsFolder == null || importsFolder.list().length == 0) {
+		if (importsFolder == null || !importsFolder.exists() || importsFolder.list().length == 0) {
 			return "";
 		}
 		// Make the folder a module.
