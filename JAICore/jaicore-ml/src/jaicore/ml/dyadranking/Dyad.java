@@ -44,4 +44,17 @@ public class Dyad {
 	public Vector getAlternative() {
 		return alternative;
 	}
+
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("Dyad (");
+		builder.append("instance (");
+		builder.append(instance);
+		builder.append(")");
+		builder.append("alternative (");
+		builder.append(")");
+		builder.append(")");
+		return builder.toString();
+	}
 }
