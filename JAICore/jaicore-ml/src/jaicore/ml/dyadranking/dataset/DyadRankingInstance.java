@@ -57,4 +57,10 @@ public class DyadRankingInstance implements IDyadRankingInstance {
 		return dyads.get(position);
 	}
 
+	@Override
+	public int length() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
 }

@@ -83,4 +83,10 @@ public class SparseDyadRankingInstance implements IDyadRankingInstance {
 		return new Dyad(instance, alternatives.get(position));
 	}
 
+	@Override
+	public int length() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
 }
