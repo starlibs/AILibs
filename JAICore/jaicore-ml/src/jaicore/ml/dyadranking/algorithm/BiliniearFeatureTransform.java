@@ -20,7 +20,7 @@ public class BiliniearFeatureTransform implements IDyadFeatureTransform {
 
 		for (int i = 0; i < dyad.getInstance().length(); i++) {
 			for (int j = 0; j < dyad.getAlternative().length(); j++) {
-				result.setValue(i * j + j, dyad.getInstance().getValue(i) * dyad.getAlternative().getValue(j));
+				result.setValue(i * dyad.getAlternative().length() + j, dyad.getInstance().getValue(i) * dyad.getAlternative().getValue(j));
 			}
 		}
 
