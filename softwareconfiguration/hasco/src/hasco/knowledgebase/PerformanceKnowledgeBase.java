@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.jfree.util.Log;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -215,7 +214,7 @@ public class PerformanceKnowledgeBase {
 					if (attrContainsValue)
 						instance.setValue(attr, value);
 					else
-						Log.info("The value you're trying to insert is not in the attributes range!");
+						System.out.println("The value you're trying to insert is not in the attributes range!");
 				} else if (param.isNumeric()) {
 					double finalValue = Double.parseDouble(values.get(i).getRight());
 					instance.setValue(attr, finalValue);

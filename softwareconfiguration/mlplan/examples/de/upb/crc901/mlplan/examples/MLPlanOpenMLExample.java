@@ -45,17 +45,17 @@ public class MLPlanOpenMLExample {
 //        PerformanceDBAdapter pAdapter = new PerformanceDBAdapter(adapter, "performance_cache");
 
 		MLPlanWekaBuilder builder = new MLPlanWekaBuilder(
-				new File("conf/automl/searchmodels/weka/j48.json"), new File("conf/mlplan.properties"),
+				new File("conf/automl/searchmodels/weka/svm.json"), new File("conf/mlplan.properties"),
 				MultiClassPerformanceMeasure.ERRORRATE);
 		
 		MLPlanWekaClassifier mlplan = new WekaMLPlanWekaClassifier(builder);
 		
 		mlplan.setLoggerName("mlplan");
 		mlplan.setUseParameterPruning(true);
-		mlplan.setParameterImportanceEstimator(new FANOVAParameterImportanceEstimator("test", 6, 1.06d));
+		mlplan.setParameterImportanceEstimator(new FANOVAParameterImportanceEstimator("test", 6, 0.20d));
 		mlplan.setTimeout(180);
-//		mlplan.setTimeoutForNodeEvaluation(300);
-//		mlplan.setTimeoutForSingleSolutionEvaluation(300);
+		mlplan.setTimeoutForNodeEvaluation(300);
+		mlplan.setTimeoutForSingleSolutionEvaluation(300);
 		mlplan.activateVisualization();
 		try {
 			long start = System.currentTimeMillis();
