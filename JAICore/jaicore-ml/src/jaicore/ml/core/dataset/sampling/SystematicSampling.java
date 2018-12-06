@@ -4,8 +4,10 @@ import java.util.Comparator;
 import java.util.Random;
 
 import jaicore.basic.algorithm.AlgorithmEvent;
+import jaicore.basic.algorithm.AlgorithmFinishedEvent;
+import jaicore.basic.algorithm.AlgorithmInitializedEvent;
+import jaicore.basic.algorithm.AlgorithmState;
 import jaicore.ml.core.dataset.ContainsNonNumericAttributesException;
-import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
 
 /**
@@ -16,6 +18,9 @@ import jaicore.ml.core.dataset.IInstance;
 public class SystematicSampling extends ASamplingAlgorithm {
 
 	private Random random;
+	private int k;
+	private int startIndex;
+	private int index;
 	
 	// Default Comparator to sort datapoints by their vector representation.
 	private Comparator<IInstance> datapointComparator = new Comparator<IInstance>() {
@@ -59,27 +64,37 @@ public class SystematicSampling extends ASamplingAlgorithm {
 	
 	@Override
 	public AlgorithmEvent nextWithException() throws Exception {
-		return null;
-	}
-
-	@Override
-	public IDataset createSampleFromDataset(IDataset dataset) throws Exception {
-		dataset.sort(this.datapointComparator);
-		
-		int startIndex = this.random.nextInt(dataset.size());
-		int k = (int)Math.floor(dataset.size() / this.sampleSize);
-		int i = 1;
-		
-		// TODO: Create real dataset.
-		IDataset sample = null;
-		
-		while(sample.size() < this.sampleSize) {
-			int e = (startIndex + (i++) * k) % dataset.size();
-			sample.add(dataset.get(e));
+		switch (this.getState()) {
+		case created:
+			// Initialize variables and sort dataset.
+			// TODO: create empty dataset
+			this.sample = null;
+			this.getInput().sort(this.datapointComparator);
+			this.startIndex = this.random.nextInt(this.getInput().size());
+			this.k = (int)Math.floor(this.getInput().size() / this.sampleSize);
+			this.index = 0;
+			this.setState(AlgorithmState.active);
+			return new AlgorithmInitializedEvent();			
+		case active:
+			// If the sample size is not reached yet, add the next datapoint from the systematic sampling method.
+			if (this.sample.size() < this.sampleSize) {
+				int e = (startIndex + (this.index++) * k) % this.getInput().size();
+				this.sample.add(this.getInput().get(e));
+				return new SampleElementAddedEvent();
+			} else {
+				this.setState(AlgorithmState.inactive);
+				return new AlgorithmFinishedEvent();
+			}
+		case inactive: {
+			if (this.sample.size() < this.sampleSize) {
+				throw new Exception("Expected sample size was not reached before termination");
+			} else {
+				return new AlgorithmFinishedEvent();
+			}
 		}
-		
-				
-		return sample;
+		default:
+			throw new IllegalStateException("Unknown algorithm state "+ this.getState());
+		}
 	}
 
 }
