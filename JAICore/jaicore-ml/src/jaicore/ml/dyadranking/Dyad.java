@@ -11,7 +11,10 @@ import de.upb.isys.linearalgebra.Vector;
  */
 public class Dyad {
 
+	/* The 'x' value of the dyad */
 	private Vector instance;
+
+	/* The 'y' value of the dyad */
 	private Vector alternative;
 
 	/**
@@ -53,8 +56,35 @@ public class Dyad {
 		builder.append(instance);
 		builder.append(")");
 		builder.append("alternative (");
+		builder.append(alternative);
 		builder.append(")");
 		builder.append(")");
 		return builder.toString();
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (!(o instanceof Dyad)) {
+			return false;
+		}
+
+		Dyad other = (Dyad) o;
+
+		if (((this.instance != null && other.instance != null && this.alternative != null && other.alternative != null)
+				&& other.instance.equals(this.instance) && other.alternative.equals(this.alternative))
+				|| (this.instance == null && other.instance == null && this.alternative == null
+						&& other.alternative == null)) {
+			return super.equals(o);
+		}
+
+		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		int result = 42;
+		result = result * 31 + instance.hashCode();
+		result = result * 31 + alternative.hashCode();
+		return result;
 	}
 }
