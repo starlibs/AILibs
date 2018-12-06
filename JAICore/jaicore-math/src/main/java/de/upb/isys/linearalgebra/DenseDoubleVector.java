@@ -194,5 +194,19 @@ public class DenseDoubleVector extends AbstractVector {
 	public SparseDoubleVector toSparseVector() {
 		return new SparseDoubleVector(asArray());
 	}
+	
+	@Override
+	public Vector kroneckerProduct(double[] vectorAsArray) {
+		return new DenseDoubleVector(kroneckerProductInternal(vectorAsArray));
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((internalVector == null) ? 0 : internalVector.hashCode());
+		return result;
+	}
+
 
 }

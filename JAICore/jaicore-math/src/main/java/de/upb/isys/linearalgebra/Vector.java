@@ -62,6 +62,13 @@ public interface Vector {
     */
    public Vector multiplyByVectorPairwiseToCopy(double[] vectorAsArray);
 
+   /**
+    * Computes the kronecker product of this vector (v) with the given vector (w). That is,
+    * v⊗w . The resulting vector has length v.length * w.length
+    * @param vectorAsArray the vector to perform the kronecker product with. i.e. the right-hand operand
+    * @return the resulting vector
+    */
+   public Vector kroneckerProduct(double [] vectorAsArray);
 
    /**
     * Divides this vector by the given double array interpreted as a pairwise vector and stores the
@@ -81,7 +88,7 @@ public interface Vector {
     */
    public Vector divideByVectorPairwiseToCopy(double[] vectorAsArray);
 
-
+   
    /**
     * Computes the dot product of the given vector and this vector.
     * 
