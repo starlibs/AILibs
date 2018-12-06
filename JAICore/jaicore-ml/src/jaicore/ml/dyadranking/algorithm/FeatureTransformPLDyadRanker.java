@@ -7,5 +7,6 @@ package jaicore.ml.dyadranking.algorithm;
  *
  */
 public class FeatureTransformPLDyadRanker extends APLDyadRanker {
-
+	
+	
 }
