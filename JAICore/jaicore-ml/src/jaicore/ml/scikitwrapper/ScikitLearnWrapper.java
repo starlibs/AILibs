@@ -78,12 +78,18 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 	 * imports the folder itself as a module.
 	 * 
 	 * @param importsFolder Folder to be added as a module.
+	 * @param keepNamespace If true, a class must be called by the modules' name
+	 *                      plus the class name. This is only important if multiple
+	 *                      modules are imported and the classes' names are
+	 *                      ambiguous. Keep in mind that the constructor call for
+	 *                      the classifier must be created accordingly.
 	 * @return String which can be appended to other imports to care for the folder
 	 *         to be added as a module.
 	 * @throws IOException The __init__.py couldn't be created in the given folder
 	 *                     (which is necessary to declare it as a module).
 	 */
-	public static String createImportStatementFromImportFolder(File importsFolder) throws IOException {
+	public static String createImportStatementFromImportFolder(File importsFolder, boolean keepNamespace)
+			throws IOException {
 		if (importsFolder == null || !importsFolder.exists() || importsFolder.list().length == 0) {
 			return "";
 		}
@@ -96,7 +102,16 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 		String absolute_folderPath = importsFolder.getAbsolutePath();
 		result.append("\n");
 		result.append("sys.path.append('" + absolute_folderPath + "')\n");
-		result.append("import " + importsFolder.getName() + "\n");
+		for (File module : importsFolder.listFiles()) {
+			if (!module.getName().startsWith("__")) {
+				if (keepNamespace) {
+					result.append("import " + module.getName().substring(0, module.getName().length() - 3) + "\n");
+				} else {
+					result.append(
+							"from " + module.getName().substring(0, module.getName().length() - 3) + " import *\n");
+				}
+			}
+		}
 		return result.toString();
 	}
 

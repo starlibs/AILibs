@@ -1,10 +1,7 @@
 package jaicore.ml.scikitwrapper;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
+import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -13,7 +10,8 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.Test;
 
 import weka.core.Instances;
 import weka.core.converters.ArffLoader.ArffReader;
@@ -27,7 +25,7 @@ public class ScikitLearn_Wrapper_Test {
 		Instances dataset = loadARFF("testsrc/ml/skikitwrapper/0532052678.arff");
 		slw.setIsRegression(true);
 		slw.buildClassifier(dataset);
-		assertNotEquals(slw.getModelPath(), "");
+		assertThat(slw.getModelPath(), not(equalTo("")));
 	}
 
 	@Test
@@ -39,7 +37,7 @@ public class ScikitLearn_Wrapper_Test {
 		int s = dataset.numAttributes();
 		slw.setTargets(s - 1, s - 2, s - 3);
 		slw.buildClassifier(dataset);
-		assertNotEquals(slw.getModelPath(), "");
+		assertThat(slw.getModelPath(), not(equalTo("")));
 	}
 
 	@Test
@@ -56,7 +54,7 @@ public class ScikitLearn_Wrapper_Test {
 		slw.buildClassifier(datasetTrain);
 		double[] result = slw.classifyInstances(datasetTest);
 		assertNotNull(result);
-		assertEquals(numberInstance * 3, result.length);
+		assertThat(numberInstance * 3, equalTo(result.length));
 	}
 
 	@Test
@@ -71,7 +69,7 @@ public class ScikitLearn_Wrapper_Test {
 		slw.setIsRegression(true);
 		double[] result = slw.classifyInstances(datasetTest);
 		assertNotNull(result);
-		assertEquals(numberInstance, result.length);
+		assertThat(numberInstance, equalTo(result.length));
 	}
 
 	@Test
@@ -81,7 +79,7 @@ public class ScikitLearn_Wrapper_Test {
 		Instances dataset = loadARFF("testsrc/ml/skikitwrapper/0532052678.arff");
 		slw.setIsRegression(true);
 		slw.buildClassifier(dataset);
-		assertNotEquals(slw.getModelPath(), "");
+		assertThat(slw.getModelPath(), not(equalTo("")));
 	}
 
 	@Test
@@ -93,25 +91,61 @@ public class ScikitLearn_Wrapper_Test {
 				ScikitLearnWrapper.getImportString(imports));
 		Instances dataset = loadARFF("testsrc/ml/skikitwrapper/dataset_31_credit-g.arff");
 		slw.buildClassifier(dataset);
-		assertNotEquals(slw.getModelPath(), "");
+		assertThat(slw.getModelPath(), not(equalTo("")));
 	}
 
 	@Test
 	public void createImportStatementFromImportFolderInvalid() throws IOException {
-		assertEquals("", ScikitLearnWrapper.createImportStatementFromImportFolder(null));
-		assertEquals("",
-				ScikitLearnWrapper.createImportStatementFromImportFolder(new File("testsrc/ml/skikitwrapper/not_existing_folder")));
-		assertEquals("",
-				ScikitLearnWrapper.createImportStatementFromImportFolder(new File("testsrc/ml/skikitwrapper/importfolder_empty")));
+		assertThat("", equalTo(ScikitLearnWrapper.createImportStatementFromImportFolder(null, true)));
+		assertThat("", equalTo(ScikitLearnWrapper.createImportStatementFromImportFolder(
+				new File("testsrc/ml/skikitwrapper/not_existing_folder"), true)));
+		assertThat("", equalTo(ScikitLearnWrapper
+				.createImportStatementFromImportFolder(new File("testsrc/ml/skikitwrapper/importfolder_empty"), true)));
 	}
 
 	@Test
 	public void createImportStatementFromImportFolderValid() throws IOException {
 		File importfolder = new File("testsrc/ml/skikitwrapper/importfolder_test");
-		String importStatement = ScikitLearnWrapper.createImportStatementFromImportFolder(importfolder);
-		assertTrue(importStatement.contains("sys.path.append('" + importfolder.getAbsolutePath() + "')\n"));
-		assertTrue(importStatement.contains("\nimport "+importfolder.getName()));
-		assertTrue(importfolder.listFiles())
+		File initFile = new File(importfolder, "__init__.py");
+		if (initFile.exists()) {
+			initFile.delete();
+		}
+		try {
+			String importStatement = ScikitLearnWrapper.createImportStatementFromImportFolder(importfolder, true);
+			assertTrue(importStatement.contains("sys.path.append('" + importfolder.getAbsolutePath() + "')\n"));
+			assertTrue(importStatement.contains("\nimport " + importfolder.getName()));
+			assertTrue(initFile.exists());
+		} finally {
+			if (initFile.exists()) {
+				initFile.delete();
+			}
+		}
+	}
+
+	@Test
+	public void loadOwnClassifierFromFileWithNamespace() throws Exception {
+		File importfolder = new File("testsrc/ml/skikitwrapper/importfolder_test");
+		String importStatement = ScikitLearnWrapper.createImportStatementFromImportFolder(importfolder, true);
+		ScikitLearnWrapper slw = new ScikitLearnWrapper("test_module_1.My_MLPRegressor()", importStatement);
+		Instances dataset = loadARFF("testsrc/ml/skikitwrapper/0532052678.arff");
+		slw.setIsVerbose(true);
+		slw.setIsRegression(true);
+		int s = dataset.numAttributes();
+		slw.setTargets(s - 1, s - 2, s - 3);
+		slw.buildClassifier(dataset);
+	}
+	
+	@Test
+	public void loadOwnClassifierFromFileWithoutNamespace() throws Exception {
+		File importfolder = new File("testsrc/ml/skikitwrapper/importfolder_test");
+		String importStatement = ScikitLearnWrapper.createImportStatementFromImportFolder(importfolder, false);
+		ScikitLearnWrapper slw = new ScikitLearnWrapper("My_MLPRegressor()", importStatement);
+		Instances dataset = loadARFF("testsrc/ml/skikitwrapper/0532052678.arff");
+		slw.setIsVerbose(true);
+		slw.setIsRegression(true);
+		int s = dataset.numAttributes();
+		slw.setTargets(s - 1, s - 2, s - 3);
+		slw.buildClassifier(dataset);
 	}
 
 	private Instances loadARFF(String arffPath) throws IOException {
