@@ -19,7 +19,13 @@ import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
  */
 public class FeatureTransformPLDyadRanker extends APLDyadRanker {
 
+	/* Phi in the paper */
 	private IDyadFeatureTransform featureTransform;
+
+	/*
+	 * The label-specific weigth vector, that determines the linear function used to
+	 * calculate the skill parameters
+	 */
 	private Vector w;
 
 	public FeatureTransformPLDyadRanker() {
@@ -37,6 +43,10 @@ public class FeatureTransformPLDyadRanker extends APLDyadRanker {
 					"FeatureTransformDyadRanker can only be used with IDyadRankingInstances.");
 		}
 
+		if (w == null) {
+			throw new PredictionException("The Ranker has not been trained yet.");
+		}
+		
 		IDyadRankingInstance dyadRankingInstance = (IDyadRankingInstance) instance;
 		TreeMap<Double, Dyad> ordering = new TreeMap<>();
 
