@@ -21,4 +21,11 @@ public interface IDyadRankingInstance extends IInstance, Iterable<Dyad> {
 	 * @return The dyad at the specified position
 	 */
 	public Dyad getDyadAtPosition(int position);
+	
+	/**
+	 * Get the number of dyads in the ranking.
+	 * 
+	 * @return The number of dyads in the ranking.
+	 */
+	public int length();
 }
