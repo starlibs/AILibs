@@ -12,15 +12,9 @@ public class SimpleRandomSampling extends ASamplingAlgorithm {
 	}
 
 	@Override
-	public IDataset call() throws Exception {
+	public IDataset createSampleFromDataset(IDataset dataset) throws Exception {
 		// TODO Auto-generated method stub
 		return null;
-	}
-
-	@Override
-	public void setSampleSize(int size) {
-		// TODO Auto-generated method stub
-
 	}
 
 }
