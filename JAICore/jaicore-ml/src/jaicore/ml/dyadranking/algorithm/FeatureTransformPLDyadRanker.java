@@ -6,6 +6,6 @@ package jaicore.ml.dyadranking.algorithm;
  * @author Helena Graf
  *
  */
-public class FTPLDyadRanker extends APLDyadRanker {
+public class FeatureTransformPLDyadRanker extends APLDyadRanker {
 
 }
