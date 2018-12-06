@@ -271,11 +271,10 @@ def run_train_mode(data):
         features, targets = data.input_matrix, data.output_matrix
         y_train = []
         for crow in targets:
-            for x in range(0,len(crow)):
+            for x in range(0, len(crow)):
                 if crow[x] == 1:
                     y_train.append(x)
-        y_train = np.array(y_train)
-        targets = y_train
+        targets = np.array(y_train)
         features = np.array(features)
     # Create instance of classifier with given parameters.
     classifier_instance = {{classifier_construct}}
