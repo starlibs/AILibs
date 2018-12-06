@@ -8,6 +8,8 @@ import java.util.NoSuchElementException;
 import de.upb.isys.linearalgebra.Vector;
 import jaicore.ml.core.dataset.ContainsNonNumericAttributesException;
 import jaicore.ml.core.dataset.attribute.IAttributeValue;
+import jaicore.ml.core.dataset.attribute.primitive.NumericAttributeType;
+import jaicore.ml.core.dataset.attribute.primitive.NumericAttributeValue;
 import jaicore.ml.dyadranking.Dyad;
 
 /**
@@ -20,7 +22,10 @@ import jaicore.ml.dyadranking.Dyad;
  */
 public class SparseDyadRankingInstance implements IDyadRankingInstance {
 
+	/* The 'x' value for this instance */
 	private Vector instance;
+
+	/* The 'y' value for this instance */
 	private List<Vector> alternatives;
 
 	/**
@@ -38,22 +43,27 @@ public class SparseDyadRankingInstance implements IDyadRankingInstance {
 		this.alternatives = Collections.unmodifiableList(alternatives);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <T> IAttributeValue<T> getAttributeValue(int position, Class<T> type) {
-		// TODO Auto-generated method stub
-		return null;
+		if (type.equals(Double.class)) {
+			return (IAttributeValue<T>) new NumericAttributeValue(new NumericAttributeType(),
+					instance.getValue(position));
+		} else {
+			throw new IllegalArgumentException("Sparse dyad ranking instances only have attributes of type double.");
+		}
 	}
 
 	@Override
 	public <T> IAttributeValue<T> getTargetValue(Class<T> type) {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException(
+				"Cannot get the target value of a sparse dyad ranking instance as the target is the ordering of the dyads.");
 	}
 
 	@Override
 	public double[] getAsDoubleVector() throws ContainsNonNumericAttributesException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException(
+				"Sparse dyad ranking instances cannot be converted to a double vector since the target type is an ordering of dyads.");
 	}
 
 	@Override
@@ -85,8 +95,7 @@ public class SparseDyadRankingInstance implements IDyadRankingInstance {
 
 	@Override
 	public int length() {
-		// TODO Auto-generated method stub
-		return 0;
+		return alternatives.size();
 	}
 
 }
