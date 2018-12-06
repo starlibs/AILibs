@@ -1,12 +1,12 @@
 package jaicore.ml.core.dataset.attribute;
 
 /**
- * An abstract class for attribute values implementing basic functionality to store its value as well as getter and setters.
+ * An abstract class for attribute values implementing basic functionality to
+ * store its value as well as getter and setters.
  *
  * @author wever
  *
- * @param <D>
- *            The domain of values.
+ * @param <D> The domain of values.
  */
 public abstract class AAttributeValue<D> implements IAttributeValue<D> {
 
@@ -17,10 +17,10 @@ public abstract class AAttributeValue<D> implements IAttributeValue<D> {
 	private final IAttributeType<D> type;
 
 	/**
-	 * Constructor creating a new attribute value for a certain type. The value remains unset.
+	 * Constructor creating a new attribute value for a certain type. The value
+	 * remains unset.
 	 *
-	 * @param type
-	 *            The type of the attribute value.
+	 * @param type The type of the attribute value.
 	 */
 	protected AAttributeValue(final IAttributeType<D> type) {
 		super();
@@ -28,12 +28,11 @@ public abstract class AAttributeValue<D> implements IAttributeValue<D> {
 	}
 
 	/**
-	 * Constructor creating a new attribute value for a certain type together with a value.
+	 * Constructor creating a new attribute value for a certain type together with a
+	 * value.
 	 *
-	 * @param type
-	 *            The type of the attribute value.
-	 * @param value
-	 *            The value of this attribute.
+	 * @param type  The type of the attribute value.
+	 * @param value The value of this attribute.
 	 */
 	protected AAttributeValue(final IAttributeType<D> type, final D value) {
 		this(type);
@@ -46,10 +45,12 @@ public abstract class AAttributeValue<D> implements IAttributeValue<D> {
 	}
 
 	@Override
-	public void setValue(final D value) {
+	public void setValue(final D value) throws IllegalArgumentException {
 		if (!this.type.isValidValue(value)) {
-			throw new IllegalArgumentException("The attribute value does not conform the domain of the attribute type.");
+			throw new IllegalArgumentException(
+					"The attribute value does not conform the domain of the attribute type.");
 		}
+		this.value = value;
 	}
 
 }
