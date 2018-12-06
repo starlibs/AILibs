@@ -149,9 +149,18 @@ class ArffStructure:
 
 
 def get_filename(path_of_file):
+    """
+    Returns the filename of a file that is referenced with its path.
+    :param path_of_file: (Absolute) path to the file.
+    :return: Name of the file (without file type extension).
+    """
     return os.path.splitext(os.path.basename(path_of_file))[0]
 
 def parse_args():
+    """
+    Parses the arguments that are given to the script and overwrites sys.argv with this parsed representation that is
+    accessable as a list.
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument('--mode', choices=['train','test'], required=True, help="Selecting whether a train or a test is run.")
     parser.add_argument('--arff', required=True, help="Path or ARFF to use for training/ testing.")
@@ -183,18 +192,22 @@ def get_feature_target_matrices(data):
     to define the matrices and the entry is removed from the map. Otherwise the last column is assumed to be the target.
     Returns a target and feature matrix.
     """
-    # If target indices are given, use them. Else assume last feature is target.
+    # If target indices are given, use them...
     if sys.argv["targets"]:
         target_indices = sys.argv["targets"]
         target_columns = []
+        # Stitch all the target columns together
         for index in target_indices:
             target_columns.append(data[:, index])
         targets = np.transpose(np.array(target_columns))
+        # The feature columns are the remaining columns that are not a target
         feature_indices = list({j for j in range(len(data[0]))} - set(target_indices))
         feature_columns = []
+        # Stitch the feature columns together
         for index in feature_indices:
             feature_columns.append(data[:, index])
         features = np.transpose(np.array(feature_columns))
+    # Else assume last column is target.
     else:
         targets = [row[-1] for row in data]
         features = [row[:-1] for row in data]
