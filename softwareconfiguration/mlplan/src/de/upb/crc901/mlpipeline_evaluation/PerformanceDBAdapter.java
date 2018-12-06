@@ -27,15 +27,18 @@ import jaicore.basic.SQLAdapter;
 import jaicore.ml.cache.ReproducibleInstances;
 
 /**
- * Database adapter for performance data
+ * Database adapter for performance data. Functionality to store and save
+ * performance values in a database. json to reproduce the
+ * {@link ReproducibleInstances} is saved as well as the solution that produced
+ * the performance value.
  * 
  * @author jmhansel
  *
  */
-public class PerformanceDBAdapter implements Closeable {	/** Logger for controlled output. */
-	static final Logger logger = LoggerFactory.getLogger(CacheEvaluatorMeasureBridge.class);
+public class PerformanceDBAdapter implements Closeable {
+	/** Logger for controlled output. */
+	private static final Logger logger = LoggerFactory.getLogger(PerformanceDBAdapter.class);
 
-	
 	private final SQLAdapter sqlAdapter;
 	private final String performanceSampleTableName;
 
@@ -79,17 +82,14 @@ public class PerformanceDBAdapter implements Closeable {	/** Logger for controll
 	 * corresponding performance score.
 	 * 
 	 * 
-	 * @param composition
-	 *            - Solution composition.
-	 * @param reproducableInstances
-	 *            - Instances object that includes the trajectory, i.e. all
-	 *            operations that have been applied to the instances like loading,
-	 *            splitting etc.
-	 * @param testData
-	 *            - The reproducible instances of the test data used for this
-	 *            evaluation process
-	 * @param className
-	 *            - the java qualified class name of the loss function that was used
+	 * @param composition           - Solution composition.
+	 * @param reproducableInstances - Instances object that includes the trajectory,
+	 *                              i.e. all operations that have been applied to
+	 *                              the instances like loading, splitting etc.
+	 * @param testData              - The reproducible instances of the test data
+	 *                              used for this evaluation process
+	 * @param className             - the java qualified class name of the loss
+	 *                              function that was used
 	 * @return opt - Optional that contains the score corresponding to the
 	 *         composition and the reproducible instances or is empty if no suiting
 	 *         entry is found in the database.
@@ -120,27 +120,23 @@ public class PerformanceDBAdapter implements Closeable {	/** Logger for controll
 		}
 		return opt;
 	}
-	
 
 	/**
 	 * Stores the composition, the trajectory and the achieved score in the
 	 * database.
 	 * 
-	 * @param composition
-	 *            - Solution composition
-	 * @param reproducableInstances
-	 *            - Instances object that includes the trajectory, i.e. all
-	 *            operations that have been applied to the instances like loading,
-	 *            splitting etc.
-	 * @param testData
-	 *            - The reproducible instances of the test data used for this
-	 *            evaluation process
-	 * @param score
-	 *            - Score achieved by the composition on the reproducible instances
-	 * @param className
-	 *            - The java qualified class name of the loss function that was used
-	 * @param evaluationTime
-	 *            - The time it took for the corresponding evaluation in milliseconds
+	 * @param composition           - Solution composition
+	 * @param reproducableInstances - Instances object that includes the trajectory,
+	 *                              i.e. all operations that have been applied to
+	 *                              the instances like loading, splitting etc.
+	 * @param testData              - The reproducible instances of the test data
+	 *                              used for this evaluation process
+	 * @param score                 - Score achieved by the composition on the
+	 *                              reproducible instances
+	 * @param className             - The java qualified class name of the loss
+	 *                              function that was used
+	 * @param evaluationTime        - The time it took for the corresponding
+	 *                              evaluation in milliseconds
 	 */
 	public void store(ComponentInstance composition, ReproducibleInstances reproducibleInstances,
 			ReproducibleInstances testData, double score, String className, long evaluationTime) {

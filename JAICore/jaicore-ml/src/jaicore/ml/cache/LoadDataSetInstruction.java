@@ -10,12 +10,17 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class LoadDataSetInstruction extends Instruction{
 	
+	/** Constant String to Identify this Instruction*/
+	public static final String COMMAND_NAME = "loadDataset";
+	
 	/**
+	 * Constructor to create an instruction for loading a dataset that can be converted to json.
+	 * 
 	 * @param provider used to identify origin of the dataset
 	 * @param id used to identify dataset
 	 */
 	public LoadDataSetInstruction(@JsonProperty("provider") String provider, @JsonProperty("id") String id) {
-		command = "loadDataset";
+		command = COMMAND_NAME;
 		inputs.put("provider", provider);
 		inputs.put("id", id);
 	}

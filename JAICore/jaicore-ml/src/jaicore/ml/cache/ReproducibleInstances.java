@@ -11,7 +11,9 @@ import jaicore.ml.openml.OpenMLHelper;
 import weka.core.Instances;
 
 /**
- * New Instances class to track splits and data origin.
+ * New Instances class to track splits and data origin. Origin of the dataset is stored by a {@link LoadDataSetInstruction} and changed by {@link SplitInstruction}s saved as a list of instructions.
+ * This history of the instances can be converted to json and used to reproduce a specific set of instances.
+ * 
  * 
  * @author jnowack
  * @author mirko
@@ -20,9 +22,6 @@ import weka.core.Instances;
  */
 public class ReproducibleInstances extends Instances {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 4318807226111536282L;
 	private List<Instruction> history = new LinkedList<>();
 	private boolean cacheStorage = true;
@@ -35,18 +34,17 @@ public class ReproducibleInstances extends Instances {
 	/**
 	 * Creates a {@link ReproducibleInstances} Object based on the given History. Instructions that no not modify the Instances will be ignored (No evaluation will be done). 
 	 * 
-	 * @param history - List of INstructions used to create the original Instances
-	 * @param apiKey - apiKey in case openml.org is used
+	 * @param history List of Instructions used to create the original Instances
+	 * @param apiKey apiKey in case openml.org is used
 	 * @return new {@link ReproducibleInstances} object
-	 * @throws IOException 
-	 * @throws  
+	 * @throws IOException if something goes wrong while loading Instances from openml or when reading arff file 
 	 */
 	public static ReproducibleInstances fromHistory(List<Instruction> history, String apiKey) throws IOException {
 		ReproducibleInstances instances = null;
 		for (int i = 0; i < history.size(); i++) {
 			Instruction inst = history.get(i);
 			switch (inst.command) {
-			case "loadDataset":
+			case LoadDataSetInstruction.COMMAND_NAME:
 				// load openml or local dataset
 				if(inst.inputs.get("provider").equals("openml.org")) {
 					instances = fromOpenML(inst.inputs.get("id"), apiKey);
@@ -55,7 +53,7 @@ public class ReproducibleInstances extends Instances {
 					instances = fromARFF(inst.inputs.get("id"), inst.inputs.get("provider").split("\\.")[1]);
 				}
 				break;
-			case "split":
+			case SplitInstruction.COMMAND_NAME:
 				// create split
 				String[] ratiosAsStrings = inst.getInputs().get("ratios").split(",");
 				double[] ratios = new double[ratiosAsStrings.length];
@@ -75,7 +73,8 @@ public class ReproducibleInstances extends Instances {
 	
 	public ReproducibleInstances(ReproducibleInstances dataset) {
 		super(dataset);
-		for (Iterator<Instruction> iterator = dataset.history.iterator(); iterator.hasNext();) {
+		Iterator<Instruction> iterator = dataset.history.iterator();
+		while(iterator.hasNext()) {
 			Instruction i = iterator.next();
 			history.add(i);
 		}
@@ -87,11 +86,10 @@ public class ReproducibleInstances extends Instances {
 	 * Creates a new {@link ReproducibleInstances} object. Data is loaded from
 	 * openml.org.
 	 * 
-	 * @param id     The id of the openml dataset
+	 * @param id The id of the openml dataset
 	 * @param apiKey apikey to use
 	 * @return new {@link ReproducibleInstances} object
-	 * @throws NumberFormatException
-	 * @throws IOException
+	 * @throws IOException if something goes wrong while loading Instances from openml
 	 */
 	public static ReproducibleInstances fromOpenML(String id, String apiKey) throws NumberFormatException, IOException {
 		OpenMLHelper.setApiKey(apiKey);
@@ -109,10 +107,10 @@ public class ReproducibleInstances extends Instances {
 	 * @param path path to the dataset
 	 * @param user We assume that the combination of user and path is unique
 	 * @return new {@link ReproducibleInstances} object
-	 * @throws IOException
+	 * @throws IOException if the ARFF file is not read successfully
 	 */
 	public static ReproducibleInstances fromARFF(String path, String user) throws IOException {
-		Instances data = new Instances(new FileReader(path)); // TODO mirko
+		Instances data = new Instances(new FileReader(path));
 		data.setClassIndex(data.numAttributes() - 1);
 		ReproducibleInstances result = new ReproducibleInstances(data);
 		result.history.add(new LoadDataSetInstruction("local_" + user, path));
@@ -122,9 +120,8 @@ public class ReproducibleInstances extends Instances {
 	}
 
 	/**
-	 * returns the ordered lists of instructions or null if cache is not used
 	 * 
-	 * @return
+	 * @return the ordered lists of instructions or null if cache is not used
 	 */
 	public List<Instruction> getInstructions() {
 		if(cacheLookup || cacheStorage) {
@@ -144,14 +141,16 @@ public class ReproducibleInstances extends Instances {
 		history.add(i);
 	}
 
-	/**
-	 * @return the cacheStorage
+	/** If true signifies that performance evaluation should be stored.
+	 * 
+	 * @return true if performance should be saved
 	 */
 	public boolean isCacheStorage() {
 		return cacheStorage;
 	}
 
-	/**
+	/** If set to true, signifies that performance evaluation should be stored.
+	 * 
 	 * @param cacheStorage the cacheStorage to set
 	 */
 	public void setCacheStorage(boolean cacheStorage) {
@@ -159,13 +158,16 @@ public class ReproducibleInstances extends Instances {
 	}
 
 	/**
-	 * @return the cacheLookup
+	 * If true signifies that performance on this data should be looked up in cache
+	 * 
+	 * @return true if lookup should be performed
 	 */
 	public boolean isCacheLookup() {
 		return cacheLookup;
 	}
 
 	/**
+	 * If true signifies that performance on this data should be looked up in cache
 	 * @param cacheLookup the cacheLookup to set
 	 */
 	public void setCacheLookup(boolean cacheLookup) {

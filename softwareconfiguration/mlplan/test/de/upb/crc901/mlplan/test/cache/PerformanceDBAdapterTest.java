@@ -24,6 +24,12 @@ import weka.attributeSelection.Ranker;
 import weka.classifiers.functions.MultilayerPerceptron;
 import weka.classifiers.trees.RandomForest;
 
+/**
+ * Tests the funcionality of the {@link PerformanceDBAdapter}. Tries to save and load different performance values.
+ * 
+ * @author jmhansel
+ *
+ */
 public class PerformanceDBAdapterTest {
 	@Test
 	public void test() {

@@ -4,8 +4,10 @@ import jaicore.ml.core.evaluation.measure.IMeasure;
 import weka.classifiers.Classifier;
 import weka.core.Instances;
 /**
- * An abstract evaluator measure-bridge 
- * @author elppa
+ * Connection between an Evaluator (e.g. MCC) and a loss Function. Able to evaluate instances based on training data and validation data.
+ * This bridge may modify this process, for example by using a cache.
+ *  
+ * @author mirko
  *
  * @param <I> the input type
  * @param <O> the output type

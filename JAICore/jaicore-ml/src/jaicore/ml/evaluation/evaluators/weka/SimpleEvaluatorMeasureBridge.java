@@ -10,6 +10,12 @@ import weka.classifiers.Classifier;
 import weka.core.Instance;
 import weka.core.Instances;
 
+/**
+ * Basic implementation of the {@link AbstractEvaluatorMeasureBridge}. Uses the given loss function to compute loss on the given data. No extra steps are performed.
+ * 
+ * @author jnowack
+ *
+ */
 public class SimpleEvaluatorMeasureBridge extends AbstractEvaluatorMeasureBridge<Double, Double>{
 
 	public SimpleEvaluatorMeasureBridge(IMeasure<Double, Double> basicEvaluator) {
@@ -17,17 +23,17 @@ public class SimpleEvaluatorMeasureBridge extends AbstractEvaluatorMeasureBridge
 	}
 
 	@Override
-	public Double evaluateSplit(Classifier pl, Instances trainingData, Instances validationData) throws Exception {
+	public Double evaluateSplit(Classifier classifier, Instances trainingData, Instances validationData) throws Exception {
 		List<Double> actual = WekaUtil.getClassesAsList(validationData);
 		List<Double> predicted = new ArrayList<>();
-		pl.buildClassifier(trainingData);
-		if (pl instanceof IInstancesClassifier) {
-			for (double prediction : ((IInstancesClassifier) pl).classifyInstances(validationData)) {
+		classifier.buildClassifier(trainingData);
+		if (classifier instanceof IInstancesClassifier) {
+			for (double prediction : ((IInstancesClassifier) classifier).classifyInstances(validationData)) {
 				predicted.add(prediction);
 			}
 		} else {
 			for (Instance inst : validationData) {
-				predicted.add(pl.classifyInstance(inst));
+				predicted.add(classifier.classifyInstance(inst));
 			}
 		}
 		return this.basicEvaluator.calculateAvgMeasure(actual, predicted);

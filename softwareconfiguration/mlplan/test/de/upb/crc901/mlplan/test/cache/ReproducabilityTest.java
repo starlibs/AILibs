@@ -16,6 +16,12 @@ import jaicore.ml.cache.ReproducibleInstances;
 import jaicore.ml.core.evaluation.measure.singlelabel.ZeroOneLoss;
 import weka.classifiers.Classifier;
 
+/**
+ * Test to ensure that saved {@link ReproducibleInstances} and Solutions can be reproduced and create the same performance value every time.
+ * 
+ * @author jmhansel
+ *
+ */
 public class ReproducabilityTest {
 
 	@Test

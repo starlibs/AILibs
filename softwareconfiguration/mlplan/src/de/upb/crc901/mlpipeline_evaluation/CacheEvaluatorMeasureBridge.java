@@ -17,18 +17,24 @@ import jaicore.ml.evaluation.evaluators.weka.SimpleEvaluatorMeasureBridge;
 import weka.classifiers.Classifier;
 import weka.core.Instances;
 
+/**
+ * Implements a cache for the {@link AbstractEvaluatorMeasureBridge}. If no cache entry is found {@link SimpleEvaluatorMeasureBridge} is used.
+ * 
+ * @author mirko
+ *
+ */
 public class CacheEvaluatorMeasureBridge extends AbstractEvaluatorMeasureBridge<Double, Double> {
 	
 	/** Logger for controlled output. */
-	static final Logger logger = LoggerFactory.getLogger(CacheEvaluatorMeasureBridge.class);
+	private static final Logger logger = LoggerFactory.getLogger(CacheEvaluatorMeasureBridge.class);
 
-	ComponentInstance evaluatedComponent;
+	private ComponentInstance evaluatedComponent;
 
 	/* Used for evaluating, when no cache entry could be found. */
-	SimpleEvaluatorMeasureBridge simpleEvaluatorMeasureBridge;
+	private SimpleEvaluatorMeasureBridge simpleEvaluatorMeasureBridge;
 
 	/* Used for looking up cache entries. */
-	PerformanceDBAdapter performanceDBAdapter;
+	private PerformanceDBAdapter performanceDBAdapter;
 
 	public CacheEvaluatorMeasureBridge(IMeasure<Double, Double> basicEvaluator,
 			PerformanceDBAdapter performanceDBAdapter) {
@@ -68,10 +74,10 @@ public class CacheEvaluatorMeasureBridge extends AbstractEvaluatorMeasureBridge<
 
 	/**
 	 * Returns a lightweight copy of this object. That is, that the database
-	 * connection stays established and only the component instace is updated.
+	 * connection stays established and only the component instance is updated.
 	 * 
 	 * @param componentInstance
-	 * @return
+	 * @return the lightweight copy
 	 */
 	public CacheEvaluatorMeasureBridge getShallowCopy(ComponentInstance componentInstance) {
 		CacheEvaluatorMeasureBridge bridge = new CacheEvaluatorMeasureBridge(this.basicEvaluator,

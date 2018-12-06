@@ -767,7 +767,7 @@ public class WekaUtil {
 		/* compute instances per class */
 		Map<String, Instances> classWiseSeparation = getInstancesPerClass(shuffledData);
 
-		Map<String, Integer> classCapacities = new HashMap<>();
+		Map<String, Integer> classCapacities = new HashMap<>(classWiseSeparation.size());
 		for (String c : classWiseSeparation.keySet()) {
 			classCapacities.put(c, classWiseSeparation.get(c).size());
 		}
@@ -805,12 +805,12 @@ public class WekaUtil {
 
 	
 	/**
-	 * Creates a StratifiedSplit for a given {@link ReproducibleInstances} Object. THe History will be updated to track the split.
+	 * Creates a stratified split for a given {@link ReproducibleInstances} Object. The history will be updated to track the split.
 	 * 
 	 * @param data - Input data
 	 * @param rand - random used to get a seed, which can be used and saved
 	 * @param portions - ratios to split
-	 * @return a List of {@link ReproducibleInstances}. For each of them the history will be updated to track the split
+	 * @return a list of {@link ReproducibleInstances}. For each of them the history will be updated to track the split
 	 */
 	public static List<ReproducibleInstances> getStratifiedSplit(final ReproducibleInstances data, final Random rand, final double... portions) {
 		return getStratifiedSplit(data, rand.nextLong(), portions);
@@ -844,7 +844,7 @@ public class WekaUtil {
 		/* compute instances per class */
 		Map<String, Instances> classWiseSeparation = getInstancesPerClass(shuffledData);
 
-		Map<String, Integer> classCapacities = new HashMap<>();
+		Map<String, Integer> classCapacities = new HashMap<>(classWiseSeparation.size());
 		for (String c : classWiseSeparation.keySet()) {
 			classCapacities.put(c, classWiseSeparation.get(c).size());
 		}
@@ -879,7 +879,7 @@ public class WekaUtil {
 		}
 		assert instances.stream().mapToInt(l -> l.size()).sum() == data.size() : "The number of instances in the folds does not equal the number of instances in the original dataset";
 		
-		/* update ReproducibleInstanes History */
+		/* update ReproducibleInstanes history */
 		String ratiosAsString = Arrays.toString(portions);
 		for(int i = 0; i < instances.size(); i++) {
 			instances.get(i).addInstruction(new SplitInstruction(ratiosAsString, seed, i));
