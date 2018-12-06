@@ -1,6 +1,12 @@
 package jaicore.ml.core.dataset.attribute.timeseries;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
+
 import jaicore.ml.core.dataset.attribute.IAttributeValue;
 
 /**
@@ -29,12 +35,19 @@ public class TimeSeriesAttributeType implements ITimeSeriesAttributeType {
 
     @Override
     public IAttributeValue<INDArray> buildAttributeValue(Object value) {
-        return null;
+        if (value instanceof INDArray) {
+            return new TimeSeriesAttributeValue(this, (INDArray) value);
+        } else {
+            throw new IllegalArgumentException("Value has to be an INDArray");
+        }
     }
 
     @Override
     public IAttributeValue<INDArray> buildAttributeValue(String stringDescription) {
-        return null;
+        double[] data = Stream.of(stringDescription.split(",")).mapToDouble(Double::parseDouble).toArray();
+        int[] shape = { data.length };
+        INDArray value = Nd4j.create(data, shape);
+        return this.buildAttributeValue(value);
     }
 
     @Override
