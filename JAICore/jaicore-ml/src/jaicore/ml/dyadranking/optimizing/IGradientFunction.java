@@ -8,7 +8,6 @@ import de.upb.isys.linearalgebra.Vector;
  * @author Helena Graf, Mirko Jürgens
  *
  */
-@FunctionalInterface
 public interface IGradientFunction {
 
 	/**
