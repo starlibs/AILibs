@@ -1,7 +1,24 @@
 package jaicore.ml.core.dataset.attribute;
 
-public interface IAttributeValue<TYPE> {
+/**
+ * A general interface for attribute values.
+ *
+ * @author wever
+ *
+ * @param <D>
+ *            The type of an attribute value.
+ */
+public interface IAttributeValue<D> {
 
-	public TYPE getValue();
+	/**
+	 * @return The value of this attribute value.
+	 */
+	public D getValue();
+
+	/**
+	 * @param value
+	 *            The value of this attribute value.
+	 */
+	public void setValue(D value);
 
 }

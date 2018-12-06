@@ -23,7 +23,7 @@ import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorithm<GraphGenerator<N, A>, Graph<N>>
 		implements IGraphAlgorithm<GraphGenerator<N, A>, Graph<N>, N, A> {
 
-	class InnerNodeLabel {
+	public class InnerNodeLabel {
 		N node;
 		NodeType type;
 //		List<List<N>> survivedGoalPaths; // ranked list of paths from node to goals
@@ -71,6 +71,7 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 					graph.addItem(newNode);
 					graph.addEdge(n, newNode);
 					open.add(newNode);
+					Thread.sleep(5);
 					post(new NodeReachedEvent<N>(n.node, newNode.node,
 							descr.getTypeOfToNode() == NodeType.OR ? "or" : "and"));
 				}
