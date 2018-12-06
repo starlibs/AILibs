@@ -65,6 +65,17 @@ public abstract class AbstractVector implements Vector {
 		return sb.toString();
 	}
 
+	protected double [] kroneckerProductInternal(double[] vectorAsArray) {
+		double [] kroneckerProduct = new double [ this.length() * vectorAsArray.length];
+		for (int i = 0; i < this.length(); i++) {
+			for (int j = 0; j < vectorAsArray.length; j++) {
+				kroneckerProduct [i * vectorAsArray.length + j ] =  this.getValue(i) * vectorAsArray[j];
+			}
+		}
+		return kroneckerProduct;
+	}
+	
+	
 	@Override
 	public void zeroAllDimensions() {
 		for (int i = 0; i < length(); i++) {
