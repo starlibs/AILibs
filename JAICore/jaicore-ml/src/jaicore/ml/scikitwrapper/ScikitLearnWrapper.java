@@ -22,10 +22,42 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.ArffSaver;
 
-/*	Wraps a Skikit-Learn Python process by utilizing a template to
- *	start a classifier in Skikit with the given classifier. It is
- *	possible to train, predict or train and predict. When the classifier
- *	is only trained, the model is being saved with an unique ID.
+/*	Wraps a Scikit-Learn Python process by utilizing a template to
+ *	start a classifier in Scikit with the given classifier.
+ *
+ *Usage:
+ *Set the constructInstruction to exactly the command how the classifier should be instantiated.
+ *E.g. "LinearRegression()" or "MLPRegressor(solver = 'lbfgs’)".
+ *
+ *Set the imports to exactly what the additional imports lines that are necessary to run
+ *the construction command must look like. It is up to the user to decide whether fully
+ *qualified names or only the class name themself are used as long as the import is
+ *on par with the construct call.
+ *E.g (without namespace in construct call) "from sklearn.linear_model import LinearRegression"
+ * or (without namespace) "import sklearn.linear_model"
+ * 
+ *createImportStatementFromImportFolder might help to import an own folder of modules. It initializes the folder
+ *to be utilizable as a source of modules. Depending on the shape of the construct call the keepNamespace flag must be set
+ *(as described above).
+ *
+ *Before starting the classification it must be set whether the given dataset is a categorical or a regression task (setIsRegression).
+ *
+ *If the task is a multi target prediction, setTargets must be used to define which columns of the dataset are the targets.
+ *If no targets are defined it is assumed that only the last column is the target vector.
+ *
+ *Moreover the outputFolder might be set to something else but the default (setOutputFolder).
+ *
+ *Now buildClassifier can be run.
+ *
+ *If classifyInstances is run with the same ScikitLearnWrapper instance after training,
+ *the previously trained model is used for testing.
+ *If another model shall be used or there was no training prior to classifyInstances,
+ *the model must be set with setModelPath.
+ *
+ *After a multi target prediction the results might be more accessible with the unflattened representation
+ *that can be obtained with getRawLastClassificationResults.
+ *
+ *For debug purposes the wrapper might be set to be verbose with setIsVerbose.
  */
 public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 	// Folder to put the serialized arff files and the scripts in.
@@ -101,13 +133,20 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 		}
 		StringBuilder result = new StringBuilder();
 		String absolute_folderPath = importsFolder.getAbsolutePath();
+		// Add the folder to the environment of the python script
 		result.append("\n");
 		result.append("sys.path.append('" + absolute_folderPath + "')\n");
 		for (File module : importsFolder.listFiles()) {
 			if (!module.getName().startsWith("__")) {
+				// Either import the module by its name. Then the classes of it have to be
+				// referenced by the fully qualified name.
 				if (keepNamespace) {
 					result.append("import " + module.getName().substring(0, module.getName().length() - 3) + "\n");
-				} else {
+				}
+				// ... else all the content of the module is imported. Than they can be called
+				// by only their name but therefore there should not be multiple modules
+				// imported that overlap in class names.
+				else {
 					result.append(
 							"from " + module.getName().substring(0, module.getName().length() - 3) + " import *\n");
 				}
