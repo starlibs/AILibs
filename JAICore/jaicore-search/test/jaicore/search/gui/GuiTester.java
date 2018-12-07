@@ -25,8 +25,9 @@ import jaicore.search.testproblems.nqueens.QueenNode;
 
 public abstract class GuiTester<I, O, VSearch, ESearch> extends ORGraphSearchTester<Integer, I, O, QueenNode, String, Double, VSearch, ESearch>
 		implements IGraphAlgorithmListener<VSearch, ESearch> {
-
-	int[] numbersOfSolutions = { 2};//, 10, 4, 40, 92, 352, 724 };
+	int n = 10;
+	int[] solutionSet= {1,0,0,4,10,4,40,92,352,724};
+	int numbersOfSolutions =solutionSet[n-1]; // 1:1, 2:0, 3:0 4: 2, 5: 10, 6: 4, 7: 40, 8: 92, 9: 352, 10: 724 
 
 	private AtomicInteger seenSolutions = new AtomicInteger(0);
 	private boolean showGraphs = false;
@@ -44,20 +45,17 @@ public abstract class GuiTester<I, O, VSearch, ESearch> extends ORGraphSearchTes
 	public void testThatIteratorReturnsEachPossibleSolution() {
 		if (searchFactory == null)
 			throw new IllegalArgumentException("Search factory has not been set");
-		for (int i = 0; i < numbersOfSolutions.length; i++) {
-			int n = i + 4;
-			System.out.print("Checking " + n + "-Queens Problem ... ");
-			IGraphSearch<I, O, QueenNode, String, Double, VSearch, ESearch> search = getSearchProblemInput(n);
-			assertNotNull("The factory has not returned any search object.", search);
-			ObjectEvaluator<Node> eval = new NodeEvaluator();
-			if (showGraphs)
-//				new SimpleGraphVisualizationWindow<>(search);
-				new VisualizationWindow(search, "Test", eval);
-			boolean initialized = false;
-			boolean terminated = false;
-			int solutions = 0;
-			Iterator<AlgorithmEvent> iterator = search.iterator();
-			assertNotNull("The search algorithm does return NULL as an iterator for itself.", iterator);
+		System.out.print("Checking " + n + "-Queens Problem ... ");
+		IGraphSearch<I, O, QueenNode, String, Double, VSearch, ESearch> search = getSearchProblemInput(n);
+		assertNotNull("The factory has not returned any search object.", search);
+		ObjectEvaluator<Node> eval = new NodeEvaluator();
+		if (showGraphs)
+			new VisualizationWindow(search, "Test", eval);
+		boolean initialized = false;
+		boolean terminated = false;
+		int solutions = 0;
+		Iterator<AlgorithmEvent> iterator = search.iterator();
+		assertNotNull("The search algorithm does return NULL as an iterator for itself.", iterator);
 //			while (iterator.hasNext()) {
 //				AlgorithmEvent e = search.next();
 //				assertNotNull("The search iterator has returned NULL even though hasNext suggested that more event should come.", e);
@@ -72,11 +70,11 @@ public abstract class GuiTester<I, O, VSearch, ESearch> extends ORGraphSearchTes
 //						solutions++;
 //				}
 //			}
-			while(true);
-				
-//			assertEquals("Failed to solve " + n + "-queens problem. Only found " + solutions + "/" + numbersOfSolutions[i] + " solutions.", numbersOfSolutions[i], solutions);
-//			System.out.println("done");
-		}
+//			while(true);
+			
+//		assertEquals("Failed to solve " + n + "-queens problem. Only found " + solutions + "/" +solutionSet[i] + " solutions.", solutionSet[i], solutions);
+		System.out.println("done");
+		while(true);
 	}
 
 	@Override
