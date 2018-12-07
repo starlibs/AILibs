@@ -36,12 +36,8 @@ public class TestProcessListener extends DefaultProcessListener {
 			String jsonTestResultsPath = input.substring(TEST_RESULTS_PATH_FLAG.length());
 			try {
 				fileContent = StringUtils.join(Files.readAllLines(Paths.get(jsonTestResultsPath)));
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			// Parse JSON response of python.
-			ObjectMapper objMapper = new ObjectMapper();
-			try {
+				// Parse JSON response of python.
+				ObjectMapper objMapper = new ObjectMapper();
 				testResults = (List<List<Double>>) objMapper.readValue(fileContent, List.class).get(0);
 			} catch (IOException e) {
 				e.printStackTrace();

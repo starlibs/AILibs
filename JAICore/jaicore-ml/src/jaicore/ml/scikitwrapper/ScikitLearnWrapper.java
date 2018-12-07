@@ -43,7 +43,7 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 	// categorical.
 	private boolean isRegression = false;
 	// Path to but the prediction results and serialized models to.
-	private String outputFolder = "";
+	private File outputFolder = null;
 	// Defines which of the columns in the arff file represent the target vectors.
 	// If not set, the last column is assumed to be the target vector.
 	private int[] targetColumns = new int[0];
@@ -51,7 +51,8 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 	// unable to depict it as a result of classifyInstances correctly, this List of
 	// Lists will keep the unflattened results until classifyInstances is called
 	// again. classifyInstances will only return a flattened representation of a
-	// multi-target prediction.
+	// multi-target prediction. The outer list represents the rows whilst the inner
+	// list represents the x target values in this row.
 	private List<List<Double>> rawLastClassificationResults = null;
 
 	/**
@@ -191,7 +192,7 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 		this.isRegression = isRegression;
 	}
 
-	public void setOutputFolder(String outputFolder) {
+	public void setOutputFolder(File outputFolder) {
 		this.outputFolder = outputFolder;
 	}
 
@@ -253,9 +254,9 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 		if (isRegression) {
 			parameters.add("--regression");
 		}
-		if (outputFolder != null && !outputFolder.equals("")) {
+		if (outputFolder != null) {
 			parameters.add("--output");
-			parameters.add(outputFolder);
+			parameters.add(outputFolder.getAbsolutePath());
 		}
 		if (targetColumns != null && targetColumns.length > 0) {
 			parameters.add("--targets");
