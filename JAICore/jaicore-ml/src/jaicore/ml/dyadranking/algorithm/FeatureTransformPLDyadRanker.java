@@ -3,6 +3,7 @@ package jaicore.ml.dyadranking.algorithm;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
+import de.upb.isys.linearalgebra.DenseDoubleVector;
 import de.upb.isys.linearalgebra.Vector;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
@@ -96,6 +97,8 @@ public class FeatureTransformPLDyadRanker extends APLDyadRanker {
 
 		negativeLogLikelihood.initialize(dRDataset, featureTransform);
 		negativeLogLikelihoodDerivative.initialize(dRDataset, featureTransform);
-		w = optimizer.optimize(negativeLogLikelihood, negativeLogLikelihoodDerivative);
+		Vector initialGuess = new DenseDoubleVector(dRDataset.size());
+		initialGuess.fillRandomly();
+		w = optimizer.optimize(negativeLogLikelihood, negativeLogLikelihoodDerivative, initialGuess);
 	}
 }
