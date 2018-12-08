@@ -7,7 +7,7 @@ import de.upb.isys.linearalgebra.Vector;
  * differentiable function and the derivation of said function to solve an
  * optimization problem.
  * 
- * @author Helena Graf
+ * @author Helena Graf, Mirko Jürgens
  *
  */
 public interface IGradientBasedOptimizer {
@@ -18,8 +18,10 @@ public interface IGradientBasedOptimizer {
 	 * @param descendableFunction
 	 *            the function to optimize
 	 * @param gradient
-	 *            the derivation of the function
+	 *            the first order derivate of the function
+	 * @param initialGuess
+	 * 			  the initial guess for the parameters that shall be optimized
 	 * @return the optimized vector
 	 */
-	public Vector optimize(IGradientDescendableFunction descendableFunction, IGradientFunction gradient);
+	public Vector optimize(IGradientDescendableFunction descendableFunction, IGradientFunction gradient, Vector initialGuess);
 }
