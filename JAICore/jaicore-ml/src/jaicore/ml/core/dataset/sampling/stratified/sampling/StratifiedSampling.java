@@ -80,6 +80,7 @@ public class StratifiedSampling extends ASamplingAlgorithm{
 						simpleRandomSampling.setInput(this.strati[this.stratiIndex]);
 						simpleRandomSampling.setSampleSize(sizeOfStratiSample);
 						this.sample.addAll(simpleRandomSampling.call());
+						this.stratiIndex++;
 						return new SampleElementAddedEvent();
 					}
 				}
