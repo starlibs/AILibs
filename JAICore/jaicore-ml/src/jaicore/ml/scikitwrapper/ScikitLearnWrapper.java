@@ -1,26 +1,20 @@
 package jaicore.ml.scikitwrapper;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
+import jaicore.ml.evaluation.IInstancesClassifier;
 import org.apache.commons.lang3.StringUtils;
 import org.jtwig.JtwigModel;
 import org.jtwig.JtwigTemplate;
-
-import jaicore.ml.evaluation.IInstancesClassifier;
 import weka.classifiers.Classifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.ArffSaver;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /*	Wraps a Scikit-Learn Python process by utilizing a template to
  *	start a classifier in Scikit with the given classifier.
@@ -246,7 +240,7 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 	@Override
 	public void buildClassifier(Instances data) throws Exception {
 		List<String> trainOptions = new ArrayList<>(Arrays.asList("--mode", "train"));
-		trainOptions.addAll(parseSetOptions(data));
+		trainOptions.addAll(parseOptions(data));
 		String[] processParameterArray = createProcessParameterArray(trainOptions);
 		TrainProcessListener processListener = new TrainProcessListener(verbose);
 		runProcess(processParameterArray, processListener);
@@ -256,7 +250,7 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 	@Override
 	public double[] classifyInstances(Instances data) throws Exception {
 		List<String> testOptions = new ArrayList<>(Arrays.asList("--mode", "test", "--model", modelPath));
-		testOptions.addAll(parseSetOptions(data));
+		testOptions.addAll(parseOptions(data));
 		String[] processParameterArray = createProcessParameterArray(testOptions);
 		TestProcessListener processListener = new TestProcessListener(verbose);
 		runProcess(processParameterArray, processListener);
@@ -269,7 +263,7 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 				.collect(Collectors.toList());
 		double[] resultsArray = new double[flatresults.size()];
 		for (int i = 0; i < resultsArray.length; i++) {
-			resultsArray[i] = flatresults.get(i);
+			resultsArray[i] =  flatresults.get(i);
 		}
 		return resultsArray;
 	}
@@ -283,7 +277,7 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 	 * @throws IOException During the serialization of the data as an arff file
 	 *                     something went wrong.
 	 */
-	private List<String> parseSetOptions(Instances data) throws IOException {
+	private List<String> parseOptions(Instances data) throws IOException {
 		List<String> parameters = new ArrayList<>();
 		File arff = instancesToArffFile(data, getArffName(data));
 		// If these attributes are renamed for some reason take care to rename them in

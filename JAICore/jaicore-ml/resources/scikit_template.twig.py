@@ -238,7 +238,14 @@ def serialize_prediction(prediction):
     Serialize prediction results.
     Returns path to serialized predictions.
     """
+    # Make sure the predictions are in a list
     prediction = prediction.tolist()
+    # Convert possible integers to floats (nescassary for Weka signature)
+    if isinstance(prediction[0],int):
+        prediction = [float(i) for i in prediction]
+    elif isinstance(prediction[0],list):
+        for sublist in prediction:
+            sublist = [float(i) for i in sublist]
     if not isinstance(prediction[0],list):
         prediction = [prediction]
     prediction_json = json.dumps(prediction)

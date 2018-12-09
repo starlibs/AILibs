@@ -22,7 +22,7 @@ import weka.core.converters.ArffLoader.ArffReader;
 public class ScikitLearn_Wrapper_Test {
 
 	@Test
-	public void buildClassifier() throws Exception {
+	public void buildClassifierRegression() throws Exception {
 		ScikitLearnWrapper slw = new ScikitLearnWrapper("LinearRegression()",
 				"from sklearn.linear_model import LinearRegression");
 		Instances dataset = loadARFF("testsrc/ml/scikitwrapper/0532052678.arff");
@@ -32,8 +32,8 @@ public class ScikitLearn_Wrapper_Test {
 	}
 
 	@Test
-	public void buildClassifier2() throws Exception {
-		ScikitLearnWrapper slw = new ScikitLearnWrapper("MLPRegressor()",
+	public void buildClassifierRegressionMultitarget() throws Exception {
+		ScikitLearnWrapper slw = new ScikitLearnWrapper("MLPRegressor(activation='logistic')",
 				"from sklearn.neural_network import MLPRegressor");
 		Instances dataset = loadARFF("testsrc/ml/scikitwrapper/0532052678.arff");
 		slw.setIsRegression(true);
@@ -41,6 +41,82 @@ public class ScikitLearn_Wrapper_Test {
 		slw.setTargets(s - 1, s - 2, s - 3);
 		slw.buildClassifier(dataset);
 		assertThat(slw.getModelPath(), not(equalTo("")));
+	}
+
+	@Test
+	public void trainAndTestClassifierRegressionMultitarget() throws Exception {
+		String test_arff = "testsrc/ml/scikitwrapper/Bayesnet_Train.arff";
+		ScikitLearnWrapper slw = new ScikitLearnWrapper("MLPRegressor()",
+				"from sklearn.neural_network import MLPRegressor");
+		Instances datasetTrain = loadARFF(test_arff);
+		Instances datasetTest = datasetTrain;
+		int numberInstance = datasetTest.numInstances();
+		slw.setIsRegression(true);
+		int s = datasetTrain.numAttributes();
+		slw.setTargets(s - 1, s - 2, s - 3);
+		slw.buildClassifier(datasetTrain);
+		double[] result = slw.classifyInstances(datasetTest);
+		assertNotNull(result);
+		assertThat(numberInstance * 3, equalTo(result.length));
+	}
+
+	@Test
+	public void testClassifierRegression() throws Exception {
+		String test_arff = "testsrc/ml/scikitwrapper/Bayesnet_Train.arff";
+		ScikitLearnWrapper slw = new ScikitLearnWrapper("MLPRegressor()",
+				"from sklearn.neural_network import MLPRegressor");
+		Instances datasetTest = loadARFF(test_arff);
+		int numberInstance = datasetTest.numInstances();
+		slw.setModelPath(
+				Paths.get("testsrc/ml/scikitwrapper/01673183575_MLPRegressor.pcl").toAbsolutePath().toString());
+		slw.setIsRegression(true);
+		double[] result = slw.classifyInstances(datasetTest);
+		assertNotNull(result);
+		assertThat(numberInstance, equalTo(result.length));
+	}
+
+	@Test
+	public void trainClassifierCategorical() throws Exception {
+		List<String> imports = Arrays.asList("sklearn", "sklearn.pipeline", "sklearn.decomposition",
+				"sklearn.ensemble");
+		String constructInstruction = "sklearn.pipeline.make_pipeline(sklearn.pipeline.make_union(sklearn.decomposition.PCA(),sklearn.decomposition.FastICA()),sklearn.ensemble.RandomForestClassifier(n_estimators=100))";
+		ScikitLearnWrapper slw = new ScikitLearnWrapper(constructInstruction,
+				ScikitLearnWrapper.getImportString(imports));
+		Instances dataset = loadARFF("testsrc/ml/scikitwrapper/dataset_31_credit-g.arff");
+		slw.buildClassifier(dataset);
+		assertThat(slw.getModelPath(), not(equalTo("")));
+	}
+
+	@Test
+	public void trainAndTestClassifierCategorical() throws Exception {
+		List<String> imports = Arrays.asList("sklearn", "sklearn.pipeline", "sklearn.decomposition",
+				"sklearn.ensemble");
+		String constructInstruction = "sklearn.pipeline.make_pipeline(sklearn.pipeline.make_union(sklearn.decomposition.PCA(),sklearn.decomposition.FastICA()),sklearn.ensemble.RandomForestClassifier(n_estimators=100))";
+		ScikitLearnWrapper slw = new ScikitLearnWrapper(constructInstruction,
+				ScikitLearnWrapper.getImportString(imports));
+		Instances datasetTrain = loadARFF("testsrc/ml/scikitwrapper/dataset_31_credit-g.arff");
+		Instances datasetTest = datasetTrain;
+		slw.buildClassifier(datasetTrain);
+		double[] result = slw.classifyInstances(datasetTest);
+		assertThat(slw.getModelPath(), not(equalTo("")));
+		assertThat(datasetTest.numInstances(), equalTo(result.length));
+	}
+	
+	@Test
+	public void testClassifierCategorical() throws Exception {
+		List<String> imports = Arrays.asList("sklearn", "sklearn.pipeline", "sklearn.decomposition",
+				"sklearn.ensemble");
+		String test_arff = "testsrc/ml/scikitwrapper/dataset_31_credit-g.arff";
+		String constructInstruction = "sklearn.pipeline.make_pipeline(sklearn.pipeline.make_union(sklearn.decomposition.PCA(),sklearn.decomposition.FastICA()),sklearn.ensemble.RandomForestClassifier(n_estimators=100))";
+		ScikitLearnWrapper slw = new ScikitLearnWrapper(constructInstruction,
+				ScikitLearnWrapper.getImportString(imports));
+		Instances datasetTest = loadARFF(test_arff);
+		int numberInstance = datasetTest.numInstances();
+		slw.setModelPath(
+				Paths.get("testsrc/ml/scikitwrapper/02055055033_Pipeline.pcl").toAbsolutePath().toString());
+		double[] result = slw.classifyInstances(datasetTest);
+		assertNotNull(result);
+		assertThat(numberInstance, equalTo(result.length));
 	}
 
 	@Test
@@ -62,60 +138,6 @@ public class ScikitLearn_Wrapper_Test {
 		for (List<Double> column : rawOutput) {
 			assertThat(column.size(), equalTo(3));
 		}
-	}
-
-	@Test
-	public void buildAndTestClassifier() throws Exception {
-		String test_arff = "testsrc/ml/scikitwrapper/Bayesnet_Train.arff";
-		ScikitLearnWrapper slw = new ScikitLearnWrapper("MLPRegressor()",
-				"from sklearn.neural_network import MLPRegressor");
-		Instances datasetTrain = loadARFF(test_arff);
-		Instances datasetTest = loadARFF(test_arff);
-		int numberInstance = datasetTest.numInstances();
-		slw.setIsRegression(true);
-		int s = datasetTrain.numAttributes();
-		slw.setTargets(s - 1, s - 2, s - 3);
-		slw.buildClassifier(datasetTrain);
-		double[] result = slw.classifyInstances(datasetTest);
-		assertNotNull(result);
-		assertThat(numberInstance * 3, equalTo(result.length));
-	}
-
-	@Test
-	public void testClassifier() throws Exception {
-		String test_arff = "testsrc/ml/scikitwrapper/Bayesnet_Train.arff";
-		ScikitLearnWrapper slw = new ScikitLearnWrapper("MLPRegressor()",
-				"from sklearn.neural_network import MLPRegressor");
-		Instances datasetTest = loadARFF(test_arff);
-		int numberInstance = datasetTest.numInstances();
-		slw.setModelPath(
-				Paths.get("testsrc/ml/scikitwrapper/01673183575_MLPRegressor.pcl").toAbsolutePath().toString());
-		slw.setIsRegression(true);
-		double[] result = slw.classifyInstances(datasetTest);
-		assertNotNull(result);
-		assertThat(numberInstance, equalTo(result.length));
-	}
-
-	@Test
-	public void buildClassifierWithConstructorParams() throws Exception {
-		ScikitLearnWrapper slw = new ScikitLearnWrapper("MLPRegressor(activation='logistic')",
-				"from sklearn.neural_network import MLPRegressor");
-		Instances dataset = loadARFF("testsrc/ml/scikitwrapper/0532052678.arff");
-		slw.setIsRegression(true);
-		slw.buildClassifier(dataset);
-		assertThat(slw.getModelPath(), not(equalTo("")));
-	}
-
-	@Test
-	public void trainPipeline() throws Exception {
-		List<String> imports = Arrays.asList("sklearn", "sklearn.pipeline", "sklearn.decomposition",
-				"sklearn.ensemble");
-		String constructInstruction = "sklearn.pipeline.make_pipeline(sklearn.pipeline.make_union(sklearn.decomposition.PCA(),sklearn.decomposition.FastICA()),sklearn.ensemble.RandomForestClassifier(n_estimators=100))";
-		ScikitLearnWrapper slw = new ScikitLearnWrapper(constructInstruction,
-				ScikitLearnWrapper.getImportString(imports));
-		Instances dataset = loadARFF("testsrc/ml/scikitwrapper/dataset_31_credit-g.arff");
-		slw.buildClassifier(dataset);
-		assertThat(slw.getModelPath(), not(equalTo("")));
 	}
 
 	@Test
