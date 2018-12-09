@@ -10,6 +10,7 @@ import org.junit.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import jaicore.basic.algorithm.AlgorithmProblemTransformer;
 import jaicore.basic.algorithm.GeneralAlgorithmTester;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
@@ -136,6 +137,23 @@ public abstract class GeneralSamplingTester extends GeneralAlgorithmTester<Objec
 			fail("Sample is null!");
 		}
 		return sample;
+	}
+
+	@Override
+	public AlgorithmProblemTransformer<Object, IDataset> getProblemReducer() {
+		throw new UnsupportedOperationException("Problem reducer not applicable for sampling algorithms!");
+	}
+	
+	@Override
+	public IDataset getSimpleProblemInputForGeneralTestPurposes() throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public IDataset getDifficultProblemInputForGeneralTestPurposes() throws Exception {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
