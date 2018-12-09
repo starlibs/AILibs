@@ -1,6 +1,6 @@
 {
 	"repository": "MEKA",
-	"include": ["../mlplan"],
+	"include": ["../weka/mlplan-components.json"],
 	"parameters": [
 		{
 			"name": "_P",

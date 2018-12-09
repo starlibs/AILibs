@@ -9,7 +9,12 @@
 		{
 			"name": "meka.classifiers.multilabel.meta.BaggingML",
 			"providedInterface": ["MLClassifier", "MetaMLClassifier"],
-			"requiredInterface": ["BasicMLClassifier"],
+			"requiredInterface": [
+			{
+				"id" : "basicMLClassifier",
+				"name" : "BasicMLClassifier"
+			}
+			],
 			"parameter": [
 				{
 					"name": "_I",
@@ -36,7 +41,12 @@
 		{
 			"name": "meka.classifiers.multilabel.meta.BaggingMLdup",
 			"providedInterface": ["MLClassifier", "MetaMLClassifier"],
-			"requiredInterface": ["BasicMLClassifier"],
+			"requiredInterface": [
+						{
+				"id" : "basicMLClassifier",
+				"name" : "BasicMLClassifier"
+			}
+			],
 			"parameter": [
 				{
 					"name": "_I",
@@ -63,7 +73,12 @@
 		{
 			"name": "meka.classifiers.multilabel.meta.CM",
 			"providedInterface": ["MLClassifier", "MetaMLClassifier"],
-			"requiredInterface": ["BasicMLClassifier"],
+			"requiredInterface": [
+						{
+				"id" : "basicMLClassifier",
+				"name" : "BasicMLClassifier"
+			}
+			],
 			"parameter": [
 				{
 					"name": "_I",
@@ -90,7 +105,12 @@
 		{
 			"name": "meka.classifiers.multilabel.meta.DeepML",
 			"providedInterface": ["MLClassifier", "MetaMLClassifier"],
-			"requiredInterface": ["BasicMLClassifier"],
+			"requiredInterface": [
+						{
+				"id" : "basicMLClassifier",
+				"name" : "BasicMLClassifier"
+			}
+			],
 			"parameter": [
 				{
 					"name": "_N",
@@ -147,7 +167,12 @@
 		{
 			"name": "meka.classifiers.multilabel.meta.EM",
 			"providedInterface": ["MLClassifier", "MetaMLClassifier"],
-			"requiredInterface": ["BasicMLClassifier"],
+			"requiredInterface": [
+						{
+				"id" : "basicMLClassifier",
+				"name" : "BasicMLClassifier"
+			}
+			],
 			"parameter": [
 				{
 					"name": "_I",
@@ -164,7 +189,12 @@
 		{
 			"name": "meka.classifiers.multilabel.meta.EnsembleML",
 			"providedInterface": ["MLClassifier", "MetaMLClassifier"],
-			"requiredInterface": ["BasicMLClassifier"],
+			"requiredInterface": [
+						{
+				"id" : "basicMLClassifier",
+				"name" : "BasicMLClassifier"
+			}
+			],
 			"parameter": [
 				{
 					"name": "_I",
@@ -191,7 +221,12 @@
 		{
 			"name": "meka.classifiers.multilabel.meta.FilteredClassifier",
 			"providedInterface": ["MLClassifier", "MetaMLClassifier"],
-			"requiredInterface": ["BasicMLClassifier"],
+			"requiredInterface": [
+						{
+				"id" : "basicMLClassifier",
+				"name" : "BasicMLClassifier"
+			}
+			],
 			"parameter": [
 				{
 					"name": "_F",
@@ -205,13 +240,23 @@
 		{
 			"name": "meka.classifiers.multilabel.meta.MBR",
 			"providedInterface": ["MLClassifier", "MetaMLClassifier"],
-			"requiredInterface": ["BasicMLClassifier"],
+			"requiredInterface": [
+						{
+				"id" : "basicMLClassifier",
+				"name" : "BasicMLClassifier"
+			}
+			],
 			"parameter": [ ]
 		},
 		{
 			"name": "meka.classifiers.multilabel.meta.MultiSearch",
 			"providedInterface": ["MLClassifier", "MetaMLClassifier"],
-			"requiredInterface": ["BasicMLClassifier"],
+			"requiredInterface": [
+						{
+				"id" : "basicMLClassifier",
+				"name" : "BasicMLClassifier"
+			}
+			],
 			"comment": "LEFT OUT: _search, _algorithm",
 			"parameter": [
 				{
@@ -226,7 +271,12 @@
 		{
 			"name": "meka.classifiers.multilabel.meta.RandomSubspaceML",
 			"providedInterface": ["MLClassifier", "MetaMLClassifier"],
-			"requiredInterface": ["BasicMLClassifier"],
+			"requiredInterface": [
+						{
+				"id" : "basicMLClassifier",
+				"name" : "BasicMLClassifier"
+			}
+			],
 			"parameter": [
 				{
 					"name": "_A",
@@ -263,13 +313,23 @@
 		{
 			"name": "meka.classifiers.multilabel.meta.SubsetMapper",
 			"providedInterface": ["MLClassifier", "MetaMLClassifier"],
-			"requiredInterface": ["BasicMLClassifier"],
+			"requiredInterface": [
+						{
+				"id" : "basicMLClassifier",
+				"name" : "BasicMLClassifier"
+			}
+			],
 			"parameter": [ ]
 		},
 		{
 			"name": "meka.classifiers.multilabel.MLCBMaD",
 			"providedInterface": ["MLClassifier", "MetaMLClassifier"],
-			"requiredInterface": ["BasicMLClassifier"],
+			"requiredInterface": [
+						{
+				"id" : "basicMLClassifier",
+				"name" : "BasicMLClassifier"
+			}
+			],
 			"parameter": [
 				{
 					"name": "_size",

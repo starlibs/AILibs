@@ -25,6 +25,7 @@ public class MonteCarloCrossValidationEvaluator implements IObjectEvaluator<Mult
 	private final float trainingPortion;
 	private final int seed;
 	private final Random random;
+	private DescriptiveStatistics stats;
 
 	public MonteCarloCrossValidationEvaluator(ADecomposableMultilabelMeasure basicEvaluator, int repeats, Instances data, float trainingPortion, int seed) {
 		super();
@@ -50,7 +51,7 @@ public class MonteCarloCrossValidationEvaluator implements IObjectEvaluator<Mult
 			throw new IllegalArgumentException("Cannot compute score for null classifier!");
 
 		/* perform random stratified split */
-		DescriptiveStatistics stats = new DescriptiveStatistics();
+		stats = new DescriptiveStatistics();
 		logger.info("Starting evaluation of {}", c);
 		for (int i = 0; i < repeats && !canceled; i++) {
 			logger.info("Evaluating {} with split #{}/{}", c, i + 1, repeats);
@@ -74,5 +75,9 @@ public class MonteCarloCrossValidationEvaluator implements IObjectEvaluator<Mult
 
 	public int getSeed() {
 		return seed;
+	}
+
+	public DescriptiveStatistics getStats() {
+		return stats;
 	}
 }
