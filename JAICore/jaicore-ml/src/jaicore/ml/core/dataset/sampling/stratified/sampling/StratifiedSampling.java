@@ -51,6 +51,7 @@ public class StratifiedSampling extends ASamplingAlgorithm{
 			for (int i = 0; i < this.strati.length; i++) {
 				this.strati[i] = null;
 			}
+			this.stratiAssigner.init(this.getInput(), this.strati.length);
 			this.stratiIndex = 0;
 			this.originalDatasetSize = this.getInput().size();
 			this.setState(AlgorithmState.active);
