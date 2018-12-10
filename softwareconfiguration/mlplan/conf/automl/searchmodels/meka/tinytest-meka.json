@@ -1,0 +1,60 @@
+{
+	"repository": "Tiny Meka repository",
+	"components": [
+		{
+			"name": "meka.classifiers.multilabel.BCC",
+			"providedInterface": [
+				"MLClassifier",
+				"BasicMLClassifier"
+			],
+			"requiredInterface": [
+				{
+					"id": "abstractClassifier",
+					"name": "AbstractClassifier"
+				}
+			],
+			"parameter": [
+				{
+					"name": "_X",
+					"comment": "The way to measure dependencies. default: lbf (frequencies only)",
+					"type": "cat",
+					"default": "lbf",
+					"values": [
+						"lbf"
+					]
+				}
+			]
+		},
+		{
+			"name": "weka.classifiers.bayes.BayesNet",
+			"requiredInterface": [
+			],
+			"providedInterface": [
+				"AbstractClassifier",
+				"BaseClassifier"
+			],
+			"parameter": [
+				{
+					"name": "D",
+					"type": "boolean",
+					"default": "true"
+				},
+				{
+					"name": "Q",
+					"type": "cat",
+					"default": "weka.classifiers.bayes.net.search.local.K2",
+					"values": [
+						"weka.classifiers.bayes.net.search.local.K2",
+						"weka.classifiers.bayes.net.search.local.HillClimber",
+						"weka.classifiers.bayes.net.search.local.LAGDHillClimber",
+						"weka.classifiers.bayes.net.search.local.SimulatedAnnealing",
+						"weka.classifiers.bayes.net.search.local.TabuSearch",
+						"weka.classifiers.bayes.net.search.local.TAN"
+					]
+				}
+			],
+			"dependencies": [
+			]
+		}
+	]
+}

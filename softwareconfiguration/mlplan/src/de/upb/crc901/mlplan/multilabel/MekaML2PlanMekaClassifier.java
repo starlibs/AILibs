@@ -12,8 +12,22 @@ import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluato
 import jaicore.search.model.travesaltree.Node;
 import weka.core.Instances;
 
+/**
+ * Wrapper for the abstract {@link ML2PlanMekaClassifier}.
+ * 
+ * @author Helena Graf
+ *
+ */
 public class MekaML2PlanMekaClassifier extends ML2PlanMekaClassifier {
 
+	/**
+	 * Construct a new classifier configured according to the given builder.
+	 * 
+	 * @param builder
+	 *            the builder used to configure the new classifier
+	 * @throws IOException
+	 *             if a configuration in the builder cannot be loaded
+	 */
 	public MekaML2PlanMekaClassifier(ML2PlanMekaBuilder builder) throws IOException {
 		super(builder.getSearchSpaceConfigFile(), new MEKAPipelineFactory(), builder.getPerformanceMeasure(),
 				builder.getAlhorithmConfigFile() != null ? loadOwnerConfig(builder.getAlhorithmConfigFile())
@@ -27,11 +41,19 @@ public class MekaML2PlanMekaClassifier extends ML2PlanMekaClassifier {
 		});
 	}
 
+	/**
+	 * Construct a new classifier using the standard configuration (the
+	 * configuration created by creating a new {@link ML2PlanMekaBuilder} with no
+	 * arguments).
+	 * 
+	 * @throws IOException
+	 *             if a configuration in the builder cannot be loaded
+	 */
 	public MekaML2PlanMekaClassifier() throws IOException {
 		this(new ML2PlanMekaBuilder());
 	}
 
-	static ML2PlanClassifierConfig loadOwnerConfig(File configFile) throws IOException {
+	private static ML2PlanClassifierConfig loadOwnerConfig(File configFile) throws IOException {
 		Properties props = new Properties();
 		if (configFile.exists()) {
 			FileInputStream fis = new FileInputStream(configFile);
