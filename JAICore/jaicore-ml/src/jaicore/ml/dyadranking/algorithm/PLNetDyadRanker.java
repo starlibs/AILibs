@@ -11,7 +11,10 @@ import org.deeplearning4j.nn.gradient.Gradient;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.nd4j.linalg.activations.Activation;
+import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.lossfunctions.ILossFunction;
+import org.nd4j.linalg.primitives.Pair;
 
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
@@ -20,7 +23,6 @@ import jaicore.ml.core.exception.TrainingException;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import jaicore.ml.dyadranking.dataset.DyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
-import de.upb.isys.linearalgebra.Vector;
 
 /**
  * A dyad ranker based on a Placket-Luce network.
@@ -62,13 +64,23 @@ public class PLNetDyadRanker extends APLDyadRanker {
 			throw new IllegalArgumentException(
 					"Can only update the Placket-Luce net dyad ranker with a dyad ranking instance!");
 		}
-		Gradient gradient;
+
+		// TODO
+
 		DyadRankingInstance dRInstance = (DyadRankingInstance) instance;
+		INDArray deltaW = Nd4j.zeros(plNet.numParams());
 		plNetLoss.preComputeOutputs(dRInstance);
 		for (int k = 0; k < dRInstance.length(); k++) {
 			plNetLoss.setK(k);
-//			TODO
+			INDArray currentOutputGradient = plNetLoss.computeGradient(null, null, null, null);
+			Pair<Gradient, INDArray> p = plNet.backpropGradient(currentOutputGradient, null);
+			Gradient gradient = p.getFirst();
+			plNet.getUpdater().update(plNet, gradient, 0, 0, 0, null);
+			INDArray deltaWk = gradient.gradient();
+			deltaW.add(deltaWk);
 		}
+		INDArray update = deltaW.mul(this.learningRate);
+		plNet.params().subi(update);
 	}
 
 	public void update(Set<IInstance> instances) throws TrainingException {
