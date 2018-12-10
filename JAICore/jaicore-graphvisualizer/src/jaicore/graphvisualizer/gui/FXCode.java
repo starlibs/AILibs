@@ -50,13 +50,13 @@ public class FXCode<V, E> implements NodeListener<V> {
 	/*Variables needed for the whole class*/
 
 	/*Tabpane*/
-	private final TabPane tabPane;
+	private TabPane tabPane;
 
 	/*Timeline*/
-	private final Slider timeline;
+	private Slider timeline;
 
 	/*EventBus*/
-	private final EventBus eventBus;
+	private EventBus eventBus;
 
 	/*Indices*/
 	private int index;
@@ -66,7 +66,7 @@ public class FXCode<V, E> implements NodeListener<V> {
 	private int displayIndex;
 
 	/*Visualisation window and visualizaton threads*/
-	private final GraphVisualization<V, E> visualization;
+	private GraphVisualization<V, E> visualization;
 	private Thread playThread;
 
 	/*Settings*/
@@ -77,7 +77,7 @@ public class FXCode<V, E> implements NodeListener<V> {
 	private Thread updateThread;
 
 	/*Log*/
-	private final Text log;
+	private Text log;
 
 	private Button colouringButton;
 	private boolean colouring;
@@ -97,7 +97,7 @@ public class FXCode<V, E> implements NodeListener<V> {
 		this.maxDisplayIndex = 0;
 		this.displayIndex = 0;
 
-		this.sleepTime = 0;
+		this.sleepTime = 1;
 
 		this.eventBus = new EventBus();
 		this.eventBus.register(rec);
@@ -105,7 +105,7 @@ public class FXCode<V, E> implements NodeListener<V> {
 		rec.registerInfoListener(this);
 
 		this.log = new Text();
-		this.numberOfTicks = 250;
+		this.numberOfTicks = 150;
 
 		/*declare  and initialize FX-elements*/
 
@@ -191,6 +191,8 @@ public class FXCode<V, E> implements NodeListener<V> {
 			this.jumpToIndex(newIndex);
 		});
 		this.timeline.setBlockIncrement(1);
+		// this.timeline.setMinorTickCount(5);
+		this.timeline.setMinorTickCount(0);
 	}
 
 	/**
@@ -252,9 +254,10 @@ public class FXCode<V, E> implements NodeListener<V> {
 
 			}
 		};
-
-		this.playThread = new Thread(run);
-		this.playThread.start();
+		if (this.playThread == null) {
+			this.playThread = new Thread(run, "play");
+			this.playThread.start();
+		}
 	}
 
 	/**
@@ -295,6 +298,7 @@ public class FXCode<V, E> implements NodeListener<V> {
 			public void handle(final ActionEvent actionEvent) {
 				if (FXCode.this.playThread != null) {
 					FXCode.this.playThread.interrupt();
+					FXCode.this.playThread = null;
 				}
 			}
 		});
@@ -433,6 +437,7 @@ public class FXCode<V, E> implements NodeListener<V> {
 	public void reset() {
 		if (this.playThread != null) {
 			this.playThread.interrupt();
+			this.playThread = null;
 		}
 		this.updateIndex(0, true);
 		this.visualization.reset();
@@ -447,6 +452,7 @@ public class FXCode<V, E> implements NodeListener<V> {
 	public void jumpToIndex(final int newIndex) {
 		if (this.playThread != null) {
 			this.playThread.interrupt();
+			this.playThread = null;
 		}
 		if (newIndex == 0) {
 			this.reset();
@@ -585,16 +591,13 @@ public class FXCode<V, E> implements NodeListener<V> {
 			while (!Thread.currentThread().isInterrupted()) {
 				try {
 					Thread.sleep(delay);
-					System.out.println("Try to acquire semaphore");
 					this.sem.acquire();
-					System.out.println("acquired");
 					try {
 						this.updateTimelineIndex();
 					} catch (IllegalArgumentException e) {
 						//
 					}
 					this.sem.drainPermits();
-					System.out.println("drained permits");
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -610,10 +613,11 @@ public class FXCode<V, E> implements NodeListener<V> {
 	 * Updates the timeline
 	 */
 	private void updateTimelineIndex() {
-		System.out.println("update timeline index.");
 		this.timeline.setMax(this.maxIndex);
 		int tickUnit = this.maxIndex / this.numberOfTicks;
-		this.timeline.setMajorTickUnit(tickUnit);
+		if (tickUnit != 0) {
+			this.timeline.setMajorTickUnit(tickUnit);
+		}
 		this.maxDisplayIndex = this.maxIndex;
 		if (this.displayIndex < this.maxDisplayIndex || this.displayIndex < this.index) {
 			if (this.index <= this.maxDisplayIndex) {
