@@ -19,11 +19,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import javax.sound.midi.Synthesizer;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.Subscribe;
 
+import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import jaicore.basic.sets.SetUtil.Pair;
@@ -45,9 +48,10 @@ import jaicore.search.model.travesaltree.Node;
 
 @SuppressWarnings("serial")
 public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> implements IGraphDependentNodeEvaluator<T, String, V>, SerializableNodeEvaluator<T, V>,
-		ISolutionReportingNodeEvaluator<T, V>, ICancelableNodeEvaluator, IUncertaintyAnnotatingNodeEvaluator<T, V> {
+		ISolutionReportingNodeEvaluator<T, V>, ICancelableNodeEvaluator, IUncertaintyAnnotatingNodeEvaluator<T, V>, ILoggingCustomizable {
 
-	private final static Logger logger = LoggerFactory.getLogger(RandomCompletionBasedNodeEvaluator.class);
+	private String loggerName;
+	private Logger logger = LoggerFactory.getLogger(RandomCompletionBasedNodeEvaluator.class);
 
 	private final int timeoutForSingleCompletionEvaluationInMS;
 	private final int timeoutForNodeEvaluationInMS;
@@ -364,7 +368,6 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 	}
 
 	protected V getFValueOfSolutionPath(final List<T> path) throws Exception {
-
 		boolean knownPath = this.scoresOfSolutionPaths.containsKey(path);
 		if (!knownPath) {
 			if (this.unsuccessfulPaths.contains(path)) {
@@ -501,5 +504,19 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 
 	public void setVisualizeSubSearch(boolean visualizeSubSearch) {
 		this.visualizeSubSearch = visualizeSubSearch;
+	}
+
+	@Override
+	public void setLoggerName(String name) {
+		this.loggerName = name;
+		logger.info("Switching logger (name) of object of class {} to {}", this.getClass().getName(), name);
+		this.logger = LoggerFactory.getLogger(name);
+		completer.setLoggerName(name + ".randomsearch");
+		logger.info("Switched logger (name) to {}", name);
+	}
+
+	@Override
+	public String getLoggerName() {
+		return loggerName;
 	}
 }
