@@ -24,7 +24,7 @@ public class StratifiedSampling extends ASamplingAlgorithm{
 	private Random random;
 	private IDataset[] strati;
 	private int stratiIndex;
-	private int originalDatasetSize;
+	private IDataset datasetCopy;
 	
 	/**
 	 * Constructor for Stratified Sampling.
@@ -36,6 +36,9 @@ public class StratifiedSampling extends ASamplingAlgorithm{
 		this.stratiAmountSelector = stratiAmountSelector;
 		this.stratiAssigner = stratiAssigner;
 		this.random = random;
+		// TODO: create empty dataset
+		this.datasetCopy = null;
+		this.datasetCopy.addAll(this.getInput());
 	}
 	
 	@Override
@@ -44,21 +47,20 @@ public class StratifiedSampling extends ASamplingAlgorithm{
 		case created:
 			// TODO: create empty dataset
 			this.sample = null;
-			this.strati = new IDataset[this.stratiAmountSelector.selectStratiAmount(this.getInput())];
+			this.strati = new IDataset[this.stratiAmountSelector.selectStratiAmount(this.datasetCopy)];
 			// TODO: create emtpy strati dataset
 			for (int i = 0; i < this.strati.length; i++) {
 				this.strati[i] = null;
 			}
-			this.stratiAssigner.init(this.getInput(), this.strati.length);
+			this.stratiAssigner.init(this.datasetCopy, this.strati.length);
 			this.stratiIndex = 0;
-			this.originalDatasetSize = this.getInput().size();
 			this.setState(AlgorithmState.active);
 			return new AlgorithmInitializedEvent();			
 		case active:
 			if (this.sample.size() < this.sampleSize) {
-				if (this.getInput().size() >= 1) {
+				if (this.datasetCopy.size() >= 1) {
 					// Stratify the datapoints one by one.
-					IInstance datapoint = this.getInput().remove(0);
+					IInstance datapoint = this.datasetCopy.remove(0);
 					int assignedStrati = this.stratiAssigner.assignToStrati(datapoint);
 					if (assignedStrati < 0 || assignedStrati >= this.strati.length) {
 						throw new Exception("No existing strati for index " + assignedStrati);
@@ -74,7 +76,7 @@ public class StratifiedSampling extends ASamplingAlgorithm{
 						return new AlgorithmFinishedEvent();
 					} else {
 						// Sample from the stratum with the current index
-						int sizeOfStratiSample = this.sampleSize * (this.strati.length / this.originalDatasetSize);
+						int sizeOfStratiSample = (int)(this.sampleSize * ((double)this.strati[stratiIndex].size() / (double)this.getInput().size()));
 						SimpleRandomSampling simpleRandomSampling = new SimpleRandomSampling(random);
 						simpleRandomSampling.setInput(this.strati[this.stratiIndex]);
 						simpleRandomSampling.setSampleSize(sizeOfStratiSample);
