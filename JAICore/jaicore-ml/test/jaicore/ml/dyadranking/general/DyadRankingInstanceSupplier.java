@@ -14,11 +14,16 @@ import jaicore.ml.dyadranking.dataset.DyadRankingInstance;
 /**
  * Creates simple rankings for testing purposes.
  * 
- * @author Jonas Hanselle
+ * @author Jonas Hanselle, Mirko Jürgens, Helena Graf, Michael Braun
  *
  */
 public class DyadRankingInstanceSupplier {
 
+	/**
+	 * Creates a random dyad ranking instance (with 2 alternatives and 2 instances)
+	 * @param maxLength the amount of dyads
+	 * @return
+	 */
 	public static DyadRankingInstance getDyadRankingInstance(int maxLength) {
 		List<Dyad> dyads = new ArrayList<Dyad>();
 		int actualLength = ThreadLocalRandom.current().nextInt(2,maxLength+1);
@@ -26,6 +31,12 @@ public class DyadRankingInstanceSupplier {
 			Dyad dyad = DyadSupplier.getRandomDyad(2, 2);
 			dyads.add(dyad);
 		}
+		Comparator<Dyad> comparator = complexDyadRanker();
+		Collections.sort(dyads, comparator);
+		return new DyadRankingInstance(dyads);
+	}
+
+	public static Comparator<Dyad> complexDyadRanker() {
 		Comparator<Dyad> comparator = new Comparator<Dyad>() {
 			@Override
 			public int compare(Dyad d1, Dyad d2) {
@@ -38,8 +49,7 @@ public class DyadRankingInstanceSupplier {
 				return score1 - score2 == 0 ? 0 : (score1 - score2 > 0 ? 1 : -1);
 			}
 		};
-		Collections.sort(dyads, comparator);
-		return new DyadRankingInstance(dyads);
+		return comparator;
 	}
 	
 	public static DyadRankingDataset getDyadRankingDataset(int maxLengthDyadRankingInstance, int length) {
