@@ -1,13 +1,16 @@
 package jaicore.ml.dyadranking.algorithm;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.TreeMap;
 
 import de.upb.isys.linearalgebra.Vector;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
+import jaicore.ml.core.exception.ConfigurationException;
 import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.core.exception.TrainingException;
+import jaicore.ml.core.predictivemodel.IPredictiveModelConfiguration;
 import jaicore.ml.dyadranking.Dyad;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import jaicore.ml.dyadranking.dataset.DyadRankingInstance;
@@ -97,5 +100,16 @@ public class FeatureTransformPLDyadRanker extends APLDyadRanker {
 		negativeLogLikelihood.initialize(dRDataset, featureTransform);
 		negativeLogLikelihoodDerivative.initialize(dRDataset, featureTransform);
 		w = optimizer.optimize(negativeLogLikelihood, negativeLogLikelihoodDerivative);
+	}
+
+	@Override
+	public IPredictiveModelConfiguration getConfiguration() {
+		/*Currently nothing to configure! */
+		return null;
+	}
+
+	@Override
+	public void setConfiguration(IPredictiveModelConfiguration configuration) throws ConfigurationException {
+		/*Currently nothing to configure */
 	}
 }
