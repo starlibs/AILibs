@@ -39,7 +39,7 @@ public class PLNetDyadRanker extends APLDyadRanker {
 	private MultiLayerNetwork plNet;
 	private PLNetLoss plNetLoss;
 	private double learningRate;
-
+	
 	/**
 	 * 
 	 * @param learningRate
@@ -135,7 +135,8 @@ public class PLNetDyadRanker extends APLDyadRanker {
 	}
 
 	/**
-	 * Creates a simple feed-forward network that can be used for dyad-ranking.
+	 * Creates a simple feed-forward network that can be used as a PLNet for
+	 * dyad-ranking.
 	 * 
 	 * @param numInputs
 	 * @param numHiddenNodes
