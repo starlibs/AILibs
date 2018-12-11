@@ -1,11 +1,13 @@
 package jaicore.ml.core.predictivemodel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.exception.ConfigurationException;
 import jaicore.ml.core.exception.PredictionException;
+import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 
 /**
  * The {@link IPredictiveModel} corresponds to a model which can be used to make predictions based on given {@link IInstance}es.
@@ -37,7 +39,13 @@ public interface IPredictiveModel<TARGET> {
 	 * @throws PredictionException
 	 *             If something fails during the prediction process.
 	 */
-	public List<TARGET> predict(IDataset dataset) throws PredictionException;
+	default List<TARGET> predict(IDataset dataset) throws PredictionException{
+		List<TARGET> results = new ArrayList<>();
+		for (IInstance instance : dataset) {
+			results.add(predict(instance));
+		}
+		return results;
+	}
 
 	/**
 	 * Returns the {@link IPredictiveModelConfiguration} of this model.
