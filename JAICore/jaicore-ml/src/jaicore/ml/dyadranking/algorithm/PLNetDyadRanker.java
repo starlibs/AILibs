@@ -16,6 +16,7 @@ import org.deeplearning4j.nn.gradient.DefaultGradient;
 import org.deeplearning4j.nn.gradient.Gradient;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
+import org.deeplearning4j.nn.workspace.LayerWorkspaceMgr;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
@@ -46,6 +47,8 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 	private MultiLayerNetwork plNet;
 	private PLNetLoss plNetLoss;
 	private IPLNetDyadRankerConfiguration configuration;
+	private int epoch;
+	private int iteration;
 
 	/**
 	 * Constructor using a {@link IPLNetDyadRankerConfiguration} to create the
@@ -53,10 +56,11 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 	 * 
 	 * @param configuration
 	 */
-	public PLNetDyadRanker() {
+	public PLNetDyadRanker(int numInputs, int numHiddenNodes, long seed) {
 		this.configuration = ConfigFactory.create(IPLNetDyadRankerConfiguration.class);
 		this.plNetLoss = new PLNetLoss();
-		this.plNet = createNetworkFromConfigFile(configuration.plNetConfig());
+		this.plNet = createNetwork(numInputs, numHiddenNodes, seed);
+//		this.plNet = createNetworkFromConfigFile(configuration.plNetConfig());
 	}
 
 	@Override
@@ -69,6 +73,7 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 		for (IInstance dyadRankingInstance : drDataset) {
 			this.update(dyadRankingInstance);
 		}
+		epoch++;
 	}
 
 	@Override
@@ -77,6 +82,7 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 			throw new IllegalArgumentException(
 					"Can only update the Plackett-Luce net dyad ranker with a dyad ranking instance!");
 		}
+
 		DyadRankingInstance drInstance = (DyadRankingInstance) instance;
 		// init weight update vector
 		INDArray dyadMatrix;
@@ -88,24 +94,27 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 			dyadList.add(dyadVector);
 		}
 		dyadMatrix = Nd4j.vstack(dyadList);
+
 		List<INDArray> activations = plNet.feedForward(dyadMatrix);
 		INDArray output = activations.get(activations.size() - 1);
-		INDArray deltaW = Nd4j.zeros(plNet.numParams());
+		System.out.println();
+		output = output.transpose();
+		INDArray deltaW = Nd4j.zeros(plNet.params().length());
+		Gradient deltaWk = null;
+		MultiLayerNetwork plNetClone = plNet.clone();
 		for (int k = 0; k < drInstance.length(); k++) {
 			// compute derivative of loss w.r.t. k
-			plNet.setInput(dyadList.get(k));
-			plNet.feedForward(true,false);
+			plNetClone.setInput(dyadList.get(k));
+			plNetClone.feedForward(true, false);
 			INDArray lossGradient = plNetLoss.computeLossGradient(output, k);
 			// compute backprop gradient for weight updates w.r.t. k
-			Pair<Gradient, INDArray> p = plNet.backpropGradient(lossGradient, null);
-			Gradient gradient = p.getFirst();
-			INDArray deltaWk = gradient.gradient();
-			// add it
-			deltaW.add(deltaWk);
+			Pair<Gradient, INDArray> p = plNetClone.backpropGradient(lossGradient, null);
+			deltaWk = p.getFirst();
+			plNet.getUpdater().update(plNet, deltaWk, iteration, epoch, 1, LayerWorkspaceMgr.noWorkspaces());
+			deltaW.add(deltaWk.gradient());
 		}
-		DefaultGradient weightGradient = new DefaultGradient(deltaW);
-		plNet.getUpdater().update(plNet, weightGradient, 0, 0, 1, null);
-		plNet.params().subi(weightGradient.gradient());
+		plNet.params().subi(deltaW);
+		iteration++;
 	}
 
 	@Override

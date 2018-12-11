@@ -3,7 +3,9 @@ package jaicore.ml.dyadranking.algorithm;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.nd4j.linalg.activations.IActivation;
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.api.ops.impl.shape.Slice;
 import org.nd4j.linalg.factory.Nd4j;
+import org.nd4j.linalg.indexing.INDArrayIndex;
 import org.nd4j.linalg.indexing.NDArrayIndex;
 import org.nd4j.linalg.lossfunctions.ILossFunction;
 import org.nd4j.linalg.ops.transforms.Transforms;
@@ -53,7 +55,7 @@ public class PLNetLoss implements ILossFunction {
 			innerSumSlice = Transforms.exp(innerSumSlice);
 			loss += Transforms.log(innerSumSlice.sum(1)).getDouble(0);
 		}
-		loss -= plNetOutputs.get(NDArrayIndex.interval(0, dyadRankingLength - 1)).sum(0).getDouble(0);
+		loss -= plNetOutputs.get(NDArrayIndex.interval(0, dyadRankingLength)).sum(0).getDouble(0);
 		return Nd4j.create(new double[]{loss});
 	}
 	
@@ -61,6 +63,7 @@ public class PLNetLoss implements ILossFunction {
 		long dyadRankingLength = plNetOutputs.size(1);
 		double errorGradient = 0;
 		for (int m = 0; m <= k; m++) {
+//			INDArrayIndex slice = NDArrayIndex.interval(m, dyadRankingLength);
 			INDArray innerSumSlice = plNetOutputs.get(NDArrayIndex.interval(m, dyadRankingLength));
 			innerSumSlice = Transforms.exp(innerSumSlice);
 			double innerSum = innerSumSlice.sum(1).getDouble(0);
