@@ -4,20 +4,13 @@ import de.upb.isys.linearalgebra.DenseDoubleVector;
 import de.upb.isys.linearalgebra.Vector;
 
 /**
- * Wraps the util methods of the LBFGS algorithm to our
+ * All configuration parameters of the LBFGS optimizer.
  * 
- * @author elppa
+ * @author Mirko
  *
  */
 public class LBFGSArrayUtils {
 
-	/**
-	 * This is a dot-product however, we trim the vectors to the same length first.
-	 * 
-	 * @param a
-	 * @param b
-	 * @return
-	 */
 	public static double trimmedDotProduct(double[] a, double[] b) {
 		int minLength = Math.min(a.length, b.length);
 		double[] trimmedA = new double[minLength];
