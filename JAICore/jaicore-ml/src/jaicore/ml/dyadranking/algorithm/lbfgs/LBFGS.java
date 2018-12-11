@@ -354,7 +354,7 @@ public class LBFGS {
 
 	static interface line_search_proc {
 		public Status go(int n, double[] x, double[] f, double[] g, double[] s, double[] stp, final double[] xp,
-				final double[] gp, double[] wa, callback_data_t cd, LFBGSParameters param);
+				final double[] gp, double[] wa, callback_data_t cd, LBFGSParameters param);
 	}
 
 	/**
@@ -438,18 +438,18 @@ public class LBFGS {
 
 	/**
 	 * Use default parameters. See
-	 * {@link LBFGS#lfbgs(double[], Function, ProgressCallback, LFBGSParameters)}
+	 * {@link LBFGS#lfbgs(double[], Function, ProgressCallback, LBFGSParameters)}
 	 */
 	public static Result lbfgs(double[] init, Function proc_evaluate) {
-		return lbfgs(init, proc_evaluate, new LFBGSParameters());
+		return lbfgs(init, proc_evaluate, new LBFGSParameters());
 	}
 
 	/**
 	 * Use debug-friendly parameters & callback. See
-	 * {@link LBFGS#lfbgs(double[], Function, ProgressCallback, LFBGSParameters)}
+	 * {@link LBFGS#lfbgs(double[], Function, ProgressCallback, LBFGSParameters)}
 	 */
 	public static Result lbfgs(double[] init, int maxIter, Function proc_evaluate) {
-		LFBGSParameters p = new LFBGSParameters();
+		LBFGSParameters p = new LBFGSParameters();
 		p.max_iterations = maxIter;
 		return lbfgs(init, proc_evaluate, p);
 	}
@@ -479,7 +479,7 @@ public class LBFGS {
 	 *            use the default parameters.
 	 * @retval Result The status code and final objective.
 	 */
-	public static Result lbfgs(double[] x, Function proc_evaluate, LFBGSParameters param) {
+	public static Result lbfgs(double[] x, Function proc_evaluate, LBFGSParameters param) {
 		int n = x.length;
 
 		Result ret = new Result(null);
@@ -628,19 +628,19 @@ public class LBFGS {
 		 * identity matrix.
 		 */
 		if (param.orthantwise_c == 0.) {
-			LFBGSArrayUtils.vecncpy(d, g, n);
+			LBFGSArrayUtils.vecncpy(d, g, n);
 		} else {
-			LFBGSArrayUtils.vecncpy(d, pg, n);
+			LBFGSArrayUtils.vecncpy(d, pg, n);
 		}
 
 		/*
 		 * Make sure that the initial variables are not a minimizer.
 		 */
-		xnorm = LFBGSArrayUtils.vec2norm(x, n);
+		xnorm = LBFGSArrayUtils.vec2norm(x, n);
 		if (param.orthantwise_c == 0.) {
-			gnorm = LFBGSArrayUtils.vec2norm(g, n);
+			gnorm = LBFGSArrayUtils.vec2norm(g, n);
 		} else {
-			gnorm = LFBGSArrayUtils.vec2norm(pg, n);
+			gnorm = LBFGSArrayUtils.vec2norm(pg, n);
 		}
 		if (xnorm < 1.0)
 			xnorm = 1.0;
@@ -651,14 +651,14 @@ public class LBFGS {
 		/*
 		 * Compute the initial step: step = 1.0 / sqrt(LFBGSArrayUtils.vecdot(d, d, n))
 		 */
-		step[0] = LFBGSArrayUtils.vec2norminv(d, n);
+		step[0] = LBFGSArrayUtils.vec2norminv(d, n);
 
 		k = 1;
 		end = 0;
 		for (;;) {
 			/* Store the current position and gradient vectors. */
-			LFBGSArrayUtils.veccpy(xp, x, n);
-			LFBGSArrayUtils.veccpy(gp, g, n);
+			LBFGSArrayUtils.veccpy(xp, x, n);
+			LBFGSArrayUtils.veccpy(gp, g, n);
 
 			/* Search for an optimal step. */
 			if (param.orthantwise_c == 0.) {
@@ -669,19 +669,19 @@ public class LBFGS {
 			}
 			if (ls != null && ls.isError()) {
 				/* Revert to the previous point. */
-				LFBGSArrayUtils.veccpy(x, xp, n);
-				LFBGSArrayUtils.veccpy(g, gp, n);
+				LBFGSArrayUtils.veccpy(x, xp, n);
+				LBFGSArrayUtils.veccpy(g, gp, n);
 				ret.status = ls;
 				ret.objective = fx[0];
 				return ret;
 			}
 
 			/* Compute x and g norms. */
-			xnorm = LFBGSArrayUtils.vec2norm(x, n);
+			xnorm = LBFGSArrayUtils.vec2norm(x, n);
 			if (param.orthantwise_c == 0.) {
-				gnorm = LFBGSArrayUtils.vec2norm(g, n);
+				gnorm = LBFGSArrayUtils.vec2norm(g, n);
 			} else {
-				gnorm = LFBGSArrayUtils.vec2norm(pg, n);
+				gnorm = LBFGSArrayUtils.vec2norm(pg, n);
 			}
 
 			/*
@@ -728,15 +728,15 @@ public class LBFGS {
 			 * g_{k+1} - g_{k}.
 			 */
 			it = lm[end];
-			LFBGSArrayUtils.vecdiff(it.s, x, xp, n);
-			LFBGSArrayUtils.vecdiff(it.y, g, gp, n);
+			LBFGSArrayUtils.vecdiff(it.s, x, xp, n);
+			LBFGSArrayUtils.vecdiff(it.y, g, gp, n);
 
 			/*
 			 * Compute scalars ys and yy: ys = y^t \cdot s = 1 / \rho. yy = y^t \cdot y.
 			 * Notice that yy is used for scaling the hessian matrix H_0 (Cholesky factor).
 			 */
-			ys = LFBGSArrayUtils.vecdot(it.y, it.s, n);
-			yy = LFBGSArrayUtils.vecdot(it.y, it.y, n);
+			ys = LBFGSArrayUtils.vecdot(it.y, it.s, n);
+			yy = LBFGSArrayUtils.vecdot(it.y, it.y, n);
 			it.ys = ys;
 
 			/*
@@ -751,9 +751,9 @@ public class LBFGS {
 			/* Compute the steepest direction. */
 			if (param.orthantwise_c == 0.) {
 				/* Compute the negative of gradients. */
-				LFBGSArrayUtils.vecncpy(d, g, n);
+				LBFGSArrayUtils.vecncpy(d, g, n);
 			} else {
-				LFBGSArrayUtils.vecncpy(d, pg, n);
+				LBFGSArrayUtils.vecncpy(d, pg, n);
 			}
 
 			j = end;
@@ -761,21 +761,21 @@ public class LBFGS {
 				j = (j + m - 1) % m; /* if (--j == -1) j = m-1; */
 				it = lm[j];
 				/* \alpha_{j} = \rho_{j} s^{t}_{j} \cdot q_{k+1}. */
-				it.alpha = LFBGSArrayUtils.vecdot(it.s, d, n);
+				it.alpha = LBFGSArrayUtils.vecdot(it.s, d, n);
 				it.alpha /= it.ys;
 				/* q_{i} = q_{i+1} - \alpha_{i} y_{i}. */
-				LFBGSArrayUtils.vecadd(d, it.y, -it.alpha, n);
+				LBFGSArrayUtils.vecadd(d, it.y, -it.alpha, n);
 			}
 
-			LFBGSArrayUtils.vecscale(d, ys / yy, n);
+			LBFGSArrayUtils.vecscale(d, ys / yy, n);
 
 			for (i = 0; i < bound; ++i) {
 				it = lm[j];
 				/* \beta_{j} = \rho_{j} y^t_{j} \cdot \gamma_{i}. */
-				beta = LFBGSArrayUtils.vecdot(it.y, d, n);
+				beta = LBFGSArrayUtils.vecdot(it.y, d, n);
 				beta /= it.ys;
 				/* \gamma_{i+1} = \gamma_{i} + (\alpha_{j} - \beta_{j}) s_{j}. */
-				LFBGSArrayUtils.vecadd(d, it.s, it.alpha - beta, n);
+				LBFGSArrayUtils.vecadd(d, it.s, it.alpha - beta, n);
 				j = (j + 1) % m; /* if (++j == m) j = 0; */
 			}
 
@@ -805,7 +805,7 @@ public class LBFGS {
 		public Status go(int n, double[] x, double[] f, double[] g, double[] s, double[] stp, // BTO: um i think this is
 																								// supposed to be a
 																								// singleton
-				final double[] xp, final double[] gp, double[] wp, callback_data_t cd, LFBGSParameters param) {
+				final double[] xp, final double[] gp, double[] wp, callback_data_t cd, LBFGSParameters param) {
 			int count = 0;
 			double width, dg;
 			double finit, dginit = 0., dgtest;
@@ -817,7 +817,7 @@ public class LBFGS {
 			}
 
 			/* Compute the initial gradient in the search direction. */
-			dginit = LFBGSArrayUtils.vecdot(g, s, n);
+			dginit = LBFGSArrayUtils.vecdot(g, s, n);
 
 			/* Make sure that s points to a descent direction. */
 			if (0 < dginit) {
@@ -829,8 +829,8 @@ public class LBFGS {
 			dgtest = param.ftol * dginit;
 
 			for (;;) {
-				LFBGSArrayUtils.veccpy(x, xp, n);
-				LFBGSArrayUtils.vecadd(x, s, stp[0], n);
+				LBFGSArrayUtils.veccpy(x, xp, n);
+				LBFGSArrayUtils.vecadd(x, s, stp[0], n);
 
 				/* Evaluate the function and gradient values. */
 				f[0] = cd.proc_evaluate.evaluate(x, g, n, stp[0]);
@@ -848,7 +848,7 @@ public class LBFGS {
 					}
 
 					/* Check the Wolfe condition. */
-					dg = LFBGSArrayUtils.vecdot(g, s, n);
+					dg = LBFGSArrayUtils.vecdot(g, s, n);
 					if (dg < param.wolfe * dginit) {
 						width = inc;
 					} else {
@@ -888,7 +888,7 @@ public class LBFGS {
 	static class line_search_backtracking_owlqn implements line_search_proc {
 
 		public Status go(int n, double[] x, double[] f, double[] g, double[] s, double[] stp, final double[] xp,
-				final double[] gp, double[] wp, callback_data_t cd, LFBGSParameters param) {
+				final double[] gp, double[] wp, callback_data_t cd, LBFGSParameters param) {
 			int i, count = 0;
 			double width = 0.5, norm = 0.;
 			double finit = f[0], dgtest;
@@ -905,8 +905,8 @@ public class LBFGS {
 
 			for (;;) {
 				/* Update the current point. */
-				LFBGSArrayUtils.veccpy(x, xp, n);
-				LFBGSArrayUtils.vecadd(x, s, stp[0], n);
+				LBFGSArrayUtils.veccpy(x, xp, n);
+				LBFGSArrayUtils.vecadd(x, s, stp[0], n);
 
 				/* The current point is projected onto the orthant. */
 				owlqn_project(x, wp, param.orthantwise_start, param.orthantwise_end);
@@ -952,7 +952,7 @@ public class LBFGS {
 
 		@Override
 		public Status go(int n, double[] x, double[] f, double[] g, double[] s, double[] stp, double[] xp, double[] gp,
-				double[] wa, callback_data_t cd, LFBGSParameters param) {
+				double[] wa, callback_data_t cd, LBFGSParameters param) {
 			assert false : "unimplemented";
 			return null;
 		}

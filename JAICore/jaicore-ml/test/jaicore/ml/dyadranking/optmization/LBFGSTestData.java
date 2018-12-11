@@ -8,13 +8,12 @@ import jaicore.ml.dyadranking.optimizing.IGradientDescendableFunction;
 import jaicore.ml.dyadranking.optimizing.IGradientFunction;
 
 /**
- * Test data for the parameterized LFBGS test. The function is the function
- * whose coefficients should be guessed
+ * Test data for the parameterized LFBGS test.
  * 
- * @author elppa
+ * @author Mirko
  *
  */
-public class LFBGSTestData {
+public class LBFGSTestData {
 
 	private IGradientDescendableFunction function;
 
@@ -26,22 +25,45 @@ public class LFBGSTestData {
 		return expectedResult;
 	}
 
-	public LFBGSTestData(IGradientDescendableFunction function, IGradientFunction gradient, double[] expectedResult) {
+	/**
+	 * Returns an TestDataInstance that can be used in a run of the
+	 * {@link LBFGSTest}.
+	 * 
+	 * @param function
+	 *            the function that should be minimized.
+	 * @param gradient
+	 *            the gradient of the functions
+	 * @param expectedResult
+	 *            the result that should be produced.
+	 */
+	public LBFGSTestData(IGradientDescendableFunction function, IGradientFunction gradient, double[] expectedResult) {
 		super();
 		this.function = function;
 		this.gradient = gradient;
 		this.expectedResult = expectedResult;
 	}
 
-	public static LFBGSTestData polynomialFromCoeffs(double[] coeffs, double [] expectedResult) {
+	/**
+	 * Creates a TestData instance that minimizes the polynomial described by this
+	 * coefficients.
+	 * 
+	 * @param coeffs
+	 *            the coefficients of the polynomial in ascending order (e.g. a_0 +
+	 *            a_1 * x + a_2* x^2, ...; where a_0, ... are the provided
+	 *            coefficients.)
+	 * @param expectedResult
+	 *            the real minimum
+	 * @return
+	 */
+	public static LBFGSTestData polynomialFromCoeffs(double[] coeffs, double[] expectedResult) {
 		// numerically derive the gradient
 		double[] gradientCoeffs = new double[coeffs.length - 1];
 		for (int i = coeffs.length - 1; i >= 1; i--) {
 			double polynomialCoeff = coeffs[i];
 			gradientCoeffs[i - 1] = polynomialCoeff * i;
 		}
-		return new LFBGSTestData(new PolynomialFunction(coeffs), new PolynomialGradientFunction(gradientCoeffs),
-				coeffs);
+		return new LBFGSTestData(new PolynomialFunction(coeffs), new PolynomialGradientFunction(gradientCoeffs),
+				expectedResult);
 	}
 
 	public IGradientDescendableFunction getFunction() {
@@ -52,7 +74,12 @@ public class LFBGSTestData {
 		return gradient;
 	}
 
-
+	/**
+	 * Simple wrapper for polynomials in our interfaces.
+	 * 
+	 * @author Mirko
+	 *
+	 */
 	static class PolynomialFunction implements IGradientDescendableFunction {
 
 		private double[] coeffs;
@@ -76,24 +103,23 @@ public class LFBGSTestData {
 
 	}
 
+	/**
+	 * Gradients of polynomials based on the polynomial implementation
+	 * 
+	 * @author Mirko
+	 *
+	 */
 	static class PolynomialGradientFunction implements IGradientFunction {
 
-		private double[] gradientCoeffs;
+		private PolynomialFunction gradientFunct;
 
 		public PolynomialGradientFunction(double[] gradientCoeffs) {
-			this.gradientCoeffs = gradientCoeffs;
+			this.gradientFunct = new PolynomialFunction(gradientCoeffs);
 		}
 
 		@Override
 		public Vector apply(Vector vector) {
-			if (vector.length() != 1)
-				throw new IllegalArgumentException(
-						"Input mismatch! The length of the input vector does not match the degree of this polynomial. ["
-								+ gradientCoeffs.length + " expected but got " + vector.length() + "]");
-			double result = 0;
-			for (int i = 0; i < gradientCoeffs.length; i++) {
-				result += gradientCoeffs[i] * Math.pow(vector.getValue(0), i);
-			}
+			double result = gradientFunct.apply(vector);
 			return new DenseDoubleVector(new double[] { result });
 		}
 

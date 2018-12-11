@@ -1,8 +1,6 @@
 package jaicore.ml.dyadranking.algorithm.lbfgs;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,9 +11,9 @@ import jaicore.ml.dyadranking.optimizing.IGradientBasedOptimizer;
 import jaicore.ml.dyadranking.optimizing.IGradientDescendableFunction;
 import jaicore.ml.dyadranking.optimizing.IGradientFunction;
 
-public class LFBGSOptimizerWrapper implements IGradientBasedOptimizer {
+public class LBFGSOptimizerWrapper implements IGradientBasedOptimizer {
 
-	private static final Logger log = LoggerFactory.getLogger(LFBGSOptimizerWrapper.class);
+	private static final Logger log = LoggerFactory.getLogger(LBFGSOptimizerWrapper.class);
 
 	@Override
 	public Vector optimize(IGradientDescendableFunction descendableFunction, IGradientFunction gradient,
@@ -39,9 +37,9 @@ public class LFBGSOptimizerWrapper implements IGradientBasedOptimizer {
 				});
 		log.debug("Optimization finished. The wrapped optimizer returned status {}", optimizedResult.status);
 		if (optimizedResult.status != LBFGS.Status.LBFGS_SUCCESS && optimizedResult.status != LBFGS.Status.LBFGS_STOP) {
-			log.warn("LFBGS returned no success, the result may not be the optimial result!");
+			log.warn("LBFGS returned no success, the result may not be the optimial result!");
 		}
-		log.debug("lBFGS returned {}", Arrays.toString(coeffs));
+		log.debug("LBFGS returned {}", Arrays.toString(coeffs));
 		return new DenseDoubleVector(coeffs);
 	}
 

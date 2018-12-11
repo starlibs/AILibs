@@ -7,7 +7,7 @@ import jaicore.ml.dyadranking.algorithm.lbfgs.LBFGS.LinesearchAlgorithm;
  * {@link #orthantwise_c}, {@link #orthantwise_start}, {@link #orthantwise_end}
  */
 
-public class LFBGSParameters {
+public class LBFGSParameters {
 		/**
 		 * The number of corrections to approximate the inverse hessian matrix. The
 		 * L-BFGS routine stores the computation results of previous \ref m iterations
@@ -16,7 +16,7 @@ public class LFBGSParameters {
 		 * default value is \c 6. Values less than \c 3 are not recommended. Large
 		 * values will result in excessive computing time.
 		 */
-		public int m = 6;
+		public int m = 12;
 
 		/**
 		 * Epsilon for convergence test. This parameter determines the accuracy with
@@ -24,7 +24,7 @@ public class LFBGSParameters {
 		 * \ref epsilon * max(1, ||x||), where ||.|| denotes the Euclidean (L2) norm.
 		 * The default value is \c 1e-5.
 		 */
-		public double epsilon = 1e-5;
+		public double epsilon = 1e-20;
 
 		/**
 		 * Distance for delta-based convergence test. This parameter determines the
@@ -32,7 +32,7 @@ public class LFBGSParameters {
 		 * function. If the value of this parameter is zero, the library does not
 		 * perform the delta-based convergence test.
 		 */
-		public int past = 3; // BTO: changed from '0'
+		public int past = 0; // BTO: changed from '0'
 
 		/**
 		 * Delta for convergence test. This parameter determines the minimum rate of

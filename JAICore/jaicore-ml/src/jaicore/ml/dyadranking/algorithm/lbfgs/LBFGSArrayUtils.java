@@ -9,7 +9,7 @@ import de.upb.isys.linearalgebra.Vector;
  * @author elppa
  *
  */
-public class LFBGSArrayUtils {
+public class LBFGSArrayUtils {
 
 	/**
 	 * This is a dot-product however, we trim the vectors to the same length first.
