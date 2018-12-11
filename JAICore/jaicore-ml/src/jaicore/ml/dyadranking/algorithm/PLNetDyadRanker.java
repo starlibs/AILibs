@@ -1,5 +1,7 @@
 package jaicore.ml.dyadranking.algorithm;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -19,10 +21,14 @@ import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.lossfunctions.ILossFunction;
 import org.nd4j.linalg.primitives.Pair;
 
+import jaicore.basic.FileUtil;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
+import jaicore.ml.core.exception.ConfigurationException;
 import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.core.exception.TrainingException;
+import jaicore.ml.core.predictivemodel.IOnlineLearner;
+import jaicore.ml.core.predictivemodel.IPredictiveModelConfiguration;
 import jaicore.ml.dyadranking.Dyad;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import jaicore.ml.dyadranking.dataset.DyadRankingInstance;
@@ -34,21 +40,22 @@ import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
  * @author Helena Graf, Jonas Hanselle
  *
  */
-public class PLNetDyadRanker extends APLDyadRanker {
+public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDyadRankingInstance> {
 
 	private MultiLayerNetwork plNet;
 	private PLNetLoss plNetLoss;
-	private double learningRate;
-	
+	private IPLNetDyadRankerConfiguration configuration;
+
 	/**
+	 * Constructor using a {@link IPLNetDyadRankerConfiguration} to create the
+	 * {@link PLNetDyadRanker}.
 	 * 
-	 * @param learningRate
+	 * @param configuration
 	 */
-	public PLNetDyadRanker(double learningRate, int numInputs, int numHiddenNodes, long seed) {
-		this.learningRate = learningRate;
+	public PLNetDyadRanker(IPLNetDyadRankerConfiguration configuration) {
+		this.configuration = configuration;
 		this.plNetLoss = new PLNetLoss();
-		this.plNet = this.createNetwork(numInputs, numHiddenNodes, seed, this.plNetLoss);
-		this.plNetLoss.setPlNet(this.plNet);
+		this.plNet = createNetworkFromConfigFile(configuration.plNetConfig());
 	}
 
 	@Override
@@ -63,6 +70,7 @@ public class PLNetDyadRanker extends APLDyadRanker {
 		}
 	}
 
+	@Override
 	public void update(IInstance instance) throws TrainingException {
 		if (!(instance instanceof IDyadRankingInstance)) {
 			throw new IllegalArgumentException(
@@ -88,10 +96,11 @@ public class PLNetDyadRanker extends APLDyadRanker {
 			deltaW.add(deltaWk);
 		}
 		//
-		INDArray update = deltaW.mul(this.learningRate);
+		INDArray update = deltaW.mul(configuration.plNetLearningRate());
 		plNet.params().subi(update);
 	}
 
+	@Override
 	public void update(Set<IInstance> instances) throws TrainingException {
 		for (IInstance instance : instances)
 			this.update(instance);
@@ -134,9 +143,22 @@ public class PLNetDyadRanker extends APLDyadRanker {
 		return results;
 	}
 
+	@Override
+	public void setConfiguration(IPredictiveModelConfiguration configuration) throws ConfigurationException {
+		if (!(configuration instanceof IPLNetDyadRankerConfiguration)) {
+			throw new IllegalArgumentException("The configuration is no PLNetDyadRankerConfiguration!");
+		}
+		this.configuration = (IPLNetDyadRankerConfiguration) configuration;
+	}
+
+	@Override
+	public IPredictiveModelConfiguration getConfiguration() {
+		return configuration;
+	}
+
 	/**
-	 * Creates a simple feed-forward network that can be used as a PLNet for
-	 * dyad-ranking.
+	 * Creates a simple feed-forward {@link MultiLayerNetwork} that can be used as a
+	 * PLNet for dyad-ranking.
 	 * 
 	 * @param numInputs
 	 * @param numHiddenNodes
@@ -158,4 +180,26 @@ public class PLNetDyadRanker extends APLDyadRanker {
 		return new MultiLayerNetwork(config);
 	}
 
+	/**
+	 * Creates a simple feed-forward {@link MultiLayerNetwork} using the json
+	 * representation of a {@link MultiLayerConfiguration} in the file .
+	 * 
+	 * @param configFile {@link File} containing the json representation of the
+	 *                   {@link MultiLayerConfiguration}
+	 * @return a new {@link MultiLayerNetwork} based on the
+	 *         {@link MultiLayerConfiguration}
+	 */
+	private MultiLayerNetwork createNetworkFromConfigFile(File configFile) {
+		String json = "";
+		try {
+			json = FileUtil.readFileAsString(configFile);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		MultiLayerConfiguration config = MultiLayerConfiguration.fromJson(json);
+		MultiLayerNetwork network = new MultiLayerNetwork(config);
+		
+		return network;
+	}
 }
