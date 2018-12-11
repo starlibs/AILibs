@@ -71,8 +71,6 @@ public class LearnShapeletsAlgorithm implements IAlgorithm<IDataset, LearnShapel
 		// TODO Auto-generated method stub
 		// Training
 
-		LearnShapeletsClassifier classifier = new LearnShapeletsClassifier();
-
 		IDataset data = this.getInput();
 		INDArray dataMatrix = null; // TODO
 
@@ -175,7 +173,7 @@ public class LearnShapeletsAlgorithm implements IAlgorithm<IDataset, LearnShapel
 			}
 		}
 
-		return classifier;
+		return new LearnShapeletsClassifier(S, W, W_0);
 	}
 
 	@Override
