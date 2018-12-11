@@ -98,4 +98,17 @@ public class SparseDyadRankingInstance implements IDyadRankingInstance {
 		return alternatives.size();
 	}
 
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("SparseDyadRankingInstance: ");
+		builder.append(System.lineSeparator());
+		builder.append("Instance: ");
+		builder.append(instance);
+		builder.append(System.lineSeparator());
+		builder.append("Alternatives: ");
+		builder.append(alternatives);
+		return builder.toString();
+	}
+
 }

@@ -85,5 +85,13 @@ public class DyadRankingInstance implements IDyadRankingInstance {
 		result = result * 31 + dyads.hashCode();
 		return result;
 	}
+	
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("DyadRankingInstance: ");
+		builder.append(dyads);
+		return builder.toString();
+	}
 
 }
