@@ -24,7 +24,7 @@ import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
 /**
  * Class that runs a simple functionality check on all dyad rankers.
  * 
- * @author Helena Graf
+ * @author Helena Graf, Mirko Jürgens
  *
  */
 @RunWith(Parameterized.class)
@@ -61,7 +61,7 @@ public class SimpleDyadDatasetDyadRankerTester {
 
 	@Test
 	public void testSwapOrdering0() throws PredictionException {
-System.out.println("Now testing if alternative2 > alternative1");
+		System.out.println("Now testing if alternative2 > alternative1");
 		Vector instance = new DenseDoubleVector(new double[] { 1.0, 1.0, 0.0 });
 		SparseDyadRankingInstance test = new SparseDyadRankingInstance(instance,
 				Arrays.asList(alternative2, alternative1));
