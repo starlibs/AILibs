@@ -3,6 +3,10 @@ package jaicore.ml.dyadranking.algorithm;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.upb.isys.linearalgebra.DenseDoubleVector;
 import de.upb.isys.linearalgebra.Vector;
@@ -18,6 +22,7 @@ import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import jaicore.ml.dyadranking.dataset.DyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 import jaicore.ml.dyadranking.optimizing.DyadRankingFeatureTransformNegativeLogLikelihood;
+import jaicore.ml.dyadranking.optimizing.DyadRankingFeatureTransformNegativeLogLikelihoodDerivative;
 import jaicore.ml.dyadranking.optimizing.IDyadRankingFeatureTransformPLGradientDescendableFunction;
 import jaicore.ml.dyadranking.optimizing.IDyadRankingFeatureTransformPLGradientFunction;
 import jaicore.ml.dyadranking.optimizing.IGradientBasedOptimizer;
@@ -30,6 +35,8 @@ import jaicore.ml.dyadranking.optimizing.IGradientBasedOptimizer;
  *
  */
 public class FeatureTransformPLDyadRanker extends APLDyadRanker {
+	
+	private static final Logger log = LoggerFactory.getLogger(APLDyadRanker.class);
 
 	/* Phi in the paper */
 	private IDyadFeatureTransform featureTransform;
@@ -44,7 +51,7 @@ public class FeatureTransformPLDyadRanker extends APLDyadRanker {
 	private IDyadRankingFeatureTransformPLGradientDescendableFunction negativeLogLikelihood = new DyadRankingFeatureTransformNegativeLogLikelihood();
 
 	/* The derivation of the above function */
-	private IDyadRankingFeatureTransformPLGradientFunction negativeLogLikelihoodDerivative;
+	private IDyadRankingFeatureTransformPLGradientFunction negativeLogLikelihoodDerivative = new DyadRankingFeatureTransformNegativeLogLikelihoodDerivative();
 
 	/* The optimizer used to find w */
 	private IGradientBasedOptimizer optimizer = new LBFGSOptimizerWrapper();
@@ -78,17 +85,30 @@ public class FeatureTransformPLDyadRanker extends APLDyadRanker {
 		if (w == null) {
 			throw new PredictionException("The Ranker has not been trained yet.");
 		}
-
+		log.debug("Training ranker with instance {}", instance);
 		IDyadRankingInstance dyadRankingInstance = (IDyadRankingInstance) instance;
-		TreeMap<Double, Dyad> ordering = new TreeMap<>();
+		TreeMap<Double, List<Dyad>> ordering = new TreeMap<>();
 
-		dyadRankingInstance.forEach(dyad -> ordering.put(computeSkillForDyad(dyad), dyad));
+		dyadRankingInstance.forEach(dyad -> {
+			double skill = computeSkillForDyad(dyad);
+			if (ordering.containsKey(skill)) {
+				ordering.get(skill).add(dyad);
+			} else {
+				ordering.put(skill, new ArrayList<Dyad>());
+				ordering.get(skill).add(dyad);
+			}
+		});
 
-		return new DyadRankingInstance(new ArrayList<Dyad>(ordering.descendingMap().values()));
+		return new DyadRankingInstance(new ArrayList<Dyad>(
+				ordering.descendingMap().values().stream().flatMap(List::stream).collect(Collectors.toList())));
 	}
 
 	private double computeSkillForDyad(Dyad dyad) {
-		return Math.exp(w.dotProduct(featureTransform.transform(dyad)));
+		Vector featureTransformVector = featureTransform.transform(dyad);
+		double dot = w.dotProduct(featureTransformVector);
+		double val = Math.exp(dot);
+		log.debug("Feature transform for dyad {} is {}. \n Dot-Product is {} and skill is {}", dyad, featureTransformVector, dot, val);
+		return val;
 	}
 
 	@Override
@@ -101,19 +121,24 @@ public class FeatureTransformPLDyadRanker extends APLDyadRanker {
 
 		negativeLogLikelihood.initialize(dRDataset, featureTransform);
 		negativeLogLikelihoodDerivative.initialize(dRDataset, featureTransform);
-		Vector initialGuess = new DenseDoubleVector(dRDataset.size());
+		int alternativeLength = ((IDyadRankingInstance) dRDataset.get(0)).getDyadAtPosition(0).getAlternative()
+				.length();
+		int instanceLength = ((IDyadRankingInstance) dRDataset.get(0)).getDyadAtPosition(0).getInstance().length();
+		Vector initialGuess = new DenseDoubleVector(
+				featureTransform.getTransformedVectorLength(alternativeLength, instanceLength));
 		initialGuess.fillRandomly();
 		w = optimizer.optimize(negativeLogLikelihood, negativeLogLikelihoodDerivative, initialGuess);
+		log.debug("Finished training the ranker. W-Vector is {}", w);
 	}
 
 	@Override
 	public IPredictiveModelConfiguration getConfiguration() {
-		/*Currently nothing to configure! */
+		/* Currently nothing to configure! */
 		return null;
 	}
 
 	@Override
 	public void setConfiguration(IPredictiveModelConfiguration configuration) throws ConfigurationException {
-		/*Currently nothing to configure */
+		/* Currently nothing to configure */
 	}
 }

@@ -7,7 +7,7 @@ import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.dyadranking.Dyad;
 import jaicore.ml.dyadranking.algorithm.IDyadFeatureTransform;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
-import jaicore.ml.dyadranking.dataset.DyadRankingInstance;
+import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 
 /**
  * Implements the negative log-likelihood function for the feature
@@ -37,12 +37,12 @@ public class DyadRankingFeatureTransformNegativeLogLikelihood
 
 		HashMap<Dyad, Vector> featureTransforms = new HashMap<>();
 		for (IInstance instance : dataset) {
-			for (Dyad dyad : ((DyadRankingInstance) instance)) {
+			for (Dyad dyad : ((IDyadRankingInstance) instance)) {
 				result -= vector.dotProduct(getOrCreateFeatureTransform(dyad, featureTransforms));
 
 				double intermediateResult = 0;
 
-				for (Dyad innerDyad : ((DyadRankingInstance) instance)) {
+				for (Dyad innerDyad : ((IDyadRankingInstance) instance)) {
 					intermediateResult += Math
 							.exp(vector.dotProduct(getOrCreateFeatureTransform(innerDyad, featureTransforms)));
 				}
