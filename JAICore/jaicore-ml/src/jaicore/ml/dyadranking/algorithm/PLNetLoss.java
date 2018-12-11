@@ -45,7 +45,7 @@ public class PLNetLoss implements ILossFunction {
 		plNetOutputs = Nd4j.create(outputs);
 	}
 	
-	public INDArray computeLoss(INDArray plNetOutputs, int k) {
+	public INDArray computeLoss(INDArray plNetOutputs) {
 		long dyadRankingLength = plNetOutputs.size(1);
 		double loss = 0;
 		for (int m = 0; m <= dyadRankingLength - 2; m++) {
@@ -60,11 +60,11 @@ public class PLNetLoss implements ILossFunction {
 	public INDArray computeLossGradient(INDArray plNetOutputs, int k) {
 		long dyadRankingLength = plNetOutputs.size(1);
 		double errorGradient = 0;
-		for (int m = 0; m <= k - 1; m++) {
+		for (int m = 0; m <= k; m++) {
 			INDArray innerSumSlice = plNetOutputs.get(NDArrayIndex.interval(m, dyadRankingLength));
 			innerSumSlice = Transforms.exp(innerSumSlice);
 			double innerSum = innerSumSlice.sum(1).getDouble(0);
-			errorGradient += Math.exp(plNetOutputs.getDouble(k - 1)) / innerSum;
+			errorGradient += Math.exp(plNetOutputs.getDouble(k)) / innerSum;
 		}
 		errorGradient -= 1;
 		return Nd4j.create(new double[] {errorGradient});
@@ -76,7 +76,7 @@ public class PLNetLoss implements ILossFunction {
 	@Override
 	public double computeScore(INDArray labels, INDArray preOutput, IActivation activationFn, INDArray mask,
 			boolean average) {
-		return computeLoss(plNetOutputs, k).getDouble(0);
+		return computeLoss(plNetOutputs).getDouble(0);
 	}
 
 	@Override
