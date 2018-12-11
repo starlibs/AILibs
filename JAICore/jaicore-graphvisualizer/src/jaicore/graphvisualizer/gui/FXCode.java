@@ -47,576 +47,594 @@ import javafx.util.StringConverter;
  * @param <E>
  */
 public class FXCode<V, E> implements NodeListener<V> {
-    /*Variables needed for the whole class*/
+	/*Variables needed for the whole class*/
 
-    /*Tabpane*/
-    private TabPane tabPane;
+	/*Tabpane*/
+	private TabPane tabPane;
 
-    /*Timeline*/
-    private Slider timeline;
+	/*Timeline*/
+	private Slider timeline;
 
-    /*EventBus*/
-    private EventBus eventBus;
+	/*EventBus*/
+	private EventBus eventBus;
 
+	/*Indices*/
+	private int index;
+	private int maxIndex;
 
-    /*Indices*/
-    private int index;
-    private int maxIndex;
+	private int maxDisplayIndex;
+	private int displayIndex;
 
-    private int maxDisplayIndex;
-    private int displayIndex;
+	/*Visualisation window and visualizaton threads*/
+	private GraphVisualization<V, E> visualization;
+	private Thread playThread;
 
-    /*Visualisation window and visualizaton threads*/
-    private GraphVisualization<V, E> visualization;
-    private Thread playThread;
+	/*Settings*/
+	private long sleepTime;
 
-    /*Settings*/
-    private long sleepTime;
+	/*update restriction*/
+	private Semaphore sem;
+	private Thread updateThread;
 
-    /*update restriction*/
-    private Semaphore sem;
-    private Thread updateThread;
+	/*Log*/
+	private Text log;
 
-    /*Log*/
-    private Text log;
-    
-    private Button colouringButton;
-    private boolean colouring;
-    
-    /**
-     *Number of Ticks at the timeline. This number should not be greater then 1999  
-     */
-    private int numberOfTicks;
-    /**
-     * Constructor
-     */
-    public FXCode(Recorder<V, E> rec, String title, ObjectEvaluator eval) {
-        /*initialize object variables;*/
-        this.index = 0;
-        this.maxIndex = 0;
-        this.maxDisplayIndex = 0;
-        this.displayIndex = 0;
+	private Button colouringButton;
+	private boolean colouring;
 
-        this.sleepTime = 0;
+	/**
+	 * Number of Ticks at the timeline. This number should not be greater then 1999
+	 */
+	private int numberOfTicks;
 
-        this.eventBus = new EventBus();
-        this.eventBus.register(rec);
+	/**
+	 * Constructor
+	 */
+	public FXCode(final Recorder<V, E> rec, final String title, final ObjectEvaluator eval) {
+		/*initialize object variables;*/
+		this.index = 0;
+		this.maxIndex = 0;
+		this.maxDisplayIndex = 0;
+		this.displayIndex = 0;
 
-        rec.registerInfoListener(this);
+		this.sleepTime = 1;
 
-        this.log = new Text();
-        this.numberOfTicks= 250;
+		this.eventBus = new EventBus();
+		this.eventBus.register(rec);
 
-        /*declare  and initialize FX-elements*/
+		rec.registerInfoListener(this);
 
-        /*create Main-BorderPane*/
-        BorderPane root = new BorderPane();
+		this.log = new Text();
+		this.numberOfTicks = 150;
 
-        /*top*/
-        ToolBar toolBar = new ToolBar();
-        BorderPane top = new BorderPane();
-        Slider sleepTimeSlider = new Slider(0, 200, 200 - sleepTime);
+		/*declare  and initialize FX-elements*/
 
-        /*center*/
-        SplitPane splitPane = new SplitPane();
-        this.tabPane = new TabPane();
-        this.visualization = new GraphVisualization<V, E>(eval);
+		/*create Main-BorderPane*/
+		BorderPane root = new BorderPane();
 
+		/*top*/
+		ToolBar toolBar = new ToolBar();
+		BorderPane top = new BorderPane();
+		Slider sleepTimeSlider = new Slider(0, 200, 200 - this.sleepTime);
 
-        /*Bottom*/
-        this.timeline = new Slider();
+		/*center*/
+		SplitPane splitPane = new SplitPane();
+		this.tabPane = new TabPane();
+		this.visualization = new GraphVisualization<V, E>(eval);
 
-        Scene scene = new Scene(root, 800, 300);
-        Stage stage = new Stage();
+		/*Bottom*/
+		this.timeline = new Slider();
 
-        /*settings for the gui elements*/
-        /*top*/
-        if(eval != null) {
-        	fillToolbar(toolBar.getItems(), true);
-        	colouring = true;
-        }
-        else
-        	fillToolbar(toolBar.getItems(), false);
-        setSleepTimeSlider(sleepTimeSlider);
-        top.setTop(toolBar);
-        top.setBottom(sleepTimeSlider);
-        root.setTop(top);
-        
-        /*Center*/
-        rec.registerReplayListener(visualization);
-        visualization.addNodeListener(this);
-        this.eventBus.register(visualization);
-        
+		Scene scene = new Scene(root, 800, 300);
+		Stage stage = new Stage();
 
-        splitPane.setDividerPosition(0, 0.25);
-        splitPane.getItems().add(tabPane);
-        splitPane.getItems().add(visualization.getFXNode());
-        root.setCenter(splitPane);
-
-        /*Bottom*/
-        setTimelineSlider();
-        root.setBottom(this.timeline);
-
-        stage.setScene(scene);
-        stage.setTitle(title);
-        stage.setMaximized(true);
-        stage.show();
-
-        Tab logTab = new Tab("Log");
-        ScrollPane scrollPane = new ScrollPane();
-        scrollPane.setContent(log);
-        logTab.setContent(scrollPane);
-        this.tabPane.getTabs().add(logTab);
-        
-        rec.getSupplier();
-        this.startPlayThread();
-        this.startUpdateRestriction(35);
-
-    }
-
-    /**
-     * Sets the settings for the timeline
-     */
-    private void setTimelineSlider() {
-        this.timeline.setShowTickLabels(true);
-        this.timeline.setShowTickMarks(true);
-        this.timeline.setOnMouseReleased((MouseEvent event) -> {
-            int newIndex = (int) timeline.getValue();
-            jumpToIndex(newIndex);
-        });
-        this.timeline.setOnKeyReleased((KeyEvent event) -> {
-            int newIndex = (int) timeline.getValue();
-            jumpToIndex(newIndex);
-        });
-        this.timeline.setOnKeyPressed((KeyEvent event) -> {
-            int newIndex = (int) timeline.getValue();
-            jumpToIndex(newIndex);
-        });
-        this.timeline.setBlockIncrement(1);
-    }
-
-    /**
-     * Sets the settings for the sleepTimeSlider
-     */
-    private void setSleepTimeSlider(Slider sleepTimeSlider) {
-        sleepTimeSlider.setShowTickLabels(true);
-        sleepTimeSlider.setShowTickMarks(true);
-        sleepTimeSlider.setBlockIncrement(1);
-        sleepTimeSlider.setOnMouseReleased((MouseEvent event) -> {
-            double sliderValue = sleepTimeSlider.getValue();
-            this.sleepTime = (long) (200 - sliderValue);
-        });
-        sleepTimeSlider.setOnKeyPressed((KeyEvent event) -> {
-            double sliderValue = sleepTimeSlider.getValue();
-            this.sleepTime = (long) (200 - sliderValue);
-        });
-        sleepTimeSlider.setOnKeyReleased((KeyEvent event) -> {
-            double sliderValue = sleepTimeSlider.getValue();
-            this.sleepTime = (long) (200 - sliderValue);
-        });
-
-        sleepTimeSlider.setLabelFormatter(new StringConverter<Double>() {
-            @Override
-            public String toString(Double object) {
-                Double speed = 200 - object;
-                return String.valueOf(speed.longValue());
-            }
-
-            @Override
-            public Double fromString(String string) {
-                return null;
-            }
-        });
-    }
-
-    /**
-     * Uses a thread to continuously post events
-     */
-    private void startPlayThread() {
-        /* play runs in an own thread to make it stoppable*/
-        Runnable run = () -> {
-
-            try {
-                while (!Thread.currentThread().isInterrupted()) {
-                    int i = index;
-                    while (i >= 0) {
-
-                        eventBus.post(new StepEvent(true, 1));
-                        TimeUnit.MILLISECONDS.sleep(sleepTime);
-                        updateIndex(1, false);
-                        i = index;
-                        if (Thread.currentThread().isInterrupted()) {
-                            i = -1;
-                        }
-                    }
-                }
-            } catch (InterruptedException e) {
-
-            }
-        };
-
-        playThread = new Thread(run);
-        playThread.start();
-    }
-
-    /**
-     * Creates the controll-buttons and adds them to the given List
-     *
-     * @param nodeList A list which shall contain the nodes of the buttons
-     */
-    private void fillToolbar(List<Node> nodeList, boolean eval) {
-        /* playbutton*/
-        Button playButton = new Button("Play");
-        playButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent actionEvent) {
-                startPlayThread();
-            }
-        });
-              
-
-        nodeList.add(playButton);
-        /* stepButton*/
-        Button stepButton = new Button("Step");
-        stepButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent actionEvent) {
-
-                eventBus.post(new StepEvent(true, 1));
-                if (index != maxIndex)
-                    updateIndex(1, false);
-            }
-        });
-        nodeList.add(stepButton);
-
-        /* stopButton*/
-        Button stopButton = new Button("Stop");
-        stopButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent actionEvent) {
-                if (playThread != null)
-                    playThread.interrupt();
-            }
-        });
-        nodeList.add(stopButton);
-
-        /* BackButton*/
-        Button backButton = new Button("Back");
-        backButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent actionEvent) {
-                if (index == 0)
-                    return;
-                if (index == 1) {
-                    reset();
-                    return;
-                }
-                eventBus.post(new StepEvent(false, 1));
-                updateIndex(-1, false);
-            }
-        });
-        nodeList.add(backButton);
-
-      /*  resetButton*/
-        Button resetButton = new Button("reset");
-        resetButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent actionEvent) {
-                reset();
-            }
-        });
-        nodeList.add(resetButton);
-
-       /* loadButton*/
-        Button loadButton = new Button("load");
-        loadButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent actionEvent) {
-                FileChooser chooser = new FileChooser();
-                File file = chooser.showOpenDialog(null);
-                if(file != null)
-                	eventBus.post(new FileEvent(true, file));
-            }
-        });
-        nodeList.add(loadButton);
-
-        /* saveButton*/
-        Button saveButton = new Button("save");
-        saveButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent actionEvent) {
-                FileChooser chooser = new FileChooser();
-                File file = chooser.showSaveDialog(null);
-                if(file != null)
-                	eventBus.post(new FileEvent(false, file));
-            }
-        });
-        nodeList.add(saveButton);
-        
-        /*Colouring button*/
-        colouringButton = new Button("colouring");
-        colouringButton.setOnAction(new EventHandler<ActionEvent>() {
-        	@Override
-        	public void handle(ActionEvent actionEvent) {
-        		if(!colouring) {
-        			colouring = true;
-        			
-        			
-        		}
-        		else {
-        			colouring = false;
-        		}
-        		eventBus.post(new EnableColouring(colouring));
-        	}
-        });
-        nodeList.add(colouringButton);
-        if(!eval)
-        	colouringButton.setDisable(true);
-        
-    }
-
-    /**
-     * Receive Info-Events from the recorder to update the timeline and the maximum
-     * index
-     *
-     * @param event The info-event.
-     */
-    @Subscribe
-    public void receiveInfoEvent(InfoEvent event) {
-        try {
-            this.maxIndex = event.getMaxIndex();
-
-            this.sem.release();
-            if (event.updateIndex())
-                this.updateIndex(maxIndex, true);
-        } catch (NullPointerException e) {
-
-        }
-    }
-
-    /**
-     * Updates the index if a new step is done. Depending on the type of step it is
-     * possible to either get the actual new index (<code>isRealIndex = true</code>
-     * or an additive one.
-     *
-     * @param newIndex    A variable which is used to compute the new index. Either
-     *                    it is the actual new index or this number has to be added
-     *                    to the current index.
-     * @param isRealIndex <code>true</code> if the newIndex is the actual new index,
-     *                    <code>false</code> if newIndex is additive.
-     */
-    private void updateIndex(int newIndex, boolean isRealIndex) {
-        if (!isRealIndex)
-            newIndex += this.index;
-
-        if (newIndex > this.maxIndex || newIndex < 0)
-            return;
-
-        this.index = newIndex;
-        this.sem.release();
-		if(index > this.maxDisplayIndex) {
-	        this.timeline.setValue(this.maxDisplayIndex);
-	        this.displayIndex = this.maxDisplayIndex;
+		/*settings for the gui elements*/
+		/*top*/
+		if (eval != null) {
+			this.fillToolbar(toolBar.getItems(), true);
+			this.colouring = true;
+		} else {
+			this.fillToolbar(toolBar.getItems(), false);
 		}
-		else {
-			this.timeline.setValue(index);
-			this.displayIndex = index;
-		}
-        this.updateLog("Index: " + index);
+		this.setSleepTimeSlider(sleepTimeSlider);
+		top.setTop(toolBar);
+		top.setBottom(sleepTimeSlider);
+		root.setTop(top);
 
-    }
+		/*Center*/
+		rec.registerReplayListener(this.visualization);
+		this.visualization.addNodeListener(this);
+		this.eventBus.register(this.visualization);
 
-    /**
-     * Resets the GUI
-     */
-    public void reset() {
-        if (this.playThread != null)
-            this.playThread.interrupt();
-        this.updateIndex(0, true);
-        this.visualization.reset();
-        eventBus.post(new ResetEvent());
-    }
+		splitPane.setDividerPosition(0, 0.25);
+		splitPane.getItems().add(this.tabPane);
+		splitPane.getItems().add(this.visualization.getFXNode());
+		root.setCenter(splitPane);
 
-    /**
-     * Jumps to a specific index at the timeline
-     *
-     * @param newIndex
-     */
-    public void jumpToIndex(int newIndex) {
-        if (this.playThread != null)
-            playThread.interrupt();
-        if (newIndex == 0) {
-            this.reset();
-            return;
-        }
-        if (newIndex > this.index)
-            this.eventBus.post(new StepEvent(true, newIndex - this.index));
-        else
-            this.eventBus.post(new StepEvent(false, index - newIndex));
-        this.updateIndex(newIndex, true);
-    }
+		/*Bottom*/
+		this.setTimelineSlider();
+		root.setBottom(this.timeline);
 
-    public TabPane getTabPane() {
-        return tabPane;
-    }
+		stage.setScene(scene);
+		stage.setTitle(title);
+		stage.setMaximized(true);
+		stage.show();
 
-    /**
-     * Registers a new supplier to the Controller. In addition the cooresponging
-     * Visualizers are searched and also added.
-     *
-     * @param supplier The new supplier.
-     */
-    public void addDataSupplier(ISupplier supplier) {
+		Tab logTab = new Tab("Log");
+		ScrollPane scrollPane = new ScrollPane();
+		scrollPane.setContent(this.log);
+		logTab.setContent(scrollPane);
+		this.tabPane.getTabs().add(logTab);
 
-        try {
-            ClassPath path = ClassPath.from(ClassLoader.getSystemClassLoader());
-            Set<?> set = path.getAllClasses();
-            try {
-                set.stream().forEach(cls -> {
-                    if (cls instanceof ClassPath.ClassInfo) {
-                       /* search for a Visualizer.
-                	To identify a visualizer the package name has to contain .dataVisualizer.*/
-                        if (((ClassPath.ClassInfo) cls).getName().contains(".dataVisualizer.")) {
-                            IVisualizer v = (IVisualizer) findClassByName(((ClassPath.ClassInfo) cls).getName());
-                            try {
-                                if (v != null) {
-                                   /* if the supplier of the visualizer matches the current one, add the visualizer
-                                    to the tabpane*/
-                                    if (v.getSupplier().equals(supplier.getClass().getSimpleName())) {
-                                        supplier.registerListener(v);
-                                        this.eventBus.register(supplier);
-                                        this.eventBus.register(v);
+		rec.getSupplier();
+		// this.startPlayThread();
+		this.startUpdateRestriction(35);
 
-                                        Tab tab = new Tab();
-                                        tab.setContent(v.getVisualization());
-                                        tab.setText(v.getTitle());
-                                        this.tabPane.getTabs().add(tab);
-                                    }
-                                }
-                            } catch (Exception e) {
-
-                            }
-                        }
-                    }
-                });
-            } catch (Exception e) {
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    /**
-     * Searches the loaded classes for class with a specific name.
-     *
-     * @param name The name of the searched class.
-     * @return
-     */
-    private Object findClassByName(String name) {
-        try {
-            Class<?> cls = Class.forName(name);
-            if (cls.isInterface())
-                return null;
-            return cls.newInstance();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-            return null;
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-            return null;
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            return null;
-        } catch (NoClassDefFoundError e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    @Subscribe
-    public void receiveAddSupplierEvent(AddSupplierEvent event) {
-        this.addDataSupplier(event.getSupplier());
-    }
-
-    @Override
-    public void mouseOver(Object node) {
-
-    }
-
-    @Override
-    public void mouseLeft(Object node) {
-
-    }
-
-    @Override
-    public void buttonReleased(Object node) {
-    }
-
-    @Override
-    public void buttonPushed(Object node) {
-        this.eventBus.post(new NodePushed<Object>(node));
-    }
-
-    /**
-     * Updates the log
-     *
-     * @param logEntry the next log entry
-     */
-    private void updateLog(String logEntry) {
-        String currentLog = this.log.getText()+  "\n - " + logEntry;
-        Platform.runLater(()->{
-        	 log.setText(currentLog);
-        });
-       
-    }
-
-    private void startUpdateRestriction(long delay) {
-        sem = new Semaphore(0);
-        Runnable run = () -> {
-            while (!Thread.currentThread().isInterrupted()) {
-                try {
-                    Thread.sleep(delay);
-                    sem.acquire();
-                    updateTimelineIndex();
-                    sem.drainPermits();
-                } catch (InterruptedException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-
-            }
-        };
-        updateThread = new Thread(run, "Update");
-        updateThread.start();
-    }
-    
-    /**
-     * Updates the timeline
-     */
-    private void updateTimelineIndex() {
-        this.timeline.setMax(maxIndex);
-        int tickUnit= maxIndex / this.numberOfTicks;
-        this.timeline.setMajorTickUnit(tickUnit);
-        this.maxDisplayIndex = maxIndex;
-        if(this.displayIndex < maxDisplayIndex || this.displayIndex < this.index) {
-        	if(index <= maxDisplayIndex) {
-        		this.displayIndex = this.index;
-        	}
-        	else {
-        		this.displayIndex = this.maxDisplayIndex;
-        	}
-        	this.timeline.setValue(displayIndex);
-        }
-
-    }
-
-	public int getNumberOfTicks() {
-		return numberOfTicks;
 	}
 
-	public void setNumberOfTicks(int numberOfTicks) {
+	/**
+	 * Sets the settings for the timeline
+	 */
+	private void setTimelineSlider() {
+		this.timeline.setShowTickLabels(true);
+		this.timeline.setShowTickMarks(true);
+		this.timeline.setOnMouseReleased((final MouseEvent event) -> {
+			int newIndex = (int) this.timeline.getValue();
+			this.jumpToIndex(newIndex);
+		});
+		this.timeline.setOnKeyReleased((final KeyEvent event) -> {
+			int newIndex = (int) this.timeline.getValue();
+			this.jumpToIndex(newIndex);
+		});
+		this.timeline.setOnKeyPressed((final KeyEvent event) -> {
+			int newIndex = (int) this.timeline.getValue();
+			this.jumpToIndex(newIndex);
+		});
+		this.timeline.setBlockIncrement(1);
+		// this.timeline.setMinorTickCount(5);
+		this.timeline.setMinorTickCount(0);
+	}
+
+	/**
+	 * Sets the settings for the sleepTimeSlider
+	 */
+	private void setSleepTimeSlider(final Slider sleepTimeSlider) {
+		sleepTimeSlider.setShowTickLabels(true);
+		sleepTimeSlider.setShowTickMarks(true);
+		sleepTimeSlider.setBlockIncrement(1);
+		sleepTimeSlider.setOnMouseReleased((final MouseEvent event) -> {
+			double sliderValue = sleepTimeSlider.getValue();
+			this.sleepTime = (long) (200 - sliderValue);
+		});
+		sleepTimeSlider.setOnKeyPressed((final KeyEvent event) -> {
+			double sliderValue = sleepTimeSlider.getValue();
+			this.sleepTime = (long) (200 - sliderValue);
+		});
+		sleepTimeSlider.setOnKeyReleased((final KeyEvent event) -> {
+			double sliderValue = sleepTimeSlider.getValue();
+			this.sleepTime = (long) (200 - sliderValue);
+		});
+
+		sleepTimeSlider.setLabelFormatter(new StringConverter<Double>() {
+			@Override
+			public String toString(final Double object) {
+				Double speed = 200 - object;
+				return String.valueOf(speed.longValue());
+			}
+
+			@Override
+			public Double fromString(final String string) {
+				return null;
+			}
+		});
+	}
+
+	/**
+	 * Uses a thread to continuously post events
+	 */
+	private void startPlayThread() {
+		/* play runs in an own thread to make it stoppable*/
+		Runnable run = () -> {
+
+			try {
+				while (!Thread.currentThread().isInterrupted()) {
+					int i = this.index;
+					while (i >= 0) {
+
+						this.eventBus.post(new StepEvent(true, 1));
+						TimeUnit.MILLISECONDS.sleep(this.sleepTime);
+						this.updateIndex(1, false);
+						i = this.index;
+						if (Thread.currentThread().isInterrupted()) {
+							i = -1;
+						}
+					}
+				}
+			} catch (InterruptedException e) {
+
+			}
+		};
+		if (this.playThread == null) {
+			this.playThread = new Thread(run, "play");
+			this.playThread.start();
+		}
+	}
+
+	/**
+	 * Creates the controll-buttons and adds them to the given List
+	 *
+	 * @param nodeList
+	 *            A list which shall contain the nodes of the buttons
+	 */
+	private void fillToolbar(final List<Node> nodeList, final boolean eval) {
+		/* playbutton*/
+		Button playButton = new Button("Play");
+		playButton.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(final ActionEvent actionEvent) {
+				FXCode.this.startPlayThread();
+			}
+		});
+
+		nodeList.add(playButton);
+		/* stepButton*/
+		Button stepButton = new Button("Step");
+		stepButton.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(final ActionEvent actionEvent) {
+
+				FXCode.this.eventBus.post(new StepEvent(true, 1));
+				if (FXCode.this.index != FXCode.this.maxIndex) {
+					FXCode.this.updateIndex(1, false);
+				}
+			}
+		});
+		nodeList.add(stepButton);
+
+		/* stopButton*/
+		Button stopButton = new Button("Stop");
+		stopButton.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(final ActionEvent actionEvent) {
+				if (FXCode.this.playThread != null) {
+					FXCode.this.playThread.interrupt();
+					FXCode.this.playThread = null;
+				}
+			}
+		});
+		nodeList.add(stopButton);
+
+		/* BackButton*/
+		Button backButton = new Button("Back");
+		backButton.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(final ActionEvent actionEvent) {
+				if (FXCode.this.index == 0) {
+					return;
+				}
+				if (FXCode.this.index == 1) {
+					FXCode.this.reset();
+					return;
+				}
+				FXCode.this.eventBus.post(new StepEvent(false, 1));
+				FXCode.this.updateIndex(-1, false);
+			}
+		});
+		nodeList.add(backButton);
+
+		/*  resetButton*/
+		Button resetButton = new Button("reset");
+		resetButton.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(final ActionEvent actionEvent) {
+				FXCode.this.reset();
+			}
+		});
+		nodeList.add(resetButton);
+
+		/* loadButton*/
+		Button loadButton = new Button("load");
+		loadButton.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(final ActionEvent actionEvent) {
+				FileChooser chooser = new FileChooser();
+				File file = chooser.showOpenDialog(null);
+				if (file != null) {
+					FXCode.this.eventBus.post(new FileEvent(true, file));
+				}
+			}
+		});
+		nodeList.add(loadButton);
+
+		/* saveButton*/
+		Button saveButton = new Button("save");
+		saveButton.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(final ActionEvent actionEvent) {
+				FileChooser chooser = new FileChooser();
+				File file = chooser.showSaveDialog(null);
+				if (file != null) {
+					FXCode.this.eventBus.post(new FileEvent(false, file));
+				}
+			}
+		});
+		nodeList.add(saveButton);
+
+		/*Colouring button*/
+		this.colouringButton = new Button("colouring");
+		this.colouringButton.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(final ActionEvent actionEvent) {
+				if (!FXCode.this.colouring) {
+					FXCode.this.colouring = true;
+
+				} else {
+					FXCode.this.colouring = false;
+				}
+				FXCode.this.eventBus.post(new EnableColouring(FXCode.this.colouring));
+			}
+		});
+		nodeList.add(this.colouringButton);
+		if (!eval) {
+			this.colouringButton.setDisable(true);
+		}
+
+	}
+
+	/**
+	 * Receive Info-Events from the recorder to update the timeline and the maximum index
+	 *
+	 * @param event
+	 *            The info-event.
+	 */
+	@Subscribe
+	public void receiveInfoEvent(final InfoEvent event) {
+		try {
+			this.maxIndex = event.getMaxIndex();
+
+			this.sem.release();
+			if (event.updateIndex()) {
+				this.updateIndex(this.maxIndex, true);
+			}
+		} catch (NullPointerException e) {
+
+		}
+	}
+
+	/**
+	 * Updates the index if a new step is done. Depending on the type of step it is possible to either get the actual new index (<code>isRealIndex = true</code> or an additive one.
+	 *
+	 * @param newIndex
+	 *            A variable which is used to compute the new index. Either it is the actual new index or this number has to be added to the current index.
+	 * @param isRealIndex
+	 *            <code>true</code> if the newIndex is the actual new index, <code>false</code> if newIndex is additive.
+	 */
+	private void updateIndex(int newIndex, final boolean isRealIndex) {
+		if (!isRealIndex) {
+			newIndex += this.index;
+		}
+
+		if (newIndex > this.maxIndex || newIndex < 0) {
+			return;
+		}
+
+		this.index = newIndex;
+		this.sem.release();
+		if (this.index > this.maxDisplayIndex) {
+			this.timeline.setValue(this.maxDisplayIndex);
+			this.displayIndex = this.maxDisplayIndex;
+		} else {
+			this.timeline.setValue(this.index);
+			this.displayIndex = this.index;
+		}
+		this.updateLog("Index: " + this.index);
+
+	}
+
+	/**
+	 * Resets the GUI
+	 */
+	public void reset() {
+		if (this.playThread != null) {
+			this.playThread.interrupt();
+			this.playThread = null;
+		}
+		this.updateIndex(0, true);
+		this.visualization.reset();
+		this.eventBus.post(new ResetEvent());
+	}
+
+	/**
+	 * Jumps to a specific index at the timeline
+	 *
+	 * @param newIndex
+	 */
+	public void jumpToIndex(final int newIndex) {
+		if (this.playThread != null) {
+			this.playThread.interrupt();
+			this.playThread = null;
+		}
+		if (newIndex == 0) {
+			this.reset();
+			return;
+		}
+		if (newIndex > this.index) {
+			this.eventBus.post(new StepEvent(true, newIndex - this.index));
+		} else {
+			this.eventBus.post(new StepEvent(false, this.index - newIndex));
+		}
+		this.updateIndex(newIndex, true);
+	}
+
+	public TabPane getTabPane() {
+		return this.tabPane;
+	}
+
+	/**
+	 * Registers a new supplier to the Controller. In addition the cooresponging Visualizers are searched and also added.
+	 *
+	 * @param supplier
+	 *            The new supplier.
+	 */
+	public void addDataSupplier(final ISupplier supplier) {
+
+		try {
+			ClassPath path = ClassPath.from(ClassLoader.getSystemClassLoader());
+			Set<?> set = path.getAllClasses();
+			try {
+				set.stream().forEach(cls -> {
+					if (cls instanceof ClassPath.ClassInfo) {
+						/* search for a Visualizer.
+						To identify a visualizer the package name has to contain .dataVisualizer.*/
+						if (((ClassPath.ClassInfo) cls).getName().contains(".dataVisualizer.")) {
+							IVisualizer v = (IVisualizer) this.findClassByName(((ClassPath.ClassInfo) cls).getName());
+							try {
+								if (v != null) {
+									/* if the supplier of the visualizer matches the current one, add the visualizer
+									to the tabpane*/
+									if (v.getSupplier().equals(supplier.getClass().getSimpleName())) {
+										supplier.registerListener(v);
+										this.eventBus.register(supplier);
+										this.eventBus.register(v);
+
+										Tab tab = new Tab();
+										tab.setContent(v.getVisualization());
+										tab.setText(v.getTitle());
+										this.tabPane.getTabs().add(tab);
+									}
+								}
+							} catch (Exception e) {
+
+							}
+						}
+					}
+				});
+			} catch (Exception e) {
+			}
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	/**
+	 * Searches the loaded classes for class with a specific name.
+	 *
+	 * @param name
+	 *            The name of the searched class.
+	 * @return
+	 */
+	private Object findClassByName(final String name) {
+		try {
+			Class<?> cls = Class.forName(name);
+			if (cls.isInterface()) {
+				return null;
+			}
+			return cls.newInstance();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+			return null;
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+			return null;
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+			return null;
+		} catch (NoClassDefFoundError e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	@Subscribe
+	public void receiveAddSupplierEvent(final AddSupplierEvent event) {
+		this.addDataSupplier(event.getSupplier());
+	}
+
+	@Override
+	public void mouseOver(final Object node) {
+
+	}
+
+	@Override
+	public void mouseLeft(final Object node) {
+
+	}
+
+	@Override
+	public void buttonReleased(final Object node) {
+	}
+
+	@Override
+	public void buttonPushed(final Object node) {
+		this.eventBus.post(new NodePushed<Object>(node));
+	}
+
+	/**
+	 * Updates the log
+	 *
+	 * @param logEntry
+	 *            the next log entry
+	 */
+	private void updateLog(final String logEntry) {
+		String currentLog = this.log.getText() + "\n - " + logEntry;
+		Platform.runLater(() -> {
+			this.log.setText(currentLog);
+		});
+
+	}
+
+	private void startUpdateRestriction(final long delay) {
+		this.sem = new Semaphore(0);
+		Runnable run = () -> {
+			while (!Thread.currentThread().isInterrupted()) {
+				try {
+					Thread.sleep(delay);
+					this.sem.acquire();
+					try {
+						this.updateTimelineIndex();
+					} catch (IllegalArgumentException e) {
+						//
+					}
+					this.sem.drainPermits();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+			}
+		};
+		this.updateThread = new Thread(run, "Update");
+		this.updateThread.start();
+	}
+
+	/**
+	 * Updates the timeline
+	 */
+	private void updateTimelineIndex() {
+		this.timeline.setMax(this.maxIndex);
+		int tickUnit = this.maxIndex / this.numberOfTicks;
+		if (tickUnit != 0) {
+			this.timeline.setMajorTickUnit(tickUnit);
+		}
+		this.maxDisplayIndex = this.maxIndex;
+		if (this.displayIndex < this.maxDisplayIndex || this.displayIndex < this.index) {
+			if (this.index <= this.maxDisplayIndex) {
+				this.displayIndex = this.index;
+			} else {
+				this.displayIndex = this.maxDisplayIndex;
+			}
+			this.timeline.setValue(this.displayIndex);
+		}
+
+	}
+
+	public int getNumberOfTicks() {
+		return this.numberOfTicks;
+	}
+
+	public void setNumberOfTicks(final int numberOfTicks) {
 		this.numberOfTicks = numberOfTicks;
 	}
 

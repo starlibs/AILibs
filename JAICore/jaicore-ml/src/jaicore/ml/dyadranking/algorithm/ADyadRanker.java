@@ -1,5 +1,6 @@
 package jaicore.ml.dyadranking.algorithm;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import jaicore.ml.core.dataset.IDataset;
@@ -36,33 +37,4 @@ import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
  */
 public abstract class ADyadRanker implements IBatchLearner<IDyadRankingInstance> {
 
-	@Override
-	public void train(IDataset dataset) throws TrainingException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public IDyadRankingInstance predict(IInstance instance) throws PredictionException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<IDyadRankingInstance> predict(IDataset dataset) throws PredictionException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public IPredictiveModelConfiguration getConfiguration() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void setConfiguration(IPredictiveModelConfiguration configuration) throws ConfigurationException {
-		// TODO Auto-generated method stub
-
-	}
 }

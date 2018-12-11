@@ -10,9 +10,12 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import javax.management.openmbean.OpenDataException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.algorithm.AlgorithmEvent;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.AlgorithmFinishedEvent;
@@ -41,9 +44,10 @@ import jaicore.search.structure.graphgenerator.SuccessorGenerator;
  * @param <N>
  * @param <A>
  */
-public class RandomSearch<N, A> extends AbstractORGraphSearch<GraphSearchInput<N, A>, Object, N, A, Double, N, A> {
+public class RandomSearch<N, A> extends AbstractORGraphSearch<GraphSearchInput<N, A>, Object, N, A, Double, N, A> implements ILoggingCustomizable {
 
-	private final Logger logger = LoggerFactory.getLogger(RandomSearch.class);
+	private String loggerName;
+	private Logger logger = LoggerFactory.getLogger(RandomSearch.class);
 
 	private final N root;
 	private final SuccessorGenerator<N, A> gen;
@@ -75,9 +79,9 @@ public class RandomSearch<N, A> extends AbstractORGraphSearch<GraphSearchInput<N
 
 	private void expandNode(N node) throws InterruptedException {
 		assert !closed.contains(node) && !goalTester.isGoal(node);
-		logger.info("Expanding next node {}", node);
+		logger.debug("Expanding next node {}", node);
 		List<NodeExpansionDescription<N, A>> successors = gen.generateSuccessors(node); // could have been interrupted here
-		logger.info("Identified {} successor(s), which are now appended.", successors.size());
+		logger.debug("Identified {} successor(s), which are now appended.", successors.size());
 		boolean atLeastOneSuccessorPrioritized = false;
 		for (NodeExpansionDescription<N, A> successor : successors) {
 			exploredGraph.addItem(successor.getTo());
@@ -89,7 +93,7 @@ public class RandomSearch<N, A> extends AbstractORGraphSearch<GraphSearchInput<N
 			exploredGraph.addEdge(node, successor.getTo(), successor.getAction());
 			boolean isGoalNode = goalTester.isGoal(successor.getTo());
 			if (isGoalNode)
-				logger.info("Found goal node {}!", successor);
+				logger.debug("Found goal node {}!", successor);
 			postEvent(new NodeReachedEvent<>(successor.getFrom(), successor.getTo(), isGoalNode ? "or_solution" : (isPrioritized ? "or_prioritized" : "or_open")));
 		}
 		if (!successors.isEmpty() && prioritizedNodes.contains(node) && !atLeastOneSuccessorPrioritized) {
@@ -99,6 +103,7 @@ public class RandomSearch<N, A> extends AbstractORGraphSearch<GraphSearchInput<N
 		if (!prioritizedNodes.contains(node))
 			postEvent(new NodeTypeSwitchEvent<N>(node, "or_closed"));
 		closed.add(node);
+		logger.debug("Finished node expansion. Sizes of explored graph and CLOSED are {} and {} respectively.", exploredGraph.getItems().size(), closed.size());
 	}
 
 	@Override
@@ -111,6 +116,7 @@ public class RandomSearch<N, A> extends AbstractORGraphSearch<GraphSearchInput<N
 			postEvent(new GraphInitializedEvent<>(root));
 			AlgorithmEvent event = new AlgorithmInitializedEvent();
 			postEvent(event);
+			logger.info("Starting random search ...");
 			return event;
 		}
 		case active: {
@@ -129,6 +135,7 @@ public class RandomSearch<N, A> extends AbstractORGraphSearch<GraphSearchInput<N
 				return event;
 			}
 			AlgorithmEvent event = new GraphSearchSolutionCandidateFoundEvent<>(drawnPath);
+			logger.info("Identified new solution ...");
 			postEvent(event);
 			return event;
 		}
@@ -151,7 +158,7 @@ public class RandomSearch<N, A> extends AbstractORGraphSearch<GraphSearchInput<N
 	}
 
 	public SearchGraphPath<N, A> nextSolutionUnderNode(N node) throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {
-
+		logger.info("Looking for next solution under node {}", node);
 		checkTermination();
 
 		/* if the root is exhausted, cancel */
@@ -257,4 +264,17 @@ public class RandomSearch<N, A> extends AbstractORGraphSearch<GraphSearchInput<N
 		return null;
 	}
 
+	@Override
+	public void setLoggerName(String name) {
+		
+		logger.info("Switch logger name from {} to {}", this.loggerName, name);
+		this.loggerName = name;
+		this.logger = LoggerFactory.getLogger(this.loggerName);
+		logger.info("Switched logger name to {}", this.loggerName);
+	}
+
+	@Override
+	public String getLoggerName() {
+		return loggerName;
+	}
 }

@@ -69,10 +69,12 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 					"Can only train the Plackett-Luce net dyad ranker with a dyad ranking dataset!");
 		}
 		DyadRankingDataset drDataset = (DyadRankingDataset) dataset;
+		while(epoch < 10) {
 		for (IInstance dyadRankingInstance : drDataset) {
 			this.update(dyadRankingInstance);
 		}
 		epoch++;
+		}
 	}
 
 	@Override
@@ -82,7 +84,7 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 					"Can only update the Plackett-Luce net dyad ranker with a dyad ranking instance!");
 		}
 
-		DyadRankingInstance drInstance = (DyadRankingInstance) instance;
+		IDyadRankingInstance drInstance = (IDyadRankingInstance) instance;
 		// init weight update vector
 		INDArray dyadMatrix;
 		List<INDArray> dyadList = new ArrayList<INDArray>(drInstance.length());
@@ -96,7 +98,6 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 
 		List<INDArray> activations = plNet.feedForward(dyadMatrix);
 		INDArray output = activations.get(activations.size() - 1);
-		System.out.println();
 		output = output.transpose();
 		INDArray deltaW = Nd4j.zeros(plNet.params().length());
 		Gradient deltaWk = null;
@@ -128,7 +129,7 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 			throw new IllegalArgumentException(
 					"Can only make prediction for dyad ranking instances using the Plackett-Luce net dyad ranker!");
 		}
-		DyadRankingInstance drInstance = (DyadRankingInstance) instance;
+		IDyadRankingInstance drInstance = (IDyadRankingInstance) instance;
 		List<Pair<Dyad, Double>> dyadUtilityPairs = new ArrayList<Pair<Dyad, Double>>(drInstance.length());
 		for (Dyad dyad : drInstance) {
 			INDArray instanceOfDyad = Nd4j.create(dyad.getInstance().asArray());
@@ -213,7 +214,6 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 		}
 		MultiLayerConfiguration config = MultiLayerConfiguration.fromJson(json);
 		MultiLayerNetwork network = new MultiLayerNetwork(config);
-
 		return network;
 	}
 }

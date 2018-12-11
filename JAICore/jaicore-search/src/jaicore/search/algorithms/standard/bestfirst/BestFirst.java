@@ -1035,6 +1035,9 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 		this.logger.info("Switching logger from {} to {}", this.logger.getName(), name);
 		this.logger = LoggerFactory.getLogger(name);
 		this.logger.info("Activated logger {} with name {}", name, this.logger.getName());
+		if (this.nodeEvaluator instanceof ILoggingCustomizable) {
+			((ILoggingCustomizable) this.nodeEvaluator).setLoggerName(name + ".nodeeval");
+		}
 	}
 
 	@Override
