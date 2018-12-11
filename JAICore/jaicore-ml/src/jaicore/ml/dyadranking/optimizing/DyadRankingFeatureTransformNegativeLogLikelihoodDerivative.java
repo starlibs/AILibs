@@ -9,7 +9,7 @@ import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.dyadranking.Dyad;
 import jaicore.ml.dyadranking.algorithm.IDyadFeatureTransform;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
-import jaicore.ml.dyadranking.dataset.DyadRankingInstance;
+import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 
 /**
  * Represents the derivate of the negative log likelihood function in the
@@ -36,7 +36,7 @@ public class DyadRankingFeatureTransformNegativeLogLikelihoodDerivative
 	@Override
 	public Vector apply(Vector vector) {
 
-		HashMap<Pair<Vector, DyadRankingInstance>, Double> preComputedGValues = new HashMap<>();
+		HashMap<Pair<Vector, IDyadRankingInstance>, Double> preComputedGValues = new HashMap<>();
 
 		Vector result = new DenseDoubleVector(vector.length());
 
@@ -48,18 +48,18 @@ public class DyadRankingFeatureTransformNegativeLogLikelihoodDerivative
 	}
 
 	private double computeDerivativeForIndex(int i, Vector vector,
-			HashMap<Pair<Vector, DyadRankingInstance>, Double> preComputedGValues) {
+			HashMap<Pair<Vector, IDyadRankingInstance>, Double> preComputedGValues) {
 		double result = 0;
 
 		for (IInstance instance : dataset) {
 
-			for (int j = 0; j < ((DyadRankingInstance) instance).length() - 1; j++) {
-				double gValue = getOrCreateG(vector, ((DyadRankingInstance) instance), preComputedGValues);
+			for (int j = 0; j < ((IDyadRankingInstance) instance).length() - 1; j++) {
+				double gValue = getOrCreateG(vector, ((IDyadRankingInstance) instance), preComputedGValues);
 				if (gValue == 0) {
 					throw new ArithmeticException("Cannot divide by 0!");
 				} else {
-					result += h(vector, ((DyadRankingInstance) instance), i) / gValue;
-					result -= featureTransform.transform(((DyadRankingInstance) instance).getDyadAtPosition(j))
+					result += h(vector, ((IDyadRankingInstance) instance), i) / gValue;
+					result -= featureTransform.transform(((IDyadRankingInstance) instance).getDyadAtPosition(j))
 							.getValue(i);
 				}
 			}
@@ -68,7 +68,7 @@ public class DyadRankingFeatureTransformNegativeLogLikelihoodDerivative
 		return result;
 	}
 
-	private double h(Vector vector, DyadRankingInstance instance, int i) {
+	private double h(Vector vector, IDyadRankingInstance instance, int i) {
 		double result = 0;
 
 		for (Dyad dyad : instance) {
@@ -80,9 +80,9 @@ public class DyadRankingFeatureTransformNegativeLogLikelihoodDerivative
 		return result;
 	}
 
-	private double getOrCreateG(Vector vector, DyadRankingInstance instance,
-			HashMap<Pair<Vector, DyadRankingInstance>, Double> preComputedGValues) {
-		Pair<Vector, DyadRankingInstance> newPair = new Pair<>(vector, instance);
+	private double getOrCreateG(Vector vector, IDyadRankingInstance instance,
+			HashMap<Pair<Vector, IDyadRankingInstance>, Double> preComputedGValues) {
+		Pair<Vector, IDyadRankingInstance> newPair = new Pair<>(vector, instance);
 		if (preComputedGValues.containsKey(newPair)) {
 			return preComputedGValues.get(newPair);
 		} else {
@@ -92,7 +92,7 @@ public class DyadRankingFeatureTransformNegativeLogLikelihoodDerivative
 		}
 	}
 
-	private double g(Vector vector, DyadRankingInstance instance) {
+	private double g(Vector vector, IDyadRankingInstance instance) {
 		double result = 0;
 
 		for (Dyad dyad : instance) {

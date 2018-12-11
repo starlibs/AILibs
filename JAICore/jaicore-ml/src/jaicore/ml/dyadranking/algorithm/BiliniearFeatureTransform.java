@@ -19,4 +19,9 @@ public class BiliniearFeatureTransform implements IDyadFeatureTransform {
 		return x.kroneckerProduct(y.asArray());
 	}
 
+	@Override
+	public int getTransformedVectorLength(int alternativeLength, int instanceLength) {
+		return alternativeLength * instanceLength;
+	}
+
 }
