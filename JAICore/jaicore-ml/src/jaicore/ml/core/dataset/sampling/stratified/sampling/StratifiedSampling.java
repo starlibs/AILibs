@@ -2,8 +2,6 @@ package jaicore.ml.core.dataset.sampling.stratified.sampling;
 
 import java.util.Random;
 
-import org.jfree.data.general.Dataset;
-
 import jaicore.basic.algorithm.AlgorithmEvent;
 import jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.AlgorithmInitializedEvent;
