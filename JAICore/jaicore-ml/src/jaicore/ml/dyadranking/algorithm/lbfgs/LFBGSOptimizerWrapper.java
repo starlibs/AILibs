@@ -1,5 +1,6 @@
 package jaicore.ml.dyadranking.algorithm.lbfgs;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,13 +21,12 @@ public class LFBGSOptimizerWrapper implements IGradientBasedOptimizer {
 	public Vector optimize(IGradientDescendableFunction descendableFunction, IGradientFunction gradient,
 			Vector initialGuess) {
 		/** Workaround for solving argmin */
-		Map<Double, Vector> optimizationRequests = new HashMap<>();
+		double [] coeffs = initialGuess.asArray();
 		log.debug("Got optimization request.");
-		LBFGS.Result optimizedResult = LBFGS.lbfgs(initialGuess.asArray(),
+		LBFGS.Result optimizedResult = LBFGS.lbfgs(coeffs,
 				(double[] x, double[] gradientToFill, int numParams, double stepSize) -> {
 					Vector inputVector = new DenseDoubleVector(x);
 					double result = descendableFunction.apply(inputVector);
-					optimizationRequests.put(result, inputVector);
 					Vector actualGradient = gradient.apply(inputVector);
 					if (actualGradient.length() != gradientToFill.length) {
 						throw new IllegalStateException(
@@ -41,7 +41,8 @@ public class LFBGSOptimizerWrapper implements IGradientBasedOptimizer {
 		if (optimizedResult.status != LBFGS.Status.LBFGS_SUCCESS && optimizedResult.status != LBFGS.Status.LBFGS_STOP) {
 			log.warn("LFBGS returned no success, the result may not be the optimial result!");
 		}
-		return optimizationRequests.get(optimizedResult.objective);
+		log.debug("lBFGS returned {}", Arrays.toString(coeffs));
+		return new DenseDoubleVector(coeffs);
 	}
 
 }
