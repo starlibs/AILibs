@@ -17,7 +17,7 @@ import jaicore.ml.dyadranking.Dyad;
  * dyads contained in its ordering. It saves the instance and alternatives
  * separately and contstructs dyads from them on request.
  * 
- * @author Helena Graf
+ * @author Helena Graf, Mirko Jürgens
  *
  */
 public class SparseDyadRankingInstance implements IDyadRankingInstance {
