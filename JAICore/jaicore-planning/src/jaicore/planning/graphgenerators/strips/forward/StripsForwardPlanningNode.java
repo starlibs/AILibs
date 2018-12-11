@@ -49,6 +49,6 @@ public class StripsForwardPlanningNode {
 
 	@Override
 	public String toString() {
-		return "StripsForwardPlanningNode [state=" + state + ", actionToReachState=" + (actionToReachState != null ? actionToReachState.getEncoding() : null) + "]";
+		return "StripsForwardPlanningNode [actionToReachState=" + (actionToReachState != null ? actionToReachState.getEncoding() : null) + "]";
 	}
 }

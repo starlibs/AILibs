@@ -41,6 +41,7 @@ public class STRIPSPlanner<V extends Comparable<V>>
 
 	/* state of the algorithm */
 	private boolean visualize = false;
+	private GraphGenerator<StripsForwardPlanningNode, String> graphGenerator;
 
 	public STRIPSPlanner(StripsPlanningProblem problem, INodeEvaluator<StripsForwardPlanningNode, V> nodeEvaluator) {
 		super(problem);
@@ -83,6 +84,23 @@ public class STRIPSPlanner<V extends Comparable<V>>
 						+ " contains variables that are not defined in the parameter list: "
 						+ undeclaredParamsInDelList);
 		}
+		
+		/* logging problem */
+		getLogger().info(
+				"Initializing planner for the following problem:\n\tOperations:{}\n\tInitial State: {}\n\tGoal State: {}",
+				problem.getDomain().getOperations().stream()
+						.map(o -> "\n\t - " + o.getName() + "\n\t\tParams: " + o.getParams() + "\n\t\tPre: "
+								+ o.getPrecondition() + "\n\t\tAdd: " + ((StripsOperation) o).getAddList()
+								+ "\n\t\tDel: " + ((StripsOperation) o).getDeleteList())
+						.collect(Collectors.joining()),
+				problem.getInitState(), problem.getGoalState());
+
+		/* create search algorithm */
+		graphGenerator = reducer.transform(problem);
+		GeneralEvaluatedTraversalTree<StripsForwardPlanningNode, String, V> searchProblem = new GeneralEvaluatedTraversalTree<>(
+				graphGenerator, nodeEvaluator);
+		search = new BestFirst<GeneralEvaluatedTraversalTree<StripsForwardPlanningNode, String, V>, StripsForwardPlanningNode, String, V>(
+				searchProblem);
 	}
 
 	@Override
@@ -90,24 +108,6 @@ public class STRIPSPlanner<V extends Comparable<V>>
 		switch (getState()) {
 		case created:
 			setState(AlgorithmState.active);
-
-			/* logging problem */
-			StripsPlanningProblem problem = getInput();
-			getLogger().info(
-					"Initializing planner for the following problem:\n\tOperations:{}\n\tInitial State: {}\n\tGoal State: {}",
-					problem.getDomain().getOperations().stream()
-							.map(o -> "\n\t - " + o.getName() + "\n\t\tParams: " + o.getParams() + "\n\t\tPre: "
-									+ o.getPrecondition() + "\n\t\tAdd: " + ((StripsOperation) o).getAddList()
-									+ "\n\t\tDel: " + ((StripsOperation) o).getDeleteList())
-							.collect(Collectors.joining()),
-					problem.getInitState(), problem.getGoalState());
-
-			/* create search algorithm */
-			GraphGenerator<StripsForwardPlanningNode, String> gg = reducer.transform(problem);
-			GeneralEvaluatedTraversalTree<StripsForwardPlanningNode, String, V> searchProblem = new GeneralEvaluatedTraversalTree<>(
-					gg, nodeEvaluator);
-			search = new BestFirst<GeneralEvaluatedTraversalTree<StripsForwardPlanningNode, String, V>, StripsForwardPlanningNode, String, V>(
-					searchProblem);
 			search.setTimeout(getTimeout());
 			setLoggerOfSearch();
 			if (visualize) {
@@ -173,5 +173,9 @@ public class STRIPSPlanner<V extends Comparable<V>>
 	@Override
 	public EvaluatedPlan<StripsAction, V> getOutput() {
 		return getBestSeenSolution();
+	}
+
+	public GraphGenerator<StripsForwardPlanningNode, String> getGraphGenerator() {
+		return graphGenerator;
 	}
 }
