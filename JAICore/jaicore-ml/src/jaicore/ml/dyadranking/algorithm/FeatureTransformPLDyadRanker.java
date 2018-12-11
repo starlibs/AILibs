@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
 
+import de.upb.isys.linearalgebra.DenseDoubleVector;
 import de.upb.isys.linearalgebra.Vector;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
@@ -12,6 +13,7 @@ import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.core.exception.TrainingException;
 import jaicore.ml.core.predictivemodel.IPredictiveModelConfiguration;
 import jaicore.ml.dyadranking.Dyad;
+import jaicore.ml.dyadranking.algorithm.lbfgs.LBFGSOptimizerWrapper;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import jaicore.ml.dyadranking.dataset.DyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
@@ -45,7 +47,7 @@ public class FeatureTransformPLDyadRanker extends APLDyadRanker {
 	private IDyadRankingFeatureTransformPLGradientFunction negativeLogLikelihoodDerivative;
 
 	/* The optimizer used to find w */
-	private IGradientBasedOptimizer optimizer;
+	private IGradientBasedOptimizer optimizer = new LBFGSOptimizerWrapper();
 
 	/**
 	 * Constructs a new feature transform Placket-Luce dyad ranker with bilinear
@@ -99,7 +101,9 @@ public class FeatureTransformPLDyadRanker extends APLDyadRanker {
 
 		negativeLogLikelihood.initialize(dRDataset, featureTransform);
 		negativeLogLikelihoodDerivative.initialize(dRDataset, featureTransform);
-		w = optimizer.optimize(negativeLogLikelihood, negativeLogLikelihoodDerivative);
+		Vector initialGuess = new DenseDoubleVector(dRDataset.size());
+		initialGuess.fillRandomly();
+		w = optimizer.optimize(negativeLogLikelihood, negativeLogLikelihoodDerivative, initialGuess);
 	}
 
 	@Override
