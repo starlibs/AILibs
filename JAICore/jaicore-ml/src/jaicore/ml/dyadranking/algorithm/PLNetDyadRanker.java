@@ -8,17 +8,17 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
+import org.aeonbits.owner.ConfigFactory;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.layers.DenseLayer;
-import org.deeplearning4j.nn.conf.layers.OutputLayer;
+import org.deeplearning4j.nn.gradient.DefaultGradient;
 import org.deeplearning4j.nn.gradient.Gradient;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.linalg.lossfunctions.ILossFunction;
 import org.nd4j.linalg.primitives.Pair;
 
 import jaicore.basic.FileUtil;
@@ -52,8 +52,8 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 	 * 
 	 * @param configuration
 	 */
-	public PLNetDyadRanker(IPLNetDyadRankerConfiguration configuration) {
-		this.configuration = configuration;
+	public PLNetDyadRanker() {
+		this.configuration = ConfigFactory.create(IPLNetDyadRankerConfiguration.class);
 		this.plNetLoss = new PLNetLoss();
 		this.plNet = createNetworkFromConfigFile(configuration.plNetConfig());
 	}
@@ -76,28 +76,35 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 			throw new IllegalArgumentException(
 					"Can only update the Plackett-Luce net dyad ranker with a dyad ranking instance!");
 		}
-
-		// TODO
-
 		DyadRankingInstance drInstance = (DyadRankingInstance) instance;
 		// init weight update vector
+		INDArray dyadMatrix;
+		List<INDArray> dyadList = new ArrayList<INDArray>(drInstance.length());
+		for (Dyad dyad : drInstance) {
+			INDArray instanceOfDyad = Nd4j.create(dyad.getInstance().asArray());
+			INDArray alternativeOfDyad = Nd4j.create(dyad.getAlternative().asArray());
+			INDArray dyadVector = Nd4j.hstack(instanceOfDyad, alternativeOfDyad);
+			dyadList.add(dyadVector);
+		}
+		dyadMatrix = Nd4j.vstack(dyadList);
+		List<INDArray> activations = plNet.feedForward(dyadMatrix);
+		INDArray output = activations.get(activations.size() - 1);
 		INDArray deltaW = Nd4j.zeros(plNet.numParams());
-		plNetLoss.preComputeOutputs(drInstance);
 		for (int k = 0; k < drInstance.length(); k++) {
-			plNetLoss.setK(k);
 			// compute derivative of loss w.r.t. k
-			INDArray currentOutputGradient = plNetLoss.computeGradient(null, null, null, null);
+			plNet.setInput(dyadList.get(k));
+			plNet.feedForward(true,false);
+			INDArray lossGradient = plNetLoss.computeLossGradient(output, k);
 			// compute backprop gradient for weight updates w.r.t. k
-			Pair<Gradient, INDArray> p = plNet.backpropGradient(currentOutputGradient, null);
+			Pair<Gradient, INDArray> p = plNet.backpropGradient(lossGradient, null);
 			Gradient gradient = p.getFirst();
-			plNet.getUpdater().update(plNet, gradient, 0, 0, 0, null);
 			INDArray deltaWk = gradient.gradient();
 			// add it
 			deltaW.add(deltaWk);
 		}
-		//
-		INDArray update = deltaW.mul(configuration.plNetLearningRate());
-		plNet.params().subi(update);
+		DefaultGradient weightGradient = new DefaultGradient(deltaW);
+		plNet.getUpdater().update(plNet, weightGradient, 0, 0, 1, null);
+		plNet.params().subi(weightGradient.gradient());
 	}
 
 	@Override
@@ -163,18 +170,16 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 	 * @param numInputs
 	 * @param numHiddenNodes
 	 * @param seed
-	 * @return
+	 * @return New {@link MultiLayerNetwork}
 	 */
-	private MultiLayerNetwork createNetwork(int numInputs, int numHiddenNodes, long seed, ILossFunction lossFunction) {
+	private MultiLayerNetwork createNetwork(int numInputs, int numHiddenNodes, long seed) {
 		int numOutputs = 1;
 		MultiLayerConfiguration config = new NeuralNetConfiguration.Builder().seed(seed).list()
 				.layer(0,
 						new DenseLayer.Builder().nIn(numInputs).nOut(numHiddenNodes).weightInit(WeightInit.XAVIER)
 								.activation(Activation.SIGMOID).build())
-				.layer(1,
-						new OutputLayer.Builder().lossFunction(lossFunction).weightInit(WeightInit.XAVIER)
-								.activation(Activation.IDENTITY).weightInit(WeightInit.XAVIER).nIn(numHiddenNodes)
-								.nOut(numOutputs).build())
+				.layer(1, new DenseLayer.Builder().weightInit(WeightInit.XAVIER).activation(Activation.IDENTITY)
+						.weightInit(WeightInit.XAVIER).nIn(numHiddenNodes).nOut(numOutputs).build())
 				.build();
 
 		return new MultiLayerNetwork(config);
@@ -199,7 +204,7 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 		}
 		MultiLayerConfiguration config = MultiLayerConfiguration.fromJson(json);
 		MultiLayerNetwork network = new MultiLayerNetwork(config);
-		
+
 		return network;
 	}
 }

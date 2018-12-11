@@ -20,7 +20,7 @@ class PLNetDyadRankerTest {
 	 */
 	@Test
 	void testPLNetCreation() {
-		DyadRankingDataset drDataset = new DyadRankingDataset();
+		PLNetDyadRanker pldr = new PLNetDyadRanker();
 	}
 
 }
