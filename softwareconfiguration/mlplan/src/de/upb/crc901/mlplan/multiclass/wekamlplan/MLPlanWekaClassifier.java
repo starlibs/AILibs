@@ -67,19 +67,22 @@ public abstract class MLPlanWekaClassifier implements Classifier, CapabilitiesHa
 	private Logger logger = LoggerFactory.getLogger(MLPlanWekaClassifier.class);
 	private String loggerName;
 
+	private final MLPlanClassifierConfig config;
 	private final File componentFile;
 	private final Collection<Component> components;
-	private final ClassifierFactory factory;
-	private INodeEvaluator<TFDNode, Double> preferredNodeEvaluator;
 	private final ADecomposableDoubleMeasure<Double> performanceMeasure;
-	private final MLPlanClassifierConfig config;
-	private Classifier selectedClassifier;
-	private double internalValidationErrorOfSelectedClassifier;
-	private final EventBus eventBus = new EventBus();
+	
+	private INodeEvaluator<TFDNode, Double> preferredNodeEvaluator;
+	private final ClassifierFactory factory;
 	private TwoPhaseHASCOFactory hascoFactory;
 	private OptimizingFactory<TwoPhaseSoftwareConfigurationProblem, Classifier, HASCOSolutionCandidate<Double>, Double> optimizingFactory;
 
 	private AlgorithmState state = AlgorithmState.created;
+	
+	private final EventBus eventBus = new EventBus();
+	private Classifier selectedClassifier;
+	private double internalValidationErrorOfSelectedClassifier;
+	
 	private Instances dataShownToSearch = null;
 	private Instances data = null;
 

@@ -1,4 +1,4 @@
-package de.upb.crc901.mlplan.multilabel;
+package de.upb.crc901.mlplan.multilabel.mekamlplan;
 
 import java.io.Serializable;
 import java.util.Enumeration;

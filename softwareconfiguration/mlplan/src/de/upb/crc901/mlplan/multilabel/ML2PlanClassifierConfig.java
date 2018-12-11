@@ -2,6 +2,7 @@ package de.upb.crc901.mlplan.multilabel;
 
 import org.aeonbits.owner.Config.Sources;
 
+import de.upb.crc901.mlplan.multilabel.mekamlplan.ML2PlanMekaClassifier;
 import hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCOConfig;
 
 /**

@@ -1,4 +1,4 @@
-package de.upb.crc901.mlplan.multilabel;
+package de.upb.crc901.mlplan.multilabel.mekamlplan.meka;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,6 +7,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.upb.crc901.mlplan.multilabel.mekamlplan.MultiLabelClassifierFactory;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
 import hasco.model.Parameter;
@@ -27,7 +28,7 @@ public class MEKAPipelineFactory implements MultiLabelClassifierFactory {
 
 	@Override
 	public MultiLabelClassifier getComponentInstantiation(ComponentInstance groundComponent) {
-		return produceClassifier(groundComponent);
+		return (MultiLabelClassifier) convertGroundComponentToMLClassifier(groundComponent);
 	}
 
 	/**
@@ -37,7 +38,8 @@ public class MEKAPipelineFactory implements MultiLabelClassifierFactory {
 	 *            the ComponentInstance to convert
 	 * @return a new MultiLabelClassifier
 	 */
-	private MultiLabelClassifier produceClassifier(ComponentInstance groundComponent) {
+	private Classifier convertGroundComponentToMLClassifier(ComponentInstance groundComponent) {
+		System.out.println(groundComponent);
 
 		/* collect basic information about the component */
 		Component component = groundComponent.getComponent();
@@ -92,11 +94,10 @@ public class MEKAPipelineFactory implements MultiLabelClassifierFactory {
 					if (baseClassifierCI == null)
 						throw new IllegalStateException("The required interface \"Classifier\" of component "
 								+ groundComponent.getComponent().getName() + " has not been satisifed!");
-					Classifier baseClassifier = produceClassifier(baseClassifierCI);
+					Classifier baseClassifier = convertGroundComponentToMLClassifier(baseClassifierCI);
 					cc.setClassifier(baseClassifier);
 				} else if (c instanceof SMO) {
-					ComponentInstance kernel = groundComponent.getSatisfactionOfRequiredInterfaces().values().iterator()
-							.next(); // there is only one required interface
+					ComponentInstance kernel = groundComponent.getSatisfactionOfRequiredInterfaces().values().iterator().next(); // there is only one required interface
 					System.out.println("Kernel " + kernel);
 				} else
 					throw new IllegalArgumentException(
@@ -111,7 +112,7 @@ public class MEKAPipelineFactory implements MultiLabelClassifierFactory {
 			System.out.println("To Classifier");
 			System.out.println(c);
 
-			return (MultiLabelClassifier) c;
+			return c;
 
 		} catch (ClassNotFoundException | NoClassDefFoundError e) {
 			logger.error("Could not find a class with class name {}", className);

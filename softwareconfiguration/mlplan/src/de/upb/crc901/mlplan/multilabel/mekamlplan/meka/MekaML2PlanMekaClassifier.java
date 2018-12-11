@@ -1,4 +1,4 @@
-package de.upb.crc901.mlplan.multilabel;
+package de.upb.crc901.mlplan.multilabel.mekamlplan.meka;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -7,6 +7,9 @@ import java.util.Properties;
 
 import org.aeonbits.owner.ConfigFactory;
 
+import de.upb.crc901.mlplan.multilabel.ML2PlanClassifierConfig;
+import de.upb.crc901.mlplan.multilabel.mekamlplan.ML2PlanMekaBuilder;
+import de.upb.crc901.mlplan.multilabel.mekamlplan.ML2PlanMekaClassifier;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.model.travesaltree.Node;
@@ -33,7 +36,6 @@ public class MekaML2PlanMekaClassifier extends ML2PlanMekaClassifier {
 				builder.getAlhorithmConfigFile() != null ? loadOwnerConfig(builder.getAlhorithmConfigFile())
 						: ConfigFactory.create(ML2PlanClassifierConfig.class));
 		this.setPreferredNodeEvaluator(new INodeEvaluator<TFDNode, Double>() {
-
 			@Override
 			public Double f(Node<TFDNode, ?> node) throws Exception {
 				return null;

@@ -7,10 +7,10 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Random;
 
-import de.upb.crc901.mlplan.multilabel.ML2PlanMekaBuilder;
-import de.upb.crc901.mlplan.multilabel.ML2PlanMekaClassifier;
-import de.upb.crc901.mlplan.multilabel.MekaML2PlanMekaClassifier;
-import de.upb.crc901.mlplan.multilabel.MultilabelMLPipeline;
+import de.upb.crc901.mlplan.multilabel.mekamlplan.ML2PlanMekaBuilder;
+import de.upb.crc901.mlplan.multilabel.mekamlplan.ML2PlanMekaClassifier;
+import de.upb.crc901.mlplan.multilabel.mekamlplan.MultilabelMLPipeline;
+import de.upb.crc901.mlplan.multilabel.mekamlplan.meka.MekaML2PlanMekaClassifier;
 import jaicore.ml.WekaUtil;
 import weka.classifiers.evaluation.Evaluation;
 import weka.core.Instances;

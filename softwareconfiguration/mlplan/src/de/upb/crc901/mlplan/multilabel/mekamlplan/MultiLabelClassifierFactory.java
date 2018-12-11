@@ -1,4 +1,4 @@
-package de.upb.crc901.mlplan.multilabel;
+package de.upb.crc901.mlplan.multilabel.mekamlplan;
 
 import hasco.optimizingfactory.BaseFactory;
 import meka.classifiers.multilabel.MultiLabelClassifier;

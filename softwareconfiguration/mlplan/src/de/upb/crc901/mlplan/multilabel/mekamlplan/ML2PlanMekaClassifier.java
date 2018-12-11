@@ -1,4 +1,4 @@
-package de.upb.crc901.mlplan.multilabel;
+package de.upb.crc901.mlplan.multilabel.mekamlplan;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,6 +18,7 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
 import de.upb.crc901.mlplan.multiclass.MLPlanClassifierConfig;
+import de.upb.crc901.mlplan.multilabel.ML2PlanClassifierConfig;
 import hasco.core.HASCOSolutionCandidate;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
