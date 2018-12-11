@@ -1,6 +1,8 @@
 package jaicore.ml.core.dataset.sampling.stratified.sampling;
 
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import jaicore.basic.algorithm.AlgorithmEvent;
 import jaicore.basic.algorithm.AlgorithmFinishedEvent;
@@ -11,6 +13,7 @@ import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.ASamplingAlgorithm;
 import jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
 import jaicore.ml.core.dataset.sampling.SimpleRandomSampling;
+import jaicore.ml.core.dataset.sampling.WaitForSamplingStepEvent;
 
 /**
  * Implementation of Stratified Sampling: Divide dataset into strati and sample from each of these.
@@ -23,8 +26,9 @@ public class StratifiedSampling extends ASamplingAlgorithm{
 	private IStratiAssigner stratiAssigner;
 	private Random random;
 	private IDataset[] strati;
-	private int stratiIndex;
 	private IDataset datasetCopy;
+	private ExecutorService executorService;
+	private boolean simpleRandomSamplingStarted;
 	
 	/**
 	 * Constructor for Stratified Sampling.
@@ -36,9 +40,6 @@ public class StratifiedSampling extends ASamplingAlgorithm{
 		this.stratiAmountSelector = stratiAmountSelector;
 		this.stratiAssigner = stratiAssigner;
 		this.random = random;
-		// TODO: create empty dataset
-		this.datasetCopy = null;
-		this.datasetCopy.addAll(this.getInput());
 	}
 	
 	@Override
@@ -47,14 +48,18 @@ public class StratifiedSampling extends ASamplingAlgorithm{
 		case created:
 			// TODO: create empty dataset
 			this.sample = null;
+			// TODO: create empty dataset
+			this.datasetCopy = null;
+			this.datasetCopy.addAll(this.getInput());
 			this.strati = new IDataset[this.stratiAmountSelector.selectStratiAmount(this.datasetCopy)];
 			// TODO: create emtpy strati dataset
 			for (int i = 0; i < this.strati.length; i++) {
 				this.strati[i] = null;
 			}
+			this.simpleRandomSamplingStarted = false;
 			this.stratiAssigner.init(this.datasetCopy, this.strati.length);
-			this.stratiIndex = 0;
 			this.setState(AlgorithmState.active);
+			this.executorService = Executors.newCachedThreadPool();
 			return new AlgorithmInitializedEvent();			
 		case active:
 			if (this.sample.size() < this.sampleSize) {
@@ -69,20 +74,38 @@ public class StratifiedSampling extends ASamplingAlgorithm{
 					}
 					return new SampleElementAddedEvent();
 				} else {
-					// Sample from the srati one by one.					
-					if (this.stratiIndex >= this.strati.length) {
-						// All strati were used
-						this.setState(AlgorithmState.inactive);
-						return new AlgorithmFinishedEvent();
+					if (!simpleRandomSamplingStarted) {
+						// Simple Random Sampling has not started yet -> Initialize one sampling thread per stratum
+						for (int i = 0; i < this.strati.length; i++) {
+							int index = i;
+							this.executorService.execute(new Runnable() {
+								@Override
+								public void run() {
+									int sizeOfStratiSample = (int)(sampleSize * ((double)strati[index].size() / (double)getInput().size()));
+									SimpleRandomSampling simpleRandomSampling = new SimpleRandomSampling(random);
+									simpleRandomSampling.setInput(strati[index]);
+									simpleRandomSampling.setSampleSize(sizeOfStratiSample);
+									try {
+										sample.addAll(simpleRandomSampling.call());
+									} catch (Exception e) {
+										e.printStackTrace();
+									}
+								}
+							});
+						}
+						// Prevent executor service from more threads being added and set Simple Random Sampling to being started.
+						this.executorService.shutdown();
+						this.simpleRandomSamplingStarted = true;
+						return new WaitForSamplingStepEvent();
 					} else {
-						// Sample from the stratum with the current index
-						int sizeOfStratiSample = (int)(this.sampleSize * ((double)this.strati[stratiIndex].size() / (double)this.getInput().size()));
-						SimpleRandomSampling simpleRandomSampling = new SimpleRandomSampling(random);
-						simpleRandomSampling.setInput(this.strati[this.stratiIndex]);
-						simpleRandomSampling.setSampleSize(sizeOfStratiSample);
-						this.sample.addAll(simpleRandomSampling.call());
-						this.stratiIndex++;
-						return new SampleElementAddedEvent();
+						// Check if all threads are finished. If yes finish Stratified Sampling, wait shortly in this step otherwise.
+						if (this.executorService.isTerminated()) {
+							this.setState(AlgorithmState.inactive);
+							return new AlgorithmFinishedEvent();
+						} else {
+							wait(100);
+							return new WaitForSamplingStepEvent();
+						}
 					}
 				}
 			} else {
