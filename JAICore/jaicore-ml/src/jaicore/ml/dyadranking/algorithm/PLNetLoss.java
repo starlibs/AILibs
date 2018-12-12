@@ -23,6 +23,9 @@ public class PLNetLoss {
 	 * @return	The NLL loss for the given PLNet outputs.
 	 */
 	public static INDArray computeLoss(INDArray plNetOutputs) {
+		if (!(plNetOutputs.isRowVector()) || plNetOutputs.size(1) < 2 ) {
+			throw new IllegalArgumentException("Input has to be a row vector of 2 or more elements.");
+		}
 		long dyadRankingLength = plNetOutputs.size(1);
 		double loss = 0;
 		for (int m = 0; m <= dyadRankingLength - 2; m++) {
@@ -30,7 +33,7 @@ public class PLNetLoss {
 			innerSumSlice = Transforms.exp(innerSumSlice);
 			loss += Transforms.log(innerSumSlice.sum(1)).getDouble(0);
 		}
-		loss -= plNetOutputs.get(NDArrayIndex.interval(0, dyadRankingLength)).sum(0).getDouble(0);
+		loss -= plNetOutputs.get(NDArrayIndex.interval(0, dyadRankingLength - 1)).sum(1).getDouble(0);
 		return Nd4j.create(new double[]{loss});
 	}
 	
@@ -41,6 +44,9 @@ public class PLNetLoss {
 	 * @return				The gradient of the NLL loss w.r.t. the k-th dyad in the ranking.
 	 */
 	public static INDArray computeLossGradient(INDArray plNetOutputs, int k) {
+		if (!(plNetOutputs.isRowVector()) || plNetOutputs.size(1) < 2 || k < 0 || k >= plNetOutputs.size(1)) {
+			throw new IllegalArgumentException("Input has to be a row vector of 2 or more elements. And k has to be a valid index of plNetOutputs.");
+		}
 		long dyadRankingLength = plNetOutputs.size(1);
 		double errorGradient = 0;
 		for (int m = 0; m <= k; m++) {
