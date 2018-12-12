@@ -14,7 +14,7 @@ import jaicore.ml.core.evaluation.measure.multilabel.MultiLabelPerformanceMeasur
 public class ML2PlanMekaBuilder {
 	private File searchSpaceConfigFile = new File("conf/automl/searchmodels/meka/mlplan-multilabel.json");
 	private File alhorithmConfigFile = new File("conf/automl/ml2plan.properties");
-	private MultiLabelPerformanceMeasure performanceMeasure = MultiLabelPerformanceMeasure.F1_AVERAGE;
+	private MultiLabelPerformanceMeasure performanceMeasure = MultiLabelPerformanceMeasure.RANK;
 
 	/**
 	 * Constructor for a ML2PlanMekaBuilder that uses a default Meka configuration.

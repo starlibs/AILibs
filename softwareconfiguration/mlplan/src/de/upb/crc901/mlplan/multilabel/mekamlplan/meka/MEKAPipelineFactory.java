@@ -39,7 +39,6 @@ public class MEKAPipelineFactory implements MultiLabelClassifierFactory {
 	 * @return a new MultiLabelClassifier
 	 */
 	private Classifier convertGroundComponentToMLClassifier(ComponentInstance groundComponent) {
-		System.out.println(groundComponent);
 
 		/* collect basic information about the component */
 		Component component = groundComponent.getComponent();
@@ -104,13 +103,6 @@ public class MEKAPipelineFactory implements MultiLabelClassifierFactory {
 							"Required interfaces are currently only supported for SingleClassifierInhancer or SMO objects (and the base classifier must be their required interface). The presented class "
 									+ c.getClass().getName() + " does not satisfy this requirement.");
 			}
-
-			System.out.println("Convert Component Instance");
-			System.out.println(groundComponent.getPrettyPrint());
-			System.out.println("Component:");
-			System.out.println(groundComponent.getComponent());
-			System.out.println("To Classifier");
-			System.out.println(c);
 
 			return c;
 

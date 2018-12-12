@@ -77,5 +77,4 @@ public class MekaML2PlanMekaClassifier extends ML2PlanMekaClassifier {
 			}
 		};
 	}
-
 }
