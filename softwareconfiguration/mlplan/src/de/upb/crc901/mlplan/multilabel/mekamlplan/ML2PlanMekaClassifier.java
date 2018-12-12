@@ -46,7 +46,6 @@ import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.core.interfaces.GraphGenerator;
-import meka.classifiers.MultiXClassifier;
 import meka.classifiers.multilabel.MultiLabelClassifier;
 import weka.classifiers.Classifier;
 import weka.core.Capabilities;
@@ -68,7 +67,7 @@ import weka.core.OptionHandler;
  *
  */
 public abstract class ML2PlanMekaClassifier implements Classifier, CapabilitiesHandler, OptionHandler,
-		ILoggingCustomizable, IAlgorithm<Instances, Classifier>, MultiXClassifier {
+		ILoggingCustomizable, IAlgorithm<Instances, Classifier>, MultiLabelClassifier {
 
 	/** Logger for controlled output. */
 	private Logger logger = LoggerFactory.getLogger(ML2PlanMekaClassifier.class);
@@ -505,28 +504,4 @@ public abstract class ML2PlanMekaClassifier implements Classifier, CapabilitiesH
 		return this.internalValidationErrorOfSelectedClassifier;
 	}
 
-	@Override
-	public void setDebug(boolean debug) {
-		throw new UnsupportedOperationException("Cannot set log level for ML2Plan here.");
-	}
-
-	@Override
-	public boolean getDebug() {
-		return logger.isDebugEnabled();
-	}
-
-	@Override
-	public String debugTipText() {
-		throw new UnsupportedOperationException("ML2Plan: Debug Tip Text not available!");
-	}
-
-	@Override
-	public String getModel() {
-
-		if (selectedClassifier == null) {
-			return "No model built yet";
-		} else {
-			return selectedClassifier.toString();
-		}
-	}
 }

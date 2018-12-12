@@ -12,7 +12,6 @@ import de.upb.crc901.mlplan.multilabel.mekamlplan.ML2PlanMekaClassifier;
 import de.upb.crc901.mlplan.multilabel.mekamlplan.meka.MekaML2PlanMekaClassifier;
 import jaicore.ml.WekaUtil;
 import jaicore.ml.core.evaluation.measure.multilabel.MultiLabelPerformanceMeasure;
-import meka.classifiers.MultiXClassifier;
 import meka.classifiers.multilabel.Evaluation;
 import meka.classifiers.multilabel.MultiLabelClassifier;
 import meka.core.Metrics;
@@ -59,7 +58,7 @@ public class ML2PlanARFFExample {
 			System.out.println("Training time was " + trainTime + "s.");
 
 			/* evaluate solution produced by mlplan */
-			Result result = Evaluation.testClassifier((MultiXClassifier) ml2plan, split.get(1));
+			Result result = Evaluation.testClassifier((MultiLabelClassifier) ml2plan, split.get(1));
 			double loss = Metrics.L_RankLoss(result.allTrueValues(), result.allPredictions());
 			System.out.println("Rank Loss of the solution produced by ML2-Plan: " + loss
 					+ ". Internally believed Rank Loss was " + ml2plan.getInternalValidationErrorOfSelectedClassifier());
