@@ -44,7 +44,6 @@ import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDyadRankingInstance> {
 
 	private MultiLayerNetwork plNet;
-	private PLNetLoss plNetLoss;
 	private IPLNetDyadRankerConfiguration configuration;
 	private int epoch;
 	private int iteration;
@@ -57,7 +56,6 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 	 */
 	public PLNetDyadRanker(int numInputs, int numHiddenNodes, long seed) {
 		this.configuration = ConfigFactory.create(IPLNetDyadRankerConfiguration.class);
-		this.plNetLoss = new PLNetLoss();
 		this.plNet = createNetwork(numInputs, numHiddenNodes, seed);
 //		this.plNet = createNetworkFromConfigFile(configuration.plNetConfig());
 	}
@@ -106,7 +104,7 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 			// compute derivative of loss w.r.t. k
 			plNetClone.setInput(dyadList.get(k));
 			plNetClone.feedForward(true, false);
-			INDArray lossGradient = plNetLoss.computeLossGradient(output, k);
+			INDArray lossGradient = PLNetLoss.computeLossGradient(output, k);
 			// compute backprop gradient for weight updates w.r.t. k
 			Pair<Gradient, INDArray> p = plNetClone.backpropGradient(lossGradient, null);
 			deltaWk = p.getFirst();
