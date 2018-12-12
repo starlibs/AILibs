@@ -10,8 +10,6 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import javax.management.openmbean.OpenDataException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,8 +78,9 @@ public class RandomSearch<N, A> extends AbstractORGraphSearch<GraphSearchInput<N
 	private void expandNode(N node) throws InterruptedException {
 		assert !closed.contains(node) && !goalTester.isGoal(node);
 		logger.debug("Expanding next node {}", node);
+		long start = System.currentTimeMillis();
 		List<NodeExpansionDescription<N, A>> successors = gen.generateSuccessors(node); // could have been interrupted here
-		logger.debug("Identified {} successor(s), which are now appended.", successors.size());
+		logger.debug("Identified {} successor(s) in {}ms, which are now appended.", successors.size(), System.currentTimeMillis() - start);
 		boolean atLeastOneSuccessorPrioritized = false;
 		for (NodeExpansionDescription<N, A> successor : successors) {
 			exploredGraph.addItem(successor.getTo());
@@ -270,6 +269,9 @@ public class RandomSearch<N, A> extends AbstractORGraphSearch<GraphSearchInput<N
 		logger.info("Switch logger name from {} to {}", this.loggerName, name);
 		this.loggerName = name;
 		this.logger = LoggerFactory.getLogger(this.loggerName);
+		if (this.getGraphGenerator() instanceof ILoggingCustomizable) {
+			((ILoggingCustomizable)this.getGraphGenerator()).setLoggerName(name + ".graphgen");
+		}
 		logger.info("Switched logger name to {}", this.loggerName);
 	}
 

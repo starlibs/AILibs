@@ -5,12 +5,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jaicore.basic.sets.SetUtil;
 import jaicore.logic.fol.structure.CNFFormula;
 import jaicore.logic.fol.structure.Clause;
 import jaicore.logic.fol.structure.ConstantParam;
@@ -29,23 +27,30 @@ public class PlannerUtil {
 
 	private static final Logger logger = LoggerFactory.getLogger(PlannerUtil.class);
 
-	public static Collection<StripsAction> getApplicableActionsInState(Monom state, StripsPlanningDomain domain) {
-		Collection<StripsAction> applicableDerivedActions = new ArrayList<>();
+	public static List<StripsAction> getApplicableActionsInState(Monom state, StripsPlanningDomain domain) {
+		long start = System.currentTimeMillis();
+		logger.debug("Computing applicable actions for state with {} items (activate TRACE for exact state)", state.size());
+		logger.trace("Exact state is {}", state);
+		List<StripsAction> applicableDerivedActions = new ArrayList<>();
 		for (Operation op : domain.getOperations()) {
 			applicableDerivedActions.addAll(getPossibleOperationGroundingsForState(state, (StripsOperation) op));
 		}
+		long duration = System.currentTimeMillis() - start;
+		logger.debug("Done. Computation took {}ms", duration);
 		return applicableDerivedActions;
 	}
 
-	public static Collection<StripsAction> getPossibleOperationGroundingsForState(Monom state,
-			StripsOperation operation) {
+	public static Collection<StripsAction> getPossibleOperationGroundingsForState(Monom state, StripsOperation operation) {
 		Collection<StripsAction> applicableDerivedActions = new ArrayList<>();
 
 		/* decompose premise in positive and negative literals */
-		Collection<Map<VariableParam, LiteralParam>> groundings = LogicUtil
-				.getSubstitutionsThatEnableForwardChainingUnderCWA(state, operation.getPrecondition());
-		logger.info("Computed {} groundings that yield valid deductions of premise {} in state {}", groundings.size(),
-				operation.getPrecondition(), state);
+		logger.debug("Compute all groundings of {}-premise that can be inferred from state with {} items (activate TRACE for exact premise and state)", operation.getPrecondition().size(), state.size());
+		logger.trace("Exact premise is {}", operation.getPrecondition());
+		logger.trace("Exact state is {}", state);
+		long start = System.currentTimeMillis();
+		Collection<Map<VariableParam, LiteralParam>> groundings = LogicUtil.getSubstitutionsThatEnableForwardChainingUnderCWA(state, operation.getPrecondition());
+		long duration = System.currentTimeMillis() - start;
+		logger.debug("Done. Computation of {} groundings took {}ms", groundings.size(), duration);
 
 		for (Map<VariableParam, LiteralParam> grounding : groundings) {
 			/* refactor grounding to constants only and add the respective action */
@@ -122,7 +127,7 @@ public class PlannerUtil {
 			System.err.println("No support for operations of class " + appliedAction.getOperation().getClass());
 		}
 	}
-	
+
 	public static Monom getStateAfterPlanExecution(Monom initState, Plan<?> plan) {
 		Monom state = new Monom(initState);
 		plan.getActions().forEach(a -> updateState(state, a));
