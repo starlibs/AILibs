@@ -4,6 +4,9 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.apache.commons.math3.stat.descriptive.moment.Mean;
+import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
+
 import jaicore.basic.algorithm.AlgorithmEvent;
 import jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.AlgorithmInitializedEvent;
@@ -28,6 +31,7 @@ public class StratifiedSampling extends ASamplingAlgorithm{
 	private IDataset[] strati;
 	private IDataset datasetCopy;
 	private ExecutorService executorService;
+	private boolean considerStandardDeviation;
 	private boolean simpleRandomSamplingStarted;
 	
 	/**
@@ -35,11 +39,14 @@ public class StratifiedSampling extends ASamplingAlgorithm{
 	 * @param stratiAmountSelector The custom selector for the used amount of strati.
 	 * @param stratiAssigner Custom logic to assign datapoints into strati.
 	 * @param random Random object for sampling inside of the strati.
+	 * @param considerStandardDeviation Flag if the overall sample should be composed from each strati partial to StratiSize / DatasetSize or if all strati
+	 * 		whose size is inside of AverageStratiSize +/- StandardDeviationOfStratiSize should be used uniformly distributed.
 	 */
-	public StratifiedSampling(IStratiAmountSelector stratiAmountSelector, IStratiAssigner stratiAssigner, Random random) {
+	public StratifiedSampling(IStratiAmountSelector stratiAmountSelector, IStratiAssigner stratiAssigner, Random random, boolean considerStandardDeviation) {
 		this.stratiAmountSelector = stratiAmountSelector;
 		this.stratiAssigner = stratiAssigner;
 		this.random = random;
+		this.considerStandardDeviation = considerStandardDeviation;
 	}
 	
 	@Override
@@ -52,8 +59,8 @@ public class StratifiedSampling extends ASamplingAlgorithm{
 			this.datasetCopy = null;
 			this.datasetCopy.addAll(this.getInput());
 			this.strati = new IDataset[this.stratiAmountSelector.selectStratiAmount(this.datasetCopy)];
-			// TODO: create emtpy strati dataset
 			for (int i = 0; i < this.strati.length; i++) {
+				// TODO: create emtpy strati dataset
 				this.strati[i] = null;
 			}
 			this.simpleRandomSamplingStarted = false;
@@ -75,26 +82,8 @@ public class StratifiedSampling extends ASamplingAlgorithm{
 					return new SampleElementAddedEvent();
 				} else {
 					if (!simpleRandomSamplingStarted) {
-						// Simple Random Sampling has not started yet -> Initialize one sampling thread per stratum
-						for (int i = 0; i < this.strati.length; i++) {
-							int index = i;
-							this.executorService.execute(new Runnable() {
-								@Override
-								public void run() {
-									int sizeOfStratiSample = (int)(sampleSize * ((double)strati[index].size() / (double)getInput().size()));
-									SimpleRandomSampling simpleRandomSampling = new SimpleRandomSampling(random);
-									simpleRandomSampling.setInput(strati[index]);
-									simpleRandomSampling.setSampleSize(sizeOfStratiSample);
-									try {
-										sample.addAll(simpleRandomSampling.call());
-									} catch (Exception e) {
-										e.printStackTrace();
-									}
-								}
-							});
-						}
-						// Prevent executor service from more threads being added and set Simple Random Sampling to being started.
-						this.executorService.shutdown();
+						// Simple Random Sampling has not started yet -> Initialize one sampling thread per stratum.
+						this.startSimpleRandomSamplingForStrati();
 						this.simpleRandomSamplingStarted = true;
 						return new WaitForSamplingStepEvent();
 					} else {
@@ -122,6 +111,71 @@ public class StratifiedSampling extends ASamplingAlgorithm{
 		default:
 			throw new IllegalStateException("Unknown algorithm state "+ this.getState());
 		}
+	}
+	
+	/**
+	 * Calculates the necessary sample sizes and start a Simple Random Sampling Thread for each stratum.
+	 */
+	private void startSimpleRandomSamplingForStrati() {
+		// Calculate the amount of datapoints that will be used from each strati
+		int[] sampleSizeForStrati = new int[this.strati.length];
+		if (this.considerStandardDeviation) {
+			// Calculate Mean and StandardDeviation.
+			Mean mean = new Mean();
+			StandardDeviation standardDeviation = new StandardDeviation();
+			for (int i = 0; i < this.strati.length; i++) {
+				mean.increment(this.strati[i].size());
+				standardDeviation.increment(this.strati[i].size());
+			}
+			// Check which strati are inside of Mean +/- StandardDeviation
+			double lowerBound = mean.getResult() - standardDeviation.getResult();
+			double upperBound = mean.getResult() + standardDeviation.getResult();
+			int numberOfStratiInsideOfInterval = 0;
+			int combinedSizeOfStratiInsideOfInterval = 0;
+			for (int i = 0; i < this.strati.length; i++) {
+				if (this.strati[i].size() < lowerBound || this.strati[i].size() > upperBound) {
+					// Outside of the interval -> Calculate ratio.
+					sampleSizeForStrati[i] = (int)(this.sampleSize * ((double)this.strati[i].size() / (double)this.getInput().size()));
+				} else {
+					// Inside of interval -> Mark for uniform distribution.
+					sampleSizeForStrati[i] = -1;
+					numberOfStratiInsideOfInterval++;
+					combinedSizeOfStratiInsideOfInterval += this.strati[i].size();
+				}
+			}
+			// Assign uniformly distributed sample sizes to marked strati.
+			int sizeForStratiInsideOfInterval =(int)(this.sampleSize * ((double)combinedSizeOfStratiInsideOfInterval / (double)this.getInput().size()) / (double)numberOfStratiInsideOfInterval);
+			for (int i = 0; i < this.strati.length; i++) {
+				if (sampleSizeForStrati[i] == -1) {
+					sampleSizeForStrati[i] = sizeForStratiInsideOfInterval;
+				}
+			}
+		} else {
+			// Calculate for each stratum the sample size by StratiSize / DatasetSize
+			for (int i = 0; i < this.strati.length; i++) {
+				sampleSizeForStrati[i] = (int)(this.sampleSize * ((double)this.strati[i].size() / (double)this.getInput().size()));
+			}
+		}
+
+		// Start a Simple Random Sampling thread for each stratum
+		for (int i = 0; i < this.strati.length; i++) {
+			int index = i;
+			this.executorService.execute(new Runnable() {
+				@Override
+				public void run() {
+					SimpleRandomSampling simpleRandomSampling = new SimpleRandomSampling(random);
+					simpleRandomSampling.setInput(strati[index]);
+					simpleRandomSampling.setSampleSize(sampleSizeForStrati[index]);
+					try {
+						sample.addAll(simpleRandomSampling.call());
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			});
+		}
+		// Prevent executor service from more threads being added.
+		this.executorService.shutdown();
 	}
 
 }
