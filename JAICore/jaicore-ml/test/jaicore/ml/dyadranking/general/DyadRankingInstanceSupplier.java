@@ -24,7 +24,8 @@ public class DyadRankingInstanceSupplier {
 	 * Creates a random {@link jaicore.ml.dyadranking.dataset.DyadRankingInstance}
 	 * consisting of (with 2 alternatives and 2 instances)
 	 * 
-	 * @param maxLength the amount of dyads
+	 * @param maxLength The amount of dyads
+	 * @param seed Seed for generating random dyads
 	 * @return random dyad ranking instance of length at most maxLength
 	 */
 	public static DyadRankingInstance getDyadRankingInstance(int maxLength, int seed) {
