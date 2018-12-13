@@ -42,6 +42,23 @@ allprojects {
 	//Project properties
 	project.group = 'de.upb.isys'
 	project.version = '0.0.1-SNAPSHOT'
+	
+	sourceSets {
+		main {
+			java {
+				srcDir 'src/main/java'
+			}
+			resources {
+				srcDir 'conf'
+			}
+		}
+		test {
+			java {
+				srcDir 'src/test/java'
+				srcDir 'src/example/java'
+			}
+		}
+	}
 
 	//Repositories
 	repositories {
@@ -57,13 +74,20 @@ allprojects {
 	}
 	//Dependencies for all(!) projects
 	dependencies {
+		
+		// configuration
+		compile group: 'org.aeonbits.owner', name: 'owner-java8', version:'1.0.10'
+		
+		// event bus
+		compile group: 'com.google.guava', name: 'guava', version: '27.0-jre'
+	
 		//Logger
 		compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
-
 		runtimeOnly group: 'org.slf4j', name:'slf4j-log4j12', version:'1.7.25'
 
 		//Testing
 		testCompile group: 'junit', name: 'junit', version: '4.12'
+		//testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.4.0-M1'
 		testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: '1.3'
 		testCompile group: 'org.mockito', name: 'mockito-all', version: '1.10.19'
 	}
@@ -110,6 +134,29 @@ allprojects {
 			}
 		}
 	}
+	// This task creates a jar with test classes.
+	task testClassesJar(type: Jar) {
+		classifier = 'tests'
+		from sourceSets.test.output
+	}
+	// Add a new configuration named testArtifacts
+	configurations {
+		testArtifacts
+	}
+	// testArtifacts contains the jar with test classes.
+	// Other projects can declare the dependency:
+	//      testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
+	artifacts {
+		testArtifacts testClassesJar
+	}
+	
+	// generate JavaDoc for each project
+    	task generateJavadoc(type: Javadoc) {
+        	source = sourceSets.main.allJava
+        	classpath = files(sourceSets.main.compileClasspath)
+        	destinationDir = file("docs/javadoc")
+//		failOnError = true
+    	}
 
 }
 
@@ -118,6 +165,7 @@ dependencies{
 	compile project(":mlplan")
 	compile project(":JAICore:jaicore-basic")
 	compile project(":JAICore:jaicore-concurrent")
+	compile project(":JAICore:jaicore-ea")
 	compile project(":JAICore:jaicore-experiments")
 	compile project(":JAICore:jaicore-graph")
 	compile project(":JAICore:jaicore-graphvisualizer")

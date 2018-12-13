@@ -1,0 +1,57 @@
+{
+	"repository": "MEKA-MultiTarget",
+	"include": [ "../mlplan" ],
+	"parameters": [
+	],
+	"components": [
+		{
+			"name": "meka.classifiers.multitarget.BCC",
+			"providedInterface": ["MTClassifier", "BasicMTClassifier"],
+			"requiredInterface": ["Classifier"],
+			"parameter": [
+			]
+		},
+		{
+			"name": "meka.classifiers.multitarget.CC",
+			"providedInterface": ["MTClassifier", "BasicMTClassifier"],
+			"requiredInterface": ["Classifier"],
+			"parameter": [
+			]
+		},
+		{
+			"name": "meka.classifiers.multitarget.CCp",
+			"providedInterface": ["MTClassifier", "BasicMTClassifier"],
+			"requiredInterface": ["Classifier"],
+			"parameter": [
+			]
+		},
+		{
+			"name": "meka.classifiers.multitarget.CR",
+			"providedInterface": ["MTClassifier", "BasicMTClassifier"],
+			"requiredInterface": ["Classifier"],
+			"parameter": [
+			]
+		},
+		{
+			"name": "meka.classifiers.multitarget.NSR",
+			"providedInterface": ["MTClassifier", "BasicMTClassifier"],
+			"requiredInterface": ["Classifier"],
+			"parameter": [
+			]
+		},
+		{
+			"name": "meka.classifiers.multitarget.RAkELd",
+			"providedInterface": ["MTClassifier", "BasicMTClassifier"],
+			"requiredInterface": ["Classifier"],
+			"parameter": [
+			]
+		},
+		{
+			"name": "meka.classifiers.multitarget.SCC",
+			"providedInterface": ["MTClassifier", "WrappingMTClassifier"],
+			"requiredInterface": ["BasicMTClassifier"],
+			"parameter": [
+			]
+		}
+	]
+}

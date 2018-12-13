@@ -1,0 +1,848 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!-- NewPage -->
+<html lang="en">
+<head>
+<title>AbstractVector (jaicore-math 0.0.1-SNAPSHOT API)</title>
+<link rel="stylesheet" type="text/css" href="../../../../stylesheet.css" title="Style">
+<script type="text/javascript" src="../../../../script.js"></script>
+</head>
+<body>
+<script type="text/javascript"><!--
+    try {
+        if (location.href.indexOf('is-external=true') == -1) {
+            parent.document.title="AbstractVector (jaicore-math 0.0.1-SNAPSHOT API)";
+        }
+    }
+    catch(err) {
+    }
+//-->
+var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10,"i9":10,"i10":10,"i11":10,"i12":10,"i13":10,"i14":10,"i15":10,"i16":10,"i17":10,"i18":10,"i19":10,"i20":10,"i21":10,"i22":10,"i23":10};
+var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
+var altColor = "altColor";
+var rowColor = "rowColor";
+var tableTab = "tableTab";
+var activeTableTab = "activeTableTab";
+</script>
+<noscript>
+<div>JavaScript is disabled on your browser.</div>
+</noscript>
+<!-- ========= START OF TOP NAVBAR ======= -->
+<div class="topNav"><a name="navbar.top">
+<!--   -->
+</a>
+<div class="skipNav"><a href="#skip.navbar.top" title="Skip navigation links">Skip navigation links</a></div>
+<a name="navbar.top.firstrow">
+<!--   -->
+</a>
+<ul class="navList" title="Navigation">
+<li><a href="../../../../overview-summary.html">Overview</a></li>
+<li><a href="package-summary.html">Package</a></li>
+<li class="navBarCell1Rev">Class</li>
+<li><a href="package-tree.html">Tree</a></li>
+<li><a href="../../../../deprecated-list.html">Deprecated</a></li>
+<li><a href="../../../../index-all.html">Index</a></li>
+<li><a href="../../../../help-doc.html">Help</a></li>
+</ul>
+</div>
+<div class="subNav">
+<ul class="navList">
+<li>Prev&nbsp;Class</li>
+<li><a href="../../../../de/upb/isys/linearalgebra/DenseDoubleVector.html" title="class in de.upb.isys.linearalgebra"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+</ul>
+<ul class="navList">
+<li><a href="../../../../index.html?de/upb/isys/linearalgebra/AbstractVector.html" target="_top">Frames</a></li>
+<li><a href="AbstractVector.html" target="_top">No&nbsp;Frames</a></li>
+</ul>
+<ul class="navList" id="allclasses_navbar_top">
+<li><a href="../../../../allclasses-noframe.html">All&nbsp;Classes</a></li>
+</ul>
+<div>
+<script type="text/javascript"><!--
+  allClassesLink = document.getElementById("allclasses_navbar_top");
+  if(window==top) {
+    allClassesLink.style.display = "block";
+  }
+  else {
+    allClassesLink.style.display = "none";
+  }
+  //-->
+</script>
+</div>
+<div>
+<ul class="subNavList">
+<li>Summary:&nbsp;</li>
+<li>Nested&nbsp;|&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#constructor.summary">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method.summary">Method</a></li>
+</ul>
+<ul class="subNavList">
+<li>Detail:&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#constructor.detail">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method.detail">Method</a></li>
+</ul>
+</div>
+<a name="skip.navbar.top">
+<!--   -->
+</a></div>
+<!-- ========= END OF TOP NAVBAR ========= -->
+<!-- ======== START OF CLASS DATA ======== -->
+<div class="header">
+<div class="subTitle">de.upb.isys.linearalgebra</div>
+<h2 title="Class AbstractVector" class="title">Class AbstractVector</h2>
+</div>
+<div class="contentContainer">
+<ul class="inheritance">
+<li>java.lang.Object</li>
+<li>
+<ul class="inheritance">
+<li>de.upb.isys.linearalgebra.AbstractVector</li>
+</ul>
+</li>
+</ul>
+<div class="description">
+<ul class="blockList">
+<li class="blockList">
+<dl>
+<dt>All Implemented Interfaces:</dt>
+<dd><a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a></dd>
+</dl>
+<dl>
+<dt>Direct Known Subclasses:</dt>
+<dd><a href="../../../../de/upb/isys/linearalgebra/DenseDoubleVector.html" title="class in de.upb.isys.linearalgebra">DenseDoubleVector</a>, <a href="../../../../de/upb/isys/linearalgebra/SparseDoubleVector.html" title="class in de.upb.isys.linearalgebra">SparseDoubleVector</a></dd>
+</dl>
+<hr>
+<br>
+<pre>public abstract class <span class="typeNameLabel">AbstractVector</span>
+extends java.lang.Object
+implements <a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a></pre>
+<div class="block">An abstract vector class, implementing several common methods for different vector implementations. All vector implementations should subclass this class.</div>
+</li>
+</ul>
+</div>
+<div class="summary">
+<ul class="blockList">
+<li class="blockList">
+<!-- ======== CONSTRUCTOR SUMMARY ======== -->
+<ul class="blockList">
+<li class="blockList"><a name="constructor.summary">
+<!--   -->
+</a>
+<h3>Constructor Summary</h3>
+<table class="memberSummary" border="0" cellpadding="3" cellspacing="0" summary="Constructor Summary table, listing constructors, and an explanation">
+<caption><span>Constructors</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colOne" scope="col">Constructor and Description</th>
+</tr>
+<tr class="altColor">
+<td class="colOne"><code><span class="memberNameLink"><a href="../../../../de/upb/isys/linearalgebra/AbstractVector.html#AbstractVector--">AbstractVector</a></span>()</code>&nbsp;</td>
+</tr>
+</table>
+</li>
+</ul>
+<!-- ========== METHOD SUMMARY =========== -->
+<ul class="blockList">
+<li class="blockList"><a name="method.summary">
+<!--   -->
+</a>
+<h3>Method Summary</h3>
+<table class="memberSummary" border="0" cellpadding="3" cellspacing="0" summary="Method Summary table, listing methods, and an explanation">
+<caption><span id="t0" class="activeTableTab"><span>All Methods</span><span class="tabEnd">&nbsp;</span></span><span id="t2" class="tableTab"><span><a href="javascript:show(2);">Instance Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t4" class="tableTab"><span><a href="javascript:show(8);">Concrete Methods</a></span><span class="tabEnd">&nbsp;</span></span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Method and Description</th>
+</tr>
+<tr id="i0" class="altColor">
+<td class="colFirst"><code><a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../de/upb/isys/linearalgebra/AbstractVector.html#addConstantToCopy-double-">addConstantToCopy</a></span>(double&nbsp;constant)</code>
+<div class="block">Adds the given constant to a copy of this vector and returns the result of this operation.</div>
+</td>
+</tr>
+<tr id="i1" class="rowColor">
+<td class="colFirst"><code><a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../de/upb/isys/linearalgebra/AbstractVector.html#addVectorToCopy-double:A-">addVectorToCopy</a></span>(double[]&nbsp;vectorAsArray)</code>
+<div class="block">Adds the given double array interpreted as a vector to a copy of this vector and returns the
+ result of the operation.</div>
+</td>
+</tr>
+<tr id="i2" class="altColor">
+<td class="colFirst"><code><a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../de/upb/isys/linearalgebra/AbstractVector.html#addVectorToCopy-de.upb.isys.linearalgebra.Vector-">addVectorToCopy</a></span>(<a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a>&nbsp;vector)</code>
+<div class="block">Adds the given vector to a copy of this vector and returns the result of the operation.</div>
+</td>
+</tr>
+<tr id="i3" class="rowColor">
+<td class="colFirst"><code>java.lang.Double</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../de/upb/isys/linearalgebra/AbstractVector.html#average--">average</a></span>()</code>
+<div class="block">Returns the average of all values contained in this vector.</div>
+</td>
+</tr>
+<tr id="i4" class="altColor">
+<td class="colFirst"><code><a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../de/upb/isys/linearalgebra/AbstractVector.html#divideByConstantToCopy-double-">divideByConstantToCopy</a></span>(double&nbsp;constant)</code>
+<div class="block">Divides a copy of this vector by the given constant and returns the result of this operation.</div>
+</td>
+</tr>
+<tr id="i5" class="rowColor">
+<td class="colFirst"><code><a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../de/upb/isys/linearalgebra/AbstractVector.html#divideByVectorPairwiseToCopy-double:A-">divideByVectorPairwiseToCopy</a></span>(double[]&nbsp;vectorAsArray)</code>
+<div class="block">Divides a copy of this vector by the given double array interpreted as a pairwise vector and
+ returns the result of this operation.</div>
+</td>
+</tr>
+<tr id="i6" class="altColor">
+<td class="colFirst"><code><a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../de/upb/isys/linearalgebra/AbstractVector.html#divideByVectorPairwiseToCopy-de.upb.isys.linearalgebra.Vector-">divideByVectorPairwiseToCopy</a></span>(<a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a>&nbsp;vector)</code>
+<div class="block">Divides a copy of this vector by the given pairwise vector and returns the result of this
+ operation.</div>
+</td>
+</tr>
+<tr id="i7" class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../de/upb/isys/linearalgebra/AbstractVector.html#equals-java.lang.Object-">equals</a></span>(java.lang.Object&nbsp;obj)</code>&nbsp;</td>
+</tr>
+<tr id="i8" class="altColor">
+<td class="colFirst"><code>double</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../de/upb/isys/linearalgebra/AbstractVector.html#euclideanNorm--">euclideanNorm</a></span>()</code>
+<div class="block">Returns the Euclidean norm (length) of this vector.</div>
+</td>
+</tr>
+<tr id="i9" class="rowColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../de/upb/isys/linearalgebra/AbstractVector.html#hashCode--">hashCode</a></span>()</code>&nbsp;</td>
+</tr>
+<tr id="i10" class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../de/upb/isys/linearalgebra/AbstractVector.html#incrementValueAt-int-double-">incrementValueAt</a></span>(int&nbsp;index,
+                double&nbsp;amount)</code>
+<div class="block">Increments the value at the given index by the given amount.</div>
+</td>
+</tr>
+<tr id="i11" class="rowColor">
+<td class="colFirst"><code>double</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../de/upb/isys/linearalgebra/AbstractVector.html#mean--">mean</a></span>()</code>
+<div class="block">Computes the mean of this vector.</div>
+</td>
+</tr>
+<tr id="i12" class="altColor">
+<td class="colFirst"><code><a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../de/upb/isys/linearalgebra/AbstractVector.html#multiplyByConstantToCopy-double-">multiplyByConstantToCopy</a></span>(double&nbsp;constant)</code>
+<div class="block">Multiplies a copy of this vector with the given constant and returns the result of this
+ operation.</div>
+</td>
+</tr>
+<tr id="i13" class="rowColor">
+<td class="colFirst"><code><a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../de/upb/isys/linearalgebra/AbstractVector.html#multiplyByVectorPairwiseToCopy-double:A-">multiplyByVectorPairwiseToCopy</a></span>(double[]&nbsp;vectorAsArray)</code>
+<div class="block">Multiplies a copy of this vector with the given double array interpreted as a pairwise vector
+ and returns the result of the operation.</div>
+</td>
+</tr>
+<tr id="i14" class="altColor">
+<td class="colFirst"><code><a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../de/upb/isys/linearalgebra/AbstractVector.html#multiplyByVectorPairwiseToCopy-de.upb.isys.linearalgebra.Vector-">multiplyByVectorPairwiseToCopy</a></span>(<a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a>&nbsp;vector)</code>
+<div class="block">Multiplies a copy of this vector with the given vector pairwisely and returns the result of
+ this operation.</div>
+</td>
+</tr>
+<tr id="i15" class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../de/upb/isys/linearalgebra/AbstractVector.html#squareRoot--">squareRoot</a></span>()</code>
+<div class="block">Replaces the current values of the vectors with the square roots of the elements.</div>
+</td>
+</tr>
+<tr id="i16" class="altColor">
+<td class="colFirst"><code><a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../de/upb/isys/linearalgebra/AbstractVector.html#squareRootToCopy--">squareRootToCopy</a></span>()</code>
+<div class="block">Takes the square root of each element of the vector and creates a new vector with these
+ elements.</div>
+</td>
+</tr>
+<tr id="i17" class="rowColor">
+<td class="colFirst"><code>double</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../de/upb/isys/linearalgebra/AbstractVector.html#standardDeviation--">standardDeviation</a></span>()</code>
+<div class="block">Returns the standard deviation over the values in the vector.</div>
+</td>
+</tr>
+<tr id="i18" class="altColor">
+<td class="colFirst"><code><a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../de/upb/isys/linearalgebra/AbstractVector.html#subtractConstantFromCopy-double-">subtractConstantFromCopy</a></span>(double&nbsp;constant)</code>
+<div class="block">Subtracts the given constant from a copy of this vector and returns the result of the
+ operation.</div>
+</td>
+</tr>
+<tr id="i19" class="rowColor">
+<td class="colFirst"><code><a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../de/upb/isys/linearalgebra/AbstractVector.html#subtractVectorFromCopy-double:A-">subtractVectorFromCopy</a></span>(double[]&nbsp;vectorAsArray)</code>
+<div class="block">Subtracts the given double array interpreted as a vector from a copy of this vector and
+ returns the result of this operation.</div>
+</td>
+</tr>
+<tr id="i20" class="altColor">
+<td class="colFirst"><code><a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../de/upb/isys/linearalgebra/AbstractVector.html#subtractVectorFromCopy-de.upb.isys.linearalgebra.Vector-">subtractVectorFromCopy</a></span>(<a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a>&nbsp;vector)</code>
+<div class="block">Subtracts the given vector from a copy of this vector and returns the result of this
+ operation.</div>
+</td>
+</tr>
+<tr id="i21" class="rowColor">
+<td class="colFirst"><code>double</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../de/upb/isys/linearalgebra/AbstractVector.html#sum--">sum</a></span>()</code>
+<div class="block">Returns the sum over the values of the dimensions of this vector.</div>
+</td>
+</tr>
+<tr id="i22" class="altColor">
+<td class="colFirst"><code>java.lang.String</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../de/upb/isys/linearalgebra/AbstractVector.html#toString--">toString</a></span>()</code>&nbsp;</td>
+</tr>
+<tr id="i23" class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../de/upb/isys/linearalgebra/AbstractVector.html#zeroAllDimensions--">zeroAllDimensions</a></span>()</code>
+<div class="block">Sets all dimensions of this vector to <code>0</code>.</div>
+</td>
+</tr>
+</table>
+<ul class="blockList">
+<li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
+<!--   -->
+</a>
+<h3>Methods inherited from class&nbsp;java.lang.Object</h3>
+<code>clone, finalize, getClass, notify, notifyAll, wait, wait, wait</code></li>
+</ul>
+<ul class="blockList">
+<li class="blockList"><a name="methods.inherited.from.class.de.upb.isys.linearalgebra.Vector">
+<!--   -->
+</a>
+<h3>Methods inherited from interface&nbsp;de.upb.isys.linearalgebra.<a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a></h3>
+<code><a href="../../../../de/upb/isys/linearalgebra/Vector.html#addConstant-double-">addConstant</a>, <a href="../../../../de/upb/isys/linearalgebra/Vector.html#addVector-double:A-">addVector</a>, <a href="../../../../de/upb/isys/linearalgebra/Vector.html#addVector-de.upb.isys.linearalgebra.Vector-">addVector</a>, <a href="../../../../de/upb/isys/linearalgebra/Vector.html#asArray--">asArray</a>, <a href="../../../../de/upb/isys/linearalgebra/Vector.html#divideByConstant-double-">divideByConstant</a>, <a href="../../../../de/upb/isys/linearalgebra/Vector.html#divideByVectorPairwise-double:A-">divideByVectorPairwise</a>, <a href="../../../../de/upb/isys/linearalgebra/Vector.html#divideByVectorPairwise-de.upb.isys.linearalgebra.Vector-">divideByVectorPairwise</a>, <a href="../../../../de/upb/isys/linearalgebra/Vector.html#dotProduct-double:A-">dotProduct</a>, <a href="../../../../de/upb/isys/linearalgebra/Vector.html#dotProduct-de.upb.isys.linearalgebra.Vector-">dotProduct</a>, <a href="../../../../de/upb/isys/linearalgebra/Vector.html#duplicate--">duplicate</a>, <a href="../../../../de/upb/isys/linearalgebra/Vector.html#fillRandomly--">fillRandomly</a>, <a href="../../../../de/upb/isys/linearalgebra/Vector.html#getValue-int-">getValue</a>, <a href="../../../../de/upb/isys/linearalgebra/Vector.html#isSparse--">isSparse</a>, <a href="../../../../de/upb/isys/linearalgebra/Vector.html#length--">length</a>, <a href="../../../../de/upb/isys/linearalgebra/Vector.html#merge-de.upb.isys.linearalgebra.Vector-de.upb.isys.linearalgebra.Vector-">merge</a>, <a href="../../../../de/upb/isys/linearalgebra/Vector.html#multiplyByConstant-double-">multiplyByConstant</a>, <a href="../../../../de/upb/isys/linearalgebra/Vector.html#multiplyByVectorPairwise-double:A-">multiplyByVectorPairwise</a>, <a href="../../../../de/upb/isys/linearalgebra/Vector.html#multiplyByVectorPairwise-de.upb.isys.linearalgebra.Vector-">multiplyByVectorPairwise</a>, <a href="../../../../de/upb/isys/linearalgebra/Vector.html#normalize--">normalize</a>, <a href="../../../../de/upb/isys/linearalgebra/Vector.html#setValue-int-double-">setValue</a>, <a href="../../../../de/upb/isys/linearalgebra/Vector.html#subtractConstant-double-">subtractConstant</a>, <a href="../../../../de/upb/isys/linearalgebra/Vector.html#subtractVector-double:A-">subtractVector</a>, <a href="../../../../de/upb/isys/linearalgebra/Vector.html#subtractVector-de.upb.isys.linearalgebra.Vector-">subtractVector</a>, <a href="../../../../de/upb/isys/linearalgebra/Vector.html#toDenseVector--">toDenseVector</a>, <a href="../../../../de/upb/isys/linearalgebra/Vector.html#toSparseVector--">toSparseVector</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="details">
+<ul class="blockList">
+<li class="blockList">
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<ul class="blockList">
+<li class="blockList"><a name="constructor.detail">
+<!--   -->
+</a>
+<h3>Constructor Detail</h3>
+<a name="AbstractVector--">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>AbstractVector</h4>
+<pre>public&nbsp;AbstractVector()</pre>
+</li>
+</ul>
+</li>
+</ul>
+<!-- ============ METHOD DETAIL ========== -->
+<ul class="blockList">
+<li class="blockList"><a name="method.detail">
+<!--   -->
+</a>
+<h3>Method Detail</h3>
+<a name="squareRoot--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>squareRoot</h4>
+<pre>public&nbsp;void&nbsp;squareRoot()</pre>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../de/upb/isys/linearalgebra/Vector.html#squareRoot--">Vector</a></code></span></div>
+<div class="block">Replaces the current values of the vectors with the square roots of the elements.</div>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../../../../de/upb/isys/linearalgebra/Vector.html#squareRoot--">squareRoot</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="squareRootToCopy--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>squareRootToCopy</h4>
+<pre>public&nbsp;<a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a>&nbsp;squareRootToCopy()</pre>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../de/upb/isys/linearalgebra/Vector.html#squareRootToCopy--">Vector</a></code></span></div>
+<div class="block">Takes the square root of each element of the vector and creates a new vector with these
+ elements.</div>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../../../../de/upb/isys/linearalgebra/Vector.html#squareRootToCopy--">squareRootToCopy</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The vector consisting of the square rooted entries of this vector.</dd>
+</dl>
+</li>
+</ul>
+<a name="incrementValueAt-int-double-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>incrementValueAt</h4>
+<pre>public&nbsp;void&nbsp;incrementValueAt(int&nbsp;index,
+                             double&nbsp;amount)</pre>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../de/upb/isys/linearalgebra/Vector.html#incrementValueAt-int-double-">Vector</a></code></span></div>
+<div class="block">Increments the value at the given index by the given amount.</div>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../../../../de/upb/isys/linearalgebra/Vector.html#incrementValueAt-int-double-">incrementValueAt</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a></code></dd>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>index</code> - The index of the value to be incremented.</dd>
+<dd><code>amount</code> - The amount to add to the value at the given index.</dd>
+</dl>
+</li>
+</ul>
+<a name="sum--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>sum</h4>
+<pre>public&nbsp;double&nbsp;sum()</pre>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../de/upb/isys/linearalgebra/Vector.html#sum--">Vector</a></code></span></div>
+<div class="block">Returns the sum over the values of the dimensions of this vector.</div>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../../../../de/upb/isys/linearalgebra/Vector.html#sum--">sum</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The sum over the values of the dimensions.</dd>
+</dl>
+</li>
+</ul>
+<a name="mean--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>mean</h4>
+<pre>public&nbsp;double&nbsp;mean()</pre>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../de/upb/isys/linearalgebra/Vector.html#mean--">Vector</a></code></span></div>
+<div class="block">Computes the mean of this vector.</div>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../../../../de/upb/isys/linearalgebra/Vector.html#mean--">mean</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The mean of this vector.</dd>
+</dl>
+</li>
+</ul>
+<a name="standardDeviation--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>standardDeviation</h4>
+<pre>public&nbsp;double&nbsp;standardDeviation()</pre>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../de/upb/isys/linearalgebra/Vector.html#standardDeviation--">Vector</a></code></span></div>
+<div class="block">Returns the standard deviation over the values in the vector.</div>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../../../../de/upb/isys/linearalgebra/Vector.html#standardDeviation--">standardDeviation</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The standard deviation over the values in the vector.</dd>
+</dl>
+</li>
+</ul>
+<a name="toString--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>toString</h4>
+<pre>public&nbsp;java.lang.String&nbsp;toString()</pre>
+<dl>
+<dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
+<dd><code>toString</code>&nbsp;in class&nbsp;<code>java.lang.Object</code></dd>
+</dl>
+</li>
+</ul>
+<a name="zeroAllDimensions--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>zeroAllDimensions</h4>
+<pre>public&nbsp;void&nbsp;zeroAllDimensions()</pre>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../de/upb/isys/linearalgebra/Vector.html#zeroAllDimensions--">Vector</a></code></span></div>
+<div class="block">Sets all dimensions of this vector to <code>0</code>.</div>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../../../../de/upb/isys/linearalgebra/Vector.html#zeroAllDimensions--">zeroAllDimensions</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="euclideanNorm--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>euclideanNorm</h4>
+<pre>public&nbsp;double&nbsp;euclideanNorm()</pre>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../de/upb/isys/linearalgebra/Vector.html#euclideanNorm--">Vector</a></code></span></div>
+<div class="block">Returns the Euclidean norm (length) of this vector.</div>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../../../../de/upb/isys/linearalgebra/Vector.html#euclideanNorm--">euclideanNorm</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The Euclidean norm of this vector.</dd>
+</dl>
+</li>
+</ul>
+<a name="addVectorToCopy-double:A-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>addVectorToCopy</h4>
+<pre>public&nbsp;<a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a>&nbsp;addVectorToCopy(double[]&nbsp;vectorAsArray)</pre>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../de/upb/isys/linearalgebra/Vector.html#addVectorToCopy-double:A-">Vector</a></code></span></div>
+<div class="block">Adds the given double array interpreted as a vector to a copy of this vector and returns the
+ result of the operation.</div>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../../../../de/upb/isys/linearalgebra/Vector.html#addVectorToCopy-double:A-">addVectorToCopy</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a></code></dd>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>vectorAsArray</code> - The vector to be added as an array.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The result vector of this operation.</dd>
+</dl>
+</li>
+</ul>
+<a name="subtractVectorFromCopy-double:A-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>subtractVectorFromCopy</h4>
+<pre>public&nbsp;<a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a>&nbsp;subtractVectorFromCopy(double[]&nbsp;vectorAsArray)</pre>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../de/upb/isys/linearalgebra/Vector.html#subtractVectorFromCopy-double:A-">Vector</a></code></span></div>
+<div class="block">Subtracts the given double array interpreted as a vector from a copy of this vector and
+ returns the result of this operation.</div>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../../../../de/upb/isys/linearalgebra/Vector.html#subtractVectorFromCopy-double:A-">subtractVectorFromCopy</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a></code></dd>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>vectorAsArray</code> - The vector to be subtracted as an array.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The result vector of this operation.</dd>
+</dl>
+</li>
+</ul>
+<a name="multiplyByVectorPairwiseToCopy-double:A-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>multiplyByVectorPairwiseToCopy</h4>
+<pre>public&nbsp;<a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a>&nbsp;multiplyByVectorPairwiseToCopy(double[]&nbsp;vectorAsArray)</pre>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../de/upb/isys/linearalgebra/Vector.html#multiplyByVectorPairwiseToCopy-double:A-">Vector</a></code></span></div>
+<div class="block">Multiplies a copy of this vector with the given double array interpreted as a pairwise vector
+ and returns the result of the operation.</div>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../../../../de/upb/isys/linearalgebra/Vector.html#multiplyByVectorPairwiseToCopy-double:A-">multiplyByVectorPairwiseToCopy</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a></code></dd>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>vectorAsArray</code> - The vector to be multiplied with.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The result vector of this operation.</dd>
+</dl>
+</li>
+</ul>
+<a name="divideByVectorPairwiseToCopy-double:A-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>divideByVectorPairwiseToCopy</h4>
+<pre>public&nbsp;<a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a>&nbsp;divideByVectorPairwiseToCopy(double[]&nbsp;vectorAsArray)</pre>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../de/upb/isys/linearalgebra/Vector.html#divideByVectorPairwiseToCopy-double:A-">Vector</a></code></span></div>
+<div class="block">Divides a copy of this vector by the given double array interpreted as a pairwise vector and
+ returns the result of this operation.</div>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../../../../de/upb/isys/linearalgebra/Vector.html#divideByVectorPairwiseToCopy-double:A-">divideByVectorPairwiseToCopy</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a></code></dd>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>vectorAsArray</code> - The operand vector as a double array.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The result vector of this operation.</dd>
+</dl>
+</li>
+</ul>
+<a name="addConstantToCopy-double-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>addConstantToCopy</h4>
+<pre>public&nbsp;<a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a>&nbsp;addConstantToCopy(double&nbsp;constant)</pre>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../de/upb/isys/linearalgebra/Vector.html#addConstantToCopy-double-">Vector</a></code></span></div>
+<div class="block">Adds the given constant to a copy of this vector and returns the result of this operation.</div>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../../../../de/upb/isys/linearalgebra/Vector.html#addConstantToCopy-double-">addConstantToCopy</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a></code></dd>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>constant</code> - The constant to be added.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The result vector of this operation.</dd>
+</dl>
+</li>
+</ul>
+<a name="addVectorToCopy-de.upb.isys.linearalgebra.Vector-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>addVectorToCopy</h4>
+<pre>public&nbsp;<a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a>&nbsp;addVectorToCopy(<a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a>&nbsp;vector)</pre>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../de/upb/isys/linearalgebra/Vector.html#addVectorToCopy-de.upb.isys.linearalgebra.Vector-">Vector</a></code></span></div>
+<div class="block">Adds the given vector to a copy of this vector and returns the result of the operation.</div>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../../../../de/upb/isys/linearalgebra/Vector.html#addVectorToCopy-de.upb.isys.linearalgebra.Vector-">addVectorToCopy</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a></code></dd>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>vector</code> - The vector to be added to this vector.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The result vector of this operation.</dd>
+</dl>
+</li>
+</ul>
+<a name="subtractConstantFromCopy-double-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>subtractConstantFromCopy</h4>
+<pre>public&nbsp;<a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a>&nbsp;subtractConstantFromCopy(double&nbsp;constant)</pre>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../de/upb/isys/linearalgebra/Vector.html#subtractConstantFromCopy-double-">Vector</a></code></span></div>
+<div class="block">Subtracts the given constant from a copy of this vector and returns the result of the
+ operation.</div>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../../../../de/upb/isys/linearalgebra/Vector.html#subtractConstantFromCopy-double-">subtractConstantFromCopy</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a></code></dd>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>constant</code> - The constant to be subtracted.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The result vector of this operation.</dd>
+</dl>
+</li>
+</ul>
+<a name="subtractVectorFromCopy-de.upb.isys.linearalgebra.Vector-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>subtractVectorFromCopy</h4>
+<pre>public&nbsp;<a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a>&nbsp;subtractVectorFromCopy(<a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a>&nbsp;vector)</pre>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../de/upb/isys/linearalgebra/Vector.html#subtractVectorFromCopy-de.upb.isys.linearalgebra.Vector-">Vector</a></code></span></div>
+<div class="block">Subtracts the given vector from a copy of this vector and returns the result of this
+ operation.</div>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../../../../de/upb/isys/linearalgebra/Vector.html#subtractVectorFromCopy-de.upb.isys.linearalgebra.Vector-">subtractVectorFromCopy</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a></code></dd>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>vector</code> - The vector to subtract from this vector.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The result vector of this operation.</dd>
+</dl>
+</li>
+</ul>
+<a name="multiplyByVectorPairwiseToCopy-de.upb.isys.linearalgebra.Vector-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>multiplyByVectorPairwiseToCopy</h4>
+<pre>public&nbsp;<a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a>&nbsp;multiplyByVectorPairwiseToCopy(<a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a>&nbsp;vector)</pre>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../de/upb/isys/linearalgebra/Vector.html#multiplyByVectorPairwiseToCopy-de.upb.isys.linearalgebra.Vector-">Vector</a></code></span></div>
+<div class="block">Multiplies a copy of this vector with the given vector pairwisely and returns the result of
+ this operation.</div>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../../../../de/upb/isys/linearalgebra/Vector.html#multiplyByVectorPairwiseToCopy-de.upb.isys.linearalgebra.Vector-">multiplyByVectorPairwiseToCopy</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a></code></dd>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>vector</code> - The vector to be multiplied with.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The result vector of this operation.</dd>
+</dl>
+</li>
+</ul>
+<a name="multiplyByConstantToCopy-double-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>multiplyByConstantToCopy</h4>
+<pre>public&nbsp;<a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a>&nbsp;multiplyByConstantToCopy(double&nbsp;constant)</pre>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../de/upb/isys/linearalgebra/Vector.html#multiplyByConstantToCopy-double-">Vector</a></code></span></div>
+<div class="block">Multiplies a copy of this vector with the given constant and returns the result of this
+ operation.</div>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../../../../de/upb/isys/linearalgebra/Vector.html#multiplyByConstantToCopy-double-">multiplyByConstantToCopy</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a></code></dd>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>constant</code> - The constant to multiply this vector with.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The result vector of this operation.</dd>
+</dl>
+</li>
+</ul>
+<a name="divideByVectorPairwiseToCopy-de.upb.isys.linearalgebra.Vector-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>divideByVectorPairwiseToCopy</h4>
+<pre>public&nbsp;<a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a>&nbsp;divideByVectorPairwiseToCopy(<a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a>&nbsp;vector)</pre>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../de/upb/isys/linearalgebra/Vector.html#divideByVectorPairwiseToCopy-de.upb.isys.linearalgebra.Vector-">Vector</a></code></span></div>
+<div class="block">Divides a copy of this vector by the given pairwise vector and returns the result of this
+ operation.</div>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../../../../de/upb/isys/linearalgebra/Vector.html#divideByVectorPairwiseToCopy-de.upb.isys.linearalgebra.Vector-">divideByVectorPairwiseToCopy</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a></code></dd>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>vector</code> - The vector to be divided by.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The result vector of this operation.</dd>
+</dl>
+</li>
+</ul>
+<a name="divideByConstantToCopy-double-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>divideByConstantToCopy</h4>
+<pre>public&nbsp;<a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a>&nbsp;divideByConstantToCopy(double&nbsp;constant)</pre>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../de/upb/isys/linearalgebra/Vector.html#divideByConstantToCopy-double-">Vector</a></code></span></div>
+<div class="block">Divides a copy of this vector by the given constant and returns the result of this operation.</div>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../../../../de/upb/isys/linearalgebra/Vector.html#divideByConstantToCopy-double-">divideByConstantToCopy</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a></code></dd>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>constant</code> - The constant to divide this vector by.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The result vector of this operation.</dd>
+</dl>
+</li>
+</ul>
+<a name="average--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>average</h4>
+<pre>public&nbsp;java.lang.Double&nbsp;average()</pre>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../../de/upb/isys/linearalgebra/Vector.html#average--">Vector</a></code></span></div>
+<div class="block">Returns the average of all values contained in this vector.</div>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../../../../de/upb/isys/linearalgebra/Vector.html#average--">average</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../de/upb/isys/linearalgebra/Vector.html" title="interface in de.upb.isys.linearalgebra">Vector</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The average of the single values.</dd>
+</dl>
+</li>
+</ul>
+<a name="equals-java.lang.Object-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>equals</h4>
+<pre>public&nbsp;boolean&nbsp;equals(java.lang.Object&nbsp;obj)</pre>
+<dl>
+<dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
+<dd><code>equals</code>&nbsp;in class&nbsp;<code>java.lang.Object</code></dd>
+</dl>
+</li>
+</ul>
+<a name="hashCode--">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>hashCode</h4>
+<pre>public&nbsp;int&nbsp;hashCode()</pre>
+<dl>
+<dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
+<dd><code>hashCode</code>&nbsp;in class&nbsp;<code>java.lang.Object</code></dd>
+</dl>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<!-- ========= END OF CLASS DATA ========= -->
+<!-- ======= START OF BOTTOM NAVBAR ====== -->
+<div class="bottomNav"><a name="navbar.bottom">
+<!--   -->
+</a>
+<div class="skipNav"><a href="#skip.navbar.bottom" title="Skip navigation links">Skip navigation links</a></div>
+<a name="navbar.bottom.firstrow">
+<!--   -->
+</a>
+<ul class="navList" title="Navigation">
+<li><a href="../../../../overview-summary.html">Overview</a></li>
+<li><a href="package-summary.html">Package</a></li>
+<li class="navBarCell1Rev">Class</li>
+<li><a href="package-tree.html">Tree</a></li>
+<li><a href="../../../../deprecated-list.html">Deprecated</a></li>
+<li><a href="../../../../index-all.html">Index</a></li>
+<li><a href="../../../../help-doc.html">Help</a></li>
+</ul>
+</div>
+<div class="subNav">
+<ul class="navList">
+<li>Prev&nbsp;Class</li>
+<li><a href="../../../../de/upb/isys/linearalgebra/DenseDoubleVector.html" title="class in de.upb.isys.linearalgebra"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+</ul>
+<ul class="navList">
+<li><a href="../../../../index.html?de/upb/isys/linearalgebra/AbstractVector.html" target="_top">Frames</a></li>
+<li><a href="AbstractVector.html" target="_top">No&nbsp;Frames</a></li>
+</ul>
+<ul class="navList" id="allclasses_navbar_bottom">
+<li><a href="../../../../allclasses-noframe.html">All&nbsp;Classes</a></li>
+</ul>
+<div>
+<script type="text/javascript"><!--
+  allClassesLink = document.getElementById("allclasses_navbar_bottom");
+  if(window==top) {
+    allClassesLink.style.display = "block";
+  }
+  else {
+    allClassesLink.style.display = "none";
+  }
+  //-->
+</script>
+</div>
+<div>
+<ul class="subNavList">
+<li>Summary:&nbsp;</li>
+<li>Nested&nbsp;|&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#constructor.summary">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method.summary">Method</a></li>
+</ul>
+<ul class="subNavList">
+<li>Detail:&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#constructor.detail">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method.detail">Method</a></li>
+</ul>
+</div>
+<a name="skip.navbar.bottom">
+<!--   -->
+</a></div>
+<!-- ======== END OF BOTTOM NAVBAR ======= -->
+</body>
+</html>
