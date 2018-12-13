@@ -66,6 +66,7 @@ public class DyadRankingInstanceSupplier {
 		return comparator;
 	}
 
+	
 	/**
 	 * 
 	 * @param maxLengthDyadRankingInstance Maximum length of an individual dyad
@@ -76,7 +77,7 @@ public class DyadRankingInstanceSupplier {
 	 *         instances) that are ranked by the ranking function implemented by the
 	 *         {@link Comparator} returned by {@link #complexDyadRanker()}
 	 */
-	public static DyadRankingDataset getDyadRankingDataset(int maxLengthDyadRankingInstance, int size) {
+	public static DyadRankingDataset getDyadRankingDataset(int maxLengthDyadRankingInstance, int length) {
 		DyadRankingDataset dataset = new DyadRankingDataset();
 		for(int i = 0; i < length; i++) {
 			dataset.add(DyadRankingInstanceSupplier.getDyadRankingInstance(maxLengthDyadRankingInstance, i));
