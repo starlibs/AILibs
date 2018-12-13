@@ -20,17 +20,11 @@ import jaicore.ml.dyadranking.general.DyadRankingInstanceSupplier;
  */
 public class PLNetDyadRankerTest {
 
-	/**
-	 * 	Tests whether the PLNet ist constructed correctly.
-	 */
 	@Test
 	public void testPLNetCreation() {
 		PLNetDyadRanker pldr = new PLNetDyadRanker(4,7,7);
-		
 		DyadRankingDataset trainingDataset = DyadRankingInstanceSupplier.getDyadRankingDataset(10, 1000);
 		DyadRankingDataset testDataset = DyadRankingInstanceSupplier.getDyadRankingDataset(10, 200);
-		
-		
 		
 		try {
 			pldr.train(trainingDataset);
