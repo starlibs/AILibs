@@ -36,7 +36,7 @@ import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 /**
  * This search randomly draws paths from the root. At every node, each successor is chosen with the same probability except if a priority predicate is defined. A priority predicate says whether or not a node lies on a path that has
  * priority. A node only has priority until all successors that have priority are exhausted.
- * 
+ *
  * @author fmohr
  *
  * @param <N>
@@ -44,8 +44,8 @@ import jaicore.search.structure.graphgenerator.SuccessorGenerator;
  */
 public class RandomSearch<N, A> extends AbstractORGraphSearch<GraphSearchInput<N, A>, Object, N, A, Double, N, A> implements ILoggingCustomizable {
 
-	private String loggerName;
 	private Logger logger = LoggerFactory.getLogger(RandomSearch.class);
+	private String loggerName;
 
 	private final N root;
 	private final SuccessorGenerator<N, A> gen;
@@ -57,65 +57,67 @@ public class RandomSearch<N, A> extends AbstractORGraphSearch<GraphSearchInput<N
 	private final Set<N> exhausted = new HashSet<>();
 	private final Random random;
 
-	public RandomSearch(GraphSearchInput<N, A> problem, int seed) {
+	public RandomSearch(final GraphSearchInput<N, A> problem, final int seed) {
 		this(problem, new Random(seed));
 	}
 
-	public RandomSearch(GraphSearchInput<N, A> problem, Random random) {
+	public RandomSearch(final GraphSearchInput<N, A> problem, final Random random) {
 		this(problem, null, random);
 	}
 
-	public RandomSearch(GraphSearchInput<N, A> problem, Predicate<N> priorityPredicate, Random random) {
+	public RandomSearch(final GraphSearchInput<N, A> problem, final Predicate<N> priorityPredicate, final Random random) {
 		super(problem);
 		this.root = ((SingleRootGenerator<N>) problem.getGraphGenerator().getRootGenerator()).getRoot();
 		this.gen = problem.getGraphGenerator().getSuccessorGenerator();
 		this.goalTester = (NodeGoalTester<N>) problem.getGraphGenerator().getGoalTester();
-		exploredGraph.addItem(root);
+		this.exploredGraph.addItem(this.root);
 		this.random = random;
 		this.priorityPredicate = priorityPredicate;
 	}
 
-	private void expandNode(N node) throws InterruptedException {
-		assert !closed.contains(node) && !goalTester.isGoal(node);
-		logger.debug("Expanding next node {}", node);
+	private void expandNode(final N node) throws InterruptedException {
+		assert !this.closed.contains(node) && !this.goalTester.isGoal(node);
+		this.logger.debug("Expanding next node {}", node);
 		long start = System.currentTimeMillis();
-		List<NodeExpansionDescription<N, A>> successors = gen.generateSuccessors(node); // could have been interrupted here
-		logger.debug("Identified {} successor(s) in {}ms, which are now appended.", successors.size(), System.currentTimeMillis() - start);
+		List<NodeExpansionDescription<N, A>> successors = this.gen.generateSuccessors(node); // could have been interrupted here
+		this.logger.debug("Identified {} successor(s) in {}ms, which are now appended.", successors.size(), System.currentTimeMillis() - start);
 		boolean atLeastOneSuccessorPrioritized = false;
 		for (NodeExpansionDescription<N, A> successor : successors) {
-			exploredGraph.addItem(successor.getTo());
-			boolean isPrioritized = priorityPredicate != null && priorityPredicate.test(successor.getTo());
+			this.exploredGraph.addItem(successor.getTo());
+			boolean isPrioritized = this.priorityPredicate != null && this.priorityPredicate.test(successor.getTo());
 			if (isPrioritized) {
 				atLeastOneSuccessorPrioritized = true;
-				prioritizedNodes.add(successor.getTo());
+				this.prioritizedNodes.add(successor.getTo());
 			}
-			exploredGraph.addEdge(node, successor.getTo(), successor.getAction());
-			boolean isGoalNode = goalTester.isGoal(successor.getTo());
-			if (isGoalNode)
-				logger.debug("Found goal node {}!", successor);
-			postEvent(new NodeReachedEvent<>(successor.getFrom(), successor.getTo(), isGoalNode ? "or_solution" : (isPrioritized ? "or_prioritized" : "or_open")));
+			this.exploredGraph.addEdge(node, successor.getTo(), successor.getAction());
+			boolean isGoalNode = this.goalTester.isGoal(successor.getTo());
+			if (isGoalNode) {
+				this.logger.debug("Found goal node {}!", successor);
+			}
+			this.post(new NodeReachedEvent<>(successor.getFrom(), successor.getTo(), isGoalNode ? "or_solution" : (isPrioritized ? "or_prioritized" : "or_open")));
 		}
-		if (!successors.isEmpty() && prioritizedNodes.contains(node) && !atLeastOneSuccessorPrioritized) {
-			prioritizedNodes.remove(node);
-			updateExhaustedAndPrioritizedState(node);
+		if (!successors.isEmpty() && this.prioritizedNodes.contains(node) && !atLeastOneSuccessorPrioritized) {
+			this.prioritizedNodes.remove(node);
+			this.updateExhaustedAndPrioritizedState(node);
 		}
-		if (!prioritizedNodes.contains(node))
-			postEvent(new NodeTypeSwitchEvent<N>(node, "or_closed"));
-		closed.add(node);
-		logger.debug("Finished node expansion. Sizes of explored graph and CLOSED are {} and {} respectively.", exploredGraph.getItems().size(), closed.size());
+		if (!this.prioritizedNodes.contains(node)) {
+			this.post(new NodeTypeSwitchEvent<N>(node, "or_closed"));
+		}
+		this.closed.add(node);
+		this.logger.debug("Finished node expansion. Sizes of explored graph and CLOSED are {} and {} respectively.", this.exploredGraph.getItems().size(), this.closed.size());
 	}
 
 	@Override
 	public AlgorithmEvent nextWithException() throws Exception {
 
-		switch (getState()) {
+		switch (this.getState()) {
 		case created: {
-			activateTimeoutTimer("RandomSearch-Timeouter");
-			switchState(AlgorithmState.active);
-			postEvent(new GraphInitializedEvent<>(root));
+			this.activateTimeoutTimer("RandomSearch-Timeouter");
+			this.switchState(AlgorithmState.active);
+			this.post(new GraphInitializedEvent<>(this.root));
 			AlgorithmEvent event = new AlgorithmInitializedEvent();
-			postEvent(event);
-			logger.info("Starting random search ...");
+			this.post(event);
+			this.logger.info("Starting random search ...");
 			return event;
 		}
 		case active: {
@@ -123,45 +125,45 @@ public class RandomSearch<N, A> extends AbstractORGraphSearch<GraphSearchInput<N
 			/* if the root is exhausted, cancel */
 			SearchGraphPath<N, A> drawnPath = null;
 			try {
-				drawnPath = nextSolutionUnderNode(root);
+				drawnPath = this.nextSolutionUnderNode(this.root);
 			} catch (TimeoutException e) {
 
 			}
 			if (drawnPath == null) {
-				shutdown();
+				this.shutdown();
 				AlgorithmEvent event = new AlgorithmFinishedEvent();
-				postEvent(event);
+				this.post(event);
 				return event;
 			}
 			AlgorithmEvent event = new GraphSearchSolutionCandidateFoundEvent<>(drawnPath);
-			logger.info("Identified new solution ...");
-			postEvent(event);
+			this.logger.info("Identified new solution ...");
+			this.post(event);
 			return event;
 		}
 		default: {
-			throw new IllegalStateException("Cannot do anything in state " + getState());
+			throw new IllegalStateException("Cannot do anything in state " + this.getState());
 		}
 		}
 	}
 
-	public boolean knowsNode(N node) {
-		return exploredGraph.getItems().contains(node);
+	public boolean knowsNode(final N node) {
+		return this.exploredGraph.getItems().contains(node);
 	}
 
-	public void appendPathToNode(List<N> nodes) throws InterruptedException {
+	public void appendPathToNode(final List<N> nodes) throws InterruptedException {
 		for (N node : nodes) {
-			if (!closed.contains(node)) {
-				expandNode(node);
+			if (!this.closed.contains(node)) {
+				this.expandNode(node);
 			}
 		}
 	}
 
-	public SearchGraphPath<N, A> nextSolutionUnderNode(N node) throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {
-		logger.info("Looking for next solution under node {}", node);
-		checkTermination();
+	public SearchGraphPath<N, A> nextSolutionUnderNode(final N node) throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {
+		this.logger.info("Looking for next solution under node {}", node);
+		this.checkTermination();
 
 		/* if the root is exhausted, cancel */
-		if (exhausted.contains(node)) {
+		if (this.exhausted.contains(node)) {
 			return null;
 		}
 
@@ -169,93 +171,85 @@ public class RandomSearch<N, A> extends AbstractORGraphSearch<GraphSearchInput<N
 		List<N> path = new ArrayList<>();
 		path.add(node);
 		N head = node;
-		while (!goalTester.isGoal(head)) {
+		while (!this.goalTester.isGoal(head)) {
 
-			checkTermination();
+			this.checkTermination();
 
 			/* expand node if this has not happened yet */
-			if (!closed.contains(head)) {
-				expandNode(head);
+			if (!this.closed.contains(head)) {
+				this.expandNode(head);
 			}
 
 			/* get unexhausted successors */
-			List<N> successors = exploredGraph.getSuccessors(head).stream().filter(n -> !exhausted.contains(n)).collect(Collectors.toList());
+			List<N> successors = this.exploredGraph.getSuccessors(head).stream().filter(n -> !this.exhausted.contains(n)).collect(Collectors.toList());
 
 			/* if we are in a dead end, mark the node as exhausted and remove the head again */
 			if (successors.isEmpty()) {
-				exhausted.add(head);
-				prioritizedNodes.remove(head); // remove prioritized node from list if it is in
+				this.exhausted.add(head);
+				this.prioritizedNodes.remove(head); // remove prioritized node from list if it is in
 				path.remove(head);
-				if (path.isEmpty())
+				if (path.isEmpty()) {
 					return null;
+				}
 				head = path.get(path.size() - 1);
 				continue;
 			}
 
 			/* if at least one of the successors is prioritized, choose one of those; otherwise choose one at random */
-			assert SetUtil.intersection(exhausted, prioritizedNodes).isEmpty() : "There are nodes that are both exhausted and prioritized, which must not be the case:" + SetUtil.intersection(exhausted, prioritizedNodes).stream().map(n -> "\n\t" + n).collect(Collectors.joining());
-			Collection<N> prioritizedSuccessors = SetUtil.intersection(successors, prioritizedNodes);
+			assert SetUtil.intersection(this.exhausted, this.prioritizedNodes).isEmpty() : "There are nodes that are both exhausted and prioritized, which must not be the case:"
+					+ SetUtil.intersection(this.exhausted, this.prioritizedNodes).stream().map(n -> "\n\t" + n).collect(Collectors.joining());
+			Collection<N> prioritizedSuccessors = SetUtil.intersection(successors, this.prioritizedNodes);
 			if (!prioritizedSuccessors.isEmpty()) {
 				head = prioritizedSuccessors.iterator().next();
-			}
-			else {
+			} else {
 				int n = successors.size();
 				assert n != 0 : "Ended up in a situation where only exhausted nodes can be chosen.";
-				int k = random.nextInt(n);
+				int k = this.random.nextInt(n);
 				head = successors.get(k);
 				final N tmpHead = head; // needed for stream in assertion
-				assert !path.contains(head) : "Going in circles ... " + path.stream().map(pn -> "\n\t[" + (pn.equals(tmpHead) ? "*" : " ") + "]" + pn.toString()).collect(Collectors.joining())
-						+ "\n\t[*]" + head;
+				assert !path.contains(head) : "Going in circles ... " + path.stream().map(pn -> "\n\t[" + (pn.equals(tmpHead) ? "*" : " ") + "]" + pn.toString()).collect(Collectors.joining()) + "\n\t[*]" + head;
 			}
 			path.add(head);
 		}
 
 		/* propagate exhausted state */
-		exhausted.add(head);
-		prioritizedNodes.remove(head);
-		updateExhaustedAndPrioritizedState(head);
+		this.exhausted.add(head);
+		this.prioritizedNodes.remove(head);
+		this.updateExhaustedAndPrioritizedState(head);
 		return new SearchGraphPath<>(path, null);
 	}
-	
-	private void updateExhaustedAndPrioritizedState(N node) {
+
+	private void updateExhaustedAndPrioritizedState(final N node) {
 		N current = node;
 		Collection<N> predecessors;
-		while (!(predecessors = exploredGraph.getPredecessors(current)).isEmpty()) {
+		while (!(predecessors = this.exploredGraph.getPredecessors(current)).isEmpty()) {
 			assert predecessors.size() == 1;
 			current = predecessors.iterator().next();
-			boolean currentIsPrioritized = prioritizedNodes.contains(current);
+			boolean currentIsPrioritized = this.prioritizedNodes.contains(current);
 			boolean allChildrenExhausted = true;
 			boolean allPrioritizedChildrenExhausted = true;
-			for (N successor : exploredGraph.getSuccessors(current)) {
-				if (!exhausted.contains(successor)) {
+			for (N successor : this.exploredGraph.getSuccessors(current)) {
+				if (!this.exhausted.contains(successor)) {
 					allChildrenExhausted = false;
-					if (currentIsPrioritized && prioritizedNodes.contains(successor)) {
+					if (currentIsPrioritized && this.prioritizedNodes.contains(successor)) {
 						allPrioritizedChildrenExhausted = false;
 						break;
-					} else if (!currentIsPrioritized)
+					} else if (!currentIsPrioritized) {
 						break;
+					}
 				}
 			}
-			if (allChildrenExhausted)
-				exhausted.add(current);
+			if (allChildrenExhausted) {
+				this.exhausted.add(current);
+			}
 			if (currentIsPrioritized && allPrioritizedChildrenExhausted) {
-				int sizeBefore = prioritizedNodes.size();
-				prioritizedNodes.remove(current);
-				postEvent(new NodeTypeSwitchEvent<N>(current, "or_closed"));
-				int sizeAfter = prioritizedNodes.size();
+				int sizeBefore = this.prioritizedNodes.size();
+				this.prioritizedNodes.remove(current);
+				this.post(new NodeTypeSwitchEvent<N>(current, "or_closed"));
+				int sizeAfter = this.prioritizedNodes.size();
 				assert sizeAfter == sizeBefore - 1;
 			}
 		}
-	}
-
-	@Override
-	public void setNumCPUs(int numberOfCPUs) {
-
-	}
-
-	@Override
-	public int getNumCPUs() {
-		return 1;
 	}
 
 	@Override
@@ -264,19 +258,22 @@ public class RandomSearch<N, A> extends AbstractORGraphSearch<GraphSearchInput<N
 	}
 
 	@Override
-	public void setLoggerName(String name) {
-		
-		logger.info("Switch logger name from {} to {}", this.loggerName, name);
-		this.loggerName = name;
-		this.logger = LoggerFactory.getLogger(this.loggerName);
-		if (this.getGraphGenerator() instanceof ILoggingCustomizable) {
-			((ILoggingCustomizable)this.getGraphGenerator()).setLoggerName(name + ".graphgen");
-		}
-		logger.info("Switched logger name to {}", this.loggerName);
+	public String getLoggerName() {
+		return this.loggerName;
 	}
 
 	@Override
-	public String getLoggerName() {
-		return loggerName;
+	public void setLoggerName(final String name) {
+		this.logger.info("Switching logger from {} to {}", this.logger.getName(), name);
+		this.logger = LoggerFactory.getLogger(name);
+		this.logger.info("Activated logger {} with name {}", name, this.logger.getName());
+		if (this.goalTester instanceof ILoggingCustomizable) {
+			((ILoggingCustomizable) this.goalTester).setLoggerName(name + ".goaltester");
+		}
+		if (this.gen instanceof ILoggingCustomizable) {
+			((ILoggingCustomizable) this.gen).setLoggerName(name + ".generator");
+		}
+		super.setLoggerName(this.loggerName + "._orgraphsearch");
 	}
+
 }

@@ -10,6 +10,7 @@ import java.sql.Time;
 import java.util.List;
 import java.util.Properties;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 import org.aeonbits.owner.ConfigFactory;
 
@@ -22,13 +23,13 @@ import weka.core.Instances;
 public class MLPlanWekaCLI {
 
 	public static void main(final String[] args) throws FileNotFoundException, IOException {
-		
+
 		if (args.length > 0 && args[0].equals("-h")) {
 			System.out.println("Parameters to set: ");
 			System.out.println("<dataset_file> <global_timeout> <evaluation_timeout>");
 			System.exit(0);
 		}
-		
+
 		Properties properties = new Properties();
 		properties.load(new FileInputStream("conf/mlplan/mlplanwekacli.properties"));
 		final MLPlanWekaCLIConfig CLI_CONFIG = ConfigFactory.create(MLPlanWekaCLIConfig.class, properties);
@@ -62,10 +63,11 @@ public class MLPlanWekaCLI {
 		/* extract all relevant information about the experiment */
 		System.out.println(getTime() + " Initialize ML-Plan...");
 		MLPlanWekaClassifier mlPlan = new WekaMLPlanWekaClassifier();
-		mlPlan.setTimeout(CLI_CONFIG.timeout());
+		mlPlan.setTimeout(CLI_CONFIG.timeout(), TimeUnit.SECONDS);
 		mlPlan.setTimeoutForSingleSolutionEvaluation(CLI_CONFIG.evalTimeout() * 1000);
-		if (CLI_CONFIG.showGraphVisualization())
+		if (CLI_CONFIG.showGraphVisualization()) {
 			mlPlan.activateVisualization();
+		}
 
 		System.out.println(getTime() + " Split the data into train and test set...");
 		List<Instances> testSplit = WekaUtil.getStratifiedSplit(data, new Random(mlPlan.getConfig().randomSeed()), 0.7);

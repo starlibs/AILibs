@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
@@ -39,12 +40,12 @@ public class MLPlanOpenMLExample {
 		/* initialize mlplan, and let it run for 30 seconds */
 		MLPlanWekaClassifier mlplan = new WekaMLPlanWekaClassifier();
 		mlplan.setLoggerName("mlplan");
-		mlplan.setTimeout(30);
+		mlplan.setTimeout(30, TimeUnit.SECONDS);
 		mlplan.activateVisualization();
 		try {
 			long start = System.currentTimeMillis();
 			mlplan.buildClassifier(split.get(0));
-			long trainTime = (int)(System.currentTimeMillis() - start) / 1000;
+			long trainTime = (int) (System.currentTimeMillis() - start) / 1000;
 			System.out.println("Finished build of the classifier. Training time was " + trainTime + "s.");
 
 			/* evaluate solution produced by mlplan */

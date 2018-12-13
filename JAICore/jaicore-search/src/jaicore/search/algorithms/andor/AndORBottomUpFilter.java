@@ -6,6 +6,10 @@ import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.IObjectEvaluator;
 import jaicore.basic.algorithm.AAlgorithm;
 import jaicore.basic.algorithm.AlgorithmEvent;
@@ -15,27 +19,30 @@ import jaicore.graph.Graph;
 import jaicore.graph.IGraphAlgorithm;
 import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
+import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.model.travesaltree.NodeExpansionDescription;
 import jaicore.search.model.travesaltree.NodeType;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 
-public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorithm<GraphGenerator<N, A>, Graph<N>>
-		implements IGraphAlgorithm<GraphGenerator<N, A>, Graph<N>, N, A> {
+public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorithm<GraphGenerator<N, A>, Graph<N>> implements IGraphAlgorithm<GraphGenerator<N, A>, Graph<N>, N, A> {
+
+	private Logger logger = LoggerFactory.getLogger(BestFirst.class);
+	private String loggerName;
 
 	public class InnerNodeLabel {
 		N node;
 		NodeType type;
-//		List<List<N>> survivedGoalPaths; // ranked list of paths from node to goals
+		// List<List<N>> survivedGoalPaths; // ranked list of paths from node to goals
 		boolean evaluated;
 
-		public InnerNodeLabel(N node, NodeType type) {
+		public InnerNodeLabel(final N node, final NodeType type) {
 			super();
 			this.node = node;
 			this.type = type;
 		}
 	}
-	
+
 	class EvaluatedGraph {
 		Graph<N> graph;
 		V value;
@@ -45,94 +52,92 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 	private final IObjectEvaluator<Graph<N>, V> evaluator; // to evaluate (sub-)solutions
 	private Graph<N> bestSolutionBase;
 
-	public AndORBottomUpFilter(GraphGenerator<N, A> gg, IObjectEvaluator<Graph<N>, V> pEvaluator) {
+	public AndORBottomUpFilter(final GraphGenerator<N, A> gg, final IObjectEvaluator<Graph<N>, V> pEvaluator) {
 		super(gg);
 		this.evaluator = pEvaluator;
 	}
 
 	@Override
 	public AlgorithmEvent nextWithException() throws Exception {
-		switch (getState()) {
+		switch (this.getState()) {
 		case created: {
-			
+
 			/* step 1: construct the whole graph */
 			Queue<InnerNodeLabel> open = new LinkedList<>();
-			InnerNodeLabel root = new InnerNodeLabel(((SingleRootGenerator<N>) getInput().getRootGenerator()).getRoot(),
-					NodeType.AND);
+			InnerNodeLabel root = new InnerNodeLabel(((SingleRootGenerator<N>) this.getInput().getRootGenerator()).getRoot(), NodeType.AND);
 
 			open.add(root);
-			post(new GraphInitializedEvent<N>(root.node));
-			graph.addItem(root);
+			this.post(new GraphInitializedEvent<N>(root.node));
+			this.graph.addItem(root);
 			while (!open.isEmpty()) {
 				InnerNodeLabel n = open.poll();
-				for (NodeExpansionDescription<N, A> descr : getInput().getSuccessorGenerator()
-						.generateSuccessors(n.node)) {
+				for (NodeExpansionDescription<N, A> descr : this.getInput().getSuccessorGenerator().generateSuccessors(n.node)) {
 					InnerNodeLabel newNode = new InnerNodeLabel(descr.getTo(), descr.getTypeOfToNode());
-					graph.addItem(newNode);
-					graph.addEdge(n, newNode);
+					this.graph.addItem(newNode);
+					this.graph.addEdge(n, newNode);
 					open.add(newNode);
 					Thread.sleep(5);
-					post(new NodeReachedEvent<N>(n.node, newNode.node,
-							descr.getTypeOfToNode() == NodeType.OR ? "or" : "and"));
+					this.post(new NodeReachedEvent<N>(n.node, newNode.node, descr.getTypeOfToNode() == NodeType.OR ? "or" : "and"));
 				}
 			}
 
-			System.out.println(graph.getItems().size());
-			setState(AlgorithmState.active);
+			System.out.println(this.graph.getItems().size());
+			this.setState(AlgorithmState.active);
 			return new AlgorithmInitializedEvent();
 		}
 		case active: {
 
 			/* now compute best local values bottom up */
-			Queue<EvaluatedGraph> bestSolutions = filterNodeSolution(graph.getRoot());
+			Queue<EvaluatedGraph> bestSolutions = this.filterNodeSolution(this.graph.getRoot());
 			System.out.println(bestSolutions.size());
-			bestSolutionBase = bestSolutions.poll().graph;
-			return terminate();
+			this.bestSolutionBase = bestSolutions.poll().graph;
+			return this.terminate();
 		}
 		default:
-			throw new IllegalStateException("No handler defined for state " + getState());
+			throw new IllegalStateException("No handler defined for state " + this.getState());
 		}
 
 	}
 
 	/**
 	 * assumes that solution paths for children have been computed already
-	 * @throws Exception 
+	 *
+	 * @throws Exception
 	 */
-	private Queue<EvaluatedGraph> filterNodeSolution(InnerNodeLabel node) throws Exception {
-		
-		Queue<EvaluatedGraph> filteredSolutions = new PriorityQueue<>((p1,p2) -> p2.value.compareTo(p1.value)); // a list of paths ordered by their (believed) importance in ASCENDING ORDER (unimportant first, because these are drained)
+	private Queue<EvaluatedGraph> filterNodeSolution(final InnerNodeLabel node) throws Exception {
+
+		Queue<EvaluatedGraph> filteredSolutions = new PriorityQueue<>((p1, p2) -> p2.value.compareTo(p1.value)); // a list of paths ordered by their (believed) importance in ASCENDING ORDER (unimportant first, because these are drained)
 		assert !node.evaluated : "Node " + node + " is filtered for the 2nd time already!";
 		node.evaluated = true;
-		System.out.println("Filtering node " + node + " with " + graph.getSuccessors(node).size() + " children.");
-		
+		System.out.println("Filtering node " + node + " with " + this.graph.getSuccessors(node).size() + " children.");
+
 		/* if this is a leaf node, just return itself */
-		if (graph.getSuccessors(node).isEmpty()) {
+		if (this.graph.getSuccessors(node).isEmpty()) {
 			EvaluatedGraph evaluatedGraph = new EvaluatedGraph();
 			Graph<N> graph = new Graph<>();
 			graph.addItem(node.node);
 			evaluatedGraph.graph = graph;
-			evaluatedGraph.value = evaluator.evaluate(graph);
+			evaluatedGraph.value = this.evaluator.evaluate(graph);
 			filteredSolutions.add(evaluatedGraph);
 			System.out.println("Returning solutions for leaf node " + node);
 			return filteredSolutions;
 		}
-		
+
 		/* otherwise first compute the values for all children */
 		Map<InnerNodeLabel, Queue<EvaluatedGraph>> labels = new HashMap<>();
-		for (InnerNodeLabel child : graph.getSuccessors(node)) {
-			Queue<EvaluatedGraph> filteredSolutionsUnderChild = filterNodeSolution(child);
+		for (InnerNodeLabel child : this.graph.getSuccessors(node)) {
+			Queue<EvaluatedGraph> filteredSolutionsUnderChild = this.filterNodeSolution(child);
 			labels.put(child, filteredSolutionsUnderChild);
 		}
-		System.out.println("Survived paths for children " + (node.type == NodeType.OR ? "OR" : "AND") + "-node " + node.node +":");
+		System.out.println("Survived paths for children " + (node.type == NodeType.OR ? "OR" : "AND") + "-node " + node.node + ":");
 		for (InnerNodeLabel child : labels.keySet()) {
 			System.out.print("\t#" + child);
 			labels.get(child).forEach(l -> System.out.println("\n\t\t" + l));
 		}
-		
+
 		/* if this is an AND node, combine all solution paths of the children and choose the best COMBINATIONs */
 		if (node.type == NodeType.AND) {
-			
+
 			/* as a dummy, take the best of each child and combine it */
 			EvaluatedGraph extendedSolutionBase = new EvaluatedGraph();
 			extendedSolutionBase.graph = new Graph<>();
@@ -142,10 +147,10 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 				extendedSolutionBase.graph.addGraph(bestSolutionBaseOfChild.graph);
 				extendedSolutionBase.graph.addEdge(node.node, bestSolutionBaseOfChild.graph.getRoot());
 			}
-			extendedSolutionBase.value = evaluator.evaluate(extendedSolutionBase.graph);
+			extendedSolutionBase.value = this.evaluator.evaluate(extendedSolutionBase.graph);
 			filteredSolutions.add(extendedSolutionBase);
 		}
-		
+
 		/* if this is an OR node, choose the best solution paths of the children */
 		else {
 			int maxK = 2;
@@ -157,12 +162,13 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 					extendedSolutionBase.graph.addEdge(node.node, child.node);
 					extendedSolutionBase.value = solutionBase.value;
 					filteredSolutions.add(extendedSolutionBase);
-					while (filteredSolutions.size() > maxK)
+					while (filteredSolutions.size() > maxK) {
 						filteredSolutions.remove();
+					}
 				}
 			}
 		}
-		
+
 		/* reverse queue */
 		LinkedList<EvaluatedGraph> filteredSolutionsReordered = new LinkedList<>();
 		while (!filteredSolutions.isEmpty()) {
@@ -175,9 +181,26 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 
 	@Override
 	public Graph<N> call() throws Exception {
-		while (hasNext())
-			nextWithException();
-		return bestSolutionBase;
+		while (this.hasNext()) {
+			this.nextWithException();
+		}
+		return this.bestSolutionBase;
+	}
+
+	@Override
+	public String getLoggerName() {
+		return this.loggerName;
+	}
+
+	@Override
+	public void setLoggerName(final String name) {
+		this.logger.info("Switching logger from {} to {}", this.logger.getName(), name);
+		this.logger = LoggerFactory.getLogger(name);
+		this.logger.info("Activated logger {} with name {}", name, this.logger.getName());
+		if (this.evaluator instanceof ILoggingCustomizable) {
+			((ILoggingCustomizable) this.evaluator).setLoggerName(name + ".eval");
+		}
+		super.setLoggerName(this.loggerName + "._orgraphsearch");
 	}
 
 }
