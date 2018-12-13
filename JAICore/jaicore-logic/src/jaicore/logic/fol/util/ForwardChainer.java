@@ -59,6 +59,7 @@ public class ForwardChainer extends AAlgorithm<ForwardChainingProblem, Collectio
 	 * rest.
 	 */
 	public AlgorithmEvent nextWithException() throws Exception {
+		long start = System.currentTimeMillis();
 		switch (getState()) {
 
 		/* initialize the algorithm for the most promising literal */
@@ -69,7 +70,6 @@ public class ForwardChainer extends AAlgorithm<ForwardChainingProblem, Collectio
 			logger.info("Computing substitution for {}-conclusion that enable forward chaining from factbase of size {}. Enable trace for more detailed output.", conclusion.size(), factbase.size());
 			logger.trace("Conclusion is {}", conclusion);
 			logger.trace("Factbase is {}", factbase);
-			long start;
 			
 			/* if CWA is active, store away all negative literals */
 			if (getInput().isCwa()) {
@@ -89,7 +89,7 @@ public class ForwardChainer extends AAlgorithm<ForwardChainingProblem, Collectio
 			
 			/* select the literal that has the least options to be ground */
 			int currentlyFewestOptions = Integer.MAX_VALUE;
-			start = System.currentTimeMillis();
+			long timeToPrepareCWAVersion = System.currentTimeMillis();
 			for (Literal nextLitealCandidate : conclusion) {
 				logger.debug("Considering {} as next literal for grounding.", nextLitealCandidate);
 				long candidateGroundingStart = System.currentTimeMillis();
@@ -107,9 +107,11 @@ public class ForwardChainer extends AAlgorithm<ForwardChainingProblem, Collectio
 			for (Literal l : conclusion)
 				if (!l.equals(chosenLiteral))
 					remainingConclusion.add(l);
+			long end = System.currentTimeMillis();
 			logger.debug("Selected literal {} with still unbound params {} that can be ground in {} ways in {}ms.", chosenLiteral, chosenLiteral.getVariableParams(), possibleChoicesForLocalLiteral.size(),
-					System.currentTimeMillis() - start);
+					end - timeToPrepareCWAVersion);
 			setState(AlgorithmState.active);
+			logger.info("Initialized FC algorithm within {}ms.", end - start);
 			return new AlgorithmInitializedEvent();
 		}
 
@@ -117,9 +119,11 @@ public class ForwardChainer extends AAlgorithm<ForwardChainingProblem, Collectio
 			
 			/* if a sub-process is running, get its result and combine it with our current grounding for the local literal */
 			if (currentlyActiveSubFC != null) {
+				logger.trace("Reuse currently active recursive FC as it may still have solutions ...");
 				NextBindingFoundEvent event = currentlyActiveSubFC.nextBinding();
-				if (event == null)
+				if (event == null) {
 					currentlyActiveSubFC = null;
+				}
 				else {
 					Map<VariableParam, LiteralParam> subsolution = event.getGrounding();
 					logger.debug("Identified recursively determined sub-solution {}", subsolution);
@@ -135,6 +139,7 @@ public class ForwardChainer extends AAlgorithm<ForwardChainingProblem, Collectio
 					/* if CWA is activated, we have to recheck whether the negative literals are ok */
 					if (getInput().isCwa() && doesCWADeductionFail(factbase, new LiteralSet(cwaRelevantNegativeLiterals, solutionToReturn)))
 						return new ForwardChainingFailedCWABindingEvent();
+					logger.info("Computed binding {} for {}-conclusion within {}ms", solutionToReturn, conclusion.size(), System.currentTimeMillis() - start);
 					return new NextBindingFoundEvent(solutionToReturn);
 				}
 			}
@@ -160,6 +165,7 @@ public class ForwardChainer extends AAlgorithm<ForwardChainingProblem, Collectio
 			/* if no (more) groundings are possible for this literal and no feasible grounding was detected, return the algorithm finished event */
 			if (!foundAChoiceThatMightBeFeasible) {
 				assert possibleChoicesForLocalLiteral.isEmpty() : "Collection of possible choices should be empty when no grounding was chosen!";
+				logger.debug("Finishing process for {}-conclusion since no (more) grounding is avilable for predicate {}.", conclusion.size(), chosenLiteral);
 				return terminate();
 			}
 

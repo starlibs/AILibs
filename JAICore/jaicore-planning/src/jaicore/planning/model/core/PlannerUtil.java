@@ -19,7 +19,6 @@ import jaicore.logic.fol.structure.Monom;
 import jaicore.logic.fol.structure.VariableParam;
 import jaicore.logic.fol.util.ForwardChainer;
 import jaicore.logic.fol.util.ForwardChainingProblem;
-import jaicore.logic.fol.util.LogicUtil;
 import jaicore.logic.fol.util.NextBindingFoundEvent;
 import jaicore.planning.model.conditional.CEAction;
 import jaicore.planning.model.conditional.CEOperation;
@@ -52,6 +51,7 @@ public class PlannerUtil {
 		}
 		
 		/* now walk over the operations and collect actions until the limit is reached */
+		long timeToOrderOps = System.currentTimeMillis() - start;
 		for (Operation op : domain.getOperations()) {
 			Collection<StripsAction> candidates = getPossibleOperationGroundingsForState(state, (StripsOperation) op, limit);
 			applicableDerivedActions.addAll(candidates);
@@ -59,7 +59,7 @@ public class PlannerUtil {
 				limit = Math.max(0, limit - candidates.size());
 		}
 		long duration = System.currentTimeMillis() - start;
-		logger.debug("Done. Computation of {} applicable actions took {}ms", applicableDerivedActions.size(), duration);
+		logger.debug("Done. Computation of {} applicable actions took {}ms of which {}ms were used to order the operations", applicableDerivedActions.size(), duration, timeToOrderOps);
 		return applicableDerivedActions;
 	}
 
@@ -75,6 +75,7 @@ public class PlannerUtil {
 //		Collection<Map<VariableParam, LiteralParam>> groundings = LogicUtil.getSubstitutionsThatEnableForwardChainingUnderCWA(state, operation.getPrecondition());
 //		long duration = System.currentTimeMillis() - start;
 //		logger.debug("Done. Computation of {} groundings took {}ms", groundings.size(), duration);
+		long fcPreparationTime = System.currentTimeMillis() - start;
 		NextBindingFoundEvent event;
 		try {
 			int i = 0;
@@ -90,12 +91,12 @@ public class PlannerUtil {
 				}
 				StripsAction a = new StripsAction(operation, rGrounding);
 				applicableDerivedActions.add(a);
-				logger.debug("Found action {} to be applicable.", a.getEncoding());
-
+				logger.debug("Found action {} to be applicable after {}ms.", a.getEncoding(), System.currentTimeMillis() - start);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		logger.info("Determined {}/{} applicable actions within {}ms of which preparing the FC algorithm consumed {}ms.", applicableDerivedActions.size(), limit, System.currentTimeMillis() - start, fcPreparationTime);
 		return applicableDerivedActions;
 	}
 

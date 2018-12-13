@@ -1,7 +1,6 @@
 package jaicore.planning.graphgenerators.strips.forward;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -58,8 +57,9 @@ public class StripsForwardPlanningGraphGenerator implements GraphGenerator<Strip
 		logger.info("Computing random successor for node {}", node);
 		long start = System.currentTimeMillis();
 		Monom state = node.getStateRelativeToInitState(initState);
-		List<StripsAction> applicableActions = PlannerUtil.getApplicableActionsInState(state, (StripsPlanningDomain) problem.getDomain(), true, 1);
-		logger.debug("Computation of applicable actions took {}ms", System.currentTimeMillis() - start);
+		long timeToComputeState = System.currentTimeMillis() - start;
+		List<StripsAction> applicableActions = PlannerUtil.getApplicableActionsInState(state, (StripsPlanningDomain) problem.getDomain(), true, 5);
+		logger.debug("Computation of applicable actions took {}ms of which {}ms were used to reproduce the state.", System.currentTimeMillis() - start, timeToComputeState);
 		return applicableActions.isEmpty() ? null : applicableActions.get(0);
 	}
 
@@ -114,9 +114,11 @@ public class StripsForwardPlanningGraphGenerator implements GraphGenerator<Strip
 				} else {
 					int counter = 0;
 					while ((action = getRandomApplicableActionInNode(node)) != null && appliedActions.get(node).contains(action) && counter < 10) {
+						logger.debug("Created the same action for the same time, iterating again.");
 						counter++;
 					}
 					if (action == null) {
+						logger.debug("Generating ALL successors, since the previous procedure has not revealed any new action within {} iterations", counter);
 						generateSuccessors(node);
 						assert completelyExpandedNodes.contains(node);
 						action = appliedActions.get(node).get(i % appliedActions.get(node).size());
