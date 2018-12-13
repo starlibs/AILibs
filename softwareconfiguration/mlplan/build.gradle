@@ -22,7 +22,7 @@ dependencies {
 
 
 	// OWL API
-	compile 'net.sourceforge.owlapi:owlapi-distribution:5.1.0'
+	compile 'net.sourceforge.owlapi:owlapi-distribution:5.1.9'
 	// TreeMiner
 	compile 'com.github.helegraf:TreeMiner:df764c7b13'
 	// linear algebra
