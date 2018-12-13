@@ -25,4 +25,14 @@ public interface IStratiAssigner {
 	 */
 	public int assignToStrati(IInstance datapoint);
 	
+	/**
+	 * Sets the number of CPU cores that can be used for parallel computation
+	 * 
+	 * @param numberOfCPUs
+	 */
+	public void setNumCPUs(int numberOfCPUs);
+
+	public int getNumCPUs();
+	
+	
 }

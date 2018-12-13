@@ -7,6 +7,8 @@ import org.apache.commons.math3.ml.clustering.CentroidCluster;
 import org.apache.commons.math3.ml.clustering.KMeansPlusPlusClusterer;
 import org.apache.commons.math3.ml.distance.DistanceMeasure;
 import org.apache.commons.math3.random.JDKRandomGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
@@ -20,6 +22,8 @@ import jaicore.ml.core.dataset.IInstance;
  */
 public class KMeansStratiAssigner implements IStratiAssigner {
 
+	private static Logger LOG = LoggerFactory.getLogger(KMeansStratiAssigner.class);
+
 	private int randomSeed;
 	private KMeansPlusPlusClusterer<IInstance> clusterer;
 	private DistanceMeasure distanceMeasure;
@@ -28,9 +32,11 @@ public class KMeansStratiAssigner implements IStratiAssigner {
 	/**
 	 * Constructor for KMeansStratiAssigner.
 	 * 
-	 * @param distanceMeasure Distance measure for datapoints, for example Manhattan
-	 *                        or Euclidian.
-	 * @param randomSeed      Seed for random numbers.
+	 * @param distanceMeasure
+	 *            Distance measure for datapoints, for example Manhattan or
+	 *            Euclidian.
+	 * @param randomSeed
+	 *            Seed for random numbers.
 	 */
 	private KMeansStratiAssigner(DistanceMeasure distanceMeasure, int randomSeed) {
 		this.randomSeed = randomSeed;
@@ -57,6 +63,16 @@ public class KMeansStratiAssigner implements IStratiAssigner {
 			}
 		}
 		throw new Error("Datapoint was not found in any cluster. This should not happen.");
+	}
+
+	@Override
+	public void setNumCPUs(int numberOfCPUs) {
+		LOG.warn("setNumCPUs() is not supported for this class");
+	}
+
+	@Override
+	public int getNumCPUs() {
+		return 1;
 	}
 
 }
