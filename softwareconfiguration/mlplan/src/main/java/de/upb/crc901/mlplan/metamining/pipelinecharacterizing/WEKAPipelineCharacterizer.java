@@ -12,7 +12,7 @@ import hasco.model.Parameter;
 import hasco.model.ParameterRefinementConfiguration;
 import treeminer.FrequentSubtreeFinder;
 import treeminer.TreeMiner;
-import treeminer.TreeRepresentationUtils;
+import treeminer.util.TreeRepresentationUtils;
 
 /**
  * A characterizer for MLPipelines. It characterizes pipelines using an ontology
