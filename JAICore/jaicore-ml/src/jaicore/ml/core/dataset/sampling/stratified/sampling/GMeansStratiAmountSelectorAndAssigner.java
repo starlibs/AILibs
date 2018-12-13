@@ -1,16 +1,18 @@
 package jaicore.ml.core.dataset.sampling.stratified.sampling;
 
+import jaicore.ml.clustering.GMeans;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
 
 /**
- * Combined strati amount selector and strati assigner vie g-means.
+ * Combined strati amount selector and strati assigner via g-means.
  * 
  * @author Lukas Brandt
  */
 public class GMeansStratiAmountSelectorAndAssigner implements IStratiAssigner, IStratiAmountSelector {
 
 	private int numCPUs = 1;
+	private GMeans<IInstance> clusterer;
 	
 	@Override
 	public int selectStratiAmount(IDataset dataset) {
