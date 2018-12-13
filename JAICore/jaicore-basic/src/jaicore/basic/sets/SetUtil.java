@@ -453,7 +453,7 @@ public class SetUtil {
 	 *            The set B.
 	 * @return The Cartesian product A x B.
 	 */
-	public static <T> List<List<T>> cartesianProduct(List<? extends Collection<T>> listOfSets) {
+	public static <T> Collection<List<T>> cartesianProduct(List<? extends Collection<T>> listOfSets) {
 
 		/* compute expected number of items of the result */
 		int expectedSize = 1;
@@ -470,7 +470,7 @@ public class SetUtil {
 		 * if there is only one set, create tuples of size 1 and return the set of tuples
 		 */
 		if (listOfSets.size() == 1) {
-			List<List<T>> product = new ArrayList<>();
+			Set<List<T>> product = new HashSet<>();
 			for (T obj : listOfSets.get(0)) {
 				List<T> tupleOfSize1 = new ArrayList<>();
 				tupleOfSize1.add(obj);
@@ -487,7 +487,7 @@ public class SetUtil {
 		Collection<T> removed = listOfSets.get(listOfSets.size() - 1);
 		listOfSets.remove(listOfSets.size() - 1);
 		Collection<List<T>> subSolution = cartesianProduct(listOfSets);
-		List<List<T>> product = new ArrayList<>();
+		Set<List<T>> product = new HashSet<>();
 		for (List<T> tuple : subSolution) {
 			for (T item : removed) {
 				List<T> newTuple = new ArrayList<>(tuple);

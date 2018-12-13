@@ -1,6 +1,7 @@
 package jaicore.search.algorithms.andor;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -163,16 +164,20 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 			for (InnerNodeLabel child : subSolutions.keySet()) {
 				List<EvaluatedGraph> bestSubSolutionsOfThisChild = new ArrayList<>();
 				logger.debug("Adding " + k + "/" + subSolutions.get(child).size() + " subsolutions of child into the cartesian product input.");
-				for (int i = 0; i < k; i++)
-					bestSubSolutionsOfThisChild.add(subSolutions.get(child).poll());
+				for (int i = 0; i < k; i++) {
+					EvaluatedGraph subsolution = subSolutions.get(child).poll();
+					if (subsolution != null)
+						bestSubSolutionsOfThisChild.add(subsolution);
+				}
 				subSolutionsPerChild.add(bestSubSolutionsOfThisChild);
 			}
-			List<List<EvaluatedGraph>> cartesianProduct = SetUtil.cartesianProduct(subSolutionsPerChild);
+			Collection<List<EvaluatedGraph>> cartesianProduct = SetUtil.cartesianProduct(subSolutionsPerChild);
 
 			/* for each such combination, build the grpah and store it */
-			int n = Math.min(cartesianProduct.size(), nodeLimit);
-			for (int i = 0; i < n; i++) {
-				List<EvaluatedGraph> subSolutionCombination = cartesianProduct.get(i);
+			int i = 0;
+			for (List<EvaluatedGraph> subSolutionCombination : cartesianProduct) {
+				if (i++ >= nodeLimit)
+					break;
 				EvaluatedGraph extendedSolutionBase = new EvaluatedGraph();
 				extendedSolutionBase.graph = new Graph<>();
 				extendedSolutionBase.graph.addItem(node.node);
