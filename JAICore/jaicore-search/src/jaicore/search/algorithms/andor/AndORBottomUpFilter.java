@@ -12,6 +12,7 @@ import java.util.Queue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.IObjectEvaluator;
 import jaicore.basic.algorithm.AAlgorithm;
 import jaicore.basic.algorithm.AlgorithmEvent;
@@ -29,7 +30,8 @@ import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 
 public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorithm<GraphGenerator<N, A>, Graph<N>> implements IGraphAlgorithm<GraphGenerator<N, A>, Graph<N>, N, A> {
 
-	private final Logger logger = LoggerFactory.getLogger(AndORBottomUpFilter.class);
+	private Logger logger = LoggerFactory.getLogger(AndORBottomUpFilter.class);
+	private String loggerName;
 
 	public class InnerNodeLabel {
 		N node;
@@ -68,7 +70,6 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 	public AlgorithmEvent nextWithException() throws Exception {
 		switch (this.getState()) {
 		case created: {
-
 			/* step 1: construct the whole graph */
 			Queue<InnerNodeLabel> open = new LinkedList<>();
 			InnerNodeLabel root = new InnerNodeLabel(((SingleRootGenerator<N>) this.getInput().getRootGenerator()).getRoot(), NodeType.AND);
@@ -100,7 +101,6 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 			return new AlgorithmInitializedEvent();
 		}
 		case active: {
-
 			this.logger.debug("timeout: {}", this.getTimeout());
 
 			/* now compute best local values bottom up */
@@ -230,4 +230,19 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 		return this.bestSolutionBase;
 	}
 
+	@Override
+	public String getLoggerName() {
+		return this.loggerName;
+	}
+
+	@Override
+	public void setLoggerName(final String name) {
+		this.logger.info("Switching logger from {} to {}", this.logger.getName(), name);
+		this.logger = LoggerFactory.getLogger(name);
+		this.logger.info("Activated logger {} with name {}", name, this.logger.getName());
+		if (this.evaluator instanceof ILoggingCustomizable) {
+			((ILoggingCustomizable) this.evaluator).setLoggerName(name + ".eval");
+		}
+		super.setLoggerName(this.loggerName + "._orgraphsearch");
+	}
 }

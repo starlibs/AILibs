@@ -1,5 +1,7 @@
 package jaicore.ml.core.dataset.attribute;
 
+import java.io.Serializable;
+
 /**
  * Wrapper interface for attribute types.
  *
@@ -8,7 +10,7 @@ package jaicore.ml.core.dataset.attribute;
  *         <D> domain of the attribute type.
  *
  */
-public interface IAttributeType<D> {
+public interface IAttributeType<D> extends Serializable {
 
 	/**
 	 * Validates whether a value conforms to this type.

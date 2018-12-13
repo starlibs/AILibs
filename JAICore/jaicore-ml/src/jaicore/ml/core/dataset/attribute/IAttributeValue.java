@@ -1,5 +1,7 @@
 package jaicore.ml.core.dataset.attribute;
 
+import java.io.Serializable;
+
 /**
  * A general interface for attribute values.
  *
@@ -8,7 +10,7 @@ package jaicore.ml.core.dataset.attribute;
  * @param <D>
  *            The type of an attribute value.
  */
-public interface IAttributeValue<D> {
+public interface IAttributeValue<D> extends Serializable {
 
 	/**
 	 * @return The value of this attribute value.
