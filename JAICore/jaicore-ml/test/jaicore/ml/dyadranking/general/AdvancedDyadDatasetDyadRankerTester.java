@@ -17,6 +17,9 @@ import jaicore.ml.core.exception.TrainingException;
 import jaicore.ml.dyadranking.Dyad;
 import jaicore.ml.dyadranking.algorithm.ADyadRanker;
 import jaicore.ml.dyadranking.algorithm.FeatureTransformPLDyadRanker;
+import jaicore.ml.dyadranking.algorithm.IPLNetDyadRankerConfiguration;
+import jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
+import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import jaicore.ml.dyadranking.dataset.DyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 import jaicore.ml.dyadranking.loss.DyadRankingMLLossFunctionWrapper;
@@ -70,6 +73,9 @@ public class AdvancedDyadDatasetDyadRankerTester {
 
 	@Parameters
 	public static List<ADyadRanker> supplyDyadRankers() {
-		return Arrays.asList(new FeatureTransformPLDyadRanker());
+		PLNetDyadRanker ranker1 = new PLNetDyadRanker();
+		ranker1.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_MAX_EPOCHS, "1");
+		System.out.println(ranker1.getConfiguration());
+		return Arrays.asList(ranker1, new PLNetDyadRanker());
 	}
 }
