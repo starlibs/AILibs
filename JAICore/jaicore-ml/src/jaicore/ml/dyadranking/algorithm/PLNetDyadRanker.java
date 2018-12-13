@@ -9,8 +9,10 @@ import java.util.List;
 import java.util.Set;
 
 import org.aeonbits.owner.ConfigFactory;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
+import org.deeplearning4j.nn.conf.NeuralNetConfiguration.ListBuilder;
 import org.deeplearning4j.nn.conf.layers.DenseLayer;
 import org.deeplearning4j.nn.gradient.DefaultGradient;
 import org.deeplearning4j.nn.gradient.Gradient;
@@ -47,6 +49,8 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 	private IPLNetDyadRankerConfiguration configuration;
 	private int epoch;
 	private int iteration;
+	private double currentBestScore;
+	private MultiLayerNetwork currentBestModel;
 
 	/**
 	 * Constructor using a {@link IPLNetDyadRankerConfiguration} to create the
@@ -54,10 +58,8 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 	 * 
 	 * @param configuration
 	 */
-	public PLNetDyadRanker(int numInputs, int numHiddenNodes, long seed) {
+	public PLNetDyadRanker() {
 		this.configuration = ConfigFactory.create(IPLNetDyadRankerConfiguration.class);
-		this.plNet = createNetwork(numInputs, numHiddenNodes, seed);
-//		this.plNet = createNetworkFromConfigFile(configuration.plNetConfig());
 	}
 
 	@Override
@@ -67,11 +69,51 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 					"Can only train the Plackett-Luce net dyad ranker with a dyad ranking dataset!");
 		}
 		DyadRankingDataset drDataset = (DyadRankingDataset) dataset;
-		while(epoch < 10) {
-		for (IInstance dyadRankingInstance : drDataset) {
-			this.update(dyadRankingInstance);
+
+		Collections.shuffle(drDataset);
+		List<IInstance> drTrain = (List<IInstance>) drDataset.subList(0, (int) (0.8d * drDataset.size()));
+		List<IInstance> drTest = (List<IInstance>) drDataset.subList((int) (0.8d * drDataset.size()), drDataset.size());
+
+		if (this.plNet == null) {
+			int dyadSize = ((DyadRankingInstance) drDataset.get(0)).getDyadAtPosition(0).getInstance().length()
+					+ ((DyadRankingInstance) drDataset.get(0)).getDyadAtPosition(0).getAlternative().length();
+			this.plNet = createNetwork(dyadSize);
 		}
-		epoch++;
+
+		currentBestScore = Double.POSITIVE_INFINITY;
+
+		boolean earlyStopping = false;
+
+		while (!earlyStopping && epoch < configuration.plNetMaxEpochs()) {
+			for (IInstance dyadRankingInstance : drTrain) {
+				this.update(dyadRankingInstance);
+			}
+
+			DescriptiveStatistics stats = new DescriptiveStatistics();
+			for (IInstance dyadRankingInstance : drTest) {
+				DyadRankingInstance drInstance = (DyadRankingInstance) dyadRankingInstance;
+				List<INDArray> dyadList = new ArrayList<INDArray>(drInstance.length());
+				for (Dyad dyad : drInstance) {
+					INDArray instanceOfDyad = Nd4j.create(dyad.getInstance().asArray());
+					INDArray alternativeOfDyad = Nd4j.create(dyad.getAlternative().asArray());
+					INDArray dyadVector = Nd4j.hstack(instanceOfDyad, alternativeOfDyad);
+					dyadList.add(dyadVector);
+				}
+				INDArray dyadMatrix;
+				dyadMatrix = Nd4j.vstack(dyadList);
+				INDArray outputs = plNet.output(dyadMatrix);
+				outputs = outputs.transpose();
+				double score = PLNetLoss.computeLoss(outputs).getDouble(0);
+				stats.addValue(score);
+			}
+			double avgScore = stats.getMean();
+			if (avgScore < currentBestScore) {
+				currentBestModel = plNet.clone();
+			} else {
+				earlyStopping = true;
+				plNet = currentBestModel;
+			}
+			epoch++;
 		}
 	}
 
@@ -93,7 +135,6 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 			dyadList.add(dyadVector);
 		}
 		dyadMatrix = Nd4j.vstack(dyadList);
-
 		List<INDArray> activations = plNet.feedForward(dyadMatrix);
 		INDArray output = activations.get(activations.size() - 1);
 		output = output.transpose();
@@ -180,17 +221,29 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 	 * @param seed
 	 * @return New {@link MultiLayerNetwork}
 	 */
-	private MultiLayerNetwork createNetwork(int numInputs, int numHiddenNodes, long seed) {
+	private MultiLayerNetwork createNetwork(int numInputs) {
+		if (this.configuration.plNetHiddenNodes().isEmpty())
+			throw new IllegalArgumentException(
+					"There must be at least one hidden layer in specified in the config file!");
 		int numOutputs = 1;
-		MultiLayerConfiguration config = new NeuralNetConfiguration.Builder().seed(seed).list()
-				.layer(0,
-						new DenseLayer.Builder().nIn(numInputs).nOut(numHiddenNodes).weightInit(WeightInit.XAVIER)
-								.activation(Activation.SIGMOID).build())
-				.layer(1, new DenseLayer.Builder().weightInit(WeightInit.XAVIER).activation(Activation.IDENTITY)
-						.weightInit(WeightInit.XAVIER).nIn(numHiddenNodes).nOut(numOutputs).build())
-				.build();
+		int inputsFirstHiddenLayer = configuration.plNetHiddenNodes().get(0);
+		ListBuilder configBuilder = new NeuralNetConfiguration.Builder().seed(configuration.plNetSeed()).list();
+		configBuilder.layer(0, new DenseLayer.Builder().nIn(numInputs).nOut(inputsFirstHiddenLayer)
+				.weightInit(WeightInit.XAVIER).activation(Activation.SIGMOID).build());
+		List<Integer> hiddenNodes = configuration.plNetHiddenNodes();
 
-		return new MultiLayerNetwork(config);
+		for (int i = 0; i < hiddenNodes.size() - 1; i++) {
+			int numIn = hiddenNodes.get(i);
+			int numOut = hiddenNodes.get(i + 1);
+			String activation = configuration.plNetActivationFunction();
+			configBuilder.layer(i + 1, new DenseLayer.Builder().nIn(numIn).nOut(numOut).weightInit(WeightInit.XAVIER)
+					.activation(Activation.fromString(activation)).build());
+		}
+		configBuilder.layer(hiddenNodes.size(), new DenseLayer.Builder().nIn(hiddenNodes.get(hiddenNodes.size() - 1))
+				.nOut(1).weightInit(WeightInit.XAVIER).activation(Activation.IDENTITY).build());
+
+		MultiLayerConfiguration multiLayerConfig = configBuilder.build();
+		return new MultiLayerNetwork(multiLayerConfig);
 	}
 
 	/**
@@ -214,4 +267,9 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 		MultiLayerNetwork network = new MultiLayerNetwork(config);
 		return network;
 	}
+
+	public void setConfiguration(IPLNetDyadRankerConfiguration configuration) {
+		this.configuration = configuration;
+	}
+
 }
