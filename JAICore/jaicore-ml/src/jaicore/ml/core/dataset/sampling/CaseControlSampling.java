@@ -12,7 +12,7 @@ import jaicore.basic.algorithm.AlgorithmState;
 import jaicore.basic.sets.SetUtil.Pair;
 
 /**
- * Case control sampling. Might be used as sampling algorithm or as subroutine of Local Case Control Sampling
+ * Case control sampling. Might be used as sampling algorithm or as subroutine for Local Case Control Sampling
  * 
  * @author Nino Schnitker
  *
@@ -111,6 +111,4 @@ public class CaseControlSampling extends ASamplingAlgorithm {
 		}
 		return classOccurrences;
 	}
-	
-
 }
