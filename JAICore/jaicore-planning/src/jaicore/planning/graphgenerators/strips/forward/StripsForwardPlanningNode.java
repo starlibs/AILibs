@@ -3,18 +3,39 @@ package jaicore.planning.graphgenerators.strips.forward;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.planning.model.core.Action;
 
+/**
+ * We only store the difference to the init state, i.e. what needs to be added or remove from the init state to get the state 
+ * 
+ * @author fmohr
+ *
+ */
 public class StripsForwardPlanningNode {
 
-	private final Monom state;
+	private final Monom add;
+	private final Monom del;
 	private final Action actionToReachState;
 
-	public StripsForwardPlanningNode(Monom state, Action actionToReachState) {
+	public StripsForwardPlanningNode(Monom add, Monom del, Action actionToReachState) {
 		super();
-		this.state = state;
+		assert add != null;
+		assert del != null;
+		this.add = add;
+		this.del = del;
 		this.actionToReachState = actionToReachState;
 	}
 
-	public Monom getState() {
+	public Monom getAdd() {
+		return add;
+	}
+
+	public Monom getDel() {
+		return del;
+	}
+	
+	public Monom getStateRelativeToInitState(Monom initState) {
+		Monom state = new Monom(initState);
+		state.removeAll(del);
+		state.addAll(add);
 		return state;
 	}
 
@@ -26,7 +47,9 @@ public class StripsForwardPlanningNode {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((state == null) ? 0 : state.hashCode());
+		result = prime * result + ((actionToReachState == null) ? 0 : actionToReachState.hashCode());
+		result = prime * result + ((add == null) ? 0 : add.hashCode());
+		result = prime * result + ((del == null) ? 0 : del.hashCode());
 		return result;
 	}
 
@@ -39,16 +62,26 @@ public class StripsForwardPlanningNode {
 		if (getClass() != obj.getClass())
 			return false;
 		StripsForwardPlanningNode other = (StripsForwardPlanningNode) obj;
-		if (state == null) {
-			if (other.state != null)
+		if (actionToReachState == null) {
+			if (other.actionToReachState != null)
 				return false;
-		} else if (!state.equals(other.state))
+		} else if (!actionToReachState.equals(other.actionToReachState))
+			return false;
+		if (add == null) {
+			if (other.add != null)
+				return false;
+		} else if (!add.equals(other.add))
+			return false;
+		if (del == null) {
+			if (other.del != null)
+				return false;
+		} else if (!del.equals(other.del))
 			return false;
 		return true;
 	}
 
 	@Override
 	public String toString() {
-		return "StripsForwardPlanningNode [actionToReachState=" + (actionToReachState != null ? actionToReachState.getEncoding() : null) + "]";
+		return "StripsForwardPlanningNode [addSize=" + add.size() + ", delSize=" + del.size() + ", actionToReachState=" + (actionToReachState != null ? actionToReachState.getEncoding() : null) + "]";
 	}
 }

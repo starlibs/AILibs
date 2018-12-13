@@ -16,42 +16,83 @@ import jaicore.search.model.travesaltree.NodeExpansionDescription;
 import jaicore.search.model.travesaltree.NodeType;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
-import jaicore.search.structure.graphgenerator.SuccessorGenerator;
+import jaicore.search.structure.graphgenerator.SingleSuccessorGenerator;
 
-public class StripsForwardPlanningGraphGenerator implements GraphGenerator<StripsForwardPlanningNode,String> {
+public class StripsForwardPlanningGraphGenerator implements GraphGenerator<StripsForwardPlanningNode, String> {
 
 	private final StripsPlanningProblem problem;
 	private static final Logger logger = LoggerFactory.getLogger(StripsForwardPlanningGraphGenerator.class);
-		
+	private final Monom initState;
+
 	public StripsForwardPlanningGraphGenerator(StripsPlanningProblem problem) {
 		this.problem = problem;
+		this.initState = problem.getInitState();
 	}
 
 	@Override
 	public SingleRootGenerator<StripsForwardPlanningNode> getRootGenerator() {
-		return () -> new StripsForwardPlanningNode(problem.getInitState(), null);
+		return () -> new StripsForwardPlanningNode(new Monom(), new Monom(), null);
+	}
+	
+	private List<StripsAction> getApplicableActionsInNode(StripsForwardPlanningNode node) {
+		logger.info("Computing successors for node {}", node);
+		long start = System.currentTimeMillis();
+		Monom state = node.getStateRelativeToInitState(initState);
+		List<StripsAction> applicableActions = PlannerUtil.getApplicableActionsInState(state, (StripsPlanningDomain) problem.getDomain());
+		logger.debug("Computation of applicable actions took {}ms", System.currentTimeMillis() - start);
+		return applicableActions;
 	}
 
 	@Override
-	public SuccessorGenerator<StripsForwardPlanningNode,String> getSuccessorGenerator() {
-		return l -> {
-			logger.debug("Computing applicable actions for state {}", l.getState());
-			List<NodeExpansionDescription<StripsForwardPlanningNode,String>> successors = new ArrayList<>();
-			Monom state = l.getState();
-			for (StripsAction action : PlannerUtil.getApplicableActionsInState(state, (StripsPlanningDomain)problem.getDomain())) {
-				Monom successorState = new Monom(state);
-				successorState.removeAll(action.getDeleteList());
-				successorState.addAll(action.getAddList());
-				successors.add(new NodeExpansionDescription<>(l, new StripsForwardPlanningNode(successorState, action), "edge label", NodeType.OR));
+	public SingleSuccessorGenerator<StripsForwardPlanningNode, String> getSuccessorGenerator() {
+		return new SingleSuccessorGenerator<StripsForwardPlanningNode, String>() {
+
+			@Override
+			public List<NodeExpansionDescription<StripsForwardPlanningNode, String>> generateSuccessors(StripsForwardPlanningNode node) throws InterruptedException {
+				long start = System.currentTimeMillis();
+				List<NodeExpansionDescription<StripsForwardPlanningNode, String>> successors = new ArrayList<>();
+				for (StripsAction action : getApplicableActionsInNode(node)) {
+					long t = System.currentTimeMillis();
+					Monom del = new Monom(node.getDel());
+					Monom add = new Monom(node.getAdd());
+					del.addAll(action.getDeleteList());
+					add.removeAll(action.getDeleteList());
+					add.addAll(action.getAddList());
+					StripsForwardPlanningNode newNode = new StripsForwardPlanningNode(add, del, action);
+					successors.add(new NodeExpansionDescription<>(node, newNode, "edge label", NodeType.OR));
+					if (logger.isTraceEnabled())
+						logger.trace("Created the node expansion description within {}ms. New state size is {}.", System.currentTimeMillis() - t, newNode.getStateRelativeToInitState(initState).size());
+				}
+				logger.info("Generated {} successors in {}ms.", successors.size(), System.currentTimeMillis() - start);
+				return successors;
 			}
-			logger.debug("Identified {} applicable actions.", successors.size());
-			return successors;
+
+			@Override
+			public NodeExpansionDescription<StripsForwardPlanningNode, String> generateSuccessor(StripsForwardPlanningNode node, int i) throws InterruptedException {
+				System.out.println("Compute single successor!");
+				long start = System.currentTimeMillis();
+				List<StripsAction> applicableActions = getApplicableActionsInNode(node);
+				StripsAction action = applicableActions.get(i % applicableActions.size());
+				long t = System.currentTimeMillis();
+				Monom del = new Monom(node.getDel());
+				Monom add = new Monom(node.getAdd());
+				del.addAll(action.getDeleteList());
+				add.removeAll(action.getDeleteList());
+				add.addAll(action.getAddList());
+				StripsForwardPlanningNode newNode = new StripsForwardPlanningNode(add, del, action);
+				NodeExpansionDescription<StripsForwardPlanningNode, String> successor = new NodeExpansionDescription<>(node, newNode, "edge label", NodeType.OR);
+				if (logger.isTraceEnabled())
+					logger.trace("Created the node expansion description within {}ms. New state size is {}.", System.currentTimeMillis() - t, newNode.getStateRelativeToInitState(initState).size());
+				logger.info("Generated {}-th successor in {}ms.", i, System.currentTimeMillis() - start);
+				return successor;
+			}
+
 		};
 	}
 
 	@Override
 	public NodeGoalTester<StripsForwardPlanningNode> getGoalTester() {
-		return l -> problem.getGoalStateFunction().isGoalState(l.getState());
+		return l -> problem.getGoalStateFunction().isGoalState(l.getStateRelativeToInitState(initState));
 	}
 
 	@Override
@@ -62,6 +103,6 @@ public class StripsForwardPlanningGraphGenerator implements GraphGenerator<Strip
 	@Override
 	public void setNodeNumbering(boolean nodenumbering) {
 		// TODO Auto-generated method stub
-		
+
 	}
 }

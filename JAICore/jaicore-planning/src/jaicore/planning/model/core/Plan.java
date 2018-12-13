@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import jaicore.logic.fol.structure.Monom;
+
 public class Plan<A extends Action> {
 	private final List<A> actions;
 	private final Map<String,Object> annotations;
@@ -32,6 +34,13 @@ public class Plan<A extends Action> {
 
 	public Map<String, Object> getAnnotations() {
 		return annotations;
+	}
+	
+	public Monom getStateAfterApplicationGivenInitState(Monom initState) {
+		Monom newState = new Monom(initState);
+		for (A action : actions)
+			PlannerUtil.updateState(newState, action);
+		return newState;
 	}
 
 	@Override

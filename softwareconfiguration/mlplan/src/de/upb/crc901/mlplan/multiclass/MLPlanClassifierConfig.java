@@ -24,7 +24,7 @@ public interface MLPlanClassifierConfig extends TwoPhaseHASCOConfig {
 
 	@Key(SEARCH_MCCV_FOLDSIZE)
 	@DefaultValue(".7")
-	public float getMCCVTrainFoldSizeDuringSearch();
+	public double getMCCVTrainFoldSizeDuringSearch();
 
 	@Key(SELECTION_MCCV_ITERATIONS)
 	@DefaultValue("5")
@@ -32,11 +32,11 @@ public interface MLPlanClassifierConfig extends TwoPhaseHASCOConfig {
 
 	@Key(SELECTION_MCCV_FOLDSIZE)
 	@DefaultValue(".7")
-	public float getMCCVTrainFoldSizeDuringSelection();
+	public double getMCCVTrainFoldSizeDuringSelection();
 
 	@Key(SELECTION_PORTION)
 	@DefaultValue("0.3")
-	public float dataPortionForSelection();
+	public double dataPortionForSelection();
 
 //	@Key(TIMEOUT_PER_EVAL_IN_SECONDS)
 //	@DefaultValue("10")
