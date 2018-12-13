@@ -22,6 +22,7 @@ import org.deeplearning4j.nn.workspace.LayerWorkspaceMgr;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
+import org.nd4j.linalg.learning.config.Adam;
 import org.nd4j.linalg.primitives.Pair;
 
 import jaicore.basic.FileUtil;
@@ -81,40 +82,32 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 		}
 
 		currentBestScore = Double.POSITIVE_INFINITY;
+		int patience = 0;
+		int earlyStoppingCounter = 0;
+		int maxEpochs = configuration.plNetMaxEpochs() == 0 ? Integer.MAX_VALUE : configuration.plNetMaxEpochs();
 
-		boolean earlyStopping = false;
-
-		while (!earlyStopping && epoch < configuration.plNetMaxEpochs()) {
+		while (!(patience > configuration.plNetEarlyStoppingPatience()) 
+				&& (epoch < configuration.plNetMaxEpochs() || configuration.plNetMaxEpochs() == 0)) {
+			// Iterate through training data
 			for (IInstance dyadRankingInstance : drTrain) {
 				this.update(dyadRankingInstance);
 			}
-
-			DescriptiveStatistics stats = new DescriptiveStatistics();
-			for (IInstance dyadRankingInstance : drTest) {
-				DyadRankingInstance drInstance = (DyadRankingInstance) dyadRankingInstance;
-				List<INDArray> dyadList = new ArrayList<INDArray>(drInstance.length());
-				for (Dyad dyad : drInstance) {
-					INDArray instanceOfDyad = Nd4j.create(dyad.getInstance().asArray());
-					INDArray alternativeOfDyad = Nd4j.create(dyad.getAlternative().asArray());
-					INDArray dyadVector = Nd4j.hstack(instanceOfDyad, alternativeOfDyad);
-					dyadList.add(dyadVector);
+			earlyStoppingCounter++;
+			// Compute validation error
+			if (earlyStoppingCounter == configuration.plNetEarlyStoppingInterval()) {
+				double avgScore = computeAvgError(drTest);
+				if (avgScore < currentBestScore) {
+					currentBestScore = avgScore;
+					currentBestModel = plNet.clone();
+					patience = 0;
+				} else {
+					patience++;
 				}
-				INDArray dyadMatrix;
-				dyadMatrix = Nd4j.vstack(dyadList);
-				INDArray outputs = plNet.output(dyadMatrix);
-				outputs = outputs.transpose();
-				double score = PLNetLoss.computeLoss(outputs).getDouble(0);
-				stats.addValue(score);
-			}
-			double avgScore = stats.getMean();
-			if (avgScore < currentBestScore) {
-				currentBestModel = plNet.clone();
-			} else {
-				earlyStopping = true;
-				plNet = currentBestModel;
+				earlyStoppingCounter = 0;
 			}
 			epoch++;
 		}
+		plNet = currentBestModel;
 	}
 
 	@Override
@@ -198,6 +191,33 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 		}
 		return results;
 	}
+	
+	/**
+	 * Computes the average error on a set of dyad rankings in terms on the negative log likelihood (NLL).
+	 * 
+	 * @param drTest
+	 * @return
+	 */
+	private double computeAvgError(List<IInstance> drTest) {
+		DescriptiveStatistics stats = new DescriptiveStatistics();
+		for (IInstance dyadRankingInstance : drTest) {
+			DyadRankingInstance drInstance = (DyadRankingInstance) dyadRankingInstance;
+			List<INDArray> dyadList = new ArrayList<INDArray>(drInstance.length());
+			for (Dyad dyad : drInstance) {
+				INDArray instanceOfDyad = Nd4j.create(dyad.getInstance().asArray());
+				INDArray alternativeOfDyad = Nd4j.create(dyad.getAlternative().asArray());
+				INDArray dyadVector = Nd4j.hstack(instanceOfDyad, alternativeOfDyad);
+				dyadList.add(dyadVector);
+			}
+			INDArray dyadMatrix;
+			dyadMatrix = Nd4j.vstack(dyadList);
+			INDArray outputs = plNet.output(dyadMatrix);
+			outputs = outputs.transpose();
+			double score = PLNetLoss.computeLoss(outputs).getDouble(0);
+			stats.addValue(score);
+		}
+		return stats.getMean();		
+	}
 
 	@Override
 	public void setConfiguration(IPredictiveModelConfiguration configuration) throws ConfigurationException {
@@ -216,9 +236,7 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 	 * Creates a simple feed-forward {@link MultiLayerNetwork} that can be used as a
 	 * PLNet for dyad-ranking.
 	 * 
-	 * @param numInputs
-	 * @param numHiddenNodes
-	 * @param seed
+	 * @param numInputs  The number of inputs to the network, i.e. the number of features of a dyad.
 	 * @return New {@link MultiLayerNetwork}
 	 */
 	private MultiLayerNetwork createNetwork(int numInputs) {
@@ -227,20 +245,37 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 					"There must be at least one hidden layer in specified in the config file!");
 		int numOutputs = 1;
 		int inputsFirstHiddenLayer = configuration.plNetHiddenNodes().get(0);
-		ListBuilder configBuilder = new NeuralNetConfiguration.Builder().seed(configuration.plNetSeed()).list();
-		configBuilder.layer(0, new DenseLayer.Builder().nIn(numInputs).nOut(inputsFirstHiddenLayer)
-				.weightInit(WeightInit.XAVIER).activation(Activation.SIGMOID).build());
+		ListBuilder configBuilder = new NeuralNetConfiguration.Builder()
+				.seed(configuration.plNetSeed())
+				.updater(new Adam(configuration.plNetLearningRate()))
+				.list();
+		
+		// Build hidden layers
+		String activation = configuration.plNetActivationFunction();
+		configBuilder.layer(0, new DenseLayer.Builder()
+				.nIn(numInputs)
+				.nOut(inputsFirstHiddenLayer)
+				.weightInit(WeightInit.XAVIER)
+				.activation(Activation.fromString(activation)).build());
 		List<Integer> hiddenNodes = configuration.plNetHiddenNodes();
 
 		for (int i = 0; i < hiddenNodes.size() - 1; i++) {
 			int numIn = hiddenNodes.get(i);
 			int numOut = hiddenNodes.get(i + 1);
-			String activation = configuration.plNetActivationFunction();
-			configBuilder.layer(i + 1, new DenseLayer.Builder().nIn(numIn).nOut(numOut).weightInit(WeightInit.XAVIER)
+			configBuilder.layer(i + 1, new DenseLayer.Builder()
+					.nIn(numIn)
+					.nOut(numOut)
+					.weightInit(WeightInit.XAVIER)
 					.activation(Activation.fromString(activation)).build());
 		}
-		configBuilder.layer(hiddenNodes.size(), new DenseLayer.Builder().nIn(hiddenNodes.get(hiddenNodes.size() - 1))
-				.nOut(1).weightInit(WeightInit.XAVIER).activation(Activation.IDENTITY).build());
+		
+		// Build output layer
+		configBuilder.layer(hiddenNodes.size(),
+				new DenseLayer.Builder()
+				.nIn(hiddenNodes.get(hiddenNodes.size() - 1))
+				.nOut(1)
+				.weightInit(WeightInit.XAVIER)
+				.activation(Activation.IDENTITY).build());
 
 		MultiLayerConfiguration multiLayerConfig = configBuilder.build();
 		return new MultiLayerNetwork(multiLayerConfig);
