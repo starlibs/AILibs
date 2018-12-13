@@ -1,7 +1,6 @@
 package jaicore.ml.evaluation.evaluators.weka;
 
 import java.util.List;
-import java.util.Random;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +24,7 @@ public class SingleRandomSplitClassifierEvaluator implements IClassifierEvaluato
 
 	@Override
 	public Double evaluate(Classifier c) throws InterruptedException {
-		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(seed >= 0 ? seed : System.currentTimeMillis()), trainingPortion);
+		List<Instances> split = WekaUtil.getStratifiedSplit(data, seed >= 0 ? seed : System.currentTimeMillis(), trainingPortion);
 		try {
 			c.buildClassifier(split.get(0));
 			Evaluation eval = new Evaluation(split.get(0));
