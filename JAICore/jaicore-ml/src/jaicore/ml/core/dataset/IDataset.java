@@ -2,6 +2,7 @@ package jaicore.ml.core.dataset;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Collection;
 import java.util.List;
 
 import jaicore.ml.core.dataset.attribute.IAttributeType;
@@ -49,5 +50,11 @@ public interface IDataset extends List<IInstance> {
 	 *            The input stream providing the data of the data set to be deserialized.
 	 */
 	public void deserialize(InputStream in);
+	
+	/**
+	 * Getter for the clusterable version of the instances.
+	 * @return Collection of all instanes as a clusterable version.
+	 */
+	public Collection<IClusterableInstance> getClusterableInstances();
 
 }
