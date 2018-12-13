@@ -1,7 +1,5 @@
 package jaicore.ml.core.dataset;
 
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.List;
 
 import jaicore.ml.core.dataset.attribute.IAttributeType;
@@ -11,14 +9,19 @@ import jaicore.ml.core.dataset.attribute.IAttributeType;
  *
  * @author wever
  */
-public interface IDataset extends List<IInstance> {
+public interface IDataset<I> extends List<I> {
 
 	/**
 	 * Returns the attribute type of the target attribute.
 	 *
 	 * @return The attribute type of the target attribute.
 	 */
-	public <T> IAttributeType<T> getTargetType(Class<? extends T> clazz);
+	public <T> IAttributeType<T> getTargetType(Class<T> clazz);
+
+	/**
+	 * @return Returns the plain attribute type of the target.
+	 */
+	public IAttributeType<?> getTargetType();
 
 	/**
 	 * Returns the list of attribute types.
@@ -33,21 +36,5 @@ public interface IDataset extends List<IInstance> {
 	 * @return The number of attributes.
 	 */
 	public int getNumberOfAttributes();
-
-	/**
-	 * Serializes the dataset and writes the serialized representation to the output stream.
-	 *
-	 * @param out
-	 *            The output stream to which the dataset is serialized to.
-	 */
-	public void serialize(OutputStream out);
-
-	/**
-	 * Reads the data set from the provided input stream.
-	 *
-	 * @param in
-	 *            The input stream providing the data of the data set to be deserialized.
-	 */
-	public void deserialize(InputStream in);
 
 }

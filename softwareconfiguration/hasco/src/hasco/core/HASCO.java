@@ -1,14 +1,14 @@
 package hasco.core;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import org.aeonbits.owner.ConfigCache;
+import org.aeonbits.owner.ConfigFactory;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import hasco.events.HASCOSearchInitializedEvent;
 import hasco.events.HASCOSolutionEvent;
@@ -47,18 +47,22 @@ import jaicore.search.model.travesaltree.NodeTooltipGenerator;
 /**
  * Hierarchically create an object of type T
  *
- * @author fmohr
+ * @author fmohr, wever
  *
- * @param <T>
+ * @param <ISearch>
+ * @param <N>
+ * @param <A>
+ * @param <V>
  */
 public class HASCO<ISearch, N, A, V extends Comparable<V>> extends SoftwareConfigurationAlgorithm<RefinementConfiguredSoftwareConfigurationProblem<V>, HASCORunReport<V>, HASCOSolutionCandidate<V>, V> {
 
+	private Logger logger = LoggerFactory.getLogger(HASCO.class);
+	private String loggerName;
+
 	/* problem and algorithm setup */
 	private final RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem;
-	private final Collection<Component> components;
 	private final IHASCOPlanningGraphGeneratorDeriver<N, A> planningGraphGeneratorDeriver;
 	private final AlgorithmProblemTransformer<GraphSearchProblemInput<N, A, V>, ISearch> searchProblemTransformer;
-	private HASCOConfig config = ConfigCache.getOrCreate(HASCOConfig.class);
 	private final IGraphSearchFactory<ISearch, ?, N, A, V, ?, ?> searchFactory;
 
 	/* Parameters for the search algorithm configuration */
@@ -77,31 +81,30 @@ public class HASCO<ISearch, N, A, V extends Comparable<V>> extends SoftwareConfi
 	private boolean searchCreatedAndInitialized = false;
 	private final TimeRecordingEvaluationWrapper<V> timeGrabbingEvaluationWrapper;
 
-	public HASCO(RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem, IHASCOPlanningGraphGeneratorDeriver<N, A> planningGraphGeneratorDeriver,
-			IGraphSearchFactory<ISearch, ?, N, A, V, ?, ?> searchFactory, AlgorithmProblemTransformer<GraphSearchProblemInput<N, A, V>, ISearch> searchProblemTransformer) {
-		super();
-		if (configurationProblem == null)
+	public HASCO(final RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem, final IHASCOPlanningGraphGeneratorDeriver<N, A> planningGraphGeneratorDeriver,
+			final IGraphSearchFactory<ISearch, ?, N, A, V, ?, ?> searchFactory, final AlgorithmProblemTransformer<GraphSearchProblemInput<N, A, V>, ISearch> searchProblemTransformer) {
+		super(ConfigFactory.create(HASCOConfig.class));
+		if (configurationProblem == null) {
 			throw new IllegalArgumentException("Cannot work with configuration problem NULL");
+		}
 		this.configurationProblem = configurationProblem;
 		this.planningGraphGeneratorDeriver = planningGraphGeneratorDeriver;
 		this.searchFactory = searchFactory;
 		this.searchProblemTransformer = searchProblemTransformer;
-		this.components = configurationProblem.getComponents();
 		this.timeGrabbingEvaluationWrapper = new TimeRecordingEvaluationWrapper<>(configurationProblem.getCompositionEvaluator());
-		setInput(new RefinementConfiguredSoftwareConfigurationProblem<>(
-				new SoftwareConfigurationProblem<V>(components, configurationProblem.getRequiredInterface(), timeGrabbingEvaluationWrapper), configurationProblem.getParamRefinementConfig()));
+		this.setInput(new RefinementConfiguredSoftwareConfigurationProblem<>(new SoftwareConfigurationProblem<V>(configurationProblem.getComponents(), configurationProblem.getRequiredInterface(), this.timeGrabbingEvaluationWrapper),
+				configurationProblem.getParamRefinementConfig()));
 	}
 
 	@Override
 	public AlgorithmEvent nextWithException() throws Exception {
-		Logger logger = getLogger();
-		switch (getState()) {
+		switch (this.getState()) {
 		case created: {
-			logger.info("Starting HASCO run.");
+			this.logger.info("Starting HASCO run.");
 
 			/* check whether there is a refinement config for each numeric parameter */
-			Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig = getInput().getParamRefinementConfig();
-			for (Component c : this.components) {
+			Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig = this.getInput().getParamRefinementConfig();
+			for (Component c : this.getInput().getComponents()) {
 				for (Parameter p : c.getParameters()) {
 					if (p.isNumeric() && (!paramRefinementConfig.containsKey(c) || !paramRefinementConfig.get(c).containsKey(p))) {
 						throw new IllegalArgumentException("No refinement config was delivered for numeric parameter " + p.getName() + " of component " + c.getName());
@@ -110,178 +113,166 @@ public class HASCO<ISearch, N, A, V extends Comparable<V>> extends SoftwareConfi
 			}
 
 			/* derive search problem */
-			logger.debug("Deriving search problem");
-			planningProblem = new HASCOReduction<V>().transform(getInput());
-			if (logger.isDebugEnabled()) {
-				String operations = planningProblem.getCorePlanningProblem().getDomain().getOperations().stream().map(o -> "\n\t\t" + o.getName() + "(" + o.getParams() + ")\n\t\t\tPre: "
-						+ o.getPrecondition() + "\n\t\t\tAdd List: " + o.getAddLists() + "\n\t\t\tDelete List: " + o.getDeleteLists()).collect(Collectors.joining());
-				String methods = planningProblem
-						.getCorePlanningProblem().getDomain().getMethods().stream().map(m -> "\n\t\t" + m.getName() + "(" + m.getParameters() + ") for task " + m.getTask() + "\n\t\t\tPre: "
-								+ m.getPrecondition() + "\n\t\t\tPre Eval: " + m.getEvaluablePrecondition() + "\n\t\t\tNetwork: " + m.getNetwork().getLineBasedStringRepresentation())
-						.collect(Collectors.joining());
-				logger.debug("Derived the following HTN planning problem:\n\tOperations:{}\n\tMethods:{}", operations, methods);
+			this.logger.debug("Deriving search problem");
+			this.planningProblem = new HASCOReduction<V>().transform(this.getInput());
+			if (this.logger.isDebugEnabled()) {
+				String operations = this.planningProblem.getCorePlanningProblem().getDomain().getOperations().stream()
+						.map(o -> "\n\t\t" + o.getName() + "(" + o.getParams() + ")\n\t\t\tPre: " + o.getPrecondition() + "\n\t\t\tAdd List: " + o.getAddLists() + "\n\t\t\tDelete List: " + o.getDeleteLists()).collect(Collectors.joining());
+				String methods = this.planningProblem.getCorePlanningProblem().getDomain().getMethods().stream().map(m -> "\n\t\t" + m.getName() + "(" + m.getParameters() + ") for task " + m.getTask() + "\n\t\t\tPre: " + m.getPrecondition()
+						+ "\n\t\t\tPre Eval: " + m.getEvaluablePrecondition() + "\n\t\t\tNetwork: " + m.getNetwork().getLineBasedStringRepresentation()).collect(Collectors.joining());
+				this.logger.debug("Derived the following HTN planning problem:\n\tOperations:{}\n\tMethods:{}", operations, methods);
 			}
-			searchProblem = new CostSensitivePlanningToSearchProblemTransformer<CEOCOperation, OCIPMethod, CEOCAction, CEOCIPSTNPlanningProblem<CEOCOperation, OCIPMethod, CEOCAction>, V, N, A>(
-					planningGraphGeneratorDeriver).transform(planningProblem);
+			this.searchProblem = new CostSensitivePlanningToSearchProblemTransformer<CEOCOperation, OCIPMethod, CEOCAction, CEOCIPSTNPlanningProblem<CEOCOperation, OCIPMethod, CEOCAction>, V, N, A>(this.planningGraphGeneratorDeriver)
+					.transform(this.planningProblem);
 
 			/* communicate that algorithm has been initialized */
-			logger.debug("Emitting intialization event");
+			this.logger.debug("Emitting intialization event");
 			AlgorithmInitializedEvent initEvent = new AlgorithmInitializedEvent();
-			post(initEvent);
-			setState(AlgorithmState.active);
+			this.post(initEvent);
+			this.setState(AlgorithmState.active);
 			return initEvent;
 		}
 		case active: {
-
 			/* if the search itself has not been initialized, do this now */
-			if (!searchCreatedAndInitialized) {
-
+			if (!this.searchCreatedAndInitialized) {
 				/* create search algorithm, set its logger, and initialize visualization*/
-				logger.debug("Creating the search object");
-				searchFactory.setProblemInput(searchProblem, searchProblemTransformer);
-				search = searchFactory.getAlgorithm();
-				search.setNumCPUs(config.cpus());
-				search.setTimeout(config.timeout() * 1000, TimeUnit.MILLISECONDS);
-				String loggerName = getLoggerName();
-				if (loggerName != null && loggerName.length() > 0 && search instanceof ILoggingCustomizable) {
-					logger.info("Setting logger name of {} to {}", search, loggerName + ".search");
-					((ILoggingCustomizable) this.search).setLoggerName(loggerName + ".search");
+				this.logger.debug("Creating the search object");
+				this.searchFactory.setProblemInput(this.searchProblem, this.searchProblemTransformer);
+				this.search = this.searchFactory.getAlgorithm();
+				this.search.setNumCPUs(this.getConfig().cpus());
+				this.search.setTimeout(this.getConfig().timeout() * 1000, TimeUnit.MILLISECONDS);
+				if (this.loggerName != null && this.loggerName.length() > 0 && this.search instanceof ILoggingCustomizable) {
+					this.logger.info("Setting logger name of {} to {}", this.search, this.loggerName + ".search");
+					((ILoggingCustomizable) this.search).setLoggerName(this.loggerName + ".search");
 				}
-				if (config.visualizationEnabled()) {
-					logger.info("Launching graph visualization");
-					VisualizationWindow<?, ?> window = new VisualizationWindow<>(search);
-					if ((planningGraphGeneratorDeriver instanceof DefaultHASCOPlanningGraphGeneratorDeriver
-							&& ((DefaultHASCOPlanningGraphGeneratorDeriver) planningGraphGeneratorDeriver).getWrappedDeriver() instanceof ForwardDecompositionReducer) && search instanceof BestFirst) {
+				if (this.getConfig().visualizationEnabled()) {
+					this.logger.info("Launching graph visualization");
+					VisualizationWindow<?, ?> window = new VisualizationWindow<>(this.search);
+					if ((this.planningGraphGeneratorDeriver instanceof DefaultHASCOPlanningGraphGeneratorDeriver
+							&& ((DefaultHASCOPlanningGraphGeneratorDeriver) this.planningGraphGeneratorDeriver).getWrappedDeriver() instanceof ForwardDecompositionReducer) && this.search instanceof BestFirst) {
 						window.setTooltipGenerator(new NodeTooltipGenerator<>(new TFDTooltipGenerator()));
 					}
 				}
 
 				/* now initialize the search */
-				logger.debug("Initializing the search");
+				this.logger.debug("Initializing the search");
 				boolean searchInitializationObserved = false;
-				while (search.hasNext() && !(searchInitializationObserved = (search.next() instanceof AlgorithmInitializedEvent)))
+				while (this.search.hasNext() && !(searchInitializationObserved = (this.search.next() instanceof AlgorithmInitializedEvent))) {
 					;
-				if (!searchInitializationObserved)
+				}
+				if (!searchInitializationObserved) {
 					throw new IllegalStateException("The search underlying HASCO could not be initialized successully.");
+				}
 				HASCOSearchInitializedEvent event = new HASCOSearchInitializedEvent();
-				post(event);
-				searchCreatedAndInitialized = true;
+				this.post(event);
+				this.searchCreatedAndInitialized = true;
 				return event;
 			}
 
 			/* otherwise iterate over the search */
-			while (search.hasNext()) {
-				AlgorithmEvent searchEvent = search.nextWithException();
+			while (this.search.hasNext()) {
+				AlgorithmEvent searchEvent = this.search.nextWithException();
 
 				/* if the underlying search algorithm finished, we also finish */
 				if (searchEvent instanceof AlgorithmFinishedEvent) {
-					return terminate();
+					return this.terminate();
 				}
 
 				/* otherwise, if a solution has been found, we announce this finding to our listeners and memorize if it is a new best candidate */
 				else if (searchEvent instanceof EvaluatedSearchSolutionCandidateFoundEvent) {
-					logger.info("Received new solution from search, communicating this solution to the HASCO listeners.");
+					this.logger.info("Received new solution from search, communicating this solution to the HASCO listeners.");
 					@SuppressWarnings("unchecked")
 					EvaluatedSearchSolutionCandidateFoundEvent<N, A, V> solutionEvent = (EvaluatedSearchSolutionCandidateFoundEvent<N, A, V>) searchEvent;
 					EvaluatedSearchGraphPath<N, A, V> searchPath = solutionEvent.getSolutionCandidate();
-					Plan<CEOCAction> plan = planningGraphGeneratorDeriver.getPlan(searchPath.getNodes());
-					ComponentInstance objectInstance = Util.getSolutionCompositionForPlan(components, planningProblem.getCorePlanningProblem().getInit(), plan, true);
-					V score = timeGrabbingEvaluationWrapper.hasEvaluationForComponentInstance(objectInstance) ? solutionEvent.getSolutionCandidate().getScore()
-							: timeGrabbingEvaluationWrapper.evaluate(objectInstance);
+					Plan<CEOCAction> plan = this.planningGraphGeneratorDeriver.getPlan(searchPath.getNodes());
+					ComponentInstance objectInstance = Util.getSolutionCompositionForPlan(this.getInput().getComponents(), this.planningProblem.getCorePlanningProblem().getInit(), plan, true);
+					V score = this.timeGrabbingEvaluationWrapper.hasEvaluationForComponentInstance(objectInstance) ? solutionEvent.getSolutionCandidate().getScore() : this.timeGrabbingEvaluationWrapper.evaluate(objectInstance);
 					EvaluatedSearchGraphBasedPlan<CEOCAction, V, N> evaluatedPlan = new EvaluatedSearchGraphBasedPlan<>(plan, score, searchPath);
-					HASCOSolutionCandidate<V> solution = new HASCOSolutionCandidate<>(objectInstance, evaluatedPlan,
-							timeGrabbingEvaluationWrapper.getEvaluationTimeForComponentInstance(objectInstance));
-					updateBestSeenSolution(solution);
-					listOfAllRecognizedSolutions.add(solution);
+					HASCOSolutionCandidate<V> solution = new HASCOSolutionCandidate<>(objectInstance, evaluatedPlan, this.timeGrabbingEvaluationWrapper.getEvaluationTimeForComponentInstance(objectInstance));
+					this.updateBestSeenSolution(solution);
+					this.listOfAllRecognizedSolutions.add(solution);
 					HASCOSolutionEvent<V> hascoSolutionEvent = new HASCOSolutionEvent<>(solution);
-					post(hascoSolutionEvent);
+					this.post(hascoSolutionEvent);
 					return hascoSolutionEvent;
 				}
 			}
-			return terminate();
+			return this.terminate();
 		}
 		default:
-			throw new IllegalStateException("HASCO cannot do anything in state " + getState());
+			throw new IllegalStateException("HASCO cannot do anything in state " + this.getState());
 		}
 
 	}
 
 	protected void afterSearch() {
-	}
-
-	/**
-	 * @return The config object defining the properties.
-	 */
-	public HASCOConfig getConfig() {
-		return config;
-	}
-
-	public void setConfig(HASCOConfig config) {
-		this.config = config;
-	}
-
-	/**
-	 * Set the number of CPUs to be used by HASCO.
-	 *
-	 * @param numberOfCPUs
-	 *            The number of cpus to be used.
-	 */
-	@Override
-	public void setNumCPUs(final int numberOfCPUs) {
-		this.getConfig().setProperty(HASCOConfig.K_CPUS, numberOfCPUs + "");
+		// hook that is invoked after the search algorithm
 	}
 
 	public GraphGenerator<N, A> getGraphGenerator() {
-		return searchProblem.getGraphGenerator();
-	}
-	
-	/**
-	 * @return Returns the number of CPUs that is to be used by HASCO.
-	 */
-	public int getNumCPUs() {
-		return this.getConfig().cpus();
+		return this.searchProblem.getGraphGenerator();
 	}
 
 	@Override
 	public RefinementConfiguredSoftwareConfigurationProblem<V> getInput() {
-		return configurationProblem;
+		return this.configurationProblem;
 	}
 
 	public CostSensitiveHTNPlanningProblem<CEOCOperation, OCIPMethod, CEOCAction, CEOCIPSTNPlanningProblem<CEOCOperation, OCIPMethod, CEOCAction>, V> getPlanningProblem() {
-		return planningProblem;
+		return this.planningProblem;
 	}
 
-	public void setVisualization(boolean visualization) {
-		this.config.setProperty(HASCOConfig.K_VISUALIZE, String.valueOf(visualization));
+	public void setVisualization(final boolean visualization) {
+		this.getConfig().setProperty(HASCOConfig.K_VISUALIZE, String.valueOf(visualization));
 	}
 
 	@Override
 	public void cancel() {
-		if (search != null)
-			search.cancel();
+		super.cancel();
+		if (this.search != null) {
+			this.search.cancel();
+		}
 		this.terminate();
 	}
 
 	public IHASCOPlanningGraphGeneratorDeriver<N, A> getPlanningGraphGeneratorDeriver() {
-		return planningGraphGeneratorDeriver;
+		return this.planningGraphGeneratorDeriver;
 	}
 
 	public AlgorithmProblemTransformer<GraphSearchProblemInput<N, A, V>, ISearch> getSearchProblemTransformer() {
-		return searchProblemTransformer;
+		return this.searchProblemTransformer;
 	}
 
 	public AlgorithmInitializedEvent init() {
 		AlgorithmEvent e = null;
-		while (hasNext()) {
-			e = next();
-			if (e instanceof AlgorithmInitializedEvent)
+		while (this.hasNext()) {
+			e = this.next();
+			if (e instanceof AlgorithmInitializedEvent) {
 				return (AlgorithmInitializedEvent) e;
+			}
 		}
 		throw new IllegalStateException("Could not complete initialization");
 	}
 
 	@Override
 	public HASCORunReport<V> getOutput() {
-		return new HASCORunReport<>(listOfAllRecognizedSolutions);
+		return new HASCORunReport<>(this.listOfAllRecognizedSolutions);
+	}
+
+	@Override
+	public HASCOConfig getConfig() {
+		return (HASCOConfig) super.getConfig();
+	}
+
+	@Override
+	public String getLoggerName() {
+		return this.loggerName;
+	}
+
+	@Override
+	public void setLoggerName(final String name) {
+		this.logger.info("Switching logger from {} to {}", this.logger.getName(), name);
+		this.logger = LoggerFactory.getLogger(name);
+		this.logger.info("Activated logger {} with name {}", name, this.logger.getName());
+		super.setLoggerName(this.loggerName + "._swConfigAlgo");
 	}
 }
