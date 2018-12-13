@@ -177,7 +177,7 @@ public class WekaConversionTest {
 	public void checkClassifierPerformance() throws Exception {
 		Instances data = new Instances(new BufferedReader(new FileReader(folder + File.separator + "vowel.arff")));
 		data.setClassIndex(data.numAttributes() - 1);
-		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(System.currentTimeMillis()), .9f);
+		List<Instances> split = WekaUtil.getStratifiedSplit(data, System.currentTimeMillis(), .9f);
 		Instances instOrig = split.get(0);
 		Instances instTranslated = WekaUtil.fromJAICoreInstances(WekaUtil.toJAICoreLabeledInstances(instOrig));
 		Instances instTest = split.get(1);
