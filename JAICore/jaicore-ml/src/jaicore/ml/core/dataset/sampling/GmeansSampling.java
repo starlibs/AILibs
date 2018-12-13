@@ -36,8 +36,7 @@ public class GmeansSampling extends ASamplingAlgorithm {
 		switch (this.getState()) {
 		case created:
 			// Initialize variables
-			// TODO: create empty dataset
-			this.sample = null;
+			this.sample = this.createEmptyDatasetFromInputSchema();
 
 			// create cluster
 			gMeansCluster = new GMeans<IInstance>(getInput(), new ManhattanDistance());

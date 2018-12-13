@@ -67,8 +67,7 @@ public class SystematicSampling extends ASamplingAlgorithm {
 		switch (this.getState()) {
 		case created:
 			// Initialize variables and sort dataset.
-			// TODO: create empty dataset
-			this.sample = null;
+			this.sample = this.createEmptyDatasetFromInputSchema();
 			this.getInput().sort(this.datapointComparator);
 			this.startIndex = this.random.nextInt(this.getInput().size());
 			this.k = (int)Math.floor(this.getInput().size() / this.sampleSize);

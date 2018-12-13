@@ -34,7 +34,7 @@ public class CaseControlSampling extends ASamplingAlgorithm {
 	public AlgorithmEvent nextWithException() throws Exception {
 		switch(this.getState()) {
 		case created:
-			this.sample = null;
+			this.sample = this.createEmptyDatasetFromInputSchema();
 			
 			HashMap<String, Integer> classOccurrences = countClassOccurrences(this.getInput());
 			
@@ -47,11 +47,11 @@ public class CaseControlSampling extends ASamplingAlgorithm {
 			// Calculate Boundaries that define which Instances is choose for which random number
 			double boundaryOfCurrentInstance = 0.0;
 			probabilityBoundaries = new ArrayList<Pair<IInstance, Double>>();
-			for(IInstance instance: this.getInput()) {
+			for(Object instance: this.getInput()) {
 				boundaryOfCurrentInstance = ((double) 1 / 
-						classOccurrences.get((String) instance.getTargetValue(Class.forName(new String())).getValue()).intValue()) /
+						classOccurrences.get((String) ((IInstance)instance).getTargetValue(Class.forName(new String())).getValue()).intValue()) /
 						numberOfClasses;
-				probabilityBoundaries.add(new Pair<IInstance, Double>(instance, new Double(boundaryOfCurrentInstance)));
+				probabilityBoundaries.add(new Pair<IInstance, Double>((IInstance)instance, new Double(boundaryOfCurrentInstance)));
 			}
 			this.setState(AlgorithmState.active);
 			return new AlgorithmInitializedEvent();
@@ -94,19 +94,19 @@ public class CaseControlSampling extends ASamplingAlgorithm {
 	 */
 	private HashMap<String, Integer> countClassOccurrences(IDataset dataset) throws ClassNotFoundException {
 		HashMap<String, Integer> classOccurrences = new HashMap<String, Integer>();
-		for(IInstance instance: dataset) {
+		for(Object instance: dataset) {
 			boolean classExists = false;
 			for(String clazz: classOccurrences.keySet()) {
-				if(clazz.equals(instance.getTargetValue(Class.forName(new String())).getValue())) {
+				if(clazz.equals(((IInstance) instance).getTargetValue(Class.forName(new String())).getValue())) {
 					classExists = true;
 				}
 			}
 			if(classExists) {
-				classOccurrences.put((String) instance.getTargetValue(Class.forName(new String())).getValue(), 
-						new Integer(classOccurrences.get((String) instance.getTargetValue(Class.forName(new String())).getValue()).intValue() + 1)); 
+				classOccurrences.put((String) ((IInstance) instance).getTargetValue(Class.forName(new String())).getValue(), 
+						new Integer(classOccurrences.get((String) ((IInstance) instance).getTargetValue(Class.forName(new String())).getValue()).intValue() + 1)); 
 			}
 			else {
-				classOccurrences.put((String) instance.getTargetValue(Class.forName(new String())).getValue(), new Integer(0));
+				classOccurrences.put((String) ((IInstance) instance).getTargetValue(Class.forName(new String())).getValue(), new Integer(0));
 			}
 		}
 		return classOccurrences;
