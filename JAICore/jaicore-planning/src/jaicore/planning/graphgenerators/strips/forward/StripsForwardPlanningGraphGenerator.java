@@ -1,7 +1,12 @@
 package jaicore.planning.graphgenerators.strips.forward;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +28,8 @@ public class StripsForwardPlanningGraphGenerator implements GraphGenerator<Strip
 	private final StripsPlanningProblem problem;
 	private static final Logger logger = LoggerFactory.getLogger(StripsForwardPlanningGraphGenerator.class);
 	private final Monom initState;
+	private final Map<StripsForwardPlanningNode, List<StripsAction>> appliedActions = new HashMap<>(); // maintain a local copy of the graph here
+	private final Set<StripsForwardPlanningNode> completelyExpandedNodes = new HashSet<>();
 
 	public StripsForwardPlanningGraphGenerator(StripsPlanningProblem problem) {
 		this.problem = problem;
@@ -31,9 +38,13 @@ public class StripsForwardPlanningGraphGenerator implements GraphGenerator<Strip
 
 	@Override
 	public SingleRootGenerator<StripsForwardPlanningNode> getRootGenerator() {
-		return () -> new StripsForwardPlanningNode(new Monom(), new Monom(), null);
+		return () -> {
+			StripsForwardPlanningNode root = new StripsForwardPlanningNode(new Monom(), new Monom(), null);
+			appliedActions.put(root, new ArrayList<>());
+			return root;
+		};
 	}
-	
+
 	private List<StripsAction> getApplicableActionsInNode(StripsForwardPlanningNode node) {
 		logger.info("Computing successors for node {}", node);
 		long start = System.currentTimeMillis();
@@ -43,36 +54,78 @@ public class StripsForwardPlanningGraphGenerator implements GraphGenerator<Strip
 		return applicableActions;
 	}
 
+	private StripsAction getRandomApplicableActionInNode(StripsForwardPlanningNode node) {
+		logger.info("Computing random successor for node {}", node);
+		long start = System.currentTimeMillis();
+		Monom state = node.getStateRelativeToInitState(initState);
+		List<StripsAction> applicableActions = PlannerUtil.getApplicableActionsInState(state, (StripsPlanningDomain) problem.getDomain(), true, 1);
+		logger.debug("Computation of applicable actions took {}ms", System.currentTimeMillis() - start);
+		return applicableActions.isEmpty() ? null : applicableActions.get(0);
+	}
+
 	@Override
 	public SingleSuccessorGenerator<StripsForwardPlanningNode, String> getSuccessorGenerator() {
 		return new SingleSuccessorGenerator<StripsForwardPlanningNode, String>() {
+
+			private Set<StripsForwardPlanningNode> completelyExpandedNodes = new HashSet<>();
 
 			@Override
 			public List<NodeExpansionDescription<StripsForwardPlanningNode, String>> generateSuccessors(StripsForwardPlanningNode node) throws InterruptedException {
 				long start = System.currentTimeMillis();
 				List<NodeExpansionDescription<StripsForwardPlanningNode, String>> successors = new ArrayList<>();
-				for (StripsAction action : getApplicableActionsInNode(node)) {
+				List<StripsAction> applicableActions = getApplicableActionsInNode(node);
+				appliedActions.put(node, applicableActions);
+				for (StripsAction action : applicableActions) {
 					long t = System.currentTimeMillis();
 					Monom del = new Monom(node.getDel());
 					Monom add = new Monom(node.getAdd());
 					del.addAll(action.getDeleteList());
 					add.removeAll(action.getDeleteList());
 					add.addAll(action.getAddList());
+
 					StripsForwardPlanningNode newNode = new StripsForwardPlanningNode(add, del, action);
 					successors.add(new NodeExpansionDescription<>(node, newNode, "edge label", NodeType.OR));
 					if (logger.isTraceEnabled())
 						logger.trace("Created the node expansion description within {}ms. New state size is {}.", System.currentTimeMillis() - t, newNode.getStateRelativeToInitState(initState).size());
 				}
 				logger.info("Generated {} successors in {}ms.", successors.size(), System.currentTimeMillis() - start);
+				completelyExpandedNodes.add(node);
 				return successors;
 			}
 
 			@Override
 			public NodeExpansionDescription<StripsForwardPlanningNode, String> generateSuccessor(StripsForwardPlanningNode node, int i) throws InterruptedException {
-				System.out.println("Compute single successor!");
+
 				long start = System.currentTimeMillis();
-				List<StripsAction> applicableActions = getApplicableActionsInNode(node);
-				StripsAction action = applicableActions.get(i % applicableActions.size());
+				
+				/* if no successor has been computed for this node, add the list */
+				if (!appliedActions.containsKey(node))
+					appliedActions.put(node, new ArrayList<>());
+
+				/* determine action (if index here is high, just compute all of them) */
+				assert i >= 0 : "Index must not be negative!";
+				StripsAction action;
+				if (completelyExpandedNodes.contains(node)) {
+					action = appliedActions.get(node).get(i % appliedActions.get(node).size());
+				} else if (appliedActions.get(node).size() >= 3) {
+					generateSuccessors(node);
+					assert completelyExpandedNodes.contains(node);
+					action = appliedActions.get(node).get(i % appliedActions.get(node).size());
+				} else {
+					int counter = 0;
+					while ((action = getRandomApplicableActionInNode(node)) != null && appliedActions.get(node).contains(action) && counter < 10) {
+						counter++;
+					}
+					if (action == null) {
+						generateSuccessors(node);
+						assert completelyExpandedNodes.contains(node);
+						action = appliedActions.get(node).get(i % appliedActions.get(node).size());
+					}
+				}
+				
+				/* action should not be null at this point */
+				assert action != null;
+				appliedActions.get(node).add(action);
 				long t = System.currentTimeMillis();
 				Monom del = new Monom(node.getDel());
 				Monom add = new Monom(node.getAdd());
@@ -85,6 +138,11 @@ public class StripsForwardPlanningGraphGenerator implements GraphGenerator<Strip
 					logger.trace("Created the node expansion description within {}ms. New state size is {}.", System.currentTimeMillis() - t, newNode.getStateRelativeToInitState(initState).size());
 				logger.info("Generated {}-th successor in {}ms.", i, System.currentTimeMillis() - start);
 				return successor;
+			}
+
+			@Override
+			public boolean allSuccessorsComputed(StripsForwardPlanningNode node) {
+				return completelyExpandedNodes.contains(node);
 			}
 
 		};

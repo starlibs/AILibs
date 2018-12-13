@@ -82,6 +82,8 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 			return new AlgorithmInitializedEvent();
 		}
 		case active: {
+			
+			System.out.println(getTimeout());
 
 			/* now compute best local values bottom up */
 			Queue<EvaluatedGraph> bestSolutions = filterNodeSolution(graph.getRoot());

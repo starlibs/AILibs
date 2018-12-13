@@ -20,7 +20,7 @@ import jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.AlgorithmState;
 import jaicore.basic.sets.SetUtil;
-import jaicore.graph.LabeledGraph;
+import jaicore.graph.Graph;
 import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
@@ -31,11 +31,15 @@ import jaicore.search.model.probleminputs.GraphSearchInput;
 import jaicore.search.model.travesaltree.NodeExpansionDescription;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
+import jaicore.search.structure.graphgenerator.SingleSuccessorGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 /**
- * This search randomly draws paths from the root. At every node, each successor is chosen with the same probability except if a priority predicate is defined. A priority predicate says whether or not a node lies on a path that has
- * priority. A node only has priority until all successors that have priority are exhausted.
+ * This search randomly draws paths from the root. At every node, each successor
+ * is chosen with the same probability except if a priority predicate is
+ * defined. A priority predicate says whether or not a node lies on a path that
+ * has priority. A node only has priority until all successors that have
+ * priority are exhausted.
  * 
  * @author fmohr
  *
@@ -49,12 +53,13 @@ public class RandomSearch<N, A> extends AbstractORGraphSearch<GraphSearchInput<N
 
 	private final N root;
 	private final SuccessorGenerator<N, A> gen;
+	private final boolean isSingleNodeSuccessorGenerator;
 	private final NodeGoalTester<N> goalTester;
-	private final LabeledGraph<N, A> exploredGraph = new LabeledGraph<>();
+	private final Graph<N> exploredGraph = new Graph<>();
 	private final Set<N> closed = new HashSet<>();
 	private final Predicate<N> priorityPredicate;
 	private final Set<N> prioritizedNodes = new HashSet<>();
-	private final Set<N> exhausted = new HashSet<>();
+	private final Set<N> exhausted = new HashSet<>(); // the set of nodes of which all solution paths have been computed
 	private final Random random;
 
 	public RandomSearch(GraphSearchInput<N, A> problem, int seed) {
@@ -69,40 +74,90 @@ public class RandomSearch<N, A> extends AbstractORGraphSearch<GraphSearchInput<N
 		super(problem);
 		this.root = ((SingleRootGenerator<N>) problem.getGraphGenerator().getRootGenerator()).getRoot();
 		this.gen = problem.getGraphGenerator().getSuccessorGenerator();
+		this.isSingleNodeSuccessorGenerator = this.gen instanceof SingleSuccessorGenerator;
 		this.goalTester = (NodeGoalTester<N>) problem.getGraphGenerator().getGoalTester();
 		exploredGraph.addItem(root);
 		this.random = random;
 		this.priorityPredicate = priorityPredicate;
 	}
 
+	/**
+	 * This expansion either generates all successors of a node (if the successor
+	 * generator function is not able to provide single successor) or only one new
+	 * successor. The node is put on CLOSED once all successors have been generated.
+	 * 
+	 * Note that the fact that a new successor is generated does not mean that the
+	 * algorithm will choose the newly generated successor to be appended to the
+	 * paths.
+	 * 
+	 * @param node
+	 * @throws InterruptedException
+	 */
 	private void expandNode(N node) throws InterruptedException {
-		assert !closed.contains(node) && !goalTester.isGoal(node);
-		logger.debug("Expanding next node {}", node);
-		long start = System.currentTimeMillis();
-		List<NodeExpansionDescription<N, A>> successors = gen.generateSuccessors(node); // could have been interrupted here
-		logger.debug("Identified {} successor(s) in {}ms, which are now appended.", successors.size(), System.currentTimeMillis() - start);
-		boolean atLeastOneSuccessorPrioritized = false;
-		for (NodeExpansionDescription<N, A> successor : successors) {
-			exploredGraph.addItem(successor.getTo());
-			boolean isPrioritized = priorityPredicate != null && priorityPredicate.test(successor.getTo());
-			if (isPrioritized) {
-				atLeastOneSuccessorPrioritized = true;
-				prioritizedNodes.add(successor.getTo());
+		synchronized (exploredGraph) {
+
+			assert exploredGraph.getItems().contains(node) : "Node that shall be expanded is not part of the graph";
+			assert !closed.contains(node) && !goalTester.isGoal(node);
+			logger.debug("Expanding next node {}", node);
+			boolean closeNodeAfterwards = false;
+			if (isSingleNodeSuccessorGenerator) {
+
+				/* generate the next successor */
+				SingleSuccessorGenerator<N, A> cGen = ((SingleSuccessorGenerator<N, A>) gen);
+				NodeExpansionDescription<N, A> successor = cGen.generateSuccessor(node, random.nextInt(Integer.MAX_VALUE));
+				if (successor != null) {
+					addNodeToLocalModel(successor.getFrom(), successor.getTo());
+				}
+
+				/* if this was the last successor, set the close node flag to 1 */
+				closeNodeAfterwards = cGen.allSuccessorsComputed(node);
+			} else {
+				long start = System.currentTimeMillis();
+				List<NodeExpansionDescription<N, A>> successors = gen.generateSuccessors(node); // could have been interrupted here
+				logger.debug("Identified {} successor(s) in {}ms, which are now appended.", successors.size(), System.currentTimeMillis() - start);
+				boolean atLeastOneSuccessorPrioritized = false;
+				for (NodeExpansionDescription<N, A> successor : successors) {
+					addNodeToLocalModel(successor.getFrom(), successor.getTo());
+				}
+
+				/*
+				 * if the node has successors but none of them is prioritized, remove the node
+				 * from the priority list
+				 */
+				if (!exploredGraph.getSuccessors(node).isEmpty() && prioritizedNodes.contains(node) && !atLeastOneSuccessorPrioritized) {
+					prioritizedNodes.remove(node);
+					updateExhaustedAndPrioritizedState(node);
+				}
+
+				closeNodeAfterwards = true;
 			}
-			exploredGraph.addEdge(node, successor.getTo(), successor.getAction());
-			boolean isGoalNode = goalTester.isGoal(successor.getTo());
-			if (isGoalNode)
-				logger.debug("Found goal node {}!", successor);
-			postEvent(new NodeReachedEvent<>(successor.getFrom(), successor.getTo(), isGoalNode ? "or_solution" : (isPrioritized ? "or_prioritized" : "or_open")));
+
+			if (closeNodeAfterwards) {
+
+				/* if the node was not prioritized, change its state */
+				if (!prioritizedNodes.contains(node))
+					postEvent(new NodeTypeSwitchEvent<N>(node, "or_closed"));
+				closed.add(node);
+			}
+			logger.debug("Finished node expansion. Sizes of explored graph and CLOSED are {} and {} respectively.", exploredGraph.getItems().size(), closed.size());
 		}
-		if (!successors.isEmpty() && prioritizedNodes.contains(node) && !atLeastOneSuccessorPrioritized) {
-			prioritizedNodes.remove(node);
-			updateExhaustedAndPrioritizedState(node);
+	}
+	
+	private void addNodeToLocalModel(N from, N to) {
+		assert from != null;
+		assert to != null;
+		assert !exploredGraph.hasItem(to);
+		assert exploredGraph.hasItem(from);
+		exploredGraph.addItem(to);
+		boolean isPrioritized = priorityPredicate != null && priorityPredicate.test(to);
+		if (isPrioritized) {
+			prioritizedNodes.add(to);
 		}
-		if (!prioritizedNodes.contains(node))
-			postEvent(new NodeTypeSwitchEvent<N>(node, "or_closed"));
-		closed.add(node);
-		logger.debug("Finished node expansion. Sizes of explored graph and CLOSED are {} and {} respectively.", exploredGraph.getItems().size(), closed.size());
+		exploredGraph.addEdge(from, to);
+		boolean isGoalNode = goalTester.isGoal(to);
+		if (isGoalNode)
+			logger.debug("Found goal node {}!", to);
+		postEvent(new NodeReachedEvent<>(from, to, isGoalNode ? "or_solution" : (isPrioritized ? "or_prioritized" : "or_open")));
 	}
 
 	@Override
@@ -145,14 +200,17 @@ public class RandomSearch<N, A> extends AbstractORGraphSearch<GraphSearchInput<N
 	}
 
 	public boolean knowsNode(N node) {
-		return exploredGraph.getItems().contains(node);
+		synchronized (exploredGraph) {
+			return exploredGraph.getItems().contains(node);
+		}
 	}
 
 	public void appendPathToNode(List<N> nodes) throws InterruptedException {
+		N parent = null;
 		for (N node : nodes) {
-			if (!closed.contains(node)) {
-				expandNode(node);
-			}
+			if (!exploredGraph.getItems().contains(node))
+				addNodeToLocalModel(parent, node);
+			parent = node;
 		}
 	}
 
@@ -169,45 +227,51 @@ public class RandomSearch<N, A> extends AbstractORGraphSearch<GraphSearchInput<N
 		List<N> path = new ArrayList<>();
 		path.add(node);
 		N head = node;
-		while (!goalTester.isGoal(head)) {
+		synchronized (exploredGraph) {
+			while (!goalTester.isGoal(head)) {
 
-			checkTermination();
+				checkTermination();
 
-			/* expand node if this has not happened yet */
-			if (!closed.contains(head)) {
-				expandNode(head);
+				/* expand node if this has not happened yet. */
+				if (!closed.contains(head)) {
+					expandNode(head);
+				}
+
+				/* get unexhausted successors */
+				List<N> successors = exploredGraph.getSuccessors(head).stream().filter(n -> !exhausted.contains(n)).collect(Collectors.toList());
+
+				/*
+				 * if we are in a dead end, mark the node as exhausted and remove the head again
+				 */
+				if (successors.isEmpty()) {
+					exhausted.add(head);
+					prioritizedNodes.remove(head); // remove prioritized node from list if it is in
+					path.remove(head);
+					if (path.isEmpty())
+						return null;
+					head = path.get(path.size() - 1);
+					continue;
+				}
+
+				/*
+				 * if at least one of the successors is prioritized, choose one of those;
+				 * otherwise choose one at random
+				 */
+				assert SetUtil.intersection(exhausted, prioritizedNodes).isEmpty() : "There are nodes that are both exhausted and prioritized, which must not be the case:"
+						+ SetUtil.intersection(exhausted, prioritizedNodes).stream().map(n -> "\n\t" + n).collect(Collectors.joining());
+				Collection<N> prioritizedSuccessors = SetUtil.intersection(successors, prioritizedNodes);
+				if (!prioritizedSuccessors.isEmpty()) {
+					head = prioritizedSuccessors.iterator().next();
+				} else {
+					int n = successors.size();
+					assert n != 0 : "Ended up in a situation where only exhausted nodes can be chosen.";
+					int k = random.nextInt(n);
+					head = successors.get(k);
+					final N tmpHead = head; // needed for stream in assertion
+					assert !path.contains(head) : "Going in circles ... " + path.stream().map(pn -> "\n\t[" + (pn.equals(tmpHead) ? "*" : " ") + "]" + pn.toString()).collect(Collectors.joining()) + "\n\t[*]" + head;
+				}
+				path.add(head);
 			}
-
-			/* get unexhausted successors */
-			List<N> successors = exploredGraph.getSuccessors(head).stream().filter(n -> !exhausted.contains(n)).collect(Collectors.toList());
-
-			/* if we are in a dead end, mark the node as exhausted and remove the head again */
-			if (successors.isEmpty()) {
-				exhausted.add(head);
-				prioritizedNodes.remove(head); // remove prioritized node from list if it is in
-				path.remove(head);
-				if (path.isEmpty())
-					return null;
-				head = path.get(path.size() - 1);
-				continue;
-			}
-
-			/* if at least one of the successors is prioritized, choose one of those; otherwise choose one at random */
-			assert SetUtil.intersection(exhausted, prioritizedNodes).isEmpty() : "There are nodes that are both exhausted and prioritized, which must not be the case:" + SetUtil.intersection(exhausted, prioritizedNodes).stream().map(n -> "\n\t" + n).collect(Collectors.joining());
-			Collection<N> prioritizedSuccessors = SetUtil.intersection(successors, prioritizedNodes);
-			if (!prioritizedSuccessors.isEmpty()) {
-				head = prioritizedSuccessors.iterator().next();
-			}
-			else {
-				int n = successors.size();
-				assert n != 0 : "Ended up in a situation where only exhausted nodes can be chosen.";
-				int k = random.nextInt(n);
-				head = successors.get(k);
-				final N tmpHead = head; // needed for stream in assertion
-				assert !path.contains(head) : "Going in circles ... " + path.stream().map(pn -> "\n\t[" + (pn.equals(tmpHead) ? "*" : " ") + "]" + pn.toString()).collect(Collectors.joining())
-						+ "\n\t[*]" + head;
-			}
-			path.add(head);
 		}
 
 		/* propagate exhausted state */
@@ -216,34 +280,36 @@ public class RandomSearch<N, A> extends AbstractORGraphSearch<GraphSearchInput<N
 		updateExhaustedAndPrioritizedState(head);
 		return new SearchGraphPath<>(path, null);
 	}
-	
+
 	private void updateExhaustedAndPrioritizedState(N node) {
-		N current = node;
-		Collection<N> predecessors;
-		while (!(predecessors = exploredGraph.getPredecessors(current)).isEmpty()) {
-			assert predecessors.size() == 1;
-			current = predecessors.iterator().next();
-			boolean currentIsPrioritized = prioritizedNodes.contains(current);
-			boolean allChildrenExhausted = true;
-			boolean allPrioritizedChildrenExhausted = true;
-			for (N successor : exploredGraph.getSuccessors(current)) {
-				if (!exhausted.contains(successor)) {
-					allChildrenExhausted = false;
-					if (currentIsPrioritized && prioritizedNodes.contains(successor)) {
-						allPrioritizedChildrenExhausted = false;
-						break;
-					} else if (!currentIsPrioritized)
-						break;
+		synchronized (exploredGraph) {
+			N current = node;
+			Collection<N> predecessors;
+			while (!(predecessors = exploredGraph.getPredecessors(current)).isEmpty()) {
+				assert predecessors.size() == 1;
+				current = predecessors.iterator().next();
+				boolean currentIsPrioritized = prioritizedNodes.contains(current);
+				boolean allChildrenExhausted = true;
+				boolean allPrioritizedChildrenExhausted = true;
+				for (N successor : exploredGraph.getSuccessors(current)) {
+					if (!exhausted.contains(successor)) {
+						allChildrenExhausted = false;
+						if (currentIsPrioritized && prioritizedNodes.contains(successor)) {
+							allPrioritizedChildrenExhausted = false;
+							break;
+						} else if (!currentIsPrioritized)
+							break;
+					}
 				}
-			}
-			if (allChildrenExhausted)
-				exhausted.add(current);
-			if (currentIsPrioritized && allPrioritizedChildrenExhausted) {
-				int sizeBefore = prioritizedNodes.size();
-				prioritizedNodes.remove(current);
-				postEvent(new NodeTypeSwitchEvent<N>(current, "or_closed"));
-				int sizeAfter = prioritizedNodes.size();
-				assert sizeAfter == sizeBefore - 1;
+				if (allChildrenExhausted)
+					exhausted.add(current);
+				if (currentIsPrioritized && allPrioritizedChildrenExhausted) {
+					int sizeBefore = prioritizedNodes.size();
+					prioritizedNodes.remove(current);
+					postEvent(new NodeTypeSwitchEvent<N>(current, "or_closed"));
+					int sizeAfter = prioritizedNodes.size();
+					assert sizeAfter == sizeBefore - 1;
+				}
 			}
 		}
 	}
@@ -265,12 +331,12 @@ public class RandomSearch<N, A> extends AbstractORGraphSearch<GraphSearchInput<N
 
 	@Override
 	public void setLoggerName(String name) {
-		
+
 		logger.info("Switch logger name from {} to {}", this.loggerName, name);
 		this.loggerName = name;
 		this.logger = LoggerFactory.getLogger(this.loggerName);
 		if (this.getGraphGenerator() instanceof ILoggingCustomizable) {
-			((ILoggingCustomizable)this.getGraphGenerator()).setLoggerName(name + ".graphgen");
+			((ILoggingCustomizable) this.getGraphGenerator()).setLoggerName(name + ".graphgen");
 		}
 		logger.info("Switched logger name to {}", this.loggerName);
 	}

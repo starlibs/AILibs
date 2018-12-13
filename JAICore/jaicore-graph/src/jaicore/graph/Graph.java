@@ -69,6 +69,10 @@ public class Graph<T> implements Serializable {
 	public Set<T> getItems() {
 		return nodes.keySet();
 	}
+	
+	public boolean hasItem(T item) {
+		return nodes.containsKey(item);
+	}
 
 	public void removeItem(T item) {
 		for (T successor : getSuccessors(item))
