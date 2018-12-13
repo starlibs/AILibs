@@ -9,13 +9,40 @@ import jaicore.ml.core.predictivemodel.IPredictiveModelConfiguration;
 
 @Sources({ "file:conf/plNet/plnet.properties" })
 public interface IPLNetDyadRankerConfiguration extends IPredictiveModelConfiguration {
-
+	/**
+	 * The learning rate for the gradient updater.
+	 */
 	public static final String K_PLNET_LEARNINGRATE = "plnet.learningrate";
+	/**
+	 * List of integers describing the architecture of the hidden layers. 
+	 * The i-th element represents the number of units in the i-th hidden layer.
+	 */
 	public static final String K_PLNET_HIDDEN_NODES = "plnet.hidden.nodes";
-	public static final String K_PLNET_SEED = "plnet.hidden.nodes";
+	/**
+	 * The random seed to use.
+	 */
+	public static final String K_PLNET_SEED = "plnet.seed";
+	/**
+	 * The activation function for the hidden layers.
+	 * For a list of supported functions, 
+	 * see <a href="https://deeplearning4j.org/docs/latest/deeplearning4j-cheat-sheet#config-afn">https://deeplearning4j.org/docs/latest/deeplearning4j-cheat-sheet#config-afn</a>
+	 */
 	public static final String K_ACTIVATION_FUNCTION = "plnet.hidden.activation.function";
+	/**
+	 * The maximum number of epochs to be used during training, 
+	 * i.e. how many times the training algorithm should iterate through the entire training data set.
+	 * Set to 0 for no limit apart from early stopping.
+	 */
 	public static final String K_MAX_EPOCHS = "plnet.epochs";
+	/**
+	 * How often (in epochs) the validation error should be checked for early stopping.
+	 */
 	public static final String K_EARLY_STOPPING_INTERVAL = "plnet.early.stopping.interval";
+	/**
+	 * For how many epochs early stopping should wait until training is stopped if no improvement in the
+	 * validation error is observed.
+	 */
+	public static final String K_EARLY_STOPPING_PATIENCE = "plnet.early.stopping.patience";
 
 	
 	@Key(K_PLNET_LEARNINGRATE)
@@ -41,5 +68,9 @@ public interface IPLNetDyadRankerConfiguration extends IPredictiveModelConfigura
 	@Key(K_EARLY_STOPPING_INTERVAL)
 	@DefaultValue("1")
 	public int plNetEarlyStoppingInterval();
+	
+	@Key(K_EARLY_STOPPING_PATIENCE)
+	@DefaultValue("10")
+	public int plNetEarlyStoppingPatience();
 	
 }

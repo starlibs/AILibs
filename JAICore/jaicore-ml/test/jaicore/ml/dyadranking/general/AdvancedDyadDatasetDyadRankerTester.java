@@ -1,5 +1,7 @@
 package jaicore.ml.dyadranking.general;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -72,9 +74,10 @@ public class AdvancedDyadDatasetDyadRankerTester {
 	}
 
 	@Parameters
-	public static List<ADyadRanker> supplyDyadRankers() {
+	public static List<ADyadRanker[]> supplyDyadRankers() {
 		PLNetDyadRanker ranker1 = new PLNetDyadRanker();
-		ranker1.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_MAX_EPOCHS, "1");
+		ranker1.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_MAX_EPOCHS, "0");
+		ranker1.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_PLNET_HIDDEN_NODES, "6,4,3");
 		System.out.println(ranker1.getConfiguration());
 		return Arrays.asList(ranker1, new PLNetDyadRanker());
 	}
