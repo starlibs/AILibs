@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,25 +77,21 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 			this.post(new GraphInitializedEvent<N>(root.node));
 			this.graph.addItem(root);
 			while (!open.isEmpty()) {
-				Queue<InnerNodeLabel> newOpen = new LinkedList<>();
-				open.stream().forEach(n -> {
-					try {
-						for (NodeExpansionDescription<N, A> descr : this.getInput().getSuccessorGenerator().generateSuccessors(n.node)) {
-							InnerNodeLabel newNode = new InnerNodeLabel(descr.getTo(), descr.getTypeOfToNode());
-							synchronized (this.graph) {
-								this.graph.addItem(newNode);
-								this.graph.addEdge(n, newNode);
-							}
-							newOpen.add(newNode);
-							this.post(new NodeReachedEvent<N>(n.node, newNode.node, descr.getTypeOfToNode() == NodeType.OR ? "or" : "and"));
+				InnerNodeLabel n = open.poll();
+				try {
+					for (NodeExpansionDescription<N, A> descr : this.getInput().getSuccessorGenerator().generateSuccessors(n.node)) {
+						InnerNodeLabel newNode = new InnerNodeLabel(descr.getTo(), descr.getTypeOfToNode());
+						synchronized (this.graph) {
+							this.graph.addItem(newNode);
+							this.graph.addEdge(n, newNode);
 						}
-					} catch (Exception e) {
-						e.printStackTrace();
+						open.add(newNode);
+						this.post(new NodeReachedEvent<N>(n.node, newNode.node, descr.getTypeOfToNode() == NodeType.OR ? "or" : "and"));
 					}
-				});
-				open = newOpen;
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
-
 			this.logger.info("Size: {}", this.graph.getItems().size());
 			this.setState(AlgorithmState.active);
 			return new AlgorithmInitializedEvent();
@@ -126,7 +123,7 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 																													// (unimportant first, because these are drained)
 		assert !node.evaluated : "Node " + node + " is filtered for the 2nd time already!";
 		node.evaluated = true;
-		this.logger.debug("Filtering node " + node + " with " + this.graph.getSuccessors(node).size() + " children.");
+		this.logger.debug("Filtering ({})-Node " + node.node + " with " + this.graph.getSuccessors(node).size() + " children.", node.type);
 
 		/* if this is a leaf node, just return itself */
 		if (this.graph.getSuccessors(node).isEmpty()) {
@@ -136,20 +133,26 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 			evaluatedGraph.graph = graph;
 			evaluatedGraph.value = this.evaluator.evaluate(graph);
 			filteredSolutions.add(evaluatedGraph);
-			this.logger.debug("Returning solutions for leaf node " + node);
+			this.logger.debug("Returning one single-node solution graph for leaf node {}", node.node);
 			return filteredSolutions;
 		}
 
 		/* otherwise first compute the values for all children */
 		Map<InnerNodeLabel, Queue<EvaluatedGraph>> subSolutions = new HashMap<>();
+		logger.debug("Computing subsolutions of node {}", node);
 		for (InnerNodeLabel child : this.graph.getSuccessors(node)) {
 			Queue<EvaluatedGraph> filteredSolutionsUnderChild = this.filterNodeSolution(child);
 			subSolutions.put(child, filteredSolutionsUnderChild);
+			logger.debug("Child {} has {} solutions.", child, filteredSolutionsUnderChild.size());
 		}
-		this.logger.debug("Survived paths for children " + (node.type == NodeType.OR ? "OR" : "AND") + "-node " + node.node + ":");
-		for (InnerNodeLabel child : subSolutions.keySet()) {
-			this.logger.debug("\t#" + child);
-			subSolutions.get(child).forEach(l -> this.logger.debug("\n\t\t" + l));
+		if (logger.isDebugEnabled()) {
+			StringBuilder sb = new StringBuilder();
+			sb.append("Survived paths for children " + (node.type == NodeType.OR ? "OR" : "AND") + "-node " + node.node + ":");
+			for (InnerNodeLabel child : subSolutions.keySet()) {
+				sb.append("\t#" + child);
+				subSolutions.get(child).forEach(l -> sb.append("\n\t\t" + l));
+			}
+			logger.debug(sb.toString());
 		}
 
 		/*
@@ -196,7 +199,9 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 
 		/* if this is an OR node, choose the best solution paths of the children */
 		else {
+			logger.debug("OR-Node: Selecting best child solution out of {}", subSolutions.size());
 			for (InnerNodeLabel child : subSolutions.keySet()) {
+				logger.trace("Child {} has {} sub-solutions.", child, subSolutions.size());
 				for (EvaluatedGraph solutionBase : subSolutions.get(child)) {
 					EvaluatedGraph extendedSolutionBase = new EvaluatedGraph();
 					extendedSolutionBase.graph = new Graph<>(solutionBase.graph);
@@ -204,22 +209,17 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 					extendedSolutionBase.graph.addEdge(node.node, child.node);
 					extendedSolutionBase.value = solutionBase.value;
 					filteredSolutions.add(extendedSolutionBase);
-					while (filteredSolutions.size() > this.nodeLimit) {
-						filteredSolutions.remove();
-					}
 				}
 			}
 		}
-
-		/* reverse queue */
-		LinkedList<EvaluatedGraph> filteredSolutionsReordered = new LinkedList<>();
-		while (!filteredSolutions.isEmpty()) {
-			filteredSolutionsReordered.add(0, filteredSolutions.poll());
-		}
+		
+		/* order solutions by value */
+		filteredSolutions = new LinkedList<>(filteredSolutions.stream().sorted((g1,g2) -> g1.value.compareTo(g2.value)).limit(nodeLimit).collect(Collectors.toList()));
+		
 		// logger.debug("\treturning " + filteredSolutionsReordered.size() + "
 		// graph(s):");
-		filteredSolutionsReordered.forEach(g -> this.logger.debug("\tScore " + g.value + " for " + g.graph));
-		return filteredSolutionsReordered;
+		filteredSolutions.forEach(g -> this.logger.debug("\tScore " + g.value + " for " + g.graph));
+		return filteredSolutions;
 	}
 
 	@Override

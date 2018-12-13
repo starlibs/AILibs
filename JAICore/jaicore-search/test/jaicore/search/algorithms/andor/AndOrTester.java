@@ -17,8 +17,8 @@ public class AndOrTester {
 	public void test() throws Exception {
 		int k = 3;
 		int b = 2;
-		int d = 3;
-		int limit = 10;
+		int d = 2;
+		int limit = 100;
 		GraphGenerator<NodeLabel, String> gg = new SyntheticAndGrid(k, b, d);
 		IObjectEvaluator<Graph<NodeLabel>, Double> evaluator = g -> {
 			double sum = 0;
