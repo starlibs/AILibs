@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
@@ -14,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.Subscribe;
 
+import de.upb.crc901.mlpipeline_evaluation.CacheEvaluatorMeasureBridge;
 import de.upb.crc901.mlplan.multiclass.MLPlanClassifierConfig;
 import hasco.core.HASCOSolutionCandidate;
 import hasco.model.Component;
@@ -34,8 +34,8 @@ import jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.AlgorithmState;
 import jaicore.basic.algorithm.SolutionCandidateFoundEvent;
 import jaicore.ml.WekaUtil;
-import jaicore.ml.core.evaluation.measure.ADecomposableDoubleMeasure;
 import jaicore.ml.core.evaluation.measure.singlelabel.MultiClassPerformanceMeasure;
+import jaicore.ml.evaluation.evaluators.weka.AbstractEvaluatorMeasureBridge;
 import jaicore.ml.evaluation.evaluators.weka.MonteCarloCrossValidationEvaluator;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
@@ -58,9 +58,9 @@ import weka.core.OptionHandler;
  * @author wever, fmohr
  *
  */
-public abstract class MLPlanWekaClassifier extends AAlgorithm<Instances, Classifier> implements Classifier, CapabilitiesHandler, OptionHandler {
+public abstract class MLPlanWekaClassifier extends AAlgorithm<Instances, Classifier> implements Classifier, CapabilitiesHandler, OptionHandler, ILoggingCustomizable {
 
-	/* logging */
+	/** Logger for controlled output. */
 	private Logger logger = LoggerFactory.getLogger(MLPlanWekaClassifier.class);
 	private String loggerName;
 
@@ -68,8 +68,7 @@ public abstract class MLPlanWekaClassifier extends AAlgorithm<Instances, Classif
 	private final Collection<Component> components;
 	private final ClassifierFactory factory;
 	private INodeEvaluator<TFDNode, Double> preferredNodeEvaluator;
-	private final ADecomposableDoubleMeasure<Double> performanceMeasure;
-
+	private final AbstractEvaluatorMeasureBridge<Double, Double> evaluationMeasurementBridge;
 	private Classifier selectedClassifier;
 	private double internalValidationErrorOfSelectedClassifier;
 	private TwoPhaseHASCOFactory hascoFactory;
@@ -77,19 +76,18 @@ public abstract class MLPlanWekaClassifier extends AAlgorithm<Instances, Classif
 
 	private Instances dataShownToSearch = null;
 
-	public MLPlanWekaClassifier(final File componentFile, final ClassifierFactory factory, final ADecomposableDoubleMeasure<Double> performanceMeasure, final MLPlanClassifierConfig config) throws IOException {
+	public MLPlanWekaClassifier(final File componentFile, final ClassifierFactory factory, final AbstractEvaluatorMeasureBridge<Double, Double> evaluationMeasurementBridge, final MLPlanClassifierConfig config) throws IOException {
 		super(config);
 		this.componentFile = componentFile;
 		this.components = new ComponentLoader(componentFile).getComponents();
 		this.factory = factory;
-		this.performanceMeasure = performanceMeasure;
+		this.evaluationMeasurementBridge = evaluationMeasurementBridge;
 	}
 
 	@Override
 	public AlgorithmEvent nextWithException() throws Exception {
 		switch (this.getState()) {
 		case created: {
-
 			/* check whether data has been set */
 			if (this.getInput() == null) {
 				throw new IllegalArgumentException("Data to work on is still NULL");
@@ -101,9 +99,9 @@ public abstract class MLPlanWekaClassifier extends AAlgorithm<Instances, Classif
 			}
 
 			/* set up exact splits */
-			float selectionDataPortion = this.getConfig().dataPortionForSelection();
+			double selectionDataPortion = this.getConfig().dataPortionForSelection();
 			if (selectionDataPortion > 0) {
-				List<Instances> selectionSplit = WekaUtil.getStratifiedSplit(this.getInput(), new Random(this.getConfig().randomSeed()), selectionDataPortion);
+				List<Instances> selectionSplit = WekaUtil.getStratifiedSplit(this.getInput(), this.getConfig().randomSeed(), selectionDataPortion);
 				this.dataShownToSearch = selectionSplit.get(1);
 			} else {
 				this.dataShownToSearch = this.getInput();
@@ -128,27 +126,41 @@ public abstract class MLPlanWekaClassifier extends AAlgorithm<Instances, Classif
 			this.logger.info("Using the following preferred node evaluator: {}", this.preferredNodeEvaluator);
 
 			/* create HASCO problem */
-			IObjectEvaluator<Classifier, Double> searchBenchmark = new MonteCarloCrossValidationEvaluator(this.performanceMeasure, this.getConfig().numberOfMCIterationsDuringSearch(), this.dataShownToSearch,
+			IObjectEvaluator<Classifier, Double> searchBenchmark = new MonteCarloCrossValidationEvaluator(this.evaluationMeasurementBridge, this.getConfig().numberOfMCIterationsDuringSearch(), this.dataShownToSearch,
 					this.getConfig().getMCCVTrainFoldSizeDuringSearch(), this.getConfig().randomSeed());
-			IObjectEvaluator<ComponentInstance, Double> wrappedSearchBenchmark = c -> searchBenchmark.evaluate(this.factory.getComponentInstantiation(c));
-			IObjectEvaluator<Classifier, Double> selectionBenchmark = new IObjectEvaluator<Classifier, Double>() {
 
-				@Override
-				public Double evaluate(final Classifier object) throws Exception {
+			IObjectEvaluator<ComponentInstance, Double> wrappedSearchBenchmark = c -> {
+				if (this.evaluationMeasurementBridge instanceof CacheEvaluatorMeasureBridge) {
+					CacheEvaluatorMeasureBridge bridge = ((CacheEvaluatorMeasureBridge) this.evaluationMeasurementBridge).getShallowCopy(c);
 
-					/* first conduct MCCV */
-					MonteCarloCrossValidationEvaluator mccv = new MonteCarloCrossValidationEvaluator(MLPlanWekaClassifier.this.performanceMeasure, MLPlanWekaClassifier.this.getConfig().numberOfMCIterationsDuringSelection(),
-							MLPlanWekaClassifier.this.getInput(), MLPlanWekaClassifier.this.getConfig().getMCCVTrainFoldSizeDuringSelection(), MLPlanWekaClassifier.this.getConfig().randomSeed());
-					mccv.evaluate(object);
+					long seed = this.getConfig().randomSeed() + c.hashCode();
 
-					/* now retrieve .75-percentile from stats */
-					double mean = mccv.getStats().getMean();
-					double percentile = mccv.getStats().getPercentile(75f);
-					MLPlanWekaClassifier.this.logger.info("Select {} as .75-percentile where {} would have been the mean. Samples size of MCCV was {}", percentile, mean, mccv.getStats().getN());
-					return percentile;
+					IObjectEvaluator<Classifier, Double> copiedSearchBenchmark = new MonteCarloCrossValidationEvaluator(bridge, this.getConfig().numberOfMCIterationsDuringSearch(), this.dataShownToSearch,
+							this.getConfig().getMCCVTrainFoldSizeDuringSearch(), seed);
+					return copiedSearchBenchmark.evaluate(this.factory.getComponentInstantiation(c));
 				}
+				return searchBenchmark.evaluate(this.factory.getComponentInstantiation(c));
 			};
-			IObjectEvaluator<ComponentInstance, Double> wrappedSelectionBenchmark = c -> selectionBenchmark.evaluate(this.factory.getComponentInstantiation(c));
+
+			IObjectEvaluator<ComponentInstance, Double> wrappedSelectionBenchmark = c -> {
+				/* first conduct MCCV */
+				AbstractEvaluatorMeasureBridge<Double, Double> bridge = this.evaluationMeasurementBridge;
+				if (this.evaluationMeasurementBridge instanceof CacheEvaluatorMeasureBridge) {
+					bridge = ((CacheEvaluatorMeasureBridge) bridge).getShallowCopy(c);
+
+				}
+
+				MonteCarloCrossValidationEvaluator mccv = new MonteCarloCrossValidationEvaluator(bridge, MLPlanWekaClassifier.this.getConfig().numberOfMCIterationsDuringSelection(), MLPlanWekaClassifier.this.getInput(),
+						MLPlanWekaClassifier.this.getConfig().getMCCVTrainFoldSizeDuringSelection(), this.getConfig().randomSeed());
+				mccv.evaluate(this.factory.getComponentInstantiation(c));
+
+				/* now retrieve .75-percentile from stats */
+				double mean = mccv.getStats().getMean();
+				double percentile = mccv.getStats().getPercentile(75f);
+				MLPlanWekaClassifier.this.logger.info("Select {} as .75-percentile where {} would have been the mean. Samples size of MCCV was {}", percentile, mean, mccv.getStats().getN());
+				return percentile;
+			};
+
 			TwoPhaseSoftwareConfigurationProblem problem = new TwoPhaseSoftwareConfigurationProblem(this.componentFile, "AbstractClassifier", wrappedSearchBenchmark, wrappedSelectionBenchmark);
 
 			/* configure and start optimizing factory */
@@ -167,7 +179,6 @@ public abstract class MLPlanWekaClassifier extends AAlgorithm<Instances, Classif
 			return new AlgorithmInitializedEvent();
 		}
 		case active: {
-
 			/* train the classifier returned by the optimizing factory */
 			long startOptimizationTime = System.currentTimeMillis();
 			this.selectedClassifier = this.optimizingFactory.call();
@@ -276,6 +287,15 @@ public abstract class MLPlanWekaClassifier extends AAlgorithm<Instances, Classif
 		return null;
 	}
 
+	@Override
+	public void setLoggerName(final String name) {
+		this.loggerName = name;
+		this.logger.info("Switching logger name to {}", name);
+		this.logger = LoggerFactory.getLogger(name);
+		this.logger.info("Switched ML-Plan logger to {}", name);
+
+	}
+
 	public void setPortionOfDataForPhase2(final float portion) {
 		this.getConfig().setProperty(MLPlanClassifierConfig.SELECTION_PORTION, String.valueOf(portion));
 	}
@@ -286,6 +306,11 @@ public abstract class MLPlanWekaClassifier extends AAlgorithm<Instances, Classif
 
 	public void deactivateVisualization() {
 		this.getConfig().setProperty(MLPlanClassifierConfig.K_VISUALIZE, String.valueOf(false));
+	}
+
+	@Override
+	public String getLoggerName() {
+		return this.loggerName;
 	}
 
 	public INodeEvaluator<TFDNode, Double> getPreferredNodeEvaluator() {
@@ -333,7 +358,7 @@ public abstract class MLPlanWekaClassifier extends AAlgorithm<Instances, Classif
 	}
 
 	public void registerListenerForSolutionEvaluations(final Object listener) {
-		super.registerListener(listener);
+		this.registerListener(listener);
 	}
 
 	public Classifier getSelectedClassifier() {
@@ -369,30 +394,5 @@ public abstract class MLPlanWekaClassifier extends AAlgorithm<Instances, Classif
 
 	public double getInternalValidationErrorOfSelectedClassifier() {
 		return this.internalValidationErrorOfSelectedClassifier;
-	}
-
-	@Override
-	public String getLoggerName() {
-		return this.loggerName;
-	}
-
-	@Override
-	public void setLoggerName(final String name) {
-		this.logger.info("Switching logger from {} to {}", this.logger.getName(), name);
-		this.logger = LoggerFactory.getLogger(name);
-		this.logger.info("Activated logger {} with name {}", name, this.logger.getName());
-		if (this.factory instanceof ILoggingCustomizable) {
-			((ILoggingCustomizable) this.factory).setLoggerName(name + ".factory");
-		}
-		if (this.preferredNodeEvaluator instanceof ILoggingCustomizable) {
-			((ILoggingCustomizable) this.preferredNodeEvaluator).setLoggerName(name + ".preferrednodeeval");
-		}
-		if (this.optimizingFactory instanceof ILoggingCustomizable) {
-			this.optimizingFactory.setLoggerName(name + ".optimizingfactory");
-		}
-		if (this.hascoFactory instanceof ILoggingCustomizable) {
-			((ILoggingCustomizable) this.hascoFactory).setLoggerName(name + ".hascofactory");
-		}
-		super.setLoggerName(this.loggerName + "._orgraphsearch");
 	}
 }

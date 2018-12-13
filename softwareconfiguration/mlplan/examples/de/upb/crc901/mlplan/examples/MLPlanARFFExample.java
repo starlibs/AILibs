@@ -22,7 +22,7 @@ public class MLPlanARFFExample {
 		/* load data for segment dataset and create a train-test-split */
 		Instances data = new Instances(new FileReader("../../../../../datasets/classification/multi-class/car.arff"));
 		data.setClassIndex(data.numAttributes() - 1);
-		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(0), .7f);
+		List<Instances> split = WekaUtil.getStratifiedSplit(data, 0, .7f);
 
 		/* initialize mlplan with a tiny search space, and let it run for 30 seconds */
 		MLPlanWekaClassifier mlplan = new WekaMLPlanWekaClassifier(new MLPlanWekaBuilder().withSearchSpaceConfigFile(new File("conf/automl/searchmodels/weka/tinytest.json")));

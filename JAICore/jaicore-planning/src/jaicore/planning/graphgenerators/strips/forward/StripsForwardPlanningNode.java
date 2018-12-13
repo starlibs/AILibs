@@ -47,7 +47,6 @@ public class StripsForwardPlanningNode {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((actionToReachState == null) ? 0 : actionToReachState.hashCode());
 		result = prime * result + ((add == null) ? 0 : add.hashCode());
 		result = prime * result + ((del == null) ? 0 : del.hashCode());
 		return result;
@@ -62,11 +61,6 @@ public class StripsForwardPlanningNode {
 		if (getClass() != obj.getClass())
 			return false;
 		StripsForwardPlanningNode other = (StripsForwardPlanningNode) obj;
-		if (actionToReachState == null) {
-			if (other.actionToReachState != null)
-				return false;
-		} else if (!actionToReachState.equals(other.actionToReachState))
-			return false;
 		if (add == null) {
 			if (other.add != null)
 				return false;

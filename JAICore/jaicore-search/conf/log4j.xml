@@ -55,6 +55,10 @@
 		<appender-ref ref="traceFileAppender" />
 	</logger>
 	
+	<logger name="jaicore.search.algorithms.andor">
+		<level value="info" />
+	</logger>
+	
 	<logger name="jaicore.logic">
 		<level value="warn" />
 	</logger>

@@ -1,11 +1,16 @@
 package hasco.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+@JsonPropertyOrder({"name", "defaultDomain", "defaultValue"})
 public class Parameter {
 	private final String name;
 	private final ParameterDomain defaultDomain;
 	private final Object defaultValue;
 
-	public Parameter(String name, ParameterDomain defaultDomain, Object defaultValue) {
+	
+	public Parameter(@JsonProperty("name") String name, @JsonProperty("defaultDomain")ParameterDomain defaultDomain,@JsonProperty("defaultValue") Object defaultValue) {
 		super();
 		this.name = name;
 		this.defaultDomain = defaultDomain;

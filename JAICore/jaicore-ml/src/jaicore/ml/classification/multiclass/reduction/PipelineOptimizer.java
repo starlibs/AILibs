@@ -30,15 +30,14 @@ public class PipelineOptimizer {
 			System.out.println(i + ": " + inst.classAttribute().value(i));
 		
 		for (int j = 0; j < 1; j++) {
-			Random rand = new Random(j);
-			List<Instances> split = WekaUtil.getStratifiedSplit(inst, rand, .6f);
+			List<Instances> split = WekaUtil.getStratifiedSplit(inst, j, .6f);
 			
 			System.out.print("Running base learner ...");
 //			Classifier rf = AbstractClassifier.forName(classifierName, null);
 			mcc.buildClassifier(split.get(0));
 			System.out.println("done. Accuracy: " + getAccuracy(mcc, split.get(1)) + "%");
 			
-			Classifier c = new ReductionOptimizer(rand);
+			Classifier c = new ReductionOptimizer(j);
 			
 //			System.out.print("Train ... ");
 			c.buildClassifier(split.get(0));

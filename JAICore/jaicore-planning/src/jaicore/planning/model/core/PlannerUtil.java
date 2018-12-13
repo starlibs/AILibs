@@ -2,6 +2,7 @@ package jaicore.planning.model.core;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +17,9 @@ import jaicore.logic.fol.structure.Literal;
 import jaicore.logic.fol.structure.LiteralParam;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.logic.fol.structure.VariableParam;
-import jaicore.logic.fol.util.LogicUtil;
+import jaicore.logic.fol.util.ForwardChainer;
+import jaicore.logic.fol.util.ForwardChainingProblem;
+import jaicore.logic.fol.util.NextBindingFoundEvent;
 import jaicore.planning.model.conditional.CEAction;
 import jaicore.planning.model.conditional.CEOperation;
 import jaicore.planning.model.strips.StripsAction;
@@ -28,19 +31,39 @@ public class PlannerUtil {
 	private static final Logger logger = LoggerFactory.getLogger(PlannerUtil.class);
 
 	public static List<StripsAction> getApplicableActionsInState(Monom state, StripsPlanningDomain domain) {
+		return getApplicableActionsInState(state, domain, false, -1);
+	}
+	
+	public static List<StripsAction> getApplicableActionsInState(Monom state, StripsPlanningDomain domain, boolean randomized, final int pLimit)  {
 		long start = System.currentTimeMillis();
+		int limit = pLimit;
 		logger.debug("Computing applicable actions for state with {} items (activate TRACE for exact state)", state.size());
 		logger.trace("Exact state is {}", state);
 		List<StripsAction> applicableDerivedActions = new ArrayList<>();
+		Collection<Operation> operations = domain.getOperations();
+		
+		/* if the computation should be randomized, shuffle operations first */
+		if (randomized) {
+			if (!(operations instanceof List)) {
+				operations = new ArrayList<>(operations);
+			}
+			Collections.shuffle((List<Operation>)operations);
+		}
+		
+		/* now walk over the operations and collect actions until the limit is reached */
+		long timeToOrderOps = System.currentTimeMillis() - start;
 		for (Operation op : domain.getOperations()) {
-			applicableDerivedActions.addAll(getPossibleOperationGroundingsForState(state, (StripsOperation) op));
+			Collection<StripsAction> candidates = getPossibleOperationGroundingsForState(state, (StripsOperation) op, limit);
+			applicableDerivedActions.addAll(candidates);
+			if (limit >= 0)
+				limit = Math.max(0, limit - candidates.size());
 		}
 		long duration = System.currentTimeMillis() - start;
-		logger.debug("Done. Computation took {}ms", duration);
+		logger.debug("Done. Computation of {} applicable actions took {}ms of which {}ms were used to order the operations", applicableDerivedActions.size(), duration, timeToOrderOps);
 		return applicableDerivedActions;
 	}
 
-	public static Collection<StripsAction> getPossibleOperationGroundingsForState(Monom state, StripsOperation operation) {
+	public static Collection<StripsAction> getPossibleOperationGroundingsForState(Monom state, StripsOperation operation, int limit)  {
 		Collection<StripsAction> applicableDerivedActions = new ArrayList<>();
 
 		/* decompose premise in positive and negative literals */
@@ -48,22 +71,32 @@ public class PlannerUtil {
 		logger.trace("Exact premise is {}", operation.getPrecondition());
 		logger.trace("Exact state is {}", state);
 		long start = System.currentTimeMillis();
-		Collection<Map<VariableParam, LiteralParam>> groundings = LogicUtil.getSubstitutionsThatEnableForwardChainingUnderCWA(state, operation.getPrecondition());
-		long duration = System.currentTimeMillis() - start;
-		logger.debug("Done. Computation of {} groundings took {}ms", groundings.size(), duration);
-
-		for (Map<VariableParam, LiteralParam> grounding : groundings) {
-			/* refactor grounding to constants only and add the respective action */
-			Map<VariableParam, ConstantParam> rGrounding = new HashMap<>();
-			for (VariableParam p : grounding.keySet()) {
-				ConstantParam cp = (ConstantParam) grounding.get(p);
-				rGrounding.put(p, cp);
+		ForwardChainer fc = new ForwardChainer(new ForwardChainingProblem(state, operation.getPrecondition(), true));
+//		Collection<Map<VariableParam, LiteralParam>> groundings = LogicUtil.getSubstitutionsThatEnableForwardChainingUnderCWA(state, operation.getPrecondition());
+//		long duration = System.currentTimeMillis() - start;
+//		logger.debug("Done. Computation of {} groundings took {}ms", groundings.size(), duration);
+		long fcPreparationTime = System.currentTimeMillis() - start;
+		NextBindingFoundEvent event;
+		try {
+			int i = 0;
+			while ((event = fc.nextBinding()) != null && (limit < 0 || (i++ < limit))) {
+				
+				Map<VariableParam, LiteralParam> grounding = event.getGrounding();
+				
+				/* refactor grounding to constants only and add the respective action */
+				Map<VariableParam, ConstantParam> rGrounding = new HashMap<>();
+				for (VariableParam p : grounding.keySet()) {
+					ConstantParam cp = (ConstantParam) grounding.get(p);
+					rGrounding.put(p, cp);
+				}
+				StripsAction a = new StripsAction(operation, rGrounding);
+				applicableDerivedActions.add(a);
+				logger.debug("Found action {} to be applicable after {}ms.", a.getEncoding(), System.currentTimeMillis() - start);
 			}
-			StripsAction a = new StripsAction(operation, rGrounding);
-			applicableDerivedActions.add(a);
-			logger.debug("Found action {} to be applicable.", a.getEncoding());
-
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
+		logger.info("Determined {}/{} applicable actions within {}ms of which preparing the FC algorithm consumed {}ms.", applicableDerivedActions.size(), limit, System.currentTimeMillis() - start, fcPreparationTime);
 		return applicableDerivedActions;
 	}
 

@@ -1,12 +1,8 @@
 package jaicore.logic.fol.util;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,39 +60,6 @@ public class LogicUtil {
 
 	}
 	
-	public static Collection<Map<VariableParam, LiteralParam>> getSubstitutionsThatEnableForwardChainingUnderCWA(Collection<Literal> factbase, Collection<Literal> premise) {
-		
-		/* decompose premise in positive and negative literals */
-		LiteralSet positiveLiterals = new LiteralSet();
-		LiteralSet negativeLiterals = new LiteralSet();
-		for (Literal l : premise) {
-			if (l.isPositive())
-				positiveLiterals.add(l);
-			else
-				negativeLiterals.add(l);
-		}
-		
-		/* get groundings for which positive literals hold and then check each of those groundings on conformity with negative literals */
-		 Collection<Map<VariableParam, LiteralParam>> groundings = getSubstitutionsThatEnableForwardChaining(factbase, positiveLiterals);
-		 if (logger.isTraceEnabled()) {
-			 groundings.forEach(g -> {
-				 LiteralSet groundPositivePremise = new LiteralSet(positiveLiterals, g);
-				 for (Literal l : groundPositivePremise)
-					 assert factbase.contains(l) : "The factbase should contain " + l + " according to forward chaining, but it does not!";
-				 logger.trace("Grounding {} induces premise {}, which holds.", g, groundPositivePremise);
-			 });
-		 }
-		 return groundings.stream().filter(grounding ->  {
-			 LiteralSet groundNegativeLiterals = new LiteralSet(negativeLiterals, grounding);
-			 boolean negativeLiteralIsPositivelyContainedInFactbase = doesPremiseContainAGroundLiteralThatIsNotInFactBaseCWA(factbase, groundNegativeLiterals);
-			 return !negativeLiteralIsPositivelyContainedInFactbase;
-		 }).collect(Collectors.toList());
-	}
-	
-	public static Collection<Map<VariableParam, LiteralParam>> getSubstitutionsThatEnableForwardChaining(Collection<Literal> factbase, Collection<Literal> premise) {
-		return getSubstitutionsThatEnableForwardChaining(factbase, new ArrayList<>(premise));
-	}
-	
 	public static boolean doesPremiseContainAGroundLiteralThatIsNotInFactBase(Collection<Literal> factbase, Collection<Literal> premise) {
 		for (Literal l : premise) {
 			if (l.isGround() && !factbase.contains(l))
@@ -119,134 +82,6 @@ public class LogicUtil {
 			}
 		}
 		return false;
-	}
-	
-	/**
-	 * This method answers the question for which groundings G of the variables in $premise, G[$premise] follows from $factbase.
-	 * This method does NOT adopt the closed world assumption, i.e. !L in the premise can only be followed if L is provably wrong in the factbase. 
-	 * 
-	 * @param factbase
-	 * @param premise
-	 * @return
-	 */
-	private static Collection<Map<VariableParam, LiteralParam>> getSubstitutionsThatEnableForwardChaining(Collection<Literal> factbase, List<Literal> premise) {
-		
-		logger.info("Computing substitution for {}-premise that enable forward chaining from factbase of size {}. Enable trace for more detailed output.", premise.size(), factbase.size());
-		logger.trace("Premise is {}", premise);
-		logger.trace("Factbase is {}", factbase);
-		Collection<Map<VariableParam, LiteralParam>> mappings = new HashSet<>();
-		long start;
-
-		/* if the premise is empty, add the empty mapping */
-		if (premise.isEmpty()) {
-			mappings.add(new HashMap<>());
-			logger.debug("Premise is empty, no substitution required.");
-			return mappings;
-		}
-
-		/* in any other case, select the literal that has the least options to be ground */
-		Literal nextLiteral = null;
-		Collection<Map<VariableParam, LiteralParam>> choices = null;
-		int currentlyFewestOptions = Integer.MAX_VALUE;
-		List<Literal> remainingPremise = new ArrayList<>();
-		{
-			start = System.currentTimeMillis();
-			for (Literal nextLitealCandidate : premise) {
-				logger.debug("Considering {} as next literal for grounding.", nextLitealCandidate);
-				long candidateGroundingStart = System.currentTimeMillis();
-				Collection<Map<VariableParam, LiteralParam>> choicesTmp = getGroundingsUnderWhichALiteralAppearsInFactBase(factbase, nextLitealCandidate, currentlyFewestOptions);
-				logger.debug("Computation of {} groundings took {}ms.", choicesTmp.size(), System.currentTimeMillis() - candidateGroundingStart);
-				if (choicesTmp.size() < currentlyFewestOptions) {
-					nextLiteral = nextLitealCandidate;
-					choices = choicesTmp;
-					currentlyFewestOptions = choicesTmp.size();
-					if (currentlyFewestOptions == 0)
-						break;
-				}
-			}
-			for (Literal l : premise)
-				if (!l.equals(nextLiteral))
-					remainingPremise.add(l);
-		}
-		logger.debug("Selected literal {} with still unbound params {} that can be ground in {} ways in {}ms.", nextLiteral, nextLiteral.getVariableParams(), choices.size(), System.currentTimeMillis() - start);
-		
-		/* now apply the different possible choices substitution to the remaining premise and compute possible submappings */
-		logger.debug("Now check consistency of each sub-mapping when applied to the {} remaining open literals in the premise.", remainingPremise.size());
-		start = System.currentTimeMillis();
-		for (Map<VariableParam, LiteralParam> submap : choices) {
-			logger.debug("Considering choice {}", submap);
-			long startChoice = System.currentTimeMillis();
-			Monom modifiedRemainingPremise = new Monom(remainingPremise, submap);
-			
-			/* if there is a ground literal in the modified remaining premise that is not in the fact base, skip this option */
-			logger.trace("Checking whether one of the ground remaining premise {} is not in the state.", modifiedRemainingPremise);
-			if (doesPremiseContainAGroundLiteralThatIsNotInFactBase(factbase, modifiedRemainingPremise))
-				continue;
-			
-			/* otherwise recurse */
-			logger.debug("Recurse to {}-premise", modifiedRemainingPremise.size());
-			long startRecursiveCall = System.currentTimeMillis();
-			Collection<Map<VariableParam, LiteralParam>> subsolutions = getSubstitutionsThatEnableForwardChaining(factbase, modifiedRemainingPremise);
-			logger.debug("Finished recursion of {}-premise. Computation took {}ms", modifiedRemainingPremise.size(), System.currentTimeMillis() - startRecursiveCall);
-			for (Map<VariableParam, LiteralParam> subsolution : subsolutions) {
-				logger.trace("Identified sub-solution {}", subsolution);
-				Map<VariableParam, LiteralParam> solutionToReturn = new HashMap<>(subsolution);
-				solutionToReturn.putAll(submap);
-				assert verifyThatGroundingEnablesPremise(factbase, modifiedRemainingPremise, solutionToReturn);
-				mappings.add(solutionToReturn);
-			}
-			logger.debug("Finished consistency check for choice {} in {}ms.", submap, System.currentTimeMillis() - startChoice);
-		}
-		logger.debug("Done. Recursive consistency check of {} choices for the {}-premise took {}ms and returned {} mappings.", choices.size(), remainingPremise.size(), System.currentTimeMillis() - start, mappings.size());
-//		logger.info("Finished computation of substitution for {} that enable forward chaining from {}: {}", premise, factbase, mappings);
-		return mappings;
-	}
-	
-	public static Collection<Map<VariableParam, LiteralParam>> getGroundingsUnderWhichALiteralAppearsInFactBase(Collection<Literal> factbase, Literal l, int maxSubstitutions) {
-
-		List<VariableParam> openParams = l.getVariableParams();
-		
-		/* if there are no open params, we do not need to make decisions here, so just compute subsolutions */
-		logger.debug("Compute possible sub-groundings of the open parameters.");
-		long start = System.currentTimeMillis();
-		Collection<Map<VariableParam, LiteralParam>> choices = new HashSet<>();
-		if (openParams.isEmpty()) {
-			choices.add(new HashMap<>());
-		}
-
-		/* otherwise, select literal from the factbase that could be used for unification */
-		else {
-			for (Literal fact : factbase) {
-				if (!fact.getPropertyName().equals(l.getPropertyName()) || fact.isPositive() != l.isPositive())
-					continue;
-				logger.trace("Considering known literal {} as a literal that can be used for grounding", fact);
-				List<LiteralParam> factParams = fact.getParameters(); // should only contain constant params
-				List<LiteralParam> nextLiteralParams = l.getParameters();
-				Map<VariableParam, LiteralParam> submap = new HashMap<>();
-
-				/* create a substitution that grounds the rest of the literal */
-				boolean paramsCanBeMatched = true;
-				for (int i = 0; i < factParams.size(); i++) {
-					if (nextLiteralParams.get(i) instanceof VariableParam) {
-						submap.put((VariableParam) nextLiteralParams.get(i), factParams.get(i));
-					}
-					else if (!nextLiteralParams.get(i).equals(factParams.get(i))) {
-						paramsCanBeMatched = false;
-						break;
-					}
-				}
-				if (!paramsCanBeMatched)
-					continue;
-				logger.trace("Adding {} as a possible such grounding.", submap);
-				choices.add(submap);
-				if (choices.size() >= maxSubstitutions) {
-					logger.debug("Reached maximum number {} of required substitutions. Returning what we have so far.", maxSubstitutions);
-					return choices;
-				}
-			}
-		}
-		logger.debug("Done. Computation of {} groundings took {}ms", choices.size(), System.currentTimeMillis() - start);
-		return choices;
 	}
 	
 	public static boolean verifyThatGroundingEnablesPremise(Collection<Literal> factbase, Collection<Literal> premise, Map<VariableParam,LiteralParam> grounding) {

@@ -84,7 +84,7 @@ public class MLPlanWekaExperimenter implements IExperimentSetEvaluator {
 		Instances data = new Instances(new FileReader(datasetFile));
 		data.setClassIndex(data.numAttributes() - 1);
 		print("Split instances");
-		List<Instances> stratifiedSplit = WekaUtil.getStratifiedSplit(data, new Random(), .7);
+		List<Instances> stratifiedSplit = WekaUtil.getStratifiedSplit(data, 0, .7);
 
 		/* initialize ML-Plan with the same config file that has been used to specify the experiments */
 		MLPlanWekaClassifier mlplan = new WekaMLPlanWekaClassifier(new MLPlanWekaBuilder().withAlgorithmConfigFile(configFile));
