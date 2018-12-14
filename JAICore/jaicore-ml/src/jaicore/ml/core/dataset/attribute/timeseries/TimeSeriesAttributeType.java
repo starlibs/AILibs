@@ -8,13 +8,14 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
 import jaicore.ml.core.dataset.attribute.IAttributeValue;
+import jaicore.ml.core.dataset.attribute.IAttributeType;
 
 /**
  * Describes a time series type as an 1-NDArray with a fixed length.
  */
-public class TimeSeriesAttributeType implements ITimeSeriesAttributeType {
+public class TimeSeriesAttributeType implements IAttributeType<INDArray> {
 
-    private final int length;
+    private int length;
 
     public TimeSeriesAttributeType(int length) {
         this.length = length;
@@ -50,9 +51,20 @@ public class TimeSeriesAttributeType implements ITimeSeriesAttributeType {
         return this.buildAttributeValue(value);
     }
 
-    @Override
+    /**
+     * Get the length of this time series attribute type.
+     * 
+     * @return The length respec. the number of datapoints of this time series
+     *         attribute.
+     */
     public int getLength() {
         return length;
+    }
+
+    public void setLength(int length) {
+        if (length < 0)
+            throw new IllegalArgumentException("the length has to be greater than or equal to zero.");
+        this.length = length;
     }
 
 }

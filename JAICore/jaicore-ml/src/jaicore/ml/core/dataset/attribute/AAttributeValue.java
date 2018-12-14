@@ -53,4 +53,9 @@ public abstract class AAttributeValue<D> implements IAttributeValue<D> {
 		this.value = value;
 	}
 
+	@Override
+	public IAttributeType<D> getType() {
+		return this.type;
+	}
+
 }
