@@ -45,6 +45,7 @@ import jaicore.search.structure.graphgenerator.SuccessorGenerator;
  */
 public class RandomSearch<N, A> extends AbstractORGraphSearch<GraphSearchInput<N, A>, Object, N, A, Double, N, A> implements ILoggingCustomizable {
 
+	/* logging */
 	private String loggerName;
 	private Logger logger = LoggerFactory.getLogger(RandomSearch.class);
 

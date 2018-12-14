@@ -40,6 +40,13 @@ public abstract class AAttributeValue<D> implements IAttributeValue<D> {
 		this.setValue(value);
 	}
 
+	/**
+	 * @return The attribute type of this attribute value.
+	 */
+	public IAttributeType<D> getType() {
+		return this.type;
+	}
+
 	@Override
 	public D getValue() {
 		return this.value;
@@ -50,6 +57,7 @@ public abstract class AAttributeValue<D> implements IAttributeValue<D> {
 		if (!this.type.isValidValue(value)) {
 			throw new IllegalArgumentException("The attribute value does not conform the domain of the attribute type.");
 		}
+		this.value = value;
 	}
 
 }
