@@ -10,8 +10,9 @@ import org.nd4j.linalg.factory.Nd4j;
 
 import jaicore.basic.TimeOut;
 import jaicore.basic.algorithm.AlgorithmEvent;
-import jaicore.ml.core.dataset.IDataset;
+import jaicore.ml.core.dataset.TimeSeriesDataset;
 import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
+import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeValue;
 
 /**
  * Generalized Shapelets Learning implementation for
@@ -22,7 +23,8 @@ import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
  * @author Julian Lienen
  *
  */
-public class LearnShapeletsAlgorithm extends ATSCAlgorithm<CategoricalAttributeType, LearnShapeletsClassifier> {
+public class LearnShapeletsAlgorithm extends
+		ATSCAlgorithm<CategoricalAttributeType, CategoricalAttributeValue, TimeSeriesDataset, LearnShapeletsClassifier> {
 
 	private int K;
 	private double learningRate;
@@ -35,7 +37,7 @@ public class LearnShapeletsAlgorithm extends ATSCAlgorithm<CategoricalAttributeT
 	private int Q;
 	private int C;
 
-	private double alpha = -100d;
+	public static double ALPHA = -100d;
 
 	public LearnShapeletsAlgorithm(final int K, final double learningRate, final double regularization,
 			final int scaleR, final int minShapeLength, final int maxIter) {
@@ -71,7 +73,7 @@ public class LearnShapeletsAlgorithm extends ATSCAlgorithm<CategoricalAttributeT
 		// TODO Auto-generated method stub
 		// Training
 
-		IDataset data = this.getInput();
+		TimeSeriesDataset data = this.getInput();
 		INDArray dataMatrix = null; // TODO
 
 		this.I = data.getNumberOfAttributes(); // I
@@ -112,7 +114,7 @@ public class LearnShapeletsAlgorithm extends ATSCAlgorithm<CategoricalAttributeT
 							double newDValue = calculateD(S, minShapeLength, r, dataMatrix.getRow(i), k, j);
 
 							D.get(r).putScalar(new int[] { i, k, j }, newDValue);
-							Xi.get(r).putScalar(new int[] { i, k, j }, Math.exp(this.alpha * newDValue));
+							Xi.get(r).putScalar(new int[] { i, k, j }, Math.exp(this.ALPHA * newDValue));
 						}
 						double newPsiValue = 0;
 						double newMHatValue = 0;
@@ -150,7 +152,7 @@ public class LearnShapeletsAlgorithm extends ATSCAlgorithm<CategoricalAttributeT
 
 							for (int j = 0; j < getNumberOfSegments(this.Q, this.minShapeLength, r); j++) {
 								double newPhiValue = 2 * Xi.get(r).getDouble(i, k, j)
-										* (1 + this.alpha * (D.get(r).getDouble(i, k, j) - M_hat.getDouble(r, i, k)));
+										* (1 + this.ALPHA * (D.get(r).getDouble(i, k, j) - M_hat.getDouble(r, i, k)));
 								newPhiValue /= r * this.minShapeLength * Psi.getDouble(r, i, k);
 								Phi.get(r).putScalar(new int[] { i, k, j }, newPhiValue);
 
@@ -205,7 +207,7 @@ public class LearnShapeletsAlgorithm extends ATSCAlgorithm<CategoricalAttributeT
 	}
 
 	@Override
-	public IDataset getInput() {
+	public TimeSeriesDataset getInput() {
 		// TODO Auto-generated method stub
 		return null;
 	}

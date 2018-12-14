@@ -1,16 +1,22 @@
 package jaicore.ml.tsc.classifier;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.nd4j.linalg.api.ndarray.INDArray;
 
-import jaicore.ml.core.dataset.IDataset;
-import jaicore.ml.core.dataset.IInstance;
+import jaicore.ml.core.dataset.TimeSeriesDataset;
+import jaicore.ml.core.dataset.TimeSeriesInstance;
 import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
+import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeValue;
+import jaicore.ml.core.dataset.attribute.timeseries.TimeSeriesAttributeValue;
 import jaicore.ml.core.exception.PredictionException;
 
-public class LearnShapeletsClassifier extends TSClassifier<CategoricalAttributeType> {
+public class LearnShapeletsClassifier
+		extends TSClassifier<CategoricalAttributeType, CategoricalAttributeValue, TimeSeriesDataset> {
 
 	private List<INDArray> S;
 	private INDArray W;
@@ -53,27 +59,35 @@ public class LearnShapeletsClassifier extends TSClassifier<CategoricalAttributeT
 		W_0 = w_0;
 	}
 
-	// public INDArray getM_hat() {
-	// return M_hat;
-	// }
-	//
-	// public void setM_hat(INDArray m_hat) {
-	// M_hat = m_hat;
-	// }
-	//
-	//
-
 	@Override
-	public CategoricalAttributeType predict(IInstance instance) throws PredictionException {
-		// TODO Auto-generated method stub
+	public CategoricalAttributeValue predict(TimeSeriesInstance instance) throws PredictionException {
+		final HashMap<String, Double> scoring = new HashMap<>();
+		String[] classes = (String[]) this.getTargetType().getDomain().toArray();
 
-		return null;
+		// TODO: Improve this
+		INDArray instanceValues = instance.getAttributeValue(0, TimeSeriesAttributeValue.class).getValue().getValue();
+		int q = (int) instanceValues.length();
+
+		for (int i = 0; i < classes.length; i++) {
+			double tmpScore = this.W_0.getDouble(i);
+			for (int r = 0; r < this.scaleR; r++) {
+				for (int k = 0; k < this.K; k++) {
+					tmpScore += LearnShapeletsAlgorithm.calculateM_hat(this.S, this.minShapeLength, r, instanceValues,
+							k, q, LearnShapeletsAlgorithm.ALPHA) * W.getDouble(i, r, k);
+				}
+			}
+			scoring.put(classes[i], LearnShapeletsAlgorithm.sigmoid(tmpScore));
+		}
+
+		String predictedClass = Collections.max(scoring.entrySet(), Map.Entry.comparingByValue()).getKey();
+
+		return (CategoricalAttributeValue) this.getTargetType().buildAttributeValue(predictedClass);
 	}
 
 	@Override
-	public List<CategoricalAttributeType> predict(IDataset dataset) throws PredictionException {
-		final List<CategoricalAttributeType> result = new ArrayList<>();
-		for (IInstance inst : dataset) {
+	public List<CategoricalAttributeValue> predict(TimeSeriesDataset dataset) throws PredictionException {
+		final List<CategoricalAttributeValue> result = new ArrayList<>();
+		for (TimeSeriesInstance inst : dataset) {
 			result.add(this.predict(inst));
 		}
 		return result;
