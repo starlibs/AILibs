@@ -87,7 +87,7 @@ public class LearnShapeletsAlgorithm extends ATSCAlgorithm<CategoricalAttributeT
 		List<INDArray> Xi = new ArrayList<>();
 		List<INDArray> Phi = new ArrayList<>();
 		for (int r = 0; r < this.scaleR; r++) {
-			final int numberOfSegments = getNumberOfSegments(r);
+			final int numberOfSegments = getNumberOfSegments(this.Q, this.minShapeLength, r);
 			S.add(Nd4j.create(K, r * this.minShapeLength));
 			D.add(Nd4j.create(this.I, this.K, numberOfSegments));
 			Xi.add(Nd4j.create(this.I, this.K, numberOfSegments));
@@ -108,19 +108,15 @@ public class LearnShapeletsAlgorithm extends ATSCAlgorithm<CategoricalAttributeT
 				// Pre-compute terms
 				for (int r = 0; r < this.scaleR; r++) {
 					for (int k = 0; k < this.K; k++) {
-						for (int j = 0; j < getNumberOfSegments(r); j++) {
-							double newDValue = 0;
-							for (int l = 0; l < r * this.minShapeLength; l++) {
-								newDValue += Math.pow(dataMatrix.getDouble(i, j + l - 1) - S.get(r).getDouble(k, l), 2);
-							}
-							newDValue /= r * this.minShapeLength;
+						for (int j = 0; j < getNumberOfSegments(this.Q, this.minShapeLength, r); j++) {
+							double newDValue = calculateD(S, minShapeLength, r, dataMatrix.getRow(i), k, j);
 
 							D.get(r).putScalar(new int[] { i, k, j }, newDValue);
 							Xi.get(r).putScalar(new int[] { i, k, j }, Math.exp(this.alpha * newDValue));
 						}
 						double newPsiValue = 0;
 						double newMHatValue = 0;
-						for (int j = 0; j < getNumberOfSegments(r); j++) {
+						for (int j = 0; j < getNumberOfSegments(this.Q, this.minShapeLength, r); j++) {
 							newPsiValue += Xi.get(r).getDouble(i, k, j);
 							newMHatValue += D.get(r).getDouble(i, k, j) * Xi.get(r).getDouble(i, k, j);
 						}
@@ -152,7 +148,7 @@ public class LearnShapeletsAlgorithm extends ATSCAlgorithm<CategoricalAttributeT
 
 							W.putScalar(new int[] { c, r, k }, W.getDouble(c, r, k) + this.learningRate * wStep);
 
-							for (int j = 0; j < getNumberOfSegments(r); j++) {
+							for (int j = 0; j < getNumberOfSegments(this.Q, this.minShapeLength, r); j++) {
 								double newPhiValue = 2 * Xi.get(r).getDouble(i, k, j)
 										* (1 + this.alpha * (D.get(r).getDouble(i, k, j) - M_hat.getDouble(r, i, k)));
 								newPhiValue /= r * this.minShapeLength * Psi.getDouble(r, i, k);
@@ -176,8 +172,30 @@ public class LearnShapeletsAlgorithm extends ATSCAlgorithm<CategoricalAttributeT
 		this.model.setS(S);
 		this.model.setW(W);
 		this.model.setW_0(W_0);
-		this.model.setM_hat(M_hat);
+		// this.model.setM_hat(M_hat);
 		return this.model;
+	}
+
+	public static double calculateM_hat(final List<INDArray> S, final int minShapeLength, final int r,
+			final INDArray instance, final int k, final int Q, final double alpha) {
+		double nominator = 0;
+		double denominator = 0;
+		for (int j = 0; j < getNumberOfSegments(Q, minShapeLength, r); j++) {
+			double D = calculateD(S, minShapeLength, r, instance, k, j);
+			double expD = Math.exp(alpha * D);
+			nominator += D * expD;
+			denominator += expD;
+		}
+		return nominator / denominator;
+	}
+
+	public static double calculateD(final List<INDArray> S, final int minShapeLength, final int r,
+			final INDArray instance, final int k, final int j) {
+		double result = 0;
+		for (int l = 0; l < r * minShapeLength; l++) {
+			result += Math.pow(instance.getDouble(0, j + l - 1) - S.get(r).getDouble(k, l), 2);
+		}
+		return result / (r * minShapeLength);
 	}
 
 	@Override
@@ -234,12 +252,12 @@ public class LearnShapeletsAlgorithm extends ATSCAlgorithm<CategoricalAttributeT
 		return null;
 	}
 
-	private int getNumberOfSegments(final int r) {
-		return this.Q - r * this.minShapeLength + 1;
+	public static int getNumberOfSegments(final int Q, final int minShapeLength, final int r) {
+		return Q - r * minShapeLength + 1;
 	}
 
 	// TODO: Maybe move to utility? Or use library?
-	private static double sigmoid(final double z) {
+	public static double sigmoid(final double z) {
 		return 1 / (1 + Math.exp((-1) * z));
 	}
 }

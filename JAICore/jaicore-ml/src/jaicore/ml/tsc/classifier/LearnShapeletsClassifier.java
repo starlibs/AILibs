@@ -15,11 +15,18 @@ public class LearnShapeletsClassifier extends TSClassifier<CategoricalAttributeT
 	private List<INDArray> S;
 	private INDArray W;
 	private INDArray W_0;
-	private INDArray M_hat;
+
+	private int scaleR;
+	private int K;
+	private int minShapeLength;
 
 	public LearnShapeletsClassifier(final int K, final double learningRate, final double regularization,
 			final int scaleR, final int minShapeLength, final int maxIter) {
 		super(new LearnShapeletsAlgorithm(K, learningRate, regularization, scaleR, minShapeLength, maxIter));
+
+		this.scaleR = scaleR;
+		this.K = K;
+		this.minShapeLength = minShapeLength;
 	}
 
 	public List<INDArray> getS() {
@@ -46,17 +53,20 @@ public class LearnShapeletsClassifier extends TSClassifier<CategoricalAttributeT
 		W_0 = w_0;
 	}
 
-	public INDArray getM_hat() {
-		return M_hat;
-	}
-
-	public void setM_hat(INDArray m_hat) {
-		M_hat = m_hat;
-	}
+	// public INDArray getM_hat() {
+	// return M_hat;
+	// }
+	//
+	// public void setM_hat(INDArray m_hat) {
+	// M_hat = m_hat;
+	// }
+	//
+	//
 
 	@Override
 	public CategoricalAttributeType predict(IInstance instance) throws PredictionException {
 		// TODO Auto-generated method stub
+
 		return null;
 	}
 
