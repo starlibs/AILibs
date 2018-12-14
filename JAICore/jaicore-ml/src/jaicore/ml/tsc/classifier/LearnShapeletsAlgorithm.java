@@ -10,8 +10,8 @@ import org.nd4j.linalg.factory.Nd4j;
 
 import jaicore.basic.TimeOut;
 import jaicore.basic.algorithm.AlgorithmEvent;
-import jaicore.basic.algorithm.IAlgorithm;
 import jaicore.ml.core.dataset.IDataset;
+import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
 
 /**
  * Generalized Shapelets Learning implementation for
@@ -22,7 +22,7 @@ import jaicore.ml.core.dataset.IDataset;
  * @author Julian Lienen
  *
  */
-public class LearnShapeletsAlgorithm implements IAlgorithm<IDataset, LearnShapeletsClassifier> {
+public class LearnShapeletsAlgorithm extends ATSCAlgorithm<CategoricalAttributeType, LearnShapeletsClassifier> {
 
 	private int K;
 	private double learningRate;
@@ -173,7 +173,11 @@ public class LearnShapeletsAlgorithm implements IAlgorithm<IDataset, LearnShapel
 			}
 		}
 
-		return new LearnShapeletsClassifier(S, W, W_0);
+		this.model.setS(S);
+		this.model.setW(W);
+		this.model.setW_0(W_0);
+		this.model.setM_hat(M_hat);
+		return this.model;
 	}
 
 	@Override
