@@ -79,15 +79,19 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 			while (!open.isEmpty()) {
 				InnerNodeLabel n = open.poll();
 				try {
+					int generatedChildren = 0;
 					for (NodeExpansionDescription<N, A> descr : this.getInput().getSuccessorGenerator().generateSuccessors(n.node)) {
 						InnerNodeLabel newNode = new InnerNodeLabel(descr.getTo(), descr.getTypeOfToNode());
 						synchronized (this.graph) {
 							this.graph.addItem(newNode);
+							logger.trace("Added {}-node {} as a child to {}", newNode.type, newNode, n);
 							this.graph.addEdge(n, newNode);
 						}
 						open.add(newNode);
+						generatedChildren ++;
 						this.post(new NodeReachedEvent<N>(n.node, newNode.node, descr.getTypeOfToNode() == NodeType.OR ? "or" : "and"));
 					}
+					logger.debug("Node expansion of {}-node {} completed. Generated {} successors.", n.type, n, generatedChildren);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -142,16 +146,11 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 		for (InnerNodeLabel child : this.graph.getSuccessors(node)) {
 			Queue<EvaluatedGraph> filteredSolutionsUnderChild = this.filterNodeSolution(child);
 			subSolutions.put(child, filteredSolutionsUnderChild);
-			logger.debug("Child {} has {} solutions.", child, filteredSolutionsUnderChild.size());
-		}
-		if (logger.isDebugEnabled()) {
-			StringBuilder sb = new StringBuilder();
-			sb.append("Survived paths for children " + (node.type == NodeType.OR ? "OR" : "AND") + "-node " + node.node + ":");
-			for (InnerNodeLabel child : subSolutions.keySet()) {
-				sb.append("\t#" + child);
-				subSolutions.get(child).forEach(l -> sb.append("\n\t\t" + l));
+			if (logger.isDebugEnabled()) {
+				StringBuilder sb = new StringBuilder();
+				subSolutions.get(child).forEach(l -> sb.append("\n\tGraph Evaluation: " + l.value + "\n\tGraph representation: \n" + l.graph.getLineBasedStringRepresentation(2).replaceAll("\n", "\n\t\t")));
+				logger.debug("Child {} has {} solutions: {}", child, filteredSolutionsUnderChild.size(), sb.toString());
 			}
-			logger.debug(sb.toString());
 		}
 
 		/*
@@ -188,6 +187,7 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 					extendedSolutionBase.graph.addEdge(node.node, subSolution.graph.getRoot());
 				}
 				extendedSolutionBase.value = this.evaluator.evaluate(extendedSolutionBase.graph);
+				logger.debug("Combination {} of subsolutions with performances {} yields an aggregate performance value of {}", i, subSolutionCombination.stream().map(g -> "" + g.value).collect(Collectors.joining(", ")), extendedSolutionBase.value);
 				filteredSolutions.add(extendedSolutionBase);
 			}
 			this.logger.debug("Determined " + filteredSolutions.size() + " sub-solutions for AND-node with " + subSolutions.size() + " children.");

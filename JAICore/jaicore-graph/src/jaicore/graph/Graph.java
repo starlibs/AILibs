@@ -202,10 +202,16 @@ public class Graph<T> implements Serializable {
 	 * The order is obtained by BFS.
 	 **/
 	public String getLineBasedStringRepresentation() {
+		return getLineBasedStringRepresentation(1);
+	}
+	
+	public String getLineBasedStringRepresentation(int offset) {
 		StringBuilder sb = new StringBuilder();
 		for (T root : getSources()) {
+			for (int i = 0; i < offset; i++)
+				sb.append("\t");
 			sb.append(root);
-			sb.append(getLineBasedStringRepresentation(root, 1));
+			sb.append(getLineBasedStringRepresentation(root, offset));
 			sb.append("\n");
 		}
 		return sb.toString();
