@@ -165,7 +165,7 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 			List<List<EvaluatedGraph>> subSolutionsPerChild = new ArrayList<>();
 			for (InnerNodeLabel child : subSolutions.keySet()) {
 				List<EvaluatedGraph> bestSubSolutionsOfThisChild = new ArrayList<>();
-				this.logger.debug("Adding " + k + "/" + subSolutions.get(child).size() + " subsolutions of child into the cartesian product input.");
+				this.logger.debug("Adding " + Math.min(k, subSolutions.get(child).size()) + "/" + subSolutions.get(child).size() + " subsolutions of child into the cartesian product input.");
 				for (int i = 0; i < k; i++) {
 					EvaluatedGraph subsolution = subSolutions.get(child).poll();
 					if (subsolution != null) {
