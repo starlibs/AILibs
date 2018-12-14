@@ -9,6 +9,6 @@ package jaicore.ml.core.predictivemodel;
  * @param <TARGET>
  *            The type of the target that this {@link AOnlineLearner} predicts.
  */
-public abstract class AOnlineLearner<TARGET> implements IOnlineLearner<TARGET> {
+public abstract class AOnlineLearner<TARGET> extends ABatchLearner<TARGET> implements IOnlineLearner<TARGET> {
 
 }
