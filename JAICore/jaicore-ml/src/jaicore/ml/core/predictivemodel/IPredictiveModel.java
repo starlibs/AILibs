@@ -8,17 +8,25 @@ import jaicore.ml.core.exception.ConfigurationException;
 import jaicore.ml.core.exception.PredictionException;
 
 /**
- * The {@link IPredictiveModel} corresponds to a model which can be used to make predictions based on given {@link IInstance}es.
+ * The {@link IPredictiveModel} corresponds to a model which can be used to make
+ * predictions based on given {@link IInstance}es.
  * 
- * @author Alexander Hetzer
+ * @author Alexander Hetzer, Julian Lienen
  *
  * @param <TARGET>
- *            The type of the target that this {@link IPredictiveModel} predicts.
+ *            The type of the target that this {@link IPredictiveModel}
+ *            predicts.
+ * @param <INSTANCE>
+ *            The type of the instances stored in the data set specified by the
+ *            generic parameter <DATASET>.
+ * @param <DATASET>
+ *            The type of the data set used to learn from and predict batches.
  */
-public interface IPredictiveModel<TARGET> {
+public interface IPredictiveModel<TARGET, INSTANCE extends IInstance, DATASET extends IDataset<INSTANCE>> {
 
 	/**
-	 * Performs a prediction based on the given {@link IInstance} and returns the result.
+	 * Performs a prediction based on the given {@link IInstance} and returns the
+	 * result.
 	 * 
 	 * @param instance
 	 *            The {@link IInstance} for which a prediction should be made.
@@ -26,10 +34,11 @@ public interface IPredictiveModel<TARGET> {
 	 * @throws PredictionException
 	 *             If something fails during the prediction process.
 	 */
-	public TARGET predict(IInstance instance) throws PredictionException;
+	public TARGET predict(INSTANCE instance) throws PredictionException;
 
 	/**
-	 * Performs multiple predictions based on the {@link IInstance}s contained in the given {@link IDataset}s and returns the result.
+	 * Performs multiple predictions based on the {@link IInstance}s contained in
+	 * the given {@link IDataset}s and returns the result.
 	 * 
 	 * @param dataset
 	 *            The {@link IDataset} for which predictions should be made.
@@ -37,7 +46,7 @@ public interface IPredictiveModel<TARGET> {
 	 * @throws PredictionException
 	 *             If something fails during the prediction process.
 	 */
-	public List<TARGET> predict(IDataset dataset) throws PredictionException;
+	public List<TARGET> predict(DATASET dataset) throws PredictionException;
 
 	/**
 	 * Returns the {@link IPredictiveModelConfiguration} of this model.
@@ -47,7 +56,8 @@ public interface IPredictiveModel<TARGET> {
 	public IPredictiveModelConfiguration getConfiguration();
 
 	/**
-	 * Sets the {@link IPredictiveModelConfiguration} of this model to the given one.
+	 * Sets the {@link IPredictiveModelConfiguration} of this model to the given
+	 * one.
 	 * 
 	 * @throws ConfigurationException
 	 *             If something fails during the configuration process.

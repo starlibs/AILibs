@@ -5,10 +5,10 @@ import java.util.concurrent.TimeUnit;
 
 import jaicore.basic.TimeOut;
 import jaicore.basic.algorithm.AlgorithmEvent;
-import jaicore.ml.core.dataset.IDataset;
+import jaicore.ml.core.dataset.TimeSeriesDataset;
 import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
 
-public class BOSSAlgorithm extends ATSCAlgorithm<CategoricalAttributeType, BOSSClassifier> {
+public class BOSSAlgorithm extends ATSCAlgorithm<CategoricalAttributeType, TimeSeriesDataset, BOSSClassifier> {
 
 	@Override
 	public Iterator<AlgorithmEvent> iterator() {
@@ -45,7 +45,7 @@ public class BOSSAlgorithm extends ATSCAlgorithm<CategoricalAttributeType, BOSSC
 
 	// TODO: Change to TimeSeriesDataset when available
 	@Override
-	public IDataset getInput() {
+	public TimeSeriesDataset getInput() {
 		// TODO Auto-generated method stub
 		return null;
 	}

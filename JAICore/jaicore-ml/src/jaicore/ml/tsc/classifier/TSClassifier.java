@@ -3,8 +3,8 @@ package jaicore.ml.tsc.classifier;
 import java.util.ArrayList;
 import java.util.List;
 
-import jaicore.ml.core.dataset.IDataset;
-import jaicore.ml.core.dataset.IInstance;
+import jaicore.ml.core.dataset.TimeSeriesDataset;
+import jaicore.ml.core.dataset.TimeSeriesInstance;
 import jaicore.ml.core.exception.ConfigurationException;
 import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.core.exception.TrainingException;
@@ -20,55 +20,93 @@ import jaicore.ml.core.predictivemodel.IPredictiveModelConfiguration;
  *
  * @param <TARGET>
  *            Type of the target attribute
+ * @param <DATASET>
+ *            The type of the time series data set used to learn from and
+ *            predict batches.
  */
-public abstract class TSClassifier<TARGET> extends ABatchLearner<TARGET> {
+public abstract class TSClassifier<TARGET, DATASET extends TimeSeriesDataset>
+		extends ABatchLearner<TARGET, TimeSeriesInstance, DATASET> {
 
-	protected ATSCAlgorithm<TARGET, ? extends TSClassifier<TARGET>> algorithm;
+	/**
+	 * The algorithm object used for the training of the classifier.
+	 */
+	protected ATSCAlgorithm<TARGET, DATASET, ? extends TSClassifier<TARGET, DATASET>> algorithm;
 
-	public TSClassifier(ATSCAlgorithm<TARGET, ? extends TSClassifier<TARGET>> algorithm) {
+	/**
+	 * Constructor for a time series classifier.
+	 * 
+	 * @param algorithm
+	 *            The algorithm object used for the training of the classifier
+	 */
+	public TSClassifier(ATSCAlgorithm<TARGET, DATASET, ? extends TSClassifier<TARGET, DATASET>> algorithm) {
 		this.algorithm = algorithm;
 	}
 
+	/**
+	 * {@inheritDoc ABatchLearner#train(jaicore.ml.core.dataset.IDataset)}
+	 */
 	@Override
-	public void train(IDataset dataset) throws TrainingException {
+	public void train(DATASET dataset) throws TrainingException {
+		// Set model which is trained
 		this.algorithm.setModel(this);
 
-		// TODO Auto-generated method stub
+		// Set input data from which the model should learn
+		algorithm.setInput(dataset);
 		try {
-			algorithm.setInput(dataset);
+			// Train
 			algorithm.call();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new TrainingException("Could not train model " + this.getClass().getSimpleName(), e);
 		}
 	}
 
+	/**
+	 * Getter for the model's training algorithm object.
+	 * 
+	 * @return The model's training algorithm
+	 */
+	public ATSCAlgorithm<TARGET, DATASET, ? extends IBatchLearner<TARGET, TimeSeriesInstance, DATASET>> getAlgorithm() {
+		return algorithm;
+	}
+
+	/**
+	 * Sets the training algorithm for the classifier.
+	 * 
+	 * @param algorithm
+	 *            The algorithm object used to maintain the model's parameters.
+	 */
+	public void setAlgorithm(
+			ATSCAlgorithm<TARGET, DATASET, ? extends IBatchLearner<TARGET, TimeSeriesInstance, DATASET>> algorithm) {
+		this.algorithm = algorithm;
+	}
+
+	/**
+	 * {@inheritDoc ABatchLearner#predict(jaicore.ml.core.dataset.IDataset)}
+	 */
+	@Override
+	public List<TARGET> predict(DATASET dataset) throws PredictionException {
+		final List<TARGET> result = new ArrayList<>();
+		for (TimeSeriesInstance inst : dataset) {
+			result.add(this.predict(inst));
+		}
+		return result;
+	}
+
+	/**
+	 * {@inheritDoc ABatchLearner#getConfiguration()}
+	 */
 	@Override
 	public IPredictiveModelConfiguration getConfiguration() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	/**
+	 * {@inheritDoc ABatchLearner#setConfiguration(IPredictiveModelConfiguration)}
+	 */
 	@Override
 	public void setConfiguration(IPredictiveModelConfiguration configuration) throws ConfigurationException {
 		// TODO Auto-generated method stub
 
-	}
-
-	public ATSCAlgorithm<TARGET, ? extends IBatchLearner<TARGET>> getAlgorithm() {
-		return algorithm;
-	}
-
-	public void setAlgorithm(ATSCAlgorithm<TARGET, ? extends IBatchLearner<TARGET>> algorithm) {
-		this.algorithm = algorithm;
-	}
-
-	@Override
-	public List<TARGET> predict(IDataset dataset) throws PredictionException {
-		final List<TARGET> result = new ArrayList<>();
-		for (IInstance inst : dataset) {
-			result.add(this.predict(inst));
-		}
-		return result;
 	}
 }
