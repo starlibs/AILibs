@@ -1,8 +1,14 @@
 package jaicore.ml.tsc.classifier;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import jaicore.ml.core.dataset.IDataset;
+import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.exception.ConfigurationException;
+import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.core.exception.TrainingException;
+import jaicore.ml.core.predictivemodel.ABatchLearner;
 import jaicore.ml.core.predictivemodel.IBatchLearner;
 import jaicore.ml.core.predictivemodel.IPredictiveModelConfiguration;
 
@@ -15,7 +21,7 @@ import jaicore.ml.core.predictivemodel.IPredictiveModelConfiguration;
  * @param <TARGET>
  *            Type of the target attribute
  */
-public abstract class TSClassifier<TARGET> implements IBatchLearner<TARGET> {
+public abstract class TSClassifier<TARGET> extends ABatchLearner<TARGET> {
 
 	protected ATSCAlgorithm<TARGET, ? extends TSClassifier<TARGET>> algorithm;
 
@@ -57,4 +63,12 @@ public abstract class TSClassifier<TARGET> implements IBatchLearner<TARGET> {
 		this.algorithm = algorithm;
 	}
 
+	@Override
+	public List<TARGET> predict(IDataset dataset) throws PredictionException {
+		final List<TARGET> result = new ArrayList<>();
+		for (IInstance inst : dataset) {
+			result.add(this.predict(inst));
+		}
+		return result;
+	}
 }
