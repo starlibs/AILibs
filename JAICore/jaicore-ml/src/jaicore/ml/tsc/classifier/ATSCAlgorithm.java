@@ -10,8 +10,10 @@ import jaicore.ml.core.dataset.TimeSeriesDataset;
  * 
  * @author Julian Lienen
  *
- * @param <TARGET>
+ * @param <TARGETTYPE>
  *            The type of the target that the <CLASSIFIER> to be trained
+ * @param <TARGETVALUETYPE>
+ *            The value type of the target that the <CLASSIFIER> to be trained
  *            predicts.
  * @param <DATASET>
  *            The type of the time series data set used to learn from and
@@ -20,7 +22,7 @@ import jaicore.ml.core.dataset.TimeSeriesDataset;
  *            The time series classifier which is modified and returned as
  *            algorithm result.
  */
-public abstract class ATSCAlgorithm<TARGET, DATASET extends TimeSeriesDataset, CLASSIFIER extends TSClassifier<TARGET, DATASET>>
+public abstract class ATSCAlgorithm<TARGETTYPE, TARGETVALUETYPE, DATASET extends TimeSeriesDataset, CLASSIFIER extends TSClassifier<TARGETTYPE, TARGETVALUETYPE, DATASET>>
 		implements IAlgorithm<TimeSeriesDataset, CLASSIFIER> {
 
 	/**
@@ -42,7 +44,7 @@ public abstract class ATSCAlgorithm<TARGET, DATASET extends TimeSeriesDataset, C
 	 *            algorithm calls.
 	 */
 	@SuppressWarnings("unchecked")
-	public <T extends TSClassifier<TARGET, DATASET>> void setModel(T model) {
+	public <T extends TSClassifier<TARGETTYPE, TARGETVALUETYPE, DATASET>> void setModel(T model) {
 		this.model = (CLASSIFIER) model;
 	}
 
