@@ -5,10 +5,10 @@ import java.util.concurrent.TimeUnit;
 
 import jaicore.basic.TimeOut;
 import jaicore.basic.algorithm.AlgorithmEvent;
-import jaicore.basic.algorithm.IAlgorithm;
 import jaicore.ml.core.dataset.IDataset;
+import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
 
-public class BOSSAlgorithm implements IAlgorithm<IDataset, BOSSClassifier>{
+public class BOSSAlgorithm extends ATSCAlgorithm<CategoricalAttributeType, BOSSClassifier> {
 
 	@Override
 	public Iterator<AlgorithmEvent> iterator() {
@@ -31,18 +31,19 @@ public class BOSSAlgorithm implements IAlgorithm<IDataset, BOSSClassifier>{
 	@Override
 	public BOSSClassifier call() throws Exception {
 		// TODO Auto-generated method stub
-		
-		//blabliblub training
-		
-		return new BOSSClassifier();
+
+		// Training on model
+
+		return this.model;
 	}
 
 	@Override
 	public void cancel() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
+	// TODO: Change to TimeSeriesDataset when available
 	@Override
 	public IDataset getInput() {
 		// TODO Auto-generated method stub
@@ -52,13 +53,13 @@ public class BOSSAlgorithm implements IAlgorithm<IDataset, BOSSClassifier>{
 	@Override
 	public void registerListener(Object listener) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void setNumCPUs(int numberOfCPUs) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -70,13 +71,13 @@ public class BOSSAlgorithm implements IAlgorithm<IDataset, BOSSClassifier>{
 	@Override
 	public void setTimeout(int timeout, TimeUnit timeUnit) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void setTimeout(TimeOut timeout) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
