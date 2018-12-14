@@ -11,7 +11,21 @@ import jaicore.basic.algorithm.AAlgorithm;
 import jaicore.basic.algorithm.AlgorithmEvent;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.AlgorithmFinishedEvent;
+import jaicore.basic.algorithm.AlgorithmInitializedEvent;
 
+/**
+ * This algorithms allows to compute an ordered Cartesian product. It is ordered
+ * in the sense that it interprets the sets over which the product is built as
+ * ORDERED sets and first generates tuples with items that appear first in the
+ * sets.
+ * 
+ * The algorithm also works for ordinary unordered sets but is a bit slower why
+ * another algorithm could be favorable.
+ * 
+ * @author fmohr
+ *
+ * @param <T>
+ */
 public class LDSBasedCartesianProductComputer<T> extends AAlgorithm<List<? extends Collection<T>>, List<List<T>>> {
 
 	private class Node {
@@ -44,7 +58,7 @@ public class LDSBasedCartesianProductComputer<T> extends AAlgorithm<List<? exten
 			checkTermination();
 			if (open.isEmpty())
 				return terminate();
-			
+
 			/* determine next cheapest path to a leaf */
 			Node next;
 			while ((next = open.poll()).nextDecision < getInput().size()) {
@@ -56,7 +70,7 @@ public class LDSBasedCartesianProductComputer<T> extends AAlgorithm<List<? exten
 					open.add(new Node(next.nextDecision + 1, next.defficiency + i++, tuple));
 				}
 			}
-			
+
 			/* at this point, next should contain a fully specified tuple */
 			assert next.tuple.size() == getInput().size();
 			return new TupleOfCartesianProductFoundEvent<>(next.tuple);
@@ -67,20 +81,27 @@ public class LDSBasedCartesianProductComputer<T> extends AAlgorithm<List<? exten
 	}
 
 	@SuppressWarnings("unchecked")
-	@Override
-	public List<List<T>> call() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {
-		List<List<T>> product = new ArrayList<>();
-		next(); // initialize
+	public List<T> nextTuple() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {
 		while (hasNext()) {
 			AlgorithmEvent e = nextWithException();
 			if (e instanceof AlgorithmFinishedEvent)
-				return product;
+				return null;
 			else if (e instanceof TupleOfCartesianProductFoundEvent)
-				product.add(((TupleOfCartesianProductFoundEvent<T>) e).getTuple());
-			else
+				return ((TupleOfCartesianProductFoundEvent<T>) e).getTuple();
+			else if (!(e instanceof AlgorithmInitializedEvent))
 				throw new IllegalStateException("Cannot handle event of type " + e.getClass());
 		}
 		throw new IllegalStateException("No more elements but no AlgorithmFinishedEvent was generated!");
+	}
+
+	@Override
+	public List<List<T>> call() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {
+		List<List<T>> product = new ArrayList<>();
+		List<T> nextTuple;
+		while ((nextTuple = nextTuple()) != null) {
+			product.add(nextTuple);
+		}
+		return product;
 	}
 
 }

@@ -15,10 +15,10 @@ public class AndOrTester {
 
 	@Test
 	public void test() throws Exception {
-		int k = 3;
-		int b = 2;
-		int d = 2;
-		int limit = 100;
+		int k = 10;
+		int b = 10;
+		int d = 6;
+		int limit = 1;
 		GraphGenerator<NodeLabel, String> gg = new SyntheticAndGrid(k, b, d);
 		IObjectEvaluator<Graph<NodeLabel>, Double> evaluator = g -> {
 			double sum = 0;
