@@ -7,8 +7,10 @@ import jaicore.basic.TimeOut;
 import jaicore.basic.algorithm.AlgorithmEvent;
 import jaicore.ml.core.dataset.TimeSeriesDataset;
 import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
+import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeValue;
 
-public class BOSSAlgorithm extends ATSCAlgorithm<CategoricalAttributeType, TimeSeriesDataset, BOSSClassifier> {
+public class BOSSAlgorithm
+		extends ATSCAlgorithm<CategoricalAttributeType, CategoricalAttributeValue, TimeSeriesDataset, BOSSClassifier> {
 
 	@Override
 	public Iterator<AlgorithmEvent> iterator() {

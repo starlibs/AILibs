@@ -2,7 +2,6 @@ package jaicore.ml.core.predictivemodel;
 
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
-import jaicore.ml.core.dataset.attribute.IAttributeType;
 
 /**
  * Abstract extension of {@link IPredictiveModel} to be able to construct
@@ -10,8 +9,11 @@ import jaicore.ml.core.dataset.attribute.IAttributeType;
  * 
  * @author Julian Lienen
  *
- * @param <TARGET>
- *            The type of the target that this {@link APredictiveModel}
+ * @param <TARGETTYPE>
+ *            The attribute type of the target that this
+ *            {@link APredictiveModel} predicts.
+ * @param <TARGETVALUETYPE>
+ *            The value type of the target that this {@link APredictiveModel}
  *            predicts.
  * @param <INSTANCE>
  *            The type of the instances stored in the data set specified by the
@@ -19,20 +21,20 @@ import jaicore.ml.core.dataset.attribute.IAttributeType;
  * @param <DATASET>
  *            The type of the data set used to learn from and predict batches.
  */
-public abstract class APredictiveModel<TARGET, INSTANCE extends IInstance, DATASET extends IDataset<INSTANCE>>
-		implements IPredictiveModel<TARGET, INSTANCE, DATASET> {
+public abstract class APredictiveModel<TARGETTYPE, TARGETVALUETYPE, INSTANCE extends IInstance, DATASET extends IDataset<INSTANCE>>
+		implements IPredictiveModel<TARGETVALUETYPE, INSTANCE, DATASET> {
 
 	/**
 	 * Target type of the predicted values induced by the predicted model.
 	 */
-	private IAttributeType<?> targetType;
+	private TARGETTYPE targetType;
 
 	/**
 	 * Getter method for the given <code>targetType</code>.
 	 * 
 	 * @return Returns the target type used for generating predictions
 	 */
-	public IAttributeType<?> getTargetType() {
+	public TARGETTYPE getTargetType() {
 		return targetType;
 	}
 
@@ -42,7 +44,7 @@ public abstract class APredictiveModel<TARGET, INSTANCE extends IInstance, DATAS
 	 * @param targetType
 	 *            The target type used for generating predictions
 	 */
-	public void setTargetType(IAttributeType<?> targetType) {
+	public void setTargetType(TARGETTYPE targetType) {
 		this.targetType = targetType;
 	}
 }

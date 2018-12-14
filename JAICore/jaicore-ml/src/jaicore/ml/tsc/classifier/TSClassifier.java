@@ -18,19 +18,21 @@ import jaicore.ml.core.predictivemodel.IPredictiveModelConfiguration;
  * 
  * @author Julian Lienen
  *
- * @param <TARGET>
- *            Type of the target attribute
+ * @param <TARGETTYPE>
+ *            The attribute type of the target.
+ * @param <TARGETVALUETYPE>
+ *            The value type of the target attribute.
  * @param <DATASET>
  *            The type of the time series data set used to learn from and
  *            predict batches.
  */
-public abstract class TSClassifier<TARGET, DATASET extends TimeSeriesDataset>
-		extends ABatchLearner<TARGET, TimeSeriesInstance, DATASET> {
+public abstract class TSClassifier<TARGETTYPE, TARGETVALUETYPE, DATASET extends TimeSeriesDataset>
+		extends ABatchLearner<TARGETTYPE, TARGETVALUETYPE, TimeSeriesInstance, DATASET> {
 
 	/**
 	 * The algorithm object used for the training of the classifier.
 	 */
-	protected ATSCAlgorithm<TARGET, DATASET, ? extends TSClassifier<TARGET, DATASET>> algorithm;
+	protected ATSCAlgorithm<TARGETTYPE, TARGETVALUETYPE, DATASET, ? extends TSClassifier<TARGETTYPE, TARGETVALUETYPE, DATASET>> algorithm;
 
 	/**
 	 * Constructor for a time series classifier.
@@ -38,7 +40,8 @@ public abstract class TSClassifier<TARGET, DATASET extends TimeSeriesDataset>
 	 * @param algorithm
 	 *            The algorithm object used for the training of the classifier
 	 */
-	public TSClassifier(ATSCAlgorithm<TARGET, DATASET, ? extends TSClassifier<TARGET, DATASET>> algorithm) {
+	public TSClassifier(
+			ATSCAlgorithm<TARGETTYPE, TARGETVALUETYPE, DATASET, ? extends TSClassifier<TARGETTYPE, TARGETVALUETYPE, DATASET>> algorithm) {
 		this.algorithm = algorithm;
 	}
 
@@ -65,7 +68,7 @@ public abstract class TSClassifier<TARGET, DATASET extends TimeSeriesDataset>
 	 * 
 	 * @return The model's training algorithm
 	 */
-	public ATSCAlgorithm<TARGET, DATASET, ? extends IBatchLearner<TARGET, TimeSeriesInstance, DATASET>> getAlgorithm() {
+	public ATSCAlgorithm<TARGETTYPE, TARGETVALUETYPE, DATASET, ? extends IBatchLearner<TARGETVALUETYPE, TimeSeriesInstance, DATASET>> getAlgorithm() {
 		return algorithm;
 	}
 
@@ -76,7 +79,7 @@ public abstract class TSClassifier<TARGET, DATASET extends TimeSeriesDataset>
 	 *            The algorithm object used to maintain the model's parameters.
 	 */
 	public void setAlgorithm(
-			ATSCAlgorithm<TARGET, DATASET, ? extends IBatchLearner<TARGET, TimeSeriesInstance, DATASET>> algorithm) {
+			ATSCAlgorithm<TARGETTYPE, TARGETVALUETYPE, DATASET, ? extends IBatchLearner<TARGETVALUETYPE, TimeSeriesInstance, DATASET>> algorithm) {
 		this.algorithm = algorithm;
 	}
 
@@ -84,8 +87,8 @@ public abstract class TSClassifier<TARGET, DATASET extends TimeSeriesDataset>
 	 * {@inheritDoc ABatchLearner#predict(jaicore.ml.core.dataset.IDataset)}
 	 */
 	@Override
-	public List<TARGET> predict(DATASET dataset) throws PredictionException {
-		final List<TARGET> result = new ArrayList<>();
+	public List<TARGETVALUETYPE> predict(DATASET dataset) throws PredictionException {
+		final List<TARGETVALUETYPE> result = new ArrayList<>();
 		for (TimeSeriesInstance inst : dataset) {
 			result.add(this.predict(inst));
 		}
