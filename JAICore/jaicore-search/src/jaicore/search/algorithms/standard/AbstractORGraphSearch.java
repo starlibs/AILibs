@@ -30,11 +30,7 @@ public abstract class AbstractORGraphSearch<I extends GraphSearchInput<NSrc, ASr
 	/* Logger variables */
 	private Logger logger = LoggerFactory.getLogger(AAlgorithm.class);
 	private String loggerName;
-
-	private boolean shutdownInitialized = false;
-	private boolean timeouted;
-	private Timer timeouter;
-	private final Set<Thread> activeThreads = new HashSet<>();
+	
 	private EvaluatedSearchGraphPath<NSrc, ASrc, V> bestSeenSolution;
 
 	public AbstractORGraphSearch(final I problem) {
@@ -86,118 +82,7 @@ public abstract class AbstractORGraphSearch<I extends GraphSearchInput<NSrc, ASr
 	public GraphGenerator<NSrc, ASrc> getGraphGenerator() {
 		return this.getInput().getGraphGenerator();
 	}
-
-	public boolean isTimeouted() {
-		return this.timeouted;
-	}
-
-	public boolean isStopCriterionSatisfied() {
-		return this.isCanceled() || this.timeouted;
-	}
-
-	protected void setTimeouted(final boolean timeouted) {
-		this.timeouted = timeouted;
-	}
-
-	protected void activateTimeoutTimer(final String name) {
-		if (this.getTimeout() == null) {
-			return;
-		}
-		this.timeouter = new Timer(name);
-		this.timeouter.schedule(new TimerTask() {
-			@Override
-			public void run() {
-				AbstractORGraphSearch.this.timeouted = true;
-				AbstractORGraphSearch.this.logger.info("Timeout triggered. Have set the timeouted flag to true and will now invoke shutdown procedure.");
-				AbstractORGraphSearch.this.shutdown();
-			}
-		}, this.getTimeout().milliseconds());
-		this.logger.info("Timeouter {} activated for in {}ms", name, this.getTimeout().milliseconds());
-	}
-
-	protected void checkTermination() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {
-		this.logger.debug("Checking Termination of {}", this);
-		if (this.isTimeouted()) {
-			this.logger.info("Timeout detected for {}, stopping execution with TimeoutException", this);
-			throw new TimeoutException();
-		}
-		if (this.isCanceled()) {
-			this.logger.info("Cancel detected for {}, stopping execution with AlgorithmExceptionCanceledException", this);
-			throw new AlgorithmExecutionCanceledException(); // for a controlled cancel from outside on the algorithm
-		}
-		if (Thread.currentThread().isInterrupted()) {
-			this.logger.info("Interruption detected for {}, stopping execution with InterruptedException", this);
-			throw new InterruptedException(); // if the thread itself was actively interrupted by somebody
-		}
-	}
-
-	protected AlgorithmInitializedEvent activate() {
-		this.switchState(AlgorithmState.active);
-		AlgorithmInitializedEvent event = new AlgorithmInitializedEvent();
-		this.post(event);
-		return event;
-	}
-
-	@Override
-	public void cancel() {
-		super.cancel();
-		this.logger.info("Executing cancel on {}. Have set the cancel flag and will now invoke shutdown procedure.", this);
-		this.shutdown();
-	}
-
-	protected void unregisterThreadAndShutdown() {
-		this.unregisterActiveThread();
-		this.shutdown();
-	}
-
-	protected void shutdown() {
-		synchronized (this) {
-			if (this.shutdownInitialized) {
-				this.logger.info("Tried to enter shudtown for {}, but the shutdown has already been initialized in the past, so exiting the shutdown block.", this);
-				return;
-			}
-			this.shutdownInitialized = true;
-		}
-		this.logger.info("Entering shutdown procedure for {}. Setting algorithm state from {} to inactive and interrupting potentially active threads.", this, this.getState());
-		this.setState(AlgorithmState.inactive);
-		this.activeThreads.forEach(t -> {
-			this.logger.info("Interrupting {} on behalf of shutdown of {}", t, this);
-			t.interrupt();
-		});
-		if (this.timeouter != null) {
-			this.logger.info("Canceling timeouter {}", this.timeouter);
-			this.timeouter.cancel();
-		}
-		this.logger.info("Shutdown of {} completed.", this);
-	}
-
-	protected void registerActiveThread() {
-		this.activeThreads.add(Thread.currentThread());
-	}
-
-	protected void unregisterActiveThread() {
-		this.activeThreads.remove(Thread.currentThread());
-	}
-
-	@Override
-	public boolean hasNext() {
-		return this.getState() != AlgorithmState.inactive;
-	}
-
-	@Override
-	public AlgorithmEvent next() {
-		try {
-			return this.nextWithException();
-		} catch (Exception e) {
-			this.setState(AlgorithmState.inactive);
-			this.unregisterThreadAndShutdown();
-			if (e instanceof InterruptedException && this.timeouted) {
-				return new AlgorithmFinishedEvent();
-			}
-			throw new RuntimeException(e);
-		}
-	}
-
+	
 	@Override
 	public O call() throws Exception {
 		while (this.hasNext()) {
@@ -214,10 +99,6 @@ public abstract class AbstractORGraphSearch<I extends GraphSearchInput<NSrc, ASr
 	}
 
 	public abstract O getSolutionProvidedToCall();
-
-	public boolean isShutdownInitialized() {
-		return this.shutdownInitialized;
-	}
 
 	@Override
 	public void setLoggerName(final String name) {

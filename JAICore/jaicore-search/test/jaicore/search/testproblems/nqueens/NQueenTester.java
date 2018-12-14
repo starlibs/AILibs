@@ -23,7 +23,8 @@ import jaicore.search.core.interfaces.IGraphSearchFactory;
 public abstract class NQueenTester<I, O, VSearch, ESearch> extends ORGraphSearchTester<Integer, I, O, QueenNode, String, Double, VSearch, ESearch>
 		implements IGraphAlgorithmListener<VSearch, ESearch> {
 
-	int[] numbersOfSolutions = { 2, 10, 4, 40, 92, 352, 724 };
+//	int[] numbersOfSolutions = { 2, 10, 4, 40, 92, 352, 724 };
+	int[] numbersOfSolutions = { 2, 10, 4, 40, 92 };
 
 	private AtomicInteger seenSolutions = new AtomicInteger(0);
 	private boolean showGraphs = false;

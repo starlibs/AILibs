@@ -14,8 +14,6 @@ import com.google.common.eventbus.Subscribe;
 
 import jaicore.basic.algorithm.AlgorithmEvent;
 import jaicore.basic.algorithm.AlgorithmFinishedEvent;
-import jaicore.basic.algorithm.AlgorithmInitializedEvent;
-import jaicore.basic.algorithm.AlgorithmState;
 import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
@@ -197,7 +195,6 @@ public class AwaStarSearch<I extends GeneralEvaluatedTraversalTree<T, A, V>, T, 
 		this.unconfirmedSolutions.add(solutionEvent.getSolutionCandidate());
 	}
 
-	@SuppressWarnings("unchecked")
 	public EvaluatedSearchSolutionCandidateFoundEvent<T, A, V> registerNewSolutionCandidate(final EvaluatedSearchGraphPath<T, A, V> solution) {
 		EvaluatedSearchSolutionCandidateFoundEvent<T, A, V> event = this.registerSolution(solution);
 		this.unreturnedSolutionEvents.add(event);
@@ -210,17 +207,13 @@ public class AwaStarSearch<I extends GeneralEvaluatedTraversalTree<T, A, V>, T, 
 		this.checkTermination();
 		switch (this.getState()) {
 		case created: {
-			this.activateTimeoutTimer("AWA*-Timeouter");
 			T externalRootNode = this.rootNodeGenerator.getRoot();
 			Node<T, V> rootNode = new Node<T, V>(null, externalRootNode);
 			this.logger.info("Initializing graph and OPEN with {}.", rootNode);
 			this.openList.add(rootNode);
 			this.post(new GraphInitializedEvent<>(rootNode));
 			rootNode.setInternalLabel(this.nodeEvaluator.f(rootNode));
-			this.switchState(AlgorithmState.active);
-			AlgorithmEvent e = new AlgorithmInitializedEvent();
-			this.post(e);
-			return e;
+			return activate();
 		}
 		case active: {
 			AlgorithmEvent event;

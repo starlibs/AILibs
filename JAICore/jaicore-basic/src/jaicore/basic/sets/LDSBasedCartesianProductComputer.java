@@ -5,12 +5,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.concurrent.TimeoutException;
 
 import jaicore.basic.algorithm.AAlgorithm;
 import jaicore.basic.algorithm.AlgorithmEvent;
+import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.AlgorithmFinishedEvent;
-import jaicore.basic.algorithm.AlgorithmInitializedEvent;
-import jaicore.basic.algorithm.AlgorithmState;
 
 public class LDSBasedCartesianProductComputer<T> extends AAlgorithm<List<? extends Collection<T>>, List<List<T>>> {
 
@@ -34,14 +34,14 @@ public class LDSBasedCartesianProductComputer<T> extends AAlgorithm<List<? exten
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws Exception {
+	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {
 		switch (getState()) {
 		case created: {
 			open.add(new Node(0, 0, new ArrayList<>()));
-			setState(AlgorithmState.active);
-			return new AlgorithmInitializedEvent();
+			return activate();
 		}
 		case active: {
+			checkTermination();
 			if (open.isEmpty())
 				return terminate();
 			
@@ -50,6 +50,7 @@ public class LDSBasedCartesianProductComputer<T> extends AAlgorithm<List<? exten
 			while ((next = open.poll()).nextDecision < getInput().size()) {
 				int i = 0;
 				for (T item : getInput().get(next.nextDecision)) {
+					checkTermination();
 					List<T> tuple = new ArrayList<>(next.tuple);
 					tuple.add(item);
 					open.add(new Node(next.nextDecision + 1, next.defficiency + i++, tuple));
@@ -57,7 +58,7 @@ public class LDSBasedCartesianProductComputer<T> extends AAlgorithm<List<? exten
 			}
 			
 			/* at this point, next should contain a fully specified tuple */
-			System.out.println(next.tuple + ": " + next.defficiency);
+			assert next.tuple.size() == getInput().size();
 			return new TupleOfCartesianProductFoundEvent<>(next.tuple);
 		}
 		default:
@@ -65,12 +66,13 @@ public class LDSBasedCartesianProductComputer<T> extends AAlgorithm<List<? exten
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public List<List<T>> call() {
+	public List<List<T>> call() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {
 		List<List<T>> product = new ArrayList<>();
 		next(); // initialize
 		while (hasNext()) {
-			AlgorithmEvent e = next();
+			AlgorithmEvent e = nextWithException();
 			if (e instanceof AlgorithmFinishedEvent)
 				return product;
 			else if (e instanceof TupleOfCartesianProductFoundEvent)
