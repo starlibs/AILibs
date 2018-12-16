@@ -12,9 +12,23 @@ import jaicore.search.model.probleminputs.GraphSearchInput;
 
 public class RandomizedDepthFirstSearch<T, A> extends StandardBestFirst<T, A, Double> {
 
-	private static Logger logger = LoggerFactory.getLogger(RandomizedDepthFirstSearch.class);
+	private Logger logger = LoggerFactory.getLogger(RandomizedDepthFirstSearch.class);
+	private String loggerName;
 
-	public RandomizedDepthFirstSearch(GraphSearchInput<T, A> problem, Random random) {
+	public RandomizedDepthFirstSearch(final GraphSearchInput<T, A> problem, final Random random) {
 		super(new GeneralEvaluatedTraversalTree<>(problem.getGraphGenerator(), new RandomizedDepthFirstNodeEvaluator<>(random)));
+	}
+
+	@Override
+	public String getLoggerName() {
+		return this.loggerName;
+	}
+
+	@Override
+	public void setLoggerName(final String name) {
+		this.logger.info("Switching logger from {} to {}", this.logger.getName(), name);
+		this.logger = LoggerFactory.getLogger(name);
+		this.logger.info("Activated logger {} with name {}", name, this.logger.getName());
+		super.setLoggerName(this.loggerName + "._bestfirst");
 	}
 }

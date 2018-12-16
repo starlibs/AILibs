@@ -11,29 +11,24 @@ import jaicore.basic.algorithm.AlgorithmEvent;
 import jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.AlgorithmState;
-import jaicore.ml.core.dataset.IClusterableInstance;
+import jaicore.ml.clustering.GMeans;
+import jaicore.ml.core.dataset.IInstance;
 
 /**
- * Implementation of a sampling method using kmeans-clustering.
+ * Implementation of a sampling method using gmeans-clustering.
  * 
  * @author jnowack
  *
  */
-public class KmeansSampling extends ASamplingAlgorithm {
+public class GmeansSampling extends ASamplingAlgorithm {
 
-	private KMeansPlusPlusClusterer<IClusterableInstance> kMeansCluster;
-	private List<CentroidCluster<IClusterableInstance>> clusterResults;
+	private GMeans<IInstance> gMeansCluster;
+	private List<CentroidCluster<IInstance>> clusterResults;
 
 	/**
-	 * Implementation of a sampling method using kmeans-clustering.
-	 * 
-	 * @param k             Number of clusters.
-	 * @param maxIterations max number of iterations or -1 for no limit.
-	 * @param seed          seed for random generator
+	 * Implementation of a sampling method using gmeans-clustering.
 	 */
-	public KmeansSampling(int k, int maxIterations, int seed) {
-		this.kMeansCluster = new KMeansPlusPlusClusterer<IClusterableInstance>(k, maxIterations,
-				new ManhattanDistance(), new JDKRandomGenerator(seed));
+	public GmeansSampling() {
 	}
 
 	@Override
@@ -41,19 +36,18 @@ public class KmeansSampling extends ASamplingAlgorithm {
 		switch (this.getState()) {
 		case created:
 			// Initialize variables
-			// TODO: create empty dataset
-			this.sample = null;
+			this.sample = this.createEmptyDatasetFromInputSchema();
 
 			// create cluster
-			clusterResults = kMeansCluster.cluster(getInput().getClusterableInstances());
+			gMeansCluster = new GMeans<IInstance>(getInput(), new ManhattanDistance());
+			clusterResults = gMeansCluster.cluster();
 
 			this.setState(AlgorithmState.active);
 			return new AlgorithmInitializedEvent();
 		case active:
-			for (CentroidCluster<IClusterableInstance> cluster : clusterResults) {
+			for (CentroidCluster<IInstance> cluster : clusterResults) {
 				boolean same = true;
 				for (int i = 1; i < cluster.getPoints().size(); i++) {
-					// TODO find way to compare targetValues
 					if (!cluster.getPoints().get(i - 1).getTargetValue(Object.class)
 							.equals(cluster.getPoints().get(i).getTargetValue(Object.class))) {
 						same = false;

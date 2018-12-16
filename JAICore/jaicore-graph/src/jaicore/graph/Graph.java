@@ -44,7 +44,7 @@ public class Graph<T> implements Serializable {
 
 	public Graph(Graph<T> toClone) {
 		this();
-		System.out.println("Starting clone computation");
+//		System.out.println("Starting clone computation");
 		for (T i : toClone.nodes.keySet())
 			this.addItem(i);
 		for (T i : this.nodes.keySet()) {
@@ -57,7 +57,7 @@ public class Graph<T> implements Serializable {
 				System.exit(1);
 			}
 		}
-		System.out.println("Finished clone computation");
+//		System.out.println("Finished clone computation");
 	}
 
 	public void addItem(T item) {
@@ -68,6 +68,10 @@ public class Graph<T> implements Serializable {
 
 	public Set<T> getItems() {
 		return nodes.keySet();
+	}
+	
+	public boolean hasItem(T item) {
+		return nodes.containsKey(item);
 	}
 
 	public void removeItem(T item) {

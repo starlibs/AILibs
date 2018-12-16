@@ -61,7 +61,7 @@ public class OpenMLHelper {
 	 * 
 	 * @param dataId
 	 * @return
-	 * @throws IOException
+	 * @throws IOException if something goes wrong while loading Instances from openml
 	 */
 	public static Instances getInstancesById(int dataId) throws IOException {
 		Instances dataset = null;
