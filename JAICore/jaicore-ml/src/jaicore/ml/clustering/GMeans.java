@@ -12,6 +12,8 @@ import org.apache.commons.math3.ml.clustering.Clusterable;
 import org.apache.commons.math3.ml.clustering.KMeansPlusPlusClusterer;
 import org.apache.commons.math3.ml.distance.DistanceMeasure;
 import org.apache.commons.math3.ml.distance.ManhattanDistance;
+import org.apache.commons.math3.random.JDKRandomGenerator;
+import org.apache.commons.math3.random.RandomGenerator;
 
 /**
  * Implementation of Gmeans based on Helen Beierlings implementation of
@@ -40,15 +42,18 @@ public class GMeans<C extends Clusterable> {
 
 	private DistanceMeasure distanceMeasure = new ManhattanDistance();
 
+	private RandomGenerator randomGenerator;
 	
 	public GMeans(Collection<C> toClusterPoints) {
-		this(toClusterPoints, new ManhattanDistance());
+		this(toClusterPoints, new ManhattanDistance(), 1);
 	}
 	
-	public GMeans(Collection<C> toClusterPoints, DistanceMeasure distanceMeasure) {
+	public GMeans(Collection<C> toClusterPoints, DistanceMeasure distanceMeasure, long seed) {
 		this.points = new ArrayList<>(toClusterPoints);
 		this.distanceMeasure = distanceMeasure;
 		this.gmeansCluster = new ArrayList<CentroidCluster<C>>();
+		this.randomGenerator = new JDKRandomGenerator();
+		randomGenerator.setSeed(seed);
 	}
 
 	public List<CentroidCluster<C>> cluster() {
@@ -59,7 +64,7 @@ public class GMeans<C extends Clusterable> {
 		int i = 1;
 		// creates a k means clustering instance with all points and an L1 distance
 		// metric as metric
-		KMeansPlusPlusClusterer<C> test = new KMeansPlusPlusClusterer<>(k);
+		KMeansPlusPlusClusterer<C> test = new KMeansPlusPlusClusterer<>(k, -1, distanceMeasure, randomGenerator);
 		// ModifiedISACkMeans test = new ModifiedISACkMeans(points, dist);
 
 		// clusters all points with k = 1
@@ -85,7 +90,7 @@ public class GMeans<C extends Clusterable> {
 			loopPoints = currentPoints.get(positionOfCenter.get(i));
 
 			// makes a new instance with of kmeans with S_i as base
-			KMeansPlusPlusClusterer<C> loopCluster = new KMeansPlusPlusClusterer<>(2);
+			KMeansPlusPlusClusterer<C> loopCluster = new KMeansPlusPlusClusterer<>(2, -1, distanceMeasure, randomGenerator);
 			// ModifiedISACkMeans loopCluster = new ModifiedISACkMeans(loopPoints, dist);
 
 			// clusters S_I into to cluster intermediate points is a HashMap of center with
