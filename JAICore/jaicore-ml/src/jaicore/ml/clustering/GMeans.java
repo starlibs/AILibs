@@ -24,21 +24,21 @@ import org.apache.commons.math3.ml.distance.ManhattanDistance;
  */
 public class GMeans<C extends Clusterable> {
 
-	public ArrayList<double[]> center;
+	private ArrayList<double[]> center = new ArrayList<>();
 
-	private ArrayList<CentroidCluster<C>> gmeansCluster;
+	private ArrayList<CentroidCluster<C>> gmeansCluster = new  ArrayList<>();
 
 	private List<double[]> intermediateCenter;
 
-	private HashMap<double[], List<C>> currentPoints;
+	private HashMap<double[], List<C>> currentPoints = new HashMap<>();
 
-	private HashMap<double[], List<C>> intermediatePoints;
+	private HashMap<double[], List<C>> intermediatePoints = new HashMap<>();
 
-	private ArrayList<C> points;
+	private ArrayList<C> points = new ArrayList<>();
 
 	private List<C> loopPoints;
 
-	DistanceMeasure distanceMeasure = new ManhattanDistance();
+	private DistanceMeasure distanceMeasure = new ManhattanDistance();
 
 	
 	public GMeans(Collection<C> toClusterPoints) {
