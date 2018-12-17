@@ -37,7 +37,7 @@ public class GMeansStratiAmountSelectorAndAssigner implements IStratiAssigner, I
 	 * 
 	 * @param randomSeed Seed for random numbers.
 	 */
-	private GMeansStratiAmountSelectorAndAssigner(int randomSeed) {
+	public GMeansStratiAmountSelectorAndAssigner(int randomSeed) {
 		this.randomSeed = randomSeed;
 		this.distanceMeasure = new ManhattanDistance();
 	}
@@ -50,7 +50,7 @@ public class GMeansStratiAmountSelectorAndAssigner implements IStratiAssigner, I
 	 *                        or Euclidian.
 	 * @param randomSeed      Seed for random numbers.
 	 */
-	private GMeansStratiAmountSelectorAndAssigner(DistanceMeasure distanceMeasure, int randomSeed) {
+	public GMeansStratiAmountSelectorAndAssigner(DistanceMeasure distanceMeasure, int randomSeed) {
 		this.randomSeed = randomSeed;
 		this.distanceMeasure = distanceMeasure;
 	}
@@ -58,7 +58,7 @@ public class GMeansStratiAmountSelectorAndAssigner implements IStratiAssigner, I
 	@Override
 	public int selectStratiAmount(IDataset dataset) {
 		// Perform g-means to get a fitting k and the corresponding clusters.
-		this.clusterer = new GMeans<IInstance>(dataset, this.distanceMeasure);
+		this.clusterer = new GMeans<IInstance>(dataset, this.distanceMeasure, randomSeed);
 		this.clusters = this.clusterer.cluster();
 		this.k = this.clusters.size();
 		return this.k;

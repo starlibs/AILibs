@@ -38,7 +38,7 @@ public class KMeansStratiAssigner implements IStratiAssigner {
 	 * @param randomSeed
 	 *            Seed for random numbers.
 	 */
-	private KMeansStratiAssigner(DistanceMeasure distanceMeasure, int randomSeed) {
+	public KMeansStratiAssigner(DistanceMeasure distanceMeasure, int randomSeed) {
 		this.randomSeed = randomSeed;
 		this.distanceMeasure = distanceMeasure;
 	}
