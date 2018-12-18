@@ -9,6 +9,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import jaicore.ml.core.dataset.ContainsNonNumericAttributesException;
+import jaicore.ml.core.dataset.IDataset;
+import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.InstanceSchema;
 import jaicore.ml.core.dataset.attribute.IAttributeType;
 import jaicore.ml.core.dataset.attribute.IAttributeValue;
@@ -19,8 +21,10 @@ import jaicore.ml.core.dataset.attribute.primitive.NumericAttributeValue;
 import jaicore.ml.core.dataset.standard.SimpleDataset;
 import jaicore.ml.core.dataset.standard.SimpleInstance;
 import weka.core.Attribute;
+import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.UnsupportedAttributeTypeException;
 
 public class WekaInstancesUtil {
 
@@ -67,6 +71,63 @@ public class WekaInstancesUtil {
 		return dataset;
 	}
 
+	public static Instances datasetToWekaInstances(final IDataset<? extends IInstance> dataset) throws UnsupportedAttributeTypeException {
+		List<Attribute> attributes = new LinkedList<>();
+		Attribute classAttribute;
+
+		for (int i = 0; i < dataset.getNumberOfAttributes(); i++) {
+			IAttributeType<?> attType = dataset.getAttributeTypes().get(i);
+			if (attType instanceof NumericAttributeType) {
+				attributes.add(new Attribute("att" + i));
+			} else if (attType instanceof CategoricalAttributeType) {
+				attributes.add(new Attribute("att" + i, ((CategoricalAttributeType) attType).getDomain()));
+			} else {
+				throw new UnsupportedAttributeTypeException("The class attribute has an unsupported attribute type.");
+			}
+		}
+
+		IAttributeType<?> classType = dataset.getTargetType();
+		if (classType instanceof NumericAttributeType) {
+			classAttribute = new Attribute("class");
+		} else if (classType instanceof CategoricalAttributeType) {
+			classAttribute = new Attribute("class", ((CategoricalAttributeType) classType).getDomain());
+		} else {
+			throw new UnsupportedAttributeTypeException("The class attribute has an unsupported attribute type.");
+		}
+
+		ArrayList<Attribute> attributeList = new ArrayList<>(attributes);
+		attributeList.add(classAttribute);
+
+		Instances wekaInstances = new Instances("weka-instances", attributeList, 0);
+		wekaInstances.setClassIndex(wekaInstances.numAttributes() - 1);
+
+		for (IInstance inst : dataset) {
+			DenseInstance iNew = new DenseInstance(attributeList.size());
+			iNew.setDataset(wekaInstances);
+
+			for (int i = 0; i < dataset.getNumberOfAttributes(); i++) {
+				if (dataset.getAttributeTypes().get(i) instanceof NumericAttributeType) {
+					IAttributeValue<Double> val = inst.getAttributeValue(i, Double.class);
+					iNew.setValue(i, val.getValue());
+				} else if (dataset.getAttributeTypes().get(i) instanceof CategoricalAttributeType) {
+					IAttributeValue<String> val = inst.getAttributeValue(i, String.class);
+					iNew.setValue(i, val.getValue());
+				}
+			}
+
+			if (dataset.getTargetType() instanceof NumericAttributeType) {
+				IAttributeValue<Double> val = inst.getTargetValue(Double.class);
+				iNew.setValue(dataset.getNumberOfAttributes(), val.getValue());
+			} else if (dataset.getTargetType() instanceof CategoricalAttributeType) {
+				IAttributeValue<String> val = inst.getTargetValue(String.class);
+				iNew.setValue(dataset.getNumberOfAttributes(), val.getValue());
+			}
+
+			wekaInstances.add(iNew);
+		}
+		return wekaInstances;
+	}
+
 	public static IAttributeType<?> transformWEKAAttributeToAttributeType(final Attribute att) {
 		if (att.isNumeric()) {
 			return new NumericAttributeType();
@@ -80,17 +141,17 @@ public class WekaInstancesUtil {
 		throw new IllegalArgumentException("Can only transform numeric or categorical attributes");
 	}
 
-	public static void main(final String[] args) throws FileNotFoundException, IOException, ContainsNonNumericAttributesException {
+	public static void main(final String[] args) throws FileNotFoundException, IOException, ContainsNonNumericAttributesException, UnsupportedAttributeTypeException {
 		Instances data = new Instances(new FileReader(new File("../../../datasets/classification/multi-class/car.arff")));
 		data.setClassIndex(data.numAttributes() - 1);
 		System.out.println("Read in weka instances.");
 		long timestampStart = System.currentTimeMillis();
 		SimpleDataset simpleDataset = WekaInstancesUtil.wekaInstancesToDataset(data);
 		long timestampStop = System.currentTimeMillis();
-		System.out.println(simpleDataset);
 		System.out.println("Transformation took " + (timestampStop - timestampStart) + "ms");
 
-		System.out.println(simpleDataset.printDoubleRepresentation());
+		Instances backToInstances = datasetToWekaInstances(simpleDataset);
+		System.out.println(backToInstances);
 
 	}
 }
