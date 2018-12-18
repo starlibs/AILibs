@@ -161,13 +161,9 @@ public class RandomSearch<N, A> extends AbstractORGraphSearch<GraphSearchInput<N
 
 		switch (this.getState()) {
 		case created: {
-			this.activateTimeoutTimer("RandomSearch-Timeouter");
-			this.switchState(AlgorithmState.active);
 			this.post(new GraphInitializedEvent<>(this.root));
-			AlgorithmEvent event = new AlgorithmInitializedEvent();
-			this.post(event);
 			this.logger.info("Starting random search ...");
-			return event;
+			return activate();
 		}
 		case active: {
 

@@ -26,6 +26,6 @@ public interface IAlgorithmConfig extends Mutable {
 	 * @return Overall timeout for the algorithm in milliseconds.
 	 */
 	@Key(K_TIMEOUT)
-	@DefaultValue("60000")
+	@DefaultValue("-1")
 	public long timeout();
 }

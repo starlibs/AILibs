@@ -11,7 +11,6 @@ import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
-import java.util.Timer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -34,12 +33,8 @@ import com.google.common.eventbus.Subscribe;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.algorithm.AlgorithmEvent;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
-import jaicore.basic.algorithm.AlgorithmFinishedEvent;
-import jaicore.basic.algorithm.AlgorithmInitializedEvent;
-import jaicore.basic.algorithm.AlgorithmState;
 import jaicore.basic.algorithm.SolutionCandidateFoundEvent;
 import jaicore.concurrent.InterruptionTimerTask;
-import jaicore.concurrent.NamedTimerTask;
 import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeParentSwitchEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
@@ -100,7 +95,6 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 	private int createdCounter;
 	private int expandedCounter;
 	private boolean initialized = false;
-	private Timer timer;
 	private final List<NodeExpansionDescription<N, A>> lastExpansion = new ArrayList<>();
 	protected final Queue<EvaluatedSearchGraphPath<N, A, V>> solutions = new LinkedBlockingQueue<>();
 	protected final Queue<EvaluatedSearchSolutionCandidateFoundEvent<N, A, V>> pendingSolutionFoundEvents = new LinkedBlockingQueue<>();
@@ -177,7 +171,10 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 		}
 		this.cancelableNodeEvaluator = this.nodeEvaluator instanceof ICancelableNodeEvaluator;
 
-		/* add shutdown hook so as to cancel the search once the overall program is shutdown */
+		/*
+		 * add shutdown hook so as to cancel the search once the overall program is
+		 * shutdown
+		 */
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> BestFirst.this.cancel(), "Shutdown hook thread for " + BestFirst.this));
 	}
 
@@ -255,7 +252,10 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 				if (BestFirst.this.getConfig().parentDiscarding() != ParentDiscarding.NONE) {
 					BestFirst.this.openLock.lockInterruptibly();
 					try {
-						/* determine whether we already have the node AND it is worse than the one we want to insert */
+						/*
+						 * determine whether we already have the node AND it is worse than the one we
+						 * want to insert
+						 */
 						Optional<Node<N, V>> existingIdenticalNodeOnOpen = BestFirst.this.open.stream().filter(n -> n.getPoint().equals(newNode.getPoint())).findFirst();
 						if (existingIdenticalNodeOnOpen.isPresent()) {
 							Node<N, V> existingNode = existingIdenticalNodeOnOpen.get();
@@ -273,7 +273,10 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 							nodeProcessed = true;
 						}
 
-						/* if parent discarding is not only for OPEN but also for CLOSE (and the node was not on OPEN), check the list of expanded nodes */
+						/*
+						 * if parent discarding is not only for OPEN but also for CLOSE (and the node
+						 * was not on OPEN), check the list of expanded nodes
+						 */
 						else if (BestFirst.this.getConfig().parentDiscarding() == ParentDiscarding.ALL) {
 							/* reopening, if the node is already on CLOSED */
 							Optional<N> existingIdenticalNodeOnClosed = BestFirst.this.closed.stream().filter(n -> n.equals(newNode.getPoint())).findFirst();
@@ -295,7 +298,10 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 					}
 				}
 
-				/* if parent discarding is turned off OR if the node was node processed by a parent discarding rule, just insert it on OPEN */
+				/*
+				 * if parent discarding is turned off OR if the node was node processed by a
+				 * parent discarding rule, just insert it on OPEN
+				 */
 				if (!nodeProcessed) {
 					if (!newNode.isGoal()) {
 						BestFirst.this.openLock.lockInterruptibly();
@@ -324,7 +330,10 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 				if (newNode.isGoal()) {
 					EvaluatedSearchGraphPath<N, A, V> solution = new EvaluatedSearchGraphPath<>(newNode.externalPath(), null, newNode.getInternalLabel());
 
-					/* if the node evaluator has not reported the solution already anyway, register the solution */
+					/*
+					 * if the node evaluator has not reported the solution already anyway, register
+					 * the solution
+					 */
 					if (!BestFirst.this.solutionReportingNodeEvaluator) {
 						BestFirst.this.registerSolution(solution);
 					}
@@ -335,7 +344,9 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 				e.printStackTrace();
 			} finally {
 
-				/* free resources if this is computed by helper threads and notify the listeners */
+				/*
+				 * free resources if this is computed by helper threads and notify the listeners
+				 */
 				assert !Thread.holdsLock(BestFirst.this.openLock) : "Node Builder must not hold a lock on OPEN when locking the active jobs counter";
 				BestFirst.this.activeJobsCounterLock.lock(); // cannot be interruptible without opening more cases
 				try {
@@ -403,7 +414,7 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 		if (BestFirst.this.timeoutForComputationOfF > 0) {
 			interruptionTask = new InterruptionTimerTask("Timeout for Node-Labeling in " + BestFirst.this, Thread.currentThread(), () -> timedout.set(true));
 			this.logger.debug("Scheduling timeout for f-value computation. Allowed time: {}ms", this.timeoutForComputationOfF);
-			this.timer.schedule(interruptionTask, this.timeoutForComputationOfF);
+			getTimerAndCreateIfNotExistent().schedule(interruptionTask, this.timeoutForComputationOfF);
 		}
 
 		/* compute f */
@@ -534,7 +545,9 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 	}
 
 	/**
-	 * This method conducts the expansion of the next node. Unless the next node has been selected from outside, it selects the first node on OPEN (if OPEN is empty but active jobs are running, it waits until those terminate)
+	 * This method conducts the expansion of the next node. Unless the next node has
+	 * been selected from outside, it selects the first node on OPEN (if OPEN is
+	 * empty but active jobs are running, it waits until those terminate)
 	 *
 	 * @return
 	 * @throws InterruptedException
@@ -543,14 +556,21 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 	 */
 	protected NodeExpansionJobSubmittedEvent<N, A, V> expandNextNode() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {
 
-		/* Preliminarily check that the active jobs are less than the additional threads */
+		/*
+		 * Preliminarily check that the active jobs are less than the additional threads
+		 */
 		assert this.additionalThreadsForNodeAttachment == 0 || this.activeJobs.get() < this.additionalThreadsForNodeAttachment : "Cannot expand nodes if number of active jobs (" + this.activeJobs.get()
 				+ " is at least as high as the threads available for node attachment (" + this.additionalThreadsForNodeAttachment + ")";
 
-		/* Step 1: determine node that will be expanded next. Either it already has been set or it will be the first of OPEN. If necessary, we wait for potential incoming nodes */
+		/*
+		 * Step 1: determine node that will be expanded next. Either it already has been
+		 * set or it will be the first of OPEN. If necessary, we wait for potential
+		 * incoming nodes
+		 */
 		final Node<N, V> nodeSelectedForExpansion;
 		{
-			Node<N, V> tmpNodeSelectedForExpansion = null; // necessary workaround as setting final variables in a try-block is not reasonably possible
+			Node<N, V> tmpNodeSelectedForExpansion = null; // necessary workaround as setting final variables in a try-block is not
+															// reasonably possible
 			this.nodeSelectionLock.lockInterruptibly();
 			try {
 				if (this.nodeSelectedForExpansion == null) {
@@ -608,7 +628,10 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 		this.logger.debug("Finished computation of successors. Sending SuccessorComputationCompletedEvent with {} successors for {}", successorDescriptions.size(), nodeSelectedForExpansion);
 		this.post(new SuccessorComputationCompletedEvent<>(nodeSelectedForExpansion, successorDescriptions));
 
-		/* step 3: trigger node builders that compute node details and decide whether and how to integrate the successors into the search */
+		/*
+		 * step 3: trigger node builders that compute node details and decide whether
+		 * and how to integrate the successors into the search
+		 */
 		List<N> todoList = successorDescriptions.stream().map(d -> d.getTo()).collect(Collectors.toList());
 		for (NodeExpansionDescription<N, A> successorDescription : successorDescriptions) {
 			NodeBuilder nb = new NodeBuilder(todoList, nodeSelectedForExpansion, successorDescription);
@@ -628,7 +651,10 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 		this.checkTermination();
 		this.logger.debug("Finished expansion of node {}. Size of OPEN is now {}. Number of active jobs is {}", nodeSelectedForExpansion, this.open.size(), this.activeJobs.get());
 
-		/* step 4: update statistics, send closed notifications, and possibly return a solution */
+		/*
+		 * step 4: update statistics, send closed notifications, and possibly return a
+		 * solution
+		 */
 		this.expandedCounter++;
 		synchronized (this.expanding) {
 			this.expanding.remove(nodeSelectedForExpansion.getPoint());
@@ -667,7 +693,7 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 			return;
 		}
 
-		/* set state to inactive*/
+		/* set state to inactive */
 		this.logger.info("Invoking shutdown routine ...");
 
 		super.shutdown();
@@ -707,12 +733,6 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 		if (this.cancelableNodeEvaluator) {
 			this.logger.info("Canceling node evaluator.");
 			((ICancelableNodeEvaluator) this.nodeEvaluator).cancel();
-		}
-
-		/* cancel timer (wait until possible if necessary) */
-		if (this.timer != null) {
-			this.logger.info("Waiting for timer lock to shutdown the timer ...");
-			this.timer.cancel();
 		}
 		this.logger.info("Shutdown completed");
 	}
@@ -772,7 +792,8 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 	}
 
 	/**
-	 * This is relevant if we work with several copies of a node (usually if we need to copy the search space somewhere).
+	 * This is relevant if we work with several copies of a node (usually if we need
+	 * to copy the search space somewhere).
 	 *
 	 * @param node
 	 * @return
@@ -784,7 +805,9 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 	/** BLOCK B: Controlling the algorithm from the outside **/
 
 	/**
-	 * This method can be used to create an initial graph different from just root nodes. This can be interesting if the search is distributed and we want to search only an excerpt of the original one.
+	 * This method can be used to create an initial graph different from just root
+	 * nodes. This can be interesting if the search is distributed and we want to
+	 * search only an excerpt of the original one.
 	 *
 	 * @param initialNodes
 	 */
@@ -827,74 +850,49 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 		switch (this.getState()) {
 		case created: {
 			this.logger.info("Initializing BestFirst search {} with {} CPUs and a timeout of {}ms", this, this.getConfig().cpus(), this.getConfig().timeout());
-			this.timer = new Timer("Timer of BestFirst search " + this);
-			if (this.getConfig().timeout() > 0) {
-				this.timer.schedule(new NamedTimerTask("Timeout for the entire search of " + BestFirst.this) {
-
-					@Override
-					public void run() {
-						BestFirst.this.logger.info("Timeout triggered. Setting timeout flag to true and initiating shutdown.");
-						BestFirst.this.setTimeouted(true);
-						BestFirst.this.shutdown();
-					}
-
-				}, this.getConfig().timeout());
-			}
 			this.parallelizeNodeExpansion(this.getConfig().cpus());
 			this.initGraph();
-			this.switchState(AlgorithmState.active);
-			AlgorithmEvent event = new AlgorithmInitializedEvent();
-			this.post(event);
-			return event;
+			return activate();
 		}
 		case active: {
 			synchronized (this.pendingSolutionFoundEvents) {
 				if (!this.pendingSolutionFoundEvents.isEmpty()) {
-					return this.pendingSolutionFoundEvents.poll(); // these already have been posted over the event bus but are now returned to the controller for respective handling
+					return this.pendingSolutionFoundEvents.poll(); // these already have been posted over the event bus but are now returned to the
+																	// controller for respective handling
 				}
 			}
 			AlgorithmEvent event;
 
-			try {
-
-				/* if worker threads are used for expansion, make sure that there is at least one that is not busy */
-				if (this.additionalThreadsForNodeAttachment > 0) {
-					this.activeJobsCounterLock.lockInterruptibly();
-					try {
-						while (this.additionalThreadsForNodeAttachment <= this.activeJobs.get()) {
-							this.checkTermination();
-							this.logger.info("Waiting as {} jobs are running but only {} threads are available", this.activeJobs.get(), this.additionalThreadsForNodeAttachment);
-							this.numberOfActiveJobsHasChanged.await();
-						}
-					} finally {
-						this.activeJobsCounterLock.unlock();
+			/* if worker threads are used for expansion, make sure that there is at least one that is not busy */
+			if (this.additionalThreadsForNodeAttachment > 0) {
+				this.activeJobsCounterLock.lockInterruptibly();
+				try {
+					while (this.additionalThreadsForNodeAttachment <= this.activeJobs.get()) {
+						this.checkTermination();
+						this.logger.info("Waiting as {} jobs are running but only {} threads are available", this.activeJobs.get(), this.additionalThreadsForNodeAttachment);
+						this.numberOfActiveJobsHasChanged.await();
 					}
+				} finally {
+					this.activeJobsCounterLock.unlock();
 				}
-
-				/* now conduct node expansion */
-				this.checkTermination();
-				event = this.expandNextNode();
-
-				/* if no event has occurred, still check whether a solution has arrived in the meantime prior to setting the algorithm state to inactive */
-				if (event == null) {
-					synchronized (this.pendingSolutionFoundEvents) {
-						if (!this.pendingSolutionFoundEvents.isEmpty()) {
-							event = this.pendingSolutionFoundEvents.poll();
-						} else {
-							event = new AlgorithmFinishedEvent();
-							this.logger.info("No event was returned and there are no pending solutions. Number of active jobs: {}. Setting state to inactive.", this.activeJobs.get());
-						}
-					}
-				}
-			} catch (TimeoutException e) {
-				event = new AlgorithmFinishedEvent();
 			}
 
-			/* if the event is the finish event, shutdown */
-			if (event instanceof AlgorithmFinishedEvent) {
-				this.logger.info("Shutting down the search.");
-				this.unregisterThreadAndShutdown();
+			/* now conduct node expansion */
+			this.checkTermination();
+			event = this.expandNextNode();
+
+			/* if no event has occurred, still check whether a solution has arrived in the meantime prior to setting the algorithm state to inactive */
+			if (event == null) {
+				synchronized (this.pendingSolutionFoundEvents) {
+					if (!this.pendingSolutionFoundEvents.isEmpty()) {
+						event = this.pendingSolutionFoundEvents.poll();
+					} else {
+						this.logger.info("No event was returned and there are no pending solutions. Number of active jobs: {}. Setting state to inactive.", this.activeJobs.get());
+						return terminate();
+					}
+				}
 			}
+
 			if (!(event instanceof SolutionCandidateFoundEvent)) {
 				this.post(event);
 			}

@@ -246,12 +246,8 @@ public class MCTS<N, A, V extends Comparable<V>> extends AbstractORGraphSearch<G
 	public AlgorithmEvent nextWithException() throws Exception {
 		switch (this.getState()) {
 		case created:
-			this.activateTimeoutTimer("MCTS-Timeouter");
 			this.post(new GraphInitializedEvent<N>(this.root));
-			this.switchState(AlgorithmState.active);
-			AlgorithmEvent initEvent = new AlgorithmInitializedEvent();
-			this.post(initEvent);
-			return initEvent;
+			return activate();
 
 		case active:
 			if (this.playoutSimulator == null) {
