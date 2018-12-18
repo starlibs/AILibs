@@ -27,8 +27,8 @@ public class LearnShapeletsClassifier
 	private int minShapeLength;
 
 	public LearnShapeletsClassifier(final int K, final double learningRate, final double regularization,
-			final int scaleR, final int minShapeLength, final int maxIter) {
-		super(new LearnShapeletsAlgorithm(K, learningRate, regularization, scaleR, minShapeLength, maxIter));
+			final int scaleR, final int minShapeLength, final int maxIter, final int seed) {
+		super(new LearnShapeletsAlgorithm(K, learningRate, regularization, scaleR, minShapeLength, maxIter, seed));
 
 		this.scaleR = scaleR;
 		this.K = K;

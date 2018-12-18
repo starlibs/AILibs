@@ -6,13 +6,20 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.api.rng.distribution.Distribution;
+import org.nd4j.linalg.api.rng.distribution.impl.NormalDistribution;
 import org.nd4j.linalg.factory.Nd4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jaicore.basic.TimeOut;
 import jaicore.basic.algorithm.AlgorithmEvent;
 import jaicore.ml.core.dataset.TimeSeriesDataset;
 import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
 import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeValue;
+import jaicore.ml.tsc.util.TimeSeriesUtil;
+import weka.clusterers.SimpleKMeans;
+import weka.core.Instances;
 
 /**
  * Generalized Shapelets Learning implementation for
@@ -26,12 +33,15 @@ import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeValue;
 public class LearnShapeletsAlgorithm extends
 		ATSCAlgorithm<CategoricalAttributeType, CategoricalAttributeValue, TimeSeriesDataset, LearnShapeletsClassifier> {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(LearnShapeletsAlgorithm.class);
+
 	private int K;
 	private double learningRate;
 	private double regularization;
 	private int scaleR;
 	private int minShapeLength;
 	private int maxIter;
+	private int seed;
 
 	private int I;
 	private int Q;
@@ -40,14 +50,14 @@ public class LearnShapeletsAlgorithm extends
 	public static double ALPHA = -100d;
 
 	public LearnShapeletsAlgorithm(final int K, final double learningRate, final double regularization,
-			final int scaleR, final int minShapeLength, final int maxIter) {
+			final int scaleR, final int minShapeLength, final int maxIter, final int seed) {
 		this.K = K;
 		this.learningRate = learningRate;
 		this.regularization = regularization;
 		this.scaleR = scaleR;
 		this.minShapeLength = minShapeLength;
 		this.maxIter = maxIter;
-
+		this.seed = seed;
 	}
 
 	@Override
@@ -68,9 +78,54 @@ public class LearnShapeletsAlgorithm extends
 		return null;
 	}
 
+	public List<INDArray> initializeS(final INDArray trainingMatrix) {
+		final List<INDArray> result = new ArrayList<>();
+
+		for (int r = 0; r < this.scaleR; r++) {
+			final int numberOfSegments = getNumberOfSegments(this.Q, this.K, r);
+
+			final int L = (r + 1) * this.minShapeLength;
+
+			final INDArray tmpSegments = Nd4j.create(trainingMatrix.shape()[0] * numberOfSegments, L);
+
+			// Prepare training data for finding the centroids
+			for (int i = 0; i < trainingMatrix.shape()[0]; i++) {
+				for (int j = 0; j < numberOfSegments; j++) {
+					for (int l = 0; l < L; l++) {
+						tmpSegments.putScalar(new int[] { i * numberOfSegments + j, l },
+								trainingMatrix.getDouble(i, j + l));
+					}
+					TimeSeriesUtil.normalizeINDArray(tmpSegments.getRow(i * numberOfSegments + j), true);
+				}
+			}
+
+			Instances wekaInstances = TimeSeriesUtil.indArrayToWekaInstances(tmpSegments);
+
+			// Cluster using k-Means
+			SimpleKMeans kMeans = new SimpleKMeans();
+			try {
+				kMeans.setNumClusters(K);
+				kMeans.setSeed(this.seed);
+				kMeans.setMaxIterations(100);
+				kMeans.buildClusterer(wekaInstances);
+			} catch (Exception e) {
+				LOGGER.warn(
+						"Could not initialize matrix S using kMeans clustering for r=%d due to the following problem: %s. "
+								+ "Using zero matrix instead (possibly leading to a poor training performance).",
+						r, e.getMessage());
+				result.add(Nd4j.zeros(this.K, r * this.minShapeLength));
+				continue;
+			}
+			Instances clusterCentroids = kMeans.getClusterCentroids();
+
+			result.add(TimeSeriesUtil.wekaInstancesToINDArray(clusterCentroids, false));
+		}
+
+		return result;
+	}
+
 	@Override
 	public LearnShapeletsClassifier call() throws Exception {
-		// TODO Auto-generated method stub
 		// Training
 
 		TimeSeriesDataset data = this.getInput();
@@ -84,13 +139,13 @@ public class LearnShapeletsAlgorithm extends
 		INDArray Y = Nd4j.create(this.I, this.C);
 
 		// TODO: Initialization
-		List<INDArray> S = new ArrayList<>();
+		List<INDArray> S = initializeS(dataMatrix);
 		List<INDArray> D = new ArrayList<>();
 		List<INDArray> Xi = new ArrayList<>();
 		List<INDArray> Phi = new ArrayList<>();
 		for (int r = 0; r < this.scaleR; r++) {
 			final int numberOfSegments = getNumberOfSegments(this.Q, this.minShapeLength, r);
-			S.add(Nd4j.create(K, r * this.minShapeLength));
+			// S.add(Nd4j.create(K, r * this.minShapeLength));
 			D.add(Nd4j.create(this.I, this.K, numberOfSegments));
 			Xi.add(Nd4j.create(this.I, this.K, numberOfSegments));
 			Phi.add(Nd4j.create(this.I, this.K, numberOfSegments));
@@ -98,8 +153,9 @@ public class LearnShapeletsAlgorithm extends
 
 		// TODO: Check correct order of shape parameters of W => Current version is the
 		// paper's version but doesn't match with the allocated matrix's shape
-		INDArray W = Nd4j.create(this.C, this.scaleR, this.K);
-		INDArray W_0 = Nd4j.create(this.C);
+		Distribution wInitDistribution = new NormalDistribution(0, 0.01);
+		INDArray W = Nd4j.rand(new long[] { this.C, this.scaleR, this.K }, wInitDistribution);
+		INDArray W_0 = Nd4j.rand(new long[] { this.C }, wInitDistribution);
 
 		INDArray Psi = Nd4j.create(this.scaleR, this.I, this.K);
 		INDArray M_hat = Nd4j.create(this.scaleR, this.I, this.K);
@@ -255,7 +311,7 @@ public class LearnShapeletsAlgorithm extends
 	}
 
 	public static int getNumberOfSegments(final int Q, final int minShapeLength, final int r) {
-		return Q - r * minShapeLength + 1;
+		return Q - (r + 1) * minShapeLength;
 	}
 
 	// TODO: Maybe move to utility? Or use library?
