@@ -17,7 +17,6 @@ import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
-import jaicore.basic.algorithm.exceptions.CascadingAlgorithmException;
 
 public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C extends EvaluatedSoftwareConfigurationSolution<V>, V extends Comparable<V>> extends AAlgorithm<OptimizingFactoryProblem<P, T, V>, T> {
 
@@ -60,7 +59,7 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C e
 				this.performanceOfObject = solutionModel.getScore();
 				return terminate();
 			} catch (ComponentInstantiationFailedException e) {
-				throw new CascadingAlgorithmException(e, "Could not conduct next step in OptimizingFactory due to an exception in the component instantiation.");
+				throw new AlgorithmException(e, "Could not conduct next step in OptimizingFactory due to an exception in the component instantiation.");
 			}
 		}
 		default:

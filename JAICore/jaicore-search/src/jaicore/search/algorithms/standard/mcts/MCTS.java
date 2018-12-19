@@ -16,9 +16,7 @@ import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.AlgorithmState;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
-import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
-import jaicore.basic.algorithm.exceptions.CascadingAlgorithmException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.basic.sets.SetUtil;
 import jaicore.graph.LabeledGraph;
@@ -298,7 +296,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 				this.post(finishEvent);
 				return finishEvent;
 			} catch (ObjectEvaluationFailedException e) {
-				throw new CascadingAlgorithmException(e, "Could not evaluate playout!");
+				throw new AlgorithmException(e, "Could not evaluate playout!");
 			} finally {
 
 				/* unregister this thread in order to avoid interruptions */
