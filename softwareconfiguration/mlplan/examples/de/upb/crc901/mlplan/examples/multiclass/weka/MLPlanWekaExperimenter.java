@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 import org.aeonbits.owner.ConfigFactory;
 
@@ -39,9 +40,9 @@ public class MLPlanWekaExperimenter implements IExperimentSetEvaluator {
 	private final MLPlanWekaExperimenterConfig experimentConfig;
 	private SQLAdapter adapter;
 	private int experimentID;
-	private WEKAPipelineFactory factory = new WEKAPipelineFactory();
-	
-	public MLPlanWekaExperimenter(File configFile) {
+	private final WEKAPipelineFactory factory = new WEKAPipelineFactory();
+
+	public MLPlanWekaExperimenter(final File configFile) {
 		super();
 		Properties props = new Properties();
 		try {
@@ -50,18 +51,18 @@ public class MLPlanWekaExperimenter implements IExperimentSetEvaluator {
 			System.err.println("Could not find or access config file " + configFile);
 			System.exit(1);
 		}
-		experimentConfig = ConfigFactory.create(MLPlanWekaExperimenterConfig.class, props);
-		if (experimentConfig.getDatasetFolder() == null) {
+		this.experimentConfig = ConfigFactory.create(MLPlanWekaExperimenterConfig.class, props);
+		if (this.experimentConfig.getDatasetFolder() == null) {
 			throw new IllegalArgumentException("No dataset folder (datasetfolder) set in config.");
 		}
-		if (experimentConfig.evaluationsTable() == null) {
+		if (this.experimentConfig.evaluationsTable() == null) {
 			throw new IllegalArgumentException("No evaluations table (db.evalTable) set in config");
 		}
 	}
 
 	@Override
 	public IExperimentSetConfig getConfig() {
-		return experimentConfig;
+		return this.experimentConfig;
 	}
 
 	@Override
@@ -77,18 +78,18 @@ public class MLPlanWekaExperimenter implements IExperimentSetEvaluator {
 			throw new IllegalArgumentException("\"evaluationTimeout\" is not configured as a keyword in the experiment config");
 		}
 
-		File datasetFile = new File(experimentConfig.getDatasetFolder().getAbsolutePath() + File.separator + experimentValues.get("dataset") + ".arff");
+		File datasetFile = new File(this.experimentConfig.getDatasetFolder().getAbsolutePath() + File.separator + experimentValues.get("dataset") + ".arff");
 		print("Load dataset file: " + datasetFile.getAbsolutePath());
 
 		Instances data = new Instances(new FileReader(datasetFile));
 		data.setClassIndex(data.numAttributes() - 1);
 		print("Split instances");
-		List<Instances> stratifiedSplit = WekaUtil.getStratifiedSplit(data, new Random(), .7);
+		List<Instances> stratifiedSplit = WekaUtil.getStratifiedSplit(data, 0, .7);
 
 		/* initialize ML-Plan with the same config file that has been used to specify the experiments */
 		MLPlanWekaClassifier mlplan = new WekaMLPlanWekaClassifier(new MLPlanWekaBuilder().withAlgorithmConfigFile(configFile));
 		mlplan.setLoggerName("mlplan");
-		mlplan.setTimeout(new Integer(experimentValues.get("timeout")));
+		mlplan.setTimeout(new Integer(experimentValues.get("timeout")), TimeUnit.SECONDS);
 		mlplan.setTimeoutForSingleSolutionEvaluation(new Integer(experimentValues.get("evaluationTimeout")));
 		mlplan.setTimeoutForNodeEvaluation(new Integer(experimentValues.get("evaluationTimeout")));
 		mlplan.setRandomSeed(new Integer(experimentValues.get("seed")));
@@ -126,7 +127,7 @@ public class MLPlanWekaExperimenter implements IExperimentSetEvaluator {
 				eval.put("errorRate", e.getSolutionCandidate().getScore());
 				eval.put("time_train", e.getSolutionCandidate().getTimeToEvaluateCandidate());
 
-				this.adapter.insert(experimentConfig.evaluationsTable(), eval);
+				this.adapter.insert(this.experimentConfig.evaluationsTable(), eval);
 			} catch (Exception e1) {
 				e1.printStackTrace();
 			}
@@ -138,7 +139,7 @@ public class MLPlanWekaExperimenter implements IExperimentSetEvaluator {
 	}
 
 	public static void main(final String[] args) {
-		
+
 		/* check config */
 		print("Start experiment runner...");
 		ExperimentRunner runner = new ExperimentRunner(new MLPlanWekaExperimenter(configFile));

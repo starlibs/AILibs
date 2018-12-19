@@ -98,13 +98,13 @@ public class Literal implements Serializable {
 	/**
 	 * Protected helper constructor. Ensure the literal gets parameters!!
 	 */
-	public Literal(String propertyWithParams) {
+	public Literal(final String pPropertyWithParams) {
 		super();
 		this.parameters = new ArrayList<>();
 
 		/* detect special predicates = or != */
-		if (propertyWithParams.contains("=")) {
-			String[] params = StringUtil.explode(propertyWithParams, "=");
+		if (pPropertyWithParams.contains("=")) {
+			String[] params = StringUtil.explode(pPropertyWithParams, "=");
 			boolean isNegated = params.length > 0 && params[0].endsWith("!");
 			this.property = isNegated ? "!=" : "=";
 			if (params.length == 2) {
@@ -119,9 +119,10 @@ public class Literal implements Serializable {
 		else {
 
 			boolean isPositive = true;
-			if (propertyWithParams.startsWith("!")) {
+			String propertyWithParams = new String(pPropertyWithParams);
+			if (pPropertyWithParams.startsWith("!")) {
 				isPositive = false;
-				propertyWithParams = propertyWithParams.substring(1);
+				propertyWithParams = pPropertyWithParams.substring(1);
 			}
 
 			/* add parameters if given in the string */
@@ -142,6 +143,8 @@ public class Literal implements Serializable {
 				this.property = "!" + this.property;
 			}
 		}
+		if (this.property == null)
+			throw new IllegalArgumentException("Given string \"" + pPropertyWithParams + "\" causes a NULL property!");
 	}
 
 	public Literal(String property2, boolean isPositive) {

@@ -31,7 +31,7 @@ public class CaseControlSampling extends CaseControlLikeSampling {
 	public AlgorithmEvent nextWithException() throws Exception {
 		switch(this.getState()) {
 		case created:
-			this.sample = null;
+			this.sample = this.createEmptyDatasetFromInputSchema();
 			
 			HashMap<Object, Integer> classOccurrences = countClassOccurrences(this.getInput());
 			
@@ -40,7 +40,6 @@ public class CaseControlSampling extends CaseControlLikeSampling {
 			
 			// Calculate Boundaries that define which Instances is choose for which random number
 			probabilityBoundaries = calculateInstanceBoundaries(classOccurrences, numberOfClasses);
-			
 			this.setState(AlgorithmState.active);
 			return new AlgorithmInitializedEvent();
 		case active:

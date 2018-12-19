@@ -1,5 +1,6 @@
 package jaicore.planning.graphgenerators.task;
 
+import java.awt.event.FocusEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -27,6 +28,8 @@ import jaicore.logic.fol.structure.LiteralParam;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.logic.fol.structure.VariableParam;
 import jaicore.logic.fol.theories.EvaluablePredicate;
+import jaicore.logic.fol.util.ForwardChainer;
+import jaicore.logic.fol.util.ForwardChainingProblem;
 import jaicore.logic.fol.util.LogicUtil;
 import jaicore.planning.model.ceoc.CEOCAction;
 import jaicore.planning.model.ceoc.CEOCOperation;
@@ -355,8 +358,9 @@ public class TaskPlannerUtil {
 				/* now create the part of the grounding of the METHOD related to params NOT occurring in the task. if no such exists, consider just one empty completion */
 				Monom positiveRequirements = new Monom(preconditionOfMethodOrPrimitive.stream().filter(l -> l.isPositive()).collect(Collectors.toList()),
 						groundingForMethodOrPrimitiveTask);
-
-				final Collection<Map<VariableParam, LiteralParam>> restMaps = LogicUtil.getSubstitutionsThatEnableForwardChaining(unitedKnowledge, positiveRequirements);
+				
+				ForwardChainer fc = new ForwardChainer(new ForwardChainingProblem(unitedKnowledge, positiveRequirements, true));
+				final Collection<Map<VariableParam, LiteralParam>> restMaps = fc.call();
 				if (restMaps.isEmpty())
 					restMaps.add(new HashMap<>());
 

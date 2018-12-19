@@ -62,16 +62,14 @@ public class StratifiedSampling extends ASamplingAlgorithm {
 	public AlgorithmEvent nextWithException() throws Exception {
 		switch (this.getState()) {
 		case created:
-			// TODO: create empty dataset
-			this.sample = null;
-			// TODO: create empty dataset
-			this.datasetCopy = null;
+			this.sample = this.createEmptyDatasetFromInputSchema();
+			this.datasetCopy = this.createEmptyDatasetFromInputSchema();
 			this.datasetCopy.addAll(this.getInput());
 			this.stratiAmountSelector.setNumCPUs(this.getNumCPUs());
+			this.stratiAssigner.setNumCPUs(this.getNumCPUs());
 			this.strati = new IDataset[this.stratiAmountSelector.selectStratiAmount(this.datasetCopy)];
 			for (int i = 0; i < this.strati.length; i++) {
-				// TODO: create emtpy strati dataset
-				this.strati[i] = null;
+				this.strati[i] = this.createEmptyDatasetFromInputSchema();
 			}
 			this.simpleRandomSamplingStarted = false;
 			this.stratiAssigner.init(this.datasetCopy, this.strati.length);
@@ -82,7 +80,7 @@ public class StratifiedSampling extends ASamplingAlgorithm {
 			if (this.sample.size() < this.sampleSize) {
 				if (this.datasetCopy.size() >= 1) {
 					// Stratify the datapoints one by one.
-					IInstance datapoint = this.datasetCopy.remove(0);
+					IInstance datapoint = (IInstance) this.datasetCopy.remove(0);
 					int assignedStrati = this.stratiAssigner.assignToStrati(datapoint);
 					if (assignedStrati < 0 || assignedStrati >= this.strati.length) {
 						throw new Exception("No existing strati for index " + assignedStrati);

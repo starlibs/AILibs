@@ -19,8 +19,7 @@ public class SimpleRandomSampling extends ASamplingAlgorithm {
 	public AlgorithmEvent nextWithException() throws Exception {
 		switch (this.getState()) {
 		case created:
-			// TODO: create empty dataset
-			this.sample = null;
+			this.sample = this.createEmptyDatasetFromInputSchema();
 			this.setState(AlgorithmState.active);
 			return new AlgorithmInitializedEvent();			
 		case active:
