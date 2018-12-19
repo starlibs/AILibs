@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.indexing.NDArrayIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +22,17 @@ import jaicore.ml.core.dataset.TimeSeriesDataset;
 import jaicore.ml.core.dataset.TimeSeriesInstance;
 import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
 import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeValue;
+import jaicore.ml.core.dataset.attribute.timeseries.TimeSeriesAttributeType;
 import jaicore.ml.tsc.quality_measures.IQualityMeasure;
+import weka.classifiers.Classifier;
+import weka.classifiers.bayes.NaiveBayes;
+import weka.classifiers.functions.SMO;
+import weka.classifiers.functions.supportVector.PolyKernel;
+import weka.classifiers.lazy.IBk;
+import weka.classifiers.meta.Vote;
+import weka.classifiers.trees.J48;
+import weka.classifiers.trees.RandomForest;
+import weka.core.SelectedTag;
 
 public class ShapeletTransformAlgorithm extends
 		ATSCAlgorithm<CategoricalAttributeType, CategoricalAttributeValue, TimeSeriesDataset, ShapeletTransformClassifier> {
@@ -62,11 +73,13 @@ public class ShapeletTransformAlgorithm extends
 	private final IQualityMeasure<String> qualityMeasure;
 
 	private final int k;
+	private final int seed;
 
-	public ShapeletTransformAlgorithm(final int k, final IQualityMeasure<String> qualityMeasure) {
+	public ShapeletTransformAlgorithm(final int k, final IQualityMeasure<String> qualityMeasure, final int seed) {
 		// TODO Auto-generated constructor stub
 		this.k = k;
 		this.qualityMeasure = qualityMeasure;
+		this.seed = seed;
 	}
 
 	@Override
@@ -87,6 +100,10 @@ public class ShapeletTransformAlgorithm extends
 		int min = 0;
 
 		List<Shapelet> shapelets = shapeletCachedSelection(dataMatrix, min, max, this.k, classValues);
+
+		Classifier classifier = initEnsembleModel();
+
+		// classifier.buildClassifier(data);
 
 		this.model.setShapelets(shapelets);
 
@@ -206,6 +223,77 @@ public class ShapeletTransformAlgorithm extends
 			result.add(new Shapelet(data.get(NDArrayIndex.interval(i, i + l)), i, l, candidateIndex));
 		}
 		return result;
+	}
+
+	// Using HIVE COTE paper ensemble
+	private Classifier initEnsembleModel() {
+
+		Classifier[] classifier = new Classifier[7];
+
+		Vote voter = new Vote();
+		voter.setCombinationRule(new SelectedTag(Vote.MAJORITY_VOTING_RULE, Vote.TAGS_RULES));
+
+		// SMO poly2
+		SMO smop = new SMO();
+		smop.turnChecksOff();
+		smop.setBuildCalibrationModels(true);
+		PolyKernel kernel = new PolyKernel();
+		kernel.setExponent(2);
+		smop.setKernel(kernel);
+		smop.setRandomSeed(this.seed);
+		classifier[0] = smop;
+
+		// Random Forest
+		RandomForest rf = new RandomForest();
+		rf.setSeed(this.seed);
+		classifier[1] = rf;
+
+		// Rotation forest
+		// TODO
+
+		// NN
+		IBk nn = new IBk();
+		classifier[3] = nn;
+
+		// Naive Bayes
+		NaiveBayes nb = new NaiveBayes();
+		classifier[4] = nb;
+
+		// C45
+		J48 c45 = new J48();
+		classifier[5] = c45;
+
+		// SMO linear
+		SMO smol = new SMO();
+		smol.turnChecksOff();
+		smol.setBuildCalibrationModels(true);
+		PolyKernel linearKernel = new PolyKernel();
+		linearKernel.setExponent(1);
+		smol.setKernel(linearKernel);
+		classifier[6] = smol;
+
+		voter.setClassifiers(classifier);
+		return voter;
+	}
+
+	public static TimeSeriesDataset shapeletTransform(final TimeSeriesDataset dataSet, final List<Shapelet> shapelets) {
+
+		// TODO: Deal with multivariate (assuming univariate for now)
+		TimeSeriesAttributeType tsAttType = (TimeSeriesAttributeType) dataSet.getAttributeTypes().get(0);
+		INDArray timeSeries = dataSet.getMatrixForAttributeType(tsAttType);
+
+		INDArray transformedTS = Nd4j.create(timeSeries.shape()[0], shapelets.size());
+
+		for (int i = 0; i < timeSeries.shape()[0]; i++) {
+			for (int j = 0; j < shapelets.size(); j++) {
+				transformedTS.putScalar(new int[] { i, j }, ShapeletTransformAlgorithm
+						.getMinimumDistanceAmongAllSubsequences(shapelets.get(j), timeSeries.getRow(i)));
+			}
+		}
+
+		dataSet.updateTimeSeriesMatrix(tsAttType, transformedTS);
+		return dataSet;
+
 	}
 
 	@Override
