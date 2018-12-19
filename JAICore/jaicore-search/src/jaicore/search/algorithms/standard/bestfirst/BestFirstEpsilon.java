@@ -11,8 +11,8 @@ import org.slf4j.LoggerFactory;
 
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
-import jaicore.search.model.probleminputs.GeneralEvaluatedTraversalTree;
 import jaicore.search.model.travesaltree.Node;
+import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 
 /**
  * A* algorithm implementation using the method design pattern.
@@ -58,11 +58,11 @@ public class BestFirstEpsilon<T, A, W extends Comparable<W>> extends StandardBes
 		}
 	}
 
-	public BestFirstEpsilon(final GeneralEvaluatedTraversalTree<T, A, Double> problem, final INodeEvaluator<T, W> pSecondaryNodeEvaluator, final int epsilon) throws InterruptedException {
+	public BestFirstEpsilon(final GraphSearchWithSubpathEvaluationsInput<T, A, Double> problem, final INodeEvaluator<T, W> pSecondaryNodeEvaluator, final int epsilon) throws InterruptedException {
 		this(problem, pSecondaryNodeEvaluator, epsilon, true);
 	}
 
-	public BestFirstEpsilon(final GeneralEvaluatedTraversalTree<T, A, Double> problem, final INodeEvaluator<T, W> pSecondaryNodeEvaluator, final double epsilon, final boolean absolute) throws InterruptedException {
+	public BestFirstEpsilon(final GraphSearchWithSubpathEvaluationsInput<T, A, Double> problem, final INodeEvaluator<T, W> pSecondaryNodeEvaluator, final double epsilon, final boolean absolute) throws InterruptedException {
 		super(problem);
 		this.secondaryNodeEvaluator = pSecondaryNodeEvaluator;
 		this.epsilon = epsilon;

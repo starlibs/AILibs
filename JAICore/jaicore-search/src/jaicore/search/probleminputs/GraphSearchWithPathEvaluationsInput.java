@@ -1,4 +1,4 @@
-package jaicore.search.model.probleminputs;
+package jaicore.search.probleminputs;
 
 import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.core.interfaces.ISolutionEvaluator;
@@ -16,10 +16,10 @@ import jaicore.search.core.interfaces.ISolutionEvaluator;
  * @param <A>
  * @param <V>
  */
-public class GraphSearchProblemInput<N, A, V extends Comparable<V>> extends GraphSearchInput<N, A> {
+public class GraphSearchWithPathEvaluationsInput<N, A, V extends Comparable<V>> extends GraphSearchInput<N, A> {
 	private final ISolutionEvaluator<N, V> pathEvaluator;
 
-	public GraphSearchProblemInput(GraphGenerator<N, A> graphGenerator, ISolutionEvaluator<N, V> pathEvaluator) {
+	public GraphSearchWithPathEvaluationsInput(GraphGenerator<N, A> graphGenerator, ISolutionEvaluator<N, V> pathEvaluator) {
 		super(graphGenerator);
 		this.pathEvaluator = pathEvaluator;
 	}

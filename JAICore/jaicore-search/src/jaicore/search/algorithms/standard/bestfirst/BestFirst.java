@@ -31,9 +31,10 @@ import org.slf4j.LoggerFactory;
 import com.google.common.eventbus.Subscribe;
 
 import jaicore.basic.ILoggingCustomizable;
-import jaicore.basic.algorithm.AlgorithmEvent;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
-import jaicore.basic.algorithm.SolutionCandidateFoundEvent;
+import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
+import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.concurrent.InterruptionTimerTask;
 import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeParentSwitchEvent;
@@ -41,23 +42,24 @@ import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeRemovedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
 import jaicore.logging.LoggerUtil;
-import jaicore.search.algorithms.standard.AbstractORGraphSearch;
 import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.NodeAnnotationEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.NodeExpansionCompletedEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.NodeExpansionJobSubmittedEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.SolutionAnnotationEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.SuccessorComputationCompletedEvent;
+import jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.DecoratingNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.ICancelableNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.IGraphDependentNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.ISolutionReportingNodeEvaluator;
+import jaicore.search.core.interfaces.AOptimalPathInORGraphSearch;
 import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
-import jaicore.search.model.probleminputs.GeneralEvaluatedTraversalTree;
 import jaicore.search.model.travesaltree.Node;
 import jaicore.search.model.travesaltree.NodeExpansionDescription;
+import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 import jaicore.search.structure.graphgenerator.MultipleRootGenerator;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.PathGoalTester;
@@ -65,7 +67,7 @@ import jaicore.search.structure.graphgenerator.RootGenerator;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
-public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V extends Comparable<V>> extends AbstractORGraphSearch<I, EvaluatedSearchGraphPath<N, A, V>, N, A, V, Node<N, V>, A> {
+public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>, N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSearch<I, N, A, V, Node<N, V>, A> {
 
 	private Logger logger = LoggerFactory.getLogger(BestFirst.class);
 	private String loggerName;
@@ -123,7 +125,7 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 
 	@SuppressWarnings("unchecked")
 	public BestFirst(final I problem, final IBestFirstConfig config) {
-		super(config, problem);
+		super(problem, config);
 		this.graphGenerator = problem.getGraphGenerator();
 		this.rootGenerator = this.graphGenerator.getRootGenerator();
 		this.successorGenerator = this.graphGenerator.getSuccessorGenerator();
@@ -406,7 +408,7 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 		return newNode;
 	}
 
-	protected void labelNode(final Node<N, V> node) throws Exception {
+	protected void labelNode(final Node<N, V> node) throws NodeEvaluationException, TimeoutException, AlgorithmExecutionCanceledException, InterruptedException {
 
 		/* define timeouter for label computation */
 		InterruptionTimerTask interruptionTask = null;
@@ -479,8 +481,12 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 
 	/**
 	 * This method setups the graph by inserting the root nodes.
+	 * @throws InterruptedException 
+	 * @throws AlgorithmExecutionCanceledException 
+	 * @throws TimeoutException 
+	 * @throws NodeEvaluationException 
 	 */
-	protected void initGraph() throws Exception {
+	protected void initGraph() throws NodeEvaluationException, TimeoutException, AlgorithmExecutionCanceledException, InterruptedException {
 		if (!this.initialized) {
 			this.initialized = true;
 			if (this.rootGenerator instanceof MultipleRootGenerator) {
@@ -846,7 +852,7 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws Exception {
+	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
 		switch (this.getState()) {
 		case created: {
 			this.logger.info("Initializing BestFirst search {} with {} CPUs and a timeout of {}ms", this, this.getConfig().cpus(), this.getConfig().timeout());
@@ -857,8 +863,7 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 		case active: {
 			synchronized (this.pendingSolutionFoundEvents) {
 				if (!this.pendingSolutionFoundEvents.isEmpty()) {
-					return this.pendingSolutionFoundEvents.poll(); // these already have been posted over the event bus but are now returned to the
-																	// controller for respective handling
+					return this.pendingSolutionFoundEvents.poll(); // these already have been posted over the event bus but are now returned to the controller for respective handling
 				}
 			}
 			AlgorithmEvent event;
@@ -918,12 +923,12 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 		return null;
 	}
 
-	public EvaluatedSearchGraphPath<N, A, V> nextSolutionThatDominatesOpen() throws InterruptedException, AlgorithmExecutionCanceledException {
+	public EvaluatedSearchGraphPath<N, A, V> nextSolutionThatDominatesOpen() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
 		EvaluatedSearchGraphPath<N, A, V> currentlyBestSolution = null;
 		V currentlyBestScore = null;
 		boolean loopCondition = true;
 		while (loopCondition) {
-			EvaluatedSearchGraphPath<N, A, V> solution = this.nextSolution();
+			EvaluatedSearchGraphPath<N, A, V> solution = this.nextSolutionCandidate();
 			V scoreOfSolution = solution.getScore();
 			if (currentlyBestScore == null || scoreOfSolution.compareTo(currentlyBestScore) < 0) {
 				currentlyBestScore = scoreOfSolution;
@@ -1072,11 +1077,6 @@ public class BestFirst<I extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V
 	public Object getNodeAnnotation(final N node, final String annotation) {
 		Node<N, V> intNode = this.ext2int.get(node);
 		return intNode.getAnnotation(annotation);
-	}
-
-	@Override
-	public EvaluatedSearchGraphPath<N, A, V> getSolutionProvidedToCall() {
-		return this.getBestSeenSolution();
 	}
 
 	@Override

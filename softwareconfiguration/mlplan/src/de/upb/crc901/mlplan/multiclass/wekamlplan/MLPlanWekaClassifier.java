@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,7 @@ import com.google.common.eventbus.Subscribe;
 import de.upb.crc901.mlpipeline_evaluation.CacheEvaluatorMeasureBridge;
 import de.upb.crc901.mlplan.multiclass.MLPlanClassifierConfig;
 import hasco.core.HASCOSolutionCandidate;
+import hasco.exceptions.ComponentInstantiationFailedException;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
 import hasco.optimizingfactory.OptimizingFactory;
@@ -28,11 +30,15 @@ import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.IObjectEvaluator;
 import jaicore.basic.MathExt;
 import jaicore.basic.algorithm.AAlgorithm;
-import jaicore.basic.algorithm.AlgorithmEvent;
-import jaicore.basic.algorithm.AlgorithmFinishedEvent;
-import jaicore.basic.algorithm.AlgorithmInitializedEvent;
+import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.AlgorithmState;
-import jaicore.basic.algorithm.SolutionCandidateFoundEvent;
+import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
+import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
+import jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
+import jaicore.basic.algorithm.exceptions.AlgorithmException;
+import jaicore.basic.algorithm.exceptions.CascadingAlgorithmException;
+import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.ml.WekaUtil;
 import jaicore.ml.core.evaluation.measure.singlelabel.MultiClassPerformanceMeasure;
 import jaicore.ml.evaluation.evaluators.weka.AbstractEvaluatorMeasureBridge;
@@ -51,9 +57,11 @@ import weka.core.Option;
 import weka.core.OptionHandler;
 
 /**
- * A WEKA classifier wrapping the functionality of ML-Plan where the constructed object is a WEKA classifier.
+ * A WEKA classifier wrapping the functionality of ML-Plan where the constructed
+ * object is a WEKA classifier.
  *
- * It implements the algorithm interface with itself (with modified state) as an output
+ * It implements the algorithm interface with itself (with modified state) as an
+ * output
  *
  * @author wever, fmohr
  *
@@ -85,7 +93,7 @@ public abstract class MLPlanWekaClassifier extends AAlgorithm<Instances, Classif
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws Exception {
+	public AlgorithmEvent nextWithException() throws AlgorithmException, InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {
 		switch (this.getState()) {
 		case created: {
 			/* check whether data has been set */
@@ -119,7 +127,7 @@ public abstract class MLPlanWekaClassifier extends AAlgorithm<Instances, Classif
 			/* communicate the parameters with which ML-Plan will run */
 			this.logger.info(
 					"Starting ML-Plan with the following setup:\n\tDataset: {}\n\tTarget: {}\n\tCPUs: {}\n\tTimeout: {}s\n\tTimeout for single candidate evaluation: {}s\n\tTimeout for node evaluation: {}s\n\tRandom Completions per node evaluation: {}\n\tPortion of data for selection phase: {}%\n\tMCCV for search: {} iterations with {}% for training\n\tMCCV for select: {} iterations with {}% for training\n\tBlow-ups are {} for selection phase and {} for post-processing phase.",
-					this.getInput().relationName(), MultiClassPerformanceMeasure.ERRORRATE, this.getConfig().cpus(), this.getConfig().timeout(), this.getConfig().timeoutForCandidateEvaluation() / 1000,
+					this.getInput().relationName(), MultiClassPerformanceMeasure.ERRORRATE, this.getConfig().cpus(), this.getTimeout().seconds(), this.getConfig().timeoutForCandidateEvaluation() / 1000,
 					this.getConfig().timeoutForNodeEvaluation() / 1000, this.getConfig().randomCompletions(), MathExt.round(this.getConfig().dataPortionForSelection() * 100, 2), this.getConfig().numberOfMCIterationsDuringSearch(),
 					(int) (100 * this.getConfig().getMCCVTrainFoldSizeDuringSearch()), this.getConfig().numberOfMCIterationsDuringSelection(), (int) (100 * this.getConfig().getMCCVTrainFoldSizeDuringSelection()),
 					this.getConfig().expectedBlowupInSelection(), this.getConfig().expectedBlowupInPostprocessing());
@@ -130,16 +138,21 @@ public abstract class MLPlanWekaClassifier extends AAlgorithm<Instances, Classif
 					this.getConfig().getMCCVTrainFoldSizeDuringSearch(), this.getConfig().randomSeed());
 
 			IObjectEvaluator<ComponentInstance, Double> wrappedSearchBenchmark = c -> {
-				if (this.evaluationMeasurementBridge instanceof CacheEvaluatorMeasureBridge) {
-					CacheEvaluatorMeasureBridge bridge = ((CacheEvaluatorMeasureBridge) this.evaluationMeasurementBridge).getShallowCopy(c);
+				try {
+					if (this.evaluationMeasurementBridge instanceof CacheEvaluatorMeasureBridge) {
+						CacheEvaluatorMeasureBridge bridge = ((CacheEvaluatorMeasureBridge) this.evaluationMeasurementBridge).getShallowCopy(c);
 
-					long seed = this.getConfig().randomSeed() + c.hashCode();
+						long seed = this.getConfig().randomSeed() + c.hashCode();
 
-					IObjectEvaluator<Classifier, Double> copiedSearchBenchmark = new MonteCarloCrossValidationEvaluator(bridge, this.getConfig().numberOfMCIterationsDuringSearch(), this.dataShownToSearch,
-							this.getConfig().getMCCVTrainFoldSizeDuringSearch(), seed);
-					return copiedSearchBenchmark.evaluate(this.factory.getComponentInstantiation(c));
+						IObjectEvaluator<Classifier, Double> copiedSearchBenchmark = new MonteCarloCrossValidationEvaluator(bridge, this.getConfig().numberOfMCIterationsDuringSearch(), this.dataShownToSearch,
+								this.getConfig().getMCCVTrainFoldSizeDuringSearch(), seed);
+
+						return copiedSearchBenchmark.evaluate(this.factory.getComponentInstantiation(c));
+					}
+					return searchBenchmark.evaluate(this.factory.getComponentInstantiation(c));
+				} catch (ComponentInstantiationFailedException e) {
+					throw new ObjectEvaluationFailedException(e, "Evaluation of composition failed as the component instantiation could not be built.");
 				}
-				return searchBenchmark.evaluate(this.factory.getComponentInstantiation(c));
 			};
 
 			IObjectEvaluator<ComponentInstance, Double> wrappedSelectionBenchmark = c -> {
@@ -152,7 +165,11 @@ public abstract class MLPlanWekaClassifier extends AAlgorithm<Instances, Classif
 
 				MonteCarloCrossValidationEvaluator mccv = new MonteCarloCrossValidationEvaluator(bridge, MLPlanWekaClassifier.this.getConfig().numberOfMCIterationsDuringSelection(), MLPlanWekaClassifier.this.getInput(),
 						MLPlanWekaClassifier.this.getConfig().getMCCVTrainFoldSizeDuringSelection(), this.getConfig().randomSeed());
-				mccv.evaluate(this.factory.getComponentInstantiation(c));
+				try {
+					mccv.evaluate(this.factory.getComponentInstantiation(c));
+				} catch (ComponentInstantiationFailedException e) {
+					throw new ObjectEvaluationFailedException(e, "Evaluation of composition failed as the component instantiation could not be built.");
+				}
 
 				/* now retrieve .75-percentile from stats */
 				double mean = mccv.getStats().getMean();
@@ -161,42 +178,51 @@ public abstract class MLPlanWekaClassifier extends AAlgorithm<Instances, Classif
 				return percentile;
 			};
 
-			TwoPhaseSoftwareConfigurationProblem problem = new TwoPhaseSoftwareConfigurationProblem(this.componentFile, "AbstractClassifier", wrappedSearchBenchmark, wrappedSelectionBenchmark);
+			try {
+				TwoPhaseSoftwareConfigurationProblem problem = new TwoPhaseSoftwareConfigurationProblem(this.componentFile, "AbstractClassifier", wrappedSearchBenchmark, wrappedSelectionBenchmark);
 
-			/* configure and start optimizing factory */
-			OptimizingFactoryProblem<TwoPhaseSoftwareConfigurationProblem, Classifier, Double> optimizingFactoryProblem = new OptimizingFactoryProblem<>(this.factory, problem);
-			this.hascoFactory = new TwoPhaseHASCOFactory();
-			this.hascoFactory.setPreferredNodeEvaluator(new AlternativeNodeEvaluator<TFDNode, Double>(this.getSemanticNodeEvaluator(this.dataShownToSearch), this.preferredNodeEvaluator));
-			this.hascoFactory.setConfig(this.getConfig());
-			this.optimizingFactory = new OptimizingFactory<>(optimizingFactoryProblem, this.hascoFactory);
-			this.optimizingFactory.setLoggerName(this.loggerName + ".2phasehasco");
-			this.optimizingFactory.setTimeout(this.getConfig().timeout(), TimeUnit.SECONDS);
-			this.optimizingFactory.registerListener(this);
-			this.optimizingFactory.init();
+				/* configure and start optimizing factory */
+				OptimizingFactoryProblem<TwoPhaseSoftwareConfigurationProblem, Classifier, Double> optimizingFactoryProblem = new OptimizingFactoryProblem<>(this.factory, problem);
+				this.hascoFactory = new TwoPhaseHASCOFactory();
+				this.hascoFactory.setPreferredNodeEvaluator(new AlternativeNodeEvaluator<TFDNode, Double>(this.getSemanticNodeEvaluator(this.dataShownToSearch), this.preferredNodeEvaluator));
+				this.hascoFactory.setConfig(this.getConfig());
+				this.optimizingFactory = new OptimizingFactory<>(optimizingFactoryProblem, this.hascoFactory);
+				logger.info("Setting logger directive of {} to {}", this.optimizingFactory, this.loggerName + ".2phasehasco");
+				this.optimizingFactory.setLoggerName(this.loggerName + ".2phasehasco");
+				this.optimizingFactory.setTimeout(getTimeout());
+				this.optimizingFactory.registerListener(this);
+				this.optimizingFactory.init();
 
-			/* set state to active */
-			this.setState(AlgorithmState.active);
-			return new AlgorithmInitializedEvent();
+				/* set state to active */
+				return activate();
+			} catch (IOException e) {
+				throw new CascadingAlgorithmException(e, "Could not create TwoPhase configuration problem.");
+			}
 		}
 		case active: {
+			
 			/* train the classifier returned by the optimizing factory */
 			long startOptimizationTime = System.currentTimeMillis();
 			this.selectedClassifier = this.optimizingFactory.call();
 			this.internalValidationErrorOfSelectedClassifier = this.optimizingFactory.getPerformanceOfObject();
 			long startBuildTime = System.currentTimeMillis();
-			this.selectedClassifier.buildClassifier(this.getInput());
+			try {
+				this.selectedClassifier.buildClassifier(this.getInput());
+			} catch (Exception e) {
+				throw new CascadingAlgorithmException(e, "Training the classifier failed!");
+			}
 			long endBuildTime = System.currentTimeMillis();
 			this.logger.info("Selected model has been built on entire dataset. Build time of chosen model was {}ms. Total construction time was {}ms", endBuildTime - startBuildTime, endBuildTime - startOptimizationTime);
-			this.setState(AlgorithmState.inactive);
-			return new AlgorithmFinishedEvent();
+			return terminate();
 		}
 		default:
 			throw new IllegalStateException("Cannot do anything in state " + this.getState());
 		}
+
 	}
 
 	@Override
-	public Classifier call() throws Exception {
+	public Classifier call() throws AlgorithmException, InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {
 		while (this.hasNext()) {
 			this.nextWithException();
 		}

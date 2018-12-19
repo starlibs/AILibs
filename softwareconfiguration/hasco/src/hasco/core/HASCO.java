@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import org.aeonbits.owner.ConfigFactory;
@@ -19,11 +20,14 @@ import hasco.model.ParameterRefinementConfiguration;
 import hasco.optimizingfactory.SoftwareConfigurationAlgorithm;
 import hasco.reduction.HASCOReduction;
 import jaicore.basic.ILoggingCustomizable;
-import jaicore.basic.algorithm.AlgorithmEvent;
-import jaicore.basic.algorithm.AlgorithmFinishedEvent;
-import jaicore.basic.algorithm.AlgorithmInitializedEvent;
+import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.AlgorithmProblemTransformer;
-import jaicore.basic.algorithm.AlgorithmState;
+import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
+import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
+import jaicore.basic.algorithm.exceptions.AlgorithmException;
+import jaicore.basic.algorithm.exceptions.CascadingAlgorithmException;
+import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.graphvisualizer.gui.VisualizationWindow;
 import jaicore.planning.EvaluatedSearchGraphBasedPlan;
 import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionReducer;
@@ -38,11 +42,12 @@ import jaicore.planning.model.task.ceocipstn.OCIPMethod;
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import jaicore.search.core.interfaces.GraphGenerator;
-import jaicore.search.core.interfaces.IGraphSearch;
-import jaicore.search.core.interfaces.IGraphSearchFactory;
+import jaicore.search.core.interfaces.IOptimalPathInORGraphSearch;
+import jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
-import jaicore.search.model.probleminputs.GraphSearchProblemInput;
 import jaicore.search.model.travesaltree.NodeTooltipGenerator;
+import jaicore.search.probleminputs.GraphSearchInput;
+import jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 
 /**
  * Hierarchically create an object of type T
@@ -54,7 +59,7 @@ import jaicore.search.model.travesaltree.NodeTooltipGenerator;
  * @param <A>
  * @param <V>
  */
-public class HASCO<ISearch, N, A, V extends Comparable<V>> extends SoftwareConfigurationAlgorithm<RefinementConfiguredSoftwareConfigurationProblem<V>, HASCORunReport<V>, HASCOSolutionCandidate<V>, V> {
+public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Comparable<V>> extends SoftwareConfigurationAlgorithm<RefinementConfiguredSoftwareConfigurationProblem<V>, HASCOSolutionCandidate<V>, V> {
 
 	private Logger logger = LoggerFactory.getLogger(HASCO.class);
 	private String loggerName;
@@ -62,8 +67,8 @@ public class HASCO<ISearch, N, A, V extends Comparable<V>> extends SoftwareConfi
 	/* problem and algorithm setup */
 	private final RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem;
 	private final IHASCOPlanningGraphGeneratorDeriver<N, A> planningGraphGeneratorDeriver;
-	private final AlgorithmProblemTransformer<GraphSearchProblemInput<N, A, V>, ISearch> searchProblemTransformer;
-	private final IGraphSearchFactory<ISearch, ?, N, A, V, ?, ?> searchFactory;
+	private final AlgorithmProblemTransformer<GraphSearchWithPathEvaluationsInput<N, A, V>, ISearch> searchProblemTransformer;
+	private final IOptimalPathInORGraphSearchFactory<ISearch, N, A, V, ?, ?> searchFactory;
 
 	/* Parameters for the search algorithm configuration */
 	/** Factory for producing planners solving the HTN planning problem. */
@@ -73,8 +78,8 @@ public class HASCO<ISearch, N, A, V extends Comparable<V>> extends SoftwareConfi
 
 	/* working constants of the algorithms - these are effectively final but are not set at object creation time */
 	private CostSensitiveHTNPlanningProblem<CEOCOperation, OCIPMethod, CEOCAction, CEOCIPSTNPlanningProblem<CEOCOperation, OCIPMethod, CEOCAction>, V> planningProblem;
-	private GraphSearchProblemInput<N, A, V> searchProblem;
-	private IGraphSearch<ISearch, ?, N, A, V, ?, ?> search;
+	private GraphSearchWithPathEvaluationsInput<N, A, V> searchProblem;
+	private IOptimalPathInORGraphSearch<ISearch, N, A, V, ?, ?> search;
 	private final List<HASCOSolutionCandidate<V>> listOfAllRecognizedSolutions = new ArrayList<>();
 
 	/* runtime variables of algorithm */
@@ -82,7 +87,7 @@ public class HASCO<ISearch, N, A, V extends Comparable<V>> extends SoftwareConfi
 	private final TimeRecordingEvaluationWrapper<V> timeGrabbingEvaluationWrapper;
 
 	public HASCO(final RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem, final IHASCOPlanningGraphGeneratorDeriver<N, A> planningGraphGeneratorDeriver,
-			final IGraphSearchFactory<ISearch, ?, N, A, V, ?, ?> searchFactory, final AlgorithmProblemTransformer<GraphSearchProblemInput<N, A, V>, ISearch> searchProblemTransformer) {
+			final IOptimalPathInORGraphSearchFactory<ISearch, N, A, V, ?, ?> searchFactory, final AlgorithmProblemTransformer<GraphSearchWithPathEvaluationsInput<N, A, V>, ISearch> searchProblemTransformer) {
 		super(ConfigFactory.create(HASCOConfig.class));
 		if (configurationProblem == null) {
 			throw new IllegalArgumentException("Cannot work with configuration problem NULL");
@@ -97,7 +102,7 @@ public class HASCO<ISearch, N, A, V extends Comparable<V>> extends SoftwareConfi
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws Exception {
+	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
 		switch (this.getState()) {
 		case created: {
 			this.logger.info("Starting HASCO run.");
@@ -127,10 +132,7 @@ public class HASCO<ISearch, N, A, V extends Comparable<V>> extends SoftwareConfi
 
 			/* communicate that algorithm has been initialized */
 			this.logger.debug("Emitting intialization event");
-			AlgorithmInitializedEvent initEvent = new AlgorithmInitializedEvent();
-			this.post(initEvent);
-			this.setState(AlgorithmState.active);
-			return initEvent;
+			return activate();
 		}
 		case active: {
 			/* if the search itself has not been initialized, do this now */
@@ -186,7 +188,12 @@ public class HASCO<ISearch, N, A, V extends Comparable<V>> extends SoftwareConfi
 					EvaluatedSearchGraphPath<N, A, V> searchPath = solutionEvent.getSolutionCandidate();
 					Plan<CEOCAction> plan = this.planningGraphGeneratorDeriver.getPlan(searchPath.getNodes());
 					ComponentInstance objectInstance = Util.getSolutionCompositionForPlan(this.getInput().getComponents(), this.planningProblem.getCorePlanningProblem().getInit(), plan, true);
-					V score = this.timeGrabbingEvaluationWrapper.hasEvaluationForComponentInstance(objectInstance) ? solutionEvent.getSolutionCandidate().getScore() : this.timeGrabbingEvaluationWrapper.evaluate(objectInstance);
+					V score;
+					try {
+						score = this.timeGrabbingEvaluationWrapper.hasEvaluationForComponentInstance(objectInstance) ? solutionEvent.getSolutionCandidate().getScore() : this.timeGrabbingEvaluationWrapper.evaluate(objectInstance);
+					} catch (ObjectEvaluationFailedException e) {
+						throw new CascadingAlgorithmException(e, "Could not evaluate component instance.");
+					}
 					EvaluatedSearchGraphBasedPlan<CEOCAction, V, N> evaluatedPlan = new EvaluatedSearchGraphBasedPlan<>(plan, score, searchPath);
 					HASCOSolutionCandidate<V> solution = new HASCOSolutionCandidate<>(objectInstance, evaluatedPlan, this.timeGrabbingEvaluationWrapper.getEvaluationTimeForComponentInstance(objectInstance));
 					this.updateBestSeenSolution(solution);
@@ -238,7 +245,7 @@ public class HASCO<ISearch, N, A, V extends Comparable<V>> extends SoftwareConfi
 		return this.planningGraphGeneratorDeriver;
 	}
 
-	public AlgorithmProblemTransformer<GraphSearchProblemInput<N, A, V>, ISearch> getSearchProblemTransformer() {
+	public AlgorithmProblemTransformer<GraphSearchWithPathEvaluationsInput<N, A, V>, ISearch> getSearchProblemTransformer() {
 		return this.searchProblemTransformer;
 	}
 
@@ -253,8 +260,7 @@ public class HASCO<ISearch, N, A, V extends Comparable<V>> extends SoftwareConfi
 		throw new IllegalStateException("Could not complete initialization");
 	}
 
-	@Override
-	public HASCORunReport<V> getOutput() {
+	public HASCORunReport<V> getReport() {
 		return new HASCORunReport<>(this.listOfAllRecognizedSolutions);
 	}
 

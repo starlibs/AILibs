@@ -226,7 +226,7 @@ public class KnapsackProblem {
 		return new ISolutionEvaluator<KnapsackProblem.KnapsackNode, Double>() {
 
 			@Override
-			public Double evaluateSolution(List<KnapsackNode> solutionPath) throws Exception {
+			public Double evaluateSolution(List<KnapsackNode> solutionPath) {
 				KnapsackNode packedKnapsack = solutionPath.get(solutionPath.size() - 1);
 				if (packedKnapsack == null || packedKnapsack.usedCapacity > knapsackCapacity) {
 					return Double.MAX_VALUE;

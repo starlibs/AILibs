@@ -8,10 +8,10 @@ import java.util.Queue;
 import java.util.concurrent.TimeoutException;
 
 import jaicore.basic.algorithm.AAlgorithm;
-import jaicore.basic.algorithm.AlgorithmEvent;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
-import jaicore.basic.algorithm.AlgorithmFinishedEvent;
-import jaicore.basic.algorithm.AlgorithmInitializedEvent;
+import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
+import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 
 /**
  * This algorithms allows to compute an ordered Cartesian product. It is ordered
@@ -79,7 +79,7 @@ public class LDSBasedCartesianProductComputer<T> extends AAlgorithm<List<? exten
 			throw new IllegalStateException();
 		}
 	}
-
+	
 	@SuppressWarnings("unchecked")
 	public List<T> nextTuple() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {
 		while (hasNext()) {

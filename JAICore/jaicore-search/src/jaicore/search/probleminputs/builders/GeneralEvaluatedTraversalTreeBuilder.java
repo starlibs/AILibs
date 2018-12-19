@@ -1,9 +1,9 @@
-package jaicore.search.model.probleminputs.builders;
+package jaicore.search.probleminputs.builders;
 
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
-import jaicore.search.model.probleminputs.GeneralEvaluatedTraversalTree;
+import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 
-public class GeneralEvaluatedTraversalTreeBuilder<N, A, V extends Comparable<V>> extends SearchProblemInputBuilder<N, A, GeneralEvaluatedTraversalTree<N, A, V>> {
+public class GeneralEvaluatedTraversalTreeBuilder<N, A, V extends Comparable<V>> extends SearchProblemInputBuilder<N, A, GraphSearchWithSubpathEvaluationsInput<N, A, V>> {
 
 	private INodeEvaluator<N, V> nodeEvaluator;
 
@@ -25,8 +25,8 @@ public class GeneralEvaluatedTraversalTreeBuilder<N, A, V extends Comparable<V>>
 	}
 
 	@Override
-	public GeneralEvaluatedTraversalTree<N, A, V> build() {
-		return new GeneralEvaluatedTraversalTree<>(getGraphGenerator(), nodeEvaluator);
+	public GraphSearchWithSubpathEvaluationsInput<N, A, V> build() {
+		return new GraphSearchWithSubpathEvaluationsInput<>(getGraphGenerator(), nodeEvaluator);
 	}
 
 }

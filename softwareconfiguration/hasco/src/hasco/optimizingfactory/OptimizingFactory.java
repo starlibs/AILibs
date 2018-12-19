@@ -1,19 +1,23 @@
 package hasco.optimizingfactory;
 
+import java.util.concurrent.TimeoutException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.Subscribe;
 
 import hasco.core.SoftwareConfigurationProblem;
+import hasco.exceptions.ComponentInstantiationFailedException;
 import hasco.model.EvaluatedSoftwareConfigurationSolution;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.algorithm.AAlgorithm;
-import jaicore.basic.algorithm.AlgorithmEvent;
-import jaicore.basic.algorithm.AlgorithmFinishedEvent;
-import jaicore.basic.algorithm.AlgorithmInitializedEvent;
-import jaicore.basic.algorithm.AlgorithmState;
-import jaicore.basic.algorithm.SolutionCandidateFoundEvent;
+import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
+import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
+import jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
+import jaicore.basic.algorithm.exceptions.AlgorithmException;
+import jaicore.basic.algorithm.exceptions.CascadingAlgorithmException;
 
 public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C extends EvaluatedSoftwareConfigurationSolution<V>, V extends Comparable<V>> extends AAlgorithm<OptimizingFactoryProblem<P, T, V>, T> {
 
@@ -21,42 +25,43 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C e
 	private Logger logger = LoggerFactory.getLogger(OptimizingFactory.class);
 	private String loggerName;
 
-	private final SoftwareConfigurationAlgorithmFactory<P, ?, C, V> factoryForOptimizationAlgorithm;
+	private final SoftwareConfigurationAlgorithmFactory<P, C, V> factoryForOptimizationAlgorithm;
 	private T constructedObject;
 	private V performanceOfObject;
 
 	/* factory state */
-	private SoftwareConfigurationAlgorithm<P, ?, C, V> optimizer;
+	private SoftwareConfigurationAlgorithm<P, C, V> optimizer;
 
-	public OptimizingFactory(final OptimizingFactoryProblem<P, T, V> problem, final SoftwareConfigurationAlgorithmFactory<P, ?, C, V> factoryForOptimizationAlgorithm) {
+	public OptimizingFactory(final OptimizingFactoryProblem<P, T, V> problem, final SoftwareConfigurationAlgorithmFactory<P, C, V> factoryForOptimizationAlgorithm) {
 		super(problem);
 		this.factoryForOptimizationAlgorithm = factoryForOptimizationAlgorithm;
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws Exception {
+	public AlgorithmEvent nextWithException() throws AlgorithmException, InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {
 		switch (this.getState()) {
 		case created: {
 			this.factoryForOptimizationAlgorithm.setProblemInput(this.getInput().getConfigurationProblem());
 			this.optimizer = this.factoryForOptimizationAlgorithm.getAlgorithm();
-			if (this.optimizer instanceof ILoggingCustomizable) {
-				this.logger.info("Switching the logger name of the actually used optimizer to {}", this.getLoggerName());
-				this.optimizer.setLoggerName(this.getLoggerName() + ".optimizer");
+			if (this.optimizer instanceof ILoggingCustomizable && this.loggerName != null) {
+				this.logger.info("Switching the logger name of the actually used optimizer to {}", this.loggerName);
+				this.optimizer.setLoggerName(loggerName + ".optimizer");
 			}
 			this.optimizer.registerListener(this);
 			while (!(this.optimizer.next() instanceof AlgorithmInitializedEvent)) {
 				;
 			}
-			this.setState(AlgorithmState.active);
-			return new AlgorithmInitializedEvent();
+			return activate();
 		}
 		case active: {
-			this.optimizer.call();
-			C solutionModel = this.optimizer.getOptimizationResult().getResult();
-			this.constructedObject = this.getInput().getBaseFactory().getComponentInstantiation(solutionModel.getComponentInstance());
-			this.performanceOfObject = this.optimizer.getOptimizationResult().getValue();
-			this.setState(AlgorithmState.inactive);
-			return new AlgorithmFinishedEvent();
+			C solutionModel = this.optimizer.call();
+			try {
+				this.constructedObject = this.getInput().getBaseFactory().getComponentInstantiation(solutionModel.getComponentInstance());
+				this.performanceOfObject = solutionModel.getScore();
+				return terminate();
+			} catch (ComponentInstantiationFailedException e) {
+				throw new CascadingAlgorithmException(e, "Could not conduct next step in OptimizingFactory due to an exception in the component instantiation.");
+			}
 		}
 		default:
 			throw new IllegalStateException("Cannot do anything in state " + this.getState());
@@ -64,7 +69,7 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C e
 	}
 
 	@Override
-	public T call() throws Exception {
+	public T call() throws AlgorithmException, InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {
 		while (this.hasNext()) {
 			this.nextWithException();
 		}
@@ -79,7 +84,7 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C e
 	/**
 	 * @return the optimizer that is used for building the object
 	 */
-	public SoftwareConfigurationAlgorithm<P, ?, C, V> getOptimizer() {
+	public SoftwareConfigurationAlgorithm<P, C, V> getOptimizer() {
 		return this.optimizer;
 	}
 

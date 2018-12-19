@@ -4,6 +4,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -12,16 +13,17 @@ import org.slf4j.LoggerFactory;
 import com.google.common.eventbus.Subscribe;
 
 import jaicore.basic.ILoggingCustomizable;
-import jaicore.basic.algorithm.AlgorithmEvent;
-import jaicore.graph.IGraphAlgorithmListener;
-import jaicore.search.algorithms.standard.AbstractORGraphSearch;
+import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
+import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.search.algorithms.standard.bestfirst.StandardBestFirst;
 import jaicore.search.algorithms.standard.bestfirst.events.SuccessorComputationCompletedEvent;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
+import jaicore.search.core.interfaces.AOptimalPathInORGraphSearch;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
-import jaicore.search.model.probleminputs.GeneralEvaluatedTraversalTree;
-import jaicore.search.model.probleminputs.NodeRecommendedTree;
 import jaicore.search.model.travesaltree.Node;
+import jaicore.search.probleminputs.GraphSearchWithNodeRecommenderInput;
+import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 
 /**
  * This class conducts a limited discrepancy search by running a best first algorithm with list-based node evaluations Since the f-values are lists too, we do not simply extend BestFirst but rather forward all commands to it
@@ -32,14 +34,14 @@ import jaicore.search.model.travesaltree.Node;
  * @param <A>
  * @param <V>
  */
-public class BestFirstLimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends AbstractORGraphSearch<NodeRecommendedTree<T, A>, EvaluatedSearchGraphPath<T, A, V>, T, A, V, Node<T, NodeOrderList>, A> {
+public class BestFirstLimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends AOptimalPathInORGraphSearch<GraphSearchWithNodeRecommenderInput<T, A>, T, A, V, Node<T, NodeOrderList>, A> {
 
 	private Logger logger = LoggerFactory.getLogger(BestFirstLimitedDiscrepancySearch.class);
 	private String loggerName;
 
 	private final StandardBestFirst<T, A, NodeOrderList> bestFirst;
 
-	private class OrderListNumberComputer implements INodeEvaluator<T, NodeOrderList>, IGraphAlgorithmListener<Node<T, NodeOrderList>, A> {
+	private class OrderListNumberComputer implements INodeEvaluator<T, NodeOrderList> {
 		private final Comparator<T> heuristic;
 		private final Map<Node<T, ?>, List<T>> childOrdering = new HashMap<>();
 
@@ -49,7 +51,7 @@ public class BestFirstLimitedDiscrepancySearch<T, A, V extends Comparable<V>> ex
 		}
 
 		@Override
-		public NodeOrderList f(final Node<T, ?> node) throws Exception {
+		public NodeOrderList f(final Node<T, ?> node) {
 			NodeOrderList list = new NodeOrderList();
 			Node<T, ?> parent = node.getParent();
 			if (parent == null) {
@@ -69,10 +71,10 @@ public class BestFirstLimitedDiscrepancySearch<T, A, V extends Comparable<V>> ex
 		}
 	}
 
-	public BestFirstLimitedDiscrepancySearch(final NodeRecommendedTree<T, A> problem) {
+	public BestFirstLimitedDiscrepancySearch(final GraphSearchWithNodeRecommenderInput<T, A> problem) {
 		super(problem);
 		OrderListNumberComputer nodeEvaluator = new OrderListNumberComputer(problem.getRecommender());
-		this.bestFirst = new StandardBestFirst<>(new GeneralEvaluatedTraversalTree<>(problem.getGraphGenerator(), nodeEvaluator));
+		this.bestFirst = new StandardBestFirst<>(new GraphSearchWithSubpathEvaluationsInput<>(problem.getGraphGenerator(), nodeEvaluator));
 		this.bestFirst.registerListener(nodeEvaluator);
 	}
 
@@ -94,20 +96,15 @@ public class BestFirstLimitedDiscrepancySearch<T, A, V extends Comparable<V>> ex
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws Exception {
+	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException  {
 		return this.bestFirst.nextWithException();
 	}
 
 	@Override
-	public EvaluatedSearchGraphPath<T, A, V> call() throws Exception {
+	public EvaluatedSearchGraphPath<T, A, V> call() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException  {
 		EvaluatedSearchGraphPath<T, A, NodeOrderList> solution = this.bestFirst.call();
 		EvaluatedSearchGraphPath<T, A, V> modifiedSolution = new EvaluatedSearchGraphPath<T, A, V>(solution.getNodes(), solution.getEdges(), null);
 		return modifiedSolution;
-	}
-
-	@Override
-	public EvaluatedSearchGraphPath<T, A, V> getSolutionProvidedToCall() {
-		return null;
 	}
 
 	@Override

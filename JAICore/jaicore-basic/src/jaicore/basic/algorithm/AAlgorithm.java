@@ -16,6 +16,9 @@ import com.google.common.eventbus.EventBus;
 
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.TimeOut;
+import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
+import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 
 public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCustomizable {
 
@@ -76,7 +79,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	 * @param config
 	 *            The configuration to take as the internal configuration object.
 	 */
-	protected AAlgorithm(final IAlgorithmConfig config, final I input) {
+	protected AAlgorithm(final I input, final IAlgorithmConfig config) {
 		this(config);
 		this.input = input;
 	}
@@ -258,6 +261,12 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	 *            The new state of the algorithm.
 	 */
 	protected void setState(final AlgorithmState state) {
+		if (state == AlgorithmState.active) {
+			throw new IllegalArgumentException("Cannot switch state to active. Use \"activate\" instead, which will set the state to active and provide the AlgorithmInitializedEvent.");
+		}
+		else if (state == AlgorithmState.inactive) {
+			throw new IllegalArgumentException("Cannot switch state to inactive. Use \"terminate\" instead, which will set the state to inactive and provide the AlgorithmFinishedEvent.");
+		}
 		this.state = state;
 	}
 

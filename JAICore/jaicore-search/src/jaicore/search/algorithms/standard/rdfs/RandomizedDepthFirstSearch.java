@@ -7,8 +7,8 @@ import org.slf4j.LoggerFactory;
 
 import jaicore.search.algorithms.standard.bestfirst.StandardBestFirst;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomizedDepthFirstNodeEvaluator;
-import jaicore.search.model.probleminputs.GeneralEvaluatedTraversalTree;
-import jaicore.search.model.probleminputs.GraphSearchInput;
+import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
+import jaicore.search.probleminputs.GraphSearchInput;
 
 public class RandomizedDepthFirstSearch<T, A> extends StandardBestFirst<T, A, Double> {
 
@@ -16,7 +16,7 @@ public class RandomizedDepthFirstSearch<T, A> extends StandardBestFirst<T, A, Do
 	private String loggerName;
 
 	public RandomizedDepthFirstSearch(final GraphSearchInput<T, A> problem, final Random random) {
-		super(new GeneralEvaluatedTraversalTree<>(problem.getGraphGenerator(), new RandomizedDepthFirstNodeEvaluator<>(random)));
+		super(new GraphSearchWithSubpathEvaluationsInput<>(problem.getGraphGenerator(), new RandomizedDepthFirstNodeEvaluator<>(random)));
 	}
 
 	@Override

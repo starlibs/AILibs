@@ -1,4 +1,4 @@
-package jaicore.search.model.probleminputs.builders;
+package jaicore.search.probleminputs.builders;
 
 import jaicore.search.core.interfaces.GraphGenerator;
 

@@ -9,7 +9,7 @@ import java.util.List;
 
 import org.junit.Test;
 
-import jaicore.basic.algorithm.AlgorithmEvent;
+import jaicore.basic.algorithm.events.AlgorithmEvent;
 
 public class CartesianProductTest {
 

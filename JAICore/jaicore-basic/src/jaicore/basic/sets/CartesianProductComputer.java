@@ -5,8 +5,8 @@ import java.util.Collection;
 import java.util.List;
 
 import jaicore.basic.algorithm.AAlgorithm;
-import jaicore.basic.algorithm.AlgorithmEvent;
-import jaicore.basic.algorithm.AlgorithmFinishedEvent;
+import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
 
 public class CartesianProductComputer<T> extends AAlgorithm<List<Collection<T>>, List<List<T>>> {
 
@@ -79,7 +79,7 @@ public class CartesianProductComputer<T> extends AAlgorithm<List<Collection<T>>,
 	}
 
 	@Override
-	public List<List<T>> call() throws Exception {
+	public List<List<T>> call() {
 		List<List<T>> product = new ArrayList<>();
 		while (hasNext()) {
 			TupleFoundEvent<T> nextEvent = nextTupleEvent();

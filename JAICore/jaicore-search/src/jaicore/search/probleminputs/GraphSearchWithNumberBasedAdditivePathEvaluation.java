@@ -1,13 +1,17 @@
-package jaicore.search.model.probleminputs;
+package jaicore.search.probleminputs;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 
+import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
+import jaicore.basic.algorithm.exceptions.AlgorithmException;
+import jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.model.travesaltree.Node;
 
-public class NumberBasedAdditiveTraversalTree<N,A> extends GeneralEvaluatedTraversalTree<N, A, Double> {
+public class GraphSearchWithNumberBasedAdditivePathEvaluation<N,A> extends GraphSearchWithSubpathEvaluationsInput<N, A, Double> {
 
 	public interface EdgeCostComputer<N> {
 		public double g(Node<N,?> from, Node<N,?> to);
@@ -25,7 +29,7 @@ public class NumberBasedAdditiveTraversalTree<N,A> extends GeneralEvaluatedTrave
 		}
 
 		@Override
-		public Double f(Node<N,?> node) throws Exception {
+		public Double f(Node<N,?> node) throws NodeEvaluationException, TimeoutException, AlgorithmExecutionCanceledException, InterruptedException {
 			List<?> path = node.path();
 			int depth = path.size() - 1;
 			double pathCost = 0;
@@ -45,7 +49,7 @@ public class NumberBasedAdditiveTraversalTree<N,A> extends GeneralEvaluatedTrave
 		}
 	}
 	
-	public NumberBasedAdditiveTraversalTree(GraphGenerator<N, A> graphGenerator, EdgeCostComputer<N> g, INodeEvaluator<N, Double> h) {
+	public GraphSearchWithNumberBasedAdditivePathEvaluation(GraphGenerator<N, A> graphGenerator, EdgeCostComputer<N> g, INodeEvaluator<N, Double> h) {
 		super(graphGenerator, new FComputer<>(g, h));
 	}
 

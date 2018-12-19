@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -15,9 +16,13 @@ import org.slf4j.LoggerFactory;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.IObjectEvaluator;
 import jaicore.basic.algorithm.AAlgorithm;
-import jaicore.basic.algorithm.AlgorithmEvent;
-import jaicore.basic.algorithm.AlgorithmInitializedEvent;
+import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.AlgorithmState;
+import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
+import jaicore.basic.algorithm.exceptions.AlgorithmException;
+import jaicore.basic.algorithm.exceptions.CascadingAlgorithmException;
+import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.basic.sets.LDSBasedCartesianProductComputer;
 import jaicore.graph.Graph;
 import jaicore.graph.IGraphAlgorithm;
@@ -67,7 +72,7 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws Exception {
+	public AlgorithmEvent nextWithException() throws TimeoutException, InterruptedException, AlgorithmException, AlgorithmExecutionCanceledException {
 		switch (this.getState()) {
 		case created: {
 			/* step 1: construct the whole graph */
@@ -88,7 +93,7 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 							this.graph.addEdge(n, newNode);
 						}
 						open.add(newNode);
-						generatedChildren ++;
+						generatedChildren++;
 						this.post(new NodeReachedEvent<N>(n.node, newNode.node, descr.getTypeOfToNode() == NodeType.OR ? "or" : "and"));
 					}
 					logger.debug("Node expansion of {}-node {} completed. Generated {} successors.", n.type, n, generatedChildren);
@@ -97,17 +102,21 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 				}
 			}
 			this.logger.info("Size: {}", this.graph.getItems().size());
-			this.setState(AlgorithmState.active);
-			return new AlgorithmInitializedEvent();
+			return activate();
 		}
 		case active: {
 			this.logger.debug("timeout: {}", this.getTimeout());
 
 			/* now compute best local values bottom up */
-			Queue<EvaluatedGraph> bestSolutions = this.filterNodeSolution(this.graph.getRoot());
-			this.logger.info("Number of solutions: {}", bestSolutions.size());
-			this.bestSolutionBase = bestSolutions.poll().graph;
-			return this.terminate();
+			Queue<EvaluatedGraph> bestSolutions;
+			try {
+				bestSolutions = this.filterNodeSolution(this.graph.getRoot());
+				this.logger.info("Number of solutions: {}", bestSolutions.size());
+				this.bestSolutionBase = bestSolutions.poll().graph;
+				return this.terminate();
+			} catch (ObjectEvaluationFailedException e) {
+				throw new CascadingAlgorithmException(e, "Could not evaluate solution.");
+			}
 		}
 		default:
 			throw new IllegalStateException("No handler defined for state " + this.getState());
@@ -117,10 +126,15 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 
 	/**
 	 * assumes that solution paths for children have been computed already
+	 * 
+	 * @throws AlgorithmException
+	 * @throws InterruptedException
+	 * @throws TimeoutException
+	 * @throws AlgorithmExecutionCanceledException
 	 *
 	 * @throws Exception
 	 */
-	private Queue<EvaluatedGraph> filterNodeSolution(final InnerNodeLabel node) throws Exception {
+	private Queue<EvaluatedGraph> filterNodeSolution(final InnerNodeLabel node) throws TimeoutException, InterruptedException, ObjectEvaluationFailedException, AlgorithmExecutionCanceledException {
 
 		Queue<EvaluatedGraph> filteredSolutions = new PriorityQueue<>((p1, p2) -> p2.value.compareTo(p1.value)); // a list of paths ordered by their (believed) importance in ASCENDING ORDER
 																													// (unimportant first, because these are drained)
@@ -187,7 +201,8 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 					extendedSolutionBase.graph.addEdge(node.node, subSolution.graph.getRoot());
 				}
 				extendedSolutionBase.value = this.evaluator.evaluate(extendedSolutionBase.graph);
-				logger.debug("Combination {} of subsolutions with performances {} yields an aggregate performance value of {}", i, subSolutionCombination.stream().map(g -> "" + g.value).collect(Collectors.joining(", ")), extendedSolutionBase.value);
+				logger.debug("Combination {} of subsolutions with performances {} yields an aggregate performance value of {}", i, subSolutionCombination.stream().map(g -> "" + g.value).collect(Collectors.joining(", ")),
+						extendedSolutionBase.value);
 				filteredSolutions.add(extendedSolutionBase);
 			}
 			this.logger.debug("Determined " + filteredSolutions.size() + " sub-solutions for AND-node with " + subSolutions.size() + " children.");
@@ -208,10 +223,10 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 				}
 			}
 		}
-		
+
 		/* order solutions by value */
-		filteredSolutions = new LinkedList<>(filteredSolutions.stream().sorted((g1,g2) -> g1.value.compareTo(g2.value)).limit(nodeLimit).collect(Collectors.toList()));
-		
+		filteredSolutions = new LinkedList<>(filteredSolutions.stream().sorted((g1, g2) -> g1.value.compareTo(g2.value)).limit(nodeLimit).collect(Collectors.toList()));
+
 		// logger.debug("\treturning " + filteredSolutionsReordered.size() + "
 		// graph(s):");
 		filteredSolutions.forEach(g -> this.logger.debug("\tScore " + g.value + " for " + g.graph));
@@ -219,7 +234,7 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 	}
 
 	@Override
-	public Graph<N> call() throws Exception {
+	public Graph<N> call() throws TimeoutException, InterruptedException, AlgorithmException, AlgorithmExecutionCanceledException {
 		while (this.hasNext()) {
 			this.nextWithException();
 		}

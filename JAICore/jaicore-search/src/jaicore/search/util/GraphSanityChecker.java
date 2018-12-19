@@ -6,19 +6,19 @@ import java.util.Stack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jaicore.basic.algorithm.AlgorithmEvent;
-import jaicore.basic.algorithm.AlgorithmFinishedEvent;
+import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
 import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
-import jaicore.search.algorithms.standard.AbstractORGraphSearch;
-import jaicore.search.model.probleminputs.GraphSearchInput;
+import jaicore.search.core.interfaces.AOptimalPathInORGraphSearch;
 import jaicore.search.model.travesaltree.Node;
 import jaicore.search.model.travesaltree.NodeExpansionDescription;
+import jaicore.search.probleminputs.GraphSearchInput;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 
-public class GraphSanityChecker<N, A> extends AbstractORGraphSearch<GraphSearchInput<N, A>, SanityCheckResult, N, A, Double, N, A> {
+public class GraphSanityChecker<N, A> extends AOptimalPathInORGraphSearch<GraphSearchInput<N, A>, N, A, Double, N, A> {
 
 	private Logger logger = LoggerFactory.getLogger(GraphSanityChecker.class);
 	private String loggerName;
@@ -34,7 +34,7 @@ public class GraphSanityChecker<N, A> extends AbstractORGraphSearch<GraphSearchI
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws Exception {
+	public AlgorithmEvent nextWithException() throws InterruptedException  {
 		switch (this.getState()) {
 		case created:
 			return this.activate();
@@ -82,8 +82,7 @@ public class GraphSanityChecker<N, A> extends AbstractORGraphSearch<GraphSearchI
 		}
 	}
 
-	@Override
-	public SanityCheckResult getSolutionProvidedToCall() {
+	public SanityCheckResult getSanityCheck() {
 		return this.sanityCheckResult != null ? this.sanityCheckResult : new GraphSeemsSaneResult();
 	}
 

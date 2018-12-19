@@ -5,7 +5,7 @@ import hasco.model.EvaluatedSoftwareConfigurationSolution;
 import jaicore.basic.algorithm.AOptimizer;
 import jaicore.basic.algorithm.IAlgorithmConfig;
 
-public abstract class SoftwareConfigurationAlgorithm<P extends SoftwareConfigurationProblem<V>, O, C extends EvaluatedSoftwareConfigurationSolution<V>, V extends Comparable<V>> extends AOptimizer<P, O, C, V> {
+public abstract class SoftwareConfigurationAlgorithm<P extends SoftwareConfigurationProblem<V>, O extends EvaluatedSoftwareConfigurationSolution<V>, V extends Comparable<V>> extends AOptimizer<P, O, V> {
 
 	protected SoftwareConfigurationAlgorithm() {
 		super();
@@ -16,7 +16,7 @@ public abstract class SoftwareConfigurationAlgorithm<P extends SoftwareConfigura
 	}
 
 	protected SoftwareConfigurationAlgorithm(final IAlgorithmConfig config, final P input) {
-		super(config, input);
+		super(input, config);
 	}
 
 	protected SoftwareConfigurationAlgorithm(final IAlgorithmConfig config) {

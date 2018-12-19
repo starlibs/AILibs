@@ -14,21 +14,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jaicore.basic.ILoggingCustomizable;
-import jaicore.basic.algorithm.AlgorithmEvent;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
-import jaicore.basic.algorithm.AlgorithmFinishedEvent;
-import jaicore.basic.algorithm.AlgorithmInitializedEvent;
-import jaicore.basic.algorithm.AlgorithmState;
+import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
+import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.sets.SetUtil;
 import jaicore.graph.Graph;
 import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
-import jaicore.search.algorithms.standard.AbstractORGraphSearch;
 import jaicore.search.algorithms.standard.bestfirst.events.GraphSearchSolutionCandidateFoundEvent;
+import jaicore.search.core.interfaces.AAnyPathInORGraphSearch;
 import jaicore.search.model.other.SearchGraphPath;
-import jaicore.search.model.probleminputs.GraphSearchInput;
 import jaicore.search.model.travesaltree.NodeExpansionDescription;
+import jaicore.search.probleminputs.GraphSearchInput;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SingleSuccessorGenerator;
@@ -43,7 +42,7 @@ import jaicore.search.structure.graphgenerator.SuccessorGenerator;
  * @param <N>
  * @param <A>
  */
-public class RandomSearch<N, A> extends AbstractORGraphSearch<GraphSearchInput<N, A>, Object, N, A, Double, N, A> implements ILoggingCustomizable {
+public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput<N, A>, SearchGraphPath<N, A>, N, A, N, A> implements ILoggingCustomizable {
 
 	/* logging */
 	private String loggerName;
@@ -157,7 +156,7 @@ public class RandomSearch<N, A> extends AbstractORGraphSearch<GraphSearchInput<N
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws Exception {
+	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException  {
 
 		switch (this.getState()) {
 		case created: {
@@ -308,11 +307,6 @@ public class RandomSearch<N, A> extends AbstractORGraphSearch<GraphSearchInput<N
 				}
 			}
 		}
-	}
-
-	@Override
-	public Object getSolutionProvidedToCall() {
-		return null;
 	}
 
 	@Override

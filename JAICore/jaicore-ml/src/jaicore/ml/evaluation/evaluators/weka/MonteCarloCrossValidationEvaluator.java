@@ -1,12 +1,13 @@
 package jaicore.ml.evaluation.evaluators.weka;
 
 import java.util.List;
-import java.util.Random;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jaicore.basic.algorithm.exceptions.CascadingAlgorithmException;
+import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.ml.WekaUtil;
 import weka.classifiers.Classifier;
 import weka.core.Instances;
@@ -33,8 +34,7 @@ public class MonteCarloCrossValidationEvaluator implements IClassifierEvaluator 
 
 	private final DescriptiveStatistics stats = new DescriptiveStatistics();
 
-	public MonteCarloCrossValidationEvaluator(AbstractEvaluatorMeasureBridge<Double, Double> bridge,
-			final int repeats, final Instances data, final double trainingPortion, final long seed) {
+	public MonteCarloCrossValidationEvaluator(AbstractEvaluatorMeasureBridge<Double, Double> bridge, final int repeats, final Instances data, final double trainingPortion, final long seed) {
 		super();
 		this.repeats = repeats;
 		this.bridge = bridge;
@@ -49,7 +49,7 @@ public class MonteCarloCrossValidationEvaluator implements IClassifierEvaluator 
 	}
 
 	@Override
-	public Double evaluate(final Classifier pl) throws Exception {
+	public Double evaluate(final Classifier pl) throws ObjectEvaluationFailedException, InterruptedException {
 		if (pl == null) {
 			throw new IllegalArgumentException("Cannot compute score for null pipeline!");
 		}
@@ -58,10 +58,17 @@ public class MonteCarloCrossValidationEvaluator implements IClassifierEvaluator 
 		logger.info("Starting evaluation of {}", pl);
 		for (int i = 0; i < this.repeats && !this.canceled && !Thread.currentThread().isInterrupted(); i++) {
 			logger.debug("Obtaining predictions of {} for split #{}/{}", pl, i + 1, this.repeats);
-			List<Instances> split = WekaUtil.getStratifiedSplit(data, seed+i, trainingPortion);
-			double score = bridge.evaluateSplit(pl, split.get(0), split.get(1));
-			logger.info("Score for evaluation of {} with split #{}/{}: {}", pl, i + 1, this.repeats, score);
-			stats.addValue(score);
+			List<Instances> split = WekaUtil.getStratifiedSplit(data, seed + i, trainingPortion);
+			try {
+				double score = bridge.evaluateSplit(pl, split.get(0), split.get(1));
+				logger.info("Score for evaluation of {} with split #{}/{}: {}", pl, i + 1, this.repeats, score);
+				stats.addValue(score);
+			}
+
+			catch (Exception e) {
+				throw new ObjectEvaluationFailedException(e, "Could not evaluate classifier!");
+
+			}
 		}
 		if (Thread.currentThread().isInterrupted())
 			throw new InterruptedException("MCCV has been interrupted");

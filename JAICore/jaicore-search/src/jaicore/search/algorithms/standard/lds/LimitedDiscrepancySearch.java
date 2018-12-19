@@ -5,26 +5,23 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jaicore.basic.algorithm.AlgorithmCanceledEvent;
-import jaicore.basic.algorithm.AlgorithmEvent;
-import jaicore.basic.algorithm.AlgorithmFinishedEvent;
-import jaicore.basic.algorithm.AlgorithmInterruptedEvent;
-import jaicore.basic.algorithm.SolutionCandidateFoundEvent;
+import jaicore.basic.algorithm.events.AlgorithmCanceledEvent;
+import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
+import jaicore.basic.algorithm.events.AlgorithmInterruptedEvent;
+import jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
 import jaicore.graph.TreeNode;
 import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
-import jaicore.search.algorithms.standard.AbstractORGraphSearch;
-import jaicore.search.core.interfaces.GraphGenerator;
+import jaicore.search.core.interfaces.AOptimalPathInORGraphSearch;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
-import jaicore.search.model.probleminputs.NodeRecommendedTree;
 import jaicore.search.model.travesaltree.NodeExpansionDescription;
+import jaicore.search.probleminputs.GraphSearchWithNodeRecommenderInput;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.PathGoalTester;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
@@ -38,7 +35,7 @@ import jaicore.search.structure.graphgenerator.SuccessorGenerator;
  * @author fmohr
  *
  */
-public class LimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends AbstractORGraphSearch<NodeRecommendedTree<T, A>, EvaluatedSearchGraphPath<T, A, V>, T, A, V, TreeNode<T>, A> {
+public class LimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends AOptimalPathInORGraphSearch<GraphSearchWithNodeRecommenderInput<T, A>, T, A, V, TreeNode<T>, A> {
 
 	/* logging */
 	private Logger logger = LoggerFactory.getLogger(LimitedDiscrepancySearch.class);
@@ -47,7 +44,6 @@ public class LimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends Abs
 	/* communication */
 	protected TreeNode<T> traversalTree;
 	protected Collection<TreeNode<T>> expanded = new HashSet<>();
-	protected final Queue<EvaluatedSearchGraphPath<T, A, V>> solutions = new LinkedBlockingQueue<>();
 
 	/* graph construction helpers */
 	protected final SingleRootGenerator<T> rootGenerator;
@@ -64,7 +60,7 @@ public class LimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends Abs
 	private int currentK = 1;
 	private boolean probeHasExpandedNode = false;
 
-	public LimitedDiscrepancySearch(final NodeRecommendedTree<T, A> problemInput) {
+	public LimitedDiscrepancySearch(final GraphSearchWithNodeRecommenderInput<T, A> problemInput) {
 		super(problemInput);
 		this.rootGenerator = (SingleRootGenerator<T>) this.getInput().getGraphGenerator().getRootGenerator();
 		this.successorGenerator = this.getInput().getGraphGenerator().getSuccessorGenerator();
@@ -134,7 +130,7 @@ public class LimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends Abs
 		if (this.nodeGoalTester.isGoal(node.getValue())) {
 			List<T> path = node.getValuesOnPathFromRoot();
 			EvaluatedSearchGraphPath<T, A, V> solution = new EvaluatedSearchGraphPath<>(path, null, null);
-			this.solutions.add(solution);
+			updateBestSeenSolution(solution);
 			return new SolutionCandidateFoundEvent<>(solution);
 		}
 
@@ -187,27 +183,6 @@ public class LimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends Abs
 			this.post(new NodeReachedEvent<TreeNode<T>>(parent, newTree, "or_" + (isGoal ? "solution" : "created")));
 		}
 		return newTree;
-	}
-
-	@Override
-	public EvaluatedSearchGraphPath<T, A, V> call() throws Exception {
-		this.nextSolution();
-		return this.solutions.peek();
-	}
-
-	@Override
-	public GraphGenerator<T, A> getGraphGenerator() {
-		return this.getInput().getGraphGenerator();
-	}
-
-	@Override
-	public EvaluatedSearchGraphPath<T, A, V> getBestSeenSolution() {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public EvaluatedSearchGraphPath<T, A, V> getSolutionProvidedToCall() {
-		return this.solutions.peek();
 	}
 
 	@Override

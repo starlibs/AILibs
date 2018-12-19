@@ -3,17 +3,20 @@ package jaicore.planning.algorithms.strips;
 import java.util.Collection;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jaicore.basic.ILoggingCustomizable;
-import jaicore.basic.algorithm.AlgorithmEvent;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
-import jaicore.basic.algorithm.AlgorithmFinishedEvent;
-import jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.AlgorithmState;
+import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
+import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
+import jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
+import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.sets.SetUtil;
 import jaicore.graphvisualizer.TooltipGenerator;
 import jaicore.graphvisualizer.gui.VisualizationWindow;
@@ -31,10 +34,10 @@ import jaicore.planning.model.strips.StripsPlanningProblem;
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.core.interfaces.GraphGenerator;
-import jaicore.search.core.interfaces.IGraphSearch;
+import jaicore.search.core.interfaces.IPathInORGraphSearch;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
-import jaicore.search.model.probleminputs.GeneralEvaluatedTraversalTree;
 import jaicore.search.model.travesaltree.Node;
+import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 
 public class STRIPSPlanner<V extends Comparable<V>> extends IPlanningAlgorithm<StripsPlanningProblem, EvaluatedPlan<StripsAction, V>, V> {
 
@@ -42,7 +45,7 @@ public class STRIPSPlanner<V extends Comparable<V>> extends IPlanningAlgorithm<S
 	private Logger logger = LoggerFactory.getLogger(BestFirst.class);
 	private String loggerName;
 
-	private final IGraphSearch<GeneralEvaluatedTraversalTree<StripsForwardPlanningNode, String, V>, EvaluatedSearchGraphPath<StripsForwardPlanningNode, String, V>, StripsForwardPlanningNode, String, V, Node<StripsForwardPlanningNode, V>, String> search;
+	private final IPathInORGraphSearch<GraphSearchWithSubpathEvaluationsInput<StripsForwardPlanningNode, String, V>, EvaluatedSearchGraphPath<StripsForwardPlanningNode, String, V>, StripsForwardPlanningNode, String, Node<StripsForwardPlanningNode, V>, String> search;
 	private final INodeEvaluator<StripsForwardPlanningNode, V> nodeEvaluator;
 	private final STRIPSForwardSearchReducer reducer = new STRIPSForwardSearchReducer();
 
@@ -93,15 +96,14 @@ public class STRIPSPlanner<V extends Comparable<V>> extends IPlanningAlgorithm<S
 
 		/* create search algorithm */
 		this.graphGenerator = this.reducer.transform(problem);
-		GeneralEvaluatedTraversalTree<StripsForwardPlanningNode, String, V> searchProblem = new GeneralEvaluatedTraversalTree<>(this.graphGenerator, nodeEvaluator);
-		this.search = new BestFirst<GeneralEvaluatedTraversalTree<StripsForwardPlanningNode, String, V>, StripsForwardPlanningNode, String, V>(searchProblem);
+		GraphSearchWithSubpathEvaluationsInput<StripsForwardPlanningNode, String, V> searchProblem = new GraphSearchWithSubpathEvaluationsInput<>(this.graphGenerator, nodeEvaluator);
+		this.search = new BestFirst<GraphSearchWithSubpathEvaluationsInput<StripsForwardPlanningNode, String, V>, StripsForwardPlanningNode, String, V>(searchProblem);
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws AlgorithmExecutionCanceledException, InterruptedException {
+	public AlgorithmEvent nextWithException() throws AlgorithmExecutionCanceledException, InterruptedException, TimeoutException, AlgorithmException {
 		switch (this.getState()) {
 		case created:
-			this.setState(AlgorithmState.active);
 			this.search.setTimeout(this.getTimeout());
 			this.setLoggerOfSearch();
 			if (this.visualize) {
@@ -109,16 +111,15 @@ public class STRIPSPlanner<V extends Comparable<V>> extends IPlanningAlgorithm<S
 				TooltipGenerator<StripsForwardPlanningNode> tt = new StripsTooltipGenerator<>();
 				w.setTooltipGenerator(n -> tt.getTooltip(((Node<StripsForwardPlanningNode, V>) n).getPoint()));
 			}
-			return new AlgorithmInitializedEvent();
+			return activate();
 		case active:
 
 			/* invoke next step in search algorithm */
 			if (!this.search.hasNext()) {
-				this.setState(AlgorithmState.inactive);
-				return new AlgorithmFinishedEvent();
+				return terminate();
 			}
 			try {
-				EvaluatedSearchGraphPath<StripsForwardPlanningNode, String, V> nextSolution = this.search.nextSolution();
+				EvaluatedSearchGraphPath<StripsForwardPlanningNode, String, V> nextSolution = this.search.nextSolutionCandidate();
 				Plan<StripsAction> plan = this.reducer.getPlan(nextSolution.getNodes());
 				EvaluatedPlan<StripsAction, V> evaluatedPlan = new EvaluatedPlan<>(plan, nextSolution.getScore());
 				this.updateBestSeenSolution(evaluatedPlan);
@@ -159,12 +160,7 @@ public class STRIPSPlanner<V extends Comparable<V>> extends IPlanningAlgorithm<S
 			this.logger.info("The search is of class {}, which is not logging customizable.", this.search.getClass());
 		}
 	}
-
-	@Override
-	public EvaluatedPlan<StripsAction, V> getOutput() {
-		return this.getBestSeenSolution();
-	}
-
+	
 	public GraphGenerator<StripsForwardPlanningNode, String> getGraphGenerator() {
 		return this.graphGenerator;
 	}

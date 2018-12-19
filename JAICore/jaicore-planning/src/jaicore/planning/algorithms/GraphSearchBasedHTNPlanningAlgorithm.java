@@ -1,6 +1,7 @@
 package jaicore.planning.algorithms;
 
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -8,12 +9,11 @@ import org.slf4j.LoggerFactory;
 
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.algorithm.AAlgorithm;
-import jaicore.basic.algorithm.AlgorithmEvent;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
-import jaicore.basic.algorithm.AlgorithmFinishedEvent;
-import jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.AlgorithmState;
-import jaicore.basic.algorithm.IAlgorithmListener;
+import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
+import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.planning.EvaluatedSearchGraphBasedPlan;
 import jaicore.planning.algorithms.events.PlanFoundEvent;
 import jaicore.planning.graphgenerators.IHierarchicalPlanningGraphGeneratorDeriver;
@@ -23,12 +23,26 @@ import jaicore.planning.model.core.Operation;
 import jaicore.planning.model.core.Plan;
 import jaicore.planning.model.task.IHTNPlanningProblem;
 import jaicore.planning.model.task.stn.Method;
-import jaicore.search.core.interfaces.IGraphSearch;
-import jaicore.search.core.interfaces.IGraphSearchFactory;
+import jaicore.search.core.interfaces.IOptimalPathInORGraphSearch;
+import jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
-import jaicore.search.model.probleminputs.builders.SearchProblemInputBuilder;
+import jaicore.search.probleminputs.GraphSearchInput;
+import jaicore.search.probleminputs.builders.SearchProblemInputBuilder;
 
-public class GraphSearchBasedHTNPlanningAlgorithm<PA extends Action, P extends IHTNPlanningProblem<?, ?, PA>, ISearch, OSearch, NSrc, ASrc, V extends Comparable<V>, NSearch, ASearch, L extends IAlgorithmListener>
+/**
+ * 
+ * @author fmohr
+ *
+ * @param <PA> class of actions in the planning problem
+ * @param <P> class of the HTN planning problem
+ * @param <ISearch> class of the graph search problem input to which the HTN problem is reduced
+ * @param <NSrc> class of the nodes in the search problem
+ * @param <ASrc> class of the edges in the search problem
+ * @param <V> evaluation of solutions
+ * @param <NSearch>
+ * @param <ASearch>
+ */
+public class GraphSearchBasedHTNPlanningAlgorithm<PA extends Action, P extends IHTNPlanningProblem<?, ?, PA>, ISearch extends GraphSearchInput<NSrc, ASrc>, NSrc, ASrc, V extends Comparable<V>, NSearch, ASearch>
 		extends AAlgorithm<P, EvaluatedSearchGraphBasedPlan<PA, V, NSrc>> {
 
 	private Logger logger = LoggerFactory.getLogger(GraphSearchBasedHTNPlanningAlgorithm.class);
@@ -36,10 +50,10 @@ public class GraphSearchBasedHTNPlanningAlgorithm<PA extends Action, P extends I
 
 	/* algorithm inputs */
 	private final IHierarchicalPlanningGraphGeneratorDeriver<?, ?, PA, P, NSrc, ASrc> problemTransformer;
-	private final IGraphSearch<ISearch, OSearch, NSrc, ASrc, V, NSearch, ASearch> search;
+	private final IOptimalPathInORGraphSearch<ISearch, NSrc, ASrc, V, NSearch, ASearch> search;
 
 	public GraphSearchBasedHTNPlanningAlgorithm(final P problem, final IHierarchicalPlanningGraphGeneratorDeriver<?, ?, PA, P, NSrc, ASrc> problemTransformer,
-			final IGraphSearchFactory<ISearch, OSearch, NSrc, ASrc, V, NSearch, ASearch> searchFactory, final SearchProblemInputBuilder<NSrc, ASrc, ISearch> searchProblemBuilder) {
+			final IOptimalPathInORGraphSearchFactory<ISearch, NSrc, ASrc, V, NSearch, ASearch> searchFactory, final SearchProblemInputBuilder<NSrc, ASrc, ISearch> searchProblemBuilder) {
 		super(problem);
 
 		this.problemTransformer = problemTransformer;
@@ -49,7 +63,7 @@ public class GraphSearchBasedHTNPlanningAlgorithm<PA extends Action, P extends I
 		searchFactory.setProblemInput(searchProblemBuilder.build());
 		this.search = searchFactory.getAlgorithm();
 	}
-
+	
 	public List<Action> getPlan(final List<TFDNode> path) {
 		return path.stream().filter(n -> n.getAppliedAction() != null).map(n -> n.getAppliedAction()).collect(Collectors.toList());
 	}
@@ -61,7 +75,7 @@ public class GraphSearchBasedHTNPlanningAlgorithm<PA extends Action, P extends I
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws AlgorithmExecutionCanceledException, InterruptedException {
+	public AlgorithmEvent nextWithException() throws AlgorithmExecutionCanceledException, InterruptedException, TimeoutException, AlgorithmException {
 
 		this.logger.debug("I'm being asked whether there is a next solution.");
 
@@ -86,19 +100,17 @@ public class GraphSearchBasedHTNPlanningAlgorithm<PA extends Action, P extends I
 				this.logger.info("Customizing logger of search with {}", this.getLoggerName());
 				((ILoggingCustomizable) this.search).setLoggerName(this.getLoggerName() + ".search");
 			}
-			this.setState(AlgorithmState.active);
-			return new AlgorithmInitializedEvent();
+			return activate();
 		}
 		case active: {
 			if (this.isCanceled()) {
 				throw new IllegalStateException("The planner has already been canceled. Cannot compute more plans.");
 			}
 			this.logger.info("Starting/continuing search for next plan.");
-			EvaluatedSearchGraphPath<NSrc, ASrc, V> solution = this.search.nextSolution();
+			EvaluatedSearchGraphPath<NSrc, ASrc, V> solution = this.search.nextSolutionCandidate();
 			if (solution == null) {
 				this.logger.info("No more solutions will be found. Terminating algorithm.");
-				this.setState(AlgorithmState.inactive);
-				return new AlgorithmFinishedEvent();
+				return terminate();
 			}
 			this.logger.info("Next solution found.");
 			List<NSrc> solutionPath = solution.getNodes();
@@ -112,13 +124,13 @@ public class GraphSearchBasedHTNPlanningAlgorithm<PA extends Action, P extends I
 		}
 	}
 
-	public IGraphSearch<ISearch, OSearch, NSrc, ASrc, V, NSearch, ASearch> getSearch() {
+	public IOptimalPathInORGraphSearch<ISearch, NSrc, ASrc, V, NSearch, ASearch> getSearch() {
 		return this.search;
 	}
 
 	@Override
-	public EvaluatedSearchGraphBasedPlan<PA, V, NSrc> call() throws Exception {
-		return null;
+	public EvaluatedSearchGraphBasedPlan<PA, V, NSrc> call() {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override

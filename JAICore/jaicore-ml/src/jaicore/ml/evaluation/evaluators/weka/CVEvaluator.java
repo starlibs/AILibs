@@ -8,6 +8,8 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jaicore.basic.algorithm.exceptions.CascadingAlgorithmException;
+import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.ml.WekaUtil;
 import jaicore.ml.core.evaluation.measure.IMeasure;
 import weka.classifiers.Classifier;
@@ -28,7 +30,7 @@ public class CVEvaluator implements IClassifierEvaluator {
 	}
 
 	@Override
-	public Double evaluate(Classifier c) throws Exception {
+	public Double evaluate(Classifier c) throws ObjectEvaluationFailedException  {
 		
 		/* perform random stratified split */
 		DescriptiveStatistics stats = new DescriptiveStatistics();
@@ -40,7 +42,12 @@ public class CVEvaluator implements IClassifierEvaluator {
 			Instances test = data.testCV(folds, i);
 			List<Double> actual = WekaUtil.getClassesAsList(test);
 			List<Double> predicted = new ArrayList<>();
-			c.buildClassifier(train);
+			try {
+				c.buildClassifier(train);
+			}
+			catch (Exception e) {
+				throw new ObjectEvaluationFailedException(e, "Could not train classifier c");
+			}
 			double score = evaluator.calculateAvgMeasure(actual, predicted);
 			logger.info("Score for evaluation of {} with split #{}/{}: {}", c, i + 1, folds, score);
 			stats.addValue(score);

@@ -1,4 +1,4 @@
-package jaicore.basic.algorithm;
+package jaicore.basic.algorithm.events;
 
 /**
  * This is to notify listeners that an algorithm has found a solution candidate.

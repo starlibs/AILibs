@@ -2,17 +2,18 @@ package jaicore.search.algorithms.standard.random;
 
 import jaicore.basic.algorithm.AlgorithmProblemTransformer;
 import jaicore.search.core.interfaces.IGraphSearchFactory;
-import jaicore.search.model.probleminputs.GraphSearchInput;
+import jaicore.search.model.other.SearchGraphPath;
+import jaicore.search.probleminputs.GraphSearchInput;
 import jaicore.search.testproblems.enhancedttsp.EnhancedTTSP;
 import jaicore.search.testproblems.enhancedttsp.EnhancedTTSPNode;
 import jaicore.search.testproblems.enhancedttsp.EnhancedTTSPTester;
 
-public class RandomSearchEnhancedTTSPTester extends EnhancedTTSPTester<GraphSearchInput<EnhancedTTSPNode, String>, Object, EnhancedTTSPNode, String> {
+public class RandomSearchEnhancedTTSPTester extends EnhancedTTSPTester<GraphSearchInput<EnhancedTTSPNode, String>, SearchGraphPath<EnhancedTTSPNode, String>, EnhancedTTSPNode, String> {
 
 	
 
 	@Override
-	public IGraphSearchFactory<GraphSearchInput<EnhancedTTSPNode, String>, Object, EnhancedTTSPNode, String, Double, EnhancedTTSPNode, String> getFactory() {
+	public IGraphSearchFactory<GraphSearchInput<EnhancedTTSPNode, String>, SearchGraphPath<EnhancedTTSPNode, String>, EnhancedTTSPNode, String, EnhancedTTSPNode, String> getFactory() {
 		return new RandomSearchFactory<>();
 	}
 
