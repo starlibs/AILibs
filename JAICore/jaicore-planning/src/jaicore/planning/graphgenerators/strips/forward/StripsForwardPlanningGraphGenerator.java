@@ -121,6 +121,8 @@ public class StripsForwardPlanningGraphGenerator implements GraphGenerator<Strip
 						logger.debug("Generating ALL successors, since the previous procedure has not revealed any new action within {} iterations", counter);
 						generateSuccessors(node);
 						assert completelyExpandedNodes.contains(node);
+						if (appliedActions.get(node).isEmpty())
+							return null;
 						action = appliedActions.get(node).get(i % appliedActions.get(node).size());
 					}
 				}
