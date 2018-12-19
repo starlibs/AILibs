@@ -17,10 +17,7 @@ import jaicore.basic.sets.SetUtil.Pair;
  * @author Nino Schnitker
  *
  */
-public class CaseControlSampling extends ASamplingAlgorithm {
-	
-	private Random rand;
-	private ArrayList<Pair<IInstance, Double>> probabilityBoundaries;
+public class CaseControlSampling extends CaseControlLikeSampling {
 	
 	/**
 	 * Constructor
@@ -36,23 +33,14 @@ public class CaseControlSampling extends ASamplingAlgorithm {
 		case created:
 			this.sample = null;
 			
-			HashMap<String, Integer> classOccurrences = countClassOccurrences(this.getInput());
+			HashMap<Object, Integer> classOccurrences = countClassOccurrences(this.getInput());
 			
 			// Count number of classes
-			int numberOfClasses = 0;
-			for(String clazz: classOccurrences.keySet()) {
-				numberOfClasses++;
-			}
+			int numberOfClasses = classOccurrences.keySet().size();
 			
 			// Calculate Boundaries that define which Instances is choose for which random number
-			double boundaryOfCurrentInstance = 0.0;
-			probabilityBoundaries = new ArrayList<Pair<IInstance, Double>>();
-			for(IInstance instance: this.getInput()) {
-				boundaryOfCurrentInstance = ((double) 1 / 
-						classOccurrences.get((String) instance.getTargetValue(Class.forName(new String())).getValue()).intValue()) /
-						numberOfClasses;
-				probabilityBoundaries.add(new Pair<IInstance, Double>(instance, new Double(boundaryOfCurrentInstance)));
-			}
+			probabilityBoundaries = calculateInstanceBoundaries(classOccurrences, numberOfClasses);
+			
 			this.setState(AlgorithmState.active);
 			return new AlgorithmInitializedEvent();
 		case active:
@@ -83,32 +71,5 @@ public class CaseControlSampling extends ASamplingAlgorithm {
 		default:
 			throw new IllegalStateException("Unknown algorithm state "+ this.getState());	
 		}	
-	}
-	
-	/**
-	 * Count occurrences of every class. Needed to determine the probability for all instances of that class
-	 * 
-	 * @param dataset Dataset of the sample algorithm object
-	 * @return HashMap of occurrences
-	 * @throws ClassNotFoundException
-	 */
-	private HashMap<String, Integer> countClassOccurrences(IDataset dataset) throws ClassNotFoundException {
-		HashMap<String, Integer> classOccurrences = new HashMap<String, Integer>();
-		for(IInstance instance: dataset) {
-			boolean classExists = false;
-			for(String clazz: classOccurrences.keySet()) {
-				if(clazz.equals(instance.getTargetValue(Class.forName(new String())).getValue())) {
-					classExists = true;
-				}
-			}
-			if(classExists) {
-				classOccurrences.put((String) instance.getTargetValue(Class.forName(new String())).getValue(), 
-						new Integer(classOccurrences.get((String) instance.getTargetValue(Class.forName(new String())).getValue()).intValue() + 1)); 
-			}
-			else {
-				classOccurrences.put((String) instance.getTargetValue(Class.forName(new String())).getValue(), new Integer(0));
-			}
-		}
-		return classOccurrences;
-	}
+	}	
 }
