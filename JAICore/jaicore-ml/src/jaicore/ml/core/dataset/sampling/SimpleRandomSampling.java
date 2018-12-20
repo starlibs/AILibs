@@ -6,8 +6,9 @@ import jaicore.basic.algorithm.AlgorithmEvent;
 import jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.AlgorithmState;
+import jaicore.ml.core.dataset.IInstance;
 
-public class SimpleRandomSampling extends ASamplingAlgorithm {
+public class SimpleRandomSampling <I extends IInstance> extends ASamplingAlgorithm<I> {
 	
 	private Random random;
 	
@@ -19,7 +20,7 @@ public class SimpleRandomSampling extends ASamplingAlgorithm {
 	public AlgorithmEvent nextWithException() throws Exception {
 		switch (this.getState()) {
 		case created:
-			this.sample = this.createEmptyDatasetFromInputSchema();
+			this.sample = getInput().createEmpty();
 			this.setState(AlgorithmState.active);
 			return new AlgorithmInitializedEvent();			
 		case active:

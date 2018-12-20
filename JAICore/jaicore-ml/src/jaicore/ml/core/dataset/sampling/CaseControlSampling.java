@@ -17,10 +17,10 @@ import jaicore.basic.sets.SetUtil.Pair;
  * @author Nino Schnitker
  *
  */
-public class CaseControlSampling extends ASamplingAlgorithm {
+public class CaseControlSampling <I extends IInstance> extends ASamplingAlgorithm<I> {
 	
 	private Random rand;
-	private ArrayList<Pair<IInstance, Double>> probabilityBoundaries;
+	private ArrayList<Pair<I, Double>> probabilityBoundaries;
 	
 	/**
 	 * Constructor
@@ -34,7 +34,7 @@ public class CaseControlSampling extends ASamplingAlgorithm {
 	public AlgorithmEvent nextWithException() throws Exception {
 		switch(this.getState()) {
 		case created:
-			this.sample = this.createEmptyDatasetFromInputSchema();
+			this.sample = getInput().createEmpty();
 			
 			HashMap<String, Integer> classOccurrences = countClassOccurrences(this.getInput());
 			
@@ -46,19 +46,19 @@ public class CaseControlSampling extends ASamplingAlgorithm {
 			
 			// Calculate Boundaries that define which Instances is choose for which random number
 			double boundaryOfCurrentInstance = 0.0;
-			probabilityBoundaries = new ArrayList<Pair<IInstance, Double>>();
+			probabilityBoundaries = new ArrayList<Pair<I, Double>>();
 			for(Object instance: this.getInput()) {
 				boundaryOfCurrentInstance = ((double) 1 / 
-						classOccurrences.get((String) ((IInstance)instance).getTargetValue(Class.forName(new String())).getValue()).intValue()) /
+						classOccurrences.get((String) ((I)instance).getTargetValue(Class.forName(new String())).getValue()).intValue()) /
 						numberOfClasses;
-				probabilityBoundaries.add(new Pair<IInstance, Double>((IInstance)instance, new Double(boundaryOfCurrentInstance)));
+				probabilityBoundaries.add(new Pair<I, Double>((I)instance, new Double(boundaryOfCurrentInstance)));
 			}
 			this.setState(AlgorithmState.active);
 			return new AlgorithmInitializedEvent();
 		case active:
 			if(this.sample.size() < this.sampleSize) {
 				double r = this.rand.nextDouble();
-				IInstance choosenInstance = null;
+				I choosenInstance = null;
 				for(int i = 0; i < probabilityBoundaries.size(); i++) {
 					if(probabilityBoundaries.get(i).getY().doubleValue() > r) {
 						choosenInstance = probabilityBoundaries.get(i).getX();

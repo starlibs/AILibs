@@ -1,6 +1,7 @@
 package jaicore.ml.core.dataset.sampling.stratified.sampling;
 
 import jaicore.ml.core.dataset.IDataset;
+import jaicore.ml.core.dataset.IInstance;
 
 /**
  * Functional interface to write custom logic for selecting the amount of strati
@@ -8,7 +9,7 @@ import jaicore.ml.core.dataset.IDataset;
  * 
  * @author Lukas Brandt
  */
-public interface IStratiAmountSelector {
+public interface IStratiAmountSelector< I extends IInstance> {
 
 	/**
 	 * Select a suitable amount of strati for a Dataset.
@@ -17,7 +18,7 @@ public interface IStratiAmountSelector {
 	 *            The dataset that will be stratified.
 	 * @return The determined amount of strati.
 	 */
-	public int selectStratiAmount(IDataset dataset);
+	public int selectStratiAmount(IDataset<I> dataset);
 
 	/**
 	 * Sets the number of CPU cores that can be used for parallel computation
