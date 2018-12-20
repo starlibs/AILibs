@@ -298,6 +298,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 		this.state = AlgorithmState.active;
 		AlgorithmInitializedEvent event = new AlgorithmInitializedEvent();
 		this.eventBus.post(event);
+		logger.info("Starting algorithm {} with problem {} and config {}", this, input, config);
 		return event;
 	}
 

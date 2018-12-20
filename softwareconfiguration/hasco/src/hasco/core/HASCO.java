@@ -174,16 +174,11 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 			}
 
 			/* otherwise iterate over the search */
-			while (this.search.hasNext()) {
-				AlgorithmEvent searchEvent = this.search.nextWithException();
-
-				/* if the underlying search algorithm finished, we also finish */
-				if (searchEvent instanceof AlgorithmFinishedEvent) {
-					return this.terminate();
-				}
-
+			AlgorithmEvent searchEvent;
+			while (!((searchEvent = this.search.nextWithException()) instanceof AlgorithmFinishedEvent)) {
+				
 				/* otherwise, if a solution has been found, we announce this finding to our listeners and memorize if it is a new best candidate */
-				else if (searchEvent instanceof EvaluatedSearchSolutionCandidateFoundEvent) {
+				if (searchEvent instanceof EvaluatedSearchSolutionCandidateFoundEvent) {
 					this.logger.info("Received new solution from search, communicating this solution to the HASCO listeners.");
 					@SuppressWarnings("unchecked")
 					EvaluatedSearchSolutionCandidateFoundEvent<N, A, V> solutionEvent = (EvaluatedSearchSolutionCandidateFoundEvent<N, A, V>) searchEvent;
