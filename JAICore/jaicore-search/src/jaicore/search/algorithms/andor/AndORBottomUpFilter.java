@@ -17,11 +17,8 @@ import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.IObjectEvaluator;
 import jaicore.basic.algorithm.AAlgorithm;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
-import jaicore.basic.algorithm.AlgorithmState;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
-import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
-import jaicore.basic.algorithm.exceptions.CascadingAlgorithmException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.basic.sets.LDSBasedCartesianProductComputer;
 import jaicore.graph.Graph;
@@ -115,7 +112,7 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 				this.bestSolutionBase = bestSolutions.poll().graph;
 				return this.terminate();
 			} catch (ObjectEvaluationFailedException e) {
-				throw new CascadingAlgorithmException(e, "Could not evaluate solution.");
+				throw new AlgorithmException(e, "Could not evaluate solution.");
 			}
 		}
 		default:

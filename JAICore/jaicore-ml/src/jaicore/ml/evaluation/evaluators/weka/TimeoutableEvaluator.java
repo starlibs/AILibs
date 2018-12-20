@@ -1,7 +1,6 @@
 package jaicore.ml.evaluation.evaluators.weka;
 
 import jaicore.basic.IObjectEvaluator;
-import jaicore.basic.algorithm.exceptions.CascadingAlgorithmException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.concurrent.TimeoutTimer;
 import weka.classifiers.Classifier;

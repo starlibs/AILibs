@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.slf4j.Logger;
@@ -33,11 +32,9 @@ import jaicore.basic.algorithm.AAlgorithm;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.AlgorithmState;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
-import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
-import jaicore.basic.algorithm.exceptions.CascadingAlgorithmException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.ml.WekaUtil;
 import jaicore.ml.core.evaluation.measure.singlelabel.MultiClassPerformanceMeasure;
@@ -196,7 +193,7 @@ public abstract class MLPlanWekaClassifier extends AAlgorithm<Instances, Classif
 				/* set state to active */
 				return activate();
 			} catch (IOException e) {
-				throw new CascadingAlgorithmException(e, "Could not create TwoPhase configuration problem.");
+				throw new AlgorithmException(e, "Could not create TwoPhase configuration problem.");
 			}
 		}
 		case active: {
@@ -209,7 +206,7 @@ public abstract class MLPlanWekaClassifier extends AAlgorithm<Instances, Classif
 			try {
 				this.selectedClassifier.buildClassifier(this.getInput());
 			} catch (Exception e) {
-				throw new CascadingAlgorithmException(e, "Training the classifier failed!");
+				throw new AlgorithmException(e, "Training the classifier failed!");
 			}
 			long endBuildTime = System.currentTimeMillis();
 			this.logger.info("Selected model has been built on entire dataset. Build time of chosen model was {}ms. Total construction time was {}ms", endBuildTime - startBuildTime, endBuildTime - startOptimizationTime);
