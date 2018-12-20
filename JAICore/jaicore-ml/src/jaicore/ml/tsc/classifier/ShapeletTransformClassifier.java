@@ -18,7 +18,7 @@ public class ShapeletTransformClassifier
 	private Classifier classifier;
 
 	public ShapeletTransformClassifier(final int k, final int seed) {
-		super(new ShapeletTransformAlgorithm(k, null, seed));
+		super(new ShapeletTransformAlgorithm(k, k / 2, null, seed));
 		this.seed = seed;
 	}
 

@@ -2,6 +2,7 @@ package jaicore.ml.tsc.classifier;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -45,6 +46,16 @@ public class ShapeletTransformAlgorithm extends
 		private int startIndex;
 		private int length;
 		private int instanceIndex;
+		private double determinedQuality;
+
+		public Shapelet(final INDArray data, final int startIndex, final int length, final int instanceIndex,
+				final double determinedQuality) {
+			this.data = data;
+			this.startIndex = startIndex;
+			this.length = length;
+			this.instanceIndex = instanceIndex;
+			this.determinedQuality = determinedQuality;
+		}
 
 		public Shapelet(final INDArray data, final int startIndex, final int length, final int instanceIndex) {
 			this.data = data;
@@ -68,6 +79,14 @@ public class ShapeletTransformAlgorithm extends
 		public int getInstanceIndex() {
 			return instanceIndex;
 		}
+
+		public double getDeterminedQuality() {
+			return determinedQuality;
+		}
+
+		public void setDeterminedQuality(double determinedQuality) {
+			this.determinedQuality = determinedQuality;
+		}
 	}
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ShapeletTransformAlgorithm.class);
@@ -76,12 +95,15 @@ public class ShapeletTransformAlgorithm extends
 
 	private final int k;
 	private final int seed;
+	private final int noClusters;
 
-	public ShapeletTransformAlgorithm(final int k, final IQualityMeasure<String> qualityMeasure, final int seed) {
+	public ShapeletTransformAlgorithm(final int k, final int noClusters, final IQualityMeasure<String> qualityMeasure,
+			final int seed) {
 		// TODO Auto-generated constructor stub
 		this.k = k;
 		this.qualityMeasure = qualityMeasure;
 		this.seed = seed;
+		this.noClusters = noClusters;
 	}
 
 	@Override
@@ -105,12 +127,13 @@ public class ShapeletTransformAlgorithm extends
 
 		List<Shapelet> shapelets = shapeletCachedSelection(dataMatrix, min, max, this.k, classValues);
 
+		shapelets = clusterShapelets(shapelets, this.noClusters);
+
 		Classifier classifier = initEnsembleModel();
 
 		// classifier.buildClassifier(data);
 
 		this.model.setShapelets(shapelets);
-
 		return this.model;
 	}
 
@@ -141,6 +164,70 @@ public class ShapeletTransformAlgorithm extends
 		return result;
 	}
 
+	public List<Shapelet> clusterShapelets(final List<Shapelet> shapelets, final int noClusters) {
+		final List<List<Shapelet>> C = new ArrayList<>();
+		for (final Shapelet shapelet : shapelets) {
+			List<Shapelet> list = new ArrayList<>();
+			list.add(shapelet);
+			C.add(list);
+		}
+
+		while (C.size() > noClusters) {
+			INDArray M = Nd4j.create(C.size(), C.size());
+			for (int i = 0; i < C.size(); i++) {
+				for (int j = 0; j < C.size(); j++) {
+					double distance = 0;
+					int comparisons = C.get(i).size() * C.get(j).size();
+					for (int l = 0; l < C.get(i).size(); l++) {
+						for (int k = 0; k < C.get(j).size(); k++) {
+							Shapelet c_l = C.get(i).get(l);
+							Shapelet c_k = C.get(j).get(k);
+
+							if (c_l.length > c_k.length)
+								distance += getMinimumDistanceAmongAllSubsequences(c_k, c_l.getData());
+							else
+								distance += getMinimumDistanceAmongAllSubsequences(c_l, c_k.getData());
+						}
+					}
+
+					M.putScalar(new int[] { i, j }, distance / comparisons);
+				}
+			}
+
+			double best = Double.MAX_VALUE;
+			int x = 0;
+			int y = 0;
+			for (int i = 0; i < M.shape()[0]; i++) {
+				for (int j = 0; j < M.shape()[1]; j++) {
+					if (M.getDouble(i, j) < best && i != j) {
+						x = i;
+						y = j;
+						best = M.getDouble(i, j);
+					}
+				}
+			}
+			final List<Shapelet> C_prime = C.get(x);
+			C_prime.addAll(C.get(y));
+			Shapelet maxClusterShapelet = getHighestQualityShapeletInList(C_prime);
+			if (x > y) {
+				C.remove(x);
+				C.remove(y);
+			} else {
+				C.remove(y);
+				C.remove(x);
+			}
+			C.add(Arrays.asList(maxClusterShapelet));
+		}
+
+		// Flatten list
+		return C.stream().flatMap(List::stream).collect(Collectors.toList());
+	}
+
+	private static Shapelet getHighestQualityShapeletInList(final List<Shapelet> shapelets) {
+		return Collections.max(shapelets,
+				(s1, s2) -> (-1) * Double.compare(s1.getDeterminedQuality(), s2.getDeterminedQuality()));
+	}
+
 	private List<Shapelet> shapeletCachedSelection(final INDArray data, final int min, final int max, final int k,
 			final List<String> classValues) {
 		List<Map.Entry<Shapelet, Double>> kShapelets = new ArrayList<>();
@@ -154,6 +241,7 @@ public class ShapeletTransformAlgorithm extends
 				for (Shapelet s : W_il) {
 					List<Double> D_s = findDistances(s, data);
 					double quality = qualityMeasure.assessQuality(D_s, classValues);
+					s.setDeterminedQuality(quality);
 					shapelets.add(new AbstractMap.SimpleEntry<>(s, quality));
 				}
 			}
