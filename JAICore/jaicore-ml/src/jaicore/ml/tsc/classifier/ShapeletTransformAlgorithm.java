@@ -2,10 +2,12 @@ package jaicore.ml.tsc.classifier;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -96,8 +98,10 @@ public class ShapeletTransformAlgorithm extends
 		// Set<String> classValues = ((ICategoricalAttributeType)
 		// data.getTargetType(String.class)).getDomain();
 
-		int max = 0;
-		int min = 0;
+		// Estimate min and max
+		int[] minMax = estimateMinMax(dataMatrix, classValues);
+		int min = minMax[0];
+		int max = minMax[1];
 
 		List<Shapelet> shapelets = shapeletCachedSelection(dataMatrix, min, max, this.k, classValues);
 
@@ -108,6 +112,33 @@ public class ShapeletTransformAlgorithm extends
 		this.model.setShapelets(shapelets);
 
 		return this.model;
+	}
+
+	private int[] estimateMinMax(final INDArray data, final List<String> classValues) {
+		int[] result = new int[2];
+
+		List<Shapelet> shapelets = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			INDArray tmpMatrix = Nd4j.create(10, data.shape()[1]);
+			Random rand = new Random(this.seed);
+			List<String> tmpClasses = new ArrayList<>();
+			for (int j = 0; j < 10; j++) {
+				int nextIndex = (int) (rand.nextInt() % data.shape()[0]);
+				tmpMatrix.putRow(j, data.getRow(nextIndex));
+				tmpClasses.add(classValues.get(nextIndex));
+			}
+
+			shapelets.addAll(shapeletCachedSelection(tmpMatrix, 3, (int) data.shape()[1], 10, tmpClasses));
+		}
+
+		sortByLengthDesc(shapelets);
+
+		// Min
+		result[0] = shapelets.get(25).getLength();
+		// Max
+		result[1] = shapelets.get(75).getLength();
+
+		return result;
 	}
 
 	private List<Shapelet> shapeletCachedSelection(final INDArray data, final int min, final int max, final int k,
@@ -126,7 +157,7 @@ public class ShapeletTransformAlgorithm extends
 					shapelets.add(new AbstractMap.SimpleEntry<>(s, quality));
 				}
 			}
-			shapelets = sortByQuality(shapelets);
+			sortByQualityDesc(shapelets);
 			shapelets = removeSelfSimilar(shapelets);
 			kShapelets = merge(k, kShapelets, shapelets);
 		}
@@ -140,16 +171,16 @@ public class ShapeletTransformAlgorithm extends
 		kShapelets.addAll(shapelets);
 
 		// Retain only k
-		kShapelets = sortByQuality(kShapelets);
+		sortByQualityDesc(kShapelets);
 		for (int i = k; i < kShapelets.size(); i++)
 			kShapelets.remove(i);
 
 		return kShapelets;
 	}
 
-	private static List<Map.Entry<Shapelet, Double>> sortByQuality(final List<Map.Entry<Shapelet, Double>> list) {
+	private static void sortByQualityDesc(final List<Map.Entry<Shapelet, Double>> list) {
 		list.sort((e1, e2) -> e1.getValue().compareTo(e2.getValue()));
-		return list;
+		Collections.sort(list, Collections.reverseOrder());
 	}
 
 	private static List<Map.Entry<Shapelet, Double>> removeSelfSimilar(
@@ -362,4 +393,8 @@ public class ShapeletTransformAlgorithm extends
 
 	}
 
+	private static void sortByLengthDesc(final List<Shapelet> shapelets) {
+		shapelets.sort((s1, s2) -> Integer.compare(s1.getLength(), s2.getLength()));
+		Collections.sort(shapelets, Collections.reverseOrder());
+	}
 }
