@@ -17,5 +17,5 @@ public interface IDistance {
      * @param timeSeries2 Second time series.
      * @return Distance between the first and second time series.
      */
-    public double distance(INDArray timeSeries1, INDArray timeSeries2) throws TimeSeriesLengthException;
+    public double distance(INDArray A, INDArray tA, INDArray B, INDArray tB) throws TimeSeriesLengthException;
 }
