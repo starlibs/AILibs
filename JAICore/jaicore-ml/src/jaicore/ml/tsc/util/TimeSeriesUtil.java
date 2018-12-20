@@ -3,16 +3,16 @@ package jaicore.ml.tsc.util;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
 import jaicore.ml.core.dataset.TimeSeriesDataset;
 import jaicore.ml.core.dataset.TimeSeriesInstance;
-import jaicore.ml.core.dataset.attribute.IAttributeType;
 import jaicore.ml.core.dataset.attribute.IAttributeValue;
 import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
-import jaicore.ml.core.dataset.attribute.timeseries.TimeSeriesAttributeType;
 import jaicore.ml.core.dataset.attribute.timeseries.TimeSeriesAttributeValue;
 import jaicore.ml.core.exception.TrainingException;
 import jaicore.ml.tsc.exceptions.TimeSeriesLengthException;
@@ -23,18 +23,93 @@ import weka.core.Instance;
 import weka.core.Instances;
 
 /**
- * TimeSeriesUtil
+ * Utility class for time series operations.
  */
 public class TimeSeriesUtil {
 
-	public static void sameLengthOrException(TimeSeriesAttributeValue timeSeries1, TimeSeriesAttributeValue timeSeries2)
+	/**
+	 * Checks, whether a given INDArray is a valid time series.
+	 * 
+	 * @param array
+	 * @return True, if the array is a valid time series.
+	 */
+	public static boolean isTimeSeries(INDArray array) {
+		return array.rank() == 1;
+	}
+
+	/**
+	 * Checks, whether a given INDArray is a valid time series with a given length.
+	 * 
+	 * @param array
+	 * @param length
+	 * @return True, if the array is a valid time series of the given length. False,
+	 *         otherwise.
+	 */
+	public static boolean isTimeSeries(INDArray array, int length) {
+		return array.rank() == 1 && array.length() == length;
+	}
+
+	/**
+	 * Checks, whether a given INDArray is a valid time series. Throws an exception
+	 * otherwise.
+	 * 
+	 * @param array
+	 * @throws IllegalArgumentException
+	 */
+	public static void isTimeSeriesOrException(INDArray array) throws IllegalArgumentException {
+		if (!isTimeSeries(array)) {
+			String message = String.format(
+					"The given INDArray is no time series. It should have rank 1, but has a rank of %d.", array.rank());
+			throw new IllegalArgumentException(message);
+		}
+	}
+
+	/**
+	 * Checks, whether a given INDArray is a valid time series with a given length.
+	 * Throws an exception otherwise.
+	 * 
+	 * @param array
+	 * @param length
+	 * @throws IllegalArgumentException
+	 */
+	public static void isTimeSeriesOrException(INDArray array, int length) throws IllegalArgumentException {
+		if (!isTimeSeries(array)) {
+			String message = String.format(
+					"The given INDArray is no time series. It should have rank 1, but has a rank of %d.", array.rank());
+			throw new IllegalArgumentException(message);
+		}
+		if (!isTimeSeries(array, length)) {
+			String message = String.format("The given time series should length 7, but has a length of %d.",
+					array.length());
+			throw new IllegalArgumentException(message);
+		}
+	}
+
+	/**
+	 * Checks whether arrays have the same length.
+	 * 
+	 * @param timeSeries1
+	 * @param timeSeries2
+	 * @return True if the arrays have the same length. False, otherwise.
+	 */
+	public static boolean isSameLength(INDArray timeSeries1, INDArray timeSeries2) {
+		return timeSeries1.length() == timeSeries2.length();
+	}
+
+	/**
+	 * Checks whether two arrays have the same length. Throws an exception
+	 * otherwise.
+	 * 
+	 * @param timeSeries1
+	 * @param timeSeries2
+	 * @throws TimeSeriesLengthException
+	 */
+	public static void isSameLengthOrException(INDArray timeSeries1, INDArray timeSeries2)
 			throws TimeSeriesLengthException {
-		long length1 = timeSeries1.getValue().length();
-		long length2 = timeSeries2.getValue().length();
-		if (length1 != length2) {
+		if (!isSameLength(timeSeries1, timeSeries2)) {
 			String message = String.format(
 					"Length of the given time series are not equal: Length first time series: (%d). Length of seconds time series: (%d)",
-					length1, length2);
+					timeSeries1.length(), timeSeries2.length());
 			throw new TimeSeriesLengthException(message);
 		}
 	}
@@ -91,18 +166,11 @@ public class TimeSeriesUtil {
 	 */
 	// TODO: Include meta information
 	public static Instances timeSeriesDatasetToWekaInstances(final TimeSeriesDataset dataSet) {
-		if (!(dataSet.getTargetType(String.class) instanceof CategoricalAttributeType)) {
-			throw new UnsupportedOperationException(
-					"Time series to Weka instances transformation works only with categorical target attribute types.");
-		}
 
-		// Get all attributes
-		List<IAttributeType<?>> attTypes = dataSet.getAttributeTypes();
+		// TODO: Integrate direct access in TimeSeriesDataset
 		List<INDArray> matrices = new ArrayList<>();
-		for (IAttributeType<?> attType : attTypes) {
-			if (attType instanceof TimeSeriesAttributeType)
-				matrices.add(dataSet.getMatrixForAttributeType((TimeSeriesAttributeType) attType));
-		}
+		for (int i = 0; i < dataSet.getNumberOfVariables(); i++)
+			matrices.add(dataSet.getValues(i));
 
 		// Create attributes
 		final ArrayList<Attribute> attributes = new ArrayList<>();
@@ -115,22 +183,24 @@ public class TimeSeriesUtil {
 		}
 
 		// Add class attribute
+		final INDArray targets = dataSet.getTargets();
 		attributes.add(new Attribute("class",
-				new ArrayList<>(((CategoricalAttributeType) dataSet.getTargetType(String.class)).getDomain())));
-		final Instances result = new Instances("Instances", attributes, dataSet.size());
+				IntStream.rangeClosed((int) targets.minNumber().longValue(), (int) targets.maxNumber().longValue())
+						.boxed().map(i -> String.valueOf(i)).collect(Collectors.toList())));
+		final Instances result = new Instances("Instances", attributes, (int) dataSet.getNumberOfInstances());
 		result.setClassIndex(result.numAttributes() - 1);
 
 		// Concatenate multiple matrices if series is multivariate
 		INDArray combinedMatrix = hstackINDArrays(matrices);
 
 		// Create instances
-		for (int i = 0; i < dataSet.size(); i++) {
+		for (int i = 0; i < dataSet.getNumberOfInstances(); i++) {
 
 			// Initialize instance
 			final Instance inst = new DenseInstance(1, Nd4j.toFlattened(combinedMatrix.getRow(i)).toDoubleVector());
 
 			inst.setDataset(result);
-			inst.setClassValue(dataSet.get(i).getTargetValue(String.class).getValue());
+			inst.setClassValue(String.valueOf(targets.getInt(i)));
 		}
 
 		return result;
