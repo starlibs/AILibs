@@ -8,7 +8,9 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
 import jaicore.ml.core.dataset.TimeSeriesDataset;
+import jaicore.ml.core.dataset.TimeSeriesInstance;
 import jaicore.ml.core.dataset.attribute.IAttributeType;
+import jaicore.ml.core.dataset.attribute.IAttributeValue;
 import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
 import jaicore.ml.core.dataset.attribute.timeseries.TimeSeriesAttributeType;
 import jaicore.ml.core.dataset.attribute.timeseries.TimeSeriesAttributeValue;
@@ -119,15 +121,7 @@ public class TimeSeriesUtil {
 		result.setClassIndex(result.numAttributes() - 1);
 
 		// Concatenate multiple matrices if series is multivariate
-		INDArray combinedMatrix;
-		if (matrices.size() > 0) {
-			combinedMatrix = matrices.get(0).dup();
-			for (int i = 1; i < matrices.size(); i++) {
-				combinedMatrix = Nd4j.hstack(combinedMatrix, matrices.get(i));
-			}
-		} else {
-			combinedMatrix = Nd4j.create(0, 0);
-		}
+		INDArray combinedMatrix = hstackINDArrays(matrices);
 
 		// Create instances
 		for (int i = 0; i < dataSet.size(); i++) {
@@ -186,8 +180,8 @@ public class TimeSeriesUtil {
 	 *             Throws exception if the training could not be finished
 	 *             successfully
 	 */
-	private static void buildWekaClassifierFromTS(final Classifier classifier,
-			final TimeSeriesDataset timeSeriesDataset) throws TrainingException {
+	public static void buildWekaClassifierFromTS(final Classifier classifier, final TimeSeriesDataset timeSeriesDataset)
+			throws TrainingException {
 
 		final Instances trainingInstances = timeSeriesDatasetToWekaInstances(timeSeriesDataset);
 
@@ -197,5 +191,63 @@ public class TimeSeriesUtil {
 			throw new TrainingException(String.format("Could not train classifier %d due to a Weka exception.",
 					classifier.getClass().getName()), e);
 		}
+	}
+
+	/**
+	 * Maps a time series instance to a Weka instance.
+	 * 
+	 * @param instance
+	 *            The time series instance storing the time series data and the
+	 *            target value
+	 * @return Returns the Weka instance containing the time series data and the
+	 *         class information.
+	 */
+	// TODO: Add meta attribute support
+	public static Instance tsInstanceToWekaInstance(final TimeSeriesInstance instance) {
+		List<IAttributeValue<?>> attValues = instance.getAttributeValues();
+		List<INDArray> indArrays = new ArrayList<>();
+
+		for (final IAttributeValue<?> attValue : attValues) {
+			if (attValue instanceof TimeSeriesAttributeValue) {
+				indArrays.add(((TimeSeriesAttributeValue) attValue).getValue());
+			}
+		}
+
+		INDArray combinedMatrix = hstackINDArrays(indArrays);
+
+		final Instance finalInstance = new DenseInstance(1, Nd4j.toFlattened(combinedMatrix).toDoubleVector());
+		finalInstance.setClassValue(instance.getTargetValue(String.class).getValue());
+		return finalInstance;
+	}
+
+	/**
+	 * Stacks the given matrices horizontally.
+	 * 
+	 * @param matrices
+	 *            List of INDArray matrices to be stacked
+	 * @return Returns one INDArray containing all <code>matrices</code>. New
+	 *         dimensionality is (originalShape[0] x sum of originalShape[1]s)
+	 */
+	private static INDArray hstackINDArrays(List<INDArray> matrices) {
+		// Check first shape dimension
+		if (matrices.size() > 0) {
+			long[] shape = matrices.get(0).shape();
+			for (int i = 1; i < matrices.size(); i++) {
+				if (matrices.get(i).shape()[0] != shape[0])
+					throw new IllegalArgumentException("First dimensionality of the given matrices must be equal!");
+			}
+		}
+
+		INDArray combinedMatrix;
+		if (matrices.size() > 0) {
+			combinedMatrix = matrices.get(0).dup();
+			for (int i = 1; i < matrices.size(); i++) {
+				combinedMatrix = Nd4j.hstack(combinedMatrix, matrices.get(i));
+			}
+		} else {
+			// If an empty list was given, return an empty matrix
+			combinedMatrix = Nd4j.create(0, 0);
+		}
+		return combinedMatrix;
 	}
 }
