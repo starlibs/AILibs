@@ -8,11 +8,8 @@ import org.slf4j.LoggerFactory;
 
 import jaicore.basic.algorithm.AAlgorithm;
 import jaicore.ml.core.dataset.IDataset;
-import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.InstanceSchema;
-import jaicore.ml.core.dataset.sampling.stratified.sampling.AttributeBasedStratiAmountSelector;
 import jaicore.ml.core.dataset.standard.SimpleDataset;
-import jaicore.ml.core.dataset.standard.SimpleInstance;
 
 /**
  * An abstract class for sampling algorithms providing basic functionality of an
