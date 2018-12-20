@@ -3,7 +3,6 @@ package hasco.core;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
@@ -132,17 +131,21 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 
 			/* communicate that algorithm has been initialized */
 			this.logger.debug("Emitting intialization event");
-			return activate();
+			return this.activate();
 		}
 		case active: {
+			/* Check termination */
+			this.checkTermination();
+
 			/* if the search itself has not been initialized, do this now */
 			if (!this.searchCreatedAndInitialized) {
 				/* create search algorithm, set its logger, and initialize visualization*/
 				this.logger.debug("Creating the search object");
 				this.searchFactory.setProblemInput(this.searchProblem, this.searchProblemTransformer);
 				this.search = this.searchFactory.getAlgorithm();
-				this.search.setNumCPUs(this.getConfig().cpus());
-				this.search.setTimeout(this.getConfig().timeout() * 1000, TimeUnit.MILLISECONDS);
+				this.search.setNumCPUs(this.getNumCPUs());
+				this.search.setTimeout(this.getTimeout());
+
 				if (this.loggerName != null && this.loggerName.length() > 0 && this.search instanceof ILoggingCustomizable) {
 					this.logger.info("Setting logger name of {} to {}", this.search, this.loggerName + ".search");
 					((ILoggingCustomizable) this.search).setLoggerName(this.loggerName + ".search");
@@ -228,10 +231,6 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 		return this.planningProblem;
 	}
 
-	public void setVisualization(final boolean visualization) {
-		this.getConfig().setProperty(HASCOConfig.K_VISUALIZE, String.valueOf(visualization));
-	}
-
 	@Override
 	public void cancel() {
 		super.cancel();
@@ -267,6 +266,14 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 	@Override
 	public HASCOConfig getConfig() {
 		return (HASCOConfig) super.getConfig();
+	}
+
+	public boolean getVisualization() {
+		return this.getConfig().visualizationEnabled();
+	}
+
+	public void setVisualization(final boolean visualization) {
+		this.getConfig().setProperty(HASCOConfig.K_VISUALIZE, String.valueOf(visualization));
 	}
 
 	@Override
