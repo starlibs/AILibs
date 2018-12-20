@@ -185,10 +185,15 @@ public class StratifiedSampling extends ASamplingAlgorithm {
 					simpleRandomSampling.setInput(strati[index]);
 					simpleRandomSampling.setSampleSize(sampleSizeForStrati[index]);
 					try {
-						sample.addAll(simpleRandomSampling.call());
+						synchronized (sample) {		
+							sample.addAll(simpleRandomSampling.call());
+						}
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
+					System.out.println("Hi " + index);
+					
+					
 				}
 			});
 		}
