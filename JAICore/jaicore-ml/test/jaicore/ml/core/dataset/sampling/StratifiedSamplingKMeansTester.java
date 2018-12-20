@@ -48,7 +48,7 @@ public class StratifiedSamplingKMeansTester extends GeneralSamplingTester {
 					public int getNumCPUs() {
 						return 0;
 					}
-				}, k, new Random(RANDOM_SEED), true);
+				}, k, new Random(RANDOM_SEED));
 				if (this.input != null) {
 					algorithm.setInput(input);
 				}

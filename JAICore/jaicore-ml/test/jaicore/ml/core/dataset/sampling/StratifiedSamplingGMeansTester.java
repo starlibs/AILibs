@@ -33,7 +33,7 @@ public class StratifiedSamplingGMeansTester extends GeneralSamplingTester {
 			@Override
 			public IAlgorithm<IDataset, IDataset> getAlgorithm() {
 				GMeansStratiAmountSelectorAndAssigner g = new GMeansStratiAmountSelectorAndAssigner(RANDOM_SEED);
-				AAlgorithm<IDataset, IDataset> algorithm = new StratifiedSampling(g, g, new Random(RANDOM_SEED), true);
+				AAlgorithm<IDataset, IDataset> algorithm = new StratifiedSampling(g, g, new Random(RANDOM_SEED));
 				if (this.input != null) {
 					algorithm.setInput(input);
 				}

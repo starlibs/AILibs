@@ -32,30 +32,21 @@ public class StratifiedSampling<I extends IInstance> extends ASamplingAlgorithm<
 	private IDataset<I>[] strati;
 	private IDataset<I> datasetCopy;
 	private ExecutorService executorService;
-	private boolean considerStandardDeviation;
 	private boolean simpleRandomSamplingStarted;
 
 	/**
 	 * Constructor for Stratified Sampling.
 	 * 
-	 * @param stratiAmountSelector
-	 *            The custom selector for the used amount of strati.
-	 * @param stratiAssigner
-	 *            Custom logic to assign datapoints into strati.
-	 * @param random
-	 *            Random object for sampling inside of the strati.
-	 * @param considerStandardDeviation
-	 *            Flag if the overall sample should be composed from each strati
-	 *            partial to StratiSize / DatasetSize or if all strati whose size is
-	 *            inside of AverageStratiSize +/- StandardDeviationOfStratiSize
-	 *            should be used uniformly distributed.
+	 * @param stratiAmountSelector The custom selector for the used amount of
+	 *                             strati.
+	 * @param stratiAssigner       Custom logic to assign datapoints into strati.
+	 * @param random               Random object for sampling inside of the strati.
 	 */
-	public StratifiedSampling(IStratiAmountSelector<I> stratiAmountSelector, IStratiAssigner<I> stratiAssigner, Random random,
-			boolean considerStandardDeviation) {
+	public StratifiedSampling(IStratiAmountSelector<I> stratiAmountSelector, IStratiAssigner<I> stratiAssigner,
+			Random random) {
 		this.stratiAmountSelector = stratiAmountSelector;
 		this.stratiAssigner = stratiAssigner;
 		this.random = random;
-		this.considerStandardDeviation = considerStandardDeviation;
 	}
 
 	@Override
@@ -132,47 +123,11 @@ public class StratifiedSampling<I extends IInstance> extends ASamplingAlgorithm<
 	private void startSimpleRandomSamplingForStrati() {
 		// Calculate the amount of datapoints that will be used from each strati
 		int[] sampleSizeForStrati = new int[this.strati.length];
-		if (this.considerStandardDeviation) {
-			// Calculate Mean and StandardDeviation.
-			Mean mean = new Mean();
-			StandardDeviation standardDeviation = new StandardDeviation();
-			for (int i = 0; i < this.strati.length; i++) {
-				mean.increment(this.strati[i].size());
-				standardDeviation.increment(this.strati[i].size());
-			}
-			// Check which strati are inside of Mean +/- StandardDeviation
-			double lowerBound = mean.getResult() - standardDeviation.getResult();
-			double upperBound = mean.getResult() + standardDeviation.getResult();
-			int numberOfStratiInsideOfInterval = 0;
-			int combinedSizeOfStratiInsideOfInterval = 0;
-			for (int i = 0; i < this.strati.length; i++) {
-				if (this.strati[i].size() < lowerBound || this.strati[i].size() > upperBound) {
-					// Outside of the interval -> Calculate ratio.
-					sampleSizeForStrati[i] = (int) (this.sampleSize
-							* ((double) this.strati[i].size() / (double) this.getInput().size()));
-				} else {
-					// Inside of interval -> Mark for uniform distribution.
-					sampleSizeForStrati[i] = -1;
-					numberOfStratiInsideOfInterval++;
-					combinedSizeOfStratiInsideOfInterval += this.strati[i].size();
-				}
-			}
-			// Assign uniformly distributed sample sizes to marked strati.
-			int sizeForStratiInsideOfInterval = (int) (this.sampleSize
-					* ((double) combinedSizeOfStratiInsideOfInterval / (double) this.getInput().size())
-					/ (double) numberOfStratiInsideOfInterval);
-			for (int i = 0; i < this.strati.length; i++) {
-				if (sampleSizeForStrati[i] == -1) {
-					sampleSizeForStrati[i] = sizeForStratiInsideOfInterval;
-				}
-			}
-		} else {
-			// Calculate for each stratum the sample size by StratiSize / DatasetSize
-			for (int i = 0; i < this.strati.length; i++) {
-				sampleSizeForStrati[i] = (int) (this.sampleSize
-						* ((double) this.strati[i].size() / (double) this.getInput().size()));
-				System.out.println("Strati size: " + this.strati[i].size() + " sample amount " + sampleSizeForStrati[i]);
-			}
+		// Calculate for each stratum the sample size by StratiSize / DatasetSize
+		for (int i = 0; i < this.strati.length; i++) {
+			sampleSizeForStrati[i] = Math.round(
+					(float) (this.sampleSize * ((double) this.strati[i].size() / (double) this.getInput().size())));
+			System.out.println("Strati size: " + this.strati[i].size() + " sample amount " + sampleSizeForStrati[i]);
 		}
 
 		// Start a Simple Random Sampling thread for each stratum
@@ -185,13 +140,13 @@ public class StratifiedSampling<I extends IInstance> extends ASamplingAlgorithm<
 					simpleRandomSampling.setInput(strati[index]);
 					simpleRandomSampling.setSampleSize(sampleSizeForStrati[index]);
 					try {
-						synchronized (sample) {		
+						synchronized (sample) {
 							sample.addAll(simpleRandomSampling.call());
 						}
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
-					
+
 				}
 			});
 		}

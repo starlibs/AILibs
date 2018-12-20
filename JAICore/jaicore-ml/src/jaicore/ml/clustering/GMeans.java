@@ -110,6 +110,9 @@ public class GMeans<C extends Clusterable> {
 			// an ArrayList of thier
 			// corresponding points
 			intermediateCenter = new ArrayList<>(2);
+			if(loopPoints.size() <2) {
+				break;
+			}
 			List<CentroidCluster<C>> intermediatePointsTemp = loopCluster.cluster(loopPoints);
 			for (CentroidCluster<C> centroidCluster : intermediatePointsTemp) {
 				intermediatePoints.put(centroidCluster.getCenter().getPoint(), centroidCluster.getPoints());
@@ -142,7 +145,7 @@ public class GMeans<C extends Clusterable> {
 						if (!Double.isNaN(v[p])) {
 							y[r] += (v[p] * loopPoints.get(r).getPoint()[p]) / w;
 						}
-						// TODO soll ich wenn v an der stelle NaN ist einfach so tuen als wäre es
+						// TODO soll ich wenn v an der stelle NaN ist einfach so tuen als wï¿½re es
 						// 1 oder nichts machen ?
 					}
 				}
