@@ -18,17 +18,18 @@ import weka.core.Attribute;
 import weka.core.Instances;
 import weka.core.Instance;
 
-public abstract class PilotEstimateSampling extends CaseControlLikeSampling {
+public abstract class PilotEstimateSampling <I extends IInstance> extends CaseControlLikeSampling<I> {
 	
 	protected int preSampleSize;
 	protected Classifier pilotEstimator = new Logistic();
 	
 	@Override
 	public AlgorithmEvent nextWithException() throws Exception {
+		ArrayList<Pair<I, Double>> probabilityBoundaries = null;
 		switch(this.getState()) {
 		case created:
-			this.sample = this.createEmptyDatasetFromInputSchema();
-			IDataset<IInstance> pilotEstimateSample = this.createEmptyDatasetFromInputSchema();
+			this.sample = this.getInput().createEmpty();
+			IDataset<I> pilotEstimateSample = this.getInput().createEmpty();
 			
 			HashMap<Object, Integer> classOccurrences = countClassOccurrences(this.getInput());
 			
@@ -39,7 +40,7 @@ public abstract class PilotEstimateSampling extends CaseControlLikeSampling {
 			probabilityBoundaries = calculateInstanceBoundaries(classOccurrences, numberOfClasses);
 			
 			double r;
-			IInstance choosenInstance;
+			I choosenInstance;
 			for(int i = 0; i < this.preSampleSize; i++) {
 				r = this.rand.nextDouble();
 				choosenInstance = null;
@@ -51,7 +52,7 @@ public abstract class PilotEstimateSampling extends CaseControlLikeSampling {
 				if(choosenInstance == null) {
 					choosenInstance = probabilityBoundaries.get(probabilityBoundaries.size() - 1).getX();
 				}
-				pilotEstimateSample.add((IInstance) choosenInstance);
+				pilotEstimateSample.add(choosenInstance);
 			}
 			Instances pilotEstimateInstances = WekaInstancesUtil.datasetToWekaInstances(pilotEstimateSample);
 			this.pilotEstimator.buildClassifier(pilotEstimateInstances);
@@ -92,5 +93,5 @@ public abstract class PilotEstimateSampling extends CaseControlLikeSampling {
 		}
 	}
 	
-	abstract ArrayList<Pair<IInstance, Double>> calculateFinalInstanceBoundaries(Instances instances, Classifier pilotEstimator) throws Exception;
+	abstract ArrayList<Pair<I, Double>> calculateFinalInstanceBoundaries(Instances instances, Classifier pilotEstimator) throws Exception;
 }

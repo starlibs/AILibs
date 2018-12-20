@@ -12,7 +12,6 @@ import jaicore.ml.core.dataset.standard.SimpleInstance;
 public abstract class CaseControlLikeSampling <I extends IInstance> extends ASamplingAlgorithm<I>{
 	
 	protected Random rand;
-	protected ArrayList<Pair<IInstance, Double>> probabilityBoundaries;
 	
 	/**
 	 * Count occurrences of every class. Needed to determine the probability for all instances of that class
@@ -21,9 +20,9 @@ public abstract class CaseControlLikeSampling <I extends IInstance> extends ASam
 	 * @return HashMap of occurrences
 	 * @throws ClassNotFoundException
 	 */
-	protected HashMap<Object, Integer> countClassOccurrences(IDataset<SimpleInstance> dataset) throws ClassNotFoundException {
+	protected HashMap<Object, Integer> countClassOccurrences(IDataset<I> dataset) throws ClassNotFoundException {
 		HashMap<Object, Integer> classOccurrences = new HashMap<Object, Integer>();
-		for(SimpleInstance instance: dataset) {
+		for(I instance: dataset) {
 			boolean classExists = false;
 			for(Object clazz: classOccurrences.keySet()) {
 				if(clazz.equals(instance.getTargetValue(new Object().getClass()).getValue())) {
@@ -41,17 +40,15 @@ public abstract class CaseControlLikeSampling <I extends IInstance> extends ASam
 		return classOccurrences;
 	}
 	
-	protected ArrayList<Pair<IInstance, Double>> calculateInstanceBoundaries(HashMap<Object, Integer> classOccurrences, int numberOfClasses) {
+	protected ArrayList<Pair<I, Double>> calculateInstanceBoundaries(HashMap<Object, Integer> classOccurrences, int numberOfClasses) {
 		double boundaryOfCurrentInstance = 0.0;
-		probabilityBoundaries = new ArrayList<Pair<IInstance, Double>>();
-		IInstance instance;
-		for(Object instanceObject: this.getInput()) {
-			instance = (IInstance) instanceObject;
+		ArrayList<Pair<I, Double>> probabilityBoundaries = new ArrayList<Pair<I, Double>>();
+		for(I instance: this.getInput()) {
 			boundaryOfCurrentInstance += ((double) 1 / 
 					classOccurrences.get(instance.getTargetValue(new Object().getClass()).getValue()).intValue()) /
 					numberOfClasses;
-			probabilityBoundaries.add(new Pair<IInstance, Double>(instance, new Double(boundaryOfCurrentInstance)));
+			probabilityBoundaries.add(new Pair<I, Double>(instance, new Double(boundaryOfCurrentInstance)));
 		}
-		return null;
+		return probabilityBoundaries;
 	}
 }

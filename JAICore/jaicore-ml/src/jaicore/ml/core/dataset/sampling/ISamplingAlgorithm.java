@@ -2,6 +2,7 @@ package jaicore.ml.core.dataset.sampling;
 
 import jaicore.basic.algorithm.IAlgorithm;
 import jaicore.ml.core.dataset.IDataset;
+import jaicore.ml.core.dataset.IInstance;
 
 /**
  * Interface for sampling algorithms. Sampling algorithms take a dataset as input and return a (reduced) dataset as their output.
@@ -9,6 +10,6 @@ import jaicore.ml.core.dataset.IDataset;
  * @author wever
  *
  */
-public interface ISamplingAlgorithm extends IAlgorithm<IDataset, IDataset> {
+public interface ISamplingAlgorithm <I extends IInstance> extends IAlgorithm<IDataset<I>, IDataset<I>> {
 
 }

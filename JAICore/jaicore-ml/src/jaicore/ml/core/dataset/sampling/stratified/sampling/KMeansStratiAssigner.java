@@ -20,14 +20,14 @@ import jaicore.ml.core.dataset.IInstance;
  * 
  * @author Lukas Brandt
  */
-public class KMeansStratiAssigner implements IStratiAssigner {
+public class KMeansStratiAssigner<I extends IInstance> implements IStratiAssigner<I> {
 
 	private static Logger LOG = LoggerFactory.getLogger(KMeansStratiAssigner.class);
 
 	private int randomSeed;
-	private KMeansPlusPlusClusterer<IInstance> clusterer;
+	private KMeansPlusPlusClusterer<I> clusterer;
 	private DistanceMeasure distanceMeasure;
-	private List<CentroidCluster<IInstance>> clusters;
+	private List<CentroidCluster<I>> clusters;
 
 	/**
 	 * Constructor for KMeansStratiAssigner.
@@ -44,7 +44,7 @@ public class KMeansStratiAssigner implements IStratiAssigner {
 	}
 
 	@Override
-	public void init(IDataset dataset, int stratiAmount) {
+	public void init(IDataset<I> dataset, int stratiAmount) {
 		// Perform initial Clustering of the dataset.
 		this.clusterer = new KMeansPlusPlusClusterer<>(stratiAmount, -1, this.distanceMeasure,
 				new JDKRandomGenerator(this.randomSeed));
@@ -55,7 +55,7 @@ public class KMeansStratiAssigner implements IStratiAssigner {
 	public int assignToStrati(IInstance datapoint) {
 		// Search for the cluster that contains the datapoint.
 		for (int i = 0; i < this.clusters.size(); i++) {
-			List<IInstance> clusterPoints = this.clusters.get(i).getPoints();
+			List<I> clusterPoints = this.clusters.get(i).getPoints();
 			for (int n = 0; n < clusterPoints.size(); n++) {
 				if (Arrays.equals(datapoint.getPoint(), clusterPoints.get(n).getPoint())) {
 					return i;

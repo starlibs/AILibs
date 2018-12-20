@@ -73,5 +73,10 @@ public class SimpleDataset extends LinkedList<SimpleInstance> implements IDatase
 
 		return sb.toString();
 	}
+	
+	@Override
+	public IDataset<SimpleInstance> createEmpty() {
+		return new SimpleDataset(instanceSchema);
+	}
 
 }

@@ -8,8 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import jaicore.basic.algorithm.AAlgorithm;
 import jaicore.ml.core.dataset.IDataset;
-import jaicore.ml.core.dataset.InstanceSchema;
-import jaicore.ml.core.dataset.standard.SimpleDataset;
+import jaicore.ml.core.dataset.IInstance;
 
 /**
  * An abstract class for sampling algorithms providing basic functionality of an
@@ -18,20 +17,21 @@ import jaicore.ml.core.dataset.standard.SimpleDataset;
  * @author wever
  * @author Lukas Brandt
  * @author Felix Weiland
+ * @author jnowack
  */
-public abstract class ASamplingAlgorithm extends AAlgorithm<IDataset, IDataset> {
+public abstract class ASamplingAlgorithm <I extends IInstance> extends AAlgorithm<IDataset<I>, IDataset<I>> {
 
 	private static Logger LOG = LoggerFactory.getLogger(ASamplingAlgorithm.class);
 
 	protected Integer sampleSize = null;
-	protected IDataset sample = null;
+	protected IDataset<I> sample = null;
 
 	public void setSampleSize(int size) {
 		this.sampleSize = size;
 	}
 
 	@Override
-	public IDataset call() throws Exception {
+	public IDataset<I> call() throws Exception {
 		Instant timeoutTime;
 		if (this.getTimeout().milliseconds() <= 0) {
 			LOG.warn("Invalid or no timeout set. There will be no timeout in this algorithm run");
@@ -44,9 +44,9 @@ public abstract class ASamplingAlgorithm extends AAlgorithm<IDataset, IDataset> 
 			throw new Exception("No valid sample size specified");
 		}
 		if (sampleSize == 0) {
-			return this.createEmptyDatasetFromInputSchema();
+			return getInput().createEmpty();
 		}
-		IDataset dataset = this.getInput();
+		IDataset<I> dataset = this.getInput();
 		if (dataset == null || dataset.size() == 0) {
 			throw new Exception("No dataset or an empty dataset was given as an input.");
 		}
@@ -69,14 +69,6 @@ public abstract class ASamplingAlgorithm extends AAlgorithm<IDataset, IDataset> 
 			}
 			return sample;
 		}
-	}
-
-	/**
-	 * @return An empty dataset that has the same schema as the input dataset.
-	 */
-	protected IDataset createEmptyDatasetFromInputSchema() {
-		return new SimpleDataset(
-				new InstanceSchema(this.getInput().getAttributeTypes(), this.getInput().getTargetType()));
 	}
 
 }

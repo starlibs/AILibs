@@ -8,7 +8,7 @@ import jaicore.ml.core.dataset.IInstance;
  * 
  * @author Lukas Brandt
  */
-public interface IStratiAssigner {
+public interface IStratiAssigner <I extends IInstance> {
 
 	
 	/**
@@ -16,7 +16,7 @@ public interface IStratiAssigner {
 	 * @param dataset The dataset the datapoints will be sampled from.
 	 * @param stratiAmount The predetermined amount of strati the dataset will be stratified into.
 	 */
-	public void init(IDataset dataset, int stratiAmount);
+	public void init(IDataset<I> dataset, int stratiAmount);
 	
 	/**
 	 * Custom logic for assigning datapoints into strati.

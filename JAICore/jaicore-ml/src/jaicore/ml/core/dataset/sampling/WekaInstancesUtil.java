@@ -23,7 +23,7 @@ import weka.core.UnsupportedAttributeTypeException;
 
 public class WekaInstancesUtil {
 
-	public static SimpleDataset wekaInstancesToDataset(final Instances data) {
+	public static IDataset wekaInstancesToDataset(final Instances data) {
 		List<IAttributeType<?>> attributeTypeList = new LinkedList<>();
 		for (int i = 0; i < data.numAttributes(); i++) {
 			if (i != data.classIndex()) {
@@ -33,7 +33,7 @@ public class WekaInstancesUtil {
 		IAttributeType<?> targetType = transformWEKAAttributeToAttributeType(data.classAttribute());
 
 		InstanceSchema schema = new InstanceSchema(attributeTypeList, targetType);
-		SimpleDataset dataset = new SimpleDataset(schema);
+		IDataset dataset = new SimpleDataset(schema);
 
 		for (Instance inst : data) {
 			ArrayList<IAttributeValue<?>> attributeValuesList = new ArrayList<>();
@@ -59,7 +59,7 @@ public class WekaInstancesUtil {
 				}
 			}
 
-			SimpleInstance instance = new SimpleInstance(attributeValuesList, targetValue);
+			IInstance instance = new SimpleInstance(attributeValuesList, targetValue);
 			dataset.add(instance);
 		}
 

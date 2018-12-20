@@ -16,16 +16,30 @@ import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
 
 /**
- * Combined strati amount selector and strati assigner via g-means.
+ * Combined strati amount selector and strati assigner via g-means. IT can be
+ * used in 3 combinations:
+ * 
+ * 1) Amount Selector and Strati Assigner: A g-means
+ * clustering is initially performed to select a strati amount via the amount of
+ * found clusters and to assign datapoints with this clusters afterwards.
+ * 
+ * 2) Amount Selector: A g-means clustering is initially performed to select a
+ * suitable strati amount with the amount of found clusters.
+ * 3) Strati Assigner: Since the amount of strati is selected with another
+ * component g-means cannot be used and k-means will be used to be conform with
+ * the given strati amount.
+ * 
+ * It is recommended to use combination 1, because only using this component for
+ * only one of the two tasks could yield in inconsistent results.
  * 
  * @author Lukas Brandt
  */
-public class GMeansStratiAmountSelectorAndAssigner implements IStratiAssigner, IStratiAmountSelector {
+public class GMeansStratiAmountSelectorAndAssigner<I extends IInstance> implements IStratiAssigner<I>, IStratiAmountSelector<I> {
 
 	private static Logger LOG = LoggerFactory.getLogger(GMeansStratiAmountSelectorAndAssigner.class);
 
-	private GMeans<IInstance> clusterer;
-	private List<CentroidCluster<IInstance>> clusters;
+	private GMeans<I> clusterer;
+	private List<CentroidCluster<I>> clusters;
 	private int k;
 
 	private int randomSeed;
@@ -56,20 +70,20 @@ public class GMeansStratiAmountSelectorAndAssigner implements IStratiAssigner, I
 	}
 
 	@Override
-	public int selectStratiAmount(IDataset dataset) {
+	public int selectStratiAmount(IDataset<I> dataset) {
 		// Perform g-means to get a fitting k and the corresponding clusters.
-		this.clusterer = new GMeans<IInstance>(dataset, this.distanceMeasure, randomSeed);
+		this.clusterer = new GMeans<I>(dataset, this.distanceMeasure, randomSeed);
 		this.clusters = this.clusterer.cluster();
 		this.k = this.clusters.size();
 		return this.k;
 	}
 
 	@Override
-	public void init(IDataset dataset, int stratiAmount) {
+	public void init(IDataset<I> dataset, int stratiAmount) {
 		if (this.clusterer == null || this.clusters == null) {
 			// This object was not used for strati amount selection.
 			// Perform k-means clustering to get the correct strati amounts.
-			KMeansPlusPlusClusterer<IInstance> kmeans = new KMeansPlusPlusClusterer<>(stratiAmount, -1,
+			KMeansPlusPlusClusterer<I> kmeans = new KMeansPlusPlusClusterer<>(stratiAmount, -1,
 					this.distanceMeasure, new JDKRandomGenerator(this.randomSeed));
 			this.clusters = kmeans.cluster(dataset);
 		}
@@ -79,7 +93,7 @@ public class GMeansStratiAmountSelectorAndAssigner implements IStratiAssigner, I
 	public int assignToStrati(IInstance datapoint) {
 		// Search for the cluster that contains the datapoint.
 		for (int i = 0; i < this.clusters.size(); i++) {
-			List<IInstance> clusterPoints = this.clusters.get(i).getPoints();
+			List<I> clusterPoints = this.clusters.get(i).getPoints();
 			for (int n = 0; n < clusterPoints.size(); n++) {
 				if (Arrays.equals(datapoint.getPoint(), clusterPoints.get(n).getPoint())) {
 					return i;

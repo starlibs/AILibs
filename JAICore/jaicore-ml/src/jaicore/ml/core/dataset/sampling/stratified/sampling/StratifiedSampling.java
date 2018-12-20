@@ -24,13 +24,13 @@ import jaicore.ml.core.dataset.sampling.WaitForSamplingStepEvent;
  * 
  * @author Lukas Brandt
  */
-public class StratifiedSampling extends ASamplingAlgorithm {
+public class StratifiedSampling<I extends IInstance> extends ASamplingAlgorithm<I> {
 
-	private IStratiAmountSelector stratiAmountSelector;
-	private IStratiAssigner stratiAssigner;
+	private IStratiAmountSelector<I> stratiAmountSelector;
+	private IStratiAssigner<I> stratiAssigner;
 	private Random random;
-	private IDataset[] strati;
-	private IDataset datasetCopy;
+	private IDataset<I>[] strati;
+	private IDataset<I> datasetCopy;
 	private ExecutorService executorService;
 	private boolean considerStandardDeviation;
 	private boolean simpleRandomSamplingStarted;
@@ -50,7 +50,7 @@ public class StratifiedSampling extends ASamplingAlgorithm {
 	 *            inside of AverageStratiSize +/- StandardDeviationOfStratiSize
 	 *            should be used uniformly distributed.
 	 */
-	public StratifiedSampling(IStratiAmountSelector stratiAmountSelector, IStratiAssigner stratiAssigner, Random random,
+	public StratifiedSampling(IStratiAmountSelector<I> stratiAmountSelector, IStratiAssigner<I> stratiAssigner, Random random,
 			boolean considerStandardDeviation) {
 		this.stratiAmountSelector = stratiAmountSelector;
 		this.stratiAssigner = stratiAssigner;
@@ -62,14 +62,14 @@ public class StratifiedSampling extends ASamplingAlgorithm {
 	public AlgorithmEvent nextWithException() throws Exception {
 		switch (this.getState()) {
 		case created:
-			this.sample = this.createEmptyDatasetFromInputSchema();
-			this.datasetCopy = this.createEmptyDatasetFromInputSchema();
+			this.sample = getInput().createEmpty();
+			this.datasetCopy = getInput().createEmpty();
 			this.datasetCopy.addAll(this.getInput());
 			this.stratiAmountSelector.setNumCPUs(this.getNumCPUs());
 			this.stratiAssigner.setNumCPUs(this.getNumCPUs());
 			this.strati = new IDataset[this.stratiAmountSelector.selectStratiAmount(this.datasetCopy)];
 			for (int i = 0; i < this.strati.length; i++) {
-				this.strati[i] = this.createEmptyDatasetFromInputSchema();
+				this.strati[i] = getInput().createEmpty();
 			}
 			this.simpleRandomSamplingStarted = false;
 			this.stratiAssigner.init(this.datasetCopy, this.strati.length);
@@ -80,7 +80,7 @@ public class StratifiedSampling extends ASamplingAlgorithm {
 			if (this.sample.size() < this.sampleSize) {
 				if (this.datasetCopy.size() >= 1) {
 					// Stratify the datapoints one by one.
-					IInstance datapoint = (IInstance) this.datasetCopy.remove(0);
+					I datapoint = this.datasetCopy.remove(0);
 					int assignedStrati = this.stratiAssigner.assignToStrati(datapoint);
 					if (assignedStrati < 0 || assignedStrati >= this.strati.length) {
 						throw new Exception("No existing strati for index " + assignedStrati);
@@ -181,7 +181,7 @@ public class StratifiedSampling extends ASamplingAlgorithm {
 			this.executorService.execute(new Runnable() {
 				@Override
 				public void run() {
-					SimpleRandomSampling simpleRandomSampling = new SimpleRandomSampling(random);
+					SimpleRandomSampling<I> simpleRandomSampling = new SimpleRandomSampling<I>(random);
 					simpleRandomSampling.setInput(strati[index]);
 					simpleRandomSampling.setSampleSize(sampleSizeForStrati[index]);
 					try {
@@ -191,8 +191,6 @@ public class StratifiedSampling extends ASamplingAlgorithm {
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
-					System.out.println("Hi " + index);
-					
 					
 				}
 			});

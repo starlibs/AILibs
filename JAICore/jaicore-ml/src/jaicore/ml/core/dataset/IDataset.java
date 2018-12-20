@@ -8,8 +8,9 @@ import jaicore.ml.core.dataset.attribute.IAttributeType;
  * Common interface of a dataset defining methods to access meta-data and instances contained in the dataset. Moreover, methods for serialization and deserialization are defined.
  *
  * @author wever
+ * @author jnowack
  */
-public interface IDataset<I> extends List<I> {
+public interface IDataset<I extends IInstance> extends List<I> {
 
 	/**
 	 * Returns the attribute type of the target attribute.
@@ -37,4 +38,12 @@ public interface IDataset<I> extends List<I> {
 	 */
 	public int getNumberOfAttributes();
 
+	
+	/**
+	 * Creates an empty copy with the same attribute types as this IDataset.
+	 * 
+	 * @return The newly created Dataset.
+	 */
+	public IDataset<I> createEmpty();
+	
 }

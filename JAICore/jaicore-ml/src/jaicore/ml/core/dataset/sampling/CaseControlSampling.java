@@ -1,21 +1,24 @@
 package jaicore.ml.core.dataset.sampling;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 import jaicore.ml.core.dataset.*;
-
+import jaicore.ml.core.dataset.standard.SimpleInstance;
 import jaicore.basic.algorithm.AlgorithmEvent;
 import jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.AlgorithmState;
+import jaicore.basic.sets.SetUtil.Pair;
 
 /**
  * Case control sampling. Might be used as sampling algorithm or as subroutine for Local Case Control Sampling
  * 
  * @author Nino Schnitker
+ * @param <I>
  *
  */
-public class CaseControlSampling extends CaseControlLikeSampling {
+public class CaseControlSampling <I extends IInstance> extends CaseControlLikeSampling <I> {
 	
 	/**
 	 * Constructor
@@ -27,9 +30,10 @@ public class CaseControlSampling extends CaseControlLikeSampling {
 	
 	@Override
 	public AlgorithmEvent nextWithException() throws Exception {
+		ArrayList<Pair<I, Double>> probabilityBoundaries = null;;
 		switch(this.getState()) {
 		case created:
-			this.sample = this.createEmptyDatasetFromInputSchema();
+			this.sample = getInput().createEmpty();
 			
 			HashMap<Object, Integer> classOccurrences = countClassOccurrences(this.getInput());
 			
@@ -42,7 +46,7 @@ public class CaseControlSampling extends CaseControlLikeSampling {
 			return new AlgorithmInitializedEvent();
 		case active:
 			if(this.sample.size() < this.sampleSize) {
-				IInstance choosenInstance = null;
+				I choosenInstance = null;
 				double r;
 				do {
 					r = this.rand.nextDouble();

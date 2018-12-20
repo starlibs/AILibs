@@ -34,10 +34,10 @@ import jaicore.ml.core.dataset.standard.SimpleInstance;
  * @author jnowack
  *
  */
-public class GmeansSampling extends ASamplingAlgorithm {
+public class GmeansSampling <I extends IInstance> extends ASamplingAlgorithm<I> {
 
-	private GMeans<IInstance> gMeansCluster;
-	private List<CentroidCluster<IInstance>> clusterResults;
+	private GMeans<I> gMeansCluster;
+	private List<CentroidCluster<I>> clusterResults;
 
 	private long seed;
 	
@@ -53,16 +53,16 @@ public class GmeansSampling extends ASamplingAlgorithm {
 		switch (this.getState()) {
 		case created:
 			// Initialize variables
-			this.sample = this.createEmptyDatasetFromInputSchema();
+			this.sample = getInput().createEmpty();
 
 			// create cluster
-			gMeansCluster = new GMeans<IInstance>(getInput(), new ManhattanDistance(), seed);
+			gMeansCluster = new GMeans<I>(getInput(), new ManhattanDistance(), seed);
 			clusterResults = gMeansCluster.cluster();
 
 			this.setState(AlgorithmState.active);
 			return new AlgorithmInitializedEvent();
 		case active:
-			for (CentroidCluster<IInstance> cluster : clusterResults) {
+			for (CentroidCluster<I> cluster : clusterResults) {
 				boolean same = true;
 				for (int i = 1; i < cluster.getPoints().size(); i++) {
 					if (!cluster.getPoints().get(i - 1).getTargetValue(Double.class)
@@ -73,7 +73,8 @@ public class GmeansSampling extends ASamplingAlgorithm {
 				}
 				if (same) {
 					// if all points are the same only add the center 
-					sample.add(createSimpleInstanceFromDoubleVector(cluster.getCenter().getPoint(), (NumericAttributeValue) cluster.getPoints().get(0).getTargetValue(Double.class)));
+					//TODO find nearest point 
+					//sample.add(createSimpleInstanceFromDoubleVector(cluster.getCenter().getPoint(), (NumericAttributeValue) cluster.getPoints().get(0).getTargetValue(Double.class)));
 					
 				} else {
 					for (int i = 0; i < cluster.getPoints().size(); i++) {

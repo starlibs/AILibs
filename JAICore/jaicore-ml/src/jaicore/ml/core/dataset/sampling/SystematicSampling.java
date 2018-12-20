@@ -15,7 +15,7 @@ import jaicore.ml.core.dataset.IInstance;
  * 
  * @author Lukas Brandt
  */
-public class SystematicSampling extends ASamplingAlgorithm {
+public class SystematicSampling<I extends IInstance> extends ASamplingAlgorithm<I> {
 
 	private Random random;
 	private int k;
@@ -67,7 +67,7 @@ public class SystematicSampling extends ASamplingAlgorithm {
 		switch (this.getState()) {
 		case created:
 			// Initialize variables and sort dataset.
-			this.sample = this.createEmptyDatasetFromInputSchema();
+			this.sample = getInput().createEmpty();
 			this.getInput().sort(this.datapointComparator);
 			this.startIndex = this.random.nextInt(this.getInput().size());
 			this.k = (int)Math.floor(this.getInput().size() / this.sampleSize);
