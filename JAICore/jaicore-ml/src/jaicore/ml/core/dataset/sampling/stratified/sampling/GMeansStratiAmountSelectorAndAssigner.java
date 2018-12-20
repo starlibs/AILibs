@@ -16,7 +16,21 @@ import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
 
 /**
- * Combined strati amount selector and strati assigner via g-means.
+ * Combined strati amount selector and strati assigner via g-means. IT can be
+ * used in 3 combinations:
+ * 
+ * 1) Amount Selector and Strati Assigner: A g-means
+ * clustering is initially performed to select a strati amount via the amount of
+ * found clusters and to assign datapoints with this clusters afterwards.
+ * 
+ * 2) Amount Selector: A g-means clustering is initially performed to select a
+ * suitable strati amount with the amount of found clusters.
+ * 3) Strati Assigner: Since the amount of strati is selected with another
+ * component g-means cannot be used and k-means will be used to be conform with
+ * the given strati amount.
+ * 
+ * It is recommended to use combination 1, because only using this component for
+ * only one of the two tasks could yield in inconsistent results.
  * 
  * @author Lukas Brandt
  */
