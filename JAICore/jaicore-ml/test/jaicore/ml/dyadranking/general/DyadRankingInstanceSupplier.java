@@ -29,6 +29,7 @@ public class DyadRankingInstanceSupplier {
 	public static DyadRankingInstance getDyadRankingInstance(int maxLength) {
 		List<Dyad> dyads = new ArrayList<Dyad>();
 		int actualLength = ThreadLocalRandom.current().nextInt(2, maxLength + 1);
+
 		for (int i = 0; i < actualLength; i++) {
 			Dyad dyad = DyadSupplier.getRandomDyad(2, 2);
 			dyads.add(dyad);

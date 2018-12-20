@@ -57,11 +57,11 @@ public class DyadSupplier {
 		Random rnd = new Random(seed);
 		Vector instance = new DenseDoubleVector(instanceSize);
 		for (int i = 0; i < instanceSize; i++) {
-			instance.setValue(i, rnd.nextDouble());
+			instance.setValue(i, rnd.nextGaussian());
 		}
 		Vector alternatives = new DenseDoubleVector(alternativeSize);
 		for (int i = 0; i < alternativeSize; i++) {
-			alternatives.setValue(i, rnd.nextDouble());
+			alternatives.setValue(i, rnd.nextGaussian());
 		}
 		return new Dyad(instance, alternatives);
 	}

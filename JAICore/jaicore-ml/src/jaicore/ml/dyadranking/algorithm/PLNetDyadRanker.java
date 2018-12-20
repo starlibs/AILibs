@@ -19,10 +19,12 @@ import org.deeplearning4j.nn.gradient.Gradient;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.nn.workspace.LayerWorkspaceMgr;
+import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.learning.config.Adam;
+import org.nd4j.linalg.learning.config.Sgd;
 import org.nd4j.linalg.primitives.Pair;
 
 import jaicore.basic.FileUtil;
@@ -41,7 +43,7 @@ import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 /**
  * A dyad ranker based on a Plackett-Luce network.
  * 
- * @author Helena Graf, Jonas Hanselle
+ * @author Helena Graf, Jonas Hanselle, Michael Braun
  *
  */
 public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDyadRankingInstance> {
@@ -61,6 +63,10 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 	 */
 	public PLNetDyadRanker() {
 		this.configuration = ConfigFactory.create(IPLNetDyadRankerConfiguration.class);
+	}
+	
+	public PLNetDyadRanker(IPLNetDyadRankerConfiguration config) {
+		this.configuration = config;
 	}
 
 	@Override
@@ -82,16 +88,19 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 		}
 
 		currentBestScore = Double.POSITIVE_INFINITY;
+		epoch = 0;
+		iteration = 0;
 		int patience = 0;
 		int earlyStoppingCounter = 0;
-		int maxEpochs = configuration.plNetMaxEpochs() == 0 ? Integer.MAX_VALUE : configuration.plNetMaxEpochs();
+		int maxEpochs = configuration.plNetMaxEpochs();
 
-		while (!(patience > configuration.plNetEarlyStoppingPatience()) 
-				&& (epoch < configuration.plNetMaxEpochs() || configuration.plNetMaxEpochs() == 0)) {
+		while (patience < configuration.plNetEarlyStoppingPatience() 
+				&& (epoch < maxEpochs || maxEpochs == 0)) {
 			// Iterate through training data
 			for (IInstance dyadRankingInstance : drTrain) {
 				this.update(dyadRankingInstance);
 			}
+			//System.out.println(plNet.params());
 			earlyStoppingCounter++;
 			// Compute validation error
 			if (earlyStoppingCounter == configuration.plNetEarlyStoppingInterval()) {
@@ -99,17 +108,19 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 				if (avgScore < currentBestScore) {
 					currentBestScore = avgScore;
 					currentBestModel = plNet.clone();
+					System.out.println(currentBestScore);
 					patience = 0;
 				} else {
 					patience++;
 				}
+				System.out.println("patience: " + patience);
 				earlyStoppingCounter = 0;
 			}
 			epoch++;
 		}
 		plNet = currentBestModel;
 	}
-
+	
 	@Override
 	public void update(IInstance instance) throws TrainingException {
 		if (!(instance instanceof IDyadRankingInstance)) {
@@ -143,7 +154,7 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 			Pair<Gradient, INDArray> p = plNetClone.backpropGradient(lossGradient, null);
 			deltaWk = p.getFirst();
 			plNet.getUpdater().update(plNet, deltaWk, iteration, epoch, 1, LayerWorkspaceMgr.noWorkspaces());
-			deltaW.add(deltaWk.gradient());
+			deltaW.addi(deltaWk.gradient());
 		}
 		plNet.params().subi(deltaW);
 		iteration++;
@@ -171,7 +182,7 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 			dyadUtilityPairs.add(new Pair<Dyad, Double>(dyad, plNetOutput));
 		}
 		// sort the instance in descending order of utility values
-		Collections.sort(dyadUtilityPairs, Comparator.comparing(p -> p.getRight()));
+		Collections.sort(dyadUtilityPairs, Comparator.comparing(p -> -p.getRight()));
 		List<Dyad> ranking = new ArrayList<Dyad>();
 		for (Pair<Dyad, Double> pair : dyadUtilityPairs)
 			ranking.add(pair.getLeft());
@@ -247,7 +258,8 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 		int inputsFirstHiddenLayer = configuration.plNetHiddenNodes().get(0);
 		ListBuilder configBuilder = new NeuralNetConfiguration.Builder()
 				.seed(configuration.plNetSeed())
-				.updater(new Adam(configuration.plNetLearningRate()))
+				// Gradient descent updater: SGD
+				.updater(new Sgd(configuration.plNetLearningRate()))
 				.list();
 		
 		// Build hidden layers
@@ -269,7 +281,8 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 					.activation(Activation.fromString(activation)).build());
 		}
 		
-		// Build output layer
+		// Build output layer. Since we are using an external error for training, 
+		// this is a regular layer instead of an OutputLayer
 		configBuilder.layer(hiddenNodes.size(),
 				new DenseLayer.Builder()
 				.nIn(hiddenNodes.get(hiddenNodes.size() - 1))
@@ -305,6 +318,32 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 
 	public void setConfiguration(IPLNetDyadRankerConfiguration configuration) {
 		this.configuration = configuration;
+	}
+	
+	/**
+	 * Save a trained model at a given file path. Note that the produced file is a zip file and a ".zip" ending is added.
+	 * 
+	 * @param filePath	The file path to save to.
+	 * @throws IOException
+	 */
+	public void saveModelToFile(String filePath) throws IOException {
+		if (plNet == null) {
+			throw new IllegalStateException("Cannot save untrained model.");
+		}
+		File locationToSave = new File("filePath" + ".zip");
+		ModelSerializer.writeModel(plNet, locationToSave, true);
+	}
+	
+	/**
+	 * Restore a trained model from a given file path. Warning: does not check whether the loaded model is
+	 * a valid PLNet or conforms to the configuration of the object.
+	 * 
+	 * @param filePath	The file to load from.
+	 * @throws IOException
+	 */
+	public void loadModelFromFile(String filePath) throws IOException {
+		MultiLayerNetwork restored = ModelSerializer.restoreMultiLayerNetwork(filePath);
+		plNet = restored;
 	}
 
 }
