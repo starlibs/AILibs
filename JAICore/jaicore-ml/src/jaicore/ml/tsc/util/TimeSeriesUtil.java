@@ -80,8 +80,7 @@ public class TimeSeriesUtil {
     }
 
     /**
-     * Checks wheter two arrays have the same length. Throws an exception
-     * otherwise.
+     * Checks wheter two arrays have the same length. Throws an exception otherwise.
      * 
      * @param timeSeries1
      * @param timeSeries2
@@ -92,7 +91,7 @@ public class TimeSeriesUtil {
         if (!isSameLength(timeSeries1, timeSeries2)) {
             String message = String.format(
                     "Length of the given time series are not equal: Length first time series: (%d). Length of seconds time series: (%d)",
-                    timeSeries1.length(), timeSeries2.length()));
+                    timeSeries1.length(), timeSeries2.length());
             throw new TimeSeriesLengthException(message);
         }
     }
