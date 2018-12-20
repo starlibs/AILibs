@@ -102,8 +102,10 @@ public class StratifiedSampling extends ASamplingAlgorithm {
 							this.setState(AlgorithmState.inactive);
 							return new AlgorithmFinishedEvent();
 						} else {
-							wait(100);
-							return new WaitForSamplingStepEvent();
+							synchronized (Thread.currentThread()) {
+								Thread.currentThread().wait(100);
+								return new WaitForSamplingStepEvent();
+							}
 						}
 					}
 				}
@@ -169,6 +171,7 @@ public class StratifiedSampling extends ASamplingAlgorithm {
 			for (int i = 0; i < this.strati.length; i++) {
 				sampleSizeForStrati[i] = (int) (this.sampleSize
 						* ((double) this.strati[i].size() / (double) this.getInput().size()));
+				System.out.println("Strati size: " + this.strati[i].size() + " sample amount " + sampleSizeForStrati[i]);
 			}
 		}
 
@@ -182,10 +185,15 @@ public class StratifiedSampling extends ASamplingAlgorithm {
 					simpleRandomSampling.setInput(strati[index]);
 					simpleRandomSampling.setSampleSize(sampleSizeForStrati[index]);
 					try {
-						sample.addAll(simpleRandomSampling.call());
+						synchronized (sample) {		
+							sample.addAll(simpleRandomSampling.call());
+						}
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
+					System.out.println("Hi " + index);
+					
+					
 				}
 			});
 		}

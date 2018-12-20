@@ -7,8 +7,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 
 import jaicore.basic.algorithm.AlgorithmProblemTransformer;
 import jaicore.basic.algorithm.GeneralAlgorithmTester;
@@ -28,45 +26,38 @@ public abstract class GeneralSamplingTester extends GeneralAlgorithmTester<Objec
 	private static final double DEFAULT_SAMPLE_FRACTION = 0.1;
 
 	/**
-	 * This test verifies that the produced samples have the desired size. The test
-	 * is executed for different sample sizes, which are dependent on the size of
-	 * the original data set.
+	 * This test verifies that the produced samples have the desired size.
 	 * 
 	 * This test executes the test on a small problem/data set.
 	 * 
 	 * @param sampleFraction
 	 * @throws Exception
 	 */
-	@ParameterizedTest
-	@ValueSource(doubles = { 0.1, 0.5, 1 })
-	public void testSampleSizeSmallProblem(double sampleFraction) throws Exception {
+	@Test
+	public void testSampleSizeSmallProblem() throws Exception {
 		IDataset dataset = this.getSimpleProblemInputForGeneralTestPurposes();
-		testSampleSize(dataset, sampleFraction);
+		testSampleSize(dataset, DEFAULT_SAMPLE_FRACTION);
 	}
 
 	/**
-	 * This test verifies that the produced samples have the desired size. The test
-	 * is executed for different sample sizes, which are dependent on the size of
-	 * the original data set.
+	 * This test verifies that the produced samples have the desired size.
 	 * 
 	 * This test executes the test on a large problem/data set.
 	 * 
 	 * @param sampleFraction
 	 * @throws Exception
 	 */
-	@ParameterizedTest
-	@ValueSource(doubles = { 0.1, 0.5, 1 })
-	public void testSampleSizeLargeProblem(double sampleFraction) throws Exception {
+	// @Test
+	public void testSampleSizeLargeProblem() throws Exception {
 		IDataset dataset = this.getDifficultProblemInputForGeneralTestPurposes();
-		testSampleSize(dataset, sampleFraction);
+		testSampleSize(dataset, DEFAULT_SAMPLE_FRACTION);
 	}
 
 	private void testSampleSize(IDataset dataset, double sampleFraction) {
 		ASamplingAlgorithm samplingAlgorithm = (ASamplingAlgorithm) this.getFactory().getAlgorithm();
-		IDataset sample = getSample(dataset, samplingAlgorithm);
-
 		int sampleSize = (int) (dataset.size() * sampleFraction);
 		samplingAlgorithm.setSampleSize(sampleSize);
+		IDataset sample = getSample(dataset, samplingAlgorithm);
 
 		assertEquals(sampleSize, sample.size());
 	}
@@ -131,7 +122,8 @@ public abstract class GeneralSamplingTester extends GeneralAlgorithmTester<Objec
 		try {
 			sample = samplingAlgorithm.call();
 		} catch (Exception e) {
-			fail("Sampling algorithm was not able to compute a sample!");
+			e.printStackTrace();
+			fail("Sampling algorithm was not able to compute a sample: ");
 		}
 		if (sample == null) {
 			fail("Sample is null!");
@@ -143,7 +135,7 @@ public abstract class GeneralSamplingTester extends GeneralAlgorithmTester<Objec
 	public AlgorithmProblemTransformer<Object, IDataset> getProblemReducer() {
 		throw new UnsupportedOperationException("Problem reducer not applicable for sampling algorithms!");
 	}
-	
+
 	@Override
 	public IDataset getSimpleProblemInputForGeneralTestPurposes() throws Exception {
 		// TODO Auto-generated method stub
