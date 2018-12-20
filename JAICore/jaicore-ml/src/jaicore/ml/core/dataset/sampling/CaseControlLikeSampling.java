@@ -7,8 +7,9 @@ import java.util.Random;
 import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
+import jaicore.ml.core.dataset.standard.SimpleInstance;
 
-public abstract class CaseControlLikeSampling extends ASamplingAlgorithm{
+public abstract class CaseControlLikeSampling <I extends IInstance> extends ASamplingAlgorithm<I>{
 	
 	protected Random rand;
 	protected ArrayList<Pair<IInstance, Double>> probabilityBoundaries;
@@ -20,9 +21,9 @@ public abstract class CaseControlLikeSampling extends ASamplingAlgorithm{
 	 * @return HashMap of occurrences
 	 * @throws ClassNotFoundException
 	 */
-	protected HashMap<Object, Integer> countClassOccurrences(IDataset dataset) throws ClassNotFoundException {
+	protected HashMap<Object, Integer> countClassOccurrences(IDataset<SimpleInstance> dataset) throws ClassNotFoundException {
 		HashMap<Object, Integer> classOccurrences = new HashMap<Object, Integer>();
-		for(IInstance instance: dataset) {
+		for(SimpleInstance instance: dataset) {
 			boolean classExists = false;
 			for(Object clazz: classOccurrences.keySet()) {
 				if(clazz.equals(instance.getTargetValue(new Object().getClass()).getValue())) {
@@ -43,8 +44,10 @@ public abstract class CaseControlLikeSampling extends ASamplingAlgorithm{
 	protected ArrayList<Pair<IInstance, Double>> calculateInstanceBoundaries(HashMap<Object, Integer> classOccurrences, int numberOfClasses) {
 		double boundaryOfCurrentInstance = 0.0;
 		probabilityBoundaries = new ArrayList<Pair<IInstance, Double>>();
-		for(IInstance instance: this.getInput()) {
-			boundaryOfCurrentInstance = ((double) 1 / 
+		IInstance instance;
+		for(Object instanceObject: this.getInput()) {
+			instance = (IInstance) instanceObject;
+			boundaryOfCurrentInstance += ((double) 1 / 
 					classOccurrences.get(instance.getTargetValue(new Object().getClass()).getValue()).intValue()) /
 					numberOfClasses;
 			probabilityBoundaries.add(new Pair<IInstance, Double>(instance, new Double(boundaryOfCurrentInstance)));

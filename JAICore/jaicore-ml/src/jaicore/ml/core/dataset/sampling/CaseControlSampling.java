@@ -1,6 +1,5 @@
 package jaicore.ml.core.dataset.sampling;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 import jaicore.ml.core.dataset.*;
@@ -9,7 +8,6 @@ import jaicore.basic.algorithm.AlgorithmEvent;
 import jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.AlgorithmState;
-import jaicore.basic.sets.SetUtil.Pair;
 
 /**
  * Case control sampling. Might be used as sampling algorithm or as subroutine for Local Case Control Sampling
@@ -44,16 +42,19 @@ public class CaseControlSampling extends CaseControlLikeSampling {
 			return new AlgorithmInitializedEvent();
 		case active:
 			if(this.sample.size() < this.sampleSize) {
-				double r = this.rand.nextDouble();
 				IInstance choosenInstance = null;
-				for(int i = 0; i < probabilityBoundaries.size(); i++) {
-					if(probabilityBoundaries.get(i).getY().doubleValue() > r) {
-						choosenInstance = probabilityBoundaries.get(i).getX();
+				double r;
+				do {
+					r = this.rand.nextDouble();
+					for(int i = 0; i < probabilityBoundaries.size(); i++) {
+						if(probabilityBoundaries.get(i).getY().doubleValue() > r) {
+							choosenInstance = probabilityBoundaries.get(i).getX();
+						}
 					}
-				}
-				if(choosenInstance == null) {
-					choosenInstance = probabilityBoundaries.get(probabilityBoundaries.size() - 1).getX();
-				}
+					if(choosenInstance == null) {
+						choosenInstance = probabilityBoundaries.get(probabilityBoundaries.size() - 1).getX();
+					}
+				} while(this.sample.contains(choosenInstance));
 				this.sample.add(choosenInstance);
 				return new SampleElementAddedEvent();
 			}
