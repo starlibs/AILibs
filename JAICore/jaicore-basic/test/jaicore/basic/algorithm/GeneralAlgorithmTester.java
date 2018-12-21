@@ -36,7 +36,7 @@ public abstract class GeneralAlgorithmTester<P, I, O> implements ILoggingCustomi
 	private String loggerName;
 	private Logger logger = LoggerFactory.getLogger(GeneralAlgorithmTester.class);
 	private static final int INTERRUPTION_DELAY = 5000;
-	private static final int INTERRUPTION_CLEANUP_TOLERANCE = 250;
+	private static final int INTERRUPTION_CLEANUP_TOLERANCE = 1000;
 	private static final int THREAD_SHUTDOWN_TOLERANCE = 10000;
 
 	public abstract AlgorithmProblemTransformer<P, I> getProblemReducer();

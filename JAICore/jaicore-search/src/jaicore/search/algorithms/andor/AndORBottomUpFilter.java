@@ -1,6 +1,7 @@
 package jaicore.search.algorithms.andor;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -13,6 +14,8 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.lowagie.tools.Executable;
+
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.IObjectEvaluator;
 import jaicore.basic.algorithm.AAlgorithm;
@@ -21,6 +24,7 @@ import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.basic.sets.LDSRelationComputer;
+import jaicore.basic.sets.RelationComputationProblem;
 import jaicore.graph.Graph;
 import jaicore.graph.IGraphAlgorithm;
 import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
@@ -109,7 +113,8 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 			try {
 				bestSolutions = this.filterNodeSolution(this.graph.getRoot());
 				this.logger.info("Number of solutions: {}", bestSolutions.size());
-				this.bestSolutionBase = bestSolutions.poll().graph;
+				if (!bestSolutions.isEmpty())
+					this.bestSolutionBase = bestSolutions.poll().graph;
 				return this.terminate();
 			} catch (ObjectEvaluationFailedException e) {
 				throw new AlgorithmException(e, "Could not evaluate solution.");
@@ -186,7 +191,23 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 			}
 			/* for each such combination, build the grpah and store it */
 			int i = 0;
-			LDSRelationComputer<EvaluatedGraph> cartesianProductBuilder = new LDSRelationComputer<>(subSolutionsPerChild);
+			LDSRelationComputer<EvaluatedGraph> cartesianProductBuilder = new LDSRelationComputer<>(new RelationComputationProblem<>(subSolutionsPerChild, subSolutionCombination -> {
+				EvaluatedGraph extendedSolutionBase = new EvaluatedGraph();
+				extendedSolutionBase.graph = new Graph<>();
+				extendedSolutionBase.graph.addItem(node.node);
+				for (EvaluatedGraph subSolution : subSolutionCombination) {
+					assert subSolution != null;
+					extendedSolutionBase.graph.addGraph(subSolution.graph);
+					extendedSolutionBase.graph.addEdge(node.node, subSolution.graph.getRoot());
+				}
+				try {
+					extendedSolutionBase.value = this.evaluator.evaluate(extendedSolutionBase.graph);
+				} catch (TimeoutException | InterruptedException | ObjectEvaluationFailedException e) {
+					e.printStackTrace();
+				}
+				boolean isDouble = extendedSolutionBase.value instanceof Double;
+				return isDouble ? !(extendedSolutionBase.value.equals(Double.NaN) || extendedSolutionBase.value.equals(Double.MAX_VALUE)) : extendedSolutionBase.value != null;
+			}));
 			List<EvaluatedGraph> subSolutionCombination;
 			while ((subSolutionCombination = cartesianProductBuilder.nextTuple()) != null && i++ < this.nodeLimit) {
 				EvaluatedGraph extendedSolutionBase = new EvaluatedGraph();
@@ -198,7 +219,8 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 					extendedSolutionBase.graph.addEdge(node.node, subSolution.graph.getRoot());
 				}
 				extendedSolutionBase.value = this.evaluator.evaluate(extendedSolutionBase.graph);
-				logger.debug("Combination {} of subsolutions with performances {} yields an aggregate performance value of {}", i, subSolutionCombination.stream().map(g -> "" + g.value).collect(Collectors.joining(", ")),
+//				System.out.println("\t" + extendedSolutionBase.value);
+				logger.debug("Combination {} of subsolutions with performances {} yields an aggregate performance value of {}", i, subSolutionCombination.stream().map(g -> ""+g.value).collect(Collectors.joining(", ")),
 						extendedSolutionBase.value);
 				filteredSolutions.add(extendedSolutionBase);
 			}
@@ -246,6 +268,7 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 	@Override
 	public void setLoggerName(final String name) {
 		this.logger.info("Switching logger from {} to {}", this.logger.getName(), name);
+		this.loggerName = name;
 		this.logger = LoggerFactory.getLogger(name);
 		this.logger.info("Activated logger {} with name {}", name, this.logger.getName());
 		if (this.evaluator instanceof ILoggingCustomizable) {

@@ -5,10 +5,10 @@ import java.util.List;
 import jaicore.basic.algorithm.AAlgorithmFactory;
 import jaicore.basic.algorithm.IAlgorithm;
 
-public class LDSRelationComputerFactory<T> extends AAlgorithmFactory<RelationComputationProblem<T>, List<Object[]>> {
+public class LDSRelationComputerFactory<T> extends AAlgorithmFactory<RelationComputationProblem<T>, List<List<T>>> {
 
 	@Override
-	public IAlgorithm<RelationComputationProblem<T>, List<Object[]>> getAlgorithm() {
+	public IAlgorithm<RelationComputationProblem<T>, List<List<T>>> getAlgorithm() {
 		return new LDSRelationComputer<>(getInput());
 	}
 }

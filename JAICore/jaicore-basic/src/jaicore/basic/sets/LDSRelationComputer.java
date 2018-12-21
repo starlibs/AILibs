@@ -9,8 +9,6 @@ import java.util.Queue;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Predicate;
 
-import org.omg.CORBA.DefinitionKind;
-
 import jaicore.basic.algorithm.AAlgorithm;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
@@ -32,69 +30,94 @@ import jaicore.basic.algorithm.exceptions.DelayedTimeoutCheckException;
  *
  * @param <T>
  */
-public class LDSRelationComputer<T> extends AAlgorithm<RelationComputationProblem<T>, List<Object[]>> {
+public class LDSRelationComputer<T> extends AAlgorithm<RelationComputationProblem<T>, List<List<T>>> {
 
-	private static class Node {
+	private class Node {
 		Node parent;
-		int nextDecision;
 		int defficiency;
-		Object val;
+		int indexOfSet;
+		int indexOfValue;
 
 		public Node() {
 			
 		}
-		public Node(Node parent, int nextDecision, int defficiency, Object val) {
+		public Node(Node parent, int indexOfSet, int defficiency, int indexInSet) {
 			long start = System.currentTimeMillis();
 			this.parent = parent;
-			this.nextDecision = nextDecision;
+			this.indexOfSet = indexOfSet;
 			this.defficiency = defficiency;
-			this.val = val;
+			this.indexOfValue = indexInSet;
 			assert System.currentTimeMillis() - start <= 1 : "Constructor execution took more than 1ms: " + (System.currentTimeMillis() - start) + "ms";
 		}
 		
-		public void fillTupleArrayWithValues(Object[] tupleArray) {
-			for (int i = nextDecision; i < tupleArray.length; i++)
-				tupleArray[i] = null;
+		public void fillTupleArrayWithValues(List<T> tupleArray) {
+			tupleArray.clear();
 			fillTupleArrayWithValuesRec(tupleArray);
 		}
 		
-		private void fillTupleArrayWithValuesRec(Object[] tupleArray) {
-			if (nextDecision <= 0)
+		private void fillTupleArrayWithValuesRec(List<T> tupleArray) {
+			if (parent == null)
 				return;
-			tupleArray[nextDecision - 1] = val;
+			tupleArray.add(0, getObject());
 			parent.fillTupleArrayWithValuesRec(tupleArray);
 		}
 
 		@Override
 		public String toString() {
-			return "Node [parent=" + parent + ", nextDecision=" + nextDecision + ", defficiency=" + defficiency + ", val=" + val + "]";
+			return "Node [parent=" + parent + ", indexOfSet=" + indexOfSet + ", defficiency=" + defficiency + ", indexInSet=" + indexOfValue + "]";
+		}
+		
+		T getObject() {
+			return sets.get(indexOfSet).get(indexOfValue);
+		}
+		
+		/**
+		 * this method can be used to store old nodes in order to use them again later in the algorithm.
+		 * This can be useful to avoid the creation of new objects all the time, which can be time consuming.
+		 */
+		public void recycle() {
+			if (indexOfSet >= numSets) {
+				recycledNodes.add(this);
+			}
+//			System.out.println(indexOfValue +"/" + sets.get(parent.nextDecision).size());
+//			if (parent != null && indexOfValue == sets.get(parent.nextDecision).size()) {
+//				System.out.println("Recycling");
+//				parent.recycle();
+//			}
 		}
 	}
 
-	private final List<? extends Collection<T>> sets;
+	private final List<List<T>> sets;
 	private final int numSets;
-	private final Predicate<Object[]> prefixFilter;
+	private final Predicate<List<T>> prefixFilter;
 	private int computedTuples = 0;
-	private final Object[] currentTuple;
+	private final List<T> currentTuple;
 	private Queue<Node> open = new PriorityQueue<>((n1, n2) -> n1.defficiency - n2.defficiency);
+	private List<Node> recycledNodes = new ArrayList<>();
+	private int numRecycledNodes;
+	private int numCreatedNodes;
 
 	public LDSRelationComputer(List<? extends Collection<T>> sets) {
 		this(new RelationComputationProblem<>(sets));
 	}
 
+	@SuppressWarnings("unchecked")
 	public LDSRelationComputer(RelationComputationProblem<T> problem) {
 		super(problem);
-		sets = problem.getSets();
+		sets = new ArrayList<>();
+		for (Collection<T> set : problem.getSets())
+			sets.add(set instanceof List ? (List<T>)set : new ArrayList<>(set));
 		numSets = sets.size();
 		prefixFilter = problem.getPrefixFilter();
-		currentTuple = new Object[numSets];
+		currentTuple = new ArrayList<>();
 	}
 
 	@Override
 	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {
 		switch (getState()) {
 		case created: {
-			open.add(new Node(null, 0, 0, null));
+			open.add(new Node(null, -1, 0, 0));
+			numCreatedNodes++;
 			return activate();
 		}
 		case active: {
@@ -103,45 +126,66 @@ public class LDSRelationComputer<T> extends AAlgorithm<RelationComputationProble
 			} catch (DelayedTimeoutCheckException | DelayedCancellationCheckException e) {
 				e.printStackTrace();
 			}
-			long start = System.currentTimeMillis();
-			long lastCheck = start;
 			if (open.isEmpty())
 				return terminate();
 
 			/* determine next cheapest path to a leaf */
 			Node next = null;
-			while (!open.isEmpty() && (next = open.poll()).nextDecision < numSets) {
+			Node newNode;
+			while (!open.isEmpty() && (next = open.poll()).indexOfSet < numSets - 1) {
 				int i = 0;
-				for (T item : sets.get(next.nextDecision)) {
+				int setIndex = next.indexOfSet + 1;
+				List<T> set = sets.get(setIndex);
+				int n = set.size();
+				next.fillTupleArrayWithValues(currentTuple); // get current tuple
+				for (int j = 0; j < n; j++) {
+					try {
+						checkTermination();
+					} catch (DelayedTimeoutCheckException | DelayedCancellationCheckException e) {
+						e.printStackTrace();
+					}
 					long innerTimePoint = System.currentTimeMillis();
-					next.fillTupleArrayWithValues(currentTuple);
-					assert (System.currentTimeMillis() - innerTimePoint) < 5 : "Copying the " + (next.nextDecision) + "-tuple " + Arrays.toString(currentTuple) + " took " + (System.currentTimeMillis() - innerTimePoint) + "ms, which is way too much!";
+					currentTuple.add(set.get(j));
+					assert (System.currentTimeMillis() - innerTimePoint) < 5 : "Copying the " + (next.indexOfSet) + "-tuple " + currentTuple + " took " + (System.currentTimeMillis() - innerTimePoint) + "ms, which is way too much!";
 					innerTimePoint = System.currentTimeMillis();
 					boolean adopt = prefixFilter.test(currentTuple);
-					assert (System.currentTimeMillis() - innerTimePoint) < 5 : "Testing the " + (next.nextDecision) + "-tuple " + Arrays.toString(currentTuple) + " took " + (System.currentTimeMillis() - innerTimePoint) + "ms, which is way too much!";
+					assert (System.currentTimeMillis() - innerTimePoint) < 1000 : "Testing the " + (next.indexOfSet) + "-tuple " + currentTuple + " took " + (System.currentTimeMillis() - innerTimePoint) + "ms, which is way too much!";
 					if (adopt) {
 						innerTimePoint = System.currentTimeMillis();
-						int nextDecision = next.nextDecision + 1;
-						int defficiency = next.defficiency + i++;
-						assert (System.currentTimeMillis() - innerTimePoint) <= 5 : "Computing values for the next node for the " + (next.nextDecision) + "-tuple " + Arrays.toString(currentTuple) + " took " + (System.currentTimeMillis() - innerTimePoint) + "ms, which is way too much!";
-						innerTimePoint = System.currentTimeMillis();
-//						System.out.println(computedTuples);
-						Node newNode = new Node();
-						assert (System.currentTimeMillis() - innerTimePoint) < 750 : "Creating a new node took " + (System.currentTimeMillis() - innerTimePoint) + "ms, which is way too much! " + computedTuples + " tuples have been computed already.";
+						if (recycledNodes.isEmpty()) {
+							newNode = new Node();
+							numCreatedNodes++;
+							assert (System.currentTimeMillis() - innerTimePoint) < 1000 : "Creating a new node took " + (System.currentTimeMillis() - innerTimePoint) + "ms, which is way too much!\n" + computedTuples + " tuples have been computed already.\nRecycling list contains " + recycledNodes.size() + "\nOPEN contains " + open.size();
+						}
+						else {
+							newNode = recycledNodes.remove(0);
+							assert (System.currentTimeMillis() - innerTimePoint) < 10 : "Retrieving node from recycle list " + (System.currentTimeMillis() - innerTimePoint) + "ms, which is way too much!\n" + computedTuples + " tuples have been computed already.\nRecycling list contains " + recycledNodes.size() + "\nOPEN contains " + open.size();
+						}
 						newNode.parent = next;
-						newNode.nextDecision = nextDecision;
-						newNode.defficiency = defficiency;
-						newNode.val = item;
+						newNode.indexOfSet = next.indexOfSet + 1;
+						newNode.defficiency = next.defficiency + i++;
+						newNode.indexOfValue = j;
 						open.add(newNode);
 					}
+					currentTuple.remove(setIndex);
 				}
 			}
 
-			/* at this point, next should contain a fully specified tuple */
-			if (next == null || next.nextDecision < sets.size())
+			/* at this point, next should contain a fully specified tuple. If no next element exists, or the chosen node is not a leaf, terminate */
+			if (next == null || next.indexOfSet < sets.size() - 1) {
 				return terminate();
+			}
 			computedTuples++;
-			return new TupleOfCartesianProductFoundEvent<>(Arrays.copyOf(currentTuple, sets.size()));
+			
+			/* load tuple of selected leaf node */
+			next.fillTupleArrayWithValues(currentTuple);
+			
+			/* recycle leaf node and possibly also inner nodes*/
+			next.recycle();
+			numRecycledNodes++;
+			List<T> tuple = new ArrayList<>(currentTuple);
+			assert currentTuple.size() == numSets : "Tuple " + currentTuple + " should contain " + numSets + " elements but has " + currentTuple.size();
+			return new TupleOfCartesianProductFoundEvent<>(tuple);
 		}
 		default:
 			throw new IllegalStateException();
@@ -150,7 +194,7 @@ public class LDSRelationComputer<T> extends AAlgorithm<RelationComputationProble
 	}
 
 	@SuppressWarnings("unchecked")
-	public Object[] nextTuple() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {
+	public List<T> nextTuple() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {
 		while (hasNext()) {
 			AlgorithmEvent e = nextWithException();
 			if (e instanceof AlgorithmFinishedEvent)
@@ -164,13 +208,20 @@ public class LDSRelationComputer<T> extends AAlgorithm<RelationComputationProble
 	}
 
 	@Override
-	public List<Object[]> call() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {
-		List<Object[]> product = new ArrayList<>();
-		Object[] nextTuple;
+	public List<List<T>> call() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {
+		List<List<T>> product = new ArrayList<>();
+		List<T> nextTuple;
 		while ((nextTuple = nextTuple()) != null) {
 			product.add(nextTuple);
 		}
 		return product;
 	}
 
+	public int getNumRecycledNodes() {
+		return numRecycledNodes;
+	}
+
+	public int getNumCreatedNodes() {
+		return numCreatedNodes;
+	}
 }

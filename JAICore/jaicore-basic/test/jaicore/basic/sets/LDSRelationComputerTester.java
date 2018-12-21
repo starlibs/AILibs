@@ -16,7 +16,7 @@ import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.HomogeneousGeneralAlgorithmTester;
 import jaicore.basic.algorithm.IAlgorithmFactory;
 
-public class LDSRelationComputerTester extends HomogeneousGeneralAlgorithmTester<RelationComputationProblem<Integer>, List<Object[]>> {
+public class LDSRelationComputerTester extends HomogeneousGeneralAlgorithmTester<RelationComputationProblem<Integer>, List<List<Integer>>> {
 
 	@Test
 	public void testOutputSizeForCartesianProducts() throws Exception {
@@ -28,8 +28,9 @@ public class LDSRelationComputerTester extends HomogeneousGeneralAlgorithmTester
 	@Test
 	public void testOutputSizeForNonEmptyRelation() throws Exception {
 		RelationComputationProblem<Integer> problem = getSimpleProblemInputForGeneralTestPurposes();
-		List<Object[]> cartesianProduct = new LDSRelationComputer<>(getCartesianProductProblem()).call();
-		List<Object[]> groundTruth = cartesianProduct.stream().filter(problem.getPrefixFilter()).collect(Collectors.toList());
+		List<List<Integer>> cartesianProduct = new LDSRelationComputer<>(getCartesianProductProblem()).call();
+		List<List<Integer>> groundTruth = cartesianProduct.stream().filter(problem.getPrefixFilter()).collect(Collectors.toList());
+//		cartesianProduct.forEach(t -> System.out.println(t));
 		testRelation(problem, groundTruth.size());
 	}
 	
@@ -45,23 +46,24 @@ public class LDSRelationComputerTester extends HomogeneousGeneralAlgorithmTester
 	
 	private void testRelation(RelationComputationProblem<Integer> problem, int expected) throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException  {
 		LDSRelationComputer<Integer> cpc = new LDSRelationComputer<>(problem);
-		List<Object[]> relation = cpc.call();
-		relation.forEach(t -> System.out.println(t));
+		List<List<Integer>> relation = cpc.call();
 		assertEquals(expected, relation.size()); // the size of the output must be correct
 		for (int i = 0; i < expected - 1; i++) {
-			Object[] tuple1 = relation.get(i);
-			Object[] tuple2 = relation.get(i + 1);
+			List<Integer> tuple1 = relation.get(i);
+			assertEquals(problem.getSets().size(), tuple1.size());
+			List<Integer> tuple2 = relation.get(i + 1);
+			assertEquals(problem.getSets().size(), tuple2.size());
 			int d1 = computeDefficiency(problem.getSets(), tuple1);
 			int d2 = computeDefficiency(problem.getSets(), tuple2);
 			assertTrue(d1 <= d2);
 		}
 	}
 
-	private int computeDefficiency(List<? extends Collection<Integer>> collections, Object[] tuple) {
+	private int computeDefficiency(List<? extends Collection<Integer>> collections, List<Integer> tuple) {
 		int defficiency = 0;
-		for (int i = 0; i < tuple.length; i++) {
+		for (int i = 0; i < tuple.size(); i++) {
 			List<Integer> ithSet = (List<Integer>)collections.get(i);
-			defficiency += ithSet.indexOf(tuple[i]);
+			defficiency += ithSet.indexOf(tuple.get(i));
 		}
 		return defficiency;
 	}
@@ -75,7 +77,7 @@ public class LDSRelationComputerTester extends HomogeneousGeneralAlgorithmTester
 		collections.add(a);
 		collections.add(b);
 		collections.add(c);
-		return new RelationComputationProblem<>(collections, t -> t[1] == null || (int)t[0] + 3 == (int)t[1]);
+		return new RelationComputationProblem<>(collections, t -> t.size() < 2 || t.get(0) + 3 == t.get(1));
 	}
 
 	@Override
@@ -87,7 +89,7 @@ public class LDSRelationComputerTester extends HomogeneousGeneralAlgorithmTester
 			if (collection.size() > 2)
 				collections.add(new ArrayList<>(collection));
 		}
-		return new RelationComputationProblem<>(collections, t -> t[1] == null || (int)t[0] + 3 == (int)t[1]);
+		return new RelationComputationProblem<>(collections, t -> t.size() < 2|| t.get(0) + 3 == t.get(1));
 	}
 	
 	public RelationComputationProblem<Integer> getCartesianProductProblem() {
@@ -95,7 +97,7 @@ public class LDSRelationComputerTester extends HomogeneousGeneralAlgorithmTester
 	}
 	
 	public RelationComputationProblem<Integer> getInfeasibleRelationProblem() {
-		return new RelationComputationProblem<>(getSimpleProblemInputForGeneralTestPurposes().getSets(), t -> t.length < 3); // all full tuples are forbidden
+		return new RelationComputationProblem<>(getSimpleProblemInputForGeneralTestPurposes().getSets(), t -> t.size() < 3); // all full tuples are forbidden
 	}
 	
 	public RelationComputationProblem<Integer> getInfeasibleCompletelyPrunedRelationProblem() {
@@ -103,7 +105,7 @@ public class LDSRelationComputerTester extends HomogeneousGeneralAlgorithmTester
 	}
 
 	@Override
-	public IAlgorithmFactory<RelationComputationProblem<Integer>, List<Object[]>> getFactory() {
+	public IAlgorithmFactory<RelationComputationProblem<Integer>, List<List<Integer>>> getFactory() {
 		return new LDSRelationComputerFactory<Integer>();
 	}
 }

@@ -35,6 +35,8 @@ import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
+import jaicore.basic.algorithm.exceptions.DelayedCancellationCheckException;
+import jaicore.basic.algorithm.exceptions.DelayedTimeoutCheckException;
 import jaicore.concurrent.InterruptionTimerTask;
 import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeParentSwitchEvent;
@@ -1036,6 +1038,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 	@Override
 	public void setLoggerName(final String name) {
 		this.logger.info("Switching logger from {} to {}", this.logger.getName(), name);
+		this.loggerName = name;
 		this.logger = LoggerFactory.getLogger(name);
 		this.logger.info("Activated logger {} with name {}", name, this.logger.getName());
 		if (this.nodeEvaluator instanceof ILoggingCustomizable) {

@@ -196,7 +196,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 			this.unregisterThreadAndShutdown();
 			this.logger.info("Timeout detected for {}, stopping execution with TimeoutException", this);
 			TimeoutException e = new TimeoutException();
-			if (timeouted - deadline > 100)
+			if (timeouted - deadline > 500)
 				throw new DelayedTimeoutCheckException(e, timeouted - deadline);
 			else
 				throw e;

@@ -25,6 +25,8 @@ import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
+import jaicore.basic.algorithm.exceptions.DelayedCancellationCheckException;
+import jaicore.basic.algorithm.exceptions.DelayedTimeoutCheckException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.graphvisualizer.gui.VisualizationWindow;
 import jaicore.planning.EvaluatedSearchGraphBasedPlan;
@@ -134,7 +136,15 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 		}
 		case active: {
 			/* Check termination */
-			this.checkTermination();
+			try {
+				this.checkTermination();
+			} catch (DelayedTimeoutCheckException e1) {
+				e1.printStackTrace();
+				throw e1.getException();
+			} catch (DelayedCancellationCheckException e1) {
+				e1.printStackTrace();
+				throw e1.getException();
+			}
 
 			/* if the search itself has not been initialized, do this now */
 			if (!this.searchCreatedAndInitialized) {
