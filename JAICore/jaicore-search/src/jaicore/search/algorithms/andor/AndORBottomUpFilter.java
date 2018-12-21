@@ -20,7 +20,7 @@ import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
-import jaicore.basic.sets.LDSBasedCartesianProductComputer;
+import jaicore.basic.sets.LDSRelationComputer;
 import jaicore.graph.Graph;
 import jaicore.graph.IGraphAlgorithm;
 import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
@@ -186,7 +186,7 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 			}
 			/* for each such combination, build the grpah and store it */
 			int i = 0;
-			LDSBasedCartesianProductComputer<EvaluatedGraph> cartesianProductBuilder = new LDSBasedCartesianProductComputer<>(subSolutionsPerChild);
+			LDSRelationComputer<EvaluatedGraph> cartesianProductBuilder = new LDSRelationComputer<>(subSolutionsPerChild);
 			List<EvaluatedGraph> subSolutionCombination;
 			while ((subSolutionCombination = cartesianProductBuilder.nextTuple()) != null && i++ < this.nodeLimit) {
 				EvaluatedGraph extendedSolutionBase = new EvaluatedGraph();
