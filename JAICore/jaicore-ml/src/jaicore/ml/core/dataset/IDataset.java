@@ -13,7 +13,7 @@ import jaicore.ml.core.dataset.attribute.IAttributeType;
  *
  * @author wever
  */
-public interface IDataset<INSTANCE extends IInstance> extends List<INSTANCE> {
+public interface IDataset<INSTANCE extends IInstance> extends Iterable<INSTANCE> {
 
 	/**
 	 * Returns the attribute type of the target attribute.
