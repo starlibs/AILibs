@@ -30,6 +30,7 @@ import jaicore.graph.IGraphAlgorithm;
 import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
 import jaicore.search.core.interfaces.GraphGenerator;
+import jaicore.search.model.other.EvaluatedSearchGraphPath;
 import jaicore.search.model.travesaltree.NodeExpansionDescription;
 import jaicore.search.model.travesaltree.NodeType;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
@@ -40,6 +41,8 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 	private String loggerName;
 
 	public class InnerNodeLabel {
+		InnerNodeLabel parent;
+		int val;
 		N node;
 		NodeType type;
 		// List<List<N>> survivedGoalPaths; // ranked list of paths from node to goals
@@ -49,6 +52,12 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 			super();
 			this.node = node;
 			this.type = type;
+		}
+		
+		public String path() {
+			if (parent == null)
+				return val + "";
+			return parent.path() + " -> " + val;
 		}
 	}
 
@@ -79,6 +88,7 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 			/* step 1: construct the whole graph */
 			Queue<InnerNodeLabel> open = new LinkedList<>();
 			InnerNodeLabel root = new InnerNodeLabel(((SingleRootGenerator<N>) this.getInput().getRootGenerator()).getRoot(), NodeType.AND);
+			root.val = 0;
 			open.add(root);
 			this.post(new GraphInitializedEvent<N>(root.node));
 			this.graph.addItem(root);
@@ -88,6 +98,8 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 					int generatedChildren = 0;
 					for (NodeExpansionDescription<N, A> descr : this.getInput().getSuccessorGenerator().generateSuccessors(n.node)) {
 						InnerNodeLabel newNode = new InnerNodeLabel(descr.getTo(), descr.getTypeOfToNode());
+						newNode.parent = n;
+						newNode.val = generatedChildren;
 						synchronized (this.graph) {
 							this.graph.addItem(newNode);
 							logger.trace("Added {}-node {} as a child to {}", newNode.type, newNode, n);
@@ -142,7 +154,7 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 																													// (unimportant first, because these are drained)
 		assert !node.evaluated : "Node " + node + " is filtered for the 2nd time already!";
 		node.evaluated = true;
-		this.logger.debug("Filtering ({})-Node " + node.node + " with " + this.graph.getSuccessors(node).size() + " children.", node.type);
+		this.logger.debug("Computing solutions for ({})-Node {} with {} children.", node.type, node.node, this.graph.getSuccessors(node).size());
 
 		/* if this is a leaf node, just return itself */
 		if (this.graph.getSuccessors(node).isEmpty()) {
@@ -161,6 +173,10 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 		logger.debug("Computing subsolutions of node {}", node);
 		for (InnerNodeLabel child : this.graph.getSuccessors(node)) {
 			Queue<EvaluatedGraph> filteredSolutionsUnderChild = this.filterNodeSolution(child);
+			if (filteredSolutionsUnderChild.isEmpty()) {
+				System.out.println("Canceling further examinations as we have a node without sub-solutions.");
+				return new LinkedList<>();
+			}
 			subSolutions.put(child, filteredSolutionsUnderChild);
 			if (logger.isDebugEnabled()) {
 				StringBuilder sb = new StringBuilder();
@@ -168,7 +184,7 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 				logger.debug("Child {} has {} solutions: {}", child, filteredSolutionsUnderChild.size(), sb.toString());
 			}
 		}
-
+		
 		/*
 		 * if this is an AND node, combine all solution paths of the children and choose
 		 * the best COMBINATIONs
@@ -206,10 +222,13 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 					e.printStackTrace();
 				}
 				boolean isDouble = extendedSolutionBase.value instanceof Double;
-				return isDouble ? !(extendedSolutionBase.value.equals(Double.NaN) || extendedSolutionBase.value.equals(Double.MAX_VALUE)) : extendedSolutionBase.value != null;
+				boolean validSolution = isDouble ? !(extendedSolutionBase.value.equals(Double.NaN)) : extendedSolutionBase.value != null;
+				if (!validSolution)
+					System.out.println("\tCutting of sub-solution combination at level " + subSolutionCombination.size() + "/" + subSolutionsPerChild.size() + " as cost function returned " + extendedSolutionBase.value + ". The following combined solution graph was subject of evaluation (one path per line, ommitted nodes are equal to the above line(s)):\n" + extendedSolutionBase.graph.getLineBasedStringRepresentation(2));
+				return validSolution;
 			}));
 			List<EvaluatedGraph> subSolutionCombination;
-			while ((subSolutionCombination = cartesianProductBuilder.nextTuple()) != null && i++ < this.nodeLimit) {
+			while ((subSolutionCombination = cartesianProductBuilder.nextTuple()) != null && i++ < 2 * this.nodeLimit) {
 				EvaluatedGraph extendedSolutionBase = new EvaluatedGraph();
 				extendedSolutionBase.graph = new Graph<>();
 				extendedSolutionBase.graph.addItem(node.node);
@@ -248,7 +267,13 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 
 		// logger.debug("\treturning " + filteredSolutionsReordered.size() + "
 		// graph(s):");
-		filteredSolutions.forEach(g -> this.logger.debug("\tScore " + g.value + " for " + g.graph));
+		
+		System.out.println(filteredSolutions.size() + " accepted sub-solutions of " + node.type + "-node " + node.path() + " with " + subSolutions.size() + " children.");
+		int i = 1;
+		for (EvaluatedGraph g : filteredSolutions) {
+			System.out.println("\tValue of sub-solution #" + i + ": " + g.value);
+			i++;
+		}
 		return filteredSolutions;
 	}
 

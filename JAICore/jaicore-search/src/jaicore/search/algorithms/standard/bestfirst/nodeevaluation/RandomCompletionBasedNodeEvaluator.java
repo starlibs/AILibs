@@ -14,6 +14,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
@@ -25,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.eventbus.Subscribe;
 
 import jaicore.basic.ILoggingCustomizable;
+import jaicore.basic.TimeOut;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import jaicore.basic.sets.SetUtil.Pair;
@@ -54,6 +56,7 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 
 	private final int timeoutForSingleCompletionEvaluationInMS;
 	private final int timeoutForNodeEvaluationInMS;
+	private long totalDeadline = -1;
 
 	protected Set<List<T>> unsuccessfulPaths = Collections.synchronizedSet(new HashSet<>());
 	protected Set<List<T>> postedSolutions = new HashSet<>();
@@ -248,7 +251,7 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 							}
 						}
 					};
-					long timeoutForJob = deadline - System.currentTimeMillis();
+					long timeoutForJob = Math.min(deadline - System.currentTimeMillis(), totalDeadline - System.currentTimeMillis());
 					if (timeoutForJob < 0)
 						break;
 					if (timeoutForSingleCompletionEvaluationInMS > 0 && timeoutForSingleCompletionEvaluationInMS < timeoutForJob)
@@ -463,6 +466,8 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 		INodeEvaluator<T, Double> nodeEvaluator = new RandomizedDepthFirstNodeEvaluator<>(this.random);
 		GraphSearchWithSubpathEvaluationsInput<T, String, Double> completionProblem = new GraphSearchWithSubpathEvaluationsInput<>(generator, nodeEvaluator);
 		completer = new RandomSearch<>(completionProblem, priorityPredicateForRDFS, this.random);
+		System.out.println(totalDeadline);
+		completer.setTimeout(new TimeOut(totalDeadline - System.currentTimeMillis(), TimeUnit.MILLISECONDS));
 		if (visualizeSubSearch)
 			new VisualizationWindow<>(completer).setTooltipGenerator(n -> n.toString() + "<br />f: " + String.valueOf(bestKnownScoreUnderNodeInCompleterGraph.get(n)));
 		while (!(completer.next() instanceof AlgorithmInitializedEvent))
@@ -517,5 +522,13 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 	@Override
 	public String getLoggerName() {
 		return loggerName;
+	}
+
+	public long getTotalDeadline() {
+		return totalDeadline;
+	}
+
+	public void setTotalDeadline(long totalDeadline) {
+		this.totalDeadline = totalDeadline;
 	}
 }

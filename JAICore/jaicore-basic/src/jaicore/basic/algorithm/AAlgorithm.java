@@ -133,11 +133,12 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 
 	@Override
 	public void setTimeout(final long timeout, final TimeUnit timeUnit) {
-		this.getConfig().setProperty(IAlgorithmConfig.K_TIMEOUT, new TimeOut(timeout, timeUnit).milliseconds() + "");
+		setTimeout(new TimeOut(timeout, timeUnit));
 	}
 
 	@Override
 	public void setTimeout(final TimeOut timeout) {
+		logger.info("Setting timeout to {}ms", timeout.milliseconds());
 		this.getConfig().setProperty(IAlgorithmConfig.K_TIMEOUT, timeout.milliseconds() + "");
 	}
 
@@ -150,7 +151,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 		return this.timeouted > 0;
 	}
 	
-	protected long remainingTimeToDeadline() {
+	protected long getRemainingTimeToDeadline() {
 		return deadline - System.currentTimeMillis();
 	}
 

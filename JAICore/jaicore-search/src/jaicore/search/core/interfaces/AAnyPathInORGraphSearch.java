@@ -76,10 +76,10 @@ public abstract class AAnyPathInORGraphSearch<I extends GraphSearchInput<NSrc, A
 		try {
 			super.checkTermination();
 		} catch (DelayedTimeoutCheckException e) {
-			e.printStackTrace();
+			logger.warn("CheckTermination was called with delay. Message: \"{}\"", e.getMessage());
 			throw e.getException();
 		} catch (DelayedCancellationCheckException e) {
-			e.printStackTrace();
+			logger.warn("CheckTermination was called with delay. Message: \"{}\"", e.getMessage());
 			throw e.getException();
 		}
 	}

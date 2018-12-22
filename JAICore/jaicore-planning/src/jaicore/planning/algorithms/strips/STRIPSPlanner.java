@@ -14,8 +14,6 @@ import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.AlgorithmState;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
-import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
-import jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.sets.SetUtil;
 import jaicore.graphvisualizer.TooltipGenerator;
@@ -125,8 +123,8 @@ public class STRIPSPlanner<V extends Comparable<V>>
 			throws AlgorithmExecutionCanceledException, InterruptedException, TimeoutException, AlgorithmException {
 		switch (this.getState()) {
 		case created:
-			this.search.setTimeout(this.getTimeout());
 			this.setLoggerOfSearch();
+			this.search.setTimeout(this.getTimeout());
 			if (this.visualize) {
 				VisualizationWindow<Node<StripsForwardPlanningNode, V>, String> w = new VisualizationWindow<>(
 						this.search);
@@ -148,8 +146,7 @@ public class STRIPSPlanner<V extends Comparable<V>>
 				this.updateBestSeenSolution(evaluatedPlan);
 				return new PlanFoundEvent<>(evaluatedPlan);
 			} catch (NoSuchElementException e) {
-				this.setState(AlgorithmState.active);
-				return new AlgorithmFinishedEvent();
+				return terminate();
 			}
 
 		default:

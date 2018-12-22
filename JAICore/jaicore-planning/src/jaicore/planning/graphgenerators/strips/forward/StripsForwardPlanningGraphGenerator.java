@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -27,7 +28,8 @@ public class StripsForwardPlanningGraphGenerator implements GraphGenerator<Strip
 	private final StripsPlanningProblem problem;
 	private static final Logger logger = LoggerFactory.getLogger(StripsForwardPlanningGraphGenerator.class);
 	private final Monom initState;
-	private final Map<StripsForwardPlanningNode, List<StripsAction>> appliedActions = new HashMap<>(); // maintain a local copy of the graph here
+	private final Map<StripsForwardPlanningNode, List<StripsAction>> existingActions = new HashMap<>(); // maintain a local copy of the graph here
+	private final Map<StripsForwardPlanningNode, List<Boolean>> appliedFlags = new HashMap<>(); // maintain a local copy of the graph here
 	private final Set<StripsForwardPlanningNode> completelyExpandedNodes = new HashSet<>();
 
 	public StripsForwardPlanningGraphGenerator(StripsPlanningProblem problem) {
@@ -39,7 +41,7 @@ public class StripsForwardPlanningGraphGenerator implements GraphGenerator<Strip
 	public SingleRootGenerator<StripsForwardPlanningNode> getRootGenerator() {
 		return () -> {
 			StripsForwardPlanningNode root = new StripsForwardPlanningNode(new Monom(), new Monom(), null);
-			appliedActions.put(root, new ArrayList<>());
+			existingActions.put(root, new ArrayList<>());
 			return root;
 		};
 	}
@@ -58,7 +60,7 @@ public class StripsForwardPlanningGraphGenerator implements GraphGenerator<Strip
 		long start = System.currentTimeMillis();
 		Monom state = node.getStateRelativeToInitState(initState);
 		long timeToComputeState = System.currentTimeMillis() - start;
-		List<StripsAction> applicableActions = PlannerUtil.getApplicableActionsInState(state, (StripsPlanningDomain) problem.getDomain(), true, 5);
+		List<StripsAction> applicableActions = PlannerUtil.getApplicableActionsInState(state, (StripsPlanningDomain) problem.getDomain(), true, 2);
 		logger.debug("Computation of applicable actions took {}ms of which {}ms were used to reproduce the state.", System.currentTimeMillis() - start, timeToComputeState);
 		return applicableActions.isEmpty() ? null : applicableActions.get(0);
 	}
@@ -74,7 +76,7 @@ public class StripsForwardPlanningGraphGenerator implements GraphGenerator<Strip
 				long start = System.currentTimeMillis();
 				List<NodeExpansionDescription<StripsForwardPlanningNode, String>> successors = new ArrayList<>();
 				List<StripsAction> applicableActions = getApplicableActionsInNode(node);
-				appliedActions.put(node, applicableActions);
+				existingActions.put(node, applicableActions);
 				for (StripsAction action : applicableActions) {
 					long t = System.currentTimeMillis();
 					Monom del = new Monom(node.getDel());
@@ -99,21 +101,21 @@ public class StripsForwardPlanningGraphGenerator implements GraphGenerator<Strip
 				long start = System.currentTimeMillis();
 				
 				/* if no successor has been computed for this node, add the list */
-				if (!appliedActions.containsKey(node))
-					appliedActions.put(node, new ArrayList<>());
+				if (!existingActions.containsKey(node))
+					existingActions.put(node, new ArrayList<>());
 
 				/* determine action (if index here is high, just compute all of them) */
 				assert i >= 0 : "Index must not be negative!";
 				StripsAction action;
 				if (completelyExpandedNodes.contains(node)) {
-					action = appliedActions.get(node).get(i % appliedActions.get(node).size());
-				} else if (appliedActions.get(node).size() >= 3) {
+					action = existingActions.get(node).get(i % existingActions.get(node).size());
+				} else if (existingActions.get(node).size() >= 3) {
 					generateSuccessors(node);
 					assert completelyExpandedNodes.contains(node);
-					action = appliedActions.get(node).get(i % appliedActions.get(node).size());
+					action = existingActions.get(node).get(i % existingActions.get(node).size());
 				} else {
 					int counter = 0;
-					while ((action = getRandomApplicableActionInNode(node)) != null && appliedActions.get(node).contains(action) && counter < 10) {
+					while ((action = getRandomApplicableActionInNode(node)) != null && existingActions.get(node).contains(action) && counter < 10) {
 						logger.debug("Created the same action for the same time, iterating again.");
 						counter++;
 					}
@@ -121,15 +123,15 @@ public class StripsForwardPlanningGraphGenerator implements GraphGenerator<Strip
 						logger.debug("Generating ALL successors, since the previous procedure has not revealed any new action within {} iterations", counter);
 						generateSuccessors(node);
 						assert completelyExpandedNodes.contains(node);
-						if (appliedActions.get(node).isEmpty())
+						if (existingActions.get(node).isEmpty())
 							return null;
-						action = appliedActions.get(node).get(i % appliedActions.get(node).size());
+						action = existingActions.get(node).get(i % existingActions.get(node).size());
 					}
 				}
 				
 				/* action should not be null at this point */
 				assert action != null;
-				appliedActions.get(node).add(action);
+				existingActions.get(node).add(action);
 				long t = System.currentTimeMillis();
 				Monom del = new Monom(node.getDel());
 				Monom add = new Monom(node.getAdd());
