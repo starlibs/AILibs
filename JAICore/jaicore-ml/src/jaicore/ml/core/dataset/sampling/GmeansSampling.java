@@ -38,6 +38,7 @@ public class GmeansSampling <I extends IInstance> extends ASamplingAlgorithm<I> 
 
 	private GMeans<I> gMeansCluster;
 	private List<CentroidCluster<I>> clusterResults;
+	private int currentCluster = 0;
 
 	private DistanceMeasure distanceMeassure = new ManhattanDistance();
 	
@@ -64,7 +65,8 @@ public class GmeansSampling <I extends IInstance> extends ASamplingAlgorithm<I> 
 			this.setState(AlgorithmState.active);
 			return new AlgorithmInitializedEvent();
 		case active:
-			for (CentroidCluster<I> cluster : clusterResults) {
+			if(currentCluster < clusterResults.size()) {
+				CentroidCluster<I> cluster = clusterResults.get(currentCluster++);
 				boolean same = true;
 				for (int i = 1; i < cluster.getPoints().size(); i++) {
 					if (!cluster.getPoints().get(i - 1).getTargetValue(Double.class)
@@ -90,9 +92,11 @@ public class GmeansSampling <I extends IInstance> extends ASamplingAlgorithm<I> 
 						sample.add(cluster.getPoints().get(i));
 					}
 				}
+				return new SampleElementAddedEvent();
+			}else {
+				this.setState(AlgorithmState.inactive);	
+				return new AlgorithmFinishedEvent();
 			}
-			this.setState(AlgorithmState.inactive);
-			return new AlgorithmFinishedEvent();
 		case inactive: {
 			if (this.sample.size() < this.sampleSize) {
 				throw new Exception("Expected sample size was not reached before termination");
@@ -121,12 +125,12 @@ public class GmeansSampling <I extends IInstance> extends ASamplingAlgorithm<I> 
 			values.add(new NumericAttributeValue(new NumericAttributeType(), rand.nextDouble()));
 			values.add(new NumericAttributeValue(new NumericAttributeType(), rand.nextDouble()));
 			values.add(new NumericAttributeValue(new NumericAttributeType(), rand.nextDouble()));
-			ds.add(new SimpleInstance(values, new NumericAttributeValue(new NumericAttributeType(), rand.nextInt(5)*12.0)));
+			ds.add(new SimpleInstance(values, new NumericAttributeValue(new NumericAttributeType(), 12.0)));
 		}
 		
-		GMeansStratiAmountSelectorAndAssigner<SimpleInstance> gm = new GMeansStratiAmountSelectorAndAssigner<>(45);
+		//GMeansStratiAmountSelectorAndAssigner<SimpleInstance> gm = new GMeansStratiAmountSelectorAndAssigner<>(45);
 		
-		ASamplingAlgorithm<SimpleInstance> sampling = new StratifiedSampling<SimpleInstance>(gm, gm, new Random());
+		ASamplingAlgorithm<SimpleInstance> sampling = new GmeansSampling<SimpleInstance>(45);
 		sampling.setInput(ds);
 		sampling.setSampleSize(1000);
 		
