@@ -126,7 +126,7 @@ public class GmeansSampling <I extends IInstance> extends ASamplingAlgorithm<I> 
 		
 		GMeansStratiAmountSelectorAndAssigner<SimpleInstance> gm = new GMeansStratiAmountSelectorAndAssigner<>(45);
 		
-		ASamplingAlgorithm<SimpleInstance> sampling = new StratifiedSampling<SimpleInstance>(gm, gm, new Random(), false);
+		ASamplingAlgorithm<SimpleInstance> sampling = new StratifiedSampling<SimpleInstance>(gm, gm, new Random());
 		sampling.setInput(ds);
 		sampling.setSampleSize(1000);
 		
