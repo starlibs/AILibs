@@ -12,7 +12,7 @@ import org.junit.runners.Parameterized.Parameters;
 
 import de.upb.isys.linearalgebra.DenseDoubleVector;
 import de.upb.isys.linearalgebra.Vector;
-import jaicore.ml.dyadranking.algorithm.lbfgs.LBFGSOptimizerWrapper;
+import jaicore.ml.core.optimizing.lbfgs.LBFGSOptimizerWrapper;
 
 /**
  * Tests the LFBGS wrapper by letting it minimize polynomials.

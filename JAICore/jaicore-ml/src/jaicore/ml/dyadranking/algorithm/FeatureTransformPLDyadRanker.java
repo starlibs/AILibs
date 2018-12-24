@@ -15,9 +15,11 @@ import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.exception.ConfigurationException;
 import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.core.exception.TrainingException;
+import jaicore.ml.core.optimizing.IGradientBasedOptimizer;
+import jaicore.ml.core.optimizing.graddesc.GradientDescentOptimizer;
+import jaicore.ml.core.optimizing.lbfgs.LBFGSOptimizerWrapper;
 import jaicore.ml.core.predictivemodel.IPredictiveModelConfiguration;
 import jaicore.ml.dyadranking.Dyad;
-import jaicore.ml.dyadranking.algorithm.lbfgs.LBFGSOptimizerWrapper;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import jaicore.ml.dyadranking.dataset.DyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
@@ -25,17 +27,24 @@ import jaicore.ml.dyadranking.optimizing.DyadRankingFeatureTransformNegativeLogL
 import jaicore.ml.dyadranking.optimizing.DyadRankingFeatureTransformNegativeLogLikelihoodDerivative;
 import jaicore.ml.dyadranking.optimizing.IDyadRankingFeatureTransformPLGradientDescendableFunction;
 import jaicore.ml.dyadranking.optimizing.IDyadRankingFeatureTransformPLGradientFunction;
-import jaicore.ml.dyadranking.optimizing.IGradientBasedOptimizer;
 
 /**
  * A feature transformation Placket-Luce dyad ranker. By default uses bilinear
  * feature transformation.
  * 
- * @author Helena Graf
+ * All the provided algorithms are implementations of the PLModel introduced in
+ * [1].
+ * 
+ * 
+ * [1] Schäfer, D. & Hüllermeier, Dyad ranking using Plackett–Luce models based
+ * on joint feature representations,
+ * https://link.springer.com/article/10.1007%2Fs10994-017-5694-9
+ * 
+ * @author Helena Graf, Mirko Jürgens
  *
  */
 public class FeatureTransformPLDyadRanker extends APLDyadRanker {
-	
+
 	private static final Logger log = LoggerFactory.getLogger(APLDyadRanker.class);
 
 	/* Phi in the paper */
@@ -107,7 +116,8 @@ public class FeatureTransformPLDyadRanker extends APLDyadRanker {
 		Vector featureTransformVector = featureTransform.transform(dyad);
 		double dot = w.dotProduct(featureTransformVector);
 		double val = Math.exp(dot);
-		log.debug("Feature transform for dyad {} is {}. \n Dot-Product is {} and skill is {}", dyad, featureTransformVector, dot, val);
+		log.debug("Feature transform for dyad {} is {}. \n Dot-Product is {} and skill is {}", dyad,
+				featureTransformVector, dot, val);
 		return val;
 	}
 
@@ -125,10 +135,51 @@ public class FeatureTransformPLDyadRanker extends APLDyadRanker {
 				.length();
 		int instanceLength = ((IDyadRankingInstance) dRDataset.get(0)).getDyadAtPosition(0).getInstance().length();
 		Vector initialGuess = new DenseDoubleVector(
-				featureTransform.getTransformedVectorLength(alternativeLength, instanceLength));
-		initialGuess.fillRandomly();
+				featureTransform.getTransformedVectorLength(alternativeLength, instanceLength), -0.3);
+		// initialGuess.fillRandomly();
+		System.out.println("likelihood of this the random w is " + likelihoodOfParameter(initialGuess, dRDataset));
+		System.out.println(negativeLogLikelihoodDerivative.apply(initialGuess));
 		w = optimizer.optimize(negativeLogLikelihood, negativeLogLikelihoodDerivative, initialGuess);
+		System.out.println("log lilkelihood is " + negativeLogLikelihood.apply(w));
+		System.out.println("w is " + w);
+		System.out.println("derivative of w is " + negativeLogLikelihoodDerivative.apply(w).toString());
 		log.debug("Finished training the ranker. W-Vector is {}", w);
+		System.out.println("likelihood of this w is " + likelihoodOfParameter(w, dRDataset));
+
+	}
+
+	/**
+	 * Computes the likelihood of the parameter vector w. Algorithm (16) of [1].
+	 * 
+	 * @param w
+	 *            the likelihood to be computed
+	 * @param dataset
+	 *            the dataset on which the likelihood should be evaluated
+	 * @return the likelihood, measured as a probability
+	 */
+	private double likelihoodOfParameter(Vector w, DyadRankingDataset dataset) {
+		int N = dataset.size();
+		double outerProduct = 1.0;
+		for (int n = 0; n < N; n++) {
+			IDyadRankingInstance dyadRankingInstance = (IDyadRankingInstance) dataset.get(n);
+			int M_n = dyadRankingInstance.length();
+			float innerProduct = 1.0f;
+			for (int m = 0; m < M_n; m++) {
+				Dyad dyad = dyadRankingInstance.getDyadAtPosition(m);
+				Vector z_nm = featureTransform.transform(dyad);
+				float en = (float) Math.exp(w.dotProduct(z_nm));
+				float denum_sum = 0;
+				for (int l = m; l < M_n; l++) {
+					Dyad dyad_l = dyadRankingInstance.getDyadAtPosition(l);
+					Vector z_nl = featureTransform.transform(dyad_l);
+					denum_sum += Math.exp(w.dotProduct(z_nl));
+				}
+				innerProduct = innerProduct * (en / denum_sum);
+			}
+
+			outerProduct = outerProduct * innerProduct;
+		}
+		return outerProduct;
 	}
 
 	@Override

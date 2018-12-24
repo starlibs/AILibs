@@ -4,8 +4,8 @@ import java.util.Arrays;
 
 import de.upb.isys.linearalgebra.DenseDoubleVector;
 import de.upb.isys.linearalgebra.Vector;
-import jaicore.ml.dyadranking.optimizing.IGradientDescendableFunction;
-import jaicore.ml.dyadranking.optimizing.IGradientFunction;
+import jaicore.ml.core.optimizing.IGradientDescendableFunction;
+import jaicore.ml.core.optimizing.IGradientFunction;
 
 /**
  * Test data for the parameterized LFBGS test.
