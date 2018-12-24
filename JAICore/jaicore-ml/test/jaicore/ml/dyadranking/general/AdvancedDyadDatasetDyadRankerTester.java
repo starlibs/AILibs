@@ -35,14 +35,14 @@ public class AdvancedDyadDatasetDyadRankerTester {
 
 	@Before
 	public void trainRanker() throws TrainingException {
-		ranker.train(DyadRankingInstanceSupplier.getDyadRankingDataset(10, 1000));
+		ranker.train(DyadRankingInstanceSupplier.getDyadRankingDataset(55, 200));
 	}
 
 	@Test
 	public void testSwapOrdering1() throws PredictionException {
 		System.out.println("Now testing ordering");
 		
-		int maxDyadRankingLength = 10;
+		int maxDyadRankingLength = 4;
 		int nTestInstances = 100;
 		double avgKendallTau = 0;
 		double avgFailures = 0;
@@ -57,7 +57,7 @@ public class AdvancedDyadDatasetDyadRankerTester {
 			for (int i = 1; i < dyadRankingLength; i++) {
 				for (int j = 0; j < i; j++) {
 					if (DyadRankingInstanceSupplier.complexDyadRanker().compare(
-							predict.getDyadAtPosition(j), predict.getDyadAtPosition(i)) < 0) {
+							predict.getDyadAtPosition(j), predict.getDyadAtPosition(i)) <= 0) {
 						nConc++;
 					} else {
 						nDisc++;
@@ -86,7 +86,7 @@ public class AdvancedDyadDatasetDyadRankerTester {
 	}
 
 	@Parameters
-	public static List<ADyadRanker[]> supplyDyadRankers() {
+	public static List<ADyadRanker> supplyDyadRankers() {
 		PLNetDyadRanker ranker1 = new PLNetDyadRanker();
 		ranker1.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_MAX_EPOCHS, "0");
 		ranker1.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_PLNET_HIDDEN_NODES, "6,4,3");

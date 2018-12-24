@@ -1,19 +1,35 @@
 package jaicore.ml.dyadranking.optimizing;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.util.HashMap;
 
+import com.google.common.math.BigIntegerMath;
+
 import de.upb.isys.linearalgebra.Vector;
-import jaicore.ml.core.dataset.IInstance;
+import jaicore.basic.algorithm.IOptimizationAlgorithm;
 import jaicore.ml.dyadranking.Dyad;
 import jaicore.ml.dyadranking.algorithm.IDyadFeatureTransform;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
+import spire.std.BigIntegerAlgebra;
 
 /**
  * Implements the negative log-likelihood function for the feature
  * transformation Placket-Luce dyad ranker.
  * 
- * @author Helena Graf
+ * In particular, this implmentation is the NLL of [1] (we adhere their notation
+ * here). This NLL is a convex function, which we can optimize using an
+ * {@link IOptimizationAlgorithm}, together with the
+ * {@link DyadRankingFeatureTransformNegativeLogLikelihoodDerivative}.
+ * 
+ * 
+ * [1] Schäfer, D. & Hüllermeier, Dyad ranking using Plackett–Luce models based
+ * on joint feature representations,
+ * https://link.springer.com/article/10.1007%2Fs10994-017-5694-9
+ * 
+ * @author Helena Graf, Mirko Jürgens
  *
  */
 public class DyadRankingFeatureTransformNegativeLogLikelihood
@@ -31,23 +47,29 @@ public class DyadRankingFeatureTransformNegativeLogLikelihood
 		this.featureTransform = featureTransform;
 	}
 
+/**
+ * Algorithm (18) of [1]. We adhere their notations, but, unify the sums.
+ */
 	@Override
-	public double apply(Vector vector) {
-		double result = 0;
-
+	public double apply(Vector w) {
 		HashMap<Dyad, Vector> featureTransforms = new HashMap<>();
-		for (IInstance instance : dataset) {
-			for (Dyad dyad : ((IDyadRankingInstance) instance)) {
-				result -= vector.dotProduct(getOrCreateFeatureTransform(dyad, featureTransforms));
-
-				double intermediateResult = 0;
-
-				for (Dyad innerDyad : ((IDyadRankingInstance) instance)) {
-					intermediateResult += Math
-							.exp(vector.dotProduct(getOrCreateFeatureTransform(innerDyad, featureTransforms)));
+		double result = 0;
+		int N = dataset.size();
+		for (int n = 0; n < N; n++) {
+			IDyadRankingInstance instance = dataset.get(n);
+			int M_n = instance.length();
+			for (int m = 0; m < M_n; m++) {
+				Dyad dyad = instance.getDyadAtPosition(m);
+				result -= w.dotProduct(getOrCreateFeatureTransform(dyad, featureTransforms));
+				double innerSum =0;
+				
+				for (int l = m; l < M_n; l++) {
+					Dyad innerDyad = instance.getDyadAtPosition(l);
+					
+					innerSum+= Math
+							.exp(w.dotProduct(getOrCreateFeatureTransform(innerDyad, featureTransforms)));
 				}
-
-				result += Math.log(intermediateResult);
+				result += Math.log(innerSum);
 			}
 		}
 

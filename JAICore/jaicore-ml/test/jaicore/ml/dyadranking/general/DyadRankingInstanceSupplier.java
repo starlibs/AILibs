@@ -23,7 +23,8 @@ public class DyadRankingInstanceSupplier {
 	 * Creates a random {@link jaicore.ml.dyadranking.dataset.DyadRankingInstance}
 	 * consisting of (with 2 alternatives and 2 instances)
 	 * 
-	 * @param maxLength the amount of dyads
+	 * @param maxLength
+	 *            the amount of dyads
 	 * @return random dyad ranking instance of length at most maxLength
 	 */
 	public static DyadRankingInstance getDyadRankingInstance(int maxLength) {
@@ -31,7 +32,7 @@ public class DyadRankingInstanceSupplier {
 		int actualLength = ThreadLocalRandom.current().nextInt(2, maxLength + 1);
 
 		for (int i = 0; i < actualLength; i++) {
-			Dyad dyad = DyadSupplier.getRandomDyad(2, 2);
+			Dyad dyad = DyadSupplier.getRandomDyad(30, 2);
 			dyads.add(dyad);
 		}
 		Comparator<Dyad> comparator = complexDyadRanker();
@@ -55,22 +56,28 @@ public class DyadRankingInstanceSupplier {
 				Vector scoreVecA = d1.getAlternative();
 				Vector scoreVecI2 = d2.getInstance();
 				Vector scoreVecA2 = d2.getAlternative();
-				double score1 = Math.pow(scoreVecI.getValue(0), 2) + Math.pow(scoreVecI.getValue(1), 2)
-						- Math.pow(scoreVecA.getValue(0), 2) - Math.pow(scoreVecA.getValue(1), 2);
-				double score2 = Math.pow(scoreVecI2.getValue(0), 2) + Math.pow(scoreVecI2.getValue(1), 2)
-						- Math.pow(scoreVecA2.getValue(0), 2) - Math.pow(scoreVecA2.getValue(1), 2);
+				double score1 = bilinFunc(scoreVecI, scoreVecA);
+				double score2 = bilinFunc(scoreVecI2, scoreVecA2);
 				return score1 - score2 == 0 ? 0 : (score1 - score2 > 0 ? 1 : -1);
 			}
 		};
 		return comparator;
 	}
 
+	private static final double bilinFunc(Vector scoreVec1, Vector scoreVec2) {
+		// x1 * y1 + x2*y2 + x1*y2 + x2*y1
+		double score = scoreVec1.getValue(0) * scoreVec2.getValue(0) + scoreVec1.getValue(1) * scoreVec2.getValue(1)
+				+ scoreVec1.getValue(0) * scoreVec2.getValue(1) + scoreVec1.getValue(1) * scoreVec2.getValue(0);
+		return Math.exp(score);
+	}
+
 	/**
 	 * 
-	 * @param maxLengthDyadRankingInstance Maximum length of an individual dyad
-	 *                                     ranking instance in the dataset
-	 * @param size                         Number of dyad ranking instances in the
-	 *                                     dataset
+	 * @param maxLengthDyadRankingInstance
+	 *            Maximum length of an individual dyad ranking instance in the
+	 *            dataset
+	 * @param size
+	 *            Number of dyad ranking instances in the dataset
 	 * @return A dyad ranking dataset with random dyads ((with 2 alternatives and 2
 	 *         instances) that are ranked by the ranking function implemented by the
 	 *         {@link Comparator} returned by {@link #complexDyadRanker()}
