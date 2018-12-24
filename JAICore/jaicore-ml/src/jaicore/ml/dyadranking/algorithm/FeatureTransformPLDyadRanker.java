@@ -17,7 +17,6 @@ import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.core.exception.TrainingException;
 import jaicore.ml.core.optimizing.IGradientBasedOptimizer;
 import jaicore.ml.core.optimizing.graddesc.GradientDescentOptimizer;
-import jaicore.ml.core.optimizing.lbfgs.LBFGSOptimizerWrapper;
 import jaicore.ml.core.predictivemodel.IPredictiveModelConfiguration;
 import jaicore.ml.dyadranking.Dyad;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
@@ -45,7 +44,7 @@ import jaicore.ml.dyadranking.optimizing.IDyadRankingFeatureTransformPLGradientF
  */
 public class FeatureTransformPLDyadRanker extends APLDyadRanker {
 
-	private static final Logger log = LoggerFactory.getLogger(APLDyadRanker.class);
+	private static final Logger log = LoggerFactory.getLogger(FeatureTransformPLDyadRanker.class);
 
 	/* Phi in the paper */
 	private IDyadFeatureTransform featureTransform;
@@ -63,7 +62,7 @@ public class FeatureTransformPLDyadRanker extends APLDyadRanker {
 	private IDyadRankingFeatureTransformPLGradientFunction negativeLogLikelihoodDerivative = new DyadRankingFeatureTransformNegativeLogLikelihoodDerivative();
 
 	/* The optimizer used to find w */
-	private IGradientBasedOptimizer optimizer = new LBFGSOptimizerWrapper();
+	private IGradientBasedOptimizer optimizer = new GradientDescentOptimizer();
 
 	/**
 	 * Constructs a new feature transform Placket-Luce dyad ranker with bilinear
@@ -131,20 +130,16 @@ public class FeatureTransformPLDyadRanker extends APLDyadRanker {
 
 		negativeLogLikelihood.initialize(dRDataset, featureTransform);
 		negativeLogLikelihoodDerivative.initialize(dRDataset, featureTransform);
-		int alternativeLength = ((IDyadRankingInstance) dRDataset.get(0)).getDyadAtPosition(0).getAlternative()
-				.length();
-		int instanceLength = ((IDyadRankingInstance) dRDataset.get(0)).getDyadAtPosition(0).getInstance().length();
+		int alternativeLength = dRDataset.get(0).getDyadAtPosition(0).getAlternative().length();
+		int instanceLength = dRDataset.get(0).getDyadAtPosition(0).getInstance().length();
 		Vector initialGuess = new DenseDoubleVector(
 				featureTransform.getTransformedVectorLength(alternativeLength, instanceLength), -0.3);
 		// initialGuess.fillRandomly();
-		System.out.println("likelihood of this the random w is " + likelihoodOfParameter(initialGuess, dRDataset));
-		System.out.println(negativeLogLikelihoodDerivative.apply(initialGuess));
+		log.debug("Likelihood of the randomly filled w is {}", likelihoodOfParameter(initialGuess, dRDataset));
 		w = optimizer.optimize(negativeLogLikelihood, negativeLogLikelihoodDerivative, initialGuess);
-		System.out.println("log lilkelihood is " + negativeLogLikelihood.apply(w));
-		System.out.println("w is " + w);
-		System.out.println("derivative of w is " + negativeLogLikelihoodDerivative.apply(w).toString());
-		log.debug("Finished training the ranker. W-Vector is {}", w);
-		System.out.println("likelihood of this w is " + likelihoodOfParameter(w, dRDataset));
+		log.debug("Finished optimizing, the final w is {}", w);
+		log.debug("Final derivative of w is {}", negativeLogLikelihoodDerivative.apply(w));
+		log.debug("Likelihood of the final w is {}", likelihoodOfParameter(w, dRDataset));
 
 	}
 
@@ -161,7 +156,7 @@ public class FeatureTransformPLDyadRanker extends APLDyadRanker {
 		int N = dataset.size();
 		double outerProduct = 1.0;
 		for (int n = 0; n < N; n++) {
-			IDyadRankingInstance dyadRankingInstance = (IDyadRankingInstance) dataset.get(n);
+			IDyadRankingInstance dyadRankingInstance = dataset.get(n);
 			int M_n = dyadRankingInstance.length();
 			float innerProduct = 1.0f;
 			for (int m = 0; m < M_n; m++) {

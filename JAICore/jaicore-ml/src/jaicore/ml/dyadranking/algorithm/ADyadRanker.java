@@ -1,15 +1,6 @@
 package jaicore.ml.dyadranking.algorithm;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import jaicore.ml.core.dataset.IDataset;
-import jaicore.ml.core.dataset.IInstance;
-import jaicore.ml.core.exception.ConfigurationException;
-import jaicore.ml.core.exception.PredictionException;
-import jaicore.ml.core.exception.TrainingException;
 import jaicore.ml.core.predictivemodel.IBatchLearner;
-import jaicore.ml.core.predictivemodel.IPredictiveModelConfiguration;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 
 /**
