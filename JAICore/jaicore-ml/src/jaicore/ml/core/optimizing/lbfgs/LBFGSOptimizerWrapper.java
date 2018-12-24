@@ -1,4 +1,4 @@
-package jaicore.ml.dyadranking.algorithm.lbfgs;
+package jaicore.ml.core.optimizing.lbfgs;
 
 import java.util.Arrays;
 
@@ -7,9 +7,9 @@ import org.slf4j.LoggerFactory;
 
 import de.upb.isys.linearalgebra.DenseDoubleVector;
 import de.upb.isys.linearalgebra.Vector;
-import jaicore.ml.dyadranking.optimizing.IGradientBasedOptimizer;
-import jaicore.ml.dyadranking.optimizing.IGradientDescendableFunction;
-import jaicore.ml.dyadranking.optimizing.IGradientFunction;
+import jaicore.ml.core.optimizing.IGradientBasedOptimizer;
+import jaicore.ml.core.optimizing.IGradientDescendableFunction;
+import jaicore.ml.core.optimizing.IGradientFunction;
 
 /**
  * Wraps the LBFGS class to our optimizer interface. The LBFGS optimizer
