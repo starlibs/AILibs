@@ -1,5 +1,6 @@
 package hasco.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
@@ -9,7 +10,7 @@ public class Parameter {
 	private final ParameterDomain defaultDomain;
 	private final Object defaultValue;
 
-	
+	@JsonCreator
 	public Parameter(@JsonProperty("name") String name, @JsonProperty("defaultDomain")ParameterDomain defaultDomain,@JsonProperty("defaultValue") Object defaultValue) {
 		super();
 		this.name = name;
