@@ -1,19 +1,13 @@
 package jaicore.ml.dyadranking.optimizing;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.math.RoundingMode;
 import java.util.HashMap;
-
-import com.google.common.math.BigIntegerMath;
 
 import de.upb.isys.linearalgebra.Vector;
 import jaicore.basic.algorithm.IOptimizationAlgorithm;
 import jaicore.ml.dyadranking.Dyad;
-import jaicore.ml.dyadranking.algorithm.IDyadFeatureTransform;
+import jaicore.ml.dyadranking.algorithm.featuretransform.IDyadFeatureTransform;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
-import spire.std.BigIntegerAlgebra;
 
 /**
  * Implements the negative log-likelihood function for the feature

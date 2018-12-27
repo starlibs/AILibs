@@ -14,9 +14,9 @@ import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.core.exception.TrainingException;
 import jaicore.ml.dyadranking.Dyad;
 import jaicore.ml.dyadranking.algorithm.ADyadRanker;
-import jaicore.ml.dyadranking.algorithm.FeatureTransformPLDyadRanker;
 import jaicore.ml.dyadranking.algorithm.IPLNetDyadRankerConfiguration;
 import jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
+import jaicore.ml.dyadranking.algorithm.featuretransform.FeatureTransformPLDyadRanker;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 import jaicore.ml.dyadranking.loss.DyadRankingMLLossFunctionWrapper;
 

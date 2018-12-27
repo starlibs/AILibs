@@ -1,5 +1,6 @@
 package jaicore.ml.core.optimizing.graddesc;
 
+import org.aeonbits.owner.ConfigFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,13 +17,23 @@ import jaicore.ml.core.optimizing.IGradientFunction;
  */
 public class GradientDescentOptimizer implements IGradientBasedOptimizer {
 
-	private static float LEARNING_RATE = 0.008f;
+	private final double learningRate;
 
-	private static final double GRADIENT_THRESHHOLD = 1e-3;
-	
-	private static final int MAX_ITERATIONS = 30;
+	private final double gradientThreshold;
+
+	private final int maxIterations;
 
 	private static final Logger log = LoggerFactory.getLogger(GradientDescentOptimizer.class);
+
+	public GradientDescentOptimizer(GradientDescentOptimizerConfig config) {
+		this.learningRate = config.learningRate();
+		this.gradientThreshold = config.gradientThreshold();
+		this.maxIterations = config.maxIterations();
+	}
+
+	public GradientDescentOptimizer() {
+		this(ConfigFactory.create(GradientDescentOptimizerConfig.class));
+	}
 
 	@Override
 	public Vector optimize(IGradientDescendableFunction descendableFunction, IGradientFunction gradient,
@@ -30,32 +41,30 @@ public class GradientDescentOptimizer implements IGradientBasedOptimizer {
 		int iterations = 0;
 		Vector gradients;
 		do {
-			if (iterations % 10 == 0)
-				LEARNING_RATE = LEARNING_RATE / 2;
 			gradients = gradient.apply(initialGuess);
 			iterations++;
 			updatePredictions(initialGuess, gradients);
-			log.warn("iteration {}; w{} and g {}", iterations, initialGuess, gradients);
-			
-		} while (!allGradientsAreBelowThreshold(gradients) && iterations < MAX_ITERATIONS);
+			log.warn("iteration {}:\n weights \t{} \n gradients \t{}", iterations, initialGuess, gradients);
+
+		} while (!allGradientsAreBelowThreshold(gradients) && iterations < maxIterations);
 		log.warn("Gradient descent based optimization took {} iterations.", iterations);
 		return initialGuess;
 	}
 
 	private boolean allGradientsAreBelowThreshold(Vector gradients) {
-		return gradients.stream().allMatch(grad -> Math.abs(grad) < GRADIENT_THRESHHOLD || !Double.isFinite(grad));
+		return gradients.stream().allMatch(grad -> Math.abs(grad) < gradientThreshold || !Double.isFinite(grad));
 	}
 
 	private void updatePredictions(Vector initialGuess, Vector gradients) {
 		for (int i = 0; i < initialGuess.length(); i++) {
-			float weight = (float) initialGuess.getValue(i);
-			float gradient = (float) gradients.getValue(i);
-			// don't further optimize if we me the threshold
-			if (Math.abs(gradient) < GRADIENT_THRESHHOLD)
+			double weight = initialGuess.getValue(i);
+			double gradient = gradients.getValue(i);
+			// don't further optimize if we meet the threshold
+			if (Math.abs(gradient) < gradientThreshold)
 				continue;
 			// we want to minimize
-			gradient = gradient * -1f;
-			weight = weight + gradient * LEARNING_RATE;
+			gradient = gradient * -1.0;
+			weight = weight + gradient * learningRate;
 			initialGuess.setValue(i, weight);
 		}
 

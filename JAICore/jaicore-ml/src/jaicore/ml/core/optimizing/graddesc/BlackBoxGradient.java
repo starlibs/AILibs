@@ -7,7 +7,7 @@ import jaicore.ml.core.optimizing.IGradientFunction;
 
 /**
  * Difference quotient based gradient estimation. This class will give a
- * black-box gradient estimation by simply clalculating
+ * black-box gradient estimation by simply calculating
  * 
  * (f(x + h) - f(x))/h
  * 
