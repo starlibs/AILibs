@@ -4,7 +4,7 @@ import de.upb.isys.linearalgebra.DenseDoubleVector;
 import de.upb.isys.linearalgebra.Vector;
 import jaicore.ml.core.optimizing.graddesc.BlackBoxGradient;
 import jaicore.ml.dyadranking.Dyad;
-import jaicore.ml.dyadranking.algorithm.IDyadFeatureTransform;
+import jaicore.ml.dyadranking.algorithm.featuretransform.IDyadFeatureTransform;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 
@@ -49,10 +49,9 @@ public class DyadRankingFeatureTransformNegativeLogLikelihoodDerivative
 			function.initialize(dataset, featureTransform);
 			//backup plan: estimate the gradient
 			BlackBoxGradient bbg = new BlackBoxGradient(function, 0.1);
-			Vector gradient = bbg.apply(vector);System.out.println("asdf");
+			Vector gradient = bbg.apply(vector);
 			for (int i = 0; i < vector.length(); i++) {
 				if (!Double.isFinite(result.getValue(i))) {
-					System.out.println("setting to " + gradient.getValue(i));
 					result.setValue(i, gradient.getValue(i));
 				}
 			}
