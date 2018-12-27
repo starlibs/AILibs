@@ -1,4 +1,4 @@
-package jaicore.ml.dyadranking.algorithm;
+package jaicore.ml.dyadranking.algorithm.featuretransform;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +19,7 @@ import jaicore.ml.core.optimizing.IGradientBasedOptimizer;
 import jaicore.ml.core.optimizing.graddesc.GradientDescentOptimizer;
 import jaicore.ml.core.predictivemodel.IPredictiveModelConfiguration;
 import jaicore.ml.dyadranking.Dyad;
+import jaicore.ml.dyadranking.algorithm.APLDyadRanker;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import jaicore.ml.dyadranking.dataset.DyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
@@ -158,12 +159,12 @@ public class FeatureTransformPLDyadRanker extends APLDyadRanker {
 		for (int n = 0; n < N; n++) {
 			IDyadRankingInstance dyadRankingInstance = dataset.get(n);
 			int M_n = dyadRankingInstance.length();
-			float innerProduct = 1.0f;
+			double innerProduct = 1.0;
 			for (int m = 0; m < M_n; m++) {
 				Dyad dyad = dyadRankingInstance.getDyadAtPosition(m);
 				Vector z_nm = featureTransform.transform(dyad);
-				float en = (float) Math.exp(w.dotProduct(z_nm));
-				float denum_sum = 0;
+				double en = Math.exp(w.dotProduct(z_nm));
+				double denum_sum = 0;
 				for (int l = m; l < M_n; l++) {
 					Dyad dyad_l = dyadRankingInstance.getDyadAtPosition(l);
 					Vector z_nl = featureTransform.transform(dyad_l);

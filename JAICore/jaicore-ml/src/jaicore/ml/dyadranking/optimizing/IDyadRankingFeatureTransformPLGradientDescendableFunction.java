@@ -1,7 +1,7 @@
 package jaicore.ml.dyadranking.optimizing;
 
 import jaicore.ml.core.optimizing.IGradientDescendableFunction;
-import jaicore.ml.dyadranking.algorithm.IDyadFeatureTransform;
+import jaicore.ml.dyadranking.algorithm.featuretransform.IDyadFeatureTransform;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 
 /**

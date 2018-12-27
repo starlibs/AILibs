@@ -7,7 +7,7 @@ import org.junit.Test;
 
 import de.upb.isys.linearalgebra.DenseDoubleVector;
 import de.upb.isys.linearalgebra.Vector;
-import jaicore.ml.dyadranking.algorithm.BiliniearFeatureTransform;
+import jaicore.ml.dyadranking.algorithm.featuretransform.BiliniearFeatureTransform;
 import jaicore.ml.dyadranking.general.DyadSupplier;
 
 /**

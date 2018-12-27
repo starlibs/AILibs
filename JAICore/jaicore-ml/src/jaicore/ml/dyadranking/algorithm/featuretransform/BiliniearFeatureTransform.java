@@ -1,4 +1,4 @@
-package jaicore.ml.dyadranking.algorithm;
+package jaicore.ml.dyadranking.algorithm.featuretransform;
 
 import de.upb.isys.linearalgebra.Vector;
 import jaicore.ml.dyadranking.Dyad;
