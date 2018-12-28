@@ -7,33 +7,35 @@ import jaicore.basic.algorithm.AlgorithmProblemTransformer;
 import jaicore.basic.algorithm.IAlgorithm;
 import jaicore.basic.algorithm.IAlgorithmFactory;
 import jaicore.ml.core.dataset.IDataset;
+import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.stratified.sampling.GMeansStratiAmountSelectorAndAssigner;
 import jaicore.ml.core.dataset.sampling.stratified.sampling.StratifiedSampling;
 
-public class StratifiedSamplingGMeansTester extends GeneralSamplingTester {
+public class StratifiedSamplingGMeansTester<I extends IInstance> extends GeneralSamplingTester<I> {
 
 	private static final int RANDOM_SEED = 1;
 
 	@Override
-	public IAlgorithmFactory<IDataset, IDataset> getFactory() {
-		return new IAlgorithmFactory<IDataset, IDataset>() {
+	public IAlgorithmFactory<IDataset<I>, IDataset<I>> getFactory() {
+		return new IAlgorithmFactory<IDataset<I>, IDataset<I>>() {
 
-			private IDataset input;
+			private IDataset<I> input;
 
 			@Override
-			public void setProblemInput(IDataset problemInput) {
+			public void setProblemInput(IDataset<I> problemInput) {
 				this.input = problemInput;
 			}
 
 			@Override
-			public <P> void setProblemInput(P problemInput, AlgorithmProblemTransformer<P, IDataset> reducer) {
+			public <P> void setProblemInput(P problemInput, AlgorithmProblemTransformer<P, IDataset<I>> reducer) {
 				throw new UnsupportedOperationException("Problem input not applicable for subsampling algorithms!");
 			}
 
 			@Override
-			public IAlgorithm<IDataset, IDataset> getAlgorithm() {
-				GMeansStratiAmountSelectorAndAssigner g = new GMeansStratiAmountSelectorAndAssigner(RANDOM_SEED);
-				AAlgorithm<IDataset, IDataset> algorithm = new StratifiedSampling(g, g, new Random(RANDOM_SEED));
+			public IAlgorithm<IDataset<I>, IDataset<I>> getAlgorithm() {
+				GMeansStratiAmountSelectorAndAssigner<I> g = new GMeansStratiAmountSelectorAndAssigner<I>(RANDOM_SEED);
+				AAlgorithm<IDataset<I>, IDataset<I>> algorithm = new StratifiedSampling<I>(g, g,
+						new Random(RANDOM_SEED));
 				if (this.input != null) {
 					algorithm.setInput(input);
 				}
@@ -41,5 +43,5 @@ public class StratifiedSamplingGMeansTester extends GeneralSamplingTester {
 			}
 		};
 	}
-	
+
 }

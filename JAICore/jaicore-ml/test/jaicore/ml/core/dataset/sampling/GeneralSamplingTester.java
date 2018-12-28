@@ -21,7 +21,8 @@ import jaicore.ml.core.dataset.IInstance;
  * @author Felix Weiland
  *
  */
-public abstract class GeneralSamplingTester extends GeneralAlgorithmTester<Object, IDataset, IDataset> {
+public abstract class GeneralSamplingTester<I extends IInstance>
+		extends GeneralAlgorithmTester<Object, IDataset<I>, IDataset<I>> {
 
 	private static final double DEFAULT_SAMPLE_FRACTION = 0.1;
 
@@ -35,7 +36,7 @@ public abstract class GeneralSamplingTester extends GeneralAlgorithmTester<Objec
 	 */
 	@Test
 	public void testSampleSizeSmallProblem() throws Exception {
-		IDataset dataset = this.getSimpleProblemInputForGeneralTestPurposes();
+		IDataset<I> dataset = this.getSimpleProblemInputForGeneralTestPurposes();
 		testSampleSize(dataset, DEFAULT_SAMPLE_FRACTION);
 	}
 
@@ -49,15 +50,15 @@ public abstract class GeneralSamplingTester extends GeneralAlgorithmTester<Objec
 	 */
 	// @Test
 	public void testSampleSizeLargeProblem() throws Exception {
-		IDataset dataset = this.getDifficultProblemInputForGeneralTestPurposes();
+		IDataset<I> dataset = this.getDifficultProblemInputForGeneralTestPurposes();
 		testSampleSize(dataset, DEFAULT_SAMPLE_FRACTION);
 	}
 
-	private void testSampleSize(IDataset dataset, double sampleFraction) {
-		ASamplingAlgorithm samplingAlgorithm = (ASamplingAlgorithm) this.getFactory().getAlgorithm();
+	private void testSampleSize(IDataset<I> dataset, double sampleFraction) {
+		ASamplingAlgorithm<I> samplingAlgorithm = (ASamplingAlgorithm<I>) this.getFactory().getAlgorithm();
 		int sampleSize = (int) (dataset.size() * sampleFraction);
 		samplingAlgorithm.setSampleSize(sampleSize);
-		IDataset sample = getSample(dataset, samplingAlgorithm);
+		IDataset<I> sample = getSample(dataset, samplingAlgorithm);
 
 		assertEquals(sampleSize, sample.size());
 	}
@@ -72,7 +73,7 @@ public abstract class GeneralSamplingTester extends GeneralAlgorithmTester<Objec
 	 */
 	@Test
 	public void testNoDuplicatesSmallProblem() throws Exception {
-		IDataset dataset = this.getSimpleProblemInputForGeneralTestPurposes();
+		IDataset<I> dataset = this.getSimpleProblemInputForGeneralTestPurposes();
 		testNoDuplicates(dataset);
 	}
 
@@ -86,14 +87,14 @@ public abstract class GeneralSamplingTester extends GeneralAlgorithmTester<Objec
 	 */
 	@Test
 	public void testNoDuplicatesLargeProblem() throws Exception {
-		IDataset dataset = this.getDifficultProblemInputForGeneralTestPurposes();
+		IDataset<I> dataset = this.getDifficultProblemInputForGeneralTestPurposes();
 		testNoDuplicates(dataset);
 	}
 
-	private void testNoDuplicates(IDataset dataset) {
-		ASamplingAlgorithm samplingAlgorithm = (ASamplingAlgorithm) this.getFactory().getAlgorithm();
+	private void testNoDuplicates(IDataset<I> dataset) {
+		ASamplingAlgorithm<I> samplingAlgorithm = (ASamplingAlgorithm<I>) this.getFactory().getAlgorithm();
 		samplingAlgorithm.setSampleSize((int) DEFAULT_SAMPLE_FRACTION * dataset.size());
-		IDataset sample = getSample(dataset, samplingAlgorithm);
+		IDataset<I> sample = getSample(dataset, samplingAlgorithm);
 		int sampleSize = sample.size();
 		Set<IInstance> set = new HashSet<>();
 		set.addAll(sample);
@@ -108,17 +109,17 @@ public abstract class GeneralSamplingTester extends GeneralAlgorithmTester<Objec
 	 */
 	@Test
 	public void checkOriginalDataSetNotModified() throws Exception {
-		IDataset dataset = this.getSimpleProblemInputForGeneralTestPurposes();
+		IDataset<I> dataset = this.getSimpleProblemInputForGeneralTestPurposes();
 		int hashCode = dataset.hashCode();
-		ASamplingAlgorithm samplingAlgorithm = (ASamplingAlgorithm) this.getFactory().getAlgorithm();
+		ASamplingAlgorithm<I> samplingAlgorithm = (ASamplingAlgorithm<I>) this.getFactory().getAlgorithm();
 		samplingAlgorithm.setSampleSize((int) DEFAULT_SAMPLE_FRACTION * dataset.size());
 		getSample(dataset, samplingAlgorithm);
 		assertEquals(hashCode, dataset.hashCode());
 	}
 
-	private IDataset getSample(IDataset dataset, ASamplingAlgorithm samplingAlgorithm) {
+	private IDataset<I> getSample(IDataset<I> dataset, ASamplingAlgorithm<I> samplingAlgorithm) {
 		samplingAlgorithm.setInput(dataset);
-		IDataset sample = null;
+		IDataset<I> sample = null;
 		try {
 			sample = samplingAlgorithm.call();
 		} catch (Exception e) {
@@ -132,18 +133,18 @@ public abstract class GeneralSamplingTester extends GeneralAlgorithmTester<Objec
 	}
 
 	@Override
-	public AlgorithmProblemTransformer<Object, IDataset> getProblemReducer() {
+	public AlgorithmProblemTransformer<Object, IDataset<I>> getProblemReducer() {
 		throw new UnsupportedOperationException("Problem reducer not applicable for sampling algorithms!");
 	}
 
 	@Override
-	public IDataset getSimpleProblemInputForGeneralTestPurposes() throws Exception {
+	public IDataset<I> getSimpleProblemInputForGeneralTestPurposes() throws Exception {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public IDataset getDifficultProblemInputForGeneralTestPurposes() throws Exception {
+	public IDataset<I> getDifficultProblemInputForGeneralTestPurposes() throws Exception {
 		// TODO Auto-generated method stub
 		return null;
 	}
