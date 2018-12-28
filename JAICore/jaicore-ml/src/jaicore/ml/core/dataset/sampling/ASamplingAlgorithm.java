@@ -19,7 +19,7 @@ import jaicore.ml.core.dataset.IInstance;
  * @author Felix Weiland
  * @author jnowack
  */
-public abstract class ASamplingAlgorithm <I extends IInstance> extends AAlgorithm<IDataset<I>, IDataset<I>> {
+public abstract class ASamplingAlgorithm<I extends IInstance> extends AAlgorithm<IDataset<I>, IDataset<I>> {
 
 	private static Logger LOG = LoggerFactory.getLogger(ASamplingAlgorithm.class);
 
@@ -34,7 +34,7 @@ public abstract class ASamplingAlgorithm <I extends IInstance> extends AAlgorith
 	public IDataset<I> call() throws Exception {
 		Instant timeoutTime;
 		if (this.getTimeout().milliseconds() <= 0) {
-			LOG.warn("Invalid or no timeout set. There will be no timeout in this algorithm run");
+			LOG.debug("Invalid or no timeout set. There will be no timeout in this algorithm run");
 			timeoutTime = Instant.MAX;
 		} else {
 			timeoutTime = Instant.now().plus(getTimeout().milliseconds(), ChronoUnit.MILLIS);
