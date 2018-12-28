@@ -4,7 +4,6 @@ import java.util.Random;
 
 import org.apache.commons.math3.ml.distance.ManhattanDistance;
 
-import jaicore.basic.algorithm.AAlgorithm;
 import jaicore.basic.algorithm.AlgorithmProblemTransformer;
 import jaicore.basic.algorithm.IAlgorithm;
 import jaicore.basic.algorithm.IAlgorithmFactory;
@@ -17,6 +16,8 @@ import jaicore.ml.core.dataset.sampling.stratified.sampling.StratifiedSampling;
 public class StratifiedSamplingKMeansTester<I extends IInstance> extends GeneralSamplingTester<I> {
 
 	private static final int RANDOM_SEED = 1;
+
+	private static final double DEFAULT_SAMPLE_FRACTION = 0.1;
 
 	@Override
 	public IAlgorithmFactory<IDataset<I>, IDataset<I>> getFactory() {
@@ -37,14 +38,16 @@ public class StratifiedSamplingKMeansTester<I extends IInstance> extends General
 			@Override
 			public IAlgorithm<IDataset<I>, IDataset<I>> getAlgorithm() {
 				KMeansStratiAssigner<I> k = new KMeansStratiAssigner<I>(new ManhattanDistance(), RANDOM_SEED);
-				AAlgorithm<IDataset<I>, IDataset<I>> algorithm = new StratifiedSampling<I>(new IStratiAmountSelector<I>() {
+				ASamplingAlgorithm<I> algorithm = new StratifiedSampling<I>(new IStratiAmountSelector<I>() {
 					@Override
 					public void setNumCPUs(int numberOfCPUs) {
 					}
+
 					@Override
 					public int selectStratiAmount(IDataset<I> dataset) {
 						return dataset.getNumberOfAttributes() * 2;
 					}
+
 					@Override
 					public int getNumCPUs() {
 						return 0;
@@ -52,10 +55,11 @@ public class StratifiedSamplingKMeansTester<I extends IInstance> extends General
 				}, k, new Random(RANDOM_SEED));
 				if (this.input != null) {
 					algorithm.setInput(input);
+					algorithm.setSampleSize((int) DEFAULT_SAMPLE_FRACTION * input.size());
 				}
 				return algorithm;
 			}
 		};
 	}
-	
+
 }

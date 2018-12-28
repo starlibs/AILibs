@@ -2,7 +2,6 @@ package jaicore.ml.core.dataset.sampling;
 
 import java.util.Random;
 
-import jaicore.basic.algorithm.AAlgorithm;
 import jaicore.basic.algorithm.AlgorithmProblemTransformer;
 import jaicore.basic.algorithm.IAlgorithm;
 import jaicore.basic.algorithm.IAlgorithmFactory;
@@ -12,6 +11,8 @@ import jaicore.ml.core.dataset.IInstance;
 public class SimpleRandomSamplingTester<I extends IInstance> extends GeneralSamplingTester<I> {
 
 	private static final long RANDOM_SEED = 1;
+
+	private static final double DEFAULT_SAMPLE_FRACTION = 0.1;
 
 	@Override
 	public IAlgorithmFactory<IDataset<I>, IDataset<I>> getFactory() {
@@ -32,9 +33,10 @@ public class SimpleRandomSamplingTester<I extends IInstance> extends GeneralSamp
 			@Override
 			public IAlgorithm<IDataset<I>, IDataset<I>> getAlgorithm() {
 				Random r = new Random(RANDOM_SEED);
-				AAlgorithm<IDataset<I>, IDataset<I>> algorithm = new SimpleRandomSampling<I>(r);
+				ASamplingAlgorithm<I> algorithm = new SimpleRandomSampling<I>(r);
 				if (this.input != null) {
 					algorithm.setInput(input);
+					algorithm.setSampleSize((int) DEFAULT_SAMPLE_FRACTION * input.size());
 				}
 				return algorithm;
 			}

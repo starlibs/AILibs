@@ -2,7 +2,6 @@ package jaicore.ml.core.dataset.sampling;
 
 import java.util.Random;
 
-import jaicore.basic.algorithm.AAlgorithm;
 import jaicore.basic.algorithm.AlgorithmProblemTransformer;
 import jaicore.basic.algorithm.IAlgorithm;
 import jaicore.basic.algorithm.IAlgorithmFactory;
@@ -14,6 +13,8 @@ import jaicore.ml.core.dataset.sampling.stratified.sampling.StratifiedSampling;
 public class StratifiedSamplingGMeansTester<I extends IInstance> extends GeneralSamplingTester<I> {
 
 	private static final int RANDOM_SEED = 1;
+
+	private static final double DEFAULT_SAMPLE_FRACTION = 0.1;
 
 	@Override
 	public IAlgorithmFactory<IDataset<I>, IDataset<I>> getFactory() {
@@ -34,10 +35,10 @@ public class StratifiedSamplingGMeansTester<I extends IInstance> extends General
 			@Override
 			public IAlgorithm<IDataset<I>, IDataset<I>> getAlgorithm() {
 				GMeansStratiAmountSelectorAndAssigner<I> g = new GMeansStratiAmountSelectorAndAssigner<I>(RANDOM_SEED);
-				AAlgorithm<IDataset<I>, IDataset<I>> algorithm = new StratifiedSampling<I>(g, g,
-						new Random(RANDOM_SEED));
+				ASamplingAlgorithm<I> algorithm = new StratifiedSampling<I>(g, g, new Random(RANDOM_SEED));
 				if (this.input != null) {
 					algorithm.setInput(input);
+					algorithm.setSampleSize((int) DEFAULT_SAMPLE_FRACTION * input.size());
 				}
 				return algorithm;
 			}
