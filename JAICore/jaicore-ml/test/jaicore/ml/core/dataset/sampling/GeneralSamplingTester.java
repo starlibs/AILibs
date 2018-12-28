@@ -59,7 +59,7 @@ public abstract class GeneralSamplingTester<I extends IInstance>
 	 * @param sampleFraction
 	 * @throws Exception
 	 */
-	// @Test
+	@Test
 	public void testSampleSizeLargeProblem() throws Exception {
 		IDataset<I> dataset = this.getDifficultProblemInputForGeneralTestPurposes();
 		testSampleSize(dataset, DEFAULT_SAMPLE_FRACTION);
