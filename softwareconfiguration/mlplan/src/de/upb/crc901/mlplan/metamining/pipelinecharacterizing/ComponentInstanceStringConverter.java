@@ -32,7 +32,7 @@ public class ComponentInstanceStringConverter extends Thread {
 	/**
 	 * The name of the top node for all pipelines
 	 */
-	private String pipelineTreeName = "Pipeline";
+	private String pipelineTreeName = "";
 
 	IOntologyConnector ontologyConnector;
 
@@ -55,9 +55,9 @@ public class ComponentInstanceStringConverter extends Thread {
 		try {
 			wekaLabels.load(fis);
 		} catch (IOException e) {
-			log.warn("Could not load weka labels. We won't replace any strings in the component instance.");
-			// indicates that no properties could be read
-			wekaLabels = null;
+			log.warn("Could not load weka labels.");
+			throw new RuntimeException(e);
+			
 		}
 	}
 
@@ -85,7 +85,7 @@ public class ComponentInstanceStringConverter extends Thread {
 		// Component is pipeline
 		if (pipeline == null) {
 			log.warn("Try to characterize a null pipeline");
-			return "";
+			return null;
 		}
 
 		if (pipeline.getComponent().getName().equals("pipeline")) {
@@ -116,10 +116,12 @@ public class ComponentInstanceStringConverter extends Thread {
 		// if we have a properties file which maps our weka label to integers; use it
 		if (wekaLabels != null) {
 			Pattern p = Pattern.compile(" ");
-			return p.splitAsStream(toReturn).map(s -> wekaLabels.getProperty(s, s))
+			return p.splitAsStream(toReturn).filter(s -> !"".equals(s)).map(s ->wekaLabels.getProperty(s, s))
 					.collect(Collectors.joining(" "));
-		}
-		return toReturn;
+		} else {
+			log.error("Did not find label property mapper.");
+			throw new IllegalStateException();
+		} 
 	}
 
 	/**
@@ -167,8 +169,8 @@ public class ComponentInstanceStringConverter extends Thread {
 				&& componentInstance.getSatisfactionOfRequiredInterfaces().size() > 0) {
 			componentInstance.getSatisfactionOfRequiredInterfaces().forEach((requiredInterface, component) -> {
 				// so far, only have the "K" interface & this has no param so can directly get
-
-				List<String> kernelFunctionCharacterisation = Arrays.asList(requiredInterface);
+				List<String> kernelFunctionCharacterisation = new ArrayList<>();
+				kernelFunctionCharacterisation.add(requiredInterface);
 				kernelFunctionCharacterisation
 						.addAll(ontologyConnector.getAncestorsOfAlgorithm(component.getComponent().getName()));
 				parameters.add(TreeRepresentationUtils.addChildrenToNode(requiredInterface, Arrays
