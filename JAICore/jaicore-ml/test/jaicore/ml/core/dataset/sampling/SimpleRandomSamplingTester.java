@@ -36,7 +36,8 @@ public class SimpleRandomSamplingTester<I extends IInstance> extends GeneralSamp
 				ASamplingAlgorithm<I> algorithm = new SimpleRandomSampling<I>(r);
 				if (this.input != null) {
 					algorithm.setInput(input);
-					algorithm.setSampleSize((int) DEFAULT_SAMPLE_FRACTION * input.size());
+					int sampleSize = (int) (DEFAULT_SAMPLE_FRACTION * (double) input.size());
+					algorithm.setSampleSize(sampleSize);
 				}
 				return algorithm;
 			}
