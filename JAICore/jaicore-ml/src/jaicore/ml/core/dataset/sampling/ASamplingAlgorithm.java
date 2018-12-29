@@ -32,18 +32,20 @@ public abstract class ASamplingAlgorithm<I extends IInstance> extends AAlgorithm
 
 	@Override
 	public IDataset<I> call() throws Exception {
-		Instant timeoutTime;
+		Instant timeoutTime = null;
 		if (this.getTimeout().milliseconds() <= 0) {
 			LOG.debug("Invalid or no timeout set. There will be no timeout in this algorithm run");
 			timeoutTime = Instant.MAX;
 		} else {
 			timeoutTime = Instant.now().plus(getTimeout().milliseconds(), ChronoUnit.MILLIS);
+			LOG.debug("Set timeout to {}", timeoutTime.toString());
 		}
 		// Check missing or invalid configuration.
 		if (sampleSize == null) {
 			throw new Exception("No valid sample size specified");
 		}
 		if (sampleSize == 0) {
+			LOG.warn("Sample size is 0, so an empty data set is returned!");
 			return getInput().createEmpty();
 		}
 		IDataset<I> dataset = this.getInput();
@@ -53,6 +55,7 @@ public abstract class ASamplingAlgorithm<I extends IInstance> extends AAlgorithm
 		if (dataset.size() < this.sampleSize) {
 			throw new Exception("Specified sample size is bigger than the dataset.");
 		} else if (dataset.size() == this.sampleSize) {
+			LOG.warn("Sample size and data set size are equal. Returning the original data set");
 			// The dataset size is exactly the specified sample size, so just return the
 			// whole dataset.
 			return dataset;
