@@ -86,6 +86,6 @@ public class SimpleDyadDatasetDyadRankerTester {
 
 	@Parameters
 	public static List<ADyadRanker> supplyDyadRankers() {
-		return Arrays.asList(new FeatureTransformPLDyadRanker());
+		return Arrays.asList(new FeatureTransformPLDyadRanker(), new PLNetDyadRanker());
 	}
 }
