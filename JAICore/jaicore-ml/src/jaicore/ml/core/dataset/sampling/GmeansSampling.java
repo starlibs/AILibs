@@ -20,8 +20,6 @@ import jaicore.ml.core.dataset.attribute.IAttributeType;
 import jaicore.ml.core.dataset.attribute.IAttributeValue;
 import jaicore.ml.core.dataset.attribute.primitive.NumericAttributeType;
 import jaicore.ml.core.dataset.attribute.primitive.NumericAttributeValue;
-import jaicore.ml.core.dataset.sampling.stratified.sampling.GMeansStratiAmountSelectorAndAssigner;
-import jaicore.ml.core.dataset.sampling.stratified.sampling.StratifiedSampling;
 import jaicore.ml.core.dataset.standard.SimpleDataset;
 import jaicore.ml.core.dataset.standard.SimpleInstance;
 
