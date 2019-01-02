@@ -31,6 +31,7 @@ import weka.classifiers.bayes.NaiveBayes;
 import weka.classifiers.functions.SMO;
 import weka.classifiers.functions.supportVector.PolyKernel;
 import weka.classifiers.lazy.IBk;
+import weka.classifiers.meta.RotationForest;
 import weka.classifiers.meta.Vote;
 import weka.classifiers.trees.J48;
 import weka.classifiers.trees.RandomForest;
@@ -92,25 +93,28 @@ public class ShapeletTransformAlgorithm extends
 
 	private final IQualityMeasure qualityMeasure;
 
+	private static final int MIN_MAX_ESTIMATION_SAMPLES = 10;
+
 	private final int k;
 	private final int seed;
 	private final int noClusters;
 
 	public ShapeletTransformAlgorithm(final int k, final int noClusters, final IQualityMeasure qualityMeasure,
 			final int seed) {
-		// TODO Auto-generated constructor stub
 		this.k = k;
 		this.qualityMeasure = qualityMeasure;
 		this.seed = seed;
 		this.noClusters = noClusters;
 	}
 
+	// Training procedure
 	@Override
 	public ShapeletTransformClassifier call() throws Exception {
 
-		// Training
+		// Extract time series data and the corresponding targets
 		TimeSeriesDataset data = this.getInput();
-
+		if (data == null)
+			throw new IllegalStateException("The time series input data must not be null!");
 		if (data.isMultivariate())
 			throw new UnsupportedOperationException("Multivariate datasets are not supported.");
 
@@ -118,38 +122,64 @@ public class ShapeletTransformAlgorithm extends
 		if (dataMatrix == null || dataMatrix.shape().length != 2)
 			throw new IllegalArgumentException(
 					"Timestamp matrix must be a valid 2D matrix containing the time series values for all instances!");
-
 		final INDArray targetMatrix = data.getTargets();
 
 		// Estimate min and max
+		LOGGER.debug("Starting min max estimation.");
 		int[] minMax = estimateMinMax(dataMatrix, targetMatrix);
 		int min = minMax[0];
 		int max = minMax[1];
+		LOGGER.debug("Finished min max estimation. min={}, max={}", min, max);
 
+		// Determine shapelets
+		LOGGER.debug("Starting cached shapelet selection...");
 		List<Shapelet> shapelets = shapeletCachedSelection(dataMatrix, min, max, this.k, targetMatrix);
+		LOGGER.debug("Finished cached shapelet selection. Extracted {} shapelets.", shapelets.size());
 
+		// Cluster shapelets
+		LOGGER.debug("Starting shapelet clustering...");
 		shapelets = clusterShapelets(shapelets, this.noClusters);
+		this.model.setShapelets(shapelets);
+		LOGGER.debug("Finished shapelet clustering. Staying with {} shapelets.", shapelets.size());
 
+		// Transforming the data using the extracted shapelets
+		LOGGER.debug("Transforming the training data using the extracted shapelets.");
+		TimeSeriesDataset transfTrainingData = shapeletTransform(data, this.model.getShapelets());
+		LOGGER.debug("Finished transforming the training data.");
+
+		// Inititalize Weka ensemble
+		LOGGER.debug("Initializing ensemble classifier...");
 		Classifier classifier = initEnsembleModel();
+		LOGGER.debug("Initialized ensemble classifier.");
 
-		// TODO: Train classifier ensemble
+		// Train Weka ensemble using the data
 		LOGGER.debug("Starting ensemble training...");
-		TimeSeriesUtil.buildWekaClassifierFromTS(classifier, data);
+		TimeSeriesUtil.buildWekaClassifierFromTS(classifier, transfTrainingData);
 		LOGGER.debug("Finished ensemble training.");
 
-		this.model.setShapelets(shapelets);
 		return this.model;
 	}
 
+	/**
+	 * Implements the min max estimation (algorithm 4 in the paper) for an initial
+	 * value used as parameters for the shapelet selection.
+	 * 
+	 * @param data
+	 *            Input data which is sampled from
+	 * @param classes
+	 *            Classes of the input data instances
+	 * @return Returns an int[] object of length 2 storing the min (index 0) and the
+	 *         max (index 1) estimation
+	 */
 	private int[] estimateMinMax(final INDArray data, final INDArray classes) {
 		int[] result = new int[2];
 
 		List<Shapelet> shapelets = new ArrayList<>();
-		for (int i = 0; i < 10; i++) {
-			INDArray tmpMatrix = Nd4j.create(10, data.shape()[1]);
+		for (int i = 0; i < MIN_MAX_ESTIMATION_SAMPLES; i++) {
+			INDArray tmpMatrix = Nd4j.create(MIN_MAX_ESTIMATION_SAMPLES, data.shape()[1]);
 			Random rand = new Random(this.seed);
-			INDArray tmpClasses = Nd4j.create(10);
-			for (int j = 0; j < 10; j++) {
+			INDArray tmpClasses = Nd4j.create(MIN_MAX_ESTIMATION_SAMPLES);
+			for (int j = 0; j < MIN_MAX_ESTIMATION_SAMPLES; j++) {
 				int nextIndex = (int) (rand.nextInt() % data.shape()[0]);
 				tmpMatrix.putRow(j, data.getRow(nextIndex));
 				tmpClasses.putScalar(j, classes.getDouble(nextIndex));
@@ -373,6 +403,10 @@ public class ShapeletTransformAlgorithm extends
 
 		// Rotation forest
 		// TODO
+		RotationForest rotF = new RotationForest();
+		rotF.setSeed(this.seed);
+		rotF.setNumIterations(100);
+		classifier[2] = rotF;
 
 		// NN
 		IBk nn = new IBk();
