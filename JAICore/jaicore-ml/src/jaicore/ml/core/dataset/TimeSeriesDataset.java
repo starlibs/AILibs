@@ -1,12 +1,25 @@
 package jaicore.ml.core.dataset;
 
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
+import java.util.NoSuchElementException;
+
 import org.nd4j.linalg.api.ndarray.INDArray;
+
+import jaicore.ml.core.dataset.attribute.IAttributeType;
+import jaicore.ml.core.dataset.attribute.IAttributeValue;
+import jaicore.ml.core.dataset.attribute.primitive.NumericAttributeType;
+import jaicore.ml.core.dataset.attribute.timeseries.TimeSeriesAttributeType;
 
 /**
  * Time Series Dataset.
  */
-public class TimeSeriesDataset {
+public class TimeSeriesDataset implements IDataset<TimeSeriesInstance> {
 
 	/** Number of instances contained in the dataset. */
 	private long numberOfInstances;
@@ -19,6 +32,16 @@ public class TimeSeriesDataset {
 
 	/** Target values for the instances. */
 	private INDArray targets;
+
+	/**
+	 * Attribute types for the time series variables contained in this dataset.
+	 * These are implicitly created/removed whenever a new timeseries variable (as
+	 * INDArray-matrix) is added to/removed from the dataset. Used to be able to
+	 * reconstruct {@link}TimeSeriesInstances from the stored matrices.
+	 */
+	private List<IAttributeType<?>> attributeTypes;
+
+	private IAttributeType<?> targetType;
 
 	/**
 	 * Creates a TimeSeries dataset. Let `n` be the number of instances.
@@ -37,10 +60,16 @@ public class TimeSeriesDataset {
 		// Parameter checks.
 		// ..
 		this.numberOfInstances = valueMatrices.get(0).shape()[0];
-		this.numberOfInstances = valueMatrices.size();
 		this.valueMatrices = valueMatrices;
 		this.timestampMatrices = timestampMatrices;
 		this.targets = targets;
+		// Create time series attributes types.
+		attributeTypes = new ArrayList<>();
+		for (INDArray valueMatrix : valueMatrices) {
+			createAttributeType(valueMatrix);
+		}
+		// Create target attribute type.
+		targetType = new NumericAttributeType();
 	}
 
 	/**
@@ -59,6 +88,7 @@ public class TimeSeriesDataset {
 		// ..
 		valueMatrices.add(valueMatrix);
 		timestampMatrices.add(timestampMatrix);
+		addAttributeType(valueMatrix);
 	}
 
 	/**
@@ -70,6 +100,7 @@ public class TimeSeriesDataset {
 	public void remove(int index) throws IndexOutOfBoundsException {
 		valueMatrices.remove(index);
 		timestampMatrices.remove(index);
+		attributeTypes.remove(index);
 	}
 
 	/**
@@ -88,6 +119,8 @@ public class TimeSeriesDataset {
 	public void replace(int index, INDArray valueMatrix, INDArray timestampMatrix) throws IndexOutOfBoundsException {
 		valueMatrices.set(index, valueMatrix);
 		timestampMatrices.set(index, timestampMatrix);
+		TimeSeriesAttributeType type = createAttributeType(valueMatrix);
+		attributeTypes.set(index, type);
 	}
 
 	public INDArray getTargets() {
@@ -128,6 +161,92 @@ public class TimeSeriesDataset {
 
 	public boolean isMultivariate() {
 		return valueMatrices.size() > 1;
+	}
+
+	// --
+	// Intern helper functions.
+	// --
+
+	private TimeSeriesAttributeType createAttributeType(INDArray valueMatrix) {
+		int length = (int) valueMatrix.shape()[1];
+		TimeSeriesAttributeType type = new TimeSeriesAttributeType(length);
+		return type;
+	}
+
+	private void addAttributeType(INDArray valueMatrix) {
+		TimeSeriesAttributeType type = createAttributeType(valueMatrix);
+		attributeTypes.add(type);
+	}
+
+	// --
+	// IDataset interface.
+	// --
+
+	/**
+	 * Iterator for the @{@link}TimeSeriesDataset. Iterates and implicitly creates
+	 * the @{link}TimeSeriesInstance.
+	 */
+	class TimeSeriesDatasetIterator implements Iterator<TimeSeriesInstance> {
+
+		int current = 0;
+
+		@Override
+		public boolean hasNext() {
+			return TimeSeriesDataset.this.numberOfInstances > current ? true : false;
+		}
+
+		@Override
+		public TimeSeriesInstance next() {
+			if (!hasNext()) {
+				throw new NoSuchElementException();
+			}
+			// Build attribute value as view on the row of the attribute matrix.
+			List<IAttributeValue<?>> attributeValues = new ArrayList<>();
+			for (int i = 0; i < TimeSeriesDataset.this.valueMatrices.size(); i++) {
+				INDArray viewOnCurrent = TimeSeriesDataset.this.valueMatrices.get(i).getRow(current);
+				IAttributeType<?> type = TimeSeriesDataset.this.attributeTypes.get(i);
+				IAttributeValue<?> value = type.buildAttributeValue(viewOnCurrent);
+				attributeValues.add(value);
+			}
+			// Build target value.
+			double target = TimeSeriesDataset.this.targets.getDouble(current);
+			IAttributeValue<?> targetValue = TimeSeriesDataset.this.targetType.buildAttributeValue(target);
+			// Return time series instance.
+			current++;
+			TimeSeriesInstance instance = new TimeSeriesInstance(attributeValues, targetValue);
+			return instance;
+		}
+
+	}
+
+	@Override
+	public Iterator<TimeSeriesInstance> iterator() {
+		return new TimeSeriesDatasetIterator();
+	}
+
+	@Override
+	public int getNumberOfAttributes() {
+		return attributeTypes.size();
+	}
+
+	@Override
+	public void serialize(OutputStream out) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void deserialize(InputStream in) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public <T> IAttributeType<T> getTargetType(Class<? extends T> clazz) {
+		return (IAttributeType<T>) targetType;
+	}
+
+	@Override
+	public List<IAttributeType<?>> getAttributeTypes() {
+		return attributeTypes;
 	}
 
 }
