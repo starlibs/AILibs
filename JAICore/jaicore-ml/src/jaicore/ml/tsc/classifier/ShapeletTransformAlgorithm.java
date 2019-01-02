@@ -22,10 +22,8 @@ import org.slf4j.LoggerFactory;
 import jaicore.basic.TimeOut;
 import jaicore.basic.algorithm.AlgorithmEvent;
 import jaicore.ml.core.dataset.TimeSeriesDataset;
-import jaicore.ml.core.dataset.TimeSeriesInstance;
 import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
 import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeValue;
-import jaicore.ml.core.dataset.attribute.timeseries.TimeSeriesAttributeType;
 import jaicore.ml.tsc.quality_measures.IQualityMeasure;
 import weka.classifiers.Classifier;
 import weka.classifiers.bayes.NaiveBayes;
@@ -91,13 +89,13 @@ public class ShapeletTransformAlgorithm extends
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ShapeletTransformAlgorithm.class);
 
-	private final IQualityMeasure<String> qualityMeasure;
+	private final IQualityMeasure qualityMeasure;
 
 	private final int k;
 	private final int seed;
 	private final int noClusters;
 
-	public ShapeletTransformAlgorithm(final int k, final int noClusters, final IQualityMeasure<String> qualityMeasure,
+	public ShapeletTransformAlgorithm(final int k, final int noClusters, final IQualityMeasure qualityMeasure,
 			final int seed) {
 		// TODO Auto-generated constructor stub
 		this.k = k;
@@ -108,47 +106,50 @@ public class ShapeletTransformAlgorithm extends
 
 	@Override
 	public ShapeletTransformClassifier call() throws Exception {
-		// TODO Auto-generated method stub
 
 		// Training
 		TimeSeriesDataset data = this.getInput();
-		INDArray dataMatrix = null; // TODO
-		final List<String> classValues = new ArrayList<>();
-		for (TimeSeriesInstance instance : data) {
-			classValues.add(instance.getTargetValue(String.class).getValue());
-		}
-		// Set<String> classValues = ((ICategoricalAttributeType)
-		// data.getTargetType(String.class)).getDomain();
+
+		if (data.isMultivariate())
+			throw new UnsupportedOperationException("Multivariate datasets are not supported.");
+
+		final INDArray dataMatrix = data.getValuesOrNull(0);
+		if (dataMatrix == null || dataMatrix.shape().length != 2)
+			throw new IllegalArgumentException(
+					"Timestamp matrix must be a valid 2D matrix containing the time series values for all instances!");
+
+		final INDArray targetMatrix = data.getTargets();
 
 		// Estimate min and max
-		int[] minMax = estimateMinMax(dataMatrix, classValues);
+		int[] minMax = estimateMinMax(dataMatrix, targetMatrix);
 		int min = minMax[0];
 		int max = minMax[1];
 
-		List<Shapelet> shapelets = shapeletCachedSelection(dataMatrix, min, max, this.k, classValues);
+		List<Shapelet> shapelets = shapeletCachedSelection(dataMatrix, min, max, this.k, targetMatrix);
 
 		shapelets = clusterShapelets(shapelets, this.noClusters);
 
 		Classifier classifier = initEnsembleModel();
 
+		// TODO: Train classifier ensemble
 		// classifier.buildClassifier(data);
 
 		this.model.setShapelets(shapelets);
 		return this.model;
 	}
 
-	private int[] estimateMinMax(final INDArray data, final List<String> classValues) {
+	private int[] estimateMinMax(final INDArray data, final INDArray classes) {
 		int[] result = new int[2];
 
 		List<Shapelet> shapelets = new ArrayList<>();
 		for (int i = 0; i < 10; i++) {
 			INDArray tmpMatrix = Nd4j.create(10, data.shape()[1]);
 			Random rand = new Random(this.seed);
-			List<String> tmpClasses = new ArrayList<>();
+			INDArray tmpClasses = Nd4j.create(10);
 			for (int j = 0; j < 10; j++) {
 				int nextIndex = (int) (rand.nextInt() % data.shape()[0]);
 				tmpMatrix.putRow(j, data.getRow(nextIndex));
-				tmpClasses.add(classValues.get(nextIndex));
+				tmpClasses.putScalar(j, classes.getDouble(nextIndex));
 			}
 
 			shapelets.addAll(shapeletCachedSelection(tmpMatrix, 3, (int) data.shape()[1], 10, tmpClasses));
@@ -229,7 +230,7 @@ public class ShapeletTransformAlgorithm extends
 	}
 
 	private List<Shapelet> shapeletCachedSelection(final INDArray data, final int min, final int max, final int k,
-			final List<String> classValues) {
+			final INDArray classes) {
 		List<Map.Entry<Shapelet, Double>> kShapelets = new ArrayList<>();
 
 		final int numInstances = (int) data.shape()[0];
@@ -240,7 +241,7 @@ public class ShapeletTransformAlgorithm extends
 				Set<Shapelet> W_il = generateCandidates(data.getRow(i), l, i);
 				for (Shapelet s : W_il) {
 					List<Double> D_s = findDistances(s, data);
-					double quality = qualityMeasure.assessQuality(D_s, classValues);
+					double quality = qualityMeasure.assessQuality(D_s, classes);
 					s.setDeterminedQuality(quality);
 					shapelets.add(new AbstractMap.SimpleEntry<>(s, quality));
 				}
@@ -398,8 +399,12 @@ public class ShapeletTransformAlgorithm extends
 	public static TimeSeriesDataset shapeletTransform(final TimeSeriesDataset dataSet, final List<Shapelet> shapelets) {
 
 		// TODO: Deal with multivariate (assuming univariate for now)
-		TimeSeriesAttributeType tsAttType = (TimeSeriesAttributeType) dataSet.getAttributeTypes().get(0);
-		INDArray timeSeries = dataSet.getMatrixForAttributeType(tsAttType);
+		// TimeSeriesAttributeType tsAttType = (TimeSeriesAttributeType)
+		// dataSet.getAttributeTypes().get(0);
+		// INDArray timeSeries = dataSet.getMatrixForAttributeType(tsAttType);
+		INDArray timeSeries = dataSet.getValuesOrNull(0);
+		if (timeSeries == null || timeSeries.shape().length != 2)
+			throw new IllegalArgumentException("Time series matrix must be a valid 2d matrix!");
 
 		INDArray transformedTS = Nd4j.create(timeSeries.shape()[0], shapelets.size());
 
@@ -410,7 +415,7 @@ public class ShapeletTransformAlgorithm extends
 			}
 		}
 
-		dataSet.updateTimeSeriesMatrix(tsAttType, transformedTS);
+		dataSet.replace(0, transformedTS, dataSet.getTimestampsOrNull(0));
 		return dataSet;
 
 	}
