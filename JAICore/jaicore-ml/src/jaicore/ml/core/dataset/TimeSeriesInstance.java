@@ -10,13 +10,6 @@ import jaicore.ml.core.dataset.attribute.IAttributeValue;
  */
 public class TimeSeriesInstance implements IInstance {
 
-    /**
-     * Dataset that this instance is part of. If not null, than the time series
-     * attribute values hold a view on a row of the correnspondig matrix of the
-     * dataset.
-     */
-    TimeSeriesDataset dataset = null;
-
     /** Attribute values of the instance. */
     List<IAttributeValue<?>> attributeValues;
 
@@ -30,16 +23,11 @@ public class TimeSeriesInstance implements IInstance {
      * @param attributeValues
      * @param targetValue
      */
-    public TimeSeriesInstance(final TimeSeriesDataset dataset, final List<IAttributeValue<?>> attributeValues,
-            final IAttributeValue<?> targetValue) {
+    public TimeSeriesInstance(final List<IAttributeValue<?>> attributeValues, final IAttributeValue<?> targetValue) {
         // Set attributes.
-        this.dataset = dataset;
         this.attributeValues = attributeValues;
         this.targetValue = targetValue;
         this.attributeValues = attributeValues;
-        // Add instance to dataset. The dataset sets a view for all
-        // TimeSeriesAttributes of the instance.
-        dataset.add(this);
     }
 
     @Override

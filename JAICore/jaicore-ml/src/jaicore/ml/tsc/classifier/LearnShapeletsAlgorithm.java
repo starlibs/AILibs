@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.api.rng.distribution.Distribution;
@@ -129,16 +131,31 @@ public class LearnShapeletsAlgorithm extends
 		// Training
 
 		TimeSeriesDataset data = this.getInput();
-		INDArray dataMatrix = null; // TODO
 
-		this.I = data.getNumberOfAttributes(); // I
-		this.Q = data.size(); // Q
-		this.C = 0; // TODO: C
+		if (data.isMultivariate())
+			throw new UnsupportedOperationException("Multivariate datasets are not supported.");
 
-		// TODO: Prepare binary classes
+		final INDArray dataMatrix = data.getTimestampsOrNull(0);
+		if (dataMatrix == null || dataMatrix.shape().length != 2)
+			throw new IllegalArgumentException(
+					"Timestamp matrix must be a valid 2D matrix containing the time series values for all instances!");
+
+		final INDArray targetMatrix = data.getTargets();
+		final List<Integer> occuringClasses = DoubleStream.of(targetMatrix.toDoubleVector()).mapToInt(d -> (int) d)
+				.boxed().collect(Collectors.toSet()).stream().collect(Collectors.toList());
+
+		this.I = (int) data.getNumberOfInstances(); // I
+		this.Q = (int) dataMatrix.shape()[1]; // Q
+		this.C = occuringClasses.size(); // C
+
+		// Prepare binary classes
 		INDArray Y = Nd4j.create(this.I, this.C);
+		for (int i = 0; i < this.I; i++) {
+			Integer instanceClass = targetMatrix.getInt(i);
+			Y.putScalar(new int[] { i, occuringClasses.indexOf(instanceClass) }, 1);
+		}
 
-		// TODO: Initialization
+		// Initialization
 		List<INDArray> S = initializeS(dataMatrix);
 		List<INDArray> D = new ArrayList<>();
 		List<INDArray> Xi = new ArrayList<>();
