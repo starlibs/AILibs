@@ -135,7 +135,7 @@ public class LearnShapeletsAlgorithm extends
 		if (data.isMultivariate())
 			throw new UnsupportedOperationException("Multivariate datasets are not supported.");
 
-		final INDArray dataMatrix = data.getTimestampsOrNull(0);
+		final INDArray dataMatrix = data.getValuesOrNull(0);
 		if (dataMatrix == null || dataMatrix.shape().length != 2)
 			throw new IllegalArgumentException(
 					"Timestamp matrix must be a valid 2D matrix containing the time series values for all instances!");
