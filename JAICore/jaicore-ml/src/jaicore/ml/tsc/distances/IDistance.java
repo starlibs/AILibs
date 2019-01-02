@@ -1,5 +1,7 @@
 package jaicore.ml.tsc.distances;
 
+import org.nd4j.linalg.api.ndarray.INDArray;
+
 import jaicore.ml.core.dataset.attribute.timeseries.TimeSeriesAttributeValue;
 import jaicore.ml.tsc.exceptions.TimeSeriesLengthException;
 
@@ -15,6 +17,5 @@ public interface IDistance {
      * @param timeSeries2 Second time series.
      * @return Distance between the first and second time series.
      */
-    public double distance(TimeSeriesAttributeValue timeSeries1, TimeSeriesAttributeValue timeSeries2)
-            throws TimeSeriesLengthException;
+    public double distance(INDArray timeSeries1, INDArray timeSeries2) throws TimeSeriesLengthException;
 }

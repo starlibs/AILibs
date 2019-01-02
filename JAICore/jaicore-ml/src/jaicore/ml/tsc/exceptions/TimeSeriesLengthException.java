@@ -5,7 +5,7 @@ import jaicore.ml.core.exception.CheckedJaicoreMLException;
 /**
  * Exception class encapsultaing faulty behaviour with lenght of time series.
  */
-public class TimeSeriesLengthException extends CheckedJaicoreMLException {
+public class TimeSeriesLengthException extends IllegalArgumentException {
 
     private static final long serialVersionUID = 1L;
 
