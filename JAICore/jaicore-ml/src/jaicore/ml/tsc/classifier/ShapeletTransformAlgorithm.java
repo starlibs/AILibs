@@ -25,6 +25,7 @@ import jaicore.ml.core.dataset.TimeSeriesDataset;
 import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
 import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeValue;
 import jaicore.ml.tsc.quality_measures.IQualityMeasure;
+import jaicore.ml.tsc.util.TimeSeriesUtil;
 import weka.classifiers.Classifier;
 import weka.classifiers.bayes.NaiveBayes;
 import weka.classifiers.functions.SMO;
@@ -132,7 +133,9 @@ public class ShapeletTransformAlgorithm extends
 		Classifier classifier = initEnsembleModel();
 
 		// TODO: Train classifier ensemble
-		// classifier.buildClassifier(data);
+		LOGGER.debug("Starting ensemble training...");
+		TimeSeriesUtil.buildWekaClassifierFromTS(classifier, data);
+		LOGGER.debug("Finished ensemble training.");
 
 		this.model.setShapelets(shapelets);
 		return this.model;
