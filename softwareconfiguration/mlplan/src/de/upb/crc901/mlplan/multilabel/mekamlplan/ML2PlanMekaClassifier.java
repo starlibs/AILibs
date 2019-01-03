@@ -503,5 +503,29 @@ public abstract class ML2PlanMekaClassifier implements Classifier, CapabilitiesH
 	public double getInternalValidationErrorOfSelectedClassifier() {
 		return this.internalValidationErrorOfSelectedClassifier;
 	}
+	
+	@Override
+	public void setDebug(boolean debug) {
+		throw new UnsupportedOperationException("Cannot change log level dynamically for ML2Plan.");
+	}
+
+	@Override
+	public boolean getDebug() {
+		return logger.isDebugEnabled();
+	}
+
+	@Override
+	public String debugTipText() {
+		return "Multilabel Classifier using MLPlan";
+	}
+
+	@Override
+	public String getModel() {
+		if (selectedClassifier != null) {
+			return selectedClassifier.toString();
+		} else {
+			return "No model built yet.";
+		}
+	}
 
 }
