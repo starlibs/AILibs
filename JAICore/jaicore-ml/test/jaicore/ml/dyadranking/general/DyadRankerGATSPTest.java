@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.stat.correlation.KendallsCorrelation;
@@ -21,9 +22,11 @@ import de.upb.isys.linearalgebra.Vector;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.core.exception.TrainingException;
+import jaicore.ml.dyadranking.Dyad;
 import jaicore.ml.dyadranking.algorithm.ADyadRanker;
 import jaicore.ml.dyadranking.algorithm.FeatureTransformPLDyadRanker;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
+import jaicore.ml.dyadranking.dataset.DyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
 
@@ -41,7 +44,6 @@ import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
  * @author Jonas Hanselle
  *
  */
-//@RunWith(Parameterized.class)
 public class DyadRankerGATSPTest {
 
 	private static final String XXL_FILE = "testsrc/ml/dyadranking/ga-tsp/data_meta/GAMeta72-LR.txt";
@@ -61,6 +63,7 @@ public class DyadRankerGATSPTest {
 	public void init() {
 		// load dataset
 		dataset = loadDatasetFromXXLAndCSV(XXL_FILE, ALTERNATIVES_FEATURE_FILE);
+		ranker = new FeatureTransformPLDyadRanker();
 	}
 
 	@Test
@@ -69,10 +72,10 @@ public class DyadRankerGATSPTest {
 		Collections.shuffle(dataset, new Random(seed));
 
 		// split data
-		DyadRankingDataset trainData = (DyadRankingDataset) dataset.subList(0, N);
-		DyadRankingDataset testData = (DyadRankingDataset) dataset.subList(N, dataset.size());
+		DyadRankingDataset trainData = new DyadRankingDataset(dataset.subList(0, N));
+		DyadRankingDataset testData = new DyadRankingDataset(dataset.subList(N, dataset.size()));
 
-		// tirim dyad ranking instances for train data
+		// trim dyad ranking instances for train data
 		trainData = randomlyTrimSparseDyadRankingInstances(trainData, M);
 
 		try {
@@ -80,23 +83,45 @@ public class DyadRankerGATSPTest {
 			// train the ranker
 			ranker.train(trainData);
 			List<IDyadRankingInstance> predictions = ranker.predict(testData);
+			double avgKendallTau = 0.0d;
 
 			// compute average rank correlation
-			DescriptiveStatistics rankCorrelationStats = new DescriptiveStatistics();
-			for (IDyadRankingInstance prediction : predictions) {
-				KendallsCorrelation kendallsCorrelation = new KendallsCorrelation();
-				// TODO computation of loss				
+			for (int testIndex = 0; testIndex < testData.size(); testIndex++) {
+				IDyadRankingInstance testInstance = (IDyadRankingInstance) testData.get(testIndex);
+				IDyadRankingInstance predictionInstance = (IDyadRankingInstance) predictions.get(testIndex);
+
+				int dyadRankingLength = testInstance.length();
+				int nConc = 0;
+				int nDisc = 0;
+
+				// check for all pairs of dyads in the test instance whether their order is the
+				// same in the prediction, assumes that both DyadRankingInstances have the same
+				// dyads and that these dyads are pairwise distinct
+				for (int i = 1; i < dyadRankingLength; i++) {
+					for (int j = 0; j < i; j++) {
+						Dyad followingDyad = testInstance.getDyadAtPosition(i);
+						Dyad leadingDyad = testInstance.getDyadAtPosition(j);
+						int posOfFollowingInPrediction = positionOfDyad(predictionInstance, followingDyad);
+						int posOfLeadingInPrediction = positionOfDyad(predictionInstance, leadingDyad);
+						if (posOfFollowingInPrediction >= posOfLeadingInPrediction) {
+							nConc++;
+						} else {
+							nDisc++;
+						}
+					}
+				}
+				double kendallTau = 2.0 * (nConc - nDisc) / (dyadRankingLength * (dyadRankingLength - 1));
+				avgKendallTau += kendallTau;
 			}
+
+			avgKendallTau /= testData.size();
+
+			System.out.println("Average Kendall's tau: " + avgKendallTau);
 
 		} catch (TrainingException | PredictionException e) {
 			e.printStackTrace();
 		}
 
-	}
-
-	@Parameters
-	public static List<ADyadRanker> supplyParams() {
-		return Arrays.asList(new FeatureTransformPLDyadRanker());
 	}
 
 	/**
@@ -182,7 +207,6 @@ public class DyadRankerGATSPTest {
 			}
 			reader.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return dataset;
@@ -224,5 +248,25 @@ public class DyadRankerGATSPTest {
 			System.out.println("trimmed: " + trimmedDRInstance + "\n\n");
 		}
 		return trimmedDataset;
+	}
+
+	/**
+	 * Return the position of the first occurence of a {@link Dyad} in a
+	 * {@link DyadRankingInstance}. Returns -1 if the dyad is not contained in the
+	 * ranking.
+	 * 
+	 * @param drInstance
+	 * @param dyad
+	 * @return Position of the dyad in the ranking. -1 if it is not contained in the
+	 *         ranking.
+	 */
+	private static int positionOfDyad(IDyadRankingInstance drInstance, Dyad dyad) {
+		int pos = 0;
+		while (!drInstance.getDyadAtPosition(pos).equals(dyad)) {
+			if (pos >= drInstance.length())
+				return -1;
+			pos++;
+		}
+		return pos;
 	}
 }
