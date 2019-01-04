@@ -1,22 +1,8 @@
-plugins {
-	id 'eclipse-wtp'
-}
-
 sourceSets {
     main {
-        java {
-            srcDir 'src'
-        }
         resources {
-        	srcDir 'conf'
         	srcDir 'resources'
     	}
-    }
-    test {
-		java {
-			srcDir 'test'
-			srcDir 'examples'
-		}
     }
 }
 
@@ -36,9 +22,9 @@ dependencies {
 
 
 	// OWL API
-	compile 'net.sourceforge.owlapi:owlapi-distribution:5.1.0'
+	compile 'net.sourceforge.owlapi:owlapi-distribution:5.1.9'
 	// TreeMiner
-	compile 'com.github.helegraf:TreeMiner:-SNAPSHOT'
+	compile 'com.github.helegraf:TreeMiner:df764c7b13'
 	// linear algebra
 	compile group: 'org.nd4j', name: 'nd4j-native-platform', version: '0.9.1'
 	compile group: 'org.nd4j', name: 'nd4j-api', version: '0.9.1'
@@ -50,6 +36,10 @@ dependencies {
 	  exclude group: 'org.apache.logging.log4j', module: 'log4j-core'
 	  exclude group: 'org.apache.logging.log4j', module: 'log4j-api'
 	}
+
+	testCompile project(path: ':JAICore:jaicore-search', configuration: 'testArtifacts')
+	
+	compile group: 'org.apache.commons', name: 'commons-math', version: '2.1'
 	
 }
 
