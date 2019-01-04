@@ -81,6 +81,6 @@ public interface IPLNetDyadRankerConfiguration extends IPredictiveModelConfigura
 	
 	@Key(K_EARLY_STOPPING_TRAIN_RATIO)
 	@DefaultValue("0.8")
-	public int plNetEarlyStoppingTrainRatio();
+	public double plNetEarlyStoppingTrainRatio();
 
 }
