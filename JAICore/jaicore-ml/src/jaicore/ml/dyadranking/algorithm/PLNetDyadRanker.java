@@ -361,7 +361,7 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 		if (plNet == null) {
 			throw new IllegalStateException("Cannot save untrained model.");
 		}
-		File locationToSave = new File("filePath" + ".zip");
+		File locationToSave = new File(filePath + ".zip");
 		ModelSerializer.writeModel(plNet, locationToSave, true);
 	}
 
