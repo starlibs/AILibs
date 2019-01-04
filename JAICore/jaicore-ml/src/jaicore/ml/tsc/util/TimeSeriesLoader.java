@@ -183,7 +183,7 @@ public class TimeSeriesLoader {
 					if (line.startsWith(ARFF_DATA_FLAG)) {
 						readData = true;
 						numInstances = fileLinesCount - lineCounter + 1;
-						matrix = Nd4j.create(numInstances, attributeCount);
+						matrix = Nd4j.create(numInstances, targetSet ? attributeCount - 1 : attributeCount);
 						targetMatrix = Nd4j.create(numInstances);
 						lineCounter = 0;
 
@@ -194,7 +194,7 @@ public class TimeSeriesLoader {
 					if (!line.equals("")) {
 						// Read the data
 						String[] values = line.split(ARFF_VALUE_DELIMITER);
-						double[] dValues = new double[values.length];
+						double[] dValues = new double[targetSet ? values.length - 1 : values.length];
 						for (int i = 0; i < values.length - 1; i++) {
 							dValues[i] = Double.parseDouble(values[i]);
 						}
