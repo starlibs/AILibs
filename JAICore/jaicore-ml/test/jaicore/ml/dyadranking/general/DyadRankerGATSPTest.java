@@ -63,6 +63,7 @@ public class DyadRankerGATSPTest {
 	public void init() {
 		// load dataset
 		dataset = loadDatasetFromXXLAndCSV(XXL_FILE, ALTERNATIVES_FEATURE_FILE);
+		// TODO differenct rankers
 		ranker = new FeatureTransformPLDyadRanker();
 	}
 
@@ -158,8 +159,6 @@ public class DyadRankerGATSPTest {
 			e.printStackTrace();
 		}
 
-		System.out.println(alternativeFeatures.size());
-
 		// parse XXL file
 		File xxlFile = new File(filePathXXL);
 		int numAttributes = 0;
@@ -179,8 +178,6 @@ public class DyadRankerGATSPTest {
 					break;
 				}
 			}
-			System.out.println("numAttributes: " + numAttributes);
-			System.out.println("numLabels: " + numLabels);
 
 			// skip two lines
 			reader.readLine();
@@ -244,8 +241,6 @@ public class DyadRankerGATSPTest {
 			SparseDyadRankingInstance trimmedDRInstance = new SparseDyadRankingInstance(
 					drInstance.getDyadAtPosition(0).getInstance(), trimmedAlternatives);
 			trimmedDataset.add(trimmedDRInstance);
-			System.out.println("original: " + drInstance);
-			System.out.println("trimmed: " + trimmedDRInstance + "\n\n");
 		}
 		return trimmedDataset;
 	}
