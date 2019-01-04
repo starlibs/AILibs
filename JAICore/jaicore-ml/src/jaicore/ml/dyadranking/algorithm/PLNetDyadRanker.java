@@ -106,6 +106,7 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 		}
 
 		currentBestScore = Double.POSITIVE_INFINITY;
+		currentBestModel = this.plNet;
 		epoch = 0;
 		iteration = 0;
 		int patience = 0;
@@ -120,7 +121,7 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 			log.debug("plNet params: {}", plNet.params().toString());
 			earlyStoppingCounter++;
 			// Compute validation error
-			if (earlyStoppingCounter == configuration.plNetEarlyStoppingInterval()) {
+			if (earlyStoppingCounter == configuration.plNetEarlyStoppingInterval() && configuration.plNetEarlyStoppingTrainRatio() < 1.0) {
 				double avgScore = computeAvgError(drTest);
 				if (avgScore < currentBestScore) {
 					currentBestScore = avgScore;

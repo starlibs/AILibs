@@ -90,7 +90,11 @@ public class AdvancedDyadDatasetDyadRankerTester {
 		PLNetDyadRanker ranker1 = new PLNetDyadRanker();
 		ranker1.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_MAX_EPOCHS, "0");
 		ranker1.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_PLNET_HIDDEN_NODES, "6,4,3");
-		System.out.println(ranker1.getConfiguration());
-		return Arrays.asList(new PLNetDyadRanker[] {ranker1},new PLNetDyadRanker[] { new PLNetDyadRanker()}, new FeatureTransformPLDyadRanker[] {new FeatureTransformPLDyadRanker()});
+		PLNetDyadRanker ranker2 = new PLNetDyadRanker();
+		ranker2.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_MAX_EPOCHS, "10");
+		ranker2.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_TRAIN_RATIO, "1.0");
+		ranker2.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_PLNET_HIDDEN_NODES, "8,4");
+		
+		return Arrays.asList(new PLNetDyadRanker[] {ranker1}, new PLNetDyadRanker[] {ranker2}, new PLNetDyadRanker[] { new PLNetDyadRanker()}, new FeatureTransformPLDyadRanker[] {new FeatureTransformPLDyadRanker()});
 	}
 }
