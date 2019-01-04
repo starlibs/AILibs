@@ -4,12 +4,8 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.apache.commons.math3.stat.descriptive.moment.Mean;
-import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
-
 import jaicore.basic.algorithm.AlgorithmEvent;
 import jaicore.basic.algorithm.AlgorithmFinishedEvent;
-import jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.AlgorithmState;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
@@ -37,10 +33,12 @@ public class StratifiedSampling<I extends IInstance> extends ASamplingAlgorithm<
 	/**
 	 * Constructor for Stratified Sampling.
 	 * 
-	 * @param stratiAmountSelector The custom selector for the used amount of
-	 *                             strati.
-	 * @param stratiAssigner       Custom logic to assign datapoints into strati.
-	 * @param random               Random object for sampling inside of the strati.
+	 * @param stratiAmountSelector
+	 *            The custom selector for the used amount of strati.
+	 * @param stratiAssigner
+	 *            Custom logic to assign datapoints into strati.
+	 * @param random
+	 *            Random object for sampling inside of the strati.
 	 */
 	public StratifiedSampling(IStratiAmountSelector<I> stratiAmountSelector, IStratiAssigner<I> stratiAssigner,
 			Random random) {
@@ -64,9 +62,8 @@ public class StratifiedSampling<I extends IInstance> extends ASamplingAlgorithm<
 			}
 			this.simpleRandomSamplingStarted = false;
 			this.stratiAssigner.init(this.datasetCopy, this.strati.length);
-			this.setState(AlgorithmState.active);
 			this.executorService = Executors.newCachedThreadPool();
-			return new AlgorithmInitializedEvent();
+			return this.activate();
 		case active:
 			if (this.sample.size() < this.sampleSize) {
 				if (this.datasetCopy.size() >= 1) {
@@ -101,14 +98,13 @@ public class StratifiedSampling<I extends IInstance> extends ASamplingAlgorithm<
 					}
 				}
 			} else {
-				this.setState(AlgorithmState.inactive);
-				return new AlgorithmFinishedEvent();
+				return this.terminate();
 			}
 		case inactive: {
 			if (this.sample.size() < this.sampleSize) {
 				throw new Exception("Expected sample size was not reached before termination");
 			} else {
-				return new AlgorithmFinishedEvent();
+				return this.terminate();
 			}
 		}
 		default:

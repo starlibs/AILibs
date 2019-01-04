@@ -4,9 +4,6 @@ import java.util.Comparator;
 import java.util.Random;
 
 import jaicore.basic.algorithm.AlgorithmEvent;
-import jaicore.basic.algorithm.AlgorithmFinishedEvent;
-import jaicore.basic.algorithm.AlgorithmInitializedEvent;
-import jaicore.basic.algorithm.AlgorithmState;
 import jaicore.ml.core.dataset.IInstance;
 
 /**
@@ -42,7 +39,8 @@ public class SystematicSampling<I extends IInstance> extends ASamplingAlgorithm<
 	/**
 	 * Simple constructor that uses the default datapoint comparator.
 	 * 
-	 * @param random Random Object for determining the sampling start point.
+	 * @param random
+	 *            Random Object for determining the sampling start point.
 	 */
 	public SystematicSampling(Random random) {
 		this.random = random;
@@ -51,9 +49,10 @@ public class SystematicSampling<I extends IInstance> extends ASamplingAlgorithm<
 	/**
 	 * Constructor for a custom datapoint comparator.
 	 * 
-	 * @param random              Random Object for determining the sampling start
-	 *                            point.
-	 * @param datapointComparator Comparator to sort the dataset.
+	 * @param random
+	 *            Random Object for determining the sampling start point.
+	 * @param datapointComparator
+	 *            Comparator to sort the dataset.
 	 */
 	public SystematicSampling(Random random, Comparator<IInstance> datapointComparator) {
 		this.random = random;
@@ -70,8 +69,7 @@ public class SystematicSampling<I extends IInstance> extends ASamplingAlgorithm<
 			this.startIndex = this.random.nextInt(this.getInput().size());
 			this.k = (int) Math.floor(this.getInput().size() / this.sampleSize);
 			this.index = 0;
-			this.setState(AlgorithmState.active);
-			return new AlgorithmInitializedEvent();
+			return this.activate();
 		case active:
 			// If the sample size is not reached yet, add the next datapoint from the
 			// systematic sampling method.
@@ -80,14 +78,13 @@ public class SystematicSampling<I extends IInstance> extends ASamplingAlgorithm<
 				this.sample.add(this.getInput().get(e));
 				return new SampleElementAddedEvent();
 			} else {
-				this.setState(AlgorithmState.inactive);
-				return new AlgorithmFinishedEvent();
+				return this.terminate();
 			}
 		case inactive: {
 			if (this.sample.size() < this.sampleSize) {
 				throw new Exception("Expected sample size was not reached before termination");
 			} else {
-				return new AlgorithmFinishedEvent();
+				return this.terminate();
 			}
 		}
 		default:

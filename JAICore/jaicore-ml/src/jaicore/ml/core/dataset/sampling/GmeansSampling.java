@@ -9,9 +9,6 @@ import org.apache.commons.math3.ml.distance.DistanceMeasure;
 import org.apache.commons.math3.ml.distance.ManhattanDistance;
 
 import jaicore.basic.algorithm.AlgorithmEvent;
-import jaicore.basic.algorithm.AlgorithmFinishedEvent;
-import jaicore.basic.algorithm.AlgorithmInitializedEvent;
-import jaicore.basic.algorithm.AlgorithmState;
 import jaicore.ml.clustering.GMeans;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
@@ -32,16 +29,16 @@ import jaicore.ml.core.dataset.standard.SimpleInstance;
  * @author jnowack
  *
  */
-public class GmeansSampling <I extends IInstance> extends ASamplingAlgorithm<I> {
+public class GmeansSampling<I extends IInstance> extends ASamplingAlgorithm<I> {
 
 	private GMeans<I> gMeansCluster;
 	private List<CentroidCluster<I>> clusterResults;
 	private int currentCluster = 0;
 
 	private DistanceMeasure distanceMeassure = new ManhattanDistance();
-	
+
 	private long seed;
-	
+
 	/**
 	 * Implementation of a sampling method using gmeans-clustering.
 	 */
@@ -60,10 +57,9 @@ public class GmeansSampling <I extends IInstance> extends ASamplingAlgorithm<I> 
 			gMeansCluster = new GMeans<I>(getInput(), distanceMeassure, seed);
 			clusterResults = gMeansCluster.cluster();
 
-			this.setState(AlgorithmState.active);
-			return new AlgorithmInitializedEvent();
+			return this.activate();
 		case active:
-			if(currentCluster < clusterResults.size()) {
+			if (currentCluster < clusterResults.size()) {
 				CentroidCluster<I> cluster = clusterResults.get(currentCluster++);
 				boolean same = true;
 				for (int i = 1; i < cluster.getPoints().size(); i++) {
@@ -76,9 +72,9 @@ public class GmeansSampling <I extends IInstance> extends ASamplingAlgorithm<I> 
 				if (same) {
 					I near = cluster.getPoints().get(0);
 					double dist = Double.MAX_VALUE;
-					for(I p : cluster.getPoints()) {
+					for (I p : cluster.getPoints()) {
 						double newDist = distanceMeassure.compute(p.getPoint(), cluster.getCenter().getPoint());
-						if(newDist < dist ) {
+						if (newDist < dist) {
 							near = p;
 							dist = newDist;
 						}
@@ -91,32 +87,31 @@ public class GmeansSampling <I extends IInstance> extends ASamplingAlgorithm<I> 
 					}
 				}
 				return new SampleElementAddedEvent();
-			}else {
-				this.setState(AlgorithmState.inactive);	
-				return new AlgorithmFinishedEvent();
+			} else {
+				return this.terminate();
 			}
 		case inactive: {
 			if (this.sample.size() < this.sampleSize) {
 				throw new Exception("Expected sample size was not reached before termination");
 			} else {
-				return new AlgorithmFinishedEvent();
+				return this.terminate();
 			}
 		}
 		default:
 			throw new IllegalStateException("Unknown algorithm state " + this.getState());
 		}
 	}
-	
+
 	public static void main(String[] args) throws Exception {
 		Random rand = new Random(42);
-		
+
 		ArrayList<IAttributeType<?>> types = new ArrayList<>();
 		types.add(new NumericAttributeType());
 		types.add(new NumericAttributeType());
 		types.add(new NumericAttributeType());
-		
+
 		SimpleDataset ds = new SimpleDataset(new InstanceSchema(types, new NumericAttributeType()));
-		
+
 		// fill instances
 		for (int i = 0; i < 10000; i++) {
 			ArrayList<IAttributeValue<?>> values = new ArrayList<>();
@@ -125,27 +120,21 @@ public class GmeansSampling <I extends IInstance> extends ASamplingAlgorithm<I> 
 			values.add(new NumericAttributeValue(new NumericAttributeType(), rand.nextDouble()));
 			ds.add(new SimpleInstance(values, new NumericAttributeValue(new NumericAttributeType(), 12.0)));
 		}
-		
-		//GMeansStratiAmountSelectorAndAssigner<SimpleInstance> gm = new GMeansStratiAmountSelectorAndAssigner<>(45);
-		
+
+		// GMeansStratiAmountSelectorAndAssigner<SimpleInstance> gm = new
+		// GMeansStratiAmountSelectorAndAssigner<>(45);
+
 		ASamplingAlgorithm<SimpleInstance> sampling = new GmeansSampling<SimpleInstance>(45);
 		sampling.setInput(ds);
 		sampling.setSampleSize(1000);
-		
+
 		IDataset<SimpleInstance> dsOut = sampling.call();
-		
+
 		System.out.println("Size: " + dsOut.size());
 		for (SimpleInstance sam : dsOut) {
 			System.out.println(sam);
 		}
-		
-		
-		
-		
-		
+
 	}
-	
-	
-	
-	
+
 }
