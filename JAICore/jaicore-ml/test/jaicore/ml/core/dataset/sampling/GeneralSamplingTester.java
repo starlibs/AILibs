@@ -134,8 +134,7 @@ public abstract class GeneralSamplingTester<I extends IInstance>
 		try {
 			sample = samplingAlgorithm.call();
 		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Sampling algorithm was not able to compute a sample: ");
+			throw new RuntimeException("Sampling algorithm was not able to compute a sample", e);
 		}
 		if (sample == null) {
 			fail("Sample is null!");
