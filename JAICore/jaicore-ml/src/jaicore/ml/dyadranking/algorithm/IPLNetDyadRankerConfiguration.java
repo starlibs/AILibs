@@ -1,6 +1,5 @@
 package jaicore.ml.dyadranking.algorithm;
 
-import java.io.File;
 import java.util.List;
 
 import org.aeonbits.owner.Config.Sources;

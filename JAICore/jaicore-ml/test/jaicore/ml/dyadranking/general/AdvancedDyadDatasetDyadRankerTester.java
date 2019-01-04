@@ -1,20 +1,14 @@
 package jaicore.ml.dyadranking.general;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import de.upb.isys.linearalgebra.DenseDoubleVector;
-import de.upb.isys.linearalgebra.Vector;
 import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.core.exception.TrainingException;
 import jaicore.ml.dyadranking.Dyad;
@@ -22,10 +16,7 @@ import jaicore.ml.dyadranking.algorithm.ADyadRanker;
 import jaicore.ml.dyadranking.algorithm.FeatureTransformPLDyadRanker;
 import jaicore.ml.dyadranking.algorithm.IPLNetDyadRankerConfiguration;
 import jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
-import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
-import jaicore.ml.dyadranking.dataset.DyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
-import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
 
 /**
  * Class that runs a simple functionality check on all dyad rankers.
