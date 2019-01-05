@@ -2,6 +2,7 @@ package jaicore.ml.core.dataset.sampling;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,13 +63,14 @@ public abstract class ASamplingAlgorithm<I extends IInstance> extends AAlgorithm
 		} else {
 			// Working configuration, so create the actual sample.
 			while (this.hasNext()) {
+				checkTermination();
 				if (Instant.now().isAfter(timeoutTime)) {
+					LOG.warn("Algorithm is running even though it has been timeouted. Cancelling..");
 					this.cancel();
+					throw new TimeoutException();
+				} else {
+					this.next();
 				}
-				if (this.isCanceled()) {
-					throw new InterruptedException("Subsampling not finished");
-				}
-				this.next();
 			}
 			return sample;
 		}
