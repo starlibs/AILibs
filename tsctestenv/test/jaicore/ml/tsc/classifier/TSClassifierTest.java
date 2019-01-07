@@ -17,6 +17,8 @@ import jaicore.ml.WekaUtil;
 import jaicore.ml.core.dataset.TimeSeriesDataset;
 import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
 import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeValue;
+import jaicore.ml.core.dataset.attribute.primitive.NumericAttributeType;
+import jaicore.ml.core.dataset.attribute.primitive.NumericAttributeValue;
 import jaicore.ml.core.exception.EvaluationException;
 import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.core.exception.TrainingException;
@@ -81,7 +83,7 @@ public class TSClassifierTest {
 	 * @throws PredictionException
 	 */
 	public static Map<String, Object> compareClassifier(final Classifier tsRefClassifier,
-			final TSClassifier<CategoricalAttributeType, CategoricalAttributeValue, TimeSeriesDataset> tsClassifier,
+			final TSClassifier<?, ?, TimeSeriesDataset> tsClassifier,
 			final int seed,
 			final double trainingPortion, final String tsRefClassifierParams, final String tsClassifierParams,
 			final File... arffFiles)
@@ -92,7 +94,8 @@ public class TSClassifierTest {
 		result.put("dataset", reduceFileNames(arffFiles));
 
 		trainAndEvaluateRefClassifier(tsRefClassifier, seed, trainingPortion, tsRefClassifierParams, result, arffFiles);
-		trainAndEvaluateClassifier(tsClassifier, seed, trainingPortion, tsClassifierParams, result, arffFiles);
+		trainAndEvaluateClassifier(tsClassifier, seed, trainingPortion, tsClassifierParams, result,
+				arffFiles);
 
 		return result;
 	}
@@ -131,7 +134,8 @@ public class TSClassifierTest {
 	 */
 	public static Map<String, Object> compareClassifier(
 			final sfa.classification.Classifier tsRefClassifier,
-			final TSClassifier<CategoricalAttributeType, CategoricalAttributeValue, TimeSeriesDataset> tsClassifier, final int seed,
+			final TSClassifier<?, ?, TimeSeriesDataset> tsClassifier,
+			final int seed,
 			final double trainingPortion, final String tsRefClassifierParams, final String tsClassifierParams,
 			final File... arffFiles) throws TrainingException, PredictionException {
 		final Map<String, Object> result = new HashMap<>();
@@ -139,7 +143,8 @@ public class TSClassifierTest {
 		result.put("dataset", reduceFileNames(arffFiles));
 
 		trainAndEvaluateRefClassifier(tsRefClassifier, seed, trainingPortion, tsRefClassifierParams, result, arffFiles);
-		trainAndEvaluateClassifier(tsClassifier, seed, trainingPortion, tsClassifierParams, result, arffFiles);
+		trainAndEvaluateClassifier(tsClassifier, seed, trainingPortion, tsClassifierParams, result,
+				arffFiles);
 
 		return result;
 	}
@@ -170,7 +175,7 @@ public class TSClassifierTest {
 	 * @throws PredictionException 
 	 */
 	private static void trainAndEvaluateClassifier(
-			final TSClassifier<CategoricalAttributeType, CategoricalAttributeValue, TimeSeriesDataset> tsClassifier, final int seed,
+			final TSClassifier<?, ?, TimeSeriesDataset> tsClassifier, final int seed,
 			final double trainingPortion, final String tsClassifierParams, final Map<String, Object> result,
 			final File... arffFiles) throws TrainingException, PredictionException {
 
@@ -208,14 +213,27 @@ public class TSClassifierTest {
 		LOGGER.debug("Starting evaluation of classifier...");
 		timeStart = System.currentTimeMillis();
 
-		CategoricalAttributeType targetType = tsClassifier.getTargetType();
-		List<CategoricalAttributeValue> predictions = tsClassifier.predict(test);
+		List<?> predictions = tsClassifier.predict(test);
 		int totalPreds = predictions.size();
 		int correct = 0;
-		for (int i=0; i<totalPreds; i++) {
-			CategoricalAttributeValue prediction = predictions.get(i);
-			if (targetType.getDomain().indexOf(prediction.getValue()) == test.getTargets().getInt(i))
-				correct++;
+
+		if (tsClassifier.getTargetType().getClass() != test.getTargetType().getClass())
+			throw new PredictionException("Can not evaluate classifier due to wrong target type.");
+
+		if (tsClassifier.getTargetType() instanceof CategoricalAttributeType) {
+			CategoricalAttributeType targetType = (CategoricalAttributeType) tsClassifier.getTargetType();
+
+			for (int i = 0; i < totalPreds; i++) {
+				CategoricalAttributeValue prediction = (CategoricalAttributeValue) predictions.get(i);
+				if (targetType.getDomain().indexOf(prediction.getValue()) == test.getTargets().getInt(i))
+					correct++;
+			}
+		} else if(tsClassifier.getTargetType() instanceof NumericAttributeType) {
+			for (int i = 0; i < totalPreds; i++) {
+				NumericAttributeValue prediction = (NumericAttributeValue) predictions.get(i);
+				if (prediction.getValue().intValue() == test.getTargets().getDouble(i))
+					correct++;
+			}
 		}
 			
 		double accuracy = (double) correct / totalPreds;
