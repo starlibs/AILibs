@@ -3,13 +3,13 @@ package jaicore.search.testproblems.enhancedttsp;
 import jaicore.basic.algorithm.AlgorithmProblemTransformer;
 import jaicore.graph.LabeledGraph;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
-import jaicore.search.model.probleminputs.NumberBasedAdditiveTraversalTree;
-import jaicore.search.model.probleminputs.NumberBasedAdditiveTraversalTree.EdgeCostComputer;
+import jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePathEvaluation;
+import jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePathEvaluation.EdgeCostComputer;
 
-public class EnhancedTTSPAdditiveGraphReducer implements AlgorithmProblemTransformer<EnhancedTTSP, NumberBasedAdditiveTraversalTree<EnhancedTTSPNode, String>> {
+public class EnhancedTTSPAdditiveGraphReducer implements AlgorithmProblemTransformer<EnhancedTTSP, GraphSearchWithNumberBasedAdditivePathEvaluation<EnhancedTTSPNode, String>> {
 
 	@Override
-	public NumberBasedAdditiveTraversalTree<EnhancedTTSPNode, String> transform(EnhancedTTSP problem) {
+	public GraphSearchWithNumberBasedAdditivePathEvaluation<EnhancedTTSPNode, String> transform(EnhancedTTSP problem) {
 
 		/* define g */
 		EdgeCostComputer<EnhancedTTSPNode> g = (from, to) -> to.getPoint().getTime() - from.getPoint().getTime();
@@ -30,6 +30,6 @@ public class EnhancedTTSPAdditiveGraphReducer implements AlgorithmProblemTransfo
 			return hVal;
 		};
 
-		return new NumberBasedAdditiveTraversalTree<>(problem.getGraphGenerator(), g, h);
+		return new GraphSearchWithNumberBasedAdditivePathEvaluation<>(problem.getGraphGenerator(), g, h);
 	}
 }

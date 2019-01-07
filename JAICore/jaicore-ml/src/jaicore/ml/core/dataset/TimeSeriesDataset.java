@@ -3,10 +3,8 @@ package jaicore.ml.core.dataset;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.NoSuchElementException;
 
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -240,13 +238,19 @@ public class TimeSeriesDataset implements IDataset<TimeSeriesInstance> {
 	}
 
 	@Override
-	public <T> IAttributeType<T> getTargetType(Class<? extends T> clazz) {
+	public <T> IAttributeType<T> getTargetType(Class<T> clazz) {
 		return (IAttributeType<T>) targetType;
 	}
 
 	@Override
 	public List<IAttributeType<?>> getAttributeTypes() {
 		return attributeTypes;
+	}
+
+	@Override
+	public IAttributeType<?> getTargetType() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

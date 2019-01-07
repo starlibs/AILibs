@@ -9,6 +9,7 @@ import hasco.model.ComponentInstance;
 import hasco.model.Parameter;
 import hasco.model.ParameterRefinementConfiguration;
 import hasco.serialization.ComponentLoader;
+import hasco.serialization.UnresolvableRequiredInterfaceException;
 import jaicore.basic.IObjectEvaluator;
 
 /**
@@ -21,7 +22,7 @@ import jaicore.basic.IObjectEvaluator;
 public class RefinementConfiguredSoftwareConfigurationProblem<V extends Comparable<V>> extends SoftwareConfigurationProblem<V> {
 	private final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig;
 
-	public RefinementConfiguredSoftwareConfigurationProblem(File configurationFile, String requiredInterface, IObjectEvaluator<ComponentInstance, V> compositionEvaluator) throws IOException {
+	public RefinementConfiguredSoftwareConfigurationProblem(File configurationFile, String requiredInterface, IObjectEvaluator<ComponentInstance, V> compositionEvaluator) throws IOException, UnresolvableRequiredInterfaceException {
 		super(configurationFile, requiredInterface, compositionEvaluator);
 		this.paramRefinementConfig = new ComponentLoader(configurationFile).getParamConfigs();
 	}

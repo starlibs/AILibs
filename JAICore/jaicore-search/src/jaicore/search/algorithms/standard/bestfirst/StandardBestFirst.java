@@ -1,10 +1,10 @@
 package jaicore.search.algorithms.standard.bestfirst;
 
-import jaicore.search.model.probleminputs.GeneralEvaluatedTraversalTree;
+import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 
-public class StandardBestFirst<N,A,V extends Comparable<V>> extends BestFirst<GeneralEvaluatedTraversalTree<N, A, V>, N, A, V> {
+public class StandardBestFirst<N,A,V extends Comparable<V>> extends BestFirst<GraphSearchWithSubpathEvaluationsInput<N, A, V>, N, A, V> {
 
-	public StandardBestFirst(GeneralEvaluatedTraversalTree<N, A, V> problem) {
+	public StandardBestFirst(GraphSearchWithSubpathEvaluationsInput<N, A, V> problem) {
 		super(problem);
 	}
 }

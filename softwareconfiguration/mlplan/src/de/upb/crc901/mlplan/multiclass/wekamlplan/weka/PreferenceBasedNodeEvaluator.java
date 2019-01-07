@@ -23,7 +23,7 @@ public class PreferenceBasedNodeEvaluator implements INodeEvaluator<TFDNode, Dou
 	}
 
 	@Override
-	public Double f(final Node<TFDNode, ?> n) throws Exception {
+	public Double f(final Node<TFDNode, ?> n) {
 		List<String> appliedMethods = new LinkedList<>();
 		boolean last = false;
 		for (TFDNode x : n.externalPath()) {
