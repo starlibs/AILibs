@@ -8,7 +8,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +15,10 @@ import org.slf4j.LoggerFactory;
 import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.ml.WekaUtil;
 import jaicore.ml.core.dataset.TimeSeriesDataset;
+import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
+import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeValue;
 import jaicore.ml.core.exception.EvaluationException;
+import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.core.exception.TrainingException;
 import jaicore.ml.tsc.exceptions.TimeSeriesLoadingException;
 import jaicore.ml.tsc.util.TimeSeriesLoader;
@@ -76,11 +78,14 @@ public class TSClassifierTest {
 	 *             Will be thrown if the given classifier could not be evaluated
 	 * @throws TrainingException
 	 *             Will be thrown if the given classifier could not be trained
+	 * @throws PredictionException
 	 */
-	public static <TARGETTYPE, TARGETVALUETYPE> Map<String, Object> compareClassifier(final Classifier tsRefClassifier,
-			final TSClassifier<TARGETTYPE, TARGETVALUETYPE, TimeSeriesDataset> tsClassifier, final int seed,
+	public static Map<String, Object> compareClassifier(final Classifier tsRefClassifier,
+			final TSClassifier<CategoricalAttributeType, CategoricalAttributeValue, TimeSeriesDataset> tsClassifier,
+			final int seed,
 			final double trainingPortion, final String tsRefClassifierParams, final String tsClassifierParams,
-			final File... arffFiles) throws FileNotFoundException, EvaluationException, TrainingException, IOException {
+			final File... arffFiles)
+			throws FileNotFoundException, EvaluationException, TrainingException, IOException, PredictionException {
 
 		final Map<String, Object> result = new HashMap<>();
 		result.put("seed", seed);
@@ -122,12 +127,13 @@ public class TSClassifierTest {
 	 *         database
 	 * @throws TrainingException
 	 *             Will be thrown if the given classifier could not be trained
+	 * @throws PredictionException
 	 */
-	public static <TARGETTYPE, TARGETVALUETYPE> Map<String, Object> compareClassifier(
+	public static Map<String, Object> compareClassifier(
 			final sfa.classification.Classifier tsRefClassifier,
-			final TSClassifier<TARGETTYPE, TARGETVALUETYPE, TimeSeriesDataset> tsClassifier, final int seed,
+			final TSClassifier<CategoricalAttributeType, CategoricalAttributeValue, TimeSeriesDataset> tsClassifier, final int seed,
 			final double trainingPortion, final String tsRefClassifierParams, final String tsClassifierParams,
-			final File... arffFiles) throws TrainingException {
+			final File... arffFiles) throws TrainingException, PredictionException {
 		final Map<String, Object> result = new HashMap<>();
 		result.put("seed", seed);
 		result.put("dataset", reduceFileNames(arffFiles));
@@ -161,11 +167,12 @@ public class TSClassifierTest {
 	 *            (assumes univariate dataset, if only one file is given)
 	 * @throws TrainingException
 	 *             Will be thrown if training of <code>tsClassifier</code> fails
+	 * @throws PredictionException 
 	 */
-	private static <TARGETTYPE, TARGETVALUETYPE> void trainAndEvaluateClassifier(
-			final TSClassifier<TARGETTYPE, TARGETVALUETYPE, TimeSeriesDataset> tsClassifier, final int seed,
+	private static void trainAndEvaluateClassifier(
+			final TSClassifier<CategoricalAttributeType, CategoricalAttributeValue, TimeSeriesDataset> tsClassifier, final int seed,
 			final double trainingPortion, final String tsClassifierParams, final Map<String, Object> result,
-			final File... arffFiles) throws TrainingException {
+			final File... arffFiles) throws TrainingException, PredictionException {
 
 		result.put("classifier", tsClassifier.getClass().getSimpleName());
 		result.put("classifier_params", tsClassifierParams);
@@ -202,11 +209,22 @@ public class TSClassifierTest {
 		timeStart = System.currentTimeMillis();
 
 		// TODO: Evaluate
+		CategoricalAttributeType targetType = tsClassifier.getTargetType();
+		List<CategoricalAttributeValue> predictions = tsClassifier.predict(test);
+		int totalPreds = predictions.size();
+		int correct = 0;
+		for (int i=0; i<totalPreds; i++) {
+			CategoricalAttributeValue prediction = predictions.get(i);
+			if (targetType.getDomain().indexOf(prediction.getValue()) == test.getTargets().getInt(i))
+				correct++;
+		}
+			
+		double accuracy = (double) correct / totalPreds;
 
 		final long evaluationEnd = System.currentTimeMillis();
-		LOGGER.debug("Finished evaluation of classifier. Took {} ms. Accuracy: {}", (evaluationEnd - timeStart), null);
+		LOGGER.debug("Finished evaluation of classifier. Took {} ms. Accuracy: {}", (evaluationEnd - timeStart), accuracy);
 		result.put("ref_eval_time", (evaluationEnd - timeStart));
-		result.put("ref_accuracy", null);
+		result.put("ref_accuracy", accuracy);
 	}
 
 	/**
@@ -255,7 +273,7 @@ public class TSClassifierTest {
 		ArffReader arffReader = new ArffReader(new FileReader(arffFiles[0]));
 		final Instances wekaInstances = arffReader.getData();
 		wekaInstances.setClassIndex(wekaInstances.numAttributes() - 1);
-		List<Instances> split = WekaUtil.getStratifiedSplit(wekaInstances, new Random(seed), trainingPortion);
+		List<Instances> split = WekaUtil.getStratifiedSplit(wekaInstances, seed, trainingPortion);
 
 		// Training
 		LOGGER.debug("Starting training of reference classifier...");
