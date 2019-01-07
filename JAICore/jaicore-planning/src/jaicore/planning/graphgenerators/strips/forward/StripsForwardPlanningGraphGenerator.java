@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.sound.midi.Synthesizer;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -117,7 +115,7 @@ public class StripsForwardPlanningGraphGenerator implements GraphGenerator<Strip
 				else if (returnedActions.containsKey(node)) {
 					assert !returnedActions.get(node).isEmpty();
 					assert unreturnedActions.get(node).isEmpty();
-					System.out.println("Generating " + (returnedActions.get(node).size() + 1) + "-th successor of " + node);
+					logger.debug("Generating {}th successor of {}", returnedActions.get(node).size() + 1, node);
 					
 					/* memorize the actions already generated, generate all successors (re-generating the known ones), and update the stats about returned and unreturned actions */
 					List<StripsAction> returnedSolutionBak = new ArrayList<>(returnedActions.get(node));
@@ -147,7 +145,7 @@ public class StripsForwardPlanningGraphGenerator implements GraphGenerator<Strip
 //						returnedActions.get(node).clear();
 //						assert completelyExpandedNodes.contains(node);
 //						if (unreturnedActions.get(node).isEmpty())
-						System.out.println("Apparently, the node has no successors.");
+						logger.debug("Apparently, the node {} has no successors.", node);
 						return null;
 //						action = unreturnedActions.get(node).get(i % unreturnedActions.get(node).size());
 					}

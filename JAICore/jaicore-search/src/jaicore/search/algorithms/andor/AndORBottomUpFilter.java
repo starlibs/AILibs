@@ -1,7 +1,6 @@
 package jaicore.search.algorithms.andor;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -13,8 +12,6 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.lowagie.tools.Executable;
 
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.IObjectEvaluator;
@@ -30,7 +27,6 @@ import jaicore.graph.IGraphAlgorithm;
 import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
 import jaicore.search.core.interfaces.GraphGenerator;
-import jaicore.search.model.other.EvaluatedSearchGraphPath;
 import jaicore.search.model.travesaltree.NodeExpansionDescription;
 import jaicore.search.model.travesaltree.NodeType;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
