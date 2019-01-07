@@ -27,7 +27,8 @@ import jaicore.logic.fol.structure.LiteralParam;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.logic.fol.structure.VariableParam;
 import jaicore.logic.fol.theories.EvaluablePredicate;
-import jaicore.logic.fol.util.LogicUtil;
+import jaicore.logic.fol.util.ForwardChainer;
+import jaicore.logic.fol.util.ForwardChainingProblem;
 import jaicore.planning.model.ceoc.CEOCAction;
 import jaicore.planning.model.ceoc.CEOCOperation;
 import jaicore.planning.model.core.Action;
@@ -296,8 +297,22 @@ public class TaskPlannerUtil {
 
 	private Collection<Map<VariableParam, LiteralParam>> getMappingsThatMatchTasksAndMakesItApplicable(CNFFormula knowledge, Literal methodOrPrimitiveTask, Literal target,
 			Monom preconditionOfMethodOrPrimitive, Monom state) {
-		
+		assert preconditionOfMethodOrPrimitive != null : "precondition of methode or primitive task " + methodOrPrimitiveTask + " is null";
 		logger.info("Now computing the possible applications of method {} for task {}", methodOrPrimitiveTask, target);
+		
+		/* if no precondition is to be matched, just match the params and return this binding */
+		if (preconditionOfMethodOrPrimitive.isEmpty()) {
+			int numParams = target.getParameters().size();
+			Map<VariableParam, LiteralParam> grounding = new HashMap<>();
+			for (int i = 0; i < numParams; i++) {
+				VariableParam paramOfPreconditionLiteral = (VariableParam)methodOrPrimitiveTask.getParameters().get(i);
+				LiteralParam targetParam = target.getParameters().get(i);
+				grounding.put(paramOfPreconditionLiteral, targetParam);
+			}
+			Collection<Map<VariableParam, LiteralParam>> groundings = new ArrayList<>();
+			groundings.add(grounding);
+			return groundings;
+		}
 
 		/* consistency check */
 		if (!methodOrPrimitiveTask.getPropertyName().equals(target.getPropertyName()))
@@ -355,8 +370,8 @@ public class TaskPlannerUtil {
 				/* now create the part of the grounding of the METHOD related to params NOT occurring in the task. if no such exists, consider just one empty completion */
 				Monom positiveRequirements = new Monom(preconditionOfMethodOrPrimitive.stream().filter(l -> l.isPositive()).collect(Collectors.toList()),
 						groundingForMethodOrPrimitiveTask);
-
-				final Collection<Map<VariableParam, LiteralParam>> restMaps = LogicUtil.getSubstitutionsThatEnableForwardChaining(unitedKnowledge, positiveRequirements);
+				ForwardChainer fc = new ForwardChainer(new ForwardChainingProblem(unitedKnowledge, positiveRequirements, true));
+				final Collection<Map<VariableParam, LiteralParam>> restMaps = fc.call();
 				if (restMaps.isEmpty())
 					restMaps.add(new HashMap<>());
 

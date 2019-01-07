@@ -1,6 +1,7 @@
 package jaicore.ml.evaluation.evaluators.weka;
 
 import jaicore.basic.IObjectEvaluator;
+import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.concurrent.TimeoutTimer;
 import weka.classifiers.Classifier;
 
@@ -26,7 +27,7 @@ public class TimeoutableEvaluator implements IClassifierEvaluator {
 	}
 
 	@Override
-	public Double evaluate(final Classifier object) throws Exception {
+	public Double evaluate(final Classifier object) throws ObjectEvaluationFailedException  {
 		int timeoutTaskID = TimeoutTimer.getInstance().getSubmitter().interruptMeAfterMS(this.timeoutInMS);
 		Double returnValue = 30000.0;
 		try {
@@ -36,7 +37,7 @@ public class TimeoutableEvaluator implements IClassifierEvaluator {
 		} catch (Throwable e) {
 			//
 			if (!e.getMessage().contains("Killed WEKA") && !e.getMessage().contains("Bag size needs")) {
-				throw e;
+				throw new ObjectEvaluationFailedException(e, "Error");
 			}
 		} finally {
 			TimeoutTimer.getInstance().getSubmitter().cancelTimeout(timeoutTaskID);

@@ -7,10 +7,10 @@ import hasco.core.HASCOFactory;
 import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionReducer;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.search.algorithms.standard.bestfirst.BestFirstFactory;
-import jaicore.search.model.probleminputs.GeneralEvaluatedTraversalTree;
+import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 import jaicore.search.problemtransformers.GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS;
 
-public class HASCOViaFDAndBestFirstWithRandomCompletionsFactory extends HASCOFactory<GeneralEvaluatedTraversalTree<TFDNode, String, Double>, TFDNode, String, Double> {
+public class HASCOViaFDAndBestFirstWithRandomCompletionsFactory extends HASCOFactory<GraphSearchWithSubpathEvaluationsInput<TFDNode, String, Double>, TFDNode, String, Double> {
 	
 	private Predicate<TFDNode> priorizingPredicate;
 	

@@ -48,8 +48,12 @@ public class ExperimentRunner {
 	private int cpuLimit;
 	private int totalNumberOfExperiments;
 
-	public ExperimentRunner(final IExperimentSetEvaluator conductor) {
+	/**
+	 * This flag indicates whether the given memory limit deviates from the actually available memory.
+	 */
+	private boolean cond_memoryLimitCheck = false;
 
+	public ExperimentRunner(final IExperimentSetEvaluator conductor) {
 		/* check data base configuration */
 		this.config = conductor.getConfig();
 		if (this.config.getDBHost() == null) {
@@ -67,28 +71,34 @@ public class ExperimentRunner {
 		if (this.config.getDBTableName() == null) {
 			throw new IllegalArgumentException("DB table must not be null in experiment config.");
 		}
-		if (this.config.getKeyFields() == null)
+		if (this.config.getKeyFields() == null) {
 			throw new IllegalArgumentException("Key fields (keyfields) entry must be set in configuration!");
-		if (this.config.getResultFields() == null)
+		}
+		if (this.config.getResultFields() == null) {
 			throw new IllegalArgumentException("Result fields (resultfields) entry must be set in configuration!");
-		
+		}
+
 		this.fieldsForWhichToIgnoreMemory = (this.config.getFieldsForWhichToIgnoreMemory() != null) ? this.config.getFieldsForWhichToIgnoreMemory() : new ArrayList<>();
 		this.fieldsForWhichToIgnoreTime = (this.config.getFieldsForWhichToIgnoreTime() != null) ? this.config.getFieldsForWhichToIgnoreTime() : new ArrayList<>();
 
 		this.conductor = conductor;
 		this.adapter = new SQLAdapter(this.config.getDBHost(), this.config.getDBUsername(), this.config.getDBPassword(), this.config.getDBDatabaseName(), this.config.getDBSSL());
-		this.updateExperimentSetupAccordingToConfig();
 	}
 
 	private void updateExperimentSetupAccordingToConfig() {
-		this.memoryLimit = (int) (Runtime.getRuntime().maxMemory() / 1024 / 1024);
-		if (this.memoryLimit != this.config.getMemoryLimitinMB()) {
-			System.err.println("The true memory limit is " + this.memoryLimit + ", which differs from the " + this.config.getMemoryLimitinMB() + " specified in the config! We will write " + this.memoryLimit + " into the database.");
+		if (this.cond_memoryLimitCheck) {
+			this.memoryLimit = (int) (Runtime.getRuntime().maxMemory() / 1024 / 1024);
+			if (this.memoryLimit != this.config.getMemoryLimitinMB()) {
+				System.err.println("The true memory limit is " + this.memoryLimit + ", which differs from the " + this.config.getMemoryLimitinMB() + " specified in the config! We will write " + this.memoryLimit + " into the database.");
+			}
+		} else {
+			this.memoryLimit = this.config.getMemoryLimitinMB();
 		}
+
 		this.cpuLimit = this.config.getNumberOfCPUs();
 		int numExperiments = 1;
 		try {
-			
+
 			/* create map of possible values for each key field */
 			for (String key : this.config.getKeyFields()) {
 				/* this is a hack needed because one cannot retrieve generic configs */
@@ -149,14 +159,15 @@ public class ExperimentRunner {
 			queryStringSB.append(")");
 		}
 
-		ResultSet rs = this.adapter.getPreparedStatement(queryStringSB.toString()).executeQuery();
-		while (rs.next()) {
-			Map<String, String> keyValues = new HashMap<>();
-			for (String key : this.config.getKeyFields()) {
-				String dbKey = this.getDatabaseFieldnameForConfigEntry(key);
-				keyValues.put(dbKey, rs.getString(dbKey));
+		try (ResultSet rs = this.adapter.getPreparedStatement(queryStringSB.toString()).executeQuery()) {
+			while (rs.next()) {
+				Map<String, String> keyValues = new HashMap<>();
+				for (String key : this.config.getKeyFields()) {
+					String dbKey = this.getDatabaseFieldnameForConfigEntry(key);
+					keyValues.put(dbKey, rs.getString(dbKey));
+				}
+				experimentEntries.add(new ExperimentDBEntry(rs.getInt(FIELD_ID), new Experiment(rs.getInt(FIELD_MEMORY + "_max"), rs.getInt(FIELD_NUMCPUS), keyValues)));
 			}
-			experimentEntries.add(new ExperimentDBEntry(rs.getInt(FIELD_ID), new Experiment(rs.getInt(FIELD_MEMORY + "_max"), rs.getInt(FIELD_NUMCPUS), keyValues)));
 		}
 		return experimentEntries;
 	}
@@ -241,6 +252,8 @@ public class ExperimentRunner {
 	}
 
 	public void randomlyConductExperiments(final int maxNumberOfExperiments, final boolean reload) {
+		this.updateExperimentSetupAccordingToConfig();
+
 		if (this.totalNumberOfExperiments <= 0) {
 			System.out.println("Number of total experiments is 0");
 			return;
@@ -267,6 +280,10 @@ public class ExperimentRunner {
 			}
 		}
 
+	}
+
+	public void randomlyConductExperiments(final boolean reload) {
+		this.randomlyConductExperiments(-1, reload);
 	}
 
 	/**
@@ -343,7 +360,14 @@ public class ExperimentRunner {
 		this.adapter.update(sql.toString(), new String[] {});
 	}
 
-	public void randomlyConductExperiments(final boolean reload) {
-		this.randomlyConductExperiments(-1, reload);
+	/**
+	 * This method can be used to toggle the check of the memory limit. If the check is active (default or doCheck == true), the memory actually available in this runtime will be taken as an entry for the memory limit.
+	 *
+	 * @param doCheck
+	 *            A flag whether the check shall be performed or not. If doCheck is true, the check will be performed and the actually available memory in this runtime environment will be written to the database. Otherwise, the memory limit
+	 *            specified in the configuration file will be written to the database.
+	 */
+	public void setConditionMemoryLimitCheck(final boolean doCheck) {
+		this.cond_memoryLimitCheck = doCheck;
 	}
 }

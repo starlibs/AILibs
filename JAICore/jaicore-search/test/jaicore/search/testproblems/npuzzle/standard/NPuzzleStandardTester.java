@@ -9,19 +9,18 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.google.common.eventbus.Subscribe;
 
-import jaicore.basic.algorithm.AlgorithmEvent;
-import jaicore.basic.algorithm.AlgorithmFinishedEvent;
-import jaicore.basic.algorithm.AlgorithmInitializedEvent;
-import jaicore.graph.IGraphAlgorithmListener;
-import jaicore.graphvisualizer.gui.VisualizationWindow;
+import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
+import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import jaicore.search.algorithms.standard.ORGraphSearchTester;
 import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.GraphSearchSolutionCandidateFoundEvent;
 import jaicore.search.core.interfaces.IGraphSearch;
 import jaicore.search.core.interfaces.IGraphSearchFactory;
+import jaicore.search.model.other.SearchGraphPath;
+import jaicore.search.probleminputs.GraphSearchInput;
 
-public abstract class NPuzzleStandardTester<I, O, VSearch, ESearch> extends ORGraphSearchTester<NPuzzleProblem, I, O, NPuzzleNode, String, Double, VSearch, ESearch>
-		implements IGraphAlgorithmListener<VSearch, ESearch> {
+public abstract class NPuzzleStandardTester<I extends GraphSearchInput<NPuzzleNode, String>, O extends SearchGraphPath<NPuzzleNode, String>, VSearch, ESearch> extends ORGraphSearchTester<NPuzzleProblem, I, O, NPuzzleNode, String, VSearch, ESearch> {
 
 	private final static int SEED = 0;
 	private int max_n = 4;
@@ -29,8 +28,8 @@ public abstract class NPuzzleStandardTester<I, O, VSearch, ESearch> extends ORGr
 	private AtomicInteger seenSolutions = new AtomicInteger(0);
 	private boolean showGraphs = false;
 
-	private IGraphSearch<I, O, NPuzzleNode, String, Double, VSearch, ESearch> getSearch(int n, int seed) {
-		IGraphSearchFactory<I, O, NPuzzleNode, String, Double, VSearch, ESearch> factory = getFactory();
+	private IGraphSearch<I, O, NPuzzleNode, String, VSearch, ESearch> getSearch(int n, int seed) {
+		IGraphSearchFactory<I, O, NPuzzleNode, String, VSearch, ESearch> factory = getFactory();
 		factory.setProblemInput(new NPuzzleProblem(n, seed), getProblemReducer());
 		return factory.getAlgorithm();
 	}
@@ -39,10 +38,8 @@ public abstract class NPuzzleStandardTester<I, O, VSearch, ESearch> extends ORGr
 	public void testThatIteratorReturnsEachPossibleSolution() {
 		for (int n = 3; n <= max_n; n++) {
 			System.out.print("Checking first 100 solutions of " + n + "-puzzle ... ");
-			IGraphSearch<I,O,NPuzzleNode, String, Double, VSearch, ESearch> search = getSearch(n, SEED);
+			IGraphSearch<I,O,NPuzzleNode, String, VSearch, ESearch> search = getSearch(n, SEED);
 			assertNotNull("The factory has not returned any search object.", search);
-			if (showGraphs)
-				new VisualizationWindow<>(search);
 			boolean initialized = false;
 			boolean terminated = false;
 			int solutions = 0;

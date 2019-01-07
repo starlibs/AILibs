@@ -2,9 +2,11 @@ package hasco.core;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeoutException;
 
 import hasco.model.ComponentInstance;
 import jaicore.basic.IObjectEvaluator;
+import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 
 public class TimeRecordingEvaluationWrapper<V extends Comparable<V>> implements IObjectEvaluator<ComponentInstance, V> {
 
@@ -17,7 +19,7 @@ public class TimeRecordingEvaluationWrapper<V extends Comparable<V>> implements 
 	}
 
 	@Override
-	public V evaluate(ComponentInstance object) throws Exception {
+	public V evaluate(ComponentInstance object) throws TimeoutException, InterruptedException, ObjectEvaluationFailedException {
 		long start = System.currentTimeMillis();
 		V score = baseEvaluator.evaluate(object);
 		long end = System.currentTimeMillis();

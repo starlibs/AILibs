@@ -1,12 +1,14 @@
 package jaicore.search.algorithms.standard.bestfirst;
 
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
+import jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory;
 import jaicore.search.core.interfaces.StandardORGraphSearchFactory;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
-import jaicore.search.model.probleminputs.GeneralEvaluatedTraversalTree;
 import jaicore.search.model.travesaltree.Node;
+import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 
-public class BestFirstFactory<P extends GeneralEvaluatedTraversalTree<N, A, V>, N, A, V extends Comparable<V>> extends StandardORGraphSearchFactory<P, EvaluatedSearchGraphPath<N, A, V>,N, A, V, Node<N,V>, A> {
+public class BestFirstFactory<P extends GraphSearchWithSubpathEvaluationsInput<N, A, V>, N, A, V extends Comparable<V>> extends StandardORGraphSearchFactory<P, EvaluatedSearchGraphPath<N, A, V>, N, A, V, Node<N, V>, A>
+		implements IOptimalPathInORGraphSearchFactory<P, N, A, V, Node<N,V>, A> {
 
 	private int timeoutForFInMS;
 	private INodeEvaluator<N, V> timeoutEvaluator;
