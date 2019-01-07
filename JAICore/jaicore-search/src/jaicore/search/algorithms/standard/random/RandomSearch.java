@@ -16,8 +16,6 @@ import org.slf4j.LoggerFactory;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
-import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
-import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.sets.SetUtil;
 import jaicore.graph.Graph;
 import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
@@ -93,21 +91,21 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 			assert !this.closed.contains(node) && !this.goalTester.isGoal(node);
 			this.logger.debug("Expanding next node {}", node);
 			boolean closeNodeAfterwards = false;
-//			if (this.isSingleNodeSuccessorGenerator) {
-//				
-//				/* generate the next successor */
-//				SingleSuccessorGenerator<N, A> cGen = ((SingleSuccessorGenerator<N, A>) this.gen);
-//				NodeExpansionDescription<N, A> successor = cGen.generateSuccessor(node, this.random.nextInt(Integer.MAX_VALUE));
-//				assert this.exploredGraph.hasItem(node);
-//				if (successor != null) {
-//					assert this.exploredGraph.hasItem(successor.getFrom()) : "Parent node of successor is not part of the explored graph.";
-//					assert !this.exploredGraph.hasItem(successor.getTo()) : "Successor has been reached before.";
-//					this.addNodeToLocalModel(successor.getFrom(), successor.getTo());
-//				}
-//
-//				/* if this was the last successor, set the close node flag to 1 */
-//				closeNodeAfterwards = cGen.allSuccessorsComputed(node);
-//			} else {
+			if (this.isSingleNodeSuccessorGenerator) {
+				
+				/* generate the next successor */
+				SingleSuccessorGenerator<N, A> cGen = ((SingleSuccessorGenerator<N, A>) this.gen);
+				NodeExpansionDescription<N, A> successor = cGen.generateSuccessor(node, this.random.nextInt(Integer.MAX_VALUE));
+				assert this.exploredGraph.hasItem(node);
+				if (successor != null) {
+					assert this.exploredGraph.hasItem(successor.getFrom()) : "Parent node of successor is not part of the explored graph.";
+					assert !this.exploredGraph.hasItem(successor.getTo()) : "Successor " + successor.getTo() + " has been reached before.";
+					this.addNodeToLocalModel(successor.getFrom(), successor.getTo());
+				}
+
+				/* if this was the last successor, set the close node flag to 1 */
+				closeNodeAfterwards = cGen.allSuccessorsComputed(node);
+			} else {
 				long start = System.currentTimeMillis();
 				List<NodeExpansionDescription<N, A>> successors = this.gen.generateSuccessors(node); // could have been interrupted here
 				this.logger.debug("Identified {} successor(s) in {}ms, which are now appended.", successors.size(), System.currentTimeMillis() - start);
@@ -126,7 +124,7 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 				}
 
 				closeNodeAfterwards = true;
-//			}
+			}
 
 			if (closeNodeAfterwards) {
 
@@ -177,10 +175,7 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 				e.printStackTrace();
 			}
 			if (drawnPath == null) {
-				this.shutdown();
-				AlgorithmEvent event = new AlgorithmFinishedEvent();
-				this.post(event);
-				return event;
+				return terminate();
 			}
 			AlgorithmEvent event = new GraphSearchSolutionCandidateFoundEvent<>(drawnPath);
 			this.logger.info("Identified new solution ...");

@@ -1,5 +1,7 @@
 package jaicore.basic.algorithm;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.TimeoutException;
 
@@ -57,5 +59,21 @@ public abstract class ASolutionCandidateIterator<I, O> extends AAlgorithm<I, O> 
 	public O call() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
 		return nextSolutionCandidate();
 	}
-
+	
+	/**
+	 * Gathers all solutions that exist
+	 * 
+	 * @return
+	 * @throws InterruptedException
+	 * @throws AlgorithmExecutionCanceledException
+	 * @throws TimeoutException
+	 * @throws AlgorithmException
+	 */
+	public List<O> collectAllSolutions() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
+		List<O> solutions = new ArrayList<>();
+		while (hasNext()) {
+			solutions.add(nextSolutionCandidate());
+		}
+		return solutions;
+	}
 }
