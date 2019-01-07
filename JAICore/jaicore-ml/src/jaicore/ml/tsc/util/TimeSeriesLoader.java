@@ -19,7 +19,6 @@ import org.nd4j.linalg.indexing.NDArrayIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.ml.core.dataset.TimeSeriesDataset;
 import jaicore.ml.tsc.exceptions.TimeSeriesLoadingException;
 
@@ -74,13 +73,15 @@ public class TimeSeriesLoader {
 	 *             Throws an exception when the TimeSeriesDataset could not be
 	 *             created from the given file.
 	 */
+	@SuppressWarnings("unchecked")
 	public static TimeSeriesDataset loadArff(final File arffFile) throws TimeSeriesLoadingException {
 		if (arffFile == null)
 			throw new IllegalArgumentException("Parameter 'arffFile' must not be null!");
 
-		Pair<INDArray, INDArray> tsWithTarget = loadTimeSeriesWithTargetFromArffFile(arffFile);
+		Object[] tsTargetClassNames = loadTimeSeriesWithTargetFromArffFile(arffFile);
 
-		return new TimeSeriesDataset(Arrays.asList(tsWithTarget.getX()), null, tsWithTarget.getY());
+		return new TimeSeriesDataset(Arrays.asList((INDArray) tsTargetClassNames[0]), null,
+				(INDArray) tsTargetClassNames[1], (List<String>) tsTargetClassNames[2]);
 	}
 
 	/**
@@ -97,20 +98,36 @@ public class TimeSeriesLoader {
 	 *             Throws an exception when the TimeSeriesDataset could not be
 	 *             created from the given files.
 	 */
+	@SuppressWarnings("unchecked")
 	public static TimeSeriesDataset loadArffs(final File... arffFiles) throws TimeSeriesLoadingException {
 		if (arffFiles == null)
 			throw new IllegalArgumentException("Parameter 'arffFiles' must not be null!");
 
 		final List<INDArray> matrices = new ArrayList<>();
 		INDArray target = null;
+		List<String> classNames = null;
 
 		for (final File arffFile : arffFiles) {
-			Pair<INDArray, INDArray> tsWithTarget = loadTimeSeriesWithTargetFromArffFile(arffFile);
+			// Pair<INDArray, INDArray> tsWithTarget =
+			// loadTimeSeriesWithTargetFromArffFile(arffFile);
+			Object[] tsTargetClassNames = loadTimeSeriesWithTargetFromArffFile(arffFile);
+
+			if (classNames == null)
+				classNames = (List<String>) tsTargetClassNames[2];
+			else {
+				// Check whether the same class names are used among all of the time series
+				List<String> furtherClassNames = (List<String>) tsTargetClassNames[2];
+				if (furtherClassNames == null || !furtherClassNames.equals(classNames))
+					throw new TimeSeriesLoadingException(
+							"Could not load multivariate time series with different targets. Target values have to be stored in each "
+									+ "time series arff file and must be equal!");
+			}
+
 			if (target == null)
-				target = tsWithTarget.getY();
+				target = (INDArray) tsTargetClassNames[1];
 			else {
 				// Check whether the same targets are used among all of the time series
-				INDArray furtherTarget = tsWithTarget.getY();
+				INDArray furtherTarget = (INDArray) tsTargetClassNames[1];
 				if (furtherTarget == null || target.length() != furtherTarget.length()
 						|| !target.equalsWithEps(furtherTarget, IND_TARGET_EQUALS_EPS)) {
 					throw new TimeSeriesLoadingException(
@@ -120,13 +137,13 @@ public class TimeSeriesLoader {
 			}
 
 			// Check for same instance length
-			if (matrices.size() != 0 && tsWithTarget.getX().shape()[0] != matrices.get(0).shape()[0])
+			if (matrices.size() != 0 && ((INDArray) tsTargetClassNames[0]).shape()[0] != matrices.get(0).shape()[0])
 				throw new TimeSeriesLoadingException(
 						"All time series must have the same first dimensionality (number of instances).");
 
-			matrices.add(tsWithTarget.getX());
+			matrices.add((INDArray) tsTargetClassNames[0]);
 		}
-		return new TimeSeriesDataset(matrices, null, target);
+		return new TimeSeriesDataset(matrices, null, target, classNames);
 	}
 
 	/**
@@ -136,17 +153,21 @@ public class TimeSeriesLoader {
 	 * 
 	 * @param arffFile
 	 *            The arff file to be parsed
-	 * @return Returns a pair consisting of the time series and the target matrix
+	 * @return Returns an object consisting of three elements: 1. The time series
+	 *         value matrix (INDArray), 2. the target value matrix (INDArray) and 3.
+	 *         a list of the class value strings (List<String>)
 	 * @throws TimeSeriesLoadingException
 	 *             Throws an exception when the matrices could not be extracted from
 	 *             the given arff file
 	 */
-	private static Pair<INDArray, INDArray> loadTimeSeriesWithTargetFromArffFile(final File arffFile)
+	private static Object[] loadTimeSeriesWithTargetFromArffFile(final File arffFile)
 			throws TimeSeriesLoadingException {
 		INDArray matrix = null;
 		INDArray targetMatrix = null;
 
 		long numEmptyDataRows = 0;
+
+		List<String> targetValues = null;
 
 		try (BufferedReader br = new BufferedReader(
 				new InputStreamReader(new FileInputStream(arffFile), DEFAULT_CHARSET))) {
@@ -162,7 +183,6 @@ public class TimeSeriesLoader {
 			boolean readData = false;
 			String line;
 			String lastLine = "";
-			List<String> targetValues = null;
 
 			while ((line = br.readLine()) != null) {
 				if (!readData) {
@@ -232,7 +252,13 @@ public class TimeSeriesLoader {
 			targetMatrix = targetMatrix.get(NDArrayIndex.interval(0, endIndex));
 		}
 
-		return new Pair<INDArray, INDArray>(matrix, targetMatrix);
+		Object[] result = new Object[3];
+		result[0] = matrix;
+		result[1] = targetMatrix;
+		result[2] = targetValues;
+		// return new TimeSeriesDataset(Arrays.asList(matrix), null, targetMatrix,
+		// targetValues);
+		return result;
 	}
 
 	/**

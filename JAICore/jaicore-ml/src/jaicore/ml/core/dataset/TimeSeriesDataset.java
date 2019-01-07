@@ -275,19 +275,19 @@ public class TimeSeriesDataset implements IDataset<TimeSeriesInstance> {
 	}
 
 	@Override
-	public <T> IAttributeType<T> getTargetType(Class<T> clazz) {
-		return (IAttributeType<T>) targetType;
-	}
-
-	@Override
 	public List<IAttributeType<?>> getAttributeTypes() {
 		return attributeTypes;
 	}
 
 	@Override
 	public IAttributeType<?> getTargetType() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.targetType;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> IAttributeType<T> getTargetType(Class<T> clazz) {
+		return (IAttributeType<T>) this.targetType;
 	}
 
 }

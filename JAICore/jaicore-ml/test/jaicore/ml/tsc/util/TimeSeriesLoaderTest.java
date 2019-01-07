@@ -3,10 +3,13 @@ package jaicore.ml.tsc.util;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 
 import org.junit.Test;
 
 import jaicore.ml.core.dataset.TimeSeriesDataset;
+import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
 import jaicore.ml.tsc.exceptions.TimeSeriesLoadingException;
 
 /**
@@ -20,7 +23,7 @@ public class TimeSeriesLoaderTest {
 	/**
 	 * Path prefix for the time series classification datasets.
 	 */
-	private static final String TSC_DATASET_PATH_PREFIX = "";
+	private static final String TSC_DATASET_PATH_PREFIX = "C:\\Users\\Julian\\Downloads\\";
 
 	@Test
 	public void testUnivariateArffFileLoading() throws TimeSeriesLoadingException {
@@ -73,10 +76,12 @@ public class TimeSeriesLoaderTest {
 		final int expectedNumSteps = 50;
 		final int expectedNumVariables = 2; // Multivariate
 		final int expectedNumTargets = 316;
+		final List<String> expectedClassDomain = Arrays.asList("left", "right");
 
 		assertEquals(expectedNumInstances, result.getNumberOfInstances());
 		assertEquals(expectedNumSteps, (int) result.getValues(0).shape()[1]);
 		assertEquals(expectedNumVariables, result.getNumberOfVariables());
 		assertEquals(expectedNumTargets, result.getTargets().length());
+		assertEquals(expectedClassDomain, ((CategoricalAttributeType) result.getTargetType()).getDomain());
 	}
 }
