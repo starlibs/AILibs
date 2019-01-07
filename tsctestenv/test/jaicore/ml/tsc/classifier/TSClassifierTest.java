@@ -177,7 +177,7 @@ public class TSClassifierTest {
 		result.put("classifier", tsClassifier.getClass().getSimpleName());
 		result.put("classifier_params", tsClassifierParams);
 
-		// TODO: Load dataset
+		// Load dataset
 		TimeSeriesDataset dataset;
 		try {
 			if (arffFiles.length < 1)
@@ -208,7 +208,6 @@ public class TSClassifierTest {
 		LOGGER.debug("Starting evaluation of classifier...");
 		timeStart = System.currentTimeMillis();
 
-		// TODO: Evaluate
 		CategoricalAttributeType targetType = tsClassifier.getTargetType();
 		List<CategoricalAttributeValue> predictions = tsClassifier.predict(test);
 		int totalPreds = predictions.size();
