@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import de.upb.isys.linearalgebra.Vector;
 import jaicore.ml.dyadranking.Dyad;
@@ -24,16 +25,15 @@ public class DyadRankingInstanceSupplier {
 	 * Creates a random {@link jaicore.ml.dyadranking.dataset.DyadRankingInstance}
 	 * consisting of (with 2 alternatives and 2 instances)
 	 * 
-	 * @param maxLength The amount of dyads
-	 * @param seed Seed for generating random dyads
+	 * @param maxLength the amount of dyads
 	 * @return random dyad ranking instance of length at most maxLength
 	 */
 	public static DyadRankingInstance getDyadRankingInstance(int maxLength, int seed) {
 		List<Dyad> dyads = new ArrayList<Dyad>();
-		
-		int actualLength = new Random(seed).nextInt(maxLength+1);
-		for(int i = 0; i < actualLength; i++) {
-			Dyad dyad = DyadSupplier.getRandomDyad(i, 2, 2);
+		int actualLength = ThreadLocalRandom.current().nextInt(2, maxLength + 1);
+
+		for (int i = 0; i < actualLength; i++) {
+			Dyad dyad = DyadSupplier.getRandomDyad(2, 2);
 			dyads.add(dyad);
 		}
 		Comparator<Dyad> comparator = complexDyadRanker();
@@ -57,14 +57,15 @@ public class DyadRankingInstanceSupplier {
 				Vector scoreVecA = d1.getAlternative();
 				Vector scoreVecI2 = d2.getInstance();
 				Vector scoreVecA2 = d2.getAlternative();
-				double score1 = Math.pow(scoreVecI.getValue(0), 2) + Math.pow(scoreVecI.getValue(1), 2) - Math.pow(scoreVecA.getValue(0), 2) - Math.pow(scoreVecA.getValue(1), 2);
-				double score2 = Math.pow(scoreVecI2.getValue(0), 2) + Math.pow(scoreVecI2.getValue(1), 2) - Math.pow(scoreVecA2.getValue(0), 2) - Math.pow(scoreVecA2.getValue(1), 2);
+				double score1 = Math.pow(scoreVecI.getValue(0), 2) + Math.pow(scoreVecI.getValue(1), 2)
+						- Math.pow(scoreVecA.getValue(0), 2) - Math.pow(scoreVecA.getValue(1), 2);
+				double score2 = Math.pow(scoreVecI2.getValue(0), 2) + Math.pow(scoreVecI2.getValue(1), 2)
+						- Math.pow(scoreVecA2.getValue(0), 2) - Math.pow(scoreVecA2.getValue(1), 2);
 				return score1 - score2 == 0 ? 0 : (score1 - score2 > 0 ? 1 : -1);
 			}
 		};
 		return comparator;
 	}
-	
 	/**
 	 * 
 	 * @param maxLengthDyadRankingInstance Maximum length of an individual dyad
@@ -75,10 +76,10 @@ public class DyadRankingInstanceSupplier {
 	 *         instances) that are ranked by the ranking function implemented by the
 	 *         {@link Comparator} returned by {@link #complexDyadRanker()}
 	 */
-	public static DyadRankingDataset getDyadRankingDataset(int maxLengthDyadRankingInstance, int length) {
+	public static DyadRankingDataset getDyadRankingDataset(int maxLengthDyadRankingInstance, int size) {
 		DyadRankingDataset dataset = new DyadRankingDataset();
-		for(int i = 0; i < length; i++) {
-			dataset.add(DyadRankingInstanceSupplier.getDyadRankingInstance(maxLengthDyadRankingInstance, i));
+		for (int i = 0; i < size; i++) {
+			dataset.add(DyadRankingInstanceSupplier.getDyadRankingInstance(maxLengthDyadRankingInstance, 7));
 		}
 		return dataset;
 	}
