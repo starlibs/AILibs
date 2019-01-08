@@ -41,7 +41,7 @@ import weka.classifiers.trees.RandomForest;
 import weka.core.SelectedTag;
 
 public class ShapeletTransformAlgorithm extends
-		ATSCAlgorithm<CategoricalAttributeType, CategoricalAttributeValue, TimeSeriesDataset, ShapeletTransformClassifier> {
+		ATSCAlgorithm<CategoricalAttributeType, CategoricalAttributeValue, TimeSeriesDataset, ShapeletTransformTSClassifier> {
 
 	// TODO: Maybe move to a separate class?
 	static class Shapelet {
@@ -90,6 +90,27 @@ public class ShapeletTransformAlgorithm extends
 		public void setDeterminedQuality(double determinedQuality) {
 			this.determinedQuality = determinedQuality;
 		}
+		
+		@Override
+		public boolean equals(Object obj) {
+			if(obj instanceof Shapelet) {
+				Shapelet other = (Shapelet) obj;
+				if(data == null && other.getData() != null || data != null && other.getData() == null)
+					return false;
+
+				return (data == null && other.getData() == null || this.data.equalsWithEps(other.getData(), 0.00001))
+						&& length == other.getLength() && determinedQuality == other.determinedQuality
+						&& instanceIndex == other.instanceIndex;
+			}
+			return super.equals(obj);
+		}
+
+		@Override
+		public String toString() {
+			return "Shapelet [data=" + data + ", startIndex=" + startIndex + ", length=" + length + ", instanceIndex="
+					+ instanceIndex + ", determinedQuality=" + determinedQuality + "]";
+		}
+
 	}
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ShapeletTransformAlgorithm.class);
@@ -112,7 +133,7 @@ public class ShapeletTransformAlgorithm extends
 
 	// Training procedure
 	@Override
-	public ShapeletTransformClassifier call() throws AlgorithmException {
+	public ShapeletTransformTSClassifier call() throws AlgorithmException {
 
 		// Extract time series data and the corresponding targets
 		TimeSeriesDataset data = this.getInput();
@@ -120,12 +141,15 @@ public class ShapeletTransformAlgorithm extends
 			throw new IllegalStateException("The time series input data must not be null!");
 		if (data.isMultivariate())
 			throw new UnsupportedOperationException("Multivariate datasets are not supported.");
+		if (!(data.getTargetType() instanceof CategoricalAttributeType))
+			throw new IllegalArgumentException("Target type of the training data set must be categorical.");
 
 		final INDArray dataMatrix = data.getValuesOrNull(0);
 		if (dataMatrix == null || dataMatrix.shape().length != 2)
 			throw new IllegalArgumentException(
-					"Timestamp matrix must be a valid 2D matrix containing the time series values for all instances!");
+					"Value matrix must be a valid 2D matrix containing the time series values for all instances!");
 		final INDArray targetMatrix = data.getTargets();
+		this.model.setTargetType((CategoricalAttributeType) data.getTargetType());
 
 		// Estimate min and max
 		LOGGER.debug("Starting min max estimation.");
@@ -135,7 +159,7 @@ public class ShapeletTransformAlgorithm extends
 		LOGGER.debug("Finished min max estimation. min={}, max={}", min, max);
 
 		// Determine shapelets
-		LOGGER.debug("Starting cached shapelet selection...");
+		LOGGER.debug("Starting cached shapelet selection with min={}, max={} and k={}...", min, max, this.k);
 		List<Shapelet> shapelets = shapeletCachedSelection(dataMatrix, min, max, this.k, targetMatrix);
 		LOGGER.debug("Finished cached shapelet selection. Extracted {} shapelets.", shapelets.size());
 
@@ -164,6 +188,8 @@ public class ShapeletTransformAlgorithm extends
 		}
 		LOGGER.debug("Finished ensemble training.");
 
+		this.model.setClassifier(classifier);
+
 		return this.model;
 	}
 
@@ -181,13 +207,17 @@ public class ShapeletTransformAlgorithm extends
 	private int[] estimateMinMax(final INDArray data, final INDArray classes) {
 		int[] result = new int[2];
 
+		long numInstances = data.shape()[0];
+
 		List<Shapelet> shapelets = new ArrayList<>();
 		for (int i = 0; i < MIN_MAX_ESTIMATION_SAMPLES; i++) {
 			INDArray tmpMatrix = Nd4j.create(MIN_MAX_ESTIMATION_SAMPLES, data.shape()[1]);
 			Random rand = new Random(this.seed);
 			INDArray tmpClasses = Nd4j.create(MIN_MAX_ESTIMATION_SAMPLES);
 			for (int j = 0; j < MIN_MAX_ESTIMATION_SAMPLES; j++) {
-				int nextIndex = (int) (rand.nextInt() % data.shape()[0]);
+				long nextIndex = (int) (rand.nextInt() % numInstances);
+				if(nextIndex <0)
+					nextIndex += numInstances;
 				tmpMatrix.putRow(j, data.getRow(nextIndex));
 				tmpClasses.putScalar(j, classes.getDouble(nextIndex));
 			}
@@ -195,7 +225,9 @@ public class ShapeletTransformAlgorithm extends
 			shapelets.addAll(shapeletCachedSelection(tmpMatrix, 3, (int) data.shape()[1], 10, tmpClasses));
 		}
 
-		sortByLengthDesc(shapelets);
+		sortByLengthAsc(shapelets);
+
+		LOGGER.debug("Number of shapelets found in min/max estimation: {}", shapelets.size());
 
 		// Min
 		result[0] = shapelets.get(25).getLength();
@@ -283,10 +315,11 @@ public class ShapeletTransformAlgorithm extends
 					List<Double> D_s = findDistances(s, data);
 					double quality = qualityMeasure.assessQuality(D_s, classes);
 					s.setDeterminedQuality(quality);
-					shapelets.add(new AbstractMap.SimpleEntry<>(s, quality));
+					shapelets.add(new AbstractMap.SimpleEntry<Shapelet, Double>(s, quality));
 				}
 			}
 			sortByQualityDesc(shapelets);
+
 			shapelets = removeSelfSimilar(shapelets);
 			kShapelets = merge(k, kShapelets, shapelets);
 		}
@@ -294,25 +327,26 @@ public class ShapeletTransformAlgorithm extends
 		return kShapelets.stream().map(entry -> entry.getKey()).collect(Collectors.toList());
 	}
 
-	private static List<Map.Entry<Shapelet, Double>> merge(final int k, List<Map.Entry<Shapelet, Double>> kShapelets,
+	public static List<Map.Entry<Shapelet, Double>> merge(final int k, List<Map.Entry<Shapelet, Double>> kShapelets,
 			final List<Map.Entry<Shapelet, Double>> shapelets) {
 
 		kShapelets.addAll(shapelets);
 
 		// Retain only k
 		sortByQualityDesc(kShapelets);
-		for (int i = k; i < kShapelets.size(); i++)
-			kShapelets.remove(i);
+		int numRemoveItems = kShapelets.size() - k;
+		for (int i = 0; i < numRemoveItems; i++)
+			kShapelets.remove(kShapelets.size() - 1);
 
 		return kShapelets;
 	}
 
 	private static void sortByQualityDesc(final List<Map.Entry<Shapelet, Double>> list) {
-		list.sort((e1, e2) -> e1.getValue().compareTo(e2.getValue()));
-		Collections.sort(list, Collections.reverseOrder());
+		list.sort((e1, e2) -> (-1) * e1.getValue().compareTo(e2.getValue()));
+		// Collections.sort(list, Collections.reverseOrder());
 	}
 
-	private static List<Map.Entry<Shapelet, Double>> removeSelfSimilar(
+	public static List<Map.Entry<Shapelet, Double>> removeSelfSimilar(
 			final List<Map.Entry<Shapelet, Double>> shapelets) {
 		List<Map.Entry<Shapelet, Double>> result = new ArrayList<>();
 		for (final Map.Entry<Shapelet, Double> entry : shapelets) {
@@ -327,19 +361,19 @@ public class ShapeletTransformAlgorithm extends
 				result.add(entry);
 		}
 
-		return shapelets;
+		return result;
 	}
 
 	// Assumes that both shapelets are from the same time series
 	private static boolean isSelfSimilar(final Shapelet s1, final Shapelet s2) {
 		if (s1.getInstanceIndex() == s2.getInstanceIndex()) {
-			return (s1.getStartIndex() <= (s2.getStartIndex() + s2.getLength()))
-					&& (s2.getStartIndex() <= (s1.getStartIndex() + s1.getLength()));
+			return (s1.getStartIndex() < (s2.getStartIndex() + s2.getLength()))
+					&& (s2.getStartIndex() < (s1.getStartIndex() + s1.getLength()));
 		} else
 			return false;
 	}
 
-	private static List<Double> findDistances(final Shapelet s, final INDArray matrix) {
+	public static List<Double> findDistances(final Shapelet s, final INDArray matrix) {
 		List<Double> result = new ArrayList<>();
 
 		for (int i = 0; i < matrix.shape()[0]; i++) {
@@ -376,10 +410,10 @@ public class ShapeletTransformAlgorithm extends
 		return result;
 	}
 
-	private static Set<Shapelet> generateCandidates(final INDArray data, final int l, final int candidateIndex) {
+	public static Set<Shapelet> generateCandidates(INDArray data, final int l, final int candidateIndex) {
 		Set<Shapelet> result = new HashSet<>();
 
-		for (int i = 0; i < data.shape()[0] - l; i++) {
+		for (int i = 0; i < data.shape()[1] - l + 1; i++) {
 			result.add(new Shapelet(data.get(NDArrayIndex.interval(i, i + l)), i, l, candidateIndex));
 		}
 		return result;
@@ -443,9 +477,9 @@ public class ShapeletTransformAlgorithm extends
 	public static TimeSeriesDataset shapeletTransform(final TimeSeriesDataset dataSet, final List<Shapelet> shapelets) {
 
 		// TODO: Deal with multivariate (assuming univariate for now)
-		// TimeSeriesAttributeType tsAttType = (TimeSeriesAttributeType)
-		// dataSet.getAttributeTypes().get(0);
-		// INDArray timeSeries = dataSet.getMatrixForAttributeType(tsAttType);
+		if (dataSet.isMultivariate())
+			throw new UnsupportedOperationException("Multivariate datasets are not supported yet!");
+
 		INDArray timeSeries = dataSet.getValuesOrNull(0);
 		if (timeSeries == null || timeSeries.shape().length != 2)
 			throw new IllegalArgumentException("Time series matrix must be a valid 2d matrix!");
@@ -530,9 +564,9 @@ public class ShapeletTransformAlgorithm extends
 
 	}
 
-	private static void sortByLengthDesc(final List<Shapelet> shapelets) {
+	private static void sortByLengthAsc(final List<Shapelet> shapelets) {
 		shapelets.sort((s1, s2) -> Integer.compare(s1.getLength(), s2.getLength()));
-		Collections.sort(shapelets, Collections.reverseOrder());
+		// Collections.sort(shapelets, Collections.reverseOrder());
 	}
 
 	@Override
