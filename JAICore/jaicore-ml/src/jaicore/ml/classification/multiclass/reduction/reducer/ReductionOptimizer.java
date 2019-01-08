@@ -19,9 +19,9 @@ import jaicore.ml.classification.multiclass.reduction.MCTreeNode;
 import jaicore.ml.classification.multiclass.reduction.MCTreeNodeLeaf;
 import jaicore.search.algorithms.standard.bestfirst.BestFirstEpsilon;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
-import jaicore.search.model.probleminputs.GeneralEvaluatedTraversalTree;
-import jaicore.search.model.probleminputs.GraphSearchProblemInput;
 import jaicore.search.model.travesaltree.Node;
+import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
+import jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.rules.OneR;
@@ -32,20 +32,20 @@ import weka.core.Instances;
 
 public class ReductionOptimizer implements Classifier {
 
-	private final Random rand;
+	private final long seed;
 	private MCTreeNode root;
 
-	public ReductionOptimizer(Random rand) {
+	public ReductionOptimizer(long seed) {
 		super();
-		this.rand = rand;
+		this.seed = seed;
 	}
 
 	@Override
 	public void buildClassifier(Instances data) throws Exception {
-		List<Instances> dataSplit = WekaUtil.getStratifiedSplit(data, rand, .6f);
+		List<Instances> dataSplit = WekaUtil.getStratifiedSplit(data, seed, .6f);
 		Instances train = dataSplit.get(0);
 		Instances validate = dataSplit.get(1);
-		BestFirstEpsilon<RestProblem, Decision, Double> search = new BestFirstEpsilon<RestProblem, Decision, Double>(new GeneralEvaluatedTraversalTree<>(new ReductionGraphGenerator(rand, train), n -> getLossForClassifier(getTreeFromSolution(n.externalPath(), data, false), data) * 1.0), n -> n.path().size() * -1.0
+		BestFirstEpsilon<RestProblem, Decision, Double> search = new BestFirstEpsilon<RestProblem, Decision, Double>(new GraphSearchWithSubpathEvaluationsInput<>(new ReductionGraphGenerator(new Random(seed), train), n -> getLossForClassifier(getTreeFromSolution(n.externalPath(), data, false), data) * 1.0), n -> n.path().size() * -1.0
 		, 0.1, false);
 
 		VisualizationWindow<Node<RestProblem, Double>,Decision> window = new VisualizationWindow<>(search);
@@ -61,7 +61,7 @@ public class ReductionOptimizer implements Classifier {
 		int i = 0;
 		Collection<EvaluatedSearchGraphPath<RestProblem,Decision,Double>> solutions = new ArrayList<>();
 		EvaluatedSearchGraphPath<RestProblem,Decision,Double> solution;
-		while ((solution = search.nextSolution()) != null) {
+		while ((solution = search.nextSolutionCandidate()) != null) {
 			solutions.add(solution);
 			if (i++ > 100)
 				break;
@@ -122,7 +122,7 @@ public class ReductionOptimizer implements Classifier {
 			try {
 				DescriptiveStatistics stats = new DescriptiveStatistics();
 				for (int i = 0; i < 2; i++) {
-					List<Instances> split = (WekaUtil.getStratifiedSplit(data, rand, .6f));
+					List<Instances> split = (WekaUtil.getStratifiedSplit(data, seed + i, .6f));
 					tree.buildClassifier(split.get(0));
 
 					Evaluation eval = new Evaluation(data);

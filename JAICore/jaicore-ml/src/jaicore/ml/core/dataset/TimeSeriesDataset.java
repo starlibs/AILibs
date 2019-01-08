@@ -3,16 +3,15 @@ package jaicore.ml.core.dataset;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.NoSuchElementException;
 
 import org.nd4j.linalg.api.ndarray.INDArray;
 
 import jaicore.ml.core.dataset.attribute.IAttributeType;
 import jaicore.ml.core.dataset.attribute.IAttributeValue;
+import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
 import jaicore.ml.core.dataset.attribute.primitive.NumericAttributeType;
 import jaicore.ml.core.dataset.attribute.timeseries.TimeSeriesAttributeType;
 
@@ -66,10 +65,46 @@ public class TimeSeriesDataset implements IDataset<TimeSeriesInstance> {
 		// Create time series attributes types.
 		attributeTypes = new ArrayList<>();
 		for (INDArray valueMatrix : valueMatrices) {
-			createAttributeType(valueMatrix);
+			addAttributeType(valueMatrix);
 		}
 		// Create target attribute type.
 		targetType = new NumericAttributeType();
+	}
+
+	/**
+	 * Creates a TimeSeries dataset. Let `n` be the number of instances.
+	 * 
+	 * @param valueMatrices
+	 *            Values for the time series variables. List of 2D-Arrays with shape
+	 *            `[n, ?]`.
+	 * @param timestampMatrices
+	 *            Timestamps for the time series variables. List of 2D-Arrays with
+	 *            shape `[n, ?]`. Or `null` if no timestamps exist for the
+	 *            corresponding time series variable. The shape of the `i`th index
+	 *            must be equal to the shape of the `i`th element of
+	 *            `valueMatrices`.
+	 * @param targets
+	 *            Target values for the instances.
+	 * @param classNamens
+	 *            Ordered list of String objects containing the mapped class names
+	 *            for the target values (target value 0 corresponds to first list
+	 *            element, ....).
+	 */
+	public TimeSeriesDataset(List<INDArray> valueMatrices, List<INDArray> timestampMatrices, INDArray targets,
+			final List<String> classNames) {
+		// Parameter checks.
+		// ..
+		this.numberOfInstances = valueMatrices.get(0).shape()[0];
+		this.valueMatrices = valueMatrices;
+		this.timestampMatrices = timestampMatrices;
+		this.targets = targets;
+		// Create time series attributes types.
+		attributeTypes = new ArrayList<>();
+		for (INDArray valueMatrix : valueMatrices) {
+			addAttributeType(valueMatrix);
+		}
+		// Create target attribute type.
+		targetType = new CategoricalAttributeType(classNames);
 	}
 
 	/**
@@ -240,13 +275,19 @@ public class TimeSeriesDataset implements IDataset<TimeSeriesInstance> {
 	}
 
 	@Override
-	public <T> IAttributeType<T> getTargetType(Class<? extends T> clazz) {
-		return (IAttributeType<T>) targetType;
+	public List<IAttributeType<?>> getAttributeTypes() {
+		return attributeTypes;
 	}
 
 	@Override
-	public List<IAttributeType<?>> getAttributeTypes() {
-		return attributeTypes;
+	public IAttributeType<?> getTargetType() {
+		return this.targetType;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> IAttributeType<T> getTargetType(Class<T> clazz) {
+		return (IAttributeType<T>) this.targetType;
 	}
 
 }

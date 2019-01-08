@@ -8,7 +8,7 @@ import java.util.List;
 import org.junit.Test;
 
 import jaicore.basic.MathExt;
-import jaicore.basic.algorithm.AlgorithmEvent;
+import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.planning.algorithms.events.PlanFoundEvent;
 import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionHTNPlannerBasedOnBestFirst;
 import jaicore.planning.model.ceoc.CEOCAction;

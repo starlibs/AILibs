@@ -1,14 +1,14 @@
 package jaicore.search.problemtransformers;
 
 import jaicore.basic.algorithm.AlgorithmProblemTransformer;
-import jaicore.search.model.probleminputs.GeneralEvaluatedTraversalTree;
-import jaicore.search.model.probleminputs.GraphSearchProblemInput;
+import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
+import jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 
-public class GraphSearchProblemInputToUninformedGeneralEvaluatedTraversalTree<N, A> implements AlgorithmProblemTransformer<GraphSearchProblemInput<N, A, Double>, GeneralEvaluatedTraversalTree<N, A, Double>> {
+public class GraphSearchProblemInputToUninformedGeneralEvaluatedTraversalTree<N, A> implements AlgorithmProblemTransformer<GraphSearchWithPathEvaluationsInput<N, A, Double>, GraphSearchWithSubpathEvaluationsInput<N, A, Double>> {
 
 	@Override
-	public GeneralEvaluatedTraversalTree<N, A, Double> transform(GraphSearchProblemInput<N, A, Double> problem) {
-		return new GeneralEvaluatedTraversalTree<>(problem.getGraphGenerator(), n -> 0.0);
+	public GraphSearchWithSubpathEvaluationsInput<N, A, Double> transform(GraphSearchWithPathEvaluationsInput<N, A, Double> problem) {
+		return new GraphSearchWithSubpathEvaluationsInput<>(problem.getGraphGenerator(), n -> 0.0);
 	}
 
 }
