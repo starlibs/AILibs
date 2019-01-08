@@ -104,12 +104,13 @@ public abstract class GeneralSamplingTester<I extends IInstance>
 
 	private void testNoDuplicates(IDataset<I> dataset) {
 		ASamplingAlgorithm<I> samplingAlgorithm = (ASamplingAlgorithm<I>) this.getFactory().getAlgorithm();
-		samplingAlgorithm.setSampleSize((int) DEFAULT_SAMPLE_FRACTION * dataset.size());
+		int sampleSize = (int) (dataset.size() * DEFAULT_SAMPLE_FRACTION);
+		samplingAlgorithm.setSampleSize(sampleSize);
 		IDataset<I> sample = getSample(dataset, samplingAlgorithm);
-		int sampleSize = sample.size();
+		int actualSampleSize = sample.size();
 		Set<IInstance> set = new HashSet<>();
 		set.addAll(sample);
-		assertEquals(sampleSize, set.size());
+		assertEquals(actualSampleSize, set.size());
 	}
 
 	/**
@@ -123,7 +124,8 @@ public abstract class GeneralSamplingTester<I extends IInstance>
 		IDataset<I> dataset = this.getSimpleProblemInputForGeneralTestPurposes();
 		int hashCode = dataset.hashCode();
 		ASamplingAlgorithm<I> samplingAlgorithm = (ASamplingAlgorithm<I>) this.getFactory().getAlgorithm();
-		samplingAlgorithm.setSampleSize((int) DEFAULT_SAMPLE_FRACTION * dataset.size());
+		int sampleSize = (int) (dataset.size() * DEFAULT_SAMPLE_FRACTION);
+		samplingAlgorithm.setSampleSize(sampleSize);
 		getSample(dataset, samplingAlgorithm);
 		assertEquals(hashCode, dataset.hashCode());
 	}
