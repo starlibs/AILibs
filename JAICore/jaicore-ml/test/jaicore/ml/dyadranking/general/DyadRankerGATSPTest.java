@@ -210,6 +210,12 @@ public class DyadRankerGATSPTest {
 					alternatives.add(alternativeFeatures.get(index));
 				}
 				SparseDyadRankingInstance drInstance = new SparseDyadRankingInstance(instance, alternatives);
+//				List<Dyad> dyadList = new LinkedList<Dyad>();
+//				for(Dyad dyad : drInstance) {
+//					dyadList.add(dyad);
+//				}
+//				DyadRankingInstance drDenseInstance = new DyadRankingInstance(dyadList);
+//				System.out.println(dyadList);
 				dataset.add(drInstance);
 			}
 			reader.close();
@@ -232,7 +238,7 @@ public class DyadRankerGATSPTest {
 			int dyadRankingLength) {
 		DyadRankingDataset trimmedDataset = new DyadRankingDataset();
 		for (IInstance instance : dataset) {
-			SparseDyadRankingInstance drInstance = (SparseDyadRankingInstance) instance;
+			IDyadRankingInstance drInstance = (IDyadRankingInstance) instance;
 			if (drInstance.length() < dyadRankingLength)
 				continue;
 			ArrayList<Boolean> flagVector = new ArrayList<Boolean>(drInstance.length());
