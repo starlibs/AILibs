@@ -100,8 +100,8 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 				.subList((int) (configuration.plNetEarlyStoppingTrainRatio() * drDataset.size()), drDataset.size());
 
 		if (this.plNet == null) {
-			int dyadSize = ((DyadRankingInstance) drDataset.get(0)).getDyadAtPosition(0).getInstance().length()
-					+ ((DyadRankingInstance) drDataset.get(0)).getDyadAtPosition(0).getAlternative().length();
+			int dyadSize = ((IDyadRankingInstance) drDataset.get(0)).getDyadAtPosition(0).getInstance().length()
+					+ ((IDyadRankingInstance) drDataset.get(0)).getDyadAtPosition(0).getAlternative().length();
 			this.plNet = createNetwork(dyadSize);
 		}
 
@@ -112,13 +112,13 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 		int patience = 0;
 		int earlyStoppingCounter = 0;
 		int maxEpochs = configuration.plNetMaxEpochs();
-
+		
 		while (patience < configuration.plNetEarlyStoppingPatience() && (epoch < maxEpochs || maxEpochs == 0)) {
 			// Iterate through training data
 			for (IInstance dyadRankingInstance : drTrain) {
 				this.update(dyadRankingInstance);
 			}
-			log.debug("plNet params: {}", plNet.params().toString());
+			log.warn("plNet params: {}", plNet.params().toString());
 			earlyStoppingCounter++;
 			// Compute validation error
 			if (earlyStoppingCounter == configuration.plNetEarlyStoppingInterval() && configuration.plNetEarlyStoppingTrainRatio() < 1.0) {
@@ -202,12 +202,18 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 		List<Pair<Dyad, Double>> dyadUtilityPairs = new ArrayList<Pair<Dyad, Double>>(drInstance.length());
 		for (Dyad dyad : drInstance) {
 			INDArray plNetInput = dyadToVector(dyad);
+			System.out.println("Dyad: " + dyad);
+			System.out.println("PLNetInput: " + plNetInput);
 			double plNetOutput = plNet.output(plNetInput).getDouble(0);
+			System.out.println("PLNetOutput: " + plNetOutput);
 			dyadUtilityPairs.add(new Pair<Dyad, Double>(dyad, plNetOutput));
 		}
 		// sort the instance in descending order of utility values
 		Collections.sort(dyadUtilityPairs, Comparator.comparing(p -> -p.getRight()));
 		List<Dyad> ranking = new ArrayList<Dyad>();
+		
+		System.out.println("Dyad utility pairs: " + dyadUtilityPairs);
+		
 		for (Pair<Dyad, Double> pair : dyadUtilityPairs)
 			ranking.add(pair.getLeft());
 		return new DyadRankingInstance(ranking);
@@ -232,13 +238,13 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 	 * log likelihood (NLL).
 	 * 
 	 * @param drTest Test data on which the error should be computed given as a
-	 *               {@link List} of {@link DyadRankingInstance}
+	 *               {@link List} of {@link IDyadRankingInstance}
 	 * @return Average error on the given test data
 	 */
 	private double computeAvgError(List<IInstance> drTest) {
 		DescriptiveStatistics stats = new DescriptiveStatistics();
 		for (IInstance dyadRankingInstance : drTest) {
-			DyadRankingInstance drInstance = (DyadRankingInstance) dyadRankingInstance;
+			IDyadRankingInstance drInstance = (IDyadRankingInstance) dyadRankingInstance;
 			INDArray dyadMatrix = dyadRankingToMatrix(drInstance);
 			INDArray outputs = plNet.output(dyadMatrix);
 			outputs = outputs.transpose();
