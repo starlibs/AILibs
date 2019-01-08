@@ -25,6 +25,8 @@ import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
+import jaicore.basic.algorithm.exceptions.DelayedCancellationCheckException;
+import jaicore.basic.algorithm.exceptions.DelayedTimeoutCheckException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.graphvisualizer.gui.VisualizationWindow;
 import jaicore.planning.EvaluatedSearchGraphBasedPlan;
@@ -134,7 +136,15 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 		}
 		case active: {
 			/* Check termination */
-			this.checkTermination();
+			try {
+				this.checkTermination();
+			} catch (DelayedTimeoutCheckException e1) {
+				e1.printStackTrace();
+				throw e1.getException();
+			} catch (DelayedCancellationCheckException e1) {
+				e1.printStackTrace();
+				throw e1.getException();
+			}
 
 			/* if the search itself has not been initialized, do this now */
 			if (!this.searchCreatedAndInitialized) {
@@ -174,16 +184,11 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 			}
 
 			/* otherwise iterate over the search */
-			while (this.search.hasNext()) {
-				AlgorithmEvent searchEvent = this.search.nextWithException();
-
-				/* if the underlying search algorithm finished, we also finish */
-				if (searchEvent instanceof AlgorithmFinishedEvent) {
-					return this.terminate();
-				}
-
+			AlgorithmEvent searchEvent;
+			while (!((searchEvent = this.search.nextWithException()) instanceof AlgorithmFinishedEvent)) {
+				
 				/* otherwise, if a solution has been found, we announce this finding to our listeners and memorize if it is a new best candidate */
-				else if (searchEvent instanceof EvaluatedSearchSolutionCandidateFoundEvent) {
+				if (searchEvent instanceof EvaluatedSearchSolutionCandidateFoundEvent) {
 					this.logger.info("Received new solution from search, communicating this solution to the HASCO listeners.");
 					@SuppressWarnings("unchecked")
 					EvaluatedSearchSolutionCandidateFoundEvent<N, A, V> solutionEvent = (EvaluatedSearchSolutionCandidateFoundEvent<N, A, V>) searchEvent;

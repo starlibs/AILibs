@@ -56,7 +56,7 @@
 	</logger>
 	
 	<logger name="jaicore.search.algorithms.andor">
-		<level value="warn" />
+		<level value="debug" />
 	</logger>
 	
 	<logger name="jaicore.logic">

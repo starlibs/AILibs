@@ -16,8 +16,6 @@ import org.slf4j.LoggerFactory;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
-import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
-import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.sets.SetUtil;
 import jaicore.graph.Graph;
 import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
@@ -94,11 +92,14 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 			this.logger.debug("Expanding next node {}", node);
 			boolean closeNodeAfterwards = false;
 			if (this.isSingleNodeSuccessorGenerator) {
-
+				
 				/* generate the next successor */
 				SingleSuccessorGenerator<N, A> cGen = ((SingleSuccessorGenerator<N, A>) this.gen);
 				NodeExpansionDescription<N, A> successor = cGen.generateSuccessor(node, this.random.nextInt(Integer.MAX_VALUE));
+				assert this.exploredGraph.hasItem(node);
 				if (successor != null) {
+					assert this.exploredGraph.hasItem(successor.getFrom()) : "Parent node of successor is not part of the explored graph.";
+					assert !this.exploredGraph.hasItem(successor.getTo()) : "Successor " + successor.getTo() + " has been reached before.";
 					this.addNodeToLocalModel(successor.getFrom(), successor.getTo());
 				}
 
@@ -171,13 +172,10 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 			try {
 				drawnPath = this.nextSolutionUnderNode(this.root);
 			} catch (TimeoutException e) {
-
+				e.printStackTrace();
 			}
 			if (drawnPath == null) {
-				this.shutdown();
-				AlgorithmEvent event = new AlgorithmFinishedEvent();
-				this.post(event);
-				return event;
+				return terminate();
 			}
 			AlgorithmEvent event = new GraphSearchSolutionCandidateFoundEvent<>(drawnPath);
 			this.logger.info("Identified new solution ...");
@@ -207,7 +205,7 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 	}
 
 	public SearchGraphPath<N, A> nextSolutionUnderNode(final N node) throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {
-		this.logger.info("Looking for next solution under node {}", node);
+		this.logger.info("Looking for next solution under node {}. Remaining time is {}ms.", node, getRemainingTimeToDeadline());
 		this.checkTermination();
 
 		/* if the root is exhausted, cancel */
