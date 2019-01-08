@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -50,7 +49,7 @@ public class DyadRankerGATSPTest {
 	private static final String ALTERNATIVES_FEATURE_FILE = "testsrc/ml/dyadranking/ga-tsp/data_meta/GAMeta72-labeldescriptions.csv";
 
 	// M = average ranking length
-	private static final int M = 5;
+	private static final int M = 30;
 	// N = number of training instances
 	private static final int N = 30;
 	// seed for shuffling the dataset
@@ -71,6 +70,9 @@ public class DyadRankerGATSPTest {
 
 		Collections.shuffle(dataset, new Random(seed));
 
+		// trim rankings
+		dataset = randomlyTrimSparseDyadRankingInstances(dataset, M);
+		
 		// split data
 		DyadRankingDataset trainData = new DyadRankingDataset(dataset.subList(0, N));
 		DyadRankingDataset testData = new DyadRankingDataset(dataset.subList(N, dataset.size()));
@@ -81,9 +83,14 @@ public class DyadRankerGATSPTest {
 		try {
 
 			// train the ranker
+			
+//			System.out.println(trainData);
+			
 			ranker.train(trainData);
 			List<IDyadRankingInstance> predictions = ranker.predict(testData);
 			double avgKendallTau = 0.0d;
+
+			System.out.println();
 
 			// compute average rank correlation
 			for (int testIndex = 0; testIndex < testData.size(); testIndex++) {
