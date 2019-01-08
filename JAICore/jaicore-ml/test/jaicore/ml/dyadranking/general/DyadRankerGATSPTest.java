@@ -5,17 +5,14 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
 
-import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
-import org.apache.commons.math3.stat.correlation.KendallsCorrelation;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runners.Parameterized.Parameters;
+
+import com.google.common.collect.Lists;
 
 import de.upb.isys.linearalgebra.DenseDoubleVector;
 import de.upb.isys.linearalgebra.Vector;
@@ -25,6 +22,7 @@ import jaicore.ml.core.exception.TrainingException;
 import jaicore.ml.dyadranking.Dyad;
 import jaicore.ml.dyadranking.algorithm.ADyadRanker;
 import jaicore.ml.dyadranking.algorithm.FeatureTransformPLDyadRanker;
+import jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import jaicore.ml.dyadranking.dataset.DyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
@@ -50,9 +48,9 @@ public class DyadRankerGATSPTest {
 	private static final String ALTERNATIVES_FEATURE_FILE = "testsrc/ml/dyadranking/ga-tsp/data_meta/GAMeta72-labeldescriptions.csv";
 
 	// M = average ranking length
-	private static final int M = 5;
+	private static final int M = 30;
 	// N = number of training instances
-	private static final int N = 30;
+	private static final int N = 90;
 	// seed for shuffling the dataset
 	private static final long seed = 15;
 
@@ -72,24 +70,50 @@ public class DyadRankerGATSPTest {
 
 		Collections.shuffle(dataset, new Random(seed));
 
+		// trim rankings
+		dataset = randomlyTrimSparseDyadRankingInstances(dataset, M);
+		
 		// split data
 		DyadRankingDataset trainData = new DyadRankingDataset(dataset.subList(0, N));
-		DyadRankingDataset testData = new DyadRankingDataset(dataset.subList(N, dataset.size()));
+//		DyadRankingDataset testData = new DyadRankingDataset(dataset.subList(N, dataset.size()));
+		DyadRankingDataset testData = new DyadRankingDataset(dataset.subList(N, N + 20));
 
 		// trim dyad ranking instances for train data
-		trainData = randomlyTrimSparseDyadRankingInstances(trainData, M);
+//		trainData = randomlyTrimSparseDyadRankingInstances(trainData, M);
 
 		try {
 
 			// train the ranker
+			
+//			System.out.println(trainData);
+			
 			ranker.train(trainData);
-			List<IDyadRankingInstance> predictions = ranker.predict(testData);
+
 			double avgKendallTau = 0.0d;
+
+			System.out.println();
 
 			// compute average rank correlation
 			for (int testIndex = 0; testIndex < testData.size(); testIndex++) {
 				IDyadRankingInstance testInstance = (IDyadRankingInstance) testData.get(testIndex);
-				IDyadRankingInstance predictionInstance = (IDyadRankingInstance) predictions.get(testIndex);
+				List<Dyad> shuffleContainer = Lists.newArrayList(testInstance.iterator());
+				shuffleContainer = Lists.reverse(shuffleContainer);
+				IDyadRankingInstance shuffledInstance = new DyadRankingInstance(shuffleContainer);
+				IDyadRankingInstance predictionInstance = (IDyadRankingInstance) ranker.predict(shuffledInstance);
+
+//				System.out.println("Test instance");
+//				for (Dyad dyad : testInstance) {
+//					System.out.println(dyad.getAlternative());
+//				}
+//				System.out.println("\nPrediction ");
+//				for (Dyad dyad : predictionInstance) {
+//					System.out.println(dyad.getAlternative());
+//				}
+//				System.out.println("\n\n");
+
+//				System.out.println("prediction: " + predictionInstance.toString());
+//				System.out.println("test instance: " + testInstance.toString());
+//				System.out.println();
 
 				int dyadRankingLength = testInstance.length();
 				int nConc = 0;

@@ -5,12 +5,12 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import de.upb.isys.linearalgebra.Vector;
 import jaicore.ml.dyadranking.Dyad;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import jaicore.ml.dyadranking.dataset.DyadRankingInstance;
-import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
 
 /**
  * Creates simple rankings for testing purposes.
