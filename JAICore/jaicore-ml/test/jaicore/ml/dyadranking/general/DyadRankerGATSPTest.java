@@ -8,13 +8,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
 
-import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
-import org.apache.commons.math3.stat.correlation.KendallsCorrelation;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runners.Parameterized.Parameters;
+
+import com.google.common.collect.Lists;
 
 import de.upb.isys.linearalgebra.DenseDoubleVector;
 import de.upb.isys.linearalgebra.Vector;
@@ -23,7 +22,7 @@ import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.core.exception.TrainingException;
 import jaicore.ml.dyadranking.Dyad;
 import jaicore.ml.dyadranking.algorithm.ADyadRanker;
-import jaicore.ml.dyadranking.algorithm.FeatureTransformPLDyadRanker;
+import jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import jaicore.ml.dyadranking.dataset.DyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
@@ -51,7 +50,7 @@ public class DyadRankerGATSPTest {
 	// M = average ranking length
 	private static final int M = 30;
 	// N = number of training instances
-	private static final int N = 30;
+	private static final int N = 90;
 	// seed for shuffling the dataset
 	private static final long seed = 15;
 
@@ -62,7 +61,8 @@ public class DyadRankerGATSPTest {
 	public void init() {
 		// load dataset
 		dataset = loadDatasetFromXXLAndCSV(XXL_FILE, ALTERNATIVES_FEATURE_FILE);
-		ranker = new FeatureTransformPLDyadRanker();
+		// TODO differenct rankers
+		ranker = new PLNetDyadRanker();
 	}
 
 	@Test
@@ -78,7 +78,7 @@ public class DyadRankerGATSPTest {
 		DyadRankingDataset testData = new DyadRankingDataset(dataset.subList(N, dataset.size()));
 
 		// trim dyad ranking instances for train data
-		trainData = randomlyTrimSparseDyadRankingInstances(trainData, M);
+//		trainData = randomlyTrimSparseDyadRankingInstances(trainData, M);
 
 		try {
 
@@ -87,7 +87,7 @@ public class DyadRankerGATSPTest {
 //			System.out.println(trainData);
 			
 			ranker.train(trainData);
-			List<IDyadRankingInstance> predictions = ranker.predict(testData);
+
 			double avgKendallTau = 0.0d;
 
 			System.out.println();
@@ -95,7 +95,24 @@ public class DyadRankerGATSPTest {
 			// compute average rank correlation
 			for (int testIndex = 0; testIndex < testData.size(); testIndex++) {
 				IDyadRankingInstance testInstance = (IDyadRankingInstance) testData.get(testIndex);
-				IDyadRankingInstance predictionInstance = (IDyadRankingInstance) predictions.get(testIndex);
+				List<Dyad> shuffleContainer = Lists.newArrayList(testInstance.iterator());
+				shuffleContainer = Lists.reverse(shuffleContainer);
+				IDyadRankingInstance shuffledInstance = new DyadRankingInstance(shuffleContainer);
+				IDyadRankingInstance predictionInstance = (IDyadRankingInstance) ranker.predict(shuffledInstance);
+
+//				System.out.println("Test instance");
+//				for (Dyad dyad : testInstance) {
+//					System.out.println(dyad.getAlternative());
+//				}
+//				System.out.println("\nPrediction ");
+//				for (Dyad dyad : predictionInstance) {
+//					System.out.println(dyad.getAlternative());
+//				}
+//				System.out.println("\n\n");
+
+//				System.out.println("prediction: " + predictionInstance.toString());
+//				System.out.println("test instance: " + testInstance.toString());
+//				System.out.println();
 
 				int dyadRankingLength = testInstance.length();
 				int nConc = 0;
@@ -193,15 +210,22 @@ public class DyadRankerGATSPTest {
 			reader.readLine();
 			reader.readLine();
 
+			List<Vector> instanceFeatures = new ArrayList<Vector>(246);
+			List<ArrayList<Vector>> alternativesList = new ArrayList<ArrayList<Vector>>(246);
+			DescriptiveStatistics[] stats = new DescriptiveStatistics[numAttributes];
+			for(int i = 0; i < stats.length; i++) {
+				stats[i] = new DescriptiveStatistics();
+			} 
 			while ((line = reader.readLine()) != null) {
 				tokens = line.split("\t");
-
 				Vector instance = new DenseDoubleVector(numAttributes);
-				List<Vector> alternatives = new ArrayList<Vector>(numLabels);
+				ArrayList<Vector> alternatives = new ArrayList<Vector>(numLabels);
 
 				// add the instances to the dyad ranking instance
 				for (int i = 0; i < numAttributes; i++) {
-					instance.setValue(i, Double.parseDouble(tokens[i]));
+					double val =  Double.parseDouble(tokens[i]);
+					instance.setValue(i,val);
+					stats[i].addValue(val);
 				}
 
 				// add the alternatives to the dyad ranking instance
@@ -209,15 +233,39 @@ public class DyadRankerGATSPTest {
 					int index = Integer.parseInt(tokens[i]) - 1;
 					alternatives.add(alternativeFeatures.get(index));
 				}
-				SparseDyadRankingInstance drInstance = new SparseDyadRankingInstance(instance, alternatives);
+				instanceFeatures.add(instance);
+				alternativesList.add(alternatives);
+				
+//				SparseDyadRankingInstance drInstance = new SparseDyadRankingInstance(instance, alternatives);
 //				List<Dyad> dyadList = new LinkedList<Dyad>();
 //				for(Dyad dyad : drInstance) {
 //					dyadList.add(dyad);
 //				}
 //				DyadRankingInstance drDenseInstance = new DyadRankingInstance(dyadList);
 //				System.out.println(dyadList);
-				dataset.add(drInstance);
+//				dataset.add(drInstance);
 			}
+			
+			double[] means = new double[numAttributes];
+			for(int i = 0; i < means.length; i++) {
+				means[i] = stats[i].getMean();
+			}
+			double[] stds = new double[numAttributes];
+			for(int i = 0; i < stds.length; i++) {
+				stds[i] = stats[i].getStandardDeviation();
+			}
+			Vector meanVec = new DenseDoubleVector(means);
+			Vector stdVec = new DenseDoubleVector(stds);
+			
+			for(Vector instVec : instanceFeatures) {
+				instVec.subtractVector(meanVec);
+				instVec.divideByVectorPairwise(stds);
+			}
+			
+			for(int i = 0; i < instanceFeatures.size(); i++) {
+				dataset.add(new SparseDyadRankingInstance(instanceFeatures.get(i), alternativesList.get(i)));
+			}
+			
 			reader.close();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -282,4 +330,5 @@ public class DyadRankerGATSPTest {
 		}
 		return pos;
 	}
+	
 }
