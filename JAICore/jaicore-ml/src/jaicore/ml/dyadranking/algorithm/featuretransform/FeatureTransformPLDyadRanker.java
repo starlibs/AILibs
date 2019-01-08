@@ -1,4 +1,4 @@
-package jaicore.ml.dyadranking.algorithm;
+package jaicore.ml.dyadranking.algorithm.featuretransform;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,9 +15,11 @@ import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.exception.ConfigurationException;
 import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.core.exception.TrainingException;
+import jaicore.ml.core.optimizing.IGradientBasedOptimizer;
+import jaicore.ml.core.optimizing.graddesc.GradientDescentOptimizer;
 import jaicore.ml.core.predictivemodel.IPredictiveModelConfiguration;
 import jaicore.ml.dyadranking.Dyad;
-import jaicore.ml.dyadranking.algorithm.lbfgs.LBFGSOptimizerWrapper;
+import jaicore.ml.dyadranking.algorithm.APLDyadRanker;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import jaicore.ml.dyadranking.dataset.DyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
@@ -25,18 +27,25 @@ import jaicore.ml.dyadranking.optimizing.DyadRankingFeatureTransformNegativeLogL
 import jaicore.ml.dyadranking.optimizing.DyadRankingFeatureTransformNegativeLogLikelihoodDerivative;
 import jaicore.ml.dyadranking.optimizing.IDyadRankingFeatureTransformPLGradientDescendableFunction;
 import jaicore.ml.dyadranking.optimizing.IDyadRankingFeatureTransformPLGradientFunction;
-import jaicore.ml.dyadranking.optimizing.IGradientBasedOptimizer;
 
 /**
  * A feature transformation Placket-Luce dyad ranker. By default uses bilinear
  * feature transformation.
  * 
- * @author Helena Graf
+ * All the provided algorithms are implementations of the PLModel introduced in
+ * [1].
+ * 
+ * 
+ * [1] Schäfer, D. & Hüllermeier, Dyad ranking using Plackett–Luce models based
+ * on joint feature representations,
+ * https://link.springer.com/article/10.1007%2Fs10994-017-5694-9
+ * 
+ * @author Helena Graf, Mirko Jürgens
  *
  */
 public class FeatureTransformPLDyadRanker extends APLDyadRanker {
-	
-	private static final Logger log = LoggerFactory.getLogger(APLDyadRanker.class);
+
+	private static final Logger log = LoggerFactory.getLogger(FeatureTransformPLDyadRanker.class);
 
 	/* Phi in the paper */
 	private IDyadFeatureTransform featureTransform;
@@ -54,7 +63,7 @@ public class FeatureTransformPLDyadRanker extends APLDyadRanker {
 	private IDyadRankingFeatureTransformPLGradientFunction negativeLogLikelihoodDerivative = new DyadRankingFeatureTransformNegativeLogLikelihoodDerivative();
 
 	/* The optimizer used to find w */
-	private IGradientBasedOptimizer optimizer = new LBFGSOptimizerWrapper();
+	private IGradientBasedOptimizer optimizer = new GradientDescentOptimizer();
 
 	/**
 	 * Constructs a new feature transform Placket-Luce dyad ranker with bilinear
@@ -107,7 +116,8 @@ public class FeatureTransformPLDyadRanker extends APLDyadRanker {
 		Vector featureTransformVector = featureTransform.transform(dyad);
 		double dot = w.dotProduct(featureTransformVector);
 		double val = Math.exp(dot);
-		log.debug("Feature transform for dyad {} is {}. \n Dot-Product is {} and skill is {}", dyad, featureTransformVector, dot, val);
+		log.debug("Feature transform for dyad {} is {}. \n Dot-Product is {} and skill is {}", dyad,
+				featureTransformVector, dot, val);
 		return val;
 	}
 
@@ -121,14 +131,51 @@ public class FeatureTransformPLDyadRanker extends APLDyadRanker {
 
 		negativeLogLikelihood.initialize(dRDataset, featureTransform);
 		negativeLogLikelihoodDerivative.initialize(dRDataset, featureTransform);
-		int alternativeLength = ((IDyadRankingInstance) dRDataset.get(0)).getDyadAtPosition(0).getAlternative()
-				.length();
-		int instanceLength = ((IDyadRankingInstance) dRDataset.get(0)).getDyadAtPosition(0).getInstance().length();
+		int alternativeLength = dRDataset.get(0).getDyadAtPosition(0).getAlternative().length();
+		int instanceLength = dRDataset.get(0).getDyadAtPosition(0).getInstance().length();
 		Vector initialGuess = new DenseDoubleVector(
-				featureTransform.getTransformedVectorLength(alternativeLength, instanceLength));
-		initialGuess.fillRandomly();
+				featureTransform.getTransformedVectorLength(alternativeLength, instanceLength), -0.3);
+		// initialGuess.fillRandomly();
+		log.debug("Likelihood of the randomly filled w is {}", likelihoodOfParameter(initialGuess, dRDataset));
 		w = optimizer.optimize(negativeLogLikelihood, negativeLogLikelihoodDerivative, initialGuess);
-		log.debug("Finished training the ranker. W-Vector is {}", w);
+		log.debug("Finished optimizing, the final w is {}", w);
+		log.debug("Final derivative of w is {}", negativeLogLikelihoodDerivative.apply(w));
+		log.debug("Likelihood of the final w is {}", likelihoodOfParameter(w, dRDataset));
+
+	}
+
+	/**
+	 * Computes the likelihood of the parameter vector w. Algorithm (16) of [1].
+	 * 
+	 * @param w
+	 *            the likelihood to be computed
+	 * @param dataset
+	 *            the dataset on which the likelihood should be evaluated
+	 * @return the likelihood, measured as a probability
+	 */
+	private double likelihoodOfParameter(Vector w, DyadRankingDataset dataset) {
+		int N = dataset.size();
+		double outerProduct = 1.0;
+		for (int n = 0; n < N; n++) {
+			IDyadRankingInstance dyadRankingInstance = dataset.get(n);
+			int M_n = dyadRankingInstance.length();
+			double innerProduct = 1.0;
+			for (int m = 0; m < M_n; m++) {
+				Dyad dyad = dyadRankingInstance.getDyadAtPosition(m);
+				Vector z_nm = featureTransform.transform(dyad);
+				double en = Math.exp(w.dotProduct(z_nm));
+				double denum_sum = 0;
+				for (int l = m; l < M_n; l++) {
+					Dyad dyad_l = dyadRankingInstance.getDyadAtPosition(l);
+					Vector z_nl = featureTransform.transform(dyad_l);
+					denum_sum += Math.exp(w.dotProduct(z_nl));
+				}
+				innerProduct = innerProduct * (en / denum_sum);
+			}
+
+			outerProduct = outerProduct * innerProduct;
+		}
+		return outerProduct;
 	}
 
 	@Override
