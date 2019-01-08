@@ -1,28 +1,22 @@
 package jaicore.ml.dyadranking.general;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import de.upb.isys.linearalgebra.DenseDoubleVector;
-import de.upb.isys.linearalgebra.Vector;
 import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.core.exception.TrainingException;
 import jaicore.ml.dyadranking.Dyad;
 import jaicore.ml.dyadranking.algorithm.ADyadRanker;
 import jaicore.ml.dyadranking.algorithm.FeatureTransformPLDyadRanker;
-import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
-import jaicore.ml.dyadranking.dataset.DyadRankingInstance;
+import jaicore.ml.dyadranking.algorithm.IPLNetDyadRankerConfiguration;
+import jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
-import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
 
 /**
  * Class that runs a simple functionality check on all dyad rankers.
@@ -41,30 +35,66 @@ public class AdvancedDyadDatasetDyadRankerTester {
 
 	@Before
 	public void trainRanker() throws TrainingException {
-		ranker.train(DyadRankingInstanceSupplier.getDyadRankingDataset(100, 100));
+		ranker.train(DyadRankingInstanceSupplier.getDyadRankingDataset(10, 1000));
 	}
 
 	@Test
 	public void testSwapOrdering1() throws PredictionException {
 		System.out.println("Now testing ordering");
-
-		IDyadRankingInstance test = DyadRankingInstanceSupplier.getDyadRankingInstance(100);
-		IDyadRankingInstance predict = ranker.predict(test);
-
-		Dyad currentMin = predict.getDyadAtPosition(0);
-		int failures = 0;
-		for (Dyad dyad : predict) {
-			if (!(DyadRankingInstanceSupplier.complexDyadRanker().compare(currentMin, dyad) <= 0)) {		
-				failures++;
-			} 
-			currentMin = dyad;
+		
+		int maxDyadRankingLength = 10;
+		int nTestInstances = 100;
+		double avgKendallTau = 0;
+		double avgFailures = 0;
+		
+		for (int testInst = 0; testInst < nTestInstances; testInst++) {
+			IDyadRankingInstance test = DyadRankingInstanceSupplier.getDyadRankingInstance(maxDyadRankingLength);
+			IDyadRankingInstance predict = ranker.predict(test);
+			
+			int dyadRankingLength = test.length();
+			int nConc = 0;
+			int nDisc = 0;
+			for (int i = 1; i < dyadRankingLength; i++) {
+				for (int j = 0; j < i; j++) {
+					if (DyadRankingInstanceSupplier.complexDyadRanker().compare(
+							predict.getDyadAtPosition(j), predict.getDyadAtPosition(i)) < 0) {
+						nConc++;
+					} else {
+						nDisc++;
+					}
+				}
+			}
+			double kendallTau = 2.0 * (nConc - nDisc) / (dyadRankingLength * (dyadRankingLength - 1) );
+			avgKendallTau += kendallTau;
+			
+			Dyad currentMin = predict.getDyadAtPosition(0);
+			int failures = 0;
+			for (Dyad dyad : predict) {
+				if (!(DyadRankingInstanceSupplier.complexDyadRanker().compare(currentMin, dyad) <= 0)) {		
+					failures++;
+				} 
+				currentMin = dyad;
+			}
+			avgFailures += failures;
 		}
-		System.out.println("Found failures: "+ failures);
+		avgKendallTau /= nTestInstances;
+		avgFailures /= nTestInstances;
+		
+		System.out.println("Kendall's tau: " + avgKendallTau); 
+		System.out.println("Found failures: "+ avgFailures);
 		
 	}
 
 	@Parameters
-	public static List<ADyadRanker> supplyDyadRankers() {
-		return Arrays.asList(new FeatureTransformPLDyadRanker());
+	public static List<ADyadRanker[]> supplyDyadRankers() {
+		PLNetDyadRanker ranker1 = new PLNetDyadRanker();
+		ranker1.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_MAX_EPOCHS, "0");
+		ranker1.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_PLNET_HIDDEN_NODES, "6,4,3");
+		PLNetDyadRanker ranker2 = new PLNetDyadRanker();
+		ranker2.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_MAX_EPOCHS, "10");
+		ranker2.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_TRAIN_RATIO, "1.0");
+		ranker2.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_PLNET_HIDDEN_NODES, "8,4");
+		
+		return Arrays.asList(new PLNetDyadRanker[] {ranker1}, new PLNetDyadRanker[] {ranker2}, new PLNetDyadRanker[] { new PLNetDyadRanker()}, new FeatureTransformPLDyadRanker[] {new FeatureTransformPLDyadRanker()});
 	}
 }
