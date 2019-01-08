@@ -10,7 +10,17 @@ import jaicore.ml.core.optimizing.IGradientDescendableFunction;
 import jaicore.ml.core.optimizing.IGradientFunction;
 
 /**
- * An optimizer based on the gradient descent method [1].
+ * An optimizer based on the gradient descent method [1]. This optimizer is the
+ * naive implementation that calculates the gradient in every step and makes an
+ * update into the negative direction of the gradient.
+ * 
+ * This method is known to find the optimum, if the underlying function is convex.
+ * 
+ * At some point in the future, we should probably implement faster methods,
+ * like for example http://www.seas.ucla.edu/~vandenbe/236C/lectures/fgrad.pdf
+ * 
+ * [1] Jonathan Barzilai and Jonathan M. Borwein, "Two-point step size gradient
+ * methods", in: IMA journal of numerical analysis, 8.1 (1998), pp. 141-148.
  * 
  * @author Mirko Jürgens
  *
@@ -25,6 +35,10 @@ public class GradientDescentOptimizer implements IGradientBasedOptimizer {
 
 	private static final Logger log = LoggerFactory.getLogger(GradientDescentOptimizer.class);
 
+	/**
+	 * 
+	 * @param config
+	 */
 	public GradientDescentOptimizer(GradientDescentOptimizerConfig config) {
 		this.learningRate = config.learningRate();
 		this.gradientThreshold = config.gradientThreshold();
@@ -60,8 +74,9 @@ public class GradientDescentOptimizer implements IGradientBasedOptimizer {
 			double weight = initialGuess.getValue(i);
 			double gradient = gradients.getValue(i);
 			// don't further optimize if we meet the threshold
-			if (Math.abs(gradient) < gradientThreshold)
+			if (Math.abs(gradient) < gradientThreshold) {
 				continue;
+			}
 			// we want to minimize
 			gradient = gradient * -1.0;
 			weight = weight + gradient * learningRate;

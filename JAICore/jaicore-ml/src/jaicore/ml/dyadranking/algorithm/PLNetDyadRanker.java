@@ -37,6 +37,7 @@ import jaicore.ml.core.exception.TrainingException;
 import jaicore.ml.core.predictivemodel.IOnlineLearner;
 import jaicore.ml.core.predictivemodel.IPredictiveModelConfiguration;
 import jaicore.ml.dyadranking.Dyad;
+import jaicore.ml.dyadranking.algorithm.featuretransform.FeatureTransformPLDyadRanker;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import jaicore.ml.dyadranking.dataset.DyadRankingInstance;
 import jaicore.ml.core.predictivemodel.IPredictiveModelConfiguration;
@@ -58,7 +59,7 @@ import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
  */
 public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDyadRankingInstance> {
 
-	private static final Logger log = LoggerFactory.getLogger(FeatureTransformPLDyadRanker.class);
+	private static final Logger log = LoggerFactory.getLogger(PLNetDyadRanker.class);
 
 	private MultiLayerNetwork plNet;
 	private IPLNetDyadRankerConfiguration configuration;
