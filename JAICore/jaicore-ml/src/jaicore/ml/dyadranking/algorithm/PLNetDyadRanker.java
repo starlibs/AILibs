@@ -173,8 +173,9 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 //			log.warn(dyadVector.toString());
 			dyadList.add(dyadVector);
 		}
-		dyadMatrix = Nd4j.vstack(dyadList);
-//		log.warn(dyadMatrix.toString());
+//		dyadMatrix = Nd4j.vstack(dyadList);
+		dyadMatrix = dyadRankingToMatrix(drInstance);
+		log.warn(dyadMatrix.toString());
 		List<INDArray> activations = plNet.feedForward(dyadMatrix);
 		INDArray output = activations.get(activations.size() - 1);
 		System.out.println();
@@ -351,18 +352,18 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 		}
 		INDArray dyadMatrix;
 		dyadMatrix = Nd4j.vstack(dyadList);
-		log.warn("dyad matrix before: \n {}", dyadMatrix.toString());
+//		log.warn("dyad matrix before: \n {}", dyadMatrix.toString());
 		// standardize matrix
-		for (int i = 0; i < dyadMatrix.shape()[1]; i++) {
-			INDArray columnVector = dyadMatrix.getColumn(i);
-			DescriptiveStatistics stats = new DescriptiveStatistics();
-			for(int j = 0; j < columnVector.shape()[0];j++) {
-				stats.addValue(columnVector.getDouble(j));
-			}
-			columnVector.subi(stats.getMean());
-			columnVector.divi(stats.getStandardDeviation());
-		}
-		log.warn("dyad matrix after: \n {}",  dyadMatrix.toString());
+//		for (int i = 0; i < dyadMatrix.shape()[1]; i++) {
+//			INDArray columnVector = dyadMatrix.getColumn(i);
+//			DescriptiveStatistics stats = new DescriptiveStatistics();
+//			for(int j = 0; j < columnVector.shape()[0];j++) {
+//				stats.addValue(columnVector.getDouble(j));
+//			}
+//			columnVector.subi(stats.getMean());
+//			columnVector.divi(stats.getStandardDeviation());
+//		}
+//		log.warn("dyad matrix after: \n {}",  dyadMatrix.toString());
 		return dyadMatrix;
 	}
 

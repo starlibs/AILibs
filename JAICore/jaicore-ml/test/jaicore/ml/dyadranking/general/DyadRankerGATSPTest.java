@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -207,15 +208,22 @@ public class DyadRankerGATSPTest {
 			reader.readLine();
 			reader.readLine();
 
+			List<Vector> instanceFeatures = new ArrayList<Vector>(246);
+			List<ArrayList<Vector>> alternativesList = new ArrayList<ArrayList<Vector>>(246);
+			DescriptiveStatistics[] stats = new DescriptiveStatistics[numAttributes];
+			for(int i = 0; i < stats.length; i++) {
+				stats[i] = new DescriptiveStatistics();
+			} 
 			while ((line = reader.readLine()) != null) {
 				tokens = line.split("\t");
-
 				Vector instance = new DenseDoubleVector(numAttributes);
-				List<Vector> alternatives = new ArrayList<Vector>(numLabels);
+				ArrayList<Vector> alternatives = new ArrayList<Vector>(numLabels);
 
 				// add the instances to the dyad ranking instance
 				for (int i = 0; i < numAttributes; i++) {
-					instance.setValue(i, Double.parseDouble(tokens[i]));
+					double val =  Double.parseDouble(tokens[i]);
+					instance.setValue(i,val);
+					stats[i].addValue(val);
 				}
 
 				// add the alternatives to the dyad ranking instance
@@ -223,15 +231,39 @@ public class DyadRankerGATSPTest {
 					int index = Integer.parseInt(tokens[i]) - 1;
 					alternatives.add(alternativeFeatures.get(index));
 				}
-				SparseDyadRankingInstance drInstance = new SparseDyadRankingInstance(instance, alternatives);
+				instanceFeatures.add(instance);
+				alternativesList.add(alternatives);
+				
+//				SparseDyadRankingInstance drInstance = new SparseDyadRankingInstance(instance, alternatives);
 //				List<Dyad> dyadList = new LinkedList<Dyad>();
 //				for(Dyad dyad : drInstance) {
 //					dyadList.add(dyad);
 //				}
 //				DyadRankingInstance drDenseInstance = new DyadRankingInstance(dyadList);
 //				System.out.println(dyadList);
-				dataset.add(drInstance);
+//				dataset.add(drInstance);
 			}
+			
+			double[] means = new double[numAttributes];
+			for(int i = 0; i < means.length; i++) {
+				means[i] = stats[i].getMean();
+			}
+			double[] stds = new double[numAttributes];
+			for(int i = 0; i < stds.length; i++) {
+				stds[i] = stats[i].getStandardDeviation();
+			}
+			Vector meanVec = new DenseDoubleVector(means);
+			Vector stdVec = new DenseDoubleVector(stds);
+			
+			for(Vector instVec : instanceFeatures) {
+				instVec.subtractVector(meanVec);
+				instVec.divideByVectorPairwise(stds);
+			}
+			
+			for(int i = 0; i < instanceFeatures.size(); i++) {
+				dataset.add(new SparseDyadRankingInstance(instanceFeatures.get(i), alternativesList.get(i)));
+			}
+			
 			reader.close();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -294,4 +326,5 @@ public class DyadRankerGATSPTest {
 		}
 		return pos;
 	}
+	
 }
