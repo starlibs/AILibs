@@ -1,7 +1,6 @@
 package jaicore.ml.dyadranking.general;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import org.junit.Before;
@@ -27,6 +26,8 @@ import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
  */
 @RunWith(Parameterized.class)
 public class AdvancedDyadDatasetDyadRankerTester {
+	
+	public static int SEED = 7;
 
 	ADyadRanker ranker;
 
@@ -38,7 +39,7 @@ public class AdvancedDyadDatasetDyadRankerTester {
 
 	@Before
 	public void trainRanker() throws TrainingException {
-		ranker.train(DyadRankingInstanceSupplier.getDyadRankingDataset(10, 1000));
+		ranker.train(DyadRankingInstanceSupplier.getDyadRankingDataset(10, 1000, SEED));
 	}
 
 	@Test
@@ -51,7 +52,7 @@ public class AdvancedDyadDatasetDyadRankerTester {
 		double avgFailures = 0;
 		
 		for (int testInst = 0; testInst < nTestInstances; testInst++) {
-			IDyadRankingInstance test = DyadRankingInstanceSupplier.getDyadRankingInstance(maxDyadRankingLength);
+			IDyadRankingInstance test = DyadRankingInstanceSupplier.getDyadRankingInstance(maxDyadRankingLength, SEED);
 			IDyadRankingInstance predict = ranker.predict(test);
 			
 			int dyadRankingLength = test.length();
