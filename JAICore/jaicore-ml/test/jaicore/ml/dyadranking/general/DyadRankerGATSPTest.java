@@ -50,7 +50,7 @@ public class DyadRankerGATSPTest {
 	// M = average ranking length
 	private static final int M = 30;
 	// N = number of training instances
-	private static final int N = 90;
+	private static final int N = 120;
 	// seed for shuffling the dataset
 	private static final long seed = 15;
 
@@ -70,23 +70,17 @@ public class DyadRankerGATSPTest {
 
 		Collections.shuffle(dataset, new Random(seed));
 
-		// trim rankings
-		dataset = randomlyTrimSparseDyadRankingInstances(dataset, M);
 		
 		// split data
 		DyadRankingDataset trainData = new DyadRankingDataset(dataset.subList(0, N));
-//		DyadRankingDataset testData = new DyadRankingDataset(dataset.subList(N, dataset.size()));
-		DyadRankingDataset testData = new DyadRankingDataset(dataset.subList(N, N + 20));
+		DyadRankingDataset testData = new DyadRankingDataset(dataset.subList(N, dataset.size()));
 
 		// trim dyad ranking instances for train data
-//		trainData = randomlyTrimSparseDyadRankingInstances(trainData, M);
+		trainData = randomlyTrimSparseDyadRankingInstances(trainData, M);
 
 		try {
 
 			// train the ranker
-			
-//			System.out.println(trainData);
-			
 			ranker.train(trainData);
 
 			double avgKendallTau = 0.0d;
@@ -97,7 +91,7 @@ public class DyadRankerGATSPTest {
 			for (int testIndex = 0; testIndex < testData.size(); testIndex++) {
 				IDyadRankingInstance testInstance = (IDyadRankingInstance) testData.get(testIndex);
 				List<Dyad> shuffleContainer = Lists.newArrayList(testInstance.iterator());
-				shuffleContainer = Lists.reverse(shuffleContainer);
+//				shuffleContainer = Lists.reverse(shuffleContainer);
 				IDyadRankingInstance shuffledInstance = new DyadRankingInstance(shuffleContainer);
 				IDyadRankingInstance predictionInstance = (IDyadRankingInstance) ranker.predict(shuffledInstance);
 
@@ -233,14 +227,6 @@ public class DyadRankerGATSPTest {
 				instanceFeatures.add(instance);
 				alternativesList.add(alternatives);
 				
-//				SparseDyadRankingInstance drInstance = new SparseDyadRankingInstance(instance, alternatives);
-//				List<Dyad> dyadList = new LinkedList<Dyad>();
-//				for(Dyad dyad : drInstance) {
-//					dyadList.add(dyad);
-//				}
-//				DyadRankingInstance drDenseInstance = new DyadRankingInstance(dyadList);
-//				System.out.println(dyadList);
-//				dataset.add(drInstance);
 			}
 			
 			double[] means = new double[numAttributes];
