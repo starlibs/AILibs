@@ -48,7 +48,7 @@ import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
  * All the provided algorithms are implementations of the PLModel introduced in
  * [1].
  * 
- * Schäfer, D., & Hüllermeier, E. (2018). Dyad ranking using Plackett--Luce
+ * [1] Schäfer, D., & Hüllermeier, E. (2018). Dyad ranking using Plackett--Luce
  * models based on joint feature representations. Machine Learning, 107(5),
  * 903–941. https://doi.org/10.1007/s10994-017-5694-9
  * 
@@ -138,6 +138,16 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 		plNet = currentBestModel;
 	}
 
+	/**
+	 * Updates this {@link PLNetDyadRanker} based on the given {@link IInstance},
+	 * which needs to be an {@link IDyadRankingInstance}. The update procedure is
+	 * based on algorithm 2 in [1].
+	 * 
+	 * 
+	 * @param instances The {@link IInstance} the update should be based on. Needs
+	 *                  to be a {@link IDyadRankingInstance}.
+	 * @throws TrainingException If something fails during the update process.
+	 */
 	@Override
 	public void update(IInstance instance) throws TrainingException {
 		if (!(instance instanceof IDyadRankingInstance)) {
