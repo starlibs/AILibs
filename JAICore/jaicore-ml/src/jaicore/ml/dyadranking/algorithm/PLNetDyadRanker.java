@@ -348,7 +348,7 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 		}
 		INDArray dyadMatrix;
 		dyadMatrix = Nd4j.vstack(dyadList);
-//		log.warn("dyad matrix before: \n {}", dyadMatrix.toString());
+		log.warn("dyad matrix before: \n {}", dyadMatrix.toString());
 		// standardize matrix
 		for (int i = 0; i < dyadMatrix.shape()[1]; i++) {
 			INDArray columnVector = dyadMatrix.getColumn(i);
@@ -357,9 +357,9 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 				stats.addValue(columnVector.getDouble(j));
 			}
 			columnVector.subi(stats.getMean());
-			columnVector.div(stats.getStandardDeviation());
+			columnVector.divi(stats.getStandardDeviation());
 		}
-//		log.warn("dyad matrix after: \n {}",  dyadMatrix.toString());
+		log.warn("dyad matrix after: \n {}",  dyadMatrix.toString());
 		return dyadMatrix;
 	}
 
