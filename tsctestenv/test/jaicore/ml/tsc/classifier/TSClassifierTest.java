@@ -49,7 +49,70 @@ public class TSClassifierTest {
 	/**
 	 * Function comparing a time series classifier deriving from Weka's
 	 * <code>Classifier</code> interface (used in Bagnall's reference
-	 * implementations).
+	 * implementations) or from <code>sfa.classification.Classifier</code>.
+	 * 
+	 * @param tsRefClassifier
+	 *            Time series classifier reference to be compared to own
+	 *            implementation
+	 * @param tsClassifier
+	 *            Own implementation of the time series classifier
+	 * @param seed
+	 *            Seed used in the experiments
+	 * @param tsRefClassifierParams
+	 *            Textual description of the used parameters of the reference
+	 *            classifier. Will be stored in the database entry
+	 * @param tsClassifierParams
+	 *            Textual description of the used parameters of the own classifier.
+	 *            Will be stored in the database entry
+	 * @param trainingArffFile
+	 *            Arff file storing the training dataset
+	 * @param testArffFile
+	 *            Arff file storing the test dataset
+	 * @return Returns a map consisting of a fields and values to be stored in the
+	 *         database
+	 * @throws IOException
+	 *             Will be thrown if the data could not be read
+	 * @throws FileNotFoundException
+	 *             Will be thrown if the given data set file could not be found
+	 * @throws EvaluationException
+	 *             Will be thrown if the given classifier could not be evaluated
+	 * @throws TrainingException
+	 *             Will be thrown if the given classifier could not be trained
+	 * @throws PredictionException
+	 *             Will be thrown if a prediction error occurred
+	 * @throws TimeSeriesLoadingException
+	 *             Will be thrown if the time series dataset could not be loaded
+	 */
+	public static Map<String, Object> compareClassifiers(final Object tsRefClassifier,
+			final TSClassifier<?, ?, TimeSeriesDataset> tsClassifier, final int seed,
+			final String tsRefClassifierParams, final String tsClassifierParams, final File trainingArffFile,
+			final File testArffFile)
+			throws FileNotFoundException, EvaluationException, TrainingException, IOException, PredictionException,
+			TimeSeriesLoadingException {
+
+		if (trainingArffFile == null || testArffFile == null)
+			throw new IllegalArgumentException("Training and test file must not be null!");
+
+		final Map<String, Object> result = new HashMap<>();
+		result.put("seed", seed);
+		result.put("dataset", reduceFileNames(trainingArffFile, testArffFile));
+
+		// Test reference classifier
+		compareRefClassifiers(tsRefClassifier, seed, tsRefClassifierParams, result, trainingArffFile, testArffFile);
+
+		// Load dataset
+		TimeSeriesDataset train = TimeSeriesLoader.loadArff(trainingArffFile);
+		TimeSeriesDataset test = TimeSeriesLoader.loadArff(testArffFile);
+
+		trainAndEvaluateClassifier(tsClassifier, seed, tsClassifierParams, result, train, test);
+
+		return result;
+	}
+
+	/**
+	 * Function comparing a time series classifier deriving from Weka's
+	 * <code>Classifier</code> interface (used in Bagnall's reference
+	 * implementations) or from <code>sfa.classification.Classifier</code>.
 	 * 
 	 * @param tsRefClassifier
 	 *            Time series classifier reference to be compared to own
@@ -81,72 +144,155 @@ public class TSClassifierTest {
 	 * @throws TrainingException
 	 *             Will be thrown if the given classifier could not be trained
 	 * @throws PredictionException
+	 *             Will be thrown if a prediction error occurred
+	 * @throws TimeSeriesLoadingException
+	 *             Will be thrown if the time series dataset could not be loaded
 	 */
-	public static Map<String, Object> compareClassifier(final Classifier tsRefClassifier,
+	public static Map<String, Object> compareClassifiers(final Object tsRefClassifier,
 			final TSClassifier<?, ?, TimeSeriesDataset> tsClassifier,
 			final int seed,
 			final double trainingPortion, final String tsRefClassifierParams, final String tsClassifierParams,
 			final File... arffFiles)
-			throws FileNotFoundException, EvaluationException, TrainingException, IOException, PredictionException {
+			throws FileNotFoundException, EvaluationException, TrainingException, IOException, PredictionException,
+			TimeSeriesLoadingException {
 
 		final Map<String, Object> result = new HashMap<>();
 		result.put("seed", seed);
 		result.put("dataset", reduceFileNames(arffFiles));
 
-		trainAndEvaluateRefClassifier(tsRefClassifier, seed, trainingPortion, tsRefClassifierParams, result, arffFiles);
-		trainAndEvaluateClassifier(tsClassifier, seed, trainingPortion, tsClassifierParams, result,
-				arffFiles);
+		// Test reference classifier
+		compareRefClassifiers(tsRefClassifier, seed, trainingPortion, tsRefClassifierParams, result, arffFiles);
+
+		// Load dataset
+		TimeSeriesDataset dataset = loadDatasetFromArffFiles(arffFiles);
+
+		Pair<TimeSeriesDataset, TimeSeriesDataset> trainTest = TimeSeriesUtil.getStratifiedSplit(dataset,
+				trainingPortion);
+		TimeSeriesDataset train = trainTest.getX();
+		TimeSeriesDataset test = trainTest.getY();
+
+		trainAndEvaluateClassifier(tsClassifier, seed, tsClassifierParams, result, train, test);
 
 		return result;
 	}
 
-	// For SFA reference repository
 	/**
-	 * Function comparing a time series classifier deriving from the
-	 * <code>sfa.classification.Classifier</code> interface (used in Schaefer's
-	 * reference implementations).
+	 * Function to add the training and test results to the given
+	 * <code>result</code> map for the reference classifier.
 	 * 
 	 * @param tsRefClassifier
-	 *            Time series classifier reference to be compared to own
-	 *            implementation
-	 * @param tsClassifier
-	 *            Own implementation of the time series classifier
-	 * @param seed
-	 *            Seed used for the stratified split of the given data in
-	 *            <code>arffFile</code>
-	 * @param trainingPortion
-	 *            Training portion to be used for training of both classifiers
-	 *            (range 0 to 1)
+	 *            The time series reference classifier to be tested
 	 * @param tsRefClassifierParams
-	 *            Textual description of the used parameters of the reference
-	 *            classifier. Will be stored in the database entry
-	 * @param tsClassifierParams
-	 *            Textual description of the used parameters of the own classifier.
-	 *            Will be stored in the database entry
-	 * @param arffFiles
-	 *            Arff files containing the data used for training and evaluation
-	 *            (assumes univariate dataset, if only one file is given)
-	 * @return Returns a map consisting of a fields and values to be stored in the
-	 *         database
+	 *            The classifier parameters of the given reference classifier
+	 *            (stored in the databse entry, the classifier is assumed to be
+	 *            parameterized beforehand)
+	 * @param result
+	 *            The result map storing all experiment information
+	 * @param trainingFile
+	 *            The arff file storing the training data
+	 * @param testFile
+	 *            The arff file storing the test data
+	 * @throws FileNotFoundException
+	 *             Thrown if any of the dataset files could not be found
+	 * @throws EvaluationException
+	 *             Thrown if an error occurred during the evaluation
 	 * @throws TrainingException
-	 *             Will be thrown if the given classifier could not be trained
-	 * @throws PredictionException
+	 *             Thrown if the training could not be completed successfully
+	 * @throws IOException
+	 *             Thrown if an IO error occurred during the parsing of the arff
+	 *             files
 	 */
-	public static Map<String, Object> compareClassifier(
-			final sfa.classification.Classifier tsRefClassifier,
-			final TSClassifier<?, ?, TimeSeriesDataset> tsClassifier,
-			final int seed,
-			final double trainingPortion, final String tsRefClassifierParams, final String tsClassifierParams,
-			final File... arffFiles) throws TrainingException, PredictionException {
-		final Map<String, Object> result = new HashMap<>();
-		result.put("seed", seed);
-		result.put("dataset", reduceFileNames(arffFiles));
+	public static void compareRefClassifiers(final Object tsRefClassifier, final int seed,
+			final String tsRefClassifierParams, final Map<String, Object> result, final File trainingFile,
+			final File testFile)
+			throws FileNotFoundException, EvaluationException, TrainingException, IOException {
+		if (tsRefClassifier instanceof sfa.classification.Classifier) {
+			// SFA
+			// TODO
+			TimeSeries[] train = null;
+			TimeSeries[] test = null;
 
-		trainAndEvaluateRefClassifier(tsRefClassifier, seed, trainingPortion, tsRefClassifierParams, result, arffFiles);
-		trainAndEvaluateClassifier(tsClassifier, seed, trainingPortion, tsClassifierParams, result,
-				arffFiles);
+			trainAndEvaluateSFARefClassifier((sfa.classification.Classifier) tsRefClassifier, 
+					tsRefClassifierParams, result,
+					train, test);
+		} else if (tsRefClassifier instanceof Classifier) {
+			// Bagnall
+			// Transform and split data to Weka instances
+			ArffReader arffReader = new ArffReader(new FileReader(trainingFile));
+			final Instances trainingInstances = arffReader.getData();
+			trainingInstances.setClassIndex(trainingInstances.numAttributes() - 1);
 
-		return result;
+			arffReader = new ArffReader(new FileReader(testFile));
+			final Instances testInstances = arffReader.getData();
+			testInstances.setClassIndex(testInstances.numAttributes() - 1);
+
+			trainAndEvaluateBagnallRefClassifier((Classifier) tsRefClassifier, seed,
+					tsRefClassifierParams, result,
+					trainingInstances, testInstances);
+		} else
+			throw new IllegalArgumentException("Unknown reference classifier class.");
+	}
+
+	/**
+	 * Function to add the training and test results to the given
+	 * <code>result</code> map for the reference classifier.
+	 * 
+	 * @param tsRefClassifier
+	 *            The time series reference classifier to be tested
+	 * @param seed
+	 *            The seed used for the data split
+	 * @param trainingPortion
+	 *            The training portion used for the data split
+	 * @param tsRefClassifierParams
+	 *            The classifier parameters of the given reference classifier
+	 *            (stored in the databse entry, the classifier is assumed to be
+	 *            parameterized beforehand)
+	 * @param result
+	 *            The result map storing all experiment information
+	 * @param arffFiles
+	 *            The arff files to be parsed
+	 * @throws FileNotFoundException
+	 *             Thrown if any of the dataset files could not be found
+	 * @throws EvaluationException
+	 *             Thrown if an error occurred during the evaluation
+	 * @throws TrainingException
+	 *             Thrown if the training could not be completed successfully
+	 * @throws IOException
+	 *             Thrown if an IO error occurred during the parsing of the arff
+	 *             files
+	 */
+	public static void compareRefClassifiers(final Object tsRefClassifier, final int seed, final double trainingPortion,
+			final String tsRefClassifierParams, final Map<String, Object> result, final File... arffFiles)
+			throws FileNotFoundException, EvaluationException, TrainingException, IOException {
+		if (tsRefClassifier instanceof sfa.classification.Classifier) {
+			// SFA
+			// TODO
+			TimeSeries[] train = null;
+			TimeSeries[] test = null;
+
+			trainAndEvaluateSFARefClassifier((sfa.classification.Classifier) tsRefClassifier, 
+					tsRefClassifierParams, result,
+					train, test);
+		} else if (tsRefClassifier instanceof Classifier) {
+			// Bagnall
+			// Transform and split data to Weka instances
+			if (arffFiles == null || arffFiles.length < 1)
+				throw new IllegalArgumentException("At least one arff file must be given!");
+			if (arffFiles.length > 1) {
+				// TODO: Support multivariate evaluation
+				throw new UnsupportedOperationException(
+						"Multivariate ref ts classifier evaluation is not supported yet.");
+			}
+			ArffReader arffReader = new ArffReader(new FileReader(arffFiles[0]));
+			final Instances wekaInstances = arffReader.getData();
+			wekaInstances.setClassIndex(wekaInstances.numAttributes() - 1);
+			List<Instances> split = WekaUtil.getStratifiedSplit(wekaInstances, seed, trainingPortion);
+
+			trainAndEvaluateBagnallRefClassifier((Classifier) tsRefClassifier, seed, 
+					tsRefClassifierParams, result,
+					split.get(0), split.get(1));
+		} else
+			throw new IllegalArgumentException("Unknown reference classifier class.");
 	}
 
 	/**
@@ -156,50 +302,31 @@ public class TSClassifierTest {
 	 * 
 	 * @param tsClassifier
 	 *            Time series classifier to be trained and evaluated
-	 * 
 	 * @param seed
 	 *            Seed used for randomized splitting the given data into train and
 	 *            test set
-	 * @param trainingPortion
-	 *            Portion of the data used for training (range from 0 to 1)
 	 * @param tsClassifierParams
 	 *            Textual description of the time series classifier parameters to be
 	 *            stored in the database
 	 * @param result
 	 *            Map used to store the database entry's information
-	 * @param arffFiles
-	 *            Arff files containing the data used for training and evaluation
-	 *            (assumes univariate dataset, if only one file is given)
+	 * @param train
+	 *            Training instances
+	 * @param test
+	 *            Test instances
 	 * @throws TrainingException
-	 *             Will be thrown if training of <code>tsClassifier</code> fails
-	 * @throws PredictionException 
+	 *             Will be thrown if the training of <code>tsClassifier</code> fails
+	 * @throws PredictionException
+	 *             Will be thrown if the prediction of <code>tsClassifier</code>
+	 *             fails
 	 */
 	private static void trainAndEvaluateClassifier(
 			final TSClassifier<?, ?, TimeSeriesDataset> tsClassifier, final int seed,
-			final double trainingPortion, final String tsClassifierParams, final Map<String, Object> result,
-			final File... arffFiles) throws TrainingException, PredictionException {
+			final String tsClassifierParams, final Map<String, Object> result, final TimeSeriesDataset train,
+			final TimeSeriesDataset test) throws TrainingException, PredictionException {
 
 		result.put("classifier", tsClassifier.getClass().getSimpleName());
 		result.put("classifier_params", tsClassifierParams);
-
-		// Load dataset
-		TimeSeriesDataset dataset;
-		try {
-			if (arffFiles.length < 1)
-				throw new IllegalArgumentException("At least one arff file must be given!");
-			else if (arffFiles.length == 1) {
-				dataset = TimeSeriesLoader.loadArff(arffFiles[0]);
-			} else {
-				dataset = TimeSeriesLoader.loadArffs(arffFiles);
-			}
-		} catch (TimeSeriesLoadingException e) {
-			throw new TrainingException("Could not load training dataset.", e);
-		}
-
-		Pair<TimeSeriesDataset, TimeSeriesDataset> trainTest = TimeSeriesUtil.getStratifiedSplit(dataset,
-				trainingPortion);
-		TimeSeriesDataset train = trainTest.getX();
-		TimeSeriesDataset test = trainTest.getY();
 
 		// Training
 		LOGGER.debug("Starting training of classifier...");
@@ -254,49 +381,37 @@ public class TSClassifierTest {
 	 * @param seed
 	 *            Seed used for randomized splitting the given data into train and
 	 *            test set
-	 * @param trainingPortion
-	 *            Portion of the data used for training (range from 0 to 1)
 	 * @param tsRefClassifierParams
 	 *            Textual description of the time series classifier reference
 	 *            parameters to be stored in the database
 	 * @param result
 	 *            Map used to store the database entry's information
-	 * @param arffFiles
-	 *            Arff files containing the data used for training and evaluation
-	 *            (assumes univariate dataset, if only one file is given)
-	 * @throws IOException
-	 *             Will be thrown if the data could not be read
+	 * @param trainingInstances
+	 *            Training instances
+	 * @param testInstances
+	 *            Test instances
 	 * @throws FileNotFoundException
 	 *             Will be thrown if the given data set file could not be found
+	 * @throws IOException
+	 *             Will be thrown if the data could not be read
 	 * @throws EvaluationException
 	 *             Will be thrown if the given classifier could not be evaluated
 	 * @throws TrainingException
 	 *             Will be thrown if the given classifier could not be trained
 	 */
-	private static void trainAndEvaluateRefClassifier(final Classifier tsRefClassifier, final int seed,
-			final double trainingPortion, final String tsRefClassifierParams, final Map<String, Object> result,
-			final File... arffFiles) throws FileNotFoundException, IOException, EvaluationException, TrainingException {
+	private static void trainAndEvaluateBagnallRefClassifier(final Classifier tsRefClassifier, final int seed,
+			final String tsRefClassifierParams, final Map<String, Object> result,
+			final Instances trainingInstances, final Instances testInstances)
+			throws FileNotFoundException, IOException, EvaluationException, TrainingException {
 
 		result.put("ref_classifier", tsRefClassifier.getClass().getSimpleName());
 		result.put("ref_classifier_params", tsRefClassifierParams);
-
-		// Transform and split data to Weka instances
-		if (arffFiles == null || arffFiles.length < 1)
-			throw new IllegalArgumentException("At least one arff file must be given!");
-		if (arffFiles.length > 1) {
-			// TODO: Support multivariate evaluation
-			throw new UnsupportedOperationException("Multivariate ref ts classifier evaluation is not supported yet.");
-		}
-		ArffReader arffReader = new ArffReader(new FileReader(arffFiles[0]));
-		final Instances wekaInstances = arffReader.getData();
-		wekaInstances.setClassIndex(wekaInstances.numAttributes() - 1);
-		List<Instances> split = WekaUtil.getStratifiedSplit(wekaInstances, seed, trainingPortion);
 
 		// Training
 		LOGGER.debug("Starting training of reference classifier...");
 		long refTimeStart = System.currentTimeMillis();
 		try {
-			tsRefClassifier.buildClassifier(split.get(0));
+			tsRefClassifier.buildClassifier(trainingInstances);
 		} catch (Exception e) {
 			LOGGER.debug("Could not train classifier {} due to {}.", tsRefClassifier.toString(), e.getMessage());
 			throw new TrainingException("Could not train classifier " + tsRefClassifier.toString(), e);
@@ -310,8 +425,8 @@ public class TSClassifierTest {
 		refTimeStart = System.currentTimeMillis();
 		Evaluation refEvaluation;
 		try {
-			refEvaluation = new Evaluation(split.get(0));
-			refEvaluation.evaluateModel(tsRefClassifier, split.get(1));
+			refEvaluation = new Evaluation(trainingInstances);
+			refEvaluation.evaluateModel(tsRefClassifier, testInstances);
 		} catch (Exception e) {
 			LOGGER.debug("Could not evaluate classifier {} due to {}.", tsRefClassifier.toString(), e.getMessage());
 			throw new EvaluationException("Could not evaluate classifier " + tsRefClassifier.toString(), e);
@@ -331,31 +446,22 @@ public class TSClassifierTest {
 	 * 
 	 * @param tsRefClassifier
 	 *            Time series classifier reference to be trained and evaluated
-	 * @param seed
-	 *            Seed used for randomized splitting the given data into train and
-	 *            test set
-	 * @param trainingPortion
-	 *            Portion of the data used for training (range from 0 to 1)
 	 * @param tsRefClassifierParams
 	 *            Textual description of the time series classifier reference
 	 *            parameters to be stored in the database
 	 * @param result
 	 *            Map used to store the database entry's information
-	 * @param arffFiles
-	 *            Arff files containing the data used for training and evaluation
-	 *            (assumes univariate dataset, if only one file is given)
+	 * @param train
+	 *            Training dataset
+	 * @param test
+	 *            Test dataset
 	 */
-	private static void trainAndEvaluateRefClassifier(final sfa.classification.Classifier tsRefClassifier,
-			final int seed, final double trainingPortion, final String tsRefClassifierParams,
-			final Map<String, Object> result, final File... arffFiles) {
+	private static void trainAndEvaluateSFARefClassifier(final sfa.classification.Classifier tsRefClassifier,
+			final String tsRefClassifierParams,
+			final Map<String, Object> result, final TimeSeries[] train, final TimeSeries[] test) {
 
 		result.put("ref_classifier", tsRefClassifier.getClass().getSimpleName());
 		result.put("ref_classifier_params", tsRefClassifierParams);
-
-		// Transform and split data
-		// TODO
-		TimeSeries[] train = null;
-		TimeSeries[] test = null;
 
 		// Training
 		LOGGER.debug("Starting training of reference classifier...");
@@ -375,6 +481,33 @@ public class TSClassifierTest {
 				(refEvaluationEnd - refTimeStart), accuracy);
 		result.put("ref_eval_time", (refEvaluationEnd - refTimeStart));
 		result.put("ref_accuracy", accuracy);
+	}
+
+	/**
+	 * Loads a time series dataset from an arbitrary number of arff files (multiple
+	 * will be handled as multivariate dataset).
+	 * 
+	 * @param arffFiles
+	 *            Arff files to be loaded
+	 * @return Returns a TimeSeriesDataset object storing the arff data
+	 * @throws TimeSeriesLoadingException
+	 *             Thrown if the dataset could not be parsed
+	 */
+	private static TimeSeriesDataset loadDatasetFromArffFiles(final File... arffFiles)
+			throws TimeSeriesLoadingException {
+		TimeSeriesDataset dataset;
+		try {
+			if (arffFiles.length < 1)
+				throw new IllegalArgumentException("At least one arff file must be given!");
+			else if (arffFiles.length == 1) {
+				dataset = TimeSeriesLoader.loadArff(arffFiles[0]);
+			} else {
+				dataset = TimeSeriesLoader.loadArffs(arffFiles);
+			}
+		} catch (TimeSeriesLoadingException e) {
+			throw new TimeSeriesLoadingException("Could not load training dataset.", e);
+		}
+		return dataset;
 	}
 
 	/**
