@@ -204,10 +204,13 @@ public class TimeSeriesUtil {
 		for (int i = 0; i < dataSet.getNumberOfInstances(); i++) {
 
 			// Initialize instance
-			final Instance inst = new DenseInstance(1, Nd4j.toFlattened(combinedMatrix.getRow(i)).toDoubleVector());
+			final Instance inst = new DenseInstance(1, Nd4j
+					.hstack(Nd4j.toFlattened(combinedMatrix.getRow(i)),
+							Nd4j.create(new double[] { targets.getDouble(i) }))
+					.toDoubleVector());
 
 			inst.setDataset(result);
-			inst.setClassValue(String.valueOf(targets.getInt(i)));
+			result.add(inst);
 		}
 
 		return result;
