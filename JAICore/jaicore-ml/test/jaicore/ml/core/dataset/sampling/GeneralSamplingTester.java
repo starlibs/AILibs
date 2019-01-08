@@ -14,6 +14,7 @@ import org.openml.apiconnector.xml.DataSetDescription;
 
 import jaicore.basic.algorithm.AlgorithmProblemTransformer;
 import jaicore.basic.algorithm.GeneralAlgorithmTester;
+import jaicore.basic.algorithm.IAlgorithmFactory;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.standard.SimpleDataset;
@@ -66,10 +67,12 @@ public abstract class GeneralSamplingTester<I extends IInstance>
 	}
 
 	private void testSampleSize(IDataset<I> dataset, double sampleFraction) {
-		ASamplingAlgorithm<I> samplingAlgorithm = (ASamplingAlgorithm<I>) this.getFactory().getAlgorithm();
+		IAlgorithmFactory<IDataset<I>, IDataset<I>> factory = this.getFactory();
+		factory.setProblemInput(dataset);
+		ASamplingAlgorithm<I> samplingAlgorithm = (ASamplingAlgorithm<I>) factory.getAlgorithm();
 		int sampleSize = (int) (dataset.size() * sampleFraction);
 		samplingAlgorithm.setSampleSize(sampleSize);
-		IDataset<I> sample = getSample(dataset, samplingAlgorithm);
+		IDataset<I> sample = getSample(samplingAlgorithm);
 
 		assertEquals(sampleSize, sample.size());
 	}
@@ -103,10 +106,12 @@ public abstract class GeneralSamplingTester<I extends IInstance>
 	}
 
 	private void testNoDuplicates(IDataset<I> dataset) {
-		ASamplingAlgorithm<I> samplingAlgorithm = (ASamplingAlgorithm<I>) this.getFactory().getAlgorithm();
+		IAlgorithmFactory<IDataset<I>, IDataset<I>> factory = this.getFactory();
+		factory.setProblemInput(dataset);
+		ASamplingAlgorithm<I> samplingAlgorithm = (ASamplingAlgorithm<I>) factory.getAlgorithm();
 		int sampleSize = (int) (dataset.size() * DEFAULT_SAMPLE_FRACTION);
 		samplingAlgorithm.setSampleSize(sampleSize);
-		IDataset<I> sample = getSample(dataset, samplingAlgorithm);
+		IDataset<I> sample = getSample(samplingAlgorithm);
 		int actualSampleSize = sample.size();
 		Set<IInstance> set = new HashSet<>();
 		set.addAll(sample);
@@ -123,15 +128,16 @@ public abstract class GeneralSamplingTester<I extends IInstance>
 	public void checkOriginalDataSetNotModified() throws Exception {
 		IDataset<I> dataset = this.getSimpleProblemInputForGeneralTestPurposes();
 		int hashCode = dataset.hashCode();
-		ASamplingAlgorithm<I> samplingAlgorithm = (ASamplingAlgorithm<I>) this.getFactory().getAlgorithm();
+		IAlgorithmFactory<IDataset<I>, IDataset<I>> factory = this.getFactory();
+		factory.setProblemInput(dataset);
+		ASamplingAlgorithm<I> samplingAlgorithm = (ASamplingAlgorithm<I>) factory.getAlgorithm();
 		int sampleSize = (int) (dataset.size() * DEFAULT_SAMPLE_FRACTION);
 		samplingAlgorithm.setSampleSize(sampleSize);
-		getSample(dataset, samplingAlgorithm);
+		getSample(samplingAlgorithm);
 		assertEquals(hashCode, dataset.hashCode());
 	}
 
-	private IDataset<I> getSample(IDataset<I> dataset, ASamplingAlgorithm<I> samplingAlgorithm) {
-		samplingAlgorithm.setInput(dataset);
+	private IDataset<I> getSample(ASamplingAlgorithm<I> samplingAlgorithm) {
 		IDataset<I> sample = null;
 		try {
 			sample = samplingAlgorithm.call();
