@@ -120,12 +120,12 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 	private final Condition numberOfActiveJobsHasChanged = this.activeJobsCounterLock.newCondition(); // condition that is signaled whenever a node is added to the open queue
 
 	public BestFirst(final I problem) {
-		this(problem, ConfigFactory.create(IBestFirstConfig.class));
+		this(ConfigFactory.create(IBestFirstConfig.class),problem);
 	}
 
 	@SuppressWarnings("unchecked")
-	public BestFirst(final I problem, final IBestFirstConfig config) {
-		super(problem, config);
+	public BestFirst(final IBestFirstConfig config,final I problem) {
+		super(config,problem);
 		this.graphGenerator = problem.getGraphGenerator();
 		this.rootGenerator = this.graphGenerator.getRootGenerator();
 		this.successorGenerator = this.graphGenerator.getSuccessorGenerator();

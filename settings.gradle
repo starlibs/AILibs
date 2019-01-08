@@ -5,6 +5,7 @@ def configPrefix = 'softwareconfiguration/'
 
 include ":JAICore:jaicore-basic"
 include ":JAICore:jaicore-concurrent"
+include ":JAICore:jaicore-ea"
 include ":JAICore:jaicore-experiments"
 include ":JAICore:jaicore-graph"
 include ":JAICore:jaicore-graphvisualizer"

@@ -27,8 +27,8 @@ public abstract class AOptimizer<I, O extends ScoredItem<V>, V extends Comparabl
 		super(input);
 	}
 
-	protected AOptimizer(final I input, final IAlgorithmConfig config) {
-		super(input, config);
+	protected AOptimizer(final IAlgorithmConfig config,final I input) {
+		super(config,input);
 	}
 
 	protected AOptimizer(final IAlgorithmConfig config) {

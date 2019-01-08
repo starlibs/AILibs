@@ -79,7 +79,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	 * @param config
 	 *            The configuration to take as the internal configuration object.
 	 */
-	protected AAlgorithm(final I input, final IAlgorithmConfig config) {
+	protected AAlgorithm(final IAlgorithmConfig config, final I input) {
 		this(config);
 		this.input = input;
 	}
@@ -130,7 +130,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 
 	@Override
 	public void setTimeout(final long timeout, final TimeUnit timeUnit) {
-		this.getConfig().setProperty(IAlgorithmConfig.K_TIMEOUT, new TimeOut(timeout, timeUnit).milliseconds() + "");
+		this.setTimeout(new TimeOut(timeout, timeUnit));
 	}
 
 	@Override
@@ -142,7 +142,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	public TimeOut getTimeout() {
 		return new TimeOut(this.getConfig().timeout(), TimeUnit.MILLISECONDS);
 	}
-	
+
 	public boolean isTimeouted() {
 		return this.timeouted;
 	}
@@ -150,7 +150,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	public boolean isStopCriterionSatisfied() {
 		return this.isCanceled() || this.timeouted;
 	}
-	
+
 	protected void setTimeouted(final boolean timeouted) {
 		this.timeouted = timeouted;
 	}
@@ -159,7 +159,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 		if (this.getTimeout() == null || this.getTimeout().milliseconds() <= 0) {
 			return;
 		}
-		getTimerAndCreateIfNotExistent().schedule(new TimerTask() {
+		this.getTimerAndCreateIfNotExistent().schedule(new TimerTask() {
 			@Override
 			public void run() {
 				AAlgorithm.this.timeouted = true;
@@ -167,13 +167,14 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 				AAlgorithm.this.shutdown();
 			}
 		}, this.getTimeout().milliseconds());
-		this.logger.info("Timer {} activated for in {}ms", timer, this.getTimeout().milliseconds());
+		this.logger.info("Timer {} activated for in {}ms", this.timer, this.getTimeout().milliseconds());
 	}
-	
+
 	protected Timer getTimerAndCreateIfNotExistent() {
-		if (timer == null)
-			timer = new Timer("Algorithm Timer for " + this, true);
-		return timer;
+		if (this.timer == null) {
+			this.timer = new Timer("Algorithm Timer for " + this, true);
+		}
+		return this.timer;
 	}
 
 	/**
@@ -182,7 +183,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	public boolean isCanceled() {
 		return this.canceled;
 	}
-	
+
 	protected void checkTermination() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {
 		this.logger.debug("Checking Termination of {}", this);
 		if (this.isTimeouted()) {
@@ -201,14 +202,14 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 			throw new InterruptedException(); // if the thread itself was actively interrupted by somebody
 		}
 	}
-	
+
 	/**
 	 * This method does two things:
 	 *   1. it interrupts all threads that are registered to be active inside this algorithm
 	 *   2. it cancels the (possibly created) timeout thread
-	 * 
+	 *
 	 * This method should be called ALWAYS when the algorithm activity ceases.
-	 * 
+	 *
 	 * This method takes effect only once. Further invocations will be ignored.
 	 */
 	protected void shutdown() {
@@ -234,7 +235,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	public boolean isShutdownInitialized() {
 		return this.shutdownInitialized;
 	}
-	
+
 	protected void unregisterThreadAndShutdown() {
 		this.unregisterActiveThread();
 		this.shutdown();
@@ -247,7 +248,6 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	protected void unregisterActiveThread() {
 		this.activeThreads.remove(Thread.currentThread());
 	}
-
 
 	/**
 	 * @return The current state of the algorithm.
@@ -263,8 +263,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	protected void setState(final AlgorithmState state) {
 		if (state == AlgorithmState.active) {
 			throw new IllegalArgumentException("Cannot switch state to active. Use \"activate\" instead, which will set the state to active and provide the AlgorithmInitializedEvent.");
-		}
-		else if (state == AlgorithmState.inactive) {
+		} else if (state == AlgorithmState.inactive) {
 			throw new IllegalArgumentException("Cannot switch state to inactive. Use \"terminate\" instead, which will set the state to inactive and provide the AlgorithmFinishedEvent.");
 		}
 		this.state = state;
@@ -284,7 +283,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	public void setCanceled(final boolean canceled) {
 		this.canceled = canceled;
 	}
-	
+
 	/**
 	 * This method
 	 *  - activates the timeout timer
@@ -294,7 +293,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	 */
 	protected AlgorithmInitializedEvent activate() {
 		assert this.state == AlgorithmState.created : "Can only activate an algorithm as long as its state has not been changed from CREATED to something else. It is currently " + this.state;
-		activateTimeoutTimer();
+		this.activateTimeoutTimer();
 		this.state = AlgorithmState.active;
 		AlgorithmInitializedEvent event = new AlgorithmInitializedEvent();
 		this.eventBus.post(event);
@@ -309,7 +308,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	protected AlgorithmFinishedEvent terminate() {
 		this.state = AlgorithmState.inactive;
 		AlgorithmFinishedEvent finishedEvent = new AlgorithmFinishedEvent();
-		unregisterThreadAndShutdown();
+		this.unregisterThreadAndShutdown();
 		this.eventBus.post(finishedEvent);
 		return finishedEvent;
 	}

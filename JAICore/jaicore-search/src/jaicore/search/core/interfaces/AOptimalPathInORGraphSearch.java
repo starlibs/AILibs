@@ -40,8 +40,8 @@ public abstract class AOptimalPathInORGraphSearch<I extends GraphSearchInput<NSr
 		super(problem);
 	}
 
-	protected AOptimalPathInORGraphSearch(final I problem, final IAlgorithmConfig config) {
-		super(problem, config);
+	protected AOptimalPathInORGraphSearch( final IAlgorithmConfig config,final I problem) {
+		super(config,problem);
 	}
 
 	@SuppressWarnings("unchecked")

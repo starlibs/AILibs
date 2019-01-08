@@ -41,8 +41,8 @@ public abstract class AAnyPathInORGraphSearch<I extends GraphSearchInput<NSrc, A
 		super(problem);
 	}
 
-	protected AAnyPathInORGraphSearch(final I problem, final IAlgorithmConfig config) {
-		super(problem, config);
+	protected AAnyPathInORGraphSearch(final IAlgorithmConfig config,final I problem) {
+		super(config,problem);
 	}
 	
 	protected GraphSearchSolutionCandidateFoundEvent<NSrc, ASrc, O> registerSolution(final O path) {

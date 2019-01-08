@@ -26,8 +26,8 @@ public abstract class ASolutionCandidateIterator<I, O> extends AAlgorithm<I, O> 
 		super(input);
 	}
 
-	protected ASolutionCandidateIterator(final I input, final IAlgorithmConfig config) {
-		super(input, config);
+	protected ASolutionCandidateIterator(final IAlgorithmConfig config,final I input) {
+		super(config,input);
 	}
 
 	protected ASolutionCandidateIterator(final IAlgorithmConfig config) {
