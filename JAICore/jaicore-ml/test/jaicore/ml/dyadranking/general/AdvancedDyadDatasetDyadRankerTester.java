@@ -20,6 +20,7 @@ import jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
 import jaicore.ml.dyadranking.algorithm.featuretransform.FeatureTransformPLDyadRanker;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 import jaicore.ml.dyadranking.loss.DyadRankingMLLossFunctionWrapper;
+import jaicore.ml.dyadranking.loss.KendallsTauDyadRankingLoss;
 
 /**
  * Class that runs a simple functionality check on all dyad rankers.
@@ -52,26 +53,15 @@ public class AdvancedDyadDatasetDyadRankerTester {
 		int maxDyadRankingLength = 4;
 		int nTestInstances = 100;
 		double avgKendallTau = 0;
+		double avgKendallTau2 = 0;
 		double avgFailures = 0;
 		
 		for (int testInst = 0; testInst < nTestInstances; testInst++) {
 			IDyadRankingInstance test = DyadRankingInstanceSupplier.getDyadRankingInstance(maxDyadRankingLength, SEED);
 			IDyadRankingInstance predict = ranker.predict(test);
 			
-			int dyadRankingLength = test.length();
-			int nConc = 0;
-			int nDisc = 0;
-			for (int i = 1; i < dyadRankingLength; i++) {
-				for (int j = 0; j < i; j++) {
-					if (DyadRankingInstanceSupplier.complexDyadRanker().compare(
-							predict.getDyadAtPosition(j), predict.getDyadAtPosition(i)) <= 0) {
-						nConc++;
-					} else {
-						nDisc++;
-					}
-				}
-			}
-			double kendallTau = 2.0 * (nConc - nDisc) / (dyadRankingLength * (dyadRankingLength - 1) );
+			double kendallTau = new KendallsTauDyadRankingLoss().loss(test, predict);
+			
 			avgKendallTau += kendallTau;
 			
 			Dyad currentMin = predict.getDyadAtPosition(0);
