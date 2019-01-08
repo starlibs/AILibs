@@ -9,6 +9,7 @@ import java.util.stream.IntStream;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
+import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.ml.core.dataset.TimeSeriesDataset;
 import jaicore.ml.core.dataset.TimeSeriesInstance;
 import jaicore.ml.core.dataset.attribute.IAttributeValue;
@@ -65,7 +66,7 @@ public class TimeSeriesUtil {
 	}
 
 	/**
-	 * Checks, whether a given INDArray is a valid time series with a given length.
+	 * Checks, wheter a given INDArray is a valid time series with a given length.
 	 * Throws an exception otherwise.
 	 * 
 	 * @param array
@@ -112,6 +113,12 @@ public class TimeSeriesUtil {
 					timeSeries1.length(), timeSeries2.length());
 			throw new TimeSeriesLengthException(message);
 		}
+	}
+
+	public static Pair<TimeSeriesDataset, TimeSeriesDataset> getStratifiedSplit(final TimeSeriesDataset dataset,
+		final double portion) {
+		// TODO
+		return new Pair<TimeSeriesDataset, TimeSeriesDataset>(null, null);
 	}
 
 	/**
@@ -319,5 +326,6 @@ public class TimeSeriesUtil {
 			combinedMatrix = Nd4j.create(0, 0);
 		}
 		return combinedMatrix;
+
 	}
 }

@@ -1,7 +1,11 @@
 package jaicore.search.algorithms.standard.bestfirst.nodeevaluation;
 
+import java.util.concurrent.TimeoutException;
+
+import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.concurrent.TimeoutTimer;
 import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
+import jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
 import jaicore.search.model.travesaltree.Node;
 
 public class TimedNodeEvaluator<T, V extends Comparable<V>> extends DecoratingNodeEvaluator<T, V> {
@@ -16,7 +20,7 @@ public class TimedNodeEvaluator<T, V extends Comparable<V>> extends DecoratingNo
 	}
 
 	@Override
-	public V f(Node<T, ?> node) throws Exception {
+	public V f(Node<T, ?> node) throws NodeEvaluationException, TimeoutException, AlgorithmExecutionCanceledException, InterruptedException {
 		TimeoutSubmitter ts = TimeoutTimer.getInstance().getSubmitter();
 		int taskId = ts.interruptMeAfterMS(timeoutInMS);
 		try {

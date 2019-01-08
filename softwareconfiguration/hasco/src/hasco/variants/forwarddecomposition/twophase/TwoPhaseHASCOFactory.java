@@ -6,7 +6,7 @@ import jaicore.basic.algorithm.AlgorithmProblemTransformer;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 
-public class TwoPhaseHASCOFactory implements SoftwareConfigurationAlgorithmFactory<TwoPhaseSoftwareConfigurationProblem, TwoPhaseHASCOReport, HASCOSolutionCandidate<Double>, Double> {
+public class TwoPhaseHASCOFactory implements SoftwareConfigurationAlgorithmFactory<TwoPhaseSoftwareConfigurationProblem, HASCOSolutionCandidate<Double>, Double> {
 
 	private TwoPhaseSoftwareConfigurationProblem problem;
 	private TwoPhaseHASCOConfig config;

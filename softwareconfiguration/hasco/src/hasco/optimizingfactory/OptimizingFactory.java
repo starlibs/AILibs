@@ -1,180 +1,121 @@
 package hasco.optimizingfactory;
 
-import java.util.Iterator;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
 import hasco.core.SoftwareConfigurationProblem;
+import hasco.exceptions.ComponentInstantiationFailedException;
 import hasco.model.EvaluatedSoftwareConfigurationSolution;
 import jaicore.basic.ILoggingCustomizable;
-import jaicore.basic.TimeOut;
-import jaicore.basic.algorithm.AlgorithmEvent;
-import jaicore.basic.algorithm.AlgorithmFinishedEvent;
-import jaicore.basic.algorithm.AlgorithmInitializedEvent;
-import jaicore.basic.algorithm.AlgorithmState;
-import jaicore.basic.algorithm.IAlgorithm;
-import jaicore.basic.algorithm.SolutionCandidateFoundEvent;
+import jaicore.basic.algorithm.AAlgorithm;
+import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
+import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
+import jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
+import jaicore.basic.algorithm.exceptions.AlgorithmException;
 
-public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C extends EvaluatedSoftwareConfigurationSolution<V>, V extends Comparable<V>> implements IAlgorithm<OptimizingFactoryProblem<P, T, V>, T>, ILoggingCustomizable {
+public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C extends EvaluatedSoftwareConfigurationSolution<V>, V extends Comparable<V>> extends AAlgorithm<OptimizingFactoryProblem<P, T, V>, T> {
 
-	private String loggerName;
+	/* logging */
 	private Logger logger = LoggerFactory.getLogger(OptimizingFactory.class);
-	private final OptimizingFactoryProblem<P, T, V> problem;
-	private final SoftwareConfigurationAlgorithmFactory<P, ?, C, V> factoryForOptimizationAlgorithm;
+	private String loggerName;
+
+	private final SoftwareConfigurationAlgorithmFactory<P, C, V> factoryForOptimizationAlgorithm;
 	private T constructedObject;
 	private V performanceOfObject;
-	private final EventBus eventBus = new EventBus();
 
 	/* factory state */
-	private SoftwareConfigurationAlgorithm<P, ?, C, V> optimizer;
-	private AlgorithmState state = AlgorithmState.created;
+	private SoftwareConfigurationAlgorithm<P, C, V> optimizer;
 
-	public OptimizingFactory(OptimizingFactoryProblem<P, T, V> problem, SoftwareConfigurationAlgorithmFactory<P, ?, C, V> factoryForOptimizationAlgorithm) {
-		super();
-		this.problem = problem;
+	public OptimizingFactory(final OptimizingFactoryProblem<P, T, V> problem, final SoftwareConfigurationAlgorithmFactory<P, C, V> factoryForOptimizationAlgorithm) {
+		super(problem);
 		this.factoryForOptimizationAlgorithm = factoryForOptimizationAlgorithm;
 	}
 
 	@Override
-	public Iterator<AlgorithmEvent> iterator() {
-		return this;
-	}
-
-	@Override
-	public boolean hasNext() {
-		return state != AlgorithmState.inactive;
-	}
-
-	@Override
-	public AlgorithmEvent next() {
-		try {
-			return nextWithException();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	@Override
-	public AlgorithmEvent nextWithException() throws Exception {
-
-		switch (state) {
+	public AlgorithmEvent nextWithException() throws AlgorithmException, InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {
+		switch (this.getState()) {
 		case created: {
-			factoryForOptimizationAlgorithm.setProblemInput(problem.getConfigurationProblem());
-			optimizer = factoryForOptimizationAlgorithm.getAlgorithm();
-			if (optimizer instanceof ILoggingCustomizable) {
-				this.logger.info("Switching the logger name of the actually used optimizer to {}", loggerName);
-				((ILoggingCustomizable) optimizer).setLoggerName(loggerName + ".optimizer");
+			this.factoryForOptimizationAlgorithm.setProblemInput(this.getInput().getConfigurationProblem());
+			this.optimizer = this.factoryForOptimizationAlgorithm.getAlgorithm();
+			if (this.optimizer instanceof ILoggingCustomizable && this.loggerName != null) {
+				this.logger.info("Switching the logger name of the actually used optimizer to {}", this.loggerName);
+				this.optimizer.setLoggerName(loggerName + ".optimizer");
 			}
-			optimizer.registerListener(this);
-			while (!(optimizer.next() instanceof AlgorithmInitializedEvent))
+			this.optimizer.registerListener(this);
+			while (!(this.optimizer.next() instanceof AlgorithmInitializedEvent)) {
 				;
-			state = AlgorithmState.active;
-			return new AlgorithmInitializedEvent();
+			}
+			return activate();
 		}
 		case active: {
-			optimizer.call();
-			C solutionModel = optimizer.getOptimizationResult().getResult();
-			this.constructedObject = problem.getBaseFactory().getComponentInstantiation(solutionModel.getComponentInstance());
-			this.performanceOfObject = optimizer.getOptimizationResult().getValue();
-			state = AlgorithmState.inactive;
-			return new AlgorithmFinishedEvent();
+			C solutionModel = this.optimizer.call();
+			try {
+				this.constructedObject = this.getInput().getBaseFactory().getComponentInstantiation(solutionModel.getComponentInstance());
+				this.performanceOfObject = solutionModel.getScore();
+				return terminate();
+			} catch (ComponentInstantiationFailedException e) {
+				throw new AlgorithmException(e, "Could not conduct next step in OptimizingFactory due to an exception in the component instantiation.");
+			}
 		}
 		default:
-			throw new IllegalStateException("Cannot do anything in state " + state);
+			throw new IllegalStateException("Cannot do anything in state " + this.getState());
 		}
 	}
 
 	@Override
-	public T call() throws Exception {
-		while (this.hasNext())
+	public T call() throws AlgorithmException, InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {
+		while (this.hasNext()) {
 			this.nextWithException();
+		}
 		return this.constructedObject;
 	}
 
-	@Override
-	public OptimizingFactoryProblem<P, T, V> getInput() {
-		return problem;
-	}
-
-	@Override
-	public void cancel() {
-		// TODO Auto-generated method stub
-
-	}
-
 	@Subscribe
-	public void receiveSolutionEvent(SolutionCandidateFoundEvent<?> event) {
-		eventBus.post(event);
-	}
-
-	@Override
-	public void registerListener(Object listener) {
-		eventBus.register(listener);
-	}
-
-	@Override
-	public void setNumCPUs(int numberOfCPUs) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public int getNumCPUs() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public void setTimeout(int timeout, TimeUnit timeUnit) {
-		// TODO Auto-generated method stub
-
-	}
-	
-	@Override
-	public void setTimeout(TimeOut timeout) {
-
-	}
-
-	@Override
-	public TimeOut getTimeout() {
-		return null;
-	}
-
-	@Override
-	public void setLoggerName(String name) {
-		this.loggerName = name;
-		this.logger = LoggerFactory.getLogger(name);
-		this.logger.info("Switched logger of optimizing factory to {}", loggerName);
-	}
-
-	@Override
-	public String getLoggerName() {
-		return loggerName;
+	public void receiveSolutionEvent(final SolutionCandidateFoundEvent<?> event) {
+		this.post(event);
 	}
 
 	/**
 	 * @return the optimizer that is used for building the object
 	 */
-	public SoftwareConfigurationAlgorithm<P, ?, C, V> getOptimizer() {
-		return optimizer;
+	public SoftwareConfigurationAlgorithm<P, C, V> getOptimizer() {
+		return this.optimizer;
 	}
 
 	public AlgorithmInitializedEvent init() {
 		AlgorithmEvent e = null;
-		while (hasNext()) {
-			e = next();
-			if (e instanceof AlgorithmInitializedEvent)
+		while (this.hasNext()) {
+			e = this.next();
+			if (e instanceof AlgorithmInitializedEvent) {
 				return (AlgorithmInitializedEvent) e;
+			}
 		}
 		throw new IllegalStateException("Could not complete initialization");
 	}
 
 	public V getPerformanceOfObject() {
-		return performanceOfObject;
+		return this.performanceOfObject;
+	}
+
+	@Override
+	public String getLoggerName() {
+		return this.loggerName;
+	}
+
+	@Override
+	public void setLoggerName(final String name) {
+		this.logger.info("Switching logger from {} to {}", this.logger.getName(), name);
+		this.loggerName = name;
+		this.logger = LoggerFactory.getLogger(name);
+		this.logger.info("Activated logger {} with name {}", name, this.logger.getName());
+		if (this.factoryForOptimizationAlgorithm instanceof ILoggingCustomizable) {
+			((ILoggingCustomizable) this.factoryForOptimizationAlgorithm).setLoggerName(name + ".optAlgoFactory");
+		}
+		super.setLoggerName(this.loggerName + "._algorithm");
 	}
 }

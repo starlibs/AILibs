@@ -1,9 +1,11 @@
 package jaicore.graph;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -44,7 +46,7 @@ public class Graph<T> implements Serializable {
 
 	public Graph(Graph<T> toClone) {
 		this();
-		System.out.println("Starting clone computation");
+//		System.out.println("Starting clone computation");
 		for (T i : toClone.nodes.keySet())
 			this.addItem(i);
 		for (T i : this.nodes.keySet()) {
@@ -57,7 +59,7 @@ public class Graph<T> implements Serializable {
 				System.exit(1);
 			}
 		}
-		System.out.println("Finished clone computation");
+//		System.out.println("Finished clone computation");
 	}
 
 	public void addItem(T item) {
@@ -68,6 +70,10 @@ public class Graph<T> implements Serializable {
 
 	public Set<T> getItems() {
 		return nodes.keySet();
+	}
+	
+	public boolean hasItem(T item) {
+		return nodes.containsKey(item);
 	}
 
 	public void removeItem(T item) {
@@ -198,23 +204,36 @@ public class Graph<T> implements Serializable {
 	 * The order is obtained by BFS.
 	 **/
 	public String getLineBasedStringRepresentation() {
+		return getLineBasedStringRepresentation(1);
+	}
+	
+	public String getLineBasedStringRepresentation(int offset) {
 		StringBuilder sb = new StringBuilder();
 		for (T root : getSources()) {
-			sb.append(root);
-			sb.append(getLineBasedStringRepresentation(root, 1));
-			sb.append("\n");
+			sb.append(getLineBasedStringRepresentation(root, offset, new ArrayList<>()));
 		}
 		return sb.toString();
 	}
 	
-	private String getLineBasedStringRepresentation(T node, int offset) {
+	private String getLineBasedStringRepresentation(T node, int outerOffset, List<Boolean> childrenOffset) {
 		StringBuilder sb = new StringBuilder();
-		for (T successor : getSuccessors(node)) {
-			sb.append(" -> " + successor);
-			sb.append(getLineBasedStringRepresentation(successor, offset + 1));
+		for (int i = 0; i < outerOffset; i++)
+			sb.append("\t");
+		for (boolean lastChild : childrenOffset) {
+			sb.append(lastChild ? " " : "|");
+			sb.append("      ");
+		}
+		if (!childrenOffset.isEmpty())
+			sb.append("+----- ");
+		sb.append(node.toString());
+		Collection<T> successors = getSuccessors(node);
+		int n = successors.size();
+		int i = 1;
+		for (T successor : successors) {
 			sb.append("\n");
-			for (int i = 0; i < offset; i++)
-				sb.append("\t");
+			List<Boolean> childrenOffsetCopy = new ArrayList<>(childrenOffset);
+			childrenOffsetCopy.add(i++ == n);
+			sb.append(getLineBasedStringRepresentation(successor, outerOffset, childrenOffsetCopy));
 		}
 		return sb.toString();
 	}

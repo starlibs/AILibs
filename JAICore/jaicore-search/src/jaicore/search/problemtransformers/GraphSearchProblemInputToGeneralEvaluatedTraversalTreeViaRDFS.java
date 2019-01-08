@@ -7,11 +7,11 @@ import jaicore.basic.algorithm.AlgorithmProblemTransformer;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator;
-import jaicore.search.model.probleminputs.GeneralEvaluatedTraversalTree;
-import jaicore.search.model.probleminputs.GraphSearchProblemInput;
+import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
+import jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 
 public class GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS<N, A, V extends Comparable<V>>
-		implements AlgorithmProblemTransformer<GraphSearchProblemInput<N, A, V>, GeneralEvaluatedTraversalTree<N, A, V>> {
+		implements AlgorithmProblemTransformer<GraphSearchWithPathEvaluationsInput<N, A, V>, GraphSearchWithSubpathEvaluationsInput<N, A, V>> {
 
 	private final INodeEvaluator<N, V> preferredNodeEvaluator;
 	private final Predicate<N> prioritizedNodesInRandomCompletion;
@@ -47,9 +47,9 @@ public class GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS<N, A,
 	}
 
 	@Override
-	public GeneralEvaluatedTraversalTree<N, A, V> transform(GraphSearchProblemInput<N, A, V> problem) {
+	public GraphSearchWithSubpathEvaluationsInput<N, A, V> transform(GraphSearchWithPathEvaluationsInput<N, A, V> problem) {
 		RandomCompletionBasedNodeEvaluator<N, V> rc = new RandomCompletionBasedNodeEvaluator<>(new Random(seed), numSamples, problem.getPathEvaluator(), timeoutForSingleCompletionEvaluationInMS, timeoutForNodeEvaluationInMS, prioritizedNodesInRandomCompletion);
-		return new GeneralEvaluatedTraversalTree<>(problem.getGraphGenerator(), new AlternativeNodeEvaluator<>(preferredNodeEvaluator, rc));
+		return new GraphSearchWithSubpathEvaluationsInput<>(problem.getGraphGenerator(), new AlternativeNodeEvaluator<>(preferredNodeEvaluator, rc));
 	}
 
 }

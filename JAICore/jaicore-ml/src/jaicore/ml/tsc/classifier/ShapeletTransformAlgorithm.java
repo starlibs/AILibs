@@ -20,10 +20,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jaicore.basic.TimeOut;
-import jaicore.basic.algorithm.AlgorithmEvent;
+import jaicore.basic.algorithm.IAlgorithmConfig;
+import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.ml.core.dataset.TimeSeriesDataset;
 import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
 import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeValue;
+import jaicore.ml.core.exception.TrainingException;
 import jaicore.ml.tsc.quality_measures.IQualityMeasure;
 import jaicore.ml.tsc.util.TimeSeriesUtil;
 import weka.classifiers.Classifier;
@@ -109,7 +112,7 @@ public class ShapeletTransformAlgorithm extends
 
 	// Training procedure
 	@Override
-	public ShapeletTransformClassifier call() throws Exception {
+	public ShapeletTransformClassifier call() throws AlgorithmException {
 
 		// Extract time series data and the corresponding targets
 		TimeSeriesDataset data = this.getInput();
@@ -154,7 +157,11 @@ public class ShapeletTransformAlgorithm extends
 
 		// Train Weka ensemble using the data
 		LOGGER.debug("Starting ensemble training...");
-		TimeSeriesUtil.buildWekaClassifierFromTS(classifier, transfTrainingData);
+		try {
+			TimeSeriesUtil.buildWekaClassifierFromTS(classifier, transfTrainingData);
+		} catch (TrainingException e) {
+			throw new AlgorithmException(e, "Could not train classifier due to a training exception.");
+		}
 		LOGGER.debug("Finished ensemble training.");
 
 		return this.model;
@@ -476,7 +483,7 @@ public class ShapeletTransformAlgorithm extends
 	}
 
 	@Override
-	public void setTimeout(int timeout, TimeUnit timeUnit) {
+	public void setTimeout(long timeout, TimeUnit timeUnit) {
 		// TODO Auto-generated method stub
 
 	}
@@ -494,7 +501,7 @@ public class ShapeletTransformAlgorithm extends
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws Exception {
+	public AlgorithmEvent nextWithException() {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -526,5 +533,11 @@ public class ShapeletTransformAlgorithm extends
 	private static void sortByLengthDesc(final List<Shapelet> shapelets) {
 		shapelets.sort((s1, s2) -> Integer.compare(s1.getLength(), s2.getLength()));
 		Collections.sort(shapelets, Collections.reverseOrder());
+	}
+
+	@Override
+	public IAlgorithmConfig getConfig() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

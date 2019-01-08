@@ -13,21 +13,21 @@ import jaicore.search.algorithms.standard.uncertainty.explorationexploitationsea
 import jaicore.search.algorithms.standard.uncertainty.explorationexploitationsearch.UncertaintyExplorationOpenSelection;
 import jaicore.search.algorithms.standard.uncertainty.paretosearch.ParetoNode;
 import jaicore.search.algorithms.standard.uncertainty.paretosearch.ParetoSelection;
-import jaicore.search.model.probleminputs.UncertainlyEvaluatedTraversalTree;
+import jaicore.search.probleminputs.GraphSearchWithUncertaintyBasedSubpathEvaluationInput;
 
-public class UncertaintyORGraphSearchFactory<N, A, V extends Comparable<V>> extends BestFirstFactory<UncertainlyEvaluatedTraversalTree<N, A, V>, N, A, V> {
+public class UncertaintyORGraphSearchFactory<N, A, V extends Comparable<V>> extends BestFirstFactory<GraphSearchWithUncertaintyBasedSubpathEvaluationInput<N, A, V>, N, A, V> {
 
 	private static final Logger logger = LoggerFactory.getLogger(UncertaintyORGraphSearchFactory.class);
 	
 	private OversearchAvoidanceConfig<N, V> oversearchAvoidanceConfig;
 	
 	@Override
-	public BestFirst<UncertainlyEvaluatedTraversalTree<N, A, V>, N, A, V> getAlgorithm() {
+	public BestFirst<GraphSearchWithUncertaintyBasedSubpathEvaluationInput<N, A, V>, N, A, V> getAlgorithm() {
 		if (oversearchAvoidanceConfig == null)
 			throw new IllegalStateException("Uncertainty Config has not been set yet.");
 
 		/* let the best first factory configure general aspects of the best first search */
-		BestFirst<UncertainlyEvaluatedTraversalTree<N, A, V>, N, A, V> search = super.getAlgorithm();
+		BestFirst<GraphSearchWithUncertaintyBasedSubpathEvaluationInput<N, A, V>, N, A, V> search = super.getAlgorithm();
 		
 		/* now set uncertainty-specific behavior */
 		switch (oversearchAvoidanceConfig.getOversearchAvoidanceMode()) {
