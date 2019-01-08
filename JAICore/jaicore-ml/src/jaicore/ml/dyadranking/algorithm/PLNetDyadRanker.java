@@ -24,6 +24,9 @@ import org.deeplearning4j.nn.workspace.LayerWorkspaceMgr;
 import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.cpu.nativecpu.NDArray;
+import org.nd4j.linalg.dataset.api.iterator.StandardScaler;
+import org.nd4j.linalg.dataset.api.preprocessor.NormalizerStandardize;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.learning.config.Sgd;
 import org.nd4j.linalg.primitives.Pair;
@@ -103,6 +106,7 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 			int dyadSize = ((IDyadRankingInstance) drDataset.get(0)).getDyadAtPosition(0).getInstance().length()
 					+ ((IDyadRankingInstance) drDataset.get(0)).getDyadAtPosition(0).getAlternative().length();
 			this.plNet = createNetwork(dyadSize);
+			log.warn("Architecture: " + plNet.getLayers());
 		}
 
 		currentBestScore = Double.POSITIVE_INFINITY;
@@ -112,7 +116,7 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 		int patience = 0;
 		int earlyStoppingCounter = 0;
 		int maxEpochs = configuration.plNetMaxEpochs();
-		
+
 		while (patience < configuration.plNetEarlyStoppingPatience() && (epoch < maxEpochs || maxEpochs == 0)) {
 			// Iterate through training data
 			for (IInstance dyadRankingInstance : drTrain) {
@@ -121,7 +125,8 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 			log.warn("plNet params: {}", plNet.params().toString());
 			earlyStoppingCounter++;
 			// Compute validation error
-			if (earlyStoppingCounter == configuration.plNetEarlyStoppingInterval() && configuration.plNetEarlyStoppingTrainRatio() < 1.0) {
+			if (earlyStoppingCounter == configuration.plNetEarlyStoppingInterval()
+					&& configuration.plNetEarlyStoppingTrainRatio() < 1.0) {
 				double avgScore = computeAvgError(drTest);
 				if (avgScore < currentBestScore) {
 					currentBestScore = avgScore;
@@ -131,7 +136,7 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 				} else {
 					patience++;
 				}
-				log.debug("patience: + {}", patience);
+//				log.debug("patience: + {}", patience);
 				earlyStoppingCounter = 0;
 			}
 			epoch++;
@@ -162,9 +167,12 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 		List<INDArray> dyadList = new ArrayList<INDArray>(drInstance.length());
 		for (Dyad dyad : drInstance) {
 			INDArray dyadVector = dyadToVector(dyad);
+//			log.warn(dyad.toString());
+//			log.warn(dyadVector.toString());
 			dyadList.add(dyadVector);
 		}
 		dyadMatrix = Nd4j.vstack(dyadList);
+//		log.warn(dyadMatrix.toString());
 		List<INDArray> activations = plNet.feedForward(dyadMatrix);
 		INDArray output = activations.get(activations.size() - 1);
 		output = output.transpose();
@@ -176,12 +184,16 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 			plNetClone.setInput(dyadList.get(k));
 			plNetClone.feedForward(true, false);
 			INDArray lossGradient = PLNetLoss.computeLossGradient(output, k);
+			log.warn("loss gradient: " + lossGradient.toString());
+//			lossGradient = new NDArray(new double[][] {{2.0d}});
 			// compute backprop gradient for weight updates w.r.t. k
 			Pair<Gradient, INDArray> p = plNetClone.backpropGradient(lossGradient, null);
+			log.warn("backprop gradient: " + p.toString());
 			deltaWk = p.getFirst();
 			plNet.getUpdater().update(plNet, deltaWk, iteration, epoch, 1, LayerWorkspaceMgr.noWorkspaces());
 			deltaW.addi(deltaWk.gradient());
 		}
+//		log.warn("Gradient: " + deltaW);
 		plNet.params().subi(deltaW);
 		iteration++;
 	}
@@ -202,18 +214,18 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 		List<Pair<Dyad, Double>> dyadUtilityPairs = new ArrayList<Pair<Dyad, Double>>(drInstance.length());
 		for (Dyad dyad : drInstance) {
 			INDArray plNetInput = dyadToVector(dyad);
-			System.out.println("Dyad: " + dyad);
-			System.out.println("PLNetInput: " + plNetInput);
+//			System.out.println("Dyad: " + dyad);
+//			System.out.println("PLNetInput: " + plNetInput);
 			double plNetOutput = plNet.output(plNetInput).getDouble(0);
-			System.out.println("PLNetOutput: " + plNetOutput);
+//			System.out.println("PLNetOutput: " + plNetOutput);
 			dyadUtilityPairs.add(new Pair<Dyad, Double>(dyad, plNetOutput));
 		}
 		// sort the instance in descending order of utility values
 		Collections.sort(dyadUtilityPairs, Comparator.comparing(p -> -p.getRight()));
 		List<Dyad> ranking = new ArrayList<Dyad>();
-		
+
 		System.out.println("Dyad utility pairs: " + dyadUtilityPairs);
-		
+
 		for (Pair<Dyad, Double> pair : dyadUtilityPairs)
 			ranking.add(pair.getLeft());
 		return new DyadRankingInstance(ranking);
@@ -286,43 +298,32 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 		// Build hidden layers
 		String activation = configuration.plNetActivationFunction();
 		int inputsFirstHiddenLayer = configuration.plNetHiddenNodes().get(0);
-		configBuilder.layer(0, new DenseLayer.Builder()
-				.nIn(numInputs)
-				.nOut(inputsFirstHiddenLayer)
-				.weightInit(WeightInit.XAVIER)
-				.activation(Activation.fromString(activation))
-				.build());
+		configBuilder.layer(0, new DenseLayer.Builder().nIn(numInputs).nOut(inputsFirstHiddenLayer)
+				.weightInit(WeightInit.XAVIER).activation(Activation.fromString(activation)).hasBias(true).build());
 		List<Integer> hiddenNodes = configuration.plNetHiddenNodes();
 
 		for (int i = 0; i < hiddenNodes.size() - 1; i++) {
 			int numIn = hiddenNodes.get(i);
 			int numOut = hiddenNodes.get(i + 1);
-			configBuilder.layer(i + 1, new DenseLayer.Builder()
-					.nIn(numIn)
-					.nOut(numOut)
-					.weightInit(WeightInit.XAVIER)
-					.activation(Activation.fromString(activation))
-					.build());
+			configBuilder.layer(i + 1, new DenseLayer.Builder().nIn(numIn).nOut(numOut).weightInit(WeightInit.XAVIER)
+					.activation(Activation.fromString(activation)).hasBias(true).build());
 		}
 
 		// Build output layer. Since we are using an external error for training,
 		// this is a regular layer instead of an OutputLayer
-		configBuilder.layer(hiddenNodes.size(), new DenseLayer.Builder()
-				.nIn(hiddenNodes.get(hiddenNodes.size() - 1))
-				.nOut(1)
-				.weightInit(WeightInit.XAVIER)
-				.activation(Activation.IDENTITY)
-				.build());
+		configBuilder.layer(hiddenNodes.size(), new DenseLayer.Builder().nIn(hiddenNodes.get(hiddenNodes.size() - 1))
+				.nOut(1).weightInit(WeightInit.XAVIER).activation(Activation.IDENTITY).hasBias(true).build());
 
 		MultiLayerConfiguration multiLayerConfig = configBuilder.build();
 		return new MultiLayerNetwork(multiLayerConfig);
 	}
-	
+
 	/**
-	 * Converts a dyad to a {@link INDArray} row vector consisting of a concatenation of the instance and alternative features.
+	 * Converts a dyad to a {@link INDArray} row vector consisting of a
+	 * concatenation of the instance and alternative features.
 	 * 
-	 * @param dyad	The dyad to convert.
-	 * @return		The dyad in {@link INDArray} row vector form.
+	 * @param dyad The dyad to convert.
+	 * @return The dyad in {@link INDArray} row vector form.
 	 */
 	private INDArray dyadToVector(Dyad dyad) {
 		INDArray instanceOfDyad = Nd4j.create(dyad.getInstance().asArray());
@@ -330,20 +331,35 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 		INDArray dyadVector = Nd4j.hstack(instanceOfDyad, alternativeOfDyad);
 		return dyadVector;
 	}
-	
+
 	/**
-	 * Converts a dyad ranking to a {@link INDArray} matrix where each row corresponds to a dyad.
-	 * @param drInstance	The dyad ranking to convert to a matrix.
-	 * @return				The dyad ranking in {@link INDArray} matrix form.
+	 * Converts a dyad ranking to a {@link INDArray} matrix where each row
+	 * corresponds to a dyad.
+	 * 
+	 * @param drInstance The dyad ranking to convert to a matrix.
+	 * @return The dyad ranking in {@link INDArray} matrix form.
 	 */
 	private INDArray dyadRankingToMatrix(IDyadRankingInstance drInstance) {
 		List<INDArray> dyadList = new ArrayList<INDArray>(drInstance.length());
 		for (Dyad dyad : drInstance) {
 			INDArray dyadVector = dyadToVector(dyad);
+			// normalize dyad vectors
 			dyadList.add(dyadVector);
 		}
 		INDArray dyadMatrix;
 		dyadMatrix = Nd4j.vstack(dyadList);
+//		log.warn("dyad matrix before: \n {}", dyadMatrix.toString());
+		// standardize matrix
+		for (int i = 0; i < dyadMatrix.shape()[1]; i++) {
+			INDArray columnVector = dyadMatrix.getColumn(i);
+			DescriptiveStatistics stats = new DescriptiveStatistics();
+			for(int j = 0; j < columnVector.shape()[0];j++) {
+				stats.addValue(columnVector.getDouble(j));
+			}
+			columnVector.subi(stats.getMean());
+			columnVector.div(stats.getStandardDeviation());
+		}
+//		log.warn("dyad matrix after: \n {}",  dyadMatrix.toString());
 		return dyadMatrix;
 	}
 
