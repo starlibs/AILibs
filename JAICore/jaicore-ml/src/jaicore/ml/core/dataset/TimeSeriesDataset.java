@@ -153,7 +153,8 @@ public class TimeSeriesDataset implements IDataset<TimeSeriesInstance> {
 	 */
 	public void replace(int index, INDArray valueMatrix, INDArray timestampMatrix) throws IndexOutOfBoundsException {
 		valueMatrices.set(index, valueMatrix);
-		timestampMatrices.set(index, timestampMatrix);
+		if (timestampMatrix != null && timestampMatrices != null && timestampMatrices.size() > index)
+			timestampMatrices.set(index, timestampMatrix);
 		TimeSeriesAttributeType type = createAttributeType(valueMatrix);
 		attributeTypes.set(index, type);
 	}
@@ -179,11 +180,11 @@ public class TimeSeriesDataset implements IDataset<TimeSeriesInstance> {
 	}
 
 	public INDArray getValuesOrNull(int index) {
-		return valueMatrices.size() < index ? valueMatrices.get(index) : null;
+		return valueMatrices.size() > index ? valueMatrices.get(index) : null;
 	}
 
 	public INDArray getTimestampsOrNull(int index) {
-		return timestampMatrices.size() < index ? timestampMatrices.get(index) : null;
+		return timestampMatrices != null && timestampMatrices.size() > index ? timestampMatrices.get(index) : null;
 	}
 
 	public boolean isEmpty() {

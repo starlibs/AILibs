@@ -80,7 +80,7 @@ public class TimeSeriesLoader {
 
 		Object[] tsTargetClassNames = loadTimeSeriesWithTargetFromArffFile(arffFile);
 
-		return new TimeSeriesDataset(Arrays.asList((INDArray) tsTargetClassNames[0]), null,
+		return new TimeSeriesDataset(Arrays.asList((INDArray) tsTargetClassNames[0]), new ArrayList<INDArray>(),
 				(INDArray) tsTargetClassNames[1], (List<String>) tsTargetClassNames[2]);
 	}
 
@@ -143,7 +143,7 @@ public class TimeSeriesLoader {
 
 			matrices.add((INDArray) tsTargetClassNames[0]);
 		}
-		return new TimeSeriesDataset(matrices, null, target, classNames);
+		return new TimeSeriesDataset(matrices, new ArrayList<INDArray>(), target, classNames);
 	}
 
 	/**
