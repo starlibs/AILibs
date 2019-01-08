@@ -11,8 +11,8 @@ import jaicore.ml.core.optimizing.IGradientFunction;
  * 
  * (f(x + h) - f(x))/h
  * 
- * where x is the provided point and x' is a point that slightly differs
- * (specified by the parameter <code>precision</code>. (Obviously it holds that
+ * where x is the provided point and x' is a point that slightly differs,
+ * specified by the parameter <code>precision</code>. (Obviously it holds that
  * in lim_{precision -> 0} this yields the exact gradient.)
  * 
  * If x is a vector (a_o, ..., a_n), then, instead we calculate each partial
@@ -20,8 +20,8 @@ import jaicore.ml.core.optimizing.IGradientFunction;
  * 
  * (f(a_o, ... a_i +h, ... , a_n) - f((a_o, ..., a_n)))/h
  * 
- * Obviously, this is an highly in efficient approach for estimating the
- * gradient (if we have n partial derivatives, we need 2 *n estimations).
+ * Obviously, this is a highly inefficient approach for estimating the gradient
+ * (if we have n partial derivatives, we need 2 *n estimations).
  * 
  * @author Mirko Jürgens
  *
@@ -32,6 +32,11 @@ public class BlackBoxGradient implements IGradientFunction {
 
 	private final IGradientDescendableFunction function;
 
+	/**
+	 * Sets up a gradient-estimator for the given function. The estimation of the gradient can be tuned by the precision parameter.
+	 * @param underlyingFunction the function for which the gradient shall be estimated
+	 * @param precision the precision of the estimation, the close this value is to zero the better is the estimation
+	 */
 	public BlackBoxGradient(IGradientDescendableFunction underlyingFunction, double precision) {
 		this.precision = precision;
 		this.function = underlyingFunction;

@@ -64,8 +64,16 @@ public class DyadRankingInstanceSupplier {
 		return comparator;
 	}
 
+	/**
+	 * A simple function that can be learned by a bilinear feature transform:
+	 * <code>
+	 * f((x_1,y_1) , (x_2, y_2)) = x1*y1 + x2*y2 + x1*y2 + x2*y1
+	 * </code>
+	 * @param scoreVec1 (x_1, y_1)
+	 * @param scoreVec2 (x_2, y_2)
+	 * @return
+	 */
 	private static final double bilinFunc(Vector scoreVec1, Vector scoreVec2) {
-		// x1 * y1 + x2*y2 + x1*y2 + x2*y1
 		double score = scoreVec1.getValue(0) * scoreVec2.getValue(0) + scoreVec1.getValue(1) * scoreVec2.getValue(1)
 				+ scoreVec1.getValue(0) * scoreVec2.getValue(1) + scoreVec1.getValue(1) * scoreVec2.getValue(0);
 		return Math.exp(score);
