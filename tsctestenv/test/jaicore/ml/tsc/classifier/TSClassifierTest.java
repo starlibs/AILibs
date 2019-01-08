@@ -97,14 +97,14 @@ public class TSClassifierTest {
 		result.put("seed", seed);
 		result.put("dataset", reduceFileNames(trainingArffFile, testArffFile));
 
-		// Test reference classifier
-		compareRefClassifiers(tsRefClassifier, seed, tsRefClassifierParams, result, trainingArffFile, testArffFile);
-
 		// Load dataset
 		TimeSeriesDataset train = TimeSeriesLoader.loadArff(trainingArffFile);
 		TimeSeriesDataset test = TimeSeriesLoader.loadArff(testArffFile);
 
 		trainAndEvaluateClassifier(tsClassifier, seed, tsClassifierParams, result, train, test);
+
+		// Test reference classifier
+		compareRefClassifiers(tsRefClassifier, seed, tsRefClassifierParams, result, trainingArffFile, testArffFile);
 
 		return result;
 	}
