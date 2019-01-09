@@ -52,10 +52,11 @@ public class DFT implements IFilter {
 		}
 		
 		for(int matrix = 0; matrix < ((TimeSeriesDataset) input).getNumberOfVariables(); matrix++) {
-			INDArray matrixDFTCoefficient = Nd4j.create(new long [] {((TimeSeriesDataset) input).getNumberOfInstances(),InstancesLength*2});
+			INDArray matrixDFTCoefficient = Nd4j.create(new long [] {((TimeSeriesDataset) input).getNumberOfInstances(),numberOfDisieredCoefficients*2});
 			for(int instances = 0; instances < ((TimeSeriesDataset) input).getNumberOfInstances(); instances++) {
-				int loopcounter = 0;
+				
 				for(int f = 0; f < numberOfDisieredCoefficients; f++) {	
+					int loopcounter = 0;
 					Complex c = null;
 					for(int t = 0; t<InstancesLength; t++) {
 						
@@ -64,10 +65,11 @@ public class DFT implements IFilter {
 						//TODO can not find a exponential function for Nd4j that is free to use 
 						c= new Complex(Math.cos(-(1/InstancesLength-1)*2*Math.PI*t*f), Math.sin(-(1/InstancesLength-1)*2*Math.PI*t*f));
 						c.multiply(entry);
+						
 					}
 					c.multiply(1/Math.sqrt(InstancesLength));
 					matrixDFTCoefficient.putScalar(new long[] {instances,loopcounter},c.getReal());
-					matrixDFTCoefficient.putScalar(new long[] {instances,f, loopcounter+1}, c.getImaginary());
+					matrixDFTCoefficient.putScalar(new long[] {instances,loopcounter+1}, c.getImaginary());
 					loopcounter= loopcounter+2;
 				}
 			}
