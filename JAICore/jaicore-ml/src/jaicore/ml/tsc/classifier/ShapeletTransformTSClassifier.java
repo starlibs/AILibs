@@ -29,11 +29,18 @@ public class ShapeletTransformTSClassifier
 	private Classifier classifier;
 
 	public ShapeletTransformTSClassifier(final int k, final int seed) {
-		super(new ShapeletTransformAlgorithm(k, k / 2, new FStat(), seed));
+		super(new ShapeletTransformAlgorithm(k, k / 2, new FStat(), seed, true));
+	}
+	
+	public ShapeletTransformTSClassifier(final int k, final IQualityMeasure qm, final int seed,
+			final boolean clusterShapelets) {
+		super(new ShapeletTransformAlgorithm(k, k / 2, qm, seed, clusterShapelets));
 	}
 
-	public ShapeletTransformTSClassifier(final int k, final IQualityMeasure qm, final int seed) {
-		super(new ShapeletTransformAlgorithm(k, k / 2, qm, seed));
+	public ShapeletTransformTSClassifier(final int k, final IQualityMeasure qm, final int seed,
+			final boolean clusterShapelets, final int minShapeletLength, final int maxShapeletLength) {
+		super(new ShapeletTransformAlgorithm(k, k / 2, qm, seed, clusterShapelets, minShapeletLength,
+				maxShapeletLength));
 	}
 
 

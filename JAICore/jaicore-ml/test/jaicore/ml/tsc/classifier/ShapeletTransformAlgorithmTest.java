@@ -15,7 +15,7 @@ import junit.framework.Assert;
 
 public class ShapeletTransformAlgorithmTest {
 
-	private static final double EPS_DELTA = 0.001;
+	private static final double EPS_DELTA = 0.00001;
 
 	@Test
 	public void generateCandidatesTest() {
@@ -83,5 +83,16 @@ public class ShapeletTransformAlgorithmTest {
 		Assert.assertEquals(k, actResult.size());
 		Assert.assertTrue(actResult.contains(testEntry1));
 		Assert.assertFalse(actResult.contains(testEntry2));
+	}
+
+	@Test
+	public void zNormalizeTest() {
+		INDArray vector = Nd4j.create(new double[] { 1, 2, 3 });
+		INDArray expectedResult = Nd4j.create(new double[] { -1, 0, 1 });
+
+		INDArray actResult = ShapeletTransformAlgorithm.zNormalize(vector);
+		System.out.println(actResult);
+		Assert.assertTrue(expectedResult.equalsWithEps(actResult, EPS_DELTA));
+
 	}
 }

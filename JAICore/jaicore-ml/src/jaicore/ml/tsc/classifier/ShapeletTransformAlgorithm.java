@@ -31,6 +31,8 @@ import jaicore.ml.tsc.quality_measures.IQualityMeasure;
 import jaicore.ml.tsc.util.TimeSeriesUtil;
 import weka.classifiers.Classifier;
 import weka.classifiers.bayes.NaiveBayes;
+import weka.classifiers.functions.Logistic;
+import weka.classifiers.functions.MultilayerPerceptron;
 import weka.classifiers.functions.SMO;
 import weka.classifiers.functions.supportVector.PolyKernel;
 import weka.classifiers.lazy.IBk;
@@ -38,6 +40,7 @@ import weka.classifiers.meta.RotationForest;
 import weka.classifiers.meta.Vote;
 import weka.classifiers.trees.J48;
 import weka.classifiers.trees.RandomForest;
+import weka.core.EuclideanDistance;
 import weka.core.SelectedTag;
 
 public class ShapeletTransformAlgorithm extends
@@ -119,16 +122,37 @@ public class ShapeletTransformAlgorithm extends
 
 	private static final int MIN_MAX_ESTIMATION_SAMPLES = 10;
 
-	private final int k;
+	private int k;
 	private final int seed;
 	private final int noClusters;
+	private boolean clusterShapelets;
+	private boolean estimateShapeletLengthBorders;
+
+	private int minShapeletLength;
+	private int maxShapeletLength;
+
+	private Shapelet pruningBound;
 
 	public ShapeletTransformAlgorithm(final int k, final int noClusters, final IQualityMeasure qualityMeasure,
-			final int seed) {
+			final int seed, final boolean clusterShapelets) {
 		this.k = k;
 		this.qualityMeasure = qualityMeasure;
 		this.seed = seed;
 		this.noClusters = noClusters;
+		this.clusterShapelets = clusterShapelets;
+		this.estimateShapeletLengthBorders = true;
+	}
+
+	public ShapeletTransformAlgorithm(final int k, final int noClusters, final IQualityMeasure qualityMeasure,
+			final int seed, final boolean clusterShapelets, final int minShapeletLength, final int maxShapeletLength) {
+		this.k = k;
+		this.qualityMeasure = qualityMeasure;
+		this.seed = seed;
+		this.noClusters = noClusters;
+		this.clusterShapelets = clusterShapelets;
+		this.estimateShapeletLengthBorders = false;
+		this.minShapeletLength = minShapeletLength;
+		this.maxShapeletLength = maxShapeletLength;
 	}
 
 	// Training procedure
@@ -152,22 +176,28 @@ public class ShapeletTransformAlgorithm extends
 		this.model.setTargetType((CategoricalAttributeType) data.getTargetType());
 
 		// Estimate min and max
-		LOGGER.debug("Starting min max estimation.");
-		int[] minMax = estimateMinMax(dataMatrix, targetMatrix);
-		int min = minMax[0];
-		int max = minMax[1];
-		LOGGER.debug("Finished min max estimation. min={}, max={}", min, max);
+		if (this.estimateShapeletLengthBorders) {
+			LOGGER.debug("Starting min max estimation.");
+			int[] minMax = estimateMinMax(dataMatrix, targetMatrix);
+			this.minShapeletLength = minMax[0];
+			this.maxShapeletLength = minMax[1];
+			LOGGER.debug("Finished min max estimation. min={}, max={}", this.minShapeletLength, this.maxShapeletLength);
+		}
 
 		// Determine shapelets
-		LOGGER.debug("Starting cached shapelet selection with min={}, max={} and k={}...", min, max, this.k);
-		List<Shapelet> shapelets = shapeletCachedSelection(dataMatrix, min, max, this.k, targetMatrix);
+		LOGGER.debug("Starting cached shapelet selection with min={}, max={} and k={}...", this.minShapeletLength,
+				this.maxShapeletLength, this.k);
+		List<Shapelet> shapelets = shapeletCachedSelection(dataMatrix, this.minShapeletLength, this.maxShapeletLength,
+				this.k, targetMatrix);
 		LOGGER.debug("Finished cached shapelet selection. Extracted {} shapelets.", shapelets.size());
 
 		// Cluster shapelets
-		LOGGER.debug("Starting shapelet clustering...");
-		shapelets = clusterShapelets(shapelets, this.noClusters);
+		if (this.clusterShapelets) {
+			LOGGER.debug("Starting shapelet clustering...");
+			shapelets = clusterShapelets(shapelets, this.noClusters);
+			LOGGER.debug("Finished shapelet clustering. Staying with {} shapelets.", shapelets.size());
+		}
 		this.model.setShapelets(shapelets);
-		LOGGER.debug("Finished shapelet clustering. Staying with {} shapelets.", shapelets.size());
 
 		// Transforming the data using the extracted shapelets
 		LOGGER.debug("Transforming the training data using the extracted shapelets.");
@@ -177,6 +207,13 @@ public class ShapeletTransformAlgorithm extends
 		// Inititalize Weka ensemble
 		LOGGER.debug("Initializing ensemble classifier...");
 		Classifier classifier = initEnsembleModel();
+		// Classifier classifier;
+		// try {
+		// classifier = initCAWPEEnsembleModel();
+		// } catch (Exception e1) {
+		// throw new AlgorithmException(e1, "Could not train model due to ensemble
+		// exception.");
+		// }
 		LOGGER.debug("Initialized ensemble classifier.");
 
 		// Train Weka ensemble using the data
@@ -308,6 +345,9 @@ public class ShapeletTransformAlgorithm extends
 		final int numInstances = (int) data.shape()[0];
 
 		for (int i = 0; i < numInstances; i++) {
+
+			pruningBound = kShapelets.size() == this.k ? kShapelets.get(kShapelets.size() - 1).getKey() : null;
+
 			List<Map.Entry<Shapelet, Double>> shapelets = new ArrayList<>();
 			for (int l = min; l < max; l++) {
 				Set<Shapelet> W_il = generateCandidates(data.getRow(i), l, i);
@@ -384,30 +424,50 @@ public class ShapeletTransformAlgorithm extends
 	}
 
 	public static double getMinimumDistanceAmongAllSubsequences(final Shapelet shapelet, final INDArray timeSeries) {
-		final int l = (int) shapelet.getData().length();
+		final int l = (int) shapelet.getLength();
 		final int n = (int) timeSeries.length();
 
 		double min = Double.MAX_VALUE;
 
+		INDArray normalizedShapeletData = zNormalize(shapelet.getData());
+
 		for (int i = 0; i < n - l; i++) {
-			double tmpED = singleEuclideanDistance(shapelet.getData(), timeSeries.get(NDArrayIndex.interval(i, i + l)));
+			double tmpED = singleSquaredEuclideanDistance(normalizedShapeletData,
+					zNormalize(timeSeries.get(NDArrayIndex.interval(i, i + l))));
 			if (tmpED < min)
 				min = tmpED;
 		}
-		return min;
+		return min / shapelet.getLength();
 	}
 
 	// TODO: Change IDistance interface? Work directly on INDArray as opposed to
 	// usage of TimeSeriesAttributes?
-	private static double singleEuclideanDistance(final INDArray vector1, final INDArray vector2) {
+	private static double singleSquaredEuclideanDistance(final INDArray vector1, final INDArray vector2) {
 		if (vector1.length() != vector2.length())
 			throw new IllegalArgumentException("The lengths of of both vectors must match!");
 
-		double result = 0;
-		for (int i = 0; i < vector1.length(); i++) {
-			result += Math.pow(vector1.getDouble(i) - vector2.getDouble(i), 2);
-		}
-		return result;
+//		return new org.nd4j.linalg.api.ops.impl.accum.distances.EuclideanDistance(vector1, vector2).exec().getFinalResult()
+//				.doubleValue();
+		
+//		org.nd4j.linalg.api.ops.impl.accum.distances.EuclideanDistance
+		
+
+		return Math.pow(Nd4j.getExecutioner()
+				.exec(new org.nd4j.linalg.api.ops.impl.accum.distances.EuclideanDistance(vector1, vector2),
+						1)
+				.getDouble(0), 2);
+	}
+
+	// TODO: Use Helens implementation
+	public static INDArray zNormalize(final INDArray dataVector) {
+		// TODO: Parameter checks...
+		double mean = dataVector.meanNumber().doubleValue();
+		double stddev = dataVector.stdNumber().doubleValue();
+
+		if (stddev == 0.0)
+			return Nd4j.zeros(dataVector.shape());
+
+		return dataVector.sub(mean).divi(stddev);
 	}
 
 	public static Set<Shapelet> generateCandidates(INDArray data, final int l, final int candidateIndex) {
@@ -427,6 +487,7 @@ public class ShapeletTransformAlgorithm extends
 		Vote voter = new Vote();
 		voter.setCombinationRule(new SelectedTag(Vote.MAJORITY_VOTING_RULE, Vote.TAGS_RULES));
 
+
 		// SMO poly2
 		SMO smop = new SMO();
 		smop.turnChecksOff();
@@ -440,6 +501,7 @@ public class ShapeletTransformAlgorithm extends
 		// Random Forest
 		RandomForest rf = new RandomForest();
 		rf.setSeed(this.seed);
+		rf.setNumIterations(500);
 		classifier[1] = rf;
 
 		// Rotation forest
@@ -471,6 +533,40 @@ public class ShapeletTransformAlgorithm extends
 		classifier[6] = smol;
 
 		voter.setClassifiers(classifier);
+		return voter;
+	}
+
+	// Using CAWPE ensemble
+	private Classifier initCAWPEEnsembleModel() throws Exception {
+
+		Classifier[] classifiers = new Classifier[5];
+
+		Vote voter = new Vote();
+		voter.setCombinationRule(new SelectedTag(Vote.MAJORITY_VOTING_RULE, Vote.TAGS_RULES));
+
+		SMO smo = new SMO();
+		smo.turnChecksOff();
+		smo.setBuildCalibrationModels(true);
+		PolyKernel kl = new PolyKernel();
+		kl.setExponent(1);
+		smo.setKernel(kl);
+		smo.setRandomSeed(seed);
+		classifiers[0] = smo;
+
+		IBk k = new IBk(100);
+		k.setCrossValidate(true);
+		EuclideanDistance ed = new EuclideanDistance();
+		ed.setDontNormalize(true);
+		k.getNearestNeighbourSearchAlgorithm().setDistanceFunction(ed);
+		classifiers[1] = k;
+
+		classifiers[2] = new J48();
+
+		classifiers[3] = new Logistic();
+
+		classifiers[4] = new MultilayerPerceptron();
+
+		voter.setClassifiers(classifiers);
 		return voter;
 	}
 
