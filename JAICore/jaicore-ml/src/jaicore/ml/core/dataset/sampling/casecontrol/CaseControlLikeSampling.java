@@ -1,4 +1,4 @@
-package jaicore.ml.core.dataset.sampling;
+package jaicore.ml.core.dataset.sampling.casecontrol;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -7,6 +7,7 @@ import java.util.Random;
 import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
+import jaicore.ml.core.dataset.sampling.ASamplingAlgorithm;
 import jaicore.ml.core.dataset.standard.SimpleInstance;
 
 public abstract class CaseControlLikeSampling <I extends IInstance> extends ASamplingAlgorithm<I>{

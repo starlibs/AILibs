@@ -1,4 +1,4 @@
-package jaicore.ml.core.dataset.sampling;
+package jaicore.ml.core.dataset.sampling.casecontrol;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,6 +11,7 @@ import jaicore.basic.algorithm.AlgorithmState;
 import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
+import jaicore.ml.core.dataset.sampling.WekaInstancesUtil;
 import weka.classifiers.Classifier;
 import weka.core.Instance;
 import weka.core.Instances;

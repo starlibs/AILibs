@@ -1,4 +1,4 @@
-package jaicore.ml.core.dataset.sampling;
+package jaicore.ml.core.dataset.sampling.casecontrol;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,6 +13,8 @@ import weka.classifiers.Classifier;
 import weka.core.Instance;
 import weka.core.Instances;
 import jaicore.ml.core.dataset.*;
+import jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
+import jaicore.ml.core.dataset.sampling.WekaInstancesUtil;
 import jaicore.ml.core.dataset.standard.SimpleInstance;
 
 public class LocalCaseControlSampling <I extends IInstance> extends PilotEstimateSampling <I> { 

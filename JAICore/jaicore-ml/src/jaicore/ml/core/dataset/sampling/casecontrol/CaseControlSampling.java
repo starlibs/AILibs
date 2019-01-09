@@ -1,9 +1,10 @@
-package jaicore.ml.core.dataset.sampling;
+package jaicore.ml.core.dataset.sampling.casecontrol;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 import jaicore.ml.core.dataset.*;
+import jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
 import jaicore.ml.core.dataset.standard.SimpleInstance;
 import jaicore.basic.algorithm.AlgorithmEvent;
 import jaicore.basic.algorithm.AlgorithmFinishedEvent;
