@@ -1,4 +1,4 @@
-package jaicore.ml.skikitwrapper;
+package jaicore.ml.scikitwrapper;
 
 import java.util.Scanner;
 
@@ -18,12 +18,6 @@ public abstract class ProcessListener {
 			}
 			while(error.hasNext())
 				handleError(error.next());
-		}
-		if (input.hasNext()) {
-			handleInput(input.next());
-		}
-		if (error.hasNext()) {
-			handleError(error.next());
 		}
 		input.close();
 		error.close();
