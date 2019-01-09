@@ -83,8 +83,10 @@ public class GMeansStratiAmountSelectorAndAssigner<I extends IInstance> implemen
 		if (this.clusterer == null || this.clusters == null) {
 			// This object was not used for strati amount selection.
 			// Perform k-means clustering to get the correct strati amounts.
-			KMeansPlusPlusClusterer<I> kmeans = new KMeansPlusPlusClusterer<>(stratiAmount, -1,
-					this.distanceMeasure, new JDKRandomGenerator(this.randomSeed));
+			JDKRandomGenerator rand = new JDKRandomGenerator();
+			rand.setSeed(this.randomSeed);
+			KMeansPlusPlusClusterer<I> kmeans = new KMeansPlusPlusClusterer<I>(stratiAmount, -1,
+					this.distanceMeasure, rand);
 			this.clusters = kmeans.cluster(dataset);
 		}
 	}

@@ -46,8 +46,9 @@ public class KMeansStratiAssigner<I extends IInstance> implements IStratiAssigne
 	@Override
 	public void init(IDataset<I> dataset, int stratiAmount) {
 		// Perform initial Clustering of the dataset.
-		this.clusterer = new KMeansPlusPlusClusterer<>(stratiAmount, -1, this.distanceMeasure,
-				new JDKRandomGenerator(this.randomSeed));
+		JDKRandomGenerator rand = new JDKRandomGenerator();
+		rand.setSeed(this.randomSeed);
+		this.clusterer = new KMeansPlusPlusClusterer<>(stratiAmount, -1, this.distanceMeasure, rand);
 		this.clusters = this.clusterer.cluster(dataset);
 	}
 

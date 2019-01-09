@@ -2,42 +2,46 @@ package jaicore.ml.core.dataset.sampling;
 
 import java.util.Random;
 
-import jaicore.basic.algorithm.AAlgorithm;
 import jaicore.basic.algorithm.AlgorithmProblemTransformer;
 import jaicore.basic.algorithm.IAlgorithm;
 import jaicore.basic.algorithm.IAlgorithmFactory;
 import jaicore.ml.core.dataset.IDataset;
+import jaicore.ml.core.dataset.IInstance;
 
-public class SystematicSamplingTest  extends GeneralSamplingTester {
+public class SystematicSamplingTest<I extends IInstance> extends GeneralSamplingTester<I> {
 
 	private static final long RANDOM_SEED = 1;
 
-	@Override
-	public IAlgorithmFactory<IDataset, IDataset> getFactory() {
-		return new IAlgorithmFactory<IDataset, IDataset>() {
+	private static final double DEFAULT_SAMPLE_FRACTION = 0.1;
 
-			private IDataset input;
+	@Override
+	public IAlgorithmFactory<IDataset<I>, IDataset<I>> getFactory() {
+		return new IAlgorithmFactory<IDataset<I>, IDataset<I>>() {
+
+			private IDataset<I> input;
 
 			@Override
-			public void setProblemInput(IDataset problemInput) {
+			public void setProblemInput(IDataset<I> problemInput) {
 				this.input = problemInput;
 			}
 
 			@Override
-			public <P> void setProblemInput(P problemInput, AlgorithmProblemTransformer<P, IDataset> reducer) {
+			public <P> void setProblemInput(P problemInput, AlgorithmProblemTransformer<P, IDataset<I>> reducer) {
 				throw new UnsupportedOperationException("Problem input not applicable for subsampling algorithms!");
 			}
 
 			@Override
-			public IAlgorithm<IDataset, IDataset> getAlgorithm() {
+			public IAlgorithm<IDataset<I>, IDataset<I>> getAlgorithm() {
 				Random r = new Random(RANDOM_SEED);
-				AAlgorithm<IDataset, IDataset> algorithm = new SystematicSampling(r);
+				ASamplingAlgorithm<I> algorithm = new SystematicSampling<I>(r);
 				if (this.input != null) {
 					algorithm.setInput(input);
+					int sampleSize = (int) (DEFAULT_SAMPLE_FRACTION * (double) input.size());
+					algorithm.setSampleSize(sampleSize);
 				}
 				return algorithm;
 			}
 		};
 	}
-	
+
 }

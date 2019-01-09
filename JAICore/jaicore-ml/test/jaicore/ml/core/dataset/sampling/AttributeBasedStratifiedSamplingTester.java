@@ -1,23 +1,21 @@
 package jaicore.ml.core.dataset.sampling;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
-import org.apache.commons.math3.ml.distance.ManhattanDistance;
-
+import jaicore.basic.algorithm.AAlgorithm;
 import jaicore.basic.algorithm.AlgorithmProblemTransformer;
 import jaicore.basic.algorithm.IAlgorithm;
 import jaicore.basic.algorithm.IAlgorithmFactory;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
-import jaicore.ml.core.dataset.sampling.stratified.sampling.IStratiAmountSelector;
-import jaicore.ml.core.dataset.sampling.stratified.sampling.KMeansStratiAssigner;
+import jaicore.ml.core.dataset.sampling.stratified.sampling.AttributeBasedStratiAmountSelectorAndAssigner;
 import jaicore.ml.core.dataset.sampling.stratified.sampling.StratifiedSampling;
 
-public class StratifiedSamplingKMeansTester<I extends IInstance> extends GeneralSamplingTester<I> {
+public class AttributeBasedStratifiedSamplingTester<I extends IInstance> extends GeneralSamplingTester<I> {
 
-	private static final int RANDOM_SEED = 1;
-
-	private static final double DEFAULT_SAMPLE_FRACTION = 0.1;
+	private static final long RANDOM_SEED = 1;
 
 	@Override
 	public IAlgorithmFactory<IDataset<I>, IDataset<I>> getFactory() {
@@ -37,29 +35,23 @@ public class StratifiedSamplingKMeansTester<I extends IInstance> extends General
 
 			@Override
 			public IAlgorithm<IDataset<I>, IDataset<I>> getAlgorithm() {
-				KMeansStratiAssigner<I> k = new KMeansStratiAssigner<I>(new ManhattanDistance(), RANDOM_SEED);
-				ASamplingAlgorithm<I> algorithm = new StratifiedSampling<I>(new IStratiAmountSelector<I>() {
-					@Override
-					public void setNumCPUs(int numberOfCPUs) {
-					}
+				Random r = new Random(RANDOM_SEED);
+				List<Integer> attributeIndices = new ArrayList<>();
+				// We assume that the target is the last attribute
+				attributeIndices.add(input.getNumberOfAttributes());
 
-					@Override
-					public int selectStratiAmount(IDataset<I> dataset) {
-						return dataset.getNumberOfAttributes() * 2;
-					}
+				AttributeBasedStratiAmountSelectorAndAssigner<I> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<>(
+						attributeIndices);
 
-					@Override
-					public int getNumCPUs() {
-						return 0;
-					}
-				}, k, new Random(RANDOM_SEED));
+				AAlgorithm<IDataset<I>, IDataset<I>> algorithm = new StratifiedSampling<>(selectorAndAssigner,
+						selectorAndAssigner, r);
+
 				if (this.input != null) {
 					algorithm.setInput(input);
-					int sampleSize = (int) (DEFAULT_SAMPLE_FRACTION * (double) input.size());
-					algorithm.setSampleSize(sampleSize);
 				}
 				return algorithm;
 			}
+
 		};
 	}
 

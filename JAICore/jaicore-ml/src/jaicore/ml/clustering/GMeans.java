@@ -17,7 +17,8 @@ import org.apache.commons.math3.random.RandomGenerator;
 
 /**
  * Implementation of Gmeans based on Helen Beierlings implementation of
- * GMeans(https://github.com/helebeen/AILibs/blob/master/JAICore/jaicore-modifiedISAC/src/main/java/jaicore/modifiedISAC/ModifiedISACgMeans.java).
+ * GMeans(https://github.com/helebeen/AILibs/blob/master/JAICore/jaicore-modifiedISAC/src/main/java/jaicore/modifiedISAC/ModifiedISACgMeans.java).<br>
+ * For more Information see: "Hamerly, G., and Elkan, C. 2003. Learning the k in kmeans. in proceedings of the seventeenth annual conference on neural information processing systems (nips)".
  * 
  * @author Helen Beierling
  * @author jnowack
@@ -44,10 +45,22 @@ public class GMeans<C extends Clusterable> {
 
 	private RandomGenerator randomGenerator;
 	
+	
+	/** Initializes a basic cluster for the given Point using Mannhatten distance and seed=1
+	 * 
+	 * @param toClusterPoints Points which should be clustered
+	 */
 	public GMeans(Collection<C> toClusterPoints) {
 		this(toClusterPoints, new ManhattanDistance(), 1);
 	}
 	
+	/**
+	 *  Initializes a cluster for the given Point using a given distance meassure and a seed.
+	 * 
+	 * @param toClusterPoints P
+	 * @param distanceMeasure
+	 * @param seed
+	 */
 	public GMeans(Collection<C> toClusterPoints, DistanceMeasure distanceMeasure, long seed) {
 		this.points = new ArrayList<>(toClusterPoints);
 		this.distanceMeasure = distanceMeasure;
@@ -97,6 +110,9 @@ public class GMeans<C extends Clusterable> {
 			// an ArrayList of thier
 			// corresponding points
 			intermediateCenter = new ArrayList<>(2);
+			if(loopPoints.size() <2) {
+				break;
+			}
 			List<CentroidCluster<C>> intermediatePointsTemp = loopCluster.cluster(loopPoints);
 			for (CentroidCluster<C> centroidCluster : intermediatePointsTemp) {
 				intermediatePoints.put(centroidCluster.getCenter().getPoint(), centroidCluster.getPoints());
@@ -129,7 +145,7 @@ public class GMeans<C extends Clusterable> {
 						if (!Double.isNaN(v[p])) {
 							y[r] += (v[p] * loopPoints.get(r).getPoint()[p]) / w;
 						}
-						// TODO soll ich wenn v an der stelle NaN ist einfach so tuen als wäre es
+						// TODO soll ich wenn v an der stelle NaN ist einfach so tuen als wï¿½re es
 						// 1 oder nichts machen ?
 					}
 				}
@@ -156,20 +172,16 @@ public class GMeans<C extends Clusterable> {
 		mergeCluster(currentPoints);
 		for (double[] d : currentPoints.keySet()) {
 			List<C> pointsInCluster = currentPoints.get(d);
-			// List<ProblemInstance<Instance>> instancesInCluster = new
-			// ArrayList<ProblemInstance<Instance>>();
 			CentroidCluster<C> c = new CentroidCluster<>(new Clusterable() {
 				@Override
 				public double[] getPoint() {
 					return d;
 				}
-			}); // TODO: Create DataPoint
+			});
 			for (C point : pointsInCluster) {
 				c.addPoint(point);
 			}
 			gmeansCluster.add(c);
-			// gmeansCluster.add(new Cluster(instancesInCluster,new
-			// GroupIdentifier<double[]>(d)));
 		}
 		return gmeansCluster;
 	}

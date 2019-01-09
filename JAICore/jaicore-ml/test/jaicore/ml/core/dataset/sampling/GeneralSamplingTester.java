@@ -3,15 +3,25 @@ package jaicore.ml.core.dataset.sampling;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.Test;
+import org.openml.apiconnector.io.OpenmlConnector;
+import org.openml.apiconnector.xml.DataSetDescription;
 
 import jaicore.basic.algorithm.AlgorithmProblemTransformer;
 import jaicore.basic.algorithm.GeneralAlgorithmTester;
+import jaicore.basic.algorithm.IAlgorithmFactory;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
+import jaicore.ml.core.dataset.standard.SimpleDataset;
+import jaicore.ml.core.dataset.weka.WekaInstancesUtil;
+import weka.core.Attribute;
+import weka.core.Instances;
+import weka.core.converters.ConverterUtils.DataSource;
 
 /**
  * This class provides some tests that verify basic properties of a sampling
@@ -21,9 +31,12 @@ import jaicore.ml.core.dataset.IInstance;
  * @author Felix Weiland
  *
  */
-public abstract class GeneralSamplingTester extends GeneralAlgorithmTester<Object, IDataset, IDataset> {
+public abstract class GeneralSamplingTester<I extends IInstance>
+		extends GeneralAlgorithmTester<Object, IDataset<I>, IDataset<I>> {
 
 	private static final double DEFAULT_SAMPLE_FRACTION = 0.1;
+
+	private static final String OPENML_API_KEY = "4350e421cdc16404033ef1812ea38c01";
 
 	/**
 	 * This test verifies that the produced samples have the desired size.
@@ -35,7 +48,7 @@ public abstract class GeneralSamplingTester extends GeneralAlgorithmTester<Objec
 	 */
 	@Test
 	public void testSampleSizeSmallProblem() throws Exception {
-		IDataset dataset = this.getSimpleProblemInputForGeneralTestPurposes();
+		IDataset<I> dataset = this.getSimpleProblemInputForGeneralTestPurposes();
 		testSampleSize(dataset, DEFAULT_SAMPLE_FRACTION);
 	}
 
@@ -47,17 +60,19 @@ public abstract class GeneralSamplingTester extends GeneralAlgorithmTester<Objec
 	 * @param sampleFraction
 	 * @throws Exception
 	 */
-	// @Test
+	@Test
 	public void testSampleSizeLargeProblem() throws Exception {
-		IDataset dataset = this.getDifficultProblemInputForGeneralTestPurposes();
+		IDataset<I> dataset = this.getDifficultProblemInputForGeneralTestPurposes();
 		testSampleSize(dataset, DEFAULT_SAMPLE_FRACTION);
 	}
 
-	private void testSampleSize(IDataset dataset, double sampleFraction) {
-		ASamplingAlgorithm samplingAlgorithm = (ASamplingAlgorithm) this.getFactory().getAlgorithm();
+	private void testSampleSize(IDataset<I> dataset, double sampleFraction) {
+		IAlgorithmFactory<IDataset<I>, IDataset<I>> factory = this.getFactory();
+		factory.setProblemInput(dataset);
+		ASamplingAlgorithm<I> samplingAlgorithm = (ASamplingAlgorithm<I>) factory.getAlgorithm();
 		int sampleSize = (int) (dataset.size() * sampleFraction);
 		samplingAlgorithm.setSampleSize(sampleSize);
-		IDataset sample = getSample(dataset, samplingAlgorithm);
+		IDataset<I> sample = getSample(samplingAlgorithm);
 
 		assertEquals(sampleSize, sample.size());
 	}
@@ -72,7 +87,7 @@ public abstract class GeneralSamplingTester extends GeneralAlgorithmTester<Objec
 	 */
 	@Test
 	public void testNoDuplicatesSmallProblem() throws Exception {
-		IDataset dataset = this.getSimpleProblemInputForGeneralTestPurposes();
+		IDataset<I> dataset = this.getSimpleProblemInputForGeneralTestPurposes();
 		testNoDuplicates(dataset);
 	}
 
@@ -86,18 +101,21 @@ public abstract class GeneralSamplingTester extends GeneralAlgorithmTester<Objec
 	 */
 	@Test
 	public void testNoDuplicatesLargeProblem() throws Exception {
-		IDataset dataset = this.getDifficultProblemInputForGeneralTestPurposes();
+		IDataset<I> dataset = this.getDifficultProblemInputForGeneralTestPurposes();
 		testNoDuplicates(dataset);
 	}
 
-	private void testNoDuplicates(IDataset dataset) {
-		ASamplingAlgorithm samplingAlgorithm = (ASamplingAlgorithm) this.getFactory().getAlgorithm();
-		samplingAlgorithm.setSampleSize((int) DEFAULT_SAMPLE_FRACTION * dataset.size());
-		IDataset sample = getSample(dataset, samplingAlgorithm);
-		int sampleSize = sample.size();
+	private void testNoDuplicates(IDataset<I> dataset) {
+		IAlgorithmFactory<IDataset<I>, IDataset<I>> factory = this.getFactory();
+		factory.setProblemInput(dataset);
+		ASamplingAlgorithm<I> samplingAlgorithm = (ASamplingAlgorithm<I>) factory.getAlgorithm();
+		int sampleSize = (int) (dataset.size() * DEFAULT_SAMPLE_FRACTION);
+		samplingAlgorithm.setSampleSize(sampleSize);
+		IDataset<I> sample = getSample(samplingAlgorithm);
+		int actualSampleSize = sample.size();
 		Set<IInstance> set = new HashSet<>();
 		set.addAll(sample);
-		assertEquals(sampleSize, set.size());
+		assertEquals(actualSampleSize, set.size());
 	}
 
 	/**
@@ -108,22 +126,23 @@ public abstract class GeneralSamplingTester extends GeneralAlgorithmTester<Objec
 	 */
 	@Test
 	public void checkOriginalDataSetNotModified() throws Exception {
-		IDataset dataset = this.getSimpleProblemInputForGeneralTestPurposes();
+		IDataset<I> dataset = this.getSimpleProblemInputForGeneralTestPurposes();
 		int hashCode = dataset.hashCode();
-		ASamplingAlgorithm samplingAlgorithm = (ASamplingAlgorithm) this.getFactory().getAlgorithm();
-		samplingAlgorithm.setSampleSize((int) DEFAULT_SAMPLE_FRACTION * dataset.size());
-		getSample(dataset, samplingAlgorithm);
+		IAlgorithmFactory<IDataset<I>, IDataset<I>> factory = this.getFactory();
+		factory.setProblemInput(dataset);
+		ASamplingAlgorithm<I> samplingAlgorithm = (ASamplingAlgorithm<I>) factory.getAlgorithm();
+		int sampleSize = (int) (dataset.size() * DEFAULT_SAMPLE_FRACTION);
+		samplingAlgorithm.setSampleSize(sampleSize);
+		getSample(samplingAlgorithm);
 		assertEquals(hashCode, dataset.hashCode());
 	}
 
-	private IDataset getSample(IDataset dataset, ASamplingAlgorithm samplingAlgorithm) {
-		samplingAlgorithm.setInput(dataset);
-		IDataset sample = null;
+	private IDataset<I> getSample(ASamplingAlgorithm<I> samplingAlgorithm) {
+		IDataset<I> sample = null;
 		try {
 			sample = samplingAlgorithm.call();
 		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Sampling algorithm was not able to compute a sample: ");
+			throw new RuntimeException("Sampling algorithm was not able to compute a sample", e);
 		}
 		if (sample == null) {
 			fail("Sample is null!");
@@ -132,20 +151,48 @@ public abstract class GeneralSamplingTester extends GeneralAlgorithmTester<Objec
 	}
 
 	@Override
-	public AlgorithmProblemTransformer<Object, IDataset> getProblemReducer() {
+	public AlgorithmProblemTransformer<Object, IDataset<I>> getProblemReducer() {
 		throw new UnsupportedOperationException("Problem reducer not applicable for sampling algorithms!");
 	}
 
 	@Override
-	public IDataset getSimpleProblemInputForGeneralTestPurposes() throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+	public IDataset<I> getSimpleProblemInputForGeneralTestPurposes() throws Exception {
+		// Load whine quality data set
+		return loadDatasetFromOpenML(287);
 	}
 
 	@Override
-	public IDataset getDifficultProblemInputForGeneralTestPurposes() throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+	public IDataset<I> getDifficultProblemInputForGeneralTestPurposes() throws Exception {
+		// Load higgs data set
+		return loadDatasetFromOpenML(23512);
+	}
+
+	@SuppressWarnings("unchecked")
+	private IDataset<I> loadDatasetFromOpenML(int id) throws IOException {
+		Instances dataset = null;
+		OpenmlConnector client = new OpenmlConnector();
+		try {
+			DataSetDescription description = client.dataGet(id);
+			File file = description.getDataset(OPENML_API_KEY);
+			DataSource source = new DataSource(file.getCanonicalPath());
+			dataset = source.getDataSet();
+			dataset.setClassIndex(dataset.numAttributes() - 1);
+			Attribute targetAttribute = dataset.attribute(description.getDefault_target_attribute());
+			dataset.setClassIndex(targetAttribute.index());
+		} catch (Exception e) {
+			throw new IOException("Could not load data set from OpenML!", e);
+		}
+
+		SimpleDataset simpleDataset = WekaInstancesUtil.wekaInstancesToDataset(dataset);
+		IDataset<I> toReturn = null;
+		try {
+			toReturn = (IDataset<I>) simpleDataset;
+		} catch (ClassCastException e) {
+			throw new RuntimeException("Cannot cast the loaded simple data set to the desired data set!", e);
+		}
+
+		return toReturn;
+
 	}
 
 }
