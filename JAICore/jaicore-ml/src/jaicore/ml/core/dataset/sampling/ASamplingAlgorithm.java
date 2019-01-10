@@ -8,6 +8,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jaicore.basic.algorithm.AAlgorithm;
+import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
+import jaicore.basic.algorithm.exceptions.AlgorithmException;
+import jaicore.basic.algorithm.exceptions.DelayedCancellationCheckException;
+import jaicore.basic.algorithm.exceptions.DelayedTimeoutCheckException;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
 
@@ -32,7 +36,7 @@ public abstract class ASamplingAlgorithm<I extends IInstance> extends AAlgorithm
 	}
 
 	@Override
-	public IDataset<I> call() throws Exception {
+	public IDataset<I> call() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
 		Instant timeoutTime = null;
 		if (this.getTimeout().milliseconds() <= 0) {
 			LOG.debug("Invalid or no timeout set. There will be no timeout in this algorithm run");
@@ -43,7 +47,7 @@ public abstract class ASamplingAlgorithm<I extends IInstance> extends AAlgorithm
 		}
 		// Check missing or invalid configuration.
 		if (sampleSize == null) {
-			throw new Exception("No valid sample size specified");
+			throw new AlgorithmException("No valid sample size specified");
 		}
 		if (sampleSize == 0) {
 			LOG.warn("Sample size is 0, so an empty data set is returned!");
@@ -51,10 +55,10 @@ public abstract class ASamplingAlgorithm<I extends IInstance> extends AAlgorithm
 		}
 		IDataset<I> dataset = this.getInput();
 		if (dataset == null || dataset.size() == 0) {
-			throw new Exception("No dataset or an empty dataset was given as an input.");
+			throw new AlgorithmException("No dataset or an empty dataset was given as an input.");
 		}
 		if (dataset.size() < this.sampleSize) {
-			throw new Exception("Specified sample size is bigger than the dataset.");
+			throw new AlgorithmException("Specified sample size is bigger than the dataset.");
 		} else if (dataset.size() == this.sampleSize) {
 			LOG.warn("Sample size and data set size are equal. Returning the original data set");
 			// The dataset size is exactly the specified sample size, so just return the
@@ -63,7 +67,11 @@ public abstract class ASamplingAlgorithm<I extends IInstance> extends AAlgorithm
 		} else {
 			// Working configuration, so create the actual sample.
 			while (this.hasNext()) {
-				checkTermination();
+				try {
+					checkTermination();
+				} catch (DelayedTimeoutCheckException | DelayedCancellationCheckException e) {
+					throw new AlgorithmException(e.getMessage());
+				}
 				if (Instant.now().isAfter(timeoutTime)) {
 					LOG.warn("Algorithm is running even though it has been timeouted. Cancelling..");
 					this.cancel();

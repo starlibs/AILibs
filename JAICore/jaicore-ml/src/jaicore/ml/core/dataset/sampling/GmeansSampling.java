@@ -8,7 +8,8 @@ import org.apache.commons.math3.ml.clustering.CentroidCluster;
 import org.apache.commons.math3.ml.distance.DistanceMeasure;
 import org.apache.commons.math3.ml.distance.ManhattanDistance;
 
-import jaicore.basic.algorithm.AlgorithmEvent;
+import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.ml.clustering.GMeans;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
@@ -47,7 +48,7 @@ public class GmeansSampling<I extends IInstance> extends ASamplingAlgorithm<I> {
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws Exception {
+	public AlgorithmEvent nextWithException() throws AlgorithmException {
 		switch (this.getState()) {
 		case created:
 			// Initialize variables
@@ -92,7 +93,7 @@ public class GmeansSampling<I extends IInstance> extends ASamplingAlgorithm<I> {
 			}
 		case inactive: {
 			if (this.sample.size() < this.sampleSize) {
-				throw new Exception("Expected sample size was not reached before termination");
+				throw new AlgorithmException("Expected sample size was not reached before termination");
 			} else {
 				return this.terminate();
 			}

@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
-import jaicore.basic.algorithm.AlgorithmEvent;
+import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
@@ -32,12 +33,17 @@ public class CaseControlSampling<I extends IInstance> extends ASamplingAlgorithm
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws Exception {
+	public AlgorithmEvent nextWithException() throws AlgorithmException {
 		switch (this.getState()) {
 		case created:
 			this.sample = getInput().createEmpty();
 
-			HashMap<String, Integer> classOccurrences = countClassOccurrences(this.getInput());
+			HashMap<String, Integer> classOccurrences;
+			try {
+				classOccurrences = countClassOccurrences(this.getInput());
+			} catch (ClassNotFoundException e) {
+				throw new AlgorithmException(e.getMessage());
+			}
 
 			// Count number of classes
 			int numberOfClasses = 0;
@@ -50,9 +56,13 @@ public class CaseControlSampling<I extends IInstance> extends ASamplingAlgorithm
 			double boundaryOfCurrentInstance = 0.0;
 			probabilityBoundaries = new ArrayList<Pair<I, Double>>();
 			for (Object instance : this.getInput()) {
-				boundaryOfCurrentInstance = ((double) 1 / classOccurrences
-						.get((String) ((I) instance).getTargetValue(Class.forName(new String())).getValue()).intValue())
-						/ numberOfClasses;
+				try {
+					boundaryOfCurrentInstance = ((double) 1 / classOccurrences
+							.get((String) ((I) instance).getTargetValue(Class.forName(new String())).getValue()).intValue())
+							/ numberOfClasses;
+				} catch (ClassNotFoundException e) {
+					throw new AlgorithmException(e.getMessage());
+				}
 				probabilityBoundaries.add(new Pair<I, Double>((I) instance, new Double(boundaryOfCurrentInstance)));
 			}
 			return this.activate();
