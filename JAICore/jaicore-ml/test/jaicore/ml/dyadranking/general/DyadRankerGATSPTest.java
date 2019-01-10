@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -46,6 +47,7 @@ public class DyadRankerGATSPTest {
 
 	private static final String XXL_FILE = "testsrc/ml/dyadranking/ga-tsp/data_meta/GAMeta72-LR.txt";
 	private static final String ALTERNATIVES_FEATURE_FILE = "testsrc/ml/dyadranking/ga-tsp/data_meta/GAMeta72-labeldescriptions.csv";
+	private static final String ORDERINGS_FILE = "testsrc/ml/dyadranking/ga-tsp/data_meta/orderings.csv";
 
 	// M = average ranking length
 	private static final int M = 30;
@@ -61,6 +63,7 @@ public class DyadRankerGATSPTest {
 	public void init() {
 		// load dataset
 		dataset = loadDatasetFromXXLAndCSV(XXL_FILE, ALTERNATIVES_FEATURE_FILE);
+		System.out.println(dataset);
 		// TODO differenct rankers
 		ranker = new PLNetDyadRanker();
 	}
@@ -68,6 +71,8 @@ public class DyadRankerGATSPTest {
 	@Test
 	public void test() {
 
+		System.out.println(dataset);
+		
 		Collections.shuffle(dataset, new Random(seed));
 
 		// trim rankings
@@ -78,14 +83,11 @@ public class DyadRankerGATSPTest {
 		DyadRankingDataset testData = new DyadRankingDataset(dataset.subList(N, dataset.size()));
 
 		// trim dyad ranking instances for train data
-//		trainData = randomlyTrimSparseDyadRankingInstances(trainData, M);
+		trainData = randomlyTrimSparseDyadRankingInstances(trainData, M);
 
 		try {
 
 			// train the ranker
-			
-//			System.out.println(trainData);
-			
 			ranker.train(trainData);
 
 			double avgKendallTau = 0.0d;
@@ -182,8 +184,6 @@ public class DyadRankerGATSPTest {
 			e.printStackTrace();
 		}
 
-		System.out.println(alternativeFeatures.size());
-
 		// parse XXL file
 		File xxlFile = new File(filePathXXL);
 		int numAttributes = 0;
@@ -216,6 +216,7 @@ public class DyadRankerGATSPTest {
 			for(int i = 0; i < stats.length; i++) {
 				stats[i] = new DescriptiveStatistics();
 			} 
+			int lineIndex = 0;
 			while ((line = reader.readLine()) != null) {
 				tokens = line.split("\t");
 				Vector instance = new DenseDoubleVector(numAttributes);
