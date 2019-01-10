@@ -8,7 +8,6 @@ import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.ASamplingAlgorithm;
-import jaicore.ml.core.dataset.standard.SimpleInstance;
 
 public abstract class CaseControlLikeSampling <I extends IInstance> extends ASamplingAlgorithm<I>{
 	
@@ -22,7 +21,7 @@ public abstract class CaseControlLikeSampling <I extends IInstance> extends ASam
 	 * @return HashMap of occurrences
 	 * @throws ClassNotFoundException
 	 */
-	protected HashMap<Object, Integer> countClassOccurrences(IDataset<I> dataset) throws ClassNotFoundException {
+	protected HashMap<Object, Integer> countClassOccurrences(IDataset<I> dataset) {
 		HashMap<Object, Integer> classOccurrences = new HashMap<Object, Integer>();
 		for(I instance: dataset) {
 			boolean classExists = false;

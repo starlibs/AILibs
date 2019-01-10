@@ -1,13 +1,8 @@
 package jaicore.ml.core.dataset.sampling.casecontrol;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Random;
 
-import jaicore.basic.algorithm.AlgorithmEvent;
-import jaicore.basic.algorithm.AlgorithmFinishedEvent;
-import jaicore.basic.algorithm.AlgorithmInitializedEvent;
-import jaicore.basic.algorithm.AlgorithmState;
 import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
@@ -23,7 +18,7 @@ public class OSMAC <I extends IInstance> extends PilotEstimateSampling <I> {
 		this.preSampleSize = preSampleSize;
 	}
 	
-	protected ArrayList<Pair<I, Double>> calculateFinalInstanceBoundaries(Instances instances, Classifier pilotEstimator) throws Exception {
+	protected ArrayList<Pair<I, Double>> calculateFinalInstanceBoundaries(Instances instances, Classifier pilotEstimator) {
 		double boundaryOfCurrentInstance = 0.0;
 		ArrayList<Pair<I, Double>> probabilityBoundaries = new ArrayList<Pair<I, Double>>();
 		ArrayList<Pair<Instance, Double>> instanceProbabilityBoundaries = new ArrayList<Pair<Instance, Double>>();
@@ -38,7 +33,7 @@ public class OSMAC <I extends IInstance> extends PilotEstimateSampling <I> {
 			try {
 				loss = 1 - pilotEstimator.distributionForInstance(instance)[(int) instance.classValue()];
 			}
-			catch(ArrayIndexOutOfBoundsException e) {
+			catch(Exception e) {
 				loss = 1;
 			}
 			sumOfDistributionLosses += loss* vectorLength;
@@ -51,7 +46,7 @@ public class OSMAC <I extends IInstance> extends PilotEstimateSampling <I> {
 			try {
 				loss = 1 - pilotEstimator.distributionForInstance(instance)[(int) instance.classValue()];
 			}
-			catch(ArrayIndexOutOfBoundsException e) {
+			catch(Exception e) {
 				loss = 1;
 			}
 			boundaryOfCurrentInstance += loss * vectorLength / sumOfDistributionLosses;

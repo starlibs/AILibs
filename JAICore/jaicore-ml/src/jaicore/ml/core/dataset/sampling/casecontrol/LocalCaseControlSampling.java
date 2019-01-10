@@ -1,21 +1,14 @@
 package jaicore.ml.core.dataset.sampling.casecontrol;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Random;
 
-import jaicore.basic.algorithm.AlgorithmEvent;
-import jaicore.basic.algorithm.AlgorithmFinishedEvent;
-import jaicore.basic.algorithm.AlgorithmInitializedEvent;
-import jaicore.basic.algorithm.AlgorithmState;
 import jaicore.basic.sets.SetUtil.Pair;
 import weka.classifiers.Classifier;
 import weka.core.Instance;
 import weka.core.Instances;
 import jaicore.ml.core.dataset.*;
-import jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
 import jaicore.ml.core.dataset.sampling.WekaInstancesUtil;
-import jaicore.ml.core.dataset.standard.SimpleInstance;
 
 public class LocalCaseControlSampling <I extends IInstance> extends PilotEstimateSampling <I> { 
 	
@@ -24,7 +17,7 @@ public class LocalCaseControlSampling <I extends IInstance> extends PilotEstimat
 		this.preSampleSize = preSampleSize;
 	}
 	
-	protected ArrayList<Pair<I, Double>> calculateFinalInstanceBoundaries(Instances instances, Classifier pilotEstimator) throws Exception {
+	protected ArrayList<Pair<I, Double>> calculateFinalInstanceBoundaries(Instances instances, Classifier pilotEstimator) {
 		double boundaryOfCurrentInstance = 0.0;
 		ArrayList<Pair<Instance, Double>> instanceProbabilityBoundaries = new ArrayList<Pair<Instance, Double>>();
 		double sumOfDistributionLosses = 0;
@@ -33,7 +26,7 @@ public class LocalCaseControlSampling <I extends IInstance> extends PilotEstimat
 			try {
 				loss = 1 - pilotEstimator.distributionForInstance(instance)[(int) instance.classValue()];
 			}
-			catch(ArrayIndexOutOfBoundsException e) {
+			catch(Exception e) {
 				loss = 1;
 			}
 			sumOfDistributionLosses += loss;
@@ -42,7 +35,7 @@ public class LocalCaseControlSampling <I extends IInstance> extends PilotEstimat
 			try {
 				loss = 1 - pilotEstimator.distributionForInstance(instance)[(int) instance.classValue()];
 			}
-			catch(ArrayIndexOutOfBoundsException e) {
+			catch(Exception e) {
 				loss = 1;
 			}
 			boundaryOfCurrentInstance += loss  / sumOfDistributionLosses;

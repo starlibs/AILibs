@@ -2,22 +2,18 @@ package jaicore.ml.core.dataset.sampling.casecontrol;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
-import jaicore.basic.algorithm.AlgorithmEvent;
-import jaicore.basic.algorithm.AlgorithmFinishedEvent;
-import jaicore.basic.algorithm.AlgorithmInitializedEvent;
-import jaicore.basic.algorithm.AlgorithmState;
+import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
 import jaicore.ml.core.dataset.sampling.WekaInstancesUtil;
-import jaicore.ml.core.dataset.standard.SimpleDataset;
 import weka.classifiers.Classifier;
 import weka.classifiers.functions.Logistic;
-import weka.core.Attribute;
 import weka.core.Instances;
+import weka.core.UnsupportedAttributeTypeException;
 import weka.filters.unsupervised.attribute.NumericToNominal;
 import weka.core.Instance;
 import weka.filters.Filter;
@@ -28,7 +24,7 @@ public abstract class PilotEstimateSampling <I extends IInstance> extends CaseCo
 	protected Classifier pilotEstimator = new Logistic();
 	
 	@Override
-	public AlgorithmEvent nextWithException() throws Exception {
+	public AlgorithmEvent nextWithException() throws AlgorithmException {
 		switch(this.getState()) {
 		case created:
 			this.sample = this.getInput().createEmpty();
@@ -65,16 +61,32 @@ public abstract class PilotEstimateSampling <I extends IInstance> extends CaseCo
 				} while(pilotEstimateSample.contains(choosenInstance));
 				pilotEstimateSample.add(choosenInstance);
 			}
-			Instances pilotEstimateInstances = WekaInstancesUtil.datasetToWekaInstances(pilotEstimateSample);
+			Instances pilotEstimateInstances = null;;
+			try {
+				pilotEstimateInstances = WekaInstancesUtil.datasetToWekaInstances(pilotEstimateSample);
+			} catch (UnsupportedAttributeTypeException e) {
+				e.printStackTrace();
+				this.terminate();
+			}
 			
 			NumericToNominal numericToNominal = new NumericToNominal();
 			String[] options = new String[2];
 			options[0] = "-R";
 			options[1] = "last";
-			numericToNominal.setOptions(options);
-			numericToNominal.setInputFormat(pilotEstimateInstances);
+			try {
+				numericToNominal.setOptions(options);
+				numericToNominal.setInputFormat(pilotEstimateInstances);
+			} catch (Exception e) {
+				e.printStackTrace();
+				this.terminate();
+			}
 			
-			pilotEstimateInstances = Filter.useFilter(pilotEstimateInstances, numericToNominal);
+			try {
+				pilotEstimateInstances = Filter.useFilter(pilotEstimateInstances, numericToNominal);
+			} catch (Exception e) {
+				e.printStackTrace();
+				this.terminate();
+			}
 			
 			ArrayList<Pair<Double, Double>> classMapping = new ArrayList<Pair<Double, Double>>();
 			boolean classNotInMapping;
@@ -90,10 +102,20 @@ public abstract class PilotEstimateSampling <I extends IInstance> extends CaseCo
 				}
 			}
 			
-			this.pilotEstimator.buildClassifier(pilotEstimateInstances);
+			try {
+				this.pilotEstimator.buildClassifier(pilotEstimateInstances);
+			} catch (Exception e) {
+				e.printStackTrace();
+				this.terminate();
+			}
 			
-			probabilityBoundaries = calculateFinalInstanceBoundaries(WekaInstancesUtil.datasetToWekaInstances(sampleCopy),
-					this.pilotEstimator);
+			try {
+				probabilityBoundaries = calculateFinalInstanceBoundaries(WekaInstancesUtil.datasetToWekaInstances(sampleCopy),
+						this.pilotEstimator);
+			} catch (UnsupportedAttributeTypeException e) {
+				e.printStackTrace();
+				this.terminate();
+			}
 			
 			return this.activate();
 		case active:
@@ -128,5 +150,5 @@ public abstract class PilotEstimateSampling <I extends IInstance> extends CaseCo
 		}
 	}
 	
-	abstract ArrayList<Pair<I, Double>> calculateFinalInstanceBoundaries(Instances instances, Classifier pilotEstimator) throws Exception;
+	abstract ArrayList<Pair<I, Double>> calculateFinalInstanceBoundaries(Instances instances, Classifier pilotEstimator);
 }

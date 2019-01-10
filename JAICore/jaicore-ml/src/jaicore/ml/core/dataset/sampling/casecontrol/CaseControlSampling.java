@@ -1,16 +1,11 @@
 package jaicore.ml.core.dataset.sampling.casecontrol;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 import jaicore.ml.core.dataset.*;
 import jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
-import jaicore.ml.core.dataset.standard.SimpleInstance;
-import jaicore.basic.algorithm.AlgorithmEvent;
-import jaicore.basic.algorithm.AlgorithmFinishedEvent;
-import jaicore.basic.algorithm.AlgorithmInitializedEvent;
-import jaicore.basic.algorithm.AlgorithmState;
-import jaicore.basic.sets.SetUtil.Pair;
+import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.exceptions.AlgorithmException;
 
 /**
  * Case control sampling. Might be used as sampling algorithm or as subroutine for Local Case Control Sampling
@@ -30,7 +25,7 @@ public class CaseControlSampling <I extends IInstance> extends CaseControlLikeSa
 	}
 	
 	@Override
-	public AlgorithmEvent nextWithException() throws Exception {
+	public AlgorithmEvent nextWithException() throws AlgorithmException {
 		switch(this.getState()) {
 		case created:
 			this.sample = getInput().createEmpty();
