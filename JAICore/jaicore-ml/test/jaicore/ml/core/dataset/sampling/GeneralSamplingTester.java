@@ -18,7 +18,7 @@ import jaicore.basic.algorithm.IAlgorithmFactory;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.standard.SimpleDataset;
-import jaicore.ml.core.dataset.weka.WekaInstancesUtil;
+import jaicore.ml.core.dataset.sampling.WekaInstancesUtil;
 import weka.core.Attribute;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSource;
@@ -183,7 +183,7 @@ public abstract class GeneralSamplingTester<I extends IInstance>
 			throw new IOException("Could not load data set from OpenML!", e);
 		}
 
-		SimpleDataset simpleDataset = WekaInstancesUtil.wekaInstancesToDataset(dataset);
+		SimpleDataset simpleDataset = (SimpleDataset) WekaInstancesUtil.wekaInstancesToDataset(dataset);
 		IDataset<I> toReturn = null;
 		try {
 			toReturn = (IDataset<I>) simpleDataset;

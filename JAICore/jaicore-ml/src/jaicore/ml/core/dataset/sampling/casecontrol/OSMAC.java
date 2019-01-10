@@ -29,27 +29,39 @@ public class OSMAC <I extends IInstance> extends PilotEstimateSampling <I> {
 		ArrayList<Pair<Instance, Double>> instanceProbabilityBoundaries = new ArrayList<Pair<Instance, Double>>();
 		double sumOfDistributionLosses = 0;
 		int vectorLength;
+		double loss;
 		for(Instance instance: instances) {
 			vectorLength = 0;
 			for(double dimensionLength: instance.toDoubleArray()) {
 				vectorLength += dimensionLength;
 			}
-			sumOfDistributionLosses += (1 - pilotEstimator.distributionForInstance(instance)[instance.classIndex()]) //TODO need Class
-					* vectorLength;
+			try {
+				loss = 1 - pilotEstimator.distributionForInstance(instance)[(int) instance.classValue()];
+			}
+			catch(ArrayIndexOutOfBoundsException e) {
+				loss = 1;
+			}
+			sumOfDistributionLosses += loss* vectorLength;
 		}
 		for(Instance instance: instances) {
 			vectorLength = 0;
 			for(double dimensionLength: instance.toDoubleArray()) {
 				vectorLength += dimensionLength;
 			}
-			boundaryOfCurrentInstance += (1 - pilotEstimator.distributionForInstance(instance)[instance.classIndex()]) //TODO need Class
-					 * vectorLength / sumOfDistributionLosses;
+			try {
+				loss = 1 - pilotEstimator.distributionForInstance(instance)[(int) instance.classValue()];
+			}
+			catch(ArrayIndexOutOfBoundsException e) {
+				loss = 1;
+			}
+			boundaryOfCurrentInstance += loss * vectorLength / sumOfDistributionLosses;
 			instanceProbabilityBoundaries.add(new Pair<Instance, Double>(instance, new Double(boundaryOfCurrentInstance)));
 		}
 		IDataset<IInstance> dataset = WekaInstancesUtil.wekaInstancesToDataset(instances);
 		int iterator = 0;
 		for(IInstance instance: dataset) {
 			probabilityBoundaries.add(new Pair<I, Double>((I) instance, instanceProbabilityBoundaries.get(iterator).getY()));
+			iterator++;
 		}
 		return probabilityBoundaries;
 	}

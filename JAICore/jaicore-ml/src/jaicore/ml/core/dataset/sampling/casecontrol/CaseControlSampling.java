@@ -31,7 +31,6 @@ public class CaseControlSampling <I extends IInstance> extends CaseControlLikeSa
 	
 	@Override
 	public AlgorithmEvent nextWithException() throws Exception {
-		ArrayList<Pair<I, Double>> probabilityBoundaries = null;;
 		switch(this.getState()) {
 		case created:
 			this.sample = getInput().createEmpty();
@@ -43,8 +42,7 @@ public class CaseControlSampling <I extends IInstance> extends CaseControlLikeSa
 			
 			// Calculate Boundaries that define which Instances is choose for which random number
 			probabilityBoundaries = calculateInstanceBoundaries(classOccurrences, numberOfClasses);
-			this.setState(AlgorithmState.active);
-			return new AlgorithmInitializedEvent();
+			return this.activate();
 		case active:
 			if(this.sample.size() < this.sampleSize) {
 				I choosenInstance = null;
@@ -54,6 +52,7 @@ public class CaseControlSampling <I extends IInstance> extends CaseControlLikeSa
 					for(int i = 0; i < probabilityBoundaries.size(); i++) {
 						if(probabilityBoundaries.get(i).getY().doubleValue() > r) {
 							choosenInstance = probabilityBoundaries.get(i).getX();
+							break;
 						}
 					}
 					if(choosenInstance == null) {
@@ -64,14 +63,13 @@ public class CaseControlSampling <I extends IInstance> extends CaseControlLikeSa
 				return new SampleElementAddedEvent();
 			}
 			else {
-				this.setState(AlgorithmState.inactive);
-				return new AlgorithmFinishedEvent();
+				return this.terminate();
 			}
 		case inactive:
 			if (this.sample.size() < this.sampleSize) {
 				throw new RuntimeException("Expected sample size was not reached before termination");
 			} else {
-				return new AlgorithmFinishedEvent();
+				return this.terminate();
 			}
 		default:
 			throw new IllegalStateException("Unknown algorithm state "+ this.getState());	

@@ -13,7 +13,7 @@ public class LocalCaseControlSamplingTester<I extends IInstance> extends General
 	
 	private static long SEED = 1;
 	private static double SAMLPING_FRACTION = 0.1;
-	private static double PRE_SAMPLING_FRACTION = 1.0;
+	private static double PRE_SAMPLING_FRACTION = 0.01;
 	
 	@Override
 	public IAlgorithmFactory<IDataset<I>, IDataset<I>> getFactory() {

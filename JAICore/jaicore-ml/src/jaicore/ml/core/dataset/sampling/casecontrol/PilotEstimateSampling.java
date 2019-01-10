@@ -18,7 +18,9 @@ import weka.classifiers.Classifier;
 import weka.classifiers.functions.Logistic;
 import weka.core.Attribute;
 import weka.core.Instances;
+import weka.filters.unsupervised.attribute.NumericToNominal;
 import weka.core.Instance;
+import weka.filters.Filter;
 
 public abstract class PilotEstimateSampling <I extends IInstance> extends CaseControlLikeSampling<I> {
 	
@@ -27,13 +29,17 @@ public abstract class PilotEstimateSampling <I extends IInstance> extends CaseCo
 	
 	@Override
 	public AlgorithmEvent nextWithException() throws Exception {
-		ArrayList<Pair<I, Double>> probabilityBoundaries = null;
 		switch(this.getState()) {
 		case created:
 			this.sample = this.getInput().createEmpty();
 			IDataset<I> pilotEstimateSample = this.getInput().createEmpty();
+			IDataset<I> sampleCopy = this.getInput().createEmpty();
 			
-			HashMap<Object, Integer> classOccurrences = countClassOccurrences(this.getInput());
+			for(I instance: this.getInput()) {
+				sampleCopy.add(instance);
+			}
+			
+			HashMap<Object, Integer> classOccurrences = countClassOccurrences(sampleCopy);
 			
 			// Count number of classes
 			int numberOfClasses = classOccurrences.keySet().size();
@@ -44,33 +50,61 @@ public abstract class PilotEstimateSampling <I extends IInstance> extends CaseCo
 			double r;
 			I choosenInstance;
 			for(int i = 0; i < this.preSampleSize; i++) {
-				r = this.rand.nextDouble();
-				choosenInstance = null;
-				for(int j = 0; j < probabilityBoundaries.size(); j++) {
-					if(probabilityBoundaries.get(j).getY().doubleValue() > r) {
-						choosenInstance = probabilityBoundaries.get(j).getX();
+				do {
+					r = this.rand.nextDouble();
+					choosenInstance = null;
+					for(int j = 0; j < probabilityBoundaries.size(); j++) {
+						if(probabilityBoundaries.get(j).getY().doubleValue() > r) {
+							choosenInstance = probabilityBoundaries.get(j).getX();
+							break;
+						}
 					}
-				}
-				if(choosenInstance == null) {
-					choosenInstance = probabilityBoundaries.get(probabilityBoundaries.size() - 1).getX();
-				}
+					if(choosenInstance == null) {
+						choosenInstance = probabilityBoundaries.get(probabilityBoundaries.size() - 1).getX();
+					}
+				} while(pilotEstimateSample.contains(choosenInstance));
 				pilotEstimateSample.add(choosenInstance);
 			}
 			Instances pilotEstimateInstances = WekaInstancesUtil.datasetToWekaInstances(pilotEstimateSample);
+			
+			NumericToNominal numericToNominal = new NumericToNominal();
+			String[] options = new String[2];
+			options[0] = "-R";
+			options[1] = "last";
+			numericToNominal.setOptions(options);
+			numericToNominal.setInputFormat(pilotEstimateInstances);
+			
+			pilotEstimateInstances = Filter.useFilter(pilotEstimateInstances, numericToNominal);
+			
+			ArrayList<Pair<Double, Double>> classMapping = new ArrayList<Pair<Double, Double>>();
+			boolean classNotInMapping;
+			for(Instance in: pilotEstimateInstances) {
+				classNotInMapping = true;
+				for(Pair<Double, Double> classPair: classMapping) {
+					if(in.classValue() == classPair.getX().doubleValue()) {
+						classNotInMapping = false;
+					}
+				}
+				if(classNotInMapping) {
+					classMapping.add(new Pair<Double, Double>(new Double(in.classValue()), (double) classMapping.size()));
+				}
+			}
+			
 			this.pilotEstimator.buildClassifier(pilotEstimateInstances);
 			
-			probabilityBoundaries = calculateFinalInstanceBoundaries(pilotEstimateInstances, this.pilotEstimator);
+			probabilityBoundaries = calculateFinalInstanceBoundaries(WekaInstancesUtil.datasetToWekaInstances(sampleCopy),
+					this.pilotEstimator);
 			
-			this.setState(AlgorithmState.active);
-			return new AlgorithmInitializedEvent();
+			return this.activate();
 		case active:
 			if(this.sample.size() < this.sampleSize) {
-				choosenInstance = null;
 				do {
 					r = this.rand.nextDouble();
+					choosenInstance = null;
 					for(int i = 0; i < probabilityBoundaries.size(); i++) {
 						if(probabilityBoundaries.get(i).getY().doubleValue() > r) {
 							choosenInstance = probabilityBoundaries.get(i).getX();
+							break;
 						}
 					}
 					if(choosenInstance == null) {
@@ -81,14 +115,13 @@ public abstract class PilotEstimateSampling <I extends IInstance> extends CaseCo
 				return new SampleElementAddedEvent();
 			}
 			else {
-				this.setState(AlgorithmState.inactive);
-				return new AlgorithmFinishedEvent();
+				return this.terminate();
 			}
 		case inactive:
 			if (this.sample.size() < this.sampleSize) {
 				throw new RuntimeException("Expected sample size was not reached before termination");
 			} else {
-				return new AlgorithmFinishedEvent();
+				return this.terminate();
 			}
 		default: 
 			throw new IllegalStateException("Unknown algorithm state "+ this.getState());	

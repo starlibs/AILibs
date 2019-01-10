@@ -13,6 +13,7 @@ import jaicore.ml.core.dataset.standard.SimpleInstance;
 public abstract class CaseControlLikeSampling <I extends IInstance> extends ASamplingAlgorithm<I>{
 	
 	protected Random rand;
+	protected ArrayList<Pair<I, Double>> probabilityBoundaries;
 	
 	/**
 	 * Count occurrences of every class. Needed to determine the probability for all instances of that class
