@@ -4,6 +4,7 @@ import java.util.Comparator;
 import java.util.Random;
 
 import jaicore.basic.algorithm.AlgorithmEvent;
+import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
 
 /**
@@ -15,6 +16,7 @@ import jaicore.ml.core.dataset.IInstance;
 public class SystematicSampling<I extends IInstance> extends ASamplingAlgorithm<I> {
 
 	private Random random;
+	private IDataset<I> sortedDataset;
 	private int k;
 	private int startIndex;
 	private int index;
@@ -64,18 +66,20 @@ public class SystematicSampling<I extends IInstance> extends ASamplingAlgorithm<
 		switch (this.getState()) {
 		case created:
 			// Initialize variables and sort dataset.
-			this.sample = getInput().createEmpty();
-			this.getInput().sort(this.datapointComparator);
-			this.startIndex = this.random.nextInt(this.getInput().size());
-			this.k = (int) Math.floor(this.getInput().size() / this.sampleSize);
+			this.sample = this.getInput().createEmpty();
+			this.sortedDataset = this.getInput().createEmpty();
+			this.sortedDataset.addAll(this.getInput());
+			this.sortedDataset.sort(this.datapointComparator);
+			this.startIndex = this.random.nextInt(this.sortedDataset.size());
+			this.k = (int) Math.floor(this.sortedDataset.size() / this.sampleSize);
 			this.index = 0;
 			return this.activate();
 		case active:
 			// If the sample size is not reached yet, add the next datapoint from the
 			// systematic sampling method.
 			if (this.sample.size() < this.sampleSize) {
-				int e = (startIndex + (this.index++) * k) % this.getInput().size();
-				this.sample.add(this.getInput().get(e));
+				int e = (startIndex + (this.index++) * k) % this.sortedDataset.size();
+				this.sample.add(this.sortedDataset.get(e));
 				return new SampleElementAddedEvent();
 			} else {
 				return this.terminate();
