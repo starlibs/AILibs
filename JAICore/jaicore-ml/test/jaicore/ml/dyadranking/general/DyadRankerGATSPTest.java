@@ -24,10 +24,13 @@ import jaicore.ml.core.exception.TrainingException;
 import jaicore.ml.dyadranking.Dyad;
 import jaicore.ml.dyadranking.algorithm.ADyadRanker;
 import jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
+import jaicore.ml.dyadranking.algorithm.featuretransform.FeatureTransformPLDyadRanker;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import jaicore.ml.dyadranking.dataset.DyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
+import jaicore.ml.dyadranking.loss.DyadRankingLossUtil;
+import jaicore.ml.dyadranking.loss.KendallsTauDyadRankingLoss;
 
 /**
  * This is a test based on Dirk Schäfers dyad ranking dataset based on
