@@ -27,15 +27,14 @@ public class DyadRankingInstanceSupplier {
 	 *            the amount of dyads
 	 * @return random dyad ranking instance of length at most maxLength
 	 */
-	public static DyadRankingInstance getDyadRankingInstance(int maxLength) {
+	public static DyadRankingInstance getDyadRankingInstance(int maxLength, int instSize, int altSize, Comparator<Dyad> comparator) {
 		List<Dyad> dyads = new ArrayList<Dyad>();
 		int actualLength = ThreadLocalRandom.current().nextInt(2, maxLength + 1);
 
 		for (int i = 0; i < actualLength; i++) {
-			Dyad dyad = DyadSupplier.getRandomDyad(30, 2);
+			Dyad dyad = DyadSupplier.getRandomDyad(instSize, altSize);
 			dyads.add(dyad);
 		}
-		Comparator<Dyad> comparator = complexDyadRanker();
 		Collections.sort(dyads, comparator);
 		return new DyadRankingInstance(dyads);
 	}
@@ -63,7 +62,24 @@ public class DyadRankingInstanceSupplier {
 		};
 		return comparator;
 	}
+	
+	public static Comparator<Dyad> inputOptimizerTestRanker() {
+		Comparator<Dyad> comparator = new Comparator<Dyad>() {
 
+			@Override
+			public int compare(Dyad d1, Dyad d2) {
+				Vector instD1 = d1.getInstance();
+				Vector altD1 = d1.getAlternative();
+				Vector instD2 = d2.getInstance();
+				Vector altD2 = d2.getAlternative();
+				double score1 = Math.abs(instD1.getValue(0) + instD1.getValue(1) - altD1.getValue(0) - altD1.getValue(1));
+				double score2 = Math.abs(instD2.getValue(0) + instD2.getValue(1) - altD2.getValue(0) - altD2.getValue(1));
+				return score1 - score2 == 0 ? 0 : (score1 - score2 > 0 ? -1 : 1);
+			}	
+		};
+		return comparator;
+	}
+	
 	/**
 	 * A simple function that can be learned by a bilinear feature transform:
 	 * <code>
@@ -93,7 +109,15 @@ public class DyadRankingInstanceSupplier {
 	public static DyadRankingDataset getDyadRankingDataset(int maxLengthDyadRankingInstance, int size) {
 		DyadRankingDataset dataset = new DyadRankingDataset();
 		for (int i = 0; i < size; i++) {
-			dataset.add(DyadRankingInstanceSupplier.getDyadRankingInstance(maxLengthDyadRankingInstance));
+			dataset.add(DyadRankingInstanceSupplier.getDyadRankingInstance(maxLengthDyadRankingInstance, 30, 2, complexDyadRanker()));
+		}
+		return dataset;
+	}
+	
+	public static DyadRankingDataset getInputOptTestSet(int maxLengthDyadRankingInstance, int size) {
+		DyadRankingDataset dataset = new DyadRankingDataset();
+		for (int i = 0; i < size; i++) {
+			dataset.add(DyadRankingInstanceSupplier.getDyadRankingInstance(maxLengthDyadRankingInstance, 2, 2, inputOptimizerTestRanker()));
 		}
 		return dataset;
 	}

@@ -49,7 +49,7 @@ public class AdvancedDyadDatasetDyadRankerTester {
 		double avgFailures = 0;
 		
 		for (int testInst = 0; testInst < nTestInstances; testInst++) {
-			IDyadRankingInstance test = DyadRankingInstanceSupplier.getDyadRankingInstance(maxDyadRankingLength);
+			IDyadRankingInstance test = DyadRankingInstanceSupplier.getDyadRankingInstance(maxDyadRankingLength, 30, 2, DyadRankingInstanceSupplier.complexDyadRanker());
 			IDyadRankingInstance predict = ranker.predict(test);
 			
 			int dyadRankingLength = test.length();

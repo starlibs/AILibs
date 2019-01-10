@@ -388,5 +388,8 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 		MultiLayerNetwork restored = ModelSerializer.restoreMultiLayerNetwork(filePath);
 		plNet = restored;
 	}
-
+	
+	public MultiLayerNetwork getPlNet() {
+		return plNet;
+	}
 }
