@@ -12,22 +12,24 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.Subscribe;
 
-import jaicore.basic.algorithm.AlgorithmEvent;
-import jaicore.basic.algorithm.AlgorithmFinishedEvent;
+import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
+import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
 import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
-import jaicore.search.algorithms.standard.AbstractORGraphSearch;
 import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.GraphSearchSolutionCandidateFoundEvent;
+import jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.ICancelableNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.ISolutionReportingNodeEvaluator;
+import jaicore.search.core.interfaces.AOptimalPathInORGraphSearch;
 import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
-import jaicore.search.model.probleminputs.GeneralEvaluatedTraversalTree;
 import jaicore.search.model.travesaltree.Node;
 import jaicore.search.model.travesaltree.NodeExpansionDescription;
+import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 import jaicore.search.structure.graphgenerator.GoalTester;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.PathGoalTester;
@@ -43,7 +45,7 @@ import jaicore.search.structure.graphgenerator.SuccessorGenerator;
  * @param <A>
  * @param <V>
  */
-public class AwaStarSearch<I extends GeneralEvaluatedTraversalTree<T, A, V>, T, A, V extends Comparable<V>> extends AbstractORGraphSearch<I, EvaluatedSearchGraphPath<T, A, V>, T, A, V, Node<T, V>, A> {
+public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A, V>, T, A, V extends Comparable<V>> extends AOptimalPathInORGraphSearch<I, T, A, V, Node<T, V>, A> {
 
 	private Logger logger = LoggerFactory.getLogger(AwaStarSearch.class);
 	private String loggerName;
@@ -74,7 +76,7 @@ public class AwaStarSearch<I extends GeneralEvaluatedTraversalTree<T, A, V>, T, 
 		}
 	}
 
-	private AlgorithmEvent processUntilNextEvent() throws Exception {
+	private AlgorithmEvent processUntilNextEvent() throws NodeEvaluationException, TimeoutException, AlgorithmExecutionCanceledException, InterruptedException {
 
 		this.logger.info("Searching for next solution.");
 
@@ -105,7 +107,7 @@ public class AwaStarSearch<I extends GeneralEvaluatedTraversalTree<T, A, V>, T, 
 		return toReturn;
 	}
 
-	private void windowAStar() throws Exception {
+	private void windowAStar() throws NodeEvaluationException, TimeoutException, AlgorithmExecutionCanceledException, InterruptedException {
 		while (!this.openList.isEmpty()) {
 			this.checkTermination();
 			if (!this.unreturnedSolutionEvents.isEmpty()) {
@@ -202,7 +204,7 @@ public class AwaStarSearch<I extends GeneralEvaluatedTraversalTree<T, A, V>, T, 
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws Exception {
+	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, NodeEvaluationException {
 		// logger.info("Next step in {}. State is {}", this, getState());
 		this.checkTermination();
 		switch (this.getState()) {
@@ -269,11 +271,6 @@ public class AwaStarSearch<I extends GeneralEvaluatedTraversalTree<T, A, V>, T, 
 	@Override
 	public GraphGenerator<T, A> getGraphGenerator() {
 		return this.getInput().getGraphGenerator();
-	}
-
-	@Override
-	public EvaluatedSearchGraphPath<T, A, V> getSolutionProvidedToCall() {
-		return this.getBestSeenSolution();
 	}
 
 	@Override

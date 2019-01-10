@@ -1,0 +1,21 @@
+plugins {
+	id "com.github.hauner.jarTest" version "1.0.1"
+}
+
+sourceSets {
+    main {
+      java {
+          srcDir 'src'
+          srcDir 'ext'
+      }
+    }
+    test {
+     	java {
+     		srcDir 'test'
+     	}
+    }
+}
+dependencies {
+    compile project(":JAICore:jaicore-basic")
+    compile group: 'org.moeaframework', name: 'moeaframework', version: '2.12'
+}

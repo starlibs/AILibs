@@ -3,9 +3,12 @@ package jaicore.basic.algorithm;
 import java.util.Iterator;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import jaicore.basic.Cancelable;
 import jaicore.basic.TimeOut;
+import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.exceptions.AlgorithmException;
 
 /**
  * The algorithms should actually also be interruptible, but since this is often not the case, we require the cancel method to ensure that the authors of the algorithms provide a mechanism to stop the algorithm and free the used resources.
@@ -72,10 +75,15 @@ public interface IAlgorithm<I, O> extends Iterable<AlgorithmEvent>, Iterator<Alg
 	 * @return The next event occuring during the execution of the algorithm.
 	 * @throws Exception
 	 */
-	public AlgorithmEvent nextWithException() throws Exception;
+	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException;
 
 	/**
 	 * @return The config interface to store parameters to the algorithm in.
 	 */
 	public IAlgorithmConfig getConfig();
+	
+	/**
+	 * Overrides the call of Callable to restrict the set of allowed exceptions
+	 */
+	public O call() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException;
 }

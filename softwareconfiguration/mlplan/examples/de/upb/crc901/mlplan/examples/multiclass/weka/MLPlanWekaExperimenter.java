@@ -23,7 +23,7 @@ import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.WekaMLPlanWekaClassifier;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import hasco.core.HASCOSolutionCandidate;
 import jaicore.basic.SQLAdapter;
-import jaicore.basic.algorithm.SolutionCandidateFoundEvent;
+import jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
 import jaicore.concurrent.TimeoutTimer;
 import jaicore.experiments.ExperimentDBEntry;
 import jaicore.experiments.ExperimentRunner;

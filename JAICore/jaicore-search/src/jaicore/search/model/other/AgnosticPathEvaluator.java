@@ -7,7 +7,7 @@ import jaicore.search.core.interfaces.ISolutionEvaluator;
 public class AgnosticPathEvaluator<N> implements ISolutionEvaluator<N, Double> {
 
 	@Override
-	public Double evaluateSolution(List<N> solutionPath) throws Exception {
+	public Double evaluateSolution(List<N> solutionPath) {
 		return 0.0;
 	}
 
