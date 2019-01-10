@@ -1,4 +1,4 @@
-package jaicore.ml.dyadranking.optimizing;
+package jaicore.ml.core.optimizing;
 
 import de.upb.isys.linearalgebra.Vector;
 

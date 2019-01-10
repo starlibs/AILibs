@@ -13,9 +13,10 @@ import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.core.exception.TrainingException;
 import jaicore.ml.dyadranking.Dyad;
 import jaicore.ml.dyadranking.algorithm.ADyadRanker;
-import jaicore.ml.dyadranking.algorithm.FeatureTransformPLDyadRanker;
+import jaicore.ml.dyadranking.algorithm.APLDyadRanker;
 import jaicore.ml.dyadranking.algorithm.IPLNetDyadRankerConfiguration;
 import jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
+import jaicore.ml.dyadranking.algorithm.featuretransform.FeatureTransformPLDyadRanker;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 import jaicore.ml.dyadranking.loss.KendallsTauDyadRankingLoss;
 
@@ -47,7 +48,7 @@ public class AdvancedDyadDatasetDyadRankerTester {
 	public void testSwapOrdering1() throws PredictionException {
 		System.out.println("Now testing ordering");
 		
-		int maxDyadRankingLength = 10;
+		int maxDyadRankingLength = 4;
 		int nTestInstances = 100;
 		double avgKendallTau = 0;
 		double avgKendallTau2 = 0;
@@ -80,7 +81,7 @@ public class AdvancedDyadDatasetDyadRankerTester {
 	}
 
 	@Parameters
-	public static List<ADyadRanker[]> supplyDyadRankers() {
+	public static List<APLDyadRanker[]> supplyDyadRankers() {
 		PLNetDyadRanker ranker1 = new PLNetDyadRanker();
 		ranker1.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_MAX_EPOCHS, "0");
 		ranker1.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_PLNET_HIDDEN_NODES, "6,4,3");

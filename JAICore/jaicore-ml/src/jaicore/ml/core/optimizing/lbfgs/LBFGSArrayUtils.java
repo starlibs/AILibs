@@ -1,4 +1,4 @@
-package jaicore.ml.dyadranking.algorithm.lbfgs;
+package jaicore.ml.core.optimizing.lbfgs;
 
 import de.upb.isys.linearalgebra.DenseDoubleVector;
 import de.upb.isys.linearalgebra.Vector;

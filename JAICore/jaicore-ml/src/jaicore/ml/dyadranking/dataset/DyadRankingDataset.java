@@ -12,9 +12,11 @@ import jaicore.ml.core.dataset.attribute.IAttributeType;
 
 /**
  * A dataset representation for dyad ranking. Contains
- * {@link IDyadRankingInstance}s.
+ * {@link IDyadRankingInstance}s. In particular, this dataset is just an
+ * extension to the {@link ArrayList} implementation with typecasts to
+ * {@link IDyadRankingInstance}.
  * 
- * @author Helena Graf, Jonas Hanselle
+ * @author Helena Graf, Mirko Jürgens, Jonas Hanselle
  *
  */
 public class DyadRankingDataset extends ArrayList<IInstance> implements IDataset {
@@ -75,6 +77,11 @@ public class DyadRankingDataset extends ArrayList<IInstance> implements IDataset
 	public void deserialize(InputStream in) {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public IDyadRankingInstance get(int index) {
+		return (IDyadRankingInstance) super.get(index);
 	}
 
 }
