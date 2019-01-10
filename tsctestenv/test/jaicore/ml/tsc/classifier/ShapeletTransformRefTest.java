@@ -17,14 +17,18 @@ import jaicore.ml.tsc.quality_measures.FStat;
 import timeseriesweka.classifiers.ShapeletTransformClassifier;
 
 public class ShapeletTransformRefTest {
+	private static final String UNIVARIATE_PREFIX = "C:\\Users\\Julian\\Desktop\\NewTSCProblems\\";
+
 	private static final String CAR_TRAIN = "C:\\Users\\Julian\\Downloads\\UnivariateTSCProblems\\Car\\Car_TRAIN.arff";
 	private static final String CAR_TEST = "C:\\Users\\Julian\\Downloads\\UnivariateTSCProblems\\Car\\Car_TEST.arff";
 
 	private static final String ARROW_HEAD_TRAIN = "C:\\Users\\Julian\\Downloads\\UnivariateTSCProblems\\ArrowHead\\ArrowHead\\ArrowHead_TRAIN.arff";
 	private static final String ARROW_HEAD_TEST = "C:\\Users\\Julian\\Downloads\\UnivariateTSCProblems\\ArrowHead\\ArrowHead\\ArrowHead_TEST.arff";
 
-	private static final String ITALY_POWER_DEMAND_TRAIN = "C:\\Users\\Julian\\Downloads\\UnivariateTSCProblems\\ItalyPowerDemand\\ItalyPowerDemand_TRAIN.arff";
-	private static final String ITALY_POWER_DEMAND_TEST = "C:\\Users\\Julian\\Downloads\\UnivariateTSCProblems\\ItalyPowerDemand\\ItalyPowerDemand_TEST.arff";
+	private static final String ITALY_POWER_DEMAND_TRAIN = UNIVARIATE_PREFIX
+			+ "ItalyPowerDemand\\ItalyPowerDemand_TRAIN.arff";
+	private static final String ITALY_POWER_DEMAND_TEST = UNIVARIATE_PREFIX
+			+ "ItalyPowerDemand\\ItalyPowerDemand_TEST.arff";
 
 	@Test
 	public void testClassifier() throws FileNotFoundException, EvaluationException, TrainingException,

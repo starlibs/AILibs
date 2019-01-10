@@ -4,6 +4,7 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -93,12 +94,12 @@ public class ShapeletTransformAlgorithm extends
 		public void setDeterminedQuality(double determinedQuality) {
 			this.determinedQuality = determinedQuality;
 		}
-		
+
 		@Override
 		public boolean equals(Object obj) {
-			if(obj instanceof Shapelet) {
+			if (obj instanceof Shapelet) {
 				Shapelet other = (Shapelet) obj;
-				if(data == null && other.getData() != null || data != null && other.getData() == null)
+				if (data == null && other.getData() != null || data != null && other.getData() == null)
 					return false;
 
 				return (data == null && other.getData() == null || this.data.equalsWithEps(other.getData(), 0.00001))
@@ -253,7 +254,7 @@ public class ShapeletTransformAlgorithm extends
 			INDArray tmpClasses = Nd4j.create(MIN_MAX_ESTIMATION_SAMPLES);
 			for (int j = 0; j < MIN_MAX_ESTIMATION_SAMPLES; j++) {
 				long nextIndex = (int) (rand.nextInt() % numInstances);
-				if(nextIndex <0)
+				if (nextIndex < 0)
 					nextIndex += numInstances;
 				tmpMatrix.putRow(j, data.getRow(nextIndex));
 				tmpClasses.putScalar(j, classes.getDouble(nextIndex));
@@ -423,6 +424,69 @@ public class ShapeletTransformAlgorithm extends
 		return result;
 	}
 
+	// Algorithm 2: Similarity search with online normalisation and reordered early
+	// abandon
+	public static double getMinimumDistanceAmongAllSubsequencesOptimized(final Shapelet shapelet,
+			final INDArray timeSeries) {
+		int length = shapelet.getLength();
+		long m = timeSeries.length();
+
+		final INDArray S = shapelet.getData();
+		final INDArray S_prime = zNormalize(S);
+		final List<Integer> A = sortIndexes(S_prime, false); // descending
+		final INDArray F = zNormalize(timeSeries.get(NDArrayIndex.interval(0, length)));
+		double p = 0;
+		double q = length;
+		double b = singleSquaredEuclideanDistance(S_prime, F);
+
+		for (long i = 0; i < m - length; i++) {
+
+			double t_i = timeSeries.getDouble(i);
+			double t_il = timeSeries.getDouble(i + length);
+			p -= t_i;
+			q -= t_i * t_i;
+			p += t_il;
+			q += t_il * t_il;
+			double x_bar = p / length;
+			double s = q / length - x_bar * x_bar;
+			int j = 0;
+			double d = 0;
+			while (j < length && d < b) {
+				d += Math.pow(S_prime.getDouble(A.get(j)) - ((timeSeries.getDouble(i + A.get(j)) - x_bar) / s), 2);
+				j++;
+			}
+			if (j == length && d < b) {
+				b = d;
+			}
+		}
+		return b;
+	}
+
+	// Analogous to argsort function of ArrayUtil in Nd4j
+	public static List<Integer> sortIndexes(final INDArray vector, final boolean ascending) {
+		List<Integer> result = new ArrayList<>();
+
+		Integer[] indexes = new Integer[(int) vector.length()];
+		for (int i = 0; i < indexes.length; i++) {
+			indexes[i] = i;
+		}
+
+		double[] dataVector = vector.toDoubleVector();
+
+		Arrays.sort(indexes, new Comparator<Integer>() {
+			@Override
+			public int compare(final Integer i1, final Integer i2) {
+				return (ascending ? 1 : -1) * Double.compare(Math.abs(dataVector[i1]), Math.abs(dataVector[i2]));
+			}
+		});
+
+		for (int i = 0; i < indexes.length; i++) {
+			result.add(indexes[i]);
+		}
+
+		return result;
+	}
+
 	public static double getMinimumDistanceAmongAllSubsequences(final Shapelet shapelet, final INDArray timeSeries) {
 		final int l = (int) shapelet.getLength();
 		final int n = (int) timeSeries.length();
@@ -437,7 +501,7 @@ public class ShapeletTransformAlgorithm extends
 			if (tmpED < min)
 				min = tmpED;
 		}
-		return min / shapelet.getLength();
+		return min;
 	}
 
 	// TODO: Change IDistance interface? Work directly on INDArray as opposed to
@@ -446,16 +510,16 @@ public class ShapeletTransformAlgorithm extends
 		if (vector1.length() != vector2.length())
 			throw new IllegalArgumentException("The lengths of of both vectors must match!");
 
-//		return new org.nd4j.linalg.api.ops.impl.accum.distances.EuclideanDistance(vector1, vector2).exec().getFinalResult()
-//				.doubleValue();
-		
-//		org.nd4j.linalg.api.ops.impl.accum.distances.EuclideanDistance
-		
+		// return new
+		// org.nd4j.linalg.api.ops.impl.accum.distances.EuclideanDistance(vector1,
+		// vector2).exec().getFinalResult()
+		// .doubleValue();
+
+		// org.nd4j.linalg.api.ops.impl.accum.distances.EuclideanDistance
 
 		return Math.pow(Nd4j.getExecutioner()
-				.exec(new org.nd4j.linalg.api.ops.impl.accum.distances.EuclideanDistance(vector1, vector2),
-						1)
-				.getDouble(0), 2);
+				.exec(new org.nd4j.linalg.api.ops.impl.accum.distances.EuclideanDistance(vector1, vector2), 1)
+				.getDouble(0), 2) / vector1.length();
 	}
 
 	// TODO: Use Helens implementation
@@ -486,7 +550,6 @@ public class ShapeletTransformAlgorithm extends
 
 		Vote voter = new Vote();
 		voter.setCombinationRule(new SelectedTag(Vote.MAJORITY_VOTING_RULE, Vote.TAGS_RULES));
-
 
 		// SMO poly2
 		SMO smop = new SMO();

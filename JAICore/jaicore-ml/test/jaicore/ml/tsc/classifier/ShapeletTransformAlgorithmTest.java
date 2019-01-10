@@ -2,6 +2,7 @@ package jaicore.ml.tsc.classifier;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -25,24 +26,24 @@ public class ShapeletTransformAlgorithmTest {
 		Set<Shapelet> actResult = ShapeletTransformAlgorithm.generateCandidates(data, l, 0);
 		Assert.assertEquals(4, actResult.size());
 
-		Shapelet expectedShapelet = new Shapelet(Nd4j.create(new double[] { 1, 2, 3 }), 0, 3,
-				0);
+		Shapelet expectedShapelet = new Shapelet(Nd4j.create(new double[] { 1, 2, 3 }), 0, 3, 0);
 		Assert.assertTrue(actResult.stream().anyMatch(s -> s.equals(expectedShapelet)));
 
 	}
 
 	@Test
 	public void findDistancesTest() {
-		Shapelet shapelet = new Shapelet(Nd4j.create(new double[] { 1, 2, 3 }), 0, 3,
-				0);
-		INDArray dataMatrix = Nd4j.create(new double[][] { { 4, 1, 2, 3, 5 }, { 2, 2, 2, 2, 2 } });
-		
+		Shapelet shapelet = new Shapelet(Nd4j.create(new double[] { 1, 2, 3 }), 0, 3, 0);
+		// INDArray dataMatrix = Nd4j.create(new double[][] { { 4, 1, 2, 3, 5 }, { 2, 2,
+		// 2, 2, 2 } });
+		INDArray dataMatrix = Nd4j.create(new double[][] { { 4, 2, 4, 6, 5 }, { 2, 2, 2, 2, 2 } });
+
 		List<Double> actResult = ShapeletTransformAlgorithm.findDistances(shapelet, dataMatrix);
 
 		Assert.assertEquals("A distance has to be found for each instance!", dataMatrix.shape()[0], actResult.size());
 
 		Assert.assertEquals(0, actResult.get(0), EPS_DELTA);
-		Assert.assertEquals(2, actResult.get(1), EPS_DELTA);
+		Assert.assertEquals(2d / 3, actResult.get(1), EPS_DELTA);
 	}
 
 	@Test
@@ -91,8 +92,30 @@ public class ShapeletTransformAlgorithmTest {
 		INDArray expectedResult = Nd4j.create(new double[] { -1, 0, 1 });
 
 		INDArray actResult = ShapeletTransformAlgorithm.zNormalize(vector);
-		System.out.println(actResult);
 		Assert.assertTrue(expectedResult.equalsWithEps(actResult, EPS_DELTA));
 
+	}
+
+	@Test
+	public void getMinimumDistanceAmongAllSequencesTest() {
+		INDArray meanTest = Nd4j.create(new double[][] { { 1, 2, 3 }, { 2, 3, 5 }, { 3, 4, 5 } });
+
+		INDArray vector = Nd4j.create(new double[] { 2, 4, 6 });
+	}
+
+	@Test
+	public void sortIndexesTest() {
+		INDArray vector = Nd4j.create(new double[] { 4, 2, 6 });
+		INDArray vector2 = Nd4j.create(new double[] { 2, 4, 6 });
+
+		List<Integer> result1 = ShapeletTransformAlgorithm.sortIndexes(vector, true);
+		List<Integer> result1Inv = ShapeletTransformAlgorithm.sortIndexes(vector, false);
+
+		Assert.assertEquals(Arrays.asList(1, 0, 2), result1);
+		Assert.assertEquals(Arrays.asList(2, 0, 1), result1Inv);
+
+		List<Integer> result2 = ShapeletTransformAlgorithm.sortIndexes(vector2, true);
+
+		Assert.assertEquals(Arrays.asList(0, 1, 2), result2);
 	}
 }
