@@ -10,9 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jaicore.basic.algorithm.AAlgorithm;
-import jaicore.basic.algorithm.AlgorithmEvent;
-import jaicore.basic.algorithm.AlgorithmInitializedEvent;
-import jaicore.basic.algorithm.AlgorithmState;
+import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.logic.fol.structure.Literal;
 import jaicore.logic.fol.structure.LiteralParam;
 import jaicore.logic.fol.structure.LiteralSet;
@@ -50,6 +48,7 @@ public class ForwardChainer extends AAlgorithm<ForwardChainingProblem, Collectio
 	
 	public ForwardChainer(ForwardChainingProblem problem) {
 		super(problem);
+		assert !problem.getConclusion().isEmpty() : "Ill defined forward chaining problem with empty conclusion!";
 	}
 
 	@Override
@@ -58,7 +57,7 @@ public class ForwardChainer extends AAlgorithm<ForwardChainingProblem, Collectio
 	 * literals in the conclusion and invoke a new instance of ForwardChainer on the
 	 * rest.
 	 */
-	public AlgorithmEvent nextWithException() throws Exception {
+	public AlgorithmEvent nextWithException() {
 		long start = System.currentTimeMillis();
 		switch (getState()) {
 
@@ -103,6 +102,8 @@ public class ForwardChainer extends AAlgorithm<ForwardChainingProblem, Collectio
 						break;
 				}
 			}
+			assert chosenLiteral != null : "No literal has been chosen";
+			assert possibleChoicesForLocalLiteral != null : "List of possible choices for literal must not be null";
 			remainingConclusion = new Monom();
 			for (Literal l : conclusion)
 				if (!l.equals(chosenLiteral))
@@ -110,9 +111,8 @@ public class ForwardChainer extends AAlgorithm<ForwardChainingProblem, Collectio
 			long end = System.currentTimeMillis();
 			logger.debug("Selected literal {} with still unbound params {} that can be ground in {} ways in {}ms.", chosenLiteral, chosenLiteral.getVariableParams(), possibleChoicesForLocalLiteral.size(),
 					end - timeToPrepareCWAVersion);
-			setState(AlgorithmState.active);
 			logger.info("Initialized FC algorithm within {}ms.", end - start);
-			return new AlgorithmInitializedEvent();
+			return activate();
 		}
 
 		case active: {

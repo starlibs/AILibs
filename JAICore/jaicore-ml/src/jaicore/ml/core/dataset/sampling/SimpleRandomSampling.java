@@ -2,7 +2,8 @@ package jaicore.ml.core.dataset.sampling;
 
 import java.util.Random;
 
-import jaicore.basic.algorithm.AlgorithmEvent;
+import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.ml.core.dataset.IInstance;
 
 public class SimpleRandomSampling<I extends IInstance> extends ASamplingAlgorithm<I> {
@@ -14,7 +15,7 @@ public class SimpleRandomSampling<I extends IInstance> extends ASamplingAlgorith
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws Exception {
+	public AlgorithmEvent nextWithException() throws AlgorithmException {
 		switch (this.getState()) {
 		case created:
 			this.sample = getInput().createEmpty();
@@ -30,7 +31,7 @@ public class SimpleRandomSampling<I extends IInstance> extends ASamplingAlgorith
 			}
 		case inactive: {
 			if (this.sample.size() < this.sampleSize) {
-				throw new Exception("Expected sample size was not reached before termination");
+				throw new AlgorithmException("Expected sample size was not reached before termination");
 			} else {
 				return this.terminate();
 			}

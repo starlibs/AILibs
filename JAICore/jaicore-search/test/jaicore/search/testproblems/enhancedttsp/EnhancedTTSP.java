@@ -285,7 +285,7 @@ public class EnhancedTTSP {
 		return new ISolutionEvaluator<EnhancedTTSPNode, Double>() {
 
 			@Override
-			public Double evaluateSolution(List<EnhancedTTSPNode> solutionPath) throws Exception {
+			public Double evaluateSolution(List<EnhancedTTSPNode> solutionPath) {
 				if (solutionPath == null || solutionPath.size() == 0) {
 					return Double.MAX_VALUE;
 				}

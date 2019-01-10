@@ -41,7 +41,7 @@ public class SemanticNodeEvaluator implements INodeEvaluator<TFDNode, Double> {
 	}
 
 	@Override
-	public Double f(final Node<TFDNode, ?> n) throws Exception {
+	public Double f(final Node<TFDNode, ?> n) {
 		/* get partial component */
 		ComponentInstance instance = Util.getSolutionCompositionFromState(this.components, n.getPoint().getState(), false);
 

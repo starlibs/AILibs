@@ -1,9 +1,10 @@
 package jaicore.search.algorithms.standard.random;
 
 import jaicore.search.core.interfaces.StandardORGraphSearchFactory;
-import jaicore.search.model.probleminputs.GraphSearchInput;
+import jaicore.search.model.other.SearchGraphPath;
+import jaicore.search.probleminputs.GraphSearchInput;
 
-public class RandomSearchFactory<N, A> extends StandardORGraphSearchFactory<GraphSearchInput<N, A>, Object,N, A, Double, N, A> {
+public class RandomSearchFactory<N, A> extends StandardORGraphSearchFactory<GraphSearchInput<N, A>, SearchGraphPath<N, A>,N, A, Double, N, A> {
 
 	private int timeoutForFInMS;
 	private String loggerName;

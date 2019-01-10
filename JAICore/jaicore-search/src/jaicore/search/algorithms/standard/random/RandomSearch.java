@@ -14,21 +14,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jaicore.basic.ILoggingCustomizable;
-import jaicore.basic.algorithm.AlgorithmEvent;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
-import jaicore.basic.algorithm.AlgorithmFinishedEvent;
-import jaicore.basic.algorithm.AlgorithmInitializedEvent;
-import jaicore.basic.algorithm.AlgorithmState;
+import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.sets.SetUtil;
 import jaicore.graph.Graph;
 import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
-import jaicore.search.algorithms.standard.AbstractORGraphSearch;
 import jaicore.search.algorithms.standard.bestfirst.events.GraphSearchSolutionCandidateFoundEvent;
+import jaicore.search.core.interfaces.AAnyPathInORGraphSearch;
 import jaicore.search.model.other.SearchGraphPath;
-import jaicore.search.model.probleminputs.GraphSearchInput;
 import jaicore.search.model.travesaltree.NodeExpansionDescription;
+import jaicore.search.probleminputs.GraphSearchInput;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SingleSuccessorGenerator;
@@ -43,7 +40,7 @@ import jaicore.search.structure.graphgenerator.SuccessorGenerator;
  * @param <N>
  * @param <A>
  */
-public class RandomSearch<N, A> extends AbstractORGraphSearch<GraphSearchInput<N, A>, Object, N, A, Double, N, A> implements ILoggingCustomizable {
+public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput<N, A>, SearchGraphPath<N, A>, N, A, N, A> implements ILoggingCustomizable {
 
 	/* logging */
 	private String loggerName;
@@ -95,11 +92,14 @@ public class RandomSearch<N, A> extends AbstractORGraphSearch<GraphSearchInput<N
 			this.logger.debug("Expanding next node {}", node);
 			boolean closeNodeAfterwards = false;
 			if (this.isSingleNodeSuccessorGenerator) {
-
+				
 				/* generate the next successor */
 				SingleSuccessorGenerator<N, A> cGen = ((SingleSuccessorGenerator<N, A>) this.gen);
 				NodeExpansionDescription<N, A> successor = cGen.generateSuccessor(node, this.random.nextInt(Integer.MAX_VALUE));
+				assert this.exploredGraph.hasItem(node);
 				if (successor != null) {
+					assert this.exploredGraph.hasItem(successor.getFrom()) : "Parent node of successor is not part of the explored graph.";
+					assert !this.exploredGraph.hasItem(successor.getTo()) : "Successor " + successor.getTo() + " has been reached before.";
 					this.addNodeToLocalModel(successor.getFrom(), successor.getTo());
 				}
 
@@ -157,7 +157,7 @@ public class RandomSearch<N, A> extends AbstractORGraphSearch<GraphSearchInput<N
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws Exception {
+	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException  {
 
 		switch (this.getState()) {
 		case created: {
@@ -172,13 +172,10 @@ public class RandomSearch<N, A> extends AbstractORGraphSearch<GraphSearchInput<N
 			try {
 				drawnPath = this.nextSolutionUnderNode(this.root);
 			} catch (TimeoutException e) {
-
+				e.printStackTrace();
 			}
 			if (drawnPath == null) {
-				this.shutdown();
-				AlgorithmEvent event = new AlgorithmFinishedEvent();
-				this.post(event);
-				return event;
+				return terminate();
 			}
 			AlgorithmEvent event = new GraphSearchSolutionCandidateFoundEvent<>(drawnPath);
 			this.logger.info("Identified new solution ...");
@@ -208,7 +205,7 @@ public class RandomSearch<N, A> extends AbstractORGraphSearch<GraphSearchInput<N
 	}
 
 	public SearchGraphPath<N, A> nextSolutionUnderNode(final N node) throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {
-		this.logger.info("Looking for next solution under node {}", node);
+		this.logger.info("Looking for next solution under node {}. Remaining time is {}ms.", node, getRemainingTimeToDeadline());
 		this.checkTermination();
 
 		/* if the root is exhausted, cancel */
@@ -308,11 +305,6 @@ public class RandomSearch<N, A> extends AbstractORGraphSearch<GraphSearchInput<N
 				}
 			}
 		}
-	}
-
-	@Override
-	public Object getSolutionProvidedToCall() {
-		return null;
 	}
 
 	@Override

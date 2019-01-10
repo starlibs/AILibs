@@ -6,28 +6,30 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.TimeoutException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jaicore.basic.algorithm.AlgorithmEvent;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
-import jaicore.basic.algorithm.AlgorithmFinishedEvent;
-import jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.AlgorithmState;
+import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
+import jaicore.basic.algorithm.exceptions.AlgorithmException;
+import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.basic.sets.SetUtil;
 import jaicore.graph.LabeledGraph;
 import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
-import jaicore.search.algorithms.standard.AbstractORGraphSearch;
+import jaicore.search.core.interfaces.AOptimalPathInORGraphSearch;
 import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.core.interfaces.ISolutionEvaluator;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
-import jaicore.search.model.probleminputs.GraphSearchProblemInput;
 import jaicore.search.model.travesaltree.Node;
 import jaicore.search.model.travesaltree.NodeExpansionDescription;
+import jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.PathGoalTester;
 import jaicore.search.structure.graphgenerator.RootGenerator;
@@ -39,7 +41,7 @@ import jaicore.search.structure.graphgenerator.SuccessorGenerator;
  *
  * @author Felix Mohr
  */
-public class MCTS<N, A, V extends Comparable<V>> extends AbstractORGraphSearch<GraphSearchProblemInput<N, A, V>, Object, N, A, V, Node<N, V>, A> implements IPolicy<N, A, V> {
+public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSearch<GraphSearchWithPathEvaluationsInput<N, A, V>, N, A, V, Node<N, V>, A> implements IPolicy<N, A, V> {
 
 	private Logger logger = LoggerFactory.getLogger(MCTS.class);
 	private String loggerName;
@@ -67,7 +69,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AbstractORGraphSearch<G
 	protected final LabeledGraph<N, A> exploredGraph;
 	private final Collection<N> deadLeafNodes = new HashSet<>();
 
-	public MCTS(final GraphSearchProblemInput<N, A, V> problem, final IPathUpdatablePolicy<N, A, V> treePolicy, final IPolicy<N, A, V> defaultPolicy) {
+	public MCTS(final GraphSearchWithPathEvaluationsInput<N, A, V> problem, final IPathUpdatablePolicy<N, A, V> treePolicy, final IPolicy<N, A, V> defaultPolicy) {
 		super(problem);
 		this.graphGenerator = problem.getGraphGenerator();
 		this.rootGenerator = this.graphGenerator.getRootGenerator();
@@ -91,7 +93,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AbstractORGraphSearch<G
 		this.exploredGraph.addItem(this.root);
 	}
 
-	private List<N> getPlayout() throws Exception {
+	private List<N> getPlayout() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException  {
 		this.logger.info("Computing a new playout ...");
 		N current = this.root;
 		N next;
@@ -233,7 +235,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AbstractORGraphSearch<G
 
 		try {
 			/* compute next solution */
-			this.nextSolution();
+			this.nextSolutionCandidate();
 
 			/* choose action in root that has best reward */
 			return this.treePolicy.getAction(this.root, actionsWithSuccessors);
@@ -243,7 +245,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AbstractORGraphSearch<G
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws Exception {
+	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, CancellationException, AlgorithmException {
 		switch (this.getState()) {
 		case created:
 			this.post(new GraphInitializedEvent<N>(this.root));
@@ -293,6 +295,8 @@ public class MCTS<N, A, V extends Comparable<V>> extends AbstractORGraphSearch<G
 				this.logger.info("Finishing MCTS due to timeout.");
 				this.post(finishEvent);
 				return finishEvent;
+			} catch (ObjectEvaluationFailedException e) {
+				throw new AlgorithmException(e, "Could not evaluate playout!");
 			} finally {
 
 				/* unregister this thread in order to avoid interruptions */
@@ -305,11 +309,6 @@ public class MCTS<N, A, V extends Comparable<V>> extends AbstractORGraphSearch<G
 	}
 
 	@Override
-	public Object getSolutionProvidedToCall() {
-		return null;
-	}
-
-	@Override
 	public String getLoggerName() {
 		return this.loggerName;
 	}
@@ -317,6 +316,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AbstractORGraphSearch<G
 	@Override
 	public void setLoggerName(final String name) {
 		this.logger.info("Switching logger from {} to {}", this.logger.getName(), name);
+		this.loggerName = name;
 		this.logger = LoggerFactory.getLogger(name);
 		this.logger.info("Activated logger {} with name {}", name, this.logger.getName());
 		super.setLoggerName(this.loggerName + "._orgraphsearch");

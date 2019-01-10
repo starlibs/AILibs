@@ -2,7 +2,7 @@ package jaicore.logic.fol.util;
 
 import java.util.Map;
 
-import jaicore.basic.algorithm.AlgorithmEvent;
+import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.logic.fol.structure.LiteralParam;
 import jaicore.logic.fol.structure.VariableParam;
 

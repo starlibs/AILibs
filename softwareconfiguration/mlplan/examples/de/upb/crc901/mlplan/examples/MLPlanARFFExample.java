@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import de.upb.crc901.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
@@ -28,7 +27,7 @@ public class MLPlanARFFExample {
 		MLPlanWekaClassifier mlplan = new WekaMLPlanWekaClassifier(new MLPlanWekaBuilder().withSearchSpaceConfigFile(new File("conf/automl/searchmodels/weka/tinytest.json")));
 		mlplan.setPortionOfDataForPhase2(0.3f);
 		mlplan.setLoggerName("mlplan");
-		mlplan.setTimeout(300, TimeUnit.SECONDS);
+		mlplan.setTimeout(60, TimeUnit.SECONDS);
 		mlplan.setTimeoutForNodeEvaluation(15);
 		mlplan.setTimeoutForSingleSolutionEvaluation(15);
 		mlplan.setNumCPUs(8);

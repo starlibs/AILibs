@@ -12,6 +12,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -28,11 +29,10 @@ import hasco.optimizingfactory.SoftwareConfigurationAlgorithm;
 import hasco.variants.forwarddecomposition.DefaultPathPriorizingPredicate;
 import hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstWithRandomCompletions;
 import jaicore.basic.IObjectEvaluator;
-import jaicore.basic.algorithm.AlgorithmEvent;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
-import jaicore.basic.algorithm.AlgorithmInitializedEvent;
-import jaicore.basic.algorithm.AlgorithmState;
-import jaicore.basic.algorithm.SolutionCandidateFoundEvent;
+import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
+import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.sets.SetUtil;
 import jaicore.concurrent.TimeoutTimer;
 import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
@@ -41,7 +41,7 @@ import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.core.interfaces.GraphGenerator;
 
-public class TwoPhaseHASCO extends SoftwareConfigurationAlgorithm<TwoPhaseSoftwareConfigurationProblem, TwoPhaseHASCOReport, HASCOSolutionCandidate<Double>, Double> {
+public class TwoPhaseHASCO extends SoftwareConfigurationAlgorithm<TwoPhaseSoftwareConfigurationProblem, HASCOSolutionCandidate<Double>, Double> {
 
 	/* logging */
 	private Logger logger = LoggerFactory.getLogger(TwoPhaseHASCO.class);
@@ -70,7 +70,7 @@ public class TwoPhaseHASCO extends SoftwareConfigurationAlgorithm<TwoPhaseSoftwa
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws Exception {
+	public AlgorithmEvent nextWithException() throws InterruptedException, TimeoutException, AlgorithmException  {
 		switch (this.getState()) {
 		case created: {
 			this.timeOfStart = System.currentTimeMillis();
@@ -93,8 +93,7 @@ public class TwoPhaseHASCO extends SoftwareConfigurationAlgorithm<TwoPhaseSoftwa
 
 			/* initialize HASCO and set state of this algorithm to initialized */
 			this.hasco.init();
-			this.setState(AlgorithmState.active);
-			return new AlgorithmInitializedEvent();
+			return activate();
 		}
 
 		/* active is only one step in this model; this could be refined */
@@ -108,7 +107,7 @@ public class TwoPhaseHASCO extends SoftwareConfigurationAlgorithm<TwoPhaseSoftwa
 						while (!Thread.currentThread().isInterrupted()) {
 							Thread.sleep(1000);
 							int timeElapsed = (int) (System.currentTimeMillis() - TwoPhaseHASCO.this.timeOfStart);
-							int timeRemaining = (int) TwoPhaseHASCO.this.getConfig().timeout() * 1000 - timeElapsed;
+							int timeRemaining = (int) getTimeout().milliseconds() - timeElapsed;
 							if (timeRemaining < 2000 || TwoPhaseHASCO.this.shouldSearchTerminate(timeRemaining)) {
 								TwoPhaseHASCO.this.logger.info("Canceling HASCO (first phase). {}ms remaining.", timeRemaining);
 								TwoPhaseHASCO.this.hasco.cancel();
@@ -139,6 +138,7 @@ public class TwoPhaseHASCO extends SoftwareConfigurationAlgorithm<TwoPhaseSoftwa
 			/* phase 2: select model */
 			this.logger.info("Entering phase 2");
 			this.selectedHASCOSolution = this.selectModel();
+			updateBestSeenSolution(selectedHASCOSolution);
 			return this.terminate();
 		}
 		default:
@@ -257,8 +257,8 @@ public class TwoPhaseHASCO extends SoftwareConfigurationAlgorithm<TwoPhaseSoftwa
 		this.logger.info("Starting with phase 2: Selection of final model among the {} solutions that were identified.", this.phase1ResultQueue.size());
 		long startOfPhase2 = System.currentTimeMillis();
 		List<HASCOSolutionCandidate<Double>> ensembleToSelectFrom;
-		if (this.getConfig().timeout() > 0) {
-			int remainingTime = (int) (this.getConfig().timeout() * 1000 - (System.currentTimeMillis() - this.timeOfStart));
+		if (this.getTimeout().seconds() > 0) {
+			int remainingTime = (int) (this.getTimeout().milliseconds() - (System.currentTimeMillis() - this.timeOfStart));
 			/* check remaining time, otherwise just return the solution with best F-Value. */
 			if (remainingTime < 0) {
 				this.logger.info("Timelimit is already exhausted, just returning a greedy solution that had internal error {}.", scoreOfBestSolution);
@@ -270,7 +270,7 @@ public class TwoPhaseHASCO extends SoftwareConfigurationAlgorithm<TwoPhaseSoftwa
 			int expectedTimeForPhase2 = this.getExpectedRuntimeForPhase2ForAGivenPool(ensembleToSelectFrom);
 			int expectedPostprocessingTime = this.getPostprocessingTimeOfCurrentlyBest();
 			int expectedMaximumRemainingRuntime = expectedTimeForPhase2 + expectedPostprocessingTime;
-			remainingTime = (int) (this.getConfig().timeout() * 1000 - (System.currentTimeMillis() - this.timeOfStart));
+			remainingTime = (int) (this.getTimeout().milliseconds() - (System.currentTimeMillis() - this.timeOfStart));
 
 			if (expectedMaximumRemainingRuntime > remainingTime) {
 				this.logger.warn("Only {}ms remaining. We probably cannot make it in time.", remainingTime);
@@ -337,7 +337,7 @@ public class TwoPhaseHASCO extends SoftwareConfigurationAlgorithm<TwoPhaseSoftwa
 					int taskId = ts.interruptMeAfterMS(timeoutForEvaluation);
 
 					/* If we have a global timeout, check whether considering this model is feasible. */
-					if (TwoPhaseHASCO.this.getConfig().timeout() > 0) {
+					if (getTimeout().seconds() > 0) {
 						int remainingTime = (int) (timestampOfDeadline - System.currentTimeMillis());
 						if (estimatedTotalEffortInCaseOfSelection >= remainingTime) {
 							TwoPhaseHASCO.this.logger.info(
@@ -494,8 +494,7 @@ public class TwoPhaseHASCO extends SoftwareConfigurationAlgorithm<TwoPhaseSoftwa
 		return this.hasco.getGraphGenerator();
 	}
 
-	@Override
-	public TwoPhaseHASCOReport getOutput() {
+	public TwoPhaseHASCOReport getReort() {
 		return new TwoPhaseHASCOReport(this.phase1ResultQueue.size(), this.secondsSpentInPhase1, this.selectedHASCOSolution);
 	}
 

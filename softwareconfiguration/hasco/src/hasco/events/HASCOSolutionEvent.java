@@ -1,7 +1,7 @@
 package hasco.events;
 
 import hasco.core.HASCOSolutionCandidate;
-import jaicore.basic.algorithm.SolutionCandidateFoundEvent;
+import jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
 
 public class HASCOSolutionEvent<V extends Comparable<V>> extends SolutionCandidateFoundEvent<HASCOSolutionCandidate<V>> {
 

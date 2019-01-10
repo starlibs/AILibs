@@ -14,12 +14,11 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
-import javax.sound.midi.Synthesizer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,8 +26,9 @@ import org.slf4j.LoggerFactory;
 import com.google.common.eventbus.Subscribe;
 
 import jaicore.basic.ILoggingCustomizable;
+import jaicore.basic.TimeOut;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
-import jaicore.basic.algorithm.AlgorithmInitializedEvent;
+import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.graphvisualizer.gui.VisualizationWindow;
 import jaicore.logging.LoggerUtil;
@@ -36,6 +36,7 @@ import jaicore.search.algorithms.parallel.parallelexploration.distributed.interf
 import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.NodeAnnotationEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.NodeExpansionCompletedEvent;
+import jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
 import jaicore.search.algorithms.standard.gbf.SolutionEventBus;
 import jaicore.search.algorithms.standard.random.RandomSearch;
 import jaicore.search.algorithms.standard.uncertainty.IUncertaintySource;
@@ -43,8 +44,8 @@ import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.core.interfaces.ISolutionEvaluator;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
 import jaicore.search.model.other.SearchGraphPath;
-import jaicore.search.model.probleminputs.GeneralEvaluatedTraversalTree;
 import jaicore.search.model.travesaltree.Node;
+import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 
 @SuppressWarnings("serial")
 public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> implements IGraphDependentNodeEvaluator<T, String, V>, SerializableNodeEvaluator<T, V>,
@@ -55,6 +56,7 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 
 	private final int timeoutForSingleCompletionEvaluationInMS;
 	private final int timeoutForNodeEvaluationInMS;
+	private long totalDeadline = -1;
 
 	protected Set<List<T>> unsuccessfulPaths = Collections.synchronizedSet(new HashSet<>());
 	protected Set<List<T>> postedSolutions = new HashSet<>();
@@ -135,7 +137,7 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 	}
 
 	@Override
-	public V f(final Node<T, ?> n) throws Exception {
+	public V f(final Node<T, ?> n) throws InterruptedException, TimeoutException, NodeEvaluationException {
 		long startOfComputation = System.currentTimeMillis();
 		long deadline = timeoutForNodeEvaluationInMS > 0 ? startOfComputation + timeoutForNodeEvaluationInMS - 50 : Long.MAX_VALUE - 86400 * 1000;
 		if (this.timestampOfFirstEvaluation == 0) {
@@ -249,7 +251,7 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 							}
 						}
 					};
-					long timeoutForJob = deadline - System.currentTimeMillis();
+					long timeoutForJob = Math.min(deadline - System.currentTimeMillis(), totalDeadline - System.currentTimeMillis());
 					if (timeoutForJob < 0)
 						break;
 					if (timeoutForSingleCompletionEvaluationInMS > 0 && timeoutForSingleCompletionEvaluationInMS < timeoutForJob)
@@ -277,7 +279,7 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 					} catch (Exception ex) {
 						if (j == maxSamples) {
 							logger.warn("Too many retry attempts, giving up.");
-							throw ex;
+							throw new NodeEvaluationException("Error in the evaluation of a node!");
 						} else {
 							countedExceptions++;
 							logger.error("Could not evaluate solution candidate ... retry another completion. {}", LoggerUtil.getExceptionInfo(ex));
@@ -367,7 +369,7 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 		}
 	}
 
-	protected V getFValueOfSolutionPath(final List<T> path) throws Exception {
+	protected V getFValueOfSolutionPath(final List<T> path) throws InterruptedException, NodeEvaluationException {
 		boolean knownPath = this.scoresOfSolutionPaths.containsKey(path);
 		if (!knownPath) {
 			if (this.unsuccessfulPaths.contains(path)) {
@@ -388,7 +390,7 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 				logger.error("Computing the solution quality of {} failed due to an exception. Here is the trace:\n\t{}\n\t{}\n\t{}", path, e.getClass().getName(), e.getMessage(),
 						Arrays.asList(e.getStackTrace()).stream().map(n -> "\n\t" + n.toString()).collect(Collectors.toList()));
 				this.unsuccessfulPaths.add(path);
-				throw e;
+				throw new NodeEvaluationException(e.getMessage());
 			}
 			long duration = System.currentTimeMillis() - start;
 
@@ -462,8 +464,10 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 
 		/* create the completion algorithm and initialize it */
 		INodeEvaluator<T, Double> nodeEvaluator = new RandomizedDepthFirstNodeEvaluator<>(this.random);
-		GeneralEvaluatedTraversalTree<T, String, Double> completionProblem = new GeneralEvaluatedTraversalTree<>(generator, nodeEvaluator);
+		GraphSearchWithSubpathEvaluationsInput<T, String, Double> completionProblem = new GraphSearchWithSubpathEvaluationsInput<>(generator, nodeEvaluator);
 		completer = new RandomSearch<>(completionProblem, priorityPredicateForRDFS, this.random);
+		System.out.println(totalDeadline);
+		completer.setTimeout(new TimeOut(totalDeadline - System.currentTimeMillis(), TimeUnit.MILLISECONDS));
 		if (visualizeSubSearch)
 			new VisualizationWindow<>(completer).setTooltipGenerator(n -> n.toString() + "<br />f: " + String.valueOf(bestKnownScoreUnderNodeInCompleterGraph.get(n)));
 		while (!(completer.next() instanceof AlgorithmInitializedEvent))
@@ -518,5 +522,13 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 	@Override
 	public String getLoggerName() {
 		return loggerName;
+	}
+
+	public long getTotalDeadline() {
+		return totalDeadline;
+	}
+
+	public void setTotalDeadline(long totalDeadline) {
+		this.totalDeadline = totalDeadline;
 	}
 }

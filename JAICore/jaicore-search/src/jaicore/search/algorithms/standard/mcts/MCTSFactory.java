@@ -1,10 +1,11 @@
 package jaicore.search.algorithms.standard.mcts;
 
 import jaicore.search.core.interfaces.StandardORGraphSearchFactory;
-import jaicore.search.model.probleminputs.GraphSearchProblemInput;
+import jaicore.search.model.other.EvaluatedSearchGraphPath;
 import jaicore.search.model.travesaltree.Node;
+import jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 
-public class MCTSFactory<N, A, V extends Comparable<V>> extends StandardORGraphSearchFactory<GraphSearchProblemInput<N, A, V>, Object, N, A, V, Node<N, V>, A> {
+public class MCTSFactory<N, A, V extends Comparable<V>> extends StandardORGraphSearchFactory<GraphSearchWithPathEvaluationsInput<N, A, V>, EvaluatedSearchGraphPath<N, A, V>, N, A, V, Node<N, V>, A> {
 	private IPathUpdatablePolicy<N, A, V> treePolicy;
 	private IPolicy<N, A, V> defaultPolicy;
 

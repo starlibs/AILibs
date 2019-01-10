@@ -4,9 +4,10 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import jaicore.basic.algorithm.AlgorithmEvent;
-import jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.AlgorithmState;
+import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
+import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.ASamplingAlgorithm;
@@ -48,7 +49,7 @@ public class StratifiedSampling<I extends IInstance> extends ASamplingAlgorithm<
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws Exception {
+	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmException {
 		switch (this.getState()) {
 		case created:
 			this.sample = getInput().createEmpty();
@@ -71,7 +72,7 @@ public class StratifiedSampling<I extends IInstance> extends ASamplingAlgorithm<
 					I datapoint = this.datasetCopy.remove(0);
 					int assignedStrati = this.stratiAssigner.assignToStrati(datapoint);
 					if (assignedStrati < 0 || assignedStrati >= this.strati.length) {
-						throw new Exception("No existing strati for index " + assignedStrati);
+						throw new AlgorithmException("No existing strati for index " + assignedStrati);
 					} else {
 						this.strati[assignedStrati].add(datapoint);
 					}
@@ -102,7 +103,7 @@ public class StratifiedSampling<I extends IInstance> extends ASamplingAlgorithm<
 			}
 		case inactive: {
 			if (this.sample.size() < this.sampleSize) {
-				throw new Exception("Expected sample size was not reached before termination");
+				throw new AlgorithmException("Expected sample size was not reached before termination");
 			} else {
 				return this.terminate();
 			}

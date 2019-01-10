@@ -27,7 +27,8 @@ public class StripsForwardPlanningGraphGenerator implements GraphGenerator<Strip
 	private final StripsPlanningProblem problem;
 	private static final Logger logger = LoggerFactory.getLogger(StripsForwardPlanningGraphGenerator.class);
 	private final Monom initState;
-	private final Map<StripsForwardPlanningNode, List<StripsAction>> appliedActions = new HashMap<>(); // maintain a local copy of the graph here
+	private final Map<StripsForwardPlanningNode, List<StripsAction>> returnedActions = new HashMap<>(); // maintain a local copy of the graph here
+	private final Map<StripsForwardPlanningNode, List<StripsAction>> unreturnedActions = new HashMap<>(); // maintain a local copy of the graph here
 	private final Set<StripsForwardPlanningNode> completelyExpandedNodes = new HashSet<>();
 
 	public StripsForwardPlanningGraphGenerator(StripsPlanningProblem problem) {
@@ -39,7 +40,6 @@ public class StripsForwardPlanningGraphGenerator implements GraphGenerator<Strip
 	public SingleRootGenerator<StripsForwardPlanningNode> getRootGenerator() {
 		return () -> {
 			StripsForwardPlanningNode root = new StripsForwardPlanningNode(new Monom(), new Monom(), null);
-			appliedActions.put(root, new ArrayList<>());
 			return root;
 		};
 	}
@@ -58,7 +58,7 @@ public class StripsForwardPlanningGraphGenerator implements GraphGenerator<Strip
 		long start = System.currentTimeMillis();
 		Monom state = node.getStateRelativeToInitState(initState);
 		long timeToComputeState = System.currentTimeMillis() - start;
-		List<StripsAction> applicableActions = PlannerUtil.getApplicableActionsInState(state, (StripsPlanningDomain) problem.getDomain(), true, 5);
+		List<StripsAction> applicableActions = PlannerUtil.getApplicableActionsInState(state, (StripsPlanningDomain) problem.getDomain(), true, 2);
 		logger.debug("Computation of applicable actions took {}ms of which {}ms were used to reproduce the state.", System.currentTimeMillis() - start, timeToComputeState);
 		return applicableActions.isEmpty() ? null : applicableActions.get(0);
 	}
@@ -67,14 +67,14 @@ public class StripsForwardPlanningGraphGenerator implements GraphGenerator<Strip
 	public SingleSuccessorGenerator<StripsForwardPlanningNode, String> getSuccessorGenerator() {
 		return new SingleSuccessorGenerator<StripsForwardPlanningNode, String>() {
 
-			private Set<StripsForwardPlanningNode> completelyExpandedNodes = new HashSet<>();
-
 			@Override
 			public List<NodeExpansionDescription<StripsForwardPlanningNode, String>> generateSuccessors(StripsForwardPlanningNode node) throws InterruptedException {
+				if (completelyExpandedNodes.contains(node))
+					throw new IllegalArgumentException("Successors of node " + node + " have already been computed.");
 				long start = System.currentTimeMillis();
 				List<NodeExpansionDescription<StripsForwardPlanningNode, String>> successors = new ArrayList<>();
 				List<StripsAction> applicableActions = getApplicableActionsInNode(node);
-				appliedActions.put(node, applicableActions);
+				returnedActions.put(node, applicableActions);
 				for (StripsAction action : applicableActions) {
 					long t = System.currentTimeMillis();
 					Monom del = new Monom(node.getDel());
@@ -95,39 +95,74 @@ public class StripsForwardPlanningGraphGenerator implements GraphGenerator<Strip
 
 			@Override
 			public NodeExpansionDescription<StripsForwardPlanningNode, String> generateSuccessor(StripsForwardPlanningNode node, int i) throws InterruptedException {
-
-				long start = System.currentTimeMillis();
+				
+				/* if all successors of this node have been returned, return null */
+				if (completelyExpandedNodes.contains(node) && unreturnedActions.get(node).isEmpty()) {
+					return null;
+				}
 				
 				/* if no successor has been computed for this node, add the list */
-				if (!appliedActions.containsKey(node))
-					appliedActions.put(node, new ArrayList<>());
-
-				/* determine action (if index here is high, just compute all of them) */
+				long start = System.currentTimeMillis();
 				assert i >= 0 : "Index must not be negative!";
 				StripsAction action;
+				
+				/* if all successors of this node are known (but not all have been returned yet), just select the next action of the one already internally computed */
 				if (completelyExpandedNodes.contains(node)) {
-					action = appliedActions.get(node).get(i % appliedActions.get(node).size());
-				} else if (appliedActions.get(node).size() >= 3) {
+					action = unreturnedActions.get(node).get(0);
+				}
+				
+				/* if this node is asked for the second time for a successor, internally just compute all successors */
+				else if (returnedActions.containsKey(node)) {
+					assert !returnedActions.get(node).isEmpty();
+					assert unreturnedActions.get(node).isEmpty();
+					logger.debug("Generating {}th successor of {}", returnedActions.get(node).size() + 1, node);
+					
+					/* memorize the actions already generated, generate all successors (re-generating the known ones), and update the stats about returned and unreturned actions */
+					List<StripsAction> returnedSolutionBak = new ArrayList<>(returnedActions.get(node));
 					generateSuccessors(node);
+					unreturnedActions.put(node, returnedActions.get(node));
+					returnedActions.put(node, returnedSolutionBak);
+					unreturnedActions.get(node).removeAll(returnedSolutionBak);
 					assert completelyExpandedNodes.contains(node);
-					action = appliedActions.get(node).get(i % appliedActions.get(node).size());
-				} else {
-					int counter = 0;
-					while ((action = getRandomApplicableActionInNode(node)) != null && appliedActions.get(node).contains(action) && counter < 10) {
-						logger.debug("Created the same action for the same time, iterating again.");
-						counter++;
-					}
+					
+					/* if, by chance, all successors already had been computed, there is no new successor we could return here. So return NULL */
+					if (unreturnedActions.get(node).isEmpty())
+						return null;
+					action = unreturnedActions.get(node).get(i % unreturnedActions.get(node).size());
+				}
+				
+				/* if this node is asked for the first time for a successor, just compute a random successor */
+				else {
+					assert !completelyExpandedNodes.contains(node);
+					assert !returnedActions.containsKey(node);
+					assert !unreturnedActions.containsKey(node);
+					
+					/* try to generate a new and unknown successor of the node */
+					action = getRandomApplicableActionInNode(node);
 					if (action == null) {
-						logger.debug("Generating ALL successors, since the previous procedure has not revealed any new action within {} iterations", counter);
-						generateSuccessors(node);
-						assert completelyExpandedNodes.contains(node);
-						action = appliedActions.get(node).get(i % appliedActions.get(node).size());
+//						generateSuccessors(node);
+//						unreturnedActions.put(node, new ArrayList<>(returnedActions.get(node))); // undo the flags set by the generateSuccessors method
+//						returnedActions.get(node).clear();
+//						assert completelyExpandedNodes.contains(node);
+//						if (unreturnedActions.get(node).isEmpty())
+						logger.debug("Apparently, the node {} has no successors.", node);
+						return null;
+//						action = unreturnedActions.get(node).get(i % unreturnedActions.get(node).size());
+					}
+					else {
+						if (!unreturnedActions.containsKey(node))
+							unreturnedActions.put(node, new ArrayList<>());
+						unreturnedActions.get(node).add(action);
+						assert !completelyExpandedNodes.contains(node);
 					}
 				}
 				
 				/* action should not be null at this point */
 				assert action != null;
-				appliedActions.get(node).add(action);
+				if (!returnedActions.containsKey(node))
+					returnedActions.put(node, new ArrayList<>());
+				returnedActions.get(node).add(action);
+				unreturnedActions.get(node).remove(action);
 				long t = System.currentTimeMillis();
 				Monom del = new Monom(node.getDel());
 				Monom add = new Monom(node.getAdd());

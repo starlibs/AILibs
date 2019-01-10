@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import jaicore.graphvisualizer.gui.VisualizationWindow;
@@ -13,6 +14,7 @@ import org.junit.Test;
 
 import jaicore.basic.MathExt;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
+import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.planning.graphgenerators.task.ceoctfd.CEOCTFDGraphGenerator;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;
@@ -22,9 +24,9 @@ import jaicore.planning.model.task.ceocstn.CEOCSTNPlanningProblem;
 import jaicore.planning.model.task.ceocstn.OCMethod;
 import jaicore.planning.model.task.ceocstn.StandardProblemFactory;
 import jaicore.search.algorithms.standard.astar.AStar;
-import jaicore.search.model.probleminputs.NumberBasedAdditiveTraversalTree;
 import jaicore.search.model.travesaltree.Node;
 import jaicore.search.model.travesaltree.NodeTooltipGenerator;
+import jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePathEvaluation;
 
 public class CEOCTFDTester {
 
@@ -40,7 +42,7 @@ public class CEOCTFDTester {
 		solveProblemUsingAStar(StandardProblemFactory.getNestedDichotomyCreationProblem("root", classes, true, 1, 1));
 	}
 
-	private void solveProblemUsingAStar(CEOCSTNPlanningProblem problem) throws InterruptedException, AlgorithmExecutionCanceledException {
+	private void solveProblemUsingAStar(CEOCSTNPlanningProblem problem) throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
 
 		/* create AStar algorithm to solve the problem */
 		System.out.print("Generate problem ...");
@@ -48,14 +50,14 @@ public class CEOCTFDTester {
 		System.out.println(" done");
 		System.out.print("Starting Search Process");
 		long start = System.currentTimeMillis();
-		AStar<TFDNode, String> astar = new AStar<TFDNode, String>(new NumberBasedAdditiveTraversalTree<TFDNode, String>(generator, (n1, n2) -> -1 * (Math.random() * 1000), n -> 0.0));
+		AStar<TFDNode, String> astar = new AStar<TFDNode, String>(new GraphSearchWithNumberBasedAdditivePathEvaluation<TFDNode, String>(generator, (n1, n2) -> -1 * (Math.random() * 1000), n -> 0.0));
 
 		new VisualizationWindow<Node<TFDNode, Double>, String>(astar).setTooltipGenerator(new NodeTooltipGenerator<>(new TFDTooltipGenerator()));
 
 		List<TFDNode> solution = null;
 		Collection<List<TFDNode>> solutions = new HashSet<>();
 		do {
-			solution = astar.nextSolution().getNodes();
+			solution = astar.nextSolutionCandidate().getNodes();
 			solutions.add(solution);
 		} while (solution != null);
 		long end = System.currentTimeMillis();
