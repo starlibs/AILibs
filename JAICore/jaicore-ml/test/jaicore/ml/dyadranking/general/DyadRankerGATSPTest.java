@@ -2,9 +2,11 @@ package jaicore.ml.dyadranking.general;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -47,6 +49,7 @@ public class DyadRankerGATSPTest {
 
 	private static final String XXL_FILE = "testsrc/ml/dyadranking/ga-tsp/data_meta/GAMeta72-LR.txt";
 	private static final String ALTERNATIVES_FEATURE_FILE = "testsrc/ml/dyadranking/ga-tsp/data_meta/GAMeta72-labeldescriptions.csv";
+	private static final String ORDERINGS_FILE = "testsrc/ml/dyadranking/ga-tsp/data_meta/orderings.csv";
 
 	// M = average ranking length
 	private static final int M = 30;
@@ -62,6 +65,7 @@ public class DyadRankerGATSPTest {
 	public void init() {
 		// load dataset
 		dataset = loadDatasetFromXXLAndCSV(XXL_FILE, ALTERNATIVES_FEATURE_FILE);
+		System.out.println(dataset);
 		// TODO differenct rankers
 		ranker = new FeatureTransformPLDyadRanker();
 	}
@@ -69,9 +73,10 @@ public class DyadRankerGATSPTest {
 	@Test
 	public void test() {
 
+		System.out.println(dataset);
+		
 		Collections.shuffle(dataset, new Random(seed));
 
-		
 		// split data
 		DyadRankingDataset trainData = new DyadRankingDataset(dataset.subList(0, N));
 		DyadRankingDataset testData = new DyadRankingDataset(dataset.subList(N, dataset.size()));
@@ -95,6 +100,8 @@ public class DyadRankerGATSPTest {
 //				shuffleContainer = Lists.reverse(shuffleContainer);
 				IDyadRankingInstance shuffledInstance = new DyadRankingInstance(shuffleContainer);
 				IDyadRankingInstance predictionInstance = (IDyadRankingInstance) ranker.predict(shuffledInstance);
+				
+				
 
 //				System.out.println("Test instance");
 //				for (Dyad dyad : testInstance) {
@@ -156,6 +163,37 @@ public class DyadRankerGATSPTest {
 	private static DyadRankingDataset loadDatasetFromXXLAndCSV(String filePathXXL, String filePathAlternativeFeatures) {
 
 		DyadRankingDataset dataset = new DyadRankingDataset();
+		
+		int[][] orderings = new int[246][72];
+		
+		List<List<String>> records = new ArrayList<>();
+		try (BufferedReader br = new BufferedReader(new FileReader(ORDERINGS_FILE))) {
+		    String line;
+		    int i = 0;
+		    while ((line = br.readLine()) != null) {
+		    	int j = 0; 
+		        String[] values = line.split(",");
+		        records.add(Arrays.asList(values));
+		        for(String value : values) {
+		        	orderings[i][j] = Integer.parseInt(value);
+		        	j++;
+		        }
+		        i++;
+		    }
+		} catch (FileNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		for(int i = 0; i < orderings.length; i++) {
+			for(int j = 0; j < orderings[i].length; j++) {
+				System.out.print(orderings[i][j] + ", ");
+			}
+			System.out.println();
+		}
 
 		List<Vector> alternativeFeatures = new ArrayList<Vector>(100);
 
@@ -208,6 +246,7 @@ public class DyadRankerGATSPTest {
 			for(int i = 0; i < stats.length; i++) {
 				stats[i] = new DescriptiveStatistics();
 			} 
+			int lineIndex = 0;
 			while ((line = reader.readLine()) != null) {
 				tokens = line.split("\t");
 				Vector instance = new DenseDoubleVector(numAttributes);
@@ -222,7 +261,8 @@ public class DyadRankerGATSPTest {
 
 				// add the alternatives to the dyad ranking instance
 				for (int i = numAttributes; i < tokens.length; i++) {
-					int index = Integer.parseInt(tokens[i]) - 1;
+//					int index = Integer.parseInt(tokens[i]) - 1;
+					int index = orderings[lineIndex][i-numAttributes] - 1;
 					alternatives.add(alternativeFeatures.get(index));
 				}
 				instanceFeatures.add(instance);
@@ -243,7 +283,7 @@ public class DyadRankerGATSPTest {
 			
 			for(Vector instVec : instanceFeatures) {
 				instVec.subtractVector(meanVec);
-				instVec.divideByVectorPairwise(stds);
+				instVec.divideByVectorPairwise(stdVec);
 			}
 			
 			for(int i = 0; i < instanceFeatures.size(); i++) {
