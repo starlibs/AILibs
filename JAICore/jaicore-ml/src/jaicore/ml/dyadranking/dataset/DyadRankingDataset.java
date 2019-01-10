@@ -77,4 +77,9 @@ public class DyadRankingDataset extends ArrayList<IInstance> implements IDataset
 
 	}
 
+	@Override
+	public IDyadRankingInstance get(int index) {
+		return (IDyadRankingInstance) super.get(index);
+	}
+
 }

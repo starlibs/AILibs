@@ -1,6 +1,6 @@
-package jaicore.ml.dyadranking.algorithm.lbfgs;
+package jaicore.ml.core.optimizing.lbfgs;
 
-import jaicore.ml.dyadranking.algorithm.lbfgs.LBFGS.LinesearchAlgorithm;
+import jaicore.ml.core.optimizing.lbfgs.LBFGS.LinesearchAlgorithm;
 /**
  * Parameters to control the optimizer. To control convergence/runtime, see:
  * {@link #max_iterations} and {@link #epsilon} To get L1 penalization, see:
