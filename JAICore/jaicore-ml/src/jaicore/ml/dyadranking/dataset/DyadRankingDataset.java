@@ -49,6 +49,10 @@ public class DyadRankingDataset extends ArrayList<IInstance> implements IDataset
 		super(initialCapacity);
 	}
 
+	public DyadRankingDataset(List<IDyadRankingInstance> sparseDyadRankingInstances) {
+		super(sparseDyadRankingInstances);
+	}
+
 	@Override
 	public <T> IAttributeType<T> getTargetType(Class<? extends T> clazz) {
 		// TODO Auto-generated method stub

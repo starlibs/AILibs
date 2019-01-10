@@ -26,10 +26,13 @@ import jaicore.ml.dyadranking.Dyad;
 import jaicore.ml.dyadranking.algorithm.ADyadRanker;
 import jaicore.ml.dyadranking.algorithm.FeatureTransformPLDyadRanker;
 import jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
+import jaicore.ml.dyadranking.algorithm.featuretransform.FeatureTransformPLDyadRanker;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import jaicore.ml.dyadranking.dataset.DyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
+import jaicore.ml.dyadranking.loss.DyadRankingLossUtil;
+import jaicore.ml.dyadranking.loss.KendallsTauDyadRankingLoss;
 
 /**
  * This is a test based on Dirk Schäfers dyad ranking dataset based on
@@ -94,55 +97,57 @@ public class DyadRankerGATSPTest {
 			System.out.println();
 
 			// compute average rank correlation
-			for (int testIndex = 0; testIndex < testData.size(); testIndex++) {
-				IDyadRankingInstance testInstance = (IDyadRankingInstance) testData.get(testIndex);
-				List<Dyad> shuffleContainer = Lists.newArrayList(testInstance.iterator());
+//			for (int testIndex = 0; testIndex < testData.size(); testIndex++) {
+//				IDyadRankingInstance testInstance = (IDyadRankingInstance) testData.get(testIndex);
+//				List<Dyad> shuffleContainer = Lists.newArrayList(testInstance.iterator());
 //				shuffleContainer = Lists.reverse(shuffleContainer);
-				IDyadRankingInstance shuffledInstance = new DyadRankingInstance(shuffleContainer);
-				IDyadRankingInstance predictionInstance = (IDyadRankingInstance) ranker.predict(shuffledInstance);
-				
-				
-
-//				System.out.println("Test instance");
-//				for (Dyad dyad : testInstance) {
-//					System.out.println(dyad.getAlternative());
+//				IDyadRankingInstance shuffledInstance = new DyadRankingInstance(shuffleContainer);
+//				IDyadRankingInstance predictionInstance = (IDyadRankingInstance) ranker.predict(shuffledInstance);
+//				
+//				
+//
+////				System.out.println("Test instance");
+////				for (Dyad dyad : testInstance) {
+////					System.out.println(dyad.getAlternative());
+////				}
+////				System.out.println("\nPrediction ");
+////				for (Dyad dyad : predictionInstance) {
+////					System.out.println(dyad.getAlternative());
+////				}
+////				System.out.println("\n\n");
+//
+////				System.out.println("prediction: " + predictionInstance.toString());
+////				System.out.println("test instance: " + testInstance.toString());
+////				System.out.println();
+//
+//				int dyadRankingLength = testInstance.length();
+//				int nConc = 0;
+//				int nDisc = 0;
+//
+//				// check for all pairs of dyads in the test instance whether their order is the
+//				// same in the prediction, assumes that both DyadRankingInstances have the same
+//				// dyads and that these dyads are pairwise distinct
+//				for (int i = 1; i < dyadRankingLength; i++) {
+//					for (int j = 0; j < i; j++) {
+//						Dyad followingDyad = testInstance.getDyadAtPosition(i);
+//						Dyad leadingDyad = testInstance.getDyadAtPosition(j);
+//						int posOfFollowingInPrediction = positionOfDyad(predictionInstance, followingDyad);
+//						int posOfLeadingInPrediction = positionOfDyad(predictionInstance, leadingDyad);
+//						if (posOfFollowingInPrediction >= posOfLeadingInPrediction) {
+//							nConc++;
+//						} else {
+//							nDisc++;
+//						}
+//					}
 //				}
-//				System.out.println("\nPrediction ");
-//				for (Dyad dyad : predictionInstance) {
-//					System.out.println(dyad.getAlternative());
-//				}
-//				System.out.println("\n\n");
+//				double kendallTau = 2.0 * (nConc - nDisc) / (dyadRankingLength * (dyadRankingLength - 1));
+//				avgKendallTau += kendallTau;
+//			}
+//
+//			avgKendallTau /= testData.size();
 
-//				System.out.println("prediction: " + predictionInstance.toString());
-//				System.out.println("test instance: " + testInstance.toString());
-//				System.out.println();
-
-				int dyadRankingLength = testInstance.length();
-				int nConc = 0;
-				int nDisc = 0;
-
-				// check for all pairs of dyads in the test instance whether their order is the
-				// same in the prediction, assumes that both DyadRankingInstances have the same
-				// dyads and that these dyads are pairwise distinct
-				for (int i = 1; i < dyadRankingLength; i++) {
-					for (int j = 0; j < i; j++) {
-						Dyad followingDyad = testInstance.getDyadAtPosition(i);
-						Dyad leadingDyad = testInstance.getDyadAtPosition(j);
-						int posOfFollowingInPrediction = positionOfDyad(predictionInstance, followingDyad);
-						int posOfLeadingInPrediction = positionOfDyad(predictionInstance, leadingDyad);
-						if (posOfFollowingInPrediction >= posOfLeadingInPrediction) {
-							nConc++;
-						} else {
-							nDisc++;
-						}
-					}
-				}
-				double kendallTau = 2.0 * (nConc - nDisc) / (dyadRankingLength * (dyadRankingLength - 1));
-				avgKendallTau += kendallTau;
-			}
-
-			avgKendallTau /= testData.size();
-
+			avgKendallTau = DyadRankingLossUtil.computeAverageLoss(new KendallsTauDyadRankingLoss(), testData, ranker);
+			
 			System.out.println("Average Kendall's tau: " + avgKendallTau);
 
 		} catch (TrainingException | PredictionException e) {
