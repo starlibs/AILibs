@@ -107,7 +107,6 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 			int dyadSize = ((IDyadRankingInstance) drDataset.get(0)).getDyadAtPosition(0).getInstance().length()
 					+ ((IDyadRankingInstance) drDataset.get(0)).getDyadAtPosition(0).getAlternative().length();
 			this.plNet = createNetwork(dyadSize);
-			log.warn("Architecture: " + plNet.getLayers());
 		}
 
 		currentBestScore = Double.POSITIVE_INFINITY;
@@ -123,7 +122,7 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 			for (IInstance dyadRankingInstance : drTrain) {
 				this.update(dyadRankingInstance);
 			}
-			log.warn("plNet params: {}", plNet.params().toString());
+			log.debug("plNet params: {}", plNet.params().toString());
 			earlyStoppingCounter++;
 			// Compute validation error
 			if (earlyStoppingCounter == configuration.plNetEarlyStoppingInterval()
@@ -168,13 +167,9 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 		List<INDArray> dyadList = new ArrayList<INDArray>(drInstance.length());
 		for (Dyad dyad : drInstance) {
 			INDArray dyadVector = dyadToVector(dyad);
-//			log.warn(dyad.toString());
-//			log.warn(dyadVector.toString());
 			dyadList.add(dyadVector);
 		}
-//		dyadMatrix = Nd4j.vstack(dyadList);
 		dyadMatrix = dyadRankingToMatrix(drInstance);
-		log.warn(dyadMatrix.toString());
 		List<INDArray> activations = plNet.feedForward(dyadMatrix);
 		INDArray output = activations.get(activations.size() - 1);
 		output = output.transpose();
@@ -186,16 +181,12 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 			plNetClone.setInput(dyadList.get(k));
 			plNetClone.feedForward(true, false);
 			INDArray lossGradient = PLNetLoss.computeLossGradient(output, k);
-			log.warn("loss gradient: " + lossGradient.toString());
-//			lossGradient = new NDArray(new double[][] {{2.0d}});
 			// compute backprop gradient for weight updates w.r.t. k
 			Pair<Gradient, INDArray> p = plNetClone.backpropGradient(lossGradient, null);
-			log.warn("backprop gradient: " + p.toString());
 			deltaWk = p.getFirst();
 			plNet.getUpdater().update(plNet, deltaWk, iteration, epoch, 1, LayerWorkspaceMgr.noWorkspaces());
 			deltaW.addi(deltaWk.gradient());
 		}
-//		log.warn("Gradient: " + deltaW);
 		plNet.params().subi(deltaW);
 		iteration++;
 	}
@@ -216,17 +207,12 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 		List<Pair<Dyad, Double>> dyadUtilityPairs = new ArrayList<Pair<Dyad, Double>>(drInstance.length());
 		for (Dyad dyad : drInstance) {
 			INDArray plNetInput = dyadToVector(dyad);
-//			System.out.println("Dyad: " + dyad);
-//			System.out.println("PLNetInput: " + plNetInput);
 			double plNetOutput = plNet.output(plNetInput).getDouble(0);
-//			System.out.println("PLNetOutput: " + plNetOutput);
 			dyadUtilityPairs.add(new Pair<Dyad, Double>(dyad, plNetOutput));
 		}
 		// sort the instance in descending order of utility values
 		Collections.sort(dyadUtilityPairs, Comparator.comparing(p -> -p.getRight()));
 		List<Dyad> ranking = new ArrayList<Dyad>();
-
-		System.out.println("Dyad utility pairs: " + dyadUtilityPairs);
 
 		for (Pair<Dyad, Double> pair : dyadUtilityPairs)
 			ranking.add(pair.getLeft());
@@ -350,18 +336,6 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 		}
 		INDArray dyadMatrix;
 		dyadMatrix = Nd4j.vstack(dyadList);
-//		log.warn("dyad matrix before: \n {}", dyadMatrix.toString());
-		// standardize matrix
-//		for (int i = 0; i < dyadMatrix.shape()[1]; i++) {
-//			INDArray columnVector = dyadMatrix.getColumn(i);
-//			DescriptiveStatistics stats = new DescriptiveStatistics();
-//			for(int j = 0; j < columnVector.shape()[0];j++) {
-//				stats.addValue(columnVector.getDouble(j));
-//			}
-//			columnVector.subi(stats.getMean());
-//			columnVector.divi(stats.getStandardDeviation());
-//		}
-//		log.warn("dyad matrix after: \n {}",  dyadMatrix.toString());
 		return dyadMatrix;
 	}
 
