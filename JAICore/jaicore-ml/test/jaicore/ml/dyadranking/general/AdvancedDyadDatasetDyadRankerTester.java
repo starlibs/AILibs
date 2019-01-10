@@ -53,7 +53,6 @@ public class AdvancedDyadDatasetDyadRankerTester {
 		int maxDyadRankingLength = 4;
 		int nTestInstances = 100;
 		double avgKendallTau = 0;
-		double avgKendallTau2 = 0;
 		double avgFailures = 0;
 		
 		for (int testInst = 0; testInst < nTestInstances; testInst++) {
@@ -86,7 +85,7 @@ public class AdvancedDyadDatasetDyadRankerTester {
 	public static List<APLDyadRanker[]> supplyDyadRankers() {
 		PLNetDyadRanker ranker1 = new PLNetDyadRanker();
 		ranker1.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_MAX_EPOCHS, "0");
-		ranker1.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_PLNET_HIDDEN_NODES, "6,4,3");
+		ranker1.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_PLNET_HIDDEN_NODES, "8,6,4");
 		PLNetDyadRanker ranker2 = new PLNetDyadRanker();
 		ranker2.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_MAX_EPOCHS, "10");
 		ranker2.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_TRAIN_RATIO, "1.0");
