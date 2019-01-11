@@ -16,7 +16,7 @@ import junit.framework.Assert;
 
 public class ShapeletTransformAlgorithmTest {
 
-	private static final double EPS_DELTA = 0.00001;
+	private static final double EPS_DELTA = 0.0000000001;
 
 	@Test
 	public void generateCandidatesTest() {
@@ -43,7 +43,7 @@ public class ShapeletTransformAlgorithmTest {
 		Assert.assertEquals("A distance has to be found for each instance!", dataMatrix.shape()[0], actResult.size());
 
 		Assert.assertEquals(0, actResult.get(0), EPS_DELTA);
-		Assert.assertEquals(2d / 3, actResult.get(1), EPS_DELTA);
+		Assert.assertEquals((1.224744871 * 1.224744871 * 2) / 3, actResult.get(1), EPS_DELTA);
 	}
 
 	@Test
@@ -89,18 +89,33 @@ public class ShapeletTransformAlgorithmTest {
 	@Test
 	public void zNormalizeTest() {
 		INDArray vector = Nd4j.create(new double[] { 1, 2, 3 });
-		INDArray expectedResult = Nd4j.create(new double[] { -1, 0, 1 });
+		// INDArray expectedResult = Nd4j.create(new double[] { -1.224744871, 0,
+		// +1.224744871 });
+		INDArray expectedResult = Nd4j.create(new double[] { -1, 0, +1 });
 
 		INDArray actResult = ShapeletTransformAlgorithm.zNormalize(vector);
 		Assert.assertTrue(expectedResult.equalsWithEps(actResult, EPS_DELTA));
 
+		INDArray array = Nd4j.create(new double[] { 2, 4, 6 });
+		System.out.println(array.stdNumber(false).doubleValue());
+
+		System.out.println(ShapeletTransformAlgorithm.zNormalize(array));
 	}
 
 	@Test
-	public void getMinimumDistanceAmongAllSequencesTest() {
-		INDArray meanTest = Nd4j.create(new double[][] { { 1, 2, 3 }, { 2, 3, 5 }, { 3, 4, 5 } });
+	public void getMinimumDistanceAmongAllSequencesOptimizedTest() {
+		INDArray matrix = Nd4j.create(new double[][] { { 4, 2, 4, 6, 5 } });
 
-		INDArray vector = Nd4j.create(new double[] { 2, 4, 6 });
+		INDArray vector = Nd4j.create(new double[] { 1, 2, 3 });
+		Shapelet shapelet = new Shapelet(vector, 0, 3, 0);
+
+		double actResult = ShapeletTransformAlgorithm.getMinimumDistanceAmongAllSubsequences(shapelet, matrix);
+
+		Assert.assertEquals(0.0, actResult, EPS_DELTA);
+
+		Assert.assertEquals(actResult,
+				ShapeletTransformAlgorithm.getMinimumDistanceAmongAllSubsequencesOptimized(shapelet, matrix),
+				EPS_DELTA);
 	}
 
 	@Test

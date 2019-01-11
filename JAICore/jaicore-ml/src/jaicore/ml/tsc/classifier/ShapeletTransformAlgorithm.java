@@ -57,7 +57,7 @@ public class ShapeletTransformAlgorithm extends
 
 		public Shapelet(final INDArray data, final int startIndex, final int length, final int instanceIndex,
 				final double determinedQuality) {
-			this.data = data;
+			this.data = zNormalize(data);
 			this.startIndex = startIndex;
 			this.length = length;
 			this.instanceIndex = instanceIndex;
@@ -65,7 +65,8 @@ public class ShapeletTransformAlgorithm extends
 		}
 
 		public Shapelet(final INDArray data, final int startIndex, final int length, final int instanceIndex) {
-			this.data = data;
+			if (data != null)
+				this.data = zNormalize(data);
 			this.startIndex = startIndex;
 			this.length = length;
 			this.instanceIndex = instanceIndex;
@@ -418,48 +419,61 @@ public class ShapeletTransformAlgorithm extends
 		List<Double> result = new ArrayList<>();
 
 		for (int i = 0; i < matrix.shape()[0]; i++) {
-			result.add(getMinimumDistanceAmongAllSubsequences(s, matrix.getRow(i)));
+			result.add(getMinimumDistanceAmongAllSubsequencesOptimized(s, matrix.getRow(i)));
 		}
 
 		return result;
 	}
 
-	// Algorithm 2: Similarity search with online normalisation and reordered early
+	// Algorithm 2: Similarity search with online normalization and reordered early
 	// abandon
 	public static double getMinimumDistanceAmongAllSubsequencesOptimized(final Shapelet shapelet,
 			final INDArray timeSeries) {
 		int length = shapelet.getLength();
 		long m = timeSeries.length();
 
-		final INDArray S = shapelet.getData();
-		final INDArray S_prime = zNormalize(S);
+		// final INDArray S = shapelet.getData();
+		final INDArray S_prime = shapelet.getData();
 		final List<Integer> A = sortIndexes(S_prime, false); // descending
 		final INDArray F = zNormalize(timeSeries.get(NDArrayIndex.interval(0, length)));
 		double p = 0;
 		double q = length;
+		// TODO: Update variables here too
+		p = timeSeries.get(NDArrayIndex.interval(0, length)).sumNumber().doubleValue();
+		for (int i = 0; i < length; i++) {
+			q += timeSeries.getDouble(i) * timeSeries.getDouble(i);
+		}
+
 		double b = singleSquaredEuclideanDistance(S_prime, F);
 
-		for (long i = 0; i < m - length; i++) {
+		for (long i = 1; i < m - length; i++) {
 
-			double t_i = timeSeries.getDouble(i);
-			double t_il = timeSeries.getDouble(i + length);
+			double t_i = timeSeries.getDouble(i - 1);
+			double t_il = timeSeries.getDouble(i - 1 + length);
 			p -= t_i;
 			q -= t_i * t_i;
 			p += t_il;
 			q += t_il * t_il;
 			double x_bar = p / length;
-			double s = q / length - x_bar * x_bar;
+			double s = q / (length) - x_bar * x_bar;
+			s = s < 0.000000001 ? 0d : (length / (length - 1)) * Math.sqrt(s);
 			int j = 0;
 			double d = 0;
 			while (j < length && d < b) {
-				d += Math.pow(S_prime.getDouble(A.get(j)) - ((timeSeries.getDouble(i + A.get(j)) - x_bar) / s), 2);
+				double normVal = s == 0.0 ? 0d : (timeSeries.getDouble(i + A.get(j)) - x_bar) / s;
+				double diff = S_prime.getDouble(A.get(j)) - normVal;
+
+				// d += Math.pow(S_prime.getDouble(A.get(j)) - ((timeSeries.getDouble(i +
+				// A.get(j)) - x_bar) / s), 2);
+				d += diff * diff;
 				j++;
 			}
 			if (j == length && d < b) {
 				b = d;
 			}
 		}
-		return b;
+
+		return b / length;
 	}
 
 	// Analogous to argsort function of ArrayUtil in Nd4j
@@ -493,7 +507,7 @@ public class ShapeletTransformAlgorithm extends
 
 		double min = Double.MAX_VALUE;
 
-		INDArray normalizedShapeletData = zNormalize(shapelet.getData());
+		INDArray normalizedShapeletData = shapelet.getData();
 
 		for (int i = 0; i < n - l; i++) {
 			double tmpED = singleSquaredEuclideanDistance(normalizedShapeletData,
@@ -526,6 +540,7 @@ public class ShapeletTransformAlgorithm extends
 	public static INDArray zNormalize(final INDArray dataVector) {
 		// TODO: Parameter checks...
 		double mean = dataVector.meanNumber().doubleValue();
+		// Do not use Bessel's correction to get the population stddev
 		double stddev = dataVector.stdNumber().doubleValue();
 
 		if (stddev == 0.0)
