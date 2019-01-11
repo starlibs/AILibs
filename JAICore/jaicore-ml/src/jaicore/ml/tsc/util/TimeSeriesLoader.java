@@ -216,7 +216,12 @@ public class TimeSeriesLoader {
 						String[] values = line.split(ARFF_VALUE_DELIMITER);
 						double[] dValues = new double[targetSet ? values.length - 1 : values.length];
 						for (int i = 0; i < values.length - 1; i++) {
-							dValues[i] = Double.parseDouble(values[i]);
+							String actValue = values[i];
+							if (actValue.startsWith("'"))
+								actValue = actValue.substring(1);
+							if (actValue.endsWith("'"))
+								actValue = actValue.substring(0, actValue.length() - 1);
+							dValues[i] = Double.parseDouble(actValue);
 						}
 						matrix.putRow(lineCounter, Nd4j.create(dValues));
 

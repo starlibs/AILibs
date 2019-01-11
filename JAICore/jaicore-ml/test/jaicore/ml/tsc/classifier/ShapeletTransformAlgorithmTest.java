@@ -16,7 +16,7 @@ import junit.framework.Assert;
 
 public class ShapeletTransformAlgorithmTest {
 
-	private static final double EPS_DELTA = 0.0000000001;
+	private static final double EPS_DELTA = 0.000001;
 
 	@Test
 	public void generateCandidatesTest() {
@@ -43,7 +43,7 @@ public class ShapeletTransformAlgorithmTest {
 		Assert.assertEquals("A distance has to be found for each instance!", dataMatrix.shape()[0], actResult.size());
 
 		Assert.assertEquals(0, actResult.get(0), EPS_DELTA);
-		Assert.assertEquals((1.224744871 * 1.224744871 * 2) / 3, actResult.get(1), EPS_DELTA);
+		Assert.assertEquals(2d / 3, actResult.get(1), EPS_DELTA); // (1.224744871 * 1.224744871 * 2) / 3,
 	}
 
 	@Test
@@ -132,5 +132,38 @@ public class ShapeletTransformAlgorithmTest {
 		List<Integer> result2 = ShapeletTransformAlgorithm.sortIndexes(vector2, true);
 
 		Assert.assertEquals(Arrays.asList(0, 1, 2), result2);
+	}
+
+	@Test
+	public void squareEuclideanDistanceTest() {
+		INDArray vector = Nd4j.create(new double[] { 4, 2, 6 });
+		INDArray vector2 = Nd4j.create(new double[] { 2, 4, 6 });
+
+		Assert.assertEquals(8d, ShapeletTransformAlgorithm.singleSquaredEuclideanDistance(vector, vector2),
+				EPS_DELTA);
+	}
+
+	@Test
+	public void getMinimumDistanceAmongAllSequencesOptimizedTest2() {
+		INDArray matrix = Nd4j.create(new double[][] { { 4, 3, 6, 9 } });
+		// INDArray matrix = Nd4j.create(new double[][] { { 4, 2, 4, 6, 5, } });
+
+		INDArray vector = Nd4j.create(new double[] { 1, 2, 3 });
+		Shapelet shapelet = new Shapelet(vector, 0, 3, 0);
+
+		double oldResult = ShapeletTransformAlgorithm.getMinimumDistanceAmongAllSubsequences(shapelet, matrix);
+		System.out.println("oldResult: " + 3 * oldResult);
+		double oldOptimizedResult = ShapeletTransformAlgorithm.getMinimumDistanceAmongAllSubsequencesOptimized(shapelet,
+				matrix);
+
+		System.out.println("=============================================");
+		double actResult = ShapeletTransformAlgorithm.getMinimumDistanceAmongAllSubsequencesOptimized2(shapelet,
+				matrix);
+
+		Assert.assertEquals(oldResult, oldOptimizedResult, EPS_DELTA);
+		Assert.assertEquals(oldOptimizedResult, actResult, EPS_DELTA);
+		// Assert.assertEquals(0, actResult, EPS_DELTA);
+
+		System.out.println(actResult);
 	}
 }

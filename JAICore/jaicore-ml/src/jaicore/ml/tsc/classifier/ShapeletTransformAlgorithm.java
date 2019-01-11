@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.indexing.NDArrayIndex;
+import org.nd4j.linalg.ops.transforms.Transforms;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -132,8 +133,6 @@ public class ShapeletTransformAlgorithm extends
 
 	private int minShapeletLength;
 	private int maxShapeletLength;
-
-	private Shapelet pruningBound;
 
 	public ShapeletTransformAlgorithm(final int k, final int noClusters, final IQualityMeasure qualityMeasure,
 			final int seed, final boolean clusterShapelets) {
@@ -348,8 +347,6 @@ public class ShapeletTransformAlgorithm extends
 
 		for (int i = 0; i < numInstances; i++) {
 
-			pruningBound = kShapelets.size() == this.k ? kShapelets.get(kShapelets.size() - 1).getKey() : null;
-
 			List<Map.Entry<Shapelet, Double>> shapelets = new ArrayList<>();
 			for (int l = min; l < max; l++) {
 				Set<Shapelet> W_il = generateCandidates(data.getRow(i), l, i);
@@ -419,7 +416,7 @@ public class ShapeletTransformAlgorithm extends
 		List<Double> result = new ArrayList<>();
 
 		for (int i = 0; i < matrix.shape()[0]; i++) {
-			result.add(getMinimumDistanceAmongAllSubsequencesOptimized(s, matrix.getRow(i)));
+			result.add(getMinimumDistanceAmongAllSubsequences(s, matrix.getRow(i)));
 		}
 
 		return result;
@@ -429,51 +426,126 @@ public class ShapeletTransformAlgorithm extends
 	// abandon
 	public static double getMinimumDistanceAmongAllSubsequencesOptimized(final Shapelet shapelet,
 			final INDArray timeSeries) {
-		int length = shapelet.getLength();
+
+		double length = shapelet.getLength();
 		long m = timeSeries.length();
 
 		// final INDArray S = shapelet.getData();
 		final INDArray S_prime = shapelet.getData();
 		final List<Integer> A = sortIndexes(S_prime, false); // descending
-		final INDArray F = zNormalize(timeSeries.get(NDArrayIndex.interval(0, length)));
+		final INDArray F = zNormalize(timeSeries.get(NDArrayIndex.interval(0, Math.round(length))));
 		double p = 0;
-		double q = length;
+		double q = 0;
 		// TODO: Update variables here too
-		p = timeSeries.get(NDArrayIndex.interval(0, length)).sumNumber().doubleValue();
+		p = timeSeries.get(NDArrayIndex.interval(0, Math.round(length))).sumNumber().doubleValue();
 		for (int i = 0; i < length; i++) {
 			q += timeSeries.getDouble(i) * timeSeries.getDouble(i);
 		}
 
 		double b = singleSquaredEuclideanDistance(S_prime, F);
 
-		for (long i = 1; i < m - length; i++) {
+		for (long i = 1; i <= m - length; i++) {
 
 			double t_i = timeSeries.getDouble(i - 1);
-			double t_il = timeSeries.getDouble(i - 1 + length);
+			double t_il = timeSeries.getDouble(i - 1 + Math.round(length));
 			p -= t_i;
 			q -= t_i * t_i;
 			p += t_il;
 			q += t_il * t_il;
 			double x_bar = p / length;
 			double s = q / (length) - x_bar * x_bar;
-			s = s < 0.000000001 ? 0d : (length / (length - 1)) * Math.sqrt(s);
+			s = s < 0.000000001 ? 0d : Math.sqrt((length / (length - 1)) * s); //
+
 			int j = 0;
 			double d = 0;
 			while (j < length && d < b) {
 				double normVal = s == 0.0 ? 0d : (timeSeries.getDouble(i + A.get(j)) - x_bar) / s;
 				double diff = S_prime.getDouble(A.get(j)) - normVal;
 
-				// d += Math.pow(S_prime.getDouble(A.get(j)) - ((timeSeries.getDouble(i +
-				// A.get(j)) - x_bar) / s), 2);
 				d += diff * diff;
 				j++;
 			}
+
 			if (j == length && d < b) {
 				b = d;
 			}
 		}
 
 		return b / length;
+	}
+
+	// Its actually not an early abandon algorithm
+	public static double getMinimumDistanceAmongAllSubsequencesOptimized2(final Shapelet shapelet,
+			final INDArray timeSeries) {
+
+		double length = shapelet.getLength();
+		long m = timeSeries.length();
+		int iLength = shapelet.getLength();
+
+		// final INDArray S = shapelet.getData();
+		final INDArray S_prime = shapelet.getData();
+		final List<Integer> A = sortIndexes(S_prime, false); // descending
+		 final INDArray F = zNormalize(timeSeries.get(NDArrayIndex.interval(0,
+				iLength)));
+		 double b = singleSquaredEuclideanDistance(S_prime, F);
+		 
+		double p = 0;
+		double q = 0;
+		p = timeSeries.get(NDArrayIndex.interval(0, iLength)).sumNumber().doubleValue();
+		for (int i = 0; i < length; i++) {
+			q += timeSeries.getDouble(i) * timeSeries.getDouble(i);
+		}
+
+		INDArray P = Nd4j.zeros(m - iLength);
+		
+		INDArray firstPart = timeSeries.get(NDArrayIndex.interval(0, m - iLength));
+		INDArray secondPart = timeSeries.get(NDArrayIndex.interval(0 + iLength, m));
+		
+		P.putScalar(0, p);
+
+
+		P = P.subi(firstPart)
+				.addi(secondPart).cumsumi(1);
+
+		INDArray Q = Nd4j.zeros(m - iLength);
+		Q.putScalar(0, q);
+		Q = Q.subi(firstPart.mul(firstPart)).addi(secondPart.mul(secondPart)).cumsumi(1);
+
+		INDArray X_bar = P.divi(length);
+		INDArray S = Q.divi(length).subi(X_bar.mul(X_bar));
+		S.muli((length / (length - 1)));
+		S = Transforms.sqrt(S);
+		
+
+		long[][] indices = new long[(int) (m - iLength + 1)][iLength];
+		for (int i = 0; i <= m - iLength; i++) {
+			for(int j=0; j<iLength; j++)
+				indices[i][j] = i + A.get(j);
+		}
+		long[] sPrimeIndices = new long[iLength];
+		for (int i = 0; i < iLength; i++) {
+			sPrimeIndices[i] = A.get(i);
+		}
+		
+		List<INDArray> stack = new ArrayList<>();
+		for (int i = 1; i <= m - iLength; i++) {
+			stack.add(timeSeries.get(NDArrayIndex.indices(indices[i])).transpose());
+		}
+		if (stack.size() < 1)
+			throw new IllegalArgumentException();
+
+		INDArray Norm = stack.size() > 1 ? Nd4j.vstack(stack) : stack.get(0);
+		
+
+		Norm.subiColumnVector(X_bar).diviColumnVector(S);
+		
+		INDArray result = Nd4j.getExecutioner()
+				.exec(new org.nd4j.linalg.api.ops.impl.accum.distances.EuclideanDistance(Norm,
+						S_prime.get(NDArrayIndex.indices(sPrimeIndices)).transpose()), 1);
+		
+		result = result.muli(result);
+
+		return Math.min(result.minNumber().doubleValue(), b) / length;
 	}
 
 	// Analogous to argsort function of ArrayUtil in Nd4j
@@ -520,28 +592,19 @@ public class ShapeletTransformAlgorithm extends
 
 	// TODO: Change IDistance interface? Work directly on INDArray as opposed to
 	// usage of TimeSeriesAttributes?
-	private static double singleSquaredEuclideanDistance(final INDArray vector1, final INDArray vector2) {
+	public static double singleSquaredEuclideanDistance(final INDArray vector1, final INDArray vector2) {
 		if (vector1.length() != vector2.length())
 			throw new IllegalArgumentException("The lengths of of both vectors must match!");
 
-		// return new
-		// org.nd4j.linalg.api.ops.impl.accum.distances.EuclideanDistance(vector1,
-		// vector2).exec().getFinalResult()
-		// .doubleValue();
-
-		// org.nd4j.linalg.api.ops.impl.accum.distances.EuclideanDistance
-
-		return Math.pow(Nd4j.getExecutioner()
-				.exec(new org.nd4j.linalg.api.ops.impl.accum.distances.EuclideanDistance(vector1, vector2), 1)
-				.getDouble(0), 2) / vector1.length();
+		return vector1.squaredDistance(vector2);
 	}
 
 	// TODO: Use Helens implementation
 	public static INDArray zNormalize(final INDArray dataVector) {
 		// TODO: Parameter checks...
 		double mean = dataVector.meanNumber().doubleValue();
-		// Do not use Bessel's correction to get the population stddev
-		double stddev = dataVector.stdNumber().doubleValue();
+		// Use Bessel's correction to get the sample stddev
+		double stddev = dataVector.stdNumber(true).doubleValue();
 
 		if (stddev == 0.0)
 			return Nd4j.zeros(dataVector.shape());
