@@ -1,6 +1,9 @@
 package jaicore.ml.tsc.util;
 
+import java.util.stream.IntStream;
+
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
 
 import jaicore.ml.tsc.exceptions.TimeSeriesLengthException;
 
@@ -110,5 +113,19 @@ public class TimeSeriesUtil {
                 throw new TimeSeriesLengthException(message);
             }
         }
+    }
+
+    /**
+     * Creates equidistant timestamps for a time series.
+     * 
+     * @param timeSeries Time series to generate timestamps for. Let n be its
+     *                   length.
+     * @return Equidistant timestamp, i.e. {0, 1, .., n-1}.
+     */
+    public static INDArray createEquidistantTimestamps(INDArray timeSeries) {
+        int n = (int) timeSeries.length();
+        double[] timestamps = IntStream.range(0, n).mapToDouble(t -> (double) t).toArray();
+        int[] shape = { n };
+        return Nd4j.create(timestamps, shape);
     }
 }
