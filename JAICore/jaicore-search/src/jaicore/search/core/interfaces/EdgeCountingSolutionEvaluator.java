@@ -12,7 +12,7 @@ import java.util.List;
 public class EdgeCountingSolutionEvaluator<N> implements ISolutionEvaluator<N, Double> {
 
 	@Override
-	public Double evaluateSolution(List<N> solutionPath) throws Exception {
+	public Double evaluateSolution(List<N> solutionPath) {
 		return solutionPath.size() * 1.0;
 	}
 

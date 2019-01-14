@@ -18,7 +18,7 @@ public class SyntheticAndGrid implements GraphGenerator<NodeLabel, String> {
 	private int depth = 10;
 
 	
-	class NodeLabel {
+	public class NodeLabel {
 		int depth;
 		int task;
 		public NodeLabel(int depth, int task) {

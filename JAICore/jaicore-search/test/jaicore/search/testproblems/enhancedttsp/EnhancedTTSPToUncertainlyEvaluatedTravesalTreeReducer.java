@@ -9,9 +9,9 @@ import jaicore.search.algorithms.standard.uncertainty.IUncertaintySource;
 import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.core.interfaces.ISolutionEvaluator;
 import jaicore.search.model.other.AgnosticPathEvaluator;
-import jaicore.search.model.probleminputs.UncertainlyEvaluatedTraversalTree;
+import jaicore.search.probleminputs.GraphSearchWithUncertaintyBasedSubpathEvaluationInput;
 
-public class EnhancedTTSPToUncertainlyEvaluatedTravesalTreeReducer implements AlgorithmProblemTransformer<EnhancedTTSP, UncertainlyEvaluatedTraversalTree<EnhancedTTSPNode, String, Double>> {
+public class EnhancedTTSPToUncertainlyEvaluatedTravesalTreeReducer implements AlgorithmProblemTransformer<EnhancedTTSP, GraphSearchWithUncertaintyBasedSubpathEvaluationInput<EnhancedTTSPNode, String, Double>> {
 	
 	private Random random = new Random(0);
 	private int samples = 3;
@@ -20,11 +20,11 @@ public class EnhancedTTSPToUncertainlyEvaluatedTravesalTreeReducer implements Al
 	
 	
 	@Override
-	public UncertainlyEvaluatedTraversalTree<EnhancedTTSPNode, String, Double> transform(EnhancedTTSP problem) {
+	public GraphSearchWithUncertaintyBasedSubpathEvaluationInput<EnhancedTTSPNode, String, Double> transform(EnhancedTTSP problem) {
 		GraphGenerator<EnhancedTTSPNode, String> graphGenerator = problem.getGraphGenerator();
 		IUncertaintyAnnotatingNodeEvaluator<EnhancedTTSPNode, Double> nodeEvaluator = new RandomCompletionBasedNodeEvaluator<>(random, samples, solutionEvaluator);
 		nodeEvaluator.setUncertaintySource(uncertaintySource);
-		return new UncertainlyEvaluatedTraversalTree<>(graphGenerator, nodeEvaluator);
+		return new GraphSearchWithUncertaintyBasedSubpathEvaluationInput<>(graphGenerator, nodeEvaluator);
 
 	}
 }

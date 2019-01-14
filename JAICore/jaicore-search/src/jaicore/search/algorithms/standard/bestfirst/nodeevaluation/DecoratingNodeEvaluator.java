@@ -1,5 +1,9 @@
 package jaicore.search.algorithms.standard.bestfirst.nodeevaluation;
 
+import java.util.concurrent.TimeoutException;
+
+import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
+import jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
 import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.model.travesaltree.Node;
 
@@ -18,7 +22,7 @@ public abstract class DecoratingNodeEvaluator<T, V extends Comparable<V>> implem
 	}
 
 	@Override
-	public V f(Node<T, ?> node) throws Exception {
+	public V f(Node<T, ?> node) throws NodeEvaluationException, TimeoutException, AlgorithmExecutionCanceledException, InterruptedException {
 		return this.evaluator.f(node);
 	}
 

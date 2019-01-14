@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.TimeoutException;
 
 import hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
 import hasco.core.Util;
@@ -21,6 +22,7 @@ import hasco.model.Parameter;
 import hasco.model.ParameterRefinementConfiguration;
 import jaicore.basic.IObjectEvaluator;
 import jaicore.basic.algorithm.AlgorithmProblemTransformer;
+import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.logic.fol.structure.CNFFormula;
 import jaicore.logic.fol.structure.ConstantParam;
 import jaicore.logic.fol.structure.Literal;
@@ -42,7 +44,7 @@ import jaicore.planning.model.task.ceocipstn.OCIPMethod;
 import jaicore.planning.model.task.stn.Method;
 import jaicore.planning.model.task.stn.TaskNetwork;
 import jaicore.search.core.interfaces.GraphGenerator;
-import jaicore.search.model.probleminputs.GraphSearchInput;
+import jaicore.search.probleminputs.GraphSearchInput;
 
 /**
  * This is the class that conducts the actual problem reduction of software configuration to HTN Planning
@@ -296,7 +298,7 @@ public class HASCOReduction<V extends Comparable<V>> implements AlgorithmProblem
 		IObjectEvaluator<Plan<CEOCAction>, V> planEvaluator = new IObjectEvaluator<Plan<CEOCAction>, V>() {
 
 			@Override
-			public V evaluate(Plan<CEOCAction> plan) throws Exception {
+			public V evaluate(Plan<CEOCAction> plan) throws TimeoutException, InterruptedException, ObjectEvaluationFailedException  {
 				ComponentInstance solution = Util.getSolutionCompositionForPlan(components, getInitState(), plan, true);
 				return problem.getCompositionEvaluator().evaluate(solution);
 			}

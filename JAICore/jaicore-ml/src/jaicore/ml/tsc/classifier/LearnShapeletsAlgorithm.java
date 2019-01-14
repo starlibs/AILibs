@@ -15,7 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jaicore.basic.TimeOut;
-import jaicore.basic.algorithm.AlgorithmEvent;
+import jaicore.basic.algorithm.IAlgorithmConfig;
+import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.ml.core.dataset.TimeSeriesDataset;
 import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
 import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeValue;
@@ -127,7 +128,7 @@ public class LearnShapeletsAlgorithm extends
 	}
 
 	@Override
-	public LearnShapeletsClassifier call() throws Exception {
+	public LearnShapeletsClassifier call() {
 		// Training
 
 		TimeSeriesDataset data = this.getInput();
@@ -304,7 +305,7 @@ public class LearnShapeletsAlgorithm extends
 	}
 
 	@Override
-	public void setTimeout(int timeout, TimeUnit timeUnit) {
+	public void setTimeout(long timeout, TimeUnit timeUnit) {
 		// TODO Auto-generated method stub
 
 	}
@@ -322,7 +323,7 @@ public class LearnShapeletsAlgorithm extends
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws Exception {
+	public AlgorithmEvent nextWithException() {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -334,5 +335,11 @@ public class LearnShapeletsAlgorithm extends
 	// TODO: Maybe move to utility? Or use library?
 	public static double sigmoid(final double z) {
 		return 1 / (1 + Math.exp((-1) * z));
+	}
+
+	@Override
+	public IAlgorithmConfig getConfig() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

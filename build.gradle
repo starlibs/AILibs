@@ -128,6 +128,7 @@ dependencies{
 	compile project(":JAICore:jaicore-processes")
 	compile project(":JAICore:jaicore-search")
 	compile project(":JAICore:jaicore-services")
+	compile project(":tsctestenv")
 }
 
 publish.dependsOn shadowJar
