@@ -436,11 +436,8 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>>
 	}
 
 	protected void postSolution(final List<T> solution) {
-		if (this.postedSolutions.contains(solution)) {
-			throw new IllegalArgumentException("Solution " + solution.toString() + " already posted!");
-		}
+		assert !this.postedSolutions.contains(solution) : "Solution " + solution.toString() + " already posted!";
 		this.postedSolutions.add(solution);
-		// List<CEOCAction> plan = CEOCSTNUtil.extractPlanFromSolutionPath(solution);
 		try {
 
 			/* now post the solution to the event bus */
@@ -454,6 +451,7 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>>
 			solutionObject.setAnnotation("fTime", this.timesToComputeEvaluations.get(solution));
 			solutionObject.setAnnotation("timeToSolution", (int) (System.currentTimeMillis() - this.timestampOfFirstEvaluation));
 			solutionObject.setAnnotation("nodesEvaluatedToSolution", numberOfComputedFValues);
+			logger.debug("Posting solution {}", solutionObject);
 			this.eventBus.post(new EvaluatedSearchSolutionCandidateFoundEvent<>(solutionObject));
 		} catch (Throwable e) {
 			List<Pair<String, Object>> explanations = new ArrayList<>();
