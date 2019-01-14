@@ -40,7 +40,9 @@ public class SFA implements IFilter {
 		if(!(input instanceof TimeSeriesDataset)) {
 			throw new IllegalArgumentException("This method only supports Timesereies datasets");
 		}
-		
+		if(((TimeSeriesDataset)input).isEmpty()) {
+			throw new IllegalArgumentException("This method can not work with an empty dataset.");
+		}
 		if(!fitted) {
 			throw new NoneFittedFilterExeception("The filter must be fitted before it can transform.");
 		}
@@ -74,6 +76,10 @@ public class SFA implements IFilter {
 		if(!(input instanceof TimeSeriesDataset)) {
 			throw new IllegalArgumentException("This method only supports Timesereies datasets");
 		}
+		if(((TimeSeriesDataset)input).isEmpty()) {
+			throw new IllegalArgumentException("This method can not work with an empty dataset.");
+		}
+		
 		if(alphabet.length() == 0) {
 			throw new IllegalArgumentException("The alphabet size can not be zero.");
 		}
@@ -125,12 +131,8 @@ public class SFA implements IFilter {
 
 	@Override
 	public IDataset fitTransform(IDataset input) throws IllegalArgumentException, NoneFittedFilterExeception {
-		// TODO Auto-generated method stub
-		if(!(input instanceof TimeSeriesDataset)) {
-			throw new IllegalArgumentException("This method only supports timeseries datasets.");
-		}
+		// TODO Auto-generated method stump
 		fit(input);
-		
 		return transform(input);
 	}
 

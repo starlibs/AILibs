@@ -28,15 +28,14 @@ public class SAX implements IFilter {
 	public IDataset transform(IDataset input) throws IllegalArgumentException, NoneFittedFilterExeception {
 		// TODO Auto-generated method stub
 		
-		if(((INDArray) input).isEmpty()) {
-			throw new IllegalArgumentException("The input dataset can not be empty");
-		}
 		if(!(input instanceof TimeSeriesDataset)){
 			throw new IllegalArgumentException("This method only supports TimeSeriesDatasets");
 		}
-			
+		if(((TimeSeriesDataset) input).isEmpty()) {
+			throw new IllegalArgumentException("This method can not work with an empty dataset.");
+		}	
 		if(!fitted) {
-			throw new NoneFittedFilterExeception("Fitted must be called before transformed");
+			throw new NoneFittedFilterExeception("Fit() must be called before transform()");
 		}
 		
 		TimeSeriesDataset sAXTransformedDataset = new TimeSeriesDataset(null, null, null);
@@ -72,7 +71,7 @@ public class SAX implements IFilter {
 		}
 		
 		
-		return null;
+		return sAXTransformedDataset;
 	}
 
 	@Override
@@ -80,15 +79,16 @@ public class SAX implements IFilter {
 		if(!(input instanceof TimeSeriesDataset)) {
 			throw new IllegalArgumentException("This method only supports Timeseriesdatasets");
 		}
+		if(((TimeSeriesDataset)input).isEmpty()){
+			throw new IllegalArgumentException("This method can not work with an empty dataset.");
+		}
 		// TODO Can a ppa value be smaller than the smallest value or higher then the highest
 		maxAndMin = Nd4j.valueArrayOf(new int []{2,((TimeSeriesDataset) input).getNumberOfVariables()}, 0);
 		try {
 			zTransformedDataset = (TimeSeriesDataset)ztransform.fitTransform(input);
 			for(int matrix = 0; matrix < ((TimeSeriesDataset) input).getNumberOfVariables(); matrix++){
-				for(int instances = 0; instances < ((TimeSeriesDataset) input).getNumberOfInstances(); instances++) {
-					maxAndMin.putScalar(new int [] {0,matrix}, ((TimeSeriesDataset) input).getValues(matrix).getRow(instances).max(1).getDouble(0));
-					maxAndMin.putScalar(new int [] {1,matrix}, ((TimeSeriesDataset) input).getValues(matrix).getRow(instances).min(1).getDouble(0));	
-				}
+					maxAndMin.put(new int [] {0,matrix}, ((TimeSeriesDataset) input).getValues(matrix).max(1).max(1));
+					maxAndMin.put(new int [] {1,matrix}, ((TimeSeriesDataset) input).getValues(matrix).min(1).min(1));		
 			}
 			
 		} catch (IllegalArgumentException e) {
@@ -118,7 +118,6 @@ public class SAX implements IFilter {
 	public IDataset fitTransform(IDataset input) throws IllegalArgumentException, NoneFittedFilterExeception {
 		// TODO Auto-generated method stub
 		fit(input);
-		fitted = true;
 		return transform(input);
 	}
 

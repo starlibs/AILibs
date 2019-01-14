@@ -28,6 +28,9 @@ public class DFT implements IFilter {
 		if(!(input instanceof TimeSeriesDataset)) {
 			throw new IllegalArgumentException("This method only supports Timesereies datasets");
 		}
+		if(((TimeSeriesDataset)input).isEmpty()) {
+			throw new IllegalArgumentException("This method can not work with an empty dataset.");
+		}
 		if(!fitted) {
 			throw new NoneFittedFilterExeception("The fit method must be called before the transform method is called.");
 		}
@@ -44,7 +47,10 @@ public class DFT implements IFilter {
 			throw new IllegalArgumentException("This method only supports Timesereies datasets");
 		}
 		
-		//TODO Dataset empty ??
+		if(((TimeSeriesDataset)input).isEmpty()) {
+			throw new IllegalArgumentException("This method can not work with an empty dataset.");
+		}
+
 		int InstancesLength = (int) ((TimeSeriesDataset) input).getValues(0).getRow(0).length();
 		
 		if(numberOfDisieredCoefficients > InstancesLength) {
@@ -82,8 +88,7 @@ public class DFT implements IFilter {
 	@Override
 	public IDataset fitTransform(IDataset input) throws IllegalArgumentException, NoneFittedFilterExeception {
 		fit(input);
-		transform(input);
-		return null;
+		return transform(input);
 	}
 
 }

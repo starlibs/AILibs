@@ -22,22 +22,20 @@ public class ZTransformer implements IFilter {
 	private boolean fitted = false;
 
 	
-	//TODO all methods static ? 
-	
 	/* (non-Javadoc)
 	 * @see jaicore.ml.tsc.filter.IFilter#transform(jaicore.ml.core.dataset.IDataset)
 	 */
+	
 	@Override
 	public IDataset transform(IDataset input) throws IllegalArgumentException, NoneFittedFilterExeception{
 		
 	//TODO is a dataset empty if it has no attributes
-		
-//		if(input.) {
-//			throw new IllegalArgumentException("The input dataset was empty");
-//		}
-		
 		if(!(input instanceof TimeSeriesDataset)) {
 			throw new IllegalArgumentException("This method only supports timeseries datasets");
+		}
+		
+		if(!((TimeSeriesDataset)input).isEmpty()) {
+			throw new IllegalArgumentException("This method can not work with an empty dataset.");
 		}
 		if(fitted) {
 			
@@ -70,6 +68,9 @@ public class ZTransformer implements IFilter {
 		if(!(input instanceof TimeSeriesDataset)){
 			throw new IllegalArgumentException("This mehtod only supports for timeseries datasets.");
 		}	
+		if(((TimeSeriesDataset)input).isEmpty()) {
+			throw new IllegalArgumentException("This method can not work with an empty dataset.");
+		}
 		
 		//make suitable means and deviation matrix rows == different attributes columns == different instances
 		means = Nd4j.zeros(((TimeSeriesDataset) input).getNumberOfVariables(), ((TimeSeriesDataset) input).getNumberOfInstances()); 
@@ -77,11 +78,8 @@ public class ZTransformer implements IFilter {
 		
 		//for every attribute for every instance of this attribute compute mean and deviation and put it in the according cell in matrix 
 		for(int matrix = 0; matrix < ((TimeSeriesDataset) input).getNumberOfVariables(); matrix++) {
-			for(int row = 0; row< ((TimeSeriesDataset) input).getNumberOfInstances();row++) {
-				int [] index = {matrix, row};
-				means.putScalar(index,(double)((TimeSeriesDataset) input).getValues(matrix).getRow(row).mean(1).getDouble(0));
-				deviation.putScalar(index, (double)((TimeSeriesDataset) input).getValues(matrix).getRow(row).std(1).getDouble(0));
-			}		
+				means.put(matrix,((TimeSeriesDataset) input).getValues(matrix).mean(1));
+				deviation.put(matrix,((TimeSeriesDataset) input).getValues(matrix).std(1));		
 		}
 		
 		fitted = true;
@@ -94,8 +92,8 @@ public class ZTransformer implements IFilter {
 	@Override
 	public IDataset fitTransform(IDataset input) throws IllegalArgumentException, NoneFittedFilterExeception {
 		//TODO call fit in transform or not ?
+		
 		fit(input);
-		fitted = true;
 		return transform(input);
 	}
 
