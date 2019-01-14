@@ -63,18 +63,22 @@ public class DyadRankingInstanceSupplier {
 		return comparator;
 	}
 	
+	public static double inputOptimizerTestScore(Dyad dyad) {
+		Vector inst = dyad.getInstance();
+		Vector alt = dyad.getAlternative();
+		double score = Math.abs(inst.getValue(0) + inst.getValue(1) - alt.getValue(0) - alt.getValue(1))
+					 + Math.abs(inst.getValue(0)) + Math.abs(inst.getValue(1)) + Math.abs(alt.getValue(0)) + Math.abs(alt.getValue(1)) ;
+		return score;
+	}
+	
 	public static Comparator<Dyad> inputOptimizerTestRanker() {
 		Comparator<Dyad> comparator = new Comparator<Dyad>() {
 
 			@Override
 			public int compare(Dyad d1, Dyad d2) {
-				Vector instD1 = d1.getInstance();
-				Vector altD1 = d1.getAlternative();
-				Vector instD2 = d2.getInstance();
-				Vector altD2 = d2.getAlternative();
-				double score1 = Math.abs(instD1.getValue(0) + instD1.getValue(1) - altD1.getValue(0) - altD1.getValue(1));
-				double score2 = Math.abs(instD2.getValue(0) + instD2.getValue(1) - altD2.getValue(0) - altD2.getValue(1));
-				return score1 - score2 == 0 ? 0 : (score1 - score2 > 0 ? -1 : 1);
+				double score1 = inputOptimizerTestScore(d1);
+				double score2 = inputOptimizerTestScore(d2);
+				return score1 - score2 == 0 ? 0 : (score1 - score2 > 0 ? 1 : -1);
 			}	
 		};
 		return comparator;
