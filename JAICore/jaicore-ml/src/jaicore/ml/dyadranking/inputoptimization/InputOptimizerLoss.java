@@ -6,4 +6,6 @@ public interface InputOptimizerLoss {
 	
 	public double loss(INDArray plNetOutput);
 	
+	public double lossGradient(INDArray plNetOutput);
+	
 }
