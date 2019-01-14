@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jaicore.ml.core.dataset.TimeSeriesDataset;
 import jaicore.ml.core.dataset.TimeSeriesInstance;
@@ -17,6 +19,8 @@ import jaicore.ml.core.exception.PredictionException;
 
 public class LearnShapeletsClassifier
 		extends TSClassifier<CategoricalAttributeType, CategoricalAttributeValue, TimeSeriesDataset> {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(LearnShapeletsClassifier.class);
 
 	private List<INDArray> S;
 	private INDArray W;
@@ -86,10 +90,44 @@ public class LearnShapeletsClassifier
 
 	@Override
 	public List<CategoricalAttributeValue> predict(TimeSeriesDataset dataset) throws PredictionException {
-		final List<CategoricalAttributeValue> result = new ArrayList<>();
-		for (TimeSeriesInstance inst : dataset) {
-			result.add(this.predict(inst));
+
+		final List<CategoricalAttributeValue> predictions = new ArrayList<>();
+
+		if (dataset.isMultivariate())
+			LOGGER.warn(
+					"Dataset to be predicted is multivariate but only first time series (univariate) will be considered.");
+
+		INDArray timeSeries = dataset.getValuesOrNull(0);
+		if (timeSeries == null)
+			throw new IllegalArgumentException("Dataset matrix of the instances to be predicted must not be null!");
+
+		List<String> classes = ((CategoricalAttributeType) dataset.getTargetType()).getDomain();
+
+		LOGGER.debug("Starting prediction...");
+		for (int inst = 0; inst < timeSeries.shape()[0]; inst++) {
+			INDArray instanceValues = timeSeries.getRow(inst);
+			int q = (int) instanceValues.length();
+
+			final HashMap<String, Double> scoring = new HashMap<>();
+
+			for (int i = 0; i < classes.size(); i++) {
+				double tmpScore = this.W_0.getDouble(i);
+				for (int r = 0; r < this.scaleR; r++) {
+					for (int k = 0; k < this.K; k++) {
+						tmpScore += LearnShapeletsAlgorithm.calculateM_hat(this.S, this.minShapeLength, r,
+								instanceValues, k, q, LearnShapeletsAlgorithm.ALPHA) * W.getDouble(i, r, k);
+					}
+				}
+				scoring.put(classes.get(i), LearnShapeletsAlgorithm.sigmoid(tmpScore));
+			}
+			LOGGER.debug("Scoring for instance {}: {}", inst, scoring);
+
+			String predictedClass = Collections.max(scoring.entrySet(), Map.Entry.comparingByValue()).getKey();
+
+			predictions.add((CategoricalAttributeValue) dataset.getTargetType().buildAttributeValue(predictedClass));
 		}
-		return result;
+		LOGGER.debug("Finished prediction.");
+
+		return predictions;
 	}
 }

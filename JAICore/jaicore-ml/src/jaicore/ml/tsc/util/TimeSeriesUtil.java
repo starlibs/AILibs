@@ -344,13 +344,13 @@ public class TimeSeriesUtil {
 	 *         normalized copy of the input array (if not inplace)
 	 */
 	public static INDArray normalizeINDArray(final INDArray array, final boolean inplace) {
-		if (array.shape().length > 1)
+		if (array.shape().length > 2 && array.shape()[0] != 1)
 			throw new IllegalArgumentException(
 					String.format("Input INDArray object must be a vector with shape size 1. Actual shape: (%s)",
 							Arrays.toString(array.shape())));
 
-		final double mean = array.mean(0).getDouble(0);
-		final double std = array.std(0).getDouble(0);
+		final double mean = array.mean(1).getDouble(0);
+		final double std = array.std(1).getDouble(0);
 
 		INDArray result;
 		if (inplace) {

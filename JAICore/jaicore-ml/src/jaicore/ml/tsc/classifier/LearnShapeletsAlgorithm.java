@@ -50,7 +50,7 @@ public class LearnShapeletsAlgorithm extends
 	private int Q;
 	private int C;
 
-	public static double ALPHA = -100d;
+	public static double ALPHA = -30d; // Used in implementation. Paper says -100d
 
 	public LearnShapeletsAlgorithm(final int K, final double learningRate, final double regularization,
 			final int scaleR, final int minShapeLength, final int maxIter, final int seed) {
@@ -82,10 +82,12 @@ public class LearnShapeletsAlgorithm extends
 	}
 
 	public List<INDArray> initializeS(final INDArray trainingMatrix) {
+		LOGGER.debug("Initializing S...");
+
 		final List<INDArray> result = new ArrayList<>();
 
 		for (int r = 0; r < this.scaleR; r++) {
-			final int numberOfSegments = getNumberOfSegments(this.Q, this.K, r);
+			final int numberOfSegments = getNumberOfSegments(this.Q, this.minShapeLength, r);
 
 			final int L = (r + 1) * this.minShapeLength;
 
@@ -124,6 +126,8 @@ public class LearnShapeletsAlgorithm extends
 			result.add(TimeSeriesUtil.wekaInstancesToINDArray(clusterCentroids, false));
 		}
 
+		LOGGER.debug("Initialized S.");
+
 		return result;
 	}
 
@@ -135,6 +139,9 @@ public class LearnShapeletsAlgorithm extends
 
 		if (data.isMultivariate())
 			throw new UnsupportedOperationException("Multivariate datasets are not supported.");
+
+		// TODO: Possibly unsafe cast
+		this.model.setTargetType((CategoricalAttributeType) data.getTargetType());
 
 		final INDArray dataMatrix = data.getValuesOrNull(0);
 		if (dataMatrix == null || dataMatrix.shape().length != 2)
@@ -179,26 +186,41 @@ public class LearnShapeletsAlgorithm extends
 		INDArray M_hat = Nd4j.create(this.scaleR, this.I, this.K);
 		INDArray Theta = Nd4j.create(this.I, this.C);
 
+		LOGGER.debug("Starting training for {} iterations...", this.maxIter);
 		for (int it = 0; it < this.maxIter; it++) {
 			for (int i = 0; i < this.Q; i++) {
 				// Pre-compute terms
 				for (int r = 0; r < this.scaleR; r++) {
 					for (int k = 0; k < this.K; k++) {
-						for (int j = 0; j < getNumberOfSegments(this.Q, this.minShapeLength, r); j++) {
+						int J_r = getNumberOfSegments(this.Q, this.minShapeLength, r);
+
+						for (int j = 0; j < J_r; j++) {
 							double newDValue = calculateD(S, minShapeLength, r, dataMatrix.getRow(i), k, j);
+							if (Double.isNaN(newDValue))
+								newDValue = 0;
 
 							D.get(r).putScalar(new int[] { i, k, j }, newDValue);
-							Xi.get(r).putScalar(new int[] { i, k, j }, Math.exp(this.ALPHA * newDValue));
+							newDValue = Math.exp(ALPHA * newDValue);
+							if (Double.isNaN(newDValue))
+								LOGGER.debug("Test");// newDValue = 0;
+							Xi.get(r).putScalar(new int[] { i, k, j }, newDValue);
 						}
+						
 						double newPsiValue = 0;
 						double newMHatValue = 0;
-						for (int j = 0; j < getNumberOfSegments(this.Q, this.minShapeLength, r); j++) {
+						// FIXME: Zero is added although Xi stores non zero
+						for (int j = 0; j < J_r; j++) {
 							newPsiValue += Xi.get(r).getDouble(i, k, j);
 							newMHatValue += D.get(r).getDouble(i, k, j) * Xi.get(r).getDouble(i, k, j);
 						}
 						Psi.putScalar(new int[] { r, i, k }, newPsiValue);
 
+						// FIXME Div by zero
 						newMHatValue /= Psi.getDouble(r, i, k);
+
+						if (Double.isNaN(newMHatValue) || Double.isInfinite(newMHatValue))
+							LOGGER.debug("NaN value");
+
 						M_hat.putScalar(new int[] { r, i, k }, newMHatValue);
 					}
 				}
@@ -211,29 +233,39 @@ public class LearnShapeletsAlgorithm extends
 							newThetaValue += M_hat.getDouble(r, i, k) * W.getDouble(c, r, k);
 						}
 					}
-					newThetaValue = Y.getDouble(i, c) - sigmoid(newThetaValue);
-					Theta.putScalar(new int[] { i, c }, newThetaValue);
+					if (Double.isNaN(newThetaValue) || Double.isInfinite(newThetaValue))
+						LOGGER.debug("NaN value");
+
+					double newThetaValue2 = Y.getDouble(i, c) - sigmoid(newThetaValue);
+					if (Double.isNaN(newThetaValue2) || Double.isInfinite(newThetaValue2))
+						LOGGER.debug("NaN value");
+					
+					Theta.putScalar(new int[] { i, c }, newThetaValue2);
 				}
 
 				// Learn shapelets and classification weights
 				for (int c = 0; c < this.C; c++) {
 					for (int r = 0; r < this.scaleR; r++) {
-						for (int k = 0; k < this.K; k++) {
+						for (int k = 0; k < S.get(r).shape()[0]; k++) { // this differs from paper: this.K instead of
+																		// shapelet length
 							double wStep = Theta.getDouble(i, c) * M_hat.getDouble(r, i, k)
 									- 2 * this.regularization / (this.I * this.C) * W.getDouble(c, r, k);
 
 							W.putScalar(new int[] { c, r, k }, W.getDouble(c, r, k) + this.learningRate * wStep);
 
-							for (int j = 0; j < getNumberOfSegments(this.Q, this.minShapeLength, r); j++) {
+							int J_r = getNumberOfSegments(this.Q, this.minShapeLength, r);
+							for (int j = 0; j < J_r; j++) {
 								double newPhiValue = 2 * Xi.get(r).getDouble(i, k, j)
-										* (1 + this.ALPHA * (D.get(r).getDouble(i, k, j) - M_hat.getDouble(r, i, k)));
-								newPhiValue /= r * this.minShapeLength * Psi.getDouble(r, i, k);
+										* (1 + ALPHA * (D.get(r).getDouble(i, k, j) - M_hat.getDouble(r, i, k)));
+								newPhiValue /= (r + 1) * this.minShapeLength * Psi.getDouble(r, i, k);
 								Phi.get(r).putScalar(new int[] { i, k, j }, newPhiValue);
 
-								for (int l = 0; l < r * this.scaleR; l++) {
+								for (int l = 0; l < (r + 1) * this.minShapeLength; l++) {
 									double sStep = Theta.getDouble(i, c) * Phi.get(r).getDouble(i, k, j)
 											* (S.get(r).getDouble(k, l) - dataMatrix.getDouble(i, j + l - 1))
 											* W.getDouble(c, r, k);
+									// LOGGER.debug("S.get({}) k={}, l={}, shape: {}", r, k, l,
+									// Arrays.toString(S.get(r).shape()));
 									S.get(r).putScalar(new int[] { k, l },
 											S.get(r).getDouble(k, l) + this.learningRate * sStep);
 								}
@@ -243,7 +275,16 @@ public class LearnShapeletsAlgorithm extends
 					W_0.putScalar(c, W_0.getDouble(c) + this.learningRate * Theta.getDouble(i, c));
 				}
 			}
+			if (W.scan(new org.nd4j.linalg.indexing.conditions.IsNaN()).intValue() > 0
+					|| W_0.scan(new org.nd4j.linalg.indexing.conditions.IsNaN()).intValue() > 0) {
+				LOGGER.debug("Found nan");
+			}
+
+			if (it % 10 == 0) {
+				LOGGER.debug("Iteration {}/{}", it, this.maxIter);
+			}
 		}
+		LOGGER.debug("Finished training.");
 
 		this.model.setS(S);
 		this.model.setW(W);
@@ -271,7 +312,7 @@ public class LearnShapeletsAlgorithm extends
 		for (int l = 0; l < r * minShapeLength; l++) {
 			result += Math.pow(instance.getDouble(0, j + l - 1) - S.get(r).getDouble(k, l), 2);
 		}
-		return result / (r * minShapeLength);
+		return result / ((r + 1) * minShapeLength);
 	}
 
 	@Override
@@ -282,8 +323,7 @@ public class LearnShapeletsAlgorithm extends
 
 	@Override
 	public TimeSeriesDataset getInput() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.input;
 	}
 
 	@Override
