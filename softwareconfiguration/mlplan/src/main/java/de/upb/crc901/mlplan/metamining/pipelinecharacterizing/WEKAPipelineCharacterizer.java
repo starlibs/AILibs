@@ -39,6 +39,11 @@ public class WEKAPipelineCharacterizer implements IPipelineCharacterizer {
 
 	/** The default path for pre computed algorithm patterns. */
 	private static final String ALGORITHM_PATTERNS_PATH = "draco/algorithm_patterns.csv";
+	
+	
+	/** The default path for pre computed algorithm patterns. */
+	private static final String ALGORITHM_PATTERNS_2000_PATH = "draco/patterns_support_2000.csv";
+	
 	/**
 	 * Number of concurrent threads maximally used by the characterizer
 	 */
@@ -65,7 +70,7 @@ public class WEKAPipelineCharacterizer implements IPipelineCharacterizer {
 	 * The minimum support required for a pattern to be considered frequent by the
 	 * tree miner
 	 */
-	private int patternMinSupport = 5;
+	private int patternMinSupport = 2000;
 
 	private Map<Component, Map<Parameter, ParameterRefinementConfiguration>> componentParameters;
 
