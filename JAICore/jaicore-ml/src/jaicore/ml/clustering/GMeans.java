@@ -19,6 +19,8 @@ import org.apache.commons.math3.random.RandomGenerator;
  * Implementation of Gmeans based on Helen Beierlings implementation of
  * GMeans(https://github.com/helebeen/AILibs/blob/master/JAICore/jaicore-modifiedISAC/src/main/java/jaicore/modifiedISAC/ModifiedISACgMeans.java).<br>
  * For more Information see: "Hamerly, G., and Elkan, C. 2003. Learning the k in kmeans. in proceedings of the seventeenth annual conference on neural information processing systems (nips)".
+ * <br><br>
+ * This implementation uses {@link KMeansPlusPlusClusterer} as the k-means cluster algorithm. 
  * 
  * @author Helen Beierling
  * @author jnowack

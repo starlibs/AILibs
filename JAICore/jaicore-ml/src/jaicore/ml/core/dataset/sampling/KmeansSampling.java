@@ -1,28 +1,19 @@
 package jaicore.ml.core.dataset.sampling;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import org.apache.commons.math3.ml.clustering.CentroidCluster;
+import org.apache.commons.math3.ml.clustering.KMeansPlusPlusClusterer;
 import org.apache.commons.math3.ml.distance.DistanceMeasure;
 import org.apache.commons.math3.ml.distance.ManhattanDistance;
+import org.apache.commons.math3.random.JDKRandomGenerator;
 
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
-import jaicore.ml.clustering.GMeans;
-import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
-import jaicore.ml.core.dataset.InstanceSchema;
-import jaicore.ml.core.dataset.attribute.IAttributeType;
-import jaicore.ml.core.dataset.attribute.IAttributeValue;
-import jaicore.ml.core.dataset.attribute.primitive.NumericAttributeType;
-import jaicore.ml.core.dataset.attribute.primitive.NumericAttributeValue;
-import jaicore.ml.core.dataset.standard.SimpleDataset;
-import jaicore.ml.core.dataset.standard.SimpleInstance;
 
 /**
- * Implementation of a sampling method using gmeans-clustering. This algorithm
+ * Implementation of a sampling method using kmeans-clustering. This algorithm
  * produces clusters of the given points and checks weather all points in a
  * cluster have the same target Attribute. If yes only the point nearest to the
  * center is added, otherwise the whole cluster is added to the sample.<p>
@@ -31,23 +22,32 @@ import jaicore.ml.core.dataset.standard.SimpleInstance;
  * @author jnowack
  *
  */
-public class GmeansSampling<I extends IInstance> extends ASamplingAlgorithm<I> {
+public class KmeansSampling<I extends IInstance> extends ASamplingAlgorithm<I> {
 
-	private GMeans<I> gMeansCluster;
+	private KMeansPlusPlusClusterer<I> kMeansCluster;
 	private List<CentroidCluster<I>> clusterResults;
 	private int currentCluster = 0;
 
 	private DistanceMeasure distanceMeassure = new ManhattanDistance();
-
 	private long seed;
-
+	private int k;
+	
 	/**
-	 * Implementation of a sampling method using gmeans-clustering.
+	 * Implementation of a sampling method using kmeans-clustering.
 	 */
-	public GmeansSampling(long seed) {
+	public KmeansSampling(long seed) {
 		this.seed = seed;
 	}
 
+	/**
+	 * Sets the number of clusters to use.
+	 * 
+	 * @param k number of clusters
+	 */
+	public void setK(int k) {
+		this.k = k;
+	}
+	
 	@Override
 	public AlgorithmEvent nextWithException() throws AlgorithmException {
 		switch (this.getState()) {
@@ -56,8 +56,10 @@ public class GmeansSampling<I extends IInstance> extends ASamplingAlgorithm<I> {
 			this.sample = getInput().createEmpty();
 
 			// create cluster
-			gMeansCluster = new GMeans<I>(getInput(), distanceMeassure, seed);
-			clusterResults = gMeansCluster.cluster();
+			JDKRandomGenerator r = new JDKRandomGenerator();
+			r.setSeed(seed);
+			kMeansCluster = new KMeansPlusPlusClusterer<I>(k, -1, distanceMeassure, r);
+			clusterResults = kMeansCluster.cluster(getInput());
 
 			return this.activate();
 		case active:
@@ -103,40 +105,6 @@ public class GmeansSampling<I extends IInstance> extends ASamplingAlgorithm<I> {
 			throw new IllegalStateException("Unknown algorithm state " + this.getState());
 		}
 	}
-
-	public static void main(String[] args) throws Exception {
-		Random rand = new Random(42);
-
-		ArrayList<IAttributeType<?>> types = new ArrayList<>();
-		types.add(new NumericAttributeType());
-		types.add(new NumericAttributeType());
-		types.add(new NumericAttributeType());
-
-		SimpleDataset ds = new SimpleDataset(new InstanceSchema(types, new NumericAttributeType()));
-
-		// fill instances
-		for (int i = 0; i < 10000; i++) {
-			ArrayList<IAttributeValue<?>> values = new ArrayList<>();
-			values.add(new NumericAttributeValue(new NumericAttributeType(), rand.nextDouble()));
-			values.add(new NumericAttributeValue(new NumericAttributeType(), rand.nextDouble()));
-			values.add(new NumericAttributeValue(new NumericAttributeType(), rand.nextDouble()));
-			ds.add(new SimpleInstance(values, new NumericAttributeValue(new NumericAttributeType(), 12.0)));
-		}
-
-		// GMeansStratiAmountSelectorAndAssigner<SimpleInstance> gm = new
-		// GMeansStratiAmountSelectorAndAssigner<>(45);
-
-		ASamplingAlgorithm<SimpleInstance> sampling = new GmeansSampling<SimpleInstance>(45);
-		sampling.setInput(ds);
-		sampling.setSampleSize(1000);
-
-		IDataset<SimpleInstance> dsOut = sampling.call();
-
-		System.out.println("Size: " + dsOut.size());
-		for (SimpleInstance sam : dsOut) {
-			System.out.println(sam);
-		}
-
-	}
-
+	
+	
 }
