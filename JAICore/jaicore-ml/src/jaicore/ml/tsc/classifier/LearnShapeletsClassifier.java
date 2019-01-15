@@ -16,6 +16,7 @@ import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
 import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeValue;
 import jaicore.ml.core.dataset.attribute.timeseries.TimeSeriesAttributeValue;
 import jaicore.ml.core.exception.PredictionException;
+import jaicore.ml.tsc.util.TimeSeriesUtil;
 
 public class LearnShapeletsClassifier
 		extends TSClassifier<CategoricalAttributeType, CategoricalAttributeValue, TimeSeriesDataset> {
@@ -105,7 +106,7 @@ public class LearnShapeletsClassifier
 
 		LOGGER.debug("Starting prediction...");
 		for (int inst = 0; inst < timeSeries.shape()[0]; inst++) {
-			INDArray instanceValues = timeSeries.getRow(inst);
+			INDArray instanceValues = TimeSeriesUtil.normalizeINDArray(timeSeries.getRow(inst), true); //
 			int q = (int) instanceValues.length();
 
 			final HashMap<String, Double> scoring = new HashMap<>();

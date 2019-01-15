@@ -46,7 +46,11 @@ public class LearnShapeletsRefTest {
 	public void testClassifier() throws FileNotFoundException, EvaluationException, TrainingException,
 			PredictionException, IOException, TimeSeriesLoadingException, ClassNotFoundException {
 
+
+
 		Logger.getLogger("jaicore").setLevel(Level.DEBUG);
+
+		System.out.println("Using OMP_NUM_THREADS=" + System.getenv().get("OMP_NUM_THREADS"));
 
 		Nd4j.setDataType(Type.DOUBLE);
 
