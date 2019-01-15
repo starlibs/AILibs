@@ -50,7 +50,7 @@ public class LearnShapeletsAlgorithm extends
 	private int Q;
 	private int C;
 
-	public static double ALPHA = -30; // Used in implementation. Paper says -100d
+	public static double ALPHA = -30d; // Used in implementation. Paper says -100d
 
 	public LearnShapeletsAlgorithm(final int K, final double learningRate, final double regularization,
 			final int scaleR, final int minShapeLength, final int maxIter, final int seed) {
@@ -169,6 +169,10 @@ public class LearnShapeletsAlgorithm extends
 
 		// Initialization
 		List<INDArray> S = initializeS(dataMatrix);
+		List<INDArray> S_hist = new ArrayList<>();
+		for (int r = 0; r < this.scaleR; r++) {
+			S_hist.add(Nd4j.create(S.get(r).shape()));
+		}
 		List<INDArray> D = new ArrayList<>();
 		List<INDArray> Xi = new ArrayList<>();
 		List<INDArray> Phi = new ArrayList<>();
@@ -193,7 +197,9 @@ public class LearnShapeletsAlgorithm extends
 		// paper's version but doesn't match with the allocated matrix's shape
 		Distribution wInitDistribution = new NormalDistribution(0, 0.01);
 		INDArray W = Nd4j.rand(new long[] { this.C, this.scaleR, this.K }, wInitDistribution);
+		INDArray W_hist = Nd4j.create(W.shape());
 		INDArray W_0 = Nd4j.rand(new long[] { this.C }, wInitDistribution);
+		INDArray W_0_hist = Nd4j.create(W_0.shape());
 
 		INDArray Psi = Nd4j.create(this.scaleR, this.I, this.K);
 		INDArray M_hat = Nd4j.create(this.scaleR, this.I, this.K);
@@ -265,18 +271,22 @@ public class LearnShapeletsAlgorithm extends
 
 				// Learn shapelets and classification weights
 				for (int c = 0; c < this.C; c++) {
+					double gradW_0 = Theta.getDouble(i, c);
+
 					for (int r = 0; r < this.scaleR; r++) {
 						for (int k = 0; k < S.get(r).shape()[0]; k++) { // this differs from paper: this.K instead of
 																		// shapelet length
-							double wStep = (-1) * Theta.getDouble(i, c) * M_hat.getDouble(r, i, k)
-									- 2d * this.regularization / (this.I) * W.getDouble(c, r, k);
+							double wStep = (-1d) * Theta.getDouble(i, c) * M_hat.getDouble(r, i, k)
+									+ 2d * this.regularization / (this.I) * W.getDouble(c, r, k);
+
+							double wStepSquare = W_hist.getScalar(c, r, k).addi(wStep * wStep).getDouble(0);
 
 							// double wStep = Theta.getDouble(i, c) * M_hat.getDouble(r, i, k)
 							// + 2d * this.regularization / (this.I * this.C) * W.getDouble(c, r, k);
 
 							// W.putScalar(new int[] { c, r, k }, W.getDouble(c, r, k) - this.learningRate *
 							// wStep);
-							W.getScalar(new int[] { c, r, k }).subi(this.learningRate * wStep);
+							W.getScalar(c, r, k).subi(this.learningRate * wStep / Math.sqrt(wStepSquare));
 
 							int J_r = getNumberOfSegments(this.Q, this.minShapeLength, r);
 							for (int j = 0; j < J_r; j++) {
@@ -286,24 +296,22 @@ public class LearnShapeletsAlgorithm extends
 								Phi.get(r).putScalar(new int[] { i, k, j }, newPhiValue);
 
 								for (int l = 0; l < (r + 1) * this.minShapeLength; l++) {
-									double sStep = Theta.getDouble(i, c) * Phi.get(r).getDouble(i, k, j)
-											* (S.get(r).getDouble(k, l) - dataMatrix.getDouble(i, j + l - 1))
+									double sStep = (-1) * gradW_0 * Phi.get(r).getDouble(i, k, j)
+											* (S.get(r).getDouble(k, l) - dataMatrix.getDouble(i, j + l))
 											* W.getDouble(c, r, k);
-									// LOGGER.debug("S.get({}) k={}, l={}, shape: {}", r, k, l,
-									// Arrays.toString(S.get(r).shape()));
-									S.get(r).getScalar(new int[] { k, l }).subi(this.learningRate * sStep);
+									double sStepSquare = S_hist.get(r).getScalar(k, l).addi(sStep * sStep).getDouble(0);
+
+									S.get(r).getScalar(k, l)
+											.subi(this.learningRate * sStep / Math.sqrt(sStepSquare));
 								}
 							}
 						}
 					}
-					W_0.getScalar(c).subi(this.learningRate * Theta.getDouble(i, c));
+
+					double gradW_0Square = W_0_hist.getScalar(c).addi(gradW_0 * gradW_0).getDouble(0);
+					W_0.getScalar(c).addi(this.learningRate * gradW_0 / Math.sqrt(gradW_0Square));
 				}
 			}
-			// if (W.scan(new org.nd4j.linalg.indexing.conditions.IsNaN()).intValue() > 0
-			// || W_0.scan(new org.nd4j.linalg.indexing.conditions.IsNaN()).intValue() > 0)
-			// {
-			// LOGGER.debug("Found nan");
-			// }
 
 			if (it % 10 == 0) {
 				LOGGER.debug("Iteration {}/{}", it, this.maxIter);
