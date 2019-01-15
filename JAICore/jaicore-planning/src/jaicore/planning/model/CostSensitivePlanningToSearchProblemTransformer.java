@@ -18,37 +18,37 @@ public class CostSensitivePlanningToSearchProblemTransformer<PO extends Operatio
 
 	private final IHierarchicalPlanningGraphGeneratorDeriver<PO, PM, PA, I, N, A> graphGeneratorDeriver;
 
-	public CostSensitivePlanningToSearchProblemTransformer(IHierarchicalPlanningGraphGeneratorDeriver<PO, PM, PA, I, N, A> graphGeneratorDeriver) {
+	public CostSensitivePlanningToSearchProblemTransformer(final IHierarchicalPlanningGraphGeneratorDeriver<PO, PM, PA, I, N, A> graphGeneratorDeriver) {
 		super();
 		this.graphGeneratorDeriver = graphGeneratorDeriver;
 	}
 
 	@Override
-	public GraphSearchWithPathEvaluationsInput<N, A, V> transform(CostSensitiveHTNPlanningProblem<PO, PM, PA, I, V> problem) {
+	public GraphSearchWithPathEvaluationsInput<N, A, V> transform(final CostSensitiveHTNPlanningProblem<PO, PM, PA, I, V> problem) {
 
-		ISolutionEvaluator<N, V> solutionEvaluator = new ISolutionEvaluator<N,V>() {
+		ISolutionEvaluator<N, V> solutionEvaluator = new ISolutionEvaluator<N, V>() {
 
 			@Override
-			public V evaluateSolution(List<N> solutionPath) throws TimeoutException, InterruptedException, ObjectEvaluationFailedException  {
-				return problem.getPlanEvaluator().evaluate(graphGeneratorDeriver.getPlan(solutionPath));
+			public V evaluateSolution(final List<N> solutionPath) throws TimeoutException, InterruptedException, ObjectEvaluationFailedException {
+				return problem.getPlanEvaluator().evaluate(CostSensitivePlanningToSearchProblemTransformer.this.graphGeneratorDeriver.getPlan(solutionPath));
 			}
 
 			@Override
-			public boolean doesLastActionAffectScoreOfAnySubsequentSolution(List<N> partialSolutionPath) {
+			public boolean doesLastActionAffectScoreOfAnySubsequentSolution(final List<N> partialSolutionPath) {
 				return true;
 			}
 
 			@Override
 			public void cancel() {
 				// TODO Auto-generated method stub
-				
+
 			}
 		};
 		/* derive the concrete graph search problem input */
-		return new GraphSearchWithPathEvaluationsInput<>(graphGeneratorDeriver.transform(problem.getCorePlanningProblem()), solutionEvaluator);
+		return new GraphSearchWithPathEvaluationsInput<>(this.graphGeneratorDeriver.transform(problem.getCorePlanningProblem()), solutionEvaluator);
 	}
 
 	public IHierarchicalPlanningGraphGeneratorDeriver<PO, PM, PA, I, N, A> getGraphGeneratorDeriver() {
-		return graphGeneratorDeriver;
+		return this.graphGeneratorDeriver;
 	}
 }

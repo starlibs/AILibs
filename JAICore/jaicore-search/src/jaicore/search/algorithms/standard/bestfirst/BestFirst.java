@@ -35,8 +35,6 @@ import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
-import jaicore.basic.algorithm.exceptions.DelayedCancellationCheckException;
-import jaicore.basic.algorithm.exceptions.DelayedTimeoutCheckException;
 import jaicore.concurrent.InterruptionTimerTask;
 import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeParentSwitchEvent;
@@ -122,12 +120,12 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 	private final Condition numberOfActiveJobsHasChanged = this.activeJobsCounterLock.newCondition(); // condition that is signaled whenever a node is added to the open queue
 
 	public BestFirst(final I problem) {
-		this(ConfigFactory.create(IBestFirstConfig.class),problem);
+		this(ConfigFactory.create(IBestFirstConfig.class), problem);
 	}
 
 	@SuppressWarnings("unchecked")
-	public BestFirst(final IBestFirstConfig config,final I problem) {
-		super(config,problem);
+	public BestFirst(final IBestFirstConfig config, final I problem) {
+		super(config, problem);
 		this.graphGenerator = problem.getGraphGenerator();
 		this.rootGenerator = this.graphGenerator.getRootGenerator();
 		this.successorGenerator = this.graphGenerator.getSuccessorGenerator();
@@ -418,7 +416,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		if (BestFirst.this.timeoutForComputationOfF > 0) {
 			interruptionTask = new InterruptionTimerTask("Timeout for Node-Labeling in " + BestFirst.this, Thread.currentThread(), () -> timedout.set(true));
 			this.logger.debug("Scheduling timeout for f-value computation. Allowed time: {}ms", this.timeoutForComputationOfF);
-			getTimerAndCreateIfNotExistent().schedule(interruptionTask, this.timeoutForComputationOfF);
+			this.getTimerAndCreateIfNotExistent().schedule(interruptionTask, this.timeoutForComputationOfF);
 		}
 
 		/* compute f */
@@ -483,10 +481,10 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 
 	/**
 	 * This method setups the graph by inserting the root nodes.
-	 * @throws InterruptedException 
-	 * @throws AlgorithmExecutionCanceledException 
-	 * @throws TimeoutException 
-	 * @throws NodeEvaluationException 
+	 * @throws InterruptedException
+	 * @throws AlgorithmExecutionCanceledException
+	 * @throws TimeoutException
+	 * @throws NodeEvaluationException
 	 */
 	protected void initGraph() throws NodeEvaluationException, TimeoutException, AlgorithmExecutionCanceledException, InterruptedException {
 		if (!this.initialized) {
@@ -860,7 +858,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 			this.logger.info("Initializing BestFirst search {} with {} CPUs and a timeout of {}ms", this, this.getConfig().cpus(), this.getConfig().timeout());
 			this.parallelizeNodeExpansion(this.getConfig().cpus());
 			this.initGraph();
-			return activate();
+			return this.activate();
 		}
 		case active: {
 			synchronized (this.pendingSolutionFoundEvents) {
@@ -895,7 +893,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 						event = this.pendingSolutionFoundEvents.poll();
 					} else {
 						this.logger.info("No event was returned and there are no pending solutions. Number of active jobs: {}. Setting state to inactive.", this.activeJobs.get());
-						return terminate();
+						return this.terminate();
 					}
 				}
 			}
@@ -908,6 +906,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		default:
 			throw new IllegalStateException("BestFirst search is in state " + this.getState() + " in which next must not be called!");
 		}
+
 	}
 
 	public void selectNodeForNextExpansion(final N node) throws InterruptedException {

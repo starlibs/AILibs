@@ -65,16 +65,9 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 	private String loggerName;
 
 	/* problem and algorithm setup */
-	private final RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem;
 	private final IHASCOPlanningGraphGeneratorDeriver<N, A> planningGraphGeneratorDeriver;
 	private final AlgorithmProblemTransformer<GraphSearchWithPathEvaluationsInput<N, A, V>, ISearch> searchProblemTransformer;
 	private final IOptimalPathInORGraphSearchFactory<ISearch, N, A, V, ?, ?> searchFactory;
-
-	/* Parameters for the search algorithm configuration */
-	/** Factory for producing planners solving the HTN planning problem. */
-	// private final IHASCOSearchSpaceUtilFactory<N, A, V> searchSpaceUtilFactory;
-
-	/** Object evaluator for assessing the quality of plans. */
 
 	/* working constants of the algorithms - these are effectively final but are not set at object creation time */
 	private CostSensitiveHTNPlanningProblem<CEOCOperation, OCIPMethod, CEOCAction, CEOCIPSTNPlanningProblem<CEOCOperation, OCIPMethod, CEOCAction>, V> planningProblem;
@@ -88,17 +81,14 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 
 	public HASCO(final RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem, final IHASCOPlanningGraphGeneratorDeriver<N, A> planningGraphGeneratorDeriver,
 			final IOptimalPathInORGraphSearchFactory<ISearch, N, A, V, ?, ?> searchFactory, final AlgorithmProblemTransformer<GraphSearchWithPathEvaluationsInput<N, A, V>, ISearch> searchProblemTransformer) {
-		super(ConfigFactory.create(HASCOConfig.class));
+		super(ConfigFactory.create(HASCOConfig.class), configurationProblem);
 		if (configurationProblem == null) {
 			throw new IllegalArgumentException("Cannot work with configuration problem NULL");
 		}
-		this.configurationProblem = configurationProblem;
 		this.planningGraphGeneratorDeriver = planningGraphGeneratorDeriver;
 		this.searchFactory = searchFactory;
 		this.searchProblemTransformer = searchProblemTransformer;
 		this.timeGrabbingEvaluationWrapper = new TimeRecordingEvaluationWrapper<>(configurationProblem.getCompositionEvaluator());
-		this.setInput(new RefinementConfiguredSoftwareConfigurationProblem<>(new SoftwareConfigurationProblem<V>(configurationProblem.getComponents(), configurationProblem.getRequiredInterface(), this.timeGrabbingEvaluationWrapper),
-				configurationProblem.getParamRefinementConfig()));
 	}
 
 	@Override
@@ -119,7 +109,9 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 
 			/* derive search problem */
 			this.logger.debug("Deriving search problem");
-			this.planningProblem = new HASCOReduction<V>().transform(this.getInput());
+			RefinementConfiguredSoftwareConfigurationProblem<V> refConfigSoftwareConfigurationProblem = new RefinementConfiguredSoftwareConfigurationProblem<>(
+					new SoftwareConfigurationProblem<V>(this.getInput().getComponents(), this.getInput().getRequiredInterface(), this.timeGrabbingEvaluationWrapper), this.getInput().getParamRefinementConfig());
+			this.planningProblem = new HASCOReduction<V>().transform(refConfigSoftwareConfigurationProblem);
 			if (this.logger.isDebugEnabled()) {
 				String operations = this.planningProblem.getCorePlanningProblem().getDomain().getOperations().stream()
 						.map(o -> "\n\t\t" + o.getName() + "(" + o.getParams() + ")\n\t\t\tPre: " + o.getPrecondition() + "\n\t\t\tAdd List: " + o.getAddLists() + "\n\t\t\tDelete List: " + o.getDeleteLists()).collect(Collectors.joining());
@@ -186,7 +178,7 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 			/* otherwise iterate over the search */
 			AlgorithmEvent searchEvent;
 			while (!((searchEvent = this.search.nextWithException()) instanceof AlgorithmFinishedEvent)) {
-				
+
 				/* otherwise, if a solution has been found, we announce this finding to our listeners and memorize if it is a new best candidate */
 				if (searchEvent instanceof EvaluatedSearchSolutionCandidateFoundEvent) {
 					this.logger.info("Received new solution from search, communicating this solution to the HASCO listeners.");
@@ -197,7 +189,14 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 					ComponentInstance objectInstance = Util.getSolutionCompositionForPlan(this.getInput().getComponents(), this.planningProblem.getCorePlanningProblem().getInit(), plan, true);
 					V score;
 					try {
-						score = this.timeGrabbingEvaluationWrapper.hasEvaluationForComponentInstance(objectInstance) ? solutionEvent.getSolutionCandidate().getScore() : this.timeGrabbingEvaluationWrapper.evaluate(objectInstance);
+						boolean scoreInCache = this.timeGrabbingEvaluationWrapper.hasEvaluationForComponentInstance(objectInstance);
+						assert (scoreInCache || solutionEvent.getSolutionCandidate().getScore() == null) : "Solution candidate has a score but is not in cache of the timeGrabbingEvaluationWrapper";
+
+						if (scoreInCache) {
+							score = solutionEvent.getSolutionCandidate().getScore();
+						} else {
+							score = this.timeGrabbingEvaluationWrapper.evaluate(objectInstance);
+						}
 					} catch (ObjectEvaluationFailedException e) {
 						throw new AlgorithmException(e, "Could not evaluate component instance.");
 					}
@@ -224,11 +223,6 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 
 	public GraphGenerator<N, A> getGraphGenerator() {
 		return this.searchProblem.getGraphGenerator();
-	}
-
-	@Override
-	public RefinementConfiguredSoftwareConfigurationProblem<V> getInput() {
-		return this.configurationProblem;
 	}
 
 	public CostSensitiveHTNPlanningProblem<CEOCOperation, OCIPMethod, CEOCAction, CEOCIPSTNPlanningProblem<CEOCOperation, OCIPMethod, CEOCAction>, V> getPlanningProblem() {
