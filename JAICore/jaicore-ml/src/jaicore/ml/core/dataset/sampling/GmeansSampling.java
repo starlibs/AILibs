@@ -48,6 +48,15 @@ public class GmeansSampling<I extends IInstance> extends ASamplingAlgorithm<I> {
 		this.seed = seed;
 	}
 
+	/**
+	 * Implementation of a sampling method using gmeans-clustering.
+	 */
+	public GmeansSampling(long seed, DistanceMeasure dist) {
+		this.seed = seed;
+		this.distanceMeassure = dist;
+	}
+	
+	
 	@Override
 	public AlgorithmEvent nextWithException() throws AlgorithmException {
 		switch (this.getState()) {

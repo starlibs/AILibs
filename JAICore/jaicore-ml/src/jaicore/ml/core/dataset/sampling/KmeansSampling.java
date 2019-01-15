@@ -32,20 +32,29 @@ public class KmeansSampling<I extends IInstance> extends ASamplingAlgorithm<I> {
 	private long seed;
 	private int k;
 	
+	
 	/**
 	 * Implementation of a sampling method using kmeans-clustering.
+	 * 
+	 * @param seed RAndom Seed
+	 * @param k number of clusters
 	 */
-	public KmeansSampling(long seed) {
+	public KmeansSampling(long seed, int k) {
 		this.seed = seed;
+		this.k = k;
 	}
 
 	/**
-	 * Sets the number of clusters to use.
+	 * Implementation of a sampling method using kmeans-clustering.
 	 * 
+	 * @param seed Random Seed
 	 * @param k number of clusters
+	 * @param dis {@link DistanceMeasure} to be used
 	 */
-	public void setK(int k) {
+	public KmeansSampling(long seed, int k, DistanceMeasure dis) {
+		this.seed = seed;
 		this.k = k;
+		this.distanceMeassure = dis;
 	}
 	
 	@Override
