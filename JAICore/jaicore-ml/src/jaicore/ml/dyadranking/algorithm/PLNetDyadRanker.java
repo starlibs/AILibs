@@ -8,9 +8,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.aeonbits.owner.ConfigFactory;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
@@ -24,12 +21,11 @@ import org.deeplearning4j.nn.workspace.LayerWorkspaceMgr;
 import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.cpu.nativecpu.NDArray;
-import org.nd4j.linalg.dataset.api.iterator.StandardScaler;
-import org.nd4j.linalg.dataset.api.preprocessor.NormalizerStandardize;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.learning.config.Sgd;
 import org.nd4j.linalg.primitives.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jaicore.basic.FileUtil;
 import jaicore.ml.core.dataset.IDataset;
@@ -40,7 +36,6 @@ import jaicore.ml.core.exception.TrainingException;
 import jaicore.ml.core.predictivemodel.IOnlineLearner;
 import jaicore.ml.core.predictivemodel.IPredictiveModelConfiguration;
 import jaicore.ml.dyadranking.Dyad;
-import jaicore.ml.dyadranking.algorithm.featuretransform.FeatureTransformPLDyadRanker;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import jaicore.ml.dyadranking.dataset.DyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
