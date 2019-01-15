@@ -1,23 +1,28 @@
 package jaicore.ml.tsc.distances;
 
 import org.nd4j.linalg.api.ndarray.INDArray;
-
 import static jaicore.ml.tsc.util.TimeSeriesUtil.*;
-
-import java.util.function.BiFunction;
 
 /**
  * Class for the Time Warp Distance Calculation.
  */
 public class DynamicTimeWarping implements ITimeSeriesDistance {
 
-    /** Distance calculation for scalar points. */
+    /** Distance measure for scalar points. */
     IScalarDistance d;
 
+    /**
+     * Creates an instance with absolute distance as point distance.
+     */
     public DynamicTimeWarping() {
         this((x, y) -> Math.abs(x - y));
     }
 
+    /**
+     * Creates an instance with a given scalar distance measure.
+     * 
+     * @param d Scalar distance measure.
+     */
     public DynamicTimeWarping(IScalarDistance d) {
         this.d = d;
     }
