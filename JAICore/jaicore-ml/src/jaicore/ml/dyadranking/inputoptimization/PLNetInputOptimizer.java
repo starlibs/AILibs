@@ -15,14 +15,7 @@ import jaicore.ml.dyadranking.general.DyadRankingInstanceSupplier;
 
 public class PLNetInputOptimizer {
 	
-	private PLNetDyadRanker plNet;
-	
-	public PLNetInputOptimizer(PLNetDyadRanker plNet) {
-		super();
-		this.plNet = plNet;
-	}
-	
-	public INDArray optimizeInput(INDArray input, InputOptimizerLoss loss, double learningRate, int numSteps, Pair<Integer, Integer> indexRange) {
+	public static INDArray optimizeInput(PLNetDyadRanker plNet, INDArray input, InputOptimizerLoss loss, double learningRate, int numSteps, Pair<Integer, Integer> indexRange) {
 		INDArray mask;
 		if (indexRange != null) {
 			mask = Nd4j.zeros(input.length());
@@ -31,17 +24,17 @@ public class PLNetInputOptimizer {
 			mask = Nd4j.ones(input.length());
 		}
 		
-		return optimizeInput(input, loss, learningRate, numSteps, mask);
+		return optimizeInput(plNet, input, loss, learningRate, numSteps, mask);
 	}
 	
-	public INDArray optimizeInput(INDArray input, InputOptimizerLoss loss, double learningRate, int numSteps, INDArray inputMask) {
+	public static INDArray optimizeInput(PLNetDyadRanker plNet, INDArray input, InputOptimizerLoss loss, double learningRate, int numSteps, INDArray inputMask) {
 		INDArray inp = input.dup();
 		System.out.print(inp);
 		Dyad testinpDyad = ndArrayToDyad(inp, 2, 2);
 		System.out.print("PLNet output: " + plNet.getPlNet().output(inp) + " ");
 		System.out.println(" input score: " + DyadRankingInstanceSupplier.inputOptimizerTestScore(testinpDyad));
 		for(int i = 0; i < numSteps; i++) {
-			INDArray grad = computeInputDerivative(inp, loss);
+			INDArray grad = computeInputDerivative(plNet, inp, loss);
 			grad.muli(inputMask);
 			System.out.println("Gradient: " + grad);
 			grad.muli(learningRate);
@@ -55,7 +48,7 @@ public class PLNetInputOptimizer {
 		return inp;
 	}
 
-	private INDArray computeInputDerivative(INDArray input, InputOptimizerLoss loss) {
+	private static INDArray computeInputDerivative(PLNetDyadRanker plNet, INDArray input, InputOptimizerLoss loss) {
 		MultiLayerNetwork net = plNet.getPlNet();
 		
 		INDArray output = net.output(input);
