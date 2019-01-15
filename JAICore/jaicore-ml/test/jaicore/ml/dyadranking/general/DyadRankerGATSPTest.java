@@ -18,21 +18,16 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import com.google.common.collect.Lists;
-
 import de.upb.isys.linearalgebra.DenseDoubleVector;
 import de.upb.isys.linearalgebra.Vector;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.core.exception.TrainingException;
-import jaicore.ml.dyadranking.Dyad;
 import jaicore.ml.dyadranking.algorithm.ADyadRanker;
 import jaicore.ml.dyadranking.algorithm.APLDyadRanker;
-import jaicore.ml.dyadranking.algorithm.IPLNetDyadRankerConfiguration;
 import jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
 import jaicore.ml.dyadranking.algorithm.featuretransform.FeatureTransformPLDyadRanker;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
-import jaicore.ml.dyadranking.dataset.DyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
 import jaicore.ml.dyadranking.loss.DyadRankingLossUtil;
@@ -82,8 +77,8 @@ public class DyadRankerGATSPTest {
 	@Test
 	public void test() {
 
-		Collections.shuffle(dataset, new Random(seed));
-
+			Collections.shuffle(dataset, new Random(seed));
+		
 		// split data
 		DyadRankingDataset trainData = new DyadRankingDataset(dataset.subList(0, N));
 		DyadRankingDataset testData = new DyadRankingDataset(dataset.subList(N, dataset.size()));
