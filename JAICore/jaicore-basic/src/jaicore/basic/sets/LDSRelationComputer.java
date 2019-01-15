@@ -1,7 +1,6 @@
 package jaicore.basic.sets;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.PriorityQueue;
@@ -101,7 +100,6 @@ public class LDSRelationComputer<T> extends AAlgorithm<RelationComputationProble
 		this(new RelationComputationProblem<>(sets));
 	}
 
-	@SuppressWarnings("unchecked")
 	public LDSRelationComputer(RelationComputationProblem<T> problem) {
 		super(problem);
 		sets = new ArrayList<>();
