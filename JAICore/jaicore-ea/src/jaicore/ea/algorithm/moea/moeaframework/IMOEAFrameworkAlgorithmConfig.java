@@ -26,11 +26,11 @@ public interface IMOEAFrameworkAlgorithmConfig extends IEvolutionaryAlgorithmCon
 
 	@Key(K_PERMUTATION_RATE)
 	@DefaultValue("0.1")
-	public double permutationRate();
+	public double mutationRate();
 
 	@Key(K_PERMUTATION_DIST_INDEX)
 	@DefaultValue("10")
-	public double permutationDistIndex();
+	public double mutationDistIndex();
 
 	@Key(K_WITH_REPLACEMENT)
 	@DefaultValue("false")

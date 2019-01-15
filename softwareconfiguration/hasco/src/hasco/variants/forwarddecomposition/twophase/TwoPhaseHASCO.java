@@ -70,13 +70,13 @@ public class TwoPhaseHASCO extends SoftwareConfigurationAlgorithm<TwoPhaseSoftwa
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws InterruptedException, TimeoutException, AlgorithmException  {
+	public AlgorithmEvent nextWithException() throws InterruptedException, TimeoutException, AlgorithmException {
 		switch (this.getState()) {
 		case created: {
 			this.timeOfStart = System.currentTimeMillis();
 			this.logger.info(
 					"Starting 2-Phase HASCO with the following setup:\n\tCPUs:{},\n\tTimeout: {}s\n\tTimeout per node evaluation: {}ms\n\tTimeout per candidate: {}ms\n\tNumber of Random Completions: {}\n\tExpected blow-ups are {} (selection) and {} (post-processing). Preferred node evaluator is {}",
-					this.getNumCPUs(), this.getTimeout(), this.getConfig().timeoutForNodeEvaluation(), this.getConfig().randomCompletions(), this.getConfig().timeoutForCandidateEvaluation(), this.getConfig().expectedBlowupInSelection(),
+					this.getNumCPUs(), this.getTimeout(), this.getConfig().timeoutForNodeEvaluation(), this.getConfig().timeoutForCandidateEvaluation(), this.getConfig().randomCompletions(), this.getConfig().expectedBlowupInSelection(),
 					this.getConfig().expectedBlowupInPostprocessing(), this.preferredNodeEvaluator);
 
 			/* create HASCO object */
@@ -93,7 +93,7 @@ public class TwoPhaseHASCO extends SoftwareConfigurationAlgorithm<TwoPhaseSoftwa
 
 			/* initialize HASCO and set state of this algorithm to initialized */
 			this.hasco.init();
-			return activate();
+			return this.activate();
 		}
 
 		/* active is only one step in this model; this could be refined */
@@ -107,7 +107,7 @@ public class TwoPhaseHASCO extends SoftwareConfigurationAlgorithm<TwoPhaseSoftwa
 						while (!Thread.currentThread().isInterrupted()) {
 							Thread.sleep(1000);
 							int timeElapsed = (int) (System.currentTimeMillis() - TwoPhaseHASCO.this.timeOfStart);
-							int timeRemaining = (int) getTimeout().milliseconds() - timeElapsed;
+							int timeRemaining = (int) TwoPhaseHASCO.this.getTimeout().milliseconds() - timeElapsed;
 							if (timeRemaining < 2000 || TwoPhaseHASCO.this.shouldSearchTerminate(timeRemaining)) {
 								TwoPhaseHASCO.this.logger.info("Canceling HASCO (first phase). {}ms remaining.", timeRemaining);
 								TwoPhaseHASCO.this.hasco.cancel();
@@ -138,7 +138,7 @@ public class TwoPhaseHASCO extends SoftwareConfigurationAlgorithm<TwoPhaseSoftwa
 			/* phase 2: select model */
 			this.logger.info("Entering phase 2");
 			this.selectedHASCOSolution = this.selectModel();
-			updateBestSeenSolution(selectedHASCOSolution);
+			this.updateBestSeenSolution(this.selectedHASCOSolution);
 			return this.terminate();
 		}
 		default:
@@ -337,7 +337,7 @@ public class TwoPhaseHASCO extends SoftwareConfigurationAlgorithm<TwoPhaseSoftwa
 					int taskId = ts.interruptMeAfterMS(timeoutForEvaluation);
 
 					/* If we have a global timeout, check whether considering this model is feasible. */
-					if (getTimeout().seconds() > 0) {
+					if (TwoPhaseHASCO.this.getTimeout().seconds() > 0) {
 						int remainingTime = (int) (timestampOfDeadline - System.currentTimeMillis());
 						if (estimatedTotalEffortInCaseOfSelection >= remainingTime) {
 							TwoPhaseHASCO.this.logger.info(

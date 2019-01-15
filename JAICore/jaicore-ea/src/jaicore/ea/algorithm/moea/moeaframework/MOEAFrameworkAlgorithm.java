@@ -1,10 +1,24 @@
 package jaicore.ea.algorithm.moea.moeaframework;
 
-import java.util.Properties;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.TimeoutException;
 
-import org.moeaframework.algorithm.StandardAlgorithms;
 import org.moeaframework.core.Algorithm;
+import org.moeaframework.core.Initialization;
+import org.moeaframework.core.NondominatedSortingPopulation;
+import org.moeaframework.core.Population;
+import org.moeaframework.core.Solution;
+import org.moeaframework.core.Variation;
+import org.moeaframework.core.comparator.ChainedComparator;
+import org.moeaframework.core.comparator.CrowdingComparator;
+import org.moeaframework.core.comparator.ParetoDominanceComparator;
+import org.moeaframework.core.operator.RandomInitialization;
+import org.moeaframework.core.operator.TournamentSelection;
+import org.moeaframework.core.spi.OperatorFactory;
+import org.moeaframework.util.TypedProperties;
 
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.AlgorithmState;
@@ -34,15 +48,35 @@ public class MOEAFrameworkAlgorithm extends AEvolutionaryAlgorithm {
 			throw new TimeoutException(e.getMessage());
 		}
 
+		if (this.getClass().getName().equals("ndea.core.simplend.nd.NDOptimizationEA")) {
+			System.out.println(this.getClass().getName() + " step1: " + this.getState());
+		}
+
 		switch (this.getState()) {
 		case created:
-			// initialize population
-			StandardAlgorithms sa = new StandardAlgorithms();
-			Properties properties = new Properties();
-			this.algorithm = sa.getAlgorithm(this.getConfig().algorithmName().toString(), properties, this.getInput().getProblem());
-			this.algorithm.step();
-			return super.activate();
+			try {
+				this.numberOfGenerationsEvolved = 0;
+
+				// initialize population
+				TypedProperties properties = new TypedProperties();
+				properties.setInt("populationSize", this.getConfig().populationSize());
+				properties.setDouble("sbx.rate", this.getConfig().crossoverRate());
+				properties.setDouble("pm.rate", this.getConfig().mutationRate());
+
+				Initialization initialization = new RandomInitialization(this.getInput().getProblem(), this.getConfig().populationSize());
+				NondominatedSortingPopulation population = new NondominatedSortingPopulation();
+				TournamentSelection selection = new TournamentSelection(2, new ChainedComparator(new ParetoDominanceComparator(), new CrowdingComparator()));
+				Variation variation = OperatorFactory.getInstance().getVariation(null, properties, this.getInput().getProblem());
+				this.algorithm = new NSGAII(this.getInput().getProblem(), population, null, selection, variation, initialization);
+				System.out.println(this.getClass().getName() + " step2");
+				this.algorithm.step();
+				return super.activate();
+			} catch (Exception e) {
+				e.printStackTrace();
+				System.exit(0);
+			}
 		case active:
+			System.out.println(this.getClass().getName() + " step3");
 			this.algorithm.step();
 			return new MOEAFrameworkAlgorithmResultEvent(this.getCurrentResult());
 		default:
@@ -52,9 +86,20 @@ public class MOEAFrameworkAlgorithm extends AEvolutionaryAlgorithm {
 
 	}
 
+	public void reset() {
+		this.setState(AlgorithmState.created);
+	}
+
 	public MOEAFrameworkAlgorithmResult getCurrentResult() {
 		this.algorithm.getResult();
-		return new MOEAFrameworkAlgorithmResult(this.algorithm.getResult());
+		Population population = null;
+		try {
+			population = this.getPopulation();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return new MOEAFrameworkAlgorithmResult(this.algorithm.getResult(), population);
 	}
 
 	public int getNumberOfGenerationsEvolved() {
@@ -89,4 +134,34 @@ public class MOEAFrameworkAlgorithm extends AEvolutionaryAlgorithm {
 		return (IMOEAFrameworkAlgorithmInput) super.getInput();
 	}
 
+	protected Algorithm getAlgorithm() {
+		return this.algorithm;
+	}
+
+	public Population getPopulation() throws IllegalAccessException, InvocationTargetException {
+		if (this.algorithm instanceof NSGAII) {
+			return ((NSGAII) this.algorithm).getPopulation();
+		}
+
+		Method getPopulationMethod = null;
+		try {
+			getPopulationMethod = this.getAlgorithm().getClass().getMethod("getPopulation", (Class<?>[]) null);
+		} catch (NoSuchMethodException | SecurityException e) {
+
+		}
+
+		if (getPopulationMethod == null) {
+			throw new UnsupportedOperationException("The method getPopulation is not available for " + this.getAlgorithm().getClass().getName());
+		} else {
+			return (Population) getPopulationMethod.invoke(this.getAlgorithm(), (Object[]) null);
+		}
+	}
+
+	public List<Solution> getPopulationAsList() throws IllegalAccessException, InvocationTargetException {
+		List<Solution> population = new LinkedList<>();
+		for (Solution solution : this.getPopulation()) {
+			population.add(solution);
+		}
+		return population;
+	}
 }
