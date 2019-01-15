@@ -13,8 +13,8 @@ import org.nd4j.linalg.factory.Nd4j;
  */
 public class StretchingComplexityTest {
 
-    INDArray timeSeries1; // { 1, 1, 1, 1, 1, 1 }
-    INDArray timeSeries2; // { 1, 1, 1, 1, 1, 1 }
+    INDArray timeSeries1;
+    INDArray timeSeries2;
 
     INDArray noTimeSeries;
 
