@@ -194,8 +194,9 @@ public class DyadDatasetGenerator {
 		password = args[1];
 		db_host = args[2];
 		db = args[3];
-		DyadRankingDataset trainDataset = getSparseDyadDataset(42, 300, 10);
-		DyadRankingDataset testDataset = getSparseDyadDataset(1337, 300, 10);
+		DyadRankingDataset dataset = getSparseDyadDataset(1337, 400, 10);
+		DyadRankingDataset trainDataset = new DyadRankingDataset(dataset.subList(0, 300));
+		DyadRankingDataset testDataset = new DyadRankingDataset(dataset.subList(300, 400));
 		ADyadRanker ranker = new PLNetDyadRanker();
 		ranker.train(trainDataset);
 		try {
