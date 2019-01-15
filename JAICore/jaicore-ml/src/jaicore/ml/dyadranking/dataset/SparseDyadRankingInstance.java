@@ -32,13 +32,12 @@ public class SparseDyadRankingInstance implements IDyadRankingInstance {
 	 * Construct a new sparse dyad ranking instance containing the given instance
 	 * vector and ordering of alternatives.
 	 * 
-	 * @param instance
-	 *            the instance for all of the alternatives
-	 * @param alternatives
-	 *            the ordering of alternatives that, when combined with the
-	 *            instances is an ordering of dyads
+	 * @param instance     the instance for all of the alternatives
+	 * @param alternatives the ordering of alternatives that, when combined with the
+	 *                     instances is an ordering of dyads
 	 */
-	public SparseDyadRankingInstance(Vector instance, List<Vector> alternatives) {
+	public SparseDyadRankingInstance(Vector instance,
+			List<Vector> alternatives) {
 		this.instance = instance;
 		this.alternatives = Collections.unmodifiableList(alternatives);
 	}
