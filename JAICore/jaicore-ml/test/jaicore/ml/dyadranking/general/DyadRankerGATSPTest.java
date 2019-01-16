@@ -275,7 +275,10 @@ public class DyadRankerGATSPTest {
 
 	@Parameters
 	public static List<APLDyadRanker[]> supplyDyadRankers() {
+		PLNetDyadRanker earlyStoppingRetrain = new PLNetDyadRanker();
+		earlyStoppingRetrain.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_RETRAIN, "true");
 		return Arrays.asList(new PLNetDyadRanker[] { new PLNetDyadRanker() },
+				new PLNetDyadRanker[] { earlyStoppingRetrain },
 				new FeatureTransformPLDyadRanker[] { new FeatureTransformPLDyadRanker() });
 	}
 }

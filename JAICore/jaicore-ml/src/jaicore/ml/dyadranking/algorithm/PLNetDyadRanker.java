@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 import org.aeonbits.owner.ConfigFactory;
@@ -84,20 +85,20 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 	public PLNetDyadRanker(IPLNetDyadRankerConfiguration config) {
 		this.configuration = config;
 	}
-
-	@Override
-	public void train(IDataset dataset) throws TrainingException {
+	
+	public void train(IDataset dataset,int maxEpochs, double earlyStoppingTrainRatio, boolean shuffleData) throws TrainingException {
 		if (!(dataset instanceof DyadRankingDataset)) {
 			throw new IllegalArgumentException(
 					"Can only train the Plackett-Luce net dyad ranker with a dyad ranking dataset!");
 		}
 		DyadRankingDataset drDataset = (DyadRankingDataset) dataset;
-
-		Collections.shuffle(drDataset);
+		if (shuffleData) {
+			Collections.shuffle(drDataset, new Random(configuration.plNetSeed()));
+		}
 		List<IInstance> drTrain = (List<IInstance>) drDataset.subList(0,
-				(int) (configuration.plNetEarlyStoppingTrainRatio() * drDataset.size()));
+				(int) (earlyStoppingTrainRatio * drDataset.size()));
 		List<IInstance> drTest = (List<IInstance>) drDataset
-				.subList((int) (configuration.plNetEarlyStoppingTrainRatio() * drDataset.size()), drDataset.size());
+				.subList((int) (earlyStoppingTrainRatio * drDataset.size()), drDataset.size());
 
 		if (this.plNet == null) {
 			int dyadSize = ((IDyadRankingInstance) drDataset.get(0)).getDyadAtPosition(0).getInstance().length()
@@ -111,9 +112,8 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 		iteration = 0;
 		int patience = 0;
 		int earlyStoppingCounter = 0;
-		int maxEpochs = configuration.plNetMaxEpochs();
 
-		while (patience < configuration.plNetEarlyStoppingPatience() && (epoch < maxEpochs || maxEpochs == 0)) {
+		while ((patience < configuration.plNetEarlyStoppingPatience() || configuration.plNetEarlyStoppingPatience() <= 0) && (epoch < maxEpochs || maxEpochs == 0)) {
 			// Iterate through training data
 			for (IInstance dyadRankingInstance : drTrain) {
 				this.update(dyadRankingInstance);
@@ -122,7 +122,7 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 			earlyStoppingCounter++;
 			// Compute validation error
 			if (earlyStoppingCounter == configuration.plNetEarlyStoppingInterval()
-					&& configuration.plNetEarlyStoppingTrainRatio() < 1.0) {
+					&& earlyStoppingTrainRatio < 1.0) {
 				double avgScore = computeAvgError(drTest);
 				if (avgScore < currentBestScore) {
 					currentBestScore = avgScore;
@@ -138,6 +138,16 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 			epoch++;
 		}
 		plNet = currentBestModel;
+	}
+	
+	@Override
+	public void train(IDataset dataset) throws TrainingException {
+		train(dataset, configuration.plNetMaxEpochs(), configuration.plNetEarlyStoppingTrainRatio(), true);
+		if (configuration.plNetEarlyStoppingRetrain()) {
+			int maxEpochs = epoch;
+			this.plNet = null;
+			train(dataset, maxEpochs, 1.0, false);
+		}
 	}
 
 	/**
