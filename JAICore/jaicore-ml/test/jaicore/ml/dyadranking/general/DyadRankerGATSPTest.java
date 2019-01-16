@@ -277,8 +277,11 @@ public class DyadRankerGATSPTest {
 	public static List<APLDyadRanker[]> supplyDyadRankers() {
 		PLNetDyadRanker earlyStoppingRetrain = new PLNetDyadRanker();
 		earlyStoppingRetrain.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_RETRAIN, "true");
+		PLNetDyadRanker miniBatchNet = new PLNetDyadRanker();
+		miniBatchNet.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_MINI_BATCH_SIZE, "8");
 		return Arrays.asList(new PLNetDyadRanker[] { new PLNetDyadRanker() },
 				new PLNetDyadRanker[] { earlyStoppingRetrain },
+				new PLNetDyadRanker[] { miniBatchNet },
 				new FeatureTransformPLDyadRanker[] { new FeatureTransformPLDyadRanker() });
 	}
 }

@@ -86,15 +86,15 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 		this.configuration = config;
 	}
 	
-	public void train(IDataset dataset,int maxEpochs, double earlyStoppingTrainRatio, boolean shuffleData) throws TrainingException {
+	public void train(IDataset dataset, int maxEpochs, double earlyStoppingTrainRatio, boolean shuffleData) throws TrainingException {
 		if (!(dataset instanceof DyadRankingDataset)) {
 			throw new IllegalArgumentException(
 					"Can only train the Plackett-Luce net dyad ranker with a dyad ranking dataset!");
 		}
 		DyadRankingDataset drDataset = (DyadRankingDataset) dataset;
-		if (shuffleData) {
+/*		if (shuffleData) {
 			Collections.shuffle(drDataset, new Random(configuration.plNetSeed()));
-		}
+		}*/
 		List<IInstance> drTrain = (List<IInstance>) drDataset.subList(0,
 				(int) (earlyStoppingTrainRatio * drDataset.size()));
 		List<IInstance> drTest = (List<IInstance>) drDataset
@@ -104,6 +104,7 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 			int dyadSize = ((IDyadRankingInstance) drDataset.get(0)).getDyadAtPosition(0).getInstance().length()
 					+ ((IDyadRankingInstance) drDataset.get(0)).getDyadAtPosition(0).getAlternative().length();
 			this.plNet = createNetwork(dyadSize);
+			this.plNet.init();
 		}
 
 		currentBestScore = Double.POSITIVE_INFINITY;
@@ -115,8 +116,19 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 
 		while ((patience < configuration.plNetEarlyStoppingPatience() || configuration.plNetEarlyStoppingPatience() <= 0) && (epoch < maxEpochs || maxEpochs == 0)) {
 			// Iterate through training data
+			int miniBatchSize = configuration.plNetMiniBatchSize();
+			List<IInstance> miniBatch = new ArrayList<>(miniBatchSize);
 			for (IInstance dyadRankingInstance : drTrain) {
-				this.update(dyadRankingInstance);
+				miniBatch.add(dyadRankingInstance);
+				if (miniBatch.size() == miniBatchSize) {
+					this.updateWithMinibatch(miniBatch);
+					miniBatch.clear();
+				}
+				//this.update(dyadRankingInstance);
+			}
+			if (!miniBatch.isEmpty()) {
+				this.updateWithMinibatch(miniBatch);
+				miniBatch.clear();
 			}
 			log.debug("plNet params: {}", plNet.params().toString());
 			earlyStoppingCounter++;
@@ -149,19 +161,16 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 			train(dataset, maxEpochs, 1.0, false);
 		}
 	}
-
+	
 	/**
-	 * Updates this {@link PLNetDyadRanker} based on the given {@link IInstance},
-	 * which needs to be an {@link IDyadRankingInstance}. The update procedure is
-	 * based on algorithm 2 in [1].
+	 * Computes the gradient of the plNets' error function for a given instance.
+	 * The returned gradient is already scaled by the updater.
+	 * The update procedure is  based on algorithm 2 in [1].
 	 * 
-	 * 
-	 * @param instances The {@link IInstance} the update should be based on. Needs
-	 *                  to be a {@link IDyadRankingInstance}.
-	 * @throws TrainingException If something fails during the update process.
+	 * @param instance	The instance to compute the scaled gradient for.
+	 * @return			The gradient for the given instance, multiplied by the updater's learning rate.
 	 */
-	@Override
-	public void update(IInstance instance) throws TrainingException {
+	private INDArray computeScaledGradient(IInstance instance) {
 		if (!(instance instanceof IDyadRankingInstance)) {
 			throw new IllegalArgumentException(
 					"Can only update the Plackett-Luce net dyad ranker with a dyad ranking instance!");
@@ -194,6 +203,40 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 			plNet.getUpdater().update(plNet, deltaWk, iteration, epoch, 1, LayerWorkspaceMgr.noWorkspaces());
 			deltaW.addi(deltaWk.gradient());
 		}
+		
+		return deltaW;	
+	}
+	
+	/**
+	 * Updates this {@link PLNetDyadRanker} based on a given mini batch of {@link IInstance}s
+	 * which need to be {@link IDyadRankingInstance}s
+	 * 
+	 * @param minibatch	A mini batch consisting of a {@link List} of {@link IDyadRankingInstance}.
+	 */
+	private void updateWithMinibatch(List<IInstance> minibatch) {
+		double actualMiniBatchSize = minibatch.size();
+		INDArray cumulativeDeltaW = Nd4j.zeros(plNet.params().length());
+		for (IInstance instance : minibatch) {
+			cumulativeDeltaW.addi(computeScaledGradient(instance));
+		}
+		cumulativeDeltaW.muli(1 / actualMiniBatchSize);
+		plNet.params().subi(cumulativeDeltaW);
+		iteration++;
+	}
+
+	/**
+	 * Updates this {@link PLNetDyadRanker} based on the given {@link IInstance},
+	 * which needs to be an {@link IDyadRankingInstance}. The update procedure is
+	 * based on algorithm 2 in [1].
+	 * 
+	 * 
+	 * @param instances The {@link IInstance} the update should be based on. Needs
+	 *                  to be a {@link IDyadRankingInstance}.
+	 * @throws TrainingException If something fails during the update process.
+	 */
+	@Override
+	public void update(IInstance instance) throws TrainingException {
+		INDArray deltaW = computeScaledGradient(instance);
 		plNet.params().subi(deltaW);
 		iteration++;
 	}
