@@ -151,8 +151,8 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 		return this.timeouted > 0;
 	}
 
-	protected long getRemainingTimeToDeadline() {
-		return this.deadline - System.currentTimeMillis();
+	protected TimeOut getRemainingTimeToDeadline() {
+		return new TimeOut(this.deadline - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
 	}
 
 	public boolean isStopCriterionSatisfied() {

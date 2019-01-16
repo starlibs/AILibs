@@ -65,6 +65,9 @@
 	</logger>
 	
 
+ <logger name="jaicore.search.algorithms.standard.bestfirst.nodeevaluation">
+  <level value="debug" />
+ </logger>
  <logger name="hasco.core.isRefinementCompletedPredicate">
   <level value="warn" />
  </logger>

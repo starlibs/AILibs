@@ -38,7 +38,7 @@ public class TimeOut {
 
 	@Override
 	public String toString() {
-		return this.seconds() + "s";
+		return this.milliseconds() + "ms";
 	}
 
 }
