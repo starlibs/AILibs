@@ -4,9 +4,7 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import jaicore.basic.algorithm.AlgorithmState;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
-import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
@@ -88,8 +86,7 @@ public class StratifiedSampling<I extends IInstance> extends ASamplingAlgorithm<
 						// Check if all threads are finished. If yes finish Stratified Sampling, wait
 						// shortly in this step otherwise.
 						if (this.executorService.isTerminated()) {
-							this.setState(AlgorithmState.inactive);
-							return new AlgorithmFinishedEvent();
+							return this.terminate();
 						} else {
 							synchronized (Thread.currentThread()) {
 								Thread.currentThread().wait(100);
