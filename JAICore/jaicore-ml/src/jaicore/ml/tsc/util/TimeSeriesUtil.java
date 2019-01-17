@@ -115,8 +115,22 @@ public class TimeSeriesUtil {
 		}
 	}
 
+	/**
+	 * Creates equidistant timestamps for a time series.
+	 * 
+	 * @param timeSeries
+	 *            Time series to generate timestamps for. Let n be its length.
+	 * @return Equidistant timestamp, i.e. {0, 1, .., n-1}.
+	 */
+	public static INDArray createEquidistantTimestamps(INDArray timeSeries) {
+		int n = (int) timeSeries.length();
+		double[] timestamps = IntStream.range(0, n).mapToDouble(t -> (double) t).toArray();
+		int[] shape = { n };
+		return Nd4j.create(timestamps, shape);
+	}
+
 	public static Pair<TimeSeriesDataset, TimeSeriesDataset> getStratifiedSplit(final TimeSeriesDataset dataset,
-		final double portion) {
+			final double portion) {
 		// TODO
 		return new Pair<TimeSeriesDataset, TimeSeriesDataset>(null, null);
 	}
@@ -204,10 +218,8 @@ public class TimeSeriesUtil {
 		for (int i = 0; i < dataSet.getNumberOfInstances(); i++) {
 
 			// Initialize instance
-			final Instance inst = new DenseInstance(1, Nd4j
-					.hstack(Nd4j.toFlattened(combinedMatrix.getRow(i)),
-							Nd4j.create(new double[] { targets.getDouble(i) }))
-					.toDoubleVector());
+			final Instance inst = new DenseInstance(1, Nd4j.hstack(Nd4j.toFlattened(combinedMatrix.getRow(i)),
+					Nd4j.create(new double[] { targets.getDouble(i) })).toDoubleVector());
 
 			inst.setDataset(result);
 			result.add(inst);

@@ -9,9 +9,9 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
 /**
- * TimeWarpDistanceTest
+ * TimeWarpEditDistanceTest
  */
-public class DynamicTimeWarpingTest {
+public class TimeWarpEditDistanceTest {
 
     INDArray timeSeries1; // { 1, 1, 1, 1, 1, 1 }
     INDArray timeSeries2; // { 1, 1, 1, 1, 1, 1 }
@@ -36,33 +36,10 @@ public class DynamicTimeWarpingTest {
 
     @Test
     public void testDistanceCalculation() throws IllegalArgumentException {
-        DynamicTimeWarping dtw = new DynamicTimeWarping();
-        double distance = dtw.distance(timeSeries1, timeSeries2);
+        TimeWarpEditDistance twed = new TimeWarpEditDistance(1.0, 1.0);
+        double distance = twed.distance(timeSeries1, timeSeries2);
         double expectation = 0;
-        assertEquals(expectation, distance, 1.0E-5);
-    }
-
-    @Test
-    public void testDistanceCalculation2() throws IllegalArgumentException {
-        DynamicTimeWarping dtw = new DynamicTimeWarping();
-        double distance = dtw.distance(timeSeries3, timeSeries4);
-        double expectation = 3.29;
-        assertEquals(expectation, distance, 1.0E-5);
-    }
-
-    @Test
-    public void testThrowsErrorWhenTimeSeriesHaveDifferentLength() {
-        DynamicTimeWarping dtw = new DynamicTimeWarping();
-        assertThrows(IllegalArgumentException.class, () -> {
-            dtw.distance(timeSeries1, timeSeries4);
-        });
-    }
-
-    @Test
-    public void testThrowsErrorWhenTimeSeriesIsNoTimeSeries() {
-        DynamicTimeWarping dtw = new DynamicTimeWarping();
-        assertThrows(IllegalArgumentException.class, () -> {
-            dtw.distance(noTimeSeries, timeSeries4);
-        });
+        String message = "Calculated %f, but %f was expected";
+        assertEquals(String.format(message, distance, expectation), expectation, distance, 0);
     }
 }
