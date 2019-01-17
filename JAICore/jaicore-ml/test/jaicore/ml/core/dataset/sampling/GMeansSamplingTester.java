@@ -1,7 +1,5 @@
 package jaicore.ml.core.dataset.sampling;
 
-import java.util.Random;
-
 import jaicore.basic.algorithm.AlgorithmProblemTransformer;
 import jaicore.basic.algorithm.IAlgorithm;
 import jaicore.basic.algorithm.IAlgorithmFactory;

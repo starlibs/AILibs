@@ -1,7 +1,5 @@
 package jaicore.ml.core.dataset.sampling;
 
-import java.util.Random;
-
 import org.apache.commons.math3.ml.distance.ManhattanDistance;
 
 import jaicore.basic.algorithm.AlgorithmProblemTransformer;

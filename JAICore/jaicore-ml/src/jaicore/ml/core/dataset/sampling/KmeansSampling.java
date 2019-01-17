@@ -30,6 +30,7 @@ public class KmeansSampling<I extends IInstance> extends ASamplingAlgorithm<I> {
 
 	private DistanceMeasure distanceMeassure = new ManhattanDistance();
 	private long seed;
+	/* number of clusters, if -1 use sample size */
 	private int k;
 	
 	
@@ -45,6 +46,18 @@ public class KmeansSampling<I extends IInstance> extends ASamplingAlgorithm<I> {
 	}
 
 	/**
+	 * Implementation of a sampling method using kmeans-clustering. The sample size will be used as the number of clusters. 
+	 * 
+	 * @param seed Random Seed
+	 * @param dis {@link DistanceMeasure} to be used
+	 */
+	public KmeansSampling(long seed, DistanceMeasure dis) {
+		this.seed = seed;
+		this.k = -1;
+		this.distanceMeassure = dis;
+	}
+	
+	/**
 	 * Implementation of a sampling method using kmeans-clustering.
 	 * 
 	 * @param seed Random Seed
@@ -57,6 +70,9 @@ public class KmeansSampling<I extends IInstance> extends ASamplingAlgorithm<I> {
 		this.distanceMeassure = dis;
 	}
 	
+	
+	
+	
 	@Override
 	public AlgorithmEvent nextWithException() throws AlgorithmException {
 		switch (this.getState()) {
@@ -67,6 +83,8 @@ public class KmeansSampling<I extends IInstance> extends ASamplingAlgorithm<I> {
 			// create cluster
 			JDKRandomGenerator r = new JDKRandomGenerator();
 			r.setSeed(seed);
+			// update k if k=-1
+			if(k == -1) {k = sampleSize;}
 			kMeansCluster = new KMeansPlusPlusClusterer<I>(k, -1, distanceMeassure, r);
 			clusterResults = kMeansCluster.cluster(getInput());
 
