@@ -3,6 +3,7 @@ package jaicore.ml.tsc.filter;
 import static org.junit.Assert.*;
 
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
@@ -12,6 +13,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
@@ -26,7 +28,7 @@ import jaicore.ml.tsc.exceptions.NoneFittedFilterExeception;
 @RunWith(JUnit4.class)
 public class DFTTest {
 	INDArray timeseries1;
-	//INDArray timeseries2;
+	
 	TimeSeriesDataset dataset;
 	
 	@Before
@@ -40,12 +42,17 @@ public class DFTTest {
 		dataset = new TimeSeriesDataset(futureDataSet,null, null);
 	}
 	
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
+	
 	@Test
 	public void testFit() {
 		DFT testDFT = new DFT();
+//		testDFT.setNumberOfDisieredCoefficients(7);
 		testDFT.setNumberOfDisieredCoefficients(2);
 		testDFT.fit(dataset);
 		TimeSeriesDataset output = null;
+//		thrown.expect(IllegalArgumentException.class);
 		try {
 			 output = (TimeSeriesDataset)testDFT.transform(dataset);
 		} catch (IllegalArgumentException e) {

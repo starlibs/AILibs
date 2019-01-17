@@ -78,17 +78,19 @@ public class DFT implements IFilter {
 			for(int instances = 0; instances < ((TimeSeriesDataset) input).getNumberOfInstances(); instances++) {
 				int loopcounter = 0;
 				for(int f = 0; f < numberOfDisieredCoefficients; f++) {	
+					
 					Complex result = new Complex(0,0);
 					Complex c = null;
+					
 					for(int t = 0; t<InstancesLength; t++) {
 						
 						double entry = ((TimeSeriesDataset) input).getValues(matrix).getRow(instances).getDouble(t);
 						
-						//TODO can not find a exponential function for Nd4j that is free to use 
 						double realpart = Math.cos(-(1.0/(double)InstancesLength)*2.0*Math.PI*(double)t*(double)f);
 						double imaginarypart = Math.sin(-(1.0/(double)InstancesLength)*2.0*Math.PI*(double)t*(double)f);
+						
 						c= new Complex(realpart, imaginarypart);
-						c.exp();
+						
 						c = c.multiply(entry);
 						result = result.add(c);
 						
