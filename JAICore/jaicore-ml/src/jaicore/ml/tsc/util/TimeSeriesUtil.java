@@ -29,97 +29,113 @@ import weka.core.Instances;
 public class TimeSeriesUtil {
 
 	/**
-	 * Checks, whether a given INDArray is a valid time series.
+	 * Checks, wheter given INDArray are valid time series.
 	 * 
 	 * @param array
-	 * @return True, if the array is a valid time series.
+	 * @return True, if the all arrays are valid time series.
 	 */
-	public static boolean isTimeSeries(INDArray array) {
-		return array.rank() == 1;
+	public static boolean isTimeSeries(INDArray... array) {
+		for (INDArray a : array)
+			if (a.rank() != 1)
+				return false;
+		return true;
 	}
 
 	/**
-	 * Checks, whether a given INDArray is a valid time series with a given length.
+	 * Checks, wheter given INDArrays are valid time series with a given length.
 	 * 
 	 * @param array
 	 * @param length
 	 * @return True, if the array is a valid time series of the given length. False,
 	 *         otherwise.
 	 */
-	public static boolean isTimeSeries(INDArray array, int length) {
-		return array.rank() == 1 && array.length() == length;
+	public static boolean isTimeSeries(int length, INDArray... array) {
+		for (INDArray a : array)
+			if (a.rank() != 1 && a.length() == length)
+				return false;
+		return true;
 	}
 
 	/**
-	 * Checks, whether a given INDArray is a valid time series. Throws an exception
+	 * Checks, wheter given INDArrays are valid time series. Throws an exception
 	 * otherwise.
 	 * 
 	 * @param array
 	 * @throws IllegalArgumentException
 	 */
-	public static void isTimeSeriesOrException(INDArray array) throws IllegalArgumentException {
-		if (!isTimeSeries(array)) {
-			String message = String.format(
-					"The given INDArray is no time series. It should have rank 1, but has a rank of %d.", array.rank());
-			throw new IllegalArgumentException(message);
+	public static void isTimeSeriesOrException(INDArray... array) throws IllegalArgumentException {
+		for (INDArray a : array) {
+			if (!isTimeSeries(array)) {
+				String message = String.format(
+						"The given INDArray is no time series. It should have rank 1, but has a rank of %d.", a.rank());
+				throw new IllegalArgumentException(message);
+			}
 		}
 	}
 
 	/**
-	 * Checks, wheter a given INDArray is a valid time series with a given length.
+	 * Checks, wheter given INDArrays are valid time series with a given length.
 	 * Throws an exception otherwise.
 	 * 
 	 * @param array
 	 * @param length
 	 * @throws IllegalArgumentException
 	 */
-	public static void isTimeSeriesOrException(INDArray array, int length) throws IllegalArgumentException {
-		if (!isTimeSeries(array)) {
-			String message = String.format(
-					"The given INDArray is no time series. It should have rank 1, but has a rank of %d.", array.rank());
-			throw new IllegalArgumentException(message);
-		}
-		if (!isTimeSeries(array, length)) {
-			String message = String.format("The given time series should length 7, but has a length of %d.",
-					array.length());
-			throw new IllegalArgumentException(message);
+	public static void isTimeSeriesOrException(int length, INDArray... array) throws IllegalArgumentException {
+		for (INDArray a : array) {
+			if (!isTimeSeries(array)) {
+				String message = String.format(
+						"The given INDArray is no time series. It should have rank 1, but has a rank of %d.", a.rank());
+				throw new IllegalArgumentException(message);
+			}
+			if (!isTimeSeries(length, a)) {
+				String message = String.format("The given time series should length 7, but has a length of %d.",
+						a.length());
+				throw new IllegalArgumentException(message);
+			}
 		}
 	}
 
 	/**
-	 * Checks whether arrays have the same length.
+	 * Checks wheter multiple arrays have the same length.
 	 * 
 	 * @param timeSeries1
 	 * @param timeSeries2
 	 * @return True if the arrays have the same length. False, otherwise.
 	 */
-	public static boolean isSameLength(INDArray timeSeries1, INDArray timeSeries2) {
-		return timeSeries1.length() == timeSeries2.length();
+	public static boolean isSameLength(INDArray timeSeries1, INDArray... timeSeries) {
+		for (INDArray t : timeSeries) {
+			if (timeSeries1.length() != t.length())
+				return false;
+		}
+		return true;
 	}
 
 	/**
-	 * Checks whether two arrays have the same length. Throws an exception
+	 * Checks wheter multiple arrays have the same length. Throws an exception
 	 * otherwise.
 	 * 
 	 * @param timeSeries1
 	 * @param timeSeries2
 	 * @throws TimeSeriesLengthException
 	 */
-	public static void isSameLengthOrException(INDArray timeSeries1, INDArray timeSeries2)
+	public static void isSameLengthOrException(INDArray timeSeries1, INDArray... timeSeries)
 			throws TimeSeriesLengthException {
-		if (!isSameLength(timeSeries1, timeSeries2)) {
-			String message = String.format(
-					"Length of the given time series are not equal: Length first time series: (%d). Length of seconds time series: (%d)",
-					timeSeries1.length(), timeSeries2.length());
-			throw new TimeSeriesLengthException(message);
+		for (INDArray t : timeSeries) {
+			if (!isSameLength(timeSeries1, t)) {
+				String message = String.format(
+						"Length of the given time series are not equal: Length first time series: (%d). Length of seconds time series: (%d)",
+						timeSeries1.length(), t.length());
+				throw new TimeSeriesLengthException(message);
+			}
 		}
 	}
 
 	/**
 	 * Creates equidistant timestamps for a time series.
 	 * 
-	 * @param timeSeries
-	 *            Time series to generate timestamps for. Let n be its length.
+	 * @param timeSeries Time series to generate timestamps for. Let n be its
+	 *                   length.
 	 * @return Equidistant timestamp, i.e. {0, 1, .., n-1}.
 	 */
 	public static INDArray createEquidistantTimestamps(INDArray timeSeries) {
@@ -139,8 +155,8 @@ public class TimeSeriesUtil {
 	 * Converts an INDArray matrix (number of instances x number of attributes) to
 	 * Weka instances without any class attribute.
 	 * 
-	 * @param matrix
-	 *            INDArray matrix storing all the attribute values of the instances
+	 * @param matrix INDArray matrix storing all the attribute values of the
+	 *               instances
 	 * @return Returns the Weka Instances object consisting of all instances and the
 	 *         attribute values
 	 */
@@ -181,8 +197,7 @@ public class TimeSeriesUtil {
 	 * Converts a given {@link TimeSeriesDataset} object to a Weka Instances object.
 	 * Works with {@link CategoricalAttributeType} target values.
 	 * 
-	 * @param dataSet
-	 *            Data set which is transformed
+	 * @param dataSet Data set which is transformed
 	 * @return Transformed Weka Instances object
 	 */
 	// TODO: Include meta information
@@ -231,11 +246,9 @@ public class TimeSeriesUtil {
 	/**
 	 * Converts Weka instances to an INDArray matrix.
 	 * 
-	 * @param instances
-	 *            Weka instances to be converted.
-	 * @param keepClass
-	 *            Determines whether the class attribute should be stored in the
-	 *            result matrix
+	 * @param instances Weka instances to be converted.
+	 * @param keepClass Determines whether the class attribute should be stored in
+	 *                  the result matrix
 	 * @return Returns an INDArray consisting of all instances with the shape
 	 *         (number instances x number attributes)
 	 */
@@ -263,14 +276,11 @@ public class TimeSeriesUtil {
 	 * Trains a given Weka <code>classifier</code> using the time series data set
 	 * <code>matrix</code>.
 	 * 
-	 * @param classifier
-	 *            The Weka {@link weka.Classifier} object
-	 * @param matrix
-	 *            The time series data set which is transformed to Weka instances
-	 *            used for the training
-	 * @throws TrainingException
-	 *             Throws exception if the training could not be finished
-	 *             successfully
+	 * @param classifier The Weka {@link weka.Classifier} object
+	 * @param matrix     The time series data set which is transformed to Weka
+	 *                   instances used for the training
+	 * @throws TrainingException Throws exception if the training could not be
+	 *                           finished successfully
 	 */
 	public static void buildWekaClassifierFromTS(final Classifier classifier, final TimeSeriesDataset timeSeriesDataset)
 			throws TrainingException {
@@ -288,9 +298,8 @@ public class TimeSeriesUtil {
 	/**
 	 * Maps a time series instance to a Weka instance.
 	 * 
-	 * @param instance
-	 *            The time series instance storing the time series data and the
-	 *            target value
+	 * @param instance The time series instance storing the time series data and the
+	 *                 target value
 	 * @return Returns the Weka instance containing the time series data and the
 	 *         class information.
 	 */
@@ -315,8 +324,7 @@ public class TimeSeriesUtil {
 	/**
 	 * Stacks the given matrices horizontally.
 	 * 
-	 * @param matrices
-	 *            List of INDArray matrices to be stacked
+	 * @param matrices List of INDArray matrices to be stacked
 	 * @return Returns one INDArray containing all <code>matrices</code>. New
 	 *         dimensionality is (originalShape[0] x sum of originalShape[1]s)
 	 */
