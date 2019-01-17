@@ -21,6 +21,9 @@ public class KendallsTauDyadRankingLoss implements DyadRankingLossFunction {
 	public double loss(IDyadRankingInstance actual, IDyadRankingInstance predicted) {
 			
 		int dyadRankingLength = actual.length();
+		if (dyadRankingLength <= 1) {
+			throw new IllegalArgumentException("Dyad rankings must have length greater than 1.");
+		}
 		int nConc = 0;
 		int nDisc = 0;
 		for (int predIndex = 0; predIndex < dyadRankingLength - 1; predIndex++) {
