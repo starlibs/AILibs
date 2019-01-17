@@ -21,7 +21,7 @@ public class DFT implements IFilter {
 	
 	/**
 	 *  The variable is set to 1/sqrt(n) in paper "Efficient Retrieval of Similar Time Sequences Using DFT" by Davood Rafieidrafiei and Alberto Mendelzon
-	 *  but in the orignal "The BOSS is concerned with time series classification in the presence of noise" by Patrick Schäfer
+	 *  but in the orignal "The BOSS is concerned with time series classification in the presence of noise" by Patrick Schï¿½fer
 	 *  it is set to 1/n. By default it is set to 1/n. 
 	 */ 
 	private double paperSpecificVariable;   
