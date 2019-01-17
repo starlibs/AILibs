@@ -34,6 +34,7 @@ import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
 import jaicore.ml.dyadranking.loss.DyadRankingLossUtil;
 import jaicore.ml.dyadranking.loss.KendallsTauDyadRankingLoss;
+import jaicore.ml.dyadranking.loss.NDCGLoss;
 
 /**
  * This is a test based on Dirk Schäfers dyad ranking dataset based on
@@ -95,6 +96,9 @@ public class DyadRankerGATSPTest {
 			double avgKendallTau = 0.0d;
 			avgKendallTau = DyadRankingLossUtil.computeAverageLoss(new KendallsTauDyadRankingLoss(), testData, ranker);
 			System.out.println("Average Kendall's tau for " + ranker.getClass().getSimpleName() + ": " + avgKendallTau);
+			double avgNDCG = 0.0d;
+			avgNDCG = DyadRankingLossUtil.computeAverageLoss(new NDCGLoss(), testData, ranker);
+			System.out.println("Average NDCG for " + ranker.getClass().getSimpleName() + ": " + avgNDCG);
 		} catch (TrainingException | PredictionException e) {
 			e.printStackTrace();
 		}
@@ -275,13 +279,7 @@ public class DyadRankerGATSPTest {
 
 	@Parameters
 	public static List<APLDyadRanker[]> supplyDyadRankers() {
-		PLNetDyadRanker earlyStoppingRetrain = new PLNetDyadRanker();
-		earlyStoppingRetrain.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_RETRAIN, "true");
-		PLNetDyadRanker miniBatchNet = new PLNetDyadRanker();
-		miniBatchNet.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_MINI_BATCH_SIZE, "8");
 		return Arrays.asList(new PLNetDyadRanker[] { new PLNetDyadRanker() },
-				new PLNetDyadRanker[] { earlyStoppingRetrain },
-				new PLNetDyadRanker[] { miniBatchNet },
 				new FeatureTransformPLDyadRanker[] { new FeatureTransformPLDyadRanker() });
 	}
 }
