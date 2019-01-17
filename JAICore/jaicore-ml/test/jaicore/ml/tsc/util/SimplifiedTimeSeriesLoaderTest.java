@@ -8,18 +8,18 @@ import java.util.List;
 
 import org.junit.Test;
 
-import jaicore.ml.core.dataset.TimeSeriesDataset;
-import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
+import jaicore.basic.sets.SetUtil.Pair;
+import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import jaicore.ml.tsc.exceptions.TimeSeriesLoadingException;
 
 /**
- * Unit tests for loading time series datasets from files using the class
- * <code>TimeSeriesLoader</code>.
+ * Unit tests for loading simplified, native Java array using time series
+ * datasets from files using the class <code>SimplifiedTimeSeriesLoader</code>.
  * 
  * @author Julian Lienen
  *
  */
-public class TimeSeriesLoaderTest {
+public class SimplifiedTimeSeriesLoaderTest {
 	/**
 	 * Path prefix for the time series classification datasets.
 	 */
@@ -29,7 +29,8 @@ public class TimeSeriesLoaderTest {
 	public void testUnivariateArffFileLoading() throws TimeSeriesLoadingException {
 		final File datasetFile = new File(TSC_DATASET_PATH_PREFIX + "UnivariateTSCProblems\\Car\\Car_TRAIN.arff");
 
-		final TimeSeriesDataset result = TimeSeriesLoader.loadArff(datasetFile);
+		final Pair<TimeSeriesDataset, List<String>> pairResult = SimplifiedTimeSeriesLoader.loadArff(datasetFile);
+		TimeSeriesDataset result = pairResult.getX();
 
 		final int expectedNumInstances = 60;
 		final int expectedNumSteps = 577;
@@ -37,9 +38,9 @@ public class TimeSeriesLoaderTest {
 		final int expectedNumTargets = 60;
 
 		assertEquals(expectedNumInstances, result.getNumberOfInstances());
-		assertEquals(expectedNumSteps, (int) result.getValues(0).shape()[1]);
+		assertEquals(expectedNumSteps, result.getValues(0)[0].length);
 		assertEquals(expectedNumVariables, result.getNumberOfVariables());
-		assertEquals(expectedNumTargets, result.getTargets().length());
+		assertEquals(expectedNumTargets, result.getTargets().length);
 	}
 
 	@Test
@@ -49,7 +50,9 @@ public class TimeSeriesLoaderTest {
 		File datasetFile1 = new File(
 				TSC_DATASET_PATH_PREFIX + "MultivariateTSCProblems\\Libras\\LibrasDimension2_TRAIN.arff");
 
-		final TimeSeriesDataset result = TimeSeriesLoader.loadArffs(datasetFile0, datasetFile1);
+		final Pair<TimeSeriesDataset, List<String>> pairResult = SimplifiedTimeSeriesLoader.loadArffs(datasetFile0,
+				datasetFile1);
+		TimeSeriesDataset result = pairResult.getX();
 
 		final int expectedNumInstances = 180;
 		final int expectedNumSteps = 45;
@@ -57,9 +60,9 @@ public class TimeSeriesLoaderTest {
 		final int expectedNumTargets = 180;
 
 		assertEquals(expectedNumInstances, result.getNumberOfInstances());
-		assertEquals(expectedNumSteps, (int) result.getValues(0).shape()[1]);
+		assertEquals(expectedNumSteps, result.getValues(0)[0].length);
 		assertEquals(expectedNumVariables, result.getNumberOfVariables());
-		assertEquals(expectedNumTargets, result.getTargets().length());
+		assertEquals(expectedNumTargets, result.getTargets().length);
 	}
 
 	@Test
@@ -70,7 +73,9 @@ public class TimeSeriesLoaderTest {
 		File datasetFile1 = new File(TSC_DATASET_PATH_PREFIX
 				+ "MultivariateTSCProblems\\FingerMovements\\FingerMovementsDimension2_TRAIN.arff");
 
-		final TimeSeriesDataset result = TimeSeriesLoader.loadArffs(datasetFile0, datasetFile1);
+		final Pair<TimeSeriesDataset, List<String>> pairResult = SimplifiedTimeSeriesLoader.loadArffs(datasetFile0,
+				datasetFile1);
+		TimeSeriesDataset result = pairResult.getX();
 
 		final int expectedNumInstances = 316;
 		final int expectedNumSteps = 50;
@@ -79,9 +84,9 @@ public class TimeSeriesLoaderTest {
 		final List<String> expectedClassDomain = Arrays.asList("left", "right");
 
 		assertEquals(expectedNumInstances, result.getNumberOfInstances());
-		assertEquals(expectedNumSteps, (int) result.getValues(0).shape()[1]);
+		assertEquals(expectedNumSteps, result.getValues(0)[0].length);
 		assertEquals(expectedNumVariables, result.getNumberOfVariables());
-		assertEquals(expectedNumTargets, result.getTargets().length());
-		assertEquals(expectedClassDomain, ((CategoricalAttributeType) result.getTargetType()).getDomain());
+		assertEquals(expectedNumTargets, result.getTargets().length);
+		assertEquals(expectedClassDomain, pairResult.getY());
 	}
 }
