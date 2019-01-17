@@ -2,15 +2,16 @@ package hasco.core;
 
 import hasco.optimizingfactory.SoftwareConfigurationAlgorithmFactory;
 import jaicore.basic.algorithm.AlgorithmProblemTransformer;
-import jaicore.search.core.interfaces.IGraphSearchFactory;
-import jaicore.search.model.probleminputs.GraphSearchProblemInput;
+import jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory;
+import jaicore.search.probleminputs.GraphSearchInput;
+import jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 
-public class HASCOFactory<ISearch, N, A, V extends Comparable<V>> implements SoftwareConfigurationAlgorithmFactory<RefinementConfiguredSoftwareConfigurationProblem<V>, HASCORunReport<V>, HASCOSolutionCandidate<V>, V> {
+public class HASCOFactory<ISearch extends GraphSearchInput<N, A>, N, A, V extends Comparable<V>> implements SoftwareConfigurationAlgorithmFactory<RefinementConfiguredSoftwareConfigurationProblem<V>, HASCOSolutionCandidate<V>, V> {
 
 	private RefinementConfiguredSoftwareConfigurationProblem<V> problem;
 	private IHASCOPlanningGraphGeneratorDeriver<N, A> planningGraphGeneratorDeriver;
-	private IGraphSearchFactory<ISearch, ?, N, A, V, ?, ?> searchFactory;
-	private AlgorithmProblemTransformer<GraphSearchProblemInput<N, A, V>, ISearch> searchProblemTransformer;
+	private IOptimalPathInORGraphSearchFactory<ISearch, N, A, V, ?, ?> searchFactory;
+	private AlgorithmProblemTransformer<GraphSearchWithPathEvaluationsInput<N, A, V>, ISearch> searchProblemTransformer;
 	private boolean visualizationEnabled;
 
 	@Override
@@ -38,19 +39,19 @@ public class HASCOFactory<ISearch, N, A, V extends Comparable<V>> implements Sof
 		this.planningGraphGeneratorDeriver = planningGraphGeneratorDeriver;
 	}
 
-	public IGraphSearchFactory<ISearch, ?, N, A, V, ?, ?> getSearchFactory() {
+	public IOptimalPathInORGraphSearchFactory<ISearch, N, A, V, ?, ?> getSearchFactory() {
 		return searchFactory;
 	}
 
-	public void setSearchFactory(IGraphSearchFactory<ISearch, ?, N, A, V, ?, ?> searchFactory) {
+	public void setSearchFactory(IOptimalPathInORGraphSearchFactory<ISearch, N, A, V, ?, ?> searchFactory) {
 		this.searchFactory = searchFactory;
 	}
 
-	public AlgorithmProblemTransformer<GraphSearchProblemInput<N, A, V>, ISearch> getSearchProblemTransformer() {
+	public AlgorithmProblemTransformer<GraphSearchWithPathEvaluationsInput<N, A, V>, ISearch> getSearchProblemTransformer() {
 		return searchProblemTransformer;
 	}
 
-	public void setSearchProblemTransformer(AlgorithmProblemTransformer<GraphSearchProblemInput<N, A, V>, ISearch> searchProblemTransformer) {
+	public void setSearchProblemTransformer(AlgorithmProblemTransformer<GraphSearchWithPathEvaluationsInput<N, A, V>, ISearch> searchProblemTransformer) {
 		this.searchProblemTransformer = searchProblemTransformer;
 	}
 

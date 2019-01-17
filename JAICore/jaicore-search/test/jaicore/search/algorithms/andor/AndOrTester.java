@@ -7,7 +7,9 @@ import org.junit.Test;
 import jaicore.basic.IObjectEvaluator;
 import jaicore.graph.Graph;
 import jaicore.search.algorithms.andor.SyntheticAndGrid.NodeLabel;
+import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import jaicore.search.core.interfaces.GraphGenerator;
+import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 
 public class AndOrTester {
 
@@ -16,6 +18,7 @@ public class AndOrTester {
 		int k = 10;
 		int b = 10;
 		int d = 6;
+		int limit = 1;
 		GraphGenerator<NodeLabel, String> gg = new SyntheticAndGrid(k, b, d);
 		IObjectEvaluator<Graph<NodeLabel>, Double> evaluator = g -> {
 			double sum = 0;
@@ -24,9 +27,9 @@ public class AndOrTester {
 			}
 			return sum;
 		};
-		AndORBottomUpFilter<NodeLabel, String, Double> algo = new AndORBottomUpFilter<>(gg, evaluator);
-//		GeneralEvaluatedTraversalTree<NodeLabel, String, Double> prob = new GeneralEvaluatedTraversalTree<>(gg, n -> 0.0);
-//		BestFirst<GeneralEvaluatedTraversalTree<NodeLabel,String,Double>, NodeLabel, String, Double> bf = new BestFirst<>(prob);
+		AndORBottomUpFilter<NodeLabel, String, Double> algo = new AndORBottomUpFilter<>(gg, evaluator, limit);
+		GraphSearchWithSubpathEvaluationsInput<NodeLabel, String, Double> prob = new GraphSearchWithSubpathEvaluationsInput<>(gg, n -> 0.0);
+		BestFirst<GraphSearchWithSubpathEvaluationsInput<NodeLabel,String,Double>, NodeLabel, String, Double> bf = new BestFirst<>(prob);
 //		VisualizationWindow<?,?> window = new VisualizationWindow<>(algo);
 		long start = System.currentTimeMillis();
 		Graph<NodeLabel> solution = algo.call();

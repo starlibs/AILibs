@@ -2,8 +2,11 @@ package jaicore.search.testproblems.enhancedttsp;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -82,6 +85,8 @@ public class EnhancedTTSP {
 			@Override
 			public SuccessorGenerator<EnhancedTTSPNode, String> getSuccessorGenerator() {
 				return new SingleSuccessorGenerator<EnhancedTTSPNode, String>() {
+					
+					private Map<EnhancedTTSPNode,Set<Integer>> expandedChildren = new HashMap<>();
 
 					private ShortList getPossibleDestinations(EnhancedTTSPNode n) {
 						short curLoc = n.getCurLocation();
@@ -198,6 +203,11 @@ public class EnhancedTTSP {
 					public NodeExpansionDescription<EnhancedTTSPNode, String> generateSuccessor(EnhancedTTSPNode node, int i) {
 						return generateSuccessor(node, getPossibleDestinations(node), i);
 					}
+
+					@Override
+					public boolean allSuccessorsComputed(EnhancedTTSPNode node) {
+						return getPossibleDestinations(node).size() == expandedChildren.get(node).size();
+					}
 				};
 			}
 
@@ -275,7 +285,7 @@ public class EnhancedTTSP {
 		return new ISolutionEvaluator<EnhancedTTSPNode, Double>() {
 
 			@Override
-			public Double evaluateSolution(List<EnhancedTTSPNode> solutionPath) throws Exception {
+			public Double evaluateSolution(List<EnhancedTTSPNode> solutionPath) {
 				if (solutionPath == null || solutionPath.size() == 0) {
 					return Double.MAX_VALUE;
 				}

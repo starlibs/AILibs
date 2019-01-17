@@ -64,6 +64,6 @@ public abstract class ATSCAlgorithm<TARGETTYPE, TARGETVALUETYPE, DATASET extends
 	 */
 	@Override
 	public DATASET getInput() {
-		return this.getInput();
+		return (DATASET) this.input;
 	}
 }

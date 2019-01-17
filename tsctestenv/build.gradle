@@ -1,0 +1,27 @@
+plugins {
+	id 'eclipse-wtp'
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src'
+        }
+        resources {
+        	srcDir 'conf'
+        }
+    }
+    test {
+	   	java {
+	   		srcDir 'test'
+	   	}
+    }
+}
+
+dependencies {
+	compile project(':JAICore:jaicore-ml')
+	
+	// Reference repositories
+	compile 'com.github.patrickzib:SFA:v0.1'
+	compile files('lib/TimeSeriesClassification.jar')
+}

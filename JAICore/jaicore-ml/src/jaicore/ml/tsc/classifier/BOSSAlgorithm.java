@@ -4,7 +4,8 @@ import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 
 import jaicore.basic.TimeOut;
-import jaicore.basic.algorithm.AlgorithmEvent;
+import jaicore.basic.algorithm.IAlgorithmConfig;
+import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.ml.core.dataset.TimeSeriesDataset;
 import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
 import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeValue;
@@ -31,7 +32,7 @@ public class BOSSAlgorithm
 	}
 
 	@Override
-	public BOSSClassifier call() throws Exception {
+	public BOSSClassifier call() {
 		// TODO Auto-generated method stub
 
 		// Training on model
@@ -71,7 +72,7 @@ public class BOSSAlgorithm
 	}
 
 	@Override
-	public void setTimeout(int timeout, TimeUnit timeUnit) {
+	public void setTimeout(long timeout, TimeUnit timeUnit) {
 		// TODO Auto-generated method stub
 
 	}
@@ -89,7 +90,13 @@ public class BOSSAlgorithm
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws Exception {
+	public AlgorithmEvent nextWithException() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public IAlgorithmConfig getConfig() {
 		// TODO Auto-generated method stub
 		return null;
 	}
