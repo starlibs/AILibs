@@ -11,14 +11,25 @@ import jaicore.ml.core.dataset.IInstance;
 public class KMeansSamplingTester<I extends IInstance> extends GeneralSamplingTester<I> {
 	
 	private static long SEED = 1;
-	private static double SAMLPING_FRACTION = 1; // TODO deactivate test for sample size, test for at least
+	private static double SAMLPING_FRACTION = 1;
 	private static int K = 100;
+	
+	
+	@Override
+	public void testSampleSizeLargeProblem() throws Exception {
+		// Sample Size is not supported for KMeansSampling
+	}
+	
+	@Override
+	public void testSampleSizeSmallProblem() throws Exception {
+		// Sample Size is not supported for KMeansSampling
+	}
 	
 	@Override
 	public IAlgorithmFactory<IDataset<I>, IDataset<I>> getFactory() {
 		return new IAlgorithmFactory<IDataset<I>, IDataset<I>>() {
 
-			private IDataset<I> input;
+			private IDataset<I> input; 
 
 			@Override
 			public void setProblemInput(IDataset<I> problemInput) {

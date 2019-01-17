@@ -9,7 +9,18 @@ import jaicore.ml.core.dataset.IInstance;
 public class GMeansSamplingTester<I extends IInstance> extends GeneralSamplingTester<I> {
 	
 	private static final long SEED = 1;
-	private static final double SAMLPING_FRACTION = 1; // TODO deactivate test for sample size
+	private static final double SAMLPING_FRACTION = 1;
+	
+	
+	@Override
+	public void testSampleSizeLargeProblem() throws Exception {
+		// Sample Size is not supported for GMeansSampling
+	}
+	
+	@Override
+	public void testSampleSizeSmallProblem() throws Exception {
+		// Sample Size is not supported for GMeansSampling
+	}
 	
 	@Override
 	public IAlgorithmFactory<IDataset<I>, IDataset<I>> getFactory() {
