@@ -3,6 +3,8 @@
  */
 package jaicore.ml.tsc.filter;
 
+import java.util.Arrays;
+
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
@@ -17,11 +19,18 @@ import jaicore.ml.tsc.exceptions.NoneFittedFilterExeception;
  */
 public class ZTransformer implements IFilter {
 	
-	private INDArray means;
-	private INDArray deviation;
+	private double [][] means;
+
+	private double [][] deviation;
+
 	private boolean fitted = false;
 
-	
+	public double[][] getMeans() {
+		return means;
+	}
+	public double[][] getDeviation() {
+		return deviation;
+	}
 	/* (non-Javadoc)
 	 * @see jaicore.ml.tsc.filter.IFilter#transform(jaicore.ml.core.dataset.IDataset)
 	 */
@@ -73,8 +82,10 @@ public class ZTransformer implements IFilter {
 		}
 		
 		//make suitable means and deviation matrix rows == different attributes columns == different instances
-		means = Nd4j.zeros(((TimeSeriesDataset) input).getNumberOfVariables(), ((TimeSeriesDataset) input).getNumberOfInstances()); 
-		deviation = Nd4j.zeros(((TimeSeriesDataset) input).getNumberOfVariables(),((TimeSeriesDataset) input).getNumberOfInstances());
+		
+		means = new double[((TimeSeriesDataset)input).getNumberOfVariables()][((TimeSeriesDataset)input).getNumberOfInstances()];
+		deviation = new double[((TimeSeriesDataset)input).getNumberOfVariables()][((TimeSeriesDataset)input).getNumberOfInstances()];
+		
 		
 		//for every attribute for every instance of this attribute compute mean and deviation and put it in the according cell in matrix 
 		for(int matrix = 0; matrix < ((TimeSeriesDataset) input).getNumberOfVariables(); matrix++) {
