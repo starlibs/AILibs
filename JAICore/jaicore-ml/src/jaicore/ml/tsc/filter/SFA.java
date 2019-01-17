@@ -63,10 +63,10 @@ public class SFA implements IFilter {
 					} 
 				}
 			}
-				sfaDataset.add(sfaWords);
+				sfaDataset.add(sfaWords);	
 			}
-			//TODO geht der Cast
-			return (IDataset) sfaDataset;
+			TimeSeriesDataset output = new TimeSeriesDataset(sfaDataset, null, null);
+			return output;
 	}
 
 	@Override
