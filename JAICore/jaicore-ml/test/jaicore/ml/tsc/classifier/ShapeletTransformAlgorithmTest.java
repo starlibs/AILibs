@@ -7,12 +7,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.junit.Assert;
 import org.junit.Test;
-import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.factory.Nd4j;
 
 import jaicore.ml.tsc.classifier.ShapeletTransformAlgorithm.Shapelet;
-import junit.framework.Assert;
 
 public class ShapeletTransformAlgorithmTest {
 
@@ -20,27 +18,27 @@ public class ShapeletTransformAlgorithmTest {
 
 	@Test
 	public void generateCandidatesTest() {
-		INDArray data = Nd4j.create(new double[] { 1, 2, 3, 4, 5, 6 }).ravel();
+		double[] data = new double[] { 1, 2, 3, 4, 5, 6 };
 		int l = 3;
 
 		Set<Shapelet> actResult = ShapeletTransformAlgorithm.generateCandidates(data, l, 0);
 		Assert.assertEquals(4, actResult.size());
 
-		Shapelet expectedShapelet = new Shapelet(Nd4j.create(new double[] { 1, 2, 3 }), 0, 3, 0);
+		Shapelet expectedShapelet = new Shapelet(new double[] { 1, 2, 3 }, 0, 3, 0);
 		Assert.assertTrue(actResult.stream().anyMatch(s -> s.equals(expectedShapelet)));
 
 	}
 
 	@Test
 	public void findDistancesTest() {
-		Shapelet shapelet = new Shapelet(Nd4j.create(new double[] { 1, 2, 3 }), 0, 3, 0);
+		Shapelet shapelet = new Shapelet(new double[] { 1, 2, 3 }, 0, 3, 0);
 		// INDArray dataMatrix = Nd4j.create(new double[][] { { 4, 1, 2, 3, 5 }, { 2, 2,
 		// 2, 2, 2 } });
-		INDArray dataMatrix = Nd4j.create(new double[][] { { 4, 2, 4, 6, 5 }, { 2, 2, 2, 2, 2 } });
+		double[][] dataMatrix = new double[][] { { 4, 2, 4, 6, 5 }, { 2, 2, 2, 2, 2 } };
 
 		List<Double> actResult = ShapeletTransformAlgorithm.findDistances(shapelet, dataMatrix);
 
-		Assert.assertEquals("A distance has to be found for each instance!", dataMatrix.shape()[0], actResult.size());
+		Assert.assertEquals("A distance has to be found for each instance!", dataMatrix.length, actResult.size());
 
 		Assert.assertEquals(0, actResult.get(0), EPS_DELTA);
 		Assert.assertEquals(2d / 3, actResult.get(1), EPS_DELTA); // (1.224744871 * 1.224744871 * 2) / 3,
@@ -88,25 +86,24 @@ public class ShapeletTransformAlgorithmTest {
 
 	@Test
 	public void zNormalizeTest() {
-		INDArray vector = Nd4j.create(new double[] { 1, 2, 3 });
+		double[] vector = new double[] { 1, 2, 3 };
 		// INDArray expectedResult = Nd4j.create(new double[] { -1.224744871, 0,
 		// +1.224744871 });
-		INDArray expectedResult = Nd4j.create(new double[] { -1, 0, +1 });
+		double[] expectedResult = new double[] { -1, 0, +1 };
 
-		INDArray actResult = ShapeletTransformAlgorithm.zNormalize(vector);
-		Assert.assertTrue(expectedResult.equalsWithEps(actResult, EPS_DELTA));
+		double[] actResult = ShapeletTransformAlgorithm.zNormalize(vector, true);
+		Assert.assertArrayEquals(expectedResult, actResult, EPS_DELTA);
 
-		INDArray array = Nd4j.create(new double[] { 2, 4, 6 });
-		System.out.println(array.stdNumber(false).doubleValue());
+		double[] array = new double[] { 2, 4, 6 };
 
-		System.out.println(ShapeletTransformAlgorithm.zNormalize(array));
+		System.out.println(Arrays.toString(ShapeletTransformAlgorithm.zNormalize(array, true)));
 	}
 
 	@Test
 	public void getMinimumDistanceAmongAllSequencesOptimizedTest() {
-		INDArray matrix = Nd4j.create(new double[][] { { 4, 2, 4, 6, 5 } });
+		double[] matrix = new double[] { 4, 1, 2, 4, 6, 5 };
 
-		INDArray vector = Nd4j.create(new double[] { 1, 2, 3 });
+		double[] vector = new double[] { 1, 2, 3 };
 		Shapelet shapelet = new Shapelet(vector, 0, 3, 0);
 
 		double actResult = ShapeletTransformAlgorithm.getMinimumDistanceAmongAllSubsequences(shapelet, matrix);
@@ -120,8 +117,8 @@ public class ShapeletTransformAlgorithmTest {
 
 	@Test
 	public void sortIndexesTest() {
-		INDArray vector = Nd4j.create(new double[] { 4, 2, 6 });
-		INDArray vector2 = Nd4j.create(new double[] { 2, 4, 6 });
+		double[] vector = new double[] { 4, 2, 6 };
+		double[] vector2 = new double[] { 2, 4, 6 };
 
 		List<Integer> result1 = ShapeletTransformAlgorithm.sortIndexes(vector, true);
 		List<Integer> result1Inv = ShapeletTransformAlgorithm.sortIndexes(vector, false);
@@ -136,19 +133,18 @@ public class ShapeletTransformAlgorithmTest {
 
 	@Test
 	public void squareEuclideanDistanceTest() {
-		INDArray vector = Nd4j.create(new double[] { 4, 2, 6 });
-		INDArray vector2 = Nd4j.create(new double[] { 2, 4, 6 });
+		double[] vector = new double[] { 4, 2, 6 };
+		double[] vector2 = new double[] { 2, 4, 6 };
 
-		Assert.assertEquals(8d, ShapeletTransformAlgorithm.singleSquaredEuclideanDistance(vector, vector2),
-				EPS_DELTA);
+		Assert.assertEquals(8d, ShapeletTransformAlgorithm.singleSquaredEuclideanDistance(vector, vector2), EPS_DELTA);
 	}
 
 	@Test
 	public void getMinimumDistanceAmongAllSequencesOptimizedTest2() {
-		INDArray matrix = Nd4j.create(new double[][] { { 4, 3, 6, 9 } });
+		double[] matrix = new double[] { 4, 3, 6, 9 };
 		// INDArray matrix = Nd4j.create(new double[][] { { 4, 2, 4, 6, 5, } });
 
-		INDArray vector = Nd4j.create(new double[] { 1, 2, 3 });
+		double[] vector = new double[] { 1, 2, 3 };
 		Shapelet shapelet = new Shapelet(vector, 0, 3, 0);
 
 		double oldResult = ShapeletTransformAlgorithm.getMinimumDistanceAmongAllSubsequences(shapelet, matrix);
@@ -157,13 +153,14 @@ public class ShapeletTransformAlgorithmTest {
 				matrix);
 
 		System.out.println("=============================================");
-		double actResult = ShapeletTransformAlgorithm.getMinimumDistanceAmongAllSubsequencesOptimized2(shapelet,
-				matrix);
+		// double actResult =
+		// ShapeletTransformAlgorithm.getMinimumDistanceAmongAllSubsequencesOptimized2(shapelet,
+		// matrix);
 
 		Assert.assertEquals(oldResult, oldOptimizedResult, EPS_DELTA);
-		Assert.assertEquals(oldOptimizedResult, actResult, EPS_DELTA);
+		// Assert.assertEquals(oldOptimizedResult, actResult, EPS_DELTA);
 		// Assert.assertEquals(0, actResult, EPS_DELTA);
 
-		System.out.println(actResult);
+		// System.out.println(actResult);
 	}
 }
