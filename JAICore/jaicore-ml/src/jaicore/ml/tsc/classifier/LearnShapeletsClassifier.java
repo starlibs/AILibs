@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.nd4j.linalg.api.ndarray.INDArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,18 +13,16 @@ import jaicore.ml.core.dataset.TimeSeriesDataset;
 import jaicore.ml.core.dataset.TimeSeriesInstance;
 import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
 import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeValue;
-import jaicore.ml.core.dataset.attribute.timeseries.TimeSeriesAttributeValue;
 import jaicore.ml.core.exception.PredictionException;
-import jaicore.ml.tsc.util.TimeSeriesUtil;
 
 public class LearnShapeletsClassifier
 		extends TSClassifier<CategoricalAttributeType, CategoricalAttributeValue, TimeSeriesDataset> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(LearnShapeletsClassifier.class);
 
-	private List<INDArray> S;
-	private INDArray W;
-	private INDArray W_0;
+	private double[][][] S;
+	private double[][][] W;
+	private double[] W_0;
 
 	private int scaleR;
 	private int K;
@@ -40,27 +37,27 @@ public class LearnShapeletsClassifier
 		this.minShapeLength = minShapeLength;
 	}
 
-	public List<INDArray> getS() {
+	public double[][][] getS() {
 		return S;
 	}
 
-	public void setS(List<INDArray> s) {
+	public void setS(double[][][] s) {
 		S = s;
 	}
 
-	public INDArray getW() {
+	public double[][][] getW() {
 		return W;
 	}
 
-	public void setW(INDArray w) {
+	public void setW(double[][][] w) {
 		W = w;
 	}
 
-	public INDArray getW_0() {
+	public double[] getW_0() {
 		return W_0;
 	}
 
-	public void setW_0(INDArray w_0) {
+	public void setW_0(double[] w_0) {
 		W_0 = w_0;
 	}
 
@@ -70,15 +67,17 @@ public class LearnShapeletsClassifier
 		String[] classes = (String[]) this.getTargetType().getDomain().toArray();
 
 		// TODO: Improve this
-		INDArray instanceValues = instance.getAttributeValue(0, TimeSeriesAttributeValue.class).getValue().getValue();
-		int q = (int) instanceValues.length();
+		// INDArray instanceValues = instance.getAttributeValue(0,
+		// TimeSeriesAttributeValue.class).getValue().getValue();
+		double[] instanceValues = new double[0];
+		int q = instanceValues.length;
 
 		for (int i = 0; i < classes.length; i++) {
-			double tmpScore = this.W_0.getDouble(i);
+			double tmpScore = this.W_0[i];
 			for (int r = 0; r < this.scaleR; r++) {
 				for (int k = 0; k < this.K; k++) {
 					tmpScore += LearnShapeletsAlgorithm.calculateM_hat(this.S, this.minShapeLength, r, instanceValues,
-							k, q, LearnShapeletsAlgorithm.ALPHA) * W.getDouble(i, r, k);
+							k, q, LearnShapeletsAlgorithm.ALPHA) * W[i][r][k];
 				}
 			}
 			scoring.put(classes[i], LearnShapeletsAlgorithm.sigmoid(tmpScore));
@@ -98,25 +97,28 @@ public class LearnShapeletsClassifier
 			LOGGER.warn(
 					"Dataset to be predicted is multivariate but only first time series (univariate) will be considered.");
 
-		INDArray timeSeries = dataset.getValuesOrNull(0);
+		// INDArray timeSeries = dataset.getValuesOrNull(0);
+		// TODO
+		double[][] timeSeries = null;
 		if (timeSeries == null)
 			throw new IllegalArgumentException("Dataset matrix of the instances to be predicted must not be null!");
 
 		List<String> classes = ((CategoricalAttributeType) dataset.getTargetType()).getDomain();
 
 		LOGGER.debug("Starting prediction...");
-		for (int inst = 0; inst < timeSeries.shape()[0]; inst++) {
-			INDArray instanceValues = TimeSeriesUtil.normalizeINDArray(timeSeries.getRow(inst), true); //
-			int q = (int) instanceValues.length();
+		for (int inst = 0; inst < timeSeries.length; inst++) {
+			// TODO
+			double[] instanceValues = null;// TimeSeriesUtil.normalize(timeSeries[inst], true); //
+			int q = instanceValues.length;
 
 			final HashMap<String, Double> scoring = new HashMap<>();
 
 			for (int i = 0; i < classes.size(); i++) {
-				double tmpScore = this.W_0.getDouble(i);
+				double tmpScore = this.W_0[i];
 				for (int r = 0; r < this.scaleR; r++) {
 					for (int k = 0; k < this.K; k++) {
 						tmpScore += LearnShapeletsAlgorithm.calculateM_hat(this.S, this.minShapeLength, r,
-								instanceValues, k, q, LearnShapeletsAlgorithm.ALPHA) * W.getDouble(i, r, k);
+								instanceValues, k, q, LearnShapeletsAlgorithm.ALPHA) * W[i][r][k];
 					}
 				}
 				scoring.put(classes.get(i), LearnShapeletsAlgorithm.sigmoid(tmpScore));
