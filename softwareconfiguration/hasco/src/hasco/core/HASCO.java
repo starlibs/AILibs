@@ -163,7 +163,7 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 				/* now initialize the search */
 				this.logger.debug("Initializing the search");
 				boolean searchInitializationObserved = false;
-				while (this.search.hasNext() && !(searchInitializationObserved = (this.search.next() instanceof AlgorithmInitializedEvent))) {
+				while (this.search.hasNext() && !(searchInitializationObserved = (this.search.nextWithException() instanceof AlgorithmInitializedEvent))) {
 					;
 				}
 				if (!searchInitializationObserved) {
