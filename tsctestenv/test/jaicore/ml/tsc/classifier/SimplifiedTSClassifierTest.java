@@ -232,7 +232,7 @@ public class SimplifiedTSClassifierTest extends TSClassifierTest {
 			}
 		} else if (predictions.get(0) instanceof String) {
 			for (int i = 0; i < totalPreds; i++) {
-				String prediction = (String) predictions.get(i);
+				// String prediction = (String) predictions.get(i);
 				// TODO: Add mapper
 				throw new UnsupportedOperationException("Not implemented yet.");
 				// if (prediction.equals(test.getTargets()[i]))

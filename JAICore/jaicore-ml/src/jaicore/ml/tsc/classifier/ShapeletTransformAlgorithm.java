@@ -56,7 +56,7 @@ public class ShapeletTransformAlgorithm extends
 		public Shapelet(final double[] data, final int startIndex, final int length, final int instanceIndex,
 				final double determinedQuality) {
 			if (data != null)
-				this.data = zNormalize(data, true);
+				this.data = zNormalize(data, USE_BIAS_CORRECTION);
 			this.startIndex = startIndex;
 			this.length = length;
 			this.instanceIndex = instanceIndex;
@@ -65,7 +65,7 @@ public class ShapeletTransformAlgorithm extends
 
 		public Shapelet(final double[] data, final int startIndex, final int length, final int instanceIndex) {
 			if (data != null)
-				this.data = zNormalize(data, true);
+				this.data = zNormalize(data, USE_BIAS_CORRECTION);
 			this.startIndex = startIndex;
 			this.length = length;
 			this.instanceIndex = instanceIndex;
@@ -131,6 +131,8 @@ public class ShapeletTransformAlgorithm extends
 
 	private int minShapeletLength;
 	private int maxShapeletLength;
+
+	private static boolean USE_BIAS_CORRECTION = false;
 
 	public ShapeletTransformAlgorithm(final int k, final int noClusters, final IQualityMeasure qualityMeasure,
 			final int seed, final boolean clusterShapelets) {
@@ -281,6 +283,7 @@ public class ShapeletTransformAlgorithm extends
 		return result;
 	}
 
+	// TODO: Update to new dataset representation
 	public List<Shapelet> clusterShapelets(final List<Shapelet> shapelets, final int noClusters) {
 		final List<List<Shapelet>> C = new ArrayList<>();
 		for (final Shapelet shapelet : shapelets) {
@@ -434,20 +437,20 @@ public class ShapeletTransformAlgorithm extends
 	public static double getMinimumDistanceAmongAllSubsequencesOptimized(final Shapelet shapelet,
 			final double[] timeSeries) {
 
-		int length = shapelet.getLength();
+		double length = shapelet.getLength();
 		int m = timeSeries.length;
 
 		// final INDArray S = shapelet.getData();
 		final double[] S_prime = shapelet.getData();
 		final List<Integer> A = sortIndexes(S_prime, false); // descending
-		final double[] F = zNormalize(getInterval(timeSeries, 0, length), true);
+		final double[] F = zNormalize(getInterval(timeSeries, 0, shapelet.getLength()), USE_BIAS_CORRECTION);
 
 		double p = 0;
 		double q = 0;
 
 		// TODO: Update variables here too
 
-		p = sum(getInterval(timeSeries, 0, length));
+		p = sum(getInterval(timeSeries, 0, shapelet.getLength()));
 		for (int i = 0; i < length; i++) {
 			q += timeSeries[i] * timeSeries[i];
 		}
@@ -457,17 +460,18 @@ public class ShapeletTransformAlgorithm extends
 		for (int i = 1; i <= m - length; i++) {
 
 			double t_i = timeSeries[i - 1];
-			double t_il = timeSeries[i - 1 + length];
+			double t_il = timeSeries[i - 1 + shapelet.getLength()];
 			p -= t_i;
 			q -= t_i * t_i;
 			p += t_il;
 			q += t_il * t_il;
 			double x_bar = p / length;
 			double s = q / (length) - x_bar * x_bar;
-			s = s < 0.000000001d ? 0d : Math.sqrt(((double) length / (double) (length - 1)) * s); //
+			s = s < 0.000000001d ? 0d
+					: Math.sqrt(USE_BIAS_CORRECTION ? ((double) length / (double) (length - 1d)) : 1d * s); //
 
 			int j = 0;
-			double d = 0;
+			double d = 0d;
 
 
 			while (j < length && d < b) {
@@ -590,9 +594,11 @@ public class ShapeletTransformAlgorithm extends
 
 		double[] normalizedShapeletData = shapelet.getData();
 
-		for (int i = 0; i <= n - l; i++) {
+		// TODO: Reference implementation uses i < n-l => Leads sometimes to a better
+		// performance => Check this
+		for (int i = 0; i < n - l; i++) {
 			double tmpED = singleSquaredEuclideanDistance(normalizedShapeletData,
-					zNormalize(getInterval(timeSeries, i, i + l), true));
+					zNormalize(getInterval(timeSeries, i, i + l), USE_BIAS_CORRECTION));
 			if (tmpED < min)
 				min = tmpED;
 		}

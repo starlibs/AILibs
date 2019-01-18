@@ -101,7 +101,7 @@ public class ShapeletTransformTSClassifier
 		Instance inst = WekaUtil.simplifiedTSInstanceToWekaInstance(transformedInstance);
 
 		try {
-			return (int) classifier.classifyInstance(inst);
+			return (int) Math.round(classifier.classifyInstance(inst));
 		} catch (Exception e) {
 			throw new PredictionException(String.format("Could not predict Weka instance {}.", inst.toString()), e);
 		}
