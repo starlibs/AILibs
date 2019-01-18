@@ -239,4 +239,46 @@ public class TimeSeriesUtil {
 		}
 		return result.addi(Nd4j.EPS_THRESHOLD).divi(std);
 	}
+
+	/**
+	 * Z-normalizes a given <code>dataVector</code>. Uses Bessel's correction
+	 * (1/(n-1) in the calculation of the standard deviation) if set.
+	 * 
+	 * @param dataVector
+	 *            Vector to be z-normalized
+	 * @param besselsCorrection
+	 *            Indicator whether the std dev correction using n-1 instead of n
+	 *            should be applied
+	 * @return Z-normalized vector
+	 */
+	// TODO: Use Filter implementation
+	public static double[] zNormalize(final double[] dataVector, final boolean besselsCorrection) {
+		// TODO: Parameter checks...
+
+		int n = dataVector.length - (besselsCorrection ? 1 : 0);
+
+		double mean = 0; // dataVector.meanNumber().doubleValue();
+		for (int i = 0; i < dataVector.length; i++) {
+			mean += dataVector[i];
+		}
+		mean /= dataVector.length;
+
+		// Use Bessel's correction to get the sample stddev
+		double stddev = 0;
+		for (int i = 0; i < dataVector.length; i++) {
+			stddev += Math.pow(dataVector[i] - mean, 2);
+		}
+		stddev /= n;
+		stddev = Math.sqrt(stddev);
+
+		double[] result = new double[dataVector.length];
+		if (stddev == 0.0)
+			return result;
+
+		for (int i = 0; i < result.length; i++) {
+			result[i] = (dataVector[i] - mean) / stddev;
+		}
+
+		return result;
+	}
 }

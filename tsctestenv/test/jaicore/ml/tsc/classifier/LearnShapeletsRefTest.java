@@ -72,7 +72,7 @@ public class LearnShapeletsRefTest {
 		refClf.setSeed(seed);
 		refClf.fixParameters();
 
-		Map<String, Object> result = TSClassifierTest.compareClassifiers(refClf, ownClf, seed, null, null,
+		Map<String, Object> result = SimplifiedTSClassifierTest.compareClassifiers(refClf, ownClf, seed, null, null,
 				new File(ITALY_POWER_DEMAND_TRAIN), new File(ITALY_POWER_DEMAND_TEST));
 
 		System.out.println("Ref clf parameters: " + refClf.getParameters());

@@ -9,14 +9,10 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jaicore.ml.core.dataset.TimeSeriesDataset;
-import jaicore.ml.core.dataset.TimeSeriesInstance;
-import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
-import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeValue;
 import jaicore.ml.core.exception.PredictionException;
 
 public class LearnShapeletsClassifier
-		extends TSClassifier<CategoricalAttributeType, CategoricalAttributeValue, TimeSeriesDataset> {
+		extends ASimplifiedTSClassifier<Integer> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(LearnShapeletsClassifier.class);
 
@@ -27,6 +23,8 @@ public class LearnShapeletsClassifier
 	private int scaleR;
 	private int K;
 	private int minShapeLength;
+
+	private int C;
 
 	public LearnShapeletsClassifier(final int K, final double learningRate, final double regularization,
 			final int scaleR, final int minShapeLength, final int maxIter, final int seed) {
@@ -61,73 +59,139 @@ public class LearnShapeletsClassifier
 		W_0 = w_0;
 	}
 
+	public void setC(int c) {
+		C = c;
+	}
+
+	// @Override
+	// public CategoricalAttributeValue predict(TimeSeriesInstance instance) throws
+	// PredictionException {
+	// final HashMap<String, Double> scoring = new HashMap<>();
+	// String[] classes = (String[]) this.getTargetType().getDomain().toArray();
+	//
+	// // TODO: Improve this
+	// // INDArray instanceValues = instance.getAttributeValue(0,
+	// // TimeSeriesAttributeValue.class).getValue().getValue();
+	// double[] instanceValues = new double[0];
+	// int q = instanceValues.length;
+	//
+	// for (int i = 0; i < classes.length; i++) {
+	// double tmpScore = this.W_0[i];
+	// for (int r = 0; r < this.scaleR; r++) {
+	// for (int k = 0; k < this.K; k++) {
+	// tmpScore += LearnShapeletsAlgorithm.calculateM_hat(this.S,
+	// this.minShapeLength, r, instanceValues,
+	// k, q, LearnShapeletsAlgorithm.ALPHA) * W[i][r][k];
+	// }
+	// }
+	// scoring.put(classes[i], LearnShapeletsAlgorithm.sigmoid(tmpScore));
+	// }
+	//
+	// String predictedClass = Collections.max(scoring.entrySet(),
+	// Map.Entry.comparingByValue()).getKey();
+	//
+	// return (CategoricalAttributeValue)
+	// this.getTargetType().buildAttributeValue(predictedClass);
+	// }
+	//
+	// @Override
+	// public List<CategoricalAttributeValue> predict(TimeSeriesDataset dataset)
+	// throws PredictionException {
+	//
+	// final List<CategoricalAttributeValue> predictions = new ArrayList<>();
+	//
+	// if (dataset.isMultivariate())
+	// LOGGER.warn(
+	// "Dataset to be predicted is multivariate but only first time series
+	// (univariate) will be considered.");
+	//
+	// // INDArray timeSeries = dataset.getValuesOrNull(0);
+	// // TODO
+	// double[][] timeSeries = null;
+	// if (timeSeries == null)
+	// throw new IllegalArgumentException("Dataset matrix of the instances to be
+	// predicted must not be null!");
+	//
+	// List<String> classes = ((CategoricalAttributeType)
+	// dataset.getTargetType()).getDomain();
+	//
+	// LOGGER.debug("Starting prediction...");
+	// for (int inst = 0; inst < timeSeries.length; inst++) {
+	// // TODO
+	// double[] instanceValues = null;// TimeSeriesUtil.normalize(timeSeries[inst],
+	// true); //
+	// int q = instanceValues.length;
+	//
+	// final HashMap<String, Double> scoring = new HashMap<>();
+	//
+	// for (int i = 0; i < classes.size(); i++) {
+	// double tmpScore = this.W_0[i];
+	// for (int r = 0; r < this.scaleR; r++) {
+	// for (int k = 0; k < this.K; k++) {
+	// tmpScore += LearnShapeletsAlgorithm.calculateM_hat(this.S,
+	// this.minShapeLength, r,
+	// instanceValues, k, q, LearnShapeletsAlgorithm.ALPHA) * W[i][r][k];
+	// }
+	// }
+	// scoring.put(classes.get(i), LearnShapeletsAlgorithm.sigmoid(tmpScore));
+	// }
+	// LOGGER.debug("Scoring for instance {}: {}", inst, scoring);
+	//
+	// String predictedClass = Collections.max(scoring.entrySet(),
+	// Map.Entry.comparingByValue()).getKey();
+	//
+	// predictions.add((CategoricalAttributeValue)
+	// dataset.getTargetType().buildAttributeValue(predictedClass));
+	// }
+	// LOGGER.debug("Finished prediction.");
+	//
+	// return predictions;
+	// }
+
 	@Override
-	public CategoricalAttributeValue predict(TimeSeriesInstance instance) throws PredictionException {
-		final HashMap<String, Double> scoring = new HashMap<>();
-		String[] classes = (String[]) this.getTargetType().getDomain().toArray();
+	public Integer predict(double[] univInstance) throws PredictionException {
+		final HashMap<Integer, Double> scoring = new HashMap<>();
 
-		// TODO: Improve this
-		// INDArray instanceValues = instance.getAttributeValue(0,
-		// TimeSeriesAttributeValue.class).getValue().getValue();
-		double[] instanceValues = new double[0];
-		int q = instanceValues.length;
-
-		for (int i = 0; i < classes.length; i++) {
+		for (int i = 0; i < this.C; i++) {
 			double tmpScore = this.W_0[i];
 			for (int r = 0; r < this.scaleR; r++) {
-				for (int k = 0; k < this.K; k++) {
-					tmpScore += LearnShapeletsAlgorithm.calculateM_hat(this.S, this.minShapeLength, r, instanceValues,
-							k, q, LearnShapeletsAlgorithm.ALPHA) * W[i][r][k];
+				for (int k = 0; k < this.S[r].length; k++) {
+					tmpScore += LearnShapeletsAlgorithm.calculateM_hat(this.S, this.minShapeLength, r, univInstance, k,
+							univInstance.length, LearnShapeletsAlgorithm.ALPHA) * W[i][r][k];
 				}
 			}
-			scoring.put(classes[i], LearnShapeletsAlgorithm.sigmoid(tmpScore));
+			scoring.put(i, LearnShapeletsAlgorithm.sigmoid(tmpScore));
 		}
 
-		String predictedClass = Collections.max(scoring.entrySet(), Map.Entry.comparingByValue()).getKey();
-
-		return (CategoricalAttributeValue) this.getTargetType().buildAttributeValue(predictedClass);
+		return Collections.max(scoring.entrySet(), Map.Entry.comparingByValue()).getKey();
 	}
 
 	@Override
-	public List<CategoricalAttributeValue> predict(TimeSeriesDataset dataset) throws PredictionException {
+	public Integer predict(List<double[]> multivInstance) throws PredictionException {
+		// TODO: Add multivariate support
+		LOGGER.warn(
+				"Dataset to be predicted is multivariate but only first time series (univariate) will be considered.");
 
-		final List<CategoricalAttributeValue> predictions = new ArrayList<>();
+		return predict(multivInstance.get(0));
+	}
 
+	@Override
+	public List<Integer> predict(jaicore.ml.tsc.dataset.TimeSeriesDataset dataset) throws PredictionException {
 		if (dataset.isMultivariate())
 			LOGGER.warn(
 					"Dataset to be predicted is multivariate but only first time series (univariate) will be considered.");
 
-		// INDArray timeSeries = dataset.getValuesOrNull(0);
-		// TODO
-		double[][] timeSeries = null;
+		double[][] timeSeries = dataset.getValuesOrNull(0);
 		if (timeSeries == null)
 			throw new IllegalArgumentException("Dataset matrix of the instances to be predicted must not be null!");
 
-		List<String> classes = ((CategoricalAttributeType) dataset.getTargetType()).getDomain();
+		List<Integer> predictions = new ArrayList<>();
 
 		LOGGER.debug("Starting prediction...");
 		for (int inst = 0; inst < timeSeries.length; inst++) {
-			// TODO
-			double[] instanceValues = null;// TimeSeriesUtil.normalize(timeSeries[inst], true); //
-			int q = instanceValues.length;
+			double[] instanceValues = timeSeries[inst];
+			predictions.add(this.predict(instanceValues));
 
-			final HashMap<String, Double> scoring = new HashMap<>();
-
-			for (int i = 0; i < classes.size(); i++) {
-				double tmpScore = this.W_0[i];
-				for (int r = 0; r < this.scaleR; r++) {
-					for (int k = 0; k < this.K; k++) {
-						tmpScore += LearnShapeletsAlgorithm.calculateM_hat(this.S, this.minShapeLength, r,
-								instanceValues, k, q, LearnShapeletsAlgorithm.ALPHA) * W[i][r][k];
-					}
-				}
-				scoring.put(classes.get(i), LearnShapeletsAlgorithm.sigmoid(tmpScore));
-			}
-			LOGGER.debug("Scoring for instance {}: {}", inst, scoring);
-
-			String predictedClass = Collections.max(scoring.entrySet(), Map.Entry.comparingByValue()).getKey();
-
-			predictions.add((CategoricalAttributeValue) dataset.getTargetType().buildAttributeValue(predictedClass));
 		}
 		LOGGER.debug("Finished prediction.");
 

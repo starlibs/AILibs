@@ -7,17 +7,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.nd4j.linalg.api.rng.distribution.Distribution;
-import org.nd4j.linalg.api.rng.distribution.impl.NormalDistribution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jaicore.basic.TimeOut;
 import jaicore.basic.algorithm.IAlgorithmConfig;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
-import jaicore.ml.core.dataset.TimeSeriesDataset;
-import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
-import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeValue;
+import jaicore.ml.tsc.dataset.TimeSeriesDataset;
+import jaicore.ml.tsc.util.TimeSeriesUtil;
 import weka.clusterers.SimpleKMeans;
 import weka.core.Attribute;
 import weka.core.Debug.Random;
@@ -35,7 +32,7 @@ import weka.core.Instances;
  *
  */
 public class LearnShapeletsAlgorithm extends
-		ATSCAlgorithm<CategoricalAttributeType, CategoricalAttributeValue, TimeSeriesDataset, LearnShapeletsClassifier> {
+		ASimplifiedTSCAlgorithm<Integer, LearnShapeletsClassifier> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(LearnShapeletsAlgorithm.class);
 
@@ -50,6 +47,8 @@ public class LearnShapeletsAlgorithm extends
 	private int I;
 	private int Q;
 	private int C;
+
+	private static final boolean USE_BIAS_CORRECTION = true;
 
 	public static double ALPHA = -30d; // Used in implementation. Paper says -100d
 
@@ -104,10 +103,8 @@ public class LearnShapeletsAlgorithm extends
 						// trainingMatrix.getDouble(i, j + l));
 						tmpSegments[i * numberOfSegments + j][l] = trainingMatrix[i][j + l];
 					}
-					// TimeSeriesUtil.normalizeINDArray(tmpSegments.getRow(i * numberOfSegments +
-					// j), true);
-					// TODO: Normalize
-					tmpSegments[i * numberOfSegments + j] = null; // normalize(tmpSegments[i*numberOfSegments+j];
+					tmpSegments[i * numberOfSegments + j] = TimeSeriesUtil
+							.zNormalize(tmpSegments[i * numberOfSegments + j], USE_BIAS_CORRECTION);
 				}
 			}
 
@@ -146,9 +143,9 @@ public class LearnShapeletsAlgorithm extends
 			Instances clusterCentroids = kMeans.getClusterCentroids();
 
 			// result[r] = TimeSeriesUtil.wekaInstancesToINDArray(clusterCentroids, false);
-			double[][] tmpResult = new double[wekaInstances.numInstances()][wekaInstances.numAttributes()];
+			double[][] tmpResult = new double[clusterCentroids.numInstances()][clusterCentroids.numAttributes()];
 			for (int i = 0; i < tmpResult.length; i++) {
-				double[] instValues = wekaInstances.get(i).toDoubleArray();
+				double[] instValues = clusterCentroids.get(i).toDoubleArray();
 				for (int j = 0; j < tmpResult[i].length; j++) {
 					tmpResult[i][j] = instValues[j];
 				}
@@ -171,7 +168,6 @@ public class LearnShapeletsAlgorithm extends
 	// throw new UnsupportedOperationException("Multivariate datasets are not
 	// supported.");
 	//
-	// // TODO: Possibly unsafe cast
 	// this.model.setTargetType((CategoricalAttributeType) data.getTargetType());
 	//
 	// final INDArray dataMatrix = data.getValuesOrNull(0);
@@ -228,9 +224,6 @@ public class LearnShapeletsAlgorithm extends
 	// Phi.add(Nd4j.create(this.I, this.K, numberOfSegments));
 	// }
 	//
-	// // TODO: Check correct order of shape parameters of W => Current version is
-	// the
-	// // paper's version but doesn't match with the allocated matrix's shape
 	// Distribution wInitDistribution = new NormalDistribution(0, 0.01);
 	// INDArray W = Nd4j.rand(new long[] { this.C, this.scaleR, this.K },
 	// wInitDistribution);
@@ -271,14 +264,12 @@ public class LearnShapeletsAlgorithm extends
 	//
 	// double newPsiValue = 0;
 	// double newMHatValue = 0;
-	// // FIXME: Xi stores zero only for row
 	// for (int j = 0; j < J_r; j++) {
 	// newPsiValue += Xi.get(r).getDouble(i, k, j);
 	// newMHatValue += D.get(r).getDouble(i, k, j) * Xi.get(r).getDouble(i, k, j);
 	// }
 	// Psi.putScalar(new int[] { r, i, k }, newPsiValue);
 	//
-	// // FIXME Div by zero
 	// newMHatValue /= Psi.getDouble(r, i, k);
 	//
 	// // if (Double.isNaN(newMHatValue) || Double.isInfinite(newMHatValue))
@@ -379,17 +370,12 @@ public class LearnShapeletsAlgorithm extends
 		if (data.isMultivariate())
 			throw new UnsupportedOperationException("Multivariate datasets are not supported.");
 
-		// TODO: Possibly unsafe cast
-		this.model.setTargetType((CategoricalAttributeType) data.getTargetType());
+		final double[][] dataMatrix = data.getValuesOrNull(0);
+		if (dataMatrix == null) // || dataMatrix.shape().length != 2)
+			throw new IllegalArgumentException(
+					"Timestamp matrix must be a valid 2D matrix containing the time series values for all instances!");
 
-		// TODO
-		final double[][] dataMatrix = null; // = data.getValuesOrNull(0);
-		// if (dataMatrix == null || dataMatrix.shape().length != 2)
-		// throw new IllegalArgumentException(
-		// "Timestamp matrix must be a valid 2D matrix containing the time series values
-		// for all instances!");
-
-		final int[] targetMatrix = null; // = data.getTargets();
+		final int[] targetMatrix = data.getTargets();
 		final List<Integer> occuringClasses = IntStream.of(targetMatrix).boxed().collect(Collectors.toSet()).stream()
 				.collect(Collectors.toList());// DoubleStream.of(targetMatrix.toDoubleVector()).mapToInt(d -> (int) d)
 		// .boxed().collect(Collectors.toSet()).stream().collect(Collectors.toList());
@@ -444,7 +430,6 @@ public class LearnShapeletsAlgorithm extends
 
 		// TODO: Check correct order of shape parameters of W => Current version is the
 		// paper's version but doesn't match with the allocated matrix's shape
-		Distribution wInitDistribution = new NormalDistribution(0, 0.01);
 		Random rand = new Random(this.seed);
 
 		double[][][] W = new double[this.C][this.scaleR][this.K];
@@ -486,41 +471,25 @@ public class LearnShapeletsAlgorithm extends
 						int J_r = getNumberOfSegments(this.Q, this.minShapeLength, r);
 
 						for (int j = 0; j < J_r; j++) {
-							// if (i == 23 && k == 4 && r == 2)
-							// LOGGER.debug("Check this here.");
 
 							double newDValue = calculateD(S, minShapeLength, r, dataMatrix[i], k, j);
-							// if (Double.isNaN(newDValue))
-							// newDValue = 0;
-
-							// D.get(r).putScalar(new int[] { i, k, j }, newDValue);
 							D[r][i][k][j] = newDValue;
 							newDValue = Math.exp(ALPHA * newDValue);
-							// if (Double.isNaN(newDValue))
-							// LOGGER.debug("Test");// newDValue = 0;
-							// Xi.get(r).putScalar(new int[] { i, k, j }, newDValue);
 							Xi[r][i][k][j] = newDValue;
 
 						}
 
 						double newPsiValue = 0;
 						double newMHatValue = 0;
-						// FIXME: Xi stores zero only for row
+
 						for (int j = 0; j < J_r; j++) {
 							newPsiValue += Xi[r][i][k][j];
 							newMHatValue += D[r][i][k][j] * Xi[r][i][k][j];
 						}
 						Psi[r][i][k] = newPsiValue;
-						// Psi.putScalar(new int[] { r, i, k }, newPsiValue);
 
-						// FIXME Div by zero
-						// newMHatValue /= Psi.getDouble(r, i, k);
 						newMHatValue /= Psi[r][i][k];
 
-						// if (Double.isNaN(newMHatValue) || Double.isInfinite(newMHatValue))
-						// LOGGER.debug("NaN value");
-
-						// M_hat.putScalar(new int[] { r, i, k }, newMHatValue);
 						M_hat[r][i][k] = newMHatValue;
 					}
 				}
@@ -599,6 +568,7 @@ public class LearnShapeletsAlgorithm extends
 		this.model.setS(S);
 		this.model.setW(W);
 		this.model.setW_0(W_0);
+		this.model.setC(this.C);
 		// this.model.setM_hat(M_hat);
 		return this.model;
 	}
