@@ -123,7 +123,7 @@ public class WEKAPipelineCharacterizer implements IPipelineCharacterizer {
 	public void buildFromFile() {
 		try {
 			this.buildFromFile(
-					Paths.get(getClass().getClassLoader().getResource(ALGORITHM_PATTERNS_PATH).toURI()).toFile());
+					Paths.get(getClass().getClassLoader().getResource(ALGORITHM_PATTERNS_2000_PATH).toURI()).toFile());
 		} catch (URISyntaxException e) {
 			log.error("Couldn't find default algorithm patterns!", e);
 		}
