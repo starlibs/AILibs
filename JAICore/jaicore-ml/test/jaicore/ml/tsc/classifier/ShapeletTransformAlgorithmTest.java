@@ -12,10 +12,22 @@ import org.junit.Test;
 
 import jaicore.ml.tsc.classifier.ShapeletTransformAlgorithm.Shapelet;
 
+/**
+ * Unit tests for {@link ShapeletTransformAlgorithm}.
+ * 
+ * @author Julian Lienen
+ *
+ */
 public class ShapeletTransformAlgorithmTest {
-
+	/**
+	 * Maximal delta for asserts with precision.
+	 */
 	private static final double EPS_DELTA = 0.000001;
 
+	/**
+	 * See
+	 * {@link ShapeletTransformAlgorithm#generateCandidates(double[], int, int)}.
+	 */
 	@Test
 	public void generateCandidatesTest() {
 		double[] data = new double[] { 1, 2, 3, 4, 5, 6 };
@@ -29,6 +41,9 @@ public class ShapeletTransformAlgorithmTest {
 
 	}
 
+	/**
+	 * See {@link ShapeletTransformAlgorithm#findDistances(Shapelet, double[][])}.
+	 */
 	@Test
 	public void findDistancesTest() {
 		Shapelet shapelet = new Shapelet(new double[] { 1, 2, 3 }, 0, 3, 0);
@@ -44,6 +59,9 @@ public class ShapeletTransformAlgorithmTest {
 		Assert.assertEquals(2d / 3, actResult.get(1), EPS_DELTA); // (1.224744871 * 1.224744871 * 2) / 3,
 	}
 
+	/**
+	 * See {@link ShapeletTransformAlgorithm#removeSelfSimilar(List)}.
+	 */
 	@Test
 	public void removeSelfSimilarTest() {
 		List<Map.Entry<Shapelet, Double>> shapelets = new ArrayList<>();
@@ -56,6 +74,9 @@ public class ShapeletTransformAlgorithmTest {
 		Assert.assertEquals(4, ShapeletTransformAlgorithm.removeSelfSimilar(shapelets).size());
 	}
 
+	/**
+	 * See {@link ShapeletTransformAlgorithm#merge(int, List, List)}.
+	 */
 	@Test
 	public void mergeTest() {
 		Map.Entry<Shapelet, Double> testEntry1;
@@ -84,6 +105,9 @@ public class ShapeletTransformAlgorithmTest {
 		Assert.assertFalse(actResult.contains(testEntry2));
 	}
 
+	/**
+	 * See {@link ShapeletTransformAlgorithm#zNormalize(double[], boolean)}.
+	 */
 	@Test
 	public void zNormalizeTest() {
 		double[] vector = new double[] { 1, 2, 3 };
@@ -99,6 +123,12 @@ public class ShapeletTransformAlgorithmTest {
 		System.out.println(Arrays.toString(ShapeletTransformAlgorithm.zNormalize(array, true)));
 	}
 
+	/**
+	 * See
+	 * {@link ShapeletTransformAlgorithm#getMinimumDistanceAmongAllSubsequences(Shapelet, double[])}
+	 * and
+	 * {@link ShapeletTransformAlgorithm#getMinimumDistanceAmongAllSubsequencesOptimized(Shapelet, double[])
+	 */
 	@Test
 	public void getMinimumDistanceAmongAllSequencesOptimizedTest() {
 		double[] matrix = new double[] { 4, 1, 2, 4, 6, 5 };
@@ -115,6 +145,9 @@ public class ShapeletTransformAlgorithmTest {
 				EPS_DELTA);
 	}
 
+	/**
+	 * See {@link ShapeletTransformAlgorithm#sortIndexes(double[], boolean)}.
+	 */
 	@Test
 	public void sortIndexesTest() {
 		double[] vector = new double[] { 4, 2, 6 };
@@ -131,6 +164,10 @@ public class ShapeletTransformAlgorithmTest {
 		Assert.assertEquals(Arrays.asList(0, 1, 2), result2);
 	}
 
+	/**
+	 * See
+	 * {@link ShapeletTransformAlgorithm#singleSquaredEuclideanDistance(double[], double[])}.
+	 */
 	@Test
 	public void squareEuclideanDistanceTest() {
 		double[] vector = new double[] { 4, 2, 6 };
@@ -139,6 +176,13 @@ public class ShapeletTransformAlgorithmTest {
 		Assert.assertEquals(8d, ShapeletTransformAlgorithm.singleSquaredEuclideanDistance(vector, vector2), EPS_DELTA);
 	}
 
+	/**
+	 * See {@link
+	 * ShapeletTransformAlgorithm#getMinimumDistanceAmongAllSubsequences(Shapelet,
+	 * double[])} and {@link
+	 * ShapeletTransformAlgorithm#getMinimumDistanceAmongAllSubsequencesOptimized(Shapelet,
+	 * double[])
+	 */
 	@Test
 	public void getMinimumDistanceAmongAllSequencesOptimizedTest2() {
 		double[] matrix = new double[] { 4, 3, 6, 9 };
@@ -148,19 +192,9 @@ public class ShapeletTransformAlgorithmTest {
 		Shapelet shapelet = new Shapelet(vector, 0, 3, 0);
 
 		double oldResult = ShapeletTransformAlgorithm.getMinimumDistanceAmongAllSubsequences(shapelet, matrix);
-		System.out.println("oldResult: " + 3 * oldResult);
 		double oldOptimizedResult = ShapeletTransformAlgorithm.getMinimumDistanceAmongAllSubsequencesOptimized(shapelet,
 				matrix);
 
-		System.out.println("=============================================");
-		// double actResult =
-		// ShapeletTransformAlgorithm.getMinimumDistanceAmongAllSubsequencesOptimized2(shapelet,
-		// matrix);
-
 		Assert.assertEquals(oldResult, oldOptimizedResult, EPS_DELTA);
-		// Assert.assertEquals(oldOptimizedResult, actResult, EPS_DELTA);
-		// Assert.assertEquals(0, actResult, EPS_DELTA);
-
-		// System.out.println(actResult);
 	}
 }

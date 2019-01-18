@@ -48,47 +48,6 @@ public class ShapeletTransformTSClassifier
 		this.shapelets = shapelets;
 	}
 
-	// @Override
-	// public List<CategoricalAttributeValue> predict(TimeSeriesDataset dataset)
-	// throws PredictionException {
-	//
-	// if(dataset.isMultivariate())
-	// LOGGER.warn(
-	// "Dataset to be predicted is multivariate but only first time series
-	// (univariate) will be considered.");
-	//
-	// LOGGER.debug("Transforming dataset...");
-	// TimeSeriesDataset transformedDataset =
-	// ShapeletTransformAlgorithm.shapeletTransform(dataset, this.shapelets);
-	// LOGGER.debug("Transformed dataset.");
-	// INDArray timeSeries = transformedDataset.getValuesOrNull(0);
-	// if (timeSeries == null)
-	// throw new IllegalArgumentException("Dataset matrix of the instances to be
-	// predicted must not be null!");
-	//
-	// LOGGER.debug("Converting time series dataset to Weka instances...");
-	// Instances insts =
-	// WekaUtil.timeSeriesDatasetToWekaInstances(transformedDataset);
-	// LOGGER.debug("Converted time series dataset to Weka instances.");
-	//
-	// LOGGER.debug("Starting prediction...");
-	// final List<CategoricalAttributeValue> predictions = new ArrayList<>();
-	// for (final Instance inst : insts) {
-	// try {
-	// double prediction = classifier.classifyInstance(inst);
-	// predictions.add((CategoricalAttributeValue) this.getTargetType()
-	// .buildAttributeValue(this.getTargetType().getDomain().get((int)
-	// prediction)));
-	// } catch (Exception e) {
-	// throw new PredictionException(String.format("Could not predict Weka instance
-	// {}.", inst.toString()), e);
-	// }
-	// }
-	// LOGGER.debug("Finished prediction.");
-	//
-	// return predictions;
-	// }
-
 	public void setClassifier(Classifier classifier) {
 		this.classifier = classifier;
 	}
@@ -118,8 +77,6 @@ public class ShapeletTransformTSClassifier
 
 	@Override
 	public List<Integer> predict(TimeSeriesDataset dataset) throws PredictionException {
-		// TODO Auto-generated method stub
-		
 
 		if(dataset.isMultivariate())
 			LOGGER.warn(
