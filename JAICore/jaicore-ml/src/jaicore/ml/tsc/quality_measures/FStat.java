@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.nd4j.linalg.api.ndarray.INDArray;
-
 public class FStat implements IQualityMeasure {
 	/**
 	 * Generated serial version UID.
@@ -13,13 +11,13 @@ public class FStat implements IQualityMeasure {
 	private static final long serialVersionUID = 6991529180002046551L;
 
 	@Override
-	public double assessQuality(final List<Double> distances, final INDArray classValues) {
+	public double assessQuality(final List<Double> distances, final int[] classValues) {
 		HashMap<Integer, List<Double>> classDistances = new HashMap<>();
 		for (int i = 0; i < distances.size(); i++) {
-			if (!classDistances.containsKey(classValues.getInt(i)))
-				classDistances.put(classValues.getInt(i), new ArrayList<>());
+			if (!classDistances.containsKey(classValues[i]))
+				classDistances.put(classValues[i], new ArrayList<>());
 
-			classDistances.get(classValues.getInt(i)).add(distances.get(i));
+			classDistances.get(classValues[i]).add(distances.get(i));
 		}
 
 		int numClasses = classDistances.size();
