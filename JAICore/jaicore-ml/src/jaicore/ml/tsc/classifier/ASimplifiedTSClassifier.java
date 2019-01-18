@@ -87,7 +87,19 @@ public abstract class ASimplifiedTSClassifier<TARGETDOMAIN> {
 	 * @throws TrainingException
 	 *             If something fails during the training process.
 	 */
-	public abstract void train(final TimeSeriesDataset dataset) throws TrainingException;
+	public void train(final TimeSeriesDataset dataset) throws TrainingException {
+		// Set model which is trained
+		this.algorithm.setModel(this);
+
+		// Set input data from which the model should learn
+		algorithm.setInput(dataset);
+		try {
+			// Train
+			algorithm.call();
+		} catch (Exception e) {
+			throw new TrainingException("Could not train model " + this.getClass().getSimpleName(), e);
+		}
+	}
 
 	/**
 	 * Getter for the property <code>classMapper</code>.
