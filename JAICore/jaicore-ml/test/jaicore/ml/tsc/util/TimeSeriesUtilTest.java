@@ -17,11 +17,12 @@ public class TimeSeriesUtilTest {
 
 	@Test
 	public void timeSeriesDatasetToWekaInstancesTest() {
-		final List<INDArray> valueMatrix = Arrays.asList(Nd4j.create(new double[][] {{1,2,3,4}, {1,2,2,2}}));
+		final List<INDArray> valueMatrix = Arrays
+				.asList(Nd4j.create(new double[][] { { 1, 2, 3, 4 }, { 1, 2, 2, 2 } }));
 		TimeSeriesDataset dataset = new TimeSeriesDataset(valueMatrix, new ArrayList<>(),
 				Nd4j.create(new double[] { 1, 2 }));
 
-		Instances actResult = TimeSeriesUtil.timeSeriesDatasetToWekaInstances(dataset);
+		Instances actResult = WekaUtil.timeSeriesDatasetToWekaInstances(dataset);
 
 		Assert.assertEquals(2, actResult.numInstances());
 		Assert.assertEquals(5, actResult.numAttributes()); // 4 + target

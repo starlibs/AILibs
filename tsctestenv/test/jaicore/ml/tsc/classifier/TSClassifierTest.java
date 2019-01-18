@@ -24,7 +24,6 @@ import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.core.exception.TrainingException;
 import jaicore.ml.tsc.exceptions.TimeSeriesLoadingException;
 import jaicore.ml.tsc.util.TimeSeriesLoader;
-import jaicore.ml.tsc.util.TimeSeriesUtil;
 import sfa.classification.Classifier.Predictions;
 import sfa.timeseries.TimeSeries;
 import weka.classifiers.Classifier;
@@ -86,9 +85,8 @@ public class TSClassifierTest {
 	public static Map<String, Object> compareClassifiers(final Object tsRefClassifier,
 			final TSClassifier<?, ?, TimeSeriesDataset> tsClassifier, final int seed,
 			final String tsRefClassifierParams, final String tsClassifierParams, final File trainingArffFile,
-			final File testArffFile)
-			throws FileNotFoundException, EvaluationException, TrainingException, IOException, PredictionException,
-			TimeSeriesLoadingException {
+			final File testArffFile) throws FileNotFoundException, EvaluationException, TrainingException, IOException,
+			PredictionException, TimeSeriesLoadingException {
 
 		if (trainingArffFile == null || testArffFile == null)
 			throw new IllegalArgumentException("Training and test file must not be null!");
@@ -149,10 +147,8 @@ public class TSClassifierTest {
 	 *             Will be thrown if the time series dataset could not be loaded
 	 */
 	public static Map<String, Object> compareClassifiers(final Object tsRefClassifier,
-			final TSClassifier<?, ?, TimeSeriesDataset> tsClassifier,
-			final int seed,
-			final double trainingPortion, final String tsRefClassifierParams, final String tsClassifierParams,
-			final File... arffFiles)
+			final TSClassifier<?, ?, TimeSeriesDataset> tsClassifier, final int seed, final double trainingPortion,
+			final String tsRefClassifierParams, final String tsClassifierParams, final File... arffFiles)
 			throws FileNotFoundException, EvaluationException, TrainingException, IOException, PredictionException,
 			TimeSeriesLoadingException {
 
@@ -166,8 +162,9 @@ public class TSClassifierTest {
 		// Load dataset
 		TimeSeriesDataset dataset = loadDatasetFromArffFiles(arffFiles);
 
-		Pair<TimeSeriesDataset, TimeSeriesDataset> trainTest = TimeSeriesUtil.getStratifiedSplit(dataset,
-				trainingPortion);
+		// TODO
+		Pair<TimeSeriesDataset, TimeSeriesDataset> trainTest = null; // jaicore.ml.tsc.util.WekaUtil.getStratifiedSplit(dataset,
+		// trainingPortion);
 		TimeSeriesDataset train = trainTest.getX();
 		TimeSeriesDataset test = trainTest.getY();
 
@@ -204,17 +201,15 @@ public class TSClassifierTest {
 	 */
 	public static void compareRefClassifiers(final Object tsRefClassifier, final int seed,
 			final String tsRefClassifierParams, final Map<String, Object> result, final File trainingFile,
-			final File testFile)
-			throws FileNotFoundException, EvaluationException, TrainingException, IOException {
+			final File testFile) throws FileNotFoundException, EvaluationException, TrainingException, IOException {
 		if (tsRefClassifier instanceof sfa.classification.Classifier) {
 			// SFA
 			// TODO
 			TimeSeries[] train = null;
 			TimeSeries[] test = null;
 
-			trainAndEvaluateSFARefClassifier((sfa.classification.Classifier) tsRefClassifier, 
-					tsRefClassifierParams, result,
-					train, test);
+			trainAndEvaluateSFARefClassifier((sfa.classification.Classifier) tsRefClassifier, tsRefClassifierParams,
+					result, train, test);
 		} else if (tsRefClassifier instanceof Classifier) {
 			// Bagnall
 			// Transform and split data to Weka instances
@@ -226,8 +221,7 @@ public class TSClassifierTest {
 			final Instances testInstances = arffReader.getData();
 			testInstances.setClassIndex(testInstances.numAttributes() - 1);
 
-			trainAndEvaluateBagnallRefClassifier((Classifier) tsRefClassifier, seed,
-					tsRefClassifierParams, result,
+			trainAndEvaluateBagnallRefClassifier((Classifier) tsRefClassifier, seed, tsRefClassifierParams, result,
 					trainingInstances, testInstances);
 		} else
 			throw new IllegalArgumentException("Unknown reference classifier class.");
@@ -270,9 +264,8 @@ public class TSClassifierTest {
 			TimeSeries[] train = null;
 			TimeSeries[] test = null;
 
-			trainAndEvaluateSFARefClassifier((sfa.classification.Classifier) tsRefClassifier, 
-					tsRefClassifierParams, result,
-					train, test);
+			trainAndEvaluateSFARefClassifier((sfa.classification.Classifier) tsRefClassifier, tsRefClassifierParams,
+					result, train, test);
 		} else if (tsRefClassifier instanceof Classifier) {
 			// Bagnall
 			// Transform and split data to Weka instances
@@ -288,8 +281,7 @@ public class TSClassifierTest {
 			wekaInstances.setClassIndex(wekaInstances.numAttributes() - 1);
 			List<Instances> split = WekaUtil.getStratifiedSplit(wekaInstances, seed, trainingPortion);
 
-			trainAndEvaluateBagnallRefClassifier((Classifier) tsRefClassifier, seed, 
-					tsRefClassifierParams, result,
+			trainAndEvaluateBagnallRefClassifier((Classifier) tsRefClassifier, seed, tsRefClassifierParams, result,
 					split.get(0), split.get(1));
 		} else
 			throw new IllegalArgumentException("Unknown reference classifier class.");
@@ -320,10 +312,9 @@ public class TSClassifierTest {
 	 *             Will be thrown if the prediction of <code>tsClassifier</code>
 	 *             fails
 	 */
-	private static void trainAndEvaluateClassifier(
-			final TSClassifier<?, ?, TimeSeriesDataset> tsClassifier, final int seed,
-			final String tsClassifierParams, final Map<String, Object> result, final TimeSeriesDataset train,
-			final TimeSeriesDataset test) throws TrainingException, PredictionException {
+	private static void trainAndEvaluateClassifier(final TSClassifier<?, ?, TimeSeriesDataset> tsClassifier,
+			final int seed, final String tsClassifierParams, final Map<String, Object> result,
+			final TimeSeriesDataset train, final TimeSeriesDataset test) throws TrainingException, PredictionException {
 
 		result.put("classifier", tsClassifier.getClass().getSimpleName());
 		result.put("classifier_params", tsClassifierParams);
@@ -355,18 +346,19 @@ public class TSClassifierTest {
 				if (targetType.getDomain().indexOf(prediction.getValue()) == test.getTargets().getInt(i))
 					correct++;
 			}
-		} else if(tsClassifier.getTargetType() instanceof NumericAttributeType) {
+		} else if (tsClassifier.getTargetType() instanceof NumericAttributeType) {
 			for (int i = 0; i < totalPreds; i++) {
 				NumericAttributeValue prediction = (NumericAttributeValue) predictions.get(i);
 				if (prediction.getValue().intValue() == test.getTargets().getDouble(i))
 					correct++;
 			}
 		}
-			
+
 		double accuracy = (double) correct / totalPreds;
 
 		final long evaluationEnd = System.currentTimeMillis();
-		LOGGER.debug("Finished evaluation of classifier. Took {} ms. Accuracy: {}", (evaluationEnd - timeStart), accuracy);
+		LOGGER.debug("Finished evaluation of classifier. Took {} ms. Accuracy: {}", (evaluationEnd - timeStart),
+				accuracy);
 		result.put("ref_eval_time", (evaluationEnd - timeStart));
 		result.put("ref_accuracy", accuracy);
 	}
@@ -399,9 +391,9 @@ public class TSClassifierTest {
 	 * @throws TrainingException
 	 *             Will be thrown if the given classifier could not be trained
 	 */
-	private static void trainAndEvaluateBagnallRefClassifier(final Classifier tsRefClassifier, final int seed,
-			final String tsRefClassifierParams, final Map<String, Object> result,
-			final Instances trainingInstances, final Instances testInstances)
+	protected static void trainAndEvaluateBagnallRefClassifier(final Classifier tsRefClassifier, final int seed,
+			final String tsRefClassifierParams, final Map<String, Object> result, final Instances trainingInstances,
+			final Instances testInstances)
 			throws FileNotFoundException, IOException, EvaluationException, TrainingException {
 
 		result.put("ref_classifier", tsRefClassifier.getClass().getSimpleName());
@@ -456,9 +448,9 @@ public class TSClassifierTest {
 	 * @param test
 	 *            Test dataset
 	 */
-	private static void trainAndEvaluateSFARefClassifier(final sfa.classification.Classifier tsRefClassifier,
-			final String tsRefClassifierParams,
-			final Map<String, Object> result, final TimeSeries[] train, final TimeSeries[] test) {
+	protected static void trainAndEvaluateSFARefClassifier(final sfa.classification.Classifier tsRefClassifier,
+			final String tsRefClassifierParams, final Map<String, Object> result, final TimeSeries[] train,
+			final TimeSeries[] test) {
 
 		result.put("ref_classifier", tsRefClassifier.getClass().getSimpleName());
 		result.put("ref_classifier_params", tsRefClassifierParams);
@@ -518,7 +510,7 @@ public class TSClassifierTest {
 	 * @return Returns the concatenated file namens or "none" if the given file
 	 *         array is empty
 	 */
-	private static String reduceFileNames(final File... files) {
+	protected static String reduceFileNames(final File... files) {
 		return Arrays.stream(files).map(file -> file.getName()).reduce((s1, s2) -> s1 + ";" + s2).orElse("none");
 	}
 }
