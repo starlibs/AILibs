@@ -30,7 +30,7 @@ import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
 import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeValue;
 import jaicore.ml.core.exception.TrainingException;
 import jaicore.ml.tsc.quality_measures.IQualityMeasure;
-import jaicore.ml.tsc.util.TimeSeriesUtil;
+import jaicore.ml.tsc.util.WekaUtil;
 import weka.classifiers.Classifier;
 import weka.classifiers.bayes.NaiveBayes;
 import weka.classifiers.functions.Logistic;
@@ -220,7 +220,7 @@ public class ShapeletTransformAlgorithm extends
 		// Train Weka ensemble using the data
 		LOGGER.debug("Starting ensemble training...");
 		try {
-			TimeSeriesUtil.buildWekaClassifierFromTS(classifier, transfTrainingData);
+			WekaUtil.buildWekaClassifierFromTS(classifier, transfTrainingData);
 		} catch (TrainingException e) {
 			throw new AlgorithmException(e, "Could not train classifier due to a training exception.");
 		}

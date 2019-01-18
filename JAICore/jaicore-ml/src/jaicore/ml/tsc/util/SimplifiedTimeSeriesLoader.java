@@ -13,29 +13,26 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.linalg.indexing.NDArrayIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jaicore.ml.core.dataset.TimeSeriesDataset;
+import jaicore.basic.sets.SetUtil.Pair;
+import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import jaicore.ml.tsc.exceptions.TimeSeriesLoadingException;
 
 /**
  * Time series loader class which provides functionality to read datasets from
- * files.
+ * files storing into simplified, more efficient time series datasets.
  * 
  * @author Julian Lienen
  *
  */
-// TODO: Remove me if TimeSeriesDataset using INDArray is not used anymore
-public class TimeSeriesLoader {
+public class SimplifiedTimeSeriesLoader {
 
 	/**
 	 * Log4j logger.
 	 */
-	private static final Logger LOGGER = LoggerFactory.getLogger(TimeSeriesLoader.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(SimplifiedTimeSeriesLoader.class);
 
 	/**
 	 * Default charset used when extracting from files.
@@ -56,11 +53,11 @@ public class TimeSeriesLoader {
 	private static final String ARFF_DATA_FLAG = "@data";
 
 	/**
-	 * Epsilon used for INDArray target comparisons (e. g. used when reading
+	 * Epsilon used for target array comparisons (e. g. used when reading
 	 * multivariate time series which must share their targets among all the
 	 * series).
 	 */
-	private static final double IND_TARGET_EQUALS_EPS = 0.01;
+	private static final double TARGET_EQUALS_EPS = 0.01;
 
 	// TODO: Add meta data support
 	/**
@@ -69,20 +66,29 @@ public class TimeSeriesLoader {
 	 * 
 	 * @param arffFile
 	 *            The arff file which is read
-	 * @return Returns an univariate TimeSeriesDataset object
+	 * @return Returns a pair consisting of an univariate TimeSeriesDataset object
+	 *         and a list of String objects containing the class values.
 	 * @throws TimeSeriesLoadingException
 	 *             Throws an exception when the TimeSeriesDataset could not be
 	 *             created from the given file.
 	 */
 	@SuppressWarnings("unchecked")
-	public static TimeSeriesDataset loadArff(final File arffFile) throws TimeSeriesLoadingException {
+	public static Pair<TimeSeriesDataset, ClassMapper> loadArff(final File arffFile) throws TimeSeriesLoadingException {
 		if (arffFile == null)
 			throw new IllegalArgumentException("Parameter 'arffFile' must not be null!");
 
 		Object[] tsTargetClassNames = loadTimeSeriesWithTargetFromArffFile(arffFile);
 
-		return new TimeSeriesDataset(Arrays.asList((INDArray) tsTargetClassNames[0]), new ArrayList<INDArray>(),
-				(INDArray) tsTargetClassNames[1], (List<String>) tsTargetClassNames[2]);
+		ArrayList<double[][]> matrices = new ArrayList<>();
+		matrices.add((double[][]) tsTargetClassNames[0]);
+
+		ClassMapper cm = null;
+		if (tsTargetClassNames[2] != null) {
+			cm = new ClassMapper((List<String>) tsTargetClassNames[2]);
+		}
+
+		return new Pair<TimeSeriesDataset, ClassMapper>(
+				new TimeSeriesDataset(matrices, new ArrayList<double[][]>(), (int[]) tsTargetClassNames[1]), cm);
 	}
 
 	/**
@@ -100,12 +106,13 @@ public class TimeSeriesLoader {
 	 *             created from the given files.
 	 */
 	@SuppressWarnings("unchecked")
-	public static TimeSeriesDataset loadArffs(final File... arffFiles) throws TimeSeriesLoadingException {
+	public static Pair<TimeSeriesDataset, ClassMapper> loadArffs(final File... arffFiles)
+			throws TimeSeriesLoadingException {
 		if (arffFiles == null)
 			throw new IllegalArgumentException("Parameter 'arffFiles' must not be null!");
 
-		final List<INDArray> matrices = new ArrayList<>();
-		INDArray target = null;
+		final List<double[][]> matrices = new ArrayList<>();
+		int[] target = null;
 		List<String> classNames = null;
 
 		for (final File arffFile : arffFiles) {
@@ -113,24 +120,25 @@ public class TimeSeriesLoader {
 			// loadTimeSeriesWithTargetFromArffFile(arffFile);
 			Object[] tsTargetClassNames = loadTimeSeriesWithTargetFromArffFile(arffFile);
 
-			if (classNames == null)
+			if (classNames == null && tsTargetClassNames[2] != null)
 				classNames = (List<String>) tsTargetClassNames[2];
 			else {
 				// Check whether the same class names are used among all of the time series
 				List<String> furtherClassNames = (List<String>) tsTargetClassNames[2];
-				if (furtherClassNames == null || !furtherClassNames.equals(classNames))
+				if ((classNames != null && furtherClassNames == null)
+						|| (furtherClassNames != null && !furtherClassNames.equals(classNames)))
 					throw new TimeSeriesLoadingException(
 							"Could not load multivariate time series with different targets. Target values have to be stored in each "
 									+ "time series arff file and must be equal!");
 			}
 
 			if (target == null)
-				target = (INDArray) tsTargetClassNames[1];
+				target = (int[]) tsTargetClassNames[1];
 			else {
 				// Check whether the same targets are used among all of the time series
-				INDArray furtherTarget = (INDArray) tsTargetClassNames[1];
-				if (furtherTarget == null || target.length() != furtherTarget.length()
-						|| !target.equalsWithEps(furtherTarget, IND_TARGET_EQUALS_EPS)) {
+				int[] furtherTarget = (int[]) tsTargetClassNames[1];
+				if (furtherTarget == null || target.length != furtherTarget.length
+						|| !Arrays.equals(target, furtherTarget)) {
 					throw new TimeSeriesLoadingException(
 							"Could not load multivariate time series with different targets. Target values have to be stored in each "
 									+ "time series arff file and must be equal!");
@@ -138,13 +146,18 @@ public class TimeSeriesLoader {
 			}
 
 			// Check for same instance length
-			if (matrices.size() != 0 && ((INDArray) tsTargetClassNames[0]).shape()[0] != matrices.get(0).shape()[0])
+			if (matrices.size() != 0 && ((double[][]) tsTargetClassNames[0]).length != matrices.get(0).length)
 				throw new TimeSeriesLoadingException(
 						"All time series must have the same first dimensionality (number of instances).");
 
-			matrices.add((INDArray) tsTargetClassNames[0]);
+			matrices.add((double[][]) tsTargetClassNames[0]);
 		}
-		return new TimeSeriesDataset(matrices, new ArrayList<INDArray>(), target, classNames);
+		ClassMapper cm = null;
+		if (classNames != null)
+			cm = new ClassMapper(classNames);
+
+		return new Pair<TimeSeriesDataset, ClassMapper>(
+				new TimeSeriesDataset(matrices, new ArrayList<double[][]>(), target), cm);
 	}
 
 	/**
@@ -155,7 +168,7 @@ public class TimeSeriesLoader {
 	 * @param arffFile
 	 *            The arff file to be parsed
 	 * @return Returns an object consisting of three elements: 1. The time series
-	 *         value matrix (INDArray), 2. the target value matrix (INDArray) and 3.
+	 *         value matrix (double[][]), 2. the target value matrix (int[]) and 3.
 	 *         a list of the class value strings (List<String>)
 	 * @throws TimeSeriesLoadingException
 	 *             Throws an exception when the matrices could not be extracted from
@@ -163,12 +176,13 @@ public class TimeSeriesLoader {
 	 */
 	private static Object[] loadTimeSeriesWithTargetFromArffFile(final File arffFile)
 			throws TimeSeriesLoadingException {
-		INDArray matrix = null;
-		INDArray targetMatrix = null;
+		double[][] matrix = null;
+		int[] targetMatrix = null;
 
-		long numEmptyDataRows = 0;
+		int numEmptyDataRows = 0;
 
 		List<String> targetValues = null;
+		boolean stringAttributes = false;
 
 		try (BufferedReader br = new BufferedReader(
 				new InputStreamReader(new FileInputStream(arffFile), DEFAULT_CHARSET))) {
@@ -193,6 +207,15 @@ public class TimeSeriesLoader {
 					if (!targetSet && line.equals("") && lastLine.startsWith(ARFF_ATTRIBUTE_PREFIX)) {
 						String targetString = lastLine.substring(lastLine.indexOf("{") + 1, lastLine.length() - 1);
 						targetValues = Arrays.asList(targetString.split(ARFF_VALUE_DELIMITER));
+						for (String targetVal : targetValues) {
+							try {
+								Double.parseDouble(targetVal);
+							} catch (NumberFormatException e) {
+								LOGGER.info("Found String attributes in parsed dataset.");
+								stringAttributes = true;
+								break;
+							}
+						}
 
 						targetSet = true;
 					}
@@ -204,8 +227,8 @@ public class TimeSeriesLoader {
 					if (line.startsWith(ARFF_DATA_FLAG)) {
 						readData = true;
 						numInstances = fileLinesCount - lineCounter + 1;
-						matrix = Nd4j.create(numInstances, targetSet ? attributeCount - 1 : attributeCount);
-						targetMatrix = Nd4j.create(numInstances);
+						matrix = new double[numInstances][targetSet ? attributeCount - 1 : attributeCount];
+						targetMatrix = new int[numInstances];
 						lineCounter = 0;
 
 						if (!targetSet)
@@ -217,17 +240,12 @@ public class TimeSeriesLoader {
 						String[] values = line.split(ARFF_VALUE_DELIMITER);
 						double[] dValues = new double[targetSet ? values.length - 1 : values.length];
 						for (int i = 0; i < values.length - 1; i++) {
-							String actValue = values[i];
-							if (actValue.startsWith("'"))
-								actValue = actValue.substring(1);
-							if (actValue.endsWith("'"))
-								actValue = actValue.substring(0, actValue.length() - 1);
-							dValues[i] = Double.parseDouble(actValue);
+							dValues[i] = Double.parseDouble(values[i]);
 						}
-						matrix.putRow(lineCounter, Nd4j.create(dValues));
+						matrix[lineCounter] = dValues;
 
 						if (targetSet)
-							targetMatrix.putScalar(lineCounter, targetValues.indexOf(values[values.length - 1]));
+							targetMatrix[lineCounter] = targetValues.indexOf(values[values.length - 1]);
 					}
 
 					lineCounter++;
@@ -253,17 +271,34 @@ public class TimeSeriesLoader {
 		// Due to efficiency reasons, the matrices are narrowed afterwards to eliminate
 		// empty data rows
 		if (numEmptyDataRows > 0) {
-			long endIndex = matrix.shape()[0] - numEmptyDataRows;
-			matrix = matrix.get(NDArrayIndex.interval(0, endIndex));
-			targetMatrix = targetMatrix.get(NDArrayIndex.interval(0, endIndex));
+			int endIndex = matrix.length - numEmptyDataRows;
+			matrix = getInterval(matrix, 0, endIndex);
+			targetMatrix = getInterval(targetMatrix, 0, endIndex);
 		}
 
 		Object[] result = new Object[3];
 		result[0] = matrix;
 		result[1] = targetMatrix;
-		result[2] = targetValues;
-		// return new TimeSeriesDataset(Arrays.asList(matrix), null, targetMatrix,
-		// targetValues);
+		result[2] = stringAttributes ? targetValues : null;
+		return result;
+	}
+
+	// end is exclusive
+	private static double[][] getInterval(final double[][] matrix, final int begin, final int end) {
+		final double[][] result = new double[end - begin][];
+		for (int i = 0; i < end - begin; i++) {
+			result[i] = matrix[i + begin];
+		}
+		return result;
+	}
+
+	// TODO: Make this generic?
+	// end is exclusive
+	private static int[] getInterval(final int[] array, final int begin, final int end) {
+		final int[] result = new int[end - begin];
+		for (int i = 0; i < end - begin; i++) {
+			result[i] = array[i + begin];
+		}
 		return result;
 	}
 

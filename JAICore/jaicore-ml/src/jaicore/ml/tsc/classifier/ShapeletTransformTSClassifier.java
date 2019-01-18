@@ -15,7 +15,7 @@ import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.tsc.classifier.ShapeletTransformAlgorithm.Shapelet;
 import jaicore.ml.tsc.quality_measures.FStat;
 import jaicore.ml.tsc.quality_measures.IQualityMeasure;
-import jaicore.ml.tsc.util.TimeSeriesUtil;
+import jaicore.ml.tsc.util.WekaUtil;
 import weka.classifiers.Classifier;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -73,7 +73,7 @@ public class ShapeletTransformTSClassifier
 			throw new IllegalArgumentException("Dataset matrix of the instances to be predicted must not be null!");
 
 		LOGGER.debug("Converting time series dataset to Weka instances...");
-		Instances insts = TimeSeriesUtil.timeSeriesDatasetToWekaInstances(transformedDataset);
+		Instances insts = WekaUtil.timeSeriesDatasetToWekaInstances(transformedDataset);
 		LOGGER.debug("Converted time series dataset to Weka instances.");
 		
 		LOGGER.debug("Starting prediction...");
