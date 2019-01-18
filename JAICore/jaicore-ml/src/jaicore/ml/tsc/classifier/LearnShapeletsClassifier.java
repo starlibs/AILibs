@@ -11,147 +11,150 @@ import org.slf4j.LoggerFactory;
 
 import jaicore.ml.core.exception.PredictionException;
 
+/**
+ * <code>LearnShapeletsClassifier</code> published in "J. Grabocka, N.
+ * Schilling, M. Wistuba, L. Schmidt-Thieme: Learning Time-Series Shapelets"
+ * (https://www.ismll.uni-hildesheim.de/pub/pdfs/grabocka2014e-kdd.pdf)
+ * 
+ * @author Julian Lienen
+ *
+ */
 public class LearnShapeletsClassifier
 		extends ASimplifiedTSClassifier<Integer> {
 
+	/**
+	 * The log4j logger.
+	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(LearnShapeletsClassifier.class);
 
+	/**
+	 * The tensor storing the derived shapelets.
+	 */
 	private double[][][] S;
+	/**
+	 * The model's weights used for the class prediction learned by the training
+	 * algorithm.
+	 */
 	private double[][][] W;
+	/**
+	 * The model's bias weights.
+	 */
 	private double[] W_0;
 
+	/**
+	 * The number of scales used for the shapelet lengths.
+	 */
 	private int scaleR;
-	private int K;
+	/**
+	 * The minimum shapelet of the shapelets to be learned. Internally derived by
+	 * the time series lengths and the <code>minShapeLengthPercentage</code>.
+	 */
 	private int minShapeLength;
 
+	/**
+	 * The number of classes.
+	 */
 	private int C;
 
+	/**
+	 * Constructor of the {@link LearnShapeletsClassifier}.
+	 * 
+	 * @param K
+	 *            See {@link LearnShapeletsAlgorithm#K}
+	 * @param learningRate
+	 *            See {@link LearnShapeletsAlgorithm#learningRate}
+	 * @param regularization
+	 *            See {@link LearnShapeletsAlgorithm#regularization}
+	 * @param scaleR
+	 *            See {@link LearnShapeletsAlgorithm#scaleR}
+	 * @param minShapeLengthPercentage
+	 *            See {@link LearnShapeletsAlgorithm#minShapeLengthPercentage}
+	 * @param maxIter
+	 *            See {@link LearnShapeletsAlgorithm#maxIter}
+	 * @param seed
+	 *            See {@link LearnShapeletsAlgorithm#seed}
+	 */
 	public LearnShapeletsClassifier(final int K, final double learningRate, final double regularization,
 			final int scaleR, final double minShapeLengthPercentage, final int maxIter, final int seed) {
 		super(new LearnShapeletsAlgorithm(K, learningRate, regularization, scaleR, minShapeLengthPercentage, maxIter,
 				seed));
-
 		this.scaleR = scaleR;
-		this.K = K;
 	}
 
+	/**
+	 * @return {@link LearnShapeletsClassifier#S}.
+	 */
 	public double[][][] getS() {
 		return S;
 	}
 
+	/**
+	 * Setter for {@link LearnShapeletsClassifier#S}
+	 * 
+	 * @param S
+	 *            New value to be set
+	 */
 	public void setS(double[][][] s) {
 		S = s;
 	}
 
+	/**
+	 * @return {@link LearnShapeletsClassifier#W}.
+	 */
 	public double[][][] getW() {
 		return W;
 	}
 
+	/**
+	 * Setter for {@link LearnShapeletsClassifier#W}
+	 * 
+	 * @param W
+	 *            New value to be set
+	 */
 	public void setW(double[][][] w) {
 		W = w;
 	}
 
+	/**
+	 * @return {@link LearnShapeletsClassifier#W_0}.
+	 */
 	public double[] getW_0() {
 		return W_0;
 	}
 
+	/**
+	 * Setter for {@link LearnShapeletsClassifier#W_0}
+	 * 
+	 * @param W_0
+	 *            New value to be set
+	 */
 	public void setW_0(double[] w_0) {
 		W_0 = w_0;
 	}
 
+	/**
+	 * Setter for {@link LearnShapeletsClassifier#C}
+	 * 
+	 * @param C
+	 *            New value to be set
+	 */
 	public void setC(int c) {
 		C = c;
 	}
 
+	/**
+	 * Setter for {@link LearnShapeletsClassifier#minShapeLength}
+	 * 
+	 * @param minShapeLength
+	 *            New value to be set
+	 */
 	public void setMinShapeLength(final int minShapeLength) {
 		this.minShapeLength = minShapeLength;
 	}
 
-	// @Override
-	// public CategoricalAttributeValue predict(TimeSeriesInstance instance) throws
-	// PredictionException {
-	// final HashMap<String, Double> scoring = new HashMap<>();
-	// String[] classes = (String[]) this.getTargetType().getDomain().toArray();
-	//
-	// // TODO: Improve this
-	// // INDArray instanceValues = instance.getAttributeValue(0,
-	// // TimeSeriesAttributeValue.class).getValue().getValue();
-	// double[] instanceValues = new double[0];
-	// int q = instanceValues.length;
-	//
-	// for (int i = 0; i < classes.length; i++) {
-	// double tmpScore = this.W_0[i];
-	// for (int r = 0; r < this.scaleR; r++) {
-	// for (int k = 0; k < this.K; k++) {
-	// tmpScore += LearnShapeletsAlgorithm.calculateM_hat(this.S,
-	// this.minShapeLength, r, instanceValues,
-	// k, q, LearnShapeletsAlgorithm.ALPHA) * W[i][r][k];
-	// }
-	// }
-	// scoring.put(classes[i], LearnShapeletsAlgorithm.sigmoid(tmpScore));
-	// }
-	//
-	// String predictedClass = Collections.max(scoring.entrySet(),
-	// Map.Entry.comparingByValue()).getKey();
-	//
-	// return (CategoricalAttributeValue)
-	// this.getTargetType().buildAttributeValue(predictedClass);
-	// }
-	//
-	// @Override
-	// public List<CategoricalAttributeValue> predict(TimeSeriesDataset dataset)
-	// throws PredictionException {
-	//
-	// final List<CategoricalAttributeValue> predictions = new ArrayList<>();
-	//
-	// if (dataset.isMultivariate())
-	// LOGGER.warn(
-	// "Dataset to be predicted is multivariate but only first time series
-	// (univariate) will be considered.");
-	//
-	// // INDArray timeSeries = dataset.getValuesOrNull(0);
-	// // TODO
-	// double[][] timeSeries = null;
-	// if (timeSeries == null)
-	// throw new IllegalArgumentException("Dataset matrix of the instances to be
-	// predicted must not be null!");
-	//
-	// List<String> classes = ((CategoricalAttributeType)
-	// dataset.getTargetType()).getDomain();
-	//
-	// LOGGER.debug("Starting prediction...");
-	// for (int inst = 0; inst < timeSeries.length; inst++) {
-	// // TODO
-	// double[] instanceValues = null;// TimeSeriesUtil.normalize(timeSeries[inst],
-	// true); //
-	// int q = instanceValues.length;
-	//
-	// final HashMap<String, Double> scoring = new HashMap<>();
-	//
-	// for (int i = 0; i < classes.size(); i++) {
-	// double tmpScore = this.W_0[i];
-	// for (int r = 0; r < this.scaleR; r++) {
-	// for (int k = 0; k < this.K; k++) {
-	// tmpScore += LearnShapeletsAlgorithm.calculateM_hat(this.S,
-	// this.minShapeLength, r,
-	// instanceValues, k, q, LearnShapeletsAlgorithm.ALPHA) * W[i][r][k];
-	// }
-	// }
-	// scoring.put(classes.get(i), LearnShapeletsAlgorithm.sigmoid(tmpScore));
-	// }
-	// LOGGER.debug("Scoring for instance {}: {}", inst, scoring);
-	//
-	// String predictedClass = Collections.max(scoring.entrySet(),
-	// Map.Entry.comparingByValue()).getKey();
-	//
-	// predictions.add((CategoricalAttributeValue)
-	// dataset.getTargetType().buildAttributeValue(predictedClass));
-	// }
-	// LOGGER.debug("Finished prediction.");
-	//
-	// return predictions;
-	// }
-
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Integer predict(double[] univInstance) throws PredictionException {
 		final HashMap<Integer, Double> scoring = new HashMap<>();
@@ -170,6 +173,9 @@ public class LearnShapeletsClassifier
 		return Collections.max(scoring.entrySet(), Map.Entry.comparingByValue()).getKey();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Integer predict(List<double[]> multivInstance) throws PredictionException {
 		// TODO: Add multivariate support
@@ -179,6 +185,9 @@ public class LearnShapeletsClassifier
 		return predict(multivInstance.get(0));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public List<Integer> predict(jaicore.ml.tsc.dataset.TimeSeriesDataset dataset) throws PredictionException {
 		if (dataset.isMultivariate())
