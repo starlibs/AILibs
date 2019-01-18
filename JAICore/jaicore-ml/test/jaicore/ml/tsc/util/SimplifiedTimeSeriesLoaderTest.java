@@ -29,7 +29,7 @@ public class SimplifiedTimeSeriesLoaderTest {
 	public void testUnivariateArffFileLoading() throws TimeSeriesLoadingException {
 		final File datasetFile = new File(TSC_DATASET_PATH_PREFIX + "UnivariateTSCProblems\\Car\\Car_TRAIN.arff");
 
-		final Pair<TimeSeriesDataset, List<String>> pairResult = SimplifiedTimeSeriesLoader.loadArff(datasetFile);
+		final Pair<TimeSeriesDataset, ClassMapper> pairResult = SimplifiedTimeSeriesLoader.loadArff(datasetFile);
 		TimeSeriesDataset result = pairResult.getX();
 
 		final int expectedNumInstances = 60;
@@ -50,7 +50,7 @@ public class SimplifiedTimeSeriesLoaderTest {
 		File datasetFile1 = new File(
 				TSC_DATASET_PATH_PREFIX + "MultivariateTSCProblems\\Libras\\LibrasDimension2_TRAIN.arff");
 
-		final Pair<TimeSeriesDataset, List<String>> pairResult = SimplifiedTimeSeriesLoader.loadArffs(datasetFile0,
+		final Pair<TimeSeriesDataset, ClassMapper> pairResult = SimplifiedTimeSeriesLoader.loadArffs(datasetFile0,
 				datasetFile1);
 		TimeSeriesDataset result = pairResult.getX();
 
@@ -73,7 +73,7 @@ public class SimplifiedTimeSeriesLoaderTest {
 		File datasetFile1 = new File(TSC_DATASET_PATH_PREFIX
 				+ "MultivariateTSCProblems\\FingerMovements\\FingerMovementsDimension2_TRAIN.arff");
 
-		final Pair<TimeSeriesDataset, List<String>> pairResult = SimplifiedTimeSeriesLoader.loadArffs(datasetFile0,
+		final Pair<TimeSeriesDataset, ClassMapper> pairResult = SimplifiedTimeSeriesLoader.loadArffs(datasetFile0,
 				datasetFile1);
 		TimeSeriesDataset result = pairResult.getX();
 
@@ -87,6 +87,6 @@ public class SimplifiedTimeSeriesLoaderTest {
 		assertEquals(expectedNumSteps, result.getValues(0)[0].length);
 		assertEquals(expectedNumVariables, result.getNumberOfVariables());
 		assertEquals(expectedNumTargets, result.getTargets().length);
-		assertEquals(expectedClassDomain, pairResult.getY());
+		assertEquals(expectedClassDomain, pairResult.getY().getClassValues());
 	}
 }

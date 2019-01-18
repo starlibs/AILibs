@@ -391,7 +391,7 @@ public class TSClassifierTest {
 	 * @throws TrainingException
 	 *             Will be thrown if the given classifier could not be trained
 	 */
-	private static void trainAndEvaluateBagnallRefClassifier(final Classifier tsRefClassifier, final int seed,
+	protected static void trainAndEvaluateBagnallRefClassifier(final Classifier tsRefClassifier, final int seed,
 			final String tsRefClassifierParams, final Map<String, Object> result, final Instances trainingInstances,
 			final Instances testInstances)
 			throws FileNotFoundException, IOException, EvaluationException, TrainingException {
@@ -448,7 +448,7 @@ public class TSClassifierTest {
 	 * @param test
 	 *            Test dataset
 	 */
-	private static void trainAndEvaluateSFARefClassifier(final sfa.classification.Classifier tsRefClassifier,
+	protected static void trainAndEvaluateSFARefClassifier(final sfa.classification.Classifier tsRefClassifier,
 			final String tsRefClassifierParams, final Map<String, Object> result, final TimeSeries[] train,
 			final TimeSeries[] test) {
 
@@ -510,7 +510,7 @@ public class TSClassifierTest {
 	 * @return Returns the concatenated file namens or "none" if the given file
 	 *         array is empty
 	 */
-	private static String reduceFileNames(final File... files) {
+	protected static String reduceFileNames(final File... files) {
 		return Arrays.stream(files).map(file -> file.getName()).reduce((s1, s2) -> s1 + ";" + s2).orElse("none");
 	}
 }

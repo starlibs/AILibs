@@ -73,8 +73,7 @@ public class SimplifiedTimeSeriesLoader {
 	 *             created from the given file.
 	 */
 	@SuppressWarnings("unchecked")
-	public static Pair<TimeSeriesDataset, List<String>> loadArff(final File arffFile)
-			throws TimeSeriesLoadingException {
+	public static Pair<TimeSeriesDataset, ClassMapper> loadArff(final File arffFile) throws TimeSeriesLoadingException {
 		if (arffFile == null)
 			throw new IllegalArgumentException("Parameter 'arffFile' must not be null!");
 
@@ -83,9 +82,13 @@ public class SimplifiedTimeSeriesLoader {
 		ArrayList<double[][]> matrices = new ArrayList<>();
 		matrices.add((double[][]) tsTargetClassNames[0]);
 
-		return new Pair<TimeSeriesDataset, List<String>>(
-				new TimeSeriesDataset(matrices, new ArrayList<double[][]>(), (int[]) tsTargetClassNames[1]),
-				(List<String>) tsTargetClassNames[2]);
+		ClassMapper cm = null;
+		if (tsTargetClassNames[2] != null) {
+			cm = new ClassMapper((List<String>) tsTargetClassNames[2]);
+		}
+
+		return new Pair<TimeSeriesDataset, ClassMapper>(
+				new TimeSeriesDataset(matrices, new ArrayList<double[][]>(), (int[]) tsTargetClassNames[1]), cm);
 	}
 
 	/**
@@ -103,7 +106,7 @@ public class SimplifiedTimeSeriesLoader {
 	 *             created from the given files.
 	 */
 	@SuppressWarnings("unchecked")
-	public static Pair<TimeSeriesDataset, List<String>> loadArffs(final File... arffFiles)
+	public static Pair<TimeSeriesDataset, ClassMapper> loadArffs(final File... arffFiles)
 			throws TimeSeriesLoadingException {
 		if (arffFiles == null)
 			throw new IllegalArgumentException("Parameter 'arffFiles' must not be null!");
@@ -117,12 +120,13 @@ public class SimplifiedTimeSeriesLoader {
 			// loadTimeSeriesWithTargetFromArffFile(arffFile);
 			Object[] tsTargetClassNames = loadTimeSeriesWithTargetFromArffFile(arffFile);
 
-			if (classNames == null)
+			if (classNames == null && tsTargetClassNames[2] != null)
 				classNames = (List<String>) tsTargetClassNames[2];
 			else {
 				// Check whether the same class names are used among all of the time series
 				List<String> furtherClassNames = (List<String>) tsTargetClassNames[2];
-				if (furtherClassNames == null || !furtherClassNames.equals(classNames))
+				if ((classNames != null && furtherClassNames == null)
+						|| (furtherClassNames != null && !furtherClassNames.equals(classNames)))
 					throw new TimeSeriesLoadingException(
 							"Could not load multivariate time series with different targets. Target values have to be stored in each "
 									+ "time series arff file and must be equal!");
@@ -148,8 +152,12 @@ public class SimplifiedTimeSeriesLoader {
 
 			matrices.add((double[][]) tsTargetClassNames[0]);
 		}
-		return new Pair<TimeSeriesDataset, List<String>>(
-				new TimeSeriesDataset(matrices, new ArrayList<double[][]>(), target), classNames);
+		ClassMapper cm = null;
+		if (classNames != null)
+			cm = new ClassMapper(classNames);
+
+		return new Pair<TimeSeriesDataset, ClassMapper>(
+				new TimeSeriesDataset(matrices, new ArrayList<double[][]>(), target), cm);
 	}
 
 	/**
@@ -174,6 +182,7 @@ public class SimplifiedTimeSeriesLoader {
 		int numEmptyDataRows = 0;
 
 		List<String> targetValues = null;
+		boolean stringAttributes = false;
 
 		try (BufferedReader br = new BufferedReader(
 				new InputStreamReader(new FileInputStream(arffFile), DEFAULT_CHARSET))) {
@@ -198,6 +207,15 @@ public class SimplifiedTimeSeriesLoader {
 					if (!targetSet && line.equals("") && lastLine.startsWith(ARFF_ATTRIBUTE_PREFIX)) {
 						String targetString = lastLine.substring(lastLine.indexOf("{") + 1, lastLine.length() - 1);
 						targetValues = Arrays.asList(targetString.split(ARFF_VALUE_DELIMITER));
+						for (String targetVal : targetValues) {
+							try {
+								Double.parseDouble(targetVal);
+							} catch (NumberFormatException e) {
+								LOGGER.info("Found String attributes in parsed dataset.");
+								stringAttributes = true;
+								break;
+							}
+						}
 
 						targetSet = true;
 					}
@@ -261,7 +279,7 @@ public class SimplifiedTimeSeriesLoader {
 		Object[] result = new Object[3];
 		result[0] = matrix;
 		result[1] = targetMatrix;
-		result[2] = targetValues;
+		result[2] = stringAttributes ? targetValues : null;
 		return result;
 	}
 
