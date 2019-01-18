@@ -12,14 +12,14 @@ import org.nd4j.linalg.factory.Nd4j;
 import jaicore.ml.core.dataset.TimeSeriesDataset;
 import jaicore.ml.core.dataset.TimeSeriesInstance;
 import jaicore.ml.core.dataset.attribute.IAttributeValue;
+import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
 import jaicore.ml.core.dataset.attribute.timeseries.TimeSeriesAttributeValue;
+import jaicore.ml.core.exception.TrainingException;
 import weka.classifiers.Classifier;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
-
-import jaicore.ml.core.exception.TrainingException;
 
 /**
  * WekaUtil
@@ -226,5 +226,31 @@ public class WekaUtil {
 
         return result;
     }
+
+	/**
+	 * Converts a double[][] matrix (number of instances x number of attributes) to
+	 * Weka instances without any class attribute.
+	 * 
+	 * @param matrix
+	 *            The double[][] matrix storing all the attribute values of the
+	 *            instances
+	 * @return Returns the Weka Instances object consisting of all instances and the
+	 *         attribute values
+	 */
+	public static Instances matrixToWekaInstances(final double[][] matrix) {
+		final ArrayList<Attribute> attributes = new ArrayList<>();
+		for (int i = 0; i < matrix[0].length; i++) {
+			final Attribute newAtt = new Attribute("val" + i);
+			attributes.add(newAtt);
+		}
+		Instances wekaInstances = new Instances("Instances", attributes, matrix.length);
+		for (int i = 0; i < matrix[0].length; i++) {
+			final Instance inst = new DenseInstance(1, matrix[i]);
+			inst.setDataset(wekaInstances);
+			wekaInstances.add(inst);
+		}
+
+		return wekaInstances;
+	}
 
 }

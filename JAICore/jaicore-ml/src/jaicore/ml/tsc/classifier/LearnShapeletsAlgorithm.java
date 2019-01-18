@@ -1,6 +1,5 @@
 package jaicore.ml.tsc.classifier;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -15,11 +14,9 @@ import jaicore.basic.algorithm.IAlgorithmConfig;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import jaicore.ml.tsc.util.TimeSeriesUtil;
+import jaicore.ml.tsc.util.WekaUtil;
 import weka.clusterers.SimpleKMeans;
-import weka.core.Attribute;
 import weka.core.Debug.Random;
-import weka.core.DenseInstance;
-import weka.core.Instance;
 import weka.core.Instances;
 
 /**
@@ -41,6 +38,7 @@ public class LearnShapeletsAlgorithm extends
 	private double regularization;
 	private int scaleR;
 	private int minShapeLength;
+	private double minShapeLengthPercentage;
 	private int maxIter;
 	private int seed;
 
@@ -48,19 +46,21 @@ public class LearnShapeletsAlgorithm extends
 	private int Q;
 	private int C;
 
-	private static final boolean USE_BIAS_CORRECTION = true;
+	private static final boolean USE_BIAS_CORRECTION = false;
 
 	public static double ALPHA = -30d; // Used in implementation. Paper says -100d
 
+	private static double EPS = 0.0000000000000001d;
+
 	public LearnShapeletsAlgorithm(final int K, final double learningRate, final double regularization,
-			final int scaleR, final int minShapeLength, final int maxIter, final int seed) {
+			final int scaleR, final double minShapeLengthPercentage, final int maxIter, final int seed) {
 		this.K = K;
 		this.learningRate = learningRate;
 		this.regularization = regularization;
 		this.scaleR = scaleR;
-		this.minShapeLength = minShapeLength;
 		this.maxIter = maxIter;
 		this.seed = seed;
+		this.minShapeLengthPercentage = minShapeLengthPercentage;
 	}
 
 	@Override
@@ -91,58 +91,39 @@ public class LearnShapeletsAlgorithm extends
 
 			final int L = (r + 1) * this.minShapeLength;
 
-			// final INDArray tmpSegments = Nd4j.create(trainingMatrix.shape()[0] *
-			// numberOfSegments, L);
 			final double[][] tmpSegments = new double[trainingMatrix.length * numberOfSegments][L];
 
 			// Prepare training data for finding the centroids
 			for (int i = 0; i < trainingMatrix.length; i++) {
 				for (int j = 0; j < numberOfSegments; j++) {
 					for (int l = 0; l < L; l++) {
-						// tmpSegments.putScalar(new int[] { i * numberOfSegments + j, l },
-						// trainingMatrix.getDouble(i, j + l));
 						tmpSegments[i * numberOfSegments + j][l] = trainingMatrix[i][j + l];
 					}
 					tmpSegments[i * numberOfSegments + j] = TimeSeriesUtil
 							.zNormalize(tmpSegments[i * numberOfSegments + j], USE_BIAS_CORRECTION);
 				}
 			}
-
-			// TODO:
-			final ArrayList<Attribute> attributes = new ArrayList<>();
-			for (int i = 0; i < tmpSegments[0].length; i++) {
-				final Attribute newAtt = new Attribute("val" + i);
-				attributes.add(newAtt);
-			}
-			Instances wekaInstances = new Instances("Instances", attributes, tmpSegments.length);
-			for (int i = 0; i < tmpSegments[0].length; i++) {
-				final Instance inst = new DenseInstance(1, tmpSegments[i]);
-				inst.setDataset(wekaInstances);
-				wekaInstances.add(inst);
-			}
-
-			// Instances wekaInstances =
-			// TimeSeriesUtil.indArrayToWekaInstances(tmpSegments);
+			
+			// Transform instances
+			Instances wekaInstances = WekaUtil.matrixToWekaInstances(tmpSegments);
 
 			// Cluster using k-Means
 			SimpleKMeans kMeans = new SimpleKMeans();
 			try {
-				kMeans.setNumClusters(K);
+				kMeans.setNumClusters(this.K);
 				kMeans.setSeed(this.seed);
 				kMeans.setMaxIterations(100);
 				kMeans.buildClusterer(wekaInstances);
 			} catch (Exception e) {
 				LOGGER.warn(
-						"Could not initialize matrix S using kMeans clustering for r=%d due to the following problem: %s. "
+						"Could not initialize matrix S using kMeans clustering for r={} due to the following problem: {}. "
 								+ "Using zero matrix instead (possibly leading to a poor training performance).",
 						r, e.getMessage());
-				// result.add(Nd4j.zeros(this.K, r * this.minShapeLength));
 				result[r] = new double[this.K][r * this.minShapeLength];
 				continue;
 			}
 			Instances clusterCentroids = kMeans.getClusterCentroids();
 
-			// result[r] = TimeSeriesUtil.wekaInstancesToINDArray(clusterCentroids, false);
 			double[][] tmpResult = new double[clusterCentroids.numInstances()][clusterCentroids.numAttributes()];
 			for (int i = 0; i < tmpResult.length; i++) {
 				double[] instValues = clusterCentroids.get(i).toDoubleArray();
@@ -384,6 +365,8 @@ public class LearnShapeletsAlgorithm extends
 		this.Q = dataMatrix[0].length; // Q
 		this.C = occuringClasses.size(); // C
 
+		this.minShapeLength = (int) (this.minShapeLengthPercentage * (double) this.Q);
+
 		// Prepare binary classes
 		int[][] Y = new int[this.I][this.C];
 		for (int i = 0; i < this.I; i++) {
@@ -395,6 +378,14 @@ public class LearnShapeletsAlgorithm extends
 		// Normalize instances
 		// for (int i = 0; i < data.getNumberOfInstances(); i++)
 		// TimeSeriesUtil.normalizeINDArray(dataMatrix.getRow(i), true);
+
+		int totalSegments = 0;
+		for (int r = 0; r < this.scaleR; r++) {
+			final int numberOfSegments = getNumberOfSegments(this.Q, this.minShapeLength, r);
+			totalSegments += numberOfSegments * this.I;
+		}
+
+		this.K = (int) (Math.log(totalSegments) * (this.C - 1));
 
 		// Initialization
 		double[][][] S = initializeS(dataMatrix);
@@ -409,14 +400,6 @@ public class LearnShapeletsAlgorithm extends
 		double[][][][] D = new double[this.scaleR][][][];
 		double[][][][] Xi = new double[this.scaleR][][][];
 		double[][][][] Phi = new double[this.scaleR][][][];
-
-		int totalSegments = 0;
-		for (int r = 0; r < this.scaleR; r++) {
-			final int numberOfSegments = getNumberOfSegments(this.Q, this.minShapeLength, r);
-			totalSegments += numberOfSegments * this.I;
-		}
-
-		this.K = (int) (Math.log(totalSegments) * (this.C - 1));
 
 		for (int r = 0; r < this.scaleR; r++) {
 			final int numberOfSegments = getNumberOfSegments(this.Q, this.minShapeLength, r);
@@ -569,6 +552,7 @@ public class LearnShapeletsAlgorithm extends
 		this.model.setW(W);
 		this.model.setW_0(W_0);
 		this.model.setC(this.C);
+		this.model.setMinShapeLength(this.minShapeLength);
 		// this.model.setM_hat(M_hat);
 		return this.model;
 	}
@@ -583,6 +567,7 @@ public class LearnShapeletsAlgorithm extends
 			nominator += D * expD;
 			denominator += expD;
 		}
+		denominator = denominator == 0d ? EPS : denominator;
 		return nominator / denominator;
 	}
 

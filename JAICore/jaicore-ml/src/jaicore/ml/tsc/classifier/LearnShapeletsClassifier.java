@@ -27,12 +27,12 @@ public class LearnShapeletsClassifier
 	private int C;
 
 	public LearnShapeletsClassifier(final int K, final double learningRate, final double regularization,
-			final int scaleR, final int minShapeLength, final int maxIter, final int seed) {
-		super(new LearnShapeletsAlgorithm(K, learningRate, regularization, scaleR, minShapeLength, maxIter, seed));
+			final int scaleR, final double minShapeLengthPercentage, final int maxIter, final int seed) {
+		super(new LearnShapeletsAlgorithm(K, learningRate, regularization, scaleR, minShapeLengthPercentage, maxIter,
+				seed));
 
 		this.scaleR = scaleR;
 		this.K = K;
-		this.minShapeLength = minShapeLength;
 	}
 
 	public double[][][] getS() {
@@ -61,6 +61,10 @@ public class LearnShapeletsClassifier
 
 	public void setC(int c) {
 		C = c;
+	}
+
+	public void setMinShapeLength(final int minShapeLength) {
+		this.minShapeLength = minShapeLength;
 	}
 
 	// @Override

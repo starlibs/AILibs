@@ -42,6 +42,9 @@ public class LearnShapeletsRefTest {
 	private static final String SYNTHETIC_CONTROL_TEST = UNIVARIATE_PREFIX
 			+ "\\SyntheticControl\\SyntheticControl_TEST.arff";
 
+	private static final String COMPUTERS_TRAIN = UNIVARIATE_PREFIX + "\\Computers\\Computers_TRAIN.arff";
+	private static final String COMPUTERS_TEST = UNIVARIATE_PREFIX + "\\Computers\\Computers_TEST.arff";
+
 	@Test
 	public void testClassifier() throws FileNotFoundException, EvaluationException, TrainingException,
 			PredictionException, IOException, TimeSeriesLoadingException, ClassNotFoundException {
@@ -56,12 +59,12 @@ public class LearnShapeletsRefTest {
 
 		// Initialize classifiers with values selected by reference classifier by
 		// default
-		int Q = 25;
+		// int Q = 25;
 		int K = 8;
 		double learningRate = 0.1;
 		double regularization = 0.01;
 		int scaleR = 3;
-		int minShapeLength = 4; // (int) (0.2d * Q);
+		double minShapeLength = 0.2; // (int) (0.2d * Q);
 		int maxIter = 300;
 		int seed = 42;
 
@@ -73,7 +76,7 @@ public class LearnShapeletsRefTest {
 		refClf.fixParameters();
 
 		Map<String, Object> result = SimplifiedTSClassifierTest.compareClassifiers(refClf, ownClf, seed, null, null,
-				new File(ITALY_POWER_DEMAND_TRAIN), new File(ITALY_POWER_DEMAND_TEST));
+				new File(COMPUTERS_TRAIN), new File(COMPUTERS_TEST));
 
 		System.out.println("Ref clf parameters: " + refClf.getParameters());
 		System.out.println(result.toString());
