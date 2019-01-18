@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.junit.Assert;
 import org.junit.Test;
 
 import jaicore.ml.core.exception.EvaluationException;
@@ -14,7 +15,6 @@ import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.core.exception.TrainingException;
 import jaicore.ml.tsc.exceptions.TimeSeriesLoadingException;
 import jaicore.ml.tsc.quality_measures.FStat;
-import junit.framework.Assert;
 import timeseriesweka.classifiers.ShapeletTransformClassifier;
 import timeseriesweka.filters.shapelet_transforms.Shapelet;
 import timeseriesweka.filters.shapelet_transforms.distance_functions.OnlineSubSeqDistance;
@@ -67,8 +67,8 @@ public class ShapeletTransformRefTest {
 		refClf.setSeed(42);
 		refClf.doSTransform(true);
 
-		Map<String, Object> result = TSClassifierTest.compareClassifiers(refClf, ownClf, seed, null, null,
-				new File(SYNTHETIC_CONTROL_TRAIN), new File(SYNTHETIC_CONTROL_TEST));
+		Map<String, Object> result = SimplifiedTSClassifierTest.compareClassifiers(refClf, ownClf, seed, null, null,
+				new File(ITALY_POWER_DEMAND_TRAIN), new File(ITALY_POWER_DEMAND_TEST));
 
 		System.out.println("Ref clf parameters: " + refClf.getParameters());
 		System.out.println(result.toString());

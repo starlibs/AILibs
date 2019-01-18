@@ -24,10 +24,8 @@ import jaicore.basic.TimeOut;
 import jaicore.basic.algorithm.IAlgorithmConfig;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
-import jaicore.ml.core.dataset.TimeSeriesDataset;
-import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
-import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeValue;
 import jaicore.ml.core.exception.TrainingException;
+import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import jaicore.ml.tsc.quality_measures.IQualityMeasure;
 import jaicore.ml.tsc.util.WekaUtil;
 import weka.classifiers.Classifier;
@@ -45,7 +43,7 @@ import weka.core.EuclideanDistance;
 import weka.core.SelectedTag;
 
 public class ShapeletTransformAlgorithm extends
-		ATSCAlgorithm<CategoricalAttributeType, CategoricalAttributeValue, TimeSeriesDataset, ShapeletTransformTSClassifier> {
+		ASimplifiedTSCAlgorithm<Integer, ShapeletTransformTSClassifier> {
 
 	// TODO: Maybe move to a separate class?
 	static class Shapelet {
@@ -166,17 +164,18 @@ public class ShapeletTransformAlgorithm extends
 			throw new IllegalStateException("The time series input data must not be null!");
 		if (data.isMultivariate())
 			throw new UnsupportedOperationException("Multivariate datasets are not supported.");
-		if (!(data.getTargetType() instanceof CategoricalAttributeType))
-			throw new IllegalArgumentException("Target type of the training data set must be categorical.");
+		// if (!(data.getTargetType() instanceof CategoricalAttributeType))
+		// throw new IllegalArgumentException("Target type of the training data set must
+		// be categorical.");
 
 		// TODO
-		final double[][] dataMatrix = null; // data.getValuesOrNull(0);
+		final double[][] dataMatrix = data.getValuesOrNull(0);
 		if (dataMatrix == null)// || dataMatrix.shape().length != 2)
 			throw new IllegalArgumentException(
 					"Value matrix must be a valid 2D matrix containing the time series values for all instances!");
 
-		final int[] targetMatrix = null; // data.getTargets();
-		this.model.setTargetType((CategoricalAttributeType) data.getTargetType());
+		final int[] targetMatrix = data.getTargets();
+		// this.model.setTargetType((CategoricalAttributeType) data.getTargetType());
 
 		// Estimate min and max
 		if (this.estimateShapeletLengthBorders) {
@@ -222,7 +221,7 @@ public class ShapeletTransformAlgorithm extends
 		// Train Weka ensemble using the data
 		LOGGER.debug("Starting ensemble training...");
 		try {
-			WekaUtil.buildWekaClassifierFromTS(classifier, transfTrainingData);
+			WekaUtil.buildWekaClassifierFromSimplifiedTS(classifier, transfTrainingData);
 		} catch (TrainingException e) {
 			throw new AlgorithmException(e, "Could not train classifier due to a training exception.");
 		}
@@ -441,8 +440,6 @@ public class ShapeletTransformAlgorithm extends
 		// final INDArray S = shapelet.getData();
 		final double[] S_prime = shapelet.getData();
 		final List<Integer> A = sortIndexes(S_prime, false); // descending
-		System.out.println(Arrays.toString(S_prime));
-		System.out.println(A);
 		final double[] F = zNormalize(getInterval(timeSeries, 0, length), true);
 
 		double p = 0;
@@ -467,21 +464,14 @@ public class ShapeletTransformAlgorithm extends
 			q += t_il * t_il;
 			double x_bar = p / length;
 			double s = q / (length) - x_bar * x_bar;
-			System.out.println("s before transform: " + s);
 			s = s < 0.000000001d ? 0d : Math.sqrt(((double) length / (double) (length - 1)) * s); //
 
 			int j = 0;
 			double d = 0;
 
-			System.out.println("X_bar=" + x_bar + "\t| s=" + s);
-			System.out.println(Arrays.toString(
-					new double[] { timeSeries[i + A.get(0)], timeSeries[i + A.get(1)], timeSeries[i + A.get(2)] }));
-			System.out
-					.println(Arrays.toString(new double[] { S_prime[A.get(0)], S_prime[A.get(1)], S_prime[A.get(2)] }));
 
 			while (j < length && d < b) {
 				final double normVal = (s == 0.0 ? 0d : (timeSeries[i + A.get(j)] - x_bar) / s);
-				System.out.println("Norm val for i=" + i + " and j=" + j + " : " + normVal);
 				final double diff = S_prime[A.get(j)] - normVal;
 
 				d += diff * diff;
@@ -603,7 +593,6 @@ public class ShapeletTransformAlgorithm extends
 		for (int i = 0; i <= n - l; i++) {
 			double tmpED = singleSquaredEuclideanDistance(normalizedShapeletData,
 					zNormalize(getInterval(timeSeries, i, i + l), true));
-			System.out.println("tmp ed: " + tmpED);
 			if (tmpED < min)
 				min = tmpED;
 		}
@@ -775,13 +764,10 @@ public class ShapeletTransformAlgorithm extends
 		if (dataSet.isMultivariate())
 			throw new UnsupportedOperationException("Multivariate datasets are not supported yet!");
 
-		// TODO
-		double[][] timeSeries = null; // dataSet.getValuesOrNull(0);
+		double[][] timeSeries = dataSet.getValuesOrNull(0);
 		if (timeSeries == null) // || timeSeries.shape.length != 2)
 			throw new IllegalArgumentException("Time series matrix must be a valid 2d matrix!");
 
-		// INDArray transformedTS = Nd4j.create(timeSeries.shape()[0],
-		// shapelets.size());
 		double[][] transformedTS = new double[timeSeries.length][shapelets.size()];
 
 		for (int i = 0; i < timeSeries.length; i++) {
@@ -794,9 +780,21 @@ public class ShapeletTransformAlgorithm extends
 			}
 		}
 
-		// TODO: Replace
-		// dataSet.replace(0, transformedTS, dataSet.getTimestampsOrNull(0));
+		dataSet.replace(0, transformedTS, dataSet.getTimestampsOrNull(0));
 		return dataSet;
+
+	}
+
+	public static double[] shapeletTransform(final double[] instance, final List<Shapelet> shapelets) {
+
+		double[] transformedTS = new double[shapelets.size()];
+
+			for (int j = 0; j < shapelets.size(); j++) {
+			transformedTS[j] = ShapeletTransformAlgorithm
+					.getMinimumDistanceAmongAllSubsequences(shapelets.get(j), instance);
+			}
+
+		return transformedTS;
 
 	}
 
