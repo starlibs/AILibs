@@ -1,4 +1,6 @@
-package jaicore.ml.tsc.distances;
+package jaicore.ml.tsc.util;
+
+import jaicore.ml.tsc.distances.IScalarDistance;
 
 /**
  * ScalarDistanceUtil

@@ -1,6 +1,8 @@
 package jaicore.ml.tsc.distances;
 
 import jaicore.ml.tsc.exceptions.TimeSeriesLengthException;
+import jaicore.ml.tsc.util.ScalarDistanceUtil;
+
 import static jaicore.ml.tsc.util.TimeSeriesUtil.*;
 
 /**
