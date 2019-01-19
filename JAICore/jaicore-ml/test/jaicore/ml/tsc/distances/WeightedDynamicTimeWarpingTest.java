@@ -7,9 +7,9 @@ import org.junit.Test;
 import jaicore.ml.tsc.exceptions.TimeSeriesLengthException;
 
 /**
- * TimeWarpEditDistanceTest
+ * WeightedDynamicTimeWarpingTest
  */
-public class TimeWarpEditDistanceTest {
+public class WeightedDynamicTimeWarpingTest {
 
     double[] timeSeries1 = { 1, 1, 1, 1, 1, 1 };
     double[] timeSeries2 = { 1, 1, 1, 1, 1, 1 };
@@ -18,18 +18,17 @@ public class TimeWarpEditDistanceTest {
 
     @Test
     public void testDistanceCalculation() throws TimeSeriesLengthException {
-        TimeWarpEditDistance twed = new TimeWarpEditDistance(1.0, 1.0);
-        double distance = twed.distance(timeSeries1, timeSeries2);
+        WeightedDynamicTimeWarping wdtw = new WeightedDynamicTimeWarping(1, 1, 1);
+        double distance = wdtw.distance(timeSeries1, timeSeries2);
         double expectation = 0;
-        String message = "Calculated %f, but %f was expected";
-        assertEquals(String.format(message, distance, expectation), expectation, distance, 0);
+        assertEquals(expectation, distance, 1.0E-5);
     }
 
     @Test
     public void testThrowsErrorWhenTimeSeriesHaveDifferentLength() {
-        TimeWarpEditDistance twed = new TimeWarpEditDistance(1.0, 1.0);
+        WeightedDynamicTimeWarping wdtw = new WeightedDynamicTimeWarping(1, 1, 1);
         assertThrows(TimeSeriesLengthException.class, () -> {
-            twed.distance(timeSeries1, timeSeries4);
+            wdtw.distance(timeSeries1, timeSeries4);
         });
     }
 }

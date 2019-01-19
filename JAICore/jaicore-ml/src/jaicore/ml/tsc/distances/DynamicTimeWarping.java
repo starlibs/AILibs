@@ -1,7 +1,7 @@
 package jaicore.ml.tsc.distances;
 
-import org.nd4j.linalg.api.ndarray.INDArray;
 import static jaicore.ml.tsc.util.TimeSeriesUtil.*;
+import jaicore.ml.tsc.exceptions.TimeSeriesLengthException;
 
 /**
  * Class for the Time Warp Distance Calculation.
@@ -28,12 +28,11 @@ public class DynamicTimeWarping implements ITimeSeriesDistance {
     }
 
     @Override
-    public double distance(INDArray A, INDArray B) throws IllegalArgumentException {
+    public double distance(double[] A, double[] B) throws TimeSeriesLengthException {
         // Parameter checks.
-        isTimeSeriesOrException(A, B);
         isSameLengthOrException(A, B);
 
-        int n = (int) A.length();
+        int n = A.length;
         double[][] M = new double[n + 1][n + 1];
 
         // Dynamic Programming initialization.
@@ -46,7 +45,7 @@ public class DynamicTimeWarping implements ITimeSeriesDistance {
         // Dynamic programming.
         for (int i = 1; i <= n; i++) {
             for (int j = 1; j <= n; j++) {
-                double cost = d.distance(A.getDouble(i - 1), B.getDouble(j - 1));
+                double cost = d.distance(A[i - 1], B[j - 1]);
                 double mini = Math.min(M[i - 1][j], Math.min(M[i][j - 1], M[i - 1][j - 1]));
                 M[i][j] = cost + mini;
             }

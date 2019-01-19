@@ -10,6 +10,6 @@ public class ScalarDistanceUtil {
     }
 
     public static IScalarDistance getEuclideanDistance() {
-        return (x, y) -> Math.sqrt(x * x + y * y);
+        return (x, y) -> Math.sqrt(x * x - y * y);
     }
 }

@@ -1,8 +1,5 @@
 package jaicore.ml.tsc.complexity;
 
-import org.nd4j.linalg.api.ndarray.INDArray;
-import static jaicore.ml.tsc.util.TimeSeriesUtil.*;
-
 /**
  * Stretching Complexity metric as described in "A Complexity-Invariant Distance
  * Measure for Time Series". Note that the equation in the paper is not correct.
@@ -15,16 +12,12 @@ import static jaicore.ml.tsc.util.TimeSeriesUtil.*;
 public class StretchingComplexity implements ITimeSeriesComplexity {
 
     @Override
-    public double complexity(INDArray T) {
-        // Parameter checks.
-        isTimeSeriesOrException(T);
-
-        int n = (int) T.length();
+    public double complexity(double[] T) {
+        int n = (int) T.length;
         double sum = .0;
         for (int i = 0; i < n - 1; i++) {
-            sum += Math.sqrt(1 + Math.pow(T.getDouble(i + 1) - T.getDouble(i), 2));
+            sum += Math.sqrt(1 + Math.pow(T[i + 1] - T[i], 2));
         }
-
         return sum;
     }
 

@@ -3,42 +3,19 @@ package jaicore.ml.tsc.distances;
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.bytedeco.javacpp.mkldnn.concat;
-import org.junit.Before;
 import org.junit.Test;
-import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.factory.Nd4j;
 
 /**
- * TimeWarpEditDistanceTest
+ * MoveSplitMergeTest
  */
 public class MoveSplitMergeTest {
 
-    INDArray timeSeries1; // { 1, 1, 1, 1, 1, 1 }
-    INDArray timeSeries2; // { 1, 1, 1, 1, 1, 1 }
-    INDArray timeSeries3;
-    INDArray timeSeries4;
-    INDArray timeSeries5;
-    INDArray timeSeries6;
-
-    INDArray noTimeSeries;
-
-    @Before
-    public void setUp() {
-        int[] shape = { 6 };
-        float[] data = { 1, 1, 1, 1, 1, 1 };
-        timeSeries1 = Nd4j.create(data, shape);
-        timeSeries2 = Nd4j.create(data, shape);
-
-        int[] shape2 = { 7 };
-        timeSeries3 = Nd4j.create(new double[] { 7.0, 8.0, 12.0, 15.0, 9.0, 3.0, 5.0 }, shape2);
-        timeSeries4 = Nd4j.create(new double[] { 7.0, 9.0, 12.0, 15.0, 15.0, 9.0, 3.0 }, shape2);
-
-        timeSeries5 = Nd4j.create(new double[] { 7.0, 8.0, 12.0, 15.0, 9.0, 9.0, 5.0 }, shape2);
-        timeSeries6 = Nd4j.create(new double[] { 7.0, 8.0, 12.0, 13.0, 9.0, 9.0, 5.0 }, shape2);
-
-        noTimeSeries = Nd4j.rand(2, 2);
-    }
+    double[] timeSeries1 = { 1, 1, 1, 1, 1, 1 };
+    double[] timeSeries2 = { 1, 1, 1, 1, 1, 1 };
+    double[] timeSeries3 = { 7.0, 8.0, 12.0, 15.0, 9.0, 3.0, 5.0 };
+    double[] timeSeries4 = { 7.0, 9.0, 12.0, 15.0, 15.0, 9.0, 3.0 };
+    double[] timeSeries5 = { 7.0, 8.0, 12.0, 15.0, 9.0, 9.0, 5.0 };
+    double[] timeSeries6 = { 7.0, 8.0, 12.0, 13.0, 9.0, 9.0, 5.0 };
 
     @Test
     public void testDistanceCalculation() throws IllegalArgumentException {
@@ -64,14 +41,6 @@ public class MoveSplitMergeTest {
         MoveSplitMerge msm = new MoveSplitMerge(1.0);
         assertThrows(IllegalArgumentException.class, () -> {
             msm.distance(timeSeries1, timeSeries4);
-        });
-    }
-
-    @Test
-    public void testThrowsErrorWhenTimeSeriesIsNoTimeSeries() {
-        MoveSplitMerge msm = new MoveSplitMerge(1.0);
-        assertThrows(IllegalArgumentException.class, () -> {
-            msm.distance(noTimeSeries, timeSeries4);
         });
     }
 

@@ -1,7 +1,5 @@
 package jaicore.ml.tsc.distances;
 
-import org.nd4j.linalg.api.ndarray.INDArray;
-
 import static jaicore.ml.tsc.util.TimeSeriesUtil.*;
 
 import jaicore.ml.tsc.complexity.ITimeSeriesComplexity;
@@ -30,9 +28,8 @@ public class ComplexityInvariantDistance implements ITimeSeriesDistance {
     }
 
     @Override
-    public double distance(INDArray A, INDArray B) throws TimeSeriesLengthException {
+    public double distance(double[] A, double[] B) throws TimeSeriesLengthException {
         // Parameter checks.
-        isTimeSeriesOrException(A, B);
         isSameLengthOrException(A, B);
 
         double complexityA = complexityMeasure.complexity(A);

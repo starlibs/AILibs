@@ -1,9 +1,7 @@
 package jaicore.ml.tsc.distances;
 
-import org.nd4j.linalg.api.ndarray.INDArray;
-import static jaicore.ml.tsc.util.TimeSeriesUtil.*;
 import jaicore.ml.tsc.exceptions.TimeSeriesLengthException;
-import jaicore.ml.tsc.util.TimeSeriesUtil;
+import static jaicore.ml.tsc.util.TimeSeriesUtil.*;
 
 /**
  * TimeWarpEditDistance
@@ -17,23 +15,21 @@ public class TimeWarpEditDistance implements ITimeSeriesDistanceWithTimestamps {
     private double lambda;
 
     /**
-     * Distance mesaure used for point distance calculation. In {"euclidean",
-     * "absolute"}.
+     * Distance mesaure used for point distance calculation.
      */
-    private String pointDistance;
+    private IScalarDistance d;
 
     /**
      * Constructor.
      * 
-     * @param lambda        Additional cost parameter for deletion.
-     * @param nu            Stiffness parameter.
-     * @param pointDistance Distance mesaure used for point distance calculation. In
-     *                      {"euclidean", "absolute"}.
+     * @param lambda Additional cost parameter for deletion.
+     * @param nu     Stiffness parameter.
+     * @param d      Distance mesaure used for point distance calculation.
      */
-    public TimeWarpEditDistance(double lambda, double nu, String pointDistance) {
+    public TimeWarpEditDistance(double lambda, double nu, IScalarDistance d) {
         this.lambda = lambda;
         this.nu = nu;
-        this.pointDistance = pointDistance;
+        this.d = d;
     }
 
     /**
@@ -43,32 +39,30 @@ public class TimeWarpEditDistance implements ITimeSeriesDistanceWithTimestamps {
      * @param nu     Stiffness parameter.
      */
     public TimeWarpEditDistance(double lambda, double nu) {
-        this(lambda, nu, "euclidean");
+        this(lambda, nu, ScalarDistanceUtil.getEuclideanDistance());
     }
 
     @Override
-    public double distance(INDArray A, INDArray B) throws TimeSeriesLengthException {
+    public double distance(double[] A, double[] B) throws TimeSeriesLengthException {
         // Parameter checks.
-        isTimeSeriesOrException(A, B);
         isSameLengthOrException(A, B);
         // Create dummy timestamps for A and B.
-        INDArray tA = TimeSeriesUtil.createEquidistantTimestamps(A);
-        INDArray tB = TimeSeriesUtil.createEquidistantTimestamps(B);
+        double[] tA = createEquidistantTimestamps(A);
+        double[] tB = createEquidistantTimestamps(B);
 
         return calculateDistance(A, tA, B, tB);
     }
 
     @Override
-    public double distance(INDArray A, INDArray tA, INDArray B, INDArray tB) throws TimeSeriesLengthException {
+    public double distance(double[] A, double[] tA, double[] B, double[] tB) throws TimeSeriesLengthException {
         // Parameter checks.
-        isTimeSeriesOrException(A, tA, B, tB);
         isSameLengthOrException(A, tA, B, tB);
 
         return calculateDistance(A, tA, B, tB);
     }
 
-    private double calculateDistance(INDArray A, INDArray tA, INDArray B, INDArray tB) {
-        int n = (int) A.length();
+    private double calculateDistance(double[] A, double[] tA, double[] B, double[] tB) {
+        int n = A.length;
         double[][] M = new double[n][n];
 
         // Dynamic Programming initialization.
@@ -82,15 +76,12 @@ public class TimeWarpEditDistance implements ITimeSeriesDistanceWithTimestamps {
         for (int i = 1; i < n; i++) {
             for (int j = 1; j < n; j++) {
                 // Case: Delete in A
-                double c1 = M[i - 1][j] + d(A.getDouble(i), A.getDouble(i - 1))
-                        + nu * (tA.getDouble(i) - tA.getDouble(i - 1)) + lambda;
+                double c1 = M[i - 1][j] + d.distance(A[i], A[i - 1]) + nu * (tA[i] - tA[i - 1]) + lambda;
                 // Case: Agreement
-                double c2 = M[i - 1][j - 1] + d(A.getDouble(i), B.getDouble(j))
-                        + d(A.getDouble(i - 1), B.getDouble(j - 1)) + nu * (Math.abs(tA.getDouble(i) - tB.getDouble(j))
-                                + Math.abs(tA.getDouble(i - 1) - tB.getDouble(j - 1)));
+                double c2 = M[i - 1][j - 1] + d.distance(A[i], B[j]) + d.distance(A[i - 1], B[j - 1])
+                        + nu * (Math.abs(tA[i] - tB[j]) + Math.abs(tA[i - 1] - tB[j - 1]));
                 // Case: Delete in B
-                double c3 = M[i][j - 1] + d(B.getDouble(i), B.getDouble(i - 1))
-                        + nu * (tB.getDouble(j) - tB.getDouble(j - 1)) + lambda;
+                double c3 = M[i][j - 1] + d.distance(B[i], B[i - 1]) + nu * (tB[j] - tB[j - 1]) + lambda;
                 // Minimum cost.
                 double minimum = Math.min(c1, Math.min(c2, c3));
                 M[i][j] = minimum;
@@ -98,10 +89,6 @@ public class TimeWarpEditDistance implements ITimeSeriesDistanceWithTimestamps {
         }
 
         return M[n - 1][n - 1];
-    }
-
-    private double d(double a, double b) {
-        return Math.sqrt(a * a + b * b);
     }
 
 }
