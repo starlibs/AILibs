@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jaicore.ml.core.exception.PredictionException;
+import jaicore.ml.tsc.util.TimeSeriesUtil;
 
 /**
  * <code>LearnShapeletsClassifier</code> published in "J. Grabocka, N.
@@ -159,6 +160,8 @@ public class LearnShapeletsClassifier
 	public Integer predict(double[] univInstance) throws PredictionException {
 		final HashMap<Integer, Double> scoring = new HashMap<>();
 
+		univInstance = TimeSeriesUtil.zNormalize(univInstance, LearnShapeletsAlgorithm.USE_BIAS_CORRECTION);
+		
 		for (int i = 0; i < this.C; i++) {
 			double tmpScore = this.W_0[i];
 			for (int r = 0; r < this.scaleR; r++) {

@@ -1,5 +1,6 @@
 package jaicore.ml.tsc.classifier;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -89,7 +90,7 @@ public class LearnShapeletsAlgorithm extends
 	/**
 	 * Indicator whether Bessel's correction should be used when normalizing arrays.
 	 */
-	private static final boolean USE_BIAS_CORRECTION = false;
+	public static final boolean USE_BIAS_CORRECTION = true;
 
 	/**
 	 * Predefined alpha parameter used within the calculations.
@@ -298,10 +299,17 @@ public class LearnShapeletsAlgorithm extends
 		double[][][] M_hat = new double[this.scaleR][this.I][this.K];
 		double[][] Theta = new double[this.I][this.C];
 
+		List<Integer> indices = IntStream.range(0, this.I).boxed().collect(Collectors.toList());
+
 		// Stochastic gradient descent
 		LOGGER.debug("Starting training for {} iterations...", this.maxIter);
 		for (int it = 0; it < this.maxIter; it++) {
-			for (int i = 0; i < this.I; i++) {
+			// Shuffle instances
+			Collections.shuffle(indices);
+
+			for (int idx = 0; idx < this.I; idx++) {
+				int i = indices.get(idx);
+
 				// Pre-compute terms
 				for (int r = 0; r < this.scaleR; r++) {
 
@@ -357,7 +365,7 @@ public class LearnShapeletsAlgorithm extends
 
 							W_hist[c][r][k] += wStep * wStep;
 
-							W[c][r][k] -= (this.learningRate * wStep / Math.sqrt(W_hist[c][r][k]));
+							W[c][r][k] -= (this.learningRate * wStep / Math.sqrt(W_hist[c][r][k] + EPS));
 
 							int J_r = getNumberOfSegments(this.Q, this.minShapeLength, r);
 							for (int j = 0; j < J_r; j++) {
@@ -371,14 +379,14 @@ public class LearnShapeletsAlgorithm extends
 											* (S[r][k][l] - dataMatrix[i][j + l]) * W[c][r][k];
 									S_hist[r][k][l] += sStep * sStep;
 
-									S[r][k][l] -= this.learningRate * sStep / Math.sqrt(S_hist[r][k][l]);
+									S[r][k][l] -= this.learningRate * sStep / Math.sqrt(S_hist[r][k][l] + EPS);
 								}
 							}
 						}
 					}
 
 					W_0_hist[c] += gradW_0 * gradW_0;
-					W_0[c] += this.learningRate * gradW_0 / Math.sqrt(W_0_hist[c]);
+					W_0[c] += this.learningRate * gradW_0 / Math.sqrt(W_0_hist[c] + EPS);
 				}
 			}
 
