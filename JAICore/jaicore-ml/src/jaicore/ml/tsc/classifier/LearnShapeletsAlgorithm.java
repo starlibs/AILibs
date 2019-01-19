@@ -100,7 +100,7 @@ public class LearnShapeletsAlgorithm extends
 	/**
 	 * Epsilon value used to prevent dividing by zero occurrences.
 	 */
-	private static double EPS = 0.0000000000000001d;
+	private static double EPS = 0.000000000000000000001d;
 
 	/**
 	 * Constructor of the algorithm to train a {@link LearnShapeletsClassifier}.
@@ -259,6 +259,9 @@ public class LearnShapeletsAlgorithm extends
 
 		this.K = (int) (Math.log(totalSegments) * (this.C - 1));
 
+		LOGGER.info("Parameters: k={}, learningRate={}, reg={}, r={}, minShapeLength={}, maxIter={}, Q={}, C={}", K,
+				learningRate, regularization, scaleR, minShapeLength, maxIter, Q, C);
+
 		// Initialization
 		double[][][] S = initializeS(dataMatrix);
 		double[][][] S_hist = new double[this.scaleR][][];
@@ -280,17 +283,17 @@ public class LearnShapeletsAlgorithm extends
 		// paper's version but doesn't match with the allocated matrix's shape
 		Random rand = new Random(this.seed);
 
-		// Initialize the initial weights using a normal distribution with mean 0 and
-		// stddev 0.01
+		// Initializes the given weights nearly around zeros (as opposed to the paper
+		// due to vanish effects)
 		double[][][] W = new double[this.C][this.scaleR][this.K];
 		double[][][] W_hist = new double[this.C][this.scaleR][this.K];
 		double[] W_0 = new double[this.C];
 		double[] W_0_hist = new double[this.C];
 		for (int i = 0; i < this.C; i++) {
-			W_0[i] = rand.nextGaussian() * 0.01;
+			W_0[i] = 2 * EPS * rand.nextDouble() - 1;
 			for (int j = 0; j < this.scaleR; j++) {
 				for (int k = 0; k < this.K; k++) {
-					W[i][j][k] = rand.nextGaussian() * 0.01;
+					W[i][j][k] = 2 * EPS * rand.nextDouble() - 1;
 				}
 			}
 		}
