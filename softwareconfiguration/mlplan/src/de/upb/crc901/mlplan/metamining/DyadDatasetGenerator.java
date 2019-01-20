@@ -15,6 +15,9 @@ import java.util.Random;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.nd4j.linalg.exception.ND4JArraySizeException;
+import org.nd4j.linalg.factory.Nd4j;
+
 import de.upb.isys.linearalgebra.DenseDoubleVector;
 import de.upb.isys.linearalgebra.Vector;
 import jaicore.basic.SQLAdapter;
@@ -194,6 +197,7 @@ public class DyadDatasetGenerator {
 	}
 
 	public static void main(String... args) throws SQLException, TrainingException {
+		Nd4j.setNumThreads(4);
 		user = args[0];
 		password = args[1];
 		db_host = args[2];
