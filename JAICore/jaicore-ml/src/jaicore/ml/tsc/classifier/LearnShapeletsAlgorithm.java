@@ -29,8 +29,7 @@ import weka.core.Instances;
  * @author Julian Lienen
  *
  */
-public class LearnShapeletsAlgorithm extends
-		ASimplifiedTSCAlgorithm<Integer, LearnShapeletsClassifier> {
+public class LearnShapeletsAlgorithm extends ASimplifiedTSCAlgorithm<Integer, LearnShapeletsClassifier> {
 
 	/**
 	 * The log4j logger.
@@ -181,7 +180,7 @@ public class LearnShapeletsAlgorithm extends
 							.zNormalize(tmpSegments[i * numberOfSegments + j], USE_BIAS_CORRECTION);
 				}
 			}
-			
+
 			// Transform instances
 			Instances wekaInstances = WekaUtil.matrixToWekaInstances(tmpSegments);
 
@@ -272,11 +271,13 @@ public class LearnShapeletsAlgorithm extends
 		double[][][][] Xi = new double[this.scaleR][][][];
 		double[][][][] Phi = new double[this.scaleR][][][];
 
+		int[] numberOfSegments = new int[this.scaleR];
+
 		for (int r = 0; r < this.scaleR; r++) {
-			final int numberOfSegments = getNumberOfSegments(this.Q, this.minShapeLength, r);
-			D[r] = new double[this.I][this.K][numberOfSegments];
-			Xi[r] = new double[this.I][this.K][numberOfSegments];
-			Phi[r] = new double[this.I][this.K][numberOfSegments];
+			numberOfSegments[r] = getNumberOfSegments(this.Q, this.minShapeLength, r);
+			D[r] = new double[this.I][this.K][numberOfSegments[r]];
+			Xi[r] = new double[this.I][this.K][numberOfSegments[r]];
+			Phi[r] = new double[this.I][this.K][numberOfSegments[r]];
 		}
 
 		// TODO: Check correct order of shape parameters of W => Current version is the
@@ -308,7 +309,7 @@ public class LearnShapeletsAlgorithm extends
 		LOGGER.debug("Starting training for {} iterations...", this.maxIter);
 		for (int it = 0; it < this.maxIter; it++) {
 			// Shuffle instances
-			Collections.shuffle(indices);
+			Collections.shuffle(indices, new Random(this.seed + it));
 
 			for (int idx = 0; idx < this.I; idx++) {
 				int i = indices.get(idx);
@@ -319,7 +320,7 @@ public class LearnShapeletsAlgorithm extends
 					long kBound = S[r].length;
 					for (int k = 0; k < kBound; k++) { // this.K
 
-						int J_r = getNumberOfSegments(this.Q, this.minShapeLength, r);
+						int J_r = numberOfSegments[r];
 
 						for (int j = 0; j < J_r; j++) {
 
@@ -370,20 +371,24 @@ public class LearnShapeletsAlgorithm extends
 
 							W[c][r][k] -= (this.learningRate * wStep / Math.sqrt(W_hist[c][r][k] + EPS));
 
-							int J_r = getNumberOfSegments(this.Q, this.minShapeLength, r);
+							int J_r = numberOfSegments[r];
+
+							double phiDenominator = 1d / ((r + 1d) * this.minShapeLength * Psi[r][i][k]);
+
+							double[] distDiff = new double[J_r];
 							for (int j = 0; j < J_r; j++) {
-								double newPhiValue = 2 * Xi[r][i][k][j]
-										* (1 + ALPHA * (D[r][i][k][j] - M_hat[r][i][k]));
-								newPhiValue /= (r + 1) * this.minShapeLength * Psi[r][i][k];
-								Phi[r][i][k][j] = newPhiValue;
+								distDiff[j] = Xi[r][i][k][j] * (1d + ALPHA * (D[r][i][k][j] - M_hat[r][i][k]));
+							}
 
-								for (int l = 0; l < (r + 1) * this.minShapeLength; l++) {
-									double sStep = (-1) * gradW_0 * Phi[r][i][k][j]
-											* (S[r][k][l] - dataMatrix[i][j + l]) * W[c][r][k];
-									S_hist[r][k][l] += sStep * sStep;
+							for (int l = 0; l < (r + 1) * this.minShapeLength; l++) {
+								double shapeletDiff = 0;
+								for (int j = 0; j < J_r; j++)
+									shapeletDiff += distDiff[j] * (S[r][k][l] - dataMatrix[i][j + l]);
 
-									S[r][k][l] -= this.learningRate * sStep / Math.sqrt(S_hist[r][k][l] + EPS);
-								}
+								double sStep = (-1d) * gradW_0 * shapeletDiff * W[c][r][k] * phiDenominator;
+								S_hist[r][k][l] += sStep * sStep;
+
+								S[r][k][l] -= this.learningRate * sStep / Math.sqrt(S_hist[r][k][l] + EPS);
 							}
 						}
 					}
