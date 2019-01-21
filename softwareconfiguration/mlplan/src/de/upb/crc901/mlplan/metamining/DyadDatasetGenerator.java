@@ -17,6 +17,9 @@ import java.util.stream.Collectors;
 
 import org.nd4j.linalg.exception.ND4JArraySizeException;
 import org.nd4j.linalg.factory.Nd4j;
+import org.nd4j.nativeblas.NativeOps;
+import org.nd4j.nativeblas.NativeOpsHolder;
+import org.nd4j.nativeblas.Nd4jBlas;
 
 import de.upb.isys.linearalgebra.DenseDoubleVector;
 import de.upb.isys.linearalgebra.Vector;
@@ -197,7 +200,16 @@ public class DyadDatasetGenerator {
 	}
 
 	public static void main(String... args) throws SQLException, TrainingException {
+		
+		Nd4jBlas nd4jBlas = (Nd4jBlas) Nd4j.factory().blas();
+		nd4jBlas.setMaxThreads(4);
+
+		NativeOpsHolder instance = NativeOpsHolder.getInstance();
+		NativeOps deviceNativeOps = instance.getDeviceNativeOps();
+		deviceNativeOps.setOmpNumThreads(4);
+		
 		Nd4j.setNumThreads(4);
+		
 		user = args[0];
 		password = args[1];
 		db_host = args[2];
@@ -205,7 +217,7 @@ public class DyadDatasetGenerator {
 		int[] trainSeeds = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 		int[] testSeeds = new int[] { 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 };
 		SQLAdapter resultAdapter = new SQLAdapter(db_host, user, password, db);
-		String resultTableName = "results_automl_metadata_plnet";
+		String resultTableName = "results_automl_metadata_plnet_4threads";
 		try {
 			ResultSet rs = resultAdapter.getResultsOfQuery("SHOW TABLES");
 			boolean hasPerformanceTable = false;
