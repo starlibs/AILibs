@@ -1,18 +1,14 @@
 package jaicore.ml.tsc.filter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
-import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.factory.Nd4j;
-
-
-import jaicore.ml.core.dataset.IDataset;
-import jaicore.ml.core.dataset.TimeSeriesDataset;
+import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import jaicore.ml.tsc.exceptions.NoneFittedFilterExeception;
 
 public class SFA implements IFilter {
 
-	private INDArray alphabet;
+	private double[] alphabet;
 	
 	
 	private boolean fitted = false;
@@ -21,22 +17,22 @@ public class SFA implements IFilter {
 	private int numberOfDesieredDFTCoefficients;
 
 	
-	private ArrayList<INDArray> lookupTable = null;
-	private ArrayList<INDArray> sfaDataset = null;
+	private ArrayList<double[][]> lookupTable = null;
+	private ArrayList<double[][]> sfaDataset = null;
 	
 	public void setNumberOfDesieredDFTCoefficients(int numberOfDesieredDFTCoefficients) {
 		this.numberOfDesieredDFTCoefficients = numberOfDesieredDFTCoefficients;
 	}
 
-	//TODO should I use long ?
-	public SFA(INDArray alphabet, int wordLength) {
+
+	public SFA(double [] alphabet, int wordLength) {
 		this.alphabet  = alphabet;
 		this.numberOfDesieredDFTCoefficients = wordLength;
 	}
 	
 	@Override
-	public IDataset transform(IDataset input) throws IllegalArgumentException, NoneFittedFilterExeception {
-		//TODO is empty ??
+	public TimeSeriesDataset transform(TimeSeriesDataset input) throws IllegalArgumentException, NoneFittedFilterExeception {
+		
 		if(!(input instanceof TimeSeriesDataset)) {
 			throw new IllegalArgumentException("This method only supports Timesereies datasets");
 		}
@@ -48,17 +44,17 @@ public class SFA implements IFilter {
 		}
 		//TODO Sliding window is still missing 
 		
-		sfaDataset = new ArrayList<INDArray>();
+		sfaDataset = new ArrayList<double[][]>();
 		
 		for(int matrix = 0; matrix < DFTDataset.getNumberOfVariables(); matrix++) {
-			INDArray sfaWords = Nd4j.valueArrayOf(new long [] {DFTDataset.getNumberOfInstances(),numberOfDesieredDFTCoefficients},0);
+			double[][] sfaWords = new double [(int) DFTDataset.getNumberOfInstances()][numberOfDesieredDFTCoefficients];
 			for(int instance = 0; instance < DFTDataset.getNumberOfInstances(); instance++) {
 				for(int entry = 0; entry < numberOfDesieredDFTCoefficients; entry++) {
-					double elem = DFTDataset.getValues(matrix).getRow(instance).getDouble(entry);
-					INDArray lookup = lookupTable.get(matrix).getRow(instance);
-					for(int i = 0; i < lookup.length(); i=+2) {
-						if(elem > lookup.getDouble(i)& elem < lookup.getDouble(i+1)) {
-							sfaWords.putScalar(new long[]{instance,entry}, alphabet.getDouble(i/2));
+					double elem = DFTDataset.getValues(matrix)[instance][entry];
+					double lookup [] = lookupTable.get(matrix)[instance];
+					for(int i = 0; i < lookup.length; i=+2) {
+						if(elem > lookup[i]& elem < lookup[i+1]) {
+							sfaWords[instance][entry] = alphabet[i/2];
 						}
 					} 
 				}
@@ -70,7 +66,7 @@ public class SFA implements IFilter {
 	}
 
 	@Override
-	public void fit(IDataset input) {
+	public void fit(TimeSeriesDataset input) {
 		// TODO Auto-generated method stub
 	
 		if(!(input instanceof TimeSeriesDataset)) {
@@ -80,12 +76,10 @@ public class SFA implements IFilter {
 			throw new IllegalArgumentException("This method can not work with an empty dataset.");
 		}
 		
-		if(alphabet.length() == 0) {
+		if(alphabet.length == 0) {
 			throw new IllegalArgumentException("The alphabet size can not be zero.");
 		}
-		if(alphabet.isEmpty()) {
-			throw new IllegalArgumentException("The alphabet can not be null for this method.");
-		}
+		
 		
 		DFT dftFilter = new DFT();
 		
@@ -100,27 +94,27 @@ public class SFA implements IFilter {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		ArrayList<INDArray> lookupTable = new ArrayList<INDArray>(); 
+		ArrayList<double[][]> lookupTable = new ArrayList<double[][]>(); 
 		
 		
 		for(int matrix = 0; matrix < DFTDataset.getNumberOfVariables(); matrix++) {
 			int index = 0;
-			INDArray lookUpTable = Nd4j.valueArrayOf(new int[]{numberOfDesieredDFTCoefficients*2,(int)alphabet.length()*2},0);
+			double[][] lookUpTable = new double [numberOfDesieredDFTCoefficients*2][alphabet.length*2];
 			for(int coeficient = 0; coeficient < numberOfDesieredDFTCoefficients*2; coeficient++) {
 				
-				INDArray toBin = Nd4j.valueArrayOf(new int[] {(int)((TimeSeriesDataset)input).getNumberOfInstances()},0); 
+				double[] toBin = new double[(int)input.getNumberOfInstances()]; 
 				
 				for(int instances = 0; instances < DFTDataset.getNumberOfInstances(); instances++) {
-					toBin.putScalar(instances,DFTDataset.getValues(instances).getDouble(coeficient));
+					toBin[instances]= DFTDataset.getValues(matrix)[instances][coeficient];
 				}
 				//Sort ascending
-				Nd4j.sort(toBin, true);
-				long splitValue = toBin.length()/alphabet.length();
+				Arrays.sort(toBin);
+				long splitValue = toBin.length/alphabet.length;
 				//TODO TEST!!
-				for(int alphabetLetter = 0; alphabetLetter < alphabet.length()*2; alphabetLetter+=2) {
+				for(int alphabetLetter = 0; alphabetLetter < alphabet.length*2; alphabetLetter+=2) {
 					index += (alphabetLetter/2)*splitValue;
-					lookUpTable.putScalar(new int[] {coeficient,alphabetLetter},toBin.getDouble(index));
-					lookUpTable.putScalar(new int[] {coeficient,alphabetLetter+1},toBin.getDouble(index+splitValue-1));
+					lookUpTable[coeficient][alphabetLetter] = toBin[index];
+					lookUpTable[coeficient][alphabetLetter+1] = toBin[(int) (index+splitValue-1)];
 				}
 			}
 			lookupTable.add(lookUpTable);
@@ -130,7 +124,7 @@ public class SFA implements IFilter {
 	}
 
 	@Override
-	public IDataset fitTransform(IDataset input) throws IllegalArgumentException, NoneFittedFilterExeception {
+	public TimeSeriesDataset fitTransform(TimeSeriesDataset input) throws IllegalArgumentException, NoneFittedFilterExeception {
 		// TODO Auto-generated method stump
 		fit(input);
 		return transform(input);

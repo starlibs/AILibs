@@ -1,31 +1,29 @@
 package jaicore.ml.tsc.filter;
 
-import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.factory.Nd4j;
 
-import jaicore.ml.core.dataset.IDataset;
-import jaicore.ml.core.dataset.TimeSeriesDataset;
+import java.util.Arrays;
+
 import jaicore.ml.tsc.PPA;
+import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import jaicore.ml.tsc.exceptions.NoneFittedFilterExeception;
 
 public class SAX implements IFilter {
 	
-	private INDArray alphabet;
+	private double [] alphabet;
 	private boolean fitted;
 	private int wordLength;
-	private INDArray lookuptable;
-	private TimeSeriesDataset zTransformedDataset;
+	private double [][] lookuptable;
 	private ZTransformer ztransform;
-	private INDArray maxAndMin;
+	private double [][] maxAndMin;
 	
-	public SAX(INDArray alphabet, int wordLength) {
+	public SAX(double[] alphabet, int wordLength) {
 		this.ztransform = new ZTransformer();
 		this.alphabet  = alphabet;
 		this.wordLength = wordLength;
 	}
 
 	@Override
-	public IDataset transform(IDataset input) throws IllegalArgumentException, NoneFittedFilterExeception {
+	public TimeSeriesDataset transform(TimeSeriesDataset input) throws IllegalArgumentException, NoneFittedFilterExeception {
 		// TODO Auto-generated method stub
 		
 		if(!(input instanceof TimeSeriesDataset)){
@@ -41,30 +39,30 @@ public class SAX implements IFilter {
 		TimeSeriesDataset sAXTransformedDataset = new TimeSeriesDataset(null, null, null);
 		
 		for(int matrix = 0; matrix < ((TimeSeriesDataset) input).getNumberOfVariables(); matrix++) {
-			INDArray newMatrix = Nd4j.valueArrayOf(new long[] {((TimeSeriesDataset) input).getNumberOfInstances(), wordLength},0); 
+			double [][] newMatrix = new double[(int) input.getNumberOfInstances()][wordLength]; 
 			
-			for(int instance = 0; instance < ((TimeSeriesDataset) input).getNumberOfInstances(); instance++) {
-				INDArray INDArrayPPAOfInstance = PPA.ppa(((TimeSeriesDataset) input).getValues(matrix).getRow(instance), wordLength);
-				INDArray TSasString = Nd4j.zeros(wordLength);
-				INDArray localLookupTable = lookuptable.getRow(matrix);
+			for(int instance = 0; instance < input.getNumberOfInstances(); instance++) {
+				double[] PPAOfInstance = PPA.ppa(input.getValues(matrix)[instance], wordLength);
+				double[] TSasString = new double[wordLength];
+				double [] localLookupTable = lookuptable[matrix];
 				
-				for(int i = 0; i < (int)INDArrayPPAOfInstance.length();i++) {
-					double ppaValue = INDArrayPPAOfInstance.getDouble(i);
+				for(int i = 0; i < (int)PPAOfInstance.length;i++) {
+					double ppaValue = PPAOfInstance[i];
 					boolean valuefound = false;
-					for(int j = 0; j < localLookupTable.length(); j++) {
-						if(ppaValue<localLookupTable.getDouble(j)) {
-							TSasString.putScalar(i, alphabet.getDouble(j));
+					for(int j = 0; j < localLookupTable.length; j++) {
+						if(ppaValue<localLookupTable[j]) {
+							TSasString[i] = alphabet[j];
 							valuefound = true;
 						}
 					}
 					
 					//TODO testen !!! evt put data into tree 
 					if(valuefound == false) {
-						TSasString.putScalar(i, alphabet.getDouble(alphabet.length()-1));
+						TSasString[i] =alphabet[alphabet.length-1];
 					}
 				}
 				
-				newMatrix.putRow(instance, TSasString);
+				newMatrix[instance] = TSasString;
 			}
 			
 			sAXTransformedDataset.add(newMatrix, null);
@@ -75,7 +73,7 @@ public class SAX implements IFilter {
 	}
 
 	@Override
-	public void fit(IDataset input) {
+	public void fit(TimeSeriesDataset input) {
 		if(!(input instanceof TimeSeriesDataset)) {
 			throw new IllegalArgumentException("This method only supports Timeseriesdatasets");
 		}
@@ -83,12 +81,19 @@ public class SAX implements IFilter {
 			throw new IllegalArgumentException("This method can not work with an empty dataset.");
 		}
 		// TODO Can a ppa value be smaller than the smallest value or higher then the highest
-		maxAndMin = Nd4j.valueArrayOf(new int []{2,((TimeSeriesDataset) input).getNumberOfVariables()}, 0);
+		maxAndMin = new double [2][input.getNumberOfVariables()];
 		try {
-			zTransformedDataset = (TimeSeriesDataset)ztransform.fitTransform(input);
-			for(int matrix = 0; matrix < ((TimeSeriesDataset) input).getNumberOfVariables(); matrix++){
-					maxAndMin.put(new int [] {0,matrix}, ((TimeSeriesDataset) input).getValues(matrix).max(1).max(1));
-					maxAndMin.put(new int [] {1,matrix}, ((TimeSeriesDataset) input).getValues(matrix).min(1).min(1));		
+			ztransform.fitTransform(input);
+			for(int matrix = 0; matrix < input.getNumberOfVariables(); matrix++){
+				
+				double[] max = new double [(int)input.getNumberOfInstances()]; 
+				double[] min = new double [(int)input.getNumberOfInstances()];
+				for(int instance = 0; instance < input.getNumberOfInstances(); instance++) {
+					max[instance] = Arrays.stream(input.getValues(matrix)[instance]).max().getAsDouble();
+					min[instance] = Arrays.stream(input.getValues(matrix)[instance]).min().getAsDouble();
+				}
+					maxAndMin[0][matrix] = Arrays.stream(max).max().getAsDouble();
+					maxAndMin[1][matrix] = Arrays.stream(min).min().getAsDouble();
 			}
 			
 		} catch (IllegalArgumentException e) {
@@ -99,23 +104,23 @@ public class SAX implements IFilter {
 			e.printStackTrace();
 		}
 		//filling the lookuptable
-		this.lookuptable = Nd4j.valueArrayOf(new int[] {((TimeSeriesDataset) input).getNumberOfVariables(),(int) alphabet.length()},0);
+		this.lookuptable = new double [input.getNumberOfVariables()][alphabet.length];
 		
-		for(int matrix = 0; matrix < ((TimeSeriesDataset) input).getNumberOfVariables(); matrix++) {
-			INDArray localMaxMin =  maxAndMin.getColumn(matrix);
-			double totalsize = localMaxMin.getDouble(0)-localMaxMin.getDouble(1);
-			double stepsize = totalsize/alphabet.length();
+		for(int matrix = 0; matrix < input.getNumberOfVariables(); matrix++) {
+			double [] localMaxMin =  new double[] {maxAndMin[0][matrix], maxAndMin[1][matrix]};
+			double totalsize = localMaxMin[0]-localMaxMin[1];
+			double stepsize = totalsize/alphabet.length;
 			
-			lookuptable.putScalar(new int[] {matrix,0}, localMaxMin.getDouble(1)+stepsize);
-			for(int i = 1; i < lookuptable.columns();i++) {
-				lookuptable.putScalar(new int[] {matrix,i},lookuptable.getDouble(i-1)+stepsize);
+			lookuptable[matrix][0] = localMaxMin[1]+stepsize;
+			for(int i = 1; i < alphabet.length;i++) {
+				lookuptable[matrix][i] = lookuptable[matrix][i-1]+stepsize;
 			}
 		}
 		fitted = true;
 	}
 
 	@Override
-	public IDataset fitTransform(IDataset input) throws IllegalArgumentException, NoneFittedFilterExeception {
+	public TimeSeriesDataset fitTransform(TimeSeriesDataset input) throws IllegalArgumentException, NoneFittedFilterExeception {
 		// TODO Auto-generated method stub
 		fit(input);
 		return transform(input);

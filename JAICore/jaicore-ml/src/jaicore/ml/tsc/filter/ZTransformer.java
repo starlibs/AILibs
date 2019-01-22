@@ -5,11 +5,7 @@ package jaicore.ml.tsc.filter;
 
 import java.util.Arrays;
 
-import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.factory.Nd4j;
-
-import jaicore.ml.core.dataset.IDataset;
-import jaicore.ml.core.dataset.TimeSeriesDataset;
+import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import jaicore.ml.tsc.exceptions.NoneFittedFilterExeception;
 
 
@@ -36,7 +32,7 @@ public class ZTransformer implements IFilter {
 	 */
 	
 	@Override
-	public IDataset transform(IDataset input) throws IllegalArgumentException, NoneFittedFilterExeception{
+	public TimeSeriesDataset transform(TimeSeriesDataset input) throws IllegalArgumentException, NoneFittedFilterExeception{
 		
 	//TODO is a dataset empty if it has no attributes
 		if(!(input instanceof TimeSeriesDataset)) {
@@ -49,14 +45,14 @@ public class ZTransformer implements IFilter {
 		if(fitted) {
 			
 			for(int i = 0; i < ((TimeSeriesDataset) input).getNumberOfVariables(); i++){			
-					 INDArray matrix =  ((TimeSeriesDataset) input).getValues(i);
+					 double[][] matrix =  ((TimeSeriesDataset) input).getValues(i);
 					 for(int instance = 0; instance < ((TimeSeriesDataset) input).getNumberOfInstances(); instance++) {
-						INDArray row =  matrix.getRow(instance);
-						for(int elem = 0; elem < row.length(); elem++) {
+						double[] row =  matrix[instance];
+						for(int elem = 0; elem < row.length; elem++) {
 							//update every elem by the calculation of elem multiplied by the mean of the according instance
-							row.putScalar(elem, ((row.getDouble(elem)*means.getDouble(new int [] {i,instance}))/deviation.getDouble(new int[]{i,instance})));
+							row[elem]=((row[elem]*means[i][instance])/deviation[i][instance]);
 						}
-						matrix.putRow(instance, row);
+						matrix[instance]= row;
 					 }
 				((TimeSeriesDataset) input).replace(i,matrix,null);
 			}
@@ -72,25 +68,31 @@ public class ZTransformer implements IFilter {
 	 */
 	
 	@Override
-	public void fit(IDataset input) {
+	public void fit(TimeSeriesDataset input) {
 		
 		if(!(input instanceof TimeSeriesDataset)){
 			throw new IllegalArgumentException("This mehtod only supports for timeseries datasets.");
 		}	
-		if(((TimeSeriesDataset)input).isEmpty()) {
+		if(input.isEmpty()) {
 			throw new IllegalArgumentException("This method can not work with an empty dataset.");
 		}
 		
 		//make suitable means and deviation matrix rows == different attributes columns == different instances
 		
-		means = new double[((TimeSeriesDataset)input).getNumberOfVariables()][((TimeSeriesDataset)input).getNumberOfInstances()];
-		deviation = new double[((TimeSeriesDataset)input).getNumberOfVariables()][((TimeSeriesDataset)input).getNumberOfInstances()];
+		means = new double[input.getNumberOfVariables()][(int) input.getNumberOfInstances()];
+		deviation = new double[input.getNumberOfVariables()][(int) input.getNumberOfInstances()];
 		
 		
 		//for every attribute for every instance of this attribute compute mean and deviation and put it in the according cell in matrix 
-		for(int matrix = 0; matrix < ((TimeSeriesDataset) input).getNumberOfVariables(); matrix++) {
-				means.put(matrix,((TimeSeriesDataset) input).getValues(matrix).mean(1));
-				deviation.put(matrix,((TimeSeriesDataset) input).getValues(matrix).std(1));		
+		for(int matrix = 0; matrix < input.getNumberOfVariables(); matrix++) {
+			for(int instance = 0; instance < input.getNumberOfInstances(); instance++) {
+				means[matrix][instance] = Arrays.stream(input.getValues(matrix)[instance]).average().getAsDouble();
+				double sum = 0;
+				for( double elem : input.getValues(matrix)[instance]) {
+					sum += Math.pow((elem - means[matrix][instance]),2);
+				}
+				deviation[matrix][instance] = Math.sqrt(1/(input.getValues(matrix)[instance].length-1)*sum);		
+			}
 		}
 		
 		fitted = true;
@@ -101,9 +103,7 @@ public class ZTransformer implements IFilter {
 	 * @see jaicore.ml.tsc.filter.IFilter#fitTransform(jaicore.ml.core.dataset.IDataset)
 	 */
 	@Override
-	public IDataset fitTransform(IDataset input) throws IllegalArgumentException, NoneFittedFilterExeception {
-		//TODO call fit in transform or not ?
-		
+	public TimeSeriesDataset fitTransform(TimeSeriesDataset input) throws IllegalArgumentException, NoneFittedFilterExeception {
 		fit(input);
 		return transform(input);
 	}

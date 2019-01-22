@@ -14,7 +14,7 @@ public class zTransformTest {
 
 	@Test
 	public void test() {
-		fail("Not yet implemented");
+		
 	}
 
 }

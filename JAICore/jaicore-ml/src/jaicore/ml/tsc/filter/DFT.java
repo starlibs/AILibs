@@ -3,16 +3,13 @@ package jaicore.ml.tsc.filter;
 import java.util.ArrayList;
 
 import org.apache.commons.math.complex.Complex;
-import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.factory.Nd4j;
 
-import jaicore.ml.core.dataset.IDataset;
-import jaicore.ml.core.dataset.TimeSeriesDataset;
+import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import jaicore.ml.tsc.exceptions.NoneFittedFilterExeception;
 
 public class DFT implements IFilter {
 
-	private ArrayList<INDArray> DFTCoefficients = new ArrayList<INDArray>();
+	private ArrayList<double[][]> DFTCoefficients = new ArrayList<double[][]>();
 	//TODO sinvollen wert finden 
 	private int numberOfDisieredCoefficients = 10; 
 	
@@ -36,7 +33,7 @@ public class DFT implements IFilter {
 	}
 
 	@Override
-	public IDataset transform(IDataset input) throws IllegalArgumentException, NoneFittedFilterExeception {
+	public TimeSeriesDataset transform(TimeSeriesDataset input) throws IllegalArgumentException, NoneFittedFilterExeception {
 		// TODO Dataset empty ??
 		if(!(input instanceof TimeSeriesDataset)) {
 			throw new IllegalArgumentException("This method only supports Timesereies datasets");
@@ -49,22 +46,23 @@ public class DFT implements IFilter {
 		}
 		//First value is real part and second imaginary
 		TimeSeriesDataset output = new TimeSeriesDataset(DFTCoefficients, null, null);
+		
 		return output;
 	}
 
 	@Override
-	public void fit(IDataset input) {
+	public void fit(TimeSeriesDataset input) {
 		// TODO Auto-generated method stub
 		
 		if(!(input instanceof TimeSeriesDataset)) {
 			throw new IllegalArgumentException("This method only supports Timesereies datasets");
 		}
 		
-		if(((TimeSeriesDataset)input).isEmpty()) {
+		if(input.isEmpty()) {
 			throw new IllegalArgumentException("This method can not work with an empty dataset.");
 		}
 
-		double InstancesLength = ((TimeSeriesDataset) input).getValues(0).getRow(0).length();
+		double InstancesLength = input.getValues(0)[0].length;
 		if(!variableSet) {
 			paperSpecificVariable = (double) 1.0/((double)InstancesLength);
 		}
@@ -73,9 +71,9 @@ public class DFT implements IFilter {
 			throw new IllegalArgumentException("The number of desired coeficientes must be smaller than the number of data points of an instance.");
 		}
 		
-		for(int matrix = 0; matrix < ((TimeSeriesDataset) input).getNumberOfVariables(); matrix++) {
-			INDArray matrixDFTCoefficient = Nd4j.zeros(((TimeSeriesDataset) input).getNumberOfInstances(),numberOfDisieredCoefficients*2);
-			for(int instances = 0; instances < ((TimeSeriesDataset) input).getNumberOfInstances(); instances++) {
+		for(int matrix = 0; matrix < input.getNumberOfVariables(); matrix++) {
+			double[][] matrixDFTCoefficient = new double [(int) input.getNumberOfInstances()][numberOfDisieredCoefficients*2];
+			for(int instances = 0; instances < input.getNumberOfInstances(); instances++) {
 				int loopcounter = 0;
 				for(int f = 0; f < numberOfDisieredCoefficients; f++) {	
 					
@@ -84,7 +82,7 @@ public class DFT implements IFilter {
 					
 					for(int t = 0; t<InstancesLength; t++) {
 						
-						double entry = ((TimeSeriesDataset) input).getValues(matrix).getRow(instances).getDouble(t);
+						double entry = input.getValues(matrix)[instances][t];
 						
 						double realpart = Math.cos(-(1.0/(double)InstancesLength)*2.0*Math.PI*(double)t*(double)f);
 						double imaginarypart = Math.sin(-(1.0/(double)InstancesLength)*2.0*Math.PI*(double)t*(double)f);
@@ -103,8 +101,8 @@ public class DFT implements IFilter {
 					if(Math.abs(result.getReal())<Math.pow(10, -15)){
 						result = new Complex(0,result.getImaginary());
 					}
-					matrixDFTCoefficient.putScalar(new long[] {instances,loopcounter},result.getReal());
-					matrixDFTCoefficient.putScalar(new long[] {instances,loopcounter+1}, result.getImaginary());
+					matrixDFTCoefficient[instances][loopcounter] = result.getReal();
+					matrixDFTCoefficient[instances][loopcounter+1] = result.getImaginary();
 					loopcounter= loopcounter+2;
 				}
 			}
@@ -114,7 +112,7 @@ public class DFT implements IFilter {
 	}
 
 	@Override
-	public IDataset fitTransform(IDataset input) throws IllegalArgumentException, NoneFittedFilterExeception {
+	public TimeSeriesDataset fitTransform(TimeSeriesDataset input) throws IllegalArgumentException, NoneFittedFilterExeception {
 		fit(input);
 		return transform(input);
 	}
