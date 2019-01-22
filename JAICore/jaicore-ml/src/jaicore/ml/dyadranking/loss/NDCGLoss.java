@@ -12,12 +12,29 @@ import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
  *
  */
 public class NDCGLoss implements DyadRankingLossFunction {
+	
+	/**
+	 * The position up to which to compute the cumulative gain (zero-indexed, exclusive). 
+	 */
+	private int L;
+	
+	/**
+	 * 
+	 * @param L The position up to which to compute the cumulative gain (zero-indexed, exclusive). 
+	 */
+	public NDCGLoss(int L) {
+		super();
+		this.setL(L);
+	}
 
 	@Override
 	public double loss(IDyadRankingInstance actual, IDyadRankingInstance predicted) {	
-		int L = actual.length();
-		if (L <= 1) {
+		if (actual.length() <= 1) {
 			throw new IllegalArgumentException("Dyad rankings must have length greater than 1.");
+		}
+		
+		if (actual.length() != predicted.length()) {
+			throw new IllegalArgumentException("Dyad rankings must have equal length.");
 		}
 		
 		Map<Dyad, Integer> relevance = new HashMap<Dyad, Integer>();
@@ -28,7 +45,7 @@ public class NDCGLoss implements DyadRankingLossFunction {
 		double DCG = computeDCG(predicted, relevance);
 		double IDCG = computeDCG(actual, relevance);
 		
-		return DCG / IDCG;
+		return IDCG / DCG;
 	}
 	
 	private double computeDCG(IDyadRankingInstance ranking, Map<Dyad, Integer> relevance) {
@@ -42,6 +59,14 @@ public class NDCGLoss implements DyadRankingLossFunction {
 	
 	private double log2(double x) {
 		return Math.log(x) / Math.log(2);
+	}
+
+	public int getL() {
+		return L;
+	}
+
+	public void setL(int l) {
+		L = l;
 	}
 	
 	
