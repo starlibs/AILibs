@@ -66,17 +66,18 @@ public class DyadRankingInstance implements IDyadRankingInstance {
 
 	@Override
 	public boolean equals(Object o) {
-		if (!(o instanceof DyadRankingInstance)) {
+		if (!(o instanceof IDyadRankingInstance)) {
 			return false;
 		}
 
-		DyadRankingInstance dRInstance = (DyadRankingInstance) o;
+		IDyadRankingInstance drInstance = (IDyadRankingInstance) o;
 
-		if (!dyads.equals(dRInstance.dyads)) {
-			return false;
+		for (int i = 0; i < drInstance.length(); i++) {
+			if (!(drInstance.getDyadAtPosition(i)).equals(this.getDyadAtPosition(i)))
+				return false;
 		}
 
-		return super.equals(o);
+		return true;
 	}
 
 	@Override

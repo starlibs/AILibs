@@ -36,8 +36,7 @@ public class SparseDyadRankingInstance implements IDyadRankingInstance {
 	 * @param alternatives the ordering of alternatives that, when combined with the
 	 *                     instances is an ordering of dyads
 	 */
-	public SparseDyadRankingInstance(Vector instance,
-			List<Vector> alternatives) {
+	public SparseDyadRankingInstance(Vector instance, List<Vector> alternatives) {
 		this.instance = instance;
 		this.alternatives = Collections.unmodifiableList(alternatives);
 	}
@@ -108,6 +107,22 @@ public class SparseDyadRankingInstance implements IDyadRankingInstance {
 		builder.append("Alternatives: ");
 		builder.append(alternatives);
 		return builder.toString();
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (!(o instanceof IDyadRankingInstance)) {
+			return false;
+		}
+
+		IDyadRankingInstance drInstance = (IDyadRankingInstance) o;
+
+		for (int i = 0; i < drInstance.length(); i++) {
+			if (!(drInstance.getDyadAtPosition(i)).equals(this.getDyadAtPosition(i)))
+				return false;
+		}
+
+		return true;
 	}
 
 }
