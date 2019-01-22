@@ -91,9 +91,7 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 					"Can only train the Plackett-Luce net dyad ranker with a dyad ranking dataset!");
 		}
 		DyadRankingDataset drDataset = (DyadRankingDataset) dataset;
-/*		if (shuffleData) {
-			Collections.shuffle(drDataset, new Random(configuration.plNetSeed()));
-		}*/
+
 		List<IInstance> drTrain = (List<IInstance>) drDataset.subList(0,
 				(int) (earlyStoppingTrainRatio * drDataset.size()));
 		List<IInstance> drTest = (List<IInstance>) drDataset
@@ -123,7 +121,6 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 					this.updateWithMinibatch(miniBatch);
 					miniBatch.clear();
 				}
-				//this.update(dyadRankingInstance);
 			}
 			if (!miniBatch.isEmpty()) {
 				this.updateWithMinibatch(miniBatch);
@@ -143,7 +140,6 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 				} else {
 					patience++;
 				}
-//				log.debug("patience: + {}", patience);
 				earlyStoppingCounter = 0;
 			}
 			epoch++;
