@@ -3,6 +3,7 @@ package jaicore.ml.dyadranking.general;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,6 +29,7 @@ import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
 import jaicore.ml.dyadranking.loss.DyadRankingLossUtil;
 import jaicore.ml.dyadranking.loss.KendallsTauDyadRankingLoss;
+import jaicore.ml.dyadranking.util.DyadStandardScaler;
 
 /**
  * This is a test based on a dataset containing 400 dyad rankings of dataset and
@@ -69,13 +71,16 @@ public class DyadRankerMetaminingTest {
 
 	@Test
 	public void test() {
-
+		
+		DyadStandardScaler scaler = new DyadStandardScaler();
 		Collections.shuffle(dataset, new Random(seed));
 
 		// split data
 		DyadRankingDataset trainData = new DyadRankingDataset(dataset.subList(0, N));
+		scaler.fit(trainData);
+		scaler.transformInstances(trainData);
 		DyadRankingDataset testData = new DyadRankingDataset(dataset.subList(N, dataset.size()));
-
+		scaler.transformInstances(testData);
 		System.out.println(trainData.size());
 		System.out.println(testData.size());
 		
@@ -134,8 +139,7 @@ public class DyadRankerMetaminingTest {
 	}
 
 	@Parameters
-	public static List<APLDyadRanker[]> supplyDyadRankers() {
-		return Arrays.asList(new PLNetDyadRanker[] { new PLNetDyadRanker() },
-				new FeatureTransformPLDyadRanker[] { new FeatureTransformPLDyadRanker() });
+	public static List<APLDyadRanker> supplyDyadRankers() {
+		return Arrays.asList(new PLNetDyadRanker());
 	}
 }
