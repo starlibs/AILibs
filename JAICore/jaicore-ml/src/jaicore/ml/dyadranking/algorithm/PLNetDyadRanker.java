@@ -85,7 +85,7 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 		this.configuration = config;
 	}
 	
-	public void train(IDataset dataset, int maxEpochs, double earlyStoppingTrainRatio, boolean shuffleData) throws TrainingException {
+	public void train(IDataset dataset, int maxEpochs, double earlyStoppingTrainRatio) throws TrainingException {
 		if (!(dataset instanceof DyadRankingDataset)) {
 			throw new IllegalArgumentException(
 					"Can only train the Plackett-Luce net dyad ranker with a dyad ranking dataset!");
@@ -149,11 +149,11 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 	
 	@Override
 	public void train(IDataset dataset) throws TrainingException {
-		train(dataset, configuration.plNetMaxEpochs(), configuration.plNetEarlyStoppingTrainRatio(), true);
+		train(dataset, configuration.plNetMaxEpochs(), configuration.plNetEarlyStoppingTrainRatio());
 		if (configuration.plNetEarlyStoppingRetrain()) {
 			int maxEpochs = epoch;
 			this.plNet = null;
-			train(dataset, maxEpochs, 1.0, false);
+			train(dataset, maxEpochs, 1.0);
 		}
 	}
 	
