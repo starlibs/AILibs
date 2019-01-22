@@ -10,6 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.bouncycastle.util.Strings;
 
 import de.upb.isys.linearalgebra.DenseDoubleVector;
@@ -48,7 +49,7 @@ public class DyadRankingDataset extends ArrayList<IInstance> implements IDataset
 	public DyadRankingDataset(Collection<IInstance> c) {
 		super(c);
 	}
-	
+
 	/**
 	 * Creates an empty dyad ranking dataset with the given initial capacity.
 	 * 
@@ -105,7 +106,7 @@ public class DyadRankingDataset extends ArrayList<IInstance> implements IDataset
 			String input = IOUtils.toString(in, StandardCharsets.UTF_8);
 			String[] rows = Strings.split(input, '\n');
 			for (String row : rows) {
-				if(row.isEmpty())
+				if (row.isEmpty())
 					break;
 				List<Dyad> dyads = new LinkedList<Dyad>();
 				String[] dyadTokens = Strings.split(row, '|');
@@ -133,22 +134,22 @@ public class DyadRankingDataset extends ArrayList<IInstance> implements IDataset
 			e.printStackTrace();
 		}
 	}
-	
+
 	@Override
 	public boolean equals(Object o) {
-		if(!(o instanceof DyadRankingDataset)) {
+		if (!(o instanceof DyadRankingDataset)) {
 			return false;
 		}
 		DyadRankingDataset dataset = (DyadRankingDataset) o;
-		
-		if(dataset.size() != this.size()) {
+
+		if (dataset.size() != this.size()) {
 			return false;
 		}
-			
-		for(int i = 0; i < dataset.size(); i++) {
+
+		for (int i = 0; i < dataset.size(); i++) {
 			IDyadRankingInstance i1 = this.get(i);
 			IDyadRankingInstance i2 = dataset.get(i);
-			if(! i1.equals(i2)) {
+			if (!i1.equals(i2)) {
 				return false;
 			}
 		}

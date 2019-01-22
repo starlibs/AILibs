@@ -17,7 +17,8 @@ public class DyadRankingDatasetSerializationTest {
 	
 	@Test
 	public void testSerialization() {
-		DyadRankingDataset dataset = DyadRankingInstanceSupplier.getDyadRankingDataset(2, 3, 47);
+		DyadRankingDataset dataset = DyadRankingInstanceSupplier.getDyadRankingDataset(5, 15, 47);
+		
 		try {
 			dataset.serialize(new FileOutputStream(new File(DATASET_FILE)));
 			DyadRankingDataset dataset2 = new DyadRankingDataset();
