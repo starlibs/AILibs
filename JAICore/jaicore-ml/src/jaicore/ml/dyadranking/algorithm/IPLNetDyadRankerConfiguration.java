@@ -34,6 +34,10 @@ public interface IPLNetDyadRankerConfiguration extends IPredictiveModelConfigura
 	 */
 	public static final String K_MAX_EPOCHS = "plnet.epochs";
 	/**
+	 * The size of mini batches used during training.
+	 */
+	public static final String K_MINI_BATCH_SIZE = "plnet.minibatch.size";
+	/**
 	 * How often (in epochs) the validation error should be checked for early
 	 * stopping.
 	 */
@@ -49,6 +53,12 @@ public interface IPLNetDyadRankerConfiguration extends IPredictiveModelConfigura
 	 * for testing.
 	 */
 	public static final String K_EARLY_STOPPING_TRAIN_RATIO = "plnet.early.stopping.train.ratio";
+	
+	/**
+	 * Whether to retrain on the full training data after early stopping, using the same number of epochs
+	 * the model was trained for before early stopping occured.
+	 */
+	public static final String K_EARLY_STOPPING_RETRAIN = "plnet.early.stopping.retrain";
 
 	@Key(K_PLNET_LEARNINGRATE)
 	@DefaultValue("0.1")
@@ -69,6 +79,10 @@ public interface IPLNetDyadRankerConfiguration extends IPredictiveModelConfigura
 	@Key(K_MAX_EPOCHS)
 	@DefaultValue("25")
 	public int plNetMaxEpochs();
+	
+	@Key(K_MINI_BATCH_SIZE)
+	@DefaultValue("4")
+	public int plNetMiniBatchSize();
 
 	@Key(K_EARLY_STOPPING_INTERVAL)
 	@DefaultValue("1")
@@ -81,5 +95,9 @@ public interface IPLNetDyadRankerConfiguration extends IPredictiveModelConfigura
 	@Key(K_EARLY_STOPPING_TRAIN_RATIO)
 	@DefaultValue("0.8")
 	public double plNetEarlyStoppingTrainRatio();
+	
+	@Key(K_EARLY_STOPPING_RETRAIN)
+	@DefaultValue("true")
+	public boolean plNetEarlyStoppingRetrain();
 
 }

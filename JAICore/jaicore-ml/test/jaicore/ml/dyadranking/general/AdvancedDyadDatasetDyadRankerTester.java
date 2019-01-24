@@ -18,6 +18,7 @@ import jaicore.ml.dyadranking.algorithm.IPLNetDyadRankerConfiguration;
 import jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
 import jaicore.ml.dyadranking.algorithm.featuretransform.FeatureTransformPLDyadRanker;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
+import jaicore.ml.dyadranking.loss.KendallsTauDyadRankingLoss;
 
 /**
  * Class that runs a simple functionality check on all dyad rankers.
@@ -27,8 +28,12 @@ import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
  */
 @RunWith(Parameterized.class)
 public class AdvancedDyadDatasetDyadRankerTester {
+	
+	public static int SEED = 7;
 
 	ADyadRanker ranker;
+
+	int seedTest = 60;
 
 	public AdvancedDyadDatasetDyadRankerTester(ADyadRanker ranker) {
 		this.ranker = ranker;
@@ -36,7 +41,7 @@ public class AdvancedDyadDatasetDyadRankerTester {
 
 	@Before
 	public void trainRanker() throws TrainingException {
-		ranker.train(DyadRankingInstanceSupplier.getDyadRankingDataset(55, 200));
+		ranker.train(DyadRankingInstanceSupplier.getDyadRankingDataset(10, 1000, SEED));
 	}
 
 	@Test
@@ -49,23 +54,11 @@ public class AdvancedDyadDatasetDyadRankerTester {
 		double avgFailures = 0;
 		
 		for (int testInst = 0; testInst < nTestInstances; testInst++) {
-			IDyadRankingInstance test = DyadRankingInstanceSupplier.getDyadRankingInstance(maxDyadRankingLength, 30, 2, DyadRankingInstanceSupplier.complexDyadRanker());
+			IDyadRankingInstance test = DyadRankingInstanceSupplier.getDyadRankingInstance(maxDyadRankingLength, SEED);
 			IDyadRankingInstance predict = ranker.predict(test);
 			
-			int dyadRankingLength = test.length();
-			int nConc = 0;
-			int nDisc = 0;
-			for (int i = 1; i < dyadRankingLength; i++) {
-				for (int j = 0; j < i; j++) {
-					if (DyadRankingInstanceSupplier.complexDyadRanker().compare(
-							predict.getDyadAtPosition(j), predict.getDyadAtPosition(i)) <= 0) {
-						nConc++;
-					} else {
-						nDisc++;
-					}
-				}
-			}
-			double kendallTau = 2.0 * (nConc - nDisc) / (dyadRankingLength * (dyadRankingLength - 1) );
+			double kendallTau = new KendallsTauDyadRankingLoss().loss(test, predict);
+			
 			avgKendallTau += kendallTau;
 			
 			Dyad currentMin = predict.getDyadAtPosition(0);
@@ -90,7 +83,7 @@ public class AdvancedDyadDatasetDyadRankerTester {
 	public static List<APLDyadRanker[]> supplyDyadRankers() {
 		PLNetDyadRanker ranker1 = new PLNetDyadRanker();
 		ranker1.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_MAX_EPOCHS, "0");
-		ranker1.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_PLNET_HIDDEN_NODES, "6,4,3");
+		ranker1.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_PLNET_HIDDEN_NODES, "8,6,4");
 		PLNetDyadRanker ranker2 = new PLNetDyadRanker();
 		ranker2.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_MAX_EPOCHS, "10");
 		ranker2.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_TRAIN_RATIO, "1.0");

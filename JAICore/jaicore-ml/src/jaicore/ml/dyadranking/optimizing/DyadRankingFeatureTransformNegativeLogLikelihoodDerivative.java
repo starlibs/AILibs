@@ -1,10 +1,10 @@
 package jaicore.ml.dyadranking.optimizing;
 
+import java.util.Map;
+
 import de.upb.isys.linearalgebra.DenseDoubleVector;
 import de.upb.isys.linearalgebra.Vector;
-import jaicore.ml.core.optimizing.graddesc.BlackBoxGradient;
 import jaicore.ml.dyadranking.Dyad;
-import jaicore.ml.dyadranking.algorithm.featuretransform.IDyadFeatureTransform;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 
@@ -29,13 +29,12 @@ public class DyadRankingFeatureTransformNegativeLogLikelihoodDerivative
 	/* the dataset used by this function */
 	private DyadRankingDataset dataset;
 
-	/* the feature transformation method used by this function */
-	private IDyadFeatureTransform featureTransform;
+	private Map<IDyadRankingInstance, Map<Dyad, Vector>> featureTransforms;
 
 	@Override
-	public void initialize(DyadRankingDataset dataset, IDyadFeatureTransform featureTransform) {
+	public void initialize(DyadRankingDataset dataset, Map<IDyadRankingInstance, Map<Dyad, Vector>> featureTransforms) {
 		this.dataset = dataset;
-		this.featureTransform = featureTransform;
+		this.featureTransforms = featureTransforms;
 	}
 
 	@Override
@@ -43,18 +42,6 @@ public class DyadRankingFeatureTransformNegativeLogLikelihoodDerivative
 		Vector result = new DenseDoubleVector(vector.length());
 		for (int i = 0; i < vector.length(); i++) {
 			result.setValue(i, computeDerivativeForIndex(i, vector));
-		}
-		if (!result.stream().allMatch(Double::isFinite)) {
-			DyadRankingFeatureTransformNegativeLogLikelihood function = new DyadRankingFeatureTransformNegativeLogLikelihood();
-			function.initialize(dataset, featureTransform);
-			//backup plan: estimate the gradient
-			BlackBoxGradient bbg = new BlackBoxGradient(function, 0.1);
-			Vector gradient = bbg.apply(vector);
-			for (int i = 0; i < vector.length(); i++) {
-				if (!Double.isFinite(result.getValue(i))) {
-					result.setValue(i, gradient.getValue(i));
-				}
-			}
 		}
 		return result;
 	}
@@ -69,42 +56,27 @@ public class DyadRankingFeatureTransformNegativeLogLikelihoodDerivative
 	 * @return the partial derivative w_i
 	 */
 	private double computeDerivativeForIndex(int i, Vector vector) {
-		double result = 0;
+		double secondSum = 0d;
 		int N = dataset.size();
+		double firstSum = 0d;
 		for (int n = 0; n < N; n++) {
 			IDyadRankingInstance instance = dataset.get(n);
 			int M_n = instance.length();
 			for (int m = 0; m < M_n - 1; m++) {
-				double gValue = 1 / g(vector, instance, m);
-				result += h(vector, instance, i, m) * gValue;
-				result -= featureTransform.transform(instance.getDyadAtPosition(m)).getValue(i);
-
+				double innerDenumerator = 0d;
+				double innerNumerator = 0d;
+				Dyad dyad = instance.getDyadAtPosition(m);
+				firstSum = firstSum + featureTransforms.get(instance).get(dyad).getValue(i);
+				for (int l = m; l < M_n; l++) {
+					Vector zNL = featureTransforms.get(instance).get(instance.getDyadAtPosition(l));
+					double dotProd = Math.exp(vector.dotProduct(zNL));
+					innerNumerator = innerNumerator + zNL.getValue(i) * dotProd;
+					innerDenumerator = innerDenumerator + dotProd;
+				}
+				secondSum = secondSum + innerNumerator / innerDenumerator;
 			}
 		}
-
-		return result;
-	}
-
-	private double h(Vector vector, IDyadRankingInstance instance, int i, int beginIndex) {
-		double result = 0;
-		int M_n = instance.length();
-		for (int l = beginIndex; l < M_n; l++) {
-			Dyad dyad = instance.getDyadAtPosition(l);
-			Vector zNL = featureTransform.transform(dyad);
-			result += zNL.getValue(i) * Math.exp(vector.dotProduct(zNL));
-		}
-
-		return result;
-	}
-
-	private double g(Vector w, IDyadRankingInstance instance, int beginIndex) {
-		double result = 0;
-		int M_n = instance.length();
-		for (int l = beginIndex; l < M_n; l++) {
-			Dyad dyad = instance.getDyadAtPosition(l);
-			result += Math.exp(w.dotProduct(featureTransform.transform(dyad)));
-		}
-		return result;
+		return -firstSum + secondSum;
 	}
 
 }

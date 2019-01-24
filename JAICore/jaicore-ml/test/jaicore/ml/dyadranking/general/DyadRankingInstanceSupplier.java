@@ -27,14 +27,15 @@ public class DyadRankingInstanceSupplier {
 	 *            the amount of dyads
 	 * @return random dyad ranking instance of length at most maxLength
 	 */
-	public static DyadRankingInstance getDyadRankingInstance(int maxLength, int instSize, int altSize, Comparator<Dyad> comparator) {
+	public static DyadRankingInstance getDyadRankingInstance(int maxLength, int seed) {
 		List<Dyad> dyads = new ArrayList<Dyad>();
 		int actualLength = ThreadLocalRandom.current().nextInt(2, maxLength + 1);
 
 		for (int i = 0; i < actualLength; i++) {
-			Dyad dyad = DyadSupplier.getRandomDyad(instSize, altSize);
+			Dyad dyad = DyadSupplier.getRandomDyad(30, 2);
 			dyads.add(dyad);
 		}
+		Comparator<Dyad> comparator = complexDyadRanker();
 		Collections.sort(dyads, comparator);
 		return new DyadRankingInstance(dyads);
 	}
@@ -110,7 +111,7 @@ public class DyadRankingInstanceSupplier {
 	 *         instances) that are ranked by the ranking function implemented by the
 	 *         {@link Comparator} returned by {@link #complexDyadRanker()}
 	 */
-	public static DyadRankingDataset getDyadRankingDataset(int maxLengthDyadRankingInstance, int size) {
+	public static DyadRankingDataset getDyadRankingDataset(int maxLengthDyadRankingInstance, int size, int seed) {
 		DyadRankingDataset dataset = new DyadRankingDataset();
 		for (int i = 0; i < size; i++) {
 			dataset.add(DyadRankingInstanceSupplier.getDyadRankingInstance(maxLengthDyadRankingInstance, 30, 2, complexDyadRanker()));
