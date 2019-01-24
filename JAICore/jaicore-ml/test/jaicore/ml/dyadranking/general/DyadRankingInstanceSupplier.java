@@ -39,6 +39,19 @@ public class DyadRankingInstanceSupplier {
 		Collections.sort(dyads, comparator);
 		return new DyadRankingInstance(dyads);
 	}
+	
+	public static DyadRankingInstance getInputOptDyadRankingInstance(int maxLength, int seed) {
+		List<Dyad> dyads = new ArrayList<Dyad>();
+		int actualLength = ThreadLocalRandom.current().nextInt(2, maxLength + 1);
+
+		for (int i = 0; i < actualLength; i++) {
+			Dyad dyad = DyadSupplier.getRandomDyad(2, 2);
+			dyads.add(dyad);
+		}
+		Comparator<Dyad> comparator = inputOptimizerTestRanker();
+		Collections.sort(dyads, comparator);
+		return new DyadRankingInstance(dyads);
+	}
 
 	/**
 	 * Creates a comparator for {@link jaicore.ml.dyadranking.Dyad} (with 2
@@ -114,15 +127,15 @@ public class DyadRankingInstanceSupplier {
 	public static DyadRankingDataset getDyadRankingDataset(int maxLengthDyadRankingInstance, int size, int seed) {
 		DyadRankingDataset dataset = new DyadRankingDataset();
 		for (int i = 0; i < size; i++) {
-			dataset.add(DyadRankingInstanceSupplier.getDyadRankingInstance(maxLengthDyadRankingInstance, 30, 2, complexDyadRanker()));
+			dataset.add(DyadRankingInstanceSupplier.getDyadRankingInstance(maxLengthDyadRankingInstance, seed));
 		}
 		return dataset;
 	}
 	
-	public static DyadRankingDataset getInputOptTestSet(int maxLengthDyadRankingInstance, int size) {
+	public static DyadRankingDataset getInputOptTestSet(int maxLengthDyadRankingInstance, int size, int seed) {
 		DyadRankingDataset dataset = new DyadRankingDataset();
 		for (int i = 0; i < size; i++) {
-			dataset.add(DyadRankingInstanceSupplier.getDyadRankingInstance(maxLengthDyadRankingInstance, 2, 2, inputOptimizerTestRanker()));
+			dataset.add(DyadRankingInstanceSupplier.getInputOptDyadRankingInstance(maxLengthDyadRankingInstance, seed));
 		}
 		return dataset;
 	}
