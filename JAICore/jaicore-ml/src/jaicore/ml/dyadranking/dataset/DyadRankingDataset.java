@@ -82,6 +82,8 @@ public class DyadRankingDataset extends ArrayList<IInstance> implements IDataset
 
 	@Override
 	public void serialize(OutputStream out) {
+		// currently, this always creates a dense dyad representation of the dyad
+		// ranking dataset
 		try {
 			for (IInstance instance : this) {
 				IDyadRankingInstance drInstance = (IDyadRankingInstance) instance;
@@ -100,6 +102,7 @@ public class DyadRankingDataset extends ArrayList<IInstance> implements IDataset
 
 	@Override
 	public void deserialize(InputStream in) {
+		// currently, this always creates a dense dyad ranking dataset
 		this.clear();
 		try {
 			String input = IOUtils.toString(in, StandardCharsets.UTF_8);
