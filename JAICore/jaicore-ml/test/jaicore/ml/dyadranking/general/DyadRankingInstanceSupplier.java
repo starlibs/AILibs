@@ -27,7 +27,7 @@ public class DyadRankingInstanceSupplier {
 	 *            the amount of dyads
 	 * @return random dyad ranking instance of length at most maxLength
 	 */
-	public static DyadRankingInstance getDyadRankingInstance(int maxLength) {
+	public static DyadRankingInstance getDyadRankingInstance(int maxLength, int seed) {
 		List<Dyad> dyads = new ArrayList<Dyad>();
 		int actualLength = ThreadLocalRandom.current().nextInt(2, maxLength + 1);
 
@@ -63,7 +63,6 @@ public class DyadRankingInstanceSupplier {
 		};
 		return comparator;
 	}
-
 	/**
 	 * A simple function that can be learned by a bilinear feature transform:
 	 * <code>
@@ -90,10 +89,10 @@ public class DyadRankingInstanceSupplier {
 	 *         instances) that are ranked by the ranking function implemented by the
 	 *         {@link Comparator} returned by {@link #complexDyadRanker()}
 	 */
-	public static DyadRankingDataset getDyadRankingDataset(int maxLengthDyadRankingInstance, int size) {
+	public static DyadRankingDataset getDyadRankingDataset(int maxLengthDyadRankingInstance, int size, int seed) {
 		DyadRankingDataset dataset = new DyadRankingDataset();
 		for (int i = 0; i < size; i++) {
-			dataset.add(DyadRankingInstanceSupplier.getDyadRankingInstance(maxLengthDyadRankingInstance));
+			dataset.add(DyadRankingInstanceSupplier.getDyadRankingInstance(maxLengthDyadRankingInstance, seed));
 		}
 		return dataset;
 	}

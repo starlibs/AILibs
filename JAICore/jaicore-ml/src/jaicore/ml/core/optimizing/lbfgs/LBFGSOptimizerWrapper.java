@@ -44,6 +44,7 @@ public class LBFGSOptimizerWrapper implements IGradientBasedOptimizer {
 					for (int i = 0; i < gradientToFill.length; i++) {
 						gradientToFill[i] = actualGradient.asArray()[i];
 					}
+					log.debug("Current Gradient is {}", actualGradient);
 					//return f(x)
 					return result;
 				});
