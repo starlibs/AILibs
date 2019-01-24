@@ -4,12 +4,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.Random;
 
 import de.upb.isys.linearalgebra.Vector;
 import jaicore.ml.dyadranking.Dyad;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import jaicore.ml.dyadranking.dataset.DyadRankingInstance;
+import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
 
 /**
  * Creates simple rankings for testing purposes.
@@ -23,16 +24,16 @@ public class DyadRankingInstanceSupplier {
 	 * Creates a random {@link jaicore.ml.dyadranking.dataset.DyadRankingInstance}
 	 * consisting of (with 2 alternatives and 2 instances)
 	 * 
-	 * @param maxLength
-	 *            the amount of dyads
+	 * @param maxLength The amount of dyads
+	 * @param seed Seed for generating random dyads
 	 * @return random dyad ranking instance of length at most maxLength
 	 */
-	public static DyadRankingInstance getDyadRankingInstance(int maxLength) {
+	public static DyadRankingInstance getDyadRankingInstance(int maxLength, int seed) {
 		List<Dyad> dyads = new ArrayList<Dyad>();
-		int actualLength = ThreadLocalRandom.current().nextInt(2, maxLength + 1);
-
-		for (int i = 0; i < actualLength; i++) {
-			Dyad dyad = DyadSupplier.getRandomDyad(30, 2);
+		
+		int actualLength = new Random(seed).nextInt(maxLength+1);
+		for(int i = 0; i < actualLength; i++) {
+			Dyad dyad = DyadSupplier.getRandomDyad(i, 2, 2);
 			dyads.add(dyad);
 		}
 		Comparator<Dyad> comparator = complexDyadRanker();
@@ -56,14 +57,16 @@ public class DyadRankingInstanceSupplier {
 				Vector scoreVecA = d1.getAlternative();
 				Vector scoreVecI2 = d2.getInstance();
 				Vector scoreVecA2 = d2.getAlternative();
-				double score1 = bilinFunc(scoreVecI, scoreVecA);
-				double score2 = bilinFunc(scoreVecI2, scoreVecA2);
+				double score1 = Math.pow(scoreVecI.getValue(0), 2) + Math.pow(scoreVecI.getValue(1), 2)
+						- Math.pow(scoreVecA.getValue(0), 2) - Math.pow(scoreVecA.getValue(1), 2);
+				double score2 = Math.pow(scoreVecI2.getValue(0), 2) + Math.pow(scoreVecI2.getValue(1), 2)
+						- Math.pow(scoreVecA2.getValue(0), 2) - Math.pow(scoreVecA2.getValue(1), 2);
 				return score1 - score2 == 0 ? 0 : (score1 - score2 > 0 ? 1 : -1);
 			}
 		};
 		return comparator;
 	}
-
+	
 	/**
 	 * A simple function that can be learned by a bilinear feature transform:
 	 * <code>
@@ -81,19 +84,18 @@ public class DyadRankingInstanceSupplier {
 
 	/**
 	 * 
-	 * @param maxLengthDyadRankingInstance
-	 *            Maximum length of an individual dyad ranking instance in the
-	 *            dataset
-	 * @param size
-	 *            Number of dyad ranking instances in the dataset
+	 * @param maxLengthDyadRankingInstance Maximum length of an individual dyad
+	 *                                     ranking instance in the dataset
+	 * @param size                         Number of dyad ranking instances in the
+	 *                                     dataset
 	 * @return A dyad ranking dataset with random dyads ((with 2 alternatives and 2
 	 *         instances) that are ranked by the ranking function implemented by the
 	 *         {@link Comparator} returned by {@link #complexDyadRanker()}
 	 */
-	public static DyadRankingDataset getDyadRankingDataset(int maxLengthDyadRankingInstance, int size) {
+	public static DyadRankingDataset getDyadRankingDataset(int maxLengthDyadRankingInstance, int size, int seed) {
 		DyadRankingDataset dataset = new DyadRankingDataset();
 		for (int i = 0; i < size; i++) {
-			dataset.add(DyadRankingInstanceSupplier.getDyadRankingInstance(maxLengthDyadRankingInstance));
+			dataset.add(DyadRankingInstanceSupplier.getDyadRankingInstance(maxLengthDyadRankingInstance, seed));
 		}
 		return dataset;
 	}

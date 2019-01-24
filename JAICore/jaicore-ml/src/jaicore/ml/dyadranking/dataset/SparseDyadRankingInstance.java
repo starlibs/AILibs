@@ -17,7 +17,7 @@ import jaicore.ml.dyadranking.Dyad;
  * dyads contained in its ordering. It saves the instance and alternatives
  * separately and contstructs dyads from them on request.
  * 
- * @author Helena Graf
+ * @author Helena Graf, Mirko Jürgens
  *
  */
 public class SparseDyadRankingInstance implements IDyadRankingInstance {
@@ -32,13 +32,12 @@ public class SparseDyadRankingInstance implements IDyadRankingInstance {
 	 * Construct a new sparse dyad ranking instance containing the given instance
 	 * vector and ordering of alternatives.
 	 * 
-	 * @param instance
-	 *            the instance for all of the alternatives
-	 * @param alternatives
-	 *            the ordering of alternatives that, when combined with the
-	 *            instances is an ordering of dyads
+	 * @param instance     the instance for all of the alternatives
+	 * @param alternatives the ordering of alternatives that, when combined with the
+	 *                     instances is an ordering of dyads
 	 */
-	public SparseDyadRankingInstance(Vector instance, List<Vector> alternatives) {
+	public SparseDyadRankingInstance(Vector instance,
+			List<Vector> alternatives) {
 		this.instance = instance;
 		this.alternatives = Collections.unmodifiableList(alternatives);
 	}
@@ -96,6 +95,19 @@ public class SparseDyadRankingInstance implements IDyadRankingInstance {
 	@Override
 	public int length() {
 		return alternatives.size();
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("SparseDyadRankingInstance: ");
+		builder.append(System.lineSeparator());
+		builder.append("Instance: ");
+		builder.append(instance);
+		builder.append(System.lineSeparator());
+		builder.append("Alternatives: ");
+		builder.append(alternatives);
+		return builder.toString();
 	}
 
 }

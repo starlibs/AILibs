@@ -1,11 +1,10 @@
 package jaicore.ml.dyadranking.optimizing;
 
-import java.util.HashMap;
+import java.util.Map;
 
 import de.upb.isys.linearalgebra.Vector;
 import jaicore.basic.algorithm.IOptimizationAlgorithm;
 import jaicore.ml.dyadranking.Dyad;
-import jaicore.ml.dyadranking.algorithm.featuretransform.IDyadFeatureTransform;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 
@@ -32,52 +31,38 @@ public class DyadRankingFeatureTransformNegativeLogLikelihood
 	/* the dataset used by this function */
 	private DyadRankingDataset dataset;
 
-	/* the feature transformation method used by this function */
-	private IDyadFeatureTransform featureTransform;
+	private Map<IDyadRankingInstance, Map<Dyad, Vector>> featureTransforms;
 
 	@Override
-	public void initialize(DyadRankingDataset dataset, IDyadFeatureTransform featureTransform) {
+	public void initialize(DyadRankingDataset dataset, Map<IDyadRankingInstance, Map<Dyad, Vector>> featureTransforms) {
 		this.dataset = dataset;
-		this.featureTransform = featureTransform;
+		this.featureTransforms = featureTransforms;
+
 	}
 
-/**
- * Algorithm (18) of [1]. We adhere their notations, but, unify the sums.
- */
+	/**
+	 * Algorithm (18) of [1]. We adhere their notations, but, unify the sums.
+	 */
 	@Override
 	public double apply(Vector w) {
-		HashMap<Dyad, Vector> featureTransforms = new HashMap<>();
-		double result = 0;
+		double firstSum = 0d;
+		double secondSum = 0d;
 		int N = dataset.size();
 		for (int n = 0; n < N; n++) {
 			IDyadRankingInstance instance = dataset.get(n);
 			int M_n = instance.length();
 			for (int m = 0; m < M_n; m++) {
 				Dyad dyad = instance.getDyadAtPosition(m);
-				result -= w.dotProduct(getOrCreateFeatureTransform(dyad, featureTransforms));
-				double innerSum =0;
-				
-				for (int l = m; l < M_n; l++) {
+				firstSum = firstSum + w.dotProduct(featureTransforms.get(instance).get(dyad));
+				double innerSum = 0d;
+				for (int l = m; l < M_n - 1; l++) {
 					Dyad innerDyad = instance.getDyadAtPosition(l);
-					
-					innerSum+= Math
-							.exp(w.dotProduct(getOrCreateFeatureTransform(innerDyad, featureTransforms)));
+					innerSum = innerSum + Math.exp(w.dotProduct(featureTransforms.get(instance).get(innerDyad)));
 				}
-				result += Math.log(innerSum);
+				secondSum = secondSum + Math.log(innerSum);
 			}
 		}
-
-		return result;
-	}
-
-	private Vector getOrCreateFeatureTransform(Dyad dyad, HashMap<Dyad, Vector> featureTransforms) {
-		if (featureTransforms.containsKey(dyad)) {
-			return featureTransforms.get(dyad);
-		} else {
-			Vector newFeatureTransform = featureTransform.transform(dyad);
-			featureTransforms.put(dyad, newFeatureTransform);
-			return newFeatureTransform;
-		}
+		return -firstSum + secondSum;
 	}
 
 }

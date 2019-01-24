@@ -27,7 +27,7 @@ import jaicore.ml.core.optimizing.IGradientFunction;
  */
 public class GradientDescentOptimizer implements IGradientBasedOptimizer {
 
-	private final double learningRate;
+	private double learningRate;
 
 	private final double gradientThreshold;
 
