@@ -1,8 +1,10 @@
-package jaicore.ml.tsc.classifier;
+package jaicore.ml.tsc.classifier.trees;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
@@ -11,15 +13,20 @@ import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import jaicore.basic.TimeOut;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.IAlgorithmConfig;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.sets.SetUtil.Pair;
+import jaicore.ml.tsc.classifier.ASimplifiedTSCAlgorithm;
+import jaicore.ml.tsc.classifier.trees.TimeSeriesTree.TimeSeriesTreeNode;
+import jaicore.ml.tsc.classifier.trees.TimeSeriesTree.TimeSeriesTreeNodeDecisionFunction;
+import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 
-// As proposed by Deng et. al. (as opposed to simplified version by Bagnall et. al.)
-public class TimeSeriesForestAlgorithm extends ASimplifiedTSCAlgorithm<Integer, TimeSeriesForestClassifier> {
+public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, TimeSeriesTree> {
 
 	public static final int NUM_FEATURE_TYPES = 3;
 	public static final int NUM_THRESH_CANDIDATES = 20;
@@ -30,6 +37,12 @@ public class TimeSeriesForestAlgorithm extends ASimplifiedTSCAlgorithm<Integer, 
 	private static final double PRECISION_DELTA = 0.000001d;
 
 	private int seed;
+
+	private final int maxDepth;
+
+	public TimeSeriesTreeAlgorithm(final int maxDepth) {
+		this.maxDepth = maxDepth;
+	}
 
 	@Override
 	public void registerListener(Object listener) {
@@ -81,9 +94,17 @@ public class TimeSeriesForestAlgorithm extends ASimplifiedTSCAlgorithm<Integer, 
 	}
 
 	@Override
-	public TimeSeriesForestClassifier call()
+	public TimeSeriesTree call()
 			throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
 		// TODO Auto-generated method stub
+
+		TimeSeriesDataset data = this.getInput();
+
+		// TODO: Does this make sense?
+		double parentEntropy = .5d;
+
+		tree(data.getValuesOrNull(0), data.getTargets(), parentEntropy, this.model.getRootNode(), 0);
+
 		return null;
 	}
 
@@ -112,46 +133,43 @@ public class TimeSeriesForestAlgorithm extends ASimplifiedTSCAlgorithm<Integer, 
 	}
 
 	// Entropy based
-	public void tree(double[][] data, int[] targets, final double parentEntropy) {
-		Pair<List<Integer>, List<Integer>> T1T2 = sampleIntervals(data[0].length);
-		
+	public void tree(double[][] data, int[] targets, final double parentEntropy,
+			final TimeSeriesTreeNode nodeToBeFilled, int depth) {
+		Pair<List<Integer>, List<Integer>> T1T2 = sampleIntervals(data[0].length, this.seed);
+
+		// Transform instances
 		double[][][][] transformedInstances = transformInstances(data, T1T2);
 		List<List<Double>> thresholdCandidates = generateThresholdCandidates(T1T2, NUM_THRESH_CANDIDATES,
 				transformedInstances);
 
-		// TODO
-		int C = 0;
-		
-		// Transform instances
+		int n = targets.length;
 
-		// TODO: Calculate the thresholds for each feature type k
-		// double[] thresholds = new double[NUM_FEATURE_TYPES];
-		// for (int i = 0; i < NUM_FEATURE_TYPES; i++) {
-		// thresholds[i] = 0;
-		// }
+		// Get number of classes present in the targets array
+		final List<Integer> classes = Arrays.asList(ArrayUtils.toObject(targets));
+		int C = new HashSet<Integer>(classes).size();
 
-		double eStar = 0, deltaEntropyStar = 0, thresholdStar = 0d;
+		double deltaEntropyStar = 0, thresholdStar = 0d;
 		int t1Star = 0, t2Star = 0;
 		int fStar = -1;
-		
+
 		double[] eStarPerFeatureType = new double[NUM_FEATURE_TYPES];
 		double[] deltaEntropyStarPerFeatureType = new double[NUM_FEATURE_TYPES];
 		int[] t1StarPerFeatureType = new int[NUM_FEATURE_TYPES];
 		int[] t2StarPerFeatureType = new int[NUM_FEATURE_TYPES];
 		double[] thresholdStarPerFeatureType = new double[NUM_FEATURE_TYPES];
 
-		// TODO: Scale all the features 
-		for (final int t1 : T1T2.getX()) {
-			for (final int t2 : T1T2.getY()) {
+		List<Integer> T1 = T1T2.getX();
+		List<Integer> T2 = T1T2.getY();
+		for (int t1 = 0; t1 < T1.size(); t1++) {
+			for (int t2 = 0; t2 < T2.size(); t2++) {
 				for (int k = 0; k < NUM_FEATURE_TYPES; k++) {
 					for (final double cand : thresholdCandidates.get(k)) {
-						// TOOD: Calculate delta entropy and E for f_k(t1,t2) <= cand
+						// Calculate delta entropy and E for f_k(t1,t2) <= cand
 						double localDeltaEntropy = calculateDeltaEntropy(transformedInstances[k][t1][t2], targets, cand,
-								C,
-								parentEntropy);
+								classes, parentEntropy);
 						double localE = calculateEntrance(localDeltaEntropy,
 								calculateMargin(transformedInstances[k][t1][t2], cand), ENTROPY_APLHA);
-						
+
 						if (localE > eStarPerFeatureType[k]) {
 							eStarPerFeatureType[k] = localE;
 							deltaEntropyStarPerFeatureType[k] = localDeltaEntropy;
@@ -163,32 +181,71 @@ public class TimeSeriesForestAlgorithm extends ASimplifiedTSCAlgorithm<Integer, 
 				}
 			}
 		}
-		
+
 		// Set best solution
 		int bestK = getBestSplitIndex(deltaEntropyStarPerFeatureType);
-		eStar = eStarPerFeatureType[bestK];
+		// eStar = eStarPerFeatureType[bestK];
 		deltaEntropyStar = deltaEntropyStarPerFeatureType[bestK];
 		t1Star = t1StarPerFeatureType[bestK];
 		t2Star = t2StarPerFeatureType[bestK];
 		thresholdStar = thresholdStarPerFeatureType[bestK];
 		fStar = bestK;
 
-		if (Math.abs(deltaEntropyStar) <= PRECISION_DELTA) {
+		if (Math.abs(deltaEntropyStar) <= PRECISION_DELTA || depth == maxDepth - 1) {
 			// Label this node as a leaf and return
-			// TODO
+			// Get majority
+			nodeToBeFilled.getValue().classPrediction = getMode(targets);
+			return;
 		}
-		
-		double[][] dataLeft = null; // TODO
-		int[] targetsLeft = null; // TODO
-		double[][] dataRight = null; // TODO
-		int[] targetsRight = null; // TODO
 
-		tree(dataLeft, targetsLeft, deltaEntropyStar);
-		tree(dataRight, targetsRight, deltaEntropyStar);
+		// Update node's decision function
+		nodeToBeFilled.getValue().f = fStar;
+		nodeToBeFilled.getValue().t1 = t1Star;
+		nodeToBeFilled.getValue().t2 = t2Star;
+		nodeToBeFilled.getValue().threshold = thresholdStar;
+
+		Pair<List<Integer>, List<Integer>> childDataIndices = getChildDataIndices(transformedInstances, data, n, fStar,
+				t1Star, t2Star, thresholdStar);
+
+		double[][] dataLeft = new double[childDataIndices.getX().size()][data[0].length];
+		int[] targetsLeft = new int[childDataIndices.getX().size()];
+		double[][] dataRight = new double[childDataIndices.getY().size()][data[0].length];
+		int[] targetsRight = new int[childDataIndices.getY().size()];
+
+		for (int i = 0; i < childDataIndices.getX().size(); i++) {
+			dataLeft[i] = data[childDataIndices.getX().get(i)];
+			targetsLeft[i] = targets[childDataIndices.getX().get(i)];
+		}
+		for (int i = 0; i < childDataIndices.getY().size(); i++) {
+			dataRight[i] = data[childDataIndices.getY().get(i)];
+			targetsRight[i] = targets[childDataIndices.getY().get(i)];
+		}
+
+		TimeSeriesTreeNode leftNode = nodeToBeFilled.addChild(new TimeSeriesTreeNodeDecisionFunction());
+		TimeSeriesTreeNode rightNode = nodeToBeFilled.addChild(new TimeSeriesTreeNodeDecisionFunction());
+
+		tree(dataLeft, targetsLeft, deltaEntropyStar, leftNode, depth + 1);
+		tree(dataRight, targetsRight, deltaEntropyStar, rightNode, depth + 1);
 	}
 
-	public int getBestSplitIndex(final double[] deltaEntropyStarPerFeatureType) {
-		double max = Double.MIN_VALUE;
+	public static Pair<List<Integer>, List<Integer>> getChildDataIndices(final double[][][][] transformedData,
+			final double[][] data, final int n, final int k, final int t1, final int t2, final double threshold) {
+
+		List<Integer> leftIndices = new ArrayList<>();
+		List<Integer> rightIndices = new ArrayList<>();
+
+		for (int i = 0; i < n; i++) {
+			if (transformedData[k][t1][t2][i] <= threshold)
+				leftIndices.add(i);
+			else
+				rightIndices.add(i);
+		}
+
+		return new Pair<>(leftIndices, rightIndices);
+	}
+
+	public static int getBestSplitIndex(final double[] deltaEntropyStarPerFeatureType) {
+		double max = (double) Integer.MIN_VALUE;
 
 		List<Integer> maxIndexes = new ArrayList<>();
 
@@ -202,9 +259,11 @@ public class TimeSeriesForestAlgorithm extends ASimplifiedTSCAlgorithm<Integer, 
 				maxIndexes.add(i);
 			}
 		}
-		if(maxIndexes.size() < 1)
-			throw new IllegalArgumentException("Could not find any maximum delta entropy star for any feature type for the given array " + Arrays.toString(deltaEntropyStarPerFeatureType) + ".");
-		
+		if (maxIndexes.size() < 1)
+			throw new IllegalArgumentException(
+					"Could not find any maximum delta entropy star for any feature type for the given array "
+							+ Arrays.toString(deltaEntropyStarPerFeatureType) + ".");
+
 		// Return random index among best ones if multiple solutions exist
 		if (maxIndexes.size() > 1)
 			Collections.shuffle(maxIndexes);
@@ -215,9 +274,11 @@ public class TimeSeriesForestAlgorithm extends ASimplifiedTSCAlgorithm<Integer, 
 
 	// Assume targets 1 to n
 	public static double calculateDeltaEntropy(final double[] dataValues, final int[] targets,
-			final double thresholdCandidate, final int numClasses, final double parentEntropy) {
+			final double thresholdCandidate, final List<Integer> classes, final double parentEntropy) {
 		// TODO
 		double[] entropyValues = new double[2];
+
+		int numClasses = classes.size();
 
 		int[][] classNodeStatistic = new int[2][numClasses];
 		int[] intCounter = new int[2];
@@ -225,27 +286,27 @@ public class TimeSeriesForestAlgorithm extends ASimplifiedTSCAlgorithm<Integer, 
 		// Calculate proportions
 		for (int i = 0; i < dataValues.length; i++) {
 			if (dataValues[i] < thresholdCandidate) {
-				classNodeStatistic[0][targets[i]]++;
+				classNodeStatistic[0][classes.indexOf(targets[i])]++;
 				intCounter[0]++;
 			} else {
-				classNodeStatistic[1][targets[i]]++;
+				classNodeStatistic[1][classes.indexOf(targets[i])]++;
 				intCounter[1]++;
 			}
 		}
 
 		for (int i = 0; i < entropyValues.length; i++) {
 			double entropySum = 0;
-			for(int c=0; c<numClasses; c++) {
+			for (int c = 0; c < numClasses; c++) {
 				entropySum += (double) classNodeStatistic[i][c] / (double) intCounter[i];
 			}
 			entropyValues[i] = (-1) * entropySum;
 		}
-		
+
 		double weightedSum = 0;
 		for (int i = 0; i < entropyValues.length; i++) {
 			weightedSum += (double) intCounter[i] / (double) dataValues.length * entropyValues[i];
 		}
-		
+
 		return parentEntropy - weightedSum;
 	}
 
@@ -265,7 +326,7 @@ public class TimeSeriesForestAlgorithm extends ASimplifiedTSCAlgorithm<Integer, 
 	}
 
 	public static double[][][][] transformInstances(final double[][] dataset, Pair<List<Integer>, List<Integer>> T1T2) {
-		double[][][][] result = new double[dataset.length][NUM_FEATURE_TYPES][T1T2.getX().size()][T1T2.getY().size()];
+		double[][][][] result = new double[NUM_FEATURE_TYPES][T1T2.getX().size()][T1T2.getY().size()][dataset.length];
 
 		for (int i = 0; i < dataset.length; i++) {
 			for (int k = 0; k < T1T2.getX().size(); k++) {
@@ -281,7 +342,7 @@ public class TimeSeriesForestAlgorithm extends ASimplifiedTSCAlgorithm<Integer, 
 	}
 
 	// TODO: Make enum out of feature type
-	public List<List<Double>> generateThresholdCandidates(final Pair<List<Integer>, List<Integer>> T1T2,
+	public static List<List<Double>> generateThresholdCandidates(final Pair<List<Integer>, List<Integer>> T1T2,
 			final int numOfCandidates, final double[][][][] transformedFeatures) {
 		List<List<Double>> result = new ArrayList<>();
 
@@ -294,14 +355,14 @@ public class TimeSeriesForestAlgorithm extends ASimplifiedTSCAlgorithm<Integer, 
 		for (int i = 0; i < NUM_FEATURE_TYPES; i++) {
 			result.add(new ArrayList<>());
 			min[i] = Double.MAX_VALUE;
-			max[i] = Double.MIN_VALUE;
+			max[i] = Integer.MIN_VALUE;
 		}
 
 		// Find min and max
-		for(int i=0; i<NUM_FEATURE_TYPES; i++) {
+		for (int i = 0; i < NUM_FEATURE_TYPES; i++) {
 			for (int j = 0; j < numInstances; j++) {
-				for (final int t1 : T1T2.getX()) {
-					for (final int t2 : T1T2.getY()) {
+				for (int t1 = 0; t1 < T1T2.getX().size(); t1++) {
+					for (int t2 = 0; t2 < T1T2.getY().size(); t2++) {
 						if (transformedFeatures[i][t1][t2][j] < min[i])
 							min[i] = transformedFeatures[i][t1][t2][j];
 						if (transformedFeatures[i][t1][t2][j] > max[i])
@@ -322,20 +383,20 @@ public class TimeSeriesForestAlgorithm extends ASimplifiedTSCAlgorithm<Integer, 
 		return result;
 	}
 
-	public Pair<List<Integer>, List<Integer>> sampleIntervals(final int m) {
-		if(m<1)
+	public static Pair<List<Integer>, List<Integer>> sampleIntervals(final int m, final int seed) {
+		if (m < 1)
 			throw new IllegalArgumentException("The series' length m must be greater than zero.");
-		
+
 		List<Integer> T1 = new ArrayList<>();
 		List<Integer> T2 = new ArrayList<>();
 		List<Integer> W = randomlySampleNoReplacement(IntStream.range(0, m).boxed().collect(Collectors.toList()),
-				(int) Math.sqrt(m), this.seed);
+				(int) Math.sqrt(m), seed);
 		for (int w : W) {
 			List<Integer> tmpSampling = randomlySampleNoReplacement(
 					IntStream.range(0, m - w + 1).boxed().collect(Collectors.toList()), (int) Math.sqrt(m - w + 1),
-					this.seed);
+					seed);
 			T1.addAll(tmpSampling);
-			for(int t1 : tmpSampling) {
+			for (int t1 : tmpSampling) {
 				T2.add(t1 + w - 1);
 			}
 		}
@@ -348,7 +409,7 @@ public class TimeSeriesForestAlgorithm extends ASimplifiedTSCAlgorithm<Integer, 
 			throw new IllegalArgumentException("The list to be sampled from must not be null!");
 		if (sampleSize < 1 || sampleSize > list.size())
 			throw new IllegalArgumentException(
-						"Sample size must lower equals the size of the list to be sampled from without replacement and greater zero.");
+					"Sample size must lower equals the size of the list to be sampled from without replacement and greater zero.");
 
 		final List<Integer> listCopy = new ArrayList<>(list);
 		Collections.shuffle(listCopy, new Random(seed));
@@ -362,25 +423,26 @@ public class TimeSeriesForestAlgorithm extends ASimplifiedTSCAlgorithm<Integer, 
 		// Calculate mean
 		// TODO: Iteratively calculating mean AND stddev
 		result[0] = getMean(vector, t1, t2);
-		
+
 		double xx = 0;
 		double x = 0;
 		double xy = 0;
-		double y =0;
+		double y = 0;
 
 		double stddev = 0;
 		for (int i = t1; i < t2; i++) {
 			stddev += Math.pow(vector[i] - result[0], 2);
-			
+
 			x += i;
 			y += vector[i];
 			xx += i * i;
 			xy += i * vector[i];
 		}
-		result[1] = Math.sqrt(stddev / (t2 - t1));
-		
+		// TODO: Use Bessel's correction?
+		result[1] = Math.sqrt(stddev / (t2 - t1 - 1));
+
 		// Calculate slope
-		int length = t2-t1;
+		int length = t2 - t1;
 		result[2] = (length * xy - x * y) / (length * xx - x * x);
 		return result;
 	}
@@ -390,7 +452,7 @@ public class TimeSeriesForestAlgorithm extends ASimplifiedTSCAlgorithm<Integer, 
 		for (int i = t1; i < t2; i++) {
 			result += vector[i];
 		}
-		return result / (t2 - t1 + 1);
+		return result / (t2 - t1);
 	}
 
 	private static double getStddev(final double[] vector, final int t1, final int t2) {
@@ -404,14 +466,62 @@ public class TimeSeriesForestAlgorithm extends ASimplifiedTSCAlgorithm<Integer, 
 			result += Math.pow(vector[i] - mean, 2);
 		}
 
-		return Math.sqrt(result / (t2 - t1));
+		// TODO: Use Bessel's correction?
+		return Math.sqrt(result / (double) (t2 - t1 - 1));
 	}
-	//
-	// private static double getSlope(final double[] vector, final int t1, final int
-	// t2) {
-	// if (t1 == t2)
-	// return 0.0d;
-	//
-	//
-	// }
+
+	private static double getSlope(final double[] vector, final int t1, final int t2) {
+
+		double xx = 0;
+		double x = 0;
+		double xy = 0;
+		double y = 0;
+
+		for (int i = t1; i < t2; i++) {
+			x += i;
+			y += vector[i];
+			xx += i * i;
+			xy += i * vector[i];
+		}
+
+		// Calculate slope
+		int length = t2 - t1;
+		return (length * xy - x * y) / (length * xx - x * x);
+	}
+
+	public static double calculateFeature(final int featureId, final double[] instance, final int t1, final int t2) {
+		switch (featureId) {
+		case 0:
+			return getMean(instance, t1, t2);
+		case 1:
+			return getStddev(instance, t1, t2);
+		case 2:
+			return getSlope(instance, t1, t2);
+		default:
+			throw new UnsupportedOperationException(
+					"Feature calculation function with id '" + featureId + "' is unknwon.");
+		}
+	}
+
+	// TODO: Move this to utility functions
+	public static int getMode(final int[] array) {
+		HashMap<Integer, Integer> statistics = new HashMap<>();
+		for (int i = 0; i < array.length; i++) {
+			if (!statistics.containsKey(array[i]))
+				statistics.put(array[i], 1);
+			else
+				statistics.replace(array[i], statistics.get(array[i]) + 1);
+		}
+
+		int maxKey = -1;
+		int maxCount = 0;
+		for (Integer key : statistics.keySet()) {
+			if (statistics.get(key) > maxCount) {
+				maxCount = statistics.get(key);
+				maxKey = key;
+			}
+		}
+
+		return maxKey;
+	}
 }

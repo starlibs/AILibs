@@ -1,8 +1,10 @@
-package jaicore.ml.tsc.classifier;
+package jaicore.ml.tsc.classifier.trees;
 
 import java.util.List;
 
 import jaicore.ml.core.exception.PredictionException;
+import jaicore.ml.tsc.classifier.ASimplifiedTSCAlgorithm;
+import jaicore.ml.tsc.classifier.ASimplifiedTSClassifier;
 import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 
 public class TimeSeriesForestClassifier extends ASimplifiedTSClassifier<Integer> {
