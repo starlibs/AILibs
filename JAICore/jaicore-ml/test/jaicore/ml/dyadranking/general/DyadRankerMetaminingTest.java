@@ -30,6 +30,11 @@ import jaicore.ml.dyadranking.util.DyadStandardScaler;
 /**
  * This is a test based on a dataset containing 400 dyad rankings of dataset and
  * pipeline metafeatures obtain from ML-Plan via landmarking and treemining.
+ * Note that the train and test data are drawn from the same pool, i.e. train
+ * and test data likely contain dyads from the same classifiers on the same
+ * datasets. This unit test is intended to test the functionality of the dyad
+ * ranker. It is NOT intended to give an unbiased estimate of the rankers
+ * performance in a real-world scenario.
  * 
  * @author Jonas Hanselle
  *
@@ -72,7 +77,7 @@ public class DyadRankerMetaminingTest {
 		// split data
 		DyadRankingDataset trainData = new DyadRankingDataset(dataset.subList(0, N));
 		DyadRankingDataset testData = new DyadRankingDataset(dataset.subList(N, dataset.size()));
-		// standardize data		
+		// standardize data
 		scaler.fit(trainData);
 		scaler.transformInstances(trainData);
 		scaler.transformInstances(testData);
