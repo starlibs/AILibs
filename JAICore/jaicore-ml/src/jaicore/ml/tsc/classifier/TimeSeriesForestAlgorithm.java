@@ -1,6 +1,7 @@
 package jaicore.ml.tsc.classifier;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -110,6 +111,7 @@ public class TimeSeriesForestAlgorithm extends ASimplifiedTSCAlgorithm<Integer, 
 
 	}
 
+	// Entropy based
 	public void tree(double[][] data, int[] targets, final double parentEntropy) {
 		Pair<List<Integer>, List<Integer>> T1T2 = sampleIntervals(data[0].length);
 		
@@ -128,34 +130,49 @@ public class TimeSeriesForestAlgorithm extends ASimplifiedTSCAlgorithm<Integer, 
 		// thresholds[i] = 0;
 		// }
 
-		double EStar = 0, deltaEntropyStar = 0, thresholdStar = 0d;
+		double eStar = 0, deltaEntropyStar = 0, thresholdStar = 0d;
 		int t1Star = 0, t2Star = 0;
 		int fStar = -1;
+		
+		double[] eStarPerFeatureType = new double[NUM_FEATURE_TYPES];
+		double[] deltaEntropyStarPerFeatureType = new double[NUM_FEATURE_TYPES];
+		int[] t1StarPerFeatureType = new int[NUM_FEATURE_TYPES];
+		int[] t2StarPerFeatureType = new int[NUM_FEATURE_TYPES];
+		double[] thresholdStarPerFeatureType = new double[NUM_FEATURE_TYPES];
 
 		// TODO: Scale all the features 
 		for (final int t1 : T1T2.getX()) {
 			for (final int t2 : T1T2.getY()) {
-				for (int k = 0; k < NUM_THRESH_CANDIDATES; k++) {
+				for (int k = 0; k < NUM_FEATURE_TYPES; k++) {
 					for (final double cand : thresholdCandidates.get(k)) {
 						// TOOD: Calculate delta entropy and E for f_k(t1,t2) <= cand
 						double localDeltaEntropy = calculateDeltaEntropy(transformedInstances[k][t1][t2], targets, cand,
 								C,
 								parentEntropy);
-						double E = calculateEntrance(localDeltaEntropy, calculateMargin(transformedInstances[k][t1][t2], cand), ENTROPY_APLHA);
+						double localE = calculateEntrance(localDeltaEntropy,
+								calculateMargin(transformedInstances[k][t1][t2], cand), ENTROPY_APLHA);
 						
-						if (E > EStar) {
-							EStar = E;
-							deltaEntropyStar = localDeltaEntropy;
-							t1Star = t1;
-							t2Star = t2;
-							thresholdStar = cand;
-							fStar = k;
+						if (localE > eStarPerFeatureType[k]) {
+							eStarPerFeatureType[k] = localE;
+							deltaEntropyStarPerFeatureType[k] = localDeltaEntropy;
+							t1StarPerFeatureType[k] = t1;
+							t2StarPerFeatureType[k] = t2;
+							thresholdStarPerFeatureType[k] = cand;
 						}
 					}
 				}
 			}
 		}
 		
+		// Set best solution
+		int bestK = getBestSplitIndex(deltaEntropyStarPerFeatureType);
+		eStar = eStarPerFeatureType[bestK];
+		deltaEntropyStar = deltaEntropyStarPerFeatureType[bestK];
+		t1Star = t1StarPerFeatureType[bestK];
+		t2Star = t2StarPerFeatureType[bestK];
+		thresholdStar = thresholdStarPerFeatureType[bestK];
+		fStar = bestK;
+
 		if (Math.abs(deltaEntropyStar) <= PRECISION_DELTA) {
 			// Label this node as a leaf and return
 			// TODO
@@ -168,6 +185,32 @@ public class TimeSeriesForestAlgorithm extends ASimplifiedTSCAlgorithm<Integer, 
 
 		tree(dataLeft, targetsLeft, deltaEntropyStar);
 		tree(dataRight, targetsRight, deltaEntropyStar);
+	}
+
+	public int getBestSplitIndex(final double[] deltaEntropyStarPerFeatureType) {
+		double max = Double.MIN_VALUE;
+
+		List<Integer> maxIndexes = new ArrayList<>();
+
+		for (int i = 0; i < deltaEntropyStarPerFeatureType.length; i++) {
+			if (deltaEntropyStarPerFeatureType[i] > max) {
+				max = deltaEntropyStarPerFeatureType[i];
+				maxIndexes.clear();
+				maxIndexes.add(i);
+			} else if (deltaEntropyStarPerFeatureType[i] == max) {
+				// Multiple best candidates
+				maxIndexes.add(i);
+			}
+		}
+		if(maxIndexes.size() < 1)
+			throw new IllegalArgumentException("Could not find any maximum delta entropy star for any feature type for the given array " + Arrays.toString(deltaEntropyStarPerFeatureType) + ".");
+		
+		// Return random index among best ones if multiple solutions exist
+		if (maxIndexes.size() > 1)
+			Collections.shuffle(maxIndexes);
+
+		return maxIndexes.get(0);
+
 	}
 
 	// Assume targets 1 to n
@@ -236,7 +279,6 @@ public class TimeSeriesForestAlgorithm extends ASimplifiedTSCAlgorithm<Integer, 
 		}
 		return result;
 	}
-
 
 	// TODO: Make enum out of feature type
 	public List<List<Double>> generateThresholdCandidates(final Pair<List<Integer>, List<Integer>> T1T2,
