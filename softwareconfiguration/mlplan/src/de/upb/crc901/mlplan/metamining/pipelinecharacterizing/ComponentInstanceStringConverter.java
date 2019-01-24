@@ -32,7 +32,7 @@ public class ComponentInstanceStringConverter extends Thread {
 	/**
 	 * The name of the top node for all pipelines
 	 */
-	private String pipelineTreeName = "";
+	private String pipelineTreeName = "0";
 
 	IOntologyConnector ontologyConnector;
 
