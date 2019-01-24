@@ -21,8 +21,10 @@ public class InputOptimizerTest {
 
 	@Test
 	public void testPLNetInputOptimizer() throws TrainingException, PredictionException {
+		int seed = 12;
+		
 		PLNetDyadRanker testnet = new PLNetDyadRanker();
-		IDataset train = DyadRankingInstanceSupplier.getInputOptTestSet(5, 2000);
+		IDataset train = DyadRankingInstanceSupplier.getInputOptTestSet(5, 2000, seed);
 		testnet.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_PLNET_HIDDEN_NODES, "8,6,4,4");
 		testnet.train(train);
 		
@@ -32,7 +34,7 @@ public class InputOptimizerTest {
 		
 		//TODO: exchange for general kendall's tau implementation once it is merged to dev
 		for (int testInst = 0; testInst < nTestInstances; testInst++) {
-			IDyadRankingInstance test = DyadRankingInstanceSupplier.getDyadRankingInstance(maxDyadRankingLength, 2, 2, DyadRankingInstanceSupplier.inputOptimizerTestRanker());
+			IDyadRankingInstance test = DyadRankingInstanceSupplier.getInputOptDyadRankingInstance(maxDyadRankingLength, seed);
 			IDyadRankingInstance predict = testnet.predict(test);
 			
 			int dyadRankingLength = test.length();

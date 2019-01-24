@@ -40,6 +40,19 @@ public class DyadRankingInstanceSupplier {
 		Collections.sort(dyads, comparator);
 		return new DyadRankingInstance(dyads);
 	}
+	
+	public static DyadRankingInstance getInputOptDyadRankingInstance(int maxLength, int seed) {
+		List<Dyad> dyads = new ArrayList<Dyad>();
+		int actualLength = ThreadLocalRandom.current().nextInt(2, maxLength + 1);
+
+		for (int i = 0; i < actualLength; i++) {
+			Dyad dyad = DyadSupplier.getRandomDyad(2, 2);
+			dyads.add(dyad);
+		}
+		Comparator<Dyad> comparator = inputOptimizerTestRanker();
+		Collections.sort(dyads, comparator);
+		return new DyadRankingInstance(dyads);
+	}
 
 	/**
 	 * Creates a comparator for {@link jaicore.ml.dyadranking.Dyad} (with 2
@@ -57,12 +70,31 @@ public class DyadRankingInstanceSupplier {
 				Vector scoreVecA = d1.getAlternative();
 				Vector scoreVecI2 = d2.getInstance();
 				Vector scoreVecA2 = d2.getAlternative();
-				double score1 = Math.pow(scoreVecI.getValue(0), 2) + Math.pow(scoreVecI.getValue(1), 2)
-						- Math.pow(scoreVecA.getValue(0), 2) - Math.pow(scoreVecA.getValue(1), 2);
-				double score2 = Math.pow(scoreVecI2.getValue(0), 2) + Math.pow(scoreVecI2.getValue(1), 2)
-						- Math.pow(scoreVecA2.getValue(0), 2) - Math.pow(scoreVecA2.getValue(1), 2);
+				double score1 = bilinFunc(scoreVecI, scoreVecA);
+				double score2 = bilinFunc(scoreVecI2, scoreVecA2);
 				return score1 - score2 == 0 ? 0 : (score1 - score2 > 0 ? 1 : -1);
 			}
+		};
+		return comparator;
+	}
+	
+	public static double inputOptimizerTestScore(Dyad dyad) {
+		Vector inst = dyad.getInstance();
+		Vector alt = dyad.getAlternative();
+		double score = Math.abs(inst.getValue(0) + inst.getValue(1) - alt.getValue(0) - alt.getValue(1))
+					/* + Math.abs(inst.getValue(0)) + Math.abs(inst.getValue(1)) + Math.abs(alt.getValue(0)) + Math.abs(alt.getValue(1)) */;
+		return score;
+	}
+	
+	public static Comparator<Dyad> inputOptimizerTestRanker() {
+		Comparator<Dyad> comparator = new Comparator<Dyad>() {
+
+			@Override
+			public int compare(Dyad d1, Dyad d2) {
+				double score1 = inputOptimizerTestScore(d1);
+				double score2 = inputOptimizerTestScore(d2);
+				return score1 - score2 == 0 ? 0 : (score1 - score2 > 0 ? 1 : -1);
+			}	
 		};
 		return comparator;
 	}
@@ -84,10 +116,11 @@ public class DyadRankingInstanceSupplier {
 
 	/**
 	 * 
-	 * @param maxLengthDyadRankingInstance Maximum length of an individual dyad
-	 *                                     ranking instance in the dataset
-	 * @param size                         Number of dyad ranking instances in the
-	 *                                     dataset
+	 * @param maxLengthDyadRankingInstance
+	 *            Maximum length of an individual dyad ranking instance in the
+	 *            dataset
+	 * @param size
+	 *            Number of dyad ranking instances in the dataset
 	 * @return A dyad ranking dataset with random dyads ((with 2 alternatives and 2
 	 *         instances) that are ranked by the ranking function implemented by the
 	 *         {@link Comparator} returned by {@link #complexDyadRanker()}
@@ -96,6 +129,14 @@ public class DyadRankingInstanceSupplier {
 		DyadRankingDataset dataset = new DyadRankingDataset();
 		for (int i = 0; i < size; i++) {
 			dataset.add(DyadRankingInstanceSupplier.getDyadRankingInstance(maxLengthDyadRankingInstance, seed));
+		}
+		return dataset;
+	}
+	
+	public static DyadRankingDataset getInputOptTestSet(int maxLengthDyadRankingInstance, int size, int seed) {
+		DyadRankingDataset dataset = new DyadRankingDataset();
+		for (int i = 0; i < size; i++) {
+			dataset.add(DyadRankingInstanceSupplier.getInputOptDyadRankingInstance(maxLengthDyadRankingInstance, seed));
 		}
 		return dataset;
 	}
