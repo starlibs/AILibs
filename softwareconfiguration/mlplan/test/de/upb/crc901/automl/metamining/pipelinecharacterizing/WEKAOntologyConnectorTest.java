@@ -23,8 +23,8 @@ public class WEKAOntologyConnectorTest {
 	public void testGetAncestorsOfClassifiers() {
 		connector.getAvailableClassifiers().forEach(classifier -> {
 			List<String> ancestors = connector.getAncestorsOfAlgorithm(classifier);
-			assertEquals(ancestors.get(0), connector.getClassifierTopNode());
-			assertEquals(ancestors.get(ancestors.size()-1), classifier);
+			assertEquals(connector.getClassifierTopNode(), ancestors.get(0));
+			assertEquals(classifier, ancestors.get(ancestors.size()-1));
 		});
 	}
 	
@@ -32,8 +32,8 @@ public class WEKAOntologyConnectorTest {
 	public void testGetAncestorsOfEvaluators() {
 		connector.getAvailableEvaluators().forEach(evaluator -> {
 			List<String> ancestors = connector.getAncestorsOfAlgorithm(evaluator);
-			assertEquals(ancestors.get(0), connector.getEvaluatorTopNode());
-			assertEquals(ancestors.get(ancestors.size()-1), evaluator);
+			assertEquals(connector.getEvaluatorTopNode(), ancestors.get(0));
+			assertEquals(evaluator, ancestors.get(ancestors.size()-1));
 		});
 	}
 	
@@ -41,8 +41,17 @@ public class WEKAOntologyConnectorTest {
 	public void testGetAncestorsOfSearchers() {
 		connector.getAvailableSearchers().forEach(searcher -> {
 			List<String> ancestors = connector.getAncestorsOfAlgorithm(searcher);
-			assertEquals(ancestors.get(0), connector.getSearcherTopNode());
-			assertEquals(ancestors.get(ancestors.size()-1), searcher);
+			assertEquals(connector.getSearcherTopNode(), ancestors.get(0));
+			assertEquals(searcher, ancestors.get(ancestors.size()-1));
 		});
+	}
+	
+	@Test
+	public void testGetAncestorsOfKernelFunctions() {
+		connector.getAvailableKernelFunctions().forEach(searcher -> {
+			List<String> ancestors = connector.getAncestorsOfAlgorithm(searcher);
+			assertEquals(connector.getKernelFunctionTopNode(), ancestors.get(0));
+			assertEquals(searcher, ancestors.get(ancestors.size()-1));
+		});	
 	}
 }

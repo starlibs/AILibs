@@ -175,6 +175,12 @@ public class WEKAOntologyConnector implements IOntologyConnector {
 		ArrayList<OWLClass> ancestors = new ArrayList<OWLClass>();
 		ancestors.add(algorithmClass);
 		for (int i = 0; i < ancestors.size(); i++) {
+			
+			// If we have found the last element, stop
+			if (ancestors.get(ancestors.size() - 1).getIRI().getShortForm().equals(until)) {
+				break;
+			}
+			
 			int previousAncestorSize = ancestors.size();
 			ontology.subClassAxiomsForSubClass(ancestors.get(i))
 					.filter(axiom -> axiom.getSuperClass().getClassExpressionType() == ClassExpressionType.OWL_CLASS)
@@ -192,10 +198,7 @@ public class WEKAOntologyConnector implements IOntologyConnector {
 					});
 				});
 			}
-			// If we have found the last element, stop
-			if (ancestors.get(ancestors.size() - 1).getIRI().getShortForm().equals(until)) {
-				break;
-			}
+
 		}
 
 		// Get names and invert order
