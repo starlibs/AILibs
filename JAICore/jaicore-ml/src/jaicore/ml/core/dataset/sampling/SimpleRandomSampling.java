@@ -4,11 +4,14 @@ import java.util.Random;
 
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
+import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
 
 public class SimpleRandomSampling<I extends IInstance> extends ASamplingAlgorithm<I> {
 
 	private Random random;
+	
+	private IDataset<I> copyDataset;
 
 	public SimpleRandomSampling(Random random) {
 		this.random = random;
@@ -19,12 +22,14 @@ public class SimpleRandomSampling<I extends IInstance> extends ASamplingAlgorith
 		switch (this.getState()) {
 		case created:
 			this.sample = getInput().createEmpty();
+			this.copyDataset = this.getInput().createEmpty();
+			this.copyDataset.addAll(this.getInput());
 			return this.activate();
 		case active:
 			if (this.sample.size() < this.sampleSize) {
-				int i = random.nextInt(this.getInput().size());
-				this.sample.add(this.getInput().get(i));
-				this.getInput().remove(i);
+				int i = random.nextInt(this.copyDataset.size());
+				this.sample.add(this.copyDataset.get(i));
+				this.copyDataset.remove(i);
 				return new SampleElementAddedEvent();
 			} else {
 				return this.terminate();
