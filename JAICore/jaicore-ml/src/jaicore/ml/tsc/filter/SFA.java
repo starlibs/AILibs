@@ -17,8 +17,8 @@ public class SFA implements IFilter {
 	private int numberOfDesieredDFTCoefficients;
 
 	
-	private ArrayList<double[][]> lookupTable = null;
-	private ArrayList<double[][]> sfaDataset = null;
+	private ArrayList<double[][]> lookupTable = new ArrayList<double[][]>();
+	private ArrayList<double[][]> sfaDataset = new ArrayList<double[][]>();
 	
 	public void setNumberOfDesieredDFTCoefficients(int numberOfDesieredDFTCoefficients) {
 		this.numberOfDesieredDFTCoefficients = numberOfDesieredDFTCoefficients;
@@ -27,16 +27,14 @@ public class SFA implements IFilter {
 
 	public SFA(double [] alphabet, int wordLength) {
 		this.alphabet  = alphabet;
+		//TODO wordlength /2
 		this.numberOfDesieredDFTCoefficients = wordLength;
 	}
 	
 	@Override
 	public TimeSeriesDataset transform(TimeSeriesDataset input) throws IllegalArgumentException, NoneFittedFilterExeception {
 		
-		if(!(input instanceof TimeSeriesDataset)) {
-			throw new IllegalArgumentException("This method only supports Timesereies datasets");
-		}
-		if(((TimeSeriesDataset)input).isEmpty()) {
+		if(input.isEmpty()) {
 			throw new IllegalArgumentException("This method can not work with an empty dataset.");
 		}
 		if(!fitted) {
@@ -45,18 +43,40 @@ public class SFA implements IFilter {
 		//TODO Sliding window is still missing 
 		
 		sfaDataset = new ArrayList<double[][]>();
-		
+		//calculate SFA words for every instance and its DFT coefficients 
 		for(int matrix = 0; matrix < DFTDataset.getNumberOfVariables(); matrix++) {
-			double[][] sfaWords = new double [(int) DFTDataset.getNumberOfInstances()][numberOfDesieredDFTCoefficients];
+			double[][] sfaWords = new double [(int) DFTDataset.getNumberOfInstances()][numberOfDesieredDFTCoefficients*2];
 			for(int instance = 0; instance < DFTDataset.getNumberOfInstances(); instance++) {
-				for(int entry = 0; entry < numberOfDesieredDFTCoefficients; entry++) {
+				for(int entry = 0; entry < numberOfDesieredDFTCoefficients*2; entry++) {
 					double elem = DFTDataset.getValues(matrix)[instance][entry];
-					double lookup [] = lookupTable.get(matrix)[instance];
-					for(int i = 0; i < lookup.length; i=+2) {
-						if(elem > lookup[i]& elem < lookup[i+1]) {
-							sfaWords[instance][entry] = alphabet[i/2];
-						}
-					} 
+					// get the lookup table for DFT values of the instance 
+					double lookup [] = lookupTable.get(matrix)[entry];
+					
+					// if the DFT coefficient is smaller than the first or larger than the last
+					// or it lays on the border give it first, last or second ,penultimate  
+					if(elem < lookup[0]) {
+						sfaWords[instance][entry] = alphabet[0];
+					}
+					if(elem == lookup[0]){
+						sfaWords[instance][entry] = alphabet[1];
+					}
+					if(elem > lookup[alphabet.length-2]) {
+						sfaWords[instance][entry] = alphabet[alphabet.length-1];
+					}
+					if(elem == lookup[alphabet.length-2]) {
+						sfaWords[instance][entry] = alphabet[alphabet.length-1];
+					}
+					//get alphabet letter for every non extrem coefficient
+					else {
+						for(int i = 1; i < lookup.length-2; i++) {
+							if(elem > lookup[i]) {
+								sfaWords[instance][entry] = alphabet[i];
+							}
+							if(elem == lookup[i]){
+								sfaWords[instance][entry] = alphabet[i+1];
+							}
+						} 
+					}
 				}
 			}
 				sfaDataset.add(sfaWords);	
@@ -69,10 +89,7 @@ public class SFA implements IFilter {
 	public void fit(TimeSeriesDataset input) {
 		// TODO Auto-generated method stub
 	
-		if(!(input instanceof TimeSeriesDataset)) {
-			throw new IllegalArgumentException("This method only supports Timesereies datasets");
-		}
-		if(((TimeSeriesDataset)input).isEmpty()) {
+		if(input.isEmpty()) {
 			throw new IllegalArgumentException("This method can not work with an empty dataset.");
 		}
 		
@@ -84,6 +101,7 @@ public class SFA implements IFilter {
 		DFT dftFilter = new DFT();
 		
 		try {
+			//calculates the number of DFT coefficents with wordlength as number of desired DFT coefficients
 			dftFilter.setNumberOfDisieredCoefficients(numberOfDesieredDFTCoefficients);
 			DFTDataset = (TimeSeriesDataset) dftFilter.fitTransform(input);
 			
@@ -94,28 +112,37 @@ public class SFA implements IFilter {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		ArrayList<double[][]> lookupTable = new ArrayList<double[][]>(); 
+		
 		
 		
 		for(int matrix = 0; matrix < DFTDataset.getNumberOfVariables(); matrix++) {
-			int index = 0;
-			double[][] lookUpTable = new double [numberOfDesieredDFTCoefficients*2][alphabet.length*2];
+			//for each part of every coefficient claculate the bins for the alphabet (number of bins == number of letters)
+			double[][] lookUpTable = new double [numberOfDesieredDFTCoefficients*2][alphabet.length-1];
+			
 			for(int coeficient = 0; coeficient < numberOfDesieredDFTCoefficients*2; coeficient++) {
-				
+				//get the columns of the DFT dataset 
 				double[] toBin = new double[(int)input.getNumberOfInstances()]; 
-				
 				for(int instances = 0; instances < DFTDataset.getNumberOfInstances(); instances++) {
 					toBin[instances]= DFTDataset.getValues(matrix)[instances][coeficient];
 				}
+				
 				//Sort ascending
+				//If the number of instances is equal to the number of bins the breakpoints are set to this values
 				Arrays.sort(toBin);
-				long splitValue = toBin.length/alphabet.length;
-				//TODO TEST!!
-				for(int alphabetLetter = 0; alphabetLetter < alphabet.length*2; alphabetLetter+=2) {
-					index += (alphabetLetter/2)*splitValue;
-					lookUpTable[coeficient][alphabetLetter] = toBin[index];
-					lookUpTable[coeficient][alphabetLetter+1] = toBin[(int) (index+splitValue-1)];
+				if(toBin.length == alphabet.length-1) {
+					for(int alphabetLetter = 0; alphabetLetter< alphabet.length-1;alphabetLetter++) {
+						lookUpTable[coeficient][alphabetLetter] = toBin[alphabetLetter];
+					}
 				}
+				//	If the number of instances is greater than the number of bins then the breakpoints are set
+				//  in the way that all coefficients are spread equally over the bins
+				else {
+					int splitValue=(int) Math.round(toBin.length/alphabet.length);
+					for(int alphabetLetter = 0; alphabetLetter < alphabet.length-1; alphabetLetter++) {
+						lookUpTable[coeficient][alphabetLetter] = toBin[alphabetLetter+splitValue];
+					}
+				}
+				
 			}
 			lookupTable.add(lookUpTable);
 		}
