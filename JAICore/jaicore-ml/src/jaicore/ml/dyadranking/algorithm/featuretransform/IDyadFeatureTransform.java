@@ -1,7 +1,13 @@
 package jaicore.ml.dyadranking.algorithm.featuretransform;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import de.upb.isys.linearalgebra.Vector;
+import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.dyadranking.Dyad;
+import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
+import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 
 /**
  * Feature transformation interface for the
@@ -32,4 +38,24 @@ public interface IDyadFeatureTransform {
 	 */
 	public int getTransformedVectorLength(int alternativeLength, int instanceLength);
 
+	/**
+	 * Precomputed the feature transforms for the dataset, this can speed up the
+	 * runtime as the feature transform will be reduced to O(1) at the cost of O(n).
+	 * 
+	 * @param dataset
+	 * @return the feature transform
+	 */
+	default Map<IDyadRankingInstance, Map<Dyad, Vector>> getPreComputedFeatureTransforms(DyadRankingDataset dataset) {
+		Map<IDyadRankingInstance, Map<Dyad, Vector>> featureTransforms = new HashMap<>();
+		for (IInstance instance : dataset) {
+			IDyadRankingInstance rankingInstance = (IDyadRankingInstance) instance;
+			Map<Dyad, Vector> transforms = new HashMap<>();
+			for (int i = 0; i < rankingInstance.length(); i++) {
+				transforms.put(rankingInstance.getDyadAtPosition(i),
+						this.transform(rankingInstance.getDyadAtPosition(i)));
+			}
+			featureTransforms.put(rankingInstance, transforms);
+		}
+		return featureTransforms;
+	}
 }

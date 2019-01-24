@@ -2,7 +2,7 @@ package jaicore.ml.dyadranking.algorithm.featuretransform;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TreeMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -10,19 +10,22 @@ import org.slf4j.LoggerFactory;
 
 import de.upb.isys.linearalgebra.DenseDoubleVector;
 import de.upb.isys.linearalgebra.Vector;
+import edu.stanford.nlp.optimization.QNMinimizer;
+import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.exception.ConfigurationException;
 import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.core.exception.TrainingException;
 import jaicore.ml.core.optimizing.IGradientBasedOptimizer;
-import jaicore.ml.core.optimizing.graddesc.GradientDescentOptimizer;
+import jaicore.ml.core.optimizing.lbfgs.LBFGSOptimizerWrapper;
 import jaicore.ml.core.predictivemodel.IPredictiveModelConfiguration;
 import jaicore.ml.dyadranking.Dyad;
 import jaicore.ml.dyadranking.algorithm.APLDyadRanker;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import jaicore.ml.dyadranking.dataset.DyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
+import jaicore.ml.dyadranking.optimizing.BilinFunction;
 import jaicore.ml.dyadranking.optimizing.DyadRankingFeatureTransformNegativeLogLikelihood;
 import jaicore.ml.dyadranking.optimizing.DyadRankingFeatureTransformNegativeLogLikelihoodDerivative;
 import jaicore.ml.dyadranking.optimizing.IDyadRankingFeatureTransformPLGradientDescendableFunction;
@@ -63,7 +66,7 @@ public class FeatureTransformPLDyadRanker extends APLDyadRanker {
 	private IDyadRankingFeatureTransformPLGradientFunction negativeLogLikelihoodDerivative = new DyadRankingFeatureTransformNegativeLogLikelihoodDerivative();
 
 	/* The optimizer used to find w */
-	private IGradientBasedOptimizer optimizer = new GradientDescentOptimizer();
+	private IGradientBasedOptimizer optimizer = new LBFGSOptimizerWrapper();
 
 	/**
 	 * Constructs a new feature transform Placket-Luce dyad ranker with bilinear
@@ -90,26 +93,20 @@ public class FeatureTransformPLDyadRanker extends APLDyadRanker {
 			throw new IllegalArgumentException(
 					"FeatureTransformDyadRanker can only be used with IDyadRankingInstances.");
 		}
-
 		if (w == null) {
 			throw new PredictionException("The Ranker has not been trained yet.");
 		}
 		log.debug("Training ranker with instance {}", instance);
 		IDyadRankingInstance dyadRankingInstance = (IDyadRankingInstance) instance;
-		TreeMap<Double, List<Dyad>> ordering = new TreeMap<>();
-
-		dyadRankingInstance.forEach(dyad -> {
-			double skill = computeSkillForDyad(dyad);
-			if (ordering.containsKey(skill)) {
-				ordering.get(skill).add(dyad);
-			} else {
-				ordering.put(skill, new ArrayList<Dyad>());
-				ordering.get(skill).add(dyad);
-			}
-		});
-
-		return new DyadRankingInstance(new ArrayList<Dyad>(
-				ordering.descendingMap().values().stream().flatMap(List::stream).collect(Collectors.toList())));
+		List<Pair<Double, Dyad>> skillForDyads = new ArrayList<>();
+		
+		for (Dyad d : dyadRankingInstance) {
+			double skill = computeSkillForDyad(d);
+			skillForDyads.add(new Pair<Double, Dyad>(skill, d));
+		}
+		
+		return new DyadRankingInstance(skillForDyads.stream().sorted((p1, p2) -> Double.compare(p1.getX(), p2.getX())).map(Pair::getY).collect(Collectors.toList()));
+		
 	}
 
 	private double computeSkillForDyad(Dyad dyad) {
@@ -128,19 +125,21 @@ public class FeatureTransformPLDyadRanker extends APLDyadRanker {
 					"Can only train the feature transform Placket-Luce dyad ranker with a dyad ranking dataset!");
 		}
 		DyadRankingDataset dRDataset = (DyadRankingDataset) dataset;
-
-		negativeLogLikelihood.initialize(dRDataset, featureTransform);
-		negativeLogLikelihoodDerivative.initialize(dRDataset, featureTransform);
+		
+		Map<IDyadRankingInstance, Map<Dyad, Vector>> featureTransforms = featureTransform.getPreComputedFeatureTransforms(dRDataset);
+		negativeLogLikelihood.initialize(dRDataset, featureTransforms);
+		negativeLogLikelihoodDerivative.initialize(dRDataset, featureTransforms);
+		
 		int alternativeLength = dRDataset.get(0).getDyadAtPosition(0).getAlternative().length();
 		int instanceLength = dRDataset.get(0).getDyadAtPosition(0).getInstance().length();
-		Vector initialGuess = new DenseDoubleVector(
-				featureTransform.getTransformedVectorLength(alternativeLength, instanceLength), -0.3);
-		// initialGuess.fillRandomly();
-		log.debug("Likelihood of the randomly filled w is {}", likelihoodOfParameter(initialGuess, dRDataset));
-		w = optimizer.optimize(negativeLogLikelihood, negativeLogLikelihoodDerivative, initialGuess);
+		w = new DenseDoubleVector(
+				featureTransform.getTransformedVectorLength(alternativeLength, instanceLength), 0.3);
+		log.debug("Likelihood of the randomly filled w is {}", likelihoodOfParameter(w, dRDataset));
+		//w =optimizer.optimize(negativeLogLikelihood, negativeLogLikelihoodDerivative, w);
+		BilinFunction fun = new BilinFunction(featureTransforms , dRDataset, featureTransform.getTransformedVectorLength(alternativeLength, instanceLength));
+		QNMinimizer minimizer = new QNMinimizer();
+		w = new DenseDoubleVector(minimizer.minimize(fun, 0.01, w.asArray()));
 		log.debug("Finished optimizing, the final w is {}", w);
-		log.debug("Final derivative of w is {}", negativeLogLikelihoodDerivative.apply(w));
-		log.debug("Likelihood of the final w is {}", likelihoodOfParameter(w, dRDataset));
 
 	}
 
