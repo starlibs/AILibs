@@ -12,14 +12,12 @@ import org.apache.commons.lang3.tuple.Pair;
 public interface ExtrapolatedLearningcurve {
 
 	/**
-	 * Calculated or search an interval around saturation point, i. e. the point where the curve
-	 * starts to flatten.
+	 * Calculated or search a saturation point with a tolerance of epsilon.
 	 * 
-	 * @param epsilon Epsilon value(must be > 0) that the prediction of the
-	 *                saturation point is allowed to deviate.
-	 * @return Left and right border of the interval, where the saturation point will be inside of.
+	 * @param epsilon Epsilon value(must be > 0) that is a tolerance the saturation point can deviate.
+	 * @return Saturation point with tolerated deviation.
 	 */
-	public Pair<Double, Double> getSaturationPoint(double epsilon);
+	public double getSaturationPoint(double epsilon);
 
 	/**
 	 * Calculates or looks-up the curves value at a given point.
