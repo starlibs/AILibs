@@ -1,5 +1,7 @@
 package jaicore.ml.dyadranking.general;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -11,7 +13,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,6 +33,7 @@ import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
 import jaicore.ml.dyadranking.loss.DyadRankingLossUtil;
 import jaicore.ml.dyadranking.loss.KendallsTauDyadRankingLoss;
+import jaicore.ml.dyadranking.util.DyadStandardScaler;
 
 /**
  * This is a test based on Dirk Schäfers dyad ranking dataset based on
@@ -83,6 +85,12 @@ public class DyadRankerGATSPTest {
 		DyadRankingDataset trainData = new DyadRankingDataset(dataset.subList(0, N));
 		DyadRankingDataset testData = new DyadRankingDataset(dataset.subList(N, dataset.size()));
 
+		// standardize data
+		DyadStandardScaler scaler = new DyadStandardScaler();
+		scaler.fit(trainData);
+		scaler.transformInstances(trainData);
+		scaler.transformInstances(testData);
+		
 		// trim dyad ranking instances for train data
 		trainData = randomlyTrimSparseDyadRankingInstances(trainData, M);
 
@@ -93,9 +101,7 @@ public class DyadRankerGATSPTest {
 			double avgKendallTau = 0.0d;
 			avgKendallTau = DyadRankingLossUtil.computeAverageLoss(new KendallsTauDyadRankingLoss(), testData, ranker);
 			System.out.println("Average Kendall's tau for " + ranker.getClass().getSimpleName() + ": " + avgKendallTau);
-//			double avgNDCG = 0.0d;
-//			avgNDCG = DyadRankingLossUtil.computeAverageLoss(new NDCGLoss(), testData, ranker);
-//			System.out.println("Average NDCG for " + ranker.getClass().getSimpleName() + ": " + avgNDCG);
+			assertTrue(avgKendallTau > 0.5d);
 		} catch (TrainingException | PredictionException e) {
 			e.printStackTrace();
 		}
@@ -182,10 +188,6 @@ public class DyadRankerGATSPTest {
 
 			List<Vector> instanceFeatures = new ArrayList<Vector>(246);
 			List<ArrayList<Vector>> alternativesList = new ArrayList<ArrayList<Vector>>(246);
-			DescriptiveStatistics[] stats = new DescriptiveStatistics[numAttributes];
-			for (int i = 0; i < stats.length; i++) {
-				stats[i] = new DescriptiveStatistics();
-			}
 			int lineIndex = 0;
 			while ((line = reader.readLine()) != null) {
 				tokens = line.split("\t");
@@ -196,7 +198,6 @@ public class DyadRankerGATSPTest {
 				for (int i = 0; i < numAttributes; i++) {
 					double val = Double.parseDouble(tokens[i]);
 					instance.setValue(i, val);
-					stats[i].addValue(val);
 				}
 
 				// add the alternatives to the dyad ranking instance
@@ -207,22 +208,6 @@ public class DyadRankerGATSPTest {
 				instanceFeatures.add(instance);
 				alternativesList.add(alternatives);
 
-			}
-
-			double[] means = new double[numAttributes];
-			for (int i = 0; i < means.length; i++) {
-				means[i] = stats[i].getMean();
-			}
-			double[] stds = new double[numAttributes];
-			for (int i = 0; i < stds.length; i++) {
-				stds[i] = stats[i].getStandardDeviation();
-			}
-			Vector meanVec = new DenseDoubleVector(means);
-			Vector stdVec = new DenseDoubleVector(stds);
-
-			for (Vector instVec : instanceFeatures) {
-				instVec.subtractVector(meanVec);
-				instVec.divideByVectorPairwise(stdVec);
 			}
 
 			for (int i = 0; i < instanceFeatures.size(); i++) {

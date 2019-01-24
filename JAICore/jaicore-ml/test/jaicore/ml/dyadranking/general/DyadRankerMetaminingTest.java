@@ -1,5 +1,7 @@
 package jaicore.ml.dyadranking.general;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -82,6 +84,7 @@ public class DyadRankerMetaminingTest {
 			double avgKendallTau = 0.0d;
 			avgKendallTau = DyadRankingLossUtil.computeAverageLoss(new KendallsTauDyadRankingLoss(), testData, ranker);
 			System.out.println("Average Kendall's tau for " + ranker.getClass().getSimpleName() + ": " + avgKendallTau);
+			assertTrue(avgKendallTau > 0.5d);
 		} catch (TrainingException | PredictionException e) {
 			e.printStackTrace();
 		}
