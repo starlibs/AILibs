@@ -60,7 +60,7 @@ public class DyadStandardScaler {
 		int lengthY = dataset.get(0).getDyadAtPosition(0).getAlternative().length();
 
 		if (lengthX != statsX.length || lengthY != statsY.length)
-			throw new IllegalArgumentException("The scalar was fit to dyads with instances of length " + statsX.length
+			throw new IllegalArgumentException("The scaler was fit to dyads with instances of length " + statsX.length
 					+ " and alternatives of length " + statsY.length + "\n but received instances of length " + lengthX
 					+ " and alternatives of length " + lengthY);
 
@@ -154,7 +154,7 @@ public class DyadStandardScaler {
 	}
 	
 	/**
-	 * Prints the standard devations of all features this scaler has been fit to.
+	 * Prints the means of all features this scaler has been fit to.
 	 */
 	public void printMeans() {
 		if(statsX == null || statsY == null)

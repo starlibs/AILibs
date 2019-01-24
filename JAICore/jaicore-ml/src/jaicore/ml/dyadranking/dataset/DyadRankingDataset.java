@@ -58,26 +58,27 @@ public class DyadRankingDataset extends ArrayList<IInstance> implements IDataset
 		super(initialCapacity);
 	}
 
-	public DyadRankingDataset(List<IDyadRankingInstance> sparseDyadRankingInstances) {
-		super(sparseDyadRankingInstances);
+	public DyadRankingDataset(List<IDyadRankingInstance> dyadRankingInstances) {
+		super(dyadRankingInstances);
 	}
 
 	@Override
 	public <T> IAttributeType<T> getTargetType(Class<? extends T> clazz) {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("Dyad rankings have no target type.");
 	}
 
 	@Override
 	public List<IAttributeType<?>> getAttributeTypes() {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public int getNumberOfAttributes() {
-		// TODO Auto-generated method stub
-		return 0;
+		if (this.size() == 0) {
+			return 0;
+		}
+		Dyad firstDyad = this.get(0).getDyadAtPosition(0);
+		return firstDyad.getInstance().length() + firstDyad.getAlternative().length();
 	}
 
 	@Override
