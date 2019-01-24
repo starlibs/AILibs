@@ -180,7 +180,7 @@ public class TimeSeriesDataset {
         return valueMatrices.size();
     }
 
-    public long getNumberOfInstances() {
+    public int getNumberOfInstances() {
         return numberOfInstances;
     }
 
