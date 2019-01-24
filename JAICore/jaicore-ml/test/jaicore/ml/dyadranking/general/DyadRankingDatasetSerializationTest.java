@@ -11,6 +11,11 @@ import org.junit.Test;
 
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 
+/**
+ * A simple test to check whether serialization and deserialization works for {@link DyadRankingDataset}s.
+ * @author Jonas Hanselle, Michael Braun
+ *
+ */
 public class DyadRankingDatasetSerializationTest {
 	
 	private static String DATASET_FILE = "testsrc/ml/dyadranking/serialized-dataset.txt";
