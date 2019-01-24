@@ -134,4 +134,40 @@ public class DyadStandardScaler {
 		this.fit(dataset);
 		this.transform(dataset);
 	}
+	
+	/**
+	 * Prints the standard devations of all features this scaler has been fit to.
+	 */
+	public void printStandardDeviations() {
+		if(statsX == null || statsY == null)
+			throw new IllegalStateException("The scaler must be fit before calling this method!");
+		System.out.print("Standard deviations for instances: ");
+		for(SummaryStatistics stats : statsX) {
+			System.out.print(stats.getStandardDeviation() + ", ");
+		}
+		System.out.println();
+		System.out.print("Standard deviations for alternatives: ");
+		for(SummaryStatistics stats : statsY) {
+			System.out.print(stats.getStandardDeviation() + ", ");
+		}
+		System.out.println();
+	}
+	
+	/**
+	 * Prints the standard devations of all features this scaler has been fit to.
+	 */
+	public void printMeans() {
+		if(statsX == null || statsY == null)
+			throw new IllegalStateException("The scaler must be fit before calling this method!");
+		System.out.print("Means for instances: ");
+		for(SummaryStatistics stats : statsX) {
+			System.out.print(stats.getMean() + ", ");
+		}
+		System.out.println();
+		System.out.print("Means for alternatives: ");
+		for(SummaryStatistics stats : statsY) {
+			System.out.print(stats.getMean() + ", ");
+		}
+		System.out.println();
+	}
 }
