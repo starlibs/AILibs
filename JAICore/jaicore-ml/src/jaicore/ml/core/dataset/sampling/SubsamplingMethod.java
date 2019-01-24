@@ -7,6 +7,7 @@ import org.apache.commons.math3.ml.distance.ManhattanDistance;
 
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.casecontrol.CaseControlSampling;
+import jaicore.ml.core.dataset.sampling.stratified.sampling.AttributeBasedStratiAmountSelectorAndAssigner;
 import jaicore.ml.core.dataset.sampling.stratified.sampling.GMeansStratiAmountSelectorAndAssigner;
 import jaicore.ml.core.dataset.sampling.stratified.sampling.StratifiedSampling;
 
@@ -65,14 +66,15 @@ public enum SubsamplingMethod {
 	ATTRIBUTE_STRATIFIED_SAMLPING {
 		@Override
 		public ASamplingAlgorithm<IInstance> getSubsampler(long seed) {
-			throw new NotImplementedException(
-					"Create a subsampler with default configuration for Attribute Stratified is not implemented yet");
+			AttributeBasedStratiAmountSelectorAndAssigner<IInstance> a = new AttributeBasedStratiAmountSelectorAndAssigner<>();
+			return new StratifiedSampling<IInstance>(a, a, new Random(seed));
 		}
 	},
 	G_MEANS_STRATIFIED_SAMPLING {
 		@Override
 		public ASamplingAlgorithm<IInstance> getSubsampler(long seed) {
-			GMeansStratiAmountSelectorAndAssigner<IInstance> g = new GMeansStratiAmountSelectorAndAssigner<IInstance>((int) seed);
+			GMeansStratiAmountSelectorAndAssigner<IInstance> g = new GMeansStratiAmountSelectorAndAssigner<IInstance>(
+					(int) seed);
 			return new StratifiedSampling<IInstance>(g, g, new Random(seed));
 		}
 	};
