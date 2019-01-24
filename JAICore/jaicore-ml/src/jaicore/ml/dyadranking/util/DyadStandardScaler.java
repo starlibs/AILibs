@@ -7,6 +7,14 @@ import jaicore.ml.dyadranking.Dyad;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 
+/**
+ * A scaler that can be fit to a certain dataset and then be used to standardize
+ * datasets, i.e. transform the data to have a mean of 0 and a standard deviation of 1 according to
+ * the data it was fit to.
+ * 
+ * @author Michael Braun, Jonas Hanselle
+ *
+ */
 public class DyadStandardScaler {
 
 	private SummaryStatistics[] statsX;
@@ -14,7 +22,8 @@ public class DyadStandardScaler {
 
 	/**
 	 * Fits the standard scaler to the dataset.
-	 * @param dataset
+	 * 
+	 * @param dataset The dataset the scaler should be fit to.
 	 */
 	public void fit(DyadRankingDataset dataset) {
 		int lengthX = dataset.get(0).getDyadAtPosition(0).getInstance().length();
@@ -42,8 +51,9 @@ public class DyadStandardScaler {
 	}
 
 	/**
-	 * Transforms the dataset according to the mean and standard deviation.
-	 * @param dataset
+	 * Transforms the entire dataset according to the mean and standard deviation of the data the scaler has been fit to.
+	 * 
+	 * @param dataset The dataset to be standardized.
 	 */
 	public void transform(DyadRankingDataset dataset) {
 		int lengthX = dataset.get(0).getDyadAtPosition(0).getInstance().length();
@@ -72,10 +82,12 @@ public class DyadStandardScaler {
 			}
 		}
 	}
-	
+
 	/**
-	 * Transforms only the instances of each dyad according to the mean and standard deviation.
-	 * @param dataset
+	 * Transforms only the instances of each dyad according to the mean and standard
+	 * of the data the scaler has been fit to.
+	 * 
+	 * @param dataset The dataset of which the instances are to be standardized.
 	 */
 	public void transformInstances(DyadRankingDataset dataset) {
 		int lengthX = dataset.get(0).getDyadAtPosition(0).getInstance().length();
@@ -91,10 +103,12 @@ public class DyadStandardScaler {
 			}
 		}
 	}
-	
+
 	/**
-	 * Transforms only the alternatives of each dyad according to the mean and standard deviation.
-	 * @param dataset
+	 * Transforms only the alternatives of each dyad according to the mean and
+	 * standard deviation of the data the scaler has been fit to.
+	 * 
+	 * @param dataset The dataset of which the alternatives are to be standardized.
 	 */
 	public void transformAlternatives(DyadRankingDataset dataset) {
 		int lengthY = dataset.get(0).getDyadAtPosition(0).getAlternative().length();
@@ -112,8 +126,9 @@ public class DyadStandardScaler {
 	}
 
 	/**
-	 * Fits the standard scaler to the dataset and transforms the
-	 * @param dataset
+	 * Fits the standard scaler to the dataset and transforms the entire dataset according to the mean and standard deviation of the dataset.
+	 * 
+	 * @param dataset The dataset to be standardized.
 	 */
 	public void fitTransform(DyadRankingDataset dataset) {
 		this.fit(dataset);

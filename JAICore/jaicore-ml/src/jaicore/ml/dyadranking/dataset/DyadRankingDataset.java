@@ -10,7 +10,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.bouncycastle.util.Strings;
 
 import de.upb.isys.linearalgebra.DenseDoubleVector;
@@ -26,7 +25,7 @@ import jaicore.ml.dyadranking.Dyad;
  * extension to the {@link ArrayList} implementation with typecasts to
  * {@link IDyadRankingInstance}.
  * 
- * @author Helena Graf, Jonas Hanselle, Mirko Jürgens
+ * @author Helena Graf, Mirko Jürgens, Michael Braun, Jonas Hanselle
  *
  */
 public class DyadRankingDataset extends ArrayList<IInstance> implements IDataset {

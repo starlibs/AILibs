@@ -26,14 +26,13 @@ import jaicore.ml.core.exception.TrainingException;
 import jaicore.ml.dyadranking.algorithm.ADyadRanker;
 import jaicore.ml.dyadranking.algorithm.FeatureTransformPLDyadRanker;
 import jaicore.ml.dyadranking.algorithm.APLDyadRanker;
+import jaicore.ml.dyadranking.algorithm.IPLNetDyadRankerConfiguration;
 import jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
-import jaicore.ml.dyadranking.algorithm.featuretransform.FeatureTransformPLDyadRanker;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
 import jaicore.ml.dyadranking.loss.DyadRankingLossUtil;
 import jaicore.ml.dyadranking.loss.KendallsTauDyadRankingLoss;
-import jaicore.ml.dyadranking.loss.NDCGLoss;
 
 /**
  * This is a test based on Dirk Schäfers dyad ranking dataset based on
@@ -79,8 +78,8 @@ public class DyadRankerGATSPTest {
 	@Test
 	public void test() {
 
-			Collections.shuffle(dataset, new Random(seed));
-		
+		Collections.shuffle(dataset, new Random(seed));
+
 		// split data
 		DyadRankingDataset trainData = new DyadRankingDataset(dataset.subList(0, N));
 		DyadRankingDataset testData = new DyadRankingDataset(dataset.subList(N, dataset.size()));
@@ -95,9 +94,9 @@ public class DyadRankerGATSPTest {
 			double avgKendallTau = 0.0d;
 			avgKendallTau = DyadRankingLossUtil.computeAverageLoss(new KendallsTauDyadRankingLoss(), testData, ranker);
 			System.out.println("Average Kendall's tau for " + ranker.getClass().getSimpleName() + ": " + avgKendallTau);
-			double avgNDCG = 0.0d;
-			avgNDCG = DyadRankingLossUtil.computeAverageLoss(new NDCGLoss(), testData, ranker);
-			System.out.println("Average NDCG for " + ranker.getClass().getSimpleName() + ": " + avgNDCG);
+//			double avgNDCG = 0.0d;
+//			avgNDCG = DyadRankingLossUtil.computeAverageLoss(new NDCGLoss(), testData, ranker);
+//			System.out.println("Average NDCG for " + ranker.getClass().getSimpleName() + ": " + avgNDCG);
 		} catch (TrainingException | PredictionException e) {
 			e.printStackTrace();
 		}
@@ -275,8 +274,17 @@ public class DyadRankerGATSPTest {
 	}
 
 	@Parameters
-	public static List<APLDyadRanker[]> supplyDyadRankers() {
-		return Arrays.asList(new PLNetDyadRanker[] { new PLNetDyadRanker() },
-				new FeatureTransformPLDyadRanker[] { new FeatureTransformPLDyadRanker() });
+	public static List<APLDyadRanker> supplyDyadRankers() {
+		PLNetDyadRanker plNetRanker = new PLNetDyadRanker();
+		// Use a simple config such that the test finishes quickly
+		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_ACTIVATION_FUNCTION, "SIGMOID");
+		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_PLNET_HIDDEN_NODES, "5");
+		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_MAX_EPOCHS, "10");
+		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_INTERVAL, "1");
+		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_PATIENCE, "5");
+		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_RETRAIN, "false");
+		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_PLNET_LEARNINGRATE, "0.1");
+		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_MINI_BATCH_SIZE, "1");
+		return Arrays.asList(plNetRanker);
 	}
 }
