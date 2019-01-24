@@ -25,7 +25,7 @@ import jaicore.ml.dyadranking.Dyad;
  * extension to the {@link ArrayList} implementation with typecasts to
  * {@link IDyadRankingInstance}.
  * 
- * @author Helena Graf, Mirko Jürgens
+ * @author Helena Graf, Mirko Jürgens, Michael Braun, Jonas Hanselle
  *
  */
 public class DyadRankingDataset extends ArrayList<IInstance> implements IDataset {
