@@ -2,6 +2,7 @@ package jaicore.ml.core.dataset.sampling.stratified.sampling;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -75,6 +76,15 @@ public class AttributeBasedStratiAmountSelectorAndAssigner<I extends IInstance>
 	/** The number of categories for discretization selected by the user */
 	private int numberOfCategories;
 
+	/**
+	 * SCALE-54: Explicitly allow to not provide an attribute list
+	 */
+	public AttributeBasedStratiAmountSelectorAndAssigner() {
+		this(null, null);
+		this.discretizationStrategy = DEFAULT_DISCRETIZATION_STRATEGY;
+		this.numberOfCategories = DEFAULT_DISCRETIZATION_CATEGORY_AMOUNT;
+	}
+
 	public AttributeBasedStratiAmountSelectorAndAssigner(List<Integer> attributeIndices) {
 		this(attributeIndices, null);
 		this.discretizationStrategy = DEFAULT_DISCRETIZATION_STRATEGY;
@@ -102,6 +112,7 @@ public class AttributeBasedStratiAmountSelectorAndAssigner<I extends IInstance>
 	@Override
 	public int selectStratiAmount(IDataset<I> dataset) {
 		this.dataset = dataset;
+
 		// Compute attribute values from data set
 		computeAttributeValues();
 
@@ -123,6 +134,15 @@ public class AttributeBasedStratiAmountSelectorAndAssigner<I extends IInstance>
 	private void computeAttributeValues() {
 		LOG.info("computeAttributeValues(): enter");
 		LOG.debug("Computing attribute values for attribute indices {}", attributeIndices.toString());
+
+		// SCALE-54: Use target attribute only if no attribute indices are provided
+		if (this.attributeIndices == null || this.attributeIndices.isEmpty()) {
+			// We assume that the last attribute is the target attribute
+			int targetIndex = this.dataset.getNumberOfAttributes();
+			LOG.info(String.format("No attribute indices provided. Working with target attribute only (index: %d",
+					targetIndex));
+			this.attributeIndices = Collections.singletonList(targetIndex);
+		}
 
 		// Check validity of the attribute indices
 		for (int attributeIndex : attributeIndices) {
