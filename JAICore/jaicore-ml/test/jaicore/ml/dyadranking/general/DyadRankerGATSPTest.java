@@ -85,6 +85,9 @@ public class DyadRankerGATSPTest {
 		// split data
 		DyadRankingDataset trainData = new DyadRankingDataset(dataset.subList(0, N));
 		DyadRankingDataset testData = new DyadRankingDataset(dataset.subList(N, dataset.size()));
+		
+		// trim dyad ranking instances for train data
+		trainData = randomlyTrimSparseDyadRankingInstances(trainData, M);
 
 		// standardize data
 		DyadStandardScaler scaler = new DyadStandardScaler();
@@ -92,9 +95,6 @@ public class DyadRankerGATSPTest {
 		scaler.transformInstances(trainData);
 		scaler.transformInstances(testData);
 		
-		// trim dyad ranking instances for train data
-		trainData = randomlyTrimSparseDyadRankingInstances(trainData, M);
-
 		try {
 
 			// train the ranker
