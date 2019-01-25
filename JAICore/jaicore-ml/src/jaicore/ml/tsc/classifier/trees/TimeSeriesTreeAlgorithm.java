@@ -27,26 +27,63 @@ import jaicore.ml.tsc.classifier.trees.TimeSeriesTree.TimeSeriesTreeNodeDecision
 import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import jaicore.ml.tsc.util.TimeSeriesUtil;
 
+/**
+ * Algorithm to build a time series tree as described in Deng, Houtao et al. “A
+ * Time Series Forest for Classification and Feature Extraction.” Inf. Sci. 239
+ * (2013): 142-153.
+ * 
+ * @author Julian Lienen
+ *
+ */
 public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, TimeSeriesTree> {
-
+	/**
+	 * Feature types used within the time series tree.
+	 */
 	public enum FeatureType {
 		MEAN, STDDEV, SLOPE
 	}
 
-	public static final int NUM_FEATURE_TYPES = 3;
+	/**
+	 * Number of features used within the time series tree.
+	 */
+	public static final int NUM_FEATURE_TYPES = FeatureType.values().length;
+
+	/**
+	 * Number of threshold candidates created in each tree recursion step.
+	 */
 	public static final int NUM_THRESH_CANDIDATES = 20;
 
-	// Set to useful value
+	/**
+	 * Alpha parameter used to weight the importance of the feature's margins to the
+	 * threshold candidates.
+	 */
 	public static final double ENTROPY_APLHA = 0.0000000000000000000001;
 
+	/**
+	 * Precision delta used to overcome imprecision, e. g. for values very close to
+	 * but not exactly zero.
+	 */
 	private static final double PRECISION_DELTA = 0.000000001d;
 
+	/**
+	 * Seed used for all randomized operations.
+	 */
 	private int seed;
 
+	/**
+	 * Maximum depth of the tree.
+	 */
 	private final int maxDepth;
 
-	// Caching mechanism
+	/**
+	 * Sparse cache used for already generated feature values.
+	 */
 	private HashMap<Long, double[]> transformedFeaturesCache = null;
+	/**
+	 * Indicator whether feature caching should be used. Usage for datasets with
+	 * many attributes is not recommended due to a high number of possible
+	 * intervals.
+	 */
 	private boolean useFeatureCaching = false;
 
 	public TimeSeriesTreeAlgorithm(final int maxDepth, final int seed, final boolean useFeatureCaching) {
@@ -109,7 +146,6 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 			throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
 
 		// Training
-
 		TimeSeriesDataset data = this.getInput();
 		double[][] dataMatrix = data.getValuesOrNull(0);
 
@@ -117,8 +153,9 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 		if (n <= 0)
 			throw new IllegalArgumentException("The traning data must contain at least one instance!");
 
-		// TODO: Does this make sense?
-		double parentEntropy = .5d;
+		// Initial prior parentEntropy value, affects the scale of delta entropy values
+		// in each recursion step
+		double parentEntropy = 2d;
 
 		if (useFeatureCaching) {
 			int Q = dataMatrix[0].length;
@@ -132,26 +169,22 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 
 	@Override
 	public Iterator<AlgorithmEvent> iterator() {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("The operation to be performed is not supported.");
 	}
 
 	@Override
 	public boolean hasNext() {
-		// TODO Auto-generated method stub
-		return false;
+		throw new UnsupportedOperationException("The operation to be performed is not supported.");
 	}
 
 	@Override
 	public AlgorithmEvent next() {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("The operation to be performed is not supported.");
 	}
 
 	@Override
 	public void cancel() {
-		// TODO Auto-generated method stub
-
+		throw new UnsupportedOperationException("The operation to be performed is not supported.");
 	}
 
 	// Entropy based
@@ -344,6 +377,18 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 		return deltaEntropy + ENTROPY_APLHA * margin;
 	}
 
+	/**
+	 * Function calculating the margin between the given
+	 * <code>thresholdCandidate</code> and the nearest feature value from the given
+	 * <code>dataValues</code>.
+	 * 
+	 * @param dataValues
+	 *            The feature values compared to the candidate
+	 * @param thresholdCandidate
+	 *            The threshold candidate which is assessed
+	 * @return Returns the minimum distance among the feature values and the
+	 *         threshold candidate
+	 */
 	public static double calculateMargin(final double[] dataValues, final double thresholdCandidate) {
 		double min = Double.MAX_VALUE;
 		for (int i = 0; i < dataValues.length; i++) {
@@ -351,7 +396,6 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 			if (localDist < min)
 				min = localDist;
 		}
-
 		return min;
 	}
 
@@ -388,7 +432,6 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 		return result;
 	}
 
-	// TODO: Make enum out of feature type
 	public static List<List<Double>> generateThresholdCandidates(final Pair<List<Integer>, List<Integer>> T1T2,
 			final int numOfCandidates, final double[][][] transformedFeatures) {
 		List<List<Double>> result = new ArrayList<>();

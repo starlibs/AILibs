@@ -31,7 +31,9 @@ public class TimeSeriesForestClassifier extends ASimplifiedTSClassifier<Integer>
 
 	@Override
 	public Integer predict(double[] univInstance) throws PredictionException {
-		// TODO Auto-generated method stub
+		if (univInstance == null)
+			throw new IllegalArgumentException("Instance to be predicted must not be null or empty!");
+
 		HashMap<Integer, Integer> votes = new HashMap<>();
 		for (int i = 0; i < trees.length; i++) {
 			int prediction = trees[i].predict(univInstance);
@@ -40,27 +42,29 @@ public class TimeSeriesForestClassifier extends ASimplifiedTSClassifier<Integer>
 			else
 				votes.replace(prediction, votes.get(prediction) + 1);
 		}
-		// LOGGER.debug("Votes: " + votes);
 		return TimeSeriesUtil.getMaximumKeyByValue(votes);
 	}
 
 	@Override
 	public Integer predict(List<double[]> multivInstance) throws PredictionException {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Multivariate instances are not supported yet.");
 	}
 
 	@Override
 	public List<Integer> predict(TimeSeriesDataset dataset) throws PredictionException {
-		// TODO: Multivariate support or exception
+		if (dataset.isMultivariate())
+			throw new UnsupportedOperationException("Multivariate instances are not supported yet.");
+
+		if (dataset == null || dataset.isEmpty())
+			throw new IllegalArgumentException("Dataset to be predicted must not be null or empty!");
 
 		double[][] data = dataset.getValuesOrNull(0);
 		List<Integer> predictions = new ArrayList<>();
-
+		LOGGER.debug("Starting prediction...");
 		for (int i = 0; i < data.length; i++) {
 			predictions.add(this.predict(data[i]));
 		}
-
+		LOGGER.debug("Finished prediction.");
 		return predictions;
 	}
 
