@@ -1,14 +1,8 @@
 package de.upb.crc901.mlplan.multiclass.wekamlplan.weka;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Properties;
-
-import org.aeonbits.owner.ConfigFactory;
 
 import de.upb.crc901.mlpipeline_evaluation.CacheEvaluatorMeasureBridge;
-import de.upb.crc901.mlplan.multiclass.MLPlanClassifierConfig;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.MLPlanWekaClassifier;
 import hasco.serialization.ComponentLoader;
@@ -23,19 +17,8 @@ import weka.core.Instances;
 
 public class WekaMLPlanWekaClassifier extends MLPlanWekaClassifier {
 	
-	static MLPlanClassifierConfig loadOwnerConfig(File configFile) throws IOException {
-		Properties props = new Properties();
-		if (configFile.exists()) {
-			FileInputStream fis = new FileInputStream(configFile);
-			props.load(fis);
-		}
-		else
-			System.out.println("Config file " + configFile.getAbsolutePath() + " not found, working with default parameters.");
-		return ConfigFactory.create(MLPlanClassifierConfig.class, props);
-	}
-
 	public WekaMLPlanWekaClassifier(MLPlanWekaBuilder builder) throws IOException {
-		super(builder.getSearchSpaceConfigFile(), new WEKAPipelineFactory(), getBridge(builder), builder.getAlhorithmConfigFile() != null ? loadOwnerConfig(builder.getAlhorithmConfigFile()) : ConfigFactory.create(MLPlanClassifierConfig.class));
+		super(builder.getSearchSpaceConfigFile(), new WEKAPipelineFactory(), getBridge(builder), builder.getAlgorithmConfig());
 		PreferenceBasedNodeEvaluator preferenceNodeEvaluator = new PreferenceBasedNodeEvaluator(new ComponentLoader(getComponentFile()).getComponents(), FileUtil.readFileAsList(getConfig().preferredComponents()));
 		this.setPreferredNodeEvaluator(preferenceNodeEvaluator);
 	}

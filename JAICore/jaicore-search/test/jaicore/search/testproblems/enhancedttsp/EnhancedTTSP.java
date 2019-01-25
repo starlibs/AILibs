@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -14,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import it.unimi.dsi.fastutil.shorts.ShortArrayList;
 import it.unimi.dsi.fastutil.shorts.ShortList;
+import jaicore.basic.sets.SetUtil;
 import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.graph.LabeledGraph;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
@@ -79,47 +79,49 @@ public class EnhancedTTSP {
 
 			@Override
 			public SingleRootGenerator<EnhancedTTSPNode> getRootGenerator() {
-				return () -> new EnhancedTTSPNode(startLocation, new ShortArrayList(), hourOfDeparture, 0, 0);
+				return () -> {
+					EnhancedTTSPNode root = new EnhancedTTSPNode(startLocation, new ShortArrayList(), hourOfDeparture, 0, 0);
+					return root;
+				};
 			}
 
 			@Override
 			public SuccessorGenerator<EnhancedTTSPNode, String> getSuccessorGenerator() {
 				return new SingleSuccessorGenerator<EnhancedTTSPNode, String>() {
 					
-					private Map<EnhancedTTSPNode,Set<Integer>> expandedChildren = new HashMap<>();
+					private Map<EnhancedTTSPNode,ShortList> expandedChildrenPerNode = new HashMap<>();
 
-					private ShortList getPossibleDestinations(EnhancedTTSPNode n) {
+					private ShortList getPossibleDestinationsThatHaveNotBeenGeneratedYet(EnhancedTTSPNode n) {
 						short curLoc = n.getCurLocation();
-
+						ShortList destinationsThatHaveBeenGeneratedBefore = expandedChildrenPerNode.get(n);
 						ShortList possibleDestinations = new ShortArrayList();
 						ShortList seenPlaces = n.getCurTour();
-
 						int k = 0;
 						boolean openPlaces = seenPlaces.size() < EnhancedTTSP.this.possibleDestinations.size() - 1;
 						if (openPlaces) {
 							for (short l : EnhancedTTSP.this.possibleDestinations) {
 								if (k++ == 0)
 									continue;
-								if (l != curLoc && !seenPlaces.contains(l))
+								if (l != curLoc && !seenPlaces.contains(l) && (destinationsThatHaveBeenGeneratedBefore == null || !destinationsThatHaveBeenGeneratedBefore.contains(l)))
 									possibleDestinations.add(l);
 							}
-						} else
+						} else if (destinationsThatHaveBeenGeneratedBefore == null || !destinationsThatHaveBeenGeneratedBefore.contains((short)0))
 							possibleDestinations.add((short) 0);
+						assert destinationsThatHaveBeenGeneratedBefore == null || SetUtil.disjoint(possibleDestinations, destinationsThatHaveBeenGeneratedBefore) : "Possible destinations and destinations that have been tried before should be disjoint, but the intersection is not empty: " + SetUtil.intersection(possibleDestinations, destinationsThatHaveBeenGeneratedBefore);
 						return possibleDestinations;
 					}
 
 					@Override
 					public List<NodeExpansionDescription<EnhancedTTSPNode, String>> generateSuccessors(EnhancedTTSPNode node) {
 						List<NodeExpansionDescription<EnhancedTTSPNode, String>> l = new ArrayList<>();
-						ShortList possibleDestinations = getPossibleDestinations(node);
-						assert (possibleDestinations.size() == 1 && possibleDestinations.contains((short)0)) || (possibleDestinations.size() > 1 && !possibleDestinations.contains((short)0));
-						int N = possibleDestinations.size();
+						ShortList possibleUntriedDestinations = getPossibleDestinationsThatHaveNotBeenGeneratedYet(node);
+						int N = possibleUntriedDestinations.size();
 						for (int i = 0; i < N; i++)
-							l.add(generateSuccessor(node, possibleDestinations, i));
+							l.add(generateSuccessor(node, possibleUntriedDestinations.getShort(i)));
 						return l;
 					}
 
-					public NodeExpansionDescription<EnhancedTTSPNode, String> generateSuccessor(EnhancedTTSPNode n, ShortList destinations, int i) {
+					private NodeExpansionDescription<EnhancedTTSPNode, String> generateSuccessor(EnhancedTTSPNode n, short destination) {
 
 						/*
 						 * there is one successor for going to any of the not visited places that can be
@@ -127,8 +129,6 @@ public class EnhancedTTSP {
 						 * blocking hour constraints
 						 */
 						short curLocation = n.getCurLocation();
-						int N = destinations.size();
-						short destination = destinations.get(i % N);
 						double curTime = n.getTime();
 						double timeSinceLastShortBreak = n.getTimeTraveledSinceLastShortBreak();
 						double timeSinceLastLongBreak = n.getTimeTraveledSinceLastLongBreak();
@@ -196,17 +196,21 @@ public class EnhancedTTSP {
 						ShortList tourToHere = new ShortArrayList(n.getCurTour());
 						tourToHere.add(destination);
 						EnhancedTTSPNode newNode = new EnhancedTTSPNode(destination, tourToHere, timeOfArrival, timeSinceLastShortBreak, timeSinceLastLongBreak);
+						if (!expandedChildrenPerNode.containsKey(n))
+							expandedChildrenPerNode.put(n, new ShortArrayList());
+						expandedChildrenPerNode.get(n).add(destination);
 						return new NodeExpansionDescription<EnhancedTTSPNode, String>(n, newNode, n.getCurLocation() + " -> " + destination, NodeType.OR);
 					}
 
 					@Override
 					public NodeExpansionDescription<EnhancedTTSPNode, String> generateSuccessor(EnhancedTTSPNode node, int i) {
-						return generateSuccessor(node, getPossibleDestinations(node), i);
+						ShortList availableDestinations = getPossibleDestinationsThatHaveNotBeenGeneratedYet(node);
+						return generateSuccessor(node, availableDestinations.getShort(i % availableDestinations.size()));
 					}
 
 					@Override
 					public boolean allSuccessorsComputed(EnhancedTTSPNode node) {
-						return getPossibleDestinations(node).size() == expandedChildren.get(node).size();
+						return getPossibleDestinationsThatHaveNotBeenGeneratedYet(node).size() == 0;
 					}
 				};
 			}

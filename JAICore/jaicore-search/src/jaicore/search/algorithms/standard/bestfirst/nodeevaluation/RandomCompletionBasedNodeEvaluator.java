@@ -168,7 +168,7 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>>
 					assert this.fValues.containsKey(n.getParent()) : "The solution evaluator tells that the solution on the path has not significantly changed, but no f-value has been stored before for the parent. The path is: " + path;
 					V score = this.fValues.get(n.getParent());
 					this.fValues.put(n, score);
-					this.logger.info("Score {} of parent can be used since the last action did not affect the performance.", score);
+					this.logger.debug("Score {} of parent can be used since the last action did not affect the performance.", score);
 					if (score == null) {
 						this.logger.warn("Returning score NULL inherited from parent, this should not happen.");
 					}
@@ -189,7 +189,7 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>>
 				final int maxSamples = this.samples * 2;
 				List<V> evaluations = new ArrayList<>();
 				List<List<T>> completedPaths = new ArrayList<>();
-				this.logger.info("Now drawing {} successful examples but no more than {}", this.samples, maxSamples);
+				this.logger.debug("Now drawing {} successful examples but no more than {}", this.samples, maxSamples);
 				for (; i < this.samples; i++) {
 
 					if (Thread.currentThread().isInterrupted()) {
@@ -212,7 +212,7 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>>
 						}
 						completedPath = new ArrayList<>(n.externalPath());
 
-						this.logger.info("Starting search for next solution ...");
+						this.logger.debug("Starting search for next solution ...");
 
 						SearchGraphPath<T, String> solutionPathFromN = null;
 						try {
@@ -225,7 +225,8 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>>
 							this.logger.info("No completion was found for path {}.", path);
 							break;
 						}
-						this.logger.info("Found solution {}", solutionPathFromN);
+						this.logger.debug("Found solution of length {}. Enable TRACE for details.", solutionPathFromN.getNodes().size());
+						this.logger.trace("Solution path is {}", solutionPathFromN);
 						pathCompletion = new ArrayList<>(solutionPathFromN.getNodes());
 						pathCompletion.remove(0);
 						completedPath.addAll(pathCompletion);
@@ -387,7 +388,8 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>>
 				this.logger.warn("Asking again for the reevaluation of a path that was evaluated unsuccessfully in a previous run; returning NULL: {}", path);
 				return null;
 			}
-			this.logger.info("Associated plan is new. Calling solution evaluator {} to compute f-value for complete path {}", this.solutionEvaluator, path);
+			this.logger.debug("Associated plan is new. Calling solution evaluator {} to compute f-value for path of length {}. Enable TRACE for exact plan.", this.solutionEvaluator, path.size());
+			this.logger.trace("The path is {}", path);
 
 			/* compute value of solution */
 			long start = System.currentTimeMillis();
@@ -431,7 +433,8 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>>
 		}
 		V score = this.scoresOfSolutionPaths.get(path);
 		assert score != null : "Stored scores must never be null";
-		this.logger.info("Determined value {} for path {}.", score, path);
+		this.logger.debug("Determined value {} for path of length {}.", score, path.size());
+		this.logger.trace("Full path is {}", path);
 		return score;
 	}
 

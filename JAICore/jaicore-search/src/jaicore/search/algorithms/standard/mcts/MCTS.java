@@ -17,6 +17,7 @@ import jaicore.basic.algorithm.AlgorithmState;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
+import jaicore.basic.algorithm.exceptions.DelayedTimeoutCheckException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.basic.sets.SetUtil;
 import jaicore.graph.LabeledGraph;
@@ -291,10 +292,8 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 			} catch (TimeoutException e) {
 				this.unregisterThreadAndShutdown();
 				Thread.interrupted(); // unset interrupted flag
-				AlgorithmEvent finishEvent = new AlgorithmFinishedEvent();
 				this.logger.info("Finishing MCTS due to timeout.");
-				this.post(finishEvent);
-				return finishEvent;
+				return terminate();
 			} catch (ObjectEvaluationFailedException e) {
 				throw new AlgorithmException(e, "Could not evaluate playout!");
 			} finally {

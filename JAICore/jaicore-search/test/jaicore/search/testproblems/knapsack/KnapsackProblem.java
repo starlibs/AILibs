@@ -179,6 +179,7 @@ public class KnapsackProblem {
 							expandedChildren.put(n, new HashSet<>());
 						int N = objetcs.size();
 						int j = i % N;
+						System.out.println(N);
 						expandedChildren.get(n).add(j);
 						String object = objetcs.get(j);
 						KnapsackNode newNode = new KnapsackNode(n.getPackedObjects(), n.getRemainingObjects(), object);
@@ -192,6 +193,7 @@ public class KnapsackProblem {
 
 					@Override
 					public boolean allSuccessorsComputed(KnapsackNode node) {
+						System.out.println(getPossiblePackingObjects(node).size() == expandedChildren.get(node).size());
 						return getPossiblePackingObjects(node).size() == expandedChildren.get(node).size();
 					}
 				};

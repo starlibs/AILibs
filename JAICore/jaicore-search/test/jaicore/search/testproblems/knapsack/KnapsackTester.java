@@ -30,30 +30,6 @@ public abstract class KnapsackTester<I extends GraphSearchInput<KnapsackNode, St
 	private Map<String, Double> weights;
 	private Map<String, Double> values;
 	private Map<Set<String>, Double> bonusPoints;
-
-	private KnapsackProblem getKnapsackProblem(int numObjects) {
-		/* create knapsack problem */
-		Random r = new Random(0);
-		Set<String> objects = new HashSet<String>();
-		Map<String, Double> weights = new HashMap<>();
-		Map<String, Double> values = new HashMap<>();
-		Map<Set<String>, Double> bonusPoints;
-		for (int i = 0; i < numObjects; i++) {
-			objects.add(String.valueOf(i));
-		}
-		for (int i = 0; i < numObjects; i++)
-			weights.put("" + i, r.nextInt(100) * 1.0);
-		for (int i = 0; i < numObjects; i++)
-			values.put("" + i, r.nextInt(100) * 1.0);
-		
-		bonusPoints = new HashMap<>();
-		Set<String> bonusCombination = new HashSet<>();
-		bonusCombination.add("0");
-		bonusCombination.add("2");
-		bonusPoints.put(bonusCombination, 25.0d);
-		KnapsackProblem kp = new KnapsackProblem(objects, values, weights, bonusPoints, numObjects * 20);
-		return kp;
-	}
 	
 	public IGraphSearch<I, O, KnapsackNode, String, VSearch, ESearch> getSearch() {
 		
@@ -193,11 +169,11 @@ public abstract class KnapsackTester<I extends GraphSearchInput<KnapsackNode, St
 
 	@Override
 	public I getSimpleProblemInputForGeneralTestPurposes() {
-		return getProblemReducer().transform(getKnapsackProblem(5));
+		return getProblemReducer().transform(KnapsackProblemGenerator.getKnapsackProblem(5));
 	}
 
 	@Override
 	public I getDifficultProblemInputForGeneralTestPurposes() {
-		return getProblemReducer().transform(getKnapsackProblem(5000));
+		return getProblemReducer().transform(KnapsackProblemGenerator.getKnapsackProblem(5000));
 	}
 }
