@@ -1,6 +1,8 @@
 package jaicore.ml.tsc.classifier.trees;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -11,8 +13,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jaicore.basic.sets.SetUtil.Pair;
+import jaicore.graph.TreeNode;
 import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.core.exception.TrainingException;
+import jaicore.ml.tsc.classifier.trees.TimeSeriesTree.TimeSeriesTreeNodeDecisionFunction;
 import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import jaicore.ml.tsc.exceptions.TimeSeriesLoadingException;
 import jaicore.ml.tsc.util.ClassMapper;
@@ -24,13 +28,13 @@ public class TimeSeriesTreeTest {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(TimeSeriesTreeTest.class);
 
-	private static final String UNIVARIATE_PREFIX = "D:\\Data\\TSC\\UnivariateTSCProblems\\";
+	private static final String UNIVARIATE_PREFIX = "C:\\Users\\Julian\\Downloads\\UnivariateTSCProblems\\";
 	private static final String ITALY_POWER_DEMAND_TRAIN = UNIVARIATE_PREFIX
 			+ "ItalyPowerDemand\\ItalyPowerDemand_TRAIN.arff";
 	private static final String ITALY_POWER_DEMAND_TEST = UNIVARIATE_PREFIX
 			+ "ItalyPowerDemand\\ItalyPowerDemand_TEST.arff";
 
-	// @Test
+	@Test
 	public void classifierTest() throws TimeSeriesLoadingException, TrainingException, PredictionException {
 
 		org.apache.log4j.Logger.getLogger("jaicore").setLevel(Level.DEBUG);
@@ -138,41 +142,155 @@ public class TimeSeriesTreeTest {
 
 	@Test
 	public void generateThresholdCandidatesTest() {
-		// TODO
+		List<Integer> T1 = Arrays.asList(0, 1);
+		List<Integer> T2 = Arrays.asList(2, 3);
+		int numOfCandidates = 4;
+		Pair<List<Integer>, List<Integer>> T1T2 = new Pair<>(T1, T2);
+		double[][][] transformedInstances = new double[][][] { { { 3 }, { 0 } }, { { 5 }, { 2 } }, { { 2 }, { 0 } } };
+		
+		List<List<Double>> thresholdCandidates = TimeSeriesTreeAlgorithm.generateThresholdCandidates(T1T2,
+				numOfCandidates, transformedInstances);
+
+		Assert.assertEquals(3, thresholdCandidates.size());
+		Assert.assertEquals(numOfCandidates, thresholdCandidates.get(0).size());
+		Assert.assertEquals(numOfCandidates, thresholdCandidates.get(1).size());
+		Assert.assertEquals(numOfCandidates, thresholdCandidates.get(2).size());
+
+		Assert.assertEquals(6d / 5d, thresholdCandidates.get(0).get(1), EPS_DELTA);
+		Assert.assertEquals(6d / 5d + 2d, thresholdCandidates.get(1).get(1), EPS_DELTA);
+		Assert.assertEquals(4d / 5d, thresholdCandidates.get(2).get(1), EPS_DELTA);
 	}
 
 	@Test
 	public void transformInstancesTest() {
-		// TODO
+		double[][] data = new double[][] { { 0, 1, 2, 3, 4, 5, 6 }, { 2, 4, 6, 8, 10, 12, 14 } };
+		List<Integer> T1 = Arrays.asList(0, 0);
+		List<Integer> T2 = Arrays.asList(2, 3);
+		Pair<List<Integer>, List<Integer>> T1T2 = new Pair<>(T1, T2);
+		double[][][] transformedData = TimeSeriesTreeAlgorithm.transformInstances(data, T1T2);
+
+		Assert.assertEquals(3, transformedData.length);
+		Assert.assertEquals(T1.size(), transformedData[0].length);
+		Assert.assertEquals(T2.size(), transformedData[0].length);
+		Assert.assertEquals(data.length, transformedData[0][0].length);
+
+		Assert.assertEquals(0.5d, transformedData[0][0][0], EPS_DELTA); // Mean of first two elements of first
+																			// instance
+		Assert.assertEquals(1d, transformedData[0][1][0], EPS_DELTA); // Mean of first three elements of first
+																			// instance
+
+		Assert.assertEquals(Math.sqrt(0.5d), transformedData[1][0][0], EPS_DELTA); // Stddev of first two elements of
+																						// first
+																			// instance
+		Assert.assertEquals(Math.sqrt(1d), transformedData[1][1][0], EPS_DELTA); // Stddev of first three elements of
+																					// first
+																			// instance
+
+		Assert.assertEquals(1d, transformedData[2][0][0], EPS_DELTA); // Stddev of first two elements of
+																						// first instance
+		Assert.assertEquals(2d, transformedData[2][1][1], EPS_DELTA); // Stddev of first three elements of
+																			// second instance
 	}
 
 	@Test
 	public void calculateMarginTest() {
-		// TODO
+		double[] dataValues = new double[] { 0, 1, 2, 3, 4, 5 };
+		double thresholdCandidate = 1.5d;
+		Assert.assertEquals(0.5d, TimeSeriesTreeAlgorithm.calculateMargin(dataValues, thresholdCandidate), EPS_DELTA);
+
+		dataValues = new double[] { 2, 4, 6, 7 };
+		thresholdCandidate = 0d;
+		Assert.assertEquals(2d, TimeSeriesTreeAlgorithm.calculateMargin(dataValues, thresholdCandidate), EPS_DELTA);
 	}
 
 	@Test
 	public void calculateEntranceTest() {
-		// TODO
+		double[] dataValues = new double[] { 0, 0, 1, 1, 2, 2, 3, 3 };
+		int[] targets = new int[] { 0, 0, 0, 0, 0, 0, 1, 1 };
+		double thresholdCandidate = 2;
+		List<Integer> classes = Arrays.asList(0, 1);
+		double parentEntropy = 1d;
+
+		double deltaEntropy = TimeSeriesTreeAlgorithm
+				.calculateDeltaEntropy(dataValues, targets, thresholdCandidate, classes, parentEntropy);
+		double margin = TimeSeriesTreeAlgorithm.calculateMargin(dataValues, thresholdCandidate);
+		
+		Assert.assertEquals(1d - TimeSeriesTreeAlgorithm.ENTROPY_APLHA * 0,
+				TimeSeriesTreeAlgorithm.calculateEntrance(deltaEntropy, margin));
 	}
 
 	@Test
 	public void calculateDeltaEntropyTest() {
-		// TODO
+		double[] dataValues = new double[] { 0, 0, 1, 1, 2, 2, 3, 3 };
+		int[] targets = new int[] { 0, 0, 0, 0, 0, 0, 1, 1 };
+		double thresholdCandidate = 2;
+		List<Integer> classes = Arrays.asList(0, 1);
+		double parentEntropy = 1d;
+
+		Assert.assertEquals(parentEntropy + 6d / 8d * Math.log(1d) + 2d / 8d * 0d, TimeSeriesTreeAlgorithm
+				.calculateDeltaEntropy(dataValues, targets, thresholdCandidate, classes, parentEntropy), EPS_DELTA);
+
 	}
 
 	@Test
 	public void getBestSplitIndexTest() {
-		// TODO
+		double[] deltaEntropyStarPerFeatureType = new double[] { 1, 6, 7 };
+		Assert.assertEquals(2, TimeSeriesTreeAlgorithm.getBestSplitIndex(deltaEntropyStarPerFeatureType));
+
+		deltaEntropyStarPerFeatureType = new double[] { 2, 0.01, -1 };
+		Assert.assertEquals(0, TimeSeriesTreeAlgorithm.getBestSplitIndex(deltaEntropyStarPerFeatureType));
 	}
 
 	@Test
 	public void getChildDataIndicesTest() {
-		// TODO
+		double[][][] transformedFeatures = new double[][][] { { { 0, 1.2d }, { 1, 6d } }, { { 3, 1.1d }, { 2, 0.5d } },
+				{ { 1, 1.34d }, { 0, 3.2d } } };
+		int n = 2;
+		int k = 1;
+		int t1t2 = 0;
+		double threshold = 1.1d;
+
+		Pair<List<Integer>, List<Integer>> childDataIndices = TimeSeriesTreeAlgorithm
+				.getChildDataIndices(transformedFeatures, n, k, t1t2, threshold);
+
+		Assert.assertEquals(n, childDataIndices.getX().size() + childDataIndices.getY().size());
+		Assert.assertEquals(1, childDataIndices.getX().size());
+		Assert.assertEquals(1, childDataIndices.getY().size());
+		Assert.assertEquals(0, childDataIndices.getY().get(0).intValue());
+		Assert.assertEquals(1, childDataIndices.getX().get(0).intValue());
+
+		transformedFeatures = new double[][][] { { { 0, 1.2d }, { 1, 6d } }, { { 1.1d, 1.1d }, { 2, 0.5d } },
+				{ { 1, 1.34d }, { 0, 3.2d } } };
+		n = 2;
+		k = 1;
+		t1t2 = 0;
+		threshold = 1.1d;
+
+		childDataIndices = TimeSeriesTreeAlgorithm.getChildDataIndices(transformedFeatures, n, k, t1t2, threshold);
+
+		Assert.assertEquals(n, childDataIndices.getX().size() + childDataIndices.getY().size());
+		Assert.assertEquals(2, childDataIndices.getX().size());
+		Assert.assertEquals(0, childDataIndices.getY().size());
+		Assert.assertEquals(0, childDataIndices.getX().get(0).intValue());
+		Assert.assertEquals(1, childDataIndices.getX().get(1).intValue());
 	}
 
 	@Test
-	public void treeTest() {
+	public void treeTest() throws TrainingException {
 		// TODO
+		TimeSeriesTree tst = new TimeSeriesTree(2);
+
+		double[][] data = new double[][] { { 0, 1, 2, 3, 4, 5 }, { 0, 2, 4, 6, 8, 10 } };
+		int[] targets = new int[] { 0, 1 };
+		List<double[][]> dataList = new ArrayList<>();
+		dataList.add(data);
+		TimeSeriesDataset dataset = new TimeSeriesDataset(dataList, targets);
+		
+		tst.train(dataset);
+		
+		TreeNode<TimeSeriesTreeNodeDecisionFunction> rootNode = tst.getRootNode();
+		Assert.assertEquals(2, rootNode.getChildren().size());
+
+		System.out.println(rootNode.getValue());
 	}
 }

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
@@ -21,8 +20,8 @@ import jaicore.basic.algorithm.IAlgorithmConfig;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.sets.SetUtil.Pair;
+import jaicore.graph.TreeNode;
 import jaicore.ml.tsc.classifier.ASimplifiedTSCAlgorithm;
-import jaicore.ml.tsc.classifier.trees.TimeSeriesTree.TimeSeriesTreeNode;
 import jaicore.ml.tsc.classifier.trees.TimeSeriesTree.TimeSeriesTreeNodeDecisionFunction;
 import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 
@@ -32,9 +31,11 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 	public static final int NUM_THRESH_CANDIDATES = 20;
 
 	// Set to useful value
-	private static final double ENTROPY_APLHA = 0.01;
+	public static final double ENTROPY_APLHA = 0.01;
 
 	private static final double PRECISION_DELTA = 0.000001d;
+
+	public static final double EPS = 0.00001d;
 
 	private int seed;
 
@@ -134,11 +135,11 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 
 	// Entropy based
 	public void tree(double[][] data, int[] targets, final double parentEntropy,
-			final TimeSeriesTreeNode nodeToBeFilled, int depth) {
+			final TreeNode<TimeSeriesTreeNodeDecisionFunction> nodeToBeFilled, int depth) {
 		Pair<List<Integer>, List<Integer>> T1T2 = sampleIntervals(data[0].length, this.seed);
 
 		// Transform instances
-		double[][][][] transformedInstances = transformInstances(data, T1T2);
+		double[][][] transformedInstances = transformInstances(data, T1T2);
 		List<List<Double>> thresholdCandidates = generateThresholdCandidates(T1T2, NUM_THRESH_CANDIDATES,
 				transformedInstances);
 
@@ -146,48 +147,45 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 
 		// Get number of classes present in the targets array
 		final List<Integer> classes = Arrays.asList(ArrayUtils.toObject(targets));
-		int C = new HashSet<Integer>(classes).size();
 
 		double deltaEntropyStar = 0, thresholdStar = 0d;
-		int t1Star = 0, t2Star = 0;
+		int t1t2Star = -1;
 		int fStar = -1;
 
 		double[] eStarPerFeatureType = new double[NUM_FEATURE_TYPES];
 		double[] deltaEntropyStarPerFeatureType = new double[NUM_FEATURE_TYPES];
-		int[] t1StarPerFeatureType = new int[NUM_FEATURE_TYPES];
-		int[] t2StarPerFeatureType = new int[NUM_FEATURE_TYPES];
+		int[] t1t2StarPerFeatureType = new int[NUM_FEATURE_TYPES];
 		double[] thresholdStarPerFeatureType = new double[NUM_FEATURE_TYPES];
 
 		List<Integer> T1 = T1T2.getX();
 		List<Integer> T2 = T1T2.getY();
-		for (int t1 = 0; t1 < T1.size(); t1++) {
-			for (int t2 = 0; t2 < T2.size(); t2++) {
+		for (int i = 0; i < T1.size(); i++) {
+
 				for (int k = 0; k < NUM_FEATURE_TYPES; k++) {
 					for (final double cand : thresholdCandidates.get(k)) {
 						// Calculate delta entropy and E for f_k(t1,t2) <= cand
-						double localDeltaEntropy = calculateDeltaEntropy(transformedInstances[k][t1][t2], targets, cand,
+					double localDeltaEntropy = calculateDeltaEntropy(transformedInstances[k][i], targets, cand,
 								classes, parentEntropy);
 						double localE = calculateEntrance(localDeltaEntropy,
-								calculateMargin(transformedInstances[k][t1][t2], cand), ENTROPY_APLHA);
+							calculateMargin(transformedInstances[k][i], cand));
 
 						if (localE > eStarPerFeatureType[k]) {
 							eStarPerFeatureType[k] = localE;
 							deltaEntropyStarPerFeatureType[k] = localDeltaEntropy;
-							t1StarPerFeatureType[k] = t1;
-							t2StarPerFeatureType[k] = t2;
+						// TODO: Index or actual value?
+						t1t2StarPerFeatureType[k] = i;
 							thresholdStarPerFeatureType[k] = cand;
 						}
 					}
 				}
-			}
+			// }
 		}
 
 		// Set best solution
 		int bestK = getBestSplitIndex(deltaEntropyStarPerFeatureType);
 		// eStar = eStarPerFeatureType[bestK];
 		deltaEntropyStar = deltaEntropyStarPerFeatureType[bestK];
-		t1Star = t1StarPerFeatureType[bestK];
-		t2Star = t2StarPerFeatureType[bestK];
+		t1t2Star = t1t2StarPerFeatureType[bestK];
 		thresholdStar = thresholdStarPerFeatureType[bestK];
 		fStar = bestK;
 
@@ -200,12 +198,12 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 
 		// Update node's decision function
 		nodeToBeFilled.getValue().f = fStar;
-		nodeToBeFilled.getValue().t1 = t1Star;
-		nodeToBeFilled.getValue().t2 = t2Star;
+		nodeToBeFilled.getValue().t1 = T1.get(t1t2Star);
+		nodeToBeFilled.getValue().t2 = T2.get(t1t2Star);
 		nodeToBeFilled.getValue().threshold = thresholdStar;
 
-		Pair<List<Integer>, List<Integer>> childDataIndices = getChildDataIndices(transformedInstances, data, n, fStar,
-				t1Star, t2Star, thresholdStar);
+		Pair<List<Integer>, List<Integer>> childDataIndices = getChildDataIndices(transformedInstances, n, fStar,
+				t1t2Star, thresholdStar);
 
 		double[][] dataLeft = new double[childDataIndices.getX().size()][data[0].length];
 		int[] targetsLeft = new int[childDataIndices.getX().size()];
@@ -221,21 +219,23 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 			targetsRight[i] = targets[childDataIndices.getY().get(i)];
 		}
 
-		TimeSeriesTreeNode leftNode = nodeToBeFilled.addChild(new TimeSeriesTreeNodeDecisionFunction());
-		TimeSeriesTreeNode rightNode = nodeToBeFilled.addChild(new TimeSeriesTreeNodeDecisionFunction());
+		TreeNode<TimeSeriesTreeNodeDecisionFunction> leftNode = nodeToBeFilled
+				.addChild(new TimeSeriesTreeNodeDecisionFunction());
+		TreeNode<TimeSeriesTreeNodeDecisionFunction> rightNode = nodeToBeFilled
+				.addChild(new TimeSeriesTreeNodeDecisionFunction());
 
 		tree(dataLeft, targetsLeft, deltaEntropyStar, leftNode, depth + 1);
 		tree(dataRight, targetsRight, deltaEntropyStar, rightNode, depth + 1);
 	}
 
-	public static Pair<List<Integer>, List<Integer>> getChildDataIndices(final double[][][][] transformedData,
-			final double[][] data, final int n, final int k, final int t1, final int t2, final double threshold) {
+	public static Pair<List<Integer>, List<Integer>> getChildDataIndices(final double[][][] transformedData,
+			final int n, final int k, final int t1t2, final double threshold) {
 
 		List<Integer> leftIndices = new ArrayList<>();
 		List<Integer> rightIndices = new ArrayList<>();
 
 		for (int i = 0; i < n; i++) {
-			if (transformedData[k][t1][t2][i] <= threshold)
+			if (transformedData[k][t1t2][i] <= threshold)
 				leftIndices.add(i);
 			else
 				rightIndices.add(i);
@@ -285,7 +285,7 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 
 		// Calculate proportions
 		for (int i = 0; i < dataValues.length; i++) {
-			if (dataValues[i] < thresholdCandidate) {
+			if (dataValues[i] <= thresholdCandidate) {
 				classNodeStatistic[0][classes.indexOf(targets[i])]++;
 				intCounter[0]++;
 			} else {
@@ -297,7 +297,10 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 		for (int i = 0; i < entropyValues.length; i++) {
 			double entropySum = 0;
 			for (int c = 0; c < numClasses; c++) {
-				entropySum += (double) classNodeStatistic[i][c] / (double) intCounter[i];
+				double gammaC = (double) classNodeStatistic[i][c] / (double) intCounter[i];
+				// if (Math.abs(gammaC) < PRECISION_DELTA)
+				// gammaC += EPS;
+				entropySum += gammaC < PRECISION_DELTA ? 0 : gammaC * Math.log(gammaC);
 			}
 			entropyValues[i] = (-1) * entropySum;
 		}
@@ -310,8 +313,8 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 		return parentEntropy - weightedSum;
 	}
 
-	public static double calculateEntrance(final double deltaEntropy, final double margin, final double alpha) {
-		return deltaEntropy + alpha * margin;
+	public static double calculateEntrance(final double deltaEntropy, final double margin) {
+		return deltaEntropy + ENTROPY_APLHA * margin;
 	}
 
 	public static double calculateMargin(final double[] dataValues, final double thresholdCandidate) {
@@ -325,17 +328,15 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 		return min;
 	}
 
-	public static double[][][][] transformInstances(final double[][] dataset, Pair<List<Integer>, List<Integer>> T1T2) {
-		double[][][][] result = new double[NUM_FEATURE_TYPES][T1T2.getX().size()][T1T2.getY().size()][dataset.length];
+	public static double[][][] transformInstances(final double[][] dataset, Pair<List<Integer>, List<Integer>> T1T2) {
+		double[][][] result = new double[NUM_FEATURE_TYPES][T1T2.getX().size()][dataset.length];
 
 		for (int i = 0; i < dataset.length; i++) {
-			for (int k = 0; k < T1T2.getX().size(); k++) {
-				for (int l = 0; l < T1T2.getY().size(); l++) {
-					double[] features = getFeatures(dataset[i], T1T2.getX().get(k), T1T2.getX().get(l));
-					result[0][k][l][i] = features[0];
-					result[1][k][l][i] = features[1];
-					result[2][k][l][i] = features[2];
-				}
+			for (int j = 0; j < T1T2.getX().size(); j++) {
+				double[] features = getFeatures(dataset[i], T1T2.getX().get(j), T1T2.getY().get(j));
+				result[0][j][i] = features[0];
+				result[1][j][i] = features[1];
+				result[2][j][i] = features[2];
 			}
 		}
 		return result;
@@ -343,10 +344,10 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 
 	// TODO: Make enum out of feature type
 	public static List<List<Double>> generateThresholdCandidates(final Pair<List<Integer>, List<Integer>> T1T2,
-			final int numOfCandidates, final double[][][][] transformedFeatures) {
+			final int numOfCandidates, final double[][][] transformedFeatures) {
 		List<List<Double>> result = new ArrayList<>();
 
-		int numInstances = transformedFeatures[0][0][0].length;
+		int numInstances = transformedFeatures[0][0].length;
 
 		double[] min = new double[NUM_FEATURE_TYPES];
 		double[] max = new double[NUM_FEATURE_TYPES];
@@ -361,14 +362,12 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 		// Find min and max
 		for (int i = 0; i < NUM_FEATURE_TYPES; i++) {
 			for (int j = 0; j < numInstances; j++) {
-				for (int t1 = 0; t1 < T1T2.getX().size(); t1++) {
-					for (int t2 = 0; t2 < T1T2.getY().size(); t2++) {
-						if (transformedFeatures[i][t1][t2][j] < min[i])
-							min[i] = transformedFeatures[i][t1][t2][j];
-						if (transformedFeatures[i][t1][t2][j] > max[i])
-							max[i] = transformedFeatures[i][t1][t2][j];
+				for (int l = 0; l < T1T2.getX().size(); l++) {
+					if (transformedFeatures[i][l][j] < min[i])
+						min[i] = transformedFeatures[i][l][j];
+					if (transformedFeatures[i][l][j] > max[i])
+						max[i] = transformedFeatures[i][l][j];
 					}
-				}
 			}
 		}
 
@@ -389,7 +388,7 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 
 		List<Integer> T1 = new ArrayList<>();
 		List<Integer> T2 = new ArrayList<>();
-		List<Integer> W = randomlySampleNoReplacement(IntStream.range(0, m).boxed().collect(Collectors.toList()),
+		List<Integer> W = randomlySampleNoReplacement(IntStream.rangeClosed(1, m).boxed().collect(Collectors.toList()),
 				(int) Math.sqrt(m), seed);
 		for (int w : W) {
 			List<Integer> tmpSampling = randomlySampleNoReplacement(
