@@ -3,6 +3,7 @@ package jaicore.ml.tsc.classifier.trees;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
@@ -31,18 +32,17 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 	public static final int NUM_THRESH_CANDIDATES = 20;
 
 	// Set to useful value
-	public static final double ENTROPY_APLHA = 0.1;
+	public static final double ENTROPY_APLHA = 0.0000000000000000000001;
 
-	private static final double PRECISION_DELTA = 0.000001d;
-
-	public static final double EPS = 0.00001d;
+	private static final double PRECISION_DELTA = 0.000000001d;
 
 	private int seed;
 
 	private final int maxDepth;
 
-	public TimeSeriesTreeAlgorithm(final int maxDepth) {
+	public TimeSeriesTreeAlgorithm(final int maxDepth, final int seed) {
 		this.maxDepth = maxDepth;
+		this.seed = seed;
 	}
 
 	@Override
@@ -100,11 +100,16 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 		// TODO Auto-generated method stub
 
 		TimeSeriesDataset data = this.getInput();
+		
+		double[][] dataMatrix = data.getValuesOrNull(0);
+		// for(int i=0; i<dataMatrix.length; i++) {
+		// dataMatrix[i] = zNormalize(dataMatrix[i], true);
+		// }
 
 		// TODO: Does this make sense?
 		double parentEntropy = .5d;
 
-		tree(data.getValuesOrNull(0), data.getTargets(), parentEntropy, this.model.getRootNode(), 0);
+		tree(dataMatrix, data.getTargets(), parentEntropy, this.model.getRootNode(), 0);
 
 		return null;
 	}
@@ -136,6 +141,10 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 	// Entropy based
 	public void tree(double[][] data, int[] targets, final double parentEntropy,
 			final TreeNode<TimeSeriesTreeNodeDecisionFunction> nodeToBeFilled, int depth) {
+
+		if (data.length < 1)
+			System.out.println("Stop here");
+
 		Pair<List<Integer>, List<Integer>> T1T2 = sampleIntervals(data[0].length, this.seed);
 
 		// Transform instances
@@ -145,14 +154,18 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 
 		int n = targets.length;
 
-		// Get number of classes present in the targets array
-		final List<Integer> classes = Arrays.asList(ArrayUtils.toObject(targets));
+		// Get unique classes
+		final List<Integer> classes = new ArrayList<>(
+				new HashSet<Integer>(Arrays.asList(ArrayUtils.toObject(targets))));
 
 		double deltaEntropyStar = 0, thresholdStar = 0d;
 		int t1t2Star = -1;
 		int fStar = -1;
 
 		double[] eStarPerFeatureType = new double[NUM_FEATURE_TYPES];
+		for (int i = 0; i < eStarPerFeatureType.length; i++) {
+			eStarPerFeatureType[i] = Integer.MIN_VALUE;
+		}
 		double[] deltaEntropyStarPerFeatureType = new double[NUM_FEATURE_TYPES];
 		int[] t1t2StarPerFeatureType = new int[NUM_FEATURE_TYPES];
 		double[] thresholdStarPerFeatureType = new double[NUM_FEATURE_TYPES];
@@ -161,23 +174,22 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 		List<Integer> T2 = T1T2.getY();
 		for (int i = 0; i < T1.size(); i++) {
 
-				for (int k = 0; k < NUM_FEATURE_TYPES; k++) {
-					for (final double cand : thresholdCandidates.get(k)) {
-						// Calculate delta entropy and E for f_k(t1,t2) <= cand
-					double localDeltaEntropy = calculateDeltaEntropy(transformedInstances[k][i], targets, cand,
-								classes, parentEntropy);
-						double localE = calculateEntrance(localDeltaEntropy,
+			for (int k = 0; k < NUM_FEATURE_TYPES; k++) {
+				for (final double cand : thresholdCandidates.get(k)) {
+					// Calculate delta entropy and E for f_k(t1,t2) <= cand
+					double localDeltaEntropy = calculateDeltaEntropy(transformedInstances[k][i], targets, cand, classes,
+							parentEntropy);
+					double localE = calculateEntrance(localDeltaEntropy,
 							calculateMargin(transformedInstances[k][i], cand));
 
-						if (localE > eStarPerFeatureType[k]) {
-							eStarPerFeatureType[k] = localE;
-							deltaEntropyStarPerFeatureType[k] = localDeltaEntropy;
-						// TODO: Index or actual value?
+					if (localE > eStarPerFeatureType[k]) {
+						eStarPerFeatureType[k] = localE;
+						deltaEntropyStarPerFeatureType[k] = localDeltaEntropy;
 						t1t2StarPerFeatureType[k] = i;
-							thresholdStarPerFeatureType[k] = cand;
-						}
+						thresholdStarPerFeatureType[k] = cand;
 					}
 				}
+			}
 			// }
 		}
 
@@ -189,7 +201,10 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 		thresholdStar = thresholdStarPerFeatureType[bestK];
 		fStar = bestK;
 
-		if (Math.abs(deltaEntropyStar) <= PRECISION_DELTA || depth == maxDepth - 1) {
+		//
+		if (Math.abs(deltaEntropyStar) <= PRECISION_DELTA
+				|| depth == maxDepth - 1
+				|| (depth != 0 && Math.abs(deltaEntropyStar - parentEntropy) <= PRECISION_DELTA)) {
 			// Label this node as a leaf and return
 			// Get majority
 			nodeToBeFilled.getValue().classPrediction = TimeSeriesUtil.getMode(targets);
@@ -223,6 +238,12 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 				.addChild(new TimeSeriesTreeNodeDecisionFunction());
 		TreeNode<TimeSeriesTreeNodeDecisionFunction> rightNode = nodeToBeFilled
 				.addChild(new TimeSeriesTreeNodeDecisionFunction());
+
+		if (dataLeft.length < 1)
+			System.out.println("Stop here");
+
+		if (dataRight.length < 1)
+			System.out.println("Stop here");
 
 		tree(dataLeft, targetsLeft, deltaEntropyStar, leftNode, depth + 1);
 		tree(dataRight, targetsRight, deltaEntropyStar, rightNode, depth + 1);
@@ -297,9 +318,10 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 		for (int i = 0; i < entropyValues.length; i++) {
 			double entropySum = 0;
 			for (int c = 0; c < numClasses; c++) {
-				double gammaC = (double) classNodeStatistic[i][c] / (double) intCounter[i];
-				// if (Math.abs(gammaC) < PRECISION_DELTA)
-				// gammaC += EPS;
+				double gammaC = 0;
+				if (intCounter[i] != 0)
+					gammaC = (double) classNodeStatistic[i][c] / (double) intCounter[i];
+
 				entropySum += gammaC < PRECISION_DELTA ? 0 : gammaC * Math.log(gammaC);
 			}
 			entropyValues[i] = (-1) * entropySum;
@@ -367,7 +389,7 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 						min[i] = transformedFeatures[i][l][j];
 					if (transformedFeatures[i][l][j] > max[i])
 						max[i] = transformedFeatures[i][l][j];
-					}
+				}
 			}
 		}
 
@@ -392,7 +414,7 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 				(int) Math.sqrt(m), seed);
 		for (int w : W) {
 			List<Integer> tmpSampling = randomlySampleNoReplacement(
-					IntStream.range(0, m - w + 1).boxed().collect(Collectors.toList()), (int) Math.sqrt(m - w + 1),
+					IntStream.rangeClosed(0, m - w).boxed().collect(Collectors.toList()), (int) Math.sqrt(m - w + 1),
 					seed);
 			T1.addAll(tmpSampling);
 			for (int t1 : tmpSampling) {
@@ -416,8 +438,15 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 		return listCopy.subList(0, sampleSize);
 	}
 
+	// t2 inclusive
 	public static double[] getFeatures(final double[] vector, final int t1, final int t2) {
 		double[] result = new double[NUM_FEATURE_TYPES];
+		
+		if(t1 >= vector.length || t2 >= vector.length)
+			throw new IllegalArgumentException("Parameters t1 and t2 must be valid indices of the vector.");
+		
+		if(t1 == t2)
+			return new double[] { vector[t1], 0d, 0d };
 
 		// Calculate mean
 		// TODO: Iteratively calculating mean AND stddev
@@ -429,7 +458,7 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 		double y = 0;
 
 		double stddev = 0;
-		for (int i = t1; i < t2; i++) {
+		for (int i = t1; i <= t2; i++) {
 			stddev += Math.pow(vector[i] - result[0], 2);
 
 			x += i;
@@ -438,22 +467,27 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 			xy += i * vector[i];
 		}
 		// TODO: Use Bessel's correction?
-		result[1] = Math.sqrt(stddev / (t2 - t1 - 1));
+		result[1] = Math.sqrt(stddev / (double) (t2 - t1));
 
 		// Calculate slope
-		int length = t2 - t1;
+		int length = t2 - t1 + 1;
 		result[2] = (length * xy - x * y) / (length * xx - x * x);
 		return result;
 	}
 
+	// t2 inclusive
 	private static double getMean(final double[] vector, final int t1, final int t2) {
+		if (t1 >= vector.length || t2 >= vector.length)
+			throw new IllegalArgumentException("Parameters t1 and t2 must be valid indices of the vector.");
+
 		double result = 0;
-		for (int i = t1; i < t2; i++) {
+		for (int i = t1; i <= t2; i++) {
 			result += vector[i];
 		}
-		return result / (t2 - t1);
+		return result / (t2 - t1 + 1);
 	}
 
+	// t2 inclusive
 	private static double getStddev(final double[] vector, final int t1, final int t2) {
 		if (t1 == t2)
 			return 0.0d;
@@ -461,12 +495,12 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 		double mean = getMean(vector, t1, t2);
 
 		double result = 0;
-		for (int i = t1; i < t2; i++) {
+		for (int i = t1; i <= t2; i++) {
 			result += Math.pow(vector[i] - mean, 2);
 		}
 
 		// TODO: Use Bessel's correction?
-		return Math.sqrt(result / (double) (t2 - t1 - 1));
+		return Math.sqrt(result / (double) (t2 - t1));
 	}
 
 	private static double getSlope(final double[] vector, final int t1, final int t2) {
@@ -476,7 +510,7 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 		double xy = 0;
 		double y = 0;
 
-		for (int i = t1; i < t2; i++) {
+		for (int i = t1; i <= t2; i++) {
 			x += i;
 			y += vector[i];
 			xx += i * i;
@@ -484,7 +518,7 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 		}
 
 		// Calculate slope
-		int length = t2 - t1;
+		int length = t2 - t1 + 1;
 		return (length * xy - x * y) / (length * xx - x * x);
 	}
 
@@ -500,5 +534,35 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 			throw new UnsupportedOperationException(
 					"Feature calculation function with id '" + featureId + "' is unknwon.");
 		}
+	}
+
+	public static double[] zNormalize(final double[] dataVector, final boolean besselsCorrection) {
+		// TODO: Parameter checks...
+
+		int n = dataVector.length - (besselsCorrection ? 1 : 0);
+
+		double mean = 0; // dataVector.meanNumber().doubleValue();
+		for (int i = 0; i < dataVector.length; i++) {
+			mean += dataVector[i];
+		}
+		mean /= dataVector.length;
+
+		// Use Bessel's correction to get the sample stddev
+		double stddev = 0;
+		for (int i = 0; i < dataVector.length; i++) {
+			stddev += Math.pow(dataVector[i] - mean, 2);
+		}
+		stddev /= n;
+		stddev = Math.sqrt(stddev);
+
+		double[] result = new double[dataVector.length];
+		if (stddev == 0.0)
+			return result;
+
+		for (int i = 0; i < result.length; i++) {
+			result[i] = (dataVector[i] - mean) / stddev;
+		}
+
+		return result;
 	}
 }

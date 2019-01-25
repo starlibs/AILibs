@@ -18,8 +18,8 @@ public class TimeSeriesForestClassifier extends ASimplifiedTSClassifier<Integer>
 
 	private TimeSeriesTree[] trees;
 
-	public TimeSeriesForestClassifier(final int numTrees, final int maxDepth) {
-		super(new TimeSeriesForestAlgorithm(numTrees, maxDepth));
+	public TimeSeriesForestClassifier(final int numTrees, final int maxDepth, final int seed) {
+		super(new TimeSeriesForestAlgorithm(numTrees, maxDepth, seed));
 		this.trees = new TimeSeriesTree[numTrees];
 	}
 
@@ -34,7 +34,7 @@ public class TimeSeriesForestClassifier extends ASimplifiedTSClassifier<Integer>
 			else
 				votes.replace(prediction, votes.get(prediction) + 1);
 		}
-		LOGGER.debug("Votes: " + votes);
+		// LOGGER.debug("Votes: " + votes);
 		return TimeSeriesUtil.getMaximumKeyByValue(votes);
 	}
 

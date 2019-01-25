@@ -34,19 +34,22 @@ public class TimeSeriesTreeTest {
 	private static final String ITALY_POWER_DEMAND_TEST = UNIVARIATE_PREFIX
 			+ "ItalyPowerDemand\\ItalyPowerDemand_TEST.arff";
 
+	private static final String BEEF_TRAIN = UNIVARIATE_PREFIX + "Beef\\Beef_TRAIN.arff";
+	private static final String BEEF_TEST = UNIVARIATE_PREFIX + "Beef\\Beef_TEST.arff";
+
 	@Test
 	public void classifierTest() throws TimeSeriesLoadingException, TrainingException, PredictionException {
 
 		org.apache.log4j.Logger.getLogger("jaicore").setLevel(Level.DEBUG);
 
-		TimeSeriesTree tst = new TimeSeriesTree(10);
+		TimeSeriesTree tst = new TimeSeriesTree(1000, 42);
 
 		Pair<TimeSeriesDataset, ClassMapper> trainPair = SimplifiedTimeSeriesLoader
-				.loadArff(new File(ITALY_POWER_DEMAND_TRAIN));
+				.loadArff(new File(BEEF_TRAIN));
 		TimeSeriesDataset train = trainPair.getX();
 		tst.setClassMapper(trainPair.getY());
 		Pair<TimeSeriesDataset, ClassMapper> testPair = SimplifiedTimeSeriesLoader
-				.loadArff(new File(ITALY_POWER_DEMAND_TEST));
+				.loadArff(new File(BEEF_TEST));
 		TimeSeriesDataset test = testPair.getX();
 
 		// Training
@@ -73,7 +76,8 @@ public class TimeSeriesTreeTest {
 		if (predictions.get(0) instanceof Integer) {
 			for (int i = 0; i < totalPreds; i++) {
 				int prediction = (int) predictions.get(i);
-				LOGGER.debug("Prediction {}: {} | Expected: {}", i, prediction, test.getTargets()[i]);
+				// LOGGER.debug("Prediction {}: {} | Expected: {}", i, prediction,
+				// test.getTargets()[i]);
 				if (prediction == test.getTargets()[i])
 					correct++;
 			}
@@ -91,15 +95,15 @@ public class TimeSeriesTreeTest {
 	public void calculateFeatureTest() {
 		double[] instance = new double[] { 1, 2, 3 };
 		// Mean
-		Assert.assertEquals(2d, TimeSeriesTreeAlgorithm.calculateFeature(0, instance, 0, 3), EPS_DELTA);
-		Assert.assertEquals(1.5d, TimeSeriesTreeAlgorithm.calculateFeature(0, instance, 0, 2), EPS_DELTA);
+		Assert.assertEquals(2d, TimeSeriesTreeAlgorithm.calculateFeature(0, instance, 0, 2), EPS_DELTA);
+		Assert.assertEquals(1.5d, TimeSeriesTreeAlgorithm.calculateFeature(0, instance, 0, 1), EPS_DELTA);
 		// Standard deviation
-		Assert.assertEquals(1d, TimeSeriesTreeAlgorithm.calculateFeature(1, instance, 0, 3), EPS_DELTA);
+		Assert.assertEquals(1d, TimeSeriesTreeAlgorithm.calculateFeature(1, instance, 0, 2), EPS_DELTA);
 		// Slope
-		Assert.assertEquals(1d, TimeSeriesTreeAlgorithm.calculateFeature(2, instance, 0, 3), EPS_DELTA);
+		Assert.assertEquals(1d, TimeSeriesTreeAlgorithm.calculateFeature(2, instance, 0, 2), EPS_DELTA);
 
 		// TODO: Unify
-		double[] features = TimeSeriesTreeAlgorithm.getFeatures(instance, 0, 3);
+		double[] features = TimeSeriesTreeAlgorithm.getFeatures(instance, 0, 2);
 		Assert.assertEquals(2d, features[0], EPS_DELTA);
 		Assert.assertEquals(1d, features[1], EPS_DELTA);
 		Assert.assertEquals(1d, features[2], EPS_DELTA);
@@ -153,7 +157,7 @@ public class TimeSeriesTreeTest {
 	public void transformInstancesTest() {
 		double[][] data = new double[][] { { 0, 1, 2, 3, 4, 5, 6 }, { 2, 4, 6, 8, 10, 12, 14 } };
 		List<Integer> T1 = Arrays.asList(0, 0);
-		List<Integer> T2 = Arrays.asList(2, 3);
+		List<Integer> T2 = Arrays.asList(1, 2);
 		Pair<List<Integer>, List<Integer>> T1T2 = new Pair<>(T1, T2);
 		double[][][] transformedData = TimeSeriesTreeAlgorithm.transformInstances(data, T1T2);
 
@@ -266,7 +270,7 @@ public class TimeSeriesTreeTest {
 	@Test
 	public void treeTest() throws TrainingException {
 		// TODO
-		TimeSeriesTree tst = new TimeSeriesTree(2);
+		TimeSeriesTree tst = new TimeSeriesTree(10, 42);
 
 		double[][] data = new double[][] { { 0, 1, 2, 3, 4, 5 }, { 0, 2, 4, 6, 8, 10 } };
 		int[] targets = new int[] { 0, 1 };

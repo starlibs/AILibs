@@ -30,19 +30,22 @@ public class TimeSeriesForestTest {
 	private static final String COFFEE_TRAIN = UNIVARIATE_PREFIX + "Coffee\\Coffee_TRAIN.arff";
 	private static final String COFFEE_TEST = UNIVARIATE_PREFIX + "Coffee\\Coffee_TEST.arff";
 
+	private static final String BEEF_TRAIN = UNIVARIATE_PREFIX + "Beef\\Beef_TRAIN.arff";
+	private static final String BEEF_TEST = UNIVARIATE_PREFIX + "Beef\\Beef_TEST.arff";
+
 	@Test
 	public void classifierTest() throws TimeSeriesLoadingException, TrainingException, PredictionException {
 
 		org.apache.log4j.Logger.getLogger("jaicore").setLevel(Level.DEBUG);
 
-		TimeSeriesForestClassifier tsf = new TimeSeriesForestClassifier(50, 1000);
+		TimeSeriesForestClassifier tsf = new TimeSeriesForestClassifier(500, 1000, 42);
 
 		Pair<TimeSeriesDataset, ClassMapper> trainPair = SimplifiedTimeSeriesLoader
-				.loadArff(new File(ITALY_POWER_DEMAND_TRAIN));
+				.loadArff(new File(BEEF_TRAIN));
 		TimeSeriesDataset train = trainPair.getX();
 		tsf.setClassMapper(trainPair.getY());
 		Pair<TimeSeriesDataset, ClassMapper> testPair = SimplifiedTimeSeriesLoader
-				.loadArff(new File(ITALY_POWER_DEMAND_TEST));
+				.loadArff(new File(BEEF_TEST));
 		TimeSeriesDataset test = testPair.getX();
 
 		// Training

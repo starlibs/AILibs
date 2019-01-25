@@ -28,8 +28,8 @@ public class TimeSeriesTree extends ASimplifiedTSClassifier<Integer> {
 
 	private final TreeNode<TimeSeriesTreeNodeDecisionFunction> rootNode;
 
-	public TimeSeriesTree(final int maxDepth) {
-		super(new TimeSeriesTreeAlgorithm(maxDepth));
+	public TimeSeriesTree(final int maxDepth, final int seed) {
+		super(new TimeSeriesTreeAlgorithm(maxDepth, seed));
 		this.rootNode = new TreeNode<TimeSeriesTreeNodeDecisionFunction>(new TimeSeriesTreeNodeDecisionFunction(),
 				null);
 	}
