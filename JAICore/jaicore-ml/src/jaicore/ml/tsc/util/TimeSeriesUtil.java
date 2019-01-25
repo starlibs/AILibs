@@ -238,4 +238,81 @@ public class TimeSeriesUtil {
 		return maxKey;
 	}
 	
+	public static double[] zNormalize(final double[] dataVector, final boolean besselsCorrection) {
+		// TODO: Parameter checks...
+
+		int n = dataVector.length - (besselsCorrection ? 1 : 0);
+
+		double mean = 0; // dataVector.meanNumber().doubleValue();
+		for (int i = 0; i < dataVector.length; i++) {
+			mean += dataVector[i];
+		}
+		mean /= dataVector.length;
+
+		// Use Bessel's correction to get the sample stddev
+		double stddev = 0;
+		for (int i = 0; i < dataVector.length; i++) {
+			stddev += Math.pow(dataVector[i] - mean, 2);
+		}
+		stddev /= n;
+		stddev = Math.sqrt(stddev);
+
+		double[] result = new double[dataVector.length];
+		if (stddev == 0.0)
+			return result;
+
+		for (int i = 0; i < result.length; i++) {
+			result[i] = (dataVector[i] - mean) / stddev;
+		}
+
+		return result;
+	}
+
+	// t2 inclusive
+	public static double mean(final double[] vector, final int t1, final int t2) {
+		if (t1 >= vector.length || t2 >= vector.length)
+			throw new IllegalArgumentException("Parameters t1 and t2 must be valid indices of the vector.");
+
+		double result = 0;
+		for (int i = t1; i <= t2; i++) {
+			result += vector[i];
+		}
+		return result / (t2 - t1 + 1);
+	}
+
+	// t2 inclusive
+	public static double stddev(final double[] vector, final int t1, final int t2) {
+		if (t1 == t2)
+			return 0.0d;
+
+		double mean = mean(vector, t1, t2);
+
+		double result = 0;
+		for (int i = t1; i <= t2; i++) {
+			result += Math.pow(vector[i] - mean, 2);
+		}
+
+		// TODO: Use Bessel's correction?
+		return Math.sqrt(result / (double) (t2 - t1));
+	}
+
+	public static double slope(final double[] vector, final int t1, final int t2) {
+
+		double xx = 0;
+		double x = 0;
+		double xy = 0;
+		double y = 0;
+
+		for (int i = t1; i <= t2; i++) {
+			x += i;
+			y += vector[i];
+			xx += i * i;
+			xy += i * vector[i];
+		}
+
+		// Calculate slope
+		int length = t2 - t1 + 1;
+		return (length * xy - x * y) / (length * xx - x * x);
+	}
+
 }

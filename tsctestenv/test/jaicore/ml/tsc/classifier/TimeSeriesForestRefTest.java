@@ -42,6 +42,9 @@ public class TimeSeriesForestRefTest {
 	private static final String COMPUTERS_TRAIN = UNIVARIATE_PREFIX + "\\Computers\\Computers_TRAIN.arff";
 	private static final String COMPUTERS_TEST = UNIVARIATE_PREFIX + "\\Computers\\Computers_TEST.arff";
 
+	private static final String BEEF_TRAIN = UNIVARIATE_PREFIX + "Beef\\Beef_TRAIN.arff";
+	private static final String BEEF_TEST = UNIVARIATE_PREFIX + "Beef\\Beef_TEST.arff";
+
 	@Test
 	public void testClassifier() throws FileNotFoundException, EvaluationException, TrainingException,
 			PredictionException, IOException, TimeSeriesLoadingException {
@@ -59,7 +62,7 @@ public class TimeSeriesForestRefTest {
 		refClf.setNumTrees(numTrees);
 
 		Map<String, Object> result = SimplifiedTSClassifierTest.compareClassifiers(refClf, ownClf, seed, null, null,
-				new File(SYNTHETIC_CONTROL_TRAIN), new File(SYNTHETIC_CONTROL_TEST));
+				new File(ITALY_POWER_DEMAND_TRAIN), new File(ITALY_POWER_DEMAND_TEST));
 
 		System.out.println("Ref clf parameters: " + refClf.getParameters());
 		System.out.println(result.toString());

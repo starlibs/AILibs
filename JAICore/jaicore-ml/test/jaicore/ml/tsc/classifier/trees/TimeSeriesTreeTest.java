@@ -17,6 +17,7 @@ import jaicore.graph.TreeNode;
 import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.core.exception.TrainingException;
 import jaicore.ml.tsc.classifier.trees.TimeSeriesTree.TimeSeriesTreeNodeDecisionFunction;
+import jaicore.ml.tsc.classifier.trees.TimeSeriesTreeAlgorithm.FeatureType;
 import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import jaicore.ml.tsc.exceptions.TimeSeriesLoadingException;
 import jaicore.ml.tsc.util.ClassMapper;
@@ -95,12 +96,14 @@ public class TimeSeriesTreeTest {
 	public void calculateFeatureTest() {
 		double[] instance = new double[] { 1, 2, 3 };
 		// Mean
-		Assert.assertEquals(2d, TimeSeriesTreeAlgorithm.calculateFeature(0, instance, 0, 2), EPS_DELTA);
-		Assert.assertEquals(1.5d, TimeSeriesTreeAlgorithm.calculateFeature(0, instance, 0, 1), EPS_DELTA);
+		Assert.assertEquals(2d, TimeSeriesTreeAlgorithm.calculateFeature(FeatureType.MEAN, instance, 0, 2), EPS_DELTA);
+		Assert.assertEquals(1.5d, TimeSeriesTreeAlgorithm.calculateFeature(FeatureType.MEAN, instance, 0, 1),
+				EPS_DELTA);
 		// Standard deviation
-		Assert.assertEquals(1d, TimeSeriesTreeAlgorithm.calculateFeature(1, instance, 0, 2), EPS_DELTA);
+		Assert.assertEquals(1d, TimeSeriesTreeAlgorithm.calculateFeature(FeatureType.STDDEV, instance, 0, 2),
+				EPS_DELTA);
 		// Slope
-		Assert.assertEquals(1d, TimeSeriesTreeAlgorithm.calculateFeature(2, instance, 0, 2), EPS_DELTA);
+		Assert.assertEquals(1d, TimeSeriesTreeAlgorithm.calculateFeature(FeatureType.SLOPE, instance, 0, 2), EPS_DELTA);
 
 		// TODO: Unify
 		double[] features = TimeSeriesTreeAlgorithm.getFeatures(instance, 0, 2);
@@ -229,11 +232,13 @@ public class TimeSeriesTreeTest {
 
 	@Test
 	public void getBestSplitIndexTest() {
+		TimeSeriesTreeAlgorithm algorithm = new TimeSeriesTreeAlgorithm(0, 0);
+		
 		double[] deltaEntropyStarPerFeatureType = new double[] { 1, 6, 7 };
-		Assert.assertEquals(2, TimeSeriesTreeAlgorithm.getBestSplitIndex(deltaEntropyStarPerFeatureType));
+		Assert.assertEquals(2, algorithm.getBestSplitIndex(deltaEntropyStarPerFeatureType));
 
 		deltaEntropyStarPerFeatureType = new double[] { 2, 0.01, -1 };
-		Assert.assertEquals(0, TimeSeriesTreeAlgorithm.getBestSplitIndex(deltaEntropyStarPerFeatureType));
+		Assert.assertEquals(0, algorithm.getBestSplitIndex(deltaEntropyStarPerFeatureType));
 	}
 
 	@Test

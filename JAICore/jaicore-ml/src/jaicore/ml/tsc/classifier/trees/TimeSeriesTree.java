@@ -6,6 +6,7 @@ import java.util.List;
 import jaicore.graph.TreeNode;
 import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.tsc.classifier.ASimplifiedTSClassifier;
+import jaicore.ml.tsc.classifier.trees.TimeSeriesTreeAlgorithm.FeatureType;
 import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 
 public class TimeSeriesTree extends ASimplifiedTSClassifier<Integer> {
@@ -13,7 +14,7 @@ public class TimeSeriesTree extends ASimplifiedTSClassifier<Integer> {
 	 * Decision information for a tree node within a <code>TimeSeriesTree</code>.
 	 */
 	static class TimeSeriesTreeNodeDecisionFunction {
-		int f;
+		FeatureType f;
 		int t1;
 		int t2;
 		double threshold;

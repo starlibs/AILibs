@@ -41,11 +41,11 @@ public class TimeSeriesForestTest {
 		TimeSeriesForestClassifier tsf = new TimeSeriesForestClassifier(500, 1000, 42);
 
 		Pair<TimeSeriesDataset, ClassMapper> trainPair = SimplifiedTimeSeriesLoader
-				.loadArff(new File(BEEF_TRAIN));
+				.loadArff(new File(ITALY_POWER_DEMAND_TRAIN));
 		TimeSeriesDataset train = trainPair.getX();
 		tsf.setClassMapper(trainPair.getY());
 		Pair<TimeSeriesDataset, ClassMapper> testPair = SimplifiedTimeSeriesLoader
-				.loadArff(new File(BEEF_TEST));
+				.loadArff(new File(ITALY_POWER_DEMAND_TEST));
 		TimeSeriesDataset test = testPair.getX();
 
 		// Training

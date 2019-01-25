@@ -29,6 +29,10 @@ import jaicore.ml.tsc.util.TimeSeriesUtil;
 
 public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, TimeSeriesTree> {
 
+	public enum FeatureType {
+		MEAN, STDDEV, SLOPE
+	}
+
 	public static final int NUM_FEATURE_TYPES = 3;
 	public static final int NUM_THRESH_CANDIDATES = 20;
 
@@ -58,20 +62,17 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 
 	@Override
 	public void registerListener(Object listener) {
-		// TODO Auto-generated method stub
-
+		throw new UnsupportedOperationException("The operation to be performed is not supported.");
 	}
 
 	@Override
 	public int getNumCPUs() {
-		// TODO Auto-generated method stub
-		return 0;
+		throw new UnsupportedOperationException("The operation to be performed is not supported.");
 	}
 
 	@Override
 	public void setNumCPUs(int numberOfCPUs) {
-		// TODO Auto-generated method stub
-
+		throw new UnsupportedOperationException("The operation to be performed is not supported.");
 	}
 
 	@Override
@@ -95,27 +96,22 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 	@Override
 	public AlgorithmEvent nextWithException()
 			throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("The operation to be performed is not supported.");
 	}
 
 	@Override
 	public IAlgorithmConfig getConfig() {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("The operation to be performed is not supported.");
 	}
 
 	@Override
 	public TimeSeriesTree call()
 			throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
-		// TODO Auto-generated method stub
+
+		// Training
 
 		TimeSeriesDataset data = this.getInput();
-
 		double[][] dataMatrix = data.getValuesOrNull(0);
-		// for(int i=0; i<dataMatrix.length; i++) {
-		// dataMatrix[i] = zNormalize(dataMatrix[i], true);
-		// }
 
 		int n = dataMatrix.length;
 		if (n <= 0)
@@ -228,7 +224,7 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 		}
 
 		// Update node's decision function
-		nodeToBeFilled.getValue().f = fStar;
+		nodeToBeFilled.getValue().f = FeatureType.values()[fStar];
 		nodeToBeFilled.getValue().t1 = T1.get(t1t2Star);
 		nodeToBeFilled.getValue().t2 = T2.get(t1t2Star);
 		nodeToBeFilled.getValue().threshold = thresholdStar;
@@ -275,7 +271,7 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 		return new Pair<>(leftIndices, rightIndices);
 	}
 
-	public static int getBestSplitIndex(final double[] deltaEntropyStarPerFeatureType) {
+	public int getBestSplitIndex(final double[] deltaEntropyStarPerFeatureType) {
 		double max = (double) Integer.MIN_VALUE;
 
 		List<Integer> maxIndexes = new ArrayList<>();
@@ -297,7 +293,7 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 
 		// Return random index among best ones if multiple solutions exist
 		if (maxIndexes.size() > 1)
-			Collections.shuffle(maxIndexes);
+			Collections.shuffle(maxIndexes, new Random(this.seed));
 
 		return maxIndexes.get(0);
 
@@ -306,7 +302,6 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 	// Assume targets 1 to n
 	public static double calculateDeltaEntropy(final double[] dataValues, final int[] targets,
 			final double thresholdCandidate, final List<Integer> classes, final double parentEntropy) {
-		// TODO
 		double[] entropyValues = new double[2];
 
 		int numClasses = classes.size();
@@ -477,121 +472,49 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 		if (t1 == t2)
 			return new double[] { vector[t1], 0d, 0d };
 
-		// Calculate mean
-		// TODO: Iteratively calculating mean AND stddev
-		result[0] = getMean(vector, t1, t2);
-
+		// Calculate running sums for mean, stddev and slope
 		double xx = 0;
 		double x = 0;
 		double xy = 0;
 		double y = 0;
+		double yy = 0;
 
-		double stddev = 0;
 		for (int i = t1; i <= t2; i++) {
-			stddev += Math.pow(vector[i] - result[0], 2);
-
 			x += i;
 			y += vector[i];
+			yy += vector[i] * vector[i];
 			xx += i * i;
 			xy += i * vector[i];
 		}
+		result[0] = y / (double) (t2 - t1 + 1);
+		
 		// TODO: Use Bessel's correction?
-		result[1] = Math.sqrt(stddev / (double) (t2 - t1));
+		double length = t2 - t1 + 1d;
+		double stddev = (yy / length - ((y / length) * (y / length)));
+		stddev *= length / (length - 1);
+		stddev = Math.sqrt(stddev);
+		result[1] = stddev;
 
 		// Calculate slope
-		int length = t2 - t1 + 1;
 		result[2] = (length * xy - x * y) / (length * xx - x * x);
 		return result;
 	}
 
-	// t2 inclusive
-	private static double getMean(final double[] vector, final int t1, final int t2) {
-		if (t1 >= vector.length || t2 >= vector.length)
-			throw new IllegalArgumentException("Parameters t1 and t2 must be valid indices of the vector.");
 
-		double result = 0;
-		for (int i = t1; i <= t2; i++) {
-			result += vector[i];
-		}
-		return result / (t2 - t1 + 1);
-	}
 
-	// t2 inclusive
-	private static double getStddev(final double[] vector, final int t1, final int t2) {
-		if (t1 == t2)
-			return 0.0d;
-
-		double mean = getMean(vector, t1, t2);
-
-		double result = 0;
-		for (int i = t1; i <= t2; i++) {
-			result += Math.pow(vector[i] - mean, 2);
-		}
-
-		// TODO: Use Bessel's correction?
-		return Math.sqrt(result / (double) (t2 - t1));
-	}
-
-	private static double getSlope(final double[] vector, final int t1, final int t2) {
-
-		double xx = 0;
-		double x = 0;
-		double xy = 0;
-		double y = 0;
-
-		for (int i = t1; i <= t2; i++) {
-			x += i;
-			y += vector[i];
-			xx += i * i;
-			xy += i * vector[i];
-		}
-
-		// Calculate slope
-		int length = t2 - t1 + 1;
-		return (length * xy - x * y) / (length * xx - x * x);
-	}
-
-	public static double calculateFeature(final int featureId, final double[] instance, final int t1, final int t2) {
-		switch (featureId) {
-		case 0:
-			return getMean(instance, t1, t2);
-		case 1:
-			return getStddev(instance, t1, t2);
-		case 2:
-			return getSlope(instance, t1, t2);
+	public static double calculateFeature(final FeatureType fType, final double[] instance, final int t1,
+			final int t2) {
+		switch (fType) {
+		case MEAN:
+			return TimeSeriesUtil.mean(instance, t1, t2);
+		case STDDEV:
+			return TimeSeriesUtil.stddev(instance, t1, t2);
+		case SLOPE:
+			return TimeSeriesUtil.slope(instance, t1, t2);
 		default:
 			throw new UnsupportedOperationException(
-					"Feature calculation function with id '" + featureId + "' is unknwon.");
+					"Feature calculation function with id '" + fType + "' is unknwon.");
 		}
 	}
 
-	public static double[] zNormalize(final double[] dataVector, final boolean besselsCorrection) {
-		// TODO: Parameter checks...
-
-		int n = dataVector.length - (besselsCorrection ? 1 : 0);
-
-		double mean = 0; // dataVector.meanNumber().doubleValue();
-		for (int i = 0; i < dataVector.length; i++) {
-			mean += dataVector[i];
-		}
-		mean /= dataVector.length;
-
-		// Use Bessel's correction to get the sample stddev
-		double stddev = 0;
-		for (int i = 0; i < dataVector.length; i++) {
-			stddev += Math.pow(dataVector[i] - mean, 2);
-		}
-		stddev /= n;
-		stddev = Math.sqrt(stddev);
-
-		double[] result = new double[dataVector.length];
-		if (stddev == 0.0)
-			return result;
-
-		for (int i = 0; i < result.length; i++) {
-			result[i] = (dataVector[i] - mean) / stddev;
-		}
-
-		return result;
-	}
 }
