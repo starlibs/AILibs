@@ -1,5 +1,7 @@
 package jaicore.ml.tsc.util;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.IntStream;
 
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -210,4 +212,30 @@ public class TimeSeriesUtil {
 		return timestamps;
 	}
 
+	public static int getMode(final int[] array) {
+		HashMap<Integer, Integer> statistics = new HashMap<>();
+		for (int i = 0; i < array.length; i++) {
+			if (!statistics.containsKey(array[i]))
+				statistics.put(array[i], 1);
+			else
+				statistics.replace(array[i], statistics.get(array[i]) + 1);
+		}
+
+		int maxKey = getMaximumKeyByValue(statistics) != null ? getMaximumKeyByValue(statistics) : -1;
+		return maxKey;
+	}
+
+	public static <T> T getMaximumKeyByValue(final Map<T, Integer> map) {
+		T maxKey = null;
+		int maxCount = 0;
+		for (T key : map.keySet()) {
+			if (map.get(key) > maxCount) {
+				maxCount = map.get(key);
+				maxKey = key;
+			}
+		}
+
+		return maxKey;
+	}
+	
 }

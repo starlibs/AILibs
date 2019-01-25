@@ -27,4 +27,16 @@ public class TimeSeriesUtilTest {
 		Assert.assertEquals(3, actResult.get(0).value(2), 0.001);
 		Assert.assertEquals(2, actResult.get(1).classValue(), 0.001);
 	}
+
+	@Test
+	public void getModeTest() {
+		int[] testArray = new int[] { 1, 2, 1, 1, 4, 6, 6, 6, 7, 7, 7, 7, 7, 7, 2, 1, 1 };
+		Assert.assertEquals(7, TimeSeriesUtil.getMode(testArray));
+
+		testArray = new int[] {};
+		Assert.assertEquals(-1, TimeSeriesUtil.getMode(testArray));
+
+		testArray = new int[] { 1, 1, 2, 2 };
+		Assert.assertEquals(1, TimeSeriesUtil.getMode(testArray));
+	}
 }

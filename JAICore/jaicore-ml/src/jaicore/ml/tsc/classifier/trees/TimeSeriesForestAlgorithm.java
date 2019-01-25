@@ -9,16 +9,19 @@ import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.IAlgorithmConfig;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
+import jaicore.ml.core.exception.TrainingException;
 import jaicore.ml.tsc.classifier.ASimplifiedTSCAlgorithm;
+import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 
 // As proposed by Deng et. al. (as opposed to simplified version by Bagnall et. al.)
 public class TimeSeriesForestAlgorithm extends ASimplifiedTSCAlgorithm<Integer, TimeSeriesForestClassifier> {
 
 	private final int numTrees;
+	private final int maxDepth;
 
-	public TimeSeriesForestAlgorithm(final int numTrees, final int numDepth) {
+	public TimeSeriesForestAlgorithm(final int numTrees, final int maxDepth) {
 		this.numTrees = numTrees;
-		// this.numDepth = numDepth;
+		this.maxDepth = maxDepth;
 	}
 
 	@Override
@@ -73,8 +76,25 @@ public class TimeSeriesForestAlgorithm extends ASimplifiedTSCAlgorithm<Integer, 
 	@Override
 	public TimeSeriesForestClassifier call()
 			throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
-		// TODO Auto-generated method stub
-		return null;
+		
+		TimeSeriesDataset dataset = this.getInput();
+		
+		// Training
+		final TimeSeriesTree[] trees = new TimeSeriesTree[this.numTrees];
+		for (int i = 0; i < this.numTrees; i++) {
+			TimeSeriesTree tst = new TimeSeriesTree(this.maxDepth);
+			try {
+				tst.train(dataset);
+			} catch (TrainingException e) {
+				throw new AlgorithmException(
+						"Could not train time series tree due to training exception: " + e.getMessage());
+			}
+			trees[i] = tst;
+		}
+
+		this.model.setTrees(trees);
+
+		return this.model;
 	}
 
 	@Override

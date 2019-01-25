@@ -88,18 +88,6 @@ public class TimeSeriesTreeTest {
 	}
 
 	@Test
-	public void getModeTest() {
-		int[] testArray = new int[] { 1, 2, 1, 1, 4, 6, 6, 6, 7, 7, 7, 7, 7, 7, 2, 1, 1 };
-		Assert.assertEquals(7, TimeSeriesTreeAlgorithm.getMode(testArray));
-
-		testArray = new int[] {};
-		Assert.assertEquals(-1, TimeSeriesTreeAlgorithm.getMode(testArray));
-
-		testArray = new int[] { 1, 1, 2, 2 };
-		Assert.assertEquals(1, TimeSeriesTreeAlgorithm.getMode(testArray));
-	}
-
-	@Test
 	public void calculateFeatureTest() {
 		double[] instance = new double[] { 1, 2, 3 };
 		// Mean

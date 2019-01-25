@@ -3,7 +3,6 @@ package jaicore.ml.tsc.classifier.trees;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
@@ -24,6 +23,7 @@ import jaicore.graph.TreeNode;
 import jaicore.ml.tsc.classifier.ASimplifiedTSCAlgorithm;
 import jaicore.ml.tsc.classifier.trees.TimeSeriesTree.TimeSeriesTreeNodeDecisionFunction;
 import jaicore.ml.tsc.dataset.TimeSeriesDataset;
+import jaicore.ml.tsc.util.TimeSeriesUtil;
 
 public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, TimeSeriesTree> {
 
@@ -31,7 +31,7 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 	public static final int NUM_THRESH_CANDIDATES = 20;
 
 	// Set to useful value
-	public static final double ENTROPY_APLHA = 0.01;
+	public static final double ENTROPY_APLHA = 0.1;
 
 	private static final double PRECISION_DELTA = 0.000001d;
 
@@ -192,7 +192,7 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 		if (Math.abs(deltaEntropyStar) <= PRECISION_DELTA || depth == maxDepth - 1) {
 			// Label this node as a leaf and return
 			// Get majority
-			nodeToBeFilled.getValue().classPrediction = getMode(targets);
+			nodeToBeFilled.getValue().classPrediction = TimeSeriesUtil.getMode(targets);
 			return;
 		}
 
@@ -500,27 +500,5 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 			throw new UnsupportedOperationException(
 					"Feature calculation function with id '" + featureId + "' is unknwon.");
 		}
-	}
-
-	// TODO: Move this to utility functions
-	public static int getMode(final int[] array) {
-		HashMap<Integer, Integer> statistics = new HashMap<>();
-		for (int i = 0; i < array.length; i++) {
-			if (!statistics.containsKey(array[i]))
-				statistics.put(array[i], 1);
-			else
-				statistics.replace(array[i], statistics.get(array[i]) + 1);
-		}
-
-		int maxKey = -1;
-		int maxCount = 0;
-		for (Integer key : statistics.keySet()) {
-			if (statistics.get(key) > maxCount) {
-				maxCount = statistics.get(key);
-				maxKey = key;
-			}
-		}
-
-		return maxKey;
 	}
 }
