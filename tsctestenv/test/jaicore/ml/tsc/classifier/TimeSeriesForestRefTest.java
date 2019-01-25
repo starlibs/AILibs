@@ -53,13 +53,13 @@ public class TimeSeriesForestRefTest {
 		// Ref classifier uses no depth limit
 		int maxDepth = 1000;
 
-		TimeSeriesForestClassifier ownClf = new TimeSeriesForestClassifier(numTrees, maxDepth, seed);
+		TimeSeriesForestClassifier ownClf = new TimeSeriesForestClassifier(numTrees, maxDepth, seed, false);
 
 		TSF refClf = new TSF(seed);
 		refClf.setNumTrees(numTrees);
 
 		Map<String, Object> result = SimplifiedTSClassifierTest.compareClassifiers(refClf, ownClf, seed, null, null,
-				new File(ITALY_POWER_DEMAND_TRAIN), new File(ITALY_POWER_DEMAND_TEST));
+				new File(SYNTHETIC_CONTROL_TRAIN), new File(SYNTHETIC_CONTROL_TEST));
 
 		System.out.println("Ref clf parameters: " + refClf.getParameters());
 		System.out.println(result.toString());

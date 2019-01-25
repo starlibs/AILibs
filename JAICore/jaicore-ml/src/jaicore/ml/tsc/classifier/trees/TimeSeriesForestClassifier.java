@@ -23,6 +23,12 @@ public class TimeSeriesForestClassifier extends ASimplifiedTSClassifier<Integer>
 		this.trees = new TimeSeriesTree[numTrees];
 	}
 
+	public TimeSeriesForestClassifier(final int numTrees, final int maxDepth, final int seed,
+			final boolean useFeatureCaching) {
+		super(new TimeSeriesForestAlgorithm(numTrees, maxDepth, seed, useFeatureCaching));
+		this.trees = new TimeSeriesTree[numTrees];
+	}
+
 	@Override
 	public Integer predict(double[] univInstance) throws PredictionException {
 		// TODO Auto-generated method stub

@@ -155,11 +155,14 @@ public class TimeSeriesTreeTest {
 
 	@Test
 	public void transformInstancesTest() {
+		TimeSeriesTreeAlgorithm algorithm = new TimeSeriesTreeAlgorithm(0, 0);
+
 		double[][] data = new double[][] { { 0, 1, 2, 3, 4, 5, 6 }, { 2, 4, 6, 8, 10, 12, 14 } };
 		List<Integer> T1 = Arrays.asList(0, 0);
 		List<Integer> T2 = Arrays.asList(1, 2);
 		Pair<List<Integer>, List<Integer>> T1T2 = new Pair<>(T1, T2);
-		double[][][] transformedData = TimeSeriesTreeAlgorithm.transformInstances(data, T1T2);
+
+		double[][][] transformedData = algorithm.transformInstances(data, T1T2);
 
 		Assert.assertEquals(3, transformedData.length);
 		Assert.assertEquals(T1.size(), transformedData[0].length);
@@ -270,7 +273,7 @@ public class TimeSeriesTreeTest {
 	@Test
 	public void treeTest() throws TrainingException {
 		// TODO
-		TimeSeriesTree tst = new TimeSeriesTree(10, 42);
+		TimeSeriesTree tst = new TimeSeriesTree(10, 42, true);
 
 		double[][] data = new double[][] { { 0, 1, 2, 3, 4, 5 }, { 0, 2, 4, 6, 8, 10 } };
 		int[] targets = new int[] { 0, 1 };

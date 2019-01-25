@@ -34,6 +34,12 @@ public class TimeSeriesTree extends ASimplifiedTSClassifier<Integer> {
 				null);
 	}
 
+	public TimeSeriesTree(final int maxDepth, final int seed, final boolean useFeatureCaching) {
+		super(new TimeSeriesTreeAlgorithm(maxDepth, seed, useFeatureCaching));
+		this.rootNode = new TreeNode<TimeSeriesTreeNodeDecisionFunction>(new TimeSeriesTreeNodeDecisionFunction(),
+				null);
+	}
+
 	public TreeNode<TimeSeriesTreeNodeDecisionFunction> getRootNode() {
 		return rootNode;
 	}

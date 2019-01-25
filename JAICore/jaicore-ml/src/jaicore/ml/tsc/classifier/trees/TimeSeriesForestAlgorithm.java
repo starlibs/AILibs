@@ -19,11 +19,20 @@ public class TimeSeriesForestAlgorithm extends ASimplifiedTSCAlgorithm<Integer, 
 	private final int numTrees;
 	private final int maxDepth;
 	private final int seed;
+	private boolean useFeatureCaching = false;
 
 	public TimeSeriesForestAlgorithm(final int numTrees, final int maxDepth, final int seed) {
 		this.numTrees = numTrees;
 		this.maxDepth = maxDepth;
 		this.seed = seed;
+	}
+
+	public TimeSeriesForestAlgorithm(final int numTrees, final int maxDepth, final int seed,
+			final boolean useFeatureCaching) {
+		this.numTrees = numTrees;
+		this.maxDepth = maxDepth;
+		this.seed = seed;
+		this.useFeatureCaching = useFeatureCaching;
 	}
 
 	@Override
@@ -84,7 +93,7 @@ public class TimeSeriesForestAlgorithm extends ASimplifiedTSCAlgorithm<Integer, 
 		// Training
 		final TimeSeriesTree[] trees = new TimeSeriesTree[this.numTrees];
 		for (int i = 0; i < this.numTrees; i++) {
-			TimeSeriesTree tst = new TimeSeriesTree(this.maxDepth, this.seed + i);
+			TimeSeriesTree tst = new TimeSeriesTree(this.maxDepth, this.seed + i, this.useFeatureCaching);
 			try {
 				tst.train(dataset);
 			} catch (TrainingException e) {

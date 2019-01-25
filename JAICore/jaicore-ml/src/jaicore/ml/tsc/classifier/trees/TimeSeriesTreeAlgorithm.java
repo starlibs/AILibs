@@ -3,6 +3,7 @@ package jaicore.ml.tsc.classifier.trees;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -39,6 +40,16 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 	private int seed;
 
 	private final int maxDepth;
+
+	// Caching mechanism
+	private HashMap<Long, double[]> transformedFeaturesCache = null;
+	private boolean useFeatureCaching = false;
+
+	public TimeSeriesTreeAlgorithm(final int maxDepth, final int seed, final boolean useFeatureCaching) {
+		this.maxDepth = maxDepth;
+		this.seed = seed;
+		this.useFeatureCaching = useFeatureCaching;
+	}
 
 	public TimeSeriesTreeAlgorithm(final int maxDepth, final int seed) {
 		this.maxDepth = maxDepth;
@@ -100,14 +111,23 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 		// TODO Auto-generated method stub
 
 		TimeSeriesDataset data = this.getInput();
-		
+
 		double[][] dataMatrix = data.getValuesOrNull(0);
 		// for(int i=0; i<dataMatrix.length; i++) {
 		// dataMatrix[i] = zNormalize(dataMatrix[i], true);
 		// }
 
+		int n = dataMatrix.length;
+		if (n <= 0)
+			throw new IllegalArgumentException("The traning data must contain at least one instance!");
+
 		// TODO: Does this make sense?
 		double parentEntropy = .5d;
+
+		if (useFeatureCaching) {
+			int Q = dataMatrix[0].length;
+			this.transformedFeaturesCache = new HashMap<>(Q * Q * n);
+		}
 
 		tree(dataMatrix, data.getTargets(), parentEntropy, this.model.getRootNode(), 0);
 
@@ -141,9 +161,6 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 	// Entropy based
 	public void tree(double[][] data, int[] targets, final double parentEntropy,
 			final TreeNode<TimeSeriesTreeNodeDecisionFunction> nodeToBeFilled, int depth) {
-
-		if (data.length < 1)
-			System.out.println("Stop here");
 
 		Pair<List<Integer>, List<Integer>> T1T2 = sampleIntervals(data[0].length, this.seed);
 
@@ -202,8 +219,7 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 		fStar = bestK;
 
 		//
-		if (Math.abs(deltaEntropyStar) <= PRECISION_DELTA
-				|| depth == maxDepth - 1
+		if (Math.abs(deltaEntropyStar) <= PRECISION_DELTA || depth == maxDepth - 1
 				|| (depth != 0 && Math.abs(deltaEntropyStar - parentEntropy) <= PRECISION_DELTA)) {
 			// Label this node as a leaf and return
 			// Get majority
@@ -238,12 +254,6 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 				.addChild(new TimeSeriesTreeNodeDecisionFunction());
 		TreeNode<TimeSeriesTreeNodeDecisionFunction> rightNode = nodeToBeFilled
 				.addChild(new TimeSeriesTreeNodeDecisionFunction());
-
-		if (dataLeft.length < 1)
-			System.out.println("Stop here");
-
-		if (dataRight.length < 1)
-			System.out.println("Stop here");
 
 		tree(dataLeft, targetsLeft, deltaEntropyStar, leftNode, depth + 1);
 		tree(dataRight, targetsRight, deltaEntropyStar, rightNode, depth + 1);
@@ -350,12 +360,31 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 		return min;
 	}
 
-	public static double[][][] transformInstances(final double[][] dataset, Pair<List<Integer>, List<Integer>> T1T2) {
+	public double[][][] transformInstances(final double[][] dataset, Pair<List<Integer>, List<Integer>> T1T2) {
 		double[][][] result = new double[NUM_FEATURE_TYPES][T1T2.getX().size()][dataset.length];
 
-		for (int i = 0; i < dataset.length; i++) {
+		int n = dataset.length;
+
+		for (int i = 0; i < n; i++) {
 			for (int j = 0; j < T1T2.getX().size(); j++) {
-				double[] features = getFeatures(dataset[i], T1T2.getX().get(j), T1T2.getY().get(j));
+
+				int t1 = T1T2.getX().get(j);
+				int t2 = T1T2.getY().get(j);
+				double[] features;
+
+				// If caching is used, calculate and store the generated features
+				if (this.useFeatureCaching) {
+					long key = i + dataset[i].length * t1 + dataset[i].length * dataset[i].length * t2;
+					if (!this.transformedFeaturesCache.containsKey(key)) {
+						features = getFeatures(dataset[i], t1, t2);
+						this.transformedFeaturesCache.put(key, features);
+					} else {
+						features = this.transformedFeaturesCache.get(key);
+					}
+				} else {
+					features = getFeatures(dataset[i], t1, t2);
+				}
+
 				result[0][j][i] = features[0];
 				result[1][j][i] = features[1];
 				result[2][j][i] = features[2];
@@ -441,11 +470,11 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 	// t2 inclusive
 	public static double[] getFeatures(final double[] vector, final int t1, final int t2) {
 		double[] result = new double[NUM_FEATURE_TYPES];
-		
-		if(t1 >= vector.length || t2 >= vector.length)
+
+		if (t1 >= vector.length || t2 >= vector.length)
 			throw new IllegalArgumentException("Parameters t1 and t2 must be valid indices of the vector.");
-		
-		if(t1 == t2)
+
+		if (t1 == t2)
 			return new double[] { vector[t1], 0d, 0d };
 
 		// Calculate mean
