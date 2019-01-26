@@ -165,6 +165,6 @@ public abstract class LearningCurveExtrapolator {
 	}
 
 	protected abstract ExtrapolatedLearningcurve extrapolateLearningCurveFromAnchorPoints(int[] xValues,
-			double[] yValues);
+			double[] yValues) throws InvalidAnchorPointsException;
 
 }
