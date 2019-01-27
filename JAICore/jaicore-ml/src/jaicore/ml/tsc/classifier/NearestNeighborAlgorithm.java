@@ -62,6 +62,9 @@ public class NearestNeighborAlgorithm extends ASimplifiedTSCAlgorithm<Integer, N
             throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
         // Retrieve dataset.
         TimeSeriesDataset dataset = this.getInput();
+        // Check if model is set.
+        if (this.model == null)
+            throw new AlgorithmException("Model not set.");
         // Check dataset.
         if (dataset == null)
             throw new AlgorithmException("No input data set.");

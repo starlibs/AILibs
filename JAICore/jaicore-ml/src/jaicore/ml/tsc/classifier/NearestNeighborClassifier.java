@@ -1,8 +1,13 @@
 package jaicore.ml.tsc.classifier;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.PriorityQueue;
 
+import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import jaicore.ml.tsc.distances.ITimeSeriesDistance;
@@ -37,19 +42,52 @@ public class NearestNeighborClassifier extends ASimplifiedTSClassifier<Integer> 
         this.targets = targets;
     }
 
-    public int nearestNeigbor(double[] testInstance) {
+    private int nearestNeigbor(double[] testInstance) {
         int numberOfTrainInstances = values.length;
 
-        double minimalDistance = Double.MAX_VALUE;
-        int predictedClass = -1;
+        // Priority queue for nearest neigbors, sorted by distance ascending.
+        PriorityQueue<Pair<Integer, Double>> nearestNeighbors = new PriorityQueue<>(k + 1, (a, b) -> {
+            return -1 * a.getY().compareTo(b.getY());
+        });
+
+        // double minimalDistance = Double.MAX_VALUE;
+        // int predictedClass = -1;
         for (int i = 0; i < numberOfTrainInstances; i++) {
             double d = distanceMeasure.distance(testInstance, values[i]);
-            if (d < minimalDistance) {
-                minimalDistance = d;
-                predictedClass = targets[i];
+
+            Pair<Integer, Double> neighbor = new Pair<>(targets[i], d);
+            nearestNeighbors.add(neighbor);
+            if (nearestNeighbors.size() > k)
+                nearestNeighbors.poll();
+            // if (d < minimalDistance) {
+            // minimalDistance = d;
+            // predictedClass = targets[i];
+            // }
+        }
+
+        // Voting.
+        HashMap<Integer, Integer> votes = new HashMap<>();
+        for (Pair<Integer, Double> neighbor : nearestNeighbors) {
+            Integer target = neighbor.getX();
+            Integer currentVotes = votes.get(target);
+            if (currentVotes == null) {
+                votes.put(target, 0);
+            } else {
+                votes.put(target, currentVotes + 1);
             }
         }
-        return predictedClass;
+        // Return most voted target.
+        Integer maxNumberOfVotes = Integer.MIN_VALUE;
+        Integer mostVotedTarget = -1;
+        for (Integer target : votes.keySet()) {
+            Integer numberOfVotes = votes.get(target);
+            if (numberOfVotes > maxNumberOfVotes) {
+                maxNumberOfVotes = numberOfVotes;
+                mostVotedTarget = target;
+            }
+        }
+
+        return mostVotedTarget;
     }
 
     @Override
