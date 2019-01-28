@@ -35,13 +35,13 @@ public class TimeWarpEditDistance implements ITimeSeriesDistanceWithTimestamps {
     }
 
     /**
-     * Creates a TimeWarpEditDistance with euclidean distance as point distance.
+     * Creates a TimeWarpEditDistance with squared distance as point distance.
      * 
      * @param lambda Additional cost parameter for deletion.
      * @param nu     Stiffness parameter.
      */
     public TimeWarpEditDistance(double lambda, double nu) {
-        this(lambda, nu, ScalarDistanceUtil.getEuclideanDistance());
+        this(lambda, nu, ScalarDistanceUtil.getSquaredDistance());
     }
 
     @Override
