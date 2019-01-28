@@ -210,4 +210,25 @@ public class TimeSeriesUtil {
 		return timestamps;
 	}
 
+	/**
+	 * Enables printing of time series.
+	 * 
+	 * @param timeSeries Time series to print.
+	 * @return Readable string of the time series, i.e.
+	 *         <code>"{1.0, 2.0, 3.0, 4.0}"</code>
+	 */
+	public static String toString(double[] timeSeries) {
+		if (timeSeries.length == 0)
+			return "{}";
+
+		int stringLength = 2 + timeSeries.length * 3 - 1;
+		StringBuilder sb = new StringBuilder(stringLength);
+		sb.append("{" + timeSeries[0]);
+		for (int i = 1; i < timeSeries.length; i++) {
+			sb.append(", " + timeSeries[i]);
+		}
+		sb.append("}");
+		return sb.toString();
+	}
+
 }
