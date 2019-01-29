@@ -33,6 +33,7 @@ import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.exception.ConfigurationException;
 import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.core.exception.TrainingException;
+import jaicore.ml.core.predictivemodel.ICertaintyProvider;
 import jaicore.ml.core.predictivemodel.IOnlineLearner;
 import jaicore.ml.core.predictivemodel.IPredictiveModelConfiguration;
 import jaicore.ml.dyadranking.Dyad;
@@ -55,7 +56,8 @@ import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
  * @author Helena Graf, Jonas Hanselle, Michael Braun
  *
  */
-public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDyadRankingInstance> {
+public class PLNetDyadRanker extends APLDyadRanker
+		implements IOnlineLearner<IDyadRankingInstance>, ICertaintyProvider<IDyadRankingInstance> {
 
 	private static final Logger log = LoggerFactory.getLogger(PLNetDyadRanker.class);
 
@@ -84,7 +86,7 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 	public PLNetDyadRanker(IPLNetDyadRankerConfiguration config) {
 		this.configuration = config;
 	}
-	
+
 	public void train(IDataset dataset, int maxEpochs, double earlyStoppingTrainRatio) throws TrainingException {
 		if (!(dataset instanceof DyadRankingDataset)) {
 			throw new IllegalArgumentException(
@@ -94,8 +96,8 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 
 		List<IInstance> drTrain = (List<IInstance>) drDataset.subList(0,
 				(int) (earlyStoppingTrainRatio * drDataset.size()));
-		List<IInstance> drTest = (List<IInstance>) drDataset
-				.subList((int) (earlyStoppingTrainRatio * drDataset.size()), drDataset.size());
+		List<IInstance> drTest = (List<IInstance>) drDataset.subList((int) (earlyStoppingTrainRatio * drDataset.size()),
+				drDataset.size());
 
 		if (this.plNet == null) {
 			int dyadSize = ((IDyadRankingInstance) drDataset.get(0)).getDyadAtPosition(0).getInstance().length()
@@ -111,7 +113,8 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 		int patience = 0;
 		int earlyStoppingCounter = 0;
 
-		while ((patience < configuration.plNetEarlyStoppingPatience() || configuration.plNetEarlyStoppingPatience() <= 0) && (epoch < maxEpochs || maxEpochs == 0)) {
+		while ((patience < configuration.plNetEarlyStoppingPatience()
+				|| configuration.plNetEarlyStoppingPatience() <= 0) && (epoch < maxEpochs || maxEpochs == 0)) {
 			// Iterate through training data
 			int miniBatchSize = configuration.plNetMiniBatchSize();
 			List<IInstance> miniBatch = new ArrayList<>(miniBatchSize);
@@ -129,8 +132,7 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 			log.debug("plNet params: {}", plNet.params().toString());
 			earlyStoppingCounter++;
 			// Compute validation error
-			if (earlyStoppingCounter == configuration.plNetEarlyStoppingInterval()
-					&& earlyStoppingTrainRatio < 1.0) {
+			if (earlyStoppingCounter == configuration.plNetEarlyStoppingInterval() && earlyStoppingTrainRatio < 1.0) {
 				double avgScore = computeAvgError(drTest);
 				if (avgScore < currentBestScore) {
 					currentBestScore = avgScore;
@@ -146,7 +148,7 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 		}
 		plNet = currentBestModel;
 	}
-	
+
 	@Override
 	public void train(IDataset dataset) throws TrainingException {
 		train(dataset, configuration.plNetMaxEpochs(), configuration.plNetEarlyStoppingTrainRatio());
@@ -156,14 +158,15 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 			train(dataset, maxEpochs, 1.0);
 		}
 	}
-	
+
 	/**
-	 * Computes the gradient of the plNets' error function for a given instance.
-	 * The returned gradient is already scaled by the updater.
-	 * The update procedure is  based on algorithm 2 in [1].
+	 * Computes the gradient of the plNets' error function for a given instance. The
+	 * returned gradient is already scaled by the updater. The update procedure is
+	 * based on algorithm 2 in [1].
 	 * 
-	 * @param instance	The instance to compute the scaled gradient for.
-	 * @return			The gradient for the given instance, multiplied by the updater's learning rate.
+	 * @param instance The instance to compute the scaled gradient for.
+	 * @return The gradient for the given instance, multiplied by the updater's
+	 *         learning rate.
 	 */
 	private INDArray computeScaledGradient(IInstance instance) {
 		if (!(instance instanceof IDyadRankingInstance)) {
@@ -198,15 +201,16 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 			plNet.getUpdater().update(plNet, deltaWk, iteration, epoch, 1, LayerWorkspaceMgr.noWorkspaces());
 			deltaW.addi(deltaWk.gradient());
 		}
-		
-		return deltaW;	
+
+		return deltaW;
 	}
-	
+
 	/**
-	 * Updates this {@link PLNetDyadRanker} based on a given mini batch of {@link IInstance}s
-	 * which need to be {@link IDyadRankingInstance}s
+	 * Updates this {@link PLNetDyadRanker} based on a given mini batch of
+	 * {@link IInstance}s which need to be {@link IDyadRankingInstance}s
 	 * 
-	 * @param minibatch	A mini batch consisting of a {@link List} of {@link IDyadRankingInstance}.
+	 * @param minibatch A mini batch consisting of a {@link List} of
+	 *                  {@link IDyadRankingInstance}.
 	 */
 	private void updateWithMinibatch(List<IInstance> minibatch) {
 		double actualMiniBatchSize = minibatch.size();
@@ -431,4 +435,22 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 		plNet = restored;
 	}
 
+	@Override
+	public double getCertainty(IInstance queryInstance) {
+		if (!(queryInstance instanceof IDyadRankingInstance)) {
+			throw new IllegalArgumentException("Can only provide certainty for dyad ranking instances!");
+		}
+		IDyadRankingInstance drInstance = (IDyadRankingInstance) queryInstance;
+
+		if (drInstance.length() != 2) {
+			throw new IllegalArgumentException("Can only provide certainty for pairs of dyads!");
+		}
+		List<Pair<Dyad, Double>> dyadUtilityPairs = new ArrayList<Pair<Dyad, Double>>(drInstance.length());
+		for (Dyad dyad : drInstance) {
+			INDArray plNetInput = dyadToVector(dyad);
+			double plNetOutput = plNet.output(plNetInput).getDouble(0);
+			dyadUtilityPairs.add(new Pair<Dyad, Double>(dyad, plNetOutput));
+		}
+		return Math.abs(dyadUtilityPairs.get(0).getRight() - dyadUtilityPairs.get(1).getRight());
+	}
 }

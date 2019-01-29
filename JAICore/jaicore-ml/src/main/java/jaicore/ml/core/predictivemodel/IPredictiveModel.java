@@ -7,7 +7,6 @@ import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.exception.ConfigurationException;
 import jaicore.ml.core.exception.PredictionException;
-import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 
 /**
  * The {@link IPredictiveModel} corresponds to a model which can be used to make predictions based on given {@link IInstance}es.
