@@ -38,7 +38,7 @@ public class SFATest {
 		SFA testSFA = new SFA(new double[]{1,2},4);
 		try {
 			TimeSeriesDataset output = testSFA.fitTransform(dataset);
-			assertEquals(output.getValues(0)[0][0],2,1.0E-5);
+			assertEquals(2,output.getValues(0)[0][0],1.0E-5);
 		} catch (IllegalArgumentException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

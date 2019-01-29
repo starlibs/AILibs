@@ -34,16 +34,12 @@ public class ZTransformer implements IFilter {
 	@Override
 	public TimeSeriesDataset transform(TimeSeriesDataset input) throws IllegalArgumentException, NoneFittedFilterExeception{
 		
-	//TODO is a dataset empty if it has no attributes
-		if(!(input instanceof TimeSeriesDataset)) {
-			throw new IllegalArgumentException("This method only supports timeseries datasets");
-		}
+	//TODO is a dataset empty if it has no attributes}
 		
 		if(!((TimeSeriesDataset)input).isEmpty()) {
 			throw new IllegalArgumentException("This method can not work with an empty dataset.");
 		}
 		if(fitted) {
-			
 			for(int i = 0; i < ((TimeSeriesDataset) input).getNumberOfVariables(); i++){			
 					 double[][] matrix =  ((TimeSeriesDataset) input).getValues(i);
 					 for(int instance = 0; instance < ((TimeSeriesDataset) input).getNumberOfInstances(); instance++) {
