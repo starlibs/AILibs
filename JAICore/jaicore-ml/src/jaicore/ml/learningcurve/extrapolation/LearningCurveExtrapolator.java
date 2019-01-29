@@ -104,7 +104,7 @@ public class LearningCurveExtrapolator {
 				this.subsamplingAlgorithm.setSampleSize(anchorPoints[i]);
 				this.subsamplingAlgorithm.setInput(this.train);
 				IDataset<IInstance> subsampledDataset = this.subsamplingAlgorithm.call();
-
+				
 				// Train classifier on subsample
 				this.learner.buildClassifier(WekaInstancesUtil.datasetToWekaInstances(subsampledDataset));
 
@@ -116,6 +116,7 @@ public class LearningCurveExtrapolator {
 					}
 				}
 				yValues[i] = correctCounter / (double) testInstances.size();
+				
 			}
 		} catch (Exception e) {
 			throw new AlgorithmException(e, "Error during creation of the anchropoints");
@@ -137,7 +138,7 @@ public class LearningCurveExtrapolator {
 		// Stratify the data by class
 		Map<Object, IDataset<IInstance>> classStrati = new HashMap<Object, IDataset<IInstance>>();
 		this.dataset.forEach(d -> {
-			Object c = d.getTargetValue(new Object().getClass());
+			Object c = d.getTargetValue(Object.class).getValue();
 			if (!classStrati.containsKey(c)) {
 				classStrati.put(c, this.dataset.createEmpty());
 			}
