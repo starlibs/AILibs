@@ -22,7 +22,7 @@ public class SlidingWindowBuilder implements IFilter{
 	public TimeSeriesDataset transform(TimeSeriesDataset input)
 			throws IllegalArgumentException, NoneFittedFilterExeception {
 		// TODO Auto-generated method stub
-		return null;
+		return new TimeSeriesDataset(blownUpDataset,null,null);
 	}
 
 	@Override
