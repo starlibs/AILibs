@@ -18,7 +18,7 @@ import jaicore.ml.core.dataset.sampling.stratified.sampling.StratifiedSampling;
  * @author Lukas Brandt
  */
 public enum SubsamplingMethod {
-	SIMEPL_RANDOM_SAMPLING {
+	SIMPLE_RANDOM_SAMPLING {
 		@Override
 		public ASamplingAlgorithm<IInstance> getSubsampler(long seed) {
 			return new SimpleRandomSampling<IInstance>(new Random(seed));
