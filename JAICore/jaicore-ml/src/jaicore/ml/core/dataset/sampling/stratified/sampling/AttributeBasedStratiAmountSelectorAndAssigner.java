@@ -80,7 +80,7 @@ public class AttributeBasedStratiAmountSelectorAndAssigner<I extends IInstance>
 	 * SCALE-54: Explicitly allow to not provide an attribute list
 	 */
 	public AttributeBasedStratiAmountSelectorAndAssigner() {
-		this(null, null);
+		super();
 		this.discretizationStrategy = DEFAULT_DISCRETIZATION_STRATEGY;
 		this.numberOfCategories = DEFAULT_DISCRETIZATION_CATEGORY_AMOUNT;
 	}
