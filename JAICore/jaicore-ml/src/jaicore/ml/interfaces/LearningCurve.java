@@ -1,6 +1,4 @@
-package jaicore.ml.learningcurve.extrapolation;
-
-import org.apache.commons.lang3.tuple.Pair;
+package jaicore.ml.interfaces;
 
 /**
  * Interface for the result of an learning curve extrapolation. Has to save the
@@ -9,7 +7,7 @@ import org.apache.commons.lang3.tuple.Pair;
  * 
  * @author Lukas Brandt
  */
-public interface ExtrapolatedLearningcurve {
+public interface LearningCurve {
 
 	/**
 	 * Calculated or search a saturation point with a tolerance of epsilon.

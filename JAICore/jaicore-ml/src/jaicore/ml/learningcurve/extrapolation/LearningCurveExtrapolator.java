@@ -11,6 +11,7 @@ import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.ASamplingAlgorithm;
 import jaicore.ml.core.dataset.sampling.SubsamplingMethod;
 import jaicore.ml.core.dataset.weka.WekaInstancesUtil;
+import jaicore.ml.interfaces.LearningCurve;
 import weka.classifiers.Classifier;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -24,26 +25,30 @@ import weka.core.Instances;
  * 
  * @author Lukas Brandt
  */
-public abstract class LearningCurveExtrapolator {
+public class LearningCurveExtrapolator {
 
 	protected Classifier learner;
 	protected IDataset<IInstance> dataset, train, test;
 	protected ASamplingAlgorithm<IInstance> subsamplingAlgorithm;
+	protected LearningCurveExtrapolationMethod extrapolationMethod;
 
 	/**
 	 * Create a learning curve extrapolator with a custom configured subsampling
 	 * method.
 	 * 
-	 * @param learner           Learning model to predict the learning curve of.
-	 * @param dataset           Dataset to measure evaluate the learner on.
-	 * @param trainsplit        Portion of the dataset, which shall be used to
-	 *                          sample from for training.
-	 * @param subsamplingMethod Subsampling method to retrieve a default configured
-	 *                          subsampler for.
-	 * @param seed              Random seed.
+	 * @param extrapolationMethod Method for extrapolating a learning curve from
+	 *                            anchorpoints.
+	 * @param learner             Learning model to predict the learning curve of.
+	 * @param dataset             Dataset to measure evaluate the learner on.
+	 * @param trainsplit          Portion of the dataset, which shall be used to
+	 *                            sample from for training.
+	 * @param subsamplingMethod   Subsampling method to retrieve a default
+	 *                            configured subsampler for.
+	 * @param seed                Random seed.
 	 */
-	public LearningCurveExtrapolator(Classifier learner, IDataset<IInstance> dataset, double trainsplit,
-			SubsamplingMethod subsamplingMethod, long seed) {
+	public LearningCurveExtrapolator(LearningCurveExtrapolationMethod extrapolationMethod, Classifier learner,
+			IDataset<IInstance> dataset, double trainsplit, SubsamplingMethod subsamplingMethod, long seed) {
+		this.extrapolationMethod = extrapolationMethod;
 		this.learner = learner;
 		this.dataset = dataset;
 		this.subsamplingAlgorithm = subsamplingMethod.getSubsampler(seed);
@@ -53,6 +58,8 @@ public abstract class LearningCurveExtrapolator {
 	/**
 	 * Create a learning curve extrapolator with a given subsampler.
 	 * 
+	 * @param extrapolationMethod  Method for extrapolating a learning curve from
+	 *                             anchorpoints.
 	 * @param learner              Learning model to predict the learning curve of.
 	 * @param dataset              Dataset to measure evaluate the learner on.
 	 * @param trainsplit           Portion of the dataset, which shall be used to
@@ -61,8 +68,10 @@ public abstract class LearningCurveExtrapolator {
 	 *                             anchorpoints.
 	 * @param seed                 Random seed.
 	 */
-	public LearningCurveExtrapolator(Classifier learner, IDataset<IInstance> dataset, double trainsplit,
-			ASamplingAlgorithm<IInstance> subsamplingAlgorithm, long seed) {
+	public LearningCurveExtrapolator(LearningCurveExtrapolationMethod extrapolationMethod, Classifier learner,
+			IDataset<IInstance> dataset, double trainsplit, ASamplingAlgorithm<IInstance> subsamplingAlgorithm,
+			long seed) {
+		this.extrapolationMethod = extrapolationMethod;
 		this.learner = learner;
 		this.dataset = dataset;
 		this.subsamplingAlgorithm = subsamplingAlgorithm;
@@ -83,7 +92,7 @@ public abstract class LearningCurveExtrapolator {
 	 * @throws AlgorithmException           An error occured during the creation of
 	 *                                      the specified anchorpoints.
 	 */
-	public ExtrapolatedLearningcurve extapolateLearningCurve(int[] anchorPoints)
+	public LearningCurve extrapolateLearningCurve(int[] anchorPoints)
 			throws InvalidAnchorPointsException, AlgorithmException {
 		double[] yValues = new double[anchorPoints.length];
 		try {
@@ -112,7 +121,7 @@ public abstract class LearningCurveExtrapolator {
 			throw new AlgorithmException(e, "Error during creation of the anchropoints");
 		}
 
-		return extrapolateLearningCurveFromAnchorPoints(anchorPoints, yValues);
+		return extrapolationMethod.extrapolateLearningCurveFromAnchorPoints(anchorPoints, yValues);
 	}
 
 	private void createSplit(double trainsplit, long seed) {
@@ -174,8 +183,5 @@ public abstract class LearningCurveExtrapolator {
 		Collections.shuffle(this.train, random);
 		Collections.shuffle(this.test, random);
 	}
-
-	protected abstract ExtrapolatedLearningcurve extrapolateLearningCurveFromAnchorPoints(int[] xValues,
-			double[] yValues) throws InvalidAnchorPointsException;
 
 }

@@ -1,6 +1,6 @@
 package jaicore.ml.learningcurve.extrapolation.InversePowerLaw;
 
-import jaicore.ml.learningcurve.extrapolation.ExtrapolatedLearningcurve;
+import jaicore.ml.interfaces.LearningCurve;
 
 /**
  * Representation of a learning curve with the Inverse Power Law function, which
@@ -10,7 +10,7 @@ import jaicore.ml.learningcurve.extrapolation.ExtrapolatedLearningcurve;
  * @author Lukas Brandt
  *
  */
-public class InversePowerLawLearningCurve implements ExtrapolatedLearningcurve {
+public class InversePowerLawLearningCurve implements LearningCurve {
 
 	private double a, b, c;
 
