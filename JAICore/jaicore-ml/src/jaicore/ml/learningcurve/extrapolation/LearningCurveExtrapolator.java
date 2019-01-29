@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.ASamplingAlgorithm;
@@ -75,30 +76,40 @@ public abstract class LearningCurveExtrapolator {
 	 * @param anchorPoints Sample sizes as anchorpoints, where the accuracy shall be
 	 *                     measured.
 	 * @return The extrapolated learning curve.
+	 * 
+	 * @throws InvalidAnchorPointsException The anchorpoints (amount, values, ...)
+	 *                                      are not suitable for the given learning
+	 *                                      curve extrapolation method.
+	 * @throws AlgorithmException           An error occured during the creation of
+	 *                                      the specified anchorpoints.
 	 */
-	public ExtrapolatedLearningcurve extapolateLearningCurve(int[] anchorPoints) throws Exception {
+	public ExtrapolatedLearningcurve extapolateLearningCurve(int[] anchorPoints)
+			throws InvalidAnchorPointsException, AlgorithmException {
 		double[] yValues = new double[anchorPoints.length];
+		try {
+			Instances testInstances = WekaInstancesUtil.datasetToWekaInstances(this.test);
 
-		Instances testInstances = WekaInstancesUtil.datasetToWekaInstances(this.test);
+			// Create subsamples at the anchorpoints and measure the accuracy there
+			for (int i = 0; i < anchorPoints.length; i++) {
 
-		// Create subsamples at the anchorpoints and measure the accuracy there
-		for (int i = 0; i < anchorPoints.length; i++) {
+				this.subsamplingAlgorithm.setSampleSize(anchorPoints[i]);
+				this.subsamplingAlgorithm.setInput(this.train);
+				IDataset<IInstance> subsampledDataset = this.subsamplingAlgorithm.call();
 
-			this.subsamplingAlgorithm.setSampleSize(anchorPoints[i]);
-			this.subsamplingAlgorithm.setInput(this.train);
-			IDataset<IInstance> subsampledDataset = this.subsamplingAlgorithm.call();
+				// Train classifier on subsample
+				this.learner.buildClassifier(WekaInstancesUtil.datasetToWekaInstances(subsampledDataset));
 
-			// Train classifier on subsample
-			this.learner.buildClassifier(WekaInstancesUtil.datasetToWekaInstances(subsampledDataset));
-
-			// Measure accuracy of the trained learner on test split
-			double correctCounter = 0d;
-			for (Instance instance : testInstances) {
-				if (this.learner.classifyInstance(instance) == instance.classValue()) {
-					correctCounter++;
+				// Measure accuracy of the trained learner on test split
+				double correctCounter = 0d;
+				for (Instance instance : testInstances) {
+					if (this.learner.classifyInstance(instance) == instance.classValue()) {
+						correctCounter++;
+					}
 				}
+				yValues[i] = correctCounter / (double) testInstances.size();
 			}
-			yValues[i] = correctCounter / (double) testInstances.size();
+		} catch (Exception e) {
+			throw new AlgorithmException(e, "Error during creation of the anchropoints");
 		}
 
 		return extrapolateLearningCurveFromAnchorPoints(anchorPoints, yValues);
