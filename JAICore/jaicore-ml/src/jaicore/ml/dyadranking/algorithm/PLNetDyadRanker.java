@@ -432,4 +432,24 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 	public MultiLayerNetwork getPlNet() {
 		return plNet;
 	}
+	
+	/**
+	 * Pretty prints the PLNet's configuration.
+	 */
+	public void printConfig() {
+		StringBuilder output = new StringBuilder();
+		output.append("PLNet config:")
+			  .append("\n\tLearning rate:\t\t\t").append(configuration.plNetLearningRate())
+			  .append("\n\tHidden nodes:\t\t\t").append(configuration.plNetHiddenNodes())
+			  .append("\n\tSeed:\t\t\t\t").append(configuration.plNetSeed())
+			  .append("\n\tActivation function:\t\t").append(configuration.plNetActivationFunction())
+			  .append("\n\tMax epochs:\t\t\t").append(configuration.plNetMaxEpochs())
+			  .append("\n\tMini batch size:\t\t").append(configuration.plNetMiniBatchSize())
+			  .append("\n\tEarly stopping interval:\t").append(configuration.plNetEarlyStoppingInterval())
+			  .append("\n\tEarly stopping patience:\t").append(configuration.plNetEarlyStoppingPatience())
+			  .append("\n\tEarly stopping train ratio:\t").append(configuration.plNetEarlyStoppingTrainRatio())
+			  .append("\n\tEarly stopping retrain:\t\t").append(configuration.plNetEarlyStoppingRetrain())
+			  .append("\n");
+		System.out.print(output.toString());
+	}
 }
