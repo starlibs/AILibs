@@ -28,11 +28,14 @@ import jaicore.basic.algorithm.exceptions.DelayedCancellationCheckException;
 import jaicore.basic.algorithm.exceptions.DelayedTimeoutCheckException;
 import jaicore.ea.algorithm.AEvolutionaryAlgorithm;
 import jaicore.ea.algorithm.moea.moeaframework.event.MOEAFrameworkAlgorithmResultEvent;
+import jaicore.ea.algorithm.moea.moeaframework.util.MOEAFrameworkUtil;
 
 public class MOEAFrameworkAlgorithm extends AEvolutionaryAlgorithm {
 
 	private Algorithm algorithm;
 	private int numberOfGenerationsEvolved = 0;
+	private double bestFitness = 1.0;
+	private int numberOfGenerationsWOChange = 0;
 
 	public MOEAFrameworkAlgorithm(final IMOEAFrameworkAlgorithmConfig config, final IMOEAFrameworkAlgorithmInput input) {
 		super(config, input);
@@ -78,6 +81,13 @@ public class MOEAFrameworkAlgorithm extends AEvolutionaryAlgorithm {
 		case active:
 			System.out.println(this.getClass().getName() + " step3");
 			this.algorithm.step();
+
+			this.numberOfGenerationsWOChange++;
+			if (this.getCurrentResult().getResult().get(0).getObjective(0) + this.getConfig().earlyTerminationEpsilon() < this.bestFitness) {
+				this.bestFitness = this.getCurrentResult().getResult().get(0).getObjective(0);
+				this.numberOfGenerationsWOChange = 0;
+			}
+
 			return new MOEAFrameworkAlgorithmResultEvent(this.getCurrentResult());
 		default:
 		case inactive:
@@ -119,9 +129,38 @@ public class MOEAFrameworkAlgorithm extends AEvolutionaryAlgorithm {
 		while ((this.getState() == AlgorithmState.created || this.getState() == AlgorithmState.active) && (this.getConfig().numberOfGenerations() <= 0 || this.numberOfGenerationsEvolved < this.getConfig().numberOfGenerations())
 				&& (this.getConfig().numberOfEvaluations() <= 0 || this.algorithm.getNumberOfEvaluations() < this.getConfig().numberOfEvaluations())) {
 			this.nextWithException();
+			System.out.println("=============");
+			System.out.println("Current Result:");
+			System.out.println(MOEAFrameworkUtil.populationToString(this.getCurrentResult().getResult()));
+			System.out.println();
+			System.out.println("Gen: " + this.numberOfGenerationsEvolved + " / " + this.getConfig().numberOfGenerations());
+			System.out.println("Evals: " + this.getNumberOfEvaluations() + " / " + this.getConfig().numberOfEvaluations());
+			System.out.println("=============");
 			this.numberOfGenerationsEvolved++;
 		}
+
+		System.out.println("State: " + (this.getState() == AlgorithmState.created || this.getState() == AlgorithmState.active));
+		System.out.println("Generations: " + (this.getConfig().numberOfGenerations() <= 0) + " " + (this.numberOfGenerationsEvolved < this.getConfig().numberOfGenerations()));
+		System.out.println("Evaluations: " + (this.getConfig().numberOfEvaluations() <= 0 || this.algorithm.getNumberOfEvaluations() < this.getConfig().numberOfEvaluations()));
+
+		System.out.println("Gen: " + this.numberOfGenerationsEvolved + " / " + this.getConfig().numberOfGenerations());
+		System.out.println("Evals: " + this.getNumberOfEvaluations() + " / " + this.getConfig().numberOfEvaluations());
+
 		return this.getCurrentResult();
+	}
+
+	public boolean terminateEvolution() {
+		boolean condition = this.getState() == AlgorithmState.inactive;
+		if (this.getConfig().numberOfEvaluations() > 0) {
+			condition = condition || this.getNumberOfEvaluations() >= this.getConfig().numberOfEvaluations();
+		}
+		if (this.getConfig().numberOfGenerations() > 0) {
+			condition = condition || this.getNumberOfGenerationsEvolved() >= this.getConfig().numberOfGenerations();
+		}
+		if (this.getConfig().earlyTerminationGenerations() >= 0) {
+			condition = condition || this.numberOfGenerationsWOChange >= this.getConfig().earlyTerminationGenerations();
+		}
+		return condition;
 	}
 
 	@Override

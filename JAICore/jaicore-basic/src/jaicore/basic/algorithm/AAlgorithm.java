@@ -36,7 +36,8 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	/* State and event bus for sending algorithm events. */
 	private Timer timer;
 	private long shutdownInitialized = -1; // timestamp for when the shutdown has been initialized
-	private long activationTime = -1; // timestampe of algorithm activation
+	private long activationTime = -1; // timestamp of algorithm activation
+
 	private long deadline = -1; // timestamp when algorithm must terminate due to timeout
 	private long timeouted = -1; // timestamp for when timeout has been triggered
 	private long canceled = -1; // timestamp for when the algorithm has been canceled
@@ -152,6 +153,9 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	}
 
 	protected TimeOut getRemainingTimeToDeadline() {
+		if (this.deadline < 0) {
+			return new TimeOut(Integer.MAX_VALUE, TimeUnit.SECONDS);
+		}
 		return new TimeOut(this.deadline - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
 	}
 
