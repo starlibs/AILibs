@@ -16,6 +16,13 @@ import jaicore.ml.tsc.exceptions.TimeSeriesLoadingException;
 import jaicore.ml.tsc.util.ClassMapper;
 import jaicore.ml.tsc.util.SimplifiedTimeSeriesLoader;
 
+/**
+ * Unit tests of the time series forest classifier.
+ * 
+ * @author Julian Lienen
+ *
+ */
+@SuppressWarnings("unused")
 public class TimeSeriesForestTest {
 	private static final double EPS_DELTA = 0.000001;
 
@@ -33,6 +40,14 @@ public class TimeSeriesForestTest {
 	private static final String BEEF_TRAIN = UNIVARIATE_PREFIX + "Beef\\Beef_TRAIN.arff";
 	private static final String BEEF_TEST = UNIVARIATE_PREFIX + "Beef\\Beef_TEST.arff";
 
+	/**
+	 * Test for the (possibly parallel) training of the time series forest
+	 * classifier.
+	 * 
+	 * @throws TimeSeriesLoadingException
+	 * @throws TrainingException
+	 * @throws PredictionException
+	 */
 	@Test
 	public void classifierTest() throws TimeSeriesLoadingException, TrainingException, PredictionException {
 

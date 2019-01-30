@@ -9,6 +9,13 @@ import jaicore.ml.tsc.classifier.ASimplifiedTSClassifier;
 import jaicore.ml.tsc.classifier.trees.TimeSeriesTreeAlgorithm.FeatureType;
 import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 
+/**
+ * Time series tree as described in Deng, Houtao et al. “A Time Series Forest
+ * for Classification and Feature Extraction.” Inf. Sci. 239 (2013): 142-153.
+ * 
+ * @author Julian Lienen
+ *
+ */
 public class TimeSeriesTree extends ASimplifiedTSClassifier<Integer> {
 	/**
 	 * Decision information for a tree node within a <code>TimeSeriesTree</code>.
@@ -27,24 +34,59 @@ public class TimeSeriesTree extends ASimplifiedTSClassifier<Integer> {
 		}
 	}
 
+	/**
+	 * The root node of the time series tree
+	 */
 	private final TreeNode<TimeSeriesTreeNodeDecisionFunction> rootNode;
 
+	/**
+	 * Constructs an empty time series tree.
+	 * 
+	 * @param maxDepth
+	 *            Maximal depth of the tree to be trained
+	 * @param seed
+	 *            Seed used for randomized operations
+	 */
 	public TimeSeriesTree(final int maxDepth, final int seed) {
 		super(new TimeSeriesTreeAlgorithm(maxDepth, seed));
 		this.rootNode = new TreeNode<TimeSeriesTreeNodeDecisionFunction>(new TimeSeriesTreeNodeDecisionFunction(),
 				null);
 	}
 
+	/**
+	 * Constructs an empty time series tree.
+	 * 
+	 * @param maxDepth
+	 *            Maximal depth of the tree to be trained
+	 * @param seed
+	 *            Seed used for randomized operations
+	 * @param useFeatureCaching
+	 *            Indicator whether feature caching should be used. Since feature
+	 *            generation is very efficient, this should be only used if the time
+	 *            series is very long
+	 */
 	public TimeSeriesTree(final int maxDepth, final int seed, final boolean useFeatureCaching) {
 		super(new TimeSeriesTreeAlgorithm(maxDepth, seed, useFeatureCaching));
 		this.rootNode = new TreeNode<TimeSeriesTreeNodeDecisionFunction>(new TimeSeriesTreeNodeDecisionFunction(),
 				null);
 	}
 
+	/**
+	 * Getter for the root node.
+	 * 
+	 * @return Returns the root node of the time series tree
+	 */
 	public TreeNode<TimeSeriesTreeNodeDecisionFunction> getRootNode() {
 		return rootNode;
 	}
 
+	/**
+	 * Predicts the class of the given univariate instance by iterating through the
+	 * tree starting from the root node to a leaf node to induce a class prediction.
+	 * 
+	 * @param univInstance
+	 *            Univariate instance to be predicted
+	 */
 	@Override
 	public Integer predict(double[] univInstance) throws PredictionException {
 		TreeNode<TimeSeriesTreeNodeDecisionFunction> currNode = this.rootNode;
@@ -55,15 +97,24 @@ public class TimeSeriesTree extends ASimplifiedTSClassifier<Integer> {
 		return currNode.getValue().classPrediction;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Integer predict(List<double[]> multivInstance) throws PredictionException {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Multivariate instances are not supported yet.");
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public List<Integer> predict(TimeSeriesDataset dataset) throws PredictionException {
-		// TODO: Multivariate support or exception
+		if (dataset.isMultivariate())
+			throw new UnsupportedOperationException("Multivariate instances are not supported yet.");
+
+		if (dataset.isEmpty())
+			throw new IllegalArgumentException("The dataset to be predicted must not be null!");
 
 		double[][] data = dataset.getValuesOrNull(0);
 		List<Integer> predictions = new ArrayList<>();
@@ -75,6 +126,17 @@ public class TimeSeriesTree extends ASimplifiedTSClassifier<Integer> {
 		return predictions;
 	}
 
+	/**
+	 * Function performing the decision on a <code>treeNode</code> given the
+	 * <code>instance</code> based on the locally stored splitting criterion.
+	 * 
+	 * @param treeNode
+	 *            Tree node where the decision is taken place
+	 * @param instance
+	 *            Instance values
+	 * @return Returns the child node where the next decision can be done, null if
+	 *         <code>treeNode</code> is a tree node
+	 */
 	public static TreeNode<TimeSeriesTreeNodeDecisionFunction> decide(
 			final TreeNode<TimeSeriesTreeNodeDecisionFunction> treeNode, final double[] instance) {
 		if (treeNode.getValue().classPrediction != -1)
@@ -86,7 +148,7 @@ public class TimeSeriesTree extends ASimplifiedTSClassifier<Integer> {
 
 		// Check decision function
 		if (TimeSeriesTreeAlgorithm.calculateFeature(treeNode.getValue().f, instance, treeNode.getValue().t1,
-				treeNode.getValue().t2) <= treeNode.getValue().threshold) {
+				treeNode.getValue().t2, TimeSeriesTreeAlgorithm.USE_BIAS_CORRECTION) <= treeNode.getValue().threshold) {
 			return treeNode.getChildren().get(0);
 		} else {
 			return treeNode.getChildren().get(1);

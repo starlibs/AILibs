@@ -86,111 +86,211 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 	 */
 	private boolean useFeatureCaching = false;
 
+	/**
+	 * Indicator that the bias (Bessel's) correction should be used for the
+	 * calculation of the standard deviation.
+	 */
+	public static final boolean USE_BIAS_CORRECTION = true;
+
+	/**
+	 * Constructor.
+	 * 
+	 * @param maxDepth
+	 *            Maximal depth of the tree to be trained
+	 * @param seed
+	 *            Seed used for randomized operations
+	 * @param useFeatureCaching
+	 *            Indicator whether feature caching should be used. Since feature
+	 *            generation is very efficient, this should be only used if the time
+	 *            series is very long
+	 */
 	public TimeSeriesTreeAlgorithm(final int maxDepth, final int seed, final boolean useFeatureCaching) {
 		this.maxDepth = maxDepth;
 		this.seed = seed;
 		this.useFeatureCaching = useFeatureCaching;
 	}
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param maxDepth
+	 *            Maximal depth of the tree to be trained
+	 * @param seed
+	 *            Seed used for randomized operations
+	 */
 	public TimeSeriesTreeAlgorithm(final int maxDepth, final int seed) {
 		this.maxDepth = maxDepth;
 		this.seed = seed;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void registerListener(Object listener) {
 		throw new UnsupportedOperationException("The operation to be performed is not supported.");
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public int getNumCPUs() {
 		throw new UnsupportedOperationException("The operation to be performed is not supported.");
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void setNumCPUs(int numberOfCPUs) {
 		throw new UnsupportedOperationException("The operation to be performed is not supported.");
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void setTimeout(long timeout, TimeUnit timeUnit) {
 		// TODO Auto-generated method stub
 
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void setTimeout(TimeOut timeout) {
 		// TODO Auto-generated method stub
 
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public TimeOut getTimeout() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public AlgorithmEvent nextWithException()
 			throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
 		throw new UnsupportedOperationException("The operation to be performed is not supported.");
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public IAlgorithmConfig getConfig() {
 		throw new UnsupportedOperationException("The operation to be performed is not supported.");
 	}
 
+	/**
+	 * Training procedure construction a time series tree using the given input
+	 * data.
+	 */
 	@Override
 	public TimeSeriesTree call()
 			throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
-
 		// Training
 		TimeSeriesDataset data = this.getInput();
+		if (data.isEmpty())
+			throw new IllegalArgumentException("The dataset used for training must not be null!");
+		if (data.isMultivariate())
+			throw new UnsupportedOperationException("Multivariate instances are not supported yet.");
+
 		double[][] dataMatrix = data.getValuesOrNull(0);
 
+		// Also check for number of instances
 		int n = dataMatrix.length;
 		if (n <= 0)
-			throw new IllegalArgumentException("The traning data must contain at least one instance!");
+			throw new IllegalArgumentException("The traning data's matrix must contain at least one instance!");
 
 		// Initial prior parentEntropy value, affects the scale of delta entropy values
 		// in each recursion step
 		double parentEntropy = 2d;
 
+		// Set up feature caching
 		if (useFeatureCaching) {
 			int Q = dataMatrix[0].length;
 			this.transformedFeaturesCache = new HashMap<>(Q * Q * n);
 		}
 
+		// Build tree
 		tree(dataMatrix, data.getTargets(), parentEntropy, this.model.getRootNode(), 0);
 
-		return null;
+		return this.model;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Iterator<AlgorithmEvent> iterator() {
 		throw new UnsupportedOperationException("The operation to be performed is not supported.");
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean hasNext() {
 		throw new UnsupportedOperationException("The operation to be performed is not supported.");
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public AlgorithmEvent next() {
 		throw new UnsupportedOperationException("The operation to be performed is not supported.");
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void cancel() {
 		throw new UnsupportedOperationException("The operation to be performed is not supported.");
 	}
 
-	// Entropy based
+	/**
+	 * Tree generation (cf. Algorithm 2 of original paper). Samples the intervals in
+	 * each recursion step and calculates the features (using caches if
+	 * {@link TimeSeriesTreeAlgorithm#useFeatureCaching} was set true). It then
+	 * searches for an optimal split regarding several threshold candidates for
+	 * feature splits. The splitting criterion is based on a metric called Entrance
+	 * gain which is a combination of the entropy induced by the class proportions
+	 * and the feature margins to the threshold (cf. chapter 4.1 in the paper). The
+	 * tree's recursion is stopped at a leaf node if there is no entropy gain, the
+	 * <code>maxDepth</code> has been reached or the local entropy is zero.
+	 * 
+	 * @param data
+	 *            The untransformed data which will be used for the split in the
+	 *            transformed feature representation
+	 * @param targets
+	 *            The targets of the instances
+	 * @param parentEntropy
+	 *            The parent entropy calculated in the recursion's previous step
+	 * @param nodeToBeFilled
+	 *            The tree node which should be filled with the splitting
+	 *            information to use it for predictions
+	 * @param depth
+	 *            The current depth to be compared to the
+	 *            {@link TimeSeriesTreeAlgorithm#maxDepth}
+	 */
 	public void tree(double[][] data, int[] targets, final double parentEntropy,
 			final TreeNode<TimeSeriesTreeNodeDecisionFunction> nodeToBeFilled, int depth) {
 
+		int n = targets.length;
+
+		// Sample the intervals used for the feature generation
 		Pair<List<Integer>, List<Integer>> T1T2 = sampleIntervals(data[0].length, this.seed);
 
 		// Transform instances
@@ -198,16 +298,14 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 		List<List<Double>> thresholdCandidates = generateThresholdCandidates(T1T2, NUM_THRESH_CANDIDATES,
 				transformedInstances);
 
-		int n = targets.length;
-
 		// Get unique classes
 		final List<Integer> classes = new ArrayList<>(
 				new HashSet<Integer>(Arrays.asList(ArrayUtils.toObject(targets))));
 
+		// Initialize solution storing variables
 		double deltaEntropyStar = 0, thresholdStar = 0d;
 		int t1t2Star = -1;
 		int fStar = -1;
-
 		double[] eStarPerFeatureType = new double[NUM_FEATURE_TYPES];
 		for (int i = 0; i < eStarPerFeatureType.length; i++) {
 			eStarPerFeatureType[i] = Integer.MIN_VALUE;
@@ -216,10 +314,11 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 		int[] t1t2StarPerFeatureType = new int[NUM_FEATURE_TYPES];
 		double[] thresholdStarPerFeatureType = new double[NUM_FEATURE_TYPES];
 
+		// Search for the best splitting criterion in terms of the best Entrance gain
+		// for each feature type due to different feature scales
 		List<Integer> T1 = T1T2.getX();
 		List<Integer> T2 = T1T2.getY();
 		for (int i = 0; i < T1.size(); i++) {
-
 			for (int k = 0; k < NUM_FEATURE_TYPES; k++) {
 				for (final double cand : thresholdCandidates.get(k)) {
 					// Calculate delta entropy and E for f_k(t1,t2) <= cand
@@ -228,6 +327,7 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 					double localE = calculateEntrance(localDeltaEntropy,
 							calculateMargin(transformedInstances[k][i], cand));
 
+					// Update solution if it has the best Entrance value
 					if (localE > eStarPerFeatureType[k]) {
 						eStarPerFeatureType[k] = localE;
 						deltaEntropyStarPerFeatureType[k] = localDeltaEntropy;
@@ -236,22 +336,19 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 					}
 				}
 			}
-			// }
 		}
 
-		// Set best solution
+		// Set best solution among all feature types
 		int bestK = getBestSplitIndex(deltaEntropyStarPerFeatureType);
-		// eStar = eStarPerFeatureType[bestK];
 		deltaEntropyStar = deltaEntropyStarPerFeatureType[bestK];
 		t1t2Star = t1t2StarPerFeatureType[bestK];
 		thresholdStar = thresholdStarPerFeatureType[bestK];
 		fStar = bestK;
 
-		//
+		// Check for recursion stop condition (=> leaf node condition)
 		if (Math.abs(deltaEntropyStar) <= PRECISION_DELTA || depth == maxDepth - 1
 				|| (depth != 0 && Math.abs(deltaEntropyStar - parentEntropy) <= PRECISION_DELTA)) {
-			// Label this node as a leaf and return
-			// Get majority
+			// Label this node as a leaf and return majority class
 			nodeToBeFilled.getValue().classPrediction = TimeSeriesUtil.getMode(targets);
 			return;
 		}
@@ -262,6 +359,7 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 		nodeToBeFilled.getValue().t2 = T2.get(t1t2Star);
 		nodeToBeFilled.getValue().threshold = thresholdStar;
 
+		// Assign data instances and the corresponding targets to the child nodes
 		Pair<List<Integer>, List<Integer>> childDataIndices = getChildDataIndices(transformedInstances, n, fStar,
 				t1t2Star, thresholdStar);
 
@@ -279,23 +377,48 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 			targetsRight[i] = targets[childDataIndices.getY().get(i)];
 		}
 
+		// Prepare the child nodes
 		TreeNode<TimeSeriesTreeNodeDecisionFunction> leftNode = nodeToBeFilled
 				.addChild(new TimeSeriesTreeNodeDecisionFunction());
 		TreeNode<TimeSeriesTreeNodeDecisionFunction> rightNode = nodeToBeFilled
 				.addChild(new TimeSeriesTreeNodeDecisionFunction());
 
+		// Recursion
 		tree(dataLeft, targetsLeft, deltaEntropyStar, leftNode, depth + 1);
 		tree(dataRight, targetsRight, deltaEntropyStar, rightNode, depth + 1);
 	}
 
+	/**
+	 * Function returning the data indices assigned to the left and the right child
+	 * of a binary tree based on the splitting criterion given by the feature type
+	 * <code>fType</code>, the intervals index <code>t1t2</code> in the transformed
+	 * data set <code>transformedData</code> and the <code>threshold</code>.
+	 * 
+	 * @param transformedData
+	 *            Transformed data on which the split is calculated
+	 * @param n
+	 *            The number of instances
+	 * @param fType
+	 *            The feature type to be used for the split
+	 * @param t1t2
+	 *            The interval's index in the <code>transformedData</code> to be
+	 *            used for the split
+	 * @param threshold
+	 *            The threshold to be used for the split
+	 * @return Returns a pair of two lists, storing the data indices for the data
+	 *         points assigned to the left child of the current node (X) and the
+	 *         data indices assigned to the right child (Y)
+	 */
 	public static Pair<List<Integer>, List<Integer>> getChildDataIndices(final double[][][] transformedData,
-			final int n, final int k, final int t1t2, final double threshold) {
+			final int n, final int fType, final int t1t2, final double threshold) {
 
 		List<Integer> leftIndices = new ArrayList<>();
 		List<Integer> rightIndices = new ArrayList<>();
 
+		// Check for every instance whether it should be assigned to the left or right
+		// child
 		for (int i = 0; i < n; i++) {
-			if (transformedData[k][t1t2][i] <= threshold)
+			if (transformedData[fType][t1t2][i] <= threshold)
 				leftIndices.add(i);
 			else
 				rightIndices.add(i);
@@ -304,11 +427,23 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 		return new Pair<>(leftIndices, rightIndices);
 	}
 
+	/**
+	 * Function returning feature type used for the split based on given the
+	 * deltaEntropy star values. If multiple feature types have generated the same
+	 * deltaEntropy value, a random decision is taken.
+	 * 
+	 * @param deltaEntropyStarPerFeatureType
+	 *            The delta entropy star value per feature
+	 * @return Returns the feature type index which has been chosen
+	 */
 	public int getBestSplitIndex(final double[] deltaEntropyStarPerFeatureType) {
-		double max = (double) Integer.MIN_VALUE;
+		if (deltaEntropyStarPerFeatureType.length != NUM_FEATURE_TYPES)
+			throw new IllegalArgumentException("A delta entropy star value has to be given for each feature type!");
 
+		double max = (double) Integer.MIN_VALUE;
 		List<Integer> maxIndexes = new ArrayList<>();
 
+		// Search for the indices storing the best value
 		for (int i = 0; i < deltaEntropyStarPerFeatureType.length; i++) {
 			if (deltaEntropyStarPerFeatureType[i] > max) {
 				max = deltaEntropyStarPerFeatureType[i];
@@ -332,17 +467,41 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 
 	}
 
-	// Assume targets 1 to n
+	/**
+	 * Function calculating the delta entropy for a given
+	 * <code>thresholdCandidate</code> and <code>parentEntropy</code>. The values of
+	 * the data are the feature type's values for each instance. The delta entropy
+	 * is formed of the difference between the parent entropy and the weighted sum
+	 * of the entropy values of the children and their instance assignments based on
+	 * the split.
+	 * 
+	 * @param dataValues
+	 *            The transformed feature type values for each instance
+	 * @param targets
+	 *            The targets of each instance
+	 * @param thresholdCandidate
+	 *            The threshold candidate to be evaluated
+	 * @param classes
+	 *            List storing the classes whose indices can be looked up
+	 * @param parentEntropy
+	 *            The parent entropy used for the delta calculation
+	 * @return Returns the delta entropy for the threshold candidate of the current
+	 *         feature type
+	 */
 	public static double calculateDeltaEntropy(final double[] dataValues, final int[] targets,
 			final double thresholdCandidate, final List<Integer> classes, final double parentEntropy) {
+		
+		if(dataValues.length != targets.length)
+			throw new IllegalArgumentException(
+					"The number of data values must be the same as the number of target values!");
+		
+		// Initialization
 		double[] entropyValues = new double[2];
-
 		int numClasses = classes.size();
-
 		int[][] classNodeStatistic = new int[2][numClasses];
 		int[] intCounter = new int[2];
 
-		// Calculate proportions
+		// Calculate class statistics based on the split
 		for (int i = 0; i < dataValues.length; i++) {
 			if (dataValues[i] <= thresholdCandidate) {
 				classNodeStatistic[0][classes.indexOf(targets[i])]++;
@@ -353,6 +512,7 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 			}
 		}
 
+		// Calculate the entropy values for each child
 		for (int i = 0; i < entropyValues.length; i++) {
 			double entropySum = 0;
 			for (int c = 0; c < numClasses; c++) {
@@ -365,6 +525,8 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 			entropyValues[i] = (-1) * entropySum;
 		}
 
+		// Get the weighted sum of the children based on the proportions of the
+		// instances assigned to the corresponding nodes
 		double weightedSum = 0;
 		for (int i = 0; i < entropyValues.length; i++) {
 			weightedSum += (double) intCounter[i] / (double) dataValues.length * entropyValues[i];
@@ -373,6 +535,16 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 		return parentEntropy - weightedSum;
 	}
 
+	/**
+	 * Calculates the entrance gain specified by Deng et. al. in the paper's chapter
+	 * 4.1.
+	 * 
+	 * @param deltaEntropy
+	 *            The delta entropy
+	 * @param margin
+	 *            The features margin
+	 * @return Returns the entrance gain
+	 */
 	public static double calculateEntrance(final double deltaEntropy, final double margin) {
 		return deltaEntropy + ENTROPY_APLHA * margin;
 	}
@@ -399,6 +571,19 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 		return min;
 	}
 
+	/**
+	 * Method transforming the given <code>dataset</code> using the interval pairs
+	 * specified in <code>T1T2</code> by calculating each {@link FeatureType} for
+	 * every instance and interval pair.
+	 * 
+	 * @param dataset
+	 *            The dataset which should be transformed
+	 * @param T1T2
+	 *            The stard and end interval pairs (see
+	 *            {@link TimeSeriesTreeAlgorithm#sampleIntervals(int, int)})
+	 * @return Returns the transformed instances (shape: number of feature types x
+	 *         number of interval pairs x number of instances)
+	 */
 	public double[][][] transformInstances(final double[][] dataset, Pair<List<Integer>, List<Integer>> T1T2) {
 		double[][][] result = new double[NUM_FEATURE_TYPES][T1T2.getX().size()][dataset.length];
 
@@ -415,13 +600,13 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 				if (this.useFeatureCaching) {
 					long key = i + dataset[i].length * t1 + dataset[i].length * dataset[i].length * t2;
 					if (!this.transformedFeaturesCache.containsKey(key)) {
-						features = getFeatures(dataset[i], t1, t2);
+						features = getFeatures(dataset[i], t1, t2, USE_BIAS_CORRECTION);
 						this.transformedFeaturesCache.put(key, features);
 					} else {
 						features = this.transformedFeaturesCache.get(key);
 					}
 				} else {
-					features = getFeatures(dataset[i], t1, t2);
+					features = getFeatures(dataset[i], t1, t2, USE_BIAS_CORRECTION);
 				}
 
 				result[0][j][i] = features[0];
@@ -432,10 +617,28 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 		return result;
 	}
 
+	/**
+	 * Function generating threshold candidates for each feature type. It calculates
+	 * the interval [min f_k(t1,t2), max f_k(t1,t2)] among all instances for every
+	 * feature type and every possible interval and generates
+	 * <code>numberOfCandidates</code> candidates using equal-width intervals.
+	 * 
+	 * @param T1T2
+	 *            The pair of start and end interval pairs (see
+	 *            {@link TimeSeriesTreeAlgorithm#sampleIntervals(int, int)})
+	 * @param numOfCandidates
+	 *            The number of candidates to be generated per feature type
+	 * @param transformedFeatures
+	 *            The transformed data instances
+	 * @return Returns a list consisting of a list for each feature type storing the
+	 *         threshold candidates
+	 */
 	public static List<List<Double>> generateThresholdCandidates(final Pair<List<Integer>, List<Integer>> T1T2,
 			final int numOfCandidates, final double[][][] transformedFeatures) {
-		List<List<Double>> result = new ArrayList<>();
+		if (numOfCandidates < 1)
+			throw new IllegalArgumentException("At least one candidate must be calculated!");
 
+		List<List<Double>> result = new ArrayList<>();
 		int numInstances = transformedFeatures[0][0].length;
 
 		double[] min = new double[NUM_FEATURE_TYPES];
@@ -471,6 +674,20 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 		return result;
 	}
 
+	/**
+	 * Function sampling intervals based on the length of the time series
+	 * <code>m</code> and the given <code>seed</code>. Refers to algorithm 1 of the
+	 * paper. The sampled intervals are stored in a pair of lists where each index
+	 * of the first list is related to the same index in the second list. Sampling
+	 * is done without replacement.
+	 * 
+	 * @param m
+	 *            Number of time series attributes (steps)
+	 * @param seed
+	 *            The seed used for the randomized sampling
+	 * @return Returns a pair of lists consisting of the start indices (X) and the
+	 *         end indices (Y)
+	 */
 	public static Pair<List<Integer>, List<Integer>> sampleIntervals(final int m, final int seed) {
 		if (m < 1)
 			throw new IllegalArgumentException("The series' length m must be greater than zero.");
@@ -491,6 +708,19 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 		return new Pair<List<Integer>, List<Integer>>(T1, T2);
 	}
 
+	/**
+	 * Function sampling a given <code>list</code> randomly without replacement
+	 * using the given <code>seed</code>. <code>sampleSize</code> many elements are
+	 * sampled and returned.
+	 * 
+	 * @param list
+	 *            List to be sampled from without replacement
+	 * @param sampleSize
+	 *            Number of elements to be sampled (must be <= list.size())
+	 * @param seed
+	 *            The seed used for the randomized sampling
+	 * @return Returns a list of elements which have been sampled
+	 */
 	public static List<Integer> randomlySampleNoReplacement(final List<Integer> list, final int sampleSize,
 			final int seed) {
 		if (list == null)
@@ -505,8 +735,26 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 		return listCopy.subList(0, sampleSize);
 	}
 
-	// t2 inclusive
-	public static double[] getFeatures(final double[] vector, final int t1, final int t2) {
+	/**
+	 * Function calculating all features occurring in {@link FeatureType} at once
+	 * using an online calculation approach for mean, standard deviation and the
+	 * slope.
+	 * 
+	 * @param vector
+	 *            The instance's vector which is used to calculate the features
+	 * @param t1
+	 *            Start of the interval
+	 * @param t2
+	 *            End of the interval (inclusive)
+	 * @param useBiasCorrection
+	 *            Indicator whether the bias (Bessel's) correction should be used
+	 *            for the standard deviation calculation
+	 * @return Returns an double array of the size
+	 *         {@link TimeSeriesTreeAlgorithm#NUM_FEATURE_TYPES} storing the
+	 *         generated feature values.
+	 */
+	public static double[] getFeatures(final double[] vector, final int t1, final int t2,
+			final boolean useBiasCorrection) {
 		double[] result = new double[NUM_FEATURE_TYPES];
 
 		if (t1 >= vector.length || t2 >= vector.length)
@@ -521,7 +769,6 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 		double xy = 0;
 		double y = 0;
 		double yy = 0;
-
 		for (int i = t1; i <= t2; i++) {
 			x += i;
 			y += vector[i];
@@ -529,12 +776,15 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 			xx += i * i;
 			xy += i * vector[i];
 		}
-		result[0] = y / (double) (t2 - t1 + 1);
-		
-		// TODO: Use Bessel's correction?
 		double length = t2 - t1 + 1d;
+
+		// Calculate the mean
+		result[0] = y / length;
+		
+		// Calculate the standard deviation
 		double stddev = (yy / length - ((y / length) * (y / length)));
-		stddev *= length / (length - 1);
+		if (useBiasCorrection)
+			stddev *= length / (length - 1);
 		stddev = Math.sqrt(stddev);
 		result[1] = stddev;
 
@@ -543,21 +793,36 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 		return result;
 	}
 
-
-
-	public static double calculateFeature(final FeatureType fType, final double[] instance, final int t1,
-			final int t2) {
+	/**
+	 * Function calculating the feature specified by the feature type
+	 * <code>fType</code> for a given instance <code>vector</code> of the interval
+	 * [<code>t1</code>, <code>t2</code>].
+	 * 
+	 * @param fType
+	 *            The feature type to be calculated
+	 * @param instance
+	 *            The instance's vector which values are used
+	 * @param t1
+	 *            Start of the interval
+	 * @param t2
+	 *            End of the interval (inclusive)
+	 * @param useBiasCorrection
+	 *            Indicator whether the bias (Bessel's) correction should be used
+	 *            for the standard deviation calculation
+	 * @return Returns the calculated feature for the specific instance and interval
+	 */
+	public static double calculateFeature(final FeatureType fType, final double[] vector, final int t1,
+			final int t2, final boolean useBiasCorrection) {
 		switch (fType) {
 		case MEAN:
-			return TimeSeriesUtil.mean(instance, t1, t2);
+			return TimeSeriesUtil.mean(vector, t1, t2);
 		case STDDEV:
-			return TimeSeriesUtil.stddev(instance, t1, t2);
+			return TimeSeriesUtil.stddev(vector, t1, t2, useBiasCorrection);
 		case SLOPE:
-			return TimeSeriesUtil.slope(instance, t1, t2);
+			return TimeSeriesUtil.slope(vector, t1, t2);
 		default:
 			throw new UnsupportedOperationException(
 					"Feature calculation function with id '" + fType + "' is unknwon.");
 		}
 	}
-
 }

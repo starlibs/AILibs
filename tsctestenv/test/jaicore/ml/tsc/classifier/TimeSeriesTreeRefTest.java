@@ -1,5 +1,12 @@
 package jaicore.ml.tsc.classifier;
 
+/**
+ * Reference tests for the time series tree classifier.
+ * 
+ * @author Julian Lienen
+ *
+ */
+@SuppressWarnings("unused")
 public class TimeSeriesTreeRefTest {
 	private static final double EPS_DELTA = 0.000001;
 

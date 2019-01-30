@@ -212,6 +212,14 @@ public class TimeSeriesUtil {
 		return timestamps;
 	}
 
+	/**
+	 * Returns the mode of the given <code>array</code>. If there are multiple
+	 * values with the same frequency, the lower value will be taken.
+	 * 
+	 * @param array
+	 *            The array which mode should be returned
+	 * @return Returns the mode, i. e. the most frequently occurring int value
+	 */
 	public static int getMode(final int[] array) {
 		HashMap<Integer, Integer> statistics = new HashMap<>();
 		for (int i = 0; i < array.length; i++) {
@@ -225,6 +233,14 @@ public class TimeSeriesUtil {
 		return maxKey;
 	}
 
+	/**
+	 * Returns the key with the maximum integer value. If there are multiple values
+	 * with the same value, the lower key with regard to its type will be taken.
+	 * 
+	 * @param map
+	 *            The map storing the keys with its corresponding integer values
+	 * @return Returns the key of type <T> storing the maximum integer value
+	 */
 	public static <T> T getMaximumKeyByValue(final Map<T, Integer> map) {
 		T maxKey = null;
 		int maxCount = 0;
@@ -238,6 +254,7 @@ public class TimeSeriesUtil {
 		return maxKey;
 	}
 	
+	// TODO: Unify with Helen's calculation
 	public static double[] zNormalize(final double[] dataVector, final boolean besselsCorrection) {
 		// TODO: Parameter checks...
 
@@ -268,10 +285,20 @@ public class TimeSeriesUtil {
 		return result;
 	}
 
-	// t2 inclusive
+	/**
+	 * Function calculating the mean of the interval [t1, t2 (inclusive)] of the
+	 * given <code>vector</code>.
+	 * 
+	 * @param vector
+	 *            Vector which is used for the calculation
+	 * @param t1
+	 *            Interval start
+	 * @param t2
+	 *            Interval end (inclusive)
+	 * @return Returns the mean of the vector's interval [t1, t2 (inclusive)]
+	 */
 	public static double mean(final double[] vector, final int t1, final int t2) {
-		if (t1 >= vector.length || t2 >= vector.length)
-			throw new IllegalArgumentException("Parameters t1 and t2 must be valid indices of the vector.");
+		checkIntervalParameters(vector, t1, t2);
 
 		double result = 0;
 		for (int i = t1; i <= t2; i++) {
@@ -280,8 +307,23 @@ public class TimeSeriesUtil {
 		return result / (t2 - t1 + 1);
 	}
 
-	// t2 inclusive
-	public static double stddev(final double[] vector, final int t1, final int t2) {
+	/**
+	 * Function calculating the standard deviation of the interval [t1, t2
+	 * (inclusive)] of the given <code>vector</code>.
+	 * 
+	 * @param vector
+	 *            Vector which is used for the calculation
+	 * @param t1
+	 *            Interval start
+	 * @param t2
+	 *            Interval end (inclusive)
+	 * @param useBiasCorrection
+	 *            Indicator whether the bias (Bessel's) correction should be used
+	 * @return Returns the standard deviation of the vector's interval [t1, t2
+	 *         (inclusive)]
+	 */
+	public static double stddev(final double[] vector, final int t1, final int t2, final boolean useBiasCorrection) {
+		checkIntervalParameters(vector, t1, t2);
 		if (t1 == t2)
 			return 0.0d;
 
@@ -292,11 +334,26 @@ public class TimeSeriesUtil {
 			result += Math.pow(vector[i] - mean, 2);
 		}
 
-		// TODO: Use Bessel's correction?
-		return Math.sqrt(result / (double) (t2 - t1));
+		return Math.sqrt(result / (double) (t2 - t1 + (useBiasCorrection ? 0 : 1)));
 	}
 
+	/**
+	 * Function calculating the slope of the interval [t1, t2 (inclusive)] of the
+	 * given <code>vector</code>.
+	 * 
+	 * @param vector
+	 *            Vector which is used for the calculation
+	 * @param t1
+	 *            Interval start
+	 * @param t2
+	 *            Interval end (inclusive)
+	 * @return Returns the slope of the vector's interval [t1, t2 (inclusive)]
+	 */
 	public static double slope(final double[] vector, final int t1, final int t2) {
+		checkIntervalParameters(vector, t1, t2);
+
+		if (t2 == t1)
+			return 0d;
 
 		double xx = 0;
 		double x = 0;
@@ -313,6 +370,24 @@ public class TimeSeriesUtil {
 		// Calculate slope
 		int length = t2 - t1 + 1;
 		return (length * xy - x * y) / (length * xx - x * x);
+	}
+
+	/**
+	 * Checks the parameters <code>t1</code> and </code>t2</code> for validity given
+	 * the <code>vector</code>
+	 * 
+	 * @param vector
+	 *            Value vector
+	 * @param t1
+	 *            Interval start
+	 * @param t2
+	 *            Interval end (inclusive)
+	 */
+	private static void checkIntervalParameters(final double[] vector, final int t1, final int t2) {
+		if (t1 >= vector.length || t2 >= vector.length)
+			throw new IllegalArgumentException("Parameters t1 and t2 must be valid indices of the vector!");
+		if (t2 < t1)
+			throw new IllegalArgumentException("End index t2 of the interval must be greater equals start index t1!");
 	}
 
 }

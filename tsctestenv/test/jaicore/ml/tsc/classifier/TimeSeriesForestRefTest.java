@@ -15,6 +15,13 @@ import jaicore.ml.tsc.classifier.trees.TimeSeriesForestClassifier;
 import jaicore.ml.tsc.exceptions.TimeSeriesLoadingException;
 import timeseriesweka.classifiers.TSF;
 
+/**
+ * Reference tests for the time series forest classifier.
+ * 
+ * @author Julian Lienen
+ *
+ */
+@SuppressWarnings("unused")
 public class TimeSeriesForestRefTest {
 	private static final double EPS_DELTA = 0.000001;
 
@@ -55,8 +62,9 @@ public class TimeSeriesForestRefTest {
 		int numTrees = 500;
 		// Ref classifier uses no depth limit
 		int maxDepth = 1000;
+		int numCPUs = 1;
 
-		TimeSeriesForestClassifier ownClf = new TimeSeriesForestClassifier(numTrees, maxDepth, seed, false);
+		TimeSeriesForestClassifier ownClf = new TimeSeriesForestClassifier(numTrees, maxDepth, seed, false, numCPUs);
 
 		TSF refClf = new TSF(seed);
 		refClf.setNumTrees(numTrees);

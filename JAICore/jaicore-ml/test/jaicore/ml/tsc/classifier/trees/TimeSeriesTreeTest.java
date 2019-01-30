@@ -24,12 +24,20 @@ import jaicore.ml.tsc.util.ClassMapper;
 import jaicore.ml.tsc.util.SimplifiedTimeSeriesLoader;
 import junit.framework.Assert;
 
+/**
+ * Unit tests for the time series tree classifier.
+ * 
+ * @author Julian Lienen
+ *
+ */
+@SuppressWarnings("unused")
 public class TimeSeriesTreeTest {
 	private static final double EPS_DELTA = 0.000001;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(TimeSeriesTreeTest.class);
 
 	private static final String UNIVARIATE_PREFIX = "C:\\Users\\Julian\\Downloads\\UnivariateTSCProblems\\";
+
 	private static final String ITALY_POWER_DEMAND_TRAIN = UNIVARIATE_PREFIX
 			+ "ItalyPowerDemand\\ItalyPowerDemand_TRAIN.arff";
 	private static final String ITALY_POWER_DEMAND_TEST = UNIVARIATE_PREFIX
@@ -38,6 +46,13 @@ public class TimeSeriesTreeTest {
 	private static final String BEEF_TRAIN = UNIVARIATE_PREFIX + "Beef\\Beef_TRAIN.arff";
 	private static final String BEEF_TEST = UNIVARIATE_PREFIX + "Beef\\Beef_TEST.arff";
 
+	/**
+	 * Tests the training of time series trees.
+	 * 
+	 * @throws TimeSeriesLoadingException
+	 * @throws TrainingException
+	 * @throws PredictionException
+	 */
 	@Test
 	public void classifierTest() throws TimeSeriesLoadingException, TrainingException, PredictionException {
 
@@ -92,26 +107,40 @@ public class TimeSeriesTreeTest {
 
 	}
 
+	/**
+	 * See
+	 * {@link TimeSeriesTreeAlgorithm#calculateFeature(FeatureType, double[], int, int, boolean)}.
+	 */
 	@Test
 	public void calculateFeatureTest() {
 		double[] instance = new double[] { 1, 2, 3 };
 		// Mean
-		Assert.assertEquals(2d, TimeSeriesTreeAlgorithm.calculateFeature(FeatureType.MEAN, instance, 0, 2), EPS_DELTA);
-		Assert.assertEquals(1.5d, TimeSeriesTreeAlgorithm.calculateFeature(FeatureType.MEAN, instance, 0, 1),
+		Assert.assertEquals(2d, TimeSeriesTreeAlgorithm.calculateFeature(FeatureType.MEAN, instance, 0, 2,
+				TimeSeriesTreeAlgorithm.USE_BIAS_CORRECTION), EPS_DELTA);
+		Assert.assertEquals(1.5d,
+				TimeSeriesTreeAlgorithm.calculateFeature(FeatureType.MEAN, instance, 0, 1,
+						TimeSeriesTreeAlgorithm.USE_BIAS_CORRECTION),
 				EPS_DELTA);
 		// Standard deviation
-		Assert.assertEquals(1d, TimeSeriesTreeAlgorithm.calculateFeature(FeatureType.STDDEV, instance, 0, 2),
+		Assert.assertEquals(1d,
+				TimeSeriesTreeAlgorithm.calculateFeature(FeatureType.STDDEV, instance, 0, 2,
+						TimeSeriesTreeAlgorithm.USE_BIAS_CORRECTION),
 				EPS_DELTA);
 		// Slope
-		Assert.assertEquals(1d, TimeSeriesTreeAlgorithm.calculateFeature(FeatureType.SLOPE, instance, 0, 2), EPS_DELTA);
+		Assert.assertEquals(1d, TimeSeriesTreeAlgorithm.calculateFeature(FeatureType.SLOPE, instance, 0, 2,
+				TimeSeriesTreeAlgorithm.USE_BIAS_CORRECTION), EPS_DELTA);
 
-		// TODO: Unify
-		double[] features = TimeSeriesTreeAlgorithm.getFeatures(instance, 0, 2);
+		double[] features = TimeSeriesTreeAlgorithm.getFeatures(instance, 0, 2,
+				TimeSeriesTreeAlgorithm.USE_BIAS_CORRECTION);
 		Assert.assertEquals(2d, features[0], EPS_DELTA);
 		Assert.assertEquals(1d, features[1], EPS_DELTA);
 		Assert.assertEquals(1d, features[2], EPS_DELTA);
 	}
 
+	/**
+	 * See
+	 * {@link TimeSeriesTreeAlgorithm#randomlySampleNoReplacement(List, int, int)}.
+	 */
 	@Test
 	public void randomlySampleNoReplacementTest() {
 		int m = 40;
@@ -122,6 +151,9 @@ public class TimeSeriesTreeTest {
 		Assert.assertEquals(m, samples.size());
 	}
 
+	/**
+	 * See {@link TimeSeriesTreeAlgorithm#sampleIntervals(int, int)}.
+	 */
 	@Test
 	public void sampleIntervalsTest() {
 		int m = 40;
@@ -130,11 +162,12 @@ public class TimeSeriesTreeTest {
 		Pair<List<Integer>, List<Integer>> result = TimeSeriesTreeAlgorithm.sampleIntervals(m, seed);
 
 		Assert.assertEquals(result.getX().size(), result.getY().size());
-
-		// TODO: Check this
-		// Assert.assertEquals(m, result.getX().size());
 	}
 
+	/**
+	 * See
+	 * {@link TimeSeriesTreeAlgorithm#generateThresholdCandidates(Pair, int, double[][][])}.
+	 */
 	@Test
 	public void generateThresholdCandidatesTest() {
 		List<Integer> T1 = Arrays.asList(0, 1);
@@ -156,6 +189,9 @@ public class TimeSeriesTreeTest {
 		Assert.assertEquals(4d / 5d, thresholdCandidates.get(2).get(1), EPS_DELTA);
 	}
 
+	/**
+	 * See {@link TimeSeriesTreeAlgorithm#transformInstances(double[][], Pair)}.
+	 */
 	@Test
 	public void transformInstancesTest() {
 		TimeSeriesTreeAlgorithm algorithm = new TimeSeriesTreeAlgorithm(0, 0);
@@ -190,6 +226,9 @@ public class TimeSeriesTreeTest {
 																			// second instance
 	}
 
+	/**
+	 * See {@link TimeSeriesTreeAlgorithm#calculateMargin(double[], double)}.
+	 */
 	@Test
 	public void calculateMarginTest() {
 		double[] dataValues = new double[] { 0, 1, 2, 3, 4, 5 };
@@ -201,6 +240,9 @@ public class TimeSeriesTreeTest {
 		Assert.assertEquals(2d, TimeSeriesTreeAlgorithm.calculateMargin(dataValues, thresholdCandidate), EPS_DELTA);
 	}
 
+	/**
+	 * See {@link TimeSeriesTreeAlgorithm#calculateEntrance(double, double)}.
+	 */
 	@Test
 	public void calculateEntranceTest() {
 		double[] dataValues = new double[] { 0, 0, 1, 1, 2, 2, 3, 3 };
@@ -217,6 +259,10 @@ public class TimeSeriesTreeTest {
 				TimeSeriesTreeAlgorithm.calculateEntrance(deltaEntropy, margin));
 	}
 
+	/**
+	 * See
+	 * {@link TimeSeriesTreeAlgorithm#calculateDeltaEntropy(double[], int[], double, List, double)}.
+	 */
 	@Test
 	public void calculateDeltaEntropyTest() {
 		double[] dataValues = new double[] { 0, 0, 1, 1, 2, 2, 3, 3 };
@@ -230,6 +276,9 @@ public class TimeSeriesTreeTest {
 
 	}
 
+	/**
+	 * See {@link TimeSeriesTreeAlgorithm#getBestSplitIndex(double[])}.
+	 */
 	@Test
 	public void getBestSplitIndexTest() {
 		TimeSeriesTreeAlgorithm algorithm = new TimeSeriesTreeAlgorithm(0, 0);
@@ -241,6 +290,10 @@ public class TimeSeriesTreeTest {
 		Assert.assertEquals(0, algorithm.getBestSplitIndex(deltaEntropyStarPerFeatureType));
 	}
 
+	/**
+	 * See
+	 * {@link TimeSeriesTreeAlgorithm#getChildDataIndices(double[][][], int, int, int, double)}.
+	 */
 	@Test
 	public void getChildDataIndicesTest() {
 		double[][][] transformedFeatures = new double[][][] { { { 0, 1.2d }, { 1, 6d } }, { { 3, 1.1d }, { 2, 0.5d } },
@@ -275,6 +328,10 @@ public class TimeSeriesTreeTest {
 		Assert.assertEquals(1, childDataIndices.getX().get(1).intValue());
 	}
 
+	/**
+	 * See
+	 * {@link TimeSeriesTreeAlgorithm#tree(double[][], int[], double, TreeNode, int)}.
+	 */
 	@Test
 	public void treeTest() throws TrainingException {
 		// TODO
