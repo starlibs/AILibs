@@ -2,6 +2,7 @@ package jaicore.ml.tsc.classifier;
 
 import org.junit.Test;
 
+import jaicore.ml.tsc.util.MathUtil;
 import junit.framework.Assert;
 
 /**
@@ -17,13 +18,13 @@ public class LearnShapeletsAlgorithmTest {
 	private static final double EPS_DELTA = 0.00001;
 
 	/**
-	 * See {@link LearnShapeletsAlgorithm#sigmoid(double)}.
+	 * See {@link MathUtil#sigmoid(double)}.
 	 */
 	@Test
 	public void sigmoidTest() {
 		final double z = 0.5;
 		final double expected = 0.6224593312018545646389;
-		Assert.assertEquals(expected, LearnShapeletsAlgorithm.sigmoid(z), EPS_DELTA);
+		Assert.assertEquals(expected, MathUtil.sigmoid(z), EPS_DELTA);
 	}
 
 	/**

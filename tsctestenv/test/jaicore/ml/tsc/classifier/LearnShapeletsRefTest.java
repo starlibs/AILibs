@@ -17,6 +17,12 @@ import jaicore.ml.core.exception.TrainingException;
 import jaicore.ml.tsc.exceptions.TimeSeriesLoadingException;
 import timeseriesweka.classifiers.LearnShapelets;
 
+/**
+ * Reference tests for the LearnShapelets classifier.
+ * 
+ * @author Julian Lienen
+ *
+ */
 public class LearnShapeletsRefTest {
 
 	private static final double EPS_DELTA = 0.000001;
@@ -76,7 +82,7 @@ public class LearnShapeletsRefTest {
 		refClf.fixParameters();
 
 		Map<String, Object> result = SimplifiedTSClassifierTest.compareClassifiers(refClf, ownClf, seed, null, null,
-				new File(COMPUTERS_TRAIN), new File(COMPUTERS_TEST));
+				new File(SYNTHETIC_CONTROL_TRAIN), new File(SYNTHETIC_CONTROL_TEST));
 
 		System.out.println("Ref clf parameters: " + refClf.getParameters());
 		System.out.println(result.toString());

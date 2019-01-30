@@ -9,7 +9,9 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jaicore.basic.TimeOut;
 import jaicore.ml.core.exception.PredictionException;
+import jaicore.ml.tsc.util.MathUtil;
 import jaicore.ml.tsc.util.TimeSeriesUtil;
 
 /**
@@ -56,6 +58,34 @@ public class LearnShapeletsClassifier
 	 * The number of classes.
 	 */
 	private int C;
+
+	/**
+	 * Constructor of the {@link LearnShapeletsClassifier}.
+	 * 
+	 * @param K
+	 *            See {@link LearnShapeletsAlgorithm#K}
+	 * @param learningRate
+	 *            See {@link LearnShapeletsAlgorithm#learningRate}
+	 * @param regularization
+	 *            See {@link LearnShapeletsAlgorithm#regularization}
+	 * @param scaleR
+	 *            See {@link LearnShapeletsAlgorithm#scaleR}
+	 * @param minShapeLengthPercentage
+	 *            See {@link LearnShapeletsAlgorithm#minShapeLengthPercentage}
+	 * @param maxIter
+	 *            See {@link LearnShapeletsAlgorithm#maxIter}
+	 * @param seed
+	 *            See {@link LearnShapeletsAlgorithm#seed}
+	 * @param seed
+	 *            See {@link LearnShapeletsAlgorithm#timeout}
+	 */
+	public LearnShapeletsClassifier(final int K, final double learningRate, final double regularization,
+			final int scaleR, final double minShapeLengthPercentage, final int maxIter, final int seed,
+			final TimeOut timeout) {
+		super(new LearnShapeletsAlgorithm(K, learningRate, regularization, scaleR, minShapeLengthPercentage, maxIter,
+				seed, timeout));
+		this.scaleR = scaleR;
+	}
 
 	/**
 	 * Constructor of the {@link LearnShapeletsClassifier}.
@@ -170,7 +200,7 @@ public class LearnShapeletsClassifier
 							univInstance.length, LearnShapeletsAlgorithm.ALPHA) * W[i][r][k];
 				}
 			}
-			scoring.put(i, LearnShapeletsAlgorithm.sigmoid(tmpScore));
+			scoring.put(i, MathUtil.sigmoid(tmpScore));
 		}
 
 		return Collections.max(scoring.entrySet(), Map.Entry.comparingByValue()).getKey();
@@ -181,7 +211,6 @@ public class LearnShapeletsClassifier
 	 */
 	@Override
 	public Integer predict(List<double[]> multivInstance) throws PredictionException {
-		// TODO: Add multivariate support
 		LOGGER.warn(
 				"Dataset to be predicted is multivariate but only first time series (univariate) will be considered.");
 

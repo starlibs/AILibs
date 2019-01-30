@@ -11,9 +11,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jaicore.basic.TimeOut;
+import jaicore.basic.algorithm.IAlgorithm;
 import jaicore.basic.algorithm.IAlgorithmConfig;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.ml.tsc.dataset.TimeSeriesDataset;
+import jaicore.ml.tsc.util.MathUtil;
 import jaicore.ml.tsc.util.TimeSeriesUtil;
 import jaicore.ml.tsc.util.WekaUtil;
 import weka.clusterers.SimpleKMeans;
@@ -102,6 +104,44 @@ public class LearnShapeletsAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Le
 	private static double EPS = 0.000000000000000000001d;
 
 	/**
+	 * See {@link IAlgorithm#getTimeout()}.
+	 */
+	private TimeOut timeout = new TimeOut(Integer.MAX_VALUE, TimeUnit.SECONDS);
+
+	/**
+	 * Constructor of the algorithm to train a {@link LearnShapeletsClassifier}.
+	 * 
+	 * @param K
+	 *            See {@link LearnShapeletsAlgorithm#K}
+	 * @param learningRate
+	 *            See {@link LearnShapeletsAlgorithm#learningRate}
+	 * @param regularization
+	 *            See {@link LearnShapeletsAlgorithm#regularization}
+	 * @param scaleR
+	 *            See {@link LearnShapeletsAlgorithm#scaleR}
+	 * @param minShapeLengthPercentage
+	 *            See {@link LearnShapeletsAlgorithm#minShapeLengthPercentage}
+	 * @param maxIter
+	 *            See {@link LearnShapeletsAlgorithm#maxIter}
+	 * @param seed
+	 *            See {@link LearnShapeletsAlgorithm#seed}
+	 * @param timeout
+	 *            See {@link LearnShapeletsAlgorithm#timeout}
+	 */
+	public LearnShapeletsAlgorithm(final int K, final double learningRate, final double regularization,
+			final int scaleR, final double minShapeLengthPercentage, final int maxIter, final int seed,
+			final TimeOut timeout) {
+		this.K = K;
+		this.learningRate = learningRate;
+		this.regularization = regularization;
+		this.scaleR = scaleR;
+		this.maxIter = maxIter;
+		this.seed = seed;
+		this.minShapeLengthPercentage = minShapeLengthPercentage;
+		this.timeout = timeout;
+	}
+
+	/**
 	 * Constructor of the algorithm to train a {@link LearnShapeletsClassifier}.
 	 * 
 	 * @param K
@@ -130,22 +170,28 @@ public class LearnShapeletsAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Le
 		this.minShapeLengthPercentage = minShapeLengthPercentage;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Iterator<AlgorithmEvent> iterator() {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("The operation to be performed is not supported.");
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean hasNext() {
-		// TODO Auto-generated method stub
-		return false;
+		throw new UnsupportedOperationException("The operation to be performed is not supported.");
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public AlgorithmEvent next() {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("The operation to be performed is not supported.");
 	}
 
 	/**
@@ -222,17 +268,21 @@ public class LearnShapeletsAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Le
 	@Override
 	public LearnShapeletsClassifier call() {
 		// Training
+		long beginTime = System.currentTimeMillis();
 
 		TimeSeriesDataset data = this.getInput();
 
 		if (data.isMultivariate())
 			throw new UnsupportedOperationException("Multivariate datasets are not supported.");
+		if (data.isEmpty())
+			throw new IllegalArgumentException("The training dataset must not be null!");
 
 		final double[][] dataMatrix = data.getValuesOrNull(0);
-		if (dataMatrix == null) // || dataMatrix.shape().length != 2)
+		if (dataMatrix == null)
 			throw new IllegalArgumentException(
 					"Timestamp matrix must be a valid 2D matrix containing the time series values for all instances!");
 
+		// Get occurring classes which can be used for index extraction
 		final int[] targetMatrix = data.getTargets();
 		final List<Integer> occuringClasses = IntStream.of(targetMatrix).boxed().collect(Collectors.toSet()).stream()
 				.collect(Collectors.toList());
@@ -280,8 +330,6 @@ public class LearnShapeletsAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Le
 			Phi[r] = new double[this.I][this.K][numberOfSegments[r]];
 		}
 
-		// TODO: Check correct order of shape parameters of W => Current version is the
-		// paper's version but doesn't match with the allocated matrix's shape
 		Random rand = new Random(this.seed);
 
 		// Initializes the given weights nearly around zeros (as opposed to the paper
@@ -354,7 +402,7 @@ public class LearnShapeletsAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Le
 							newThetaValue += M_hat[r][i][k] * W[c][r][k];
 						}
 					}
-					Theta[i][c] = Y[i][c] - sigmoid(newThetaValue);
+					Theta[i][c] = Y[i][c] - MathUtil.sigmoid(newThetaValue);
 				}
 
 				// Learn shapelets and classification weights
@@ -400,6 +448,12 @@ public class LearnShapeletsAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Le
 
 			if (it % 10 == 0) {
 				LOGGER.debug("Iteration {}/{}", it, this.maxIter);
+
+				long currTime = System.currentTimeMillis();
+				if (currTime - beginTime > this.timeout.milliseconds()) {
+					LOGGER.debug("Stopping training due to timeout.");
+					break;
+				}
 			}
 		}
 		LOGGER.debug("Finished training.");
@@ -483,57 +537,79 @@ public class LearnShapeletsAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Le
 		return result / (double) ((r + 1) * minShapeLength);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void cancel() {
-		// TODO Auto-generated method stub
-
+		throw new UnsupportedOperationException("The operation to be performed is not supported.");
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public TimeSeriesDataset getInput() {
 		return this.input;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void registerListener(Object listener) {
-		// TODO Auto-generated method stub
-
+		throw new UnsupportedOperationException("The operation to be performed is not supported.");
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void setNumCPUs(int numberOfCPUs) {
-		// TODO Auto-generated method stub
-
+		LOGGER.warn(
+				"Multithreading is not supported for LearnShapelets yet. Therefore, the number of CPUs is not considered.");
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public int getNumCPUs() {
-		// TODO Auto-generated method stub
-		return 0;
+		LOGGER.warn(
+				"Multithreading is not supported for LearnShapelets yet. Therefore, the number of CPUs is not considered.");
+		return 1;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void setTimeout(long timeout, TimeUnit timeUnit) {
-		// TODO Auto-generated method stub
-
+		this.timeout = new TimeOut(timeout, timeUnit);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void setTimeout(TimeOut timeout) {
-		// TODO Auto-generated method stub
-
+		this.timeout = timeout;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public TimeOut getTimeout() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.timeout;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public AlgorithmEvent nextWithException() {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("The operation to be performed is not supported.");
 	}
 
 	/**
@@ -555,20 +631,10 @@ public class LearnShapeletsAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Le
 	}
 
 	/**
-	 * Function to calculate the sigmoid for the given value <code>z</code>.
-	 * 
-	 * @param z
-	 *            Parameter z
-	 * @return Returns the sigmoid for the parameter <code>z</code>.
+	 * {@inheritDoc}
 	 */
-	// TODO: Maybe move to utility? Or use library?
-	public static double sigmoid(final double z) {
-		return 1 / (1 + Math.exp((-1) * z));
-	}
-
 	@Override
 	public IAlgorithmConfig getConfig() {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("The operation to be performed is not supported.");
 	}
 }
