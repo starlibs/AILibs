@@ -10,7 +10,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
-import org.bouncycastle.util.Strings;
 
 import de.upb.isys.linearalgebra.DenseDoubleVector;
 import de.upb.isys.linearalgebra.Vector;
@@ -107,17 +106,17 @@ public class DyadRankingDataset extends ArrayList<IInstance> implements IDataset
 		this.clear();
 		try {
 			String input = IOUtils.toString(in, StandardCharsets.UTF_8);
-			String[] rows = Strings.split(input, '\n');
+			String[] rows = input.split("\n");
 			for (String row : rows) {
 				if (row.isEmpty())
 					break;
 				List<Dyad> dyads = new LinkedList<Dyad>();
-				String[] dyadTokens = Strings.split(row, '|');
+				String[] dyadTokens = row.split("\\|");
 				for (String dyadString : dyadTokens) {
-					String[] values = Strings.split(dyadString, ';');
+					String[] values = dyadString.split(";");
 					if (values[0].length() > 1 && values[1].length() > 1) {
-						String[] instanceValues = Strings.split(values[0].substring(1, values[0].length() - 1), ',');
-						String[] alternativeValues = Strings.split(values[1].substring(1, values[1].length() - 1), ',');
+						String[] instanceValues = values[0].substring(1, values[0].length() - 1).split(",");
+						String[] alternativeValues = values[1].substring(1, values[1].length() - 1).split(",");
 						Vector instance = new DenseDoubleVector(instanceValues.length);
 						for (int i = 0; i < instanceValues.length; i++) {
 							instance.setValue(i, Double.parseDouble(instanceValues[i]));
