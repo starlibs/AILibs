@@ -1,10 +1,14 @@
 package hasco.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class NumericParameterDomain extends ParameterDomain {
 	private final boolean isInteger;
 	private final double min, max;
 
-	public NumericParameterDomain(final boolean isInteger, final double min, final double max) {
+	@JsonCreator
+	public NumericParameterDomain(@JsonProperty("integer") final boolean isInteger, @JsonProperty("min")final double min, @JsonProperty("maxf")final double max) {
 		super();
 		this.isInteger = isInteger;
 		this.min = min;
