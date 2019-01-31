@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -452,5 +453,80 @@ public class PLNetDyadRanker extends APLDyadRanker
 			dyadUtilityPairs.add(new Pair<Dyad, Double>(dyad, plNetOutput));
 		}
 		return Math.abs(dyadUtilityPairs.get(0).getRight() - dyadUtilityPairs.get(1).getRight());
+	}
+
+	/**
+	 * Returns the pair of {@link Dyad}s for which the model is least certain.
+	 * @param drInstance Ranking for which certainty should be assessed.
+	 * @return The pair of {@link Dyad}s for which the model is least certain.
+	 */
+	public DyadRankingInstance getPairWithLeastCertainty(IDyadRankingInstance drInstance) {
+		if (drInstance.length() < 2) {
+			throw new IllegalArgumentException("The query instance must contain at least 2 dyads!");
+		}
+		List<Pair<Dyad, Double>> dyadUtilityPairs = new ArrayList<Pair<Dyad, Double>>(drInstance.length());
+		for (Dyad dyad : drInstance) {
+			INDArray plNetInput = dyadToVector(dyad);
+			double plNetOutput = plNet.output(plNetInput).getDouble(0);
+			dyadUtilityPairs.add(new Pair<Dyad, Double>(dyad, plNetOutput));
+		}
+		// sort the instance in descending order of utility values
+		Collections.sort(dyadUtilityPairs, Comparator.comparing(p -> -p.getRight()));
+		int indexOfPairWithLeastCertainty = 0;
+		double currentlyLowestCertainty = Double.MAX_VALUE;
+		for(int i = 0; i < dyadUtilityPairs.size() - 1; i++) {
+			double currentCertainty = Math.abs(dyadUtilityPairs.get(i).getRight() - dyadUtilityPairs.get(i+1).getRight());
+			if(currentCertainty < currentlyLowestCertainty) {
+				currentlyLowestCertainty = currentCertainty;
+				indexOfPairWithLeastCertainty = i;
+			}
+		}
+		List<Dyad> leastCertainDyads = new LinkedList<Dyad>();
+		leastCertainDyads.add(dyadUtilityPairs.get(indexOfPairWithLeastCertainty).getLeft());
+		leastCertainDyads.add(dyadUtilityPairs.get(indexOfPairWithLeastCertainty+1).getLeft());
+		DyadRankingInstance leastCertainPair = new DyadRankingInstance(leastCertainDyads);
+		return leastCertainPair;
+	}
+	
+	public double getProbabilityOfTopRanking(IDyadRankingInstance drInstance) {
+		List<Pair<Dyad, Double>> dyadUtilityPairs = new ArrayList<Pair<Dyad, Double>>(drInstance.length());
+		for (Dyad dyad : drInstance) {
+			INDArray plNetInput = dyadToVector(dyad);
+			double plNetOutput = plNet.output(plNetInput).getDouble(0);
+			dyadUtilityPairs.add(new Pair<Dyad, Double>(dyad, plNetOutput));
+		}
+		// sort the instance in descending order of utility values
+		Collections.sort(dyadUtilityPairs, Comparator.comparing(p -> -p.getRight()));
+		
+		// compute the probability of this ranking according to the Plackett-Luce model		
+		double currentProbability = 1;
+		for(int i = 0; i < dyadUtilityPairs.size(); i++) {
+			double sumOfRemainingSkills = 0;
+			for(int j = i; j < dyadUtilityPairs.size(); j++) {
+				sumOfRemainingSkills += Math.exp(dyadUtilityPairs.get(j).getRight());
+			}
+			currentProbability *= (Math.exp(dyadUtilityPairs.get(i).getRight()) / sumOfRemainingSkills);
+		}
+		return currentProbability;
+	}
+	
+	public double getProbabilityRanking(IDyadRankingInstance drInstance) {
+		List<Pair<Dyad, Double>> dyadUtilityPairs = new ArrayList<Pair<Dyad, Double>>(drInstance.length());
+		for (Dyad dyad : drInstance) {
+			INDArray plNetInput = dyadToVector(dyad);
+			double plNetOutput = plNet.output(plNetInput).getDouble(0);
+			dyadUtilityPairs.add(new Pair<Dyad, Double>(dyad, plNetOutput));
+		}
+		
+		// compute the probability of this ranking according to the Plackett-Luce model		
+		double currentProbability = 1;
+		for(int i = 0; i < dyadUtilityPairs.size(); i++) {
+			double sumOfRemainingSkills = 0;
+			for(int j = i; j < dyadUtilityPairs.size(); j++) {
+				sumOfRemainingSkills += Math.exp(dyadUtilityPairs.get(j).getRight());
+			}
+			currentProbability *= (Math.exp(dyadUtilityPairs.get(i).getRight()) / sumOfRemainingSkills);
+		}
+		return currentProbability;
 	}
 }
