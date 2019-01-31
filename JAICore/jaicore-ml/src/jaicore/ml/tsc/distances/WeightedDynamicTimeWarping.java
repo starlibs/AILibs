@@ -2,6 +2,10 @@ package jaicore.ml.tsc.distances;
 
 import static jaicore.ml.tsc.util.TimeSeriesUtil.*;
 
+import org.bytedeco.javacpp.opencv_core.Scalar;
+
+import jaicore.ml.tsc.util.ScalarDistanceUtil;
+
 /**
  * Class for the Weighted Dynamic Time Warp Distance Calculation.
  */
@@ -15,6 +19,8 @@ public class WeightedDynamicTimeWarping implements ITimeSeriesDistance {
     double g;
     double Wmax;
 
+    private IScalarDistance d;
+
     private double[] weights;
 
     /**
@@ -25,10 +31,11 @@ public class WeightedDynamicTimeWarping implements ITimeSeriesDistance {
      *             difference.
      * @param Wmax The desired upper bound for the weight parameter.
      */
-    public WeightedDynamicTimeWarping(int p, double g, double Wmax) {
+    public WeightedDynamicTimeWarping(int p, double g, double Wmax, IScalarDistance d) {
         this.p = p;
         this.g = g;
         this.Wmax = Wmax;
+        this.d = d;
     }
 
     @Override
@@ -52,13 +59,15 @@ public class WeightedDynamicTimeWarping implements ITimeSeriesDistance {
         for (int i = 1; i <= n; i++) {
             for (int j = 1; j <= n; j++) {
                 // Paper: | w[i-j] (a_i - b_j) |^p
-                double cost = Math.pow(Math.abs(weights[Math.abs(i - j)] * (A[i - 1] - B[j - 1])), p);
+                // double cost = Math.pow(Math.abs(weights[Math.abs(i - j)] * (A[i - 1] - B[j -
+                // 1])), p);
+                double cost = weights[Math.abs(i - j)] * d.distance(A[i - 1], B[j - 1]);
                 double mini = Math.min(M[i - 1][j], Math.min(M[i][j - 1], M[i - 1][j - 1]));
                 M[i][j] = cost + mini;
             }
         }
-
-        return Math.pow(M[n][n], 1 / (double) p);
+        return M[n][n];
+        // return Math.pow(M[n][n], 1 / (double) p);
     }
 
     /**
