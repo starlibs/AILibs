@@ -31,31 +31,28 @@ import weka.classifiers.lazy.kNN;
  */
 public class NearestNeighborClassifierRefTest {
 
-    private static final String PATH = "/Users/rtf/Data/TSC/";
+        private static final String PATH = "./tsctestenv/data/";
 
-    private static final String CAR_TRAIN = PATH + "Car/Car_TRAIN.arff";
-    private static final String CAR_TEST = PATH + "Car/Car_TEST.arff";
+        private static final String CAR_TRAIN = PATH + "Car/Car/Car_TRAIN.arff";
+        private static final String CAR_TEST = PATH + "Car/Car/Car_TEST.arff";
 
-    private static final String BIRDCHICKEN_TRAIN = PATH + "BirdChicken/BirdChicken_TRAIN.arff";
-    private static final String BIRDCHICKEN_TEST = PATH + "BirdChicken/BirdChicken_TEST.arff";
+        @Test
+        public void testClassifier() throws FileNotFoundException, EvaluationException, TrainingException,
+                        PredictionException, IOException, TimeSeriesLoadingException, ClassNotFoundException {
 
-    @Test
-    public void testClassifier() throws FileNotFoundException, EvaluationException, TrainingException,
-            PredictionException, IOException, TimeSeriesLoadingException, ClassNotFoundException {
+                final int k = 1;
 
-        final int k = 1;
+                kNN refClf = new kNN(); // k = 1 by default
+                BasicDTW refTimeWarpEditDistance = new BasicDTW(); // public TWEDistance(double nu=1, double lambda=1)
+                refClf.setDistanceFunction(refTimeWarpEditDistance);
 
-        kNN refClf = new kNN(); // k = 1 by default
-        BasicDTW refTimeWarpEditDistance = new BasicDTW(); // public TWEDistance(double nu=1, double lambda=1)
-        refClf.setDistanceFunction(refTimeWarpEditDistance);
+                NearestNeighborClassifier ownClf = new NearestNeighborClassifier(k,
+                                new DynamicTimeWarping(ScalarDistanceUtil.getSquaredDistance()));
 
-        NearestNeighborClassifier ownClf = new NearestNeighborClassifier(k,
-                new DynamicTimeWarping(ScalarDistanceUtil.getSquaredDistance()));
+                Map<String, Object> result = SimplifiedTSClassifierTest.compareClassifiers(refClf, ownClf, 0, null,
+                                null, new File(CAR_TRAIN), new File(CAR_TEST));
 
-        Map<String, Object> result = SimplifiedTSClassifierTest.compareClassifiers(refClf, ownClf, 0, null, null,
-                new File(BIRDCHICKEN_TRAIN), new File(BIRDCHICKEN_TEST));
-
-        System.out.println(result.toString());
-    }
+                System.out.println(result.toString());
+        }
 
 }

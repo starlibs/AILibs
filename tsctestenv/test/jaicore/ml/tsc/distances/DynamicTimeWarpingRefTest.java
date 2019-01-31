@@ -47,10 +47,10 @@ import timeseriesweka.elastic_distance_measures.BasicDTW;
 public class DynamicTimeWarpingRefTest {
 
     /** Local path for the datasets arff files. */
-    private static final String PATH = "/Users/rtf/Data/TSC/";
+    private static final String PATH = "./tsctestenv/data/univariate/";
 
     /** Path for pen digits dataset. */
-    private static final String PEN_DIGITS = PATH + "PenDigits/PenDigitsDimension1_TRAIN.arff";
+    private static final String CAR = PATH + "Car/Car/Car_TRAIN.arff";
 
     /** Dataset used for comparison tests. */
     private TimeSeriesDataset dataset;
@@ -63,7 +63,7 @@ public class DynamicTimeWarpingRefTest {
     @Before
     public void setUp() throws TimeSeriesLoadingException {
         // Load dataset.
-        File arffFile = new File(PEN_DIGITS);
+        File arffFile = new File(CAR);
         Pair<TimeSeriesDataset, ClassMapper> trainPair = SimplifiedTimeSeriesLoader.loadArff(arffFile);
         dataset = trainPair.getX();
     }
