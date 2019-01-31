@@ -204,6 +204,10 @@ public class HASCO<ISearch, N, A, V extends Comparable<V>> extends SoftwareConfi
 
 	}
 
+	public IGraphSearch<ISearch, ?, N, A, V, ?, ?> getSearch() {
+		return search;
+	}
+
 	protected void afterSearch() {
 	}
 

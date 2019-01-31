@@ -28,13 +28,28 @@ import jaicore.search.model.travesaltree.Node;
  */
 public abstract class DyadRankedNodeQueue<N, V extends Comparable<V>> implements Queue<Node<N, V>> {
 
+	/** the dyad ranker used to rank the nodes */
+	//TODO: load a pre-trained PLNet 
 	private ADyadRanker dyadRanker = new PLNetDyadRanker();
+
+	/** the actual queue of nodes */
 	private List<Node<N, V>> queue;
+
+	/** characterizations of the nodes (not ordered the same way as the nodes!) */
 	private List<Vector> nodeCharacterizations;
+
+	/** characterization of the context the nodes are ranked in */
 	private Vector contextCharacterization;
+
+	/**
+	 * the instance which is used repeatedly to query the dyadranker, which infers
+	 * an ordering of the nodes
+	 */
 	private SparseDyadRankingInstance queryInstance = new SparseDyadRankingInstance(contextCharacterization,
 			nodeCharacterizations);
-	private BiMap<Node<N, V>, Vector> map = HashBiMap.create();
+
+	/** connects nodes to their respective characterizations */
+	private BiMap<Node<N, V>, Vector> nodesAndCharacterizationsMap = HashBiMap.create();
 
 	/**
 	 * Constructs a new DyadRankedNodeQueue that ranks the nodes in the queue
@@ -102,14 +117,14 @@ public abstract class DyadRankedNodeQueue<N, V extends Comparable<V>> implements
 
 	@Override
 	public boolean remove(Object o) {
-		if (o instanceof Node<?,?>) {
+		if (o instanceof Node<?, ?>) {
 			int index = -1;
-			for(int i = 0; i < queue.size(); i++) {
+			for (int i = 0; i < queue.size(); i++) {
 				if (queue.get(i).equals(o)) {
 					index = i;
 				}
 			}
-			
+
 			if (index != -1) {
 				removeNodeAtPosition(index);
 				return true;
@@ -118,7 +133,7 @@ public abstract class DyadRankedNodeQueue<N, V extends Comparable<V>> implements
 			}
 		} else {
 			return false;
-		}		
+		}
 	}
 
 	@Override
@@ -160,7 +175,7 @@ public abstract class DyadRankedNodeQueue<N, V extends Comparable<V>> implements
 	@Override
 	public void clear() {
 		queue.clear();
-		map.clear();
+		nodesAndCharacterizationsMap.clear();
 		nodeCharacterizations.clear();
 	}
 
@@ -178,11 +193,12 @@ public abstract class DyadRankedNodeQueue<N, V extends Comparable<V>> implements
 				IDyadRankingInstance prediction = dyadRanker.predict(queryInstance);
 				queue.clear();
 				for (int i = 0; i < prediction.length(); i++) {
-					queue.add(map.inverse().get(prediction.getDyadAtPosition(i).getAlternative()));
+					queue.add(nodesAndCharacterizationsMap.inverse()
+							.get(prediction.getDyadAtPosition(i).getAlternative()));
 				}
 
 				// add new pairing of node and characterization
-				map.put(e, characterization);
+				nodesAndCharacterizationsMap.put(e, characterization);
 
 				return true;
 			} catch (PredictionException e1) {
@@ -208,8 +224,8 @@ public abstract class DyadRankedNodeQueue<N, V extends Comparable<V>> implements
 
 	public Node<N, V> removeNodeAtPosition(int i) {
 		Node<N, V> removedNode = queue.remove(i);
-		nodeCharacterizations.remove(map.get(removedNode));
-		map.remove(removedNode);
+		nodeCharacterizations.remove(nodesAndCharacterizationsMap.get(removedNode));
+		nodesAndCharacterizationsMap.remove(removedNode);
 		return removedNode;
 	}
 
@@ -234,6 +250,27 @@ public abstract class DyadRankedNodeQueue<N, V extends Comparable<V>> implements
 		} else {
 			return null;
 		}
+	}
+
+	/**
+	 * Get the dyad ranker used to rank the nodes.
+	 * 
+	 * @return the dyad ranker
+	 */
+	public ADyadRanker getDyadRanker() {
+		return dyadRanker;
+	}
+
+	/**
+	 * Set which dyad ranker shall be used to rank the nodes. It is not trained in
+	 * this class, so it must be pre-trained before setting it as a dyad ranker for
+	 * this queue!
+	 * 
+	 * @param dyadRanker
+	 *            the dyad ranker
+	 */
+	public void setDyadRanker(ADyadRanker dyadRanker) {
+		this.dyadRanker = dyadRanker;
 	}
 
 }

@@ -514,4 +514,8 @@ public class TwoPhaseHASCO extends SoftwareConfigurationAlgorithm<TwoPhaseSoftwa
 	public TwoPhaseHASCOReport getOutput() {
 		return new TwoPhaseHASCOReport(phase1ResultQueue.size(), secondsSpentInPhase1, selectedHASCOSolution);
 	}
+
+	public HASCOViaFDAndBestFirstWithRandomCompletions<Double> getHasco() {
+		return hasco;
+	}
 }

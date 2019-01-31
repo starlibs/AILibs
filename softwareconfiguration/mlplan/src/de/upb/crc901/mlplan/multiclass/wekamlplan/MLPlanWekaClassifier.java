@@ -102,6 +102,10 @@ public abstract class MLPlanWekaClassifier implements Classifier, CapabilitiesHa
 		return this.state != AlgorithmState.inactive;
 	}
 
+	public TwoPhaseHASCOFactory getHascoFactory() {
+		return hascoFactory;
+	}
+
 	@Override
 	public AlgorithmEvent next() {
 		try {
