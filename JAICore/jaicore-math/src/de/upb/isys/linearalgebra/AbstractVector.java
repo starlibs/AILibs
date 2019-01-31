@@ -67,9 +67,10 @@ public abstract class AbstractVector implements Vector {
 
 	protected double [] kroneckerProductInternal(double[] vectorAsArray) {
 		double [] kroneckerProduct = new double [ this.length() * vectorAsArray.length];
+		int counter = 0;
 		for (int i = 0; i < this.length(); i++) {
 			for (int j = 0; j < vectorAsArray.length; j++) {
-				kroneckerProduct [i * vectorAsArray.length + j ] =  this.getValue(i) * vectorAsArray[j];
+				kroneckerProduct [counter++] =  this.getValue(i) * vectorAsArray[j];
 			}
 		}
 		return kroneckerProduct;

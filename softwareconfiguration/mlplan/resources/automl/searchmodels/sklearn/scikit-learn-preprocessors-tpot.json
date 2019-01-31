@@ -1,0 +1,247 @@
+ {
+  "repository" : "sklearn-tpot-classifiers",
+  "include": ["./scikit-learn-classifiers-tpot.json"],
+  "components" : [ {
+    "name" : "sklearn.preprocessing.Binarizer",
+    "providedInterface" : [ "sklearn.preprocessing.Binarizer", "Preprocessing", "AbstractPreprocessor", "BasicPreprocessor" ],
+    "requiredInterface" : [ ],
+    "parameter" : [ {
+      "name" : "threshold",
+      "type" : "double",
+      "default" : 0.505,
+      "min" : 0.0,
+      "max" : 1.01,
+      "minInterval" : 0.05,
+      "refineSplits" : 2
+    } ]
+  }, {
+    "name" : "sklearn.decomposition.FastICA",
+    "providedInterface" : [ "sklearn.decomposition.FastICA", "DecompositionPreprocessing", "AbstractPreprocessor", "BasicPreprocessor" ],
+    "requiredInterface" : [ ],
+    "parameter" : [ {
+      "name" : "tol",
+      "type" : "double",
+      "default" : 0.505,
+      "min" : 0.0,
+      "max" : 1.01,
+      "minInterval" : 0.05,
+      "refineSplits" : 2
+    } ]
+  }, {
+    "name" : "sklearn.cluster.FeatureAgglomeration",
+    "providedInterface" : [ "sklearn.cluster.FeatureAgglomeration", "AgglomerationPreprocessing", "AbstractPreprocessor", "BasicPreprocessor" ],
+    "requiredInterface" : [ ],
+    "parameter" : [ {
+      "name" : "linkage",
+      "default" : "ward",
+      "type" : "cat",
+      "values" : [ "ward", "complete", "average" ]
+    }, {
+      "name" : "affinity",
+      "default" : "euclidean",
+      "type" : "cat",
+      "values" : [ "euclidean", "l1", "l2", "manhattan", "cosine" ]
+    } ],
+    "dependency": [
+    	{
+    		"pre": "linkage in {ward}",
+    		"post": "affinity in {euclidean}"
+    	}
+    ]
+  }, {
+    "name" : "sklearn.preprocessing.MaxAbsScaler",
+    "providedInterface" : [ "sklearn.preprocessing.MaxAbsScaler", "Preprocessing", "AbstractPreprocessor", "BasicPreprocessor" ],
+    "requiredInterface" : [ ],
+    "parameter" : [ ]
+  }, {
+    "name" : "sklearn.preprocessing.MinMaxScaler",
+    "providedInterface" : [ "sklearn.preprocessing.MinMaxScaler", "Preprocessing", "AbstractPreprocessor", "BasicPreprocessor" ],
+    "requiredInterface" : [ ],
+    "parameter" : [ ]
+  }, {
+    "name" : "sklearn.preprocessing.Normalizer",
+    "providedInterface" : [ "sklearn.preprocessing.Normalizer", "Preprocessing", "AbstractPreprocessor", "BasicPreprocessor" ],
+    "requiredInterface" : [ ],
+    "parameter" : [ {
+      "name" : "norm",
+      "default" : "l1",
+      "type" : "cat",
+      "values" : [ "l1", "l2", "max" ]
+    } ]
+  }, {
+    "name" : "sklearn.kernel_approximation.Nystroem",
+    "providedInterface" : [ "sklearn.kernel_approximation.Nystroem", "AbstractPreprocessor", "BasicPreprocessor" ],
+    "requiredInterface" : [ ],
+    "parameter" : [ {
+      "name" : "kernel",
+      "default" : "rbf",
+      "type" : "cat",
+      "values" : [ "rbf", "cosine", "chi2", "laplacian", "polynomial", "poly", "linear", "additive_chi2", "sigmoid" ]
+    }, {
+      "name" : "gamma",
+      "type" : "double",
+      "default" : 0.505,
+      "min" : 0.0,
+      "max" : 1.01,
+      "minInterval" : 0.05,
+      "refineSplits" : 2
+    }, {
+      "name" : "n_components",
+      "type" : "int",
+      "default" : 6,
+      "min" : 1,
+      "max" : 11,
+      "minInterval" : 1,
+      "refineSplits" : 2
+    } ]
+  }, {
+    "name" : "sklearn.decomposition.PCA",
+    "providedInterface" : [ "sklearn.decomposition.PCA", "DecompositionPreprocessing", "AbstractPreprocessor", "BasicPreprocessor" ],
+    "requiredInterface" : [ ],
+    "parameter" : [ {
+      "name" : "svd_solver",
+      "default" : "randomized",
+      "type" : "cat",
+      "values" : [ "randomized" ]
+    }, {
+      "name" : "iterated_power",
+      "type" : "int",
+      "default" : 6,
+      "min" : 1,
+      "max" : 11,
+      "minInterval" : 1,
+      "refineSplits" : 2
+    } ]
+  }, {
+    "name" : "sklearn.preprocessing.PolynomialFeatures",
+    "providedInterface" : [ "sklearn.preprocessing.PolynomialFeatures", "Preprocessing", "AbstractPreprocessor", "BasicPreprocessor" ],
+    "requiredInterface" : [ ],
+    "parameter" : [ {
+      "name" : "degree",
+      "default" : 2,
+      "type" : "cat",
+      "values" : [ 2 ]
+    }, {
+      "name" : "include_bias",
+      "default" : "False",
+      "type" : "cat",
+      "values" : [ "False" ]
+    }, {
+      "name" : "interaction_only",
+      "default" : "False",
+      "type" : "cat",
+      "values" : [ "False" ]
+    } ]
+  }, {
+    "name" : "sklearn.kernel_approximation.RBFSampler",
+    "providedInterface" : [ "sklearn.kernel_approximation.RBFSampler",  "AbstractPreprocessor", "BasicPreprocessor"  ],
+    "requiredInterface" : [ ],
+    "parameter" : [ {
+      "name" : "gamma",
+      "type" : "double",
+      "default" : 0.505,
+      "min" : 0.0,
+      "max" : 1.01,
+      "minInterval" : 0.05,
+      "refineSplits" : 2
+    } ]
+  }, {
+    "name" : "sklearn.preprocessing.RobustScaler",
+    "providedInterface" : [ "sklearn.preprocessing.RobustScaler", "Preprocessing", "AbstractPreprocessor", "BasicPreprocessor" ],
+    "requiredInterface" : [ ],
+    "parameter" : [ ]
+  }, {
+    "name" : "sklearn.preprocessing.StandardScaler",
+    "providedInterface" : [ "sklearn.preprocessing.StandardScaler", "Preprocessing", "AbstractPreprocessor", "BasicPreprocessor" ],
+    "requiredInterface" : [ ],
+    "parameter" : [ ]
+  }, {
+    "name" : "tpot.builtins.ZeroCount",
+    "providedInterface" : [ "tpot.builtins.ZeroCount", "Preprocessing", "AbstractPreprocessor", "BasicPreprocessor" ],
+    "requiredInterface" : [ ],
+    "parameter" : [ ]
+  }, {
+    "name" : "tpot.builtins.OneHotEncoder",
+    "providedInterface" : [ "tpot.builtins.OneHotEncoder", "Preprocessing", "AbstractPreprocessor", "BasicPreprocessor" ],
+    "requiredInterface" : [ ],
+    "parameter" : [ {
+      "name" : "minimum_fraction",
+      "default" : 0.05,
+      "type" : "cat",
+      "values" : [ 0.05, 0.1, 0.15, 0.2, 0.25 ]
+    }, {
+      "name" : "sparse",
+      "default" : "False",
+      "type" : "cat",
+      "values" : [ "False" ]
+    } ]
+  }, {
+    "name" : "sklearn.feature_selection.f_classif",
+    "providedInterface" : [ "sklearn.feature_selection.f_classif"  ],
+    "requiredInterface" : [ ],
+    "parameter" : [ ]
+  }, {
+    "name" : "sklearn.feature_selection.SelectFwe",
+    "providedInterface" : [ "sklearn.feature_selection.SelectFwe", "FeatureSelection", "AbstractPreprocessor", "BasicPreprocessor"  ],
+    "requiredInterface" : [ {"id": "score_func", "name": "sklearn.feature_selection.f_classif"} ],
+    "parameter" : [ {
+      "name" : "alpha",
+      "type" : "double",
+      "default" : 0.025,
+      "min" : 0.0,
+      "max" : 0.05,
+      "minInterval" : 0.001,
+      "refineSplits" : 2
+    } ]
+  }, {
+    "name" : "sklearn.feature_selection.SelectPercentile",
+    "providedInterface" : [ "sklearn.feature_selection.SelectPercentile", "FeatureSelection", "AbstractPreprocessor", "BasicPreprocessor"  ],
+    "requiredInterface" : [ {"id": "score_func", "name": "sklearn.feature_selection.f_classif"} ],
+    "parameter" : [ {
+      "name" : "percentile",
+      "type" : "int",
+      "default" : 50,
+      "min" : 1,
+      "max" : 100,
+      "minInterval" : 1,
+      "refineSplits" : 2
+    } ]
+  }, {
+    "name" : "sklearn.feature_selection.VarianceThreshold",
+    "providedInterface" : [ "sklearn.feature_selection.VarianceThreshold", "FeatureSelection", "AbstractPreprocessor", "BasicPreprocessor"  ],
+    "requiredInterface" : [ ],
+    "parameter" : [ {
+      "name" : "threshold",
+      "default" : 1.0E-4,
+      "type" : "cat",
+      "values" : [ 1.0E-4, 5.0E-4, 0.001, 0.005, 0.01, 0.05, 0.1, 0.2 ]
+    } ]
+  }, {
+    "name" : "sklearn.feature_selection.RFE",
+    "providedInterface" : [ "sklearn.feature_selection.RFE", "FeatureSelection", "AbstractPreprocessor", "BasicPreprocessor"  ],
+    "requiredInterface" : [ {"id": "estimator", "name": "sklearn.ensemble.ExtraTreesClassifier" } ],
+    "parameter" : [ {
+      "name" : "step",
+      "type" : "double",
+      "default" : 0.53,
+      "min" : 0.05,
+      "max" : 1.01,
+      "minInterval" : 0.05,
+      "refineSplits" : 2
+    } ]
+  }, {
+    "name" : "sklearn.feature_selection.SelectFromModel",
+    "providedInterface" : [ "sklearn.feature_selection.SelectFromModel", "FeatureSelection", "AbstractPreprocessor", "BasicPreprocessor"  ],
+    "requiredInterface" : [  {"id": "estimator", "name":"sklearn.ensemble.ExtraTreesClassifier" }],
+    "parameter" : [ {
+      "name" : "threshold",
+      "type" : "double",
+      "default" : 0.505,
+      "min" : 0.0,
+      "max" : 1.01,
+      "minInterval" : 0.05,
+      "refineSplits" : 2
+    } ]
+  }]
+}
+  

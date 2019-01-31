@@ -36,7 +36,7 @@ dependencies {
 
 
 	// OWL API
-	compile 'net.sourceforge.owlapi:owlapi-distribution:5.1.0'
+	compile 'net.sourceforge.owlapi:owlapi-distribution:5.1.9'
 	// TreeMiner
 	compile 'com.github.helegraf:TreeMiner:-SNAPSHOT'
 	// linear algebra
@@ -50,6 +50,8 @@ dependencies {
 	  exclude group: 'org.apache.logging.log4j', module: 'log4j-core'
 	  exclude group: 'org.apache.logging.log4j', module: 'log4j-api'
 	}
+	
+	compile group: 'org.apache.commons', name: 'commons-math', version: '2.1'
 	
 }
 

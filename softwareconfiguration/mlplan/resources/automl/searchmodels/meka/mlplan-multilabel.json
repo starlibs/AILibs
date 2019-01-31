@@ -1,0 +1,6 @@
+{
+	"repository": "MLPlan-Multilabel",
+	"include": ["./meka-multilabel.json","./meka-multilabel-meta.json"],
+	"parameters": [	],
+	"components": [	]
+}

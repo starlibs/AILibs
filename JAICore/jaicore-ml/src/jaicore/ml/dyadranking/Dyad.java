@@ -74,7 +74,7 @@ public class Dyad {
 				&& other.instance.equals(this.instance) && other.alternative.equals(this.alternative))
 				|| (this.instance == null && other.instance == null && this.alternative == null
 						&& other.alternative == null)) {
-			return super.equals(o);
+			return (this.instance.equals(other.instance) && this.alternative.equals(other.alternative));
 		}
 
 		return false;
