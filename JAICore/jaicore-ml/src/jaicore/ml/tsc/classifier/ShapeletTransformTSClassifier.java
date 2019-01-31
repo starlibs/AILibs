@@ -52,7 +52,7 @@ public class ShapeletTransformTSClassifier extends ASimplifiedTSClassifier<Integ
 	/**
 	 * Indicator whether the optimized minimum distance search should be used.
 	 */
-	private boolean useOptimizedMinimumDistSearch = true;
+	private boolean useOptimizedMinimumDistSearch = false;
 
 	/**
 	 * Constructs an Shapelet Transform classifier using <code>k</code> shapelets,
