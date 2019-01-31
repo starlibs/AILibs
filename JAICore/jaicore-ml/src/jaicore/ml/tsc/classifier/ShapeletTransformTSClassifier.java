@@ -7,10 +7,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jaicore.ml.core.exception.PredictionException;
-import jaicore.ml.tsc.classifier.ShapeletTransformAlgorithm.Shapelet;
 import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import jaicore.ml.tsc.quality_measures.FStat;
 import jaicore.ml.tsc.quality_measures.IQualityMeasure;
+import jaicore.ml.tsc.shapelets.Shapelet;
 import jaicore.ml.tsc.util.WekaUtil;
 import weka.classifiers.Classifier;
 import weka.core.Instance;
@@ -68,11 +68,7 @@ public class ShapeletTransformTSClassifier
 
 	@Override
 	public Integer predict(List<double[]> multivInstance) throws PredictionException {
-		// TODO: Add multivariate support
-		LOGGER.warn(
-				"Dataset to be predicted is multivariate but only first time series (univariate) will be considered.");
-
-		return predict(multivInstance.get(0));
+		throw new UnsupportedOperationException("Multivariate datasets are not supported.");
 	}
 
 	@Override
@@ -83,7 +79,13 @@ public class ShapeletTransformTSClassifier
 					"Dataset to be predicted is multivariate but only first time series (univariate) will be considered.");
 			
 		LOGGER.debug("Transforming dataset...");
-		TimeSeriesDataset transformedDataset = ShapeletTransformAlgorithm.shapeletTransform(dataset, this.shapelets);
+		TimeSeriesDataset transformedDataset = null;
+		try {
+			transformedDataset = ShapeletTransformAlgorithm.shapeletTransform(dataset, this.shapelets, null, -1);
+		} catch (InterruptedException e1) {
+			throw new IllegalStateException(
+					"Got interrupted within the shapelet transform although it should not happen due to unlimited timeout.");
+		}
 		LOGGER.debug("Transformed dataset.");
 		double[][] timeSeries = transformedDataset.getValuesOrNull(0);
 		if (timeSeries == null)

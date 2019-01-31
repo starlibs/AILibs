@@ -10,7 +10,7 @@ import java.util.Set;
 import org.junit.Assert;
 import org.junit.Test;
 
-import jaicore.ml.tsc.classifier.ShapeletTransformAlgorithm.Shapelet;
+import jaicore.ml.tsc.shapelets.Shapelet;
 
 /**
  * Unit tests for {@link ShapeletTransformAlgorithm}.
@@ -36,7 +36,8 @@ public class ShapeletTransformAlgorithmTest {
 		Set<Shapelet> actResult = ShapeletTransformAlgorithm.generateCandidates(data, l, 0);
 		Assert.assertEquals(4, actResult.size());
 
-		Shapelet expectedShapelet = new Shapelet(new double[] { 1, 2, 3 }, 0, 3, 0);
+		Shapelet expectedShapelet = new Shapelet(ShapeletTransformAlgorithm.zNormalize(new double[] { 1, 2, 3 }, true),
+				0, 3, 0);
 		Assert.assertTrue(actResult.stream().anyMatch(s -> s.equals(expectedShapelet)));
 
 	}
@@ -46,7 +47,8 @@ public class ShapeletTransformAlgorithmTest {
 	 */
 	@Test
 	public void findDistancesTest() {
-		Shapelet shapelet = new Shapelet(new double[] { 1, 2, 3 }, 0, 3, 0);
+		Shapelet shapelet = new Shapelet(ShapeletTransformAlgorithm.zNormalize(new double[] { 1, 2, 3 }, true), 0, 3,
+				0);
 		// INDArray dataMatrix = Nd4j.create(new double[][] { { 4, 1, 2, 3, 5 }, { 2, 2,
 		// 2, 2, 2 } });
 		double[][] dataMatrix = new double[][] { { 4, 2, 4, 6, 5 }, { 2, 2, 2, 2, 2 } };
@@ -134,7 +136,7 @@ public class ShapeletTransformAlgorithmTest {
 		double[] matrix = new double[] { 4, 1, 2, 4, 6, 5 };
 
 		double[] vector = new double[] { 1, 2, 3 };
-		Shapelet shapelet = new Shapelet(vector, 0, 3, 0);
+		Shapelet shapelet = new Shapelet(ShapeletTransformAlgorithm.zNormalize(vector, true), 0, 3, 0);
 
 		double actResult = ShapeletTransformAlgorithm.getMinimumDistanceAmongAllSubsequences(shapelet, matrix);
 
@@ -189,7 +191,7 @@ public class ShapeletTransformAlgorithmTest {
 		// INDArray matrix = Nd4j.create(new double[][] { { 4, 2, 4, 6, 5, } });
 
 		double[] vector = new double[] { 1, 2, 3 };
-		Shapelet shapelet = new Shapelet(vector, 0, 3, 0);
+		Shapelet shapelet = new Shapelet(ShapeletTransformAlgorithm.zNormalize(vector, true), 0, 3, 0);
 
 		double oldResult = ShapeletTransformAlgorithm.getMinimumDistanceAmongAllSubsequences(shapelet, matrix);
 		double oldOptimizedResult = ShapeletTransformAlgorithm.getMinimumDistanceAmongAllSubsequencesOptimized(shapelet,

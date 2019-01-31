@@ -359,8 +359,8 @@ public class TSClassifierTest {
 		final long evaluationEnd = System.currentTimeMillis();
 		LOGGER.debug("Finished evaluation of classifier. Took {} ms. Accuracy: {}", (evaluationEnd - timeStart),
 				accuracy);
-		result.put("ref_eval_time", (evaluationEnd - timeStart));
-		result.put("ref_accuracy", accuracy);
+		result.put("eval_time", (evaluationEnd - timeStart));
+		result.put("accuracy", accuracy);
 	}
 
 	/**
