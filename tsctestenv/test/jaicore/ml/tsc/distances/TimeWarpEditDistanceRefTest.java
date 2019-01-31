@@ -11,12 +11,17 @@ import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import jaicore.ml.tsc.exceptions.TimeSeriesLoadingException;
 import jaicore.ml.tsc.util.ClassMapper;
+import jaicore.ml.tsc.util.ScalarDistanceUtil;
 import jaicore.ml.tsc.util.SimplifiedTimeSeriesLoader;
 import jaicore.ml.tsc.util.TimeSeriesUtil;
 import timeseriesweka.elastic_distance_measures.TWEDistance;
 
 /**
- * TimeWarpEditDistanceRefTest
+ * Tests performance and correctness of the {@link TimeWarpEditDistance} against
+ * the reference implementation.
+ * 
+ * The reference implementation uses a squared distance as pointwise distance
+ * metric..
  */
 public class TimeWarpEditDistanceRefTest {
 
@@ -24,7 +29,9 @@ public class TimeWarpEditDistanceRefTest {
     private static final String PATH = "./tsctestenv/data/univariate/";
 
     /** Path for pen digits dataset. */
-    private static final String DATASET_PATH = PATH + "ItalyPowerDemand/ItalyPowerDemand_TRAIN.arff";
+    // private static final String DATASET_PATH = PATH +
+    // "ItalyPowerDemand/ItalyPowerDemand_TRAIN.arff";
+    private static final String DATASET_PATH = PATH + "PenDigits/PenDigitsDimension1_TEST.arff";
 
     /** Dataset used for comparison tests. */
     private TimeSeriesDataset dataset;
@@ -53,13 +60,14 @@ public class TimeWarpEditDistanceRefTest {
         double nu = 1;
         double lambda = 1;
 
-        TWEDistance referenceTimeWarpEditDsitance = new TWEDistance(lambda, nu);
-        TimeWarpEditDistance timeWarpEditDistance = new TimeWarpEditDistance(lambda, nu);
+        TWEDistance referenceTimeWarpEditDistance = new TWEDistance(lambda, nu);
+        TimeWarpEditDistance timeWarpEditDistance = new TimeWarpEditDistance(lambda, nu,
+                ScalarDistanceUtil.getSquaredDistance());
 
         double[][] values = dataset.getValues(0);
         for (int i = 0; i < 100; i++) {
             for (int j = i; j < values.length; j++) {
-                double referenceDistance = referenceTimeWarpEditDsitance.distance(values[i], values[j], cutoff);
+                double referenceDistance = referenceTimeWarpEditDistance.distance(values[i], values[j], cutoff);
                 double distance = timeWarpEditDistance.distance(values[i], values[j]);
                 String message = String.format("Distance between %s and %s.", TimeSeriesUtil.toString(values[i]),
                         TimeSeriesUtil.toString(values[j]));
@@ -78,12 +86,17 @@ public class TimeWarpEditDistanceRefTest {
         double nu = 0.001;
         double lambda = 1;
 
-        TWEDistance referenceTimeWarpEditDsitance = new TWEDistance(lambda, nu);
-        double distance = referenceTimeWarpEditDsitance.distance(timeSeries5, timeSeries6, Double.MAX_VALUE);
-        assertEquals(3, distance, 0);
+        TimeWarpEditDistance timeWarpEditDistance = new TimeWarpEditDistance(lambda, nu,
+                ScalarDistanceUtil.getSquaredDistance());
 
-        double distance2 = referenceTimeWarpEditDsitance.distance(timeSeries5, timeSeries7, Double.MAX_VALUE);
-        assertEquals(17, distance2, 0);
+        TWEDistance referenceTimeWarpEditDistance = new TWEDistance(lambda, nu);
+        double refDistance = referenceTimeWarpEditDistance.distance(timeSeries5, timeSeries6, Double.MAX_VALUE);
+        double ownDistance = timeWarpEditDistance.distance(timeSeries5, timeSeries6);
+        assertEquals(ownDistance, refDistance, 0);
+
+        double refDistance2 = referenceTimeWarpEditDistance.distance(timeSeries5, timeSeries7, Double.MAX_VALUE);
+        double ownDistance2 = timeWarpEditDistance.distance(timeSeries5, timeSeries7);
+        assertEquals(ownDistance2, refDistance2, 0);
 
     }
 }
