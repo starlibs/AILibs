@@ -28,6 +28,10 @@ public abstract class PilotEstimateSampling <I extends IInstance> extends CaseCo
 		switch(this.getState()) {
 		case created:
 			this.sample = this.getInput().createEmpty();
+			// set preSampleSize to |Dataset|/2 as default value, if preSampleSize would be smaller than 1
+			if(this.preSampleSize < 1) {
+				this.preSampleSize = this.getInput().size() / 2;
+			}
 			IDataset<I> pilotEstimateSample = this.getInput().createEmpty();
 			IDataset<I> sampleCopy = this.getInput().createEmpty();
 			

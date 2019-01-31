@@ -7,6 +7,8 @@ import org.apache.commons.math3.ml.distance.ManhattanDistance;
 
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.casecontrol.CaseControlSampling;
+import jaicore.ml.core.dataset.sampling.casecontrol.LocalCaseControlSampling;
+import jaicore.ml.core.dataset.sampling.casecontrol.OSMAC;
 import jaicore.ml.core.dataset.sampling.stratified.sampling.AttributeBasedStratiAmountSelectorAndAssigner;
 import jaicore.ml.core.dataset.sampling.stratified.sampling.GMeansStratiAmountSelectorAndAssigner;
 import jaicore.ml.core.dataset.sampling.stratified.sampling.StratifiedSampling;
@@ -52,15 +54,13 @@ public enum SubsamplingMethod {
 	LOCAL_CASE_CONTROL_SAMPLING {
 		@Override
 		public ASamplingAlgorithm<IInstance> getSubsampler(long seed) {
-			throw new NotImplementedException(
-					"Create a subsampler with default configuration for LCC is not implemented yet");
+			return new LocalCaseControlSampling<IInstance>(new Random(seed), -1);
 		}
 	},
 	OSMAC_SAMPLING {
 		@Override
 		public ASamplingAlgorithm<IInstance> getSubsampler(long seed) {
-			throw new NotImplementedException(
-					"Create a subsampler with default configuration for OSMAC is not implemented yet");
+			return new OSMAC<IInstance>(new Random(seed), -1);
 		}
 	},
 	ATTRIBUTE_STRATIFIED_SAMLPING {
