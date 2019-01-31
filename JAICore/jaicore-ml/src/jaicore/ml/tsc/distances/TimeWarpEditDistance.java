@@ -84,15 +84,15 @@ public class TimeWarpEditDistance implements ITimeSeriesDistanceWithTimestamps {
         // referencing A[i-1] use A[i-2]
 
         // Dynamic Programming initialization.
-        for (int i = 1; i < n; i++)
+        for (int i = 1; i <= n; i++)
             DP[i][0] = Double.MAX_VALUE;
-        for (int i = 1; i < n; i++)
+        for (int i = 1; i <= m; i++)
             DP[0][i] = Double.MAX_VALUE;
         DP[0][0] = 0d;
 
         // Dynamic programming.
         for (int i = 1; i <= n; i++) {
-            for (int j = 1; j <= n; j++) {
+            for (int j = 1; j <= m; j++) {
 
                 // Cost for Deletion in A.
                 double c1;
@@ -132,7 +132,7 @@ public class TimeWarpEditDistance implements ITimeSeriesDistanceWithTimestamps {
             }
         }
 
-        return DP[n][n];
+        return DP[n][m];
     }
 
 }
