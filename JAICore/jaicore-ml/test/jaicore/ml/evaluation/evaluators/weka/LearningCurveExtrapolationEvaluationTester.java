@@ -43,7 +43,7 @@ public class LearningCurveExtrapolationEvaluationTester {
 		double evaluationResult;
 		try {
 			evaluationResult = evaluator.evaluate(new SMO());
-			Assert.assertTrue(evaluationResult > 0 && evaluationResult <= 1);
+			Assert.assertTrue(evaluationResult > 0 && evaluationResult <= 100);
 		} catch (Exception e) {
 			fail();
 		}
