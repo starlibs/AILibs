@@ -1,6 +1,5 @@
 package jaicore.ml.tsc.distances;
 
-import org.nd4j.linalg.api.ndarray.INDArray;
 import static jaicore.ml.tsc.util.TimeSeriesUtil.*;
 
 /**
@@ -33,12 +32,11 @@ public class WeightedDynamicTimeWarping implements ITimeSeriesDistance {
     }
 
     @Override
-    public double distance(INDArray A, INDArray B) throws IllegalArgumentException {
+    public double distance(double[] A, double[] B) throws IllegalArgumentException {
         // Parameter checks.
-        isTimeSeriesOrException(A, B);
         isSameLengthOrException(A, B);
 
-        int n = (int) A.length();
+        int n = A.length;
         double[][] M = new double[n + 1][n + 1];
 
         initWeights(n);
@@ -54,7 +52,7 @@ public class WeightedDynamicTimeWarping implements ITimeSeriesDistance {
         for (int i = 1; i <= n; i++) {
             for (int j = 1; j <= n; j++) {
                 // Paper: | w[i-j] (a_i - b_j) |^p
-                double cost = Math.pow(Math.abs(weights[i - j] * (A.getDouble(i - 1) - B.getDouble(j - 1))), p);
+                double cost = Math.pow(Math.abs(weights[Math.abs(i - j)] * (A[i - 1] - B[j - 1])), p);
                 double mini = Math.min(M[i - 1][j], Math.min(M[i][j - 1], M[i - 1][j - 1]));
                 M[i][j] = cost + mini;
             }

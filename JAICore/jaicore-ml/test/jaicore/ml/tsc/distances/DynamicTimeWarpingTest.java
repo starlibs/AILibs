@@ -1,41 +1,26 @@
 package jaicore.ml.tsc.distances;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
-import org.junit.Before;
 import org.junit.Test;
-import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.factory.Nd4j;
+
+import jaicore.ml.tsc.exceptions.TimeSeriesLengthException;
 
 /**
- * TimeWarpDistanceTest
+ * DynamicTimeWarpingTest
  */
 public class DynamicTimeWarpingTest {
 
-    INDArray timeSeries1; // { 1, 1, 1, 1, 1, 1 }
-    INDArray timeSeries2; // { 1, 1, 1, 1, 1, 1 }
-    INDArray timeSeries3; // { 0.50, 0.87, 0.90, 0.82, 0.70 }
-    INDArray timeSeries4; // { 0.10, 0.10, 0.10, 0.10, 0.10 }
+    double[] timeSeries1 = { 1, 1, 1, 1, 1, 1 };
+    double[] timeSeries2 = { 1, 1, 1, 1, 1, 1 };
 
-    INDArray noTimeSeries;
+    double[] timeSeries3 = { 0.50, 0.87, 0.90, 0.82, 0.70 }; // distance with
+    double[] timeSeries4 = { 0.10, 0.10, 0.10, 0.10, 0.10 };
 
-    @Before
-    public void setUp() {
-        int[] shape = { 6 };
-        float[] data = { 1, 1, 1, 1, 1, 1 };
-        timeSeries1 = Nd4j.create(data, shape);
-        timeSeries2 = Nd4j.create(data, shape);
-
-        int[] shape2 = { 5 };
-        timeSeries3 = Nd4j.create(new double[] { 0.50, 0.87, 0.90, 0.82, 0.70 }, shape2);
-        timeSeries4 = Nd4j.create(new double[] { 0.10, 0.10, 0.10, 0.10, 0.10 }, shape2);
-
-        noTimeSeries = Nd4j.rand(2, 2);
-    }
+    double[] timeSeries5 = { 1, 1, 2, 2, 3, 5 }; // distance with d(x,y) = |x-y| is 1
+    double[] timeSeries6 = { 1, 2, 3, 5, 5, 6 };
 
     @Test
-    public void testDistanceCalculation() throws IllegalArgumentException {
+    public void testDistanceCalculation() throws TimeSeriesLengthException {
         DynamicTimeWarping dtw = new DynamicTimeWarping();
         double distance = dtw.distance(timeSeries1, timeSeries2);
         double expectation = 0;
@@ -43,7 +28,7 @@ public class DynamicTimeWarpingTest {
     }
 
     @Test
-    public void testDistanceCalculation2() throws IllegalArgumentException {
+    public void testDistanceCalculation2() throws TimeSeriesLengthException {
         DynamicTimeWarping dtw = new DynamicTimeWarping();
         double distance = dtw.distance(timeSeries3, timeSeries4);
         double expectation = 3.29;
@@ -51,18 +36,19 @@ public class DynamicTimeWarpingTest {
     }
 
     @Test
-    public void testThrowsErrorWhenTimeSeriesHaveDifferentLength() {
+    public void testDistanceCalculationWithWindow() throws TimeSeriesLengthException {
         DynamicTimeWarping dtw = new DynamicTimeWarping();
-        assertThrows(IllegalArgumentException.class, () -> {
-            dtw.distance(timeSeries1, timeSeries4);
-        });
+        double distance = dtw.distanceWithWindow(timeSeries3, timeSeries4, 10000);
+        double expectation = 3.29;
+        assertEquals(expectation, distance, 1.0E-5);
     }
 
     @Test
-    public void testThrowsErrorWhenTimeSeriesIsNoTimeSeries() {
+    public void testDistanceCalculation3() throws TimeSeriesLengthException {
         DynamicTimeWarping dtw = new DynamicTimeWarping();
-        assertThrows(IllegalArgumentException.class, () -> {
-            dtw.distance(noTimeSeries, timeSeries4);
-        });
+        double distance = dtw.distance(timeSeries5, timeSeries6);
+        double expectation = 1;
+        assertEquals(expectation, distance, 1.0E-5);
     }
+
 }
