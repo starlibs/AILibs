@@ -39,6 +39,8 @@ dependencies {
 
 	testCompile project(path: ':JAICore:jaicore-search', configuration: 'testArtifacts')
 	
+	compile group: 'org.apache.commons', name: 'commons-math', version: '2.1'
+	
 }
 
 
