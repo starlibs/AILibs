@@ -52,4 +52,108 @@ public class MathUtil {
 		return distance;
 	}
 
+	/**
+	 * Function calculating the mean of the interval [t1, t2 (inclusive)] of the
+	 * given <code>vector</code>.
+	 * 
+	 * @param vector
+	 *            Vector which is used for the calculation
+	 * @param t1
+	 *            Interval start
+	 * @param t2
+	 *            Interval end (inclusive)
+	 * @return Returns the mean of the vector's interval [t1, t2 (inclusive)]
+	 */
+	public static double mean(final double[] vector, final int t1, final int t2) {
+		checkIntervalParameters(vector, t1, t2);
+
+		double result = 0;
+		for (int i = t1; i <= t2; i++) {
+			result += vector[i];
+		}
+		return result / (t2 - t1 + 1);
+	}
+
+	/**
+	 * Function calculating the standard deviation of the interval [t1, t2
+	 * (inclusive)] of the given <code>vector</code>.
+	 * 
+	 * @param vector
+	 *            Vector which is used for the calculation
+	 * @param t1
+	 *            Interval start
+	 * @param t2
+	 *            Interval end (inclusive)
+	 * @param useBiasCorrection
+	 *            Indicator whether the bias (Bessel's) correction should be used
+	 * @return Returns the standard deviation of the vector's interval [t1, t2
+	 *         (inclusive)]
+	 */
+	public static double stddev(final double[] vector, final int t1, final int t2, final boolean useBiasCorrection) {
+		checkIntervalParameters(vector, t1, t2);
+		if (t1 == t2)
+			return 0.0d;
+
+		double mean = mean(vector, t1, t2);
+
+		double result = 0;
+		for (int i = t1; i <= t2; i++) {
+			result += Math.pow(vector[i] - mean, 2);
+		}
+
+		return Math.sqrt(result / (double) (t2 - t1 + (useBiasCorrection ? 0 : 1)));
+	}
+
+	/**
+	 * Function calculating the slope of the interval [t1, t2 (inclusive)] of the
+	 * given <code>vector</code>.
+	 * 
+	 * @param vector
+	 *            Vector which is used for the calculation
+	 * @param t1
+	 *            Interval start
+	 * @param t2
+	 *            Interval end (inclusive)
+	 * @return Returns the slope of the vector's interval [t1, t2 (inclusive)]
+	 */
+	public static double slope(final double[] vector, final int t1, final int t2) {
+		checkIntervalParameters(vector, t1, t2);
+
+		if (t2 == t1)
+			return 0d;
+
+		double xx = 0;
+		double x = 0;
+		double xy = 0;
+		double y = 0;
+
+		for (int i = t1; i <= t2; i++) {
+			x += i;
+			y += vector[i];
+			xx += i * i;
+			xy += i * vector[i];
+		}
+
+		// Calculate slope
+		int length = t2 - t1 + 1;
+		return (length * xy - x * y) / (length * xx - x * x);
+	}
+
+	/**
+	 * Checks the parameters <code>t1</code> and </code>t2</code> for validity given
+	 * the <code>vector</code>
+	 * 
+	 * @param vector
+	 *            Value vector
+	 * @param t1
+	 *            Interval start
+	 * @param t2
+	 *            Interval end (inclusive)
+	 */
+	private static void checkIntervalParameters(final double[] vector, final int t1, final int t2) {
+		if (t1 >= vector.length || t2 >= vector.length)
+			throw new IllegalArgumentException("Parameters t1 and t2 must be valid indices of the vector!");
+		if (t2 < t1)
+			throw new IllegalArgumentException("End index t2 of the interval must be greater equals start index t1!");
+	}
 }

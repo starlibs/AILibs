@@ -3,7 +3,9 @@ package jaicore.ml.tsc.util;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.IntStream;
 
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -267,6 +269,48 @@ public class TimeSeriesUtil {
 	}
 
 	/**
+	 * Returns the mode of the given <code>array</code>. If there are multiple
+	 * values with the same frequency, the lower value will be taken.
+	 * 
+	 * @param array
+	 *            The array which mode should be returned
+	 * @return Returns the mode, i. e. the most frequently occurring int value
+	 */
+	public static int getMode(final int[] array) {
+		HashMap<Integer, Integer> statistics = new HashMap<>();
+		for (int i = 0; i < array.length; i++) {
+			if (!statistics.containsKey(array[i]))
+				statistics.put(array[i], 1);
+			else
+				statistics.replace(array[i], statistics.get(array[i]) + 1);
+		}
+
+		int maxKey = getMaximumKeyByValue(statistics) != null ? getMaximumKeyByValue(statistics) : -1;
+		return maxKey;
+	}
+
+	/**
+	 * Returns the key with the maximum integer value. If there are multiple values
+	 * with the same value, the lower key with regard to its type will be taken.
+	 * 
+	 * @param map
+	 *            The map storing the keys with its corresponding integer values
+	 * @return Returns the key of type <T> storing the maximum integer value
+	 */
+	public static <T> T getMaximumKeyByValue(final Map<T, Integer> map) {
+		T maxKey = null;
+		int maxCount = 0;
+		for (T key : map.keySet()) {
+			if (map.get(key) > maxCount) {
+				maxCount = map.get(key);
+				maxKey = key;
+			}
+		}
+
+		return maxKey;
+	}
+
+	/**
 	 * Z-normalizes a given <code>dataVector</code>. Uses Bessel's correction
 	 * (1/(n-1) in the calculation of the standard deviation) if set.
 	 * 
@@ -277,7 +321,7 @@ public class TimeSeriesUtil {
 	 *            should be applied
 	 * @return Z-normalized vector
 	 */
-	// TODO: Use Filter implementation
+	// TODO: Unify with Helen's calculation
 	public static double[] zNormalize(final double[] dataVector, final boolean besselsCorrection) {
 		// TODO: Parameter checks...
 
@@ -318,7 +362,6 @@ public class TimeSeriesUtil {
 	 * @return Returns the list of indices which are sorting based on the vector's
 	 *         values
 	 */
-	// Analogous to argsort function of ArrayUtil in Nd4j
 	public static List<Integer> sortIndexes(final double[] vector, final boolean ascending) {
 		List<Integer> result = new ArrayList<>();
 

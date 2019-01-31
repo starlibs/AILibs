@@ -4,12 +4,14 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Test;
 
+import jaicore.basic.TimeOut;
 import jaicore.ml.core.exception.EvaluationException;
 import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.core.exception.TrainingException;
@@ -67,7 +69,7 @@ public class ShapeletTransformRefTest {
 		final int minShapeletLength = 3;
 		final int maxShapeletLength = 24;// 24;
 		ShapeletTransformTSClassifier ownClf = new ShapeletTransformTSClassifier(k, new FStat(), seed, false,
-				minShapeletLength, maxShapeletLength, true);
+				minShapeletLength, maxShapeletLength, true, new TimeOut(Integer.MAX_VALUE, TimeUnit.SECONDS));
 		ownClf.setUseOptimizedMinimumDistSearch(false);
 
 		ShapeletTransformClassifier refClf = new ShapeletTransformClassifier();

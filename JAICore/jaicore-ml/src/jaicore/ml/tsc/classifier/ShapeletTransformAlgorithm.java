@@ -175,10 +175,12 @@ public class ShapeletTransformAlgorithm extends ASimplifiedTSCAlgorithm<Integer,
 	 * @param useHIVECOTEEnsemble
 	 *            Indicator whether the HIVE COTE ensemble should be used (CAWPE
 	 *            otherwise)
+	 * @param timeout
+	 *            The timeout used for the training
 	 */
 	public ShapeletTransformAlgorithm(final int k, final int noClusters, final IQualityMeasure qualityMeasure,
 			final int seed, final boolean clusterShapelets, final int minShapeletLength, final int maxShapeletLength,
-			final boolean useHIVECOTEEnsemble) {
+			final boolean useHIVECOTEEnsemble, final TimeOut timeout) {
 		this.k = k;
 		this.qualityMeasure = qualityMeasure;
 		this.seed = seed;
@@ -188,6 +190,7 @@ public class ShapeletTransformAlgorithm extends ASimplifiedTSCAlgorithm<Integer,
 		this.minShapeletLength = minShapeletLength;
 		this.maxShapeletLength = maxShapeletLength;
 		this.useHIVECOTEEnsemble = useHIVECOTEEnsemble;
+		this.timeout = timeout;
 	}
 
 	/**

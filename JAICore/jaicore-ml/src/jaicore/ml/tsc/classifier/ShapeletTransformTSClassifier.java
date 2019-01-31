@@ -6,6 +6,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jaicore.basic.TimeOut;
 import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import jaicore.ml.tsc.quality_measures.FStat;
@@ -116,14 +117,20 @@ public class ShapeletTransformTSClassifier extends ASimplifiedTSClassifier<Integ
 	 *            Indicator whether shapelet clustering should be used after
 	 *            extracting the best k shapelets
 	 * @param minShapeletLength
+	 *            The minimal length of the shapelets
 	 * @param maxShapeletLength
+	 *            The maximal length of the shapelets
 	 * @param useHIVECOTEEnsemble
+	 *            Indicator whether the HIVE COTE ensemble should be used (CAWPE
+	 *            otherwise)
+	 * @param timeout
+	 *            The timeout used for the training
 	 */
 	public ShapeletTransformTSClassifier(final int k, final IQualityMeasure qm, final int seed,
 			final boolean clusterShapelets, final int minShapeletLength, final int maxShapeletLength,
-			final boolean useHIVECOTEEnsemble) {
+			final boolean useHIVECOTEEnsemble, final TimeOut timeout) {
 		super(new ShapeletTransformAlgorithm(k, k / 2, qm, seed, clusterShapelets, minShapeletLength, maxShapeletLength,
-				useHIVECOTEEnsemble));
+				useHIVECOTEEnsemble, timeout));
 		((ShapeletTransformAlgorithm) this.algorithm)
 				.setUseOptimizedMinimumDistSearch(this.useOptimizedMinimumDistSearch);
 
