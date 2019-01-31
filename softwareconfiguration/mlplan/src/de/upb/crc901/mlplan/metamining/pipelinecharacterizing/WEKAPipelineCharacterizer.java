@@ -1,38 +1,91 @@
 package de.upb.crc901.mlplan.metamining.pipelinecharacterizing;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
 
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
-import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.SupervisedFilterSelector;
+import hasco.model.Component;
+import hasco.model.ComponentInstance;
+import hasco.model.Parameter;
+import hasco.model.ParameterRefinementConfiguration;
 import treeminer.FrequentSubtreeFinder;
 import treeminer.TreeMiner;
 import treeminer.util.TreeRepresentationUtils;
+
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 
 /**
- * A characterizer for MLPipelines that characterizes them using an ontology and
- * a tree mining algorithm.
+ * A characterizer for MLPipelines. It characterizes pipelines using an ontology
+ * and a tree mining algorithm. The ontology is used to get a characterization
+ * of a pipeline element; from the characterization of all pipelines elements
+ * and their parameters, a tree is then built. The trees retrieved from a number
+ * of training examples for pipelines are then used to find frequent patterns in
+ * the pipelines. A new pipeline is then characterizes by which of these
+ * patterns appear in it.
  * 
  * @author Helena Graf
  *
  */
 public class WEKAPipelineCharacterizer implements IPipelineCharacterizer {
 
-	private FrequentSubtreeFinder treeMiner;
-	private IOntologyConnector ontologyConnector;
-	private String[] patterns;
-	private int minSupport = 1;
-	private String preprocessorSubTreeName = "Preprocessor";
-	private String preprocessorsSubTreeName = "Preprocessors";
-	private String pipelineTreeName = "Pipeline";
+	private static final Logger log = LoggerFactory.getLogger(WEKAPipelineCharacterizer.class);
 
-	public WEKAPipelineCharacterizer() {
-		treeMiner = new TreeMiner();
+	/** The default path for pre computed algorithm patterns. */
+	private static final String ALGORITHM_PATTERNS_PATH = "draco/algorithm_patterns.csv";
+	
+	/**
+	 * Number of concurrent threads maximally used by the characterizer
+	 */
+	private int CPUs = 1;
+
+	/**
+	 * The ontology connector used to characterize a single pipeline element
+	 */
+	private IOntologyConnector ontologyConnector;
+
+	/**
+	 * The algorithm used by the pipeline characterizer to find frequent subtrees in
+	 * deduced tree representations of given pipelines
+	 */
+	private FrequentSubtreeFinder treeMiner;
+
+	/**
+	 * The frequent patterns found in the tree representations of pipelines by the
+	 * tree mining algorithm
+	 */
+	private List<String> foundPipelinePatterns;
+
+	/**
+	 * The minimum support required for a pattern to be considered frequent by the
+	 * tree miner
+	 */
+	private int patternMinSupport = 5;
+
+	private Map<Component, Map<Parameter, ParameterRefinementConfiguration>> componentParameters;
+
+	/**
+	 * Creates a new pipeline characterizer that uses the given descriptions of
+	 * parameters to characterize MLPipelines.
+	 * 
+	 * @param componentParameters
+	 *            The description of parameters in the current configuration
+	 *            together with their refinements.
+	 */
+	public WEKAPipelineCharacterizer(
+			Map<Component, Map<Parameter, ParameterRefinementConfiguration>> componentParameters) {
+		this.treeMiner = new TreeMiner();
+		this.componentParameters = componentParameters;
+
 		try {
 			ontologyConnector = new WEKAOntologyConnector();
 		} catch (OWLOntologyCreationException e) {
@@ -41,113 +94,107 @@ public class WEKAPipelineCharacterizer implements IPipelineCharacterizer {
 		}
 	}
 
-	@Override
-	public void build(List<MLPipeline> pipelines) {
-		// Convert the pipelines to String representations
-		List<String> pipelineRepresentations = new ArrayList<String>();
-		pipelines.forEach(pipeline -> {
-			pipelineRepresentations.add(makeStringTreeRepresentation(pipeline));
-		});
+	/**
+	 * Build this pipeline characterizer from a file of patterns. The pattern need
+	 * to be UTF-8 encoded strings and each line specifies exactly one pattern.
+	 * 
+	 * @param file
+	 *            the file to read from
+	 */
+	public void buildFromFile(File file) {
+		List<String> foundPatterns = new ArrayList<>();
+		try (Scanner scanner = new Scanner(file)) {
+			while (scanner.hasNextLine()) {
+				String pattern = scanner.nextLine();
+				foundPatterns.add(pattern);
+			}
+		} catch (IOException e) {
+			log.error("Couldn't initialize pipeline characterizer", e);
+		}
+		this.foundPipelinePatterns = foundPatterns;
 
-		// Use the tree miner to find patterns
-		treeMiner.findFrequentSubtrees(pipelineRepresentations, minSupport);
+	}
+
+	/**
+	 * Builds the pipeline characterizer with a default list of patterns, which was
+	 * generated by a random search over the algorithm space of weka.
+	 */
+	public void buildFromFile() {
+		try {
+			this.buildFromFile(
+					Paths.get(getClass().getClassLoader().getResource(ALGORITHM_PATTERNS_PATH).toURI()).toFile());
+		} catch (URISyntaxException e) {
+			log.error("Couldn't find default algorithm patterns!", e);
+		}
 	}
 
 	@Override
-	public double[] characterize(MLPipeline pipeline) {
+	public void build(List<ComponentInstance> pipelines) throws InterruptedException {
+		patternMinSupport = (int) (0.05 * pipelines.size()); 
+		// Convert the pipelines to String representations
+		System.out.println("WEKAPipelineCharacterizer: Converting training examples to trees. With support "+ patternMinSupport);
+
+		int chunkSize = Math.floorDiv(pipelines.size(), CPUs);
+		int lastchunkSize = pipelines.size() - (chunkSize * (CPUs - 1));
+
+		ComponentInstanceStringConverter[] threads = new ComponentInstanceStringConverter[CPUs];
+
+		for (int i = 0; i < threads.length; i++) {
+			threads[i] = new ComponentInstanceStringConverter(ontologyConnector,
+					pipelines.subList(i * chunkSize,
+							i == threads.length - 1 ? (i * chunkSize) + lastchunkSize : (i + 1) * chunkSize),
+					componentParameters);
+			threads[i].start();
+		}
+
+		List<String> pipelineRepresentations = new ArrayList<String>(pipelines.size());
+		for (int i = 0; i < threads.length; i++) {
+			threads[i].join();
+			pipelineRepresentations.addAll(threads[i].getConvertedPipelines());
+		}
+
+		// Use the tree miner to find patterns
+		System.out.println("WEKAPipelineCharacterizer: Find frequent subtrees.");
+		foundPipelinePatterns = treeMiner.findFrequentSubtrees(pipelineRepresentations, patternMinSupport);
+	}
+
+	@Override
+	public double[] characterize(ComponentInstance pipeline) {
 		// Make tree representation from this pipeline
-		String treeRepresentation = makeStringTreeRepresentation(pipeline);
+		String treeRepresentation = new ComponentInstanceStringConverter(ontologyConnector, new ArrayList<>(),
+				componentParameters).makeStringTreeRepresentation(pipeline);
 
 		// Ask the treeMiner which of the patterns are included in this pipeline
-		double[] pipelineCharacterization = new double[patterns.length];
-		for (int i = 0; i < patterns.length; i++) {
-			if (TreeRepresentationUtils.containsSubtree(treeRepresentation, patterns[i])) {
+		double[] pipelineCharacterization = new double[foundPipelinePatterns.size()];
+		for (int i = 0; i < foundPipelinePatterns.size(); i++) {
+			if (TreeRepresentationUtils.containsSubtree(treeRepresentation, foundPipelinePatterns.get(i))) {
 				pipelineCharacterization[i] = 1;
 			} else {
 				pipelineCharacterization[i] = 0;
 			}
 		}
-
 		return pipelineCharacterization;
-	}
-
-	/**
-	 * Converts the given MLPipeline to a String representation of its components
-	 * using the ontology
-	 * 
-	 * @param pipeline
-	 * @return
-	 */
-	protected String makeStringTreeRepresentation(MLPipeline pipeline) {
-		// TODO add hyperparameters of the algorithms
-
-		// Get annotations for preprocessors
-		List<String> preprocessorsSubTree = new ArrayList<String>();
-		List<SupervisedFilterSelector> preprocessors = pipeline.getPreprocessors();
-		preprocessors.forEach(preprocessor -> {
-			// Get searcher annotation
-			String searcher = preprocessor.getSearcher().getClass().getName();
-			List<String> searcherBranch = ontologyConnector.getAncestorsOfSearcher(searcher);
-			String searcherBranchRepresentation = TreeRepresentationUtils.makeRepresentationForBranch(searcherBranch);
-
-			// Get evaluator annotation
-			String evaluator = preprocessor.getEvaluator().getClass().getName();
-			List<String> evaluatorBranch = ontologyConnector.getAncestorsOfEvaluator(evaluator);
-			String evaluatorBranchRepresentation = TreeRepresentationUtils.makeRepresentationForBranch(evaluatorBranch);
-
-			// Merge both annotations
-			String preprocessorSubTree = TreeRepresentationUtils.addChildrenToNode(preprocessorSubTreeName,
-					Arrays.asList(searcherBranchRepresentation, evaluatorBranchRepresentation));
-			preprocessorsSubTree.add(preprocessorSubTree);
-		});
-		// Merge preprocessors
-		String preprocessorsSubTreeRepresentation = TreeRepresentationUtils.addChildrenToNode(preprocessorsSubTreeName,
-				preprocessorsSubTree);
-
-		// Get annotations for classifier
-		String classifier = pipeline.getBaseClassifier().getClass().getName();
-		List<String> classifierBranch = ontologyConnector.getAncestorsOfClassifier(classifier);
-		String classifierBranchRepresentation = TreeRepresentationUtils.makeRepresentationForBranch(classifierBranch);
-
-		// Merge preprocessors and classifiers
-		return TreeRepresentationUtils.addChildrenToNode(pipelineTreeName,
-				Arrays.asList(preprocessorsSubTreeRepresentation, classifierBranchRepresentation));
-	}
-	
-	private List<String> getParametersForClassifier(Classifier classifier) {
-		List<String> parameters = new ArrayList<String>();
-		
-		// Check if classifier has options
-		if (classifier instanceof AbstractClassifier) {
-			AbstractClassifier abstractClassifier = (AbstractClassifier) classifier;
-			if (abstractClassifier.getOptions() != null && abstractClassifier.getOptions().length > 0) {
-				
-				// Get options
-				abstractClassifier.getOptions();
-				//TODO
-			}
-		} 
-		
-		return parameters;
 	}
 
 	@Override
 	public double[][] getCharacterizationsOfTrainingExamples() {
-		// TODO Implement
-		// TODO maybe adjust return parameter type here
-		return null;
+		return treeMiner.getCharacterizationsOfTrainingExamples();
 	}
 
 	/**
-	 * @return the ontologyConnector
+	 * Get the used ontology connector.
+	 * 
+	 * @return The used ontology connector
 	 */
 	public IOntologyConnector getOntologyConnector() {
 		return ontologyConnector;
 	}
 
 	/**
+	 * Set the ontology connector to be used.
+	 * 
 	 * @param ontologyConnector
-	 *            the ontologyConnector to set
+	 *            the ontologyConnector to be used
 	 */
 	public void setOntologyConnector(IOntologyConnector ontologyConnector) {
 		this.ontologyConnector = ontologyConnector;
@@ -161,7 +208,7 @@ public class WEKAPipelineCharacterizer implements IPipelineCharacterizer {
 	 *         frequent
 	 */
 	public int getMinSupport() {
-		return minSupport;
+		return patternMinSupport;
 	}
 
 	/**
@@ -173,7 +220,26 @@ public class WEKAPipelineCharacterizer implements IPipelineCharacterizer {
 	 *            frequent
 	 */
 	public void setMinSupport(int minSupport) {
-		this.minSupport = minSupport;
+		this.patternMinSupport = minSupport;
+	}
+
+	/**
+	 * Inform the Characterizer about resource usage.
+	 * 
+	 * @param cPUs
+	 *            Maximum number of threads that will be used by the characterizer
+	 */
+	public void setCPUs(int cPUs) {
+		CPUs = cPUs;
+	}
+
+	/**
+	 * Get the patterns found among the given training examples.
+	 * 
+	 * @return A list of patterns
+	 */
+	public List<String> getFoundPipelinePatterns() {
+		return foundPipelinePatterns;
 	}
 
 }
