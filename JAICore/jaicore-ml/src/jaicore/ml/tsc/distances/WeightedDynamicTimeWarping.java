@@ -40,24 +40,22 @@ public class WeightedDynamicTimeWarping implements ITimeSeriesDistance {
 
     @Override
     public double distance(double[] A, double[] B) throws IllegalArgumentException {
-        // Parameter checks.
-        isSameLengthOrException(A, B);
-
         int n = A.length;
-        double[][] M = new double[n + 1][n + 1];
+        int m = B.length;
+        double[][] M = new double[n + 1][m + 1];
 
         initWeights(n);
 
         // Dynamic Programming initialization.
         for (int i = 1; i <= n; i++)
             M[i][0] = Double.MAX_VALUE;
-        for (int i = 1; i <= n; i++)
+        for (int i = 1; i <= m; i++)
             M[0][i] = Double.MAX_VALUE;
         M[0][0] = 0d;
 
         // Dynamic programming.
         for (int i = 1; i <= n; i++) {
-            for (int j = 1; j <= n; j++) {
+            for (int j = 1; j <= m; j++) {
                 // Paper: | w[i-j] (a_i - b_j) |^p
                 // double cost = Math.pow(Math.abs(weights[Math.abs(i - j)] * (A[i - 1] - B[j -
                 // 1])), p);
@@ -66,7 +64,7 @@ public class WeightedDynamicTimeWarping implements ITimeSeriesDistance {
                 M[i][j] = cost + mini;
             }
         }
-        return M[n][n];
+        return M[n][m];
         // return Math.pow(M[n][n], 1 / (double) p);
     }
 
