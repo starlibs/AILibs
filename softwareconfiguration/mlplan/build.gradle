@@ -51,6 +51,8 @@ dependencies {
 	  exclude group: 'org.apache.logging.log4j', module: 'log4j-api'
 	}
 	
+	compile group: 'org.apache.commons', name: 'commons-math', version: '2.1'
+	
 }
 
 

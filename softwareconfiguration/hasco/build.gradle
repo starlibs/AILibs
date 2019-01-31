@@ -23,6 +23,7 @@ dependencies {
 	compile project(':JAICore:jaicore-basic')
 	compile project(':JAICore:jaicore-concurrent')
 	compile project(':JAICore:jaicore-logic')
+	compile project(':JAICore:jaicore-ml')
 	compile project(':JAICore:jaicore-graph')
 	compile project(':JAICore:jaicore-graphvisualizer')
 	compile project(':JAICore:jaicore-planning')

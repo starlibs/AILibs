@@ -2,7 +2,6 @@ package jaicore.ml.dyadranking.loss;
 
 import jaicore.ml.dyadranking.Dyad;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
-import jaicore.ml.dyadranking.general.DyadRankingInstanceSupplier;
 
 /**
  * Computes the rank correlation measure known as Kendall's tau coefficient, i.e.
