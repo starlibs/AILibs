@@ -6,11 +6,16 @@ import java.util.ArrayList;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import jaicore.ml.tsc.exceptions.NoneFittedFilterExeception;
 
+import static org.junit.Assert.assertEquals;
 
+
+@RunWith(JUnit4.class)
 public class zTransformTest {
 
 	
@@ -50,7 +55,7 @@ public class zTransformTest {
 			e.printStackTrace();
 		}
 		
-		assertEquals(1007, dataset.getValues(0)[0][0],1.0E-5);
+		assertEquals(1, dataset.getValues(0)[0][0],1.0E-5);
 	}
 
 }

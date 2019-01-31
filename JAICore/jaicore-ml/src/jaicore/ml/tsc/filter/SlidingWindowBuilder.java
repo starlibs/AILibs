@@ -17,11 +17,23 @@ public class SlidingWindowBuilder implements IFilter{
 	public void setDefaultWindowSize(int defaultWindowSize) {
 		this.defaultWindowSize = defaultWindowSize;
 	}
-
+	
+	public int getDefaultWindowSize() {
+		return defaultWindowSize;
+	}
+	
 	@Override
 	public TimeSeriesDataset transform(TimeSeriesDataset input)
 			throws IllegalArgumentException, NoneFittedFilterExeception {
 		// TODO Auto-generated method stub
+		if(input.isEmpty()) {
+			throw new IllegalArgumentException("The input dataset can not be empty");
+		}
+		
+		if(!fitted){
+			throw new NoneFittedFilterExeception("The fit mehtod must be called before transformning");
+		}
+		
 		return new TimeSeriesDataset(blownUpDataset,null,null);
 	}
 
@@ -30,8 +42,8 @@ public class SlidingWindowBuilder implements IFilter{
 		for(int matrix = 0; matrix < input.getNumberOfVariables(); matrix++) {
 			ArrayList<double[]> newinstances = new ArrayList<double[]>();
 			for(int instance = 0; instance < input.getNumberOfInstances(); instance++) {
-				for(int entry = 0; entry < input.getValues(matrix)[instance].length; entry++) {
-					newinstances.add(Arrays.copyOfRange(input.getValues(matrix)[instance], entry, entry+defaultWindowSize));
+				for(int entry = 0; entry < input.getValues(matrix)[instance].length-(defaultWindowSize); entry++) {
+					newinstances.add(Arrays.copyOfRange(input.getValues(matrix)[instance], entry, entry+defaultWindowSize-1));
 				}
 			}
 			double[][] newMatrix = new double[newinstances.size()][defaultWindowSize];
