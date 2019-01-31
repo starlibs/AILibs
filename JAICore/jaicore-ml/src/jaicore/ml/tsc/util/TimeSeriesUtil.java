@@ -186,8 +186,8 @@ public class TimeSeriesUtil {
 	/**
 	 * Creates equidistant timestamps for a time series.
 	 * 
-	 * @param timeSeries Time series to generate timestamps for. Let n be its
-	 *                   length.
+	 * @param timeSeries
+	 *            Time series to generate timestamps for. Let n be its length.
 	 * @return Equidistant timestamp, i.e. {0, 1, .., n-1}.
 	 */
 	public static INDArray createEquidistantTimestamps(INDArray timeSeries) {
@@ -200,8 +200,8 @@ public class TimeSeriesUtil {
 	/**
 	 * Creates equidistant timestamps for a time series.
 	 * 
-	 * @param timeSeries Time series to generate timestamps for. Let n be its
-	 *                   length.
+	 * @param timeSeries
+	 *            Time series to generate timestamps for. Let n be its length.
 	 * @return Equidistant timestamp, i.e. {0, 1, .., n-1}.
 	 */
 	public static double[] createEquidistantTimestamps(double[] timeSeries) {
@@ -210,4 +210,26 @@ public class TimeSeriesUtil {
 		return timestamps;
 	}
 
+	/**
+	 * Function extracting the interval [start, end (exclusive)] out of the given
+	 * <code>timeSeries</code> vector.
+	 * 
+	 * @param timeSeries
+	 *            Time series vector source
+	 * @param start
+	 *            Start of the interval
+	 * @param end
+	 *            End index of the interval (exclusive)
+	 * @return Returns the specified interval as a double array
+	 */
+	public static double[] getInterval(double[] timeSeries, int start, int end) {
+		if (end <= start)
+			throw new IllegalArgumentException("The end index must be greater than the start index.");
+
+		final double[] result = new double[end - start];
+		for (int j = 0; j < end - start; j++) {
+			result[j] = timeSeries[j + start];
+		}
+		return result;
+	}
 }

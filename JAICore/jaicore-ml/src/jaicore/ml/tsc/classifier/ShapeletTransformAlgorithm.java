@@ -29,6 +29,7 @@ import jaicore.ml.core.exception.TrainingException;
 import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import jaicore.ml.tsc.quality_measures.IQualityMeasure;
 import jaicore.ml.tsc.shapelets.Shapelet;
+import jaicore.ml.tsc.util.TimeSeriesUtil;
 import jaicore.ml.tsc.util.WekaUtil;
 import weka.classifiers.Classifier;
 import weka.classifiers.bayes.NaiveBayes;
@@ -117,7 +118,8 @@ public class ShapeletTransformAlgorithm extends ASimplifiedTSCAlgorithm<Integer,
 	private TimeOut timeout = new TimeOut(Integer.MAX_VALUE, TimeUnit.SECONDS);
 
 	/**
-	 * 
+	 * Indicator whether the HIVE COTE ensemble should be used. If it is set to
+	 * false, the CAWPE ensemble model will be used instead.
 	 */
 	private final boolean useHIVECOTEEnsemble;
 
@@ -204,8 +206,7 @@ public class ShapeletTransformAlgorithm extends ASimplifiedTSCAlgorithm<Integer,
 			LOGGER.debug("Initializing ensemble classifier...");
 			Classifier classifier = null;
 			try {
-				classifier = this.useHIVECOTEEnsemble ? initHIVECOTEEnsembleModel()
-						: initCAWPEEnsembleModel();
+				classifier = this.useHIVECOTEEnsemble ? initHIVECOTEEnsembleModel() : initCAWPEEnsembleModel();
 			} catch (Exception e1) {
 				throw new AlgorithmException(e1, "Could not train model due to ensemble exception.");
 			}
@@ -252,10 +253,8 @@ public class ShapeletTransformAlgorithm extends ASimplifiedTSCAlgorithm<Integer,
 		List<Shapelet> shapelets = new ArrayList<>();
 		for (int i = 0; i < MIN_MAX_ESTIMATION_SAMPLES; i++) {
 			double[][] tmpMatrix = new double[MIN_MAX_ESTIMATION_SAMPLES][data[0].length];
-			// INDArray tmpMatrix = Nd4j.create(MIN_MAX_ESTIMATION_SAMPLES, data[0].length);
 			Random rand = new Random(this.seed);
 			int[] tmpClasses = new int[MIN_MAX_ESTIMATION_SAMPLES];
-			// INDArray tmpClasses = Nd4j.create(MIN_MAX_ESTIMATION_SAMPLES);
 			for (int j = 0; j < MIN_MAX_ESTIMATION_SAMPLES; j++) {
 				int nextIndex = (int) (rand.nextInt() % numInstances);
 				if (nextIndex < 0)
@@ -444,12 +443,13 @@ public class ShapeletTransformAlgorithm extends ASimplifiedTSCAlgorithm<Integer,
 		// final INDArray S = shapelet.getData();
 		final double[] S_prime = shapelet.getData();
 		final List<Integer> A = sortIndexes(S_prime, false); // descending
-		final double[] F = zNormalize(getInterval(timeSeries, 0, shapelet.getLength()), USE_BIAS_CORRECTION);
+		final double[] F = TimeSeriesUtil.zNormalize(TimeSeriesUtil.getInterval(timeSeries, 0, shapelet.getLength()),
+				USE_BIAS_CORRECTION);
 
 		double p = 0;
 		double q = 0;
 
-		p = sum(getInterval(timeSeries, 0, shapelet.getLength()));
+		p = sum(TimeSeriesUtil.getInterval(timeSeries, 0, shapelet.getLength()));
 		for (int i = 0; i < length; i++) {
 			q += timeSeries[i] * timeSeries[i];
 		}
@@ -523,7 +523,7 @@ public class ShapeletTransformAlgorithm extends ASimplifiedTSCAlgorithm<Integer,
 		// performance => Check this
 		for (int i = 0; i < n - l; i++) {
 			double tmpED = singleSquaredEuclideanDistance(normalizedShapeletData,
-					zNormalize(getInterval(timeSeries, i, i + l), USE_BIAS_CORRECTION));
+					TimeSeriesUtil.zNormalize(TimeSeriesUtil.getInterval(timeSeries, i, i + l), USE_BIAS_CORRECTION));
 			if (tmpED < min)
 				min = tmpED;
 		}
@@ -544,53 +544,13 @@ public class ShapeletTransformAlgorithm extends ASimplifiedTSCAlgorithm<Integer,
 		return distance;
 	}
 
-	// TODO: Use Helens implementation
-	public static double[] zNormalize(final double[] dataVector, final boolean besselsCorrection) {
-		// TODO: Parameter checks...
-
-		int n = dataVector.length - (besselsCorrection ? 1 : 0);
-
-		double mean = 0; // dataVector.meanNumber().doubleValue();
-		for (int i = 0; i < dataVector.length; i++) {
-			mean += dataVector[i];
-		}
-		mean /= dataVector.length;
-
-		// Use Bessel's correction to get the sample stddev
-		double stddev = 0; // dataVector.stdNumber(true).doubleValue();
-		for (int i = 0; i < dataVector.length; i++) {
-			stddev += Math.pow(dataVector[i] - mean, 2);
-		}
-		stddev /= n;
-		stddev = Math.sqrt(stddev);
-
-		double[] result = new double[dataVector.length];
-		if (stddev == 0.0)
-			return result;
-
-		for (int i = 0; i < result.length; i++) {
-			result[i] = (dataVector[i] - mean) / stddev;
-		}
-
-		return result;
-	}
-
 	public static Set<Shapelet> generateCandidates(final double[] data, final int l, final int candidateIndex) {
 		Set<Shapelet> result = new HashSet<>();
 
 		for (int i = 0; i < data.length - l + 1; i++) {
-			double[] tmpData = getInterval(data, i, i + l);
+			double[] tmpData = TimeSeriesUtil.getInterval(data, i, i + l);
 
-			result.add(new Shapelet(zNormalize(tmpData, USE_BIAS_CORRECTION), i, l, candidateIndex));
-		}
-		return result;
-	}
-
-	// end exclusive
-	private static double[] getInterval(double[] timeSeries, int start, int end) {
-		final double[] result = new double[end - start];
-		for (int j = 0; j < end - start; j++) {
-			result[j] = timeSeries[j + start];
+			result.add(new Shapelet(TimeSeriesUtil.zNormalize(tmpData, USE_BIAS_CORRECTION), i, l, candidateIndex));
 		}
 		return result;
 	}
@@ -599,7 +559,16 @@ public class ShapeletTransformAlgorithm extends ASimplifiedTSCAlgorithm<Integer,
 		return DoubleStream.of(array).sum();
 	}
 
-	// Using HIVE COTE paper ensemble
+	/**
+	 * Initializes the HIVE COTE ensemble consisting of 7 classifiers using a
+	 * majority voting strategy as described in J. Lines, S. Taylor and A. Bagnall,
+	 * "HIVE-COTE: The Hierarchical Vote Collective of Transformation-Based
+	 * Ensembles for Time Series Classification," 2016 IEEE 16th International
+	 * Conference on Data Mining (ICDM), Barcelona, 2016, pp. 1041-1046. doi:
+	 * 10.1109/ICDM.2016.0133.
+	 * 
+	 * @return Returns the initialized (but untrained) HIVE COTE ensemble model.
+	 */
 	private Classifier initHIVECOTEEnsembleModel() {
 
 		Classifier[] classifier = new Classifier[7];
@@ -654,7 +623,15 @@ public class ShapeletTransformAlgorithm extends ASimplifiedTSCAlgorithm<Integer,
 		return voter;
 	}
 
-	// Using CAWPE ensemble
+	/**
+	 * Initializes the CAWPE ensemble model consisting of five classifiers (SMO,
+	 * KNN, J48, Logistic and MLP) using a majority voting strategy. The ensemble
+	 * uses Weka classifiers.
+	 * 
+	 * @return Returns an initialized (but untrained) ensemble model.
+	 * @throws Exception
+	 *             Thrown when the initialization has failed
+	 */
 	private Classifier initCAWPEEnsembleModel() throws Exception {
 
 		Classifier[] classifiers = new Classifier[5];
@@ -688,6 +665,23 @@ public class ShapeletTransformAlgorithm extends ASimplifiedTSCAlgorithm<Integer,
 		return voter;
 	}
 
+	/**
+	 * Performs a shapelet transform on a complete <code>dataSet</code>. See
+	 * {@link ShapeletTransformAlgorithm#shapeletTransform(double[], List)}.
+	 * 
+	 * @param dataSet
+	 *            Data set to be transformed
+	 * @param shapelets
+	 *            Shapelets used as new feature dimensions
+	 * @param timeout
+	 *            Timeout compared to the current time difference to the
+	 *            <code>beginTime</code>
+	 * @param beginTime
+	 *            System time in ms when the training algorithm has started
+	 * @return Returns the transformed data set
+	 * @throws InterruptedException
+	 *             Thrown if there was a timeout
+	 */
 	public static TimeSeriesDataset shapeletTransform(final TimeSeriesDataset dataSet, final List<Shapelet> shapelets,
 			final TimeOut timeout, final long beginTime) throws InterruptedException {
 		// Since the original paper only works on univariate data, this is assumed to be
@@ -699,17 +693,13 @@ public class ShapeletTransformAlgorithm extends ASimplifiedTSCAlgorithm<Integer,
 		if (timeSeries == null) // || timeSeries.shape.length != 2)
 			throw new IllegalArgumentException("Time series matrix must be a valid 2d matrix!");
 
-		double[][] transformedTS = new double[timeSeries.length][shapelets.size()];
+		double[][] transformedTS = new double[timeSeries.length][];
 
 		for (int i = 0; i < timeSeries.length; i++) {
 			if (timeout != null && (System.currentTimeMillis() - beginTime) > timeout.milliseconds())
 				throw new InterruptedException("Interrupted training due to timeout.");
 
-			for (int j = 0; j < shapelets.size(); j++) {
-
-				transformedTS[i][j] = ShapeletTransformAlgorithm
-						.getMinimumDistanceAmongAllSubsequences(shapelets.get(j), timeSeries[i]);
-			}
+			transformedTS[i] = shapeletTransform(timeSeries[i], shapelets);
 		}
 
 		dataSet.replace(0, transformedTS, dataSet.getTimestampsOrNull(0));
@@ -717,6 +707,17 @@ public class ShapeletTransformAlgorithm extends ASimplifiedTSCAlgorithm<Integer,
 
 	}
 
+	/**
+	 * Function transforming the given <code>instance</code> into the new feature
+	 * space spanned by the shapelets. Uses the minimum squared Euclidean distance
+	 * of the corresponding shapelets to the instance as feature values.
+	 * 
+	 * @param instance
+	 *            The instance to be transformed
+	 * @param shapelets
+	 *            The shapelets to be used as new feature dimensions
+	 * @return Returns the transformed instance feature vector
+	 */
 	public static double[] shapeletTransform(final double[] instance, final List<Shapelet> shapelets) {
 
 		double[] transformedTS = new double[shapelets.size()];
