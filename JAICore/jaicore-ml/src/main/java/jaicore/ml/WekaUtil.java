@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -31,8 +32,6 @@ import com.google.common.collect.ContiguousSet;
 import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.Range;
 
-import jaicore.basic.sets.CartesianProductComputationProblem;
-import jaicore.basic.sets.LDSRelationComputer;
 import jaicore.ml.cache.ReproducibleInstances;
 import jaicore.ml.cache.SplitInstruction;
 import jaicore.ml.core.SimpleInstanceImpl;
@@ -41,9 +40,6 @@ import jaicore.ml.core.SimpleLabeledInstanceImpl;
 import jaicore.ml.core.WekaCompatibleInstancesImpl;
 import jaicore.ml.interfaces.LabeledInstance;
 import jaicore.ml.interfaces.LabeledInstances;
-import weka.attributeSelection.ASEvaluation;
-import weka.attributeSelection.ASSearch;
-import weka.attributeSelection.AttributeSelection;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.core.Attribute;
@@ -167,37 +163,6 @@ public class WekaUtil {
 		return classifiers;
 	}
 
-	public static boolean isValidPreprocessorCombination(String searcher, String evaluator) {
-		boolean isSetEvaluator = evaluator.toLowerCase().matches(
-				".*(relief|gainratio|principalcomponents|onerattributeeval|infogainattributeeval|correlationattributeeval|symmetricaluncertattributeeval).*");
-		boolean isRanker = searcher.toLowerCase().contains("ranker");
-		boolean isNonRankerEvaluator = evaluator.toLowerCase().matches(".*(cfssubseteval).*");
-		return !(isSetEvaluator && !isRanker || isNonRankerEvaluator && isRanker);
-	}
-	
-	/**
-	 * Determines all attribute selection variants (search/evaluator combinations with default parametrization) 
-	 * 
-	 * @return
-	 */
-	public static Collection<List<String>> getAdmissibleSearcherEvaluatorCombinationsForAttributeSelection() {
-		Collection<List<String>> preprocessors = new ArrayList<>();
-		List<Collection<String>> sets = new ArrayList<>();
-		try {
-			sets.add(getSearchers());
-			sets.add(getFeatureEvaluators());
-			CartesianProductComputationProblem<String> problem = new CartesianProductComputationProblem<>(sets);
-			List<List<String>> combinations = new LDSRelationComputer<>(problem).call();
-			for (List<String> combo : combinations) {
-				if (isValidPreprocessorCombination(combo.get(0), combo.get(1)))
-					preprocessors.add(combo);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return preprocessors;
-	}
-
 	public static <L> Instances fromJAICoreInstances(final WekaCompatibleInstancesImpl instances) {
 
 		/* create basic attribute entries */
@@ -209,8 +174,7 @@ public class WekaUtil {
 		}
 
 		/*
-		 * if the instances object is labeled, create the label entry and create a list
-		 * of all the possible labels
+		 * if the instances object is labeled, create the label entry and create a list of all the possible labels
 		 */
 		Map<Object, Double> labelMap = new HashMap<>();
 		int c = 0;
@@ -310,8 +274,7 @@ public class WekaUtil {
 	}
 
 	public static Instances fromJAICoreInstances(final LabeledInstances<String> labeledInstances) {
-		int attributeCount = labeledInstances.getNumberOfColumns() + 1; // the amount of attributes including the class
-																		// label.
+		int attributeCount = labeledInstances.getNumberOfColumns() + 1; // the amount of attributes including the class label.
 		int dataSize = labeledInstances.getNumberOfRows();
 
 		/* create basic attribute entries */
@@ -345,8 +308,7 @@ public class WekaUtil {
 	}
 
 	public static WekaCompatibleInstancesImpl toJAICoreLabeledInstances(final Instances wekaInstances) {
-		WekaCompatibleInstancesImpl labeledInstances = new WekaCompatibleInstancesImpl(
-				getClassesDeclaredInDataset(wekaInstances));
+		WekaCompatibleInstancesImpl labeledInstances = new WekaCompatibleInstancesImpl(getClassesDeclaredInDataset(wekaInstances));
 		for (Instance inst : wekaInstances) {
 			labeledInstances.add(toJAICoreLabeledInstance(inst));
 		}
@@ -354,8 +316,7 @@ public class WekaUtil {
 	}
 
 	/**
-	 * Returns true if there is at least one nominal attribute in the given dataset
-	 * that has more than 2 values.
+	 * Returns true if there is at least one nominal attribute in the given dataset that has more than 2 values.
 	 *
 	 * @param wekaInstances
 	 *            dataset that is checked
@@ -371,8 +332,7 @@ public class WekaUtil {
 			}
 		}
 		// iterate over every attribute and check.
-		for (Enumeration<Attribute> attributeEnum = wekaInstances.enumerateAttributes(); attributeEnum
-				.hasMoreElements();) {
+		for (Enumeration<Attribute> attributeEnum = wekaInstances.enumerateAttributes(); attributeEnum.hasMoreElements();) {
 			Attribute currentAttr = attributeEnum.nextElement();
 			if (!currentAttr.isNominal()) {
 				continue; // ignore attributes that aren't nominal.
@@ -568,8 +528,7 @@ public class WekaUtil {
 		return getNumberOfInstancesFromClass(data, cs) / (1f * data.size());
 	}
 
-	public static Collection<Integer>[] getArbitrarySplit(final Instances data, final Random rand,
-			final double... portions) {
+	public static Collection<Integer>[] getArbitrarySplit(final Instances data, final Random rand, final double... portions) {
 
 		/* check that portions sum up to s.th. smaller than 1 */
 		double sum = 0;
@@ -580,8 +539,7 @@ public class WekaUtil {
 			throw new IllegalArgumentException("Portions must sum up to at most 1.");
 		}
 
-		LinkedList<Integer> indices = new LinkedList<>(
-				ContiguousSet.create(Range.closed(0, data.size() - 1), DiscreteDomain.integers()).asList());
+		LinkedList<Integer> indices = new LinkedList<>(ContiguousSet.create(Range.closed(0, data.size() - 1), DiscreteDomain.integers()).asList());
 		Collections.shuffle(indices, rand);
 
 		@SuppressWarnings("unchecked")
@@ -604,8 +562,7 @@ public class WekaUtil {
 		while (!indices.isEmpty()) {
 			folds[rand.nextInt(folds.length)].add(indices.poll());
 		}
-		assert Arrays.asList(folds).stream().mapToInt(l -> l.size()).sum() == data
-				.size() : "The number of instancens in the folds does not equal the number of instances in the original dataset";
+		assert Arrays.asList(folds).stream().mapToInt(l -> l.size()).sum() == data.size() : "The number of instancens in the folds does not equal the number of instances in the original dataset";
 		return folds;
 	}
 
@@ -627,8 +584,7 @@ public class WekaUtil {
 		return folds;
 	}
 
-	public static List<Instances> realizeSplitAsCopiedInstances(final Instances data,
-			final Collection<Integer>[] split) {
+	public static List<Instances> realizeSplitAsCopiedInstances(final Instances data, final Collection<Integer>[] split) {
 		List<Instances> folds = new ArrayList<>();
 		for (Collection<Integer> foldIndices : split) {
 			Instances fold = new Instances(data, 0);
@@ -651,8 +607,7 @@ public class WekaUtil {
 		return folds;
 	}
 
-	public static Collection<Integer>[] getStratifiedSplitIndices(final Instances data, final Random rand,
-			final double... pPortions) {
+	public static Collection<Integer>[] getStratifiedSplitIndices(final Instances data, final Random rand, final double... pPortions) {
 
 		/* check that portions sum up to s.th. smaller than 1 */
 		double sum = 0;
@@ -672,8 +627,7 @@ public class WekaUtil {
 		for (String className : numberOfInstancesPerClass.keySet()) {
 			numberOfInstancesPerClassAndFold.put(className, new HashMap<>());
 			for (int foldId = 0; foldId < portions.length; foldId++) {
-				numberOfInstancesPerClassAndFold.get(className).put(foldId,
-						((int) Math.ceil(numberOfInstancesPerClass.get(className) * portions[foldId])) + 1);
+				numberOfInstancesPerClassAndFold.get(className).put(foldId, ((int) Math.ceil(numberOfInstancesPerClass.get(className) * portions[foldId])) + 1 );
 			}
 		}
 
@@ -681,8 +635,7 @@ public class WekaUtil {
 		Map<String, Integer> nextBinForClass = new HashMap<>();
 		numberOfInstancesPerClass.keySet().forEach(c -> nextBinForClass.put(c, 0));
 		Collection<Integer>[] folds = new ArrayList[portions.length];
-		LinkedList<Integer> indices = new LinkedList<>(
-				ContiguousSet.create(Range.closed(0, data.size() - 1), DiscreteDomain.integers()).asList());
+		LinkedList<Integer> indices = new LinkedList<>(ContiguousSet.create(Range.closed(0, data.size() - 1), DiscreteDomain.integers()).asList());
 		Collections.shuffle(indices, rand);
 
 		/* first assign one item of each class to each fold */
@@ -699,8 +652,7 @@ public class WekaUtil {
 			fold.add(index);
 
 			/* update point for class */
-			numberOfInstancesPerClassAndFold.get(assignedClass).put(foldId,
-					numberOfInstancesPerClassAndFold.get(assignedClass).get(foldId) - 1);
+			numberOfInstancesPerClassAndFold.get(assignedClass).put(foldId, numberOfInstancesPerClassAndFold.get(assignedClass).get(foldId) - 1);
 			do {
 				foldId++;
 				if (foldId >= portions.length) {
@@ -710,13 +662,11 @@ public class WekaUtil {
 			nextBinForClass.put(assignedClass, foldId);
 		}
 
-		assert Arrays.asList(folds).stream().mapToInt(l -> l.size()).sum() == data
-				.size() : "The number of instancens in the folds does not equal the number of instances in the original dataset";
+		assert Arrays.asList(folds).stream().mapToInt(l -> l.size()).sum() == data.size() : "The number of instancens in the folds does not equal the number of instances in the original dataset";
 		return folds;
 	}
 
-	public static List<List<Integer>> getStratifiedSplitIndicesAsList(final Instances data, final Random rand,
-			final double... portions) {
+	public static List<List<Integer>> getStratifiedSplitIndicesAsList(final Instances data, final Random rand, final double... portions) {
 		/* check that portions sum up to s.th. smaller than 1 */
 		double sum = 0;
 		for (double p : portions) {
@@ -776,8 +726,7 @@ public class WekaUtil {
 
 			Collections.shuffle(instancesForSplit, rand);
 		}
-		assert instances.stream().mapToInt(l -> l.size()).sum() == data
-				.size() : "The number of instances in the folds does not equal the number of instances in the original dataset";
+		assert instances.stream().mapToInt(l -> l.size()).sum() == data.size() : "The number of instances in the folds does not equal the number of instances in the original dataset";
 		return instances;
 	}
 
@@ -788,16 +737,16 @@ public class WekaUtil {
 		return an;
 	}
 
+	
 	public static List<Instances> getStratifiedSplit(final Instances data, final long seed, final double... portions) {
-		// if data should be reproducible use other method.
-		if (data instanceof ReproducibleInstances) {
-			List<ReproducibleInstances> reproducibleInstancesResult = getStratifiedSplit((ReproducibleInstances) data,
-					seed, portions);
+		// if data should be reproducible use other method. 
+		if(data instanceof ReproducibleInstances) {
+			List<ReproducibleInstances> reproducibleInstancesResult = getStratifiedSplit((ReproducibleInstances)data, seed, portions);
 			ArrayList<Instances> result = new ArrayList<>(reproducibleInstancesResult.size());
 			for (int i = 0; i < reproducibleInstancesResult.size(); i++) {
 				result.add(reproducibleInstancesResult.get(i));
 			}
-			return result;
+			return result; 
 		}
 		Random rand = new Random(seed);
 		/* check that portions sum up to s.th. smaller than 1 */
@@ -850,44 +799,32 @@ public class WekaUtil {
 			}
 			instancesForSplit.randomize(rand);
 		}
-		assert instances.stream().mapToInt(l -> l.size()).sum() == data
-				.size() : "The number of instances in the folds does not equal the number of instances in the original dataset";
+		assert instances.stream().mapToInt(l -> l.size()).sum() == data.size() : "The number of instances in the folds does not equal the number of instances in the original dataset";
 		return instances;
 	}
 
+	
 	/**
-	 * Creates a stratified split for a given {@link ReproducibleInstances} Object.
-	 * The history will be updated to track the split.
+	 * Creates a stratified split for a given {@link ReproducibleInstances} Object. The history will be updated to track the split.
 	 * 
-	 * @param data
-	 *            - Input data
-	 * @param rand
-	 *            - random used to get a seed, which can be used and saved
-	 * @param portions
-	 *            - ratios to split
-	 * @return a list of {@link ReproducibleInstances}. For each of them the history
-	 *         will be updated to track the split
+	 * @param data - Input data
+	 * @param rand - random used to get a seed, which can be used and saved
+	 * @param portions - ratios to split
+	 * @return a list of {@link ReproducibleInstances}. For each of them the history will be updated to track the split
 	 */
-	public static List<ReproducibleInstances> getStratifiedSplit(final ReproducibleInstances data, final Random rand,
-			final double... portions) {
+	public static List<ReproducibleInstances> getStratifiedSplit(final ReproducibleInstances data, final Random rand, final double... portions) {
 		return getStratifiedSplit(data, rand.nextLong(), portions);
 	}
-
+	
 	/**
-	 * Creates a StratifiedSplit for a given {@link ReproducibleInstances} Object.
-	 * THe History will be updated to track the split.
+	 * Creates a StratifiedSplit for a given {@link ReproducibleInstances} Object. THe History will be updated to track the split.
 	 * 
-	 * @param data
-	 *            - Input data
-	 * @param seed
-	 *            - random seed
-	 * @param portions
-	 *            - ratios to split
-	 * @return a List of {@link ReproducibleInstances}. For each of them the history
-	 *         will be updated to track the split
+	 * @param data - Input data
+	 * @param seed - random seed
+	 * @param portions - ratios to split
+	 * @return a List of {@link ReproducibleInstances}. For each of them the history will be updated to track the split
 	 */
-	public static List<ReproducibleInstances> getStratifiedSplit(final ReproducibleInstances data, final long seed,
-			final double... portions) {
+	public static List<ReproducibleInstances> getStratifiedSplit(final ReproducibleInstances data, final long seed, final double... portions) {
 		Random rand = new Random(seed);
 		/* check that portions sum up to s.th. smaller than 1 */
 		double sum = 0;
@@ -903,7 +840,7 @@ public class WekaUtil {
 		List<ReproducibleInstances> instances = new ArrayList<>();
 		ReproducibleInstances emptyInstances = new ReproducibleInstances(data);
 		emptyInstances.clear(); // leaves History untouched
-
+		
 		/* compute instances per class */
 		Map<String, Instances> classWiseSeparation = getInstancesPerClass(shuffledData);
 
@@ -914,10 +851,8 @@ public class WekaUtil {
 
 		/* first assign one item of each class to each fold */
 		for (int i = 0; i <= portions.length; i++) {
-			ReproducibleInstances instancesForSplit = new ReproducibleInstances(emptyInstances); // Will have the same
-																									// history as data
-																									// but is empty
-
+			ReproducibleInstances instancesForSplit = new ReproducibleInstances(emptyInstances); // Will have the same history as data but is empty
+			
 			for (String c : classWiseSeparation.keySet()) {
 				Instances availableInstances = classWiseSeparation.get(c);
 				if (!availableInstances.isEmpty()) {
@@ -942,22 +877,22 @@ public class WekaUtil {
 			}
 			instancesForSplit.randomize(rand);
 		}
-		assert instances.stream().mapToInt(l -> l.size()).sum() == data
-				.size() : "The number of instances in the folds does not equal the number of instances in the original dataset";
-
+		assert instances.stream().mapToInt(l -> l.size()).sum() == data.size() : "The number of instances in the folds does not equal the number of instances in the original dataset";
+		
 		/* update ReproducibleInstanes history */
 		String ratiosAsString = Arrays.toString(portions);
-		for (int i = 0; i < instances.size(); i++) {
+		for(int i = 0; i < instances.size(); i++) {
 			instances.get(i).addInstruction(new SplitInstruction(ratiosAsString, seed, i));
 		}
 		return instances;
 	}
 
+	
+	
 	public static List<File> getDatasetsInFolder(final File folder) throws IOException {
 		List<File> files = new ArrayList<>();
 		try (Stream<Path> paths = Files.walk(folder.toPath())) {
-			paths.filter(f -> f.getParent().toFile().equals(folder) && f.toFile().getAbsolutePath().endsWith(".arff"))
-					.forEach(f -> files.add(f.toFile()));
+			paths.filter(f -> f.getParent().toFile().equals(folder) && f.toFile().getAbsolutePath().endsWith(".arff")).forEach(f -> files.add(f.toFile()));
 		}
 		return files.stream().sorted().collect(Collectors.toList());
 	}
@@ -1025,8 +960,7 @@ public class WekaUtil {
 		return newData;
 	}
 
-	public static Instances getEmptySetOfInstancesWithRefactoredClass(final Instances instances,
-			final List<String> classes) {
+	public static Instances getEmptySetOfInstancesWithRefactoredClass(final Instances instances, final List<String> classes) {
 		List<Attribute> newAttributes = getAttributes(instances, false);
 		newAttributes.add(instances.classIndex(), getNewClassAttribute(instances.classAttribute(), classes));
 		Instances newData = new Instances("split", (ArrayList<Attribute>) newAttributes, 0);
@@ -1055,15 +989,6 @@ public class WekaUtil {
 		return attributes;
 	}
 
-	public static boolean hasOnlyNumericAttributes(Instances instances) {
-		for (Attribute a : getAttributes(instances, false)) {
-			if (!a.isNumeric()) {
-				return false;
-			}
-		}
-		return true;
-	}
-
 	public static Attribute getNewClassAttribute(final Attribute attribute) {
 		List<String> vals = Arrays.asList(new String[] { "0.0", "1.0" });
 		Attribute a = new Attribute(attribute.name(), vals);
@@ -1075,8 +1000,7 @@ public class WekaUtil {
 		return a;
 	}
 
-	public static List<Attribute> getReplacedAttributeList(final List<Attribute> attributes,
-			final Attribute classAttribute) {
+	public static List<Attribute> getReplacedAttributeList(final List<Attribute> attributes, final Attribute classAttribute) {
 		ArrayList<Attribute> newAttributes = new ArrayList<>();
 		for (Attribute a : attributes) {
 			if (classAttribute != a) {
@@ -1088,8 +1012,7 @@ public class WekaUtil {
 		return newAttributes;
 	}
 
-	public static Instances mergeClassesOfInstances(final Instances data, final Collection<String> cluster1,
-			final Collection<String> cluster2) {
+	public static Instances mergeClassesOfInstances(final Instances data, final Collection<String> cluster1, final Collection<String> cluster2) {
 		Instances newData = WekaUtil.getEmptySetOfInstancesWithRefactoredClass(data);
 		for (Instance i : data) {
 			Instance iNew = (Instance) i.copy();
@@ -1140,7 +1063,7 @@ public class WekaUtil {
 		Map<String, Integer> counter = getNumberOfInstancesPerClass(data);
 		return counter.keySet().stream().filter(k -> counter.get(k) != 0).collect(Collectors.toList());
 	}
-
+	
 	public static double[] getClassesAsArray(Instances inst) {
 		int n = inst.size();
 		double[] vec = new double[n];
@@ -1149,7 +1072,7 @@ public class WekaUtil {
 		}
 		return vec;
 	}
-
+	
 	public static List<Double> getClassesAsList(Instances inst) {
 		return inst.stream().map(Instance::classValue).collect(Collectors.toList());
 	}
@@ -1176,9 +1099,7 @@ public class WekaUtil {
 	}
 
 	/**
-	 * Compute indices of instances of the original data set that are contained in
-	 * the given subset. This does only work for data sets that contain an instance
-	 * at most once!
+	 * Compute indices of instances of the original data set that are contained in the given subset. This does only work for data sets that contain an instance at most once!
 	 *
 	 * @param dataset
 	 * @param subset
