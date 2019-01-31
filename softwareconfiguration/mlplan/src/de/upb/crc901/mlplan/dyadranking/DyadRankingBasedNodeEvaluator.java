@@ -1,5 +1,9 @@
 package de.upb.crc901.mlplan.dyadranking;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -22,8 +26,10 @@ import de.upb.isys.linearalgebra.Vector;
 import hasco.core.Util;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
+import hasco.serialization.ComponentLoader;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.sets.SetUtil.Pair;
+import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.dyadranking.Dyad;
 import jaicore.ml.dyadranking.algorithm.ADyadRanker;
 import jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
@@ -77,8 +83,8 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 	 * of the f-value
 	 */
 	private final int randomlyCompletedPaths;
-	
-	private final double [] datasetMetaFeatures;
+
+	private final double[] datasetMetaFeatures;
 
 	/*
 	 * Specifies the amount of paths that will be evaluated after ranking the paths
@@ -88,12 +94,14 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 	private final Random random;
 
 	private final Predicate<T> priorityPredicateForRDFS;
-	
+
 	private ADyadRanker dyadRanker = new PLNetDyadRanker();
 
-	private final WEKAPipelineCharacterizer characterizer; 
+	private WEKAPipelineCharacterizer characterizer;
+
 	public DyadRankingBasedNodeEvaluator(Collection<Component> components, ISolutionEvaluator<T, V> solutionEvaluator,
-			int randomlyCompletedPaths, int evaluatedPaths, Random random, Predicate<T> priorityPredicateForRDFS, double [] datasetMetaFeatures) {
+			int randomlyCompletedPaths, int evaluatedPaths, Random random, Predicate<T> priorityPredicateForRDFS,
+			double[] datasetMetaFeatures) {
 		super();
 		this.components = components;
 		this.solutionEvaluator = solutionEvaluator;
@@ -102,10 +110,23 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 		this.random = random;
 		this.priorityPredicateForRDFS = priorityPredicateForRDFS;
 		this.datasetMetaFeatures = datasetMetaFeatures;
-		this.characterizer = new WEKAPipelineCharacterizer();
-		//loads precomputed patterns
-		characterizer.buildFromFile();
-		//pretrain dyadRanker
+
+		// pretrain dyadRanker
+		File jsonFile;
+		try {
+			jsonFile = Paths.get(getClass().getClassLoader()
+					.getResource(Paths.get("automl", "searchmodels", "weka", "weka-all-autoweka.json").toString())
+					.toURI()).toFile();
+
+			ComponentLoader loader = new ComponentLoader(jsonFile);
+			this.characterizer = new WEKAPipelineCharacterizer(loader.getParamConfigs());
+			characterizer.buildFromFile();
+		} catch (URISyntaxException | IOException e) {
+			logger.error("Couldn't load weka models", e);
+			this.characterizer = null;
+
+		}
+
 	}
 
 	@Override
@@ -157,13 +178,19 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 			dyadToPath.put(pipelineCharacterization, ci.getX());
 			alternatives.add(pipelineCharacterization);
 		}
-		SparseDyadRankingInstance toRank = new SparseDyadRankingInstance(new DenseDoubleVector(datasetMetaFeatures), alternatives);
-		IDyadRankingInstance rankedInstance = dyadRanker.predict(toRank);
-		List<List<T>> rankedPipelines = new ArrayList<>();
-		for (Dyad dyad : rankedInstance) {
-			rankedPipelines.add(dyadToPath.get(dyad.getAlternative()));
+		SparseDyadRankingInstance toRank = new SparseDyadRankingInstance(new DenseDoubleVector(datasetMetaFeatures),
+				alternatives);
+		IDyadRankingInstance rankedInstance;
+		try {
+			rankedInstance = dyadRanker.predict(toRank);
+			List<List<T>> rankedPipelines = new ArrayList<>();
+			for (Dyad dyad : rankedInstance) {
+				rankedPipelines.add(dyadToPath.get(dyad.getAlternative()));
+			}
+			return rankedPipelines;
+		} catch (PredictionException e) {
+			throw new RuntimeException(e);
 		}
-		return rankedPipelines;
 	}
 
 	private List<List<T>> getNRandomPaths(Node<T, ?> node) throws InterruptedException, TimeoutException {
