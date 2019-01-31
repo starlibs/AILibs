@@ -1,21 +1,26 @@
 package jaicore.ml.dyadranking.optimizing;
 
-import java.util.HashMap;
+import java.util.Map;
 
 import de.upb.isys.linearalgebra.DenseDoubleVector;
 import de.upb.isys.linearalgebra.Vector;
-import jaicore.basic.sets.SetUtil.Pair;
-import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.dyadranking.Dyad;
-import jaicore.ml.dyadranking.algorithm.IDyadFeatureTransform;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 
 /**
  * Represents the derivate of the negative log likelihood function in the
- * context of feature transformation Placket-Luce dyad ranking.
+ * context of feature transformation Placket-Luce dyad ranking [1].
  * 
- * @author Helena Graf
+ * This implementation can be used for the partial derivatives of the linear
+ * vector <code>w</code> w.r.t. the negative log-likelihood that should be
+ * minimized.
+ * 
+ * [1] Schäfer, D. & Hüllermeier, Dyad ranking using Plackett–Luce models based
+ * on joint feature representations,
+ * https://link.springer.com/article/10.1007%2Fs10994-017-5694-9Ï
+ * 
+ * @author Helena Graf, Mirko Jürgens
  *
  */
 public class DyadRankingFeatureTransformNegativeLogLikelihoodDerivative
@@ -24,82 +29,54 @@ public class DyadRankingFeatureTransformNegativeLogLikelihoodDerivative
 	/* the dataset used by this function */
 	private DyadRankingDataset dataset;
 
-	/* the feature transformation method used by this function */
-	private IDyadFeatureTransform featureTransform;
+	private Map<IDyadRankingInstance, Map<Dyad, Vector>> featureTransforms;
 
 	@Override
-	public void initialize(DyadRankingDataset dataset, IDyadFeatureTransform featureTransform) {
+	public void initialize(DyadRankingDataset dataset, Map<IDyadRankingInstance, Map<Dyad, Vector>> featureTransforms) {
 		this.dataset = dataset;
-		this.featureTransform = featureTransform;
+		this.featureTransforms = featureTransforms;
 	}
 
 	@Override
 	public Vector apply(Vector vector) {
-
-		HashMap<Pair<Vector, IDyadRankingInstance>, Double> preComputedGValues = new HashMap<>();
-
 		Vector result = new DenseDoubleVector(vector.length());
-
 		for (int i = 0; i < vector.length(); i++) {
-			result.setValue(i, computeDerivativeForIndex(i, vector, preComputedGValues));
+			result.setValue(i, computeDerivativeForIndex(i, vector));
 		}
-
 		return result;
 	}
 
-	private double computeDerivativeForIndex(int i, Vector vector,
-			HashMap<Pair<Vector, IDyadRankingInstance>, Double> preComputedGValues) {
-		double result = 0;
-
-		for (IInstance instance : dataset) {
-
-			for (int j = 0; j < ((IDyadRankingInstance) instance).length() - 1; j++) {
-				double gValue = getOrCreateG(vector, ((IDyadRankingInstance) instance), preComputedGValues);
-				if (gValue == 0) {
-					throw new ArithmeticException("Cannot divide by 0!");
-				} else {
-					result += h(vector, ((IDyadRankingInstance) instance), i) / gValue;
-					result -= featureTransform.transform(((IDyadRankingInstance) instance).getDyadAtPosition(j))
-							.getValue(i);
+	/**
+	 * Computes the partial derivatives of every single w_i. Algorithm (19) of [1].
+	 * 
+	 * @param i
+	 *            the index of the partial derivative.
+	 * @param vector
+	 *            the w vector
+	 * @return the partial derivative w_i
+	 */
+	private double computeDerivativeForIndex(int i, Vector vector) {
+		double secondSum = 0d;
+		int N = dataset.size();
+		double firstSum = 0d;
+		for (int n = 0; n < N; n++) {
+			IDyadRankingInstance instance = dataset.get(n);
+			int M_n = instance.length();
+			for (int m = 0; m < M_n - 1; m++) {
+				double innerDenumerator = 0d;
+				double innerNumerator = 0d;
+				Dyad dyad = instance.getDyadAtPosition(m);
+				firstSum = firstSum + featureTransforms.get(instance).get(dyad).getValue(i);
+				for (int l = m; l < M_n; l++) {
+					Vector zNL = featureTransforms.get(instance).get(instance.getDyadAtPosition(l));
+					double dotProd = Math.exp(vector.dotProduct(zNL));
+					innerNumerator = innerNumerator + zNL.getValue(i) * dotProd;
+					innerDenumerator = innerDenumerator + dotProd;
 				}
+				secondSum = secondSum + innerNumerator / innerDenumerator;
 			}
 		}
-
-		return result;
-	}
-
-	private double h(Vector vector, IDyadRankingInstance instance, int i) {
-		double result = 0;
-
-		for (Dyad dyad : instance) {
-			Vector zNL = featureTransform.transform(dyad);
-
-			result += zNL.getValue(i) * Math.exp(vector.dotProduct(zNL));
-		}
-
-		return result;
-	}
-
-	private double getOrCreateG(Vector vector, IDyadRankingInstance instance,
-			HashMap<Pair<Vector, IDyadRankingInstance>, Double> preComputedGValues) {
-		Pair<Vector, IDyadRankingInstance> newPair = new Pair<>(vector, instance);
-		if (preComputedGValues.containsKey(newPair)) {
-			return preComputedGValues.get(newPair);
-		} else {
-			double gValue = g(vector, instance);
-			preComputedGValues.put(newPair, gValue);
-			return gValue;
-		}
-	}
-
-	private double g(Vector vector, IDyadRankingInstance instance) {
-		double result = 0;
-
-		for (Dyad dyad : instance) {
-			result += Math.exp(vector.dotProduct(featureTransform.transform(dyad)));
-		}
-
-		return result;
+		return -firstSum + secondSum;
 	}
 
 }

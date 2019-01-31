@@ -66,17 +66,18 @@ public class DyadRankingInstance implements IDyadRankingInstance {
 
 	@Override
 	public boolean equals(Object o) {
-		if (!(o instanceof DyadRankingInstance)) {
+		if (!(o instanceof IDyadRankingInstance)) {
 			return false;
 		}
 
-		DyadRankingInstance dRInstance = (DyadRankingInstance) o;
+		IDyadRankingInstance drInstance = (IDyadRankingInstance) o;
 
-		if (!dyads.equals(dRInstance.dyads)) {
-			return false;
+		for (int i = 0; i < drInstance.length(); i++) {
+			if (!(drInstance.getDyadAtPosition(i)).equals(this.getDyadAtPosition(i)))
+				return false;
 		}
 
-		return super.equals(o);
+		return true;
 	}
 
 	@Override
@@ -84,6 +85,14 @@ public class DyadRankingInstance implements IDyadRankingInstance {
 		int result = 42;
 		result = result * 31 + dyads.hashCode();
 		return result;
+	}
+	
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("DyadRankingInstance: ");
+		builder.append(dyads);
+		return builder.toString();
 	}
 
 }

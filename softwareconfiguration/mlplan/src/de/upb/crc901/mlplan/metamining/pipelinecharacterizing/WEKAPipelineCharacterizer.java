@@ -21,6 +21,9 @@ import treeminer.FrequentSubtreeFinder;
 import treeminer.TreeMiner;
 import treeminer.util.TreeRepresentationUtils;
 
+import weka.classifiers.AbstractClassifier;
+import weka.classifiers.Classifier;
+
 /**
  * A characterizer for MLPipelines. It characterizes pipelines using an ontology
  * and a tree mining algorithm. The ontology is used to get a characterization

@@ -16,7 +16,8 @@ import de.upb.isys.linearalgebra.Vector;
 import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.core.exception.TrainingException;
 import jaicore.ml.dyadranking.algorithm.ADyadRanker;
-import jaicore.ml.dyadranking.algorithm.FeatureTransformPLDyadRanker;
+import jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
+import jaicore.ml.dyadranking.algorithm.featuretransform.FeatureTransformPLDyadRanker;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
@@ -86,6 +87,6 @@ public class SimpleDyadDatasetDyadRankerTester {
 
 	@Parameters
 	public static List<ADyadRanker> supplyDyadRankers() {
-		return Arrays.asList(new FeatureTransformPLDyadRanker());
+		return Arrays.asList(new FeatureTransformPLDyadRanker(), new PLNetDyadRanker());
 	}
 }

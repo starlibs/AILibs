@@ -1,7 +1,12 @@
 package jaicore.ml.dyadranking.optimizing;
 
-import jaicore.ml.dyadranking.algorithm.IDyadFeatureTransform;
+import java.util.Map;
+
+import de.upb.isys.linearalgebra.Vector;
+import jaicore.ml.core.optimizing.IGradientDescendableFunction;
+import jaicore.ml.dyadranking.Dyad;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
+import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 
 /**
  * An interface for a differentiable function in the context of feature
@@ -18,7 +23,7 @@ public interface IDyadRankingFeatureTransformPLGradientDescendableFunction exten
 	 * @param dataset
 	 *            the dataset to use
 	 * @param featureTransform
-	 *            the feature transformation method to use
+	 *            the feature precomputed feature transforms
 	 */
-	void initialize(DyadRankingDataset dataset, IDyadFeatureTransform featureTransform);
+	void initialize(DyadRankingDataset dataset, Map<IDyadRankingInstance, Map<Dyad, Vector>> featureTransform);
 }
