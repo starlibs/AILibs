@@ -11,6 +11,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import jaicore.ml.tsc.shapelets.Shapelet;
+import jaicore.ml.tsc.util.TimeSeriesUtil;
 
 /**
  * Unit tests for {@link ShapeletTransformAlgorithm}.
@@ -36,8 +37,7 @@ public class ShapeletTransformAlgorithmTest {
 		Set<Shapelet> actResult = ShapeletTransformAlgorithm.generateCandidates(data, l, 0);
 		Assert.assertEquals(4, actResult.size());
 
-		Shapelet expectedShapelet = new Shapelet(ShapeletTransformAlgorithm.zNormalize(new double[] { 1, 2, 3 }, true),
-				0, 3, 0);
+		Shapelet expectedShapelet = new Shapelet(TimeSeriesUtil.zNormalize(new double[] { 1, 2, 3 }, true), 0, 3, 0);
 		Assert.assertTrue(actResult.stream().anyMatch(s -> s.equals(expectedShapelet)));
 
 	}
@@ -47,8 +47,7 @@ public class ShapeletTransformAlgorithmTest {
 	 */
 	@Test
 	public void findDistancesTest() {
-		Shapelet shapelet = new Shapelet(ShapeletTransformAlgorithm.zNormalize(new double[] { 1, 2, 3 }, true), 0, 3,
-				0);
+		Shapelet shapelet = new Shapelet(TimeSeriesUtil.zNormalize(new double[] { 1, 2, 3 }, true), 0, 3, 0);
 		// INDArray dataMatrix = Nd4j.create(new double[][] { { 4, 1, 2, 3, 5 }, { 2, 2,
 		// 2, 2, 2 } });
 		double[][] dataMatrix = new double[][] { { 4, 2, 4, 6, 5 }, { 2, 2, 2, 2, 2 } };
@@ -117,26 +116,27 @@ public class ShapeletTransformAlgorithmTest {
 		// +1.224744871 });
 		double[] expectedResult = new double[] { -1, 0, +1 };
 
-		double[] actResult = ShapeletTransformAlgorithm.zNormalize(vector, true);
+		double[] actResult = TimeSeriesUtil.zNormalize(vector, true);
 		Assert.assertArrayEquals(expectedResult, actResult, EPS_DELTA);
 
 		double[] array = new double[] { 2, 4, 6 };
 
-		System.out.println(Arrays.toString(ShapeletTransformAlgorithm.zNormalize(array, true)));
+		System.out.println(Arrays.toString(TimeSeriesUtil.zNormalize(array, true)));
 	}
 
 	/**
-	 * See
-	 * {@link ShapeletTransformAlgorithm#getMinimumDistanceAmongAllSubsequences(Shapelet, double[])}
-	 * and
-	 * {@link ShapeletTransformAlgorithm#getMinimumDistanceAmongAllSubsequencesOptimized(Shapelet, double[])
+	 * See {@link
+	 * ShapeletTransformAlgorithm#getMinimumDistanceAmongAllSubsequences(Shapelet,
+	 * double[])} and {@link
+	 * ShapeletTransformAlgorithm#getMinimumDistanceAmongAllSubsequencesOptimized(Shapelet,
+	 * double[])
 	 */
 	@Test
 	public void getMinimumDistanceAmongAllSequencesOptimizedTest() {
 		double[] matrix = new double[] { 4, 1, 2, 4, 6, 5 };
 
 		double[] vector = new double[] { 1, 2, 3 };
-		Shapelet shapelet = new Shapelet(ShapeletTransformAlgorithm.zNormalize(vector, true), 0, 3, 0);
+		Shapelet shapelet = new Shapelet(TimeSeriesUtil.zNormalize(vector, true), 0, 3, 0);
 
 		double actResult = ShapeletTransformAlgorithm.getMinimumDistanceAmongAllSubsequences(shapelet, matrix);
 
@@ -179,19 +179,19 @@ public class ShapeletTransformAlgorithmTest {
 	}
 
 	/**
-	 * See {@link
-	 * ShapeletTransformAlgorithm#getMinimumDistanceAmongAllSubsequences(Shapelet,
-	 * double[])} and {@link
-	 * ShapeletTransformAlgorithm#getMinimumDistanceAmongAllSubsequencesOptimized(Shapelet,
-	 * double[])
+	 * See
+	 * {@link ShapeletTransformAlgorithm#getMinimumDistanceAmongAllSubsequences(Shapelet, double[])}
+	 * and
+	 * {@link ShapeletTransformAlgorithm#getMinimumDistanceAmongAllSubsequencesOptimized(Shapelet, double[])
 	 */
 	@Test
 	public void getMinimumDistanceAmongAllSequencesOptimizedTest2() {
-		double[] matrix = new double[] { 4, 3, 6, 9 };
+		double[] matrix = new double[] { 4, 3, 6, 9, 23, 1 };
 		// INDArray matrix = Nd4j.create(new double[][] { { 4, 2, 4, 6, 5, } });
 
 		double[] vector = new double[] { 1, 2, 3 };
-		Shapelet shapelet = new Shapelet(ShapeletTransformAlgorithm.zNormalize(vector, true), 0, 3, 0);
+		Shapelet shapelet = new Shapelet(TimeSeriesUtil.zNormalize(vector, true), 0, 3, 0);
+		System.out.println("Normalized vector: " + Arrays.toString(shapelet.getData()));
 
 		double oldResult = ShapeletTransformAlgorithm.getMinimumDistanceAmongAllSubsequences(shapelet, matrix);
 		double oldOptimizedResult = ShapeletTransformAlgorithm.getMinimumDistanceAmongAllSubsequencesOptimized(shapelet,

@@ -1,5 +1,6 @@
 package jaicore.ml.tsc.util;
 
+import java.util.Arrays;
 import java.util.stream.IntStream;
 
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -229,6 +230,76 @@ public class TimeSeriesUtil {
 		final double[] result = new double[end - start];
 		for (int j = 0; j < end - start; j++) {
 			result[j] = timeSeries[j + start];
+		}
+		return result;
+	}
+
+	/**
+	 * Normalizes an INDArray vector object.
+	 * 
+	 * @param array
+	 *            INDArray row vector with single shape dimension
+	 * @param inplace
+	 *            Indication whether the normalization should be performed in place
+	 *            or on a new array copy
+	 * @return Returns the view on the transformed INDArray (if inplace) or a
+	 *         normalized copy of the input array (if not inplace)
+	 */
+	public static INDArray normalizeINDArray(final INDArray array, final boolean inplace) {
+		if (array.shape().length > 2 && array.shape()[0] != 1)
+			throw new IllegalArgumentException(
+					String.format("Input INDArray object must be a vector with shape size 1. Actual shape: (%s)",
+							Arrays.toString(array.shape())));
+
+		final double mean = array.mean(1).getDouble(0);
+		final double std = array.std(1).getDouble(0);
+
+		INDArray result;
+		if (inplace) {
+			result = array.subi(mean);
+		} else {
+			result = array.sub(mean);
+		}
+		return result.addi(Nd4j.EPS_THRESHOLD).divi(std);
+	}
+
+	/**
+	 * Z-normalizes a given <code>dataVector</code>. Uses Bessel's correction
+	 * (1/(n-1) in the calculation of the standard deviation) if set.
+	 * 
+	 * @param dataVector
+	 *            Vector to be z-normalized
+	 * @param besselsCorrection
+	 *            Indicator whether the std dev correction using n-1 instead of n
+	 *            should be applied
+	 * @return Z-normalized vector
+	 */
+	// TODO: Use Filter implementation
+	public static double[] zNormalize(final double[] dataVector, final boolean besselsCorrection) {
+		// TODO: Parameter checks...
+
+		int n = dataVector.length - (besselsCorrection ? 1 : 0);
+
+		double mean = 0; // dataVector.meanNumber().doubleValue();
+		for (int i = 0; i < dataVector.length; i++) {
+			mean += dataVector[i];
+		}
+		mean /= dataVector.length;
+
+		// Use Bessel's correction to get the sample stddev
+		double stddev = 0;
+		for (int i = 0; i < dataVector.length; i++) {
+			stddev += Math.pow(dataVector[i] - mean, 2);
+		}
+		stddev /= n;
+		stddev = Math.sqrt(stddev);
+
+		double[] result = new double[dataVector.length];
+		if (stddev == 0.0)
+			return result;
+
+		for (int i = 0; i < result.length; i++) {
+			result[i] = (dataVector[i] - mean) / stddev;
 		}
 		return result;
 	}

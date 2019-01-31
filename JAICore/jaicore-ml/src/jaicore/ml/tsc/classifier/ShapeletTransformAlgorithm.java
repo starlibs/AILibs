@@ -110,7 +110,7 @@ public class ShapeletTransformAlgorithm extends ASimplifiedTSCAlgorithm<Integer,
 	/**
 	 * Static indicator whether the bias (Bessel's) correction should be used.
 	 */
-	private static boolean USE_BIAS_CORRECTION = false;
+	private static boolean USE_BIAS_CORRECTION = true;
 
 	/**
 	 * See {@link IAlgorithm#getTimeout()}.
@@ -467,7 +467,7 @@ public class ShapeletTransformAlgorithm extends ASimplifiedTSCAlgorithm<Integer,
 			double x_bar = p / length;
 			double s = q / (length) - x_bar * x_bar;
 			s = s < 0.000000001d ? 0d
-					: Math.sqrt(USE_BIAS_CORRECTION ? ((double) length / (double) (length - 1d)) : 1d * s); //
+					: Math.sqrt((USE_BIAS_CORRECTION ? ((double) length / (double) (length - 1d)) : 1d) * s); //
 
 			int j = 0;
 			double d = 0d;

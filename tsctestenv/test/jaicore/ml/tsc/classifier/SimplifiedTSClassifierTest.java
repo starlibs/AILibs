@@ -91,7 +91,7 @@ public class SimplifiedTSClassifierTest extends TSClassifierTest {
 		TimeSeriesDataset test = testPair.getX();
 
 		// TODO: Deal with it and move it to the right place
-		if (testPair.getY() != null && trainPair.getY() != null
+		if (trainPair.getY() != null && testPair.getY() != null
 				&& !testPair.getY().getClassValues().equals(trainPair.getY().getClassValues())) {
 			LOGGER.warn("The class mapper of the training data differs from the test class mapper.");
 		}

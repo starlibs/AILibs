@@ -13,6 +13,8 @@ import junit.framework.Assert;
 import weka.core.Instances;
 
 public class TimeSeriesUtilTest {
+	private static final double EPS_DELTA = 0.0000001;
+
 	@Test
 	public void timeSeriesDatasetToWekaInstancesTest() {
 		final List<INDArray> valueMatrix = Arrays
@@ -26,5 +28,13 @@ public class TimeSeriesUtilTest {
 		Assert.assertEquals(5, actResult.numAttributes()); // 4 + target
 		Assert.assertEquals(3, actResult.get(0).value(2), 0.001);
 		Assert.assertEquals(2, actResult.get(1).classValue(), 0.001);
+	}
+
+	@Test
+	public void normalizeINDArrayTest() {
+		INDArray testArray = Nd4j.create(new double[] { 1, 2, 3 });
+
+		Assert.assertTrue(Nd4j.create(new double[] { -1, 0, 1 })
+				.equalsWithEps(TimeSeriesUtil.normalizeINDArray(testArray, false), EPS_DELTA));
 	}
 }
