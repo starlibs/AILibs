@@ -78,7 +78,7 @@ public class LearningCurveExtrapolationEvaluator implements IClassifierEvaluator
 			// Create the extrapolator and calculate the accuracy the classifier would have
 			// if it was trained on the complete dataset.
 			LearningCurve learningCurve = extrapolator.extrapolateLearningCurve(this.anchorpoints);
-			return learningCurve.getCurveValue(dataset.size());
+			return learningCurve.getCurveValue(dataset.size()) * 100.0d;
 		} catch (Exception e) {
 			logger.warn("Evaluation of classifier failed due Exception {} with message {}. Returning null.",
 					e.getClass().getName(), e.getMessage());
