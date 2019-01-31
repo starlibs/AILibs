@@ -7,6 +7,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jaicore.basic.TimeOut;
 import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.tsc.classifier.ASimplifiedTSClassifier;
 import jaicore.ml.tsc.dataset.TimeSeriesDataset;
@@ -62,11 +63,14 @@ public class TimeSeriesForestClassifier extends ASimplifiedTSClassifier<Integer>
 	 *            series is very long
 	 * @param numOfCPUs
 	 *            Number of CPUs used for the training
+	 * @param timeout
+	 *            The timeout used for the training
 	 */
 	public TimeSeriesForestClassifier(final int numTrees, final int maxDepth, final int seed,
-			final boolean useFeatureCaching, final int numOfCPUs) {
+			final boolean useFeatureCaching, final int numOfCPUs, final TimeOut timeout) {
 		super(new TimeSeriesForestAlgorithm(numTrees, maxDepth, seed, useFeatureCaching));
 		this.algorithm.setNumCPUs(numOfCPUs);
+		this.algorithm.setTimeout(timeout);
 		this.trees = new TimeSeriesTree[numTrees];
 	}
 
@@ -140,6 +144,5 @@ public class TimeSeriesForestClassifier extends ASimplifiedTSClassifier<Integer>
 	public void setTrees(TimeSeriesTree[] trees) {
 		this.trees = trees;
 	}
-
 
 }

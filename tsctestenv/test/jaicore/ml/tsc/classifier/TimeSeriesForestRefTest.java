@@ -4,10 +4,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Level;
 import org.junit.Test;
 
+import jaicore.basic.TimeOut;
 import jaicore.ml.core.exception.EvaluationException;
 import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.core.exception.TrainingException;
@@ -64,7 +66,8 @@ public class TimeSeriesForestRefTest {
 		int maxDepth = 1000;
 		int numCPUs = 1;
 
-		TimeSeriesForestClassifier ownClf = new TimeSeriesForestClassifier(numTrees, maxDepth, seed, false, numCPUs);
+		TimeSeriesForestClassifier ownClf = new TimeSeriesForestClassifier(numTrees, maxDepth, seed, false, numCPUs,
+				new TimeOut(Integer.MAX_VALUE, TimeUnit.SECONDS));
 
 		TSF refClf = new TSF(seed);
 		refClf.setNumTrees(numTrees);

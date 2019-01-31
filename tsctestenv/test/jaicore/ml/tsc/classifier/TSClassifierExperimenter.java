@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import jaicore.basic.SQLAdapter;
 import jaicore.basic.TimeOut;
+import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.concurrent.TimeoutTimer;
 import jaicore.experiments.ExperimentDBEntry;
 import jaicore.experiments.ExperimentRunner;
@@ -17,9 +18,6 @@ import jaicore.experiments.IExperimentIntermediateResultProcessor;
 import jaicore.experiments.IExperimentSetConfig;
 import jaicore.experiments.IExperimentSetEvaluator;
 import jaicore.ml.tsc.exceptions.TimeSeriesLoadingException;
-import jaicore.ml.tsc.quality_measures.FStat;
-import timeseriesweka.classifiers.LearnShapelets;
-import timeseriesweka.classifiers.ShapeletTransformClassifier;
 
 /**
  * Experimenter class which can randomly conduct experiments and storing the
@@ -54,52 +52,15 @@ public class TSClassifierExperimenter implements IExperimentSetEvaluator {
 
 		long seed = Long.valueOf(experiment.get("seed"));
 		long timeoutInS = Long.valueOf(experiment.get("timeout"));
+		TimeOut timeout = new TimeOut(timeoutInS, TimeUnit.SECONDS);
 
 		LOGGER.info("Load dataset...");
 		String dataset = experiment.get("dataset");
 
-		Object refClassifier = null;
-		ASimplifiedTSClassifier<Integer> ownClassifier = null;
-
-		switch (experiment.get("algorithm")) {
-		case "ShapeletTransform":
-			int k = 205;
-			final int minShapeletLength = 3;
-			final int maxShapeletLength = 23;
-
-			refClassifier = new ShapeletTransformClassifier();
-			((ShapeletTransformClassifier) refClassifier).setSeed(seed);
-			((ShapeletTransformClassifier) refClassifier).setNumberOfShapelets(k);
-
-			ownClassifier = new ShapeletTransformTSClassifier(k, new FStat(), (int) seed, false, minShapeletLength,
-					maxShapeletLength, true, new TimeOut(timeoutInS, TimeUnit.SECONDS));
-			break;
-
-		case "LearnShapelets":
-			// Initialize classifiers with values selected by reference classifier by
-			// default
-			int K = 8;
-			double learningRate = 0.1;
-			double regularization = 0.01;
-			int scaleR = 3;
-			double minShapeLength = 0.2;
-			int maxIter = 600;
-
-			ownClassifier = new LearnShapeletsClassifier(K, learningRate, regularization, scaleR, minShapeLength,
-					maxIter, (int) seed);
-
-			refClassifier = new LearnShapelets();
-			((LearnShapelets) refClassifier).setSeed(seed);
-			((LearnShapelets) refClassifier).fixParameters();
-			break;
-		case "TimeSeriesForest":
-			// TODO
-			break;
-		default:
-			LOGGER.error("Please specify a valid algorithm. An invalid value was given: {}",
-					experiment.get("algorithm"));
-			return;
-		}
+		Pair<ASimplifiedTSClassifier<Integer>, Object> classifierPair = SimplifiedTSClassifierTest
+				.createClassifierPairsWithDefaultParameter(experiment.get("algorithm"), (int) seed, timeout);
+		ASimplifiedTSClassifier<Integer> ownClassifier = classifierPair.getX();
+		Object refClassifier = classifierPair.getY();
 
 		try {
 			Map<String, Object> results = SimplifiedTSClassifierTest.compareClassifiers(refClassifier, ownClassifier,
