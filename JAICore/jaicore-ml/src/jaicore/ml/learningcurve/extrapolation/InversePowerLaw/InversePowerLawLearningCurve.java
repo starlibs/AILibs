@@ -15,6 +15,8 @@ public class InversePowerLawLearningCurve implements LearningCurve {
 	private double a, b, c;
 
 	public InversePowerLawLearningCurve(double a, double b, double c) {
+		assert a > 0 && a < 1;
+		assert c > -1 && c < 0;
 		this.a = a;
 		this.b = b;
 		this.c = c;

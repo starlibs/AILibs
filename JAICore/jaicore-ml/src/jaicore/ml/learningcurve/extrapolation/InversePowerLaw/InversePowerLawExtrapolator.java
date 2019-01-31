@@ -56,9 +56,9 @@ public class InversePowerLawExtrapolator implements LearningCurveExtrapolationMe
 			data.add(newInstance2);
 			data.setClassIndex(data.numAttributes() - 1);
 			double[] result = slw.classifyInstances(data);
-			double a = result[3];
+			double a = Math.max(0.0000000001, Math.min(result[3], 0.9999999999));
 			double b = result[4];
-			double c = result[5];
+			double c = Math.max(-0.9999999999, Math.min(result[5], -0.0000000001));
 			return new InversePowerLawLearningCurve(a, b, c);
 		} catch (Exception e) {
 			e.printStackTrace();
