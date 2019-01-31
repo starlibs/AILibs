@@ -116,6 +116,11 @@ public class ShapeletTransformAlgorithm extends ASimplifiedTSCAlgorithm<Integer,
 	 */
 	private TimeOut timeout = new TimeOut(Integer.MAX_VALUE, TimeUnit.SECONDS);
 
+	/**
+	 * 
+	 */
+	private final boolean useHIVECOTEEnsemble;
+
 	public ShapeletTransformAlgorithm(final int k, final int noClusters, final IQualityMeasure qualityMeasure,
 			final int seed, final boolean clusterShapelets) {
 		this.k = k;
@@ -124,10 +129,12 @@ public class ShapeletTransformAlgorithm extends ASimplifiedTSCAlgorithm<Integer,
 		this.noClusters = noClusters;
 		this.clusterShapelets = clusterShapelets;
 		this.estimateShapeletLengthBorders = true;
+		this.useHIVECOTEEnsemble = true;
 	}
 
 	public ShapeletTransformAlgorithm(final int k, final int noClusters, final IQualityMeasure qualityMeasure,
-			final int seed, final boolean clusterShapelets, final int minShapeletLength, final int maxShapeletLength) {
+			final int seed, final boolean clusterShapelets, final int minShapeletLength, final int maxShapeletLength,
+			final boolean useHIVECOTEEnsemble) {
 		this.k = k;
 		this.qualityMeasure = qualityMeasure;
 		this.seed = seed;
@@ -136,6 +143,7 @@ public class ShapeletTransformAlgorithm extends ASimplifiedTSCAlgorithm<Integer,
 		this.estimateShapeletLengthBorders = false;
 		this.minShapeletLength = minShapeletLength;
 		this.maxShapeletLength = maxShapeletLength;
+		this.useHIVECOTEEnsemble = useHIVECOTEEnsemble;
 	}
 
 	// Training procedure
@@ -194,14 +202,13 @@ public class ShapeletTransformAlgorithm extends ASimplifiedTSCAlgorithm<Integer,
 
 			// Inititalize Weka ensemble
 			LOGGER.debug("Initializing ensemble classifier...");
-			Classifier classifier = initEnsembleModel();
-			// Classifier classifier;
-			// try {
-			// classifier = initCAWPEEnsembleModel();
-			// } catch (Exception e1) {
-			// throw new AlgorithmException(e1, "Could not train model due to ensemble
-			// exception.");
-			// }
+			Classifier classifier = null;
+			try {
+				classifier = this.useHIVECOTEEnsemble ? initHIVECOTEEnsembleModel()
+						: initCAWPEEnsembleModel();
+			} catch (Exception e1) {
+				throw new AlgorithmException(e1, "Could not train model due to ensemble exception.");
+			}
 			LOGGER.debug("Initialized ensemble classifier.");
 
 			// Train Weka ensemble using the data
@@ -273,7 +280,6 @@ public class ShapeletTransformAlgorithm extends ASimplifiedTSCAlgorithm<Integer,
 		return result;
 	}
 
-	// TODO: Update to new dataset representation
 	public List<Shapelet> clusterShapelets(final List<Shapelet> shapelets, final int noClusters, final long beginTime)
 			throws InterruptedException {
 		final List<List<Shapelet>> C = new ArrayList<>();
@@ -284,9 +290,9 @@ public class ShapeletTransformAlgorithm extends ASimplifiedTSCAlgorithm<Integer,
 		}
 
 		while (C.size() > noClusters) {
-			if((System.currentTimeMillis() - beginTime) > this.timeout.milliseconds())
+			if ((System.currentTimeMillis() - beginTime) > this.timeout.milliseconds())
 				throw new InterruptedException("Interrupted training due to timeout.");
-			
+
 			INDArray M = Nd4j.create(C.size(), C.size());
 			for (int i = 0; i < C.size(); i++) {
 				for (int j = 0; j < C.size(); j++) {
@@ -594,7 +600,7 @@ public class ShapeletTransformAlgorithm extends ASimplifiedTSCAlgorithm<Integer,
 	}
 
 	// Using HIVE COTE paper ensemble
-	private Classifier initEnsembleModel() {
+	private Classifier initHIVECOTEEnsembleModel() {
 
 		Classifier[] classifier = new Classifier[7];
 
@@ -698,9 +704,9 @@ public class ShapeletTransformAlgorithm extends ASimplifiedTSCAlgorithm<Integer,
 		for (int i = 0; i < timeSeries.length; i++) {
 			if (timeout != null && (System.currentTimeMillis() - beginTime) > timeout.milliseconds())
 				throw new InterruptedException("Interrupted training due to timeout.");
-			
+
 			for (int j = 0; j < shapelets.size(); j++) {
-				
+
 				transformedTS[i][j] = ShapeletTransformAlgorithm
 						.getMinimumDistanceAmongAllSubsequences(shapelets.get(j), timeSeries[i]);
 			}

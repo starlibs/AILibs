@@ -34,9 +34,10 @@ public class ShapeletTransformTSClassifier
 	}
 
 	public ShapeletTransformTSClassifier(final int k, final IQualityMeasure qm, final int seed,
-			final boolean clusterShapelets, final int minShapeletLength, final int maxShapeletLength) {
+			final boolean clusterShapelets, final int minShapeletLength, final int maxShapeletLength,
+			final boolean useHIVECOTEEnsemble) {
 		super(new ShapeletTransformAlgorithm(k, k / 2, qm, seed, clusterShapelets, minShapeletLength,
-				maxShapeletLength));
+				maxShapeletLength, useHIVECOTEEnsemble));
 	}
 
 

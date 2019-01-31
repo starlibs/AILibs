@@ -56,7 +56,8 @@ public class TSClassifierExperimenter implements IExperimentSetEvaluator {
 			((ShapeletTransformClassifier) refClassifier).setSeed(seed);
 			((ShapeletTransformClassifier) refClassifier).setNumberOfShapelets(k);
 			
-			ownClassifier = new ShapeletTransformTSClassifier(k, new FStat(), (int) seed, false, minShapeletLength, maxShapeletLength);
+			ownClassifier = new ShapeletTransformTSClassifier(k, new FStat(), (int) seed, false, minShapeletLength,
+					maxShapeletLength, true);
 		}
 		
 		try {
