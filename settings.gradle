@@ -18,6 +18,8 @@ include ":JAICore:jaicore-processes"
 include ":JAICore:jaicore-search"
 include ":JAICore:jaicore-services"
 
+include ":JAICore:jaicore-web"
+
 
 // Software-Configuration
 include 'hasco'
