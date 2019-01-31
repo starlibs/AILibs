@@ -1,6 +1,9 @@
 package jaicore.ml.tsc.util;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 import java.util.stream.IntStream;
 
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -301,6 +304,40 @@ public class TimeSeriesUtil {
 		for (int i = 0; i < result.length; i++) {
 			result[i] = (dataVector[i] - mean) / stddev;
 		}
+		return result;
+	}
+
+	/**
+	 * Sorts the indices of the given <code>vector</code> based on the the vector's
+	 * values (argsort).
+	 * 
+	 * @param vector
+	 *            Vector where the values are extracted from
+	 * @param ascending
+	 *            Indicator whether the indices should be sorted ascending
+	 * @return Returns the list of indices which are sorting based on the vector's
+	 *         values
+	 */
+	// Analogous to argsort function of ArrayUtil in Nd4j
+	public static List<Integer> sortIndexes(final double[] vector, final boolean ascending) {
+		List<Integer> result = new ArrayList<>();
+
+		Integer[] indexes = new Integer[(int) vector.length];
+		for (int i = 0; i < indexes.length; i++) {
+			indexes[i] = i;
+		}
+
+		Arrays.sort(indexes, new Comparator<Integer>() {
+			@Override
+			public int compare(final Integer i1, final Integer i2) {
+				return (ascending ? 1 : -1) * Double.compare(Math.abs(vector[i1]), Math.abs(vector[i2]));
+			}
+		});
+
+		for (int i = 0; i < indexes.length; i++) {
+			result.add(indexes[i]);
+		}
+
 		return result;
 	}
 }

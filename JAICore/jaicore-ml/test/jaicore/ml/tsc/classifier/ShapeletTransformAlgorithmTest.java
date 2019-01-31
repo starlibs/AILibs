@@ -11,6 +11,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import jaicore.ml.tsc.shapelets.Shapelet;
+import jaicore.ml.tsc.util.MathUtil;
 import jaicore.ml.tsc.util.TimeSeriesUtil;
 
 /**
@@ -48,11 +49,18 @@ public class ShapeletTransformAlgorithmTest {
 	@Test
 	public void findDistancesTest() {
 		Shapelet shapelet = new Shapelet(TimeSeriesUtil.zNormalize(new double[] { 1, 2, 3 }, true), 0, 3, 0);
-		// INDArray dataMatrix = Nd4j.create(new double[][] { { 4, 1, 2, 3, 5 }, { 2, 2,
-		// 2, 2, 2 } });
 		double[][] dataMatrix = new double[][] { { 4, 2, 4, 6, 5 }, { 2, 2, 2, 2, 2 } };
 
-		List<Double> actResult = ShapeletTransformAlgorithm.findDistances(shapelet, dataMatrix);
+		// Using the non-optimized version
+		List<Double> actResult = ShapeletTransformAlgorithm.findDistances(shapelet, dataMatrix, false);
+
+		Assert.assertEquals("A distance has to be found for each instance!", dataMatrix.length, actResult.size());
+
+		Assert.assertEquals(0, actResult.get(0), EPS_DELTA);
+		Assert.assertEquals(2d / 3, actResult.get(1), EPS_DELTA); // (1.224744871 * 1.224744871 * 2) / 3,
+
+		// Using the optimized version
+		actResult = ShapeletTransformAlgorithm.findDistances(shapelet, dataMatrix, true);
 
 		Assert.assertEquals("A distance has to be found for each instance!", dataMatrix.length, actResult.size());
 
@@ -125,11 +133,10 @@ public class ShapeletTransformAlgorithmTest {
 	}
 
 	/**
-	 * See {@link
-	 * ShapeletTransformAlgorithm#getMinimumDistanceAmongAllSubsequences(Shapelet,
-	 * double[])} and {@link
-	 * ShapeletTransformAlgorithm#getMinimumDistanceAmongAllSubsequencesOptimized(Shapelet,
-	 * double[])
+	 * See
+	 * {@link ShapeletTransformAlgorithm#getMinimumDistanceAmongAllSubsequences(Shapelet, double[])}
+	 * and
+	 * {@link ShapeletTransformAlgorithm#getMinimumDistanceAmongAllSubsequencesOptimized(Shapelet, double[])
 	 */
 	@Test
 	public void getMinimumDistanceAmongAllSequencesOptimizedTest() {
@@ -148,25 +155,6 @@ public class ShapeletTransformAlgorithmTest {
 	}
 
 	/**
-	 * See {@link ShapeletTransformAlgorithm#sortIndexes(double[], boolean)}.
-	 */
-	@Test
-	public void sortIndexesTest() {
-		double[] vector = new double[] { 4, 2, 6 };
-		double[] vector2 = new double[] { 2, 4, 6 };
-
-		List<Integer> result1 = ShapeletTransformAlgorithm.sortIndexes(vector, true);
-		List<Integer> result1Inv = ShapeletTransformAlgorithm.sortIndexes(vector, false);
-
-		Assert.assertEquals(Arrays.asList(1, 0, 2), result1);
-		Assert.assertEquals(Arrays.asList(2, 0, 1), result1Inv);
-
-		List<Integer> result2 = ShapeletTransformAlgorithm.sortIndexes(vector2, true);
-
-		Assert.assertEquals(Arrays.asList(0, 1, 2), result2);
-	}
-
-	/**
 	 * See
 	 * {@link ShapeletTransformAlgorithm#singleSquaredEuclideanDistance(double[], double[])}.
 	 */
@@ -175,14 +163,15 @@ public class ShapeletTransformAlgorithmTest {
 		double[] vector = new double[] { 4, 2, 6 };
 		double[] vector2 = new double[] { 2, 4, 6 };
 
-		Assert.assertEquals(8d, ShapeletTransformAlgorithm.singleSquaredEuclideanDistance(vector, vector2), EPS_DELTA);
+		Assert.assertEquals(8d, MathUtil.singleSquaredEuclideanDistance(vector, vector2), EPS_DELTA);
 	}
 
 	/**
-	 * See
-	 * {@link ShapeletTransformAlgorithm#getMinimumDistanceAmongAllSubsequences(Shapelet, double[])}
-	 * and
-	 * {@link ShapeletTransformAlgorithm#getMinimumDistanceAmongAllSubsequencesOptimized(Shapelet, double[])
+	 * See {@link
+	 * ShapeletTransformAlgorithm#getMinimumDistanceAmongAllSubsequences(Shapelet,
+	 * double[])} and {@link
+	 * ShapeletTransformAlgorithm#getMinimumDistanceAmongAllSubsequencesOptimized(Shapelet,
+	 * double[])
 	 */
 	@Test
 	public void getMinimumDistanceAmongAllSequencesOptimizedTest2() {

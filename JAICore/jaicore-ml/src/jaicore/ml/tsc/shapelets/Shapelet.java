@@ -1,6 +1,7 @@
 package jaicore.ml.tsc.shapelets;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -168,5 +169,18 @@ public class Shapelet {
 	 */
 	public static void sortByLengthAsc(final List<Shapelet> shapelets) {
 		shapelets.sort((s1, s2) -> Integer.compare(s1.getLength(), s2.getLength()));
+	}
+
+	/**
+	 * Returns the shapelet with the highest quality in the given list
+	 * <code>shapelets</code>.
+	 * 
+	 * @param shapelets
+	 *            The list of shapelets which is evaluated
+	 * @return Returns the shapelet with the highest determined quality
+	 */
+	public static Shapelet getHighestQualityShapeletInList(final List<Shapelet> shapelets) {
+		return Collections.max(shapelets,
+				(s1, s2) -> (-1) * Double.compare(s1.getDeterminedQuality(), s2.getDeterminedQuality()));
 	}
 }

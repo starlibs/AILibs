@@ -68,6 +68,7 @@ public class ShapeletTransformRefTest {
 		final int maxShapeletLength = 24;// 24;
 		ShapeletTransformTSClassifier ownClf = new ShapeletTransformTSClassifier(k, new FStat(), seed, false,
 				minShapeletLength, maxShapeletLength, true);
+		ownClf.setUseOptimizedMinimumDistSearch(false);
 
 		ShapeletTransformClassifier refClf = new ShapeletTransformClassifier();
 		refClf.setNumberOfShapelets(k);
@@ -91,8 +92,6 @@ public class ShapeletTransformRefTest {
 		dist.setShapelet(new Shapelet(dist.getCandidate()));
 		long timeStart = System.currentTimeMillis();
 		Assert.assertEquals(0.0d, dist.calculate(new double[] { 4, 2, 4, 6, 5 }, 0), EPS_DELTA);
-		// System.out.println("Online took " + (System.currentTimeMillis() - timeStart)
-		// + " ms.");
 
 		SubSeqDistance dist2 = new SubSeqDistance();
 
@@ -100,11 +99,6 @@ public class ShapeletTransformRefTest {
 		dist2.setShapelet(new Shapelet(dist2.getCandidate()));
 		timeStart = System.currentTimeMillis();
 		Assert.assertEquals(0.0d, dist2.calculate(new double[] { 4, 2, 4, 6, 5 }, 0), EPS_DELTA);
-		// System.out.println("Normal took " + (System.currentTimeMillis() - timeStart)
-		// + " ms.");
-
-		// System.out.println(Arrays.toString(dist.zNormalise(new double[] { 2, 4, 6 },
-		// false)));
 	}
 
 	public static void main(String[] args) throws FileNotFoundException, EvaluationException, TrainingException,
