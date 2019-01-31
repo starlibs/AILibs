@@ -10,4 +10,8 @@ public class InvalidAnchorPointsException extends Exception {
 
 	private static final long serialVersionUID = 779132065752019479L;
 
+	public InvalidAnchorPointsException(String message) {
+		super(message);
+	}
+	
 }
