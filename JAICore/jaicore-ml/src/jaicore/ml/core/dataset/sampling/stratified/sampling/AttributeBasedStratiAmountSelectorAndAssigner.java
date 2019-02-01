@@ -133,7 +133,6 @@ public class AttributeBasedStratiAmountSelectorAndAssigner<I extends IInstance>
 	 */
 	private void computeAttributeValues() {
 		LOG.info("computeAttributeValues(): enter");
-		LOG.debug("Computing attribute values for attribute indices {}", attributeIndices.toString());
 
 		// SCALE-54: Use target attribute only if no attribute indices are provided
 		if (this.attributeIndices == null || this.attributeIndices.isEmpty()) {
@@ -143,6 +142,7 @@ public class AttributeBasedStratiAmountSelectorAndAssigner<I extends IInstance>
 					targetIndex));
 			this.attributeIndices = Collections.singletonList(targetIndex);
 		}
+		LOG.debug("Computing attribute values for attribute indices {}", attributeIndices.toString());
 
 		// Check validity of the attribute indices
 		for (int attributeIndex : attributeIndices) {
