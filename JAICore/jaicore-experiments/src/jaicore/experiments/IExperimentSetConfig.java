@@ -34,7 +34,7 @@ public interface IExperimentSetConfig extends Mutable, Reloadable {
 	public static final String IGNORE_MEMORY = "ignore.memory";
 
 	@Key(MEM_MAX)
-	public Integer getMemoryLimitinMB();
+	public Integer getMemoryLimitInMB();
 
 	@Key(MEM_OPP)
 	public Integer getAssumedMemoryOverheadPerProcess();
