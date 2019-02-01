@@ -127,9 +127,10 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 			return this.activate();
 		}
 		case active: {
+			
 			/* Check termination */
 			try {
-				this.checkTermination();
+				this.checkAndConductTermination();
 			} catch (DelayedTimeoutCheckException e1) {
 				e1.printStackTrace();
 				throw e1.getException();
@@ -140,6 +141,7 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 
 			/* if the search itself has not been initialized, do this now */
 			if (!this.searchCreatedAndInitialized) {
+				
 				/* create search algorithm, set its logger, and initialize visualization*/
 				this.logger.debug("Creating the search object");
 				this.searchFactory.setProblemInput(this.searchProblem, this.searchProblemTransformer);
@@ -151,6 +153,8 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 					this.logger.info("Setting logger name of {} to {}", this.search, this.loggerName + ".search");
 					((ILoggingCustomizable) this.search).setLoggerName(this.loggerName + ".search");
 				}
+				else
+					this.logger.info("Not setting the logger name of the search. Logger name of HASCO is {}. Search loggingCustomizable: {}", loggerName, (this.search instanceof ILoggingCustomizable));
 				if (this.getConfig().visualizationEnabled()) {
 					this.logger.info("Launching graph visualization");
 					VisualizationWindow<?, ?> window = new VisualizationWindow<>(this.search);
@@ -260,6 +264,15 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 	public HASCORunReport<V> getReport() {
 		return new HASCORunReport<>(this.listOfAllRecognizedSolutions);
 	}
+	
+	@Override
+	protected void shutdown() {
+		logger.info("Entering HASCO shutdown routine.");
+		super.shutdown();
+		logger.debug("Cancelling search.");
+		search.cancel();
+		logger.debug("Shutdown of HASCO completed.");
+	}
 
 	@Override
 	public HASCOConfig getConfig() {
@@ -282,6 +295,7 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 	@Override
 	public void setLoggerName(final String name) {
 		this.logger.info("Switching logger from {} to {}", this.logger.getName(), name);
+		this.loggerName = name;
 		this.logger = LoggerFactory.getLogger(name);
 		this.logger.info("Activated logger {} with name {}", name, this.logger.getName());
 		super.setLoggerName(this.loggerName + "._swConfigAlgo");

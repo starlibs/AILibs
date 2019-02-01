@@ -64,9 +64,9 @@ public abstract class AOptimalPathInORGraphSearch<I extends GraphSearchInput<NSr
 		return this.getInput().getGraphGenerator();
 	}
 	
-	protected void checkTermination() throws TimeoutException, AlgorithmExecutionCanceledException, InterruptedException {
+	protected void checkAndConductTermination() throws TimeoutException, AlgorithmExecutionCanceledException, InterruptedException {
 		try {
-			super.checkTermination();
+			super.checkAndConductTermination();
 		} catch (DelayedTimeoutCheckException e) {
 			e.printStackTrace();
 			throw e.getException();

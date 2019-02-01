@@ -93,6 +93,7 @@ public abstract class HASCOTester<ISearch extends GraphSearchInput<N, A>, N, A>
 
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testThatIteratorReturnsEachPossibleSolution() throws Exception {
 		for (Pair<HASCO<ISearch, N, A, Double>, Integer> pairOfHASCOAndExpectedNumberOfSolutions : getAllHASCOObjectsWithExpectedNumberOfSolutionsForTheKnownProblems()) {
@@ -103,8 +104,8 @@ public abstract class HASCOTester<ISearch extends GraphSearchInput<N, A>, N, A>
 			List<ComponentInstance> solutions = new ArrayList<>();
 			for (AlgorithmEvent e : hasco) {
 				if (e instanceof HASCOSolutionEvent) {
-					solutions.add(((HASCOSolutionCandidate<Double>) ((HASCOSolutionEvent) e).getSolutionCandidate()).getComponentInstance());
-					System.out.println(new CompositionSerializer().serializeComponentInstance(((HASCOSolutionCandidate<Double>) ((HASCOSolutionEvent) e).getSolutionCandidate()).getComponentInstance()));
+					solutions.add(((HASCOSolutionCandidate<Double>) ((HASCOSolutionEvent<Double>) e).getSolutionCandidate()).getComponentInstance());
+					System.out.println(CompositionSerializer.serializeComponentInstance(((HASCOSolutionCandidate<Double>) ((HASCOSolutionEvent<Double>) e).getSolutionCandidate()).getComponentInstance()));
 				}
 			}
 			Set<Object> uniqueSolutions = new HashSet<>(solutions);

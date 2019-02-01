@@ -35,8 +35,9 @@ public abstract class GeneralAlgorithmTester<P, I, O> implements ILoggingCustomi
 
 	private String loggerName;
 	private Logger logger = LoggerFactory.getLogger(GeneralAlgorithmTester.class);
+	private static final String TESTEDALGORITHM_LOGGERNAME = "testedalgorithm";
 	private static final int INTERRUPTION_DELAY = 5000;
-	private static final int INTERRUPTION_CLEANUP_TOLERANCE = 1000;
+	private static final int INTERRUPTION_CLEANUP_TOLERANCE = 10000;
 	private static final int THREAD_SHUTDOWN_TOLERANCE = 10000;
 
 	public abstract AlgorithmProblemTransformer<P, I> getProblemReducer();
@@ -53,6 +54,9 @@ public abstract class GeneralAlgorithmTester<P, I, O> implements ILoggingCustomi
 		IAlgorithmFactory<I, O> factory = getFactory();
 		factory.setProblemInput(getSimpleProblemInputForGeneralTestPurposes());
 		IAlgorithm<I, O> algorithm = factory.getAlgorithm();
+		if (algorithm instanceof ILoggingCustomizable) {
+			((ILoggingCustomizable) algorithm).setLoggerName(TESTEDALGORITHM_LOGGERNAME);
+		}
 		CheckingEventListener listener = new CheckingEventListener();
 		algorithm.registerListener(listener);
 		algorithm.call();
@@ -66,6 +70,9 @@ public abstract class GeneralAlgorithmTester<P, I, O> implements ILoggingCustomi
 		IAlgorithmFactory<I, O> factory = getFactory();
 		factory.setProblemInput(getSimpleProblemInputForGeneralTestPurposes());
 		IAlgorithm<I, O> algorithm = factory.getAlgorithm();
+		if (algorithm instanceof ILoggingCustomizable) {
+			((ILoggingCustomizable) algorithm).setLoggerName(TESTEDALGORITHM_LOGGERNAME);
+		}
 		algorithm.setNumCPUs(Runtime.getRuntime().availableProcessors());
 		CheckingEventListener listener = new CheckingEventListener();
 		algorithm.registerListener(listener);
@@ -81,6 +88,9 @@ public abstract class GeneralAlgorithmTester<P, I, O> implements ILoggingCustomi
 		IAlgorithmFactory<I, O> factory = getFactory();
 		factory.setProblemInput(getSimpleProblemInputForGeneralTestPurposes());
 		IAlgorithm<I, O> algorithm = factory.getAlgorithm();
+		if (algorithm instanceof ILoggingCustomizable) {
+			((ILoggingCustomizable) algorithm).setLoggerName(TESTEDALGORITHM_LOGGERNAME);
+		}
 		CheckingEventListener listener = new CheckingEventListener();
 		int numberOfThreadsBefore = Thread.activeCount();
 		for (AlgorithmEvent e : algorithm) {
@@ -98,6 +108,9 @@ public abstract class GeneralAlgorithmTester<P, I, O> implements ILoggingCustomi
 		IAlgorithmFactory<I, O> factory = getFactory();
 		factory.setProblemInput(getDifficultProblemInputForGeneralTestPurposes());
 		IAlgorithm<I, O> algorithm = factory.getAlgorithm();
+		if (algorithm instanceof ILoggingCustomizable) {
+			((ILoggingCustomizable) algorithm).setLoggerName(TESTEDALGORITHM_LOGGERNAME);
+		}
 		algorithm.setNumCPUs(Runtime.getRuntime().availableProcessors());
 		FutureTask<O> task = new FutureTask<>(algorithm);
 		int numberOfThreadsBefore = Thread.activeCount();
@@ -132,6 +145,7 @@ public abstract class GeneralAlgorithmTester<P, I, O> implements ILoggingCustomi
 			timeoutTriggered = true;
 		}
 		int runtime = (int) (System.currentTimeMillis() - start);
+		logger.info("Executing thread has returned control after {}ms. Now observing metrics and waiting for possibly active sub-threads to shutdown.", runtime);
 		assertTrue("Runtime must be at least 5 seconds, actually should be at least 10 seconds.", runtime >= INTERRUPTION_DELAY);
 		assertFalse("The algorithm has not terminated within " + INTERRUPTION_CLEANUP_TOLERANCE + "ms after the interrupt.", timeoutTriggered);
 		assertTrue("The algorithm has not emitted an interrupted exception.", interruptedExceptionSeen);
@@ -152,6 +166,9 @@ public abstract class GeneralAlgorithmTester<P, I, O> implements ILoggingCustomi
 		IAlgorithmFactory<I, O> factory = getFactory();
 		factory.setProblemInput(getDifficultProblemInputForGeneralTestPurposes());
 		IAlgorithm<I, O> algorithm = factory.getAlgorithm();
+		if (algorithm instanceof ILoggingCustomizable) {
+			((ILoggingCustomizable) algorithm).setLoggerName(TESTEDALGORITHM_LOGGERNAME);
+		}
 		algorithm.setNumCPUs(Runtime.getRuntime().availableProcessors());
 		FutureTask<O> task = new FutureTask<>(algorithm);
 		int numberOfThreadsBefore = Thread.activeCount();
@@ -187,6 +204,7 @@ public abstract class GeneralAlgorithmTester<P, I, O> implements ILoggingCustomi
 		}
 		long end = System.currentTimeMillis();
 		int runtime = (int) (end - start);
+		logger.info("Executing thread has returned control after {}ms. Now observing metrics and waiting for possibly active sub-threads to shutdown.", runtime);
 		assertTrue("Runtime must be at least 5 seconds, actually should be at least 10 seconds.", runtime >= INTERRUPTION_DELAY);
 		assertFalse("The algorithm has not terminated within " + INTERRUPTION_CLEANUP_TOLERANCE + "ms after it has been canceled.", timeoutTriggered);
 		assertTrue("The algorithm has not emitted an AlgorithmExecutionCanceledException.", cancellationExceptionSeen);
@@ -201,6 +219,9 @@ public abstract class GeneralAlgorithmTester<P, I, O> implements ILoggingCustomi
 		IAlgorithmFactory<I, O> factory = getFactory();
 		factory.setProblemInput(getDifficultProblemInputForGeneralTestPurposes());
 		IAlgorithm<I, O> algorithm = factory.getAlgorithm();
+		if (algorithm instanceof ILoggingCustomizable) {
+			((ILoggingCustomizable) algorithm).setLoggerName(TESTEDALGORITHM_LOGGERNAME);
+		}
 		algorithm.setNumCPUs(Runtime.getRuntime().availableProcessors());
 		FutureTask<O> task = new FutureTask<>(algorithm);
 		algorithm.setTimeout(INTERRUPTION_DELAY, TimeUnit.MILLISECONDS);
@@ -227,6 +248,7 @@ public abstract class GeneralAlgorithmTester<P, I, O> implements ILoggingCustomi
 		}
 		long end = System.currentTimeMillis();
 		int runtime = (int) (end - start);
+		logger.info("Executing thread has returned control after {}ms. Now observing metrics and waiting for possibly active sub-threads to shutdown.", runtime);
 		assertTrue("Runtime must be at least 5 seconds, actually should be at least 10 seconds.", runtime >= INTERRUPTION_DELAY);
 		assertFalse("The algorithm has not terminated within " + INTERRUPTION_CLEANUP_TOLERANCE + " ms after the specified timeout.", timeoutTriggered);
 		assertTrue("The algorithm has not emitted an TimeoutException.", timeoutedExceptionSeen);
@@ -240,9 +262,11 @@ public abstract class GeneralAlgorithmTester<P, I, O> implements ILoggingCustomi
 
 	private void waitForThreadsToAssumeNumber(int maximumNumberOfThreads) throws InterruptedException {
 		int n = 10;
+		int sleepTime = THREAD_SHUTDOWN_TOLERANCE / n;
 		int numberOfThreadsAfter = Thread.activeCount();
 		for (int i = 0; i < n && numberOfThreadsAfter > maximumNumberOfThreads; i++) {
-			Thread.sleep(THREAD_SHUTDOWN_TOLERANCE / n);
+			logger.info("Thread wait {}/{}: There are {} threads active compared to {} that were running prior to test. Waiting {}ms for another check.", i + 1, n, numberOfThreadsAfter, maximumNumberOfThreads, sleepTime);
+			Thread.sleep(sleepTime);
 			numberOfThreadsAfter = Thread.activeCount();
 		}
 		assertTrue("Number of threads has increased with execution", maximumNumberOfThreads >= numberOfThreadsAfter);

@@ -39,7 +39,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	private long activationTime = -1; // timestamp of algorithm activation
 
 	private long deadline = -1; // timestamp when algorithm must terminate due to timeout
-	private long timeouted = -1; // timestamp for when timeout has been triggered
+	private long timeOfTimeoutDetection = -1; // timestamp for when timeout has been triggered
 	private long canceled = -1; // timestamp for when the algorithm has been canceled
 	private final Set<Thread> activeThreads = new HashSet<>();
 	private AlgorithmState state = AlgorithmState.created;
@@ -149,7 +149,13 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	}
 
 	public boolean isTimeouted() {
-		return this.timeouted > 0;
+		if (this.timeOfTimeoutDetection > 0)
+			return true;
+		if (this.deadline > 0 && System.currentTimeMillis() >= this.deadline) {
+			this.timeOfTimeoutDetection = System.currentTimeMillis();
+			return true;
+		}
+		return false;
 	}
 
 	protected TimeOut getRemainingTimeToDeadline() {
@@ -160,26 +166,8 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	}
 
 	public boolean isStopCriterionSatisfied() {
-		return this.isCanceled() || this.isTimeouted();
+		return this.isCanceled() || this.isTimeouted() || Thread.currentThread().isInterrupted();
 	}
-
-	// protected void activateTimeoutTimer() {
-	// if (this.getTimeout() == null || this.getTimeout().milliseconds() <= 0) {
-	// return;
-	// }
-	// final long start = System.currentTimeMillis();
-	// getTimerAndCreateIfNotExistent().schedule(new TimerTask() {
-	// @Override
-	// public void run() {
-	// AAlgorithm.this.timeouted = System.currentTimeMillis();
-	// assert AAlgorithm.this.timeouted <= start + getTimeout().milliseconds() + 100 : "The timeout has not been triggered " + (AAlgorithm.this.timeouted - start) + "ms after algorithm activation, but timeout was " +
-	// getTimeout().milliseconds() + "ms. That is, the timeout was triggered with a delay of " + (AAlgorithm.this.timeouted - (start + getTimeout().milliseconds())) + "ms";
-	// AAlgorithm.this.logger.info("Timeout triggered. Have set the timeouted flag to true and will now invoke shutdown procedure.");
-	// AAlgorithm.this.shutdown();
-	// }
-	// }, this.getTimeout().milliseconds());
-	// this.logger.info("Timer {} activated for in {}ms", timer, this.getTimeout().milliseconds());
-	// }
 
 	protected Timer getTimerAndCreateIfNotExistent() {
 		if (this.timer == null) {
@@ -194,17 +182,18 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	public boolean isCanceled() {
 		return this.canceled > 0;
 	}
-
-	protected void checkTermination() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, DelayedTimeoutCheckException, DelayedCancellationCheckException {
+	
+	protected void checkAndConductTermination() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, DelayedTimeoutCheckException, DelayedCancellationCheckException {
 		this.logger.debug("Checking Termination of {}", this);
-		if (this.deadline > 0 && System.currentTimeMillis() >= this.deadline) {
-			assert !this.isTimeouted() : "checkTermination should not be called after the timeout flag has been set!";
-			this.timeouted = System.currentTimeMillis();
+		assert !isShutdownInitialized() : "checkTermination should not be called after the shutdown has been initialized!";
+		if (isTimeouted()) {
+			this.logger.info("Timeout detected for {}, shutting down the algorithm and stopping execution with TimeoutException", this);
+			logger.debug("Invoking shutdown");
 			this.unregisterThreadAndShutdown();
-			this.logger.info("Timeout detected for {}, stopping execution with TimeoutException", this);
+			logger.debug("Throwing TimeoutException");
 			TimeoutException e = new TimeoutException();
-			if (this.timeouted - this.deadline > 500) {
-				throw new DelayedTimeoutCheckException(e, this.timeouted - this.deadline);
+			if (this.timeOfTimeoutDetection - this.deadline > 500) {
+				throw new DelayedTimeoutCheckException(e, this.timeOfTimeoutDetection - this.deadline);
 			} else {
 				throw e;
 			}
@@ -224,6 +213,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 			this.logger.info("Interruption detected for {}, stopping execution with InterruptedException", this);
 			throw new InterruptedException(); // if the thread itself was actively interrupted by somebody
 		}
+		logger.debug("No termination condition observed.");
 	}
 
 	/**
@@ -243,7 +233,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 			}
 			this.shutdownInitialized = System.currentTimeMillis();
 		}
-		this.logger.info("Entering shutdown procedure for {}. Setting algorithm state from {} to inactive and interrupting potentially active threads.", this, this.getState());
+		this.logger.info("Entering shutdown procedure for {}. Setting algorithm state from {} to inactive and interrupting {} active threads.", this, this.getState(), this.activeThreads.size());
 		this.activeThreads.forEach(t -> {
 			this.logger.info("Interrupting {} on behalf of shutdown of {}", t, this);
 			t.interrupt();
@@ -269,6 +259,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	}
 
 	protected void unregisterActiveThread() {
+		logger.trace("Unregistering current thread {}", Thread.currentThread());
 		this.activeThreads.remove(Thread.currentThread());
 	}
 

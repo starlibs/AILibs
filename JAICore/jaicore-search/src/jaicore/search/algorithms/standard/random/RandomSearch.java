@@ -212,7 +212,7 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 
 	public SearchGraphPath<N, A> nextSolutionUnderNode(final N node) throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {
 		this.logger.info("Looking for next solution under node {}. Remaining time is {}ms.", node, getRemainingTimeToDeadline());
-		this.checkTermination();
+		this.checkAndConductTermination();
 
 		/* if the root is exhausted, cancel */
 		if (this.exhausted.contains(node)) {
@@ -226,7 +226,7 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 		synchronized (this.exploredGraph) {
 			while (!this.goalTester.isGoal(head)) {
 
-				this.checkTermination();
+				this.checkAndConductTermination();
 
 				/* expand node if this has not happened yet. */
 				if (!this.closed.contains(head)) {

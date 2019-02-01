@@ -120,7 +120,7 @@ public class LDSRelationComputer<T> extends AAlgorithm<RelationComputationProble
 		}
 		case active: {
 			try {
-				checkTermination();
+				checkAndConductTermination();
 			} catch (DelayedTimeoutCheckException | DelayedCancellationCheckException e) {
 				e.printStackTrace();
 			}
@@ -138,7 +138,7 @@ public class LDSRelationComputer<T> extends AAlgorithm<RelationComputationProble
 				next.fillTupleArrayWithValues(currentTuple); // get current tuple
 				for (int j = 0; j < n; j++) {
 					try {
-						checkTermination();
+						checkAndConductTermination();
 					} catch (DelayedTimeoutCheckException | DelayedCancellationCheckException e) {
 						e.printStackTrace();
 					}
