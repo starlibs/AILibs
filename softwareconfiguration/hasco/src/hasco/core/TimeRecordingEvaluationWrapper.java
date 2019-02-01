@@ -7,6 +7,7 @@ import java.util.concurrent.TimeoutException;
 import hasco.model.ComponentInstance;
 import jaicore.basic.IObjectEvaluator;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
+import jaicore.logging.ToJSONStringUtil;
 
 public class TimeRecordingEvaluationWrapper<V extends Comparable<V>> implements IObjectEvaluator<ComponentInstance, V> {
 
@@ -33,5 +34,13 @@ public class TimeRecordingEvaluationWrapper<V extends Comparable<V>> implements 
 
 	public int getEvaluationTimeForComponentInstance(final ComponentInstance inst) {
 		return this.consumedTimes.get(inst);
+	}
+
+	@Override
+	public String toString() {
+		Map<String, Object> fields = new HashMap<>();
+		fields.put("baseEvaluator", this.baseEvaluator);
+		fields.put("consumedTimes", this.consumedTimes);
+		return ToJSONStringUtil.toJSONString(fields);
 	}
 }

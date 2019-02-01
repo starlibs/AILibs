@@ -32,6 +32,7 @@ import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.graphvisualizer.gui.VisualizationWindow;
 import jaicore.logging.LoggerUtil;
+import jaicore.logging.ToJSONStringUtil;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.NodeAnnotationEvent;
@@ -128,6 +129,10 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>>
 			System.out.println("If you are not in debugging mode, we strongly suggest to deactive assertions.");
 			System.out.println("--------------------------------------------------------");
 		}
+	}
+
+	public ISolutionEvaluator<T, V> getSolutionEvaluator() {
+		return this.solutionEvaluator;
 	}
 
 	protected double getExpectedUpperBoundForRelativeDistanceToOptimalSolution(final Node<T, ?> n, final List<T> path) {
@@ -454,7 +459,7 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>>
 			solutionObject.setAnnotation("fTime", this.timesToComputeEvaluations.get(solution));
 			solutionObject.setAnnotation("timeToSolution", (int) (System.currentTimeMillis() - this.timestampOfFirstEvaluation));
 			solutionObject.setAnnotation("nodesEvaluatedToSolution", numberOfComputedFValues);
-			logger.debug("Posting solution {}", solutionObject);
+			this.logger.debug("Posting solution {}", solutionObject);
 			this.eventBus.post(new EvaluatedSearchSolutionCandidateFoundEvent<>(solutionObject));
 		} catch (Throwable e) {
 			List<Pair<String, Object>> explanations = new ArrayList<>();
@@ -544,5 +549,13 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>>
 
 	public void setTotalDeadline(final long totalDeadline) {
 		this.totalDeadline = totalDeadline;
+	}
+
+	@Override
+	public String toString() {
+		Map<String, Object> fields = new HashMap<>();
+		fields.put("solutionEvaluator", this.solutionEvaluator);
+		fields.put("visualizeSubSearch", this.visualizeSubSearch);
+		return ToJSONStringUtil.toJSONString(fields);
 	}
 }

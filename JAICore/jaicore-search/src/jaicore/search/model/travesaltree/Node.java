@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import jaicore.logging.ToJSONStringUtil;
+
 public class Node<T, V extends Comparable<V>> implements Serializable, Comparable<Node<T, V>> {
 	private static final long serialVersionUID = -7608088086719059550L;
 	private final T externalLabel;
@@ -13,50 +15,50 @@ public class Node<T, V extends Comparable<V>> implements Serializable, Comparabl
 	protected Node<T, V> parent;
 	private final Map<String, Object> annotations = new HashMap<>(); // for nodes effectively examined
 
-	public Node(Node<T, V> parent, T point) {
+	public Node(final Node<T, V> parent, final T point) {
 		super();
 		this.parent = parent;
 		this.externalLabel = point;
 	}
 
 	public Node<T, V> getParent() {
-		return parent;
+		return this.parent;
 	}
 
 	public T getPoint() {
-		return externalLabel;
+		return this.externalLabel;
 	}
 
 	@SuppressWarnings("unchecked")
 	public V getInternalLabel() {
-		return (V)annotations.get("f");
+		return (V) this.annotations.get("f");
 	}
-	
-	public void setParent(Node<T,V> newParent) {
+
+	public void setParent(final Node<T, V> newParent) {
 		this.parent = newParent;
 	}
-	
-	public void setInternalLabel(V internalLabel) {
+
+	public void setInternalLabel(final V internalLabel) {
 		this.setAnnotation("f", internalLabel);
 	}
-	
-	public void setAnnotation(String annotationName, Object annotationValue) {
+
+	public void setAnnotation(final String annotationName, final Object annotationValue) {
 		this.annotations.put(annotationName, annotationValue);
 	}
-	
-	public Object getAnnotation(String annotationName) {
+
+	public Object getAnnotation(final String annotationName) {
 		return this.annotations.get(annotationName);
 	}
-	
-	public Map<String,Object> getAnnotations() {
+
+	public Map<String, Object> getAnnotations() {
 		return this.annotations;
 	}
 
 	public boolean isGoal() {
-		return goal;
+		return this.goal;
 	}
 
-	public void setGoal(boolean goal) {
+	public void setGoal(final boolean goal) {
 		this.goal = goal;
 	}
 
@@ -81,7 +83,7 @@ public class Node<T, V extends Comparable<V>> implements Serializable, Comparabl
 	}
 
 	@Override
-	public int compareTo(Node<T, V> o) {
+	public int compareTo(final Node<T, V> o) {
 		return this.getInternalLabel().compareTo(o.getInternalLabel());
 	}
 
@@ -89,24 +91,30 @@ public class Node<T, V extends Comparable<V>> implements Serializable, Comparabl
 		String s = "Node [ref=";
 		s += this.toString();
 		s += ", externalLabel=";
-		s += externalLabel;
+		s += this.externalLabel;
 		s += ", goal";
-		s += goal;
+		s += this.goal;
 		s += ", parentRef=";
-		if (parent != null)
-			s += parent.toString();
-		else
+		if (this.parent != null) {
+			s += this.parent.toString();
+		} else {
 			s += "null";
+		}
 		s += ", annotations=";
-		s += annotations;
+		s += this.annotations;
 		s += "]";
 
-//		return "Node [ref=" + this.toString() + ", externalLabel=" + externalLabel + ", goal=" + goal + ", parentRef=" + parent.toString() + ", annotations=" + annotations + "]";
+		// return "Node [ref=" + this.toString() + ", externalLabel=" + externalLabel + ", goal=" + goal + ", parentRef=" + parent.toString() + ", annotations=" + annotations + "]";
 		return s;
 	}
 
 	@Override
 	public String toString() {
-		return "Node [externalLabel=" + externalLabel + ", goal=" + goal + ", annotations=" + annotations + "]";
+		Map<String, Object> fields = new HashMap<>();
+		fields.put("externalLabel", this.externalLabel);
+		fields.put("goal", this.goal);
+		fields.put("annotations", this.annotations);
+		return ToJSONStringUtil.toJSONString(fields);
+		// return "Node [externalLabel=" + this.externalLabel + ", goal=" + this.goal + ", annotations=" + this.annotations + "]";
 	}
 }

@@ -23,6 +23,7 @@ import hasco.model.ParameterRefinementConfiguration;
 import jaicore.basic.IObjectEvaluator;
 import jaicore.basic.algorithm.AlgorithmProblemTransformer;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
+import jaicore.logging.ToJSONStringUtil;
 import jaicore.logic.fol.structure.CNFFormula;
 import jaicore.logic.fol.structure.ConstantParam;
 import jaicore.logic.fol.structure.Literal;
@@ -300,6 +301,14 @@ public class HASCOReduction<V extends Comparable<V>> implements
 				ComponentInstance solution = Util.getSolutionCompositionForPlan(HASCOReduction.this.components, HASCOReduction.this.getInitState(), plan, true);
 				return problem.getCompositionEvaluator().evaluate(solution);
 			}
+
+			@Override
+			public String toString() {
+				Map<String, Object> fields = new HashMap<>();
+				fields.put("problem", problem);
+				return ToJSONStringUtil.toJSONString(fields);
+			}
+
 		};
 		CostSensitiveHTNPlanningProblem<CEOCOperation, OCIPMethod, CEOCAction, CEOCIPSTNPlanningProblem<CEOCOperation, OCIPMethod, CEOCAction>, V> costSensitiveProblem = new CostSensitiveHTNPlanningProblem<>(planningProblem, planEvaluator);
 		return costSensitiveProblem;

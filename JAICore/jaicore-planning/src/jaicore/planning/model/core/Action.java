@@ -1,89 +1,99 @@
 package jaicore.planning.model.core;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import jaicore.basic.ObjectSizeFetcher;
+import jaicore.logging.ToJSONStringUtil;
 import jaicore.logic.fol.structure.ConstantParam;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.logic.fol.structure.VariableParam;
 
 public class Action implements Serializable {
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = -2685277085885131650L;
 	private final Operation operation;
 	private final Map<VariableParam, ConstantParam> grounding;
 
-	public Action(Operation operation, Map<VariableParam, ConstantParam> grounding) {
+	public Action(final Operation operation, final Map<VariableParam, ConstantParam> grounding) {
 		super();
 		this.operation = operation;
 		this.grounding = grounding;
-		if (!this.grounding.keySet().containsAll(operation.getParams()))
-			throw new IllegalArgumentException(
-					"Planning actions must contain a grounding for ALL params of the operation " + operation.getName() + ". Here, op params: " + operation.getParams() + ". Given grounding: " + grounding);
+		if (!this.grounding.keySet().containsAll(operation.getParams())) {
+			throw new IllegalArgumentException("Planning actions must contain a grounding for ALL params of the operation " + operation.getName() + ". Here, op params: " + operation.getParams() + ". Given grounding: " + grounding);
+		}
 	}
 
 	public List<ConstantParam> getParameters() {
-		return operation.getParams().stream().map(p -> grounding.get(p)).collect(Collectors.toList());
+		return this.operation.getParams().stream().map(p -> this.grounding.get(p)).collect(Collectors.toList());
 	}
 
 	public Map<VariableParam, ConstantParam> getGrounding() {
-		return grounding;
+		return this.grounding;
 	}
 
 	public Operation getOperation() {
-		return operation;
+		return this.operation;
 	}
 
 	public Monom getPrecondition() {
-		return new Monom(operation.getPrecondition(), grounding);
+		return new Monom(this.operation.getPrecondition(), this.grounding);
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((grounding == null) ? 0 : grounding.hashCode());
-		result = prime * result + ((operation == null) ? 0 : operation.hashCode());
+		result = prime * result + ((this.grounding == null) ? 0 : this.grounding.hashCode());
+		result = prime * result + ((this.operation == null) ? 0 : this.operation.hashCode());
 		return result;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (this.getClass() != obj.getClass()) {
 			return false;
+		}
 		Action other = (Action) obj;
-		if (grounding == null) {
-			if (other.grounding != null)
+		if (this.grounding == null) {
+			if (other.grounding != null) {
 				return false;
-		} else if (!grounding.equals(other.grounding))
+			}
+		} else if (!this.grounding.equals(other.grounding)) {
 			return false;
-		if (operation == null) {
-			if (other.operation != null)
+		}
+		if (this.operation == null) {
+			if (other.operation != null) {
 				return false;
-		} else if (!operation.equals(other.operation))
+			}
+		} else if (!this.operation.equals(other.operation)) {
 			return false;
+		}
 		return true;
 	}
 
 	public String getEncoding() {
 		StringBuilder b = new StringBuilder();
-		b.append(operation.getName());
+		b.append(this.operation.getName());
 		b.append("(");
-		List<VariableParam> params = operation.getParams();
+		List<VariableParam> params = this.operation.getParams();
 		int size = params.size();
 		for (int i = 0; i < params.size(); i++) {
-			b.append(grounding.get(params.get(i)));
-			if (i < size - 1)
+			b.append(this.grounding.get(params.get(i)));
+			if (i < size - 1) {
 				b.append(", ");
+			}
 		}
 		b.append(")");
 		return b.toString();
@@ -91,10 +101,14 @@ public class Action implements Serializable {
 
 	@Override
 	public String toString() {
-		return "Action [operation=" + operation + ", grounding=" + grounding + "]";
+		Map<String, Object> fields = new HashMap<>();
+		fields.put("operation", this.operation);
+		fields.put("grounding", this.grounding);
+		return ToJSONStringUtil.toJSONString(fields);
+		// return "Action [operation=" + this.operation + ", grounding=" + this.grounding + "]";
 	}
-	
+
 	public long getMemory() {
-		return ObjectSizeFetcher.getObjectSize(this) + ObjectSizeFetcher.getObjectSize(grounding);
+		return ObjectSizeFetcher.getObjectSize(this) + ObjectSizeFetcher.getObjectSize(this.grounding);
 	}
 }

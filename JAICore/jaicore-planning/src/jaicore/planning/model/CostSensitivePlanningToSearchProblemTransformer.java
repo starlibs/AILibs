@@ -1,10 +1,13 @@
 package jaicore.planning.model;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
 import jaicore.basic.algorithm.AlgorithmProblemTransformer;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
+import jaicore.logging.ToJSONStringUtil;
 import jaicore.planning.graphgenerators.IHierarchicalPlanningGraphGeneratorDeriver;
 import jaicore.planning.model.core.Action;
 import jaicore.planning.model.core.Operation;
@@ -30,6 +33,7 @@ public class CostSensitivePlanningToSearchProblemTransformer<PO extends Operatio
 
 			@Override
 			public V evaluateSolution(final List<N> solutionPath) throws TimeoutException, InterruptedException, ObjectEvaluationFailedException {
+
 				return problem.getPlanEvaluator().evaluate(CostSensitivePlanningToSearchProblemTransformer.this.graphGeneratorDeriver.getPlan(solutionPath));
 			}
 
@@ -41,7 +45,13 @@ public class CostSensitivePlanningToSearchProblemTransformer<PO extends Operatio
 			@Override
 			public void cancel() {
 				// TODO Auto-generated method stub
+			}
 
+			@Override
+			public String toString() {
+				Map<String, Object> fields = new HashMap<>();
+				fields.put("problem", problem);
+				return ToJSONStringUtil.toJSONString(fields);
 			}
 		};
 		/* derive the concrete graph search problem input */
