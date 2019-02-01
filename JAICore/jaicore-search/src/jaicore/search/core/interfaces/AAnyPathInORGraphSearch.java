@@ -70,9 +70,9 @@ public abstract class AAnyPathInORGraphSearch<I extends GraphSearchInput<NSrc, A
 		return this.loggerName;
 	}
 	
-	protected void checkTermination() throws TimeoutException, AlgorithmExecutionCanceledException, InterruptedException {
+	protected void checkAndConductTermination() throws TimeoutException, AlgorithmExecutionCanceledException, InterruptedException {
 		try {
-			super.checkTermination();
+			super.checkAndConductTermination();
 		} catch (DelayedTimeoutCheckException e) {
 			logger.warn("CheckTermination was called with delay. Message: \"{}\"", e.getMessage());
 			throw e.getException();

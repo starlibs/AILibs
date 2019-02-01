@@ -27,7 +27,7 @@ public abstract class NQueenTester<I extends GraphSearchInput<QueenNode, String>
 	int[] numbersOfSolutions = { 2, 10, 4, 40, 92 };
 
 	private AtomicInteger seenSolutions = new AtomicInteger(0);
-	private boolean showGraphs = true;
+	private boolean showGraphs = false;
 
 	IGraphSearchFactory<I, O, QueenNode, String, VSearch, ESearch> searchFactory = getFactory();
 
@@ -36,7 +36,7 @@ public abstract class NQueenTester<I extends GraphSearchInput<QueenNode, String>
 		IGraphSearch<I, O, QueenNode, String, VSearch, ESearch> search = searchFactory.getAlgorithm();
 		return search;
 	}
-
+	
 	@Override
 	public void testThatIteratorReturnsEachPossibleSolution() {
 		if (searchFactory == null)

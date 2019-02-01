@@ -84,7 +84,7 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 		while (this.unreturnedSolutionEvents.isEmpty()) {
 
 			/* check whether execution shoud be halted */
-			this.checkTermination();
+			this.checkAndConductTermination();
 
 			/* if the current graph has been exhausted, add all suspended nodes to OPEN and increase window size */
 			if (this.openList.isEmpty()) {
@@ -109,7 +109,7 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 
 	private void windowAStar() throws NodeEvaluationException, TimeoutException, AlgorithmExecutionCanceledException, InterruptedException {
 		while (!this.openList.isEmpty()) {
-			this.checkTermination();
+			this.checkAndConductTermination();
 			if (!this.unreturnedSolutionEvents.isEmpty()) {
 				this.logger.info("Not doing anything because there are still unreturned solutions.");
 				return;
@@ -136,13 +136,13 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 				this.logger.info("Switching level from {} to {}", this.currentLevel, nLevel);
 				this.currentLevel = nLevel;
 			}
-			this.checkTermination();
+			this.checkAndConductTermination();
 
 			/* compute successors of the expanded node */
 			Collection<NodeExpansionDescription<T, A>> successors = this.successorGenerator.generateSuccessors(n.getPoint());
 			this.logger.info("Expanding {}. Identified {} successors.", n.getPoint(), successors.size());
 			for (NodeExpansionDescription<T, A> expansionDescription : successors) {
-				this.checkTermination();
+				this.checkAndConductTermination();
 				Node<T, V> nPrime = new Node<>(n, expansionDescription.getTo());
 				if (this.goalTester instanceof NodeGoalTester<?>) {
 					nPrime.setGoal(((NodeGoalTester<T>) this.goalTester).isGoal(nPrime.getPoint()));
@@ -206,7 +206,7 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 	@Override
 	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, NodeEvaluationException {
 		// logger.info("Next step in {}. State is {}", this, getState());
-		this.checkTermination();
+		this.checkAndConductTermination();
 		switch (this.getState()) {
 		case created: {
 			T externalRootNode = this.rootNodeGenerator.getRoot();

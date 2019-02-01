@@ -329,8 +329,8 @@ public class Util {
 		ComponentInstance instance = getComponentInstanceFromState(components, state, objectIdentifierInState, false);
 
 		/* now compute the new domains based on the current values */
-		Collection<Parameter> overwrittenParams = getOverwrittenDatacontainersInState(state).stream().filter(containerName -> parameterContainerMap.containsValue(containerName))
-				.map(containerName -> component.getParameterWithName(parameterContainerMapInv.get(containerName))).collect(Collectors.toList());
+//		Collection<Parameter> overwrittenParams = getOverwrittenDatacontainersInState(state).stream().filter(containerName -> parameterContainerMap.containsValue(containerName))
+//				.map(containerName -> component.getParameterWithName(parameterContainerMapInv.get(containerName))).collect(Collectors.toList());
 		return getUpdatedDomainsOfComponentParameters(instance);
 		// return null;
 	}
