@@ -21,7 +21,7 @@ import jaicore.search.probleminputs.GraphSearchInput;
 
 public abstract class EnhancedTTSPTester<I extends GraphSearchInput<EnhancedTTSPNode, String>, O, VSearch, ESearch> extends ORGraphSearchTester<EnhancedTTSP, I, O, EnhancedTTSPNode, String, VSearch, ESearch> {
 
-	private static final int MAX_N = 8;
+	private static final int MAX_N = 6;
 	private static final int MAX_DISTANCE = 12;
 	private static final int TIMEOUT_IN_MS = 5 * 60 * 1000;
 //	private static final boolean VISUALIZE = false;

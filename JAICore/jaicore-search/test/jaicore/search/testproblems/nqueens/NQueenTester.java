@@ -24,7 +24,7 @@ import jaicore.search.probleminputs.GraphSearchInput;
 public abstract class NQueenTester<I extends GraphSearchInput<QueenNode, String>, O extends SearchGraphPath<QueenNode, String>, VSearch, ESearch> extends ORGraphSearchTester<Integer, I, O, QueenNode, String, VSearch, ESearch> {
 
 //	int[] numbersOfSolutions = { 2, 10, 4, 40, 92, 352, 724 };
-	int[] numbersOfSolutions = { 2, 10, 4, 40, 92 };
+	int[] numbersOfSolutions = { 2, 10, 4, 40};
 
 	private AtomicInteger seenSolutions = new AtomicInteger(0);
 	private boolean showGraphs = false;

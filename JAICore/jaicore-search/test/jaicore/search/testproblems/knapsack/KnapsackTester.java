@@ -9,7 +9,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 
 import org.junit.Test;
@@ -25,7 +24,6 @@ import jaicore.search.probleminputs.GraphSearchInput;
 import jaicore.search.testproblems.knapsack.KnapsackProblem.KnapsackNode;
 
 public abstract class KnapsackTester<I extends GraphSearchInput<KnapsackNode, String>, O, VSearch,ESearch> extends ORGraphSearchTester<KnapsackProblem, I, O, KnapsackNode, String, VSearch, ESearch>  {
-
 
 	private Map<String, Double> weights;
 	private Map<String, Double> values;

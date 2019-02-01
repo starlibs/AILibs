@@ -157,6 +157,7 @@ public abstract class GeneralAlgorithmTester<P, I, O> implements ILoggingCustomi
 		 */
 		algorithm.cancel();
 		waitForThreadsToAssumeNumber(numberOfThreadsBefore);
+		logger.info("Interrupt-Test finished.");
 	}
 
 	@Test
@@ -202,14 +203,14 @@ public abstract class GeneralAlgorithmTester<P, I, O> implements ILoggingCustomi
 		} catch (TimeoutException e) {
 			timeoutTriggered = true;
 		}
-		long end = System.currentTimeMillis();
-		int runtime = (int) (end - start);
+		int runtime = (int) (System.currentTimeMillis() - start);
 		logger.info("Executing thread has returned control after {}ms. Now observing metrics and waiting for possibly active sub-threads to shutdown.", runtime);
 		assertTrue("Runtime must be at least 5 seconds, actually should be at least 10 seconds.", runtime >= INTERRUPTION_DELAY);
 		assertFalse("The algorithm has not terminated within " + INTERRUPTION_CLEANUP_TOLERANCE + "ms after it has been canceled.", timeoutTriggered);
 		assertTrue("The algorithm has not emitted an AlgorithmExecutionCanceledException.", cancellationExceptionSeen);
 		waitForThreadsToAssumeNumber(numberOfThreadsBefore);
 		checkNotInterrupted();
+		logger.info("Cancel-Test finished.");
 	}
 
 	@Test
@@ -254,6 +255,7 @@ public abstract class GeneralAlgorithmTester<P, I, O> implements ILoggingCustomi
 		assertTrue("The algorithm has not emitted an TimeoutException.", timeoutedExceptionSeen);
 		waitForThreadsToAssumeNumber(numberOfThreadsBefore);
 		checkNotInterrupted();
+		logger.info("Timeout-Test finished.");
 	}
 
 	private void checkNotInterrupted() {
@@ -261,8 +263,9 @@ public abstract class GeneralAlgorithmTester<P, I, O> implements ILoggingCustomi
 	}
 
 	private void waitForThreadsToAssumeNumber(int maximumNumberOfThreads) throws InterruptedException {
-		int n = 10;
-		int sleepTime = THREAD_SHUTDOWN_TOLERANCE / n;
+		logger.info("Waiting for number of threads to become {}.", maximumNumberOfThreads);
+		int sleepTime = 100;
+		int n = THREAD_SHUTDOWN_TOLERANCE / sleepTime;
 		int numberOfThreadsAfter = Thread.activeCount();
 		for (int i = 0; i < n && numberOfThreadsAfter > maximumNumberOfThreads; i++) {
 			logger.info("Thread wait {}/{}: There are {} threads active compared to {} that were running prior to test. Waiting {}ms for another check.", i + 1, n, numberOfThreadsAfter, maximumNumberOfThreads, sleepTime);

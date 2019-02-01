@@ -173,13 +173,13 @@ public class KnapsackProblem {
 
 					public NodeExpansionDescription<KnapsackNode, String> generateSuccessor(KnapsackNode n, List<String> objetcs, int i) throws InterruptedException {
 						if (Thread.currentThread().isInterrupted()) {
+							System.err.println("LEAVING");
 							throw new InterruptedException("Successor generation interrupted");
 						}
 						if (!expandedChildren.containsKey(n))
 							expandedChildren.put(n, new HashSet<>());
 						int N = objetcs.size();
 						int j = i % N;
-						System.out.println(N);
 						expandedChildren.get(n).add(j);
 						String object = objetcs.get(j);
 						KnapsackNode newNode = new KnapsackNode(n.getPackedObjects(), n.getRemainingObjects(), object);

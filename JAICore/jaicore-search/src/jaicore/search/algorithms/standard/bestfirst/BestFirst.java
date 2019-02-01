@@ -11,6 +11,8 @@ import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -642,8 +644,41 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		final List<NodeExpansionDescription<N, A>> successorDescriptions;
 		{
 			List<NodeExpansionDescription<N, A>> tmpSuccessorDescriptions = null;
-			tmpSuccessorDescriptions = BestFirst.this.successorGenerator.generateSuccessors(nodeSelectedForExpansion.getPoint());
-			successorDescriptions = tmpSuccessorDescriptions;
+			long remainingTime = getRemainingTimeToDeadline().milliseconds();
+			if (remainingTime > 500) {
+				Timer t = getTimerAndCreateIfNotExistent(); // this is used, because the timeout is not checked within the successor generation
+				AtomicBoolean timeoutTriggered = new AtomicBoolean(false);
+				TimerTask task = new InterruptionTimerTask("Timeout triggered", () -> {
+					logger.debug("Timeout detected {} prior to deadline, interrupting successor generation.", getRemainingTimeToDeadline());
+					timeoutTriggered.set(true);
+				});
+				t.schedule(task, remainingTime - 500);
+				try {
+					tmpSuccessorDescriptions = BestFirst.this.successorGenerator.generateSuccessors(nodeSelectedForExpansion.getPoint());
+					task.cancel();
+				} catch (InterruptedException e) { // the fact that we are interrupted here can have several reasons. Could be an interrupt from the outside, a cancel, or a timeout by the above timer
+
+					/* if the timeout has been triggered (with caution), just sleep until */
+					remainingTime = getRemainingTimeToDeadline().milliseconds();
+					if (timeoutTriggered.get()) {
+						if (remainingTime > 0) {
+							Thread.interrupted(); // clear the interrupted field
+							logger.debug("Artificially sleeping {}ms to trigger the correct behavior in the checker.", remainingTime);
+							Thread.sleep(remainingTime);
+						} else
+							logger.debug("Gained back control from successor generation, but remaining time is now only {}ms. Algorithm should terminate now.", remainingTime);
+					} else if (!isCanceled())
+						Thread.currentThread().interrupt(); // reset the interrupt
+					this.checkTerminationAndUnregisterFromExpand(nodeSelectedForExpansion);
+				}
+				successorDescriptions = tmpSuccessorDescriptions;
+			} else {
+				logger.debug("Only {}ms left, which is not enough to reliably compute more successors. Terminating search at this point", remainingTime);
+				if (remainingTime > 0) {
+					Thread.sleep(remainingTime);
+				}
+				successorDescriptions = null;
+			}
 		}
 		this.checkTerminationAndUnregisterFromExpand(nodeSelectedForExpansion);
 		this.logger.debug("Finished computation of successors. Sending SuccessorComputationCompletedEvent with {} successors for {}", successorDescriptions.size(), nodeSelectedForExpansion);
@@ -659,7 +694,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 			if (this.additionalThreadsForNodeAttachment < 1) {
 				nb.run();
 			} else {
-				this.activeJobsCounterLock.lockInterruptibly();
+				lockConditionSafeleyWhileExpandingNode(activeJobsCounterLock, nodeSelectedForExpansion); // acquires the lock and shuts down properly when being interrupted
 				logger.trace("Acquired activeJobsCounterLock for increment");
 				try {
 					this.activeJobs.incrementAndGet();
@@ -668,6 +703,8 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 					this.activeJobsCounterLock.unlock();
 					logger.trace("Released activeJobsCounterLock after increment");
 				}
+				if (isShutdownInitialized())
+					break;
 				this.pool.submit(nb);
 			}
 		}
@@ -707,6 +744,19 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 			this.pendingSolutionFoundEvents.add(solutionEvent);
 		}
 		return solutionEvent;
+	}
+
+	private void lockConditionSafeleyWhileExpandingNode(Lock l, Node<N, V> node) throws TimeoutException, AlgorithmExecutionCanceledException, InterruptedException {
+		try {
+			l.lockInterruptibly();
+		} catch (InterruptedException e) { // if we are interrupted during a wait, we must still conduct a controlled shutdown
+			logger.debug("Received an interrupt while waiting for " + l + " to become available.");
+			if (!isShutdownInitialized()) { // if the algorithm has not been shutdown yet, we do this now by interrupting ourselves explicitly and invoking the check
+				Thread.currentThread().interrupt();
+				checkTerminationAndUnregisterFromExpand(node);
+			} else
+				throw e; // if the algorithm has already been shut down, just throw the exception
+		}
 	}
 
 	/**
@@ -913,25 +963,45 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 			/* if worker threads are used for expansion, make sure that there is at least one that is not busy */
 			if (this.additionalThreadsForNodeAttachment > 0) {
 				boolean poolSlotFree = false;
+				boolean haveLock = false;
 				do {
 					this.checkAndConductTermination();
 					try {
 						this.activeJobsCounterLock.lockInterruptibly();
+						haveLock = true;
 						logger.trace("Acquired activeJobsCounterLock for read");
 						this.logger.debug("The pool is currently busy with {}/{} jobs.", this.activeJobs.get(), additionalThreadsForNodeAttachment);
 						if (this.additionalThreadsForNodeAttachment > this.activeJobs.get()) {
 							poolSlotFree = true;
 						}
 						logger.trace("Number of active jobs is now {}", this.activeJobs.get());
-					} finally {
 						if (!poolSlotFree) {
 							logger.trace("Releasing activeJobsCounterLock for a wait.");
-							this.numberOfActiveJobsHasChanged.await();
+							try {
+								haveLock = false;
+								this.numberOfActiveJobsHasChanged.await();
+								haveLock = true;
+							} catch (InterruptedException e) { // if we are interrupted during a wait, we must still conduct a controlled shutdown
+								logger.debug("Received an interrupt while waiting for number of active jobs to change.");
+								if (!isShutdownInitialized()) { // if the algorithm has not been shutdown yet, we do this now by interrupting ourselves explicitly and invoking the check
+									this.activeJobsCounterLock.unlock(); // we can (and MUST) unlock now to avoid deadlocks 
+									haveLock = false;
+									Thread.currentThread().interrupt();
+									checkAndConductTermination();
+								} else
+									throw e; // if the algorithm has already been shut down, just throw the exception
+							}
 							logger.trace("Re-acquired activeJobsCounterLock after a wait.");
 							this.logger.debug("Number of active jobs has changed. Let's see whether we can enter now ...");
 						}
-						this.activeJobsCounterLock.unlock();
-						logger.trace("Released activeJobsCounterLock after read.");
+					} finally {
+						if (haveLock) {
+							logger.trace("Trying to unlock activeJobsCounterLock");
+							this.activeJobsCounterLock.unlock();
+							haveLock = false;
+							logger.trace("Released activeJobsCounterLock after read.");
+						} else
+							logger.trace("Don't need to give lock free, because we came to the finally-block via an exception.");
 					}
 				} while (!poolSlotFree);
 			}

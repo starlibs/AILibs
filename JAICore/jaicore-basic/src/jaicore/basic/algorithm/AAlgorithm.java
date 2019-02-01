@@ -185,7 +185,6 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	
 	protected void checkAndConductTermination() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, DelayedTimeoutCheckException, DelayedCancellationCheckException {
 		this.logger.debug("Checking Termination of {}", this);
-		assert !isShutdownInitialized() : "checkTermination should not be called after the shutdown has been initialized!";
 		if (isTimeouted()) {
 			this.logger.info("Timeout detected for {}, shutting down the algorithm and stopping execution with TimeoutException", this);
 			logger.debug("Invoking shutdown");
@@ -199,8 +198,8 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 			}
 		}
 		if (this.isCanceled()) {
-			this.unregisterThreadAndShutdown(); // calling cancel() usually already shutdowns, but this behavior may have been overwritten
 			this.logger.info("Cancel detected for {}, stopping execution with AlgorithmExceptionCanceledException", this);
+			this.unregisterThreadAndShutdown(); // calling cancel() usually already shutdowns, but this behavior may have been overwritten
 			AlgorithmExecutionCanceledException e = new AlgorithmExecutionCanceledException(); // for a controlled cancel from outside on the algorithm
 			if (System.currentTimeMillis() - this.canceled > 100) {
 				throw new DelayedCancellationCheckException(e, System.currentTimeMillis() - this.canceled);
@@ -209,8 +208,10 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 			}
 		}
 		if (Thread.currentThread().isInterrupted()) {
+			this.logger.info("Interruption detected for {}, stopping execution with InterruptedException. Resetting interrupted-flag.", this);
+			Thread.interrupted(); // clear the interrupt-field. This is necessary, because otherwise some shutdown-activities (like waiting for pool shutdown) might fail
 			this.unregisterThreadAndShutdown();
-			this.logger.info("Interruption detected for {}, stopping execution with InterruptedException", this);
+			Thread.currentThread().interrupt(); // interrupt again to double-inform the invoker (not only via Exception but also over the interrupted-flag)
 			throw new InterruptedException(); // if the thread itself was actively interrupted by somebody
 		}
 		logger.debug("No termination condition observed.");
@@ -290,6 +291,10 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 			return;
 		}
 		this.canceled = System.currentTimeMillis();
+		if (isShutdownInitialized()) {
+			this.logger.debug("Ignoring cancel command since the algorithm has already been shutdown before.");
+			return;
+		}
 		this.logger.info("Executing cancel on {}. Have set the cancel flag and will now invoke shutdown procedure.", this);
 		this.shutdown();
 	}

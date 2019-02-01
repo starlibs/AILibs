@@ -44,7 +44,7 @@ public class MOEAFrameworkAlgorithm extends AEvolutionaryAlgorithm {
 	@Override
 	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
 		try {
-			this.checkTermination();
+			this.checkAndConductTermination();
 		} catch (DelayedTimeoutCheckException e) {
 			e.printStackTrace();
 		} catch (DelayedCancellationCheckException e) {
