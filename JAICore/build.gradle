@@ -44,6 +44,7 @@ allprojects {
 dependencies {
 	compile project(":JAICore:jaicore-basic")
 	compile project(":JAICore:jaicore-concurrent")
+	compile project(":JAICore:jaicore-ea")
 	compile project(":JAICore:jaicore-experiments")
 	compile project(":JAICore:jaicore-graph")
 	compile project(":JAICore:jaicore-graphvisualizer")

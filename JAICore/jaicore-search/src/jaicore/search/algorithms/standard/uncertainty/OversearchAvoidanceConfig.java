@@ -91,7 +91,7 @@ public class OversearchAvoidanceConfig<N, V extends Comparable<V>> {
 		return this.seed;
 	}
 
-	public void setParetoComperator(Comparator<ParetoNode<N, V>> paretoComparator) {
+	public void setParetoComparator(Comparator<ParetoNode<N, V>> paretoComparator) {
 		this.paretoComparator = paretoComparator;
 	}
 	

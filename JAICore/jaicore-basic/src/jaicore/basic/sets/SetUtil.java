@@ -68,7 +68,8 @@ public class SetUtil {
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			Pair other = (Pair) obj;
+			@SuppressWarnings("unchecked")
+			Pair<X,Y> other = (Pair<X,Y>) obj;
 			if (x == null) {
 				if (other.x != null)
 					return false;

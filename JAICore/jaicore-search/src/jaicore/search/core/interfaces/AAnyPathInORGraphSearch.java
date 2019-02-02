@@ -9,8 +9,6 @@ import jaicore.basic.algorithm.AAlgorithm;
 import jaicore.basic.algorithm.ASolutionCandidateIterator;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.IAlgorithmConfig;
-import jaicore.basic.algorithm.events.AlgorithmEvent;
-import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.DelayedCancellationCheckException;
 import jaicore.basic.algorithm.exceptions.DelayedTimeoutCheckException;
 import jaicore.search.algorithms.standard.bestfirst.events.GraphSearchSolutionCandidateFoundEvent;
@@ -43,8 +41,8 @@ public abstract class AAnyPathInORGraphSearch<I extends GraphSearchInput<NSrc, A
 		super(problem);
 	}
 
-	protected AAnyPathInORGraphSearch(final I problem, final IAlgorithmConfig config) {
-		super(problem, config);
+	protected AAnyPathInORGraphSearch(final IAlgorithmConfig config,final I problem) {
+		super(config,problem);
 	}
 	
 	protected GraphSearchSolutionCandidateFoundEvent<NSrc, ASrc, O> registerSolution(final O path) {
@@ -72,9 +70,9 @@ public abstract class AAnyPathInORGraphSearch<I extends GraphSearchInput<NSrc, A
 		return this.loggerName;
 	}
 	
-	protected void checkTermination() throws TimeoutException, AlgorithmExecutionCanceledException, InterruptedException {
+	protected void checkAndConductTermination() throws TimeoutException, AlgorithmExecutionCanceledException, InterruptedException {
 		try {
-			super.checkTermination();
+			super.checkAndConductTermination();
 		} catch (DelayedTimeoutCheckException e) {
 			logger.warn("CheckTermination was called with delay. Message: \"{}\"", e.getMessage());
 			throw e.getException();

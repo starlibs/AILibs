@@ -16,8 +16,6 @@ import org.slf4j.LoggerFactory;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
-import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
-import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.sets.SetUtil;
 import jaicore.graph.Graph;
 import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
@@ -58,6 +56,10 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 	private final Set<N> prioritizedNodes = new HashSet<>();
 	private final Set<N> exhausted = new HashSet<>(); // the set of nodes of which all solution paths have been computed
 	private final Random random;
+	
+	public RandomSearch(final GraphSearchInput<N, A> problem) {
+		this(problem, 0);
+	}
 
 	public RandomSearch(final GraphSearchInput<N, A> problem, final int seed) {
 		this(problem, new Random(seed));
@@ -89,25 +91,24 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 	private void expandNode(final N node) throws InterruptedException {
 		synchronized (this.exploredGraph) {
 
-			assert this.exploredGraph.getItems().contains(node) : "Node that shall be expanded is not part of the graph";
+			assert this.exploredGraph.hasItem(node) : "Node that shall be expanded is not part of the graph";
 			assert !this.closed.contains(node) && !this.goalTester.isGoal(node);
 			this.logger.debug("Expanding next node {}", node);
 			boolean closeNodeAfterwards = false;
-//			if (this.isSingleNodeSuccessorGenerator) {
-//				
-//				/* generate the next successor */
-//				SingleSuccessorGenerator<N, A> cGen = ((SingleSuccessorGenerator<N, A>) this.gen);
-//				NodeExpansionDescription<N, A> successor = cGen.generateSuccessor(node, this.random.nextInt(Integer.MAX_VALUE));
-//				assert this.exploredGraph.hasItem(node);
-//				if (successor != null) {
-//					assert this.exploredGraph.hasItem(successor.getFrom()) : "Parent node of successor is not part of the explored graph.";
-//					assert !this.exploredGraph.hasItem(successor.getTo()) : "Successor has been reached before.";
-//					this.addNodeToLocalModel(successor.getFrom(), successor.getTo());
-//				}
-//
-//				/* if this was the last successor, set the close node flag to 1 */
-//				closeNodeAfterwards = cGen.allSuccessorsComputed(node);
-//			} else {
+			if (this.isSingleNodeSuccessorGenerator) {
+				
+				/* generate the next successor */
+				SingleSuccessorGenerator<N, A> cGen = ((SingleSuccessorGenerator<N, A>) this.gen);
+				NodeExpansionDescription<N, A> successor = cGen.generateSuccessor(node, this.random.nextInt(Integer.MAX_VALUE));
+				if (successor != null) {
+					assert this.exploredGraph.hasItem(successor.getFrom()) : "Parent node of successor is not part of the explored graph.";
+					assert !this.exploredGraph.hasItem(successor.getTo()) : "Successor " + successor.getTo() + " has been reached before.";
+					this.addNodeToLocalModel(successor.getFrom(), successor.getTo());
+				}
+
+				/* if this was the last successor, set the close node flag to 1 */
+				closeNodeAfterwards = cGen.allSuccessorsComputed(node);
+			} else {
 				long start = System.currentTimeMillis();
 				List<NodeExpansionDescription<N, A>> successors = this.gen.generateSuccessors(node); // could have been interrupted here
 				this.logger.debug("Identified {} successor(s) in {}ms, which are now appended.", successors.size(), System.currentTimeMillis() - start);
@@ -126,7 +127,7 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 				}
 
 				closeNodeAfterwards = true;
-//			}
+			}
 
 			if (closeNodeAfterwards) {
 
@@ -177,11 +178,11 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 				e.printStackTrace();
 			}
 			if (drawnPath == null) {
-				this.shutdown();
-				AlgorithmEvent event = new AlgorithmFinishedEvent();
-				this.post(event);
-				return event;
+				logger.info("Drew NULL path, terminating");
+				return terminate();
 			}
+			logger.info("Drew path of length {}. Posting this event. For more details on the path, enable TRACE", drawnPath.getNodes().size());
+			logger.trace("The drawn path is {}", drawnPath);
 			AlgorithmEvent event = new GraphSearchSolutionCandidateFoundEvent<>(drawnPath);
 			this.logger.info("Identified new solution ...");
 			this.post(event);
@@ -211,7 +212,7 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 
 	public SearchGraphPath<N, A> nextSolutionUnderNode(final N node) throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {
 		this.logger.info("Looking for next solution under node {}. Remaining time is {}ms.", node, getRemainingTimeToDeadline());
-		this.checkTermination();
+		this.checkAndConductTermination();
 
 		/* if the root is exhausted, cancel */
 		if (this.exhausted.contains(node)) {
@@ -225,7 +226,7 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 		synchronized (this.exploredGraph) {
 			while (!this.goalTester.isGoal(head)) {
 
-				this.checkTermination();
+				this.checkAndConductTermination();
 
 				/* expand node if this has not happened yet. */
 				if (!this.closed.contains(head)) {
@@ -271,12 +272,18 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 		}
 
 		/* propagate exhausted state */
+		logger.trace("Head node {} has been exhausted.", head);
 		this.exhausted.add(head);
 		this.prioritizedNodes.remove(head);
 		this.updateExhaustedAndPrioritizedState(head);
 		return new SearchGraphPath<>(path, null);
 	}
 
+	/**
+	 * This method goes from the given node up to the root and checks, for each node on this path, whether all of its children have been exhausted.
+	 * 
+	 * @param node
+	 */
 	private void updateExhaustedAndPrioritizedState(final N node) {
 		synchronized (this.exploredGraph) {
 			N current = node;
@@ -284,6 +291,14 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 			while (!(predecessors = this.exploredGraph.getPredecessors(current)).isEmpty()) {
 				assert predecessors.size() == 1;
 				current = predecessors.iterator().next();
+				
+				/* if the currently considered node is not even fully expanded, it is certainly not exhausted */
+				boolean currentIsCompletelyExpanded = !this.isSingleNodeSuccessorGenerator || ((SingleSuccessorGenerator<N,A>)gen).allSuccessorsComputed(current);
+				if (!currentIsCompletelyExpanded) {
+					logger.trace("Leaving update routine at node {}, which has not been expanded completely.", current);
+					return;
+				}
+				
 				boolean currentIsPrioritized = this.prioritizedNodes.contains(current);
 				boolean allChildrenExhausted = true;
 				boolean allPrioritizedChildrenExhausted = true;
@@ -299,6 +314,7 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 					}
 				}
 				if (allChildrenExhausted) {
+					logger.trace("Update state of {} as being exhausted since all its children have been exhausted.", current);
 					this.exhausted.add(current);
 				}
 				if (currentIsPrioritized && allPrioritizedChildrenExhausted) {

@@ -88,11 +88,11 @@ public class ExperimentRunner {
 	private void updateExperimentSetupAccordingToConfig() {
 		if (this.cond_memoryLimitCheck) {
 			this.memoryLimit = (int) (Runtime.getRuntime().maxMemory() / 1024 / 1024);
-			if (this.memoryLimit != this.config.getMemoryLimitinMB()) {
-				System.err.println("The true memory limit is " + this.memoryLimit + ", which differs from the " + this.config.getMemoryLimitinMB() + " specified in the config! We will write " + this.memoryLimit + " into the database.");
+			if (this.memoryLimit != this.config.getMemoryLimitInMB()) {
+				System.err.println("The true memory limit is " + this.memoryLimit + ", which differs from the " + this.config.getMemoryLimitInMB() + " specified in the config! We will write " + this.memoryLimit + " into the database.");
 			}
 		} else {
-			this.memoryLimit = this.config.getMemoryLimitinMB();
+			this.memoryLimit = this.config.getMemoryLimitInMB();
 		}
 
 		this.cpuLimit = this.config.getNumberOfCPUs();

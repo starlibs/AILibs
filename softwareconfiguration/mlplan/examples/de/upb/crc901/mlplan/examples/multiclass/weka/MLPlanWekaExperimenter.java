@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import org.aeonbits.owner.ConfigFactory;
@@ -94,6 +93,7 @@ public class MLPlanWekaExperimenter implements IExperimentSetEvaluator {
 		mlplan.setTimeoutForNodeEvaluation(new Integer(experimentValues.get("evaluationTimeout")));
 		mlplan.setRandomSeed(new Integer(experimentValues.get("seed")));
 		mlplan.setNumCPUs(experimentEntry.getExperiment().getNumCPUs());
+		mlplan.registerListener(this);
 		mlplan.registerListenerForSolutionEvaluations(this);
 
 		print("Build mlplan classifier");

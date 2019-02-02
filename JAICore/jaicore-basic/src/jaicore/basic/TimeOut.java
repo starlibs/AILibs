@@ -4,8 +4,8 @@ import java.util.concurrent.TimeUnit;
 
 public class TimeOut {
 
-	private TimeUnit unit;
-	private long duration;
+	private final TimeUnit unit;
+	private final long duration;
 
 	public TimeOut(final long duration, final TimeUnit unit) {
 		this.duration = duration;
@@ -34,6 +34,11 @@ public class TimeOut {
 
 	public long days() {
 		return TimeUnit.DAYS.convert(this.duration, this.unit);
+	}
+
+	@Override
+	public String toString() {
+		return this.milliseconds() + "ms";
 	}
 
 }

@@ -27,8 +27,8 @@ public abstract class AOptimizer<I, O extends ScoredItem<V>, V extends Comparabl
 		super(input);
 	}
 
-	protected AOptimizer(final I input, final IAlgorithmConfig config) {
-		super(input, config);
+	protected AOptimizer(final IAlgorithmConfig config, final I input) {
+		super(config, input);
 	}
 
 	protected AOptimizer(final IAlgorithmConfig config) {
@@ -49,25 +49,26 @@ public abstract class AOptimizer<I, O extends ScoredItem<V>, V extends Comparabl
 		return false;
 	}
 
+	@Override
 	public O nextSolutionCandidate() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
 		O candidate = super.nextSolutionCandidate();
-		updateBestSeenSolution(candidate);
+		this.updateBestSeenSolution(candidate);
 		return candidate;
 	}
-	
+
 	@Override
 	public SolutionCandidateFoundEvent<O> nextSolutionCandidateEvent() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
-		while (hasNext()) {
-			AlgorithmEvent event = nextWithException();
+		while (this.hasNext()) {
+			AlgorithmEvent event = this.nextWithException();
 			if (event instanceof SolutionCandidateFoundEvent) {
 				@SuppressWarnings("unchecked")
-				SolutionCandidateFoundEvent<O> castedEvent = (SolutionCandidateFoundEvent<O>)event;
+				SolutionCandidateFoundEvent<O> castedEvent = (SolutionCandidateFoundEvent<O>) event;
 				return castedEvent;
 			}
 		}
 		throw new NoSuchElementException();
 	}
-	
+
 	public O getBestSeenSolution() {
 		return this.bestSeenSolution;
 	}
@@ -77,7 +78,7 @@ public abstract class AOptimizer<I, O extends ScoredItem<V>, V extends Comparabl
 		while (this.hasNext()) {
 			this.nextWithException();
 		}
-		return bestSeenSolution;
+		return this.bestSeenSolution;
 	}
 
 	@Override

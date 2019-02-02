@@ -17,6 +17,7 @@ import jaicore.basic.algorithm.AlgorithmState;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
+import jaicore.basic.algorithm.exceptions.DelayedTimeoutCheckException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.basic.sets.SetUtil;
 import jaicore.graph.LabeledGraph;
@@ -104,7 +105,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 		/* if all children of the current node have been used at least once child that has not been used in a playout, just use any of them according to the tree policy */
 		boolean currentNodeIsDeadEnd = false;
 		while (!(childrenOfCurrent = this.exploredGraph.getSuccessors(current)).isEmpty() && (SetUtil.difference(childrenOfCurrent, this.nodesConsideredInAPlayout)).isEmpty()) {
-			this.checkTermination();
+			this.checkAndConductTermination();
 			this.logger.debug("Using tree policy to compute choice for successor of {} among {}", current, childrenOfCurrent);
 			List<A> availableActions = new ArrayList<>();
 			Map<A, N> successorStates = new HashMap<>();
@@ -143,7 +144,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 				SetUtil.difference(childrenOfCurrent, this.nodesConsideredInAPlayout));
 
 		/* ask the tree policy among one of the remaining options */
-		this.checkTermination();
+		this.checkAndConductTermination();
 		if (!currentNodeIsDeadEnd) {
 			Map<A, N> successorStates = new HashMap<>();
 			if (this.unexpandedNodes.contains(current)) {
@@ -168,7 +169,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 
 		/* use default policy to proceed to a goal node */
 		while (!currentNodeIsDeadEnd && !this.isGoal(current)) {
-			this.checkTermination();
+			this.checkAndConductTermination();
 			Map<A, N> successorStates = new HashMap<>();
 			this.logger.debug("Determining possible moves for {}.", current);
 			if (this.unexpandedNodes.contains(current)) {
@@ -201,7 +202,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 	}
 
 	private Map<A, N> expandNode(final N node) throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {
-		this.checkTermination();
+		this.checkAndConductTermination();
 		if (!this.unexpandedNodes.contains(node)) {
 			throw new IllegalArgumentException();
 		}
@@ -211,11 +212,11 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 		try {
 			availableActions = this.successorGenerator.generateSuccessors(node);
 		} catch (InterruptedException e) {
-			this.checkTermination();
+			this.checkAndConductTermination();
 		}
 		Map<A, N> successorStates = new HashMap<>();
 		for (NodeExpansionDescription<N, A> d : availableActions) {
-			this.checkTermination();
+			this.checkAndConductTermination();
 			successorStates.put(d.getAction(), d.getTo());
 			this.logger.debug("Adding edge {} -> {} with label {}", d.getFrom(), d.getTo(), d.getAction());
 			this.exploredGraph.addItem(d.getTo());
@@ -259,7 +260,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 			try {
 				this.registerActiveThread();
 				while (this.getState() == AlgorithmState.active) {
-					this.checkTermination();
+					this.checkAndConductTermination();
 					if (this.unexpandedNodes.isEmpty()) {
 						this.unregisterThreadAndShutdown();
 						AlgorithmEvent finishEvent = new AlgorithmFinishedEvent();
@@ -291,10 +292,8 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 			} catch (TimeoutException e) {
 				this.unregisterThreadAndShutdown();
 				Thread.interrupted(); // unset interrupted flag
-				AlgorithmEvent finishEvent = new AlgorithmFinishedEvent();
 				this.logger.info("Finishing MCTS due to timeout.");
-				this.post(finishEvent);
-				return finishEvent;
+				return terminate();
 			} catch (ObjectEvaluationFailedException e) {
 				throw new AlgorithmException(e, "Could not evaluate playout!");
 			} finally {

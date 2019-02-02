@@ -32,6 +32,7 @@ import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.graphvisualizer.gui.VisualizationWindow;
 import jaicore.logging.LoggerUtil;
+import jaicore.logging.ToJSONStringUtil;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.NodeAnnotationEvent;
@@ -48,8 +49,8 @@ import jaicore.search.model.travesaltree.Node;
 import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 
 @SuppressWarnings("serial")
-public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> implements IGraphDependentNodeEvaluator<T, String, V>, SerializableNodeEvaluator<T, V>,
-		ISolutionReportingNodeEvaluator<T, V>, ICancelableNodeEvaluator, IUncertaintyAnnotatingNodeEvaluator<T, V>, ILoggingCustomizable {
+public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>>
+		implements IGraphDependentNodeEvaluator<T, String, V>, SerializableNodeEvaluator<T, V>, ISolutionReportingNodeEvaluator<T, V>, ICancelableNodeEvaluator, IUncertaintyAnnotatingNodeEvaluator<T, V>, ILoggingCustomizable {
 
 	private String loggerName;
 	private Logger logger = LoggerFactory.getLogger(RandomCompletionBasedNodeEvaluator.class);
@@ -69,7 +70,7 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 	protected Map<String, Integer> plSuccesses = new ConcurrentHashMap<>();
 
 	protected GraphGenerator<T, String> generator;
-//	private boolean generatorProvidesPathUnification;
+	// private boolean generatorProvidesPathUnification;
 	protected long timestampOfFirstEvaluation;
 
 	/* algorithm parameters */
@@ -80,7 +81,7 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 	/* sub-tools for conducting and analyzing random completions */
 	private Timer timeoutTimer;
 	private RandomSearch<T, String> completer;
-	private Semaphore completerInsertionSemaphore = new Semaphore(0); // this is required since the step-method of the completer is asynchronous
+	private final Semaphore completerInsertionSemaphore = new Semaphore(0); // this is required since the step-method of the completer is asynchronous
 	protected final ISolutionEvaluator<T, V> solutionEvaluator;
 	protected IUncertaintySource<T, V> uncertaintySource;
 	protected transient SolutionEventBus<T> eventBus = new SolutionEventBus<>();
@@ -91,13 +92,12 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 		this(random, samples, solutionEvaluator, -1, -1);
 	}
 
-	public RandomCompletionBasedNodeEvaluator(final Random random, final int samples, final ISolutionEvaluator<T, V> solutionEvaluator, int timeoutForSingleCompletionEvaluationInMS,
-			int timeoutForNodeEvaluationInMS) {
+	public RandomCompletionBasedNodeEvaluator(final Random random, final int samples, final ISolutionEvaluator<T, V> solutionEvaluator, final int timeoutForSingleCompletionEvaluationInMS, final int timeoutForNodeEvaluationInMS) {
 		this(random, samples, solutionEvaluator, timeoutForSingleCompletionEvaluationInMS, timeoutForNodeEvaluationInMS, null);
 	}
 
-	public RandomCompletionBasedNodeEvaluator(final Random random, final int samples, final ISolutionEvaluator<T, V> solutionEvaluator, int timeoutForSingleCompletionEvaluationInMS,
-			int timeoutForNodeEvaluationInMS, Predicate<T> priorityPredicateForRDFS) {
+	public RandomCompletionBasedNodeEvaluator(final Random random, final int samples, final ISolutionEvaluator<T, V> solutionEvaluator, final int timeoutForSingleCompletionEvaluationInMS, final int timeoutForNodeEvaluationInMS,
+			final Predicate<T> priorityPredicateForRDFS) {
 		super();
 		if (random == null) {
 			throw new IllegalArgumentException("Random source must not be null!");
@@ -117,8 +117,7 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 		this.priorityPredicateForRDFS = priorityPredicateForRDFS;
 
 		/* create randomized dfs searcher */
-		logger.info("Initialized RandomCompletionEvaluator with timeout {}ms for single evaluations and {}ms in total per node", timeoutForSingleCompletionEvaluationInMS,
-				timeoutForNodeEvaluationInMS);
+		this.logger.info("Initialized RandomCompletionEvaluator with timeout {}ms for single evaluations and {}ms in total per node", timeoutForSingleCompletionEvaluationInMS, timeoutForNodeEvaluationInMS);
 
 		/* check whether assertions are on */
 		boolean assertOn = false;
@@ -132,6 +131,10 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 		}
 	}
 
+	public ISolutionEvaluator<T, V> getSolutionEvaluator() {
+		return this.solutionEvaluator;
+	}
+
 	protected double getExpectedUpperBoundForRelativeDistanceToOptimalSolution(final Node<T, ?> n, final List<T> path) {
 		return 0.0;
 	}
@@ -139,16 +142,16 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 	@Override
 	public V f(final Node<T, ?> n) throws InterruptedException, TimeoutException, NodeEvaluationException {
 		long startOfComputation = System.currentTimeMillis();
-		long deadline = timeoutForNodeEvaluationInMS > 0 ? startOfComputation + timeoutForNodeEvaluationInMS - 50 : Long.MAX_VALUE - 86400 * 1000;
+		long deadline = this.timeoutForNodeEvaluationInMS > 0 ? startOfComputation + this.timeoutForNodeEvaluationInMS - 50 : Long.MAX_VALUE - 86400 * 1000;
 		if (this.timestampOfFirstEvaluation == 0) {
 			this.timestampOfFirstEvaluation = startOfComputation;
 		}
-		if (this.generator == null)
+		if (this.generator == null) {
 			throw new IllegalStateException("Cannot compute f as no generator has been set!");
-		logger.info("Received request for f-value of node {}", n);
+		}
+		this.logger.info("Received request for f-value of node {}", n);
 
 		if (!this.fValues.containsKey(n)) {
-
 			/* abort if not graph generator is set*/
 			if (this.generator == null) {
 				throw new IllegalStateException("Cannot compute f-values before the generator is set!");
@@ -167,21 +170,20 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 
 				/* if there was no relevant change in comparison to parent, apply parent's f */
 				if (path.size() > 1 && !this.solutionEvaluator.doesLastActionAffectScoreOfAnySubsequentSolution(path)) {
-					assert this.fValues.containsKey(n
-							.getParent()) : "The solution evaluator tells that the solution on the path has not significantly changed, but no f-value has been stored before for the parent. The path is: "
-									+ path;
+					assert this.fValues.containsKey(n.getParent()) : "The solution evaluator tells that the solution on the path has not significantly changed, but no f-value has been stored before for the parent. The path is: " + path;
 					V score = this.fValues.get(n.getParent());
 					this.fValues.put(n, score);
-					logger.info("Score {} of parent can be used since the last action did not affect the performance.", score);
-					if (score == null)
-						logger.warn("Returning score NULL inherited from parent, this should not happen.");
+					this.logger.debug("Score {} of parent can be used since the last action did not affect the performance.", score);
+					if (score == null) {
+						this.logger.warn("Returning score NULL inherited from parent, this should not happen.");
+					}
 					return score;
 				}
 
 				/* make sure that the completer has the path from the root to the node in question */
-				if (!completer.knowsNode(n.getPoint())) {
-					synchronized (completer) {
-						completer.appendPathToNode(n.externalPath());
+				if (!this.completer.knowsNode(n.getPoint())) {
+					synchronized (this.completer) {
+						this.completer.appendPathToNode(n.externalPath());
 					}
 				}
 
@@ -192,43 +194,44 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 				final int maxSamples = this.samples * 2;
 				List<V> evaluations = new ArrayList<>();
 				List<List<T>> completedPaths = new ArrayList<>();
-				logger.info("Now drawing {} successful examples but no more than {}", samples, maxSamples);
+				this.logger.debug("Now drawing {} successful examples but no more than {}", this.samples, maxSamples);
 				for (; i < this.samples; i++) {
 
 					if (Thread.currentThread().isInterrupted()) {
-						logger.info("Thread ist interrupted, canceling RDFS");
+						this.logger.info("Thread ist interrupted, canceling RDFS");
 						break;
 					}
 					if (System.currentTimeMillis() >= deadline) {
-						logger.info("Deadline for random completions hit! Finishing node evaluation.");
+						this.logger.info("Deadline for random completions hit! Finishing node evaluation.");
 						break;
 					}
 
 					/* complete the current path by the dfs-solution; we assume that this goes in almost constant time */
 					List<T> pathCompletion = null;
 					List<T> completedPath = null;
-					synchronized (completer) {
+					synchronized (this.completer) {
 
-						if (completer.isCanceled()) {
-							logger.info("Completer has been canceled (perhaps due a cancel on the evaluator). Canceling RDFS");
+						if (this.completer.isCanceled()) {
+							this.logger.info("Completer has been canceled (perhaps due a cancel on the evaluator). Canceling RDFS");
 							break;
 						}
 						completedPath = new ArrayList<>(n.externalPath());
 
-						logger.info("Starting search for next solution ...");
+						this.logger.debug("Starting search for next solution ...");
 
 						SearchGraphPath<T, String> solutionPathFromN = null;
 						try {
-							solutionPathFromN = completer.nextSolutionUnderNode(n.getPoint());
+							solutionPathFromN = this.completer.nextSolutionUnderNode(n.getPoint());
 						} catch (AlgorithmExecutionCanceledException e) {
-							logger.info("Completer has been canceled. Returning control.");
+							this.logger.info("Completer has been canceled. Returning control.");
 							break;
 						}
 						if (solutionPathFromN == null) {
-							logger.info("No completion was found for path {}.", path);
+							this.logger.info("No completion was found for path {}.", path);
 							break;
 						}
-						logger.info("Found solution {}", solutionPathFromN);
+						this.logger.debug("Found solution of length {}. Enable TRACE for details.", solutionPathFromN.getNodes().size());
+						this.logger.trace("Solution path is {}", solutionPathFromN);
 						pathCompletion = new ArrayList<>(solutionPathFromN.getNodes());
 						pathCompletion.remove(0);
 						completedPath.addAll(pathCompletion);
@@ -239,37 +242,47 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 					AtomicBoolean nodeEvaluationTimedOut = new AtomicBoolean(false);
 					Thread executingThread = Thread.currentThread();
 					TimerTask abortionTask = new TimerTask() {
-
 						@Override
 						public void run() {
 
 							/* if the executing thread has not been interrupted from outside */
 							if (!executingThread.isInterrupted()) {
-								logger.info("Sending an controlled interrupt to the evaluating thread to get it back here.");
+								RandomCompletionBasedNodeEvaluator.this.logger.info("Sending an controlled interrupt to the evaluating thread to get it back here.");
 								nodeEvaluationTimedOut.set(true);
 								executingThread.interrupt();
 							}
 						}
 					};
-					long timeoutForJob = Math.min(deadline - System.currentTimeMillis(), totalDeadline - System.currentTimeMillis());
-					if (timeoutForJob < 0)
+
+					// FIXME wever: @fmohr check whether this logic with total deadline and deadline is actually correct.
+					// FIXME make naming of variables consistent with total deadline etc.
+					long timeoutForJob = deadline - System.currentTimeMillis();
+					if (this.totalDeadline >= 0 && (this.totalDeadline - System.currentTimeMillis()) < timeoutForJob) {
+						timeoutForJob = this.totalDeadline - System.currentTimeMillis();
+					}
+
+					if (timeoutForJob < 0) {
 						break;
-					if (timeoutForSingleCompletionEvaluationInMS > 0 && timeoutForSingleCompletionEvaluationInMS < timeoutForJob)
-						timeoutForJob = timeoutForSingleCompletionEvaluationInMS;
-					if (timeoutTimer == null)
-						timeoutTimer = new Timer("RandomCompletion-Timeouter");
-					timeoutTimer.schedule(abortionTask, timeoutForJob);
+					}
+					if (this.timeoutForSingleCompletionEvaluationInMS > 0 && this.timeoutForSingleCompletionEvaluationInMS < timeoutForJob) {
+						timeoutForJob = this.timeoutForSingleCompletionEvaluationInMS;
+					}
+					if (this.timeoutTimer == null) {
+						this.timeoutTimer = new Timer("RandomCompletion-Timeouter");
+					}
+					this.timeoutTimer.schedule(abortionTask, timeoutForJob);
 					j++;
 					try {
 						V val = this.getFValueOfSolutionPath(completedPath);
 						if (val != null) {
 							evaluations.add(val);
-							updateMapOfBestScoreFoundSoFar(completedPath, val);
-						} else
-							logger.warn("Got NULL result as score for path {}", completedPath);
+							this.updateMapOfBestScoreFoundSoFar(completedPath, val);
+						} else {
+							this.logger.warn("Got NULL result as score for path {}", completedPath);
+						}
 					} catch (InterruptedException e) {
 						boolean intentionalInterrupt = nodeEvaluationTimedOut.get();
-						logger.info("Recognized {} interrupt", intentionalInterrupt ? "intentional" : "external");
+						this.logger.info("Recognized {} interrupt", intentionalInterrupt ? "intentional" : "external");
 						if (!intentionalInterrupt) {
 							abortionTask.cancel();
 							throw e;
@@ -278,11 +291,11 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 						}
 					} catch (Exception ex) {
 						if (j == maxSamples) {
-							logger.warn("Too many retry attempts, giving up.");
+							this.logger.warn("Too many retry attempts, giving up.");
 							throw new NodeEvaluationException("Error in the evaluation of a node!");
 						} else {
 							countedExceptions++;
-							logger.error("Could not evaluate solution candidate ... retry another completion. {}", LoggerUtil.getExceptionInfo(ex));
+							this.logger.error("Could not evaluate solution candidate ... retry another completion. {}", LoggerUtil.getExceptionInfo(ex));
 							i--;
 						}
 					}
@@ -290,25 +303,27 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 				}
 
 				/* the only reason why we have no score at this point is that all evaluations have failed with exception or were interrupted */
-				V best = bestKnownScoreUnderNodeInCompleterGraph.get(n.externalPath());
+				V best = this.bestKnownScoreUnderNodeInCompleterGraph.get(n.externalPath());
 				if (best == null) {
-					if (deadline < System.currentTimeMillis())
-						throw new TimeoutException("The timeout of " + timeoutForNodeEvaluationInMS + "ms for node evaluation has been exhausted.");
-					else if (countedExceptions > 0)
+					if (deadline < System.currentTimeMillis()) {
+						throw new TimeoutException("The timeout of " + this.timeoutForNodeEvaluationInMS + "ms for node evaluation has been exhausted.");
+					} else if (countedExceptions > 0) {
 						throw new NoSuchElementException("Among " + j + " evaluated candidates, we could not identify any candidate that did not throw an exception.");
-					else {
+					} else {
 						return null;
 					}
 				}
 
 				/* if we are still interrupted, throw an exception */
-				if (Thread.currentThread().isInterrupted())
+				if (Thread.currentThread().isInterrupted()) {
 					throw new InterruptedException("Node evaluation interrupted");
+				}
 
 				/* add number of samples to node */
 				n.setAnnotation("fRPSamples", i);
-				if (uncertaintySource != null)
+				if (this.uncertaintySource != null) {
 					uncertainty = this.uncertaintySource.calculateUncertainty((Node<T, V>) n, completedPaths, evaluations);
+				}
 
 				/* cache this result and possible determine whether we already had a solution path that goes over this node before */
 				// if (rememberBestScores) {
@@ -341,31 +356,33 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 			else {
 				V score = this.getFValueOfSolutionPath(path);
 				if (score == null) {
-					logger.warn("No score was computed");
+					this.logger.warn("No score was computed");
 					return null;
 				}
 				this.fValues.put(n, score);
 				if (!this.postedSolutions.contains(path)) {
-					logger.error("Found a goal node whose solution has not been posted before!");
+					this.logger.error("Found a goal node whose solution has not been posted before!");
 				}
 				uncertainty = 0.0;
 			}
 
 			/* set uncertainty if an uncertainty source has been set */
-			if (uncertaintySource != null)
+			if (this.uncertaintySource != null) {
 				n.setAnnotation("uncertainty", uncertainty);
+			}
 		}
 		V f = this.fValues.get(n);
-		logger.info("Returning f-value: {}", f);
+		this.logger.info("Returning f-value: {}", f);
 		return f;
 	}
 
-	private void updateMapOfBestScoreFoundSoFar(List<T> nodeInCompleterGraph, V scoreOnOriginalBenchmark) {
-		V bestKnownScore = bestKnownScoreUnderNodeInCompleterGraph.get(nodeInCompleterGraph);
+	private void updateMapOfBestScoreFoundSoFar(final List<T> nodeInCompleterGraph, final V scoreOnOriginalBenchmark) {
+		V bestKnownScore = this.bestKnownScoreUnderNodeInCompleterGraph.get(nodeInCompleterGraph);
 		if (bestKnownScore == null || scoreOnOriginalBenchmark.compareTo(bestKnownScore) < 0) {
-			bestKnownScoreUnderNodeInCompleterGraph.put(nodeInCompleterGraph, scoreOnOriginalBenchmark);
-			if (nodeInCompleterGraph.size() > 1)
-				updateMapOfBestScoreFoundSoFar(nodeInCompleterGraph.subList(0, nodeInCompleterGraph.size() - 1), scoreOnOriginalBenchmark);
+			this.bestKnownScoreUnderNodeInCompleterGraph.put(nodeInCompleterGraph, scoreOnOriginalBenchmark);
+			if (nodeInCompleterGraph.size() > 1) {
+				this.updateMapOfBestScoreFoundSoFar(nodeInCompleterGraph.subList(0, nodeInCompleterGraph.size() - 1), scoreOnOriginalBenchmark);
+			}
 		}
 	}
 
@@ -373,10 +390,11 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 		boolean knownPath = this.scoresOfSolutionPaths.containsKey(path);
 		if (!knownPath) {
 			if (this.unsuccessfulPaths.contains(path)) {
-				logger.warn("Asking again for the reevaluation of a path that was evaluated unsuccessfully in a previous run; returning NULL: {}", path);
+				this.logger.warn("Asking again for the reevaluation of a path that was evaluated unsuccessfully in a previous run; returning NULL: {}", path);
 				return null;
 			}
-			logger.info("Associated plan is new. Calling solution evaluator {} to compute f-value for complete path {}", solutionEvaluator, path);
+			this.logger.debug("Associated plan is new. Calling solution evaluator {} to compute f-value for path of length {}. Enable TRACE for exact plan.", this.solutionEvaluator, path.size());
+			this.logger.trace("The path is {}", path);
 
 			/* compute value of solution */
 			long start = System.currentTimeMillis();
@@ -384,10 +402,10 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 			try {
 				val = this.solutionEvaluator.evaluateSolution(path);
 			} catch (InterruptedException e) {
-				logger.info("Computing the solution quality of {} was interrupted.", path);
+				this.logger.info("Computing the solution quality of {} was interrupted.", path);
 				throw e;
 			} catch (Throwable e) {
-				logger.error("Computing the solution quality of {} failed due to an exception. Here is the trace:\n\t{}\n\t{}\n\t{}", path, e.getClass().getName(), e.getMessage(),
+				this.logger.error("Computing the solution quality of {} failed due to an exception. Here is the trace:\n\t{}\n\t{}\n\t{}", path, e.getClass().getName(), e.getMessage(),
 						Arrays.asList(e.getStackTrace()).stream().map(n -> "\n\t" + n.toString()).collect(Collectors.toList()));
 				this.unsuccessfulPaths.add(path);
 				throw new NodeEvaluationException(e.getMessage());
@@ -395,9 +413,9 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 			long duration = System.currentTimeMillis() - start;
 
 			/* at this point, the value should not be NULL */
-			logger.info("Result: {}, Size: {}", val, this.scoresOfSolutionPaths.size());
+			this.logger.info("Result: {}, Size: {}", val, this.scoresOfSolutionPaths.size());
 			if (val == null) {
-				logger.warn("The solution evaluator has returned NULL, which should not happen.");
+				this.logger.warn("The solution evaluator has returned NULL, which should not happen.");
 				this.unsuccessfulPaths.add(path);
 				return null;
 			}
@@ -406,11 +424,11 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 			this.timesToComputeEvaluations.put(path, (int) duration);
 			this.postSolution(path);
 		} else {
-			logger.info("Associated plan is known. Reading score from cache.");
-			if (logger.isTraceEnabled()) {
+			this.logger.info("Associated plan is known. Reading score from cache.");
+			if (this.logger.isTraceEnabled()) {
 				for (List<T> existingPath : this.scoresOfSolutionPaths.keySet()) {
 					if (existingPath.equals(path)) {
-						logger.trace("The following plans appear equal:\n\t{}\n\t{}", existingPath, path);
+						this.logger.trace("The following plans appear equal:\n\t{}\n\t{}", existingPath, path);
 					}
 				}
 			}
@@ -420,16 +438,14 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 		}
 		V score = this.scoresOfSolutionPaths.get(path);
 		assert score != null : "Stored scores must never be null";
-		logger.info("Determined value {} for path {}.", score, path);
+		this.logger.debug("Determined value {} for path of length {}.", score, path.size());
+		this.logger.trace("Full path is {}", path);
 		return score;
 	}
 
 	protected void postSolution(final List<T> solution) {
-		if (this.postedSolutions.contains(solution)) {
-			throw new IllegalArgumentException("Solution " + solution.toString() + " already posted!");
-		}
+		assert !this.postedSolutions.contains(solution) : "Solution " + solution.toString() + " already posted!";
 		this.postedSolutions.add(solution);
-		// List<CEOCAction> plan = CEOCSTNUtil.extractPlanFromSolutionPath(solution);
 		try {
 
 			/* now post the solution to the event bus */
@@ -443,15 +459,16 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 			solutionObject.setAnnotation("fTime", this.timesToComputeEvaluations.get(solution));
 			solutionObject.setAnnotation("timeToSolution", (int) (System.currentTimeMillis() - this.timestampOfFirstEvaluation));
 			solutionObject.setAnnotation("nodesEvaluatedToSolution", numberOfComputedFValues);
+			this.logger.debug("Posting solution {}", solutionObject);
 			this.eventBus.post(new EvaluatedSearchSolutionCandidateFoundEvent<>(solutionObject));
 		} catch (Throwable e) {
 			List<Pair<String, Object>> explanations = new ArrayList<>();
-			if (logger.isDebugEnabled()) {
+			if (this.logger.isDebugEnabled()) {
 				StringBuilder sb = new StringBuilder();
 				solution.forEach(n -> sb.append(n.toString() + "\n"));
 				explanations.add(new Pair<>("The path that has been tried to convert is as follows:", sb.toString()));
 			}
-			logger.error("Cannot post solution, because no valid MLPipeline object could be derived from it:\n{}", LoggerUtil.getExceptionInfo(e, explanations));
+			this.logger.error("Cannot post solution, because no valid MLPipeline object could be derived from it:\n{}", LoggerUtil.getExceptionInfo(e, explanations));
 		}
 	}
 
@@ -465,32 +482,34 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 		/* create the completion algorithm and initialize it */
 		INodeEvaluator<T, Double> nodeEvaluator = new RandomizedDepthFirstNodeEvaluator<>(this.random);
 		GraphSearchWithSubpathEvaluationsInput<T, String, Double> completionProblem = new GraphSearchWithSubpathEvaluationsInput<>(generator, nodeEvaluator);
-		completer = new RandomSearch<>(completionProblem, priorityPredicateForRDFS, this.random);
-		System.out.println(totalDeadline);
-		completer.setTimeout(new TimeOut(totalDeadline - System.currentTimeMillis(), TimeUnit.MILLISECONDS));
-		if (visualizeSubSearch)
-			new VisualizationWindow<>(completer).setTooltipGenerator(n -> n.toString() + "<br />f: " + String.valueOf(bestKnownScoreUnderNodeInCompleterGraph.get(n)));
-		while (!(completer.next() instanceof AlgorithmInitializedEvent))
+		this.completer = new RandomSearch<>(completionProblem, this.priorityPredicateForRDFS, this.random);
+		this.completer.setTimeout(new TimeOut(this.totalDeadline - System.currentTimeMillis(), TimeUnit.MILLISECONDS));
+		if (this.visualizeSubSearch) {
+			new VisualizationWindow<>(this.completer).setTooltipGenerator(n -> n.toString() + "<br />f: " + String.valueOf(this.bestKnownScoreUnderNodeInCompleterGraph.get(n)));
+		}
+		while (!(this.completer.next() instanceof AlgorithmInitializedEvent)) {
 			;
-		logger.info("Generator has been set, and completer has been initialized");
+		}
+		this.logger.info("Generator has been set, and completer has been initialized");
 	}
 
 	@Subscribe
-	public void receiveCompleterEvent(NodeExpansionCompletedEvent<Node<T, Double>> event) {
-		completerInsertionSemaphore.release();
+	public void receiveCompleterEvent(final NodeExpansionCompletedEvent<Node<T, Double>> event) {
+		this.completerInsertionSemaphore.release();
 	}
 
 	@Override
-	public void registerSolutionListener(Object listener) {
-		eventBus.register(listener);
+	public void registerSolutionListener(final Object listener) {
+		this.eventBus.register(listener);
 	}
 
 	@Override
 	public void cancel() {
-		logger.info("Receive cancel signal.");
-		completer.cancel();
-		if (timeoutTimer != null)
-			timeoutTimer.cancel();
+		this.logger.info("Receive cancel signal.");
+		this.completer.cancel();
+		if (this.timeoutTimer != null) {
+			this.timeoutTimer.cancel();
+		}
 	}
 
 	public void setNumberOfRandomCompletions(final int randomCompletions) {
@@ -498,37 +517,45 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> impl
 	}
 
 	@Override
-	public void setUncertaintySource(IUncertaintySource<T, V> uncertaintySource) {
+	public void setUncertaintySource(final IUncertaintySource<T, V> uncertaintySource) {
 		this.uncertaintySource = uncertaintySource;
 	}
 
 	public boolean isVisualizeSubSearch() {
-		return visualizeSubSearch;
+		return this.visualizeSubSearch;
 	}
 
-	public void setVisualizeSubSearch(boolean visualizeSubSearch) {
+	public void setVisualizeSubSearch(final boolean visualizeSubSearch) {
 		this.visualizeSubSearch = visualizeSubSearch;
 	}
 
 	@Override
-	public void setLoggerName(String name) {
+	public void setLoggerName(final String name) {
 		this.loggerName = name;
-		logger.info("Switching logger (name) of object of class {} to {}", this.getClass().getName(), name);
+		this.logger.info("Switching logger (name) of object of class {} to {}", this.getClass().getName(), name);
 		this.logger = LoggerFactory.getLogger(name);
-		completer.setLoggerName(name + ".randomsearch");
-		logger.info("Switched logger (name) to {}", name);
+		this.completer.setLoggerName(name + ".randomsearch");
+		this.logger.info("Switched logger (name) to {}", name);
 	}
 
 	@Override
 	public String getLoggerName() {
-		return loggerName;
+		return this.loggerName;
 	}
 
 	public long getTotalDeadline() {
-		return totalDeadline;
+		return this.totalDeadline;
 	}
 
-	public void setTotalDeadline(long totalDeadline) {
+	public void setTotalDeadline(final long totalDeadline) {
 		this.totalDeadline = totalDeadline;
+	}
+
+	@Override
+	public String toString() {
+		Map<String, Object> fields = new HashMap<>();
+		fields.put("solutionEvaluator", this.solutionEvaluator);
+		fields.put("visualizeSubSearch", this.visualizeSubSearch);
+		return ToJSONStringUtil.toJSONString(fields);
 	}
 }

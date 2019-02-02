@@ -173,6 +173,7 @@ public class KnapsackProblem {
 
 					public NodeExpansionDescription<KnapsackNode, String> generateSuccessor(KnapsackNode n, List<String> objetcs, int i) throws InterruptedException {
 						if (Thread.currentThread().isInterrupted()) {
+							System.err.println("LEAVING");
 							throw new InterruptedException("Successor generation interrupted");
 						}
 						if (!expandedChildren.containsKey(n))
@@ -192,6 +193,7 @@ public class KnapsackProblem {
 
 					@Override
 					public boolean allSuccessorsComputed(KnapsackNode node) {
+						System.out.println(getPossiblePackingObjects(node).size() == expandedChildren.get(node).size());
 						return getPossiblePackingObjects(node).size() == expandedChildren.get(node).size();
 					}
 				};

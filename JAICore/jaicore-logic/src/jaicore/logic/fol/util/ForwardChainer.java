@@ -151,7 +151,6 @@ public class ForwardChainer extends AAlgorithm<ForwardChainingProblem, Collectio
 				currentGroundingOfLocalLiteral = possibleChoicesForLocalLiteral.get(0);
 				possibleChoicesForLocalLiteral.remove(0);
 				logger.debug("Considering choice {}", currentGroundingOfLocalLiteral);
-				long startChoice = System.currentTimeMillis();
 				Monom modifiedRemainingConclusion = new Monom(remainingConclusion, currentGroundingOfLocalLiteral);
 				logger.trace("Checking whether one of the ground remaining conclusion {} is not in the state.", modifiedRemainingConclusion);
 				if (!doesConclusionContainAGroundLiteralThatIsNotInFactBase(factbase, modifiedRemainingConclusion)) {

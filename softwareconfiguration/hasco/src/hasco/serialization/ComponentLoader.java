@@ -40,6 +40,7 @@ public class ComponentLoader {
 	private final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramConfigs = new HashMap<>();
 	private final Collection<Component> components = new ArrayList<>();
 	private final Set<String> parsedFiles = new HashSet<>();
+
 	private final ObjectMapper objectMapper = new ObjectMapper();
 	private final Map<String, JsonNode> parameterMap = new HashMap<>();
 	private final Set<String> uniqueComponentNames = new HashSet<>();
@@ -113,15 +114,15 @@ public class ComponentLoader {
 				}
 			}
 		}
-		readFromJson(rootNode);
-	}
-	
-	public void readFromString(String json) throws IOException {
-		ObjectMapper mapper = new ObjectMapper();
-		readFromJson(mapper.readTree(json));
+		this.readFromJson(rootNode);
 	}
 
-	private void readFromJson(JsonNode rootNode) throws IOException {
+	public void readFromString(final String json) throws IOException {
+		ObjectMapper mapper = new ObjectMapper();
+		this.readFromJson(mapper.readTree(json));
+	}
+
+	private void readFromJson(final JsonNode rootNode) throws IOException {
 		// get the array of components
 		JsonNode components = rootNode.path("components");
 		if (components != null) {
@@ -376,7 +377,7 @@ public class ComponentLoader {
 		}
 	}
 
-	public void loadComponents(final File componentDescriptionFile) throws IOException, UnresolvableRequiredInterfaceException {
+	public ComponentLoader loadComponents(final File componentDescriptionFile) throws IOException, UnresolvableRequiredInterfaceException {
 		this.paramConfigs.clear();
 		this.components.clear();
 		this.uniqueComponentNames.clear();
@@ -388,6 +389,8 @@ public class ComponentLoader {
 		if (this.checkRequiredInterfacesResolvable && !this.getUnresolvableRequiredInterfaces().isEmpty()) {
 			throw new UnresolvableRequiredInterfaceException();
 		}
+
+		return this;
 	}
 
 	/**

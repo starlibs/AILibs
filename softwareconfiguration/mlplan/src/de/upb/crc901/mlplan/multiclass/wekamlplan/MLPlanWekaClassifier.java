@@ -184,20 +184,20 @@ public abstract class MLPlanWekaClassifier extends AAlgorithm<Instances, Classif
 				this.hascoFactory.setPreferredNodeEvaluator(new AlternativeNodeEvaluator<TFDNode, Double>(this.getSemanticNodeEvaluator(this.dataShownToSearch), this.preferredNodeEvaluator));
 				this.hascoFactory.setConfig(this.getConfig());
 				this.optimizingFactory = new OptimizingFactory<>(optimizingFactoryProblem, this.hascoFactory);
-				logger.info("Setting logger directive of {} to {}", this.optimizingFactory, this.loggerName + ".2phasehasco");
+				this.logger.info("Setting logger directive of {} to {}", this.optimizingFactory, this.loggerName + ".2phasehasco");
 				this.optimizingFactory.setLoggerName(this.loggerName + ".2phasehasco");
-				this.optimizingFactory.setTimeout(getTimeout());
+				this.optimizingFactory.setTimeout(this.getTimeout());
 				this.optimizingFactory.registerListener(this);
 				this.optimizingFactory.init();
 
 				/* set state to active */
-				return activate();
+				return this.activate();
 			} catch (IOException e) {
 				throw new AlgorithmException(e, "Could not create TwoPhase configuration problem.");
 			}
 		}
 		case active: {
-			
+
 			/* train the classifier returned by the optimizing factory */
 			long startOptimizationTime = System.currentTimeMillis();
 			this.selectedClassifier = this.optimizingFactory.call();
@@ -210,7 +210,7 @@ public abstract class MLPlanWekaClassifier extends AAlgorithm<Instances, Classif
 			}
 			long endBuildTime = System.currentTimeMillis();
 			this.logger.info("Selected model has been built on entire dataset. Build time of chosen model was {}ms. Total construction time was {}ms", endBuildTime - startBuildTime, endBuildTime - startOptimizationTime);
-			return terminate();
+			return this.terminate();
 		}
 		default:
 			throw new IllegalStateException("Cannot do anything in state " + this.getState());
@@ -224,11 +224,6 @@ public abstract class MLPlanWekaClassifier extends AAlgorithm<Instances, Classif
 			this.nextWithException();
 		}
 		return this;
-	}
-
-	@Override
-	public void registerListener(final Object listener) {
-		this.optimizingFactory.registerListener(listener);
 	}
 
 	protected abstract INodeEvaluator<TFDNode, Double> getSemanticNodeEvaluator(Instances data);

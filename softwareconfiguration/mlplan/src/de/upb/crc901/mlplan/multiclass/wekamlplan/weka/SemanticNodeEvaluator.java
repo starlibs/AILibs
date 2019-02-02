@@ -25,8 +25,8 @@ public class SemanticNodeEvaluator implements INodeEvaluator<TFDNode, Double> {
 		this.components = components;
 
 		/* compute binary class predicate */
-		binaryClass = this.data.numClasses() == 2;
-		
+		this.binaryClass = this.data.numClasses() == 2;
+
 		/* determine whether the dataset is multi-valued nominal */
 		boolean multiValuedNominalAttributes = false;
 		for (int i = 0; i < this.data.numAttributes(); i++) {
@@ -47,24 +47,23 @@ public class SemanticNodeEvaluator implements INodeEvaluator<TFDNode, Double> {
 
 		if (instance != null) {
 			ComponentInstance classifier;
-
 			if (instance.getComponent().getName().toLowerCase().contains("pipeline")) {
 				classifier = instance.getSatisfactionOfRequiredInterfaces().get("classifier");
 			} else {
 				classifier = instance;
 			}
-			
+
 			if (classifier != null) {
-				
 				String classifierName = classifier.getComponent().getName().toLowerCase();
-				
+
 				/* forbid M5regression algorithms on non-binary classes */
-				if (!this.binaryClass && classifierName.matches("(.*)(additiveregression|simplelinearregression|m5rules|votedperceptron|m5p)(.*)"))
-					throw new IllegalArgumentException("Cannot adopt classifier " + classifier.getClass().getName() + " on non-binary datasets.");
-				
+				if (!this.binaryClass && classifierName.matches("(.*)(additiveregression|simplelinearregression|m5rules|votedperceptron|m5p)(.*)")) {
+					throw new IllegalArgumentException("Cannot adopt classifier " + classifier.getComponent().getName() + " on non-binary datasets.");
+				}
+
 				/* forbid NaiveBayesMultinomial on multi-valued nominal attributes */
-				if (multiValuedNominalAttributes && (classifierName.matches("(.*)(naivebayesmultinomial|simplelinearregression)(.*)"))) {
-					throw new IllegalArgumentException("Cannot adopt classifier " + classifier.getClass().getName() + " on datasets with multi-valued nominal attributes.");
+				if (this.multiValuedNominalAttributes && (classifierName.matches("(.*)(naivebayesmultinomial|simplelinearregression)(.*)"))) {
+					throw new IllegalArgumentException("Cannot adopt classifier " + classifier.getComponent().getName() + " on datasets with multi-valued nominal attributes.");
 				}
 			}
 		}

@@ -1,7 +1,6 @@
 package jaicore.basic.sets;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.PriorityQueue;
@@ -101,7 +100,6 @@ public class LDSRelationComputer<T> extends AAlgorithm<RelationComputationProble
 		this(new RelationComputationProblem<>(sets));
 	}
 
-	@SuppressWarnings("unchecked")
 	public LDSRelationComputer(RelationComputationProblem<T> problem) {
 		super(problem);
 		sets = new ArrayList<>();
@@ -122,7 +120,7 @@ public class LDSRelationComputer<T> extends AAlgorithm<RelationComputationProble
 		}
 		case active: {
 			try {
-				checkTermination();
+				checkAndConductTermination();
 			} catch (DelayedTimeoutCheckException | DelayedCancellationCheckException e) {
 				e.printStackTrace();
 			}
@@ -140,7 +138,7 @@ public class LDSRelationComputer<T> extends AAlgorithm<RelationComputationProble
 				next.fillTupleArrayWithValues(currentTuple); // get current tuple
 				for (int j = 0; j < n; j++) {
 					try {
-						checkTermination();
+						checkAndConductTermination();
 					} catch (DelayedTimeoutCheckException | DelayedCancellationCheckException e) {
 						e.printStackTrace();
 					}

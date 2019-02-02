@@ -3,11 +3,15 @@ package jaicore.ml.core;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.util.Collection;
+import java.util.List;
 import java.util.Random;
 
 import org.junit.Assert;
 import org.junit.Test;
 
+import jaicore.ml.WekaUtil;
+import weka.attributeSelection.AttributeSelection;
 import weka.classifiers.Classifier;
 import weka.classifiers.evaluation.Evaluation;
 import weka.classifiers.trees.RandomForest;
@@ -52,5 +56,14 @@ public class WekaUtilTester {
 			System.out.println(eval.pctCorrect());
 		}
 	}
-
+	
+	@Test
+	public void checkValidAttributeSelections() throws Exception {
+		Collection<List<String>> preprocessors = WekaUtil.getAdmissibleSearcherEvaluatorCombinationsForAttributeSelection();
+		preprocessors.forEach(a -> System.out.println(a.toString()));
+	}
+	
+	public static void main(String[] args) throws Exception {
+		new WekaUtilTester().checkValidAttributeSelections();
+	}
 }

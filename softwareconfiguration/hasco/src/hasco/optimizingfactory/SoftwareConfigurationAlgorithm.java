@@ -16,7 +16,7 @@ public abstract class SoftwareConfigurationAlgorithm<P extends SoftwareConfigura
 	}
 
 	protected SoftwareConfigurationAlgorithm(final IAlgorithmConfig config, final P input) {
-		super(input, config);
+		super(config,input);
 	}
 
 	protected SoftwareConfigurationAlgorithm(final IAlgorithmConfig config) {
