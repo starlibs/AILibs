@@ -12,19 +12,29 @@ public class MultiLabelMeasureBuilder {
 	public static ADecomposableMultilabelMeasure getEvaluator(MultiLabelPerformanceMeasure pm) {
 		
 		switch (pm) {
-		case EXACT_MATCH : return new ADecomposableMultilabelMeasure() {
+		case ZERO_ONE : return new ADecomposableMultilabelMeasure() {
 			
-			ExactMatchLoss base = new ExactMatchLoss();
+			ZeroOneLossMultilabelMeasure base = new ZeroOneLossMultilabelMeasure();
 			
 			@Override
 			public Double calculateMeasure(int[] actual, int[] expected) {
 				return base.calculateMeasure(convertToDoubleArray(actual), convertToDoubleArray(expected));
 			}
 		};
-		case F1_AVERAGE:
+		case INVERSE_F1_MACRO_AVERAGE_D:
 			return new ADecomposableMultilabelMeasure() {
 				
-				private F1AverageMeasure base = new F1AverageMeasure();
+				private InverseF1MacroAverageDMultilabelMeasure base = new InverseF1MacroAverageDMultilabelMeasure();
+				
+				@Override
+				public Double calculateMeasure(int[] actual, int[] expected) {
+					return base.calculateMeasure(convertToDoubleArray(actual), convertToDoubleArray(expected));
+				}
+			};
+		case INVERSE_F1_MACRO_AVERAGE_L:
+			return new ADecomposableMultilabelMeasure() {
+				
+				private InverseF1MacroAverageLMultilabelMeasure base = new InverseF1MacroAverageLMultilabelMeasure();
 				
 				@Override
 				public Double calculateMeasure(int[] actual, int[] expected) {
@@ -34,7 +44,7 @@ public class MultiLabelMeasureBuilder {
 		case HAMMING:
 			return new ADecomposableMultilabelMeasure() {
 				
-				private HammingMultilabelEvaluator base = new HammingMultilabelEvaluator();
+				private HammingLossMultilabelEvaluator base = new HammingLossMultilabelEvaluator();
 				
 				@Override
 				public Double calculateMeasure(int[] actual, int[] expected) {
@@ -44,7 +54,7 @@ public class MultiLabelMeasureBuilder {
 		case JACCARD:
 			return new ADecomposableMultilabelMeasure() {
 				
-				private JaccardMultilabelEvaluator base = new JaccardMultilabelEvaluator();
+				private JaccardErrorMultilabelMeasure base = new JaccardErrorMultilabelMeasure();
 				
 				@Override
 				public Double calculateMeasure(int[] actual, int[] expected) {
@@ -54,7 +64,7 @@ public class MultiLabelMeasureBuilder {
 		case RANK:
 			return new ADecomposableMultilabelMeasure() {
 				
-				private RankMultilabelEvaluator base = new RankMultilabelEvaluator();
+				private RankLossMultilabelEvaluator base = new RankLossMultilabelEvaluator();
 				
 				@Override
 				public Double calculateMeasure(int[] actual, int[] expected) {

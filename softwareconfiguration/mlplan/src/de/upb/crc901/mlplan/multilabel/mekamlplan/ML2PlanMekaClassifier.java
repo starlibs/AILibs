@@ -178,7 +178,7 @@ public abstract class ML2PlanMekaClassifier implements Classifier, CapabilitiesH
 					this.config.numberOfMCIterationsDuringSearch(), dataShownToSearch,
 					this.config.getMCCVTrainFoldSizeDuringSearch(), this.config.randomSeed());
 			IObjectEvaluator<ComponentInstance, Double> wrappedSearchBenchmark = c -> {
-				double result = this.performanceMeasure.isMeasureSortedAscendingly() ? 1.0 : 0.0;
+				double result = 1.0;
 				try {
 					result = searchBenchmark.evaluate(this.factory.getComponentInstantiation(c));
 				} catch (Exception e) {
