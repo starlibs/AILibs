@@ -2,15 +2,12 @@ package jaicore.ml.core.evaluation.measure;
 
 import java.util.List;
 
+import jaicore.basic.aggregate.reals.Mean;
+
 public abstract class ADecomposableDoubleMeasure<INPUT> extends ADecomposableMeasure<INPUT, Double> {
 
 	@Override
-	public Double calculateAvgMeasure(List<INPUT> actual, List<INPUT> expected) {
-		return calculateMeasure(actual,  expected, l -> {
-			double sum = 0;
-			for (double i : l)
-				sum += i;
-			return sum / l.size();
-		});
+	public Double calculateAvgMeasure(final List<INPUT> actual, final List<INPUT> expected) {
+		return this.calculateMeasure(actual, expected, new Mean());
 	}
 }

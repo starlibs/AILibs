@@ -7,30 +7,28 @@ import static org.junit.Assert.assertTrue;
 import java.util.Iterator;
 import java.util.List;
 
-import jaicore.graphvisualizer.gui.VisualizationWindow;
 import org.apache.commons.math.util.MathUtils;
 
-import jaicore.basic.algorithm.AlgorithmEvent;
-import jaicore.basic.algorithm.AlgorithmFinishedEvent;
-import jaicore.basic.algorithm.AlgorithmInitializedEvent;
-import jaicore.basic.algorithm.SolutionCandidateFoundEvent;
-import jaicore.graph.IGraphAlgorithmListener;
+import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
+import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
+import jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
 import jaicore.search.algorithms.standard.ORGraphSearchTester;
 import jaicore.search.core.interfaces.IGraphSearch;
 import jaicore.search.core.interfaces.IGraphSearchFactory;
 import jaicore.search.model.other.SearchGraphPath;
+import jaicore.search.probleminputs.GraphSearchInput;
 
-public abstract class EnhancedTTSPTester<I, O, VSearch, ESearch> extends ORGraphSearchTester<EnhancedTTSP, I, O, EnhancedTTSPNode, String, Double, VSearch, ESearch>
-		implements IGraphAlgorithmListener<VSearch, ESearch> {
+public abstract class EnhancedTTSPTester<I extends GraphSearchInput<EnhancedTTSPNode, String>, O, VSearch, ESearch> extends ORGraphSearchTester<EnhancedTTSP, I, O, EnhancedTTSPNode, String, VSearch, ESearch> {
 
-	private static final int MAX_N = 8;
+	private static final int MAX_N = 6;
 	private static final int MAX_DISTANCE = 12;
 	private static final int TIMEOUT_IN_MS = 5 * 60 * 1000;
-	private static final boolean VISUALIZE = false;
+//	private static final boolean VISUALIZE = false;
 
 	
 
-	IGraphSearchFactory<I, O, EnhancedTTSPNode, String, Double, VSearch, ESearch> searchFactory = getFactory();
+	IGraphSearchFactory<I, O, EnhancedTTSPNode, String, VSearch, ESearch> searchFactory = getFactory();
 
 	private I getSearchProblem(int n) {
 
@@ -38,7 +36,7 @@ public abstract class EnhancedTTSPTester<I, O, VSearch, ESearch> extends ORGraph
 		return getProblemReducer().transform(new EnhancedTTSPGenerator().generate(n, MAX_DISTANCE));
 	}
 	
-	private IGraphSearch<I, O, EnhancedTTSPNode, String, Double, VSearch, ESearch> getSearchAlgorithmForProblem(int n) {
+	private IGraphSearch<I, O, EnhancedTTSPNode, String, VSearch, ESearch> getSearchAlgorithmForProblem(int n) {
 		searchFactory.setProblemInput(getSearchProblem(n));
 		return searchFactory.getAlgorithm();
 	}
@@ -48,9 +46,9 @@ public abstract class EnhancedTTSPTester<I, O, VSearch, ESearch> extends ORGraph
 		for (int n = 3; n <= MAX_N; n++) {
 			System.out.print("Checking n = " + n + " ");
 
-			IGraphSearch<I, O, EnhancedTTSPNode, String, Double, VSearch, ESearch> search = getSearchAlgorithmForProblem(n);
-			if (VISUALIZE)
-				new VisualizationWindow<>(search);
+			IGraphSearch<I, O, EnhancedTTSPNode, String, VSearch, ESearch> search = getSearchAlgorithmForProblem(n);
+//			if (VISUALIZE)
+//				new VisualizationWindow<>(search);
 			Iterator<AlgorithmEvent> iterator = search.iterator();
 			assertNotNull("The search algorithm does return NULL as an iterator for itself.", iterator);
 			boolean initialized = false;

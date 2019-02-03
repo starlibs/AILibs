@@ -10,7 +10,7 @@ import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.SupervisedFilterSelector;
 import treeminer.FrequentSubtreeFinder;
 import treeminer.TreeMiner;
-import treeminer.util.TreeRepresentationUtils;
+import treeminer.TreeRepresentationUtils;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 

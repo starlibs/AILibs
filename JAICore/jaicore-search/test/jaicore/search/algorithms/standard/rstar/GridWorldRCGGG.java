@@ -1,12 +1,11 @@
 package jaicore.search.algorithms.standard.rstar;
 
+import java.util.List;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import jaicore.search.core.interfaces.ISolutionEvaluator;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class GridWorldRCGGG {
 
@@ -20,7 +19,7 @@ public class GridWorldRCGGG {
 
         ISolutionEvaluator<GridWorld, Double> solutionEvaluator = new ISolutionEvaluator<GridWorld, Double>() {
             @Override
-            public Double evaluateSolution(List<GridWorld> solutionPath) throws Exception {
+            public Double evaluateSolution(List<GridWorld> solutionPath)  {
                 return null;
             }
 

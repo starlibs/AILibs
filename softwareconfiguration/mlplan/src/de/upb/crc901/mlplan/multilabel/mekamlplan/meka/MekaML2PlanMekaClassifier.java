@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 import org.aeonbits.owner.ConfigFactory;
 
@@ -35,12 +36,7 @@ public class MekaML2PlanMekaClassifier extends ML2PlanMekaClassifier {
 		super(builder.getSearchSpaceConfigFile(), new MEKAPipelineFactory(), builder.getPerformanceMeasure(),
 				builder.getAlhorithmConfigFile() != null ? loadOwnerConfig(builder.getAlhorithmConfigFile())
 						: ConfigFactory.create(ML2PlanClassifierConfig.class));
-		this.setPreferredNodeEvaluator(new INodeEvaluator<TFDNode, Double>() {
-			@Override
-			public Double f(Node<TFDNode, ?> node) throws Exception {
-				return null;
-			}
-		});
+		this.setPreferredNodeEvaluator(node -> null);
 	}
 
 	/**
@@ -69,12 +65,6 @@ public class MekaML2PlanMekaClassifier extends ML2PlanMekaClassifier {
 
 	@Override
 	protected INodeEvaluator<TFDNode, Double> getSemanticNodeEvaluator(Instances data) {
-		return new INodeEvaluator<TFDNode, Double>() {
-
-			@Override
-			public Double f(Node<TFDNode, ?> node) throws Exception {
-				return null;
-			}
-		};
+		return node->null;
 	}
 }

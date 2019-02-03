@@ -9,54 +9,27 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 
 import org.junit.Test;
 
-import jaicore.basic.algorithm.AlgorithmEvent;
-import jaicore.basic.algorithm.AlgorithmFinishedEvent;
-import jaicore.basic.algorithm.AlgorithmInitializedEvent;
-import jaicore.graph.IGraphAlgorithmListener;
+import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
+import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import jaicore.search.algorithms.standard.ORGraphSearchTester;
 import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
-import jaicore.search.algorithms.standard.bestfirst.events.GraphSearchSolutionCandidateFoundEvent;
 import jaicore.search.core.interfaces.IGraphSearch;
 import jaicore.search.core.interfaces.IGraphSearchFactory;
+import jaicore.search.probleminputs.GraphSearchInput;
 import jaicore.search.testproblems.knapsack.KnapsackProblem.KnapsackNode;
 
-public abstract class KnapsackTester<I, O, VSearch,ESearch> extends ORGraphSearchTester<KnapsackProblem, I, O, KnapsackNode, String, Double, VSearch, ESearch> implements IGraphAlgorithmListener<VSearch, ESearch> {
+public abstract class KnapsackTester<I extends GraphSearchInput<KnapsackNode, String>, O, VSearch,ESearch> extends ORGraphSearchTester<KnapsackProblem, I, O, KnapsackNode, String, VSearch, ESearch>  {
 
-	
 	private Map<String, Double> weights;
 	private Map<String, Double> values;
 	private Map<Set<String>, Double> bonusPoints;
-
-	private KnapsackProblem getKnapsackProblem(int numObjects) {
-		/* create knapsack problem */
-		Random r = new Random(0);
-		Set<String> objects = new HashSet<String>();
-		Map<String, Double> weights = new HashMap<>();
-		Map<String, Double> values = new HashMap<>();
-		Map<Set<String>, Double> bonusPoints;
-		for (int i = 0; i < numObjects; i++) {
-			objects.add(String.valueOf(i));
-		}
-		for (int i = 0; i < numObjects; i++)
-			weights.put("" + i, r.nextInt(100) * 1.0);
-		for (int i = 0; i < numObjects; i++)
-			values.put("" + i, r.nextInt(100) * 1.0);
-		
-		bonusPoints = new HashMap<>();
-		Set<String> bonusCombination = new HashSet<>();
-		bonusCombination.add("0");
-		bonusCombination.add("2");
-		bonusPoints.put(bonusCombination, 25.0d);
-		KnapsackProblem kp = new KnapsackProblem(objects, values, weights, bonusPoints, numObjects * 20);
-		return kp;
-	}
 	
-	public IGraphSearch<I, O, KnapsackNode, String, Double, VSearch, ESearch> getSearch() {
+	public IGraphSearch<I, O, KnapsackNode, String, VSearch, ESearch> getSearch() {
 		
 		/* create knapsack problem */
 		Set<String> objects = new HashSet<String>();
@@ -121,7 +94,7 @@ public abstract class KnapsackTester<I, O, VSearch,ESearch> extends ORGraphSearc
 		}
 	}
 	
-	IGraphSearchFactory<I, O, KnapsackNode, String, Double, VSearch, ESearch> searchFactory = getFactory();
+	IGraphSearchFactory<I, O, KnapsackNode, String, VSearch, ESearch> searchFactory = getFactory();
 
 	@Override
 	public void testThatAnEventForEachPossibleSolutionIsEmittedInSimpleCall() throws Throwable {
@@ -145,7 +118,7 @@ public abstract class KnapsackTester<I, O, VSearch,ESearch> extends ORGraphSearc
 
 		KnapsackNode bestSolution = null;
 		double bestValue = 0.0d;
-		IGraphSearch<I, O, KnapsackNode, String, Double, VSearch, ESearch> search = getSearch();
+		IGraphSearch<I, O, KnapsackNode, String, VSearch, ESearch> search = getSearch();
 //		new SimpleGraphVisualizationWindow<>(search);
 		Iterator<AlgorithmEvent> iterator = search.iterator();
 		assertNotNull("The search algorithm does return NULL as an iterator for itself.", iterator);
@@ -194,11 +167,11 @@ public abstract class KnapsackTester<I, O, VSearch,ESearch> extends ORGraphSearc
 
 	@Override
 	public I getSimpleProblemInputForGeneralTestPurposes() {
-		return getProblemReducer().transform(getKnapsackProblem(5));
+		return getProblemReducer().transform(KnapsackProblemGenerator.getKnapsackProblem(5));
 	}
 
 	@Override
 	public I getDifficultProblemInputForGeneralTestPurposes() {
-		return getProblemReducer().transform(getKnapsackProblem(5000));
+		return getProblemReducer().transform(KnapsackProblemGenerator.getKnapsackProblem(5000));
 	}
 }

@@ -7,6 +7,7 @@ import java.util.List;
 import hasco.core.Util;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
+import jaicore.ml.WekaUtil;
 import jaicore.planning.graphgenerators.task.tfd.TFDNode;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.model.travesaltree.Node;
@@ -23,7 +24,7 @@ public class PreferenceBasedNodeEvaluator implements INodeEvaluator<TFDNode, Dou
 	}
 
 	@Override
-	public Double f(final Node<TFDNode, ?> n) throws Exception {
+	public Double f(final Node<TFDNode, ?> n) {
 		List<String> appliedMethods = new LinkedList<>();
 		boolean last = false;
 		for (TFDNode x : n.externalPath()) {
@@ -44,16 +45,7 @@ public class PreferenceBasedNodeEvaluator implements INodeEvaluator<TFDNode, Dou
 				ComponentInstance search = pp.getSatisfactionOfRequiredInterfaces().get("search");
 				ComponentInstance eval = pp.getSatisfactionOfRequiredInterfaces().get("eval");
 				if (search != null && eval != null) {
-					boolean isSetEvaluator = eval.getComponent().getName().toLowerCase().matches(".*(relief|gainratio|principalcomponents|onerattributeeval|infogainattributeeval|correlationattributeeval|symmetricaluncertattributeeval).*");
-					boolean isRanker = search.getComponent().getName().toLowerCase().contains("ranker");
-					boolean isNonRankerEvaluator = eval.getComponent().getName().toLowerCase().matches(".*(cfssubseteval).*");
-//					if (isSetEvaluator && !isRanker) {
-//						return 20000d;
-//					}
-//					if (isNonRankerEvaluator && isRanker) {
-//						return 20000d;
-//					}
-					if (isSetEvaluator && !isRanker || isNonRankerEvaluator && isRanker)
+					if (!WekaUtil.isValidPreprocessorCombination(search.getComponent().getName(), eval.getComponent().getName()))
 						throw new IllegalArgumentException("The given combination of searcher and evaluator cannot be benchmarked since they are incompatible.");
 				}
 			}

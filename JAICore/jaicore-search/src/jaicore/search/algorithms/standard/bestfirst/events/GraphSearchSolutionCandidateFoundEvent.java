@@ -1,11 +1,19 @@
 package jaicore.search.algorithms.standard.bestfirst.events;
 
-import jaicore.basic.algorithm.SolutionCandidateFoundEvent;
+import jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
 import jaicore.search.model.other.SearchGraphPath;
 
-public class GraphSearchSolutionCandidateFoundEvent<T, A> extends SolutionCandidateFoundEvent<SearchGraphPath<T, A>> {
+/**
+ * 
+ * @author fmohr
+ *
+ * @param <N> the node class
+ * @param <A> the arc class
+ * @param <S> the solution coding class
+ */
+public class GraphSearchSolutionCandidateFoundEvent<N, A, S extends SearchGraphPath<N, A>> extends SolutionCandidateFoundEvent<S> {
 
-	public GraphSearchSolutionCandidateFoundEvent(SearchGraphPath<T, A> solution) {
+	public GraphSearchSolutionCandidateFoundEvent(S solution) {
 		super(solution);
 	}
 }

@@ -5,11 +5,11 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +20,7 @@ import com.google.common.eventbus.Subscribe;
 import de.upb.crc901.mlplan.multiclass.MLPlanClassifierConfig;
 import de.upb.crc901.mlplan.multilabel.ML2PlanClassifierConfig;
 import hasco.core.HASCOSolutionCandidate;
+import hasco.exceptions.ComponentInstantiationFailedException;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
 import hasco.optimizingfactory.OptimizingFactory;
@@ -31,13 +32,15 @@ import hasco.variants.forwarddecomposition.twophase.TwoPhaseSoftwareConfiguratio
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.IObjectEvaluator;
 import jaicore.basic.MathExt;
-import jaicore.basic.TimeOut;
-import jaicore.basic.algorithm.AlgorithmEvent;
-import jaicore.basic.algorithm.AlgorithmFinishedEvent;
-import jaicore.basic.algorithm.AlgorithmInitializedEvent;
+import jaicore.basic.algorithm.AAlgorithm;
+import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.AlgorithmState;
-import jaicore.basic.algorithm.IAlgorithm;
-import jaicore.basic.algorithm.SolutionCandidateFoundEvent;
+import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
+import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
+import jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
+import jaicore.basic.algorithm.exceptions.AlgorithmException;
+import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.ml.WekaUtil;
 import jaicore.ml.core.evaluation.measure.multilabel.MonteCarloCrossValidationEvaluator;
 import jaicore.ml.core.evaluation.measure.multilabel.MultiLabelMeasureBuilder;
@@ -63,11 +66,11 @@ import weka.core.OptionHandler;
  * It implements the algorithm interface with itself (with modified state) as an
  * output
  *
- * @author wever, fmohr
+ * @author wever, fmohr 
  *
  */
-public abstract class ML2PlanMekaClassifier implements Classifier, CapabilitiesHandler, OptionHandler,
-		ILoggingCustomizable, IAlgorithm<Instances, Classifier>, MultiLabelClassifier {
+public abstract class ML2PlanMekaClassifier extends AAlgorithm<Instances, Classifier> implements Classifier, CapabilitiesHandler, OptionHandler,
+		ILoggingCustomizable, MultiLabelClassifier {
 
 	/** Logger for controlled output. */
 	private Logger logger = LoggerFactory.getLogger(ML2PlanMekaClassifier.class);
@@ -116,7 +119,7 @@ public abstract class ML2PlanMekaClassifier implements Classifier, CapabilitiesH
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws Exception {
+	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
 		switch (this.state) {
 		case created:
 
@@ -191,7 +194,7 @@ public abstract class ML2PlanMekaClassifier implements Classifier, CapabilitiesH
 			IObjectEvaluator<MultiLabelClassifier, Double> selectionBenchmark = new IObjectEvaluator<MultiLabelClassifier, Double>() {
 
 				@Override
-				public Double evaluate(final MultiLabelClassifier object) throws Exception {
+				public Double evaluate(final MultiLabelClassifier object) throws ObjectEvaluationFailedException {
 
 					/* first conduct MCCV */
 					MonteCarloCrossValidationEvaluator mccv = new MonteCarloCrossValidationEvaluator(
@@ -211,27 +214,38 @@ public abstract class ML2PlanMekaClassifier implements Classifier, CapabilitiesH
 					return percentile;
 				}
 			};
-			IObjectEvaluator<ComponentInstance, Double> wrappedSelectionBenchmark = c -> selectionBenchmark
-					.evaluate(this.factory.getComponentInstantiation(c));
-			TwoPhaseSoftwareConfigurationProblem problem = new TwoPhaseSoftwareConfigurationProblem(this.componentFile,
-					"MLClassifier", wrappedSearchBenchmark, wrappedSelectionBenchmark);
+			IObjectEvaluator<ComponentInstance, Double> wrappedSelectionBenchmark = c -> {
+				try {
+					return selectionBenchmark
+							.evaluate(this.factory.getComponentInstantiation(c));
+				} catch (ComponentInstantiationFailedException e) {
+					throw new ObjectEvaluationFailedException(e, "Evaluation of composition failed as the component instantiation could not be built.");
+				}
+			};
+			TwoPhaseSoftwareConfigurationProblem problem;
+			try {
+				problem = new TwoPhaseSoftwareConfigurationProblem(this.componentFile,
+						"MLClassifier", wrappedSearchBenchmark, wrappedSelectionBenchmark);
+				
+				/* configure and start optimizing factory */
+				OptimizingFactoryProblem<TwoPhaseSoftwareConfigurationProblem, MultiLabelClassifier, Double> optimizingFactoryProblem = new OptimizingFactoryProblem<>(
+						this.factory, problem);
+				TwoPhaseHASCOFactory hascoFactory = new TwoPhaseHASCOFactory();
+				hascoFactory.setPreferredNodeEvaluator(new AlternativeNodeEvaluator<TFDNode, Double>(
+						this.getSemanticNodeEvaluator(dataShownToSearch), this.preferredNodeEvaluator));
+				hascoFactory.setConfig(this.config);
+				this.optimizingFactory = new OptimizingFactory<>(optimizingFactoryProblem, hascoFactory);
+				this.optimizingFactory.setLoggerName(this.loggerName + ".2phasehasco");
+				this.optimizingFactory.setTimeout(this.config.timeout(), TimeUnit.SECONDS);
+				this.optimizingFactory.registerListener(this);
+				this.optimizingFactory.init();
 
-			/* configure and start optimizing factory */
-			OptimizingFactoryProblem<TwoPhaseSoftwareConfigurationProblem, MultiLabelClassifier, Double> optimizingFactoryProblem = new OptimizingFactoryProblem<>(
-					this.factory, problem);
-			TwoPhaseHASCOFactory hascoFactory = new TwoPhaseHASCOFactory();
-			hascoFactory.setPreferredNodeEvaluator(new AlternativeNodeEvaluator<TFDNode, Double>(
-					this.getSemanticNodeEvaluator(dataShownToSearch), this.preferredNodeEvaluator));
-			hascoFactory.setConfig(this.config);
-			this.optimizingFactory = new OptimizingFactory<>(optimizingFactoryProblem, hascoFactory);
-			this.optimizingFactory.setLoggerName(this.loggerName + ".2phasehasco");
-			this.optimizingFactory.setTimeout(this.config.timeout(), TimeUnit.SECONDS);
-			this.optimizingFactory.registerListener(this);
-			this.optimizingFactory.init();
-
-			/* set state to active */
-			this.state = AlgorithmState.active;
-			return new AlgorithmInitializedEvent();
+				/* set state to active */
+				this.state = AlgorithmState.active;
+				return new AlgorithmInitializedEvent();
+			} catch (IOException e) {
+				throw new AlgorithmException(e, "Could not create TwoPhase configuration problem.");
+			}
 
 		case active:
 
@@ -240,7 +254,11 @@ public abstract class ML2PlanMekaClassifier implements Classifier, CapabilitiesH
 			this.selectedClassifier = this.optimizingFactory.call();
 			this.internalValidationErrorOfSelectedClassifier = this.optimizingFactory.getPerformanceOfObject();
 			long startBuildTime = System.currentTimeMillis();
-			this.selectedClassifier.buildClassifier(this.data);
+			try {
+				this.selectedClassifier.buildClassifier(this.data);
+			} catch (Exception e) {
+				throw new AlgorithmException(e, "Training the classifier failed!");
+			}
 			long endBuildTime = System.currentTimeMillis();
 			this.logger.info(
 					"Selected model has been built on entire dataset. Build time of chosen model was {}ms. Total construction time was {}ms",
@@ -254,51 +272,11 @@ public abstract class ML2PlanMekaClassifier implements Classifier, CapabilitiesH
 	}
 
 	@Override
-	public Classifier call() throws Exception {
+	public Classifier call() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
 		while (this.hasNext()) {
 			this.nextWithException();
 		}
 		return this;
-	}
-
-	@Override
-	public Instances getInput() {
-		return this.data;
-	}
-
-	@Override
-	public void registerListener(final Object listener) {
-		this.optimizingFactory.registerListener(listener);
-	}
-
-	@Override
-	public int getNumCPUs() {
-		return 0;
-	}
-
-	@Override
-	public void setTimeout(final int timeout, final TimeUnit timeUnit) {
-
-	}
-
-	@Override
-	public void setTimeout(final TimeOut timeout) {
-
-	}
-
-	@Override
-	public TimeOut getTimeout() {
-		return null;
-	}
-
-	@Override
-	public Iterator<AlgorithmEvent> iterator() {
-		return this;
-	}
-
-	@Override
-	public void cancel() {
-
 	}
 
 	protected abstract INodeEvaluator<TFDNode, Double> getSemanticNodeEvaluator(Instances data);
@@ -389,10 +367,6 @@ public abstract class ML2PlanMekaClassifier implements Classifier, CapabilitiesH
 		this.config.setProperty(MLPlanClassifierConfig.SELECTION_PORTION, String.valueOf(portion));
 	}
 
-	public void setTimeout(final int seconds) {
-		this.config.setProperty(MLPlanClassifierConfig.K_TIMEOUT, String.valueOf(seconds));
-	}
-
 	public void activateVisualization() {
 		this.config.setProperty(MLPlanClassifierConfig.K_VISUALIZE, String.valueOf(true));
 	}
@@ -423,14 +397,34 @@ public abstract class ML2PlanMekaClassifier implements Classifier, CapabilitiesH
 	}
 
 	public void setTimeoutForSingleSolutionEvaluation(final int timeout) {
-		this.config.setProperty(MLPlanClassifierConfig.K_RANDOM_COMPLETIONS_TIMEOUT_PATH,
+		this.config.setProperty(ML2PlanClassifierConfig.K_RANDOM_COMPLETIONS_TIMEOUT_PATH,
 				String.valueOf(timeout * 1000));
 	}
 
 	public void setTimeoutForNodeEvaluation(final int timeout) {
-		this.config.setProperty(MLPlanClassifierConfig.K_RANDOM_COMPLETIONS_TIMEOUT_NODE,
+		this.config.setProperty(ML2PlanClassifierConfig.K_RANDOM_COMPLETIONS_TIMEOUT_NODE,
 				String.valueOf(timeout * 1000));
 	}
+
+//	@Override
+//	public void setTimeout(long timeout, TimeUnit timeUnit) {
+//		// TODO Auto-generated method stub
+//		
+//	}
+
+	public void setTimeout(final int seconds) {
+		this.config.setProperty(ML2PlanClassifierConfig.K_TIMEOUT, String.valueOf(seconds));
+	}
+
+//	@Override
+//	public void setTimeout(final TimeOut timeout) {
+//	
+//	}
+//
+//	@Override
+//	public TimeOut getTimeout() {
+//		return null;
+//	}
 
 	public Collection<Component> getComponents() {
 		return Collections.unmodifiableCollection(this.components);

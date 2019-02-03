@@ -1,6 +1,7 @@
 package jaicore.search.testproblems.knapsack;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -144,8 +145,10 @@ public class KnapsackProblem {
 
 			@Override
 			public SingleSuccessorGenerator<KnapsackNode, String> getSuccessorGenerator() {
-
+				
 				return new SingleSuccessorGenerator<KnapsackNode, String>() {
+					
+					private Map<KnapsackNode,Set<Integer>> expandedChildren = new HashMap<>();
 
 					private List<String> getPossiblePackingObjects(KnapsackNode n) {
 						List<String> possibleObjects = new ArrayList<>();
@@ -170,10 +173,15 @@ public class KnapsackProblem {
 
 					public NodeExpansionDescription<KnapsackNode, String> generateSuccessor(KnapsackNode n, List<String> objetcs, int i) throws InterruptedException {
 						if (Thread.currentThread().isInterrupted()) {
+							System.err.println("LEAVING");
 							throw new InterruptedException("Successor generation interrupted");
 						}
+						if (!expandedChildren.containsKey(n))
+							expandedChildren.put(n, new HashSet<>());
 						int N = objetcs.size();
-						String object = objetcs.get(i % N);
+						int j = i % N;
+						expandedChildren.get(n).add(j);
+						String object = objetcs.get(j);
 						KnapsackNode newNode = new KnapsackNode(n.getPackedObjects(), n.getRemainingObjects(), object);
 						return new NodeExpansionDescription<KnapsackNode, String>(n, newNode, "(" + n.getPackedObjects().toString() + ", " + object + ")", NodeType.OR);
 					}
@@ -181,6 +189,12 @@ public class KnapsackProblem {
 					@Override
 					public NodeExpansionDescription<KnapsackNode, String> generateSuccessor(KnapsackNode node, int i) throws InterruptedException {
 						return generateSuccessor(node, getPossiblePackingObjects(node), i);
+					}
+
+					@Override
+					public boolean allSuccessorsComputed(KnapsackNode node) {
+						System.out.println(getPossiblePackingObjects(node).size() == expandedChildren.get(node).size());
+						return getPossiblePackingObjects(node).size() == expandedChildren.get(node).size();
 					}
 				};
 			}
@@ -214,7 +228,7 @@ public class KnapsackProblem {
 		return new ISolutionEvaluator<KnapsackProblem.KnapsackNode, Double>() {
 
 			@Override
-			public Double evaluateSolution(List<KnapsackNode> solutionPath) throws Exception {
+			public Double evaluateSolution(List<KnapsackNode> solutionPath) {
 				KnapsackNode packedKnapsack = solutionPath.get(solutionPath.size() - 1);
 				if (packedKnapsack == null || packedKnapsack.usedCapacity > knapsackCapacity) {
 					return Double.MAX_VALUE;

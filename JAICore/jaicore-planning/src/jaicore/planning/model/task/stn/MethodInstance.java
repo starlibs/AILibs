@@ -6,7 +6,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
+
 import jaicore.basic.sets.SetUtil;
+import jaicore.logging.ToJSONStringUtil;
 import jaicore.logic.fol.structure.ConstantParam;
 import jaicore.logic.fol.structure.Literal;
 import jaicore.logic.fol.structure.Monom;
@@ -15,45 +21,46 @@ import jaicore.logic.fol.structure.VariableParam;
 public class MethodInstance implements Serializable {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 8957990820135975139L;
 	private final Method method;
 	private final Map<VariableParam, ConstantParam> grounding;
 	private final Monom precondition;
 
-	public MethodInstance(Method method, Map<VariableParam, ConstantParam> grounding) {
+	public MethodInstance(final Method method, final Map<VariableParam, ConstantParam> grounding) {
 		super();
 		this.method = method;
 		this.grounding = grounding;
-		if (!this.grounding.keySet().containsAll(method.getParameters()))
-			throw new IllegalArgumentException("Planning Method instances must contain a grounding for ALL params of the method. Here, method (" + method.getName() + ") params: " + method.getParameters()
-					+ ". Params missing: " + SetUtil.difference(method.getParameters(), this.grounding.keySet()));
-		precondition = new Monom(method.getPrecondition(), grounding);
+		if (!this.grounding.keySet().containsAll(method.getParameters())) {
+			throw new IllegalArgumentException("Planning Method instances must contain a grounding for ALL params of the method. Here, method (" + method.getName() + ") params: " + method.getParameters() + ". Params missing: "
+					+ SetUtil.difference(method.getParameters(), this.grounding.keySet()));
+		}
+		this.precondition = new Monom(method.getPrecondition(), grounding);
 	}
 
 	public Method getMethod() {
-		return method;
+		return this.method;
 	}
 
 	public Map<VariableParam, ConstantParam> getGrounding() {
-		return grounding;
+		return this.grounding;
 	}
 
 	public Monom getPrecondition() {
-		return precondition;
+		return this.precondition;
 	}
 
 	public List<ConstantParam> getParameters() {
-		return method.getParameters().stream().map(p -> grounding.get(p)).collect(Collectors.toList());
+		return this.method.getParameters().stream().map(p -> this.grounding.get(p)).collect(Collectors.toList());
 	}
 
 	public TaskNetwork getNetwork() {
 		TaskNetwork instanceNetwork = new TaskNetwork();
-		TaskNetwork methodNetwork = getMethod().getNetwork();
+		TaskNetwork methodNetwork = this.getMethod().getNetwork();
 		Map<Literal, Literal> correspondence = new HashMap<>();
 		for (Literal task : methodNetwork.getItems()) {
-			Literal groundTask = new Literal(task, grounding);
+			Literal groundTask = new Literal(task, this.grounding);
 			correspondence.put(task, groundTask);
 			instanceNetwork.addItem(groundTask);
 
@@ -70,42 +77,53 @@ public class MethodInstance implements Serializable {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((method == null) ? 0 : method.hashCode());
+		result = prime * result + ((this.method == null) ? 0 : this.method.hashCode());
 		return result;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (this.getClass() != obj.getClass()) {
 			return false;
+		}
 		MethodInstance other = (MethodInstance) obj;
-		if (method == null) {
-			if (other.method != null)
+		if (this.method == null) {
+			if (other.method != null) {
 				return false;
-		} else if (!method.equals(other.method))
+			}
+		} else if (!this.method.equals(other.method)) {
 			return false;
+		}
 		return true;
 	}
 
 	@Override
 	public String toString() {
-		return "MethodInstance [method=" + method + ", grounding=" + grounding + ", precondition=" + precondition + "]";
+		Map<String, Object> fields = new HashMap<>();
+		fields.put("method", this.method);
+		fields.put("grounding", grounding);
+		fields.put("precondition", precondition);
+		return ToJSONStringUtil.toJSONString(fields);
+//			return "MethodInstance [method=" + this.method + ", grounding=" + this.grounding + ", precondition=" + this.precondition + "]";
 	}
 
 	public String getEncoding() {
 		StringBuilder b = new StringBuilder();
-		b.append(method.getName());
+		b.append(this.method.getName());
 		b.append("(");
-		List<VariableParam> params = method.getParameters();
+		List<VariableParam> params = this.method.getParameters();
 		int size = params.size();
 		for (int i = 0; i < params.size(); i++) {
-			b.append(grounding.get(params.get(i)));
-			if (i < size - 1)
+			b.append(this.grounding.get(params.get(i)));
+			if (i < size - 1) {
 				b.append(", ");
+			}
 		}
 		b.append(")");
 		return b.toString();

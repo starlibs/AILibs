@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jaicore.basic.IObjectEvaluator;
+import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.ml.WekaUtil;
 import meka.classifiers.multilabel.Evaluation;
 import meka.classifiers.multilabel.MultiLabelClassifier;
@@ -45,8 +46,8 @@ public class MonteCarloCrossValidationEvaluator implements IObjectEvaluator<Mult
 	}
 	
 	@Override
-	public Double evaluate(MultiLabelClassifier c) throws Exception {
-		
+	public Double evaluate(MultiLabelClassifier c) throws ObjectEvaluationFailedException {
+
 		if (c == null)
 			throw new IllegalArgumentException("Cannot compute score for null classifier!");
 
@@ -59,14 +60,18 @@ public class MonteCarloCrossValidationEvaluator implements IObjectEvaluator<Mult
 			Instances train = split.get(0);
 			Instances test = split.get(1);
 			logger.info("Split data set with {} items into {}/{}", data.size(), train.size(), test.size());
-			MultiLabelClassifier cCopy = (MultiLabelClassifier)WekaUtil.cloneClassifier(c);
-			cCopy.buildClassifier(train);
-			Result result = Evaluation.testClassifier(cCopy, test);
-			List<int[]> actuals = Arrays.asList(result.allTrueValues());
-			List<int[]> predictions = Arrays.asList(result.allPredictions(.5));
-			double score = measure.calculateAvgMeasure(actuals, predictions);
-			logger.info("Score for evaluation of {} with split #{}/{}: {}", c, i + 1, repeats, score);
-			stats.addValue(score);
+			try {
+				MultiLabelClassifier cCopy = (MultiLabelClassifier) WekaUtil.cloneClassifier(c);
+				cCopy.buildClassifier(train);
+				Result result = Evaluation.testClassifier(cCopy, test);
+				List<int[]> actuals = Arrays.asList(result.allTrueValues());
+				List<int[]> predictions = Arrays.asList(result.allPredictions(.5));
+				double score = measure.calculateAvgMeasure(actuals, predictions);
+				logger.info("Score for evaluation of {} with split #{}/{}: {}", c, i + 1, repeats, score);
+				stats.addValue(score);
+			} catch (Exception e) {
+				throw new ObjectEvaluationFailedException(e, "Problem in evaluation of multilabel classifier");
+			}
 		}
 		Double score = stats.getMean();
 		logger.info("Obtained score of {} for classifier {}.", score, c);

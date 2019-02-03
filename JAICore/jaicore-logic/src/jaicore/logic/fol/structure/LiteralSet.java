@@ -91,6 +91,10 @@ public class LiteralSet extends HashSet<Literal> {
 			logger.debug("finished clone for literal {}, which is of class {}, on literal set {}", l, l.getClass(), this);
 		}
 	}
+	
+	public boolean add(String literalDescriptor) {
+		return this.add(new Literal(literalDescriptor));
+	}
 
 	/**
 	 * @param conclusion
