@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 import de.upb.crc901.mlplan.multilabel.mekamlplan.ML2PlanMekaBuilder;
 import de.upb.crc901.mlplan.multilabel.mekamlplan.ML2PlanMekaClassifier;
@@ -41,7 +42,8 @@ public class ML2PlanARFFExample {
 				.withPerformanceMeasure(MultiLabelPerformanceMeasure.RANK));
 		ml2plan.setPortionOfDataForPhase2(0.0f);
 		ml2plan.setLoggerName("ml2plan");
-		ml2plan.setTimeout(150);
+		ml2plan.setTimeout(150, TimeUnit.SECONDS);
+		//ml2plan.setTimeout(150);
 		ml2plan.setTimeoutForNodeEvaluation(60);
 		ml2plan.setTimeoutForSingleSolutionEvaluation(60);
 		ml2plan.setNumCPUs(2);

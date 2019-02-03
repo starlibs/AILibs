@@ -36,7 +36,7 @@ public class MekaML2PlanMekaClassifier extends ML2PlanMekaClassifier {
 		super(builder.getSearchSpaceConfigFile(), new MEKAPipelineFactory(), builder.getPerformanceMeasure(),
 				builder.getAlhorithmConfigFile() != null ? loadOwnerConfig(builder.getAlhorithmConfigFile())
 						: ConfigFactory.create(ML2PlanClassifierConfig.class));
-		this.setPreferredNodeEvaluator(node -> null);
+		this.setPreferredNodeEvaluator(node -> 0.0);
 	}
 
 	/**

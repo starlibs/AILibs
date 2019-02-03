@@ -101,24 +101,6 @@ public abstract class ML2PlanMekaClassifier extends AAlgorithm<Instances, Classi
 	}
 
 	@Override
-	public boolean hasNext() {
-		return this.state != AlgorithmState.inactive;
-	}
-
-	@Override
-	public AlgorithmEvent next() {
-		if (!this.hasNext()) {
-			throw new NoSuchElementException("ML2Plan is in state inactive and cannot produce any more solutions.");
-		}
-
-		try {
-			return this.nextWithException();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	@Override
 	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
 		switch (this.state) {
 		case created:
@@ -183,6 +165,7 @@ public abstract class ML2PlanMekaClassifier extends AAlgorithm<Instances, Classi
 			IObjectEvaluator<ComponentInstance, Double> wrappedSearchBenchmark = c -> {
 				double result = 1.0;
 				try {
+					System.out.println("Evaluating solution (search)");
 					result = searchBenchmark.evaluate(this.factory.getComponentInstantiation(c));
 				} catch (Exception e) {
 					logger.info("Exception while evaluating multilabel pipeline. Message: {}", e.getMessage());
@@ -236,13 +219,13 @@ public abstract class ML2PlanMekaClassifier extends AAlgorithm<Instances, Classi
 				hascoFactory.setConfig(this.config);
 				this.optimizingFactory = new OptimizingFactory<>(optimizingFactoryProblem, hascoFactory);
 				this.optimizingFactory.setLoggerName(this.loggerName + ".2phasehasco");
-				this.optimizingFactory.setTimeout(this.config.timeout(), TimeUnit.SECONDS);
+				this.optimizingFactory.setTimeout(this.config.timeout(), TimeUnit.MILLISECONDS);
+				this.optimizingFactory.setNumCPUs(this.config.cpus());
 				this.optimizingFactory.registerListener(this);
 				this.optimizingFactory.init();
 
 				/* set state to active */
-				this.state = AlgorithmState.active;
-				return new AlgorithmInitializedEvent();
+				return this.activate();
 			} catch (IOException e) {
 				throw new AlgorithmException(e, "Could not create TwoPhase configuration problem.");
 			}
@@ -263,8 +246,7 @@ public abstract class ML2PlanMekaClassifier extends AAlgorithm<Instances, Classi
 			this.logger.info(
 					"Selected model has been built on entire dataset. Build time of chosen model was {}ms. Total construction time was {}ms",
 					endBuildTime - startBuildTime, endBuildTime - startOptimizationTime);
-			this.state = AlgorithmState.inactive;
-			return new AlgorithmFinishedEvent();
+			this.terminate();
 
 		default:
 			throw new IllegalStateException("Cannot do anything in state " + this.state);
@@ -413,7 +395,7 @@ public abstract class ML2PlanMekaClassifier extends AAlgorithm<Instances, Classi
 //	}
 
 	public void setTimeout(final int seconds) {
-		this.config.setProperty(ML2PlanClassifierConfig.K_TIMEOUT, String.valueOf(seconds));
+		this.config.setProperty(ML2PlanClassifierConfig.K_TIMEOUT, String.valueOf(seconds*1000));
 	}
 
 //	@Override

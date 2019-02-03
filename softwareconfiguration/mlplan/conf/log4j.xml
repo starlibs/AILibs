@@ -75,6 +75,12 @@
 		<appender-ref ref="infoFileAppender" />
 	</logger>
 	
+		<logger name="ml2plan">
+		<level value="debug" />
+		<appender-ref ref="console" />
+		<appender-ref ref="infoFileAppender" />
+	</logger>
+	
 	<logger name="jaicore.search.algorithms.standard.rdfs.RandomizedDepthFirstSearch">
 		<level value="off" />
 	</logger>
