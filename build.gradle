@@ -65,7 +65,10 @@ allprojects {
 		//Testing
 		testCompile group: 'junit', name: 'junit', version: '4.12'
 		testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: '1.3'
-		testCompile group: 'org.mockito', name: 'mockito-all', version: '1.10.19'
+		//testCompile group: 'org.mockito', name: 'mockito-all', version: '1.10.19'
+		
+		//Mockito
+		testCompile group: 'org.mockito', name: 'mockito-core', version: '2.23.0'
 	}
 
 	//Always check for updates in SNAPSHOT versions, do not cache
