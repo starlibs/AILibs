@@ -1,4 +1,4 @@
-package de.upb.crc901.mlplan.examples;
+package de.upb.crc901.mlplan.examples.multilabel.meka;
 
 import java.io.File;
 import java.io.FileReader;
