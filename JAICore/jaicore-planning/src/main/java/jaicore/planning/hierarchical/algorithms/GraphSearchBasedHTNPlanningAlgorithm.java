@@ -99,6 +99,9 @@ public class GraphSearchBasedHTNPlanningAlgorithm<PA extends Action, P extends I
 				this.logger.info("Customizing logger of search with {}", this.getLoggerName());
 				((ILoggingCustomizable) this.search).setLoggerName(this.getLoggerName() + ".search");
 			}
+			
+			/* set timeout on search */
+			this.search.setTimeout(getTimeout());
 			return activate();
 		}
 		case active: {
