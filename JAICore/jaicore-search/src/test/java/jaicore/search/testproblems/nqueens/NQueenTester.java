@@ -9,21 +9,20 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.google.common.eventbus.Subscribe;
 
-import jaicore.search.core.interfaces.AAnyPathInORGraphSearch;
-import jaicore.basic.algorithm.ISolutionCandidateIterator;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
 import jaicore.graphvisualizer.gui.VisualizationWindow;
-import jaicore.search.algorithms.standard.ORGraphSearchTester;
+import jaicore.search.algorithms.GraphSearchTester;
 import jaicore.search.algorithms.standard.bestfirst.events.GraphSearchSolutionCandidateFoundEvent;
+import jaicore.search.core.interfaces.AAnyPathInORGraphSearch;
 import jaicore.search.core.interfaces.IGraphSearch;
 import jaicore.search.core.interfaces.IGraphSearchFactory;
 import jaicore.search.model.other.SearchGraphPath;
 import jaicore.search.probleminputs.GraphSearchInput;
 
-public abstract class NQueenTester<I extends GraphSearchInput<QueenNode, String>, O extends SearchGraphPath<QueenNode, String>, VSearch, ESearch> extends ORGraphSearchTester<Integer, I, O, QueenNode, String, VSearch, ESearch> {
+public abstract class NQueenTester<I extends GraphSearchInput<QueenNode, String>, O extends SearchGraphPath<QueenNode, String>, VSearch, ESearch> extends GraphSearchTester<Integer, I, O, QueenNode, String, VSearch, ESearch> {
 
 //	int[] numbersOfSolutions = { 2, 10, 4, 40, 92, 352, 724 };
 	int[] numbersOfSolutions = { 2, 10, 4, 40};

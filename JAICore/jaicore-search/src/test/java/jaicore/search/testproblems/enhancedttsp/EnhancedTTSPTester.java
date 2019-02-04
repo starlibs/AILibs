@@ -8,19 +8,18 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.math3.util.CombinatoricsUtils;
-import org.junit.Test;
 
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
-import jaicore.search.algorithms.standard.ORGraphSearchTester;
+import jaicore.search.algorithms.GraphSearchTester;
 import jaicore.search.core.interfaces.IGraphSearch;
 import jaicore.search.core.interfaces.IGraphSearchFactory;
 import jaicore.search.model.other.SearchGraphPath;
 import jaicore.search.probleminputs.GraphSearchInput;
 
-public abstract class EnhancedTTSPTester<I extends GraphSearchInput<EnhancedTTSPNode, String>, O, VSearch, ESearch> extends ORGraphSearchTester<EnhancedTTSP, I, O, EnhancedTTSPNode, String, VSearch, ESearch> {
+public abstract class EnhancedTTSPTester<I extends GraphSearchInput<EnhancedTTSPNode, String>, O, VSearch, ESearch> extends GraphSearchTester<EnhancedTTSP, I, O, EnhancedTTSPNode, String, VSearch, ESearch> {
 
 	private static final int MAX_N = 6;
 	private static final int MAX_DISTANCE = 12;

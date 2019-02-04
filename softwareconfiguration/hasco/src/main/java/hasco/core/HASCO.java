@@ -1,15 +1,11 @@
 package hasco.core;
 
 import java.util.ArrayList;
-
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeoutException;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import org.aeonbits.owner.ConfigFactory;
@@ -35,16 +31,16 @@ import jaicore.basic.algorithm.exceptions.DelayedCancellationCheckException;
 import jaicore.basic.algorithm.exceptions.DelayedTimeoutCheckException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.graphvisualizer.gui.VisualizationWindow;
-import jaicore.planning.EvaluatedSearchGraphBasedPlan;
-import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionReducer;
-import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;
-import jaicore.planning.model.CostSensitiveHTNPlanningProblem;
-import jaicore.planning.model.CostSensitivePlanningToSearchProblemTransformer;
-import jaicore.planning.model.ceoc.CEOCAction;
-import jaicore.planning.model.ceoc.CEOCOperation;
-import jaicore.planning.model.core.Plan;
-import jaicore.planning.model.task.ceocipstn.CEOCIPSTNPlanningProblem;
-import jaicore.planning.model.task.ceocipstn.OCIPMethod;
+import jaicore.planning.classical.problems.ceoc.CEOCAction;
+import jaicore.planning.classical.problems.ceoc.CEOCOperation;
+import jaicore.planning.core.EvaluatedSearchGraphBasedPlan;
+import jaicore.planning.core.Plan;
+import jaicore.planning.hierarchical.algorithms.forwarddecomposition.ForwardDecompositionReducer;
+import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDTooltipGenerator;
+import jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem;
+import jaicore.planning.hierarchical.problems.ceocipstn.OCIPMethod;
+import jaicore.planning.hierarchical.problems.htn.CostSensitiveHTNPlanningProblem;
+import jaicore.planning.hierarchical.problems.htn.CostSensitivePlanningToSearchProblemTransformer;
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import jaicore.search.core.interfaces.GraphGenerator;

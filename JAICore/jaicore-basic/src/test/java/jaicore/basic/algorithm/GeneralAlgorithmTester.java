@@ -326,6 +326,10 @@ public abstract class GeneralAlgorithmTester<P, I, O> implements ILoggingCustomi
 	public String getLoggerName() {
 		return loggerName;
 	}
+	
+	protected Logger getLogger() {
+		return logger;
+	}
 
 	@Override
 	public void setLoggerName(String name) {

@@ -8,7 +8,7 @@ import hasco.core.Util;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
 import jaicore.ml.WekaUtil;
-import jaicore.planning.graphgenerators.task.tfd.TFDNode;
+import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.model.travesaltree.Node;
 

@@ -6,7 +6,7 @@ import hasco.core.HASCO;
 import hasco.core.Util;
 import hasco.model.ComponentInstance;
 import hasco.serialization.ComponentLoader;
-import jaicore.planning.graphgenerators.task.tfd.TFDNode;
+import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 
 /**
  * A Comparator for {@link TFDNode}s that sorts based on meta information about

@@ -1,5 +1,6 @@
 dependencies {
 	compile project(':JAICore:jaicore-basic')
+	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
 	compile project(':JAICore:jaicore-concurrent')
 	compile project(':JAICore:jaicore-logic')
 	compile project(':JAICore:jaicore-graph')

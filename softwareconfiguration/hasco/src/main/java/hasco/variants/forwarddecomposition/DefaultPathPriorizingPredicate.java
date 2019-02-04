@@ -5,7 +5,7 @@ import java.util.function.Predicate;
 import hasco.core.HASCO;
 import hasco.core.Util;
 import hasco.model.ComponentInstance;
-import jaicore.planning.graphgenerators.task.tfd.TFDNode;
+import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 
 /**
  * This is a node evaluator that assigns 0 to all nodes encoding (partial) compositions where each component refinement is with its default parameters.

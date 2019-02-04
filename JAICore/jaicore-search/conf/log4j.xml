@@ -68,4 +68,8 @@
     <appender-ref ref="errFileAppender" />
     <appender-ref ref="traceFileAppender" />
   </logger>
+  
+  <logger name="testedalgorithm.search">
+    <level value="warn" />
+  </logger>
 </log4j:configuration>

@@ -12,7 +12,7 @@ import com.google.common.eventbus.Subscribe;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
-import jaicore.search.algorithms.standard.ORGraphSearchTester;
+import jaicore.search.algorithms.GraphSearchTester;
 import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.GraphSearchSolutionCandidateFoundEvent;
 import jaicore.search.core.interfaces.IGraphSearch;
@@ -20,7 +20,7 @@ import jaicore.search.core.interfaces.IGraphSearchFactory;
 import jaicore.search.model.other.SearchGraphPath;
 import jaicore.search.probleminputs.GraphSearchInput;
 
-public abstract class NPuzzleStandardTester<I extends GraphSearchInput<NPuzzleNode, String>, O extends SearchGraphPath<NPuzzleNode, String>, VSearch, ESearch> extends ORGraphSearchTester<NPuzzleProblem, I, O, NPuzzleNode, String, VSearch, ESearch> {
+public abstract class NPuzzleStandardTester<I extends GraphSearchInput<NPuzzleNode, String>, O extends SearchGraphPath<NPuzzleNode, String>, VSearch, ESearch> extends GraphSearchTester<NPuzzleProblem, I, O, NPuzzleNode, String, VSearch, ESearch> {
 
 	private final static int SEED = 0;
 	private int max_n = 4;

@@ -11,7 +11,7 @@ import jaicore.ml.core.evaluation.measure.ADecomposableDoubleMeasure;
 import jaicore.ml.core.evaluation.measure.singlelabel.MultiClassMeasureBuilder;
 import jaicore.ml.evaluation.evaluators.weka.AbstractEvaluatorMeasureBridge;
 import jaicore.ml.evaluation.evaluators.weka.SimpleEvaluatorMeasureBridge;
-import jaicore.planning.graphgenerators.task.tfd.TFDNode;
+import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import weka.core.Instances;
 

@@ -8,7 +8,7 @@ import java.util.List;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.MLPlanWekaClassifier;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.WekaMLPlanWekaClassifier;
 import jaicore.basic.sets.SetUtil.Pair;
-import jaicore.planning.graphgenerators.task.tfd.TFDNode;
+import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import jaicore.search.GraphGeneratorTester;
 import jaicore.search.core.interfaces.GraphGenerator;
 import weka.core.Instances;

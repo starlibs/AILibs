@@ -1,0 +1,73 @@
+package jaicore.planning.hierarchical.testproblems.nesteddichotomies;
+
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Test;
+
+import jaicore.basic.MathExt;
+import jaicore.basic.algorithm.HomogeneousGeneralAlgorithmTester;
+import jaicore.basic.algorithm.IAlgorithm;
+import jaicore.basic.algorithm.IAlgorithmFactory;
+import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.planning.classical.problems.ceoc.CEOCAction;
+import jaicore.planning.classical.problems.ceoc.CEOCOperation;
+import jaicore.planning.core.Action;
+import jaicore.planning.core.EvaluatedSearchGraphBasedPlan;
+import jaicore.planning.core.events.PlanFoundEvent;
+import jaicore.planning.hierarchical.algorithms.GraphSearchBasedHTNPlanningAlgorithm;
+import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
+import jaicore.planning.hierarchical.problems.ceocstn.CEOCSTNPlanningProblem;
+import jaicore.planning.hierarchical.problems.ceocstn.OCMethod;
+import jaicore.planning.hierarchical.problems.ceocstn.StandardProblemFactory;
+import jaicore.planning.hierarchical.problems.htn.IHTNPlanningProblem;
+
+public abstract class CEOCSTNNestedDichotomyTest extends HomogeneousGeneralAlgorithmTester<CEOCSTNPlanningProblem<CEOCOperation,OCMethod,CEOCAction>, EvaluatedSearchGraphBasedPlan<Action, Double, TFDNode>> {
+	
+	private void checkNumberOfSolutionsForProblemSize(int numClasses) {
+			
+		CEOCSTNPlanningProblem<CEOCOperation,OCMethod,CEOCAction> problem = StandardProblemFactory.getNestedDichotomyCreationProblem("root", numClasses, true, 0, 0);
+		IAlgorithmFactory factory = getFactory();
+		factory.setProblemInput(problem);
+		IAlgorithm planner = factory.getAlgorithm();
+		
+		/* solve problem */
+		System.out.println("Searching all nested dichotomies to sepratate " + numClasses + ".");
+		int numSolutions = 0;
+		for (AlgorithmEvent ae : (GraphSearchBasedHTNPlanningAlgorithm<CEOCAction, IHTNPlanningProblem<?,?,CEOCAction>, ?, ?, ?, Double, ?, ?>)planner) {
+			if (ae instanceof PlanFoundEvent) {
+				numSolutions ++;
+				if (numSolutions % 10 == 0)
+					System.out.println("Found " + numSolutions + " solutions so far ...");
+			}
+		}
+		int numberOfExpectedDichotomies = MathExt.doubleFactorial(2 * numClasses - 3);
+		assertEquals(numberOfExpectedDichotomies, numSolutions);
+		System.out.println("Ready, found exactly the expected " + numberOfExpectedDichotomies + " solutions.");
+	}
+	
+	@Test
+	public void solveNDWith3Classes() {
+		checkNumberOfSolutionsForProblemSize(3);
+	}
+	
+	@Test
+	public void solveNDWith4Classes() {
+		checkNumberOfSolutionsForProblemSize(4);
+	}
+	
+	@Test
+	public void solveNDWith5Classes() {
+		checkNumberOfSolutionsForProblemSize(5);
+	}
+
+	@Override
+	public CEOCSTNPlanningProblem<CEOCOperation, OCMethod, CEOCAction> getSimpleProblemInputForGeneralTestPurposes() {
+		return StandardProblemFactory.getNestedDichotomyCreationProblem("root", 3, true, 0, 0);
+	}
+
+	@Override
+	public CEOCSTNPlanningProblem<CEOCOperation, OCMethod, CEOCAction> getDifficultProblemInputForGeneralTestPurposes() throws Exception {
+		return StandardProblemFactory.getNestedDichotomyCreationProblem("root", 10, true, 0, 0);
+	}
+
+}

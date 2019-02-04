@@ -30,10 +30,10 @@ import jaicore.basic.sets.SetUtil;
 import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.logic.fol.structure.Literal;
 import jaicore.logic.fol.structure.Monom;
-import jaicore.planning.graphgenerators.IHierarchicalPlanningGraphGeneratorDeriver;
-import jaicore.planning.model.core.Action;
-import jaicore.planning.model.core.Plan;
-import jaicore.planning.model.core.PlannerUtil;
+import jaicore.planning.classical.algorithms.strips.forward.StripsUtil;
+import jaicore.planning.core.Action;
+import jaicore.planning.core.Plan;
+import jaicore.planning.hierarchical.problems.htn.IHierarchicalPlanningGraphGeneratorDeriver;
 import jaicore.search.model.travesaltree.Node;
 
 public class Util {
@@ -218,7 +218,7 @@ public class Util {
 	public static Monom getFinalStateOfPlan(final Monom initState, final Plan<? extends Action> plan) {
 		Monom state = new Monom(initState);
 		for (Action a : plan.getActions()) {
-			PlannerUtil.updateState(state, a);
+			StripsUtil.updateState(state, a);
 		}
 		return state;
 	}

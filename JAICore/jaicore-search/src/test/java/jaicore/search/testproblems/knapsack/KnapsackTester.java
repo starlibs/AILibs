@@ -16,14 +16,14 @@ import org.junit.Test;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
-import jaicore.search.algorithms.standard.ORGraphSearchTester;
+import jaicore.search.algorithms.GraphSearchTester;
 import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import jaicore.search.core.interfaces.IGraphSearch;
 import jaicore.search.core.interfaces.IGraphSearchFactory;
 import jaicore.search.probleminputs.GraphSearchInput;
 import jaicore.search.testproblems.knapsack.KnapsackProblem.KnapsackNode;
 
-public abstract class KnapsackTester<I extends GraphSearchInput<KnapsackNode, String>, O, VSearch,ESearch> extends ORGraphSearchTester<KnapsackProblem, I, O, KnapsackNode, String, VSearch, ESearch>  {
+public abstract class KnapsackTester<I extends GraphSearchInput<KnapsackNode, String>, O, VSearch,ESearch> extends GraphSearchTester<KnapsackProblem, I, O, KnapsackNode, String, VSearch, ESearch>  {
 
 	private Map<String, Double> weights;
 	private Map<String, Double> values;

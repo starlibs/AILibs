@@ -3,7 +3,7 @@ package hasco.variants.forwarddecomposition;
 
 import hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
 import jaicore.basic.algorithm.AlgorithmProblemTransformer;
-import jaicore.planning.graphgenerators.task.tfd.TFDNode;
+import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import jaicore.search.algorithms.standard.bestfirst.BestFirstFactory;
 import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 import jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;

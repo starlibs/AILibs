@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.TimeoutException;
 
 import org.slf4j.Logger;
@@ -53,7 +52,7 @@ public class ForwardChainer extends AAlgorithm<ForwardChainingProblem, Collectio
 
 	public ForwardChainer(ForwardChainingProblem problem) {
 		super(problem);
-		assert !problem.getConclusion().isEmpty() : "Ill defined forward chaining problem with empty conclusion!";
+		assert !problem.getConclusion().isEmpty() : "Ill-defined forward chaining problem with empty conclusion!";
 	}
 
 	@Override

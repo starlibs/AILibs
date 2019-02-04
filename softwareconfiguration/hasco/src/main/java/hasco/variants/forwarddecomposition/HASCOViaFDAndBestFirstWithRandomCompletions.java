@@ -3,7 +3,7 @@ package hasco.variants.forwarddecomposition;
 import java.util.function.Predicate;
 
 import hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
-import jaicore.planning.graphgenerators.task.tfd.TFDNode;
+import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.problemtransformers.GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS;
 

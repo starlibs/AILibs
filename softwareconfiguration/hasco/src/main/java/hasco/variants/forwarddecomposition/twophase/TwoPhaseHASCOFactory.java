@@ -3,7 +3,7 @@ package hasco.variants.forwarddecomposition.twophase;
 import hasco.core.HASCOSolutionCandidate;
 import hasco.optimizingfactory.SoftwareConfigurationAlgorithmFactory;
 import jaicore.basic.algorithm.AlgorithmProblemTransformer;
-import jaicore.planning.graphgenerators.task.tfd.TFDNode;
+import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 
 public class TwoPhaseHASCOFactory implements SoftwareConfigurationAlgorithmFactory<TwoPhaseSoftwareConfigurationProblem, HASCOSolutionCandidate<Double>, Double> {
