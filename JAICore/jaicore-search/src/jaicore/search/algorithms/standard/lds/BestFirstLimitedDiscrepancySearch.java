@@ -14,7 +14,11 @@ import com.google.common.eventbus.Subscribe;
 
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
+import jaicore.basic.algorithm.AlgorithmState;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
+import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
+import jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.search.algorithms.standard.bestfirst.StandardBestFirst;
 import jaicore.search.algorithms.standard.bestfirst.events.SuccessorComputationCompletedEvent;
@@ -97,15 +101,31 @@ public class BestFirstLimitedDiscrepancySearch<T, A, V extends Comparable<V>> ex
 
 	@Override
 	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException  {
-		return this.bestFirst.nextWithException();
+		checkAndConductTermination();
+		if (getState().equals(AlgorithmState.created)) {
+			this.bestFirst.setTimeout(getTimeout());
+			return activate();
+		}
+		AlgorithmEvent e = this.bestFirst.nextWithException();
+		if (e instanceof AlgorithmInitializedEvent)
+			return nextWithException();
+		else if (e instanceof AlgorithmFinishedEvent)
+			return terminate();
+		else if (e instanceof SolutionCandidateFoundEvent) {
+			EvaluatedSearchGraphPath<T, A, NodeOrderList> solution = (EvaluatedSearchGraphPath<T, A, NodeOrderList>) ((SolutionCandidateFoundEvent) e).getSolutionCandidate();
+			EvaluatedSearchGraphPath<T, A, V> modifiedSolution = new EvaluatedSearchGraphPath<T, A, V>(solution.getNodes(), solution.getEdges(), null);
+			return new SolutionCandidateFoundEvent<>(modifiedSolution);
+		}
+		else
+			return e;
 	}
 
-	@Override
-	public EvaluatedSearchGraphPath<T, A, V> call() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException  {
-		EvaluatedSearchGraphPath<T, A, NodeOrderList> solution = this.bestFirst.call();
-		EvaluatedSearchGraphPath<T, A, V> modifiedSolution = new EvaluatedSearchGraphPath<T, A, V>(solution.getNodes(), solution.getEdges(), null);
-		return modifiedSolution;
-	}
+//	@Override
+//	public EvaluatedSearchGraphPath<T, A, V> call() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException  {
+//		EvaluatedSearchGraphPath<T, A, NodeOrderList> solution = this.bestFirst.call();
+//		EvaluatedSearchGraphPath<T, A, V> modifiedSolution = new EvaluatedSearchGraphPath<T, A, V>(solution.getNodes(), solution.getEdges(), null);
+//		return modifiedSolution;
+//	}
 
 	@Override
 	public String getLoggerName() {

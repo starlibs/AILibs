@@ -9,6 +9,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.google.common.eventbus.Subscribe;
 
+import jaicore.search.core.interfaces.AAnyPathInORGraphSearch;
+import jaicore.basic.algorithm.ISolutionCandidateIterator;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
@@ -86,7 +88,7 @@ public abstract class NQueenTester<I extends GraphSearchInput<QueenNode, String>
 			search.registerListener(this);
 			seenSolutions = new AtomicInteger(0);
 			search.call();
-			assertEquals(numbersOfSolutions[i], seenSolutions.get());
+			assertEquals(search instanceof AAnyPathInORGraphSearch ? 1 : numbersOfSolutions[i], seenSolutions.get());
 			System.out.println("done");
 		}
 	}
@@ -106,7 +108,7 @@ public abstract class NQueenTester<I extends GraphSearchInput<QueenNode, String>
 			search.setNumCPUs(Runtime.getRuntime().availableProcessors());
 			seenSolutions = new AtomicInteger(0);
 			search.call();
-			assertEquals(numbersOfSolutions[i], seenSolutions.get());
+			assertEquals(search instanceof AAnyPathInORGraphSearch ? 1 : numbersOfSolutions[i], seenSolutions.get());
 			System.out.println("done");
 		}
 	}

@@ -751,11 +751,11 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 			l.lockInterruptibly();
 		} catch (InterruptedException e) { // if we are interrupted during a wait, we must still conduct a controlled shutdown
 			logger.debug("Received an interrupt while waiting for " + l + " to become available.");
-			if (!isShutdownInitialized()) { // if the algorithm has not been shutdown yet, we do this now by interrupting ourselves explicitly and invoking the check
+//			if (!isShutdownInitialized()) { // if the algorithm has not been shutdown yet, we do this now by interrupting ourselves explicitly and invoking the check
 				Thread.currentThread().interrupt();
 				checkTerminationAndUnregisterFromExpand(node);
-			} else
-				throw e; // if the algorithm has already been shut down, just throw the exception
+//			} else if ()
+//				throw e; // if the algorithm has already been shut down, just throw the exception
 		}
 	}
 

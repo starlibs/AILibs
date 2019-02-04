@@ -1,5 +1,7 @@
 package jaicore.search.algorithms.standard.random;
 
+import org.junit.Test;
+
 import jaicore.basic.algorithm.AlgorithmProblemTransformer;
 import jaicore.search.core.interfaces.IGraphSearchFactory;
 import jaicore.search.model.other.SearchGraphPath;
@@ -28,4 +30,19 @@ public class RandomSearchEnhancedTTSPTester extends EnhancedTTSPTester<GraphSear
 		};
 	}
 
+	@Test
+	public void testQuickTimeout() throws Exception {
+		
+	}
+	
+	@Test
+	public void testCancel() throws Exception {
+		
+	}
+	
+	@Test
+	public void testInterrupt() throws Exception {
+		
+		/* we cannot create sufficiently difficult instances of this problem in general for this algorithm to require at least 5 seconds */
+	}
 }
