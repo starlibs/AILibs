@@ -9,6 +9,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import jaicore.logging.ToJSONStringUtil;
 import jaicore.logic.fol.structure.Literal;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.planning.classical.algorithms.strips.forward.StripsUtil;
@@ -181,5 +182,14 @@ public class TFDGraphGenerator<O extends Operation, M extends Method, A extends 
 			if (!path.get(i).equals(potentialSuperPath.get(i)))
 				return false;
 		return true;
+	}
+	
+	@Override
+	public String toString() {
+		Map<String, Object> fields = new HashMap<>();
+		fields.put("util", this.util);
+		fields.put("problem", this.problem);
+		fields.put("primitiveTasks", this.primitiveTasks);
+		return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
 	}
 }

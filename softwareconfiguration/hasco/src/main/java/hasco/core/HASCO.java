@@ -1,6 +1,7 @@
 package hasco.core;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ import jaicore.basic.algorithm.exceptions.DelayedCancellationCheckException;
 import jaicore.basic.algorithm.exceptions.DelayedTimeoutCheckException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.graphvisualizer.gui.VisualizationWindow;
+import jaicore.logging.ToJSONStringUtil;
 import jaicore.planning.classical.problems.ceoc.CEOCAction;
 import jaicore.planning.classical.problems.ceoc.CEOCOperation;
 import jaicore.planning.core.EvaluatedSearchGraphBasedPlan;
@@ -41,6 +43,7 @@ import jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem
 import jaicore.planning.hierarchical.problems.ceocipstn.OCIPMethod;
 import jaicore.planning.hierarchical.problems.htn.CostSensitiveHTNPlanningProblem;
 import jaicore.planning.hierarchical.problems.htn.CostSensitivePlanningToSearchProblemTransformer;
+//github.com/fmohr/AILibs.git
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import jaicore.search.core.interfaces.GraphGenerator;
@@ -81,7 +84,7 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 	private boolean searchCreatedAndInitialized = false;
 	private final TimeRecordingEvaluationWrapper<V> timeGrabbingEvaluationWrapper;
 	private HASCOSolutionCandidate<V> bestRecognizedSolution;
-	
+
 	/**Extension: Allow other clients to listen to search events */
 	Set<Object> searchListeners = new HashSet<>();
 
@@ -133,7 +136,7 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 			return this.activate();
 		}
 		case active: {
-			
+
 			/* Check termination */
 			try {
 				this.checkAndConductTermination();
@@ -147,7 +150,7 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 
 			/* if the search itself has not been initialized, do this now */
 			if (!this.searchCreatedAndInitialized) {
-				
+
 				/* create search algorithm, set its logger, and initialize visualization*/
 				this.logger.debug("Creating the search object");
 				this.searchFactory.setProblemInput(this.searchProblem, this.searchProblemTransformer);
@@ -158,9 +161,9 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 				if (this.loggerName != null && this.loggerName.length() > 0 && this.search instanceof ILoggingCustomizable) {
 					this.logger.info("Setting logger name of {} to {}", this.search, this.loggerName + ".search");
 					((ILoggingCustomizable) this.search).setLoggerName(this.loggerName + ".search");
+				} else {
+					this.logger.info("Not setting the logger name of the search. Logger name of HASCO is {}. Search loggingCustomizable: {}", this.loggerName, (this.search instanceof ILoggingCustomizable));
 				}
-				else
-					this.logger.info("Not setting the logger name of the search. Logger name of HASCO is {}. Search loggingCustomizable: {}", loggerName, (this.search instanceof ILoggingCustomizable));
 				if (this.getConfig().visualizationEnabled()) {
 					this.logger.info("Launching graph visualization");
 					VisualizationWindow<?, ?> window = new VisualizationWindow<>(this.search);
@@ -171,10 +174,10 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 				}
 
 				/* register external listeners */
-				for (Object listener : searchListeners) {
-					search.registerListener(listener);
+				for (Object listener : this.searchListeners) {
+					this.search.registerListener(listener);
 				}
-				
+
 				/* now initialize the search */
 				this.logger.debug("Initializing the search");
 				boolean searchInitializationObserved = false;
@@ -235,15 +238,15 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 	protected void afterSearch() {
 		// hook that is invoked after the search algorithm
 	}
-	
-	public void registerListenerForSearch (final Object listener) {
+
+	public void registerListenerForSearch(final Object listener) {
 		this.searchListeners.add(listener);
 	}
 
 	public void removeListenerForSearch(final Object listener) {
 		this.searchListeners.remove(listener);
 	}
-	
+
 	public GraphGenerator<N, A> getGraphGenerator() {
 		return this.searchProblem.getGraphGenerator();
 	}
@@ -283,14 +286,14 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 	public HASCORunReport<V> getReport() {
 		return new HASCORunReport<>(this.listOfAllRecognizedSolutions);
 	}
-	
+
 	@Override
 	protected void shutdown() {
-		logger.info("Entering HASCO shutdown routine.");
+		this.logger.info("Entering HASCO shutdown routine.");
 		super.shutdown();
-		logger.debug("Cancelling search.");
-		search.cancel();
-		logger.debug("Shutdown of HASCO completed.");
+		this.logger.debug("Cancelling search.");
+		this.search.cancel();
+		this.logger.debug("Shutdown of HASCO completed.");
 	}
 
 	@Override
@@ -318,5 +321,15 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 		this.logger = LoggerFactory.getLogger(name);
 		this.logger.info("Activated logger {} with name {}", name, this.logger.getName());
 		super.setLoggerName(this.loggerName + "._swConfigAlgo");
+	}
+
+	@Override
+	public String toString() {
+		Map<String, Object> fields = new HashMap<>();
+		fields.put("planningGraphGeneratorDeriver", this.planningGraphGeneratorDeriver);
+		fields.put("planningProblem", this.planningProblem);
+		fields.put("search", this.search);
+		fields.put("searchProblem", this.searchProblem);
+		return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
 	}
 }

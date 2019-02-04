@@ -306,7 +306,7 @@ public class HASCOReduction<V extends Comparable<V>> implements
 			public String toString() {
 				Map<String, Object> fields = new HashMap<>();
 				fields.put("problem", problem);
-				return ToJSONStringUtil.toJSONString(fields);
+				return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
 			}
 
 		};

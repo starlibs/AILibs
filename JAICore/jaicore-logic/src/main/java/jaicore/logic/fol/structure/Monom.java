@@ -6,6 +6,12 @@ import java.util.Map;
 
 import jaicore.basic.sets.SetUtil;
 import jaicore.logging.ToJSONStringUtil;
+import jaicore.logic.fol.structure.CNFFormula;
+import jaicore.logic.fol.structure.Clause;
+import jaicore.logic.fol.structure.Literal;
+import jaicore.logic.fol.structure.LiteralParam;
+import jaicore.logic.fol.structure.LiteralSet;
+import jaicore.logic.fol.structure.VariableParam;
 
 public class Monom extends LiteralSet {
 
@@ -53,7 +59,7 @@ public class Monom extends LiteralSet {
 	public String toString() {
 		Map<String, Object> fields = new HashMap<>();
 		fields.put("literals", this);
-		return ToJSONStringUtil.toJSONString(fields);
+		return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
 		// StringBuilder sb = new StringBuilder();
 		// boolean firstElement = true;
 		// for (Literal l : this) {

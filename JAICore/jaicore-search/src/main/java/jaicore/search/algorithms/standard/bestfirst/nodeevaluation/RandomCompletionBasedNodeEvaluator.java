@@ -556,6 +556,6 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>>
 		Map<String, Object> fields = new HashMap<>();
 		fields.put("solutionEvaluator", this.solutionEvaluator);
 		fields.put("visualizeSubSearch", this.visualizeSubSearch);
-		return ToJSONStringUtil.toJSONString(fields);
+		return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
 	}
 }

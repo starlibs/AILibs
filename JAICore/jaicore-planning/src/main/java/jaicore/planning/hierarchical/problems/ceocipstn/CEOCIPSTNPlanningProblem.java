@@ -1,7 +1,9 @@
 package jaicore.planning.hierarchical.problems.ceocipstn;
 
+import java.util.HashMap;
 import java.util.Map;
 
+import jaicore.logging.ToJSONStringUtil;
 import jaicore.logic.fol.structure.CNFFormula;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.logic.fol.theories.EvaluablePredicate;
@@ -64,4 +66,14 @@ public class CEOCIPSTNPlanningProblem<O extends CEOCOperation, M extends OCIPMet
 		return true;
 	}
 
+	@Override
+	public String toString() {
+		Map<String, Object> fields = new HashMap<>();
+		fields.put("evaluablePlanningPredicates", this.evaluablePlanningPredicates);
+		fields.put("oracleResolvers", this.oracleResolvers);
+		fields.put("super", super.toString());
+		return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
+	}
+	
+	
 }

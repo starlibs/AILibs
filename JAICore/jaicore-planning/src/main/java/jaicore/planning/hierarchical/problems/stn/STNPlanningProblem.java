@@ -1,5 +1,9 @@
 package jaicore.planning.hierarchical.problems.stn;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import jaicore.logging.ToJSONStringUtil;
 import jaicore.logic.fol.structure.CNFFormula;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.planning.classical.problems.strips.Operation;
@@ -87,5 +91,16 @@ public class STNPlanningProblem<O extends Operation, M extends Method, A extends
 		if (sortNetworkBasedOnNumberPrefixes != other.sortNetworkBasedOnNumberPrefixes)
 			return false;
 		return true;
+	}
+	
+	@Override
+	public String toString() {
+		Map<String, Object> fields = new HashMap<>();
+		fields.put("domain", this.domain);
+		fields.put("knowledge", this.knowledge);
+		fields.put("init", this.init);
+		fields.put("network", this.network);
+		fields.put("sortNetworkBasedOnNumberPrefixes", this.sortNetworkBasedOnNumberPrefixes);
+		return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
 	}
 }

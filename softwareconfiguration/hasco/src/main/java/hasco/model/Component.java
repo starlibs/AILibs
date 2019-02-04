@@ -2,6 +2,7 @@ package hasco.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -14,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import jaicore.basic.sets.PartialOrderedSet;
+import jaicore.logging.ToJSONStringUtil;
 
 @JsonPropertyOrder({ "name", "parameters", "dependencies", "providedInterfaces", "requiredInterfaces" })
 public class Component {
@@ -31,11 +33,8 @@ public class Component {
 
 	// Json constructor
 	@JsonCreator
-	public Component(@JsonProperty("name") final String name,
-			@JsonProperty("providedInterfaces") Collection<String> providedInterfaces,
-			@JsonProperty("requiredInterfaces") List<Map<String, String>> requiredInterfaces,
-			@JsonProperty("parameters") PartialOrderedSet<Parameter> parameters,
-			@JsonProperty("dependencies") List<Dependency> dependencies) {
+	public Component(@JsonProperty("name") final String name, @JsonProperty("providedInterfaces") final Collection<String> providedInterfaces, @JsonProperty("requiredInterfaces") final List<Map<String, String>> requiredInterfaces,
+			@JsonProperty("parameters") final PartialOrderedSet<Parameter> parameters, @JsonProperty("dependencies") final List<Dependency> dependencies) {
 		super();
 		this.name = name;
 		this.providedInterfaces = providedInterfaces;
@@ -45,9 +44,7 @@ public class Component {
 		this.dependencies = dependencies;
 	}
 
-	public Component(final String name, final TreeMap<String, String> requiredInterfaces,
-			final Collection<String> providedInterfaces, final List<Parameter> parameters,
-			final Collection<Dependency> dependencies) {
+	public Component(final String name, final TreeMap<String, String> requiredInterfaces, final Collection<String> providedInterfaces, final List<Parameter> parameters, final Collection<Dependency> dependencies) {
 		this(name);
 		this.requiredInterfaces.putAll(requiredInterfaces);
 		this.providedInterfaces.addAll(providedInterfaces);
@@ -77,8 +74,7 @@ public class Component {
 	public Parameter getParameterWithName(final String paramName) {
 		Optional<Parameter> param = this.parameters.stream().filter(p -> p.getName().equals(paramName)).findFirst();
 		if (!param.isPresent()) {
-			throw new IllegalArgumentException(
-					"Component " + this.name + " has no parameter with name \"" + paramName + "\"");
+			throw new IllegalArgumentException("Component " + this.name + " has no parameter with name \"" + paramName + "\"");
 		}
 		return param.get();
 	}
@@ -92,8 +88,7 @@ public class Component {
 	}
 
 	public void addParameter(final Parameter param) {
-		assert !this.parameters.stream().filter(p -> p.getName().equals(param.getName())).findAny()
-				.isPresent() : "Component " + this.name + " already has parameter with name " + param.getName();
+		assert !this.parameters.stream().filter(p -> p.getName().equals(param.getName())).findAny().isPresent() : "Component " + this.name + " already has parameter with name " + param.getName();
 		this.parameters.add(param);
 	}
 
@@ -119,30 +114,6 @@ public class Component {
 
 	public Collection<Dependency> getDependencies() {
 		return this.dependencies;
-	}
-
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-
-		sb.append(this.providedInterfaces);
-		sb.append(":");
-		sb.append(this.name);
-		sb.append("(");
-		boolean first = true;
-		for (Parameter p : this.parameters) {
-			if (first) {
-				first = false;
-			} else {
-				sb.append(",");
-			}
-			sb.append(p);
-		}
-		sb.append(")");
-		sb.append(":");
-		sb.append(this.requiredInterfaces);
-
-		return sb.toString();
 	}
 
 	@Override
@@ -206,4 +177,15 @@ public class Component {
 		}
 		return true;
 	}
+
+	@Override
+	public String toString() {
+		Map<String, Object> fields = new HashMap<>();
+		fields.put("name", this.name);
+		fields.put("providedInterfaces", this.providedInterfaces);
+		fields.put("requiredInterfaces", this.requiredInterfaces);
+		fields.put("parameters", this.parameters);
+		return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
+	}
+
 }

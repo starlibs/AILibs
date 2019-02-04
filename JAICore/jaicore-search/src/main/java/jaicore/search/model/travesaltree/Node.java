@@ -114,7 +114,7 @@ public class Node<T, V extends Comparable<V>> implements Serializable, Comparabl
 		fields.put("externalLabel", this.externalLabel);
 		fields.put("goal", this.goal);
 		fields.put("annotations", this.annotations);
-		return ToJSONStringUtil.toJSONString(fields);
+		return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
 		// return "Node [externalLabel=" + this.externalLabel + ", goal=" + this.goal + ", annotations=" + this.annotations + "]";
 	}
 }

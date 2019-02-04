@@ -1,8 +1,11 @@
 package jaicore.search.algorithms.standard.bestfirst.nodeevaluation;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
+import jaicore.logging.ToJSONStringUtil;
 import jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
 import jaicore.search.model.travesaltree.Node;
 
@@ -37,6 +40,9 @@ public class AlternativeNodeEvaluator<T, V extends Comparable<V>> extends Decora
 
 	@Override
 	public String toString() {
-		return "AlternativeNodeEvaluator [primary=" + this.ne1 + ", secondary=" + super.getEvaluator() + "]";
+		Map<String, Object> fields = new HashMap<>();
+		fields.put("primary", this.ne1);
+		fields.put("secondary", super.getEvaluator());
+		return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
 	}
 }

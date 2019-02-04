@@ -2,7 +2,10 @@ package jaicore.planning.hierarchical.problems.stn;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
+import jaicore.logging.ToJSONStringUtil;
 import jaicore.planning.classical.problems.strips.Operation;
 
 @SuppressWarnings("serial")
@@ -63,6 +66,9 @@ public class STNPlanningDomain<O extends Operation, M extends Method> implements
 
 	@Override
 	public String toString() {
-		return "STNPlanningDomain [operations=" + operations + ", methods=" + methods + "]";
+		Map<String, Object> fields = new HashMap<>();
+		fields.put("operations", this.operations);
+		fields.put("methods", this.methods);
+		return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
 	}
 }

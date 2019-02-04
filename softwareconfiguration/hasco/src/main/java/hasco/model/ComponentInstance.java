@@ -2,6 +2,7 @@ package hasco.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -10,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import jaicore.basic.sets.SetUtil;
+import jaicore.logging.ToJSONStringUtil;
 
 /**
  * For a given component, a composition defines all parameter values and the
@@ -18,7 +20,7 @@ import jaicore.basic.sets.SetUtil;
  * @author fmohr
  *
  */
-@JsonPropertyOrder(alphabetic=true)
+@JsonPropertyOrder(alphabetic = true)
 public class ComponentInstance {
 	private final Component component;
 	private final Map<String, String> parameterValues;
@@ -28,8 +30,7 @@ public class ComponentInstance {
 	 */
 	private final Map<String, ComponentInstance> satisfactionOfRequiredInterfaces;
 
-	public ComponentInstance(@JsonProperty("component") final Component component,
-			@JsonProperty("parameterValues") final Map<String, String> parameterValues,
+	public ComponentInstance(@JsonProperty("component") final Component component, @JsonProperty("parameterValues") final Map<String, String> parameterValues,
 			@JsonProperty("satisfactionOfRequiredInterfaces") final Map<String, ComponentInstance> satisfactionOfRequiredInterfaces) {
 		super();
 		this.component = component;
@@ -46,22 +47,22 @@ public class ComponentInstance {
 	}
 
 	public Collection<Parameter> getParametersThatHaveBeenSetExplicitly() {
-		if (parameterValues == null)
+		if (this.parameterValues == null) {
 			return new ArrayList<>();
-		return getComponent().getParameters().stream().filter(p -> parameterValues.containsKey(p.getName()))
-				.collect(Collectors.toList());
+		}
+		return this.getComponent().getParameters().stream().filter(p -> this.parameterValues.containsKey(p.getName())).collect(Collectors.toList());
 	}
 
 	public Collection<Parameter> getParametersThatHaveNotBeenSetExplicitly() {
-		return SetUtil.difference(component.getParameters(), getParametersThatHaveBeenSetExplicitly());
+		return SetUtil.difference(this.component.getParameters(), this.getParametersThatHaveBeenSetExplicitly());
 	}
 
-	public String getParameterValue(Parameter param) {
-		return getParameterValue(param.getName());
+	public String getParameterValue(final Parameter param) {
+		return this.getParameterValue(param.getName());
 	}
 
-	public String getParameterValue(String param) {
-		return parameterValues.get(param);
+	public String getParameterValue(final String param) {
+		return this.parameterValues.get(param);
 	}
 
 	/**
@@ -72,43 +73,36 @@ public class ComponentInstance {
 		return this.satisfactionOfRequiredInterfaces;
 	}
 
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-
-		sb.append(this.component);
-		sb.append(this.parameterValues);
-
-		return sb.toString();
-	}
-
 	@JsonIgnore
 	public String getPrettyPrint() {
-		return getPrettyPrint(0);
+		return this.getPrettyPrint(0);
 	}
 
-	private String getPrettyPrint(int offset) {
+	private String getPrettyPrint(final int offset) {
 		StringBuilder sb = new StringBuilder();
-		sb.append(component.getName());
+		sb.append(this.component.getName());
 		sb.append("{");
 		boolean atLeastOneParamPrinted = false;
-		for (String key : parameterValues.keySet()) {
-			if (atLeastOneParamPrinted)
+		for (String key : this.parameterValues.keySet()) {
+			if (atLeastOneParamPrinted) {
 				sb.append(", ");
+			}
 			atLeastOneParamPrinted = true;
-			sb.append(key + " = " + parameterValues.get(key));
+			sb.append(key + " = " + this.parameterValues.get(key));
 		}
 		sb.append("}");
 		sb.append("\n");
-		for (String requiredInterface : component.getRequiredInterfaces().keySet()) {
-			for (int i = 0; i < offset + 1; i++)
+		for (String requiredInterface : this.component.getRequiredInterfaces().keySet()) {
+			for (int i = 0; i < offset + 1; i++) {
 				sb.append("\t");
+			}
 			sb.append(requiredInterface);
 			sb.append(": ");
-			if (satisfactionOfRequiredInterfaces.containsKey(requiredInterface))
-				sb.append(satisfactionOfRequiredInterfaces.get(requiredInterface).getPrettyPrint(offset + 1));
-			else
+			if (this.satisfactionOfRequiredInterfaces.containsKey(requiredInterface)) {
+				sb.append(this.satisfactionOfRequiredInterfaces.get(requiredInterface).getPrettyPrint(offset + 1));
+			} else {
 				sb.append("null\n");
+			}
 		}
 		return sb.toString();
 	}
@@ -117,37 +111,54 @@ public class ComponentInstance {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((component == null) ? 0 : component.hashCode());
-		result = prime * result + ((parameterValues == null) ? 0 : parameterValues.hashCode());
-		result = prime * result
-				+ ((satisfactionOfRequiredInterfaces == null) ? 0 : satisfactionOfRequiredInterfaces.hashCode());
+		result = prime * result + ((this.component == null) ? 0 : this.component.hashCode());
+		result = prime * result + ((this.parameterValues == null) ? 0 : this.parameterValues.hashCode());
+		result = prime * result + ((this.satisfactionOfRequiredInterfaces == null) ? 0 : this.satisfactionOfRequiredInterfaces.hashCode());
 		return result;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (this.getClass() != obj.getClass()) {
 			return false;
+		}
 		ComponentInstance other = (ComponentInstance) obj;
-		if (component == null) {
-			if (other.component != null)
+		if (this.component == null) {
+			if (other.component != null) {
 				return false;
-		} else if (!component.equals(other.component))
+			}
+		} else if (!this.component.equals(other.component)) {
 			return false;
-		if (parameterValues == null) {
-			if (other.parameterValues != null)
+		}
+		if (this.parameterValues == null) {
+			if (other.parameterValues != null) {
 				return false;
-		} else if (!parameterValues.equals(other.parameterValues))
+			}
+		} else if (!this.parameterValues.equals(other.parameterValues)) {
 			return false;
-		if (satisfactionOfRequiredInterfaces == null) {
-			if (other.satisfactionOfRequiredInterfaces != null)
+		}
+		if (this.satisfactionOfRequiredInterfaces == null) {
+			if (other.satisfactionOfRequiredInterfaces != null) {
 				return false;
-		} else if (!satisfactionOfRequiredInterfaces.equals(other.satisfactionOfRequiredInterfaces))
+			}
+		} else if (!this.satisfactionOfRequiredInterfaces.equals(other.satisfactionOfRequiredInterfaces)) {
 			return false;
+		}
 		return true;
+	}
+
+	@Override
+	public String toString() {
+		Map<String, Object> fields = new HashMap<>();
+		fields.put("component", this.component);
+		fields.put("parameterValues", this.parameterValues);
+		fields.put("satisfactionOfRequiredInterfaces", this.satisfactionOfRequiredInterfaces);
+		return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
 	}
 }
