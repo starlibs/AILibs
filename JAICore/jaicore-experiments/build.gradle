@@ -8,9 +8,11 @@ sourceSets {
     test {
      	java {
      		srcDir 'test'
+     		srcDir 'test_resource'
      	}
     }
 }
 dependencies {
 	compile project(":JAICore:jaicore-basic")
+	compile 'mysql:mysql-connector-java:5.1.45'
 }

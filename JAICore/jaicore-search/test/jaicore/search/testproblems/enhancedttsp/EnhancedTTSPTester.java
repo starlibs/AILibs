@@ -7,7 +7,8 @@ import static org.junit.Assert.assertTrue;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.math3.util.ArithmeticUtils;
+import org.apache.commons.math3.util.CombinatoricsUtils;
+import org.junit.Test;
 
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
@@ -80,7 +81,7 @@ public abstract class EnhancedTTSPTester<I extends GraphSearchInput<EnhancedTTSP
 	}
 	
 	private void checkNumberOfSolutions(int n, int givenSolutions) {
-		int expected = (int)ArithmeticUtils.factorial(n - 1);
+		int expected = (int)CombinatoricsUtils.factorial(n - 1);
 		assertEquals("Wrong number of returned solutions for " + n + "-TTSP. Expected " + expected + " and received " + givenSolutions,expected, givenSolutions);
 	}
 	

@@ -57,7 +57,9 @@ public abstract class ASolutionCandidateIterator<I, O> extends AAlgorithm<I, O> 
 
 	@Override
 	public O call() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
-		return nextSolutionCandidate();
+		O candidate = nextSolutionCandidate();
+		terminate(); // make sure that a termination event is sent
+		return candidate;
 	}
 	
 	/**
