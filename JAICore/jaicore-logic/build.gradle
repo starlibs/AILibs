@@ -1,16 +1,4 @@
-sourceSets {
-    main {
-      java {
-          srcDir 'src/main/java'
-      }
-    }
-    test {
-     	java {
-     		srcDir 'src/test/java'
-     	}
-    }
-}
 dependencies {
 	compile project(":JAICore:jaicore-basic")
-
+	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
 }

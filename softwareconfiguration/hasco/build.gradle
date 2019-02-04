@@ -1,24 +1,3 @@
-plugins {
-	id 'java'
-	id 'eclipse-wtp'
-}
-
-sourceSets {
-    main {
-        java {
-            srcDir 'src'
-        }
-        resources {
-        	srcDir 'conf'
-    	}
-    }
-    test {
-	   	java {
-	   		srcDir 'test'
-	   	}
-    }
-}
-
 dependencies {
 	compile project(':JAICore:jaicore-basic')
 	compile project(':JAICore:jaicore-concurrent')
