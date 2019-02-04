@@ -110,6 +110,21 @@ allprojects {
 			}
 		}
 	}
+	// This task creates a jar with test classes.
+	task testClassesJar(type: Jar) {
+		classifier = 'tests'
+		from sourceSets.test.output
+	}
+	// Add a new configuration named testArtifacts
+	configurations {
+		testArtifacts
+	}
+	// testArtifacts contains the jar with test classes.
+	// Other projects can declare the dependency:
+	//      testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
+	artifacts {
+		testArtifacts testClassesJar
+	}
 
 }
 
