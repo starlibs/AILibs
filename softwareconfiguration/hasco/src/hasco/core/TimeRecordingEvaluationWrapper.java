@@ -41,6 +41,6 @@ public class TimeRecordingEvaluationWrapper<V extends Comparable<V>> implements 
 		Map<String, Object> fields = new HashMap<>();
 		fields.put("baseEvaluator", this.baseEvaluator);
 		fields.put("consumedTimes", this.consumedTimes);
-		return ToJSONStringUtil.toJSONString(fields);
+		return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
 	}
 }

@@ -1,6 +1,7 @@
 package hasco.core;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
@@ -29,6 +30,7 @@ import jaicore.basic.algorithm.exceptions.DelayedCancellationCheckException;
 import jaicore.basic.algorithm.exceptions.DelayedTimeoutCheckException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.graphvisualizer.gui.VisualizationWindow;
+import jaicore.logging.ToJSONStringUtil;
 import jaicore.planning.EvaluatedSearchGraphBasedPlan;
 import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionReducer;
 import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;
@@ -127,7 +129,7 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 			return this.activate();
 		}
 		case active: {
-			
+
 			/* Check termination */
 			try {
 				this.checkAndConductTermination();
@@ -141,7 +143,7 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 
 			/* if the search itself has not been initialized, do this now */
 			if (!this.searchCreatedAndInitialized) {
-				
+
 				/* create search algorithm, set its logger, and initialize visualization*/
 				this.logger.debug("Creating the search object");
 				this.searchFactory.setProblemInput(this.searchProblem, this.searchProblemTransformer);
@@ -152,9 +154,9 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 				if (this.loggerName != null && this.loggerName.length() > 0 && this.search instanceof ILoggingCustomizable) {
 					this.logger.info("Setting logger name of {} to {}", this.search, this.loggerName + ".search");
 					((ILoggingCustomizable) this.search).setLoggerName(this.loggerName + ".search");
+				} else {
+					this.logger.info("Not setting the logger name of the search. Logger name of HASCO is {}. Search loggingCustomizable: {}", this.loggerName, (this.search instanceof ILoggingCustomizable));
 				}
-				else
-					this.logger.info("Not setting the logger name of the search. Logger name of HASCO is {}. Search loggingCustomizable: {}", loggerName, (this.search instanceof ILoggingCustomizable));
 				if (this.getConfig().visualizationEnabled()) {
 					this.logger.info("Launching graph visualization");
 					VisualizationWindow<?, ?> window = new VisualizationWindow<>(this.search);
@@ -264,14 +266,14 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 	public HASCORunReport<V> getReport() {
 		return new HASCORunReport<>(this.listOfAllRecognizedSolutions);
 	}
-	
+
 	@Override
 	protected void shutdown() {
-		logger.info("Entering HASCO shutdown routine.");
+		this.logger.info("Entering HASCO shutdown routine.");
 		super.shutdown();
-		logger.debug("Cancelling search.");
-		search.cancel();
-		logger.debug("Shutdown of HASCO completed.");
+		this.logger.debug("Cancelling search.");
+		this.search.cancel();
+		this.logger.debug("Shutdown of HASCO completed.");
 	}
 
 	@Override
@@ -299,5 +301,15 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 		this.logger = LoggerFactory.getLogger(name);
 		this.logger.info("Activated logger {} with name {}", name, this.logger.getName());
 		super.setLoggerName(this.loggerName + "._swConfigAlgo");
+	}
+
+	@Override
+	public String toString() {
+		Map<String, Object> fields = new HashMap<>();
+		fields.put("planningGraphGeneratorDeriver", this.planningGraphGeneratorDeriver);
+		fields.put("planningProblem", this.planningProblem);
+		fields.put("search", this.search);
+		fields.put("searchProblem", this.searchProblem);
+		return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
 	}
 }

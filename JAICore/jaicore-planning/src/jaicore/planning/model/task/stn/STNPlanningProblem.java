@@ -1,5 +1,9 @@
 package jaicore.planning.model.task.stn;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import jaicore.logging.ToJSONStringUtil;
 import jaicore.logic.fol.structure.CNFFormula;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.planning.model.core.Action;
@@ -15,7 +19,7 @@ public class STNPlanningProblem<O extends Operation, M extends Method, A extends
 	private final TaskNetwork network;
 	private final boolean sortNetworkBasedOnNumberPrefixes = true;
 
-	public STNPlanningProblem(STNPlanningDomain<O,M> domain, CNFFormula knowledge, Monom init, TaskNetwork network) {
+	public STNPlanningProblem(final STNPlanningDomain<O, M> domain, final CNFFormula knowledge, final Monom init, final TaskNetwork network) {
 		super();
 		this.domain = domain;
 		this.knowledge = knowledge;
@@ -23,69 +27,97 @@ public class STNPlanningProblem<O extends Operation, M extends Method, A extends
 		this.network = network;
 	}
 
-	public STNPlanningDomain<O,M> getDomain() {
-		return domain;
+	@Override
+	public String toString() {
+		Map<String, Object> fields = new HashMap<>();
+		fields.put("domain", this.domain);
+		fields.put("knowledge", this.knowledge);
+		fields.put("init", this.init);
+		fields.put("network", this.network);
+		fields.put("sortNetworkBasedOnNumberPrefixes", this.sortNetworkBasedOnNumberPrefixes);
+		return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
 	}
 
+	@Override
+	public STNPlanningDomain<O, M> getDomain() {
+		return this.domain;
+	}
+
+	@Override
 	public CNFFormula getKnowledge() {
-		return knowledge;
+		return this.knowledge;
 	}
 
+	@Override
 	public Monom getInit() {
-		return init;
+		return this.init;
 	}
 
+	@Override
 	public TaskNetwork getNetwork() {
-		return network;
+		return this.network;
 	}
 
 	public boolean isSortNetworkBasedOnNumberPrefixes() {
-		return sortNetworkBasedOnNumberPrefixes;
+		return this.sortNetworkBasedOnNumberPrefixes;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((domain == null) ? 0 : domain.hashCode());
-		result = prime * result + ((init == null) ? 0 : init.hashCode());
-		result = prime * result + ((knowledge == null) ? 0 : knowledge.hashCode());
-		result = prime * result + ((network == null) ? 0 : network.hashCode());
-		result = prime * result + (sortNetworkBasedOnNumberPrefixes ? 1231 : 1237);
+		result = prime * result + ((this.domain == null) ? 0 : this.domain.hashCode());
+		result = prime * result + ((this.init == null) ? 0 : this.init.hashCode());
+		result = prime * result + ((this.knowledge == null) ? 0 : this.knowledge.hashCode());
+		result = prime * result + ((this.network == null) ? 0 : this.network.hashCode());
+		result = prime * result + (this.sortNetworkBasedOnNumberPrefixes ? 1231 : 1237);
 		return result;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (this.getClass() != obj.getClass()) {
 			return false;
+		}
 		STNPlanningProblem other = (STNPlanningProblem) obj;
-		if (domain == null) {
-			if (other.domain != null)
+		if (this.domain == null) {
+			if (other.domain != null) {
 				return false;
-		} else if (!domain.equals(other.domain))
+			}
+		} else if (!this.domain.equals(other.domain)) {
 			return false;
-		if (init == null) {
-			if (other.init != null)
+		}
+		if (this.init == null) {
+			if (other.init != null) {
 				return false;
-		} else if (!init.equals(other.init))
+			}
+		} else if (!this.init.equals(other.init)) {
 			return false;
-		if (knowledge == null) {
-			if (other.knowledge != null)
+		}
+		if (this.knowledge == null) {
+			if (other.knowledge != null) {
 				return false;
-		} else if (!knowledge.equals(other.knowledge))
+			}
+		} else if (!this.knowledge.equals(other.knowledge)) {
 			return false;
-		if (network == null) {
-			if (other.network != null)
+		}
+		if (this.network == null) {
+			if (other.network != null) {
 				return false;
-		} else if (!network.equals(other.network))
+			}
+		} else if (!this.network.equals(other.network)) {
 			return false;
-		if (sortNetworkBasedOnNumberPrefixes != other.sortNetworkBasedOnNumberPrefixes)
+		}
+		if (this.sortNetworkBasedOnNumberPrefixes != other.sortNetworkBasedOnNumberPrefixes) {
 			return false;
+		}
 		return true;
 	}
+
 }

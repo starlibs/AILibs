@@ -1,7 +1,9 @@
 package jaicore.planning.model.task.ceocipstn;
 
+import java.util.HashMap;
 import java.util.Map;
 
+import jaicore.logging.ToJSONStringUtil;
 import jaicore.logic.fol.structure.CNFFormula;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.logic.fol.theories.EvaluablePredicate;
@@ -17,51 +19,67 @@ public class CEOCIPSTNPlanningProblem<O extends CEOCOperation, M extends OCIPMet
 	private final Map<String, EvaluablePredicate> evaluablePlanningPredicates;
 	private final Map<String, OracleTaskResolver> oracleResolvers;
 
-	public CEOCIPSTNPlanningProblem(CEOCSTNPlanningDomain<O, M> domain, CNFFormula knowledge, Monom init, TaskNetwork network, Map<String, EvaluablePredicate> evaluablePredicates,
-			Map<String, OracleTaskResolver> oracleResolvers) {
+	public CEOCIPSTNPlanningProblem(final CEOCSTNPlanningDomain<O, M> domain, final CNFFormula knowledge, final Monom init, final TaskNetwork network, final Map<String, EvaluablePredicate> evaluablePredicates,
+			final Map<String, OracleTaskResolver> oracleResolvers) {
 		super(domain, knowledge, init, network);
 		this.evaluablePlanningPredicates = evaluablePredicates;
 		this.oracleResolvers = oracleResolvers;
 	}
 
 	public Map<String, EvaluablePredicate> getEvaluablePlanningPredicates() {
-		return evaluablePlanningPredicates;
+		return this.evaluablePlanningPredicates;
 	}
 
 	public Map<String, OracleTaskResolver> getOracleResolvers() {
-		return oracleResolvers;
+		return this.oracleResolvers;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((evaluablePlanningPredicates == null) ? 0 : evaluablePlanningPredicates.hashCode());
-		result = prime * result + ((oracleResolvers == null) ? 0 : oracleResolvers.hashCode());
+		result = prime * result + ((this.evaluablePlanningPredicates == null) ? 0 : this.evaluablePlanningPredicates.hashCode());
+		result = prime * result + ((this.oracleResolvers == null) ? 0 : this.oracleResolvers.hashCode());
 		return result;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (!super.equals(obj))
+		}
+		if (!super.equals(obj)) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (this.getClass() != obj.getClass()) {
 			return false;
+		}
 		@SuppressWarnings("unchecked")
-		CEOCIPSTNPlanningProblem<O,M,A> other = (CEOCIPSTNPlanningProblem<O,M,A>) obj;
-		if (evaluablePlanningPredicates == null) {
-			if (other.evaluablePlanningPredicates != null)
+		CEOCIPSTNPlanningProblem<O, M, A> other = (CEOCIPSTNPlanningProblem<O, M, A>) obj;
+		if (this.evaluablePlanningPredicates == null) {
+			if (other.evaluablePlanningPredicates != null) {
 				return false;
-		} else if (!evaluablePlanningPredicates.equals(other.evaluablePlanningPredicates))
+			}
+		} else if (!this.evaluablePlanningPredicates.equals(other.evaluablePlanningPredicates)) {
 			return false;
-		if (oracleResolvers == null) {
-			if (other.oracleResolvers != null)
+		}
+		if (this.oracleResolvers == null) {
+			if (other.oracleResolvers != null) {
 				return false;
-		} else if (!oracleResolvers.equals(other.oracleResolvers))
+			}
+		} else if (!this.oracleResolvers.equals(other.oracleResolvers)) {
 			return false;
+		}
 		return true;
+	}
+
+	@Override
+	public String toString() {
+		Map<String, Object> fields = new HashMap<>();
+		fields.put("evaluablePlanningPredicates", this.evaluablePlanningPredicates);
+		fields.put("oracleResolvers", this.oracleResolvers);
+		fields.put("super", super.toString());
+		return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
 	}
 
 }

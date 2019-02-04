@@ -6,11 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.TextNode;
-
 import jaicore.basic.sets.SetUtil;
 import jaicore.logging.ToJSONStringUtil;
 import jaicore.logic.fol.structure.ConstantParam;
@@ -107,10 +102,10 @@ public class MethodInstance implements Serializable {
 	public String toString() {
 		Map<String, Object> fields = new HashMap<>();
 		fields.put("method", this.method);
-		fields.put("grounding", grounding);
-		fields.put("precondition", precondition);
-		return ToJSONStringUtil.toJSONString(fields);
-//			return "MethodInstance [method=" + this.method + ", grounding=" + this.grounding + ", precondition=" + this.precondition + "]";
+		fields.put("grounding", this.grounding);
+		fields.put("precondition", this.precondition);
+		return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
+		// return "MethodInstance [method=" + this.method + ", grounding=" + this.grounding + ", precondition=" + this.precondition + "]";
 	}
 
 	public String getEncoding() {

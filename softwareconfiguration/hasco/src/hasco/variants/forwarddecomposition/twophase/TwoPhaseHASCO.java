@@ -50,9 +50,6 @@ public class TwoPhaseHASCO extends SoftwareConfigurationAlgorithm<TwoPhaseSoftwa
 	/* algorithm inputs */
 	private INodeEvaluator<TFDNode, Double> preferredNodeEvaluator;
 
-	/** The classifier selected during selection phase. */
-	private HASCOSolutionCandidate<Double> selectedHASCOSolution;
-
 	/** evaluator for the selection phase. */
 	private HASCOViaFDAndBestFirstWithRandomCompletions<Double> hasco;
 
@@ -70,7 +67,7 @@ public class TwoPhaseHASCO extends SoftwareConfigurationAlgorithm<TwoPhaseSoftwa
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws InterruptedException, TimeoutException, AlgorithmException {
+	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
 		switch (this.getState()) {
 		case created: {
 			this.timeOfStart = System.currentTimeMillis();
@@ -122,6 +119,7 @@ public class TwoPhaseHASCO extends SoftwareConfigurationAlgorithm<TwoPhaseSoftwa
 
 				}
 			}, "Phase 1 time bound observer");
+
 			this.timeoutControl.start();
 			try {
 				this.hasco.call();
@@ -137,8 +135,7 @@ public class TwoPhaseHASCO extends SoftwareConfigurationAlgorithm<TwoPhaseSoftwa
 
 			/* phase 2: select model */
 			this.logger.info("Entering phase 2");
-			this.selectedHASCOSolution = this.selectModel();
-			this.updateBestSeenSolution(this.selectedHASCOSolution);
+			this.updateBestSeenSolution(this.selectModel());
 			return this.terminate();
 		}
 		default:
@@ -442,7 +439,7 @@ public class TwoPhaseHASCO extends SoftwareConfigurationAlgorithm<TwoPhaseSoftwa
 	 * @return The solution candidate selected by TwoPhase HASCO
 	 */
 	public HASCOSolutionCandidate<Double> getSelectedSolutionCandidate() {
-		return this.selectedHASCOSolution;
+		return this.getBestSeenSolution();
 	}
 
 	@Override
@@ -494,8 +491,8 @@ public class TwoPhaseHASCO extends SoftwareConfigurationAlgorithm<TwoPhaseSoftwa
 		return this.hasco.getGraphGenerator();
 	}
 
-	public TwoPhaseHASCOReport getReort() {
-		return new TwoPhaseHASCOReport(this.phase1ResultQueue.size(), this.secondsSpentInPhase1, this.selectedHASCOSolution);
+	public TwoPhaseHASCOReport getReport() {
+		return new TwoPhaseHASCOReport(this.phase1ResultQueue.size(), this.secondsSpentInPhase1, this.getBestSeenSolution());
 	}
 
 	@Override

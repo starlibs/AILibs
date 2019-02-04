@@ -53,7 +53,7 @@ public class Monom extends LiteralSet {
 	public String toString() {
 		Map<String, Object> fields = new HashMap<>();
 		fields.put("literals", this);
-		return ToJSONStringUtil.toJSONString(fields);
+		return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
 		// StringBuilder sb = new StringBuilder();
 		// boolean firstElement = true;
 		// for (Literal l : this) {

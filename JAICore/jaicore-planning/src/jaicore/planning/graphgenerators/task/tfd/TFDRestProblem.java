@@ -5,13 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.TextNode;
-
 import jaicore.logging.ToJSONStringUtil;
 import jaicore.logic.fol.structure.Literal;
 import jaicore.logic.fol.structure.Monom;
@@ -40,9 +33,9 @@ public class TFDRestProblem implements Serializable {
 	public String toString() {
 		Map<String, Object> fields = new HashMap<>();
 		fields.put("state", this.state);
-		fields.put("remainingTasks", remainingTasks);
-		return ToJSONStringUtil.toJSONString(fields);
-//			return "TFDRestProblem [state=" + this.state + ", remainingTasks=" + this.remainingTasks + "]";
+		fields.put("remainingTasks", this.remainingTasks);
+		return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
+		// return "TFDRestProblem [state=" + this.state + ", remainingTasks=" + this.remainingTasks + "]";
 	}
 
 	@Override

@@ -104,7 +104,7 @@ public class Action implements Serializable {
 		Map<String, Object> fields = new HashMap<>();
 		fields.put("operation", this.operation);
 		fields.put("grounding", this.grounding);
-		return ToJSONStringUtil.toJSONString(fields);
+		return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
 		// return "Action [operation=" + this.operation + ", grounding=" + this.grounding + "]";
 	}
 

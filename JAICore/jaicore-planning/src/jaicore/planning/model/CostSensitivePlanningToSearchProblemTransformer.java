@@ -51,7 +51,7 @@ public class CostSensitivePlanningToSearchProblemTransformer<PO extends Operatio
 			public String toString() {
 				Map<String, Object> fields = new HashMap<>();
 				fields.put("problem", problem);
-				return ToJSONStringUtil.toJSONString(fields);
+				return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
 			}
 		};
 		/* derive the concrete graph search problem input */
