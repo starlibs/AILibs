@@ -1,5 +1,6 @@
 package jaicore.logging;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -40,10 +41,20 @@ public class ToJSONStringUtil {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static JsonNode parseObjectToJsonNode(final Object fieldValue, final ObjectMapper om) {
-		if (fieldValue instanceof Iterable<?>) {
+	public static JsonNode parseObjectToJsonNode(final Object fieldValue, final ObjectMapper om) {
+		if (fieldValue instanceof JsonNode) {
+			return (JsonNode) fieldValue;
+		}
+
+		if (fieldValue instanceof Collection<?>) {
 			ArrayNode valueArray = om.createArrayNode();
-			for (Object value : (Iterable<?>) fieldValue) {
+			for (Object value : (Collection<?>) fieldValue) {
+				valueArray.add(parseObjectToJsonNode(value, om));
+			}
+			return valueArray;
+		} else if (fieldValue.getClass().isArray()) {
+			ArrayNode valueArray = om.createArrayNode();
+			for (Object value : (Object[]) fieldValue) {
 				valueArray.add(parseObjectToJsonNode(value, om));
 			}
 			return valueArray;
