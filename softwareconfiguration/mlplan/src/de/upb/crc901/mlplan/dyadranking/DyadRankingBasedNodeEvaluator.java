@@ -27,6 +27,7 @@ import hasco.core.Util;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
 import hasco.serialization.ComponentLoader;
+import jaicore.basic.IObjectEvaluator;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.ml.core.exception.PredictionException;
@@ -42,7 +43,6 @@ import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomComplet
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomizedDepthFirstNodeEvaluator;
 import jaicore.search.algorithms.standard.random.RandomSearch;
 import jaicore.search.core.interfaces.GraphGenerator;
-import jaicore.search.core.interfaces.ISolutionEvaluator;
 import jaicore.search.model.other.SearchGraphPath;
 import jaicore.search.model.probleminputs.GeneralEvaluatedTraversalTree;
 import jaicore.search.model.travesaltree.Node;
@@ -69,7 +69,7 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 	private RandomSearch<T, String> randomPathCompleter;
 
 	/* The evaluator that can be used to get the performance of the paths */
-	private final ISolutionEvaluator<T, V> solutionEvaluator;
+	private IObjectEvaluator<ComponentInstance, V> pipelineEvaluator;
 
 	/* Stores the computed f-values s.t. they can be cached */
 	private final Map<T, V> fValueCache = new HashMap<>();
@@ -84,7 +84,7 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 	 */
 	private final int randomlyCompletedPaths;
 
-	private final double[] datasetMetaFeatures;
+	private double[] datasetMetaFeatures;
 
 	/*
 	 * Specifies the amount of paths that will be evaluated after ranking the paths
@@ -95,16 +95,16 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 
 	private final Predicate<T> priorityPredicateForRDFS;
 
-	private ADyadRanker dyadRanker = new PLNetDyadRanker();
+	private PLNetDyadRanker dyadRanker = new PLNetDyadRanker();
 
 	private WEKAPipelineCharacterizer characterizer;
 
-	public DyadRankingBasedNodeEvaluator(Collection<Component> components, ISolutionEvaluator<T, V> solutionEvaluator,
+	public DyadRankingBasedNodeEvaluator(Collection<Component> components, IObjectEvaluator<ComponentInstance, V> pipelineEvaluator,
 			int randomlyCompletedPaths, int evaluatedPaths, Random random, Predicate<T> priorityPredicateForRDFS,
 			double[] datasetMetaFeatures) {
 		super();
 		this.components = components;
-		this.solutionEvaluator = solutionEvaluator;
+		this.pipelineEvaluator = pipelineEvaluator;
 		this.randomlyCompletedPaths = randomlyCompletedPaths;
 		this.evaluatedPaths = evaluatedPaths;
 		this.random = random;
@@ -126,6 +126,12 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 			this.characterizer = null;
 
 		}
+		try {
+			this.dyadRanker.loadModelFromFile(Paths.get("resources","draco", "plnet", "pretrained_plnet.zip").toString());
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+			//logger.error("Could load model for plnet");
+		}
 
 	}
 
@@ -139,43 +145,44 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 		Instant startOfEvaluation = Instant.now();
 
 		/* Make sure that the completer knows the path until this node */
+		
 		if (!randomPathCompleter.knowsNode(node.getPoint())) {
 			synchronized (randomPathCompleter) {
 				randomPathCompleter.appendPathToNode(node.externalPath());
 			}
 		}
 		// draw N paths at random
-		List<List<T>> randomPaths = getNRandomPaths(node);
+		List<T> randomPaths = getNRandomPaths(node);
 		// order them according to dyad ranking
-		List<List<T>> allRankedPaths = getDyadRankedPaths(randomPaths, node);
+		List<ComponentInstance> allRankedPaths = getDyadRankedPaths(randomPaths);
 		// get the top k paths
-		List<List<T>> topKRankedPaths = allRankedPaths.subList(0, evaluatedPaths);
+		List<ComponentInstance> topKRankedPaths = allRankedPaths.subList(0, evaluatedPaths);
 		// evaluate the top k paths
-		List<Pair<List<T>, V>> allEvaluatedPaths = evaluateTopKPaths(topKRankedPaths);
+		List<Pair<ComponentInstance, V>> allEvaluatedPaths = evaluateTopKPaths(topKRankedPaths);
 		Duration evaluationTime = Duration.between(startOfEvaluation, Instant.now());
-		logger.debug("Evaluation of node {} took {}ms", node.getPoint(), evaluationTime.toMillis());
+		logger.info("Evaluation of node {} took {}ms", node.getPoint(), evaluationTime.toMillis());
 
 		return getBestSolution(allEvaluatedPaths);
 	}
 
-	private List<List<T>> getDyadRankedPaths(List<List<T>> randomPaths, Node<T, ?> node) {
-		List<Pair<List<T>, ComponentInstance>> randomPipelines = new ArrayList<>();
+	private List<ComponentInstance> getDyadRankedPaths(List<T> randomPaths) {
+		List<ComponentInstance> randomPipelines = new ArrayList<>();
 		// extract componentInstances that we can rank
-		for (List<T> randomPath : randomPaths) {
-			TFDNode goalNode = (TFDNode) randomPath.get(randomPath.size() - 1);
+		for (T randomPath : randomPaths) {
+			TFDNode goalNode = (TFDNode) randomPath;
 			ComponentInstance cI = Util.getSolutionCompositionFromState(components, goalNode.getState(), true);
-			randomPipelines.add(new Pair<>(randomPath, cI));
+			randomPipelines.add(cI);
 		}
 		// invoke dyad ranker
 		return rankRandomPipelines(randomPipelines);
 	}
 
-	private List<List<T>> rankRandomPipelines(List<Pair<List<T>, ComponentInstance>> randomPipelines) {
-		Map<Vector, List<T>> dyadToPath = new HashMap<>();
+	private List<ComponentInstance> rankRandomPipelines(List<ComponentInstance> randomPipelines) {
+		Map<Vector, ComponentInstance> dyadToPath = new HashMap<>();
 		List<Vector> alternatives = new ArrayList<>();
-		for (Pair<List<T>, ComponentInstance> ci : randomPipelines) {
-			Vector pipelineCharacterization = new DenseDoubleVector(characterizer.characterize(ci.getY()));
-			dyadToPath.put(pipelineCharacterization, ci.getX());
+		for (ComponentInstance ci : randomPipelines) {
+			Vector pipelineCharacterization = new DenseDoubleVector(characterizer.characterize(ci));
+			dyadToPath.put(pipelineCharacterization, ci);
 			alternatives.add(pipelineCharacterization);
 		}
 		SparseDyadRankingInstance toRank = new SparseDyadRankingInstance(new DenseDoubleVector(datasetMetaFeatures),
@@ -183,7 +190,7 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 		IDyadRankingInstance rankedInstance;
 		try {
 			rankedInstance = dyadRanker.predict(toRank);
-			List<List<T>> rankedPipelines = new ArrayList<>();
+			List<ComponentInstance> rankedPipelines = new ArrayList<>();
 			for (Dyad dyad : rankedInstance) {
 				rankedPipelines.add(dyadToPath.get(dyad.getAlternative()));
 			}
@@ -193,8 +200,8 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 		}
 	}
 
-	private List<List<T>> getNRandomPaths(Node<T, ?> node) throws InterruptedException, TimeoutException {
-		List<List<T>> completedPaths = new ArrayList<>();
+	private List<T> getNRandomPaths(Node<T, ?> node) throws InterruptedException, TimeoutException {
+		List<T> completedPaths = new ArrayList<>();
 		for (int currentPath = 0; currentPath < randomlyCompletedPaths; currentPath++) {
 			/*
 			 * complete the current path by the dfs-solution; we assume that this goes in
@@ -228,7 +235,7 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 				pathCompletion.remove(0);
 				completedPath.addAll(pathCompletion);
 			}
-			completedPaths.add(completedPath);
+			completedPaths.add(completedPath.get(completedPath.size() - 1));
 		}
 		return completedPaths;
 	}
@@ -240,11 +247,11 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 	 *            the paths, after ranking
 	 * @return the list of scores.
 	 */
-	private List<Pair<List<T>, V>> evaluateTopKPaths(List<List<T>> topKRankedPaths) {
-		List<Pair<List<T>, V>> evaluatedSolutions = new ArrayList<>();
-		for (List<T> node : topKRankedPaths) {
+	private List<Pair<ComponentInstance, V>> evaluateTopKPaths(List<ComponentInstance> topKRankedPaths) {
+		List<Pair<ComponentInstance, V>> evaluatedSolutions = new ArrayList<>();
+		for (ComponentInstance node : topKRankedPaths) {
 			try {
-				V score = solutionEvaluator.evaluateSolution(node);
+				V score = pipelineEvaluator.evaluate(node);
 				evaluatedSolutions.add(new Pair<>(node, score));
 			} catch (Exception e) {
 				logger.error("Couldn't evaluate {}", node);
@@ -261,7 +268,8 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 	 *            all solutions
 	 * @return
 	 */
-	private V getBestSolution(List<Pair<List<T>, V>> allEvaluatedPaths) {
+	private V getBestSolution(List<Pair<ComponentInstance, V>> allEvaluatedPaths) {
+
 		return allEvaluatedPaths.stream().map(Pair::getY).min(V::compareTo).orElseThrow(NoSuchElementException::new);
 	}
 
@@ -271,5 +279,13 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 		GeneralEvaluatedTraversalTree<T, String, Double> completionProblem = new GeneralEvaluatedTraversalTree<>(
 				generator, nodeEvaluator);
 		randomPathCompleter = new RandomSearch<>(completionProblem, priorityPredicateForRDFS, this.random);
+	}
+
+	public void setMetaFeatures(double[] array) {
+		this.datasetMetaFeatures = array;
+	}
+
+	public void setPipelineEvaluator(IObjectEvaluator<ComponentInstance, V> wrappedSearchBenchmark) {
+		this.pipelineEvaluator = wrappedSearchBenchmark;
 	}
 }
