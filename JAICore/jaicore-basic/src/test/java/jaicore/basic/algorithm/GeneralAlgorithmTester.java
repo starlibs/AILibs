@@ -179,6 +179,7 @@ public abstract class GeneralAlgorithmTester<P, I, O> implements ILoggingCustomi
 		new Timer("CancelTest Timer").schedule(new TimerTask() {
 			@Override
 			public void run() {
+				logger.info("Triggering cancel");
 				algorithm.cancel();
 				cancelEvent.set(System.currentTimeMillis());
 			}

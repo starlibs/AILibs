@@ -8,17 +8,17 @@ import jaicore.logging.ToJSONStringUtil;
 import jaicore.planning.core.Action;
 import jaicore.planning.core.Plan;
 
-public class CostSensitiveHTNPlanningProblem<A extends Action, V extends Comparable<V>> {
-	private final IHTNPlanningProblem corePlanningProblem;
+public class CostSensitiveHTNPlanningProblem<A extends Action, IPlanning extends IHTNPlanningProblem, V extends Comparable<V>> {
+	private final IPlanning corePlanningProblem;
 	private final IObjectEvaluator<Plan<A>, V> planEvaluator;
 
-	public CostSensitiveHTNPlanningProblem(IHTNPlanningProblem corePlanningProblem, IObjectEvaluator<Plan<A>, V> planEvaluator) {
+	public CostSensitiveHTNPlanningProblem(IPlanning corePlanningProblem, IObjectEvaluator<Plan<A>, V> planEvaluator) {
 		super();
 		this.corePlanningProblem = corePlanningProblem;
 		this.planEvaluator = planEvaluator;
 	}
 
-	public IHTNPlanningProblem getCorePlanningProblem() {
+	public IPlanning getCorePlanningProblem() {
 		return corePlanningProblem;
 	}
 

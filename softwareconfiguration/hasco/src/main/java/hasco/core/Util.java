@@ -31,8 +31,10 @@ import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.logic.fol.structure.Literal;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.planning.classical.algorithms.strips.forward.StripsUtil;
+import jaicore.planning.classical.problems.ceoc.CEOCAction;
 import jaicore.planning.core.Action;
 import jaicore.planning.core.Plan;
+import jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem;
 import jaicore.planning.hierarchical.problems.htn.IHierarchicalPlanningGraphGeneratorDeriver;
 import jaicore.search.model.travesaltree.Node;
 
@@ -205,12 +207,12 @@ public class Util {
 		return objectMap;
 	}
 
-	public static <N, A, V extends Comparable<V>> ComponentInstance getSolutionCompositionForNode(final IHierarchicalPlanningGraphGeneratorDeriver<?, ?, ?, ?, N, A> planningGraphDeriver,
+	public static <N, A, V extends Comparable<V>> ComponentInstance getSolutionCompositionForNode(final IHierarchicalPlanningGraphGeneratorDeriver<CEOCAction, CEOCIPSTNPlanningProblem, N, A> planningGraphDeriver,
 			final Collection<Component> components, final Monom initState, final Node<N, ?> path, final boolean resolveIntervals) {
 		return getSolutionCompositionForPlan(components, initState, planningGraphDeriver.getPlan(path.externalPath()), resolveIntervals);
 	}
 
-	public static <N, A, V extends Comparable<V>> ComponentInstance getComponentInstanceForNode(final IHierarchicalPlanningGraphGeneratorDeriver<?, ?, ?, ?, N, A> planningGraphDeriver,
+	public static <N, A, V extends Comparable<V>> ComponentInstance getComponentInstanceForNode(final IHierarchicalPlanningGraphGeneratorDeriver<CEOCAction, CEOCIPSTNPlanningProblem, N, A> planningGraphDeriver,
 			final Collection<Component> components, final Monom initState, final Node<N, ?> path, String name, final boolean resolveIntervals) {
 		return getComponentInstanceForPlan(components, initState, planningGraphDeriver.getPlan(path.externalPath()), name, resolveIntervals);
 	}
@@ -601,15 +603,16 @@ public class Util {
 		int depth = 0;
 		do {
 			Interval intervalToRefine = openRefinements.pop();
+			String offset = "";
 			for (int i = 0; i < depth; i++) {
-				System.out.print("\t");
+				offset += "\t";
 			}
-			System.out.println("[" + intervalToRefine.getInf() + ", " + intervalToRefine.getSup() + "]");
+			logger.info("{}[{}, {}]", offset, intervalToRefine.getInf(), intervalToRefine.getSup());
 
 			/* compute desired granularity for this specific interval */
 			double distanceToPointOfContentration = Math.min(Math.abs(intervalToRefine.getInf() - pointOfConcentration), Math.abs(intervalToRefine.getSup() - pointOfConcentration));
 			double maximumLengthOfFinestIntervals = Math.pow(distanceToPointOfContentration + 1, 2) * factorForMaximumLengthOfFinestIntervals;
-			System.out.println(Math.pow(distanceToPointOfContentration + 1, 2) + " * " + factorForMaximumLengthOfFinestIntervals + " = " + maximumLengthOfFinestIntervals);
+			logger.info("{} * {} = {}", Math.pow(distanceToPointOfContentration + 1, 2), factorForMaximumLengthOfFinestIntervals, maximumLengthOfFinestIntervals);
 			List<Interval> refinements = refineOnLinearScale(intervalToRefine, maxNumberOfSubIntervalsPerRefinement, maximumLengthOfFinestIntervals);
 
 			depth++;

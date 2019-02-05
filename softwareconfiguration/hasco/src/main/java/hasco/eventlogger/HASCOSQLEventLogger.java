@@ -1,10 +1,5 @@
 package hasco.eventlogger;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.eventbus.Subscribe;
-
-import jaicore.basic.SQLAdapter;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -14,12 +9,20 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.eventbus.Subscribe;
+
 import hasco.events.HASCORunStartedEvent;
 import hasco.events.HASCORunTerminatedEvent;
 import hasco.events.HASCOSolutionEvaluationEvent;
+import jaicore.basic.SQLAdapter;
 
 public class HASCOSQLEventLogger<T, V extends Comparable<V>> {
 
+	private Logger logger = LoggerFactory.getLogger(HASCOSQLEventLogger.class);
   private int runId;
   private final SQLAdapter sqlAdapter;
 
@@ -42,13 +45,13 @@ public class HASCOSQLEventLogger<T, V extends Comparable<V>> {
       }
 
       if (!haveRunTable) {
-        System.out.println("Creating table for runs");
+        logger.info("Creating table for runs");
         sqlAdapter.update(
             "CREATE TABLE `runs` ( `run_id` int(8) NOT NULL AUTO_INCREMENT, `seed` int(20) NOT NULL, `timeout` int(10) NOT NULL, `CPUs` int(2) NOT NULL, `benchmark` varchar(200) COLLATE utf8_bin DEFAULT NULL, `run_started` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, `run_terminated` timestamp NULL DEFAULT NULL, `solution` json DEFAULT NULL, `score` double DEFAULT NULL, PRIMARY KEY (`run_id`)) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_bin",
             new ArrayList<>());
       }
       if (!haveEvaluationTable) {
-        System.out.println("Creating table for evaluations");
+        logger.info("Creating table for evaluations");
         sqlAdapter.update(
             "CREATE TABLE `evaluations` (\r\n" + " `evaluation_id` int(10) NOT NULL AUTO_INCREMENT,\r\n" + " `run_id` int(8) NOT NULL,\r\n" + " `composition` json NOT NULL,\r\n"
                 + " `score` double NOT NULL,\r\n" + " PRIMARY KEY (`evaluation_id`)\r\n" + ") ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_bin",

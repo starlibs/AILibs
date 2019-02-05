@@ -241,7 +241,7 @@ public class ComponentLoader {
 									values.add(value.asText());
 								}
 							} else {
-								System.err.println("Warning: Categorical parameter " + name + " in component " + c.getName() + " without value list.");
+								L.error("Warning: Categorical parameter {} in component {} without value list.", name, c.getName());
 							}
 							p = new Parameter(name, new CategoricalParameterDomain(values), stringParamValues[2]);
 						}

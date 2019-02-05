@@ -102,7 +102,6 @@ public class isRefinementCompletedPredicate implements EvaluablePredicate {
 			}
 			else
 				throw new UnsupportedOperationException("Currently no support for testing parameters of type " + param.getClass().getName());
-//			System.out.println("\t" + param.getName() + " (" + componentParams.get(param.getName()) + ") is still refinable.");
 		}
 		logger.info("Test for isRefinementCompletedPredicate({},{}) is positive", params[0].getName(), objectContainer);
 		return true;

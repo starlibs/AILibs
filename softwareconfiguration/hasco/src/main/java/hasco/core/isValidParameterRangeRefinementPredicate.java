@@ -259,14 +259,16 @@ public class isValidParameterRangeRefinementPredicate implements EvaluablePredic
 		int depth = 0;
 		do {
 			Interval intervalToRefine = openRefinements.pop();
+			String offset = "";
 			for (int i = 0; i < depth; i++) {
-				System.out.print("\t");
+				offset += "\t";
 			}
-			System.out.println("[" + intervalToRefine.getInf() + ", " + intervalToRefine.getSup() + "]");
+			logger.info("{}[{}, {}]", offset, intervalToRefine.getInf(), intervalToRefine.getSup());
+
 			/* compute desired granularity for this specific interval */
 			double distanceToPointOfContentration = Math.min(Math.abs(intervalToRefine.getInf() - pointOfConcentration), Math.abs(intervalToRefine.getSup() - pointOfConcentration));
 			double maximumLengthOfFinestIntervals = Math.pow(distanceToPointOfContentration + 1, 2) * factorForMaximumLengthOfFinestIntervals;
-			System.out.println(Math.pow(distanceToPointOfContentration + 1, 2) + " * " + factorForMaximumLengthOfFinestIntervals + " = " + maximumLengthOfFinestIntervals);
+			logger.info("{} * {} = {}", Math.pow(distanceToPointOfContentration + 1, 2), factorForMaximumLengthOfFinestIntervals, maximumLengthOfFinestIntervals);
 			List<Interval> refinements = this.refineOnLinearScale(intervalToRefine, maxNumberOfSubIntervalsPerRefinement, maximumLengthOfFinestIntervals);
 			depth++;
 			if (refinements.size() == 1 && refinements.get(0).equals(intervalToRefine)) {

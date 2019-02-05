@@ -6,10 +6,8 @@ import java.util.Map;
 
 import jaicore.logging.ToJSONStringUtil;
 import jaicore.planning.classical.problems.ceoc.CEOCAction;
-import jaicore.planning.classical.problems.ceoc.CEOCOperation;
 import jaicore.planning.core.Plan;
 import jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem;
-import jaicore.planning.hierarchical.problems.ceocipstn.OCIPMethod;
 import jaicore.planning.hierarchical.problems.htn.IHierarchicalPlanningGraphGeneratorDeriver;
 //github.com/fmohr/AILibs.git
 import jaicore.search.core.interfaces.GraphGenerator;
@@ -27,15 +25,15 @@ import jaicore.search.core.interfaces.GraphGenerator;
  */
 public class DefaultHASCOPlanningGraphGeneratorDeriver<N, A> implements IHASCOPlanningGraphGeneratorDeriver<N, A> {
 
-	private final IHierarchicalPlanningGraphGeneratorDeriver<CEOCOperation, OCIPMethod, CEOCAction, CEOCIPSTNPlanningProblem<CEOCOperation, OCIPMethod, CEOCAction>, N, A> wrappedDeriver;
+	private final IHierarchicalPlanningGraphGeneratorDeriver<CEOCAction, CEOCIPSTNPlanningProblem, N, A> wrappedDeriver;
 
-	public DefaultHASCOPlanningGraphGeneratorDeriver(final IHierarchicalPlanningGraphGeneratorDeriver<CEOCOperation, OCIPMethod, CEOCAction, CEOCIPSTNPlanningProblem<CEOCOperation, OCIPMethod, CEOCAction>, N, A> wrappedDeriver) {
+	public DefaultHASCOPlanningGraphGeneratorDeriver(final IHierarchicalPlanningGraphGeneratorDeriver<CEOCAction, CEOCIPSTNPlanningProblem, N, A> wrappedDeriver) {
 		super();
 		this.wrappedDeriver = wrappedDeriver;
 	}
 
 	@Override
-	public GraphGenerator<N, A> transform(final CEOCIPSTNPlanningProblem<CEOCOperation, OCIPMethod, CEOCAction> problem) {
+	public GraphGenerator<N, A> transform(final CEOCIPSTNPlanningProblem problem) {
 		return this.wrappedDeriver.transform(problem);
 	}
 
@@ -44,7 +42,7 @@ public class DefaultHASCOPlanningGraphGeneratorDeriver<N, A> implements IHASCOPl
 		return this.wrappedDeriver.getPlan(path);
 	}
 
-	public IHierarchicalPlanningGraphGeneratorDeriver<CEOCOperation, OCIPMethod, CEOCAction, CEOCIPSTNPlanningProblem<CEOCOperation, OCIPMethod, CEOCAction>, N, A> getWrappedDeriver() {
+	public IHierarchicalPlanningGraphGeneratorDeriver<CEOCAction, CEOCIPSTNPlanningProblem, N, A> getWrappedDeriver() {
 		return this.wrappedDeriver;
 	}
 

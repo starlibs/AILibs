@@ -14,6 +14,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import hasco.core.HASCO;
 import hasco.core.HASCOFactory;
@@ -39,6 +41,8 @@ import jaicore.search.util.SanityCheckResult;
 public abstract class HASCOTester<ISearch extends GraphSearchInput<N, A>, N, A>
 		extends GeneralAlgorithmTester<RefinementConfiguredSoftwareConfigurationProblem<Double>, RefinementConfiguredSoftwareConfigurationProblem<Double>, HASCOSolutionCandidate<Double>> {
 
+	private Logger logger = LoggerFactory.getLogger(HASCOTester.class);
+	
 	private HASCO<ISearch, N, A, Double> getHASCOForProblem(RefinementConfiguredSoftwareConfigurationProblem<Double> problem) {
 		HASCOFactory<ISearch, N, A, Double> factory = getFactory();
 		factory.setProblemInput(problem);
@@ -105,7 +109,7 @@ public abstract class HASCOTester<ISearch extends GraphSearchInput<N, A>, N, A>
 			for (AlgorithmEvent e : hasco) {
 				if (e instanceof HASCOSolutionEvent) {
 					solutions.add(((HASCOSolutionCandidate<Double>) ((HASCOSolutionEvent<Double>) e).getSolutionCandidate()).getComponentInstance());
-					System.out.println(CompositionSerializer.serializeComponentInstance(((HASCOSolutionCandidate<Double>) ((HASCOSolutionEvent<Double>) e).getSolutionCandidate()).getComponentInstance()));
+					logger.info("Found solution {}", CompositionSerializer.serializeComponentInstance(((HASCOSolutionCandidate<Double>) ((HASCOSolutionEvent<Double>) e).getSolutionCandidate()).getComponentInstance()));
 				}
 			}
 			Set<Object> uniqueSolutions = new HashSet<>(solutions);

@@ -115,7 +115,7 @@ public class TwoPhaseHASCO extends SoftwareConfigurationAlgorithm<TwoPhaseSoftwa
 							}
 						}
 					} catch (Exception e) {
-						System.err.println("Timeouter died away. This must not happen; killing the whole application. The exception responsible for this is:");
+						logger.error("Timeouter died away. This must not happen; killing the whole application. The exception responsible for this is:");
 						e.printStackTrace();
 						System.exit(1);
 					}

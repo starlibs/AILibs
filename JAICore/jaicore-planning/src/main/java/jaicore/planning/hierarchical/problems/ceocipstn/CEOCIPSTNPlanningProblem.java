@@ -8,7 +8,6 @@ import jaicore.logic.fol.structure.CNFFormula;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.logic.fol.theories.EvaluablePredicate;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.ceociptfd.OracleTaskResolver;
-import jaicore.planning.hierarchical.problems.ceocstn.CEOCSTNPlanningDomain;
 import jaicore.planning.hierarchical.problems.ceocstn.CEOCSTNPlanningProblem;
 import jaicore.planning.hierarchical.problems.stn.TaskNetwork;
 
@@ -17,11 +16,16 @@ public class CEOCIPSTNPlanningProblem extends CEOCSTNPlanningProblem {
 	private final Map<String, EvaluablePredicate> evaluablePlanningPredicates;
 	private final Map<String, OracleTaskResolver> oracleResolvers;
 
-	public CEOCIPSTNPlanningProblem(CEOCSTNPlanningDomain domain, CNFFormula knowledge, Monom init, TaskNetwork network, Map<String, EvaluablePredicate> evaluablePredicates,
+	public CEOCIPSTNPlanningProblem(CEOCIPSTNPlanningDomain domain, CNFFormula knowledge, Monom init, TaskNetwork network, Map<String, EvaluablePredicate> evaluablePredicates,
 			Map<String, OracleTaskResolver> oracleResolvers) {
 		super(domain, knowledge, init, network);
 		this.evaluablePlanningPredicates = evaluablePredicates;
 		this.oracleResolvers = oracleResolvers;
+	}
+	
+	@Override
+	public CEOCIPSTNPlanningDomain getDomain() {
+		return (CEOCIPSTNPlanningDomain)super.getDomain();
 	}
 
 	public Map<String, EvaluablePredicate> getEvaluablePlanningPredicates() {

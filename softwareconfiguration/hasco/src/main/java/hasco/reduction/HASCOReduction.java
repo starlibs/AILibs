@@ -33,16 +33,13 @@ import jaicore.logic.fol.structure.VariableParam;
 import jaicore.logic.fol.theories.EvaluablePredicate;
 import jaicore.planning.classical.problems.ceoc.CEOCAction;
 import jaicore.planning.classical.problems.ceoc.CEOCOperation;
-import jaicore.planning.classical.problems.strips.Operation;
 import jaicore.planning.core.Action;
 import jaicore.planning.core.Plan;
 import jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningDomain;
 import jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem;
 import jaicore.planning.hierarchical.problems.ceocipstn.OCIPMethod;
 import jaicore.planning.hierarchical.problems.htn.CostSensitiveHTNPlanningProblem;
-import jaicore.planning.hierarchical.problems.htn.IHTNPlanningProblem;
 import jaicore.planning.hierarchical.problems.htn.IHierarchicalPlanningGraphGeneratorDeriver;
-import jaicore.planning.hierarchical.problems.stn.Method;
 import jaicore.planning.hierarchical.problems.stn.TaskNetwork;
 import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.probleminputs.GraphSearchInput;
@@ -54,7 +51,7 @@ import jaicore.search.probleminputs.GraphSearchInput;
  *
  */
 public class HASCOReduction<V extends Comparable<V>> implements
-		AlgorithmProblemTransformer<RefinementConfiguredSoftwareConfigurationProblem<V>, CostSensitiveHTNPlanningProblem<CEOCOperation, OCIPMethod, CEOCAction, CEOCIPSTNPlanningProblem<CEOCOperation, OCIPMethod, CEOCAction>, V>> {
+		AlgorithmProblemTransformer<RefinementConfiguredSoftwareConfigurationProblem<V>, CostSensitiveHTNPlanningProblem<CEOCAction, CEOCIPSTNPlanningProblem, V>> {
 
 	// component selection
 	private static final String RESOLVE_COMPONENT_IFACE_PREFIX = "1_tResolve";
@@ -259,15 +256,15 @@ public class HASCOReduction<V extends Comparable<V>> implements
 		return new CEOCIPSTNPlanningDomain(operations, methods);
 	}
 
-	public CEOCIPSTNPlanningProblem<CEOCOperation, OCIPMethod, CEOCAction> getPlanningProblem(final CEOCIPSTNPlanningDomain domain, final CNFFormula knowledge, final Monom init) {
+	public CEOCIPSTNPlanningProblem getPlanningProblem(final CEOCIPSTNPlanningDomain domain, final CNFFormula knowledge, final Monom init) {
 		Map<String, EvaluablePredicate> evaluablePredicates = new HashMap<>();
 		evaluablePredicates.put("isValidParameterRangeRefinement", new isValidParameterRangeRefinementPredicate(this.components, this.paramRefinementConfig));
 		evaluablePredicates.put("notRefinable", new isNotRefinable(this.components, this.paramRefinementConfig));
 		evaluablePredicates.put("refinementCompleted", new isRefinementCompletedPredicate(this.components, this.paramRefinementConfig));
-		return new CEOCIPSTNPlanningProblem<>(domain, knowledge, init, new TaskNetwork(RESOLVE_COMPONENT_IFACE_PREFIX + this.originalProblem.getRequiredInterface() + "('request', 'solution')"), evaluablePredicates, new HashMap<>());
+		return new CEOCIPSTNPlanningProblem(domain, knowledge, init, new TaskNetwork(RESOLVE_COMPONENT_IFACE_PREFIX + this.originalProblem.getRequiredInterface() + "('request', 'solution')"), evaluablePredicates, new HashMap<>());
 	}
 
-	public CEOCIPSTNPlanningProblem<CEOCOperation, OCIPMethod, CEOCAction> getPlanningProblem() {
+	public CEOCIPSTNPlanningProblem getPlanningProblem() {
 		return this.getPlanningProblem(this.getPlanningDomain(), new CNFFormula(), this.getInitState());
 	}
 
@@ -278,12 +275,12 @@ public class HASCOReduction<V extends Comparable<V>> implements
 	 * @return
 	 */
 	public <T, A, ISearch extends GraphSearchInput<T, A>> GraphGenerator<T, A> getGraphGeneratorUsedByHASCOForSpecificPlanner(
-			final IHierarchicalPlanningGraphGeneratorDeriver<? extends Operation, ? extends Method, ? extends Action, IHTNPlanningProblem<?, ?, ?>, T, A> transformer) {
+			final IHierarchicalPlanningGraphGeneratorDeriver<? extends Action, CEOCIPSTNPlanningProblem, T, A> transformer) {
 		return transformer.transform(this.getPlanningProblem());
 	}
 
 	@Override
-	public CostSensitiveHTNPlanningProblem<CEOCOperation, OCIPMethod, CEOCAction, CEOCIPSTNPlanningProblem<CEOCOperation, OCIPMethod, CEOCAction>, V> transform(final RefinementConfiguredSoftwareConfigurationProblem<V> problem) {
+	public CostSensitiveHTNPlanningProblem<CEOCAction, CEOCIPSTNPlanningProblem, V> transform(final RefinementConfiguredSoftwareConfigurationProblem<V> problem) {
 
 		/* set object variables that will be important for several methods in the reduction */
 		this.originalProblem = problem;
@@ -291,7 +288,7 @@ public class HASCOReduction<V extends Comparable<V>> implements
 		this.paramRefinementConfig = this.originalProblem.getParamRefinementConfig();
 
 		/* build the cost insensitive planning problem */
-		CEOCIPSTNPlanningProblem<CEOCOperation, OCIPMethod, CEOCAction> planningProblem = this.getPlanningProblem();
+		CEOCIPSTNPlanningProblem planningProblem = this.getPlanningProblem();
 
 		/* derive a plan evaluator from the configuration evaluator */
 		IObjectEvaluator<Plan<CEOCAction>, V> planEvaluator = new IObjectEvaluator<Plan<CEOCAction>, V>() {
@@ -310,7 +307,7 @@ public class HASCOReduction<V extends Comparable<V>> implements
 			}
 
 		};
-		CostSensitiveHTNPlanningProblem<CEOCOperation, OCIPMethod, CEOCAction, CEOCIPSTNPlanningProblem<CEOCOperation, OCIPMethod, CEOCAction>, V> costSensitiveProblem = new CostSensitiveHTNPlanningProblem<>(planningProblem, planEvaluator);
+		CostSensitiveHTNPlanningProblem<CEOCAction, CEOCIPSTNPlanningProblem, V> costSensitiveProblem = new CostSensitiveHTNPlanningProblem<>(planningProblem, planEvaluator);
 		return costSensitiveProblem;
 	}
 }

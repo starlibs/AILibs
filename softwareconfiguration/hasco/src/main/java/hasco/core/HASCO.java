@@ -31,26 +31,18 @@ import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.DelayedCancellationCheckException;
 import jaicore.basic.algorithm.exceptions.DelayedTimeoutCheckException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
-import jaicore.graphvisualizer.gui.VisualizationWindow;
 import jaicore.logging.ToJSONStringUtil;
 import jaicore.planning.classical.problems.ceoc.CEOCAction;
-import jaicore.planning.classical.problems.ceoc.CEOCOperation;
 import jaicore.planning.core.EvaluatedSearchGraphBasedPlan;
 import jaicore.planning.core.Plan;
-import jaicore.planning.hierarchical.algorithms.forwarddecomposition.ForwardDecompositionReducer;
-import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDTooltipGenerator;
 import jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem;
-import jaicore.planning.hierarchical.problems.ceocipstn.OCIPMethod;
 import jaicore.planning.hierarchical.problems.htn.CostSensitiveHTNPlanningProblem;
 import jaicore.planning.hierarchical.problems.htn.CostSensitivePlanningToSearchProblemTransformer;
-//github.com/fmohr/AILibs.git
-import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.core.interfaces.IOptimalPathInORGraphSearch;
 import jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
-import jaicore.search.model.travesaltree.NodeTooltipGenerator;
 import jaicore.search.probleminputs.GraphSearchInput;
 import jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 
@@ -75,7 +67,7 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 	private final IOptimalPathInORGraphSearchFactory<ISearch, N, A, V, ?, ?> searchFactory;
 
 	/* working constants of the algorithms - these are effectively final but are not set at object creation time */
-	private CostSensitiveHTNPlanningProblem<CEOCOperation, OCIPMethod, CEOCAction, CEOCIPSTNPlanningProblem<CEOCOperation, OCIPMethod, CEOCAction>, V> planningProblem;
+	private CostSensitiveHTNPlanningProblem<CEOCAction, CEOCIPSTNPlanningProblem, V> planningProblem;
 	private GraphSearchWithPathEvaluationsInput<N, A, V> searchProblem;
 	private IOptimalPathInORGraphSearch<ISearch, N, A, V, ?, ?> search;
 	private final List<HASCOSolutionCandidate<V>> listOfAllRecognizedSolutions = new ArrayList<>();
@@ -83,8 +75,7 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 	/* runtime variables of algorithm */
 	private boolean searchCreatedAndInitialized = false;
 	private final TimeRecordingEvaluationWrapper<V> timeGrabbingEvaluationWrapper;
-	private HASCOSolutionCandidate<V> bestRecognizedSolution;
-
+	
 	/**Extension: Allow other clients to listen to search events */
 	Set<Object> searchListeners = new HashSet<>();
 
@@ -125,10 +116,10 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 				String operations = this.planningProblem.getCorePlanningProblem().getDomain().getOperations().stream()
 						.map(o -> "\n\t\t" + o.getName() + "(" + o.getParams() + ")\n\t\t\tPre: " + o.getPrecondition() + "\n\t\t\tAdd List: " + o.getAddLists() + "\n\t\t\tDelete List: " + o.getDeleteLists()).collect(Collectors.joining());
 				String methods = this.planningProblem.getCorePlanningProblem().getDomain().getMethods().stream().map(m -> "\n\t\t" + m.getName() + "(" + m.getParameters() + ") for task " + m.getTask() + "\n\t\t\tPre: " + m.getPrecondition()
-						+ "\n\t\t\tPre Eval: " + m.getEvaluablePrecondition() + "\n\t\t\tNetwork: " + m.getNetwork().getLineBasedStringRepresentation()).collect(Collectors.joining());
+						+ "\n\t\t\tPre Eval: " +  m.getEvaluablePrecondition() + "\n\t\t\tNetwork: " + m.getNetwork().getLineBasedStringRepresentation()).collect(Collectors.joining());
 				this.logger.debug("Derived the following HTN planning problem:\n\tOperations:{}\n\tMethods:{}", operations, methods);
 			}
-			this.searchProblem = new CostSensitivePlanningToSearchProblemTransformer<CEOCOperation, OCIPMethod, CEOCAction, CEOCIPSTNPlanningProblem<CEOCOperation, OCIPMethod, CEOCAction>, V, N, A>(this.planningGraphGeneratorDeriver)
+			this.searchProblem = new CostSensitivePlanningToSearchProblemTransformer<CEOCAction, CEOCIPSTNPlanningProblem, V, N, A>(this.planningGraphGeneratorDeriver)
 					.transform(this.planningProblem);
 
 			/* communicate that algorithm has been initialized */
@@ -136,6 +127,8 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 			return this.activate();
 		}
 		case active: {
+			
+			logger.trace("Conducting next step. Search created and initialized: {}", this.searchCreatedAndInitialized);
 
 			/* Check termination */
 			try {
@@ -147,12 +140,13 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 				e1.printStackTrace();
 				throw e1.getException();
 			}
+			logger.trace("No stop criteria have caused HASCO to stop up to now. Proceeding ...");
 
 			/* if the search itself has not been initialized, do this now */
 			if (!this.searchCreatedAndInitialized) {
-
+				
 				/* create search algorithm, set its logger, and initialize visualization*/
-				this.logger.debug("Creating the search object");
+				this.logger.debug("Creating and initializing the search object");
 				this.searchFactory.setProblemInput(this.searchProblem, this.searchProblemTransformer);
 				this.search = this.searchFactory.getAlgorithm();
 				this.search.setNumCPUs(this.getNumCPUs());
@@ -166,11 +160,7 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 				}
 				if (this.getConfig().visualizationEnabled()) {
 					this.logger.info("Launching graph visualization");
-					VisualizationWindow<?, ?> window = new VisualizationWindow<>(this.search);
-					if ((this.planningGraphGeneratorDeriver instanceof DefaultHASCOPlanningGraphGeneratorDeriver
-							&& ((DefaultHASCOPlanningGraphGeneratorDeriver) this.planningGraphGeneratorDeriver).getWrappedDeriver() instanceof ForwardDecompositionReducer) && this.search instanceof BestFirst) {
-						window.setTooltipGenerator(new NodeTooltipGenerator<>(new TFDTooltipGenerator()));
-					}
+					throw new UnsupportedOperationException("Visualization is currently not supported in HASCO.");
 				}
 
 				/* register external listeners */
@@ -181,22 +171,27 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 				/* now initialize the search */
 				this.logger.debug("Initializing the search");
 				boolean searchInitializationObserved = false;
-				while (this.search.hasNext() && !(searchInitializationObserved = (this.search.nextWithException() instanceof AlgorithmInitializedEvent))) {
-					;
+				AlgorithmEvent searchEvent;
+				do {
+					searchEvent = this.search.nextWithException();
+					logger.debug("Observing search event {}", searchEvent);
+					searchInitializationObserved = (searchEvent instanceof AlgorithmInitializedEvent);
 				}
+				while (this.search.hasNext() && !searchInitializationObserved);
 				if (!searchInitializationObserved) {
 					throw new IllegalStateException("The search underlying HASCO could not be initialized successully.");
 				}
+				logger.debug("Search has been initialized. Returning HASCOSearchInitializedEvent.");
 				HASCOSearchInitializedEvent event = new HASCOSearchInitializedEvent();
 				this.post(event);
 				this.searchCreatedAndInitialized = true;
 				return event;
 			}
-
+			
 			/* otherwise iterate over the search */
 			AlgorithmEvent searchEvent;
 			while (!((searchEvent = this.search.nextWithException()) instanceof AlgorithmFinishedEvent)) {
-
+				
 				/* otherwise, if a solution has been found, we announce this finding to our listeners and memorize if it is a new best candidate */
 				if (searchEvent instanceof EvaluatedSearchSolutionCandidateFoundEvent) {
 					this.logger.info("Received new solution from search, communicating this solution to the HASCO listeners.");
@@ -226,13 +221,14 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 					this.post(hascoSolutionEvent);
 					return hascoSolutionEvent;
 				}
+				else
+					logger.debug("Received event {} from search. Going to next event.", searchEvent);
 			}
 			return this.terminate();
 		}
 		default:
 			throw new IllegalStateException("HASCO cannot do anything in state " + this.getState());
 		}
-
 	}
 
 	protected void afterSearch() {
@@ -251,16 +247,23 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 		return this.searchProblem.getGraphGenerator();
 	}
 
-	public CostSensitiveHTNPlanningProblem<CEOCOperation, OCIPMethod, CEOCAction, CEOCIPSTNPlanningProblem<CEOCOperation, OCIPMethod, CEOCAction>, V> getPlanningProblem() {
+	public CostSensitiveHTNPlanningProblem<CEOCAction, CEOCIPSTNPlanningProblem, V> getPlanningProblem() {
 		return this.planningProblem;
 	}
 
 	@Override
 	public void cancel() {
+		if (isCanceled()) {
+			logger.debug("Ignoring cancel, because cancel has been triggered in the past already.");
+			return;
+		}
+		logger.info("Received cancel, first processing the cancel locally, then forwarding to search.");
 		super.cancel();
 		if (this.search != null) {
+			logger.info("Trigger cancel on search.");
 			this.search.cancel();
 		}
+		logger.info("Finished, now terminating");
 		this.terminate();
 	}
 

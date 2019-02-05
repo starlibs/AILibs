@@ -950,6 +950,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 			this.logger.info("Initializing BestFirst search {} with {} CPUs and a timeout of {}ms", this, this.getConfig().cpus(), this.getConfig().timeout());
 			this.parallelizeNodeExpansion(this.getConfig().cpus());
 			this.initGraph();
+			logger.info("Search initialized, returning activation event.");
 			return this.activate();
 		}
 		case active: {

@@ -16,7 +16,7 @@ import jaicore.planning.hierarchical.problems.htn.IHierarchicalPlanningGraphGene
 import jaicore.planning.hierarchical.problems.stn.STNPlanningProblem;
 import jaicore.search.core.interfaces.GraphGenerator;
 
-public class ForwardDecompositionReducer<PA extends Action> implements IHierarchicalPlanningGraphGeneratorDeriver<PA, TFDNode, String> {
+public class ForwardDecompositionReducer<PA extends Action, IPlanning extends IHTNPlanningProblem> implements IHierarchicalPlanningGraphGeneratorDeriver<PA, IPlanning, TFDNode, String> {
 
 	@Override
 	public GraphGenerator<TFDNode, String> transform(IHTNPlanningProblem planningProblem) {

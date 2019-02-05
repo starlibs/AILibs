@@ -49,10 +49,10 @@ public class GraphSearchBasedHTNPlanningAlgorithm<PA extends Action, IP extends 
 	private String loggerName;
 
 	/* algorithm inputs */
-	private final IHierarchicalPlanningGraphGeneratorDeriver<PA, NSrc, ASrc> problemTransformer;
+	private final IHierarchicalPlanningGraphGeneratorDeriver<PA, IP, NSrc, ASrc> problemTransformer;
 	private final IOptimalPathInORGraphSearch<ISearch, NSrc, ASrc, V, ?, ?> search;
 
-	public GraphSearchBasedHTNPlanningAlgorithm(final IP problem, final IHierarchicalPlanningGraphGeneratorDeriver<PA, NSrc, ASrc> problemTransformer,
+	public GraphSearchBasedHTNPlanningAlgorithm(final IP problem, final IHierarchicalPlanningGraphGeneratorDeriver<PA, IP, NSrc, ASrc> problemTransformer,
 			final IOptimalPathInORGraphSearchFactory<ISearch, NSrc, ASrc, V, ?, ?> searchFactory, final SearchProblemInputBuilder<NSrc, ASrc, ISearch> searchProblemBuilder) {
 		super(problem);
 

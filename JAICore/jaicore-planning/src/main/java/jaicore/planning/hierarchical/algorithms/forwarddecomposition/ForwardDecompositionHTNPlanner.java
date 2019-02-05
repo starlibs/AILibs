@@ -20,6 +20,6 @@ public class ForwardDecompositionHTNPlanner<PA extends Action, IPlanning extends
 
 	public ForwardDecompositionHTNPlanner(IPlanning problem, IOptimalPathInORGraphSearchFactory<ISearch, TFDNode, String, V, ?, ?> searchFactory,
 			SearchProblemInputBuilder<TFDNode, String, ISearch> searchProblemBuilder) {
-		super(problem, new ForwardDecompositionReducer<PA>(), searchFactory, searchProblemBuilder);
+		super(problem, new ForwardDecompositionReducer<PA, IPlanning>(), searchFactory, searchProblemBuilder);
 	}
 }
