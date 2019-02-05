@@ -42,6 +42,9 @@ public class ToJSONStringUtil {
 
 	@SuppressWarnings("unchecked")
 	public static JsonNode parseObjectToJsonNode(final Object fieldValue, final ObjectMapper om) {
+		if (fieldValue == null) {
+			return new TextNode(fieldValue + "");
+		}
 		if (fieldValue instanceof JsonNode) {
 			return (JsonNode) fieldValue;
 		}
