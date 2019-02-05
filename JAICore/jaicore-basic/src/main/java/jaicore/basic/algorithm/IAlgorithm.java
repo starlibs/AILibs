@@ -86,4 +86,11 @@ public interface IAlgorithm<I, O> extends Iterable<AlgorithmEvent>, Iterator<Alg
 	 * Overrides the call of Callable to restrict the set of allowed exceptions
 	 */
 	public O call() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException;
+	
+	/**
+	 * globally unique identifier for the algorithm run
+	 * 
+	 * @return
+	 */
+	public String getId();
 }

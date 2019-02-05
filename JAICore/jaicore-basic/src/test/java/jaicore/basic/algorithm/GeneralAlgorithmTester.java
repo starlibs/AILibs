@@ -116,7 +116,7 @@ public abstract class GeneralAlgorithmTester<P, I, O> implements ILoggingCustomi
 		int numberOfThreadsBefore = Thread.activeCount();
 
 		/* set up timer for interruption */
-		Thread t = new Thread(task, "InterruptTest Algorithm runner for " + algorithm);
+		Thread t = new Thread(task, "InterruptTest Algorithm runner for " + algorithm.getId());
 		AtomicLong interruptEvent = new AtomicLong();
 		t.start();
 		new Timer("InterruptTest Timer").schedule(new TimerTask() {
@@ -189,7 +189,7 @@ public abstract class GeneralAlgorithmTester<P, I, O> implements ILoggingCustomi
 		long start = System.currentTimeMillis();
 		boolean cancellationExceptionSeen = false;
 		boolean timeoutTriggered = false;
-		Thread t = new Thread(task, "CancelTest Algorithm runner for " + algorithm);
+		Thread t = new Thread(task, "CancelTest Algorithm runner for " + algorithm.getId());
 		t.start();
 		try {
 			O output = task.get(INTERRUPTION_DELAY + INTERRUPTION_CLEANUP_TOLERANCE, TimeUnit.MILLISECONDS);
@@ -233,7 +233,7 @@ public abstract class GeneralAlgorithmTester<P, I, O> implements ILoggingCustomi
 		long start = System.currentTimeMillis();
 		boolean timeoutedExceptionSeen = false;
 		boolean timeoutTriggered = false;
-		Thread t = new Thread(task, "TimeoutTest Algorithm runner for " + algorithm);
+		Thread t = new Thread(task, "TimeoutTest Algorithm runner for " + algorithm.getId());
 		t.start();
 		try {
 			O output = task.get(INTERRUPTION_DELAY + INTERRUPTION_CLEANUP_TOLERANCE, TimeUnit.MILLISECONDS);

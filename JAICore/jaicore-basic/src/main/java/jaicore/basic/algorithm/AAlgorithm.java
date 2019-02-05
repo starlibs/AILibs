@@ -38,6 +38,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	private long shutdownInitialized = -1; // timestamp for when the shutdown has been initialized
 	private long activationTime = -1; // timestamp of algorithm activation
 
+	private String id;
 	private long deadline = -1; // timestamp when algorithm must terminate due to timeout
 	private long timeOfTimeoutDetection = -1; // timestamp for when timeout has been triggered
 	private long canceled = -1; // timestamp for when the algorithm has been canceled
@@ -183,10 +184,18 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 		return this.canceled > 0;
 	}
 	
+	@Override
+	public String getId() {
+		if (id == null) {
+			id = getClass().getName() + "-" + System.currentTimeMillis();
+		}
+		return id;
+	}
+	
 	protected void checkAndConductTermination() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, DelayedTimeoutCheckException, DelayedCancellationCheckException {
-		this.logger.debug("Checking Termination of {}", this);
+		this.logger.debug("Checking Termination");
 		if (isTimeouted()) {
-			this.logger.info("Timeout detected for {}, shutting down the algorithm and stopping execution with TimeoutException", this);
+			this.logger.info("Timeout detected for {}, shutting down the algorithm and stopping execution with TimeoutException", this.getId());
 			logger.debug("Invoking shutdown");
 			this.unregisterThreadAndShutdown();
 			logger.debug("Throwing TimeoutException");
@@ -198,7 +207,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 			}
 		}
 		if (this.isCanceled()) {
-			this.logger.info("Cancel detected for {}, stopping execution with AlgorithmExceptionCanceledException", this);
+			this.logger.info("Cancel detected for {}, stopping execution with AlgorithmExceptionCanceledException", this.getId());
 			this.unregisterThreadAndShutdown(); // calling cancel() usually already shutdowns, but this behavior may have been overwritten
 			AlgorithmExecutionCanceledException e = new AlgorithmExecutionCanceledException(); // for a controlled cancel from outside on the algorithm
 			if (System.currentTimeMillis() - this.canceled > 100) {
@@ -208,7 +217,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 			}
 		}
 		if (Thread.currentThread().isInterrupted()) {
-			this.logger.info("Interruption detected for {}, stopping execution with InterruptedException. Resetting interrupted-flag.", this);
+			this.logger.info("Interruption detected for {}, stopping execution with InterruptedException. Resetting interrupted-flag.", this.getId());
 			Thread.interrupted(); // clear the interrupt-field. This is necessary, because otherwise some shutdown-activities (like waiting for pool shutdown) might fail
 			this.unregisterThreadAndShutdown();
 			Thread.currentThread().interrupt(); // interrupt again to double-inform the invoker (not only via Exception but also over the interrupted-flag)
@@ -234,16 +243,16 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 			}
 			this.shutdownInitialized = System.currentTimeMillis();
 		}
-		this.logger.info("Entering shutdown procedure for {}. Setting algorithm state from {} to inactive and interrupting {} active threads.", this, this.getState(), this.activeThreads.size());
+		this.logger.info("Entering shutdown procedure for {}. Setting algorithm state from {} to inactive and interrupting {} active threads.", this.getId(), this.getState(), this.activeThreads.size());
 		this.activeThreads.forEach(t -> {
-			this.logger.info("Interrupting {} on behalf of shutdown of {}", t, this);
+			this.logger.info("Interrupting {} on behalf of shutdown of {}", t, this.getId());
 			t.interrupt();
 		});
 		if (this.timer != null) {
 			this.logger.info("Canceling timer {}", this.timer);
 			this.timer.cancel();
 		}
-		this.logger.info("Shutdown of {} completed.", this);
+		this.logger.info("Shutdown of {} completed.", this.getId());
 	}
 
 	public boolean isShutdownInitialized() {
@@ -295,7 +304,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 			this.logger.debug("Ignoring cancel command since the algorithm has already been shutdown before.");
 			return;
 		}
-		this.logger.info("Executing cancel on {}. Have set the cancel flag and will now invoke shutdown procedure.", this);
+		this.logger.info("Executing cancel on {}. Have set the cancel flag and will now invoke shutdown procedure.", this.getId());
 		this.shutdown();
 	}
 
