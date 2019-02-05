@@ -1,5 +1,6 @@
 package jaicore.ml.dyadranking.activelearning;
 
+import java.util.Collection;
 import java.util.Set;
 
 import de.upb.isys.linearalgebra.Vector;
@@ -35,4 +36,13 @@ public interface IDyadRankingPoolProvider extends IActiveLearningPoolProvider {
 	 *         features.
 	 */
 	public Set<Dyad> getDyadsByAlternative(Vector alternativeFeatures);
+
+	/**
+	 * Returns a {@link Collection} that contains all instance features contained in
+	 * the pool.
+	 * 
+	 * @return A {@link Collection} that contains all instance features contained in
+	 *         the pool.
+	 */
+	public Collection<Vector> getInstanceFeatures();
 }

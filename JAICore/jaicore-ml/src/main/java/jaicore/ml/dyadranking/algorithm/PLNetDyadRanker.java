@@ -23,6 +23,7 @@ import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
+import org.nd4j.linalg.learning.config.Adam;
 import org.nd4j.linalg.learning.config.Sgd;
 import org.nd4j.linalg.primitives.Pair;
 import org.slf4j.Logger;
@@ -236,6 +237,17 @@ public class PLNetDyadRanker extends APLDyadRanker
 	 */
 	@Override
 	public void update(IInstance instance) throws TrainingException {
+		if (!(instance instanceof IDyadRankingInstance)) {
+			throw new IllegalArgumentException(
+					"Can only train the Plackett-Luce net dyad ranker with a dyad ranking instances!");
+		}
+		IDyadRankingInstance drInstance = (IDyadRankingInstance) instance;
+		if (this.plNet == null) {
+			int dyadSize = (drInstance.getDyadAtPosition(0).getInstance().length())
+					+ (drInstance.getDyadAtPosition(0).getAlternative().length());
+			this.plNet = createNetwork(dyadSize);
+			this.plNet.init();
+		}
 		INDArray deltaW = computeScaledGradient(instance);
 		plNet.params().subi(deltaW);
 		iteration++;
@@ -243,8 +255,20 @@ public class PLNetDyadRanker extends APLDyadRanker
 
 	@Override
 	public void update(Set<IInstance> instances) throws TrainingException {
-		for (IInstance instance : instances)
+		for (IInstance instance : instances) {
+			if (!(instance instanceof IDyadRankingInstance)) {
+				throw new IllegalArgumentException(
+						"Can only train the Plackett-Luce net dyad ranker with a dyad ranking instances!");
+			}
+			IDyadRankingInstance drInstance = (IDyadRankingInstance) instance;
+			if (this.plNet == null) {
+				int dyadSize = (drInstance.getDyadAtPosition(0).getInstance().length())
+						+ (drInstance.getDyadAtPosition(0).getAlternative().length());
+				this.plNet = createNetwork(dyadSize);
+				this.plNet.init();
+			}
 			this.update(instance);
+		}
 	}
 
 	@Override
@@ -331,26 +355,26 @@ public class PLNetDyadRanker extends APLDyadRanker
 					"There must be at least one hidden layer in specified in the config file!");
 		ListBuilder configBuilder = new NeuralNetConfiguration.Builder().seed(configuration.plNetSeed())
 				// Gradient descent updater: SGD
-				.updater(new Sgd(configuration.plNetLearningRate())).list();
+				.updater(new Adam(configuration.plNetLearningRate())).list();
 
 		// Build hidden layers
 		String activation = configuration.plNetActivationFunction();
 		int inputsFirstHiddenLayer = configuration.plNetHiddenNodes().get(0);
 		configBuilder.layer(0, new DenseLayer.Builder().nIn(numInputs).nOut(inputsFirstHiddenLayer)
-				.weightInit(WeightInit.XAVIER).activation(Activation.fromString(activation)).hasBias(true).build());
+				.weightInit(WeightInit.SIGMOID_UNIFORM).activation(Activation.fromString(activation)).hasBias(true).build());
 		List<Integer> hiddenNodes = configuration.plNetHiddenNodes();
 
 		for (int i = 0; i < hiddenNodes.size() - 1; i++) {
 			int numIn = hiddenNodes.get(i);
 			int numOut = hiddenNodes.get(i + 1);
-			configBuilder.layer(i + 1, new DenseLayer.Builder().nIn(numIn).nOut(numOut).weightInit(WeightInit.XAVIER)
+			configBuilder.layer(i + 1, new DenseLayer.Builder().nIn(numIn).nOut(numOut).weightInit(WeightInit.SIGMOID_UNIFORM)
 					.activation(Activation.fromString(activation)).hasBias(true).build());
 		}
 
 		// Build output layer. Since we are using an external error for training,
 		// this is a regular layer instead of an OutputLayer
 		configBuilder.layer(hiddenNodes.size(), new DenseLayer.Builder().nIn(hiddenNodes.get(hiddenNodes.size() - 1))
-				.nOut(1).weightInit(WeightInit.XAVIER).activation(Activation.IDENTITY).hasBias(true).build());
+				.nOut(1).weightInit(WeightInit.UNIFORM).activation(Activation.IDENTITY).hasBias(true).build());
 
 		MultiLayerConfiguration multiLayerConfig = configBuilder.build();
 		return new MultiLayerNetwork(multiLayerConfig);
@@ -457,6 +481,7 @@ public class PLNetDyadRanker extends APLDyadRanker
 
 	/**
 	 * Returns the pair of {@link Dyad}s for which the model is least certain.
+	 * 
 	 * @param drInstance Ranking for which certainty should be assessed.
 	 * @return The pair of {@link Dyad}s for which the model is least certain.
 	 */
@@ -474,21 +499,30 @@ public class PLNetDyadRanker extends APLDyadRanker
 		Collections.sort(dyadUtilityPairs, Comparator.comparing(p -> -p.getRight()));
 		int indexOfPairWithLeastCertainty = 0;
 		double currentlyLowestCertainty = Double.MAX_VALUE;
-		for(int i = 0; i < dyadUtilityPairs.size() - 1; i++) {
-			double currentCertainty = Math.abs(dyadUtilityPairs.get(i).getRight() - dyadUtilityPairs.get(i+1).getRight());
-			if(currentCertainty < currentlyLowestCertainty) {
+		for (int i = 0; i < dyadUtilityPairs.size() - 1; i++) {
+			double currentCertainty = Math
+					.abs(dyadUtilityPairs.get(i).getRight() - dyadUtilityPairs.get(i + 1).getRight());
+			if (currentCertainty < currentlyLowestCertainty) {
 				currentlyLowestCertainty = currentCertainty;
 				indexOfPairWithLeastCertainty = i;
 			}
 		}
 		List<Dyad> leastCertainDyads = new LinkedList<Dyad>();
 		leastCertainDyads.add(dyadUtilityPairs.get(indexOfPairWithLeastCertainty).getLeft());
-		leastCertainDyads.add(dyadUtilityPairs.get(indexOfPairWithLeastCertainty+1).getLeft());
+		leastCertainDyads.add(dyadUtilityPairs.get(indexOfPairWithLeastCertainty + 1).getLeft());
 		DyadRankingInstance leastCertainPair = new DyadRankingInstance(leastCertainDyads);
 		return leastCertainPair;
 	}
-	
+
 	public double getProbabilityOfTopRanking(IDyadRankingInstance drInstance) {
+
+		if (this.plNet == null) {
+			int dyadSize = (drInstance.getDyadAtPosition(0).getInstance().length())
+					+ (drInstance.getDyadAtPosition(0).getAlternative().length());
+			this.plNet = createNetwork(dyadSize);
+			this.plNet.init();
+		}
+
 		List<Pair<Dyad, Double>> dyadUtilityPairs = new ArrayList<Pair<Dyad, Double>>(drInstance.length());
 		for (Dyad dyad : drInstance) {
 			INDArray plNetInput = dyadToVector(dyad);
@@ -497,32 +531,40 @@ public class PLNetDyadRanker extends APLDyadRanker
 		}
 		// sort the instance in descending order of utility values
 		Collections.sort(dyadUtilityPairs, Comparator.comparing(p -> -p.getRight()));
-		
-		// compute the probability of this ranking according to the Plackett-Luce model		
+
+		// compute the probability of this ranking according to the Plackett-Luce model
 		double currentProbability = 1;
-		for(int i = 0; i < dyadUtilityPairs.size(); i++) {
+		for (int i = 0; i < dyadUtilityPairs.size(); i++) {
 			double sumOfRemainingSkills = 0;
-			for(int j = i; j < dyadUtilityPairs.size(); j++) {
+			for (int j = i; j < dyadUtilityPairs.size(); j++) {
 				sumOfRemainingSkills += Math.exp(dyadUtilityPairs.get(j).getRight());
 			}
 			currentProbability *= (Math.exp(dyadUtilityPairs.get(i).getRight()) / sumOfRemainingSkills);
 		}
 		return currentProbability;
 	}
-	
+
 	public double getProbabilityRanking(IDyadRankingInstance drInstance) {
+
+		if (this.plNet == null) {
+			int dyadSize = (drInstance.getDyadAtPosition(0).getInstance().length())
+					+ (drInstance.getDyadAtPosition(0).getAlternative().length());
+			this.plNet = createNetwork(dyadSize);
+			this.plNet.init();
+		}
+
 		List<Pair<Dyad, Double>> dyadUtilityPairs = new ArrayList<Pair<Dyad, Double>>(drInstance.length());
 		for (Dyad dyad : drInstance) {
 			INDArray plNetInput = dyadToVector(dyad);
 			double plNetOutput = plNet.output(plNetInput).getDouble(0);
 			dyadUtilityPairs.add(new Pair<Dyad, Double>(dyad, plNetOutput));
 		}
-		
-		// compute the probability of this ranking according to the Plackett-Luce model		
+
+		// compute the probability of this ranking according to the Plackett-Luce model
 		double currentProbability = 1;
-		for(int i = 0; i < dyadUtilityPairs.size(); i++) {
+		for (int i = 0; i < dyadUtilityPairs.size(); i++) {
 			double sumOfRemainingSkills = 0;
-			for(int j = i; j < dyadUtilityPairs.size(); j++) {
+			for (int j = i; j < dyadUtilityPairs.size(); j++) {
 				sumOfRemainingSkills += Math.exp(dyadUtilityPairs.get(j).getRight());
 			}
 			currentProbability *= (Math.exp(dyadUtilityPairs.get(i).getRight()) / sumOfRemainingSkills);
