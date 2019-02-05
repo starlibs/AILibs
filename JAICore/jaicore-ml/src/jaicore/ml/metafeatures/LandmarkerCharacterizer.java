@@ -36,10 +36,25 @@ public class LandmarkerCharacterizer extends GlobalCharacterizer {
 				new GenericLandmarker("CfsSubsetEval_kNN1N", cpASC, 2, Utils.splitOptions(preprocessingPrefix + cp1NN)),
 				new GenericLandmarker("CfsSubsetEval_NaiveBayes", cpASC, 2,
 						Utils.splitOptions(preprocessingPrefix + cpNB)),
-				new GenericLandmarker("DecisionStump", cpDS, 2, null),
-				new GenericLandmarker("kNN1N", cp1NN, 2, null),
+				new GenericLandmarker("DecisionStump", cpDS, 2, null), new GenericLandmarker("kNN1N", cp1NN, 2, null),
 				new GenericLandmarker("NaiveBayes", cpNB, 2, null), };
-		characterizers = new ArrayList<>(Arrays.asList(characterizerArray));
+		ArrayList<Characterizer> characterizerList = new ArrayList<>(Arrays.asList(characterizerArray));
+		String zeros = "0";
+		for (int i = 1; i <= 3; ++i) {
+			zeros += "0";
+			String[] j48Option = { "-C", "." + zeros + "1" };
+			characterizerList
+					.add(new GenericLandmarker("J48." + zeros + "1.", "weka.classifiers.trees.J48", 2, j48Option));
+
+			String[] repOption = { "-L", "" + i };
+			characterizerList
+					.add(new GenericLandmarker("REPTreeDepth" + i, "weka.classifiers.trees.REPTree", 2, repOption));
+
+			String[] randomtreeOption = { "-depth", "" + i };
+			characterizerList.add(new GenericLandmarker("RandomTreeDepth" + i, "weka.classifiers.trees.RandomTree", 2,
+					randomtreeOption));
+		}
+		characterizers = characterizerList;
 	}
 
 }
