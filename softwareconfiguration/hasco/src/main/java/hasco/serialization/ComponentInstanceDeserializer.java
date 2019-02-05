@@ -30,13 +30,14 @@ public class ComponentInstanceDeserializer extends StdDeserializer<ComponentInst
 		super(ComponentInstance.class);
 	}
 
+	@SuppressWarnings("unchecked")
 	public ComponentInstance readAsTree(TreeNode p) throws IOException {
 		ObjectMapper mapper = new ObjectMapper();
 		// read the parameter values
 		Map<String, String> parameterValues = mapper.treeToValue(p.get("parameterValues"), HashMap.class);
 		// read the component
 
-		List<Object> componentList = new ArrayList();
+		List<Object> componentList = new ArrayList<>();
 		componentList.add(p.get("component"));
 
 		ComponentLoader loader = new ComponentLoader();

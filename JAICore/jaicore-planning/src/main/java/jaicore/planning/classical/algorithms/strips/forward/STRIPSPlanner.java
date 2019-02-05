@@ -14,11 +14,8 @@ import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.sets.SetUtil;
-import jaicore.graphvisualizer.TooltipGenerator;
-import jaicore.graphvisualizer.gui.VisualizationWindow;
 import jaicore.logic.fol.structure.VariableParam;
 import jaicore.planning.classical.problems.strips.Operation;
-import jaicore.planning.classical.problems.strips.StripsAction;
 import jaicore.planning.classical.problems.strips.StripsOperation;
 import jaicore.planning.classical.problems.strips.StripsPlanningProblem;
 import jaicore.planning.core.EvaluatedPlan;
@@ -33,7 +30,7 @@ import jaicore.search.model.travesaltree.Node;
 import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 
 public class STRIPSPlanner<V extends Comparable<V>>
-		extends AOptimizer<StripsPlanningProblem, EvaluatedPlan<StripsAction, V>, V> {
+		extends AOptimizer<StripsPlanningProblem, EvaluatedPlan<V>, V> {
 
 	/* logging */
 	private Logger logger = LoggerFactory.getLogger(BestFirst.class);
@@ -121,10 +118,11 @@ public class STRIPSPlanner<V extends Comparable<V>>
 			this.setLoggerOfSearch();
 			this.search.setTimeout(this.getTimeout());
 			if (this.visualize) {
-				VisualizationWindow<Node<StripsForwardPlanningNode, V>, String> w = new VisualizationWindow<>(
-						this.search);
-				TooltipGenerator<StripsForwardPlanningNode> tt = new StripsTooltipGenerator<>();
-				w.setTooltipGenerator(n -> tt.getTooltip(((Node<StripsForwardPlanningNode, V>) n).getPoint()));
+				throw new UnsupportedOperationException("Currently no visualization supported!");
+//				VisualizationWindow<Node<StripsForwardPlanningNode, V>, String> w = new VisualizationWindow<>(
+//						this.search);
+//				TooltipGenerator<StripsForwardPlanningNode> tt = new StripsTooltipGenerator<>();
+//				w.setTooltipGenerator(n -> tt.getTooltip(((Node<StripsForwardPlanningNode, V>) n).getPoint()));
 			}
 			return activate();
 		case active:
@@ -136,8 +134,8 @@ public class STRIPSPlanner<V extends Comparable<V>>
 			try {
 				EvaluatedSearchGraphPath<StripsForwardPlanningNode, String, V> nextSolution = this.search
 						.nextSolutionCandidate();
-				Plan<StripsAction> plan = this.reducer.getPlan(nextSolution.getNodes());
-				EvaluatedPlan<StripsAction, V> evaluatedPlan = new EvaluatedPlan<>(plan, nextSolution.getScore());
+				Plan plan = this.reducer.getPlan(nextSolution.getNodes());
+				EvaluatedPlan<V> evaluatedPlan = new EvaluatedPlan<>(plan, nextSolution.getScore());
 				this.updateBestSeenSolution(evaluatedPlan);
 				return new PlanFoundEvent<>(evaluatedPlan);
 			} catch (NoSuchElementException e) {

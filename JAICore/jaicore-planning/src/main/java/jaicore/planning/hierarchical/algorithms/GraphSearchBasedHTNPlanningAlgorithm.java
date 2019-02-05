@@ -42,17 +42,17 @@ import jaicore.search.probleminputs.builders.SearchProblemInputBuilder;
  * @param <NSearch>
  * @param <ASearch>
  */
-public class GraphSearchBasedHTNPlanningAlgorithm<PA extends Action, IP extends IHTNPlanningProblem, ISearch extends GraphSearchInput<NSrc, ASrc>, NSrc, ASrc, V extends Comparable<V>>
-		extends AOptimizer<IP, EvaluatedSearchGraphBasedPlan<PA, V, NSrc>, V> {
+public class GraphSearchBasedHTNPlanningAlgorithm<IP extends IHTNPlanningProblem, ISearch extends GraphSearchInput<NSrc, ASrc>, NSrc, ASrc, V extends Comparable<V>>
+		extends AOptimizer<IP, EvaluatedSearchGraphBasedPlan<V, NSrc>, V> {
 
 	private Logger logger = LoggerFactory.getLogger(GraphSearchBasedHTNPlanningAlgorithm.class);
 	private String loggerName;
 
 	/* algorithm inputs */
-	private final IHierarchicalPlanningGraphGeneratorDeriver<PA, IP, NSrc, ASrc> problemTransformer;
+	private final IHierarchicalPlanningGraphGeneratorDeriver<IP, NSrc, ASrc> problemTransformer;
 	private final IOptimalPathInORGraphSearch<ISearch, NSrc, ASrc, V, ?, ?> search;
 
-	public GraphSearchBasedHTNPlanningAlgorithm(final IP problem, final IHierarchicalPlanningGraphGeneratorDeriver<PA, IP, NSrc, ASrc> problemTransformer,
+	public GraphSearchBasedHTNPlanningAlgorithm(final IP problem, final IHierarchicalPlanningGraphGeneratorDeriver<IP, NSrc, ASrc> problemTransformer,
 			final IOptimalPathInORGraphSearchFactory<ISearch, NSrc, ASrc, V, ?, ?> searchFactory, final SearchProblemInputBuilder<NSrc, ASrc, ISearch> searchProblemBuilder) {
 		super(problem);
 
@@ -120,8 +120,8 @@ public class GraphSearchBasedHTNPlanningAlgorithm<PA extends Action, IP extends 
 				}
 				this.logger.info("Next solution found.");
 				List<NSrc> solutionPath = solution.getNodes();
-				Plan<PA> plan = this.problemTransformer.getPlan(solutionPath);
-				PlanFoundEvent<PA, V> event = new PlanFoundEvent<>(new EvaluatedSearchGraphBasedPlan<>(plan.getActions(), solution.getScore(), solution));
+				Plan plan = this.problemTransformer.getPlan(solutionPath);
+				PlanFoundEvent<?, V> event = new PlanFoundEvent<>(new EvaluatedSearchGraphBasedPlan<>(plan.getActions(), solution.getScore(), solution));
 				this.post(event);
 				return event;
 			}

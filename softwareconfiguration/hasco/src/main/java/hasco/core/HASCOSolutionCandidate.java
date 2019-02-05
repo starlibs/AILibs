@@ -2,7 +2,6 @@ package hasco.core;
 
 import hasco.model.ComponentInstance;
 import hasco.model.EvaluatedSoftwareConfigurationSolution;
-import jaicore.planning.classical.problems.ceoc.CEOCAction;
 import jaicore.planning.core.EvaluatedPlan;
 import jaicore.planning.core.EvaluatedSearchGraphBasedPlan;
 
@@ -17,11 +16,11 @@ import jaicore.planning.core.EvaluatedSearchGraphBasedPlan;
 public class HASCOSolutionCandidate<V extends Comparable<V>> implements EvaluatedSoftwareConfigurationSolution<V> {
 
 	private final ComponentInstance componentInstance;
-	private final EvaluatedSearchGraphBasedPlan<CEOCAction, V, ?> planningSolution;
+	private final EvaluatedSearchGraphBasedPlan<V, ?> planningSolution;
 	private final int timeToEvaluateCandidate;
 	private final long timeOfCreation = System.currentTimeMillis();
 
-	public HASCOSolutionCandidate(ComponentInstance componentInstance, EvaluatedSearchGraphBasedPlan<CEOCAction, V, ?> planningSolution, int timeToEvaluateCandidate) {
+	public HASCOSolutionCandidate(ComponentInstance componentInstance, EvaluatedSearchGraphBasedPlan<V, ?> planningSolution, int timeToEvaluateCandidate) {
 		super();
 		this.componentInstance = componentInstance;
 		this.planningSolution = planningSolution;
@@ -36,7 +35,7 @@ public class HASCOSolutionCandidate<V extends Comparable<V>> implements Evaluate
 		return componentInstance;
 	}
 
-	public EvaluatedPlan<CEOCAction, V> getPlanningSolution() {
+	public EvaluatedPlan<V> getPlanningSolution() {
 		return planningSolution;
 	}
 	

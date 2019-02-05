@@ -31,9 +31,7 @@ import jaicore.logic.fol.structure.LiteralParam;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.logic.fol.structure.VariableParam;
 import jaicore.logic.fol.theories.EvaluablePredicate;
-import jaicore.planning.classical.problems.ceoc.CEOCAction;
 import jaicore.planning.classical.problems.ceoc.CEOCOperation;
-import jaicore.planning.core.Action;
 import jaicore.planning.core.Plan;
 import jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningDomain;
 import jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem;
@@ -51,7 +49,7 @@ import jaicore.search.probleminputs.GraphSearchInput;
  *
  */
 public class HASCOReduction<V extends Comparable<V>> implements
-		AlgorithmProblemTransformer<RefinementConfiguredSoftwareConfigurationProblem<V>, CostSensitiveHTNPlanningProblem<CEOCAction, CEOCIPSTNPlanningProblem, V>> {
+		AlgorithmProblemTransformer<RefinementConfiguredSoftwareConfigurationProblem<V>, CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, V>> {
 
 	// component selection
 	private static final String RESOLVE_COMPONENT_IFACE_PREFIX = "1_tResolve";
@@ -275,12 +273,12 @@ public class HASCOReduction<V extends Comparable<V>> implements
 	 * @return
 	 */
 	public <T, A, ISearch extends GraphSearchInput<T, A>> GraphGenerator<T, A> getGraphGeneratorUsedByHASCOForSpecificPlanner(
-			final IHierarchicalPlanningGraphGeneratorDeriver<? extends Action, CEOCIPSTNPlanningProblem, T, A> transformer) {
+			final IHierarchicalPlanningGraphGeneratorDeriver<CEOCIPSTNPlanningProblem, T, A> transformer) {
 		return transformer.transform(this.getPlanningProblem());
 	}
 
 	@Override
-	public CostSensitiveHTNPlanningProblem<CEOCAction, CEOCIPSTNPlanningProblem, V> transform(final RefinementConfiguredSoftwareConfigurationProblem<V> problem) {
+	public CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, V> transform(final RefinementConfiguredSoftwareConfigurationProblem<V> problem) {
 
 		/* set object variables that will be important for several methods in the reduction */
 		this.originalProblem = problem;
@@ -291,10 +289,10 @@ public class HASCOReduction<V extends Comparable<V>> implements
 		CEOCIPSTNPlanningProblem planningProblem = this.getPlanningProblem();
 
 		/* derive a plan evaluator from the configuration evaluator */
-		IObjectEvaluator<Plan<CEOCAction>, V> planEvaluator = new IObjectEvaluator<Plan<CEOCAction>, V>() {
+		IObjectEvaluator<Plan, V> planEvaluator = new IObjectEvaluator<Plan, V>() {
 
 			@Override
-			public V evaluate(final Plan<CEOCAction> plan) throws TimeoutException, InterruptedException, ObjectEvaluationFailedException {
+			public V evaluate(final Plan plan) throws TimeoutException, InterruptedException, ObjectEvaluationFailedException {
 				ComponentInstance solution = Util.getSolutionCompositionForPlan(HASCOReduction.this.components, HASCOReduction.this.getInitState(), plan, true);
 				return problem.getCompositionEvaluator().evaluate(solution);
 			}
@@ -307,7 +305,7 @@ public class HASCOReduction<V extends Comparable<V>> implements
 			}
 
 		};
-		CostSensitiveHTNPlanningProblem<CEOCAction, CEOCIPSTNPlanningProblem, V> costSensitiveProblem = new CostSensitiveHTNPlanningProblem<>(planningProblem, planEvaluator);
+		CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, V> costSensitiveProblem = new CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, V>(planningProblem, planEvaluator);
 		return costSensitiveProblem;
 	}
 }

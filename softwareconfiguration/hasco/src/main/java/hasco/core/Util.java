@@ -31,7 +31,6 @@ import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.logic.fol.structure.Literal;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.planning.classical.algorithms.strips.forward.StripsUtil;
-import jaicore.planning.classical.problems.ceoc.CEOCAction;
 import jaicore.planning.core.Action;
 import jaicore.planning.core.Plan;
 import jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem;
@@ -207,17 +206,17 @@ public class Util {
 		return objectMap;
 	}
 
-	public static <N, A, V extends Comparable<V>> ComponentInstance getSolutionCompositionForNode(final IHierarchicalPlanningGraphGeneratorDeriver<CEOCAction, CEOCIPSTNPlanningProblem, N, A> planningGraphDeriver,
+	public static <N, A, V extends Comparable<V>> ComponentInstance getSolutionCompositionForNode(final IHierarchicalPlanningGraphGeneratorDeriver<CEOCIPSTNPlanningProblem, N, A> planningGraphDeriver,
 			final Collection<Component> components, final Monom initState, final Node<N, ?> path, final boolean resolveIntervals) {
 		return getSolutionCompositionForPlan(components, initState, planningGraphDeriver.getPlan(path.externalPath()), resolveIntervals);
 	}
 
-	public static <N, A, V extends Comparable<V>> ComponentInstance getComponentInstanceForNode(final IHierarchicalPlanningGraphGeneratorDeriver<CEOCAction, CEOCIPSTNPlanningProblem, N, A> planningGraphDeriver,
+	public static <N, A, V extends Comparable<V>> ComponentInstance getComponentInstanceForNode(final IHierarchicalPlanningGraphGeneratorDeriver<CEOCIPSTNPlanningProblem, N, A> planningGraphDeriver,
 			final Collection<Component> components, final Monom initState, final Node<N, ?> path, String name, final boolean resolveIntervals) {
 		return getComponentInstanceForPlan(components, initState, planningGraphDeriver.getPlan(path.externalPath()), name, resolveIntervals);
 	}
 
-	public static Monom getFinalStateOfPlan(final Monom initState, final Plan<? extends Action> plan) {
+	public static Monom getFinalStateOfPlan(final Monom initState, final Plan plan) {
 		Monom state = new Monom(initState);
 		for (Action a : plan.getActions()) {
 			StripsUtil.updateState(state, a);
@@ -225,11 +224,11 @@ public class Util {
 		return state;
 	}
 
-	public static ComponentInstance getSolutionCompositionForPlan(final Collection<Component> components, final Monom initState, final Plan<? extends Action> plan, final boolean resolveIntervals) {
+	public static ComponentInstance getSolutionCompositionForPlan(final Collection<Component> components, final Monom initState, final Plan plan, final boolean resolveIntervals) {
 		return getSolutionCompositionFromState(components, getFinalStateOfPlan(initState, plan), resolveIntervals);
 	}
 
-	public static ComponentInstance getComponentInstanceForPlan(final Collection<Component> components, final Monom initState, final Plan<? extends Action> plan, String name,
+	public static ComponentInstance getComponentInstanceForPlan(final Collection<Component> components, final Monom initState, final Plan plan, String name,
 			final boolean resolveIntervals) {
 		return getComponentInstanceFromState(components, getFinalStateOfPlan(initState, plan), name, resolveIntervals);
 	}

@@ -8,22 +8,21 @@ import java.util.concurrent.TimeoutException;
 import jaicore.basic.algorithm.AlgorithmProblemTransformer;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.logging.ToJSONStringUtil;
-import jaicore.planning.core.Action;
 import jaicore.search.core.interfaces.ISolutionEvaluator;
 import jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 
-public class CostSensitivePlanningToSearchProblemTransformer<PA extends Action, IPlanning extends IHTNPlanningProblem, V extends Comparable<V>, N, A>
-		implements AlgorithmProblemTransformer<CostSensitiveHTNPlanningProblem<PA, IPlanning, V>, GraphSearchWithPathEvaluationsInput<N, A, V>> {
+public class CostSensitivePlanningToSearchProblemTransformer<IPlanning extends IHTNPlanningProblem, V extends Comparable<V>, N, A>
+		implements AlgorithmProblemTransformer<CostSensitiveHTNPlanningProblem<IPlanning, V>, GraphSearchWithPathEvaluationsInput<N, A, V>> {
 
-	private final IHierarchicalPlanningGraphGeneratorDeriver<PA, IPlanning, N, A> graphGeneratorDeriver;
+	private final IHierarchicalPlanningGraphGeneratorDeriver<IPlanning, N, A> graphGeneratorDeriver;
 
-	public CostSensitivePlanningToSearchProblemTransformer(final IHierarchicalPlanningGraphGeneratorDeriver<PA, IPlanning, N, A> graphGeneratorDeriver) {
+	public CostSensitivePlanningToSearchProblemTransformer(final IHierarchicalPlanningGraphGeneratorDeriver<IPlanning, N, A> graphGeneratorDeriver) {
 		super();
 		this.graphGeneratorDeriver = graphGeneratorDeriver;
 	}
 
 	@Override
-	public GraphSearchWithPathEvaluationsInput<N, A, V> transform(final CostSensitiveHTNPlanningProblem<PA, IPlanning, V> problem) {
+	public GraphSearchWithPathEvaluationsInput<N, A, V> transform(final CostSensitiveHTNPlanningProblem<IPlanning, V> problem) {
 
 		ISolutionEvaluator<N, V> solutionEvaluator = new ISolutionEvaluator<N, V>() {
 
@@ -54,7 +53,7 @@ public class CostSensitivePlanningToSearchProblemTransformer<PA extends Action, 
 		return new GraphSearchWithPathEvaluationsInput<>(this.graphGeneratorDeriver.transform(problem.getCorePlanningProblem()), solutionEvaluator);
 	}
 
-	public IHierarchicalPlanningGraphGeneratorDeriver<PA, IPlanning, N, A> getGraphGeneratorDeriver() {
+	public IHierarchicalPlanningGraphGeneratorDeriver<IPlanning, N, A> getGraphGeneratorDeriver() {
 		return this.graphGeneratorDeriver;
 	}
 }

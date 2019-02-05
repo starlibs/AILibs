@@ -7,21 +7,21 @@ import java.util.Map;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.planning.classical.algorithms.strips.forward.StripsUtil;
 
-public class Plan<A extends Action> {
-	private final List<A> actions;
+public class Plan {
+	private final List<Action> actions;
 	private final Map<String,Object> annotations;
 
-	public Plan(List<A> actions) {
+	public Plan(List<Action> actions) {
 		this(actions, new HashMap<>());
 	}
 	
-	public Plan(List<A> actions, Map<String, Object> annotations) {
+	public Plan(List<Action> actions, Map<String, Object> annotations) {
 		super();
 		this.actions = actions;
 		this.annotations = annotations;
 	}
 
-	public List<A> getActions() {
+	public List<Action> getActions() {
 		return actions;
 	}
 	
@@ -39,7 +39,7 @@ public class Plan<A extends Action> {
 	
 	public Monom getStateAfterApplicationGivenInitState(Monom initState) {
 		Monom newState = new Monom(initState);
-		for (A action : actions)
+		for (Action action : actions)
 			StripsUtil.updateState(newState, action);
 		return newState;
 	}
@@ -60,8 +60,7 @@ public class Plan<A extends Action> {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		@SuppressWarnings("unchecked")
-		Plan<A> other = (Plan<A>) obj;
+		Plan other = (Plan) obj;
 		if (actions == null) {
 			if (other.actions != null)
 				return false;

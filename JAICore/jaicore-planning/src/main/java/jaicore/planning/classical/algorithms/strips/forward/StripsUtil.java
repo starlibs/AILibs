@@ -164,7 +164,7 @@ public class StripsUtil {
 		}
 	}
 
-	public static Monom getStateAfterPlanExecution(Monom initState, Plan<?> plan) {
+	public static Monom getStateAfterPlanExecution(Monom initState, Plan plan) {
 		Monom state = new Monom(initState);
 		plan.getActions().forEach(a -> updateState(state, a));
 		return state;

@@ -6,30 +6,28 @@ import org.junit.Test;
 
 import jaicore.basic.MathExt;
 import jaicore.basic.algorithm.HomogeneousGeneralAlgorithmTester;
-import jaicore.basic.algorithm.IAlgorithm;
 import jaicore.basic.algorithm.IAlgorithmFactory;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
-import jaicore.planning.classical.problems.ceoc.CEOCAction;
-import jaicore.planning.core.Action;
 import jaicore.planning.core.EvaluatedSearchGraphBasedPlan;
 import jaicore.planning.core.events.PlanFoundEvent;
 import jaicore.planning.hierarchical.algorithms.GraphSearchBasedHTNPlanningAlgorithm;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import jaicore.planning.hierarchical.problems.ceocstn.CEOCSTNPlanningProblem;
 
-public abstract class CEOCSTNNestedDichotomyTest extends HomogeneousGeneralAlgorithmTester<CEOCSTNPlanningProblem, EvaluatedSearchGraphBasedPlan<CEOCAction, Double, TFDNode>> {
+public abstract class CEOCSTNNestedDichotomyTest extends HomogeneousGeneralAlgorithmTester<CEOCSTNPlanningProblem, EvaluatedSearchGraphBasedPlan<Double, TFDNode>> {
 	
 	private void checkNumberOfSolutionsForProblemSize(int numClasses) {
 			
 		CEOCSTNPlanningProblem problem = CEOCSTNNDProblemGenerator.getNestedDichotomyCreationProblem("root", numClasses, true, 0, 0);
-		IAlgorithmFactory factory = getFactory();
+		IAlgorithmFactory<CEOCSTNPlanningProblem, EvaluatedSearchGraphBasedPlan<Double, TFDNode>> factory = getFactory();
 		factory.setProblemInput(problem);
-		IAlgorithm planner = factory.getAlgorithm();
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		GraphSearchBasedHTNPlanningAlgorithm<CEOCSTNPlanningProblem, ?, ?, ?, Double> planner = (GraphSearchBasedHTNPlanningAlgorithm)factory.getAlgorithm();
 		
 		/* solve problem */
 		System.out.println("Searching all nested dichotomies to sepratate " + numClasses + ".");
 		int numSolutions = 0;
-		for (AlgorithmEvent ae : (GraphSearchBasedHTNPlanningAlgorithm<CEOCAction, CEOCSTNPlanningProblem, ?, ?, ?, Double>)planner) {
+		for (AlgorithmEvent ae : planner) {
 			if (ae instanceof PlanFoundEvent) {
 				numSolutions ++;
 				if (numSolutions % 10 == 0)

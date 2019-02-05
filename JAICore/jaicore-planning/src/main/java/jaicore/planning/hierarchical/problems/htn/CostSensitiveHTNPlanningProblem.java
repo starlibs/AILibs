@@ -5,14 +5,13 @@ import java.util.Map;
 
 import jaicore.basic.IObjectEvaluator;
 import jaicore.logging.ToJSONStringUtil;
-import jaicore.planning.core.Action;
 import jaicore.planning.core.Plan;
 
-public class CostSensitiveHTNPlanningProblem<A extends Action, IPlanning extends IHTNPlanningProblem, V extends Comparable<V>> {
+public class CostSensitiveHTNPlanningProblem<IPlanning extends IHTNPlanningProblem, V extends Comparable<V>> {
 	private final IPlanning corePlanningProblem;
-	private final IObjectEvaluator<Plan<A>, V> planEvaluator;
+	private final IObjectEvaluator<Plan, V> planEvaluator;
 
-	public CostSensitiveHTNPlanningProblem(IPlanning corePlanningProblem, IObjectEvaluator<Plan<A>, V> planEvaluator) {
+	public CostSensitiveHTNPlanningProblem(IPlanning corePlanningProblem, IObjectEvaluator<Plan, V> planEvaluator) {
 		super();
 		this.corePlanningProblem = corePlanningProblem;
 		this.planEvaluator = planEvaluator;
@@ -22,7 +21,7 @@ public class CostSensitiveHTNPlanningProblem<A extends Action, IPlanning extends
 		return corePlanningProblem;
 	}
 
-	public IObjectEvaluator<Plan<A>, V> getPlanEvaluator() {
+	public IObjectEvaluator<Plan, V> getPlanEvaluator() {
 		return planEvaluator;
 	}
 	

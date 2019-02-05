@@ -6,11 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.TextNode;
-
 import jaicore.basic.sets.SetUtil;
 import jaicore.logging.ToJSONStringUtil;
 import jaicore.logic.fol.structure.ConstantParam;

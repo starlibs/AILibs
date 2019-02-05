@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import jaicore.logging.ToJSONStringUtil;
-import jaicore.planning.classical.problems.ceoc.CEOCAction;
 import jaicore.planning.core.Plan;
 import jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem;
 import jaicore.planning.hierarchical.problems.htn.IHierarchicalPlanningGraphGeneratorDeriver;
@@ -25,9 +24,9 @@ import jaicore.search.core.interfaces.GraphGenerator;
  */
 public class DefaultHASCOPlanningGraphGeneratorDeriver<N, A> implements IHASCOPlanningGraphGeneratorDeriver<N, A> {
 
-	private final IHierarchicalPlanningGraphGeneratorDeriver<CEOCAction, CEOCIPSTNPlanningProblem, N, A> wrappedDeriver;
+	private final IHierarchicalPlanningGraphGeneratorDeriver<CEOCIPSTNPlanningProblem, N, A> wrappedDeriver;
 
-	public DefaultHASCOPlanningGraphGeneratorDeriver(final IHierarchicalPlanningGraphGeneratorDeriver<CEOCAction, CEOCIPSTNPlanningProblem, N, A> wrappedDeriver) {
+	public DefaultHASCOPlanningGraphGeneratorDeriver(final IHierarchicalPlanningGraphGeneratorDeriver<CEOCIPSTNPlanningProblem, N, A> wrappedDeriver) {
 		super();
 		this.wrappedDeriver = wrappedDeriver;
 	}
@@ -38,11 +37,11 @@ public class DefaultHASCOPlanningGraphGeneratorDeriver<N, A> implements IHASCOPl
 	}
 
 	@Override
-	public Plan<CEOCAction> getPlan(final List<N> path) {
+	public Plan getPlan(final List<N> path) {
 		return this.wrappedDeriver.getPlan(path);
 	}
 
-	public IHierarchicalPlanningGraphGeneratorDeriver<CEOCAction, CEOCIPSTNPlanningProblem, N, A> getWrappedDeriver() {
+	public IHierarchicalPlanningGraphGeneratorDeriver<CEOCIPSTNPlanningProblem, N, A> getWrappedDeriver() {
 		return this.wrappedDeriver;
 	}
 

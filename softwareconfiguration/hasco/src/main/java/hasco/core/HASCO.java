@@ -32,7 +32,6 @@ import jaicore.basic.algorithm.exceptions.DelayedCancellationCheckException;
 import jaicore.basic.algorithm.exceptions.DelayedTimeoutCheckException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.logging.ToJSONStringUtil;
-import jaicore.planning.classical.problems.ceoc.CEOCAction;
 import jaicore.planning.core.EvaluatedSearchGraphBasedPlan;
 import jaicore.planning.core.Plan;
 import jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem;
@@ -71,7 +70,7 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 	 * working constants of the algorithms - these are effectively final but are not
 	 * set at object creation time
 	 */
-	private CostSensitiveHTNPlanningProblem<CEOCAction, CEOCIPSTNPlanningProblem, V> planningProblem;
+	private CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, V> planningProblem;
 	private GraphSearchWithPathEvaluationsInput<N, A, V> searchProblem;
 	private IOptimalPathInORGraphSearch<ISearch, N, A, V, ?, ?> search;
 	private final List<HASCOSolutionCandidate<V>> listOfAllRecognizedSolutions = new ArrayList<>();
@@ -139,7 +138,7 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 				this.logger.debug("Derived the following HTN planning problem:\n\tOperations:{}\n\tMethods:{}",
 						operations, methods);
 			}
-			this.searchProblem = new CostSensitivePlanningToSearchProblemTransformer<CEOCAction, CEOCIPSTNPlanningProblem, V, N, A>(
+			this.searchProblem = new CostSensitivePlanningToSearchProblemTransformer<CEOCIPSTNPlanningProblem, V, N, A>(
 					this.planningGraphGeneratorDeriver).transform(this.planningProblem);
 
 			/* communicate that algorithm has been initialized */
@@ -225,7 +224,7 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 					@SuppressWarnings("unchecked")
 					EvaluatedSearchSolutionCandidateFoundEvent<N, A, V> solutionEvent = (EvaluatedSearchSolutionCandidateFoundEvent<N, A, V>) searchEvent;
 					EvaluatedSearchGraphPath<N, A, V> searchPath = solutionEvent.getSolutionCandidate();
-					Plan<CEOCAction> plan = this.planningGraphGeneratorDeriver.getPlan(searchPath.getNodes());
+					Plan plan = this.planningGraphGeneratorDeriver.getPlan(searchPath.getNodes());
 					ComponentInstance objectInstance = Util.getSolutionCompositionForPlan(
 							this.getInput().getComponents(), this.planningProblem.getCorePlanningProblem().getInit(),
 							plan, true);
@@ -244,7 +243,7 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 					} catch (ObjectEvaluationFailedException e) {
 						throw new AlgorithmException(e, "Could not evaluate component instance.");
 					}
-					EvaluatedSearchGraphBasedPlan<CEOCAction, V, N> evaluatedPlan = new EvaluatedSearchGraphBasedPlan<>(
+					EvaluatedSearchGraphBasedPlan<V, N> evaluatedPlan = new EvaluatedSearchGraphBasedPlan<>(
 							plan, score, searchPath);
 					HASCOSolutionCandidate<V> solution = new HASCOSolutionCandidate<>(objectInstance, evaluatedPlan,
 							this.timeGrabbingEvaluationWrapper.getEvaluationTimeForComponentInstance(objectInstance));
@@ -279,7 +278,7 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 		return this.searchProblem.getGraphGenerator();
 	}
 
-	public CostSensitiveHTNPlanningProblem<CEOCAction, CEOCIPSTNPlanningProblem, V> getPlanningProblem() {
+	public CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, V> getPlanningProblem() {
 		return this.planningProblem;
 	}
 

@@ -8,7 +8,7 @@ import jaicore.planning.classical.problems.strips.StripsPlanningProblem;
 import jaicore.planning.core.Plan;
 import jaicore.search.core.interfaces.GraphGenerator;
 
-public class STRIPSForwardSearchReducer implements ISTRIPSPlanningGraphGeneratorDeriver<StripsAction, StripsForwardPlanningNode, String> {
+public class STRIPSForwardSearchReducer implements ISTRIPSPlanningGraphGeneratorDeriver<StripsForwardPlanningNode, String> {
 	
 	@Override
 	public GraphGenerator<StripsForwardPlanningNode, String> transform(StripsPlanningProblem problem) {
@@ -16,7 +16,7 @@ public class STRIPSForwardSearchReducer implements ISTRIPSPlanningGraphGenerator
 	}
 
 	@Override
-	public Plan<StripsAction> getPlan(List<StripsForwardPlanningNode> path) {
-		return new Plan<>(path.stream().map(n -> (StripsAction)n.getActionToReachState()).filter(a -> a != null).collect(Collectors.toList()));
+	public Plan getPlan(List<StripsForwardPlanningNode> path) {
+		return new Plan(path.stream().map(n -> (StripsAction)n.getActionToReachState()).filter(a -> a != null).collect(Collectors.toList()));
 	}
 }
