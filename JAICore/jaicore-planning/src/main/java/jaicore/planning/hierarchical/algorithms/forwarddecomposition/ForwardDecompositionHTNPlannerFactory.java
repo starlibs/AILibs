@@ -1,18 +1,16 @@
 package jaicore.planning.hierarchical.algorithms.forwarddecomposition;
 
 import jaicore.basic.algorithm.AAlgorithmFactory;
-import jaicore.planning.classical.problems.strips.Operation;
 import jaicore.planning.core.Action;
 import jaicore.planning.core.EvaluatedSearchGraphBasedPlan;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import jaicore.planning.hierarchical.problems.htn.IHTNPlanningProblem;
-import jaicore.planning.hierarchical.problems.stn.Method;
 import jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory;
 import jaicore.search.probleminputs.GraphSearchInput;
 import jaicore.search.probleminputs.builders.SearchProblemInputBuilder;
 
-public class ForwardDecompositionHTNPlannerFactory<PO extends Operation, PM extends Method, PA extends Action, IPlanning extends IHTNPlanningProblem<PO, PM, PA>, V extends Comparable<V>, ISearch extends GraphSearchInput<TFDNode, String>>
-		extends AAlgorithmFactory<IPlanning, EvaluatedSearchGraphBasedPlan<PA, V, TFDNode>> {
+public class ForwardDecompositionHTNPlannerFactory<PA extends Action, IPlanner extends IHTNPlanningProblem, V extends Comparable<V>, ISearch extends GraphSearchInput<TFDNode, String>>
+		extends AAlgorithmFactory<IPlanner, EvaluatedSearchGraphBasedPlan<PA, V, TFDNode>> {
 
 	private IOptimalPathInORGraphSearchFactory<ISearch, TFDNode, String, V, ?, ?> searchFactory;
 	private SearchProblemInputBuilder<TFDNode, String, ISearch> searchProblemBuilder;
@@ -45,7 +43,7 @@ public class ForwardDecompositionHTNPlannerFactory<PO extends Operation, PM exte
 	}
 
 	@Override
-	public ForwardDecompositionHTNPlanner<PO, PM, PA, IPlanning, V, ISearch, ?, ?> getAlgorithm() {
+	public ForwardDecompositionHTNPlanner<PA, IPlanner, V, ISearch> getAlgorithm() {
 		if (searchFactory == null)
 			throw new IllegalStateException("Cannot create algorithm, search factory has not been set or set to NULL");
 		if (searchProblemBuilder == null)

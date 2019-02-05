@@ -1,4 +1,4 @@
-package jaicore.planning.hierarchical.problems.ceocstn;
+package jaicore.planning.hierarchical.testproblems.nesteddichotomies;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,9 +14,12 @@ import jaicore.logic.fol.structure.Literal;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.logic.fol.structure.VariableParam;
 import jaicore.planning.classical.problems.ceoc.CEOCOperation;
+import jaicore.planning.hierarchical.problems.ceocstn.CEOCSTNPlanningDomain;
+import jaicore.planning.hierarchical.problems.ceocstn.CEOCSTNPlanningProblem;
+import jaicore.planning.hierarchical.problems.ceocstn.OCMethod;
 import jaicore.planning.hierarchical.problems.stn.TaskNetwork;
 
-public class StandardProblemFactory {
+public class CEOCSTNNDProblemGenerator {
 	
 	public static CEOCSTNPlanningProblem getNestedDichotomyCreationProblem(String rootClusterName, int numClasses, boolean objectCreation, int maxExpRange, int maxRefinement) {
 		List<String> classes = new ArrayList<>();

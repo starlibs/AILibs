@@ -28,13 +28,13 @@ import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 @SuppressWarnings("serial")
-public class TFDGraphGenerator<O extends Operation, M extends Method, A extends Action> implements SerializableGraphGenerator<TFDNode, String>, PathUnifyingGraphGenerator<TFDNode, String> {
+public class TFDGraphGenerator implements SerializableGraphGenerator<TFDNode, String>, PathUnifyingGraphGenerator<TFDNode, String> {
 
 	protected TaskPlannerUtil util = new TaskPlannerUtil(null);
-	protected final IHTNPlanningProblem<O, M, A> problem;
+	protected final IHTNPlanningProblem problem;
 	protected final Map<String, Operation> primitiveTasks = new HashMap<>();
 
-	public TFDGraphGenerator(IHTNPlanningProblem<O, M, A> problem) {
+	public TFDGraphGenerator(IHTNPlanningProblem problem) {
 		this.problem = problem;
 		for (Operation op : problem.getDomain().getOperations())
 			primitiveTasks.put(op.getName(), op);

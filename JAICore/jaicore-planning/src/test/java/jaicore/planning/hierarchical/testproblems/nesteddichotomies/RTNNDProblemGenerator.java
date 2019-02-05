@@ -1,4 +1,4 @@
-package jaicore.planning.hierarchical.problems.rtn;
+package jaicore.planning.hierarchical.testproblems.nesteddichotomies;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -7,18 +7,22 @@ import java.util.List;
 import java.util.Map;
 
 import jaicore.logic.fol.structure.Literal;
-import jaicore.planning.classical.problems.ceoc.CEOCAction;
 import jaicore.planning.classical.problems.ceoc.CEOCOperation;
 import jaicore.planning.hierarchical.problems.ceocstn.CEOCSTNPlanningProblem;
 import jaicore.planning.hierarchical.problems.ceocstn.OCMethod;
+import jaicore.planning.hierarchical.problems.rtn.RTNMethod;
+import jaicore.planning.hierarchical.problems.rtn.RTNPlanningDomain;
+import jaicore.planning.hierarchical.problems.rtn.RTNPlanningProblem;
+import jaicore.planning.hierarchical.problems.rtn.RTaskNetwork;
+import jaicore.planning.hierarchical.problems.rtn.StateReducer;
 import jaicore.planning.hierarchical.problems.stn.TaskNetwork;
 
-public class StandardProblemFactory {
+public class RTNNDProblemGenerator {
 	
 	public static RTNPlanningProblem getNestedDichotomyCreationProblem(String rootClusterName, List<String> classes) {
 		
 		/* get problem on the basis of the standard CEOC STN problem */
-		CEOCSTNPlanningProblem<CEOCOperation, OCMethod, CEOCAction> problem = jaicore.planning.hierarchical.problems.ceocstn.StandardProblemFactory.getNestedDichotomyCreationProblem(rootClusterName, classes, true, 1, 1);
+		CEOCSTNPlanningProblem problem = jaicore.planning.hierarchical.testproblems.nesteddichotomies.CEOCSTNNDProblemGenerator.getNestedDichotomyCreationProblem(rootClusterName, classes, true, 1, 1);
 		
 		/* now derive RTN methods from the CEOC STN methods */
 		Collection<? extends CEOCOperation> operations = problem.getDomain().getOperations();

@@ -10,22 +10,18 @@ import jaicore.basic.algorithm.IAlgorithm;
 import jaicore.basic.algorithm.IAlgorithmFactory;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.planning.classical.problems.ceoc.CEOCAction;
-import jaicore.planning.classical.problems.ceoc.CEOCOperation;
 import jaicore.planning.core.Action;
 import jaicore.planning.core.EvaluatedSearchGraphBasedPlan;
 import jaicore.planning.core.events.PlanFoundEvent;
 import jaicore.planning.hierarchical.algorithms.GraphSearchBasedHTNPlanningAlgorithm;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import jaicore.planning.hierarchical.problems.ceocstn.CEOCSTNPlanningProblem;
-import jaicore.planning.hierarchical.problems.ceocstn.OCMethod;
-import jaicore.planning.hierarchical.problems.ceocstn.StandardProblemFactory;
-import jaicore.planning.hierarchical.problems.htn.IHTNPlanningProblem;
 
-public abstract class CEOCSTNNestedDichotomyTest extends HomogeneousGeneralAlgorithmTester<CEOCSTNPlanningProblem<CEOCOperation,OCMethod,CEOCAction>, EvaluatedSearchGraphBasedPlan<Action, Double, TFDNode>> {
+public abstract class CEOCSTNNestedDichotomyTest extends HomogeneousGeneralAlgorithmTester<CEOCSTNPlanningProblem, EvaluatedSearchGraphBasedPlan<CEOCAction, Double, TFDNode>> {
 	
 	private void checkNumberOfSolutionsForProblemSize(int numClasses) {
 			
-		CEOCSTNPlanningProblem<CEOCOperation,OCMethod,CEOCAction> problem = StandardProblemFactory.getNestedDichotomyCreationProblem("root", numClasses, true, 0, 0);
+		CEOCSTNPlanningProblem problem = CEOCSTNNDProblemGenerator.getNestedDichotomyCreationProblem("root", numClasses, true, 0, 0);
 		IAlgorithmFactory factory = getFactory();
 		factory.setProblemInput(problem);
 		IAlgorithm planner = factory.getAlgorithm();
@@ -33,7 +29,7 @@ public abstract class CEOCSTNNestedDichotomyTest extends HomogeneousGeneralAlgor
 		/* solve problem */
 		System.out.println("Searching all nested dichotomies to sepratate " + numClasses + ".");
 		int numSolutions = 0;
-		for (AlgorithmEvent ae : (GraphSearchBasedHTNPlanningAlgorithm<CEOCAction, IHTNPlanningProblem<?,?,CEOCAction>, ?, ?, ?, Double, ?, ?>)planner) {
+		for (AlgorithmEvent ae : (GraphSearchBasedHTNPlanningAlgorithm<CEOCAction, CEOCSTNPlanningProblem, ?, ?, ?, Double>)planner) {
 			if (ae instanceof PlanFoundEvent) {
 				numSolutions ++;
 				if (numSolutions % 10 == 0)
@@ -61,13 +57,13 @@ public abstract class CEOCSTNNestedDichotomyTest extends HomogeneousGeneralAlgor
 	}
 
 	@Override
-	public CEOCSTNPlanningProblem<CEOCOperation, OCMethod, CEOCAction> getSimpleProblemInputForGeneralTestPurposes() {
-		return StandardProblemFactory.getNestedDichotomyCreationProblem("root", 3, true, 0, 0);
+	public CEOCSTNPlanningProblem getSimpleProblemInputForGeneralTestPurposes() {
+		return CEOCSTNNDProblemGenerator.getNestedDichotomyCreationProblem("root", 3, true, 0, 0);
 	}
 
 	@Override
-	public CEOCSTNPlanningProblem<CEOCOperation, OCMethod, CEOCAction> getDifficultProblemInputForGeneralTestPurposes() throws Exception {
-		return StandardProblemFactory.getNestedDichotomyCreationProblem("root", 10, true, 0, 0);
+	public CEOCSTNPlanningProblem getDifficultProblemInputForGeneralTestPurposes() throws Exception {
+		return CEOCSTNNDProblemGenerator.getNestedDichotomyCreationProblem("root", 10, true, 0, 0);
 	}
 
 }

@@ -9,12 +9,12 @@ import jaicore.logging.ToJSONStringUtil;
 import jaicore.planning.classical.problems.strips.Operation;
 
 @SuppressWarnings("serial")
-public class STNPlanningDomain<O extends Operation, M extends Method> implements Serializable {
+public class STNPlanningDomain implements Serializable {
 
-	private final Collection<O> operations;
-	private final Collection<M> methods;
+	private final Collection<? extends Operation> operations;
+	private final Collection<? extends Method> methods;
 
-	public STNPlanningDomain(Collection<O> operations, Collection<M> methods) {
+	public STNPlanningDomain(Collection<? extends Operation> operations, Collection<? extends Method> methods) {
 		super();
 		this.operations = operations;
 		this.methods = methods;
@@ -25,11 +25,11 @@ public class STNPlanningDomain<O extends Operation, M extends Method> implements
 		return true;
 	}
 
-	public Collection<O> getOperations() {
+	public Collection<? extends Operation> getOperations() {
 		return operations;
 	}
 
-	public Collection<M> getMethods() {
+	public Collection<? extends Method> getMethods() {
 		return methods;
 	}
 

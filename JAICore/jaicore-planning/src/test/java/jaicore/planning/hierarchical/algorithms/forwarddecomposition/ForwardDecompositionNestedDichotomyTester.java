@@ -1,39 +1,48 @@
 package jaicore.planning.hierarchical.algorithms.forwarddecomposition;
 
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.impl.StaticLoggerBinder;
+
 import jaicore.basic.algorithm.AlgorithmProblemTransformer;
 import jaicore.basic.algorithm.IAlgorithm;
 import jaicore.basic.algorithm.IAlgorithmFactory;
 import jaicore.planning.classical.problems.ceoc.CEOCAction;
-import jaicore.planning.classical.problems.ceoc.CEOCOperation;
-import jaicore.planning.core.Action;
 import jaicore.planning.core.EvaluatedSearchGraphBasedPlan;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import jaicore.planning.hierarchical.problems.ceocstn.CEOCSTNPlanningProblem;
-import jaicore.planning.hierarchical.problems.ceocstn.OCMethod;
-import jaicore.planning.hierarchical.problems.htn.IHTNPlanningProblem;
-import jaicore.planning.hierarchical.testproblems.nesteddichotomies.CEOCSTNNestedDichotomyTest;
 
-public class ForwardDecompositionNestedDichotomyTester extends CEOCSTNNestedDichotomyTest {
-
-	@Override
-	public IAlgorithmFactory<CEOCSTNPlanningProblem<CEOCOperation, OCMethod, CEOCAction>, EvaluatedSearchGraphBasedPlan<Action, Double, TFDNode>> getFactory() {
-		return new IAlgorithmFactory<CEOCSTNPlanningProblem<CEOCOperation,OCMethod,CEOCAction>, EvaluatedSearchGraphBasedPlan<Action,Double,TFDNode>>() {
+//public class ForwardDecompositionNestedDichotomyTester extends CEOCSTNNestedDichotomyTest {
+public class ForwardDecompositionNestedDichotomyTester {
+	
+	@Test
+	public void f() {
+		final StaticLoggerBinder binder = StaticLoggerBinder.getSingleton();
+		System.out.println(binder.getLoggerFactory());
+		System.out.println(binder.getLoggerFactoryClassStr());
+		Logger logger = LoggerFactory.getLogger("testedalgorithm.search");
+		logger.info("OK");
+	}
+	
+	public IAlgorithmFactory<CEOCSTNPlanningProblem, EvaluatedSearchGraphBasedPlan<CEOCAction, Double, TFDNode>> getFactory() {
+		return new IAlgorithmFactory<CEOCSTNPlanningProblem, EvaluatedSearchGraphBasedPlan<CEOCAction,Double,TFDNode>>() {
 			
-			private CEOCSTNPlanningProblem<CEOCOperation, OCMethod, CEOCAction> problem;
+			private CEOCSTNPlanningProblem problem;
 
 			@Override
-			public <P> void setProblemInput(P problemInput, AlgorithmProblemTransformer<P, CEOCSTNPlanningProblem<CEOCOperation, OCMethod, CEOCAction>> reducer) {
+			public <P> void setProblemInput(P problemInput, AlgorithmProblemTransformer<P, CEOCSTNPlanningProblem> reducer) {
 				problem = reducer.transform(problemInput);
 			}
 
 			@Override
-			public void setProblemInput(CEOCSTNPlanningProblem<CEOCOperation, OCMethod, CEOCAction> problemInput) {
+			public void setProblemInput(CEOCSTNPlanningProblem problemInput) {
 				problem = problemInput;
 			}
 
 			@Override
-			public IAlgorithm<CEOCSTNPlanningProblem<CEOCOperation, OCMethod, CEOCAction>, EvaluatedSearchGraphBasedPlan<Action, Double, TFDNode>> getAlgorithm() {
-				ForwardDecompositionHTNPlannerBasedOnBestFirst algo = new ForwardDecompositionHTNPlannerBasedOnBestFirst<CEOCOperation, OCMethod, CEOCAction, IHTNPlanningProblem<CEOCOperation,OCMethod, CEOCAction>, Double>(problem, n -> 0.0);
+			public IAlgorithm<CEOCSTNPlanningProblem, EvaluatedSearchGraphBasedPlan<CEOCAction, Double, TFDNode>> getAlgorithm() {
+				ForwardDecompositionHTNPlannerBasedOnBestFirst<CEOCAction, CEOCSTNPlanningProblem, Double> algo = new ForwardDecompositionHTNPlannerBasedOnBestFirst<>(problem, n -> 0.0);
 				return algo;
 			}
 			

@@ -1,4 +1,4 @@
-package jaicore.planning.hierarchical.problems.ceocstn;
+package jaicore.planning.hierarchical.problems.ceocstn.converters;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -12,6 +12,7 @@ import jaicore.logic.fol.structure.CNFFormula;
 import jaicore.logic.fol.structure.Literal;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.planning.classical.problems.ceoc.CEOCOperation;
+import jaicore.planning.hierarchical.problems.ceocstn.CEOCSTNPlanningProblem;
 import jaicore.planning.hierarchical.problems.stn.Method;
 import jaicore.planning.hierarchical.problems.stn.TaskNetwork;
 

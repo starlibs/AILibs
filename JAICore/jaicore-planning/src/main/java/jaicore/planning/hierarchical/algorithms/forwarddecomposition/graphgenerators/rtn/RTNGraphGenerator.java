@@ -22,7 +22,6 @@ import jaicore.planning.classical.problems.ceoc.CEOCOperation;
 import jaicore.planning.classical.problems.strips.Operation;
 import jaicore.planning.core.Action;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.TaskPlannerUtil;
-import jaicore.planning.hierarchical.problems.rtn.RTNMethod;
 import jaicore.planning.hierarchical.problems.rtn.RTNPlanningProblem;
 import jaicore.planning.hierarchical.problems.stn.Method;
 import jaicore.planning.hierarchical.problems.stn.MethodInstance;
@@ -36,11 +35,11 @@ public class RTNGraphGenerator implements GraphGenerator<RTNNode, RTNEdge> {
 
 	private static final Logger logger = LoggerFactory.getLogger(RTNGraphGenerator.class);
 
-	private final RTNPlanningProblem<CEOCOperation,RTNMethod,CEOCAction> problem;
+	private final RTNPlanningProblem problem;
 	private final Map<String, Operation> primitiveTasks = new HashMap<>();
 	private final TaskPlannerUtil util = new TaskPlannerUtil(null);
 
-	public RTNGraphGenerator(RTNPlanningProblem<CEOCOperation,RTNMethod,CEOCAction> problem) {
+	public RTNGraphGenerator(RTNPlanningProblem problem) {
 		this.problem = problem;
 		for (Operation op : problem.getDomain().getOperations())
 			primitiveTasks.put(op.getName(), op);

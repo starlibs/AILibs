@@ -7,19 +7,17 @@ import jaicore.logging.ToJSONStringUtil;
 import jaicore.logic.fol.structure.CNFFormula;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.logic.fol.theories.EvaluablePredicate;
-import jaicore.planning.classical.problems.ceoc.CEOCAction;
-import jaicore.planning.classical.problems.ceoc.CEOCOperation;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.ceociptfd.OracleTaskResolver;
 import jaicore.planning.hierarchical.problems.ceocstn.CEOCSTNPlanningDomain;
 import jaicore.planning.hierarchical.problems.ceocstn.CEOCSTNPlanningProblem;
 import jaicore.planning.hierarchical.problems.stn.TaskNetwork;
 
 @SuppressWarnings("serial")
-public class CEOCIPSTNPlanningProblem<O extends CEOCOperation, M extends OCIPMethod, A extends CEOCAction> extends CEOCSTNPlanningProblem<O, M, A> {
+public class CEOCIPSTNPlanningProblem extends CEOCSTNPlanningProblem {
 	private final Map<String, EvaluablePredicate> evaluablePlanningPredicates;
 	private final Map<String, OracleTaskResolver> oracleResolvers;
 
-	public CEOCIPSTNPlanningProblem(CEOCSTNPlanningDomain<O, M> domain, CNFFormula knowledge, Monom init, TaskNetwork network, Map<String, EvaluablePredicate> evaluablePredicates,
+	public CEOCIPSTNPlanningProblem(CEOCSTNPlanningDomain domain, CNFFormula knowledge, Monom init, TaskNetwork network, Map<String, EvaluablePredicate> evaluablePredicates,
 			Map<String, OracleTaskResolver> oracleResolvers) {
 		super(domain, knowledge, init, network);
 		this.evaluablePlanningPredicates = evaluablePredicates;
@@ -51,8 +49,7 @@ public class CEOCIPSTNPlanningProblem<O extends CEOCOperation, M extends OCIPMet
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		@SuppressWarnings("unchecked")
-		CEOCIPSTNPlanningProblem<O,M,A> other = (CEOCIPSTNPlanningProblem<O,M,A>) obj;
+		CEOCIPSTNPlanningProblem other = (CEOCIPSTNPlanningProblem) obj;
 		if (evaluablePlanningPredicates == null) {
 			if (other.evaluablePlanningPredicates != null)
 				return false;

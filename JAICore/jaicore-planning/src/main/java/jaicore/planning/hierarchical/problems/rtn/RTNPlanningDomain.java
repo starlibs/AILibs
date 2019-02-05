@@ -6,9 +6,14 @@ import jaicore.planning.classical.problems.ceoc.CEOCOperation;
 import jaicore.planning.hierarchical.problems.ceocstn.CEOCSTNPlanningDomain;
 
 @SuppressWarnings("serial")
-public class RTNPlanningDomain<O extends CEOCOperation, M extends RTNMethod> extends CEOCSTNPlanningDomain<O,M> {
+public class RTNPlanningDomain extends CEOCSTNPlanningDomain {
 
-	public RTNPlanningDomain(Collection<O> operations, Collection<M> methods) {
+	public RTNPlanningDomain(Collection<? extends CEOCOperation> operations, Collection<? extends RTNMethod> methods) {
 		super(operations, methods);
+	}
+
+	@SuppressWarnings("unchecked")
+	public Collection<RTNMethod> getMethods() {
+		return (Collection<RTNMethod>)super.getMethods();
 	}
 }

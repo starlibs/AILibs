@@ -1,26 +1,24 @@
 package jaicore.planning.hierarchical.problems.rtn;
 
 import jaicore.logic.fol.structure.Monom;
-import jaicore.planning.classical.problems.ceoc.CEOCAction;
-import jaicore.planning.classical.problems.ceoc.CEOCOperation;
 import jaicore.planning.hierarchical.problems.stn.TaskNetwork;
 
-public class RTNPlanningProblem<O extends CEOCOperation, M extends RTNMethod, A extends CEOCAction> {
+public class RTNPlanningProblem {
 
-	private final RTNPlanningDomain<O,M> domain;
+	private final RTNPlanningDomain domain;
 
 	private final Monom init;
 
 	private final TaskNetwork network;
 
-	public RTNPlanningProblem(RTNPlanningDomain<O,M> domain, Monom init, TaskNetwork network) {
+	public RTNPlanningProblem(RTNPlanningDomain domain, Monom init, TaskNetwork network) {
 		super();
 		this.domain = domain;
 		this.init = init;
 		this.network = network;
 	}
 
-	public RTNPlanningDomain<O,M> getDomain() {
+	public RTNPlanningDomain getDomain() {
 		return domain;
 	}
 

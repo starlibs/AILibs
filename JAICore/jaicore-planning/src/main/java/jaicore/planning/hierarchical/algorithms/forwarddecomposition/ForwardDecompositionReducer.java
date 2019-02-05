@@ -3,9 +3,6 @@ package jaicore.planning.hierarchical.algorithms.forwarddecomposition;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import jaicore.planning.classical.problems.ceoc.CEOCAction;
-import jaicore.planning.classical.problems.ceoc.CEOCOperation;
-import jaicore.planning.classical.problems.strips.Operation;
 import jaicore.planning.core.Action;
 import jaicore.planning.core.Plan;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.ceociptfd.CEOCIPTFDGraphGenerator;
@@ -14,32 +11,31 @@ import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenera
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem;
 import jaicore.planning.hierarchical.problems.ceocstn.CEOCSTNPlanningProblem;
-import jaicore.planning.hierarchical.problems.ceocstn.OCMethod;
 import jaicore.planning.hierarchical.problems.htn.IHTNPlanningProblem;
 import jaicore.planning.hierarchical.problems.htn.IHierarchicalPlanningGraphGeneratorDeriver;
-import jaicore.planning.hierarchical.problems.stn.Method;
 import jaicore.planning.hierarchical.problems.stn.STNPlanningProblem;
 import jaicore.search.core.interfaces.GraphGenerator;
 
-public class ForwardDecompositionReducer<O extends Operation, M extends Method, A extends Action, I extends IHTNPlanningProblem<O, M, A>> implements IHierarchicalPlanningGraphGeneratorDeriver<O, M, A, I, TFDNode, String> {
+public class ForwardDecompositionReducer<PA extends Action> implements IHierarchicalPlanningGraphGeneratorDeriver<PA, TFDNode, String> {
 
 	@Override
-	public GraphGenerator<TFDNode, String> transform(I planningProblem) {
+	public GraphGenerator<TFDNode, String> transform(IHTNPlanningProblem planningProblem) {
 		GraphGenerator<TFDNode, String> graphGenerator;
 		if (planningProblem instanceof CEOCIPSTNPlanningProblem) {
-			graphGenerator = new CEOCIPTFDGraphGenerator((CEOCIPSTNPlanningProblem<? extends CEOCOperation,? extends OCMethod, ? extends CEOCAction>) planningProblem);
+			graphGenerator = new CEOCIPTFDGraphGenerator((CEOCIPSTNPlanningProblem) planningProblem);
 		} else if (planningProblem instanceof CEOCSTNPlanningProblem) {
-			graphGenerator = new CEOCTFDGraphGenerator<>((CEOCSTNPlanningProblem<? extends CEOCOperation,? extends OCMethod, ? extends CEOCAction>) planningProblem);
+			graphGenerator = new CEOCTFDGraphGenerator((CEOCSTNPlanningProblem) planningProblem);
 		} else if (planningProblem.getClass().equals(STNPlanningProblem.class)) {
-			graphGenerator = new TFDGraphGenerator<>(planningProblem);
+			graphGenerator = new TFDGraphGenerator(planningProblem);
 		} else {
 			throw new IllegalArgumentException("HTN problems of class \"" + planningProblem.getClass().getName() + "\" are currently not supported.");
 		}
 		return graphGenerator;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
-	public Plan<A> getPlan(List<TFDNode> path) {
-		return new Plan<>(path.stream().filter(n -> n.getAppliedAction() != null).map(n -> (A) n.getAppliedAction()).collect(Collectors.toList()));
+	public Plan<PA> getPlan(List<TFDNode> path) {
+		return new Plan<>(path.stream().filter(n -> n.getAppliedAction() != null).map(n -> (PA)n.getAppliedAction()).collect(Collectors.toList()));
 	}
 }

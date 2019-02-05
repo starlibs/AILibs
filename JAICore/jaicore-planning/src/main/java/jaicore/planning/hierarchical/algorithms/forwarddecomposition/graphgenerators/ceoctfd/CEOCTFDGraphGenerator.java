@@ -14,21 +14,18 @@ import jaicore.basic.sets.SetUtil;
 import jaicore.logic.fol.structure.ConstantParam;
 import jaicore.logic.fol.structure.Literal;
 import jaicore.logic.fol.structure.Monom;
-import jaicore.planning.classical.problems.ceoc.CEOCAction;
-import jaicore.planning.classical.problems.ceoc.CEOCOperation;
 import jaicore.planning.core.Action;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDGraphGenerator;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import jaicore.planning.hierarchical.problems.ceocstn.CEOCSTNPlanningProblem;
-import jaicore.planning.hierarchical.problems.ceocstn.OCMethod;
 import jaicore.planning.hierarchical.problems.stn.MethodInstance;
 
 @SuppressWarnings("serial")
-public class CEOCTFDGraphGenerator<O extends CEOCOperation, M extends OCMethod, A extends CEOCAction> extends TFDGraphGenerator<O, M, A> {
+public class CEOCTFDGraphGenerator extends TFDGraphGenerator {
 	
 	private final static Logger logger = LoggerFactory.getLogger(CEOCTFDGraphGenerator.class);
 
-	public CEOCTFDGraphGenerator(CEOCSTNPlanningProblem<O, M, A> problem) {
+	public CEOCTFDGraphGenerator(CEOCSTNPlanningProblem problem) {
 		super(problem);
 	}
 

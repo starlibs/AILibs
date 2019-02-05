@@ -1,4 +1,4 @@
-package jaicore.planning.hierarchical.problems.ceocipstn;
+package jaicore.planning.hierarchical.testproblems.nesteddichotomies;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,9 +15,12 @@ import jaicore.logic.fol.structure.VariableParam;
 import jaicore.logic.fol.theories.EvaluablePredicate;
 import jaicore.planning.classical.problems.ceoc.CEOCOperation;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.ceociptfd.OracleTaskResolver;
+import jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningDomain;
+import jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem;
+import jaicore.planning.hierarchical.problems.ceocipstn.OCIPMethod;
 import jaicore.planning.hierarchical.problems.stn.TaskNetwork;
 
-public class StandardProblemFactory {
+public class CEOCIPSTNNDProblemGenerator {
 	
 	public static CEOCIPSTNPlanningProblem getNestedDichotomyCreationProblem(String rootClusterName, Collection<String> classesInit, boolean objectCreation, int maxExpRange, int maxRefinement, Map<String, EvaluablePredicate> evaluablePredicates, Map<String, OracleTaskResolver> oracleResolvers) {
 		

@@ -8,24 +8,22 @@ import java.util.concurrent.TimeoutException;
 import jaicore.basic.algorithm.AlgorithmProblemTransformer;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.logging.ToJSONStringUtil;
-import jaicore.planning.classical.problems.strips.Operation;
 import jaicore.planning.core.Action;
-import jaicore.planning.hierarchical.problems.stn.Method;
 import jaicore.search.core.interfaces.ISolutionEvaluator;
 import jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 
-public class CostSensitivePlanningToSearchProblemTransformer<PO extends Operation, PM extends Method, PA extends Action, I extends IHTNPlanningProblem<PO, PM, PA>, V extends Comparable<V>, N, A>
-		implements AlgorithmProblemTransformer<CostSensitiveHTNPlanningProblem<PO, PM, PA, I, V>, GraphSearchWithPathEvaluationsInput<N, A, V>> {
+public class CostSensitivePlanningToSearchProblemTransformer<PA extends Action, V extends Comparable<V>, N, A>
+		implements AlgorithmProblemTransformer<CostSensitiveHTNPlanningProblem<PA, V>, GraphSearchWithPathEvaluationsInput<N, A, V>> {
 
-	private final IHierarchicalPlanningGraphGeneratorDeriver<PO, PM, PA, I, N, A> graphGeneratorDeriver;
+	private final IHierarchicalPlanningGraphGeneratorDeriver<PA, N, A> graphGeneratorDeriver;
 
-	public CostSensitivePlanningToSearchProblemTransformer(final IHierarchicalPlanningGraphGeneratorDeriver<PO, PM, PA, I, N, A> graphGeneratorDeriver) {
+	public CostSensitivePlanningToSearchProblemTransformer(final IHierarchicalPlanningGraphGeneratorDeriver<PA, N, A> graphGeneratorDeriver) {
 		super();
 		this.graphGeneratorDeriver = graphGeneratorDeriver;
 	}
 
 	@Override
-	public GraphSearchWithPathEvaluationsInput<N, A, V> transform(final CostSensitiveHTNPlanningProblem<PO, PM, PA, I, V> problem) {
+	public GraphSearchWithPathEvaluationsInput<N, A, V> transform(final CostSensitiveHTNPlanningProblem<PA, V> problem) {
 
 		ISolutionEvaluator<N, V> solutionEvaluator = new ISolutionEvaluator<N, V>() {
 
@@ -56,7 +54,7 @@ public class CostSensitivePlanningToSearchProblemTransformer<PO extends Operatio
 		return new GraphSearchWithPathEvaluationsInput<>(this.graphGeneratorDeriver.transform(problem.getCorePlanningProblem()), solutionEvaluator);
 	}
 
-	public IHierarchicalPlanningGraphGeneratorDeriver<PO, PM, PA, I, N, A> getGraphGeneratorDeriver() {
+	public IHierarchicalPlanningGraphGeneratorDeriver<PA, N, A> getGraphGeneratorDeriver() {
 		return this.graphGeneratorDeriver;
 	}
 }

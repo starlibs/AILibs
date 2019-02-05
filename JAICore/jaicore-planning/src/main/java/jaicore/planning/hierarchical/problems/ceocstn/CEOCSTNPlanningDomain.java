@@ -6,14 +6,14 @@ import jaicore.planning.classical.problems.ceoc.CEOCOperation;
 import jaicore.planning.hierarchical.problems.stn.STNPlanningDomain;
 
 @SuppressWarnings("serial")
-public class CEOCSTNPlanningDomain<O extends CEOCOperation, M extends OCMethod> extends STNPlanningDomain<O, M> {
+public class CEOCSTNPlanningDomain extends STNPlanningDomain {
 
-	public CEOCSTNPlanningDomain(Collection<O> operations, Collection<M> methods) {
+	public CEOCSTNPlanningDomain(Collection<? extends CEOCOperation> operations, Collection<? extends OCMethod> methods) {
 		super(operations, methods);
 	}
 	
 	public boolean isValid() {
-		for (O op : getOperations()) {
+		for (CEOCOperation op : getOperations()) {
 			boolean isValid = !(op.getAddLists().isEmpty() && op.getDeleteLists().isEmpty());
 			assert isValid : "Degenerated planning problem. Operation \"" + op.getName() + "\" has empty add list and empty delete list!";
 			if (!isValid)
@@ -22,7 +22,13 @@ public class CEOCSTNPlanningDomain<O extends CEOCOperation, M extends OCMethod> 
 		return true;
 	}
 	
-	public Collection<O> getOperations() {
-		return super.getOperations();
+	@SuppressWarnings("unchecked")
+	public Collection<? extends CEOCOperation> getOperations() {
+		return (Collection<CEOCOperation>)super.getOperations();
+	}
+	
+	@SuppressWarnings("unchecked")
+	public Collection<? extends OCMethod> getMethods() {
+		return (Collection<? extends OCMethod>)super.getMethods();
 	}
 }

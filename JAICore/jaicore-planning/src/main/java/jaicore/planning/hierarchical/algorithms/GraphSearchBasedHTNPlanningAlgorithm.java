@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jaicore.basic.ILoggingCustomizable;
+import jaicore.basic.TimeOut;
 import jaicore.basic.algorithm.AOptimizer;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
@@ -41,18 +42,18 @@ import jaicore.search.probleminputs.builders.SearchProblemInputBuilder;
  * @param <NSearch>
  * @param <ASearch>
  */
-public class GraphSearchBasedHTNPlanningAlgorithm<PA extends Action, P extends IHTNPlanningProblem<?, ?, PA>, ISearch extends GraphSearchInput<NSrc, ASrc>, NSrc, ASrc, V extends Comparable<V>, NSearch, ASearch>
-		extends AOptimizer<P, EvaluatedSearchGraphBasedPlan<PA, V, NSrc>, V> {
+public class GraphSearchBasedHTNPlanningAlgorithm<PA extends Action, IP extends IHTNPlanningProblem, ISearch extends GraphSearchInput<NSrc, ASrc>, NSrc, ASrc, V extends Comparable<V>>
+		extends AOptimizer<IP, EvaluatedSearchGraphBasedPlan<PA, V, NSrc>, V> {
 
 	private Logger logger = LoggerFactory.getLogger(GraphSearchBasedHTNPlanningAlgorithm.class);
 	private String loggerName;
 
 	/* algorithm inputs */
-	private final IHierarchicalPlanningGraphGeneratorDeriver<?, ?, PA, P, NSrc, ASrc> problemTransformer;
-	private final IOptimalPathInORGraphSearch<ISearch, NSrc, ASrc, V, NSearch, ASearch> search;
+	private final IHierarchicalPlanningGraphGeneratorDeriver<PA, NSrc, ASrc> problemTransformer;
+	private final IOptimalPathInORGraphSearch<ISearch, NSrc, ASrc, V, ?, ?> search;
 
-	public GraphSearchBasedHTNPlanningAlgorithm(final P problem, final IHierarchicalPlanningGraphGeneratorDeriver<?, ?, PA, P, NSrc, ASrc> problemTransformer,
-			final IOptimalPathInORGraphSearchFactory<ISearch, NSrc, ASrc, V, NSearch, ASearch> searchFactory, final SearchProblemInputBuilder<NSrc, ASrc, ISearch> searchProblemBuilder) {
+	public GraphSearchBasedHTNPlanningAlgorithm(final IP problem, final IHierarchicalPlanningGraphGeneratorDeriver<PA, NSrc, ASrc> problemTransformer,
+			final IOptimalPathInORGraphSearchFactory<ISearch, NSrc, ASrc, V, ?, ?> searchFactory, final SearchProblemInputBuilder<NSrc, ASrc, ISearch> searchProblemBuilder) {
 		super(problem);
 
 		this.problemTransformer = problemTransformer;
@@ -95,13 +96,15 @@ public class GraphSearchBasedHTNPlanningAlgorithm<PA extends Action, P extends I
 				this.logger.debug("The HTN problem is defined as follows:\n\tOperations:{}\n\tMethods:{}", opSB.toString(), methodSB.toString());
 			}
 
-			if (this.getLoggerName() != null && this.getLoggerName().length() > 0 && this.search instanceof ILoggingCustomizable) {
-				this.logger.info("Customizing logger of search with {}", this.getLoggerName());
-				((ILoggingCustomizable) this.search).setLoggerName(this.getLoggerName() + ".search");
-			}
+//			if (this.getLoggerName() != null && this.getLoggerName().length() > 0 && this.search instanceof ILoggingCustomizable) {
+//				this.logger.info("Setting logger of search to {}", this.getLoggerName() + ".search");
+//				((ILoggingCustomizable) this.search).setLoggerName(this.getLoggerName() + ".search");
+//			}
 			
 			/* set timeout on search */
-			this.search.setTimeout(getTimeout());
+			TimeOut to = getTimeout();
+			logger.debug("Setting timeout of search to {}", to);
+			this.search.setTimeout(to);
 			return activate();
 		}
 		case active: {
@@ -131,7 +134,7 @@ public class GraphSearchBasedHTNPlanningAlgorithm<PA extends Action, P extends I
 		}
 	}
 
-	public IOptimalPathInORGraphSearch<ISearch, NSrc, ASrc, V, NSearch, ASearch> getSearch() {
+	public IOptimalPathInORGraphSearch<ISearch, NSrc, ASrc, V, ?, ?> getSearch() {
 		return this.search;
 	}
 
@@ -147,9 +150,11 @@ public class GraphSearchBasedHTNPlanningAlgorithm<PA extends Action, P extends I
 		this.logger = LoggerFactory.getLogger(name);
 		this.logger.info("Activated logger {} with name {}", name, this.logger.getName());
 		if (this.problemTransformer instanceof ILoggingCustomizable) {
+			logger.info("Setting logger of problem transformer to {}", name + ".problemtransformer");
 			((ILoggingCustomizable) this.problemTransformer).setLoggerName(name + ".problemtransformer");
 		}
 		if (this.search instanceof ILoggingCustomizable) {
+			logger.info("Setting logger of search to {}", name + ".search");
 			((ILoggingCustomizable) this.search).setLoggerName(name + ".search");
 		}
 		super.setLoggerName(this.loggerName + "._algorithm");

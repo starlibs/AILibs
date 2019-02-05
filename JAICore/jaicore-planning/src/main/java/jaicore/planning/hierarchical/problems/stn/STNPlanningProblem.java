@@ -6,20 +6,18 @@ import java.util.Map;
 import jaicore.logging.ToJSONStringUtil;
 import jaicore.logic.fol.structure.CNFFormula;
 import jaicore.logic.fol.structure.Monom;
-import jaicore.planning.classical.problems.strips.Operation;
-import jaicore.planning.core.Action;
 import jaicore.planning.hierarchical.problems.htn.IHTNPlanningProblem;
 
 @SuppressWarnings("serial")
-public class STNPlanningProblem<O extends Operation, M extends Method, A extends Action> implements IHTNPlanningProblem<O, M, A> {
+public class STNPlanningProblem implements IHTNPlanningProblem {
 
-	private final STNPlanningDomain<O, M> domain;
+	private final STNPlanningDomain domain;
 	private final CNFFormula knowledge;
 	private final Monom init;
 	private final TaskNetwork network;
 	private final boolean sortNetworkBasedOnNumberPrefixes = true;
 
-	public STNPlanningProblem(STNPlanningDomain<O,M> domain, CNFFormula knowledge, Monom init, TaskNetwork network) {
+	public STNPlanningProblem(STNPlanningDomain domain, CNFFormula knowledge, Monom init, TaskNetwork network) {
 		super();
 		this.domain = domain;
 		this.knowledge = knowledge;
@@ -27,7 +25,7 @@ public class STNPlanningProblem<O extends Operation, M extends Method, A extends
 		this.network = network;
 	}
 
-	public STNPlanningDomain<O,M> getDomain() {
+	public STNPlanningDomain getDomain() {
 		return domain;
 	}
 

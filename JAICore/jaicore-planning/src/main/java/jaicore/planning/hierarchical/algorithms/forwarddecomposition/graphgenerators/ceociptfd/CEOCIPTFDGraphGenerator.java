@@ -1,19 +1,7 @@
 package jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.ceociptfd;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
-import jaicore.logic.fol.structure.Literal;
-import jaicore.logic.fol.structure.Monom;
-import jaicore.planning.classical.algorithms.strips.forward.StripsUtil;
-import jaicore.planning.classical.problems.ceoc.CEOCAction;
-import jaicore.planning.classical.problems.ceoc.CEOCOperation;
-import jaicore.planning.core.Action;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.TaskPlannerUtil;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.ceoctfd.CEOCTFDGraphGenerator;
-import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem;
 
 /**
