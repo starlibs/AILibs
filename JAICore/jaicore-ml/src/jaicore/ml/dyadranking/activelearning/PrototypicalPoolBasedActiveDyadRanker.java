@@ -11,14 +11,11 @@ import jaicore.ml.dyadranking.dataset.DyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
 
-public class PrototypicalPoolBasedActiveDyadRanker {
+public class PrototypicalPoolBasedActiveDyadRanker extends ActiveDyadRanker{
 
-	private PLNetDyadRanker ranker;
-	private IDyadRankingPoolProvider poolProvider;
 
 	public PrototypicalPoolBasedActiveDyadRanker(PLNetDyadRanker ranker, IDyadRankingPoolProvider poolProvider) {
-		this.ranker = ranker;
-		this.poolProvider = poolProvider;
+		super(ranker, poolProvider);
 	}
 
 	public void activelyTrain(int numberOfQueries) {
