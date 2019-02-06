@@ -5,6 +5,7 @@ import hasco.core.HASCO;
 import hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
 import jaicore.basic.algorithm.AlgorithmProblemTransformer;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
+//github.com/fmohr/AILibs.git
 import jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory;
 import jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
