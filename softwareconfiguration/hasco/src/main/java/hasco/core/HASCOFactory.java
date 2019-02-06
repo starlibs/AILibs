@@ -26,6 +26,14 @@ public class HASCOFactory<ISearch extends GraphSearchInput<N, A>, N, A, V extend
 
 	@Override
 	public HASCO<ISearch, N, A, V> getAlgorithm() {
+		if (problem == null)
+			throw new IllegalStateException("Cannot create HASCO, because no problem has been specified.");
+		if (planningGraphGeneratorDeriver == null)
+			throw new IllegalStateException("Cannot create HASCO, because no planningGraphGeneratorDeriver has been specified.");
+		if (searchFactory == null)
+			throw new IllegalStateException("Cannot create HASCO, because no search factory has been specified.");
+		if (searchProblemTransformer == null)
+			throw new IllegalStateException("Cannot create HASCO, because no searchProblemTransformer has been specified.");
 		HASCO<ISearch, N, A, V> hasco = new HASCO<>(problem, planningGraphGeneratorDeriver, searchFactory, searchProblemTransformer);
 		hasco.setVisualization(visualizationEnabled);
 		return hasco;

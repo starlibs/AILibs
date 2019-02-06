@@ -40,7 +40,7 @@ public class TFDGraphGenerator implements SerializableGraphGenerator<TFDNode, St
 			primitiveTasks.put(op.getName(), op);
 	}
 
-	protected Collection<TFDNode> getSuccessorsResultingFromResolvingPrimitiveTask(Monom state, Literal taskToBeResolved, List<Literal> remainingOtherTasks) {
+	protected Collection<TFDNode> getSuccessorsResultingFromResolvingPrimitiveTask(Monom state, Literal taskToBeResolved, List<Literal> remainingOtherTasks) throws InterruptedException {
 		Collection<TFDNode> successors = new ArrayList<>();
 		for (Action applicableAction : util.getActionsForPrimitiveTaskThatAreApplicableInState(null, primitiveTasks.get(taskToBeResolved.getPropertyName()), taskToBeResolved, state)) {
 			Monom stateCopy = new Monom(state);
@@ -50,7 +50,7 @@ public class TFDGraphGenerator implements SerializableGraphGenerator<TFDNode, St
 		return successors;
 	}
 
-	protected Collection<TFDNode> getSuccessorsResultingFromResolvingComplexTask(Monom state, Literal taskToBeResolved, List<Literal> remainingOtherTasks) {
+	protected Collection<TFDNode> getSuccessorsResultingFromResolvingComplexTask(Monom state, Literal taskToBeResolved, List<Literal> remainingOtherTasks) throws InterruptedException {
 		Collection<TFDNode> successors = new ArrayList<>();
 		Collection<MethodInstance> applicableMethodInstances = util.getMethodInstancesForTaskThatAreApplicableInState(null, this.problem.getDomain().getMethods(), taskToBeResolved, state, remainingOtherTasks);
 		assert areLonelyMethodsContainedAtMostOnce(applicableMethodInstances);

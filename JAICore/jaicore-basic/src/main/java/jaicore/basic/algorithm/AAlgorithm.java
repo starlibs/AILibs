@@ -31,7 +31,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	private IAlgorithmConfig config;
 
 	/* Semantic input to the algorithm. */
-	private I input;
+	private final I input;
 
 	/* State and event bus for sending algorithm events. */
 	private Timer timer;
@@ -47,34 +47,16 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	private final EventBus eventBus = new EventBus();
 
 	/**
-	 * Standard c'tor without any parameters.
-	 */
-	protected AAlgorithm() {
-		super();
-		this.config = ConfigFactory.create(IAlgorithmConfig.class);
-	}
-
-	/**
 	 * C'tor providing the input for the algorithm already.
 	 *
 	 * @param input
 	 *            The input for the algorithm.
 	 */
 	protected AAlgorithm(final I input) {
-		this();
 		this.input = input;
+		this.config = ConfigFactory.create(IAlgorithmConfig.class);
 	}
 
-	/**
-	 * Internal c'tor overwriting the internal config to keep the config consistent.
-	 *
-	 * @param config
-	 *            The config to take as the internal config object.
-	 */
-	protected AAlgorithm(final IAlgorithmConfig config) {
-		super();
-		this.config = config;
-	}
 
 	/**
 	 * Internal c'tore overwriting the internal configuration and setting the input.
@@ -85,7 +67,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	 *            The configuration to take as the internal configuration object.
 	 */
 	protected AAlgorithm(final IAlgorithmConfig config, final I input) {
-		this(config);
+		this.config = config;
 		this.input = input;
 	}
 
@@ -107,10 +89,6 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 			this.unregisterThreadAndShutdown();
 			throw new RuntimeException(e);
 		}
-	}
-
-	public void setInput(final I input) {
-		this.input = input;
 	}
 
 	@Override

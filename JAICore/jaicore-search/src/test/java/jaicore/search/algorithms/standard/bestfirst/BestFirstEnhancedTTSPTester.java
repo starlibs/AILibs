@@ -31,7 +31,7 @@ public class BestFirstEnhancedTTSPTester extends EnhancedTTSPTester<GraphSearchW
 				try {
 					return a.getSolutionEvaluator().evaluateSolution(node.externalPath());
 				} catch (ObjectEvaluationFailedException e) {
-					throw new NodeEvaluationException("Could not evaluate node. " + e.getMessage());
+					throw new NodeEvaluationException(e, "Could not evaluate node. " + e.getMessage());
 				}
 			}
 		});

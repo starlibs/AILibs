@@ -46,10 +46,6 @@ public class ForwardChainer extends AAlgorithm<ForwardChainingProblem, Collectio
 	private Monom currentGroundRemainingConclusion;
 	private ForwardChainer currentlyActiveSubFC;
 
-	public ForwardChainer() {
-		super();
-	}
-
 	public ForwardChainer(ForwardChainingProblem problem) {
 		super(problem);
 		assert !problem.getConclusion().isEmpty() : "Ill-defined forward chaining problem with empty conclusion!";
@@ -240,7 +236,7 @@ public class ForwardChainer extends AAlgorithm<ForwardChainingProblem, Collectio
 	}
 
 	@Override
-	public Collection<Map<VariableParam, LiteralParam>> call() {
+	public Collection<Map<VariableParam, LiteralParam>> call() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {
 		Collection<Map<VariableParam, LiteralParam>> mappings = new ArrayList<>();
 		NextBindingFoundEvent e;
 		while ((e = nextBinding()) != null) {
@@ -250,8 +246,9 @@ public class ForwardChainer extends AAlgorithm<ForwardChainingProblem, Collectio
 		return mappings;
 	}
 
-	public NextBindingFoundEvent nextBinding() {
-		for (AlgorithmEvent e : this) {
+	public NextBindingFoundEvent nextBinding() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException  {
+		while (this.hasNext()) {
+			AlgorithmEvent e = nextWithException();
 			if (e instanceof NextBindingFoundEvent)
 				return (NextBindingFoundEvent) e;
 		}

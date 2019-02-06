@@ -5,8 +5,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.upb.crc901.mlplan.multiclass.wekamlplan.MLPlanWekaClassifier;
-import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.WekaMLPlanWekaClassifier;
+import de.upb.crc901.mlplan.multiclass.core.MLPlan;
+import de.upb.crc901.mlplan.multiclass.core.MLPlanBuilder;
 import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import jaicore.search.GraphGeneratorTester;
@@ -19,10 +19,9 @@ public class MLPlanGraphGeneratorTest extends GraphGeneratorTester<TFDNode, Stri
 	public List<Pair<GraphGenerator<TFDNode, String>,Integer>> getGraphGenerators() throws IOException {
 
 		/* extract graph generator from mlplan */
-		MLPlanWekaClassifier mlplan = new WekaMLPlanWekaClassifier();
 		Instances data = new Instances(new FileReader("../../../../datasets/classification/multi-class/car.arff"));
 		data.setClassIndex(data.numAttributes() - 1);
-		mlplan.setData(data);
+		MLPlan mlplan = new MLPlan(new MLPlanBuilder().withAutoWEKAConfiguration(), data);
 		GraphGenerator<TFDNode, String> graphGenerator = mlplan.getGraphGenerator();
 		
 		/* generate the actual input for the test */

@@ -12,6 +12,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.sets.SetUtil;
 import jaicore.logic.fol.structure.CNFFormula;
 import jaicore.logic.fol.structure.ConstantParam;
@@ -52,24 +54,24 @@ public class TaskPlannerUtil {
 	}
 
 	public Collection<MethodInstance> getMethodInstancesForTaskThatAreApplicableInState(CNFFormula knowledge, Collection<? extends Method> methods, Literal task, Monom state,
-			List<Literal> remainingProblems) {
+			List<Literal> remainingProblems) throws InterruptedException {
 		Collection<MethodInstance> applicableDerivedMethods = new ArrayList<>();
 		for (Method m : methods) {
 			if (m.getTask().getPropertyName().equals(task.getPropertyName())) {
 				Collection<MethodInstance> additionalInstances = getMethodInstancesForTaskThatAreApplicableInState(knowledge, m, task, state, remainingProblems);
-				assert !m.isLonely() || additionalInstances.size() <= 1 : "Computed more than one instantiations for lonely method: \n\t" + additionalInstances.stream().map(n -> n.toString()).collect(Collectors.joining("\n\t"));
+				assert !m.isLonely() || additionalInstances.size() <= 1 : "Computed more than one instantiations for lonely method: \n\t"
+						+ additionalInstances.stream().map(n -> n.toString()).collect(Collectors.joining("\n\t"));
 				applicableDerivedMethods.addAll(additionalInstances);
 			}
 		}
 		return applicableDerivedMethods;
 	}
 
-	public Collection<MethodInstance> getMethodInstancesForTaskThatAreApplicableInState(CNFFormula knowledge, Method method, Literal task, Monom state,
-			List<Literal> remainingProblems) {
+	public Collection<MethodInstance> getMethodInstancesForTaskThatAreApplicableInState(CNFFormula knowledge, Method method, Literal task, Monom state, List<Literal> remainingProblems) throws InterruptedException {
 		Collection<MethodInstance> applicableDerivedMethodInstances = new ArrayList<>();
 		Collection<Map<VariableParam, LiteralParam>> maps = getMappingsThatMatchTasksAndMakesItApplicable(knowledge, method.getTask(), task, method.getPrecondition(), state);
 		for (Map<VariableParam, LiteralParam> grounding : maps) {
-			
+
 			/* create a copy of the grounding */
 			Map<VariableParam, ConstantParam> basicConstantGrounding = new HashMap<>();
 			for (VariableParam key : grounding.keySet()) {
@@ -78,12 +80,11 @@ public class TaskPlannerUtil {
 
 			/* up to where, we only have considered the "normal" parameters. Now check whether additional inputs bindings are indicated by interpreted predicates */
 			Collection<Map<VariableParam, ConstantParam>> extendedGroundings = new ArrayList<>();
-			
+
 			/* this block is to cater for methods that have interpreted predicates and need to be oracled for valid groundings */
 			if (method instanceof OCIPMethod) {
 				OCIPMethod castedMethod = (OCIPMethod) method;
-				Collection<VariableParam> ungroundParamsInEvaluablePrecondition = SetUtil.difference(castedMethod.getEvaluablePrecondition().getVariableParams(),
-						basicConstantGrounding.keySet());
+				Collection<VariableParam> ungroundParamsInEvaluablePrecondition = SetUtil.difference(castedMethod.getEvaluablePrecondition().getVariableParams(), basicConstantGrounding.keySet());
 
 				Map<Literal, EvaluablePredicate> evaluablePredicatesForLiterals = new HashMap<>();
 				for (Literal l : castedMethod.getEvaluablePrecondition()) {
@@ -121,7 +122,7 @@ public class TaskPlannerUtil {
 					getOracleGroundings(ungroundParamsInEvaluablePrecondition, literalsOrderedByOracability, state, new HashSet<>(), oracleGroundings, basicConstantGrounding);
 					extendedGroundings.addAll(oracleGroundings);
 				}
-				
+
 				/* all parameters are ground, we just need to test the predicate */
 				else {
 					boolean allSatisfied = true;
@@ -129,7 +130,7 @@ public class TaskPlannerUtil {
 						ConstantParam[] params = new ConstantParam[l.getParameters().size()];
 						for (int i = 0; i < params.length; i++) {
 							LiteralParam param = l.getParameters().get(i);
-							params[i] = (param instanceof ConstantParam) ? (ConstantParam)param : basicConstantGrounding.get(param);
+							params[i] = (param instanceof ConstantParam) ? (ConstantParam) param : basicConstantGrounding.get(param);
 						}
 						if (evaluablePredicatesForLiterals.get(l).test(state, params) != l.isPositive()) {
 							allSatisfied = false;
@@ -151,11 +152,11 @@ public class TaskPlannerUtil {
 					knownConstants.addAll(l.getConstantParams());
 				}
 				Collection<VariableParam> unboundParams = SetUtil.difference(method.getParameters(), extendedGrounding.keySet());
-				
-				
+
 				if (method instanceof OCMethod) {
 					Collection<VariableParam> unboundOutputParams = SetUtil.intersection(unboundParams, ((OCMethod) method).getOutputs());
-					assert unboundOutputParams.equals(unboundParams) : "Some of the inputs of method " + method.getName() + " have not been ground. Unground inputs: " + SetUtil.difference(unboundParams, unboundOutputParams);
+					assert unboundOutputParams.equals(unboundParams) : "Some of the inputs of method " + method.getName() + " have not been ground. Unground inputs: "
+							+ SetUtil.difference(unboundParams, unboundOutputParams);
 					int indexForNewVariable = 1;
 					for (VariableParam v : unboundOutputParams) {
 						ConstantParam p;
@@ -166,11 +167,11 @@ public class TaskPlannerUtil {
 						unboundParams.remove(v);
 					}
 					assert unboundParams.isEmpty() : "Method " + method.getName() + " must be ground completely before processing. Here, " + unboundParams + " are unground.";
+				} else if (!unboundParams.isEmpty()) {
+					throw new IllegalStateException(
+							"Could not compute a complete grounding for method " + method.getName() + ". The following parameters were not ground until the end: " + unboundParams);
 				}
-				else if (!unboundParams.isEmpty()) {
-					throw new IllegalStateException("Could not compute a complete grounding for method " + method.getName() + ". The following parameters were not ground until the end: " + unboundParams);
-				}
-				
+
 				applicableDerivedMethodInstances.add(new MethodInstance(method, extendedGrounding));
 				if (method.isLonely()) // if the method is lonely, do not add other groundings here
 					return applicableDerivedMethodInstances;
@@ -179,8 +180,8 @@ public class TaskPlannerUtil {
 		return applicableDerivedMethodInstances;
 	}
 
-	private void getOracleGroundings(Collection<VariableParam> ungroundParamsInEvaluablePrecondition, Queue<Literal> literalsOrderedByOracability, Monom state,
-			Set<VariableParam> paramsGroundSoFar, Collection<Map<VariableParam, ConstantParam>> groundingsFixedSoFar, Map<VariableParam, ConstantParam> basicConstantGrounding) {
+	private void getOracleGroundings(Collection<VariableParam> ungroundParamsInEvaluablePrecondition, Queue<Literal> literalsOrderedByOracability, Monom state, Set<VariableParam> paramsGroundSoFar,
+			Collection<Map<VariableParam, ConstantParam>> groundingsFixedSoFar, Map<VariableParam, ConstantParam> basicConstantGrounding) {
 		if (literalsOrderedByOracability.isEmpty())
 			return;
 
@@ -190,7 +191,8 @@ public class TaskPlannerUtil {
 		Collection<LiteralParam> paramsThatNeedGrounding = SetUtil.intersection(SetUtil.difference(ungroundParamsInEvaluablePrecondition, paramsGroundSoFar), l.getParameters());
 		logger.info("Now checking validity of {}. Set of params that still need grounding: {}", l, paramsThatNeedGrounding);
 		if (paramsThatNeedGrounding.size() > 1)
-			throw new UnsupportedOperationException("Currently only support for at most one unground variable! Here, the following variables of \"" + l + "\"need grounding: " + paramsThatNeedGrounding);
+			throw new UnsupportedOperationException(
+					"Currently only support for at most one unground variable! Here, the following variables of \"" + l + "\"need grounding: " + paramsThatNeedGrounding);
 
 		/* now go over all previous groundings and check them */
 		List<Map<VariableParam, ConstantParam>> localCopyOfCurrentGrounding = new ArrayList<>(groundingsFixedSoFar);
@@ -206,9 +208,8 @@ public class TaskPlannerUtil {
 			boolean parameterIsGround = basicConstantGrounding.containsKey(param);
 			boolean parameterHasBeenDecidedByOracle = !(parameterIsConstant || parameterIsGround) && paramsGroundSoFar.contains(param);
 			if (parameterIsConstant) {
-				params[i] = (ConstantParam)param;
-			}
-			else if (parameterIsGround) {
+				params[i] = (ConstantParam) param;
+			} else if (parameterIsGround) {
 				params[i] = basicConstantGrounding.get(param);
 			} else {
 				positionsOfVariableParams.put((VariableParam) param, i);
@@ -218,7 +219,7 @@ public class TaskPlannerUtil {
 				}
 			}
 		}
-		
+
 		/* update list of solutions */
 		groundingsFixedSoFar.clear();
 		for (Map<VariableParam, ConstantParam> previouslyOracledGrounding : localCopyOfCurrentGrounding) {
@@ -253,8 +254,7 @@ public class TaskPlannerUtil {
 					logger.warn("Predicate {} returned NULL for params {} in state {}. Canceling grounding process.", l.getPropertyName(), params, state);
 					return;
 				}
-				Collection<ConstantParam> possibleValuesForNewParamInThisGrounding = possibleGroundingsOfThisPredicate.stream().map(s -> s.get(finalizedIndexOfParam))
-						.collect(Collectors.toSet());
+				Collection<ConstantParam> possibleValuesForNewParamInThisGrounding = possibleGroundingsOfThisPredicate.stream().map(s -> s.get(finalizedIndexOfParam)).collect(Collectors.toSet());
 				for (ConstantParam oracledParamOfThisLiteral : possibleValuesForNewParamInThisGrounding) {
 					Map<VariableParam, ConstantParam> extendedOracleGrounding = new HashMap<>(previouslyOracledGrounding);
 					extendedOracleGrounding.put(paramToBeGround, oracledParamOfThisLiteral);
@@ -266,15 +266,18 @@ public class TaskPlannerUtil {
 
 			/* otherwise just test the predicate against the choices already made */
 			else {
-				logger.info("No new parameters to ground. Only testing {} (evaluated by {}) against params {} given groundings {}.", l, predicate.getClass().getName(), Arrays.toString(params), groundingsFixedSoFar);
-				localCopyOfCurrentGrounding.stream().filter(grounding -> predicate.test(state, params) == l.isPositive()).forEach(g -> {groundingsFixedSoFar.add(g);});
+				logger.info("No new parameters to ground. Only testing {} (evaluated by {}) against params {} given groundings {}.", l, predicate.getClass().getName(), Arrays.toString(params),
+						groundingsFixedSoFar);
+				localCopyOfCurrentGrounding.stream().filter(grounding -> predicate.test(state, params) == l.isPositive()).forEach(g -> {
+					groundingsFixedSoFar.add(g);
+				});
 			}
 		}
 		logger.info("Proceeding with extended oracle grounding: {}", groundingsFixedSoFar);
 		getOracleGroundings(ungroundParamsInEvaluablePrecondition, literalsOrderedByOracability, state, paramsGroundSoFar, groundingsFixedSoFar, basicConstantGrounding);
 	}
 
-	public Collection<Action> getActionsForPrimitiveTaskThatAreApplicableInState(CNFFormula knowledge, Operation op, Literal task, Monom state) {
+	public Collection<Action> getActionsForPrimitiveTaskThatAreApplicableInState(CNFFormula knowledge, Operation op, Literal task, Monom state) throws InterruptedException {
 		Collection<Action> applicableDerivedActions = new ArrayList<>();
 		List<VariableParam> allParams = new ArrayList<>();
 		allParams.addAll(op.getParams());
@@ -292,7 +295,7 @@ public class TaskPlannerUtil {
 				constantGrounding.put(key, (ConstantParam) grounding.get(key));
 			}
 			if (op instanceof CEOCOperation)
-				applicableDerivedActions.add(new CEOCAction((CEOCOperation)op, constantGrounding));
+				applicableDerivedActions.add(new CEOCAction((CEOCOperation) op, constantGrounding));
 			else
 				applicableDerivedActions.add(new Action(op, constantGrounding));
 		}
@@ -300,16 +303,16 @@ public class TaskPlannerUtil {
 	}
 
 	private Collection<Map<VariableParam, LiteralParam>> getMappingsThatMatchTasksAndMakesItApplicable(CNFFormula knowledge, Literal methodOrPrimitiveTask, Literal target,
-			Monom preconditionOfMethodOrPrimitive, Monom state) {
+			Monom preconditionOfMethodOrPrimitive, Monom state) throws InterruptedException {
 		assert preconditionOfMethodOrPrimitive != null : "precondition of methode or primitive task " + methodOrPrimitiveTask + " is null";
 		logger.info("Now computing the possible applications of method {} for task {}", methodOrPrimitiveTask, target);
-		
+
 		/* if no precondition is to be matched, just match the params and return this binding */
 		if (preconditionOfMethodOrPrimitive.isEmpty()) {
 			int numParams = target.getParameters().size();
 			Map<VariableParam, LiteralParam> grounding = new HashMap<>();
 			for (int i = 0; i < numParams; i++) {
-				VariableParam paramOfPreconditionLiteral = (VariableParam)methodOrPrimitiveTask.getParameters().get(i);
+				VariableParam paramOfPreconditionLiteral = (VariableParam) methodOrPrimitiveTask.getParameters().get(i);
 				LiteralParam targetParam = target.getParameters().get(i);
 				grounding.put(paramOfPreconditionLiteral, targetParam);
 			}
@@ -320,8 +323,8 @@ public class TaskPlannerUtil {
 
 		/* consistency check */
 		if (!methodOrPrimitiveTask.getPropertyName().equals(target.getPropertyName()))
-			throw new IllegalArgumentException("The method used to refine task \"" + target
-					+ "\" must be compatible with it, i.e. designed for that task, but it is designed for \"" + methodOrPrimitiveTask.getPropertyName() + "\"");
+			throw new IllegalArgumentException("The method used to refine task \"" + target + "\" must be compatible with it, i.e. designed for that task, but it is designed for \""
+					+ methodOrPrimitiveTask.getPropertyName() + "\"");
 
 		/*
 		 * compute map between argument names of the method or primitive task literal and the target literal. Primitive tasks are completely bound here, but methods may have other parameters that do
@@ -343,88 +346,87 @@ public class TaskPlannerUtil {
 		Monom unitedKnowledge = new Monom(state);
 		if (knowledge != null)
 			unitedKnowledge.addAll(knowledge.extractMonom());
-		try {
 
-			/* determine potential output parameters of the task */
-			final Collection<VariableParam> outputs = SetUtil.difference(target.getVariableParams(), preconditionOfMethodOrPrimitive.getVariableParams());
-			final Collection<VariableParam> parametersThatNeedGrounding = SetUtil.difference(target.getVariableParams(), outputs);
+		/* determine potential output parameters of the task */
+		final Collection<VariableParam> outputs = SetUtil.difference(target.getVariableParams(), preconditionOfMethodOrPrimitive.getVariableParams());
+		final Collection<VariableParam> parametersThatNeedGrounding = SetUtil.difference(target.getVariableParams(), outputs);
 
-			/* first compute the possible groundings of the TASK to the state objects; if the task is already ground, add the empty completion */
-			final Collection<Map<VariableParam, ConstantParam>> groundingsOfTargetTask = SetUtil.allTotalMappings(parametersThatNeedGrounding, unitedKnowledge.getConstantParams());
-			if (groundingsOfTargetTask.isEmpty()) {
-				groundingsOfTargetTask.add(new HashMap<>());
-			}
-
-			/* now check the instances of the method for each grounding completion */
-			for (Map<VariableParam, ConstantParam> targetTaskGrounding : groundingsOfTargetTask) {
-
-				/*
-				 * transfer the grounding of the target predicate to the parameters occurring in the method task/primitive task respectively. NOTE: There may be parameters of the target task (e.g.
-				 * outputs) that will not be ground here. So also the instance will be ground only partially.
-				 */
-				final Map<VariableParam, ConstantParam> groundingForMethodOrPrimitiveTask = new HashMap<>();
-				for (VariableParam var : methodTaskParams) {
-					LiteralParam correspondingVarInTaskLiteral = taskParameterMapping.get(var);
-					if (correspondingVarInTaskLiteral instanceof ConstantParam)
-						groundingForMethodOrPrimitiveTask.put(var, (ConstantParam) correspondingVarInTaskLiteral);
-					else if (targetTaskGrounding.containsKey(correspondingVarInTaskLiteral))
-						groundingForMethodOrPrimitiveTask.put(var, targetTaskGrounding.get(correspondingVarInTaskLiteral));
-				}
-
-				/* now create the part of the grounding of the METHOD related to params NOT occurring in the task. if no such exists, consider just one empty completion */
-				Monom positiveRequirements = new Monom(preconditionOfMethodOrPrimitive.stream().filter(l -> l.isPositive()).collect(Collectors.toList()),
-						groundingForMethodOrPrimitiveTask);
-				Collection<Map<VariableParam, LiteralParam>> restMaps;
-				if (!positiveRequirements.isEmpty()) {
-					ForwardChainer fc = new ForwardChainer(new ForwardChainingProblem(unitedKnowledge, positiveRequirements, true));
-					restMaps = fc.call();
-				}
-				else
-					restMaps = new ArrayList<>();
-				if (restMaps.isEmpty())
-					restMaps.add(new HashMap<>());
-
-				/* now compute the resulting complete groundings */
-				for (Map<VariableParam, LiteralParam> restMap : restMaps) {
-					Map<VariableParam, LiteralParam> completeGroundingMethod = new HashMap<>();
-					completeGroundingMethod.putAll(groundingForMethodOrPrimitiveTask);
-					completeGroundingMethod.putAll(restMap);
-
-					/* now check applicability of the GROUND method */
-					logger.debug("Now considering grounding {}", completeGroundingMethod);
-					Monom precondition = new Monom(preconditionOfMethodOrPrimitive, completeGroundingMethod);
-					if (precondition.isContradictory()) {
-						logger.debug("Ignoring this grounding because it makes the precondition contradictory.");
-						continue;
-					}
-					List<Literal> positiveLiterals = precondition.stream().filter(l -> l.isPositive()).collect(Collectors.toList());
-					List<Literal> negativeLiterals = precondition.stream().filter(l -> l.isNegated()).map(l -> l.clone().toggleNegation()).collect(Collectors.toList());
-					if (unitedKnowledge.containsAll(positiveLiterals) && SetUtil.intersection(unitedKnowledge, negativeLiterals).isEmpty()) {
-						logger.debug("Adding the grounding.");
-						groundings.add(completeGroundingMethod);
-					}
-					else if (logger.isDebugEnabled()) {
-						for (Literal l : positiveLiterals) {
-							if (!unitedKnowledge.contains(l)) {
-								logger.debug("Ignoring this grounding because the united knowledge {} does not contain the positive literal {}", unitedKnowledge, l);
-								if (logger.isTraceEnabled()) {
-									for (Literal l2 : unitedKnowledge) {
-										logger.trace("Comparing {} of signature {}{} with {} of signature{}{}: {}/{}", l, l.getClass().getName(), l.getParameters().stream().map(p -> p.getName() + ":" + p.getType()).collect(Collectors.toList()), l2, l2.getClass().getName(), l2.getParameters().stream().map(p -> p.getName() + ":" + p.getType()).collect(Collectors.toList()), l.equals(l2), l2.equals(l));
-									}
-								}
-								break;
-							}
-						}
-						if (!SetUtil.intersection(unitedKnowledge, negativeLiterals).isEmpty())
-							logger.debug("Ignoring this grounding because of an non-empty intersection of the united knowledge {} and the negative literals {}", unitedKnowledge, negativeLiterals);
-					}
-				}
-			}
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+		/* first compute the possible groundings of the TASK to the state objects; if the task is already ground, add the empty completion */
+		final Collection<Map<VariableParam, ConstantParam>> groundingsOfTargetTask = SetUtil.allTotalMappings(parametersThatNeedGrounding, unitedKnowledge.getConstantParams());
+		if (groundingsOfTargetTask.isEmpty()) {
+			groundingsOfTargetTask.add(new HashMap<>());
 		}
-		logger.info("Admissible groundings for {} with precondition {} on {} in state {} are: {}", methodOrPrimitiveTask, preconditionOfMethodOrPrimitive, target, state,
-				groundings);
+
+		/* now check the instances of the method for each grounding completion */
+		for (Map<VariableParam, ConstantParam> targetTaskGrounding : groundingsOfTargetTask) {
+
+			/*
+			 * transfer the grounding of the target predicate to the parameters occurring in the method task/primitive task respectively. NOTE: There may be parameters of the target task (e.g.
+			 * outputs) that will not be ground here. So also the instance will be ground only partially.
+			 */
+			final Map<VariableParam, ConstantParam> groundingForMethodOrPrimitiveTask = new HashMap<>();
+			for (VariableParam var : methodTaskParams) {
+				LiteralParam correspondingVarInTaskLiteral = taskParameterMapping.get(var);
+				if (correspondingVarInTaskLiteral instanceof ConstantParam)
+					groundingForMethodOrPrimitiveTask.put(var, (ConstantParam) correspondingVarInTaskLiteral);
+				else if (targetTaskGrounding.containsKey(correspondingVarInTaskLiteral))
+					groundingForMethodOrPrimitiveTask.put(var, targetTaskGrounding.get(correspondingVarInTaskLiteral));
+			}
+
+			/* now create the part of the grounding of the METHOD related to params NOT occurring in the task. if no such exists, consider just one empty completion */
+			Monom positiveRequirements = new Monom(preconditionOfMethodOrPrimitive.stream().filter(l -> l.isPositive()).collect(Collectors.toList()), groundingForMethodOrPrimitiveTask);
+			Collection<Map<VariableParam, LiteralParam>> restMaps;
+			if (!positiveRequirements.isEmpty()) {
+				ForwardChainer fc = new ForwardChainer(new ForwardChainingProblem(unitedKnowledge, positiveRequirements, true));
+				try {
+					restMaps = fc.call();
+				} catch (AlgorithmExecutionCanceledException | TimeoutException e) {
+					logger.warn("The forward chainer was canceled or timed out, so maybe not all bindings could be computed!");
+					return groundings;
+				}
+			} else
+				restMaps = new ArrayList<>();
+			if (restMaps.isEmpty())
+				restMaps.add(new HashMap<>());
+
+			/* now compute the resulting complete groundings */
+			for (Map<VariableParam, LiteralParam> restMap : restMaps) {
+				Map<VariableParam, LiteralParam> completeGroundingMethod = new HashMap<>();
+				completeGroundingMethod.putAll(groundingForMethodOrPrimitiveTask);
+				completeGroundingMethod.putAll(restMap);
+
+				/* now check applicability of the GROUND method */
+				logger.debug("Now considering grounding {}", completeGroundingMethod);
+				Monom precondition = new Monom(preconditionOfMethodOrPrimitive, completeGroundingMethod);
+				if (precondition.isContradictory()) {
+					logger.debug("Ignoring this grounding because it makes the precondition contradictory.");
+					continue;
+				}
+				List<Literal> positiveLiterals = precondition.stream().filter(l -> l.isPositive()).collect(Collectors.toList());
+				List<Literal> negativeLiterals = precondition.stream().filter(l -> l.isNegated()).map(l -> l.clone().toggleNegation()).collect(Collectors.toList());
+				if (unitedKnowledge.containsAll(positiveLiterals) && SetUtil.intersection(unitedKnowledge, negativeLiterals).isEmpty()) {
+					logger.debug("Adding the grounding.");
+					groundings.add(completeGroundingMethod);
+				} else if (logger.isDebugEnabled()) {
+					for (Literal l : positiveLiterals) {
+						if (!unitedKnowledge.contains(l)) {
+							logger.debug("Ignoring this grounding because the united knowledge {} does not contain the positive literal {}", unitedKnowledge, l);
+							if (logger.isTraceEnabled()) {
+								for (Literal l2 : unitedKnowledge) {
+									logger.trace("Comparing {} of signature {}{} with {} of signature{}{}: {}/{}", l, l.getClass().getName(),
+											l.getParameters().stream().map(p -> p.getName() + ":" + p.getType()).collect(Collectors.toList()), l2, l2.getClass().getName(),
+											l2.getParameters().stream().map(p -> p.getName() + ":" + p.getType()).collect(Collectors.toList()), l.equals(l2), l2.equals(l));
+								}
+							}
+							break;
+						}
+					}
+					if (!SetUtil.intersection(unitedKnowledge, negativeLiterals).isEmpty())
+						logger.debug("Ignoring this grounding because of an non-empty intersection of the united knowledge {} and the negative literals {}", unitedKnowledge, negativeLiterals);
+				}
+			}
+		}
+		logger.info("Admissible groundings for {} with precondition {} on {} in state {} are: {}", methodOrPrimitiveTask, preconditionOfMethodOrPrimitive, target, state, groundings);
 		return groundings;
 	}
 
@@ -454,7 +456,7 @@ public class TaskPlannerUtil {
 		Objects.requireNonNull(nameOfOperation);
 		return domain.getOperations().stream().filter(o -> o.getName().equals(nameOfOperation)).findAny();
 	}
-	
+
 	public List<CEOCAction> recoverPlanFromActionEncoding(STNPlanningDomain domain, List<String> actionEncodings) {
 		List<CEOCAction> plan = new ArrayList<>();
 		Pattern p = Pattern.compile("([^(]+)\\(([^,]*|([^,]*(?:,[^,]*)+))\\)");
@@ -462,20 +464,20 @@ public class TaskPlannerUtil {
 			Matcher m = p.matcher(actionEncoding);
 			if (!m.find())
 				throw new IllegalArgumentException("Cannot match the action encoding " + actionEncoding);
-			
+
 			/* compute operation */
 			Optional<? extends Operation> op = getOperationWithName(domain, m.group(1));
 			if (!op.isPresent())
 				throw new IllegalArgumentException("Invalid action " + actionEncoding + ", because no operation with name \"" + m.group(1) + "\" is known in the given domain.");
-			
+
 			/* compute grounding */
 			List<ConstantParam> args = Arrays.asList(m.group(2).split(",")).stream().map(param -> new ConstantParam(param.trim())).collect(Collectors.toList());
-			Map<VariableParam,ConstantParam> grounding = new HashMap<>();
+			Map<VariableParam, ConstantParam> grounding = new HashMap<>();
 			List<VariableParam> params = op.get().getParams();
 			for (int i = 0; i < params.size(); i++) {
 				grounding.put(params.get(i), args.get(i));
 			}
-			plan.add(new CEOCAction((CEOCOperation)op.get(), grounding));
+			plan.add(new CEOCAction((CEOCOperation) op.get(), grounding));
 		}
 		return plan;
 	}

@@ -652,12 +652,21 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 					logger.debug("Timeout detected {} prior to deadline, interrupting successor generation.", getRemainingTimeToDeadline());
 					timeoutTriggered.set(true);
 				});
-				t.schedule(task, remainingTime - 500);
 				try {
+					t.schedule(task, remainingTime - 500);
+				}
+				catch (IllegalStateException e) { // apparently the algorithm has terminated
+					this.checkTerminationAndUnregisterFromExpand(nodeSelectedForExpansion);
+				}
+				try {
+					logger.trace("Invoking getSuccessors");
 					tmpSuccessorDescriptions = BestFirst.this.successorGenerator.generateSuccessors(nodeSelectedForExpansion.getPoint());
+					logger.trace("Received {} successor descriptions", tmpSuccessorDescriptions.size());
 					task.cancel();
-				} catch (InterruptedException e) { // the fact that we are interrupted here can have several reasons. Could be an interrupt from the outside, a cancel, or a timeout by the above timer
-
+				}
+				catch (InterruptedException e) { // the fact that we are interrupted here can have several reasons. Could be an interrupt from the outside, a cancel, or a timeout by the above timer
+					logger.debug("Received intterrupt. Cancel flag is {}", isCanceled());
+					
 					/* if the timeout has been triggered (with caution), just sleep until */
 					remainingTime = getRemainingTimeToDeadline().milliseconds();
 					if (timeoutTriggered.get()) {

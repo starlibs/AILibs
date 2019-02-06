@@ -75,7 +75,6 @@ public abstract class HASCOTester<ISearch extends GraphSearchInput<N, A>, N, A>
 	public void sanityCheckOfSearchGraph() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException, UnresolvableRequiredInterfaceException, IOException  {
 		for (Pair<HASCO<ISearch, N, A, Double>, Integer> pairOfHASCOAndNumOfSolutions : getAllHASCOObjectsWithExpectedNumberOfSolutionsForTheKnownProblems()) {
 			HASCO<ISearch, N, A, Double> hasco = pairOfHASCOAndNumOfSolutions.getX();
-			hasco.init();
 			GraphGenerator<N, A> gen = hasco.getGraphGenerator();
 
 			/* check on dead end */

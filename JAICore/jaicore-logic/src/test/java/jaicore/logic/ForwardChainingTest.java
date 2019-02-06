@@ -61,8 +61,7 @@ public class ForwardChainingTest extends HomogeneousGeneralAlgorithmTester<Forwa
 
 			@Override
 			public IAlgorithm<ForwardChainingProblem, Collection<Map<VariableParam, LiteralParam>>> getAlgorithm() {
-				ForwardChainer fc = new ForwardChainer();
-				fc.setInput(getInput());
+				ForwardChainer fc = new ForwardChainer(getInput());
 				return fc;
 			}
 		};
