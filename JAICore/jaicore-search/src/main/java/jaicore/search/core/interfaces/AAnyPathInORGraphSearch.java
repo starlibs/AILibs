@@ -24,14 +24,14 @@ import jaicore.search.probleminputs.GraphSearchInput;
  * @author fmohr
  *
  * @param <I>
- * @param <NSrc>
- * @param <ASrc>
+ * @param <N>
+ * @param <A>
  * @param <V>
  * @param <NSearch>
  * @param <Asearch>
  */
-public abstract class AAnyPathInORGraphSearch<I extends GraphSearchInput<NSrc, ASrc>, O extends SearchGraphPath<NSrc, ASrc>, NSrc, ASrc, NSearch, Asearch> extends ASolutionCandidateIterator<I, O>
-		implements IPathInORGraphSearch<I, O, NSrc, ASrc, NSearch, Asearch> {
+public abstract class AAnyPathInORGraphSearch<I extends GraphSearchInput<N, A>, O extends SearchGraphPath<N, A>, N, A> extends ASolutionCandidateIterator<I, O>
+		implements IPathInORGraphSearch<I, O, N, A> {
 
 	/* Logger variables */
 	private Logger logger = LoggerFactory.getLogger(AAlgorithm.class);
@@ -45,14 +45,14 @@ public abstract class AAnyPathInORGraphSearch<I extends GraphSearchInput<NSrc, A
 		super(config,problem);
 	}
 	
-	protected GraphSearchSolutionCandidateFoundEvent<NSrc, ASrc, O> registerSolution(final O path) {
-		GraphSearchSolutionCandidateFoundEvent<NSrc, ASrc, O> event = new GraphSearchSolutionCandidateFoundEvent<>(path);
+	protected GraphSearchSolutionCandidateFoundEvent<N, A, O> registerSolution(final O path) {
+		GraphSearchSolutionCandidateFoundEvent<N, A, O> event = new GraphSearchSolutionCandidateFoundEvent<>(path);
 		this.post(event);
 		return event;
 	}
 
 	@Override
-	public GraphGenerator<NSrc, ASrc> getGraphGenerator() {
+	public GraphGenerator<N, A> getGraphGenerator() {
 		return this.getInput().getGraphGenerator();
 	}
 

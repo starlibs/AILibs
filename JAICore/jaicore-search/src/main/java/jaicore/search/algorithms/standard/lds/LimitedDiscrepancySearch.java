@@ -35,7 +35,7 @@ import jaicore.search.structure.graphgenerator.SuccessorGenerator;
  * @author fmohr
  *
  */
-public class LimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends AOptimalPathInORGraphSearch<GraphSearchWithNodeRecommenderInput<T, A>, T, A, V, TreeNode<T>, A> {
+public class LimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends AOptimalPathInORGraphSearch<GraphSearchWithNodeRecommenderInput<T, A>, T, A, V> {
 
 	/* logging */
 	private Logger logger = LoggerFactory.getLogger(LimitedDiscrepancySearch.class);

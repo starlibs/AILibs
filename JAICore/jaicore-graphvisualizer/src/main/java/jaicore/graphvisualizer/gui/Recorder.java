@@ -3,7 +3,6 @@ package jaicore.graphvisualizer.gui;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -15,7 +14,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
-import jaicore.graph.IGraphAlgorithm;
 import jaicore.graphvisualizer.events.controlEvents.ControlEvent;
 import jaicore.graphvisualizer.events.controlEvents.FileEvent;
 import jaicore.graphvisualizer.events.controlEvents.NodePushed;
@@ -42,7 +40,7 @@ import jaicore.graphvisualizer.gui.dataSupplier.ReconstructionDataSupplier;
 public class Recorder<V,E> {
 
     /*Algorithm to listen to*/
-	private IGraphAlgorithm<?,?,V,E> algorithm;
+//	private IGraphAlgorithm<?,?,V,E> algorithm;
 
     /*List for storing the events*/
 	private List<Object> receivedEvents;
@@ -67,7 +65,7 @@ public class Recorder<V,E> {
 	 * algorithm but it can load a replay.
 	 */
 	public Recorder() {
-		this(null);
+//		this(null);
 	}
 
 	/**
@@ -75,24 +73,24 @@ public class Recorder<V,E> {
 	 * 
 	 * @param algorithm The algorithm from which the reocrder receives the events.
 	 */
-	public Recorder(IGraphAlgorithm<?, ?, V, E> algorithm) {
-		if (algorithm != null)
-			algorithm.registerListener(this);
-
-		this.algorithm = algorithm;
-
-		/* initializing variables*/
-
-		this.index = 0;
-
-		this.receivedEvents = new ArrayList<>();
-		this.receivingTimes = new ArrayList<>();
-		this.replayBus = new EventBus();
-		this.infoBus = new EventBus();
-
-		this.nodeMap = new HashMap<>();
-		supplier = new ArrayList<>();
-	}
+//	public Recorder(IGraphAlgorithm<?, ?, V, E> algorithm) {
+//		if (algorithm != null)
+//			algorithm.registerListener(this);
+//
+//		this.algorithm = algorithm;
+//
+//		/* initializing variables*/
+//
+//		this.index = 0;
+//
+//		this.receivedEvents = new ArrayList<>();
+//		this.receivingTimes = new ArrayList<>();
+//		this.replayBus = new EventBus();
+//		this.infoBus = new EventBus();
+//
+//		this.nodeMap = new HashMap<>();
+//		supplier = new ArrayList<>();
+//	}
 
 	/**
 	 * Register a listener to the replay-Eventbus to receive the graphevents, that
@@ -171,10 +169,10 @@ public class Recorder<V,E> {
 	 * @param steps The number of steps to do.
 	 */
 	private void forward(int steps) {
-		if (this.index == this.receivedEvents.size() && this.algorithm != null)
-			if (this.algorithm.hasNext()) {
-				this.algorithm.next();
-			}
+//		if (this.index == this.receivedEvents.size() && this.algorithm != null)
+//			if (this.algorithm.hasNext()) {
+//				this.algorithm.next();
+//			}
 		while (steps != 0) {
 			if (this.index < this.receivedEvents.size()) {
 				Object event = this.receivedEvents.get(index);

@@ -18,7 +18,7 @@ import jaicore.search.probleminputs.GraphSearchInput;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 
-public class GraphSanityChecker<N, A> extends AOptimalPathInORGraphSearch<GraphSearchInput<N, A>, N, A, Double, N, A> {
+public class GraphSanityChecker<N, A> extends AOptimalPathInORGraphSearch<GraphSearchInput<N, A>, N, A, Double> {
 
 	private Logger logger = LoggerFactory.getLogger(GraphSanityChecker.class);
 	private String loggerName;

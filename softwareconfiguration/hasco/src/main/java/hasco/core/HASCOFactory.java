@@ -10,7 +10,7 @@ public class HASCOFactory<ISearch extends GraphSearchInput<N, A>, N, A, V extend
 
 	private RefinementConfiguredSoftwareConfigurationProblem<V> problem;
 	private IHASCOPlanningGraphGeneratorDeriver<N, A> planningGraphGeneratorDeriver;
-	private IOptimalPathInORGraphSearchFactory<ISearch, N, A, V, ?, ?> searchFactory;
+	private IOptimalPathInORGraphSearchFactory<ISearch, N, A, V> searchFactory;
 	private AlgorithmProblemTransformer<GraphSearchWithPathEvaluationsInput<N, A, V>, ISearch> searchProblemTransformer;
 	private boolean visualizationEnabled;
 
@@ -39,11 +39,11 @@ public class HASCOFactory<ISearch extends GraphSearchInput<N, A>, N, A, V extend
 		this.planningGraphGeneratorDeriver = planningGraphGeneratorDeriver;
 	}
 
-	public IOptimalPathInORGraphSearchFactory<ISearch, N, A, V, ?, ?> getSearchFactory() {
+	public IOptimalPathInORGraphSearchFactory<ISearch, N, A, V> getSearchFactory() {
 		return searchFactory;
 	}
 
-	public void setSearchFactory(IOptimalPathInORGraphSearchFactory<ISearch, N, A, V, ?, ?> searchFactory) {
+	public void setSearchFactory(IOptimalPathInORGraphSearchFactory<ISearch, N, A, V> searchFactory) {
 		this.searchFactory = searchFactory;
 	}
 

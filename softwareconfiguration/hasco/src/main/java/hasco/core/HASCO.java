@@ -64,7 +64,7 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 	/* problem and algorithm setup */
 	private final IHASCOPlanningGraphGeneratorDeriver<N, A> planningGraphGeneratorDeriver;
 	private final AlgorithmProblemTransformer<GraphSearchWithPathEvaluationsInput<N, A, V>, ISearch> searchProblemTransformer;
-	private final IOptimalPathInORGraphSearchFactory<ISearch, N, A, V, ?, ?> searchFactory;
+	private final IOptimalPathInORGraphSearchFactory<ISearch, N, A, V> searchFactory;
 
 	/*
 	 * working constants of the algorithms - these are effectively final but are not
@@ -72,7 +72,7 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 	 */
 	private CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, V> planningProblem;
 	private GraphSearchWithPathEvaluationsInput<N, A, V> searchProblem;
-	private IOptimalPathInORGraphSearch<ISearch, N, A, V, ?, ?> search;
+	private IOptimalPathInORGraphSearch<ISearch, N, A, V> search;
 	private final List<HASCOSolutionCandidate<V>> listOfAllRecognizedSolutions = new ArrayList<>();
 
 	/* runtime variables of algorithm */
@@ -84,7 +84,7 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 
 	public HASCO(final RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem,
 			final IHASCOPlanningGraphGeneratorDeriver<N, A> planningGraphGeneratorDeriver,
-			final IOptimalPathInORGraphSearchFactory<ISearch, N, A, V, ?, ?> searchFactory,
+			final IOptimalPathInORGraphSearchFactory<ISearch, N, A, V> searchFactory,
 			final AlgorithmProblemTransformer<GraphSearchWithPathEvaluationsInput<N, A, V>, ISearch> searchProblemTransformer) {
 		super(ConfigFactory.create(HASCOConfig.class), configurationProblem);
 		if (configurationProblem == null) {

@@ -17,7 +17,7 @@ import jaicore.search.probleminputs.builders.SearchProblemInputBuilder;
 public class ForwardDecompositionHTNPlanner<IPlanning extends IHTNPlanningProblem, V extends Comparable<V>, ISearch extends GraphSearchInput<TFDNode, String>>
 		extends GraphSearchBasedHTNPlanningAlgorithm<IPlanning, ISearch, TFDNode, String, V> {
 
-	public ForwardDecompositionHTNPlanner(IPlanning problem, IOptimalPathInORGraphSearchFactory<ISearch, TFDNode, String, V, ?, ?> searchFactory,
+	public ForwardDecompositionHTNPlanner(IPlanning problem, IOptimalPathInORGraphSearchFactory<ISearch, TFDNode, String, V> searchFactory,
 			SearchProblemInputBuilder<TFDNode, String, ISearch> searchProblemBuilder) {
 		super(problem, new ForwardDecompositionReducer<IPlanning>(), searchFactory, searchProblemBuilder);
 	}

@@ -23,15 +23,16 @@ import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.basic.sets.LDSRelationComputer;
 import jaicore.basic.sets.RelationComputationProblem;
 import jaicore.graph.Graph;
-import jaicore.graph.IGraphAlgorithm;
 import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
 import jaicore.search.core.interfaces.GraphGenerator;
+import jaicore.search.core.interfaces.IGraphSearch;
 import jaicore.search.model.travesaltree.NodeExpansionDescription;
 import jaicore.search.model.travesaltree.NodeType;
+import jaicore.search.probleminputs.GraphSearchInput;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 
-public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorithm<GraphGenerator<N, A>, Graph<N>> implements IGraphAlgorithm<GraphGenerator<N, A>, Graph<N>, N, A> {
+public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorithm<GraphSearchInput<N, A>, Graph<N>> implements IGraphSearch<GraphSearchInput<N, A>, Graph<N>, N, A> {
 
 	private Logger logger = LoggerFactory.getLogger(AndORBottomUpFilter.class);
 	private String loggerName;
@@ -72,7 +73,7 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 	}
 
 	public AndORBottomUpFilter(final GraphGenerator<N, A> gg, final IObjectEvaluator<Graph<N>, V> pEvaluator, final int andNodeLimit) {
-		super(gg);
+		super(new GraphSearchInput<>(gg));
 		this.evaluator = pEvaluator;
 		this.nodeLimit = andNodeLimit;
 	}
@@ -83,7 +84,7 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 		case created: {
 			/* step 1: construct the whole graph */
 			Queue<InnerNodeLabel> open = new LinkedList<>();
-			InnerNodeLabel root = new InnerNodeLabel(((SingleRootGenerator<N>) this.getInput().getRootGenerator()).getRoot(), NodeType.AND);
+			InnerNodeLabel root = new InnerNodeLabel(((SingleRootGenerator<N>) this.getInput().getGraphGenerator().getRootGenerator()).getRoot(), NodeType.AND);
 			root.val = 0;
 			open.add(root);
 			this.post(new GraphInitializedEvent<N>(root.node));
@@ -92,7 +93,7 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 				InnerNodeLabel n = open.poll();
 				try {
 					int generatedChildren = 0;
-					for (NodeExpansionDescription<N, A> descr : this.getInput().getSuccessorGenerator().generateSuccessors(n.node)) {
+					for (NodeExpansionDescription<N, A> descr : this.getInput().getGraphGenerator().getSuccessorGenerator().generateSuccessors(n.node)) {
 						InnerNodeLabel newNode = new InnerNodeLabel(descr.getTo(), descr.getTypeOfToNode());
 						newNode.parent = n;
 						newNode.val = generatedChildren;
@@ -296,5 +297,10 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 			((ILoggingCustomizable) this.evaluator).setLoggerName(name + ".eval");
 		}
 		super.setLoggerName(this.loggerName + "._orgraphsearch");
+	}
+
+	@Override
+	public GraphGenerator<N, A> getGraphGenerator() {
+		return getInput().getGraphGenerator();
 	}
 }

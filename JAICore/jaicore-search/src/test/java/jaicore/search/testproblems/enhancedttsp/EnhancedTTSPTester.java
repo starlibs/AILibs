@@ -19,16 +19,16 @@ import jaicore.search.core.interfaces.IGraphSearchFactory;
 import jaicore.search.model.other.SearchGraphPath;
 import jaicore.search.probleminputs.GraphSearchInput;
 
-public abstract class EnhancedTTSPTester<I extends GraphSearchInput<EnhancedTTSPNode, String>, O, VSearch, ESearch> extends GraphSearchTester<EnhancedTTSP, I, O, EnhancedTTSPNode, String, VSearch, ESearch> {
+public abstract class EnhancedTTSPTester<I extends GraphSearchInput<EnhancedTTSPNode, String>, O> extends GraphSearchTester<EnhancedTTSP, I, O, EnhancedTTSPNode, String> {
 
 	private static final int MAX_N = 6;
 	private static final int MAX_DISTANCE = 12;
-	private static final int TIMEOUT_IN_MS = 5 * 60 * 1000;
+//	private static final int TIMEOUT_IN_MS = 5 * 60 * 1000;
 //	private static final boolean VISUALIZE = false;
 
 	
 
-	IGraphSearchFactory<I, O, EnhancedTTSPNode, String, VSearch, ESearch> searchFactory = getFactory();
+	IGraphSearchFactory<I, O, EnhancedTTSPNode, String> searchFactory = getFactory();
 
 	private I getSearchProblem(int n) {
 
@@ -36,7 +36,7 @@ public abstract class EnhancedTTSPTester<I extends GraphSearchInput<EnhancedTTSP
 		return getProblemReducer().transform(new EnhancedTTSPGenerator().generate(n, MAX_DISTANCE));
 	}
 	
-	private IGraphSearch<I, O, EnhancedTTSPNode, String, VSearch, ESearch> getSearchAlgorithmForProblem(int n) {
+	private IGraphSearch<I, O, EnhancedTTSPNode, String> getSearchAlgorithmForProblem(int n) {
 		searchFactory.setProblemInput(getSearchProblem(n));
 		return searchFactory.getAlgorithm();
 	}
@@ -46,7 +46,7 @@ public abstract class EnhancedTTSPTester<I extends GraphSearchInput<EnhancedTTSP
 		for (int n = 3; n <= MAX_N; n++) {
 			System.out.print("Checking n = " + n + " ");
 
-			IGraphSearch<I, O, EnhancedTTSPNode, String, VSearch, ESearch> search = getSearchAlgorithmForProblem(n);
+			IGraphSearch<I, O, EnhancedTTSPNode, String> search = getSearchAlgorithmForProblem(n);
 //			if (VISUALIZE)
 //				new VisualizationWindow<>(search);
 			Iterator<AlgorithmEvent> iterator = search.iterator();

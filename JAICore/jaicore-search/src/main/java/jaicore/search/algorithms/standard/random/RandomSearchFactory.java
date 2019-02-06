@@ -4,9 +4,8 @@ import jaicore.search.core.interfaces.StandardORGraphSearchFactory;
 import jaicore.search.model.other.SearchGraphPath;
 import jaicore.search.probleminputs.GraphSearchInput;
 
-public class RandomSearchFactory<N, A> extends StandardORGraphSearchFactory<GraphSearchInput<N, A>, SearchGraphPath<N, A>,N, A, Double, N, A> {
+public class RandomSearchFactory<N, A> extends StandardORGraphSearchFactory<GraphSearchInput<N, A>, SearchGraphPath<N, A>,N, A, Double> {
 
-	private int timeoutForFInMS;
 	private String loggerName;
 	private int seed;
 
@@ -14,18 +13,11 @@ public class RandomSearchFactory<N, A> extends StandardORGraphSearchFactory<Grap
 		super();
 	}
 
-	public RandomSearchFactory(final int timeoutForFInMS) {
-		this();
-		if (timeoutForFInMS > 0) {
-			this.timeoutForFInMS = timeoutForFInMS;
-		}
-	}
-
 	@Override
 	public RandomSearch<N, A> getAlgorithm() {
-		if (getProblemInput().getGraphGenerator() == null)
+		if (getInput().getGraphGenerator() == null)
 			throw new IllegalStateException("Cannot produce RandomSearch searches before the graph generator is set in the problem.");
-		RandomSearch<N, A> search = new RandomSearch<>(getProblemInput(), seed);
+		RandomSearch<N, A> search = new RandomSearch<>(getInput(), seed);
 		return search;
 	}
 

@@ -40,7 +40,7 @@ import jaicore.search.structure.graphgenerator.SuccessorGenerator;
  * @param <N>
  * @param <A>
  */
-public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput<N, A>, SearchGraphPath<N, A>, N, A, N, A> implements ILoggingCustomizable {
+public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput<N, A>, SearchGraphPath<N, A>, N, A> implements ILoggingCustomizable {
 
 	/* logging */
 	private String loggerName;

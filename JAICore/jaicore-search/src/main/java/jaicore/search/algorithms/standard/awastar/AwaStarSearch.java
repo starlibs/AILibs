@@ -45,7 +45,7 @@ import jaicore.search.structure.graphgenerator.SuccessorGenerator;
  * @param <A>
  * @param <V>
  */
-public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A, V>, T, A, V extends Comparable<V>> extends AOptimalPathInORGraphSearch<I, T, A, V, Node<T, V>, A> {
+public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A, V>, T, A, V extends Comparable<V>> extends AOptimalPathInORGraphSearch<I, T, A, V> {
 
 	private Logger logger = LoggerFactory.getLogger(AwaStarSearch.class);
 	private String loggerName;
@@ -60,6 +60,7 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 	private final List<EvaluatedSearchGraphPath<T, A, V>> unconfirmedSolutions = new ArrayList<>(); // these are solutions emitted on the basis of the node evaluator but whose solutions have not been found in the original graph yet
 	private final List<EvaluatedSearchSolutionCandidateFoundEvent<T, A, V>> unreturnedSolutionEvents = new ArrayList<>();
 
+	@SuppressWarnings("rawtypes")
 	public AwaStarSearch(final I problem) {
 		super(problem);
 		this.rootNodeGenerator = (SingleRootGenerator<T>) problem.getGraphGenerator().getRootGenerator();

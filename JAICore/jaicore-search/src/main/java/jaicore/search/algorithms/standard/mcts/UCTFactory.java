@@ -13,6 +13,6 @@ public class UCTFactory<T, A> extends MCTSFactory<T, A, Double> {
 
 	@Override
 	public UCT<T, A> getAlgorithm() {
-		return new UCT<>(getProblemInput(), seed);
+		return new UCT<>(getInput(), seed);
 	}
 }
