@@ -3,6 +3,7 @@ package jaicore.graphvisualizer.events.recorder;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.graphvisualizer.events.graph.bus.AlgorithmEventListener;
 import jaicore.graphvisualizer.events.graph.bus.AlgorithmEventSource;
 import jaicore.graphvisualizer.events.graph.bus.HandleAlgorithmEventException;
@@ -40,14 +41,17 @@ public class AlgorithmEventHistoryPuller extends Thread implements AlgorithmEven
 	@Override
 	public void run() {
 		while (!paused) {
-			for (AlgorithmEventListener eventListener : algorithmEventListeners) {
-				try {
-					eventListener.handleAlgorithmEvent(eventHistory.getEntryAtTimeStep(timestep).getAlgorithmEvent());
-				} catch (HandleAlgorithmEventException e) {
-					// TODO LOG THIS ERROR
+			if (timestep < eventHistory.getLength()) {
+				AlgorithmEvent algorithmEvent = eventHistory.getEntryAtTimeStep(timestep).getAlgorithmEvent();
+				for (AlgorithmEventListener eventListener : algorithmEventListeners) {
+					try {
+						eventListener.handleAlgorithmEvent(algorithmEvent);
+					} catch (HandleAlgorithmEventException e) {
+						// TODO LOG THIS ERROR
+					}
 				}
+				timestep++;
 			}
-			timestep++;
 			try {
 				sleep(sleepTimeInMillis);
 			} catch (InterruptedException e) {
