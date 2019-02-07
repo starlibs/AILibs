@@ -16,10 +16,12 @@ import jaicore.basic.algorithm.exceptions.AlgorithmException;
 public class HASCOModelStatisticsObserverPluginExample {
 	public static void main(String[] args) throws UnresolvableRequiredInterfaceException, IOException, InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
 		HASCOViaFDAndBestFirstFactory<Double> hascoFactory = new HASCOViaFDAndBestFirstFactory<>(n -> 0.0);
-		hascoFactory.setProblemInput(new RefinementConfiguredSoftwareConfigurationProblem<>(new File("testrsc/simpleproblemwithtwocomponents.json"), "IFace", n -> System.currentTimeMillis() * 1.0));
+		hascoFactory.setProblemInput(new RefinementConfiguredSoftwareConfigurationProblem<>(new File("testrsc/difficultproblem.json"), "IFace", n -> System.currentTimeMillis() * 1.0));
 		HASCOViaFDAndBestFirst<Double> hasco = hascoFactory.getAlgorithm();
+		hasco.setNumCPUs(1);
 		HASCOModelStatisticsObserver observer = new HASCOModelStatisticsObserver();
 		hasco.registerListener(observer);
+		hasco.setVisualization(true);
 		HASCOSolutionCandidate<Double> solution = hasco.call();
 		System.out.println(observer.getPerformanceStatisticsPerComposition());
 	}
