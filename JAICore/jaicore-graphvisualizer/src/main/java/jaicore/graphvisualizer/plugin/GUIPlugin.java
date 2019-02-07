@@ -1,6 +1,6 @@
 package jaicore.graphvisualizer.plugin;
 
-import jaicore.graphvisualizer.events.graph.bus.GraphEventSource;
+import jaicore.graphvisualizer.events.graph.bus.AlgorithmEventSource;
 import jaicore.graphvisualizer.events.gui.GUIEventSource;
 
 public interface GUIPlugin {
@@ -11,7 +11,7 @@ public interface GUIPlugin {
 
 	public GUIPluginView getView();
 
-	public void setGraphEventSource(GraphEventSource graphEventSource);
+	public void setGraphEventSource(AlgorithmEventSource graphEventSource);
 
 	public void setGUIEventSource(GUIEventSource guiEventSource);
 

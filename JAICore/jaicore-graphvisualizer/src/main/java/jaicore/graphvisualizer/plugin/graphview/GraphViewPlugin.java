@@ -1,6 +1,6 @@
 package jaicore.graphvisualizer.plugin.graphview;
 
-import jaicore.graphvisualizer.events.graph.bus.GraphEventSource;
+import jaicore.graphvisualizer.events.graph.bus.AlgorithmEventSource;
 import jaicore.graphvisualizer.events.gui.GUIEventSource;
 import jaicore.graphvisualizer.plugin.GUIPlugin;
 import jaicore.graphvisualizer.plugin.GUIPluginController;
@@ -33,7 +33,7 @@ public class GraphViewPlugin implements GUIPlugin {
 	}
 
 	@Override
-	public void setGraphEventSource(GraphEventSource graphEventSource) {
+	public void setGraphEventSource(AlgorithmEventSource graphEventSource) {
 		graphEventSource.registerListener(controller);
 	}
 

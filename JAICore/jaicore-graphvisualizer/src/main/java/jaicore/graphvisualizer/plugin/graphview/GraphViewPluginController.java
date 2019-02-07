@@ -3,13 +3,13 @@ package jaicore.graphvisualizer.plugin.graphview;
 import java.util.Arrays;
 import java.util.Collections;
 
-import jaicore.graphvisualizer.events.graph.GraphEvent;
+import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.graphvisualizer.events.graph.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graph.NodeAddedEvent;
 import jaicore.graphvisualizer.events.graph.NodeParentSwitchEvent;
 import jaicore.graphvisualizer.events.graph.NodeRemovedEvent;
 import jaicore.graphvisualizer.events.graph.NodeTypeSwitchEvent;
-import jaicore.graphvisualizer.events.graph.bus.HandleGraphEventException;
+import jaicore.graphvisualizer.events.graph.bus.HandleAlgorithmEventException;
 import jaicore.graphvisualizer.events.gui.GUIEvent;
 import jaicore.graphvisualizer.plugin.GUIPluginController;
 
@@ -22,26 +22,26 @@ public class GraphViewPluginController implements GUIPluginController {
 	}
 
 	@Override
-	public void handleGraphEvent(GraphEvent graphEvent) throws HandleGraphEventException {
+	public void handleAlgorithmEvent(AlgorithmEvent algorithmEvent) throws HandleAlgorithmEventException {
 		try {
-			if (GraphInitializedEvent.class.isInstance(graphEvent)) {
-				GraphInitializedEvent<?> graphInitializedEvent = (GraphInitializedEvent<?>) graphEvent;
+			if (GraphInitializedEvent.class.isInstance(algorithmEvent)) {
+				GraphInitializedEvent<?> graphInitializedEvent = (GraphInitializedEvent<?>) algorithmEvent;
 				handleGraphInitializedEvent(graphInitializedEvent);
-			} else if (NodeAddedEvent.class.isInstance(graphEvent)) {
-				NodeAddedEvent<?> nodeAddedEvent = (NodeAddedEvent<?>) graphEvent;
+			} else if (NodeAddedEvent.class.isInstance(algorithmEvent)) {
+				NodeAddedEvent<?> nodeAddedEvent = (NodeAddedEvent<?>) algorithmEvent;
 				handleNodeAddedEvent(nodeAddedEvent);
-			} else if (NodeParentSwitchEvent.class.isInstance(graphEvent)) {
-				NodeParentSwitchEvent<?> nodeParentSwitchEvent = (NodeParentSwitchEvent<?>) graphEvent;
+			} else if (NodeParentSwitchEvent.class.isInstance(algorithmEvent)) {
+				NodeParentSwitchEvent<?> nodeParentSwitchEvent = (NodeParentSwitchEvent<?>) algorithmEvent;
 				handleNodeParentSwitchEvent(nodeParentSwitchEvent);
-			} else if (NodeRemovedEvent.class.isInstance(graphEvent)) {
-				NodeRemovedEvent<?> nodeRemovedEvent = (NodeRemovedEvent<?>) graphEvent;
+			} else if (NodeRemovedEvent.class.isInstance(algorithmEvent)) {
+				NodeRemovedEvent<?> nodeRemovedEvent = (NodeRemovedEvent<?>) algorithmEvent;
 				handleNodeRemovedEvent(nodeRemovedEvent);
-			} else if (NodeTypeSwitchEvent.class.isInstance(graphEvent)) {
-				NodeTypeSwitchEvent<?> nodeTypeSwitchEvent = (NodeTypeSwitchEvent<?>) graphEvent;
+			} else if (NodeTypeSwitchEvent.class.isInstance(algorithmEvent)) {
+				NodeTypeSwitchEvent<?> nodeTypeSwitchEvent = (NodeTypeSwitchEvent<?>) algorithmEvent;
 				handleNodeTypeSwitchEvent(nodeTypeSwitchEvent);
 			}
 		} catch (ViewGraphManipulationException exception) {
-			throw new HandleGraphEventException("Encountered a problem while handling graph event " + graphEvent + " .", exception);
+			throw new HandleAlgorithmEventException("Encountered a problem while handling graph event " + algorithmEvent + " .", exception);
 		}
 	}
 

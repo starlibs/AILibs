@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jaicore.basic.algorithm.IAlgorithm;
-import jaicore.graphvisualizer.events.graph.bus.GraphEventSource;
+import jaicore.graphvisualizer.events.graph.bus.AlgorithmEventSource;
 import jaicore.graphvisualizer.events.gui.DefaultGUIEventBus;
-import jaicore.graphvisualizer.events.recorder.GraphEventHistoryRecorder;
+import jaicore.graphvisualizer.events.recorder.AlgorithmEventHistoryRecorder;
 import jaicore.graphvisualizer.plugin.GUIPlugin;
 import jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
 import javafx.geometry.Pos;
@@ -25,7 +25,7 @@ import javafx.stage.Stage;
 
 public class GraphVisualizationWindow implements Runnable {
 
-	private GraphEventSource graphEventSource;
+	private AlgorithmEventSource graphEventSource;
 
 	private List<GUIPlugin> visualizationPlugins;
 	private GraphViewPlugin graphViewPlugin;
@@ -38,19 +38,19 @@ public class GraphVisualizationWindow implements Runnable {
 	private BorderPane topLayout;
 	private ToolBar topButtonToolBar;
 
-	public GraphVisualizationWindow(GraphEventSource graphEventSource, GraphViewPlugin graphViewPlugin, GUIPlugin... visualizationPlugins) {
+	public GraphVisualizationWindow(AlgorithmEventSource graphEventSource, GraphViewPlugin graphViewPlugin, GUIPlugin... visualizationPlugins) {
 		this.graphEventSource = graphEventSource;
 		initializePlugins(graphEventSource, graphViewPlugin, visualizationPlugins);
 	}
 
 	public GraphVisualizationWindow(IAlgorithm<?, ?> algorithm, GraphViewPlugin graphViewPlugin, GUIPlugin... visualizationPlugins) {
-		GraphEventHistoryRecorder historyRecorder = new GraphEventHistoryRecorder();
+		AlgorithmEventHistoryRecorder historyRecorder = new AlgorithmEventHistoryRecorder();
 		this.graphEventSource = historyRecorder.getHistory();
 		initializePlugins(graphEventSource, graphViewPlugin, visualizationPlugins);
 		algorithm.registerListener(historyRecorder);
 	}
 
-	private void initializePlugins(GraphEventSource graphEventSource, GraphViewPlugin graphViewPlugin, GUIPlugin... visualizationPlugins) {
+	private void initializePlugins(AlgorithmEventSource graphEventSource, GraphViewPlugin graphViewPlugin, GUIPlugin... visualizationPlugins) {
 		this.graphViewPlugin = graphViewPlugin;
 		graphViewPlugin.setGraphEventSource(graphEventSource);
 		this.visualizationPlugins = new ArrayList<>(visualizationPlugins.length);
