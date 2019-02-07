@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jaicore.basic.algorithm.events.AlgorithmEvent;
-import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
 import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
 import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
@@ -71,11 +70,11 @@ public class GraphSanityChecker<N, A> extends AOptimalPathInORGraphSearch<GraphS
 				if (this.sanityCheckResult != null) {
 					break;
 				}
+				if (expanded % 100 == 0 || expanded == this.maxNodesToExpand)
+					logger.debug("Expanded {}/{} nodes.", expanded, maxNodesToExpand);
 			}
 			this.shutdown();
-			AlgorithmFinishedEvent event = new AlgorithmFinishedEvent();
-			this.post(event);
-			return event;
+			return terminate();
 		}
 		default:
 			throw new IllegalStateException("Cannot do anything in state " + this.getState());

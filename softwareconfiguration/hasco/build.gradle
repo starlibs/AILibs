@@ -1,3 +1,11 @@
+sourceSets {
+    src {
+      java {
+       srcDir 'src/examples/java'
+      }
+    }
+}
+
 dependencies {
 	compile project(':JAICore:jaicore-basic')
 	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')

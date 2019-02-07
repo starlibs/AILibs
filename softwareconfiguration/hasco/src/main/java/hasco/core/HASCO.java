@@ -290,6 +290,10 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 	public HASCOConfig getConfig() {
 		return (HASCOConfig) super.getConfig();
 	}
+	
+	public IOptimalPathInORGraphSearchFactory<ISearch, N, A, V> getSearchFactory() {
+		return searchFactory;
+	}
 
 	public boolean getVisualization() {
 		return this.getConfig().visualizationEnabled();

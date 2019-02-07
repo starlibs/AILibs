@@ -1,7 +1,6 @@
 package hasco.variants.forwarddecomposition;
 
 import hasco.core.DefaultHASCOPlanningGraphGeneratorDeriver;
-import hasco.core.HASCO;
 import hasco.core.HASCOFactory;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.ForwardDecompositionReducer;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
@@ -44,9 +43,9 @@ public class HASCOViaFDAndBestFirstFactory<V extends Comparable<V>> extends HASC
 	}
 	
 	@Override
-	public HASCO<GraphSearchWithSubpathEvaluationsInput<TFDNode, String, V>, TFDNode, String, V> getAlgorithm() {
+	public HASCOViaFDAndBestFirst<V> getAlgorithm() {
 		if (getSearchProblemTransformer() == null)
 			throw new IllegalStateException("Cannot create HASCO with BestFirst, because no node evaluator has been set. Please set a node evaluator prior to invoking getAlgorithm()");
-		return super.getAlgorithm();
+		return new HASCOViaFDAndBestFirst<>(super.getAlgorithm());
 	}
 }
