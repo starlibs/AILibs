@@ -3,13 +3,13 @@ package jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgener
 import java.util.List;
 import java.util.stream.Collectors;
 
-import jaicore.graphvisualizer.TooltipGenerator;
+import jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGenerator;
 import jaicore.logic.fol.structure.Literal;
 
-public class TFDTooltipGenerator implements TooltipGenerator<TFDNode> {
+public class TFDNodeInfoGenerator implements NodeInfoGenerator<TFDNode> {
 
 	@Override
-	public String getTooltip(TFDNode node) {
+	public String generateInfoForNode(TFDNode node) {
 		StringBuilder sb = new StringBuilder();
 		if (node.getAppliedMethodInstance() != null || node.getAppliedAction() != null) {
 			sb.append("<h2>Applied Instance</h2>");
@@ -24,7 +24,7 @@ public class TFDTooltipGenerator implements TooltipGenerator<TFDNode> {
 		}
 		sb.append("</ul>");
 		sb.append("<h2>Current State</h2>");
-		List<String> monomStrings = node.getProblem().getState().stream().sorted((l1,l2) -> l1.getPropertyName().compareTo(l2.getPropertyName())).map(l -> l.toString()).collect(Collectors.toList());
+		List<String> monomStrings = node.getProblem().getState().stream().sorted((l1, l2) -> l1.getPropertyName().compareTo(l2.getPropertyName())).map(l -> l.toString()).collect(Collectors.toList());
 		sb.append("<ul>");
 		for (String literal : monomStrings) {
 			sb.append("<li>");
@@ -34,12 +34,12 @@ public class TFDTooltipGenerator implements TooltipGenerator<TFDNode> {
 		sb.append("</ul>");
 		sb.append("<h2>Current Plan</h2>");
 		sb.append("<ul>");
-//		for (Action a : node.externalPath().stream().map(np -> np.getAppliedAction()).filter(a -> a != null).collect(Collectors.toList())) {
-//			sb.append("<li>");
-//			sb.append(a.getEncoding());
-//			sb.append("</li>");
-//		}
-//		sb.append("</ul>");
+		// for (Action a : node.externalPath().stream().map(np -> np.getAppliedAction()).filter(a -> a != null).collect(Collectors.toList())) {
+		// sb.append("<li>");
+		// sb.append(a.getEncoding());
+		// sb.append("</li>");
+		// }
+		// sb.append("</ul>");
 		return sb.toString();
 	}
 
