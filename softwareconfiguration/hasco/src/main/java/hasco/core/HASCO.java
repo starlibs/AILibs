@@ -50,6 +50,7 @@ import jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
 import jaicore.search.probleminputs.GraphSearchInput;
 import jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import javafx.application.Platform;
+import javafx.embed.swing.JFXPanel;
 
 /**
  * Hierarchically create an object of type T
@@ -135,7 +136,7 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 		}
 		case active: {
 
-			logger.trace("Conducting next step. Search created and initialized: {}", this.searchCreatedAndInitialized);
+			this.logger.trace("Conducting next step. Search created and initialized: {}", this.searchCreatedAndInitialized);
 
 			/* Check termination */
 			try {
@@ -147,7 +148,7 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 				e1.printStackTrace();
 				throw e1.getException();
 			}
-			logger.trace("No stop criteria have caused HASCO to stop up to now. Proceeding ...");
+			this.logger.trace("No stop criteria have caused HASCO to stop up to now. Proceeding ...");
 
 			/* if the search itself has not been initialized, do this now */
 			if (!this.searchCreatedAndInitialized) {
@@ -167,7 +168,8 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 				}
 				if (this.getConfig().visualizationEnabled()) {
 					this.logger.info("Launching graph visualization");
-					Platform.startup(new GraphVisualizationWindow(this.search, new GraphViewPlugin(), new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator()))));
+					new JFXPanel();
+					Platform.runLater(new GraphVisualizationWindow(this.search, new GraphViewPlugin(), new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator()))));
 				}
 
 				/* register external listeners */
@@ -181,13 +183,13 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 				AlgorithmEvent searchEvent;
 				do {
 					searchEvent = this.search.nextWithException();
-					logger.debug("Observing search event {}", searchEvent);
+					this.logger.debug("Observing search event {}", searchEvent);
 					searchInitializationObserved = (searchEvent instanceof AlgorithmInitializedEvent);
 				} while (this.search.hasNext() && !searchInitializationObserved);
 				if (!searchInitializationObserved) {
 					throw new IllegalStateException("The search underlying HASCO could not be initialized successully.");
 				}
-				logger.debug("Search has been initialized. Returning HASCOSearchInitializedEvent.");
+				this.logger.debug("Search has been initialized. Returning HASCOSearchInitializedEvent.");
 				HASCOSearchInitializedEvent event = new HASCOSearchInitializedEvent();
 				this.post(event);
 				this.searchCreatedAndInitialized = true;
@@ -230,7 +232,7 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 					this.post(hascoSolutionEvent);
 					return hascoSolutionEvent;
 				} else {
-					logger.debug("Received event {} from search. Going to next event.", searchEvent);
+					this.logger.debug("Received event {} from search. Going to next event.", searchEvent);
 				}
 			}
 			return this.terminate();
@@ -262,17 +264,17 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 
 	@Override
 	public void cancel() {
-		if (isCanceled()) {
-			logger.debug("Ignoring cancel, because cancel has been triggered in the past already.");
+		if (this.isCanceled()) {
+			this.logger.debug("Ignoring cancel, because cancel has been triggered in the past already.");
 			return;
 		}
-		logger.info("Received cancel, first processing the cancel locally, then forwarding to search.");
+		this.logger.info("Received cancel, first processing the cancel locally, then forwarding to search.");
 		super.cancel();
 		if (this.search != null) {
-			logger.info("Trigger cancel on search.");
+			this.logger.info("Trigger cancel on search.");
 			this.search.cancel();
 		}
-		logger.info("Finished, now terminating");
+		this.logger.info("Finished, now terminating");
 		this.terminate();
 	}
 
@@ -301,7 +303,7 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 
 	@Override
 	protected void shutdown() {
-		if (isShutdownInitialized()) {
+		if (this.isShutdownInitialized()) {
 			this.logger.debug("Shutdown has already been initialized, ignoring new shutdown request.");
 			return;
 		}
