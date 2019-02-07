@@ -9,6 +9,9 @@ import jaicore.graphvisualizer.events.graph.bus.AlgorithmEventSource;
 import jaicore.graphvisualizer.events.graph.bus.HandleAlgorithmEventException;
 import jaicore.graphvisualizer.events.gui.GUIEvent;
 import jaicore.graphvisualizer.events.gui.GUIEventListener;
+import jaicore.graphvisualizer.plugin.controlbar.PauseEvent;
+import jaicore.graphvisualizer.plugin.controlbar.PlayEvent;
+import jaicore.graphvisualizer.plugin.controlbar.ResetEvent;
 
 public class AlgorithmEventHistoryPuller extends Thread implements AlgorithmEventSource, GUIEventListener {
 
@@ -62,7 +65,25 @@ public class AlgorithmEventHistoryPuller extends Thread implements AlgorithmEven
 
 	@Override
 	public void handleGUIEvent(GUIEvent guiEvent) {
-		// TODO Auto-generated method stub
+		if (guiEvent instanceof PauseEvent) {
+			pause();
+		} else if (guiEvent instanceof PlayEvent) {
+			unpause();
+		} else if (guiEvent instanceof ResetEvent) {
+			resetTimeStep();
+		}
+	}
+
+	private void pause() {
+		paused = true;
+	}
+
+	private void unpause() {
+		paused = false;
+	}
+
+	private void resetTimeStep() {
+		timestep = 0;
 	}
 
 }

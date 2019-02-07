@@ -42,6 +42,7 @@ public class GraphVisualizationWindow implements Runnable {
 
 	public GraphVisualizationWindow(AlgorithmEventHistory algorithmEventHistory, GraphViewPlugin graphViewPlugin, GUIPlugin... visualizationPlugins) {
 		algorithmEventHistoryPuller = new AlgorithmEventHistoryPuller(algorithmEventHistory, 10);
+		DefaultGUIEventBus.getInstance().registerListener(algorithmEventHistoryPuller);
 		this.graphEventSource = algorithmEventHistoryPuller;
 		initializePlugins(algorithmEventHistory, graphViewPlugin, visualizationPlugins);
 	}
@@ -49,6 +50,7 @@ public class GraphVisualizationWindow implements Runnable {
 	public GraphVisualizationWindow(IAlgorithm<?, ?> algorithm, GraphViewPlugin graphViewPlugin, GUIPlugin... visualizationPlugins) {
 		AlgorithmEventHistoryRecorder historyRecorder = new AlgorithmEventHistoryRecorder();
 		algorithmEventHistoryPuller = new AlgorithmEventHistoryPuller(historyRecorder.getHistory(), 10);
+		DefaultGUIEventBus.getInstance().registerListener(algorithmEventHistoryPuller);
 		this.graphEventSource = algorithmEventHistoryPuller;
 		initializePlugins(graphEventSource, graphViewPlugin, visualizationPlugins);
 		algorithm.registerListener(historyRecorder);
