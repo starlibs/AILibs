@@ -38,6 +38,7 @@ public class WekaMLPlanWekaClassifier extends MLPlanWekaClassifier {
 		super(builder.getSearchSpaceConfigFile(), new WEKAPipelineFactory(), getBridge(builder), builder.getAlhorithmConfigFile() != null ? loadOwnerConfig(builder.getAlhorithmConfigFile()) : ConfigFactory.create(MLPlanClassifierConfig.class));
 		PreferenceBasedNodeEvaluator preferenceNodeEvaluator = new PreferenceBasedNodeEvaluator(new ComponentLoader(getComponentFile()).getComponents(), FileUtil.readFileAsList(getConfig().preferredComponents()));
 		this.setPreferredNodeEvaluator(preferenceNodeEvaluator);
+		this.setDyadRankingConfig(builder.getDyadRankingConfig());
 	}
 	
 	private static AbstractEvaluatorMeasureBridge<Double, Double> getBridge(MLPlanWekaBuilder builder){

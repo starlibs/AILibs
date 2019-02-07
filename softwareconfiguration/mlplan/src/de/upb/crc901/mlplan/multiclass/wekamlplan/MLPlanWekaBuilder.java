@@ -3,6 +3,7 @@ package de.upb.crc901.mlplan.multiclass.wekamlplan;
 import java.io.File;
 
 import de.upb.crc901.mlpipeline_evaluation.PerformanceDBAdapter;
+import de.upb.crc901.mlplan.metamining.dyadranking.WEKADyadRankedNodeQueueConfig;
 import jaicore.ml.core.evaluation.measure.singlelabel.MultiClassPerformanceMeasure;
 
 public class MLPlanWekaBuilder {
@@ -11,6 +12,7 @@ public class MLPlanWekaBuilder {
 	private MultiClassPerformanceMeasure performanceMeasure = MultiClassPerformanceMeasure.ERRORRATE;
 	private boolean useCache = false;
 	private PerformanceDBAdapter dbAdapter = null;
+	private WEKADyadRankedNodeQueueConfig dyadRankingConfig = null;
 	
 	public MLPlanWekaBuilder() { }
 	
@@ -44,6 +46,10 @@ public class MLPlanWekaBuilder {
 		return performanceMeasure;
 	}
 
+	public WEKADyadRankedNodeQueueConfig getDyadRankingConfig() {
+		return dyadRankingConfig;
+	}
+
 	public MLPlanWekaBuilder withSearchSpaceConfigFile(File searchSpaceConfig) {
 		this.searchSpaceConfigFile = searchSpaceConfig;
 		return this;
@@ -56,6 +62,11 @@ public class MLPlanWekaBuilder {
 
 	public MLPlanWekaBuilder withPerformanceMeasure(MultiClassPerformanceMeasure performanceMeasure) {
 		this.performanceMeasure = performanceMeasure;
+		return this;
+	}
+	
+	public MLPlanWekaBuilder usingBFwithDyadRankedNodeQueue(WEKADyadRankedNodeQueueConfig dyadRankingConfig) {
+		this.dyadRankingConfig = dyadRankingConfig;
 		return this;
 	}
 	

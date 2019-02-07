@@ -26,7 +26,7 @@ import jaicore.search.model.travesaltree.Node;
  * @param <V>
  *            Second node parameter
  */
-public abstract class DyadRankedNodeQueue<N, V extends Comparable<V>> implements Queue<Node<N, V>> {
+public abstract class ADyadRankedNodeQueue<N, V extends Comparable<V>> implements Queue<Node<N, V>> {
 
 	/** the dyad ranker used to rank the nodes */
 	//TODO: load a pre-trained PLNet 
@@ -58,7 +58,7 @@ public abstract class DyadRankedNodeQueue<N, V extends Comparable<V>> implements
 	 * @param contextCharacterization
 	 *            the characterization of the context the nodes are ranked in
 	 */
-	public DyadRankedNodeQueue(Vector contextCharacterization) {
+	public ADyadRankedNodeQueue(Vector contextCharacterization) {
 		this.contextCharacterization = contextCharacterization;
 	}
 
@@ -71,7 +71,7 @@ public abstract class DyadRankedNodeQueue<N, V extends Comparable<V>> implements
 	 * @param dyadRanker
 	 *            the dyad ranker to be used for the ranking of the nodes
 	 */
-	public DyadRankedNodeQueue(Vector contextCharacterization, ADyadRanker dyadRanker) {
+	public ADyadRankedNodeQueue(Vector contextCharacterization, ADyadRanker dyadRanker) {
 		this(contextCharacterization);
 		this.dyadRanker = dyadRanker;
 	}

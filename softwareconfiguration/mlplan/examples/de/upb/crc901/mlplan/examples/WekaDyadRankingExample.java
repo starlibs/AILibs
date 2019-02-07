@@ -5,23 +5,18 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Random;
 
-import de.upb.crc901.mlpipeline_evaluation.PerformanceDBAdapter;
-import de.upb.crc901.mlplan.metamining.dyadranking.WEKADyadRankedNodeQueue;
+import de.upb.crc901.mlplan.metamining.dyadranking.WEKADyadRankedNodeQueueConfig;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.MLPlanWekaClassifier;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.WekaMLPlanWekaClassifier;
-import de.upb.isys.linearalgebra.DenseDoubleVector;
-import jaicore.basic.SQLAdapter;
 import jaicore.ml.WekaUtil;
 import jaicore.ml.cache.ReproducibleInstances;
 import jaicore.ml.core.evaluation.measure.singlelabel.MultiClassPerformanceMeasure;
-import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import weka.classifiers.Evaluation;
 import weka.core.Instances;
 
 public class WekaDyadRankingExample {
 	public static void main(final String[] args) throws Exception {
-
 		
 		ReproducibleInstances data = ReproducibleInstances.fromOpenML("40983", "4350e421cdc16404033ef1812ea38c01");
 		data.setClassIndex(data.numAttributes() - 1);
@@ -38,16 +33,16 @@ public class WekaDyadRankingExample {
 //				MultiClassPerformanceMeasure.ERRORRATE, pAdapter);
 		MLPlanWekaBuilder builder = new MLPlanWekaBuilder(
 				new File("conf/automl/searchmodels/weka/weka-all-autoweka.json"), new File("conf/mlplan.properties"),
-				MultiClassPerformanceMeasure.ERRORRATE);
+				MultiClassPerformanceMeasure.ERRORRATE).usingBFwithDyadRankedNodeQueue(new WEKADyadRankedNodeQueueConfig());
 
 		MLPlanWekaClassifier mlplan = new WekaMLPlanWekaClassifier(builder);
 
 		mlplan.setLoggerName("mlplan");
 		mlplan.setTimeout(60);
-		System.out.println(mlplan.getHascoFactory());
-		BestFirst bestFirst = (BestFirst) mlplan.getHascoFactory().getAlgorithm().getHasco().getSearch();
-		System.out.println(bestFirst);
-		bestFirst.setOpen(new WEKADyadRankedNodeQueue(new DenseDoubleVector(new double[0])));
+		//System.out.println(mlplan.getHascoFactory());
+		//BestFirst bestFirst = (BestFirst) mlplan.getHascoFactory().getAlgorithm().getHasco().getSearch();
+		//System.out.println(bestFirst);
+		//bestFirst.setOpen(new WEKADyadRankedNodeQueue(new DenseDoubleVector(new double[0])));
 		//mlplan.activateVisualization();
 		try {
 			long start = System.currentTimeMillis();

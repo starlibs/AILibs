@@ -11,9 +11,15 @@ public class BestFirstFactory<P extends GeneralEvaluatedTraversalTree<N, A, V>, 
 	private int timeoutForFInMS;
 	private INodeEvaluator<N, V> timeoutEvaluator;
 	private String loggerName;
+	private IBestFirstQueueConfiguration<P, N, A, V> config;
 
 	public BestFirstFactory() {
 		super();
+	}
+	
+	public BestFirstFactory(IBestFirstQueueConfiguration<P, N, A, V> config) {
+		this();
+		this.config = config;
 	}
 
 	public BestFirstFactory(final int timeoutForFInMS) {
@@ -25,14 +31,24 @@ public class BestFirstFactory<P extends GeneralEvaluatedTraversalTree<N, A, V>, 
 
 	@Override
 	public BestFirst<P, N, A, V> getAlgorithm() {
-		if (getProblemInput().getGraphGenerator() == null)
+		if (getProblemInput().getGraphGenerator() == null) {
 			throw new IllegalStateException("Cannot produce BestFirst searches before the graph generator is set in the problem.");
-		if (getProblemInput().getNodeEvaluator() == null)
+		}
+			
+		if (getProblemInput().getNodeEvaluator() == null) {
 			throw new IllegalStateException("Cannot produce BestFirst searches before the node evaluator is set.");
+		}
+			
 		BestFirst<P, N, A, V> search = new BestFirst<>(getProblemInput());
 		search.setTimeoutForComputationOfF(this.timeoutForFInMS, this.timeoutEvaluator);
-		if (loggerName != null && loggerName.length() > 0)
+		if (loggerName != null && loggerName.length() > 0) {
 			search.setLoggerName(loggerName);
+		}
+		
+		if (config != null) {
+			config.configureBestFirst(search);
+		}
+			
 		return search;
 	}
 

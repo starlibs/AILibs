@@ -17,6 +17,8 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
 import de.upb.crc901.mlpipeline_evaluation.CacheEvaluatorMeasureBridge;
+import de.upb.crc901.mlplan.metamining.dyadranking.WEKADyadRankedNodeQueue;
+import de.upb.crc901.mlplan.metamining.dyadranking.WEKADyadRankedNodeQueueConfig;
 import de.upb.crc901.mlplan.multiclass.MLPlanClassifierConfig;
 import hasco.core.HASCOSolutionCandidate;
 import hasco.model.Component;
@@ -82,6 +84,7 @@ public abstract class MLPlanWekaClassifier implements Classifier, CapabilitiesHa
 	private final EventBus eventBus = new EventBus();
 	private TwoPhaseHASCOFactory hascoFactory;
 	private OptimizingFactory<TwoPhaseSoftwareConfigurationProblem, Classifier, HASCOSolutionCandidate<Double>, Double> optimizingFactory;
+	private WEKADyadRankedNodeQueueConfig dyadRankingConfig;
 
 	private AlgorithmState state = AlgorithmState.created;
 	private Instances dataShownToSearch = null;
@@ -222,6 +225,11 @@ public abstract class MLPlanWekaClassifier implements Classifier, CapabilitiesHa
 			this.hascoFactory.setPreferredNodeEvaluator(new AlternativeNodeEvaluator<TFDNode, Double>(
 					this.getSemanticNodeEvaluator(this.dataShownToSearch), this.preferredNodeEvaluator));
 			this.hascoFactory.setConfig(this.config);
+			if (dyadRankingConfig != null) {
+				dyadRankingConfig.setData(dataShownToSearch);
+				dyadRankingConfig.setComponents(components);
+				hascoFactory.setDyadRankingConfig(dyadRankingConfig);
+			}
 			this.optimizingFactory = new OptimizingFactory<>(optimizingFactoryProblem, this.hascoFactory);
 			this.optimizingFactory.setLoggerName(this.loggerName + ".2phasehasco");
 			this.optimizingFactory.setTimeout(this.config.timeout(), TimeUnit.SECONDS);
@@ -505,5 +513,13 @@ public abstract class MLPlanWekaClassifier implements Classifier, CapabilitiesHa
 
 	public double getInternalValidationErrorOfSelectedClassifier() {
 		return this.internalValidationErrorOfSelectedClassifier;
+	}
+
+	public WEKADyadRankedNodeQueueConfig getDyadRankingConfig() {
+		return dyadRankingConfig;
+	}
+
+	public void setDyadRankingConfig(WEKADyadRankedNodeQueueConfig dyadRankingConfig) {
+		this.dyadRankingConfig = dyadRankingConfig;
 	}
 }
