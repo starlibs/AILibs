@@ -6,20 +6,20 @@ import java.util.List;
 import jaicore.basic.algorithm.IAlgorithm;
 import jaicore.graphvisualizer.events.graph.bus.AlgorithmEventSource;
 import jaicore.graphvisualizer.events.gui.DefaultGUIEventBus;
+import jaicore.graphvisualizer.events.recorder.AlgorithmEventHistory;
+import jaicore.graphvisualizer.events.recorder.AlgorithmEventHistoryPuller;
 import jaicore.graphvisualizer.events.recorder.AlgorithmEventHistoryRecorder;
 import jaicore.graphvisualizer.plugin.GUIPlugin;
+import jaicore.graphvisualizer.plugin.controlbar.ControlBarGUIPlugin;
 import jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
 import jaicore.graphvisualizer.plugin.timeslider.TimeSliderGUIPlugin;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.Separator;
 import javafx.scene.control.Slider;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
-import javafx.scene.control.ToolBar;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -27,27 +27,29 @@ import javafx.stage.Stage;
 public class GraphVisualizationWindow implements Runnable {
 
 	private AlgorithmEventSource graphEventSource;
+	private AlgorithmEventHistoryPuller algorithmEventHistoryPuller;
 
 	private List<GUIPlugin> visualizationPlugins;
 	private GraphViewPlugin graphViewPlugin;
 	private TimeSliderGUIPlugin timeSliderGUIPlugin;
+	private ControlBarGUIPlugin controlBarGUIPlugin;
 
 	private TabPane pluginTabPane;
-	private Slider timestepSlider;
 	private Slider visualizationSpeedSlider;
 
 	private BorderPane rootLayout;
 	private BorderPane topLayout;
-	private ToolBar topButtonToolBar;
 
-	public GraphVisualizationWindow(AlgorithmEventSource graphEventSource, GraphViewPlugin graphViewPlugin, GUIPlugin... visualizationPlugins) {
-		this.graphEventSource = graphEventSource;
-		initializePlugins(graphEventSource, graphViewPlugin, visualizationPlugins);
+	public GraphVisualizationWindow(AlgorithmEventHistory algorithmEventHistory, GraphViewPlugin graphViewPlugin, GUIPlugin... visualizationPlugins) {
+		algorithmEventHistoryPuller = new AlgorithmEventHistoryPuller(algorithmEventHistory, 100);
+		this.graphEventSource = algorithmEventHistoryPuller;
+		initializePlugins(algorithmEventHistory, graphViewPlugin, visualizationPlugins);
 	}
 
 	public GraphVisualizationWindow(IAlgorithm<?, ?> algorithm, GraphViewPlugin graphViewPlugin, GUIPlugin... visualizationPlugins) {
 		AlgorithmEventHistoryRecorder historyRecorder = new AlgorithmEventHistoryRecorder();
-		this.graphEventSource = historyRecorder.getHistory();
+		algorithmEventHistoryPuller = new AlgorithmEventHistoryPuller(historyRecorder.getHistory(), 100);
+		this.graphEventSource = algorithmEventHistoryPuller;
 		initializePlugins(graphEventSource, graphViewPlugin, visualizationPlugins);
 		algorithm.registerListener(historyRecorder);
 	}
@@ -58,6 +60,11 @@ public class GraphVisualizationWindow implements Runnable {
 
 		timeSliderGUIPlugin = new TimeSliderGUIPlugin();
 		timeSliderGUIPlugin.setAlgorithmEventSource(algorithmEventSource);
+		timeSliderGUIPlugin.setGUIEventSource(DefaultGUIEventBus.getInstance());
+
+		controlBarGUIPlugin = new ControlBarGUIPlugin();
+		controlBarGUIPlugin.setAlgorithmEventSource(algorithmEventSource);
+		controlBarGUIPlugin.setGUIEventSource(DefaultGUIEventBus.getInstance());
 
 		this.visualizationPlugins = new ArrayList<>(visualizationPlugins.length);
 		for (GUIPlugin graphVisualizationPlugin : visualizationPlugins) {
@@ -88,6 +95,7 @@ public class GraphVisualizationWindow implements Runnable {
 		stage.setMaximized(true);
 		stage.show();
 
+		algorithmEventHistoryPuller.start();
 	}
 
 	private void initializeTopLayout() {
@@ -98,26 +106,7 @@ public class GraphVisualizationWindow implements Runnable {
 	}
 
 	private void initializeTopButtonToolBar() {
-		topButtonToolBar = new ToolBar();
-
-		Button startButton = new Button("Start");
-		topButtonToolBar.getItems().add(startButton);
-
-		Button pauseButton = new Button("Pause");
-		topButtonToolBar.getItems().add(pauseButton);
-
-		Button stepButton = new Button("Step");
-		topButtonToolBar.getItems().add(stepButton);
-
-		topButtonToolBar.getItems().add(new Separator());
-
-		Button saveReplayButton = new Button("Save History");
-		topButtonToolBar.getItems().add(saveReplayButton);
-
-		Button loadReplayButton = new Button("Load History");
-		topButtonToolBar.getItems().add(loadReplayButton);
-
-		topLayout.setTop(topButtonToolBar);
+		topLayout.setTop(controlBarGUIPlugin.getView().getNode());
 	}
 
 	private void initializeVisualizationSpeedSlider() {
