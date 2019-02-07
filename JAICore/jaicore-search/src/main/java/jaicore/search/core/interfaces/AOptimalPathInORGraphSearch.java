@@ -25,14 +25,14 @@ import jaicore.search.probleminputs.GraphSearchInput;
  * @author fmohr
  *
  * @param <I>
- * @param <NSrc>
- * @param <ASrc>
+ * @param <N>
+ * @param <A>
  * @param <V>
  * @param <NSearch>
  * @param <Asearch>
  */
-public abstract class AOptimalPathInORGraphSearch<I extends GraphSearchInput<NSrc, ASrc>, NSrc, ASrc, V extends Comparable<V>, NSearch, Asearch> extends AOptimizer<I, EvaluatedSearchGraphPath<NSrc, ASrc, V>, V>
-		implements IOptimalPathInORGraphSearch<I, NSrc, ASrc, V, NSearch, Asearch> {
+public abstract class AOptimalPathInORGraphSearch<I extends GraphSearchInput<N, A>, N, A, V extends Comparable<V>> extends AOptimizer<I, EvaluatedSearchGraphPath<N, A, V>, V>
+		implements IOptimalPathInORGraphSearch<I, N, A, V> {
 
 	/* Logger variables */
 	private Logger logger = LoggerFactory.getLogger(AAlgorithm.class);
@@ -48,19 +48,19 @@ public abstract class AOptimalPathInORGraphSearch<I extends GraphSearchInput<NSr
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public EvaluatedSearchSolutionCandidateFoundEvent<NSrc, ASrc, V> nextSolutionCandidateEvent() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
-		return (EvaluatedSearchSolutionCandidateFoundEvent<NSrc, ASrc, V>) super.nextSolutionCandidateEvent();
+	public EvaluatedSearchSolutionCandidateFoundEvent<N, A, V> nextSolutionCandidateEvent() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
+		return (EvaluatedSearchSolutionCandidateFoundEvent<N, A, V>) super.nextSolutionCandidateEvent();
 	}
 	
-	protected EvaluatedSearchSolutionCandidateFoundEvent<NSrc, ASrc, V> registerSolution(final EvaluatedSearchGraphPath<NSrc, ASrc, V> path) {
+	protected EvaluatedSearchSolutionCandidateFoundEvent<N, A, V> registerSolution(final EvaluatedSearchGraphPath<N, A, V> path) {
 		updateBestSeenSolution(path);
-		EvaluatedSearchSolutionCandidateFoundEvent<NSrc, ASrc, V> event = new EvaluatedSearchSolutionCandidateFoundEvent<>(path);
+		EvaluatedSearchSolutionCandidateFoundEvent<N, A, V> event = new EvaluatedSearchSolutionCandidateFoundEvent<>(path);
 		this.post(event);
 		return event;
 	}
 
 	@Override
-	public GraphGenerator<NSrc, ASrc> getGraphGenerator() {
+	public GraphGenerator<N, A> getGraphGenerator() {
 		return this.getInput().getGraphGenerator();
 	}
 	

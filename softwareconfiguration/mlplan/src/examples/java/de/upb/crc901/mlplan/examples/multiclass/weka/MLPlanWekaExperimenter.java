@@ -15,10 +15,9 @@ import org.aeonbits.owner.ConfigFactory;
 
 import com.google.common.eventbus.Subscribe;
 
-import de.upb.crc901.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
-import de.upb.crc901.mlplan.multiclass.wekamlplan.MLPlanWekaClassifier;
+import de.upb.crc901.mlplan.multiclass.core.MLPlan;
+import de.upb.crc901.mlplan.multiclass.core.MLPlanBuilder;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.WEKAPipelineFactory;
-import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.WekaMLPlanWekaClassifier;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import hasco.core.HASCOSolutionCandidate;
 import jaicore.basic.SQLAdapter;
@@ -30,6 +29,7 @@ import jaicore.experiments.IExperimentIntermediateResultProcessor;
 import jaicore.experiments.IExperimentSetConfig;
 import jaicore.experiments.IExperimentSetEvaluator;
 import jaicore.ml.WekaUtil;
+import weka.classifiers.Classifier;
 import weka.classifiers.evaluation.Evaluation;
 import weka.core.Instances;
 
@@ -86,7 +86,7 @@ public class MLPlanWekaExperimenter implements IExperimentSetEvaluator {
 		List<Instances> stratifiedSplit = WekaUtil.getStratifiedSplit(data, 0, .7);
 
 		/* initialize ML-Plan with the same config file that has been used to specify the experiments */
-		MLPlanWekaClassifier mlplan = new WekaMLPlanWekaClassifier(new MLPlanWekaBuilder().withAlgorithmConfigFile(configFile));
+		MLPlan mlplan = new MLPlan(new MLPlanBuilder().withAlgorithmConfigFile(configFile), stratifiedSplit.get(0));
 		mlplan.setLoggerName("mlplan");
 		mlplan.setTimeout(new Integer(experimentValues.get("timeout")), TimeUnit.SECONDS);
 		mlplan.setTimeoutForSingleSolutionEvaluation(new Integer(experimentValues.get("evaluationTimeout")));
@@ -97,13 +97,13 @@ public class MLPlanWekaExperimenter implements IExperimentSetEvaluator {
 		mlplan.registerListenerForSolutionEvaluations(this);
 
 		print("Build mlplan classifier");
-		mlplan.buildClassifier(stratifiedSplit.get(0));
+		Classifier optimizedClassifier = mlplan.call();
 
 		print("Open timeout tasks: " + TimeoutTimer.getInstance().toString());
 
 		Evaluation eval = new Evaluation(data);
 		print("Assess test performance...");
-		eval.evaluateModel(mlplan, stratifiedSplit.get(1), new Object[] {});
+		eval.evaluateModel(optimizedClassifier, stratifiedSplit.get(1), new Object[] {});
 
 		print("Test error was " + eval.errorRate() + ". Internally estimated error for this model was " + mlplan.getInternalValidationErrorOfSelectedClassifier());
 		Map<String, Object> results = new HashMap<>();

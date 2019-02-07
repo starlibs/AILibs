@@ -26,7 +26,6 @@ import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluato
 import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.core.interfaces.IPathInORGraphSearch;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
-import jaicore.search.model.travesaltree.Node;
 import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 
 public class STRIPSPlanner<V extends Comparable<V>>
@@ -36,7 +35,7 @@ public class STRIPSPlanner<V extends Comparable<V>>
 	private Logger logger = LoggerFactory.getLogger(BestFirst.class);
 	private String loggerName;
 
-	private final IPathInORGraphSearch<GraphSearchWithSubpathEvaluationsInput<StripsForwardPlanningNode, String, V>, EvaluatedSearchGraphPath<StripsForwardPlanningNode, String, V>, StripsForwardPlanningNode, String, Node<StripsForwardPlanningNode, V>, String> search;
+	private final IPathInORGraphSearch<GraphSearchWithSubpathEvaluationsInput<StripsForwardPlanningNode, String, V>, EvaluatedSearchGraphPath<StripsForwardPlanningNode, String, V>, StripsForwardPlanningNode, String> search;
 	private final INodeEvaluator<StripsForwardPlanningNode, V> nodeEvaluator;
 	private final STRIPSForwardSearchReducer reducer = new STRIPSForwardSearchReducer();
 

@@ -10,8 +10,7 @@ import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomComplet
 import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 import jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 
-public class GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS<N, A, V extends Comparable<V>>
-		implements AlgorithmProblemTransformer<GraphSearchWithPathEvaluationsInput<N, A, V>, GraphSearchWithSubpathEvaluationsInput<N, A, V>> {
+public class GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS<N, A, V extends Comparable<V>> implements AlgorithmProblemTransformer<GraphSearchWithPathEvaluationsInput<N, A, V>, GraphSearchWithSubpathEvaluationsInput<N, A, V>> {
 
 	private final INodeEvaluator<N, V> preferredNodeEvaluator;
 	private final Predicate<N> prioritizedNodesInRandomCompletion;
@@ -20,7 +19,7 @@ public class GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS<N, A,
 	private final int timeoutForSingleCompletionEvaluationInMS;
 	private final int timeoutForNodeEvaluationInMS;
 
-	public GraphSearchProblemInputToGeneralEvaluatedTraversalTreeViaRDFS(INodeEvaluator<N, V> preferredNodeEvaluator, Predicate<N> preferredNodeEvaluatorForRandomCompletion, int seed, int numSamples, int timeoutForSingleCompletionEvaluationInMS, int timeoutForNodeEvaluationInMS) {
+	public GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS(INodeEvaluator<N, V> preferredNodeEvaluator, Predicate<N> preferredNodeEvaluatorForRandomCompletion, int seed, int numSamples, int timeoutForSingleCompletionEvaluationInMS, int timeoutForNodeEvaluationInMS) {
 		super();
 		this.preferredNodeEvaluator = preferredNodeEvaluator;
 		this.prioritizedNodesInRandomCompletion = preferredNodeEvaluatorForRandomCompletion;

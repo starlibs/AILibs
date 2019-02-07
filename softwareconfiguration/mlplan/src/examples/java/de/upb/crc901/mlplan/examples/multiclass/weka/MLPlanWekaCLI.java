@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.sql.Time;
 import java.util.List;
 import java.util.Properties;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import org.aeonbits.owner.ConfigFactory;
@@ -20,6 +19,7 @@ import jaicore.ml.WekaUtil;
 import weka.classifiers.Evaluation;
 import weka.core.Instances;
 
+import jaicore.basic.TimeOut;
 public class MLPlanWekaCLI {
 
 	public static void main(final String[] args) throws FileNotFoundException, IOException {
@@ -63,14 +63,14 @@ public class MLPlanWekaCLI {
 		/* extract all relevant information about the experiment */
 		System.out.println(getTime() + " Initialize ML-Plan...");
 		MLPlanWekaClassifier mlPlan = new WekaMLPlanWekaClassifier();
-		mlPlan.setTimeout(CLI_CONFIG.timeout(), TimeUnit.SECONDS);
+		mlPlan.setTimeout(new TimeOut(CLI_CONFIG.timeout(), TimeUnit.SECONDS));
 		mlPlan.setTimeoutForSingleSolutionEvaluation(CLI_CONFIG.evalTimeout() * 1000);
 		if (CLI_CONFIG.showGraphVisualization()) {
 			mlPlan.activateVisualization();
 		}
 
 		System.out.println(getTime() + " Split the data into train and test set...");
-		List<Instances> testSplit = WekaUtil.getStratifiedSplit(data, mlPlan.getConfig().randomSeed(), 0.7);
+		List<Instances> testSplit = WekaUtil.getStratifiedSplit(data, mlPlan.getMLPlanConfig().randomSeed(), 0.7);
 		System.out.println("Data split created.");
 
 		try {

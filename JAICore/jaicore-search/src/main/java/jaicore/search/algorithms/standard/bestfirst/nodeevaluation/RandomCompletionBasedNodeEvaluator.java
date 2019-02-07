@@ -138,6 +138,7 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>>
 		return 0.0;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public V f(final Node<T, ?> n) throws InterruptedException, TimeoutException, NodeEvaluationException {
 		long startOfComputation = System.currentTimeMillis();
@@ -291,7 +292,7 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>>
 					} catch (Exception ex) {
 						if (j == maxSamples) {
 							this.logger.warn("Too many retry attempts, giving up.");
-							throw new NodeEvaluationException("Error in the evaluation of a node!");
+							throw new NodeEvaluationException(ex, "Error in the evaluation of a node!");
 						} else {
 							countedExceptions++;
 							this.logger.error("Could not evaluate solution candidate ... retry another completion. {}", LoggerUtil.getExceptionInfo(ex));
@@ -407,7 +408,7 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>>
 				this.logger.error("Computing the solution quality of {} failed due to an exception. Here is the trace:\n\t{}\n\t{}\n\t{}", path, e.getClass().getName(), e.getMessage(),
 						Arrays.asList(e.getStackTrace()).stream().map(n -> "\n\t" + n.toString()).collect(Collectors.toList()));
 				this.unsuccessfulPaths.add(path);
-				throw new NodeEvaluationException(e.getMessage());
+				throw new NodeEvaluationException(e, "Error in evaluating node!");
 			}
 			long duration = System.currentTimeMillis() - start;
 
@@ -484,7 +485,7 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>>
 		this.completer = new RandomSearch<>(completionProblem, this.priorityPredicateForRDFS, this.random);
 		this.completer.setTimeout(new TimeOut(this.totalDeadline - System.currentTimeMillis(), TimeUnit.MILLISECONDS));
 		if (this.visualizeSubSearch) {
-			throw new UnsupportedOperationException("Visualization is currently not supported here.");
+//			new VisualizationWindow<>(this.completer).setTooltipGenerator(n -> n.toString() + "<br />f: " + String.valueOf(this.bestKnownScoreUnderNodeInCompleterGraph.get(n)));
 		}
 		while (!(this.completer.next() instanceof AlgorithmInitializedEvent)) {
 			;

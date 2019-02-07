@@ -10,12 +10,12 @@ import jaicore.search.testproblems.enhancedttsp.EnhancedTTSP;
 import jaicore.search.testproblems.enhancedttsp.EnhancedTTSPNode;
 import jaicore.search.testproblems.enhancedttsp.EnhancedTTSPTester;
 
-public class RandomSearchEnhancedTTSPTester extends EnhancedTTSPTester<GraphSearchInput<EnhancedTTSPNode, String>, SearchGraphPath<EnhancedTTSPNode, String>, EnhancedTTSPNode, String> {
+public class RandomSearchEnhancedTTSPTester extends EnhancedTTSPTester<GraphSearchInput<EnhancedTTSPNode, String>, SearchGraphPath<EnhancedTTSPNode, String>> {
 
 	
 
 	@Override
-	public IGraphSearchFactory<GraphSearchInput<EnhancedTTSPNode, String>, SearchGraphPath<EnhancedTTSPNode, String>, EnhancedTTSPNode, String, EnhancedTTSPNode, String> getFactory() {
+	public IGraphSearchFactory<GraphSearchInput<EnhancedTTSPNode, String>, SearchGraphPath<EnhancedTTSPNode, String>, EnhancedTTSPNode, String> getFactory() {
 		return new RandomSearchFactory<>();
 	}
 

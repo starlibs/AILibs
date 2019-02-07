@@ -23,13 +23,13 @@ import jaicore.search.core.interfaces.IGraphSearchFactory;
 import jaicore.search.probleminputs.GraphSearchInput;
 import jaicore.search.testproblems.knapsack.KnapsackProblem.KnapsackNode;
 
-public abstract class KnapsackTester<I extends GraphSearchInput<KnapsackNode, String>, O, VSearch,ESearch> extends GraphSearchTester<KnapsackProblem, I, O, KnapsackNode, String, VSearch, ESearch>  {
+public abstract class KnapsackTester<I extends GraphSearchInput<KnapsackNode, String>, O> extends GraphSearchTester<KnapsackProblem, I, O, KnapsackNode, String>  {
 
 	private Map<String, Double> weights;
 	private Map<String, Double> values;
 	private Map<Set<String>, Double> bonusPoints;
 	
-	public IGraphSearch<I, O, KnapsackNode, String, VSearch, ESearch> getSearch() {
+	public IGraphSearch<I, O, KnapsackNode, String> getSearch() {
 		
 		/* create knapsack problem */
 		Set<String> objects = new HashSet<String>();
@@ -94,7 +94,7 @@ public abstract class KnapsackTester<I extends GraphSearchInput<KnapsackNode, St
 		}
 	}
 	
-	IGraphSearchFactory<I, O, KnapsackNode, String, VSearch, ESearch> searchFactory = getFactory();
+	IGraphSearchFactory<I, O, KnapsackNode, String> searchFactory = getFactory();
 
 	@Override
 	public void testThatAnEventForEachPossibleSolutionIsEmittedInSimpleCall() throws Throwable {
@@ -118,7 +118,7 @@ public abstract class KnapsackTester<I extends GraphSearchInput<KnapsackNode, St
 
 		KnapsackNode bestSolution = null;
 		double bestValue = 0.0d;
-		IGraphSearch<I, O, KnapsackNode, String, VSearch, ESearch> search = getSearch();
+		IGraphSearch<I, O, KnapsackNode, String> search = getSearch();
 //		new SimpleGraphVisualizationWindow<>(search);
 		Iterator<AlgorithmEvent> iterator = search.iterator();
 		assertNotNull("The search algorithm does return NULL as an iterator for itself.", iterator);

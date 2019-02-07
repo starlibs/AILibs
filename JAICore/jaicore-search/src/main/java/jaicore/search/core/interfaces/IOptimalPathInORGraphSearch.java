@@ -13,12 +13,12 @@ import jaicore.search.probleminputs.GraphSearchInput;
  * @author fmohr
  *
  * @param <I>
- * @param <NSrc>
- * @param <ASrc>
+ * @param <N>
+ * @param <A>
  * @param <V>
  * @param <NSearch>
  * @param <Asearch>
  */
-public interface IOptimalPathInORGraphSearch<I extends GraphSearchInput<NSrc, ASrc>, NSrc, ASrc, V extends Comparable<V>, NSearch, Asearch> extends IOptimizationAlgorithm<I, EvaluatedSearchGraphPath<NSrc, ASrc, V>, V>, IGraphSearch<I, EvaluatedSearchGraphPath<NSrc, ASrc, V>, NSrc, ASrc, NSearch, Asearch>, IPathInORGraphSearch<I, EvaluatedSearchGraphPath<NSrc, ASrc, V>, NSrc, ASrc, NSearch, Asearch> {
+public interface IOptimalPathInORGraphSearch<I extends GraphSearchInput<N, A>, N, A, V extends Comparable<V>> extends IOptimizationAlgorithm<I, EvaluatedSearchGraphPath<N, A, V>, V>, IGraphSearch<I, EvaluatedSearchGraphPath<N, A, V>, N, A>, IPathInORGraphSearch<I, EvaluatedSearchGraphPath<N, A, V>, N, A> {
 	
 }

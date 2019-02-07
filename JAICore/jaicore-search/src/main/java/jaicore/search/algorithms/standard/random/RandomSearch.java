@@ -32,15 +32,15 @@ import jaicore.search.structure.graphgenerator.SingleSuccessorGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 /**
- * This search randomly draws paths from the root. At every node, each successor is chosen with the same probability except if a priority predicate is defined. A priority predicate says whether or not
- * a node lies on a path that has priority. A node only has priority until all successors that have priority are exhausted.
+ * This search randomly draws paths from the root. At every node, each successor is chosen with the same probability except if a priority predicate is defined. A priority predicate says whether or not a node lies on a path that has
+ * priority. A node only has priority until all successors that have priority are exhausted.
  *
  * @author fmohr
  *
  * @param <N>
  * @param <A>
  */
-public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput<N, A>, SearchGraphPath<N, A>, N, A, N, A> implements ILoggingCustomizable {
+public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput<N, A>, SearchGraphPath<N, A>, N, A> implements ILoggingCustomizable {
 
 	/* logging */
 	private String loggerName;
@@ -56,7 +56,7 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 	private final Set<N> prioritizedNodes = new HashSet<>();
 	private final Set<N> exhausted = new HashSet<>(); // the set of nodes of which all solution paths have been computed
 	private final Random random;
-
+	
 	public RandomSearch(final GraphSearchInput<N, A> problem) {
 		this(problem, 0);
 	}
@@ -81,8 +81,7 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 	}
 
 	/**
-	 * This expansion either generates all successors of a node (if the successor generator function is not able to provide single successor) or only one new successor. The node is put on CLOSED once all
-	 * successors have been generated.
+	 * This expansion either generates all successors of a node (if the successor generator function is not able to provide single successor) or only one new successor. The node is put on CLOSED once all successors have been generated.
 	 *
 	 * Note that the fact that a new successor is generated does not mean that the algorithm will choose the newly generated successor to be appended to the paths.
 	 *
@@ -97,7 +96,7 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 			this.logger.debug("Expanding next node {}", node);
 			boolean closeNodeAfterwards = false;
 			if (this.isSingleNodeSuccessorGenerator) {
-
+				
 				/* generate the next successor */
 				SingleSuccessorGenerator<N, A> cGen = ((SingleSuccessorGenerator<N, A>) this.gen);
 				NodeExpansionDescription<N, A> successor = cGen.generateSuccessor(node, this.random.nextInt(Integer.MAX_VALUE));
@@ -134,7 +133,7 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 
 				/* if the node was not prioritized, change its state */
 				if (!this.prioritizedNodes.contains(node)) {
-					this.post(new NodeTypeSwitchEvent<>(node, "or_closed"));
+					this.post(new NodeTypeSwitchEvent<N>(node, "or_closed"));
 				}
 				this.closed.add(node);
 			}
@@ -161,7 +160,7 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException {
+	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException  {
 
 		switch (this.getState()) {
 		case created: {
@@ -292,14 +291,14 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 			while (!(predecessors = this.exploredGraph.getPredecessors(current)).isEmpty()) {
 				assert predecessors.size() == 1;
 				current = predecessors.iterator().next();
-
+				
 				/* if the currently considered node is not even fully expanded, it is certainly not exhausted */
-				boolean currentIsCompletelyExpanded = !this.isSingleNodeSuccessorGenerator || ((SingleSuccessorGenerator<N, A>) gen).allSuccessorsComputed(current);
+				boolean currentIsCompletelyExpanded = !this.isSingleNodeSuccessorGenerator || ((SingleSuccessorGenerator<N,A>)gen).allSuccessorsComputed(current);
 				if (!currentIsCompletelyExpanded) {
 					logger.trace("Leaving update routine at node {}, which has not been expanded completely.", current);
 					return;
 				}
-
+				
 				boolean currentIsPrioritized = this.prioritizedNodes.contains(current);
 				boolean allChildrenExhausted = true;
 				boolean allPrioritizedChildrenExhausted = true;
@@ -321,7 +320,7 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 				if (currentIsPrioritized && allPrioritizedChildrenExhausted) {
 					int sizeBefore = this.prioritizedNodes.size();
 					this.prioritizedNodes.remove(current);
-					this.post(new NodeTypeSwitchEvent<>(current, "or_closed"));
+					this.post(new NodeTypeSwitchEvent<N>(current, "or_closed"));
 					int sizeAfter = this.prioritizedNodes.size();
 					assert sizeAfter == sizeBefore - 1;
 				}

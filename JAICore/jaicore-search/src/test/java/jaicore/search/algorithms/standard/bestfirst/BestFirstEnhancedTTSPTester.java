@@ -15,10 +15,10 @@ import jaicore.search.testproblems.enhancedttsp.EnhancedTTSP;
 import jaicore.search.testproblems.enhancedttsp.EnhancedTTSPNode;
 import jaicore.search.testproblems.enhancedttsp.EnhancedTTSPTester;
 
-public class BestFirstEnhancedTTSPTester extends EnhancedTTSPTester<GraphSearchWithSubpathEvaluationsInput<EnhancedTTSPNode, String, Double>, EvaluatedSearchGraphPath<EnhancedTTSPNode, String, Double>, Node<EnhancedTTSPNode,Double>, String> {
+public class BestFirstEnhancedTTSPTester extends EnhancedTTSPTester<GraphSearchWithSubpathEvaluationsInput<EnhancedTTSPNode, String, Double>, EvaluatedSearchGraphPath<EnhancedTTSPNode, String, Double>> {
 	
 	@Override
-	public IGraphSearchFactory<GraphSearchWithSubpathEvaluationsInput<EnhancedTTSPNode, String, Double>, EvaluatedSearchGraphPath<EnhancedTTSPNode, String, Double>, EnhancedTTSPNode, String, Node<EnhancedTTSPNode,Double>, String> getFactory() {
+	public IGraphSearchFactory<GraphSearchWithSubpathEvaluationsInput<EnhancedTTSPNode, String, Double>, EvaluatedSearchGraphPath<EnhancedTTSPNode, String, Double>, EnhancedTTSPNode, String> getFactory() {
 		return new BestFirstFactory<>();
 	}
 
@@ -31,7 +31,7 @@ public class BestFirstEnhancedTTSPTester extends EnhancedTTSPTester<GraphSearchW
 				try {
 					return a.getSolutionEvaluator().evaluateSolution(node.externalPath());
 				} catch (ObjectEvaluationFailedException e) {
-					throw new NodeEvaluationException("Could not evaluate node. " + e.getMessage());
+					throw new NodeEvaluationException(e, "Could not evaluate node. " + e.getMessage());
 				}
 			}
 		});

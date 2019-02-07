@@ -20,7 +20,7 @@ import jaicore.search.core.interfaces.IGraphSearchFactory;
 import jaicore.search.model.other.SearchGraphPath;
 import jaicore.search.probleminputs.GraphSearchInput;
 
-public abstract class NPuzzleStandardTester<I extends GraphSearchInput<NPuzzleNode, String>, O extends SearchGraphPath<NPuzzleNode, String>, VSearch, ESearch> extends GraphSearchTester<NPuzzleProblem, I, O, NPuzzleNode, String, VSearch, ESearch> {
+public abstract class NPuzzleStandardTester<I extends GraphSearchInput<NPuzzleNode, String>, O extends SearchGraphPath<NPuzzleNode, String>> extends GraphSearchTester<NPuzzleProblem, I, O, NPuzzleNode, String> {
 
 	private final static int SEED = 0;
 	private int max_n = 4;
@@ -28,8 +28,8 @@ public abstract class NPuzzleStandardTester<I extends GraphSearchInput<NPuzzleNo
 	private AtomicInteger seenSolutions = new AtomicInteger(0);
 	private boolean showGraphs = false;
 
-	private IGraphSearch<I, O, NPuzzleNode, String, VSearch, ESearch> getSearch(int n, int seed) {
-		IGraphSearchFactory<I, O, NPuzzleNode, String, VSearch, ESearch> factory = getFactory();
+	private IGraphSearch<I, O, NPuzzleNode, String> getSearch(int n, int seed) {
+		IGraphSearchFactory<I, O, NPuzzleNode, String> factory = getFactory();
 		factory.setProblemInput(new NPuzzleProblem(n, seed), getProblemReducer());
 		return factory.getAlgorithm();
 	}
@@ -38,7 +38,7 @@ public abstract class NPuzzleStandardTester<I extends GraphSearchInput<NPuzzleNo
 	public void testThatIteratorReturnsEachPossibleSolution() {
 		for (int n = 3; n <= max_n; n++) {
 			System.out.print("Checking first 100 solutions of " + n + "-puzzle ... ");
-			IGraphSearch<I,O,NPuzzleNode, String, VSearch, ESearch> search = getSearch(n, SEED);
+			IGraphSearch<I,O,NPuzzleNode, String> search = getSearch(n, SEED);
 			assertNotNull("The factory has not returned any search object.", search);
 			boolean initialized = false;
 			boolean terminated = false;
@@ -94,8 +94,6 @@ public abstract class NPuzzleStandardTester<I extends GraphSearchInput<NPuzzleNo
 	public void testThatAnEventForEachPossibleSolutionIsEmittedInParallelizedCall() throws Throwable {
 		
 	}
-	
-
 
 	@Override
 	public I getSimpleProblemInputForGeneralTestPurposes() {

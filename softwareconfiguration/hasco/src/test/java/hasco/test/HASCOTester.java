@@ -17,6 +17,8 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.eventbus.Subscribe;
+
 import hasco.core.HASCO;
 import hasco.core.HASCOFactory;
 import hasco.core.HASCOSolutionCandidate;
@@ -71,16 +73,16 @@ public abstract class HASCOTester<ISearch extends GraphSearchInput<N, A>, N, A>
 		return hascoObjects;
 	}
 
-//	@Test
+	@Test
 	public void sanityCheckOfSearchGraph() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException, UnresolvableRequiredInterfaceException, IOException  {
 		for (Pair<HASCO<ISearch, N, A, Double>, Integer> pairOfHASCOAndNumOfSolutions : getAllHASCOObjectsWithExpectedNumberOfSolutionsForTheKnownProblems()) {
 			HASCO<ISearch, N, A, Double> hasco = pairOfHASCOAndNumOfSolutions.getX();
-			hasco.init();
 			GraphGenerator<N, A> gen = hasco.getGraphGenerator();
 
 			/* check on dead end */
-			GraphSanityChecker<N, A> deadEndDetector = new GraphSanityChecker<>(new GraphSearchInput<>(gen), 100000);
+			GraphSanityChecker<N, A> deadEndDetector = new GraphSanityChecker<>(new GraphSearchInput<>(gen), 2000);
 			// new VisualizationWindow<>(deadEndDetector).setTooltipGenerator(n -> TFD);
+			deadEndDetector.setLoggerName("testedalgorithm");
 			deadEndDetector.call();
 			SanityCheckResult sanity = deadEndDetector.getSanityCheck();
 			assertTrue("HASCO graph has a dead end: " + sanity, !(sanity instanceof DeadEndDetectedResult));
@@ -90,11 +92,38 @@ public abstract class HASCOTester<ISearch extends GraphSearchInput<N, A>, N, A>
 
 	@Test
 	public void testThatAnEventForEachPossibleSolutionIsEmittedInSimpleCall() throws Exception {
+		for (Pair<HASCO<ISearch, N, A, Double>, Integer> pairOfHASCOAndExpectedNumberOfSolutions : getAllHASCOObjectsWithExpectedNumberOfSolutionsForTheKnownProblems()) {
+			HASCO<ISearch, N, A, Double> hasco = pairOfHASCOAndExpectedNumberOfSolutions.getX();
+			checkNumberOfSolutionOnHASCO(hasco, pairOfHASCOAndExpectedNumberOfSolutions.getY());
+		}
 	}
 
 	@Test
 	public void testThatAnEventForEachPossibleSolutionIsEmittedInParallelizedCall() throws Exception {
-
+		for (Pair<HASCO<ISearch, N, A, Double>, Integer> pairOfHASCOAndExpectedNumberOfSolutions : getAllHASCOObjectsWithExpectedNumberOfSolutionsForTheKnownProblems()) {
+			HASCO<ISearch, N, A, Double> hasco = pairOfHASCOAndExpectedNumberOfSolutions.getX();
+			hasco.setNumCPUs(Runtime.getRuntime().availableProcessors());
+			checkNumberOfSolutionOnHASCO(hasco, pairOfHASCOAndExpectedNumberOfSolutions.getY());
+		}
+	}
+	
+	private void checkNumberOfSolutionOnHASCO(HASCO<ISearch, N, A, Double> hasco, int numberOfExpectedSolutions) throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
+			if (numberOfExpectedSolutions < 0)
+				return;
+			List<ComponentInstance> solutions = new ArrayList<>();
+			hasco.registerListener(new Object() {
+				
+				@Subscribe
+				public void registerSolution(HASCOSolutionEvent<Double> e) {
+					solutions.add(((HASCOSolutionCandidate<Double>) e.getSolutionCandidate()).getComponentInstance());
+					logger.info("Found solution {}", CompositionSerializer.serializeComponentInstance(((HASCOSolutionCandidate<Double>) ((HASCOSolutionEvent<Double>) e).getSolutionCandidate()).getComponentInstance()));
+				}
+			});
+			hasco.call();
+			Set<Object> uniqueSolutions = new HashSet<>(solutions);
+			assertEquals("Only found " + uniqueSolutions.size() + "/" + numberOfExpectedSolutions + " solutions", numberOfExpectedSolutions, uniqueSolutions.size());
+			assertEquals("All " + numberOfExpectedSolutions + " solutions were found, but " + solutions.size() + " solutions were returned in total, i.e. there are solutions returned twice",
+					numberOfExpectedSolutions, solutions.size());
 	}
 
 	@SuppressWarnings("unchecked")

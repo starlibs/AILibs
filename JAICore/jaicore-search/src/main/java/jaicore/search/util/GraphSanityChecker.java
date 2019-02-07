@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jaicore.basic.algorithm.events.AlgorithmEvent;
-import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
 import jaicore.graphvisualizer.events.graph.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graph.NodeAddedEvent;
 import jaicore.graphvisualizer.events.graph.NodeTypeSwitchEvent;
@@ -18,7 +17,7 @@ import jaicore.search.probleminputs.GraphSearchInput;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 
-public class GraphSanityChecker<N, A> extends AOptimalPathInORGraphSearch<GraphSearchInput<N, A>, N, A, Double, N, A> {
+public class GraphSanityChecker<N, A> extends AOptimalPathInORGraphSearch<GraphSearchInput<N, A>, N, A, Double> {
 
 	private Logger logger = LoggerFactory.getLogger(GraphSanityChecker.class);
 	private String loggerName;
@@ -34,7 +33,7 @@ public class GraphSanityChecker<N, A> extends AOptimalPathInORGraphSearch<GraphS
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws InterruptedException {
+	public AlgorithmEvent nextWithException() throws InterruptedException  {
 		switch (this.getState()) {
 		case created:
 			return this.activate();
@@ -44,7 +43,7 @@ public class GraphSanityChecker<N, A> extends AOptimalPathInORGraphSearch<GraphS
 			N root = ((SingleRootGenerator<N>) this.getGraphGenerator().getRootGenerator()).getRoot();
 			NodeGoalTester<N> goalTester = (NodeGoalTester<N>) this.getGraphGenerator().getGoalTester();
 			open.push(new Node<>(null, root));
-			this.post(new GraphInitializedEvent<>(root));
+			this.post(new GraphInitializedEvent<N>(root));
 			while (!open.isEmpty() && expanded < this.maxNodesToExpand) {
 				Node<N, ?> node = open.pop();
 				if (!node.isGoal()) {
@@ -53,14 +52,14 @@ public class GraphSanityChecker<N, A> extends AOptimalPathInORGraphSearch<GraphS
 				expanded++;
 				List<NodeExpansionDescription<N, A>> successors = this.getGraphGenerator().getSuccessorGenerator().generateSuccessors(node.getPoint());
 				if (this.detectDeadEnds && successors.isEmpty() && !node.isGoal()) {
-					this.sanityCheckResult = new DeadEndDetectedResult<>(node.getPoint());
+					this.sanityCheckResult = new DeadEndDetectedResult<N>(node.getPoint());
 					break;
 				}
 				for (NodeExpansionDescription<N, A> successor : successors) {
 					if (this.detectCycles && node.externalPath().contains(successor.getTo())) {
 						List<N> path = node.externalPath();
 						path.add(successor.getTo());
-						this.sanityCheckResult = new CycleDetectedResult<>(path, node.getPoint());
+						this.sanityCheckResult = new CycleDetectedResult<N>(path, node.getPoint());
 						break;
 					}
 					Node<N, ?> newNode = new Node<>(node, successor.getTo());
@@ -71,11 +70,11 @@ public class GraphSanityChecker<N, A> extends AOptimalPathInORGraphSearch<GraphS
 				if (this.sanityCheckResult != null) {
 					break;
 				}
+				if (expanded % 100 == 0 || expanded == this.maxNodesToExpand)
+					logger.debug("Expanded {}/{} nodes.", expanded, maxNodesToExpand);
 			}
 			this.shutdown();
-			AlgorithmFinishedEvent event = new AlgorithmFinishedEvent();
-			this.post(event);
-			return event;
+			return terminate();
 		}
 		default:
 			throw new IllegalStateException("Cannot do anything in state " + this.getState());

@@ -4,10 +4,9 @@ import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluato
 import jaicore.search.core.interfaces.IOptimalPathInORGraphSearch;
 import jaicore.search.core.interfaces.StandardORGraphSearchFactory;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
-import jaicore.search.model.travesaltree.Node;
 import jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePathEvaluation;
 
-public class AStarFactory<T, A> extends StandardORGraphSearchFactory<GraphSearchWithNumberBasedAdditivePathEvaluation<T,A>, EvaluatedSearchGraphPath<T, A, Double>, T, A, Double, Node<T,Double>, A> {
+public class AStarFactory<T, A> extends StandardORGraphSearchFactory<GraphSearchWithNumberBasedAdditivePathEvaluation<T,A>, EvaluatedSearchGraphPath<T, A, Double>, T, A, Double> {
 
 	private int timeoutForFInMS;
 	private INodeEvaluator<T, Double> timeoutEvaluator;
@@ -25,8 +24,8 @@ public class AStarFactory<T, A> extends StandardORGraphSearchFactory<GraphSearch
 	}
 
 	@Override
-	public IOptimalPathInORGraphSearch<GraphSearchWithNumberBasedAdditivePathEvaluation<T,A>, T, A, Double, Node<T,Double>, A> getAlgorithm() {
-		AStar<T, A> search = new AStar<T,A>(getProblemInput());
+	public IOptimalPathInORGraphSearch<GraphSearchWithNumberBasedAdditivePathEvaluation<T,A>, T, A, Double> getAlgorithm() {
+		AStar<T, A> search = new AStar<T,A>(getInput());
 		search.setTimeoutForComputationOfF(this.timeoutForFInMS, this.timeoutEvaluator);
 		if (loggerName != null && loggerName.length() > 0)
 			search.setLoggerName(loggerName);

@@ -20,20 +20,12 @@ import jaicore.basic.algorithm.exceptions.AlgorithmException;
  */
 public abstract class ASolutionCandidateIterator<I, O> extends AAlgorithm<I, O> implements ISolutionCandidateIterator<O> {
 
-	public ASolutionCandidateIterator() {
-		super();
-	}
-
 	public ASolutionCandidateIterator(final I input) {
 		super(input);
 	}
 
 	protected ASolutionCandidateIterator(final IAlgorithmConfig config,final I input) {
 		super(config,input);
-	}
-
-	protected ASolutionCandidateIterator(final IAlgorithmConfig config) {
-		super(config);
 	}
 
 	public O nextSolutionCandidate() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {

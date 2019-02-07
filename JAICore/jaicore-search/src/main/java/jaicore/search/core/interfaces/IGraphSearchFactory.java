@@ -1,11 +1,10 @@
 package jaicore.search.core.interfaces;
 
-import jaicore.graph.IGraphAlgorithmFactory;
+import jaicore.basic.algorithm.IAlgorithmFactory;
 import jaicore.search.probleminputs.GraphSearchInput;
 
-public interface IGraphSearchFactory<I extends GraphSearchInput<NSrc, ASrc>, O, NSrc, ASrc, NSearch, ASearch>
-		extends IGraphAlgorithmFactory<I, O, NSearch, ASearch> {
+public interface IGraphSearchFactory<I extends GraphSearchInput<N, A>, O, N, A> extends IAlgorithmFactory<I, O> {
 
 	@Override
-	public IGraphSearch<I, O, NSrc, ASrc, NSearch, ASearch> getAlgorithm();
+	public IGraphSearch<I, O, N, A> getAlgorithm();
 }

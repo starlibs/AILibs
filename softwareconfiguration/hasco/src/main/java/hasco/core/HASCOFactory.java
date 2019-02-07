@@ -10,7 +10,7 @@ public class HASCOFactory<ISearch extends GraphSearchInput<N, A>, N, A, V extend
 
 	private RefinementConfiguredSoftwareConfigurationProblem<V> problem;
 	private IHASCOPlanningGraphGeneratorDeriver<N, A> planningGraphGeneratorDeriver;
-	private IOptimalPathInORGraphSearchFactory<ISearch, N, A, V, ?, ?> searchFactory;
+	private IOptimalPathInORGraphSearchFactory<ISearch, N, A, V> searchFactory;
 	private AlgorithmProblemTransformer<GraphSearchWithPathEvaluationsInput<N, A, V>, ISearch> searchProblemTransformer;
 	private boolean visualizationEnabled;
 
@@ -26,6 +26,14 @@ public class HASCOFactory<ISearch extends GraphSearchInput<N, A>, N, A, V extend
 
 	@Override
 	public HASCO<ISearch, N, A, V> getAlgorithm() {
+		if (problem == null)
+			throw new IllegalStateException("Cannot create HASCO, because no problem has been specified.");
+		if (planningGraphGeneratorDeriver == null)
+			throw new IllegalStateException("Cannot create HASCO, because no planningGraphGeneratorDeriver has been specified.");
+		if (searchFactory == null)
+			throw new IllegalStateException("Cannot create HASCO, because no search factory has been specified.");
+		if (searchProblemTransformer == null)
+			throw new IllegalStateException("Cannot create HASCO, because no searchProblemTransformer has been specified.");
 		HASCO<ISearch, N, A, V> hasco = new HASCO<>(problem, planningGraphGeneratorDeriver, searchFactory, searchProblemTransformer);
 		hasco.setVisualization(visualizationEnabled);
 		return hasco;
@@ -39,11 +47,11 @@ public class HASCOFactory<ISearch extends GraphSearchInput<N, A>, N, A, V extend
 		this.planningGraphGeneratorDeriver = planningGraphGeneratorDeriver;
 	}
 
-	public IOptimalPathInORGraphSearchFactory<ISearch, N, A, V, ?, ?> getSearchFactory() {
+	public IOptimalPathInORGraphSearchFactory<ISearch, N, A, V> getSearchFactory() {
 		return searchFactory;
 	}
 
-	public void setSearchFactory(IOptimalPathInORGraphSearchFactory<ISearch, N, A, V, ?, ?> searchFactory) {
+	public void setSearchFactory(IOptimalPathInORGraphSearchFactory<ISearch, N, A, V> searchFactory) {
 		this.searchFactory = searchFactory;
 	}
 

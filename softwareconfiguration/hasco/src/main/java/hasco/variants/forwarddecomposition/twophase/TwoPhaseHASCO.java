@@ -22,12 +22,11 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.Subscribe;
 
+import hasco.core.HASCO;
 import hasco.core.HASCOSolutionCandidate;
-import hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
 import hasco.model.ComponentInstance;
 import hasco.optimizingfactory.SoftwareConfigurationAlgorithm;
 import hasco.variants.forwarddecomposition.DefaultPathPriorizingPredicate;
-import hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstWithRandomCompletions;
 import jaicore.basic.IObjectEvaluator;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
@@ -37,27 +36,21 @@ import jaicore.basic.sets.SetUtil;
 import jaicore.concurrent.TimeoutTimer;
 import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
 import jaicore.logging.LoggerUtil;
-import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
-import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.core.interfaces.GraphGenerator;
+import jaicore.search.probleminputs.GraphSearchInput;
 
-public class TwoPhaseHASCO extends SoftwareConfigurationAlgorithm<TwoPhaseSoftwareConfigurationProblem, HASCOSolutionCandidate<Double>, Double> {
+public class TwoPhaseHASCO<ISearch extends GraphSearchInput<N, A>, N, A> extends SoftwareConfigurationAlgorithm<TwoPhaseSoftwareConfigurationProblem, HASCOSolutionCandidate<Double>, Double> {
 
 	/* logging */
 	private Logger logger = LoggerFactory.getLogger(TwoPhaseHASCO.class);
 	private String loggerName;
 
-	/* algorithm inputs */
-	private INodeEvaluator<TFDNode, Double> preferredNodeEvaluator;
-
-	/** The classifier selected during selection phase. */
-	private HASCOSolutionCandidate<Double> selectedHASCOSolution;
-
-	/** evaluator for the selection phase. */
-	private HASCOViaFDAndBestFirstWithRandomCompletions<Double> hasco;
-
-	/* state variables during the run */
+	/* HASCO configuration */
+	private HASCO<ISearch, N, A, Double> hasco;
+	
+	/** The solution selected during selection phase. */
 	private final Queue<HASCOSolutionCandidate<Double>> phase1ResultQueue = new LinkedBlockingQueue<>();
+	private HASCOSolutionCandidate<Double> selectedHASCOSolution;
 
 	/* statistics */
 	private long timeOfStart = -1;
@@ -65,34 +58,30 @@ public class TwoPhaseHASCO extends SoftwareConfigurationAlgorithm<TwoPhaseSoftwa
 
 	private Thread timeoutControl = null;
 
-	public TwoPhaseHASCO(final TwoPhaseSoftwareConfigurationProblem problem, final TwoPhaseHASCOConfig config) {
+	public TwoPhaseHASCO(final TwoPhaseSoftwareConfigurationProblem problem, final TwoPhaseHASCOConfig config, HASCO<ISearch, N, A, Double> hasco) {
 		super(config != null ? config : ConfigFactory.create(TwoPhaseHASCOConfig.class), problem);
+		this.timeOfStart = System.currentTimeMillis();
+		this.logger.info(
+				"Starting 2-Phase HASCO with the following setup:\n\tCPUs:{},\n\tTimeout: {}s\n\tTimeout per node evaluation: {}ms\n\tTimeout per candidate: {}ms\n\tNumber of Random Completions: {}\n\tExpected blow-ups are {} (selection) and {} (post-processing).",
+				this.getNumCPUs(), this.getTimeout(), this.getConfig().timeoutForNodeEvaluation(), this.getConfig().timeoutForCandidateEvaluation(), this.getConfig().randomCompletions(), this.getConfig().expectedBlowupInSelection(),
+				this.getConfig().expectedBlowupInPostprocessing());
+
+		/* create HASCO object */
+		DefaultPathPriorizingPredicate<N, A> prioritizingPredicate = new DefaultPathPriorizingPredicate<>();
+		this.hasco = hasco;
+		if (this.getLoggerName() != null)
+			this.hasco.setLoggerName(this.getLoggerName() + ".hasco");
+		this.hasco.setConfig(this.getConfig());
+		this.hasco.registerListener(this); // this is to register solutions during runtime
+
+		/* set HASCO objects within the default path prioritizing node evaluator */
+		prioritizingPredicate.setHasco(this.hasco);
 	}
 
 	@Override
 	public AlgorithmEvent nextWithException() throws InterruptedException, TimeoutException, AlgorithmException {
 		switch (this.getState()) {
 		case created: {
-			this.timeOfStart = System.currentTimeMillis();
-			this.logger.info(
-					"Starting 2-Phase HASCO with the following setup:\n\tCPUs:{},\n\tTimeout: {}s\n\tTimeout per node evaluation: {}ms\n\tTimeout per candidate: {}ms\n\tNumber of Random Completions: {}\n\tExpected blow-ups are {} (selection) and {} (post-processing). Preferred node evaluator is {}",
-					this.getNumCPUs(), this.getTimeout(), this.getConfig().timeoutForNodeEvaluation(), this.getConfig().timeoutForCandidateEvaluation(), this.getConfig().randomCompletions(), this.getConfig().expectedBlowupInSelection(),
-					this.getConfig().expectedBlowupInPostprocessing(), this.preferredNodeEvaluator);
-
-			/* create HASCO object */
-			RefinementConfiguredSoftwareConfigurationProblem<Double> hascoProblem = new RefinementConfiguredSoftwareConfigurationProblem<>(this.getInput(), this.getInput().getParamRefinementConfig());
-			DefaultPathPriorizingPredicate<TFDNode, String> prioritizingPredicate = new DefaultPathPriorizingPredicate<>();
-			this.hasco = new HASCOViaFDAndBestFirstWithRandomCompletions<>(hascoProblem, prioritizingPredicate, this.getConfig().randomCompletions(), this.getConfig().randomSeed(), this.getConfig().timeoutForCandidateEvaluation(),
-					this.getConfig().timeoutForNodeEvaluation(), this.preferredNodeEvaluator);
-			this.hasco.setLoggerName(this.getLoggerName() + ".hasco");
-			this.hasco.setConfig(this.getConfig());
-			this.hasco.registerListener(this); // this is to register solutions during runtime
-
-			/* set HASCO objects within the default path prioritizing node evaluator */
-			prioritizingPredicate.setHasco(this.hasco);
-
-			/* initialize HASCO and set state of this algorithm to initialized */
-			this.hasco.init();
 			return this.activate();
 		}
 
@@ -465,11 +454,6 @@ public class TwoPhaseHASCO extends SoftwareConfigurationAlgorithm<TwoPhaseSoftwa
 		this.getConfig().setProperty(TwoPhaseHASCOConfig.K_SELECTION_NUM_CONSIDERED_SOLUTIONS, numberOfConsideredSolutions + "");
 	}
 
-	// @Override
-	// public IOptimizerResult<EvaluatedSoftwareConfigurationSolution<Double>, Double> getOptimizationResult() {
-	// return new IOptimizerResult<ComponentInstance, Double>(selectedHASCOSolution.getComponentInstance(), selectedHASCOSolution.getScore());
-	// }
-
 	@Subscribe
 	public void receiveSolutionEvent(final SolutionCandidateFoundEvent<HASCOSolutionCandidate<Double>> solutionEvent) {
 		HASCOSolutionCandidate<Double> solution = solutionEvent.getSolutionCandidate();
@@ -479,15 +463,7 @@ public class TwoPhaseHASCO extends SoftwareConfigurationAlgorithm<TwoPhaseSoftwa
 		this.post(solutionEvent);
 	}
 
-	public INodeEvaluator<TFDNode, Double> getPreferredNodeEvaluator() {
-		return this.preferredNodeEvaluator;
-	}
-
-	public void setPreferredNodeEvaluator(final INodeEvaluator<TFDNode, Double> preferredNodeEvaluator) {
-		this.preferredNodeEvaluator = preferredNodeEvaluator;
-	}
-
-	public GraphGenerator<TFDNode, String> getGraphGenerator() {
+	public GraphGenerator<N, A> getGraphGenerator() {
 		if (this.hasco == null) {
 			throw new IllegalStateException("Cannot retrieve GraphGenerator prior to algorithm initialization.");
 		}

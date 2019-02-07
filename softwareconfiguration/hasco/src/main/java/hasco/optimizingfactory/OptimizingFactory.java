@@ -29,19 +29,19 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C e
 	private V performanceOfObject;
 
 	/* factory state */
-	private SoftwareConfigurationAlgorithm<P, C, V> optimizer;
+	private final SoftwareConfigurationAlgorithm<P, C, V> optimizer;
 
 	public OptimizingFactory(final OptimizingFactoryProblem<P, T, V> problem, final SoftwareConfigurationAlgorithmFactory<P, C, V> factoryForOptimizationAlgorithm) {
 		super(problem);
 		this.factoryForOptimizationAlgorithm = factoryForOptimizationAlgorithm;
+		this.factoryForOptimizationAlgorithm.setProblemInput(this.getInput().getConfigurationProblem());
+		this.optimizer = this.factoryForOptimizationAlgorithm.getAlgorithm();
 	}
 
 	@Override
 	public AlgorithmEvent nextWithException() throws AlgorithmException, InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {
 		switch (this.getState()) {
 		case created: {
-			this.factoryForOptimizationAlgorithm.setProblemInput(this.getInput().getConfigurationProblem());
-			this.optimizer = this.factoryForOptimizationAlgorithm.getAlgorithm();
 			if (this.optimizer instanceof ILoggingCustomizable && this.loggerName != null) {
 				this.logger.info("Switching the logger name of the actually used optimizer to {}", this.loggerName);
 				this.optimizer.setLoggerName(loggerName + ".optimizer");
@@ -87,7 +87,7 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C e
 		return this.optimizer;
 	}
 
-	public AlgorithmInitializedEvent init() {
+	public AlgorithmInitializedEvent init()  {
 		AlgorithmEvent e = null;
 		while (this.hasNext()) {
 			e = this.next();

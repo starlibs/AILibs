@@ -11,25 +11,25 @@ import jaicore.search.probleminputs.builders.SearchProblemInputBuilder;
 public class ForwardDecompositionHTNPlannerFactory<IPlanner extends IHTNPlanningProblem, V extends Comparable<V>, ISearch extends GraphSearchInput<TFDNode, String>>
 		extends AAlgorithmFactory<IPlanner, EvaluatedSearchGraphBasedPlan<V, TFDNode>> {
 
-	private IOptimalPathInORGraphSearchFactory<ISearch, TFDNode, String, V, ?, ?> searchFactory;
+	private IOptimalPathInORGraphSearchFactory<ISearch, TFDNode, String, V> searchFactory;
 	private SearchProblemInputBuilder<TFDNode, String, ISearch> searchProblemBuilder;
 
 	public ForwardDecompositionHTNPlannerFactory() {
 		super();
 	}
 
-	public ForwardDecompositionHTNPlannerFactory(IOptimalPathInORGraphSearchFactory<ISearch, TFDNode, String, V, ?, ?> searchFactory,
+	public ForwardDecompositionHTNPlannerFactory(IOptimalPathInORGraphSearchFactory<ISearch, TFDNode, String, V> searchFactory,
 			SearchProblemInputBuilder<TFDNode, String, ISearch> searchProblemBuilder) {
 		super();
 		this.searchFactory = searchFactory;
 		this.searchProblemBuilder = searchProblemBuilder;
 	}
 
-	public IOptimalPathInORGraphSearchFactory<ISearch, TFDNode, String, V, ?, ?> getSearchFactory() {
+	public IOptimalPathInORGraphSearchFactory<ISearch, TFDNode, String, V> getSearchFactory() {
 		return searchFactory;
 	}
 
-	public void setSearchFactory(IOptimalPathInORGraphSearchFactory<ISearch, TFDNode, String, V, ?, ?> searchFactory) {
+	public void setSearchFactory(IOptimalPathInORGraphSearchFactory<ISearch, TFDNode, String, V> searchFactory) {
 		this.searchFactory = searchFactory;
 	}
 

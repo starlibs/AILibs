@@ -19,20 +19,12 @@ public abstract class AOptimizer<I, O extends ScoredItem<V>, V extends Comparabl
 
 	private O bestSeenSolution;
 
-	public AOptimizer() {
-		super();
-	}
-
 	public AOptimizer(final I input) {
 		super(input);
 	}
 
 	protected AOptimizer(final IAlgorithmConfig config, final I input) {
 		super(config, input);
-	}
-
-	protected AOptimizer(final IAlgorithmConfig config) {
-		super(config);
 	}
 
 	/**

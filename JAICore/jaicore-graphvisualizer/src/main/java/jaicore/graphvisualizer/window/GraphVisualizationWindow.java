@@ -3,7 +3,7 @@ package jaicore.graphvisualizer.window;
 import java.util.ArrayList;
 import java.util.List;
 
-import jaicore.graph.IGraphAlgorithm;
+import jaicore.basic.algorithm.IAlgorithm;
 import jaicore.graphvisualizer.events.graph.bus.GraphEventSource;
 import jaicore.graphvisualizer.events.gui.DefaultGUIEventBus;
 import jaicore.graphvisualizer.events.recorder.GraphEventHistoryRecorder;
@@ -43,7 +43,7 @@ public class GraphVisualizationWindow implements Runnable {
 		initializePlugins(graphEventSource, graphViewPlugin, visualizationPlugins);
 	}
 
-	public GraphVisualizationWindow(IGraphAlgorithm<?, ?, ?, ?> algorithm, GraphViewPlugin graphViewPlugin, GUIPlugin... visualizationPlugins) {
+	public GraphVisualizationWindow(IAlgorithm<?, ?> algorithm, GraphViewPlugin graphViewPlugin, GUIPlugin... visualizationPlugins) {
 		GraphEventHistoryRecorder historyRecorder = new GraphEventHistoryRecorder();
 		this.graphEventSource = historyRecorder.getHistory();
 		initializePlugins(graphEventSource, graphViewPlugin, visualizationPlugins);

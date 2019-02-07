@@ -36,24 +36,22 @@ import jaicore.search.probleminputs.builders.SearchProblemInputBuilder;
  * @param <PA> class of actions in the planning problem
  * @param <P> class of the HTN planning problem
  * @param <ISearch> class of the graph search problem input to which the HTN problem is reduced
- * @param <NSrc> class of the nodes in the search problem
- * @param <ASrc> class of the edges in the search problem
+ * @param <N> class of the nodes in the search problem
+ * @param <A> class of the edges in the search problem
  * @param <V> evaluation of solutions
- * @param <NSearch>
- * @param <ASearch>
  */
-public class GraphSearchBasedHTNPlanningAlgorithm<IP extends IHTNPlanningProblem, ISearch extends GraphSearchInput<NSrc, ASrc>, NSrc, ASrc, V extends Comparable<V>>
-		extends AOptimizer<IP, EvaluatedSearchGraphBasedPlan<V, NSrc>, V> {
+public class GraphSearchBasedHTNPlanningAlgorithm<IP extends IHTNPlanningProblem, ISearch extends GraphSearchInput<N, A>, N, A, V extends Comparable<V>>
+		extends AOptimizer<IP, EvaluatedSearchGraphBasedPlan<V, N>, V> {
 
 	private Logger logger = LoggerFactory.getLogger(GraphSearchBasedHTNPlanningAlgorithm.class);
 	private String loggerName;
 
 	/* algorithm inputs */
-	private final IHierarchicalPlanningGraphGeneratorDeriver<IP, NSrc, ASrc> problemTransformer;
-	private final IOptimalPathInORGraphSearch<ISearch, NSrc, ASrc, V, ?, ?> search;
+	private final IHierarchicalPlanningGraphGeneratorDeriver<IP, N, A> problemTransformer;
+	private final IOptimalPathInORGraphSearch<ISearch, N, A, V> search;
 
-	public GraphSearchBasedHTNPlanningAlgorithm(final IP problem, final IHierarchicalPlanningGraphGeneratorDeriver<IP, NSrc, ASrc> problemTransformer,
-			final IOptimalPathInORGraphSearchFactory<ISearch, NSrc, ASrc, V, ?, ?> searchFactory, final SearchProblemInputBuilder<NSrc, ASrc, ISearch> searchProblemBuilder) {
+	public GraphSearchBasedHTNPlanningAlgorithm(final IP problem, final IHierarchicalPlanningGraphGeneratorDeriver<IP, N, A> problemTransformer,
+			final IOptimalPathInORGraphSearchFactory<ISearch, N, A, V> searchFactory, final SearchProblemInputBuilder<N, A, ISearch> searchProblemBuilder) {
 		super(problem);
 
 		this.problemTransformer = problemTransformer;
@@ -113,13 +111,13 @@ public class GraphSearchBasedHTNPlanningAlgorithm<IP extends IHTNPlanningProblem
 			}
 			this.logger.info("Starting/continuing search for next plan.");
 			try {
-				EvaluatedSearchGraphPath<NSrc, ASrc, V> solution = this.search.nextSolutionCandidate();
+				EvaluatedSearchGraphPath<N, A, V> solution = this.search.nextSolutionCandidate();
 				if (solution == null) {
 					this.logger.info("No more solutions will be found. Terminating algorithm.");
 					return terminate();
 				}
 				this.logger.info("Next solution found.");
-				List<NSrc> solutionPath = solution.getNodes();
+				List<N> solutionPath = solution.getNodes();
 				Plan plan = this.problemTransformer.getPlan(solutionPath);
 				PlanFoundEvent<?, V> event = new PlanFoundEvent<>(new EvaluatedSearchGraphBasedPlan<>(plan.getActions(), solution.getScore(), solution));
 				this.post(event);
@@ -134,7 +132,7 @@ public class GraphSearchBasedHTNPlanningAlgorithm<IP extends IHTNPlanningProblem
 		}
 	}
 
-	public IOptimalPathInORGraphSearch<ISearch, NSrc, ASrc, V, ?, ?> getSearch() {
+	public IOptimalPathInORGraphSearch<ISearch, N, A, V> getSearch() {
 		return this.search;
 	}
 

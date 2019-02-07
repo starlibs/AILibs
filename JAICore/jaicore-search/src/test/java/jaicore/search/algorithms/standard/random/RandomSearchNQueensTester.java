@@ -10,12 +10,12 @@ import jaicore.search.testproblems.nqueens.NQueenGenerator;
 import jaicore.search.testproblems.nqueens.NQueenTester;
 import jaicore.search.testproblems.nqueens.QueenNode;
 
-public class RandomSearchNQueensTester extends NQueenTester<GraphSearchInput<QueenNode, String>, SearchGraphPath<QueenNode, String>, QueenNode, String> {
+public class RandomSearchNQueensTester extends NQueenTester<GraphSearchInput<QueenNode, String>, SearchGraphPath<QueenNode, String>> {
 
 	
 
 	@Override
-	public IGraphSearchFactory<GraphSearchInput<QueenNode, String>, SearchGraphPath<QueenNode, String>, QueenNode, String, QueenNode, String> getFactory() {
+	public IGraphSearchFactory<GraphSearchInput<QueenNode, String>, SearchGraphPath<QueenNode, String>, QueenNode, String> getFactory() {
 		return new RandomSearchFactory<>();
 	}
 

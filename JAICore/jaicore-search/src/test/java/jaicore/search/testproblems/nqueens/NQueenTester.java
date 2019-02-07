@@ -21,35 +21,33 @@ import jaicore.search.core.interfaces.IGraphSearchFactory;
 import jaicore.search.model.other.SearchGraphPath;
 import jaicore.search.probleminputs.GraphSearchInput;
 
-public abstract class NQueenTester<I extends GraphSearchInput<QueenNode, String>, O extends SearchGraphPath<QueenNode, String>, VSearch, ESearch> extends GraphSearchTester<Integer, I, O, QueenNode, String, VSearch, ESearch> {
+public abstract class NQueenTester<I extends GraphSearchInput<QueenNode, String>, O extends SearchGraphPath<QueenNode, String>> extends GraphSearchTester<Integer, I, O, QueenNode, String> {
 
-	// int[] numbersOfSolutions = { 2, 10, 4, 40, 92, 352, 724 };
-	int[] numbersOfSolutions = { 2, 10, 4, 40 };
+//	int[] numbersOfSolutions = { 2, 10, 4, 40, 92, 352, 724 };
+	int[] numbersOfSolutions = { 2, 10, 4, 40};
 
 	private AtomicInteger seenSolutions = new AtomicInteger(0);
 	private boolean showGraphs = false;
 
-	IGraphSearchFactory<I, O, QueenNode, String, VSearch, ESearch> searchFactory = getFactory();
+	IGraphSearchFactory<I, O, QueenNode, String> searchFactory = getFactory();
 
-	private IGraphSearch<I, O, QueenNode, String, VSearch, ESearch> getSearchProblemInput(int n) {
+	private IGraphSearch<I, O, QueenNode, String> getSearchProblemInput(int n) {
 		searchFactory.setProblemInput(n, getProblemReducer());
-		IGraphSearch<I, O, QueenNode, String, VSearch, ESearch> search = searchFactory.getAlgorithm();
+		IGraphSearch<I, O, QueenNode, String> search = searchFactory.getAlgorithm();
 		return search;
 	}
-
+	
 	@Override
 	public void testThatIteratorReturnsEachPossibleSolution() {
-		if (searchFactory == null) {
+		if (searchFactory == null)
 			throw new IllegalArgumentException("Search factory has not been set");
-		}
 		for (int i = 0; i < numbersOfSolutions.length; i++) {
 			int n = i + 4;
 			System.out.print("Checking " + n + "-Queens Problem ... ");
-			IGraphSearch<I, O, QueenNode, String, VSearch, ESearch> search = getSearchProblemInput(n);
+			IGraphSearch<I, O, QueenNode, String> search = getSearchProblemInput(n);
 			assertNotNull("The factory has not returned any search object.", search);
-			if (showGraphs) {
-				throw new UnsupportedOperationException("Visualization is currently not supported here.");
-			}
+//			if (showGraphs)
+//				new VisualizationWindow<>(search);
 			boolean initialized = false;
 			boolean terminated = false;
 			int solutions = 0;
@@ -65,9 +63,8 @@ public abstract class NQueenTester<I extends GraphSearchInput<QueenNode, String>
 					terminated = true;
 				} else {
 					assertTrue(!terminated);
-					if (e instanceof SolutionCandidateFoundEvent) {
+					if (e instanceof SolutionCandidateFoundEvent)
 						solutions++;
-					}
 				}
 			}
 			assertEquals("Failed to solve " + n + "-queens problem. Only found " + solutions + "/" + numbersOfSolutions[i] + " solutions.", numbersOfSolutions[i], solutions);
@@ -77,16 +74,15 @@ public abstract class NQueenTester<I extends GraphSearchInput<QueenNode, String>
 
 	@Override
 	public void testThatAnEventForEachPossibleSolutionIsEmittedInSimpleCall() throws Exception {
-		if (searchFactory == null) {
+		if (searchFactory == null)
 			throw new IllegalArgumentException("Search factory has not been set");
-		}
 		for (int i = 0; i < numbersOfSolutions.length; i++) {
 			int n = i + 4;
 			System.out.print("Checking " + n + "-Queens Problem ... ");
-			IGraphSearch<I, O, QueenNode, String, VSearch, ESearch> search = getSearchProblemInput(n);
+			IGraphSearch<I, O, QueenNode, String> search = getSearchProblemInput(n);
 			assertNotNull("The factory has not returned any search object.", search);
-			// if (showGraphs)
-			// new VisualizationWindow<>(search);
+//			if (showGraphs)
+//				new VisualizationWindow<>(search);
 			search.registerListener(this);
 			seenSolutions = new AtomicInteger(0);
 			search.call();
@@ -97,16 +93,15 @@ public abstract class NQueenTester<I extends GraphSearchInput<QueenNode, String>
 
 	@Override
 	public void testThatAnEventForEachPossibleSolutionIsEmittedInParallelizedCall() throws Exception {
-		if (searchFactory == null) {
+		if (searchFactory == null)
 			throw new IllegalArgumentException("Search factory has not been set");
-		}
 		for (int i = 0; i < numbersOfSolutions.length; i++) {
 			int n = i + 4;
 			System.out.print("Checking " + n + "-Queens Problem ... ");
-			IGraphSearch<I, O, QueenNode, String, VSearch, ESearch> search = getSearchProblemInput(n);
+			IGraphSearch<I, O, QueenNode, String> search = getSearchProblemInput(n);
 			assertNotNull("The factory has not returned any search object.", search);
-			// if (showGraphs)
-			// new VisualizationWindow<>(search);
+//			if (showGraphs)
+//				new VisualizationWindow<>(search);
 			search.registerListener(this);
 			search.setNumCPUs(Runtime.getRuntime().availableProcessors());
 			seenSolutions = new AtomicInteger(0);

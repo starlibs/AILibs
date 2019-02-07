@@ -41,33 +41,31 @@ public class ReductionOptimizer implements Classifier {
 		List<Instances> dataSplit = WekaUtil.getStratifiedSplit(data, seed, .6f);
 		Instances train = dataSplit.get(0);
 		Instances validate = dataSplit.get(1);
-		BestFirstEpsilon<RestProblem, Decision, Double> search = new BestFirstEpsilon<>(
-				new GraphSearchWithSubpathEvaluationsInput<>(new ReductionGraphGenerator(new Random(seed), train), n -> getLossForClassifier(getTreeFromSolution(n.externalPath(), data, false), data) * 1.0), n -> n.path().size() * -1.0, 0.1,
-				false);
+		BestFirstEpsilon<RestProblem, Decision, Double> search = new BestFirstEpsilon<RestProblem, Decision, Double>(new GraphSearchWithSubpathEvaluationsInput<>(new ReductionGraphGenerator(new Random(seed), train), n -> getLossForClassifier(getTreeFromSolution(n.externalPath(), data, false), data) * 1.0), n -> n.path().size() * -1.0
+		, 0.1, false);
 
-		// VisualizationWindow<Node<RestProblem, Double>, Decision> window = new VisualizationWindow<>(search);
-		// window.setTooltipGenerator(new TooltipGenerator<Node<RestProblem, Double>>() {
-		//
-		// @Override
-		// public String getTooltip(Node<RestProblem, Double> node) {
-		// return search.getFValue(node) + "<pre>" + getTreeFromSolution(node.externalPath(), data, false).toStringWithOffset() + "</pre>";
-		// }
-		// });
+//		VisualizationWindow<Node<RestProblem, Double>,Decision> window = new VisualizationWindow<>(search);
+//		window.setTooltipGenerator(new TooltipGenerator<Node<RestProblem, Double>>() {
+//
+//			@Override
+//			public String getTooltip(Node<RestProblem, Double> node) {
+//				return search.getFValue(node) + "<pre>" + getTreeFromSolution(node.externalPath(), data, false).toStringWithOffset() + "</pre>";
+//			}
+//		});
 
 		/* get best 20 solutions */
 		int i = 0;
-		Collection<EvaluatedSearchGraphPath<RestProblem, Decision, Double>> solutions = new ArrayList<>();
-		EvaluatedSearchGraphPath<RestProblem, Decision, Double> solution;
+		Collection<EvaluatedSearchGraphPath<RestProblem,Decision,Double>> solutions = new ArrayList<>();
+		EvaluatedSearchGraphPath<RestProblem,Decision,Double> solution;
 		while ((solution = search.nextSolutionCandidate()) != null) {
 			solutions.add(solution);
-			if (i++ > 100) {
+			if (i++ > 100)
 				break;
-			}
 		}
 		System.out.println(solutions.size());
 
 		/* select */
-		EvaluatedSearchGraphPath<RestProblem, Decision, Double> bestSolution = solutions.stream().min((s1, s2) -> s1.getScore().compareTo(s2.getScore())).get();
+		EvaluatedSearchGraphPath<RestProblem,Decision,Double> bestSolution = solutions.stream().min((s1, s2) -> s1.getScore().compareTo(s2.getScore())).get();
 		root = getTreeFromSolution(bestSolution.getNodes(), data, true);
 		root.buildClassifier(data);
 		System.out.println(root.toStringWithOffset());
@@ -94,12 +92,10 @@ public class ReductionOptimizer implements Classifier {
 		/* if the tree is not ready yet, complete it. The completion strategy is now just to set the node to "direct" with a random forest */
 		if (!tree.isCompletelyConfigured()) {
 			for (MCTreeNode node : tree) {
-				if (!node.getChildren().isEmpty()) {
+				if (!node.getChildren().isEmpty())
 					continue;
-				}
-				if (node.getContainedClasses().size() == 1) {
+				if (node.getContainedClasses().size() == 1)
 					continue;
-				}
 				node.setNodeType(EMCNodeType.DIRECT);
 				node.setBaseClassifier(new OneR());
 				for (int openClass : node.getContainedClasses()) {
@@ -149,9 +145,8 @@ public class ReductionOptimizer implements Classifier {
 		open.push(root);
 		for (Decision decision : decisions) {
 			MCTreeNode nodeToRefine = open.pop(); // by construction of the search space, this node should belong to the decision
-			if (nodeToRefine == null) {
+			if (nodeToRefine == null)
 				throw new IllegalStateException("No node to apply the decision to! Apparently, there are more decisions for nodes than there are inner nodes.");
-			}
 
 			/* insert decision to the node */
 			nodeToRefine.setNodeType(decision.getClassificationType());
@@ -200,25 +195,22 @@ public class ReductionOptimizer implements Classifier {
 						MCTreeNode lft = open.pop();
 						open.push(rgt);
 						open.push(lft);
-					} else {
+					} else
 						open.push(rgt);
-					}
 				}
 			}
 		}
 
-		if (mustBeComplete && !open.isEmpty()) {
+		if (mustBeComplete && !open.isEmpty())
 			throw new IllegalStateException("Not all nodes have been equipped with decisions!");
-		}
 		return root;
 	}
 
 	private double getAccuracy(Classifier c, Instances test) throws Exception {
 		int mistakes = 0;
 		for (Instance i : test) {
-			if (c.classifyInstance(i) != i.classValue()) {
+			if (c.classifyInstance(i) != i.classValue())
 				mistakes++;
-			}
 		}
 		return MathExt.round(100 * (1 - mistakes * 1f / test.size()), 2);
 	}

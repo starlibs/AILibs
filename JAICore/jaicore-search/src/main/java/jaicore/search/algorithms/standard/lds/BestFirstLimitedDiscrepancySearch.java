@@ -38,7 +38,7 @@ import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
  * @param <A>
  * @param <V>
  */
-public class BestFirstLimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends AOptimalPathInORGraphSearch<GraphSearchWithNodeRecommenderInput<T, A>, T, A, V, Node<T, NodeOrderList>, A> {
+public class BestFirstLimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends AOptimalPathInORGraphSearch<GraphSearchWithNodeRecommenderInput<T, A>, T, A, V> {
 
 	private Logger logger = LoggerFactory.getLogger(BestFirstLimitedDiscrepancySearch.class);
 	private String loggerName;
@@ -112,6 +112,7 @@ public class BestFirstLimitedDiscrepancySearch<T, A, V extends Comparable<V>> ex
 		else if (e instanceof AlgorithmFinishedEvent)
 			return terminate();
 		else if (e instanceof SolutionCandidateFoundEvent) {
+			@SuppressWarnings({ "unchecked", "rawtypes" })
 			EvaluatedSearchGraphPath<T, A, NodeOrderList> solution = (EvaluatedSearchGraphPath<T, A, NodeOrderList>) ((SolutionCandidateFoundEvent) e).getSolutionCandidate();
 			EvaluatedSearchGraphPath<T, A, V> modifiedSolution = new EvaluatedSearchGraphPath<T, A, V>(solution.getNodes(), solution.getEdges(), null);
 			return new SolutionCandidateFoundEvent<>(modifiedSolution);

@@ -41,7 +41,7 @@ import jaicore.search.structure.graphgenerator.SuccessorGenerator;
  *
  * @author Felix Mohr
  */
-public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSearch<GraphSearchWithPathEvaluationsInput<N, A, V>, N, A, V, Node<N, V>, A> implements IPolicy<N, A, V> {
+public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSearch<GraphSearchWithPathEvaluationsInput<N, A, V>, N, A, V> implements IPolicy<N, A, V> {
 
 	private Logger logger = LoggerFactory.getLogger(MCTS.class);
 	private String loggerName;
@@ -93,7 +93,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 		this.exploredGraph.addItem(this.root);
 	}
 
-	private List<N> getPlayout() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {
+	private List<N> getPlayout() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException  {
 		this.logger.info("Computing a new playout ...");
 		N current = this.root;
 		N next;
@@ -135,7 +135,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 			}
 			this.logger.trace("Chosen action: {}. Successor: {}", chosenAction, next);
 			current = next;
-			this.post(new NodeTypeSwitchEvent<>(next, "expanding"));
+			this.post(new NodeTypeSwitchEvent<N>(next, "expanding"));
 			path.add(current);
 			this.logger.debug("Tree policy decides to expand {} taking action {} to {}", current, chosenAction, next);
 		}
@@ -195,7 +195,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 				break;
 			}
 			current = this.exploredGraph.getPredecessors(current).iterator().next();
-			this.post(new NodeTypeSwitchEvent<>(current, "or_closed"));
+			this.post(new NodeTypeSwitchEvent<N>(current, "or_closed"));
 		}
 		return path;
 	}
@@ -248,7 +248,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, CancellationException, AlgorithmException {
 		switch (this.getState()) {
 		case created:
-			this.post(new GraphInitializedEvent<>(this.root));
+			this.post(new GraphInitializedEvent<N>(this.root));
 			return activate();
 
 		case active:
