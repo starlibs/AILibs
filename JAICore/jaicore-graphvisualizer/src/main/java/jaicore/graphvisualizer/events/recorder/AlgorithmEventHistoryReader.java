@@ -1,6 +1,6 @@
 package jaicore.graphvisualizer.events.recorder;
 
-public class GraphEventHistoryReader {
+public class AlgorithmEventHistoryReader {
 
 	// public GraphEventHistory readGraphEventHistory(File file) {
 	//

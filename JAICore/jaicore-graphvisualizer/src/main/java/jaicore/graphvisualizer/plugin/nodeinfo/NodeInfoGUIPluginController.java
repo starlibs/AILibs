@@ -1,7 +1,7 @@
 package jaicore.graphvisualizer.plugin.nodeinfo;
 
-import jaicore.graphvisualizer.events.graph.GraphEvent;
-import jaicore.graphvisualizer.events.graph.bus.HandleGraphEventException;
+import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.graphvisualizer.events.graph.bus.HandleAlgorithmEventException;
 import jaicore.graphvisualizer.events.gui.GUIEvent;
 import jaicore.graphvisualizer.plugin.GUIPluginController;
 import jaicore.graphvisualizer.plugin.graphview.NodeClickedEvent;
@@ -15,7 +15,7 @@ public class NodeInfoGUIPluginController<N> implements GUIPluginController {
 	}
 
 	@Override
-	public void handleGraphEvent(GraphEvent graphEvent) throws HandleGraphEventException {
+	public void handleAlgorithmEvent(AlgorithmEvent algorithmEvent) throws HandleAlgorithmEventException {
 
 	}
 
