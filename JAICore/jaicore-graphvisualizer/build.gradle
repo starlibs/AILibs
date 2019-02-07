@@ -20,6 +20,6 @@ dependencies {
 	implementation 'com.github.graphstream:gs-algo:2.0-alpha'
 
 }
-javafx {
-    modules = [ 'javafx.controls', 'javafx.swing', 'javafx.web' ]
-}
+//javafx {
+    //modules = [ 'javafx.controls', 'javafx.swing', 'javafx.web' ]
+//}
