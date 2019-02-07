@@ -37,7 +37,8 @@ import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 /**
- * This is a modified version of the AWA* algorithm for problems without admissible heuristic. Important differences are: - no early termination if a best-f-valued solution is found as f is not optimistic
+ * This is a modified version of the AWA* algorithm for problems without admissible heuristic. Important differences are: - no early termination if a best-f-valued solution is found as f is not
+ * optimistic
  *
  * @author lbrandt2 and fmohr
  *
@@ -211,7 +212,7 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 		switch (this.getState()) {
 		case created: {
 			T externalRootNode = this.rootNodeGenerator.getRoot();
-			Node<T, V> rootNode = new Node<T, V>(null, externalRootNode);
+			Node<T, V> rootNode = new Node<>(null, externalRootNode);
 			this.logger.info("Initializing graph and OPEN with {}.", rootNode);
 			this.openList.add(rootNode);
 			this.post(new GraphInitializedEvent<>(rootNode));
