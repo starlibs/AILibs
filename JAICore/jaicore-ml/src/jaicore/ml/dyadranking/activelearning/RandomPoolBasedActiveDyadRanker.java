@@ -23,13 +23,14 @@ public class RandomPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 
 	@Override
 	public void activelyTrain(int numberOfQueries) {
-		seed++;
 		random = new Random(seed);
 		for (int i = 0; i < numberOfQueries; i++) {
 
 			// get random instance
 			List<Vector> instanceFeatures = new ArrayList<Vector>(poolProvider.getInstanceFeatures());
 			Collections.shuffle(instanceFeatures, random);
+			if(instanceFeatures.isEmpty())
+				break;
 			Vector instance = instanceFeatures.get(0);
 			
 			// get two random pair of dyads

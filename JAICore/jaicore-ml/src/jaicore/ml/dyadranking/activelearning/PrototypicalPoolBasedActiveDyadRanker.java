@@ -39,6 +39,8 @@ public class PrototypicalPoolBasedActiveDyadRanker extends ActiveDyadRanker{
 //			System.out.println("dstar: " + dStar + "with probability: " + currentLowestProb);
 
 			List<Dyad> dyads = new ArrayList<Dyad>(poolProvider.getDyadsByInstance(dStar));
+			if(dyads.size()<2)
+				break;
 			Vector instance = dyads.get(0).getInstance();
 			List<Vector> alternatives = new ArrayList<Vector>(dyads.size());
 			for (Dyad dyad : dyads)

@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -24,11 +23,9 @@ import de.upb.isys.linearalgebra.Vector;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.dyadranking.Dyad;
 import jaicore.ml.dyadranking.algorithm.APLDyadRanker;
-import jaicore.ml.dyadranking.algorithm.IPLNetDyadRankerConfiguration;
 import jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
-import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
 import jaicore.ml.dyadranking.loss.DyadRankingLossUtil;
 import jaicore.ml.dyadranking.loss.KendallsTauDyadRankingLoss;
 
@@ -93,6 +90,7 @@ public class ActiveDyadRankingMetaminingTest {
 		List<Pair<Dyad, Double>> dyadScorePairs = loadDyadsAndScore(DYADS_SCORES_FILE);
 
 		DyadScorePoolProvider poolProvider = new DyadScorePoolProvider(dyadScorePairs);
+		poolProvider.setRemoveDyadsWhenQueried(true);
 		DyadRankingDataset dataset = new DyadRankingDataset();
 		for (Vector vector : poolProvider.getInstanceFeatures()) {
 			dataset.add(poolProvider.getDyadRankingInstanceForInstanceFeatures(vector));
@@ -128,9 +126,9 @@ public class ActiveDyadRankingMetaminingTest {
 
 		System.out.println("size after: " + poolProvider.getInstanceFeatures().size());
 
-//		ActiveDyadRanker activeRanker = new PrototypicalPoolBasedActiveDyadRanker(ranker, poolProvider);
-		ActiveDyadRanker activeDyadRanker = new RandomPoolBasedActiveDyadRanker(ranker, poolProvider, seed);
-		
+		ActiveDyadRanker activeDyadRanker = new PrototypicalPoolBasedActiveDyadRanker(ranker, poolProvider);
+//		ActiveDyadRanker activeDyadRanker = new RandomPoolBasedActiveDyadRanker(ranker, poolProvider, seed);
+
 		try {
 
 			// train the ranker
@@ -143,9 +141,6 @@ public class ActiveDyadRankingMetaminingTest {
 				System.out.print(avgKendallTau + ",");
 			}
 
-//				double avgKendallTau = 0.0d;
-//				System.out.println("Average Kendall's tau for " + ranker.getClass().getSimpleName() + ": " + avgKendallTau);
-//				assertTrue(avgKendallTau > 0.5d);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -155,15 +150,6 @@ public class ActiveDyadRankingMetaminingTest {
 	@Parameters
 	public static List<APLDyadRanker> supplyDyadRankers() {
 		PLNetDyadRanker plNetRanker = new PLNetDyadRanker();
-		// Use a simple config such that the test finishes quickly
-		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_ACTIVATION_FUNCTION, "SIGMOID");
-		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_PLNET_HIDDEN_NODES, "5");
-		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_MAX_EPOCHS, "10");
-		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_INTERVAL, "1");
-		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_PATIENCE, "5");
-		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_RETRAIN, "false");
-		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_PLNET_LEARNINGRATE, "0.1");
-		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_MINI_BATCH_SIZE, "1");
 		return Arrays.asList(plNetRanker);
 	}
 

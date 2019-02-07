@@ -34,8 +34,10 @@ public class DyadScorePoolProvider implements IDyadRankingPoolProvider {
 	private HashMap<Vector, Set<Dyad>> dyadsByAlternatives;
 	private HashMap<Dyad, SummaryStatistics> dyadScores;
 	private List<IInstance> pool;
+	private boolean removeDyadsWhenQueried;
 
 	public DyadScorePoolProvider(List<Pair<Dyad, Double>> dyadScorePairs) {
+		removeDyadsWhenQueried = false;
 		dyadsByInstances = new HashMap<Vector, Set<Dyad>>();
 		dyadsByAlternatives = new HashMap<Vector, Set<Dyad>>();
 		dyadScores = new HashMap<Dyad, SummaryStatistics>();
@@ -67,7 +69,11 @@ public class DyadScorePoolProvider implements IDyadRankingPoolProvider {
 
 		for (Pair<Dyad, Double> pair : dyadUtilityPairs) {
 			ranking.add(pair.getLeft());
-//			removeDyadFromPool(pair.getLeft());
+			if (this.removeDyadsWhenQueried) {
+				removeDyadFromPool(pair.getLeft());
+				if(this.getDyadsByInstance(pair.getLeft().getInstance()).size()<2)
+					this.removeDyadsFromPoolByInstances(pair.getLeft().getInstance());
+			}
 		}
 		return new DyadRankingInstance(ranking);
 
@@ -104,7 +110,8 @@ public class DyadScorePoolProvider implements IDyadRankingPoolProvider {
 
 		if (!dyadScores.containsKey(dyad))
 			dyadScores.put(dyad, new SummaryStatistics());
-		dyadScores.get(dyad).addValue(score);;
+		dyadScores.get(dyad).addValue(score);
+		;
 
 	}
 
@@ -143,14 +150,19 @@ public class DyadScorePoolProvider implements IDyadRankingPoolProvider {
 		}
 		return new DyadRankingInstance(ranking);
 	}
-	
+
 	public void removeDyadsFromPoolByInstances(Vector instanceFeatures) {
 		dyadsByInstances.remove(instanceFeatures);
 	}
-	
+
 	public void printCounts() {
-		for(Vector instanceFeatures : dyadsByInstances.keySet()) {
+		for (Vector instanceFeatures : dyadsByInstances.keySet()) {
 			System.out.println(instanceFeatures.toString() + "\t" + dyadsByInstances.get(instanceFeatures).size());
 		}
+	}
+
+	@Override
+	public void setRemoveDyadsWhenQueried(boolean flag) {
+		this.removeDyadsWhenQueried = flag;
 	}
 }
