@@ -30,6 +30,27 @@ public class InversePowerLawLearningCurveTest {
 	}
 	
 	@Test
+	public void testDerivativeValueCalculation() {
+		int[] xValues = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+		double[] yValues = new double[] {
+				0.2d,
+				0.07d,
+				0.04d,
+				0.02d,
+				0.02d,
+				0.01d,
+				0.01d,
+				0.01d,
+				0.00d,
+				0.00d
+		};
+		InversePowerLawLearningCurve curve = new InversePowerLawLearningCurve(0.15d, 0.5d, -0.4d);
+		for (int i = 0; i < xValues.length; i++) {
+			assertEquals(yValues[i], Math.floor(curve.getDerivativeCurveValue(xValues[i]) * 100) / 100.0d);
+		}
+	}
+	
+	@Test
 	public void testSaturaionPointCalculation() {
 		double[] epsilonValues = new double[] {
 				1d,

@@ -26,15 +26,19 @@ public class InversePowerLawLearningCurve implements LearningCurve {
 	public double getSaturationPoint(double epsilon) {
 		assert epsilon > 0;
 		double n = this.c - 1.0d;
-		double base = - (epsilon / (this.b * this.c));
-		double result = Math.pow(Math.E, Math.log(base)/n);
+		double base = -(epsilon / (this.b * this.c));
+		double result = Math.pow(Math.E, Math.log(base) / n);
 		return result;
 	}
-
 
 	@Override
 	public double getCurveValue(double x) {
 		return (1.0d - this.a) - this.b * Math.pow(x, this.c);
+	}
+
+	@Override
+	public double getDerivativeCurveValue(double x) {
+		return (-this.b) * this.c * Math.pow(x, this.c - 1.0d);
 	}
 
 }
