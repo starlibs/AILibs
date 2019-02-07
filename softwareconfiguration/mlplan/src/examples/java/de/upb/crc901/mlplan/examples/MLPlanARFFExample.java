@@ -19,7 +19,7 @@ public class MLPlanARFFExample {
 	public static void main(final String[] args) throws Exception {
 
 		/* load data for segment dataset and create a train-test-split */
-		Instances data = new Instances(new FileReader("../../../../../datasets/classification/multi-class/car.arff"));
+		Instances data = new Instances(new FileReader("../../../datasets/classification/multi-class/car.arff"));
 		data.setClassIndex(data.numAttributes() - 1);
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, 0, .7f);
 

@@ -16,8 +16,8 @@ import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.events.AlgorithmInterruptedEvent;
 import jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
 import jaicore.graph.TreeNode;
-import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
-import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
+import jaicore.graphvisualizer.events.graph.GraphInitializedEvent;
+import jaicore.graphvisualizer.events.graph.NodeAddedEvent;
 import jaicore.search.core.interfaces.AOptimalPathInORGraphSearch;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
 import jaicore.search.model.travesaltree.NodeExpansionDescription;
@@ -180,7 +180,7 @@ public class LimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends AOp
 		/* send events for this new node */
 		if (parent != null) {
 			boolean isGoal = this.nodeGoalTester.isGoal(newNode);
-			this.post(new NodeReachedEvent<TreeNode<T>>(parent, newTree, "or_" + (isGoal ? "solution" : "created")));
+			this.post(new NodeAddedEvent<TreeNode<T>>(parent, newTree, "or_" + (isGoal ? "solution" : "created")));
 		}
 		return newTree;
 	}

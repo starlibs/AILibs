@@ -17,13 +17,12 @@ import jaicore.basic.algorithm.AlgorithmState;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
-import jaicore.basic.algorithm.exceptions.DelayedTimeoutCheckException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.basic.sets.SetUtil;
 import jaicore.graph.LabeledGraph;
-import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
-import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
-import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
+import jaicore.graphvisualizer.events.graph.GraphInitializedEvent;
+import jaicore.graphvisualizer.events.graph.NodeAddedEvent;
+import jaicore.graphvisualizer.events.graph.NodeTypeSwitchEvent;
 import jaicore.search.core.interfaces.AOptimalPathInORGraphSearch;
 import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.core.interfaces.ISolutionEvaluator;
@@ -94,7 +93,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 		this.exploredGraph.addItem(this.root);
 	}
 
-	private List<N> getPlayout() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException  {
+	private List<N> getPlayout() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {
 		this.logger.info("Computing a new playout ...");
 		N current = this.root;
 		N next;
@@ -136,7 +135,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 			}
 			this.logger.trace("Chosen action: {}. Successor: {}", chosenAction, next);
 			current = next;
-			this.post(new NodeTypeSwitchEvent<N>(next, "expanding"));
+			this.post(new NodeTypeSwitchEvent<>(next, "expanding"));
 			path.add(current);
 			this.logger.debug("Tree policy decides to expand {} taking action {} to {}", current, chosenAction, next);
 		}
@@ -196,7 +195,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 				break;
 			}
 			current = this.exploredGraph.getPredecessors(current).iterator().next();
-			this.post(new NodeTypeSwitchEvent<N>(current, "or_closed"));
+			this.post(new NodeTypeSwitchEvent<>(current, "or_closed"));
 		}
 		return path;
 	}
@@ -222,7 +221,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 			this.exploredGraph.addItem(d.getTo());
 			this.unexpandedNodes.add(d.getTo());
 			this.exploredGraph.addEdge(d.getFrom(), d.getTo(), d.getAction());
-			this.post(new NodeReachedEvent<>(d.getFrom(), d.getTo(), this.isGoal(d.getTo()) ? "or_solution" : "or_open"));
+			this.post(new NodeAddedEvent<>(d.getFrom(), d.getTo(), this.isGoal(d.getTo()) ? "or_solution" : "or_open"));
 		}
 		return successorStates;
 	}
@@ -249,7 +248,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, CancellationException, AlgorithmException {
 		switch (this.getState()) {
 		case created:
-			this.post(new GraphInitializedEvent<N>(this.root));
+			this.post(new GraphInitializedEvent<>(this.root));
 			return activate();
 
 		case active:
