@@ -1,7 +1,7 @@
 plugins {
 	id 'java'
 	id 'eclipse'
-	id 'application'
+	//id 'application'
 	//id 'org.openjfx.javafxplugin' version '0.0.5'
 }
 eclipse {
