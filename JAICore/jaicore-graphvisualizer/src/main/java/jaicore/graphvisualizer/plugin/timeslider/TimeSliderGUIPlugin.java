@@ -1,4 +1,4 @@
-package jaicore.graphvisualizer.plugin.nodeinfo;
+package jaicore.graphvisualizer.plugin.timeslider;
 
 import jaicore.graphvisualizer.events.graph.bus.AlgorithmEventSource;
 import jaicore.graphvisualizer.events.gui.GUIEventSource;
@@ -8,16 +8,16 @@ import jaicore.graphvisualizer.plugin.GUIPluginController;
 import jaicore.graphvisualizer.plugin.GUIPluginModel;
 import jaicore.graphvisualizer.plugin.GUIPluginView;
 
-public class NodeInfoGUIPlugin<N> implements GUIPlugin {
+public class TimeSliderGUIPlugin implements GUIPlugin {
 
 	private AlgorithmEventHistory history;
 
-	private NodeInfoGUIPluginController<N> controller;
-	private NodeInfoGUIPluginView<N> view;
+	private TimeSliderGUIPluginController controller;
+	private TimeSliderGUIPluginView view;
 
-	public NodeInfoGUIPlugin(NodeInfoGenerator<N> nodeInfoGenerator) {
-		view = new NodeInfoGUIPluginView<>(nodeInfoGenerator);
-		controller = new NodeInfoGUIPluginController<>(view.getModel());
+	public TimeSliderGUIPlugin() {
+		view = new TimeSliderGUIPluginView();
+		controller = new TimeSliderGUIPluginController(view.getModel());
 	}
 
 	@Override

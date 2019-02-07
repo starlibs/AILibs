@@ -9,6 +9,7 @@ import jaicore.graphvisualizer.events.gui.DefaultGUIEventBus;
 import jaicore.graphvisualizer.events.recorder.AlgorithmEventHistoryRecorder;
 import jaicore.graphvisualizer.plugin.GUIPlugin;
 import jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
+import jaicore.graphvisualizer.plugin.timeslider.TimeSliderGUIPlugin;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -29,6 +30,7 @@ public class GraphVisualizationWindow implements Runnable {
 
 	private List<GUIPlugin> visualizationPlugins;
 	private GraphViewPlugin graphViewPlugin;
+	private TimeSliderGUIPlugin timeSliderGUIPlugin;
 
 	private TabPane pluginTabPane;
 	private Slider timestepSlider;
@@ -50,13 +52,17 @@ public class GraphVisualizationWindow implements Runnable {
 		algorithm.registerListener(historyRecorder);
 	}
 
-	private void initializePlugins(AlgorithmEventSource graphEventSource, GraphViewPlugin graphViewPlugin, GUIPlugin... visualizationPlugins) {
+	private void initializePlugins(AlgorithmEventSource algorithmEventSource, GraphViewPlugin graphViewPlugin, GUIPlugin... visualizationPlugins) {
 		this.graphViewPlugin = graphViewPlugin;
-		graphViewPlugin.setGraphEventSource(graphEventSource);
+		graphViewPlugin.setAlgorithmEventSource(algorithmEventSource);
+
+		timeSliderGUIPlugin = new TimeSliderGUIPlugin();
+		timeSliderGUIPlugin.setAlgorithmEventSource(algorithmEventSource);
+
 		this.visualizationPlugins = new ArrayList<>(visualizationPlugins.length);
 		for (GUIPlugin graphVisualizationPlugin : visualizationPlugins) {
 			this.visualizationPlugins.add(graphVisualizationPlugin);
-			graphVisualizationPlugin.setGraphEventSource(graphEventSource);
+			graphVisualizationPlugin.setAlgorithmEventSource(algorithmEventSource);
 			graphVisualizationPlugin.setGUIEventSource(DefaultGUIEventBus.getInstance());
 		}
 	}
@@ -144,20 +150,7 @@ public class GraphVisualizationWindow implements Runnable {
 	}
 
 	private void initializeBottomLayout() {
-		VBox timestepSliderLayout = new VBox();
-		timestepSliderLayout.setAlignment(Pos.CENTER);
-
-		timestepSlider = new Slider(0, 1500, 0);
-		timestepSlider.setShowTickLabels(true);
-		timestepSlider.setShowTickMarks(true);
-		timestepSlider.setMajorTickUnit(25);
-		timestepSlider.setMinorTickCount(5);
-		timestepSliderLayout.getChildren().add(timestepSlider);
-
-		Label timestepSliderLabel = new Label("Timestep");
-		timestepSliderLayout.getChildren().add(timestepSliderLabel);
-
-		rootLayout.setBottom(timestepSliderLayout);
+		rootLayout.setBottom(timeSliderGUIPlugin.getView().getNode());
 	}
 
 	private void initializePlugins() {
