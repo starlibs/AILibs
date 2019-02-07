@@ -8,9 +8,9 @@ import org.slf4j.LoggerFactory;
 
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
-import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
-import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
-import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
+import jaicore.graphvisualizer.events.graph.GraphInitializedEvent;
+import jaicore.graphvisualizer.events.graph.NodeAddedEvent;
+import jaicore.graphvisualizer.events.graph.NodeTypeSwitchEvent;
 import jaicore.search.core.interfaces.AOptimalPathInORGraphSearch;
 import jaicore.search.model.travesaltree.Node;
 import jaicore.search.model.travesaltree.NodeExpansionDescription;
@@ -34,7 +34,7 @@ public class GraphSanityChecker<N, A> extends AOptimalPathInORGraphSearch<GraphS
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws InterruptedException  {
+	public AlgorithmEvent nextWithException() throws InterruptedException {
 		switch (this.getState()) {
 		case created:
 			return this.activate();
@@ -44,7 +44,7 @@ public class GraphSanityChecker<N, A> extends AOptimalPathInORGraphSearch<GraphS
 			N root = ((SingleRootGenerator<N>) this.getGraphGenerator().getRootGenerator()).getRoot();
 			NodeGoalTester<N> goalTester = (NodeGoalTester<N>) this.getGraphGenerator().getGoalTester();
 			open.push(new Node<>(null, root));
-			this.post(new GraphInitializedEvent<N>(root));
+			this.post(new GraphInitializedEvent<>(root));
 			while (!open.isEmpty() && expanded < this.maxNodesToExpand) {
 				Node<N, ?> node = open.pop();
 				if (!node.isGoal()) {
@@ -53,20 +53,20 @@ public class GraphSanityChecker<N, A> extends AOptimalPathInORGraphSearch<GraphS
 				expanded++;
 				List<NodeExpansionDescription<N, A>> successors = this.getGraphGenerator().getSuccessorGenerator().generateSuccessors(node.getPoint());
 				if (this.detectDeadEnds && successors.isEmpty() && !node.isGoal()) {
-					this.sanityCheckResult = new DeadEndDetectedResult<N>(node.getPoint());
+					this.sanityCheckResult = new DeadEndDetectedResult<>(node.getPoint());
 					break;
 				}
 				for (NodeExpansionDescription<N, A> successor : successors) {
 					if (this.detectCycles && node.externalPath().contains(successor.getTo())) {
 						List<N> path = node.externalPath();
 						path.add(successor.getTo());
-						this.sanityCheckResult = new CycleDetectedResult<N>(path, node.getPoint());
+						this.sanityCheckResult = new CycleDetectedResult<>(path, node.getPoint());
 						break;
 					}
 					Node<N, ?> newNode = new Node<>(node, successor.getTo());
 					newNode.setGoal(goalTester.isGoal(newNode.getPoint()));
 					open.add(newNode);
-					this.post(new NodeReachedEvent<N>(node.getPoint(), successor.getTo(), newNode.isGoal() ? "or_solution" : "or_open"));
+					this.post(new NodeAddedEvent<N>(node.getPoint(), successor.getTo(), newNode.isGoal() ? "or_solution" : "or_open"));
 				}
 				if (this.sanityCheckResult != null) {
 					break;
