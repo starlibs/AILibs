@@ -11,15 +11,12 @@ import java.util.stream.IntStream;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import jaicore.basic.MathExt;
-import jaicore.graphvisualizer.TooltipGenerator;
-import jaicore.graphvisualizer.gui.VisualizationWindow;
 import jaicore.ml.WekaUtil;
 import jaicore.ml.classification.multiclass.reduction.EMCNodeType;
 import jaicore.ml.classification.multiclass.reduction.MCTreeNode;
 import jaicore.ml.classification.multiclass.reduction.MCTreeNodeLeaf;
 import jaicore.search.algorithms.standard.bestfirst.BestFirstEpsilon;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
-import jaicore.search.model.travesaltree.Node;
 import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
@@ -48,14 +45,14 @@ public class ReductionOptimizer implements Classifier {
 				new GraphSearchWithSubpathEvaluationsInput<>(new ReductionGraphGenerator(new Random(seed), train), n -> getLossForClassifier(getTreeFromSolution(n.externalPath(), data, false), data) * 1.0), n -> n.path().size() * -1.0, 0.1,
 				false);
 
-		VisualizationWindow<Node<RestProblem, Double>, Decision> window = new VisualizationWindow<>(search);
-		window.setTooltipGenerator(new TooltipGenerator<Node<RestProblem, Double>>() {
-
-			@Override
-			public String getTooltip(Node<RestProblem, Double> node) {
-				return search.getFValue(node) + "<pre>" + getTreeFromSolution(node.externalPath(), data, false).toStringWithOffset() + "</pre>";
-			}
-		});
+		// VisualizationWindow<Node<RestProblem, Double>, Decision> window = new VisualizationWindow<>(search);
+		// window.setTooltipGenerator(new TooltipGenerator<Node<RestProblem, Double>>() {
+		//
+		// @Override
+		// public String getTooltip(Node<RestProblem, Double> node) {
+		// return search.getFValue(node) + "<pre>" + getTreeFromSolution(node.externalPath(), data, false).toStringWithOffset() + "</pre>";
+		// }
+		// });
 
 		/* get best 20 solutions */
 		int i = 0;
