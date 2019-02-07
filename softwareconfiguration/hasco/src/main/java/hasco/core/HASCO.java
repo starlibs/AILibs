@@ -29,13 +29,9 @@ import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.DelayedCancellationCheckException;
 import jaicore.basic.algorithm.exceptions.DelayedTimeoutCheckException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
-import jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
-import jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
-import jaicore.graphvisualizer.window.GraphVisualizationWindow;
 import jaicore.logging.ToJSONStringUtil;
 import jaicore.planning.core.EvaluatedSearchGraphBasedPlan;
 import jaicore.planning.core.Plan;
-import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNodeInfoGenerator;
 import jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem;
 import jaicore.planning.hierarchical.problems.htn.CostSensitiveHTNPlanningProblem;
 import jaicore.planning.hierarchical.problems.htn.CostSensitivePlanningToSearchProblemTransformer;
@@ -44,11 +40,8 @@ import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.core.interfaces.IOptimalPathInORGraphSearch;
 import jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
-import jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
 import jaicore.search.probleminputs.GraphSearchInput;
 import jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
-import javafx.application.Platform;
-import javafx.embed.swing.JFXPanel;
 
 /**
  * Hierarchically create an object of type T
@@ -160,12 +153,6 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 			} else {
 				this.logger.info("Not setting the logger name of the search. Logger name of HASCO is {}. Search loggingCustomizable: {}", this.loggerName,
 						(this.search instanceof ILoggingCustomizable));
-			}
-			if (this.getConfig().visualizationEnabled()) {
-				this.logger.info("Launching graph visualization");
-				new JFXPanel();
-				Platform.runLater(new GraphVisualizationWindow(this.search, new GraphViewPlugin(), new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator()))));
-
 			}
 
 			/* register external listeners */
@@ -309,6 +296,10 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 
 	public IOptimalPathInORGraphSearchFactory<ISearch, N, A, V> getSearchFactory() {
 		return searchFactory;
+	}
+
+	public IOptimalPathInORGraphSearch<ISearch, N, A, V> getSearch() {
+		return search;
 	}
 
 	@Override
