@@ -38,11 +38,11 @@ import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.concurrent.InterruptionTimerTask;
-import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
-import jaicore.graphvisualizer.events.graphEvents.NodeParentSwitchEvent;
-import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
-import jaicore.graphvisualizer.events.graphEvents.NodeRemovedEvent;
-import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
+import jaicore.graphvisualizer.events.graph.GraphInitializedEvent;
+import jaicore.graphvisualizer.events.graph.NodeAddedEvent;
+import jaicore.graphvisualizer.events.graph.NodeParentSwitchEvent;
+import jaicore.graphvisualizer.events.graph.NodeRemovedEvent;
+import jaicore.graphvisualizer.events.graph.NodeTypeSwitchEvent;
 import jaicore.logging.LoggerUtil;
 import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.NodeAnnotationEvent;
@@ -414,7 +414,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		if (parent == null) {
 			this.post(new GraphInitializedEvent<Node<N, V>>(newNode));
 		} else {
-			this.post(new NodeReachedEvent<Node<N, V>>(parent, newNode, "or_" + (newNode.isGoal() ? "solution" : "created")));
+			this.post(new NodeAddedEvent<Node<N, V>>(parent, newNode, "or_" + (newNode.isGoal() ? "solution" : "created")));
 			this.logger.debug("Sent message for creation of node {} as a successor of {}", newNode, parent);
 		}
 		return newNode;

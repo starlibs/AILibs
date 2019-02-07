@@ -7,9 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jaicore.basic.algorithm.events.AlgorithmEvent;
-import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
-import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
-import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
+import jaicore.graphvisualizer.events.graph.GraphInitializedEvent;
+import jaicore.graphvisualizer.events.graph.NodeAddedEvent;
+import jaicore.graphvisualizer.events.graph.NodeTypeSwitchEvent;
 import jaicore.search.core.interfaces.AOptimalPathInORGraphSearch;
 import jaicore.search.model.travesaltree.Node;
 import jaicore.search.model.travesaltree.NodeExpansionDescription;
@@ -65,7 +65,7 @@ public class GraphSanityChecker<N, A> extends AOptimalPathInORGraphSearch<GraphS
 					Node<N, ?> newNode = new Node<>(node, successor.getTo());
 					newNode.setGoal(goalTester.isGoal(newNode.getPoint()));
 					open.add(newNode);
-					this.post(new NodeReachedEvent<N>(node.getPoint(), successor.getTo(), newNode.isGoal() ? "or_solution" : "or_open"));
+					this.post(new NodeAddedEvent<N>(node.getPoint(), successor.getTo(), newNode.isGoal() ? "or_solution" : "or_open"));
 				}
 				if (this.sanityCheckResult != null) {
 					break;

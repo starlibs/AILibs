@@ -23,8 +23,8 @@ import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.basic.sets.LDSRelationComputer;
 import jaicore.basic.sets.RelationComputationProblem;
 import jaicore.graph.Graph;
-import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
-import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
+import jaicore.graphvisualizer.events.graph.GraphInitializedEvent;
+import jaicore.graphvisualizer.events.graph.NodeAddedEvent;
 import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.core.interfaces.IGraphSearch;
 import jaicore.search.model.travesaltree.NodeExpansionDescription;
@@ -104,7 +104,7 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 						}
 						open.add(newNode);
 						generatedChildren++;
-						this.post(new NodeReachedEvent<N>(n.node, newNode.node, descr.getTypeOfToNode() == NodeType.OR ? "or" : "and"));
+						this.post(new NodeAddedEvent<N>(n.node, newNode.node, descr.getTypeOfToNode() == NodeType.OR ? "or" : "and"));
 					}
 					logger.debug("Node expansion of {}-node {} completed. Generated {} successors.", n.type, n, generatedChildren);
 				} catch (Exception e) {

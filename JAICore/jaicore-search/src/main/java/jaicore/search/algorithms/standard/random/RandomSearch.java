@@ -18,9 +18,9 @@ import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.sets.SetUtil;
 import jaicore.graph.Graph;
-import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
-import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
-import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
+import jaicore.graphvisualizer.events.graph.GraphInitializedEvent;
+import jaicore.graphvisualizer.events.graph.NodeAddedEvent;
+import jaicore.graphvisualizer.events.graph.NodeTypeSwitchEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.GraphSearchSolutionCandidateFoundEvent;
 import jaicore.search.core.interfaces.AAnyPathInORGraphSearch;
 import jaicore.search.model.other.SearchGraphPath;
@@ -156,7 +156,7 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 		if (isGoalNode) {
 			this.logger.debug("Found goal node {}!", to);
 		}
-		this.post(new NodeReachedEvent<>(from, to, isGoalNode ? "or_solution" : (isPrioritized ? "or_prioritized" : "or_open")));
+		this.post(new NodeAddedEvent<>(from, to, isGoalNode ? "or_solution" : (isPrioritized ? "or_prioritized" : "or_open")));
 	}
 
 	@Override

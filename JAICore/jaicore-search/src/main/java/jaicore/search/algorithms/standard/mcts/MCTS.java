@@ -20,9 +20,9 @@ import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.basic.sets.SetUtil;
 import jaicore.graph.LabeledGraph;
-import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
-import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
-import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
+import jaicore.graphvisualizer.events.graph.GraphInitializedEvent;
+import jaicore.graphvisualizer.events.graph.NodeAddedEvent;
+import jaicore.graphvisualizer.events.graph.NodeTypeSwitchEvent;
 import jaicore.search.core.interfaces.AOptimalPathInORGraphSearch;
 import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.core.interfaces.ISolutionEvaluator;
@@ -221,7 +221,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 			this.exploredGraph.addItem(d.getTo());
 			this.unexpandedNodes.add(d.getTo());
 			this.exploredGraph.addEdge(d.getFrom(), d.getTo(), d.getAction());
-			this.post(new NodeReachedEvent<>(d.getFrom(), d.getTo(), this.isGoal(d.getTo()) ? "or_solution" : "or_open"));
+			this.post(new NodeAddedEvent<>(d.getFrom(), d.getTo(), this.isGoal(d.getTo()) ? "or_solution" : "or_open"));
 		}
 		return successorStates;
 	}

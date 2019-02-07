@@ -15,9 +15,9 @@ import com.google.common.eventbus.Subscribe;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
-import jaicore.graphvisualizer.events.graphEvents.GraphInitializedEvent;
-import jaicore.graphvisualizer.events.graphEvents.NodeReachedEvent;
-import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
+import jaicore.graphvisualizer.events.graph.GraphInitializedEvent;
+import jaicore.graphvisualizer.events.graph.NodeAddedEvent;
+import jaicore.graphvisualizer.events.graph.NodeTypeSwitchEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.GraphSearchSolutionCandidateFoundEvent;
 import jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
@@ -37,7 +37,8 @@ import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 /**
- * This is a modified version of the AWA* algorithm for problems without admissible heuristic. Important differences are: - no early termination if a best-f-valued solution is found as f is not optimistic
+ * This is a modified version of the AWA* algorithm for problems without admissible heuristic. Important differences are: - no early termination if a best-f-valued solution is found as f is not
+ * optimistic
  *
  * @author lbrandt2 and fmohr
  *
@@ -171,7 +172,7 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 					if (!nPrime.isGoal()) {
 						this.openList.add(nPrime);
 					}
-					this.post(new NodeReachedEvent<>(n, nPrime, nPrime.isGoal() ? "or_solution" : "or_open"));
+					this.post(new NodeAddedEvent<>(n, nPrime, nPrime.isGoal() ? "or_solution" : "or_open"));
 				} else if (this.openList.contains(nPrime) || this.suspendList.contains(nPrime)) {
 					V oldScore = nPrime.getInternalLabel();
 					if (oldScore != null && oldScore.compareTo(nPrimeScore) > 0) {
@@ -211,7 +212,7 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 		switch (this.getState()) {
 		case created: {
 			T externalRootNode = this.rootNodeGenerator.getRoot();
-			Node<T, V> rootNode = new Node<T, V>(null, externalRootNode);
+			Node<T, V> rootNode = new Node<>(null, externalRootNode);
 			this.logger.info("Initializing graph and OPEN with {}.", rootNode);
 			this.openList.add(rootNode);
 			this.post(new GraphInitializedEvent<>(rootNode));
