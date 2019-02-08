@@ -12,12 +12,14 @@ import de.upb.crc901.mlplan.core.MLPlanBuilder;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
 import jaicore.graphvisualizer.events.graph.GraphEvent;
 import jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
 import jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
 import jaicore.graphvisualizer.window.GraphVisualizationWindow;
 import jaicore.ml.WekaUtil;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNodeInfoGenerator;
+import jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogramPlugin;
 import jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
@@ -45,7 +47,17 @@ public class MLPlanARFFExample {
 		
 		/* open visualization */
 		new JFXPanel();
-		Platform.runLater(new GraphVisualizationWindow(mlplan, new GraphViewPlugin(), new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator()))));
+		GraphVisualizationWindow window = new GraphVisualizationWindow(mlplan, new GraphViewPlugin(), new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new SearchRolloutHistogramPlugin());
+		Platform.runLater(window);
+		
+		mlplan.registerListener(new Object() {
+			@Subscribe
+			public void f(AlgorithmEvent e) {
+				if (e instanceof SolutionCandidateFoundEvent) {
+					System.err.println(e);
+				}
+			}
+		});
 		
 		try {
 			long start = System.currentTimeMillis();

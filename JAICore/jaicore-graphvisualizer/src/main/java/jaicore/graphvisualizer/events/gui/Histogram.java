@@ -1,4 +1,4 @@
-package hasco.gui.statsplugin;
+package jaicore.graphvisualizer.events.gui;
 
 import java.util.ArrayList;
 import java.util.List;

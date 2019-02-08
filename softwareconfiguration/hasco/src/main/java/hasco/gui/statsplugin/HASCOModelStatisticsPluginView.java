@@ -7,6 +7,7 @@ import java.util.Map;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import hasco.model.UnparametrizedComponentInstance;
+import jaicore.graphvisualizer.events.gui.Histogram;
 import jaicore.graphvisualizer.plugin.ASimpleMVCPluginView;
 import jaicore.graphvisualizer.plugin.IGUIPluginView;
 import javafx.application.Platform;
