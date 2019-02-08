@@ -12,6 +12,7 @@ import de.upb.crc901.mlplan.core.MLPlanBuilder;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.graphvisualizer.events.graph.GraphEvent;
 import jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
 import jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
 import jaicore.graphvisualizer.window.GraphVisualizationWindow;
@@ -40,7 +41,7 @@ public class MLPlanARFFExample {
 		mlplan.setTimeout(60, TimeUnit.SECONDS);
 		mlplan.setTimeoutForNodeEvaluation(15);
 		mlplan.setTimeoutForSingleSolutionEvaluation(15);
-		mlplan.setNumCPUs(8);
+		mlplan.setNumCPUs(3);
 		
 		/* open visualization */
 		new JFXPanel();

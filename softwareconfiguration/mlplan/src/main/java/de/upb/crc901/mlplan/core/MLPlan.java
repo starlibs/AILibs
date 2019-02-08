@@ -182,7 +182,6 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 			public void receiveEventFromFactory(AlgorithmEvent event) {
 				if (!(event instanceof AlgorithmInitializedEvent || event instanceof AlgorithmFinishedEvent))
 					post(event);
-				post(event);
 				if (event instanceof HASCOSolutionEvent) {
 					@SuppressWarnings("unchecked")
 					HASCOSolutionCandidate<Double> solution = ((HASCOSolutionEvent<Double>) event).getSolutionCandidate();
