@@ -41,16 +41,16 @@ public class GraphVisualizationWindow implements Runnable {
 	private BorderPane topLayout;
 
 	public GraphVisualizationWindow(AlgorithmEventHistory algorithmEventHistory, GraphViewPlugin graphViewPlugin, IGUIPlugin... visualizationPlugins) {
-		algorithmEventHistoryPuller = new AlgorithmEventHistoryPuller(algorithmEventHistory, 10);
+		algorithmEventHistoryPuller = new AlgorithmEventHistoryPuller(algorithmEventHistory, 1);
 		this.graphEventSource = algorithmEventHistoryPuller;
-		initializePlugins(algorithmEventHistory, graphViewPlugin, visualizationPlugins);
+		initializePlugins(graphEventSource, graphViewPlugin, visualizationPlugins);
 		// it is important to register the history puller as a last listener!
 		DefaultGUIEventBus.getInstance().registerListener(algorithmEventHistoryPuller);
 	}
 
 	public GraphVisualizationWindow(IAlgorithm<?, ?> algorithm, GraphViewPlugin graphViewPlugin, IGUIPlugin... visualizationPlugins) {
 		AlgorithmEventHistoryRecorder historyRecorder = new AlgorithmEventHistoryRecorder();
-		algorithmEventHistoryPuller = new AlgorithmEventHistoryPuller(historyRecorder.getHistory(), 10);
+		algorithmEventHistoryPuller = new AlgorithmEventHistoryPuller(historyRecorder.getHistory(), 1);
 		this.graphEventSource = algorithmEventHistoryPuller;
 		initializePlugins(graphEventSource, graphViewPlugin, visualizationPlugins);
 		algorithm.registerListener(historyRecorder);

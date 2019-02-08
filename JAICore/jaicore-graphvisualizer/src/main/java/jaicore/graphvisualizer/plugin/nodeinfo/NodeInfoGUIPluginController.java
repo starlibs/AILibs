@@ -16,7 +16,6 @@ public class NodeInfoGUIPluginController<N> implements IGUIPluginController {
 
 	@Override
 	public void handleAlgorithmEvent(AlgorithmEvent algorithmEvent) throws HandleAlgorithmEventException {
-
 	}
 
 	@Override
