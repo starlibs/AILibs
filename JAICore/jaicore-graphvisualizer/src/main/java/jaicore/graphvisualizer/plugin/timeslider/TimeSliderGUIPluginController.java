@@ -3,12 +3,12 @@ package jaicore.graphvisualizer.plugin.timeslider;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.graphvisualizer.events.graph.bus.HandleAlgorithmEventException;
 import jaicore.graphvisualizer.events.gui.GUIEvent;
-import jaicore.graphvisualizer.plugin.GUIPluginController;
+import jaicore.graphvisualizer.plugin.IGUIPluginController;
 import jaicore.graphvisualizer.plugin.controlbar.PauseEvent;
 import jaicore.graphvisualizer.plugin.controlbar.PlayEvent;
 import jaicore.graphvisualizer.plugin.controlbar.ResetEvent;
 
-public class TimeSliderGUIPluginController implements GUIPluginController {
+public class TimeSliderGUIPluginController implements IGUIPluginController {
 
 	private TimeSliderGUIPluginModel model;
 

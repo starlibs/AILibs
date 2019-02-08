@@ -9,7 +9,6 @@ import jaicore.graphvisualizer.events.gui.DefaultGUIEventBus;
 import jaicore.graphvisualizer.events.recorder.AlgorithmEventHistory;
 import jaicore.graphvisualizer.events.recorder.AlgorithmEventHistoryPuller;
 import jaicore.graphvisualizer.events.recorder.AlgorithmEventHistoryRecorder;
-import jaicore.graphvisualizer.plugin.GUIPlugin;
 import jaicore.graphvisualizer.plugin.IGUIPlugin;
 import jaicore.graphvisualizer.plugin.controlbar.ControlBarGUIPlugin;
 import jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
@@ -149,7 +148,7 @@ public class GraphVisualizationWindow implements Runnable {
 	}
 
 	private void initializePlugins() {
-		for (GUIPlugin plugin : visualizationPlugins) {
+		for (IGUIPlugin plugin : visualizationPlugins) {
 			Tab pluginTab = new Tab(plugin.getView().getTitle(), plugin.getView().getNode());
 			pluginTabPane.getTabs().add(pluginTab);
 		}

@@ -61,7 +61,7 @@ public abstract class ASimpleMVCPlugin<M extends ASimpleMVCPluginModel<V, C>, V 
 	}
 
 	@Override
-	public void setGraphEventSource(AlgorithmEventSource graphEventSource) {
+	public void setAlgorithmEventSource(AlgorithmEventSource graphEventSource) {
 		graphEventSource.registerListener(controller);
 	}
 

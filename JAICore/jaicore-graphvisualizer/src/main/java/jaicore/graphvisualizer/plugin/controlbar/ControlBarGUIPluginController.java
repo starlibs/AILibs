@@ -3,9 +3,9 @@ package jaicore.graphvisualizer.plugin.controlbar;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.graphvisualizer.events.graph.bus.HandleAlgorithmEventException;
 import jaicore.graphvisualizer.events.gui.GUIEvent;
-import jaicore.graphvisualizer.plugin.GUIPluginController;
+import jaicore.graphvisualizer.plugin.IGUIPluginController;
 
-public class ControlBarGUIPluginController implements GUIPluginController {
+public class ControlBarGUIPluginController implements IGUIPluginController {
 
 	private ControlBarGUIPluginModel model;
 
