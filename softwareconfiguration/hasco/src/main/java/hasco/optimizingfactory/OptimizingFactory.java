@@ -14,8 +14,8 @@ import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.algorithm.AAlgorithm;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
-import jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 
 public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C extends EvaluatedSoftwareConfigurationSolution<V>, V extends Comparable<V>> extends AAlgorithm<OptimizingFactoryProblem<P, T, V>, T> {
@@ -36,20 +36,28 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C e
 		this.factoryForOptimizationAlgorithm = factoryForOptimizationAlgorithm;
 		this.factoryForOptimizationAlgorithm.setProblemInput(this.getInput().getConfigurationProblem());
 		this.optimizer = this.factoryForOptimizationAlgorithm.getAlgorithm();
+		
+		/* initialize optimizer */
+		if (this.optimizer instanceof ILoggingCustomizable && this.loggerName != null) {
+			this.logger.info("Switching the logger name of the actually used optimizer to {}", this.loggerName);
+			this.optimizer.setLoggerName(loggerName + ".optimizer");
+		}
+		this.optimizer.registerListener(new Object() {
+			@Subscribe
+			public void receiveAlgorithmEvent(AlgorithmEvent event) {
+				if (!(event instanceof AlgorithmInitializedEvent || event instanceof AlgorithmFinishedEvent))
+					post(event);
+			}
+		});
+		while (!(this.optimizer.next() instanceof AlgorithmInitializedEvent)) {
+			;
+		}
 	}
 
 	@Override
 	public AlgorithmEvent nextWithException() throws AlgorithmException, InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {
 		switch (this.getState()) {
 		case created: {
-			if (this.optimizer instanceof ILoggingCustomizable && this.loggerName != null) {
-				this.logger.info("Switching the logger name of the actually used optimizer to {}", this.loggerName);
-				this.optimizer.setLoggerName(loggerName + ".optimizer");
-			}
-			this.optimizer.registerListener(this);
-			while (!(this.optimizer.next() instanceof AlgorithmInitializedEvent)) {
-				;
-			}
 			return activate();
 		}
 		case active: {
@@ -73,11 +81,6 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C e
 			this.nextWithException();
 		}
 		return this.constructedObject;
-	}
-
-	@Subscribe
-	public void receiveSolutionEvent(final SolutionCandidateFoundEvent<?> event) {
-		this.post(event);
 	}
 
 	/**

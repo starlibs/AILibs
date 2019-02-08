@@ -26,6 +26,8 @@ public class AlternativeNodeEvaluator<T, V extends Comparable<V>> extends Decora
 
 	public AlternativeNodeEvaluator(final INodeEvaluator<T, V> ne1, final INodeEvaluator<T, V> ne2) {
 		super(ne2);
+		if (ne1 == null)
+			throw new IllegalArgumentException("The alternativ evaluator in node evaluator must not be null!");
 		this.ne1 = ne1;
 	}
 

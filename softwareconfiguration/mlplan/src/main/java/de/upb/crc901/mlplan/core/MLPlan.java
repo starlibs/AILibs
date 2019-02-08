@@ -1,4 +1,4 @@
-package de.upb.crc901.mlplan.multiclass.core;
+package de.upb.crc901.mlplan.core;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,6 +16,7 @@ import de.upb.crc901.mlpipeline_evaluation.CacheEvaluatorMeasureBridge;
 import de.upb.crc901.mlplan.multiclass.MLPlanClassifierConfig;
 import hasco.core.HASCOFactory;
 import hasco.core.HASCOSolutionCandidate;
+import hasco.events.HASCOSolutionEvent;
 import hasco.exceptions.ComponentInstantiationFailedException;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
@@ -30,8 +31,8 @@ import jaicore.basic.MathExt;
 import jaicore.basic.algorithm.AAlgorithm;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
-import jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.ml.WekaUtil;
@@ -65,7 +66,8 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 	public MLPlan(MLPlanBuilder builder, final Instances data) throws IOException {
 		super(builder.getAlgorithmConfig(), data);
 		this.builder = builder;
-		
+		builder.prepareNodeEvaluatorInFactoryWithData(data);
+
 		/* sanity checks */
 		logger.info("Starting an ML-Plan instance.");
 		if (builder.getSearchSpaceConfigFile() == null || !builder.getSearchSpaceConfigFile().exists())
@@ -174,8 +176,26 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 		this.twoPhaseHASCOFactory.setConfig(this.getConfig());
 		this.optimizingFactory = new OptimizingFactory<>(optimizingFactoryProblem, this.twoPhaseHASCOFactory);
 		this.logger.info("Setting logger directive of {} to {}", this.optimizingFactory, this.loggerName + ".2phasehasco");
+		this.optimizingFactory.registerListener(new Object() {
+			
+			@Subscribe
+			public void receiveEventFromFactory(AlgorithmEvent event) {
+				if (!(event instanceof AlgorithmInitializedEvent || event instanceof AlgorithmFinishedEvent))
+					post(event);
+				post(event);
+				if (event instanceof HASCOSolutionEvent) {
+					@SuppressWarnings("unchecked")
+					HASCOSolutionCandidate<Double> solution = ((HASCOSolutionEvent<Double>) event).getSolutionCandidate();
+					try {
+						logger.info("Received new solution {} with score {} and evaluation time {}ms", builder.getClassifierFactory().getComponentInstantiation(solution.getComponentInstance()),
+								solution.getScore(), solution.getTimeToEvaluateCandidate());
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		});
 		this.optimizingFactory.setTimeout(this.getTimeout());
-		this.optimizingFactory.registerListener(this);
 		logger.info("Initializing the optimization factory.");
 		this.optimizingFactory.init();
 	}
@@ -184,7 +204,7 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 	public AlgorithmEvent nextWithException() throws AlgorithmException, InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {
 		switch (this.getState()) {
 		case created: {
-			AlgorithmInitializedEvent event = this.activate(); 
+			AlgorithmInitializedEvent event = this.activate();
 			logger.info("Started and activated ML-Plan.");
 			return event;
 		}
@@ -224,20 +244,13 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 		this.loggerName = name;
 		this.logger.info("Switching logger name to {}", name);
 		this.logger = LoggerFactory.getLogger(name);
+		this.logger.info("Activated ML-Plan logger {}. Now setting logger of twoPhaseHASCO to {}.2phasehasco", name, name);
 		this.optimizingFactory.setLoggerName(this.loggerName + ".2phasehasco");
 		this.logger.info("Switched ML-Plan logger to {}", name);
 	}
 
 	public void setPortionOfDataForPhase2(final float portion) {
 		this.getConfig().setProperty(MLPlanClassifierConfig.SELECTION_PORTION, String.valueOf(portion));
-	}
-
-	public void activateVisualization() {
-		this.getConfig().setProperty(MLPlanClassifierConfig.K_VISUALIZE, String.valueOf(true));
-	}
-
-	public void deactivateVisualization() {
-		this.getConfig().setProperty(MLPlanClassifierConfig.K_VISUALIZE, String.valueOf(false));
 	}
 
 	@Override
@@ -270,29 +283,13 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 		this.getConfig().setProperty(MLPlanClassifierConfig.K_RANDOM_SEED, String.valueOf(seed));
 	}
 
-	@Subscribe
-	public void receiveSolutionEvent(final SolutionCandidateFoundEvent<HASCOSolutionCandidate<Double>> event) {
-		HASCOSolutionCandidate<Double> solution = event.getSolutionCandidate();
-		try {
-			this.logger.info("Received new solution {} with score {} and evaluation time {}ms", this.builder.getClassifierFactory().getComponentInstantiation(solution.getComponentInstance()),
-					solution.getScore(), solution.getTimeToEvaluateCandidate());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		this.post(event);
-	}
-
-	public void registerListenerForSolutionEvaluations(final Object listener) {
-		this.registerListener(listener);
-	}
-
 	public Classifier getSelectedClassifier() {
 		return this.selectedClassifier;
 	}
 
 	@SuppressWarnings("unchecked")
 	public GraphGenerator<TFDNode, String> getGraphGenerator() {
-		return ((TwoPhaseHASCO<? extends GraphSearchInput<TFDNode, String>, TFDNode, String>)optimizingFactory.getOptimizer()).getGraphGenerator();
+		return ((TwoPhaseHASCO<? extends GraphSearchInput<TFDNode, String>, TFDNode, String>) optimizingFactory.getOptimizer()).getGraphGenerator();
 	}
 
 	public double getInternalValidationErrorOfSelectedClassifier() {

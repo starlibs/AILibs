@@ -11,7 +11,6 @@ public class HASCOViaFDAndBlindBestFirstTester extends HASCOTester<GraphSearchWi
 	public HASCOFactory<GraphSearchWithSubpathEvaluationsInput<TFDNode, String, Double>, TFDNode, String, Double> getFactory() {
 		HASCOViaFDAndBestFirstFactory<Double> factory = new HASCOViaFDAndBestFirstFactory<>();
 		factory.setNodeEvaluator(n -> 0.0);
-		factory.setVisualizationEnabled(false);
 		return factory;
 	}
 }

@@ -9,8 +9,6 @@ public class HASCOViaFDAndBestFirstWithRandomCompletionsTester extends HASCOTest
 
 	@Override
 	public HASCOFactory<GraphSearchWithSubpathEvaluationsInput<TFDNode, String, Double>, TFDNode, String, Double> getFactory() {
-		HASCOViaFDAndBestFirstWithRandomCompletionsFactory factory = new HASCOViaFDAndBestFirstWithRandomCompletionsFactory();
-		factory.setVisualizationEnabled(false);
-		return factory;
+		return new HASCOViaFDAndBestFirstWithRandomCompletionsFactory();
 	}
 }
