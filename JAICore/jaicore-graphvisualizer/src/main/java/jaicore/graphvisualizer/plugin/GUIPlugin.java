@@ -11,7 +11,7 @@ public interface GUIPlugin {
 
 	public GUIPluginView getView();
 
-	public void setGraphEventSource(AlgorithmEventSource graphEventSource);
+	public void setAlgorithmEventSource(AlgorithmEventSource graphEventSource);
 
 	public void setGUIEventSource(GUIEventSource guiEventSource);
 

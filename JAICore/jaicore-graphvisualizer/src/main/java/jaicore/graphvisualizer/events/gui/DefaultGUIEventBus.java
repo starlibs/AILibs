@@ -1,16 +1,17 @@
 package jaicore.graphvisualizer.events.gui;
 
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 public class DefaultGUIEventBus implements GUIEventBus {
 
 	private static DefaultGUIEventBus singletonInstance;
 
-	private Set<GUIEventListener> guiEventListeners;
+	private List<GUIEventListener> guiEventListeners;
 
 	private DefaultGUIEventBus() {
-		guiEventListeners = ConcurrentHashMap.newKeySet();
+		guiEventListeners = Collections.synchronizedList(new LinkedList<>());
 	}
 
 	@Override

@@ -1,4 +1,4 @@
-package hasco.gui.statsplugin;
+package jaicore.graphvisualizer.plugin.controlbar;
 
 import jaicore.graphvisualizer.events.graph.bus.AlgorithmEventSource;
 import jaicore.graphvisualizer.events.gui.GUIEventSource;
@@ -7,15 +7,14 @@ import jaicore.graphvisualizer.plugin.GUIPluginController;
 import jaicore.graphvisualizer.plugin.GUIPluginModel;
 import jaicore.graphvisualizer.plugin.GUIPluginView;
 
-public class HASCOModelStatisticsPlugin implements GUIPlugin {
+public class ControlBarGUIPlugin implements GUIPlugin {
 
-	private final HASCOModelStatisticsPluginController controller;
-	private final HASCOModelStatisticsPluginView view;
+	private ControlBarGUIPluginController controller;
+	private ControlBarGUIPluginView view;
 
-	public HASCOModelStatisticsPlugin() {
-		super();
-		this.view = new HASCOModelStatisticsPluginView();
-		this.controller = new HASCOModelStatisticsPluginController(view.getModel());
+	public ControlBarGUIPlugin() {
+		view = new ControlBarGUIPluginView();
+		controller = new ControlBarGUIPluginController(view.getModel());
 	}
 
 	@Override

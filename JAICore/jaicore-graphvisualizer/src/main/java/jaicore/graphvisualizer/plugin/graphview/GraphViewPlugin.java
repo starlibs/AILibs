@@ -33,7 +33,7 @@ public class GraphViewPlugin implements GUIPlugin {
 	}
 
 	@Override
-	public void setGraphEventSource(AlgorithmEventSource graphEventSource) {
+	public void setAlgorithmEventSource(AlgorithmEventSource graphEventSource) {
 		graphEventSource.registerListener(controller);
 	}
 

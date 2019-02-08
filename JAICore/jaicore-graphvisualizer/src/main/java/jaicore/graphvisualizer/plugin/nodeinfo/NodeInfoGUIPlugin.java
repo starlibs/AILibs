@@ -33,7 +33,7 @@ public class NodeInfoGUIPlugin<N> implements GUIPlugin {
 	}
 
 	@Override
-	public void setGraphEventSource(AlgorithmEventSource graphEventSource) {
+	public void setAlgorithmEventSource(AlgorithmEventSource graphEventSource) {
 		graphEventSource.registerListener(controller);
 	}
 
@@ -41,5 +41,4 @@ public class NodeInfoGUIPlugin<N> implements GUIPlugin {
 	public void setGUIEventSource(GUIEventSource guiEventSource) {
 		guiEventSource.registerListener(controller);
 	}
-
 }

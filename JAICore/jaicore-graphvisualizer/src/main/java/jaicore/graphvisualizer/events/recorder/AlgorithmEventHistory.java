@@ -55,6 +55,10 @@ public class AlgorithmEventHistory implements AlgorithmEventSource {
 		return firstHistoryEntryOptional.get().getTimeEventWasReceived();
 	}
 
+	public AlgorithmEventHistoryEntry getEntryAtTimeStep(int timestep) {
+		return events.get(timestep);
+	}
+
 	public long getLength() {
 		return events.size();
 	}
