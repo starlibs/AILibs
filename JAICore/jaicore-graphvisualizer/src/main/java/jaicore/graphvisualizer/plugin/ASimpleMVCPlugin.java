@@ -11,7 +11,7 @@ import jaicore.graphvisualizer.events.gui.GUIEventSource;
 
 public abstract class ASimpleMVCPlugin<M extends ASimpleMVCPluginModel<V, C>, V extends ASimpleMVCPluginView<M, C>, C extends ASimpleMVCPluginController<M, V>> implements IGUIPlugin {
 
-	private final Logger logger = LoggerFactory.getLogger(ASimpleMVCPlugin.class); 
+	private final Logger logger = LoggerFactory.getLogger(ASimpleMVCPlugin.class);
 	private final M model;
 	private final V view;
 	private final C controller;
@@ -29,6 +29,7 @@ public abstract class ASimpleMVCPlugin<M extends ASimpleMVCPluginModel<V, C>, V 
 			model = modelClass.newInstance();
 			view = viewClass.getDeclaredConstructor(modelClass).newInstance(model);
 			controller = controllerClass.getDeclaredConstructor(modelClass, viewClass).newInstance(model, view);
+			controller.start();
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Could not initialize {} due to exception in building MVC.", this);

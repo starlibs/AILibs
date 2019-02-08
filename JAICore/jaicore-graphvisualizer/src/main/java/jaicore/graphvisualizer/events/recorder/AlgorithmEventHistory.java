@@ -1,6 +1,7 @@
 package jaicore.graphvisualizer.events.recorder;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -22,7 +23,7 @@ public class AlgorithmEventHistory implements AlgorithmEventSource {
 	private List<AlgorithmEventHistoryEntry> events;
 
 	public AlgorithmEventHistory() {
-		events = new ArrayList<>();
+		events = Collections.synchronizedList(new ArrayList<>());
 		algorithmEventListeners = ConcurrentHashMap.newKeySet();
 	}
 
