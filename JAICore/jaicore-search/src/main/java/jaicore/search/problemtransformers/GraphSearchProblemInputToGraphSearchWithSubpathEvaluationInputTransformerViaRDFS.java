@@ -3,14 +3,12 @@ package jaicore.search.problemtransformers;
 import java.util.Random;
 import java.util.function.Predicate;
 
-import jaicore.basic.algorithm.AlgorithmProblemTransformer;
-import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator;
-import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 import jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
+import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 
-public class GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS<N, A, V extends Comparable<V>> implements AlgorithmProblemTransformer<GraphSearchWithPathEvaluationsInput<N, A, V>, GraphSearchWithSubpathEvaluationsInput<N, A, V>> {
+public class GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS<N, A, V extends Comparable<V>> extends GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformer<N, A, V> {
 
 	private final INodeEvaluator<N, V> preferredNodeEvaluator;
 	private final Predicate<N> prioritizedNodesInRandomCompletion;
@@ -47,8 +45,8 @@ public class GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTrans
 
 	@Override
 	public GraphSearchWithSubpathEvaluationsInput<N, A, V> transform(GraphSearchWithPathEvaluationsInput<N, A, V> problem) {
-		RandomCompletionBasedNodeEvaluator<N, V> rc = new RandomCompletionBasedNodeEvaluator<>(new Random(seed), numSamples, problem.getPathEvaluator(), timeoutForSingleCompletionEvaluationInMS, timeoutForNodeEvaluationInMS, prioritizedNodesInRandomCompletion);
-		return new GraphSearchWithSubpathEvaluationsInput<>(problem.getGraphGenerator(), new AlternativeNodeEvaluator<>(preferredNodeEvaluator, rc));
+		setNodeEvaluator(new RandomCompletionBasedNodeEvaluator<>(new Random(seed), numSamples, problem.getPathEvaluator(), timeoutForSingleCompletionEvaluationInMS, timeoutForNodeEvaluationInMS, prioritizedNodesInRandomCompletion));
+		return super.transform(problem);
 	}
 
 }

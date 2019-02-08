@@ -44,12 +44,14 @@ import jaicore.graphvisualizer.events.graph.NodeParentSwitchEvent;
 import jaicore.graphvisualizer.events.graph.NodeRemovedEvent;
 import jaicore.graphvisualizer.events.graph.NodeTypeSwitchEvent;
 import jaicore.logging.LoggerUtil;
+import jaicore.logging.ToJSONStringUtil;
 import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.NodeAnnotationEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.NodeExpansionCompletedEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.NodeExpansionJobSubmittedEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.SolutionAnnotationEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.SuccessorComputationCompletedEvent;
+import jaicore.search.algorithms.standard.bestfirst.exceptions.ControlledNodeEvaluationException;
 import jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.DecoratingNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.ICancelableNodeEvaluator;
@@ -243,7 +245,14 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 					newNode.setAnnotation("fError", e);
 					BestFirst.this.post(new NodeTypeSwitchEvent<>(newNode, "or_timedout"));
 					return;
-				} catch (Throwable e) {
+				}
+				catch (ControlledNodeEvaluationException e) {
+					logger.debug("Node evaluation failed with a controlled exception.");
+					newNode.setAnnotation("fError", e);
+					BestFirst.this.post(new NodeTypeSwitchEvent<>(newNode, "or_ffail"));
+					return;
+				}
+				catch (Throwable e) {
 					BestFirst.this.logger.error("Observed an exception during computation of f:\n{}", LoggerUtil.getExceptionInfo(e));
 					newNode.setAnnotation("fError", e);
 					BestFirst.this.post(new NodeTypeSwitchEvent<>(newNode, "or_ffail"));
@@ -1218,5 +1227,13 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 	@Override
 	public IBestFirstConfig getConfig() {
 		return (IBestFirstConfig) super.getConfig();
+	}
+
+	@Override
+	public String toString() {
+		Map<String, Object> fields = new HashMap<>();
+		fields.put("graphGenerator", this.graphGenerator);
+		fields.put("nodeEvaluator", this.nodeEvaluator);
+		return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
 	}
 }

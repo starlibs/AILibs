@@ -7,8 +7,8 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import de.upb.crc901.mlpipeline_evaluation.PerformanceDBAdapter;
-import de.upb.crc901.mlplan.multiclass.core.MLPlan;
-import de.upb.crc901.mlplan.multiclass.core.MLPlanBuilder;
+import de.upb.crc901.mlplan.core.MLPlan;
+import de.upb.crc901.mlplan.core.MLPlanBuilder;
 import jaicore.basic.SQLAdapter;
 import jaicore.ml.WekaUtil;
 import jaicore.ml.cache.ReproducibleInstances;

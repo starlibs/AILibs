@@ -5,10 +5,21 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
 
-import de.upb.crc901.mlplan.multiclass.core.MLPlan;
-import de.upb.crc901.mlplan.multiclass.core.MLPlanBuilder;
+import com.google.common.eventbus.Subscribe;
+
+import de.upb.crc901.mlplan.core.MLPlan;
+import de.upb.crc901.mlplan.core.MLPlanBuilder;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
+import hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
+import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
+import jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
+import jaicore.graphvisualizer.window.GraphVisualizationWindow;
 import jaicore.ml.WekaUtil;
+import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNodeInfoGenerator;
+import jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
+import javafx.application.Platform;
+import javafx.embed.swing.JFXPanel;
 import weka.classifiers.Classifier;
 import weka.classifiers.evaluation.Evaluation;
 import weka.core.Instances;
@@ -18,7 +29,7 @@ public class MLPlanARFFExample {
 	public static void main(final String[] args) throws Exception {
 
 		/* load data for segment dataset and create a train-test-split */
-		Instances data = new Instances(new FileReader("../../../datasets/classification/multi-class/car.arff"));
+		Instances data = new Instances(new FileReader("testrsc/car.arff"));
 		data.setClassIndex(data.numAttributes() - 1);
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, 0, .7f);
 
@@ -30,7 +41,11 @@ public class MLPlanARFFExample {
 		mlplan.setTimeoutForNodeEvaluation(15);
 		mlplan.setTimeoutForSingleSolutionEvaluation(15);
 		mlplan.setNumCPUs(8);
-//		mlplan.activateVisualization();
+		
+		/* open visualization */
+		new JFXPanel();
+		Platform.runLater(new GraphVisualizationWindow(mlplan, new GraphViewPlugin(), new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new HASCOModelStatisticsPlugin()));
+		
 		try {
 			long start = System.currentTimeMillis();
 			Classifier optimizedClassifier = mlplan.call();

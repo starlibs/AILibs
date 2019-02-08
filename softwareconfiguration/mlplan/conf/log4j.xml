@@ -59,8 +59,17 @@
    <level value="trace" />
   </logger>
   
+  <logger name="hasco">
+    <level value="warn" />
+    <appender-ref ref="console" />
+    <appender-ref ref="infoFileAppender" />
+    <appender-ref ref="warnFileAppender" />
+    <appender-ref ref="errFileAppender" />
+    <appender-ref ref="traceFileAppender" />
+  </logger>
+  
   <logger name="mlplan">
-    <level value="info" />
+    <level value="warn" />
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />
     <appender-ref ref="warnFileAppender" />
@@ -78,4 +87,7 @@
     <appender-ref ref="traceFileAppender" />
   </logger>
 
+  <logger name="mlplan.2phasehasco">
+    <level value="warn" />
+  </logger>
 </log4j:configuration>
