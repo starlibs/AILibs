@@ -1,4 +1,4 @@
-package hasco.ciview;
+package hasco.gui.civiewplugin;
 
 import java.util.Collection;
 import java.util.Map.Entry;
@@ -11,6 +11,11 @@ import jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGenerator;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import jaicore.search.model.travesaltree.Node;
 
+/**
+ * This info generator is meant to be used in combination with the node info plug-in.
+ *
+ * @author wever
+ */
 public class TFDNodeAsCIViewInfoGenerator implements NodeInfoGenerator<Node<TFDNode, Double>> {
 
 	private Collection<Component> components;
