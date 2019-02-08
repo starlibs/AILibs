@@ -10,6 +10,7 @@ import jaicore.graphvisualizer.events.recorder.AlgorithmEventHistory;
 import jaicore.graphvisualizer.events.recorder.AlgorithmEventHistoryPuller;
 import jaicore.graphvisualizer.events.recorder.AlgorithmEventHistoryRecorder;
 import jaicore.graphvisualizer.plugin.GUIPlugin;
+import jaicore.graphvisualizer.plugin.IGUIPlugin;
 import jaicore.graphvisualizer.plugin.controlbar.ControlBarGUIPlugin;
 import jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
 import jaicore.graphvisualizer.plugin.timeslider.TimeSliderGUIPlugin;
@@ -29,7 +30,7 @@ public class GraphVisualizationWindow implements Runnable {
 	private AlgorithmEventSource graphEventSource;
 	private AlgorithmEventHistoryPuller algorithmEventHistoryPuller;
 
-	private List<GUIPlugin> visualizationPlugins;
+	private List<IGUIPlugin> visualizationPlugins;
 	private GraphViewPlugin graphViewPlugin;
 	private TimeSliderGUIPlugin timeSliderGUIPlugin;
 	private ControlBarGUIPlugin controlBarGUIPlugin;
@@ -40,7 +41,7 @@ public class GraphVisualizationWindow implements Runnable {
 	private BorderPane rootLayout;
 	private BorderPane topLayout;
 
-	public GraphVisualizationWindow(AlgorithmEventHistory algorithmEventHistory, GraphViewPlugin graphViewPlugin, GUIPlugin... visualizationPlugins) {
+	public GraphVisualizationWindow(AlgorithmEventHistory algorithmEventHistory, GraphViewPlugin graphViewPlugin, IGUIPlugin... visualizationPlugins) {
 		algorithmEventHistoryPuller = new AlgorithmEventHistoryPuller(algorithmEventHistory, 10);
 		this.graphEventSource = algorithmEventHistoryPuller;
 		initializePlugins(algorithmEventHistory, graphViewPlugin, visualizationPlugins);
@@ -48,7 +49,7 @@ public class GraphVisualizationWindow implements Runnable {
 		DefaultGUIEventBus.getInstance().registerListener(algorithmEventHistoryPuller);
 	}
 
-	public GraphVisualizationWindow(IAlgorithm<?, ?> algorithm, GraphViewPlugin graphViewPlugin, GUIPlugin... visualizationPlugins) {
+	public GraphVisualizationWindow(IAlgorithm<?, ?> algorithm, GraphViewPlugin graphViewPlugin, IGUIPlugin... visualizationPlugins) {
 		AlgorithmEventHistoryRecorder historyRecorder = new AlgorithmEventHistoryRecorder();
 		algorithmEventHistoryPuller = new AlgorithmEventHistoryPuller(historyRecorder.getHistory(), 10);
 		this.graphEventSource = algorithmEventHistoryPuller;
@@ -58,7 +59,7 @@ public class GraphVisualizationWindow implements Runnable {
 		DefaultGUIEventBus.getInstance().registerListener(algorithmEventHistoryPuller);
 	}
 
-	private void initializePlugins(AlgorithmEventSource algorithmEventSource, GraphViewPlugin graphViewPlugin, GUIPlugin... visualizationPlugins) {
+	private void initializePlugins(AlgorithmEventSource algorithmEventSource, GraphViewPlugin graphViewPlugin, IGUIPlugin... visualizationPlugins) {
 		this.graphViewPlugin = graphViewPlugin;
 		graphViewPlugin.setAlgorithmEventSource(algorithmEventSource);
 		graphViewPlugin.setGUIEventSource(DefaultGUIEventBus.getInstance());
@@ -72,7 +73,7 @@ public class GraphVisualizationWindow implements Runnable {
 		controlBarGUIPlugin.setGUIEventSource(DefaultGUIEventBus.getInstance());
 
 		this.visualizationPlugins = new ArrayList<>(visualizationPlugins.length);
-		for (GUIPlugin graphVisualizationPlugin : visualizationPlugins) {
+		for (IGUIPlugin graphVisualizationPlugin : visualizationPlugins) {
 			this.visualizationPlugins.add(graphVisualizationPlugin);
 			graphVisualizationPlugin.setAlgorithmEventSource(algorithmEventSource);
 			graphVisualizationPlugin.setGUIEventSource(DefaultGUIEventBus.getInstance());

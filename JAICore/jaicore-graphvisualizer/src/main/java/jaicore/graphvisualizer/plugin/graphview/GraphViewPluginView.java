@@ -5,11 +5,11 @@ import org.graphstream.ui.fx_viewer.FxViewer;
 import org.graphstream.ui.view.Viewer.ThreadingModel;
 import org.graphstream.ui.view.ViewerPipe;
 
-import jaicore.graphvisualizer.plugin.GUIPluginView;
+import jaicore.graphvisualizer.plugin.IGUIPluginView;
 import javafx.scene.Node;
 import javafx.scene.layout.BorderPane;
 
-public class GraphViewPluginView implements GUIPluginView {
+public class GraphViewPluginView implements IGUIPluginView {
 
 	private GraphViewPluginModel model;
 

@@ -12,9 +12,9 @@ import org.graphstream.graph.IdAlreadyInUseException;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.SingleGraph;
 
-import jaicore.graphvisualizer.plugin.GUIPluginModel;
+import jaicore.graphvisualizer.plugin.IGUIPluginModel;
 
-public class GraphViewPluginModel implements GUIPluginModel {
+public class GraphViewPluginModel implements IGUIPluginModel {
 
 	private int nodeIdCounter;
 

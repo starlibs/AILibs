@@ -11,11 +11,15 @@ import jaicore.graphvisualizer.events.graph.NodeRemovedEvent;
 import jaicore.graphvisualizer.events.graph.NodeTypeSwitchEvent;
 import jaicore.graphvisualizer.events.graph.bus.HandleAlgorithmEventException;
 import jaicore.graphvisualizer.events.gui.GUIEvent;
+<<<<<<< Upstream, based on origin/dev
 import jaicore.graphvisualizer.plugin.GUIPluginController;
 import jaicore.graphvisualizer.plugin.controlbar.ResetEvent;
 import jaicore.graphvisualizer.plugin.timeslider.GoToTimeStepEvent;
+=======
+import jaicore.graphvisualizer.plugin.IGUIPluginController;
+>>>>>>> 5ddfd54 Created a simple abstract class set for the MVC pattern
 
-public class GraphViewPluginController implements GUIPluginController {
+public class GraphViewPluginController implements IGUIPluginController {
 
 	private GraphViewPluginModel model;
 

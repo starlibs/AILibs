@@ -9,7 +9,7 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import hasco.events.HASCOSolutionEvent;
 import hasco.model.UnparametrizedComponentInstance;
-import jaicore.graphvisualizer.plugin.GUIPluginModel;
+import jaicore.graphvisualizer.plugin.ASimpleMVCPluginModel;
 
 /**
  * 
@@ -18,22 +18,16 @@ import jaicore.graphvisualizer.plugin.GUIPluginModel;
  * @param <N>
  *            The node type class.
  */
-public class HASCOModelStatisticsPluginModel implements GUIPluginModel {
+public class HASCOModelStatisticsPluginModel extends ASimpleMVCPluginModel<HASCOModelStatisticsPluginView, HASCOModelStatisticsPluginController> {
 
-	private final HASCOModelStatisticsPluginView view;
 	private final Map<UnparametrizedComponentInstance, List<HASCOSolutionEvent<Double>>> observedSolutionsGroupedByModuloParameters = new HashMap<>();
 	
-	public HASCOModelStatisticsPluginModel(HASCOModelStatisticsPluginView view) {
-		super();
-		this.view = view;
-	}
-
 	public final void addEntry(HASCOSolutionEvent<Double> solutionEvent) {
 		UnparametrizedComponentInstance comp = new UnparametrizedComponentInstance(solutionEvent.getSolutionCandidate().getComponentInstance());
 		if (!observedSolutionsGroupedByModuloParameters.containsKey(comp))
 			observedSolutionsGroupedByModuloParameters.put(comp, new ArrayList<>());
 		observedSolutionsGroupedByModuloParameters.get(comp).add(solutionEvent);
-		view.update();
+		getView().update();
 	}
 	
 	public Map<UnparametrizedComponentInstance, List<HASCOSolutionEvent<Double>>> getObservedSolutionsGroupedByModuloParameters() {

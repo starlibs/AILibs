@@ -2,7 +2,7 @@ package jaicore.graphvisualizer.plugin;
 
 import javafx.scene.Node;
 
-public interface GUIPluginView {
+public interface IGUIPluginView {
 
 	public Node getNode();
 

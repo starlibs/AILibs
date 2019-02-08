@@ -1,6 +1,6 @@
 package jaicore.graphvisualizer.plugin.nodeinfo;
 
-import jaicore.graphvisualizer.plugin.GUIPluginView;
+import jaicore.graphvisualizer.plugin.IGUIPluginView;
 import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.web.WebEngine;
@@ -13,7 +13,7 @@ import javafx.scene.web.WebView;
  * @param <N>
  *            The node class
  */
-public class NodeInfoGUIPluginView<N> implements GUIPluginView {
+public class NodeInfoGUIPluginView<N> implements IGUIPluginView {
 
 	private NodeInfoGUIPluginModel<N> model;
 	private NodeInfoGenerator<N> nodeInfoGenerator;

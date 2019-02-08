@@ -5,21 +5,19 @@ import hasco.events.HASCOSolutionEvent;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.graphvisualizer.events.graph.bus.HandleAlgorithmEventException;
 import jaicore.graphvisualizer.events.gui.GUIEvent;
-import jaicore.graphvisualizer.plugin.GUIPluginController;
+import jaicore.graphvisualizer.plugin.ASimpleMVCPluginController;
 
-public class HASCOModelStatisticsPluginController implements GUIPluginController {
+public class HASCOModelStatisticsPluginController extends ASimpleMVCPluginController<HASCOModelStatisticsPluginModel, HASCOModelStatisticsPluginView> {
 
-	private HASCOModelStatisticsPluginModel model;
-
-	public HASCOModelStatisticsPluginController(HASCOModelStatisticsPluginModel model) {
-		this.model = model;
+	public HASCOModelStatisticsPluginController(HASCOModelStatisticsPluginModel model, HASCOModelStatisticsPluginView view) {
+		super(model, view);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public void handleAlgorithmEvent(AlgorithmEvent algorithmEvent) throws HandleAlgorithmEventException {
 		if (algorithmEvent instanceof HASCOSolutionEvent) {
-			model.addEntry((HASCOSolutionEvent<Double>)algorithmEvent);
+			getModel().addEntry((HASCOSolutionEvent<Double>)algorithmEvent);
 		}
 	}
 
