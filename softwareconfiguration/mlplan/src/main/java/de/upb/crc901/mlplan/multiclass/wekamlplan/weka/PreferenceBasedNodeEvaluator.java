@@ -1,5 +1,6 @@
 package de.upb.crc901.mlplan.multiclass.wekamlplan.weka;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -7,7 +8,6 @@ import java.util.List;
 import hasco.core.Util;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
-import jaicore.ml.WekaUtil;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.model.travesaltree.Node;
@@ -21,6 +21,10 @@ public class PreferenceBasedNodeEvaluator implements INodeEvaluator<TFDNode, Dou
 		super();
 		this.components = components;
 		this.ORDERING_OF_CLASSIFIERS = ORDERING_OF_CLASSIFIERS;
+	}
+	
+	public PreferenceBasedNodeEvaluator(final Collection<Component> components) {
+		this (components, new ArrayList<>());
 	}
 
 	@Override
@@ -38,18 +42,19 @@ public class PreferenceBasedNodeEvaluator implements INodeEvaluator<TFDNode, Dou
 
 		/* get partial component */
 		ComponentInstance instance = Util.getSolutionCompositionFromState(this.components, n.getPoint().getState(), false);
-
-		if (instance != null) {
-			ComponentInstance pp = instance.getSatisfactionOfRequiredInterfaces().get("preprocessor");
-			if (pp != null && pp.getComponent().getName().contains("AttributeSelection")) {
-				ComponentInstance search = pp.getSatisfactionOfRequiredInterfaces().get("search");
-				ComponentInstance eval = pp.getSatisfactionOfRequiredInterfaces().get("eval");
-				if (search != null && eval != null) {
-					if (!WekaUtil.isValidPreprocessorCombination(search.getComponent().getName(), eval.getComponent().getName()))
-						throw new IllegalArgumentException("The given combination of searcher and evaluator cannot be benchmarked since they are incompatible.");
-				}
-			}
-		}
+		
+		/* this block should not be necessar */
+//		if (instance != null) {
+//			ComponentInstance pp = instance.getSatisfactionOfRequiredInterfaces().get("preprocessor");
+//			if (pp != null && pp.getComponent().getName().contains("AttributeSelection")) {
+//				ComponentInstance search = pp.getSatisfactionOfRequiredInterfaces().get("search");
+//				ComponentInstance eval = pp.getSatisfactionOfRequiredInterfaces().get("eval");
+//				if (search != null && eval != null) {
+//					if (!WekaUtil.isValidPreprocessorCombination(search.getComponent().getName(), eval.getComponent().getName()))
+//						throw new IllegalArgumentException("The given combination of searcher and evaluator cannot be benchmarked since they are incompatible.");
+//				}
+//			}
+//		}
 
 		boolean isPipeline = appliedMethods.stream().anyMatch(x -> x.toLowerCase().contains("pipeline"));
 		boolean lastMethod = false;

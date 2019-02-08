@@ -1,13 +1,13 @@
 package jaicore.graphvisualizer.plugin.controlbar;
 
 import jaicore.graphvisualizer.events.gui.DefaultGUIEventBus;
-import jaicore.graphvisualizer.plugin.GUIPluginView;
+import jaicore.graphvisualizer.plugin.IGUIPluginView;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Separator;
 import javafx.scene.control.ToolBar;
 
-public class ControlBarGUIPluginView implements GUIPluginView {
+public class ControlBarGUIPluginView implements IGUIPluginView {
 
 	private ControlBarGUIPluginModel model;
 

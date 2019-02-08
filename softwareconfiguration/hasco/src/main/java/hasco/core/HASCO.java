@@ -1,16 +1,16 @@
 package hasco.core;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import org.aeonbits.owner.ConfigFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.eventbus.Subscribe;
 
 import hasco.events.HASCOSolutionEvent;
 import hasco.model.Component;
@@ -72,9 +72,6 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 
 	/* runtime variables of algorithm */
 	private final TimeRecordingEvaluationWrapper<V> timeGrabbingEvaluationWrapper;
-
-	/** Extension: Allow other clients to listen to search events */
-	private final Set<Object> searchListeners = new HashSet<>();
 
 	public HASCO(final RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem, final IHASCOPlanningGraphGeneratorDeriver<N, A> planningGraphGeneratorDeriver,
 			final IOptimalPathInORGraphSearchFactory<ISearch, N, A, V> searchFactory,
@@ -155,10 +152,15 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 						(this.search instanceof ILoggingCustomizable));
 			}
 
-			/* register external listeners */
-			for (Object listener : this.searchListeners) {
-				this.search.registerListener(listener);
-			}
+			/* register a listener on the search that will forward all events to HASCO's event bus */
+			this.search.registerListener(new Object() {
+				
+				@Subscribe
+				public void receiveSearchEvent(AlgorithmEvent event) {
+					if (!(event instanceof AlgorithmInitializedEvent || event instanceof AlgorithmFinishedEvent))
+						post(event);
+				}
+			});
 
 			/* now initialize the search */
 			this.logger.debug("Initializing the search");
@@ -187,7 +189,6 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 
 			/* otherwise, if a solution has been found, we announce this finding to our listeners and memorize if it is a new best candidate */
 			else if (searchEvent instanceof EvaluatedSearchSolutionCandidateFoundEvent) {
-				this.logger.info("Received new solution from search, communicating this solution to the HASCO listeners.");
 				@SuppressWarnings("unchecked")
 				EvaluatedSearchSolutionCandidateFoundEvent<N, A, V> solutionEvent = (EvaluatedSearchSolutionCandidateFoundEvent<N, A, V>) searchEvent;
 				EvaluatedSearchGraphPath<N, A, V> searchPath = solutionEvent.getSolutionCandidate();
@@ -205,6 +206,7 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 				} catch (ObjectEvaluationFailedException e) {
 					throw new AlgorithmException(e, "Could not evaluate component instance.");
 				}
+				this.logger.info("Received new solution with score {} from search, communicating this solution to the HASCO listeners.", score);
 				EvaluatedSearchGraphBasedPlan<V, N> evaluatedPlan = new EvaluatedSearchGraphBasedPlan<>(plan, score, searchPath);
 				HASCOSolutionCandidate<V> solution = new HASCOSolutionCandidate<>(objectInstance, evaluatedPlan,
 						this.timeGrabbingEvaluationWrapper.getEvaluationTimeForComponentInstance(objectInstance));
@@ -224,14 +226,6 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 		}
 	}
 	
-	public void registerListenerForSearch(final Object listener) {
-		this.searchListeners.add(listener);
-	}
-
-	public void removeListenerForSearch(final Object listener) {
-		this.searchListeners.remove(listener);
-	}
-
 	public GraphGenerator<N, A> getGraphGenerator() {
 		return this.searchProblem.getGraphGenerator();
 	}
@@ -284,14 +278,6 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 	@Override
 	public HASCOConfig getConfig() {
 		return (HASCOConfig) super.getConfig();
-	}
-
-	public boolean getVisualization() {
-		return this.getConfig().visualizationEnabled();
-	}
-
-	public void setVisualization(final boolean visualization) {
-		this.getConfig().setProperty(HASCOConfig.K_VISUALIZE, String.valueOf(visualization));
 	}
 
 	public IOptimalPathInORGraphSearchFactory<ISearch, N, A, V> getSearchFactory() {

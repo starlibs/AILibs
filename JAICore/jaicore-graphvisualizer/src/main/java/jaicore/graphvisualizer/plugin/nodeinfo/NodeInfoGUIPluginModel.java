@@ -1,6 +1,6 @@
 package jaicore.graphvisualizer.plugin.nodeinfo;
 
-import jaicore.graphvisualizer.plugin.GUIPluginModel;
+import jaicore.graphvisualizer.plugin.IGUIPluginModel;
 
 /**
  * 
@@ -9,7 +9,7 @@ import jaicore.graphvisualizer.plugin.GUIPluginModel;
  * @param <N>
  *            The node type class.
  */
-public class NodeInfoGUIPluginModel<N> implements GUIPluginModel {
+public class NodeInfoGUIPluginModel<N> implements IGUIPluginModel {
 
 	private NodeInfoGUIPluginView<N> view;
 	private N currentlySelectedNode;

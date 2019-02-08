@@ -14,6 +14,8 @@ public abstract class DecoratingNodeEvaluator<T, V extends Comparable<V>> implem
 
 	public DecoratingNodeEvaluator(final INodeEvaluator<T, V> evaluator) {
 		super();
+		if (evaluator == null)
+			throw new IllegalArgumentException("The decorated evaluator must not be null!");
 		this.evaluator = evaluator;
 	}
 

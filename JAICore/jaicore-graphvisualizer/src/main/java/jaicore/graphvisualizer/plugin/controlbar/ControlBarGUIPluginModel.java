@@ -1,8 +1,8 @@
 package jaicore.graphvisualizer.plugin.controlbar;
 
-import jaicore.graphvisualizer.plugin.GUIPluginModel;
+import jaicore.graphvisualizer.plugin.IGUIPluginModel;
 
-public class ControlBarGUIPluginModel implements GUIPluginModel {
+public class ControlBarGUIPluginModel implements IGUIPluginModel {
 
 	private ControlBarGUIPluginView view;
 

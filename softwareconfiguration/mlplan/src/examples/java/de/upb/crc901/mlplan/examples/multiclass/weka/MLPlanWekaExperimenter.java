@@ -15,13 +15,12 @@ import org.aeonbits.owner.ConfigFactory;
 
 import com.google.common.eventbus.Subscribe;
 
-import de.upb.crc901.mlplan.multiclass.core.MLPlan;
-import de.upb.crc901.mlplan.multiclass.core.MLPlanBuilder;
+import de.upb.crc901.mlplan.core.MLPlan;
+import de.upb.crc901.mlplan.core.MLPlanBuilder;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.WEKAPipelineFactory;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
-import hasco.core.HASCOSolutionCandidate;
+import hasco.events.HASCOSolutionEvent;
 import jaicore.basic.SQLAdapter;
-import jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
 import jaicore.concurrent.TimeoutTimer;
 import jaicore.experiments.ExperimentDBEntry;
 import jaicore.experiments.ExperimentRunner;
@@ -94,7 +93,6 @@ public class MLPlanWekaExperimenter implements IExperimentSetEvaluator {
 		mlplan.setRandomSeed(new Integer(experimentValues.get("seed")));
 		mlplan.setNumCPUs(experimentEntry.getExperiment().getNumCPUs());
 		mlplan.registerListener(this);
-		mlplan.registerListenerForSolutionEvaluations(this);
 
 		print("Build mlplan classifier");
 		Classifier optimizedClassifier = mlplan.call();
@@ -116,7 +114,7 @@ public class MLPlanWekaExperimenter implements IExperimentSetEvaluator {
 	}
 
 	@Subscribe
-	public void rcvHASCOSolutionEvent(final SolutionCandidateFoundEvent<HASCOSolutionCandidate<Double>> e) {
+	public void rcvHASCOSolutionEvent(final HASCOSolutionEvent<Double> e) {
 		if (this.adapter != null) {
 			try {
 				MLPipeline pl = this.factory.getComponentInstantiation(e.getSolutionCandidate().getComponentInstance());

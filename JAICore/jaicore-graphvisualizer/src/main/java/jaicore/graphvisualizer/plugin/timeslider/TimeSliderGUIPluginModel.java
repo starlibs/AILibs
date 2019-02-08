@@ -1,8 +1,8 @@
 package jaicore.graphvisualizer.plugin.timeslider;
 
-import jaicore.graphvisualizer.plugin.GUIPluginModel;
+import jaicore.graphvisualizer.plugin.IGUIPluginModel;
 
-public class TimeSliderGUIPluginModel implements GUIPluginModel {
+public class TimeSliderGUIPluginModel implements IGUIPluginModel {
 
 	private TimeSliderGUIPluginView view;
 

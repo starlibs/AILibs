@@ -7,7 +7,8 @@ import java.util.Map;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import hasco.model.UnparametrizedComponentInstance;
-import jaicore.graphvisualizer.plugin.GUIPluginView;
+import jaicore.graphvisualizer.plugin.ASimpleMVCPluginView;
+import jaicore.graphvisualizer.plugin.IGUIPluginView;
 import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.chart.XYChart.Data;
@@ -20,17 +21,15 @@ import javafx.scene.layout.FlowPane;
  * @param <N>
  *            The node class
  */
-public class HASCOModelStatisticsPluginView implements GUIPluginView {
+public class HASCOModelStatisticsPluginView extends ASimpleMVCPluginView<HASCOModelStatisticsPluginModel, HASCOModelStatisticsPluginController> {
 
-	private HASCOModelStatisticsPluginModel model;
-	
 	private Map<UnparametrizedComponentInstance, Histogram> histograms = new HashMap<>();
 	private FlowPane root = new FlowPane();
     private final int n = 100;
 
-	public HASCOModelStatisticsPluginView() {
-		this.model = new HASCOModelStatisticsPluginModel(this);
-	}
+    public HASCOModelStatisticsPluginView(HASCOModelStatisticsPluginModel model) {
+		super(model);
+	}	
 
 	@Override
 	public Node getNode() {
@@ -41,7 +40,7 @@ public class HASCOModelStatisticsPluginView implements GUIPluginView {
 	public void update() {
 //		StringBuilder sb = new StringBuilder();
 //		sb.append("<ul>");
-		Map<UnparametrizedComponentInstance, DescriptiveStatistics> stats = model.getPerformanceStatisticsPerComposition();
+		Map<UnparametrizedComponentInstance, DescriptiveStatistics> stats = getModel().getPerformanceStatisticsPerComposition();
 		for (UnparametrizedComponentInstance comp : stats.keySet()) {
 			if (!histograms.containsKey(comp)) {
 				Histogram newHist = new Histogram(n);
@@ -91,10 +90,6 @@ public class HASCOModelStatisticsPluginView implements GUIPluginView {
         }
         return histogram;
     }
-
-	public HASCOModelStatisticsPluginModel getModel() {
-		return model;
-	}
 
 	@Override
 	public String getTitle() {

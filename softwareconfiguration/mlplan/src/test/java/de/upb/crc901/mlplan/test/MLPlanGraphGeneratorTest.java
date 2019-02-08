@@ -5,8 +5,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.upb.crc901.mlplan.multiclass.core.MLPlan;
-import de.upb.crc901.mlplan.multiclass.core.MLPlanBuilder;
+import de.upb.crc901.mlplan.core.MLPlan;
+import de.upb.crc901.mlplan.core.MLPlanBuilder;
 import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import jaicore.search.GraphGeneratorTester;

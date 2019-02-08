@@ -42,6 +42,11 @@ public class HASCOViaFDAndBestFirstFactory<V extends Comparable<V>> extends HASC
 		return (StandardBestFirstFactory<TFDNode, String, V>)super.getSearchFactory();
 	}
 	
+	@SuppressWarnings("unchecked")
+	public GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformer<TFDNode, String, V> getSearchProblemTransformer() {
+		return (GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformer<TFDNode, String, V>)super.getSearchProblemTransformer();
+	}
+	
 	@Override
 	public HASCOViaFDAndBestFirst<V> getAlgorithm() {
 		if (getSearchProblemTransformer() == null)

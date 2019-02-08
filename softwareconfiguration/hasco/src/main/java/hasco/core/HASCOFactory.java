@@ -12,7 +12,6 @@ public class HASCOFactory<ISearch extends GraphSearchInput<N, A>, N, A, V extend
 	private IHASCOPlanningGraphGeneratorDeriver<N, A> planningGraphGeneratorDeriver;
 	private IOptimalPathInORGraphSearchFactory<ISearch, N, A, V> searchFactory;
 	private AlgorithmProblemTransformer<GraphSearchWithPathEvaluationsInput<N, A, V>, ISearch> searchProblemTransformer;
-	private boolean visualizationEnabled;
 
 	@Override
 	public <P> void setProblemInput(P problemInput, AlgorithmProblemTransformer<P, RefinementConfiguredSoftwareConfigurationProblem<V>> reducer) {
@@ -34,9 +33,7 @@ public class HASCOFactory<ISearch extends GraphSearchInput<N, A>, N, A, V extend
 			throw new IllegalStateException("Cannot create HASCO, because no search factory has been specified.");
 		if (searchProblemTransformer == null)
 			throw new IllegalStateException("Cannot create HASCO, because no searchProblemTransformer has been specified.");
-		HASCO<ISearch, N, A, V> hasco = new HASCO<>(problem, planningGraphGeneratorDeriver, searchFactory, searchProblemTransformer);
-		hasco.setVisualization(visualizationEnabled);
-		return hasco;
+		return new HASCO<>(problem, planningGraphGeneratorDeriver, searchFactory, searchProblemTransformer);
 	}
 
 	public IHASCOPlanningGraphGeneratorDeriver<N, A> getPlanningGraphGeneratorDeriver() {
@@ -61,13 +58,5 @@ public class HASCOFactory<ISearch extends GraphSearchInput<N, A>, N, A, V extend
 
 	public void setSearchProblemTransformer(AlgorithmProblemTransformer<GraphSearchWithPathEvaluationsInput<N, A, V>, ISearch> searchProblemTransformer) {
 		this.searchProblemTransformer = searchProblemTransformer;
-	}
-
-	public boolean isVisualizationEnabled() {
-		return visualizationEnabled;
-	}
-
-	public void setVisualizationEnabled(boolean visualizationEnabled) {
-		this.visualizationEnabled = visualizationEnabled;
 	}
 }

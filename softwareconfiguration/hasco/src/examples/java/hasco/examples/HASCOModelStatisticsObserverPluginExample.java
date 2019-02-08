@@ -32,8 +32,8 @@ public class HASCOModelStatisticsObserverPluginExample {
 		hasco.setNumCPUs(1);
 		
 		new JFXPanel();
-		Platform.runLater(new GraphVisualizationWindow(hasco, new GraphViewPlugin(), new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new HASCOModelStatisticsPlugin()));
 		
+		Platform.runLater(new GraphVisualizationWindow(hasco, new GraphViewPlugin(), new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new HASCOModelStatisticsPlugin()));
 		
 		HASCOModelStatisticsObserver observer = new HASCOModelStatisticsObserver();
 		hasco.registerListener(observer);

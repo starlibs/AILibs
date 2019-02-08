@@ -1,14 +1,14 @@
 package jaicore.graphvisualizer.plugin.timeslider;
 
 import jaicore.graphvisualizer.events.gui.DefaultGUIEventBus;
-import jaicore.graphvisualizer.plugin.GUIPluginView;
+import jaicore.graphvisualizer.plugin.IGUIPluginView;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.layout.VBox;
 
-public class TimeSliderGUIPluginView implements GUIPluginView {
+public class TimeSliderGUIPluginView implements IGUIPluginView {
 
 	private TimeSliderGUIPluginModel model;
 

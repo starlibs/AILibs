@@ -8,9 +8,9 @@ import java.util.Enumeration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.upb.crc901.mlplan.core.MLPlan;
+import de.upb.crc901.mlplan.core.MLPlanBuilder;
 import de.upb.crc901.mlplan.multiclass.MLPlanClassifierConfig;
-import de.upb.crc901.mlplan.multiclass.core.MLPlan;
-import de.upb.crc901.mlplan.multiclass.core.MLPlanBuilder;
 import hasco.model.Component;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.TimeOut;
