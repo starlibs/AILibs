@@ -83,8 +83,8 @@ public class AlgorithmEventHistoryPuller extends Thread implements AlgorithmEven
 	}
 
 	private void handleGoToTimeStepEvent(GUIEvent guiEvent) {
-		GoToTimeStepEvent goToTimeStepEvent = (GoToTimeStepEvent) guiEvent;
 		resetTimeStep();
+		GoToTimeStepEvent goToTimeStepEvent = (GoToTimeStepEvent) guiEvent;
 		while (timestep < goToTimeStepEvent.getNewTimeStep() && timestep < eventHistory.getLength()) {
 			AlgorithmEvent algorithmEvent = eventHistory.getEntryAtTimeStep(timestep).getAlgorithmEvent();
 			sendAlgorithmEventToListeners(algorithmEvent);

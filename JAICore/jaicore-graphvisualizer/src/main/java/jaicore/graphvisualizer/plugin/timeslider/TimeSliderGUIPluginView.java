@@ -54,8 +54,12 @@ public class TimeSliderGUIPluginView implements GUIPluginView {
 	public void update() {
 		timestepSlider.setValue(model.getCurrentTimeStep());
 		timestepSlider.setMax(model.getMaximumTimeStep());
-		timestepSlider.setMajorTickUnit(Math.max(10, model.getMaximumTimeStep() / 10));
-		timestepSlider.setMinorTickCount(Math.max(5, model.getMaximumTimeStep() / 100));
+
+		if (model.isPaused() && timestepSlider.isDisabled()) {
+			timestepSlider.setDisable(false);
+		} else if (!model.isPaused() && !timestepSlider.isDisabled()) {
+			timestepSlider.setDisable(true);
+		}
 	}
 
 	@Override

@@ -7,11 +7,14 @@ public class TimeSliderGUIPluginModel implements GUIPluginModel {
 	private TimeSliderGUIPluginView view;
 
 	private int currentTimeStep;
-
 	private int maximumTimeStep;
+	private boolean paused;
 
 	public TimeSliderGUIPluginModel(TimeSliderGUIPluginView view) {
 		this.view = view;
+		currentTimeStep = 0;
+		maximumTimeStep = 0;
+		paused = true;
 	}
 
 	public void increaseMaximumTimeStep() {
@@ -33,7 +36,27 @@ public class TimeSliderGUIPluginModel implements GUIPluginModel {
 		return maximumTimeStep;
 	}
 
+	public void pause() {
+		paused = true;
+		view.update();
+	}
+
+	public void unpause() {
+		paused = false;
+		view.update();
+	}
+
 	public void increaseCurrentTimeStep() {
 		currentTimeStep++;
+		view.update();
+	}
+
+	public void setCurrentTimeStep(int currentTimeStep) {
+		this.currentTimeStep = currentTimeStep;
+		view.update();
+	}
+
+	public boolean isPaused() {
+		return paused;
 	}
 }
