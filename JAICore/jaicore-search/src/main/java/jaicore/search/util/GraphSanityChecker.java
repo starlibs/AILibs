@@ -43,11 +43,11 @@ public class GraphSanityChecker<N, A> extends AOptimalPathInORGraphSearch<GraphS
 			N root = ((SingleRootGenerator<N>) this.getGraphGenerator().getRootGenerator()).getRoot();
 			NodeGoalTester<N> goalTester = (NodeGoalTester<N>) this.getGraphGenerator().getGoalTester();
 			open.push(new Node<>(null, root));
-			this.post(new GraphInitializedEvent<N>(root));
+			this.post(new GraphInitializedEvent<N>(getId(), root));
 			while (!open.isEmpty() && expanded < this.maxNodesToExpand) {
 				Node<N, ?> node = open.pop();
 				if (!node.isGoal()) {
-					this.post(new NodeTypeSwitchEvent<>(node, "or_closed"));
+					this.post(new NodeTypeSwitchEvent<>(getId(), node, "or_closed"));
 				}
 				expanded++;
 				List<NodeExpansionDescription<N, A>> successors = this.getGraphGenerator().getSuccessorGenerator().generateSuccessors(node.getPoint());
@@ -65,7 +65,7 @@ public class GraphSanityChecker<N, A> extends AOptimalPathInORGraphSearch<GraphS
 					Node<N, ?> newNode = new Node<>(node, successor.getTo());
 					newNode.setGoal(goalTester.isGoal(newNode.getPoint()));
 					open.add(newNode);
-					this.post(new NodeAddedEvent<N>(node.getPoint(), successor.getTo(), newNode.isGoal() ? "or_solution" : "or_open"));
+					this.post(new NodeAddedEvent<N>(getId(), node.getPoint(), successor.getTo(), newNode.isGoal() ? "or_solution" : "or_open"));
 				}
 				if (this.sanityCheckResult != null) {
 					break;

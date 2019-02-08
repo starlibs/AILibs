@@ -1,7 +1,11 @@
 package jaicore.search.algorithms.standard.lds;
 
-import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.events.AAlgorithmEvent;
 
-public class NoMoreNodesOnLevelEvent implements AlgorithmEvent {
+public class NoMoreNodesOnLevelEvent extends AAlgorithmEvent {
+
+	public NoMoreNodesOnLevelEvent(String algorithmId) {
+		super(algorithmId);
+	}
 
 }

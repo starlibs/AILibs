@@ -133,7 +133,7 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 
 				/* if the node was not prioritized, change its state */
 				if (!this.prioritizedNodes.contains(node)) {
-					this.post(new NodeTypeSwitchEvent<N>(node, "or_closed"));
+					this.post(new NodeTypeSwitchEvent<N>(getId(), node, "or_closed"));
 				}
 				this.closed.add(node);
 			}
@@ -156,7 +156,7 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 		if (isGoalNode) {
 			this.logger.debug("Found goal node {}!", to);
 		}
-		this.post(new NodeAddedEvent<>(from, to, isGoalNode ? "or_solution" : (isPrioritized ? "or_prioritized" : "or_open")));
+		this.post(new NodeAddedEvent<>(getId(), from, to, isGoalNode ? "or_solution" : (isPrioritized ? "or_prioritized" : "or_open")));
 	}
 
 	@Override
@@ -164,7 +164,7 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 
 		switch (this.getState()) {
 		case created: {
-			this.post(new GraphInitializedEvent<>(this.root));
+			this.post(new GraphInitializedEvent<>(getId(), this.root));
 			this.logger.info("Starting random search ...");
 			return activate();
 		}
@@ -183,7 +183,7 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 			}
 			logger.info("Drew path of length {}. Posting this event. For more details on the path, enable TRACE", drawnPath.getNodes().size());
 			logger.trace("The drawn path is {}", drawnPath);
-			AlgorithmEvent event = new GraphSearchSolutionCandidateFoundEvent<>(drawnPath);
+			AlgorithmEvent event = new GraphSearchSolutionCandidateFoundEvent<>(getId(), drawnPath);
 			this.logger.info("Identified new solution ...");
 			this.post(event);
 			return event;
@@ -320,7 +320,7 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 				if (currentIsPrioritized && allPrioritizedChildrenExhausted) {
 					int sizeBefore = this.prioritizedNodes.size();
 					this.prioritizedNodes.remove(current);
-					this.post(new NodeTypeSwitchEvent<N>(current, "or_closed"));
+					this.post(new NodeTypeSwitchEvent<N>(getId(), current, "or_closed"));
 					int sizeAfter = this.prioritizedNodes.size();
 					assert sizeAfter == sizeBefore - 1;
 				}

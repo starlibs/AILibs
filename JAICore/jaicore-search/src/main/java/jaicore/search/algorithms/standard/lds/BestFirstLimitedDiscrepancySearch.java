@@ -115,7 +115,7 @@ public class BestFirstLimitedDiscrepancySearch<T, A, V extends Comparable<V>> ex
 			@SuppressWarnings({ "unchecked", "rawtypes" })
 			EvaluatedSearchGraphPath<T, A, NodeOrderList> solution = (EvaluatedSearchGraphPath<T, A, NodeOrderList>) ((SolutionCandidateFoundEvent) e).getSolutionCandidate();
 			EvaluatedSearchGraphPath<T, A, V> modifiedSolution = new EvaluatedSearchGraphPath<T, A, V>(solution.getNodes(), solution.getEdges(), null);
-			return new SolutionCandidateFoundEvent<>(modifiedSolution);
+			return new SolutionCandidateFoundEvent<>(getId(), modifiedSolution);
 		}
 		else
 			return e;

@@ -13,7 +13,7 @@ import jaicore.search.model.other.SearchGraphPath;
  */
 public class GraphSearchSolutionCandidateFoundEvent<N, A, S extends SearchGraphPath<N, A>> extends SolutionCandidateFoundEvent<S> {
 
-	public GraphSearchSolutionCandidateFoundEvent(S solution) {
-		super(solution);
+	public GraphSearchSolutionCandidateFoundEvent(String algorithmId, S solution) {
+		super(algorithmId, solution);
 	}
 }

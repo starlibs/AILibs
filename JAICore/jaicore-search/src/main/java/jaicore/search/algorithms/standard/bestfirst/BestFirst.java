@@ -227,7 +227,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 				try {
 					BestFirst.this.labelNode(newNode);
 					if (newNode.getInternalLabel() == null) {
-						BestFirst.this.post(new NodeTypeSwitchEvent<>(newNode, "or_pruned"));
+						BestFirst.this.post(new NodeTypeSwitchEvent<>(getId(), newNode, "or_pruned"));
 						return;
 					}
 					if (BestFirst.this.isStopCriterionSatisfied()) {
@@ -243,19 +243,19 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 				} catch (TimeoutException e) {
 					BestFirst.this.logger.debug("Node evaluation of {} has timed out.", newNode);
 					newNode.setAnnotation("fError", e);
-					BestFirst.this.post(new NodeTypeSwitchEvent<>(newNode, "or_timedout"));
+					BestFirst.this.post(new NodeTypeSwitchEvent<>(getId(), newNode, "or_timedout"));
 					return;
 				}
 				catch (ControlledNodeEvaluationException e) {
 					logger.debug("Node evaluation failed with a controlled exception.");
 					newNode.setAnnotation("fError", e);
-					BestFirst.this.post(new NodeTypeSwitchEvent<>(newNode, "or_ffail"));
+					BestFirst.this.post(new NodeTypeSwitchEvent<>(getId(), newNode, "or_ffail"));
 					return;
 				}
 				catch (Throwable e) {
 					BestFirst.this.logger.error("Observed an exception during computation of f:\n{}", LoggerUtil.getExceptionInfo(e));
 					newNode.setAnnotation("fError", e);
-					BestFirst.this.post(new NodeTypeSwitchEvent<>(newNode, "or_ffail"));
+					BestFirst.this.post(new NodeTypeSwitchEvent<>(getId(), newNode, "or_ffail"));
 					return;
 				}
 
@@ -274,15 +274,15 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 						if (existingIdenticalNodeOnOpen.isPresent()) {
 							Node<N, V> existingNode = existingIdenticalNodeOnOpen.get();
 							if (newNode.compareTo(existingNode) < 0) {
-								BestFirst.this.post(new NodeTypeSwitchEvent<>(newNode, "or_" + (newNode.isGoal() ? "solution" : "open")));
-								BestFirst.this.post(new NodeRemovedEvent<>(existingNode));
+								BestFirst.this.post(new NodeTypeSwitchEvent<>(getId(), newNode, "or_" + (newNode.isGoal() ? "solution" : "open")));
+								BestFirst.this.post(new NodeRemovedEvent<>(getId(), existingNode));
 								BestFirst.this.open.remove(existingNode);
 								if (newNode.getInternalLabel() == null) {
 									throw new IllegalArgumentException("Cannot insert nodes with value NULL into OPEN!");
 								}
 								BestFirst.this.open.add(newNode);
 							} else {
-								BestFirst.this.post(new NodeRemovedEvent<>(newNode));
+								BestFirst.this.post(new NodeRemovedEvent<>(getId(), newNode));
 							}
 							nodeProcessed = true;
 						}
@@ -301,9 +301,9 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 									node.setInternalLabel(newNode.getInternalLabel());
 									BestFirst.this.closed.remove(node.getPoint());
 									BestFirst.this.open.add(node);
-									BestFirst.this.post(new NodeParentSwitchEvent<Node<N, V>>(node, node.getParent(), newNode.getParent()));
+									BestFirst.this.post(new NodeParentSwitchEvent<Node<N, V>>(getId(), node, node.getParent(), newNode.getParent()));
 								}
-								BestFirst.this.post(new NodeRemovedEvent<Node<N, V>>(newNode));
+								BestFirst.this.post(new NodeRemovedEvent<Node<N, V>>(getId(), newNode));
 								nodeProcessed = true;
 							}
 						}
@@ -337,7 +337,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 							}
 						}
 					}
-					BestFirst.this.post(new NodeTypeSwitchEvent<>(newNode, "or_" + (newNode.isGoal() ? "solution" : "open")));
+					BestFirst.this.post(new NodeTypeSwitchEvent<>(getId(), newNode, "or_" + (newNode.isGoal() ? "solution" : "open")));
 					BestFirst.this.createdCounter++;
 				}
 
@@ -421,9 +421,9 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 
 		/* send events for this new node */
 		if (parent == null) {
-			this.post(new GraphInitializedEvent<Node<N, V>>(newNode));
+			this.post(new GraphInitializedEvent<Node<N, V>>(getId(), newNode));
 		} else {
-			this.post(new NodeAddedEvent<Node<N, V>>(parent, newNode, "or_" + (newNode.isGoal() ? "solution" : "created")));
+			this.post(new NodeAddedEvent<Node<N, V>>(getId(), parent, newNode, "or_" + (newNode.isGoal() ? "solution" : "created")));
 			this.logger.debug("Sent message for creation of node {} as a successor of {}", newNode, parent);
 		}
 		return newNode;
@@ -462,7 +462,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 			this.logger.info("Thread {} received interrupt in node evaluation. Timeout flag is {}", Thread.currentThread(), timedout.get());
 			if (timedout.get()) {
 				BestFirst.this.logger.debug("Received interrupt during computation of f.");
-				this.post(new NodeTypeSwitchEvent<>(node, "or_timedout"));
+				this.post(new NodeTypeSwitchEvent<>(getId(), node, "or_timedout"));
 				node.setAnnotation("fError", "Timeout");
 				computationTimedout = true;
 				Thread.interrupted(); // set interrupt state of thread to FALSE, because interrupt
@@ -647,7 +647,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 
 		/* Step 2: compute the successors in the underlying graph */
 		this.beforeExpansion(nodeSelectedForExpansion);
-		this.post(new NodeTypeSwitchEvent<Node<N, V>>(nodeSelectedForExpansion, "or_expanding"));
+		this.post(new NodeTypeSwitchEvent<Node<N, V>>(getId(), nodeSelectedForExpansion, "or_expanding"));
 		this.logger.info("Expanding node {} with f-value {}", nodeSelectedForExpansion, nodeSelectedForExpansion.getInternalLabel());
 		this.logger.debug("Start computation of successors");
 		final List<NodeExpansionDescription<N, A>> successorDescriptions;
@@ -700,7 +700,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		}
 		this.checkTerminationAndUnregisterFromExpand(nodeSelectedForExpansion);
 		this.logger.debug("Finished computation of successors. Sending SuccessorComputationCompletedEvent with {} successors for {}", successorDescriptions.size(), nodeSelectedForExpansion);
-		this.post(new SuccessorComputationCompletedEvent<>(nodeSelectedForExpansion, successorDescriptions));
+		this.post(new SuccessorComputationCompletedEvent<>(getId(), nodeSelectedForExpansion, successorDescriptions));
 
 		/*
 		 * step 3: trigger node builders that compute node details and decide whether
@@ -740,8 +740,8 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		}
 		this.closed.add(nodeSelectedForExpansion.getPoint());
 		assert this.closed.contains(nodeSelectedForExpansion.getPoint()) : "Expanded node " + nodeSelectedForExpansion + " was not inserted into CLOSED!";
-		this.post(new NodeTypeSwitchEvent<Node<N, V>>(nodeSelectedForExpansion, "or_closed"));
-		NodeExpansionJobSubmittedEvent<N, A, V> nodeCompletionEvent = new NodeExpansionJobSubmittedEvent<>(nodeSelectedForExpansion, successorDescriptions);
+		this.post(new NodeTypeSwitchEvent<Node<N, V>>(getId(), nodeSelectedForExpansion, "or_closed"));
+		NodeExpansionJobSubmittedEvent<N, A, V> nodeCompletionEvent = new NodeExpansionJobSubmittedEvent<>(getId(), nodeSelectedForExpansion, successorDescriptions);
 		this.afterExpansion(nodeSelectedForExpansion);
 		this.checkAndConductTermination();
 		this.openLock.lockInterruptibly();
@@ -901,7 +901,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 				assert this.ext2int.containsKey(nodeOnPath.getParent().getPoint()) : "Want to insert a node whose parent is unknown locally";
 				Node<N, V> newNode = this.newNode(localVersionOfParent, nodeOnPath.getPoint(), nodeOnPath.getInternalLabel());
 				if (!newNode.isGoal() && !newNode.getPoint().equals(leaf.getPoint())) {
-					this.post(new NodeTypeSwitchEvent<Node<N, V>>(newNode, "or_closed"));
+					this.post(new NodeTypeSwitchEvent<Node<N, V>>(getId(), newNode, "or_closed"));
 				}
 				localVersionOfParent = newNode;
 			} else {

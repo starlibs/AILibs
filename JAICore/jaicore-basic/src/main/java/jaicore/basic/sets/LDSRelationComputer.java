@@ -183,7 +183,7 @@ public class LDSRelationComputer<T> extends AAlgorithm<RelationComputationProble
 			numRecycledNodes++;
 			List<T> tuple = new ArrayList<>(currentTuple);
 			assert currentTuple.size() == numSets : "Tuple " + currentTuple + " should contain " + numSets + " elements but has " + currentTuple.size();
-			return new TupleOfCartesianProductFoundEvent<>(tuple);
+			return new TupleOfCartesianProductFoundEvent<>(getId(), tuple);
 		}
 		default:
 			throw new IllegalStateException();

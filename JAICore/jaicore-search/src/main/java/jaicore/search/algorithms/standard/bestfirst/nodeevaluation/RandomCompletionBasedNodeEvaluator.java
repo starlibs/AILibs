@@ -164,7 +164,7 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>>
 			if (this.eventBus == null) { // this is necessary if the node evaluator was stored to the disc
 				this.eventBus = new SolutionEventBus<>();
 			}
-			this.eventBus.post(new NodeAnnotationEvent<>(n.getPoint(), "EUBRD2OS", this.getExpectedUpperBoundForRelativeDistanceToOptimalSolution(n, path)));
+			this.eventBus.post(new NodeAnnotationEvent<>("RandomCompletion", n.getPoint(), "EUBRD2OS", this.getExpectedUpperBoundForRelativeDistanceToOptimalSolution(n, path)));
 			double uncertainty = 0.0;
 			if (!n.isGoal()) {
 
@@ -460,7 +460,7 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>>
 			solutionObject.setAnnotation("timeToSolution", (int) (System.currentTimeMillis() - this.timestampOfFirstEvaluation));
 			solutionObject.setAnnotation("nodesEvaluatedToSolution", numberOfComputedFValues);
 			this.logger.debug("Posting solution {}", solutionObject);
-			this.eventBus.post(new EvaluatedSearchSolutionCandidateFoundEvent<>(solutionObject));
+			this.eventBus.post(new EvaluatedSearchSolutionCandidateFoundEvent<>("RandomCompletion", solutionObject));
 		} catch (Throwable e) {
 			List<Pair<String, Object>> explanations = new ArrayList<>();
 			if (this.logger.isDebugEnabled()) {

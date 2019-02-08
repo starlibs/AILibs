@@ -6,8 +6,8 @@ public class NodeAnnotationEvent<T> extends BestFirstEvent {
 	private final String annotationName;
 	private final Object annotationValue;
 
-	public NodeAnnotationEvent(T node, String annotationName, Object annotationValue) {
-		super();
+	public NodeAnnotationEvent(String algorithmId, T node, String annotationName, Object annotationValue) {
+		super(algorithmId);
 		this.node = node;
 		this.annotationName = annotationName;
 		this.annotationValue = annotationValue;

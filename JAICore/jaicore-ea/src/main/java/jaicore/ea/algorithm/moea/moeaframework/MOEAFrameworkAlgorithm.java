@@ -88,7 +88,7 @@ public class MOEAFrameworkAlgorithm extends AEvolutionaryAlgorithm {
 				this.numberOfGenerationsWOChange = 0;
 			}
 
-			return new MOEAFrameworkAlgorithmResultEvent(this.getCurrentResult());
+			return new MOEAFrameworkAlgorithmResultEvent(getId(), this.getCurrentResult());
 		default:
 		case inactive:
 			throw new AlgorithmException("The current algorithm state is >inactive<.");

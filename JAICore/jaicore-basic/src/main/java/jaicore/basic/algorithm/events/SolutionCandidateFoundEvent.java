@@ -9,11 +9,11 @@ package jaicore.basic.algorithm.events;
  *
  * @param <O> class from which solution elements stem from
  */
-public class SolutionCandidateFoundEvent<O> implements AlgorithmEvent {
+public class SolutionCandidateFoundEvent<O> extends AAlgorithmEvent {
 	private final O solutionCandidate;
 	
-	public SolutionCandidateFoundEvent(O solutionCandidate) {
-		super();
+	public SolutionCandidateFoundEvent(String algorithmId, O solutionCandidate) {
+		super(algorithmId);
 		this.solutionCandidate = solutionCandidate;
 	}
 

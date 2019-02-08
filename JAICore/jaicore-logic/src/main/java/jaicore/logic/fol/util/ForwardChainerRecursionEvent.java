@@ -1,15 +1,15 @@
 package jaicore.logic.fol.util;
 
-import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.events.AAlgorithmEvent;
 import jaicore.logic.fol.structure.Literal;
 import jaicore.logic.fol.structure.Monom;
 
-public class ForwardChainerRecursionEvent implements AlgorithmEvent {
+public class ForwardChainerRecursionEvent extends AAlgorithmEvent {
 	private Literal local;
 	private Monom remainingConclusion;
 
-	public ForwardChainerRecursionEvent(Literal local, Monom remainingConclusion) {
-		super();
+	public ForwardChainerRecursionEvent(String algorithmId, Literal local, Monom remainingConclusion) {
+		super(algorithmId);
 		this.local = local;
 		this.remainingConclusion = remainingConclusion;
 	}

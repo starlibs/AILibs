@@ -87,7 +87,7 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 			InnerNodeLabel root = new InnerNodeLabel(((SingleRootGenerator<N>) this.getInput().getGraphGenerator().getRootGenerator()).getRoot(), NodeType.AND);
 			root.val = 0;
 			open.add(root);
-			this.post(new GraphInitializedEvent<N>(root.node));
+			this.post(new GraphInitializedEvent<N>(getId(), root.node));
 			this.graph.addItem(root);
 			while (!open.isEmpty()) {
 				InnerNodeLabel n = open.poll();
@@ -104,7 +104,7 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 						}
 						open.add(newNode);
 						generatedChildren++;
-						this.post(new NodeAddedEvent<N>(n.node, newNode.node, descr.getTypeOfToNode() == NodeType.OR ? "or" : "and"));
+						this.post(new NodeAddedEvent<N>(getId(), n.node, newNode.node, descr.getTypeOfToNode() == NodeType.OR ? "or" : "and"));
 					}
 					logger.debug("Node expansion of {}-node {} completed. Generated {} successors.", n.type, n, generatedChildren);
 				} catch (Exception e) {

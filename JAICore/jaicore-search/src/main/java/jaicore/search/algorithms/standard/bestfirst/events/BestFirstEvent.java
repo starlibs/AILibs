@@ -1,7 +1,11 @@
 package jaicore.search.algorithms.standard.bestfirst.events;
 
-import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.events.AAlgorithmEvent;
 
-public class BestFirstEvent implements AlgorithmEvent {
+public class BestFirstEvent extends AAlgorithmEvent {
+
+	public BestFirstEvent(String algorithmId) {
+		super(algorithmId);
+	}
 
 }

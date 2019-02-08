@@ -1,12 +1,14 @@
 package jaicore.graphvisualizer.events.graph;
 
-public class GraphInitializedEvent<T> implements GraphEvent {
+import jaicore.basic.algorithm.events.AAlgorithmEvent;
+
+public class GraphInitializedEvent<T> extends AAlgorithmEvent implements GraphEvent {
 
 	private T root;
 	public final String name = "GraphInitializedEvent";
 
-	public GraphInitializedEvent(T root) {
-		super();
+	public GraphInitializedEvent(String algorithmId, T root) {
+		super(algorithmId);
 		this.root = root;
 	}
 

@@ -54,7 +54,7 @@ public abstract class AOptimalPathInORGraphSearch<I extends GraphSearchInput<N, 
 	
 	protected EvaluatedSearchSolutionCandidateFoundEvent<N, A, V> registerSolution(final EvaluatedSearchGraphPath<N, A, V> path) {
 		updateBestSeenSolution(path);
-		EvaluatedSearchSolutionCandidateFoundEvent<N, A, V> event = new EvaluatedSearchSolutionCandidateFoundEvent<>(path);
+		EvaluatedSearchSolutionCandidateFoundEvent<N, A, V> event = new EvaluatedSearchSolutionCandidateFoundEvent<>(getId(), path);
 		this.post(event);
 		return event;
 	}

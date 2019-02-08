@@ -136,7 +136,7 @@ public class STRIPSPlanner<V extends Comparable<V>>
 				Plan plan = this.reducer.getPlan(nextSolution.getNodes());
 				EvaluatedPlan<V> evaluatedPlan = new EvaluatedPlan<>(plan, nextSolution.getScore());
 				this.updateBestSeenSolution(evaluatedPlan);
-				return new PlanFoundEvent<>(evaluatedPlan);
+				return new PlanFoundEvent<>(getId(), evaluatedPlan);
 			} catch (NoSuchElementException e) {
 				return terminate();
 			}

@@ -119,7 +119,7 @@ public class GraphSearchBasedHTNPlanningAlgorithm<IP extends IHTNPlanningProblem
 				this.logger.info("Next solution found.");
 				List<N> solutionPath = solution.getNodes();
 				Plan plan = this.problemTransformer.getPlan(solutionPath);
-				PlanFoundEvent<?, V> event = new PlanFoundEvent<>(new EvaluatedSearchGraphBasedPlan<>(plan.getActions(), solution.getScore(), solution));
+				PlanFoundEvent<?, V> event = new PlanFoundEvent<>(getId(), new EvaluatedSearchGraphBasedPlan<>(plan.getActions(), solution.getScore(), solution));
 				this.post(event);
 				return event;
 			}

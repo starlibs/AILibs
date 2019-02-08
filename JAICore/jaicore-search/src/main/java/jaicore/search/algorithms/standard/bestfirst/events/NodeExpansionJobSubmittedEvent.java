@@ -9,8 +9,8 @@ public class NodeExpansionJobSubmittedEvent<T, A, V extends Comparable<V>> exten
 	private final Node<T, V> expandedNode;
 	private final List<NodeExpansionDescription<T, A>> children;
 
-	public NodeExpansionJobSubmittedEvent(Node<T, V> expandedNode, List<NodeExpansionDescription<T, A>> children) {
-		super();
+	public NodeExpansionJobSubmittedEvent(String algorithmId, Node<T, V> expandedNode, List<NodeExpansionDescription<T, A>> children) {
+		super(algorithmId);
 		this.expandedNode = expandedNode;
 		this.children = children;
 	}

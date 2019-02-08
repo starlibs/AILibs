@@ -4,8 +4,8 @@ import jaicore.search.model.other.EvaluatedSearchGraphPath;
 
 public class EvaluatedSearchSolutionCandidateFoundEvent<N, A, V extends Comparable<V>> extends GraphSearchSolutionCandidateFoundEvent<N, A, EvaluatedSearchGraphPath<N, A, V>> {
 
-	public EvaluatedSearchSolutionCandidateFoundEvent(EvaluatedSearchGraphPath<N, A, V> solutionCandidate) {
-		super(solutionCandidate);
+	public EvaluatedSearchSolutionCandidateFoundEvent(String algorithmId, EvaluatedSearchGraphPath<N, A, V> solutionCandidate) {
+		super(algorithmId, solutionCandidate);
 	}
 
 	public EvaluatedSearchGraphPath<N, A, V> getSolutionCandidate() {

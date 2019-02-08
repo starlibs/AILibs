@@ -2,13 +2,13 @@ package jaicore.basic.sets;
 
 import java.util.List;
 
-import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.events.AAlgorithmEvent;
 
-public class TupleOfCartesianProductFoundEvent<T> implements AlgorithmEvent {
+public class TupleOfCartesianProductFoundEvent<T> extends AAlgorithmEvent {
 	private final List<T> tuple;
 
-	public TupleOfCartesianProductFoundEvent(List<T> tuple) {
-		super();
+	public TupleOfCartesianProductFoundEvent(String algorithmId, List<T> tuple) {
+		super(algorithmId);
 		this.tuple = tuple;
 	}
 	

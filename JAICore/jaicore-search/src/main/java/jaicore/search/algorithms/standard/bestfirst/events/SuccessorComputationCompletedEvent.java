@@ -9,9 +9,9 @@ public class SuccessorComputationCompletedEvent<T, A> extends BestFirstEvent {
 	private Node<T, ?> node;
 	private List<NodeExpansionDescription<T, A>> successorDescriptions;
 
-	public SuccessorComputationCompletedEvent(Node<T, ?> node,
+	public SuccessorComputationCompletedEvent(String algorithmId, Node<T, ?> node,
 			List<NodeExpansionDescription<T, A>> successorDescriptions) {
-		super();
+		super(algorithmId);
 		this.node = node;
 		this.successorDescriptions = successorDescriptions;
 	}

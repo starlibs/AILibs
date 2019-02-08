@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.AlgorithmState;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
-import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.basic.sets.SetUtil;
@@ -135,7 +134,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 			}
 			this.logger.trace("Chosen action: {}. Successor: {}", chosenAction, next);
 			current = next;
-			this.post(new NodeTypeSwitchEvent<N>(next, "expanding"));
+			this.post(new NodeTypeSwitchEvent<N>(getId(), next, "expanding"));
 			path.add(current);
 			this.logger.debug("Tree policy decides to expand {} taking action {} to {}", current, chosenAction, next);
 		}
@@ -195,7 +194,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 				break;
 			}
 			current = this.exploredGraph.getPredecessors(current).iterator().next();
-			this.post(new NodeTypeSwitchEvent<N>(current, "or_closed"));
+			this.post(new NodeTypeSwitchEvent<N>(getId(), current, "or_closed"));
 		}
 		return path;
 	}
@@ -221,7 +220,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 			this.exploredGraph.addItem(d.getTo());
 			this.unexpandedNodes.add(d.getTo());
 			this.exploredGraph.addEdge(d.getFrom(), d.getTo(), d.getAction());
-			this.post(new NodeAddedEvent<>(d.getFrom(), d.getTo(), this.isGoal(d.getTo()) ? "or_solution" : "or_open"));
+			this.post(new NodeAddedEvent<>(getId(), d.getFrom(), d.getTo(), this.isGoal(d.getTo()) ? "or_solution" : "or_open"));
 		}
 		return successorStates;
 	}
@@ -248,7 +247,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, CancellationException, AlgorithmException {
 		switch (this.getState()) {
 		case created:
-			this.post(new GraphInitializedEvent<N>(this.root));
+			this.post(new GraphInitializedEvent<N>(getId(), this.root));
 			return activate();
 
 		case active:
@@ -261,10 +260,8 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 				while (this.getState() == AlgorithmState.active) {
 					this.checkAndConductTermination();
 					if (this.unexpandedNodes.isEmpty()) {
-						this.unregisterThreadAndShutdown();
-						AlgorithmEvent finishEvent = new AlgorithmFinishedEvent();
+						AlgorithmEvent finishEvent = terminate();
 						this.logger.info("Finishing MCTS as all nodes have been expanded; the search graph has been exhausted.");
-						this.post(finishEvent);
 						return finishEvent;
 					} else {
 						this.logger.info("There are {} known unexpanded nodes. Starting computation of next playout path.", this.unexpandedNodes.size());

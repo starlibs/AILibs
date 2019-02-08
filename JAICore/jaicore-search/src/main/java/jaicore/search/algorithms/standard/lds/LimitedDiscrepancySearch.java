@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 
 import jaicore.basic.algorithm.events.AlgorithmCanceledEvent;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
-import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.events.AlgorithmInterruptedEvent;
 import jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
 import jaicore.graph.TreeNode;
@@ -81,7 +80,7 @@ public class LimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends AOp
 		switch (this.getState()) {
 		case created: {
 			this.traversalTree = this.newNode(null, this.rootGenerator.getRoot());
-			this.post(new GraphInitializedEvent<>(this.traversalTree));
+			this.post(new GraphInitializedEvent<>(getId(), this.traversalTree));
 			return this.activate();
 		}
 		case active: {
@@ -91,9 +90,7 @@ public class LimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends AOp
 				if (event instanceof NoMoreNodesOnLevelEvent) {
 					if (!this.probeHasExpandedNode) {
 						this.logger.info("Probe process has not expanded any node, finishing alogrithm");
-						this.shutdown();
-						;
-						return new AlgorithmFinishedEvent();
+						return terminate();
 					} else {
 						this.logger.info("Probe process has not more nodes to be considered, restarting with augmented k {}", this.maxK + 1);
 						this.maxK++;
@@ -106,7 +103,7 @@ public class LimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends AOp
 					return event;
 				}
 			} catch (InterruptedException e) {
-				return new AlgorithmInterruptedEvent();
+				return new AlgorithmInterruptedEvent(getId());
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
@@ -131,7 +128,7 @@ public class LimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends AOp
 			List<T> path = node.getValuesOnPathFromRoot();
 			EvaluatedSearchGraphPath<T, A, V> solution = new EvaluatedSearchGraphPath<>(path, null, null);
 			updateBestSeenSolution(solution);
-			return new SolutionCandidateFoundEvent<>(solution);
+			return new SolutionCandidateFoundEvent<>(getId(), solution);
 		}
 
 		/* if this node has not been expanded, compute successors and the priorities among them and attach them to search graph */
@@ -140,7 +137,7 @@ public class LimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends AOp
 			this.probeHasExpandedNode = true;
 			Collection<NodeExpansionDescription<T, A>> succ = this.successorGenerator.generateSuccessors(node.getValue());
 			if (succ == null || succ.isEmpty()) {
-				return new NoMoreNodesOnLevelEvent();
+				return new NoMoreNodesOnLevelEvent(getId());
 			}
 			List<NodeExpansionDescription<T, A>> prioSucc = succ.stream().sorted((d1, d2) -> this.heuristic.compare(d1.getTo(), d2.getTo())).collect(Collectors.toList());
 			List<TreeNode<T>> generatedNodes = new ArrayList<>();
@@ -150,7 +147,7 @@ public class LimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends AOp
 					throw new InterruptedException("Thread that executes LDS has been interrupted. The LDS has been canceled.");
 				}
 				if (this.isCanceled()) {
-					return new AlgorithmCanceledEvent();
+					return new AlgorithmCanceledEvent(getId());
 				}
 				TreeNode<T> newNode = this.newNode(node, successorDescription.getTo());
 				generatedNodes.add(newNode);
@@ -160,7 +157,7 @@ public class LimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends AOp
 		}
 		List<TreeNode<T>> children = node.getChildren();
 		if (children.isEmpty()) {
-			return new NoMoreNodesOnLevelEvent();
+			return new NoMoreNodesOnLevelEvent(getId());
 		}
 
 		/* otherwise, deviate from the heuristic if this brings a solution */
@@ -180,7 +177,7 @@ public class LimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends AOp
 		/* send events for this new node */
 		if (parent != null) {
 			boolean isGoal = this.nodeGoalTester.isGoal(newNode);
-			this.post(new NodeAddedEvent<TreeNode<T>>(parent, newTree, "or_" + (isGoal ? "solution" : "created")));
+			this.post(new NodeAddedEvent<TreeNode<T>>(getId(), parent, newTree, "or_" + (isGoal ? "solution" : "created")));
 		}
 		return newTree;
 	}

@@ -212,7 +212,7 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 						this.timeGrabbingEvaluationWrapper.getEvaluationTimeForComponentInstance(objectInstance));
 				this.updateBestSeenSolution(solution);
 				this.listOfAllRecognizedSolutions.add(solution);
-				HASCOSolutionEvent<V> hascoSolutionEvent = new HASCOSolutionEvent<>(solution);
+				HASCOSolutionEvent<V> hascoSolutionEvent = new HASCOSolutionEvent<>(getId(), solution);
 				this.post(hascoSolutionEvent);
 				return hascoSolutionEvent;
 			}

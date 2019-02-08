@@ -5,7 +5,7 @@ import jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
 
 public class HASCOSolutionEvent<V extends Comparable<V>> extends SolutionCandidateFoundEvent<HASCOSolutionCandidate<V>> {
 
-	public HASCOSolutionEvent(HASCOSolutionCandidate<V> solutionCandidate) {
-		super(solutionCandidate);
+	public HASCOSolutionEvent(String algorithmId, HASCOSolutionCandidate<V> solutionCandidate) {
+		super(algorithmId, solutionCandidate);
 	}
 }

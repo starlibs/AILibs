@@ -7,8 +7,8 @@ public class HASCORunStartedEvent<T, V extends Comparable<V>> extends AlgorithmI
 	private final int seed, timeout, numberOfCPUS;
 	private IObjectEvaluator<T, V> benchmark;
 
-	public HASCORunStartedEvent(int seed, int timeout, int numberOfCPUS, IObjectEvaluator<T, V> benchmark) {
-		super();
+	public HASCORunStartedEvent(String algorithmId, int seed, int timeout, int numberOfCPUS, IObjectEvaluator<T, V> benchmark) {
+		super(algorithmId);
 		this.seed = seed;
 		this.timeout = timeout;
 		this.numberOfCPUS = numberOfCPUS;

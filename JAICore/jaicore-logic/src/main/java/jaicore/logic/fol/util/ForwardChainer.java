@@ -157,10 +157,10 @@ public class ForwardChainer extends AAlgorithm<ForwardChainingProblem, Collectio
 						 */
 						if (getInput().isCwa() && doesCWADeductionFail(factbase,
 								new LiteralSet(cwaRelevantNegativeLiterals, solutionToReturn)))
-							return new ForwardChainingFailedCWABindingEvent();
+							return new ForwardChainingFailedCWABindingEvent(getId());
 						logger.info("Computed binding {} for {}-conclusion within {}ms", solutionToReturn,
 								conclusion.size(), System.currentTimeMillis() - start);
-						return new NextBindingFoundEvent(solutionToReturn);
+						return new NextBindingFoundEvent(getId(), solutionToReturn);
 					}
 				}
 
@@ -206,7 +206,7 @@ public class ForwardChainer extends AAlgorithm<ForwardChainingProblem, Collectio
 				 * if the conclusion has size 1, return the current candidate. Otherwise recurse
 				 */
 				if (currentGroundRemainingConclusion.isEmpty()) {
-					return new NextBindingFoundEvent(currentGroundingOfLocalLiteral);
+					return new NextBindingFoundEvent(getId(), currentGroundingOfLocalLiteral);
 				} else {
 					logger.debug("Recurse to {}-conclusion", currentGroundRemainingConclusion.size());
 					ForwardChainingProblem subProblem = new ForwardChainingProblem(factbase,
@@ -218,7 +218,7 @@ public class ForwardChainer extends AAlgorithm<ForwardChainingProblem, Collectio
 					logger.debug("Finished recursion of {}-conclusion. Computation took {}ms",
 							currentGroundRemainingConclusion.size(), System.currentTimeMillis() - startRecursiveCall);
 					currentlyActiveSubFC = new ForwardChainer(subProblem);
-					return new ForwardChainerRecursionEvent(this.chosenLiteral, currentGroundRemainingConclusion);
+					return new ForwardChainerRecursionEvent(getId(), this.chosenLiteral, currentGroundRemainingConclusion);
 				}
 			}
 

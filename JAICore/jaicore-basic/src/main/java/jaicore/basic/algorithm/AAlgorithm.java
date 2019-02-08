@@ -300,7 +300,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 			this.deadline = this.activationTime + this.getTimeout().milliseconds();
 		}
 		this.state = AlgorithmState.active;
-		AlgorithmInitializedEvent event = new AlgorithmInitializedEvent();
+		AlgorithmInitializedEvent event = new AlgorithmInitializedEvent(getId());
 		this.eventBus.post(event);
 		this.logger.info("Starting algorithm {} with problem {} and config {}", this, this.input, this.config);
 		return event;
@@ -313,7 +313,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	 */
 	protected AlgorithmFinishedEvent terminate() {
 		this.state = AlgorithmState.inactive;
-		AlgorithmFinishedEvent finishedEvent = new AlgorithmFinishedEvent();
+		AlgorithmFinishedEvent finishedEvent = new AlgorithmFinishedEvent(getId());
 		this.unregisterThreadAndShutdown();
 		this.eventBus.post(finishedEvent);
 		return finishedEvent;

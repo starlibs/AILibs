@@ -92,7 +92,7 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 			if (this.openList.isEmpty()) {
 				if (this.suspendList.isEmpty()) {
 					this.logger.info("The whole graph has been exhausted. No more solutions can be found!");
-					return new AlgorithmFinishedEvent();
+					return terminate();
 				} else {
 					this.logger.info("Search with window size {} is exhausted. Reactivating {} suspended nodes and incrementing window size.", this.windowSize, this.suspendList.size());
 					this.openList.addAll(this.suspendList);
@@ -120,7 +120,7 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 			this.openList.remove(n);
 			this.closedList.add(n);
 			if (!n.isGoal()) {
-				this.post(new NodeTypeSwitchEvent<>(n, "or_closed"));
+				this.post(new NodeTypeSwitchEvent<>(getId(), n, "or_closed"));
 			}
 
 			/* check whether this node is outside the window and suspend it */
@@ -129,7 +129,7 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 				this.closedList.remove(n);
 				this.suspendList.add(n);
 				this.logger.info("Suspending node {} with level {}, which is lower than {}", n, nLevel, this.currentLevel - this.windowSize);
-				this.post(new NodeTypeSwitchEvent<>(n, "or_suspended"));
+				this.post(new NodeTypeSwitchEvent<>(getId(), n, "or_suspended"));
 				continue;
 			}
 
@@ -172,7 +172,7 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 					if (!nPrime.isGoal()) {
 						this.openList.add(nPrime);
 					}
-					this.post(new NodeAddedEvent<>(n, nPrime, nPrime.isGoal() ? "or_solution" : "or_open"));
+					this.post(new NodeAddedEvent<>(getId(), n, nPrime, nPrime.isGoal() ? "or_solution" : "or_open"));
 				} else if (this.openList.contains(nPrime) || this.suspendList.contains(nPrime)) {
 					V oldScore = nPrime.getInternalLabel();
 					if (oldScore != null && oldScore.compareTo(nPrimeScore) > 0) {
@@ -215,7 +215,7 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 			Node<T, V> rootNode = new Node<>(null, externalRootNode);
 			this.logger.info("Initializing graph and OPEN with {}.", rootNode);
 			this.openList.add(rootNode);
-			this.post(new GraphInitializedEvent<>(rootNode));
+			this.post(new GraphInitializedEvent<>(getId(), rootNode));
 			rootNode.setInternalLabel(this.nodeEvaluator.f(rootNode));
 			return activate();
 		}
@@ -227,8 +227,7 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 					super.unregisterThreadAndShutdown();
 				}
 			} catch (TimeoutException e) {
-				super.unregisterThreadAndShutdown();
-				event = new AlgorithmFinishedEvent();
+				event = terminate();
 			}
 			if (!(event instanceof GraphSearchSolutionCandidateFoundEvent)) { // solution events are sent directly over the event bus
 				this.post(event);

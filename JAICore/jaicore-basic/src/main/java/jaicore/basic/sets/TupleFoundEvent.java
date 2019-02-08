@@ -2,13 +2,13 @@ package jaicore.basic.sets;
 
 import java.util.List;
 
-import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.events.AAlgorithmEvent;
 
-public class TupleFoundEvent<T> implements AlgorithmEvent {
+public class TupleFoundEvent<T> extends AAlgorithmEvent {
 	private final List<T> tuple;
 
-	public TupleFoundEvent(List<T> tuple) {
-		super();
+	public TupleFoundEvent(String algorithmId, List<T> tuple) {
+		super(algorithmId);
 		this.tuple = tuple;
 	}
 

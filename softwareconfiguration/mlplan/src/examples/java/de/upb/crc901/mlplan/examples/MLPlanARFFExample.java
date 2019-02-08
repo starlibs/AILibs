@@ -44,7 +44,7 @@ public class MLPlanARFFExample {
 		
 		/* open visualization */
 		new JFXPanel();
-		Platform.runLater(new GraphVisualizationWindow(mlplan, new GraphViewPlugin(), new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new HASCOModelStatisticsPlugin()));
+		Platform.runLater(new GraphVisualizationWindow(mlplan, new GraphViewPlugin(), new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator()))));
 		
 		try {
 			long start = System.currentTimeMillis();

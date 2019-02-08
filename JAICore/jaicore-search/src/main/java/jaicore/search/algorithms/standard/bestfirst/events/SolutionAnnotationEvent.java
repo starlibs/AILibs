@@ -8,8 +8,8 @@ public class SolutionAnnotationEvent<T, A, V extends Comparable<V>> extends Best
 	private final String annotationName;
 	private final Object annotationValue;
 
-	public SolutionAnnotationEvent(EvaluatedSearchGraphPath<T,A,V> solution, String annotationName, Object annotationValue) {
-		super();
+	public SolutionAnnotationEvent(String algorithmId, EvaluatedSearchGraphPath<T,A,V> solution, String annotationName, Object annotationValue) {
+		super(algorithmId);
 		this.solution = solution;
 		this.annotationName = annotationName;
 		this.annotationValue = annotationValue;
