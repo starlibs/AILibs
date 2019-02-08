@@ -21,9 +21,9 @@ public class ControlBarGUIPluginController implements GUIPluginController {
 
 	@Override
 	public void handleGUIEvent(GUIEvent guiEvent) {
-		if (guiEvent instanceof PauseEvent) {
+		if (guiEvent instanceof PauseEvent || guiEvent instanceof ResetEvent) {
 			model.setPaused();
-		} else if (guiEvent instanceof PlayEvent || guiEvent instanceof ResetEvent) {
+		} else if (guiEvent instanceof PlayEvent) {
 			model.setUnpaused();
 		}
 	}

@@ -12,6 +12,7 @@ import jaicore.graphvisualizer.events.gui.GUIEventListener;
 import jaicore.graphvisualizer.plugin.controlbar.PauseEvent;
 import jaicore.graphvisualizer.plugin.controlbar.PlayEvent;
 import jaicore.graphvisualizer.plugin.controlbar.ResetEvent;
+import jaicore.graphvisualizer.plugin.timeslider.GoToTimeStepEvent;
 
 public class AlgorithmEventHistoryPuller extends Thread implements AlgorithmEventSource, GUIEventListener {
 
@@ -27,7 +28,7 @@ public class AlgorithmEventHistoryPuller extends Thread implements AlgorithmEven
 		this.eventHistory = eventHistory;
 		this.sleepTimeInMillis = sleepTimeInMillis;
 		this.timestep = 0;
-		this.paused = false;
+		this.paused = true;
 		this.algorithmEventListeners = ConcurrentHashMap.newKeySet();
 	}
 
@@ -43,22 +44,26 @@ public class AlgorithmEventHistoryPuller extends Thread implements AlgorithmEven
 
 	@Override
 	public void run() {
-		while (!paused) {
-			if (timestep < eventHistory.getLength()) {
+		while (true) {
+			if (!paused && timestep < eventHistory.getLength()) {
 				AlgorithmEvent algorithmEvent = eventHistory.getEntryAtTimeStep(timestep).getAlgorithmEvent();
-				for (AlgorithmEventListener eventListener : algorithmEventListeners) {
-					try {
-						eventListener.handleAlgorithmEvent(algorithmEvent);
-					} catch (HandleAlgorithmEventException e) {
-						// TODO LOG THIS ERROR
-					}
-				}
+				sendAlgorithmEventToListeners(algorithmEvent);
 				timestep++;
 			}
 			try {
 				sleep(sleepTimeInMillis);
 			} catch (InterruptedException e) {
 				// TODO handle this
+			}
+		}
+	}
+
+	private void sendAlgorithmEventToListeners(AlgorithmEvent algorithmEvent) {
+		for (AlgorithmEventListener eventListener : algorithmEventListeners) {
+			try {
+				eventListener.handleAlgorithmEvent(algorithmEvent);
+			} catch (HandleAlgorithmEventException e) {
+				// TODO LOG THIS ERROR
 			}
 		}
 	}
@@ -71,6 +76,19 @@ public class AlgorithmEventHistoryPuller extends Thread implements AlgorithmEven
 			unpause();
 		} else if (guiEvent instanceof ResetEvent) {
 			resetTimeStep();
+			pause();
+		} else if (guiEvent instanceof GoToTimeStepEvent) {
+			handleGoToTimeStepEvent(guiEvent);
+		}
+	}
+
+	private void handleGoToTimeStepEvent(GUIEvent guiEvent) {
+		GoToTimeStepEvent goToTimeStepEvent = (GoToTimeStepEvent) guiEvent;
+		resetTimeStep();
+		while (timestep < goToTimeStepEvent.getNewTimeStep() && timestep < eventHistory.getLength()) {
+			AlgorithmEvent algorithmEvent = eventHistory.getEntryAtTimeStep(timestep).getAlgorithmEvent();
+			sendAlgorithmEventToListeners(algorithmEvent);
+			timestep++;
 		}
 	}
 

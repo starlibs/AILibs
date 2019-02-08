@@ -4,6 +4,7 @@ import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.graphvisualizer.events.graph.bus.HandleAlgorithmEventException;
 import jaicore.graphvisualizer.events.gui.GUIEvent;
 import jaicore.graphvisualizer.plugin.GUIPluginController;
+import jaicore.graphvisualizer.plugin.controlbar.ResetEvent;
 
 public class TimeSliderGUIPluginController implements GUIPluginController {
 
@@ -15,12 +16,15 @@ public class TimeSliderGUIPluginController implements GUIPluginController {
 
 	@Override
 	public void handleAlgorithmEvent(AlgorithmEvent algorithmEvent) throws HandleAlgorithmEventException {
+		model.increaseCurrentTimeStep();
 		model.increaseMaximumTimeStep();
 	}
 
 	@Override
 	public void handleGUIEvent(GUIEvent guiEvent) {
-		// TODO Auto-generated method stub
+		if (guiEvent instanceof ResetEvent) {
+			model.reset();
+		}
 	}
 
 }

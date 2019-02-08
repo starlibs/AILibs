@@ -22,7 +22,6 @@ public class ControlBarGUIPluginView implements GUIPluginView {
 		ToolBar topButtonToolBar = new ToolBar();
 
 		startButton = new Button("Play");
-		startButton.setDisable(true);
 		startButton.setOnMouseClicked(event -> handleStartButtonClick());
 		topButtonToolBar.getItems().add(startButton);
 

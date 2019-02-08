@@ -42,23 +42,26 @@ public class GraphVisualizationWindow implements Runnable {
 
 	public GraphVisualizationWindow(AlgorithmEventHistory algorithmEventHistory, GraphViewPlugin graphViewPlugin, GUIPlugin... visualizationPlugins) {
 		algorithmEventHistoryPuller = new AlgorithmEventHistoryPuller(algorithmEventHistory, 10);
-		DefaultGUIEventBus.getInstance().registerListener(algorithmEventHistoryPuller);
 		this.graphEventSource = algorithmEventHistoryPuller;
 		initializePlugins(algorithmEventHistory, graphViewPlugin, visualizationPlugins);
+		// it is important to register the history puller as a last listener!
+		DefaultGUIEventBus.getInstance().registerListener(algorithmEventHistoryPuller);
 	}
 
 	public GraphVisualizationWindow(IAlgorithm<?, ?> algorithm, GraphViewPlugin graphViewPlugin, GUIPlugin... visualizationPlugins) {
 		AlgorithmEventHistoryRecorder historyRecorder = new AlgorithmEventHistoryRecorder();
 		algorithmEventHistoryPuller = new AlgorithmEventHistoryPuller(historyRecorder.getHistory(), 10);
-		DefaultGUIEventBus.getInstance().registerListener(algorithmEventHistoryPuller);
 		this.graphEventSource = algorithmEventHistoryPuller;
 		initializePlugins(graphEventSource, graphViewPlugin, visualizationPlugins);
 		algorithm.registerListener(historyRecorder);
+		// it is important to register the history puller as a last listener!
+		DefaultGUIEventBus.getInstance().registerListener(algorithmEventHistoryPuller);
 	}
 
 	private void initializePlugins(AlgorithmEventSource algorithmEventSource, GraphViewPlugin graphViewPlugin, GUIPlugin... visualizationPlugins) {
 		this.graphViewPlugin = graphViewPlugin;
 		graphViewPlugin.setAlgorithmEventSource(algorithmEventSource);
+		graphViewPlugin.setGUIEventSource(DefaultGUIEventBus.getInstance());
 
 		timeSliderGUIPlugin = new TimeSliderGUIPlugin();
 		timeSliderGUIPlugin.setAlgorithmEventSource(algorithmEventSource);

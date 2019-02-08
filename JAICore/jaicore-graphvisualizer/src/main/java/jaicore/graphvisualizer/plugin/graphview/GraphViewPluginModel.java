@@ -129,6 +129,15 @@ public class GraphViewPluginModel implements GUIPluginModel {
 		}
 	}
 
+	public void reset() {
+		graph.clear();
+		graph.setAttribute("ui.stylesheet", "url('conf/searchgraph.css')");
+		searchGraphNodesToViewGraphNodesMap.clear();
+		viewGraphNodesToSearchGraphNodesMap.clear();
+		nodeToConnectedEdgesMap.clear();
+		view.update();
+	}
+
 	public Graph getGraph() {
 		return graph;
 	}

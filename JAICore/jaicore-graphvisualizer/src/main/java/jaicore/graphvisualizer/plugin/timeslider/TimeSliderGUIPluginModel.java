@@ -19,15 +19,21 @@ public class TimeSliderGUIPluginModel implements GUIPluginModel {
 		view.update();
 	}
 
-	public int getMaximumTimeStep() {
-		return maximumTimeStep;
-	}
-
 	public void reset() {
 		currentTimeStep = 0;
+		maximumTimeStep = 0;
+		view.update();
 	}
 
 	public int getCurrentTimeStep() {
 		return currentTimeStep;
+	}
+
+	public int getMaximumTimeStep() {
+		return maximumTimeStep;
+	}
+
+	public void increaseCurrentTimeStep() {
+		currentTimeStep++;
 	}
 }

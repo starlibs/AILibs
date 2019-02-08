@@ -7,17 +7,21 @@ import org.graphstream.ui.view.ViewerPipe;
 
 import jaicore.graphvisualizer.plugin.GUIPluginView;
 import javafx.scene.Node;
+import javafx.scene.layout.BorderPane;
 
 public class GraphViewPluginView implements GUIPluginView {
 
 	private GraphViewPluginModel model;
 
 	private FxViewer fxViewer;
+	private BorderPane graphParentLayout;
 
 	public GraphViewPluginView() {
 		this.model = new GraphViewPluginModel(this);
 		this.fxViewer = new FxViewer(model.getGraph(), ThreadingModel.GRAPH_IN_ANOTHER_THREAD);
 		this.fxViewer.enableAutoLayout();
+
+		this.graphParentLayout = new BorderPane();
 
 		initializeGraphMouseListener();
 	}
@@ -34,7 +38,9 @@ public class GraphViewPluginView implements GUIPluginView {
 
 	@Override
 	public Node getNode() {
-		return (FxViewPanel) fxViewer.addDefaultView(false);
+		FxViewPanel fxViewPanel = (FxViewPanel) fxViewer.addDefaultView(false);
+		graphParentLayout.setCenter(fxViewPanel);
+		return graphParentLayout;
 	}
 
 	@Override
