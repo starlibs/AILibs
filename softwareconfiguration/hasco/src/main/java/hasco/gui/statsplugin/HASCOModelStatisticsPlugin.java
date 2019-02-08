@@ -11,7 +11,7 @@ public class HASCOModelStatisticsPlugin implements GUIPlugin {
 
 	private final HASCOModelStatisticsPluginController controller;
 	private final HASCOModelStatisticsPluginView view;
-	
+
 	public HASCOModelStatisticsPlugin() {
 		super();
 		this.view = new HASCOModelStatisticsPluginView();
@@ -34,7 +34,7 @@ public class HASCOModelStatisticsPlugin implements GUIPlugin {
 	}
 
 	@Override
-	public void setGraphEventSource(AlgorithmEventSource graphEventSource) {
+	public void setAlgorithmEventSource(AlgorithmEventSource graphEventSource) {
 		graphEventSource.registerListener(controller);
 	}
 
