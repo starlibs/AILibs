@@ -3,10 +3,10 @@ package jaicore.graphvisualizer.plugin.nodeinfo;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.graphvisualizer.events.graph.bus.HandleAlgorithmEventException;
 import jaicore.graphvisualizer.events.gui.GUIEvent;
-import jaicore.graphvisualizer.plugin.GUIPluginController;
+import jaicore.graphvisualizer.plugin.IGUIPluginController;
 import jaicore.graphvisualizer.plugin.graphview.NodeClickedEvent;
 
-public class NodeInfoGUIPluginController<N> implements GUIPluginController {
+public class NodeInfoGUIPluginController<N> implements IGUIPluginController {
 
 	private NodeInfoGUIPluginModel<N> model;
 

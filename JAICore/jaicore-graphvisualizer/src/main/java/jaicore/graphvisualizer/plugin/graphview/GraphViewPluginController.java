@@ -11,9 +11,9 @@ import jaicore.graphvisualizer.events.graph.NodeRemovedEvent;
 import jaicore.graphvisualizer.events.graph.NodeTypeSwitchEvent;
 import jaicore.graphvisualizer.events.graph.bus.HandleAlgorithmEventException;
 import jaicore.graphvisualizer.events.gui.GUIEvent;
-import jaicore.graphvisualizer.plugin.GUIPluginController;
+import jaicore.graphvisualizer.plugin.IGUIPluginController;
 
-public class GraphViewPluginController implements GUIPluginController {
+public class GraphViewPluginController implements IGUIPluginController {
 
 	private GraphViewPluginModel model;
 

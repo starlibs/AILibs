@@ -7,7 +7,7 @@ import jaicore.basic.algorithm.IAlgorithm;
 import jaicore.graphvisualizer.events.graph.bus.AlgorithmEventSource;
 import jaicore.graphvisualizer.events.gui.DefaultGUIEventBus;
 import jaicore.graphvisualizer.events.recorder.AlgorithmEventHistoryRecorder;
-import jaicore.graphvisualizer.plugin.GUIPlugin;
+import jaicore.graphvisualizer.plugin.IGUIPlugin;
 import jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -27,7 +27,7 @@ public class GraphVisualizationWindow implements Runnable {
 
 	private AlgorithmEventSource graphEventSource;
 
-	private List<GUIPlugin> visualizationPlugins;
+	private List<IGUIPlugin> visualizationPlugins;
 	private GraphViewPlugin graphViewPlugin;
 
 	private TabPane pluginTabPane;
@@ -38,23 +38,23 @@ public class GraphVisualizationWindow implements Runnable {
 	private BorderPane topLayout;
 	private ToolBar topButtonToolBar;
 
-	public GraphVisualizationWindow(AlgorithmEventSource graphEventSource, GraphViewPlugin graphViewPlugin, GUIPlugin... visualizationPlugins) {
+	public GraphVisualizationWindow(AlgorithmEventSource graphEventSource, GraphViewPlugin graphViewPlugin, IGUIPlugin... visualizationPlugins) {
 		this.graphEventSource = graphEventSource;
 		initializePlugins(graphEventSource, graphViewPlugin, visualizationPlugins);
 	}
 
-	public GraphVisualizationWindow(IAlgorithm<?, ?> algorithm, GraphViewPlugin graphViewPlugin, GUIPlugin... visualizationPlugins) {
+	public GraphVisualizationWindow(IAlgorithm<?, ?> algorithm, GraphViewPlugin graphViewPlugin, IGUIPlugin... visualizationPlugins) {
 		AlgorithmEventHistoryRecorder historyRecorder = new AlgorithmEventHistoryRecorder();
 		this.graphEventSource = historyRecorder.getHistory();
 		initializePlugins(graphEventSource, graphViewPlugin, visualizationPlugins);
 		algorithm.registerListener(historyRecorder);
 	}
 
-	private void initializePlugins(AlgorithmEventSource graphEventSource, GraphViewPlugin graphViewPlugin, GUIPlugin... visualizationPlugins) {
+	private void initializePlugins(AlgorithmEventSource graphEventSource, GraphViewPlugin graphViewPlugin, IGUIPlugin... visualizationPlugins) {
 		this.graphViewPlugin = graphViewPlugin;
 		graphViewPlugin.setGraphEventSource(graphEventSource);
 		this.visualizationPlugins = new ArrayList<>(visualizationPlugins.length);
-		for (GUIPlugin graphVisualizationPlugin : visualizationPlugins) {
+		for (IGUIPlugin graphVisualizationPlugin : visualizationPlugins) {
 			this.visualizationPlugins.add(graphVisualizationPlugin);
 			graphVisualizationPlugin.setGraphEventSource(graphEventSource);
 			graphVisualizationPlugin.setGUIEventSource(DefaultGUIEventBus.getInstance());
@@ -161,7 +161,7 @@ public class GraphVisualizationWindow implements Runnable {
 	}
 
 	private void initializePlugins() {
-		for (GUIPlugin plugin : visualizationPlugins) {
+		for (IGUIPlugin plugin : visualizationPlugins) {
 			Tab pluginTab = new Tab(plugin.getView().getTitle(), plugin.getView().getNode());
 			pluginTabPane.getTabs().add(pluginTab);
 		}

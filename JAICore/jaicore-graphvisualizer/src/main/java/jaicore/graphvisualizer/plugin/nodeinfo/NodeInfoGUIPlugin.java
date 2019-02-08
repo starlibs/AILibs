@@ -2,12 +2,12 @@ package jaicore.graphvisualizer.plugin.nodeinfo;
 
 import jaicore.graphvisualizer.events.graph.bus.AlgorithmEventSource;
 import jaicore.graphvisualizer.events.gui.GUIEventSource;
-import jaicore.graphvisualizer.plugin.GUIPlugin;
-import jaicore.graphvisualizer.plugin.GUIPluginController;
-import jaicore.graphvisualizer.plugin.GUIPluginModel;
-import jaicore.graphvisualizer.plugin.GUIPluginView;
+import jaicore.graphvisualizer.plugin.IGUIPlugin;
+import jaicore.graphvisualizer.plugin.IGUIPluginController;
+import jaicore.graphvisualizer.plugin.IGUIPluginModel;
+import jaicore.graphvisualizer.plugin.IGUIPluginView;
 
-public class NodeInfoGUIPlugin<N> implements GUIPlugin {
+public class NodeInfoGUIPlugin<N> implements IGUIPlugin {
 
 	private NodeInfoGUIPluginController<N> controller;
 	private NodeInfoGUIPluginView<N> view;
@@ -18,17 +18,17 @@ public class NodeInfoGUIPlugin<N> implements GUIPlugin {
 	}
 
 	@Override
-	public GUIPluginController getController() {
+	public IGUIPluginController getController() {
 		return controller;
 	}
 
 	@Override
-	public GUIPluginModel getModel() {
+	public IGUIPluginModel getModel() {
 		return view.getModel();
 	}
 
 	@Override
-	public GUIPluginView getView() {
+	public IGUIPluginView getView() {
 		return view;
 	}
 
