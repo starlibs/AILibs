@@ -60,16 +60,16 @@ public class TwoPhaseHASCO<ISearch extends GraphSearchInput<N, A>, N, A> extends
 
 	private Thread timeoutControl = null;
 
-	public TwoPhaseHASCO(final TwoPhaseSoftwareConfigurationProblem problem, final TwoPhaseHASCOConfig config, HASCO<ISearch, N, A, Double> hasco) {
+	public TwoPhaseHASCO(final TwoPhaseSoftwareConfigurationProblem problem, final TwoPhaseHASCOConfig config) {
 		super(config != null ? config : ConfigFactory.create(TwoPhaseHASCOConfig.class), problem);
-		this.timeOfStart = System.currentTimeMillis();
-		this.logger.info(
-				"Starting 2-Phase HASCO with the following setup:\n\tCPUs:{},\n\tTimeout: {}s\n\tTimeout per node evaluation: {}ms\n\tTimeout per candidate: {}ms\n\tNumber of Random Completions: {}\n\tExpected blow-ups are {} (selection) and {} (post-processing).",
-				this.getNumCPUs(), this.getTimeout(), this.getConfig().timeoutForNodeEvaluation(), this.getConfig().timeoutForCandidateEvaluation(), this.getConfig().randomCompletions(),
-				this.getConfig().expectedBlowupInSelection(), this.getConfig().expectedBlowupInPostprocessing());
-
-		/* create HASCO object */
-		DefaultPathPriorizingPredicate<N, A> prioritizingPredicate = new DefaultPathPriorizingPredicate<>();
+	}
+	
+	public TwoPhaseHASCO(final TwoPhaseSoftwareConfigurationProblem problem, final TwoPhaseHASCOConfig config, HASCO<ISearch, N, A, Double> hasco) {
+		this(problem, config);
+		this.setHasco(hasco);
+	}
+	
+	public void setHasco(HASCO<ISearch, N, A, Double> hasco) {
 		this.hasco = hasco;
 		if (this.getLoggerName() != null)
 			this.hasco.setLoggerName(this.getLoggerName() + ".hasco");
@@ -90,16 +90,26 @@ public class TwoPhaseHASCO<ISearch extends GraphSearchInput<N, A>, N, A> extends
 				}
 
 			}
-		}); // this is to register solutions during runtime
-
-		/* set HASCO objects within the default path prioritizing node evaluator */
-		prioritizingPredicate.setHasco(this.hasco);
+		}); // this is to register solutions during runtime		
 	}
 
 	@Override
 	public AlgorithmEvent nextWithException() throws InterruptedException, TimeoutException, AlgorithmException {
 		switch (this.getState()) {
 		case created: {
+			if (hasco == null)
+				throw new IllegalStateException("Cannot start algorithm before HASCO has been set. Please set HASCO either in constructor or via the setter.");
+			this.timeOfStart = System.currentTimeMillis();
+			this.logger.info(
+					"Starting 2-Phase HASCO with the following setup:\n\tCPUs:{},\n\tTimeout: {}s\n\tTimeout per node evaluation: {}ms\n\tTimeout per candidate: {}ms\n\tNumber of Random Completions: {}\n\tExpected blow-ups are {} (selection) and {} (post-processing).",
+					this.getNumCPUs(), this.getTimeout(), this.getConfig().timeoutForNodeEvaluation(), this.getConfig().timeoutForCandidateEvaluation(), this.getConfig().randomCompletions(),
+					this.getConfig().expectedBlowupInSelection(), this.getConfig().expectedBlowupInPostprocessing());
+
+			/* create HASCO object */
+			DefaultPathPriorizingPredicate<N, A> prioritizingPredicate = new DefaultPathPriorizingPredicate<>();
+
+			/* set HASCO objects within the default path prioritizing node evaluator */
+			prioritizingPredicate.setHasco(this.hasco);
 			return this.activate();
 		}
 
@@ -446,6 +456,10 @@ public class TwoPhaseHASCO<ISearch extends GraphSearchInput<N, A>, N, A> extends
 			}
 		}
 		return selectedModel;
+	}
+
+	public HASCO<ISearch, N, A, Double> getHasco() {
+		return hasco;
 	}
 
 	@Override
