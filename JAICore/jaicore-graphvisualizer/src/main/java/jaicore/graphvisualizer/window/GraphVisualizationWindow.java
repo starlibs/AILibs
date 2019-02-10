@@ -12,16 +12,13 @@ import jaicore.graphvisualizer.events.recorder.AlgorithmEventHistoryRecorder;
 import jaicore.graphvisualizer.plugin.IGUIPlugin;
 import jaicore.graphvisualizer.plugin.controlbar.ControlBarGUIPlugin;
 import jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
+import jaicore.graphvisualizer.plugin.speedslider.SpeedSliderGUIPlugin;
 import jaicore.graphvisualizer.plugin.timeslider.TimeSliderGUIPlugin;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.control.Slider;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class GraphVisualizationWindow implements Runnable {
@@ -33,15 +30,15 @@ public class GraphVisualizationWindow implements Runnable {
 	private GraphViewPlugin graphViewPlugin;
 	private TimeSliderGUIPlugin timeSliderGUIPlugin;
 	private ControlBarGUIPlugin controlBarGUIPlugin;
+	private SpeedSliderGUIPlugin speedSliderGUIPlugin;
 
 	private TabPane pluginTabPane;
-	private Slider visualizationSpeedSlider;
 
 	private BorderPane rootLayout;
 	private BorderPane topLayout;
 
 	public GraphVisualizationWindow(AlgorithmEventHistory algorithmEventHistory, GraphViewPlugin graphViewPlugin, IGUIPlugin... visualizationPlugins) {
-		algorithmEventHistoryPuller = new AlgorithmEventHistoryPuller(algorithmEventHistory, 1);
+		algorithmEventHistoryPuller = new AlgorithmEventHistoryPuller(algorithmEventHistory);
 		this.graphEventSource = algorithmEventHistoryPuller;
 		initializePlugins(graphEventSource, graphViewPlugin, visualizationPlugins);
 		// it is important to register the history puller as a last listener!
@@ -50,7 +47,7 @@ public class GraphVisualizationWindow implements Runnable {
 
 	public GraphVisualizationWindow(IAlgorithm<?, ?> algorithm, GraphViewPlugin graphViewPlugin, IGUIPlugin... visualizationPlugins) {
 		AlgorithmEventHistoryRecorder historyRecorder = new AlgorithmEventHistoryRecorder();
-		algorithmEventHistoryPuller = new AlgorithmEventHistoryPuller(historyRecorder.getHistory(), 1);
+		algorithmEventHistoryPuller = new AlgorithmEventHistoryPuller(historyRecorder.getHistory());
 		this.graphEventSource = algorithmEventHistoryPuller;
 		initializePlugins(graphEventSource, graphViewPlugin, visualizationPlugins);
 		algorithm.registerListener(historyRecorder);
@@ -70,6 +67,10 @@ public class GraphVisualizationWindow implements Runnable {
 		controlBarGUIPlugin = new ControlBarGUIPlugin();
 		controlBarGUIPlugin.setAlgorithmEventSource(algorithmEventSource);
 		controlBarGUIPlugin.setGUIEventSource(DefaultGUIEventBus.getInstance());
+
+		speedSliderGUIPlugin = new SpeedSliderGUIPlugin();
+		speedSliderGUIPlugin.setAlgorithmEventSource(algorithmEventSource);
+		speedSliderGUIPlugin.setGUIEventSource(DefaultGUIEventBus.getInstance());
 
 		this.visualizationPlugins = new ArrayList<>(visualizationPlugins.length);
 		for (IGUIPlugin graphVisualizationPlugin : visualizationPlugins) {
@@ -115,20 +116,7 @@ public class GraphVisualizationWindow implements Runnable {
 	}
 
 	private void initializeVisualizationSpeedSlider() {
-		VBox visualizationSpeedSliderLayout = new VBox();
-		visualizationSpeedSliderLayout.setAlignment(Pos.CENTER);
-
-		visualizationSpeedSlider = new Slider(0, 200, 100);
-		visualizationSpeedSlider.setShowTickLabels(true);
-		visualizationSpeedSlider.setShowTickMarks(true);
-		visualizationSpeedSlider.setMajorTickUnit(25);
-		visualizationSpeedSlider.setMinorTickCount(5);
-		visualizationSpeedSliderLayout.getChildren().add(visualizationSpeedSlider);
-
-		Label visualizationSpeedSliderLabel = new Label("Visualization Speed");
-		visualizationSpeedSliderLayout.getChildren().add(visualizationSpeedSliderLabel);
-
-		topLayout.setBottom(visualizationSpeedSliderLayout);
+		topLayout.setBottom(speedSliderGUIPlugin.getView().getNode());
 	}
 
 	private void initializeCenterLayout() {

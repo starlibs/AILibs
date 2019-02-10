@@ -12,6 +12,7 @@ import jaicore.graphvisualizer.events.gui.GUIEventListener;
 import jaicore.graphvisualizer.plugin.controlbar.PauseEvent;
 import jaicore.graphvisualizer.plugin.controlbar.PlayEvent;
 import jaicore.graphvisualizer.plugin.controlbar.ResetEvent;
+import jaicore.graphvisualizer.plugin.speedslider.ChangeSpeedEvent;
 import jaicore.graphvisualizer.plugin.timeslider.GoToTimeStepEvent;
 
 public class AlgorithmEventHistoryPuller extends Thread implements AlgorithmEventSource, GUIEventListener {
@@ -22,14 +23,21 @@ public class AlgorithmEventHistoryPuller extends Thread implements AlgorithmEven
 	// TODO move time and paused into a model
 	private int timestep;
 	private boolean paused;
-	private int sleepTimeInMillis;
+	private int maximumSleepTimeInMilliseconds;
+	private double sleepTimeMultiplier;
 
-	public AlgorithmEventHistoryPuller(AlgorithmEventHistory eventHistory, int sleepTimeInMillis) {
+	public AlgorithmEventHistoryPuller(AlgorithmEventHistory eventHistory, int maximumSleepTimeInMilliseconds) {
 		this.eventHistory = eventHistory;
-		this.sleepTimeInMillis = sleepTimeInMillis;
+		this.maximumSleepTimeInMilliseconds = maximumSleepTimeInMilliseconds;
+
 		this.timestep = 0;
 		this.paused = true;
 		this.algorithmEventListeners = ConcurrentHashMap.newKeySet();
+		this.sleepTimeMultiplier = 1;
+	}
+
+	public AlgorithmEventHistoryPuller(AlgorithmEventHistory eventHistory) {
+		this(eventHistory, 30);
 	}
 
 	@Override
@@ -51,7 +59,7 @@ public class AlgorithmEventHistoryPuller extends Thread implements AlgorithmEven
 				timestep++;
 			}
 			try {
-				sleep(sleepTimeInMillis);
+				sleep((int) (sleepTimeMultiplier * maximumSleepTimeInMilliseconds));
 			} catch (InterruptedException e) {
 				// TODO handle this
 			}
@@ -79,16 +87,8 @@ public class AlgorithmEventHistoryPuller extends Thread implements AlgorithmEven
 			pause();
 		} else if (guiEvent instanceof GoToTimeStepEvent) {
 			handleGoToTimeStepEvent(guiEvent);
-		}
-	}
-
-	private void handleGoToTimeStepEvent(GUIEvent guiEvent) {
-		resetTimeStep();
-		GoToTimeStepEvent goToTimeStepEvent = (GoToTimeStepEvent) guiEvent;
-		while (timestep < goToTimeStepEvent.getNewTimeStep() && timestep < eventHistory.getLength()) {
-			AlgorithmEvent algorithmEvent = eventHistory.getEntryAtTimeStep(timestep).getAlgorithmEvent();
-			sendAlgorithmEventToListeners(algorithmEvent);
-			timestep++;
+		} else if (guiEvent instanceof ChangeSpeedEvent) {
+			handleChangeSpeedEvent(guiEvent);
 		}
 	}
 
@@ -102,6 +102,21 @@ public class AlgorithmEventHistoryPuller extends Thread implements AlgorithmEven
 
 	private void resetTimeStep() {
 		timestep = 0;
+	}
+
+	private void handleGoToTimeStepEvent(GUIEvent guiEvent) {
+		resetTimeStep();
+		GoToTimeStepEvent goToTimeStepEvent = (GoToTimeStepEvent) guiEvent;
+		while (timestep < goToTimeStepEvent.getNewTimeStep() && timestep < eventHistory.getLength()) {
+			AlgorithmEvent algorithmEvent = eventHistory.getEntryAtTimeStep(timestep).getAlgorithmEvent();
+			sendAlgorithmEventToListeners(algorithmEvent);
+			timestep++;
+		}
+	}
+
+	private void handleChangeSpeedEvent(GUIEvent guiEvent) {
+		ChangeSpeedEvent changeSpeedEvent = (ChangeSpeedEvent) guiEvent;
+		sleepTimeMultiplier = 1 - changeSpeedEvent.getNewSpeedPercentage() / 100.0;
 	}
 
 }
