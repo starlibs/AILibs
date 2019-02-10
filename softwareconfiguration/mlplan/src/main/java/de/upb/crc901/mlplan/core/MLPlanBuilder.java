@@ -60,7 +60,7 @@ public class MLPlanBuilder {
 	
 	public MLPlanBuilder() {
 		super();
-		this.hascoFactory = new HASCOViaFDAndBestFirstWithRandomCompletionsFactory();
+		this.hascoFactory = new HASCOViaFDAndBestFirstWithRandomCompletionsFactory(0, 3);
 	}
 	
 	public MLPlanBuilder(File searchSpaceConfigFile, File alhorithmConfigFile, MultiClassPerformanceMeasure performanceMeasure) {

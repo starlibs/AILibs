@@ -19,6 +19,9 @@ public class GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTrans
 
 	public GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS(INodeEvaluator<N, V> preferredNodeEvaluator, Predicate<N> preferredNodeEvaluatorForRandomCompletion, int seed, int numSamples, int timeoutForSingleCompletionEvaluationInMS, int timeoutForNodeEvaluationInMS) {
 		super();
+		if (numSamples <= 0) {
+			throw new IllegalArgumentException("Sample size has been set to " + numSamples + " but must be strictly positive!");
+		}
 		this.preferredNodeEvaluator = preferredNodeEvaluator;
 		this.prioritizedNodesInRandomCompletion = preferredNodeEvaluatorForRandomCompletion;
 		this.seed = seed;
