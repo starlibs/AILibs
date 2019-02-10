@@ -7,12 +7,29 @@ import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluato
 import jaicore.search.problemtransformers.GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS;
 
 public class HASCOViaFDAndBestFirstWithRandomCompletionsFactory extends HASCOViaFDAndBestFirstFactory<Double> {
-	
+
 	private INodeEvaluator<TFDNode, Double> preferredNodeEvaluator = n -> null;
 	private Predicate<TFDNode> priorizingPredicate;
+	private int seed;
+	private int numSamples;
+	private int timeoutForSingleCompletionEvaluationInMS;
+	private int timeoutForNodeEvaluationInMS;
 
 	public HASCOViaFDAndBestFirstWithRandomCompletionsFactory() {
 		super();
+	}
+	
+	public HASCOViaFDAndBestFirstWithRandomCompletionsFactory(int seed, int numSamples) {
+		this(seed, numSamples, -1, -1);
+	}
+
+	public HASCOViaFDAndBestFirstWithRandomCompletionsFactory(int seed, int numSamples,
+			int timeoutForSingleCompletionEvaluationInMS, int timeoutForNodeEvaluationInMS) {
+		super();
+		this.seed = seed;
+		this.numSamples = numSamples;
+		this.timeoutForSingleCompletionEvaluationInMS = timeoutForSingleCompletionEvaluationInMS;
+		this.timeoutForNodeEvaluationInMS = timeoutForNodeEvaluationInMS;
 	}
 
 	public Predicate<TFDNode> getPriorizingPredicate() {
@@ -30,10 +47,12 @@ public class HASCOViaFDAndBestFirstWithRandomCompletionsFactory extends HASCOVia
 	public void setPreferredNodeEvaluator(INodeEvaluator<TFDNode, Double> preferredNodeEvaluator) {
 		this.preferredNodeEvaluator = preferredNodeEvaluator;
 	}
-	
+
 	@Override
 	public HASCOViaFDAndBestFirst<Double> getAlgorithm() {
-		setSearchProblemTransformer(new GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS<>(preferredNodeEvaluator, priorizingPredicate, 1, 3, -1, -1));
+		setSearchProblemTransformer(
+				new GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS<>(
+						preferredNodeEvaluator, priorizingPredicate, seed, numSamples, timeoutForSingleCompletionEvaluationInMS, timeoutForNodeEvaluationInMS));
 		return super.getAlgorithm();
 	}
 }
