@@ -10,6 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.LineIterator;
 import org.bouncycastle.util.Strings;
 
 import de.upb.isys.linearalgebra.DenseDoubleVector;
@@ -106,9 +107,9 @@ public class DyadRankingDataset extends ArrayList<IInstance> implements IDataset
 		// currently, this always creates a dense dyad ranking dataset
 		this.clear();
 		try {
-			String input = IOUtils.toString(in, StandardCharsets.UTF_8);
-			String[] rows = Strings.split(input, '\n');
-			for (String row : rows) {
+			LineIterator input = IOUtils.lineIterator(in, StandardCharsets.UTF_8);
+			while(input.hasNext()) {
+				String row = input.next();
 				if (row.isEmpty())
 					break;
 				List<Dyad> dyads = new LinkedList<Dyad>();
