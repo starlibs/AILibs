@@ -10,6 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.LineIterator;
 import org.bouncycastle.util.Strings;
 
 import de.upb.isys.linearalgebra.DenseDoubleVector;
@@ -58,30 +59,33 @@ public class DyadRankingDataset extends ArrayList<IInstance> implements IDataset
 		super(initialCapacity);
 	}
 
-	public DyadRankingDataset(List<IDyadRankingInstance> sparseDyadRankingInstances) {
-		super(sparseDyadRankingInstances);
+	public DyadRankingDataset(List<IDyadRankingInstance> dyadRankingInstances) {
+		super(dyadRankingInstances);
 	}
 
 	@Override
 	public <T> IAttributeType<T> getTargetType(Class<? extends T> clazz) {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("Dyad rankings have no target type.");
 	}
 
 	@Override
 	public List<IAttributeType<?>> getAttributeTypes() {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public int getNumberOfAttributes() {
-		// TODO Auto-generated method stub
-		return 0;
+		if (this.size() == 0) {
+			return 0;
+		}
+		Dyad firstDyad = this.get(0).getDyadAtPosition(0);
+		return firstDyad.getInstance().length() + firstDyad.getAlternative().length();
 	}
 
 	@Override
 	public void serialize(OutputStream out) {
+		// currently, this always creates a dense dyad representation of the dyad
+		// ranking dataset
 		try {
 			for (IInstance instance : this) {
 				IDyadRankingInstance drInstance = (IDyadRankingInstance) instance;
@@ -100,11 +104,14 @@ public class DyadRankingDataset extends ArrayList<IInstance> implements IDataset
 
 	@Override
 	public void deserialize(InputStream in) {
+		// currently, this always creates a dense dyad ranking dataset
 		this.clear();
 		try {
-			String input = IOUtils.toString(in, StandardCharsets.UTF_8);
-			String[] rows = Strings.split(input, '\n');
-			for (String row : rows) {
+			LineIterator input = IOUtils.lineIterator(in, StandardCharsets.UTF_8);
+			while(input.hasNext()) {
+				String row = input.next();
+				if (row.isEmpty())
+					break;
 				List<Dyad> dyads = new LinkedList<Dyad>();
 				String[] dyadTokens = Strings.split(row, '|');
 				for (String dyadString : dyadTokens) {
@@ -130,6 +137,27 @@ public class DyadRankingDataset extends ArrayList<IInstance> implements IDataset
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (!(o instanceof DyadRankingDataset)) {
+			return false;
+		}
+		DyadRankingDataset dataset = (DyadRankingDataset) o;
+
+		if (dataset.size() != this.size()) {
+			return false;
+		}
+
+		for (int i = 0; i < dataset.size(); i++) {
+			IDyadRankingInstance i1 = this.get(i);
+			IDyadRankingInstance i2 = dataset.get(i);
+			if (!i1.equals(i2)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	@Override
