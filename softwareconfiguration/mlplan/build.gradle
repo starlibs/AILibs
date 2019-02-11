@@ -1,0 +1,49 @@
+sourceSets {
+    main {
+        resources {
+        	srcDir 'resources'
+    	}
+    }
+    test {
+  		java {
+			 srcDir 'src/examples/java'
+		  }
+    }
+}
+
+dependencies {
+  	// basic dependencies
+	compile project(':hasco')
+
+	// JAICore dependencies
+	compile project(':JAICore:jaicore-basic')
+	compile project(':JAICore:jaicore-concurrent')
+	compile project(':JAICore:jaicore-experiments')
+	compile project(':JAICore:jaicore-logic') 
+	compile project(':JAICore:jaicore-graph')
+	compile project(':JAICore:jaicore-planning')
+	compile project(':JAICore:jaicore-search')
+	compile project(':JAICore:jaicore-ml')
+
+
+	// OWL API
+	compile 'net.sourceforge.owlapi:owlapi-distribution:5.1.0'
+	// TreeMiner
+	compile 'com.github.helegraf:TreeMiner:df764c7b13'
+	// linear algebra
+	compile group: 'org.nd4j', name: 'nd4j-native-platform', version: '0.9.1'
+	compile group: 'org.nd4j', name: 'nd4j-api', version: '0.9.1'
+	
+	// gradient descent (but forbid that the guy uses his log4j-stuff, which we will bride to slf4j)
+	compile ('de.jungblut.common:thomasjungblut-common:1.1') {
+	  exclude group: 'log4j'
+	  exclude group: 'org.slf4j'
+	  exclude group: 'org.apache.logging.log4j', module: 'log4j-core'
+	  exclude group: 'org.apache.logging.log4j', module: 'log4j-api'
+	}
+
+	testCompile project(path: ':JAICore:jaicore-search', configuration: 'testArtifacts')
+	
+}
+
+
