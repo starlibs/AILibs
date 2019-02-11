@@ -1,4 +1,4 @@
-package jaicore.ml.dyadranking.inputoptimization;
+package jaicore.ml.dyadranking.zeroshot.inputoptimization;
 
 import org.deeplearning4j.nn.gradient.Gradient;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;

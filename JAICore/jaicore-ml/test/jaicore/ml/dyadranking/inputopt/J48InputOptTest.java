@@ -11,8 +11,8 @@ import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.core.exception.TrainingException;
 import jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
-import jaicore.ml.dyadranking.inputoptimization.NegIdentityInpOptLoss;
-import jaicore.ml.dyadranking.inputoptimization.PLNetInputOptimizer;
+import jaicore.ml.dyadranking.zeroshot.inputoptimization.NegIdentityInpOptLoss;
+import jaicore.ml.dyadranking.zeroshot.inputoptimization.PLNetInputOptimizer;
 
 public class J48InputOptTest {
 	
