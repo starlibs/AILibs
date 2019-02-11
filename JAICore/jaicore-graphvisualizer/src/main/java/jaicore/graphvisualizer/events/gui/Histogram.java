@@ -9,14 +9,14 @@ import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
-import javafx.scene.chart.XYChart.Data;
 
 public class Histogram extends BarChart<String, Number>{
 	private final XYChart.Series<String, Number> series = new XYChart.Series<>();
 	private final ObservableList<Data<String, Number>> histogram;
+	private String name = "Histogram";
 	public Histogram(int n) {
 		super(new CategoryAxis(), new NumberAxis());
-		series.setName("Histogram");
+		series.setName(name);
 		this.setAnimated(false);
 		this.getData().add(series);
 		List<Data<String,Number>> values = new ArrayList<>();
@@ -34,4 +34,14 @@ public class Histogram extends BarChart<String, Number>{
         }
 		this.histogram.setAll(transformedValues);
 	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+		series.setName(name);
+	}
+
 }

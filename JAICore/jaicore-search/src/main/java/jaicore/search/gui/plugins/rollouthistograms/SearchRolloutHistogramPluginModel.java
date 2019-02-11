@@ -1,11 +1,11 @@
 package jaicore.search.gui.plugins.rollouthistograms;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
-import jaicore.basic.ScoredItem;
-import jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
 import jaicore.graphvisualizer.plugin.ASimpleMVCPluginModel;
 
 /**
@@ -15,16 +15,38 @@ import jaicore.graphvisualizer.plugin.ASimpleMVCPluginModel;
  * @param <N>
  *            The node type class.
  */
-public class SearchRolloutHistogramPluginModel extends ASimpleMVCPluginModel<SearchRolloutHistogramPluginView, SearchRolloutHistogramPluginController> {
+public class SearchRolloutHistogramPluginModel<N> extends ASimpleMVCPluginModel<SearchRolloutHistogramPluginView<N>, SearchRolloutHistogramPluginController<N>> {
 
-	private final List<Double> observedPerformances = Collections.synchronizedList(new LinkedList<>());
+	private N currentlySelectedNode;
+	private final Map<N, List<Double>> observedPerformances = new HashMap<>();
 
-	public final void addEntry(SolutionCandidateFoundEvent<? extends ScoredItem<Double>> solutionEvent) {
-		observedPerformances.add(solutionEvent.getSolutionCandidate().getScore());
+	public final void addEntry(N node, double score) {
+		if (!observedPerformances.containsKey(node))
+			observedPerformances.put(node, Collections.synchronizedList(new LinkedList<>()));
+		observedPerformances.get(node).add(score);
 		getView().update();
 	}
 
-	public List<Double> getObservedPerformances() {
+	public Map<N, List<Double>> getObservedPerformances() {
 		return observedPerformances;
+	}
+	
+	public List<Double> getObservedPerformancesUnderSelectedNode (){
+		return observedPerformances.get(currentlySelectedNode);
+	}
+	
+	public void clear() {
+		observedPerformances.clear();
+		getView().clear();
+	}
+	
+	public void setCurrentlySelectedNode(N currentlySelectedNode) {
+		this.currentlySelectedNode = currentlySelectedNode;
+		
+		getView().update();
+	}
+
+	public N getCurrentlySelectedNode() {
+		return currentlySelectedNode;
 	}
 }

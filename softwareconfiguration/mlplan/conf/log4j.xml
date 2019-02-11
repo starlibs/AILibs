@@ -69,7 +69,7 @@
   </logger>
   
   <logger name="mlplan">
-    <level value="warn" />
+    <level value="info" />
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />
     <appender-ref ref="warnFileAppender" />

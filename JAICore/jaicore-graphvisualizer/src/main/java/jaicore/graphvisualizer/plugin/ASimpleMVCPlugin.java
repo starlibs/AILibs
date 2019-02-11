@@ -23,9 +23,10 @@ public abstract class ASimpleMVCPlugin<M extends ASimpleMVCPluginModel<V, C>, V 
 		V view;
 		C controller;
 		try {
-			Class<M> modelClass = ((Class<M>) Class.forName(mvcPatternClasses[0].getTypeName()));
-			Class<V> viewClass = ((Class<V>) Class.forName(mvcPatternClasses[1].getTypeName()));
-			Class<C> controllerClass = ((Class<C>) Class.forName(mvcPatternClasses[2].getTypeName()));
+			System.out.println(mvcPatternClasses[0].getTypeName().replaceAll("(<.*>)", ""));
+			Class<M> modelClass = ((Class<M>) Class.forName(mvcPatternClasses[0].getTypeName().replaceAll("(<.*>)", "")));
+			Class<V> viewClass = ((Class<V>) Class.forName(mvcPatternClasses[1].getTypeName().replaceAll("(<.*>)", "")));
+			Class<C> controllerClass = ((Class<C>) Class.forName(mvcPatternClasses[2].getTypeName().replaceAll("(<.*>)", "")));
 			model = modelClass.newInstance();
 			view = viewClass.getDeclaredConstructor(modelClass).newInstance(model);
 			controller = controllerClass.getDeclaredConstructor(modelClass, viewClass).newInstance(model, view);
