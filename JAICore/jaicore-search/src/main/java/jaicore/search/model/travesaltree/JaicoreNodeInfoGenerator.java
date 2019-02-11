@@ -1,19 +1,20 @@
 package jaicore.search.model.travesaltree;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 import java.util.Map;
 
 import jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGenerator;
 
 public class JaicoreNodeInfoGenerator<N, V extends Comparable<V>> implements NodeInfoGenerator<Node<N, V>> {
 
-	private final NodeInfoGenerator<N> nodeInfoGeneratorForPoints;
+	private final NodeInfoGenerator<List<N>> nodeInfoGeneratorForPoints;
 
 	public JaicoreNodeInfoGenerator() {
 		this(null);
 	}
 
-	public JaicoreNodeInfoGenerator(NodeInfoGenerator<N> nodeInfoGeneratorForPoints) {
+	public JaicoreNodeInfoGenerator(NodeInfoGenerator<List<N>> nodeInfoGeneratorForPoints) {
 		super();
 		this.nodeInfoGeneratorForPoints = nodeInfoGeneratorForPoints;
 	}
@@ -66,7 +67,7 @@ public class JaicoreNodeInfoGenerator<N, V extends Comparable<V>> implements Nod
 			sb.append("</pre>");
 		}
 		if (nodeInfoGeneratorForPoints != null) {
-			sb.append(nodeInfoGeneratorForPoints.generateInfoForNode(node.getPoint()));
+			sb.append(nodeInfoGeneratorForPoints.generateInfoForNode(node.externalPath()));
 		}
 		return sb.toString();
 	}
