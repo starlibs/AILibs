@@ -1,5 +1,6 @@
 package jaicore.search.gui.plugins.rollouthistograms;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
@@ -14,18 +15,19 @@ import javafx.scene.layout.FlowPane;
  * 
  * @author fmohr
  *
- * @param <N>
- *            The node class
+ * @param <N> The node class
  */
-public class SearchRolloutHistogramPluginView extends ASimpleMVCPluginView<SearchRolloutHistogramPluginModel, SearchRolloutHistogramPluginController> {
+public class SearchRolloutHistogramPluginView<N>
+		extends ASimpleMVCPluginView<SearchRolloutHistogramPluginModel<N>, SearchRolloutHistogramPluginController<N>> {
 
 	private final Histogram histogram;
 	private FlowPane root = new FlowPane();
 	private final int n = 100;
 
-	public SearchRolloutHistogramPluginView(SearchRolloutHistogramPluginModel model) {
+	public SearchRolloutHistogramPluginView(SearchRolloutHistogramPluginModel<N> model) {
 		super(model);
 		histogram = new Histogram(n);
+		histogram.setName("Search Rollout Performances");
 		Platform.runLater(() -> {
 			root.getChildren().add(histogram);
 		});
@@ -38,10 +40,17 @@ public class SearchRolloutHistogramPluginView extends ASimpleMVCPluginView<Searc
 
 	@Override
 	public void update() {
+		if (getModel().getCurrentlySelectedNode() != null && getModel().getObservedPerformancesUnderSelectedNode() != null) {
+			Platform.runLater(() -> {
+				histogram.update(getHistogram(getModel().getObservedPerformancesUnderSelectedNode(), n));
+			});
+		}
+	}
+	
+	public void clear() {
 		Platform.runLater(() -> {
-			histogram.update(getHistogram(getModel().getObservedPerformances(), n));
+			histogram.update(getHistogram(new ArrayList<>(), n));
 		});
-
 	}
 
 	// count data population in groups

@@ -49,6 +49,7 @@ import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSoluti
 import jaicore.search.algorithms.standard.bestfirst.events.NodeAnnotationEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.NodeExpansionCompletedEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.NodeExpansionJobSubmittedEvent;
+import jaicore.search.algorithms.standard.bestfirst.events.RolloutEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.SolutionAnnotationEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.SuccessorComputationCompletedEvent;
 import jaicore.search.algorithms.standard.bestfirst.exceptions.ControlledNodeEvaluationException;
@@ -861,6 +862,16 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		try {
 			this.logger.info("Received solution with f-value {} and annotations {}", solutionEvent.getSolutionCandidate().getScore(), solutionEvent.getSolutionCandidate().getAnnotations());
 			this.registerSolution(solutionEvent.getSolutionCandidate()); // unpack this solution and plug it into the registration process
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+	}
+	
+	@Subscribe
+	public void receiveRolloutEvent(final RolloutEvent<N, V> event) {
+		try {
+			this.logger.debug("Received rollout event: {}", event);
+			this.post(event);
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}

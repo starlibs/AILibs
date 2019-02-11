@@ -36,6 +36,7 @@ import jaicore.search.algorithms.parallel.parallelexploration.distributed.interf
 import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.NodeAnnotationEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.NodeExpansionCompletedEvent;
+import jaicore.search.algorithms.standard.bestfirst.events.RolloutEvent;
 import jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
 import jaicore.search.algorithms.standard.gbf.SolutionEventBus;
 import jaicore.search.algorithms.standard.random.RandomSearch;
@@ -274,6 +275,7 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>>
 					j++;
 					try {
 						V val = this.getFValueOfSolutionPath(completedPath);
+						this.eventBus.post(new RolloutEvent<>("RandomCompletion", n.path(), val));
 						if (val != null) {
 							evaluations.add(val);
 							this.updateMapOfBestScoreFoundSoFar(completedPath, val);
