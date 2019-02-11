@@ -1,5 +1,8 @@
 package jaicore.ml.dyadranking.util;
 
+import java.io.OutputStream;
+import java.io.Serializable;
+
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
 import jaicore.ml.core.dataset.IInstance;
@@ -17,8 +20,12 @@ import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
  *
  */
 
-public class DyadNormalScaler {
+public class DyadNormalScaler implements Serializable {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1319262573945961139L;
 	private SummaryStatistics[] statsX;
 	private SummaryStatistics[] statsY;
 
@@ -131,17 +138,30 @@ public class DyadNormalScaler {
 	 * @param dataset
 	 */
 	public void untransformInstances(DyadRankingDataset dataset) {
-		int lengthX = dataset.get(0).getDyadAtPosition(0).getInstance().length();
 		for (IInstance instance : dataset) {
 			IDyadRankingInstance drInstance = (IDyadRankingInstance) instance;
 			for (Dyad dyad : drInstance) {
-				for (int i = 0; i < lengthX; i++) {
-					double value = dyad.getInstance().getValue(i);
-					value *= statsX[i].getMax() - statsX[i].getMin();
-					value += statsX[i].getMin();
-					dyad.getInstance().setValue(i, value);
-				}
+				untransformInstance(dyad);
 			}
+		}
+	}
+	
+	/**
+	 * Undoes the transformation of the instance of a single dyad.
+	 * 
+	 * @param dyad
+	 */
+	public void untransformInstance(Dyad dyad) {
+		int lengthX = dyad.getInstance().length();
+		if (lengthX != statsX.length) {
+			throw new IllegalArgumentException("The scaler was fit to instances of length " + statsX.length 
+					+ " but received an instance of length " + lengthX + ".");
+		}
+		for (int i = 0; i < lengthX; i++) {
+			double value = dyad.getInstance().getValue(i);
+			value *= statsX[i].getMax() - statsX[i].getMin();
+			value += statsX[i].getMin();
+			dyad.getInstance().setValue(i, value);
 		}
 	}
 	
@@ -151,17 +171,30 @@ public class DyadNormalScaler {
 	 * @param dataset
 	 */
 	public void untransformAlternatives(DyadRankingDataset dataset) {
-		int lengthY = dataset.get(0).getDyadAtPosition(0).getAlternative().length();
 		for (IInstance instance : dataset) {
 			IDyadRankingInstance drInstance = (IDyadRankingInstance) instance;
 			for (Dyad dyad : drInstance) {
-				for (int i = 0; i < lengthY; i++) {
-					double value = dyad.getAlternative().getValue(i);
-					value *= statsY[i].getMax() - statsY[i].getMin();
-					value += statsY[i].getMin();
-					dyad.getAlternative().setValue(i, value);
-				}
+				untransformAlternative(dyad);
 			}
+		}
+	}
+	
+	/**
+	 * Undoes the transformation on the alternative of a single dyad.
+	 * 
+	 * @param dyad
+	 */
+	public void untransformAlternative(Dyad dyad) {
+		int lengthY = dyad.getAlternative().length();
+		if (lengthY != statsY.length) {
+			throw new IllegalArgumentException("The scaler was fit to alternatives of length " + statsY.length 
+					+ " but received an alternative of length " + lengthY + ".");
+		}
+		for (int i = 0; i < lengthY; i++) {
+			double value = dyad.getAlternative().getValue(i);
+			value *= statsY[i].getMax() - statsY[i].getMin();
+			value += statsY[i].getMin();
+			dyad.getAlternative().setValue(i, value);
 		}
 	}
 
@@ -210,4 +243,5 @@ public class DyadNormalScaler {
 		}
 		System.out.println();
 	}
+	
 }
