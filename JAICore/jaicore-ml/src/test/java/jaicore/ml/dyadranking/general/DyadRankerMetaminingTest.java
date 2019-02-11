@@ -92,12 +92,14 @@ public class DyadRankerMetaminingTest {
 		scaler.transformInstances(trainData);
 		scaler.transformInstances(testData);
 
-		trainData = randomlyTrimSparseDyadRankingInstances(trainData, 5);
-		testData = randomlyTrimSparseDyadRankingInstances(testData, 5);
+		trainData = randomlyTrimSparseDyadRankingInstances(trainData, 2);
+//		testData = randomlyTrimSparseDyadRankingInstances(testData, 5);
 		try {
 
 			// train the ranker
-			ranker.train(trainData);
+//			ranker.train(trainData);
+			for(int i = 0; i < 1; i++)
+				ranker.update(trainData.get(i));
 			double avgKendallTau = 0.0d;
 			avgKendallTau = DyadRankingLossUtil.computeAverageLoss(new KendallsTauDyadRankingLoss(), testData, ranker);
 			System.out.println("Average Kendall's tau for " + ranker.getClass().getSimpleName() + ": " + avgKendallTau);
@@ -107,17 +109,6 @@ public class DyadRankerMetaminingTest {
 			for(int i = 0; i < drInstance.length(); i++) {
 				dyads.add(drInstance.getDyadAtPosition(i));
 			}
-			Collection<List<Dyad>> permutations = Collections2.permutations(dyads);
-			double sum = 0;
-			for(List<Dyad> permutation : permutations) {
-				DyadRankingInstance drCurInst = new DyadRankingInstance(permutation);
-				sum += ranker.getProbabilityRanking(drCurInst);
-				System.out.println("probability of ranking: " + ranker.getProbabilityRanking(drCurInst));
-			}
-			System.out.println("sum of probabilities: " + sum);
-			
-			System.out.println("Probability of top ranking: " + ranker.getProbabilityOfTopRanking(drInstance));
-			System.out.println("Dyad ranking length: " + drInstance.length());
 		} catch (TrainingException | PredictionException e) {
 			e.printStackTrace();
 		}
@@ -128,14 +119,14 @@ public class DyadRankerMetaminingTest {
 	public static List<PLNetDyadRanker> supplyDyadRankers() {
 		PLNetDyadRanker plNetRanker = new PLNetDyadRanker();
 		// Use a simple config such that the test finishes quickly
-		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_ACTIVATION_FUNCTION, "SIGMOID");
-		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_PLNET_HIDDEN_NODES, "5");
-		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_MAX_EPOCHS, "10");
-		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_INTERVAL, "1");
-		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_PATIENCE, "5");
-		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_RETRAIN, "false");
-		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_PLNET_LEARNINGRATE, "0.1");
-		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_MINI_BATCH_SIZE, "1");
+//		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_ACTIVATION_FUNCTION, "SIGMOID");
+//		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_PLNET_HIDDEN_NODES, "5");
+//		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_MAX_EPOCHS, "10");
+//		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_INTERVAL, "1");
+//		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_PATIENCE, "5");
+//		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_RETRAIN, "false");
+//		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_PLNET_LEARNINGRATE, "0.1");
+//		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_MINI_BATCH_SIZE, "1");
 		return Arrays.asList(plNetRanker);
 	}
 

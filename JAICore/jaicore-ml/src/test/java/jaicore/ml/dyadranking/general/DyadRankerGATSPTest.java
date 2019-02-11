@@ -100,17 +100,16 @@ public class DyadRankerGATSPTest {
 
 			// train the ranker
 //			ranker.train(trainData);
-			for(int i = 0; i < 100; i++) {
-				IDyadRankingInstance drInstance = dataset.get(i);
-				ranker.update(drInstance);
-				double avgKendallTau = DyadRankingLossUtil.computeAverageLoss(new KendallsTauDyadRankingLoss(), testData, ranker);
-				System.out.print(avgKendallTau + ",");
-			}
-//			double avgKendallTau = 0.0d;
+			double avgKendallTau = 0.0d;
+			ranker.update(trainData.get(0));
+//			for(IInstance instance : trainData)
+//				ranker.update(instance);
+			List<IDyadRankingInstance> predictions = ranker.predict(testData);
 //			avgKendallTau = DyadRankingLossUtil.computeAverageLoss(new KendallsTauDyadRankingLoss(), testData, ranker);
-//			System.out.println("Average Kendall's tau for " + ranker.getClass().getSimpleName() + ": " + avgKendallTau);
-//			assertTrue(avgKendallTau > 0.5d);
-		} catch (TrainingException | PredictionException e) {
+			avgKendallTau = DyadRankingLossUtil.computeAverageLoss(new KendallsTauDyadRankingLoss(), testData, ranker);
+			System.out.println("Average Kendall's tau for " + ranker.getClass().getSimpleName() + ": " + avgKendallTau);
+			assertTrue(avgKendallTau > 0.5d);
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 

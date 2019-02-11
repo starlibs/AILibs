@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,7 +55,6 @@ public class ActiveDyadRankingGATSPTest {
 	// N = number of training instances
 	private static final int N = 120;
 	// seed for shuffling the dataset
-	private static final long seed = 1337;
 
 	PLNetDyadRanker ranker;
 	DyadRankingDataset dataset;
@@ -71,7 +71,11 @@ public class ActiveDyadRankingGATSPTest {
 
 	@Test
 	public void test() {
-		dataset = randomlyTrimSparseDyadRankingInstances(dataset, 2);
+		SummaryStatistics[] stats = new SummaryStatistics[100];
+		for(int i = 0; i < stats.length; i++)
+			stats[i] = new SummaryStatistics();
+		for(int seed = 0; seed < 20; seed++) {
+		dataset = randomlyTrimSparseDyadRankingInstances(dataset, 20);
 
 		Collections.shuffle(dataset, new Random(seed));
 		
@@ -95,8 +99,10 @@ public class ActiveDyadRankingGATSPTest {
 //		}
 		
 		DyadDatasetPoolProvider poolProvider = new DyadDatasetPoolProvider(trainData);
-		PrototypicalPoolBasedActiveDyadRanker activeRanker = new PrototypicalPoolBasedActiveDyadRanker(ranker,
-				poolProvider);
+		poolProvider.setRemoveDyadsWhenQueried(true);
+//		PrototypicalPoolBasedActiveDyadRanker activeRanker = new PrototypicalPoolBasedActiveDyadRanker(ranker,
+//				poolProvider);
+		RandomPoolBasedActiveDyadRanker activeRanker = new RandomPoolBasedActiveDyadRanker(ranker, poolProvider, seed);
 
 		try {
 
@@ -107,6 +113,7 @@ public class ActiveDyadRankingGATSPTest {
 			activeRanker.activelyTrain(1);
 			double avgKendallTau = DyadRankingLossUtil.computeAverageLoss(new KendallsTauDyadRankingLoss(), testData, ranker);
 			System.out.print(avgKendallTau + ",");
+			stats[i].addValue(avgKendallTau);
 			}
 			
 //			double avgKendallTau = 0.0d;
@@ -115,7 +122,10 @@ public class ActiveDyadRankingGATSPTest {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
+		}
+		System.out.println("final results: ");
+		for(int i = 0; i < stats.length; i++)
+			System.out.print(stats[i].getMean() + ",");
 	}
 
 	/**

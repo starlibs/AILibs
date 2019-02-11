@@ -62,10 +62,11 @@ public class DyadScorePoolProvider implements IDyadRankingPoolProvider {
 				throw new IllegalStateException("Dyad not contained yet!");
 			}
 			dyadUtilityPairs.add(new Pair<Dyad, Double>(dyad, dyadScores.get(dyad).getMean()));
+			System.out.println("Current score: " + dyadScores.get(dyad).getMean());
 		}
 		// sort the instance in descending order of utility values
 		Collections.sort(dyadUtilityPairs, Comparator.comparing(p -> -p.getRight()));
-		List<Dyad> ranking = new ArrayList<Dyad>();
+		List<Dyad> ranking = new ArrayList<Dyad>(dyadUtilityPairs.size());
 
 		for (Pair<Dyad, Double> pair : dyadUtilityPairs) {
 			ranking.add(pair.getLeft());

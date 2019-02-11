@@ -7,7 +7,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.PriorityQueue;
 import java.util.Set;
+import java.util.stream.Collector;
 
 import org.aeonbits.owner.ConfigFactory;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
@@ -28,6 +30,9 @@ import org.nd4j.linalg.learning.config.Sgd;
 import org.nd4j.linalg.primitives.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Comparators;
+import com.google.common.collect.Ordering;
 
 import jaicore.basic.FileUtil;
 import jaicore.ml.core.dataset.IDataset;
@@ -360,15 +365,18 @@ public class PLNetDyadRanker extends APLDyadRanker
 		// Build hidden layers
 		String activation = configuration.plNetActivationFunction();
 		int inputsFirstHiddenLayer = configuration.plNetHiddenNodes().get(0);
-		configBuilder.layer(0, new DenseLayer.Builder().nIn(numInputs).nOut(inputsFirstHiddenLayer)
-				.weightInit(WeightInit.SIGMOID_UNIFORM).activation(Activation.fromString(activation)).hasBias(true).build());
+		configBuilder.layer(0,
+				new DenseLayer.Builder().nIn(numInputs).nOut(inputsFirstHiddenLayer)
+						.weightInit(WeightInit.SIGMOID_UNIFORM).activation(Activation.fromString(activation))
+						.hasBias(true).build());
 		List<Integer> hiddenNodes = configuration.plNetHiddenNodes();
 
 		for (int i = 0; i < hiddenNodes.size() - 1; i++) {
 			int numIn = hiddenNodes.get(i);
 			int numOut = hiddenNodes.get(i + 1);
-			configBuilder.layer(i + 1, new DenseLayer.Builder().nIn(numIn).nOut(numOut).weightInit(WeightInit.SIGMOID_UNIFORM)
-					.activation(Activation.fromString(activation)).hasBias(true).build());
+			configBuilder.layer(i + 1,
+					new DenseLayer.Builder().nIn(numIn).nOut(numOut).weightInit(WeightInit.SIGMOID_UNIFORM)
+							.activation(Activation.fromString(activation)).hasBias(true).build());
 		}
 
 		// Build output layer. Since we are using an external error for training,
@@ -515,6 +523,10 @@ public class PLNetDyadRanker extends APLDyadRanker
 	}
 
 	public double getProbabilityOfTopRanking(IDyadRankingInstance drInstance) {
+		return getProbabilityOfTopKRanking(drInstance, drInstance.length());
+	}
+
+	public double getProbabilityOfTopKRanking(IDyadRankingInstance drInstance, int k) {
 
 		if (this.plNet == null) {
 			int dyadSize = (drInstance.getDyadAtPosition(0).getInstance().length())
@@ -530,13 +542,13 @@ public class PLNetDyadRanker extends APLDyadRanker
 			dyadUtilityPairs.add(new Pair<Dyad, Double>(dyad, plNetOutput));
 		}
 		// sort the instance in descending order of utility values
+		// TODO use top k selection 
 		Collections.sort(dyadUtilityPairs, Comparator.comparing(p -> -p.getRight()));
-
 		// compute the probability of this ranking according to the Plackett-Luce model
 		double currentProbability = 1;
-		for (int i = 0; i < dyadUtilityPairs.size(); i++) {
+		for (int i = 0; i < Integer.min(k, dyadUtilityPairs.size()); i++) {
 			double sumOfRemainingSkills = 0;
-			for (int j = i; j < dyadUtilityPairs.size(); j++) {
+			for (int j = i; j < Integer.min(k, dyadUtilityPairs.size()); j++) {
 				sumOfRemainingSkills += Math.exp(dyadUtilityPairs.get(j).getRight());
 			}
 			currentProbability *= (Math.exp(dyadUtilityPairs.get(i).getRight()) / sumOfRemainingSkills);

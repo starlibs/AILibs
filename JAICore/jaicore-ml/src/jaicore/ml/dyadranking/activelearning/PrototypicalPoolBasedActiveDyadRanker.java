@@ -11,8 +11,7 @@ import jaicore.ml.dyadranking.dataset.DyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
 
-public class PrototypicalPoolBasedActiveDyadRanker extends ActiveDyadRanker{
-
+public class PrototypicalPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 
 	public PrototypicalPoolBasedActiveDyadRanker(PLNetDyadRanker ranker, IDyadRankingPoolProvider poolProvider) {
 		super(ranker, poolProvider);
@@ -29,17 +28,18 @@ public class PrototypicalPoolBasedActiveDyadRanker extends ActiveDyadRanker{
 			for (Vector instanceFeatures : poolProvider.getInstanceFeatures()) {
 				List<Dyad> dyads = new ArrayList<Dyad>(poolProvider.getDyadsByInstance(instanceFeatures));
 				IDyadRankingInstance queryRanking = new DyadRankingInstance(dyads);
-				double prob = ranker.getProbabilityOfTopRanking(queryRanking);
+				double prob = ranker.getProbabilityOfTopKRanking(queryRanking, 5);
+//				double prob = ranker.getProbabilityOfTopRanking(queryRanking);
 //				System.out.println("Probability of ranking with " + instanceFeatures + ": " + prob);
 				if (prob < currentLowestProb) {
 					currentLowestProb = prob;
 					dStar = instanceFeatures;
 				}
 			}
-//			System.out.println("dstar: " + dStar + "with probability: " + currentLowestProb);
+			System.out.println("\ndstar: " + dStar + "with probability: " + currentLowestProb);
 
 			List<Dyad> dyads = new ArrayList<Dyad>(poolProvider.getDyadsByInstance(dStar));
-			if(dyads.size()<2)
+			if (dyads.size() < 2)
 				break;
 			Vector instance = dyads.get(0).getInstance();
 			List<Vector> alternatives = new ArrayList<Vector>(dyads.size());
@@ -64,12 +64,13 @@ public class PrototypicalPoolBasedActiveDyadRanker extends ActiveDyadRanker{
 			// query the pool provider to get the ground truth ranking for the pair
 			IDyadRankingInstance groundTruthPair = (IDyadRankingInstance) poolProvider.query(sparseQueryPair);
 
-			// update the ranker with the pair
 			try {
 				ranker.update(groundTruthPair);
 			} catch (TrainingException e) {
+				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+//			ranker.updateIteratively(groundTruthPair);
 		}
 	}
 

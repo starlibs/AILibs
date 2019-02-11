@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Random;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,16 +31,6 @@ import jaicore.ml.dyadranking.loss.DyadRankingLossUtil;
 import jaicore.ml.dyadranking.loss.KendallsTauDyadRankingLoss;
 
 /**
- * This is a test based on Dirk Schäfers dyad ranking dataset based on
- * performance data of genetic algorithms on traveling salesman problem
- * instances https://github.com/disc5/ga-tsp-dataset which was used in [1] for
- * evaluation.
- * 
- * [1] Schäfer, D., & Hüllermeier, E. (2015). Dyad Ranking using a Bilinear
- * {P}lackett-{L}uce Model. In Proceedings ECML/PKDD--2015, European Conference
- * on Machine Learning and Knowledge Discovery in Databases (pp. 227–242).
- * Porto, Portugal: Springer.
- * 
  * @author Jonas Hanselle
  *
  */
@@ -48,18 +39,15 @@ public class ActiveDyadRankingMetaminingTest {
 
 	private static final String DYADS_SCORES_FILE = "testsrc/ml/dyadranking/meta-mining-dyads.txt";
 
-	private static final double trainRatio = 0.7d;
+	private static final double TRAIN_RATIO = 0.5d;
 
-	// N = number of training instances
-	private static final int N = 120;
-	// seed for shuffling the dataset
-	private static final long seed = 1337;
+	private static boolean REMOVE_DYADS_WHEN_QUERIED = false;
 
 	PLNetDyadRanker ranker;
 	DyadRankingDataset dataset;
 
 	public ActiveDyadRankingMetaminingTest(PLNetDyadRanker ranker) {
-		this.ranker = ranker;
+//		this.ranker = ranker;
 	}
 
 	@Before
@@ -88,9 +76,15 @@ public class ActiveDyadRankingMetaminingTest {
 //		DyadDatasetPoolProvider poolProvider = new DyadDatasetPoolProvider(trainData);
 
 		List<Pair<Dyad, Double>> dyadScorePairs = loadDyadsAndScore(DYADS_SCORES_FILE);
+		long seed = 23;
+		SummaryStatistics[] results = new SummaryStatistics[100];
+		for (int i = 0; i < results.length; i++) {
+			results[i] = new SummaryStatistics();
+		}
 
+		ranker = new PLNetDyadRanker();
 		DyadScorePoolProvider poolProvider = new DyadScorePoolProvider(dyadScorePairs);
-		poolProvider.setRemoveDyadsWhenQueried(true);
+		poolProvider.setRemoveDyadsWhenQueried(REMOVE_DYADS_WHEN_QUERIED);
 		DyadRankingDataset dataset = new DyadRankingDataset();
 		for (Vector vector : poolProvider.getInstanceFeatures()) {
 			dataset.add(poolProvider.getDyadRankingInstanceForInstanceFeatures(vector));
@@ -98,9 +92,9 @@ public class ActiveDyadRankingMetaminingTest {
 
 		Collections.shuffle(dataset, new Random(seed));
 
-		DyadRankingDataset trainData = new DyadRankingDataset(dataset.subList(0, (int) (trainRatio * dataset.size())));
+		DyadRankingDataset trainData = new DyadRankingDataset(dataset.subList(0, (int) (TRAIN_RATIO * dataset.size())));
 		DyadRankingDataset testData = new DyadRankingDataset(
-				dataset.subList((int) (trainRatio * dataset.size()), dataset.size()));
+				dataset.subList((int) (TRAIN_RATIO * dataset.size()), dataset.size()));
 
 		System.out.println("size before: " + poolProvider.getInstanceFeatures().size());
 
@@ -108,7 +102,6 @@ public class ActiveDyadRankingMetaminingTest {
 		for (IInstance instance : trainData) {
 			IDyadRankingInstance drInstance = (IDyadRankingInstance) instance;
 			System.out.println(drInstance.getDyadAtPosition(0).getInstance());
-
 		}
 
 		System.out.println("test data: ");
@@ -117,34 +110,51 @@ public class ActiveDyadRankingMetaminingTest {
 			System.out.println(drInstance.getDyadAtPosition(0).getInstance());
 		}
 
+		DyadRankingDataset queryAnswers = new DyadRankingDataset();
+		for (IInstance instance : testData) {
+			queryAnswers.add((IDyadRankingInstance) poolProvider.query(instance));
+		}
+
 		for (IInstance instance : testData) {
 			IDyadRankingInstance drInstance = (IDyadRankingInstance) instance;
 
 			poolProvider.removeDyadsFromPoolByInstances(drInstance.getDyadAtPosition(0).getInstance());
-
 		}
 
 		System.out.println("size after: " + poolProvider.getInstanceFeatures().size());
 
 		ActiveDyadRanker activeDyadRanker = new PrototypicalPoolBasedActiveDyadRanker(ranker, poolProvider);
+
+		System.out.println("tau of query: "
+				+ DyadRankingLossUtil.computeAverageLoss(new KendallsTauDyadRankingLoss(), testData, queryAnswers));
+
 //		ActiveDyadRanker activeDyadRanker = new RandomPoolBasedActiveDyadRanker(ranker, poolProvider, seed);
 
 		try {
 
 			// train the ranker
-			for (IInstance inst : trainData)
-				System.out.println(((IDyadRankingInstance) inst).getDyadAtPosition(0).getInstance());
-			for (int i = 0; i < 100; i++) {
-				activeDyadRanker.activelyTrain(1);
-				double avgKendallTau = DyadRankingLossUtil.computeAverageLoss(new KendallsTauDyadRankingLoss(),
+//			for (IInstance inst : trainData)
+//				System.out.println(((IDyadRankingInstance) inst).getDyadAtPosition(0).getInstance());
+//			for (int i = 0; i < 100; i++) {
+//				activeDyadRanker.activelyTrain(1);
+//				double avgKendallTau = DyadRankingLossUtil.computeAverageLoss(new KendallsTauDyadRankingLoss(),
+//						testData, ranker);
+//				results[i].addValue(avgKendallTau);
+//				System.out.print(avgKendallTau + ",");
+//			}
+				ranker.train(trainData);
+				double avgTauOutOfSample = DyadRankingLossUtil.computeAverageLoss(new KendallsTauDyadRankingLoss(),
 						testData, ranker);
-				System.out.print(avgKendallTau + ",");
-			}
-
+				double avgTauInSample = DyadRankingLossUtil.computeAverageLoss(new KendallsTauDyadRankingLoss(),
+						trainData, ranker);
+				System.out.println("out of sample: " + avgTauOutOfSample + "\t in sample:" + avgTauInSample);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
+//		System.out.println("final averaged results: ");
+//		for (int i = 0; i < results.length; i++) {
+//			System.out.print(results[i].getMean() + ",");
+//		}
 	}
 
 	@Parameters
