@@ -41,4 +41,9 @@ public class InversePowerLawLearningCurve implements LearningCurve {
 		return (-this.b) * this.c * Math.pow(x, this.c - 1.0d);
 	}
 
+	@Override
+	public String toString () {
+		return "(1 - " + this.a + ") - " + this.b + " * x ^ " + this.c;
+	}
+	
 }
