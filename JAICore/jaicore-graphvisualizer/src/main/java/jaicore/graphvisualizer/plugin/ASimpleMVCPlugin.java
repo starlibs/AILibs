@@ -48,17 +48,17 @@ public abstract class ASimpleMVCPlugin<M extends ASimpleMVCPluginModel<V, C>, V 
 	}
 
 	@Override
-	public IGUIPluginController getController() {
+	public C getController() {
 		return controller;
 	}
 
 	@Override
-	public IGUIPluginModel getModel() {
+	public M getModel() {
 		return view.getModel();
 	}
 
 	@Override
-	public IGUIPluginView getView() {
+	public V getView() {
 		return view;
 	}
 

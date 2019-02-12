@@ -62,6 +62,7 @@ public class TwoPhaseHASCO<ISearch extends GraphSearchInput<N, A>, N, A> extends
 
 	public TwoPhaseHASCO(final TwoPhaseSoftwareConfigurationProblem problem, final TwoPhaseHASCOConfig config) {
 		super(config != null ? config : ConfigFactory.create(TwoPhaseHASCOConfig.class), problem);
+		logger.info("Created TwoPhaseHASCO object.");
 	}
 	
 	public TwoPhaseHASCO(final TwoPhaseSoftwareConfigurationProblem problem, final TwoPhaseHASCOConfig config, HASCO<ISearch, N, A, Double> hasco) {
@@ -100,6 +101,7 @@ public class TwoPhaseHASCO<ISearch extends GraphSearchInput<N, A>, N, A> extends
 			if (hasco == null)
 				throw new IllegalStateException("Cannot start algorithm before HASCO has been set. Please set HASCO either in constructor or via the setter.");
 			this.timeOfStart = System.currentTimeMillis();
+			AlgorithmInitializedEvent event = this.activate();
 			this.logger.info(
 					"Starting 2-Phase HASCO with the following setup:\n\tCPUs:{},\n\tTimeout: {}s\n\tTimeout per node evaluation: {}ms\n\tTimeout per candidate: {}ms\n\tNumber of Random Completions: {}\n\tExpected blow-ups are {} (selection) and {} (post-processing).",
 					this.getNumCPUs(), this.getTimeout(), this.getConfig().timeoutForNodeEvaluation(), this.getConfig().timeoutForCandidateEvaluation(), this.getConfig().randomCompletions(),
@@ -110,7 +112,8 @@ public class TwoPhaseHASCO<ISearch extends GraphSearchInput<N, A>, N, A> extends
 
 			/* set HASCO objects within the default path prioritizing node evaluator */
 			prioritizingPredicate.setHasco(this.hasco);
-			return this.activate();
+			logger.info("Initialized HASCO with start time {}.", timeOfStart);
+			return event;
 		}
 
 		/* active is only one step in this model; this could be refined */
@@ -140,6 +143,7 @@ public class TwoPhaseHASCO<ISearch extends GraphSearchInput<N, A>, N, A> extends
 				}
 			}, "Phase 1 time bound observer");
 			this.timeoutControl.start();
+			logger.info("Entering phase 1. Calling HASCO with timeout {}.", hasco.getTimeout());
 			try {
 				this.hasco.call();
 			} catch (AlgorithmExecutionCanceledException e) {

@@ -1,5 +1,6 @@
 package jaicore.graphvisualizer.events.recorder;
 
+import jaicore.basic.ILoggingCustomizable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -14,9 +15,10 @@ import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.graphvisualizer.events.graph.bus.AlgorithmEventListener;
 import jaicore.graphvisualizer.events.graph.bus.AlgorithmEventSource;
 
-public class AlgorithmEventHistory implements AlgorithmEventSource {
+public class AlgorithmEventHistory implements AlgorithmEventSource, ILoggingCustomizable {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(AlgorithmEventHistory.class);
+	private String loggerName;
+	private Logger logger = LoggerFactory.getLogger(AlgorithmEventHistory.class);
 
 	private Set<AlgorithmEventListener> algorithmEventListeners;
 
@@ -28,12 +30,14 @@ public class AlgorithmEventHistory implements AlgorithmEventSource {
 	}
 
 	public void addEvent(AlgorithmEvent algorithmEvent) {
-		events.add(generateHistoryEntry(algorithmEvent));
+		AlgorithmEventHistoryEntry entry = generateHistoryEntry(algorithmEvent);
+		events.add(entry);
+		logger.debug("Added entry {} for algorithm event {} to history at position {}.", entry, algorithmEvent, events.size() - 1);
 		for (AlgorithmEventListener listener : algorithmEventListeners) {
 			try {
 				listener.handleAlgorithmEvent(algorithmEvent);
 			} catch (Exception exception) { // TODO change to HandleGraphEventException
-				LOGGER.error("Encountered an error when passing graph event to listener \"{}\" .", listener, exception);
+				logger.error("Encountered an error when passing graph event to listener \"{}\" .", listener, exception);
 			}
 		}
 	}
@@ -72,6 +76,19 @@ public class AlgorithmEventHistory implements AlgorithmEventSource {
 	@Override
 	public void unregisterListener(AlgorithmEventListener graphEventListener) {
 		algorithmEventListeners.remove(graphEventListener);
+	}
+
+	@Override
+	public String getLoggerName() {
+		return loggerName;
+	}
+
+	@Override
+	public void setLoggerName(String name) {
+		this.loggerName = name;
+		this.logger.info("Switching logger name to {}", name);
+		this.logger = LoggerFactory.getLogger(name);
+		this.logger.info("Switched logger name to {}", name);
 	}
 
 }

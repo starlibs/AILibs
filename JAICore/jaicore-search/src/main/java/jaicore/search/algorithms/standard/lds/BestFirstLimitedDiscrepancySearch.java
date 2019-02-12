@@ -15,6 +15,7 @@ import com.google.common.eventbus.Subscribe;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.AlgorithmState;
+import jaicore.basic.algorithm.events.ASolutionCandidateFoundEvent;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
@@ -115,7 +116,7 @@ public class BestFirstLimitedDiscrepancySearch<T, A, V extends Comparable<V>> ex
 			@SuppressWarnings({ "unchecked", "rawtypes" })
 			EvaluatedSearchGraphPath<T, A, NodeOrderList> solution = (EvaluatedSearchGraphPath<T, A, NodeOrderList>) ((SolutionCandidateFoundEvent) e).getSolutionCandidate();
 			EvaluatedSearchGraphPath<T, A, V> modifiedSolution = new EvaluatedSearchGraphPath<T, A, V>(solution.getNodes(), solution.getEdges(), null);
-			return new SolutionCandidateFoundEvent<>(getId(), modifiedSolution);
+			return new ASolutionCandidateFoundEvent<>(getId(), modifiedSolution);
 		}
 		else
 			return e;

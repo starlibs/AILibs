@@ -59,6 +59,10 @@
    <level value="trace" />
   </logger>
   
+  <logger name="jaicore.graphvisualizer">
+    <level value="warn" />
+  </logger>
+  
   <logger name="hasco">
     <level value="warn" />
     <appender-ref ref="console" />
@@ -76,6 +80,10 @@
     <appender-ref ref="errFileAppender" />
     <appender-ref ref="traceFileAppender" />
   </logger>
+
+  <logger name="mlplan.optimizingfactory.optAlgo">
+    <level value="info" />
+  </logger>
   
   <logger name="testedalgorithm">
     <level value="trace" />
@@ -85,9 +93,5 @@
     <appender-ref ref="warnFileAppender" />
     <appender-ref ref="errFileAppender" />
     <appender-ref ref="traceFileAppender" />
-  </logger>
-
-  <logger name="mlplan.2phasehasco">
-    <level value="warn" />
   </logger>
 </log4j:configuration>

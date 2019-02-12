@@ -5,6 +5,9 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import hasco.core.Util;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
@@ -16,7 +19,8 @@ public class PreferenceBasedNodeEvaluator implements INodeEvaluator<TFDNode, Dou
 
 	private final Collection<Component> components;
 	private final List<String> ORDERING_OF_CLASSIFIERS;
-
+	private final static Logger logger = LoggerFactory.getLogger(PreferenceBasedNodeEvaluator.class);
+	
 	public PreferenceBasedNodeEvaluator(final Collection<Component> components, final List<String> ORDERING_OF_CLASSIFIERS) {
 		super();
 		this.components = components;
@@ -86,7 +90,6 @@ public class PreferenceBasedNodeEvaluator implements INodeEvaluator<TFDNode, Dou
 				score = null;
 			}
 		}
-
 		return score;
 
 	}
