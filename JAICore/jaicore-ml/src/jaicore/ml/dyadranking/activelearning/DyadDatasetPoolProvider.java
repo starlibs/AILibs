@@ -73,9 +73,9 @@ public class DyadDatasetPoolProvider implements IDyadRankingPoolProvider {
 			dyadList.add(pair.getFirst());
 		}
 		DyadRankingInstance trueRanking = new DyadRankingInstance(dyadList);
-		if(this.removeDyadsWhenQueried) {
-		for (Dyad dyad : dyadList)
-			this.removeDyadFromPool(dyad);
+		if (this.removeDyadsWhenQueried) {
+			for (Dyad dyad : dyadList)
+				this.removeDyadFromPool(dyad);
 		}
 		return trueRanking;
 	}
@@ -146,16 +146,30 @@ public class DyadDatasetPoolProvider implements IDyadRankingPoolProvider {
 
 	@Override
 	public Collection<Vector> getInstanceFeatures() {
-		return dyadRankingsByInstances.keySet();
+		return dyadsByInstances.keySet();
 	}
 
 	private void removeDyadFromPool(Dyad dyad) {
-//		System.out.println("set before: " + dyadsByInstances.get(dyad.getInstance()).toString());
-		if (dyadsByInstances.containsKey(dyad.getInstance()))
+		if(dyadsByInstances.containsKey(dyad.getInstance()))
+			System.out.println("set before: " + dyadsByInstances.get(dyad.getInstance()).size());
+		else
+			System.out.println("no dyads for these instance features available");
+		if (dyadsByInstances.containsKey(dyad.getInstance())) {
 			dyadsByInstances.get(dyad.getInstance()).remove(dyad);
-		if (dyadsByAlternatives.containsKey(dyad.getAlternative()))
+			if (dyadsByInstances.get(dyad.getInstance()).size() < 2)
+				dyadsByInstances.remove(dyad.getInstance());
+		}
+		if (dyadsByAlternatives.containsKey(dyad.getAlternative())) {
 			dyadsByAlternatives.get(dyad.getAlternative()).remove(dyad);
-//		System.out.println("set after: " + dyadsByInstances.get(dyad.getInstance()).toString());
+			if (dyadsByAlternatives.get(dyad.getAlternative()).size() < 2)
+				dyadsByAlternatives.remove(dyad.getAlternative());
+		}
+		if(dyadsByInstances.containsKey(dyad.getInstance()))
+			System.out.println("set after: " + dyadsByInstances.get(dyad.getInstance()).size());
+		else
+			System.out.println("no dyads for these instance features available");
+
+		System.out.println(dyadsByInstances.size());
 	}
 
 	@Override
