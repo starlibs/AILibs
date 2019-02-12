@@ -20,16 +20,23 @@ import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
 
 public class PrototypicalPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 
-	private static final int MAX_INSTANCES_PER_BATCH = 10;
-	private static final int MAX_PAIRS_PER_INSTANCE_IN_BATCH = 1;
-	private static final int LENGTH_OF_TOP_RANKING = 5;
-	private static final double PORTION_OF_OLD_INSTANCES_FOR_MINIBATCH = 0.3d;
-
 	private ArrayList<IInstance> seenInstances;
+	private int maxBatchSize;
+	private double ratioOfOldInstancesForMinibatch;
+	private int lengthOfTopRankingToConsider;
 
 	public PrototypicalPoolBasedActiveDyadRanker(PLNetDyadRanker ranker, IDyadRankingPoolProvider poolProvider) {
 		super(ranker, poolProvider);
 		seenInstances = new ArrayList<IInstance>(poolProvider.getPool().size());
+	}
+
+	public PrototypicalPoolBasedActiveDyadRanker(PLNetDyadRanker ranker, IDyadRankingPoolProvider poolProvider,
+			int maxBatchSize, int lengthOfTopRankingToConsider, double ratioOfOldInstancesForMinibatch) {
+		super(ranker, poolProvider);
+		seenInstances = new ArrayList<IInstance>(poolProvider.getPool().size());
+		this.maxBatchSize = maxBatchSize;
+		this.ratioOfOldInstancesForMinibatch = ratioOfOldInstancesForMinibatch;
+		this.lengthOfTopRankingToConsider = lengthOfTopRankingToConsider;
 	}
 
 	public void activelyTrain(int numberOfQueries) {
@@ -38,20 +45,20 @@ public class PrototypicalPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 			// get the instance feature vector for which the top ranking has the lowest
 			// probability, d^star in the paper
 			Set<IInstance> minibatch = new HashSet<IInstance>();
-			List<Pair<Vector, Double>> dStarWithProbability = new ArrayList<Pair<Vector, Double>>(
-					MAX_INSTANCES_PER_BATCH);
+			List<Pair<Vector, Double>> dStarWithProbability = new ArrayList<Pair<Vector, Double>>(maxBatchSize);
 			for (Vector instanceFeatures : poolProvider.getInstanceFeatures()) {
 				List<Dyad> dyads = new ArrayList<Dyad>(poolProvider.getDyadsByInstance(instanceFeatures));
 				IDyadRankingInstance queryRanking = new DyadRankingInstance(dyads);
-				double prob = ranker.getProbabilityOfTopKRanking(queryRanking, LENGTH_OF_TOP_RANKING);
+				double prob = ranker.getProbabilityOfTopKRanking(queryRanking, lengthOfTopRankingToConsider);
 				dStarWithProbability.add(new Pair<Vector, Double>(instanceFeatures, prob));
 			}
 
 			Collections.sort(dStarWithProbability, Comparator.comparing(p -> -p.getRight()));
 
-			int numberOfOldInstances = Integer.min((int)(PORTION_OF_OLD_INSTANCES_FOR_MINIBATCH*MAX_INSTANCES_PER_BATCH), seenInstances.size());
-			int numberOfNewInstances = MAX_INSTANCES_PER_BATCH - numberOfOldInstances;
-			
+			int numberOfOldInstances = Integer.min((int) (ratioOfOldInstancesForMinibatch * maxBatchSize),
+					seenInstances.size());
+			int numberOfNewInstances = maxBatchSize - numberOfOldInstances;
+
 			for (int batchIndex = 0; batchIndex < numberOfNewInstances; batchIndex++) {
 				Vector curDStar = dStarWithProbability.get(batchIndex).getFirst();
 				List<Dyad> dyads = new ArrayList<Dyad>(poolProvider.getDyadsByInstance(curDStar));
@@ -82,12 +89,13 @@ public class PrototypicalPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 				seenInstances.add(groundTruthPair);
 				minibatch.add(groundTruthPair);
 			}
-			
-			// Select a portion of random instances that have already been queried and add them to the minibatch
+
+			// Select a portion of random instances that have already been queried and add
+			// them to the minibatch
 			Collections.shuffle(seenInstances);
 			List<IInstance> oldInstances = seenInstances.subList(0, numberOfOldInstances);
 			minibatch.addAll(oldInstances);
-			
+
 			try {
 //				System.out.println("Minibatch size: " + minibatch.size());
 				ranker.update(minibatch);
@@ -97,6 +105,30 @@ public class PrototypicalPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 			}
 //			ranker.updateIteratively(groundTruthPair);
 		}
+	}
+
+	public int getMaxBatchSize() {
+		return maxBatchSize;
+	}
+
+	public void setMaxBatchSize(int maxBatchSize) {
+		this.maxBatchSize = maxBatchSize;
+	}
+
+	public double getRatioOfOldInstancesForMinibatch() {
+		return ratioOfOldInstancesForMinibatch;
+	}
+
+	public void setRatioOfOldInstancesForMinibatch(double ratioOfOldInstancesForMinibatch) {
+		this.ratioOfOldInstancesForMinibatch = ratioOfOldInstancesForMinibatch;
+	}
+
+	public int getLengthOfTopRankingToConsider() {
+		return lengthOfTopRankingToConsider;
+	}
+
+	public void setLengthOfTopRankingToConsider(int lengthOfTopRankingToConsider) {
+		this.lengthOfTopRankingToConsider = lengthOfTopRankingToConsider;
 	}
 
 }
