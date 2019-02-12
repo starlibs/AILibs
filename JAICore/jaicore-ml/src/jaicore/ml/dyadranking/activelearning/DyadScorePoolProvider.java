@@ -166,4 +166,12 @@ public class DyadScorePoolProvider implements IDyadRankingPoolProvider {
 	public void setRemoveDyadsWhenQueried(boolean flag) {
 		this.removeDyadsWhenQueried = flag;
 	}
+
+	@Override
+	public int getPoolSize() {
+		int size = 0;
+		for(Set<Dyad> set : dyadsByInstances.values())
+			size+=set.size();
+		return size;
+	}
 }

@@ -7,9 +7,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.PriorityQueue;
 import java.util.Set;
-import java.util.stream.Collector;
 
 import org.aeonbits.owner.ConfigFactory;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
@@ -26,13 +24,9 @@ import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.learning.config.Adam;
-import org.nd4j.linalg.learning.config.Sgd;
 import org.nd4j.linalg.primitives.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.Comparators;
-import com.google.common.collect.Ordering;
 
 import jaicore.basic.FileUtil;
 import jaicore.ml.core.dataset.IDataset;
@@ -272,7 +266,9 @@ public class PLNetDyadRanker extends APLDyadRanker
 				this.plNet = createNetwork(dyadSize);
 				this.plNet.init();
 			}
-			this.update(instance);
+//			this.update(instance);
+			List<IInstance> minibatch = new ArrayList<IInstance>(instances);
+			this.updateWithMinibatch(minibatch);
 		}
 	}
 

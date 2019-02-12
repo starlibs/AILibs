@@ -47,4 +47,6 @@ public interface IDyadRankingPoolProvider extends IActiveLearningPoolProvider {
 	public Collection<Vector> getInstanceFeatures();
 	
 	public void setRemoveDyadsWhenQueried(boolean flag);
+	
+	public int getPoolSize();
 }

@@ -150,10 +150,6 @@ public class DyadDatasetPoolProvider implements IDyadRankingPoolProvider {
 	}
 
 	private void removeDyadFromPool(Dyad dyad) {
-		if(dyadsByInstances.containsKey(dyad.getInstance()))
-			System.out.println("set before: " + dyadsByInstances.get(dyad.getInstance()).size());
-		else
-			System.out.println("no dyads for these instance features available");
 		if (dyadsByInstances.containsKey(dyad.getInstance())) {
 			dyadsByInstances.get(dyad.getInstance()).remove(dyad);
 			if (dyadsByInstances.get(dyad.getInstance()).size() < 2)
@@ -164,17 +160,19 @@ public class DyadDatasetPoolProvider implements IDyadRankingPoolProvider {
 			if (dyadsByAlternatives.get(dyad.getAlternative()).size() < 2)
 				dyadsByAlternatives.remove(dyad.getAlternative());
 		}
-		if(dyadsByInstances.containsKey(dyad.getInstance()))
-			System.out.println("set after: " + dyadsByInstances.get(dyad.getInstance()).size());
-		else
-			System.out.println("no dyads for these instance features available");
-
-		System.out.println(dyadsByInstances.size());
 	}
 
 	@Override
 	public void setRemoveDyadsWhenQueried(boolean flag) {
 		this.removeDyadsWhenQueried = flag;
+	}
+	
+	@Override
+	public int getPoolSize() {
+		int size = 0;
+		for(Set<Dyad> set : dyadsByInstances.values())
+			size+=set.size();
+		return size;
 	}
 
 }

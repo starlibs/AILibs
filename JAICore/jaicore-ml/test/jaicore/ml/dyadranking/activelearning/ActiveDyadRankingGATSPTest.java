@@ -22,7 +22,6 @@ import de.upb.isys.linearalgebra.DenseDoubleVector;
 import de.upb.isys.linearalgebra.Vector;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.dyadranking.algorithm.APLDyadRanker;
-import jaicore.ml.dyadranking.algorithm.IPLNetDyadRankerConfiguration;
 import jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
@@ -75,7 +74,7 @@ public class ActiveDyadRankingGATSPTest {
 		for(int i = 0; i < stats.length; i++)
 			stats[i] = new SummaryStatistics();
 		for(int seed = 0; seed < 20; seed++) {
-		dataset = randomlyTrimSparseDyadRankingInstances(dataset, 20);
+//		dataset = randomlyTrimSparseDyadRankingInstances(dataset, 20);
 
 		Collections.shuffle(dataset, new Random(seed));
 		
@@ -100,8 +99,8 @@ public class ActiveDyadRankingGATSPTest {
 		
 		DyadDatasetPoolProvider poolProvider = new DyadDatasetPoolProvider(trainData);
 		poolProvider.setRemoveDyadsWhenQueried(true);
-//		PrototypicalPoolBasedActiveDyadRanker activeRanker = new PrototypicalPoolBasedActiveDyadRanker(ranker,
-//				poolProvider);
+//			PrototypicalPoolBasedActiveDyadRanker activeRanker = new PrototypicalPoolBasedActiveDyadRanker(ranker,
+//					poolProvider);
 		RandomPoolBasedActiveDyadRanker activeRanker = new RandomPoolBasedActiveDyadRanker(ranker, poolProvider, seed);
 
 		try {

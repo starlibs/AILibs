@@ -2,18 +2,24 @@ package jaicore.ml.dyadranking.activelearning;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 import de.upb.isys.linearalgebra.Vector;
+import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.exception.TrainingException;
 import jaicore.ml.dyadranking.Dyad;
 import jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
-import jaicore.ml.dyadranking.dataset.DyadRankingInstance;
+import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
 
 public class RandomPoolBasedActiveDyadRanker extends ActiveDyadRanker {
+	
+	private static final int MAX_INSTANCES_PER_BATCH = 10;
+	private static final int MAX_PAIRS_PER_INSTANCE_IN_BATCH = 1;
 
 	private Random random;
 	private long seed;
@@ -27,7 +33,8 @@ public class RandomPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 	public void activelyTrain(int numberOfQueries) {
 		random = new Random(seed);
 		for (int i = 0; i < numberOfQueries; i++) {
-
+			Set<IInstance> minibatch = new HashSet<IInstance>();
+			for(int batchIndex = 0; batchIndex < MAX_INSTANCES_PER_BATCH; batchIndex++) {
 			// get random instance
 			List<Vector> instanceFeatures = new ArrayList<Vector>(poolProvider.getInstanceFeatures());
 			Collections.shuffle(instanceFeatures, random);
@@ -44,11 +51,12 @@ public class RandomPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 			alternatives.add(dyads.get(0).getAlternative());
 			alternatives.add(dyads.get(1).getAlternative());
 			SparseDyadRankingInstance queryInstance = new SparseDyadRankingInstance(dyads.get(0).getInstance(), alternatives);
-			DyadRankingInstance trueRanking = (DyadRankingInstance) poolProvider.query(queryInstance);
-			
+			IDyadRankingInstance trueRanking = (IDyadRankingInstance) poolProvider.query(queryInstance);
+			minibatch.add(trueRanking);
+			}
 			// feed it to the ranker
 			try {
-				ranker.update(trueRanking);
+				ranker.update(minibatch);
 			} catch (TrainingException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
