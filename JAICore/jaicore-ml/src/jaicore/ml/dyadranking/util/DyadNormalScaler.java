@@ -29,6 +29,14 @@ public class DyadNormalScaler implements Serializable {
 	private SummaryStatistics[] statsX;
 	private SummaryStatistics[] statsY;
 
+	public SummaryStatistics[] getStatsX() {
+		return statsX;
+	}
+
+	public SummaryStatistics[] getStatsY() {
+		return statsY;
+	}
+
 	/**
 	 * Fits the normal scaler to the dataset.
 	 * 

@@ -70,7 +70,7 @@ public class J48InputOptTest {
 		INDArray init = Nd4j.hstack(dsFeat, initHyperPars);
 		//scaler.printMaxima();
 		//scaler.printMinima();
-		INDArray optimized = PLNetInputOptimizer.optimizeInput(
+		INDArray optimized = new PLNetInputOptimizer().optimizeInput(
 				plNet, init, new NegIdentityInpOptLoss(), 0.0005, 200, inputMask);
 		System.out.println("OPTIMAL hyper parameters: " 
 				+ optimized.getDouble(optimized.length()-2) + ", " 

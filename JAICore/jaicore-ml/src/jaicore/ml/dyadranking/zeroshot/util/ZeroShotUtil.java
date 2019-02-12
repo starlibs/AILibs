@@ -6,7 +6,9 @@ public class ZeroShotUtil {
 	
 	public static String[] mapJ48InputsToWekaOptions(double C, double M) throws Exception {
 		
-		String[] options = Utils.splitOptions("-C " + C + " -M " + M);
+		long roundedM = Math.round(M);
+		
+		String[] options = Utils.splitOptions("-C " + C + " -M " + roundedM);
 		
 		return options;		
 	}
