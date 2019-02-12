@@ -69,6 +69,14 @@
 	</logger>
 	
 	 <logger name="hasco.core.HASCO">
+    <level value="info" />
+  </logger>
+  
+  <logger name="jaicore.graphvisualizer">
+    <level value="info" />
+  </logger>
+  
+  <logger name="jaicore.graphvisualizer.plugin.solutionperformanceplotter">
     <level value="debug" />
   </logger>
 	

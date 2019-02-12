@@ -15,10 +15,6 @@ public class HASCOViaFDAndBestFirstWithRandomCompletionsFactory extends HASCOVia
 	private int timeoutForSingleCompletionEvaluationInMS;
 	private int timeoutForNodeEvaluationInMS;
 
-	public HASCOViaFDAndBestFirstWithRandomCompletionsFactory() {
-		super();
-	}
-	
 	public HASCOViaFDAndBestFirstWithRandomCompletionsFactory(int seed, int numSamples) {
 		this(seed, numSamples, -1, -1);
 	}
