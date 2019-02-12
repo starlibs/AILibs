@@ -195,12 +195,4 @@ public class DenseDoubleVector extends AbstractVector {
 		return new SparseDoubleVector(asArray());
 	}
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + ((internalVector == null) ? 0 : internalVector.hashCode());
-		return result;
-	}
-
 }
