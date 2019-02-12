@@ -26,7 +26,7 @@ public class SolutionPerformanceTimelinePluginModel extends ASimpleMVCPluginMode
 		}
 		else
 			offset = (int)(solutionEvent.getTimestamp() - timestampOfFirstEvent);
-		timedPerformances.add(new Pair<>(offset, (double)solutionEvent.getSolutionCandidate().getScore()));
+		timedPerformances.add(new Pair<>(offset, (Double)solutionEvent.getSolutionCandidate().getScore()));
 		getView().update();
 	}
 
