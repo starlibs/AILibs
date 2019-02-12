@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.eventbus.Subscribe;
 
 import de.upb.crc901.mlpipeline_evaluation.CacheEvaluatorMeasureBridge;
+import de.upb.crc901.mlplan.core.events.ClassifierFoundEvent;
 import de.upb.crc901.mlplan.multiclass.MLPlanClassifierConfig;
 import hasco.core.HASCOFactory;
 import hasco.core.HASCOSolutionCandidate;
@@ -180,8 +181,8 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 			
 			@Subscribe
 			public void receiveEventFromFactory(AlgorithmEvent event) {
-				if (!(event instanceof AlgorithmInitializedEvent || event instanceof AlgorithmFinishedEvent))
-					post(event);
+				if (event instanceof AlgorithmInitializedEvent || event instanceof AlgorithmFinishedEvent)
+					return;
 				if (event instanceof HASCOSolutionEvent) {
 					@SuppressWarnings("unchecked")
 					HASCOSolutionCandidate<Double> solution = ((HASCOSolutionEvent<Double>) event).getSolutionCandidate();
@@ -191,7 +192,14 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
+					try {
+						post(new ClassifierFoundEvent(getId(), builder.getClassifierFactory().getComponentInstantiation(solution.getComponentInstance()), solution.getScore()));
+					} catch (ComponentInstantiationFailedException e) {
+						e.printStackTrace();
+					}
 				}
+				else
+					post(event);
 			}
 		});
 		this.optimizingFactory.setTimeout(this.getTimeout());

@@ -10,10 +10,10 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jaicore.basic.algorithm.events.ASolutionCandidateFoundEvent;
 import jaicore.basic.algorithm.events.AlgorithmCanceledEvent;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.events.AlgorithmInterruptedEvent;
-import jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
 import jaicore.graph.TreeNode;
 import jaicore.graphvisualizer.events.graph.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graph.NodeAddedEvent;
@@ -128,7 +128,7 @@ public class LimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends AOp
 			List<T> path = node.getValuesOnPathFromRoot();
 			EvaluatedSearchGraphPath<T, A, V> solution = new EvaluatedSearchGraphPath<>(path, null, null);
 			updateBestSeenSolution(solution);
-			return new SolutionCandidateFoundEvent<>(getId(), solution);
+			return new ASolutionCandidateFoundEvent<>(getId(), solution);
 		}
 
 		/* if this node has not been expanded, compute successors and the priorities among them and attach them to search graph */

@@ -5,8 +5,7 @@ import java.util.List;
 
 import org.apache.commons.math3.util.Pair;
 
-import jaicore.basic.ScoredItem;
-import jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
+import jaicore.basic.algorithm.events.ScoredSolutionCandidateFoundEvent;
 import jaicore.graphvisualizer.plugin.ASimpleMVCPluginModel;
 
 /**
@@ -19,14 +18,14 @@ public class SolutionPerformanceTimelinePluginModel extends ASimpleMVCPluginMode
 	private final List<Pair<Integer, Double>> timedPerformances = new ArrayList<>();
 	private long timestampOfFirstEvent = -1;
 	
-	public final void addEntry(SolutionCandidateFoundEvent<? extends ScoredItem<? extends Number>> solutionEvent) {
+	public final void addEntry(ScoredSolutionCandidateFoundEvent<?, ? extends Number> solutionEvent) {
 		int offset = 0;
 		if (timestampOfFirstEvent == -1) {
 			timestampOfFirstEvent = solutionEvent.getTimestamp();
 		}
 		else
 			offset = (int)(solutionEvent.getTimestamp() - timestampOfFirstEvent);
-		timedPerformances.add(new Pair<>(offset, (Double)solutionEvent.getSolutionCandidate().getScore()));
+		timedPerformances.add(new Pair<>(offset, (Double)solutionEvent.getScore()));
 		getView().update();
 	}
 

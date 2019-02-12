@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 import de.upb.crc901.mlplan.core.MLPlan;
 import de.upb.crc901.mlplan.core.MLPlanBuilder;
+import de.upb.crc901.mlplan.gui.outofsampleplots.OutOfSampleErrorPlotPlugin;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
 import jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
@@ -38,11 +39,11 @@ public class MLPlanARFFExample {
 		mlplan.setTimeout(300, TimeUnit.SECONDS);
 		mlplan.setTimeoutForNodeEvaluation(15);
 		mlplan.setTimeoutForSingleSolutionEvaluation(15);
-		mlplan.setNumCPUs(8);
+		mlplan.setNumCPUs(3);
 		
 		/* open visualization */
 		new JFXPanel();
-		GraphVisualizationWindow window = new GraphVisualizationWindow(mlplan, new GraphViewPlugin(), new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new SearchRolloutHistogramPlugin<>(), new SolutionPerformanceTimelinePlugin());
+		GraphVisualizationWindow window = new GraphVisualizationWindow(mlplan, new GraphViewPlugin(), new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new SearchRolloutHistogramPlugin<>(), new SolutionPerformanceTimelinePlugin(), new OutOfSampleErrorPlotPlugin(split.get(0), split.get(1)));
 		Platform.runLater(window);
 		
 		try {
