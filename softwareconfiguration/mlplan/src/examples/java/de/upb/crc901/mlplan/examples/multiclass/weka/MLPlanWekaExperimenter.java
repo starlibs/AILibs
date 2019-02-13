@@ -21,6 +21,7 @@ import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.WEKAPipelineFactory;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import hasco.events.HASCOSolutionEvent;
 import jaicore.basic.SQLAdapter;
+import jaicore.basic.TimeOut;
 import jaicore.concurrent.TimeoutTimer;
 import jaicore.experiments.ExperimentDBEntry;
 import jaicore.experiments.ExperimentRunner;
@@ -85,11 +86,13 @@ public class MLPlanWekaExperimenter implements IExperimentSetEvaluator {
 		List<Instances> stratifiedSplit = WekaUtil.getStratifiedSplit(data, 0, .7);
 
 		/* initialize ML-Plan with the same config file that has been used to specify the experiments */
-		MLPlan mlplan = new MLPlan(new MLPlanBuilder().withAlgorithmConfigFile(configFile), stratifiedSplit.get(0));
+		MLPlanBuilder builder = new MLPlanBuilder();
+		builder.withAlgorithmConfigFile(configFile);
+		builder.withTimeoutForNodeEvaluation(new TimeOut(new Integer(experimentValues.get("evaluationTimeout")), TimeUnit.SECONDS));
+		builder.withTimeoutForSingleSolutionEvaluation(new TimeOut(new Integer(experimentValues.get("evaluationTimeout")), TimeUnit.SECONDS));
+		MLPlan mlplan = new MLPlan(builder, stratifiedSplit.get(0));
 		mlplan.setLoggerName("mlplan");
 		mlplan.setTimeout(new Integer(experimentValues.get("timeout")), TimeUnit.SECONDS);
-		mlplan.setTimeoutForSingleSolutionEvaluation(new Integer(experimentValues.get("evaluationTimeout")));
-		mlplan.setTimeoutForNodeEvaluation(new Integer(experimentValues.get("evaluationTimeout")));
 		mlplan.setRandomSeed(new Integer(experimentValues.get("seed")));
 		mlplan.setNumCPUs(experimentEntry.getExperiment().getNumCPUs());
 		mlplan.registerListener(this);

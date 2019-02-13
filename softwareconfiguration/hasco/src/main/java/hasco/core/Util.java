@@ -650,4 +650,26 @@ public class Util {
 		}
 		return true;
 	}
+	
+	public static int getNumberOfUnparametrizedCompositions(Collection<Component> components, String requiredInterface) {
+		Collection<Component> candidates = components.stream().filter(c -> c.getProvidedInterfaces().contains(requiredInterface)).collect(Collectors.toList());
+		int numCandidates = 0;
+		for (Component candidate : candidates) {
+			int waysToResolveComponent = 0;
+			if (candidate.getRequiredInterfaces().isEmpty()) {
+				waysToResolveComponent = 1;
+			}
+			else {
+				for (String req : candidate.getRequiredInterfaces().keySet()) {
+					int subSolutionsForThisInterface = getNumberOfUnparametrizedCompositions(components, candidate.getRequiredInterfaces().get(req));
+					if (waysToResolveComponent > 0)
+						waysToResolveComponent *= subSolutionsForThisInterface;
+					else
+						waysToResolveComponent = subSolutionsForThisInterface;
+				}
+			}
+			numCandidates += waysToResolveComponent;
+		}
+		return numCandidates;
+	}
 }

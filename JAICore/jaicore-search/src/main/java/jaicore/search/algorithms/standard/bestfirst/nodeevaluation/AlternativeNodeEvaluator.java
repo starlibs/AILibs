@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
+import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.logging.ToJSONStringUtil;
 import jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
@@ -20,8 +21,9 @@ import jaicore.search.model.travesaltree.Node;
  * @param <T>
  * @param <V>
  */
-public class AlternativeNodeEvaluator<T, V extends Comparable<V>> extends DecoratingNodeEvaluator<T, V> {
+public class AlternativeNodeEvaluator<T, V extends Comparable<V>> extends DecoratingNodeEvaluator<T, V> implements ILoggingCustomizable {
 
+	private String loggerName;
 	private final INodeEvaluator<T, V> ne1;
 
 	public AlternativeNodeEvaluator(final INodeEvaluator<T, V> ne1, final INodeEvaluator<T, V> ne2) {
@@ -46,5 +48,21 @@ public class AlternativeNodeEvaluator<T, V extends Comparable<V>> extends Decora
 		fields.put("primary", this.ne1);
 		fields.put("secondary", super.getEvaluator());
 		return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
+	}
+
+	@Override
+	public String getLoggerName() {
+		return loggerName;
+	}
+
+	@Override
+	public void setLoggerName(String name) {
+		this.loggerName = name;
+		if (this.ne1 instanceof ILoggingCustomizable) {
+			((ILoggingCustomizable) this.ne1).setLoggerName(name + ".primary");
+		}
+		if (this.getEvaluator() instanceof ILoggingCustomizable) {
+			((ILoggingCustomizable) this.getEvaluator()).setLoggerName(name + ".secondary");
+		}
 	}
 }

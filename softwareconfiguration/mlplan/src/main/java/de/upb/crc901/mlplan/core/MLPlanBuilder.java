@@ -22,8 +22,8 @@ import hasco.core.HASCOFactory;
 import hasco.model.Component;
 import hasco.serialization.ComponentLoader;
 import hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstFactory;
-import hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstWithRandomCompletionsFactory;
 import jaicore.basic.FileUtil;
+import jaicore.basic.TimeOut;
 import jaicore.ml.core.evaluation.measure.singlelabel.MultiClassPerformanceMeasure;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
@@ -60,7 +60,6 @@ public class MLPlanBuilder {
 
 	public MLPlanBuilder() {
 		super();
-		this.hascoFactory = new HASCOViaFDAndBestFirstWithRandomCompletionsFactory(0, 3);
 	}
 
 	public MLPlanBuilder(File searchSpaceConfigFile, File alhorithmConfigFile, MultiClassPerformanceMeasure performanceMeasure) {
@@ -143,11 +142,7 @@ public class MLPlanBuilder {
 	 * @return
 	 */
 	public MLPlanBuilder withPreferredNodeEvaluator(INodeEvaluator<TFDNode, Double> preferredNodeEvaluator) {
-
-		if (!(hascoFactory instanceof HASCOViaFDAndBestFirstFactory)) {
-			throw new IllegalStateException("Cannot define a preferred node evaluator if the hasco factory is not a HASCOViaFDAndBestFirstFactory (or a subclass of it)");
-		}
-
+		
 		/* first update the preferred node evaluator */
 		if (this.preferredNodeEvaluator == null) {
 			this.preferredNodeEvaluator = preferredNodeEvaluator;
@@ -198,6 +193,23 @@ public class MLPlanBuilder {
 		}
 		return hascoFactory;
 	}
+
+	public void setHascoFactory(
+			HASCOFactory<? extends GraphSearchInput<TFDNode, String>, TFDNode, String, Double> hascoFactory) {
+		this.hascoFactory = hascoFactory;
+	}
+	
+
+	public void withTimeoutForSingleSolutionEvaluation(final TimeOut timeout) {
+		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.K_RANDOM_COMPLETIONS_TIMEOUT_PATH,
+				String.valueOf(timeout.milliseconds()));
+	}
+
+	public void withTimeoutForNodeEvaluation(final TimeOut timeout) {
+		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.K_RANDOM_COMPLETIONS_TIMEOUT_NODE,
+				String.valueOf(timeout.milliseconds()));
+	}
+
 
 	public boolean getUseCache() {
 		return useCache;

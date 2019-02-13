@@ -240,23 +240,30 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 						BestFirst.this.logger.warn("Leaving node building routine due to interrupt. This leaves the search inconsistent; the node should be attached again!");
 					}
 					logger.debug("Worker has been interrupted, exiting.");
+					BestFirst.this.post(new NodeAnnotationEvent<>(getId(), newNode, "fError", e));
+					BestFirst.this.post(new NodeTypeSwitchEvent<>(getId(), newNode, "or_pruned"));
 					return;
 				} catch (TimeoutException e) {
 					BestFirst.this.logger.debug("Node evaluation of {} has timed out.", newNode);
 					newNode.setAnnotation("fError", e);
+					BestFirst.this.post(new NodeAnnotationEvent<>(getId(), newNode, "fError", e));
 					BestFirst.this.post(new NodeTypeSwitchEvent<>(getId(), newNode, "or_timedout"));
 					return;
 				}
 				catch (ControlledNodeEvaluationException e) {
 					logger.debug("Node evaluation failed with a controlled exception.");
 					newNode.setAnnotation("fError", e);
-					BestFirst.this.post(new NodeTypeSwitchEvent<>(getId(), newNode, "or_ffail"));
+					BestFirst.this.post(new NodeAnnotationEvent<>(getId(), newNode, "fError", e));
+					BestFirst.this.post(new NodeAnnotationEvent<>(getId(), newNode, "fMessage", "hello, yes it is pruned!"));
+					BestFirst.this.post(new NodeTypeSwitchEvent<>(getId(), newNode, "or_pruned"));
+					
 					return;
 				}
 				catch (Throwable e) {
 					BestFirst.this.logger.error("Observed an exception during computation of f:\n{}", LoggerUtil.getExceptionInfo(e));
 					newNode.setAnnotation("fError", e);
-					BestFirst.this.post(new NodeTypeSwitchEvent<>(getId(), newNode, "or_ffail"));
+					BestFirst.this.post(new NodeAnnotationEvent<>(getId(), newNode, "fError", e));
+					BestFirst.this.post(new NodeTypeSwitchEvent<>(getId(), newNode, "or_pruned"));
 					return;
 				}
 
@@ -976,7 +983,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
 		switch (this.getState()) {
 		case created: {
-			this.logger.info("Initializing BestFirst search {} with {} CPUs and a timeout of {}ms", this, this.getConfig().cpus(), this.getConfig().timeout());
+			this.logger.info("Initializing BestFirst search {} with {} CPUs and a timeout of {}ms", this.getId(), this.getConfig().cpus(), this.getConfig().timeout());
 			this.parallelizeNodeExpansion(this.getConfig().cpus());
 			this.initGraph();
 			logger.info("Search initialized, returning activation event.");
@@ -1195,8 +1202,11 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		this.logger = LoggerFactory.getLogger(name);
 		this.logger.info("Activated logger {} with name {}", name, this.logger.getName());
 		if (this.nodeEvaluator instanceof ILoggingCustomizable) {
-			((ILoggingCustomizable) this.nodeEvaluator).setLoggerName(name + ".nodeeval");
+			logger.info("Setting logger of node evaluator {} to {}", this.nodeEvaluator, name + ".nodeevaluator");
+			((ILoggingCustomizable) this.nodeEvaluator).setLoggerName(name + ".nodeevaluator");
 		}
+		else
+			logger.info("Node evaluator {} does not implement ILoggingCustomizable, so its logger won't be customized.", this.nodeEvaluator);
 		super.setLoggerName(this.loggerName + "._orgraphsearch");
 	}
 

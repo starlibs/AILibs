@@ -302,7 +302,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 		this.state = AlgorithmState.active;
 		AlgorithmInitializedEvent event = new AlgorithmInitializedEvent(getId());
 		this.eventBus.post(event);
-		this.logger.info("Starting algorithm {} with problem {} and config {}", this, this.input, this.config);
+		this.logger.info("Starting algorithm {} with problem {} and config {}", this.getId(), this.input, this.config);
 		return event;
 	}
 

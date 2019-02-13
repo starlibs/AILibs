@@ -12,7 +12,7 @@ public interface HASCOWithRandomCompletionsConfig extends HASCOConfig {
 	 */
 	@Key(K_RANDOM_COMPLETIONS_NUM)
 	@DefaultValue("3")
-	public int randomCompletions();
+	public int numberOfRandomCompletions();
 	
 	/**
 	 * @return Timeout in ms for a node (this is an upper bound for the sum of the evaluations of all randomly drawn candidates).
