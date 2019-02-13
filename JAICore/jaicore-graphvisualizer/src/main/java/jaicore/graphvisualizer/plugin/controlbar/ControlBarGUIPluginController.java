@@ -15,8 +15,7 @@ public class ControlBarGUIPluginController implements IGUIPluginController {
 
 	@Override
 	public void handleAlgorithmEvent(AlgorithmEvent algorithmEvent) throws HandleAlgorithmEventException {
-		// TODO Auto-generated method stub
-
+		// nothing to do here as the control bar does not need to handle any algorithm event
 	}
 
 	@Override
