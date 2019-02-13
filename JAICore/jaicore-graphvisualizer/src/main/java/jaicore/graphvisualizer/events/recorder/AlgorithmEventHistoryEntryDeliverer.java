@@ -18,20 +18,19 @@ import jaicore.graphvisualizer.plugin.controlbar.ResetEvent;
 import jaicore.graphvisualizer.plugin.speedslider.ChangeSpeedEvent;
 import jaicore.graphvisualizer.plugin.timeslider.GoToTimeStepEvent;
 
-public class AlgorithmEventHistoryPuller extends Thread implements AlgorithmEventSource, GUIEventListener {
+public class AlgorithmEventHistoryEntryDeliverer extends Thread implements AlgorithmEventSource, GUIEventListener {
 
-	private Logger logger = LoggerFactory.getLogger(AlgorithmEventHistoryPuller.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(AlgorithmEventHistoryEntryDeliverer.class);
 
 	private Set<AlgorithmEventListener> algorithmEventListeners;
 	private AlgorithmEventHistory eventHistory;
+	private int maximumSleepTimeInMilliseconds;
 
-	// TODO move time and paused into a model
 	private int timestep;
 	private boolean paused;
-	private int maximumSleepTimeInMilliseconds;
 	private double sleepTimeMultiplier;
 
-	public AlgorithmEventHistoryPuller(AlgorithmEventHistory eventHistory, int maximumSleepTimeInMilliseconds) {
+	public AlgorithmEventHistoryEntryDeliverer(AlgorithmEventHistory eventHistory, int maximumSleepTimeInMilliseconds) {
 		this.eventHistory = eventHistory;
 		this.maximumSleepTimeInMilliseconds = maximumSleepTimeInMilliseconds;
 
@@ -39,10 +38,11 @@ public class AlgorithmEventHistoryPuller extends Thread implements AlgorithmEven
 		this.paused = true;
 		this.algorithmEventListeners = ConcurrentHashMap.newKeySet();
 		this.sleepTimeMultiplier = 1;
-		logger.info("AlgorithmEventHistoryPuller started with thread " + this.getName());
+
+		LOGGER.info(getClass().getSimpleName() + " started with thread " + this.getName());
 	}
 
-	public AlgorithmEventHistoryPuller(AlgorithmEventHistory eventHistory) {
+	public AlgorithmEventHistoryEntryDeliverer(AlgorithmEventHistory eventHistory) {
 		this(eventHistory, 30);
 	}
 
@@ -59,44 +59,53 @@ public class AlgorithmEventHistoryPuller extends Thread implements AlgorithmEven
 	@Override
 	public void run() {
 		while (true) {
-			if (paused)
-				logger.debug("Not processing events since visualization is paused.");
-			else if (timestep >= eventHistory.getLength())
-				logger.debug("Not processing events since no unpublished events are known.");
-			else {
+			if (!paused && timestep < eventHistory.getLength()) {
 				AlgorithmEventHistoryEntry historyEntry = eventHistory.getEntryAtTimeStep(timestep);
 				AlgorithmEvent algorithmEvent = historyEntry.getAlgorithmEvent();
-				logger.debug("Pulled event entry {} associated with event {} at position {}.", historyEntry, algorithmEvent, timestep);
-				try {
-					sendAlgorithmEventToListeners(algorithmEvent);
-					logger.info("Pulled and sent event {} as entry at time step {}.", algorithmEvent, timestep);
-					timestep++;
-					int sleepTime = (int) (sleepTimeMultiplier * maximumSleepTimeInMilliseconds);
-					logger.trace("Sleeping {}ms.", sleepTime);
-					sleep(sleepTime);
+				LOGGER.debug("Pulled event entry {} associated with event {} at position {}.", historyEntry, algorithmEvent, timestep);
 
-				} catch (InterruptedException e) {
-					return;
-				}
-				catch (Throwable e) {
-					logger.error("Could not dispatch event {} due to error.", algorithmEvent, e.toString());
-				}
+				sendAlgorithmEventToListeners(algorithmEvent);
+				timestep++;
+			} else if (paused) {
+				LOGGER.debug("Not processing events since visualization is paused.");
+			} else if (timestep >= eventHistory.getLength()) {
+				LOGGER.debug("Not processing events since no unpublished events are known.");
 			}
+
+			goToSleep();
+		}
+	}
+
+	private void goToSleep() {
+		try {
+			int sleepTime = (int) (sleepTimeMultiplier * maximumSleepTimeInMilliseconds);
+			LOGGER.trace("Sleeping {}ms.", sleepTime);
+			sleep(sleepTime);
+		} catch (InterruptedException e) {
+			LOGGER.info(getClass().getSimpleName() + " was interrupted due to exception: {}.", e);
 		}
 	}
 
 	private void sendAlgorithmEventToListeners(AlgorithmEvent algorithmEvent) {
 		for (AlgorithmEventListener eventListener : algorithmEventListeners) {
 			try {
-				logger.debug("Sending event {} to listener {}.", algorithmEvent, eventListener);
-				long start = System.currentTimeMillis();
-				eventListener.handleAlgorithmEvent(algorithmEvent);
-				long dispatchTime = System.currentTimeMillis() - start;
-				if (dispatchTime > 10)
-					logger.warn("Dispatch time for event {} to listener {} took {}ms!", algorithmEvent, eventListener, dispatchTime);
-			} catch (HandleAlgorithmEventException e) {
-				logger.error("Error in dispatching event." + e.toString());
+				sendAlgorithmEventToListener(algorithmEvent, eventListener);
+			} catch (Throwable e) {
+				LOGGER.error("Error in dispatching event {} due to error.", algorithmEvent, e.toString());
 			}
+		}
+		LOGGER.info("Pulled and sent event {} as entry at time step {}.", algorithmEvent, timestep);
+	}
+
+	private void sendAlgorithmEventToListener(AlgorithmEvent algorithmEvent, AlgorithmEventListener eventListener) throws HandleAlgorithmEventException {
+		LOGGER.debug("Sending event {} to listener {}.", algorithmEvent, eventListener);
+
+		long startTime = System.currentTimeMillis();
+		eventListener.handleAlgorithmEvent(algorithmEvent);
+		long dispatchTime = System.currentTimeMillis() - startTime;
+
+		if (dispatchTime > 10) {
+			LOGGER.warn("Dispatch time for event {} to listener {} took {}ms!", algorithmEvent, eventListener, dispatchTime);
 		}
 	}
 
@@ -107,8 +116,7 @@ public class AlgorithmEventHistoryPuller extends Thread implements AlgorithmEven
 		} else if (guiEvent instanceof PlayEvent) {
 			unpause();
 		} else if (guiEvent instanceof ResetEvent) {
-			resetTimeStep();
-			pause();
+			handleResetEvent();
 		} else if (guiEvent instanceof GoToTimeStepEvent) {
 			handleGoToTimeStepEvent(guiEvent);
 		} else if (guiEvent instanceof ChangeSpeedEvent) {
@@ -122,6 +130,11 @@ public class AlgorithmEventHistoryPuller extends Thread implements AlgorithmEven
 
 	private void unpause() {
 		paused = false;
+	}
+
+	private void handleResetEvent() {
+		resetTimeStep();
+		pause();
 	}
 
 	private void resetTimeStep() {

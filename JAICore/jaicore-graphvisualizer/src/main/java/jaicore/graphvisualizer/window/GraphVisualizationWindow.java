@@ -7,7 +7,7 @@ import jaicore.basic.algorithm.IAlgorithm;
 import jaicore.graphvisualizer.events.graph.bus.AlgorithmEventSource;
 import jaicore.graphvisualizer.events.gui.DefaultGUIEventBus;
 import jaicore.graphvisualizer.events.recorder.AlgorithmEventHistory;
-import jaicore.graphvisualizer.events.recorder.AlgorithmEventHistoryPuller;
+import jaicore.graphvisualizer.events.recorder.AlgorithmEventHistoryEntryDeliverer;
 import jaicore.graphvisualizer.events.recorder.AlgorithmEventHistoryRecorder;
 import jaicore.graphvisualizer.plugin.IGUIPlugin;
 import jaicore.graphvisualizer.plugin.controlbar.ControlBarGUIPlugin;
@@ -24,7 +24,7 @@ import javafx.stage.Stage;
 public class GraphVisualizationWindow implements Runnable {
 
 	private AlgorithmEventSource graphEventSource;
-	private AlgorithmEventHistoryPuller algorithmEventHistoryPuller;
+	private AlgorithmEventHistoryEntryDeliverer algorithmEventHistoryPuller;
 
 	private List<IGUIPlugin> visualizationPlugins;
 	private GraphViewPlugin graphViewPlugin;
@@ -38,7 +38,7 @@ public class GraphVisualizationWindow implements Runnable {
 	private BorderPane topLayout;
 
 	public GraphVisualizationWindow(AlgorithmEventHistory algorithmEventHistory, GraphViewPlugin graphViewPlugin, IGUIPlugin... visualizationPlugins) {
-		algorithmEventHistoryPuller = new AlgorithmEventHistoryPuller(algorithmEventHistory);
+		algorithmEventHistoryPuller = new AlgorithmEventHistoryEntryDeliverer(algorithmEventHistory);
 		this.graphEventSource = algorithmEventHistoryPuller;
 		initializePlugins(graphEventSource, graphViewPlugin, visualizationPlugins);
 		// it is important to register the history puller as a last listener!
@@ -47,7 +47,7 @@ public class GraphVisualizationWindow implements Runnable {
 
 	public GraphVisualizationWindow(IAlgorithm<?, ?> algorithm, GraphViewPlugin graphViewPlugin, IGUIPlugin... visualizationPlugins) {
 		AlgorithmEventHistoryRecorder historyRecorder = new AlgorithmEventHistoryRecorder();
-		algorithmEventHistoryPuller = new AlgorithmEventHistoryPuller(historyRecorder.getHistory());
+		algorithmEventHistoryPuller = new AlgorithmEventHistoryEntryDeliverer(historyRecorder.getHistory());
 		this.graphEventSource = algorithmEventHistoryPuller;
 		initializePlugins(graphEventSource, graphViewPlugin, visualizationPlugins);
 		algorithm.registerListener(historyRecorder);
