@@ -25,7 +25,7 @@ public class BusyObjectEvaluator<T, V extends Comparable<V>> implements IObjectE
 				x += i * j;
 			}
 		}
-		return null;
+		return x > 0 ? null : null;
 	}
 
 }

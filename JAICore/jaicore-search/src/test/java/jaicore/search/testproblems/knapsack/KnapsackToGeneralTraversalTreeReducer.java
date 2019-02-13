@@ -18,11 +18,11 @@ public class KnapsackToGeneralTraversalTreeReducer implements AlgorithmProblemTr
 		return new GraphSearchWithSubpathEvaluationsInput<>(problem.getGraphGenerator(), new INodeEvaluator<KnapsackNode, Double>() {
 
 			@Override
-			public Double f(Node<KnapsackNode, ?> node) throws NodeEvaluationException, TimeoutException, AlgorithmExecutionCanceledException, InterruptedException {
+			public Double f(Node<KnapsackNode, ?> node) throws NodeEvaluationException, InterruptedException {
 				try {
 					return problem.getSolutionEvaluator().evaluateSolution(node.externalPath());
 				}
-				catch (ObjectEvaluationFailedException e) {
+				catch (ObjectEvaluationFailedException | TimeoutException | AlgorithmExecutionCanceledException e) {
 					throw new NodeEvaluationException(e, "Could not evaluate node due to an algorithm exception: " + e.getMessage());
 				}
 			}
