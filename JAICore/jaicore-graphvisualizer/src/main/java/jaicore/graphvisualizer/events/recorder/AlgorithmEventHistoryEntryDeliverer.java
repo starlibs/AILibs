@@ -18,6 +18,13 @@ import jaicore.graphvisualizer.plugin.controlbar.ResetEvent;
 import jaicore.graphvisualizer.plugin.speedslider.ChangeSpeedEvent;
 import jaicore.graphvisualizer.plugin.timeslider.GoToTimeStepEvent;
 
+/**
+ * The {@link AlgorithmEventHistoryEntryDeliverer} is {@link Thread} constantly pulling events from a given {@link AlgorithmEventHistory} and sending these to all registered
+ * {@link AlgorithmEventListener}s.
+ * 
+ * @author ahetzer
+ *
+ */
 public class AlgorithmEventHistoryEntryDeliverer extends Thread implements AlgorithmEventSource, GUIEventListener {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(AlgorithmEventHistoryEntryDeliverer.class);
