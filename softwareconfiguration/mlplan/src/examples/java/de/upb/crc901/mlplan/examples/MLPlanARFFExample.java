@@ -4,13 +4,17 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Timer;
 import java.util.concurrent.TimeUnit;
 
 import de.upb.crc901.mlplan.core.MLPlan;
 import de.upb.crc901.mlplan.core.MLPlanBuilder;
 import de.upb.crc901.mlplan.gui.outofsampleplots.OutOfSampleErrorPlotPlugin;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
+import jaicore.basic.BusyObjectEvaluator;
+import jaicore.basic.IObjectEvaluator;
 import jaicore.basic.TimeOut;
+import jaicore.concurrent.InterruptionTimerTask;
 import jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
 import jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
 import jaicore.graphvisualizer.plugin.solutionperformanceplotter.SolutionPerformanceTimelinePlugin;
@@ -30,8 +34,7 @@ public class MLPlanARFFExample {
 	public static void main(final String[] args) throws Exception {
 
 		/* load data for segment dataset and create a train-test-split */
-		File file = new File("../../../datasets/amazon.arff");
-//		File file = new File("testrsc/car.arff");
+		File file = new File("testrsc/car.arff");
 		System.out.println(file.getAbsolutePath());
 		Instances data = new Instances(new FileReader(file));
 		data.setClassIndex(data.numAttributes() - 1);
