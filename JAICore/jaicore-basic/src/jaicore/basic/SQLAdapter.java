@@ -152,6 +152,15 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 		rs.next();
 		return rs.getInt(1);
 	}
+	
+	public void insertNoNewValues(final String sql, final List<? extends Object> values) throws SQLException {
+		this.checkConnection();
+		PreparedStatement stmt = this.connect.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+		for (int i = 1; i <= values.size(); i++) {
+			this.setValue(stmt, i, values.get(i - 1));
+		}
+		stmt.executeUpdate();
+	}
 
 	public int insert(final String table, final Map<String, ? extends Object> map) throws SQLException {
 		StringBuilder sb1 = new StringBuilder();
@@ -172,6 +181,27 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 
 		String statement = "INSERT INTO " + table + " (" + sb1.toString() + ") VALUES (" + sb2.toString() + ")";
 		return this.insert(statement, values);
+	}
+	
+	public void insertNoNewValues(final String table, final Map<String, ? extends Object> map) throws SQLException {
+		StringBuilder sb1 = new StringBuilder();
+		StringBuilder sb2 = new StringBuilder();
+		List<Object> values = new ArrayList<>();
+		for (String key : map.keySet()) {
+			if (map.get(key) == null) {
+				continue;
+			}
+			if (sb1.length() != 0) {
+				sb1.append(", ");
+				sb2.append(", ");
+			}
+			sb1.append(key);
+			sb2.append("?");
+			values.add(map.get(key));
+		}
+
+		String statement = "INSERT INTO " + table + " (" + sb1.toString() + ") VALUES (" + sb2.toString() + ")";
+		this.insertNoNewValues(statement, values);
 	}
 
 	public void update(final String sql) throws SQLException {
@@ -260,9 +290,11 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 	private void setValue(final PreparedStatement stmt, final int index, final Object val) throws SQLException {
 		if (val instanceof Integer) {
 			stmt.setInt(index, (Integer) val);
+		} else if (val instanceof Long) {
+			stmt.setLong(index, (Long) val);
 		} else if (val instanceof Number) {
 			stmt.setDouble(index, (Double) val);
-		} else if (val instanceof String) {
+		}  else if (val instanceof String) {
 			stmt.setString(index, (String) val);
 		} else {
 			stmt.setObject(index, val);

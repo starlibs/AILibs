@@ -41,6 +41,8 @@ public class MultilabelDatasetSplitter {
 
 		// Split according to technique
 		switch (splitTechniqueAndDetails[0]) {
+		case "mccv": return new RandomMultilabelCrossValidation().getTestSplit(data, Integer.parseInt(seed),
+				Integer.parseInt(testFold), splitTechniqueAndDetails[1]);
 		case "2cv":
 			return new RandomMultilabelCrossValidation().getTestSplit(data, Integer.parseInt(seed),
 					Integer.parseInt(testFold),
@@ -81,6 +83,8 @@ public class MultilabelDatasetSplitter {
 
 		// Split according to technique
 		switch (splitTechniqueAndDetails[0]) {
+		case "mccv": return new RandomMultilabelCrossValidation().getTrainSplit(data, Integer.parseInt(seed),
+				Integer.parseInt(testFold), splitTechniqueAndDetails[1]);
 		case "2cv": return new RandomMultilabelCrossValidation().getTrainSplit(data, Integer.parseInt(seed),
 				Integer.parseInt(testFold), new RandomMultilabelCrossValidation().generateSplittingInfo(0.5,0.5));
 		case "PseudoRandom":
