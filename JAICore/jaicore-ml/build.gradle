@@ -39,4 +39,8 @@ dependencies {
 	testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: '5.3.1'
 	
 	compile group: 'org.apache.commons', name: 'commons-collections4', version: '4.1'
+	
+	compile group: 'org.glassfish.jersey.core', name: 'jersey-client', version: '2.28'
+	compile group: 'org.glassfish.jersey.inject', name: 'jersey-hk2', version: '2.28'
+	compile group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: '2.28'
 }
