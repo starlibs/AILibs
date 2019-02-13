@@ -6,7 +6,6 @@ import java.util.Collections;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.graphvisualizer.events.graph.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graph.NodeAddedEvent;
-import jaicore.graphvisualizer.events.graph.NodeParentSwitchEvent;
 import jaicore.graphvisualizer.events.graph.NodeRemovedEvent;
 import jaicore.graphvisualizer.events.graph.NodeTypeSwitchEvent;
 import jaicore.graphvisualizer.events.graph.bus.HandleAlgorithmEventException;
@@ -32,9 +31,6 @@ public class GraphViewPluginController implements IGUIPluginController {
 			} else if (NodeAddedEvent.class.isInstance(algorithmEvent)) {
 				NodeAddedEvent<?> nodeAddedEvent = (NodeAddedEvent<?>) algorithmEvent;
 				handleNodeAddedEvent(nodeAddedEvent);
-			} else if (NodeParentSwitchEvent.class.isInstance(algorithmEvent)) {
-				NodeParentSwitchEvent<?> nodeParentSwitchEvent = (NodeParentSwitchEvent<?>) algorithmEvent;
-				handleNodeParentSwitchEvent(nodeParentSwitchEvent);
 			} else if (NodeRemovedEvent.class.isInstance(algorithmEvent)) {
 				NodeRemovedEvent<?> nodeRemovedEvent = (NodeRemovedEvent<?>) algorithmEvent;
 				handleNodeRemovedEvent(nodeRemovedEvent);
@@ -57,10 +53,6 @@ public class GraphViewPluginController implements IGUIPluginController {
 
 	private void handleNodeTypeSwitchEvent(NodeTypeSwitchEvent<?> nodeTypeSwitchEvent) throws ViewGraphManipulationException {
 		model.switchNodeType(nodeTypeSwitchEvent.getNode(), nodeTypeSwitchEvent.getType());
-	}
-
-	private void handleNodeParentSwitchEvent(NodeParentSwitchEvent<?> nodeParentSwitchEvent) {
-		// can be ignored currently as we have a tree search where this cannot happen
 	}
 
 	private void handleNodeRemovedEvent(NodeRemovedEvent<?> nodeRemovedEvent) throws ViewGraphManipulationException {
