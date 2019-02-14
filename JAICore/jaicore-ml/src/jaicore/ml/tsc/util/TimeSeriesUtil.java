@@ -239,7 +239,7 @@ public class TimeSeriesUtil {
 	 * @param T
 	 * @return
 	 */
-	public double[] keoghDerivate(double[] T) {
+	public static double[] keoghDerivate(double[] T) {
 		double[] derivate = new double[T.length - 2];
 
 		for (int i = 1; i < T.length - 1; i++) {
@@ -257,7 +257,7 @@ public class TimeSeriesUtil {
 	 * @param T
 	 * @return
 	 */
-	public double[] keoghDerivateWithBoundaries(double[] T) {
+	public static double[] keoghDerivateWithBoundaries(double[] T) {
 		double[] derivate = new double[T.length];
 
 		for (int i = 1; i < T.length - 1; i++) {
@@ -276,7 +276,7 @@ public class TimeSeriesUtil {
 	 * @param T Time series.
 	 * @return
 	 */
-	public double[] backwardDifferenceDerivate(double[] T) {
+	public static double[] backwardDifferenceDerivate(double[] T) {
 		double[] derivate = new double[T.length - 1];
 
 		for (int i = 1; i < T.length; i++) {
@@ -292,7 +292,7 @@ public class TimeSeriesUtil {
 	 * @param T Time series.
 	 * @return
 	 */
-	public double[] backwardDifferenceDerivateWithBoundaries(double[] T) {
+	public static double[] backwardDifferenceDerivateWithBoundaries(double[] T) {
 		double[] derivate = new double[T.length];
 
 		for (int i = 1; i < T.length; i++) {
@@ -309,7 +309,7 @@ public class TimeSeriesUtil {
 	 * @param T
 	 * @return
 	 */
-	public double[] forwardDifferenceDerivate(double[] T) {
+	public static double[] forwardDifferenceDerivate(double[] T) {
 		double[] derivate = new double[T.length - 1];
 
 		for (int i = 0; i < T.length - 1; i++) {
@@ -325,7 +325,7 @@ public class TimeSeriesUtil {
 	 * @param T
 	 * @return
 	 */
-	public double[] forwardDifferenceDerivateWithBoundaries(double[] T) {
+	public static double[] forwardDifferenceDerivateWithBoundaries(double[] T) {
 		double[] derivate = new double[T.length];
 
 		for (int i = 0; i < T.length - 1; i++) {
@@ -343,7 +343,7 @@ public class TimeSeriesUtil {
 	 * @param T
 	 * @return
 	 */
-	public double[] gulloDerivate(double[] T) {
+	public static double[] gulloDerivate(double[] T) {
 		double[] derivate = new double[T.length - 1];
 
 		for (int i = 1; i < T.length; i++) {
@@ -359,7 +359,7 @@ public class TimeSeriesUtil {
 	 * @param T
 	 * @return
 	 */
-	public double[] gulloDerivateWithBoundaries(double[] T) {
+	public static double[] gulloDerivateWithBoundaries(double[] T) {
 		double[] derivate = new double[T.length];
 
 		for (int i = 1; i < T.length; i++) {
