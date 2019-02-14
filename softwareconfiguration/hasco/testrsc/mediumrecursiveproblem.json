@@ -1,11 +1,11 @@
 {
-	"repository": "SimpleRecursiveProblem",
+	"repository": "MediumRecursiveProblem",
 	"components": [
 		{
 			"name": "A",
 			"requiredInterface": [
 				{
-					"id": "ri",
+					"id": "ri1",
 					"name": "Q"
 				}
 			],
@@ -42,7 +42,15 @@
 		},
 		{
 			"name": "C",
-			"requiredInterface": [],
+			"requiredInterface": [
+				{
+					"id": "ric1",
+					"name": "R"
+				},
+				{
+					"id": "ric2",
+					"name": "R"
+				}],
 			"providedInterface": [
 				"Q"
 			],
@@ -52,10 +60,6 @@
 		{
 			"name": "D",
 			"requiredInterface": [
-				{
-					"id": "rid",
-					"name": "R"
-				}
 			],
 			"providedInterface": [
 				"Q"

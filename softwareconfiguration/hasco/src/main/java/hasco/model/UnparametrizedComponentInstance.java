@@ -41,6 +41,8 @@ public class UnparametrizedComponentInstance {
 	public UnparametrizedComponentInstance getSubComposition(List<String> path) {
 		UnparametrizedComponentInstance current = this;
 		for (String requiredInterface : path) {
+			if (!current.getSatisfactionOfRequiredInterfaces().containsKey(requiredInterface))
+				throw new IllegalArgumentException("Invalid path " + path + " (size " + path.size() + "). The component " + current.getComponentName() + " does not have a required interface with id \"" + requiredInterface + "\"");
 			current = current.getSatisfactionOfRequiredInterfaces().get(requiredInterface);
 		}
 		return current;

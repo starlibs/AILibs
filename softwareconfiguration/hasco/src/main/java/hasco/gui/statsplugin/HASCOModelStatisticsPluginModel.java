@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import hasco.events.HASCOSolutionEvent;
+import hasco.model.Component;
+import hasco.model.ComponentInstance;
 import hasco.model.UnparametrizedComponentInstance;
 import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.graphvisualizer.plugin.ASimpleMVCPluginModel;
@@ -24,17 +26,33 @@ import jaicore.graphvisualizer.plugin.ASimpleMVCPluginModel;
 public class HASCOModelStatisticsPluginModel extends ASimpleMVCPluginModel<HASCOModelStatisticsPluginView, HASCOModelStatisticsPluginController> {
 
 	private final Map<UnparametrizedComponentInstance, List<HASCOSolutionEvent<Double>>> observedSolutionsGroupedByModuloParameters = new HashMap<>();
+	private final Map<String, Component> knownComponents = new HashMap<>();
 	
 	public final void addEntry(HASCOSolutionEvent<Double> solutionEvent) {
-		UnparametrizedComponentInstance comp = new UnparametrizedComponentInstance(solutionEvent.getSolutionCandidate().getComponentInstance());
-		if (!observedSolutionsGroupedByModuloParameters.containsKey(comp))
-			observedSolutionsGroupedByModuloParameters.put(comp, new ArrayList<>());
-		observedSolutionsGroupedByModuloParameters.get(comp).add(solutionEvent);
+		ComponentInstance ci = solutionEvent.getSolutionCandidate().getComponentInstance();
+		UnparametrizedComponentInstance uci = new UnparametrizedComponentInstance(ci);
+		if (!observedSolutionsGroupedByModuloParameters.containsKey(uci))
+			observedSolutionsGroupedByModuloParameters.put(uci, new ArrayList<>());
+		observedSolutionsGroupedByModuloParameters.get(uci).add(solutionEvent);
+		ci.getContainedComponents().forEach(c -> {
+			if (!knownComponents.containsKey(c.getName()))
+				knownComponents.put(c.getName(), c);
+		});
 		getView().update();
+	}
+	
+	public Collection<HASCOSolutionEvent<Double>> getAllSeenSolutionEventsUnordered() {
+		List<HASCOSolutionEvent<Double>> solutionEvents = new ArrayList<>();
+		observedSolutionsGroupedByModuloParameters.values().forEach(l -> solutionEvents.addAll(l));
+		return solutionEvents;
 	}
 	
 	public Map<UnparametrizedComponentInstance, List<HASCOSolutionEvent<Double>>> getObservedSolutionsGroupedByModuloParameters() {
 		return observedSolutionsGroupedByModuloParameters;
+	}
+
+	public Map<String, Component> getKnownComponents() {
+		return knownComponents;
 	}
 
 	public DescriptiveStatistics getPerformanceStatisticsForComposition(UnparametrizedComponentInstance composition) {

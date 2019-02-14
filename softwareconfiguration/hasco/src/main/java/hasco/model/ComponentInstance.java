@@ -3,6 +3,8 @@ package hasco.model;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -11,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import jaicore.basic.sets.SetUtil;
+import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.logging.ToJSONStringUtil;
 
 /**
@@ -71,6 +74,51 @@ public class ComponentInstance {
 	 */
 	public Map<String, ComponentInstance> getSatisfactionOfRequiredInterfaces() {
 		return this.satisfactionOfRequiredInterfaces;
+	}
+	
+	public Collection<Component> getContainedComponents() {
+		Collection<Component> components = new HashSet<>();
+		components.add(this.getComponent());
+		for (ComponentInstance ci : satisfactionOfRequiredInterfaces.values()) {
+			components.addAll(ci.getContainedComponents());
+		}
+		return components;
+	}
+	
+	public boolean matchesPathRestrictions(Collection<List<Pair<String,String>>> paths) {
+		for (List<Pair<String,String>> path : paths) {
+			if (!matchesPathRestriction(path))
+				return false;
+		}
+		return true;
+	}
+	
+	public boolean matchesPathRestriction(List<Pair<String,String>> path) {
+		if (path.isEmpty())
+			return true;
+
+		/* if the first entry is on null, we interpret it as a filter on this component itself */
+		int i = 0;
+		if (path.get(0).getX() == null) {
+			String requiredComponent = path.get(0).getY();
+			if (!requiredComponent.equals("*") && !this.component.getName().equals(requiredComponent))
+				return false;
+			i = 1;
+		}
+		
+		/* now go over the rest of the path and check every entry on conformity */
+		ComponentInstance current = this;
+		int n = path.size();
+		for (; i < n; i++) {
+			Pair<String,String> selection = path.get(i);
+			if (!current.getComponent().getRequiredInterfaces().containsKey(selection.getX()))
+				throw new IllegalArgumentException("Invalid path restriction: " + selection.getX() + " is not a required interface of " + current.getComponent().getName());
+			ComponentInstance instanceChosenForRequiredInterface = current.getSatisfactionOfRequiredInterfaces().get(selection.getX());
+			if (!selection.getY().equals("*") && !instanceChosenForRequiredInterface.getComponent().getName().equals(selection.getY()))
+				return false;
+			current = instanceChosenForRequiredInterface;
+		}
+		return true;
 	}
 
 	@JsonIgnore
