@@ -231,4 +231,143 @@ public class TimeSeriesUtil {
 		return sb.toString();
 	}
 
+	/**
+	 * Calculates the derivative of a timeseries as described first by Keogh and
+	 * Pazzani (2001).
+	 * <code>f'(n) = \frac{ f(n) - f(n-1) + /frac{f(i+1) - f(i-1)}{2} }{2}</code>
+	 * 
+	 * @param T
+	 * @return
+	 */
+	public double[] keoghDerivate(double[] T) {
+		double[] derivate = new double[T.length - 2];
+
+		for (int i = 1; i < T.length - 1; i++) {
+			derivate[i - 1] = ((T[i] - T[i - 1]) + (T[i + 1] - T[i - 1]) / 2) / 2;
+		}
+
+		return derivate;
+	}
+
+	/**
+	 * Calculates the derivateive of a timeseries as described first by Keogh and
+	 * Pazzani (2001).
+	 * <code>f'(n) = \frac{ f(n) - f(n-1) + /frac{f(i+1) - f(i-1)}{2} }{2}</code>
+	 * 
+	 * @param T
+	 * @return
+	 */
+	public double[] keoghDerivateWithBoundaries(double[] T) {
+		double[] derivate = new double[T.length];
+
+		for (int i = 1; i < T.length - 1; i++) {
+			derivate[i] = ((T[i] - T[i - 1]) + (T[i + 1] - T[i - 1]) / 2) / 2;
+		}
+
+		derivate[0] = derivate[1];
+		derivate[T.length - 1] = derivate[T.length - 2];
+
+		return derivate;
+	}
+
+	/**
+	 * Calclualtes f'(n) = f(n-1) - f(n)
+	 * 
+	 * @param T Time series.
+	 * @return
+	 */
+	public double[] backwardDifferenceDerivate(double[] T) {
+		double[] derivate = new double[T.length - 1];
+
+		for (int i = 1; i < T.length; i++) {
+			derivate[i - 1] = T[i] - T[i - 1];
+		}
+
+		return derivate;
+	}
+
+	/**
+	 * Calclualtes f'(n) = f(n-1) - f(n)
+	 * 
+	 * @param T Time series.
+	 * @return
+	 */
+	public double[] backwardDifferenceDerivateWithBoundaries(double[] T) {
+		double[] derivate = new double[T.length];
+
+		for (int i = 1; i < T.length; i++) {
+			derivate[i] = T[i] - T[i - 1];
+		}
+
+		derivate[0] = derivate[1];
+		return derivate;
+	}
+
+	/**
+	 * f'(n) = f(n+1) - f(n)
+	 * 
+	 * @param T
+	 * @return
+	 */
+	public double[] forwardDifferenceDerivate(double[] T) {
+		double[] derivate = new double[T.length - 1];
+
+		for (int i = 0; i < T.length - 1; i++) {
+			derivate[i] = T[i + 1] - T[i];
+		}
+
+		return derivate;
+	}
+
+	/**
+	 * f'(n) = f(n+1) - f(n)
+	 * 
+	 * @param T
+	 * @return
+	 */
+	public double[] forwardDifferenceDerivateWithBoundaries(double[] T) {
+		double[] derivate = new double[T.length];
+
+		for (int i = 0; i < T.length - 1; i++) {
+			derivate[i] = T[i + 1] - T[i];
+		}
+
+		derivate[T.length - 1] = derivate[T.length - 2];
+		return derivate;
+	}
+
+	/**
+	 * Calculates the derivative of a timeseries as described first by Gullo et. al
+	 * (2009).
+	 * 
+	 * @param T
+	 * @return
+	 */
+	public double[] gulloDerivate(double[] T) {
+		double[] derivate = new double[T.length - 1];
+
+		for (int i = 1; i < T.length; i++) {
+			derivate[i - 1] = T[i + 1] - T[i - 1] / 2;
+		}
+
+		return derivate;
+	}
+
+	/**
+	 * f'(n) = \frac{f(i+1)-f(i-1)}{2}
+	 * 
+	 * @param T
+	 * @return
+	 */
+	public double[] gulloDerivateWithBoundaries(double[] T) {
+		double[] derivate = new double[T.length];
+
+		for (int i = 1; i < T.length; i++) {
+			derivate[i] = T[i + 1] - T[i - 1] / 2;
+		}
+
+		derivate[0] = derivate[1];
+		return derivate;
+	}
+
 }
