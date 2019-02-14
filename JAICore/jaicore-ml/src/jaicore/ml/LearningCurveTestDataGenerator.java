@@ -52,11 +52,12 @@ public class LearningCurveTestDataGenerator {
 	private static LinearCombinationLearningCurve generateFunction() {
 		LinearCombinationConfiguration configuration = new LinearCombinationConfiguration();
 		Map<String, Double> weights = new HashMap<>();
-		weights.put("pow_3", 1.0 / 5.0);
-		weights.put("log_log_linear", 1.0 / 5.0);
-		weights.put("log_power", 1.0 / 5.0);
-		weights.put("pow_4", 1.0 / 5.0);
-		weights.put("mmf", 1.0 / 5.0);
+		weights.put("pow_3", 1.0 / 6.0);
+		weights.put("log_log_linear", 1.0 / 6.0);
+		weights.put("log_power", 1.0 / 6.0);
+		weights.put("pow_4", 1.0 / 6.0);
+		weights.put("mmf", 1.0 / 6.0);
+		weights.put("exp_4", 1.0 / 6.0);
 
 		Map<String, Map<String, Double>> modelParams = new HashMap<>();
 
@@ -95,6 +96,14 @@ public class LearningCurveTestDataGenerator {
 		mmfParams.put("delta", 0.6);
 		mmfParams.put("kappa", 0.05);
 		modelParams.put("mmf", mmfParams);
+
+		// exp_4
+		Map<String, Double> exp4Params = new HashMap<>();
+		exp4Params.put("a", 0.1);
+		exp4Params.put("b", 0.2);
+		exp4Params.put("c", 1.0);
+		exp4Params.put("alpha", 0.5);
+		modelParams.put("exp_4", exp4Params);
 
 		configuration.setParameters(modelParams);
 		configuration.setWeights(weights);

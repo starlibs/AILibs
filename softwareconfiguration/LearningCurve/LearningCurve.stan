@@ -19,9 +19,13 @@ functions{
 	real mmf(real alpha, real beta, real delta, real kappa, real x){
 		return alpha - (alpha - beta)/(1 + (kappa * x)^delta);
 	}
+
+	real exp_4(real a, real b, real c, real alpha, real x){
+		return c - exp(-a * x^alpha + b);
+	}
 	
-	real f_comb(real w_0, real w_1, real w_2, real w_3, real w_4, real a_0, real b_0, real c_1, real a_1, real alpha_1, real a_2, real b_2, real c_2, real a_3, real b_3, real c_3, real alpha_3, real alpha_4, real beta_4, real delta_4, real kappa_4, real x){
-		return w_0 * log_log_linear(a_0, b_0, x) + w_1 * pow_3(c_1, a_1, alpha_1, x) + w_2 * log_power(a_2, b_2, c_2, x) + w_3 * pow_4(a_3, b_3, c_3, alpha_3, x) + w_4 * mmf(alpha_4, beta_4, delta_4, kappa_4, x);
+	real f_comb(real w_0, real w_1, real w_2, real w_3, real w_4, real w_5, real a_0, real b_0, real c_1, real a_1, real alpha_1, real a_2, real b_2, real c_2, real a_3, real b_3, real c_3, real alpha_3, real alpha_4, real beta_4, real delta_4, real kappa_4, real a_5, real b_5, real c_5, real alpha_5, real x){
+		return w_0 * log_log_linear(a_0, b_0, x) + w_1 * pow_3(c_1, a_1, alpha_1, x) + w_2 * log_power(a_2, b_2, c_2, x) + w_3 * pow_4(a_3, b_3, c_3, alpha_3, x) + w_4 * mmf(alpha_4, beta_4, delta_4, kappa_4, x) + w_5 * exp_4(a_5, b_5, c_5, alpha_5, x);
 	}
 	
 }
@@ -38,6 +42,7 @@ parameters {
 	real<lower=0> w_2;
 	real<lower=0> w_3;
 	real<lower=0> w_4;
+	real<lower=0> w_5;
 	real a_0;
 	real b_0;
 	real c_1;
@@ -54,6 +59,10 @@ parameters {
 	real beta_4;
 	real delta_4;
 	real kappa_4;
+	real a_5;
+	real b_5;
+	real c_5;
+	real alpha_5;
 	
 	real<lower=0> sigma;
 }
@@ -68,6 +77,8 @@ model {
 	w_1 ~ normal(1,1);
 	w_2 ~ normal(1,1);
 	w_3 ~ normal(1,1);
+	w_4 ~ normal(1,1);
+	w_5 ~ normal(1,1);
 	sigma ~ normal(0, 1);
 	c_1 ~ normal(1, 1);
 	a_1 ~ normal(10, 5);
@@ -85,11 +96,15 @@ model {
 	beta_4 ~ normal(-1,1);
 	delta_4 ~ normal(0.5,0.25);
 	kappa_4 ~ normal(0.5,0.25);
+	a_5 ~ normal(0.1,0.05);
+	b_5 ~ normal(0,0.5);
+	c_5 ~ normal(1,0.3);
+	alpha_5 ~ normal(0.5,0.2);
 
 	
 	// dist
 	for (n in 1:N) 
-		ypred[n] = f_comb(w_0, w_1, w_2, w_3, w_4, a_0, b_0, c_1, a_1, alpha_1, a_2, b_2, c_2, a_3, b_3, c_3, alpha_3, alpha_4, beta_4, delta_4, kappa_4, x[n]);
+		ypred[n] = f_comb(w_0, w_1, w_2, w_3, w_4, w_5, a_0, b_0, c_1, a_1, alpha_1, a_2, b_2, c_2, a_3, b_3, c_3, alpha_3, alpha_4, beta_4, delta_4, kappa_4, a_5, b_5, c_5, alpha_5, x[n]);
 		//ypred[n] = log_log_linear(a_0, b_0, x[n]);
 	y ~ normal(ypred, sigma);
 }
