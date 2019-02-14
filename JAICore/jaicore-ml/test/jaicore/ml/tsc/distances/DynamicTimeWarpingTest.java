@@ -3,8 +3,6 @@ package jaicore.ml.tsc.distances;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
-import jaicore.ml.tsc.exceptions.TimeSeriesLengthException;
-
 /**
  * DynamicTimeWarpingTest
  */
