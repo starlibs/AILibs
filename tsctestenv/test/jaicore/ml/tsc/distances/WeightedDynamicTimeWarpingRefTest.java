@@ -1,6 +1,7 @@
 package jaicore.ml.tsc.distances;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 
@@ -79,5 +80,48 @@ public class WeightedDynamicTimeWarpingRefTest {
                 System.out.println("Correct");
             }
         }
+    }
+
+    /**
+     * Compares the performance for the distance calculation on a whole dataset by
+     * measuring calculation time.
+     */
+    @Test
+    public void testPerformance() {
+        // Get values.
+        double[][] values = dataset.getValues(0);
+        int numberOfTestInstances = 100;
+
+        double cutoff = Double.MAX_VALUE;
+        double g = 1;
+        double Wmax = 1;
+
+        // Measure time for reference implementation.
+        double refStart = System.currentTimeMillis();
+        WeightedDTW referenceWeightedDynamicTimeWarping = new WeightedDTW(g);
+        for (int i = 0; i < numberOfTestInstances; i++) {
+            for (int j = i; j < values.length; j++) {
+                referenceWeightedDynamicTimeWarping.distance(values[i], values[j], cutoff);
+            }
+        }
+        double refEnd = System.currentTimeMillis();
+
+        // Measure time for own implementation.
+        double ownStart = System.currentTimeMillis();
+        WeightedDynamicTimeWarping weightedDynamicTimeWarping = new WeightedDynamicTimeWarping(2, g, Wmax,
+                ScalarDistanceUtil.getSquaredDistance());
+        for (int i = 0; i < numberOfTestInstances; i++) {
+            for (int j = i; j < values.length; j++) {
+                weightedDynamicTimeWarping.distance(values[i], values[j]);
+            }
+        }
+        double ownEnd = System.currentTimeMillis();
+
+        // Compare performance.
+        double refTime = refEnd - refStart;
+        double ownTime = ownEnd - ownStart;
+        String message = String.format("Reference implementation was faster. Reference: %.3f ms, own: %.3f ms", refTime,
+                ownTime);
+        assertTrue(message, ownTime <= refTime);
     }
 }
