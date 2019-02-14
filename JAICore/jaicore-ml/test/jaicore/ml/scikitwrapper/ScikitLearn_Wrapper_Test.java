@@ -38,7 +38,7 @@ public class ScikitLearn_Wrapper_Test {
 		Instances dataset = loadARFF("testsrc/ml/scikitwrapper/0532052678.arff");
 		slw.setIsRegression(true);
 		int s = dataset.numAttributes();
-		slw.setTargets(s - 1, s - 2, s - 3);
+		slw.setTargets(s - 3, s - 2, s - 1);
 		slw.buildClassifier(dataset);
 		assertThat(slw.getModelPath(), not(equalTo("")));
 	}
@@ -53,7 +53,7 @@ public class ScikitLearn_Wrapper_Test {
 		int numberInstance = datasetTest.numInstances();
 		slw.setIsRegression(true);
 		int s = datasetTrain.numAttributes();
-		slw.setTargets(s - 1, s - 2, s - 3);
+		slw.setTargets(s - 3, s - 2, s - 1);
 		slw.buildClassifier(datasetTrain);
 		double[] result = slw.classifyInstances(datasetTest);
 		assertNotNull(result);
@@ -129,7 +129,7 @@ public class ScikitLearn_Wrapper_Test {
 		int numberInstance = datasetTest.numInstances();
 		slw.setIsRegression(true);
 		int s = datasetTrain.numAttributes();
-		slw.setTargets(s - 1, s - 2, s - 3);
+		slw.setTargets(s - 3, s - 2, s - 1);
 		slw.buildClassifier(datasetTrain);
 		slw.classifyInstances(datasetTest);
 		List<List<Double>> rawOutput = slw.getRawLastClassificationResults();
@@ -205,7 +205,7 @@ public class ScikitLearn_Wrapper_Test {
 		Instances dataset = loadARFF("testsrc/ml/scikitwrapper/0532052678.arff");
 		slw.setIsRegression(true);
 		int s = dataset.numAttributes();
-		slw.setTargets(s - 1, s - 2, s - 3);
+		slw.setTargets(s - 3, s - 2, s - 1);
 		slw.buildClassifier(dataset);
 		assertThat(slw.getModelPath(), not(equalTo("")));
 	}
@@ -218,7 +218,7 @@ public class ScikitLearn_Wrapper_Test {
 		Instances dataset = loadARFF("testsrc/ml/scikitwrapper/0532052678.arff");
 		slw.setIsRegression(true);
 		int s = dataset.numAttributes();
-		slw.setTargets(s - 1, s - 2, s - 3);
+		slw.setTargets(s - 3, s - 2, s - 1);
 		slw.buildClassifier(dataset);
 		assertThat(slw.getModelPath(), not(equalTo("")));
 	}

@@ -95,7 +95,7 @@ public class InversePowerLawExtrapolator implements LearningCurveExtrapolationMe
 		slw.setIsRegression(true);
 		slw.setModelPath(modelPath);
 		int s = newData.numAttributes();
-		slw.setTargets(s - 1, s - 2, s - 3);
+		slw.setTargets(s - 3, s - 2, s - 1);
 		slw.buildClassifier(newData);
 
 		return slw;

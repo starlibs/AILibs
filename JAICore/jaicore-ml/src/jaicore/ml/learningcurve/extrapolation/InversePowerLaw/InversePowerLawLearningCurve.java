@@ -1,5 +1,7 @@
 package jaicore.ml.learningcurve.extrapolation.InversePowerLaw;
 
+import java.math.BigDecimal;
+
 import jaicore.ml.interfaces.LearningCurve;
 
 /**
@@ -42,8 +44,9 @@ public class InversePowerLawLearningCurve implements LearningCurve {
 	}
 
 	@Override
-	public String toString () {
-		return "(1 - " + this.a + ") - " + this.b + " * x ^ " + this.c;
+	public String toString() {
+		return "(1 - " + new BigDecimal(this.a).toPlainString() + ") - " + new BigDecimal(this.b).toPlainString()
+				+ " * x ^ " + new BigDecimal(this.c).toPlainString();
 	}
-	
+
 }
