@@ -1,7 +1,6 @@
 package jaicore.ml.tsc.distances;
 
 import jaicore.ml.tsc.exceptions.TimeSeriesLengthException;
-import static jaicore.ml.tsc.util.TimeSeriesUtil.*;
 
 /**
  * MoveSplitMerge
@@ -21,21 +20,22 @@ public class MoveSplitMerge implements ITimeSeriesDistance {
 
     @Override
     public double distance(double[] A, double[] B) throws TimeSeriesLengthException {
-        // Parameter checks.
-        isSameLengthOrException(A, B);
-
-        int n = A.length; // TODO This distance metric also works with non-equal length
-        double[][] Cost = new double[n][n];
+        int n = A.length;
+        int m = B.length;
+        double[][] Cost = new double[n][m];
 
         // Initialization.
+        Cost[0][0] = Math.abs(A[0] - B[0]);
         for (int i = 1; i < n; i++) {
             Cost[i][0] = Cost[i - 1][0] + C(A[i], A[i - 1], B[0]);
-            Cost[0][i] = Cost[0][i - 1] + C(B[i], A[0], B[i - 1]);
+        }
+        for (int j = 1; j < m; j++) {
+            Cost[0][j] = Cost[0][j - 1] + C(B[j], A[0], B[j - 1]);
         }
 
         // Dynamic programming.
         for (int i = 1; i < n; i++) {
-            for (int j = 1; j < n; j++) {
+            for (int j = 1; j < m; j++) {
                 double costMove = Cost[i - 1][j - 1] + Math.abs(A[i] - B[j]);
                 double cost2 = Cost[i - 1][j] + C(A[i], A[i - 1], B[j]);
                 double cost3 = Cost[i][j - 1] + C(B[j], A[i], B[j - 1]);
@@ -43,7 +43,7 @@ public class MoveSplitMerge implements ITimeSeriesDistance {
             }
         }
 
-        return Cost[n - 1][n - 1];
+        return Cost[n - 1][m - 1];
     }
 
     private double C(double x, double xBefore, double y) {
