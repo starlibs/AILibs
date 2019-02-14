@@ -208,13 +208,13 @@ public class ShapeletTransformAlgorithm extends ASimplifiedTSCAlgorithm<Integer,
 
 		// Extract time series data and the corresponding targets
 		TimeSeriesDataset data = this.getInput();
-		if (data == null)
-			throw new IllegalStateException("The time series input data must not be null!");
+		if (data == null || data.isEmpty())
+			throw new IllegalStateException("The time series input data must not be null or empty!");
 		if (data.isMultivariate())
 			throw new UnsupportedOperationException("Multivariate datasets are not supported.");
 
 		final double[][] dataMatrix = data.getValuesOrNull(0);
-		if (dataMatrix == null)// || dataMatrix.shape().length != 2)
+		if (dataMatrix == null)
 			throw new IllegalArgumentException(
 					"Value matrix must be a valid 2D matrix containing the time series values for all instances!");
 

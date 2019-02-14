@@ -24,8 +24,7 @@ import timeseriesweka.classifiers.LearnShapelets;
 @SuppressWarnings("unused")
 public class LearnShapeletsRefTest {
 
-
-	private static final String UNIVARIATE_PREFIX = "C:\\Users\\Julian\\Downloads\\UnivariateTSCProblems\\";
+	private static final String UNIVARIATE_PREFIX = "D:\\Data\\TSC\\UnivariateTSCProblems\\";
 
 	private static final String CAR_TRAIN = "C:\\Users\\Julian\\Downloads\\UnivariateTSCProblems\\Car\\Car_TRAIN.arff";
 	private static final String CAR_TEST = "C:\\Users\\Julian\\Downloads\\UnivariateTSCProblems\\Car\\Car_TEST.arff";
@@ -68,6 +67,8 @@ public class LearnShapeletsRefTest {
 
 		LearnShapeletsClassifier ownClf = new LearnShapeletsClassifier(K, learningRate, regularization, scaleR,
 				minShapeLength, maxIter, seed);
+		// Use same K as in reference implementation
+		ownClf.setEstimateK(true);
 
 		LearnShapelets refClf = new LearnShapelets();
 		refClf.setSeed(seed);

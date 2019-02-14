@@ -22,8 +22,7 @@ import jaicore.ml.tsc.util.TimeSeriesUtil;
  * @author Julian Lienen
  *
  */
-public class LearnShapeletsClassifier
-		extends ASimplifiedTSClassifier<Integer> {
+public class LearnShapeletsClassifier extends ASimplifiedTSClassifier<Integer> {
 
 	/**
 	 * The log4j logger.
@@ -113,6 +112,22 @@ public class LearnShapeletsClassifier
 	}
 
 	/**
+	 * Enables / disabled the parameter estimation of K within the training
+	 * algorithm.
+	 * 
+	 * @param estimateK
+	 *            Value to be set
+	 */
+	public void setEstimateK(final boolean estimateK) {
+		if (this.algorithm != null) {
+			((LearnShapeletsAlgorithm) this.algorithm).setEstimateK(estimateK);
+		} else {
+			LOGGER.warn("Could not " + (estimateK ? "enable" : "disable")
+					+ " estimation of parameter K due to non-set algorithm object in LearnShapeletsClassifier object.");
+		}
+	}
+
+	/**
 	 * @return {@link LearnShapeletsClassifier#S}.
 	 */
 	public double[][][] getS() {
@@ -191,7 +206,7 @@ public class LearnShapeletsClassifier
 		final HashMap<Integer, Double> scoring = new HashMap<>();
 
 		univInstance = TimeSeriesUtil.zNormalize(univInstance, LearnShapeletsAlgorithm.USE_BIAS_CORRECTION);
-		
+
 		for (int i = 0; i < this.C; i++) {
 			double tmpScore = this.W_0[i];
 			for (int r = 0; r < this.scaleR; r++) {

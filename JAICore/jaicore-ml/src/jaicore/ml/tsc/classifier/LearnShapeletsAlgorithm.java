@@ -109,6 +109,12 @@ public class LearnShapeletsAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Le
 	private TimeOut timeout = new TimeOut(Integer.MAX_VALUE, TimeUnit.SECONDS);
 
 	/**
+	 * Parameter indicator whether estimation of K (number of learned shapelets)
+	 * should be derived from the number of total segments. False by default.
+	 */
+	private boolean estimateK = false;
+
+	/**
 	 * Constructor of the algorithm to train a {@link LearnShapeletsClassifier}.
 	 * 
 	 * @param K
@@ -300,13 +306,16 @@ public class LearnShapeletsAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Le
 			Y[i][occuringClasses.indexOf(instanceClass)] = 1;
 		}
 
-		int totalSegments = 0;
-		for (int r = 0; r < this.scaleR; r++) {
-			final int numberOfSegments = getNumberOfSegments(this.Q, this.minShapeLength, r);
-			totalSegments += numberOfSegments * this.I;
-		}
+		// Estimate parameter K by the maximum number of segments
+		if (this.estimateK) {
+			int totalSegments = 0;
+			for (int r = 0; r < this.scaleR; r++) {
+				final int numberOfSegments = getNumberOfSegments(this.Q, this.minShapeLength, r);
+				totalSegments += numberOfSegments * this.I;
+			}
 
-		this.K = (int) (Math.log(totalSegments) * (this.C - 1));
+			this.K = (int) (Math.log(totalSegments) * (this.C - 1));
+		}
 
 		LOGGER.info("Parameters: k={}, learningRate={}, reg={}, r={}, minShapeLength={}, maxIter={}, Q={}, C={}", K,
 				learningRate, regularization, scaleR, minShapeLength, maxIter, Q, C);
@@ -637,4 +646,24 @@ public class LearnShapeletsAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Le
 	public IAlgorithmConfig getConfig() {
 		throw new UnsupportedOperationException("The operation to be performed is not supported.");
 	}
+
+	/**
+	 * Getter for {@link LearnShapeletsAlgorithm#estimateK}.
+	 * 
+	 * @return the estimateK
+	 */
+	public boolean isEstimateK() {
+		return estimateK;
+	}
+
+	/**
+	 * Setter for {@link LearnShapeletsAlgorithm#estimateK}.
+	 * 
+	 * @param estimateK
+	 *            the estimateK to set
+	 */
+	public void setEstimateK(boolean estimateK) {
+		this.estimateK = estimateK;
+	}
+
 }
