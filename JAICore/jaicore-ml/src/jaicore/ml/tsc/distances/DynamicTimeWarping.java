@@ -1,8 +1,5 @@
 package jaicore.ml.tsc.distances;
 
-import jaicore.ml.tsc.exceptions.TimeSeriesLengthException;
-import jaicore.ml.tsc.util.TimeSeriesUtil;
-
 /**
  * Class for the Time Warp Distance Calculation.
  * 
@@ -69,7 +66,7 @@ public class DynamicTimeWarping implements ITimeSeriesDistance {
     }
 
     @Override
-    public double distance(double[] A, double[] B) throws TimeSeriesLengthException {
+    public double distance(double[] A, double[] B) {
         // Care in the most algorithm descriptions, the time series are 1-indexed.
 
         int n = A.length;

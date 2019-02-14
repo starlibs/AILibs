@@ -1,6 +1,5 @@
 package jaicore.ml.tsc.distances;
 
-import jaicore.ml.tsc.exceptions.TimeSeriesLengthException;
 import jaicore.ml.tsc.util.ScalarDistanceUtil;
 
 import static jaicore.ml.tsc.util.TimeSeriesUtil.*;
@@ -45,9 +44,7 @@ public class TimeWarpEditDistance implements ITimeSeriesDistanceWithTimestamps {
     }
 
     @Override
-    public double distance(double[] A, double[] B) throws TimeSeriesLengthException {
-        // Parameter checks.
-        isSameLengthOrException(A, B);
+    public double distance(double[] A, double[] B) {
         // Create dummy timestamps for A and B.
         double[] tA = createEquidistantTimestamps(A);
         double[] tB = createEquidistantTimestamps(B);
@@ -56,10 +53,7 @@ public class TimeWarpEditDistance implements ITimeSeriesDistanceWithTimestamps {
     }
 
     @Override
-    public double distance(double[] A, double[] tA, double[] B, double[] tB) throws TimeSeriesLengthException {
-        // Parameter checks.
-        isSameLengthOrException(A, tA, B, tB);
-
+    public double distance(double[] A, double[] tA, double[] B, double[] tB) {
         return calculateDistance(A, tA, B, tB);
     }
 

@@ -1,7 +1,5 @@
 package jaicore.ml.tsc.distances;
 
-import jaicore.ml.tsc.exceptions.TimeSeriesLengthException;
-
 /**
  * MoveSplitMerge
  */
@@ -19,7 +17,7 @@ public class MoveSplitMerge implements ITimeSeriesDistance {
     }
 
     @Override
-    public double distance(double[] A, double[] B) throws TimeSeriesLengthException {
+    public double distance(double[] A, double[] B) {
         int n = A.length;
         int m = B.length;
         double[][] Cost = new double[n][m];

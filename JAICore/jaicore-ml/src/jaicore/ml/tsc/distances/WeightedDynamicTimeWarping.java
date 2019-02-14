@@ -1,11 +1,5 @@
 package jaicore.ml.tsc.distances;
 
-import static jaicore.ml.tsc.util.TimeSeriesUtil.*;
-
-import org.bytedeco.javacpp.opencv_core.Scalar;
-
-import jaicore.ml.tsc.util.ScalarDistanceUtil;
-
 /**
  * Class for the Weighted Dynamic Time Warp Distance Calculation.
  */
@@ -39,7 +33,7 @@ public class WeightedDynamicTimeWarping implements ITimeSeriesDistance {
     }
 
     @Override
-    public double distance(double[] A, double[] B) throws IllegalArgumentException {
+    public double distance(double[] A, double[] B) {
         int n = A.length;
         int m = B.length;
         double[][] M = new double[n + 1][m + 1];

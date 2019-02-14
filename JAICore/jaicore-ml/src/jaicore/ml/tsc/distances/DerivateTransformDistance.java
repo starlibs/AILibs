@@ -1,6 +1,5 @@
 package jaicore.ml.tsc.distances;
 
-import jaicore.ml.tsc.exceptions.TimeSeriesLengthException;
 import jaicore.ml.tsc.util.TimeSeriesUtil;
 
 /**
@@ -35,7 +34,7 @@ public class DerivateTransformDistance implements ITimeSeriesDistance {
     }
 
     @Override
-    public double distance(double[] A, double[] B) throws TimeSeriesLengthException {
+    public double distance(double[] A, double[] B) {
         double[] derivateA = TimeSeriesUtil.backwardDifferenceDerivate(A);
         double[] derivateB = TimeSeriesUtil.backwardDifferenceDerivate(B);
 

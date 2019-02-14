@@ -3,7 +3,6 @@ package jaicore.ml.tsc.distances;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
-import jaicore.ml.tsc.exceptions.TimeSeriesLengthException;
 import jaicore.ml.tsc.util.ScalarDistanceUtil;
 
 /**
@@ -22,7 +21,7 @@ public class TimeWarpEditDistanceTest {
     double[] timeSeries7 = { 0, 3, 2, 5, 4, 7, 6, 9, 8 };
 
     @Test
-    public void testDistanceCalculation() throws TimeSeriesLengthException {
+    public void testDistanceCalculation() {
         TimeWarpEditDistance twed = new TimeWarpEditDistance(1.0, 1.0);
         double distance = twed.distance(timeSeries1, timeSeries2);
         double expectation = 0;
@@ -31,7 +30,7 @@ public class TimeWarpEditDistanceTest {
     }
 
     @Test
-    public void testDistanceCalculation2() throws TimeSeriesLengthException {
+    public void testDistanceCalculation2() {
         TimeWarpEditDistance twed = new TimeWarpEditDistance(1.0, 0.001, ScalarDistanceUtil.getAbsoluteDistance());
         double distance = twed.distance(timeSeries5, timeSeries6);
         // http://dekalogblog.blogspot.com/2017/12/time-warp-edit-distance.html
@@ -41,7 +40,7 @@ public class TimeWarpEditDistanceTest {
     }
 
     @Test
-    public void testDistanceCalculation3() throws TimeSeriesLengthException {
+    public void testDistanceCalculation3() {
         TimeWarpEditDistance twed = new TimeWarpEditDistance(1.0, 0.001, ScalarDistanceUtil.getAbsoluteDistance());
         double distance = twed.distance(timeSeries5, timeSeries7);
         // http://dekalogblog.blogspot.com/2017/12/time-warp-edit-distance.html

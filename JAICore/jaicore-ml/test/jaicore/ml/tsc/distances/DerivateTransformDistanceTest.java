@@ -3,7 +3,6 @@ package jaicore.ml.tsc.distances;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
-import jaicore.ml.tsc.exceptions.TimeSeriesLengthException;
 import jaicore.ml.tsc.util.ScalarDistanceUtil;
 
 /**
@@ -21,7 +20,7 @@ public class DerivateTransformDistanceTest {
     double[] timeSeries6 = { 1, 2, 3, 5, 5, 6 }; // backward distance derivates have distance 3
 
     @Test
-    public void testDistanceCalculation() throws TimeSeriesLengthException {
+    public void testDistanceCalculation() {
         DerivateTransformDistance ddt = new DerivateTransformDistance(0.5);
         double distance = ddt.distance(timeSeries1, timeSeries2);
         double expectation = 0;
@@ -29,7 +28,7 @@ public class DerivateTransformDistanceTest {
     }
 
     @Test
-    public void testDistanceCalculation2() throws TimeSeriesLengthException {
+    public void testDistanceCalculation2() {
         double alpha = 0.5;
         ITimeSeriesDistance timeSeriesDistance = new DynamicTimeWarping(ScalarDistanceUtil.getAbsoluteDistance());
         DerivateTransformDistance dtw = new DerivateTransformDistance(alpha, timeSeriesDistance);
