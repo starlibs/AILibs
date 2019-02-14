@@ -1,14 +1,17 @@
 package hasco.gui.statsplugin;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import hasco.events.HASCOSolutionEvent;
 import hasco.model.UnparametrizedComponentInstance;
+import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.graphvisualizer.plugin.ASimpleMVCPluginModel;
 
 /**
@@ -60,5 +63,18 @@ public class HASCOModelStatisticsPluginModel extends ASimpleMVCPluginModel<HASCO
 			statsMap.put(composition, getPerformanceStatisticsForComposition(composition));
 		}
 		return statsMap;
+	}
+	
+	public Collection<UnparametrizedComponentInstance> getSeenUnparametrizedComponentsUnderPath(List<Pair<String, String>> path) {
+		if (path.isEmpty()) {
+			return observedSolutionsGroupedByModuloParameters.keySet();
+		}
+		List<Pair<String, String>> copy = new ArrayList<>(path);
+		Pair<String, String> lastEntry = copy.remove(copy.size() - 1);
+		Collection<UnparametrizedComponentInstance> instancesUpToParent = getSeenUnparametrizedComponentsUnderPath(copy);
+		List<String> pathOfRequiredInterfaces = path.stream().map(p -> p.getX()).collect(Collectors.toList());
+		pathOfRequiredInterfaces.remove(0); // the first entry is always empty and, hence, can be ignored
+		System.out.println(pathOfRequiredInterfaces);
+		return instancesUpToParent.stream().filter(e -> e.getSubComposition(pathOfRequiredInterfaces).getComponentName().equals(lastEntry.getY())).collect(Collectors.toList());
 	}
 }
