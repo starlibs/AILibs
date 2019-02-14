@@ -87,7 +87,6 @@ public abstract class MLPlanWekaClassifier implements Classifier, CapabilitiesHa
 	private AlgorithmState state = AlgorithmState.created;
 	private Instances dataShownToSearch = null;
 	private Instances data = null;
-	private double [] metaFeaturesArray;
 
 	public MLPlanWekaClassifier(final File componentFile, final ClassifierFactory factory,
 			final AbstractEvaluatorMeasureBridge<Double, Double> evaluationMeasurementBridge,
@@ -220,8 +219,9 @@ public abstract class MLPlanWekaClassifier implements Classifier, CapabilitiesHa
 					this.factory, problem);
 			this.hascoFactory = new TwoPhaseHASCOFactory();
 			DyadRankingBasedNodeEvaluator<TFDNode, Double> nodeEval =(DyadRankingBasedNodeEvaluator<TFDNode, Double>) preferredNodeEvaluator;
-			nodeEval.setMetaFeatures(metaFeaturesArray);
+			nodeEval.setDataset(this.getData());
 			nodeEval.setPipelineEvaluator(wrappedSearchBenchmark);
+			nodeEval.setClassifierFactory(factory);
 			this.hascoFactory.setPreferredNodeEvaluator(nodeEval);
 			this.hascoFactory.setConfig(this.config);
 			this.optimizingFactory = new OptimizingFactory<>(optimizingFactoryProblem, this.hascoFactory);
@@ -488,15 +488,6 @@ public abstract class MLPlanWekaClassifier implements Classifier, CapabilitiesHa
 
 	public void setData(final Instances data) {
 		this.data = data;
-		Map<String, Double> metaFeatures;
-		try {
-			metaFeatures = new LandmarkerCharacterizer().characterize(this.getData());
-			metaFeaturesArray = metaFeatures.entrySet().stream().mapToDouble(Map.Entry::getValue).toArray();
-			System.out.println(metaFeaturesArray.length);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
 	}
 
 	public Instances getData() {

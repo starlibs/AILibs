@@ -39,7 +39,10 @@ public class WEKAPipelineCharacterizer implements IPipelineCharacterizer {
 
 	/** The default path for pre computed algorithm patterns. */
 	private static final String ALGORITHM_PATTERNS_PATH = "draco/algorithm_patterns.csv";
+
 	
+	/** The default path for pre computed algorithm patterns. */
+	private static final String ALGORITHM_PATTERNS_SUPPORT_5_PATH = "draco/patterns_support_5.csv";
 	/**
 	 * Number of concurrent threads maximally used by the characterizer
 	 */
@@ -119,7 +122,7 @@ public class WEKAPipelineCharacterizer implements IPipelineCharacterizer {
 	public void buildFromFile() {
 		try {
 			this.buildFromFile(
-					Paths.get(getClass().getClassLoader().getResource(ALGORITHM_PATTERNS_PATH).toURI()).toFile());
+					Paths.get(getClass().getClassLoader().getResource(ALGORITHM_PATTERNS_SUPPORT_5_PATH).toURI()).toFile());
 		} catch (URISyntaxException e) {
 			log.error("Couldn't find default algorithm patterns!", e);
 		}
@@ -128,7 +131,8 @@ public class WEKAPipelineCharacterizer implements IPipelineCharacterizer {
 	@Override
 	public void build(List<ComponentInstance> pipelines) throws InterruptedException {
 		// Convert the pipelines to String representations
-		System.out.println("WEKAPipelineCharacterizer: Converting training examples to trees. With support "+ patternMinSupport);
+		System.out.println(
+				"WEKAPipelineCharacterizer: Converting training examples to trees. With support " + patternMinSupport);
 
 		int chunkSize = Math.floorDiv(pipelines.size(), CPUs);
 		int lastchunkSize = pipelines.size() - (chunkSize * (CPUs - 1));
@@ -175,6 +179,17 @@ public class WEKAPipelineCharacterizer implements IPipelineCharacterizer {
 	@Override
 	public double[][] getCharacterizationsOfTrainingExamples() {
 		return treeMiner.getCharacterizationsOfTrainingExamples();
+	}
+
+	/**
+
+	 * Returns the amount of found pipeline patterns, which is the length of a
+	 * characterization.
+	 * 
+	 * @return the length of any array produced by {@link #characterize(ComponentInstance)}.
+	 */
+	public int getLengthOfCharacrization() {
+		return this.foundPipelinePatterns.size();
 	}
 
 	/**
