@@ -100,12 +100,13 @@ public class DynamicTimeWarpingRefTest {
     public void testPerformance() {
         // Get values.
         double[][] values = dataset.getValues(0);
+        int numberOfTestInstances = 100;
 
         // Measure time for reference implementation.
         double cutoff = Double.MAX_VALUE;
         double refStart = System.currentTimeMillis();
         BasicDTW referenceDynamicTimeWarping = new BasicDTW();
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < numberOfTestInstances; i++) {
             for (int j = i; j < values.length; j++) {
                 referenceDynamicTimeWarping.distance(values[i], values[j], cutoff);
             }
@@ -115,7 +116,7 @@ public class DynamicTimeWarpingRefTest {
         // Measure time for own implementation.
         double ownStart = System.currentTimeMillis();
         DynamicTimeWarping dynamicTimeWarping = new DynamicTimeWarping(ScalarDistanceUtil.getSquaredDistance());
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < numberOfTestInstances; i++) {
             for (int j = i; j < values.length; j++) {
                 dynamicTimeWarping.distance(values[i], values[j]);
             }
