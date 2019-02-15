@@ -57,7 +57,7 @@ public class Histogram extends BarChart<String, Number>{
 	
 	public void update(List<? extends Number> values) {
 		DescriptiveStatistics stats = new DescriptiveStatistics();
-		values.forEach(v -> stats.addValue((double)v));
+		values.forEach(v -> stats.addValue((Double)v));
 		update(stats);
 	}
 	
