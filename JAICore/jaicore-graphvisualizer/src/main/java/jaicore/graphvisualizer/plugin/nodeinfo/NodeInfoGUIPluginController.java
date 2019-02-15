@@ -20,15 +20,10 @@ public class NodeInfoGUIPluginController<N> implements IGUIPluginController {
 
 	@Override
 	public void handleGUIEvent(GUIEvent guiEvent) {
-		try {
-			if (NodeClickedEvent.class.isInstance(guiEvent)) {
-				NodeClickedEvent nodeClickedEvent = (NodeClickedEvent) guiEvent;
-				Object searchGraphNodeCorrespondingToClickedViewGraphNode = nodeClickedEvent.getSearchGraphNode();
-				this.model.setCurrentlySelectedNode((N) searchGraphNodeCorrespondingToClickedViewGraphNode);
-			}
-		} catch (Exception exception) {
-			exception.printStackTrace();
-			System.out.println();
+		if (NodeClickedEvent.class.isInstance(guiEvent)) {
+			NodeClickedEvent nodeClickedEvent = (NodeClickedEvent) guiEvent;
+			Object searchGraphNodeCorrespondingToClickedViewGraphNode = nodeClickedEvent.getSearchGraphNode();
+			this.model.setCurrentlySelectedNode((N) searchGraphNodeCorrespondingToClickedViewGraphNode);
 		}
 	}
 
