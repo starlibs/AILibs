@@ -59,14 +59,14 @@ public class TreeMinerSerializerTest {
 
 	public TreeMinerSerializerTest() throws JsonParseException, JsonMappingException, IOException, URISyntaxException,
 			OWLOntologyCreationException {
-		mapper = new ObjectMapper();
-		mapper.registerModule(new HASCOJacksonModule());
-		cI = mapper.readValue(componentInstanceJSON, ComponentInstance.class);
 		File jsonFile = Paths.get(getClass().getClassLoader()
 				.getResource(Paths.get("automl", "searchmodels", "weka", "weka-all-autoweka.json").toString()).toURI())
 				.toFile();
 
 		loader = new ComponentLoader(jsonFile);
+		mapper = new ObjectMapper();
+		mapper.registerModule(new HASCOJacksonModule(loader.getComponents()));
+		cI = mapper.readValue(componentInstanceJSON, ComponentInstance.class);
 	}
 
 	/**

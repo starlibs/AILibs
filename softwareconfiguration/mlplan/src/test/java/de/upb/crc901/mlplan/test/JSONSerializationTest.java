@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import hasco.model.ComponentInstance;
+import hasco.serialization.ComponentLoader;
 import hasco.serialization.HASCOJacksonModule;
 import junit.framework.Assert;
 
@@ -33,9 +34,14 @@ public class JSONSerializationTest {
 	String oldPlainJson = "{\"component\": {\"name\": \"pipeline\", \"parameters\": [], \"dependencies\": [], \"providedInterfaces\": [\"pipeline\", \"MLPipeline\", \"AbstractClassifier\"], \"requiredInterfaces\": {\"classifier\": \"BaseClassifier\", \"preprocessor\": \"AbstractPreprocessor\"}}, \"parameterValues\": {}, \"satisfactionOfRequiredInterfaces\": {\"classifier\": {\"component\": {\"name\": \"weka.classifiers.rules.ZeroR\", \"parameters\": [], \"dependencies\": [], \"providedInterfaces\": [\"weka.classifiers.rules.ZeroR\", \"AbstractClassifier\", \"WekaBaseClassifier\", \"BaseClassifier\"], \"requiredInterfaces\": {}}, \"parameterValues\": {}, \"satisfactionOfRequiredInterfaces\": {}, \"parametersThatHaveBeenSetExplicitly\": [], \"parametersThatHaveNotBeenSetExplicitly\": []}, \"preprocessor\": {\"component\": {\"name\": \"weka.attributeSelection.AttributeSelection\", \"parameters\": [{\"name\": \"M\", \"numeric\": false, \"categorical\": true, \"defaultValue\": true, \"defaultDomain\": {\"values\": [\"true\", \"false\"]}}], \"dependencies\": [], \"providedInterfaces\": [\"weka.attributeSelection.AttributeSelection\", \"AbstractPreprocessor\"], \"requiredInterfaces\": {\"eval\": \"evaluator\", \"search\": \"searcher\"}}, \"parameterValues\": {\"M\": \"false\"}, \"satisfactionOfRequiredInterfaces\": {\"eval\": {\"component\": {\"name\": \"weka.attributeSelection.SymmetricalUncertAttributeEval\", \"parameters\": [{\"name\": \"M\", \"numeric\": false, \"categorical\": true, \"defaultValue\": true, \"defaultDomain\": {\"values\": [\"true\", \"false\"]}}], \"dependencies\": [], \"providedInterfaces\": [\"weka.attributeSelection.SymmetricalUncertAttributeEval\", \"evaluator\"], \"requiredInterfaces\": {}}, \"parameterValues\": {\"M\": \"true\"}, \"satisfactionOfRequiredInterfaces\": {}, \"parametersThatHaveBeenSetExplicitly\": [{\"name\": \"M\", \"numeric\": false, \"categorical\": true, \"defaultValue\": true, \"defaultDomain\": {\"values\": [\"true\", \"false\"]}}], \"parametersThatHaveNotBeenSetExplicitly\": []}, \"search\": {\"component\": {\"name\": \"weka.attributeSelection.Ranker\", \"parameters\": [], \"dependencies\": [], \"providedInterfaces\": [\"weka.attributeSelection.Ranker\", \"searcher\"], \"requiredInterfaces\": {}}, \"parameterValues\": {}, \"satisfactionOfRequiredInterfaces\": {}, \"parametersThatHaveBeenSetExplicitly\": [], \"parametersThatHaveNotBeenSetExplicitly\": []}}, \"parametersThatHaveBeenSetExplicitly\": [{\"name\": \"M\", \"numeric\": false, \"categorical\": true, \"defaultValue\": true, \"defaultDomain\": {\"values\": [\"true\", \"false\"]}}], \"parametersThatHaveNotBeenSetExplicitly\": []}}, \"parametersThatHaveBeenSetExplicitly\": [], \"parametersThatHaveNotBeenSetExplicitly\": []}";
 
 	@Test
-	public void testSerializeComponentInstance() {
+	public void testSerializeComponentInstance() throws URISyntaxException, IOException {
+		File jsonFile = Paths.get(getClass().getClassLoader()
+				.getResource(Paths.get("automl", "searchmodels", "weka", "weka-all-autoweka.json").toString()).toURI())
+				.toFile();
+
+		ComponentLoader loader = new ComponentLoader(jsonFile);
 		ObjectMapper mapper = new ObjectMapper();
-		mapper.registerModule(new HASCOJacksonModule());
+		mapper.registerModule(new HASCOJacksonModule(loader.getComponents()));
 
 		try {
 			ComponentInstance instance = mapper.readValue(oldPlainJson, ComponentInstance.class);
@@ -47,18 +53,25 @@ public class JSONSerializationTest {
 	}
 
 	@Test
-	public void testAllComponentInstances () throws JsonParseException, JsonMappingException, IOException, URISyntaxException{
+	public void testAllComponentInstances()
+			throws JsonParseException, JsonMappingException, IOException, URISyntaxException {
+
+		File jsonFile = Paths.get(getClass().getClassLoader()
+				.getResource(Paths.get("automl", "searchmodels", "weka", "weka-all-autoweka.json").toString()).toURI())
+				.toFile();
+
+		ComponentLoader loader = new ComponentLoader(jsonFile);
 		ObjectMapper mapper = new ObjectMapper();
-		mapper.registerModule(new HASCOJacksonModule());
+		mapper.registerModule(new HASCOJacksonModule(loader.getComponents()));
 		File allJsonFile = Paths.get(getClass().getClassLoader().getResource(allJsonFiles).toURI()).toFile();
 		List<LinkedHashMap<String, String>> allCIs = mapper.readValue(allJsonFile, ArrayList.class);
 		for (LinkedHashMap<String, String> content : allCIs) {
 			String serializedCI = content.get("composition");
-			
+
 			// try to deserialize
-			ComponentInstance ci = mapper.readValue(serializedCI, ComponentInstance.class); 
+			ComponentInstance ci = mapper.readValue(serializedCI, ComponentInstance.class);
 		}
-			
+
 	}
 
 }

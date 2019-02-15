@@ -115,7 +115,6 @@ public class WEKAPipelineCharacterizer implements IPipelineCharacterizer {
 
 	@Override
 	public void build(List<ComponentInstance> pipelines) throws InterruptedException {
-		patternMinSupport = (int) (0.05 * pipelines.size()); 
 		// Convert the pipelines to String representations
 		System.out.println("WEKAPipelineCharacterizer: Converting training examples to trees. With support "+ patternMinSupport);
 

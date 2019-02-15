@@ -1,14 +1,11 @@
 package hasco.serialization;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-
-import org.json.simple.JSONObject;
+import java.util.NoSuchElementException;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.TreeNode;
@@ -26,8 +23,11 @@ public class ComponentInstanceDeserializer extends StdDeserializer<ComponentInst
 	 */
 	private static final long serialVersionUID = 4216559441244072999L;
 
-	public ComponentInstanceDeserializer() {
+	private Collection<Component> possibleComponents;
+
+	public ComponentInstanceDeserializer(Collection<Component> possibleComponents) {
 		super(ComponentInstance.class);
+		this.possibleComponents = possibleComponents;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -37,21 +37,11 @@ public class ComponentInstanceDeserializer extends StdDeserializer<ComponentInst
 		Map<String, String> parameterValues = mapper.treeToValue(p.get("parameterValues"), HashMap.class);
 		// read the component
 
-		List<Object> componentList = new ArrayList<>();
-		componentList.add(p.get("component"));
+		String componentName = p.get("component").get("name").toString().replaceAll("\"", "");
 
-		ComponentLoader loader = new ComponentLoader();
-		JSONObject node = new JSONObject();
-		node.put("repository", "repository");
-		node.put("components", componentList);
-		
-		loader.readFromString(node.toJSONString());
+		Component component = possibleComponents.stream().filter(c -> c.getName().equals(componentName)).findFirst()
+				.orElseThrow(NoSuchElementException::new);
 
-		Collection<Component> components = loader.getComponents();
-		Component component = null;
-		if (!components.isEmpty())
-			component = components.iterator().next();
-		
 		Map<String, ComponentInstance> satisfactionOfRequiredInterfaces = new HashMap<>();
 		// recursively resolve the requiredInterfaces
 		TreeNode n = p.get("satisfactionOfRequiredInterfaces");
