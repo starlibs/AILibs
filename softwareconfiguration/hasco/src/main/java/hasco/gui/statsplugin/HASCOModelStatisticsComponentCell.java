@@ -9,8 +9,7 @@ import javafx.scene.layout.HBox;
  * 
  * @author fmohr
  * 
- * This class provides the cells for the trees in this view.
- * They are composed of a label with the name of the required interface and the combo box with the available components. 
+ *         This class provides the cells for the trees in this view. They are composed of a label with the name of the required interface and the combo box with the available components.
  *
  */
 public class HASCOModelStatisticsComponentCell extends TreeCell<HASCOModelStatisticsComponentSelector> {

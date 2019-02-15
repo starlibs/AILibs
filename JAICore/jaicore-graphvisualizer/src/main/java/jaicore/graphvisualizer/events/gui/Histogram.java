@@ -3,6 +3,8 @@ package jaicore.graphvisualizer.events.gui;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+
 import jaicore.graphvisualizer.IntegerAxisFormatter;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -15,9 +17,11 @@ public class Histogram extends BarChart<String, Number>{
 	private final XYChart.Series<String, Number> series = new XYChart.Series<>();
 	private final ObservableList<Data<String, Number>> histogram;
 	private int max;
+	private int n;
 	
 	public Histogram(int n) {
 		super(new CategoryAxis(), new NumberAxis());
+		this.n = n;
 		this.getData().add(series);
 		List<Data<String,Number>> values = new ArrayList<>();
 		for (int i = 0; i < n; i++) {
@@ -35,6 +39,28 @@ public class Histogram extends BarChart<String, Number>{
 		((NumberAxis) getYAxis()).setMinorTickCount(0);
 	}
 	
+	public void update(DescriptiveStatistics stats) {
+		int[] histogram = new int[n];
+		double[] values = stats.getValues();
+		double min = stats.getMin();
+		double stepSize = (stats.getMax() - min) / n;
+		for (int i = 0; i < values.length; i++) {
+			for (int j = 0; j < n; j++) {
+				if (values[i] <= min + (j * stepSize)) {
+					histogram[j]++;
+					break;
+				}
+			}
+		}
+		update(histogram);
+	}
+	
+	public void update(List<? extends Number> values) {
+		DescriptiveStatistics stats = new DescriptiveStatistics();
+		values.forEach(v -> stats.addValue((double)v));
+		update(stats);
+	}
+	
 	public void update(int[] values) {
 		List<Data<String,Number>> transformedValues = new ArrayList<>();
 		for (int i = 0; i < values.length; i++) {
@@ -49,5 +75,13 @@ public class Histogram extends BarChart<String, Number>{
 	public void clear() {
 		max = 0;
 		this.histogram.clear();
+	}
+
+	public int getN() {
+		return n;
+	}
+
+	public void setN(int n) {
+		this.n = n;
 	}
 }

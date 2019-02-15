@@ -9,7 +9,7 @@ import jaicore.graphvisualizer.events.gui.GUIEvent;
 import jaicore.graphvisualizer.plugin.controlbar.ResetEvent;
 import jaicore.graphvisualizer.plugin.timeslider.GoToTimeStepEvent;
 
-public abstract class ASimpleMVCPluginController<M extends ASimpleMVCPluginModel<?, ?>, V extends ASimpleMVCPluginView<?, ?>> extends Thread implements IGUIPluginController {
+public abstract class ASimpleMVCPluginController<M extends ASimpleMVCPluginModel<?, ?>, V extends ASimpleMVCPluginView<?, ?, ?>> extends Thread implements IGUIPluginController {
 
 	private final Queue<AlgorithmEvent> eventQueue;
 
@@ -46,7 +46,7 @@ public abstract class ASimpleMVCPluginController<M extends ASimpleMVCPluginModel
 		}
 	}
 
-	public abstract void handleAlgorithmEventInternally(AlgorithmEvent algorithmEvent);
+	protected abstract void handleAlgorithmEventInternally(AlgorithmEvent algorithmEvent);
 	
 	@Override
 	public void handleGUIEvent(GUIEvent guiEvent) {
