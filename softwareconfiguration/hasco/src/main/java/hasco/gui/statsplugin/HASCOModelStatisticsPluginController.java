@@ -10,6 +10,7 @@ public class HASCOModelStatisticsPluginController extends ASimpleMVCPluginContro
 		super(model, view);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void handleAlgorithmEventInternally(AlgorithmEvent algorithmEvent) {
 		if (algorithmEvent instanceof HASCOSolutionEvent) {

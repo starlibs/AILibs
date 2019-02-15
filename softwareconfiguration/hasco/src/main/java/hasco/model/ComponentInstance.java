@@ -112,7 +112,7 @@ public class ComponentInstance {
 		for (; i < n; i++) {
 			Pair<String,String> selection = path.get(i);
 			if (!current.getComponent().getRequiredInterfaces().containsKey(selection.getX()))
-				throw new IllegalArgumentException("Invalid path restriction: " + selection.getX() + " is not a required interface of " + current.getComponent().getName());
+				throw new IllegalArgumentException("Invalid path restriction " +  path + ": " + selection.getX() + " is not a required interface of " + current.getComponent().getName());
 			ComponentInstance instanceChosenForRequiredInterface = current.getSatisfactionOfRequiredInterfaces().get(selection.getX());
 			if (!selection.getY().equals("*") && !instanceChosenForRequiredInterface.getComponent().getName().equals(selection.getY()))
 				return false;

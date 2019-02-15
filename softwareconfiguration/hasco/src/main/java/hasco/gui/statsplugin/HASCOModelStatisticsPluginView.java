@@ -13,7 +13,6 @@ import jaicore.graphvisualizer.plugin.ASimpleMVCPluginView;
 import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.control.TreeView;
-import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 
 /**
@@ -25,14 +24,16 @@ public class HASCOModelStatisticsPluginView extends ASimpleMVCPluginView<HASCOMo
 
 	private final Histogram histogram;
 	private final VBox root = new VBox();
-	private final TreeView<FlowPane> treeView;
+	private final TreeView<HASCOModelStatisticsComponentSelector> treeView;
 	private final int n = 100;
 	private final HASCOModelStatisticsComponentSelector rootNode;
 
 	public HASCOModelStatisticsPluginView(HASCOModelStatisticsPluginModel model) {
 		super(model);
 		rootNode = new HASCOModelStatisticsComponentSelector(this, model);
-		treeView = new TreeView<>(rootNode);
+		treeView = new TreeView<>();
+		treeView.setCellFactory((TreeView<HASCOModelStatisticsComponentSelector> tv) -> new HASCOModelStatisticsComponentCell(tv));
+		treeView.setRoot(rootNode);
 		root.getChildren().add(treeView);
 		histogram = new Histogram(n);
 		histogram.setTitle("Performances observed on the filtered solutions");
