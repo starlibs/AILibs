@@ -3,9 +3,7 @@ package jaicore.search.algorithms.standard.bestfirst.nodeevaluation;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.TimeoutException;
 
-import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
 import jaicore.search.model.travesaltree.Node;
 
@@ -24,7 +22,7 @@ public class SkippingNodeEvaluator<T,V extends Comparable<V>> implements INodeEv
 	}
 
 	@Override
-	public V f(Node<T,?> node) throws NodeEvaluationException, TimeoutException, AlgorithmExecutionCanceledException, InterruptedException {
+	public V f(Node<T,?> node) throws NodeEvaluationException, InterruptedException {
 		int depth = node.path().size() - 1;
 		if (!fCache.containsKey(node)) {
 			if (depth == 0) {

@@ -64,6 +64,9 @@ public class MonteCarloCrossValidationEvaluator implements IClassifierEvaluator 
 				stats.addValue(score);
 			}
 
+			catch (InterruptedException e) {
+				throw e;
+			}
 			catch (Exception e) {
 				throw new ObjectEvaluationFailedException(e, "Could not evaluate classifier!");
 

@@ -20,6 +20,7 @@ public class PreferenceBasedNodeEvaluator implements INodeEvaluator<TFDNode, Dou
 	private final Collection<Component> components;
 	private final List<String> ORDERING_OF_CLASSIFIERS;
 	private final static Logger logger = LoggerFactory.getLogger(PreferenceBasedNodeEvaluator.class);
+	private boolean sentLogMessageForHavingEnteredSecondSubPhase = false;
 	
 	public PreferenceBasedNodeEvaluator(final Collection<Component> components, final List<String> ORDERING_OF_CLASSIFIERS) {
 		super();
@@ -34,32 +35,14 @@ public class PreferenceBasedNodeEvaluator implements INodeEvaluator<TFDNode, Dou
 	@Override
 	public Double f(final Node<TFDNode, ?> n) {
 		List<String> appliedMethods = new LinkedList<>();
-		boolean last = false;
 		for (TFDNode x : n.externalPath()) {
 			if (x.getAppliedMethodInstance() != null) {
 				appliedMethods.add(x.getAppliedMethodInstance().getMethod().getName());
-				last = true;
-			} else {
-				last = false;
 			}
 		}
 
 		/* get partial component */
 		ComponentInstance instance = Util.getSolutionCompositionFromState(this.components, n.getPoint().getState(), false);
-		
-		/* this block should not be necessar */
-//		if (instance != null) {
-//			ComponentInstance pp = instance.getSatisfactionOfRequiredInterfaces().get("preprocessor");
-//			if (pp != null && pp.getComponent().getName().contains("AttributeSelection")) {
-//				ComponentInstance search = pp.getSatisfactionOfRequiredInterfaces().get("search");
-//				ComponentInstance eval = pp.getSatisfactionOfRequiredInterfaces().get("eval");
-//				if (search != null && eval != null) {
-//					if (!WekaUtil.isValidPreprocessorCombination(search.getComponent().getName(), eval.getComponent().getName()))
-//						throw new IllegalArgumentException("The given combination of searcher and evaluator cannot be benchmarked since they are incompatible.");
-//				}
-//			}
-//		}
-
 		boolean isPipeline = appliedMethods.stream().anyMatch(x -> x.toLowerCase().contains("pipeline"));
 		boolean lastMethod = false;
 		String classifierName = null;
@@ -85,9 +68,15 @@ public class PreferenceBasedNodeEvaluator implements INodeEvaluator<TFDNode, Dou
 				}
 
 				score += (this.ORDERING_OF_CLASSIFIERS.contains(classifierName) ? this.ORDERING_OF_CLASSIFIERS.indexOf(classifierName) + 1 : this.ORDERING_OF_CLASSIFIERS.size() + 1);
-				score /= 100000;
+				score *= 1.0e-10;
 			} else {
 				score = null;
+				if (!sentLogMessageForHavingEnteredSecondSubPhase) {
+					if ((Double)n.getParent().getInternalLabel() > 1.0e-6) {
+						sentLogMessageForHavingEnteredSecondSubPhase = true;
+						logger.info("Entering phase 1b! Breadth first search ends here, because the search is asking for the f-value of a node whose parent has been truely evaluated with an f-value of {}", n.getParent().getInternalLabel());
+					}
+				}
 			}
 		}
 		return score;

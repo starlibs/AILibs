@@ -1,8 +1,10 @@
 package hasco.core;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
@@ -17,6 +19,7 @@ import hasco.model.Component;
 import hasco.model.ComponentInstance;
 import hasco.model.Parameter;
 import hasco.model.ParameterRefinementConfiguration;
+import hasco.model.UnparametrizedComponentInstance;
 import hasco.optimizingfactory.SoftwareConfigurationAlgorithm;
 import hasco.reduction.HASCOReduction;
 import jaicore.basic.ILoggingCustomizable;
@@ -25,6 +28,7 @@ import jaicore.basic.algorithm.AlgorithmProblemTransformer;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
+import jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.DelayedCancellationCheckException;
 import jaicore.basic.algorithm.exceptions.DelayedTimeoutCheckException;
@@ -69,7 +73,9 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 	private final GraphSearchWithPathEvaluationsInput<N, A, V> searchProblem;
 	private final IOptimalPathInORGraphSearch<ISearch, N, A, V> search;
 	private final List<HASCOSolutionCandidate<V>> listOfAllRecognizedSolutions = new ArrayList<>();
-
+	private int numUnparametrizedSolutions = -1;
+	private final Set<UnparametrizedComponentInstance> returnedUnparametrizedComponentInstances = new HashSet<>();
+	
 	/* runtime variables of algorithm */
 	private final TimeRecordingEvaluationWrapper<V> timeGrabbingEvaluationWrapper;
 
@@ -140,12 +146,16 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 		case created: {
 			this.logger.info("Starting HASCO run.");
 			AlgorithmInitializedEvent event = this.activate();
-
+			
+			/* analyze problem */
+			numUnparametrizedSolutions = Util.getNumberOfUnparametrizedCompositions(getInput().getComponents(), getInput().getRequiredInterface());
+			logger.info("Search space contains {} unparametrized solutions.", numUnparametrizedSolutions);
+			
 			/* setup search algorithm */
 			this.search.setNumCPUs(this.getNumCPUs());
 			this.search.setTimeout(this.getTimeout());
 			if (this.loggerName != null && this.loggerName.length() > 0 && this.search instanceof ILoggingCustomizable) {
-				this.logger.info("Setting logger name of {} to {}", this.search, this.loggerName + ".search");
+				this.logger.info("Setting logger name of {} to {}", this.search.getId(), this.loggerName + ".search");
 				((ILoggingCustomizable) this.search).setLoggerName(this.loggerName + ".search");
 			} else {
 				this.logger.info("Not setting the logger name of the search. Logger name of HASCO is {}. Search loggingCustomizable: {}", this.loggerName,
@@ -194,6 +204,7 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 				EvaluatedSearchGraphPath<N, A, V> searchPath = solutionEvent.getSolutionCandidate();
 				Plan plan = this.planningGraphGeneratorDeriver.getPlan(searchPath.getNodes());
 				ComponentInstance objectInstance = Util.getSolutionCompositionForPlan(this.getInput().getComponents(), this.planningProblem.getCorePlanningProblem().getInit(), plan, true);
+				returnedUnparametrizedComponentInstances.add(new UnparametrizedComponentInstance(objectInstance));
 				V score;
 				try {
 					boolean scoreInCache = this.timeGrabbingEvaluationWrapper.hasEvaluationForComponentInstance(objectInstance);
@@ -206,7 +217,7 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 				} catch (ObjectEvaluationFailedException e) {
 					throw new AlgorithmException(e, "Could not evaluate component instance.");
 				}
-				this.logger.info("Received new solution with score {} from search, communicating this solution to the HASCO listeners.", score);
+				this.logger.info("Received new solution with score {} from search, communicating this solution to the HASCO listeners. Number of returned unparametrized solutions is now {}/{}.", score, returnedUnparametrizedComponentInstances.size(), numUnparametrizedSolutions);
 				EvaluatedSearchGraphBasedPlan<V, N> evaluatedPlan = new EvaluatedSearchGraphBasedPlan<>(plan, score, searchPath);
 				HASCOSolutionCandidate<V> solution = new HASCOSolutionCandidate<>(objectInstance, evaluatedPlan,
 						this.timeGrabbingEvaluationWrapper.getEvaluationTimeForComponentInstance(objectInstance));
@@ -295,10 +306,10 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 
 	@Override
 	public void setLoggerName(final String name) {
-		this.logger.info("Switching logger from {} to {}", this.logger.getName(), name);
+		this.logger.info("Switching logger for {} from {} to {}", this.getId(), this.logger.getName(), name);
 		this.loggerName = name;
 		this.logger = LoggerFactory.getLogger(name);
-		this.logger.info("Activated logger {} with name {}", name, this.logger.getName());
+		this.logger.info("Activated logger for {} with name {}", this.getId(), name);
 		super.setLoggerName(this.loggerName + "._swConfigAlgo");
 	}
 

@@ -72,4 +72,18 @@
   <logger name="testedalgorithm.search">
     <level value="warn" />
   </logger>
+  
+  <logger name="testednodeevaluator">
+    <level value="trace" />
+    
+    <appender-ref ref="console" />
+    <appender-ref ref="infoFileAppender" />
+    <appender-ref ref="warnFileAppender" />
+    <appender-ref ref="errFileAppender" />
+    <appender-ref ref="traceFileAppender" />
+  </logger>
+  
+  <logger name="testednodeevaluator.completer">
+  	<level value="warn" />
+  </logger>
 </log4j:configuration>

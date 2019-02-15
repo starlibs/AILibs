@@ -1,8 +1,10 @@
 package de.upb.crc901.mlplan.examples;
 
+import java.io.File;
 import java.io.FileReader;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Timer;
 import java.util.concurrent.TimeUnit;
 
 import de.upb.crc901.mlplan.core.MLPlan;
@@ -10,7 +12,6 @@ import de.upb.crc901.mlplan.core.MLPlanBuilder;
 import de.upb.crc901.mlplan.gui.outofsampleplots.OutOfSampleErrorPlotPlugin;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
-
 import jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
 import jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
 import jaicore.graphvisualizer.plugin.solutionperformanceplotter.SolutionPerformanceTimelinePlugin;
@@ -30,20 +31,22 @@ public class MLPlanARFFExample {
 	public static void main(final String[] args) throws Exception {
 
 		/* load data for segment dataset and create a train-test-split */
-		Instances data = new Instances(new FileReader("testrsc/heart.statlog.arff"));
+		File file = new File("testrsc/car.arff");
+		System.out.println(file.getAbsolutePath());
+		Instances data = new Instances(new FileReader(file));
 		data.setClassIndex(data.numAttributes() - 1);
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, 0, .7f);
 
 		/* initialize mlplan with a tiny search space, and let it run for 30 seconds */
-		MLPlan mlplan = new MLPlan(new MLPlanBuilder().withAutoWEKAConfiguration(), split.get(0));
+		MLPlanBuilder builder = new MLPlanBuilder().withAutoWEKAConfiguration();
+		builder.withTimeoutForNodeEvaluation(new TimeOut(30, TimeUnit.SECONDS));
+		builder.withTimeoutForSingleSolutionEvaluation(new TimeOut(30, TimeUnit.SECONDS));
+		MLPlan mlplan = new MLPlan(builder, split.get(0));
 		mlplan.setPortionOfDataForPhase2(0.3f);
 		mlplan.setLoggerName("mlplan");
 		mlplan.setTimeout(300, TimeUnit.SECONDS);
-		mlplan.setTimeoutForNodeEvaluation(15);
-		mlplan.setTimeoutForSingleSolutionEvaluation(15);
-		mlplan.setNumCPUs(3);
+		mlplan.setNumCPUs(6);
 
-		/* open visualization */
 		new JFXPanel();
 		GraphVisualizationWindow window = new GraphVisualizationWindow(mlplan, new GraphViewPlugin(), new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new SearchRolloutHistogramPlugin<>(), new SolutionPerformanceTimelinePlugin(), new HASCOModelStatisticsPlugin(), new OutOfSampleErrorPlotPlugin(split.get(0), split.get(1)));
 		Platform.runLater(window);
