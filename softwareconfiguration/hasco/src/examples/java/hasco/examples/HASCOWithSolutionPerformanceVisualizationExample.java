@@ -13,7 +13,7 @@ import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
 import jaicore.graphvisualizer.plugin.solutionperformanceplotter.SolutionPerformanceTimelinePlugin;
-import jaicore.graphvisualizer.window.GraphVisualizationWindow;
+import jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 
@@ -26,7 +26,7 @@ public class HASCOWithSolutionPerformanceVisualizationExample {
 		hasco.setNumCPUs(1);
 		
 		new JFXPanel();
-		Platform.runLater(new GraphVisualizationWindow(hasco, new GraphViewPlugin(), new SolutionPerformanceTimelinePlugin()));
+		Platform.runLater(new AlgorithmVisualizationWindow(hasco, new GraphViewPlugin(), new SolutionPerformanceTimelinePlugin()));
 		hasco.call();
 	}
 }

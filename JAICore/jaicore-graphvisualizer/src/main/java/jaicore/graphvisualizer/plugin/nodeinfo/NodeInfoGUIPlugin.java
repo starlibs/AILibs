@@ -12,9 +12,14 @@ public class NodeInfoGUIPlugin<N> implements IGUIPlugin {
 	private NodeInfoGUIPluginController<N> controller;
 	private NodeInfoGUIPluginView<N> view;
 
-	public NodeInfoGUIPlugin(NodeInfoGenerator<N> nodeInfoGenerator) {
-		view = new NodeInfoGUIPluginView<>(nodeInfoGenerator);
+	public NodeInfoGUIPlugin(NodeInfoGenerator<N> nodeInfoGenerator, String viewTitle) {
+		view = new NodeInfoGUIPluginView<>(nodeInfoGenerator, viewTitle);
 		controller = new NodeInfoGUIPluginController<>(view.getModel());
+
+	}
+
+	public NodeInfoGUIPlugin(NodeInfoGenerator<N> nodeInfoGenerator) {
+		this(nodeInfoGenerator, "Node Info View");
 	}
 
 	@Override

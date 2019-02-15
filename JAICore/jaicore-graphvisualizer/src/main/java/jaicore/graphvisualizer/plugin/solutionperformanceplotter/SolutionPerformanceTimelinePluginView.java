@@ -15,16 +15,11 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
 
-/**
- * 
- * @author fmohr
- *
- */
 public class SolutionPerformanceTimelinePluginView extends ASimpleMVCPluginView<SolutionPerformanceTimelinePluginModel, SolutionPerformanceTimelinePluginController> {
 
 	private Logger logger = LoggerFactory.getLogger(SolutionPerformanceTimelinePluginView.class);
 	private final LineChart<Number, Number> lineChart;
-	private final Series<Number,Number> performanceSeries;
+	private final Series<Number, Number> performanceSeries;
 	private int nextIndexToDisplay = 0;
 
 	public SolutionPerformanceTimelinePluginView(SolutionPerformanceTimelinePluginModel model) {
@@ -36,9 +31,9 @@ public class SolutionPerformanceTimelinePluginView extends ASimpleMVCPluginView<
 		xAxis.setLabel("elapsed time (s)");
 
 		// creating the chart
-		lineChart = new LineChart<Number, Number>(xAxis, yAxis);
+		lineChart = new LineChart<>(xAxis, yAxis);
 		lineChart.setTitle("Solution performances over time");
-		
+
 		// defining a series
 		performanceSeries = new Series<>();
 		lineChart.getData().add(performanceSeries);
@@ -51,7 +46,7 @@ public class SolutionPerformanceTimelinePluginView extends ASimpleMVCPluginView<
 
 	@Override
 	public void update() {
-		
+
 		/* compute data to add */
 		List<Pair<Integer, Double>> events = getModel().getTimedPerformances();
 		List<Data<Number, Number>> values = new ArrayList<>();
@@ -70,7 +65,7 @@ public class SolutionPerformanceTimelinePluginView extends ASimpleMVCPluginView<
 	public String getTitle() {
 		return "Solution Performance Timeline";
 	}
-	
+
 	public void clear() {
 		nextIndexToDisplay = 0;
 		performanceSeries.getData().clear();
@@ -78,5 +73,5 @@ public class SolutionPerformanceTimelinePluginView extends ASimpleMVCPluginView<
 
 	public int getNextIndexToDisplay() {
 		return nextIndexToDisplay;
-	}	
+	}
 }

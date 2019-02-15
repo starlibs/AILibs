@@ -15,10 +15,11 @@ import jaicore.basic.BusyObjectEvaluator;
 import jaicore.basic.IObjectEvaluator;
 import jaicore.basic.TimeOut;
 import jaicore.concurrent.InterruptionTimerTask;
+import hasco.gui.civiewplugin.TFDNodeAsCIViewInfoGenerator;
 import jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
 import jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
 import jaicore.graphvisualizer.plugin.solutionperformanceplotter.SolutionPerformanceTimelinePlugin;
-import jaicore.graphvisualizer.window.GraphVisualizationWindow;
+import jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
 import jaicore.ml.WekaUtil;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNodeInfoGenerator;
 import jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogramPlugin;
@@ -49,12 +50,12 @@ public class MLPlanARFFExample {
 		mlplan.setLoggerName("mlplan");
 		mlplan.setTimeout(300, TimeUnit.SECONDS);
 		mlplan.setNumCPUs(6);
-		
-		/* open visualization */
+
 		new JFXPanel();
-		GraphVisualizationWindow window = new GraphVisualizationWindow(mlplan, new GraphViewPlugin(), new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new SearchRolloutHistogramPlugin<>(), new SolutionPerformanceTimelinePlugin(), new OutOfSampleErrorPlotPlugin(split.get(0), split.get(1)));
+		AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(mlplan, new GraphViewPlugin(), new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new SearchRolloutHistogramPlugin<>(),
+				new SolutionPerformanceTimelinePlugin(), new OutOfSampleErrorPlotPlugin(split.get(0), split.get(1)), new NodeInfoGUIPlugin<>(new TFDNodeAsCIViewInfoGenerator(mlplan.getComponents()), "Pipeline"));
 		Platform.runLater(window);
-		
+
 		try {
 			long start = System.currentTimeMillis();
 			Classifier optimizedClassifier = mlplan.call();

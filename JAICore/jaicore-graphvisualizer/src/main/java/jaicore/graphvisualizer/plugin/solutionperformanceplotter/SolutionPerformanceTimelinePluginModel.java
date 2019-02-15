@@ -8,24 +8,19 @@ import org.apache.commons.math3.util.Pair;
 import jaicore.basic.algorithm.events.ScoredSolutionCandidateFoundEvent;
 import jaicore.graphvisualizer.plugin.ASimpleMVCPluginModel;
 
-/**
- * 
- * @author fmohr
- *
- */
 public class SolutionPerformanceTimelinePluginModel extends ASimpleMVCPluginModel<SolutionPerformanceTimelinePluginView, SolutionPerformanceTimelinePluginController> {
 
 	private final List<Pair<Integer, Double>> timedPerformances = new ArrayList<>();
 	private long timestampOfFirstEvent = -1;
-	
+
 	public final void addEntry(ScoredSolutionCandidateFoundEvent<?, ? extends Number> solutionEvent) {
 		int offset = 0;
 		if (timestampOfFirstEvent == -1) {
 			timestampOfFirstEvent = solutionEvent.getTimestamp();
+		} else {
+			offset = (int) (solutionEvent.getTimestamp() - timestampOfFirstEvent);
 		}
-		else
-			offset = (int)(solutionEvent.getTimestamp() - timestampOfFirstEvent);
-		timedPerformances.add(new Pair<>(offset, (Double)solutionEvent.getScore()));
+		timedPerformances.add(new Pair<>(offset, (Double) solutionEvent.getScore()));
 		getView().update();
 	}
 
@@ -36,7 +31,7 @@ public class SolutionPerformanceTimelinePluginModel extends ASimpleMVCPluginMode
 	public List<Pair<Integer, Double>> getTimedPerformances() {
 		return timedPerformances;
 	}
-	
+
 	public void clear() {
 		timedPerformances.clear();
 		timestampOfFirstEvent = -1;

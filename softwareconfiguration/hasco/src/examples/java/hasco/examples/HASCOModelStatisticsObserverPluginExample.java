@@ -16,7 +16,7 @@ import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
 import jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
-import jaicore.graphvisualizer.window.GraphVisualizationWindow;
+import jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNodeInfoGenerator;
 import jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
 import javafx.application.Platform;
@@ -33,7 +33,7 @@ public class HASCOModelStatisticsObserverPluginExample {
 		
 		new JFXPanel();
 		
-		Platform.runLater(new GraphVisualizationWindow(hasco, new GraphViewPlugin(), new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new HASCOModelStatisticsPlugin()));
+		Platform.runLater(new AlgorithmVisualizationWindow(hasco, new GraphViewPlugin(), new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new HASCOModelStatisticsPlugin()));
 		
 		HASCOModelStatisticsObserver observer = new HASCOModelStatisticsObserver();
 		hasco.registerListener(observer);
