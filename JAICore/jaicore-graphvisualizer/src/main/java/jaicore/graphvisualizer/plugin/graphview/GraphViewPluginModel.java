@@ -47,7 +47,7 @@ public class GraphViewPluginModel implements IGUIPluginModel {
 			registerNodeMapping(node, viewNode);
 
 			for (Object predecessorNode : predecessorNodes) {
-				createEdge(viewNode, predecessorNode);
+				createEdge(node, predecessorNode);
 			}
 
 			switchNodeType(viewNode, typeOfNode);
