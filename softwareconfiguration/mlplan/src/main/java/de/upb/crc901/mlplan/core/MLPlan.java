@@ -197,6 +197,7 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 					} catch (ComponentInstantiationFailedException e) {
 						e.printStackTrace();
 					}
+					post(event); // send HASCO solution event nevertheless
 				}
 				else
 					post(event);

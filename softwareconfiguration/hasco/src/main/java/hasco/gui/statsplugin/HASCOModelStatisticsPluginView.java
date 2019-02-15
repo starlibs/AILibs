@@ -1,89 +1,64 @@
 package hasco.gui.statsplugin;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
-import hasco.model.UnparametrizedComponentInstance;
+import hasco.core.HASCOSolutionCandidate;
+import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.graphvisualizer.events.gui.Histogram;
 import jaicore.graphvisualizer.plugin.ASimpleMVCPluginView;
 import javafx.application.Platform;
-import javafx.scene.Node;
-import javafx.scene.layout.FlowPane;
+import javafx.scene.control.TreeView;
+import javafx.scene.layout.VBox;
 
 /**
  * 
  * @author fmohr
  *
- * @param <N>
- *            The node class
  */
-public class HASCOModelStatisticsPluginView extends ASimpleMVCPluginView<HASCOModelStatisticsPluginModel, HASCOModelStatisticsPluginController> {
+public class HASCOModelStatisticsPluginView extends ASimpleMVCPluginView<HASCOModelStatisticsPluginModel, HASCOModelStatisticsPluginController, VBox> {
 
-	private Map<UnparametrizedComponentInstance, Histogram> histograms = new HashMap<>();
-	private FlowPane root = new FlowPane();
-	private final int n = 100;
-
+	private final HASCOModelStatisticsComponentSelector rootNode; // the root of the TreeView shown at the top
+	private final Histogram histogram; // the histogram shown on the bottom
+	
 	public HASCOModelStatisticsPluginView(HASCOModelStatisticsPluginModel model) {
-		super(model);
+		this (model, 100);
 	}
 
-	@Override
-	public Node getNode() {
-		return root;
+	public HASCOModelStatisticsPluginView(HASCOModelStatisticsPluginModel model, int n) {
+		super(model, new VBox());
+		rootNode = new HASCOModelStatisticsComponentSelector(this, model);
+		TreeView<HASCOModelStatisticsComponentSelector> treeView = new TreeView<>();
+		treeView.setCellFactory((TreeView<HASCOModelStatisticsComponentSelector> tv) -> new HASCOModelStatisticsComponentCell(tv));
+		treeView.setRoot(rootNode);
+		getNode().getChildren().add(treeView);
+		histogram = new Histogram(n);
+		histogram.setTitle("Performances observed on the filtered solutions");
+		getNode().getChildren().add(histogram);
 	}
 
 	@Override
 	public void update() {
-		// StringBuilder sb = new StringBuilder();
-		// sb.append("<ul>");
-		Map<UnparametrizedComponentInstance, DescriptiveStatistics> stats = getModel().getPerformanceStatisticsPerComposition();
-		for (UnparametrizedComponentInstance comp : stats.keySet()) {
-			if (!histograms.containsKey(comp)) {
-				Histogram newHist = new Histogram(n);
-				histograms.put(comp, newHist);
-				Platform.runLater(() -> {
-					root.getChildren().add(newHist);
-				});
-			}
-			// sb.append("<li>");
-			// sb.append(comp);
-			// sb.append(": ");
-			// sb.append(stats.get(comp));
-			// sb.append("</li>");
-			// }
-			// sb.append("</ul>");
-
-			// barChart.setCategoryGap(0);
-			// barChart.setBarGap(0);
-
-			// xAxis.setLabel("Range");
-			// yAxis.setLabel("Population");
-
-			// Histogram hist = ;
-			Platform.runLater(() -> {
-				histograms.get(comp).update(getHistogram(stats.get(comp), n));
-			});
-		}
-
+		rootNode.update();
+		updateHistogram();
 	}
-
-	// count data population in groups
-	private int[] getHistogram(DescriptiveStatistics stats, int numBars) {
-		int[] histogram = new int[numBars];
-		double[] values = stats.getValues();
-		double min = stats.getMin();
-		double stepSize = (stats.getMax() - min) / numBars;
-		for (int i = 0; i < values.length; i++) {
-			for (int j = 0; j < numBars; j++) {
-				if (values[i] <= min + (j * stepSize)) {
-					histogram[j]++;
-					break;
-				}
-			}
-		}
-		return histogram;
+	
+	/**
+	 * Updates the histogram at the bottom.
+	 * This is called in both the update method of the general view as well as in the change listener of the combo boxes.
+	 */
+	public void updateHistogram() {
+		Collection<List<Pair<String, String>>> activeFilters = rootNode.getAllSelectionsOnPathToAnyLeaf();
+		List<HASCOSolutionCandidate<Double>> activeSolutions = getModel().getAllSeenSolutionEventsUnordered().stream().map(s -> s.getSolutionCandidate()).filter(ci -> ci.getComponentInstance().matchesPathRestrictions(activeFilters))
+				.collect(Collectors.toList());
+		DescriptiveStatistics stats = new DescriptiveStatistics();
+		activeSolutions.forEach(s -> stats.addValue(s.getScore()));
+		Platform.runLater(() -> {
+			histogram.update(stats);
+		});
 	}
 
 	@Override
@@ -91,4 +66,9 @@ public class HASCOModelStatisticsPluginView extends ASimpleMVCPluginView<HASCOMo
 		return "HASCO Model Statistics";
 	}
 
+	@Override
+	public void clear() {
+		rootNode.clear();
+		histogram.clear();
+	}
 }

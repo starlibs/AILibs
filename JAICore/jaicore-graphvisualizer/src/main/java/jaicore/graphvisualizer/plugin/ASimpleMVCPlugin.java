@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import jaicore.graphvisualizer.events.graph.bus.AlgorithmEventSource;
 import jaicore.graphvisualizer.events.gui.GUIEventSource;
 
-public abstract class ASimpleMVCPlugin<M extends ASimpleMVCPluginModel<V, C>, V extends ASimpleMVCPluginView<M, C>, C extends ASimpleMVCPluginController<M, V>> implements IGUIPlugin {
+public abstract class ASimpleMVCPlugin<M extends ASimpleMVCPluginModel<V, C>, V extends ASimpleMVCPluginView<M, C, ?>, C extends ASimpleMVCPluginController<M, V>> implements IGUIPlugin {
 
 	private final Logger logger = LoggerFactory.getLogger(ASimpleMVCPlugin.class);
 	private final M model;
