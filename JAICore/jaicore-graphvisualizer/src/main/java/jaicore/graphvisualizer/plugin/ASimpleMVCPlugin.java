@@ -24,16 +24,15 @@ public abstract class ASimpleMVCPlugin<M extends ASimpleMVCPluginModel<V, C>, V 
 		C controller;
 		try {
 			System.out.println(mvcPatternClasses[0].getTypeName().replaceAll("(<.*>)", ""));
-			Class<M> modelClass = ((Class<M>) Class.forName(mvcPatternClasses[0].getTypeName().replaceAll("(<.*>)", "")));
-			Class<V> viewClass = ((Class<V>) Class.forName(mvcPatternClasses[1].getTypeName().replaceAll("(<.*>)", "")));
-			Class<C> controllerClass = ((Class<C>) Class.forName(mvcPatternClasses[2].getTypeName().replaceAll("(<.*>)", "")));
+			Class<M> modelClass = ((Class<M>) Class.forName(getClassNameWithoutGenerics(mvcPatternClasses[0].getTypeName())));
+			Class<V> viewClass = ((Class<V>) Class.forName(getClassNameWithoutGenerics(mvcPatternClasses[1].getTypeName())));
+			Class<C> controllerClass = ((Class<C>) Class.forName(getClassNameWithoutGenerics(mvcPatternClasses[2].getTypeName())));
 			model = modelClass.newInstance();
 			view = viewClass.getDeclaredConstructor(modelClass).newInstance(model);
 			controller = controllerClass.getDeclaredConstructor(modelClass, viewClass).newInstance(model, view);
 			controller.start();
 		} catch (Exception e) {
-			e.printStackTrace();
-			logger.error("Could not initialize {} due to exception in building MVC.", this);
+			logger.error("Could not initialize {} due to exception in building MVC.", this, e);
 			this.model = null;
 			this.view = null;
 			this.controller = null;
@@ -70,5 +69,9 @@ public abstract class ASimpleMVCPlugin<M extends ASimpleMVCPluginModel<V, C>, V 
 	@Override
 	public void setGUIEventSource(GUIEventSource guiEventSource) {
 		guiEventSource.registerListener(controller);
+	}
+
+	private String getClassNameWithoutGenerics(String className) {
+		return className.replaceAll("(<.*>)", "");
 	}
 }

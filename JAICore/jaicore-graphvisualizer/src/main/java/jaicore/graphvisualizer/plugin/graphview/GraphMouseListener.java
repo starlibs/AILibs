@@ -28,20 +28,17 @@ public class GraphMouseListener implements ViewerListener, Runnable {
 
 	@Override
 	public void buttonReleased(String id) {
-		// TODO Auto-generated method stub
-
+		// nothing to do here
 	}
 
 	@Override
 	public void mouseLeft(String id) {
-		// TODO Auto-generated method stub
-
+		// nothing to do here
 	}
 
 	@Override
 	public void mouseOver(String id) {
-		// TODO Auto-generated method stub
-
+		// nothing to do here
 	}
 
 	@Override
@@ -54,7 +51,6 @@ public class GraphMouseListener implements ViewerListener, Runnable {
 		while (active) {
 			viewerPipe.pump();
 		}
-
 	}
 
 }

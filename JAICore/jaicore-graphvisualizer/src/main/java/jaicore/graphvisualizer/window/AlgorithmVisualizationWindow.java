@@ -7,11 +7,10 @@ import jaicore.basic.algorithm.IAlgorithm;
 import jaicore.graphvisualizer.events.graph.bus.AlgorithmEventSource;
 import jaicore.graphvisualizer.events.gui.DefaultGUIEventBus;
 import jaicore.graphvisualizer.events.recorder.AlgorithmEventHistory;
-import jaicore.graphvisualizer.events.recorder.AlgorithmEventHistoryPuller;
+import jaicore.graphvisualizer.events.recorder.AlgorithmEventHistoryEntryDeliverer;
 import jaicore.graphvisualizer.events.recorder.AlgorithmEventHistoryRecorder;
 import jaicore.graphvisualizer.plugin.IGUIPlugin;
 import jaicore.graphvisualizer.plugin.controlbar.ControlBarGUIPlugin;
-import jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
 import jaicore.graphvisualizer.plugin.speedslider.SpeedSliderGUIPlugin;
 import jaicore.graphvisualizer.plugin.timeslider.TimeSliderGUIPlugin;
 import javafx.scene.Scene;
@@ -21,44 +20,50 @@ import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
-public class GraphVisualizationWindow implements Runnable {
+public class AlgorithmVisualizationWindow implements Runnable {
 
-	private AlgorithmEventSource graphEventSource;
-	private AlgorithmEventHistoryPuller algorithmEventHistoryPuller;
+	private AlgorithmEventSource algorithmEventSource;
+	private AlgorithmEventHistoryEntryDeliverer algorithmEventHistoryPuller;
 
 	private List<IGUIPlugin> visualizationPlugins;
-	private GraphViewPlugin graphViewPlugin;
+
+	private IGUIPlugin mainPlugin;
 	private TimeSliderGUIPlugin timeSliderGUIPlugin;
 	private ControlBarGUIPlugin controlBarGUIPlugin;
 	private SpeedSliderGUIPlugin speedSliderGUIPlugin;
 
-	private TabPane pluginTabPane;
+	private String title = "MLPlan Graph Search Visualization";
+
+	private Stage stage;
 
 	private BorderPane rootLayout;
 	private BorderPane topLayout;
 
-	public GraphVisualizationWindow(AlgorithmEventHistory algorithmEventHistory, GraphViewPlugin graphViewPlugin, IGUIPlugin... visualizationPlugins) {
-		algorithmEventHistoryPuller = new AlgorithmEventHistoryPuller(algorithmEventHistory);
-		this.graphEventSource = algorithmEventHistoryPuller;
-		initializePlugins(graphEventSource, graphViewPlugin, visualizationPlugins);
+	private TabPane pluginTabPane;
+
+	public AlgorithmVisualizationWindow(AlgorithmEventHistory algorithmEventHistory, IGUIPlugin mainPlugin, IGUIPlugin... visualizationPlugins) {
+		this.mainPlugin = mainPlugin;
+		algorithmEventHistoryPuller = new AlgorithmEventHistoryEntryDeliverer(algorithmEventHistory);
+		this.algorithmEventSource = algorithmEventHistoryPuller;
+		initializePlugins(visualizationPlugins);
 		// it is important to register the history puller as a last listener!
 		DefaultGUIEventBus.getInstance().registerListener(algorithmEventHistoryPuller);
 	}
 
-	public GraphVisualizationWindow(IAlgorithm<?, ?> algorithm, GraphViewPlugin graphViewPlugin, IGUIPlugin... visualizationPlugins) {
+	public AlgorithmVisualizationWindow(IAlgorithm<?, ?> algorithm, IGUIPlugin mainPlugin, IGUIPlugin... visualizationPlugins) {
+		this.mainPlugin = mainPlugin;
 		AlgorithmEventHistoryRecorder historyRecorder = new AlgorithmEventHistoryRecorder();
-		algorithmEventHistoryPuller = new AlgorithmEventHistoryPuller(historyRecorder.getHistory());
-		this.graphEventSource = algorithmEventHistoryPuller;
-		initializePlugins(graphEventSource, graphViewPlugin, visualizationPlugins);
 		algorithm.registerListener(historyRecorder);
+		algorithmEventHistoryPuller = new AlgorithmEventHistoryEntryDeliverer(historyRecorder.getHistory());
+		this.algorithmEventSource = algorithmEventHistoryPuller;
+		initializePlugins(visualizationPlugins);
 		// it is important to register the history puller as a last listener!
 		DefaultGUIEventBus.getInstance().registerListener(algorithmEventHistoryPuller);
 	}
 
-	private void initializePlugins(AlgorithmEventSource algorithmEventSource, GraphViewPlugin graphViewPlugin, IGUIPlugin... visualizationPlugins) {
-		this.graphViewPlugin = graphViewPlugin;
-		graphViewPlugin.setAlgorithmEventSource(algorithmEventSource);
-		graphViewPlugin.setGUIEventSource(DefaultGUIEventBus.getInstance());
+	private void initializePlugins(IGUIPlugin... visualizationPlugins) {
+		mainPlugin.setAlgorithmEventSource(algorithmEventSource);
+		mainPlugin.setGUIEventSource(DefaultGUIEventBus.getInstance());
 
 		timeSliderGUIPlugin = new TimeSliderGUIPlugin();
 		timeSliderGUIPlugin.setAlgorithmEventSource(algorithmEventSource);
@@ -91,13 +96,13 @@ public class GraphVisualizationWindow implements Runnable {
 
 		initializeBottomLayout();
 
-		initializePlugins();
+		initializePluginTabs();
 
 		Scene scene = new Scene(rootLayout, 800, 300);
-		Stage stage = new Stage();
+		stage = new Stage();
 
 		stage.setScene(scene);
-		stage.setTitle("MLPlan Graph Search Visualization");
+		stage.setTitle(title);
 		stage.setMaximized(true);
 		stage.show();
 
@@ -125,8 +130,7 @@ public class GraphVisualizationWindow implements Runnable {
 
 		pluginTabPane = new TabPane();
 		centerSplitLayout.getItems().add(this.pluginTabPane);
-
-		centerSplitLayout.getItems().add(graphViewPlugin.getView().getNode());
+		centerSplitLayout.getItems().add(mainPlugin.getView().getNode());
 
 		rootLayout.setCenter(centerSplitLayout);
 	}
@@ -135,11 +139,16 @@ public class GraphVisualizationWindow implements Runnable {
 		rootLayout.setBottom(timeSliderGUIPlugin.getView().getNode());
 	}
 
-	private void initializePlugins() {
+	private void initializePluginTabs() {
 		for (IGUIPlugin plugin : visualizationPlugins) {
 			Tab pluginTab = new Tab(plugin.getView().getTitle(), plugin.getView().getNode());
 			pluginTabPane.getTabs().add(pluginTab);
 		}
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+		stage.setTitle(title);
 	}
 
 }
