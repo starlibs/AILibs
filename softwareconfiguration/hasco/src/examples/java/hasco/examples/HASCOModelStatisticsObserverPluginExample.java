@@ -33,3 +33,4 @@ public class HASCOModelStatisticsObserverPluginExample {
 		hasco.call();
 	}
 }
+

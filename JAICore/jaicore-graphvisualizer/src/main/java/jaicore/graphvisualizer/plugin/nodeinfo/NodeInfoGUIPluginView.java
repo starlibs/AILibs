@@ -18,11 +18,18 @@ public class NodeInfoGUIPluginView<N> implements IGUIPluginView {
 	private NodeInfoGUIPluginModel<N> model;
 	private NodeInfoGenerator<N> nodeInfoGenerator;
 
+	private String title;
+
 	private WebEngine webViewEngine;
 
-	public NodeInfoGUIPluginView(NodeInfoGenerator<N> nodeInfoGenerator) {
+	public NodeInfoGUIPluginView(NodeInfoGenerator<N> nodeInfoGenerator, String title) {
 		this.model = new NodeInfoGUIPluginModel<>(this);
 		this.nodeInfoGenerator = nodeInfoGenerator;
+		this.title = title;
+	}
+
+	public NodeInfoGUIPluginView(NodeInfoGenerator<N> nodeInfoGenerator) {
+		this(nodeInfoGenerator, "Node Info View");
 	}
 
 	@Override
@@ -50,7 +57,7 @@ public class NodeInfoGUIPluginView<N> implements IGUIPluginView {
 
 	@Override
 	public String getTitle() {
-		return "Node Info";
+		return title;
 	}
 
 }

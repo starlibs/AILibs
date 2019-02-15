@@ -22,6 +22,7 @@ import javafx.scene.chart.XYChart.Series;
 public class SolutionPerformanceTimelinePluginView extends ASimpleMVCPluginView<SolutionPerformanceTimelinePluginModel, SolutionPerformanceTimelinePluginController, LineChart<Number, Number>> {
 
 	private Logger logger = LoggerFactory.getLogger(SolutionPerformanceTimelinePluginView.class);
+
 	private final Series<Number, Number> performanceSeries;
 	private int nextIndexToDisplay = 0;
 
@@ -33,7 +34,6 @@ public class SolutionPerformanceTimelinePluginView extends ASimpleMVCPluginView<
 
 		// creating the chart
 		getNode().setTitle(getTitle());
-
 		// defining a series
 		performanceSeries = new Series<>();
 		getNode().getData().add(performanceSeries);

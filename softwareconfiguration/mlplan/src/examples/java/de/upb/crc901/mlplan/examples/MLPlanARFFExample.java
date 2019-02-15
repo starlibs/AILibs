@@ -10,10 +10,11 @@ import de.upb.crc901.mlplan.core.MLPlanBuilder;
 import de.upb.crc901.mlplan.gui.outofsampleplots.OutOfSampleErrorPlotPlugin;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
+
 import jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
 import jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
 import jaicore.graphvisualizer.plugin.solutionperformanceplotter.SolutionPerformanceTimelinePlugin;
-import jaicore.graphvisualizer.window.GraphVisualizationWindow;
+import jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
 import jaicore.ml.WekaUtil;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNodeInfoGenerator;
 import jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogramPlugin;
@@ -41,12 +42,12 @@ public class MLPlanARFFExample {
 		mlplan.setTimeoutForNodeEvaluation(15);
 		mlplan.setTimeoutForSingleSolutionEvaluation(15);
 		mlplan.setNumCPUs(3);
-		
+
 		/* open visualization */
 		new JFXPanel();
 		GraphVisualizationWindow window = new GraphVisualizationWindow(mlplan, new GraphViewPlugin(), new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new SearchRolloutHistogramPlugin<>(), new SolutionPerformanceTimelinePlugin(), new HASCOModelStatisticsPlugin(), new OutOfSampleErrorPlotPlugin(split.get(0), split.get(1)));
 		Platform.runLater(window);
-		
+
 		try {
 			long start = System.currentTimeMillis();
 			Classifier optimizedClassifier = mlplan.call();

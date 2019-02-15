@@ -7,22 +7,22 @@ import jaicore.graphvisualizer.events.graph.bus.AlgorithmEventListener;
 
 public class AlgorithmEventHistoryRecorder implements AlgorithmEventListener {
 
-	private AlgorithmEventHistory graphEventHistory;
+	private AlgorithmEventHistory algorithmEventHistory;
 
 	public AlgorithmEventHistoryRecorder() {
-		graphEventHistory = new AlgorithmEventHistory();
+		algorithmEventHistory = new AlgorithmEventHistory();
 	}
 
 	@Subscribe
 	@Override
 	public void handleAlgorithmEvent(AlgorithmEvent algorithmEvent) {
 		synchronized (this) {
-			graphEventHistory.addEvent(algorithmEvent);
+			algorithmEventHistory.addEvent(algorithmEvent);
 		}
 	}
 
 	public AlgorithmEventHistory getHistory() {
-		return graphEventHistory;
+		return algorithmEventHistory;
 	}
 
 }

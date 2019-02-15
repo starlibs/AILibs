@@ -4,7 +4,12 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class DefaultGUIEventBus implements GUIEventBus {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultGUIEventBus.class);
 
 	private static DefaultGUIEventBus singletonInstance;
 
@@ -28,8 +33,16 @@ public class DefaultGUIEventBus implements GUIEventBus {
 	public void postEvent(GUIEvent guiEvent) {
 		synchronized (this) {
 			for (GUIEventListener listener : guiEventListeners) {
-				listener.handleGUIEvent(guiEvent);
+				passEventToListener(guiEvent, listener);
 			}
+		}
+	}
+
+	private void passEventToListener(GUIEvent guiEvent, GUIEventListener listener) {
+		try {
+			listener.handleGUIEvent(guiEvent);
+		} catch (Exception exception) {
+			LOGGER.error("Error while passing GUIEvent {} to handler {}.", guiEvent, listener, exception);
 		}
 	}
 
