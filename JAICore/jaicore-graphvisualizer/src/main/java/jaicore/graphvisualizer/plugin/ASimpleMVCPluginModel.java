@@ -1,13 +1,11 @@
 package jaicore.graphvisualizer.plugin;
 
-import jaicore.graphvisualizer.plugin.IGUIPluginModel;
-
 /**
  * 
  * @author fmohr
  *
  */
-public abstract class ASimpleMVCPluginModel<V extends IGUIPluginView, C extends IGUIPluginController> implements IGUIPluginModel {
+public abstract class ASimpleMVCPluginModel<V extends ASimpleMVCPluginView<?, ?>, C extends ASimpleMVCPluginController<?,?>> implements IGUIPluginModel {
 
 	private V view;
 	private C controller;
@@ -27,4 +25,6 @@ public abstract class ASimpleMVCPluginModel<V extends IGUIPluginView, C extends 
 	public void setController(C controller) {
 		this.controller = controller;
 	}
+	
+	public abstract void clear();
 }

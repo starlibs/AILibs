@@ -20,8 +20,6 @@ import javafx.scene.layout.VBox;
  * 
  * @author fmohr
  *
- * @param <N>
- *            The node class
  */
 public class HASCOModelStatisticsPluginView extends ASimpleMVCPluginView<HASCOModelStatisticsPluginModel, HASCOModelStatisticsPluginController> {
 
@@ -29,14 +27,15 @@ public class HASCOModelStatisticsPluginView extends ASimpleMVCPluginView<HASCOMo
 	private final VBox root = new VBox();
 	private final TreeView<FlowPane> treeView;
 	private final int n = 100;
-	private final HASCOComponentSelectionTray rootNode;
+	private final HASCOModelStatisticsComponentSelector rootNode;
 
 	public HASCOModelStatisticsPluginView(HASCOModelStatisticsPluginModel model) {
 		super(model);
-		rootNode = new HASCOComponentSelectionTray(this, model);
+		rootNode = new HASCOModelStatisticsComponentSelector(this, model);
 		treeView = new TreeView<>(rootNode);
 		root.getChildren().add(treeView);
 		histogram = new Histogram(n);
+		histogram.setTitle("Performances observed on the filtered solutions");
 		root.getChildren().add(histogram);
 	}
 
@@ -47,15 +46,11 @@ public class HASCOModelStatisticsPluginView extends ASimpleMVCPluginView<HASCOMo
 
 	@Override
 	public void update() {
-
-		/* update tree structure */
 		rootNode.update();
 		updateHistogram();
 	}
 
 	public void updateHistogram() {
-
-		/* display relevant histogram */
 		Collection<List<Pair<String, String>>> activeFilters = rootNode.getAllSelectionsOnPathToAnyLeaf();
 		List<HASCOSolutionCandidate<Double>> activeSolutions = getModel().getAllSeenSolutionEventsUnordered().stream().map(s -> s.getSolutionCandidate()).filter(ci -> ci.getComponentInstance().matchesPathRestrictions(activeFilters))
 				.collect(Collectors.toList());
@@ -86,6 +81,12 @@ public class HASCOModelStatisticsPluginView extends ASimpleMVCPluginView<HASCOMo
 	@Override
 	public String getTitle() {
 		return "HASCO Model Statistics";
+	}
+
+	@Override
+	public void clear() {
+		histogram.clear();
+		rootNode.clear();
 	}
 
 }

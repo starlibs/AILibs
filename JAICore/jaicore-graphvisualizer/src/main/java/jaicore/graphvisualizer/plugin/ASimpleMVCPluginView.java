@@ -25,4 +25,6 @@ public abstract class ASimpleMVCPluginView<M extends IGUIPluginModel, C extends 
 	public void setController(C controller) {
 		this.controller = controller;
 	}
+	
+	public abstract void clear();
 }

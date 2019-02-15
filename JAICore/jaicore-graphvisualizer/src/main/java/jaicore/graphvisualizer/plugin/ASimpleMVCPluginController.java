@@ -5,8 +5,11 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.graphvisualizer.events.graph.bus.HandleAlgorithmEventException;
+import jaicore.graphvisualizer.events.gui.GUIEvent;
+import jaicore.graphvisualizer.plugin.controlbar.ResetEvent;
+import jaicore.graphvisualizer.plugin.timeslider.GoToTimeStepEvent;
 
-public abstract class ASimpleMVCPluginController<M extends IGUIPluginModel, V extends IGUIPluginView> extends Thread implements IGUIPluginController {
+public abstract class ASimpleMVCPluginController<M extends ASimpleMVCPluginModel<?, ?>, V extends ASimpleMVCPluginView<?, ?>> extends Thread implements IGUIPluginController {
 
 	private final Queue<AlgorithmEvent> eventQueue;
 
@@ -29,7 +32,7 @@ public abstract class ASimpleMVCPluginController<M extends IGUIPluginModel, V ex
 	}
 
 	@Override
-	public void handleAlgorithmEvent(AlgorithmEvent algorithmEvent) throws HandleAlgorithmEventException {
+	public final void handleAlgorithmEvent(AlgorithmEvent algorithmEvent) throws HandleAlgorithmEventException {
 		eventQueue.add(algorithmEvent);
 	}
 
@@ -44,4 +47,12 @@ public abstract class ASimpleMVCPluginController<M extends IGUIPluginModel, V ex
 	}
 
 	public abstract void handleAlgorithmEventInternally(AlgorithmEvent algorithmEvent);
+	
+	@Override
+	public void handleGUIEvent(GUIEvent guiEvent) {
+		if (guiEvent instanceof ResetEvent || guiEvent instanceof GoToTimeStepEvent) {
+			getModel().clear();
+			getView().clear();
+		}
+	}
 }

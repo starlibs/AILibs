@@ -27,7 +27,7 @@ public class SearchRolloutHistogramPluginView<N>
 	public SearchRolloutHistogramPluginView(SearchRolloutHistogramPluginModel<N> model) {
 		super(model);
 		histogram = new Histogram(n);
-		histogram.setName("Search Rollout Performances");
+		histogram.setTitle("Search Rollout Performances");
 		Platform.runLater(() -> {
 			root.getChildren().add(histogram);
 		});

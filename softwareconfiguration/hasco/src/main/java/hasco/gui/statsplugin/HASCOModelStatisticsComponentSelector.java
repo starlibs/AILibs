@@ -15,24 +15,31 @@ import hasco.model.UnparametrizedComponentInstance;
 import jaicore.basic.sets.SetUtil.Pair;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TreeItem;
 import javafx.scene.layout.FlowPane;
 
-public class HASCOComponentSelectionTray extends TreeItem<FlowPane> {
+public class HASCOModelStatisticsComponentSelector extends TreeItem<FlowPane> {
 
-	private final static Logger logger = LoggerFactory.getLogger(HASCOComponentSelectionTray.class);
-	private final HASCOComponentSelectionTray parent;
+	private final static Logger logger = LoggerFactory.getLogger(HASCOModelStatisticsComponentSelector.class);
+	private final HASCOModelStatisticsComponentSelector parent;
 	private final String requiredInterface;
 	private final ComboBox<String> componentSelector;
 	private final HASCOModelStatisticsPluginModel model;
-	private final List<HASCOComponentSelectionTray> trayChildren = new ArrayList<>();
+	private final List<HASCOModelStatisticsComponentSelector> trayChildren = new ArrayList<>();
 
 	public String getComponentSelectedInRoot() {
 		if (parent == null)
 			return componentSelector.getValue();
 		return parent.getComponentSelectedInRoot();
+	}
+	
+	public void clear() {
+		this.componentSelector.getItems().removeIf(s -> !s.equals("*"));
+		getChildren().clear();
+		trayChildren.clear();
 	}
 
 	/**
@@ -56,7 +63,7 @@ public class HASCOComponentSelectionTray extends TreeItem<FlowPane> {
 			subPaths.add(leafRestriction);
 			return subPaths;
 		}
-		for (HASCOComponentSelectionTray child : trayChildren) {
+		for (HASCOModelStatisticsComponentSelector child : trayChildren) {
 			subPaths.addAll(child.getAllSelectionsOnPathToAnyLeaf());
 		}
 		return subPaths.stream().map(p -> {
@@ -69,9 +76,11 @@ public class HASCOComponentSelectionTray extends TreeItem<FlowPane> {
 	 * this recursively updates the whole tree view under this node with respect to the current selections
 	 */
 	public void update() {
+		long start = System.currentTimeMillis();
 		String componentChosenInRoot = getComponentSelectedInRoot();
 		List<Pair<String, String>> selectionPath = getSelectionsOnPathToRoot();
 		List<String> reqInterfacePath = selectionPath.stream().map(p -> p.getX()).collect(Collectors.toList());
+		ObservableList<String> items = this.componentSelector.getItems();
 		for (HASCOSolutionEvent<?> se : model.getAllSeenSolutionEventsUnordered()) {
 			ComponentInstance ci = se.getSolutionCandidate().getComponentInstance();
 			if (parent != null && !ci.getComponent().getName().equals(componentChosenInRoot))
@@ -80,21 +89,30 @@ public class HASCOComponentSelectionTray extends TreeItem<FlowPane> {
 				continue;
 			}
 
-			/* determine sub-component relevant for this path */
+			/* determine sub-component relevant for this path and add the respective component lexicographically correctly (unless it is already in the list) */
 			UnparametrizedComponentInstance uci = new UnparametrizedComponentInstance(ci).getSubComposition(reqInterfacePath);
 			if (this.componentSelector.getItems().contains(uci.getComponentName()))
 				continue;
 			logger.trace("Relevant UCI of {} for path {} is {}", ci, reqInterfacePath, uci);
-			this.componentSelector.getItems().add(uci.getComponentName());
+			int n = items.size();
+			String nameOfNewComponent = uci.getComponentName();
+			for (int i = 0; i <= n; i++) {
+				if (i == n || items.get(i).compareTo(nameOfNewComponent) >= 0) {
+					items.add(i, nameOfNewComponent);
+					break;
+				}
+			}
 		}
 		trayChildren.forEach(ti -> ti.update());
+		long duration = System.currentTimeMillis() - start;
+		logger.debug("Update of {} took {}ms", this, duration);
 	}
 
-	public HASCOComponentSelectionTray(HASCOModelStatisticsPluginView rootView, HASCOModelStatisticsPluginModel model) {
+	public HASCOModelStatisticsComponentSelector(HASCOModelStatisticsPluginView rootView, HASCOModelStatisticsPluginModel model) {
 		this(rootView, null, null, model);
 	}
 
-	public HASCOComponentSelectionTray(HASCOModelStatisticsPluginView rootView, HASCOComponentSelectionTray parent, String requiredInterface, HASCOModelStatisticsPluginModel model) {
+	public HASCOModelStatisticsComponentSelector(HASCOModelStatisticsPluginView rootView, HASCOModelStatisticsComponentSelector parent, String requiredInterface, HASCOModelStatisticsPluginModel model) {
 		this.parent = parent;
 		this.requiredInterface = requiredInterface;
 		this.model = model;
@@ -105,26 +123,14 @@ public class HASCOComponentSelectionTray extends TreeItem<FlowPane> {
 
 			@Override
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-
-				// new HASCOComponentSelectionTray(this, model);
-
-				// /* determine all choices that are consistent with this choice */
-				// List<Pair<String, String>> listOfFiltersOnRequiredInterfaces = new ArrayList<>();
-				// listOfFiltersOnRequiredInterfaces.add(new Pair<>("", newValue));
-				// Collection<UnparametrizedComponentInstance> compatibleSolutionClasses = model.getSeenUnparametrizedComponentsUnderPath(listOfFiltersOnRequiredInterfaces);
-				// List<String> path = new ArrayList<>(Arrays.asList(this.path.split(".")));
-				// path.remove(0);
-				// Collection<UnparametrizedComponentInstance> compatibleSubSolutions = compatibleSolutionClasses.stream().map(s -> s.getSubComposition(path)).collect(Collectors.toList());
-				//
-
 				getChildren().clear();
 				trayChildren.clear();
-
+				
 				/* determine required interfaces of this choice  */
 				if (!newValue.equals("*")) {
 					Map<String, String> requiredInterfacesOfThisChoice = model.getKnownComponents().get(newValue).getRequiredInterfaces();
 					for (String requiredInterfaceId : requiredInterfacesOfThisChoice.keySet()) {
-						HASCOComponentSelectionTray tray = new HASCOComponentSelectionTray(rootView, HASCOComponentSelectionTray.this, requiredInterfaceId, model);
+						HASCOModelStatisticsComponentSelector tray = new HASCOModelStatisticsComponentSelector(rootView, HASCOModelStatisticsComponentSelector.this, requiredInterfaceId, model);
 						getChildren().add(tray);
 						trayChildren.add(tray);
 					}
@@ -144,7 +150,7 @@ public class HASCOComponentSelectionTray extends TreeItem<FlowPane> {
 		this.setExpanded(true);
 	}
 
-	public HASCOComponentSelectionTray getParentTray() {
+	public HASCOModelStatisticsComponentSelector getParentTray() {
 		return parent;
 	}
 }

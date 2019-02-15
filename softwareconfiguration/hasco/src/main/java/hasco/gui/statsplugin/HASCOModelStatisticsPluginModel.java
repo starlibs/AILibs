@@ -95,4 +95,11 @@ public class HASCOModelStatisticsPluginModel extends ASimpleMVCPluginModel<HASCO
 		System.out.println(pathOfRequiredInterfaces);
 		return instancesUpToParent.stream().filter(e -> e.getSubComposition(pathOfRequiredInterfaces).getComponentName().equals(lastEntry.getY())).collect(Collectors.toList());
 	}
+
+	@Override
+	public void clear() {
+		observedSolutionsGroupedByModuloParameters.clear();
+		knownComponents.clear();
+		getView().clear();
+	}
 }
