@@ -9,6 +9,7 @@ import de.upb.crc901.mlplan.core.MLPlan;
 import de.upb.crc901.mlplan.core.MLPlanBuilder;
 import de.upb.crc901.mlplan.gui.outofsampleplots.OutOfSampleErrorPlotPlugin;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
+import hasco.gui.civiewplugin.TFDNodeAsCIViewInfoGenerator;
 import jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
 import jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
 import jaicore.graphvisualizer.plugin.solutionperformanceplotter.SolutionPerformanceTimelinePlugin;
@@ -44,7 +45,7 @@ public class MLPlanARFFExample {
 		/* open visualization */
 		new JFXPanel();
 		AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(mlplan, new GraphViewPlugin(), new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new SearchRolloutHistogramPlugin<>(),
-				new SolutionPerformanceTimelinePlugin(), new OutOfSampleErrorPlotPlugin(split.get(0), split.get(1)));
+				new SolutionPerformanceTimelinePlugin(), new OutOfSampleErrorPlotPlugin(split.get(0), split.get(1)), new NodeInfoGUIPlugin<>(new TFDNodeAsCIViewInfoGenerator(mlplan.getComponents()), "Pipeline"));
 		Platform.runLater(window);
 
 		try {
