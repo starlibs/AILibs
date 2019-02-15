@@ -73,11 +73,11 @@
   </logger>
   
   <logger name="jaicore.graphvisualizer">
-    <level value="info" />
+    <level value="warn" />
   </logger>
   
-  <logger name="jaicore.graphvisualizer.plugin.solutionperformanceplotter">
-    <level value="debug" />
+  <logger name="hasco.gui.statsplugin">
+    <level value="trace" />
   </logger>
 	
 	<logger name="testedalgorithm">

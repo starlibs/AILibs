@@ -196,8 +196,9 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 					} catch (ComponentInstantiationFailedException e) {
 						e.printStackTrace();
 					}
-				} else
+				} else {
 					post(event);
+        }
 			}
 		});
 	}

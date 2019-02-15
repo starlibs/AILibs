@@ -89,8 +89,8 @@ public class TwoPhaseHASCO<ISearch extends GraphSearchInput<N, A>, N, A> extends
 				if (!(event instanceof AlgorithmInitializedEvent || event instanceof AlgorithmFinishedEvent))
 					post(event);
 				if (event instanceof HASCOSolutionEvent) {
-					HASCOSolutionCandidate<Double> solution = ((HASCOSolutionEvent<Double>) event)
-							.getSolutionCandidate();
+					@SuppressWarnings("unchecked")
+					HASCOSolutionCandidate<Double> solution = ((HASCOSolutionEvent<Double>)event).getSolutionCandidate();
 					updateBestSeenSolution(solution);
 					logger.info("Received new solution {} with score {} and evaluation time {}ms",
 							solution.getComponentInstance(), solution.getScore(),
