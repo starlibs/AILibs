@@ -19,7 +19,7 @@ install:
 - true
 jobs:
   include:
-  if: commit_message != "Travis built JavaDoc. ]ci skip["
+  - if: commit_message != "Travis built JavaDoc. ]ci skip["
 
   - stage: compile
     script:
