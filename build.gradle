@@ -155,7 +155,7 @@ allprojects {
         	source = sourceSets.main.allJava
         	classpath = files(sourceSets.main.compileClasspath)
         	destinationDir = file("docs/javadoc")
-		failOnError = true
+//		failOnError = true
     	}
 
 }
