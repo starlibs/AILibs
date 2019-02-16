@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Timer;
 import java.util.concurrent.TimeUnit;
 
 import de.upb.crc901.mlplan.core.MLPlan;
