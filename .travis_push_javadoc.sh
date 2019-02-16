@@ -12,6 +12,7 @@ commit_website_files() {
   else
     BRANCHTOPUSH=${TRAVIS_PULL_REQUEST_BRANCH}
   fi
+  echo "Last commit message was ${TRAVIS_COMMIT_MESSAGE}"
   echo "Travis branch is \"${TRAVIS_BRANCH}\""
   echo "Travis pull request branch is \"${TRAVIS_PULL_REQUEST_BRANCH}\""
   echo "Checking out ${BRANCHTOPUSH} that is the source here"

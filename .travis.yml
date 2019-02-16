@@ -1,6 +1,7 @@
 stages:
+- tell
 - name: compile
-  if: false
+  if: commit_message != "Travis built JavaDoc. ]ci skip["
 - test
 - sonarqube
 - name: deploy
@@ -18,14 +19,14 @@ cache:
   - "$HOME/.gradle/wrapper/"
 jobs:
   include:
+  - stage: tell
+    script: "hello"
   - stage: compile
-    if: false
-    if: commit_message != "Travis built JavaDoc. ]ci skip["
     script:
 #    - "./gradlew build -x test"
-#    - "./gradlew generateJavadoc"
+    - "./gradlew generateJavadoc"
 #    after_success:
-#    - bash .travis_push_javadoc.sh
+    - bash .travis_push_javadoc.sh
   - stage: deploy
     script: "./gradlew publish -PnexusBaseUrl=$nexusBaseUrl -PnexusUpRepo=$nexusUpRepo
       -PnexusUser=$nexusUser -PnexusPassword=$nexusPassword"
