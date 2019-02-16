@@ -8,6 +8,7 @@ setup_git() {
 commit_website_files() {  
   git remote add origin-pages https://${GH_TOKEN}@github.com/fmohr/AILibs.git > /dev/null 2>&1
   git remote update
+  echo "Checking out branch \"${TRAVIS_PULL_REQUEST_BRANCH}\" that is the source of this pull request"
   git checkout -b ${TRAVIS_PULL_REQUEST_BRANCH}
   git add ./\*.html
   git add ./\*.css
