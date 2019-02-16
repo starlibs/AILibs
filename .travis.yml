@@ -1,5 +1,6 @@
 stages:
-- compile
+- name: compile
+  if: false
 - test
 - sonarqube
 - name: deploy
@@ -15,8 +16,6 @@ cache:
   directories:
   - "$HOME/.gradle/caches/"
   - "$HOME/.gradle/wrapper/"
-install:
-- true
 jobs:
   include:
   - stage: compile
