@@ -19,9 +19,9 @@ install:
 - true
 jobs:
   include:
-  - if: commit_message != "Travis built JavaDoc. ]ci skip["
-
   - stage: compile
+    if: false
+    if: commit_message != "Travis built JavaDoc. ]ci skip["
     script:
 #    - "./gradlew build -x test"
     - "./gradlew generateJavadoc"
