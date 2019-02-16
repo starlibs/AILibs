@@ -7,16 +7,16 @@ setup_git() {
 
 commit_website_files() {  
   git remote add origin-pages https://${GH_TOKEN}@github.com/fmohr/AILibs.git > /dev/null 2>&1
-  git checkout -b javadoc
+#  git checkout -b javadoc
   git add ./\*.html
   git add ./\*.css
   git add ./\*.js
   git add ./\*package-list
-  git commit --message "Travis built Javadoc"
+  git commit --message "Travis built Javadoc. [ci skip]"
 }
 
 upload_files() {
-  git push --set-upstream origin-pages javadoc 
+  git push --set-upstream origin-pages
 }
 
 setup_git
