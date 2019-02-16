@@ -17,7 +17,8 @@ commit_website_files() {
 }
 
 upload_files() {
-  git push --set-upstream origin-pages
+  echo "Pushing back to ${TRAVIS_PULL_REQUEST_BRANCH}"
+  git push --set-upstream origin-pages ${TRAVIS_PULL_REQUEST_BRANCH}
 }
 
 setup_git
