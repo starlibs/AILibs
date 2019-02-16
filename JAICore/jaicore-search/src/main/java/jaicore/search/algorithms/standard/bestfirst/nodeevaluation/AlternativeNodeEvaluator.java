@@ -2,10 +2,8 @@ package jaicore.search.algorithms.standard.bestfirst.nodeevaluation;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeoutException;
 
 import jaicore.basic.ILoggingCustomizable;
-import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.logging.ToJSONStringUtil;
 import jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
 import jaicore.search.model.travesaltree.Node;
@@ -34,7 +32,7 @@ public class AlternativeNodeEvaluator<T, V extends Comparable<V>> extends Decora
 	}
 
 	@Override
-	public V f(final Node<T, ?> node) throws NodeEvaluationException, TimeoutException, AlgorithmExecutionCanceledException, InterruptedException {
+	public V f(final Node<T, ?> node) throws NodeEvaluationException, InterruptedException {
 		V f1 = this.ne1.f(node);
 		if (f1 != null) {
 			return f1;

@@ -72,7 +72,7 @@ public class PreferenceBasedNodeEvaluator implements INodeEvaluator<TFDNode, Dou
 			} else {
 				score = null;
 				if (!sentLogMessageForHavingEnteredSecondSubPhase) {
-					if ((double)n.getParent().getInternalLabel() > 1.0e-6) {
+					if ((Double)n.getParent().getInternalLabel() > 1.0e-6) {
 						sentLogMessageForHavingEnteredSecondSubPhase = true;
 						logger.info("Entering phase 1b! Breadth first search ends here, because the search is asking for the f-value of a node whose parent has been truely evaluated with an f-value of {}", n.getParent().getInternalLabel());
 					}

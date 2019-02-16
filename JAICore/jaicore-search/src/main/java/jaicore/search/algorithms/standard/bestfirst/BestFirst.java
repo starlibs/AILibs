@@ -717,6 +717,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		List<N> todoList = successorDescriptions.stream().map(d -> d.getTo()).collect(Collectors.toList());
 		for (NodeExpansionDescription<N, A> successorDescription : successorDescriptions) {
 			NodeBuilder nb = new NodeBuilder(todoList, nodeSelectedForExpansion, successorDescription);
+			logger.trace("Number of additional threads for node attachment is {}", this.additionalThreadsForNodeAttachment);
 			if (this.additionalThreadsForNodeAttachment < 1) {
 				nb.run();
 			} else {
@@ -984,7 +985,9 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		switch (this.getState()) {
 		case created: {
 			this.logger.info("Initializing BestFirst search {} with {} CPUs and a timeout of {}ms", this.getId(), this.getConfig().cpus(), this.getConfig().timeout());
-			this.parallelizeNodeExpansion(this.getConfig().cpus());
+			int additionalCPUs = getConfig().cpus() - 1;
+			if (additionalCPUs > 0)
+				this.parallelizeNodeExpansion(additionalCPUs);
 			this.initGraph();
 			logger.info("Search initialized, returning activation event.");
 			return this.activate();

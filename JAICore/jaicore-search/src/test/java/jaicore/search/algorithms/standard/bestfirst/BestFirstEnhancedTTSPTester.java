@@ -27,10 +27,10 @@ public class BestFirstEnhancedTTSPTester extends EnhancedTTSPTester<GraphSearchW
 		return a -> new GraphSearchWithSubpathEvaluationsInput<>(a.getGraphGenerator(), new INodeEvaluator<EnhancedTTSPNode, Double>() {
 
 			@Override
-			public Double f(Node<EnhancedTTSPNode, ?> node) throws NodeEvaluationException, TimeoutException, AlgorithmExecutionCanceledException, InterruptedException {
+			public Double f(Node<EnhancedTTSPNode, ?> node) throws NodeEvaluationException, InterruptedException {
 				try {
 					return a.getSolutionEvaluator().evaluateSolution(node.externalPath());
-				} catch (ObjectEvaluationFailedException e) {
+				} catch (ObjectEvaluationFailedException | TimeoutException | AlgorithmExecutionCanceledException e) {
 					throw new NodeEvaluationException(e, "Could not evaluate node. " + e.getMessage());
 				}
 			}

@@ -15,7 +15,7 @@ dependencies {
 	
 	compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.7'
 	
-	implementation 'com.github.mwever:gs-core:dev-SNAPSHOT'
+	implementation 'com.github.mwever:gs-core:2.0.2-synchrofix'
 	implementation 'com.github.graphstream:gs-ui-javafx:2.0-alpha'
 	implementation 'com.github.graphstream:gs-algo:2.0-alpha'
 

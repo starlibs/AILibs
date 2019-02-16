@@ -2,10 +2,7 @@ package jaicore.search.probleminputs;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.TimeoutException;
 
-import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
-import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.core.interfaces.GraphGenerator;
@@ -29,7 +26,7 @@ public class GraphSearchWithNumberBasedAdditivePathEvaluation<N,A> extends Graph
 		}
 
 		@Override
-		public Double f(Node<N,?> node) throws NodeEvaluationException, TimeoutException, AlgorithmExecutionCanceledException, InterruptedException {
+		public Double f(Node<N,?> node) throws NodeEvaluationException, InterruptedException {
 			List<?> path = node.path();
 			int depth = path.size() - 1;
 			double pathCost = 0;

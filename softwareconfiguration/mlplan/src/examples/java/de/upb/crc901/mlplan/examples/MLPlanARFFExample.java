@@ -4,17 +4,19 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Timer;
 import java.util.concurrent.TimeUnit;
 
 import de.upb.crc901.mlplan.core.MLPlan;
 import de.upb.crc901.mlplan.core.MLPlanBuilder;
 import de.upb.crc901.mlplan.gui.outofsampleplots.OutOfSampleErrorPlotPlugin;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
+import hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
 import jaicore.basic.TimeOut;
 import jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
 import jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
 import jaicore.graphvisualizer.plugin.solutionperformanceplotter.SolutionPerformanceTimelinePlugin;
-import jaicore.graphvisualizer.window.GraphVisualizationWindow;
+import jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
 import jaicore.ml.WekaUtil;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNodeInfoGenerator;
 import jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogramPlugin;
@@ -30,8 +32,7 @@ public class MLPlanARFFExample {
 	public static void main(final String[] args) throws Exception {
 
 		/* load data for segment dataset and create a train-test-split */
-		File file = new File("../../../datasets/amazon.arff");
-//		File file = new File("testrsc/car.arff");
+		File file = new File("testrsc/car.arff");
 		System.out.println(file.getAbsolutePath());
 		Instances data = new Instances(new FileReader(file));
 		data.setClassIndex(data.numAttributes() - 1);
@@ -46,12 +47,11 @@ public class MLPlanARFFExample {
 		mlplan.setLoggerName("mlplan");
 		mlplan.setTimeout(300, TimeUnit.SECONDS);
 		mlplan.setNumCPUs(6);
-		
-		/* open visualization */
+
 		new JFXPanel();
-		GraphVisualizationWindow window = new GraphVisualizationWindow(mlplan, new GraphViewPlugin(), new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new SearchRolloutHistogramPlugin<>(), new SolutionPerformanceTimelinePlugin(), new OutOfSampleErrorPlotPlugin(split.get(0), split.get(1)));
+		AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(mlplan, new GraphViewPlugin(), new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new SearchRolloutHistogramPlugin<>(), new SolutionPerformanceTimelinePlugin(), new HASCOModelStatisticsPlugin(), new OutOfSampleErrorPlotPlugin(split.get(0), split.get(1)));
 		Platform.runLater(window);
-		
+
 		try {
 			long start = System.currentTimeMillis();
 			Classifier optimizedClassifier = mlplan.call();

@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 
 import jaicore.graphvisualizer.plugin.ASimpleMVCPluginView;
 import javafx.application.Platform;
-import javafx.scene.Node;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart.Data;
@@ -19,38 +18,23 @@ import javafx.scene.chart.XYChart.Series;
  * @author fmohr
  *
  */
-public class OutOfSampleErrorPlotPluginView extends ASimpleMVCPluginView<OutOfSampleErrorPlotPluginModel, OutOfSampleErrorPlotPluginController> {
+public class OutOfSampleErrorPlotPluginView extends ASimpleMVCPluginView<OutOfSampleErrorPlotPluginModel, OutOfSampleErrorPlotPluginController, LineChart<Number, Number>> {
 
 	private Logger logger = LoggerFactory.getLogger(OutOfSampleErrorPlotPluginView.class);
-	private final LineChart<Number, Number> lineChart;
 	private final Series<Number,Number> believedErrorSeries;
 	private final Series<Number,Number> outOfSampleErrorSeries;
 	private int nextIndexToDisplay = 0;
 
 	public OutOfSampleErrorPlotPluginView(OutOfSampleErrorPlotPluginModel model) {
-		super(model);
-
-		// defining the axes
-		final NumberAxis xAxis = new NumberAxis();
-		final NumberAxis yAxis = new NumberAxis();
-		xAxis.setLabel("elapsed time (s)");
-
-		// creating the chart
-		lineChart = new LineChart<Number, Number>(xAxis, yAxis);
-		lineChart.setTitle(getTitle());
-		
-		// defining a series
+		super(model, new LineChart<>(new NumberAxis(), new NumberAxis()));
+		getNode().getXAxis().setLabel("elapsed time (s)");
+		getNode().setTitle(getTitle());
 		believedErrorSeries = new Series<>();
 		believedErrorSeries.setName("Believed (internal) Error");
 		outOfSampleErrorSeries = new Series<>();
 		outOfSampleErrorSeries.setName("Out-of-Sample Error");
-		lineChart.getData().add(believedErrorSeries);
-		lineChart.getData().add(outOfSampleErrorSeries);
-	}
-
-	@Override
-	public Node getNode() {
-		return lineChart;
+		getNode().getData().add(believedErrorSeries);
+		getNode().getData().add(outOfSampleErrorSeries);
 	}
 
 	@Override

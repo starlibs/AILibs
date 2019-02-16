@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 import jaicore.graphvisualizer.plugin.ASimpleMVCPluginView;
 import javafx.application.Platform;
-import javafx.scene.Node;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart.Data;
@@ -20,38 +19,29 @@ import javafx.scene.chart.XYChart.Series;
  * @author fmohr
  *
  */
-public class SolutionPerformanceTimelinePluginView extends ASimpleMVCPluginView<SolutionPerformanceTimelinePluginModel, SolutionPerformanceTimelinePluginController> {
+public class SolutionPerformanceTimelinePluginView extends ASimpleMVCPluginView<SolutionPerformanceTimelinePluginModel, SolutionPerformanceTimelinePluginController, LineChart<Number, Number>> {
 
 	private Logger logger = LoggerFactory.getLogger(SolutionPerformanceTimelinePluginView.class);
-	private final LineChart<Number, Number> lineChart;
-	private final Series<Number,Number> performanceSeries;
+
+	private final Series<Number, Number> performanceSeries;
 	private int nextIndexToDisplay = 0;
 
 	public SolutionPerformanceTimelinePluginView(SolutionPerformanceTimelinePluginModel model) {
-		super(model);
+		super(model, new LineChart<>(new NumberAxis(), new NumberAxis()));
 
 		// defining the axes
-		final NumberAxis xAxis = new NumberAxis();
-		final NumberAxis yAxis = new NumberAxis();
-		xAxis.setLabel("elapsed time (s)");
+		getNode().getXAxis().setLabel("elapsed time (s)");
 
 		// creating the chart
-		lineChart = new LineChart<Number, Number>(xAxis, yAxis);
-		lineChart.setTitle("Solution performances over time");
-		
+		getNode().setTitle(getTitle());
 		// defining a series
 		performanceSeries = new Series<>();
-		lineChart.getData().add(performanceSeries);
-	}
-
-	@Override
-	public Node getNode() {
-		return lineChart;
+		getNode().getData().add(performanceSeries);
 	}
 
 	@Override
 	public void update() {
-		
+
 		/* compute data to add */
 		List<Pair<Integer, Double>> events = getModel().getTimedPerformances();
 		List<Data<Number, Number>> values = new ArrayList<>();
@@ -70,7 +60,7 @@ public class SolutionPerformanceTimelinePluginView extends ASimpleMVCPluginView<
 	public String getTitle() {
 		return "Solution Performance Timeline";
 	}
-	
+
 	public void clear() {
 		nextIndexToDisplay = 0;
 		performanceSeries.getData().clear();
@@ -78,5 +68,5 @@ public class SolutionPerformanceTimelinePluginView extends ASimpleMVCPluginView<
 
 	public int getNextIndexToDisplay() {
 		return nextIndexToDisplay;
-	}	
+	}
 }

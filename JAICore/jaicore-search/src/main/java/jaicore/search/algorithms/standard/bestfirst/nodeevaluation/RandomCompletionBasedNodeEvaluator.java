@@ -49,7 +49,7 @@ import jaicore.search.model.travesaltree.Node;
 import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 
 @SuppressWarnings("serial")
-public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>>
+public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> extends TimeAwareNodeEvaluator<T, V>
 		implements IGraphDependentNodeEvaluator<T, String, V>, SerializableNodeEvaluator<T, V>,
 		ISolutionReportingNodeEvaluator<T, V>, ICancelableNodeEvaluator, IUncertaintyAnnotatingNodeEvaluator<T, V>,
 		ILoggingCustomizable {
@@ -58,9 +58,6 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>>
 	private Logger logger = LoggerFactory.getLogger(RandomCompletionBasedNodeEvaluator.class);
 
 	private final int timeoutForSingleCompletionEvaluationInMS;
-	private final int timeoutForNodeEvaluationInMS;
-	private long totalDeadline = -1; // this deadline can be set to guarantee that there will be no activity after
-										// this timestamp
 
 	protected Set<List<T>> unsuccessfulPaths = Collections.synchronizedSet(new HashSet<>());
 	protected Set<List<T>> postedSolutions = new HashSet<>();
@@ -107,7 +104,7 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>>
 	public RandomCompletionBasedNodeEvaluator(final Random random, final int samples,
 			final ISolutionEvaluator<T, V> solutionEvaluator, final int timeoutForSingleCompletionEvaluationInMS,
 			final int timeoutForNodeEvaluationInMS, final Predicate<T> priorityPredicateForRDFS) {
-		super();
+		super(timeoutForNodeEvaluationInMS);
 		if (random == null) {
 			throw new IllegalArgumentException("Random source must not be null!");
 		}
@@ -122,7 +119,6 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>>
 		this.samples = samples;
 		this.solutionEvaluator = solutionEvaluator;
 		this.timeoutForSingleCompletionEvaluationInMS = timeoutForSingleCompletionEvaluationInMS;
-		this.timeoutForNodeEvaluationInMS = timeoutForNodeEvaluationInMS;
 		this.priorityPredicateForRDFS = priorityPredicateForRDFS;
 
 		this.logger.info(
@@ -151,23 +147,17 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>>
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public V f(final Node<T, ?> n) throws InterruptedException, TimeoutException, NodeEvaluationException {
+	protected V fTimeouted(final Node<T, ?> n, int timeout) throws InterruptedException, NodeEvaluationException {
+		assert this.generator != null : "Cannot compute f as no generator has been set!";
 		eventBus.post(new NodeAnnotationEvent<>("RandomCompletion", n.getPoint(), "f-computing thread",
 				Thread.currentThread().getName()));
 		this.logger.info(
 				"Received request for f-value of node {}. Number of subsamples will be {}, timeout for node evaluation is {}ms and for a single candidate is {}ms.",
-				n, this.samples, this.timeoutForNodeEvaluationInMS, this.timeoutForSingleCompletionEvaluationInMS);
+				n, this.samples, getTimeoutForNodeEvaluationInMS(), this.timeoutForSingleCompletionEvaluationInMS);
 		long startOfComputation = System.currentTimeMillis();
-		long deadline = this.timeoutForNodeEvaluationInMS > 0
-				? startOfComputation + this.timeoutForNodeEvaluationInMS - 50
-				: -1;
-		if (this.totalDeadline >= 0)
-			deadline = Math.min(deadline, this.totalDeadline);
+		long deadline = timeout > 0 ? startOfComputation + timeout : -1;
 		if (this.timestampOfFirstEvaluation == 0) {
 			this.timestampOfFirstEvaluation = startOfComputation;
-		}
-		if (this.generator == null) {
-			throw new IllegalStateException("Cannot compute f as no generator has been set!");
 		}
 		if (!this.fValues.containsKey(n)) {
 
@@ -215,19 +205,16 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>>
 				}
 
 				/* draw random completions and determine best solution */
-				int i = 0;
-				int j = 0;
+				int successfulSamples = 0;
+				int drawnSamples = 0;
 				int countedExceptions = 0;
 				final int maxSamples = this.samples * 2;
 				List<V> evaluations = new ArrayList<>();
 				List<List<T>> completedPaths = new ArrayList<>();
 				this.logger.debug("Now drawing {} successful examples but no more than {}", this.samples, maxSamples);
-				for (; i < this.samples; i++) {
-
-					if (Thread.currentThread().isInterrupted()) {
-						this.logger.info("Thread ist interrupted, canceling RDFS");
-						break;
-					}
+				while (successfulSamples < this.samples) {
+					logger.debug("Drawing next sample. {} samples have been drawn already, {} have been successful.", drawnSamples, successfulSamples);
+					checkInterruption();
 					if (deadline > 0 && deadline < System.currentTimeMillis()) {
 						this.logger.info("Deadline for random completions hit! Finishing node evaluation.");
 						break;
@@ -235,7 +222,7 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>>
 
 					/* determine time that is available to conduct next computation */
 					long remainingTimeForNodeEvaluation = deadline > 0 ? deadline - System.currentTimeMillis() : -1; // this
-																														// value
+																														//value
 																														// is
 																														// positive
 																														// or
@@ -265,19 +252,16 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>>
 					synchronized (this.completer) {
 						long startCompletion = System.currentTimeMillis();
 						if (this.completer.isCanceled()) {
-							this.logger.info(
-									"Completer has been canceled (perhaps due a cancel on the evaluator). Canceling RDFS");
+							this.logger.info("Completer has been canceled (perhaps due a cancel on the evaluator). Canceling sampling.");
 							break;
 						}
 						completedPath = new ArrayList<>(n.externalPath());
-
 						this.logger.debug("Starting search for next solution ...");
-
 						SearchGraphPath<T, String> solutionPathFromN = null;
 						try {
 							solutionPathFromN = this.completer.nextSolutionUnderNode(n.getPoint());
-						} catch (AlgorithmExecutionCanceledException e) {
-							this.logger.info("Completer has been canceled. Returning control.");
+						} catch (AlgorithmExecutionCanceledException | TimeoutException e) {
+							this.logger.info("Completer has been canceled or timeouted. Returning control.");
 							break;
 						}
 						if (solutionPathFromN == null) {
@@ -285,8 +269,7 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>>
 							break;
 						}
 						long finishedCompletion = System.currentTimeMillis();
-						this.logger.debug("Found solution of length {} in {}ms. Enable TRACE for details.",
-								solutionPathFromN.getNodes().size(), finishedCompletion - startCompletion);
+						this.logger.debug("Found solution of length {} in {}ms. Enable TRACE for details.", solutionPathFromN.getNodes().size(), finishedCompletion - startCompletion);
 						this.logger.trace("Solution path is {}", solutionPathFromN);
 						pathCompletion = new ArrayList<>(solutionPathFromN.getNodes());
 						pathCompletion.remove(0);
@@ -317,14 +300,14 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>>
 						}
 						this.timeoutTimer.schedule(abortionTask, timeoutForJob);
 						logger.debug("Activated timeout of {}ms for evaluation of found solution.", timeoutForJob);
-					}
-					else
+					} else
 						logger.debug("No timeout active for candidate evaluation.");
 
 					/* evaluate the found solution */
-					j++;
+					drawnSamples++;
 					try {
 						V val = this.getFValueOfSolutionPath(completedPath);
+						successfulSamples++;
 						this.eventBus.post(new RolloutEvent<>("RandomCompletion", n.path(), val));
 						if (val != null) {
 							evaluations.add(val);
@@ -343,14 +326,13 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>>
 							Thread.interrupted(); // set interrupted to false
 						}
 					} catch (Exception ex) {
-						if (j == maxSamples) {
-							this.logger.warn("Too many retry attempts, giving up.");
+						if (countedExceptions == maxSamples) {
+							this.logger.warn("Too many retry attempts, giving up. {} samples were drawn, {} were successful.", drawnSamples, successfulSamples);
 							throw new NodeEvaluationException(ex, "Error in the evaluation of a node!");
 						} else {
 							countedExceptions++;
 							this.logger.error("Could not evaluate solution candidate ... retry another completion. {}",
 									LoggerUtil.getExceptionInfo(ex));
-							i--;
 						}
 					}
 					abortionTask.cancel();
@@ -361,12 +343,11 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>>
 				 * have failed with exception or were interrupted
 				 */
 				V best = this.bestKnownScoreUnderNodeInCompleterGraph.get(n.externalPath());
+				logger.debug("Finished sampling. {} samples were drawn, {} were successful. Best seen score is {}", drawnSamples, successfulSamples, best);
 				if (best == null) {
-					if (deadline < System.currentTimeMillis()) {
-						throw new TimeoutException("The timeout of " + this.timeoutForNodeEvaluationInMS
-								+ "ms for node evaluation has been exhausted. Actually spent time in f-evaluation: " + (System.currentTimeMillis() - startOfComputation) + "ms");
-					} else if (countedExceptions > 0) {
-						throw new NoSuchElementException("Among " + j
+					checkInterruption();
+					if (countedExceptions > 0) {
+						throw new NoSuchElementException("Among " + drawnSamples
 								+ " evaluated candidates, we could not identify any candidate that did not throw an exception.");
 					} else {
 						return null;
@@ -374,12 +355,10 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>>
 				}
 
 				/* if we are still interrupted, throw an exception */
-				if (Thread.currentThread().isInterrupted()) {
-					throw new InterruptedException("Node evaluation interrupted");
-				}
+				checkInterruption();
 
 				/* add number of samples to node */
-				n.setAnnotation("fRPSamples", i);
+				n.setAnnotation("fRPSamples", successfulSamples);
 				if (this.uncertaintySource != null) {
 					uncertainty = this.uncertaintySource.calculateUncertainty((Node<T, V>) n, completedPaths,
 							evaluations);
@@ -568,9 +547,11 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>>
 		GraphSearchWithSubpathEvaluationsInput<T, String, Double> completionProblem = new GraphSearchWithSubpathEvaluationsInput<>(
 				generator, nodeEvaluator);
 		this.completer = new RandomSearch<>(completionProblem, this.priorityPredicateForRDFS, this.random);
-		if (this.totalDeadline >= 0)
-			this.completer
-					.setTimeout(new TimeOut(this.totalDeadline - System.currentTimeMillis(), TimeUnit.MILLISECONDS));
+		if (this.getTotalDeadline() >= 0)
+			this.completer.setTimeout(
+					new TimeOut(this.getTotalDeadline() - System.currentTimeMillis(), TimeUnit.MILLISECONDS));
+		if (loggerName != null)
+			completer.setLoggerName(loggerName + ".completer");
 		if (this.visualizeSubSearch) {
 //			new VisualizationWindow<>(this.completer).setTooltipGenerator(n -> n.toString() + "<br />f: " + String.valueOf(this.bestKnownScoreUnderNodeInCompleterGraph.get(n)));
 		}
@@ -621,21 +602,14 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>>
 		this.loggerName = name;
 		this.logger.info("Switching logger (name) of object of class {} to {}", this.getClass().getName(), name);
 		this.logger = LoggerFactory.getLogger(name);
-		this.completer.setLoggerName(name + ".randomsearch");
+		if (completer != null)
+			this.completer.setLoggerName(name + ".randomsearch");
 		this.logger.info("Switched logger (name) of {} to {}", this, name);
 	}
 
 	@Override
 	public String getLoggerName() {
 		return this.loggerName;
-	}
-
-	public long getTotalDeadline() {
-		return this.totalDeadline;
-	}
-
-	public void setTotalDeadline(final long totalDeadline) {
-		this.totalDeadline = totalDeadline;
 	}
 
 	@Override

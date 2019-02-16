@@ -43,26 +43,30 @@ public class GraphViewPluginModel implements IGUIPluginModel {
 
 	public void addNode(Object node, List<Object> predecessorNodes, String typeOfNode) throws ViewGraphManipulationException {
 		try {
-			nodeIdCounter++;
 			Node viewNode = graph.addNode(String.valueOf(nodeIdCounter));
 			registerNodeMapping(node, viewNode);
 
 			for (Object predecessorNode : predecessorNodes) {
-				Node viewPredecessorNode = searchGraphNodesToViewGraphNodesMap.get(predecessorNode);
-				if (viewPredecessorNode == null) {
-					throw new ViewGraphManipulationException("Cannot add edge from node " + predecessorNode + " to node " + node + " due to missing view node of predecessor.");
-				}
-				String edgeId = viewPredecessorNode.getId() + "-" + viewNode.getId();
-				Edge edge = graph.addEdge(edgeId, viewPredecessorNode, viewNode, true);
-				registerEdgeConnectedToNodesInMap(edge);
+				createEdge(node, predecessorNode);
 			}
 
-			// we do this as a last thing as it occasionally throws an exception
 			switchNodeType(viewNode, typeOfNode);
 			view.update();
+			nodeIdCounter++;
 		} catch (IdAlreadyInUseException exception) {
 			throw new ViewGraphManipulationException("Cannot add node " + node + " as the id " + nodeIdCounter + " is already in use.");
 		}
+	}
+
+	private void createEdge(Object node, Object predecessorNode) throws ViewGraphManipulationException {
+		Node viewNode = searchGraphNodesToViewGraphNodesMap.get(node);
+		Node viewPredecessorNode = searchGraphNodesToViewGraphNodesMap.get(predecessorNode);
+		if (viewPredecessorNode == null) {
+			throw new ViewGraphManipulationException("Cannot add edge from node " + predecessorNode + " to node " + viewNode + " due to missing view node of predecessor.");
+		}
+		String edgeId = viewPredecessorNode.getId() + "-" + viewNode.getId();
+		Edge edge = graph.addEdge(edgeId, viewPredecessorNode, viewNode, true);
+		registerEdgeConnectedToNodesInMap(edge);
 	}
 
 	private void registerNodeMapping(Object node, Node viewNode) {
@@ -94,14 +98,9 @@ public class GraphViewPluginModel implements IGUIPluginModel {
 		view.update();
 	}
 
-	private void switchNodeType(Node node, String newType) throws ViewGraphManipulationException {
-		try {
-			if (!isLabeledAsRootNode(node)) {
-				node.setAttribute("ui.class", newType);
-			}
-		} catch (Exception exception) {
-			// TODO although this a very nasty, the setAttribute method has a bug which sometimes throws an exception
-			throw new ViewGraphManipulationException(exception);
+	private void switchNodeType(Node node, String newType) {
+		if (!isLabeledAsRootNode(node)) {
+			node.setAttribute("ui.class", newType);
 		}
 	}
 
