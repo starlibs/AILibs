@@ -3,6 +3,7 @@ package jaicore.search.problemtransformers;
 import java.util.Random;
 import java.util.function.Predicate;
 
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator;
 import jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
@@ -17,7 +18,8 @@ public class GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTrans
 	private final int timeoutForSingleCompletionEvaluationInMS;
 	private final int timeoutForNodeEvaluationInMS;
 
-	public GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS(INodeEvaluator<N, V> preferredNodeEvaluator, Predicate<N> preferredNodeEvaluatorForRandomCompletion, int seed, int numSamples, int timeoutForSingleCompletionEvaluationInMS, int timeoutForNodeEvaluationInMS) {
+	public GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS(final INodeEvaluator<N, V> preferredNodeEvaluator, final Predicate<N> preferredNodeEvaluatorForRandomCompletion, final int seed,
+			final int numSamples, final int timeoutForSingleCompletionEvaluationInMS, final int timeoutForNodeEvaluationInMS) {
 		super();
 		if (numSamples <= 0) {
 			throw new IllegalArgumentException("Sample size has been set to " + numSamples + " but must be strictly positive!");
@@ -31,24 +33,30 @@ public class GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTrans
 	}
 
 	public INodeEvaluator<N, V> getPreferredNodeEvaluator() {
-		return preferredNodeEvaluator;
+		return this.preferredNodeEvaluator;
 	}
 
 	public Predicate<N> getPrioritizedNodePredicatesForRandomCompletion() {
-		return prioritizedNodesInRandomCompletion;
+		return this.prioritizedNodesInRandomCompletion;
 	}
 
 	public int getSeed() {
-		return seed;
+		return this.seed;
 	}
 
 	public int getNumSamples() {
-		return numSamples;
+		return this.numSamples;
 	}
 
 	@Override
-	public GraphSearchWithSubpathEvaluationsInput<N, A, V> transform(GraphSearchWithPathEvaluationsInput<N, A, V> problem) {
-		setNodeEvaluator(new RandomCompletionBasedNodeEvaluator<>(new Random(seed), numSamples, problem.getPathEvaluator(), timeoutForSingleCompletionEvaluationInMS, timeoutForNodeEvaluationInMS, prioritizedNodesInRandomCompletion));
+	public GraphSearchWithSubpathEvaluationsInput<N, A, V> transform(final GraphSearchWithPathEvaluationsInput<N, A, V> problem) {
+		RandomCompletionBasedNodeEvaluator<N, V> rdfsNodeEvaluator = new RandomCompletionBasedNodeEvaluator<>(new Random(this.seed), this.numSamples, problem.getPathEvaluator(), this.timeoutForSingleCompletionEvaluationInMS,
+				this.timeoutForNodeEvaluationInMS, this.prioritizedNodesInRandomCompletion);
+		if (this.preferredNodeEvaluator != null) {
+			this.setNodeEvaluator(new AlternativeNodeEvaluator<>(this.preferredNodeEvaluator, rdfsNodeEvaluator));
+		} else {
+			this.setNodeEvaluator(rdfsNodeEvaluator);
+		}
 		return super.transform(problem);
 	}
 
