@@ -19,7 +19,7 @@ public class MLPlanGraphGeneratorTest extends GraphGeneratorTester<TFDNode, Stri
 	public List<Pair<GraphGenerator<TFDNode, String>,Integer>> getGraphGenerators() throws IOException {
 
 		/* extract graph generator from mlplan */
-		Instances data = new Instances(new FileReader("../../../../datasets/classification/multi-class/car.arff"));
+		Instances data = new Instances(new FileReader("testrsc/car.arff"));
 		data.setClassIndex(data.numAttributes() - 1);
 		MLPlan mlplan = new MLPlan(new MLPlanBuilder().withAutoWEKAConfiguration(), data);
 		GraphGenerator<TFDNode, String> graphGenerator = mlplan.getGraphGenerator();
