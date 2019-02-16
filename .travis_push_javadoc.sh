@@ -13,7 +13,7 @@ commit_website_files() {
   git add ./\*.css
   git add ./\*.js
   git add ./\*package-list
-  git commit --message "Travis built Javadoc. [ci skip]"
+  git commit --message "Travis built JavaDoc. ]ci skip["
 }
 
 upload_files() {
