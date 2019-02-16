@@ -55,6 +55,7 @@ allprojects {
 		test {
 			java {
 				srcDir 'src/test/java'
+				srcDir 'src/example/java'
 			}
 		}
 	}
@@ -148,6 +149,13 @@ allprojects {
 	artifacts {
 		testArtifacts testClassesJar
 	}
+	
+	// generate JavaDoc for each project
+    	task generateJavadoc(type: Javadoc) {
+        	source = sourceSets.main.allJava
+        	classpath = files(sourceSets.main.compileClasspath)
+        	destinationDir = file("docs/javadoc")
+    	}
 
 }
 
