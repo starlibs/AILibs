@@ -1,4 +1,6 @@
 stages:
+- name: dummy
+  if: commit_message = "Travis built JavaDoc. ]ci skip[" 
 - name: compile
   if: commit_message != "Travis built JavaDoc. ]ci skip["
 - test
