@@ -15,7 +15,7 @@ commit_website_files() {
   echo "Travis branch is \"${TRAVIS_BRANCH}\""
   echo "Travis pull request branch is \"${TRAVIS_PULL_REQUEST_BRANCH}\""
   echo "Checking out ${BRANCHTOPUSH} that is the source here"
-  git checkout -b ${BRANCHTOPUSH}
+  git checkout -B ${BRANCHTOPUSH}
   git add ./\*.html
   git add ./\*.css
   git add ./\*.js
