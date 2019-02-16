@@ -16,7 +16,7 @@ commit_website_files() {
 }
 
 upload_files() {
-  git push --quiet --set-upstream origin-pages javadoc 
+  git push --set-upstream origin-pages javadoc 
 }
 
 setup_git
