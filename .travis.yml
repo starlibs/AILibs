@@ -21,6 +21,8 @@ install:
   - true
 jobs:
   include:
+  - stage: dummy
+    script: "echo Not doing anything. This is just here to have at least one active script entry when a recursive call after a JavaDoc build comes in"
   - stage: compile
     script:
 #    - "./gradlew build -x test"
