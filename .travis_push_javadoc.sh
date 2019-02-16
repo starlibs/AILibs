@@ -21,6 +21,6 @@ upload_files() {
   git push --set-upstream origin-pages
 }
 
-setup_git
+#setup_git
 commit_website_files
 upload_files
