@@ -18,6 +18,7 @@ cache:
 install:
 - true
 jobs:
+  if: NOT (commit_message =~ /(Travis built JavaDoc)/)
   include:
   - stage: compile
     script:
