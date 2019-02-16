@@ -18,7 +18,7 @@ cache:
 install:
 - true
 jobs:
-  if: NOT (commit_message =~ /(Travis built JavaDoc)/)
+  if: commit_message != "Travis built JavaDoc. ]ci skip["
   include:
   - stage: compile
     script:
