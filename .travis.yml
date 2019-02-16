@@ -25,7 +25,7 @@ jobs:
 #    - "./gradlew build -x test"
     - "./gradlew generateJavadoc"
 #    after_success:
-    - bash .travis_push_javadoc.sh
+#    - bash .travis_push_javadoc.sh
   - stage: deploy
     script: "./gradlew publish -PnexusBaseUrl=$nexusBaseUrl -PnexusUpRepo=$nexusUpRepo
       -PnexusUser=$nexusUser -PnexusPassword=$nexusPassword"
