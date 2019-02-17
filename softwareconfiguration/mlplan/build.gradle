@@ -4,11 +4,6 @@ sourceSets {
         	srcDir 'resources'
     	}
     }
-    test {
-  		java {
-			 srcDir 'src/examples/java'
-		  }
-    }
 }
 
 dependencies {
