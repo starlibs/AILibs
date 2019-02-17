@@ -19,15 +19,14 @@ setup_git() {
 commit_website_files() {  
   git remote add origin-pages https://${GH_TOKEN}@github.com/fmohr/AILibs.git > /dev/null 2>&1  
   if [ -z "${TRAVIS_PULL_REQUEST_BRANCH}" ]; then
-    BRANCHTOPUSH=${TRAVIS_BRANCH}
-  else
-    BRANCHTOPUSH=${TRAVIS_PULL_REQUEST_BRANCH}
+    echo "This is not a pull request check, so not pushing back the built JavaDoc"
+    exit
   fi
   echo "Last commit message was ${TRAVIS_COMMIT_MESSAGE}"
   echo "Travis branch is \"${TRAVIS_BRANCH}\""
   echo "Travis pull request branch is \"${TRAVIS_PULL_REQUEST_BRANCH}\""
-  echo "Checking out ${BRANCHTOPUSH} that is the source here"
-  git checkout -B ${BRANCHTOPUSH}
+  echo "Checking out ${TRAVIS_PULL_REQUEST_BRANCH}, which is the source here"
+  git checkout -B ${TRAVIS_PULL_REQUEST_BRANCH}
   echo "Staging changes on .html, .css, and .js-files"
   git add ./\*.html
   git add ./\*.css
@@ -39,7 +38,7 @@ commit_website_files() {
 
 upload_files() {
   echo "Pushing commit to upstream ..."
-  #git push --set-upstream origin-pages
+  git push --set-upstream origin-pages
 }
 
 setup_git
