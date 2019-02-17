@@ -28,14 +28,17 @@ commit_website_files() {
   echo "Travis pull request branch is \"${TRAVIS_PULL_REQUEST_BRANCH}\""
   echo "Checking out ${BRANCHTOPUSH} that is the source here"
   git checkout -B ${BRANCHTOPUSH}
+  echo "Staging changes on .html, .css, and .js-files"
   git add ./\*.html
   git add ./\*.css
   git add ./\*.js
   git add ./\*package-list
+  echo "Sending commit"
   git commit --message "Travis built JavaDoc. ]ci skip["
 }
 
 upload_files() {
+  echo "Pushing commit to upstream ..."
   git push --set-upstream origin-pages
 }
 
