@@ -48,6 +48,10 @@ commit_website_files() {
     echo "Nothing comitted, canceling script here to avoid unnecessary push".
 	exit 0;
   fi
+  if grep -q "nothing added to commit" "commit.out"; then
+    echo "Nothing comitted, canceling script here to avoid unnecessary push".
+	exit 0;
+  fi
   echo "Apparently there are changes, so pushing to upstream"
 }
 
