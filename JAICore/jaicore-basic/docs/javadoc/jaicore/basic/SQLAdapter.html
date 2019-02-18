@@ -1,0 +1,666 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!-- NewPage -->
+<html lang="en">
+<head>
+<title>SQLAdapter (jaicore-basic 0.0.1-SNAPSHOT API)</title>
+<link rel="stylesheet" type="text/css" href="../../stylesheet.css" title="Style">
+<script type="text/javascript" src="../../script.js"></script>
+</head>
+<body>
+<script type="text/javascript"><!--
+    try {
+        if (location.href.indexOf('is-external=true') == -1) {
+            parent.document.title="SQLAdapter (jaicore-basic 0.0.1-SNAPSHOT API)";
+        }
+    }
+    catch(err) {
+    }
+//-->
+var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10,"i9":10,"i10":10,"i11":10,"i12":10,"i13":10,"i14":10,"i15":10,"i16":10};
+var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
+var altColor = "altColor";
+var rowColor = "rowColor";
+var tableTab = "tableTab";
+var activeTableTab = "activeTableTab";
+</script>
+<noscript>
+<div>JavaScript is disabled on your browser.</div>
+</noscript>
+<!-- ========= START OF TOP NAVBAR ======= -->
+<div class="topNav"><a name="navbar.top">
+<!--   -->
+</a>
+<div class="skipNav"><a href="#skip.navbar.top" title="Skip navigation links">Skip navigation links</a></div>
+<a name="navbar.top.firstrow">
+<!--   -->
+</a>
+<ul class="navList" title="Navigation">
+<li><a href="../../overview-summary.html">Overview</a></li>
+<li><a href="package-summary.html">Package</a></li>
+<li class="navBarCell1Rev">Class</li>
+<li><a href="package-tree.html">Tree</a></li>
+<li><a href="../../deprecated-list.html">Deprecated</a></li>
+<li><a href="../../index-all.html">Index</a></li>
+<li><a href="../../help-doc.html">Help</a></li>
+</ul>
+</div>
+<div class="subNav">
+<ul class="navList">
+<li><a href="../../jaicore/basic/ScoredItem.html" title="interface in jaicore.basic"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
+<li><a href="../../jaicore/basic/StatisticsUtil.html" title="class in jaicore.basic"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+</ul>
+<ul class="navList">
+<li><a href="../../index.html?jaicore/basic/SQLAdapter.html" target="_top">Frames</a></li>
+<li><a href="SQLAdapter.html" target="_top">No&nbsp;Frames</a></li>
+</ul>
+<ul class="navList" id="allclasses_navbar_top">
+<li><a href="../../allclasses-noframe.html">All&nbsp;Classes</a></li>
+</ul>
+<div>
+<script type="text/javascript"><!--
+  allClassesLink = document.getElementById("allclasses_navbar_top");
+  if(window==top) {
+    allClassesLink.style.display = "block";
+  }
+  else {
+    allClassesLink.style.display = "none";
+  }
+  //-->
+</script>
+</div>
+<div>
+<ul class="subNavList">
+<li>Summary:&nbsp;</li>
+<li>Nested&nbsp;|&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#constructor.summary">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method.summary">Method</a></li>
+</ul>
+<ul class="subNavList">
+<li>Detail:&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#constructor.detail">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method.detail">Method</a></li>
+</ul>
+</div>
+<a name="skip.navbar.top">
+<!--   -->
+</a></div>
+<!-- ========= END OF TOP NAVBAR ========= -->
+<!-- ======== START OF CLASS DATA ======== -->
+<div class="header">
+<div class="subTitle">jaicore.basic</div>
+<h2 title="Class SQLAdapter" class="title">Class SQLAdapter</h2>
+</div>
+<div class="contentContainer">
+<ul class="inheritance">
+<li>java.lang.Object</li>
+<li>
+<ul class="inheritance">
+<li>jaicore.basic.SQLAdapter</li>
+</ul>
+</li>
+</ul>
+<div class="description">
+<ul class="blockList">
+<li class="blockList">
+<dl>
+<dt>All Implemented Interfaces:</dt>
+<dd>java.io.Serializable, java.lang.AutoCloseable</dd>
+</dl>
+<hr>
+<br>
+<pre>public class <span class="typeNameLabel">SQLAdapter</span>
+extends java.lang.Object
+implements java.io.Serializable, java.lang.AutoCloseable</pre>
+<div class="block">This is a simple util class for easy database access and query execution in sql. You need to make sure that the respective JDBC connector is in the class path. By default, the adapter uses the mysql driver, but any jdbc driver can be
+ used.</div>
+<dl>
+<dt><span class="seeLabel">See Also:</span></dt>
+<dd><a href="../../serialized-form.html#jaicore.basic.SQLAdapter">Serialized Form</a></dd>
+</dl>
+</li>
+</ul>
+</div>
+<div class="summary">
+<ul class="blockList">
+<li class="blockList">
+<!-- ======== CONSTRUCTOR SUMMARY ======== -->
+<ul class="blockList">
+<li class="blockList"><a name="constructor.summary">
+<!--   -->
+</a>
+<h3>Constructor Summary</h3>
+<table class="memberSummary" border="0" cellpadding="3" cellspacing="0" summary="Constructor Summary table, listing constructors, and an explanation">
+<caption><span>Constructors</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colOne" scope="col">Constructor and Description</th>
+</tr>
+<tr class="altColor">
+<td class="colOne"><code><span class="memberNameLink"><a href="../../jaicore/basic/SQLAdapter.html#SQLAdapter-java.lang.String-java.lang.String-java.lang.String-java.lang.String-">SQLAdapter</a></span>(java.lang.String&nbsp;host,
+          java.lang.String&nbsp;user,
+          java.lang.String&nbsp;password,
+          java.lang.String&nbsp;database)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colOne"><code><span class="memberNameLink"><a href="../../jaicore/basic/SQLAdapter.html#SQLAdapter-java.lang.String-java.lang.String-java.lang.String-java.lang.String-boolean-">SQLAdapter</a></span>(java.lang.String&nbsp;host,
+          java.lang.String&nbsp;user,
+          java.lang.String&nbsp;password,
+          java.lang.String&nbsp;database,
+          boolean&nbsp;ssl)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colOne"><code><span class="memberNameLink"><a href="../../jaicore/basic/SQLAdapter.html#SQLAdapter-java.lang.String-java.lang.String-java.lang.String-java.lang.String-java.lang.String-java.util.Properties-">SQLAdapter</a></span>(java.lang.String&nbsp;driver,
+          java.lang.String&nbsp;host,
+          java.lang.String&nbsp;user,
+          java.lang.String&nbsp;password,
+          java.lang.String&nbsp;database,
+          java.util.Properties&nbsp;connectionProperties)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colOne"><code><span class="memberNameLink"><a href="../../jaicore/basic/SQLAdapter.html#SQLAdapter-java.lang.String-java.lang.String-java.lang.String-java.lang.String-java.lang.String-java.util.Properties-boolean-">SQLAdapter</a></span>(java.lang.String&nbsp;driver,
+          java.lang.String&nbsp;host,
+          java.lang.String&nbsp;user,
+          java.lang.String&nbsp;password,
+          java.lang.String&nbsp;database,
+          java.util.Properties&nbsp;connectionProperties,
+          boolean&nbsp;ssl)</code>&nbsp;</td>
+</tr>
+</table>
+</li>
+</ul>
+<!-- ========== METHOD SUMMARY =========== -->
+<ul class="blockList">
+<li class="blockList"><a name="method.summary">
+<!--   -->
+</a>
+<h3>Method Summary</h3>
+<table class="memberSummary" border="0" cellpadding="3" cellspacing="0" summary="Method Summary table, listing methods, and an explanation">
+<caption><span id="t0" class="activeTableTab"><span>All Methods</span><span class="tabEnd">&nbsp;</span></span><span id="t2" class="tableTab"><span><a href="javascript:show(2);">Instance Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t4" class="tableTab"><span><a href="javascript:show(8);">Concrete Methods</a></span><span class="tabEnd">&nbsp;</span></span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Method and Description</th>
+</tr>
+<tr id="i0" class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../jaicore/basic/SQLAdapter.html#checkConnection--">checkConnection</a></span>()</code>&nbsp;</td>
+</tr>
+<tr id="i1" class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../jaicore/basic/SQLAdapter.html#close--">close</a></span>()</code>
+<div class="block">Close the connection.</div>
+</td>
+</tr>
+<tr id="i2" class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../jaicore/basic/SQLAdapter.html#executeQueriesAtomically-java.util.List-">executeQueriesAtomically</a></span>(java.util.List&lt;java.sql.PreparedStatement&gt;&nbsp;queries)</code>
+<div class="block">Executes the given statements atomically.</div>
+</td>
+</tr>
+<tr id="i3" class="rowColor">
+<td class="colFirst"><code>java.lang.String</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../jaicore/basic/SQLAdapter.html#getDriver--">getDriver</a></span>()</code>&nbsp;</td>
+</tr>
+<tr id="i4" class="altColor">
+<td class="colFirst"><code>java.sql.PreparedStatement</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../jaicore/basic/SQLAdapter.html#getPreparedStatement-java.lang.String-">getPreparedStatement</a></span>(java.lang.String&nbsp;query)</code>&nbsp;</td>
+</tr>
+<tr id="i5" class="rowColor">
+<td class="colFirst"><code>java.sql.ResultSet</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../jaicore/basic/SQLAdapter.html#getResultsOfQuery-java.lang.String-">getResultsOfQuery</a></span>(java.lang.String&nbsp;query)</code>&nbsp;</td>
+</tr>
+<tr id="i6" class="altColor">
+<td class="colFirst"><code>java.sql.ResultSet</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../jaicore/basic/SQLAdapter.html#getResultsOfQuery-java.lang.String-java.util.List-">getResultsOfQuery</a></span>(java.lang.String&nbsp;query,
+                 java.util.List&lt;java.lang.String&gt;&nbsp;values)</code>&nbsp;</td>
+</tr>
+<tr id="i7" class="rowColor">
+<td class="colFirst"><code>java.sql.ResultSet</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../jaicore/basic/SQLAdapter.html#getResultsOfQuery-java.lang.String-java.lang.String:A-">getResultsOfQuery</a></span>(java.lang.String&nbsp;query,
+                 java.lang.String[]&nbsp;values)</code>&nbsp;</td>
+</tr>
+<tr id="i8" class="altColor">
+<td class="colFirst"><code>java.sql.ResultSet</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../jaicore/basic/SQLAdapter.html#getRowsOfTable-java.lang.String-">getRowsOfTable</a></span>(java.lang.String&nbsp;table)</code>&nbsp;</td>
+</tr>
+<tr id="i9" class="rowColor">
+<td class="colFirst"><code>java.sql.ResultSet</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../jaicore/basic/SQLAdapter.html#getRowsOfTable-java.lang.String-java.util.Map-">getRowsOfTable</a></span>(java.lang.String&nbsp;table,
+              java.util.Map&lt;java.lang.String,java.lang.String&gt;&nbsp;conditions)</code>&nbsp;</td>
+</tr>
+<tr id="i10" class="altColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../jaicore/basic/SQLAdapter.html#insert-java.lang.String-java.util.List-">insert</a></span>(java.lang.String&nbsp;sql,
+      java.util.List&lt;? extends java.lang.Object&gt;&nbsp;values)</code>&nbsp;</td>
+</tr>
+<tr id="i11" class="rowColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../jaicore/basic/SQLAdapter.html#insert-java.lang.String-java.util.Map-">insert</a></span>(java.lang.String&nbsp;table,
+      java.util.Map&lt;java.lang.String,? extends java.lang.Object&gt;&nbsp;map)</code>&nbsp;</td>
+</tr>
+<tr id="i12" class="altColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../jaicore/basic/SQLAdapter.html#insert-java.lang.String-java.lang.String:A-">insert</a></span>(java.lang.String&nbsp;sql,
+      java.lang.String[]&nbsp;values)</code>&nbsp;</td>
+</tr>
+<tr id="i13" class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../jaicore/basic/SQLAdapter.html#update-java.lang.String-">update</a></span>(java.lang.String&nbsp;sql)</code>&nbsp;</td>
+</tr>
+<tr id="i14" class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../jaicore/basic/SQLAdapter.html#update-java.lang.String-java.util.List-">update</a></span>(java.lang.String&nbsp;sql,
+      java.util.List&lt;? extends java.lang.Object&gt;&nbsp;values)</code>&nbsp;</td>
+</tr>
+<tr id="i15" class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../jaicore/basic/SQLAdapter.html#update-java.lang.String-java.util.Map-java.util.Map-">update</a></span>(java.lang.String&nbsp;table,
+      java.util.Map&lt;java.lang.String,? extends java.lang.Object&gt;&nbsp;updateValues,
+      java.util.Map&lt;java.lang.String,? extends java.lang.Object&gt;&nbsp;conditions)</code>&nbsp;</td>
+</tr>
+<tr id="i16" class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../jaicore/basic/SQLAdapter.html#update-java.lang.String-java.lang.String:A-">update</a></span>(java.lang.String&nbsp;sql,
+      java.lang.String[]&nbsp;values)</code>&nbsp;</td>
+</tr>
+</table>
+<ul class="blockList">
+<li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
+<!--   -->
+</a>
+<h3>Methods inherited from class&nbsp;java.lang.Object</h3>
+<code>clone, equals, finalize, getClass, hashCode, notify, notifyAll, toString, wait, wait, wait</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="details">
+<ul class="blockList">
+<li class="blockList">
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<ul class="blockList">
+<li class="blockList"><a name="constructor.detail">
+<!--   -->
+</a>
+<h3>Constructor Detail</h3>
+<a name="SQLAdapter-java.lang.String-java.lang.String-java.lang.String-java.lang.String-boolean-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>SQLAdapter</h4>
+<pre>public&nbsp;SQLAdapter(java.lang.String&nbsp;host,
+                  java.lang.String&nbsp;user,
+                  java.lang.String&nbsp;password,
+                  java.lang.String&nbsp;database,
+                  boolean&nbsp;ssl)</pre>
+</li>
+</ul>
+<a name="SQLAdapter-java.lang.String-java.lang.String-java.lang.String-java.lang.String-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>SQLAdapter</h4>
+<pre>public&nbsp;SQLAdapter(java.lang.String&nbsp;host,
+                  java.lang.String&nbsp;user,
+                  java.lang.String&nbsp;password,
+                  java.lang.String&nbsp;database)</pre>
+</li>
+</ul>
+<a name="SQLAdapter-java.lang.String-java.lang.String-java.lang.String-java.lang.String-java.lang.String-java.util.Properties-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>SQLAdapter</h4>
+<pre>public&nbsp;SQLAdapter(java.lang.String&nbsp;driver,
+                  java.lang.String&nbsp;host,
+                  java.lang.String&nbsp;user,
+                  java.lang.String&nbsp;password,
+                  java.lang.String&nbsp;database,
+                  java.util.Properties&nbsp;connectionProperties)</pre>
+</li>
+</ul>
+<a name="SQLAdapter-java.lang.String-java.lang.String-java.lang.String-java.lang.String-java.lang.String-java.util.Properties-boolean-">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>SQLAdapter</h4>
+<pre>public&nbsp;SQLAdapter(java.lang.String&nbsp;driver,
+                  java.lang.String&nbsp;host,
+                  java.lang.String&nbsp;user,
+                  java.lang.String&nbsp;password,
+                  java.lang.String&nbsp;database,
+                  java.util.Properties&nbsp;connectionProperties,
+                  boolean&nbsp;ssl)</pre>
+</li>
+</ul>
+</li>
+</ul>
+<!-- ============ METHOD DETAIL ========== -->
+<ul class="blockList">
+<li class="blockList"><a name="method.detail">
+<!--   -->
+</a>
+<h3>Method Detail</h3>
+<a name="getPreparedStatement-java.lang.String-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getPreparedStatement</h4>
+<pre>public&nbsp;java.sql.PreparedStatement&nbsp;getPreparedStatement(java.lang.String&nbsp;query)
+                                                throws java.sql.SQLException</pre>
+<dl>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code>java.sql.SQLException</code></dd>
+</dl>
+</li>
+</ul>
+<a name="checkConnection--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>checkConnection</h4>
+<pre>public&nbsp;void&nbsp;checkConnection()
+                     throws java.sql.SQLException</pre>
+<dl>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code>java.sql.SQLException</code></dd>
+</dl>
+</li>
+</ul>
+<a name="getRowsOfTable-java.lang.String-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getRowsOfTable</h4>
+<pre>public&nbsp;java.sql.ResultSet&nbsp;getRowsOfTable(java.lang.String&nbsp;table)
+                                  throws java.sql.SQLException</pre>
+<dl>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code>java.sql.SQLException</code></dd>
+</dl>
+</li>
+</ul>
+<a name="getRowsOfTable-java.lang.String-java.util.Map-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getRowsOfTable</h4>
+<pre>public&nbsp;java.sql.ResultSet&nbsp;getRowsOfTable(java.lang.String&nbsp;table,
+                                         java.util.Map&lt;java.lang.String,java.lang.String&gt;&nbsp;conditions)
+                                  throws java.sql.SQLException</pre>
+<dl>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code>java.sql.SQLException</code></dd>
+</dl>
+</li>
+</ul>
+<a name="getResultsOfQuery-java.lang.String-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getResultsOfQuery</h4>
+<pre>public&nbsp;java.sql.ResultSet&nbsp;getResultsOfQuery(java.lang.String&nbsp;query)
+                                     throws java.sql.SQLException</pre>
+<dl>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code>java.sql.SQLException</code></dd>
+</dl>
+</li>
+</ul>
+<a name="getResultsOfQuery-java.lang.String-java.lang.String:A-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getResultsOfQuery</h4>
+<pre>public&nbsp;java.sql.ResultSet&nbsp;getResultsOfQuery(java.lang.String&nbsp;query,
+                                            java.lang.String[]&nbsp;values)
+                                     throws java.sql.SQLException</pre>
+<dl>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code>java.sql.SQLException</code></dd>
+</dl>
+</li>
+</ul>
+<a name="getResultsOfQuery-java.lang.String-java.util.List-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getResultsOfQuery</h4>
+<pre>public&nbsp;java.sql.ResultSet&nbsp;getResultsOfQuery(java.lang.String&nbsp;query,
+                                            java.util.List&lt;java.lang.String&gt;&nbsp;values)
+                                     throws java.sql.SQLException</pre>
+<dl>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code>java.sql.SQLException</code></dd>
+</dl>
+</li>
+</ul>
+<a name="insert-java.lang.String-java.lang.String:A-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>insert</h4>
+<pre>public&nbsp;int&nbsp;insert(java.lang.String&nbsp;sql,
+                  java.lang.String[]&nbsp;values)
+           throws java.sql.SQLException</pre>
+<dl>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code>java.sql.SQLException</code></dd>
+</dl>
+</li>
+</ul>
+<a name="insert-java.lang.String-java.util.List-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>insert</h4>
+<pre>public&nbsp;int&nbsp;insert(java.lang.String&nbsp;sql,
+                  java.util.List&lt;? extends java.lang.Object&gt;&nbsp;values)
+           throws java.sql.SQLException</pre>
+<dl>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code>java.sql.SQLException</code></dd>
+</dl>
+</li>
+</ul>
+<a name="insert-java.lang.String-java.util.Map-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>insert</h4>
+<pre>public&nbsp;int&nbsp;insert(java.lang.String&nbsp;table,
+                  java.util.Map&lt;java.lang.String,? extends java.lang.Object&gt;&nbsp;map)
+           throws java.sql.SQLException</pre>
+<dl>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code>java.sql.SQLException</code></dd>
+</dl>
+</li>
+</ul>
+<a name="update-java.lang.String-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>update</h4>
+<pre>public&nbsp;void&nbsp;update(java.lang.String&nbsp;sql)
+            throws java.sql.SQLException</pre>
+<dl>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code>java.sql.SQLException</code></dd>
+</dl>
+</li>
+</ul>
+<a name="update-java.lang.String-java.lang.String:A-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>update</h4>
+<pre>public&nbsp;void&nbsp;update(java.lang.String&nbsp;sql,
+                   java.lang.String[]&nbsp;values)
+            throws java.sql.SQLException</pre>
+<dl>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code>java.sql.SQLException</code></dd>
+</dl>
+</li>
+</ul>
+<a name="update-java.lang.String-java.util.List-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>update</h4>
+<pre>public&nbsp;void&nbsp;update(java.lang.String&nbsp;sql,
+                   java.util.List&lt;? extends java.lang.Object&gt;&nbsp;values)
+            throws java.sql.SQLException</pre>
+<dl>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code>java.sql.SQLException</code></dd>
+</dl>
+</li>
+</ul>
+<a name="update-java.lang.String-java.util.Map-java.util.Map-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>update</h4>
+<pre>public&nbsp;void&nbsp;update(java.lang.String&nbsp;table,
+                   java.util.Map&lt;java.lang.String,? extends java.lang.Object&gt;&nbsp;updateValues,
+                   java.util.Map&lt;java.lang.String,? extends java.lang.Object&gt;&nbsp;conditions)
+            throws java.sql.SQLException</pre>
+<dl>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code>java.sql.SQLException</code></dd>
+</dl>
+</li>
+</ul>
+<a name="executeQueriesAtomically-java.util.List-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>executeQueriesAtomically</h4>
+<pre>public&nbsp;void&nbsp;executeQueriesAtomically(java.util.List&lt;java.sql.PreparedStatement&gt;&nbsp;queries)
+                              throws java.sql.SQLException</pre>
+<div class="block">Executes the given statements atomically. Only works if no other statements are sent through this adapter in parallel! Only use for single-threaded applications, otherwise side effects may happen as this changes the auto commit
+ settings of the connection temporarily.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>queries</code> - The queries to execute atomically</dd>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code>java.sql.SQLException</code> - If the status of the connection cannot be changed. If something goes wrong while executing the given statements, they are rolled back before they are committed.</dd>
+</dl>
+</li>
+</ul>
+<a name="close--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>close</h4>
+<pre>public&nbsp;void&nbsp;close()</pre>
+<div class="block">Close the connection. No more queries can be sent after having the access object closed</div>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code>close</code>&nbsp;in interface&nbsp;<code>java.lang.AutoCloseable</code></dd>
+</dl>
+</li>
+</ul>
+<a name="getDriver--">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>getDriver</h4>
+<pre>public&nbsp;java.lang.String&nbsp;getDriver()</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<!-- ========= END OF CLASS DATA ========= -->
+<!-- ======= START OF BOTTOM NAVBAR ====== -->
+<div class="bottomNav"><a name="navbar.bottom">
+<!--   -->
+</a>
+<div class="skipNav"><a href="#skip.navbar.bottom" title="Skip navigation links">Skip navigation links</a></div>
+<a name="navbar.bottom.firstrow">
+<!--   -->
+</a>
+<ul class="navList" title="Navigation">
+<li><a href="../../overview-summary.html">Overview</a></li>
+<li><a href="package-summary.html">Package</a></li>
+<li class="navBarCell1Rev">Class</li>
+<li><a href="package-tree.html">Tree</a></li>
+<li><a href="../../deprecated-list.html">Deprecated</a></li>
+<li><a href="../../index-all.html">Index</a></li>
+<li><a href="../../help-doc.html">Help</a></li>
+</ul>
+</div>
+<div class="subNav">
+<ul class="navList">
+<li><a href="../../jaicore/basic/ScoredItem.html" title="interface in jaicore.basic"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
+<li><a href="../../jaicore/basic/StatisticsUtil.html" title="class in jaicore.basic"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+</ul>
+<ul class="navList">
+<li><a href="../../index.html?jaicore/basic/SQLAdapter.html" target="_top">Frames</a></li>
+<li><a href="SQLAdapter.html" target="_top">No&nbsp;Frames</a></li>
+</ul>
+<ul class="navList" id="allclasses_navbar_bottom">
+<li><a href="../../allclasses-noframe.html">All&nbsp;Classes</a></li>
+</ul>
+<div>
+<script type="text/javascript"><!--
+  allClassesLink = document.getElementById("allclasses_navbar_bottom");
+  if(window==top) {
+    allClassesLink.style.display = "block";
+  }
+  else {
+    allClassesLink.style.display = "none";
+  }
+  //-->
+</script>
+</div>
+<div>
+<ul class="subNavList">
+<li>Summary:&nbsp;</li>
+<li>Nested&nbsp;|&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#constructor.summary">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method.summary">Method</a></li>
+</ul>
+<ul class="subNavList">
+<li>Detail:&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#constructor.detail">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method.detail">Method</a></li>
+</ul>
+</div>
+<a name="skip.navbar.bottom">
+<!--   -->
+</a></div>
+<!-- ======== END OF BOTTOM NAVBAR ======= -->
+</body>
+</html>
