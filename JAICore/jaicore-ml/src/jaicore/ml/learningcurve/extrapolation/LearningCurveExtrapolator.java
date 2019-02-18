@@ -39,15 +39,20 @@ public class LearningCurveExtrapolator {
 	 * Create a learning curve extrapolator with a custom configured subsampling
 	 * method.
 	 * 
-	 * @param extrapolationMethod Method for extrapolating a learning curve from
-	 *                            anchorpoints.
-	 * @param learner             Learning model to predict the learning curve of.
-	 * @param dataset             Dataset to measure evaluate the learner on.
-	 * @param trainsplit          Portion of the dataset, which shall be used to
-	 *                            sample from for training.
-	 * @param subsamplingMethod   Subsampling method to retrieve a default
-	 *                            configured subsampler for.
-	 * @param seed                Random seed.
+	 * @param extrapolationMethod
+	 *            Method for extrapolating a learning curve from anchorpoints.
+	 * @param learner
+	 *            Learning model to predict the learning curve of.
+	 * @param dataset
+	 *            Dataset to measure evaluate the learner on.
+	 * @param trainsplit
+	 *            Portion of the dataset, which shall be used to sample from for
+	 *            training.
+	 * @param subsamplingMethod
+	 *            Subsampling method to retrieve a default configured subsampler
+	 *            for.
+	 * @param seed
+	 *            Random seed.
 	 */
 	public LearningCurveExtrapolator(LearningCurveExtrapolationMethod extrapolationMethod, Classifier learner,
 			IDataset<IInstance> dataset, double trainsplit, SubsamplingMethod subsamplingMethod, long seed) {
@@ -61,15 +66,19 @@ public class LearningCurveExtrapolator {
 	/**
 	 * Create a learning curve extrapolator with a given subsampler.
 	 * 
-	 * @param extrapolationMethod  Method for extrapolating a learning curve from
-	 *                             anchorpoints.
-	 * @param learner              Learning model to predict the learning curve of.
-	 * @param dataset              Dataset to measure evaluate the learner on.
-	 * @param trainsplit           Portion of the dataset, which shall be used to
-	 *                             sample from for training.
-	 * @param subsamplingAlgorithm Subsampler to create the samples at the
-	 *                             anchorpoints.
-	 * @param seed                 Random seed.
+	 * @param extrapolationMethod
+	 *            Method for extrapolating a learning curve from anchorpoints.
+	 * @param learner
+	 *            Learning model to predict the learning curve of.
+	 * @param dataset
+	 *            Dataset to measure evaluate the learner on.
+	 * @param trainsplit
+	 *            Portion of the dataset, which shall be used to sample from for
+	 *            training.
+	 * @param subsamplingAlgorithm
+	 *            Subsampler to create the samples at the anchorpoints.
+	 * @param seed
+	 *            Random seed.
 	 */
 	public LearningCurveExtrapolator(LearningCurveExtrapolationMethod extrapolationMethod, Classifier learner,
 			IDataset<IInstance> dataset, double trainsplit, ASamplingAlgorithm<IInstance> subsamplingAlgorithm,
@@ -85,15 +94,17 @@ public class LearningCurveExtrapolator {
 	 * Measure the learner accuracy at the given anchorpoints and extrapolate a
 	 * learning curve based the results.
 	 * 
-	 * @param anchorPoints Sample sizes as anchorpoints, where the accuracy shall be
-	 *                     measured.
+	 * @param anchorPoints
+	 *            Sample sizes as anchorpoints, where the accuracy shall be
+	 *            measured.
 	 * @return The extrapolated learning curve.
 	 * 
-	 * @throws InvalidAnchorPointsException The anchorpoints (amount, values, ...)
-	 *                                      are not suitable for the given learning
-	 *                                      curve extrapolation method.
-	 * @throws AlgorithmException           An error occured during the creation of
-	 *                                      the specified anchorpoints.
+	 * @throws InvalidAnchorPointsException
+	 *             The anchorpoints (amount, values, ...) are not suitable for the
+	 *             given learning curve extrapolation method.
+	 * @throws AlgorithmException
+	 *             An error occured during the creation of the specified
+	 *             anchorpoints.
 	 */
 	public LearningCurve extrapolateLearningCurve(int[] anchorPoints)
 			throws InvalidAnchorPointsException, AlgorithmException {
@@ -107,7 +118,7 @@ public class LearningCurveExtrapolator {
 				this.subsamplingAlgorithm.setSampleSize(anchorPoints[i]);
 				this.subsamplingAlgorithm.setInput(this.train);
 				IDataset<IInstance> subsampledDataset = this.subsamplingAlgorithm.call();
-				
+
 				// Train classifier on subsample
 				this.learner.buildClassifier(WekaInstancesUtil.datasetToWekaInstances(subsampledDataset));
 
@@ -119,12 +130,12 @@ public class LearningCurveExtrapolator {
 					}
 				}
 				yValues[i] = correctCounter / (double) testInstances.size();
-				
+
 			}
 		} catch (UnsupportedAttributeTypeException e) {
 			throw new AlgorithmException(e, "Error during convertion of the dataset to WEKA instances");
-	    } catch (InterruptedException | AlgorithmExecutionCanceledException | TimeoutException | AlgorithmException e) {
-	    	throw new AlgorithmException(e, "Error during creation of the subsamples for the anchorpoints");
+		} catch (InterruptedException | AlgorithmExecutionCanceledException | TimeoutException | AlgorithmException e) {
+			throw new AlgorithmException(e, "Error during creation of the subsamples for the anchorpoints");
 		} catch (Exception e) {
 			throw new AlgorithmException(e, "Error during training/testing the classifier");
 		}
