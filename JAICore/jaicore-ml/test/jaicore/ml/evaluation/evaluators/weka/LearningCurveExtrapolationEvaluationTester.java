@@ -1,7 +1,5 @@
 package jaicore.ml.evaluation.evaluators.weka;
 
-import static org.junit.Assert.fail;
-
 import java.io.File;
 
 import org.junit.Assert;
@@ -22,31 +20,26 @@ import weka.core.converters.ConverterUtils.DataSource;
 public class LearningCurveExtrapolationEvaluationTester {
 
 	@Test
-	public void testClassifierEvaluationWithLearningCurveExtrapolation() {
+	public void testClassifierEvaluationWithLearningCurveExtrapolation() throws Exception {
+		// Load dataset from OpenML
 		Instances dataset = null;
 		OpenmlConnector client = new OpenmlConnector();
-		try {
-			DataSetDescription description = client.dataGet(42);
-			File file = description.getDataset("4350e421cdc16404033ef1812ea38c01");
-			DataSource source = new DataSource(file.getCanonicalPath());
-			dataset = source.getDataSet();
-			dataset.setClassIndex(dataset.numAttributes() - 1);
-			Attribute targetAttribute = dataset.attribute(description.getDefault_target_attribute());
-			dataset.setClassIndex(targetAttribute.index());
-		} catch (Exception e) {
-			fail();
-		}
+		DataSetDescription description = client.dataGet(42);
+		File file = description.getDataset("4350e421cdc16404033ef1812ea38c01");
+		DataSource source = new DataSource(file.getCanonicalPath());
+		dataset = source.getDataSet();
+		dataset.setClassIndex(dataset.numAttributes() - 1);
+		Attribute targetAttribute = dataset.attribute(description.getDefault_target_attribute());
+		dataset.setClassIndex(targetAttribute.index());
 		IDataset<IInstance> simpleDataset = WekaInstancesUtil.wekaInstancesToDataset(dataset);
+
+		// Test classifier evaluation by learning curve extrapolation
 		LearningCurveExtrapolationEvaluator evaluator = new LearningCurveExtrapolationEvaluator(
 				new int[] { 8, 16, 64, 128 }, SubsamplingMethod.SYSTEMATIC_SAMPLING, simpleDataset, 0.8d,
 				new InversePowerLawExtrapolator(), 123l);
 		double evaluationResult;
-		try {
-			evaluationResult = evaluator.evaluate(new SMO());
-			Assert.assertTrue(evaluationResult > 0 && evaluationResult <= 100);
-		} catch (Exception e) {
-			fail();
-		}
+		evaluationResult = evaluator.evaluate(new SMO());
+		Assert.assertTrue(evaluationResult > 0 && evaluationResult <= 100);
 	}
 
 }

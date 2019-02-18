@@ -4,7 +4,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.TimeoutException;
 
+import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
@@ -15,6 +17,7 @@ import jaicore.ml.interfaces.LearningCurve;
 import weka.classifiers.Classifier;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.UnsupportedAttributeTypeException;
 
 /**
  * Abstract class for implementing a learning curve extrapolation method with
@@ -118,8 +121,12 @@ public class LearningCurveExtrapolator {
 				yValues[i] = correctCounter / (double) testInstances.size();
 				
 			}
+		} catch (UnsupportedAttributeTypeException e) {
+			throw new AlgorithmException(e, "Error during convertion of the dataset to WEKA instances");
+	    } catch (InterruptedException | AlgorithmExecutionCanceledException | TimeoutException | AlgorithmException e) {
+	    	throw new AlgorithmException(e, "Error during creation of the subsamples for the anchorpoints");
 		} catch (Exception e) {
-			throw new AlgorithmException(e, "Error during creation of the anchropoints");
+			throw new AlgorithmException(e, "Error during training/testing the classifier");
 		}
 
 		return extrapolationMethod.extrapolateLearningCurveFromAnchorPoints(anchorPoints, yValues);

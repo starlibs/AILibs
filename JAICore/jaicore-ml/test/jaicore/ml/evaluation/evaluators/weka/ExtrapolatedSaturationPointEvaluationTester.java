@@ -1,7 +1,5 @@
 package jaicore.ml.evaluation.evaluators.weka;
 
-import static org.junit.Assert.fail;
-
 import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
@@ -28,33 +26,27 @@ public class ExtrapolatedSaturationPointEvaluationTester {
 	private IDataset<IInstance> train, test;
 
 	@Test
-	public void testClassifierEvaluationAtSaturationPoint() {
+	public void testClassifierEvaluationAtSaturationPoint() throws Exception {
+		// Load dataset from OpenML and create stratified split
 		Instances dataset = null;
 		OpenmlConnector client = new OpenmlConnector();
-		try {
-			DataSetDescription description = client.dataGet(42);
-			File file = description.getDataset("4350e421cdc16404033ef1812ea38c01");
-			DataSource source = new DataSource(file.getCanonicalPath());
-			dataset = source.getDataSet();
-			dataset.setClassIndex(dataset.numAttributes() - 1);
-			Attribute targetAttribute = dataset.attribute(description.getDefault_target_attribute());
-			dataset.setClassIndex(targetAttribute.index());
-		} catch (Exception e) {
-			fail();
-		}
+		DataSetDescription description = client.dataGet(42);
+		File file = description.getDataset("4350e421cdc16404033ef1812ea38c01");
+		DataSource source = new DataSource(file.getCanonicalPath());
+		dataset = source.getDataSet();
+		dataset.setClassIndex(dataset.numAttributes() - 1);
+		Attribute targetAttribute = dataset.attribute(description.getDefault_target_attribute());
+		dataset.setClassIndex(targetAttribute.index());
 		IDataset<IInstance> simpleDataset = WekaInstancesUtil.wekaInstancesToDataset(dataset);
 		this.createSplit(simpleDataset, 0.8, 123l);
+
+		// Test classifier evaluation at saturation point
 		ExtrapolatedSaturationPointEvaluator evaluator = new ExtrapolatedSaturationPointEvaluator(
 				new int[] { 8, 16, 64, 128 }, SubsamplingMethod.SYSTEMATIC_SAMPLING, this.train, 0.7,
 				new InversePowerLawExtrapolator(), 123l, 0.0000000000005d, this.test);
 		double evaluationResult;
-		try {
-			evaluationResult = evaluator.evaluate(new SMO());
-			System.out.println("################### " + evaluationResult);
-			Assert.assertTrue(evaluationResult > 0 && evaluationResult <= 100);
-		} catch (Exception e) {
-			fail();
-		}
+		evaluationResult = evaluator.evaluate(new SMO());
+		Assert.assertTrue(evaluationResult > 0 && evaluationResult <= 100);
 	}
 
 	private void createSplit(IDataset<IInstance> dataset, double trainsplit, long seed) {

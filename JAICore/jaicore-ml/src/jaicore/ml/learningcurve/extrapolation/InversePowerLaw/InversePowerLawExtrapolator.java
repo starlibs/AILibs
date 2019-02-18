@@ -1,6 +1,5 @@
 package jaicore.ml.learningcurve.extrapolation.InversePowerLaw;
 
-import java.io.File;
 import java.io.FileReader;
 import java.nio.file.Paths;
 
@@ -8,12 +7,9 @@ import jaicore.ml.interfaces.LearningCurve;
 import jaicore.ml.learningcurve.extrapolation.InvalidAnchorPointsException;
 import jaicore.ml.learningcurve.extrapolation.LearningCurveExtrapolationMethod;
 import jaicore.ml.scikitwrapper.ScikitLearnWrapper;
-import weka.classifiers.Classifier;
 import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.Remove;
 
 public class InversePowerLawExtrapolator implements LearningCurveExtrapolationMethod {
 
@@ -64,41 +60,6 @@ public class InversePowerLawExtrapolator implements LearningCurveExtrapolationMe
 			e.printStackTrace();
 		}
 		return null;
-	}
-
-	/**
-	 * Trains a predictor for Inverse Power law parameters with all the datasets in
-	 * a folder.
-	 * 
-	 * @param datasetFolder Folder with the datasets
-	 * @param modelPath     Destination where the built model shall be saved.
-	 * @return Trained classifier.
-	 */
-	private Classifier trainModelClassifier(File datasetFolder, String modelPath) throws Exception {
-		Instances data = null;
-		for (File file : datasetFolder.listFiles()) {
-			System.out.println(file.getPath());
-			if (data == null) {
-				data = new Instances(new FileReader(file));
-			} else {
-				data.addAll(new Instances(new FileReader(file)));
-			}
-		}
-		Remove removeFilter = new Remove();
-		removeFilter.setAttributeIndicesArray(new int[] { 1, 2, 3, 4, 5, 6, 7 });
-		removeFilter.setInvertSelection(true);
-		removeFilter.setInputFormat(data);
-		Instances newData = Filter.useFilter(data, removeFilter);
-		ScikitLearnWrapper slw = new ScikitLearnWrapper(
-				"MLPRegressor(activation='logistic', solver='lbfgs', max_iter=1000)",
-				"from sklearn.neural_network import MLPRegressor");
-		slw.setIsRegression(true);
-		slw.setModelPath(modelPath);
-		int s = newData.numAttributes();
-		slw.setTargets(s - 3, s - 2, s - 1);
-		slw.buildClassifier(newData);
-
-		return slw;
 	}
 
 }
