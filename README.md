@@ -44,21 +44,21 @@ Then open Eclipse and go to the import menu, e.g., in the package manager. Choos
 
 ### JAICore
 
-* [JAICore:jaicore-basic](JAICore/jaicore-basic/java-doc/)
-* [JAICore:jaicore-concurrent](JAICore/jaicore-concurrent/java-doc/)
-* [JAICore:jaicore-ea](JAICore/jaicore-ea/java-doc/)
-* [JAICore:jaicore-experiments](JAICore/jaicore-experiments/java-doc/)
-* [JAICore:jaicore-graph](JAICore/jaicore-graph/java-doc/)
-* [JAICore:jaicore-graphvisualizer](JAICore/jaicore-graphvisualizer/java-doc/)
-* [JAICore:jaicore-logic](JAICore/jaicore-logic/java-doc/)
-* [JAICore:jaicore-math](JAICore/jaicore-math/java-doc/)
-* [JAICore:jaicore-ml](JAICore/jaicore-ml/java-doc/)
-* [JAICore:jaicore-planning](JAICore/jaicore-planning/java-doc/)
-* [JAICore:jaicore-processes](JAICore/jaicore-processes/java-doc/)
-* [JAICore:jaicore-search](JAICore/jaicore-search/java-doc/)
-* [JAICore:jaicore-services](JAICore/jaicore-services/java-doc/)
+* [JAICore:jaicore-basic](JAICore/jaicore-basic/docs/javadoc/)
+* [JAICore:jaicore-concurrent](JAICore/jaicore-concurrent/docs/javadoc/)
+* [JAICore:jaicore-ea](JAICore/jaicore-ea/docs/javadoc/)
+* [JAICore:jaicore-experiments](JAICore/jaicore-experiments/docs/javadoc/)
+* [JAICore:jaicore-graph](JAICore/jaicore-graph/docs/javadoc/)
+* [JAICore:jaicore-graphvisualizer](JAICore/jaicore-graphvisualizer/docs/javadoc/)
+* [JAICore:jaicore-logic](JAICore/jaicore-logic/docs/javadoc/)
+* [JAICore:jaicore-math](JAICore/jaicore-math/docs/javadoc/)
+* [JAICore:jaicore-ml](JAICore/jaicore-ml/docs/javadoc/)
+* [JAICore:jaicore-planning](JAICore/jaicore-planning/docs/javadoc/)
+* [JAICore:jaicore-processes](JAICore/jaicore-processes/docs/javadoc/)
+* [JAICore:jaicore-search](JAICore/jaicore-search/docs/javadoc/)
+* [JAICore:jaicore-services](JAICore/jaicore-services/docs/javadoc/)
 
 ### Software Configuration
 
-* [HASCO](softwareconfiguration/hasco/java-doc/)
-* [ML-Plan](softwareconfiguration/mlplan/java-doc/)
+* [HASCO](softwareconfiguration/hasco/docs/javadoc/)
+* [ML-Plan](softwareconfiguration/mlplan/docs/javadoc/)
