@@ -32,6 +32,10 @@ commit_website_files() {
   git add ./\*.css
   git add ./\*.js
   git add ./\*package-list
+  
+  echo "Change set is as follows:"
+  git status
+  
   echo "Sending commit"
   git commit --message "Travis built JavaDoc. ]ci skip[" > commit.out
   
