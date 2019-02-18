@@ -33,7 +33,13 @@ commit_website_files() {
   git add ./\*.js
   git add ./\*package-list
   echo "Sending commit"
-  git commit --message "Travis built JavaDoc. ]ci skip["
+  git commit --message "Travis built JavaDoc. ]ci skip[" > commit.out
+  
+  # if nothing has been commited, avoid a push
+  if grep -q "nothing to commit" "commit.out"; then
+    echo "Nothing comitted, canceling script here to avoid unnecessary push".
+	exit 0;
+  fi
 }
 
 upload_files() {
