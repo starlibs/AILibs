@@ -1,0 +1,5 @@
+jaicore.logic.fol.algorithms.resolution
+jaicore.logic.fol.structure
+jaicore.logic.fol.theories
+jaicore.logic.fol.theories.set
+jaicore.logic.fol.util

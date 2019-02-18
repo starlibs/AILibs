@@ -1,0 +1,13 @@
+jaicore.graphvisualizer
+jaicore.graphvisualizer.events.graph
+jaicore.graphvisualizer.events.graph.bus
+jaicore.graphvisualizer.events.gui
+jaicore.graphvisualizer.events.recorder
+jaicore.graphvisualizer.plugin
+jaicore.graphvisualizer.plugin.controlbar
+jaicore.graphvisualizer.plugin.graphview
+jaicore.graphvisualizer.plugin.nodeinfo
+jaicore.graphvisualizer.plugin.solutionperformanceplotter
+jaicore.graphvisualizer.plugin.speedslider
+jaicore.graphvisualizer.plugin.timeslider
+jaicore.graphvisualizer.window

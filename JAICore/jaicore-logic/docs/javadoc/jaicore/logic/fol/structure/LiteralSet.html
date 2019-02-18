@@ -1,0 +1,656 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!-- NewPage -->
+<html lang="en">
+<head>
+<title>LiteralSet (jaicore-logic 0.0.1-SNAPSHOT API)</title>
+<link rel="stylesheet" type="text/css" href="../../../../stylesheet.css" title="Style">
+<script type="text/javascript" src="../../../../script.js"></script>
+</head>
+<body>
+<script type="text/javascript"><!--
+    try {
+        if (location.href.indexOf('is-external=true') == -1) {
+            parent.document.title="LiteralSet (jaicore-logic 0.0.1-SNAPSHOT API)";
+        }
+    }
+    catch(err) {
+    }
+//-->
+var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10,"i9":10,"i10":10,"i11":10,"i12":10,"i13":10,"i14":10,"i15":10};
+var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
+var altColor = "altColor";
+var rowColor = "rowColor";
+var tableTab = "tableTab";
+var activeTableTab = "activeTableTab";
+</script>
+<noscript>
+<div>JavaScript is disabled on your browser.</div>
+</noscript>
+<!-- ========= START OF TOP NAVBAR ======= -->
+<div class="topNav"><a name="navbar.top">
+<!--   -->
+</a>
+<div class="skipNav"><a href="#skip.navbar.top" title="Skip navigation links">Skip navigation links</a></div>
+<a name="navbar.top.firstrow">
+<!--   -->
+</a>
+<ul class="navList" title="Navigation">
+<li><a href="../../../../overview-summary.html">Overview</a></li>
+<li><a href="package-summary.html">Package</a></li>
+<li class="navBarCell1Rev">Class</li>
+<li><a href="package-tree.html">Tree</a></li>
+<li><a href="../../../../deprecated-list.html">Deprecated</a></li>
+<li><a href="../../../../index-all.html">Index</a></li>
+<li><a href="../../../../help-doc.html">Help</a></li>
+</ul>
+</div>
+<div class="subNav">
+<ul class="navList">
+<li><a href="../../../../jaicore/logic/fol/structure/LiteralParam.html" title="class in jaicore.logic.fol.structure"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
+<li><a href="../../../../jaicore/logic/fol/structure/Monom.html" title="class in jaicore.logic.fol.structure"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+</ul>
+<ul class="navList">
+<li><a href="../../../../index.html?jaicore/logic/fol/structure/LiteralSet.html" target="_top">Frames</a></li>
+<li><a href="LiteralSet.html" target="_top">No&nbsp;Frames</a></li>
+</ul>
+<ul class="navList" id="allclasses_navbar_top">
+<li><a href="../../../../allclasses-noframe.html">All&nbsp;Classes</a></li>
+</ul>
+<div>
+<script type="text/javascript"><!--
+  allClassesLink = document.getElementById("allclasses_navbar_top");
+  if(window==top) {
+    allClassesLink.style.display = "block";
+  }
+  else {
+    allClassesLink.style.display = "none";
+  }
+  //-->
+</script>
+</div>
+<div>
+<ul class="subNavList">
+<li>Summary:&nbsp;</li>
+<li>Nested&nbsp;|&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#constructor.summary">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method.summary">Method</a></li>
+</ul>
+<ul class="subNavList">
+<li>Detail:&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#constructor.detail">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method.detail">Method</a></li>
+</ul>
+</div>
+<a name="skip.navbar.top">
+<!--   -->
+</a></div>
+<!-- ========= END OF TOP NAVBAR ========= -->
+<!-- ======== START OF CLASS DATA ======== -->
+<div class="header">
+<div class="subTitle">jaicore.logic.fol.structure</div>
+<h2 title="Class LiteralSet" class="title">Class LiteralSet</h2>
+</div>
+<div class="contentContainer">
+<ul class="inheritance">
+<li>java.lang.Object</li>
+<li>
+<ul class="inheritance">
+<li>java.util.AbstractCollection&lt;E&gt;</li>
+<li>
+<ul class="inheritance">
+<li>java.util.AbstractSet&lt;E&gt;</li>
+<li>
+<ul class="inheritance">
+<li>java.util.HashSet&lt;<a href="../../../../jaicore/logic/fol/structure/Literal.html" title="class in jaicore.logic.fol.structure">Literal</a>&gt;</li>
+<li>
+<ul class="inheritance">
+<li>jaicore.logic.fol.structure.LiteralSet</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="description">
+<ul class="blockList">
+<li class="blockList">
+<dl>
+<dt>All Implemented Interfaces:</dt>
+<dd>java.io.Serializable, java.lang.Cloneable, java.lang.Iterable&lt;<a href="../../../../jaicore/logic/fol/structure/Literal.html" title="class in jaicore.logic.fol.structure">Literal</a>&gt;, java.util.Collection&lt;<a href="../../../../jaicore/logic/fol/structure/Literal.html" title="class in jaicore.logic.fol.structure">Literal</a>&gt;, java.util.Set&lt;<a href="../../../../jaicore/logic/fol/structure/Literal.html" title="class in jaicore.logic.fol.structure">Literal</a>&gt;</dd>
+</dl>
+<dl>
+<dt>Direct Known Subclasses:</dt>
+<dd><a href="../../../../jaicore/logic/fol/structure/Clause.html" title="class in jaicore.logic.fol.structure">Clause</a>, <a href="../../../../jaicore/logic/fol/structure/Monom.html" title="class in jaicore.logic.fol.structure">Monom</a></dd>
+</dl>
+<hr>
+<br>
+<pre>public class <span class="typeNameLabel">LiteralSet</span>
+extends java.util.HashSet&lt;<a href="../../../../jaicore/logic/fol/structure/Literal.html" title="class in jaicore.logic.fol.structure">Literal</a>&gt;</pre>
+<div class="block">A set of literals.</div>
+<dl>
+<dt><span class="seeLabel">See Also:</span></dt>
+<dd><a href="../../../../serialized-form.html#jaicore.logic.fol.structure.LiteralSet">Serialized Form</a></dd>
+</dl>
+</li>
+</ul>
+</div>
+<div class="summary">
+<ul class="blockList">
+<li class="blockList">
+<!-- ======== CONSTRUCTOR SUMMARY ======== -->
+<ul class="blockList">
+<li class="blockList"><a name="constructor.summary">
+<!--   -->
+</a>
+<h3>Constructor Summary</h3>
+<table class="memberSummary" border="0" cellpadding="3" cellspacing="0" summary="Constructor Summary table, listing constructors, and an explanation">
+<caption><span>Constructors</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colOne" scope="col">Constructor and Description</th>
+</tr>
+<tr class="altColor">
+<td class="colOne"><code><span class="memberNameLink"><a href="../../../../jaicore/logic/fol/structure/LiteralSet.html#LiteralSet--">LiteralSet</a></span>()</code>
+<div class="block">Creates an empty literal set.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colOne"><code><span class="memberNameLink"><a href="../../../../jaicore/logic/fol/structure/LiteralSet.html#LiteralSet-java.util.Collection-">LiteralSet</a></span>(java.util.Collection&lt;<a href="../../../../jaicore/logic/fol/structure/Literal.html" title="class in jaicore.logic.fol.structure">Literal</a>&gt;&nbsp;literals)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colOne"><code><span class="memberNameLink"><a href="../../../../jaicore/logic/fol/structure/LiteralSet.html#LiteralSet-java.util.Collection-boolean-">LiteralSet</a></span>(java.util.Collection&lt;<a href="../../../../jaicore/logic/fol/structure/Literal.html" title="class in jaicore.logic.fol.structure">Literal</a>&gt;&nbsp;literals,
+          boolean&nbsp;deep)</code>
+<div class="block">Creates a copy of the given collection.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colOne"><code><span class="memberNameLink"><a href="../../../../jaicore/logic/fol/structure/LiteralSet.html#LiteralSet-java.util.Collection-java.util.Map-">LiteralSet</a></span>(java.util.Collection&lt;<a href="../../../../jaicore/logic/fol/structure/Literal.html" title="class in jaicore.logic.fol.structure">Literal</a>&gt;&nbsp;literals,
+          java.util.Map&lt;? extends <a href="../../../../jaicore/logic/fol/structure/LiteralParam.html" title="class in jaicore.logic.fol.structure">LiteralParam</a>,? extends <a href="../../../../jaicore/logic/fol/structure/LiteralParam.html" title="class in jaicore.logic.fol.structure">LiteralParam</a>&gt;&nbsp;mapping)</code>
+<div class="block">Creates a copy of the given collection under the given parameter mapping.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colOne"><code><span class="memberNameLink"><a href="../../../../jaicore/logic/fol/structure/LiteralSet.html#LiteralSet-jaicore.logic.fol.structure.Literal-">LiteralSet</a></span>(<a href="../../../../jaicore/logic/fol/structure/Literal.html" title="class in jaicore.logic.fol.structure">Literal</a>&nbsp;literal)</code>
+<div class="block">Creates a literal set that only contains the given literal.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colOne"><code><span class="memberNameLink"><a href="../../../../jaicore/logic/fol/structure/LiteralSet.html#LiteralSet-java.lang.String-java.lang.String-">LiteralSet</a></span>(java.lang.String&nbsp;literals,
+          java.lang.String&nbsp;delimiter)</code>&nbsp;</td>
+</tr>
+</table>
+</li>
+</ul>
+<!-- ========== METHOD SUMMARY =========== -->
+<ul class="blockList">
+<li class="blockList"><a name="method.summary">
+<!--   -->
+</a>
+<h3>Method Summary</h3>
+<table class="memberSummary" border="0" cellpadding="3" cellspacing="0" summary="Method Summary table, listing methods, and an explanation">
+<caption><span id="t0" class="activeTableTab"><span>All Methods</span><span class="tabEnd">&nbsp;</span></span><span id="t2" class="tableTab"><span><a href="javascript:show(2);">Instance Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t4" class="tableTab"><span><a href="javascript:show(8);">Concrete Methods</a></span><span class="tabEnd">&nbsp;</span></span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Method and Description</th>
+</tr>
+<tr id="i0" class="altColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../jaicore/logic/fol/structure/LiteralSet.html#add-java.lang.String-">add</a></span>(java.lang.String&nbsp;literalDescriptor)</code>&nbsp;</td>
+</tr>
+<tr id="i1" class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../jaicore/logic/fol/structure/LiteralSet.html#containsGroundEqualityPredicateThatEvaluatesTo-boolean-">containsGroundEqualityPredicateThatEvaluatesTo</a></span>(boolean&nbsp;eval)</code>&nbsp;</td>
+</tr>
+<tr id="i2" class="altColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../jaicore/logic/fol/structure/LiteralSet.html#containsLiteralWithPredicatename-java.lang.String-">containsLiteralWithPredicatename</a></span>(java.lang.String&nbsp;predicateName)</code>&nbsp;</td>
+</tr>
+<tr id="i3" class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../jaicore/logic/fol/structure/LiteralSet.html#containsPositiveAndNegativeVersionOfLiteral--">containsPositiveAndNegativeVersionOfLiteral</a></span>()</code>&nbsp;</td>
+</tr>
+<tr id="i4" class="altColor">
+<td class="colFirst"><code>java.util.Set&lt;<a href="../../../../jaicore/logic/fol/structure/ConstantParam.html" title="class in jaicore.logic.fol.structure">ConstantParam</a>&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../jaicore/logic/fol/structure/LiteralSet.html#getConstantParams--">getConstantParams</a></span>()</code>&nbsp;</td>
+</tr>
+<tr id="i5" class="rowColor">
+<td class="colFirst"><code>java.util.Map&lt;<a href="../../../../jaicore/logic/fol/structure/VariableParam.html" title="class in jaicore.logic.fol.structure">VariableParam</a>,<a href="../../../../jaicore/logic/fol/structure/VariableParam.html" title="class in jaicore.logic.fol.structure">VariableParam</a>&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../jaicore/logic/fol/structure/LiteralSet.html#getImplyingMappingThatMapsFromConclusionVarsToPremiseVars-jaicore.logic.fol.structure.LiteralSet-">getImplyingMappingThatMapsFromConclusionVarsToPremiseVars</a></span>(<a href="../../../../jaicore/logic/fol/structure/LiteralSet.html" title="class in jaicore.logic.fol.structure">LiteralSet</a>&nbsp;conclusion)</code>&nbsp;</td>
+</tr>
+<tr id="i6" class="altColor">
+<td class="colFirst"><code>java.util.Set&lt;<a href="../../../../jaicore/logic/fol/structure/InterpretedLiteral.html" title="class in jaicore.logic.fol.structure">InterpretedLiteral</a>&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../jaicore/logic/fol/structure/LiteralSet.html#getInterpretedLiterals--">getInterpretedLiterals</a></span>()</code>&nbsp;</td>
+</tr>
+<tr id="i7" class="rowColor">
+<td class="colFirst"><code>java.util.Set&lt;<a href="../../../../jaicore/logic/fol/structure/Literal.html" title="class in jaicore.logic.fol.structure">Literal</a>&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../jaicore/logic/fol/structure/LiteralSet.html#getLiteralsWithPropertyName-java.lang.String-">getLiteralsWithPropertyName</a></span>(java.lang.String&nbsp;propertyName)</code>&nbsp;</td>
+</tr>
+<tr id="i8" class="altColor">
+<td class="colFirst"><code><a href="../../../../jaicore/logic/fol/structure/LiteralSet.html" title="class in jaicore.logic.fol.structure">LiteralSet</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../jaicore/logic/fol/structure/LiteralSet.html#getNegativeLiterals--">getNegativeLiterals</a></span>()</code>&nbsp;</td>
+</tr>
+<tr id="i9" class="rowColor">
+<td class="colFirst"><code>java.util.Set&lt;<a href="../../../../jaicore/logic/fol/structure/LiteralParam.html" title="class in jaicore.logic.fol.structure">LiteralParam</a>&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../jaicore/logic/fol/structure/LiteralSet.html#getParameters--">getParameters</a></span>()</code>&nbsp;</td>
+</tr>
+<tr id="i10" class="altColor">
+<td class="colFirst"><code><a href="../../../../jaicore/logic/fol/structure/LiteralSet.html" title="class in jaicore.logic.fol.structure">LiteralSet</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../jaicore/logic/fol/structure/LiteralSet.html#getPositiveLiterals--">getPositiveLiterals</a></span>()</code>&nbsp;</td>
+</tr>
+<tr id="i11" class="rowColor">
+<td class="colFirst"><code>java.util.Set&lt;<a href="../../../../jaicore/logic/fol/structure/VariableParam.html" title="class in jaicore.logic.fol.structure">VariableParam</a>&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../jaicore/logic/fol/structure/LiteralSet.html#getVariableParams--">getVariableParams</a></span>()</code>&nbsp;</td>
+</tr>
+<tr id="i12" class="altColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../jaicore/logic/fol/structure/LiteralSet.html#hasVariables--">hasVariables</a></span>()</code>&nbsp;</td>
+</tr>
+<tr id="i13" class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../jaicore/logic/fol/structure/LiteralSet.html#implies-jaicore.logic.fol.structure.LiteralSet-">implies</a></span>(<a href="../../../../jaicore/logic/fol/structure/LiteralSet.html" title="class in jaicore.logic.fol.structure">LiteralSet</a>&nbsp;conclusion)</code>&nbsp;</td>
+</tr>
+<tr id="i14" class="altColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../jaicore/logic/fol/structure/LiteralSet.html#isConsistent--">isConsistent</a></span>()</code>&nbsp;</td>
+</tr>
+<tr id="i15" class="rowColor">
+<td class="colFirst"><code>java.util.Set&lt;java.lang.String&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../jaicore/logic/fol/structure/LiteralSet.html#toPropositionalSet--">toPropositionalSet</a></span>()</code>
+<div class="block">This method converts the LiteralSet into a PropositionalSet meaning that the resulting set only contains properties of the literals contained in this LiteralSet.</div>
+</td>
+</tr>
+</table>
+<ul class="blockList">
+<li class="blockList"><a name="methods.inherited.from.class.java.util.HashSet">
+<!--   -->
+</a>
+<h3>Methods inherited from class&nbsp;java.util.HashSet</h3>
+<code>add, clear, clone, contains, isEmpty, iterator, remove, size, spliterator</code></li>
+</ul>
+<ul class="blockList">
+<li class="blockList"><a name="methods.inherited.from.class.java.util.AbstractSet">
+<!--   -->
+</a>
+<h3>Methods inherited from class&nbsp;java.util.AbstractSet</h3>
+<code>equals, hashCode, removeAll</code></li>
+</ul>
+<ul class="blockList">
+<li class="blockList"><a name="methods.inherited.from.class.java.util.AbstractCollection">
+<!--   -->
+</a>
+<h3>Methods inherited from class&nbsp;java.util.AbstractCollection</h3>
+<code>addAll, containsAll, retainAll, toArray, toArray, toString</code></li>
+</ul>
+<ul class="blockList">
+<li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
+<!--   -->
+</a>
+<h3>Methods inherited from class&nbsp;java.lang.Object</h3>
+<code>finalize, getClass, notify, notifyAll, wait, wait, wait</code></li>
+</ul>
+<ul class="blockList">
+<li class="blockList"><a name="methods.inherited.from.class.java.util.Set">
+<!--   -->
+</a>
+<h3>Methods inherited from interface&nbsp;java.util.Set</h3>
+<code>addAll, containsAll, equals, hashCode, removeAll, retainAll, toArray, toArray</code></li>
+</ul>
+<ul class="blockList">
+<li class="blockList"><a name="methods.inherited.from.class.java.util.Collection">
+<!--   -->
+</a>
+<h3>Methods inherited from interface&nbsp;java.util.Collection</h3>
+<code>parallelStream, removeIf, stream</code></li>
+</ul>
+<ul class="blockList">
+<li class="blockList"><a name="methods.inherited.from.class.java.lang.Iterable">
+<!--   -->
+</a>
+<h3>Methods inherited from interface&nbsp;java.lang.Iterable</h3>
+<code>forEach</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="details">
+<ul class="blockList">
+<li class="blockList">
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<ul class="blockList">
+<li class="blockList"><a name="constructor.detail">
+<!--   -->
+</a>
+<h3>Constructor Detail</h3>
+<a name="LiteralSet--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>LiteralSet</h4>
+<pre>public&nbsp;LiteralSet()</pre>
+<div class="block">Creates an empty literal set. Literals can be added later.</div>
+</li>
+</ul>
+<a name="LiteralSet-java.lang.String-java.lang.String-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>LiteralSet</h4>
+<pre>public&nbsp;LiteralSet(java.lang.String&nbsp;literals,
+                  java.lang.String&nbsp;delimiter)</pre>
+</li>
+</ul>
+<a name="LiteralSet-jaicore.logic.fol.structure.Literal-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>LiteralSet</h4>
+<pre>public&nbsp;LiteralSet(<a href="../../../../jaicore/logic/fol/structure/Literal.html" title="class in jaicore.logic.fol.structure">Literal</a>&nbsp;literal)</pre>
+<div class="block">Creates a literal set that only contains the given literal. Other literals can be added later.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>literal</code> - A literal.</dd>
+</dl>
+</li>
+</ul>
+<a name="LiteralSet-java.util.Collection-boolean-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>LiteralSet</h4>
+<pre>public&nbsp;LiteralSet(java.util.Collection&lt;<a href="../../../../jaicore/logic/fol/structure/Literal.html" title="class in jaicore.logic.fol.structure">Literal</a>&gt;&nbsp;literals,
+                  boolean&nbsp;deep)</pre>
+<div class="block">Creates a copy of the given collection. The created literal set will contain all the elements from the given collection.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>literals</code> - A collection of literals.</dd>
+</dl>
+</li>
+</ul>
+<a name="LiteralSet-java.util.Collection-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>LiteralSet</h4>
+<pre>public&nbsp;LiteralSet(java.util.Collection&lt;<a href="../../../../jaicore/logic/fol/structure/Literal.html" title="class in jaicore.logic.fol.structure">Literal</a>&gt;&nbsp;literals)</pre>
+</li>
+</ul>
+<a name="LiteralSet-java.util.Collection-java.util.Map-">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>LiteralSet</h4>
+<pre>public&nbsp;LiteralSet(java.util.Collection&lt;<a href="../../../../jaicore/logic/fol/structure/Literal.html" title="class in jaicore.logic.fol.structure">Literal</a>&gt;&nbsp;literals,
+                  java.util.Map&lt;? extends <a href="../../../../jaicore/logic/fol/structure/LiteralParam.html" title="class in jaicore.logic.fol.structure">LiteralParam</a>,? extends <a href="../../../../jaicore/logic/fol/structure/LiteralParam.html" title="class in jaicore.logic.fol.structure">LiteralParam</a>&gt;&nbsp;mapping)</pre>
+<div class="block">Creates a copy of the given collection under the given parameter mapping.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>literals</code> - A collection of literals.</dd>
+<dd><code>mapping</code> - A mapping of literals.</dd>
+</dl>
+</li>
+</ul>
+</li>
+</ul>
+<!-- ============ METHOD DETAIL ========== -->
+<ul class="blockList">
+<li class="blockList"><a name="method.detail">
+<!--   -->
+</a>
+<h3>Method Detail</h3>
+<a name="add-java.lang.String-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>add</h4>
+<pre>public&nbsp;boolean&nbsp;add(java.lang.String&nbsp;literalDescriptor)</pre>
+</li>
+</ul>
+<a name="implies-jaicore.logic.fol.structure.LiteralSet-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>implies</h4>
+<pre>public&nbsp;boolean&nbsp;implies(<a href="../../../../jaicore/logic/fol/structure/LiteralSet.html" title="class in jaicore.logic.fol.structure">LiteralSet</a>&nbsp;conclusion)
+                throws java.lang.InterruptedException</pre>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>conclusion</code> - Another literal set that may be concluded by this literal set.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>True, if this literal set logically implies the conclusion literal set under any partial mapping.</dd>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code>java.lang.InterruptedException</code></dd>
+</dl>
+</li>
+</ul>
+<a name="isConsistent--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>isConsistent</h4>
+<pre>public&nbsp;boolean&nbsp;isConsistent()</pre>
+</li>
+</ul>
+<a name="getImplyingMappingThatMapsFromConclusionVarsToPremiseVars-jaicore.logic.fol.structure.LiteralSet-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getImplyingMappingThatMapsFromConclusionVarsToPremiseVars</h4>
+<pre>public&nbsp;java.util.Map&lt;<a href="../../../../jaicore/logic/fol/structure/VariableParam.html" title="class in jaicore.logic.fol.structure">VariableParam</a>,<a href="../../../../jaicore/logic/fol/structure/VariableParam.html" title="class in jaicore.logic.fol.structure">VariableParam</a>&gt;&nbsp;getImplyingMappingThatMapsFromConclusionVarsToPremiseVars(<a href="../../../../jaicore/logic/fol/structure/LiteralSet.html" title="class in jaicore.logic.fol.structure">LiteralSet</a>&nbsp;conclusion)
+                                                                                                     throws java.lang.InterruptedException</pre>
+<dl>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code>java.lang.InterruptedException</code></dd>
+</dl>
+</li>
+</ul>
+<a name="getPositiveLiterals--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getPositiveLiterals</h4>
+<pre>public&nbsp;<a href="../../../../jaicore/logic/fol/structure/LiteralSet.html" title="class in jaicore.logic.fol.structure">LiteralSet</a>&nbsp;getPositiveLiterals()</pre>
+</li>
+</ul>
+<a name="getNegativeLiterals--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getNegativeLiterals</h4>
+<pre>public&nbsp;<a href="../../../../jaicore/logic/fol/structure/LiteralSet.html" title="class in jaicore.logic.fol.structure">LiteralSet</a>&nbsp;getNegativeLiterals()</pre>
+</li>
+</ul>
+<a name="getParameters--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getParameters</h4>
+<pre>public&nbsp;java.util.Set&lt;<a href="../../../../jaicore/logic/fol/structure/LiteralParam.html" title="class in jaicore.logic.fol.structure">LiteralParam</a>&gt;&nbsp;getParameters()</pre>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>All the parameters (variable and constant) from the contained literals.</dd>
+</dl>
+</li>
+</ul>
+<a name="getVariableParams--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getVariableParams</h4>
+<pre>public&nbsp;java.util.Set&lt;<a href="../../../../jaicore/logic/fol/structure/VariableParam.html" title="class in jaicore.logic.fol.structure">VariableParam</a>&gt;&nbsp;getVariableParams()</pre>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>All the variable parameters from the contained literals.</dd>
+</dl>
+</li>
+</ul>
+<a name="getConstantParams--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getConstantParams</h4>
+<pre>public&nbsp;java.util.Set&lt;<a href="../../../../jaicore/logic/fol/structure/ConstantParam.html" title="class in jaicore.logic.fol.structure">ConstantParam</a>&gt;&nbsp;getConstantParams()</pre>
+</li>
+</ul>
+<a name="getInterpretedLiterals--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getInterpretedLiterals</h4>
+<pre>public&nbsp;java.util.Set&lt;<a href="../../../../jaicore/logic/fol/structure/InterpretedLiteral.html" title="class in jaicore.logic.fol.structure">InterpretedLiteral</a>&gt;&nbsp;getInterpretedLiterals()</pre>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>All interpreted literals that could be used as branching or looping condition</dd>
+</dl>
+</li>
+</ul>
+<a name="toPropositionalSet--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>toPropositionalSet</h4>
+<pre>public&nbsp;java.util.Set&lt;java.lang.String&gt;&nbsp;toPropositionalSet()</pre>
+<div class="block">This method converts the LiteralSet into a PropositionalSet meaning that the resulting set only contains properties of the literals contained in this LiteralSet.</div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>A set of property name strings.</dd>
+</dl>
+</li>
+</ul>
+<a name="containsPositiveAndNegativeVersionOfLiteral--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>containsPositiveAndNegativeVersionOfLiteral</h4>
+<pre>public&nbsp;boolean&nbsp;containsPositiveAndNegativeVersionOfLiteral()</pre>
+</li>
+</ul>
+<a name="containsGroundEqualityPredicateThatEvaluatesTo-boolean-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>containsGroundEqualityPredicateThatEvaluatesTo</h4>
+<pre>public&nbsp;boolean&nbsp;containsGroundEqualityPredicateThatEvaluatesTo(boolean&nbsp;eval)</pre>
+</li>
+</ul>
+<a name="containsLiteralWithPredicatename-java.lang.String-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>containsLiteralWithPredicatename</h4>
+<pre>public&nbsp;boolean&nbsp;containsLiteralWithPredicatename(java.lang.String&nbsp;predicateName)</pre>
+</li>
+</ul>
+<a name="hasVariables--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>hasVariables</h4>
+<pre>public&nbsp;boolean&nbsp;hasVariables()</pre>
+</li>
+</ul>
+<a name="getLiteralsWithPropertyName-java.lang.String-">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>getLiteralsWithPropertyName</h4>
+<pre>public&nbsp;java.util.Set&lt;<a href="../../../../jaicore/logic/fol/structure/Literal.html" title="class in jaicore.logic.fol.structure">Literal</a>&gt;&nbsp;getLiteralsWithPropertyName(java.lang.String&nbsp;propertyName)</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<!-- ========= END OF CLASS DATA ========= -->
+<!-- ======= START OF BOTTOM NAVBAR ====== -->
+<div class="bottomNav"><a name="navbar.bottom">
+<!--   -->
+</a>
+<div class="skipNav"><a href="#skip.navbar.bottom" title="Skip navigation links">Skip navigation links</a></div>
+<a name="navbar.bottom.firstrow">
+<!--   -->
+</a>
+<ul class="navList" title="Navigation">
+<li><a href="../../../../overview-summary.html">Overview</a></li>
+<li><a href="package-summary.html">Package</a></li>
+<li class="navBarCell1Rev">Class</li>
+<li><a href="package-tree.html">Tree</a></li>
+<li><a href="../../../../deprecated-list.html">Deprecated</a></li>
+<li><a href="../../../../index-all.html">Index</a></li>
+<li><a href="../../../../help-doc.html">Help</a></li>
+</ul>
+</div>
+<div class="subNav">
+<ul class="navList">
+<li><a href="../../../../jaicore/logic/fol/structure/LiteralParam.html" title="class in jaicore.logic.fol.structure"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
+<li><a href="../../../../jaicore/logic/fol/structure/Monom.html" title="class in jaicore.logic.fol.structure"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+</ul>
+<ul class="navList">
+<li><a href="../../../../index.html?jaicore/logic/fol/structure/LiteralSet.html" target="_top">Frames</a></li>
+<li><a href="LiteralSet.html" target="_top">No&nbsp;Frames</a></li>
+</ul>
+<ul class="navList" id="allclasses_navbar_bottom">
+<li><a href="../../../../allclasses-noframe.html">All&nbsp;Classes</a></li>
+</ul>
+<div>
+<script type="text/javascript"><!--
+  allClassesLink = document.getElementById("allclasses_navbar_bottom");
+  if(window==top) {
+    allClassesLink.style.display = "block";
+  }
+  else {
+    allClassesLink.style.display = "none";
+  }
+  //-->
+</script>
+</div>
+<div>
+<ul class="subNavList">
+<li>Summary:&nbsp;</li>
+<li>Nested&nbsp;|&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#constructor.summary">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method.summary">Method</a></li>
+</ul>
+<ul class="subNavList">
+<li>Detail:&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#constructor.detail">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method.detail">Method</a></li>
+</ul>
+</div>
+<a name="skip.navbar.bottom">
+<!--   -->
+</a></div>
+<!-- ======== END OF BOTTOM NAVBAR ======= -->
+</body>
+</html>
