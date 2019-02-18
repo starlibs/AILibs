@@ -38,3 +38,27 @@ Navigate to the folder where you cloned this repository and run
 ```
 This automatically creates the eclipse project files and configures the dependencies among the projects.
 Then open Eclipse and go to the import menu, e.g., in the package manager. Choose to import *Existing Projects into Workspace*, select the folder where you cloned the repository, and make sure to check the *Search for nested projects* option.
+
+
+## AILibs JavaDoc API
+
+### JAICore
+
+* [JAICore:jaicore-basic](JAICore/jaicore-basic/java-doc/)
+* [JAICore:jaicore-concurrent](JAICore/jaicore-concurrent/java-doc/)
+* [JAICore:jaicore-ea](JAICore/jaicore-ea/java-doc/)
+* [JAICore:jaicore-experiments](JAICore/jaicore-experiments/java-doc/)
+* [JAICore:jaicore-graph](JAICore/jaicore-graph/java-doc/)
+* [JAICore:jaicore-graphvisualizer](JAICore/jaicore-graphvisualizer/java-doc/)
+* [JAICore:jaicore-logic](JAICore/jaicore-logic/java-doc/)
+* [JAICore:jaicore-math](JAICore/jaicore-math/java-doc/)
+* [JAICore:jaicore-ml](JAICore/jaicore-ml/java-doc/)
+* [JAICore:jaicore-planning](JAICore/jaicore-planning/java-doc/)
+* [JAICore:jaicore-processes](JAICore/jaicore-processes/java-doc/)
+* [JAICore:jaicore-search](JAICore/jaicore-search/java-doc/)
+* [JAICore:jaicore-services](JAICore/jaicore-services/java-doc/)
+
+### Software Configuration
+
+* [HASCO](softwareconfiguration/hasco/java-doc/)
+* [ML-Plan](softwareconfiguration/mlplan/java-doc/)
