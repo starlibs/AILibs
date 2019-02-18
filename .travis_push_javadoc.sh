@@ -39,11 +39,16 @@ commit_website_files() {
   echo "Sending commit"
   git commit --message "Travis built JavaDoc. ]ci skip[" > commit.out
   
+  echo "Output of commit log file:"
+  cat commit.out
+  echo "Now deciding how to proceed ..."
+  
   # if nothing has been commited, avoid a push
   if grep -q "nothing to commit" "commit.out"; then
     echo "Nothing comitted, canceling script here to avoid unnecessary push".
 	exit 0;
   fi
+  echo "Apparently there are changes, so pushing to upstream"
 }
 
 upload_files() {
