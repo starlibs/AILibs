@@ -18,10 +18,18 @@ public class ZeroShotUtil {
 		double L = Math.pow(10, LExp);
 		double G = Math.pow(10, RBFGammaExp);
 		
-		String[] options = Utils.splitOptions("-C " + C + " -L " + L +
-				" - K \"weka.classifiers.functions.supportVector.RBFKernel -C 250007 -G " + G + "\"");
+		String C_complexity_const_option = "-C " + C;
+		String L_tolerance_option = " -L " + L;
+		String RBF_gamma_option =" -K \"weka.classifiers.functions.supportVector.RBFKernel -C 250007 -G " + G + "\"";
 		
-		return options;
+		String options = 
+				C_complexity_const_option +
+				L_tolerance_option +
+				RBF_gamma_option;
+		
+		String[] optionsSplit = Utils.splitOptions(options);
+		
+		return optionsSplit;
 	}
 	
 	public static String[] mapMLPInputsToWekaOptions(double L, double M, double N) throws Exception {	
@@ -30,12 +38,13 @@ public class ZeroShotUtil {
 		return options;
 	}
 	
-	public static String[] mapRFInputsToWekaOptions(double P, double I, double KFraction, double KNumAttributes, double M, double VExp, double depth, double N) throws Exception {
-		
-		double V = Math.exp(VExp);
+	public static String[] mapRFInputsToWekaOptions(double I, double KFraction, double M, double depth, double KNumAttributes) throws Exception {
+		int I_rounded = (int) Math.round(I);
 		int K = (int) Math.ceil(KNumAttributes * KFraction);
+		int M_rounded = (int) Math.round(M);
+		int depth_rounded = (int) Math.round(depth);
 		
-		String[] options = Utils.splitOptions("- P " + P + " -I " + I + " -K " + K + " -M " + M + " -V " + V + " -depth " + depth + " -N " + N);
+		String[] options = Utils.splitOptions(" -I " + I_rounded + " -K " + K + " -M " + M_rounded + " -depth " + depth_rounded);
 		
 		return options;
 	}

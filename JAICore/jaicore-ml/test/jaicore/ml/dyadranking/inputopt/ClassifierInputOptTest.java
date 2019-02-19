@@ -1,6 +1,5 @@
 package jaicore.ml.dyadranking.inputopt;
 
-import java.io.File;
 import java.io.IOException;
 
 import org.junit.Test;
@@ -10,13 +9,10 @@ import org.nd4j.linalg.factory.Nd4j;
 import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.core.exception.TrainingException;
 import jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
-import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import jaicore.ml.dyadranking.zeroshot.inputoptimization.NegIdentityInpOptLoss;
 import jaicore.ml.dyadranking.zeroshot.inputoptimization.PLNetInputOptimizer;
 
-public class J48InputOptTest {
-	
-	private static final String datapath = "datasets/zeroshot/J48train.dr";
+public class ClassifierInputOptTest {
 	
 	double[] dataset12Features = { 0.7207469444444443, 0.8065, 0.10388888888888889, 0.9943208333333334, 0.0535, 0.9405555555555556, 0.9741918055555554, 0.0465, 0.9483333333333334, 0.7207469444444443, 0.8065,
 			0.10388888888888889, 0.9368430555555556, 0.1405, 0.8438888888888889, 0.9371906944444445, 0.1385, 0.8461111111111111, 0.9329148611111111, 0.139, 0.8455555555555555, 0.9919074999999999, 0.0765, 0.915,
@@ -32,51 +28,49 @@ public class J48InputOptTest {
 	double[] dataset5Features = { 0.6180102200255632, 0.4247787610619469, 0.1937120240816099, 0.8210588171934307, 0.31194690265486724, 0.5175874832527193, 0.6714053412150048, 0.415929203539823, 0.3450991876936356, 0.6015576834475163, 0.4336283185840708, 0.1875349639126567, 0.7540470500074802, 0.3075221238938053, 0.5190532326959291, 0.7593984914854257, 0.3075221238938053, 0.5181975736568458, 0.758716093894532, 0.31194690265486724, 0.50859715946767, 0.7862281086897593, 0.39601769911504425, 0.40657180577966845, 0.5603291437532364, 0.46017699115044247, 0.08014128190828411, 0.6902554504242385, 0.40707964601769914, 0.3166146261298275, 0.7281550256964924, 0.35176991150442477, 0.4163573905487383, 0.5336057568745161, 0.45353982300884954, 0.024426194988418536, 0.5362809739916099, 0.46238938053097345, 0.04575850017172064, 0.6534286979987087, 0.42920353982300885, 0.17006918614005703, 0.5985703851111869, 0.4646017699115044, 0.21277866242038226 };
 	
 	@Test
-	public void testJ48InputOpt() throws TrainingException, PredictionException, IOException {
-		File inputFile = new File(datapath);
-		DyadRankingDataset data = new DyadRankingDataset();
-		
-		/*
-		try {
-			data.deserialize(new BufferedInputStream(new FileInputStream(inputFile)));
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
-		
-		System.out.println("Data loaded");
-		
-		DyadRankingDataset trainData = new DyadRankingDataset(data.subList(0, (int) 0.8 * data.size()));
-		DyadRankingDataset testData = new DyadRankingDataset(data.subList((int) 0.8 * data.size(), data.size()));
-		
-		DyadNormalScaler scaler = new DyadNormalScaler();
-		scaler.fit(trainData);
-		scaler.transformAlternatives(trainData);
-		scaler.transformAlternatives(testData);
-		*/
+	public void testInputOpt() throws TrainingException, PredictionException, IOException {
 		PLNetDyadRanker plNet = new PLNetDyadRanker();
-		plNet.loadModelFromFile("datasets/zeroshot/J48PLNet.plnet.zip");
+		plNet.loadModelFromFile("datasets/zeroshot/RFPLNet.plnet.zip");
 		
 		System.out.println("PLNet loaded");
-		/*
-		double avgKendallTau = 0.0d;
-		avgKendallTau = DyadRankingLossUtil.computeAverageLoss(new KendallsTauDyadRankingLoss(), testData, plNet);
-		System.out.println("Average Kendall's tau for " + plNet.getClass().getSimpleName() + ": " + avgKendallTau);
-		*/
+
 		INDArray dsFeat = Nd4j.create(dataset5Features);
-		INDArray initHyperPars = Nd4j.create(new double[]{0.5, 0.5});
-		INDArray inputMask = Nd4j.hstack(Nd4j.zeros(dsFeat.columns()), Nd4j.create(new double[]{1.0, 1.0}));
+		INDArray initHyperPars = Nd4j.create(new double[]{0.5, 0.5, 0.5, 0.5});
+		INDArray inputMask = Nd4j.hstack(Nd4j.zeros(dsFeat.columns()), Nd4j.ones(4));
 		
 		INDArray init = Nd4j.hstack(dsFeat, initHyperPars);
-		//scaler.printMaxima();
-		//scaler.printMinima();
+
 		INDArray optimized = new PLNetInputOptimizer().optimizeInput(
-				plNet, init, new NegIdentityInpOptLoss(), 0.0005, 200, inputMask);
+				plNet, init, new NegIdentityInpOptLoss(), 0.001, 200, inputMask);
+		/*
 		System.out.println("OPTIMAL hyper parameters: " 
 				+ optimized.getDouble(optimized.length()-2) + ", " 
 				+ optimized.getDouble(optimized.length()-1));
 		double C = optimized.getDouble(optimized.length()-2) * (0.5 - 0.001) + 0.001;
 		double M = optimized.getDouble(optimized.length()-1) * (50 - 1) + 1;
 		System.out.println("Denormalized: C = " + C + ", M = " + M);
+		*/
+		/*
+		System.out.println("OPTIMAL hyper parameters: " 
+				+ optimized.getDouble(optimized.length()-3) + ", " 
+				+ optimized.getDouble(optimized.length()-2) + ", " 
+				+ optimized.getDouble(optimized.length()-1));
+		double C = optimized.getDouble(optimized.length()-3) * (3.0 - (-3.0)) + (-3.0);
+		double L = optimized.getDouble(optimized.length()-2) * (0 - (-5.0)) + (-5.0);
+		double G = optimized.getDouble(optimized.length()-1) * (3.0 - (-3.0)) + (-3.0);
+		System.out.println("Denormalized: C = " + C + ", L = " + L +", G = " + G);
+		*/
+		
+		System.out.println("OPTIMAL hyper parameters: " 
+				+ optimized.getDouble(optimized.length()-4) + ", " 
+				+ optimized.getDouble(optimized.length()-3) + ", " 
+				+ optimized.getDouble(optimized.length()-2) + ", " 
+				+ optimized.getDouble(optimized.length()-1));
+		double I = optimized.getDouble(optimized.length()-4) * (300.0 - 10.0) + (10.0);
+		double K = optimized.getDouble(optimized.length()-3) * (1.0 - 0.0) + (0.0);
+		double M = optimized.getDouble(optimized.length()-2) * (30.0 - (1.0)) + (1.0);
+		double depth = optimized.getDouble(optimized.length()-1) * (100.0 - (0.0)) + (0.0);
+		System.out.println("Denormalized: I = " + I + ", K = " + K +", M = " + M +", depth = " + depth);
+		
 	}
 }
