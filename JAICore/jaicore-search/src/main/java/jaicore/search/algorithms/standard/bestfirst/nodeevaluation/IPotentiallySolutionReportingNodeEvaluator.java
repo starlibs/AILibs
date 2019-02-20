@@ -10,6 +10,7 @@ package jaicore.search.algorithms.standard.bestfirst.nodeevaluation;
  * @param <T>
  * @param <V>
  */
-public interface ISolutionReportingNodeEvaluator<T, V extends Comparable<V>> extends INodeEvaluator<T, V> {
+public interface IPotentiallySolutionReportingNodeEvaluator<T, V extends Comparable<V>> extends INodeEvaluator<T, V> {
 	public void registerSolutionListener(Object listener);
+	public boolean reportsSolutions();
 }

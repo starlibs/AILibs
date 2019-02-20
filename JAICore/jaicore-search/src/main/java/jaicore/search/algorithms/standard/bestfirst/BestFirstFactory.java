@@ -1,5 +1,8 @@
 package jaicore.search.algorithms.standard.bestfirst;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory;
 import jaicore.search.core.interfaces.StandardORGraphSearchFactory;
@@ -11,7 +14,7 @@ public class BestFirstFactory<P extends GraphSearchWithSubpathEvaluationsInput<N
 
 	private int timeoutForFInMS;
 	private INodeEvaluator<N, V> timeoutEvaluator;
-	private String loggerName;
+	private Logger logger = LoggerFactory.getLogger(BestFirstFactory.class);
 
 	public BestFirstFactory() {
 		super();
@@ -32,8 +35,8 @@ public class BestFirstFactory<P extends GraphSearchWithSubpathEvaluationsInput<N
 			throw new IllegalStateException("Cannot produce BestFirst searches before the node evaluator is set.");
 		BestFirst<P, N, A, V> search = new BestFirst<>(getInput());
 		search.setTimeoutForComputationOfF(this.timeoutForFInMS, this.timeoutEvaluator);
-		if (loggerName != null && loggerName.length() > 0)
-			search.setLoggerName(loggerName);
+		if (getLoggerName() != null && getLoggerName().length() > 0)
+			search.setLoggerName(getLoggerName());
 		return search;
 	}
 
@@ -51,10 +54,10 @@ public class BestFirstFactory<P extends GraphSearchWithSubpathEvaluationsInput<N
 	}
 
 	public String getLoggerName() {
-		return loggerName;
+		return logger.getName();
 	}
 
 	public void setLoggerName(String loggerName) {
-		this.loggerName = loggerName;
+		this.logger = LoggerFactory.getLogger(loggerName);
 	}
 }
