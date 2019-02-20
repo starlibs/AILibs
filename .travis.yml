@@ -28,11 +28,11 @@ jobs:
   - stage: compile
     script:
     - "./gradlew build -x test"
-    - bash .travis_push_javadoc.sh
-    - sonar-scanner
+    - bash .travis_push_javadoc.sh    
   - stage: deploy
-    script: "./gradlew publish -PnexusBaseUrl=$nexusBaseUrl -PnexusUpRepo=$nexusUpRepo
-      -PnexusUser=$nexusUser -PnexusPassword=$nexusPassword"
+    script: 
+    - sonar-scanner 
+    - "./gradlew publish -PnexusBaseUrl=$nexusBaseUrl -PnexusUpRepo=$nexusUpRepo -PnexusUser=$nexusUser -PnexusPassword=$nexusPassword"
 addons:
   sonarcloud:
     organization: "starlibs" # the key of the org you chose at step #3
