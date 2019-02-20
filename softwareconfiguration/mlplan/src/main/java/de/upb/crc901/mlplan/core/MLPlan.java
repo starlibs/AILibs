@@ -112,7 +112,8 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 				this.evaluationMeasurementBridge, this.getConfig().numberOfMCIterationsDuringSearch(),
 				this.dataShownToSearch, this.getConfig().getMCCVTrainFoldSizeDuringSearch(),
 				this.getConfig().randomSeed());
-
+		
+		/* create the benchmark used to evaluate solutions in search phase */
 		IObjectEvaluator<ComponentInstance, Double> wrappedSearchBenchmark = c -> {
 			try {
 				if (this.evaluationMeasurementBridge instanceof CacheEvaluatorMeasureBridge) {
@@ -132,7 +133,8 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 						"Evaluation of composition failed as the component instantiation could not be built.");
 			}
 		};
-
+		
+		/* create the benchmark used to evaluate solutions in selection phase */
 		IObjectEvaluator<ComponentInstance, Double> wrappedSelectionBenchmark = c -> {
 			/* first conduct MCCV */
 			AbstractEvaluatorMeasureBridge<Double, Double> bridge = this.evaluationMeasurementBridge;
