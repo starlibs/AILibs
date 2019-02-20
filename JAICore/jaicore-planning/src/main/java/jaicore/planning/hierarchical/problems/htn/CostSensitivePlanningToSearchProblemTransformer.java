@@ -28,7 +28,6 @@ public class CostSensitivePlanningToSearchProblemTransformer<IPlanning extends I
 
 			@Override
 			public V evaluateSolution(final List<N> solutionPath) throws TimeoutException, InterruptedException, ObjectEvaluationFailedException {
-
 				return problem.getPlanEvaluator().evaluate(CostSensitivePlanningToSearchProblemTransformer.this.graphGeneratorDeriver.getPlan(solutionPath));
 			}
 

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 import hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
 import hasco.core.Util;
@@ -294,6 +295,8 @@ public class HASCOReduction<V extends Comparable<V>> implements
 			@Override
 			public V evaluate(final Plan plan) throws TimeoutException, InterruptedException, ObjectEvaluationFailedException {
 				ComponentInstance solution = Util.getSolutionCompositionForPlan(HASCOReduction.this.components, HASCOReduction.this.getInitState(), plan, true);
+				if (solution == null)
+					throw new IllegalArgumentException("The following plan yields a null solution: \n\t" + plan.getActions().stream().map(a -> a.getEncoding()).collect(Collectors.joining("\n\t")));
 				return problem.getCompositionEvaluator().evaluate(solution);
 			}
 
