@@ -37,17 +37,13 @@ public class InversePowerLawExtrapolationTester {
 	}
 
 	@Test
-	public void testInversePowerLawParameterCreation() {
+	public void testInversePowerLawParameterCreation() throws Exception {
 		int[] xValues = new int[] { 8, 16, 64, 128 };
-		try {
-			LearningCurveExtrapolator extrapolator = createExtrapolationMethod();
-			InversePowerLawLearningCurve curve = (InversePowerLawLearningCurve) extrapolator
-					.extrapolateLearningCurve(xValues);
-			Assert.assertNotNull(curve);
-			Assert.assertTrue(curve.getCurveValue(256) > 0 && curve.getCurveValue(256) < 1);
-		} catch (Exception e) {
-			fail();
-		}
+		LearningCurveExtrapolator extrapolator = createExtrapolationMethod();
+		InversePowerLawLearningCurve curve = (InversePowerLawLearningCurve) extrapolator
+				.extrapolateLearningCurve(xValues);
+		Assert.assertNotNull(curve);
+		Assert.assertTrue(curve.getCurveValue(256) > 0 && curve.getCurveValue(256) < 1);
 	}
 
 	private LearningCurveExtrapolator createExtrapolationMethod() throws Exception {
