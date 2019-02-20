@@ -1,4 +1,4 @@
-package jaicore.ml.tsc.classifier;
+package jaicore.ml.tsc.classifier.neighbors;
 
 import static org.junit.Assert.assertEquals;
 
@@ -13,7 +13,7 @@ import org.junit.Test;
 import jaicore.ml.core.exception.EvaluationException;
 import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.core.exception.TrainingException;
-import jaicore.ml.tsc.classifier.NearestNeighborClassifier;
+import jaicore.ml.tsc.classifier.neighbors.NearestNeighborClassifier;
 import jaicore.ml.tsc.classifier.SimplifiedTSClassifierTest;
 import jaicore.ml.tsc.distances.DynamicTimeWarping;
 import jaicore.ml.tsc.exceptions.TimeSeriesLoadingException;

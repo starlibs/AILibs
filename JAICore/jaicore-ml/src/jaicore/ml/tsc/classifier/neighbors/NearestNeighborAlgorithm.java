@@ -1,4 +1,4 @@
-package jaicore.ml.tsc.classifier;
+package jaicore.ml.tsc.classifier.neighbors;
 
 import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
@@ -9,12 +9,44 @@ import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.IAlgorithmConfig;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
+import jaicore.ml.tsc.classifier.ASimplifiedTSCAlgorithm;
 import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 
 /**
- * NearestNeighborAlgorithm
+ * Algorithm that backs all nearest neighbor classifiers. When called, it hands
+ * the dataset over to the classifier.
  */
 public class NearestNeighborAlgorithm extends ASimplifiedTSCAlgorithm<Integer, NearestNeighborClassifier> {
+
+    @Override
+    public NearestNeighborClassifier call()
+            throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
+        // Check if model and dataset are set.
+        if (this.model == null)
+            throw new AlgorithmException("Model not set.");
+        TimeSeriesDataset dataset = this.getInput();
+        if (dataset == null)
+            throw new AlgorithmException("No input data set.");
+        if (dataset.isMultivariate())
+            throw new UnsupportedOperationException("Multivariate datasets are not supported.");
+
+        // Retrieve data from dataset.
+        double[][] values = dataset.getValuesOrNull(0);
+        double[][] timestamps = dataset.getTimestampsOrNull(0);
+        int[] targets = dataset.getTargets();
+        // Check data.
+        if (values == null)
+            throw new AlgorithmException("Empty input data set.");
+        if (targets == null)
+            throw new AlgorithmException("Empty targets.");
+
+        // Update model.
+        this.model.setValues(values);
+        this.model.setTimestamps(timestamps);
+        this.model.setTargets(targets);
+
+        return this.model;
+    }
 
     @Override
     public void registerListener(Object listener) {
@@ -55,36 +87,6 @@ public class NearestNeighborAlgorithm extends ASimplifiedTSCAlgorithm<Integer, N
     @Override
     public IAlgorithmConfig getConfig() {
         return null;
-    }
-
-    @Override
-    public NearestNeighborClassifier call()
-            throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
-        // Retrieve dataset.
-        TimeSeriesDataset dataset = this.getInput();
-        // Check if model is set.
-        if (this.model == null)
-            throw new AlgorithmException("Model not set.");
-        // Check dataset.
-        if (dataset == null)
-            throw new AlgorithmException("No input data set.");
-        if (dataset.isMultivariate())
-            throw new UnsupportedOperationException("Multivariate datasets are not supported.");
-        // Retrieve data from dataset.
-        double[][] values = dataset.getValuesOrNull(0);
-        double[][] timestamps = dataset.getTimestampsOrNull(0);
-        int[] targets = dataset.getTargets();
-        // Check data.
-        if (values == null)
-            throw new AlgorithmException("Empty input data set.");
-        if (targets == null)
-            throw new AlgorithmException("Empty targets.");
-        // Update model.
-        this.model.setValues(values);
-        this.model.setTimestamps(timestamps);
-        this.model.setTargets(targets);
-
-        return this.model;
     }
 
     @Override

@@ -1,4 +1,4 @@
-package jaicore.ml.tsc.classifier;
+package jaicore.ml.tsc.classifier.neighbors;
 
 import java.util.ArrayList;
 
