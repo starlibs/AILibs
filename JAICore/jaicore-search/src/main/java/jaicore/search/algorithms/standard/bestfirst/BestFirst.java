@@ -56,9 +56,9 @@ import jaicore.search.algorithms.standard.bestfirst.exceptions.ControlledNodeEva
 import jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.DecoratingNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.ICancelableNodeEvaluator;
-import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.IGraphDependentNodeEvaluator;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.IPotentiallyGraphDependentNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
-import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.ISolutionReportingNodeEvaluator;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.IPotentiallySolutionReportingNodeEvaluator;
 import jaicore.search.core.interfaces.AOptimalPathInORGraphSearch;
 import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
@@ -128,7 +128,6 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		this(ConfigFactory.create(IBestFirstConfig.class), problem);
 	}
 
-	@SuppressWarnings("unchecked")
 	public BestFirst(final IBestFirstConfig config, final I problem) {
 		super(config, problem);
 		this.graphGenerator = problem.getGraphGenerator();
@@ -150,11 +149,11 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 			throw new IllegalArgumentException("Cannot work with node evaulator that is null");
 		} else if (this.nodeEvaluator instanceof DecoratingNodeEvaluator<?, ?>) {
 			DecoratingNodeEvaluator<N, V> castedEvaluator = (DecoratingNodeEvaluator<N, V>) this.nodeEvaluator;
-			if (castedEvaluator.isGraphDependent()) {
+			if (castedEvaluator.requiresGraphGenerator()) {
 				this.logger.info("{} is a graph dependent node evaluator. Setting its graph generator now ...", castedEvaluator);
 				castedEvaluator.setGenerator(this.graphGenerator);
 			}
-			if (castedEvaluator.isSolutionReporter()) {
+			if (castedEvaluator.reportsSolutions()) {
 				this.logger.info("{} is a solution reporter. Register the search algo in its event bus", castedEvaluator);
 				castedEvaluator.registerSolutionListener(this);
 				this.solutionReportingNodeEvaluator = true;
@@ -162,15 +161,15 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 				this.solutionReportingNodeEvaluator = false;
 			}
 		} else {
-			if (this.nodeEvaluator instanceof IGraphDependentNodeEvaluator) {
+			if (this.nodeEvaluator instanceof IPotentiallyGraphDependentNodeEvaluator) {
 				this.logger.info("{} is a graph dependent node evaluator. Setting its graph generator now ...", this.nodeEvaluator);
-				((IGraphDependentNodeEvaluator<N, A, V>) this.nodeEvaluator).setGenerator(this.graphGenerator);
+				((IPotentiallyGraphDependentNodeEvaluator<N, V>) this.nodeEvaluator).setGenerator(this.graphGenerator);
 			}
 
 			/* if the node evaluator is a solution reporter, register in his event bus */
-			if (this.nodeEvaluator instanceof ISolutionReportingNodeEvaluator) {
+			if (this.nodeEvaluator instanceof IPotentiallySolutionReportingNodeEvaluator) {
 				this.logger.info("{} is a solution reporter. Register the search algo in its event bus", this.nodeEvaluator);
-				((ISolutionReportingNodeEvaluator<N, V>) this.nodeEvaluator).registerSolutionListener(this);
+				((IPotentiallySolutionReportingNodeEvaluator<N, V>) this.nodeEvaluator).registerSolutionListener(this);
 				this.solutionReportingNodeEvaluator = true;
 			} else {
 				this.solutionReportingNodeEvaluator = false;
