@@ -32,9 +32,7 @@ public class MonteCarloCrossValidationEvaluator implements IClassifierEvaluator,
 	
 	/* Can either compute the loss or cache it */
 	private final AbstractEvaluatorMeasureBridge<Double, Double> bridge;
-
-	private final DescriptiveStatistics stats = new DescriptiveStatistics();
-
+	
 	public MonteCarloCrossValidationEvaluator(AbstractEvaluatorMeasureBridge<Double, Double> bridge, final int repeats, final Instances data, final double trainingPortion, final long seed) {
 		super();
 		this.repeats = repeats;
@@ -51,6 +49,10 @@ public class MonteCarloCrossValidationEvaluator implements IClassifierEvaluator,
 
 	@Override
 	public Double evaluate(final Classifier pl) throws ObjectEvaluationFailedException, InterruptedException {
+		return evaluate(pl, new DescriptiveStatistics());
+	}
+	
+	public Double evaluate(final Classifier pl, DescriptiveStatistics stats) throws ObjectEvaluationFailedException, InterruptedException {
 		if (pl == null) {
 			throw new IllegalArgumentException("Cannot compute score for null pipeline!");
 		}
@@ -76,16 +78,11 @@ public class MonteCarloCrossValidationEvaluator implements IClassifierEvaluator,
 		}
 		if (Thread.currentThread().isInterrupted())
 			throw new InterruptedException("MCCV has been interrupted");
-
 		Double score = stats.getMean();
 		logger.info("Obtained score of {} for classifier {}.", score, pl);
 		return score;
 	}
-
-	public DescriptiveStatistics getStats() {
-		return stats;
-	}
-
+	
 	public AbstractEvaluatorMeasureBridge<Double, Double> getBridge() {
 		return bridge;
 	}
@@ -99,5 +96,6 @@ public class MonteCarloCrossValidationEvaluator implements IClassifierEvaluator,
 	public void setLoggerName(String name) {
 		this.logger.info("Switching logger of {} from {} to {}", this, logger.getName(), name);
 		this.logger = LoggerFactory.getLogger(name);
+		this.logger.info("Switched logger of {} to {}", this, name);
 	}
 }

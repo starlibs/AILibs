@@ -94,6 +94,18 @@
     <level value="warn" />
   </logger>
   
+  <logger name="mlplan.optimizingfactory.optAlgo.hasco">
+    <level value="info" />
+  </logger>
+  
+  <logger name="mlplan.optimizingfactory.optAlgo.hasco.solutionevaluator">
+    <level value="warn" />
+  </logger>
+  
+  <logger name="mlplan.optimizingfactory.optAlgo.hasco.solutionevaluator.benchmark">
+    <level value="warn" />
+  </logger>
+  
   <logger name="mlplan.optimizingfactory.optAlgo.hasco.search">
     <level value="warn" />
   </logger>
