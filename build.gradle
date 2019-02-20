@@ -104,7 +104,7 @@ allprojects {
 	//Sonarqube config
 	sonarqube {
 		properties {
-			properties["sonar.projectKey"] = project.name
+			properties["sonar.projectKey"] = starlibs.ailibs
 			properties["sonar.projectName"] = project.name
 			properties["sonar.projectDescription"] = project.description
 			properties["sonar.projectVersion"] = project.version
