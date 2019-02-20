@@ -45,6 +45,7 @@ public class NodeInfoGUIPluginView<N> implements IGUIPluginView {
 	@Override
 	public void update() {
 		N currentlySelectedNode = model.getCurrentlySelectedNode();
+		System.out.println(currentlySelectedNode.getClass().getName());
 		String nodeInfoOfCurrentlySelectedNode = nodeInfoGenerator.generateInfoForNode(currentlySelectedNode);
 		Platform.runLater(() -> {
 			webViewEngine.loadContent(nodeInfoOfCurrentlySelectedNode);

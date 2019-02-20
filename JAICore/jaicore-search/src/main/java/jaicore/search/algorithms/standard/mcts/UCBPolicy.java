@@ -10,9 +10,13 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class UCBPolicy<T,A> implements IPathUpdatablePolicy<T,A,Double> {
+import jaicore.basic.ILoggingCustomizable;
+
+public class UCBPolicy<T,A> implements IPathUpdatablePolicy<T,A,Double>, ILoggingCustomizable {
 	
-	private static final Logger logger = LoggerFactory.getLogger(UCBPolicy.class);
+	private String loggerName;
+	private Logger logger = LoggerFactory.getLogger(UCBPolicy.class);
+	
 	private final boolean maximize;
 
 	public UCBPolicy() {
@@ -44,8 +48,8 @@ public class UCBPolicy<T,A> implements IPathUpdatablePolicy<T,A,Double> {
 	
 	@Override
 	public A getAction(T node, Map<A,T> actionsWithTheirSuccessors) {
-		logger.info("Deriving action for node {}. Options are: {}", node, actionsWithTheirSuccessors);
 		Collection<A> possibleActions = actionsWithTheirSuccessors.keySet();
+		logger.info("Deriving action for node {}. The {} options are: {}", node, possibleActions.size(), actionsWithTheirSuccessors);
 		
 		/* if an applicable action has not been tried, play it to get some initial idea */
 		List<A> actionsThatHaveNotBeenTriedYet = possibleActions.stream().filter(a -> !labels.containsKey(actionsWithTheirSuccessors.get(a))).collect(Collectors.toList());
@@ -58,24 +62,37 @@ public class UCBPolicy<T,A> implements IPathUpdatablePolicy<T,A,Double> {
 		}
 		
 		/* otherwise, play best action */
-		double best = maximize ? 0 : Double.MAX_VALUE;
+		double best = maximize ? Double.MIN_VALUE : Double.MAX_VALUE;
 		logger.debug("All actions have been tried. Label is: {}", labels.get(node));
 		int n = labels.get(node).visits;
 		A choice = null;
 		for (A action : possibleActions) {
 			T child = actionsWithTheirSuccessors.get(action);
 			NodeLabel label = labels.get(child);
-			logger.info("Considering action {} whose successor state has stats {} and {} visits", action, label.scores.getMean(), label.visits);
+			logger.debug("Considering action {} whose successor state has stats {} and {} visits", action, label.scores.getMean(), label.visits);
 			double ucb = label.scores.getMean() + (maximize ? 1 : -1) * Math.sqrt(2 * Math.log(n) / label.visits);
 			if (maximize && (ucb > best) || !maximize && (ucb < best)) {
+				logger.trace("Updating best choice {} since it is better than the current solution with performance {}", choice, best);
 				best = ucb;
 				choice = action;
 			}
+			else
+				logger.trace("Skipping current solution {} since its score is not good enough.", choice);	
 		}
 		
 		/* quick sanity check */
-		if (choice == null)
-			throw new IllegalStateException("Would return null, but this must not be the case!");
+		assert choice != null : "Would return null, but this must not be the case!";
 		return choice;
+	}
+
+	@Override
+	public String getLoggerName() {
+		return loggerName;
+	}
+
+	@Override
+	public void setLoggerName(String name) {
+		this.loggerName = name;
+		this.logger = LoggerFactory.getLogger(name);
 	}
 }

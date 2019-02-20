@@ -14,7 +14,7 @@ public class MCTSNQueenTester extends NQueenTester<GraphSearchWithPathEvaluation
 	public AlgorithmProblemTransformer<Integer, GraphSearchWithPathEvaluationsInput<QueenNode, String, Double>> getProblemReducer() {
 		return new NQueensToGraphSearchProblemInputReducer();
 	}
-
+	
 	@Override
 	public IGraphSearchFactory<GraphSearchWithPathEvaluationsInput<QueenNode, String, Double>, EvaluatedSearchGraphPath<QueenNode, String,Double>, QueenNode, String> getFactory() {
 		return new UCTFactory<>();

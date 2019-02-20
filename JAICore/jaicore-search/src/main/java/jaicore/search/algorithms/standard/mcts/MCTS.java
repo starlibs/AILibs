@@ -8,10 +8,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.AlgorithmState;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
@@ -92,7 +94,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 		this.exploredGraph.addItem(this.root);
 	}
 
-	private List<N> getPlayout() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException  {
+	private List<N> getPlayout() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {
 		this.logger.info("Computing a new playout ...");
 		N current = this.root;
 		N next;
@@ -100,11 +102,22 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 		List<N> path = new ArrayList<>();
 		path.add(current);
 
-		/* if all children of the current node have been used at least once child that has not been used in a playout, just use any of them according to the tree policy */
+		/* if all children of the current node have been used at least once, just use any of them according to the tree policy */
 		boolean currentNodeIsDeadEnd = false;
-		while (!(childrenOfCurrent = this.exploredGraph.getSuccessors(current)).isEmpty() && (SetUtil.difference(childrenOfCurrent, this.nodesConsideredInAPlayout)).isEmpty()) {
+		while (true) {
+			
+			/* stop loop if the this node has not been expanded yet or is a dead-end */
+			childrenOfCurrent = this.exploredGraph.getSuccessors(current);
+			if (childrenOfCurrent.isEmpty())
+				break;
+			
+			/* stop loop if all children of the node have been considered in each playout already */
+			if (SetUtil.difference(childrenOfCurrent, this.nodesConsideredInAPlayout).isEmpty())
+				break;
+			
+			/* determine all actions applicable in this node that are not known to lead into a dead-end */
 			this.checkAndConductTermination();
-			this.logger.debug("Using tree policy to compute choice for successor of {} among {}", current, childrenOfCurrent);
+			this.logger.debug("Using tree policy to choose one of the {} succesors {} of current node {}", childrenOfCurrent.size(), childrenOfCurrent, current);
 			List<A> availableActions = new ArrayList<>();
 			Map<A, N> successorStates = new HashMap<>();
 			for (N child : childrenOfCurrent) {
@@ -113,17 +126,20 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 					continue;
 				}
 				A action = this.exploredGraph.getEdgeLabel(current, child);
+				assert !successorStates.containsKey(action) : "A successor state has already been defined for action \"" + action + "\" with hashCode " + action.hashCode();
 				availableActions.add(action);
 				successorStates.put(action, child);
+				assert successorStates.keySet().size() == availableActions.size() : "We have generated " + availableActions.size() + " available actions but the map of successor states only contains " + successorStates.keySet().size() + " item(s). Actions (by hash codes): \n\t" + availableActions.stream().map(a -> a.hashCode() + ": " +  a.toString()).collect(Collectors.joining("\n\t"));
 			}
+			
+			/* if every applicable action is known to yield a dead-end, mark this node to be a dead-end itself and return */
 			if (availableActions.isEmpty()) {
 				this.logger.debug("Node {} has only dead-end successors and hence is a dead-end itself. Adding it to the list of dead ends.", current);
 				currentNodeIsDeadEnd = true;
 				this.deadLeafNodes.add(current);
 				break;
 			}
-			this.logger.trace("Available actions of expanded node {}: {}. Corresponding successor states: {}", current, availableActions, successorStates);
-
+			this.logger.trace("{} available actions of expanded node {}: {}. Corresponding successor states: {}", availableActions.size(), current, availableActions, successorStates);
 			A chosenAction = this.treePolicy.getAction(current, successorStates);
 			if (chosenAction == null) {
 				throw new IllegalStateException("Chosen action is null!");
@@ -138,6 +154,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 			path.add(current);
 			this.logger.debug("Tree policy decides to expand {} taking action {} to {}", current, chosenAction, next);
 		}
+		assert !currentNodeIsDeadEnd || exploredGraph.getSuccessors(current).isEmpty() : "Flag that current node is dead end is set, but there are successors.";
 		this.logger.info("Determined non-fully-expanded node {} of traversal tree using tree policy. Untried successors are: {}. Now selecting an untried successor.", current,
 				SetUtil.difference(childrenOfCurrent, this.nodesConsideredInAPlayout));
 
@@ -166,27 +183,30 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 		}
 
 		/* use default policy to proceed to a goal node */
-		while (!currentNodeIsDeadEnd && !this.isGoal(current)) {
-			this.checkAndConductTermination();
-			Map<A, N> successorStates = new HashMap<>();
-			this.logger.debug("Determining possible moves for {}.", current);
-			if (this.unexpandedNodes.contains(current)) {
-				successorStates.putAll(this.expandNode(current));
-			} else {
-				for (N successor : this.exploredGraph.getSuccessors(current)) {
-					successorStates.put(this.exploredGraph.getEdgeLabel(current, successor), successor);
+		if (!currentNodeIsDeadEnd) {
+			while (!this.isGoal(current)) {
+				this.checkAndConductTermination();
+				Map<A, N> successorStates = new HashMap<>();
+				this.logger.debug("Determining possible moves for {}.", current);
+				if (this.unexpandedNodes.contains(current)) {
+					successorStates.putAll(this.expandNode(current));
+				} else {
+					for (N successor : this.exploredGraph.getSuccessors(current)) {
+						successorStates.put(this.exploredGraph.getEdgeLabel(current, successor), successor);
+					}
 				}
-			}
 
-			/* if the default policy has led us into a state where we cannot do anything, stop playout */
-			if (successorStates.isEmpty()) {
-				break;
+				/* if the default policy has led us into a state where we cannot do anything, stop playout */
+				if (successorStates.isEmpty()) {
+					break;
+				}
+				current = successorStates.get(this.defaultPolicy.getAction(current, successorStates));
+				this.nodesConsideredInAPlayout.add(current);
+				path.add(current);
 			}
-			current = successorStates.get(this.defaultPolicy.getAction(current, successorStates));
-			this.nodesConsideredInAPlayout.add(current);
-			path.add(current);
+			checkThatPathIsSolution(path);
+			this.logger.info("Drawn playout path is: {}.", path);
 		}
-		this.logger.info("Drawn playout path is: {}.", path);
 
 		/* change all node types on path to closed again */
 		while (true) {
@@ -196,7 +216,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 			current = this.exploredGraph.getPredecessors(current).iterator().next();
 			this.post(new NodeTypeSwitchEvent<N>(getId(), current, "or_closed"));
 		}
-		return path;
+		return currentNodeIsDeadEnd ? null : path;
 	}
 
 	private Map<A, N> expandNode(final N node) throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {
@@ -209,6 +229,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 		Collection<NodeExpansionDescription<N, A>> availableActions = null;
 		try {
 			availableActions = this.successorGenerator.generateSuccessors(node);
+			assert availableActions.stream().map(n -> n.getAction()).collect(Collectors.toList()).size() == availableActions.stream().map(n -> n.getAction()).collect(Collectors.toSet()).size() : "The actions under this node don't have unique names";
 		} catch (InterruptedException e) {
 			this.checkAndConductTermination();
 		}
@@ -243,6 +264,11 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 		}
 	}
 
+	private void checkThatPathIsSolution(List<N> path) {
+		assert !path.isEmpty() : "Solution paths cannot be empty!";
+		assert isGoal(path.get(path.size() - 1)) : "The head of a solution path must be a goal node, but this is not the case for this path: \n\t" + path.stream().map(n -> n.toString()).collect(Collectors.joining("\n\t"));
+	}
+
 	@Override
 	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, CancellationException, AlgorithmException {
 		switch (this.getState()) {
@@ -266,23 +292,31 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 					} else {
 						this.logger.info("There are {} known unexpanded nodes. Starting computation of next playout path.", this.unexpandedNodes.size());
 						List<N> path = this.getPlayout();
-						V playoutScore;
-						if (!this.scoreCache.containsKey(path)) {
-							this.logger.debug("Obtained path {}. Now starting computation of the score for this playout.", path);
-							playoutScore = this.playoutSimulator.evaluateSolution(path);
-							boolean isSolutionPlayout = this.nodeGoalTester.isGoal(path.get(path.size() - 1));
-							this.logger.debug("Determined playout score {}. Is goal: {}. Now updating the path.", playoutScore, isSolutionPlayout);
-							this.scoreCache.put(path, playoutScore);
-							this.treePolicy.updatePath(path, playoutScore);
-							if (isSolutionPlayout) {
-								AlgorithmEvent solutionEvent = this.registerSolution(new EvaluatedSearchGraphPath<>(path, null, playoutScore));
-								return solutionEvent;
+						if (path != null) {
+							V playoutScore = null;
+							if (!this.scoreCache.containsKey(path)) {
+								this.logger.debug("Obtained path {}. Now starting computation of the score for this playout.", path);
+								try {
+									playoutScore = this.playoutSimulator.evaluateSolution(path);
+									boolean isSolutionPlayout = this.nodeGoalTester.isGoal(path.get(path.size() - 1));
+									this.logger.debug("Determined playout score {}. Is goal: {}. Now updating the path.", playoutScore, isSolutionPlayout);
+									this.scoreCache.put(path, playoutScore);
+									this.treePolicy.updatePath(path, playoutScore);
+									if (isSolutionPlayout) {
+										AlgorithmEvent solutionEvent = this.registerSolution(new EvaluatedSearchGraphPath<>(path, null, playoutScore));
+										return solutionEvent;
+									}
+								} catch (ObjectEvaluationFailedException e) {
+									this.logger.error("Could not evaluate playout " + e.toString());
+								}
+							} else {
+								playoutScore = this.scoreCache.get(path);
+								this.logger.debug("Looking up score {} for the already evaluated path {}", playoutScore, path);
+								this.treePolicy.updatePath(path, playoutScore);
 							}
-						} else {
-							playoutScore = this.scoreCache.get(path);
-							this.logger.debug("Looking up score {} for the already evaluated path {}", playoutScore, path);
-							this.treePolicy.updatePath(path, playoutScore);
 						}
+						else
+							logger.warn("The drawn path is not a solution (but a dead end)");
 					}
 				}
 			} catch (TimeoutException e) {
@@ -290,12 +324,6 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 				Thread.interrupted(); // unset interrupted flag
 				this.logger.info("Finishing MCTS due to timeout.");
 				return terminate();
-			} catch (ObjectEvaluationFailedException e) {
-				throw new AlgorithmException(e, "Could not evaluate playout!");
-			} finally {
-
-				/* unregister this thread in order to avoid interruptions */
-				this.unregisterActiveThread();
 			}
 
 		default:
@@ -315,5 +343,11 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 		this.logger = LoggerFactory.getLogger(name);
 		this.logger.info("Activated logger {} with name {}", name, this.logger.getName());
 		super.setLoggerName(this.loggerName + "._orgraphsearch");
+		if (treePolicy instanceof ILoggingCustomizable) {
+			logger.info("Setting logger of tree policy to {}", name + ".treepolicy");
+			((ILoggingCustomizable) treePolicy).setLoggerName(name + ".treepolicy");
+		}
+		else
+			logger.info("Not setting logger of tree policy");
 	}
 }
