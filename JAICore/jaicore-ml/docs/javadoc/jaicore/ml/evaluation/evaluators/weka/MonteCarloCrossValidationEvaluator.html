@@ -16,7 +16,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10,"i3":10};
+var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -106,13 +106,13 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <dl>
 <dt>All Implemented Interfaces:</dt>
-<dd>jaicore.basic.IObjectEvaluator&lt;weka.classifiers.Classifier,java.lang.Double&gt;, <a href="../../../../../jaicore/ml/evaluation/evaluators/weka/IClassifierEvaluator.html" title="interface in jaicore.ml.evaluation.evaluators.weka">IClassifierEvaluator</a></dd>
+<dd>jaicore.basic.ILoggingCustomizable, jaicore.basic.IObjectEvaluator&lt;weka.classifiers.Classifier,java.lang.Double&gt;, <a href="../../../../../jaicore/ml/evaluation/evaluators/weka/IClassifierEvaluator.html" title="interface in jaicore.ml.evaluation.evaluators.weka">IClassifierEvaluator</a></dd>
 </dl>
 <hr>
 <br>
 <pre>public class <span class="typeNameLabel">MonteCarloCrossValidationEvaluator</span>
 extends java.lang.Object
-implements <a href="../../../../../jaicore/ml/evaluation/evaluators/weka/IClassifierEvaluator.html" title="interface in jaicore.ml.evaluation.evaluators.weka">IClassifierEvaluator</a></pre>
+implements <a href="../../../../../jaicore/ml/evaluation/evaluators/weka/IClassifierEvaluator.html" title="interface in jaicore.ml.evaluation.evaluators.weka">IClassifierEvaluator</a>, jaicore.basic.ILoggingCustomizable</pre>
 <div class="block">A classifier evaluator that can perform a (monte-carlo)cross-validation on
  the given dataset. Thereby, it uses the
  <a href="../../../../../jaicore/ml/evaluation/evaluators/weka/AbstractEvaluatorMeasureBridge.html" title="class in jaicore.ml.evaluation.evaluators.weka"><code>AbstractEvaluatorMeasureBridge</code></a> to evaluate the classifier on a random
@@ -165,12 +165,21 @@ implements <a href="../../../../../jaicore/ml/evaluation/evaluators/weka/IClassi
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/ml/evaluation/evaluators/weka/MonteCarloCrossValidationEvaluator.html#evaluate-weka.classifiers.Classifier-">evaluate</a></span>(weka.classifiers.Classifier&nbsp;pl)</code>&nbsp;</td>
 </tr>
 <tr id="i2" class="altColor">
+<td class="colFirst"><code>java.lang.Double</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/ml/evaluation/evaluators/weka/MonteCarloCrossValidationEvaluator.html#evaluate-weka.classifiers.Classifier-org.apache.commons.math3.stat.descriptive.DescriptiveStatistics-">evaluate</a></span>(weka.classifiers.Classifier&nbsp;pl,
+        org.apache.commons.math3.stat.descriptive.DescriptiveStatistics&nbsp;stats)</code>&nbsp;</td>
+</tr>
+<tr id="i3" class="rowColor">
 <td class="colFirst"><code><a href="../../../../../jaicore/ml/evaluation/evaluators/weka/AbstractEvaluatorMeasureBridge.html" title="class in jaicore.ml.evaluation.evaluators.weka">AbstractEvaluatorMeasureBridge</a>&lt;java.lang.Double,java.lang.Double&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/ml/evaluation/evaluators/weka/MonteCarloCrossValidationEvaluator.html#getBridge--">getBridge</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i3" class="rowColor">
-<td class="colFirst"><code>org.apache.commons.math3.stat.descriptive.DescriptiveStatistics</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/ml/evaluation/evaluators/weka/MonteCarloCrossValidationEvaluator.html#getStats--">getStats</a></span>()</code>&nbsp;</td>
+<tr id="i4" class="altColor">
+<td class="colFirst"><code>java.lang.String</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/ml/evaluation/evaluators/weka/MonteCarloCrossValidationEvaluator.html#getLoggerName--">getLoggerName</a></span>()</code>&nbsp;</td>
+</tr>
+<tr id="i5" class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/ml/evaluation/evaluators/weka/MonteCarloCrossValidationEvaluator.html#setLoggerName-java.lang.String-">setLoggerName</a></span>(java.lang.String&nbsp;name)</code>&nbsp;</td>
 </tr>
 </table>
 <ul class="blockList">
@@ -242,22 +251,56 @@ implements <a href="../../../../../jaicore/ml/evaluation/evaluators/weka/IClassi
 </dl>
 </li>
 </ul>
-<a name="getStats--">
+<a name="evaluate-weka.classifiers.Classifier-org.apache.commons.math3.stat.descriptive.DescriptiveStatistics-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>getStats</h4>
-<pre>public&nbsp;org.apache.commons.math3.stat.descriptive.DescriptiveStatistics&nbsp;getStats()</pre>
+<h4>evaluate</h4>
+<pre>public&nbsp;java.lang.Double&nbsp;evaluate(weka.classifiers.Classifier&nbsp;pl,
+                                 org.apache.commons.math3.stat.descriptive.DescriptiveStatistics&nbsp;stats)
+                          throws jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException,
+                                 java.lang.InterruptedException</pre>
+<dl>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code>jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException</code></dd>
+<dd><code>java.lang.InterruptedException</code></dd>
+</dl>
 </li>
 </ul>
 <a name="getBridge--">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>getBridge</h4>
 <pre>public&nbsp;<a href="../../../../../jaicore/ml/evaluation/evaluators/weka/AbstractEvaluatorMeasureBridge.html" title="class in jaicore.ml.evaluation.evaluators.weka">AbstractEvaluatorMeasureBridge</a>&lt;java.lang.Double,java.lang.Double&gt;&nbsp;getBridge()</pre>
+</li>
+</ul>
+<a name="getLoggerName--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getLoggerName</h4>
+<pre>public&nbsp;java.lang.String&nbsp;getLoggerName()</pre>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code>getLoggerName</code>&nbsp;in interface&nbsp;<code>jaicore.basic.ILoggingCustomizable</code></dd>
+</dl>
+</li>
+</ul>
+<a name="setLoggerName-java.lang.String-">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>setLoggerName</h4>
+<pre>public&nbsp;void&nbsp;setLoggerName(java.lang.String&nbsp;name)</pre>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code>setLoggerName</code>&nbsp;in interface&nbsp;<code>jaicore.basic.ILoggingCustomizable</code></dd>
+</dl>
 </li>
 </ul>
 </li>

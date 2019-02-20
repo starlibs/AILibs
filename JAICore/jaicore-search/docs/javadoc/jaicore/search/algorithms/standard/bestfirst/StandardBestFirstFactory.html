@@ -16,7 +16,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10};
+var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -121,12 +121,13 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <dl>
 <dt>All Implemented Interfaces:</dt>
-<dd>jaicore.basic.algorithm.IAlgorithmFactory&lt;<a href="../../../../../jaicore/search/probleminputs/GraphSearchWithSubpathEvaluationsInput.html" title="class in jaicore.search.probleminputs">GraphSearchWithSubpathEvaluationsInput</a>&lt;N,A,V&gt;,<a href="../../../../../jaicore/search/model/other/EvaluatedSearchGraphPath.html" title="class in jaicore.search.model.other">EvaluatedSearchGraphPath</a>&lt;N,A,V&gt;&gt;, <a href="../../../../../jaicore/search/core/interfaces/IGraphSearchFactory.html" title="interface in jaicore.search.core.interfaces">IGraphSearchFactory</a>&lt;<a href="../../../../../jaicore/search/probleminputs/GraphSearchWithSubpathEvaluationsInput.html" title="class in jaicore.search.probleminputs">GraphSearchWithSubpathEvaluationsInput</a>&lt;N,A,V&gt;,<a href="../../../../../jaicore/search/model/other/EvaluatedSearchGraphPath.html" title="class in jaicore.search.model.other">EvaluatedSearchGraphPath</a>&lt;N,A,V&gt;,N,A&gt;, <a href="../../../../../jaicore/search/core/interfaces/IOptimalPathInORGraphSearchFactory.html" title="interface in jaicore.search.core.interfaces">IOptimalPathInORGraphSearchFactory</a>&lt;<a href="../../../../../jaicore/search/probleminputs/GraphSearchWithSubpathEvaluationsInput.html" title="class in jaicore.search.probleminputs">GraphSearchWithSubpathEvaluationsInput</a>&lt;N,A,V&gt;,N,A,V&gt;</dd>
+<dd>jaicore.basic.algorithm.IAlgorithmFactory&lt;<a href="../../../../../jaicore/search/probleminputs/GraphSearchWithSubpathEvaluationsInput.html" title="class in jaicore.search.probleminputs">GraphSearchWithSubpathEvaluationsInput</a>&lt;N,A,V&gt;,<a href="../../../../../jaicore/search/model/other/EvaluatedSearchGraphPath.html" title="class in jaicore.search.model.other">EvaluatedSearchGraphPath</a>&lt;N,A,V&gt;&gt;, jaicore.basic.ILoggingCustomizable, <a href="../../../../../jaicore/search/core/interfaces/IGraphSearchFactory.html" title="interface in jaicore.search.core.interfaces">IGraphSearchFactory</a>&lt;<a href="../../../../../jaicore/search/probleminputs/GraphSearchWithSubpathEvaluationsInput.html" title="class in jaicore.search.probleminputs">GraphSearchWithSubpathEvaluationsInput</a>&lt;N,A,V&gt;,<a href="../../../../../jaicore/search/model/other/EvaluatedSearchGraphPath.html" title="class in jaicore.search.model.other">EvaluatedSearchGraphPath</a>&lt;N,A,V&gt;,N,A&gt;, <a href="../../../../../jaicore/search/core/interfaces/IOptimalPathInORGraphSearchFactory.html" title="interface in jaicore.search.core.interfaces">IOptimalPathInORGraphSearchFactory</a>&lt;<a href="../../../../../jaicore/search/probleminputs/GraphSearchWithSubpathEvaluationsInput.html" title="class in jaicore.search.probleminputs">GraphSearchWithSubpathEvaluationsInput</a>&lt;N,A,V&gt;,N,A,V&gt;</dd>
 </dl>
 <hr>
 <br>
 <pre>public class <span class="typeNameLabel">StandardBestFirstFactory&lt;N,A,V extends java.lang.Comparable&lt;V&gt;&gt;</span>
-extends <a href="../../../../../jaicore/search/algorithms/standard/bestfirst/BestFirstFactory.html" title="class in jaicore.search.algorithms.standard.bestfirst">BestFirstFactory</a>&lt;<a href="../../../../../jaicore/search/probleminputs/GraphSearchWithSubpathEvaluationsInput.html" title="class in jaicore.search.probleminputs">GraphSearchWithSubpathEvaluationsInput</a>&lt;N,A,V&gt;,N,A,V&gt;</pre>
+extends <a href="../../../../../jaicore/search/algorithms/standard/bestfirst/BestFirstFactory.html" title="class in jaicore.search.algorithms.standard.bestfirst">BestFirstFactory</a>&lt;<a href="../../../../../jaicore/search/probleminputs/GraphSearchWithSubpathEvaluationsInput.html" title="class in jaicore.search.probleminputs">GraphSearchWithSubpathEvaluationsInput</a>&lt;N,A,V&gt;,N,A,V&gt;
+implements jaicore.basic.ILoggingCustomizable</pre>
 </li>
 </ul>
 </div>
@@ -167,22 +168,30 @@ extends <a href="../../../../../jaicore/search/algorithms/standard/bestfirst/Bes
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/search/algorithms/standard/bestfirst/StandardBestFirstFactory.html#getAlgorithm--">getAlgorithm</a></span>()</code>&nbsp;</td>
 </tr>
 <tr id="i1" class="rowColor">
+<td class="colFirst"><code>java.lang.String</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/search/algorithms/standard/bestfirst/StandardBestFirstFactory.html#getLoggerName--">getLoggerName</a></span>()</code>&nbsp;</td>
+</tr>
+<tr id="i2" class="altColor">
 <td class="colFirst"><code><a href="../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/INodeEvaluator.html" title="interface in jaicore.search.algorithms.standard.bestfirst.nodeevaluation">INodeEvaluator</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/bestfirst/StandardBestFirstFactory.html" title="type parameter in StandardBestFirstFactory">N</a>,<a href="../../../../../jaicore/search/algorithms/standard/bestfirst/StandardBestFirstFactory.html" title="type parameter in StandardBestFirstFactory">V</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/search/algorithms/standard/bestfirst/StandardBestFirstFactory.html#getPreferredNodeEvaluator--">getPreferredNodeEvaluator</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i2" class="altColor">
+<tr id="i3" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/search/algorithms/standard/bestfirst/StandardBestFirstFactory.html#setGraphGenerator-jaicore.search.core.interfaces.GraphGenerator-">setGraphGenerator</a></span>(<a href="../../../../../jaicore/search/core/interfaces/GraphGenerator.html" title="interface in jaicore.search.core.interfaces">GraphGenerator</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/bestfirst/StandardBestFirstFactory.html" title="type parameter in StandardBestFirstFactory">N</a>,<a href="../../../../../jaicore/search/algorithms/standard/bestfirst/StandardBestFirstFactory.html" title="type parameter in StandardBestFirstFactory">A</a>&gt;&nbsp;graphGenerator)</code>&nbsp;</td>
 </tr>
-<tr id="i3" class="rowColor">
+<tr id="i4" class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/search/algorithms/standard/bestfirst/StandardBestFirstFactory.html#setLoggerName-java.lang.String-">setLoggerName</a></span>(java.lang.String&nbsp;name)</code>&nbsp;</td>
+</tr>
+<tr id="i5" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/search/algorithms/standard/bestfirst/StandardBestFirstFactory.html#setNodeEvaluator-jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator-">setNodeEvaluator</a></span>(<a href="../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/INodeEvaluator.html" title="interface in jaicore.search.algorithms.standard.bestfirst.nodeevaluation">INodeEvaluator</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/bestfirst/StandardBestFirstFactory.html" title="type parameter in StandardBestFirstFactory">N</a>,<a href="../../../../../jaicore/search/algorithms/standard/bestfirst/StandardBestFirstFactory.html" title="type parameter in StandardBestFirstFactory">V</a>&gt;&nbsp;nodeEvaluator)</code>&nbsp;</td>
 </tr>
-<tr id="i4" class="altColor">
+<tr id="i6" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/search/algorithms/standard/bestfirst/StandardBestFirstFactory.html#setPreferredNodeEvaluator-jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator-">setPreferredNodeEvaluator</a></span>(<a href="../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/INodeEvaluator.html" title="interface in jaicore.search.algorithms.standard.bestfirst.nodeevaluation">INodeEvaluator</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/bestfirst/StandardBestFirstFactory.html" title="type parameter in StandardBestFirstFactory">N</a>,<a href="../../../../../jaicore/search/algorithms/standard/bestfirst/StandardBestFirstFactory.html" title="type parameter in StandardBestFirstFactory">V</a>&gt;&nbsp;preferredNodeEvaluator)</code>&nbsp;</td>
 </tr>
-<tr id="i5" class="rowColor">
+<tr id="i7" class="rowColor">
 <td class="colFirst"><code>java.lang.String</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/search/algorithms/standard/bestfirst/StandardBestFirstFactory.html#toString--">toString</a></span>()</code>&nbsp;</td>
 </tr>
@@ -192,7 +201,7 @@ extends <a href="../../../../../jaicore/search/algorithms/standard/bestfirst/Bes
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;jaicore.search.algorithms.standard.bestfirst.<a href="../../../../../jaicore/search/algorithms/standard/bestfirst/BestFirstFactory.html" title="class in jaicore.search.algorithms.standard.bestfirst">BestFirstFactory</a></h3>
-<code><a href="../../../../../jaicore/search/algorithms/standard/bestfirst/BestFirstFactory.html#getLoggerName--">getLoggerName</a>, <a href="../../../../../jaicore/search/algorithms/standard/bestfirst/BestFirstFactory.html#getTimeoutEvaluator--">getTimeoutEvaluator</a>, <a href="../../../../../jaicore/search/algorithms/standard/bestfirst/BestFirstFactory.html#getTimeoutForFInMS--">getTimeoutForFInMS</a>, <a href="../../../../../jaicore/search/algorithms/standard/bestfirst/BestFirstFactory.html#setLoggerName-java.lang.String-">setLoggerName</a>, <a href="../../../../../jaicore/search/algorithms/standard/bestfirst/BestFirstFactory.html#setTimeoutForFComputation-int-jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator-">setTimeoutForFComputation</a></code></li>
+<code><a href="../../../../../jaicore/search/algorithms/standard/bestfirst/BestFirstFactory.html#getTimeoutEvaluator--">getTimeoutEvaluator</a>, <a href="../../../../../jaicore/search/algorithms/standard/bestfirst/BestFirstFactory.html#getTimeoutForFInMS--">getTimeoutForFInMS</a>, <a href="../../../../../jaicore/search/algorithms/standard/bestfirst/BestFirstFactory.html#setTimeoutForFComputation-int-jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator-">setTimeoutForFComputation</a></code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.jaicore.basic.algorithm.AAlgorithmFactory">
@@ -304,13 +313,43 @@ extends <a href="../../../../../jaicore/search/algorithms/standard/bestfirst/Bes
 <a name="toString--">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>toString</h4>
 <pre>public&nbsp;java.lang.String&nbsp;toString()</pre>
 <dl>
 <dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
 <dd><code>toString</code>&nbsp;in class&nbsp;<code>java.lang.Object</code></dd>
+</dl>
+</li>
+</ul>
+<a name="getLoggerName--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getLoggerName</h4>
+<pre>public&nbsp;java.lang.String&nbsp;getLoggerName()</pre>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code>getLoggerName</code>&nbsp;in interface&nbsp;<code>jaicore.basic.ILoggingCustomizable</code></dd>
+<dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
+<dd><code><a href="../../../../../jaicore/search/algorithms/standard/bestfirst/BestFirstFactory.html#getLoggerName--">getLoggerName</a></code>&nbsp;in class&nbsp;<code><a href="../../../../../jaicore/search/algorithms/standard/bestfirst/BestFirstFactory.html" title="class in jaicore.search.algorithms.standard.bestfirst">BestFirstFactory</a>&lt;<a href="../../../../../jaicore/search/probleminputs/GraphSearchWithSubpathEvaluationsInput.html" title="class in jaicore.search.probleminputs">GraphSearchWithSubpathEvaluationsInput</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/bestfirst/StandardBestFirstFactory.html" title="type parameter in StandardBestFirstFactory">N</a>,<a href="../../../../../jaicore/search/algorithms/standard/bestfirst/StandardBestFirstFactory.html" title="type parameter in StandardBestFirstFactory">A</a>,<a href="../../../../../jaicore/search/algorithms/standard/bestfirst/StandardBestFirstFactory.html" title="type parameter in StandardBestFirstFactory">V</a> extends java.lang.Comparable&lt;<a href="../../../../../jaicore/search/algorithms/standard/bestfirst/StandardBestFirstFactory.html" title="type parameter in StandardBestFirstFactory">V</a>&gt;&gt;,<a href="../../../../../jaicore/search/algorithms/standard/bestfirst/StandardBestFirstFactory.html" title="type parameter in StandardBestFirstFactory">N</a>,<a href="../../../../../jaicore/search/algorithms/standard/bestfirst/StandardBestFirstFactory.html" title="type parameter in StandardBestFirstFactory">A</a>,<a href="../../../../../jaicore/search/algorithms/standard/bestfirst/StandardBestFirstFactory.html" title="type parameter in StandardBestFirstFactory">V</a> extends java.lang.Comparable&lt;<a href="../../../../../jaicore/search/algorithms/standard/bestfirst/StandardBestFirstFactory.html" title="type parameter in StandardBestFirstFactory">V</a>&gt;&gt;</code></dd>
+</dl>
+</li>
+</ul>
+<a name="setLoggerName-java.lang.String-">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>setLoggerName</h4>
+<pre>public&nbsp;void&nbsp;setLoggerName(java.lang.String&nbsp;name)</pre>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code>setLoggerName</code>&nbsp;in interface&nbsp;<code>jaicore.basic.ILoggingCustomizable</code></dd>
+<dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
+<dd><code><a href="../../../../../jaicore/search/algorithms/standard/bestfirst/BestFirstFactory.html#setLoggerName-java.lang.String-">setLoggerName</a></code>&nbsp;in class&nbsp;<code><a href="../../../../../jaicore/search/algorithms/standard/bestfirst/BestFirstFactory.html" title="class in jaicore.search.algorithms.standard.bestfirst">BestFirstFactory</a>&lt;<a href="../../../../../jaicore/search/probleminputs/GraphSearchWithSubpathEvaluationsInput.html" title="class in jaicore.search.probleminputs">GraphSearchWithSubpathEvaluationsInput</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/bestfirst/StandardBestFirstFactory.html" title="type parameter in StandardBestFirstFactory">N</a>,<a href="../../../../../jaicore/search/algorithms/standard/bestfirst/StandardBestFirstFactory.html" title="type parameter in StandardBestFirstFactory">A</a>,<a href="../../../../../jaicore/search/algorithms/standard/bestfirst/StandardBestFirstFactory.html" title="type parameter in StandardBestFirstFactory">V</a> extends java.lang.Comparable&lt;<a href="../../../../../jaicore/search/algorithms/standard/bestfirst/StandardBestFirstFactory.html" title="type parameter in StandardBestFirstFactory">V</a>&gt;&gt;,<a href="../../../../../jaicore/search/algorithms/standard/bestfirst/StandardBestFirstFactory.html" title="type parameter in StandardBestFirstFactory">N</a>,<a href="../../../../../jaicore/search/algorithms/standard/bestfirst/StandardBestFirstFactory.html" title="type parameter in StandardBestFirstFactory">A</a>,<a href="../../../../../jaicore/search/algorithms/standard/bestfirst/StandardBestFirstFactory.html" title="type parameter in StandardBestFirstFactory">V</a> extends java.lang.Comparable&lt;<a href="../../../../../jaicore/search/algorithms/standard/bestfirst/StandardBestFirstFactory.html" title="type parameter in StandardBestFirstFactory">V</a>&gt;&gt;</code></dd>
 </dl>
 </li>
 </ul>
