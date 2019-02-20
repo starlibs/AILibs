@@ -30,7 +30,7 @@ jobs:
     script:
     - "./gradlew build -x test"
     - bash .travis_push_javadoc.sh 
-    - ./gradlew sonarqube
+    - "./gradlew sonarqube -x test"
   - stage: deploy
     script: 
     - "./gradlew publish -PnexusBaseUrl=$nexusBaseUrl -PnexusUpRepo=$nexusUpRepo -PnexusUser=$nexusUser -PnexusPassword=$nexusPassword"
