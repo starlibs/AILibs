@@ -59,8 +59,6 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 
 	public MLPlan(final MLPlanBuilder builder, final Instances data) throws IOException {
 		super(builder.getAlgorithmConfig(), data);
-		builder.setHascoFactory(new HASCOViaFDAndBestFirstWithRandomCompletionsFactory(this.getConfig().randomSeed(), this.getConfig().numberOfRandomCompletions(), this.getConfig().timeoutForCandidateEvaluation(),
-				this.getConfig().timeoutForNodeEvaluation()));
 		builder.prepareNodeEvaluatorInFactoryWithData(data);
 
 		/* sanity checks */

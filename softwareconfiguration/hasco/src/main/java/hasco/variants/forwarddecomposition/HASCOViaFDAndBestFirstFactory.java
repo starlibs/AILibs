@@ -1,8 +1,5 @@
 package hasco.variants.forwarddecomposition;
 
-import hasco.core.DefaultHASCOPlanningGraphGeneratorDeriver;
-import hasco.core.HASCOFactory;
-import jaicore.planning.hierarchical.algorithms.forwarddecomposition.ForwardDecompositionReducer;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import jaicore.search.algorithms.standard.bestfirst.StandardBestFirstFactory;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
@@ -21,11 +18,10 @@ import jaicore.search.problemtransformers.GraphSearchProblemInputToGraphSearchWi
  *
  * @param <V>
  */
-public class HASCOViaFDAndBestFirstFactory<V extends Comparable<V>> extends HASCOFactory<GraphSearchWithSubpathEvaluationsInput<TFDNode, String, V>, TFDNode, String, V> {
+public class HASCOViaFDAndBestFirstFactory<V extends Comparable<V>> extends HASCOViaFDFactory<GraphSearchWithSubpathEvaluationsInput<TFDNode, String, V>, V> {
 	
 	public HASCOViaFDAndBestFirstFactory() {
 		super();
-		setPlanningGraphGeneratorDeriver(new DefaultHASCOPlanningGraphGeneratorDeriver<>(new ForwardDecompositionReducer<>()));
 		setSearchFactory(new StandardBestFirstFactory<>());
 	}
 	
