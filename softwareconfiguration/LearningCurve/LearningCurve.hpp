@@ -17,8 +17,8 @@ static int current_statement_begin__;
 
 stan::io::program_reader prog_reader__() {
     stan::io::program_reader reader;
-    reader.add_event(0, 0, "start", "examples/LearningCurve/LearningCurve.stan");
-    reader.add_event(53, 51, "end", "examples/LearningCurve/LearningCurve.stan");
+    reader.add_event(0, 0, "start", "D://Data/Uni/PG/Project/AILibs/softwareconfiguration/LearningCurve/LearningCurve.stan");
+    reader.add_event(117, 115, "end", "D://Data/Uni/PG/Project/AILibs/softwareconfiguration/LearningCurve/LearningCurve.stan");
     return reader;
 }
 
@@ -37,7 +37,7 @@ log_log_linear(const T0__& a,
     int current_statement_begin__ = -1;
     try {
 
-        current_statement_begin__ = 3;
+        current_statement_begin__ = 4;
         return stan::math::promote_scalar<fun_return_scalar_t__>(stan::math::log(((a * stan::math::log(x)) + b)));
     } catch (const std::exception& e) {
         stan::lang::rethrow_located(e, current_statement_begin__, prog_reader__());
@@ -73,7 +73,7 @@ pow_3(const T0__& c,
     int current_statement_begin__ = -1;
     try {
 
-        current_statement_begin__ = 7;
+        current_statement_begin__ = 8;
         return stan::math::promote_scalar<fun_return_scalar_t__>((c - (a * pow(x,-(alpha)))));
     } catch (const std::exception& e) {
         stan::lang::rethrow_located(e, current_statement_begin__, prog_reader__());
@@ -94,17 +94,13 @@ struct pow_3_functor__ {
     }
 };
 
-template <typename T0__, typename T1__, typename T2__, typename T3__, typename T4__, typename T5__, typename T6__, typename T7__>
-typename boost::math::tools::promote_args<T0__, T1__, T2__, T3__, typename boost::math::tools::promote_args<T4__, T5__, T6__, T7__>::type>::type
-f_comb(const T0__& w_0,
-           const T1__& w_1,
-           const T2__& a_0,
-           const T3__& b_0,
-           const T4__& c_1,
-           const T5__& a_1,
-           const T6__& alpha_1,
-           const T7__& x, std::ostream* pstream__) {
-    typedef typename boost::math::tools::promote_args<T0__, T1__, T2__, T3__, typename boost::math::tools::promote_args<T4__, T5__, T6__, T7__>::type>::type local_scalar_t__;
+template <typename T0__, typename T1__, typename T2__, typename T3__>
+typename boost::math::tools::promote_args<T0__, T1__, T2__, T3__>::type
+log_power(const T0__& a,
+              const T1__& b,
+              const T2__& c,
+              const T3__& x, std::ostream* pstream__) {
+    typedef typename boost::math::tools::promote_args<T0__, T1__, T2__, T3__>::type local_scalar_t__;
     typedef local_scalar_t__ fun_return_scalar_t__;
     const static bool propto__ = true;
     (void) propto__;
@@ -114,8 +110,160 @@ f_comb(const T0__& w_0,
     int current_statement_begin__ = -1;
     try {
 
-        current_statement_begin__ = 11;
-        return stan::math::promote_scalar<fun_return_scalar_t__>(((w_0 * log_log_linear(a_0,b_0,x, pstream__)) + (w_1 * pow_3(c_1,a_1,alpha_1,x, pstream__))));
+        current_statement_begin__ = 12;
+        return stan::math::promote_scalar<fun_return_scalar_t__>((a / (1 + pow((x / stan::math::exp(b)),c))));
+    } catch (const std::exception& e) {
+        stan::lang::rethrow_located(e, current_statement_begin__, prog_reader__());
+        // Next line prevents compiler griping about no return
+        throw std::runtime_error("*** IF YOU SEE THIS, PLEASE REPORT A BUG ***");
+    }
+}
+
+
+struct log_power_functor__ {
+    template <typename T0__, typename T1__, typename T2__, typename T3__>
+        typename boost::math::tools::promote_args<T0__, T1__, T2__, T3__>::type
+    operator()(const T0__& a,
+              const T1__& b,
+              const T2__& c,
+              const T3__& x, std::ostream* pstream__) const {
+        return log_power(a, b, c, x, pstream__);
+    }
+};
+
+template <typename T0__, typename T1__, typename T2__, typename T3__, typename T4__>
+typename boost::math::tools::promote_args<T0__, T1__, T2__, T3__, typename boost::math::tools::promote_args<T4__>::type>::type
+pow_4(const T0__& a,
+          const T1__& b,
+          const T2__& c,
+          const T3__& alpha,
+          const T4__& x, std::ostream* pstream__) {
+    typedef typename boost::math::tools::promote_args<T0__, T1__, T2__, T3__, typename boost::math::tools::promote_args<T4__>::type>::type local_scalar_t__;
+    typedef local_scalar_t__ fun_return_scalar_t__;
+    const static bool propto__ = true;
+    (void) propto__;
+        local_scalar_t__ DUMMY_VAR__(std::numeric_limits<double>::quiet_NaN());
+        (void) DUMMY_VAR__;  // suppress unused var warning
+
+    int current_statement_begin__ = -1;
+    try {
+
+        current_statement_begin__ = 16;
+        return stan::math::promote_scalar<fun_return_scalar_t__>((c - pow(((a * x) + b),-(alpha))));
+    } catch (const std::exception& e) {
+        stan::lang::rethrow_located(e, current_statement_begin__, prog_reader__());
+        // Next line prevents compiler griping about no return
+        throw std::runtime_error("*** IF YOU SEE THIS, PLEASE REPORT A BUG ***");
+    }
+}
+
+
+struct pow_4_functor__ {
+    template <typename T0__, typename T1__, typename T2__, typename T3__, typename T4__>
+        typename boost::math::tools::promote_args<T0__, T1__, T2__, T3__, typename boost::math::tools::promote_args<T4__>::type>::type
+    operator()(const T0__& a,
+          const T1__& b,
+          const T2__& c,
+          const T3__& alpha,
+          const T4__& x, std::ostream* pstream__) const {
+        return pow_4(a, b, c, alpha, x, pstream__);
+    }
+};
+
+template <typename T0__, typename T1__, typename T2__, typename T3__, typename T4__>
+typename boost::math::tools::promote_args<T0__, T1__, T2__, T3__, typename boost::math::tools::promote_args<T4__>::type>::type
+mmf(const T0__& alpha,
+        const T1__& beta,
+        const T2__& delta,
+        const T3__& kappa,
+        const T4__& x, std::ostream* pstream__) {
+    typedef typename boost::math::tools::promote_args<T0__, T1__, T2__, T3__, typename boost::math::tools::promote_args<T4__>::type>::type local_scalar_t__;
+    typedef local_scalar_t__ fun_return_scalar_t__;
+    const static bool propto__ = true;
+    (void) propto__;
+        local_scalar_t__ DUMMY_VAR__(std::numeric_limits<double>::quiet_NaN());
+        (void) DUMMY_VAR__;  // suppress unused var warning
+
+    int current_statement_begin__ = -1;
+    try {
+
+        current_statement_begin__ = 20;
+        return stan::math::promote_scalar<fun_return_scalar_t__>((alpha - ((alpha - beta) / (1 + pow((kappa * x),delta)))));
+    } catch (const std::exception& e) {
+        stan::lang::rethrow_located(e, current_statement_begin__, prog_reader__());
+        // Next line prevents compiler griping about no return
+        throw std::runtime_error("*** IF YOU SEE THIS, PLEASE REPORT A BUG ***");
+    }
+}
+
+
+struct mmf_functor__ {
+    template <typename T0__, typename T1__, typename T2__, typename T3__, typename T4__>
+        typename boost::math::tools::promote_args<T0__, T1__, T2__, T3__, typename boost::math::tools::promote_args<T4__>::type>::type
+    operator()(const T0__& alpha,
+        const T1__& beta,
+        const T2__& delta,
+        const T3__& kappa,
+        const T4__& x, std::ostream* pstream__) const {
+        return mmf(alpha, beta, delta, kappa, x, pstream__);
+    }
+};
+
+template <typename T0__, typename T1__, typename T2__, typename T3__, typename T4__>
+typename boost::math::tools::promote_args<T0__, T1__, T2__, T3__, typename boost::math::tools::promote_args<T4__>::type>::type
+exp_4(const T0__& a,
+          const T1__& b,
+          const T2__& c,
+          const T3__& alpha,
+          const T4__& x, std::ostream* pstream__) {
+    typedef typename boost::math::tools::promote_args<T0__, T1__, T2__, T3__, typename boost::math::tools::promote_args<T4__>::type>::type local_scalar_t__;
+    typedef local_scalar_t__ fun_return_scalar_t__;
+    const static bool propto__ = true;
+    (void) propto__;
+        local_scalar_t__ DUMMY_VAR__(std::numeric_limits<double>::quiet_NaN());
+        (void) DUMMY_VAR__;  // suppress unused var warning
+
+    int current_statement_begin__ = -1;
+    try {
+
+        current_statement_begin__ = 24;
+        return stan::math::promote_scalar<fun_return_scalar_t__>((c - stan::math::exp(((-(a) * pow(x,alpha)) + b))));
+    } catch (const std::exception& e) {
+        stan::lang::rethrow_located(e, current_statement_begin__, prog_reader__());
+        // Next line prevents compiler griping about no return
+        throw std::runtime_error("*** IF YOU SEE THIS, PLEASE REPORT A BUG ***");
+    }
+}
+
+
+struct exp_4_functor__ {
+    template <typename T0__, typename T1__, typename T2__, typename T3__, typename T4__>
+        typename boost::math::tools::promote_args<T0__, T1__, T2__, T3__, typename boost::math::tools::promote_args<T4__>::type>::type
+    operator()(const T0__& a,
+          const T1__& b,
+          const T2__& c,
+          const T3__& alpha,
+          const T4__& x, std::ostream* pstream__) const {
+        return exp_4(a, b, c, alpha, x, pstream__);
+    }
+};
+
+template <typename T0__, typename T1__>
+typename boost::math::tools::promote_args<T0__, T1__>::type
+f_comb(const std::vector<T0__>& e,
+           const T1__& x, std::ostream* pstream__) {
+    typedef typename boost::math::tools::promote_args<T0__, T1__>::type local_scalar_t__;
+    typedef local_scalar_t__ fun_return_scalar_t__;
+    const static bool propto__ = true;
+    (void) propto__;
+        local_scalar_t__ DUMMY_VAR__(std::numeric_limits<double>::quiet_NaN());
+        (void) DUMMY_VAR__;  // suppress unused var warning
+
+    int current_statement_begin__ = -1;
+    try {
+
+        current_statement_begin__ = 28;
+        return stan::math::promote_scalar<fun_return_scalar_t__>(((((((get_base1(e,1,"e",1) * log_log_linear(get_base1(e,2,"e",1),get_base1(e,3,"e",1),x, pstream__)) + (get_base1(e,4,"e",1) * pow_3(get_base1(e,5,"e",1),get_base1(e,6,"e",1),get_base1(e,7,"e",1),x, pstream__))) + (get_base1(e,8,"e",1) * log_power(get_base1(e,9,"e",1),get_base1(e,10,"e",1),get_base1(e,11,"e",1),x, pstream__))) + (get_base1(e,12,"e",1) * pow_4(get_base1(e,13,"e",1),get_base1(e,14,"e",1),get_base1(e,15,"e",1),get_base1(e,16,"e",1),x, pstream__))) + (get_base1(e,17,"e",1) * mmf(get_base1(e,18,"e",1),get_base1(e,19,"e",1),get_base1(e,20,"e",1),get_base1(e,21,"e",1),x, pstream__))) + (get_base1(e,22,"e",1) * exp_4(get_base1(e,23,"e",1),get_base1(e,24,"e",1),get_base1(e,25,"e",1),get_base1(e,26,"e",1),x, pstream__))));
     } catch (const std::exception& e) {
         stan::lang::rethrow_located(e, current_statement_begin__, prog_reader__());
         // Next line prevents compiler griping about no return
@@ -125,23 +273,99 @@ f_comb(const T0__& w_0,
 
 
 struct f_comb_functor__ {
-    template <typename T0__, typename T1__, typename T2__, typename T3__, typename T4__, typename T5__, typename T6__, typename T7__>
-        typename boost::math::tools::promote_args<T0__, T1__, T2__, T3__, typename boost::math::tools::promote_args<T4__, T5__, T6__, T7__>::type>::type
-    operator()(const T0__& w_0,
-           const T1__& w_1,
-           const T2__& a_0,
-           const T3__& b_0,
-           const T4__& c_1,
-           const T5__& a_1,
-           const T6__& alpha_1,
-           const T7__& x, std::ostream* pstream__) const {
-        return f_comb(w_0, w_1, a_0, b_0, c_1, a_1, alpha_1, x, pstream__);
+    template <typename T0__, typename T1__>
+        typename boost::math::tools::promote_args<T0__, T1__>::type
+    operator()(const std::vector<T0__>& e,
+           const T1__& x, std::ostream* pstream__) const {
+        return f_comb(e, x, pstream__);
+    }
+};
+
+template <bool propto, typename T0__>
+typename boost::math::tools::promote_args<T0__>::type
+curveSlopeDist_log(const std::vector<T0__>& e,
+                       const int& c,
+                       const int& s, std::ostream* pstream__) {
+    typedef typename boost::math::tools::promote_args<T0__>::type local_scalar_t__;
+    typedef local_scalar_t__ fun_return_scalar_t__;
+    const static bool propto__ = true;
+    (void) propto__;
+        local_scalar_t__ DUMMY_VAR__(std::numeric_limits<double>::quiet_NaN());
+        (void) DUMMY_VAR__;  // suppress unused var warning
+
+    int current_statement_begin__ = -1;
+    try {
+
+        current_statement_begin__ = 37;
+        if (as_bool(logical_lt(get_base1(e,1,"e",1),0))) {
+            current_statement_begin__ = 38;
+            return stan::math::promote_scalar<fun_return_scalar_t__>(0);
+        }
+        current_statement_begin__ = 39;
+        if (as_bool(logical_lt(get_base1(e,4,"e",1),0))) {
+            current_statement_begin__ = 40;
+            return stan::math::promote_scalar<fun_return_scalar_t__>(0);
+        }
+        current_statement_begin__ = 41;
+        if (as_bool(logical_lt(get_base1(e,8,"e",1),0))) {
+            current_statement_begin__ = 42;
+            return stan::math::promote_scalar<fun_return_scalar_t__>(0);
+        }
+        current_statement_begin__ = 43;
+        if (as_bool(logical_lt(get_base1(e,12,"e",1),0))) {
+            current_statement_begin__ = 44;
+            return stan::math::promote_scalar<fun_return_scalar_t__>(0);
+        }
+        current_statement_begin__ = 45;
+        if (as_bool(logical_lt(get_base1(e,17,"e",1),0))) {
+            current_statement_begin__ = 46;
+            return stan::math::promote_scalar<fun_return_scalar_t__>(0);
+        }
+        current_statement_begin__ = 47;
+        if (as_bool(logical_lt(get_base1(e,22,"e",1),0))) {
+            current_statement_begin__ = 48;
+            return stan::math::promote_scalar<fun_return_scalar_t__>(0);
+        }
+        current_statement_begin__ = 49;
+        for (int k = 1; k <= c; ++k) {
+            current_statement_begin__ = 50;
+            if (as_bool(logical_gt(f_comb(e,(k * s), pstream__),f_comb(e,((s * k) + s), pstream__)))) {
+                current_statement_begin__ = 51;
+                return stan::math::promote_scalar<fun_return_scalar_t__>(0);
+            }
+        }
+        current_statement_begin__ = 52;
+        return stan::math::promote_scalar<fun_return_scalar_t__>(1);
+    } catch (const std::exception& e) {
+        stan::lang::rethrow_located(e, current_statement_begin__, prog_reader__());
+        // Next line prevents compiler griping about no return
+        throw std::runtime_error("*** IF YOU SEE THIS, PLEASE REPORT A BUG ***");
+    }
+}
+template <typename T0__>
+typename boost::math::tools::promote_args<T0__>::type
+curveSlopeDist_log(const std::vector<T0__>& e,
+                       const int& c,
+                       const int& s, std::ostream* pstream__) {
+    return curveSlopeDist_log<false>(e,c,s, pstream__);
+}
+
+
+struct curveSlopeDist_log_functor__ {
+    template <bool propto, typename T0__>
+        typename boost::math::tools::promote_args<T0__>::type
+    operator()(const std::vector<T0__>& e,
+                       const int& c,
+                       const int& s, std::ostream* pstream__) const {
+        return curveSlopeDist_log(e, c, s, pstream__);
     }
 };
 
 class LearningCurve_model : public prob_grad {
 private:
     int N;
+    int c;
+    int s;
     vector_d x;
     vector_d y;
 public:
@@ -180,13 +404,25 @@ public:
 
         // initialize member variables
         try {
-            current_statement_begin__ = 17;
+            current_statement_begin__ = 57;
             context__.validate_dims("data initialization", "N", "int", context__.to_vec());
             N = int(0);
             vals_i__ = context__.vals_i("N");
             pos__ = 0;
             N = vals_i__[pos__++];
-            current_statement_begin__ = 18;
+            current_statement_begin__ = 58;
+            context__.validate_dims("data initialization", "c", "int", context__.to_vec());
+            c = int(0);
+            vals_i__ = context__.vals_i("c");
+            pos__ = 0;
+            c = vals_i__[pos__++];
+            current_statement_begin__ = 59;
+            context__.validate_dims("data initialization", "s", "int", context__.to_vec());
+            s = int(0);
+            vals_i__ = context__.vals_i("s");
+            pos__ = 0;
+            s = vals_i__[pos__++];
+            current_statement_begin__ = 60;
             validate_non_negative_index("x", "N", N);
             context__.validate_dims("data initialization", "x", "vector_d", context__.to_vec(N));
             validate_non_negative_index("x", "N", N);
@@ -197,7 +433,7 @@ public:
             for (size_t i_vec__ = 0; i_vec__ < x_i_vec_lim__; ++i_vec__) {
                 x[i_vec__] = vals_r__[pos__++];
             }
-            current_statement_begin__ = 19;
+            current_statement_begin__ = 61;
             validate_non_negative_index("y", "N", N);
             context__.validate_dims("data initialization", "y", "vector_d", context__.to_vec(N));
             validate_non_negative_index("y", "N", N);
@@ -210,9 +446,11 @@ public:
             }
 
             // validate, data variables
-            current_statement_begin__ = 17;
-            current_statement_begin__ = 18;
-            current_statement_begin__ = 19;
+            current_statement_begin__ = 57;
+            current_statement_begin__ = 58;
+            current_statement_begin__ = 59;
+            current_statement_begin__ = 60;
+            current_statement_begin__ = 61;
             // initialize data variables
 
 
@@ -221,21 +459,10 @@ public:
             // validate, set parameter ranges
             num_params_r__ = 0U;
             param_ranges_i__.clear();
-            current_statement_begin__ = 23;
-            ++num_params_r__;
-            current_statement_begin__ = 24;
-            ++num_params_r__;
-            current_statement_begin__ = 25;
-            ++num_params_r__;
-            current_statement_begin__ = 26;
-            ++num_params_r__;
-            current_statement_begin__ = 27;
-            ++num_params_r__;
-            current_statement_begin__ = 28;
-            ++num_params_r__;
-            current_statement_begin__ = 29;
-            ++num_params_r__;
-            current_statement_begin__ = 31;
+            current_statement_begin__ = 65;
+            validate_non_negative_index("e", "26", 26);
+            num_params_r__ += 26;
+            current_statement_begin__ = 94;
             ++num_params_r__;
         } catch (const std::exception& e) {
             stan::lang::rethrow_located(e, current_statement_begin__, prog_reader__());
@@ -257,95 +484,20 @@ public:
         std::vector<double> vals_r__;
         std::vector<int> vals_i__;
 
-        if (!(context__.contains_r("w_0")))
-            throw std::runtime_error("variable w_0 missing");
-        vals_r__ = context__.vals_r("w_0");
+        if (!(context__.contains_r("e")))
+            throw std::runtime_error("variable e missing");
+        vals_r__ = context__.vals_r("e");
         pos__ = 0U;
-        context__.validate_dims("initialization", "w_0", "double", context__.to_vec());
-        double w_0(0);
-        w_0 = vals_r__[pos__++];
-        try {
-            writer__.scalar_lb_unconstrain(0,w_0);
+        validate_non_negative_index("e", "26", 26);
+        context__.validate_dims("initialization", "e", "double", context__.to_vec(26));
+        std::vector<double> e(26,double(0));
+        for (int i0__ = 0U; i0__ < 26; ++i0__)
+            e[i0__] = vals_r__[pos__++];
+        for (int i0__ = 0U; i0__ < 26; ++i0__)
+            try {
+            writer__.scalar_unconstrain(e[i0__]);
         } catch (const std::exception& e) { 
-            throw std::runtime_error(std::string("Error transforming variable w_0: ") + e.what());
-        }
-
-        if (!(context__.contains_r("w_1")))
-            throw std::runtime_error("variable w_1 missing");
-        vals_r__ = context__.vals_r("w_1");
-        pos__ = 0U;
-        context__.validate_dims("initialization", "w_1", "double", context__.to_vec());
-        double w_1(0);
-        w_1 = vals_r__[pos__++];
-        try {
-            writer__.scalar_lb_unconstrain(0,w_1);
-        } catch (const std::exception& e) { 
-            throw std::runtime_error(std::string("Error transforming variable w_1: ") + e.what());
-        }
-
-        if (!(context__.contains_r("a_0")))
-            throw std::runtime_error("variable a_0 missing");
-        vals_r__ = context__.vals_r("a_0");
-        pos__ = 0U;
-        context__.validate_dims("initialization", "a_0", "double", context__.to_vec());
-        double a_0(0);
-        a_0 = vals_r__[pos__++];
-        try {
-            writer__.scalar_unconstrain(a_0);
-        } catch (const std::exception& e) { 
-            throw std::runtime_error(std::string("Error transforming variable a_0: ") + e.what());
-        }
-
-        if (!(context__.contains_r("b_0")))
-            throw std::runtime_error("variable b_0 missing");
-        vals_r__ = context__.vals_r("b_0");
-        pos__ = 0U;
-        context__.validate_dims("initialization", "b_0", "double", context__.to_vec());
-        double b_0(0);
-        b_0 = vals_r__[pos__++];
-        try {
-            writer__.scalar_unconstrain(b_0);
-        } catch (const std::exception& e) { 
-            throw std::runtime_error(std::string("Error transforming variable b_0: ") + e.what());
-        }
-
-        if (!(context__.contains_r("c_1")))
-            throw std::runtime_error("variable c_1 missing");
-        vals_r__ = context__.vals_r("c_1");
-        pos__ = 0U;
-        context__.validate_dims("initialization", "c_1", "double", context__.to_vec());
-        double c_1(0);
-        c_1 = vals_r__[pos__++];
-        try {
-            writer__.scalar_unconstrain(c_1);
-        } catch (const std::exception& e) { 
-            throw std::runtime_error(std::string("Error transforming variable c_1: ") + e.what());
-        }
-
-        if (!(context__.contains_r("a_1")))
-            throw std::runtime_error("variable a_1 missing");
-        vals_r__ = context__.vals_r("a_1");
-        pos__ = 0U;
-        context__.validate_dims("initialization", "a_1", "double", context__.to_vec());
-        double a_1(0);
-        a_1 = vals_r__[pos__++];
-        try {
-            writer__.scalar_unconstrain(a_1);
-        } catch (const std::exception& e) { 
-            throw std::runtime_error(std::string("Error transforming variable a_1: ") + e.what());
-        }
-
-        if (!(context__.contains_r("alpha_1")))
-            throw std::runtime_error("variable alpha_1 missing");
-        vals_r__ = context__.vals_r("alpha_1");
-        pos__ = 0U;
-        context__.validate_dims("initialization", "alpha_1", "double", context__.to_vec());
-        double alpha_1(0);
-        alpha_1 = vals_r__[pos__++];
-        try {
-            writer__.scalar_unconstrain(alpha_1);
-        } catch (const std::exception& e) { 
-            throw std::runtime_error(std::string("Error transforming variable alpha_1: ") + e.what());
+            throw std::runtime_error(std::string("Error transforming variable e: ") + e.what());
         }
 
         if (!(context__.contains_r("sigma")))
@@ -394,54 +546,15 @@ public:
             // model parameters
             stan::io::reader<local_scalar_t__> in__(params_r__,params_i__);
 
-            local_scalar_t__ w_0;
-            (void) w_0;  // dummy to suppress unused var warning
-            if (jacobian__)
-                w_0 = in__.scalar_lb_constrain(0,lp__);
-            else
-                w_0 = in__.scalar_lb_constrain(0);
-
-            local_scalar_t__ w_1;
-            (void) w_1;  // dummy to suppress unused var warning
-            if (jacobian__)
-                w_1 = in__.scalar_lb_constrain(0,lp__);
-            else
-                w_1 = in__.scalar_lb_constrain(0);
-
-            local_scalar_t__ a_0;
-            (void) a_0;  // dummy to suppress unused var warning
-            if (jacobian__)
-                a_0 = in__.scalar_constrain(lp__);
-            else
-                a_0 = in__.scalar_constrain();
-
-            local_scalar_t__ b_0;
-            (void) b_0;  // dummy to suppress unused var warning
-            if (jacobian__)
-                b_0 = in__.scalar_constrain(lp__);
-            else
-                b_0 = in__.scalar_constrain();
-
-            local_scalar_t__ c_1;
-            (void) c_1;  // dummy to suppress unused var warning
-            if (jacobian__)
-                c_1 = in__.scalar_constrain(lp__);
-            else
-                c_1 = in__.scalar_constrain();
-
-            local_scalar_t__ a_1;
-            (void) a_1;  // dummy to suppress unused var warning
-            if (jacobian__)
-                a_1 = in__.scalar_constrain(lp__);
-            else
-                a_1 = in__.scalar_constrain();
-
-            local_scalar_t__ alpha_1;
-            (void) alpha_1;  // dummy to suppress unused var warning
-            if (jacobian__)
-                alpha_1 = in__.scalar_constrain(lp__);
-            else
-                alpha_1 = in__.scalar_constrain();
+            vector<local_scalar_t__> e;
+            size_t dim_e_0__ = 26;
+            e.reserve(dim_e_0__);
+            for (size_t k_0__ = 0; k_0__ < dim_e_0__; ++k_0__) {
+                if (jacobian__)
+                    e.push_back(in__.scalar_constrain(lp__));
+                else
+                    e.push_back(in__.scalar_constrain());
+            }
 
             local_scalar_t__ sigma;
             (void) sigma;  // dummy to suppress unused var warning
@@ -462,7 +575,7 @@ public:
 
             // model body
             {
-            current_statement_begin__ = 38;
+            current_statement_begin__ = 101;
             validate_non_negative_index("ypred", "N", N);
             Eigen::Matrix<local_scalar_t__,Eigen::Dynamic,1>  ypred(static_cast<Eigen::VectorXd::Index>(N));
             (void) ypred;  // dummy to suppress unused var warning
@@ -471,21 +584,19 @@ public:
             stan::math::fill(ypred,DUMMY_VAR__);
 
 
-            current_statement_begin__ = 40;
+            current_statement_begin__ = 103;
             lp_accum__.add(normal_log<propto__>(sigma, 0, 1));
-            current_statement_begin__ = 41;
-            lp_accum__.add(normal_log<propto__>(c_1, 1, 1));
-            current_statement_begin__ = 42;
-            lp_accum__.add(normal_log<propto__>(a_1, 1, 1));
-            current_statement_begin__ = 45;
+            current_statement_begin__ = 106;
+            lp_accum__.add(curveSlopeDist_log<propto__>(e, c, s, pstream__));
+            current_statement_begin__ = 109;
             for (int n = 1; n <= N; ++n) {
-                current_statement_begin__ = 46;
+                current_statement_begin__ = 110;
                 stan::model::assign(ypred, 
                             stan::model::cons_list(stan::model::index_uni(n), stan::model::nil_index_list()), 
-                            f_comb(w_0,w_1,a_0,b_0,c_1,a_1,alpha_1,get_base1(x,n,"x",1), pstream__), 
+                            f_comb(e,get_base1(x,n,"x",1), pstream__), 
                             "assigning variable ypred");
             }
-            current_statement_begin__ = 48;
+            current_statement_begin__ = 112;
             lp_accum__.add(normal_log<propto__>(y, ypred, sigma));
             }
 
@@ -514,13 +625,7 @@ public:
 
     void get_param_names(std::vector<std::string>& names__) const {
         names__.resize(0);
-        names__.push_back("w_0");
-        names__.push_back("w_1");
-        names__.push_back("a_0");
-        names__.push_back("b_0");
-        names__.push_back("c_1");
-        names__.push_back("a_1");
-        names__.push_back("alpha_1");
+        names__.push_back("e");
         names__.push_back("sigma");
     }
 
@@ -529,18 +634,7 @@ public:
         dimss__.resize(0);
         std::vector<size_t> dims__;
         dims__.resize(0);
-        dimss__.push_back(dims__);
-        dims__.resize(0);
-        dimss__.push_back(dims__);
-        dims__.resize(0);
-        dimss__.push_back(dims__);
-        dims__.resize(0);
-        dimss__.push_back(dims__);
-        dims__.resize(0);
-        dimss__.push_back(dims__);
-        dims__.resize(0);
-        dimss__.push_back(dims__);
-        dims__.resize(0);
+        dims__.push_back(26);
         dimss__.push_back(dims__);
         dims__.resize(0);
         dimss__.push_back(dims__);
@@ -561,21 +655,15 @@ public:
         static const char* function__ = "LearningCurve_model_namespace::write_array";
         (void) function__;  // dummy to suppress unused var warning
         // read-transform, write parameters
-        double w_0 = in__.scalar_lb_constrain(0);
-        double w_1 = in__.scalar_lb_constrain(0);
-        double a_0 = in__.scalar_constrain();
-        double b_0 = in__.scalar_constrain();
-        double c_1 = in__.scalar_constrain();
-        double a_1 = in__.scalar_constrain();
-        double alpha_1 = in__.scalar_constrain();
+        vector<double> e;
+        size_t dim_e_0__ = 26;
+        for (size_t k_0__ = 0; k_0__ < dim_e_0__; ++k_0__) {
+            e.push_back(in__.scalar_constrain());
+        }
         double sigma = in__.scalar_lb_constrain(0);
-        vars__.push_back(w_0);
-        vars__.push_back(w_1);
-        vars__.push_back(a_0);
-        vars__.push_back(b_0);
-        vars__.push_back(c_1);
-        vars__.push_back(a_1);
-        vars__.push_back(alpha_1);
+            for (int k_0__ = 0; k_0__ < 26; ++k_0__) {
+            vars__.push_back(e[k_0__]);
+            }
         vars__.push_back(sigma);
 
         // declare and define transformed parameters
@@ -637,27 +725,11 @@ public:
                                  bool include_tparams__ = true,
                                  bool include_gqs__ = true) const {
         std::stringstream param_name_stream__;
-        param_name_stream__.str(std::string());
-        param_name_stream__ << "w_0";
-        param_names__.push_back(param_name_stream__.str());
-        param_name_stream__.str(std::string());
-        param_name_stream__ << "w_1";
-        param_names__.push_back(param_name_stream__.str());
-        param_name_stream__.str(std::string());
-        param_name_stream__ << "a_0";
-        param_names__.push_back(param_name_stream__.str());
-        param_name_stream__.str(std::string());
-        param_name_stream__ << "b_0";
-        param_names__.push_back(param_name_stream__.str());
-        param_name_stream__.str(std::string());
-        param_name_stream__ << "c_1";
-        param_names__.push_back(param_name_stream__.str());
-        param_name_stream__.str(std::string());
-        param_name_stream__ << "a_1";
-        param_names__.push_back(param_name_stream__.str());
-        param_name_stream__.str(std::string());
-        param_name_stream__ << "alpha_1";
-        param_names__.push_back(param_name_stream__.str());
+        for (int k_0__ = 1; k_0__ <= 26; ++k_0__) {
+            param_name_stream__.str(std::string());
+            param_name_stream__ << "e" << '.' << k_0__;
+            param_names__.push_back(param_name_stream__.str());
+        }
         param_name_stream__.str(std::string());
         param_name_stream__ << "sigma";
         param_names__.push_back(param_name_stream__.str());
@@ -676,27 +748,11 @@ public:
                                    bool include_tparams__ = true,
                                    bool include_gqs__ = true) const {
         std::stringstream param_name_stream__;
-        param_name_stream__.str(std::string());
-        param_name_stream__ << "w_0";
-        param_names__.push_back(param_name_stream__.str());
-        param_name_stream__.str(std::string());
-        param_name_stream__ << "w_1";
-        param_names__.push_back(param_name_stream__.str());
-        param_name_stream__.str(std::string());
-        param_name_stream__ << "a_0";
-        param_names__.push_back(param_name_stream__.str());
-        param_name_stream__.str(std::string());
-        param_name_stream__ << "b_0";
-        param_names__.push_back(param_name_stream__.str());
-        param_name_stream__.str(std::string());
-        param_name_stream__ << "c_1";
-        param_names__.push_back(param_name_stream__.str());
-        param_name_stream__.str(std::string());
-        param_name_stream__ << "a_1";
-        param_names__.push_back(param_name_stream__.str());
-        param_name_stream__.str(std::string());
-        param_name_stream__ << "alpha_1";
-        param_names__.push_back(param_name_stream__.str());
+        for (int k_0__ = 1; k_0__ <= 26; ++k_0__) {
+            param_name_stream__.str(std::string());
+            param_name_stream__ << "e" << '.' << k_0__;
+            param_names__.push_back(param_name_stream__.str());
+        }
         param_name_stream__.str(std::string());
         param_name_stream__ << "sigma";
         param_names__.push_back(param_name_stream__.str());
