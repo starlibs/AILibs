@@ -18,6 +18,7 @@ cache:
   directories:
   - "$HOME/.gradle/caches/"
   - "$HOME/.gradle/wrapper/"
+  - "$HOME/.sonar/cache"
 # overriding the install step is important to avoid that ./gradlew assemble is run (which is the default in travis)
 install:
   - true
@@ -28,10 +29,10 @@ jobs:
   - stage: compile
     script:
     - "./gradlew build -x test"
-    - bash .travis_push_javadoc.sh    
+    - bash .travis_push_javadoc.sh 
+    - sonar-scanner
   - stage: deploy
     script: 
-    - sonar-scanner 
     - "./gradlew publish -PnexusBaseUrl=$nexusBaseUrl -PnexusUpRepo=$nexusUpRepo -PnexusUser=$nexusUser -PnexusPassword=$nexusPassword"
 addons:
   sonarcloud:
