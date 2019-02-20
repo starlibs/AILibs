@@ -34,6 +34,9 @@ jobs:
   - stage: deploy
     script: 
     - "./gradlew publish -PnexusBaseUrl=$nexusBaseUrl -PnexusUpRepo=$nexusUpRepo -PnexusUser=$nexusUser -PnexusPassword=$nexusPassword"
+addons:
+  sonarcloud:
+    organization: "starlibs"
 env:
   global:
   - secure: FkCxTnMbWP3Whd61puUXI6VJhhhXTeFby0k2Rmq01dYZN8asZ1FCoQFw1dEOlcx7dWLYFvb1feSmi7YOW+u6WznrbORu41NWFpA5VvGJyPkrsrhNN6xaNy7PNfFCMjmhZqcOAUoCCDwGzyUe17qoip1NfjNiIIFa+G6HNATUaODeGBtDBYpKVw3tvzM/rz14cIx2U4wF1WphxaIME3X5pzBNm0JK0NsYOZOHpb96O5t0lVkQXFgsm2A7Q0yWV+fGENoqfHZlnKmuiXjd7VJDNl9VMPjCLbcgVeN7O7OSzOQ9Omb9YwesV2nMUPEX6g2/v9yzFOoDpghtKEU9jZaLpIfmHsRafCNx0jBdy482cjznfEYaowT4CG/lGi4tT8gMYxzJGsT8TAdHoyzX7ZZUJsY+LWqb0K45YTup51Ynbuz2xeGzWo6Ydm9kYeuBcmcMwEjXFcSubalobT3JGlKUIgW9abEUfTWZwuhAzsRJ6uzB2N7pVqC/MyGXvnDJcQNDObHlmeKA0pWqZ9yIWYxHqByuwWfs+Ac63XJOk1qboWBfRXQhTWI9qQPV1W1j0kHU4S+MA2vPS1P7evzcU+Ci/YdCDwONiZ8Df1mevV3U8uZPmMcb5rgJ2YQT7xlSahTE1n7St8SroP6vFdiCgKuj8RRAIn9IZM6uTBAN1dKyDxQ=
