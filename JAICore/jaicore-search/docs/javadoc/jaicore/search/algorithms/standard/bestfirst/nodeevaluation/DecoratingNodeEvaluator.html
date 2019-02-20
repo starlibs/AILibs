@@ -16,7 +16,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10,"i9":10};
+var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10,"i9":10,"i10":10,"i11":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -106,7 +106,7 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <dl>
 <dt>All Implemented Interfaces:</dt>
-<dd><a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/ICancelableNodeEvaluator.html" title="interface in jaicore.search.algorithms.standard.bestfirst.nodeevaluation">ICancelableNodeEvaluator</a>, <a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/INodeEvaluator.html" title="interface in jaicore.search.algorithms.standard.bestfirst.nodeevaluation">INodeEvaluator</a>&lt;T,V&gt;</dd>
+<dd>jaicore.basic.ILoggingCustomizable, <a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/ICancelableNodeEvaluator.html" title="interface in jaicore.search.algorithms.standard.bestfirst.nodeevaluation">ICancelableNodeEvaluator</a>, <a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/INodeEvaluator.html" title="interface in jaicore.search.algorithms.standard.bestfirst.nodeevaluation">INodeEvaluator</a>&lt;T,V&gt;, <a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/IPotentiallyGraphDependentNodeEvaluator.html" title="interface in jaicore.search.algorithms.standard.bestfirst.nodeevaluation">IPotentiallyGraphDependentNodeEvaluator</a>&lt;T,V&gt;, <a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/IPotentiallySolutionReportingNodeEvaluator.html" title="interface in jaicore.search.algorithms.standard.bestfirst.nodeevaluation">IPotentiallySolutionReportingNodeEvaluator</a>&lt;T,V&gt;</dd>
 </dl>
 <dl>
 <dt>Direct Known Subclasses:</dt>
@@ -116,7 +116,7 @@ var activeTableTab = "activeTableTab";
 <br>
 <pre>public abstract class <span class="typeNameLabel">DecoratingNodeEvaluator&lt;T,V extends java.lang.Comparable&lt;V&gt;&gt;</span>
 extends java.lang.Object
-implements <a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/INodeEvaluator.html" title="interface in jaicore.search.algorithms.standard.bestfirst.nodeevaluation">INodeEvaluator</a>&lt;T,V&gt;, <a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/ICancelableNodeEvaluator.html" title="interface in jaicore.search.algorithms.standard.bestfirst.nodeevaluation">ICancelableNodeEvaluator</a></pre>
+implements <a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/INodeEvaluator.html" title="interface in jaicore.search.algorithms.standard.bestfirst.nodeevaluation">INodeEvaluator</a>&lt;T,V&gt;, <a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/ICancelableNodeEvaluator.html" title="interface in jaicore.search.algorithms.standard.bestfirst.nodeevaluation">ICancelableNodeEvaluator</a>, jaicore.basic.ILoggingCustomizable, <a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/IPotentiallyGraphDependentNodeEvaluator.html" title="interface in jaicore.search.algorithms.standard.bestfirst.nodeevaluation">IPotentiallyGraphDependentNodeEvaluator</a>&lt;T,V&gt;, <a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/IPotentiallySolutionReportingNodeEvaluator.html" title="interface in jaicore.search.algorithms.standard.bestfirst.nodeevaluation">IPotentiallySolutionReportingNodeEvaluator</a>&lt;T,V&gt;</pre>
 </li>
 </ul>
 </div>
@@ -157,40 +157,52 @@ implements <a href="../../../../../../jaicore/search/algorithms/standard/bestfir
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/DecoratingNodeEvaluator.html#cancel--">cancel</a></span>()</code>&nbsp;</td>
 </tr>
 <tr id="i1" class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/DecoratingNodeEvaluator.html#doesDecoratedEvaluatorReportSolutions--">doesDecoratedEvaluatorReportSolutions</a></span>()</code>&nbsp;</td>
+</tr>
+<tr id="i2" class="altColor">
 <td class="colFirst"><code><a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/DecoratingNodeEvaluator.html" title="type parameter in DecoratingNodeEvaluator">V</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/DecoratingNodeEvaluator.html#f-jaicore.search.model.travesaltree.Node-">f</a></span>(<a href="../../../../../../jaicore/search/model/travesaltree/Node.html" title="class in jaicore.search.model.travesaltree">Node</a>&lt;<a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/DecoratingNodeEvaluator.html" title="type parameter in DecoratingNodeEvaluator">T</a>,?&gt;&nbsp;node)</code>&nbsp;</td>
 </tr>
-<tr id="i2" class="altColor">
+<tr id="i3" class="rowColor">
 <td class="colFirst"><code><a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/INodeEvaluator.html" title="interface in jaicore.search.algorithms.standard.bestfirst.nodeevaluation">INodeEvaluator</a>&lt;<a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/DecoratingNodeEvaluator.html" title="type parameter in DecoratingNodeEvaluator">T</a>,<a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/DecoratingNodeEvaluator.html" title="type parameter in DecoratingNodeEvaluator">V</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/DecoratingNodeEvaluator.html#getEvaluator--">getEvaluator</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i3" class="rowColor">
-<td class="colFirst"><code>boolean</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/DecoratingNodeEvaluator.html#isDecoratedEvaluatorCancelable--">isDecoratedEvaluatorCancelable</a></span>()</code>&nbsp;</td>
-</tr>
 <tr id="i4" class="altColor">
-<td class="colFirst"><code>boolean</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/DecoratingNodeEvaluator.html#isDecoratedEvaluatorGraphDependent--">isDecoratedEvaluatorGraphDependent</a></span>()</code>&nbsp;</td>
+<td class="colFirst"><code>java.lang.String</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/DecoratingNodeEvaluator.html#getLoggerName--">getLoggerName</a></span>()</code>&nbsp;</td>
 </tr>
 <tr id="i5" class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/DecoratingNodeEvaluator.html#isDecoratedEvaluatorSolutionReporter--">isDecoratedEvaluatorSolutionReporter</a></span>()</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/DecoratingNodeEvaluator.html#isDecoratedEvaluatorCancelable--">isDecoratedEvaluatorCancelable</a></span>()</code>&nbsp;</td>
 </tr>
 <tr id="i6" class="altColor">
 <td class="colFirst"><code>boolean</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/DecoratingNodeEvaluator.html#isGraphDependent--">isGraphDependent</a></span>()</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/DecoratingNodeEvaluator.html#isDecoratedEvaluatorGraphDependent--">isDecoratedEvaluatorGraphDependent</a></span>()</code>&nbsp;</td>
 </tr>
 <tr id="i7" class="rowColor">
-<td class="colFirst"><code>boolean</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/DecoratingNodeEvaluator.html#isSolutionReporter--">isSolutionReporter</a></span>()</code>&nbsp;</td>
-</tr>
-<tr id="i8" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/DecoratingNodeEvaluator.html#registerSolutionListener-java.lang.Object-">registerSolutionListener</a></span>(java.lang.Object&nbsp;listener)</code>&nbsp;</td>
 </tr>
+<tr id="i8" class="altColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/DecoratingNodeEvaluator.html#reportsSolutions--">reportsSolutions</a></span>()</code>
+<div class="block">default implementation that is just correct with respect to the decorated node evaluator.</div>
+</td>
+</tr>
 <tr id="i9" class="rowColor">
-<td class="colFirst"><code>&lt;A&gt;&nbsp;void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/DecoratingNodeEvaluator.html#setGenerator-jaicore.search.core.interfaces.GraphGenerator-">setGenerator</a></span>(<a href="../../../../../../jaicore/search/core/interfaces/GraphGenerator.html" title="interface in jaicore.search.core.interfaces">GraphGenerator</a>&lt;<a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/DecoratingNodeEvaluator.html" title="type parameter in DecoratingNodeEvaluator">T</a>,A&gt;&nbsp;generator)</code>&nbsp;</td>
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/DecoratingNodeEvaluator.html#requiresGraphGenerator--">requiresGraphGenerator</a></span>()</code>
+<div class="block">default implementation that is just correct with respect to the decorated node evaluator.</div>
+</td>
+</tr>
+<tr id="i10" class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/DecoratingNodeEvaluator.html#setGenerator-jaicore.search.core.interfaces.GraphGenerator-">setGenerator</a></span>(<a href="../../../../../../jaicore/search/core/interfaces/GraphGenerator.html" title="interface in jaicore.search.core.interfaces">GraphGenerator</a>&lt;<a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/DecoratingNodeEvaluator.html" title="type parameter in DecoratingNodeEvaluator">T</a>,?&gt;&nbsp;generator)</code>&nbsp;</td>
+</tr>
+<tr id="i11" class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/DecoratingNodeEvaluator.html#setLoggerName-java.lang.String-">setLoggerName</a></span>(java.lang.String&nbsp;name)</code>&nbsp;</td>
 </tr>
 </table>
 <ul class="blockList">
@@ -276,31 +288,43 @@ implements <a href="../../../../../../jaicore/search/algorithms/standard/bestfir
 <pre>public&nbsp;boolean&nbsp;isDecoratedEvaluatorGraphDependent()</pre>
 </li>
 </ul>
-<a name="isGraphDependent--">
+<a name="doesDecoratedEvaluatorReportSolutions--">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>isGraphDependent</h4>
-<pre>public&nbsp;boolean&nbsp;isGraphDependent()</pre>
+<h4>doesDecoratedEvaluatorReportSolutions</h4>
+<pre>public&nbsp;boolean&nbsp;doesDecoratedEvaluatorReportSolutions()</pre>
 </li>
 </ul>
-<a name="isDecoratedEvaluatorSolutionReporter--">
+<a name="requiresGraphGenerator--">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>isDecoratedEvaluatorSolutionReporter</h4>
-<pre>public&nbsp;boolean&nbsp;isDecoratedEvaluatorSolutionReporter()</pre>
+<h4>requiresGraphGenerator</h4>
+<pre>public&nbsp;boolean&nbsp;requiresGraphGenerator()</pre>
+<div class="block">default implementation that is just correct with respect to the decorated node evaluator.
+ If the node evaluator that inherits from DecoratingNodeEvaluator itself may require the graph, this method should be overwritten.</div>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/IPotentiallyGraphDependentNodeEvaluator.html#requiresGraphGenerator--">requiresGraphGenerator</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/IPotentiallyGraphDependentNodeEvaluator.html" title="interface in jaicore.search.algorithms.standard.bestfirst.nodeevaluation">IPotentiallyGraphDependentNodeEvaluator</a>&lt;<a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/DecoratingNodeEvaluator.html" title="type parameter in DecoratingNodeEvaluator">T</a>,<a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/DecoratingNodeEvaluator.html" title="type parameter in DecoratingNodeEvaluator">V</a> extends java.lang.Comparable&lt;<a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/DecoratingNodeEvaluator.html" title="type parameter in DecoratingNodeEvaluator">V</a>&gt;&gt;</code></dd>
+</dl>
 </li>
 </ul>
-<a name="isSolutionReporter--">
+<a name="reportsSolutions--">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>isSolutionReporter</h4>
-<pre>public&nbsp;boolean&nbsp;isSolutionReporter()</pre>
+<h4>reportsSolutions</h4>
+<pre>public&nbsp;boolean&nbsp;reportsSolutions()</pre>
+<div class="block">default implementation that is just correct with respect to the decorated node evaluator.
+ If the node evaluator that inherits from DecoratingNodeEvaluator itself may be solution reporting, this method should be overwritten.</div>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/IPotentiallySolutionReportingNodeEvaluator.html#reportsSolutions--">reportsSolutions</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/IPotentiallySolutionReportingNodeEvaluator.html" title="interface in jaicore.search.algorithms.standard.bestfirst.nodeevaluation">IPotentiallySolutionReportingNodeEvaluator</a>&lt;<a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/DecoratingNodeEvaluator.html" title="type parameter in DecoratingNodeEvaluator">T</a>,<a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/DecoratingNodeEvaluator.html" title="type parameter in DecoratingNodeEvaluator">V</a> extends java.lang.Comparable&lt;<a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/DecoratingNodeEvaluator.html" title="type parameter in DecoratingNodeEvaluator">V</a>&gt;&gt;</code></dd>
+</dl>
 </li>
 </ul>
 <a name="setGenerator-jaicore.search.core.interfaces.GraphGenerator-">
@@ -309,7 +333,11 @@ implements <a href="../../../../../../jaicore/search/algorithms/standard/bestfir
 <ul class="blockList">
 <li class="blockList">
 <h4>setGenerator</h4>
-<pre>public&nbsp;&lt;A&gt;&nbsp;void&nbsp;setGenerator(<a href="../../../../../../jaicore/search/core/interfaces/GraphGenerator.html" title="interface in jaicore.search.core.interfaces">GraphGenerator</a>&lt;<a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/DecoratingNodeEvaluator.html" title="type parameter in DecoratingNodeEvaluator">T</a>,A&gt;&nbsp;generator)</pre>
+<pre>public&nbsp;void&nbsp;setGenerator(<a href="../../../../../../jaicore/search/core/interfaces/GraphGenerator.html" title="interface in jaicore.search.core.interfaces">GraphGenerator</a>&lt;<a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/DecoratingNodeEvaluator.html" title="type parameter in DecoratingNodeEvaluator">T</a>,?&gt;&nbsp;generator)</pre>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/IPotentiallyGraphDependentNodeEvaluator.html#setGenerator-jaicore.search.core.interfaces.GraphGenerator-">setGenerator</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/IPotentiallyGraphDependentNodeEvaluator.html" title="interface in jaicore.search.algorithms.standard.bestfirst.nodeevaluation">IPotentiallyGraphDependentNodeEvaluator</a>&lt;<a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/DecoratingNodeEvaluator.html" title="type parameter in DecoratingNodeEvaluator">T</a>,<a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/DecoratingNodeEvaluator.html" title="type parameter in DecoratingNodeEvaluator">V</a> extends java.lang.Comparable&lt;<a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/DecoratingNodeEvaluator.html" title="type parameter in DecoratingNodeEvaluator">V</a>&gt;&gt;</code></dd>
+</dl>
 </li>
 </ul>
 <a name="registerSolutionListener-java.lang.Object-">
@@ -319,18 +347,48 @@ implements <a href="../../../../../../jaicore/search/algorithms/standard/bestfir
 <li class="blockList">
 <h4>registerSolutionListener</h4>
 <pre>public&nbsp;void&nbsp;registerSolutionListener(java.lang.Object&nbsp;listener)</pre>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/IPotentiallySolutionReportingNodeEvaluator.html#registerSolutionListener-java.lang.Object-">registerSolutionListener</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/IPotentiallySolutionReportingNodeEvaluator.html" title="interface in jaicore.search.algorithms.standard.bestfirst.nodeevaluation">IPotentiallySolutionReportingNodeEvaluator</a>&lt;<a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/DecoratingNodeEvaluator.html" title="type parameter in DecoratingNodeEvaluator">T</a>,<a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/DecoratingNodeEvaluator.html" title="type parameter in DecoratingNodeEvaluator">V</a> extends java.lang.Comparable&lt;<a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/DecoratingNodeEvaluator.html" title="type parameter in DecoratingNodeEvaluator">V</a>&gt;&gt;</code></dd>
+</dl>
 </li>
 </ul>
 <a name="cancel--">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>cancel</h4>
 <pre>public&nbsp;void&nbsp;cancel()</pre>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/ICancelableNodeEvaluator.html#cancel--">cancel</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/ICancelableNodeEvaluator.html" title="interface in jaicore.search.algorithms.standard.bestfirst.nodeevaluation">ICancelableNodeEvaluator</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="getLoggerName--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getLoggerName</h4>
+<pre>public&nbsp;java.lang.String&nbsp;getLoggerName()</pre>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code>getLoggerName</code>&nbsp;in interface&nbsp;<code>jaicore.basic.ILoggingCustomizable</code></dd>
+</dl>
+</li>
+</ul>
+<a name="setLoggerName-java.lang.String-">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>setLoggerName</h4>
+<pre>public&nbsp;void&nbsp;setLoggerName(java.lang.String&nbsp;name)</pre>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code>setLoggerName</code>&nbsp;in interface&nbsp;<code>jaicore.basic.ILoggingCustomizable</code></dd>
 </dl>
 </li>
 </ul>

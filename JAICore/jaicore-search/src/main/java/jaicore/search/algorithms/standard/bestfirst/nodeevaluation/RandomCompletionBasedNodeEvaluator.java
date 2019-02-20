@@ -50,8 +50,8 @@ import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 
 @SuppressWarnings("serial")
 public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> extends TimeAwareNodeEvaluator<T, V>
-		implements IGraphDependentNodeEvaluator<T, String, V>, SerializableNodeEvaluator<T, V>,
-		ISolutionReportingNodeEvaluator<T, V>, ICancelableNodeEvaluator, IUncertaintyAnnotatingNodeEvaluator<T, V>,
+		implements IPotentiallyGraphDependentNodeEvaluator<T, V>, SerializableNodeEvaluator<T, V>,
+		IPotentiallySolutionReportingNodeEvaluator<T, V>, ICancelableNodeEvaluator, IUncertaintyAnnotatingNodeEvaluator<T, V>,
 		ILoggingCustomizable {
 
 	private String loggerName;
@@ -533,8 +533,8 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> exte
 	}
 
 	@Override
-	public void setGenerator(final GraphGenerator<T, String> generator) {
-		this.generator = generator;
+	public void setGenerator(final GraphGenerator<T, ?> generator) {
+		this.generator = (GraphGenerator<T, String>)generator;
 		// this.generatorProvidesPathUnification = (this.generator instanceof
 		// PathUnifyingGraphGenerator);
 		// if (!this.generatorProvidesPathUnification)
@@ -545,7 +545,7 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> exte
 		/* create the completion algorithm and initialize it */
 		INodeEvaluator<T, Double> nodeEvaluator = new RandomizedDepthFirstNodeEvaluator<>(this.random);
 		GraphSearchWithSubpathEvaluationsInput<T, String, Double> completionProblem = new GraphSearchWithSubpathEvaluationsInput<>(
-				generator, nodeEvaluator);
+				this.generator, nodeEvaluator);
 		this.completer = new RandomSearch<>(completionProblem, this.priorityPredicateForRDFS, this.random);
 		if (this.getTotalDeadline() >= 0)
 			this.completer.setTimeout(
@@ -618,5 +618,15 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> exte
 		fields.put("solutionEvaluator", this.solutionEvaluator);
 		fields.put("visualizeSubSearch", this.visualizeSubSearch);
 		return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
+	}
+
+	@Override
+	public boolean requiresGraphGenerator() {
+		return true;
+	}
+
+	@Override
+	public boolean reportsSolutions() {
+		return true;
 	}
 }

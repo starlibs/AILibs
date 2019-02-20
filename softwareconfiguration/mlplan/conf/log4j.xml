@@ -46,6 +46,15 @@
     </layout>
   </appender>
 
+  <logger name="de.upb.crc901">
+    <level value="warn" />
+    <appender-ref ref="console" />
+    <appender-ref ref="infoFileAppender" />
+    <appender-ref ref="warnFileAppender" />
+    <appender-ref ref="errFileAppender" />
+    <appender-ref ref="traceFileAppender" />
+  </logger>
+  
   <logger name="jaicore">
     <level value="warn" />
     <appender-ref ref="console" />
@@ -73,7 +82,7 @@
   </logger>
   
   <logger name="mlplan">
-    <level value="warn" />
+    <level value="trace" />
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />
     <appender-ref ref="warnFileAppender" />
@@ -82,6 +91,18 @@
   </logger>
 
   <logger name="mlplan.optimizingfactory.optAlgo">
+    <level value="warn" />
+  </logger>
+  
+  <logger name="mlplan.optimizingfactory.optAlgo.hasco">
+    <level value="info" />
+  </logger>
+  
+  <logger name="mlplan.optimizingfactory.optAlgo.hasco.solutionevaluator">
+    <level value="warn" />
+  </logger>
+  
+  <logger name="mlplan.optimizingfactory.optAlgo.hasco.solutionevaluator.benchmark">
     <level value="warn" />
   </logger>
   

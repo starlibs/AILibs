@@ -1,73 +1,84 @@
 package jaicore.search.algorithms.standard.bestfirst.nodeevaluation;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import jaicore.basic.ILoggingCustomizable;
 import jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
 import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.model.travesaltree.Node;
 
-public abstract class DecoratingNodeEvaluator<T, V extends Comparable<V>> implements INodeEvaluator<T, V>, ICancelableNodeEvaluator {
+public abstract class DecoratingNodeEvaluator<T, V extends Comparable<V>> implements INodeEvaluator<T, V>, ICancelableNodeEvaluator, ILoggingCustomizable, IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionReportingNodeEvaluator<T, V> {
 
 	private boolean canceled = false;
-	private final INodeEvaluator<T, V> evaluator;
+	private Logger logger = LoggerFactory.getLogger(DecoratingNodeEvaluator.class);
+	private final INodeEvaluator<T, V> decoratedEvaluator;
 
 	public DecoratingNodeEvaluator(final INodeEvaluator<T, V> evaluator) {
 		super();
 		if (evaluator == null)
 			throw new IllegalArgumentException("The decorated evaluator must not be null!");
-		this.evaluator = evaluator;
+		this.decoratedEvaluator = evaluator;
 	}
 
 	public INodeEvaluator<T, V> getEvaluator() {
-		return this.evaluator;
+		return this.decoratedEvaluator;
 	}
 
 	@Override
 	public V f(final Node<T, ?> node) throws NodeEvaluationException, InterruptedException {
-		return this.evaluator.f(node);
+		return this.decoratedEvaluator.f(node);
 	}
 
 	public boolean isDecoratedEvaluatorCancelable() {
-		return this.evaluator instanceof ICancelableNodeEvaluator;
+		return this.decoratedEvaluator instanceof ICancelableNodeEvaluator;
 	}
 
 	public boolean isDecoratedEvaluatorGraphDependent() {
-		if (this.evaluator instanceof DecoratingNodeEvaluator<?, ?>) {
-			return ((DecoratingNodeEvaluator<T, V>) this.evaluator).isGraphDependent();
-		}
-		return this.evaluator instanceof IGraphDependentNodeEvaluator<?, ?, ?>;
+		return this.decoratedEvaluator instanceof IPotentiallyGraphDependentNodeEvaluator && ((IPotentiallyGraphDependentNodeEvaluator<?,?>)this.decoratedEvaluator).requiresGraphGenerator();
+	}
+	
+	public boolean doesDecoratedEvaluatorReportSolutions() {
+		return this.decoratedEvaluator instanceof IPotentiallySolutionReportingNodeEvaluator && ((IPotentiallySolutionReportingNodeEvaluator<?, ?>)this.decoratedEvaluator).reportsSolutions();
+	}
+	
+	/**
+	 * default implementation that is just correct with respect to the decorated node evaluator.
+	 * If the node evaluator that inherits from DecoratingNodeEvaluator itself may require the graph, this method should be overwritten.
+	 * 
+	 */
+	@Override
+	public boolean requiresGraphGenerator() {
+		return isDecoratedEvaluatorGraphDependent();
+	}
+	
+	/**
+	 * default implementation that is just correct with respect to the decorated node evaluator.
+	 * If the node evaluator that inherits from DecoratingNodeEvaluator itself may be solution reporting, this method should be overwritten.
+	 * 
+	 */
+	@Override
+	public boolean reportsSolutions() {
+		return doesDecoratedEvaluatorReportSolutions();
 	}
 
-	public boolean isGraphDependent() {
-		return this instanceof IGraphDependentNodeEvaluator<?, ?, ?> || this.isDecoratedEvaluatorGraphDependent();
-	}
-
-	public boolean isDecoratedEvaluatorSolutionReporter() {
-		if (this.evaluator instanceof DecoratingNodeEvaluator<?, ?>) {
-			return ((DecoratingNodeEvaluator<T, V>) this.evaluator).isSolutionReporter();
-		}
-		return (this.evaluator instanceof ISolutionReportingNodeEvaluator<?, ?>);
-	}
-
-	public boolean isSolutionReporter() {
-		return this instanceof ISolutionReportingNodeEvaluator<?, ?> || this.isDecoratedEvaluatorSolutionReporter();
-	}
-
-	/* here we have the default implementations for the GraphDependent and SolutionReporter interfaces */
-	@SuppressWarnings("unchecked")
-	public <A> void setGenerator(final GraphGenerator<T, A> generator) {
-		if (!this.isGraphDependent()) {
+	@Override
+	public void setGenerator(final GraphGenerator<T, ?> generator) {
+		logger.info("Setting graph generator of {} to {}", this, generator);
+		if (!this.requiresGraphGenerator()) {
 			throw new UnsupportedOperationException("This node evaluator is not graph dependent");
 		}
 		if (!this.isDecoratedEvaluatorGraphDependent()) {
 			return;
 		}
-		((IGraphDependentNodeEvaluator<T, A, V>) this.evaluator).setGenerator(generator);
+		((IPotentiallyGraphDependentNodeEvaluator<T, V>) this.decoratedEvaluator).setGenerator(generator);
 	}
 
 	public void registerSolutionListener(final Object listener) {
-		if (!this.isDecoratedEvaluatorSolutionReporter()) {
+		if (!this.doesDecoratedEvaluatorReportSolutions()) {
 			throw new UnsupportedOperationException(this.getClass().getName() + " is not a solution reporting node evaluator");
 		}
-		((ISolutionReportingNodeEvaluator<T, V>) this.evaluator).registerSolutionListener(listener);
+		((IPotentiallySolutionReportingNodeEvaluator<T, V>) this.decoratedEvaluator).registerSolutionListener(listener);
 	}
 
 	@Override
@@ -77,10 +88,20 @@ public abstract class DecoratingNodeEvaluator<T, V extends Comparable<V>> implem
 		}
 		this.canceled = true;
 		if (this.isDecoratedEvaluatorCancelable()) {
-			((ICancelableNodeEvaluator) this.evaluator).cancel();
+			((ICancelableNodeEvaluator) this.decoratedEvaluator).cancel();
 		}
 		if (this instanceof ICancelableNodeEvaluator) {
 			((ICancelableNodeEvaluator) this).cancel();
 		}
 	}
+	
+	@Override
+	public String getLoggerName() {
+		return logger.getName();
+	}
+	
+	@Override
+	public void setLoggerName(String name) {
+		logger = LoggerFactory.getLogger(name);
+	}	
 }

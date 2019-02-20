@@ -23,7 +23,7 @@ import jaicore.search.algorithms.standard.bestfirst.events.GraphSearchSolutionCa
 import jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.ICancelableNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
-import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.ISolutionReportingNodeEvaluator;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.IPotentiallySolutionReportingNodeEvaluator;
 import jaicore.search.core.interfaces.AOptimalPathInORGraphSearch;
 import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
@@ -73,8 +73,8 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 		this.suspendList = new PriorityQueue<>();
 		this.openList = new PriorityQueue<>();
 		this.windowSize = 0;
-		if (this.nodeEvaluator instanceof ISolutionReportingNodeEvaluator) {
-			((ISolutionReportingNodeEvaluator) this.nodeEvaluator).registerSolutionListener(this);
+		if (this.nodeEvaluator instanceof IPotentiallySolutionReportingNodeEvaluator) {
+			((IPotentiallySolutionReportingNodeEvaluator) this.nodeEvaluator).registerSolutionListener(this);
 		}
 	}
 

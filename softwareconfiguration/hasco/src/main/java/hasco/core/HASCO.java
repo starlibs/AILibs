@@ -28,7 +28,6 @@ import jaicore.basic.algorithm.AlgorithmProblemTransformer;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
-import jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.DelayedCancellationCheckException;
 import jaicore.basic.algorithm.exceptions.DelayedTimeoutCheckException;
@@ -311,6 +310,12 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 		this.logger = LoggerFactory.getLogger(name);
 		this.logger.info("Activated logger for {} with name {}", this.getId(), name);
 		super.setLoggerName(this.loggerName + "._swConfigAlgo");
+		if (this.getInput().getCompositionEvaluator() instanceof ILoggingCustomizable) {
+			this.logger.info("Setting logger of HASCO solution evaluator {} to {}.", getInput().getCompositionEvaluator().getClass().getName(), name + ".solutionevaluator");
+			((ILoggingCustomizable)getInput().getCompositionEvaluator()).setLoggerName(name + ".solutionevaluator");
+		}
+		else
+			this.logger.info("The solution evaluator {} does not implement ILoggingCustomizable, so no customization possible.", getInput().getCompositionEvaluator().getClass().getName());
 	}
 
 	@Override
