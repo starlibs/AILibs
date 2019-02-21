@@ -1,6 +1,3 @@
-addons:
-  sonarcloud:
-    organization: "starlibs"
 stages:
 - name: dummy
   if: commit_message = "Travis built JavaDoc. ]ci skip[" 
@@ -30,10 +27,13 @@ jobs:
   - stage: dummy
     script: "echo Not doing anything. This is just here to have at least one active script entry when a recursive call after a JavaDoc build comes in"
   - stage: compile
+    addons:
+      sonarcloud:
+        organization: "starlibs"
     script:
     - "./gradlew build -x test"
     - bash .travis_push_javadoc.sh 
-    - "./gradlew sonarqube -x test"
+    - ./gradlew sonarqube -x test
   - stage: deploy
     script: 
     - "./gradlew publish -PnexusBaseUrl=$nexusBaseUrl -PnexusUpRepo=$nexusUpRepo -PnexusUser=$nexusUser -PnexusPassword=$nexusPassword"
