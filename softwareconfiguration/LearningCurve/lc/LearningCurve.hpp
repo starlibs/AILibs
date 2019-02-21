@@ -18,7 +18,7 @@ static int current_statement_begin__;
 stan::io::program_reader prog_reader__() {
     stan::io::program_reader reader;
     reader.add_event(0, 0, "start", "D://Data/Uni/PG/Project/AILibs/softwareconfiguration/LearningCurve/LearningCurve.stan");
-    reader.add_event(117, 115, "end", "D://Data/Uni/PG/Project/AILibs/softwareconfiguration/LearningCurve/LearningCurve.stan");
+    reader.add_event(121, 119, "end", "D://Data/Uni/PG/Project/AILibs/softwareconfiguration/LearningCurve/LearningCurve.stan");
     return reader;
 }
 
@@ -299,43 +299,53 @@ curveSlopeDist_log(const std::vector<T0__>& e,
         current_statement_begin__ = 37;
         if (as_bool(logical_lt(get_base1(e,1,"e",1),0))) {
             current_statement_begin__ = 38;
-            return stan::math::promote_scalar<fun_return_scalar_t__>(0);
+            return stan::math::promote_scalar<fun_return_scalar_t__>(stan::math::log(0));
         }
         current_statement_begin__ = 39;
         if (as_bool(logical_lt(get_base1(e,4,"e",1),0))) {
             current_statement_begin__ = 40;
-            return stan::math::promote_scalar<fun_return_scalar_t__>(0);
+            return stan::math::promote_scalar<fun_return_scalar_t__>(stan::math::log(0));
         }
         current_statement_begin__ = 41;
         if (as_bool(logical_lt(get_base1(e,8,"e",1),0))) {
             current_statement_begin__ = 42;
-            return stan::math::promote_scalar<fun_return_scalar_t__>(0);
+            return stan::math::promote_scalar<fun_return_scalar_t__>(stan::math::log(0));
         }
         current_statement_begin__ = 43;
         if (as_bool(logical_lt(get_base1(e,12,"e",1),0))) {
             current_statement_begin__ = 44;
-            return stan::math::promote_scalar<fun_return_scalar_t__>(0);
+            return stan::math::promote_scalar<fun_return_scalar_t__>(stan::math::log(0));
         }
         current_statement_begin__ = 45;
         if (as_bool(logical_lt(get_base1(e,17,"e",1),0))) {
             current_statement_begin__ = 46;
-            return stan::math::promote_scalar<fun_return_scalar_t__>(0);
+            return stan::math::promote_scalar<fun_return_scalar_t__>(stan::math::log(0));
         }
         current_statement_begin__ = 47;
         if (as_bool(logical_lt(get_base1(e,22,"e",1),0))) {
             current_statement_begin__ = 48;
-            return stan::math::promote_scalar<fun_return_scalar_t__>(0);
+            return stan::math::promote_scalar<fun_return_scalar_t__>(stan::math::log(0));
         }
-        current_statement_begin__ = 49;
-        for (int k = 1; k <= c; ++k) {
-            current_statement_begin__ = 50;
-            if (as_bool(logical_gt(f_comb(e,(k * s), pstream__),f_comb(e,((s * k) + s), pstream__)))) {
-                current_statement_begin__ = 51;
-                return stan::math::promote_scalar<fun_return_scalar_t__>(0);
-            }
+        current_statement_begin__ = 50;
+        if (as_bool(logical_lt(get_base1(e,11,"e",1),0))) {
+            current_statement_begin__ = 51;
+            return stan::math::promote_scalar<fun_return_scalar_t__>(stan::math::log(0));
         }
         current_statement_begin__ = 52;
-        return stan::math::promote_scalar<fun_return_scalar_t__>(1);
+        if (as_bool(logical_gt(f_comb(e,10000, pstream__),1))) {
+            current_statement_begin__ = 53;
+            return stan::math::promote_scalar<fun_return_scalar_t__>(stan::math::log(0));
+        }
+        current_statement_begin__ = 54;
+        for (int k = 1; k <= c; ++k) {
+            current_statement_begin__ = 55;
+            if (as_bool(logical_gt(f_comb(e,(k * s), pstream__),f_comb(e,((s * k) + s), pstream__)))) {
+                current_statement_begin__ = 56;
+                return stan::math::promote_scalar<fun_return_scalar_t__>(stan::math::log(0));
+            }
+        }
+        current_statement_begin__ = 57;
+        return stan::math::promote_scalar<fun_return_scalar_t__>(0);
     } catch (const std::exception& e) {
         stan::lang::rethrow_located(e, current_statement_begin__, prog_reader__());
         // Next line prevents compiler griping about no return
@@ -404,25 +414,25 @@ public:
 
         // initialize member variables
         try {
-            current_statement_begin__ = 57;
+            current_statement_begin__ = 62;
             context__.validate_dims("data initialization", "N", "int", context__.to_vec());
             N = int(0);
             vals_i__ = context__.vals_i("N");
             pos__ = 0;
             N = vals_i__[pos__++];
-            current_statement_begin__ = 58;
+            current_statement_begin__ = 63;
             context__.validate_dims("data initialization", "c", "int", context__.to_vec());
             c = int(0);
             vals_i__ = context__.vals_i("c");
             pos__ = 0;
             c = vals_i__[pos__++];
-            current_statement_begin__ = 59;
+            current_statement_begin__ = 64;
             context__.validate_dims("data initialization", "s", "int", context__.to_vec());
             s = int(0);
             vals_i__ = context__.vals_i("s");
             pos__ = 0;
             s = vals_i__[pos__++];
-            current_statement_begin__ = 60;
+            current_statement_begin__ = 65;
             validate_non_negative_index("x", "N", N);
             context__.validate_dims("data initialization", "x", "vector_d", context__.to_vec(N));
             validate_non_negative_index("x", "N", N);
@@ -433,7 +443,7 @@ public:
             for (size_t i_vec__ = 0; i_vec__ < x_i_vec_lim__; ++i_vec__) {
                 x[i_vec__] = vals_r__[pos__++];
             }
-            current_statement_begin__ = 61;
+            current_statement_begin__ = 66;
             validate_non_negative_index("y", "N", N);
             context__.validate_dims("data initialization", "y", "vector_d", context__.to_vec(N));
             validate_non_negative_index("y", "N", N);
@@ -446,11 +456,11 @@ public:
             }
 
             // validate, data variables
-            current_statement_begin__ = 57;
-            current_statement_begin__ = 58;
-            current_statement_begin__ = 59;
-            current_statement_begin__ = 60;
-            current_statement_begin__ = 61;
+            current_statement_begin__ = 62;
+            current_statement_begin__ = 63;
+            current_statement_begin__ = 64;
+            current_statement_begin__ = 65;
+            current_statement_begin__ = 66;
             // initialize data variables
 
 
@@ -459,10 +469,10 @@ public:
             // validate, set parameter ranges
             num_params_r__ = 0U;
             param_ranges_i__.clear();
-            current_statement_begin__ = 65;
+            current_statement_begin__ = 70;
             validate_non_negative_index("e", "26", 26);
             num_params_r__ += 26;
-            current_statement_begin__ = 94;
+            current_statement_begin__ = 99;
             ++num_params_r__;
         } catch (const std::exception& e) {
             stan::lang::rethrow_located(e, current_statement_begin__, prog_reader__());
@@ -575,7 +585,7 @@ public:
 
             // model body
             {
-            current_statement_begin__ = 101;
+            current_statement_begin__ = 106;
             validate_non_negative_index("ypred", "N", N);
             Eigen::Matrix<local_scalar_t__,Eigen::Dynamic,1>  ypred(static_cast<Eigen::VectorXd::Index>(N));
             (void) ypred;  // dummy to suppress unused var warning
@@ -584,19 +594,19 @@ public:
             stan::math::fill(ypred,DUMMY_VAR__);
 
 
-            current_statement_begin__ = 103;
+            current_statement_begin__ = 108;
             lp_accum__.add(normal_log<propto__>(sigma, 0, 1));
-            current_statement_begin__ = 106;
+            current_statement_begin__ = 110;
             lp_accum__.add(curveSlopeDist_log<propto__>(e, c, s, pstream__));
-            current_statement_begin__ = 109;
+            current_statement_begin__ = 113;
             for (int n = 1; n <= N; ++n) {
-                current_statement_begin__ = 110;
+                current_statement_begin__ = 114;
                 stan::model::assign(ypred, 
                             stan::model::cons_list(stan::model::index_uni(n), stan::model::nil_index_list()), 
                             f_comb(e,get_base1(x,n,"x",1), pstream__), 
                             "assigning variable ypred");
             }
-            current_statement_begin__ = 112;
+            current_statement_begin__ = 116;
             lp_accum__.add(normal_log<propto__>(y, ypred, sigma));
             }
 
