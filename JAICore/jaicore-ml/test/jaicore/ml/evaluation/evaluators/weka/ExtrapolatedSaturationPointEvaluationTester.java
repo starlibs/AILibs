@@ -15,7 +15,7 @@ import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.SubsamplingMethod;
 import jaicore.ml.core.dataset.sampling.WekaInstancesUtil;
-import jaicore.ml.learningcurve.extrapolation.ipl.InversePowerLawExtrapolator;
+import jaicore.ml.learningcurve.extrapolation.ipl.InversePowerLawExtrapolationMethod;
 import weka.classifiers.functions.SMO;
 import weka.core.Attribute;
 import weka.core.Instances;
@@ -43,9 +43,8 @@ public class ExtrapolatedSaturationPointEvaluationTester {
 		// Test classifier evaluation at saturation point
 		ExtrapolatedSaturationPointEvaluator evaluator = new ExtrapolatedSaturationPointEvaluator(
 				new int[] { 8, 16, 64, 128 }, SubsamplingMethod.SYSTEMATIC_SAMPLING, this.train, 0.7,
-				new InversePowerLawExtrapolator(), 123l, 0.0000000000005d, this.test);
-		double evaluationResult;
-		evaluationResult = evaluator.evaluate(new SMO());
+				new InversePowerLawExtrapolationMethod(), 123l, 0.0005d, this.test);
+		double evaluationResult = evaluator.evaluate(new SMO());
 		Assert.assertTrue(evaluationResult > 0 && evaluationResult <= 100);
 	}
 

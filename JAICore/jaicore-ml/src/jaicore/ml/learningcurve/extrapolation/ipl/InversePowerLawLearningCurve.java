@@ -24,6 +24,14 @@ public class InversePowerLawLearningCurve implements LearningCurve {
 		this.c = c;
 	}
 
+	public InversePowerLawLearningCurve(InversePowerLawConfiguration configuration) {
+		assert configuration.getA() > 0 && configuration.getA() < 1;
+		assert configuration.getC() > -1 && configuration.getC() < 0;
+		this.a = configuration.getA();
+		this.b = configuration.getB();
+		this.c = configuration.getC();
+	}
+
 	@Override
 	public double getSaturationPoint(double epsilon) {
 		assert epsilon > 0;

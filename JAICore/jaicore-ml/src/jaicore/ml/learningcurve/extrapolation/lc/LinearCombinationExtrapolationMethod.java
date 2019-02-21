@@ -3,7 +3,7 @@ package jaicore.ml.learningcurve.extrapolation.lc;
 import jaicore.ml.interfaces.LearningCurve;
 import jaicore.ml.learningcurve.extrapolation.InvalidAnchorPointsException;
 import jaicore.ml.learningcurve.extrapolation.LearningCurveExtrapolationMethod;
-import jaicore.ml.learningcurve.extrapolation.lc.client.McmcServiceClient;
+import jaicore.ml.learningcurve.extrapolation.client.ExtrapolationServiceClient;
 
 /**
  * This class describes a method for learning curve extrapolation which
@@ -16,11 +16,15 @@ import jaicore.ml.learningcurve.extrapolation.lc.client.McmcServiceClient;
  */
 public class LinearCombinationExtrapolationMethod implements LearningCurveExtrapolationMethod {
 
+	// We assume the service to be running locally
+	private static final String SERVICE_URL = "http://localhost:8080/jaicore/web/api/v1/mcmc/modelparams";
+
 	@Override
 	public LearningCurve extrapolateLearningCurveFromAnchorPoints(int[] xValues, double[] yValues)
 			throws InvalidAnchorPointsException {
 		// Request model parameters to create learning curve
-		McmcServiceClient client = new McmcServiceClient();
+		ExtrapolationServiceClient<LinearCombinationConfiguration> client = new ExtrapolationServiceClient<>(
+				SERVICE_URL, LinearCombinationConfiguration.class);
 		LinearCombinationConfiguration configuration = client.getConfigForAnchorPoints(xValues, yValues);
 		return new LinearCombinationLearningCurve(configuration);
 	}

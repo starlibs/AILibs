@@ -93,7 +93,7 @@ public class ExtrapolatedSaturationPointEvaluator implements IClassifierEvaluato
 			// Create the extrapolator and calculate sample size of the saturation point
 			// with the given epsilon
 			LearningCurve learningCurve = extrapolator.extrapolateLearningCurve(this.anchorpoints);
-			int optimalSampleSize = (int) learningCurve.getSaturationPoint(this.epsilon);
+			int optimalSampleSize = Math.min(this.train.size(), (int) learningCurve.getSaturationPoint(this.epsilon));
 
 			// Create a subsample with this size
 			ASamplingAlgorithm<IInstance> samplingAlgorithm = this.subsamplingMethod.getSubsampler(this.seed);
@@ -104,9 +104,6 @@ public class ExtrapolatedSaturationPointEvaluator implements IClassifierEvaluato
 
 			// Measure the accuracy with this subsample
 			Instances testInstances = WekaInstancesUtil.datasetToWekaInstances(this.test);
-			System.out.println("#################### Saturation point " + learningCurve.getSaturationPoint(this.epsilon));
-			System.out.println("#################### Train size " + saturationPointInstances.size());
-			System.out.println("#################### Test size " + testInstances.size());
 			FixedSplitClassifierEvaluator evaluator = new FixedSplitClassifierEvaluator(saturationPointInstances,
 					testInstances);
 			return evaluator.evaluate(classifier);

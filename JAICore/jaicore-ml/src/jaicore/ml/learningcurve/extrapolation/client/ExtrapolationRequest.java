@@ -1,15 +1,15 @@
-package jaicore.ml.learningcurve.extrapolation.lc.client;
+package jaicore.ml.learningcurve.extrapolation.client;
 
 import java.util.List;
 
 /**
- * This class describes the request that is sent to the McmcService. It contains
- * the x- and y-values of the anchor points.
+ * This class describes the request that is sent to an Extrapolation Service. It
+ * contains the x- and y-values of the anchor points.
  * 
  * @author Felix Weiland
  *
  */
-public class McmcRequest {
+public class ExtrapolationRequest {
 
 	private List<Integer> xValues;
 
@@ -48,7 +48,7 @@ public class McmcRequest {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		McmcRequest other = (McmcRequest) obj;
+		ExtrapolationRequest other = (ExtrapolationRequest) obj;
 		if (xValues == null) {
 			if (other.xValues != null)
 				return false;
@@ -64,7 +64,7 @@ public class McmcRequest {
 
 	@Override
 	public String toString() {
-		return "McmcRequest [xValues=" + xValues + ", yValues=" + yValues + "]";
+		return "ExtrapolationRequest [xValues=" + xValues + ", yValues=" + yValues + "]";
 	}
 
 }

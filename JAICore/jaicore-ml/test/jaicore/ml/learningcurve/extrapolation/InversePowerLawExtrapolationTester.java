@@ -1,7 +1,5 @@
 package jaicore.ml.learningcurve.extrapolation;
 
-import static org.junit.Assert.fail;
-
 import java.io.File;
 import java.io.IOException;
 
@@ -14,7 +12,7 @@ import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.SubsamplingMethod;
 import jaicore.ml.core.dataset.sampling.WekaInstancesUtil;
-import jaicore.ml.learningcurve.extrapolation.ipl.InversePowerLawExtrapolator;
+import jaicore.ml.learningcurve.extrapolation.ipl.InversePowerLawExtrapolationMethod;
 import jaicore.ml.learningcurve.extrapolation.ipl.InversePowerLawLearningCurve;
 import weka.classifiers.trees.J48;
 import weka.core.Attribute;
@@ -23,17 +21,11 @@ import weka.core.converters.ConverterUtils.DataSource;
 
 public class InversePowerLawExtrapolationTester {
 
-	@Test
-	public void testExceptionForIncorrectAnchorpoints() {
+	@Test(expected = InvalidAnchorPointsException.class)
+	public void testExceptionForIncorrectAnchorpoints() throws Exception {
 		int[] xValues = new int[] { 1, 2, 3 };
-		try {
-			LearningCurveExtrapolator extrapolator = createExtrapolationMethod();
-			extrapolator.extrapolateLearningCurve(xValues);
-		} catch (InvalidAnchorPointsException e) {
-			Assert.assertEquals(e.getMessage(), "Anchorpoints must be for x={8, 16, 64, 128}");
-		} catch (Exception e) {
-			fail();
-		}
+		LearningCurveExtrapolator extrapolator = createExtrapolationMethod();
+		extrapolator.extrapolateLearningCurve(xValues);
 	}
 
 	@Test
@@ -62,7 +54,7 @@ public class InversePowerLawExtrapolationTester {
 		}
 
 		IDataset<IInstance> simpleDataset = WekaInstancesUtil.wekaInstancesToDataset(dataset);
-		LearningCurveExtrapolator extrapolator = new LearningCurveExtrapolator(new InversePowerLawExtrapolator(),
+		LearningCurveExtrapolator extrapolator = new LearningCurveExtrapolator(new InversePowerLawExtrapolationMethod(),
 				new J48(), simpleDataset, 0.7d, SubsamplingMethod.SIMPLE_RANDOM_SAMPLING, 1l);
 		return extrapolator;
 	}

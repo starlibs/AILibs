@@ -11,7 +11,7 @@ import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.SubsamplingMethod;
 import jaicore.ml.core.dataset.sampling.WekaInstancesUtil;
-import jaicore.ml.learningcurve.extrapolation.ipl.InversePowerLawExtrapolator;
+import jaicore.ml.learningcurve.extrapolation.ipl.InversePowerLawExtrapolationMethod;
 import weka.classifiers.functions.SMO;
 import weka.core.Attribute;
 import weka.core.Instances;
@@ -36,9 +36,8 @@ public class LearningCurveExtrapolationEvaluationTester {
 		// Test classifier evaluation by learning curve extrapolation
 		LearningCurveExtrapolationEvaluator evaluator = new LearningCurveExtrapolationEvaluator(
 				new int[] { 8, 16, 64, 128 }, SubsamplingMethod.SYSTEMATIC_SAMPLING, simpleDataset, 0.8d,
-				new InversePowerLawExtrapolator(), 123l);
-		double evaluationResult;
-		evaluationResult = evaluator.evaluate(new SMO());
+				new InversePowerLawExtrapolationMethod(), 123l);
+		double evaluationResult = evaluator.evaluate(new SMO());
 		Assert.assertTrue(evaluationResult > 0 && evaluationResult <= 100);
 	}
 
