@@ -57,17 +57,20 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 
 	private Instances dataShownToSearch = null;
 
-	public MLPlan(MLPlanBuilder builder, final Instances data) throws IOException {
+	public MLPlan(final MLPlanBuilder builder, final Instances data) throws IOException {
 		super(builder.getAlgorithmConfig(), data);
-		builder.setHascoFactory(new HASCOViaFDAndBestFirstWithRandomCompletionsFactory(getConfig().randomSeed(), getConfig().numberOfRandomCompletions(), getConfig().timeoutForCandidateEvaluation(), getConfig().timeoutForNodeEvaluation()));
+		builder.setHascoFactory(new HASCOViaFDAndBestFirstWithRandomCompletionsFactory(this.getConfig().randomSeed(), this.getConfig().numberOfRandomCompletions(), this.getConfig().timeoutForCandidateEvaluation(),
+				this.getConfig().timeoutForNodeEvaluation()));
 		builder.prepareNodeEvaluatorInFactoryWithData(data);
 
 		/* sanity checks */
-		logger.info("Starting an ML-Plan instance.");
-		if (builder.getSearchSpaceConfigFile() == null || !builder.getSearchSpaceConfigFile().exists())
+		this.logger.info("Starting an ML-Plan instance.");
+		if (builder.getSearchSpaceConfigFile() == null || !builder.getSearchSpaceConfigFile().exists()) {
 			throw new IllegalArgumentException("The search space configuration file must be set in MLPlanBuilder, and it must be set to a file that exists!");
-		if (builder.getClassifierFactory() == null)
+		}
+		if (builder.getClassifierFactory() == null) {
 			throw new IllegalArgumentException("ClassifierFactory must be set in MLPlanBuilder!");
+		}
 
 		/* set evaluation measure bridge */
 		ADecomposableDoubleMeasure<Double> measure = new MultiClassMeasureBuilder().getEvaluator(builder.getPerformanceMeasure());
@@ -102,9 +105,9 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 		IObjectEvaluator<ComponentInstance, Double> selectionBenchmark = new SelectionPhasePipelineEvaluator(builder.getClassifierFactory(), evaluationMeasurementBridge, this.getConfig().numberOfMCIterationsDuringSelection(),
 				MLPlan.this.getInput(), this.getConfig().getMCCVTrainFoldSizeDuringSelection(), this.getConfig().randomSeed());
 		TwoPhaseSoftwareConfigurationProblem problem = new TwoPhaseSoftwareConfigurationProblem(builder.getSearchSpaceConfigFile(), "AbstractClassifier", searchBenchmark, selectionBenchmark);
-		
+
 		/* create 2-phase HASCO */
-		logger.info("Creating the twoPhaseHASCOFactory.");
+		this.logger.info("Creating the twoPhaseHASCOFactory.");
 		OptimizingFactoryProblem<TwoPhaseSoftwareConfigurationProblem, Classifier, Double> optimizingFactoryProblem = new OptimizingFactoryProblem<>(builder.getClassifierFactory(), problem);
 		HASCOFactory<? extends GraphSearchInput<TFDNode, String>, TFDNode, String, Double> hascoFactory = builder.getHASCOFactory();
 		this.twoPhaseHASCOFactory = new TwoPhaseHASCOFactory<>(hascoFactory);
@@ -113,25 +116,25 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 		this.optimizingFactory.registerListener(new Object() {
 
 			@Subscribe
-			public void receiveEventFromFactory(AlgorithmEvent event) {
-				if (event instanceof AlgorithmInitializedEvent || event instanceof AlgorithmFinishedEvent)
+			public void receiveEventFromFactory(final AlgorithmEvent event) {
+				if (event instanceof AlgorithmInitializedEvent || event instanceof AlgorithmFinishedEvent) {
 					return;
+				}
+				MLPlan.this.post(event);
 				if (event instanceof HASCOSolutionEvent) {
 					@SuppressWarnings("unchecked")
 					HASCOSolutionCandidate<Double> solution = ((HASCOSolutionEvent<Double>) event).getSolutionCandidate();
 					try {
-						logger.info("Received new solution {} with score {} and evaluation time {}ms", builder.getClassifierFactory().getComponentInstantiation(solution.getComponentInstance()), solution.getScore(),
+						MLPlan.this.logger.info("Received new solution {} with score {} and evaluation time {}ms", builder.getClassifierFactory().getComponentInstantiation(solution.getComponentInstance()), solution.getScore(),
 								solution.getTimeToEvaluateCandidate());
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
 					try {
-						post(new ClassifierFoundEvent(getId(), builder.getClassifierFactory().getComponentInstantiation(solution.getComponentInstance()), solution.getScore()));
+						MLPlan.this.post(new ClassifierFoundEvent(MLPlan.this.getId(), builder.getClassifierFactory().getComponentInstantiation(solution.getComponentInstance()), solution.getScore()));
 					} catch (ComponentInstantiationFailedException e) {
 						e.printStackTrace();
 					}
-				} else {
-					post(event);
 				}
 			}
 		});
@@ -158,9 +161,9 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 					this.getConfig().timeoutForNodeEvaluation() / 1000, this.getConfig().numberOfRandomCompletions(), MathExt.round(this.getConfig().dataPortionForSelection() * 100, 2), this.getConfig().numberOfMCIterationsDuringSearch(),
 					(int) (100 * this.getConfig().getMCCVTrainFoldSizeDuringSearch()), this.getConfig().numberOfMCIterationsDuringSelection(), (int) (100 * this.getConfig().getMCCVTrainFoldSizeDuringSelection()),
 					this.getConfig().expectedBlowupInSelection(), this.getConfig().expectedBlowupInPostprocessing());
-			logger.info("Initializing the optimization factory.");
+			this.logger.info("Initializing the optimization factory.");
 			this.optimizingFactory.init();
-			logger.info("Started and activated ML-Plan.");
+			this.logger.info("Started and activated ML-Plan.");
 			return event;
 
 		}
@@ -230,7 +233,7 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 
 	@SuppressWarnings("unchecked")
 	public GraphGenerator<TFDNode, String> getGraphGenerator() {
-		return ((TwoPhaseHASCO<? extends GraphSearchInput<TFDNode, String>, TFDNode, String>) optimizingFactory.getOptimizer()).getGraphGenerator();
+		return ((TwoPhaseHASCO<? extends GraphSearchInput<TFDNode, String>, TFDNode, String>) this.optimizingFactory.getOptimizer()).getGraphGenerator();
 	}
 
 	public double getInternalValidationErrorOfSelectedClassifier() {
