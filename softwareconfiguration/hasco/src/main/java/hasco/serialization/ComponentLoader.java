@@ -484,8 +484,6 @@ public class ComponentLoader {
 		if (this.checkRequiredInterfacesResolvable && !this.getUnresolvableRequiredInterfaces().isEmpty()) {
 			throw new UnresolvableRequiredInterfaceException();
 		}
-
-		return this;
 	}
 
 	/**

@@ -57,13 +57,6 @@ public class WekaUtilTester {
 		}
 	}
 	
-	@Test
-	public void checkValidAttributeSelections() throws Exception {
-		Collection<List<String>> preprocessors = WekaUtil.getAdmissibleSearcherEvaluatorCombinationsForAttributeSelection();
-		preprocessors.forEach(a -> System.out.println(a.toString()));
-	}
+
 	
-	public static void main(String[] args) throws Exception {
-		new WekaUtilTester().checkValidAttributeSelections();
-	}
 }

@@ -39,7 +39,7 @@ public interface IPredictiveModel<TARGET> {
 	 * @throws PredictionException
 	 *             If something fails during the prediction process.
 	 */
-	default List<TARGET> predict(IDataset dataset) throws PredictionException{
+	default List<TARGET> predict(IDataset<IInstance> dataset) throws PredictionException{
 		List<TARGET> results = new ArrayList<>();
 		for (IInstance instance : dataset) {
 			results.add(predict(instance));

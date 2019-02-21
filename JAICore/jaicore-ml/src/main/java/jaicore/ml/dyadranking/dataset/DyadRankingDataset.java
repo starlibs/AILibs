@@ -27,7 +27,7 @@ import jaicore.ml.dyadranking.Dyad;
  * @author Helena Graf, Mirko Jürgens, Michael Braun, Jonas Hanselle
  *
  */
-public class DyadRankingDataset extends ArrayList<IInstance> implements IDataset {
+public class DyadRankingDataset extends ArrayList<IInstance> implements IDataset<IInstance> {
 
 	private static final long serialVersionUID = -1102494546233523992L;
 
@@ -62,7 +62,7 @@ public class DyadRankingDataset extends ArrayList<IInstance> implements IDataset
 	}
 
 	@Override
-	public <T> IAttributeType<T> getTargetType(Class<? extends T> clazz) {
+	public IAttributeType<?> getTargetType() {
 		throw new UnsupportedOperationException("Dyad rankings have no target type.");
 	}
 
@@ -80,7 +80,6 @@ public class DyadRankingDataset extends ArrayList<IInstance> implements IDataset
 		return firstDyad.getInstance().length() + firstDyad.getAlternative().length();
 	}
 
-	@Override
 	public void serialize(OutputStream out) {
 		// currently, this always creates a dense dyad representation of the dyad
 		// ranking dataset
@@ -100,7 +99,6 @@ public class DyadRankingDataset extends ArrayList<IInstance> implements IDataset
 		}
 	}
 
-	@Override
 	public void deserialize(InputStream in) {
 		// currently, this always creates a dense dyad ranking dataset
 		this.clear();
@@ -161,6 +159,11 @@ public class DyadRankingDataset extends ArrayList<IInstance> implements IDataset
 	@Override
 	public IDyadRankingInstance get(int index) {
 		return (IDyadRankingInstance) super.get(index);
+	}
+
+	@Override
+	public <T> IAttributeType<T> getTargetType(Class<T> clazz) {
+		throw new UnsupportedOperationException("Dyad rankings have no target type.");
 	}
 
 }
