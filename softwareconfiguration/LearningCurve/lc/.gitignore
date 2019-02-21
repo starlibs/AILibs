@@ -6,3 +6,5 @@ LearningCurve.exe
 LearningCurve.hpp
 # stan test output
 output_*.csv
+# python cache from plot.py
+__pycache__/*
