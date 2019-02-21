@@ -27,7 +27,7 @@ import weka.classifiers.lazy.kNN;
  */
 public class NearestNeighborClassifierRefTest {
 
-    private static final String PATH = "./tsctestenv/data/";
+    private static final String PATH = "./tsctestenv/data/univariate/";
 
     private static final String CAR_TRAIN = PATH + "Car/Car/Car_TRAIN.arff";
     private static final String CAR_TEST = PATH + "Car/Car/Car_TEST.arff";
