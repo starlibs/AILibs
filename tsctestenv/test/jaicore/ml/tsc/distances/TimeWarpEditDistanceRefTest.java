@@ -1,6 +1,7 @@
 package jaicore.ml.tsc.distances;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 
@@ -77,6 +78,10 @@ public class TimeWarpEditDistanceRefTest {
         }
     }
 
+    /**
+     * Test the correctnes of the reference implementation on the test cases used in
+     * the unit tests for the own implementation.
+     */
     @Test
     public void testReferenceCorrectness() {
         double[] timeSeries5 = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
@@ -97,6 +102,47 @@ public class TimeWarpEditDistanceRefTest {
         double refDistance2 = referenceTimeWarpEditDistance.distance(timeSeries5, timeSeries7, Double.MAX_VALUE);
         double ownDistance2 = timeWarpEditDistance.distance(timeSeries5, timeSeries7);
         assertEquals(ownDistance2, refDistance2, 0);
+    }
 
+    /**
+     * Compares the performance for the distance calculation on a whole dataset by
+     * measuring calculation time.
+     */
+    @Test
+    public void testPerformance() {
+        // Get values.
+        double[][] values = dataset.getValues(0);
+        int numberOfTestInstances = 100;
+
+        double nu = 0.001;
+        double lambda = 1;
+
+        // Measure time for reference implementation.
+        double cutoff = Double.MAX_VALUE;
+        double refStart = System.currentTimeMillis();
+        TWEDistance referenceTimeWarpEditDistance = new TWEDistance(lambda, nu);
+        for (int i = 0; i < numberOfTestInstances; i++) {
+            for (int j = i; j < values.length; j++) {
+                referenceTimeWarpEditDistance.distance(values[i], values[j], cutoff);
+            }
+        }
+        double refEnd = System.currentTimeMillis();
+
+        // Measure time for own implementation.
+        double ownStart = System.currentTimeMillis();
+        TimeWarpEditDistance timeWarpEditDistance = new TimeWarpEditDistance(lambda, nu);
+        for (int i = 0; i < numberOfTestInstances; i++) {
+            for (int j = i; j < values.length; j++) {
+                timeWarpEditDistance.distance(values[i], values[j]);
+            }
+        }
+        double ownEnd = System.currentTimeMillis();
+
+        // Compare performance.
+        double refTime = refEnd - refStart;
+        double ownTime = ownEnd - ownStart;
+        String message = String.format("Reference implementation was faster. Reference: %.3f ms, own: %.3f ms", refTime,
+                ownTime);
+        assertTrue(message, ownTime <= refTime);
     }
 }
