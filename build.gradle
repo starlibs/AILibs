@@ -134,11 +134,18 @@ allprojects {
 			}
 		}
 	}
+	
 	// This task creates a jar with test classes.
 	task testClassesJar(type: Jar) {
 		classifier = 'tests'
 		from sourceSets.test.output
 	}
+	
+	task sourcesJar(type: Jar, dependsOn: classes) {
+		classifier = 'sources'
+		from sourceSets.main.allSource
+	}
+	
 	// Add a new configuration named testArtifacts
 	configurations {
 		testArtifacts
@@ -148,6 +155,8 @@ allprojects {
 	//      testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
 	artifacts {
 		testArtifacts testClassesJar
+		archives sourcesJar
+		archives javadocJar
 	}
 	
 	// generate JavaDoc for each project
@@ -157,6 +166,7 @@ allprojects {
         	destinationDir = file("docs/javadoc")
 //		failOnError = true
     	}
+		
 
 }
 
