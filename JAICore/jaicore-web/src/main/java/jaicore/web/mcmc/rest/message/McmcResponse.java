@@ -8,6 +8,12 @@ public class McmcResponse {
 
 	private Map<String, Map<String, Double>> parameters;
 
+	public McmcResponse(Map<String, Double> weights, Map<String, Map<String, Double>> parameters) {
+		super();
+		this.weights = weights;
+		this.parameters = parameters;
+	}
+
 	public Map<String, Double> getWeights() {
 		return weights;
 	}
