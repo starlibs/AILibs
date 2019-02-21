@@ -1,0 +1,8 @@
+
+
+# stan generated executable
+LearningCurve.exe
+# stan generated c++ file
+LearningCurve.hpp
+# stan test output
+output_*.csv
