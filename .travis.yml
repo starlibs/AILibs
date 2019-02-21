@@ -36,8 +36,7 @@ jobs:
       sonarcloud:
         organization: "starlibs"
     script:
-    - ./gradlew testCompile
-    - ./gradlew sonarqube -x test
+    - ./gradlew sonarqube -x test testClasses
   - stage: deploy
     script: 
     - "./gradlew publish -PnexusBaseUrl=$nexusBaseUrl -PnexusUpRepo=$nexusUpRepo -PnexusUser=$nexusUser -PnexusPassword=$nexusPassword"
