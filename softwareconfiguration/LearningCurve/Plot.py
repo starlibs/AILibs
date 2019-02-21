@@ -6,7 +6,7 @@ import os
 import sys
 
 plotfile = "output.csv"
-if len(sys.argv)  >= 1:
+if len(sys.argv)  >= 2:
     plotfile = sys.argv[1]
     print(plotfile)
 
@@ -88,7 +88,7 @@ def plot():
     for si in range(10):
         y.append([])
         #compute which samples are used to display
-        s = si*100
+        s = si
         for i in range(1000):
             tmp = f_combNew(float(samples[s][7]), float(samples[s][8]), float(samples[s][9]), float(samples[s][10]), float(samples[s][11]), float(samples[s][12]), float(samples[s][13]), float(samples[s][14]), float(samples[s][15]), float(samples[s][16]), float(samples[s][17]), float(samples[s][18]), float(samples[s][19]), float(samples[s][20]), float(samples[s][21]), float(samples[s][22]), float(samples[s][23]), float(samples[s][24]), float(samples[s][25]), float(samples[s][26]), float(samples[s][27]), float(samples[s][28]), float(samples[s][29]), float(samples[s][30]), float(samples[s][31]), float(samples[s][32]), x[i])
             if isinstance(tmp,complex):
@@ -103,12 +103,38 @@ def plot():
     
     plt.plot(x,comb, 'b--', label="Curve-combined", linewidth=2 )
    
-    plt.plot(x,truth, 'k--', label='truth', linewidth=2 )
+    #plt.plot(x,truth, 'k--', label='truth', linewidth=2 )
     plt.xlabel('x')
     plt.ylabel('y')
     plt.title('')
     plt.legend()
     plt.show()
 
+def testPlot():
+    x = []
+    y = []
+    
+    for i in range(1000):
+        x.append((i+1)*10 +5)
+        #original function for comparison, use same parameters as for generating the data
+        #y.append(f_comb(1.0/6.0, 1.0/6.0, 1.0/6.0, 1.0/6.0, 1.0/6.0, 1.0/6.0, 0.35, -0.04, 1, 4.5, 1, 1.0, 3.0, -1.5, 0.04, 0, 0.6, 0.37, 1.1, -1.0, 0.5, 0.05, 0.1, 0.2, 0.9, 0.5, x[i]))
+        #y.append(log_log_linear(0.497858, 0.867087, x[i]))
+        #y.append(pow_3(3.24848, 4.62609, 1.22915, x[i]))
+        y.append(log_power(-9.6865, 4.61269, 1.48929, x[i]))
+        #y.append(log_log_linear(0.497858, 0.867087, x[i]))
+        #y.append(log_log_linear(0.497858, 0.867087, x[i]))
+        
+
+    plt.plot(x,y, 'k--', label='truth', linewidth=2 )
+    plt.xlabel('x')
+    plt.ylabel('y')
+    plt.title('')
+    plt.legend()
+    plt.show()
+
+
+
+#testPlot()
+
 plot()
-#generateData("TestData6.data.R")
+#generateData("TestData7.data.R")
