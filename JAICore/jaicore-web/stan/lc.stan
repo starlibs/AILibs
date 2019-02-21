@@ -24,45 +24,72 @@ functions{
 		return c - exp(-a * x^alpha + b);
 	}
 	
-	real f_comb(real w_0, real w_1, real w_2, real w_3, real w_4, real w_5, real a_0, real b_0, real c_1, real a_1, real alpha_1, real a_2, real b_2, real c_2, real a_3, real b_3, real c_3, real alpha_3, real alpha_4, real beta_4, real delta_4, real kappa_4, real a_5, real b_5, real c_5, real alpha_5, real x){
-		return w_0 * log_log_linear(a_0, b_0, x) + w_1 * pow_3(c_1, a_1, alpha_1, x) + w_2 * log_power(a_2, b_2, c_2, x) + w_3 * pow_4(a_3, b_3, c_3, alpha_3, x) + w_4 * mmf(alpha_4, beta_4, delta_4, kappa_4, x) + w_5 * exp_4(a_5, b_5, c_5, alpha_5, x);
+	real f_comb(real[] e, real x){
+		return e[1] * log_log_linear(e[2], e[3], x) + 
+			e[4] * pow_3(e[5], e[6], e[7], x) + 
+			e[8] * log_power(e[9], e[10], e[11], x) + 
+			e[12] * pow_4(e[13], e[14], e[15], e[16], x) + 
+			e[17] * mmf(e[18], e[19], e[20], e[21], x) + 
+			e[22] * exp_4(e[23], e[24], e[25], e[26], x);
 	}
 	
+	real curveSlopeDist_log(real[] e, int c, int s){
+		if(e[1] < 0)
+			return 0;
+		if(e[4] < 0)
+			return 0;
+		if(e[8] < 0)
+			return 0;
+		if(e[12] < 0)
+			return 0;
+		if(e[17] < 0)
+			return 0;
+		if(e[22] < 0)
+			return 0;	
+		for(k in 1:c)
+			if(f_comb(e, k*s) > f_comb(e, s*k+s) )
+				return 0;
+		return 1;
+	}
 }
 
 data {
 	int N;
+	int c;
+	int s;
 	vector[N] x;
 	vector[N] y;
 }
 
 parameters {
-	real<lower=0> w_0;
-	real<lower=0> w_1;
-	real<lower=0> w_2;
-	real<lower=0> w_3;
-	real<lower=0> w_4;
-	real<lower=0> w_5;
-	real a_0;
-	real b_0;
-	real c_1;
-	real a_1;
-	real alpha_1;
-	real a_2;
-	real b_2;
-	real c_2;
-	real a_3;
-	real b_3;
-	real c_3;
-	real alpha_3;
-	real alpha_4;
-	real beta_4;
-	real delta_4;
-	real kappa_4;
-	real a_5;
-	real b_5;
-	real c_5;
-	real alpha_5;
+	real e[26];
+
+// 0 	real<lower=0> w_0;
+// 1 	real a_0;
+// 2 	real b_0;
+// 3 	real<lower=0> w_1;
+// 4 	real c_1;
+// 5 	real a_1;
+// 6 	real alpha_1;
+// 7 	real<lower=0> w_2;
+// 8 	real a_2;
+// 9 	real b_2;
+//10	real c_2;
+//11	real<lower=0> w_3;
+//12	real a_3;
+//13	real b_3;
+//14	real c_3;
+//15	real alpha_3;
+//16	real<lower=0> w_4;
+//17	real alpha_4;
+//18	real beta_4;
+//19	real delta_4;
+//20	real kappa_4;
+//21	real<lower=0> w_5;
+//22	real a_5;
+//23	real b_5;
+//24	real c_5;
+//25	real alpha_5;
 	
 	real<lower=0> sigma;
 }
@@ -73,38 +100,13 @@ transformed parameters {
 model {
 	vector[N] ypred;
 	//prior
-	w_0 ~ normal(1,1);
-	w_1 ~ normal(1,1);
-	w_2 ~ normal(1,1);
-	w_3 ~ normal(1,1);
-	w_4 ~ normal(1,1);
-	w_5 ~ normal(1,1);
 	sigma ~ normal(0, 1);
-	c_1 ~ normal(1, 1);
-	a_1 ~ normal(10, 5);
-	alpha_1 ~ normal(0.5,0.5);
-	a_0 ~ normal(0.5,0.5);
-	b_0 ~ normal(1,1);
-	a_2 ~ normal(1,0.2);
-	b_2 ~ normal(5, 2);
-	c_2 ~ normal(-1,0.5);
-	a_3 ~ normal(0.2,0.1);
-	b_3 ~ normal(0,1);
-	c_3 ~ normal(1,0.3);
-	alpha_3 ~ normal(0.25,0.25);
-	alpha_4 ~ normal(1.5, 0.5);
-	beta_4 ~ normal(-1,1);
-	delta_4 ~ normal(0.5,0.25);
-	kappa_4 ~ normal(0.5,0.25);
-	a_5 ~ normal(0.1,0.05);
-	b_5 ~ normal(0,0.5);
-	c_5 ~ normal(1,0.3);
-	alpha_5 ~ normal(0.5,0.2);
-
+	
+	e ~ curveSlopeDist(c, s);
 	
 	// dist
 	for (n in 1:N) 
-		ypred[n] = f_comb(w_0, w_1, w_2, w_3, w_4, w_5, a_0, b_0, c_1, a_1, alpha_1, a_2, b_2, c_2, a_3, b_3, c_3, alpha_3, alpha_4, beta_4, delta_4, kappa_4, a_5, b_5, c_5, alpha_5, x[n]);
+		ypred[n] = f_comb(e, x[n]);
 		//ypred[n] = log_log_linear(a_0, b_0, x[n]);
 	y ~ normal(ypred, sigma);
 }

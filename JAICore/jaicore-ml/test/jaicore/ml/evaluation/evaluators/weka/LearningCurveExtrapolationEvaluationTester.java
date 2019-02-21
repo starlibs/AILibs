@@ -11,7 +11,7 @@ import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.SubsamplingMethod;
 import jaicore.ml.core.dataset.sampling.WekaInstancesUtil;
-import jaicore.ml.learningcurve.extrapolation.InversePowerLaw.InversePowerLawExtrapolator;
+import jaicore.ml.learningcurve.extrapolation.ipl.InversePowerLawExtrapolator;
 import weka.classifiers.functions.SMO;
 import weka.core.Attribute;
 import weka.core.Instances;

@@ -1,4 +1,4 @@
-package jaicore.ml.learningcurve.extrapolation.InversePowerLaw;
+package jaicore.ml.learningcurve.extrapolation.ipl;
 
 import java.io.FileReader;
 import java.nio.file.Paths;

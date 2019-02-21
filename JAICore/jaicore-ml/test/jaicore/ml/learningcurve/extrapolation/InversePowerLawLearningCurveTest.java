@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.Test;
 
-import jaicore.ml.learningcurve.extrapolation.InversePowerLaw.InversePowerLawLearningCurve;
+import jaicore.ml.learningcurve.extrapolation.ipl.InversePowerLawLearningCurve;
 
 public class InversePowerLawLearningCurveTest {
 
