@@ -88,8 +88,10 @@ public class MLPlanWekaExperimenter implements IExperimentSetEvaluator {
 		/* initialize ML-Plan with the same config file that has been used to specify the experiments */
 		MLPlanBuilder builder = new MLPlanBuilder();
 		builder.withAlgorithmConfigFile(configFile);
+		builder.withAutoWEKAConfiguration();
 		builder.withTimeoutForNodeEvaluation(new TimeOut(new Integer(experimentValues.get("evaluationTimeout")), TimeUnit.SECONDS));
 		builder.withTimeoutForSingleSolutionEvaluation(new TimeOut(new Integer(experimentValues.get("evaluationTimeout")), TimeUnit.SECONDS));
+
 		MLPlan mlplan = new MLPlan(builder, stratifiedSplit.get(0));
 		mlplan.setLoggerName("mlplan");
 		mlplan.setTimeout(new Integer(experimentValues.get("timeout")), TimeUnit.SECONDS);
@@ -120,14 +122,20 @@ public class MLPlanWekaExperimenter implements IExperimentSetEvaluator {
 	public void rcvHASCOSolutionEvent(final HASCOSolutionEvent<Double> e) {
 		if (this.adapter != null) {
 			try {
-				MLPipeline pl = this.factory.getComponentInstantiation(e.getSolutionCandidate().getComponentInstance());
+				String classifier = "";
+				String preprocessor = "";
+				if (e.getSolutionCandidate().getComponentInstance().getComponent().equals("pipeline")) {
+					preprocessor = e.getSolutionCandidate().getComponentInstance().getSatisfactionOfRequiredInterfaces().get("preprocessor").toString();
+					classifier = e.getSolutionCandidate().getComponentInstance().getSatisfactionOfRequiredInterfaces().get("classifier").toString();
+				} else {
+					classifier = e.getSolutionCandidate().getComponentInstance().toString();
+				}
 				Map<String, Object> eval = new HashMap<>();
 				eval.put("experiment_id", this.experimentID);
-				eval.put("preprocessor", pl.getPreprocessors().toString());
-				eval.put("classifier", WekaUtil.getClassifierDescriptor(pl.getBaseClassifier()));
-				eval.put("errorRate", e.getSolutionCandidate().getScore());
+				eval.put("preprocessor", preprocessor);
+				eval.put("classifier", classifier);
+				eval.put("errorRate", e.getScore());
 				eval.put("time_train", e.getSolutionCandidate().getTimeToEvaluateCandidate());
-
 				this.adapter.insert(this.experimentConfig.evaluationsTable(), eval);
 			} catch (Exception e1) {
 				e1.printStackTrace();
