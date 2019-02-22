@@ -64,7 +64,7 @@ public class InputOptimizerTest {
 			randDoubles[i] = rng.nextGaussian();
 		}
 		INDArray testinp = Nd4j.create(randDoubles); 
-		INDArray optimized = PLNetInputOptimizer.optimizeInput(testnet, testinp, new NegIdentityInpOptLoss(), 0.01, 50, new Pair<Integer, Integer>(2,4));
+		INDArray optimized = new PLNetInputOptimizer().optimizeInput(testnet, testinp, new NegIdentityInpOptLoss(), 0.01, 50, new Pair<Integer, Integer>(2,4));
 		System.out.println("Optimized input: " + optimized);
 	}
 }

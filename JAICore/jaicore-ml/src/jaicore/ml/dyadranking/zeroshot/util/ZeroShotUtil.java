@@ -1,5 +1,8 @@
 package jaicore.ml.dyadranking.zeroshot.util;
 
+import org.nd4j.linalg.api.ndarray.INDArray;
+
+import jaicore.ml.dyadranking.util.DyadNormalScaler;
 import weka.core.Utils;
 
 public class ZeroShotUtil {
@@ -32,8 +35,12 @@ public class ZeroShotUtil {
 		return optionsSplit;
 	}
 	
-	public static String[] mapMLPInputsToWekaOptions(double L, double M, double N) throws Exception {	
-		String[] options = Utils.splitOptions("-L " + L + " -M " + M + " -N " + N);
+	public static String[] mapMLPInputsToWekaOptions(double LExp, double MExp, double N) throws Exception {
+		double L = Math.pow(10, LExp);
+		double M = Math.pow(10, MExp);
+		long roundedN = Math.round(N);
+		
+		String[] options = Utils.splitOptions("-L " + L + " -M " + M + " -N " + roundedN);
 		
 		return options;
 	}
@@ -47,5 +54,17 @@ public class ZeroShotUtil {
 		String[] options = Utils.splitOptions(" -I " + I_rounded + " -K " + K + " -M " + M_rounded + " -depth " + depth_rounded);
 		
 		return options;
+	}
+	
+	public static INDArray unscaleParameters(INDArray parameters, DyadNormalScaler scaler ) {
+		INDArray unscaled = parameters.dup();
+		for (int i = 0; i < unscaled.length(); i++) {
+			unscaled.putScalar(i, 
+					unscaled.getDouble(i) 
+					* (scaler.getStatsY()[i].getMax() - scaler.getStatsY()[i].getMin())
+					+  scaler.getStatsY()[i].getMin());
+		}
+		
+		return unscaled;		
 	}
 }
