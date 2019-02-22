@@ -34,6 +34,8 @@ import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
+import jaicore.basic.algorithm.exceptions.DelayedCancellationCheckException;
+import jaicore.basic.algorithm.exceptions.DelayedTimeoutCheckException;
 import jaicore.basic.sets.SetUtil;
 import jaicore.concurrent.TimeoutTimer;
 import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
@@ -103,7 +105,7 @@ public class TwoPhaseHASCO<ISearch extends GraphSearchInput<N, A>, N, A> extends
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws InterruptedException, TimeoutException, AlgorithmException {
+	public AlgorithmEvent nextWithException() throws InterruptedException, TimeoutException, AlgorithmException, AlgorithmExecutionCanceledException {
 		logger.info("Stepping 2phase HASCO. Current state: {}", getState());
 		switch (this.getState()) {
 		case created: {
@@ -170,6 +172,15 @@ public class TwoPhaseHASCO<ISearch extends GraphSearchInput<N, A>, N, A> extends
 
 			/* phase 2: select model */
 			this.logger.info("Entering phase 2");
+			try {
+				checkAndConductTermination();
+			} catch (DelayedTimeoutCheckException e) {
+				e.printStackTrace();
+				throw e.getException();
+			} catch (DelayedCancellationCheckException e) {
+				e.printStackTrace();
+				throw e.getException();
+			}
 			this.selectedHASCOSolution = this.selectModel();
 			this.updateBestSeenSolution(this.selectedHASCOSolution);
 			return this.terminate();

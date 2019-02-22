@@ -59,8 +59,6 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 
 	public MLPlan(final MLPlanBuilder builder, final Instances data) throws IOException {
 		super(builder.getAlgorithmConfig(), data);
-		builder.setHascoFactory(new HASCOViaFDAndBestFirstWithRandomCompletionsFactory(this.getConfig().randomSeed(), this.getConfig().numberOfRandomCompletions(), this.getConfig().timeoutForCandidateEvaluation(),
-				this.getConfig().timeoutForNodeEvaluation()));
 		builder.prepareNodeEvaluatorInFactoryWithData(data);
 
 		/* sanity checks */
@@ -101,9 +99,9 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 
 		/* create 2-phase software configuration problem */
 		IObjectEvaluator<ComponentInstance, Double> searchBenchmark = new SearchPhasePipelineEvaluator(builder.getClassifierFactory(), evaluationMeasurementBridge, this.getConfig().numberOfMCIterationsDuringSearch(), this.dataShownToSearch,
-				this.getConfig().getMCCVTrainFoldSizeDuringSearch(), this.getConfig().randomSeed());
+				this.getConfig().getMCCVTrainFoldSizeDuringSearch(), this.getConfig().randomSeed(), this.getConfig().timeoutForCandidateEvaluation());
 		IObjectEvaluator<ComponentInstance, Double> selectionBenchmark = new SelectionPhasePipelineEvaluator(builder.getClassifierFactory(), evaluationMeasurementBridge, this.getConfig().numberOfMCIterationsDuringSelection(),
-				MLPlan.this.getInput(), this.getConfig().getMCCVTrainFoldSizeDuringSelection(), this.getConfig().randomSeed());
+				MLPlan.this.getInput(), this.getConfig().getMCCVTrainFoldSizeDuringSelection(), this.getConfig().randomSeed(), this.getConfig().timeoutForCandidateEvaluation());
 		TwoPhaseSoftwareConfigurationProblem problem = new TwoPhaseSoftwareConfigurationProblem(builder.getSearchSpaceConfigFile(), "AbstractClassifier", searchBenchmark, selectionBenchmark);
 
 		/* create 2-phase HASCO */
