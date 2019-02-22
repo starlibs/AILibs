@@ -253,11 +253,12 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 		logger.info("Received cancel, first processing the cancel locally, then forwarding to search.");
 		super.cancel();
 		if (this.search != null) {
-			logger.info("Trigger cancel on search.");
+			logger.info("Trigger cancel on search. Thread intteruption flag is {}", Thread.currentThread().isInterrupted());
 			this.search.cancel();
 		}
-		logger.info("Finished, now terminating");
+		logger.info("Finished, now terminating. Thread intteruption flag is {}", Thread.currentThread().isInterrupted());
 		this.terminate();
+		logger.info("Cancel completed. Thread intteruption flag is {}", Thread.currentThread().isInterrupted());
 	}
 
 	public IHASCOPlanningGraphGeneratorDeriver<N, A> getPlanningGraphGeneratorDeriver() {

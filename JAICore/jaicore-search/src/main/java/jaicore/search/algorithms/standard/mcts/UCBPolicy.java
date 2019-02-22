@@ -30,12 +30,16 @@ public class UCBPolicy<T,A> implements IPathUpdatablePolicy<T,A,Double>, ILoggin
 	class NodeLabel {
 		private final DescriptiveStatistics scores = new DescriptiveStatistics();
 		private int visits;
+		@Override
+		public String toString() {
+			return "NodeLabel [scores=" + scores + ", visits=" + visits + "]";
+		}
 	}
 	
 	private final Map<T, NodeLabel> labels = new HashMap<>();
 
 	public void updatePath(List<T> path, Double score) {
-		logger.info("Updating path {} with score {}", path, score);
+		logger.debug("Updating path {} with score {}", path, score);
 		for (T node : path) {
 			if (!labels.containsKey(node)) {
 				labels.put(node, new NodeLabel());
@@ -43,13 +47,14 @@ public class UCBPolicy<T,A> implements IPathUpdatablePolicy<T,A,Double>, ILoggin
 			NodeLabel label = labels.get(node);
 			label.visits++;
 			label.scores.addValue(score);
+			logger.trace("Updated label of node {}. Visits now {}, stats contains {} entries with mean {}", node, label.visits, label.scores.getN(), label.scores.getMean());
 		}
 	}
 	
 	@Override
 	public A getAction(T node, Map<A,T> actionsWithTheirSuccessors) {
 		Collection<A> possibleActions = actionsWithTheirSuccessors.keySet();
-		logger.info("Deriving action for node {}. The {} options are: {}", node, possibleActions.size(), actionsWithTheirSuccessors);
+		logger.debug("Deriving action for node {}. The {} options are: {}", node, possibleActions.size(), actionsWithTheirSuccessors);
 		
 		/* if an applicable action has not been tried, play it to get some initial idea */
 		List<A> actionsThatHaveNotBeenTriedYet = possibleActions.stream().filter(a -> !labels.containsKey(actionsWithTheirSuccessors.get(a))).collect(Collectors.toList());
@@ -69,19 +74,23 @@ public class UCBPolicy<T,A> implements IPathUpdatablePolicy<T,A,Double>, ILoggin
 		for (A action : possibleActions) {
 			T child = actionsWithTheirSuccessors.get(action);
 			NodeLabel label = labels.get(child);
-			logger.debug("Considering action {} whose successor state has stats {} and {} visits", action, label.scores.getMean(), label.visits);
+			assert label.visits != 0 : "Visits of node " + child + " cannot be 0 if we already used this action before!";
+			assert label.scores.getN() != 0 : "Number of observations cannot be 0 if we already visited this node before";
+			logger.trace("Considering action {} whose successor state has stats {} and {} visits", action, label.scores.getMean(), label.visits);
 			double ucb = label.scores.getMean() + (maximize ? 1 : -1) * Math.sqrt(2 * Math.log(n) / label.visits);
+			assert !(new Double(ucb).equals(Double.NaN)) : "The UCB score is NaN, which cannot be the case. Score mean is " + label.scores.getMean() + ", number of visits is " + label.visits;
 			if (maximize && (ucb > best) || !maximize && (ucb < best)) {
-				logger.trace("Updating best choice {} since it is better than the current solution with performance {}", choice, best);
+				logger.trace("Updating best choice {} with {} since it is better than the current solution with performance {}", choice, action, best);
 				best = ucb;
 				choice = action;
 			}
 			else
-				logger.trace("Skipping current solution {} since its score is not good enough.", choice);	
+				logger.trace("Skipping current solution {} since its score {} is not better than the currently best {}.", action, ucb, best);	
 		}
 		
 		/* quick sanity check */
 		assert choice != null : "Would return null, but this must not be the case!";
+		logger.info("Recommending action {}.", choice);
 		return choice;
 	}
 
