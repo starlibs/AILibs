@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/fmohr/AILibs.svg?branch=dev)](https://travis-ci.org/fmohr/AILibs)
+[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=starlibs.ailibs&metric=alert_status)](https://sonarcloud.io/dashboard/index/starlibs.ailibs)
 
 
 # AILibs
