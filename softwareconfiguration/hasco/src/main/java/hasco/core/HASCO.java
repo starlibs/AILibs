@@ -225,7 +225,6 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 				assert (hascoSolutionEvent != null) : "Hasco solution event has not been seen yet or cannot be retrieved from cache.";
 				this.logger.info("Received new solution with score {} from search, communicating this solution to the HASCO listeners. Number of returned unparametrized solutions is now {}/{}.", hascoSolutionEvent.getScore(),
 						this.returnedUnparametrizedComponentInstances.size(), this.numUnparametrizedSolutions);
-				this.post(hascoSolutionEvent);
 				return hascoSolutionEvent;
 			} else {
 				return searchEvent;
