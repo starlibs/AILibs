@@ -2,7 +2,7 @@ package jaicore.graphvisualizer.events.graph;
 
 import jaicore.basic.algorithm.events.AAlgorithmEvent;
 
-public class NodeRemovedEvent<T> extends AAlgorithmEvent implements GraphEvent {
+public class NodeRemovedEvent<T> extends AAlgorithmEvent implements asdh {
 
 	private final T node;
 	public final String name = "NodeRemovedEvent"; // changed name to NodeRemovedEvent. before it was: "§NodeRemovedEvent";
