@@ -428,7 +428,24 @@ public class SetUtil {
 				out.add(item);
 
 		return out;
-
+	}
+	
+	public static <S, T extends S, U extends S> boolean differenceEmpty(Collection<T> a, Collection<U> b) {
+		if (a == null || a.isEmpty())
+			return true;
+		for (S item : a)
+			if (!b.contains(item))
+				return false; 
+		return true;
+	}
+	
+	public static <S, T extends S, U extends S> boolean differenceNotEmpty(Collection<T> a, Collection<U> b) {
+		if (b == null)
+			return !a.isEmpty();
+		for (S item : a)
+			if (!b.contains(item))
+				return true; 
+		return false;
 	}
 
 	/**
