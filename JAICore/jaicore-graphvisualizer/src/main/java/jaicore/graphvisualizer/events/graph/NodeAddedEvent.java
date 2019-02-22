@@ -2,7 +2,7 @@ package jaicore.graphvisualizer.events.graph;
 
 import jaicore.basic.algorithm.events.AAlgorithmEvent;
 
-public class NodeAddedEvent<T> extends AAlgorithmEvent implements GraphEvent {
+public class NodeAddedEvent<T> extends AAlgorithmEvent implements asdh {
 
 	private final T parent, node;
 	private final String type;
