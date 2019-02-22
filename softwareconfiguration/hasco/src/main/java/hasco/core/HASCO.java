@@ -170,7 +170,6 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 				@Subscribe
 				public void receiveSolutionCandidateFoundEvent(final EvaluatedSearchSolutionCandidateFoundEvent<N, A, V> solutionEvent) throws InterruptedException, TimeoutException, AlgorithmException {
 
-					System.err.println(Thread.currentThread().getName() + ": Received solution event in search listener " + solutionEvent);
 					EvaluatedSearchGraphPath<N, A, V> searchPath = solutionEvent.getSolutionCandidate();
 					Plan plan = HASCO.this.planningGraphGeneratorDeriver.getPlan(searchPath.getNodes());
 					ComponentInstance objectInstance = Util.getSolutionCompositionForPlan(HASCO.this.getInput().getComponents(), HASCO.this.planningProblem.getCorePlanningProblem().getInit(), plan, true);
@@ -194,7 +193,6 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 					HASCO.this.listOfAllRecognizedSolutions.add(solution);
 					HASCOSolutionEvent<V> hascoSolutionEvent = new HASCOSolutionEvent<>(HASCO.this.getId(), solution);
 					HASCO.this.hascoSolutionEventCache.put(solutionEvent, hascoSolutionEvent);
-					System.err.println(Thread.currentThread().getName() + ": Post solution event in search listener " + solutionEvent);
 					HASCO.this.post(hascoSolutionEvent);
 				}
 
@@ -226,7 +224,6 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 
 			/* otherwise, if a solution has been found, we announce this finding to our listeners and memorize if it is a new best candidate */
 			else if (searchEvent instanceof EvaluatedSearchSolutionCandidateFoundEvent) {
-				System.err.println(Thread.currentThread().getName() + ": Solution event in HASCO.nextWithException " + searchEvent);
 				HASCOSolutionEvent<V> hascoSolutionEvent = this.hascoSolutionEventCache.remove(searchEvent);
 				assert (hascoSolutionEvent != null) : "Hasco solution event has not been seen yet or cannot be retrieved from cache. " + this.hascoSolutionEventCache;
 				if (hascoSolutionEvent == null) {
