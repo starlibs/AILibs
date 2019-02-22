@@ -56,8 +56,12 @@ public class ZeroShotUtil {
 		return options;
 	}
 	
-	public static INDArray unscaleParameters(INDArray parameters, DyadNormalScaler scaler ) {
-		INDArray unscaled = parameters.dup();
+	public static INDArray unscaleParameters(INDArray parameters, DyadNormalScaler scaler, int numHyperPars) {
+		int[] hyperParIndices = new int[numHyperPars];
+		for (int i = 0; i < numHyperPars; i++) {
+			hyperParIndices[i] = (int) parameters.length() - numHyperPars + i;
+		}
+		INDArray unscaled = parameters.getColumns(hyperParIndices);
 		for (int i = 0; i < unscaled.length(); i++) {
 			unscaled.putScalar(i, 
 					unscaled.getDouble(i) 
