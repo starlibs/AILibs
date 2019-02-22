@@ -16,7 +16,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10};
+var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -116,7 +116,7 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <dl>
 <dt>All Implemented Interfaces:</dt>
-<dd>jaicore.basic.algorithm.IAlgorithmFactory&lt;<a href="../../../../../jaicore/search/probleminputs/GraphSearchWithPathEvaluationsInput.html" title="class in jaicore.search.probleminputs">GraphSearchWithPathEvaluationsInput</a>&lt;N,A,V&gt;,<a href="../../../../../jaicore/search/model/other/EvaluatedSearchGraphPath.html" title="class in jaicore.search.model.other">EvaluatedSearchGraphPath</a>&lt;N,A,V&gt;&gt;, <a href="../../../../../jaicore/search/core/interfaces/IGraphSearchFactory.html" title="interface in jaicore.search.core.interfaces">IGraphSearchFactory</a>&lt;<a href="../../../../../jaicore/search/probleminputs/GraphSearchWithPathEvaluationsInput.html" title="class in jaicore.search.probleminputs">GraphSearchWithPathEvaluationsInput</a>&lt;N,A,V&gt;,<a href="../../../../../jaicore/search/model/other/EvaluatedSearchGraphPath.html" title="class in jaicore.search.model.other">EvaluatedSearchGraphPath</a>&lt;N,A,V&gt;,N,A&gt;</dd>
+<dd>jaicore.basic.algorithm.IAlgorithmFactory&lt;<a href="../../../../../jaicore/search/probleminputs/GraphSearchWithPathEvaluationsInput.html" title="class in jaicore.search.probleminputs">GraphSearchWithPathEvaluationsInput</a>&lt;N,A,V&gt;,<a href="../../../../../jaicore/search/model/other/EvaluatedSearchGraphPath.html" title="class in jaicore.search.model.other">EvaluatedSearchGraphPath</a>&lt;N,A,V&gt;&gt;, <a href="../../../../../jaicore/search/core/interfaces/IGraphSearchFactory.html" title="interface in jaicore.search.core.interfaces">IGraphSearchFactory</a>&lt;<a href="../../../../../jaicore/search/probleminputs/GraphSearchWithPathEvaluationsInput.html" title="class in jaicore.search.probleminputs">GraphSearchWithPathEvaluationsInput</a>&lt;N,A,V&gt;,<a href="../../../../../jaicore/search/model/other/EvaluatedSearchGraphPath.html" title="class in jaicore.search.model.other">EvaluatedSearchGraphPath</a>&lt;N,A,V&gt;,N,A&gt;, <a href="../../../../../jaicore/search/core/interfaces/IOptimalPathInORGraphSearchFactory.html" title="interface in jaicore.search.core.interfaces">IOptimalPathInORGraphSearchFactory</a>&lt;<a href="../../../../../jaicore/search/probleminputs/GraphSearchWithPathEvaluationsInput.html" title="class in jaicore.search.probleminputs">GraphSearchWithPathEvaluationsInput</a>&lt;N,A,V&gt;,N,A,V&gt;</dd>
 </dl>
 <dl>
 <dt>Direct Known Subclasses:</dt>
@@ -125,7 +125,8 @@ var activeTableTab = "activeTableTab";
 <hr>
 <br>
 <pre>public class <span class="typeNameLabel">MCTSFactory&lt;N,A,V extends java.lang.Comparable&lt;V&gt;&gt;</span>
-extends <a href="../../../../../jaicore/search/core/interfaces/StandardORGraphSearchFactory.html" title="class in jaicore.search.core.interfaces">StandardORGraphSearchFactory</a>&lt;<a href="../../../../../jaicore/search/probleminputs/GraphSearchWithPathEvaluationsInput.html" title="class in jaicore.search.probleminputs">GraphSearchWithPathEvaluationsInput</a>&lt;N,A,V&gt;,<a href="../../../../../jaicore/search/model/other/EvaluatedSearchGraphPath.html" title="class in jaicore.search.model.other">EvaluatedSearchGraphPath</a>&lt;N,A,V&gt;,N,A,V&gt;</pre>
+extends <a href="../../../../../jaicore/search/core/interfaces/StandardORGraphSearchFactory.html" title="class in jaicore.search.core.interfaces">StandardORGraphSearchFactory</a>&lt;<a href="../../../../../jaicore/search/probleminputs/GraphSearchWithPathEvaluationsInput.html" title="class in jaicore.search.probleminputs">GraphSearchWithPathEvaluationsInput</a>&lt;N,A,V&gt;,<a href="../../../../../jaicore/search/model/other/EvaluatedSearchGraphPath.html" title="class in jaicore.search.model.other">EvaluatedSearchGraphPath</a>&lt;N,A,V&gt;,N,A,V&gt;
+implements <a href="../../../../../jaicore/search/core/interfaces/IOptimalPathInORGraphSearchFactory.html" title="interface in jaicore.search.core.interfaces">IOptimalPathInORGraphSearchFactory</a>&lt;<a href="../../../../../jaicore/search/probleminputs/GraphSearchWithPathEvaluationsInput.html" title="class in jaicore.search.probleminputs">GraphSearchWithPathEvaluationsInput</a>&lt;N,A,V&gt;,N,A,V&gt;</pre>
 </li>
 </ul>
 </div>
@@ -170,14 +171,30 @@ extends <a href="../../../../../jaicore/search/core/interfaces/StandardORGraphSe
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html#getDefaultPolicy--">getDefaultPolicy</a></span>()</code>&nbsp;</td>
 </tr>
 <tr id="i2" class="altColor">
+<td class="colFirst"><code><a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html" title="type parameter in MCTSFactory">V</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html#getEvaluationFailurePenalty--">getEvaluationFailurePenalty</a></span>()</code>&nbsp;</td>
+</tr>
+<tr id="i3" class="rowColor">
 <td class="colFirst"><code><a href="../../../../../jaicore/search/algorithms/standard/mcts/IPathUpdatablePolicy.html" title="interface in jaicore.search.algorithms.standard.mcts">IPathUpdatablePolicy</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html" title="type parameter in MCTSFactory">N</a>,<a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html" title="type parameter in MCTSFactory">A</a>,<a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html" title="type parameter in MCTSFactory">V</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html#getTreePolicy--">getTreePolicy</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i3" class="rowColor">
+<tr id="i4" class="altColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html#isForbidDoublePaths--">isForbidDoublePaths</a></span>()</code>&nbsp;</td>
+</tr>
+<tr id="i5" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html#setDefaultPolicy-jaicore.search.algorithms.standard.mcts.IPolicy-">setDefaultPolicy</a></span>(<a href="../../../../../jaicore/search/algorithms/standard/mcts/IPolicy.html" title="interface in jaicore.search.algorithms.standard.mcts">IPolicy</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html" title="type parameter in MCTSFactory">N</a>,<a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html" title="type parameter in MCTSFactory">A</a>,<a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html" title="type parameter in MCTSFactory">V</a>&gt;&nbsp;defaultPolicy)</code>&nbsp;</td>
 </tr>
-<tr id="i4" class="altColor">
+<tr id="i6" class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html#setEvaluationFailurePenalty-V-">setEvaluationFailurePenalty</a></span>(<a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html" title="type parameter in MCTSFactory">V</a>&nbsp;evaluationFailurePenalty)</code>&nbsp;</td>
+</tr>
+<tr id="i7" class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html#setForbidDoublePaths-boolean-">setForbidDoublePaths</a></span>(boolean&nbsp;forbidDoublePaths)</code>&nbsp;</td>
+</tr>
+<tr id="i8" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html#setTreePolicy-jaicore.search.algorithms.standard.mcts.IPathUpdatablePolicy-">setTreePolicy</a></span>(<a href="../../../../../jaicore/search/algorithms/standard/mcts/IPathUpdatablePolicy.html" title="interface in jaicore.search.algorithms.standard.mcts">IPathUpdatablePolicy</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html" title="type parameter in MCTSFactory">N</a>,<a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html" title="type parameter in MCTSFactory">A</a>,<a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html" title="type parameter in MCTSFactory">V</a>&gt;&nbsp;treePolicy)</code>&nbsp;</td>
 </tr>
@@ -270,6 +287,44 @@ extends <a href="../../../../../jaicore/search/core/interfaces/StandardORGraphSe
 <pre>public&nbsp;void&nbsp;setDefaultPolicy(<a href="../../../../../jaicore/search/algorithms/standard/mcts/IPolicy.html" title="interface in jaicore.search.algorithms.standard.mcts">IPolicy</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html" title="type parameter in MCTSFactory">N</a>,<a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html" title="type parameter in MCTSFactory">A</a>,<a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html" title="type parameter in MCTSFactory">V</a>&gt;&nbsp;defaultPolicy)</pre>
 </li>
 </ul>
+<a name="getEvaluationFailurePenalty--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getEvaluationFailurePenalty</h4>
+<pre>public&nbsp;<a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html" title="type parameter in MCTSFactory">V</a>&nbsp;getEvaluationFailurePenalty()</pre>
+</li>
+</ul>
+<a name="setEvaluationFailurePenalty-java.lang.Comparable-">
+<!--   -->
+</a><a name="setEvaluationFailurePenalty-V-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setEvaluationFailurePenalty</h4>
+<pre>public&nbsp;void&nbsp;setEvaluationFailurePenalty(<a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html" title="type parameter in MCTSFactory">V</a>&nbsp;evaluationFailurePenalty)</pre>
+</li>
+</ul>
+<a name="isForbidDoublePaths--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>isForbidDoublePaths</h4>
+<pre>public&nbsp;boolean&nbsp;isForbidDoublePaths()</pre>
+</li>
+</ul>
+<a name="setForbidDoublePaths-boolean-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setForbidDoublePaths</h4>
+<pre>public&nbsp;void&nbsp;setForbidDoublePaths(boolean&nbsp;forbidDoublePaths)</pre>
+</li>
+</ul>
 <a name="getAlgorithm--">
 <!--   -->
 </a>
@@ -277,6 +332,14 @@ extends <a href="../../../../../jaicore/search/core/interfaces/StandardORGraphSe
 <li class="blockList">
 <h4>getAlgorithm</h4>
 <pre>public&nbsp;<a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTS.html" title="class in jaicore.search.algorithms.standard.mcts">MCTS</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html" title="type parameter in MCTSFactory">N</a>,<a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html" title="type parameter in MCTSFactory">A</a>,<a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html" title="type parameter in MCTSFactory">V</a>&gt;&nbsp;getAlgorithm()</pre>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code>getAlgorithm</code>&nbsp;in interface&nbsp;<code>jaicore.basic.algorithm.IAlgorithmFactory&lt;<a href="../../../../../jaicore/search/probleminputs/GraphSearchWithPathEvaluationsInput.html" title="class in jaicore.search.probleminputs">GraphSearchWithPathEvaluationsInput</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html" title="type parameter in MCTSFactory">N</a>,<a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html" title="type parameter in MCTSFactory">A</a>,<a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html" title="type parameter in MCTSFactory">V</a> extends java.lang.Comparable&lt;<a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html" title="type parameter in MCTSFactory">V</a>&gt;&gt;,<a href="../../../../../jaicore/search/model/other/EvaluatedSearchGraphPath.html" title="class in jaicore.search.model.other">EvaluatedSearchGraphPath</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html" title="type parameter in MCTSFactory">N</a>,<a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html" title="type parameter in MCTSFactory">A</a>,<a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html" title="type parameter in MCTSFactory">V</a> extends java.lang.Comparable&lt;<a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html" title="type parameter in MCTSFactory">V</a>&gt;&gt;&gt;</code></dd>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../../../../../jaicore/search/core/interfaces/IGraphSearchFactory.html#getAlgorithm--">getAlgorithm</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../jaicore/search/core/interfaces/IGraphSearchFactory.html" title="interface in jaicore.search.core.interfaces">IGraphSearchFactory</a>&lt;<a href="../../../../../jaicore/search/probleminputs/GraphSearchWithPathEvaluationsInput.html" title="class in jaicore.search.probleminputs">GraphSearchWithPathEvaluationsInput</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html" title="type parameter in MCTSFactory">N</a>,<a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html" title="type parameter in MCTSFactory">A</a>,<a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html" title="type parameter in MCTSFactory">V</a> extends java.lang.Comparable&lt;<a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html" title="type parameter in MCTSFactory">V</a>&gt;&gt;,<a href="../../../../../jaicore/search/model/other/EvaluatedSearchGraphPath.html" title="class in jaicore.search.model.other">EvaluatedSearchGraphPath</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html" title="type parameter in MCTSFactory">N</a>,<a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html" title="type parameter in MCTSFactory">A</a>,<a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html" title="type parameter in MCTSFactory">V</a> extends java.lang.Comparable&lt;<a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html" title="type parameter in MCTSFactory">V</a>&gt;&gt;,<a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html" title="type parameter in MCTSFactory">N</a>,<a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html" title="type parameter in MCTSFactory">A</a>&gt;</code></dd>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../../../../../jaicore/search/core/interfaces/IOptimalPathInORGraphSearchFactory.html#getAlgorithm--">getAlgorithm</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../jaicore/search/core/interfaces/IOptimalPathInORGraphSearchFactory.html" title="interface in jaicore.search.core.interfaces">IOptimalPathInORGraphSearchFactory</a>&lt;<a href="../../../../../jaicore/search/probleminputs/GraphSearchWithPathEvaluationsInput.html" title="class in jaicore.search.probleminputs">GraphSearchWithPathEvaluationsInput</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html" title="type parameter in MCTSFactory">N</a>,<a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html" title="type parameter in MCTSFactory">A</a>,<a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html" title="type parameter in MCTSFactory">V</a> extends java.lang.Comparable&lt;<a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html" title="type parameter in MCTSFactory">V</a>&gt;&gt;,<a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html" title="type parameter in MCTSFactory">N</a>,<a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html" title="type parameter in MCTSFactory">A</a>,<a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html" title="type parameter in MCTSFactory">V</a> extends java.lang.Comparable&lt;<a href="../../../../../jaicore/search/algorithms/standard/mcts/MCTSFactory.html" title="type parameter in MCTSFactory">V</a>&gt;&gt;</code></dd>
+</dl>
 </li>
 </ul>
 </li>
