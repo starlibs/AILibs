@@ -104,7 +104,7 @@ allprojects {
 	//Sonarqube config
 	sonarqube {
 		properties {
-			properties["sonar.projectKey"] = project.name
+			properties["sonar.projectKey"] = "starlibs.ailibs"
 			properties["sonar.projectName"] = project.name
 			properties["sonar.projectDescription"] = project.description
 			properties["sonar.projectVersion"] = project.version
@@ -134,18 +134,16 @@ allprojects {
 			}
 		}
 	}
-	
 	// This task creates a jar with test classes.
 	task testClassesJar(type: Jar) {
 		classifier = 'tests'
 		from sourceSets.test.output
 	}
-	
+  
 	task sourcesJar(type: Jar, dependsOn: classes) {
 		classifier = 'sources'
 		from sourceSets.main.allSource
 	}
-	
 	// Add a new configuration named testArtifacts
 	configurations {
 		testArtifacts
@@ -166,7 +164,6 @@ allprojects {
         	destinationDir = file("docs/javadoc")
 //		failOnError = true
     	}
-		
 
 }
 
