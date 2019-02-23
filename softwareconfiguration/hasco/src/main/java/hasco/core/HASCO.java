@@ -53,25 +53,25 @@ import jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
  *
  * @author fmohr, wever
  *
- * @param <ISearch>
+ * @param <S>
  * @param <N>
  * @param <A>
  * @param <V>
  */
-public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Comparable<V>> extends SoftwareConfigurationAlgorithm<RefinementConfiguredSoftwareConfigurationProblem<V>, HASCOSolutionCandidate<V>, V> {
+public class HASCO<S extends GraphSearchInput<N, A>, N, A, V extends Comparable<V>> extends SoftwareConfigurationAlgorithm<RefinementConfiguredSoftwareConfigurationProblem<V>, HASCOSolutionCandidate<V>, V> {
 
 	private Logger logger = LoggerFactory.getLogger(HASCO.class);
 	private String loggerName;
 
 	/* problem and algorithm setup */
 	private final IHASCOPlanningGraphGeneratorDeriver<N, A> planningGraphGeneratorDeriver;
-	private final AlgorithmProblemTransformer<GraphSearchWithPathEvaluationsInput<N, A, V>, ISearch> searchProblemTransformer;
-	private final IOptimalPathInORGraphSearchFactory<ISearch, N, A, V> searchFactory;
+	private final AlgorithmProblemTransformer<GraphSearchWithPathEvaluationsInput<N, A, V>, S> searchProblemTransformer;
+	private final IOptimalPathInORGraphSearchFactory<S, N, A, V> searchFactory;
 
 	/* working constants of the algorithms */
 	private final CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, V> planningProblem;
 	private final GraphSearchWithPathEvaluationsInput<N, A, V> searchProblem;
-	private final IOptimalPathInORGraphSearch<ISearch, N, A, V> search;
+	private final IOptimalPathInORGraphSearch<S, N, A, V> search;
 	private final List<HASCOSolutionCandidate<V>> listOfAllRecognizedSolutions = new ArrayList<>();
 	private int numUnparametrizedSolutions = -1;
 	private final Set<UnparametrizedComponentInstance> returnedUnparametrizedComponentInstances = new HashSet<>();
@@ -81,7 +81,7 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 	private final TimeRecordingEvaluationWrapper<V> timeGrabbingEvaluationWrapper;
 
 	public HASCO(final RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem, final IHASCOPlanningGraphGeneratorDeriver<N, A> planningGraphGeneratorDeriver,
-			final IOptimalPathInORGraphSearchFactory<ISearch, N, A, V> searchFactory, final AlgorithmProblemTransformer<GraphSearchWithPathEvaluationsInput<N, A, V>, ISearch> searchProblemTransformer) {
+			final IOptimalPathInORGraphSearchFactory<S, N, A, V> searchFactory, final AlgorithmProblemTransformer<GraphSearchWithPathEvaluationsInput<N, A, V>, S> searchProblemTransformer) {
 		super(ConfigFactory.create(HASCOConfig.class), configurationProblem);
 		if (configurationProblem == null) {
 			throw new IllegalArgumentException("Cannot work with configuration problem NULL");
@@ -130,10 +130,10 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 			this.checkAndConductTermination();
 		} catch (DelayedTimeoutCheckException e) {
 			this.logger.warn("Delayed timeout exception has been thrown", e);
-			throw e.getException();
+			throw new TimeoutException(e.getException().getMessage());
 		} catch (DelayedCancellationCheckException e) {
 			this.logger.warn("HASCO was cancelled with significant delay.", e);
-			throw e.getException();
+			throw new AlgorithmExecutionCanceledException();
 		}
 		this.logger.trace("No stop criteria have caused HASCO to stop up to now. Proceeding ...");
 
@@ -226,9 +226,6 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 			else if (searchEvent instanceof EvaluatedSearchSolutionCandidateFoundEvent) {
 				HASCOSolutionEvent<V> hascoSolutionEvent = this.hascoSolutionEventCache.remove(searchEvent);
 				assert (hascoSolutionEvent != null) : "Hasco solution event has not been seen yet or cannot be retrieved from cache. " + this.hascoSolutionEventCache;
-				if (hascoSolutionEvent == null) {
-					System.exit(0);
-				}
 				this.logger.info("Received new solution with score {} from search, communicating this solution to the HASCO listeners. Number of returned unparametrized solutions is now {}/{}.", hascoSolutionEvent.getScore(),
 						this.returnedUnparametrizedComponentInstances.size(), this.numUnparametrizedSolutions);
 				return hascoSolutionEvent;
@@ -269,7 +266,7 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 		return this.planningGraphGeneratorDeriver;
 	}
 
-	public AlgorithmProblemTransformer<GraphSearchWithPathEvaluationsInput<N, A, V>, ISearch> getSearchProblemTransformer() {
+	public AlgorithmProblemTransformer<GraphSearchWithPathEvaluationsInput<N, A, V>, S> getSearchProblemTransformer() {
 		return this.searchProblemTransformer;
 	}
 
@@ -295,11 +292,11 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 		return (HASCOConfig) super.getConfig();
 	}
 
-	public IOptimalPathInORGraphSearchFactory<ISearch, N, A, V> getSearchFactory() {
+	public IOptimalPathInORGraphSearchFactory<S, N, A, V> getSearchFactory() {
 		return this.searchFactory;
 	}
 
-	public IOptimalPathInORGraphSearch<ISearch, N, A, V> getSearch() {
+	public IOptimalPathInORGraphSearch<S, N, A, V> getSearch() {
 		return this.search;
 	}
 
