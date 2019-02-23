@@ -238,7 +238,7 @@
       "type" : "boolean",
       "default" : "true"
     } ],
-    "dependencies" : [ ]
+    "dependencies" : [  ]
   }, {
     "name" : "weka.classifiers.lazy.KStar",
     "requiredInterface" : [ ],
@@ -363,7 +363,7 @@
     } ],
     "dependencies" : [ {
       "pre" : "R in {false}",
-      "post" : "N in [2.0,5.0]"
+      "post" : "N in [3.0,3.0]"
     } ]
   }, {
     "name" : "weka.classifiers.rules.ZeroR",
@@ -776,8 +776,8 @@
       "default" : "true"
     } ],
     "dependencies" : [ {
-      "pre" : "P in {100}",
-      "post" : "O in {false}"
+      "pre" : "O in {true}",
+      "post" : "P in {100}"
     } ]
   }, {
     "name" : "weka.classifiers.meta.ClassificationViaRegression",
