@@ -82,12 +82,12 @@ public class MLPlanWekaExperimenter implements IExperimentSetEvaluator {
 
 		Instances data = new Instances(new FileReader(datasetFile));
 		data.setClassIndex(data.numAttributes() - 1);
-		print("Split instances");
-		List<Instances> stratifiedSplit = WekaUtil.getStratifiedSplit(data, 0, .7);
+		long seed = Long.parseLong(experimentValues.get("seed"));
+		print("Split instances with seed " + seed);
+		List<Instances> stratifiedSplit = WekaUtil.getStratifiedSplit(data, seed, .7);
 
 		/* initialize ML-Plan with the same config file that has been used to specify the experiments */
 		MLPlanBuilder builder = new MLPlanBuilder();
-		builder.withAlgorithmConfigFile(configFile);
 		builder.withAutoWEKAConfiguration();
 		builder.withTimeoutForNodeEvaluation(new TimeOut(new Integer(experimentValues.get("evaluationTimeout")), TimeUnit.SECONDS));
 		builder.withTimeoutForSingleSolutionEvaluation(new TimeOut(new Integer(experimentValues.get("evaluationTimeout")), TimeUnit.SECONDS));
