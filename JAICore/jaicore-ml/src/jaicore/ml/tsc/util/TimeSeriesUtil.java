@@ -370,4 +370,38 @@ public class TimeSeriesUtil {
 		return derivate;
 	}
 
+	public static double sum(double[] T) {
+		double sum = 0;
+		for (int i = 0; i < T.length; i++)
+			sum += T[i];
+		return sum;
+	}
+
+	public static double mean(double[] T) {
+		return sum(T) / T.length;
+	}
+
+	public static double variance(double T[]) {
+		double mean = mean(T);
+		double squaredDeviations = 0;
+		for (int i = 0; i < T.length; i++) {
+			squaredDeviations += (T[i] - mean) * (T[i] - mean);
+		}
+		return squaredDeviations / T.length;
+	}
+
+	public static double standardDeviation(double[] T) {
+		return Math.sqrt(variance(T));
+	}
+
+	public static double[] zTransform(double[] T) {
+		double mean = mean(T);
+		double standardDeviation = standardDeviation(T);
+		double[] zTransformedT = new double[T.length];
+		for (int i = 0; i < T.length; i++) {
+			zTransformedT[i] = (T[i] - mean) / standardDeviation;
+		}
+		return zTransformedT;
+	}
+
 }
