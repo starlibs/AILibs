@@ -18,7 +18,9 @@ public class MCTSEnhancedTTSPTester extends EnhancedTTSPTester<GraphSearchWithPa
 
 	@Override
 	public IGraphSearchFactory<GraphSearchWithPathEvaluationsInput<EnhancedTTSPNode, String, Double>, EvaluatedSearchGraphPath<EnhancedTTSPNode, String,Double>, EnhancedTTSPNode, String> getFactory() {
-		return new UCTFactory<EnhancedTTSPNode, String>();
+		UCTFactory<EnhancedTTSPNode, String> factory = new UCTFactory<>();
+		factory.setEvaluationFailurePenalty(0.0);
+		return factory;
 	}
 	
 }

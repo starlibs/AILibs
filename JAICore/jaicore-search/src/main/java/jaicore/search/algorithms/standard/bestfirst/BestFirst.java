@@ -137,7 +137,6 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		if (this.checkGoalPropertyOnEntirePath) {
 			this.nodeGoalTester = null;
 			this.pathGoalTester = (PathGoalTester<N>) this.graphGenerator.getGoalTester();
-			;
 		} else {
 			this.nodeGoalTester = (NodeGoalTester<N>) this.graphGenerator.getGoalTester();
 			this.pathGoalTester = null;
@@ -256,7 +255,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 					BestFirst.this.post(new NodeTypeSwitchEvent<>(getId(), newNode, "or_pruned"));
 
 					return;
-				} catch (Throwable e) {
+				} catch (Exception e) {
 					BestFirst.this.logger.error("Observed an exception during computation of f:\n{}", LoggerUtil.getExceptionInfo(e));
 					newNode.setAnnotation("fError", e);
 					BestFirst.this.post(new NodeAnnotationEvent<>(getId(), newNode, "fError", e));
@@ -359,7 +358,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 				}
 			} catch (InterruptedException e) {
 				BestFirst.this.logger.info("Node builder has been interrupted, finishing execution.");
-			} catch (Throwable e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			} finally {
 
@@ -407,11 +406,11 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 
 		/* check loop */
 		assert parent == null || !parent.externalPath().contains(t2) : "There is a loop in the underlying graph. The following path contains the last node twice: "
-				+ newNode.externalPath().stream().map(n -> n.toString()).reduce("", (s, t) -> s + "\n\t\t" + t);
+				+ newNode.externalPath().stream().map(N::toString).reduce("", (s, t) -> s + "\n\t\t" + t);
 
 		/* currently, we only support tree search */
 		assert !this.ext2int.containsKey(t2) : "Reached node " + t2 + " for the second time.\nt\tFirst path:" + this.ext2int.get(t2).externalPath().stream().map(n -> n.toString()).reduce("", (s, t) -> s + "\n\t\t" + t) + "\n\tSecond Path:"
-				+ newNode.externalPath().stream().map(n -> n.toString()).reduce("", (s, t) -> s + "\n\t\t" + t);
+				+ newNode.externalPath().stream().map(N::toString).reduce("", (s, t) -> s + "\n\t\t" + t);
 
 		/* register node in map and create annotation object */
 		this.ext2int.put(t2, newNode);
@@ -1197,8 +1196,9 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		if (this.nodeEvaluator instanceof ILoggingCustomizable) {
 			logger.info("Setting logger of node evaluator {} to {}", this.nodeEvaluator, name + ".nodeevaluator");
 			((ILoggingCustomizable) this.nodeEvaluator).setLoggerName(name + ".nodeevaluator");
-		} else
+		} else {
 			logger.info("Node evaluator {} does not implement ILoggingCustomizable, so its logger won't be customized.", this.nodeEvaluator);
+		}
 		super.setLoggerName(this.loggerName + "._orgraphsearch");
 	}
 

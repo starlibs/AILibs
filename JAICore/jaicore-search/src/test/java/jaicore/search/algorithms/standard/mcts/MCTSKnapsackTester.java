@@ -18,7 +18,9 @@ public class MCTSKnapsackTester extends KnapsackTester<GraphSearchWithPathEvalua
 
 	@Override
 	public IGraphSearchFactory<GraphSearchWithPathEvaluationsInput<KnapsackNode, String, Double>, EvaluatedSearchGraphPath<KnapsackNode, String, Double>, KnapsackNode, String> getFactory() {
-		return new UCTFactory<>();
+		UCTFactory<KnapsackNode, String> factory = new UCTFactory<>();
+		factory.setEvaluationFailurePenalty(0.0);
+		return factory;
 	}
 
 }
