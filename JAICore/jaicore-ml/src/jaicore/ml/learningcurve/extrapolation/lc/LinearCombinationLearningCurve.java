@@ -21,9 +21,22 @@ public class LinearCombinationLearningCurve implements LearningCurve {
 
 	/**
 	 * Constant value describing the number of times the size of the interval in
-	 * which the saturation point is searched is doubled
+	 * which a root is searched is doubled
 	 */
-	private static final int SATURATION_POINT_RETIRES = 3;
+	private static final int ROOT_COMPUTATION_RETIRES = 6;
+
+	/**
+	 * Constant value describing the slope at which we assume to have reached the
+	 * saturation point
+	 */
+	private static final double SLOPE_SATURATION_POINT = 0.001;
+
+	/**
+	 * Constant value describing the slope at which we assume that there is no
+	 * significant change in the curve value anymore and the convergence value is
+	 * reached.
+	 */
+	private static final double SLOPE_CONVERGENCE_VALUE = 0.0000001;
 
 	/** The (extrapolated) learning curve function */
 	private LinearCombinationFunction learningCurve;
@@ -234,7 +247,7 @@ public class LinearCombinationLearningCurve implements LearningCurve {
 			weights.add(configuration.getWeights().get(LinearCombinationConstants.ILOG_2));
 		}
 
-		this.learningCurve = new LinearCombinationFunction(functions, weights, 0);
+		this.learningCurve = new LinearCombinationFunction(functions, weights);
 	}
 
 	private void generateDerivative(LinearCombinationConfiguration configuration) {
@@ -432,7 +445,7 @@ public class LinearCombinationLearningCurve implements LearningCurve {
 			weights.add(configuration.getWeights().get(LinearCombinationConstants.ILOG_2));
 		}
 
-		this.derivative = new LinearCombinationFunction(functions, weights, -0.001);
+		this.derivative = new LinearCombinationFunction(functions, weights);
 	}
 
 	@Override
@@ -442,26 +455,37 @@ public class LinearCombinationLearningCurve implements LearningCurve {
 
 	@Override
 	public double getSaturationPoint(double epsilon) {
-		UnivariateSolver solver = new BrentSolver(0, epsilon);
-		double saturationPoint = -1;
-		int upperIntervalBound = this.dataSetSize;
-		int retries_left = SATURATION_POINT_RETIRES;
-		while (retries_left > 0 && saturationPoint == -1) {
-			try {
-				saturationPoint = solver.solve(1000, this.derivative, 1, upperIntervalBound);
-			} catch (NoBracketingException e) {
-				retries_left--;
-				upperIntervalBound *= 2;
-			}
-		}
-		if (saturationPoint == -1) {
-			throw new RuntimeException(String.format("No saturation point could be found in interval [1,%d]", upperIntervalBound));
-		}
-		return saturationPoint;
+		return this.computeDerivativeRoot(epsilon, -1 * SLOPE_SATURATION_POINT);
 	}
 
 	@Override
 	public double getDerivativeCurveValue(double x) {
 		return this.derivative.value(x);
+	}
+
+	@Override
+	public double getConvergenceValue() {
+		return this.getCurveValue(this.computeDerivativeRoot(0, -1 * SLOPE_CONVERGENCE_VALUE));
+	}
+
+	private double computeDerivativeRoot(double epsilon, double offset) {
+		UnivariateSolver solver = new BrentSolver(0, epsilon);
+		this.derivative.setOffset(offset);
+		double result = -1;
+		int upperIntervalBound = this.dataSetSize;
+		int retries_left = ROOT_COMPUTATION_RETIRES;
+		while (retries_left > 0 && result == -1) {
+			try {
+				result = solver.solve(1000, this.derivative, 1, upperIntervalBound);
+			} catch (NoBracketingException e) {
+				retries_left--;
+				upperIntervalBound *= 2;
+			}
+		}
+		if (result == -1) {
+			throw new RuntimeException(
+					String.format("No solution could be found in interval [1,%d]", upperIntervalBound));
+		}
+		return result;
 	}
 }

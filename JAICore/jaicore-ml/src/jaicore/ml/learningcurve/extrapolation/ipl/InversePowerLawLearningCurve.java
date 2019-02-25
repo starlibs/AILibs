@@ -57,4 +57,9 @@ public class InversePowerLawLearningCurve implements LearningCurve {
 				+ " * x ^ " + new BigDecimal(this.c).toPlainString();
 	}
 
+	@Override
+	public double getConvergenceValue() {
+		throw new UnsupportedOperationException("Not implemented yet!");
+	}
+
 }
