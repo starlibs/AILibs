@@ -40,11 +40,18 @@ public class McmcService {
 		validateRequest(request);
 		List<Integer> xValues = request.getxValues();
 		List<Double> yValues = request.getyValues();
+		Integer numSamples = request.getNumSamples();
 
 		generateInputDataFile(xValues, yValues);
 
 		File outFile = new File("out.log");
-		ProcessBuilder pb = new ProcessBuilder("stan/lc", "sample", "data", "file=" + INPUT_DATA_FILENAME);
+		ProcessBuilder pb;
+		if (numSamples == null) {
+			pb = new ProcessBuilder("stan/lc", "sample", "data", "file=" + INPUT_DATA_FILENAME);
+		} else {
+			pb = new ProcessBuilder("stan/lc", "sample", "num_samples=" + numSamples, "data",
+					"file=" + INPUT_DATA_FILENAME);
+		}
 		pb.redirectError(outFile);
 		pb.redirectOutput(outFile);
 		Process p = pb.start();
