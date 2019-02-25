@@ -175,10 +175,10 @@ public class TwoPhaseHASCO<ISearch extends GraphSearchInput<N, A>, N, A> extends
 			try {
 				checkAndConductTermination();
 			} catch (DelayedTimeoutCheckException e) {
-				e.printStackTrace();
+				this.logger.warn("Timeout was detected with a delay of {}", e.getDelay());
 				throw e.getException();
 			} catch (DelayedCancellationCheckException e) {
-				e.printStackTrace();
+				this.logger.warn("Cancel was detected with a delay of {}", e.getDelay());
 				throw e.getException();
 			}
 			this.selectedHASCOSolution = this.selectModel();
